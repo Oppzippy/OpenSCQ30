@@ -54,11 +54,11 @@ enum AmbientSoundMode {
     NoiseCanceling,
 }
 
-impl AmbientSoundMode {
-    pub fn to_packet_structure(
-        &self,
-    ) -> openscq30_lib::packets::structures::ambient_sound_mode::AmbientSoundMode {
-        match self {
+impl From<AmbientSoundMode>
+    for openscq30_lib::packets::structures::ambient_sound_mode::AmbientSoundMode
+{
+    fn from(mode: AmbientSoundMode) -> Self {
+        match mode {
             AmbientSoundMode::Normal => openscq30_lib::packets::structures::ambient_sound_mode::AmbientSoundMode::Normal,
             AmbientSoundMode::Transparency => openscq30_lib::packets::structures::ambient_sound_mode::AmbientSoundMode::Transparency,
             AmbientSoundMode::NoiseCanceling => openscq30_lib::packets::structures::ambient_sound_mode::AmbientSoundMode::NoiseCanceling,
@@ -73,11 +73,11 @@ enum NoiseCancelingMode {
     Outdoor,
 }
 
-impl NoiseCancelingMode {
-    pub fn to_packet_structure(
-        &self,
-    ) -> openscq30_lib::packets::structures::noise_canceling_mode::NoiseCancelingMode {
-        match self {
+impl From<NoiseCancelingMode>
+    for openscq30_lib::packets::structures::noise_canceling_mode::NoiseCancelingMode
+{
+    fn from(mode: NoiseCancelingMode) -> Self {
+        match mode {
             NoiseCancelingMode::Transport => openscq30_lib::packets::structures::noise_canceling_mode::NoiseCancelingMode::Transport,
             NoiseCancelingMode::Indoor => openscq30_lib::packets::structures::noise_canceling_mode::NoiseCancelingMode::Indoor,
             NoiseCancelingMode::Outdoor => openscq30_lib::packets::structures::noise_canceling_mode::NoiseCancelingMode::Outdoor,
@@ -87,7 +87,10 @@ impl NoiseCancelingMode {
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn Error>> {
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt()
+        .with_file(true)
+        .with_line_number(true)
+        .init();
 
     let args = Cli::parse();
     let mut registry = SoundcoreDeviceRegistry::new().await?;
@@ -98,28 +101,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
         match args.command {
             Command::Set(set_command) => match set_command {
                 SetCommand::AmbientSoundMode { mode } => {
-                    device
-                        .set_ambient_sound_mode(mode.to_packet_structure())
-                        .await?
+                    device.set_ambient_sound_mode(mode.into()).await?
                 }
                 SetCommand::NoiseCancelingMode { mode } => {
-                    device
-                        .set_noise_canceling_mode(mode.to_packet_structure())
-                        .await?
+                    device.set_noise_canceling_mode(mode.into()).await?
                 }
                 SetCommand::Equalizer { band_values } => {
                     device
                         .set_equalizer_configuration(EqualizerConfiguration::Custom(
-                            EqualizerBandOffsets::new([
-                                band_values[0],
-                                band_values[1],
-                                band_values[2],
-                                band_values[3],
-                                band_values[4],
-                                band_values[5],
-                                band_values[6],
-                                band_values[7],
-                            ]),
+                            EqualizerBandOffsets::new(band_values.try_into().unwrap()),
                         ))
                         .await?
                 }
@@ -133,19 +123,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
                 GetCommand::Equalizer => {
                     let equalizer_configuration = device.get_equalizer_configuration().await;
-                    let band_offsets = equalizer_configuration.band_offsets().volume_offsets();
-                    println!(
-                        "{} [{} {} {} {} {} {} {} {}]",
-                        equalizer_configuration.profile_id(),
-                        band_offsets[0],
-                        band_offsets[1],
-                        band_offsets[2],
-                        band_offsets[3],
-                        band_offsets[4],
-                        band_offsets[5],
-                        band_offsets[6],
-                        band_offsets[7],
-                    );
+                    println!("{:?}", equalizer_configuration);
                 }
             },
         };
