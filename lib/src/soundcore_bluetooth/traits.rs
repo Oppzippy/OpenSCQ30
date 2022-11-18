@@ -1,0 +1,3 @@
+pub mod soundcore_device_connection;
+pub mod soundcore_device_connection_error;
+pub mod soundcore_device_connection_registry;
