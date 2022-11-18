@@ -5,6 +5,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use btleplug::api::{Central, Manager as _, Peripheral as _};
 use btleplug::platform::{Adapter, Manager, Peripheral};
+use tracing::warn;
 
 use crate::soundcore_bluetooth::traits::soundcore_device_connection::SoundcoreDeviceConnection;
 use crate::soundcore_bluetooth::traits::soundcore_device_connection_error::SoundcoreDeviceConnectionError;
@@ -73,7 +74,7 @@ impl SoundcoreDeviceConnectionRegistry for BtlePlugSoundcoreDeviceConnectionRegi
                             vacant_entry.insert(Arc::new(connection));
                         }
                         Err(err) => {
-                            tracing::warn!("error creating connection: {}", err);
+                            warn!("error creating connection: {}", err);
                         }
                     }
                 }
