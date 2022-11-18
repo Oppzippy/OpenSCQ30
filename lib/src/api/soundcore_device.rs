@@ -40,13 +40,13 @@ struct SoundcoreDeviceState {
 }
 
 impl SoundcoreDevice {
-    pub async fn new(connection: Arc<dyn SoundcoreDeviceConnection>) -> Self {
-        let Ok(mut inbound_receiver) = connection.inbound_packets_channel().await else {
-			todo!();
-		};
+    pub async fn new(
+        connection: Arc<dyn SoundcoreDeviceConnection>,
+    ) -> Result<Self, SoundcoreDeviceConnectionError> {
+        let mut inbound_receiver = connection.inbound_packets_channel().await?;
+        let initial_state = Self::get_state(&connection, &mut inbound_receiver).await?;
 
-        let initial_state = Self::get_state(&connection, &mut inbound_receiver).await;
-        let current_state_lock = Arc::new(RwLock::new(initial_state.unwrap()));
+        let current_state_lock = Arc::new(RwLock::new(initial_state));
         let current_state_lock_async = current_state_lock.to_owned();
 
         let join_handle = tokio::spawn(async move {
@@ -56,22 +56,21 @@ impl SoundcoreDevice {
             }
         });
 
-        Self {
+        Ok(Self {
             connection,
             state: current_state_lock,
             inbound_receiver_handle: join_handle,
-        }
+        })
     }
 
     async fn get_state(
         connection: &Arc<dyn SoundcoreDeviceConnection>,
         inbound_receiver: &mut Receiver<InboundPacket>,
-    ) -> Option<SoundcoreDeviceState> {
+    ) -> Result<SoundcoreDeviceState, SoundcoreDeviceConnectionError> {
         for i in 0..3 {
             connection
                 .write_without_response(&RequestStatePacket::new().bytes())
-                .await
-                .unwrap(); // TODO return result and handle error
+                .await?;
 
             let state_future = async {
                 while let Some(packet) = inbound_receiver.recv().await {
@@ -94,14 +93,14 @@ impl SoundcoreDevice {
             };
 
             match timeout(Duration::from_secs(1), state_future).await {
-                Ok(Some(state)) => return Some(state),
+                Ok(Some(state)) => return Ok(state),
                 Err(elapsed) => {
                     warn!("get_state: didn't receive response after {elapsed} on try #{i}");
                 }
                 _ => (),
             };
         }
-        None
+        Err(SoundcoreDeviceConnectionError::NoResponse)
     }
 
     fn on_packet_received(packet: &InboundPacket, state: &mut SoundcoreDeviceState) {

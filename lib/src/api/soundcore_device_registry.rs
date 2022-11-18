@@ -1,3 +1,5 @@
+use tracing::warn;
+
 use crate::soundcore_bluetooth::traits::{
     soundcore_device_connection_error::SoundcoreDeviceConnectionError,
     soundcore_device_connection_registry::SoundcoreDeviceConnectionRegistry,
@@ -27,7 +29,10 @@ impl SoundcoreDeviceRegistry {
         let connections = self.conneciton_registry.get_connections().await;
         let mut devices = Vec::new();
         for connection in connections {
-            devices.push(Box::new(SoundcoreDevice::new(connection).await));
+            match SoundcoreDevice::new(connection).await {
+                Ok(device) => devices.push(Box::new(device)),
+                Err(err) => warn!("failed to initialize soundcore device: {}", err),
+            }
         }
         devices
     }

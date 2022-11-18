@@ -34,14 +34,15 @@ pub struct BtlePlugSoundcoreDeviceConnection {
 
 impl BtlePlugSoundcoreDeviceConnection {
     pub async fn new(peripheral: Peripheral) -> Result<Self, SoundcoreDeviceConnectionError> {
-        match peripheral.subscribe(&NOTIFY_CHARACTERISTIC).await {
-            Ok(_) => (),
-            Err(_) => {
-                return Err(SoundcoreDeviceConnectionError::CharacteristicNotFound(
-                    NOTIFY_CHARACTERISTIC.uuid.to_string(),
-                ));
-            }
-        };
+        peripheral
+            .subscribe(&NOTIFY_CHARACTERISTIC)
+            .await
+            .map_err(
+                |err| SoundcoreDeviceConnectionError::CharacteristicNotFound {
+                    uuid: NOTIFY_CHARACTERISTIC.uuid,
+                    source: Box::new(err),
+                },
+            )?;
 
         let connection = BtlePlugSoundcoreDeviceConnection {
             peripheral,
