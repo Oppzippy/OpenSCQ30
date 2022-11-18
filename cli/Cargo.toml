@@ -3,6 +3,11 @@ name = "openscq30_cli"
 version = "0.1.0"
 edition = "2021"
 
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
+
 [dependencies]
 openscq30_lib = { path = "../lib" }
 clap = { version = "4.0.23", features = ["derive"] }
