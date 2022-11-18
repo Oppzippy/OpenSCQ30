@@ -1,5 +1,3 @@
-use std::error::Error;
-
 use async_trait::async_trait;
 use btleplug::{
     api::Characteristic,
@@ -14,7 +12,7 @@ use crate::{
     packets::inbound::inbound_packet::InboundPacket,
     soundcore_bluetooth::traits::{
         soundcore_device_connection::SoundcoreDeviceConnection,
-        soundcore_device_connection_error::SoundcoreDeviceError,
+        soundcore_device_connection_error::SoundcoreDeviceConnectionError,
     },
 };
 
@@ -35,11 +33,11 @@ pub struct BtlePlugSoundcoreDeviceConnection {
 }
 
 impl BtlePlugSoundcoreDeviceConnection {
-    pub async fn new(peripheral: Peripheral) -> Result<Self, SoundcoreDeviceError> {
+    pub async fn new(peripheral: Peripheral) -> Result<Self, SoundcoreDeviceConnectionError> {
         match peripheral.subscribe(&NOTIFY_CHARACTERISTIC).await {
             Ok(_) => (),
             Err(_) => {
-                return Err(SoundcoreDeviceError::CharacteristicNotFound(
+                return Err(SoundcoreDeviceConnectionError::CharacteristicNotFound(
                     NOTIFY_CHARACTERISTIC.uuid.to_string(),
                 ));
             }
@@ -56,42 +54,48 @@ impl BtlePlugSoundcoreDeviceConnection {
 
 #[async_trait]
 impl SoundcoreDeviceConnection for BtlePlugSoundcoreDeviceConnection {
-    async fn get_name(&self) -> Result<String, Box<dyn Error>> {
+    async fn get_name(&self) -> Result<String, SoundcoreDeviceConnectionError> {
         let maybe_name = self
             .peripheral
             .properties()
-            .await?
+            .await
+            .map_err(SoundcoreDeviceConnectionError::from)?
             .map(|property| property.local_name);
 
         match maybe_name {
             Some(Some(name)) => Ok(name),
-            _ => Err(Box::new(SoundcoreDeviceError::NameNotFound(
-                self.peripheral.address().to_string(),
-            ))),
+            _ => Err(SoundcoreDeviceConnectionError::NameNotFound {
+                mac_address: self.peripheral.address().to_string(),
+            }),
         }
     }
 
-    async fn get_mac_address(&self) -> Result<String, Box<dyn Error>> {
+    async fn get_mac_address(&self) -> Result<String, SoundcoreDeviceConnectionError> {
         Ok(self.peripheral.address().to_string())
     }
 
-    async fn write_with_response(&self, data: &[u8]) -> Result<(), Box<dyn Error>> {
+    async fn write_with_response(&self, data: &[u8]) -> Result<(), SoundcoreDeviceConnectionError> {
         self.peripheral
             .write(&self.characteristic, data, WriteType::WithResponse)
-            .await?;
+            .await
+            .map_err(SoundcoreDeviceConnectionError::from)?;
         Ok(())
     }
 
-    async fn write_without_response(&self, data: &[u8]) -> Result<(), Box<dyn Error>> {
+    async fn write_without_response(
+        &self,
+        data: &[u8],
+    ) -> Result<(), SoundcoreDeviceConnectionError> {
         self.peripheral
             .write(&self.characteristic, data, WriteType::WithoutResponse)
-            .await?;
+            .await
+            .map_err(SoundcoreDeviceConnectionError::from)?;
         Ok(())
     }
 
     async fn inbound_packets_channel(
         &self,
-    ) -> Result<mpsc::Receiver<InboundPacket>, SoundcoreDeviceError> {
+    ) -> Result<mpsc::Receiver<InboundPacket>, SoundcoreDeviceConnectionError> {
         // This queue should always be really small unless something is malfunctioning
         let (sender, receiver) = mpsc::channel(100);
 

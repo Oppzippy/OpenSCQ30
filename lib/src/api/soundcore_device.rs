@@ -1,4 +1,4 @@
-use std::{error::Error, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 
 use tokio::{
     sync::{mpsc::Receiver, RwLock},
@@ -7,20 +7,24 @@ use tokio::{
 };
 use tracing::warn;
 
-use crate::packets::{
-    inbound::inbound_packet::InboundPacket,
-    outbound::{set_ambient_mode::SetAmbientSoundModePacket, set_equalizer::SetEqualizerPacket},
-    structures::{
-        ambient_sound_mode::AmbientSoundMode, equalizer_band_offsets::EqualizerBandOffsets,
-        equalizer_configuration::EqualizerConfiguration, equalizer_profile_id::EqualizerProfileId,
-        noise_canceling_mode::NoiseCancelingMode,
-    },
-};
 use crate::{
     packets::outbound::{
         outbound_packet::OutboundPacket, request_state_packet::RequestStatePacket,
     },
     soundcore_bluetooth::traits::soundcore_device_connection::SoundcoreDeviceConnection,
+};
+use crate::{
+    packets::{
+        inbound::inbound_packet::InboundPacket,
+        outbound::{
+            set_ambient_mode::SetAmbientSoundModePacket, set_equalizer::SetEqualizerPacket,
+        },
+        structures::{
+            ambient_sound_mode::AmbientSoundMode, equalizer_configuration::EqualizerConfiguration,
+            noise_canceling_mode::NoiseCancelingMode,
+        },
+    },
+    soundcore_bluetooth::traits::soundcore_device_connection_error::SoundcoreDeviceConnectionError,
 };
 
 pub struct SoundcoreDevice {
@@ -124,7 +128,7 @@ impl SoundcoreDevice {
     pub async fn set_ambient_sound_mode(
         &self,
         ambient_sound_mode: AmbientSoundMode,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<(), SoundcoreDeviceConnectionError> {
         let noise_canceling_mode = self.get_noise_canceling_mode().await;
         self.connection
             .write_with_response(
@@ -141,7 +145,7 @@ impl SoundcoreDevice {
     pub async fn set_noise_canceling_mode(
         &self,
         noise_canceling_mode: NoiseCancelingMode,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<(), SoundcoreDeviceConnectionError> {
         let ambient_sound_mode = self.get_ambient_sound_mode().await;
         self.connection
             .write_with_response(
@@ -158,7 +162,7 @@ impl SoundcoreDevice {
     pub async fn set_equalizer_configuration(
         &self,
         configuration: EqualizerConfiguration,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<(), SoundcoreDeviceConnectionError> {
         self.connection
             .write_with_response(&SetEqualizerPacket::new(configuration).bytes())
             .await?;

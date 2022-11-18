@@ -1,7 +1,4 @@
-use crate::packets::structures::{
-    equalizer_band_offsets::EqualizerBandOffsets, equalizer_configuration::EqualizerConfiguration,
-    equalizer_profile_id::EqualizerProfileId,
-};
+use crate::packets::structures::equalizer_configuration::EqualizerConfiguration;
 
 use super::{outbound_packet::OutboundPacket, utils};
 

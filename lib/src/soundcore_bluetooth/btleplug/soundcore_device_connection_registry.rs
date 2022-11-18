@@ -1,6 +1,5 @@
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
-use std::error::Error;
 use std::sync::Arc;
 
 use async_trait::async_trait;
@@ -8,6 +7,7 @@ use btleplug::api::{Central, Manager as _, Peripheral as _};
 use btleplug::platform::{Adapter, Manager, Peripheral};
 
 use crate::soundcore_bluetooth::traits::soundcore_device_connection::SoundcoreDeviceConnection;
+use crate::soundcore_bluetooth::traits::soundcore_device_connection_error::SoundcoreDeviceConnectionError;
 use crate::soundcore_bluetooth::traits::soundcore_device_connection_registry::SoundcoreDeviceConnectionRegistry;
 
 use super::soundcore_device_connection::BtlePlugSoundcoreDeviceConnection;
@@ -28,10 +28,13 @@ impl BtlePlugSoundcoreDeviceConnectionRegistry {
     async fn get_soundcore_peripherals(
         &self,
         adapters: &Vec<Adapter>,
-    ) -> Result<Vec<Peripheral>, Box<dyn Error>> {
+    ) -> Result<Vec<Peripheral>, SoundcoreDeviceConnectionError> {
         let mut soundcore_peripherals = Vec::new();
         for adapter in adapters {
-            let peripherals = adapter.peripherals().await?;
+            let peripherals = adapter
+                .peripherals()
+                .await
+                .map_err(SoundcoreDeviceConnectionError::from)?;
             for peripheral in peripherals {
                 if peripheral.is_connected().await? {
                     let is_soundcore = match peripheral.properties().await {
@@ -53,8 +56,12 @@ impl BtlePlugSoundcoreDeviceConnectionRegistry {
 
 #[async_trait]
 impl SoundcoreDeviceConnectionRegistry for BtlePlugSoundcoreDeviceConnectionRegistry {
-    async fn refresh_connections(&mut self) -> Result<(), Box<dyn Error>> {
-        let adapters = self.manager.adapters().await?;
+    async fn refresh_connections(&mut self) -> Result<(), SoundcoreDeviceConnectionError> {
+        let adapters = self
+            .manager
+            .adapters()
+            .await
+            .map_err(SoundcoreDeviceConnectionError::from)?;
         let soundcore_peripherals = self.get_soundcore_peripherals(&adapters).await?;
 
         for peripheral in soundcore_peripherals {

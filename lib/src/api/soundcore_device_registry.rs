@@ -1,10 +1,6 @@
-use std::error::Error;
-
-use btleplug::platform::Manager;
-
-use crate::soundcore_bluetooth::{
-    btleplug::soundcore_device_connection_registry::BtlePlugSoundcoreDeviceConnectionRegistry,
-    traits::soundcore_device_connection_registry::SoundcoreDeviceConnectionRegistry,
+use crate::soundcore_bluetooth::traits::{
+    soundcore_device_connection_error::SoundcoreDeviceConnectionError,
+    soundcore_device_connection_registry::SoundcoreDeviceConnectionRegistry,
 };
 
 use super::soundcore_device::SoundcoreDevice;
@@ -14,16 +10,15 @@ pub struct SoundcoreDeviceRegistry {
 }
 
 impl SoundcoreDeviceRegistry {
-    pub async fn new() -> Result<Self, Box<dyn Error>> {
-        let manager = Manager::new().await?;
-        let connection_registry = Box::new(BtlePlugSoundcoreDeviceConnectionRegistry::new(manager));
-
+    pub async fn new() -> Result<Self, SoundcoreDeviceConnectionError> {
+        let connection_registry =
+            Box::new(crate::soundcore_bluetooth::btleplug::new_handler().await?);
         Ok(Self {
             conneciton_registry: connection_registry,
         })
     }
 
-    pub async fn refresh_devices(&mut self) -> Result<(), Box<dyn Error>> {
+    pub async fn refresh_devices(&mut self) -> Result<(), SoundcoreDeviceConnectionError> {
         self.conneciton_registry.refresh_connections().await?;
         Ok(())
     }
