@@ -2,7 +2,7 @@ use crate::packets::structures::equalizer_band_offsets::EqualizerBandOffsets;
 
 use super::equalizer_profile_id::EqualizerProfileId;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum EqualizerConfiguration {
     SoundcoreSignature,
     Acoustic,

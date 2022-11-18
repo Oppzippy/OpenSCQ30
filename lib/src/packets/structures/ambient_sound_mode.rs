@@ -1,7 +1,7 @@
 use strum::FromRepr;
 
 #[repr(u8)]
-#[derive(FromRepr, Clone, Copy)]
+#[derive(FromRepr, Clone, Copy, Debug)]
 pub enum AmbientSoundMode {
     NoiseCanceling = 0,
     Transparency = 1,

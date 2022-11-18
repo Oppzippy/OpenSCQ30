@@ -1,4 +1,4 @@
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct EqualizerBandOffsets {
     volume_offsets: [i8; 8],
 }
