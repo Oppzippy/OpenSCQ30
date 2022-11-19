@@ -17,3 +17,25 @@ impl AmbientSoundMode {
         Self::from_repr(id)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::AmbientSoundMode;
+
+    #[test]
+    fn from_id_creates_with_valid_id() {
+        let mode = AmbientSoundMode::from_id(0);
+        assert_eq!(true, mode.is_some());
+    }
+
+    #[test]
+    fn from_id_returns_none_with_invalid_id() {
+        let mode = AmbientSoundMode::from_id(100);
+        assert_eq!(true, mode.is_none());
+    }
+
+    #[test]
+    fn getting_id_works() {
+        assert_eq!(1, AmbientSoundMode::Transparency.id());
+    }
+}

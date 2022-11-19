@@ -9,8 +9,13 @@ impl fmt::Display for EqualizerProfileId {
     }
 }
 
-#[test]
-fn test_format() {
-    let profile = EqualizerProfileId([0, 15]);
-    assert_eq!("[00 0f]", profile.to_string());
+#[cfg(test)]
+mod tests {
+    use super::EqualizerProfileId;
+
+    #[test]
+    fn it_displays_using_hexidecimal() {
+        let profile = EqualizerProfileId([0, 15]);
+        assert_eq!("[00 0f]", profile.to_string());
+    }
 }
