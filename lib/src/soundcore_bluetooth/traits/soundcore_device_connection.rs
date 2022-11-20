@@ -1,8 +1,6 @@
 use async_trait::async_trait;
 use tokio::sync::mpsc;
 
-use crate::packets::inbound::inbound_packet::InboundPacket;
-
 use super::soundcore_device_connection_error::SoundcoreDeviceConnectionError;
 
 #[async_trait]
@@ -16,5 +14,5 @@ pub trait SoundcoreDeviceConnection {
     ) -> Result<(), SoundcoreDeviceConnectionError>;
     async fn inbound_packets_channel(
         &self,
-    ) -> Result<mpsc::Receiver<InboundPacket>, SoundcoreDeviceConnectionError>;
+    ) -> Result<mpsc::Receiver<Vec<u8>>, SoundcoreDeviceConnectionError>;
 }

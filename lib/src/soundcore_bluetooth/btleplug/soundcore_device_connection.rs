@@ -6,14 +6,11 @@ use btleplug::{
 };
 use futures::StreamExt;
 use tokio::sync::mpsc;
-use tracing::{debug, warn};
+use tracing::warn;
 
-use crate::{
-    packets::inbound::inbound_packet::InboundPacket,
-    soundcore_bluetooth::traits::{
-        soundcore_device_connection::SoundcoreDeviceConnection,
-        soundcore_device_connection_error::SoundcoreDeviceConnectionError,
-    },
+use crate::soundcore_bluetooth::traits::{
+    soundcore_device_connection::SoundcoreDeviceConnection,
+    soundcore_device_connection_error::SoundcoreDeviceConnectionError,
 };
 
 const WRITE_CHARACTERISTIC: Characteristic = Characteristic {
@@ -96,7 +93,7 @@ impl SoundcoreDeviceConnection for BtlePlugSoundcoreDeviceConnection {
 
     async fn inbound_packets_channel(
         &self,
-    ) -> Result<mpsc::Receiver<InboundPacket>, SoundcoreDeviceConnectionError> {
+    ) -> Result<mpsc::Receiver<Vec<u8>>, SoundcoreDeviceConnectionError> {
         // This queue should always be really small unless something is malfunctioning
         let (sender, receiver) = mpsc::channel(100);
 
@@ -105,25 +102,9 @@ impl SoundcoreDeviceConnection for BtlePlugSoundcoreDeviceConnection {
         tokio::spawn(async move {
             while let Some(data) = notifications.next().await {
                 if data.uuid == NOTIFY_CHARACTERISTIC.uuid {
-                    match InboundPacket::from_bytes(&data.value) {
-                        Some(packet) => match sender.try_send(packet) {
-                            Ok(_) => (),
-                            Err(err) => warn!(
-                                "inbound_packets_channel: error sending packet to channel: {}",
-                                err
-                            ),
-                        },
-                        None => {
-                            debug!(
-                                "received unknown packet {}",
-                                data.value
-                                    .iter()
-                                    .map(|v| v.to_string())
-                                    .collect::<Vec<String>>()
-                                    .join(" ")
-                            )
-                        }
-                    };
+                    if let Err(err) = sender.try_send(data.value) {
+                        warn!("error forwarding packet to channel: {err}",)
+                    }
                 }
             }
         });

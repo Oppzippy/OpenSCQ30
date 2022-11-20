@@ -5,7 +5,7 @@ use tokio::{
     task::JoinHandle,
     time::timeout,
 };
-use tracing::warn;
+use tracing::{debug, warn};
 
 use crate::{
     packets::outbound::{
@@ -50,9 +50,21 @@ impl SoundcoreDevice {
         let current_state_lock_async = current_state_lock.to_owned();
 
         let join_handle = tokio::spawn(async move {
-            while let Some(packet) = inbound_receiver.recv().await {
-                let mut state = current_state_lock_async.write().await;
-                Self::on_packet_received(&packet, &mut state);
+            while let Some(packet_bytes) = inbound_receiver.recv().await {
+                match InboundPacket::from_bytes(&packet_bytes) {
+                    Some(packet) => {
+                        let mut state = current_state_lock_async.write().await;
+                        Self::on_packet_received(&packet, &mut state);
+                    }
+                    None => debug!(
+                        "received unknown packet {}",
+                        packet_bytes
+                            .iter()
+                            .map(|v| v.to_string())
+                            .collect::<Vec<String>>()
+                            .join(" ")
+                    ),
+                }
             }
         });
 
@@ -65,7 +77,7 @@ impl SoundcoreDevice {
 
     async fn get_state(
         connection: &Arc<dyn SoundcoreDeviceConnection>,
-        inbound_receiver: &mut Receiver<InboundPacket>,
+        inbound_receiver: &mut Receiver<Vec<u8>>,
     ) -> Result<SoundcoreDeviceState, SoundcoreDeviceConnectionError> {
         for i in 0..3 {
             connection
@@ -73,19 +85,27 @@ impl SoundcoreDevice {
                 .await?;
 
             let state_future = async {
-                while let Some(packet) = inbound_receiver.recv().await {
-                    match packet {
-                        InboundPacket::StateUpdate {
+                while let Some(packet_bytes) = inbound_receiver.recv().await {
+                    match InboundPacket::from_bytes(&packet_bytes) {
+                        Some(InboundPacket::StateUpdate {
                             ambient_sound_mode,
                             noise_canceling_mode,
                             equalizer_configuration,
-                        } => {
+                        }) => {
                             return Some(SoundcoreDeviceState {
                                 ambient_sound_mode,
                                 noise_canceling_mode,
                                 equalizer_configuration,
                             });
                         }
+                        None => debug!(
+                            "received unknown packet {}",
+                            packet_bytes
+                                .iter()
+                                .map(|v| v.to_string())
+                                .collect::<Vec<String>>()
+                                .join(" ")
+                        ),
                         _ => (),
                     };
                 }
