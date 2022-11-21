@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use btleplug::api::{Central, Manager as _, Peripheral as _};
+use btleplug::api::{BDAddr, Central, Manager as _, Peripheral as _};
 use btleplug::platform::{Adapter, Manager, Peripheral};
 use tracing::warn;
 
@@ -15,7 +15,7 @@ use super::soundcore_device_connection::BtlePlugSoundcoreDeviceConnection;
 
 pub struct BtlePlugSoundcoreDeviceConnectionRegistry {
     manager: Manager,
-    connections: HashMap<String, Arc<dyn SoundcoreDeviceConnection + Sync + Send>>,
+    connections: HashMap<BDAddr, Arc<dyn SoundcoreDeviceConnection + Sync + Send>>,
 }
 
 impl BtlePlugSoundcoreDeviceConnectionRegistry {
@@ -39,9 +39,10 @@ impl BtlePlugSoundcoreDeviceConnectionRegistry {
             for peripheral in peripherals {
                 if peripheral.is_connected().await? {
                     let is_soundcore = match peripheral.properties().await {
-                        Ok(Some(properties)) => {
-                            properties.address.to_string().starts_with("AC:12:2F")
-                        }
+                        Ok(Some(properties)) => properties
+                            .address
+                            .into_inner()
+                            .starts_with(&[0xAC, 0x12, 0x2F]),
                         _ => false,
                     };
                     if is_soundcore {
@@ -66,7 +67,7 @@ impl SoundcoreDeviceConnectionRegistry for BtlePlugSoundcoreDeviceConnectionRegi
         let soundcore_peripherals = self.get_soundcore_peripherals(&adapters).await?;
 
         for peripheral in soundcore_peripherals {
-            let entry = self.connections.entry(peripheral.address().to_string());
+            let entry = self.connections.entry(peripheral.address());
             match entry {
                 Entry::Vacant(vacant_entry) => {
                     match BtlePlugSoundcoreDeviceConnection::new(peripheral).await {
