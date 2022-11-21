@@ -68,18 +68,15 @@ impl SoundcoreDeviceConnectionRegistry for BtlePlugSoundcoreDeviceConnectionRegi
 
         for peripheral in soundcore_peripherals {
             let entry = self.connections.entry(peripheral.address());
-            match entry {
-                Entry::Vacant(vacant_entry) => {
-                    match BtlePlugSoundcoreDeviceConnection::new(peripheral).await {
-                        Ok(connection) => {
-                            vacant_entry.insert(Arc::new(connection));
-                        }
-                        Err(err) => {
-                            warn!("error creating connection: {}", err);
-                        }
+            if let Entry::Vacant(vacant_entry) = entry {
+                match BtlePlugSoundcoreDeviceConnection::new(peripheral).await {
+                    Ok(connection) => {
+                        vacant_entry.insert(Arc::new(connection));
+                    }
+                    Err(err) => {
+                        warn!("error creating connection: {err}");
                     }
                 }
-                Entry::Occupied(_) => (),
             }
         }
 

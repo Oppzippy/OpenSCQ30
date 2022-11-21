@@ -13,5 +13,5 @@ pub async fn new_handler(
     let manager = Manager::new()
         .await
         .map_err(SoundcoreDeviceConnectionError::from)?;
-    return Ok(BtlePlugSoundcoreDeviceConnectionRegistry::new(manager));
+    Ok(BtlePlugSoundcoreDeviceConnectionRegistry::new(manager))
 }

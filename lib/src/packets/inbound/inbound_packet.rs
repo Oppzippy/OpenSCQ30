@@ -20,13 +20,7 @@ pub enum InboundPacket {
 
 impl InboundPacket {
     pub fn from_bytes(bytes: &[u8]) -> Option<InboundPacket> {
-        if let Some(state_update) = Self::parse_state_update(bytes) {
-            return Some(state_update);
-        }
-        if let Some(state_update) = Self::parse_ambient_sound_mode_update(bytes) {
-            return Some(state_update);
-        }
-        None
+        Self::parse_state_update(bytes).or_else(|| Self::parse_ambient_sound_mode_update(bytes))
     }
 
     fn parse_state_update(bytes: &[u8]) -> Option<InboundPacket> {
