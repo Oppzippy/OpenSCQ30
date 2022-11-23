@@ -3,7 +3,7 @@ use gtk::{
     gio,
     prelude::{ApplicationExt, ApplicationExtManual},
     traits::{BoxExt, GtkWindowExt},
-    Application, ApplicationWindow,
+    ApplicationWindow,
 };
 
 mod equalizer;
@@ -14,7 +14,7 @@ fn main() {
         .expect("failed to load volume slider");
     gio::resources_register_include!("equalizer.gresource").expect("failed to load volume slider");
 
-    let app = Application::builder()
+    let app = adw::Application::builder()
         .application_id("com.oppzippy.openscq30")
         .build();
     app.connect_activate(build_ui);
@@ -22,7 +22,7 @@ fn main() {
     app.run();
 }
 
-fn build_ui(app: &Application) {
+fn build_ui(app: &adw::Application) {
     let window = ApplicationWindow::builder()
         .application(app)
         .title("OpenSCQ30")
