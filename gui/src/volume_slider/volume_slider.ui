@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="GtkAdjustment" id="eq-adjustment">
+    <property name="lower">-6</property>
+    <property name="upper">6</property>
+    <property name="step-increment">0.1</property>
+    <property name="page-increment">1</property>
+  </object>
+  <template class="OpenSCQ30VolumeSlider" parent="GtkBox">
+    <property name="orientation">vertical</property>
+    <property name="hexpand">false</property>
+
+    <child>
+      <object class="GtkScale" id="slider">
+        <property name="adjustment">eq-adjustment</property>
+        <property name="orientation">vertical</property>
+        <property name="digits">1</property>
+        <property name="inverted">true</property>
+        <property name="vexpand">true</property>
+        <property name="draw-value">true</property>
+        <property name="value-pos">bottom</property>
+        <accessibility>
+          <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">band_label</relation>
+        </accessibility>
+      </object>
+    </child>
+    <child>
+      <object class="GtkLabel" id="band_label">
+        <property name="label">200hz</property>
+      </object>
+    </child>
+  </template>
+</interface>
