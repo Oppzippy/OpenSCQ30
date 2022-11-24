@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+	<template class="OpenSCQ30MainWindow" parent="GtkBox">
+		<property name="orientation">horizontal</property>
+
+		<child>
+			<object class="GtkNotebook">
+				<child>
+					<object class="OpenSCQ30General" id="general"></object>
+				</child>
+				<child type="tab">
+					<object class="GtkLabel">
+						<property name="label">General</property>
+					</object>
+				</child>
+				<child>
+					<object class="OpenSCQ30Equalizer" id="equalizer"></object>
+				</child>
+				<child type="tab">
+					<object class="GtkLabel">
+						<property name="label">Equalizer</property>
+					</object>
+				</child>
+			</object>
+		</child>
+	</template>
+</interface>

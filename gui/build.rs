@@ -9,4 +9,14 @@ fn main() {
         "src/equalizer/resources.gresource.xml",
         "equalizer.gresource",
     );
+    glib_build_tools::compile_resources(
+        "src/general",
+        "src/general/resources.gresource.xml",
+        "general.gresource",
+    );
+    glib_build_tools::compile_resources(
+        "src/main_window",
+        "src/main_window/resources.gresource.xml",
+        "main_window.gresource",
+    );
 }

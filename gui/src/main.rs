@@ -1,18 +1,22 @@
-use equalizer::Equalizer;
 use gtk::{
     gio,
     prelude::{ApplicationExt, ApplicationExtManual},
-    traits::{BoxExt, GtkWindowExt},
+    traits::GtkWindowExt,
     ApplicationWindow,
 };
+use main_window::MainWindow;
 
 mod equalizer;
+mod general;
+mod main_window;
 mod volume_slider;
 
 fn main() {
     gio::resources_register_include!("volume_slider.gresource")
         .expect("failed to load volume slider");
     gio::resources_register_include!("equalizer.gresource").expect("failed to load volume slider");
+    gio::resources_register_include!("general.gresource").expect("failed to load general");
+    gio::resources_register_include!("main_window.gresource").expect("failed to load main window");
 
     let app = adw::Application::builder()
         .application_id("com.oppzippy.openscq30")
@@ -28,13 +32,8 @@ fn build_ui(app: &adw::Application) {
         .title("OpenSCQ30")
         .build();
 
-    let container = gtk::Box::builder()
-        .orientation(gtk::Orientation::Horizontal)
-        .build();
-    window.set_child(Some(&container));
-
-    let equalizer = Equalizer::new();
-    container.append(&equalizer);
+    let main_window = MainWindow::new();
+    window.set_child(Some(&main_window));
 
     window.present();
 }
