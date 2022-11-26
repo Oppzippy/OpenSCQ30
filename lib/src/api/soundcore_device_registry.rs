@@ -8,7 +8,7 @@ use crate::soundcore_bluetooth::traits::{
 use super::soundcore_device::SoundcoreDevice;
 
 pub struct SoundcoreDeviceRegistry {
-    conneciton_registry: Box<dyn SoundcoreDeviceConnectionRegistry>,
+    conneciton_registry: Box<dyn SoundcoreDeviceConnectionRegistry + Send + Sync>,
 }
 
 impl SoundcoreDeviceRegistry {
