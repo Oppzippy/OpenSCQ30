@@ -9,6 +9,6 @@ use super::{
 
 #[async_trait]
 pub trait SoundcoreDeviceConnectionRegistry {
-    async fn refresh_connections(&mut self) -> Result<(), SoundcoreDeviceConnectionError>;
+    async fn refresh_connections(&self) -> Result<(), SoundcoreDeviceConnectionError>;
     async fn get_connections(&self) -> Vec<Arc<dyn SoundcoreDeviceConnection + Sync + Send>>;
 }

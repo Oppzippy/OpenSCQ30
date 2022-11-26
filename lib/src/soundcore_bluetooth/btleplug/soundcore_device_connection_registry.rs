@@ -5,6 +5,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use btleplug::api::{BDAddr, Central, Manager as _, Peripheral as _};
 use btleplug::platform::{Adapter, Manager, Peripheral};
+use tokio::sync::RwLock;
 use tracing::warn;
 
 use crate::soundcore_bluetooth::traits::soundcore_device_connection::SoundcoreDeviceConnection;
@@ -15,14 +16,14 @@ use super::soundcore_device_connection::BtlePlugSoundcoreDeviceConnection;
 
 pub struct BtlePlugSoundcoreDeviceConnectionRegistry {
     manager: Manager,
-    connections: HashMap<BDAddr, Arc<dyn SoundcoreDeviceConnection + Sync + Send>>,
+    connections: RwLock<HashMap<BDAddr, Arc<dyn SoundcoreDeviceConnection + Sync + Send>>>,
 }
 
 impl BtlePlugSoundcoreDeviceConnectionRegistry {
     pub fn new(manager: Manager) -> Self {
         Self {
             manager,
-            connections: HashMap::new(),
+            connections: RwLock::new(HashMap::new()),
         }
     }
 
@@ -58,7 +59,7 @@ impl BtlePlugSoundcoreDeviceConnectionRegistry {
 
 #[async_trait]
 impl SoundcoreDeviceConnectionRegistry for BtlePlugSoundcoreDeviceConnectionRegistry {
-    async fn refresh_connections(&mut self) -> Result<(), SoundcoreDeviceConnectionError> {
+    async fn refresh_connections(&self) -> Result<(), SoundcoreDeviceConnectionError> {
         let adapters = self
             .manager
             .adapters()
@@ -66,8 +67,10 @@ impl SoundcoreDeviceConnectionRegistry for BtlePlugSoundcoreDeviceConnectionRegi
             .map_err(SoundcoreDeviceConnectionError::from)?;
         let soundcore_peripherals = self.get_soundcore_peripherals(&adapters).await?;
 
+        let mut connections = self.connections.write().await;
+
         for peripheral in soundcore_peripherals {
-            let entry = self.connections.entry(peripheral.address());
+            let entry = connections.entry(peripheral.address());
             if let Entry::Vacant(vacant_entry) = entry {
                 match BtlePlugSoundcoreDeviceConnection::new(peripheral).await {
                     Ok(connection) => {
@@ -85,6 +88,8 @@ impl SoundcoreDeviceConnectionRegistry for BtlePlugSoundcoreDeviceConnectionRegi
 
     async fn get_connections(&self) -> Vec<Arc<dyn SoundcoreDeviceConnection + Sync + Send>> {
         self.connections
+            .read()
+            .await
             .values()
             .into_iter()
             .map(|arc| arc.to_owned())
