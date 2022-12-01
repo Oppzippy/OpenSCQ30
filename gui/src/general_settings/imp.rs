@@ -1,4 +1,3 @@
-use gtk::glib::RustClosure;
 use gtk::prelude::{ObjectExt, StaticType};
 use gtk::subclass::prelude::ObjectSubclassExt;
 use gtk::subclass::widget::CompositeTemplateCallbacksClass;

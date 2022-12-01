@@ -1,6 +1,5 @@
 mod imp;
 
-use crate::gtk_openscq30_lib::soundcore_device_registry::GtkSoundcoreDeviceRegistry;
 use gtk::glib::{self, Object};
 
 glib::wrapper! {
@@ -10,7 +9,7 @@ glib::wrapper! {
 }
 
 impl MainWindow {
-    pub fn new(registry: &GtkSoundcoreDeviceRegistry) -> Self {
+    pub fn new() -> Self {
         Object::new(&[])
     }
 }

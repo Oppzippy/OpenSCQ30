@@ -32,6 +32,20 @@ pub struct BtlePlugSoundcoreDeviceConnection {
 impl BtlePlugSoundcoreDeviceConnection {
     pub async fn new(peripheral: Peripheral) -> Result<Self, SoundcoreDeviceConnectionError> {
         peripheral
+            .connect()
+            .await
+            .map_err(SoundcoreDeviceConnectionError::from)?;
+
+        println!("services");
+        for service in peripheral.services() {
+            println!("{}", service.uuid);
+        }
+        println!("characteristics");
+        for characteristic in peripheral.characteristics() {
+            println!("{}", characteristic.uuid);
+        }
+
+        peripheral
             .subscribe(&NOTIFY_CHARACTERISTIC)
             .await
             .map_err(

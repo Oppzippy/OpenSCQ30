@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use openscq30_lib::{
     api::soundcore_device::SoundcoreDevice,
     packets::structures::{
@@ -10,69 +12,75 @@ use tokio::runtime::Handle;
 
 pub struct GtkSoundcoreDevice<'a> {
     tokio_runtime: &'a Handle,
-    soundcore_device: SoundcoreDevice,
+    soundcore_device: Arc<SoundcoreDevice>,
 }
 
 impl<'a> GtkSoundcoreDevice<'a> {
-    pub fn new(device: SoundcoreDevice, tokio_runtime: &'a Handle) -> Self {
+    pub fn new(device: Arc<SoundcoreDevice>, tokio_runtime: &'a Handle) -> Self {
         Self {
             tokio_runtime,
             soundcore_device: device,
         }
     }
 
-    pub async fn get_ambient_sound_mode(self) -> AmbientSoundMode {
+    pub async fn get_ambient_sound_mode(&self) -> AmbientSoundMode {
+        let soundcore_device = self.soundcore_device.to_owned();
         async_runtime_bridge!(
             self.tokio_runtime,
-            self.soundcore_device.get_ambient_sound_mode().await
+            soundcore_device.get_ambient_sound_mode().await
         )
     }
 
     pub async fn set_ambient_sound_mode(
-        self,
+        &self,
         ambient_sound_mode: AmbientSoundMode,
     ) -> Result<(), SoundcoreDeviceConnectionError> {
+        let soundcore_device = self.soundcore_device.to_owned();
         async_runtime_bridge!(
             self.tokio_runtime,
-            self.soundcore_device
+            soundcore_device
                 .set_ambient_sound_mode(ambient_sound_mode)
                 .await
         )
     }
 
-    pub async fn get_noise_canceling_mode(self) -> NoiseCancelingMode {
+    pub async fn get_noise_canceling_mode(&self) -> NoiseCancelingMode {
+        let soundcore_device = self.soundcore_device.to_owned();
         async_runtime_bridge!(
             self.tokio_runtime,
-            self.soundcore_device.get_noise_canceling_mode().await
+            soundcore_device.get_noise_canceling_mode().await
         )
     }
 
     pub async fn set_noise_canceling_mode(
-        self,
+        &self,
         noise_canceling_mode: NoiseCancelingMode,
     ) -> Result<(), SoundcoreDeviceConnectionError> {
+        let soundcore_device = self.soundcore_device.to_owned();
         async_runtime_bridge!(
             self.tokio_runtime,
-            self.soundcore_device
+            soundcore_device
                 .set_noise_canceling_mode(noise_canceling_mode)
                 .await
         )
     }
 
-    pub async fn get_equalizer_configuration(self) -> EqualizerConfiguration {
+    pub async fn get_equalizer_configuration(&self) -> EqualizerConfiguration {
+        let soundcore_device = self.soundcore_device.to_owned();
         async_runtime_bridge!(
             self.tokio_runtime,
-            self.soundcore_device.get_equalizer_configuration().await
+            soundcore_device.get_equalizer_configuration().await
         )
     }
 
     pub async fn set_equalizer_configuration(
-        self,
+        &self,
         configuration: EqualizerConfiguration,
     ) -> Result<(), SoundcoreDeviceConnectionError> {
+        let soundcore_device = self.soundcore_device.to_owned();
         async_runtime_bridge!(
             self.tokio_runtime,
-            self.soundcore_device
+            soundcore_device
                 .set_equalizer_configuration(configuration)
                 .await
         )
