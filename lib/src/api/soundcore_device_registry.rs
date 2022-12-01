@@ -20,7 +20,7 @@ impl SoundcoreDeviceRegistry {
         })
     }
 
-    pub async fn refresh_devices(&mut self) -> Result<(), SoundcoreDeviceConnectionError> {
+    pub async fn refresh_devices(&self) -> Result<(), SoundcoreDeviceConnectionError> {
         self.conneciton_registry.refresh_connections().await?;
         Ok(())
     }

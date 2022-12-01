@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-	<template class="OpenSCQ30General" parent="GtkBox">
+	<template class="OpenSCQ30GeneralSettings" parent="GtkBox">
 		<child>
 			<object class="GtkGrid">
 				<property name="row-spacing">2</property>
@@ -21,6 +21,7 @@
 				</child>
 				<child>
 					<object class="GtkToggleButton" id="normal_mode">
+						<signal name="toggled" handler="handle_normal_mode_clicked" swapped="true" />
 						<property name="label">Normal</property>
 						<layout>
 							<property name="column">1</property>
@@ -33,6 +34,7 @@
 				</child>
 				<child>
 					<object class="GtkToggleButton" id="transparency_mode">
+						<signal name="toggled" handler="handle_transparency_mode_clicked" swapped="true" />
 						<property name="group">normal_mode</property>
 						<property name="label">Transparency</property>
 						<layout>
@@ -46,6 +48,7 @@
 				</child>
 				<child>
 					<object class="GtkToggleButton" id="noise_canceling_mode">
+						<signal name="toggled" handler="handle_noise_canceling_mode_clicked" swapped="true" />
 						<property name="group">transparency_mode</property>
 						<property name="label">Noise Canceling</property>
 						<layout>
@@ -72,6 +75,7 @@
 				</child>
 				<child>
 					<object class="GtkToggleButton" id="transport_mode">
+						<signal name="toggled" handler="handle_transport_mode_clicked" swapped="true" />
 						<property name="label">Transport</property>
 						<layout>
 							<property name="column">1</property>
@@ -84,6 +88,7 @@
 				</child>
 				<child>
 					<object class="GtkToggleButton" id="indoor_mode">
+						<signal name="toggled" handler="handle_indoor_mode_clicked" swapped="true" />
 						<property name="group">transport_mode</property>
 						<property name="label">Transparency</property>
 						<layout>
@@ -97,6 +102,7 @@
 				</child>
 				<child>
 					<object class="GtkToggleButton" id="outdoor_mode">
+						<signal name="toggled" handler="handle_outdoor_canceling_mode_clicked" swapped="true" />
 						<property name="group">indoor_mode</property>
 						<property name="label">Outdoor</property>
 						<layout>

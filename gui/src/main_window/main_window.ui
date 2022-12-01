@@ -6,7 +6,10 @@
 		<child>
 			<object class="GtkNotebook">
 				<child>
-					<object class="OpenSCQ30General" id="general"></object>
+					<object class="OpenSCQ30GeneralSettings" id="general_settings">
+						<signal name="ambient-sound-mode-selected" handler="handle_ambient_sound_mode_selected" swapped="true" />
+						<signal name="noise-canceling-mode-selected" handler="handle_noise_canceling_mode_selected" swapped="true" />
+					</object>
 				</child>
 				<child type="tab">
 					<object class="GtkLabel">

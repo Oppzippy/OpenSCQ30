@@ -28,7 +28,7 @@ use crate::{
 };
 
 pub struct SoundcoreDevice {
-    connection: Arc<dyn SoundcoreDeviceConnection>,
+    connection: Arc<dyn SoundcoreDeviceConnection + Send + Sync>,
     state: Arc<RwLock<SoundcoreDeviceState>>,
     inbound_receiver_handle: JoinHandle<()>,
 }
@@ -41,7 +41,7 @@ struct SoundcoreDeviceState {
 
 impl SoundcoreDevice {
     pub async fn new(
-        connection: Arc<dyn SoundcoreDeviceConnection>,
+        connection: Arc<dyn SoundcoreDeviceConnection + Send + Sync>,
     ) -> Result<Self, SoundcoreDeviceConnectionError> {
         let mut inbound_receiver = connection.inbound_packets_channel().await?;
         let initial_state = Self::get_state(&connection, &mut inbound_receiver).await?;
@@ -76,7 +76,7 @@ impl SoundcoreDevice {
     }
 
     async fn get_state(
-        connection: &Arc<dyn SoundcoreDeviceConnection>,
+        connection: &Arc<dyn SoundcoreDeviceConnection + Send + Sync>,
         inbound_receiver: &mut Receiver<Vec<u8>>,
     ) -> Result<SoundcoreDeviceState, SoundcoreDeviceConnectionError> {
         for i in 0..3 {
@@ -196,5 +196,11 @@ impl SoundcoreDevice {
 impl Drop for SoundcoreDevice {
     fn drop(&mut self) {
         self.inbound_receiver_handle.abort();
+    }
+}
+
+impl std::fmt::Debug for SoundcoreDevice {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("SoundcoreDevice").finish()
     }
 }

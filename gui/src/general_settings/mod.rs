@@ -1,14 +1,14 @@
-mod imp;
+pub mod imp;
 
 use gtk::glib::{self, Object};
 
 glib::wrapper! {
-    pub struct General(ObjectSubclass<imp::General>)
+    pub struct GeneralSettings(ObjectSubclass<imp::GeneralSettings>)
         @extends gtk::Box, gtk::Widget,
         @implements gtk::Accessible, gtk::Actionable, gtk::Buildable, gtk::ConstraintTarget;
 }
 
-impl General {
+impl GeneralSettings {
     pub fn new() -> Self {
         Object::new(&[])
     }
