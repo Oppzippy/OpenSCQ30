@@ -63,8 +63,8 @@ impl InboundPacket {
         const PREFIX: &[u8] = &[0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00];
         if bytes.starts_with(PREFIX) {
             if bytes.len() == 14 {
-                let ambient_sound_mode_id = bytes[10];
-                let noise_canceling_mode_id = bytes[11];
+                let ambient_sound_mode_id = bytes[9];
+                let noise_canceling_mode_id = bytes[10];
                 let Some(ambient_sound_mode) = AmbientSoundMode::from_id(ambient_sound_mode_id) else {
                     warn!("parse_ambient_sound_mode_update: invalid ambient sound mode id {}", ambient_sound_mode_id);
                     return None;

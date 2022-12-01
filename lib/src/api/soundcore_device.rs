@@ -33,6 +33,7 @@ pub struct SoundcoreDevice {
     inbound_receiver_handle: JoinHandle<()>,
 }
 
+#[derive(Debug)]
 struct SoundcoreDeviceState {
     ambient_sound_mode: AmbientSoundMode,
     noise_canceling_mode: NoiseCancelingMode,
@@ -141,7 +142,8 @@ impl SoundcoreDevice {
                 state.ambient_sound_mode = *ambient_sound_mode;
                 state.noise_canceling_mode = *noise_canceling_mode;
             }
-        }
+        };
+        println!("{:?}", state);
     }
 
     pub async fn set_ambient_sound_mode(
@@ -149,11 +151,13 @@ impl SoundcoreDevice {
         ambient_sound_mode: AmbientSoundMode,
     ) -> Result<(), SoundcoreDeviceConnectionError> {
         let noise_canceling_mode = self.get_noise_canceling_mode().await;
+        let mut state = self.state.write().await;
         self.connection
             .write_with_response(
                 &SetAmbientSoundModePacket::new(ambient_sound_mode, noise_canceling_mode).bytes(),
             )
             .await?;
+        state.ambient_sound_mode = ambient_sound_mode;
         Ok(())
     }
 
@@ -166,11 +170,30 @@ impl SoundcoreDevice {
         noise_canceling_mode: NoiseCancelingMode,
     ) -> Result<(), SoundcoreDeviceConnectionError> {
         let ambient_sound_mode = self.get_ambient_sound_mode().await;
+        let mut state = self.state.write().await;
+        // It will bug and put us in noise canceling mode without changing the ambient sound mode id if we change the
+        // noise canceling mode with the ambient sound mode being normal or transparency. To work around this, we must
+        // set the ambient sound mode to Noise Canceling, and then change it back.
         self.connection
             .write_with_response(
-                &SetAmbientSoundModePacket::new(ambient_sound_mode, noise_canceling_mode).bytes(),
+                &SetAmbientSoundModePacket::new(
+                    AmbientSoundMode::NoiseCanceling,
+                    noise_canceling_mode,
+                )
+                .bytes(),
             )
             .await?;
+
+        // Set us back to the ambient sound mode we were originally in
+        if ambient_sound_mode != AmbientSoundMode::NoiseCanceling {
+            self.connection
+                .write_with_response(
+                    &SetAmbientSoundModePacket::new(ambient_sound_mode, noise_canceling_mode)
+                        .bytes(),
+                )
+                .await?;
+        }
+        state.noise_canceling_mode = noise_canceling_mode;
         Ok(())
     }
 
@@ -182,9 +205,11 @@ impl SoundcoreDevice {
         &self,
         configuration: EqualizerConfiguration,
     ) -> Result<(), SoundcoreDeviceConnectionError> {
+        let mut state = self.state.write().await;
         self.connection
             .write_with_response(&SetEqualizerPacket::new(configuration).bytes())
             .await?;
+        state.equalizer_configuration = configuration;
         Ok(())
     }
 

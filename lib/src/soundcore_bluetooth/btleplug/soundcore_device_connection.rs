@@ -36,15 +36,6 @@ impl BtlePlugSoundcoreDeviceConnection {
             .await
             .map_err(SoundcoreDeviceConnectionError::from)?;
 
-        println!("services");
-        for service in peripheral.services() {
-            println!("{}", service.uuid);
-        }
-        println!("characteristics");
-        for characteristic in peripheral.characteristics() {
-            println!("{}", characteristic.uuid);
-        }
-
         peripheral
             .subscribe(&NOTIFY_CHARACTERISTIC)
             .await
@@ -87,6 +78,13 @@ impl SoundcoreDeviceConnection for BtlePlugSoundcoreDeviceConnection {
     }
 
     async fn write_with_response(&self, data: &[u8]) -> Result<(), SoundcoreDeviceConnectionError> {
+        println!(
+            "OUT: {}",
+            data.iter()
+                .map(|i| i.to_string())
+                .collect::<Vec<String>>()
+                .join(" ")
+        );
         self.peripheral
             .write(&self.characteristic, data, WriteType::WithResponse)
             .await
@@ -116,6 +114,14 @@ impl SoundcoreDeviceConnection for BtlePlugSoundcoreDeviceConnection {
         tokio::spawn(async move {
             while let Some(data) = notifications.next().await {
                 if data.uuid == NOTIFY_CHARACTERISTIC.uuid {
+                    println!(
+                        "IN: {}",
+                        data.value
+                            .iter()
+                            .map(|i| i.to_string())
+                            .collect::<Vec<String>>()
+                            .join(" ")
+                    );
                     if let Err(err) = sender.try_send(data.value) {
                         warn!("error forwarding packet to channel: {err}",)
                     }

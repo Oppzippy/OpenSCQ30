@@ -87,7 +87,7 @@ impl GeneralSettings {
     }
 
     #[template_callback]
-    fn handle_outdoor_canceling_mode_clicked(&self, button: &gtk::ToggleButton) {
+    fn handle_outdoor_mode_clicked(&self, button: &gtk::ToggleButton) {
         if button.is_active() {
             self.obj().emit_by_name(
                 "noise-canceling-mode-selected",
