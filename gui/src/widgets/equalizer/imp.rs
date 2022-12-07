@@ -9,7 +9,7 @@ use gtk::{
     CompositeTemplate, TemplateChild,
 };
 
-use crate::volume_slider::VolumeSlider;
+use crate::widgets::VolumeSlider;
 
 #[derive(Default, CompositeTemplate)]
 #[template(resource = "/com/oppzippy/openscq30/equalizer.ui")]

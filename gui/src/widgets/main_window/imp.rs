@@ -8,12 +8,9 @@ use gtk::{
     CompositeTemplate, TemplateChild,
 };
 
-use crate::{
-    device_selection::{Device, DeviceSelection},
-    equalizer::Equalizer,
-    general_settings::GeneralSettings,
-};
 use gtk::subclass::widget::WidgetClassSubclassExt;
+
+use crate::widgets::{Device, DeviceSelection, Equalizer, GeneralSettings};
 
 #[derive(Default, CompositeTemplate)]
 #[template(resource = "/com/oppzippy/openscq30/main_window.ui")]

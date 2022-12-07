@@ -9,7 +9,7 @@ use openscq30_lib::packets::structures::{
     equalizer_configuration::EqualizerConfiguration, noise_canceling_mode::NoiseCancelingMode,
 };
 
-use crate::device_selection::Device;
+use super::Device;
 
 glib::wrapper! {
     pub struct MainWindow(ObjectSubclass<imp::MainWindow>)

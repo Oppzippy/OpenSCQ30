@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-use device_selection::Device;
 use gtk::{
     gio,
     glib::{self, clone, closure_local, MainContext},
@@ -9,21 +8,17 @@ use gtk::{
     ApplicationWindow,
 };
 use gtk_openscq30_lib::soundcore_device_registry::GtkSoundcoreDeviceRegistry;
-use main_window::MainWindow;
 use openscq30_lib::{
     api::soundcore_device_registry::SoundcoreDeviceRegistry,
     packets::structures::{
         ambient_sound_mode::AmbientSoundMode, noise_canceling_mode::NoiseCancelingMode,
     },
 };
+use widgets::{MainWindow, Device};
 
-mod device_object;
-mod device_selection;
-mod equalizer;
-mod general_settings;
+mod objects;
+mod widgets;
 mod gtk_openscq30_lib;
-mod main_window;
-mod volume_slider;
 
 fn main() {
     tracing_subscriber::fmt()

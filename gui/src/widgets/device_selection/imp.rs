@@ -18,7 +18,7 @@ use gtk::{
 };
 use gtk::{SignalListItemFactory, SingleSelection};
 
-use crate::device_object::DeviceObject;
+use crate::objects::DeviceObject;
 
 use super::Device;
 
