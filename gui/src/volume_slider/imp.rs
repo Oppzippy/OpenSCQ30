@@ -31,11 +31,11 @@ pub struct VolumeSlider {
 
 impl VolumeSlider {
     pub fn volume(&self) -> i8 {
-        return (self.volume.get() * 10.0).clamp(-60.0, 60.0) as i8;
+        (self.volume.get() * 10.0).clamp(-60.0, 60.0) as i8
     }
 
     pub fn set_volume(&self, volume: i8) {
-        self.volume.set(volume as f64 / 10.0);
+        self.slider.set_value(volume as f64 / 10.0);
     }
 }
 

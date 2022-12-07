@@ -39,8 +39,17 @@ impl MainWindow {
 
     #[template_callback]
     fn handle_device_selection_changed(&self, _device_selection: &DeviceSelection) {
-        println!("selection changed");
         self.obj().emit_by_name("device-selection-changed", &[])
+    }
+
+    #[template_callback]
+    fn handle_apply_custom_equalizer(&self, _button: &gtk::Button) {
+        self.obj().emit_by_name("apply-custom-equalizer", &[])
+    }
+
+    #[template_callback]
+    fn handle_refresh_custom_equalizer(&self, _button: &gtk::Button) {
+        self.obj().emit_by_name("refresh-custom-equalizer", &[])
     }
 
     #[template_callback]
@@ -85,6 +94,8 @@ impl ObjectImpl for MainWindow {
                     .build(),
                 Signal::builder("refresh-devices").build(),
                 Signal::builder("device-selection-changed").build(),
+                Signal::builder("apply-custom-equalizer").build(),
+                Signal::builder("refresh-custom-equalizer").build(),
             ]
         });
         SIGNALS.as_ref()

@@ -20,7 +20,7 @@ impl Equalizer {
         return self.imp().volumes();
     }
 
-    pub fn set_equalizer_configuration(&self, volumes: [i8; 8]) {
+    pub fn set_volumes(&self, volumes: [i8; 8]) {
         self.imp().set_volumes(volumes);
     }
 }

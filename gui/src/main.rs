@@ -177,6 +177,46 @@ fn build_ui(app: &adw::Application) {
         }),
     );
 
+    let gtk_registry_1 = gtk_registry.clone();
+    main_window.connect_closure(
+        "apply-custom-equalizer",
+        false,
+        closure_local!(move |main_window: MainWindow| {
+            let main_context = MainContext::default();
+            let gtk_registry_2 = gtk_registry_1.to_owned();
+            main_context.spawn_local(clone!(@weak main_window => async move {
+                if let Some(selected_device) = main_window.selected_device() {
+                    if let Some(device) = gtk_registry_2.get_device_by_mac_address(&selected_device.mac_address).await {
+                        let configuration = main_window.equalizer_configuration();
+                        device.set_equalizer_configuration(configuration).await.unwrap();
+                    } else {
+                        tracing::warn!("could not find selected device: {}", selected_device.mac_address);
+                    }
+                }
+            }));
+        }),
+    );
+
+    let gtk_registry_1 = gtk_registry.clone();
+    main_window.connect_closure(
+        "refresh-custom-equalizer",
+        false,
+        closure_local!(move |main_window: MainWindow| {
+            let main_context = MainContext::default();
+            let gtk_registry_2 = gtk_registry_1.to_owned();
+            main_context.spawn_local(clone!(@weak main_window => async move {
+                if let Some(selected_device) = main_window.selected_device() {
+                    if let Some(device) = gtk_registry_2.get_device_by_mac_address(&selected_device.mac_address).await {
+                        let configuration = device.get_equalizer_configuration().await;
+                        main_window.set_equalizer_configuration(configuration);
+                    } else {
+                        tracing::warn!("could not find selected device: {}", selected_device.mac_address);
+                    }
+                }
+            }));
+        }),
+    );
+
     window.set_child(Some(&main_window));
     window.present();
 }
