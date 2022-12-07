@@ -1,6 +1,9 @@
 use std::sync::Arc;
 
-use openscq30_lib::api::soundcore_device_registry::SoundcoreDeviceRegistry;
+use openscq30_lib::{
+    api::soundcore_device_registry::SoundcoreDeviceRegistry,
+    soundcore_bluetooth::traits::soundcore_device_connection_error::SoundcoreDeviceConnectionError,
+};
 use tokio::runtime::Runtime;
 
 use super::soundcore_device::GtkSoundcoreDevice;
@@ -16,6 +19,11 @@ impl GtkSoundcoreDeviceRegistry {
             soundcore_device_registry: Arc::new(registry),
             tokio_runtime,
         }
+    }
+
+    pub async fn refresh_devices(&self) -> Result<(), SoundcoreDeviceConnectionError> {
+        let device_registry = self.soundcore_device_registry.to_owned();
+        async_runtime_bridge!(self.tokio_runtime, device_registry.refresh_devices().await)
     }
 
     pub async fn get_devices(&self) -> Vec<Arc<GtkSoundcoreDevice>> {

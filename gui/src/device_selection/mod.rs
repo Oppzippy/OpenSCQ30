@@ -5,20 +5,24 @@ use gtk::{
     subclass::prelude::ObjectSubclassIsExt,
 };
 
-use crate::device_selection::Device;
+#[derive(Debug, Clone)]
+pub struct Device {
+    pub mac_address: String,
+    pub name: String,
+}
 
 glib::wrapper! {
-    pub struct MainWindow(ObjectSubclass<imp::MainWindow>)
+    pub struct DeviceSelection(ObjectSubclass<imp::DeviceSelection>)
         @extends gtk::Box, gtk::Widget,
         @implements gtk::Accessible, gtk::Actionable, gtk::Buildable, gtk::ConstraintTarget;
 }
 
-impl MainWindow {
+impl DeviceSelection {
     pub fn new() -> Self {
         Object::new(&[])
     }
 
     pub fn set_devices(&self, devices: &[Device]) {
-        self.imp().set_devices(devices);
+        self.imp().set_devices(devices)
     }
 }

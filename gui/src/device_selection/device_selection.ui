@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+	<template class="OpenSCQ30DeviceSelection" parent="GtkBox">
+		<property name="orientation">horizontal</property>
+
+		<child>
+			<object class="GtkLabel" id="label">
+				<property name="label">Device</property>
+				<property name="margin-start">10</property>
+				<property name="margin-end">10</property>
+			</object>
+		</child>
+
+		<child>
+			<object class="GtkDropDown" id="dropdown">
+				<accessibility>
+					<relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">label</relation>
+				</accessibility>
+			</object>
+		</child>
+
+		<child>
+			<object class="GtkButton">
+				<property name="label">Refresh</property>
+				<signal name="clicked" handler="handle_refresh_clicked" swapped="true" />
+			</object>
+		</child>
+	</template>
+</interface>

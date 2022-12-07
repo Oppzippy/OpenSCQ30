@@ -23,6 +23,16 @@ impl<'a> GtkSoundcoreDevice<'a> {
         }
     }
 
+    pub async fn get_mac_address(&self) -> Result<String, SoundcoreDeviceConnectionError> {
+        let soundcore_device = self.soundcore_device.to_owned();
+        async_runtime_bridge!(self.tokio_runtime, soundcore_device.get_mac_address().await)
+    }
+
+    pub async fn get_name(&self) -> Result<String, SoundcoreDeviceConnectionError> {
+        let soundcore_device = self.soundcore_device.to_owned();
+        async_runtime_bridge!(self.tokio_runtime, soundcore_device.get_name().await)
+    }
+
     pub async fn get_ambient_sound_mode(&self) -> AmbientSoundMode {
         let soundcore_device = self.soundcore_device.to_owned();
         async_runtime_bridge!(

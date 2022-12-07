@@ -8,12 +8,18 @@ use gtk::{
     CompositeTemplate, TemplateChild,
 };
 
-use crate::{equalizer::Equalizer, general_settings::GeneralSettings};
+use crate::{
+    device_selection::{Device, DeviceSelection},
+    equalizer::Equalizer,
+    general_settings::GeneralSettings,
+};
 use gtk::subclass::widget::WidgetClassSubclassExt;
 
 #[derive(Default, CompositeTemplate)]
 #[template(resource = "/com/oppzippy/openscq30/main_window.ui")]
 pub struct MainWindow {
+    #[template_child]
+    pub device_selection: TemplateChild<DeviceSelection>,
     #[template_child]
     pub general_settings: TemplateChild<GeneralSettings>,
     #[template_child]
@@ -22,6 +28,15 @@ pub struct MainWindow {
 
 #[gtk::template_callbacks]
 impl MainWindow {
+    pub fn set_devices(&self, devices: &[Device]) {
+        self.device_selection.set_devices(devices);
+    }
+
+    #[template_callback]
+    fn handle_refresh_devices(&self, _device_selection: &DeviceSelection) {
+        self.obj().emit_by_name("refresh-devices", &[])
+    }
+
     #[template_callback]
     // no idea why the parameter comes before &GeneralSettings
     fn handle_ambient_sound_mode_selected(&self, mode: u8, _: &GeneralSettings) {
@@ -62,6 +77,7 @@ impl ObjectImpl for MainWindow {
                 Signal::builder("noise-canceling-mode-selected")
                     .param_types([u8::static_type()])
                     .build(),
+                Signal::builder("refresh-devices").build(),
             ]
         });
         SIGNALS.as_ref()

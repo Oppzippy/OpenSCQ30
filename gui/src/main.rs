@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use device_selection::Device;
 use gtk::{
     gio,
     glib::{self, clone, closure_local, MainContext},
@@ -16,6 +17,8 @@ use openscq30_lib::{
     },
 };
 
+mod device_object;
+mod device_selection;
 mod equalizer;
 mod general_settings;
 mod gtk_openscq30_lib;
@@ -64,6 +67,49 @@ fn build_ui(app: &adw::Application) {
 
     let main_window = MainWindow::new();
 
+    let main_context = MainContext::default();
+    let gtk_registry_1 = gtk_registry.clone();
+    main_context.spawn_local(clone!(@weak main_window => async move {
+        let bluetooth_devices = gtk_registry_1
+            .get_devices()
+            .await;
+        let mut model_devices = Vec::new();
+        for bluetooth_device in bluetooth_devices {
+            model_devices.push(Device {
+                mac_address: bluetooth_device.get_mac_address().await.unwrap_or("Unknown MAC Address".to_string()),
+                name: bluetooth_device.get_name().await.unwrap_or("Unknown Name".to_string()),
+            })
+        }
+        main_window.set_devices(&model_devices);
+    }));
+
+    let gtk_registry_1 = gtk_registry.clone();
+    main_window.connect_closure(
+        "refresh-devices",
+        false,
+        closure_local!(move |main_window: MainWindow| {
+            let main_context = MainContext::default();
+            let gtk_registry_2 = gtk_registry_1.to_owned();
+            main_context.spawn_local(clone!(@weak main_window => async move {
+                if let Err(err) = gtk_registry_2.refresh_devices().await {
+                    tracing::warn!("error refreshing devices: {err}");
+                };
+
+                let bluetooth_devices = gtk_registry_2
+                    .get_devices()
+                    .await;
+                let mut model_devices = Vec::new();
+                for bluetooth_device in bluetooth_devices {
+                    model_devices.push(Device {
+                        mac_address: bluetooth_device.get_mac_address().await.unwrap_or("Unknown MAC Address".to_string()),
+                        name: bluetooth_device.get_name().await.unwrap_or("Unknown Name".to_string()),
+                    })
+                }
+                main_window.set_devices(&model_devices);
+            }));
+        }),
+    );
+
     let gtk_registry_1 = gtk_registry.clone();
     main_window.connect_closure(
         "ambient-sound-mode-selected",
@@ -102,6 +148,9 @@ fn load_resources() {
     gio::resources_register_include!("volume_slider.gresource")
         .expect("failed to load volume slider");
     gio::resources_register_include!("equalizer.gresource").expect("failed to load volume slider");
-    gio::resources_register_include!("general_settings.gresource").expect("failed to load general");
+    gio::resources_register_include!("device_selection.gresource")
+        .expect("failed to load device selection");
+    gio::resources_register_include!("general_settings.gresource")
+        .expect("failed to load general settings");
     gio::resources_register_include!("main_window.gresource").expect("failed to load main window");
 }

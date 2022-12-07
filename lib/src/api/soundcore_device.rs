@@ -146,6 +146,14 @@ impl SoundcoreDevice {
         println!("{:?}", state);
     }
 
+    pub async fn get_mac_address(&self) -> Result<String, SoundcoreDeviceConnectionError> {
+        self.connection.get_mac_address().await
+    }
+
+    pub async fn get_name(&self) -> Result<String, SoundcoreDeviceConnectionError> {
+        self.connection.get_name().await
+    }
+
     pub async fn set_ambient_sound_mode(
         &self,
         ambient_sound_mode: AmbientSoundMode,

@@ -15,6 +15,11 @@ fn main() {
         "general_settings.gresource",
     );
     glib_build_tools::compile_resources(
+        "src/device_selection",
+        "src/device_selection/resources.gresource.xml",
+        "device_selection.gresource",
+    );
+    glib_build_tools::compile_resources(
         "src/main_window",
         "src/main_window/resources.gresource.xml",
         "main_window.gresource",

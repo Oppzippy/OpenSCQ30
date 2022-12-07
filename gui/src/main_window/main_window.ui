@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
 	<template class="OpenSCQ30MainWindow" parent="GtkBox">
-		<property name="orientation">horizontal</property>
+		<property name="orientation">vertical</property>
+
+		<child>
+			<object class="OpenSCQ30DeviceSelection" id="device_selection">
+				<signal name="refresh-devices" handler="handle_refresh_devices" swapped="true" />
+			</object>
+		</child>
 
 		<child>
 			<object class="GtkNotebook">
