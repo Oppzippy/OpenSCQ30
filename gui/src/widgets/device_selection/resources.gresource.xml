@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<gresources>
-	<gresource prefix="/com/oppzippy/openscq30/">
-		<file compressed="true" preprocess="xml-stripblanks">device_selection.ui</file>
-	</gresource>
-</gresources>

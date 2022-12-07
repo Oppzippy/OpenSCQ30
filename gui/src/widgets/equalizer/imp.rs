@@ -12,7 +12,7 @@ use gtk::{
 use crate::widgets::VolumeSlider;
 
 #[derive(Default, CompositeTemplate)]
-#[template(resource = "/com/oppzippy/openscq30/equalizer.ui")]
+#[template(resource = "/com/oppzippy/openscq30/equalizer/template.ui")]
 pub struct Equalizer {
     #[template_child]
     pub band_100: TemplateChild<VolumeSlider>,

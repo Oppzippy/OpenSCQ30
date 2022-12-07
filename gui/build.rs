@@ -1,27 +1,7 @@
 fn main() {
     glib_build_tools::compile_resources(
-        "src/widgets/volume_slider",
-        "src/widgets/volume_slider/resources.gresource.xml",
-        "volume_slider.gresource",
-    );
-    glib_build_tools::compile_resources(
-        "src/widgets/equalizer",
-        "src/widgets/equalizer/resources.gresource.xml",
-        "equalizer.gresource",
-    );
-    glib_build_tools::compile_resources(
-        "src/widgets/general_settings",
-        "src/widgets/general_settings/resources.gresource.xml",
-        "general_settings.gresource",
-    );
-    glib_build_tools::compile_resources(
-        "src/widgets/device_selection",
-        "src/widgets/device_selection/resources.gresource.xml",
-        "device_selection.gresource",
-    );
-    glib_build_tools::compile_resources(
-        "src/widgets/main_window",
-        "src/widgets/main_window/resources.gresource.xml",
-        "main_window.gresource",
+        "src/widgets",
+        "src/widgets/widgets.gresource.xml",
+        "widgets.gresource",
     );
 }

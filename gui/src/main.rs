@@ -217,12 +217,6 @@ fn build_ui(app: &adw::Application) {
 }
 
 fn load_resources() {
-    gio::resources_register_include!("volume_slider.gresource")
-        .expect("failed to load volume slider");
-    gio::resources_register_include!("equalizer.gresource").expect("failed to load volume slider");
-    gio::resources_register_include!("device_selection.gresource")
-        .expect("failed to load device selection");
-    gio::resources_register_include!("general_settings.gresource")
-        .expect("failed to load general settings");
-    gio::resources_register_include!("main_window.gresource").expect("failed to load main window");
+    gio::resources_register_include!("widgets.gresource")
+        .expect("failed to load widgets");
 }

@@ -13,7 +13,7 @@ use gtk::subclass::widget::WidgetClassSubclassExt;
 use crate::widgets::{Device, DeviceSelection, Equalizer, GeneralSettings};
 
 #[derive(Default, CompositeTemplate)]
-#[template(resource = "/com/oppzippy/openscq30/main_window.ui")]
+#[template(resource = "/com/oppzippy/openscq30/main_window/template.ui")]
 pub struct MainWindow {
     #[template_child]
     pub device_selection: TemplateChild<DeviceSelection>,

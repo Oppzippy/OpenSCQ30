@@ -23,7 +23,7 @@ use crate::objects::DeviceObject;
 use super::Device;
 
 #[derive(Default, CompositeTemplate)]
-#[template(resource = "/com/oppzippy/openscq30/device_selection.ui")]
+#[template(resource = "/com/oppzippy/openscq30/device_selection/template.ui")]
 pub struct DeviceSelection {
     #[template_child]
     pub dropdown: TemplateChild<gtk::DropDown>,

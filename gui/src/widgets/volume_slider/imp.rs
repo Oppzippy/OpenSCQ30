@@ -18,7 +18,7 @@ use gtk::{
 };
 
 #[derive(Default, CompositeTemplate)]
-#[template(resource = "/com/oppzippy/openscq30/volume_slider.ui")]
+#[template(resource = "/com/oppzippy/openscq30/volume_slider/template.ui")]
 pub struct VolumeSlider {
     #[template_child]
     pub slider: TemplateChild<Scale>,
