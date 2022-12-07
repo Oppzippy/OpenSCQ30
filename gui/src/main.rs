@@ -128,7 +128,7 @@ fn build_ui(app: &adw::Application) {
                             
                             main_window.set_ambient_sound_mode(ambient_sound_mode);
                             main_window.set_noise_canceling_mode(noise_canceling_mode);
-                            // main_window.set_equalizer_configuration(equalizer_configuration);
+                            main_window.set_equalizer_configuration(equalizer_configuration);
                         },
                         None => todo!(),
                     }
@@ -145,10 +145,14 @@ fn build_ui(app: &adw::Application) {
             let main_context = MainContext::default();
             let gtk_registry_2 = gtk_registry_1.to_owned();
             main_context.spawn_local(clone!(@weak main_window => async move {
-                let ambient_sound_mode = AmbientSoundMode::from_id(mode_id).unwrap();
-                let devices = gtk_registry_2.get_devices().await;
-                let device = devices.first().unwrap();
-                device.set_ambient_sound_mode(ambient_sound_mode).await.unwrap();
+                if let Some(selected_device) = main_window.selected_device() {
+                    if let Some(device) = gtk_registry_2.get_device_by_mac_address(&selected_device.mac_address).await {
+                        let ambient_sound_mode = AmbientSoundMode::from_id(mode_id).unwrap();
+                        device.set_ambient_sound_mode(ambient_sound_mode).await.unwrap();
+                    } else {
+                        tracing::warn!("could not find selected device: {}", selected_device.mac_address);
+                    }
+                }
             }));
         }),
     );
@@ -161,8 +165,14 @@ fn build_ui(app: &adw::Application) {
             let main_context = MainContext::default();
             let gtk_registry_2 = gtk_registry_1.to_owned();
             main_context.spawn_local(clone!(@weak main_window => async move {
-                let devices = gtk_registry_2.get_devices().await;
-                devices.first().unwrap().set_noise_canceling_mode(NoiseCancelingMode::from_id(mode).unwrap()).await.unwrap();
+                if let Some(selected_device) = main_window.selected_device() {
+                    if let Some(device) = gtk_registry_2.get_device_by_mac_address(&selected_device.mac_address).await {
+                        let noise_canceling_mode = NoiseCancelingMode::from_id(mode).unwrap();
+                        device.set_noise_canceling_mode(noise_canceling_mode).await.unwrap();
+                    }else {
+                        tracing::warn!("could not find selected device: {}", selected_device.mac_address);
+                    }
+                }
             }));
         }),
     );

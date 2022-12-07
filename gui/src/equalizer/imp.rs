@@ -45,6 +45,17 @@ impl Equalizer {
             self.band_12800.get().volume(),
         ]
     }
+
+    pub fn set_volumes(&self, volumes: [i8; 8]) {
+        self.band_100.get().set_volume(volumes[0]);
+        self.band_200.get().set_volume(volumes[1]);
+        self.band_400.get().set_volume(volumes[2]);
+        self.band_800.get().set_volume(volumes[3]);
+        self.band_1600.get().set_volume(volumes[4]);
+        self.band_3200.get().set_volume(volumes[5]);
+        self.band_6400.get().set_volume(volumes[6]);
+        self.band_12800.get().set_volume(volumes[7]);
+    }
 }
 
 #[glib::object_subclass]

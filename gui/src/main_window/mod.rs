@@ -5,7 +5,8 @@ use gtk::{
     subclass::prelude::ObjectSubclassIsExt,
 };
 use openscq30_lib::packets::structures::{
-    ambient_sound_mode::AmbientSoundMode, noise_canceling_mode::NoiseCancelingMode,
+    ambient_sound_mode::AmbientSoundMode, equalizer_configuration::EqualizerConfiguration,
+    noise_canceling_mode::NoiseCancelingMode,
 };
 
 use crate::device_selection::Device;
@@ -39,5 +40,11 @@ impl MainWindow {
         self.imp()
             .general_settings
             .set_noise_canceling_mode(noise_canceling_mode);
+    }
+
+    pub fn set_equalizer_configuration(&self, equalizer_configuration: EqualizerConfiguration) {
+        self.imp()
+            .equalizer
+            .set_equalizer_configuration(equalizer_configuration.band_offsets().volume_offsets());
     }
 }

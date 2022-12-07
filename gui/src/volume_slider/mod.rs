@@ -19,4 +19,8 @@ impl VolumeSlider {
     pub fn volume(&self) -> i8 {
         self.imp().volume()
     }
+
+    pub fn set_volume(&self, volume: i8) {
+        self.imp().set_volume(volume)
+    }
 }
