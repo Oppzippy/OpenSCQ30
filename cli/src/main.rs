@@ -93,7 +93,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .init();
 
     let args = Cli::parse();
-    let mut registry = SoundcoreDeviceRegistry::new().await?;
+    let registry = SoundcoreDeviceRegistry::new().await?;
     registry.refresh_devices().await?;
 
     let devices = registry.get_devices().await;
