@@ -1,4 +1,7 @@
-use gtk::glib::{self, Object};
+use gtk::{
+    glib::{self, Object},
+    prelude::ObjectExt,
+};
 
 mod imp;
 
@@ -9,6 +12,14 @@ glib::wrapper! {
 impl DeviceObject {
     pub fn new(name: &String, mac_address: &String) -> Self {
         Object::new(&[("name", name), ("mac-address", mac_address)])
+    }
+
+    pub fn name(&self) -> String {
+        self.property("name")
+    }
+
+    pub fn mac_address(&self) -> String {
+        self.property("mac-address")
     }
 }
 

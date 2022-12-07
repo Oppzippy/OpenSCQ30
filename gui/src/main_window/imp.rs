@@ -38,6 +38,12 @@ impl MainWindow {
     }
 
     #[template_callback]
+    fn handle_device_selection_changed(&self, _device_selection: &DeviceSelection) {
+        println!("selection changed");
+        self.obj().emit_by_name("device-selection-changed", &[])
+    }
+
+    #[template_callback]
     // no idea why the parameter comes before &GeneralSettings
     fn handle_ambient_sound_mode_selected(&self, mode: u8, _: &GeneralSettings) {
         let obj = self.obj();
@@ -78,6 +84,7 @@ impl ObjectImpl for MainWindow {
                     .param_types([u8::static_type()])
                     .build(),
                 Signal::builder("refresh-devices").build(),
+                Signal::builder("device-selection-changed").build(),
             ]
         });
         SIGNALS.as_ref()

@@ -93,6 +93,7 @@ fn build_ui(app: &adw::Application) {
             main_context.spawn_local(clone!(@weak main_window => async move {
                 if let Err(err) = gtk_registry_2.refresh_devices().await {
                     tracing::warn!("error refreshing devices: {err}");
+                    return
                 };
 
                 let bluetooth_devices = gtk_registry_2
@@ -107,6 +108,32 @@ fn build_ui(app: &adw::Application) {
                 }
                 main_window.set_devices(&model_devices);
             }));
+        }),
+    );
+
+    let gtk_registry_1 = gtk_registry.to_owned();
+    main_window.connect_closure(
+        "device_selection_changed",
+        false,
+        closure_local!(move |main_window: MainWindow| {
+            if let Some(selected_device) = main_window.selected_device() {
+                let main_context = MainContext::default();
+                let gtk_registry_2 = gtk_registry_1.to_owned();
+                main_context.spawn_local(clone!(@weak main_window => async move {
+                    match gtk_registry_2.get_device_by_mac_address(&selected_device.mac_address).await {
+                        Some(device) => {
+                            let ambient_sound_mode = device.get_ambient_sound_mode().await;
+                            let noise_canceling_mode = device.get_noise_canceling_mode().await;
+                            let equalizer_configuration = device.get_equalizer_configuration().await;
+                            
+                            main_window.set_ambient_sound_mode(ambient_sound_mode);
+                            main_window.set_noise_canceling_mode(noise_canceling_mode);
+                            // main_window.set_equalizer_configuration(equalizer_configuration);
+                        },
+                        None => todo!(),
+                    }
+                }));
+            }
         }),
     );
 

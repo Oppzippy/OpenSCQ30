@@ -25,4 +25,8 @@ impl DeviceSelection {
     pub fn set_devices(&self, devices: &[Device]) {
         self.imp().set_devices(devices)
     }
+
+    pub fn selected_device(&self) -> Option<Device> {
+        self.imp().selected_device()
+    }
 }

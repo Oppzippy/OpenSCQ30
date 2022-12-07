@@ -6,6 +6,7 @@
 		<child>
 			<object class="OpenSCQ30DeviceSelection" id="device_selection">
 				<signal name="refresh-devices" handler="handle_refresh_devices" swapped="true" />
+				<signal name="selection-changed" handler="handle_device_selection_changed" swapped="true" />
 			</object>
 		</child>
 

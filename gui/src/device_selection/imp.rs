@@ -1,10 +1,9 @@
-use std::borrow::Borrow;
 use std::cell::RefCell;
 
-use gtk::gio::{self, ListStore};
+use gtk::gio;
+use gtk::glib::clone;
 use gtk::glib::once_cell::sync::Lazy;
 use gtk::glib::subclass::Signal;
-use gtk::glib::BindingFlags;
 use gtk::prelude::{Cast, ObjectExt, StaticType};
 use gtk::subclass::prelude::ObjectSubclassExt;
 use gtk::subclass::widget::CompositeTemplateCallbacksClass;
@@ -17,7 +16,7 @@ use gtk::{
     },
     CompositeTemplate, TemplateChild,
 };
-use gtk::{NoSelection, SignalListItemFactory, SingleSelection};
+use gtk::{SignalListItemFactory, SingleSelection};
 
 use crate::device_object::DeviceObject;
 
@@ -39,10 +38,27 @@ impl DeviceSelection {
             .iter()
             .map(|device| DeviceObject::new(&device.name, &device.mac_address))
             .collect();
-        let model = ListStore::new(DeviceObject::static_type());
-        model.extend_from_slice(&objects);
 
-        self.dropdown.set_model(Some(&model));
+        if let Some(model) = &*self.devices.borrow() {
+            model.remove_all();
+            model.extend_from_slice(&objects);
+
+            self.dropdown.set_model(Some(model));
+        }
+    }
+
+    pub fn selected_device(&self) -> Option<Device> {
+        self.dropdown
+            .selected_item()
+            .map(|object| {
+                object
+                    .downcast::<DeviceObject>()
+                    .expect("selected item must be a DeviceObject")
+            })
+            .map(|device_object| Device {
+                name: device_object.name(),
+                mac_address: device_object.mac_address(),
+            })
     }
 
     #[template_callback]
@@ -94,18 +110,28 @@ impl ObjectImpl for DeviceSelection {
                 .downcast::<gtk::Label>()
                 .expect("child must be a Label");
 
-            let name = device_object.property::<String>("name");
-            let mac_address = device_object.property::<String>("mac-address");
+            let name = device_object.name();
+            let mac_address = device_object.mac_address();
 
             label.set_label(&format!("{name}: [{mac_address}]"));
         });
+
+        let obj = self.obj();
+        self.dropdown
+            .connect_selected_item_notify(clone!(@weak obj => move |_dropdown| {
+                obj.emit_by_name("selection-changed", &[])
+            }));
 
         self.dropdown.set_factory(Some(&factory));
     }
 
     fn signals() -> &'static [Signal] {
-        static SIGNALS: Lazy<Vec<Signal>> =
-            Lazy::new(|| vec![Signal::builder("refresh-devices").build()]);
+        static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
+            vec![
+                Signal::builder("refresh-devices").build(),
+                Signal::builder("selection-changed").build(),
+            ]
+        });
         SIGNALS.as_ref()
     }
 }

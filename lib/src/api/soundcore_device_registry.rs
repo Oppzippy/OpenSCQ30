@@ -55,4 +55,11 @@ impl SoundcoreDeviceRegistry {
             .map(|x| x.to_owned())
             .collect()
     }
+
+    pub async fn get_device_by_mac_address(
+        &self,
+        mac_address: &String,
+    ) -> Option<Arc<SoundcoreDevice>> {
+        self.devices.read().await.get(mac_address).cloned()
+    }
 }

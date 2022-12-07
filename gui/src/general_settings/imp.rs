@@ -1,6 +1,7 @@
 use gtk::prelude::{ObjectExt, StaticType};
 use gtk::subclass::prelude::ObjectSubclassExt;
 use gtk::subclass::widget::CompositeTemplateCallbacksClass;
+use gtk::traits::ButtonExt;
 use gtk::{
     glib::{self, once_cell::sync::Lazy, subclass::Signal},
     prelude::InitializingWidgetExt,
@@ -36,6 +37,22 @@ pub struct GeneralSettings {
 
 #[gtk::template_callbacks]
 impl GeneralSettings {
+    pub fn set_ambient_sound_mode(&self, ambient_sound_mode: AmbientSoundMode) {
+        match ambient_sound_mode {
+            AmbientSoundMode::NoiseCanceling => self.noise_canceling_mode.set_active(true),
+            AmbientSoundMode::Transparency => self.transparency_mode.set_active(true),
+            AmbientSoundMode::Normal => self.normal_mode.set_active(true),
+        }
+    }
+
+    pub fn set_noise_canceling_mode(&self, noise_canceling_mode: NoiseCancelingMode) {
+        match noise_canceling_mode {
+            NoiseCancelingMode::Indoor => self.indoor_mode.set_active(true),
+            NoiseCancelingMode::Outdoor => self.outdoor_mode.set_active(true),
+            NoiseCancelingMode::Transport => self.transport_mode.set_active(true),
+        }
+    }
+
     #[template_callback]
     fn handle_normal_mode_clicked(&self, button: &gtk::ToggleButton) {
         if button.is_active() {
