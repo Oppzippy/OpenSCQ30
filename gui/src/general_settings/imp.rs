@@ -1,7 +1,8 @@
+use std::cell::Cell;
+
 use gtk::prelude::{ObjectExt, StaticType};
 use gtk::subclass::prelude::ObjectSubclassExt;
 use gtk::subclass::widget::CompositeTemplateCallbacksClass;
-use gtk::traits::ButtonExt;
 use gtk::{
     glib::{self, once_cell::sync::Lazy, subclass::Signal},
     prelude::InitializingWidgetExt,
@@ -33,29 +34,38 @@ pub struct GeneralSettings {
     pub indoor_mode: TemplateChild<gtk::ToggleButton>,
     #[template_child]
     pub outdoor_mode: TemplateChild<gtk::ToggleButton>,
+
+    // The buttons fire their click signals when using set_active to set them in their initial states
+    // We don't want to fire events to set the headphones to the state that they're already in,
+    // so we can set this flag to true when we don't want to fire events up the chain.
+    ignore_button_clicks: Cell<bool>,
 }
 
 #[gtk::template_callbacks]
 impl GeneralSettings {
     pub fn set_ambient_sound_mode(&self, ambient_sound_mode: AmbientSoundMode) {
+        self.ignore_button_clicks.replace(true);
         match ambient_sound_mode {
             AmbientSoundMode::NoiseCanceling => self.noise_canceling_mode.set_active(true),
             AmbientSoundMode::Transparency => self.transparency_mode.set_active(true),
             AmbientSoundMode::Normal => self.normal_mode.set_active(true),
         }
+        self.ignore_button_clicks.replace(false);
     }
 
     pub fn set_noise_canceling_mode(&self, noise_canceling_mode: NoiseCancelingMode) {
+        self.ignore_button_clicks.replace(true);
         match noise_canceling_mode {
             NoiseCancelingMode::Indoor => self.indoor_mode.set_active(true),
             NoiseCancelingMode::Outdoor => self.outdoor_mode.set_active(true),
             NoiseCancelingMode::Transport => self.transport_mode.set_active(true),
         }
+        self.ignore_button_clicks.replace(false);
     }
 
     #[template_callback]
     fn handle_normal_mode_clicked(&self, button: &gtk::ToggleButton) {
-        if button.is_active() {
+        if button.is_active() && !self.ignore_button_clicks.get() {
             self.obj().emit_by_name(
                 "ambient-sound-mode-selected",
                 &[&AmbientSoundMode::Normal.id()],
@@ -65,7 +75,7 @@ impl GeneralSettings {
 
     #[template_callback]
     fn handle_transparency_mode_clicked(&self, button: &gtk::ToggleButton) {
-        if button.is_active() {
+        if button.is_active() && !self.ignore_button_clicks.get() {
             self.obj().emit_by_name(
                 "ambient-sound-mode-selected",
                 &[&AmbientSoundMode::Transparency.id()],
@@ -75,7 +85,7 @@ impl GeneralSettings {
 
     #[template_callback]
     fn handle_noise_canceling_mode_clicked(&self, button: &gtk::ToggleButton) {
-        if button.is_active() {
+        if button.is_active() && !self.ignore_button_clicks.get() {
             self.obj().emit_by_name(
                 "ambient-sound-mode-selected",
                 &[&AmbientSoundMode::NoiseCanceling.id()],
@@ -85,7 +95,7 @@ impl GeneralSettings {
 
     #[template_callback]
     fn handle_transport_mode_clicked(&self, button: &gtk::ToggleButton) {
-        if button.is_active() {
+        if button.is_active() && !self.ignore_button_clicks.get() {
             self.obj().emit_by_name(
                 "noise-canceling-mode-selected",
                 &[&NoiseCancelingMode::Transport.id()],
@@ -95,7 +105,7 @@ impl GeneralSettings {
 
     #[template_callback]
     fn handle_indoor_mode_clicked(&self, button: &gtk::ToggleButton) {
-        if button.is_active() {
+        if button.is_active() && !self.ignore_button_clicks.get() {
             self.obj().emit_by_name(
                 "noise-canceling-mode-selected",
                 &[&NoiseCancelingMode::Indoor.id()],
@@ -105,7 +115,7 @@ impl GeneralSettings {
 
     #[template_callback]
     fn handle_outdoor_mode_clicked(&self, button: &gtk::ToggleButton) {
-        if button.is_active() {
+        if button.is_active() && !self.ignore_button_clicks.get() {
             self.obj().emit_by_name(
                 "noise-canceling-mode-selected",
                 &[&NoiseCancelingMode::Outdoor.id()],
@@ -131,6 +141,10 @@ impl ObjectSubclass for GeneralSettings {
 }
 
 impl ObjectImpl for GeneralSettings {
+    fn constructed(&self) {
+        self.ignore_button_clicks.replace(false);
+    }
+
     fn signals() -> &'static [Signal] {
         static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
             vec![
