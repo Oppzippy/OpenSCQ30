@@ -2,7 +2,7 @@ use std::cell::Cell;
 
 use gtk::glib::once_cell::sync::Lazy;
 use gtk::glib::{BindingFlags, ParamSpec, ParamSpecDouble, ParamSpecInt};
-use gtk::prelude::{ObjectExt, ToValue};
+use gtk::prelude::*;
 use gtk::subclass::prelude::{ObjectImplExt, ObjectSubclassExt};
 use gtk::subclass::widget::WidgetClassSubclassExt;
 use gtk::traits::{RangeExt, ScaleExt};
@@ -35,7 +35,7 @@ impl VolumeSlider {
     }
 
     pub fn set_volume(&self, volume: i8) {
-        self.slider.set_value(volume as f64 / 10.0);
+        self.obj().set_property("volume", volume as f64 / 10.0);
     }
 }
 
@@ -65,14 +65,14 @@ impl ObjectImpl for VolumeSlider {
         PROPERTIES.as_ref()
     }
 
-    fn set_property(&self, _id: usize, _value: &glib::Value, _pspec: &ParamSpec) {
-        match _pspec.name() {
+    fn set_property(&self, _id: usize, value: &glib::Value, pspec: &ParamSpec) {
+        match pspec.name() {
             "band" => {
-                let band = _value.get().expect("band must be i32");
+                let band = value.get().expect("band must be i32");
                 self.band.replace(band);
             }
             "volume" => {
-                let volume = _value.get().expect("volume must be f64");
+                let volume = value.get().expect("volume must be f64");
                 self.volume.replace(volume);
             }
             _ => unimplemented!(),
