@@ -65,42 +65,41 @@ fn build_ui(app: &adw::Application) {
     let main_window = MainWindow::new();
 
     let main_context = MainContext::default();
-    let gtk_registry_1 = gtk_registry.clone();
+    let gtk_registry_clone = gtk_registry.clone();
     main_context.spawn_local(clone!(@weak main_window => async move {
-        let bluetooth_devices = gtk_registry_1
+        let bluetooth_devices = gtk_registry_clone
             .get_devices()
             .await;
         let mut model_devices = Vec::new();
         for bluetooth_device in bluetooth_devices {
             model_devices.push(Device {
-                mac_address: bluetooth_device.get_mac_address().await.unwrap_or("Unknown MAC Address".to_string()),
-                name: bluetooth_device.get_name().await.unwrap_or("Unknown Name".to_string()),
+                mac_address: bluetooth_device.get_mac_address().await.unwrap_or_else(|_| "Unknown MAC Address".to_string()),
+                name: bluetooth_device.get_name().await.unwrap_or_else(|_| "Unknown Name".to_string()),
             })
         }
         main_window.set_devices(&model_devices);
     }));
 
-    let gtk_registry_1 = gtk_registry.clone();
+    let gtk_registry_clone = gtk_registry.clone();
     main_window.connect_closure(
         "refresh-devices",
         false,
         closure_local!(move |main_window: MainWindow| {
             let main_context = MainContext::default();
-            let gtk_registry_2 = gtk_registry_1.to_owned();
-            main_context.spawn_local(clone!(@weak main_window => async move {
-                if let Err(err) = gtk_registry_2.refresh_devices().await {
+            main_context.spawn_local(clone!(@weak main_window, @weak gtk_registry_clone => async move {
+                if let Err(err) = gtk_registry_clone.refresh_devices().await {
                     tracing::warn!("error refreshing devices: {err}");
                     return
                 };
 
-                let bluetooth_devices = gtk_registry_2
+                let bluetooth_devices = gtk_registry_clone
                     .get_devices()
                     .await;
                 let mut model_devices = Vec::new();
                 for bluetooth_device in bluetooth_devices {
                     model_devices.push(Device {
-                        mac_address: bluetooth_device.get_mac_address().await.unwrap_or("Unknown MAC Address".to_string()),
-                        name: bluetooth_device.get_name().await.unwrap_or("Unknown Name".to_string()),
+                        mac_address: bluetooth_device.get_mac_address().await.unwrap_or_else(|_| "Unknown MAC Address".to_string()),
+                        name: bluetooth_device.get_name().await.unwrap_or_else(|_| "Unknown Name".to_string()),
                     })
                 }
                 main_window.set_devices(&model_devices);
@@ -108,16 +107,15 @@ fn build_ui(app: &adw::Application) {
         }),
     );
 
-    let gtk_registry_1 = gtk_registry.to_owned();
+    let gtk_registry_clone = gtk_registry.clone();
     main_window.connect_closure(
         "device_selection_changed",
         false,
         closure_local!(move |main_window: MainWindow| {
             if let Some(selected_device) = main_window.selected_device() {
                 let main_context = MainContext::default();
-                let gtk_registry_2 = gtk_registry_1.to_owned();
-                main_context.spawn_local(clone!(@weak main_window => async move {
-                    match gtk_registry_2.get_device_by_mac_address(&selected_device.mac_address).await {
+                main_context.spawn_local(clone!(@weak main_window, @weak gtk_registry_clone => async move {
+                    match gtk_registry_clone.get_device_by_mac_address(&selected_device.mac_address).await {
                         Some(device) => {
                             let ambient_sound_mode = device.get_ambient_sound_mode().await;
                             let noise_canceling_mode = device.get_noise_canceling_mode().await;
@@ -134,16 +132,15 @@ fn build_ui(app: &adw::Application) {
         }),
     );
 
-    let gtk_registry_1 = gtk_registry.clone();
+    let gtk_registry_clone = gtk_registry.clone();
     main_window.connect_closure(
         "ambient-sound-mode-selected",
         false,
         closure_local!(move |main_window: MainWindow, mode_id: u8| {
             let main_context = MainContext::default();
-            let gtk_registry_2 = gtk_registry_1.to_owned();
-            main_context.spawn_local(clone!(@weak main_window => async move {
+            main_context.spawn_local(clone!(@weak main_window, @weak gtk_registry_clone => async move {
                 if let Some(selected_device) = main_window.selected_device() {
-                    if let Some(device) = gtk_registry_2.get_device_by_mac_address(&selected_device.mac_address).await {
+                    if let Some(device) = gtk_registry_clone.get_device_by_mac_address(&selected_device.mac_address).await {
                         let ambient_sound_mode = AmbientSoundMode::from_id(mode_id).unwrap();
                         device.set_ambient_sound_mode(ambient_sound_mode).await.unwrap();
                     } else {
@@ -154,16 +151,15 @@ fn build_ui(app: &adw::Application) {
         }),
     );
 
-    let gtk_registry_1 = gtk_registry.clone();
+    let gtk_registry_clone = gtk_registry.clone();
     main_window.connect_closure(
         "noise-canceling-mode-selected",
         false,
         closure_local!(move |main_window: MainWindow, mode: u8| {
             let main_context = MainContext::default();
-            let gtk_registry_2 = gtk_registry_1.to_owned();
-            main_context.spawn_local(clone!(@weak main_window => async move {
+            main_context.spawn_local(clone!(@weak main_window, @weak gtk_registry_clone => async move {
                 if let Some(selected_device) = main_window.selected_device() {
-                    if let Some(device) = gtk_registry_2.get_device_by_mac_address(&selected_device.mac_address).await {
+                    if let Some(device) = gtk_registry_clone.get_device_by_mac_address(&selected_device.mac_address).await {
                         let noise_canceling_mode = NoiseCancelingMode::from_id(mode).unwrap();
                         device.set_noise_canceling_mode(noise_canceling_mode).await.unwrap();
                     }else {
@@ -174,16 +170,15 @@ fn build_ui(app: &adw::Application) {
         }),
     );
 
-    let gtk_registry_1 = gtk_registry.clone();
+    let gtk_registry_clone = gtk_registry.clone();
     main_window.connect_closure(
         "apply-equalizer-settings",
         false,
         closure_local!(move |main_window: MainWindow| {
             let main_context = MainContext::default();
-            let gtk_registry_2 = gtk_registry_1.to_owned();
-            main_context.spawn_local(clone!(@weak main_window => async move {
+            main_context.spawn_local(clone!(@weak main_window, @weak gtk_registry_clone => async move {
                 if let Some(selected_device) = main_window.selected_device() {
-                    if let Some(device) = gtk_registry_2.get_device_by_mac_address(&selected_device.mac_address).await {
+                    if let Some(device) = gtk_registry_clone.get_device_by_mac_address(&selected_device.mac_address).await {
                         let configuration = main_window.equalizer_configuration();
                         device.set_equalizer_configuration(configuration).await.unwrap();
                     } else {
@@ -194,16 +189,15 @@ fn build_ui(app: &adw::Application) {
         }),
     );
 
-    let gtk_registry_1 = gtk_registry.clone();
+    let gtk_registry_clone = gtk_registry.clone();
     main_window.connect_closure(
         "refresh-equalizer-settings",
         false,
         closure_local!(move |main_window: MainWindow| {
             let main_context = MainContext::default();
-            let gtk_registry_2 = gtk_registry_1.to_owned();
-            main_context.spawn_local(clone!(@weak main_window => async move {
+            main_context.spawn_local(clone!(@weak main_window, @weak gtk_registry_clone => async move {
                 if let Some(selected_device) = main_window.selected_device() {
-                    if let Some(device) = gtk_registry_2.get_device_by_mac_address(&selected_device.mac_address).await {
+                    if let Some(device) = gtk_registry_clone.get_device_by_mac_address(&selected_device.mac_address).await {
                         let configuration = device.get_equalizer_configuration().await;
                         main_window.set_equalizer_configuration(configuration);
                     } else {
