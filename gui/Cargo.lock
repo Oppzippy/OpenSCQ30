@@ -661,6 +661,7 @@ dependencies = [
  "gtk4",
  "libadwaita",
  "openscq30_lib",
+ "strum",
  "tokio",
  "tracing",
  "tracing-subscriber",

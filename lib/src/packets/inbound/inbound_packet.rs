@@ -2,8 +2,8 @@ use tracing::warn;
 
 use crate::packets::structures::{
     ambient_sound_mode::AmbientSoundMode, equalizer_band_offsets::EqualizerBandOffsets,
-    equalizer_configuration::EqualizerConfiguration, equalizer_profile_id::EqualizerProfileId,
-    noise_canceling_mode::NoiseCancelingMode,
+    equalizer_configuration::EqualizerConfiguration, noise_canceling_mode::NoiseCancelingMode,
+    preset_equalizer_profile::PresetEqualizerProfile,
 };
 
 pub enum InboundPacket {
@@ -24,18 +24,19 @@ impl InboundPacket {
     }
 
     fn parse_state_update(bytes: &[u8]) -> Option<InboundPacket> {
-        const PREFIX: &[u8] = &[
-            0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01, 0x46, 0x00, 0x05, 0x00,
-        ];
+        // TODO offset 9 has some meaning. it's sometimes 5, sometimes 4. maybe more values I hvaen't seen.
+        const PREFIX: &[u8] = &[0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01, 0x46, 0x00];
         if bytes.starts_with(PREFIX) {
             if bytes.len() == 70 {
-                let equalizer_profile = EqualizerProfileId(bytes[11..13].try_into().unwrap());
-                let equalizer_offsets =
-                    EqualizerBandOffsets::from_bytes(bytes[13..21].try_into().unwrap());
-                let Some(equalizer_configuration) =
-                    EqualizerConfiguration::from_profile_id(equalizer_profile, equalizer_offsets) else {
-                        warn!("parse_state_update: invalid equalizer profile id {}!", equalizer_profile);
-                        return None;
+                let preset_profile_id = u16::from_le_bytes(bytes[11..13].try_into().unwrap());
+                let equalizer_configuration =
+                    match PresetEqualizerProfile::from_id(preset_profile_id) {
+                        Some(preset_profile) => {
+                            EqualizerConfiguration::new_from_preset_profile(preset_profile)
+                        }
+                        None => EqualizerConfiguration::new_custom_profile(
+                            EqualizerBandOffsets::from_bytes(bytes[13..21].try_into().unwrap()),
+                        ),
                     };
 
                 let Some(ambient_sound_mode) = AmbientSoundMode::from_id(bytes[44]) else {
@@ -53,7 +54,7 @@ impl InboundPacket {
                     equalizer_configuration,
                 });
             } else {
-                warn!("parse_state_update: expected 54 bytes, got {}", bytes.len());
+                warn!("parse_state_update: expected 70 bytes, got {}", bytes.len());
             }
         }
         None

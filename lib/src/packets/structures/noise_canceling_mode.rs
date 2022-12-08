@@ -1,7 +1,7 @@
-use strum::FromRepr;
+use strum::{Display, FromRepr};
 
 #[repr(u8)]
-#[derive(FromRepr, Clone, Copy, Debug)]
+#[derive(FromRepr, Clone, Copy, Debug, PartialEq, Eq, Hash, Display)]
 pub enum NoiseCancelingMode {
     Transport = 0,
     Outdoor = 1,

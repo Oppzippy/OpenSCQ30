@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+	<template class="OpenSCQ30EqualizerSettings" parent="GtkBox">
+		<property name="orientation">vertical</property>
+		<child>
+			<object class="GtkBox">
+				<property name="orientation">horizontal</property>
+				<child>
+					<object class="GtkLabel" id="profile_label">
+						<property name="label">Profile</property>
+					</object>
+				</child>
+				<child>
+					<object class="GtkDropDown" id="profile_dropdown">
+						<accessibility>
+							<relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">profile_label</relation>
+						</accessibility>
+					</object>
+				</child>
+			</object>
+		</child>
+		<child>
+			<object class="GtkBox">
+				<property name="orientation">horizontal</property>
+				<child>
+					<object class="OpenSCQ30Equalizer" id="equalizer"></object>
+				</child>
+				<child>
+					<object class="GtkBox">
+						<property name="orientation">vertical</property>
+						<child>
+							<object class="GtkButton" id="apply_button">
+								<signal name="clicked" handler="handle_apply_custom_equalizer" swapped="true" />
+								<property name="label">Apply</property>
+							</object>
+						</child>
+						<child>
+							<object class="GtkButton" id="refresh_button">
+								<signal name="clicked" handler="handle_refresh_custom_equalizer" swapped="true" />
+								<property name="label">Refresh</property>
+							</object>
+						</child>
+					</object>
+				</child>
+			</object>
+		</child>
+	</template>
+</interface>

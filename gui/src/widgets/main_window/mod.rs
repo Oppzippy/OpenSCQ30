@@ -5,8 +5,8 @@ use gtk::{
     subclass::prelude::ObjectSubclassIsExt,
 };
 use openscq30_lib::packets::structures::{
-    ambient_sound_mode::AmbientSoundMode, equalizer_band_offsets::EqualizerBandOffsets,
-    equalizer_configuration::EqualizerConfiguration, noise_canceling_mode::NoiseCancelingMode,
+    ambient_sound_mode::AmbientSoundMode, equalizer_configuration::EqualizerConfiguration,
+    noise_canceling_mode::NoiseCancelingMode,
 };
 
 use super::Device;
@@ -44,12 +44,11 @@ impl MainWindow {
 
     pub fn set_equalizer_configuration(&self, equalizer_configuration: EqualizerConfiguration) {
         self.imp()
-            .equalizer
-            .set_volumes(equalizer_configuration.band_offsets().volume_offsets());
+            .equalizer_settings
+            .set_equalizer_configuration(equalizer_configuration);
     }
 
     pub fn equalizer_configuration(&self) -> EqualizerConfiguration {
-        let volume_offsets = self.imp().equalizer.volumes();
-        EqualizerConfiguration::Custom(EqualizerBandOffsets::new(volume_offsets))
+        self.imp().equalizer_settings.equalizer_configuration()
     }
 }

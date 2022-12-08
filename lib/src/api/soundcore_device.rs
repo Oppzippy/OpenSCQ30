@@ -5,7 +5,7 @@ use tokio::{
     task::JoinHandle,
     time::timeout,
 };
-use tracing::{debug, warn};
+use tracing::{debug, info, warn};
 
 use crate::{
     packets::outbound::{
@@ -99,7 +99,7 @@ impl SoundcoreDevice {
                                 equalizer_configuration,
                             });
                         }
-                        None => debug!(
+                        None => info!(
                             "received unknown packet {}",
                             packet_bytes
                                 .iter()

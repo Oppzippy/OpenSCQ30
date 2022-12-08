@@ -24,28 +24,9 @@
 					</object>
 				</child>
 				<child>
-					<object class="GtkBox">
-						<property name="orientation">horizontal</property>
-						<child>
-							<object class="OpenSCQ30Equalizer" id="equalizer"></object>
-						</child>
-						<child>
-							<object class="GtkBox">
-								<property name="orientation">vertical</property>
-								<child>
-									<object class="GtkButton">
-										<signal name="clicked" handler="handle_apply_custom_equalizer" swapped="true" />
-										<property name="label">Apply</property>
-									</object>
-								</child>
-								<child>
-									<object class="GtkButton">
-										<signal name="clicked" handler="handle_refresh_custom_equalizer" swapped="true" />
-										<property name="label">Refresh</property>
-									</object>
-								</child>
-							</object>
-						</child>
+					<object class="OpenSCQ30EqualizerSettings" id="equalizer_settings">
+						<signal name="apply-equalizer-settings" handler="handle_apply_equalizer_settings" swapped="true" />
+						<signal name="refresh-equalizer-settings" handler="handle_refresh_equalizer_settings" swapped="true" />
 					</object>
 				</child>
 				<child type="tab">

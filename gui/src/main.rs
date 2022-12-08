@@ -14,6 +14,7 @@ use openscq30_lib::{
         ambient_sound_mode::AmbientSoundMode, noise_canceling_mode::NoiseCancelingMode,
     },
 };
+use tracing::Level;
 use widgets::{MainWindow, Device};
 
 mod objects;
@@ -24,6 +25,7 @@ fn main() {
     tracing_subscriber::fmt()
         .with_file(true)
         .with_line_number(true)
+        .with_max_level(Level::INFO)
         .init();
 
     load_resources();
@@ -174,7 +176,7 @@ fn build_ui(app: &adw::Application) {
 
     let gtk_registry_1 = gtk_registry.clone();
     main_window.connect_closure(
-        "apply-custom-equalizer",
+        "apply-equalizer-settings",
         false,
         closure_local!(move |main_window: MainWindow| {
             let main_context = MainContext::default();
@@ -194,7 +196,7 @@ fn build_ui(app: &adw::Application) {
 
     let gtk_registry_1 = gtk_registry.clone();
     main_window.connect_closure(
-        "refresh-custom-equalizer",
+        "refresh-equalizer-settings",
         false,
         closure_local!(move |main_window: MainWindow| {
             let main_context = MainContext::default();

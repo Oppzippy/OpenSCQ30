@@ -3,6 +3,7 @@
 	<gresource prefix="/com/oppzippy/openscq30/">
 		<file preprocess="xml-stripblanks">device_selection/template.ui</file>
 		<file preprocess="xml-stripblanks">equalizer/template.ui</file>
+		<file preprocess="xml-stripblanks">equalizer_settings/template.ui</file>
 		<file preprocess="xml-stripblanks">general_settings/template.ui</file>
 		<file preprocess="xml-stripblanks">main_window/template.ui</file>
 		<file preprocess="xml-stripblanks">volume_slider/template.ui</file>

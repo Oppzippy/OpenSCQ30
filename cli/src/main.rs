@@ -108,7 +108,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
                 SetCommand::Equalizer { band_values } => {
                     device
-                        .set_equalizer_configuration(EqualizerConfiguration::Custom(
+                        .set_equalizer_configuration(EqualizerConfiguration::new_custom_profile(
                             EqualizerBandOffsets::new(band_values.try_into().unwrap()),
                         ))
                         .await?

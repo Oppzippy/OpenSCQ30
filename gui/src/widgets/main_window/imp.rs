@@ -10,7 +10,7 @@ use gtk::{
 
 use gtk::subclass::widget::WidgetClassSubclassExt;
 
-use crate::widgets::{Device, DeviceSelection, Equalizer, GeneralSettings};
+use crate::widgets::{Device, DeviceSelection, EqualizerSettings, GeneralSettings};
 
 #[derive(Default, CompositeTemplate)]
 #[template(resource = "/com/oppzippy/openscq30/main_window/template.ui")]
@@ -20,7 +20,7 @@ pub struct MainWindow {
     #[template_child]
     pub general_settings: TemplateChild<GeneralSettings>,
     #[template_child]
-    pub equalizer: TemplateChild<Equalizer>,
+    pub equalizer_settings: TemplateChild<EqualizerSettings>,
 }
 
 #[gtk::template_callbacks]
@@ -40,13 +40,13 @@ impl MainWindow {
     }
 
     #[template_callback]
-    fn handle_apply_custom_equalizer(&self, _button: &gtk::Button) {
-        self.obj().emit_by_name("apply-custom-equalizer", &[])
+    fn handle_apply_equalizer_settings(&self, _button: &EqualizerSettings) {
+        self.obj().emit_by_name("apply-equalizer-settings", &[])
     }
 
     #[template_callback]
-    fn handle_refresh_custom_equalizer(&self, _button: &gtk::Button) {
-        self.obj().emit_by_name("refresh-custom-equalizer", &[])
+    fn handle_refresh_equalizer_settings(&self, _button: &EqualizerSettings) {
+        self.obj().emit_by_name("refresh-equalizer-settings", &[])
     }
 
     #[template_callback]
@@ -91,8 +91,8 @@ impl ObjectImpl for MainWindow {
                     .build(),
                 Signal::builder("refresh-devices").build(),
                 Signal::builder("device-selection-changed").build(),
-                Signal::builder("apply-custom-equalizer").build(),
-                Signal::builder("refresh-custom-equalizer").build(),
+                Signal::builder("apply-equalizer-settings").build(),
+                Signal::builder("refresh-equalizer-settings").build(),
             ]
         });
         SIGNALS.as_ref()
