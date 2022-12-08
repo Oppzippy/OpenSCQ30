@@ -2,6 +2,7 @@ use crate::packets::structures::equalizer_configuration::EqualizerConfiguration;
 
 use super::{outbound_packet::OutboundPacket, utils};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct SetEqualizerPacket {
     configuration: EqualizerConfiguration,
 }

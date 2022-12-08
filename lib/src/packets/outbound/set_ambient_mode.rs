@@ -4,6 +4,7 @@ use crate::packets::structures::{
 
 use super::{outbound_packet::OutboundPacket, utils::calculate_checksum};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct SetAmbientSoundModePacket {
     ambient_sound_mode: AmbientSoundMode,
     noise_canceling_mode: NoiseCancelingMode,

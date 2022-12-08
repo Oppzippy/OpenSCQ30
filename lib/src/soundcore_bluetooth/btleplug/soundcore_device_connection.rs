@@ -24,6 +24,7 @@ const NOTIFY_CHARACTERISTIC: Characteristic = Characteristic {
     properties: CharPropFlags::READ.union(CharPropFlags::NOTIFY),
 };
 
+#[derive(Debug)]
 pub struct BtlePlugSoundcoreDeviceConnection {
     peripheral: Peripheral,
     characteristic: Characteristic,

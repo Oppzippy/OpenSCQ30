@@ -1,5 +1,6 @@
 use super::outbound_packet::OutboundPacket;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct RequestStatePacket {}
 
 impl RequestStatePacket {

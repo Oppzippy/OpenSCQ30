@@ -6,6 +6,7 @@ use crate::packets::structures::{
     preset_equalizer_profile::PresetEqualizerProfile,
 };
 
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 pub enum InboundPacket {
     StateUpdate {
         ambient_sound_mode: AmbientSoundMode,
