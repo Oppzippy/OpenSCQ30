@@ -50,11 +50,18 @@ impl EqualizerSettings {
             let selection = self
                 .profile_dropdown
                 .selected_item()
-                .unwrap()
+                .expect("an item must be selected")
                 .downcast::<EqualizerProfileObject>()
                 .expect("selected item must be an EqualizerProfileObject");
             EqualizerConfiguration::new_from_preset_profile(
-                PresetEqualizerProfile::from_id(selection.profile_id() as u16).unwrap(),
+                PresetEqualizerProfile::from_id(selection.profile_id() as u16).unwrap_or_else(
+                    || {
+                        panic!(
+                            "equalizer preset with selected profile id {} not found",
+                            selection.profile_id()
+                        );
+                    },
+                ),
             )
         }
     }
@@ -69,7 +76,7 @@ impl EqualizerSettings {
                 .position(|profile| profile.profile_id() as u16 == configuration.profile_id())
                 .unwrap_or(0)
                 .try_into()
-                .unwrap(),
+                .expect("could not convert usize to u32"),
         );
     }
 
@@ -146,12 +153,19 @@ impl ObjectImpl for EqualizerSettings {
         let obj = self.obj();
         self.profile_dropdown
             .connect_selected_item_notify(clone!(@weak obj, @weak this => move |_dropdown| {
-                let selected_item: EqualizerProfileObject = this.profile_dropdown.selected_item().expect("selected item must be an EqualizerProfileObject").downcast().unwrap();
+                let selected_item: EqualizerProfileObject = this.profile_dropdown
+                    .selected_item()
+                    .expect("an item must be selected")
+                    .downcast()
+                    .expect("selected item must be an EqualizerProfileObject");
                 let profile_id = selected_item.profile_id() as u16;
                 let configuration = if profile_id == EqualizerConfiguration::CUSTOM_PROFILE_ID {
                     EqualizerConfiguration::new_custom_profile(EqualizerBandOffsets::new(this.equalizer.volumes()))
                 } else {
-                    EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::from_id(profile_id).unwrap())
+                    let preset_profile = PresetEqualizerProfile::from_id(profile_id).unwrap_or_else(|| {
+                        panic!("invalid preset profile id {profile_id}");
+                    });
+                    EqualizerConfiguration::new_from_preset_profile(preset_profile)
                 };
                 obj.set_equalizer_configuration(configuration);
                 obj.emit_by_name("apply-equalizer-settings", &[])

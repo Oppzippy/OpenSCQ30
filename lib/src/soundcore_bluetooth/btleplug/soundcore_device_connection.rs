@@ -110,7 +110,11 @@ impl SoundcoreDeviceConnection for BtlePlugSoundcoreDeviceConnection {
         // This queue should always be really small unless something is malfunctioning
         let (sender, receiver) = mpsc::channel(100);
 
-        let mut notifications = self.peripheral.notifications().await.unwrap();
+        let mut notifications = self
+            .peripheral
+            .notifications()
+            .await
+            .map_err(SoundcoreDeviceConnectionError::from)?;
 
         tokio::spawn(async move {
             while let Some(data) = notifications.next().await {

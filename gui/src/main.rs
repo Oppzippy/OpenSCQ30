@@ -39,21 +39,18 @@ fn main() {
 }
 
 fn build_ui(app: &adw::Application) {
-    let tokio_runtime = match tokio::runtime::Builder::new_multi_thread()
+    let tokio_runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(1)
         .enable_all()
         .build()
-    {
-        Ok(runtime) => runtime,
-        Err(err) => panic!("failed to start tokio runtime: {err}"),
-    };
+        .unwrap_or_else(|err| panic!("failed to start tokio runtime: {err}"));
 
-    let registry = match tokio_runtime.block_on(SoundcoreDeviceRegistry::new()) {
-        Ok(registry) => registry,
-        Err(err) => panic!("failed to initialize device registry: {err}"),
-    };
+    let registry = tokio_runtime.block_on(SoundcoreDeviceRegistry::new())
+        .unwrap_or_else(|err| panic!("failed to initialize device registry: {err}"));
 
-    tokio_runtime.block_on(registry.refresh_devices()).unwrap(); // TODO
+    if let Err(err) = tokio_runtime.block_on(registry.refresh_devices()) {
+        tracing::error!("error on initial refresh_devices: {}", err);
+    }
 
     let gtk_registry = Arc::new(GtkSoundcoreDeviceRegistry::new(registry, tokio_runtime));
 
@@ -125,7 +122,7 @@ fn build_ui(app: &adw::Application) {
                             main_window.set_noise_canceling_mode(noise_canceling_mode);
                             main_window.set_equalizer_configuration(equalizer_configuration);
                         },
-                        None => todo!(),
+                        None => tracing::warn!("could not find selected device: {}", selected_device.mac_address),
                     }
                 }));
             }
@@ -139,13 +136,20 @@ fn build_ui(app: &adw::Application) {
         closure_local!(move |main_window: MainWindow, mode_id: u8| {
             let main_context = MainContext::default();
             main_context.spawn_local(clone!(@weak main_window, @weak gtk_registry_clone => async move {
-                if let Some(selected_device) = main_window.selected_device() {
-                    if let Some(device) = gtk_registry_clone.get_device_by_mac_address(&selected_device.mac_address).await {
-                        let ambient_sound_mode = AmbientSoundMode::from_id(mode_id).unwrap();
-                        device.set_ambient_sound_mode(ambient_sound_mode).await.unwrap();
-                    } else {
-                        tracing::warn!("could not find selected device: {}", selected_device.mac_address);
-                    }
+                let Some(selected_device) = main_window.selected_device() else {
+                    tracing::warn!("no device is selected");
+                    return;
+                };
+                let Some(device) = gtk_registry_clone.get_device_by_mac_address(&selected_device.mac_address).await else {
+                    tracing::warn!("could not find selected device: {}", selected_device.mac_address);
+                    return;
+                };
+                let Some(ambient_sound_mode) = AmbientSoundMode::from_id(mode_id) else {
+                    tracing::warn!("invalid ambient sound mode: {mode_id}");
+                    return;
+                };
+                if let Err(err) = device.set_ambient_sound_mode(ambient_sound_mode).await {
+                    tracing::error!("error setting ambient sound mode: {err}")                            
                 }
             }));
         }),
@@ -155,16 +159,23 @@ fn build_ui(app: &adw::Application) {
     main_window.connect_closure(
         "noise-canceling-mode-selected",
         false,
-        closure_local!(move |main_window: MainWindow, mode: u8| {
+        closure_local!(move |main_window: MainWindow, mode_id: u8| {
             let main_context = MainContext::default();
             main_context.spawn_local(clone!(@weak main_window, @weak gtk_registry_clone => async move {
-                if let Some(selected_device) = main_window.selected_device() {
-                    if let Some(device) = gtk_registry_clone.get_device_by_mac_address(&selected_device.mac_address).await {
-                        let noise_canceling_mode = NoiseCancelingMode::from_id(mode).unwrap();
-                        device.set_noise_canceling_mode(noise_canceling_mode).await.unwrap();
-                    }else {
-                        tracing::warn!("could not find selected device: {}", selected_device.mac_address);
-                    }
+                let Some(selected_device) = main_window.selected_device() else {
+                    tracing::warn!("no device is selected");
+                    return;
+                };
+                let Some(device) = gtk_registry_clone.get_device_by_mac_address(&selected_device.mac_address).await else {
+                    tracing::warn!("could not find selected device: {}", selected_device.mac_address);
+                    return;
+                };
+                let Some(noise_canceling_mode) = NoiseCancelingMode::from_id(mode_id) else {
+                    tracing::error!("invalid noise canceling mode: {mode_id}");
+                    return;
+                };
+                if let Err(err) = device.set_noise_canceling_mode(noise_canceling_mode).await {
+                    tracing::error!("error setting noise canceling mode: {err}")                            
                 }
             }));
         }),
@@ -177,13 +188,17 @@ fn build_ui(app: &adw::Application) {
         closure_local!(move |main_window: MainWindow| {
             let main_context = MainContext::default();
             main_context.spawn_local(clone!(@weak main_window, @weak gtk_registry_clone => async move {
-                if let Some(selected_device) = main_window.selected_device() {
-                    if let Some(device) = gtk_registry_clone.get_device_by_mac_address(&selected_device.mac_address).await {
-                        let configuration = main_window.equalizer_configuration();
-                        device.set_equalizer_configuration(configuration).await.unwrap();
-                    } else {
-                        tracing::warn!("could not find selected device: {}", selected_device.mac_address);
-                    }
+                let Some(selected_device) = main_window.selected_device() else {
+                    tracing::warn!("no device is selected");
+                    return;
+                };
+                let Some(device) = gtk_registry_clone.get_device_by_mac_address(&selected_device.mac_address).await else {
+                    tracing::warn!("could not find selected device: {}", selected_device.mac_address);
+                    return;
+                };
+                let configuration = main_window.equalizer_configuration();
+                if let Err(err) = device.set_equalizer_configuration(configuration).await {
+                    tracing::error!("error setting equalizer configuration: {err}");                            
                 }
             }));
         }),
@@ -196,14 +211,16 @@ fn build_ui(app: &adw::Application) {
         closure_local!(move |main_window: MainWindow| {
             let main_context = MainContext::default();
             main_context.spawn_local(clone!(@weak main_window, @weak gtk_registry_clone => async move {
-                if let Some(selected_device) = main_window.selected_device() {
-                    if let Some(device) = gtk_registry_clone.get_device_by_mac_address(&selected_device.mac_address).await {
-                        let configuration = device.get_equalizer_configuration().await;
-                        main_window.set_equalizer_configuration(configuration);
-                    } else {
-                        tracing::warn!("could not find selected device: {}", selected_device.mac_address);
-                    }
-                }
+                let Some(selected_device) = main_window.selected_device() else {
+                    tracing::warn!("no device is selected");
+                    return;
+                };
+                let Some(device) = gtk_registry_clone.get_device_by_mac_address(&selected_device.mac_address).await else {
+                    tracing::warn!("could not find selected device: {}", selected_device.mac_address);
+                    return;
+                };
+                let configuration = device.get_equalizer_configuration().await;
+                main_window.set_equalizer_configuration(configuration);
             }));
         }),
     );

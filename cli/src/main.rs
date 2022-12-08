@@ -36,7 +36,7 @@ enum SetCommand {
     },
     Equalizer {
         #[arg(required=true, num_args = 8, value_parser = clap::value_parser!(i8).range(-60..60))]
-        band_values: Vec<i8>,
+        band_offsets: Vec<i8>,
     },
 }
 
@@ -106,10 +106,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 SetCommand::NoiseCancelingMode { mode } => {
                     device.set_noise_canceling_mode(mode.into()).await?
                 }
-                SetCommand::Equalizer { band_values } => {
+                SetCommand::Equalizer { band_offsets } => {
+                    let band_offsets = band_offsets
+                        .try_into()
+                        .map(EqualizerBandOffsets::new)
+                        .unwrap_or_else(|values| {
+                            panic!("error converting vec of band offsets to array: expected len 8, got {}", values.len())
+                        });
+
                     device
                         .set_equalizer_configuration(EqualizerConfiguration::new_custom_profile(
-                            EqualizerBandOffsets::new(band_values.try_into().unwrap()),
+                            band_offsets,
                         ))
                         .await?
                 }

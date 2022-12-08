@@ -28,7 +28,7 @@ impl EqualizerConfiguration {
     pub fn profile_id(&self) -> u16 {
         self.preset_profile
             .map(|preset_profile| preset_profile.id())
-            .unwrap_or(Self::CUSTOM_PROFILE_ID) // custom profile
+            .unwrap_or(Self::CUSTOM_PROFILE_ID)
     }
 
     pub fn band_offsets(&self) -> EqualizerBandOffsets {
