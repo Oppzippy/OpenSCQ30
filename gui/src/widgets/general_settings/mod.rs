@@ -4,9 +4,7 @@ use gtk::{
     glib::{self, Object},
     subclass::prelude::ObjectSubclassIsExt,
 };
-use openscq30_lib::packets::structures::{
-    ambient_sound_mode::AmbientSoundMode, noise_canceling_mode::NoiseCancelingMode,
-};
+use openscq30_lib::packets::structures::{AmbientSoundMode, NoiseCancelingMode};
 
 glib::wrapper! {
     pub struct GeneralSettings(ObjectSubclass<imp::GeneralSettings>)

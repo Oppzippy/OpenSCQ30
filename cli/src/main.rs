@@ -2,11 +2,8 @@ use std::error::Error;
 
 use clap::{command, Parser, Subcommand, ValueEnum};
 use openscq30_lib::{
-    api::soundcore_device_registry::SoundcoreDeviceRegistry,
-    packets::structures::{
-        equalizer_band_offsets::EqualizerBandOffsets,
-        equalizer_configuration::EqualizerConfiguration,
-    },
+    api::SoundcoreDeviceRegistry,
+    packets::structures::{EqualizerBandOffsets, EqualizerConfiguration},
 };
 
 #[derive(Parser)]
@@ -54,14 +51,18 @@ enum AmbientSoundMode {
     NoiseCanceling,
 }
 
-impl From<AmbientSoundMode>
-    for openscq30_lib::packets::structures::ambient_sound_mode::AmbientSoundMode
-{
+impl From<AmbientSoundMode> for openscq30_lib::packets::structures::AmbientSoundMode {
     fn from(mode: AmbientSoundMode) -> Self {
         match mode {
-            AmbientSoundMode::Normal => openscq30_lib::packets::structures::ambient_sound_mode::AmbientSoundMode::Normal,
-            AmbientSoundMode::Transparency => openscq30_lib::packets::structures::ambient_sound_mode::AmbientSoundMode::Transparency,
-            AmbientSoundMode::NoiseCanceling => openscq30_lib::packets::structures::ambient_sound_mode::AmbientSoundMode::NoiseCanceling,
+            AmbientSoundMode::Normal => {
+                openscq30_lib::packets::structures::AmbientSoundMode::Normal
+            }
+            AmbientSoundMode::Transparency => {
+                openscq30_lib::packets::structures::AmbientSoundMode::Transparency
+            }
+            AmbientSoundMode::NoiseCanceling => {
+                openscq30_lib::packets::structures::AmbientSoundMode::NoiseCanceling
+            }
         }
     }
 }
@@ -73,14 +74,18 @@ enum NoiseCancelingMode {
     Outdoor,
 }
 
-impl From<NoiseCancelingMode>
-    for openscq30_lib::packets::structures::noise_canceling_mode::NoiseCancelingMode
-{
+impl From<NoiseCancelingMode> for openscq30_lib::packets::structures::NoiseCancelingMode {
     fn from(mode: NoiseCancelingMode) -> Self {
         match mode {
-            NoiseCancelingMode::Transport => openscq30_lib::packets::structures::noise_canceling_mode::NoiseCancelingMode::Transport,
-            NoiseCancelingMode::Indoor => openscq30_lib::packets::structures::noise_canceling_mode::NoiseCancelingMode::Indoor,
-            NoiseCancelingMode::Outdoor => openscq30_lib::packets::structures::noise_canceling_mode::NoiseCancelingMode::Outdoor,
+            NoiseCancelingMode::Transport => {
+                openscq30_lib::packets::structures::NoiseCancelingMode::Transport
+            }
+            NoiseCancelingMode::Indoor => {
+                openscq30_lib::packets::structures::NoiseCancelingMode::Indoor
+            }
+            NoiseCancelingMode::Outdoor => {
+                openscq30_lib::packets::structures::NoiseCancelingMode::Outdoor
+            }
         }
     }
 }

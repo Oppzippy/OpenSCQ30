@@ -8,23 +8,16 @@ use tokio::{
 use tracing::{event, instrument, warn, Level};
 
 use crate::{
-    packets::outbound::{
-        outbound_packet::OutboundPacket, request_state_packet::RequestStatePacket,
-    },
-    soundcore_bluetooth::traits::soundcore_device_connection::SoundcoreDeviceConnection,
+    packets::outbound::{OutboundPacket, RequestStatePacket},
+    soundcore_bluetooth::traits::SoundcoreDeviceConnection,
 };
 use crate::{
     packets::{
-        inbound::inbound_packet::InboundPacket,
-        outbound::{
-            set_ambient_mode::SetAmbientSoundModePacket, set_equalizer::SetEqualizerPacket,
-        },
-        structures::{
-            ambient_sound_mode::AmbientSoundMode, equalizer_configuration::EqualizerConfiguration,
-            noise_canceling_mode::NoiseCancelingMode,
-        },
+        inbound::InboundPacket,
+        outbound::{SetAmbientSoundModePacket, SetEqualizerPacket},
+        structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
     },
-    soundcore_bluetooth::traits::soundcore_device_connection_error::SoundcoreDeviceConnectionError,
+    soundcore_bluetooth::traits::SoundcoreDeviceConnectionError,
 };
 
 pub struct SoundcoreDevice {

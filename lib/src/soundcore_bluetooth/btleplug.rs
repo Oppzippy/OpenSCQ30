@@ -1,12 +1,13 @@
+mod soundcore_device_connection;
+mod soundcore_device_connection_error;
+mod soundcore_device_connection_registry;
+
 use btleplug::platform::Manager;
+pub use soundcore_device_connection::*;
+pub use soundcore_device_connection_error::*;
+pub use soundcore_device_connection_registry::*;
 
-use self::soundcore_device_connection_registry::BtlePlugSoundcoreDeviceConnectionRegistry;
-
-use super::traits::soundcore_device_connection_error::SoundcoreDeviceConnectionError;
-
-pub mod soundcore_device_connection;
-pub mod soundcore_device_connection_error;
-pub mod soundcore_device_connection_registry;
+use super::traits::SoundcoreDeviceConnectionError;
 
 pub async fn new_handler(
 ) -> Result<BtlePlugSoundcoreDeviceConnectionRegistry, SoundcoreDeviceConnectionError> {

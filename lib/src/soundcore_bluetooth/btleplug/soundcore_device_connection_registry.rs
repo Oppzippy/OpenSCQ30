@@ -8,9 +8,9 @@ use btleplug::platform::{Adapter, Manager, Peripheral};
 use tokio::sync::RwLock;
 use tracing::warn;
 
-use crate::soundcore_bluetooth::traits::soundcore_device_connection::SoundcoreDeviceConnection;
-use crate::soundcore_bluetooth::traits::soundcore_device_connection_error::SoundcoreDeviceConnectionError;
-use crate::soundcore_bluetooth::traits::soundcore_device_connection_registry::SoundcoreDeviceConnectionRegistry;
+use crate::soundcore_bluetooth::traits::SoundcoreDeviceConnection;
+use crate::soundcore_bluetooth::traits::SoundcoreDeviceConnectionError;
+use crate::soundcore_bluetooth::traits::SoundcoreDeviceConnectionRegistry;
 
 use super::soundcore_device_connection::BtlePlugSoundcoreDeviceConnection;
 

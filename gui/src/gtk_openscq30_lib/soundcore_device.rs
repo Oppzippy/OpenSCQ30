@@ -1,12 +1,9 @@
 use std::sync::Arc;
 
 use openscq30_lib::{
-    api::soundcore_device::SoundcoreDevice,
-    packets::structures::{
-        ambient_sound_mode::AmbientSoundMode, equalizer_configuration::EqualizerConfiguration,
-        noise_canceling_mode::NoiseCancelingMode,
-    },
-    soundcore_bluetooth::traits::soundcore_device_connection_error::SoundcoreDeviceConnectionError,
+    api::SoundcoreDevice,
+    packets::structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
+    soundcore_bluetooth::traits::SoundcoreDeviceConnectionError,
 };
 use tokio::runtime::Handle;
 

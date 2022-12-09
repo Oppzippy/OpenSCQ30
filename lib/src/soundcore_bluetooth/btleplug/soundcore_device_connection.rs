@@ -9,8 +9,7 @@ use tokio::sync::mpsc;
 use tracing::{instrument, warn};
 
 use crate::soundcore_bluetooth::traits::{
-    soundcore_device_connection::SoundcoreDeviceConnection,
-    soundcore_device_connection_error::SoundcoreDeviceConnectionError,
+    SoundcoreDeviceConnection, SoundcoreDeviceConnectionError,
 };
 
 const WRITE_CHARACTERISTIC: Characteristic = Characteristic {

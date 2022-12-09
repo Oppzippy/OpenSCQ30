@@ -1,4 +1,4 @@
-use crate::soundcore_bluetooth::traits::soundcore_device_connection_error::SoundcoreDeviceConnectionError;
+use crate::soundcore_bluetooth::traits::SoundcoreDeviceConnectionError;
 
 impl From<btleplug::Error> for SoundcoreDeviceConnectionError {
     fn from(err: btleplug::Error) -> Self {

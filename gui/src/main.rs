@@ -7,11 +7,11 @@ use gtk::{
     traits::GtkWindowExt,
     ApplicationWindow,
 };
-use gtk_openscq30_lib::soundcore_device_registry::GtkSoundcoreDeviceRegistry;
+use gtk_openscq30_lib::GtkSoundcoreDeviceRegistry;
 use openscq30_lib::{
-    api::soundcore_device_registry::SoundcoreDeviceRegistry,
+    api::SoundcoreDeviceRegistry,
     packets::structures::{
-        ambient_sound_mode::AmbientSoundMode, noise_canceling_mode::NoiseCancelingMode,
+        AmbientSoundMode, NoiseCancelingMode,
     },
 };
 use tracing::Level;

@@ -5,7 +5,7 @@ use gtk::{
     prelude::ToValue,
     subclass::prelude::ObjectSubclassIsExt,
 };
-use openscq30_lib::packets::structures::equalizer_configuration::EqualizerConfiguration;
+use openscq30_lib::packets::structures::EqualizerConfiguration;
 
 glib::wrapper! {
     pub struct EqualizerSettings(ObjectSubclass<imp::EqualizerSettings>)

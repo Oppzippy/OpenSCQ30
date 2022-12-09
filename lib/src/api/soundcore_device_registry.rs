@@ -7,8 +7,7 @@ use tokio::sync::RwLock;
 use tracing::{event, span, warn, Level};
 
 use crate::soundcore_bluetooth::traits::{
-    soundcore_device_connection_error::SoundcoreDeviceConnectionError,
-    soundcore_device_connection_registry::SoundcoreDeviceConnectionRegistry,
+    SoundcoreDeviceConnectionError, SoundcoreDeviceConnectionRegistry,
 };
 
 use super::soundcore_device::SoundcoreDevice;

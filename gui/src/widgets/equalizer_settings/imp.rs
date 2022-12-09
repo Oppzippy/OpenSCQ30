@@ -14,9 +14,9 @@ use gtk::{
     CompositeTemplate, TemplateChild,
 };
 use gtk::{prelude::*, SignalListItemFactory};
-use openscq30_lib::packets::structures::equalizer_band_offsets::EqualizerBandOffsets;
-use openscq30_lib::packets::structures::equalizer_configuration::EqualizerConfiguration;
-use openscq30_lib::packets::structures::preset_equalizer_profile::PresetEqualizerProfile;
+use openscq30_lib::packets::structures::EqualizerBandOffsets;
+use openscq30_lib::packets::structures::EqualizerConfiguration;
+use openscq30_lib::packets::structures::PresetEqualizerProfile;
 use strum::IntoEnumIterator;
 
 use crate::objects::EqualizerProfileObject;

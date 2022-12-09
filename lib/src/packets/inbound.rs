@@ -1,1 +1,3 @@
-pub mod inbound_packet;
+mod inbound_packet;
+
+pub use inbound_packet::*;

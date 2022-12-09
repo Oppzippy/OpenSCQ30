@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use openscq30_lib::{
-    api::{soundcore_device::SoundcoreDevice, soundcore_device_registry::SoundcoreDeviceRegistry},
-    soundcore_bluetooth::traits::soundcore_device_connection_error::SoundcoreDeviceConnectionError,
+    api::{SoundcoreDevice, SoundcoreDeviceRegistry},
+    soundcore_bluetooth::traits::SoundcoreDeviceConnectionError,
 };
 use tokio::runtime::Runtime;
 

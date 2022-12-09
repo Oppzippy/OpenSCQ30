@@ -1,4 +1,7 @@
 #[macro_use]
-pub mod async_runtime_bridge;
-pub mod soundcore_device;
-pub mod soundcore_device_registry;
+mod async_runtime_bridge;
+mod soundcore_device;
+mod soundcore_device_registry;
+
+pub use soundcore_device::*;
+pub use soundcore_device_registry::*;

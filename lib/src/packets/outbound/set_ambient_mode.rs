@@ -1,6 +1,4 @@
-use crate::packets::structures::{
-    ambient_sound_mode::AmbientSoundMode, noise_canceling_mode::NoiseCancelingMode,
-};
+use crate::packets::structures::{AmbientSoundMode, NoiseCancelingMode};
 
 use super::{outbound_packet::OutboundPacket, utils::calculate_checksum};
 

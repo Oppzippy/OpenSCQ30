@@ -1,4 +1,4 @@
-use crate::packets::structures::equalizer_configuration::EqualizerConfiguration;
+use crate::packets::structures::EqualizerConfiguration;
 
 use super::{outbound_packet::OutboundPacket, utils};
 

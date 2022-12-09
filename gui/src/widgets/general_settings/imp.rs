@@ -13,8 +13,8 @@ use gtk::{
     traits::ToggleButtonExt,
     CompositeTemplate, TemplateChild,
 };
-use openscq30_lib::packets::structures::ambient_sound_mode::AmbientSoundMode;
-use openscq30_lib::packets::structures::noise_canceling_mode::NoiseCancelingMode;
+use openscq30_lib::packets::structures::AmbientSoundMode;
+use openscq30_lib::packets::structures::NoiseCancelingMode;
 
 #[derive(Default, CompositeTemplate)]
 #[template(resource = "/com/oppzippy/openscq30/general_settings/template.ui")]

@@ -5,8 +5,7 @@ use gtk::{
     subclass::prelude::ObjectSubclassIsExt,
 };
 use openscq30_lib::packets::structures::{
-    ambient_sound_mode::AmbientSoundMode, equalizer_configuration::EqualizerConfiguration,
-    noise_canceling_mode::NoiseCancelingMode,
+    AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode,
 };
 
 use super::Device;

@@ -1,9 +1,8 @@
 use tracing::warn;
 
 use crate::packets::structures::{
-    ambient_sound_mode::AmbientSoundMode, equalizer_band_offsets::EqualizerBandOffsets,
-    equalizer_configuration::EqualizerConfiguration, noise_canceling_mode::NoiseCancelingMode,
-    preset_equalizer_profile::PresetEqualizerProfile,
+    AmbientSoundMode, EqualizerBandOffsets, EqualizerConfiguration, NoiseCancelingMode,
+    PresetEqualizerProfile,
 };
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
