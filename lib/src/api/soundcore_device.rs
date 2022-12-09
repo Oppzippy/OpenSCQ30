@@ -122,6 +122,7 @@ impl SoundcoreDevice {
                 state.ambient_sound_mode = *ambient_sound_mode;
                 state.noise_canceling_mode = *noise_canceling_mode;
             }
+            InboundPacket::Ok => trace!("received Ok packet"),
         };
         trace!(
             event = "updated_state",

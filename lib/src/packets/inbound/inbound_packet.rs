@@ -16,11 +16,14 @@ pub enum InboundPacket {
         ambient_sound_mode: AmbientSoundMode,
         noise_canceling_mode: NoiseCancelingMode,
     },
+    Ok,
 }
 
 impl InboundPacket {
     pub fn from_bytes(bytes: &[u8]) -> Option<InboundPacket> {
-        Self::parse_state_update(bytes).or_else(|| Self::parse_ambient_sound_mode_update(bytes))
+        Self::parse_state_update(bytes)
+            .or_else(|| Self::parse_ambient_sound_mode_update(bytes))
+            .or_else(|| Self::parse_ok(bytes))
     }
 
     fn parse_state_update(bytes: &[u8]) -> Option<InboundPacket> {
@@ -87,5 +90,14 @@ impl InboundPacket {
             }
         }
         None
+    }
+
+    fn parse_ok(bytes: &[u8]) -> Option<InboundPacket> {
+        const PREFIX: &[u8] = &[0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x81, 0x0a, 0x00, 0x9a];
+        if bytes == PREFIX {
+            Some(Self::Ok)
+        } else {
+            None
+        }
     }
 }
