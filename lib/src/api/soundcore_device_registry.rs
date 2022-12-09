@@ -4,7 +4,7 @@ use std::{
 };
 
 use tokio::sync::RwLock;
-use tracing::{event, span, warn, Level};
+use tracing::{instrument, trace, warn};
 
 use crate::soundcore_bluetooth::traits::{
     SoundcoreDeviceConnectionError, SoundcoreDeviceConnectionRegistry,
@@ -27,10 +27,8 @@ impl SoundcoreDeviceRegistry {
         })
     }
 
+    #[instrument(level = "trace", skip(self))]
     pub async fn refresh_devices(&self) -> Result<(), SoundcoreDeviceConnectionError> {
-        let span = span!(Level::TRACE, "refresh_devices");
-        let _enter = span.enter();
-
         self.conneciton_registry.refresh_connections().await?;
         let connections = self.conneciton_registry.get_connections().await;
 
@@ -41,12 +39,12 @@ impl SoundcoreDeviceRegistry {
                 Entry::Vacant(entry) => match SoundcoreDevice::new(connection).await {
                     Ok(device) => {
                         entry.insert(Arc::new(device));
-                        event!(Level::TRACE, "added new device: {mac_address}");
+                        trace!("added new device: {mac_address}");
                     }
                     Err(err) => warn!("failed to initialize soundcore device: {}", err),
                 },
                 Entry::Occupied(_) => {
-                    event!(Level::TRACE, "found existing device: {mac_address}")
+                    trace!("found existing device: {mac_address}")
                 }
             }
         }

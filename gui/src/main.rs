@@ -15,6 +15,7 @@ use openscq30_lib::{
     },
 };
 use tracing::Level;
+use tracing_subscriber::fmt::format::FmtSpan;
 use widgets::{MainWindow, Device};
 
 mod objects;
@@ -25,7 +26,10 @@ fn main() {
     tracing_subscriber::fmt()
         .with_file(true)
         .with_line_number(true)
+        .with_target(false)
         .with_max_level(Level::TRACE)
+        .with_span_events(FmtSpan::ACTIVE)
+        .pretty()
         .init();
 
     load_resources();

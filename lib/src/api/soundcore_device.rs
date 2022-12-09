@@ -5,7 +5,7 @@ use tokio::{
     task::JoinHandle,
     time::timeout,
 };
-use tracing::{event, instrument, warn, Level};
+use tracing::{instrument, trace, warn};
 
 use crate::{
     packets::outbound::{OutboundPacket, RequestStatePacket},
@@ -123,10 +123,9 @@ impl SoundcoreDevice {
                 state.noise_canceling_mode = *noise_canceling_mode;
             }
         };
-        event!(
-            Level::INFO,
-            "type" = "updated_state",
-            "new_state" = ?state,
+        trace!(
+            event = "updated_state",
+            new_state = ?state,
         );
     }
 

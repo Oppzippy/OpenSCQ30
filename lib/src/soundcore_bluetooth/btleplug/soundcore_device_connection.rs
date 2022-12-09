@@ -6,7 +6,7 @@ use btleplug::{
 };
 use futures::StreamExt;
 use tokio::sync::mpsc;
-use tracing::{instrument, warn};
+use tracing::{instrument, trace, trace_span, warn};
 
 use crate::soundcore_bluetooth::traits::{
     SoundcoreDeviceConnection, SoundcoreDeviceConnectionError,
@@ -77,7 +77,7 @@ impl SoundcoreDeviceConnection for BtlePlugSoundcoreDeviceConnection {
         Ok(self.peripheral.address().to_string())
     }
 
-    #[instrument(level = "trace")]
+    #[instrument(level = "trace", skip(self))]
     async fn write_with_response(&self, data: &[u8]) -> Result<(), SoundcoreDeviceConnectionError> {
         self.peripheral
             .write(&self.characteristic, data, WriteType::WithResponse)
@@ -86,7 +86,7 @@ impl SoundcoreDeviceConnection for BtlePlugSoundcoreDeviceConnection {
         Ok(())
     }
 
-    #[instrument]
+    #[instrument(level = "trace", skip(self))]
     async fn write_without_response(
         &self,
         data: &[u8],
@@ -111,9 +111,11 @@ impl SoundcoreDeviceConnection for BtlePlugSoundcoreDeviceConnection {
             .map_err(SoundcoreDeviceConnectionError::from)?;
 
         tokio::spawn(async move {
+            let span = trace_span!("inbound_packets_channel async task");
+            let _enter = span.enter();
             while let Some(data) = notifications.next().await {
+                trace!(event = "btleplug notification", data = ?data);
                 if data.uuid == NOTIFY_CHARACTERISTIC.uuid {
-                    tracing::event!(tracing::Level::TRACE, "type" = "inbound_packet", "data" = ?data.value);
                     if let Err(err) = sender.try_send(data.value) {
                         warn!("error forwarding packet to channel: {err}",)
                     }
