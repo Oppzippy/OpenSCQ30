@@ -3,7 +3,10 @@ name = "gui"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
 
 [dependencies]
 openscq30_lib = { path = "../lib" }
