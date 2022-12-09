@@ -9,11 +9,11 @@ crate-type = ["lib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-btleplug = { version = "0.10.3" }
+btleplug = { version = "0.10" }
 tokio = { version = "1", features = [] }
 futures = { version = "0.3" }
-uuid = "1.2.1"
-thiserror = "1.0.37"
-async-trait = "0.1.58"
-tracing = "0.1.37"
-strum = { version = "0.24.1", features = ["derive"] }
+uuid = "1.2"
+thiserror = "1.0"
+async-trait = "0.1"
+tracing = "0.1"
+strum = { version = "0.24", features = ["derive"] }

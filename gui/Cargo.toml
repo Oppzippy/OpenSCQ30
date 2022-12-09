@@ -12,11 +12,11 @@ codegen-units = 1
 openscq30_lib = { path = "../lib" }
 tokio = { version = "1", features = ["rt-multi-thread"] }
 futures = { version = "0.3" }
-tracing = "0.1.37"
-tracing-subscriber = "0.3.16"
-adw = { version = "0.2.1", package = "libadwaita" }
-gtk = { version = "0.5.3", package = "gtk4" }
-strum = "0.24.1"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+adw = { version = "0.2", package = "libadwaita" }
+gtk = { version = "0.5", package = "gtk4" }
+strum = "0.24"
 
 [build-dependencies]
-glib-build-tools = "0.16.3"
+glib-build-tools = "0.16"
