@@ -66,14 +66,3 @@ impl PresetEqualizerProfile {
         EqualizerBandOffsets::new(offsets)
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::PresetEqualizerProfile;
-
-    #[test]
-    fn it_displays_using_hexidecimal() {
-        let profile = PresetEqualizerProfile::Rock;
-        assert_eq!("[11 00]", profile.to_string());
-    }
-}
