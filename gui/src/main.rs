@@ -25,7 +25,7 @@ fn main() {
     tracing_subscriber::fmt()
         .with_file(true)
         .with_line_number(true)
-        .with_max_level(Level::INFO)
+        .with_max_level(Level::TRACE)
         .init();
 
     load_resources();

@@ -5,7 +5,7 @@ use tokio::{
     task::JoinHandle,
     time::timeout,
 };
-use tracing::{debug, info, warn};
+use tracing::{event, instrument, warn, Level};
 
 use crate::{
     packets::outbound::{
@@ -57,14 +57,7 @@ impl SoundcoreDevice {
                         let mut state = current_state_lock_async.write().await;
                         Self::on_packet_received(&packet, &mut state);
                     }
-                    None => debug!(
-                        "received unknown packet {}",
-                        packet_bytes
-                            .iter()
-                            .map(|v| v.to_string())
-                            .collect::<Vec<String>>()
-                            .join(" ")
-                    ),
+                    None => warn!("received unknown packet {:?}", packet_bytes),
                 }
             }
         });
@@ -99,15 +92,8 @@ impl SoundcoreDevice {
                                 equalizer_configuration,
                             });
                         }
-                        None => info!(
-                            "received unknown packet {}",
-                            packet_bytes
-                                .iter()
-                                .map(|v| v.to_string())
-                                .collect::<Vec<String>>()
-                                .join(" ")
-                        ),
-                        _ => (),
+                        None => warn!("received unknown packet {:?}", packet_bytes),
+                        _ => (), // Known packet, but not the one we're looking for
                     };
                 }
                 None
@@ -124,6 +110,7 @@ impl SoundcoreDevice {
         Err(SoundcoreDeviceConnectionError::NoResponse)
     }
 
+    #[instrument(level = "trace")]
     fn on_packet_received(packet: &InboundPacket, state: &mut SoundcoreDeviceState) {
         match packet {
             InboundPacket::StateUpdate {
@@ -143,7 +130,11 @@ impl SoundcoreDevice {
                 state.noise_canceling_mode = *noise_canceling_mode;
             }
         };
-        println!("{:?}", state);
+        event!(
+            Level::INFO,
+            "type" = "updated_state",
+            "new_state" = ?state,
+        );
     }
 
     pub async fn get_mac_address(&self) -> Result<String, SoundcoreDeviceConnectionError> {
