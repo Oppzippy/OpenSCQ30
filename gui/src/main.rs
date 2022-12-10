@@ -9,18 +9,20 @@ use gtk::{
 };
 use gtk_openscq30_lib::GtkSoundcoreDeviceRegistry;
 use openscq30_lib::{
-    api::SoundcoreDeviceRegistry,
+    api::{SoundcoreDeviceRegistry, SoundcoreDeviceState},
     packets::structures::{
         AmbientSoundMode, NoiseCancelingMode,
     },
 };
-use tracing::Level;
+use swappable_broadcast::SwappableBroadcastReceiver;
+use tracing::{Level};
 use tracing_subscriber::fmt::format::FmtSpan;
 use widgets::{MainWindow, Device};
 
 mod objects;
 mod widgets;
 mod gtk_openscq30_lib;
+mod swappable_broadcast;
 
 fn main() {
     tracing_subscriber::fmt()
@@ -64,6 +66,7 @@ fn build_ui(app: &adw::Application) {
         .build();
 
     let main_window = MainWindow::new();
+    let state_update_receiver: Arc<SwappableBroadcastReceiver<SoundcoreDeviceState>> = Arc::new(SwappableBroadcastReceiver::new());
 
     let main_context = MainContext::default();
     let gtk_registry_clone = gtk_registry.clone();
@@ -79,6 +82,14 @@ fn build_ui(app: &adw::Application) {
             })
         }
         main_window.set_devices(&model_devices);
+    }));
+    
+    main_context.spawn_local(clone!(@weak main_window, @strong state_update_receiver => async move {
+        loop {
+            let next_state = state_update_receiver.next().await;
+            main_window.set_ambient_sound_mode(next_state.ambient_sound_mode());
+            main_window.set_noise_canceling_mode(next_state.noise_canceling_mode());               
+        }
     }));
 
     let gtk_registry_clone = gtk_registry.clone();
@@ -112,12 +123,15 @@ fn build_ui(app: &adw::Application) {
     main_window.connect_closure(
         "device_selection_changed",
         false,
-        closure_local!(move |main_window: MainWindow| {
+        closure_local!(@weak-allow-none state_update_receiver => move |main_window: MainWindow| {
             if let Some(selected_device) = main_window.selected_device() {
                 let main_context = MainContext::default();
-                main_context.spawn_local(clone!(@weak main_window, @weak gtk_registry_clone => async move {
+                main_context.spawn_local(clone!(@strong main_window, @weak gtk_registry_clone => async move {
                     match gtk_registry_clone.device_by_mac_address(&selected_device.mac_address).await {
                         Some(device) => {
+                            let receiver = device.subscribe_to_state_updates();
+                            state_update_receiver.unwrap().replace_receiver(receiver).await;
+
                             let ambient_sound_mode = device.ambient_sound_mode().await;
                             let noise_canceling_mode = device.noise_canceling_mode().await;
                             let equalizer_configuration = device.equalizer_configuration().await;

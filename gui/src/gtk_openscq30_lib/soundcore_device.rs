@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
 use openscq30_lib::{
-    api::SoundcoreDevice,
+    api::{SoundcoreDevice, SoundcoreDeviceState},
     packets::structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
     soundcore_bluetooth::traits::SoundcoreDeviceConnectionError,
 };
-use tokio::runtime::Handle;
+use tokio::{runtime::Handle, sync::broadcast};
 
 pub struct GtkSoundcoreDevice<'a> {
     tokio_runtime: &'a Handle,
@@ -18,6 +18,10 @@ impl<'a> GtkSoundcoreDevice<'a> {
             tokio_runtime,
             soundcore_device: device,
         }
+    }
+
+    pub fn subscribe_to_state_updates(&self) -> broadcast::Receiver<SoundcoreDeviceState> {
+        self.soundcore_device.subscribe_to_state_updates()
     }
 
     pub async fn mac_address(&self) -> Result<String, SoundcoreDeviceConnectionError> {

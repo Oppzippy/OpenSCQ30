@@ -1,11 +1,11 @@
 use std::{sync::Arc, time::Duration};
 
 use tokio::{
-    sync::{mpsc::Receiver, RwLock},
+    sync::{broadcast, mpsc::Receiver, RwLock},
     task::JoinHandle,
     time::timeout,
 };
-use tracing::{instrument, trace, warn};
+use tracing::{trace, warn};
 
 use crate::{
     packets::outbound::{OutboundPacket, RequestStatePacket},
@@ -24,13 +24,26 @@ pub struct SoundcoreDevice {
     connection: Arc<dyn SoundcoreDeviceConnection + Send + Sync>,
     state: Arc<RwLock<SoundcoreDeviceState>>,
     inbound_receiver_handle: JoinHandle<()>,
+    state_update_sender: broadcast::Sender<SoundcoreDeviceState>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 pub struct SoundcoreDeviceState {
     ambient_sound_mode: AmbientSoundMode,
     noise_canceling_mode: NoiseCancelingMode,
     equalizer_configuration: EqualizerConfiguration,
+}
+
+impl SoundcoreDeviceState {
+    pub fn ambient_sound_mode(self) -> AmbientSoundMode {
+        self.ambient_sound_mode
+    }
+    pub fn noise_canceling_mode(self) -> NoiseCancelingMode {
+        self.noise_canceling_mode
+    }
+    pub fn equalizer_configuration(self) -> EqualizerConfiguration {
+        self.equalizer_configuration
+    }
 }
 
 impl SoundcoreDevice {
@@ -43,12 +56,22 @@ impl SoundcoreDevice {
         let current_state_lock = Arc::new(RwLock::new(initial_state));
         let current_state_lock_async = current_state_lock.to_owned();
 
+        let (sender, _) = broadcast::channel(1);
+
+        let sender_copy = sender.to_owned();
         let join_handle = tokio::spawn(async move {
             while let Some(packet_bytes) = inbound_receiver.recv().await {
                 match InboundPacket::from_bytes(&packet_bytes) {
                     Some(packet) => {
                         let mut state = current_state_lock_async.write().await;
-                        Self::on_packet_received(&packet, &mut state);
+                        if let Some(new_state) = Self::transform_state_from_packet(&packet, &state)
+                        {
+                            trace!(event = "state_update", old_state = ?state, new_state = ?new_state);
+                            *state = new_state;
+                            if let Err(err) = sender_copy.send(new_state) {
+                                trace!("failed to broadcast state change: {err}");
+                            }
+                        }
                     }
                     None => warn!("received unknown packet {:?}", packet_bytes),
                 }
@@ -59,6 +82,7 @@ impl SoundcoreDevice {
             connection,
             state: current_state_lock,
             inbound_receiver_handle: join_handle,
+            state_update_sender: sender,
         })
     }
 
@@ -105,31 +129,34 @@ impl SoundcoreDevice {
         Err(SoundcoreDeviceConnectionError::NoResponse)
     }
 
-    #[instrument(level = "trace")]
-    fn on_packet_received(packet: &InboundPacket, state: &mut SoundcoreDeviceState) {
+    fn transform_state_from_packet(
+        packet: &InboundPacket,
+        state: &SoundcoreDeviceState,
+    ) -> Option<SoundcoreDeviceState> {
         match packet {
             InboundPacket::StateUpdate {
                 ambient_sound_mode,
                 noise_canceling_mode,
                 equalizer_configuration,
-            } => {
-                state.ambient_sound_mode = *ambient_sound_mode;
-                state.noise_canceling_mode = *noise_canceling_mode;
-                state.equalizer_configuration = *equalizer_configuration;
-            }
+            } => Some(SoundcoreDeviceState {
+                ambient_sound_mode: *ambient_sound_mode,
+                noise_canceling_mode: *noise_canceling_mode,
+                equalizer_configuration: *equalizer_configuration,
+            }),
             InboundPacket::AmbientSoundModeUpdate {
                 ambient_sound_mode,
                 noise_canceling_mode,
-            } => {
-                state.ambient_sound_mode = *ambient_sound_mode;
-                state.noise_canceling_mode = *noise_canceling_mode;
-            }
-            InboundPacket::Ok => trace!("received Ok packet"),
-        };
-        trace!(
-            event = "updated_state",
-            new_state = ?state,
-        );
+            } => Some(SoundcoreDeviceState {
+                ambient_sound_mode: *ambient_sound_mode,
+                noise_canceling_mode: *noise_canceling_mode,
+                equalizer_configuration: state.equalizer_configuration,
+            }),
+            InboundPacket::Ok => None,
+        }
+    }
+
+    pub fn subscribe_to_state_updates(&self) -> broadcast::Receiver<SoundcoreDeviceState> {
+        self.state_update_sender.subscribe()
     }
 
     pub async fn mac_address(&self) -> Result<String, SoundcoreDeviceConnectionError> {
