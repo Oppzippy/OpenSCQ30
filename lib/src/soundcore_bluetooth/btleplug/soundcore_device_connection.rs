@@ -57,7 +57,7 @@ impl BtlePlugSoundcoreDeviceConnection {
 
 #[async_trait]
 impl SoundcoreDeviceConnection for BtlePlugSoundcoreDeviceConnection {
-    async fn get_name(&self) -> Result<String, SoundcoreDeviceConnectionError> {
+    async fn name(&self) -> Result<String, SoundcoreDeviceConnectionError> {
         let maybe_name = self
             .peripheral
             .properties()
@@ -73,7 +73,7 @@ impl SoundcoreDeviceConnection for BtlePlugSoundcoreDeviceConnection {
         }
     }
 
-    async fn get_mac_address(&self) -> Result<String, SoundcoreDeviceConnectionError> {
+    async fn mac_address(&self) -> Result<String, SoundcoreDeviceConnectionError> {
         Ok(self.peripheral.address().to_string())
     }
 

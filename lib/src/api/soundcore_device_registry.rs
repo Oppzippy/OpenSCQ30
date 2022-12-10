@@ -30,11 +30,11 @@ impl SoundcoreDeviceRegistry {
     #[instrument(level = "trace", skip(self))]
     pub async fn refresh_devices(&self) -> Result<(), SoundcoreDeviceConnectionError> {
         self.conneciton_registry.refresh_connections().await?;
-        let connections = self.conneciton_registry.get_connections().await;
+        let connections = self.conneciton_registry.connections().await;
 
         let mut devices = self.devices.write().await;
         for connection in connections {
-            let mac_address = connection.get_mac_address().await?;
+            let mac_address = connection.mac_address().await?;
             match devices.entry(mac_address.to_owned()) {
                 Entry::Vacant(entry) => match SoundcoreDevice::new(connection).await {
                     Ok(device) => {
@@ -51,7 +51,7 @@ impl SoundcoreDeviceRegistry {
         Ok(())
     }
 
-    pub async fn get_devices(&self) -> Vec<Arc<SoundcoreDevice>> {
+    pub async fn devices(&self) -> Vec<Arc<SoundcoreDevice>> {
         self.devices
             .read()
             .await
@@ -60,7 +60,7 @@ impl SoundcoreDeviceRegistry {
             .collect()
     }
 
-    pub async fn get_device_by_mac_address(
+    pub async fn device_by_mac_address(
         &self,
         mac_address: &String,
     ) -> Option<Arc<SoundcoreDevice>> {

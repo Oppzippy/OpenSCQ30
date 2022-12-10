@@ -69,13 +69,13 @@ fn build_ui(app: &adw::Application) {
     let gtk_registry_clone = gtk_registry.clone();
     main_context.spawn_local(clone!(@weak main_window => async move {
         let bluetooth_devices = gtk_registry_clone
-            .get_devices()
+            .devices()
             .await;
         let mut model_devices = Vec::new();
         for bluetooth_device in bluetooth_devices {
             model_devices.push(Device {
-                mac_address: bluetooth_device.get_mac_address().await.unwrap_or_else(|_| "Unknown MAC Address".to_string()),
-                name: bluetooth_device.get_name().await.unwrap_or_else(|_| "Unknown Name".to_string()),
+                mac_address: bluetooth_device.mac_address().await.unwrap_or_else(|_| "Unknown MAC Address".to_string()),
+                name: bluetooth_device.name().await.unwrap_or_else(|_| "Unknown Name".to_string()),
             })
         }
         main_window.set_devices(&model_devices);
@@ -94,13 +94,13 @@ fn build_ui(app: &adw::Application) {
                 };
 
                 let bluetooth_devices = gtk_registry_clone
-                    .get_devices()
+                    .devices()
                     .await;
                 let mut model_devices = Vec::new();
                 for bluetooth_device in bluetooth_devices {
                     model_devices.push(Device {
-                        mac_address: bluetooth_device.get_mac_address().await.unwrap_or_else(|_| "Unknown MAC Address".to_string()),
-                        name: bluetooth_device.get_name().await.unwrap_or_else(|_| "Unknown Name".to_string()),
+                        mac_address: bluetooth_device.mac_address().await.unwrap_or_else(|_| "Unknown MAC Address".to_string()),
+                        name: bluetooth_device.name().await.unwrap_or_else(|_| "Unknown Name".to_string()),
                     })
                 }
                 main_window.set_devices(&model_devices);
@@ -116,11 +116,11 @@ fn build_ui(app: &adw::Application) {
             if let Some(selected_device) = main_window.selected_device() {
                 let main_context = MainContext::default();
                 main_context.spawn_local(clone!(@weak main_window, @weak gtk_registry_clone => async move {
-                    match gtk_registry_clone.get_device_by_mac_address(&selected_device.mac_address).await {
+                    match gtk_registry_clone.device_by_mac_address(&selected_device.mac_address).await {
                         Some(device) => {
-                            let ambient_sound_mode = device.get_ambient_sound_mode().await;
-                            let noise_canceling_mode = device.get_noise_canceling_mode().await;
-                            let equalizer_configuration = device.get_equalizer_configuration().await;
+                            let ambient_sound_mode = device.ambient_sound_mode().await;
+                            let noise_canceling_mode = device.noise_canceling_mode().await;
+                            let equalizer_configuration = device.equalizer_configuration().await;
                             
                             main_window.set_ambient_sound_mode(ambient_sound_mode);
                             main_window.set_noise_canceling_mode(noise_canceling_mode);
@@ -144,7 +144,7 @@ fn build_ui(app: &adw::Application) {
                     tracing::warn!("no device is selected");
                     return;
                 };
-                let Some(device) = gtk_registry_clone.get_device_by_mac_address(&selected_device.mac_address).await else {
+                let Some(device) = gtk_registry_clone.device_by_mac_address(&selected_device.mac_address).await else {
                     tracing::warn!("could not find selected device: {}", selected_device.mac_address);
                     return;
                 };
@@ -170,7 +170,7 @@ fn build_ui(app: &adw::Application) {
                     tracing::warn!("no device is selected");
                     return;
                 };
-                let Some(device) = gtk_registry_clone.get_device_by_mac_address(&selected_device.mac_address).await else {
+                let Some(device) = gtk_registry_clone.device_by_mac_address(&selected_device.mac_address).await else {
                     tracing::warn!("could not find selected device: {}", selected_device.mac_address);
                     return;
                 };
@@ -196,7 +196,7 @@ fn build_ui(app: &adw::Application) {
                     tracing::warn!("no device is selected");
                     return;
                 };
-                let Some(device) = gtk_registry_clone.get_device_by_mac_address(&selected_device.mac_address).await else {
+                let Some(device) = gtk_registry_clone.device_by_mac_address(&selected_device.mac_address).await else {
                     tracing::warn!("could not find selected device: {}", selected_device.mac_address);
                     return;
                 };
@@ -219,11 +219,11 @@ fn build_ui(app: &adw::Application) {
                     tracing::warn!("no device is selected");
                     return;
                 };
-                let Some(device) = gtk_registry_clone.get_device_by_mac_address(&selected_device.mac_address).await else {
+                let Some(device) = gtk_registry_clone.device_by_mac_address(&selected_device.mac_address).await else {
                     tracing::warn!("could not find selected device: {}", selected_device.mac_address);
                     return;
                 };
-                let configuration = device.get_equalizer_configuration().await;
+                let configuration = device.equalizer_configuration().await;
                 main_window.set_equalizer_configuration(configuration);
             }));
         }),

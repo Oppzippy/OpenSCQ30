@@ -27,7 +27,7 @@ pub struct SoundcoreDevice {
 }
 
 #[derive(Debug)]
-struct SoundcoreDeviceState {
+pub struct SoundcoreDeviceState {
     ambient_sound_mode: AmbientSoundMode,
     noise_canceling_mode: NoiseCancelingMode,
     equalizer_configuration: EqualizerConfiguration,
@@ -38,7 +38,7 @@ impl SoundcoreDevice {
         connection: Arc<dyn SoundcoreDeviceConnection + Send + Sync>,
     ) -> Result<Self, SoundcoreDeviceConnectionError> {
         let mut inbound_receiver = connection.inbound_packets_channel().await?;
-        let initial_state = Self::get_state(&connection, &mut inbound_receiver).await?;
+        let initial_state = Self::fetch_initial_state(&connection, &mut inbound_receiver).await?;
 
         let current_state_lock = Arc::new(RwLock::new(initial_state));
         let current_state_lock_async = current_state_lock.to_owned();
@@ -62,7 +62,7 @@ impl SoundcoreDevice {
         })
     }
 
-    async fn get_state(
+    async fn fetch_initial_state(
         connection: &Arc<dyn SoundcoreDeviceConnection + Send + Sync>,
         inbound_receiver: &mut Receiver<Vec<u8>>,
     ) -> Result<SoundcoreDeviceState, SoundcoreDeviceConnectionError> {
@@ -95,7 +95,9 @@ impl SoundcoreDevice {
             match timeout(Duration::from_secs(1), state_future).await {
                 Ok(Some(state)) => return Ok(state),
                 Err(elapsed) => {
-                    warn!("get_state: didn't receive response after {elapsed} on try #{i}");
+                    warn!(
+                        "fetch_initial_state: didn't receive response after {elapsed} on try #{i}"
+                    );
                 }
                 _ => (),
             };
@@ -130,19 +132,19 @@ impl SoundcoreDevice {
         );
     }
 
-    pub async fn get_mac_address(&self) -> Result<String, SoundcoreDeviceConnectionError> {
-        self.connection.get_mac_address().await
+    pub async fn mac_address(&self) -> Result<String, SoundcoreDeviceConnectionError> {
+        self.connection.mac_address().await
     }
 
-    pub async fn get_name(&self) -> Result<String, SoundcoreDeviceConnectionError> {
-        self.connection.get_name().await
+    pub async fn name(&self) -> Result<String, SoundcoreDeviceConnectionError> {
+        self.connection.name().await
     }
 
     pub async fn set_ambient_sound_mode(
         &self,
         ambient_sound_mode: AmbientSoundMode,
     ) -> Result<(), SoundcoreDeviceConnectionError> {
-        let noise_canceling_mode = self.get_noise_canceling_mode().await;
+        let noise_canceling_mode = self.noise_canceling_mode().await;
         let mut state = self.state.write().await;
         self.connection
             .write_with_response(
@@ -153,7 +155,7 @@ impl SoundcoreDevice {
         Ok(())
     }
 
-    pub async fn get_ambient_sound_mode(&self) -> AmbientSoundMode {
+    pub async fn ambient_sound_mode(&self) -> AmbientSoundMode {
         self.state.read().await.ambient_sound_mode
     }
 
@@ -161,7 +163,7 @@ impl SoundcoreDevice {
         &self,
         noise_canceling_mode: NoiseCancelingMode,
     ) -> Result<(), SoundcoreDeviceConnectionError> {
-        let ambient_sound_mode = self.get_ambient_sound_mode().await;
+        let ambient_sound_mode = self.ambient_sound_mode().await;
         let mut state = self.state.write().await;
         // It will bug and put us in noise canceling mode without changing the ambient sound mode id if we change the
         // noise canceling mode with the ambient sound mode being normal or transparency. To work around this, we must
@@ -189,7 +191,7 @@ impl SoundcoreDevice {
         Ok(())
     }
 
-    pub async fn get_noise_canceling_mode(&self) -> NoiseCancelingMode {
+    pub async fn noise_canceling_mode(&self) -> NoiseCancelingMode {
         self.state.read().await.noise_canceling_mode
     }
 
@@ -205,7 +207,7 @@ impl SoundcoreDevice {
         Ok(())
     }
 
-    pub async fn get_equalizer_configuration(&self) -> EqualizerConfiguration {
+    pub async fn equalizer_configuration(&self) -> EqualizerConfiguration {
         self.state.read().await.equalizer_configuration
     }
 }

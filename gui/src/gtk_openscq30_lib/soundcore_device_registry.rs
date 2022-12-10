@@ -26,17 +26,16 @@ impl GtkSoundcoreDeviceRegistry {
         async_runtime_bridge!(self.tokio_runtime, device_registry.refresh_devices().await)
     }
 
-    pub async fn get_devices(&self) -> Vec<Arc<GtkSoundcoreDevice>> {
+    pub async fn devices(&self) -> Vec<Arc<GtkSoundcoreDevice>> {
         let device_registry = self.soundcore_device_registry.to_owned();
-        let devices =
-            async_runtime_bridge!(self.tokio_runtime, device_registry.get_devices().await);
+        let devices = async_runtime_bridge!(self.tokio_runtime, device_registry.devices().await);
         devices
             .into_iter()
             .map(|device| self.to_gtk_device(device))
             .collect()
     }
 
-    pub async fn get_device_by_mac_address(
+    pub async fn device_by_mac_address(
         &self,
         mac_address: &String,
     ) -> Option<Arc<GtkSoundcoreDevice>> {
@@ -44,9 +43,7 @@ impl GtkSoundcoreDeviceRegistry {
         let mac_address = mac_address.to_owned();
         async_runtime_bridge!(
             self.tokio_runtime,
-            device_registry
-                .get_device_by_mac_address(&mac_address)
-                .await
+            device_registry.device_by_mac_address(&mac_address).await
         )
         .map(|device| self.to_gtk_device(device))
     }

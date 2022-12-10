@@ -101,7 +101,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let registry = SoundcoreDeviceRegistry::new().await?;
     registry.refresh_devices().await?;
 
-    let devices = registry.get_devices().await;
+    let devices = registry.devices().await;
     if let Some(device) = devices.first() {
         match args.command {
             Command::Set(set_command) => match set_command {
@@ -128,13 +128,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
             },
             Command::Get(get_command) => match get_command {
                 GetCommand::AmbientSoundMode => {
-                    println!("{}", device.get_ambient_sound_mode().await.id())
+                    println!("{}", device.ambient_sound_mode().await.id())
                 }
                 GetCommand::NoiseCancelingMode => {
-                    println!("{}", device.get_noise_canceling_mode().await.id())
+                    println!("{}", device.noise_canceling_mode().await.id())
                 }
                 GetCommand::Equalizer => {
-                    let equalizer_configuration = device.get_equalizer_configuration().await;
+                    let equalizer_configuration = device.equalizer_configuration().await;
                     println!("{:?}", equalizer_configuration);
                 }
             },

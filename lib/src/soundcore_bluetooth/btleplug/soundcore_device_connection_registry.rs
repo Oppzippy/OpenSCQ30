@@ -27,7 +27,7 @@ impl BtlePlugSoundcoreDeviceConnectionRegistry {
         }
     }
 
-    async fn get_soundcore_peripherals(
+    async fn soundcore_peripherals(
         &self,
         adapters: &Vec<Adapter>,
     ) -> Result<Vec<Peripheral>, SoundcoreDeviceConnectionError> {
@@ -65,7 +65,7 @@ impl SoundcoreDeviceConnectionRegistry for BtlePlugSoundcoreDeviceConnectionRegi
             .adapters()
             .await
             .map_err(SoundcoreDeviceConnectionError::from)?;
-        let soundcore_peripherals = self.get_soundcore_peripherals(&adapters).await?;
+        let soundcore_peripherals = self.soundcore_peripherals(&adapters).await?;
 
         let mut connections = self.connections.write().await;
 
@@ -86,7 +86,7 @@ impl SoundcoreDeviceConnectionRegistry for BtlePlugSoundcoreDeviceConnectionRegi
         Ok(())
     }
 
-    async fn get_connections(&self) -> Vec<Arc<dyn SoundcoreDeviceConnection + Sync + Send>> {
+    async fn connections(&self) -> Vec<Arc<dyn SoundcoreDeviceConnection + Sync + Send>> {
         self.connections
             .read()
             .await

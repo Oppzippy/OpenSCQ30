@@ -20,21 +20,21 @@ impl<'a> GtkSoundcoreDevice<'a> {
         }
     }
 
-    pub async fn get_mac_address(&self) -> Result<String, SoundcoreDeviceConnectionError> {
+    pub async fn mac_address(&self) -> Result<String, SoundcoreDeviceConnectionError> {
         let soundcore_device = self.soundcore_device.to_owned();
-        async_runtime_bridge!(self.tokio_runtime, soundcore_device.get_mac_address().await)
+        async_runtime_bridge!(self.tokio_runtime, soundcore_device.mac_address().await)
     }
 
-    pub async fn get_name(&self) -> Result<String, SoundcoreDeviceConnectionError> {
+    pub async fn name(&self) -> Result<String, SoundcoreDeviceConnectionError> {
         let soundcore_device = self.soundcore_device.to_owned();
-        async_runtime_bridge!(self.tokio_runtime, soundcore_device.get_name().await)
+        async_runtime_bridge!(self.tokio_runtime, soundcore_device.name().await)
     }
 
-    pub async fn get_ambient_sound_mode(&self) -> AmbientSoundMode {
+    pub async fn ambient_sound_mode(&self) -> AmbientSoundMode {
         let soundcore_device = self.soundcore_device.to_owned();
         async_runtime_bridge!(
             self.tokio_runtime,
-            soundcore_device.get_ambient_sound_mode().await
+            soundcore_device.ambient_sound_mode().await
         )
     }
 
@@ -51,11 +51,11 @@ impl<'a> GtkSoundcoreDevice<'a> {
         )
     }
 
-    pub async fn get_noise_canceling_mode(&self) -> NoiseCancelingMode {
+    pub async fn noise_canceling_mode(&self) -> NoiseCancelingMode {
         let soundcore_device = self.soundcore_device.to_owned();
         async_runtime_bridge!(
             self.tokio_runtime,
-            soundcore_device.get_noise_canceling_mode().await
+            soundcore_device.noise_canceling_mode().await
         )
     }
 
@@ -72,11 +72,11 @@ impl<'a> GtkSoundcoreDevice<'a> {
         )
     }
 
-    pub async fn get_equalizer_configuration(&self) -> EqualizerConfiguration {
+    pub async fn equalizer_configuration(&self) -> EqualizerConfiguration {
         let soundcore_device = self.soundcore_device.to_owned();
         async_runtime_bridge!(
             self.tokio_runtime,
-            soundcore_device.get_equalizer_configuration().await
+            soundcore_device.equalizer_configuration().await
         )
     }
 
