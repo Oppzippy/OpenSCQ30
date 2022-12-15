@@ -20,8 +20,11 @@ use crate::{
     soundcore_bluetooth::traits::SoundcoreDeviceConnectionError,
 };
 
-pub struct SoundcoreDevice {
-    connection: Arc<dyn SoundcoreDeviceConnection + Send + Sync>,
+pub struct SoundcoreDevice<ConnectionType>
+where
+    ConnectionType: SoundcoreDeviceConnection + Send + Sync,
+{
+    connection: Arc<ConnectionType>,
     state: Arc<RwLock<SoundcoreDeviceState>>,
     inbound_receiver_handle: JoinHandle<()>,
     state_update_sender: broadcast::Sender<SoundcoreDeviceState>,
@@ -46,9 +49,12 @@ impl SoundcoreDeviceState {
     }
 }
 
-impl SoundcoreDevice {
+impl<ConnectionType> SoundcoreDevice<ConnectionType>
+where
+    ConnectionType: SoundcoreDeviceConnection + Send + Sync,
+{
     pub async fn new(
-        connection: Arc<dyn SoundcoreDeviceConnection + Send + Sync>,
+        connection: Arc<ConnectionType>,
     ) -> Result<Self, SoundcoreDeviceConnectionError> {
         let mut inbound_receiver = connection.inbound_packets_channel().await?;
         let initial_state = Self::fetch_initial_state(&connection, &mut inbound_receiver).await?;
@@ -87,7 +93,7 @@ impl SoundcoreDevice {
     }
 
     async fn fetch_initial_state(
-        connection: &Arc<dyn SoundcoreDeviceConnection + Send + Sync>,
+        connection: &Arc<ConnectionType>,
         inbound_receiver: &mut Receiver<Vec<u8>>,
     ) -> Result<SoundcoreDeviceState, SoundcoreDeviceConnectionError> {
         for i in 0..3 {
@@ -239,14 +245,148 @@ impl SoundcoreDevice {
     }
 }
 
-impl Drop for SoundcoreDevice {
+impl<ConnectionType> Drop for SoundcoreDevice<ConnectionType>
+where
+    ConnectionType: SoundcoreDeviceConnection + Send + Sync,
+{
     fn drop(&mut self) {
         self.inbound_receiver_handle.abort();
     }
 }
 
-impl std::fmt::Debug for SoundcoreDevice {
+impl<ConnectionType> std::fmt::Debug for SoundcoreDevice<ConnectionType>
+where
+    ConnectionType: SoundcoreDeviceConnection + Send + Sync,
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("SoundcoreDevice").finish()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{sync::Arc, time::Duration};
+
+    use tokio::sync::mpsc;
+
+    use super::SoundcoreDevice;
+    use crate::{
+        packets::structures::{
+            AmbientSoundMode, EqualizerBandOffsets, EqualizerConfiguration, NoiseCancelingMode,
+        },
+        soundcore_bluetooth::stub::StubSoundcoreDeviceConnection,
+    };
+
+    fn example_state_update_packet() -> Vec<u8> {
+        vec![
+            0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01, 0x46, 0x00, 0x05, 0x00, 0xfe, 0xfe, 0x3c,
+            0xb4, 0x8f, 0xa0, 0x8e, 0xb4, 0x74, 0x88, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
+            0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x30,
+        ]
+    }
+
+    async fn create_test_connection() -> (Arc<StubSoundcoreDeviceConnection>, mpsc::Sender<Vec<u8>>)
+    {
+        let connection = Arc::new(StubSoundcoreDeviceConnection::new());
+        connection
+            .set_name_return(Ok("Soundcore Q30".to_string()))
+            .await;
+        connection
+            .set_mac_address_return(Ok("00:00:00:00:00:00".to_string()))
+            .await;
+
+        let (sender, receiver) = mpsc::channel(100);
+        connection.set_inbound_packets_channel(Ok(receiver)).await;
+        (connection, sender)
+    }
+
+    #[tokio::test]
+    async fn test_new_with_example_state_update_packet() {
+        let (connection, sender) = create_test_connection().await;
+        connection.push_write_return(Ok(())).await;
+        tokio::spawn(async move {
+            sender.send(example_state_update_packet()).await.unwrap();
+        });
+        let device = SoundcoreDevice::new(connection).await.unwrap();
+        assert_eq!(AmbientSoundMode::Normal, device.ambient_sound_mode().await);
+        assert_eq!(
+            NoiseCancelingMode::Transport,
+            device.noise_canceling_mode().await
+        );
+        assert_eq!(
+            EqualizerConfiguration::new_custom_profile(EqualizerBandOffsets::new([
+                -60, 60, 23, 40, 22, 60, -4, 16
+            ])),
+            device.equalizer_configuration().await
+        )
+    }
+
+    #[tokio::test]
+    async fn test_new_with_retry() {
+        let (connection, sender) = create_test_connection().await;
+        connection.push_write_return(Ok(())).await;
+        connection.push_write_return(Ok(())).await;
+        tokio::spawn(async move {
+            tokio::time::sleep(Duration::from_millis(1500)).await;
+            sender.send(example_state_update_packet()).await.unwrap();
+        });
+        let connection_clone = connection.clone();
+        SoundcoreDevice::new(connection_clone).await.unwrap();
+        assert_eq!(0, connection.write_return_queue_length().await);
+    }
+
+    #[tokio::test]
+    async fn test_new_max_retries() {
+        let (connection, _) = create_test_connection().await;
+        // for the purposes of this test, we don't care how many times it retries. we only care that it stops at some point.
+        for _ in 0..100 {
+            connection.push_write_return(Ok(())).await;
+        }
+
+        let connection_clone = connection.clone();
+        let result = SoundcoreDevice::new(connection_clone).await;
+        assert_eq!(true, result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_ambient_sound_mode_update_packet() {
+        let (connection, sender) = create_test_connection().await;
+        connection.push_write_return(Ok(())).await;
+        let sender_copy = sender.clone();
+        tokio::spawn(async move {
+            sender_copy
+                .send(example_state_update_packet())
+                .await
+                .unwrap();
+        });
+        let device = SoundcoreDevice::new(connection).await.unwrap();
+        assert_eq!(AmbientSoundMode::Normal, device.ambient_sound_mode().await);
+        assert_eq!(
+            NoiseCancelingMode::Transport,
+            device.noise_canceling_mode().await
+        );
+
+        tokio::spawn(async move {
+            sender
+                .send(vec![
+                    0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x00, 0x01, 0x01, 0x00,
+                    0x20,
+                ])
+                .await
+                .unwrap();
+        });
+        // wait for the packet to be handled asynchronously
+        tokio::time::sleep(Duration::from_millis(100)).await;
+
+        assert_eq!(
+            AmbientSoundMode::NoiseCanceling,
+            device.ambient_sound_mode().await
+        );
+        assert_eq!(
+            NoiseCancelingMode::Outdoor,
+            device.noise_canceling_mode().await
+        );
     }
 }

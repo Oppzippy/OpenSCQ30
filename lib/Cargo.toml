@@ -10,7 +10,7 @@ crate-type = ["lib"]
 
 [dependencies]
 btleplug = { version = "0.10" }
-tokio = { version = "1", features = [] }
+tokio = { version = "1", features = ["macros"] }
 futures = { version = "0.3" }
 uuid = "1.2"
 thiserror = "1.0"
