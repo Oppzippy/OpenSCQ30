@@ -1,0 +1,22 @@
+name: "lib: test"
+
+on:
+  - push
+
+defaults:
+  run:
+    working-directory: lib
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install dependencies
+        run: sudo apt-get install libdbus-1-dev pkg-config
+
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+      - name: Run tests
+        run: cargo test
