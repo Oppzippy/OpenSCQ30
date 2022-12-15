@@ -8,7 +8,6 @@ use btleplug::platform::{Adapter, Manager, Peripheral};
 use tokio::sync::RwLock;
 use tracing::warn;
 
-use crate::soundcore_bluetooth::traits::SoundcoreDeviceConnection;
 use crate::soundcore_bluetooth::traits::SoundcoreDeviceConnectionError;
 use crate::soundcore_bluetooth::traits::SoundcoreDeviceConnectionRegistry;
 
@@ -16,7 +15,9 @@ use super::soundcore_device_connection::BtlePlugSoundcoreDeviceConnection;
 
 pub struct BtlePlugSoundcoreDeviceConnectionRegistry {
     manager: Manager,
-    connections: RwLock<HashMap<BDAddr, Arc<dyn SoundcoreDeviceConnection + Sync + Send>>>,
+    connections: RwLock<
+        HashMap<BDAddr, Arc<<Self as SoundcoreDeviceConnectionRegistry>::DeviceConnectionType>>,
+    >,
 }
 
 impl BtlePlugSoundcoreDeviceConnectionRegistry {
@@ -59,6 +60,8 @@ impl BtlePlugSoundcoreDeviceConnectionRegistry {
 
 #[async_trait]
 impl SoundcoreDeviceConnectionRegistry for BtlePlugSoundcoreDeviceConnectionRegistry {
+    type DeviceConnectionType = BtlePlugSoundcoreDeviceConnection;
+
     async fn refresh_connections(&self) -> Result<(), SoundcoreDeviceConnectionError> {
         let adapters = self
             .manager
@@ -86,7 +89,7 @@ impl SoundcoreDeviceConnectionRegistry for BtlePlugSoundcoreDeviceConnectionRegi
         Ok(())
     }
 
-    async fn connections(&self) -> Vec<Arc<dyn SoundcoreDeviceConnection + Sync + Send>> {
+    async fn connections(&self) -> Vec<Arc<Self::DeviceConnectionType>> {
         self.connections
             .read()
             .await

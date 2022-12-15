@@ -4,6 +4,7 @@ use clap::{command, Parser, Subcommand, ValueEnum};
 use openscq30_lib::{
     api::SoundcoreDeviceRegistry,
     packets::structures::{EqualizerBandOffsets, EqualizerConfiguration},
+    soundcore_bluetooth::btleplug,
 };
 
 #[derive(Parser)]
@@ -98,7 +99,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .init();
 
     let args = Cli::parse();
-    let registry = SoundcoreDeviceRegistry::new().await?;
+    let connection_registry_impl = btleplug::new_connection_registry()
+        .await
+        .unwrap_or_else(|err| panic!("failed to initialize handler: {err}"));
+    let registry = SoundcoreDeviceRegistry::new(connection_registry_impl).await?;
     registry.refresh_devices().await?;
 
     let devices = registry.devices().await;

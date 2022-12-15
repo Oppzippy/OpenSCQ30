@@ -12,7 +12,7 @@ use openscq30_lib::{
     api::{SoundcoreDeviceRegistry, SoundcoreDeviceState},
     packets::structures::{
         AmbientSoundMode, NoiseCancelingMode,
-    },
+    }, soundcore_bluetooth::btleplug::{self},
 };
 use swappable_broadcast::SwappableBroadcastReceiver;
 use tracing::{Level};
@@ -51,7 +51,9 @@ fn build_ui(app: &adw::Application) {
         .build()
         .unwrap_or_else(|err| panic!("failed to start tokio runtime: {err}"));
 
-    let registry = tokio_runtime.block_on(SoundcoreDeviceRegistry::new())
+    let connection_registry_impl = tokio_runtime.block_on(btleplug::new_connection_registry())
+        .unwrap_or_else(|err| panic!("failed to initialize handler: {err}"));
+    let registry = tokio_runtime.block_on(SoundcoreDeviceRegistry::new(connection_registry_impl))
         .unwrap_or_else(|err| panic!("failed to initialize device registry: {err}"));
 
     if let Err(err) = tokio_runtime.block_on(registry.refresh_devices()) {

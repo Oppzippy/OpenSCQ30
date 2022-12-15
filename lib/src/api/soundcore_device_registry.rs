@@ -7,20 +7,26 @@ use tokio::sync::RwLock;
 use tracing::{instrument, trace, warn};
 
 use crate::soundcore_bluetooth::traits::{
-    SoundcoreDeviceConnectionError, SoundcoreDeviceConnectionRegistry,
+    SoundcoreDeviceConnection, SoundcoreDeviceConnectionError, SoundcoreDeviceConnectionRegistry,
 };
 
 use super::soundcore_device::SoundcoreDevice;
 
-pub struct SoundcoreDeviceRegistry {
-    conneciton_registry: Box<dyn SoundcoreDeviceConnectionRegistry + Send + Sync>,
-    devices: RwLock<HashMap<String, Arc<SoundcoreDevice>>>,
+pub struct SoundcoreDeviceRegistry<RegistryType: 'static>
+where
+    RegistryType: SoundcoreDeviceConnectionRegistry + Send + Sync,
+{
+    conneciton_registry: RegistryType,
+    devices: RwLock<HashMap<String, Arc<SoundcoreDevice<RegistryType::DeviceConnectionType>>>>,
 }
 
-impl SoundcoreDeviceRegistry {
-    pub async fn new() -> Result<Self, SoundcoreDeviceConnectionError> {
-        let connection_registry =
-            Box::new(crate::soundcore_bluetooth::btleplug::new_handler().await?);
+impl<RegistryType: 'static> SoundcoreDeviceRegistry<RegistryType>
+where
+    RegistryType: SoundcoreDeviceConnectionRegistry + Send + Sync,
+{
+    pub async fn new(
+        connection_registry: RegistryType,
+    ) -> Result<Self, SoundcoreDeviceConnectionError> {
         Ok(Self {
             conneciton_registry: connection_registry,
             devices: RwLock::new(HashMap::new()),
@@ -51,7 +57,7 @@ impl SoundcoreDeviceRegistry {
         Ok(())
     }
 
-    pub async fn devices(&self) -> Vec<Arc<SoundcoreDevice>> {
+    pub async fn devices(&self) -> Vec<Arc<SoundcoreDevice<RegistryType::DeviceConnectionType>>> {
         self.devices
             .read()
             .await
@@ -63,7 +69,7 @@ impl SoundcoreDeviceRegistry {
     pub async fn device_by_mac_address(
         &self,
         mac_address: &String,
-    ) -> Option<Arc<SoundcoreDevice>> {
+    ) -> Option<Arc<SoundcoreDevice<RegistryType::DeviceConnectionType>>> {
         self.devices.read().await.get(mac_address).cloned()
     }
 }
