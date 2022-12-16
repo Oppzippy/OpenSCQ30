@@ -3,13 +3,17 @@ name = "openscq30_gui"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+default = ["libadwaita"]
+libadwaita = ["dep:adw"]
+
 [dependencies]
 openscq30_lib = { path = "../lib" }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 futures = { version = "0.3" }
 tracing = "0.1"
 tracing-subscriber = "0.3"
-adw = { version = "0.2", package = "libadwaita" }
+adw = { version = "0.2", package = "libadwaita", optional = true }
 gtk = { version = "0.5", package = "gtk4" }
 strum = "0.24"
 

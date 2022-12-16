@@ -12,10 +12,10 @@ use openscq30_lib::{
     api::{SoundcoreDeviceRegistry, SoundcoreDeviceState},
     packets::structures::{
         AmbientSoundMode, NoiseCancelingMode,
-    }, soundcore_bluetooth::btleplug::{self},
+    }, soundcore_bluetooth::btleplug,
 };
 use swappable_broadcast::SwappableBroadcastReceiver;
-use tracing::{Level};
+use tracing::Level;
 use tracing_subscriber::fmt::format::FmtSpan;
 use widgets::{MainWindow, Device};
 
@@ -35,7 +35,21 @@ fn main() {
         .init();
 
     load_resources();
+    run_application();
+}
 
+#[cfg(not(feature = "libadwaita"))]
+fn run_application() {
+    let app = gtk::Application::builder()
+        .application_id("com.oppzippy.openscq30")
+        .build();
+    app.connect_activate(build_ui);
+
+    app.run();
+}
+
+#[cfg(feature = "libadwaita")]
+fn run_application() {
     let app = adw::Application::builder()
         .application_id("com.oppzippy.openscq30")
         .build();
@@ -44,7 +58,25 @@ fn main() {
     app.run();
 }
 
+#[cfg(not(feature = "libadwaita"))]
+fn build_ui(app: &gtk::Application) {
+    let window = ApplicationWindow::builder()
+        .application(app)
+        .title("OpenSCQ30")
+        .build();
+    build_ui_application_window(window);
+}
+
+#[cfg(feature = "libadwaita")]
 fn build_ui(app: &adw::Application) {
+    let window = ApplicationWindow::builder()
+        .application(app)
+        .title("OpenSCQ30")
+        .build();
+    build_ui_application_window(window);
+}
+
+fn build_ui_application_window(window: ApplicationWindow) {
     let tokio_runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(1)
         .enable_all()
@@ -61,11 +93,6 @@ fn build_ui(app: &adw::Application) {
     }
 
     let gtk_registry = Arc::new(GtkSoundcoreDeviceRegistry::new(registry, tokio_runtime));
-
-    let window = ApplicationWindow::builder()
-        .application(app)
-        .title("OpenSCQ30")
-        .build();
 
     let main_window = MainWindow::new();
     let state_update_receiver: Arc<SwappableBroadcastReceiver<SoundcoreDeviceState>> = Arc::new(SwappableBroadcastReceiver::new());
