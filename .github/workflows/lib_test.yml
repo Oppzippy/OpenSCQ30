@@ -3,10 +3,6 @@ name: "lib: test"
 on:
   - push
 
-defaults:
-  run:
-    working-directory: lib
-
 jobs:
   test:
     runs-on: ubuntu-22.04
@@ -19,4 +15,4 @@ jobs:
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
       - name: Run tests
-        run: cargo test
+        run: cargo test --package openscq30_lib

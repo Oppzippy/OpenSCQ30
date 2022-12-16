@@ -3,11 +3,6 @@ name = "gui"
 version = "0.1.0"
 edition = "2021"
 
-[profile.release]
-strip = true
-lto = true
-codegen-units = 1
-
 [dependencies]
 openscq30_lib = { path = "../lib" }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }

@@ -1,0 +1,7 @@
+[workspace]
+members = ["cli", "gui", "lib"]
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
