@@ -717,21 +717,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "gui"
-version = "0.1.0"
-dependencies = [
- "futures",
- "glib-build-tools",
- "gtk4",
- "libadwaita",
- "openscq30_lib",
- "strum",
- "tokio",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -985,6 +970,21 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "openscq30_lib",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "openscq30_gui"
+version = "0.1.0"
+dependencies = [
+ "futures",
+ "glib-build-tools",
+ "gtk4",
+ "libadwaita",
+ "openscq30_lib",
+ "strum",
  "tokio",
  "tracing",
  "tracing-subscriber",
