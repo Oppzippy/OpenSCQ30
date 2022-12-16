@@ -50,37 +50,3 @@ jobs:
         with:
           name: cli-macos
           path: target/release/openscq30_cli
-
-  build_windows:
-    runs-on: windows-2022
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: stable-gnu
-      - uses: msys2/setup-msys2@v2
-        with:
-          release: false
-      - name: Install gtk4 and dependencies
-        shell: msys2 {0}
-        run: pacman -S --noconfirm mingw-w64-x86_64-gtk4 mingw-w64-x86_64-pkgconf mingw-w64-x86_64-gcc mingw-w64-x86_64-libadwaita
-
-      - name: Cache cargo dependencies
-        uses: Swatinem/rust-cache@v2
-
-      - name: Build
-        run: |
-          $env:Path += "C:\msys64\mingw64\include;"
-          $env:Path += "C:\msys64\mingw64\bin;"
-          $env:Path += "C:\msys64\mingw64\lib;"
-          cargo build --release --package openscq30_gui --package openscq30_cli
-      - name: Upload gui
-        uses: actions/upload-artifact@v3
-        with:
-          name: gui-windows
-          path: target/release/openscq30_gui
-      - name: Upload cli
-        uses: actions/upload-artifact@v3
-        with:
-          name: cli-windows
-          path: target/release/openscq30_cli
