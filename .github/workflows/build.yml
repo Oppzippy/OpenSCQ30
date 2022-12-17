@@ -50,3 +50,100 @@ jobs:
         with:
           name: cli-macos
           path: target/release/openscq30_cli
+
+  build_windows:
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            git
+            mingw-w64-x86_64-gtk4
+            mingw-w64-x86_64-pkgconf
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-libadwaita
+            mingw-w64-x86_64-rust
+
+      - uses: actions/checkout@v3
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build
+        run: |
+          cargo build --release --package openscq30_gui --package openscq30_cli
+
+      - name: Copy gui and dlls into a folder
+        run: |
+          mkdir gui-release
+          cp target/release/openscq30_gui.exe gui-release
+          cp /mingw64/bin/libadwaita-1-0.dll gui-release
+          cp /mingw64/bin/libbrotlicommon.dll gui-release
+          cp /mingw64/bin/libbrotlidec.dll gui-release
+          cp /mingw64/bin/libbz2-1.dll gui-release
+          cp /mingw64/bin/libcairo-2.dll gui-release
+          cp /mingw64/bin/libcairo-gobject-2.dll gui-release
+          cp /mingw64/bin/libcairo-script-interpreter-2.dll gui-release
+          cp /mingw64/bin/libdatrie-1.dll gui-release
+          cp /mingw64/bin/libdeflate.dll gui-release
+          cp /mingw64/bin/libepoxy-0.dll gui-release
+          cp /mingw64/bin/libexpat-1.dll gui-release
+          cp /mingw64/bin/libexpat-1.dll gui-release
+          cp /mingw64/bin/libffi-8.dll gui-release
+          cp /mingw64/bin/libfontconfig-1.dll gui-release
+          cp /mingw64/bin/libfreetype-6.dll gui-release
+          cp /mingw64/bin/libfribidi-0.dll gui-release
+          cp /mingw64/bin/libgcc_s_seh-1.dll gui-release
+          cp /mingw64/bin/libgdk_pixbuf-2.0-0.dll gui-release
+          cp /mingw64/bin/libgio-2.0-0.dll gui-release
+          cp /mingw64/bin/libglib-2.0-0.dll gui-release
+          cp /mingw64/bin/libgmodule-2.0-0.dll gui-release
+          cp /mingw64/bin/libgobject-2.0-0.dll gui-release
+          cp /mingw64/bin/libgraphene-1.0-0.dll gui-release
+          cp /mingw64/bin/libgraphite2.dll gui-release
+          cp /mingw64/bin/libgstbase-1.0-0.dll gui-release
+          cp /mingw64/bin/libgstgl-1.0-0.dll gui-release
+          cp /mingw64/bin/libgstpbutils-1.0-0.dll gui-release
+          cp /mingw64/bin/libgstplay-1.0-0.dll gui-release
+          cp /mingw64/bin/libgstplayer-1.0-0.dll gui-release
+          cp /mingw64/bin/libgstreamer-1.0-0.dll gui-release
+          cp /mingw64/bin/libgsttag-1.0-0.dll gui-release
+          cp /mingw64/bin/libgstvideo-1.0-0.dll gui-release
+          cp /mingw64/bin/libgtk-4-1.dll gui-release
+          cp /mingw64/bin/libharfbuzz-0.dll gui-release
+          cp /mingw64/bin/libiconv-2.dll gui-release
+          cp /mingw64/bin/libintl-8.dll gui-release
+          cp /mingw64/bin/libjbig-0.dll gui-release
+          cp /mingw64/bin/libjpeg-8.dll gui-release
+          cp /mingw64/bin/libLerc.dll gui-release
+          cp /mingw64/bin/liblzma-5.dll gui-release
+          cp /mingw64/bin/liblzo2-2.dll gui-release
+          cp /mingw64/bin/liborc-0.4-0.dll gui-release
+          cp /mingw64/bin/libpango-1.0-0.dll gui-release
+          cp /mingw64/bin/libpangocairo-1.0-0.dll gui-release
+          cp /mingw64/bin/libpangoft2-1.0-0.dll gui-release
+          cp /mingw64/bin/libpangowin32-1.0-0.dll gui-release
+          cp /mingw64/bin/libpcre2-8-0.dll gui-release
+          cp /mingw64/bin/libpixman-1-0.dll gui-release
+          cp /mingw64/bin/libpng16-16.dll gui-release
+          cp /mingw64/bin/libstdc++-6.dll gui-release
+          cp /mingw64/bin/libthai-0.dll gui-release
+          cp /mingw64/bin/libtiff-5.dll gui-release
+          cp /mingw64/bin/libwebp-7.dll gui-release
+          cp /mingw64/bin/libwinpthread-1.dll gui-release
+          cp /mingw64/bin/libzstd.dll gui-release
+          cp /mingw64/bin/zlib1.dll gui-release
+
+      - name: Upload gui
+        uses: actions/upload-artifact@v3
+        with:
+          name: gui-windows
+          path: gui-release/
+      - name: Upload cli
+        uses: actions/upload-artifact@v3
+        with:
+          name: cli-windows
+          path: target/release/openscq30_cli.exe
