@@ -16,6 +16,7 @@ use openscq30_lib::{
 };
 use swappable_broadcast::SwappableBroadcastReceiver;
 use tracing::Level;
+#[cfg(debug_assertions)]
 use tracing_subscriber::fmt::format::FmtSpan;
 use widgets::{MainWindow, Device};
 
@@ -25,14 +26,16 @@ mod gtk_openscq30_lib;
 mod swappable_broadcast;
 
 fn main() {
-    tracing_subscriber::fmt()
+    let subscriber_builder = tracing_subscriber::fmt()
         .with_file(true)
         .with_line_number(true)
         .with_target(false)
-        .with_max_level(Level::TRACE)
-        .with_span_events(FmtSpan::ACTIVE)
-        .pretty()
-        .init();
+        .pretty();
+    #[cfg(debug_assertions)]
+    let subscriber_builder = subscriber_builder.with_max_level(Level::TRACE).with_span_events(FmtSpan::ACTIVE);
+    #[cfg(not(debug_assertions))]
+    let subscriber_builder = subscriber_builder.with_max_level(Level::INFO);
+    subscriber_builder.init();
 
     load_resources();
     run_application();

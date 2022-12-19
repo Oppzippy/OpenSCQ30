@@ -6,6 +6,9 @@ use openscq30_lib::{
     packets::structures::{EqualizerBandOffsets, EqualizerConfiguration},
     soundcore_bluetooth::btleplug,
 };
+use tracing::Level;
+#[cfg(debug_assertions)]
+use tracing_subscriber::fmt::format::FmtSpan;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -93,10 +96,18 @@ impl From<NoiseCancelingMode> for openscq30_lib::packets::structures::NoiseCance
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn Error>> {
-    tracing_subscriber::fmt()
+    let subscriber_builder = tracing_subscriber::fmt()
         .with_file(true)
         .with_line_number(true)
-        .init();
+        .with_target(false)
+        .pretty();
+    #[cfg(debug_assertions)]
+    let subscriber_builder = subscriber_builder
+        .with_max_level(Level::TRACE)
+        .with_span_events(FmtSpan::ACTIVE);
+    #[cfg(not(debug_assertions))]
+    let subscriber_builder = subscriber_builder.with_max_level(Level::INFO);
+    subscriber_builder.init();
 
     let args = Cli::parse();
     let connection_registry_impl = btleplug::new_connection_registry()
