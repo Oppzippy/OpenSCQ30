@@ -8,7 +8,7 @@ default = ["libadwaita"]
 libadwaita = ["dep:adw"]
 
 [dependencies]
-openscq30_lib = { path = "../lib" }
+openscq30_lib = { path = "../lib", features = ["btleplug"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 futures = { version = "0.3" }
 tracing = "0.1"

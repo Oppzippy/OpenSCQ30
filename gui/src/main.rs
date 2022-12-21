@@ -9,10 +9,10 @@ use gtk::{
 };
 use gtk_openscq30_lib::GtkSoundcoreDeviceRegistry;
 use openscq30_lib::{
-    api::{SoundcoreDeviceRegistry, SoundcoreDeviceState},
+    api::SoundcoreDeviceRegistry,
     packets::structures::{
         AmbientSoundMode, NoiseCancelingMode,
-    }, soundcore_bluetooth::btleplug,
+    }, soundcore_bluetooth::btleplug, state::SoundcoreDeviceState,
 };
 use swappable_broadcast::SwappableBroadcastReceiver;
 use tracing::Level;

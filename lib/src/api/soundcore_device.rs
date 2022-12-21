@@ -8,12 +8,15 @@ use tokio::{
 use tracing::{trace, warn};
 
 use crate::{
-    packets::outbound::{OutboundPacket, RequestStatePacket},
+    packets::{
+        inbound::InboundPacket,
+        outbound::{OutboundPacket, RequestStatePacket},
+    },
     soundcore_bluetooth::traits::SoundcoreDeviceConnection,
+    state::{self, SoundcoreDeviceState},
 };
 use crate::{
     packets::{
-        inbound::InboundPacket,
         outbound::{SetAmbientSoundModePacket, SetEqualizerPacket},
         structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
     },
@@ -28,25 +31,6 @@ where
     state: Arc<RwLock<SoundcoreDeviceState>>,
     inbound_receiver_handle: JoinHandle<()>,
     state_update_sender: broadcast::Sender<SoundcoreDeviceState>,
-}
-
-#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
-pub struct SoundcoreDeviceState {
-    ambient_sound_mode: AmbientSoundMode,
-    noise_canceling_mode: NoiseCancelingMode,
-    equalizer_configuration: EqualizerConfiguration,
-}
-
-impl SoundcoreDeviceState {
-    pub fn ambient_sound_mode(self) -> AmbientSoundMode {
-        self.ambient_sound_mode
-    }
-    pub fn noise_canceling_mode(self) -> NoiseCancelingMode {
-        self.noise_canceling_mode
-    }
-    pub fn equalizer_configuration(self) -> EqualizerConfiguration {
-        self.equalizer_configuration
-    }
 }
 
 impl<ConnectionType> SoundcoreDevice<ConnectionType>
@@ -67,18 +51,21 @@ where
         let sender_copy = sender.to_owned();
         let join_handle = tokio::spawn(async move {
             while let Some(packet_bytes) = inbound_receiver.recv().await {
-                match InboundPacket::from_bytes(&packet_bytes) {
-                    Some(packet) => {
-                        let mut state = current_state_lock_async.write().await;
-                        if let Some(new_state) = Self::transform_state_from_packet(&packet, &state)
-                        {
-                            trace!(event = "state_update", old_state = ?state, new_state = ?new_state);
-                            *state = new_state;
-                            if let Err(err) = sender_copy.send(new_state) {
-                                trace!("failed to broadcast state change: {err}");
+                match InboundPacket::new(&packet_bytes) {
+                    Some(packet) => match state::inbound_packet_to_state_transformer(packet) {
+                        Some(transformer) => {
+                            let mut state = current_state_lock_async.write().await;
+                            let new_state = transformer.transform(&state);
+                            if new_state != *state {
+                                trace!(event = "state_update", old_state = ?state, new_state = ?new_state);
+                                *state = new_state;
+                                if let Err(err) = sender_copy.send(new_state) {
+                                    trace!("failed to broadcast state change: {err}");
+                                }
                             }
                         }
-                    }
+                        None => (),
+                    },
                     None => warn!("received unknown packet {:?}", packet_bytes),
                 }
             }
@@ -103,17 +90,9 @@ where
 
             let state_future = async {
                 while let Some(packet_bytes) = inbound_receiver.recv().await {
-                    match InboundPacket::from_bytes(&packet_bytes) {
-                        Some(InboundPacket::StateUpdate {
-                            ambient_sound_mode,
-                            noise_canceling_mode,
-                            equalizer_configuration,
-                        }) => {
-                            return Some(SoundcoreDeviceState {
-                                ambient_sound_mode,
-                                noise_canceling_mode,
-                                equalizer_configuration,
-                            });
+                    match InboundPacket::new(&packet_bytes) {
+                        Some(InboundPacket::StateUpdate(packet)) => {
+                            return Some(packet.into());
                         }
                         None => warn!("received unknown packet {:?}", packet_bytes),
                         _ => (), // Known packet, but not the one we're looking for
@@ -133,32 +112,6 @@ where
             };
         }
         Err(SoundcoreDeviceConnectionError::NoResponse)
-    }
-
-    fn transform_state_from_packet(
-        packet: &InboundPacket,
-        state: &SoundcoreDeviceState,
-    ) -> Option<SoundcoreDeviceState> {
-        match packet {
-            InboundPacket::StateUpdate {
-                ambient_sound_mode,
-                noise_canceling_mode,
-                equalizer_configuration,
-            } => Some(SoundcoreDeviceState {
-                ambient_sound_mode: *ambient_sound_mode,
-                noise_canceling_mode: *noise_canceling_mode,
-                equalizer_configuration: *equalizer_configuration,
-            }),
-            InboundPacket::AmbientSoundModeUpdate {
-                ambient_sound_mode,
-                noise_canceling_mode,
-            } => Some(SoundcoreDeviceState {
-                ambient_sound_mode: *ambient_sound_mode,
-                noise_canceling_mode: *noise_canceling_mode,
-                equalizer_configuration: state.equalizer_configuration,
-            }),
-            InboundPacket::Ok => None,
-        }
     }
 
     pub fn subscribe_to_state_updates(&self) -> broadcast::Receiver<SoundcoreDeviceState> {
@@ -184,12 +137,12 @@ where
                 &SetAmbientSoundModePacket::new(ambient_sound_mode, noise_canceling_mode).bytes(),
             )
             .await?;
-        state.ambient_sound_mode = ambient_sound_mode;
+        *state = state.with_ambient_sound_mode(ambient_sound_mode);
         Ok(())
     }
 
     pub async fn ambient_sound_mode(&self) -> AmbientSoundMode {
-        self.state.read().await.ambient_sound_mode
+        self.state.read().await.ambient_sound_mode()
     }
 
     pub async fn set_noise_canceling_mode(
@@ -220,12 +173,12 @@ where
                 )
                 .await?;
         }
-        state.noise_canceling_mode = noise_canceling_mode;
+        *state = state.with_noise_canceling_mode(noise_canceling_mode);
         Ok(())
     }
 
     pub async fn noise_canceling_mode(&self) -> NoiseCancelingMode {
-        self.state.read().await.noise_canceling_mode
+        self.state.read().await.noise_canceling_mode()
     }
 
     pub async fn set_equalizer_configuration(
@@ -236,12 +189,12 @@ where
         self.connection
             .write_with_response(&SetEqualizerPacket::new(configuration).bytes())
             .await?;
-        state.equalizer_configuration = configuration;
+        *state = state.with_equalizer_configuration(configuration);
         Ok(())
     }
 
     pub async fn equalizer_configuration(&self) -> EqualizerConfiguration {
-        self.state.read().await.equalizer_configuration
+        self.state.read().await.equalizer_configuration()
     }
 }
 
