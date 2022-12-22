@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_general">
+
+    <fragment
+        android:id="@+id/navigation_general"
+        android:name="com.oppzippy.openscq30.ui.general.GeneralFragment"
+        android:label="@string/general"
+        tools:layout="@layout/fragment_general" />
+
+    <fragment
+        android:id="@+id/navigation_equalizer"
+        android:name="com.oppzippy.openscq30.ui.equalizer.EqualizerFragment"
+        android:label="@string/equalizer"
+        tools:layout="@layout/fragment_equalizer" />
+</navigation>
