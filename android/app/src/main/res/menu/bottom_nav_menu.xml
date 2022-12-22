@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_general"
+        android:icon="@drawable/ic_home_black_24dp"
+        android:title="@string/general" />
+
+    <item
+        android:id="@+id/navigation_equalizer"
+        android:icon="@drawable/ic_dashboard_black_24dp"
+        android:title="@string/equalizer" />
+
+</menu>

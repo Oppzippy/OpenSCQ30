@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">OpenSCQ30</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="general">General</string>
+    <string name="equalizer">Equalizer</string>
+    <string name="ambient_sound_mode">Ambient Sound Mode</string>
+    <string name="noise_canceling_mode">Noise Canceling Mode</string>
+    <string name="normal">Normal</string>
+    <string name="transparency">Transparency</string>
+    <string name="noise_canceling">Noise Canceling</string>
+    <string name="transport">Transport</string>
+    <string name="indoor">Indoor</string>
+    <string name="outdoor">Outdoor</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="hz">%1$sHz</string>
+    <string name="profile">Profile</string>
+    <string name="refresh">Refresh</string>
+    <string name="apply">Apply</string>
+</resources>
