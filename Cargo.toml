@@ -1,5 +1,5 @@
 [workspace]
-members = ["cli", "gui", "lib"]
+members = ["cli", "gui", "lib", "android"]
 
 [profile.release]
 strip = true
