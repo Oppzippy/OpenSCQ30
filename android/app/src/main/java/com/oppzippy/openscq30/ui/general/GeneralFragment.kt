@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.oppzippy.openscq30.databinding.FragmentGeneralBinding
+import com.oppzippy.openscq30.lib.HelloWorldRust
 
 class GeneralFragment : Fragment() {
 
@@ -22,16 +23,18 @@ class GeneralFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
-        val homeViewModel =
+        val generalViewModel =
                 ViewModelProvider(this).get(GeneralViewModel::class.java)
 
         _binding = FragmentGeneralBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textHome
-        homeViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
+        val r = HelloWorldRust()
+        val textView: TextView = binding.textView
+        generalViewModel.text.observe(viewLifecycleOwner) {
+            textView.text = r.greet("test")
         }
+        textView.text = r.greet("test")
         return root
     }
 

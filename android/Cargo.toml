@@ -1,0 +1,19 @@
+[package]
+name = "openscq30_android"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+openscq30_lib = { path = "../lib" }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+rifgen = "0.1.61"
+jni-sys = "0.3.0"
+log = "0.4"
+
+[build-dependencies]
+flapigen = "0.6.0-pre13"
+rifgen = "0.1.61"
+
+[lib]
+crate-type = ["cdylib"]
