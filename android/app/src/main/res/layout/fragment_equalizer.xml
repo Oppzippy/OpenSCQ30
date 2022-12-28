@@ -1,242 +1,259 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.equalizer.EqualizerFragment">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <ScrollView
+    <data>
+        <variable
+            name="viewmodel"
+            type="com.oppzippy.openscq30.ui.equalizer.EqualizerViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        tools:context=".ui.equalizer.EqualizerFragment">
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <Spinner
-                android:id="@+id/profile"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/profile"
-                android:minHeight="32dp" />
-
-            <TableLayout
-                android:id="@+id/equalizer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <TextView
-                        android:id="@+id/band100Label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_weight="0"
-                        android:text="@string/hz" />
-
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/band100"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:contentDescription="@string/hz"
-                        android:value="0"
-                        android:valueFrom="-6.0"
-                        android:valueTo="6.0" />
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <TextView
-                        android:id="@+id/band200Label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_weight="0"
-                        android:text="@string/hz" />
-
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/band200"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:contentDescription="@string/hz"
-                        android:value="0"
-                        android:valueFrom="-6.0"
-                        android:valueTo="6.0" />
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <TextView
-                        android:id="@+id/band400Label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_weight="0"
-                        android:text="@string/hz" />
-
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/band400"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:contentDescription="@string/hz"
-                        android:value="0"
-                        android:valueFrom="-6.0"
-                        android:valueTo="6.0" />
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <TextView
-                        android:id="@+id/band800Label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_weight="0"
-                        android:text="@string/hz" />
-
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/band800"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:contentDescription="@string/hz"
-                        android:value="0"
-                        android:valueFrom="-6.0"
-                        android:valueTo="6.0" />
-                </TableRow>
-
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <TextView
-                        android:id="@+id/band1600Label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_weight="0"
-                        android:text="@string/hz" />
-
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/band1600"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:contentDescription="@string/hz"
-                        android:value="0"
-                        android:valueFrom="-6.0"
-                        android:valueTo="6.0" />
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <TextView
-                        android:id="@+id/band3200Label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_weight="0"
-                        android:text="@string/hz" />
-
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/band3200"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:contentDescription="@string/hz"
-                        android:value="0"
-                        android:valueFrom="-6.0"
-                        android:valueTo="6.0" />
-                </TableRow>
-
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <TextView
-                        android:id="@+id/band6400Label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_weight="0"
-                        android:text="@string/hz" />
-
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/band6400"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:contentDescription="@string/hz"
-                        android:value="0"
-                        android:valueFrom="-6.0"
-                        android:valueTo="6.0" />
-                </TableRow>
-
-
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <TextView
-                        android:id="@+id/band12800Label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_weight="0"
-                        android:text="@string/hz" />
-
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/band12800"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:contentDescription="@string/hz"
-                        android:value="0"
-                        android:valueFrom="-6.0"
-                        android:valueTo="6.0" />
-                </TableRow>
-            </TableLayout>
+            android:layout_height="match_parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
-                <Button
-                    android:id="@+id/apply"
-                    android:layout_width="0dp"
+                <Spinner
+                    android:id="@+id/profile"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/apply" />
+                    android:contentDescription="@string/profile"
+                    android:minHeight="32dp" />
 
-                <Button
-                    android:id="@+id/reset"
-                    android:layout_width="0dp"
+                <TableLayout
+                    android:id="@+id/equalizer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <TextView
+                            android:id="@+id/band100Label"
+                            android:labelFor="@id/band100"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_weight="0" />
+
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/band100"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:value="@={viewmodel.band100}"
+                            android:valueFrom="-60"
+                            android:stepSize="1"
+                            app:tickVisible="false"
+                            android:valueTo="60" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <TextView
+                            android:id="@+id/band200Label"
+                            android:labelFor="@id/band200"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_weight="0" />
+
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/band200"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:value="@={viewmodel.band200}"
+                            android:valueFrom="-60"
+                            android:stepSize="1"
+                            app:tickVisible="false"
+                            android:valueTo="60" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <TextView
+                            android:id="@+id/band400Label"
+                            android:labelFor="@id/band400"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_weight="0" />
+
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/band400"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:value="@={viewmodel.band400}"
+                            android:valueFrom="-60"
+                            android:stepSize="1"
+                            app:tickVisible="false"
+                            android:valueTo="60" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <TextView
+                            android:id="@+id/band800Label"
+                            android:labelFor="@id/band800"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_weight="0" />
+
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/band800"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:value="@={viewmodel.band800}"
+                            android:valueFrom="-60"
+                            android:stepSize="1"
+                            app:tickVisible="false"
+                            android:valueTo="60" />
+                    </TableRow>
+
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <TextView
+                            android:id="@+id/band1600Label"
+                            android:labelFor="@id/band1600"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_weight="0" />
+
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/band1600"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:value="@={viewmodel.band1600}"
+                            android:valueFrom="-60"
+                            android:stepSize="1"
+                            app:tickVisible="false"
+                            android:valueTo="60" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <TextView
+                            android:id="@+id/band3200Label"
+                            android:labelFor="@id/band3200"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_weight="0" />
+
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/band3200"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:value="@={viewmodel.band3200}"
+                            android:valueFrom="-60"
+                            android:stepSize="1"
+                            app:tickVisible="false"
+                            android:valueTo="60" />
+                    </TableRow>
+
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <TextView
+                            android:id="@+id/band6400Label"
+                            android:labelFor="@id/band6400"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_weight="0" />
+
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/band6400"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:value="@={viewmodel.band6400}"
+                            android:valueFrom="-60"
+                            android:stepSize="1"
+                            app:tickVisible="false"
+                            android:valueTo="60" />
+                    </TableRow>
+
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <TextView
+                            android:id="@+id/band12800Label"
+                            android:labelFor="@id/band12800"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_weight="0" />
+
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/band12800"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:value="@={viewmodel.band12800}"
+                            android:valueFrom="-60"
+                            android:stepSize="1"
+                            app:tickVisible="false"
+                            android:valueTo="60" />
+                    </TableRow>
+                </TableLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/refresh" />
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/apply"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/apply" />
+
+                    <Button
+                        android:id="@+id/refresh"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/refresh" />
+
+                </LinearLayout>
 
             </LinearLayout>
+        </ScrollView>
 
-        </LinearLayout>
-    </ScrollView>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
