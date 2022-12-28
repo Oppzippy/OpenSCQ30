@@ -1,78 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.general.GeneralFragment">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout
+    <data>
+
+        <variable
+            name="viewmodel"
+            type="com.oppzippy.openscq30.ui.general.GeneralViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        tools:context=".ui.general.GeneralFragment">
 
-        <TextView
-            android:id="@+id/textView2"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/ambient_sound_mode"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-        <RadioGroup
-            android:id="@+id/ambientSoundMode"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <RadioButton
-                android:id="@+id/normal"
+            <TextView
+                android:id="@+id/textView2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/normal" />
+                android:text="@string/ambient_sound_mode"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
-            <RadioButton
-                android:id="@+id/transparency"
+            <RadioGroup
+                android:id="@+id/ambientSoundMode"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/transparency" />
+                android:checkedButton="@={viewmodel.ambientSoundModeId}">
 
-            <RadioButton
-                android:id="@+id/noiseCanceling"
+                <RadioButton
+                    android:id="@+id/normal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/normal" />
+
+                <RadioButton
+                    android:id="@+id/transparency"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/transparency" />
+
+                <RadioButton
+                    android:id="@+id/noiseCanceling"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/noise_canceling" />
+            </RadioGroup>
+
+            <TextView
+                android:id="@+id/textView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/noise_canceling" />
-        </RadioGroup>
+                android:text="@string/noise_canceling_mode"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/noise_canceling_mode"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
-
-        <RadioGroup
-            android:id="@+id/noiseCancelingMode"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <RadioButton
-                android:id="@+id/transport"
+            <RadioGroup
+                android:id="@+id/noiseCancelingMode"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/transport" />
+                android:checkedButton="@={viewmodel.noiseCancelingModeId}">
 
-            <RadioButton
-                android:id="@+id/indoor"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/indoor" />
+                <RadioButton
+                    android:id="@+id/transport"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/transport" />
 
-            <RadioButton
-                android:id="@+id/outdoor"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/outdoor" />
-        </RadioGroup>
+                <RadioButton
+                    android:id="@+id/indoor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/indoor" />
 
-    </LinearLayout>
+                <RadioButton
+                    android:id="@+id/outdoor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/outdoor" />
+            </RadioGroup>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

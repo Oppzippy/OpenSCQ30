@@ -1,45 +1,52 @@
 package com.oppzippy.openscq30.ui.general
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.databinding.FragmentGeneralBinding
-import com.oppzippy.openscq30.lib.HelloWorldRust
+import com.oppzippy.openscq30.models.AmbientSoundMode
+import com.oppzippy.openscq30.models.NoiseCancelingMode
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 
-class GeneralFragment : Fragment() {
-
-    private var _binding: FragmentGeneralBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
-    private val binding get() = _binding!!
+class GeneralFragment : Fragment(R.layout.fragment_general) {
+    private lateinit var viewModel: GeneralViewModel
+    lateinit var ambientSoundMode: StateFlow<AmbientSoundMode>
+    lateinit var noiseCancelingMode: StateFlow<NoiseCancelingMode>
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
-    ): View {
-        val generalViewModel =
-                ViewModelProvider(this).get(GeneralViewModel::class.java)
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val binding: FragmentGeneralBinding = DataBindingUtil.inflate(
+            inflater,
+            R.layout.fragment_general,
+            container,
+            false
+        )
+        viewModel = ViewModelProvider(this)[GeneralViewModel::class.java]
+        binding.viewmodel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
 
-        _binding = FragmentGeneralBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+        ambientSoundMode = viewModel.ambientSoundMode
+        noiseCancelingMode = viewModel.noiseCancelingMode
 
-        val r = HelloWorldRust()
-        val textView: TextView = binding.textView
-        generalViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = r.greet("test")
-        }
-        textView.text = r.greet("test")
-        return root
+        return binding.root
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    fun setAmbientSoundMode(ambientSoundMode: AmbientSoundMode) {
+        viewModel.setAmbientSoundMode(ambientSoundMode)
+    }
+
+    fun setNoiseCancelingMode(noiseCancelingMode: NoiseCancelingMode) {
+        viewModel.setNoiseCancelingMode(noiseCancelingMode)
     }
 }
