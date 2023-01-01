@@ -29,7 +29,8 @@ fn main() {
         )
         .use_null_annotation_from_package("androidx.annotation".to_string()),
     ))
-    .rustfmt_bindings(true);
+    .rustfmt_bindings(true)
+    .remove_not_generated_files_from_output_directory(true);
     swig_gen.expand("android bindings", &glue_file, out_dir.join("java_glue.rs"));
     println!("cargo:rerun-if-changed=src");
 }

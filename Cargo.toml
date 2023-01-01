@@ -1,5 +1,6 @@
 [workspace]
 members = ["cli", "gui", "lib", "android"]
+exclude = ["jni-utils-rs"]
 
 [profile.release]
 strip = true

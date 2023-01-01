@@ -15,7 +15,7 @@
     <string name="outdoor">Outdoor</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="hz">%1$sHz</string>
+    <string name="hz">%1$dHz</string>
     <string name="profile">Profile</string>
     <string name="refresh">Refresh</string>
     <string name="apply">Apply</string>
