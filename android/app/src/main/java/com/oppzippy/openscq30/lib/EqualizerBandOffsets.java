@@ -2,19 +2,19 @@
 package com.oppzippy.openscq30.lib;
 import androidx.annotation.NonNull;
 
-public final class HelloWorldRust {
+public final class EqualizerBandOffsets {
 
-    public HelloWorldRust() {
-        mNativeObj = init();
+    public EqualizerBandOffsets(@NonNull byte [] volume_offsets) {
+        mNativeObj = init(volume_offsets);
     }
-    private static native long init();
+    private static native long init(byte [] volume_offsets);
 
-    public final @NonNull String greet(@NonNull String to) {
-        String ret = do_greet(mNativeObj, to);
+    public final byte [] volumeOffsets() {
+        byte [] ret = do_volumeOffsets(mNativeObj);
 
         return ret;
     }
-    private static native @NonNull String do_greet(long self, @NonNull String to);
+    private static native byte [] do_volumeOffsets(long self);
 
     public synchronized void delete() {
         if (mNativeObj != 0) {
@@ -32,7 +32,7 @@ public final class HelloWorldRust {
         }
     }
     private static native void do_delete(long me);
-    /*package*/ HelloWorldRust(InternalPointerMarker marker, long ptr) {
+    /*package*/ EqualizerBandOffsets(InternalPointerMarker marker, long ptr) {
         assert marker == InternalPointerMarker.RAW_PTR;
         this.mNativeObj = ptr;
     }

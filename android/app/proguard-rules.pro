@@ -19,3 +19,7 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+#btleplug resources
+-keep class com.nonpolynomial.** { *; }
+-keep class io.github.gedgygedgy.** { *; }
