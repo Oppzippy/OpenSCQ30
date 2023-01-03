@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         System.loadLibrary("openscq30_android")
+        BtleplugInitializer().init()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

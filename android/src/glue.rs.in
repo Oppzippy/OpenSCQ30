@@ -2,6 +2,13 @@
 use crate::*;
 use jni_sys::*;
 foreign_enum!(
+	enum AmbientSoundMode {
+		NoiseCanceling = AmbientSoundMode::NoiseCanceling,
+		Transparency = AmbientSoundMode::Transparency,
+		Normal = AmbientSoundMode::Normal,
+	}
+);
+foreign_enum!(
 	enum PresetEqualizerProfile {
 		SoundcoreSignature = PresetEqualizerProfile::SoundcoreSignature,
 		Acoustic = PresetEqualizerProfile::Acoustic,
@@ -28,17 +35,15 @@ foreign_enum!(
 	}
 );
 foreign_enum!(
-	enum AmbientSoundMode {
-		NoiseCanceling = AmbientSoundMode::NoiseCanceling,
-		Transparency = AmbientSoundMode::Transparency,
-		Normal = AmbientSoundMode::Normal,
-	}
-);
-foreign_enum!(
 	enum NoiseCancelingMode {
 		Transport = NoiseCancelingMode::Transport,
 		Outdoor = NoiseCancelingMode::Outdoor,
 		Indoor = NoiseCancelingMode::Indoor,
+	}
+);
+foreign_class!(
+	class Init {
+		fn Init::logging(); alias logging;
 	}
 );
 foreign_class!(
@@ -77,10 +82,5 @@ foreign_class!(
 		constructor SoundcoreDeviceRegistry::new()->SoundcoreDeviceRegistry;
 		fn SoundcoreDeviceRegistry::refresh_devices(& self)->Result<(),String>; alias refreshDevices;
 		fn SoundcoreDeviceRegistry::devices(& self)->Vec<SoundcoreDevice>; alias devices;
-	}
-);
-foreign_class!(
-	class Init {
-		fn Init::logging(); alias logging;
 	}
 );

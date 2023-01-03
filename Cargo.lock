@@ -1064,7 +1064,9 @@ name = "openscq30_android"
 version = "0.1.0"
 dependencies = [
  "android_logger",
+ "btleplug",
  "flapigen",
+ "jni",
  "jni-sys",
  "log",
  "openscq30_lib",

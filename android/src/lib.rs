@@ -1,4 +1,5 @@
 mod ambient_sound_mode;
+mod btleplug_init;
 mod equalizer_band_offsets;
 mod equalizer_configuration;
 mod java_glue;
@@ -6,6 +7,7 @@ mod noise_canceling_mode;
 mod preset_equalizer_profile;
 mod soundcore_device;
 mod soundcore_device_registry;
+
 use log::Level;
 use rifgen::rifgen_attr::generate_interface;
 
