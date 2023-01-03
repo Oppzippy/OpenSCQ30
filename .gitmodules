@@ -1,6 +1,3 @@
-[submodule "jni-utils-rs"]
-	path = jni-utils-rs
-	url = git@github.com:deviceplug/jni-utils-rs.git
 [submodule "btleplug"]
 	path = btleplug
-	url = git@github.com:deviceplug/btleplug.git
+	url = git@github.com:Oppzippy/btleplug.git
