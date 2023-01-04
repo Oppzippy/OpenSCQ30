@@ -1,8 +1,12 @@
 [workspace]
 members = ["cli", "gui", "lib", "android"]
-exclude = ["jni-utils-rs"]
 
 [profile.release]
 strip = true
 lto = true
 codegen-units = 1
+
+[profile.release-debuginfo]
+inherits = "release"
+strip = false
+debug = 2
