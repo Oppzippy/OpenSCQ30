@@ -4,3 +4,7 @@ updates:
     package-ecosystem: cargo
     schedule:
       interval: weekly
+  - directory: /android
+    package-ecosystem: gradle
+    schedule:
+      interval: weekly
