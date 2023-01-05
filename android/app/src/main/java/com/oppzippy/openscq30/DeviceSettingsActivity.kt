@@ -1,36 +1,21 @@
 package com.oppzippy.openscq30
 
 import android.os.Bundle
-import android.util.Log
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
-import com.oppzippy.openscq30.databinding.ActivityMainBinding
-import com.oppzippy.openscq30.lib.Init
-import com.oppzippy.openscq30.lib.SoundcoreDeviceRegistry
+import com.oppzippy.openscq30.databinding.ActivityDeviceSettingsBinding
 import com.oppzippy.openscq30.ui.equalizer.EqualizerFragment
 import com.oppzippy.openscq30.ui.general.GeneralFragment
 
-class MainActivity : AppCompatActivity() {
+class DeviceSettingsActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
+    private lateinit var binding: ActivityDeviceSettingsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        System.loadLibrary("openscq30_android")
-        BtleplugInitializer().init()
-        binding = ActivityMainBinding.inflate(layoutInflater)
+        binding = ActivityDeviceSettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        Init.logging()
-        val reg = SoundcoreDeviceRegistry()
-        reg.refreshDevices()
-        Log.i("devices", reg.devices().size.toString())
 
         val general = GeneralFragment()
         val equalizer = EqualizerFragment()

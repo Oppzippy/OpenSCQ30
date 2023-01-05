@@ -14,4 +14,4 @@
 .cxx
 local.properties
 /.cargo
-/src/glue.rs.in
+/glue.rs.in

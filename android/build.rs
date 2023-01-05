@@ -14,10 +14,10 @@ fn main() {
     let java_lib_dir = java_source_dir.join("lib");
 
     let rust_src_dir = Path::new("src");
-    let glue_file = rust_src_dir.join("glue.rs.in");
+    let glue_file = Path::new("glue.rs.in");
 
     let out_dir = env::var("OUT_DIR").unwrap();
-    let out_dir = Path::new(&out_dir);
+    let out_file = Path::new(&out_dir).join("java_glue.rs");
 
     rifgen::Generator::new(TypeCases::CamelCase, Language::Java, &rust_src_dir)
         .generate_interface(&glue_file);
@@ -31,6 +31,6 @@ fn main() {
     ))
     .rustfmt_bindings(true)
     .remove_not_generated_files_from_output_directory(true);
-    swig_gen.expand("android bindings", &glue_file, out_dir.join("java_glue.rs"));
+    swig_gen.expand("android bindings", &glue_file, &out_file);
     println!("cargo:rerun-if-changed=src");
 }
