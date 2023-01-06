@@ -21,6 +21,19 @@ public final class SoundcoreDeviceRegistry {
     }
     private static native @NonNull SoundcoreDevice [] do_devices(long self);
 
+    public final @NonNull java.util.Optional<SoundcoreDevice> deviceByMacAddress(@NonNull String mac_address) {
+        long ret = do_deviceByMacAddress(mNativeObj, mac_address);
+        java.util.Optional<SoundcoreDevice> convRet;
+        if (ret != 0) {
+            convRet = java.util.Optional.of(new SoundcoreDevice(InternalPointerMarker.RAW_PTR, ret));
+        } else {
+            convRet = java.util.Optional.empty();
+        }
+
+        return convRet;
+    }
+    private static native long do_deviceByMacAddress(long self, @NonNull String mac_address);
+
     public synchronized void delete() {
         if (mNativeObj != 0) {
             do_delete(mNativeObj);

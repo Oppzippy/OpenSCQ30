@@ -5,12 +5,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.oppzippy.openscq30.R
 
-class DeviceListItemViewHolder : ViewHolder {
-    val nameView: TextView
-    val macAddressView: TextView
+class DeviceListItemViewHolder(itemView: View) : ViewHolder(itemView) {
+    val nameView: TextView = itemView.findViewById(R.id.name)
+    val macAddressView: TextView = itemView.findViewById(R.id.macAddress)
 
-    constructor(itemView: View) : super(itemView) {
-        nameView = itemView.findViewById(R.id.name)
-        macAddressView = itemView.findViewById(R.id.macAddress)
+    fun setOnClickListener(listener: View.OnClickListener) {
+        itemView.setOnClickListener(listener)
     }
 }

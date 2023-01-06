@@ -17,6 +17,7 @@ class DeviceListItemAdapter(private val context: Context, private val items: Lis
     override fun onBindViewHolder(holder: DeviceListItemViewHolder, position: Int) {
         holder.nameView.text = items[position].name
         holder.macAddressView.text = items[position].macAddress
+        holder.setOnClickListener(items[position].onClickListener)
     }
 
     override fun getItemCount(): Int {
