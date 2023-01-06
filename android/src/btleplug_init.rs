@@ -5,7 +5,7 @@ use std::ffi::c_void;
 // separate from the flapigen code
 #[cfg(target_os = "android")]
 #[no_mangle]
-pub extern "C" fn Java_com_oppzippy_openscq30_BtleplugInitializer_init(
+pub extern "C" fn Java_com_oppzippy_openscq30_BtleplugInitializerKt_initializeBtleplug(
     env: jni::JNIEnv,
     _res: *const c_void,
 ) {
