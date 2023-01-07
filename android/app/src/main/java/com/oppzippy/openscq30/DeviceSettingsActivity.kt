@@ -1,39 +1,53 @@
 package com.oppzippy.openscq30
 
+import android.Manifest
+import android.bluetooth.BluetoothManager
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.whenCreated
+import androidx.lifecycle.whenStarted
 import com.oppzippy.openscq30.databinding.ActivityDeviceSettingsBinding
-import com.oppzippy.openscq30.lib.EqualizerBandOffsets
-import com.oppzippy.openscq30.lib.EqualizerConfiguration
-import com.oppzippy.openscq30.lib.PresetEqualizerProfile
-import com.oppzippy.openscq30.lib.SoundcoreDevice
+import com.oppzippy.openscq30.soundcoredevice.SoundcoreDevice
 import com.oppzippy.openscq30.ui.equalizer.EqualizerFragment
 import com.oppzippy.openscq30.ui.general.GeneralFragment
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlin.coroutines.coroutineContext
-import kotlin.jvm.optionals.getOrNull
 
 class DeviceSettingsActivity : AppCompatActivity() {
 
-    private lateinit var soundcoreDevice: SoundcoreDevice
     private lateinit var binding: ActivityDeviceSettingsBinding
+    private lateinit var device: SoundcoreDevice
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val macAddress = intent.getStringExtra("macAddress")
-
-        val maybeDevice = macAddress?.let {
-            soundcoreDeviceRegistry.deviceByMacAddress(macAddress)
-        }?.getOrNull()
-        if (maybeDevice != null) {
-            soundcoreDevice = maybeDevice
-        } else {
+        val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
             finish()
             return
         }
+        val bluetoothDevice = bluetoothManager.adapter.bondedDevices.find { it.address.equals(macAddress) }
+        if (bluetoothDevice == null) {
+            finish()
+            return
+        }
+        val soundcoreDevice = SoundcoreDevice(applicationContext, bluetoothDevice)
+        this.device = soundcoreDevice
 
         binding = ActivityDeviceSettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -41,34 +55,16 @@ class DeviceSettingsActivity : AppCompatActivity() {
         val general = GeneralFragment()
         val equalizer = EqualizerFragment()
 
-        general.setAmbientSoundMode(soundcoreDevice.ambientSoundMode())
-        general.setNoiseCancelingMode(soundcoreDevice.noiseCancelingMode())
-        equalizer.setBandOffsets(
-            soundcoreDevice.equalizerConfiguration().bandOffsets().volumeOffsets()
-                .map { it.toInt() }.toIntArray()
-        )
-
-        lifecycleScope.launch {
-            general.ambientSoundMode.collect {
-                soundcoreDevice.setAmbientSoundMode(it)
-            }
-        }
-        lifecycleScope.launch {
-            general.noiseCancelingMode.collect {
-                soundcoreDevice.setNoiseCancelingMode(it)
-            }
-        }
-        lifecycleScope.launch {
-            equalizer.bandOffsets.collect { bandOffsets ->
-                soundcoreDevice.setEqualizerConfiguration(
-                    EqualizerConfiguration(
-                        EqualizerBandOffsets(bandOffsets.map { it.toByte() }.toByteArray())
-                    )
-                )
-            }
-        }
 
         setCurrentFragment(general)
+
+        this.lifecycleScope.launch {
+            general.lifecycle.whenStarted {
+                general.ambientSoundMode.collect {
+                    soundcoreDevice.setAmbientSoundMode(it)
+                }
+            }
+        }
 
         binding.navView.setOnItemSelectedListener {
             when (it.itemId) {
@@ -81,7 +77,6 @@ class DeviceSettingsActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        soundcoreDevice.delete()
     }
 
     private fun setCurrentFragment(fragment: Fragment) {

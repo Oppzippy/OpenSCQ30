@@ -1,8 +1,9 @@
 use openscq30_lib::packets::structures;
 use rifgen::rifgen_attr::generate_interface;
 
-use crate::{EqualizerBandOffsets, PresetEqualizerProfile};
+use super::{EqualizerBandOffsets, PresetEqualizerProfile};
 
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub struct EqualizerConfiguration {
     inner: structures::EqualizerConfiguration,
 }
@@ -27,8 +28,8 @@ impl EqualizerConfiguration {
     }
 
     #[generate_interface]
-    pub fn profile_id(&self) -> u16 {
-        self.inner.profile_id()
+    pub fn profile_id(&self) -> i32 {
+        self.inner.profile_id().into()
     }
 
     #[generate_interface]

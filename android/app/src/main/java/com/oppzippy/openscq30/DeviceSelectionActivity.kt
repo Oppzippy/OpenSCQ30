@@ -1,12 +1,17 @@
 package com.oppzippy.openscq30
 
+import android.Manifest
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.oppzippy.openscq30.databinding.ActivityDeviceSelectionBinding
 import com.oppzippy.openscq30.lib.Init
@@ -21,7 +26,6 @@ class DeviceSelectionActivity : AppCompatActivity() {
 
         System.loadLibrary("openscq30_android")
         Init.logging()
-        initializeBtleplug()
 
         binding = ActivityDeviceSelectionBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -44,15 +48,30 @@ class DeviceSelectionActivity : AppCompatActivity() {
     }
 
     private fun refreshDevices() {
-        soundcoreDeviceRegistry.refreshDevices()
-        val items = soundcoreDeviceRegistry.devices().map { device ->
-            return@map DeviceListItem(device.name(), device.macAddress(), View.OnClickListener {
-                val intent = Intent(applicationContext, DeviceSettingsActivity::class.java)
-                intent.putExtra("macAddress", device.macAddress())
-                startActivity(intent)
-            })
-        }.toList()
-        binding.deviceSelectionListing.adapter = DeviceListItemAdapter(applicationContext, items)
+        val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
+        val adapter: BluetoothAdapter? = bluetoothManager.adapter
+        if (adapter != null) {
+            val items = if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.BLUETOOTH_CONNECT
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                adapter.bondedDevices.map { device ->
+                    return@map DeviceListItem(device.name, device.address, View.OnClickListener {
+                        val intent = Intent(applicationContext, DeviceSettingsActivity::class.java)
+                        intent.putExtra("macAddress", device.address)
+                        startActivity(intent)
+                    })
+                }.toList()
+            } else {
+                Log.w("device-selection", "no permission")
+                ArrayList()
+            }
+            binding.deviceSelectionListing.adapter =
+                DeviceListItemAdapter(applicationContext, items)
+        } else {
+            Log.w("device-selection", "no bluetooth adapter")
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

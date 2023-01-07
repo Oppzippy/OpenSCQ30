@@ -1,6 +1,7 @@
 use openscq30_lib::packets::structures;
 use rifgen::rifgen_attr::generate_interface;
 
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub struct EqualizerBandOffsets {
     inner: structures::EqualizerBandOffsets,
 }

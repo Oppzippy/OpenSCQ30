@@ -2,6 +2,7 @@ use openscq30_lib::packets::structures;
 use rifgen::rifgen_attr::generate_interface;
 
 #[generate_interface]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum PresetEqualizerProfile {
     SoundcoreSignature,
     Acoustic,

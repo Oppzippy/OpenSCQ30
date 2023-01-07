@@ -2,6 +2,7 @@ use openscq30_lib::packets::structures;
 use rifgen::rifgen_attr::generate_interface;
 
 #[generate_interface]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum AmbientSoundMode {
     NoiseCanceling,
     Transparency,
