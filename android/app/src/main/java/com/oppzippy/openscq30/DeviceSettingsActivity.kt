@@ -7,7 +7,6 @@ import com.oppzippy.openscq30.databinding.ActivityDeviceSettingsBinding
 import com.oppzippy.openscq30.lib.SoundcoreDevice
 import com.oppzippy.openscq30.ui.equalizer.EqualizerFragment
 import com.oppzippy.openscq30.ui.general.GeneralFragment
-import kotlinx.coroutines.flow.subscribe
 import kotlin.jvm.optionals.getOrNull
 
 class DeviceSettingsActivity : AppCompatActivity() {
@@ -44,6 +43,10 @@ class DeviceSettingsActivity : AppCompatActivity() {
             }
             true
         }
+    }
+
+    override fun onDestroy() {
+        soundcoreDevice.delete()
     }
 
     private fun setCurrentFragment(fragment: Fragment) {

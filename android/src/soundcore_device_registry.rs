@@ -62,7 +62,7 @@ impl SoundcoreDeviceRegistry {
     }
 
     #[generate_interface]
-    pub async fn device_by_mac_address(&self, mac_address: &String) -> Option<SoundcoreDevice> {
+    pub fn device_by_mac_address(&self, mac_address: &String) -> Option<SoundcoreDevice> {
         self.runtime.block_on(async {
             self.device_registry
                 .device_by_mac_address(mac_address)

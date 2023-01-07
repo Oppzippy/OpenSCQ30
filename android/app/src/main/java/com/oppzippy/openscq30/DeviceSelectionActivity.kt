@@ -4,13 +4,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.oppzippy.openscq30.databinding.ActivityDeviceSelectionBinding
 import com.oppzippy.openscq30.lib.Init
-import com.oppzippy.openscq30.lib.SoundcoreDevice
-import com.oppzippy.openscq30.lib.SoundcoreDeviceRegistry
 import com.oppzippy.openscq30.ui.devicelistitem.DeviceListItem
 import com.oppzippy.openscq30.ui.devicelistitem.DeviceListItemAdapter
 
@@ -32,6 +31,16 @@ class DeviceSelectionActivity : AppCompatActivity() {
         refreshDevices()
 
         binding.deviceSelectionListing.layoutManager = LinearLayoutManager(this)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.refresh -> {
+                refreshDevices()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private fun refreshDevices() {
