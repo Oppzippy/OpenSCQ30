@@ -1,19 +1,16 @@
 package com.oppzippy.openscq30.ui.general
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.databinding.FragmentGeneralBinding
-import com.oppzippy.openscq30.models.AmbientSoundMode
-import com.oppzippy.openscq30.models.NoiseCancelingMode
-import kotlinx.coroutines.*
+import com.oppzippy.openscq30.lib.AmbientSoundMode
+import com.oppzippy.openscq30.lib.NoiseCancelingMode
 import kotlinx.coroutines.flow.*
 
 class GeneralFragment : Fragment(R.layout.fragment_general) {

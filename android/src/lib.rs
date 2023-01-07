@@ -7,9 +7,11 @@ mod noise_canceling_mode;
 mod preset_equalizer_profile;
 mod soundcore_device;
 mod soundcore_device_registry;
+mod tokio_runtime;
 
-use log::Level;
 use rifgen::rifgen_attr::generate_interface;
+use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
 
 pub use crate::ambient_sound_mode::*;
 pub use crate::equalizer_band_offsets::*;
@@ -25,10 +27,9 @@ struct Init {}
 impl Init {
     #[generate_interface]
     pub fn logging() {
-        android_logger::init_once(
-            android_logger::Config::default()
-                .with_min_level(Level::Trace)
-                .with_tag("openscq30-lib"),
-        )
+        tracing_subscriber::registry()
+            .with(tracing_android::layer("openscq30-lib").unwrap())
+            .try_init()
+            .unwrap();
     }
 }

@@ -1,4 +1,6 @@
 #[cfg(target_os = "android")]
+use crate::tokio_runtime;
+#[cfg(target_os = "android")]
 use std::ffi::c_void;
 
 // btleplug expects a JNIEnv from the "jni" library, but flapigen uses "jni-sys", so this needs to be completely
@@ -9,5 +11,7 @@ pub extern "C" fn Java_com_oppzippy_openscq30_BtleplugInitializerKt_initializeBt
     env: jni::JNIEnv,
     _res: *const c_void,
 ) {
-    btleplug::platform::init(&env).unwrap()
+    jni_utils::init(&env);
+    btleplug::platform::init(&env).unwrap();
+    tokio_runtime::create_runtime(&env);
 }
