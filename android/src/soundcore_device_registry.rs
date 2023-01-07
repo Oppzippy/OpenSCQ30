@@ -1,16 +1,12 @@
-use std::sync::Arc;
-
 use openscq30_lib::{
     api,
     soundcore_bluetooth::btleplug::{self, BtlePlugSoundcoreDeviceConnectionRegistry},
 };
 use rifgen::rifgen_attr::generate_interface;
-use tokio::runtime::Runtime;
 
-use crate::SoundcoreDevice;
+use crate::{tokio_runtime, SoundcoreDevice};
 
 pub struct SoundcoreDeviceRegistry {
-    runtime: Arc<Runtime>,
     device_registry: api::SoundcoreDeviceRegistry<BtlePlugSoundcoreDeviceConnectionRegistry>,
 }
 
@@ -19,15 +15,7 @@ impl SoundcoreDeviceRegistry {
     pub fn new() -> SoundcoreDeviceRegistry {
         // Lifetime specifiers don't work well with flapigen, so we can't pass down references to a runtime handle.
         // Throwing an Arc at it solves the problem.
-        let runtime = Arc::new(
-            tokio::runtime::Builder::new_multi_thread()
-                .worker_threads(1)
-                .enable_all()
-                .build()
-                .unwrap_or_else(|err| panic!("failed to start tokio runtime: {err}")),
-        );
-
-        let device_registry = runtime
+        let device_registry = tokio_runtime::get_handle()
             .block_on(async {
                 let connection_registry = btleplug::new_connection_registry()
                     .await
@@ -36,38 +24,35 @@ impl SoundcoreDeviceRegistry {
             })
             .unwrap();
 
-        Self {
-            device_registry,
-            runtime,
-        }
+        Self { device_registry }
     }
 
     #[generate_interface]
     pub fn refresh_devices(&self) -> Result<(), String> {
-        self.runtime
+        tokio_runtime::get_handle()
             .block_on(async { self.device_registry.refresh_devices().await })
             .map_err(|err| err.to_string())
     }
 
     #[generate_interface]
     pub fn devices(&self) -> Vec<SoundcoreDevice> {
-        self.runtime.block_on(async {
+        tokio_runtime::get_handle().block_on(async {
             self.device_registry
                 .devices()
                 .await
                 .into_iter()
-                .map(|device| SoundcoreDevice::new(device, self.runtime.to_owned()))
+                .map(|device| SoundcoreDevice::new(device))
                 .collect()
         })
     }
 
     #[generate_interface]
     pub fn device_by_mac_address(&self, mac_address: &String) -> Option<SoundcoreDevice> {
-        self.runtime.block_on(async {
+        tokio_runtime::get_handle().block_on(async {
             self.device_registry
                 .device_by_mac_address(mac_address)
                 .await
-                .map(|device| SoundcoreDevice::new(device, self.runtime.to_owned()))
+                .map(|device| SoundcoreDevice::new(device))
         })
     }
 }

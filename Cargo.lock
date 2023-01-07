@@ -118,7 +118,7 @@ dependencies = [
  "dbus",
  "futures",
  "jni",
- "jni-utils",
+ "jni-utils 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc",
  "log",
  "objc",
@@ -895,6 +895,20 @@ checksum = "8eaf4bc02d17cbdd7ff4c7438cafcdf7fb9a4613313ad11b4f8fefe7d3fa0130"
 [[package]]
 name = "jni-utils"
 version = "0.1.0"
+dependencies = [
+ "dashmap",
+ "futures",
+ "jni",
+ "lazy_static",
+ "log",
+ "once_cell",
+ "static_assertions",
+ "uuid",
+]
+
+[[package]]
+name = "jni-utils"
+version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0d3a00638470bedd9bcbea85292bef2207e6db984079db0bd70148a449cdb457"
 dependencies = [
@@ -1055,9 +1069,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.16.0"
+version = "1.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86f0b0d4bf799edbc74508c1e8bf170ff5f41238e5f8225603ca7caaae2b7860"
+checksum = "6f61fba1741ea2b3d6a1e3178721804bb716a68a6aeba1149b5d52e3d464ea66"
 
 [[package]]
 name = "openscq30_android"
@@ -1068,12 +1082,17 @@ dependencies = [
  "flapigen",
  "jni",
  "jni-sys",
+ "jni-utils 0.1.0",
+ "lazy_static",
  "log",
+ "once_cell",
  "openscq30_lib",
  "rifgen",
  "thiserror",
  "tokio",
  "tracing",
+ "tracing-android",
+ "tracing-subscriber",
 ]
 
 [[package]]
@@ -1613,10 +1632,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ce8c33a8d48bd45d624a6e523445fd21ec13d3653cd51f681abf67418f54eb8"
 dependencies = [
  "cfg-if",
- "log",
  "pin-project-lite",
  "tracing-attributes",
  "tracing-core",
+]
+
+[[package]]
+name = "tracing-android"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "12612be8f868a09c0ceae7113ff26afe79d81a24473a393cb9120ece162e86c0"
+dependencies = [
+ "android_log-sys",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]
