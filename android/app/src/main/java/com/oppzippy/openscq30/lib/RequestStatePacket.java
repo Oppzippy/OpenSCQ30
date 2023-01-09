@@ -9,12 +9,12 @@ public final class RequestStatePacket {
     }
     private static native long init();
 
-    public final short [] bytes() {
-        short [] ret = do_bytes(mNativeObj);
+    public final byte [] bytes() {
+        byte [] ret = do_bytes(mNativeObj);
 
         return ret;
     }
-    private static native short [] do_bytes(long self);
+    private static native byte [] do_bytes(long self);
 
     public synchronized void delete() {
         if (mNativeObj != 0) {

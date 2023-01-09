@@ -9,7 +9,7 @@ public final class AmbientSoundModeUpdatePacket {
     }
     private static native long init() throws Exception;
 
-    public static @NonNull java.util.Optional<AmbientSoundModeUpdatePacket> fromBytes(@NonNull short [] bytes) throws Exception {
+    public static @NonNull java.util.Optional<AmbientSoundModeUpdatePacket> fromBytes(@NonNull byte [] bytes) throws Exception {
         long ret = do_fromBytes(bytes);
         java.util.Optional<AmbientSoundModeUpdatePacket> convRet;
         if (ret != 0) {
@@ -20,7 +20,7 @@ public final class AmbientSoundModeUpdatePacket {
 
         return convRet;
     }
-    private static native long do_fromBytes(short [] bytes) throws Exception;
+    private static native long do_fromBytes(byte [] bytes) throws Exception;
 
     public final AmbientSoundMode ambientSoundMode() {
         int ret = do_ambientSoundMode(mNativeObj);

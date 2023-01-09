@@ -17,8 +17,8 @@ impl StateUpdatePacket {
     }
 
     #[generate_interface]
-    pub fn from_bytes(bytes: &[i16]) -> Result<Option<StateUpdatePacket>, String> {
-        let bytes = type_conversion::i16_slice_to_u8_vec(bytes).map_err(|err| err.to_string())?;
+    pub fn from_bytes(bytes: &[i8]) -> Result<Option<StateUpdatePacket>, String> {
+        let bytes = type_conversion::i8_slice_to_u8_slice(bytes);
         Ok(
             openscq30_lib::packets::inbound::StateUpdatePacket::new(&bytes)
                 .map(|packet| packet.into()),
@@ -46,5 +46,11 @@ impl From<openscq30_lib::packets::inbound::StateUpdatePacket> for StateUpdatePac
         Self {
             packet: Some(packet),
         }
+    }
+}
+
+impl From<StateUpdatePacket> for openscq30_lib::packets::inbound::StateUpdatePacket {
+    fn from(value: StateUpdatePacket) -> Self {
+        value.packet.unwrap()
     }
 }

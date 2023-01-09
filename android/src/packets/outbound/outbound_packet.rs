@@ -1,3 +1,3 @@
 pub trait OutboundPacket {
-    fn bytes(&self) -> Vec<i16>;
+    fn bytes(&self) -> Vec<i8>;
 }

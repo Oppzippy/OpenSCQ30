@@ -1,97 +1,64 @@
 package com.oppzippy.openscq30.soundcoredevice
 
-import android.Manifest
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
-import android.bluetooth.BluetoothGattCallback
-import android.bluetooth.BluetoothGattCharacteristic
-import android.bluetooth.BluetoothGattService
-import android.bluetooth.BluetoothProfile
 import android.content.Context
-import android.content.pm.PackageManager
-import android.util.Log
-import androidx.core.app.ActivityCompat
 import com.oppzippy.openscq30.lib.AmbientSoundMode
+import com.oppzippy.openscq30.lib.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.SetAmbientSoundModePacket
-import java.util.*
+import com.oppzippy.openscq30.lib.SetEqualizerPacket
+import com.oppzippy.openscq30.lib.SoundcoreDeviceState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
-class SoundcoreDevice(private val context: Context, private val bluetoothDevice: BluetoothDevice) {
-    private lateinit var gatt: BluetoothGatt
-    private var characteristic: BluetoothGattCharacteristic? = null
-    init {
-        if (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.BLUETOOTH_CONNECT
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            gatt = bluetoothDevice.connectGatt(context, true, object : BluetoothGattCallback() {
-                override fun onConnectionStateChange(
-                    gatt: BluetoothGatt?,
-                    status: Int,
-                    newState: Int
-                ) {
-                    Log.i("state", (gatt != null).toString())
-                    Log.i("state", newState.toString())
-                    if (newState == BluetoothProfile.STATE_CONNECTED) {
-                        if (ActivityCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.BLUETOOTH_CONNECT
-                            ) != PackageManager.PERMISSION_GRANTED
-                        ) {
-                            // TODO: Consider calling
-                            //    ActivityCompat#requestPermissions
-                            // here to request the missing permissions, and then overriding
-                            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                            //                                          int[] grantResults)
-                            // to handle the case where the user grants the permission. See the documentation
-                            // for ActivityCompat#requestPermissions for more details.
-                            return
-                        }
-                        gatt?.discoverServices()
-                    }
-                }
-                override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
-                    Log.i("onServicesDiscovered", (gatt == null).toString())
-                    if (gatt != null) {
-                        val service = gatt.getService(UUID.fromString("011cf5da-0000-1000-8000-00805f9b34fb"))
-                        Log.i("found-service?", (service != null).toString())
-                        characteristic = service.getCharacteristic(UUID.fromString("00007777-0000-1000-8000-00805f9b34fb"))
-                        Log.i("found-characteristic?", (characteristic != null).toString())
-                    }
-                    super.onServicesDiscovered(gatt, status)
-                }
-            }, BluetoothDevice.TRANSPORT_LE)
+@SuppressLint("MissingPermission")
+class SoundcoreDevice(context: Context, bluetoothDevice: BluetoothDevice) {
+    private val gatt: BluetoothGatt
+    private var callbacks: SoundcoreDeviceCallbacks? = null
+
+    private val mutableState: MutableStateFlow<SoundcoreDeviceState?> = MutableStateFlow(null)
+    val state: StateFlow<SoundcoreDeviceState?>
+        get() {
+            return mutableState
         }
+
+    init {
+        callbacks = SoundcoreDeviceCallbacks(mutableState)
+        gatt = bluetoothDevice.connectGatt(context, true, callbacks, BluetoothDevice.TRANSPORT_LE)
         gatt.connect()
     }
 
-   fun setAmbientSoundMode(mode: AmbientSoundMode) {
-       val characteristic = characteristic
-        if (characteristic != null) {
-            characteristic.value = SetAmbientSoundModePacket(mode, NoiseCancelingMode.Transport).bytes().map { it.toByte() }.toByteArray()
-            if (ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.BLUETOOTH_CONNECT
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return
-            }
-            gatt.writeCharacteristic(characteristic)
+    fun setAmbientSoundMode(ambientSoundMode: AmbientSoundMode) {
+        val callbacks = callbacks
+        val state = state.value
+        if (callbacks != null && state != null) {
+            val packet = SetAmbientSoundModePacket(ambientSoundMode, state.noiseCancelingMode())
+            callbacks.queueCommanad(
+                gatt, Command.Write(packet.bytes())
+            )
         }
+    }
+
+    fun setNoiseCancelingMode(noiseCancelingMode: NoiseCancelingMode) {
+        val callbacks = callbacks
+        val state = state.value
+        if (callbacks != null && state != null) {
+            val currentAmbientSoundMode = state.ambientSoundMode()
+            val packet = SetAmbientSoundModePacket(AmbientSoundMode.NoiseCanceling, noiseCancelingMode)
+            callbacks.queueCommanad(gatt, Command.Write(packet.bytes()))
+            if (currentAmbientSoundMode != AmbientSoundMode.NoiseCanceling) {
+                val packet = SetAmbientSoundModePacket(currentAmbientSoundMode, noiseCancelingMode)
+                callbacks.queueCommanad(gatt, Command.Write(packet.bytes()))
+            }
+        }
+    }
+
+    fun setEqualizerConfiguration(configuration: EqualizerConfiguration) {
+        val packet = SetEqualizerPacket(configuration)
+        callbacks?.queueCommanad(
+            gatt, Command.Write(packet.bytes())
+        )
     }
 }

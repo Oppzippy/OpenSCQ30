@@ -4,17 +4,16 @@ import android.Manifest
 import android.bluetooth.BluetoothManager
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.whenCreated
 import androidx.lifecycle.whenStarted
 import com.oppzippy.openscq30.databinding.ActivityDeviceSettingsBinding
 import com.oppzippy.openscq30.soundcoredevice.SoundcoreDevice
 import com.oppzippy.openscq30.ui.equalizer.EqualizerFragment
 import com.oppzippy.openscq30.ui.general.GeneralFragment
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class DeviceSettingsActivity : AppCompatActivity() {
@@ -27,8 +26,7 @@ class DeviceSettingsActivity : AppCompatActivity() {
         val macAddress = intent.getStringExtra("macAddress")
         val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
         if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.BLUETOOTH_CONNECT
+                this, Manifest.permission.BLUETOOTH_CONNECT
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             // TODO: Consider calling
@@ -41,7 +39,8 @@ class DeviceSettingsActivity : AppCompatActivity() {
             finish()
             return
         }
-        val bluetoothDevice = bluetoothManager.adapter.bondedDevices.find { it.address.equals(macAddress) }
+        val bluetoothDevice =
+            bluetoothManager.adapter.bondedDevices.find { it.address == macAddress }
         if (bluetoothDevice == null) {
             finish()
             return
@@ -61,7 +60,29 @@ class DeviceSettingsActivity : AppCompatActivity() {
         this.lifecycleScope.launch {
             general.lifecycle.whenStarted {
                 general.ambientSoundMode.collect {
-                    soundcoreDevice.setAmbientSoundMode(it)
+                    if (it != null) {
+                        soundcoreDevice.setAmbientSoundMode(it)
+                    }
+                }
+            }
+        }
+        this.lifecycleScope.launch {
+            general.lifecycle.whenStarted {
+                general.noiseCancelingMode.collect {
+                    if (it != null) {
+                        soundcoreDevice.setNoiseCancelingMode(it)
+                    }
+                }
+            }
+        }
+
+        this.lifecycleScope.launch {
+            general.lifecycle.whenStarted {
+                device.state.collect { state ->
+                    if (state != null) {
+                        general.setAmbientSoundMode(state.ambientSoundMode())
+                        general.setNoiseCancelingMode(state.noiseCancelingMode())
+                    }
                 }
             }
         }
@@ -73,10 +94,6 @@ class DeviceSettingsActivity : AppCompatActivity() {
             }
             true
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
     }
 
     private fun setCurrentFragment(fragment: Fragment) {

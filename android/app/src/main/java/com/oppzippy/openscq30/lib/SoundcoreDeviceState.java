@@ -6,8 +6,6 @@ public final class SoundcoreDeviceState {
 
     public SoundcoreDeviceState(@NonNull StateUpdatePacket packet) {
         long a0 = packet.mNativeObj;
-        packet.mNativeObj = 0;
-
         mNativeObj = init(a0);
         JNIReachabilityFence.reachabilityFence1(packet);
     }

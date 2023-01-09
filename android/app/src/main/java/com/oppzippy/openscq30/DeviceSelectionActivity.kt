@@ -57,11 +57,11 @@ class DeviceSelectionActivity : AppCompatActivity() {
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
                 adapter.bondedDevices.map { device ->
-                    return@map DeviceListItem(device.name, device.address, View.OnClickListener {
+                    return@map DeviceListItem(device.name, device.address) {
                         val intent = Intent(applicationContext, DeviceSettingsActivity::class.java)
                         intent.putExtra("macAddress", device.address)
                         startActivity(intent)
-                    })
+                    }
                 }.toList()
             } else {
                 Log.w("device-selection", "no permission")

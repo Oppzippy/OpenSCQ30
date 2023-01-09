@@ -14,8 +14,8 @@ impl OkPacket {
     }
 
     #[generate_interface]
-    pub fn from_bytes(bytes: &[i16]) -> Result<Option<OkPacket>, String> {
-        let bytes = type_conversion::i16_slice_to_u8_vec(bytes).map_err(|err| err.to_string())?;
+    pub fn from_bytes(bytes: &[i8]) -> Result<Option<OkPacket>, String> {
+        let bytes = type_conversion::i8_slice_to_u8_slice(bytes);
         Ok(openscq30_lib::packets::inbound::OkPacket::new(&bytes).map(|packet| packet.into()))
     }
 }

@@ -3,12 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-
-        <variable
-            name="viewmodel"
-            type="com.oppzippy.openscq30.ui.general.GeneralViewModel" />
-    </data>
+    <data></data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -30,8 +25,7 @@
             <RadioGroup
                 android:id="@+id/ambientSoundMode"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:checkedButton="@={viewmodel.ambientSoundModeId}">
+                android:layout_height="wrap_content">
 
                 <RadioButton
                     android:id="@+id/normal"
@@ -62,8 +56,7 @@
             <RadioGroup
                 android:id="@+id/noiseCancelingMode"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:checkedButton="@={viewmodel.noiseCancelingModeId}">
+                android:layout_height="wrap_content">
 
                 <RadioButton
                     android:id="@+id/transport"

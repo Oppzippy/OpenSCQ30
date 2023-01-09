@@ -1,6 +1,8 @@
 use openscq30_lib::packets::outbound::OutboundPacket as _;
 use rifgen::rifgen_attr::generate_interface;
 
+use crate::type_conversion;
+
 use super::OutboundPacket;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
@@ -19,11 +21,7 @@ impl RequestStatePacket {
 
 impl OutboundPacket for RequestStatePacket {
     #[generate_interface]
-    fn bytes(&self) -> Vec<i16> {
-        self.packet
-            .bytes()
-            .into_iter()
-            .map(|x| i16::from(x))
-            .collect()
+    fn bytes(&self) -> Vec<i8> {
+        type_conversion::u8_slice_to_i8_slice(&self.packet.bytes()).to_vec()
     }
 }

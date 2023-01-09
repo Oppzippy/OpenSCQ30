@@ -12,7 +12,7 @@ pub struct SoundcoreDeviceState {
 
 impl SoundcoreDeviceState {
     #[generate_interface(constructor)]
-    pub fn new(packet: StateUpdatePacket) -> SoundcoreDeviceState {
+    pub fn new(packet: &StateUpdatePacket) -> SoundcoreDeviceState {
         packet.into()
     }
 
@@ -64,13 +64,9 @@ impl SoundcoreDeviceState {
 
 impl From<&StateUpdatePacket> for SoundcoreDeviceState {
     fn from(packet: &StateUpdatePacket) -> Self {
-        packet.into()
-    }
-}
-
-impl From<StateUpdatePacket> for SoundcoreDeviceState {
-    fn from(packet: StateUpdatePacket) -> Self {
-        packet.into()
+        Self {
+            state: Into::<openscq30_lib::packets::inbound::StateUpdatePacket>::into(*packet).into(),
+        }
     }
 }
 
