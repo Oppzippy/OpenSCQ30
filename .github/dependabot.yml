@@ -8,3 +8,7 @@ updates:
     package-ecosystem: gradle
     schedule:
       interval: weekly
+  - directory: /android/app
+    package-ecosystem: gradle
+    schedule:
+      interval: weekly
