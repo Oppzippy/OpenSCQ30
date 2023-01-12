@@ -12,10 +12,11 @@ import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.databinding.FragmentGeneralBinding
 import com.oppzippy.openscq30.lib.AmbientSoundMode
 import com.oppzippy.openscq30.lib.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.SoundcoreDeviceState
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class GeneralFragment() : Fragment(R.layout.fragment_general) {
+class GeneralFragment(private val stateFlow: StateFlow<SoundcoreDeviceState>) : Fragment(R.layout.fragment_general) {
     private lateinit var binding: FragmentGeneralBinding
     private val mutableSoundMode =
         MutableStateFlow<Pair<AmbientSoundMode, NoiseCancelingMode>?>(null)
@@ -46,6 +47,13 @@ class GeneralFragment() : Fragment(R.layout.fragment_general) {
                 mutableSoundMode.value = Pair(ambientSoundMode, noiseCancelingMode)
             } else {
                 mutableSoundMode.value = null
+            }
+        }
+
+        lifecycleScope.launch {
+            stateFlow.collectLatest {
+                setAmbientSoundMode(it.ambientSoundMode())
+                setNoiseCancelingMode(it.noiseCancelingMode())
             }
         }
 

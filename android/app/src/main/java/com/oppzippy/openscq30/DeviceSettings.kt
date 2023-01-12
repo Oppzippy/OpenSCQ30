@@ -29,7 +29,7 @@ class DeviceSettings(private val device: SoundcoreDevice) : Fragment() {
 
         val deviceStateFlow =
             device.stateFlow.stateIn(lifecycleScope, SharingStarted.Eagerly, device.state)
-        val general = GeneralFragment()
+        val general = GeneralFragment(deviceStateFlow)
         val equalizer = EqualizerFragment(deviceStateFlow)
 
         setCurrentFragment(general)
@@ -42,13 +42,6 @@ class DeviceSettings(private val device: SoundcoreDevice) : Fragment() {
         lifecycleScope.launch {
             equalizer.equalizerConfiguration.debounce(250).collectLatest {
                 device.setEqualizerConfiguration(it)
-            }
-        }
-
-        lifecycleScope.launch {
-            deviceStateFlow.collectLatest {
-                general.setAmbientSoundMode(it.ambientSoundMode())
-                general.setNoiseCancelingMode(it.noiseCancelingMode())
             }
         }
 
