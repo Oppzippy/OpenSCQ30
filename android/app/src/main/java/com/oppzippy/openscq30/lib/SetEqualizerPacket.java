@@ -6,8 +6,6 @@ public final class SetEqualizerPacket {
 
     public SetEqualizerPacket(@NonNull EqualizerConfiguration configuration) {
         long a0 = configuration.mNativeObj;
-        configuration.mNativeObj = 0;
-
         mNativeObj = init(a0);
         JNIReachabilityFence.reachabilityFence1(configuration);
     }

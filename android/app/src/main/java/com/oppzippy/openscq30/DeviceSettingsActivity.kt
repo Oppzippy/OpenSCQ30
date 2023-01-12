@@ -8,18 +8,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.whenStarted
 import com.oppzippy.openscq30.databinding.ActivityDeviceSettingsBinding
-import com.oppzippy.openscq30.soundcoredevice.SoundcoreDevice
-import com.oppzippy.openscq30.ui.equalizer.EqualizerFragment
-import com.oppzippy.openscq30.ui.general.GeneralFragment
-import kotlinx.coroutines.flow.collect
+import com.oppzippy.openscq30.soundcoredevice.createSoundcoreDevice
 import kotlinx.coroutines.launch
 
 class DeviceSettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDeviceSettingsBinding
-    private lateinit var device: SoundcoreDevice
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,60 +40,22 @@ class DeviceSettingsActivity : AppCompatActivity() {
             finish()
             return
         }
-        val soundcoreDevice = SoundcoreDevice(applicationContext, bluetoothDevice)
-        this.device = soundcoreDevice
 
         binding = ActivityDeviceSettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val general = GeneralFragment()
-        val equalizer = EqualizerFragment()
+        val loading = Loading()
+        setCurrentFragment(loading)
 
-
-        setCurrentFragment(general)
-
-        this.lifecycleScope.launch {
-            general.lifecycle.whenStarted {
-                general.ambientSoundMode.collect {
-                    if (it != null) {
-                        soundcoreDevice.setAmbientSoundMode(it)
-                    }
-                }
-            }
-        }
-        this.lifecycleScope.launch {
-            general.lifecycle.whenStarted {
-                general.noiseCancelingMode.collect {
-                    if (it != null) {
-                        soundcoreDevice.setNoiseCancelingMode(it)
-                    }
-                }
-            }
-        }
-
-        this.lifecycleScope.launch {
-            general.lifecycle.whenStarted {
-                device.state.collect { state ->
-                    if (state != null) {
-                        general.setAmbientSoundMode(state.ambientSoundMode())
-                        general.setNoiseCancelingMode(state.noiseCancelingMode())
-                    }
-                }
-            }
-        }
-
-        binding.navView.setOnItemSelectedListener {
-            when (it.itemId) {
-                R.id.navigation_general -> setCurrentFragment(general)
-                R.id.navigation_equalizer -> setCurrentFragment(equalizer)
-            }
-            true
+        lifecycleScope.launch {
+            val soundcoreDevice = createSoundcoreDevice(applicationContext, lifecycleScope, bluetoothDevice)
+            setCurrentFragment(DeviceSettings(soundcoreDevice))
         }
     }
 
     private fun setCurrentFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction().apply {
-            replace(binding.frameLayout.id, fragment)
+            replace(binding.content.id, fragment)
             commit()
         }
     }

@@ -13,8 +13,6 @@ public final class EqualizerConfiguration {
 
     public EqualizerConfiguration(@NonNull EqualizerBandOffsets band_offsets) {
         long a0 = band_offsets.mNativeObj;
-        band_offsets.mNativeObj = 0;
-
         mNativeObj = init(a0);
         JNIReachabilityFence.reachabilityFence1(band_offsets);
     }

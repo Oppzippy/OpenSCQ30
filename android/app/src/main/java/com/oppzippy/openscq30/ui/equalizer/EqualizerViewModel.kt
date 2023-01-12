@@ -17,14 +17,14 @@ class EqualizerViewModel : ViewModel() {
 
     var bandOffsets =
         combine(band100, band200, band400, band800, band1600, band3200, band6400, band12800) {
-            return@combine it.map { value -> value.roundToInt() }.toIntArray()
+            return@combine it.map { value -> value.roundToInt().toByte() }.toByteArray()
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
-            initialValue = intArrayOf(0, 0, 0, 0, 0, 0, 0, 0)
+            initialValue = null,
         )
 
-    fun setBandOffsets(bandOffsets: IntArray) {
+    fun setBandOffsets(bandOffsets: ByteArray) {
         band100.value = bandOffsets[0].toFloat()
         band200.value = bandOffsets[1].toFloat()
         band400.value = bandOffsets[2].toFloat()

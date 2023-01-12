@@ -59,8 +59,6 @@ public final class SoundcoreDeviceState {
 
     public final @NonNull SoundcoreDeviceState withEqualizerConfiguration(@NonNull EqualizerConfiguration equalizer_configuration) {
         long a0 = equalizer_configuration.mNativeObj;
-        equalizer_configuration.mNativeObj = 0;
-
         long ret = do_withEqualizerConfiguration(mNativeObj, a0);
         SoundcoreDeviceState convRet = new SoundcoreDeviceState(InternalPointerMarker.RAW_PTR, ret);
 

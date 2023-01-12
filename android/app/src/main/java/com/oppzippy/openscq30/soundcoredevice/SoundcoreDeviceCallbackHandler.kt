@@ -1,7 +1,6 @@
 package com.oppzippy.openscq30.soundcoredevice
 
 import android.annotation.SuppressLint
-import android.annotation.TargetApi
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
@@ -11,30 +10,33 @@ import android.util.Log
 import com.oppzippy.openscq30.lib.AmbientSoundModeUpdatePacket
 import com.oppzippy.openscq30.lib.OkPacket
 import com.oppzippy.openscq30.lib.RequestStatePacket
-import com.oppzippy.openscq30.lib.SoundcoreDeviceState
 import com.oppzippy.openscq30.lib.StateUpdatePacket
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.jvm.optionals.getOrNull
 
 @SuppressLint("MissingPermission")
-class SoundcoreDeviceCallbacks(private val mutableState: MutableStateFlow<SoundcoreDeviceState?>) :
-    BluetoothGattCallback() {
+class SoundcoreDeviceCallbackHandler() : BluetoothGattCallback() {
+    private lateinit var gatt: BluetoothGatt
     private var readCharacteristic: BluetoothGattCharacteristic? = null
     private var writeCharacteristic: BluetoothGattCharacteristic? = null
     private var commandQueue: ConcurrentLinkedQueue<Command> = ConcurrentLinkedQueue()
     private var isLocked: Boolean = false
-
+    private val _packetsFlow: MutableSharedFlow<Packet> =
+        MutableSharedFlow(0, 50, BufferOverflow.DROP_OLDEST)
+    val packetsFlow: SharedFlow<Packet> = _packetsFlow
 
     @Synchronized
-    fun queueCommanad(gatt: BluetoothGatt, command: Command) {
+    fun queueCommanad(command: Command) {
         commandQueue.add(command)
-        next(gatt)
+        next()
     }
 
     @Synchronized
-    private fun next(gatt: BluetoothGatt) {
+    private fun next() {
         if (!isLocked) {
             val writeCharacteristic = writeCharacteristic
             val readCharacteristic = readCharacteristic
@@ -72,12 +74,10 @@ class SoundcoreDeviceCallbacks(private val mutableState: MutableStateFlow<Soundc
 
     @Synchronized
     override fun onCharacteristicWrite(
-        gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?, status: Int
+        _gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?, status: Int
     ) {
         isLocked = false
-        if (gatt != null) {
-            next(gatt)
-        }
+        next()
     }
 
 
@@ -85,110 +85,78 @@ class SoundcoreDeviceCallbacks(private val mutableState: MutableStateFlow<Soundc
     override fun onConnectionStateChange(
         gatt: BluetoothGatt?, status: Int, newState: Int
     ) {
-        if (newState == BluetoothProfile.STATE_CONNECTED) {
-            gatt?.discoverServices()
+        if (newState == BluetoothProfile.STATE_CONNECTED && gatt != null) {
+            this.gatt = gatt
+            gatt.discoverServices()
         }
     }
 
     @Synchronized
-    override fun onCharacteristicRead(
-        gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?, status: Int
-    ) {
-        if (gatt != null && characteristic != null) {
-            val value = characteristic.value
-            AmbientSoundModeUpdatePacket.fromBytes(value).getOrNull()?.let {
-                mutableState.value = mutableState.value?.withAmbientSoundMode(it.ambientSoundMode())
-                    ?.withNoiseCancelingMode(it.noiseCancelingMode())
-                return
-            }
-            StateUpdatePacket.fromBytes(value).getOrNull()?.let {
-                mutableState.value = SoundcoreDeviceState(it)
-                return
-            }
-            OkPacket.fromBytes(value).getOrNull()?.let {
-                return
-            }
-            Log.i("unknown-packet", "got unknown packet")
-            isLocked = false
-            next(gatt)
-        }
-    }
-
-    @Synchronized
-    override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
+    override fun onMtuChanged(_gatt: BluetoothGatt?, mtu: Int, status: Int) {
         Log.i("SoundcoreDeviceCallbaks", "mtu changed to $mtu, status $status")
         isLocked = false
-        if (gatt != null) {
-            next(gatt)
-        }
+        next()
     }
 
     @Synchronized
     override fun onCharacteristicChanged(
-        gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?
+        _gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?
     ) {
-        if (gatt != null && characteristic != null) {
+        if (characteristic != null) {
             val value = characteristic.value
             AmbientSoundModeUpdatePacket.fromBytes(value).getOrNull()?.let {
-                mutableState.value = mutableState.value?.withAmbientSoundMode(it.ambientSoundMode())
-                    ?.withNoiseCancelingMode(it.noiseCancelingMode())
+                _packetsFlow.tryEmit(Packet.AmbientSoundModeUpdate(it))
                 return
             }
             StateUpdatePacket.fromBytes(value).getOrNull()?.let {
-                mutableState.value = SoundcoreDeviceState(it)
+                _packetsFlow.tryEmit(Packet.StateUpdate(it))
                 return
             }
             OkPacket.fromBytes(value).getOrNull()?.let {
+                _packetsFlow.tryEmit(Packet.Ok(it))
                 return
             }
             Log.i("unknown-packet", "got unknown packet")
             isLocked = false
-            next(gatt)
+            next()
         }
     }
 
     @Synchronized
     override fun onDescriptorWrite(
-        gatt: BluetoothGatt?, descriptor: BluetoothGattDescriptor?, status: Int
+        _gatt: BluetoothGatt?, descriptor: BluetoothGattDescriptor?, status: Int
     ) {
-        super.onDescriptorWrite(gatt, descriptor, status)
         isLocked = false
-        if (gatt != null) {
-            next(gatt)
-        }
+        next()
     }
 
     @Synchronized
     override fun onDescriptorRead(
-        gatt: BluetoothGatt?, descriptor: BluetoothGattDescriptor?, status: Int
+        _gatt: BluetoothGatt?, descriptor: BluetoothGattDescriptor?, status: Int
     ) {
         isLocked = false
-        if (gatt != null) {
-            next(gatt)
-        }
+        next()
     }
 
     @Synchronized
-    override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
-        if (gatt != null) {
-            val service = gatt.getService(UUID.fromString("011cf5da-0000-1000-8000-00805f9b34fb"))
-            writeCharacteristic =
-                service.getCharacteristic(UUID.fromString("00007777-0000-1000-8000-00805f9b34fb"))
-            val readCharacteristic =
-                service.getCharacteristic(UUID.fromString("00008888-0000-1000-8000-00805F9B34FB"))
-            this.readCharacteristic = readCharacteristic
+    override fun onServicesDiscovered(_gatt: BluetoothGatt?, status: Int) {
+        val service = gatt.getService(UUID.fromString("011cf5da-0000-1000-8000-00805f9b34fb"))
+        writeCharacteristic =
+            service.getCharacteristic(UUID.fromString("00007777-0000-1000-8000-00805f9b34fb"))
+        val readCharacteristic =
+            service.getCharacteristic(UUID.fromString("00008888-0000-1000-8000-00805F9B34FB"))
+        this.readCharacteristic = readCharacteristic
 
-            gatt.setCharacteristicNotification(readCharacteristic, true)
-            val descriptor =
-                readCharacteristic.getDescriptor(UUID(0x0000290200001000, -9223371485494954757))
+        gatt.setCharacteristicNotification(readCharacteristic, true)
+        val descriptor =
+            readCharacteristic.getDescriptor(UUID(0x0000290200001000, -9223371485494954757))
 
-            queueCommanad(
-                gatt, Command.WriteDescriptor(
-                    descriptor, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-                )
+        queueCommanad(
+            Command.WriteDescriptor(
+                descriptor, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
             )
-            queueCommanad(gatt, Command.SetMtu(500))
-            queueCommanad(gatt, Command.Write(RequestStatePacket().bytes()))
-        }
+        )
+        queueCommanad(Command.SetMtu(500))
+        queueCommanad(Command.Write(RequestStatePacket().bytes()))
     }
 }
