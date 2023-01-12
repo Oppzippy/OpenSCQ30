@@ -50,7 +50,6 @@ class EqualizerFragment(private val stateFlow: StateFlow<SoundcoreDeviceState>) 
 
         lifecycleScope.launch {
             stateFlow.collectLatest {
-                Log.i("test", "test")
                 viewModel.setBandOffsets(it.equalizerConfiguration().bandOffsets().volumeOffsets())
             }
         }

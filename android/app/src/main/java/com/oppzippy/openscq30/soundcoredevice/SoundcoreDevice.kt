@@ -67,7 +67,7 @@ class SoundcoreDevice(
     }
 
     fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
-        if (_stateFlow.value.equalizerConfiguration() != equalizerConfiguration) {
+        if (!_stateFlow.value.equalizerConfiguration().contentEquals(equalizerConfiguration)) {
             queueSetEqualizerConfiguration(equalizerConfiguration)
             _stateFlow.value = _stateFlow.value.withEqualizerConfiguration(equalizerConfiguration)
         }
