@@ -34,30 +34,30 @@ impl SoundcoreDeviceState {
     #[generate_interface]
     pub fn with_ambient_sound_mode(
         &self,
-        ambient_sound_mode: AmbientSoundMode,
+        ambient_sound_mode: &AmbientSoundMode,
     ) -> SoundcoreDeviceState {
         self.state
-            .with_ambient_sound_mode(ambient_sound_mode.into())
+            .with_ambient_sound_mode(ambient_sound_mode.to_owned().into())
             .into()
     }
 
     #[generate_interface]
     pub fn with_noise_canceling_mode(
         &self,
-        noise_canceling_mode: NoiseCancelingMode,
+        noise_canceling_mode: &NoiseCancelingMode,
     ) -> SoundcoreDeviceState {
         self.state
-            .with_noise_canceling_mode(noise_canceling_mode.into())
+            .with_noise_canceling_mode(noise_canceling_mode.to_owned().into())
             .into()
     }
 
     #[generate_interface]
     pub fn with_equalizer_configuration(
         &self,
-        equalizer_configuration: EqualizerConfiguration,
+        equalizer_configuration: &EqualizerConfiguration,
     ) -> SoundcoreDeviceState {
         self.state
-            .with_equalizer_configuration(equalizer_configuration.into())
+            .with_equalizer_configuration(equalizer_configuration.to_owned().into())
             .into()
     }
 }

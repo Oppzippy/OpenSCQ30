@@ -21,9 +21,11 @@ impl EqualizerConfiguration {
     }
 
     #[generate_interface(constructor)]
-    pub fn new_custom_profile(band_offsets: EqualizerBandOffsets) -> EqualizerConfiguration {
+    pub fn new_custom_profile(band_offsets: &EqualizerBandOffsets) -> EqualizerConfiguration {
         Self {
-            inner: structures::EqualizerConfiguration::new_custom_profile(band_offsets.into()),
+            inner: structures::EqualizerConfiguration::new_custom_profile(
+                band_offsets.to_owned().into(),
+            ),
         }
     }
 

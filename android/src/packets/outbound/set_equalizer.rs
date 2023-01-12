@@ -12,9 +12,11 @@ pub struct SetEqualizerPacket {
 
 impl SetEqualizerPacket {
     #[generate_interface(constructor)]
-    pub fn new(configuration: EqualizerConfiguration) -> SetEqualizerPacket {
+    pub fn new(configuration: &EqualizerConfiguration) -> SetEqualizerPacket {
         Self {
-            packet: openscq30_lib::packets::outbound::SetEqualizerPacket::new(configuration.into()),
+            packet: openscq30_lib::packets::outbound::SetEqualizerPacket::new(
+                configuration.to_owned().into(),
+            ),
         }
     }
 }

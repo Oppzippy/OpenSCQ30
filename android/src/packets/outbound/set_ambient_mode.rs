@@ -16,13 +16,13 @@ pub struct SetAmbientSoundModePacket {
 impl SetAmbientSoundModePacket {
     #[generate_interface(constructor)]
     pub fn new(
-        ambient_sound_mode: AmbientSoundMode,
-        noise_canceling_mode: NoiseCancelingMode,
+        ambient_sound_mode: &AmbientSoundMode,
+        noise_canceling_mode: &NoiseCancelingMode,
     ) -> SetAmbientSoundModePacket {
         Self {
             packet: openscq30_lib::packets::outbound::SetAmbientSoundModePacket::new(
-                ambient_sound_mode.into(),
-                noise_canceling_mode.into(),
+                ambient_sound_mode.to_owned().into(),
+                noise_canceling_mode.to_owned().into(),
             ),
         }
     }
