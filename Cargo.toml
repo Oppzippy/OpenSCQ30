@@ -4,7 +4,6 @@ members = ["cli", "gui", "lib", "android"]
 [profile.release]
 strip = true
 lto = true
-codegen-units = 1
 
 [profile.release-debuginfo]
 inherits = "release"
