@@ -69,7 +69,9 @@ dependencies {
 
 def rustBasePath = ".."
 def archTriplets = [
+    'armeabi-v7a': 'arm-linux-androideabi',
     'arm64-v8a': 'aarch64-linux-android',
+    'x86': 'i686-linux-android',
     'x86_64': 'x86_64-linux-android',
 ]
 
