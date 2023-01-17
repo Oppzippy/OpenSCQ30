@@ -13,6 +13,7 @@ import com.oppzippy.openscq30.databinding.FragmentDeviceSettingsBinding
 import com.oppzippy.openscq30.soundcoredevice.SoundcoreDevice
 import com.oppzippy.openscq30.ui.equalizer.EqualizerFragment
 import com.oppzippy.openscq30.ui.general.GeneralFragment
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -20,6 +21,7 @@ import kotlinx.coroutines.launch
 class DeviceSettings(private val device: SoundcoreDevice) : Fragment() {
     private lateinit var binding: FragmentDeviceSettingsBinding
 
+    @OptIn(FlowPreview::class)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
