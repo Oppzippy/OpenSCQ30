@@ -47,7 +47,7 @@ android {
         viewBinding true
         dataBinding true
     }
-    ndkVersion "22.1.7171670"
+    ndkVersion "25.1.8937393"
 }
 
 dependencies {
@@ -68,7 +68,7 @@ dependencies {
 
 def rustBasePath = ".."
 def archTriplets = [
-    'armeabi-v7a': 'arm-linux-androideabi',
+    'armeabi-v7a': 'armv7-linux-androideabi',
     'arm64-v8a': 'aarch64-linux-android',
     'x86': 'i686-linux-android',
     'x86_64': 'x86_64-linux-android',
@@ -93,7 +93,7 @@ archTriplets.each { arch, target ->
     // Build with cargo
     tasks.create(name: "cargo-build-${arch}", type: Exec, description: "Building core for ${arch}", dependsOn: "cargo-output-dir-${arch}") {
         workingDir rustBasePath
-        commandLine 'cargo', 'build', "--target", "${target}", "--profile", "release-debuginfo"
+        commandLine "cargo", "ndk", "--target", "${arch}", "--platform", "24", "build", "--profile", "release-debuginfo"
     }
     // Sync shared native dependencies
     tasks.create(name: "sync-rust-deps-${arch}", type: Sync, dependsOn: "cargo-build-${arch}") {
