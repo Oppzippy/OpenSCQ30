@@ -10,8 +10,8 @@ android {
 
     defaultConfig {
         applicationId "com.oppzippy.openscq30"
-        minSdk 23
-        targetSdk 31
+        minSdk 24
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 

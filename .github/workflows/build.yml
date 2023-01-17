@@ -147,3 +147,60 @@ jobs:
         with:
           name: cli-windows
           path: target/release/openscq30_cli.exe
+
+  build_android:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+      - name: Setup Android NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r22b
+
+      - name: Create .cargo/config.toml
+        working-directory: android
+        env:
+          ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: |
+          mkdir .cargo
+          cat <<EOF > .cargo/config.toml
+          [target.arm-linux-androideabi]
+          linker = "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi24-clang++"
+
+          [target.aarch64-linux-android]
+          linker = "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang++"
+
+          [target.x86_64-linux-android]
+          linker = "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android24-clang++"
+
+          [target.i686-linux-android]
+          linker = "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android24-clang++"
+          EOF
+
+      - name: Create local.properties
+        working-directory: android
+        env:
+          ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: |
+          cat <<EOF > local.properties
+          sdk.dir=$ANDROID_SDK_ROOT         
+          ndk.dir=$ANDROID_NDK_ROOT
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: arm-linux-androideabi,aarch64-linux-android,i686-linux-android,x86_64-linux-android
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-directories: android
+      - name: Build
+        run: ./gradlew --no-daemon assembleRelease
+        working-directory: android
+      - name: Upload apk
+        uses: actions/upload-artifact@v3
+        with:
+          name: android
+          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
