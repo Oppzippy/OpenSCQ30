@@ -23,6 +23,7 @@ import kotlin.jvm.optionals.getOrNull
 class DeviceSettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        actionBar?.hide()
         val macAddress = intent.getStringExtra("macAddress")
         val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
         if (ActivityCompat.checkSelfPermission(
