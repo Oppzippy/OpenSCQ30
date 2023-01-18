@@ -1,6 +1,7 @@
 package com.oppzippy.openscq30.soundcoredevice
 
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothGatt
 import com.oppzippy.openscq30.lib.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
@@ -8,6 +9,7 @@ import kotlinx.coroutines.launch
 
 @SuppressLint("MissingPermission")
 class SoundcoreDevice(
+    private val gatt: BluetoothGatt,
     private val callbacks: SoundcoreDeviceCallbackHandler,
     scope: CoroutineScope,
     initialState: SoundcoreDeviceState,
@@ -36,6 +38,10 @@ class SoundcoreDevice(
                 }
             }
         }
+    }
+
+    fun destroy() {
+        gatt.disconnect()
     }
 
     fun setSoundMode(

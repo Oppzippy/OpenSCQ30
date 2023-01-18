@@ -58,6 +58,12 @@ class DeviceSettingsActivity : ComponentActivity() {
                             applicationContext, lifecycleScope, bluetoothDevice,
                         )
                     }
+                    DisposableEffect(true) {
+                        onDispose {
+                            soundcoreDevice?.destroy()
+                            soundcoreDevice = null
+                        }
+                    }
                     if (soundcoreDevice != null) {
                         SoundcoreDeviceSettings(soundcoreDevice!!)
                     } else {
