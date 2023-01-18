@@ -31,6 +31,10 @@ impl EqualizerConfiguration {
             .unwrap_or(Self::CUSTOM_PROFILE_ID)
     }
 
+    pub fn preset_profile(&self) -> Option<PresetEqualizerProfile> {
+        self.preset_profile
+    }
+
     pub fn band_offsets(&self) -> EqualizerBandOffsets {
         self.band_offsets
     }

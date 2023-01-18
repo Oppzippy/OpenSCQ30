@@ -1,7 +1,6 @@
-package com.oppzippy.openscq30.deviceselection
+package com.oppzippy.openscq30.ui.deviceselection
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding

@@ -35,6 +35,11 @@ impl EqualizerConfiguration {
     }
 
     #[generate_interface]
+    pub fn preset_profile(&self) -> Option<PresetEqualizerProfile> {
+        self.inner.preset_profile().map(|profile| profile.into())
+    }
+
+    #[generate_interface]
     pub fn band_offsets(&self) -> EqualizerBandOffsets {
         self.inner.band_offsets().into()
     }

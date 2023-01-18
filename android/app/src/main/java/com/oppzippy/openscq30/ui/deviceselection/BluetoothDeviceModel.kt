@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.deviceselection
+package com.oppzippy.openscq30.ui.deviceselection
 
 data class BluetoothDeviceModel(
     val name: String,

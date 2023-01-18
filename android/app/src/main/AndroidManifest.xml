@@ -18,12 +18,12 @@
         android:theme="@style/Theme.OpenSCQ30"
         tools:targetApi="33">
         <activity
-            android:name=".DeviceSettingsActivity"
+            android:name=".ui.devicesettings.DeviceSettingsActivity"
             android:exported="false"
             android:label="@string/title_activity_device_settings"
             android:theme="@style/Theme.OpenSCQ30" />
         <activity
-            android:name=".deviceselection.DeviceSelectionActivity"
+            android:name=".ui.deviceselection.DeviceSelectionActivity"
             android:exported="true"
             android:label="@string/app_name">
             <intent-filter>

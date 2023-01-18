@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.deviceselection
+package com.oppzippy.openscq30.ui.deviceselection
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text

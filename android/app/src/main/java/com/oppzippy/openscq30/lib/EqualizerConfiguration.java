@@ -25,6 +25,19 @@ public final class EqualizerConfiguration {
     }
     private static native int do_profileId(long self);
 
+    public final @NonNull java.util.Optional<PresetEqualizerProfile> presetProfile() {
+        int ret = do_presetProfile(mNativeObj);
+        java.util.Optional<PresetEqualizerProfile> convRet;
+        if (ret != -1) {
+            convRet = java.util.Optional.of(PresetEqualizerProfile.fromInt(ret));
+        } else {
+            convRet = java.util.Optional.empty();
+        }
+
+        return convRet;
+    }
+    private static native int do_presetProfile(long self);
+
     public final @NonNull EqualizerBandOffsets bandOffsets() {
         long ret = do_bandOffsets(mNativeObj);
         EqualizerBandOffsets convRet = new EqualizerBandOffsets(InternalPointerMarker.RAW_PTR, ret);

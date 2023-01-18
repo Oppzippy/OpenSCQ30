@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.deviceselection
+package com.oppzippy.openscq30.ui.deviceselection
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
@@ -11,7 +11,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -22,9 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
-import androidx.core.os.BuildCompat
-import com.oppzippy.openscq30.DeviceSettingsActivity
 import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.ui.devicesettings.DeviceSettingsActivity
 import com.oppzippy.openscq30.lib.Init
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
