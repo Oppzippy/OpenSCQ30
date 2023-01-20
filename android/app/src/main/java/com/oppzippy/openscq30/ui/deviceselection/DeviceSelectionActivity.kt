@@ -24,6 +24,7 @@ import androidx.core.app.ActivityCompat
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.ui.devicesettings.DeviceSettingsActivity
 import com.oppzippy.openscq30.lib.Init
+import com.oppzippy.openscq30.lib.SoundcoreDeviceUtils
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 class DeviceSelectionActivity : ComponentActivity() {
@@ -74,7 +75,9 @@ class DeviceSelectionActivity : ComponentActivity() {
                     this, Manifest.permission.BLUETOOTH_CONNECT
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
-                return adapter.bondedDevices.map {
+                return adapter.bondedDevices.filter {
+                    SoundcoreDeviceUtils.isMacAddressSoundcoreDevice(it.address)
+                }.map {
                     BluetoothDeviceModel(it.name, it.address)
                 }
             } else {

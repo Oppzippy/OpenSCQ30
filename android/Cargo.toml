@@ -13,6 +13,7 @@ tokio = { version = "1", features = ["rt-multi-thread"] }
 thiserror = "1.0"
 android_logger = "0.11.3"
 anyhow = "1.0.68"
+macaddr = "1.0.1"
 
 [build-dependencies]
 flapigen = "0.6.0-pre13"

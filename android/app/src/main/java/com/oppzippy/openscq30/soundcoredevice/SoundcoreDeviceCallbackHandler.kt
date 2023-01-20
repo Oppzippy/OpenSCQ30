@@ -11,6 +11,7 @@ import android.util.Log
 import com.oppzippy.openscq30.lib.AmbientSoundModeUpdatePacket
 import com.oppzippy.openscq30.lib.OkPacket
 import com.oppzippy.openscq30.lib.RequestStatePacket
+import com.oppzippy.openscq30.lib.SoundcoreDeviceUtils
 import com.oppzippy.openscq30.lib.StateUpdatePacket
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -142,11 +143,11 @@ class SoundcoreDeviceCallbackHandler() : BluetoothGattCallback() {
 
     @Synchronized
     override fun onServicesDiscovered(_gatt: BluetoothGatt?, status: Int) {
-        val service = gatt.getService(UUID.fromString("011cf5da-0000-1000-8000-00805f9b34fb"))
+        val service = gatt.getService(UUID.fromString(SoundcoreDeviceUtils.serviceUuid()))
         writeCharacteristic =
-            service.getCharacteristic(UUID.fromString("00007777-0000-1000-8000-00805f9b34fb"))
+            service.getCharacteristic(UUID.fromString(SoundcoreDeviceUtils.writeCharacteristicUuid()))
         val readCharacteristic =
-            service.getCharacteristic(UUID.fromString("00008888-0000-1000-8000-00805F9B34FB"))
+            service.getCharacteristic(UUID.fromString(SoundcoreDeviceUtils.readCharacteristicUuid()))
         this.readCharacteristic = readCharacteristic
 
         gatt.setCharacteristicNotification(readCharacteristic, true)

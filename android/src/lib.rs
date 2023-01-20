@@ -1,5 +1,6 @@
 mod java_glue;
 mod packets;
+mod soundcore_device_utils;
 mod state;
 pub(crate) mod type_conversion;
 use log::Level;
@@ -9,6 +10,7 @@ pub use crate::java_glue::*;
 pub use crate::packets::inbound::*;
 pub use crate::packets::outbound::*;
 pub use crate::packets::structures::*;
+pub use crate::soundcore_device_utils::*;
 pub use crate::state::*;
 
 pub struct Init {}
