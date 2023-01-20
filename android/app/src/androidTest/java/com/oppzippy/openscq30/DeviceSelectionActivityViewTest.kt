@@ -7,7 +7,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.oppzippy.openscq30.ui.deviceselection.BluetoothDeviceModel
 import com.oppzippy.openscq30.ui.deviceselection.BluetoothDeviceProvider
 import com.oppzippy.openscq30.ui.deviceselection.DeviceSelectionActivityView
+import io.mockk.MockKAnnotations
 import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 
 import org.junit.Test
@@ -20,7 +23,13 @@ import org.junit.Rule
 @RunWith(AndroidJUnit4::class)
 class DeviceSelectionActivityViewTest {
     @get:Rule
+    val mockkRule = MockKRule(this)
+
+    @get:Rule
     val composeRule = createAndroidComposeRule<ComponentActivity>()
+
+    @MockK
+    lateinit var deviceProviderMock: BluetoothDeviceProvider
 
     private lateinit var noDevicesFound: SemanticsMatcher
     private lateinit var refreshButton: SemanticsMatcher
@@ -28,13 +37,13 @@ class DeviceSelectionActivityViewTest {
     @Before
     fun initialize() {
         noDevicesFound = hasText(composeRule.activity.getString(R.string.no_devices_found))
-        refreshButton = hasContentDescriptionExactly(composeRule.activity.getString(R.string.refresh))
+        refreshButton =
+            hasContentDescriptionExactly(composeRule.activity.getString(R.string.refresh))
     }
 
 
     @Test
     fun testWithNoDevices() {
-        val deviceProviderMock = mockk<BluetoothDeviceProvider>()
         every { deviceProviderMock.getDevices() } returns listOf()
 
         composeRule.setContent {
@@ -46,7 +55,6 @@ class DeviceSelectionActivityViewTest {
 
     @Test
     fun testWithDevices() {
-        val deviceProviderMock = mockk<BluetoothDeviceProvider>()
         val deviceModels = listOf(
             BluetoothDeviceModel("test", "00:00:00:00:00:00"),
             BluetoothDeviceModel("test2", "00:00:00:00:00:01"),
@@ -67,7 +75,6 @@ class DeviceSelectionActivityViewTest {
 
     @Test
     fun testWithNoDevicesAndThenRefreshWithDevices() {
-        val deviceProviderMock = mockk<BluetoothDeviceProvider>()
         every { deviceProviderMock.getDevices() } returns listOf()
 
         composeRule.setContent {
