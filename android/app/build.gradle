@@ -56,7 +56,7 @@ android {
     ndkVersion "25.1.8937393"
     packagingOptions {
         resources {
-            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+            excludes += '/META-INF/*'
         }
     }
 }
@@ -92,6 +92,11 @@ dependencies {
     kapt 'com.google.dagger:hilt-android-compiler:2.44.2'
 
     testImplementation 'junit:junit:4.13.2'
+    testImplementation "io.mockk:mockk:1.13.3"
+    androidTestImplementation "io.mockk:mockk-android:1.13.3"
+    androidTestImplementation "androidx.test:runner:1.5.2"
+    androidTestImplementation 'androidx.test:core-ktx:1.5.0'
+    androidTestImplementation "androidx.test:rules:1.5.0"
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
