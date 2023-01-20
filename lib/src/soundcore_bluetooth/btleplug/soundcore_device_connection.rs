@@ -8,18 +8,19 @@ use futures::StreamExt;
 use tokio::sync::mpsc;
 use tracing::{instrument, trace, trace_span, warn};
 
-use crate::soundcore_bluetooth::traits::{
-    SoundcoreDeviceConnection, SoundcoreDeviceConnectionError,
+use crate::{
+    soundcore_bluetooth::traits::{SoundcoreDeviceConnection, SoundcoreDeviceConnectionError},
+    soundcore_device_utils,
 };
 
 const WRITE_CHARACTERISTIC: Characteristic = Characteristic {
-    uuid: uuid::uuid!("00007777-0000-1000-8000-00805f9b34fb"),
-    service_uuid: uuid::uuid!("011cf5da-0000-1000-8000-00805f9b34fb"),
+    uuid: soundcore_device_utils::WRITE_CHARACTERISTIC_UUID,
+    service_uuid: soundcore_device_utils::SERVICE_UUID,
     properties: CharPropFlags::WRITE_WITHOUT_RESPONSE.union(CharPropFlags::WRITE),
 };
 const NOTIFY_CHARACTERISTIC: Characteristic = Characteristic {
-    uuid: uuid::uuid!("00008888-0000-1000-8000-00805F9B34FB"),
-    service_uuid: uuid::uuid!("011cf5da-0000-1000-8000-00805f9b34fb"),
+    uuid: soundcore_device_utils::READ_CHARACTERISTIC_UUID,
+    service_uuid: soundcore_device_utils::SERVICE_UUID,
     properties: CharPropFlags::READ.union(CharPropFlags::NOTIFY),
 };
 

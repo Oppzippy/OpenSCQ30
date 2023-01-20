@@ -10,6 +10,7 @@ use tracing::warn;
 
 use crate::soundcore_bluetooth::traits::SoundcoreDeviceConnectionError;
 use crate::soundcore_bluetooth::traits::SoundcoreDeviceConnectionRegistry;
+use crate::soundcore_device_utils;
 
 use super::soundcore_device_connection::BtlePlugSoundcoreDeviceConnection;
 
@@ -41,10 +42,10 @@ impl BtlePlugSoundcoreDeviceConnectionRegistry {
             for peripheral in peripherals {
                 if peripheral.is_connected().await? {
                     let is_soundcore = match peripheral.properties().await {
-                        Ok(Some(properties)) => properties
-                            .address
-                            .into_inner()
-                            .starts_with(&[0xAC, 0x12, 0x2F]),
+                        Ok(Some(properties)) => {
+                            let address_bytes = properties.address.into_inner();
+                            soundcore_device_utils::is_mac_address_soundcore_device(address_bytes)
+                        }
                         _ => false,
                     };
                     if is_soundcore {
