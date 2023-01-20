@@ -1,13 +1,9 @@
 package com.oppzippy.openscq30.ui.deviceselection
 
 import android.Manifest
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -20,14 +16,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.app.ActivityCompat
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.ui.devicesettings.DeviceSettingsActivity
 import com.oppzippy.openscq30.lib.Init
-import com.oppzippy.openscq30.lib.SoundcoreDeviceUtils
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class DeviceSelectionActivity : ComponentActivity() {
+    @Inject
+    lateinit var bluetoothDeviceProvider: BluetoothDeviceProvider
+
     init {
         System.loadLibrary("openscq30_android")
         Init.logging()
@@ -37,13 +37,13 @@ class DeviceSelectionActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         actionBar?.hide()
         setContent {
-            var devices by remember { mutableStateOf(getDevices()) }
+            var devices by remember { mutableStateOf(bluetoothDeviceProvider.getDevices()) }
 
             val launcher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestPermission(),
             ) { isGranted ->
                 if (isGranted) {
-                    devices = getDevices()
+                    devices = bluetoothDeviceProvider.getDevices()
                 }
             }
 
@@ -67,27 +67,6 @@ class DeviceSelectionActivity : ComponentActivity() {
         }
     }
 
-    private fun getDevices(): List<BluetoothDeviceModel> {
-        val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
-        val adapter: BluetoothAdapter? = bluetoothManager.adapter
-        if (adapter != null) {
-            if (ActivityCompat.checkSelfPermission(
-                    this, Manifest.permission.BLUETOOTH_CONNECT
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                return adapter.bondedDevices.filter {
-                    SoundcoreDeviceUtils.isMacAddressSoundcoreDevice(it.address)
-                }.map {
-                    BluetoothDeviceModel(it.name, it.address)
-                }
-            } else {
-                Log.w("device-selection", "no permission")
-            }
-        } else {
-            Log.w("device-selection", "no bluetooth adapter")
-        }
-        return listOf()
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -1,8 +1,5 @@
 package com.oppzippy.openscq30.ui.devicesettings
 
-import android.Manifest
-import android.bluetooth.BluetoothManager
-import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,39 +7,26 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.core.app.ActivityCompat
-import androidx.lifecycle.lifecycleScope
 import com.oppzippy.openscq30.soundcoredevice.SoundcoreDevice
+import com.oppzippy.openscq30.soundcoredevice.SoundcoreDeviceFactory
 import com.oppzippy.openscq30.soundcoredevice.contentEquals
-import com.oppzippy.openscq30.soundcoredevice.createSoundcoreDevice
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
+import javax.inject.Inject
 import kotlin.jvm.optionals.getOrNull
 
+@AndroidEntryPoint
 class DeviceSettingsActivity : ComponentActivity() {
+    @Inject
+    lateinit var soundcoreDeviceFactory: SoundcoreDeviceFactory
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         actionBar?.hide()
         val macAddress = intent.getStringExtra("macAddress")
-        val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
-        if (ActivityCompat.checkSelfPermission(
-                this, Manifest.permission.BLUETOOTH_CONNECT
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            finish()
-            return
-        }
-        val bluetoothDevice =
-            bluetoothManager.adapter.bondedDevices.find { it.address == macAddress }
-        if (bluetoothDevice == null) {
+        if (macAddress == null) {
             finish()
             return
         }
@@ -54,9 +38,10 @@ class DeviceSettingsActivity : ComponentActivity() {
                 ) {
                     var soundcoreDevice by remember { mutableStateOf<SoundcoreDevice?>(null) }
                     LaunchedEffect(true) {
-                        soundcoreDevice = createSoundcoreDevice(
-                            applicationContext, lifecycleScope, bluetoothDevice,
-                        )
+                        soundcoreDevice = soundcoreDeviceFactory.createSoundcoreDevice(macAddress)
+                        if (soundcoreDevice == null) {
+                            finish()
+                        }
                     }
                     DisposableEffect(true) {
                         onDispose {
