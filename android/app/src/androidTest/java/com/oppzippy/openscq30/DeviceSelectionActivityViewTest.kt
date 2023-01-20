@@ -56,7 +56,7 @@ class DeviceSelectionActivityViewTest {
     @Test
     fun testWithDevices() {
         val deviceModels = listOf(
-            BluetoothDeviceModel("test", "00:00:00:00:00:00"),
+            BluetoothDeviceModel("test1", "00:00:00:00:00:00"),
             BluetoothDeviceModel("test2", "00:00:00:00:00:01"),
         )
         every { deviceProviderMock.getDevices() } returns deviceModels
