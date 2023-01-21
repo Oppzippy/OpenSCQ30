@@ -1,4 +1,4 @@
-name: "lib: test"
+name: "test"
 
 on:
   - push
@@ -8,11 +8,23 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Install dependencies
-        run: sudo apt-get install libdbus-1-dev pkg-config
+      - name: Install dependencies from apt
+        run: sudo apt-get install libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev
+      - name: Install rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: armv7-linux-androideabi,aarch64-linux-android,i686-linux-android,x86_64-linux-android
 
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
-      - name: Run tests
-        run: cargo test --package openscq30_lib
+      - name: Run rust tests
+        run: cargo test
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk
+      - name: Run android unit tests
+        working-directory: android
+        run: ./gradlew test
+      # - name: Run android instrumented tests
+      #   working-directory: android
+      #   run: ./gradlew connectedAndroidTest
