@@ -7,11 +7,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.oppzippy.openscq30.ui.deviceselection.BluetoothDeviceModel
 import com.oppzippy.openscq30.ui.deviceselection.BluetoothDeviceProvider
 import com.oppzippy.openscq30.ui.deviceselection.DeviceSelectionActivityView
-import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
-import io.mockk.mockk
 
 import org.junit.Test
 import org.junit.runner.RunWith
