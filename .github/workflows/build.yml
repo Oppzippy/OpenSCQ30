@@ -157,8 +157,6 @@ jobs:
           targets: armv7-linux-androideabi,aarch64-linux-android,i686-linux-android,x86_64-linux-android
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
-        with:
-          cache-directories: android
       - name: Install cargo-ndk
         run: cargo install cargo-ndk
       - name: Build
