@@ -2,6 +2,7 @@ package com.oppzippy.openscq30.ui.deviceselection
 
 import android.Manifest
 import android.content.Intent
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,7 +36,7 @@ fun DeviceSelectionActivityView(
             modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
         ) {
             DeviceSelection(devices, onRefreshClick = {
-                launcher.launch(Manifest.permission.BLUETOOTH_CONNECT)
+                launcher.launch(Manifest.permission.BLUETOOTH)
             }, onDeviceClick = { device ->
                 val intent = Intent(context, DeviceSettingsActivity::class.java)
                 intent.putExtra("macAddress", device.address)
