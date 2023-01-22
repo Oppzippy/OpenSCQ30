@@ -10,7 +10,7 @@ import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 @Composable
 fun <T> Dropdown(
     value: T,
-    values: Iterable<T>,
+    values: Iterable<Pair<T, String>>,
     label: String,
     onItemSelected: (value: T) -> Unit,
 ) {
@@ -33,12 +33,14 @@ fun <T> Dropdown(
             expanded = expanded,
             onDismissRequest = { expanded = false },
         ) {
-            values.forEach { newValue ->
+            values.forEach { valueAndText ->
+                val itemValue = valueAndText.first
+                val itemText = valueAndText.second
                 DropdownMenuItem(
-                    text = { Text(newValue.toString()) },
+                    text = { Text(itemText) },
                     onClick = {
                         expanded = false
-                        onItemSelected(newValue)
+                        onItemSelected(itemValue)
                     },
                 )
             }
@@ -50,9 +52,9 @@ fun <T> Dropdown(
 @Composable
 private fun DefaultPreview() {
     OpenSCQ30Theme {
-        var value by remember { mutableStateOf("Test") }
+        var value by remember { mutableStateOf(1) }
         Dropdown(value = value,
-            values = listOf("Test", "Test 2", "Test 3"),
+            values = listOf(Pair(1, "Test"), Pair(2, "Test 2"), Pair(3, "Test 3")),
             label = "Test Dropdown",
             onItemSelected = {
                 value = it

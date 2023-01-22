@@ -1,11 +1,9 @@
 package com.oppzippy.openscq30
 
 import androidx.activity.ComponentActivity
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.oppzippy.openscq30.lib.*
 import com.oppzippy.openscq30.soundcoredevice.SoundcoreDevice
@@ -16,7 +14,6 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Rule
@@ -35,10 +32,21 @@ class DeviceSettingsEqualizerTest {
     lateinit var deviceFactory: SoundcoreDeviceFactory
 
     private lateinit var equalizer: SemanticsMatcher
+    private lateinit var soundcoreSignature: SemanticsMatcher
+    private lateinit var acoustic: SemanticsMatcher
+    private lateinit var bassBooster: SemanticsMatcher
+    private lateinit var classical: SemanticsMatcher
+    private lateinit var custom: SemanticsMatcher
 
     @Before
     fun initialize() {
         equalizer = hasTextExactly(composeRule.activity.getString(R.string.equalizer))
+        soundcoreSignature =
+            hasTextExactly(composeRule.activity.getString(R.string.soundcore_signature))
+        acoustic = hasTextExactly(composeRule.activity.getString(R.string.acoustic))
+        bassBooster = hasTextExactly(composeRule.activity.getString(R.string.bass_booster))
+        classical = hasTextExactly(composeRule.activity.getString(R.string.classical))
+        custom = hasTextExactly(composeRule.activity.getString(R.string.custom))
     }
 
     @Test
@@ -57,9 +65,9 @@ class DeviceSettingsEqualizerTest {
                 onDeviceNotFound = {},
             )
         }
-        composeRule.onNode(equalizer).performClick()
-        composeRule.onNodeWithText("SoundcoreSignature").assertDoesNotExist()
-        composeRule.onNodeWithText("Classical").assertExists()
+        composeRule.onNode(equalizer, true).performClick()
+        composeRule.onNode(soundcoreSignature, true).assertDoesNotExist()
+        composeRule.onNode(classical, true).assertExists()
         val sliders = composeRule.onAllNodesWithTag("equalizerSlider")
         val values = listOf(30F, 30F, -20F, -20F, 0F, 20F, 30F, 40F)
         for (i in 0..7) {
@@ -82,9 +90,9 @@ class DeviceSettingsEqualizerTest {
                 onDeviceNotFound = {},
             )
         }
-        composeRule.onNode(equalizer).performClick()
-        composeRule.onNodeWithText("SoundcoreSignature").assertDoesNotExist()
-        composeRule.onNodeWithText("Custom").assertExists()
+        composeRule.onNode(equalizer, true).performClick()
+        composeRule.onNode(soundcoreSignature, true).assertDoesNotExist()
+        composeRule.onNode(custom, true).assertExists()
         val sliders = composeRule.onAllNodesWithTag("equalizerSlider")
         for (i in 0..7) {
             sliders[i].assertRangeInfoEquals(
@@ -109,9 +117,9 @@ class DeviceSettingsEqualizerTest {
                 onDeviceNotFound = {},
             )
         }
-        composeRule.onNode(equalizer).performClick()
-        composeRule.onNodeWithText("Acoustic").performClick()
-        composeRule.onNodeWithText("BassBooster").performClick()
+        composeRule.onNode(equalizer, true).performClick()
+        composeRule.onNode(acoustic, true).performClick()
+        composeRule.onNode(bassBooster, true).performClick()
         every { state.equalizerConfiguration() } returns EqualizerConfiguration(
             PresetEqualizerProfile.BassBooster
         )
@@ -151,8 +159,8 @@ class DeviceSettingsEqualizerTest {
         sliders[0].performTouchInput {
             swipe(center, centerRight, 100)
         }
-        composeRule.onNodeWithText("SoundcoreSignature").assertDoesNotExist()
-        composeRule.onNodeWithText("Custom").assertExists()
+        composeRule.onNode(soundcoreSignature, true).assertDoesNotExist()
+        composeRule.onNode(custom, true).assertExists()
     }
 
     private fun initializeDeviceFactoryWithOneDevice(equalizerConfiguration: EqualizerConfiguration): Pair<SoundcoreDevice, SoundcoreDeviceState> {

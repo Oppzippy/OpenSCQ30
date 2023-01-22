@@ -23,4 +23,27 @@
     <string name="title_activity_device_selection_compose">DeviceSelectionComposeActivity</string>
     <string name="no_devices_found">No Devices Found</string>
     <string name="title_activity_device_settings">DeviceSettingsActivity</string>
+    <string name="soundcore_signature">Soundcore Signature</string>
+    <string name="acoustic">Acoustic</string>
+    <string name="bass_booster">Bass Booster</string>
+    <string name="bass_reducer">Bass Reducer</string>
+    <string name="classical">Classical</string>
+    <string name="podcast">Podcast</string>
+    <string name="dance">Dance</string>
+    <string name="deep">Deep</string>
+    <string name="electronic">Electronic</string>
+    <string name="flat">Flat</string>
+    <string name="hip_hop">Hip Hop</string>
+    <string name="jazz">Jazz</string>
+    <string name="latin">Latin</string>
+    <string name="lounge">Lounge</string>
+    <string name="piano">Piano</string>
+    <string name="pop">Pop</string>
+    <string name="rnb">RnB</string>
+    <string name="rock">Rock</string>
+    <string name="small_speakers">Small Speakers</string>
+    <string name="spoken_word">Spoken Word</string>
+    <string name="treble_booster">Treble Booster</string>
+    <string name="treble_reducer">Treble Reducer</string>
+    <string name="custom">Custom</string>
 </resources>

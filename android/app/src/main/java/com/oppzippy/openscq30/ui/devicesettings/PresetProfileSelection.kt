@@ -10,9 +10,11 @@ import com.oppzippy.openscq30.R
 fun PresetProfileSelection(
     value: EqualizerProfile, onProfileSelected: (profile: EqualizerProfile) -> Unit
 ) {
+    val profiles = EqualizerProfile.values()
+
     Dropdown(
         value = value,
-        values = EqualizerProfile.values().asList(),
+        values = profiles.asList().map { Pair(it, stringResource(it.localizationStringId)) },
         label = stringResource(id = R.string.profile),
         onItemSelected = onProfileSelected,
     )
