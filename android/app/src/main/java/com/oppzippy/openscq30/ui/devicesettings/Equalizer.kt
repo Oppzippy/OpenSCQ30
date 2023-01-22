@@ -7,6 +7,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -57,7 +58,13 @@ private fun formatVolume(volume: Byte): String {
 
 @Composable
 private fun EqualizerSlider(value: Float, onValueChange: (value: Float) -> Unit) {
-    Slider(value = value, onValueChange = onValueChange, valueRange = -60F..60F, steps = 120)
+    Slider(
+        value = value,
+        onValueChange = onValueChange,
+        valueRange = -60F..60F,
+        steps = 120,
+        modifier = Modifier.testTag("equalizerSlider"),
+    )
 }
 
 @Preview(showBackground = true)
