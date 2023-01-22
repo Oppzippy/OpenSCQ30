@@ -35,12 +35,12 @@ fun SoundcoreDeviceSettings(device: SoundcoreDevice) {
         }
     }
 
-    val stateUpdateFlow = remember {
+    val equalizerConfigurationUpdateFlow = remember {
         MutableStateFlow(equalizerProfile.toEqualizerConfiguration(equalizerValues.toByteArray()))
     }
-    LaunchedEffect(stateUpdateFlow) {
-        stateUpdateFlow.distinctUntilChanged { old, new -> old.contentEquals(new) }.debounce(500)
-            .collectLatest {
+    LaunchedEffect(equalizerConfigurationUpdateFlow) {
+        equalizerConfigurationUpdateFlow.distinctUntilChanged { old, new -> old.contentEquals(new) }
+            .debounce(500).collectLatest {
                 device.setEqualizerConfiguration(it)
             }
     }
@@ -60,8 +60,10 @@ fun SoundcoreDeviceSettings(device: SoundcoreDevice) {
         },
         onEqualizerProfileChange = {
             equalizerProfile = it
-            stateUpdateFlow.value =
+            val newEqualizerConfiguration =
                 equalizerProfile.toEqualizerConfiguration(equalizerValues.toByteArray())
+            equalizerConfigurationUpdateFlow.value = newEqualizerConfiguration
+            equalizerValues = newEqualizerConfiguration.bandOffsets().volumeOffsets().asList()
         },
         onEqualizerValueChange = { changedIndex, changedValue ->
             equalizerProfile = EqualizerProfile.Custom
@@ -72,7 +74,7 @@ fun SoundcoreDeviceSettings(device: SoundcoreDevice) {
                     value
                 }
             }
-            stateUpdateFlow.value =
+            equalizerConfigurationUpdateFlow.value =
                 equalizerProfile.toEqualizerConfiguration(equalizerValues.toByteArray())
         },
     )
