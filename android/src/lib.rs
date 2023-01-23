@@ -3,7 +3,7 @@ mod packets;
 mod soundcore_device_utils;
 mod state;
 pub(crate) mod type_conversion;
-use log::Level;
+use log::LevelFilter;
 use rifgen::rifgen_attr::generate_interface;
 
 pub use crate::java_glue::*;
@@ -20,7 +20,7 @@ impl Init {
     pub fn logging() {
         android_logger::init_once(
             android_logger::Config::default()
-                .with_min_level(Level::Trace)
+                .with_max_level(LevelFilter::Trace)
                 .with_tag("openscq30-lib"),
         )
     }
