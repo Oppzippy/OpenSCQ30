@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.ui.deviceselection
+package com.oppzippy.openscq30.ui.deviceselection.composables
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.oppzippy.openscq30.ui.deviceselection.models.BluetoothDeviceModel
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable

@@ -1,8 +1,7 @@
-package com.oppzippy.openscq30.ui.deviceselection
+package com.oppzippy.openscq30.ui.deviceselection.composables
 
 import android.Manifest
 import android.content.Intent
-import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,9 +10,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.oppzippy.openscq30.ui.deviceselection.models.BluetoothDeviceProvider
 import com.oppzippy.openscq30.ui.devicesettings.DeviceSettingsActivity
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
-
 
 @Composable
 fun DeviceSelectionActivityView(

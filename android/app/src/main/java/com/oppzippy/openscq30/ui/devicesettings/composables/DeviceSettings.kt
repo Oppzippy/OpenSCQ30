@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.ui.devicesettings
+package com.oppzippy.openscq30.ui.devicesettings.composables
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
@@ -6,14 +6,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.PopUpToBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.oppzippy.openscq30.lib.AmbientSoundMode
 import com.oppzippy.openscq30.lib.NoiseCancelingMode
+import com.oppzippy.openscq30.ui.devicesettings.models.EqualizerProfile
+import com.oppzippy.openscq30.ui.devicesettings.models.Screen
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -1,7 +1,6 @@
 package com.oppzippy.openscq30.soundcoredevice
 
 import android.annotation.SuppressLint
-import android.annotation.TargetApi
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
@@ -22,7 +21,7 @@ import kotlin.jvm.optionals.getOrNull
 
 @SuppressLint("MissingPermission")
 @Suppress("DEPRECATION")
-class SoundcoreDeviceCallbackHandler() : BluetoothGattCallback() {
+class SoundcoreDeviceCallbackHandler : BluetoothGattCallback() {
     private lateinit var gatt: BluetoothGatt
     private var readCharacteristic: BluetoothGattCharacteristic? = null
     private var writeCharacteristic: BluetoothGattCharacteristic? = null

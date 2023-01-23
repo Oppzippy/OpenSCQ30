@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.ui.devicesettings
+package com.oppzippy.openscq30.ui.devicesettings.models
 
 import android.util.Log
 import com.oppzippy.openscq30.lib.EqualizerBandOffsets

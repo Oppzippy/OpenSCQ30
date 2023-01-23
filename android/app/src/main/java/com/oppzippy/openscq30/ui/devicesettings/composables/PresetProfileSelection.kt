@@ -1,10 +1,11 @@
-package com.oppzippy.openscq30.ui.devicesettings
+package com.oppzippy.openscq30.ui.devicesettings.composables
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.ui.devicesettings.models.EqualizerProfile
 
 @Composable
 fun PresetProfileSelection(

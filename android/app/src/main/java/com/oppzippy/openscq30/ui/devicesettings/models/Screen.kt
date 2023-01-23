@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.ui.devicesettings
+package com.oppzippy.openscq30.ui.devicesettings.models
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons

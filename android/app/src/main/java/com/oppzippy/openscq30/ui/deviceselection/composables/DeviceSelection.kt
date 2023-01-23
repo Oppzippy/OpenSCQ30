@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.ui.deviceselection
+package com.oppzippy.openscq30.ui.deviceselection.composables
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.ui.deviceselection.models.BluetoothDeviceModel
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @OptIn(ExperimentalMaterial3Api::class)

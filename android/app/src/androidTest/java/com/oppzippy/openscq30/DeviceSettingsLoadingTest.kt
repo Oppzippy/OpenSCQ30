@@ -6,7 +6,7 @@ import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.oppzippy.openscq30.soundcoredevice.SoundcoreDeviceFactory
-import com.oppzippy.openscq30.ui.devicesettings.DeviceSettingsActivityView
+import com.oppzippy.openscq30.ui.devicesettings.composables.DeviceSettingsActivityView
 import io.mockk.coEvery
 import io.mockk.coJustAwait
 import io.mockk.impl.annotations.MockK

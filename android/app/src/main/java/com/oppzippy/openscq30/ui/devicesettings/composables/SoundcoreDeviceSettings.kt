@@ -1,8 +1,9 @@
-package com.oppzippy.openscq30.ui.devicesettings
+package com.oppzippy.openscq30.ui.devicesettings.composables
 
 import androidx.compose.runtime.*
 import com.oppzippy.openscq30.soundcoredevice.SoundcoreDevice
 import com.oppzippy.openscq30.soundcoredevice.contentEquals
+import com.oppzippy.openscq30.ui.devicesettings.models.EqualizerProfile
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest

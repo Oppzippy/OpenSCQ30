@@ -7,12 +7,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.oppzippy.openscq30.lib.*
 import com.oppzippy.openscq30.soundcoredevice.SoundcoreDevice
 import com.oppzippy.openscq30.soundcoredevice.SoundcoreDeviceFactory
-import com.oppzippy.openscq30.ui.devicesettings.DeviceSettingsActivityView
+import com.oppzippy.openscq30.ui.devicesettings.composables.DeviceSettingsActivityView
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
 import kotlinx.coroutines.flow.MutableStateFlow
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test

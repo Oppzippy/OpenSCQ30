@@ -4,9 +4,9 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.oppzippy.openscq30.ui.deviceselection.BluetoothDeviceModel
-import com.oppzippy.openscq30.ui.deviceselection.BluetoothDeviceProvider
-import com.oppzippy.openscq30.ui.deviceselection.DeviceSelectionActivityView
+import com.oppzippy.openscq30.ui.deviceselection.models.BluetoothDeviceModel
+import com.oppzippy.openscq30.ui.deviceselection.models.BluetoothDeviceProvider
+import com.oppzippy.openscq30.ui.deviceselection.composables.DeviceSelectionActivityView
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule

@@ -8,7 +8,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.oppzippy.openscq30.lib.*
 import com.oppzippy.openscq30.soundcoredevice.SoundcoreDevice
 import com.oppzippy.openscq30.soundcoredevice.SoundcoreDeviceFactory
-import com.oppzippy.openscq30.ui.devicesettings.DeviceSettingsActivityView
+import com.oppzippy.openscq30.ui.devicesettings.composables.DeviceSettingsActivityView
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.MockK

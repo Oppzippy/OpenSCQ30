@@ -1,9 +1,10 @@
-package com.oppzippy.openscq30.ui.devicesettings
+package com.oppzippy.openscq30.ui.devicesettings.composables
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.tooling.preview.Preview
+import com.oppzippy.openscq30.ui.devicesettings.models.EqualizerProfile
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable

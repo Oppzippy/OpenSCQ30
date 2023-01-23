@@ -1,15 +1,11 @@
 package com.oppzippy.openscq30.soundcoredevice
 
-import android.Manifest
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.Context
-import android.content.pm.PackageManager
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.oppzippy.openscq30.lib.SoundcoreDeviceState
 import dagger.hilt.android.qualifiers.ActivityContext
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 

@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.ui.deviceselection
+package com.oppzippy.openscq30.ui.deviceselection.models
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
