@@ -143,10 +143,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             },
             Command::Get(get_command) => match get_command {
                 GetCommand::AmbientSoundMode => {
-                    println!("{}", device.ambient_sound_mode().await.id())
+                    println!("{}", device.ambient_sound_mode().await.to_string())
                 }
                 GetCommand::NoiseCancelingMode => {
-                    println!("{}", device.noise_canceling_mode().await.id())
+                    println!("{}", device.noise_canceling_mode().await.to_string())
                 }
                 GetCommand::Equalizer => {
                     let equalizer_configuration = device.equalizer_configuration().await;
