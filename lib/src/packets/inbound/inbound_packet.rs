@@ -1,10 +1,13 @@
-use super::{AmbientSoundModeUpdatePacket, OkPacket, StateUpdatePacket};
+use super::{
+    AmbientSoundModeUpdatePacket, SetAmbientModeOkPacket, SetEqualizerOkPacket, StateUpdatePacket,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum InboundPacket {
     StateUpdate(StateUpdatePacket),
     AmbientSoundModeUpdate(AmbientSoundModeUpdatePacket),
-    Ok(OkPacket),
+    SetAmbientModeOk(SetAmbientModeOkPacket),
+    SetEqualizerOk(SetEqualizerOkPacket),
 }
 
 impl InboundPacket {
@@ -14,6 +17,7 @@ impl InboundPacket {
             .or_else(|| {
                 AmbientSoundModeUpdatePacket::new(bytes).map(InboundPacket::AmbientSoundModeUpdate)
             })
-            .or_else(|| OkPacket::new(bytes).map(InboundPacket::Ok))
+            .or_else(|| SetAmbientModeOkPacket::new(bytes).map(InboundPacket::SetAmbientModeOk))
+            .or_else(|| SetEqualizerOkPacket::new(bytes).map(InboundPacket::SetEqualizerOk))
     }
 }
