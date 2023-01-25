@@ -2,18 +2,18 @@
 package com.oppzippy.openscq30.lib;
 import androidx.annotation.NonNull;
 
-public final class OkPacket {
+public final class SetEqualizerOkPacket {
 
-    public OkPacket() throws Exception {
+    public SetEqualizerOkPacket() throws Exception {
         mNativeObj = init();
     }
     private static native long init() throws Exception;
 
-    public static @NonNull java.util.Optional<OkPacket> fromBytes(@NonNull byte [] bytes) throws Exception {
+    public static @NonNull java.util.Optional<SetEqualizerOkPacket> fromBytes(@NonNull byte [] bytes) throws Exception {
         long ret = do_fromBytes(bytes);
-        java.util.Optional<OkPacket> convRet;
+        java.util.Optional<SetEqualizerOkPacket> convRet;
         if (ret != 0) {
-            convRet = java.util.Optional.of(new OkPacket(InternalPointerMarker.RAW_PTR, ret));
+            convRet = java.util.Optional.of(new SetEqualizerOkPacket(InternalPointerMarker.RAW_PTR, ret));
         } else {
             convRet = java.util.Optional.empty();
         }
@@ -38,7 +38,7 @@ public final class OkPacket {
         }
     }
     private static native void do_delete(long me);
-    /*package*/ OkPacket(InternalPointerMarker marker, long ptr) {
+    /*package*/ SetEqualizerOkPacket(InternalPointerMarker marker, long ptr) {
         assert marker == InternalPointerMarker.RAW_PTR;
         this.mNativeObj = ptr;
     }

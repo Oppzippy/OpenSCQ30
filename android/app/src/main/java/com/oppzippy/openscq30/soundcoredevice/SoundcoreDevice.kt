@@ -34,7 +34,8 @@ class SoundcoreDevice(
                                 .withNoiseCancelingMode(it.packet.noiseCancelingMode())
                     }
                     is Packet.StateUpdate -> _stateFlow.value = SoundcoreDeviceState(it.packet)
-                    is Packet.Ok -> {}
+                    is Packet.SetAmbientModeOk -> {}
+                    is Packet.SetEqualizerOk -> {}
                 }
             }
         }

@@ -7,11 +7,7 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothProfile
 import android.util.Log
-import com.oppzippy.openscq30.lib.AmbientSoundModeUpdatePacket
-import com.oppzippy.openscq30.lib.OkPacket
-import com.oppzippy.openscq30.lib.RequestStatePacket
-import com.oppzippy.openscq30.lib.SoundcoreDeviceUtils
-import com.oppzippy.openscq30.lib.StateUpdatePacket
+import com.oppzippy.openscq30.lib.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -114,8 +110,12 @@ class SoundcoreDeviceCallbackHandler : BluetoothGattCallback() {
                 _packetsFlow.tryEmit(Packet.StateUpdate(it))
                 return
             }
-            OkPacket.fromBytes(value).getOrNull()?.let {
-                _packetsFlow.tryEmit(Packet.Ok(it))
+            SetAmbientModeOkPacket.fromBytes(value).getOrNull()?.let {
+                _packetsFlow.tryEmit(Packet.SetAmbientModeOk(it))
+                return
+            }
+            SetEqualizerOkPacket.fromBytes(value).getOrNull()?.let {
+                _packetsFlow.tryEmit(Packet.SetEqualizerOk(it))
                 return
             }
             Log.i("unknown-packet", "got unknown packet")
