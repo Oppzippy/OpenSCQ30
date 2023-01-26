@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.ui.devicesettings.composables
+package com.oppzippy.openscq30.ui.devicesettings.composables.general
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
@@ -12,6 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.oppzippy.openscq30.lib.AmbientSoundMode
 import com.oppzippy.openscq30.lib.NoiseCancelingMode
 import com.oppzippy.openscq30.R
@@ -19,34 +20,36 @@ import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
 fun GeneralSettings(
-    ambientSoundMode: AmbientSoundMode,
-    noiseCancelingMode: NoiseCancelingMode,
-    onAmbientSoundModeChange: (ambientSoundMode: AmbientSoundMode) -> Unit,
-    onNoiseCancelingModeChange: (noiseCancelingMode: NoiseCancelingMode) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: GeneralSettingsViewModel = hiltViewModel(),
 ) {
-    Column(modifier = modifier) {
-        GroupHeader(stringResource(R.string.ambient_sound_mode))
-        LabeledRadioButtonGroup(
-            selectedValue = ambientSoundMode,
-            values = linkedMapOf(
-                Pair(AmbientSoundMode.Normal, stringResource(R.string.normal)),
-                Pair(AmbientSoundMode.Transparency, stringResource(R.string.transparency)),
-                Pair(AmbientSoundMode.NoiseCanceling, stringResource(R.string.noise_canceling)),
-            ),
-            onValueChange = onAmbientSoundModeChange,
-        )
-        Spacer(modifier = Modifier.padding(vertical = 8.dp))
-        GroupHeader(stringResource(R.string.noise_canceling_mode))
-        LabeledRadioButtonGroup(
-            selectedValue = noiseCancelingMode,
-            values = linkedMapOf(
-                Pair(NoiseCancelingMode.Transport, stringResource(R.string.transport)),
-                Pair(NoiseCancelingMode.Indoor, stringResource(R.string.indoor)),
-                Pair(NoiseCancelingMode.Outdoor, stringResource(R.string.outdoor)),
-            ),
-            onValueChange = onNoiseCancelingModeChange,
-        )
+    val ambientSoundMode = viewModel.ambientSoundMode?.collectAsState()
+    val noiseCancelingMode = viewModel.noiseCancelingMode?.collectAsState()
+
+    if (ambientSoundMode != null && noiseCancelingMode != null) {
+        Column(modifier = modifier) {
+            GroupHeader(stringResource(R.string.ambient_sound_mode))
+            LabeledRadioButtonGroup(
+                selectedValue = ambientSoundMode.value,
+                values = linkedMapOf(
+                    Pair(AmbientSoundMode.Normal, stringResource(R.string.normal)),
+                    Pair(AmbientSoundMode.Transparency, stringResource(R.string.transparency)),
+                    Pair(AmbientSoundMode.NoiseCanceling, stringResource(R.string.noise_canceling)),
+                ),
+                onValueChange = { viewModel.setAmbientSoundMode(it) },
+            )
+            Spacer(modifier = Modifier.padding(vertical = 8.dp))
+            GroupHeader(stringResource(R.string.noise_canceling_mode))
+            LabeledRadioButtonGroup(
+                selectedValue = noiseCancelingMode.value,
+                values = linkedMapOf(
+                    Pair(NoiseCancelingMode.Transport, stringResource(R.string.transport)),
+                    Pair(NoiseCancelingMode.Indoor, stringResource(R.string.indoor)),
+                    Pair(NoiseCancelingMode.Outdoor, stringResource(R.string.outdoor)),
+                ),
+                onValueChange = { viewModel.setNoiseCancelingMode(it) },
+            )
+        }
     }
 }
 
@@ -92,13 +95,6 @@ private fun LabeledRadioButton(text: String, selected: Boolean, onClick: () -> U
 @Composable
 private fun DefaultPreview() {
     OpenSCQ30Theme {
-        var ambientSoundMode by remember { mutableStateOf(AmbientSoundMode.Normal) }
-        var noiseCancelingMode by remember { mutableStateOf(NoiseCancelingMode.Transport) }
-        GeneralSettings(
-            ambientSoundMode = ambientSoundMode,
-            noiseCancelingMode = noiseCancelingMode,
-            onAmbientSoundModeChange = { ambientSoundMode = it },
-            onNoiseCancelingModeChange = { noiseCancelingMode = it },
-        )
+        GeneralSettings()
     }
 }

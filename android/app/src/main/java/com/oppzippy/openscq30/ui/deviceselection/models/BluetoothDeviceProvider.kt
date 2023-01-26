@@ -8,12 +8,8 @@ import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.oppzippy.openscq30.lib.SoundcoreDeviceUtils
-import dagger.hilt.android.qualifiers.ActivityContext
-import javax.inject.Inject
 
-class BluetoothDeviceProvider @Inject constructor(
-    @ActivityContext private val context: Context,
-) {
+class BluetoothDeviceProvider(private val context: Context) {
     fun getDevices(): List<BluetoothDeviceModel> {
         val bluetoothManager: BluetoothManager =
             context.getSystemService(BluetoothManager::class.java)

@@ -7,6 +7,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.oppzippy.openscq30.ui.deviceselection.models.BluetoothDeviceModel
 import com.oppzippy.openscq30.ui.deviceselection.models.BluetoothDeviceProvider
 import com.oppzippy.openscq30.ui.deviceselection.composables.DeviceSelectionActivityView
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
@@ -17,16 +19,20 @@ import org.junit.runner.RunWith
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
+import javax.inject.Inject
 
-@RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class DeviceSelectionActivityViewTest {
     @get:Rule
     val mockkRule = MockKRule(this)
 
-    @get:Rule
-    val composeRule = createAndroidComposeRule<ComponentActivity>()
+    @get:Rule(order = 1)
+    val hiltRule = HiltAndroidRule(this)
 
-    @MockK
+    @get:Rule(order = 2)
+    val composeRule = createAndroidComposeRule<MainActivity>()
+
+    @Inject
     lateinit var deviceProviderMock: BluetoothDeviceProvider
 
     private lateinit var noDevicesFound: SemanticsMatcher
@@ -34,6 +40,8 @@ class DeviceSelectionActivityViewTest {
 
     @Before
     fun initialize() {
+        hiltRule.inject()
+
         noDevicesFound = hasText(composeRule.activity.getString(R.string.no_devices_found))
         refreshButton =
             hasContentDescriptionExactly(composeRule.activity.getString(R.string.refresh))

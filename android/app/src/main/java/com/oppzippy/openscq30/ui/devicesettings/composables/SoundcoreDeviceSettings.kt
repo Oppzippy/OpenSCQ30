@@ -14,8 +14,6 @@ import kotlin.jvm.optionals.getOrNull
 @OptIn(FlowPreview::class)
 @Composable
 fun SoundcoreDeviceSettings(device: SoundcoreDevice) {
-    var ambientSoundMode by remember { mutableStateOf(device.state.ambientSoundMode()) }
-    var noiseCancelingMode by remember { mutableStateOf(device.state.noiseCancelingMode()) }
     var equalizerProfile by remember {
         mutableStateOf(
             EqualizerProfile.fromPresetProfile(
@@ -30,8 +28,6 @@ fun SoundcoreDeviceSettings(device: SoundcoreDevice) {
     }
     LaunchedEffect(device) {
         device.stateFlow.collectLatest {
-            ambientSoundMode = it.ambientSoundMode()
-            noiseCancelingMode = it.noiseCancelingMode()
             equalizerValues = it.equalizerConfiguration().bandOffsets().volumeOffsets().asList()
         }
     }
@@ -47,18 +43,8 @@ fun SoundcoreDeviceSettings(device: SoundcoreDevice) {
     }
 
     DeviceSettings(
-        ambientSoundMode = ambientSoundMode,
-        noiseCancelingMode = noiseCancelingMode,
         equalizerProfile = equalizerProfile,
         equalizerValues = equalizerValues,
-        onAmbientSoundModeChange = {
-            ambientSoundMode = it
-            device.setSoundMode(it, noiseCancelingMode)
-        },
-        onNoiseCancelingModeChange = {
-            noiseCancelingMode = it
-            device.setSoundMode(ambientSoundMode, it)
-        },
         onEqualizerProfileChange = {
             equalizerProfile = it
             val newEqualizerConfiguration =

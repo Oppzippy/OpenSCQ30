@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.ui.devicesettings.composables
+package com.oppzippy.openscq30.ui.devicesettings.composables.equalizer
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn

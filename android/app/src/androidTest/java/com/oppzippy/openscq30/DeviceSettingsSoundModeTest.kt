@@ -3,29 +3,35 @@ package com.oppzippy.openscq30
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.oppzippy.openscq30.lib.*
 import com.oppzippy.openscq30.soundcoredevice.SoundcoreDevice
 import com.oppzippy.openscq30.soundcoredevice.SoundcoreDeviceFactory
 import com.oppzippy.openscq30.ui.devicesettings.composables.DeviceSettingsActivityView
-import io.mockk.*
-import io.mockk.impl.annotations.MockK
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.junit4.MockKRule
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
+import javax.inject.Inject
 
-@RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class DeviceSettingsSoundModeTest {
     @get:Rule
     val mockkRule = MockKRule(this)
 
-    @get:Rule
-    val composeRule = createAndroidComposeRule<ComponentActivity>()
+    @get:Rule(order = 1)
+    val hiltRule = HiltAndroidRule(this)
 
-    @MockK
+    @get:Rule(order = 2)
+    val composeRule = createAndroidComposeRule<MainActivity>()
+
+    @Inject
     lateinit var deviceFactory: SoundcoreDeviceFactory
 
     private lateinit var ambientSoundModes: List<SemanticsMatcher>
@@ -39,6 +45,8 @@ class DeviceSettingsSoundModeTest {
 
     @Before
     fun initialize() {
+        hiltRule.inject()
+
         normal = hasTextExactly(composeRule.activity.getString(R.string.normal))
         transparency = hasTextExactly(composeRule.activity.getString(R.string.transparency))
         noiseCanceling = hasTextExactly(composeRule.activity.getString(R.string.noise_canceling))
@@ -72,7 +80,6 @@ class DeviceSettingsSoundModeTest {
         composeRule.setContent {
             DeviceSettingsActivityView(
                 macAddress = "",
-                soundcoreDeviceFactory = deviceFactory,
                 onDeviceNotFound = {},
             )
         }
@@ -93,7 +100,6 @@ class DeviceSettingsSoundModeTest {
         composeRule.setContent {
             DeviceSettingsActivityView(
                 macAddress = "",
-                soundcoreDeviceFactory = deviceFactory,
                 onDeviceNotFound = {},
             )
         }
@@ -117,7 +123,6 @@ class DeviceSettingsSoundModeTest {
         composeRule.setContent {
             DeviceSettingsActivityView(
                 macAddress = "",
-                soundcoreDeviceFactory = deviceFactory,
                 onDeviceNotFound = {},
             )
         }
@@ -132,7 +137,7 @@ class DeviceSettingsSoundModeTest {
         val equalizerConfiguration =
             EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature)
 
-        coEvery { deviceFactory.createSoundcoreDevice(any()) } returns device
+        coEvery { deviceFactory.createSoundcoreDevice(any(), any()) } returns device
         every { device.state } returns initialState
         every { device.stateFlow } returns stateFlow
         every { device.setEqualizerConfiguration(any()) } returns Unit

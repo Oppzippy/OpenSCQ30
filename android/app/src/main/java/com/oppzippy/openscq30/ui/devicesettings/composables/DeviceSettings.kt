@@ -12,6 +12,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.oppzippy.openscq30.lib.AmbientSoundMode
 import com.oppzippy.openscq30.lib.NoiseCancelingMode
+import com.oppzippy.openscq30.ui.devicesettings.composables.equalizer.EqualizerSettings
+import com.oppzippy.openscq30.ui.devicesettings.composables.general.GeneralSettings
 import com.oppzippy.openscq30.ui.devicesettings.models.EqualizerProfile
 import com.oppzippy.openscq30.ui.devicesettings.models.Screen
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
@@ -19,12 +21,8 @@ import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeviceSettings(
-    ambientSoundMode: AmbientSoundMode,
-    noiseCancelingMode: NoiseCancelingMode,
     equalizerProfile: EqualizerProfile,
     equalizerValues: List<Byte>,
-    onAmbientSoundModeChange: (ambientSoundMode: AmbientSoundMode) -> Unit,
-    onNoiseCancelingModeChange: (noiseCancelingMode: NoiseCancelingMode) -> Unit,
     onEqualizerProfileChange: (equalizerProfile: EqualizerProfile) -> Unit,
     onEqualizerValueChange: (index: Int, changedValue: Byte) -> Unit
 ) {
@@ -56,12 +54,7 @@ fun DeviceSettings(
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.General.route) {
-                GeneralSettings(
-                    ambientSoundMode = ambientSoundMode,
-                    noiseCancelingMode = noiseCancelingMode,
-                    onAmbientSoundModeChange = onAmbientSoundModeChange,
-                    onNoiseCancelingModeChange = onNoiseCancelingModeChange,
-                )
+                GeneralSettings()
             }
             composable(Screen.Equalizer.route) {
                 EqualizerSettings(
@@ -79,14 +72,9 @@ fun DeviceSettings(
 @Composable
 private fun DefaultPreview() {
     OpenSCQ30Theme {
-        var ambientSoundMode by remember { mutableStateOf(AmbientSoundMode.Normal) }
-        var noiseCancelingMode by remember { mutableStateOf(NoiseCancelingMode.Transport) }
         var equalizerProfile by remember { mutableStateOf(EqualizerProfile.Acoustic) }
         var equalizerValues by remember { mutableStateOf(listOf<Byte>(0, 0, 0, 0, 0, 0, 0, 0)) }
-        DeviceSettings(ambientSoundMode = ambientSoundMode,
-            noiseCancelingMode = noiseCancelingMode,
-            onAmbientSoundModeChange = { ambientSoundMode = it },
-            onNoiseCancelingModeChange = { noiseCancelingMode = it },
+        DeviceSettings(
             equalizerProfile = equalizerProfile,
             equalizerValues = equalizerValues,
             onEqualizerProfileChange = { equalizerProfile = it },
@@ -98,6 +86,7 @@ private fun DefaultPreview() {
                         value
                     }
                 }
-            })
+            },
+        )
     }
 }

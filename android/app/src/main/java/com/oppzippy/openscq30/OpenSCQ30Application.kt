@@ -7,7 +7,6 @@ import dagger.hilt.android.HiltAndroidApp
 @HiltAndroidApp
 class OpenSCQ30Application : Application() {
     init {
-        System.loadLibrary("openscq30_android")
-        Init.logging()
+        Native.initialize()
     }
 }

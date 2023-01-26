@@ -16,7 +16,7 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.oppzippy.openscq30.HiltTestRunner"
         vectorDrawables {
             useSupportLibrary true
         }
@@ -90,6 +90,15 @@ dependencies {
 
     implementation 'com.google.dagger:hilt-android:2.44.2'
     kapt 'com.google.dagger:hilt-android-compiler:2.44.2'
+    implementation 'androidx.hilt:hilt-navigation-compose:1.0.0'
+
+    // For instrumentation tests
+    androidTestImplementation 'com.google.dagger:hilt-android-testing:2.44.2'
+    kaptAndroidTest 'com.google.dagger:hilt-compiler:2.44.2'
+
+    // For local unit tests
+    testImplementation 'com.google.dagger:hilt-android-testing:2.44.2'
+    kaptTest 'com.google.dagger:hilt-compiler:2.44.2'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation "io.mockk:mockk:1.13.3"
@@ -106,12 +115,10 @@ kapt {
 }
 
 def rustBasePath = ".."
-def archTriplets = [
-    'armeabi-v7a': 'armv7-linux-androideabi',
-    'arm64-v8a': 'aarch64-linux-android',
-    'x86': 'i686-linux-android',
-    'x86_64': 'x86_64-linux-android',
-]
+def archTriplets = ['armeabi-v7a': 'armv7-linux-androideabi',
+                    'arm64-v8a'  : 'aarch64-linux-android',
+                    'x86'        : 'i686-linux-android',
+                    'x86_64'     : 'x86_64-linux-android',]
 
 archTriplets.each { arch, target ->
     // execute cargo metadata and get path to target directory
@@ -148,8 +155,7 @@ archTriplets.each { arch, target ->
     }
 
     // Hook up tasks to execute before building java
-    tasks.withType(JavaCompile) {
-        compileTask -> compileTask.dependsOn "rust-deploy-${arch}"
+    tasks.withType(JavaCompile) { compileTask -> compileTask.dependsOn "rust-deploy-${arch}"
     }
     preBuild.dependsOn "rust-deploy-${arch}"
 

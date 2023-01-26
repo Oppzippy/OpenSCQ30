@@ -3,18 +3,13 @@ package com.oppzippy.openscq30.soundcoredevice
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.Context
-import androidx.lifecycle.LifecycleCoroutineScope
 import com.oppzippy.openscq30.lib.SoundcoreDeviceState
-import dagger.hilt.android.qualifiers.ActivityContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
-import javax.inject.Inject
 
-class SoundcoreDeviceFactory @Inject constructor(
-    @ActivityContext private val context: Context,
-    private val scope: LifecycleCoroutineScope,
-) {
+class SoundcoreDeviceFactory(private val context: Context) {
     @Throws(SecurityException::class)
-    suspend fun createSoundcoreDevice(macAddress: String): SoundcoreDevice? {
+    suspend fun createSoundcoreDevice(macAddress: String, scope: CoroutineScope): SoundcoreDevice? {
         val bluetoothManager: BluetoothManager =
             context.getSystemService(BluetoothManager::class.java)
         val bluetoothDevice =
