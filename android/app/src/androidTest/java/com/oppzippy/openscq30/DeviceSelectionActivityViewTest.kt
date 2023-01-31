@@ -1,24 +1,17 @@
 package com.oppzippy.openscq30
 
-import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.oppzippy.openscq30.ui.deviceselection.models.BluetoothDeviceModel
-import com.oppzippy.openscq30.ui.deviceselection.models.BluetoothDeviceProvider
-import com.oppzippy.openscq30.ui.deviceselection.composables.DeviceSelectionActivityView
+import com.oppzippy.openscq30.features.ui.deviceselection.composables.DeviceSelectionActivityView
+import com.oppzippy.openscq30.features.ui.deviceselection.models.BluetoothDeviceModel
+import com.oppzippy.openscq30.features.ui.deviceselection.models.BluetoothDeviceProvider
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
-
-import org.junit.Test
-import org.junit.runner.RunWith
-
-import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
+import org.junit.Test
 import javax.inject.Inject
 
 @HiltAndroidTest

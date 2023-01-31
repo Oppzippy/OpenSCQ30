@@ -1,6 +1,7 @@
 package com.oppzippy.openscq30.hilt
 
-import com.oppzippy.openscq30.soundcoredevice.SoundcoreDeviceFactory
+import com.oppzippy.openscq30.features.soundcoredevice.SoundcoreDeviceFactory
+import com.oppzippy.openscq30.features.soundcoredevice.SoundcoreDeviceFactoryModule
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.components.SingletonComponent

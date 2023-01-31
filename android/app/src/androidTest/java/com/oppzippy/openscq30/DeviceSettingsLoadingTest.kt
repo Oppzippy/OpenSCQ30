@@ -1,11 +1,10 @@
 package com.oppzippy.openscq30
 
-import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import com.oppzippy.openscq30.soundcoredevice.SoundcoreDeviceFactory
-import com.oppzippy.openscq30.ui.devicesettings.composables.DeviceSettingsActivityView
+import com.oppzippy.openscq30.features.soundcoredevice.SoundcoreDeviceFactory
+import com.oppzippy.openscq30.features.ui.devicesettings.composables.DeviceSettingsActivityView
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.coEvery
@@ -15,7 +14,6 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 import javax.inject.Inject
 
 @HiltAndroidTest

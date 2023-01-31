@@ -1,13 +1,12 @@
 package com.oppzippy.openscq30
 
-import androidx.activity.ComponentActivity
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import com.oppzippy.openscq30.features.soundcoredevice.SoundcoreDevice
+import com.oppzippy.openscq30.features.soundcoredevice.SoundcoreDeviceFactory
+import com.oppzippy.openscq30.features.ui.devicesettings.composables.DeviceSettingsActivityView
 import com.oppzippy.openscq30.lib.*
-import com.oppzippy.openscq30.soundcoredevice.SoundcoreDevice
-import com.oppzippy.openscq30.soundcoredevice.SoundcoreDeviceFactory
-import com.oppzippy.openscq30.ui.devicesettings.composables.DeviceSettingsActivityView
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.coEvery

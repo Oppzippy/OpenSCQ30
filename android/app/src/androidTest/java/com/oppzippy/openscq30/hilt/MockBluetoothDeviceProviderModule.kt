@@ -1,6 +1,7 @@
 package com.oppzippy.openscq30.hilt
 
-import com.oppzippy.openscq30.ui.deviceselection.models.BluetoothDeviceProvider
+import com.oppzippy.openscq30.features.ui.deviceselection.BluetoothDeviceProviderModule
+import com.oppzippy.openscq30.features.ui.deviceselection.models.BluetoothDeviceProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.components.SingletonComponent
