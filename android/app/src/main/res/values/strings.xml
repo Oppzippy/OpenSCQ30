@@ -46,4 +46,6 @@
     <string name="treble_booster">Treble Booster</string>
     <string name="treble_reducer">Treble Reducer</string>
     <string name="custom">Custom</string>
+    <string name="request_permission">Request Permission</string>
+    <string name="bluetooth_permission_is_required">Bluetooth Permission is Required</string>
 </resources>
