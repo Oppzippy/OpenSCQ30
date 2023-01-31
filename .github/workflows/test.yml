@@ -9,7 +9,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install dependencies from apt
-        run: sudo apt-get install libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev
+        run: |
+          sudo apt-get update
+          sudo apt-get install libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
       - name: Cache cargo dependencies
