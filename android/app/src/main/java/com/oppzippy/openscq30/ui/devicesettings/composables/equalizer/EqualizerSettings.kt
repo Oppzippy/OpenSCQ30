@@ -4,19 +4,38 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.oppzippy.openscq30.ui.devicesettings.models.EqualizerProfile
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
+import kotlin.jvm.optionals.getOrNull
 
 @Composable
 fun EqualizerSettings(
-    profile: EqualizerProfile,
-    equalizerValues: List<Byte>,
-    onProfileChange: (profile: EqualizerProfile) -> Unit,
-    onEqualizerValueChange: (index: Int, changedValue: Byte) -> Unit,
+    viewModel: EqualizerSettingsViewModel = hiltViewModel()
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        PresetProfileSelection(value = profile, onProfileSelected = onProfileChange)
-        Equalizer(equalizerValues, onEqualizerValueChange)
+    val equalizerConfiguration by viewModel.displayedEqualizerConfiguration.collectAsState()
+
+    equalizerConfiguration?.let { equalizerConfiguration ->
+        val profile = equalizerConfiguration.equalizerProfile
+        val values = equalizerConfiguration.values
+
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            PresetProfileSelection(value = profile, onProfileSelected = { newProfile ->
+                viewModel.setEqualizerConfiguration(newProfile, values.toByteArray())
+            })
+            Equalizer(values = values, onValueChange = { changedIndex, changedValue ->
+                viewModel.setEqualizerConfiguration(
+                    profile,
+                    values.mapIndexed { index, value ->
+                        if (index == changedIndex) {
+                            changedValue
+                        } else {
+                            value
+                        }
+                    }.toByteArray(),
+                )
+            })
+        }
     }
 }
 
@@ -24,19 +43,6 @@ fun EqualizerSettings(
 @Composable
 private fun DefaultPreview() {
     OpenSCQ30Theme {
-        var profile by remember { mutableStateOf(EqualizerProfile.Acoustic) }
-        var equalizerValues by remember { mutableStateOf(listOf<Byte>(0, 0, 0, 0, 0, 0, 0, 0)) }
-        EqualizerSettings(profile = profile,
-            equalizerValues = equalizerValues,
-            onProfileChange = { profile = it },
-            onEqualizerValueChange = { changedIndex, changedValue ->
-                equalizerValues = equalizerValues.mapIndexed { index, value ->
-                    if (changedIndex == index) {
-                        changedValue
-                    } else {
-                        value
-                    }
-                }
-            })
+        EqualizerSettings()
     }
 }

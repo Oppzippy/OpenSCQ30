@@ -36,7 +36,7 @@ fun DeviceSettingsActivityView(
 
             soundcoreDevice.let {
                 if (it != null) {
-                    SoundcoreDeviceSettings(it)
+                    DeviceSettings()
                 } else {
                     Loading()
                 }
