@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
@@ -11,6 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.ui.deviceselection.models.BluetoothDeviceModel
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
@@ -40,14 +44,20 @@ fun DeviceSelection(
                 .fillMaxWidth()
                 .fillMaxHeight()
         ) {
-            if (devices.isEmpty()) {
-                NoDevicesFound()
-            } else {
-                DeviceList(
-                    devices = devices,
-                    modifier = Modifier.fillMaxWidth(),
-                    onDeviceClick = onDeviceClick,
-                )
+            SwipeRefresh(state = rememberSwipeRefreshState(false), onRefresh = {
+                onRefreshClick()
+            }) {
+                if (devices.isEmpty()) {
+                    NoDevicesFound()
+                } else {
+                    DeviceList(
+                        devices = devices,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(),
+                        onDeviceClick = onDeviceClick,
+                    )
+                }
             }
         }
     })
