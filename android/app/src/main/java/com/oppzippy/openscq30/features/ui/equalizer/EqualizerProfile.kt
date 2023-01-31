@@ -7,6 +7,7 @@ import com.oppzippy.openscq30.lib.PresetEqualizerProfile
 import com.oppzippy.openscq30.R
 
 enum class EqualizerProfile(val presetProfile: PresetEqualizerProfile?, val localizationStringId: Int) {
+    Custom(null, R.string.custom),
     SoundcoreSignature(PresetEqualizerProfile.SoundcoreSignature, R.string.soundcore_signature),
     Acoustic(PresetEqualizerProfile.Acoustic, R.string.acoustic),
     BassBooster(PresetEqualizerProfile.BassBooster, R.string.bass_booster),
@@ -28,8 +29,7 @@ enum class EqualizerProfile(val presetProfile: PresetEqualizerProfile?, val loca
     SmallSpeakers(PresetEqualizerProfile.SmallSpeakers, R.string.small_speakers),
     SpokenWord(PresetEqualizerProfile.SpokenWord, R.string.spoken_word),
     TrebleBooster(PresetEqualizerProfile.TrebleBooster, R.string.treble_booster),
-    TrebleReducer(PresetEqualizerProfile.TrebleReducer, R.string.treble_reducer),
-    Custom(null, R.string.custom);
+    TrebleReducer(PresetEqualizerProfile.TrebleReducer, R.string.treble_reducer);
 
     fun toEqualizerConfiguration(volumeOffsets: ByteArray?): EqualizerConfiguration {
         return if (presetProfile != null) {

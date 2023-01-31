@@ -18,7 +18,9 @@ import kotlin.math.pow
 import kotlin.math.roundToInt
 
 @Composable
-fun Equalizer(values: List<Byte>, onValueChange: (index: Int, value: Byte) -> Unit) {
+fun Equalizer(
+    values: List<Byte>, onValueChange: (index: Int, value: Byte) -> Unit, enabled: Boolean = true,
+) {
     if (values.size != 8) {
         throw IllegalArgumentException("There must be exactly 8 values")
     }
@@ -40,7 +42,7 @@ fun Equalizer(values: List<Byte>, onValueChange: (index: Int, value: Byte) -> Un
                     }
                     EqualizerSlider(value.toFloat(), onValueChange = { value ->
                         onValueChange(index, value.roundToInt().toByte())
-                    })
+                    }, enabled = enabled)
                 }
                 Divider(modifier = Modifier.padding(vertical = 4.dp))
             }
@@ -57,13 +59,18 @@ private fun formatVolume(volume: Byte): String {
 }
 
 @Composable
-private fun EqualizerSlider(value: Float, onValueChange: (value: Float) -> Unit) {
+private fun EqualizerSlider(
+    value: Float,
+    onValueChange: (value: Float) -> Unit,
+    enabled: Boolean = true,
+) {
     Slider(
         value = value,
         onValueChange = onValueChange,
         valueRange = -60F..60F,
         steps = 120,
         modifier = Modifier.testTag("equalizerSlider"),
+        enabled = enabled,
     )
 }
 
