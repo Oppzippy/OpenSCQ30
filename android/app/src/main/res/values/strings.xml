@@ -48,4 +48,14 @@
     <string name="custom">Custom</string>
     <string name="request_permission">Request Permission</string>
     <string name="bluetooth_permission_is_required">Bluetooth Permission is Required</string>
+    <string name="custom_profile">Custom Profile</string>
+    <string name="none">None</string>
+    <string name="add">Add</string>
+    <string name="create">Create</string>
+    <string name="new_custom_profile">New Custom Profile</string>
+    <string name="cancel">Cancel</string>
+    <string name="name">Name</string>
+    <string name="delete_custom_profile">Delete Custom Profile</string>
+    <string name="custom_profile_delete_confirm">Are you sure you want to delete \"%s\"?</string>
+    <string name="delete">Delete</string>
 </resources>

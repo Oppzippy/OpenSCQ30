@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.features.ui.equalizer
+package com.oppzippy.openscq30.features.ui.equalizer.models
 
 import kotlin.jvm.optionals.getOrNull
 

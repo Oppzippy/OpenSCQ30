@@ -4,6 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oppzippy.openscq30.features.soundcoredevice.contentEquals
 import com.oppzippy.openscq30.features.soundcoredevice.SoundcoreDeviceBox
+import com.oppzippy.openscq30.features.ui.equalizer.storage.CustomProfile
+import com.oppzippy.openscq30.features.ui.equalizer.models.EqualizerConfiguration
+import com.oppzippy.openscq30.features.ui.equalizer.models.EqualizerProfile
+import com.oppzippy.openscq30.features.ui.equalizer.storage.CustomProfileDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -13,10 +17,16 @@ import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @HiltViewModel
-class EqualizerSettingsViewModel @Inject constructor(private val deviceBox: SoundcoreDeviceBox) :
-    ViewModel() {
+class EqualizerSettingsViewModel @Inject constructor(
+    private val deviceBox: SoundcoreDeviceBox,
+    private val customProfileDao: CustomProfileDao,
+) : ViewModel() {
     val displayedEqualizerConfiguration: MutableStateFlow<EqualizerConfiguration?> =
         MutableStateFlow(null)
+    private val _selectedCustomProfile = MutableStateFlow<CustomProfile?>(null)
+    val selectedCustomProfile = _selectedCustomProfile.asStateFlow()
+    private val _customProfiles = MutableStateFlow<List<CustomProfile>>(listOf())
+    val customProfiles = _customProfiles.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -33,12 +43,20 @@ class EqualizerSettingsViewModel @Inject constructor(private val deviceBox: Soun
         }
 
         viewModelScope.launch {
-            displayedEqualizerConfiguration
-                .debounce(500).collectLatest {
-                    if (it != null) {
-                        deviceBox.device.value?.setEqualizerConfiguration(it.toRust())
-                    }
+            displayedEqualizerConfiguration.debounce(500).collectLatest {
+                if (it != null) {
+                    deviceBox.device.value?.setEqualizerConfiguration(it.toRust())
                 }
+            }
+        }
+
+        viewModelScope.launch {
+            refreshCustomProfiles()
+            displayedEqualizerConfiguration.collectLatest { equalizerConfiguration ->
+                if (equalizerConfiguration != null) {
+                    updateSelectedCustomProfile(equalizerConfiguration)
+                }
+            }
         }
     }
 
@@ -48,5 +66,44 @@ class EqualizerSettingsViewModel @Inject constructor(private val deviceBox: Soun
         val configuration =
             EqualizerConfiguration.fromRust(profile.toEqualizerConfiguration(values))
         displayedEqualizerConfiguration.value = configuration
+    }
+
+    fun createCustomProfile(name: String) {
+        displayedEqualizerConfiguration.value?.let {
+            viewModelScope.launch {
+                customProfileDao.insert(CustomProfile(name, it.values))
+                refreshCustomProfiles()
+            }
+        }
+    }
+
+    fun deleteCustomProfile(name: String) {
+        viewModelScope.launch {
+            customProfileDao.delete(name)
+            refreshCustomProfiles()
+        }
+    }
+
+    fun selectCustomProfile(customProfile: CustomProfile) {
+        setEqualizerConfiguration(EqualizerProfile.Custom, customProfile.values.toByteArray())
+    }
+
+    private suspend fun refreshCustomProfiles() {
+        _customProfiles.value = customProfileDao.getAll()
+        _selectedCustomProfile.value = _customProfiles.value.find {
+            it.name == _selectedCustomProfile.value?.name
+        }
+        displayedEqualizerConfiguration.value?.let { equalizerConfiguration ->
+            updateSelectedCustomProfile(equalizerConfiguration)
+        }
+    }
+
+    private fun updateSelectedCustomProfile(equalizerConfiguration: EqualizerConfiguration) {
+        _selectedCustomProfile.value =
+            if (equalizerConfiguration?.equalizerProfile == EqualizerProfile.Custom) {
+                _customProfiles.value.find { it.values == equalizerConfiguration.values }
+            } else {
+                null
+            }
     }
 }

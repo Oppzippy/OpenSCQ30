@@ -91,6 +91,14 @@ dependencies {
     implementation 'com.google.accompanist:accompanist-swiperefresh:0.28.0'
     implementation 'com.google.accompanist:accompanist-permissions:0.28.0'
 
+    def room_version = "2.5.0"
+
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+    testImplementation "androidx.room:room-testing:$room_version"
+
     implementation 'com.google.dagger:hilt-android:2.44.2'
     kapt 'com.google.dagger:hilt-android-compiler:2.44.2'
     implementation 'androidx.hilt:hilt-navigation-compose:1.0.0'

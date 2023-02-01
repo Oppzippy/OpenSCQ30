@@ -5,7 +5,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.features.ui.equalizer.EqualizerProfile
+import com.oppzippy.openscq30.features.ui.equalizer.models.EqualizerProfile
 
 @Composable
 fun PresetProfileSelection(
