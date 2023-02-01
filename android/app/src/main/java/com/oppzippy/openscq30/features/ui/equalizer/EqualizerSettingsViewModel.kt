@@ -21,8 +21,9 @@ class EqualizerSettingsViewModel @Inject constructor(
     private val deviceBox: SoundcoreDeviceBox,
     private val customProfileDao: CustomProfileDao,
 ) : ViewModel() {
-    val displayedEqualizerConfiguration: MutableStateFlow<EqualizerConfiguration?> =
+    private val _displayedEqualizerConfiguration: MutableStateFlow<EqualizerConfiguration?> =
         MutableStateFlow(null)
+    val displayedEqualizerConfiguration = _displayedEqualizerConfiguration.asStateFlow()
     private val _selectedCustomProfile = MutableStateFlow<CustomProfile?>(null)
     val selectedCustomProfile = _selectedCustomProfile.asStateFlow()
     private val _customProfiles = MutableStateFlow<List<CustomProfile>>(listOf())
@@ -37,13 +38,13 @@ class EqualizerSettingsViewModel @Inject constructor(
                 device.stateFlow.mapLatest {
                     it.equalizerConfiguration()
                 }.distinctUntilChanged { old, new -> old.contentEquals(new) }.collectLatest {
-                    displayedEqualizerConfiguration.value = EqualizerConfiguration.fromRust(it)
+                    _displayedEqualizerConfiguration.value = EqualizerConfiguration.fromRust(it)
                 }
             }
         }
 
         viewModelScope.launch {
-            displayedEqualizerConfiguration.debounce(500).collectLatest {
+            _displayedEqualizerConfiguration.debounce(500).collectLatest {
                 if (it != null) {
                     deviceBox.device.value?.setEqualizerConfiguration(it.toRust())
                 }
@@ -52,7 +53,7 @@ class EqualizerSettingsViewModel @Inject constructor(
 
         viewModelScope.launch {
             refreshCustomProfiles()
-            displayedEqualizerConfiguration.collectLatest { equalizerConfiguration ->
+            _displayedEqualizerConfiguration.collectLatest { equalizerConfiguration ->
                 if (equalizerConfiguration != null) {
                     updateSelectedCustomProfile(equalizerConfiguration)
                 }
@@ -65,11 +66,11 @@ class EqualizerSettingsViewModel @Inject constructor(
         // will use proper values.
         val configuration =
             EqualizerConfiguration.fromRust(profile.toEqualizerConfiguration(values))
-        displayedEqualizerConfiguration.value = configuration
+        _displayedEqualizerConfiguration.value = configuration
     }
 
     fun createCustomProfile(name: String) {
-        displayedEqualizerConfiguration.value?.let {
+        _displayedEqualizerConfiguration.value?.let {
             viewModelScope.launch {
                 customProfileDao.insert(CustomProfile(name, it.values))
                 refreshCustomProfiles()
@@ -93,7 +94,7 @@ class EqualizerSettingsViewModel @Inject constructor(
         _selectedCustomProfile.value = _customProfiles.value.find {
             it.name == _selectedCustomProfile.value?.name
         }
-        displayedEqualizerConfiguration.value?.let { equalizerConfiguration ->
+        _displayedEqualizerConfiguration.value?.let { equalizerConfiguration ->
             updateSelectedCustomProfile(equalizerConfiguration)
         }
     }
