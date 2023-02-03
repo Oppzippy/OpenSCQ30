@@ -5,6 +5,7 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.oppzippy.openscq30.features.soundcoredevice.SoundcoreDevice
 import com.oppzippy.openscq30.features.soundcoredevice.SoundcoreDeviceFactory
+import com.oppzippy.openscq30.features.soundcoredevice.contentEquals
 import com.oppzippy.openscq30.features.ui.devicesettings.composables.DeviceSettingsActivityView
 import com.oppzippy.openscq30.lib.*
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -13,6 +14,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Rule
@@ -110,6 +112,7 @@ class DeviceSettingsEqualizerTest {
         val pair = initializeDeviceFactoryWithOneDevice(
             equalizerConfiguration = EqualizerConfiguration(PresetEqualizerProfile.Acoustic),
         )
+        val device = pair.first
         val state = pair.second
 
         composeRule.setContent {
@@ -121,6 +124,14 @@ class DeviceSettingsEqualizerTest {
         composeRule.onNode(equalizer, true).performClick()
         composeRule.onNode(acoustic, true).performClick()
         composeRule.onNode(bassBooster, true).performClick()
+        Thread.sleep(600) // Wait for debounce
+        verify {
+            device.setEqualizerConfiguration(match {
+                it.contentEquals(
+                    EqualizerConfiguration(PresetEqualizerProfile.BassBooster)
+                )
+            })
+        }
         every { state.equalizerConfiguration() } returns EqualizerConfiguration(
             PresetEqualizerProfile.BassBooster
         )
@@ -138,10 +149,13 @@ class DeviceSettingsEqualizerTest {
 
     @Test
     fun testSetCustom() {
+        val values = byteArrayOf(0, 10, 15, -15, 60, -60, 10, -5)
         val pair = initializeDeviceFactoryWithOneDevice(
-            equalizerConfiguration = EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
+            equalizerConfiguration = EqualizerConfiguration(
+                EqualizerBandOffsets(values),
+            ),
         )
-        val state = pair.second
+        val device = pair.first
 
         composeRule.setContent {
             DeviceSettingsActivityView(
@@ -150,17 +164,18 @@ class DeviceSettingsEqualizerTest {
             )
         }
         composeRule.onNode(equalizer).performClick()
-        val values = byteArrayOf(0, 10, 15, -15, 60, -60, 10, -5)
-        every { state.equalizerConfiguration() } returns EqualizerConfiguration(
-            EqualizerBandOffsets(values),
-        )
 
         val sliders = composeRule.onAllNodesWithTag("equalizerSlider")
         sliders[0].performTouchInput {
             swipe(center, centerRight, 100)
         }
-        composeRule.onNode(soundcoreSignature, true).assertDoesNotExist()
-        composeRule.onNode(custom, true).assertExists()
+
+        Thread.sleep(600) // Wait for debounce
+        verify {
+            device.setEqualizerConfiguration(match {
+                it.bandOffsets().volumeOffsets().first() > 0
+            })
+        }
     }
 
     private fun initializeDeviceFactoryWithOneDevice(equalizerConfiguration: EqualizerConfiguration): Pair<SoundcoreDevice, SoundcoreDeviceState> {
