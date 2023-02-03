@@ -13,11 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.features.ui.equalizer.models.EqualizerSliderViewModel
-import java.text.NumberFormat
+import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -26,32 +25,20 @@ fun EqualizerSlider(
     hz: Int,
     value: Byte,
     onValueChange: (value: Byte) -> Unit,
+    text: String,
+    onTextChange: (text: String) -> Unit,
     enabled: Boolean = true,
-    viewModel: EqualizerSliderViewModel = viewModel(key = hz.toString()),
 ) {
-    val displayedText by viewModel.displayedText.collectAsState()
-    viewModel.checkForValueChange(value)
-
     Column {
         Row {
-            if (enabled) {
-                TextField(
-                    value = displayedText,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.width(100.dp),
-                    label = { Text(stringResource(R.string.hz, hz)) },
-                    onValueChange = { viewModel.onValueChange(it, onValueChange) },
-                    visualTransformation = { viewModel.transformText(it) },
-                )
-            } else {
-                TextField(
-                    value = viewModel.formatVolume(value),
-                    onValueChange = {},
-                    modifier = Modifier.width(100.dp),
-                    label = { Text(stringResource(R.string.hz, hz)) },
-                    enabled = false,
-                )
-            }
+            TextField(
+                value = text,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.width(100.dp),
+                label = { Text(stringResource(R.string.hz, hz)) },
+                onValueChange = onTextChange,
+                enabled = enabled
+            )
             Slider(
                 value = value.toFloat(),
                 onValueChange = {
@@ -66,3 +53,10 @@ fun EqualizerSlider(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun DefaultPreview() {
+    OpenSCQ30Theme {
+        EqualizerSlider(hz = 100, value = 0, onValueChange = {}, text = "0", onTextChange = {})
+    }
+}

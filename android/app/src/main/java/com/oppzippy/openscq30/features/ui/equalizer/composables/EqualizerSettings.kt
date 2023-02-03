@@ -7,7 +7,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -30,24 +29,25 @@ fun EqualizerSettings(
         var isDeleteDialogOpen by remember { mutableStateOf(false) }
         val selectedCustomProfile by viewModel.selectedCustomProfile.collectAsState()
         val customProfiles by viewModel.customProfiles.collectAsState()
+        val valueTexts by viewModel.valueTexts.collectAsState()
 
         CreateCustomProfileDialog(
             isOpen = isCreateDialogOpen,
             onDismiss = { isCreateDialogOpen = false },
             onCreateCustomProfile = { viewModel.createCustomProfile(it) },
         )
-        selectedCustomProfile?.let { profile ->
+        selectedCustomProfile?.let { customProfile ->
             DeleteCustomProfileDialog(
                 isOpen = isDeleteDialogOpen,
-                profileName = profile.name,
+                profileName = customProfile.name,
                 onDismiss = { isDeleteDialogOpen = false },
-                onDelete = { viewModel.deleteCustomProfile(profile.name) },
+                onDelete = { viewModel.deleteCustomProfile(customProfile.name) },
             )
         }
 
         Column {
             PresetProfileSelection(value = profile, onProfileSelected = { newProfile ->
-                viewModel.setEqualizerConfiguration(newProfile, values.toByteArray())
+                viewModel.selectPresetProfile(newProfile)
             })
             if (isCustomProfile) {
                 Row(
@@ -78,16 +78,11 @@ fun EqualizerSettings(
                 values = values,
                 enabled = isCustomProfile,
                 onValueChange = { changedIndex, changedValue ->
-                    viewModel.setEqualizerConfiguration(
-                        profile,
-                        values.mapIndexed { index, value ->
-                            if (index == changedIndex) {
-                                changedValue
-                            } else {
-                                value
-                            }
-                        }.toByteArray(),
-                    )
+                    viewModel.onValueChange(changedIndex, changedValue)
+                },
+                texts = valueTexts,
+                onTextChanged = { index, value ->
+                    viewModel.onValueTextChange(index, value)
                 },
             )
         }

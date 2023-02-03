@@ -13,9 +13,13 @@ import kotlin.math.roundToInt
 
 @Composable
 fun Equalizer(
-    values: List<Byte>, onValueChange: (index: Int, value: Byte) -> Unit, enabled: Boolean = true,
+    values: List<Byte>,
+    onValueChange: (index: Int, value: Byte) -> Unit,
+    texts: List<String>,
+    onTextChanged: (index: Int, value: String) -> Unit,
+    enabled: Boolean = true,
 ) {
-    if (values.size != 8) {
+    if (values.size != 8 || texts.size != 8) {
         throw IllegalArgumentException("There must be exactly 8 values")
     }
     LazyColumn(
@@ -26,8 +30,12 @@ fun Equalizer(
                 EqualizerSlider(
                     hz = (100 * 2F.pow(index)).roundToInt(),
                     value = value,
-                    onValueChange = { value ->
-                        onValueChange(index, value)
+                    onValueChange = {
+                        onValueChange(index, it)
+                    },
+                    text = texts[index],
+                    onTextChange = {
+                        onTextChanged(index, it)
                     },
                     enabled = enabled,
                 )
@@ -54,6 +62,8 @@ private fun DefaultPreview() {
                     }
                 }
             },
+            texts = values.map { it.toString() },
+            onTextChanged = { _, _ -> },
         )
     }
 }

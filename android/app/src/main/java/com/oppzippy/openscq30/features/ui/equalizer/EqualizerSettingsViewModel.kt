@@ -13,6 +13,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
@@ -28,6 +29,8 @@ class EqualizerSettingsViewModel @Inject constructor(
     val selectedCustomProfile = _selectedCustomProfile.asStateFlow()
     private val _customProfiles = MutableStateFlow<List<CustomProfile>>(listOf())
     val customProfiles = _customProfiles.asStateFlow()
+    private val _valueTexts = MutableStateFlow(List(8) { "" })
+    val valueTexts = _valueTexts.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -39,6 +42,14 @@ class EqualizerSettingsViewModel @Inject constructor(
                     it.equalizerConfiguration()
                 }.distinctUntilChanged { old, new -> old.contentEquals(new) }.collectLatest {
                     _displayedEqualizerConfiguration.value = EqualizerConfiguration.fromRust(it)
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            _displayedEqualizerConfiguration.collectLatest {
+                if (it != null) {
+                    refreshValueTexts(it.values)
                 }
             }
         }
@@ -61,7 +72,7 @@ class EqualizerSettingsViewModel @Inject constructor(
         }
     }
 
-    fun setEqualizerConfiguration(profile: EqualizerProfile, values: ByteArray) {
+    private fun setEqualizerConfiguration(profile: EqualizerProfile, values: ByteArray) {
         // Values match the display, not the profile. Creating the rust EqualizerConfiguration first
         // will use proper values.
         val configuration =
@@ -87,6 +98,55 @@ class EqualizerSettingsViewModel @Inject constructor(
 
     fun selectCustomProfile(customProfile: CustomProfile) {
         setEqualizerConfiguration(EqualizerProfile.Custom, customProfile.values.toByteArray())
+    }
+
+    fun onValueTextChange(changedIndex: Int, changedText: String) {
+        var reformattedText = changedText
+        try {
+            val value = BigDecimal(changedText).multiply(BigDecimal.TEN)
+                .coerceIn(BigDecimal(-60), BigDecimal(60))
+            onValueChange(changedIndex, value.toByte())
+            // don't delete trailing decimals
+            if (!changedText.endsWith(".") && !changedText.endsWith(",")) {
+                reformattedText = value.div(BigDecimal.TEN).toString()
+            }
+        } catch (_: NumberFormatException) {
+        }
+
+        _valueTexts.value = _valueTexts.value.mapIndexed { index, text ->
+            if (index == changedIndex) {
+                reformattedText
+            } else {
+                text
+            }
+        }
+    }
+
+    fun onValueChange(changedIndex: Int, changedValue: Byte) {
+        _displayedEqualizerConfiguration?.value?.let { equalizerConfiguration ->
+            setEqualizerConfiguration(
+                equalizerConfiguration.equalizerProfile,
+                equalizerConfiguration.values.mapIndexed { index, value ->
+                    if (index == changedIndex) {
+                        changedValue
+                    } else {
+                        value
+                    }
+                }.toByteArray(),
+            )
+        }
+    }
+
+    private fun refreshValueTexts(values: List<Byte>) {
+        _valueTexts.value = values.map {
+            BigDecimal(it.toInt()).divide(BigDecimal.TEN).toString()
+        }
+    }
+
+    fun selectPresetProfile(profile: EqualizerProfile) {
+        _displayedEqualizerConfiguration.value?.let {
+            setEqualizerConfiguration(profile, it.values.toByteArray())
+        }
     }
 
     private suspend fun refreshCustomProfiles() {
