@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{sync::Arc, rc::Rc};
 
 use gtk::{
     gio,
@@ -14,6 +14,7 @@ use openscq30_lib::{
         AmbientSoundMode, NoiseCancelingMode,
     }, soundcore_bluetooth::btleplug, state::SoundcoreDeviceState,
 };
+use settings::settings_file::SettingsFile;
 use swappable_broadcast::SwappableBroadcastReceiver;
 use tracing::Level;
 #[cfg(debug_assertions)]
@@ -24,6 +25,7 @@ mod objects;
 mod widgets;
 mod gtk_openscq30_lib;
 mod swappable_broadcast;
+mod settings;
 
 fn main() {
     let subscriber_builder = tracing_subscriber::fmt()
@@ -61,6 +63,14 @@ fn run_application() {
     app.run();
 }
 
+fn get_settings_file() -> SettingsFile {
+    let settings = SettingsFile::new(glib::user_data_dir().join("OpenSCQ30").join("settings.toml"));
+    if let Err(err) = settings.load() {
+        tracing::warn!("initial load of settings file failed: {:?}", err)
+    }
+    settings
+}
+
 fn build_ui(application: &impl IsA<Application>) {
     let tokio_runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(1)
@@ -79,7 +89,7 @@ fn build_ui(application: &impl IsA<Application>) {
 
     let gtk_registry = Arc::new(GtkSoundcoreDeviceRegistry::new(registry, tokio_runtime));
 
-    let main_window = MainWindow::new(application);
+    let main_window = MainWindow::new(application, Rc::new(get_settings_file()));
     let state_update_receiver: Arc<SwappableBroadcastReceiver<SoundcoreDeviceState>> = Arc::new(SwappableBroadcastReceiver::new());
 
     let main_context = MainContext::default();

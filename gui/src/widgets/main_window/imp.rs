@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use gtk::{
     glib::{self, once_cell::sync::Lazy, subclass::Signal},
     prelude::{InitializingWidgetExt, ObjectExt, StaticType},
@@ -7,12 +9,16 @@ use gtk::{
         window::WindowImpl,
     },
     traits::GtkWindowExt,
-    CompositeTemplate, TemplateChild,
+    CompositeTemplate, Inhibit, TemplateChild,
 };
 
 use gtk::subclass::widget::WidgetClassSubclassExt;
+use once_cell::sync::OnceCell;
 
-use crate::widgets::{Device, DeviceSelection, EqualizerSettings, GeneralSettings};
+use crate::{
+    settings::settings_file::SettingsFile,
+    widgets::{Device, DeviceSelection, EqualizerSettings, GeneralSettings},
+};
 
 #[derive(Default, CompositeTemplate)]
 #[template(resource = "/com/oppzippy/openscq30/main_window/template.ui")]
@@ -23,6 +29,8 @@ pub struct MainWindow {
     pub general_settings: TemplateChild<GeneralSettings>,
     #[template_child]
     pub equalizer_settings: TemplateChild<EqualizerSettings>,
+
+    pub settings_file: OnceCell<Rc<SettingsFile>>,
 }
 
 #[gtk::template_callbacks]
@@ -106,4 +114,11 @@ impl ObjectImpl for MainWindow {
     }
 }
 impl WidgetImpl for MainWindow {}
-impl WindowImpl for MainWindow {}
+impl WindowImpl for MainWindow {
+    fn close_request(&self) -> Inhibit {
+        self.obj()
+            .save_window_size()
+            .expect("failed to save window size");
+        Inhibit(false)
+    }
+}
