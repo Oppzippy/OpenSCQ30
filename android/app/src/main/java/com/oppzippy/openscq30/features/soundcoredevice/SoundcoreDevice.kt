@@ -24,6 +24,15 @@ class SoundcoreDevice(
             .contentEquals(new.equalizerConfiguration())
     }
 
+    val name: String
+        get() {
+            return gatt.device.name
+        }
+    val macAddress: String
+        get() {
+            return gatt.device.address
+        }
+
     init {
         scope.launch {
             callbacks.packetsFlow.collect {

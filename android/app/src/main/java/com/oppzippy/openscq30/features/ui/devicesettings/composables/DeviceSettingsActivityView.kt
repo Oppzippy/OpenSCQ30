@@ -1,8 +1,7 @@
 package com.oppzippy.openscq30.features.ui.devicesettings.composables
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -37,7 +36,7 @@ fun DeviceSettingsActivityView(
 
             soundcoreDevice.let {
                 if (it != null) {
-                    DeviceSettings()
+                    DeviceSettings(it.name)
                 } else {
                     Loading()
                 }

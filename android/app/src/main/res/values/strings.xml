@@ -58,4 +58,5 @@
     <string name="delete_custom_profile">Delete Custom Profile</string>
     <string name="custom_profile_delete_confirm">Are you sure you want to delete \"%s\"?</string>
     <string name="delete">Delete</string>
+    <string name="back">Back</string>
 </resources>
