@@ -5,7 +5,7 @@ use gtk::glib::clone;
 use gtk::glib::once_cell::sync::Lazy;
 use gtk::glib::subclass::Signal;
 use gtk::prelude::{Cast, ObjectExt, StaticType};
-use gtk::subclass::prelude::ObjectSubclassExt;
+use gtk::subclass::prelude::{ObjectImplExt, ObjectSubclassExt};
 use gtk::subclass::widget::CompositeTemplateCallbacksClass;
 use gtk::{
     glib,
@@ -85,6 +85,7 @@ impl ObjectSubclass for DeviceSelection {
 
 impl ObjectImpl for DeviceSelection {
     fn constructed(&self) {
+        self.parent_constructed();
         let model = gio::ListStore::new(DeviceObject::static_type());
         self.devices.replace(Some(model));
 

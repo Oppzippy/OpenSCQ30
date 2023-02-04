@@ -119,6 +119,7 @@ impl ObjectSubclass for EqualizerSettings {
 
 impl ObjectImpl for EqualizerSettings {
     fn constructed(&self) {
+        self.parent_constructed();
         let model = gio::ListStore::new(EqualizerProfileObject::static_type());
         self.profiles.replace(Some(model));
 

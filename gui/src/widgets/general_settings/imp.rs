@@ -1,7 +1,7 @@
 use std::cell::Cell;
 
 use gtk::prelude::{ObjectExt, StaticType};
-use gtk::subclass::prelude::ObjectSubclassExt;
+use gtk::subclass::prelude::{ObjectImplExt, ObjectSubclassExt};
 use gtk::subclass::widget::CompositeTemplateCallbacksClass;
 use gtk::{
     glib::{self, once_cell::sync::Lazy, subclass::Signal},
@@ -142,6 +142,7 @@ impl ObjectSubclass for GeneralSettings {
 
 impl ObjectImpl for GeneralSettings {
     fn constructed(&self) {
+        self.parent_constructed();
         self.ignore_button_clicks.replace(false);
     }
 
