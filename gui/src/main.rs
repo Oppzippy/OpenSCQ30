@@ -3,9 +3,9 @@ use std::sync::Arc;
 use gtk::{
     gio,
     glib::{self, clone, closure_local, MainContext},
-    prelude::{ApplicationExt, ApplicationExtManual, ObjectExt},
+    prelude::{ApplicationExt, ApplicationExtManual, ObjectExt, IsA},
     traits::GtkWindowExt,
-    ApplicationWindow,
+    Application,
 };
 use gtk_openscq30_lib::GtkSoundcoreDeviceRegistry;
 use openscq30_lib::{
@@ -61,25 +61,7 @@ fn run_application() {
     app.run();
 }
 
-#[cfg(not(feature = "libadwaita"))]
-fn build_ui(app: &gtk::Application) {
-    let window = ApplicationWindow::builder()
-        .application(app)
-        .title("OpenSCQ30")
-        .build();
-    build_ui_application_window(window);
-}
-
-#[cfg(feature = "libadwaita")]
-fn build_ui(app: &adw::Application) {
-    let window = ApplicationWindow::builder()
-        .application(app)
-        .title("OpenSCQ30")
-        .build();
-    build_ui_application_window(window);
-}
-
-fn build_ui_application_window(window: ApplicationWindow) {
+fn build_ui(application: &impl IsA<Application>) {
     let tokio_runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(1)
         .enable_all()
@@ -97,7 +79,7 @@ fn build_ui_application_window(window: ApplicationWindow) {
 
     let gtk_registry = Arc::new(GtkSoundcoreDeviceRegistry::new(registry, tokio_runtime));
 
-    let main_window = MainWindow::new();
+    let main_window = MainWindow::new(application);
     let state_update_receiver: Arc<SwappableBroadcastReceiver<SoundcoreDeviceState>> = Arc::new(SwappableBroadcastReceiver::new());
 
     let main_context = MainContext::default();
@@ -275,8 +257,7 @@ fn build_ui_application_window(window: ApplicationWindow) {
         }),
     );
 
-    window.set_child(Some(&main_window));
-    window.present();
+    main_window.present();
 }
 
 fn load_resources() {

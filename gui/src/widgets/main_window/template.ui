@@ -1,37 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-	<template class="OpenSCQ30MainWindow" parent="GtkBox">
-		<property name="orientation">vertical</property>
-
+	<template class="OpenSCQ30MainWindow" parent="GtkWindow">
 		<child>
-			<object class="OpenSCQ30DeviceSelection" id="device_selection">
-				<signal name="refresh-devices" handler="handle_refresh_devices" swapped="true" />
-				<signal name="selection-changed" handler="handle_device_selection_changed" swapped="true" />
-			</object>
-		</child>
+			<object class="GtkBox">
+				<property name="orientation">vertical</property>
 
-		<child>
-			<object class="GtkNotebook">
 				<child>
-					<object class="OpenSCQ30GeneralSettings" id="general_settings">
-						<signal name="ambient-sound-mode-selected" handler="handle_ambient_sound_mode_selected" swapped="true" />
-						<signal name="noise-canceling-mode-selected" handler="handle_noise_canceling_mode_selected" swapped="true" />
+					<object class="OpenSCQ30DeviceSelection" id="device_selection">
+						<signal name="refresh-devices" handler="handle_refresh_devices"
+							swapped="true" />
+						<signal name="selection-changed" handler="handle_device_selection_changed"
+							swapped="true" />
 					</object>
 				</child>
-				<child type="tab">
-					<object class="GtkLabel">
-						<property name="label">General</property>
-					</object>
-				</child>
+
 				<child>
-					<object class="OpenSCQ30EqualizerSettings" id="equalizer_settings">
-						<signal name="apply-equalizer-settings" handler="handle_apply_equalizer_settings" swapped="true" />
-						<signal name="refresh-equalizer-settings" handler="handle_refresh_equalizer_settings" swapped="true" />
-					</object>
-				</child>
-				<child type="tab">
-					<object class="GtkLabel">
-						<property name="label">Equalizer</property>
+					<object class="GtkNotebook">
+						<child>
+							<object class="OpenSCQ30GeneralSettings" id="general_settings">
+								<signal name="ambient-sound-mode-selected"
+									handler="handle_ambient_sound_mode_selected" swapped="true" />
+								<signal name="noise-canceling-mode-selected"
+									handler="handle_noise_canceling_mode_selected" swapped="true" />
+							</object>
+						</child>
+						<child type="tab">
+							<object class="GtkLabel">
+								<property name="label">General</property>
+							</object>
+						</child>
+						<child>
+							<object class="OpenSCQ30EqualizerSettings" id="equalizer_settings">
+								<signal name="apply-equalizer-settings"
+									handler="handle_apply_equalizer_settings" swapped="true" />
+								<signal name="refresh-equalizer-settings"
+									handler="handle_refresh_equalizer_settings" swapped="true" />
+							</object>
+						</child>
+						<child type="tab">
+							<object class="GtkLabel">
+								<property name="label">Equalizer</property>
+							</object>
+						</child>
 					</object>
 				</child>
 			</object>

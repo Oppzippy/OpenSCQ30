@@ -2,7 +2,9 @@ mod imp;
 
 use gtk::{
     glib::{self, Object},
+    prelude::IsA,
     subclass::prelude::ObjectSubclassIsExt,
+    Application,
 };
 use openscq30_lib::packets::structures::{
     AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode,
@@ -12,13 +14,15 @@ use super::Device;
 
 glib::wrapper! {
     pub struct MainWindow(ObjectSubclass<imp::MainWindow>)
-        @extends gtk::Box, gtk::Widget,
-        @implements gtk::Accessible, gtk::Actionable, gtk::Buildable, gtk::ConstraintTarget;
+        @extends gtk::Window, gtk::Widget,
+        @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget, gtk::Native, gtk::Root, gtk::ShortcutManager;
 }
 
 impl MainWindow {
-    pub fn new() -> Self {
-        Object::new(&[])
+    pub fn new(application: &impl IsA<Application>) -> Self {
+        Object::builder()
+            .property("application", application)
+            .build()
     }
 
     pub fn set_devices(&self, devices: &[Device]) {

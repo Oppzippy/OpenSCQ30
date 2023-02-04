@@ -2,9 +2,11 @@ use gtk::{
     glib::{self, once_cell::sync::Lazy, subclass::Signal},
     prelude::{InitializingWidgetExt, ObjectExt, StaticType},
     subclass::{
-        prelude::{BoxImpl, ObjectImpl, ObjectSubclass, ObjectSubclassExt},
+        prelude::{ObjectImpl, ObjectImplExt, ObjectSubclass, ObjectSubclassExt},
         widget::{CompositeTemplateCallbacksClass, CompositeTemplateClass, WidgetImpl},
+        window::WindowImpl,
     },
+    traits::GtkWindowExt,
     CompositeTemplate, TemplateChild,
 };
 
@@ -67,7 +69,7 @@ impl MainWindow {
 impl ObjectSubclass for MainWindow {
     const NAME: &'static str = "OpenSCQ30MainWindow";
     type Type = super::MainWindow;
-    type ParentType = gtk::Box;
+    type ParentType = gtk::Window;
 
     fn class_init(klass: &mut Self::Class) {
         klass.bind_template();
@@ -97,6 +99,11 @@ impl ObjectImpl for MainWindow {
         });
         SIGNALS.as_ref()
     }
+
+    fn constructed(&self) {
+        self.parent_constructed();
+        self.obj().set_title(Some("OpenSCQ30"));
+    }
 }
 impl WidgetImpl for MainWindow {}
-impl BoxImpl for MainWindow {}
+impl WindowImpl for MainWindow {}
