@@ -17,8 +17,6 @@
     <string name="profile">Profile</string>
     <string name="refresh">Refresh</string>
     <string name="apply">Apply</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="loading">Loading</string>
     <string name="title_activity_device_selection_compose">DeviceSelectionComposeActivity</string>
     <string name="no_devices_found">No Devices Found</string>
