@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -24,6 +25,7 @@ import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 fun DeviceSelection(
     devices: List<BluetoothDeviceModel>,
     onRefreshClick: () -> Unit = {},
+    onInfoClick: () -> Unit = {},
     onDeviceClick: (BluetoothDeviceModel) -> Unit = {},
 ) {
     Scaffold(topBar = {
@@ -34,6 +36,12 @@ fun DeviceSelection(
                 Icon(
                     imageVector = Icons.Filled.Refresh,
                     contentDescription = stringResource(id = R.string.refresh),
+                )
+            }
+            IconButton(onClick = onInfoClick) {
+                Icon(
+                    imageVector = Icons.Filled.Info,
+                    contentDescription = stringResource(id = R.string.info),
                 )
             }
         })

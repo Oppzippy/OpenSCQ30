@@ -2,7 +2,7 @@ package com.oppzippy.openscq30
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import com.oppzippy.openscq30.features.ui.deviceselection.composables.DeviceSelectionActivityView
+import com.oppzippy.openscq30.features.ui.deviceselection.composables.DeviceSelectionPermissionCheck
 import com.oppzippy.openscq30.features.ui.deviceselection.models.BluetoothDeviceModel
 import com.oppzippy.openscq30.features.ui.deviceselection.models.BluetoothDeviceProvider
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -46,7 +46,7 @@ class DeviceSelectionActivityViewTest {
         every { deviceProviderMock.getDevices() } returns listOf()
 
         composeRule.setContent {
-            DeviceSelectionActivityView(bluetoothDeviceProvider = deviceProviderMock)
+            DeviceSelectionPermissionCheck(bluetoothDeviceProvider = deviceProviderMock)
         }
 
         composeRule.onNode(noDevicesFound).assertExists()
@@ -61,7 +61,7 @@ class DeviceSelectionActivityViewTest {
         every { deviceProviderMock.getDevices() } returns deviceModels
 
         composeRule.setContent {
-            DeviceSelectionActivityView(bluetoothDeviceProvider = deviceProviderMock)
+            DeviceSelectionPermissionCheck(bluetoothDeviceProvider = deviceProviderMock)
         }
 
         deviceModels.forEach {
@@ -77,7 +77,7 @@ class DeviceSelectionActivityViewTest {
         every { deviceProviderMock.getDevices() } returns listOf()
 
         composeRule.setContent {
-            DeviceSelectionActivityView(bluetoothDeviceProvider = deviceProviderMock)
+            DeviceSelectionPermissionCheck(bluetoothDeviceProvider = deviceProviderMock)
         }
 
         composeRule.onNode(noDevicesFound).assertExists()

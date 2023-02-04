@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">OpenSCQ30</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
@@ -59,4 +59,27 @@
     <string name="custom_profile_delete_confirm">Are you sure you want to delete \"%s\"?</string>
     <string name="delete">Delete</string>
     <string name="back">Back</string>
+    <string name="info">Info</string>
+    <string name="source_code" tools:ignore="TypographyOther">
+        &lt;p>The source code and bug reports are available at &lt;a href="https://github.com/Oppzippy/OpenSCQ30">https://github.com/Oppzippy/OpenSCQ30&lt;/a>.&lt;/p>
+        &lt;br>
+
+        &lt;p>Copyright (C) Kyle Scheuing&lt;/p>
+        &lt;br>
+
+        &lt;p>This program is free software: you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version.&lt;/p>
+        &lt;br>
+
+        &lt;p>This program is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.&lt;/p>
+        &lt;br>
+
+        &lt;p>You should have received a copy of the GNU General Public License
+        along with this program.  If not, see &amp;lt;&lt;a href="https://www.gnu.org/licenses/">https://www.gnu.org/licenses/&lt;/a>&gt;.&lt;/p>
+    </string>
 </resources>
