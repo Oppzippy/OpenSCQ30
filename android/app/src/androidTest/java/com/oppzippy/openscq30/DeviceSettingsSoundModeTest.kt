@@ -2,8 +2,8 @@ package com.oppzippy.openscq30
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import com.oppzippy.openscq30.features.soundcoredevice.SoundcoreDevice
-import com.oppzippy.openscq30.features.soundcoredevice.SoundcoreDeviceFactory
+import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
+import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
 import com.oppzippy.openscq30.features.ui.devicesettings.composables.DeviceSettingsActivityView
 import com.oppzippy.openscq30.lib.*
 import dagger.hilt.android.testing.HiltAndroidRule

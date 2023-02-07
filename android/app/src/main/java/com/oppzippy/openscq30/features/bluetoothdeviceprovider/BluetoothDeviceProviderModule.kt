@@ -1,7 +1,8 @@
-package com.oppzippy.openscq30.features.ui.deviceselection
+package com.oppzippy.openscq30.features.bluetoothdeviceprovider
 
 import android.content.Context
-import com.oppzippy.openscq30.features.ui.deviceselection.models.BluetoothDeviceProvider
+import com.oppzippy.openscq30.BuildConfig
+import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDeviceProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,6 +18,10 @@ object BluetoothDeviceProviderModule {
     fun provideBluetoothDeviceProvider(
         @ApplicationContext context: Context,
     ): BluetoothDeviceProvider {
-        return BluetoothDeviceProvider(context)
+        return if (BuildConfig.IS_DEMO_MODE) {
+            DemoBluetoothDeviceProvider()
+        } else {
+            BluetoothDeviceProviderImpl(context)
+        }
     }
 }

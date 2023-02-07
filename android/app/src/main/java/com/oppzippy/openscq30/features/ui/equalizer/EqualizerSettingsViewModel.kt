@@ -2,8 +2,8 @@ package com.oppzippy.openscq30.features.ui.equalizer
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.oppzippy.openscq30.features.soundcoredevice.contentEquals
-import com.oppzippy.openscq30.features.soundcoredevice.SoundcoreDeviceBox
+import com.oppzippy.openscq30.features.soundcoredevice.api.contentEquals
+import com.oppzippy.openscq30.features.soundcoredevice.impl.SoundcoreDeviceBox
 import com.oppzippy.openscq30.features.ui.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.features.ui.equalizer.models.EqualizerConfiguration
 import com.oppzippy.openscq30.features.ui.equalizer.models.EqualizerProfile
@@ -123,7 +123,7 @@ class EqualizerSettingsViewModel @Inject constructor(
     }
 
     fun onValueChange(changedIndex: Int, changedValue: Byte) {
-        _displayedEqualizerConfiguration?.value?.let { equalizerConfiguration ->
+        _displayedEqualizerConfiguration.value?.let { equalizerConfiguration ->
             setEqualizerConfiguration(
                 equalizerConfiguration.equalizerProfile,
                 equalizerConfiguration.values.mapIndexed { index, value ->
@@ -161,7 +161,7 @@ class EqualizerSettingsViewModel @Inject constructor(
 
     private fun updateSelectedCustomProfile(equalizerConfiguration: EqualizerConfiguration) {
         _selectedCustomProfile.value =
-            if (equalizerConfiguration?.equalizerProfile == EqualizerProfile.Custom) {
+            if (equalizerConfiguration.equalizerProfile == EqualizerProfile.Custom) {
                 _customProfiles.value.find { it.values == equalizerConfiguration.values }
             } else {
                 null

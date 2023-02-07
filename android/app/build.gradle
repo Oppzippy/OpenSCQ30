@@ -28,16 +28,27 @@ android {
         }
     }
 
+    defaultConfig {
+        buildConfigField 'boolean', 'IS_DEMO_MODE', 'false'
+    }
     buildTypes {
         debug {
             debuggable true
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        debugDemo {
+            initWith buildTypes.debug
+            buildConfigField 'boolean', 'IS_DEMO_MODE', 'true'
+        }
         release {
             debuggable false
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        releaseDemo {
+            initWith buildTypes.release
+            buildConfigField 'boolean', 'IS_DEMO_MODE', 'true'
         }
     }
     compileOptions {

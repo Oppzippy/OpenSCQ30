@@ -12,8 +12,23 @@ pub struct SoundcoreDeviceState {
 
 impl SoundcoreDeviceState {
     #[generate_interface(constructor)]
-    pub fn new(packet: &StateUpdatePacket) -> SoundcoreDeviceState {
+    pub fn new_from_packet(packet: &StateUpdatePacket) -> SoundcoreDeviceState {
         packet.into()
+    }
+
+    #[generate_interface(constructor)]
+    pub fn new(
+        ambient_sound_mode: &AmbientSoundMode,
+        noise_canceling_mode: &NoiseCancelingMode,
+        equalizer_configuration: &EqualizerConfiguration,
+    ) -> SoundcoreDeviceState {
+        Self {
+            state: openscq30_lib::state::SoundcoreDeviceState::new(
+                &ambient_sound_mode.to_owned().into(),
+                &noise_canceling_mode.to_owned().into(),
+                &equalizer_configuration.to_owned().into(),
+            ),
+        }
     }
 
     #[generate_interface]

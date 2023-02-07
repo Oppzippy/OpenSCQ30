@@ -11,6 +11,13 @@ public final class SoundcoreDeviceState {
     }
     private static native long init(long packet);
 
+    public SoundcoreDeviceState(@NonNull AmbientSoundMode ambient_sound_mode, @NonNull NoiseCancelingMode noise_canceling_mode, @NonNull EqualizerConfiguration equalizer_configuration) {
+        int a0 = ambient_sound_mode.getValue();        int a1 = noise_canceling_mode.getValue();        long a2 = equalizer_configuration.mNativeObj;
+        mNativeObj = init(a0, a1, a2);
+        JNIReachabilityFence.reachabilityFence3(ambient_sound_mode, noise_canceling_mode, equalizer_configuration);
+    }
+    private static native long init(int ambient_sound_mode, int noise_canceling_mode, long equalizer_configuration);
+
     public final AmbientSoundMode ambientSoundMode() {
         int ret = do_ambientSoundMode(mNativeObj);
         AmbientSoundMode convRet = AmbientSoundMode.fromInt(ret);

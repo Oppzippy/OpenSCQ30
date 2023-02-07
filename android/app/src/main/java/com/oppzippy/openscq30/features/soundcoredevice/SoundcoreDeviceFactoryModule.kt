@@ -1,6 +1,10 @@
 package com.oppzippy.openscq30.features.soundcoredevice
 
 import android.content.Context
+import com.oppzippy.openscq30.BuildConfig
+import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
+import com.oppzippy.openscq30.features.soundcoredevice.demo.DemoSoundcoreDeviceFactory
+import com.oppzippy.openscq30.features.soundcoredevice.impl.SoundcoreDeviceFactoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,6 +20,10 @@ object SoundcoreDeviceFactoryModule {
     fun provideSoundcoreDeviceFactory(
         @ApplicationContext context: Context,
     ): SoundcoreDeviceFactory {
-        return SoundcoreDeviceFactory(context)
+        return if (BuildConfig.IS_DEMO_MODE) {
+            DemoSoundcoreDeviceFactory()
+        } else {
+            SoundcoreDeviceFactoryImpl(context)
+        }
     }
 }

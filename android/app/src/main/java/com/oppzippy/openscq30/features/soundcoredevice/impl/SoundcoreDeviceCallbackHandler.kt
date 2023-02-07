@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.features.soundcoredevice
+package com.oppzippy.openscq30.features.soundcoredevice.impl
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt

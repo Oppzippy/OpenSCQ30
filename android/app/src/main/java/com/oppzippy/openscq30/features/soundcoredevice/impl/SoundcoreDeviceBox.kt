@@ -1,5 +1,7 @@
-package com.oppzippy.openscq30.features.soundcoredevice
+package com.oppzippy.openscq30.features.soundcoredevice.impl
 
+import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
+import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -3,8 +3,8 @@ package com.oppzippy.openscq30
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.oppzippy.openscq30.features.ui.deviceselection.composables.DeviceSelectionPermissionCheck
-import com.oppzippy.openscq30.features.ui.deviceselection.models.BluetoothDeviceModel
-import com.oppzippy.openscq30.features.ui.deviceselection.models.BluetoothDeviceProvider
+import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
+import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDeviceProvider
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.every
@@ -46,7 +46,10 @@ class DeviceSelectionActivityViewTest {
         every { deviceProviderMock.getDevices() } returns listOf()
 
         composeRule.setContent {
-            DeviceSelectionPermissionCheck(bluetoothDeviceProvider = deviceProviderMock)
+            DeviceSelectionPermissionCheck(
+                bluetoothDeviceProvider = deviceProviderMock,
+                onInfoClick = {},
+            )
         }
 
         composeRule.onNode(noDevicesFound).assertExists()
@@ -55,13 +58,16 @@ class DeviceSelectionActivityViewTest {
     @Test
     fun testWithDevices() {
         val deviceModels = listOf(
-            BluetoothDeviceModel("test1", "00:00:00:00:00:00"),
-            BluetoothDeviceModel("test2", "00:00:00:00:00:01"),
+            BluetoothDevice("test1", "00:00:00:00:00:00"),
+            BluetoothDevice("test2", "00:00:00:00:00:01"),
         )
         every { deviceProviderMock.getDevices() } returns deviceModels
 
         composeRule.setContent {
-            DeviceSelectionPermissionCheck(bluetoothDeviceProvider = deviceProviderMock)
+            DeviceSelectionPermissionCheck(
+                bluetoothDeviceProvider = deviceProviderMock,
+                onInfoClick = {},
+            )
         }
 
         deviceModels.forEach {
@@ -77,13 +83,16 @@ class DeviceSelectionActivityViewTest {
         every { deviceProviderMock.getDevices() } returns listOf()
 
         composeRule.setContent {
-            DeviceSelectionPermissionCheck(bluetoothDeviceProvider = deviceProviderMock)
+            DeviceSelectionPermissionCheck(
+                bluetoothDeviceProvider = deviceProviderMock,
+                onInfoClick = {},
+            )
         }
 
         composeRule.onNode(noDevicesFound).assertExists()
 
         val deviceModels = listOf(
-            BluetoothDeviceModel("test", "00:00:00:00:00:00"),
+            BluetoothDevice("test", "00:00:00:00:00:00"),
         )
         every { deviceProviderMock.getDevices() } returns deviceModels
 

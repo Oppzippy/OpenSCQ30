@@ -11,14 +11,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.oppzippy.openscq30.features.ui.deviceselection.models.BluetoothDeviceModel
+import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
 fun DeviceList(
-    devices: List<BluetoothDeviceModel>,
+    devices: List<BluetoothDevice>,
     modifier: Modifier = Modifier,
-    onDeviceClick: (device: BluetoothDeviceModel) -> Unit = {},
+    onDeviceClick: (device: BluetoothDevice) -> Unit = {},
 ) {
     LazyColumn(
         modifier = modifier,
@@ -42,9 +42,9 @@ fun DeviceList(
 @Composable
 private fun DefaultPreview() {
     OpenSCQ30Theme {
-        val devices = ArrayList<BluetoothDeviceModel>()
+        val devices = ArrayList<BluetoothDevice>()
         for (i in 1..100) {
-            devices.add(BluetoothDeviceModel("Device #${i}", "00:00:${i}"))
+            devices.add(BluetoothDevice("Device #${i}", "00:00:${i}"))
         }
         DeviceList(devices)
     }

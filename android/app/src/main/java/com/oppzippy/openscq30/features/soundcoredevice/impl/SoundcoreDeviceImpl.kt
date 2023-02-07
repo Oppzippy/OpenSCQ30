@@ -1,34 +1,37 @@
-package com.oppzippy.openscq30.features.soundcoredevice
+package com.oppzippy.openscq30.features.soundcoredevice.impl
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
+import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
+import com.oppzippy.openscq30.features.soundcoredevice.api.contentEquals
 import com.oppzippy.openscq30.lib.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 @SuppressLint("MissingPermission")
-class SoundcoreDevice(
+class SoundcoreDeviceImpl(
     private val gatt: BluetoothGatt,
     private val callbacks: SoundcoreDeviceCallbackHandler,
     scope: CoroutineScope,
     initialState: SoundcoreDeviceState,
-) {
-    val state: SoundcoreDeviceState
+) : SoundcoreDevice {
+    override val state: SoundcoreDeviceState
         get() {
             return _stateFlow.value
         }
     private val _stateFlow: MutableStateFlow<SoundcoreDeviceState> = MutableStateFlow(initialState)
-    val stateFlow: Flow<SoundcoreDeviceState> = _stateFlow.distinctUntilChanged { old, new ->
-        old.ambientSoundMode() == new.ambientSoundMode() && old.noiseCancelingMode() == new.noiseCancelingMode() && old.equalizerConfiguration()
-            .contentEquals(new.equalizerConfiguration())
-    }
+    override val stateFlow: Flow<SoundcoreDeviceState> =
+        _stateFlow.distinctUntilChanged { old, new ->
+            old.ambientSoundMode() == new.ambientSoundMode() && old.noiseCancelingMode() == new.noiseCancelingMode() && old.equalizerConfiguration()
+                .contentEquals(new.equalizerConfiguration())
+        }
 
-    val name: String
+    override val name: String
         get() {
             return gatt.device.name
         }
-    val macAddress: String
+    override val macAddress: String
         get() {
             return gatt.device.address
         }
@@ -50,11 +53,11 @@ class SoundcoreDevice(
         }
     }
 
-    fun destroy() {
+    override fun destroy() {
         gatt.disconnect()
     }
 
-    fun setSoundMode(
+    override fun setSoundMode(
         newAmbientSoundMode: AmbientSoundMode, newNoiseCancelingMode: NoiseCancelingMode
     ) {
         val prevState = _stateFlow.value
@@ -82,7 +85,7 @@ class SoundcoreDevice(
         )
     }
 
-    fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
+    override fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
         if (!_stateFlow.value.equalizerConfiguration().contentEquals(equalizerConfiguration)) {
             queueSetEqualizerConfiguration(equalizerConfiguration)
             _stateFlow.value = _stateFlow.value.withEqualizerConfiguration(equalizerConfiguration)

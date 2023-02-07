@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.oppzippy.openscq30.features.ui.deviceselection.models.BluetoothDeviceProvider
+import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDeviceProvider
 import com.oppzippy.openscq30.features.ui.deviceselection.models.Screen
 import com.oppzippy.openscq30.features.ui.info.AppInfo
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme

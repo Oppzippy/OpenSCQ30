@@ -15,7 +15,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.features.ui.deviceselection.models.BluetoothDeviceProvider
+import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDeviceProvider
 import com.oppzippy.openscq30.features.ui.devicesettings.DeviceSettingsActivity
 
 @OptIn(ExperimentalPermissionsApi::class)

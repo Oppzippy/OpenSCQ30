@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
@@ -17,16 +15,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.features.ui.deviceselection.models.BluetoothDeviceModel
+import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeviceSelection(
-    devices: List<BluetoothDeviceModel>,
+    devices: List<BluetoothDevice>,
     onRefreshClick: () -> Unit = {},
     onInfoClick: () -> Unit = {},
-    onDeviceClick: (BluetoothDeviceModel) -> Unit = {},
+    onDeviceClick: (BluetoothDevice) -> Unit = {},
 ) {
     Scaffold(topBar = {
         TopAppBar(title = {
@@ -84,9 +82,9 @@ private fun NoDevicesFoundPreview() {
 @Composable
 private fun DevicesPreview() {
     OpenSCQ30Theme {
-        val devices = ArrayList<BluetoothDeviceModel>()
+        val devices = ArrayList<BluetoothDevice>()
         for (i in 1..100) {
-            devices.add(BluetoothDeviceModel("Device #${i}", "00:00:${i}"))
+            devices.add(BluetoothDevice("Device #${i}", "00:00:${i}"))
         }
         DeviceSelection(devices)
     }

@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.features.soundcoredevice
+package com.oppzippy.openscq30.features.soundcoredevice.impl
 
 import android.bluetooth.BluetoothGattDescriptor
 
