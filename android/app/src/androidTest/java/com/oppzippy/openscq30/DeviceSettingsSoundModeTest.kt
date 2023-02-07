@@ -137,6 +137,8 @@ class DeviceSettingsSoundModeTest {
             EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature)
 
         coEvery { deviceFactory.createSoundcoreDevice(any(), any()) } returns device
+        every { device.name } returns "Test Q30"
+        every { device.macAddress } returns "00:00:00:00:00:00"
         every { device.state } returns initialState
         every { device.stateFlow } returns stateFlow
         every { device.setEqualizerConfiguration(any()) } returns Unit
