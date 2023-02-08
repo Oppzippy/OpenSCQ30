@@ -22,6 +22,3 @@ impl DeviceObject {
         self.property("mac-address")
     }
 }
-
-#[derive(Default)]
-pub struct DeviceData {}
