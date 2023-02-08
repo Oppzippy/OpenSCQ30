@@ -19,7 +19,7 @@ use openscq30_lib::packets::structures::EqualizerConfiguration;
 use openscq30_lib::packets::structures::PresetEqualizerProfile;
 use strum::IntoEnumIterator;
 
-use crate::objects::EqualizerProfileObject;
+use crate::objects::{EqualizerCustomProfileObject, EqualizerProfileObject};
 use crate::widgets::Equalizer;
 
 #[derive(Default, CompositeTemplate)]
@@ -33,9 +33,15 @@ pub struct EqualizerSettings {
     pub apply_button: TemplateChild<gtk::Button>,
     #[template_child]
     pub refresh_button: TemplateChild<gtk::Button>,
+    #[template_child]
+    pub custom_profile_selection: TemplateChild<gtk::Box>,
+    #[template_child]
+    pub custom_profile_dropdown: TemplateChild<gtk::DropDown>,
 
     profiles: RefCell<Option<gio::ListStore>>,
     profile_objects: RefCell<Vec<EqualizerProfileObject>>,
+    custom_profiles: RefCell<Option<gio::ListStore>>,
+    custom_profile_objects: RefCell<Vec<EqualizerCustomProfileObject>>,
     is_custom_profile: Cell<bool>,
 }
 
@@ -99,33 +105,92 @@ impl EqualizerSettings {
     fn handle_refresh_custom_equalizer(&self, _button: &gtk::Button) {
         self.obj().emit_by_name("refresh-equalizer-settings", &[])
     }
-}
 
-#[glib::object_subclass]
-impl ObjectSubclass for EqualizerSettings {
-    const NAME: &'static str = "OpenSCQ30EqualizerSettings";
-    type Type = super::EqualizerSettings;
-    type ParentType = gtk::Box;
-
-    fn class_init(klass: &mut Self::Class) {
-        klass.bind_template();
-        klass.bind_template_callbacks();
+    fn set_up_custom_profile(&self) {
+        self.set_up_custom_profile_selection_model();
+        self.set_up_custom_profile_item_factory();
+        self.set_up_custom_profile_click_handler();
     }
 
-    fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
-        obj.init_template();
-    }
-}
+    fn set_up_custom_profile_selection_model(&self) {
+        let model = gio::ListStore::new(EqualizerCustomProfileObject::static_type());
+        self.custom_profiles.replace(Some(model));
 
-impl ObjectImpl for EqualizerSettings {
-    fn constructed(&self) {
-        self.parent_constructed();
+        let selection_model = SingleSelection::new(self.custom_profiles.borrow().as_ref());
+        self.custom_profile_dropdown
+            .set_model(Some(&selection_model));
+    }
+
+    fn set_up_custom_profile_item_factory(&self) {
+        let factory = SignalListItemFactory::new();
+        factory.connect_setup(move |_, list_item| {
+            let label = gtk::Label::new(None);
+            list_item.set_child(Some(&label));
+        });
+
+        factory.connect_bind(move |_, list_item| {
+            let equalizer_custom_profile_object = list_item
+                .item()
+                .expect("item must exist")
+                .downcast::<EqualizerCustomProfileObject>()
+                .expect("the item must be an EqualizerProfileObject");
+
+            let label = list_item
+                .child()
+                .expect("must have a child")
+                .downcast::<gtk::Label>()
+                .expect("child must be a Label");
+
+            let name = equalizer_custom_profile_object.name();
+
+            label.set_label(&name);
+        });
+        self.custom_profile_dropdown.set_factory(Some(&factory));
+    }
+
+    fn set_up_custom_profile_click_handler(&self) {
+        let this = self;
+        let obj = self.obj();
+        self.custom_profile_dropdown.connect_selected_item_notify(
+            clone!(@weak obj, @weak this => move |_dropdown| {
+                let selected_item: EqualizerCustomProfileObject = this.custom_profile_dropdown
+                    .selected_item()
+                    .expect("an item must be selected")
+                    .downcast()
+                    .expect("selected item must be an EqualizerProfileObject");
+                // TODO set slider positions
+                obj.emit_by_name("custom-equalizer-profile-selected", &[&selected_item.name().to_value()])
+            }),
+        );
+    }
+
+    pub fn set_custom_profiles(&self, profiles: Vec<EqualizerCustomProfileObject>) {
+        if let Some(model) = &*self.custom_profiles.borrow() {
+            model.remove_all();
+            model.extend_from_slice(&profiles);
+            self.custom_profile_objects.replace(profiles);
+
+            self.custom_profile_dropdown.set_model(Some(model));
+        }
+    }
+
+    fn set_up_preset_profile(&self) {
+        self.set_up_preset_profile_selection_model();
+        self.set_up_preset_profile_item_factory();
+        self.set_up_preset_profile_click_handler();
+        self.set_up_preset_profile_items();
+        self.set_up_preset_profile_disabled_fields();
+    }
+
+    fn set_up_preset_profile_selection_model(&self) {
         let model = gio::ListStore::new(EqualizerProfileObject::static_type());
         self.profiles.replace(Some(model));
 
-        let selection_model = SingleSelection::new(self.profiles.borrow().to_owned().as_ref());
+        let selection_model = SingleSelection::new(self.profiles.borrow().as_ref());
         self.profile_dropdown.set_model(Some(&selection_model));
+    }
 
+    fn set_up_preset_profile_item_factory(&self) {
         let factory = SignalListItemFactory::new();
         factory.connect_setup(move |_, list_item| {
             let label = gtk::Label::new(None);
@@ -149,7 +214,10 @@ impl ObjectImpl for EqualizerSettings {
 
             label.set_label(&name);
         });
+        self.profile_dropdown.set_factory(Some(&factory));
+    }
 
+    fn set_up_preset_profile_click_handler(&self) {
         let this = self;
         let obj = self.obj();
         self.profile_dropdown
@@ -171,18 +239,10 @@ impl ObjectImpl for EqualizerSettings {
                 obj.set_equalizer_configuration(configuration);
                 obj.emit_by_name("apply-equalizer-settings", &[])
             }));
+    }
 
-        self.profile_dropdown.set_factory(Some(&factory));
-
-        let profiles = PresetEqualizerProfile::iter()
-            .map(|preset| EqualizerProfileObject::new(&preset.to_string(), preset.id().into()))
-            .chain([EqualizerProfileObject::new(
-                &"Custom".to_string(),
-                EqualizerConfiguration::CUSTOM_PROFILE_ID.into(),
-            )])
-            .collect::<Vec<_>>();
-        self.set_profiles(profiles);
-
+    fn set_up_preset_profile_disabled_fields(&self) {
+        let obj = self.obj();
         self.profile_dropdown
             .bind_property("selected-item", obj.as_ref(), "is-custom-profile")
             .transform_to(|_, value: EqualizerProfileObject| {
@@ -200,6 +260,53 @@ impl ObjectImpl for EqualizerSettings {
         obj.bind_property("is-custom-profile", &self.refresh_button.get(), "sensitive")
             .sync_create()
             .build();
+        obj.bind_property(
+            "is-custom-profile",
+            &self.custom_profile_selection.get(),
+            "sensitive",
+        )
+        .sync_create()
+        .build();
+    }
+
+    fn set_up_preset_profile_items(&self) {
+        let custom_profile_iter = [EqualizerProfileObject::new(
+            &"Custom".to_string(),
+            EqualizerConfiguration::CUSTOM_PROFILE_ID.into(),
+        )]
+        .into_iter();
+        let preset_profile_iter = PresetEqualizerProfile::iter()
+            .map(|preset| EqualizerProfileObject::new(&preset.to_string(), preset.id().into()));
+
+        let profiles = custom_profile_iter
+            .chain(preset_profile_iter)
+            .collect::<Vec<_>>();
+        self.set_profiles(profiles);
+        self.profile_dropdown.set_selected(1); // Select Soundcore Signature by default
+    }
+}
+
+#[glib::object_subclass]
+impl ObjectSubclass for EqualizerSettings {
+    const NAME: &'static str = "OpenSCQ30EqualizerSettings";
+    type Type = super::EqualizerSettings;
+    type ParentType = gtk::Box;
+
+    fn class_init(klass: &mut Self::Class) {
+        klass.bind_template();
+        klass.bind_template_callbacks();
+    }
+
+    fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
+        obj.init_template();
+    }
+}
+
+impl ObjectImpl for EqualizerSettings {
+    fn constructed(&self) {
+        self.parent_constructed();
+        self.set_up_preset_profile();
+        self.set_up_custom_profile();
     }
 
     fn signals() -> &'static [Signal] {
@@ -207,6 +314,9 @@ impl ObjectImpl for EqualizerSettings {
             vec![
                 Signal::builder("apply-equalizer-settings").build(),
                 Signal::builder("refresh-equalizer-settings").build(),
+                Signal::builder("custom-equalizer-profile-selected")
+                    .param_types([EqualizerCustomProfileObject::static_type()])
+                    .build(),
             ]
         });
         SIGNALS.as_ref()

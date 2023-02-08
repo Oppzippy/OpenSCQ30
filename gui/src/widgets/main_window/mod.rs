@@ -13,7 +13,7 @@ use openscq30_lib::packets::structures::{
     AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode,
 };
 
-use crate::settings::settings_file::SettingsFile;
+use crate::settings::SettingsFile;
 
 use super::Device;
 

@@ -16,7 +16,7 @@ use gtk::subclass::widget::WidgetClassSubclassExt;
 use once_cell::sync::OnceCell;
 
 use crate::{
-    settings::settings_file::SettingsFile,
+    settings::SettingsFile,
     widgets::{Device, DeviceSelection, EqualizerSettings, GeneralSettings},
 };
 

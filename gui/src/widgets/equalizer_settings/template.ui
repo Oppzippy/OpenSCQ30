@@ -5,16 +5,44 @@
 		<child>
 			<object class="GtkBox">
 				<property name="orientation">horizontal</property>
+				<property name="homogeneous">true</property>
+				<property name="spacing">10</property>
 				<child>
-					<object class="GtkLabel" id="profile_label">
-						<property name="label">Profile</property>
+					<object class="GtkBox">
+						<property name="orientation">horizontal</property>
+						<property name="spacing">10</property>
+						<child>
+							<object class="GtkLabel" id="profile_label">
+								<property name="label">Profile</property>
+							</object>
+						</child>
+						<child>
+							<object class="GtkDropDown" id="profile_dropdown">
+								<property name="hexpand">true</property>
+								<accessibility>
+									<relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">profile_label</relation>
+								</accessibility>
+							</object>
+						</child>
 					</object>
 				</child>
 				<child>
-					<object class="GtkDropDown" id="profile_dropdown">
-						<accessibility>
-							<relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">profile_label</relation>
-						</accessibility>
+					<object class="GtkBox" id="custom_profile_selection">
+						<property name="orientation">horizontal</property>
+						<property name="spacing">10</property>
+						<child>
+							<object class="GtkLabel" id="custom_profile_label">
+								<property name="label">Custom Profile</property>
+							</object>
+						</child>
+						<child>
+							<object class="GtkDropDown" id="custom_profile_dropdown">
+								<property name="hexpand">true</property>
+								<accessibility>
+									<relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">custom_profile_label</relation>
+								</accessibility>
+							</object>
+						</child>
 					</object>
 				</child>
 			</object>
@@ -30,13 +58,15 @@
 						<property name="orientation">vertical</property>
 						<child>
 							<object class="GtkButton" id="apply_button">
-								<signal name="clicked" handler="handle_apply_custom_equalizer" swapped="true" />
+								<signal name="clicked" handler="handle_apply_custom_equalizer"
+									swapped="true" />
 								<property name="label">Apply</property>
 							</object>
 						</child>
 						<child>
 							<object class="GtkButton" id="refresh_button">
-								<signal name="clicked" handler="handle_refresh_custom_equalizer" swapped="true" />
+								<signal name="clicked" handler="handle_refresh_custom_equalizer"
+									swapped="true" />
 								<property name="label">Refresh</property>
 							</object>
 						</child>

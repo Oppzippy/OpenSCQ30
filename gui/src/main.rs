@@ -14,7 +14,7 @@ use openscq30_lib::{
         AmbientSoundMode, NoiseCancelingMode,
     }, soundcore_bluetooth::btleplug, state::SoundcoreDeviceState,
 };
-use settings::settings_file::SettingsFile;
+use settings::SettingsFile;
 use swappable_broadcast::SwappableBroadcastReceiver;
 use tracing::Level;
 #[cfg(debug_assertions)]

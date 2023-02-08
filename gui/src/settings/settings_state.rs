@@ -1,10 +1,13 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+use super::equalizer_custom_profile::EqualizerCustomProfile;
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SettingsState {
     pub window_width: i32,
     pub window_height: i32,
     pub is_maximized: bool,
+    pub equalizer_custom_profiles: Vec<EqualizerCustomProfile>,
 }
 
 impl Default for SettingsState {
@@ -13,6 +16,7 @@ impl Default for SettingsState {
             window_width: -1,
             window_height: -1,
             is_maximized: false,
+            equalizer_custom_profiles: Vec::new(),
         }
     }
 }
