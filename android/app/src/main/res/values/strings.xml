@@ -13,7 +13,7 @@
     <string name="transport">Transport</string>
     <string name="indoor">Indoor</string>
     <string name="outdoor">Outdoor</string>
-    <string name="hz">%1$dHz</string>
+    <string name="hz">%1$d Hz</string>
     <string name="profile">Profile</string>
     <string name="refresh">Refresh</string>
     <string name="apply">Apply</string>
@@ -80,4 +80,5 @@
         &lt;p>You should have received a copy of the GNU General Public License
         along with this program.  If not, see &amp;lt;&lt;a href="https://www.gnu.org/licenses/">https://www.gnu.org/licenses/&lt;/a>&gt;.&lt;/p>
     </string>
+    <string name="khz">%s kHz</string>
 </resources>

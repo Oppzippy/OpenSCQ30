@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
+import java.math.BigDecimal
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,7 +36,18 @@ fun EqualizerSlider(
                 value = text,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.width(100.dp),
-                label = { Text(stringResource(R.string.hz, hz)) },
+                label = {
+                    if (hz < 1000) {
+                        Text(stringResource(R.string.hz, hz))
+                    } else {
+                        Text(
+                            stringResource(
+                                R.string.khz,
+                                BigDecimal(hz).divide(BigDecimal(1000)).toString(),
+                            )
+                        )
+                    }
+                },
                 onValueChange = onTextChange,
                 enabled = enabled
             )
