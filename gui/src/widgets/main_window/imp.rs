@@ -16,6 +16,7 @@ use gtk::subclass::widget::WidgetClassSubclassExt;
 use once_cell::sync::OnceCell;
 
 use crate::{
+    objects::EqualizerCustomProfileObject,
     settings::SettingsFile,
     widgets::{Device, DeviceSelection, EqualizerSettings, GeneralSettings},
 };
@@ -71,6 +72,12 @@ impl MainWindow {
         let obj = self.obj();
         obj.emit_by_name("noise-canceling-mode-selected", &[&mode])
     }
+
+    #[template_callback]
+    fn handle_custom_equalizer_profile_selected(&self, profile: &EqualizerCustomProfileObject) {
+        self.obj()
+            .emit_by_name("custom-equalizer-profile-selected", &[profile])
+    }
 }
 
 #[glib::object_subclass]
@@ -103,6 +110,9 @@ impl ObjectImpl for MainWindow {
                 Signal::builder("device-selection-changed").build(),
                 Signal::builder("apply-equalizer-settings").build(),
                 Signal::builder("refresh-equalizer-settings").build(),
+                Signal::builder("custom-equalizer-profile-selected")
+                    .param_types([EqualizerCustomProfileObject::static_type()])
+                    .build(),
             ]
         });
         SIGNALS.as_ref()

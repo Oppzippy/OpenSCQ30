@@ -159,7 +159,7 @@ impl EqualizerSettings {
                     .downcast()
                     .expect("selected item must be an EqualizerProfileObject");
                 // TODO set slider positions
-                obj.emit_by_name("custom-equalizer-profile-selected", &[&selected_item.name().to_value()])
+                obj.emit_by_name("custom-equalizer-profile-selected", &[&selected_item])
             }),
         );
     }

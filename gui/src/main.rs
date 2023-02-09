@@ -11,15 +11,17 @@ use gtk_openscq30_lib::GtkSoundcoreDeviceRegistry;
 use openscq30_lib::{
     api::SoundcoreDeviceRegistry,
     packets::structures::{
-        AmbientSoundMode, NoiseCancelingMode,
+        AmbientSoundMode, NoiseCancelingMode, EqualizerConfiguration, EqualizerBandOffsets,
     }, soundcore_bluetooth::btleplug, state::SoundcoreDeviceState,
 };
-use settings::SettingsFile;
+use settings::{SettingsFile, EqualizerCustomProfile};
 use swappable_broadcast::SwappableBroadcastReceiver;
 use tracing::Level;
 #[cfg(debug_assertions)]
 use tracing_subscriber::fmt::format::FmtSpan;
 use widgets::{MainWindow, Device};
+
+use crate::objects::EqualizerCustomProfileObject;
 
 mod objects;
 mod widgets;
@@ -89,7 +91,20 @@ fn build_ui(application: &impl IsA<Application>) {
 
     let gtk_registry = Arc::new(GtkSoundcoreDeviceRegistry::new(registry, tokio_runtime));
 
-    let main_window = MainWindow::new(application, Rc::new(get_settings_file()));
+    let settings_file = Rc::new(get_settings_file());
+    // settings_file.edit(|settings| {
+    //     settings.equalizer_custom_profiles.insert("asdf".to_string(), EqualizerCustomProfile {
+    //         volume_offsets: [0,1,2,3,4,5,6,7],
+    //     });
+    //     settings.equalizer_custom_profiles.insert("qwer".to_string(), EqualizerCustomProfile {
+    //         volume_offsets: [-60,1,2,3,4,5,6,7],
+    //     });
+    // }).unwrap();
+    let main_window = MainWindow::new(application, settings_file.to_owned());
+    settings_file.get(|settings| {
+        main_window.set_custom_profiles(settings.equalizer_custom_profiles.keys().map(|profile| EqualizerCustomProfileObject::new(profile)).collect());
+    }).unwrap();
+
     let state_update_receiver: Arc<SwappableBroadcastReceiver<SoundcoreDeviceState>> = Arc::new(SwappableBroadcastReceiver::new());
 
     let main_context = MainContext::default();
@@ -264,6 +279,28 @@ fn build_ui(application: &impl IsA<Application>) {
                 let configuration = device.equalizer_configuration().await;
                 main_window.set_equalizer_configuration(configuration);
             }));
+        }),
+    );
+    
+    main_window.connect_closure(
+        "custom-equalizer-profile-selected",
+        false,
+        closure_local!(move |main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
+            let result = settings_file.get(|settings| {
+                match settings.equalizer_custom_profiles.get(&custom_profile.name()) {
+                    Some(profile) => {
+                        main_window.set_equalizer_configuration(
+                            EqualizerConfiguration::new_custom_profile(EqualizerBandOffsets::new(profile.volume_offsets))
+                        );
+                    },
+                    None => {
+                        tracing::warn!("custom profile does not exist: {}", custom_profile.name());
+                    },
+                }
+            });
+            if let Err(err) = result {
+                tracing::warn!("unable to get settings file: {:?}", err);
+            }
         }),
     );
 

@@ -7,6 +7,8 @@ use gtk::{
 };
 use openscq30_lib::packets::structures::EqualizerConfiguration;
 
+use crate::objects::EqualizerCustomProfileObject;
+
 glib::wrapper! {
     pub struct EqualizerSettings(ObjectSubclass<imp::EqualizerSettings>)
         @extends gtk::Box, gtk::Widget,
@@ -25,5 +27,9 @@ impl EqualizerSettings {
 
     pub fn equalizer_configuration(&self) -> EqualizerConfiguration {
         self.imp().equalizer_configuration()
+    }
+
+    pub fn set_custom_profiles(&self, custom_profiles: Vec<EqualizerCustomProfileObject>) {
+        self.imp().set_custom_profiles(custom_profiles)
     }
 }
