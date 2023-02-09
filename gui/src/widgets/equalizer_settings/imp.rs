@@ -37,6 +37,10 @@ pub struct EqualizerSettings {
     pub custom_profile_selection: TemplateChild<gtk::Box>,
     #[template_child]
     pub custom_profile_dropdown: TemplateChild<gtk::DropDown>,
+    #[template_child]
+    pub create_custom_profile_button: TemplateChild<gtk::Button>,
+    #[template_child]
+    pub delete_custom_profile_button: TemplateChild<gtk::Button>,
 
     profiles: RefCell<Option<gio::ListStore>>,
     profile_objects: RefCell<Vec<EqualizerProfileObject>>,
@@ -106,6 +110,29 @@ impl EqualizerSettings {
         self.obj().emit_by_name("refresh-equalizer-settings", &[])
     }
 
+    #[template_callback]
+    fn handle_create_custom_profile(&self, _button: &gtk::Button) {
+        self.obj().emit_by_name(
+            "create-custom-equalizer-profile",
+            &[&EqualizerCustomProfileObject::new(
+                &"".to_string(), // TODO use a different object that doesn't have a name field
+                self.equalizer.volumes(),
+            )],
+        )
+    }
+
+    #[template_callback]
+    fn handle_delete_custom_profile(&self, _button: &gtk::Button) {
+        let profiles = self.custom_profile_objects.borrow();
+        if let Some(profile) = profiles.get(self.custom_profile_dropdown.selected() as usize) {
+            let profile = profile.clone();
+            // The signal handlers won't be able to access profiles if we don't drop it before firing the signal
+            std::mem::drop(profiles);
+            self.obj()
+                .emit_by_name::<()>("delete-custom-equalizer-profile", &[&profile]);
+        }
+    }
+
     fn set_up_custom_profile(&self) {
         self.set_up_custom_profile_selection_model();
         self.set_up_custom_profile_item_factory();
@@ -153,13 +180,11 @@ impl EqualizerSettings {
         let obj = self.obj();
         self.custom_profile_dropdown.connect_selected_item_notify(
             clone!(@weak obj, @weak this => move |_dropdown| {
-                let selected_item: EqualizerCustomProfileObject = this.custom_profile_dropdown
-                    .selected_item()
-                    .expect("an item must be selected")
-                    .downcast()
-                    .expect("selected item must be an EqualizerProfileObject");
-                // TODO set slider positions
-                obj.emit_by_name("custom-equalizer-profile-selected", &[&selected_item])
+                let maybe_selected_item  = this.custom_profile_dropdown.selected_item()
+                    .map(|item| item.downcast::<EqualizerCustomProfileObject>().unwrap());
+                if let Some(selected_item) = maybe_selected_item {
+                    obj.emit_by_name("custom-equalizer-profile-selected", &[&selected_item])
+                }
             }),
         );
     }
@@ -315,6 +340,12 @@ impl ObjectImpl for EqualizerSettings {
                 Signal::builder("apply-equalizer-settings").build(),
                 Signal::builder("refresh-equalizer-settings").build(),
                 Signal::builder("custom-equalizer-profile-selected")
+                    .param_types([EqualizerCustomProfileObject::static_type()])
+                    .build(),
+                Signal::builder("create-custom-equalizer-profile")
+                    .param_types([EqualizerCustomProfileObject::static_type()])
+                    .build(),
+                Signal::builder("delete-custom-equalizer-profile")
                     .param_types([EqualizerCustomProfileObject::static_type()])
                     .build(),
             ]

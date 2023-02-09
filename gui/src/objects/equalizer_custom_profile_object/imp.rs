@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 
 use gtk::{
     glib::{self, once_cell::sync::Lazy, ParamSpec, ParamSpecString},
@@ -9,6 +9,7 @@ use gtk::{
 #[derive(Default)]
 pub struct EqualizerCustomProfileObject {
     pub name: RefCell<String>,
+    pub volume_offsets: Cell<[i8; 8]>,
 }
 
 #[glib::object_subclass]

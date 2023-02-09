@@ -1,15 +1,15 @@
 use std::rc::Rc;
 
 use gtk::{
-    glib::{self, once_cell::sync::Lazy, subclass::Signal},
+    glib::{self, clone, once_cell::sync::Lazy, subclass::Signal},
     prelude::{InitializingWidgetExt, ObjectExt, StaticType},
     subclass::{
         prelude::{ObjectImpl, ObjectImplExt, ObjectSubclass, ObjectSubclassExt},
         widget::{CompositeTemplateCallbacksClass, CompositeTemplateClass, WidgetImpl},
         window::WindowImpl,
     },
-    traits::GtkWindowExt,
-    CompositeTemplate, Inhibit, TemplateChild,
+    traits::{BoxExt, DialogExt, EditableExt, GtkWindowExt, WidgetExt},
+    CompositeTemplate, DialogFlags, Inhibit, ResponseType, TemplateChild,
 };
 
 use gtk::subclass::widget::WidgetClassSubclassExt;
@@ -78,6 +78,63 @@ impl MainWindow {
         self.obj()
             .emit_by_name("custom-equalizer-profile-selected", &[profile])
     }
+
+    #[template_callback]
+    fn handle_create_custom_equalizer_profile(&self, profile: &EqualizerCustomProfileObject) {
+        let obj = self.obj();
+        let dialog = gtk::Dialog::with_buttons(
+            Some("Create Custom Profile"),
+            Some(obj.as_ref().into()),
+            DialogFlags::MODAL | DialogFlags::DESTROY_WITH_PARENT | DialogFlags::USE_HEADER_BAR,
+            &[
+                ("Cancel", ResponseType::Cancel),
+                ("Create", ResponseType::Accept),
+            ],
+        );
+        dialog.set_default_response(ResponseType::Accept);
+
+        let entry = gtk::Entry::builder()
+            .margin_top(12)
+            .margin_bottom(12)
+            .margin_start(12)
+            .margin_end(12)
+            .placeholder_text("Name")
+            .activates_default(true)
+            .build();
+        dialog.content_area().append(&entry);
+
+        let accept_button = dialog
+            .widget_for_response(ResponseType::Accept)
+            .expect("missing accept button");
+        accept_button.set_sensitive(false);
+
+        entry.connect_changed(clone!(@weak dialog => move |entry| {
+            let button = dialog.widget_for_response(ResponseType::Accept).expect("missing accept button");
+            let is_empty = entry.text().trim().is_empty();
+            button.set_sensitive(!is_empty);
+        }));
+
+        let volume_offsets = profile.volume_offsets();
+        dialog.connect_response(
+            clone!(@weak self as this, @weak entry => move |dialog, response| {
+                let name = entry.text().to_string();
+                dialog.destroy();
+                if response != ResponseType::Accept {
+                    return;
+                }
+
+                let profile_with_name = EqualizerCustomProfileObject::new(&name, volume_offsets);
+                this.obj().emit_by_name::<()>("create-custom-equalizer-profile", &[&profile_with_name]);
+            }),
+        );
+        dialog.present();
+    }
+
+    #[template_callback]
+    fn handle_delete_custom_equalizer_profile(&self, profile: &EqualizerCustomProfileObject) {
+        self.obj()
+            .emit_by_name("delete-custom-equalizer-profile", &[&profile])
+    }
 }
 
 #[glib::object_subclass]
@@ -111,6 +168,12 @@ impl ObjectImpl for MainWindow {
                 Signal::builder("apply-equalizer-settings").build(),
                 Signal::builder("refresh-equalizer-settings").build(),
                 Signal::builder("custom-equalizer-profile-selected")
+                    .param_types([EqualizerCustomProfileObject::static_type()])
+                    .build(),
+                Signal::builder("create-custom-equalizer-profile")
+                    .param_types([EqualizerCustomProfileObject::static_type()])
+                    .build(),
+                Signal::builder("delete-custom-equalizer-profile")
                     .param_types([EqualizerCustomProfileObject::static_type()])
                     .build(),
             ]

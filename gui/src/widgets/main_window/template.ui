@@ -37,6 +37,10 @@
 									handler="handle_refresh_equalizer_settings" swapped="true" />
 								<signal name="custom-equalizer-profile-selected"
 									handler="handle_custom_equalizer_profile_selected" swapped="true" />
+								<signal name="create-custom-equalizer-profile"
+									handler="handle_create_custom_equalizer_profile" swapped="true" />
+								<signal name="delete-custom-equalizer-profile"
+									handler="handle_delete_custom_equalizer_profile" swapped="true" />
 							</object>
 						</child>
 						<child type="tab">

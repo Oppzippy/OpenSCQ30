@@ -102,7 +102,12 @@ fn build_ui(application: &impl IsA<Application>) {
     // }).unwrap();
     let main_window = MainWindow::new(application, settings_file.to_owned());
     settings_file.get(|settings| {
-        main_window.set_custom_profiles(settings.equalizer_custom_profiles.keys().map(|profile| EqualizerCustomProfileObject::new(profile)).collect());
+        main_window.set_custom_profiles(
+            settings.equalizer_custom_profiles
+                .iter()
+                .map(|(name, profile)| EqualizerCustomProfileObject::new(name, profile.volume_offsets))
+                .collect()
+        );
     }).unwrap();
 
     let state_update_receiver: Arc<SwappableBroadcastReceiver<SoundcoreDeviceState>> = Arc::new(SwappableBroadcastReceiver::new());
@@ -285,7 +290,7 @@ fn build_ui(application: &impl IsA<Application>) {
     main_window.connect_closure(
         "custom-equalizer-profile-selected",
         false,
-        closure_local!(move |main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
+        closure_local!(@strong settings_file => move |main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
             let result = settings_file.get(|settings| {
                 match settings.equalizer_custom_profiles.get(&custom_profile.name()) {
                     Some(profile) => {
@@ -301,6 +306,47 @@ fn build_ui(application: &impl IsA<Application>) {
             if let Err(err) = result {
                 tracing::warn!("unable to get settings file: {:?}", err);
             }
+        }),
+    );
+    
+    main_window.connect_closure(
+        "create-custom-equalizer-profile",
+        false,
+        closure_local!(@strong settings_file => move |main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
+            settings_file.edit(|settings| {
+                settings.equalizer_custom_profiles.insert(
+                    custom_profile.name(),
+                    EqualizerCustomProfile {
+                        volume_offsets: custom_profile.volume_offsets()
+                    }
+                );
+            }).unwrap();            
+            settings_file.get(|settings| {
+                main_window.set_custom_profiles(
+                    settings.equalizer_custom_profiles
+                        .iter()
+                        .map(|(name, profile)| EqualizerCustomProfileObject::new(name, profile.volume_offsets))
+                        .collect()
+                );
+            }).unwrap();
+        }),
+    );
+
+    main_window.connect_closure(
+        "delete-custom-equalizer-profile",
+        false,
+        closure_local!(@strong settings_file => move |main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
+            settings_file.edit(|settings| {
+                settings.equalizer_custom_profiles.remove(&custom_profile.name());
+            }).unwrap();            
+            settings_file.get(|settings| {
+                main_window.set_custom_profiles(
+                    settings.equalizer_custom_profiles
+                        .iter()
+                        .map(|(name, profile)| EqualizerCustomProfileObject::new(name, profile.volume_offsets))
+                        .collect()
+                );
+            }).unwrap();
         }),
     );
 
