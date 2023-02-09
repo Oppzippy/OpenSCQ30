@@ -93,9 +93,9 @@ impl ObjectImpl for VolumeSlider {
         obj.bind_property("band", &self.band_label.get(), "label")
             .transform_to(|_, band: i32| {
                 if band > 1000 {
-                    Some(format!("{:.1}kHz", band as f64 / 1000.0))
+                    Some(format!("{:.1} kHz", band as f64 / 1000.0))
                 } else {
-                    Some(format!("{}Hz", band))
+                    Some(format!("{} Hz", band))
                 }
             })
             .flags(BindingFlags::SYNC_CREATE)
