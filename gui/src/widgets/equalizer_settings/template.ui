@@ -19,6 +19,7 @@
 						<child>
 							<object class="GtkDropDown" id="profile_dropdown">
 								<property name="hexpand">true</property>
+								<property name="enable-search">true</property>
 								<accessibility>
 									<relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">profile_label</relation>
 								</accessibility>
@@ -38,6 +39,7 @@
 						<child>
 							<object class="GtkDropDown" id="custom_profile_dropdown">
 								<property name="hexpand">true</property>
+								<property name="enable-search">true</property>
 								<accessibility>
 									<relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">custom_profile_label</relation>
 								</accessibility>
