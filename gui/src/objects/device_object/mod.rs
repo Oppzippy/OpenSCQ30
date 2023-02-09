@@ -11,7 +11,10 @@ glib::wrapper! {
 
 impl DeviceObject {
     pub fn new(name: &String, mac_address: &String) -> Self {
-        Object::new(&[("name", name), ("mac-address", mac_address)])
+        Object::builder()
+            .property("name", name)
+            .property("mac-address", mac_address)
+            .build()
     }
 
     pub fn name(&self) -> String {

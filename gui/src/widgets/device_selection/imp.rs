@@ -6,10 +6,9 @@ use gtk::glib::once_cell::sync::Lazy;
 use gtk::glib::subclass::Signal;
 use gtk::prelude::{Cast, ObjectExt, StaticType};
 use gtk::subclass::prelude::{ObjectImplExt, ObjectSubclassExt};
-use gtk::subclass::widget::CompositeTemplateCallbacksClass;
+use gtk::subclass::widget::{CompositeTemplateCallbacksClass, CompositeTemplateInitializingExt};
 use gtk::{
     glib,
-    prelude::InitializingWidgetExt,
     subclass::{
         prelude::{BoxImpl, ObjectImpl, ObjectSubclass},
         widget::{CompositeTemplateClass, WidgetClassSubclassExt, WidgetImpl},
@@ -89,7 +88,7 @@ impl ObjectImpl for DeviceSelection {
         let model = gio::ListStore::new(DeviceObject::static_type());
         self.devices.replace(Some(model));
 
-        let selection_model = SingleSelection::new(self.devices.borrow().to_owned().as_ref());
+        let selection_model = SingleSelection::new(self.devices.borrow().to_owned());
         self.dropdown.set_model(Some(&selection_model));
 
         let factory = SignalListItemFactory::new();

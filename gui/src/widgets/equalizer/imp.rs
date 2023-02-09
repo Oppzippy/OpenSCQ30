@@ -1,7 +1,6 @@
-use gtk::subclass::widget::WidgetClassSubclassExt;
+use gtk::subclass::widget::{CompositeTemplateInitializingExt, WidgetClassSubclassExt};
 use gtk::{
     glib,
-    prelude::InitializingWidgetExt,
     subclass::{
         prelude::{BoxImpl, ObjectImpl, ObjectSubclass},
         widget::{CompositeTemplateClass, WidgetImpl},

@@ -14,7 +14,7 @@ glib::wrapper! {
 
 impl GeneralSettings {
     pub fn new() -> Self {
-        Object::new(&[])
+        Object::builder().build()
     }
 
     pub fn set_ambient_sound_mode(&self, ambient_sound_mode: AmbientSoundMode) {

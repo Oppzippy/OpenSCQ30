@@ -2,10 +2,13 @@ use std::rc::Rc;
 
 use gtk::{
     glib::{self, clone, once_cell::sync::Lazy, subclass::Signal},
-    prelude::{InitializingWidgetExt, ObjectExt, StaticType},
+    prelude::{ObjectExt, StaticType},
     subclass::{
         prelude::{ObjectImpl, ObjectImplExt, ObjectSubclass, ObjectSubclassExt},
-        widget::{CompositeTemplateCallbacksClass, CompositeTemplateClass, WidgetImpl},
+        widget::{
+            CompositeTemplateCallbacksClass, CompositeTemplateClass,
+            CompositeTemplateInitializingExt, WidgetImpl,
+        },
         window::WindowImpl,
     },
     traits::{BoxExt, DialogExt, EditableExt, GtkWindowExt, WidgetExt},

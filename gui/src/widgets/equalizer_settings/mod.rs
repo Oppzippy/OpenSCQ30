@@ -17,7 +17,9 @@ glib::wrapper! {
 
 impl EqualizerSettings {
     pub fn new() -> Self {
-        Object::new(&[("is-custom-profile", &false.to_value())])
+        Object::builder()
+            .property("is-custom-profile", &false.to_value())
+            .build()
     }
 
     pub fn set_equalizer_configuration(&self, equalizer_configuration: EqualizerConfiguration) {

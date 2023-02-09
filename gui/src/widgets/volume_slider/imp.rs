@@ -4,12 +4,11 @@ use gtk::glib::once_cell::sync::Lazy;
 use gtk::glib::{BindingFlags, ParamSpec, ParamSpecDouble, ParamSpecInt};
 use gtk::prelude::*;
 use gtk::subclass::prelude::{ObjectImplExt, ObjectSubclassExt};
-use gtk::subclass::widget::WidgetClassSubclassExt;
+use gtk::subclass::widget::{CompositeTemplateInitializingExt, WidgetClassSubclassExt};
 use gtk::traits::{RangeExt, ScaleExt};
 use gtk::Label;
 use gtk::{
     glib,
-    prelude::InitializingWidgetExt,
     subclass::{
         prelude::{BoxImpl, ObjectImpl, ObjectSubclass},
         widget::{CompositeTemplateClass, WidgetImpl},

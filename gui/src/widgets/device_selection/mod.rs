@@ -19,7 +19,7 @@ glib::wrapper! {
 
 impl DeviceSelection {
     pub fn new() -> Self {
-        Object::new(&[])
+        Object::builder().build()
     }
 
     pub fn set_devices(&self, devices: &[Device]) {

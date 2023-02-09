@@ -13,8 +13,8 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 futures = { version = "0.3" }
 tracing = "0.1"
 tracing-subscriber = "0.3"
-adw = { version = "0.2", package = "libadwaita", optional = true }
-gtk = { version = "0.5", package = "gtk4" }
+adw = { version = "0.3", package = "libadwaita", optional = true }
+gtk = { version = "0.6", package = "gtk4" }
 strum = "0.24"
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.7.1"

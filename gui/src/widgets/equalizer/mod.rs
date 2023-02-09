@@ -13,7 +13,7 @@ glib::wrapper! {
 
 impl Equalizer {
     pub fn new() -> Self {
-        Object::new(&[])
+        Object::builder().build()
     }
 
     pub fn volumes(&self) -> [i8; 8] {

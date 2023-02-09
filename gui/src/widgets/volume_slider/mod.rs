@@ -13,7 +13,10 @@ glib::wrapper! {
 
 impl VolumeSlider {
     pub fn new(band: i32, volume: f64) -> Self {
-        Object::new(&[("band", &band), ("volume", &volume)])
+        Object::builder()
+            .property("band", &band)
+            .property("volume", &volume)
+            .build()
     }
 
     pub fn volume(&self) -> i8 {

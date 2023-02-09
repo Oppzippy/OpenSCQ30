@@ -2,10 +2,9 @@ use std::cell::Cell;
 
 use gtk::prelude::{ObjectExt, StaticType};
 use gtk::subclass::prelude::{ObjectImplExt, ObjectSubclassExt};
-use gtk::subclass::widget::CompositeTemplateCallbacksClass;
+use gtk::subclass::widget::{CompositeTemplateCallbacksClass, CompositeTemplateInitializingExt};
 use gtk::{
     glib::{self, once_cell::sync::Lazy, subclass::Signal},
-    prelude::InitializingWidgetExt,
     subclass::{
         prelude::{BoxImpl, ObjectImpl, ObjectSubclass},
         widget::{CompositeTemplateClass, WidgetClassSubclassExt, WidgetImpl},

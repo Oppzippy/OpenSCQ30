@@ -6,7 +6,6 @@ use gtk::subclass::widget::CompositeTemplateCallbacksClass;
 use gtk::{gio, SingleSelection};
 use gtk::{
     glib::{self, once_cell::sync::Lazy, subclass::Signal},
-    prelude::InitializingWidgetExt,
     subclass::{
         prelude::{BoxImpl, ObjectImpl, ObjectSubclass},
         widget::{CompositeTemplateClass, WidgetClassSubclassExt, WidgetImpl},
@@ -143,7 +142,7 @@ impl EqualizerSettings {
         let model = gio::ListStore::new(EqualizerCustomProfileObject::static_type());
         self.custom_profiles.replace(Some(model));
 
-        let selection_model = SingleSelection::new(self.custom_profiles.borrow().as_ref());
+        let selection_model = SingleSelection::new(self.custom_profiles.borrow().to_owned());
         self.custom_profile_dropdown
             .set_model(Some(&selection_model));
     }
@@ -211,7 +210,7 @@ impl EqualizerSettings {
         let model = gio::ListStore::new(EqualizerProfileObject::static_type());
         self.profiles.replace(Some(model));
 
-        let selection_model = SingleSelection::new(self.profiles.borrow().as_ref());
+        let selection_model = SingleSelection::new(self.profiles.borrow().to_owned());
         self.profile_dropdown.set_model(Some(&selection_model));
     }
 
