@@ -235,15 +235,6 @@ impl EqualizerSettings {
             .sync_create()
             .build();
 
-        obj.bind_property("is-custom-profile", &self.equalizer.get(), "sensitive")
-            .sync_create()
-            .build();
-        obj.bind_property("is-custom-profile", &self.apply_button.get(), "sensitive")
-            .sync_create()
-            .build();
-        obj.bind_property("is-custom-profile", &self.refresh_button.get(), "sensitive")
-            .sync_create()
-            .build();
         obj.bind_property(
             "is-custom-profile",
             &self.custom_profile_selection.get(),
