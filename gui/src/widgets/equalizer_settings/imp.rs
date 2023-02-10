@@ -11,7 +11,7 @@ use gtk::{
             WidgetImpl,
         },
     },
-    CompositeTemplate, Expression, PropertyExpression, SingleSelection, TemplateChild,
+    CompositeTemplate, Expression, PropertyExpression, TemplateChild,
 };
 use openscq30_lib::packets::structures::{
     EqualizerBandOffsets, EqualizerConfiguration, PresetEqualizerProfile,
@@ -127,8 +127,6 @@ impl EqualizerSettings {
             model.remove_all();
             model.extend_from_slice(&profiles);
             self.profile_objects.replace(profiles);
-
-            self.profile_dropdown.set_model(Some(model));
         }
     }
 
@@ -140,11 +138,9 @@ impl EqualizerSettings {
 
     fn set_up_custom_profile_selection_model(&self) {
         let model = gio::ListStore::new(EqualizerCustomProfileObject::static_type());
-        self.custom_profiles.replace(Some(model));
+        self.custom_profiles.replace(Some(model.to_owned()));
 
-        let selection_model = SingleSelection::new(self.custom_profiles.borrow().to_owned());
-        self.custom_profile_dropdown
-            .set_model(Some(&selection_model));
+        self.custom_profile_dropdown.set_model(Some(&model));
     }
 
     fn set_up_custom_profile_expression(&self) {
@@ -174,8 +170,6 @@ impl EqualizerSettings {
             model.remove_all();
             model.extend_from_slice(&profiles);
             self.custom_profile_objects.replace(profiles);
-
-            self.custom_profile_dropdown.set_model(Some(model));
         }
     }
 
@@ -189,10 +183,9 @@ impl EqualizerSettings {
 
     fn set_up_preset_profile_selection_model(&self) {
         let model = gio::ListStore::new(EqualizerProfileObject::static_type());
-        self.profiles.replace(Some(model));
+        self.profiles.replace(Some(model.to_owned()));
 
-        let selection_model = SingleSelection::new(self.profiles.borrow().to_owned());
-        self.profile_dropdown.set_model(Some(&selection_model));
+        self.profile_dropdown.set_model(Some(&model));
     }
 
     fn set_up_preset_profile_expression(&self) {
