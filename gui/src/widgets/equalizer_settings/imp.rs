@@ -83,6 +83,22 @@ impl EqualizerSettings {
         }
     }
 
+    #[template_callback]
+    fn handle_volumes_changed(&self, equalizer: &Equalizer) {
+        if self.is_custom_profile.get() {
+            let profiles = self.custom_profile_objects.borrow();
+            let volumes = equalizer.volumes();
+            let custom_profile_index = profiles
+                .iter()
+                .enumerate()
+                .find(|(_i, profile)| profile.volume_offsets() == volumes)
+                .map(|(i, _profile)| i as u32)
+                .unwrap_or(u32::MAX);
+            self.custom_profile_dropdown
+                .set_selected(custom_profile_index);
+        }
+    }
+
     pub fn equalizer_configuration(&self) -> EqualizerConfiguration {
         if self.is_custom_profile.get() {
             EqualizerConfiguration::new_custom_profile(EqualizerBandOffsets::new(

@@ -1,3 +1,7 @@
+use gtk::glib::clone;
+use gtk::glib::subclass::Signal;
+use gtk::prelude::ObjectExt;
+use gtk::subclass::prelude::ObjectSubclassExt;
 use gtk::subclass::widget::{CompositeTemplateInitializingExt, WidgetClassSubclassExt};
 use gtk::{
     glib,
@@ -7,6 +11,7 @@ use gtk::{
     },
     CompositeTemplate, TemplateChild,
 };
+use once_cell::sync::Lazy;
 
 use crate::widgets::VolumeSlider;
 
@@ -33,27 +38,31 @@ pub struct Equalizer {
 
 impl Equalizer {
     pub fn volumes(&self) -> [i8; 8] {
-        [
-            self.band_100.get().volume(),
-            self.band_200.get().volume(),
-            self.band_400.get().volume(),
-            self.band_800.get().volume(),
-            self.band_1600.get().volume(),
-            self.band_3200.get().volume(),
-            self.band_6400.get().volume(),
-            self.band_12800.get().volume(),
-        ]
+        self.get_volume_sliders().map(|slider| slider.volume())
     }
 
     pub fn set_volumes(&self, volumes: [i8; 8]) {
-        self.band_100.get().set_volume(volumes[0]);
-        self.band_200.get().set_volume(volumes[1]);
-        self.band_400.get().set_volume(volumes[2]);
-        self.band_800.get().set_volume(volumes[3]);
-        self.band_1600.get().set_volume(volumes[4]);
-        self.band_3200.get().set_volume(volumes[5]);
-        self.band_6400.get().set_volume(volumes[6]);
-        self.band_12800.get().set_volume(volumes[7]);
+        self.get_volume_sliders()
+            .iter()
+            .zip(volumes.into_iter())
+            .for_each(|(slider, volume)| slider.set_volume(volume));
+    }
+
+    fn handle_volume_change(&self) {
+        self.obj().emit_by_name::<()>("volumes-changed", &[]);
+    }
+
+    fn get_volume_sliders(&self) -> [&TemplateChild<VolumeSlider>; 8] {
+        return [
+            &self.band_100,
+            &self.band_200,
+            &self.band_400,
+            &self.band_800,
+            &self.band_1600,
+            &self.band_3200,
+            &self.band_6400,
+            &self.band_12800,
+        ];
     }
 }
 
@@ -72,6 +81,23 @@ impl ObjectSubclass for Equalizer {
     }
 }
 
-impl ObjectImpl for Equalizer {}
+impl ObjectImpl for Equalizer {
+    fn constructed(&self) {
+        for band in self.get_volume_sliders() {
+            band.connect_notify_local(
+                Some("volume"),
+                clone!(@weak self as this => move |_slider, _param_spec| {
+                    this.handle_volume_change();
+                }),
+            );
+        }
+    }
+
+    fn signals() -> &'static [Signal] {
+        static SIGNALS: Lazy<Vec<Signal>> =
+            Lazy::new(|| vec![Signal::builder("volumes-changed").build()]);
+        SIGNALS.as_ref()
+    }
+}
 impl WidgetImpl for Equalizer {}
 impl BoxImpl for Equalizer {}

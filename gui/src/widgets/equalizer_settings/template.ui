@@ -67,7 +67,10 @@
 			<object class="GtkBox">
 				<property name="orientation">horizontal</property>
 				<child>
-					<object class="OpenSCQ30Equalizer" id="equalizer"></object>
+					<object class="OpenSCQ30Equalizer" id="equalizer">
+						<signal name="volumes-changed"
+							handler="handle_volumes_changed" swapped="true" />
+					</object>
 				</child>
 				<child>
 					<object class="GtkBox">
