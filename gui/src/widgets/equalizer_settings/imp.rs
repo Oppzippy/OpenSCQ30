@@ -84,19 +84,8 @@ impl EqualizerSettings {
     }
 
     #[template_callback]
-    fn handle_volumes_changed(&self, equalizer: &Equalizer) {
-        if self.is_custom_profile.get() {
-            let profiles = self.custom_profile_objects.borrow();
-            let volumes = equalizer.volumes();
-            let custom_profile_index = profiles
-                .iter()
-                .enumerate()
-                .find(|(_i, profile)| profile.volume_offsets() == volumes)
-                .map(|(i, _profile)| i as u32)
-                .unwrap_or(u32::MAX);
-            self.custom_profile_dropdown
-                .set_selected(custom_profile_index);
-        }
+    fn handle_volumes_changed(&self, _equalizer: &Equalizer) {
+        self.update_custom_profile_selection();
     }
 
     pub fn equalizer_configuration(&self) -> EqualizerConfiguration {
@@ -124,7 +113,7 @@ impl EqualizerSettings {
         }
     }
 
-    pub fn set_equalizer_configuration(&self, configuration: EqualizerConfiguration) {
+    pub fn set_equalizer_configuration(&self, configuration: &EqualizerConfiguration) {
         self.equalizer
             .set_volumes(configuration.band_offsets().volume_offsets());
         self.profile_dropdown.set_selected(
@@ -186,6 +175,24 @@ impl EqualizerSettings {
             model.remove_all();
             model.extend_from_slice(&profiles);
             self.custom_profile_objects.replace(profiles);
+            self.update_custom_profile_selection();
+        }
+    }
+
+    fn update_custom_profile_selection(&self) {
+        if self.is_custom_profile.get() {
+            let profiles = self.custom_profile_objects.borrow();
+            let volumes = self.equalizer.volumes();
+            let custom_profile_index = profiles
+                .iter()
+                .enumerate()
+                .find(|(_i, profile)| profile.volume_offsets() == volumes)
+                .map(|(i, _profile)| i as u32)
+                .unwrap_or(u32::MAX);
+            self.custom_profile_dropdown
+                .set_selected(custom_profile_index);
+        } else {
+            self.custom_profile_dropdown.set_selected(u32::MAX);
         }
     }
 
@@ -230,7 +237,7 @@ impl EqualizerSettings {
                     });
                     EqualizerConfiguration::new_from_preset_profile(preset_profile)
                 };
-                this.obj().set_equalizer_configuration(configuration);
+                this.set_equalizer_configuration(&configuration);
                 this.obj().emit_by_name("apply-equalizer-settings", &[])
             }));
     }
@@ -255,6 +262,9 @@ impl EqualizerSettings {
         obj.bind_property("is-custom-profile", &self.equalizer.get(), "sensitive")
             .sync_create()
             .build();
+        obj.connect_notify_local(Some("is-custom-profile"), |this, _param| {
+            this.imp().update_custom_profile_selection();
+        });
     }
 
     fn set_up_preset_profile_items(&self) {

@@ -182,7 +182,7 @@ fn build_ui(application: &impl IsA<Application>) {
                             
                             main_window.set_ambient_sound_mode(ambient_sound_mode);
                             main_window.set_noise_canceling_mode(noise_canceling_mode);
-                            main_window.set_equalizer_configuration(equalizer_configuration);
+                            main_window.set_equalizer_configuration(&equalizer_configuration);
                         },
                         None => tracing::warn!("could not find selected device: {}", selected_device.mac_address),
                     }
@@ -282,7 +282,7 @@ fn build_ui(application: &impl IsA<Application>) {
                     return;
                 };
                 let configuration = device.equalizer_configuration().await;
-                main_window.set_equalizer_configuration(configuration);
+                main_window.set_equalizer_configuration(&configuration);
             }));
         }),
     );
@@ -295,7 +295,7 @@ fn build_ui(application: &impl IsA<Application>) {
                 match settings.equalizer_custom_profiles.get(&custom_profile.name()) {
                     Some(profile) => {
                         main_window.set_equalizer_configuration(
-                            EqualizerConfiguration::new_custom_profile(EqualizerBandOffsets::new(profile.volume_offsets))
+                            &EqualizerConfiguration::new_custom_profile(EqualizerBandOffsets::new(profile.volume_offsets))
                         );
                     },
                     None => {
