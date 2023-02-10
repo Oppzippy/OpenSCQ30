@@ -50,6 +50,39 @@ pub struct EqualizerSettings {
 
 #[gtk::template_callbacks]
 impl EqualizerSettings {
+    #[template_callback]
+    fn handle_apply_custom_equalizer(&self, _button: &gtk::Button) {
+        self.obj().emit_by_name("apply-equalizer-settings", &[])
+    }
+
+    #[template_callback]
+    fn handle_refresh_custom_equalizer(&self, _button: &gtk::Button) {
+        self.obj().emit_by_name("refresh-equalizer-settings", &[])
+    }
+
+    #[template_callback]
+    fn handle_create_custom_profile(&self, _button: &gtk::Button) {
+        self.obj().emit_by_name(
+            "create-custom-equalizer-profile",
+            &[&EqualizerCustomProfileObject::new(
+                &"".to_string(), // TODO use a different object that doesn't have a name field
+                self.equalizer.volumes(),
+            )],
+        )
+    }
+
+    #[template_callback]
+    fn handle_delete_custom_profile(&self, _button: &gtk::Button) {
+        let profiles = self.custom_profile_objects.borrow();
+        if let Some(profile) = profiles.get(self.custom_profile_dropdown.selected() as usize) {
+            let profile = profile.clone();
+            // The signal handlers won't be able to access profiles if we don't drop it before firing the signal
+            std::mem::drop(profiles);
+            self.obj()
+                .emit_by_name::<()>("delete-custom-equalizer-profile", &[&profile]);
+        }
+    }
+
     pub fn equalizer_configuration(&self) -> EqualizerConfiguration {
         if self.is_custom_profile.get() {
             EqualizerConfiguration::new_custom_profile(EqualizerBandOffsets::new(
@@ -96,39 +129,6 @@ impl EqualizerSettings {
             self.profile_objects.replace(profiles);
 
             self.profile_dropdown.set_model(Some(model));
-        }
-    }
-
-    #[template_callback]
-    fn handle_apply_custom_equalizer(&self, _button: &gtk::Button) {
-        self.obj().emit_by_name("apply-equalizer-settings", &[])
-    }
-
-    #[template_callback]
-    fn handle_refresh_custom_equalizer(&self, _button: &gtk::Button) {
-        self.obj().emit_by_name("refresh-equalizer-settings", &[])
-    }
-
-    #[template_callback]
-    fn handle_create_custom_profile(&self, _button: &gtk::Button) {
-        self.obj().emit_by_name(
-            "create-custom-equalizer-profile",
-            &[&EqualizerCustomProfileObject::new(
-                &"".to_string(), // TODO use a different object that doesn't have a name field
-                self.equalizer.volumes(),
-            )],
-        )
-    }
-
-    #[template_callback]
-    fn handle_delete_custom_profile(&self, _button: &gtk::Button) {
-        let profiles = self.custom_profile_objects.borrow();
-        if let Some(profile) = profiles.get(self.custom_profile_dropdown.selected() as usize) {
-            let profile = profile.clone();
-            // The signal handlers won't be able to access profiles if we don't drop it before firing the signal
-            std::mem::drop(profiles);
-            self.obj()
-                .emit_by_name::<()>("delete-custom-equalizer-profile", &[&profile]);
         }
     }
 
