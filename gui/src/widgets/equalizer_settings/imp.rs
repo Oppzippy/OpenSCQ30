@@ -252,6 +252,9 @@ impl EqualizerSettings {
         )
         .sync_create()
         .build();
+        obj.bind_property("is-custom-profile", &self.equalizer.get(), "sensitive")
+            .sync_create()
+            .build();
     }
 
     fn set_up_preset_profile_items(&self) {
