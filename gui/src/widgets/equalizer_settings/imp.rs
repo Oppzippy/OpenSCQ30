@@ -168,8 +168,9 @@ impl EqualizerSettings {
         );
     }
 
-    pub fn set_custom_profiles(&self, profiles: Vec<EqualizerCustomProfileObject>) {
+    pub fn set_custom_profiles(&self, mut profiles: Vec<EqualizerCustomProfileObject>) {
         if let Some(model) = &*self.custom_profiles.borrow() {
+            profiles.sort_unstable_by(|left, right| left.name().cmp(&right.name()));
             model.remove_all();
             model.extend_from_slice(&profiles);
             self.custom_profile_objects.replace(profiles);
