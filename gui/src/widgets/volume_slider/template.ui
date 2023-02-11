@@ -8,7 +8,7 @@
   </object>
   <template class="OpenSCQ30VolumeSlider" parent="GtkBox">
     <property name="orientation">vertical</property>
-    <property name="hexpand">false</property>
+    <property name="hexpand">true</property>
 
     <child>
       <object class="GtkScale" id="slider">

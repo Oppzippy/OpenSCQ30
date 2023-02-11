@@ -5,7 +5,6 @@
 			<object class="GtkGrid">
 				<property name="row-spacing">2</property>
 				<property name="column-spacing">2</property>
-				<property name="column-homogeneous">true</property>
 
 				<!-- Ambient Sound Mode -->
 				<child>
@@ -23,6 +22,7 @@
 					<object class="GtkToggleButton" id="normal_mode">
 						<signal name="toggled" handler="handle_normal_mode_clicked" swapped="true" />
 						<property name="label">Normal</property>
+						<property name="hexpand">true</property>
 						<layout>
 							<property name="column">1</property>
 							<property name="row">0</property>
@@ -37,6 +37,7 @@
 						<signal name="toggled" handler="handle_transparency_mode_clicked" swapped="true" />
 						<property name="group">normal_mode</property>
 						<property name="label">Transparency</property>
+						<property name="hexpand">true</property>
 						<layout>
 							<property name="column">2</property>
 							<property name="row">0</property>
@@ -51,6 +52,7 @@
 						<signal name="toggled" handler="handle_noise_canceling_mode_clicked" swapped="true" />
 						<property name="group">transparency_mode</property>
 						<property name="label">Noise Canceling</property>
+						<property name="hexpand">true</property>
 						<layout>
 							<property name="column">3</property>
 							<property name="row">0</property>
@@ -77,6 +79,7 @@
 					<object class="GtkToggleButton" id="transport_mode">
 						<signal name="toggled" handler="handle_transport_mode_clicked" swapped="true" />
 						<property name="label">Transport</property>
+						<property name="hexpand">true</property>
 						<layout>
 							<property name="column">1</property>
 							<property name="row">1</property>
@@ -91,6 +94,7 @@
 						<signal name="toggled" handler="handle_indoor_mode_clicked" swapped="true" />
 						<property name="group">transport_mode</property>
 						<property name="label">Indoor</property>
+						<property name="hexpand">true</property>
 						<layout>
 							<property name="column">2</property>
 							<property name="row">1</property>
@@ -105,6 +109,7 @@
 						<signal name="toggled" handler="handle_outdoor_mode_clicked" swapped="true" />
 						<property name="group">indoor_mode</property>
 						<property name="label">Outdoor</property>
+						<property name="hexpand">true</property>
 						<layout>
 							<property name="column">3</property>
 							<property name="row">1</property>

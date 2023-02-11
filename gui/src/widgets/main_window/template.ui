@@ -11,6 +11,10 @@
 							swapped="true" />
 						<signal name="selection-changed" handler="handle_device_selection_changed"
 							swapped="true" />
+						<property name="margin-start">10</property>
+						<property name="margin-end">10</property>
+						<property name="margin-top">10</property>
+						<property name="margin-bottom">10</property>
 					</object>
 				</child>
 
@@ -22,6 +26,10 @@
 									handler="handle_ambient_sound_mode_selected" swapped="true" />
 								<signal name="noise-canceling-mode-selected"
 									handler="handle_noise_canceling_mode_selected" swapped="true" />
+								<property name="margin-start">10</property>
+								<property name="margin-end">10</property>
+								<property name="margin-top">10</property>
+								<property name="margin-bottom">10</property>
 							</object>
 						</child>
 						<child type="tab">
@@ -39,6 +47,10 @@
 									handler="handle_create_custom_equalizer_profile" swapped="true" />
 								<signal name="delete-custom-equalizer-profile"
 									handler="handle_delete_custom_equalizer_profile" swapped="true" />
+								<property name="margin-start">10</property>
+								<property name="margin-end">10</property>
+								<property name="margin-top">10</property>
+								<property name="margin-bottom">10</property>
 							</object>
 						</child>
 						<child type="tab">
