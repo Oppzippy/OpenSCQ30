@@ -33,8 +33,6 @@
 							<object class="OpenSCQ30EqualizerSettings" id="equalizer_settings">
 								<signal name="apply-equalizer-settings"
 									handler="handle_apply_equalizer_settings" swapped="true" />
-								<signal name="refresh-equalizer-settings"
-									handler="handle_refresh_equalizer_settings" swapped="true" />
 								<signal name="custom-equalizer-profile-selected"
 									handler="handle_custom_equalizer_profile_selected" swapped="true" />
 								<signal name="create-custom-equalizer-profile"

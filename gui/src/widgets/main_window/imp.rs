@@ -59,11 +59,6 @@ impl MainWindow {
     }
 
     #[template_callback]
-    fn handle_refresh_equalizer_settings(&self, _button: &EqualizerSettings) {
-        self.obj().emit_by_name("refresh-equalizer-settings", &[])
-    }
-
-    #[template_callback]
     // no idea why the parameter comes before &GeneralSettings
     fn handle_ambient_sound_mode_selected(&self, mode: u8, _: &GeneralSettings) {
         let obj = self.obj();
@@ -169,7 +164,6 @@ impl ObjectImpl for MainWindow {
                 Signal::builder("refresh-devices").build(),
                 Signal::builder("device-selection-changed").build(),
                 Signal::builder("apply-equalizer-settings").build(),
-                Signal::builder("refresh-equalizer-settings").build(),
                 Signal::builder("custom-equalizer-profile-selected")
                     .param_types([EqualizerCustomProfileObject::static_type()])
                     .build(),

@@ -1,8 +1,14 @@
-use std::cell::{Cell, RefCell};
+use std::{
+    cell::{Cell, RefCell},
+    time::Duration,
+};
 
 use gtk::{
-    gio,
-    glib::{self, clone, once_cell::sync::Lazy, subclass::Signal, ParamSpec, ParamSpecBoolean},
+    gio::{self},
+    glib::{
+        self, clone, once_cell::sync::Lazy, subclass::Signal, timeout_future, MainContext,
+        ParamSpec, ParamSpecBoolean,
+    },
     prelude::*,
     subclass::{
         prelude::{BoxImpl, ObjectImpl, ObjectSubclass, *},
@@ -29,10 +35,6 @@ pub struct EqualizerSettings {
     #[template_child]
     pub profile_dropdown: TemplateChild<gtk::DropDown>,
     #[template_child]
-    pub apply_button: TemplateChild<gtk::Button>,
-    #[template_child]
-    pub refresh_button: TemplateChild<gtk::Button>,
-    #[template_child]
     pub custom_profile_selection: TemplateChild<gtk::Box>,
     #[template_child]
     pub custom_profile_dropdown: TemplateChild<gtk::DropDown>,
@@ -46,20 +48,12 @@ pub struct EqualizerSettings {
     custom_profiles: RefCell<Option<gio::ListStore>>,
     custom_profile_objects: RefCell<Vec<EqualizerCustomProfileObject>>,
     is_custom_profile: Cell<bool>,
+
+    update_signal_debounce_handle: RefCell<Option<glib::JoinHandle<()>>>,
 }
 
 #[gtk::template_callbacks]
 impl EqualizerSettings {
-    #[template_callback]
-    fn handle_apply_custom_equalizer(&self, _button: &gtk::Button) {
-        self.obj().emit_by_name("apply-equalizer-settings", &[])
-    }
-
-    #[template_callback]
-    fn handle_refresh_custom_equalizer(&self, _button: &gtk::Button) {
-        self.obj().emit_by_name("refresh-equalizer-settings", &[])
-    }
-
     #[template_callback]
     fn handle_create_custom_profile(&self, _button: &gtk::Button) {
         self.obj().emit_by_name(
@@ -86,10 +80,26 @@ impl EqualizerSettings {
     #[template_callback]
     fn handle_volumes_changed(&self, _equalizer: &Equalizer) {
         self.update_custom_profile_selection();
+        let context = MainContext::default();
+        let mut maybe_handle = self.update_signal_debounce_handle.borrow_mut();
+        if let Some(handle) = &*maybe_handle {
+            handle.abort();
+        }
+        // apply-equalizer-settings fires instantly when changing the preset profile, so we only need to be concerned
+        // with custom profiles here.
+        if self.is_custom_profile() {
+            *maybe_handle = Some(
+                context.spawn_local(clone!(@weak self as this => async move {
+                    timeout_future(Duration::from_secs(1)).await;
+                    *this.update_signal_debounce_handle.borrow_mut() = None;
+                    this.obj().emit_by_name::<()>("apply-equalizer-settings", &[]);
+                })),
+            );
+        }
     }
 
     pub fn equalizer_configuration(&self) -> EqualizerConfiguration {
-        if self.is_custom_profile.get() {
+        if self.is_custom_profile() {
             EqualizerConfiguration::new_custom_profile(EqualizerBandOffsets::new(
                 self.equalizer.volumes(),
             ))
@@ -185,7 +195,7 @@ impl EqualizerSettings {
     }
 
     fn update_custom_profile_selection(&self) {
-        if self.is_custom_profile.get() {
+        if self.is_custom_profile() {
             let profiles = self.custom_profile_objects.borrow();
             let volumes = self.equalizer.volumes();
             let custom_profile_index = profiles
@@ -245,6 +255,17 @@ impl EqualizerSettings {
                 this.set_equalizer_configuration(&configuration);
                 this.obj().emit_by_name("apply-equalizer-settings", &[])
             }));
+    }
+
+    fn is_custom_profile(&self) -> bool {
+        self.profile_dropdown
+            .selected_item()
+            .map(|item| {
+                item.downcast::<EqualizerProfileObject>()
+                    .expect("must be EqualizerProfileObject")
+            })
+            .map(|profile| profile.profile_id() as u16 == EqualizerConfiguration::CUSTOM_PROFILE_ID)
+            .unwrap_or(false)
     }
 
     fn set_up_preset_profile_disabled_fields(&self) {
@@ -316,7 +337,6 @@ impl ObjectImpl for EqualizerSettings {
         static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
             vec![
                 Signal::builder("apply-equalizer-settings").build(),
-                Signal::builder("refresh-equalizer-settings").build(),
                 Signal::builder("custom-equalizer-profile-selected")
                     .param_types([EqualizerCustomProfileObject::static_type()])
                     .build(),

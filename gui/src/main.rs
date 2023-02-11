@@ -266,27 +266,6 @@ fn build_ui(application: &impl IsA<Application>) {
         }),
     );
 
-    let gtk_registry_clone = gtk_registry.clone();
-    main_window.connect_closure(
-        "refresh-equalizer-settings",
-        false,
-        closure_local!(move |main_window: MainWindow| {
-            let main_context = MainContext::default();
-            main_context.spawn_local(clone!(@weak main_window, @weak gtk_registry_clone => async move {
-                let Some(selected_device) = main_window.selected_device() else {
-                    tracing::warn!("no device is selected");
-                    return;
-                };
-                let Some(device) = gtk_registry_clone.device_by_mac_address(&selected_device.mac_address).await else {
-                    tracing::warn!("could not find selected device: {}", selected_device.mac_address);
-                    return;
-                };
-                let configuration = device.equalizer_configuration().await;
-                main_window.set_equalizer_configuration(&configuration);
-            }));
-        }),
-    );
-    
     main_window.connect_closure(
         "custom-equalizer-profile-selected",
         false,
