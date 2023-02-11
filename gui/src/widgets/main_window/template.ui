@@ -20,6 +20,7 @@
 
 				<child>
 					<object class="GtkNotebook">
+						<property name="tab-pos">left</property>
 						<child>
 							<object class="OpenSCQ30GeneralSettings" id="general_settings">
 								<signal name="ambient-sound-mode-selected"
