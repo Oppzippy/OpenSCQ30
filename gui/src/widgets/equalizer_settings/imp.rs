@@ -138,7 +138,7 @@ impl EqualizerSettings {
     fn set_up_custom_profile(&self) {
         self.set_up_custom_profile_selection_model();
         self.set_up_custom_profile_expression();
-        self.set_up_custom_profile_click_handler();
+        self.set_up_custom_profile_selection_changed_handler();
     }
 
     fn set_up_custom_profile_selection_model(&self) {
@@ -157,7 +157,7 @@ impl EqualizerSettings {
             )));
     }
 
-    fn set_up_custom_profile_click_handler(&self) {
+    fn set_up_custom_profile_selection_changed_handler(&self) {
         self.custom_profile_dropdown.connect_selected_item_notify(
             clone!(@weak self as this => move |_dropdown| {
                 let maybe_selected_item  = this.custom_profile_dropdown.selected_item()
@@ -172,6 +172,11 @@ impl EqualizerSettings {
     pub fn set_custom_profiles(&self, mut profiles: Vec<EqualizerCustomProfileObject>) {
         if let Some(model) = &*self.custom_profiles.borrow() {
             profiles.sort_unstable_by(|left, right| left.name().cmp(&right.name()));
+            // Notifications need to be frozen to prevent the selection changes while removing and adding items from
+            // causing the profile to change. We can't force having no selection when adding new items, so it
+            // will change the selection to the newly added item. We can set it back to what it's supposed to be
+            // afterwards.
+            let _notify_freeze_guard = self.custom_profile_dropdown.freeze_notify();
             model.remove_all();
             model.extend_from_slice(&profiles);
             self.custom_profile_objects.replace(profiles);
@@ -199,7 +204,7 @@ impl EqualizerSettings {
     fn set_up_preset_profile(&self) {
         self.set_up_preset_profile_selection_model();
         self.set_up_preset_profile_expression();
-        self.set_up_preset_profile_click_handler();
+        self.set_up_preset_profile_selection_changed_handler();
         self.set_up_preset_profile_items();
         self.set_up_preset_profile_disabled_fields();
     }
@@ -220,7 +225,7 @@ impl EqualizerSettings {
             )));
     }
 
-    fn set_up_preset_profile_click_handler(&self) {
+    fn set_up_preset_profile_selection_changed_handler(&self) {
         self.profile_dropdown
             .connect_selected_item_notify(clone!(@weak self as this => move |_dropdown| {
                 let selected_item: EqualizerProfileObject = this.profile_dropdown
