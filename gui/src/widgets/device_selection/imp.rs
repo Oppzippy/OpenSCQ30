@@ -1,12 +1,12 @@
 use std::cell::RefCell;
 
-use gtk::gio;
 use gtk::glib::clone;
 use gtk::glib::once_cell::sync::Lazy;
 use gtk::glib::subclass::Signal;
 use gtk::prelude::{Cast, ObjectExt, StaticType};
 use gtk::subclass::prelude::{ObjectImplExt, ObjectSubclassExt};
 use gtk::subclass::widget::{CompositeTemplateCallbacksClass, CompositeTemplateInitializingExt};
+use gtk::{gio, ClosureExpression};
 use gtk::{
     glib,
     subclass::{
@@ -15,7 +15,6 @@ use gtk::{
     },
     CompositeTemplate, TemplateChild,
 };
-use gtk::{SignalListItemFactory, SingleSelection};
 
 use crate::objects::DeviceObject;
 
@@ -33,10 +32,10 @@ pub struct DeviceSelection {
 #[gtk::template_callbacks]
 impl DeviceSelection {
     pub fn set_devices(&self, devices: &[Device]) {
-        let objects: Vec<DeviceObject> = devices
+        let objects = devices
             .iter()
             .map(|device| DeviceObject::new(&device.name, &device.mac_address))
-            .collect();
+            .collect::<Vec<_>>();
 
         if let Some(model) = &*self.devices.borrow() {
             model.remove_all();
@@ -86,43 +85,23 @@ impl ObjectImpl for DeviceSelection {
     fn constructed(&self) {
         self.parent_constructed();
         let model = gio::ListStore::new(DeviceObject::static_type());
+        self.dropdown.set_model(Some(&model));
         self.devices.replace(Some(model));
 
-        let selection_model = SingleSelection::new(self.devices.borrow().to_owned());
-        self.dropdown.set_model(Some(&selection_model));
-
-        let factory = SignalListItemFactory::new();
-        factory.connect_setup(move |_, list_item| {
-            let label = gtk::Label::new(None);
-            list_item.set_child(Some(&label));
+        let expression = ClosureExpression::with_callback(gtk::Expression::NONE, |args| {
+            let device_object: DeviceObject = args[0].get().unwrap();
+            format!(
+                "{}: [{}]",
+                device_object.name(),
+                device_object.mac_address()
+            )
         });
+        self.dropdown.set_expression(Some(expression));
 
-        factory.connect_bind(move |_, list_item| {
-            let device_object = list_item
-                .item()
-                .expect("item must exist")
-                .downcast::<DeviceObject>()
-                .expect("the item must be a DeviceObject");
-
-            let label = list_item
-                .child()
-                .expect("must have a child")
-                .downcast::<gtk::Label>()
-                .expect("child must be a Label");
-
-            let name = device_object.name();
-            let mac_address = device_object.mac_address();
-
-            label.set_label(&format!("{name}: [{mac_address}]"));
-        });
-
-        let obj = self.obj();
         self.dropdown
-            .connect_selected_item_notify(clone!(@weak obj => move |_dropdown| {
-                obj.emit_by_name("selection-changed", &[])
+            .connect_selected_item_notify(clone!(@weak self as this => move |_dropdown| {
+                this.obj().emit_by_name("selection-changed", &[])
             }));
-
-        self.dropdown.set_factory(Some(&factory));
     }
 
     fn signals() -> &'static [Signal] {
