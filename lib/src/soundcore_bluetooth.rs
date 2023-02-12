@@ -1,4 +1,12 @@
 #[cfg(feature = "btleplug")]
-pub mod btleplug;
+pub(crate) mod btleplug;
 pub mod stub;
 pub mod traits;
+
+use self::traits::{SoundcoreDeviceConnectionError, SoundcoreDeviceConnectionRegistry};
+
+#[cfg(feature = "btleplug")]
+pub async fn new_connection_registry(
+) -> Result<impl SoundcoreDeviceConnectionRegistry, SoundcoreDeviceConnectionError> {
+    btleplug::new_connection_registry().await
+}

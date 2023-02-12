@@ -9,7 +9,7 @@ pub use soundcore_device_connection_registry::*;
 
 use super::traits::SoundcoreDeviceConnectionError;
 
-pub async fn new_connection_registry(
+pub(crate) async fn new_connection_registry(
 ) -> Result<BtlePlugSoundcoreDeviceConnectionRegistry, SoundcoreDeviceConnectionError> {
     let manager = Manager::new()
         .await
