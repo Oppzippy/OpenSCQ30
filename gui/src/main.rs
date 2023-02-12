@@ -66,7 +66,7 @@ fn run_application() {
 }
 
 fn get_settings_file() -> SettingsFile {
-    let settings = SettingsFile::new(glib::user_data_dir().join("OpenSCQ30").join("settings.toml"));
+    let settings = SettingsFile::new(glib::user_config_dir().join("OpenSCQ30").join("settings.toml"));
     if let Err(err) = settings.load() {
         tracing::warn!("initial load of settings file failed: {:?}", err)
     }
