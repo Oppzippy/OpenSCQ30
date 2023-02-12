@@ -44,21 +44,23 @@ pub struct GeneralSettings {
 impl GeneralSettings {
     pub fn set_ambient_sound_mode(&self, ambient_sound_mode: AmbientSoundMode) {
         self.ignore_button_clicks.replace(true);
-        match ambient_sound_mode {
-            AmbientSoundMode::NoiseCanceling => self.noise_canceling_mode.set_active(true),
-            AmbientSoundMode::Transparency => self.transparency_mode.set_active(true),
-            AmbientSoundMode::Normal => self.normal_mode.set_active(true),
-        }
+        let button = match ambient_sound_mode {
+            AmbientSoundMode::NoiseCanceling => &self.noise_canceling_mode,
+            AmbientSoundMode::Transparency => &self.transparency_mode,
+            AmbientSoundMode::Normal => &self.normal_mode,
+        };
+        button.set_active(true);
         self.ignore_button_clicks.replace(false);
     }
 
     pub fn set_noise_canceling_mode(&self, noise_canceling_mode: NoiseCancelingMode) {
         self.ignore_button_clicks.replace(true);
-        match noise_canceling_mode {
-            NoiseCancelingMode::Indoor => self.indoor_mode.set_active(true),
-            NoiseCancelingMode::Outdoor => self.outdoor_mode.set_active(true),
-            NoiseCancelingMode::Transport => self.transport_mode.set_active(true),
-        }
+        let button = match noise_canceling_mode {
+            NoiseCancelingMode::Indoor => &self.indoor_mode,
+            NoiseCancelingMode::Outdoor => &self.outdoor_mode,
+            NoiseCancelingMode::Transport => &self.transport_mode,
+        };
+        button.set_active(true);
         self.ignore_button_clicks.replace(false);
     }
 

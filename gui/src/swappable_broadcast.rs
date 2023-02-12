@@ -31,8 +31,7 @@ where
     pub async fn next(&self) -> T {
         let mut maybe_receiver = self.receiver.lock().await;
         loop {
-            if maybe_receiver.is_some() {
-                let receiver = maybe_receiver.as_mut().unwrap();
+            if let Some(receiver) = maybe_receiver.as_mut() {
                 let result = select! {
                     val = receiver.recv() => {
                         Some(val)

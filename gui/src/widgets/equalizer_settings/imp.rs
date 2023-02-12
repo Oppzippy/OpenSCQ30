@@ -119,15 +119,15 @@ impl EqualizerSettings {
     pub fn set_equalizer_configuration(&self, configuration: &EqualizerConfiguration) {
         self.equalizer
             .set_volumes(configuration.band_offsets().volume_offsets());
-        self.profile_dropdown.set_selected(
-            self.profile_objects
-                .borrow()
-                .iter()
-                .position(|profile| profile.profile_id() as u16 == configuration.profile_id())
-                .unwrap_or(0)
-                .try_into()
-                .expect("could not convert usize to u32"),
-        );
+        let profile_index = self
+            .profile_objects
+            .borrow()
+            .iter()
+            .position(|profile| profile.profile_id() as u16 == configuration.profile_id())
+            .unwrap_or(0)
+            .try_into()
+            .expect("could not convert usize to u32");
+        self.profile_dropdown.set_selected(profile_index);
     }
 
     fn set_profiles(&self, profiles: Vec<EqualizerProfileObject>) {
@@ -163,7 +163,7 @@ impl EqualizerSettings {
     fn set_up_custom_profile_selection_changed_handler(&self) {
         self.custom_profile_dropdown.connect_selected_item_notify(
             clone!(@weak self as this => move |_dropdown| {
-                let maybe_selected_item  = this.custom_profile_dropdown.selected_item()
+                let maybe_selected_item = this.custom_profile_dropdown.selected_item()
                     .map(|item| item.downcast::<EqualizerCustomProfileObject>().unwrap());
                 if let Some(selected_item) = maybe_selected_item {
                     this.obj().emit_by_name("custom-equalizer-profile-selected", &[&selected_item])
