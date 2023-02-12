@@ -38,9 +38,7 @@ pub struct EqualizerSettings {
     pub delete_custom_profile_button: TemplateChild<gtk::Button>,
 
     profiles: RefCell<Option<gio::ListStore>>,
-    profile_objects: RefCell<Vec<EqualizerProfileObject>>,
     custom_profiles: RefCell<Option<gio::ListStore>>,
-    custom_profile_objects: RefCell<Vec<EqualizerCustomProfileObject>>,
 
     update_signal_debounce_handle: RefCell<Option<glib::JoinHandle<()>>>,
 }
@@ -60,11 +58,7 @@ impl EqualizerSettings {
 
     #[template_callback]
     fn handle_delete_custom_profile(&self, _button: &gtk::Button) {
-        let profiles = self.custom_profile_objects.borrow();
-        if let Some(profile) = profiles.get(self.custom_profile_dropdown.selected() as usize) {
-            let profile = profile.clone();
-            // The signal handlers won't be able to access profiles if we don't drop it before firing the signal
-            std::mem::drop(profiles);
+        if let Some(profile) = self.custom_profile_dropdown.selected_item() {
             self.obj()
                 .emit_by_name::<()>("delete-custom-equalizer-profile", &[&profile]);
         }
@@ -120,10 +114,12 @@ impl EqualizerSettings {
         self.equalizer
             .set_volumes(configuration.band_offsets().volume_offsets());
         let profile_index = self
-            .profile_objects
+            .profiles
             .borrow()
-            .iter()
-            .position(|profile| profile.profile_id() as u16 == configuration.profile_id())
+            .as_ref()
+            .unwrap()
+            .iter::<EqualizerProfileObject>()
+            .position(|profile| profile.unwrap().profile_id() as u16 == configuration.profile_id())
             .unwrap_or(0)
             .try_into()
             .expect("could not convert usize to u32");
@@ -134,7 +130,6 @@ impl EqualizerSettings {
         if let Some(model) = &*self.profiles.borrow() {
             model.remove_all();
             model.extend_from_slice(&profiles);
-            self.profile_objects.replace(profiles);
         }
     }
 
@@ -182,25 +177,27 @@ impl EqualizerSettings {
             let _notify_freeze_guard = self.custom_profile_dropdown.freeze_notify();
             model.remove_all();
             model.extend_from_slice(&profiles);
-            self.custom_profile_objects.replace(profiles);
             self.update_custom_profile_selection();
         }
     }
 
     fn update_custom_profile_selection(&self) {
-        if self.is_custom_profile() {
-            let profiles = self.custom_profile_objects.borrow();
-            let volumes = self.equalizer.volumes();
-            let custom_profile_index = profiles
-                .iter()
-                .enumerate()
-                .find(|(_i, profile)| profile.volume_offsets() == volumes)
-                .map(|(i, _profile)| i as u32)
-                .unwrap_or(u32::MAX);
-            self.custom_profile_dropdown
-                .set_selected(custom_profile_index);
-        } else {
-            self.custom_profile_dropdown.set_selected(u32::MAX);
+        match &*self.custom_profiles.borrow() {
+            Some(custom_profiles) if self.is_custom_profile() => {
+                let volumes = self.equalizer.volumes();
+                let custom_profile_index = custom_profiles
+                    .iter::<EqualizerCustomProfileObject>()
+                    .enumerate()
+                    .find(|(_i, profile)| profile.as_ref().unwrap().volume_offsets() == volumes)
+                    .map(|(i, _profile)| i as u32)
+                    .unwrap_or(u32::MAX);
+
+                self.custom_profile_dropdown
+                    .set_selected(custom_profile_index);
+            }
+            _ => {
+                self.custom_profile_dropdown.set_selected(u32::MAX);
+            }
         }
     }
 
