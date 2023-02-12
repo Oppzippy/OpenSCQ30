@@ -1,14 +1,8 @@
-use std::{
-    cell::{Cell, RefCell},
-    time::Duration,
-};
+use std::{cell::RefCell, time::Duration};
 
 use gtk::{
     gio::{self},
-    glib::{
-        self, clone, once_cell::sync::Lazy, subclass::Signal, timeout_future, MainContext,
-        ParamSpec, Properties, Value,
-    },
+    glib::{self, clone, once_cell::sync::Lazy, subclass::Signal, timeout_future, MainContext},
     prelude::*,
     subclass::{
         prelude::{BoxImpl, ObjectImpl, ObjectSubclass, *},
@@ -27,8 +21,7 @@ use strum::IntoEnumIterator;
 use crate::objects::{EqualizerCustomProfileObject, EqualizerProfileObject};
 use crate::widgets::Equalizer;
 
-#[derive(Default, CompositeTemplate, Properties)]
-#[properties(wrapper_type = super::EqualizerSettings)]
+#[derive(Default, CompositeTemplate)]
 #[template(resource = "/com/oppzippy/openscq30/equalizer_settings/template.ui")]
 pub struct EqualizerSettings {
     #[template_child]
@@ -43,9 +36,6 @@ pub struct EqualizerSettings {
     pub create_custom_profile_button: TemplateChild<gtk::Button>,
     #[template_child]
     pub delete_custom_profile_button: TemplateChild<gtk::Button>,
-
-    #[property(get, set)]
-    is_custom_profile: Cell<bool>,
 
     profiles: RefCell<Option<gio::ListStore>>,
     profile_objects: RefCell<Vec<EqualizerProfileObject>>,
@@ -272,28 +262,25 @@ impl EqualizerSettings {
     }
 
     fn set_up_preset_profile_disabled_fields(&self) {
-        let obj = self.obj();
+        let is_custom_profile_transform = |_, value: EqualizerProfileObject| {
+            Some(value.profile_id() as u16 == EqualizerConfiguration::CUSTOM_PROFILE_ID)
+        };
+
         self.profile_dropdown
-            .bind_property("selected-item", obj.as_ref(), "is-custom-profile")
-            .transform_to(|_, value: EqualizerProfileObject| {
-                Some(value.profile_id() as u16 == EqualizerConfiguration::CUSTOM_PROFILE_ID)
-            })
+            .bind_property(
+                "selected-item",
+                &self.custom_profile_selection.get(),
+                "sensitive",
+            )
+            .transform_to(is_custom_profile_transform)
             .sync_create()
             .build();
 
-        obj.bind_property(
-            "is-custom-profile",
-            &self.custom_profile_selection.get(),
-            "sensitive",
-        )
-        .sync_create()
-        .build();
-        obj.bind_property("is-custom-profile", &self.equalizer.get(), "sensitive")
+        self.profile_dropdown
+            .bind_property("selected-item", &self.equalizer.get(), "sensitive")
+            .transform_to(is_custom_profile_transform)
             .sync_create()
             .build();
-        obj.connect_notify_local(Some("is-custom-profile"), |this, _param| {
-            this.imp().update_custom_profile_selection();
-        });
     }
 
     fn set_up_preset_profile_items(&self) {
@@ -352,18 +339,6 @@ impl ObjectImpl for EqualizerSettings {
             ]
         });
         SIGNALS.as_ref()
-    }
-
-    fn properties() -> &'static [ParamSpec] {
-        Self::derived_properties()
-    }
-
-    fn set_property(&self, id: usize, value: &Value, pspec: &ParamSpec) {
-        Self::derived_set_property(self, id, value, pspec)
-    }
-
-    fn property(&self, id: usize, pspec: &ParamSpec) -> Value {
-        Self::derived_property(self, id, pspec)
     }
 }
 impl WidgetImpl for EqualizerSettings {}
