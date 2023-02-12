@@ -1,5 +1,3 @@
-use std::cell::RefCell;
-
 use gtk::glib::clone;
 use gtk::glib::once_cell::sync::Lazy;
 use gtk::glib::subclass::Signal;
@@ -15,6 +13,7 @@ use gtk::{
     },
     CompositeTemplate, TemplateChild,
 };
+use once_cell::unsync::OnceCell;
 
 use crate::objects::DeviceObject;
 
@@ -26,7 +25,7 @@ pub struct DeviceSelection {
     #[template_child]
     pub dropdown: TemplateChild<gtk::DropDown>,
 
-    pub devices: RefCell<Option<gio::ListStore>>,
+    pub devices: OnceCell<gio::ListStore>,
 }
 
 #[gtk::template_callbacks]
@@ -37,7 +36,7 @@ impl DeviceSelection {
             .map(|device| DeviceObject::new(&device.name, &device.mac_address))
             .collect::<Vec<_>>();
 
-        if let Some(model) = &*self.devices.borrow() {
+        if let Some(model) = self.devices.get() {
             model.remove_all();
             model.extend_from_slice(&objects);
 
@@ -86,7 +85,9 @@ impl ObjectImpl for DeviceSelection {
         self.parent_constructed();
         let model = gio::ListStore::new(DeviceObject::static_type());
         self.dropdown.set_model(Some(&model));
-        self.devices.replace(Some(model));
+        self.devices
+            .set(model)
+            .expect("constructed should only run once");
 
         let expression = ClosureExpression::with_callback(gtk::Expression::NONE, |args| {
             let device_object: DeviceObject = args[0].get().unwrap();

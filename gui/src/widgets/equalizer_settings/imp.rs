@@ -13,6 +13,7 @@ use gtk::{
     },
     CompositeTemplate, Expression, PropertyExpression, TemplateChild,
 };
+use once_cell::unsync::OnceCell;
 use openscq30_lib::packets::structures::{
     EqualizerBandOffsets, EqualizerConfiguration, PresetEqualizerProfile,
 };
@@ -37,8 +38,8 @@ pub struct EqualizerSettings {
     #[template_child]
     pub delete_custom_profile_button: TemplateChild<gtk::Button>,
 
-    profiles: RefCell<Option<gio::ListStore>>,
-    custom_profiles: RefCell<Option<gio::ListStore>>,
+    profiles: OnceCell<gio::ListStore>,
+    custom_profiles: OnceCell<gio::ListStore>,
 
     update_signal_debounce_handle: RefCell<Option<glib::JoinHandle<()>>>,
 }
@@ -115,9 +116,8 @@ impl EqualizerSettings {
             .set_volumes(configuration.band_offsets().volume_offsets());
         let profile_index = self
             .profiles
-            .borrow()
-            .as_ref()
-            .unwrap()
+            .get()
+            .expect("profiles should have been intitialized already")
             .iter::<EqualizerProfileObject>()
             .position(|profile| profile.unwrap().profile_id() as u16 == configuration.profile_id())
             .unwrap_or(0)
@@ -127,7 +127,7 @@ impl EqualizerSettings {
     }
 
     fn set_profiles(&self, profiles: Vec<EqualizerProfileObject>) {
-        if let Some(model) = &*self.profiles.borrow() {
+        if let Some(model) = self.profiles.get() {
             model.remove_all();
             model.extend_from_slice(&profiles);
         }
@@ -141,9 +141,10 @@ impl EqualizerSettings {
 
     fn set_up_custom_profile_selection_model(&self) {
         let model = gio::ListStore::new(EqualizerCustomProfileObject::static_type());
-        self.custom_profiles.replace(Some(model.to_owned()));
-
         self.custom_profile_dropdown.set_model(Some(&model));
+        self.custom_profiles
+            .set(model)
+            .expect("set up should only run once");
     }
 
     fn set_up_custom_profile_expression(&self) {
@@ -168,7 +169,7 @@ impl EqualizerSettings {
     }
 
     pub fn set_custom_profiles(&self, mut profiles: Vec<EqualizerCustomProfileObject>) {
-        if let Some(model) = &*self.custom_profiles.borrow() {
+        if let Some(model) = self.custom_profiles.get() {
             profiles.sort_unstable_by(|left, right| left.name().cmp(&right.name()));
             // Notifications need to be frozen to prevent the selection changes while removing and adding items from
             // causing the profile to change. We can't force having no selection when adding new items, so it
@@ -182,7 +183,7 @@ impl EqualizerSettings {
     }
 
     fn update_custom_profile_selection(&self) {
-        match &*self.custom_profiles.borrow() {
+        match self.custom_profiles.get() {
             Some(custom_profiles) if self.is_custom_profile() => {
                 let volumes = self.equalizer.volumes();
                 let custom_profile_index = custom_profiles
@@ -211,9 +212,10 @@ impl EqualizerSettings {
 
     fn set_up_preset_profile_selection_model(&self) {
         let model = gio::ListStore::new(EqualizerProfileObject::static_type());
-        self.profiles.replace(Some(model.to_owned()));
-
         self.profile_dropdown.set_model(Some(&model));
+        self.profiles
+            .set(model)
+            .expect("set up should only run once");
     }
 
     fn set_up_preset_profile_expression(&self) {
