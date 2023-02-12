@@ -1,14 +1,17 @@
 use std::cell::RefCell;
 
 use gtk::{
-    glib::{self, once_cell::sync::Lazy, ParamSpec, ParamSpecString},
-    prelude::ToValue,
-    subclass::prelude::{ObjectImpl, ObjectSubclass},
+    glib::{self, ParamSpec, Properties, Value},
+    prelude::{ObjectExt, ParamSpecBuilderExt},
+    subclass::prelude::{DerivedObjectProperties, ObjectImpl, ObjectSubclass},
 };
 
-#[derive(Default)]
+#[derive(Default, Properties)]
+#[properties(wrapper_type=super::DeviceObject)]
 pub struct DeviceObject {
+    #[property(set, get)]
     pub name: RefCell<String>,
+    #[property(set, get)]
     pub mac_address: RefCell<String>,
 }
 
@@ -20,34 +23,14 @@ impl ObjectSubclass for DeviceObject {
 
 impl ObjectImpl for DeviceObject {
     fn properties() -> &'static [ParamSpec] {
-        static PROPERTIES: Lazy<Vec<ParamSpec>> = Lazy::new(|| {
-            vec![
-                ParamSpecString::builder("name").build(),
-                ParamSpecString::builder("mac-address").build(),
-            ]
-        });
-        PROPERTIES.as_ref()
+        Self::derived_properties()
     }
 
-    fn set_property(&self, _id: usize, value: &glib::Value, pspec: &ParamSpec) {
-        match pspec.name() {
-            "name" => {
-                let name = value.get().expect("name needs to be a string");
-                self.name.replace(name);
-            }
-            "mac-address" => {
-                let mac_address = value.get().expect("mac-address must be a string");
-                self.mac_address.replace(mac_address);
-            }
-            _ => unimplemented!(),
-        }
+    fn set_property(&self, id: usize, value: &Value, pspec: &ParamSpec) {
+        Self::derived_set_property(self, id, value, pspec)
     }
 
-    fn property(&self, _id: usize, pspec: &ParamSpec) -> glib::Value {
-        match pspec.name() {
-            "name" => self.name.borrow().to_value(),
-            "mac-address" => self.mac_address.borrow().to_value(),
-            _ => unimplemented!(),
-        }
+    fn property(&self, id: usize, pspec: &ParamSpec) -> Value {
+        Self::derived_property(self, id, pspec)
     }
 }

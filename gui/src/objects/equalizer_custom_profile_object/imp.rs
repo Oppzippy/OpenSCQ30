@@ -1,13 +1,15 @@
 use std::cell::{Cell, RefCell};
 
 use gtk::{
-    glib::{self, once_cell::sync::Lazy, ParamSpec, ParamSpecString},
-    prelude::ToValue,
-    subclass::prelude::{ObjectImpl, ObjectSubclass},
+    glib::{self, ParamSpec, Properties, Value},
+    prelude::{ObjectExt, ParamSpecBuilderExt},
+    subclass::prelude::{DerivedObjectProperties, ObjectImpl, ObjectSubclass},
 };
 
-#[derive(Default)]
+#[derive(Default, Properties)]
+#[properties(wrapper_type = super::EqualizerCustomProfileObject)]
 pub struct EqualizerCustomProfileObject {
+    #[property(get, set)]
     pub name: RefCell<String>,
     pub volume_offsets: Cell<[i8; 8]>,
 }
@@ -20,25 +22,14 @@ impl ObjectSubclass for EqualizerCustomProfileObject {
 
 impl ObjectImpl for EqualizerCustomProfileObject {
     fn properties() -> &'static [ParamSpec] {
-        static PROPERTIES: Lazy<Vec<ParamSpec>> =
-            Lazy::new(|| vec![ParamSpecString::builder("name").build()]);
-        PROPERTIES.as_ref()
+        Self::derived_properties()
     }
 
-    fn set_property(&self, _id: usize, value: &glib::Value, pspec: &ParamSpec) {
-        match pspec.name() {
-            "name" => {
-                let name = value.get().expect("name needs to be a string");
-                self.name.replace(name);
-            }
-            _ => unimplemented!(),
-        }
+    fn set_property(&self, id: usize, value: &Value, pspec: &ParamSpec) {
+        Self::derived_set_property(self, id, value, pspec)
     }
 
-    fn property(&self, _id: usize, pspec: &ParamSpec) -> glib::Value {
-        match pspec.name() {
-            "name" => self.name.borrow().to_value(),
-            _ => unimplemented!(),
-        }
+    fn property(&self, id: usize, pspec: &ParamSpec) -> Value {
+        Self::derived_property(self, id, pspec)
     }
 }

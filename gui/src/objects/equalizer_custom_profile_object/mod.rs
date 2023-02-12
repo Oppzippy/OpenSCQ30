@@ -1,6 +1,5 @@
 use gtk::{
     glib::{self, Object},
-    prelude::ObjectExt,
     subclass::prelude::ObjectSubclassIsExt,
 };
 
@@ -15,10 +14,6 @@ impl EqualizerCustomProfileObject {
         let obj: Self = Object::builder().property("name", name).build();
         obj.imp().volume_offsets.replace(volume_offsets);
         obj
-    }
-
-    pub fn name(&self) -> String {
-        self.property("name")
     }
 
     pub fn volume_offsets(&self) -> [i8; 8] {

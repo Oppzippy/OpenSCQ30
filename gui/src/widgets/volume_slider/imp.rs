@@ -1,7 +1,6 @@
 use std::cell::Cell;
 
-use gtk::glib::once_cell::sync::Lazy;
-use gtk::glib::{BindingFlags, ParamSpec, ParamSpecDouble, ParamSpecInt};
+use gtk::glib::{BindingFlags, ParamSpec, Properties, Value};
 use gtk::prelude::*;
 use gtk::subclass::prelude::{ObjectImplExt, ObjectSubclassExt};
 use gtk::subclass::widget::{CompositeTemplateInitializingExt, WidgetClassSubclassExt};
@@ -10,13 +9,14 @@ use gtk::Label;
 use gtk::{
     glib,
     subclass::{
-        prelude::{BoxImpl, ObjectImpl, ObjectSubclass},
+        prelude::{BoxImpl, DerivedObjectProperties, ObjectImpl, ObjectSubclass},
         widget::{CompositeTemplateClass, WidgetImpl},
     },
     CompositeTemplate, Scale, TemplateChild,
 };
 
-#[derive(Default, CompositeTemplate)]
+#[derive(Default, CompositeTemplate, Properties)]
+#[properties(wrapper_type = super::VolumeSlider)]
 #[template(resource = "/com/oppzippy/openscq30/volume_slider/template.ui")]
 pub struct VolumeSlider {
     #[template_child]
@@ -24,18 +24,10 @@ pub struct VolumeSlider {
     #[template_child]
     pub band_label: TemplateChild<Label>,
 
+    #[property(get, set)]
     pub volume: Cell<f64>,
+    #[property(get, set)]
     pub band: Cell<i32>,
-}
-
-impl VolumeSlider {
-    pub fn volume(&self) -> i8 {
-        (self.volume.get() * 10.0).clamp(-60.0, 60.0) as i8
-    }
-
-    pub fn set_volume(&self, volume: i8) {
-        self.obj().set_property("volume", volume as f64 / 10.0);
-    }
 }
 
 #[glib::object_subclass]
@@ -54,38 +46,6 @@ impl ObjectSubclass for VolumeSlider {
 }
 
 impl ObjectImpl for VolumeSlider {
-    fn properties() -> &'static [glib::ParamSpec] {
-        static PROPERTIES: Lazy<Vec<ParamSpec>> = Lazy::new(|| {
-            vec![
-                ParamSpecInt::builder("band").build(),
-                ParamSpecDouble::builder("volume").build(),
-            ]
-        });
-        PROPERTIES.as_ref()
-    }
-
-    fn set_property(&self, _id: usize, value: &glib::Value, pspec: &ParamSpec) {
-        match pspec.name() {
-            "band" => {
-                let band = value.get().expect("band must be i32");
-                self.band.replace(band);
-            }
-            "volume" => {
-                let volume = value.get().expect("volume must be f64");
-                self.volume.replace(volume);
-            }
-            _ => unimplemented!(),
-        }
-    }
-
-    fn property(&self, _id: usize, _pspec: &ParamSpec) -> glib::Value {
-        match _pspec.name() {
-            "band" => self.band.get().to_value(),
-            "volume" => self.volume.get().to_value(),
-            _ => unimplemented!(),
-        }
-    }
-
     fn constructed(&self) {
         self.parent_constructed();
 
@@ -106,10 +66,23 @@ impl ObjectImpl for VolumeSlider {
             .build();
 
         let slider = self.slider.get();
+        slider.set_format_value_func(|_slider, value| format!("{:.1}", value / 10.0));
 
-        slider.add_mark(-6.0, gtk::PositionType::Right, Some("-6"));
+        slider.add_mark(-60.0, gtk::PositionType::Right, Some("-6"));
         slider.add_mark(0.0, gtk::PositionType::Right, Some("0"));
-        slider.add_mark(6.0, gtk::PositionType::Right, Some("+6"));
+        slider.add_mark(60.0, gtk::PositionType::Right, Some("+6"));
+    }
+
+    fn properties() -> &'static [ParamSpec] {
+        Self::derived_properties()
+    }
+
+    fn set_property(&self, id: usize, value: &Value, pspec: &ParamSpec) {
+        Self::derived_set_property(self, id, value, pspec)
+    }
+
+    fn property(&self, id: usize, pspec: &ParamSpec) -> Value {
+        Self::derived_property(self, id, pspec)
     }
 }
 impl WidgetImpl for VolumeSlider {}

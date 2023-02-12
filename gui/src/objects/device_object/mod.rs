@@ -1,7 +1,4 @@
-use gtk::{
-    glib::{self, Object},
-    prelude::ObjectExt,
-};
+use gtk::glib::{self, Object};
 
 mod imp;
 
@@ -15,13 +12,5 @@ impl DeviceObject {
             .property("name", name)
             .property("mac-address", mac_address)
             .build()
-    }
-
-    pub fn name(&self) -> String {
-        self.property("name")
-    }
-
-    pub fn mac_address(&self) -> String {
-        self.property("mac-address")
     }
 }

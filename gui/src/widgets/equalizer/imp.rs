@@ -38,14 +38,15 @@ pub struct Equalizer {
 
 impl Equalizer {
     pub fn volumes(&self) -> [i8; 8] {
-        self.get_volume_sliders().map(|slider| slider.volume())
+        self.get_volume_sliders()
+            .map(|slider| slider.volume() as i8)
     }
 
     pub fn set_volumes(&self, volumes: [i8; 8]) {
         self.get_volume_sliders()
             .iter()
             .zip(volumes.into_iter())
-            .for_each(|(slider, volume)| slider.set_volume(volume));
+            .for_each(|(slider, volume)| slider.set_volume(volume as f64));
     }
 
     fn handle_volume_change(&self) {

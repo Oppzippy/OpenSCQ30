@@ -1,7 +1,4 @@
-use gtk::{
-    glib::{self, Object},
-    prelude::ObjectExt,
-};
+use gtk::glib::{self, Object};
 
 mod imp;
 
@@ -15,13 +12,5 @@ impl EqualizerProfileObject {
             .property("name", name)
             .property("profile-id", &profile_id)
             .build()
-    }
-
-    pub fn name(&self) -> String {
-        self.property("name")
-    }
-
-    pub fn profile_id(&self) -> u32 {
-        self.property("profile_id")
     }
 }

@@ -7,7 +7,7 @@ use gtk::{
     gio::{self},
     glib::{
         self, clone, once_cell::sync::Lazy, subclass::Signal, timeout_future, MainContext,
-        ParamSpec, ParamSpecBoolean,
+        ParamSpec, Properties, Value,
     },
     prelude::*,
     subclass::{
@@ -27,7 +27,8 @@ use strum::IntoEnumIterator;
 use crate::objects::{EqualizerCustomProfileObject, EqualizerProfileObject};
 use crate::widgets::Equalizer;
 
-#[derive(Default, CompositeTemplate)]
+#[derive(Default, CompositeTemplate, Properties)]
+#[properties(wrapper_type = super::EqualizerSettings)]
 #[template(resource = "/com/oppzippy/openscq30/equalizer_settings/template.ui")]
 pub struct EqualizerSettings {
     #[template_child]
@@ -43,11 +44,13 @@ pub struct EqualizerSettings {
     #[template_child]
     pub delete_custom_profile_button: TemplateChild<gtk::Button>,
 
+    #[property(get, set)]
+    is_custom_profile: Cell<bool>,
+
     profiles: RefCell<Option<gio::ListStore>>,
     profile_objects: RefCell<Vec<EqualizerProfileObject>>,
     custom_profiles: RefCell<Option<gio::ListStore>>,
     custom_profile_objects: RefCell<Vec<EqualizerCustomProfileObject>>,
-    is_custom_profile: Cell<bool>,
 
     update_signal_debounce_handle: RefCell<Option<glib::JoinHandle<()>>>,
 }
@@ -352,24 +355,15 @@ impl ObjectImpl for EqualizerSettings {
     }
 
     fn properties() -> &'static [ParamSpec] {
-        static PROPERTIES: Lazy<Vec<ParamSpec>> =
-            Lazy::new(|| vec![ParamSpecBoolean::builder("is-custom-profile").build()]);
-        PROPERTIES.as_ref()
+        Self::derived_properties()
     }
 
-    fn property(&self, _id: usize, pspec: &ParamSpec) -> glib::Value {
-        match pspec.name() {
-            "is-custom-profile" => self.is_custom_profile.get().to_value(),
-            _ => unimplemented!(),
-        }
+    fn set_property(&self, id: usize, value: &Value, pspec: &ParamSpec) {
+        Self::derived_set_property(self, id, value, pspec)
     }
-    fn set_property(&self, _id: usize, value: &glib::Value, pspec: &ParamSpec) {
-        match pspec.name() {
-            "is-custom-profile" => self
-                .is_custom_profile
-                .replace(value.get().expect("is-custom-profile must be a bool")),
-            _ => unimplemented!(),
-        };
+
+    fn property(&self, id: usize, pspec: &ParamSpec) -> Value {
+        Self::derived_property(self, id, pspec)
     }
 }
 impl WidgetImpl for EqualizerSettings {}
