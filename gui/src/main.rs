@@ -92,14 +92,6 @@ fn build_ui(application: &impl IsA<Application>) {
     let gtk_registry = Arc::new(GtkSoundcoreDeviceRegistry::new(registry, tokio_runtime));
 
     let settings_file = Rc::new(get_settings_file());
-    // settings_file.edit(|settings| {
-    //     settings.equalizer_custom_profiles.insert("asdf".to_string(), EqualizerCustomProfile {
-    //         volume_offsets: [0,1,2,3,4,5,6,7],
-    //     });
-    //     settings.equalizer_custom_profiles.insert("qwer".to_string(), EqualizerCustomProfile {
-    //         volume_offsets: [-60,1,2,3,4,5,6,7],
-    //     });
-    // }).unwrap();
     let main_window = MainWindow::new(application, settings_file.to_owned());
     settings_file.get(|settings| {
         main_window.set_custom_profiles(
