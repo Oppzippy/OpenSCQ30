@@ -3,6 +3,7 @@ pub(crate) mod btleplug;
 pub mod stub;
 pub mod traits;
 
+#[cfg(feature = "btleplug")]
 use self::traits::{SoundcoreDeviceConnectionError, SoundcoreDeviceConnectionRegistry};
 
 #[cfg(feature = "btleplug")]
