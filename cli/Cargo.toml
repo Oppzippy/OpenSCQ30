@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-openscq30_lib = { path = "../lib", features = ["btleplug"] }
+openscq30_lib = { path = "../lib", features = ["bluetooth"] }
 clap = { version = "4.1", features = ["derive"] }
 tokio = { version = "1", features = ["macros"] }
 tracing = "0.1"
