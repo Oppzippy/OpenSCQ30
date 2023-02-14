@@ -1,26 +1,26 @@
 use std::sync::Arc;
 
 use openscq30_lib::{
-    api::SoundcoreDevice,
+    api::traits::SoundcoreDevice,
     packets::structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
-    soundcore_bluetooth::traits::{SoundcoreDeviceConnection, SoundcoreDeviceConnectionError},
+    soundcore_bluetooth::traits::SoundcoreDeviceConnectionError,
     state::SoundcoreDeviceState,
 };
 use tokio::{runtime::Handle, sync::broadcast};
 
-pub struct GtkSoundcoreDevice<'a, ConnectionType: 'static>
+pub struct GtkSoundcoreDevice<'a, SoundcoreDeviceType: 'static>
 where
-    ConnectionType: SoundcoreDeviceConnection + Send + Sync,
+    SoundcoreDeviceType: SoundcoreDevice + Send + Sync,
 {
     tokio_runtime: &'a Handle,
-    soundcore_device: Arc<SoundcoreDevice<ConnectionType>>,
+    soundcore_device: Arc<SoundcoreDeviceType>,
 }
 
-impl<'a, ConnectionType> GtkSoundcoreDevice<'a, ConnectionType>
+impl<'a, SoundcoreDeviceType> GtkSoundcoreDevice<'a, SoundcoreDeviceType>
 where
-    ConnectionType: SoundcoreDeviceConnection + Send + Sync,
+    SoundcoreDeviceType: SoundcoreDevice + Send + Sync,
 {
-    pub fn new(device: Arc<SoundcoreDevice<ConnectionType>>, tokio_runtime: &'a Handle) -> Self {
+    pub fn new(device: Arc<SoundcoreDeviceType>, tokio_runtime: &'a Handle) -> Self {
         Self {
             tokio_runtime,
             soundcore_device: device,

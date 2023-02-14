@@ -3,6 +3,9 @@ name = "openscq30_cli"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+demo = ["openscq30_lib/demo"]
+
 [dependencies]
 openscq30_lib = { path = "../lib", features = ["bluetooth"] }
 clap = { version = "4.1", features = ["derive"] }

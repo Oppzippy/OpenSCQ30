@@ -2,9 +2,8 @@ use std::error::Error;
 
 use clap::{command, Parser, Subcommand, ValueEnum};
 use openscq30_lib::{
-    api::SoundcoreDeviceRegistry,
+    api::traits::{SoundcoreDevice, SoundcoreDeviceRegistry},
     packets::structures::{EqualizerBandOffsets, EqualizerConfiguration},
-    soundcore_bluetooth::{self},
 };
 use tracing::Level;
 #[cfg(debug_assertions)]
@@ -110,10 +109,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     subscriber_builder.init();
 
     let args = Cli::parse();
-    let connection_registry_impl = soundcore_bluetooth::new_connection_registry()
+    let registry = openscq30_lib::api::new_soundcore_device_registry()
         .await
-        .unwrap_or_else(|err| panic!("failed to initialize handler: {err}"));
-    let registry = SoundcoreDeviceRegistry::new(connection_registry_impl).await?;
+        .unwrap_or_else(|err| panic!("failed to initialize device registry: {err}"));
     registry.refresh_devices().await?;
 
     let devices = registry.devices().await;

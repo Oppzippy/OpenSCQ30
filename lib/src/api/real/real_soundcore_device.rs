@@ -1,5 +1,6 @@
 use std::{sync::Arc, time::Duration};
 
+use async_trait::async_trait;
 use tokio::{
     sync::{broadcast, mpsc::Receiver, RwLock},
     task::JoinHandle,
@@ -8,6 +9,7 @@ use tokio::{
 use tracing::{trace, warn};
 
 use crate::{
+    api,
     packets::{
         inbound::InboundPacket,
         outbound::{OutboundPacket, RequestStatePacket},
@@ -23,7 +25,7 @@ use crate::{
     soundcore_bluetooth::traits::SoundcoreDeviceConnectionError,
 };
 
-pub struct SoundcoreDevice<ConnectionType>
+pub struct RealSoundcoreDevice<ConnectionType>
 where
     ConnectionType: SoundcoreDeviceConnection + Send + Sync,
 {
@@ -33,7 +35,7 @@ where
     state_update_sender: broadcast::Sender<SoundcoreDeviceState>,
 }
 
-impl<ConnectionType> SoundcoreDevice<ConnectionType>
+impl<ConnectionType> RealSoundcoreDevice<ConnectionType>
 where
     ConnectionType: SoundcoreDeviceConnection + Send + Sync,
 {
@@ -113,20 +115,26 @@ where
         }
         Err(SoundcoreDeviceConnectionError::NoResponse)
     }
+}
 
-    pub fn subscribe_to_state_updates(&self) -> broadcast::Receiver<SoundcoreDeviceState> {
+#[async_trait]
+impl<ConnectionType> api::traits::SoundcoreDevice for RealSoundcoreDevice<ConnectionType>
+where
+    ConnectionType: SoundcoreDeviceConnection + Send + Sync,
+{
+    fn subscribe_to_state_updates(&self) -> broadcast::Receiver<SoundcoreDeviceState> {
         self.state_update_sender.subscribe()
     }
 
-    pub async fn mac_address(&self) -> Result<String, SoundcoreDeviceConnectionError> {
+    async fn mac_address(&self) -> Result<String, SoundcoreDeviceConnectionError> {
         self.connection.mac_address().await
     }
 
-    pub async fn name(&self) -> Result<String, SoundcoreDeviceConnectionError> {
+    async fn name(&self) -> Result<String, SoundcoreDeviceConnectionError> {
         self.connection.name().await
     }
 
-    pub async fn set_ambient_sound_mode(
+    async fn set_ambient_sound_mode(
         &self,
         ambient_sound_mode: AmbientSoundMode,
     ) -> Result<(), SoundcoreDeviceConnectionError> {
@@ -141,11 +149,11 @@ where
         Ok(())
     }
 
-    pub async fn ambient_sound_mode(&self) -> AmbientSoundMode {
+    async fn ambient_sound_mode(&self) -> AmbientSoundMode {
         self.state.read().await.ambient_sound_mode()
     }
 
-    pub async fn set_noise_canceling_mode(
+    async fn set_noise_canceling_mode(
         &self,
         noise_canceling_mode: NoiseCancelingMode,
     ) -> Result<(), SoundcoreDeviceConnectionError> {
@@ -177,11 +185,11 @@ where
         Ok(())
     }
 
-    pub async fn noise_canceling_mode(&self) -> NoiseCancelingMode {
+    async fn noise_canceling_mode(&self) -> NoiseCancelingMode {
         self.state.read().await.noise_canceling_mode()
     }
 
-    pub async fn set_equalizer_configuration(
+    async fn set_equalizer_configuration(
         &self,
         configuration: EqualizerConfiguration,
     ) -> Result<(), SoundcoreDeviceConnectionError> {
@@ -193,12 +201,12 @@ where
         Ok(())
     }
 
-    pub async fn equalizer_configuration(&self) -> EqualizerConfiguration {
+    async fn equalizer_configuration(&self) -> EqualizerConfiguration {
         self.state.read().await.equalizer_configuration()
     }
 }
 
-impl<ConnectionType> Drop for SoundcoreDevice<ConnectionType>
+impl<ConnectionType> Drop for RealSoundcoreDevice<ConnectionType>
 where
     ConnectionType: SoundcoreDeviceConnection + Send + Sync,
 {
@@ -207,7 +215,7 @@ where
     }
 }
 
-impl<ConnectionType> std::fmt::Debug for SoundcoreDevice<ConnectionType>
+impl<ConnectionType> std::fmt::Debug for RealSoundcoreDevice<ConnectionType>
 where
     ConnectionType: SoundcoreDeviceConnection + Send + Sync,
 {
@@ -222,8 +230,9 @@ mod tests {
 
     use tokio::sync::mpsc;
 
-    use super::SoundcoreDevice;
+    use super::RealSoundcoreDevice;
     use crate::{
+        api::traits::SoundcoreDevice,
         packets::structures::{
             AmbientSoundMode, EqualizerBandOffsets, EqualizerConfiguration, NoiseCancelingMode,
         },
@@ -262,7 +271,7 @@ mod tests {
         tokio::spawn(async move {
             sender.send(example_state_update_packet()).await.unwrap();
         });
-        let device = SoundcoreDevice::new(connection).await.unwrap();
+        let device = RealSoundcoreDevice::new(connection).await.unwrap();
         assert_eq!(AmbientSoundMode::Normal, device.ambient_sound_mode().await);
         assert_eq!(
             NoiseCancelingMode::Transport,
@@ -286,7 +295,7 @@ mod tests {
             sender.send(example_state_update_packet()).await.unwrap();
         });
         let connection_clone = connection.clone();
-        SoundcoreDevice::new(connection_clone).await.unwrap();
+        RealSoundcoreDevice::new(connection_clone).await.unwrap();
         assert_eq!(0, connection.write_return_queue_length().await);
     }
 
@@ -299,7 +308,7 @@ mod tests {
         }
 
         let connection_clone = connection.clone();
-        let result = SoundcoreDevice::new(connection_clone).await;
+        let result = RealSoundcoreDevice::new(connection_clone).await;
         assert_eq!(true, result.is_err());
     }
 
@@ -314,7 +323,7 @@ mod tests {
                 .await
                 .unwrap();
         });
-        let device = SoundcoreDevice::new(connection).await.unwrap();
+        let device = RealSoundcoreDevice::new(connection).await.unwrap();
         assert_eq!(AmbientSoundMode::Normal, device.ambient_sound_mode().await);
         assert_eq!(
             NoiseCancelingMode::Transport,

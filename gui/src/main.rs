@@ -9,10 +9,9 @@ use gtk::{
 };
 use gtk_openscq30_lib::GtkSoundcoreDeviceRegistry;
 use openscq30_lib::{
-    api::SoundcoreDeviceRegistry,
     packets::structures::{
         AmbientSoundMode, NoiseCancelingMode, EqualizerConfiguration, EqualizerBandOffsets,
-    }, soundcore_bluetooth, state::SoundcoreDeviceState,
+    }, state::SoundcoreDeviceState, api::traits::SoundcoreDeviceRegistry,
 };
 use settings::{SettingsFile, EqualizerCustomProfile};
 use swappable_broadcast::SwappableBroadcastReceiver;
@@ -80,9 +79,7 @@ fn build_ui(application: &impl IsA<Application>) {
         .build()
         .unwrap_or_else(|err| panic!("failed to start tokio runtime: {err}"));
 
-    let connection_registry_impl = tokio_runtime.block_on(soundcore_bluetooth::new_connection_registry())
-        .unwrap_or_else(|err| panic!("failed to initialize handler: {err}"));
-    let registry = tokio_runtime.block_on(SoundcoreDeviceRegistry::new(connection_registry_impl))
+    let registry = tokio_runtime.block_on(openscq30_lib::api::new_soundcore_device_registry())
         .unwrap_or_else(|err| panic!("failed to initialize device registry: {err}"));
 
     if let Err(err) = tokio_runtime.block_on(registry.refresh_devices()) {

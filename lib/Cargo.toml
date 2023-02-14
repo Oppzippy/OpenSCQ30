@@ -5,6 +5,7 @@ edition = "2021"
 
 [features]
 bluetooth = ["dep:btleplug"]
+demo = []
 
 [lib]
 crate-type = ["lib"]
