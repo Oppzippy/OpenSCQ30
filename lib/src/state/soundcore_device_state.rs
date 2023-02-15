@@ -12,14 +12,14 @@ pub struct SoundcoreDeviceState {
 
 impl SoundcoreDeviceState {
     pub fn new(
-        ambient_sound_mode: &AmbientSoundMode,
-        noise_canceling_mode: &NoiseCancelingMode,
-        equalizer_configuration: &EqualizerConfiguration,
+        ambient_sound_mode: AmbientSoundMode,
+        noise_canceling_mode: NoiseCancelingMode,
+        equalizer_configuration: EqualizerConfiguration,
     ) -> Self {
         Self {
-            ambient_sound_mode: ambient_sound_mode.to_owned(),
-            noise_canceling_mode: noise_canceling_mode.to_owned(),
-            equalizer_configuration: equalizer_configuration.to_owned(),
+            ambient_sound_mode,
+            noise_canceling_mode,
+            equalizer_configuration,
         }
     }
 

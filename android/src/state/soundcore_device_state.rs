@@ -24,9 +24,9 @@ impl SoundcoreDeviceState {
     ) -> SoundcoreDeviceState {
         Self {
             state: openscq30_lib::state::SoundcoreDeviceState::new(
-                &ambient_sound_mode.to_owned().into(),
-                &noise_canceling_mode.to_owned().into(),
-                &equalizer_configuration.to_owned().into(),
+                ambient_sound_mode.to_owned().into(),
+                noise_canceling_mode.to_owned().into(),
+                equalizer_configuration.to_owned().into(),
             ),
         }
     }
