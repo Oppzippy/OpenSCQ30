@@ -18,6 +18,8 @@ jobs:
         uses: Swatinem/rust-cache@v2
       - name: Run rust tests
         run: cargo test
+      - name: Run rust tests in demo mode
+        run: cargo test --features demo
 
   android_test:
     runs-on: ubuntu-22.04

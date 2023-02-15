@@ -26,9 +26,9 @@ impl DemoSoundcoreDevice {
             mac_address,
             sender,
             state: Mutex::new(SoundcoreDeviceState::new(
-                &AmbientSoundMode::Normal,
-                &NoiseCancelingMode::Indoor,
-                &EqualizerConfiguration::new_from_preset_profile(
+                AmbientSoundMode::Normal,
+                NoiseCancelingMode::Indoor,
+                EqualizerConfiguration::new_from_preset_profile(
                     PresetEqualizerProfile::SoundcoreSignature,
                 ),
             )),
