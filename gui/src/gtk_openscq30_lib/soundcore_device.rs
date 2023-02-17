@@ -6,21 +6,22 @@ use openscq30_lib::{
     soundcore_bluetooth::traits::SoundcoreDeviceConnectionError,
     state::SoundcoreDeviceState,
 };
-use tokio::{runtime::Handle, sync::broadcast};
+use tokio::{runtime::Runtime, sync::broadcast};
 
-pub struct GtkSoundcoreDevice<'a, SoundcoreDeviceType: 'static>
+pub struct GtkSoundcoreDevice<SoundcoreDeviceType: 'static>
 where
     SoundcoreDeviceType: SoundcoreDevice + Send + Sync,
 {
-    tokio_runtime: &'a Handle,
+    tokio_runtime: Arc<Runtime>,
     soundcore_device: Arc<SoundcoreDeviceType>,
 }
 
-impl<'a, SoundcoreDeviceType> GtkSoundcoreDevice<'a, SoundcoreDeviceType>
+#[allow(dead_code)]
+impl<SoundcoreDeviceType> GtkSoundcoreDevice<SoundcoreDeviceType>
 where
     SoundcoreDeviceType: SoundcoreDevice + Send + Sync,
 {
-    pub fn new(device: Arc<SoundcoreDeviceType>, tokio_runtime: &'a Handle) -> Self {
+    pub fn new(device: Arc<SoundcoreDeviceType>, tokio_runtime: Arc<Runtime>) -> Self {
         Self {
             tokio_runtime,
             soundcore_device: device,

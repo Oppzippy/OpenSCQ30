@@ -8,11 +8,11 @@ use tokio::runtime::Runtime;
 
 use super::soundcore_device::GtkSoundcoreDevice;
 
-pub struct GtkSoundcoreDeviceRegistry<RegistryType: 'static>
+pub struct GtkSoundcoreDeviceRegistry<RegistryType>
 where
     RegistryType: SoundcoreDeviceRegistry + Send + Sync,
 {
-    tokio_runtime: Runtime,
+    tokio_runtime: Arc<Runtime>,
     soundcore_device_registry: Arc<RegistryType>,
 }
 
@@ -23,41 +23,46 @@ where
     pub fn new(registry: RegistryType, tokio_runtime: Runtime) -> Self {
         Self {
             soundcore_device_registry: Arc::new(registry),
-            tokio_runtime,
+            tokio_runtime: Arc::new(tokio_runtime),
         }
     }
 
-    pub async fn refresh_devices(&self) -> Result<(), SoundcoreDeviceConnectionError> {
-        let device_registry = self.soundcore_device_registry.to_owned();
-        async_runtime_bridge!(self.tokio_runtime, device_registry.refresh_devices().await)
-    }
-
-    pub async fn devices(&self) -> Vec<Arc<GtkSoundcoreDevice<RegistryType::DeviceType>>> {
-        let device_registry = self.soundcore_device_registry.to_owned();
-        let devices = async_runtime_bridge!(self.tokio_runtime, device_registry.devices().await);
-        devices
-            .into_iter()
-            .map(|device| self.to_gtk_device(device))
-            .collect()
-    }
-
-    pub async fn device_by_mac_address(
+    pub async fn device(
         &self,
-        mac_address: &String,
-    ) -> Option<Arc<GtkSoundcoreDevice<RegistryType::DeviceType>>> {
+        mac_address: String,
+    ) -> Result<
+        Option<Arc<GtkSoundcoreDevice<RegistryType::DeviceType>>>,
+        SoundcoreDeviceConnectionError,
+    > {
         let device_registry = self.soundcore_device_registry.to_owned();
-        let mac_address = mac_address.to_owned();
+        let maybe_device = async_runtime_bridge!(
+            self.tokio_runtime,
+            device_registry.device(&mac_address).await
+        );
+        match maybe_device {
+            Ok(Some(device)) => Ok(Some(self.to_gtk_device(device))),
+            Ok(None) => Ok(None),
+            Err(err) => Err(err),
+        }
+    }
+
+    pub async fn device_descriptors(
+        &self,
+    ) -> Result<Vec<RegistryType::DescriptorType>, SoundcoreDeviceConnectionError> {
+        let device_registry = self.soundcore_device_registry.to_owned();
         async_runtime_bridge!(
             self.tokio_runtime,
-            device_registry.device_by_mac_address(&mac_address).await
+            device_registry.device_descriptors().await
         )
-        .map(|device| self.to_gtk_device(device))
     }
 
     fn to_gtk_device(
         &self,
         device: Arc<RegistryType::DeviceType>,
     ) -> Arc<GtkSoundcoreDevice<RegistryType::DeviceType>> {
-        Arc::new(GtkSoundcoreDevice::new(device, self.tokio_runtime.handle()))
+        Arc::new(GtkSoundcoreDevice::new(
+            device,
+            self.tokio_runtime.to_owned(),
+        ))
     }
 }

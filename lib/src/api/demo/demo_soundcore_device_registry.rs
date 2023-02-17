@@ -1,13 +1,14 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
+use futures::{stream, StreamExt};
 
 use crate::{
     api::traits::{SoundcoreDevice, SoundcoreDeviceRegistry},
     soundcore_bluetooth::traits::SoundcoreDeviceConnectionError,
 };
 
-use super::demo_soundcore_device::DemoSoundcoreDevice;
+use super::{demo_soundcore_device::DemoSoundcoreDevice, DemoSoundcoreDeviceDescriptor};
 
 pub struct DemoSoundcoreDeviceRegistry {
     devices: Vec<Arc<DemoSoundcoreDevice>>,
@@ -27,21 +28,37 @@ impl DemoSoundcoreDeviceRegistry {
 #[async_trait]
 impl SoundcoreDeviceRegistry for DemoSoundcoreDeviceRegistry {
     type DeviceType = DemoSoundcoreDevice;
+    type DescriptorType = DemoSoundcoreDeviceDescriptor;
 
-    async fn refresh_devices(&self) -> Result<(), SoundcoreDeviceConnectionError> {
-        Ok(())
+    async fn device_descriptors(
+        &self,
+    ) -> Result<Vec<Self::DescriptorType>, SoundcoreDeviceConnectionError> {
+        let descriptors = stream::iter(self.devices.iter())
+            .filter_map(|device| async move {
+                Some(DemoSoundcoreDeviceDescriptor::new(
+                    device.name().await.unwrap(),
+                    device.mac_address().await.unwrap(),
+                ))
+            })
+            .collect::<Vec<_>>()
+            .await;
+        Ok(descriptors)
     }
 
-    async fn devices(&self) -> Vec<Arc<Self::DeviceType>> {
-        self.devices.to_owned()
-    }
-
-    async fn device_by_mac_address(&self, mac_address: &String) -> Option<Arc<Self::DeviceType>> {
-        for device in self.devices.iter() {
-            if &device.mac_address().await.unwrap() == mac_address {
-                return Some(device.to_owned());
-            }
-        }
-        None
+    async fn device(
+        &self,
+        mac_address: &str,
+    ) -> Result<Option<Arc<Self::DeviceType>>, SoundcoreDeviceConnectionError> {
+        let devices = stream::iter(self.devices.iter())
+            .filter_map(|device| async move {
+                if device.mac_address().await.unwrap() == mac_address {
+                    Some(device)
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>()
+            .await;
+        Ok(devices.first().cloned().cloned())
     }
 }

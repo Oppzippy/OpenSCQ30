@@ -2,7 +2,7 @@ use std::error::Error;
 
 use clap::{command, Parser, Subcommand, ValueEnum};
 use openscq30_lib::{
-    api::traits::{SoundcoreDevice, SoundcoreDeviceRegistry},
+    api::traits::{SoundcoreDevice, SoundcoreDeviceDescriptor, SoundcoreDeviceRegistry},
     packets::structures::{EqualizerBandOffsets, EqualizerConfiguration},
 };
 use tracing::Level;
@@ -112,10 +112,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let registry = openscq30_lib::api::new_soundcore_device_registry()
         .await
         .unwrap_or_else(|err| panic!("failed to initialize device registry: {err}"));
-    registry.refresh_devices().await?;
+    do_cli_command(args, registry).await
+}
 
-    let devices = registry.devices().await;
-    if let Some(device) = devices.first() {
+// rust-analyzer doesn't seem to work with the associated types of an impl Trait return value
+// as a workaround, we can immediately pass the return value as a parameter to another function
+async fn do_cli_command(
+    args: Cli,
+    registry: impl SoundcoreDeviceRegistry,
+) -> Result<(), Box<dyn Error>> {
+    let descriptors = registry.device_descriptors().await?;
+    let first = descriptors.first().unwrap();
+    let device = registry.device(first.mac_address()).await?;
+
+    if let Some(device) = device {
         match args.command {
             Command::Set(set_command) => match set_command {
                 SetCommand::AmbientSoundMode { mode } => {

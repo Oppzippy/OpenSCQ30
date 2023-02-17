@@ -1,32 +1,34 @@
-use std::{sync::Arc, rc::Rc};
+use std::{cell::RefCell, rc::Rc, sync::Arc};
 
 use gtk::{
     gio,
     glib::{self, clone, closure_local, MainContext},
-    prelude::{ApplicationExt, ApplicationExtManual, ObjectExt, IsA},
+    prelude::{ApplicationExt, ApplicationExtManual, IsA, ObjectExt},
     traits::GtkWindowExt,
     Application,
 };
 use gtk_openscq30_lib::GtkSoundcoreDeviceRegistry;
 use openscq30_lib::{
+    api::traits::{SoundcoreDeviceDescriptor, SoundcoreDeviceRegistry},
     packets::structures::{
-        AmbientSoundMode, NoiseCancelingMode, EqualizerConfiguration, EqualizerBandOffsets,
-    }, state::SoundcoreDeviceState, api::traits::SoundcoreDeviceRegistry,
+        AmbientSoundMode, EqualizerBandOffsets, EqualizerConfiguration, NoiseCancelingMode,
+    },
+    state::SoundcoreDeviceState,
 };
-use settings::{SettingsFile, EqualizerCustomProfile};
+use settings::{EqualizerCustomProfile, SettingsFile};
 use swappable_broadcast::SwappableBroadcastReceiver;
 use tracing::Level;
 #[cfg(debug_assertions)]
 use tracing_subscriber::fmt::format::FmtSpan;
-use widgets::{MainWindow, Device};
+use widgets::{Device, MainWindow};
 
 use crate::objects::EqualizerCustomProfileObject;
 
-mod objects;
-mod widgets;
 mod gtk_openscq30_lib;
-mod swappable_broadcast;
+mod objects;
 mod settings;
+mod swappable_broadcast;
+mod widgets;
 
 fn main() {
     let subscriber_builder = tracing_subscriber::fmt()
@@ -35,7 +37,9 @@ fn main() {
         .with_target(false)
         .pretty();
     #[cfg(debug_assertions)]
-    let subscriber_builder = subscriber_builder.with_max_level(Level::TRACE).with_span_events(FmtSpan::ACTIVE);
+    let subscriber_builder = subscriber_builder
+        .with_max_level(Level::TRACE)
+        .with_span_events(FmtSpan::ACTIVE);
     #[cfg(not(debug_assertions))]
     let subscriber_builder = subscriber_builder.with_max_level(Level::INFO);
     subscriber_builder.init();
@@ -65,7 +69,11 @@ fn run_application() {
 }
 
 fn get_settings_file() -> SettingsFile {
-    let settings = SettingsFile::new(glib::user_data_dir().join("OpenSCQ30").join("settings.toml"));
+    let settings = SettingsFile::new(
+        glib::user_data_dir()
+            .join("OpenSCQ30")
+            .join("settings.toml"),
+    );
     if let Err(err) = settings.load() {
         tracing::warn!("initial load of settings file failed: {:?}", err)
     }
@@ -79,120 +87,140 @@ fn build_ui(application: &impl IsA<Application>) {
         .build()
         .unwrap_or_else(|err| panic!("failed to start tokio runtime: {err}"));
 
-    let registry = tokio_runtime.block_on(openscq30_lib::api::new_soundcore_device_registry())
+    let registry = tokio_runtime
+        .block_on(openscq30_lib::api::new_soundcore_device_registry())
         .unwrap_or_else(|err| panic!("failed to initialize device registry: {err}"));
 
-    if let Err(err) = tokio_runtime.block_on(registry.refresh_devices()) {
-        tracing::error!("error on initial refresh_devices: {}", err);
-    }
-
     let gtk_registry = Arc::new(GtkSoundcoreDeviceRegistry::new(registry, tokio_runtime));
+    build_ui_2(application, gtk_registry)
+}
 
+fn build_ui_2(
+    application: &impl IsA<Application>,
+    gtk_registry: Arc<
+        GtkSoundcoreDeviceRegistry<impl SoundcoreDeviceRegistry + Send + Sync + 'static>,
+    >,
+) {
     let settings_file = Rc::new(get_settings_file());
     let main_window = MainWindow::new(application, settings_file.to_owned());
-    settings_file.get(|settings| {
-        main_window.set_custom_profiles(
-            settings.equalizer_custom_profiles
-                .iter()
-                .map(|(name, profile)| EqualizerCustomProfileObject::new(name, profile.volume_offsets))
-                .collect()
-        );
-    }).unwrap();
+    settings_file
+        .get(|settings| {
+            main_window.set_custom_profiles(
+                settings
+                    .equalizer_custom_profiles
+                    .iter()
+                    .map(|(name, profile)| {
+                        EqualizerCustomProfileObject::new(name, profile.volume_offsets)
+                    })
+                    .collect(),
+            );
+        })
+        .unwrap();
 
-    let state_update_receiver: Arc<SwappableBroadcastReceiver<SoundcoreDeviceState>> = Arc::new(SwappableBroadcastReceiver::new());
+    let state_update_receiver: Rc<SwappableBroadcastReceiver<SoundcoreDeviceState>> =
+        Rc::new(SwappableBroadcastReceiver::new());
+    let selected_device = Rc::new(RefCell::new(None));
 
     let main_context = MainContext::default();
-    let gtk_registry_clone = gtk_registry.clone();
-    main_context.spawn_local(clone!(@weak main_window => async move {
-        let bluetooth_devices = gtk_registry_clone
-            .devices()
-            .await;
-        let mut model_devices = Vec::new();
-        for bluetooth_device in bluetooth_devices {
-            model_devices.push(Device {
-                mac_address: bluetooth_device.mac_address().await.unwrap_or_else(|_| "Unknown MAC Address".to_string()),
-                name: bluetooth_device.name().await.unwrap_or_else(|_| "Unknown Name".to_string()),
-            })
-        }
-        main_window.set_devices(&model_devices);
-    }));
-    
-    main_context.spawn_local(clone!(@weak main_window, @strong state_update_receiver => async move {
-        loop {
-            let next_state = state_update_receiver.next().await;
-            main_window.set_ambient_sound_mode(next_state.ambient_sound_mode());
-            main_window.set_noise_canceling_mode(next_state.noise_canceling_mode());               
-        }
-    }));
-
-    let gtk_registry_clone = gtk_registry.clone();
-    main_window.connect_closure(
-        "refresh-devices",
-        false,
-        closure_local!(move |main_window: MainWindow| {
-            let main_context = MainContext::default();
-            main_context.spawn_local(clone!(@weak main_window, @weak gtk_registry_clone => async move {
-                if let Err(err) = gtk_registry_clone.refresh_devices().await {
-                    tracing::warn!("error refreshing devices: {err}");
-                    return
-                };
-
-                let bluetooth_devices = gtk_registry_clone
-                    .devices()
-                    .await;
-                let mut model_devices = Vec::new();
-                for bluetooth_device in bluetooth_devices {
-                    model_devices.push(Device {
-                        mac_address: bluetooth_device.mac_address().await.unwrap_or_else(|_| "Unknown MAC Address".to_string()),
-                        name: bluetooth_device.name().await.unwrap_or_else(|_| "Unknown Name".to_string()),
-                    })
-                }
-                main_window.set_devices(&model_devices);
-            }));
+    main_context.spawn_local(
+        clone!(@weak main_window, @strong gtk_registry => async move {
+            match gtk_registry
+                .device_descriptors()
+                .await {
+                Ok(descriptors) => {
+                    let mut model_devices = Vec::new();
+                    for descriptor in descriptors {
+                        model_devices.push(Device {
+                            mac_address: descriptor.mac_address().to_owned(),
+                            name: descriptor.name().to_owned(),
+                        })
+                    }
+                    main_window.set_devices(&model_devices);
+                },
+                Err(err) => {
+                    tracing::warn!("error obtaining device descriptors: {err}")
+                },
+            }
         }),
     );
 
-    let gtk_registry_clone = gtk_registry.clone();
+    main_context.spawn_local(
+        clone!(@weak main_window, @strong state_update_receiver => async move {
+            loop {
+                let next_state = state_update_receiver.next().await;
+                main_window.set_ambient_sound_mode(next_state.ambient_sound_mode());
+                main_window.set_noise_canceling_mode(next_state.noise_canceling_mode());
+            }
+        }),
+    );
+
+    main_window.connect_closure(
+        "refresh-devices",
+        false,
+        closure_local!(@strong gtk_registry, @strong selected_device, @strong state_update_receiver => move |main_window: MainWindow| {
+            let main_context = MainContext::default();
+            main_context.spawn_local(
+                clone!(@weak main_window, @weak gtk_registry, @weak selected_device, @weak state_update_receiver => async move {
+                    match gtk_registry
+                        .device_descriptors()
+                        .await {
+                        Ok(descriptors) => {
+                            let model_devices = descriptors
+                                .iter()
+                                .map(|descriptor| Device { mac_address: descriptor.mac_address().to_owned(), name: descriptor.name().to_owned() })
+                                .collect::<Vec<_>>();
+                            if model_devices.is_empty() {
+                                state_update_receiver.replace_receiver(None).await;
+                                *selected_device.borrow_mut() = None;
+                            }
+                            main_window.set_devices(&model_devices);
+                        },
+                        Err(err) => {
+                            tracing::warn!("error obtaining device descriptors: {err}")
+                        },
+                    }
+                }),
+            );
+        }),
+    );
+
     main_window.connect_closure(
         "device_selection_changed",
         false,
-        closure_local!(@weak-allow-none state_update_receiver => move |main_window: MainWindow| {
-            if let Some(selected_device) = main_window.selected_device() {
+        closure_local!(@strong state_update_receiver, @strong gtk_registry, @strong selected_device => move |main_window: MainWindow| {
+            if let Some(new_selected_device) = main_window.selected_device() {
                 let main_context = MainContext::default();
-                main_context.spawn_local(clone!(@strong main_window, @weak gtk_registry_clone => async move {
-                    match gtk_registry_clone.device_by_mac_address(&selected_device.mac_address).await {
-                        Some(device) => {
+                main_context.spawn_local(clone!(@weak main_window, @weak gtk_registry, @weak selected_device, @weak state_update_receiver => async move {
+                    match gtk_registry.device(new_selected_device.mac_address.to_owned()).await {
+                        Ok(Some(device)) => {
+                            *selected_device.borrow_mut() = Some(device.to_owned());
                             let receiver = device.subscribe_to_state_updates();
-                            state_update_receiver.unwrap().replace_receiver(receiver).await;
+                            state_update_receiver.replace_receiver(Some(receiver)).await;
 
                             let ambient_sound_mode = device.ambient_sound_mode().await;
                             let noise_canceling_mode = device.noise_canceling_mode().await;
                             let equalizer_configuration = device.equalizer_configuration().await;
-                            
+
                             main_window.set_ambient_sound_mode(ambient_sound_mode);
                             main_window.set_noise_canceling_mode(noise_canceling_mode);
                             main_window.set_equalizer_configuration(&equalizer_configuration);
                         },
-                        None => tracing::warn!("could not find selected device: {}", selected_device.mac_address),
+                        Ok(None) => tracing::warn!("could not find selected device: {:?}", new_selected_device),
+                        Err(err) => tracing::warn!("error connecting to device {:?}: {err}", new_selected_device),
                     }
                 }));
             }
         }),
     );
 
-    let gtk_registry_clone = gtk_registry.clone();
     main_window.connect_closure(
         "ambient-sound-mode-selected",
         false,
-        closure_local!(move |main_window: MainWindow, mode_id: u8| {
+        closure_local!(@strong selected_device => move |_main_window: MainWindow, mode_id: u8| {
             let main_context = MainContext::default();
-            main_context.spawn_local(clone!(@weak main_window, @weak gtk_registry_clone => async move {
-                let Some(selected_device) = main_window.selected_device() else {
+            main_context.spawn_local(clone!(@weak selected_device => async move {
+                let Some(device) = &*selected_device.borrow() else {
                     tracing::warn!("no device is selected");
-                    return;
-                };
-                let Some(device) = gtk_registry_clone.device_by_mac_address(&selected_device.mac_address).await else {
-                    tracing::warn!("could not find selected device: {}", selected_device.mac_address);
                     return;
                 };
                 let Some(ambient_sound_mode) = AmbientSoundMode::from_id(mode_id) else {
@@ -200,58 +228,52 @@ fn build_ui(application: &impl IsA<Application>) {
                     return;
                 };
                 if let Err(err) = device.set_ambient_sound_mode(ambient_sound_mode).await {
-                    tracing::error!("error setting ambient sound mode: {err}")                            
+                    tracing::error!("error setting ambient sound mode: {err}")
                 }
             }));
         }),
     );
 
-    let gtk_registry_clone = gtk_registry.clone();
     main_window.connect_closure(
         "noise-canceling-mode-selected",
         false,
-        closure_local!(move |main_window: MainWindow, mode_id: u8| {
+        closure_local!(@strong selected_device => move |_main_window: MainWindow, mode_id: u8| {
             let main_context = MainContext::default();
-            main_context.spawn_local(clone!(@weak main_window, @weak gtk_registry_clone => async move {
-                let Some(selected_device) = main_window.selected_device() else {
-                    tracing::warn!("no device is selected");
-                    return;
-                };
-                let Some(device) = gtk_registry_clone.device_by_mac_address(&selected_device.mac_address).await else {
-                    tracing::warn!("could not find selected device: {}", selected_device.mac_address);
-                    return;
-                };
-                let Some(noise_canceling_mode) = NoiseCancelingMode::from_id(mode_id) else {
-                    tracing::error!("invalid noise canceling mode: {mode_id}");
-                    return;
-                };
-                if let Err(err) = device.set_noise_canceling_mode(noise_canceling_mode).await {
-                    tracing::error!("error setting noise canceling mode: {err}")                            
-                }
-            }));
+            main_context.spawn_local(
+                clone!(@weak selected_device => async move {
+                    let Some(device) = &*selected_device.borrow() else {
+                        tracing::warn!("no device is selected");
+                        return;
+                    };
+                    let Some(noise_canceling_mode) = NoiseCancelingMode::from_id(mode_id) else {
+                        tracing::error!("invalid noise canceling mode: {mode_id}");
+                        return;
+                    };
+                    if let Err(err) = device.set_noise_canceling_mode(noise_canceling_mode).await {
+                        tracing::error!("error setting noise canceling mode: {err}")
+                    }
+                }),
+            );
         }),
     );
 
-    let gtk_registry_clone = gtk_registry.clone();
     main_window.connect_closure(
         "apply-equalizer-settings",
         false,
-        closure_local!(move |main_window: MainWindow| {
+        closure_local!(@strong selected_device => move |main_window: MainWindow| {
             let main_context = MainContext::default();
-            main_context.spawn_local(clone!(@weak main_window, @weak gtk_registry_clone => async move {
-                let Some(selected_device) = main_window.selected_device() else {
-                    tracing::warn!("no device is selected");
-                    return;
-                };
-                let Some(device) = gtk_registry_clone.device_by_mac_address(&selected_device.mac_address).await else {
-                    tracing::warn!("could not find selected device: {}", selected_device.mac_address);
-                    return;
-                };
-                let configuration = main_window.equalizer_configuration();
-                if let Err(err) = device.set_equalizer_configuration(configuration).await {
-                    tracing::error!("error setting equalizer configuration: {err}");                            
-                }
-            }));
+            main_context.spawn_local(
+                clone!(@weak selected_device => async move {
+                    let Some(device) = &*selected_device.borrow() else {
+                        tracing::warn!("no device is selected");
+                        return;
+                    };
+                    let configuration = main_window.equalizer_configuration();
+                    if let Err(err) = device.set_equalizer_configuration(configuration).await {
+                        tracing::error!("error setting equalizer configuration: {err}");
+                    }
+                }),
+            );
         }),
     );
 
@@ -276,7 +298,7 @@ fn build_ui(application: &impl IsA<Application>) {
             }
         }),
     );
-    
+
     main_window.connect_closure(
         "create-custom-equalizer-profile",
         false,
@@ -288,7 +310,7 @@ fn build_ui(application: &impl IsA<Application>) {
                         volume_offsets: custom_profile.volume_offsets()
                     }
                 );
-            }).unwrap();            
+            }).unwrap();
             settings_file.get(|settings| {
                 main_window.set_custom_profiles(
                     settings.equalizer_custom_profiles
@@ -306,7 +328,7 @@ fn build_ui(application: &impl IsA<Application>) {
         closure_local!(@strong settings_file => move |main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
             settings_file.edit(|settings| {
                 settings.equalizer_custom_profiles.remove(&custom_profile.name());
-            }).unwrap();            
+            }).unwrap();
             settings_file.get(|settings| {
                 main_window.set_custom_profiles(
                     settings.equalizer_custom_profiles
@@ -322,6 +344,5 @@ fn build_ui(application: &impl IsA<Application>) {
 }
 
 fn load_resources() {
-    gio::resources_register_include!("widgets.gresource")
-        .expect("failed to load widgets");
+    gio::resources_register_include!("widgets.gresource").expect("failed to load widgets");
 }

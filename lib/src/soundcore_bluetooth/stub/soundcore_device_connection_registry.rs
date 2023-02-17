@@ -1,52 +1,56 @@
-use std::sync::Arc;
-
-use async_trait::async_trait;
-use tokio::sync::RwLock;
-
-use crate::soundcore_bluetooth::traits::{
-    SoundcoreDeviceConnectionError, SoundcoreDeviceConnectionRegistry,
+use std::{
+    collections::{HashMap, HashSet},
+    sync::Arc,
 };
 
-use super::StubSoundcoreDeviceConnection;
+use async_trait::async_trait;
+
+use crate::soundcore_bluetooth::traits::{
+    SoundcoreDeviceConnectionDescriptor, SoundcoreDeviceConnectionError,
+    SoundcoreDeviceConnectionRegistry,
+};
+
+use super::{StubSoundcoreDeviceConnection, StubSoundcoreDeviceConnectionDescriptor};
 
 #[derive(Debug)]
 pub struct StubSoundcoreDeviceConnectionRegistry {
-    connections: Vec<Arc<<Self as SoundcoreDeviceConnectionRegistry>::DeviceConnectionType>>,
-    refresh_connections_return: RwLock<Option<Result<(), SoundcoreDeviceConnectionError>>>,
+    connections: HashMap<
+        StubSoundcoreDeviceConnectionDescriptor,
+        Arc<<Self as SoundcoreDeviceConnectionRegistry>::DeviceConnectionType>,
+    >,
 }
 
 impl StubSoundcoreDeviceConnectionRegistry {
     pub fn new(
-        connections: Vec<Arc<<Self as SoundcoreDeviceConnectionRegistry>::DeviceConnectionType>>,
+        connections: HashMap<
+            StubSoundcoreDeviceConnectionDescriptor,
+            Arc<<Self as SoundcoreDeviceConnectionRegistry>::DeviceConnectionType>,
+        >,
     ) -> Self {
-        Self {
-            connections,
-            refresh_connections_return: RwLock::new(Some(Ok(()))),
-        }
-    }
-
-    pub async fn set_refresh_connections_return(
-        &self,
-        refresh_connections_return: Result<(), SoundcoreDeviceConnectionError>,
-    ) {
-        let mut lock = self.refresh_connections_return.write().await;
-        *lock = Some(refresh_connections_return);
+        Self { connections }
     }
 }
 
 #[async_trait]
 impl SoundcoreDeviceConnectionRegistry for StubSoundcoreDeviceConnectionRegistry {
     type DeviceConnectionType = StubSoundcoreDeviceConnection;
+    type DescriptorType = StubSoundcoreDeviceConnectionDescriptor;
 
-    async fn refresh_connections(&self) -> Result<(), SoundcoreDeviceConnectionError> {
-        self.refresh_connections_return
-            .write()
-            .await
-            .take()
-            .unwrap()
+    async fn connection_descriptors(
+        &self,
+    ) -> Result<HashSet<Self::DescriptorType>, SoundcoreDeviceConnectionError> {
+        Ok(self.connections.keys().cloned().collect())
     }
 
-    async fn connections(&self) -> Vec<Arc<Self::DeviceConnectionType>> {
-        self.connections.to_owned()
+    async fn connection(
+        &self,
+        mac_address: &str,
+    ) -> Result<Option<Arc<Self::DeviceConnectionType>>, SoundcoreDeviceConnectionError> {
+        Ok(self
+            .connections
+            .iter()
+            .find(|(descriptor, _connection)| descriptor.mac_address() == mac_address)
+            .map(|(_descriptor, connection)| connection)
+            .cloned())
     }
 }

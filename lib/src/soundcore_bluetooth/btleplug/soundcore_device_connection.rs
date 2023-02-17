@@ -5,7 +5,7 @@ use btleplug::{
     platform::Peripheral,
 };
 use futures::StreamExt;
-use tokio::sync::mpsc;
+use tokio::sync::mpsc::{self, error::TrySendError};
 use tracing::{instrument, trace, trace_span, warn};
 
 use crate::{
@@ -36,6 +36,7 @@ impl BtlePlugSoundcoreDeviceConnection {
             .connect()
             .await
             .map_err(SoundcoreDeviceConnectionError::from)?;
+        peripheral.discover_services().await?;
 
         peripheral
             .subscribe(&NOTIFY_CHARACTERISTIC)
@@ -118,6 +119,9 @@ impl SoundcoreDeviceConnection for BtlePlugSoundcoreDeviceConnection {
                 trace!(event = "btleplug notification", data = ?data);
                 if data.uuid == NOTIFY_CHARACTERISTIC.uuid {
                     if let Err(err) = sender.try_send(data.value) {
+                        if let TrySendError::Closed(_) = err {
+                            break;
+                        }
                         warn!("error forwarding packet to channel: {err}",)
                     }
                 }

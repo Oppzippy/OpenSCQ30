@@ -19,3 +19,4 @@ thiserror = "1.0"
 async-trait = "0.1"
 tracing = "0.1"
 strum = { version = "0.24", features = ["derive"] }
+weak-table = "0.3.2"
