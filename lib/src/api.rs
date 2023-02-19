@@ -13,5 +13,5 @@ pub async fn new_soundcore_device_registry() -> crate::Result<impl DeviceRegistr
 #[cfg(feature = "demo")]
 pub async fn new_soundcore_device_registry() -> crate::Result<impl DeviceRegistry> {
     use crate::demo::device::DemoDeviceRegistry;
-    Ok(DemoSoundcoreDeviceRegistry::new())
+    Ok(DemoDeviceRegistry::new())
 }
