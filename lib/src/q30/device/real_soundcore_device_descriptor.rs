@@ -1,6 +1,5 @@
-use crate::{
-    api::traits::SoundcoreDeviceDescriptor,
-    soundcore_bluetooth::traits::SoundcoreDeviceConnectionDescriptor,
+use crate::api::{
+    connection::SoundcoreDeviceConnectionDescriptor, device::SoundcoreDeviceDescriptor,
 };
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]

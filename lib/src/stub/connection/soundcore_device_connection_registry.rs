@@ -5,9 +5,8 @@ use std::{
 
 use async_trait::async_trait;
 
-use crate::soundcore_bluetooth::traits::{
-    SoundcoreDeviceConnectionDescriptor, SoundcoreDeviceConnectionError,
-    SoundcoreDeviceConnectionRegistry,
+use crate::api::connection::{
+    SoundcoreDeviceConnectionDescriptor, SoundcoreDeviceConnectionRegistry,
 };
 
 use super::{StubSoundcoreDeviceConnection, StubSoundcoreDeviceConnectionDescriptor};
@@ -36,16 +35,14 @@ impl SoundcoreDeviceConnectionRegistry for StubSoundcoreDeviceConnectionRegistry
     type DeviceConnectionType = StubSoundcoreDeviceConnection;
     type DescriptorType = StubSoundcoreDeviceConnectionDescriptor;
 
-    async fn connection_descriptors(
-        &self,
-    ) -> Result<HashSet<Self::DescriptorType>, SoundcoreDeviceConnectionError> {
+    async fn connection_descriptors(&self) -> crate::Result<HashSet<Self::DescriptorType>> {
         Ok(self.connections.keys().cloned().collect())
     }
 
     async fn connection(
         &self,
         mac_address: &str,
-    ) -> Result<Option<Arc<Self::DeviceConnectionType>>, SoundcoreDeviceConnectionError> {
+    ) -> crate::Result<Option<Arc<Self::DeviceConnectionType>>> {
         Ok(self
             .connections
             .iter()

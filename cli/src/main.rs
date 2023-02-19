@@ -2,7 +2,7 @@ use std::error::Error;
 
 use clap::{command, Parser, Subcommand, ValueEnum};
 use openscq30_lib::{
-    api::traits::{SoundcoreDevice, SoundcoreDeviceDescriptor, SoundcoreDeviceRegistry},
+    api::device::{SoundcoreDevice, SoundcoreDeviceDescriptor, SoundcoreDeviceRegistry},
     packets::structures::{EqualizerBandOffsets, EqualizerConfiguration},
 };
 use tracing::Level;

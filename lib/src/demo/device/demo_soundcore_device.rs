@@ -2,11 +2,10 @@ use async_trait::async_trait;
 use tokio::sync::{broadcast, Mutex};
 
 use crate::{
-    api::traits::SoundcoreDevice,
+    api::device::SoundcoreDevice,
     packets::structures::{
         AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode, PresetEqualizerProfile,
     },
-    soundcore_bluetooth::traits::SoundcoreDeviceConnectionError,
     state::SoundcoreDeviceState,
 };
 
@@ -42,18 +41,18 @@ impl SoundcoreDevice for DemoSoundcoreDevice {
         self.sender.subscribe()
     }
 
-    async fn mac_address(&self) -> Result<String, SoundcoreDeviceConnectionError> {
+    async fn mac_address(&self) -> crate::Result<String> {
         Ok(self.mac_address.to_owned())
     }
 
-    async fn name(&self) -> Result<String, SoundcoreDeviceConnectionError> {
+    async fn name(&self) -> crate::Result<String> {
         Ok(self.name.to_owned())
     }
 
     async fn set_ambient_sound_mode(
         &self,
         ambient_sound_mode: AmbientSoundMode,
-    ) -> Result<(), SoundcoreDeviceConnectionError> {
+    ) -> crate::Result<()> {
         let mut state = self.state.lock().await;
         *state = state.with_ambient_sound_mode(ambient_sound_mode);
         Ok(())
@@ -66,7 +65,7 @@ impl SoundcoreDevice for DemoSoundcoreDevice {
     async fn set_noise_canceling_mode(
         &self,
         noise_canceling_mode: NoiseCancelingMode,
-    ) -> Result<(), SoundcoreDeviceConnectionError> {
+    ) -> crate::Result<()> {
         let mut state = self.state.lock().await;
         *state = state.with_noise_canceling_mode(noise_canceling_mode);
         Ok(())
@@ -79,7 +78,7 @@ impl SoundcoreDevice for DemoSoundcoreDevice {
     async fn set_equalizer_configuration(
         &self,
         configuration: EqualizerConfiguration,
-    ) -> Result<(), SoundcoreDeviceConnectionError> {
+    ) -> crate::Result<()> {
         let mut state = self.state.lock().await;
         *state = state.with_equalizer_configuration(configuration);
         Ok(())

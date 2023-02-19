@@ -1,28 +1,17 @@
-#[cfg(any(feature = "bluetooth", feature = "demo"))]
-use crate::{
-    api::traits::SoundcoreDeviceRegistry,
-    soundcore_bluetooth::traits::SoundcoreDeviceConnectionError,
-};
+pub mod connection;
+pub mod device;
 
-#[cfg(feature = "demo")]
-pub(crate) mod demo;
-#[cfg(all(feature = "bluetooth", not(feature = "demo")))]
-pub(crate) mod real;
-pub mod traits;
+use self::device::SoundcoreDeviceRegistry;
 
 #[cfg(all(feature = "bluetooth", not(feature = "demo")))]
-pub async fn new_soundcore_device_registry(
-) -> Result<impl SoundcoreDeviceRegistry, SoundcoreDeviceConnectionError> {
-    use self::real::RealSoundcoreDeviceRegistry;
-    use crate::soundcore_bluetooth;
-
-    let connection_registry = soundcore_bluetooth::new_connection_registry().await?;
+pub async fn new_soundcore_device_registry() -> crate::Result<impl SoundcoreDeviceRegistry> {
+    use crate::q30::device::RealSoundcoreDeviceRegistry;
+    let connection_registry = crate::q30::connection::new_connection_registry().await?;
     RealSoundcoreDeviceRegistry::new(connection_registry).await
 }
 
 #[cfg(feature = "demo")]
-pub async fn new_soundcore_device_registry(
-) -> Result<impl SoundcoreDeviceRegistry, SoundcoreDeviceConnectionError> {
-    use self::demo::DemoSoundcoreDeviceRegistry;
+pub async fn new_soundcore_device_registry() -> crate::Result<impl SoundcoreDeviceRegistry> {
+    use crate::demo::device::DemoSoundcoreDeviceRegistry;
     Ok(DemoSoundcoreDeviceRegistry::new())
 }

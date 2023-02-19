@@ -1,9 +1,8 @@
 use std::sync::Arc;
 
 use openscq30_lib::{
-    api::traits::SoundcoreDevice,
+    api::device::SoundcoreDevice,
     packets::structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
-    soundcore_bluetooth::traits::SoundcoreDeviceConnectionError,
     state::SoundcoreDeviceState,
 };
 use tokio::{runtime::Runtime, sync::broadcast};
@@ -32,12 +31,12 @@ where
         self.soundcore_device.subscribe_to_state_updates()
     }
 
-    pub async fn mac_address(&self) -> Result<String, SoundcoreDeviceConnectionError> {
+    pub async fn mac_address(&self) -> openscq30_lib::Result<String> {
         let soundcore_device = self.soundcore_device.to_owned();
         async_runtime_bridge!(self.tokio_runtime, soundcore_device.mac_address().await)
     }
 
-    pub async fn name(&self) -> Result<String, SoundcoreDeviceConnectionError> {
+    pub async fn name(&self) -> openscq30_lib::Result<String> {
         let soundcore_device = self.soundcore_device.to_owned();
         async_runtime_bridge!(self.tokio_runtime, soundcore_device.name().await)
     }
@@ -53,7 +52,7 @@ where
     pub async fn set_ambient_sound_mode(
         &self,
         ambient_sound_mode: AmbientSoundMode,
-    ) -> Result<(), SoundcoreDeviceConnectionError> {
+    ) -> openscq30_lib::Result<()> {
         let soundcore_device = self.soundcore_device.to_owned();
         async_runtime_bridge!(
             self.tokio_runtime,
@@ -74,7 +73,7 @@ where
     pub async fn set_noise_canceling_mode(
         &self,
         noise_canceling_mode: NoiseCancelingMode,
-    ) -> Result<(), SoundcoreDeviceConnectionError> {
+    ) -> openscq30_lib::Result<()> {
         let soundcore_device = self.soundcore_device.to_owned();
         async_runtime_bridge!(
             self.tokio_runtime,
@@ -95,7 +94,7 @@ where
     pub async fn set_equalizer_configuration(
         &self,
         configuration: EqualizerConfiguration,
-    ) -> Result<(), SoundcoreDeviceConnectionError> {
+    ) -> openscq30_lib::Result<()> {
         let soundcore_device = self.soundcore_device.to_owned();
         async_runtime_bridge!(
             self.tokio_runtime,

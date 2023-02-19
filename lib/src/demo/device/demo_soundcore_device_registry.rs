@@ -3,10 +3,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use futures::{stream, StreamExt};
 
-use crate::{
-    api::traits::{SoundcoreDevice, SoundcoreDeviceRegistry},
-    soundcore_bluetooth::traits::SoundcoreDeviceConnectionError,
-};
+use crate::api::device::{SoundcoreDevice, SoundcoreDeviceRegistry};
 
 use super::{demo_soundcore_device::DemoSoundcoreDevice, DemoSoundcoreDeviceDescriptor};
 
@@ -30,9 +27,7 @@ impl SoundcoreDeviceRegistry for DemoSoundcoreDeviceRegistry {
     type DeviceType = DemoSoundcoreDevice;
     type DescriptorType = DemoSoundcoreDeviceDescriptor;
 
-    async fn device_descriptors(
-        &self,
-    ) -> Result<Vec<Self::DescriptorType>, SoundcoreDeviceConnectionError> {
+    async fn device_descriptors(&self) -> crate::Result<Vec<Self::DescriptorType>> {
         let descriptors = stream::iter(self.devices.iter())
             .filter_map(|device| async move {
                 Some(DemoSoundcoreDeviceDescriptor::new(
@@ -45,10 +40,7 @@ impl SoundcoreDeviceRegistry for DemoSoundcoreDeviceRegistry {
         Ok(descriptors)
     }
 
-    async fn device(
-        &self,
-        mac_address: &str,
-    ) -> Result<Option<Arc<Self::DeviceType>>, SoundcoreDeviceConnectionError> {
+    async fn device(&self, mac_address: &str) -> crate::Result<Option<Arc<Self::DeviceType>>> {
         let devices = stream::iter(self.devices.iter())
             .filter_map(|device| async move {
                 if device.mac_address().await.unwrap() == mac_address {

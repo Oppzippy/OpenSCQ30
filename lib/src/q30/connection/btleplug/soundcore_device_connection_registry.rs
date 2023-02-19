@@ -10,9 +10,7 @@ use tokio::sync::Mutex;
 use weak_table::weak_value_hash_map::Entry;
 use weak_table::WeakValueHashMap;
 
-use crate::soundcore_bluetooth::traits::{
-    SoundcoreDeviceConnectionError, SoundcoreDeviceConnectionRegistry,
-};
+use crate::api::connection::SoundcoreDeviceConnectionRegistry;
 
 use super::soundcore_device_connection::BtlePlugSoundcoreDeviceConnection;
 use super::BtlePlugSoundcoreDeviceConnectionDescriptor;
@@ -32,8 +30,7 @@ impl BtlePlugSoundcoreDeviceConnectionRegistry {
 
     async fn all_connected(
         &self,
-    ) -> Result<HashSet<BtlePlugSoundcoreDeviceConnectionDescriptor>, SoundcoreDeviceConnectionError>
-    {
+    ) -> crate::Result<HashSet<BtlePlugSoundcoreDeviceConnectionDescriptor>> {
         let adapters = self.manager.adapters().await?;
         let peripherals = stream::iter(adapters)
             .filter_map(|adapter| async move { Self::adapter_to_peripherals(adapter).await })
@@ -52,7 +49,7 @@ impl BtlePlugSoundcoreDeviceConnectionRegistry {
     async fn new_connection(
         &self,
         mac_address: &str,
-    ) -> Result<Option<BtlePlugSoundcoreDeviceConnection>, SoundcoreDeviceConnectionError> {
+    ) -> crate::Result<Option<BtlePlugSoundcoreDeviceConnection>> {
         let adapters = self.manager.adapters().await?;
         let connections = stream::iter(adapters)
             .filter_map(|adapter| async move { Self::adapter_to_peripherals(adapter).await })
@@ -135,16 +132,14 @@ impl SoundcoreDeviceConnectionRegistry for BtlePlugSoundcoreDeviceConnectionRegi
     type DeviceConnectionType = BtlePlugSoundcoreDeviceConnection;
     type DescriptorType = BtlePlugSoundcoreDeviceConnectionDescriptor;
 
-    async fn connection_descriptors(
-        &self,
-    ) -> Result<HashSet<Self::DescriptorType>, SoundcoreDeviceConnectionError> {
+    async fn connection_descriptors(&self) -> crate::Result<HashSet<Self::DescriptorType>> {
         self.all_connected().await
     }
 
     async fn connection(
         &self,
         mac_address: &str,
-    ) -> Result<Option<Arc<Self::DeviceConnectionType>>, SoundcoreDeviceConnectionError> {
+    ) -> crate::Result<Option<Arc<Self::DeviceConnectionType>>> {
         match self.connections.lock().await.entry(mac_address.to_owned()) {
             Entry::Occupied(entry) => Ok(Some(entry.get().to_owned())),
             Entry::Vacant(entry) => {

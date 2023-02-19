@@ -1,18 +1,18 @@
-use crate::soundcore_bluetooth::traits::SoundcoreDeviceConnectionDescriptor;
+use crate::api::device::SoundcoreDeviceDescriptor;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
-pub struct BtlePlugSoundcoreDeviceConnectionDescriptor {
+pub struct DemoSoundcoreDeviceDescriptor {
     name: String,
     mac_address: String,
 }
 
-impl BtlePlugSoundcoreDeviceConnectionDescriptor {
+impl DemoSoundcoreDeviceDescriptor {
     pub fn new(name: String, mac_address: String) -> Self {
         Self { name, mac_address }
     }
 }
 
-impl SoundcoreDeviceConnectionDescriptor for BtlePlugSoundcoreDeviceConnectionDescriptor {
+impl SoundcoreDeviceDescriptor for DemoSoundcoreDeviceDescriptor {
     fn name(&self) -> &String {
         &self.name
     }

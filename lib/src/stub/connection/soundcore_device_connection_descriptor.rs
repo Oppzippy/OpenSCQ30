@@ -1,4 +1,4 @@
-use crate::soundcore_bluetooth::traits::SoundcoreDeviceConnectionDescriptor;
+use crate::api::connection::SoundcoreDeviceConnectionDescriptor;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct StubSoundcoreDeviceConnectionDescriptor {

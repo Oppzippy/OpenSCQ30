@@ -4,12 +4,7 @@ use async_trait::async_trait;
 use tokio::sync::Mutex;
 use weak_table::{weak_value_hash_map::Entry, WeakValueHashMap};
 
-use crate::{
-    api::traits::SoundcoreDeviceRegistry,
-    soundcore_bluetooth::traits::{
-        SoundcoreDeviceConnectionError, SoundcoreDeviceConnectionRegistry,
-    },
-};
+use crate::api::{connection::SoundcoreDeviceConnectionRegistry, device::SoundcoreDeviceRegistry};
 
 use super::{real_soundcore_device::RealSoundcoreDevice, RealSoundcoreDeviceDescriptor};
 
@@ -27,9 +22,7 @@ impl<RegistryType> RealSoundcoreDeviceRegistry<RegistryType>
 where
     RegistryType: SoundcoreDeviceConnectionRegistry + Send + Sync,
 {
-    pub async fn new(
-        connection_registry: RegistryType,
-    ) -> Result<Self, SoundcoreDeviceConnectionError> {
+    pub async fn new(connection_registry: RegistryType) -> crate::Result<Self> {
         Ok(Self {
             conneciton_registry: connection_registry,
             devices: Mutex::new(WeakValueHashMap::new()),
@@ -39,10 +32,7 @@ where
     async fn new_device(
         &self,
         mac_address: &str,
-    ) -> Result<
-        Option<RealSoundcoreDevice<RegistryType::DeviceConnectionType>>,
-        SoundcoreDeviceConnectionError,
-    > {
+    ) -> crate::Result<Option<RealSoundcoreDevice<RegistryType::DeviceConnectionType>>> {
         let connection = self.conneciton_registry.connection(mac_address).await?;
 
         if let Some(connection) = connection {
@@ -61,9 +51,7 @@ where
     type DeviceType = RealSoundcoreDevice<RegistryType::DeviceConnectionType>;
     type DescriptorType = RealSoundcoreDeviceDescriptor<RegistryType::DescriptorType>;
 
-    async fn device_descriptors(
-        &self,
-    ) -> Result<Vec<Self::DescriptorType>, SoundcoreDeviceConnectionError> {
+    async fn device_descriptors(&self) -> crate::Result<Vec<Self::DescriptorType>> {
         let inner_descriptors = self.conneciton_registry.connection_descriptors().await?;
         let descriptors = inner_descriptors
             .into_iter()
@@ -72,10 +60,7 @@ where
         Ok(descriptors)
     }
 
-    async fn device(
-        &self,
-        mac_address: &str,
-    ) -> Result<Option<Arc<Self::DeviceType>>, SoundcoreDeviceConnectionError> {
+    async fn device(&self, mac_address: &str) -> crate::Result<Option<Arc<Self::DeviceType>>> {
         match self.devices.lock().await.entry(mac_address.to_owned()) {
             Entry::Occupied(entry) => {
                 tracing::debug!("{mac_address} is cached");

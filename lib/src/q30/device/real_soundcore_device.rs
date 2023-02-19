@@ -9,20 +9,19 @@ use tokio::{
 use tracing::{trace, warn};
 
 use crate::{
-    api,
-    packets::{
-        inbound::InboundPacket,
-        outbound::{OutboundPacket, RequestStatePacket},
-    },
-    soundcore_bluetooth::traits::SoundcoreDeviceConnection,
-    state::{self, SoundcoreDeviceState},
-};
-use crate::{
+    api::connection::SoundcoreDeviceConnection,
     packets::{
         outbound::{SetAmbientSoundModePacket, SetEqualizerPacket},
         structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
     },
-    soundcore_bluetooth::traits::SoundcoreDeviceConnectionError,
+};
+use crate::{
+    api::{self},
+    packets::{
+        inbound::InboundPacket,
+        outbound::{OutboundPacket, RequestStatePacket},
+    },
+    state::{self, SoundcoreDeviceState},
 };
 
 pub struct RealSoundcoreDevice<ConnectionType>
@@ -39,9 +38,7 @@ impl<ConnectionType> RealSoundcoreDevice<ConnectionType>
 where
     ConnectionType: SoundcoreDeviceConnection + Send + Sync,
 {
-    pub async fn new(
-        connection: Arc<ConnectionType>,
-    ) -> Result<Self, SoundcoreDeviceConnectionError> {
+    pub async fn new(connection: Arc<ConnectionType>) -> crate::Result<Self> {
         let mut inbound_receiver = connection.inbound_packets_channel().await?;
         let initial_state = Self::fetch_initial_state(&connection, &mut inbound_receiver).await?;
 
@@ -84,7 +81,7 @@ where
     async fn fetch_initial_state(
         connection: &Arc<ConnectionType>,
         inbound_receiver: &mut Receiver<Vec<u8>>,
-    ) -> Result<SoundcoreDeviceState, SoundcoreDeviceConnectionError> {
+    ) -> crate::Result<SoundcoreDeviceState> {
         for i in 0..3 {
             connection
                 .write_without_response(&RequestStatePacket::new().bytes())
@@ -113,12 +110,12 @@ where
                 _ => (),
             };
         }
-        Err(SoundcoreDeviceConnectionError::NoResponse)
+        Err(crate::Error::NoResponse)
     }
 }
 
 #[async_trait]
-impl<ConnectionType> api::traits::SoundcoreDevice for RealSoundcoreDevice<ConnectionType>
+impl<ConnectionType> api::device::SoundcoreDevice for RealSoundcoreDevice<ConnectionType>
 where
     ConnectionType: SoundcoreDeviceConnection + Send + Sync,
 {
@@ -126,18 +123,18 @@ where
         self.state_update_sender.subscribe()
     }
 
-    async fn mac_address(&self) -> Result<String, SoundcoreDeviceConnectionError> {
+    async fn mac_address(&self) -> crate::Result<String> {
         self.connection.mac_address().await
     }
 
-    async fn name(&self) -> Result<String, SoundcoreDeviceConnectionError> {
+    async fn name(&self) -> crate::Result<String> {
         self.connection.name().await
     }
 
     async fn set_ambient_sound_mode(
         &self,
         ambient_sound_mode: AmbientSoundMode,
-    ) -> Result<(), SoundcoreDeviceConnectionError> {
+    ) -> crate::Result<()> {
         let noise_canceling_mode = self.noise_canceling_mode().await;
         let mut state = self.state.write().await;
         self.connection
@@ -156,7 +153,7 @@ where
     async fn set_noise_canceling_mode(
         &self,
         noise_canceling_mode: NoiseCancelingMode,
-    ) -> Result<(), SoundcoreDeviceConnectionError> {
+    ) -> crate::Result<()> {
         let ambient_sound_mode = self.ambient_sound_mode().await;
         let mut state = self.state.write().await;
         // It will bug and put us in noise canceling mode without changing the ambient sound mode id if we change the
@@ -192,7 +189,7 @@ where
     async fn set_equalizer_configuration(
         &self,
         configuration: EqualizerConfiguration,
-    ) -> Result<(), SoundcoreDeviceConnectionError> {
+    ) -> crate::Result<()> {
         let mut state = self.state.write().await;
         self.connection
             .write_with_response(&SetEqualizerPacket::new(configuration).bytes())
@@ -232,11 +229,11 @@ mod tests {
 
     use super::RealSoundcoreDevice;
     use crate::{
-        api::traits::SoundcoreDevice,
+        api::device::SoundcoreDevice,
         packets::structures::{
             AmbientSoundMode, EqualizerBandOffsets, EqualizerConfiguration, NoiseCancelingMode,
         },
-        soundcore_bluetooth::stub::StubSoundcoreDeviceConnection,
+        stub::connection::StubSoundcoreDeviceConnection,
     };
 
     fn example_state_update_packet() -> Vec<u8> {

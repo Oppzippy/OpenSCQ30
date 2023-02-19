@@ -8,10 +8,7 @@ use futures::StreamExt;
 use tokio::sync::mpsc::{self, error::TrySendError};
 use tracing::{instrument, trace, trace_span, warn};
 
-use crate::{
-    soundcore_bluetooth::traits::{SoundcoreDeviceConnection, SoundcoreDeviceConnectionError},
-    soundcore_device_utils,
-};
+use crate::{api::connection::SoundcoreDeviceConnection, soundcore_device_utils};
 
 const WRITE_CHARACTERISTIC: Characteristic = Characteristic {
     uuid: soundcore_device_utils::WRITE_CHARACTERISTIC_UUID,
@@ -31,22 +28,17 @@ pub struct BtlePlugSoundcoreDeviceConnection {
 }
 
 impl BtlePlugSoundcoreDeviceConnection {
-    pub async fn new(peripheral: Peripheral) -> Result<Self, SoundcoreDeviceConnectionError> {
-        peripheral
-            .connect()
-            .await
-            .map_err(SoundcoreDeviceConnectionError::from)?;
+    pub async fn new(peripheral: Peripheral) -> crate::Result<Self> {
+        peripheral.connect().await?;
         peripheral.discover_services().await?;
 
         peripheral
             .subscribe(&NOTIFY_CHARACTERISTIC)
             .await
-            .map_err(
-                |err| SoundcoreDeviceConnectionError::CharacteristicNotFound {
-                    uuid: NOTIFY_CHARACTERISTIC.uuid,
-                    source: Box::new(err),
-                },
-            )?;
+            .map_err(|err| crate::Error::CharacteristicNotFound {
+                uuid: NOTIFY_CHARACTERISTIC.uuid,
+                source: Box::new(err),
+            })?;
 
         let connection = BtlePlugSoundcoreDeviceConnection {
             peripheral,
@@ -59,58 +51,46 @@ impl BtlePlugSoundcoreDeviceConnection {
 
 #[async_trait]
 impl SoundcoreDeviceConnection for BtlePlugSoundcoreDeviceConnection {
-    async fn name(&self) -> Result<String, SoundcoreDeviceConnectionError> {
+    async fn name(&self) -> crate::Result<String> {
         let maybe_name = self
             .peripheral
             .properties()
-            .await
-            .map_err(SoundcoreDeviceConnectionError::from)?
+            .await?
             .map(|property| property.local_name);
 
         match maybe_name {
             Some(Some(name)) => Ok(name),
-            _ => Err(SoundcoreDeviceConnectionError::NameNotFound {
+            _ => Err(crate::Error::NameNotFound {
                 mac_address: self.peripheral.address().to_string(),
             }),
         }
     }
 
-    async fn mac_address(&self) -> Result<String, SoundcoreDeviceConnectionError> {
+    async fn mac_address(&self) -> crate::Result<String> {
         Ok(self.peripheral.address().to_string())
     }
 
     #[instrument(level = "trace", skip(self))]
-    async fn write_with_response(&self, data: &[u8]) -> Result<(), SoundcoreDeviceConnectionError> {
+    async fn write_with_response(&self, data: &[u8]) -> crate::Result<()> {
         self.peripheral
             .write(&self.characteristic, data, WriteType::WithResponse)
-            .await
-            .map_err(SoundcoreDeviceConnectionError::from)?;
+            .await?;
         Ok(())
     }
 
     #[instrument(level = "trace", skip(self))]
-    async fn write_without_response(
-        &self,
-        data: &[u8],
-    ) -> Result<(), SoundcoreDeviceConnectionError> {
+    async fn write_without_response(&self, data: &[u8]) -> crate::Result<()> {
         self.peripheral
             .write(&self.characteristic, data, WriteType::WithoutResponse)
-            .await
-            .map_err(SoundcoreDeviceConnectionError::from)?;
+            .await?;
         Ok(())
     }
 
-    async fn inbound_packets_channel(
-        &self,
-    ) -> Result<mpsc::Receiver<Vec<u8>>, SoundcoreDeviceConnectionError> {
+    async fn inbound_packets_channel(&self) -> crate::Result<mpsc::Receiver<Vec<u8>>> {
         // This queue should always be really small unless something is malfunctioning
         let (sender, receiver) = mpsc::channel(100);
 
-        let mut notifications = self
-            .peripheral
-            .notifications()
-            .await
-            .map_err(SoundcoreDeviceConnectionError::from)?;
+        let mut notifications = self.peripheral.notifications().await?;
 
         tokio::spawn(async move {
             let span = trace_span!("inbound_packets_channel async task");

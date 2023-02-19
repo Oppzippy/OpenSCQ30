@@ -9,7 +9,7 @@ use gtk::{
 };
 use gtk_openscq30_lib::GtkSoundcoreDeviceRegistry;
 use openscq30_lib::{
-    api::traits::{SoundcoreDeviceDescriptor, SoundcoreDeviceRegistry},
+    api::device::{SoundcoreDeviceDescriptor, SoundcoreDeviceRegistry},
     packets::structures::{
         AmbientSoundMode, EqualizerBandOffsets, EqualizerConfiguration, NoiseCancelingMode,
     },

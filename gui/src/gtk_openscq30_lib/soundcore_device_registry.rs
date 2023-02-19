@@ -1,9 +1,6 @@
 use std::sync::Arc;
 
-use openscq30_lib::{
-    api::traits::SoundcoreDeviceRegistry,
-    soundcore_bluetooth::traits::SoundcoreDeviceConnectionError,
-};
+use openscq30_lib::api::device::SoundcoreDeviceRegistry;
 use tokio::runtime::Runtime;
 
 use super::soundcore_device::GtkSoundcoreDevice;
@@ -30,10 +27,7 @@ where
     pub async fn device(
         &self,
         mac_address: String,
-    ) -> Result<
-        Option<Arc<GtkSoundcoreDevice<RegistryType::DeviceType>>>,
-        SoundcoreDeviceConnectionError,
-    > {
+    ) -> openscq30_lib::Result<Option<Arc<GtkSoundcoreDevice<RegistryType::DeviceType>>>> {
         let device_registry = self.soundcore_device_registry.to_owned();
         let maybe_device = async_runtime_bridge!(
             self.tokio_runtime,
@@ -48,7 +42,7 @@ where
 
     pub async fn device_descriptors(
         &self,
-    ) -> Result<Vec<RegistryType::DescriptorType>, SoundcoreDeviceConnectionError> {
+    ) -> openscq30_lib::Result<Vec<RegistryType::DescriptorType>> {
         let device_registry = self.soundcore_device_registry.to_owned();
         async_runtime_bridge!(
             self.tokio_runtime,
