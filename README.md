@@ -21,7 +21,7 @@ Compiled binaries won't be provided until the first release. Instructions for co
 - mingw-w64-x86_64-rust
 - mingw-w64-x86_64-libadwaita (optional)
 3. Checkout the repository in msys2
-4. In the root project directory, run: `cargo build --release --package openscq30_gui`. To build without libadwaita, run `cargo build --release --package openscq30_gui --no-default-features` instead.
+5. In the root project directory, run: `cargo build --release --package openscq30_gui --features libadwaita`. To build without libadwaita, remove `--features libadwaita`.
 5. The compiled binary can be found at `target/release/openscq30_gui`
 6. For distribution, copy the necessary DLLs listed in `.github/workflows/build.yml`
 
@@ -34,7 +34,7 @@ TODO
 2. Install rust
 3. Install gtk4 (`brew install gtk4`)
 4. Install libadwaita (`brew install libadwaita`) (optional)
-5. In the root project directory, run: `cargo build --release --package openscq30_gui`. To build without libadwaita, run `cargo build --release --package openscq30_gui --no-default-features` instead.
+5. In the root project directory, run: `cargo build --release --package openscq30_gui --features libadwaita`. To build without libadwaita, remove `--features libadwaita`.
 6. The compiled binary can be found at `target/release/openscq30_gui`
 
 ### Linux  
@@ -43,7 +43,7 @@ Instructions use Ubuntu package names. Package names may differ on other distros
 2. Install rust
 3. Install libdbus-1-dev pkg-config libgtk-4-dev 
 4. Install libadwaita-1-dev (optional)
-5. In the root project directory, run: `cargo build --release --package openscq30_gui`. To build without libadwaita, run `cargo build --release --package openscq30_gui --no-default-features` instead.
+5. In the root project directory, run: `cargo build --release --package openscq30_gui --features libadwaita`. To build without libadwaita, remove `--features libadwaita`.
 6. The compiled binary can be found at `target/release/openscq30_gui`
 
 ### Android  

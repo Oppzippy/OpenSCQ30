@@ -18,8 +18,10 @@ jobs:
 
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
-      - name: Build
-        run: cargo build --release --package openscq30_gui --package openscq30_cli
+      - name: Build gui
+        run: cargo build --release --package openscq30_gui --features libadwaita
+      - name: Build cli
+        run: cargo build --release --package openscq30_cli
       - name: Upload gui
         uses: actions/upload-artifact@v3
         with:
@@ -40,8 +42,10 @@ jobs:
 
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
-      - name: Build
-        run: cargo build --release --package openscq30_gui --package openscq30_cli
+      - name: Build gui
+        run: cargo build --release --package openscq30_gui --features libadwaita
+      - name: Build cli
+        run: cargo build --release --package openscq30_cli
       - name: Upload gui
         uses: actions/upload-artifact@v3
         with:
@@ -74,9 +78,10 @@ jobs:
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
 
-      - name: Build
-        run: |
-          cargo build --release --package openscq30_gui --package openscq30_cli
+      - name: Build gui
+        run: cargo build --release --package openscq30_gui --features libadwaita
+      - name: Build cli
+        run: cargo build --release --package openscq30_cli
 
       - name: Copy gui and dlls into a folder
         run: |
