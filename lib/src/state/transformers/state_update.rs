@@ -1,10 +1,10 @@
 use crate::{
     packets::inbound::StateUpdatePacket,
-    state::{SoundcoreDeviceState, SoundcoreDeviceStateTransformer},
+    state::{DeviceState, DeviceStateTransformer},
 };
 
-impl SoundcoreDeviceStateTransformer for StateUpdatePacket {
-    fn transform(&self, _state: &SoundcoreDeviceState) -> SoundcoreDeviceState {
+impl DeviceStateTransformer for StateUpdatePacket {
+    fn transform(&self, _state: &DeviceState) -> DeviceState {
         self.into()
     }
 }

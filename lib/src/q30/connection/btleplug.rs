@@ -1,16 +1,15 @@
-mod soundcore_device_connection;
-mod soundcore_device_connection_descriptor;
-mod soundcore_device_connection_error;
-mod soundcore_device_connection_registry;
+mod btleplug_connection;
+mod btleplug_connection_descriptor;
+mod btleplug_connection_registry;
+mod btleplug_error;
 
 use btleplug::platform::Manager;
-pub use soundcore_device_connection::*;
-pub use soundcore_device_connection_descriptor::*;
-pub use soundcore_device_connection_error::*;
-pub use soundcore_device_connection_registry::*;
+pub use btleplug_connection::*;
+pub use btleplug_connection_descriptor::*;
+pub use btleplug_connection_registry::*;
+pub use btleplug_error::*;
 
-pub(crate) async fn new_connection_registry(
-) -> crate::Result<BtlePlugSoundcoreDeviceConnectionRegistry> {
+pub(crate) async fn new_connection_registry() -> crate::Result<BtlePlugConnectionRegistry> {
     let manager = Manager::new().await?;
-    Ok(BtlePlugSoundcoreDeviceConnectionRegistry::new(manager))
+    Ok(BtlePlugConnectionRegistry::new(manager))
 }

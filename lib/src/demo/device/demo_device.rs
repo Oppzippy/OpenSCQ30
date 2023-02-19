@@ -2,29 +2,29 @@ use async_trait::async_trait;
 use tokio::sync::{broadcast, Mutex};
 
 use crate::{
-    api::device::SoundcoreDevice,
+    api::device::Device,
     packets::structures::{
         AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode, PresetEqualizerProfile,
     },
-    state::SoundcoreDeviceState,
+    state::DeviceState,
 };
 
 #[derive(Debug)]
-pub struct DemoSoundcoreDevice {
+pub struct DemoDevice {
     name: String,
     mac_address: String,
-    state: Mutex<SoundcoreDeviceState>,
-    sender: broadcast::Sender<SoundcoreDeviceState>,
+    state: Mutex<DeviceState>,
+    sender: broadcast::Sender<DeviceState>,
 }
 
-impl DemoSoundcoreDevice {
+impl DemoDevice {
     pub fn new(name: String, mac_address: String) -> Self {
         let (sender, _receiver) = broadcast::channel(50);
         Self {
             name,
             mac_address,
             sender,
-            state: Mutex::new(SoundcoreDeviceState::new(
+            state: Mutex::new(DeviceState::new(
                 AmbientSoundMode::Normal,
                 NoiseCancelingMode::Indoor,
                 EqualizerConfiguration::new_from_preset_profile(
@@ -36,8 +36,8 @@ impl DemoSoundcoreDevice {
 }
 
 #[async_trait]
-impl SoundcoreDevice for DemoSoundcoreDevice {
-    fn subscribe_to_state_updates(&self) -> broadcast::Receiver<SoundcoreDeviceState> {
+impl Device for DemoDevice {
+    fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState> {
         self.sender.subscribe()
     }
 

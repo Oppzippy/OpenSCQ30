@@ -1,21 +1,21 @@
 use std::sync::Arc;
 
-use openscq30_lib::api::device::SoundcoreDeviceRegistry;
+use openscq30_lib::api::device::DeviceRegistry;
 use tokio::runtime::Runtime;
 
-use super::soundcore_device::GtkSoundcoreDevice;
+use super::gtk_device::GtkDevice;
 
-pub struct GtkSoundcoreDeviceRegistry<RegistryType>
+pub struct GtkDeviceRegistry<RegistryType>
 where
-    RegistryType: SoundcoreDeviceRegistry + Send + Sync,
+    RegistryType: DeviceRegistry + Send + Sync,
 {
     tokio_runtime: Arc<Runtime>,
     soundcore_device_registry: Arc<RegistryType>,
 }
 
-impl<RegistryType: 'static> GtkSoundcoreDeviceRegistry<RegistryType>
+impl<RegistryType: 'static> GtkDeviceRegistry<RegistryType>
 where
-    RegistryType: SoundcoreDeviceRegistry + Send + Sync,
+    RegistryType: DeviceRegistry + Send + Sync,
 {
     pub fn new(registry: RegistryType, tokio_runtime: Runtime) -> Self {
         Self {
@@ -27,7 +27,7 @@ where
     pub async fn device(
         &self,
         mac_address: String,
-    ) -> openscq30_lib::Result<Option<Arc<GtkSoundcoreDevice<RegistryType::DeviceType>>>> {
+    ) -> openscq30_lib::Result<Option<Arc<GtkDevice<RegistryType::DeviceType>>>> {
         let device_registry = self.soundcore_device_registry.to_owned();
         let maybe_device = async_runtime_bridge!(
             self.tokio_runtime,
@@ -53,10 +53,7 @@ where
     fn to_gtk_device(
         &self,
         device: Arc<RegistryType::DeviceType>,
-    ) -> Arc<GtkSoundcoreDevice<RegistryType::DeviceType>> {
-        Arc::new(GtkSoundcoreDevice::new(
-            device,
-            self.tokio_runtime.to_owned(),
-        ))
+    ) -> Arc<GtkDevice<RegistryType::DeviceType>> {
+        Arc::new(GtkDevice::new(device, self.tokio_runtime.to_owned()))
     }
 }

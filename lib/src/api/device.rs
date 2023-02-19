@@ -1,7 +1,7 @@
-mod soundcore_device;
-mod soundcore_device_descriptor;
-mod soundcore_device_registry;
+mod device;
+mod device_descriptor;
+mod device_registry;
 
-pub use soundcore_device::*;
-pub use soundcore_device_descriptor::*;
-pub use soundcore_device_registry::*;
+pub use device::*;
+pub use device_descriptor::*;
+pub use device_registry::*;

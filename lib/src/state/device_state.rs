@@ -4,13 +4,13 @@ use crate::packets::{
 };
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
-pub struct SoundcoreDeviceState {
+pub struct DeviceState {
     ambient_sound_mode: AmbientSoundMode,
     noise_canceling_mode: NoiseCancelingMode,
     equalizer_configuration: EqualizerConfiguration,
 }
 
-impl SoundcoreDeviceState {
+impl DeviceState {
     pub fn new(
         ambient_sound_mode: AmbientSoundMode,
         noise_canceling_mode: NoiseCancelingMode,
@@ -63,7 +63,7 @@ impl SoundcoreDeviceState {
     }
 }
 
-impl From<&StateUpdatePacket> for SoundcoreDeviceState {
+impl From<&StateUpdatePacket> for DeviceState {
     fn from(packet: &StateUpdatePacket) -> Self {
         Self {
             ambient_sound_mode: packet.ambient_sound_mode(),
@@ -73,7 +73,7 @@ impl From<&StateUpdatePacket> for SoundcoreDeviceState {
     }
 }
 
-impl From<StateUpdatePacket> for SoundcoreDeviceState {
+impl From<StateUpdatePacket> for DeviceState {
     fn from(packet: StateUpdatePacket) -> Self {
         (&packet).into()
     }

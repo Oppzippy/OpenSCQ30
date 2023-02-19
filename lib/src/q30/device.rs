@@ -1,7 +1,7 @@
-mod real_soundcore_device;
-mod real_soundcore_device_descriptor;
-mod real_soundcore_device_registry;
+mod q30_device;
+mod q30_device_descriptor;
+mod q30_device_registry;
 
-pub use real_soundcore_device::*;
-pub use real_soundcore_device_descriptor::*;
-pub use real_soundcore_device_registry::*;
+pub use q30_device::*;
+pub use q30_device_descriptor::*;
+pub use q30_device_registry::*;

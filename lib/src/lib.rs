@@ -1,9 +1,9 @@
 pub mod api;
 pub mod demo;
+pub mod device_utils;
 mod error;
 pub mod packets;
 pub mod q30;
-pub mod soundcore_device_utils;
 pub mod state;
 pub mod stub;
 

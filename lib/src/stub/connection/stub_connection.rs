@@ -3,19 +3,19 @@ use std::collections::VecDeque;
 use async_trait::async_trait;
 use tokio::sync::{mpsc, Mutex, RwLock};
 
-use crate::api::connection::SoundcoreDeviceConnection;
+use crate::api::connection::Connection;
 
 #[derive(Debug)]
-pub struct StubSoundcoreDeviceConnection {
+pub struct StubConnection {
     name_return: RwLock<Option<crate::Result<String>>>,
     mac_address_return: RwLock<Option<crate::Result<String>>>,
     write_return_queue: Mutex<VecDeque<crate::Result<()>>>,
     inbound_packets_channel: Mutex<Option<crate::Result<mpsc::Receiver<Vec<u8>>>>>,
 }
 
-impl StubSoundcoreDeviceConnection {
+impl StubConnection {
     pub fn new() -> Self {
-        StubSoundcoreDeviceConnection {
+        StubConnection {
             name_return: RwLock::new(None),
             mac_address_return: RwLock::new(None),
             write_return_queue: Mutex::new(VecDeque::new()),
@@ -53,7 +53,7 @@ impl StubSoundcoreDeviceConnection {
 }
 
 #[async_trait]
-impl SoundcoreDeviceConnection for StubSoundcoreDeviceConnection {
+impl Connection for StubConnection {
     async fn name(&self) -> crate::Result<String> {
         self.name_return.write().await.take().unwrap()
     }

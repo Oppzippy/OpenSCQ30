@@ -2,7 +2,7 @@ use std::error::Error;
 
 use clap::{command, Parser, Subcommand, ValueEnum};
 use openscq30_lib::{
-    api::device::{SoundcoreDevice, SoundcoreDeviceDescriptor, SoundcoreDeviceRegistry},
+    api::device::{Device, DeviceDescriptor, DeviceRegistry},
     packets::structures::{EqualizerBandOffsets, EqualizerConfiguration},
 };
 use tracing::Level;
@@ -117,10 +117,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
 // rust-analyzer doesn't seem to work with the associated types of an impl Trait return value
 // as a workaround, we can immediately pass the return value as a parameter to another function
-async fn do_cli_command(
-    args: Cli,
-    registry: impl SoundcoreDeviceRegistry,
-) -> Result<(), Box<dyn Error>> {
+async fn do_cli_command(args: Cli, registry: impl DeviceRegistry) -> Result<(), Box<dyn Error>> {
     let descriptors = registry.device_descriptors().await?;
     let first = descriptors.first().unwrap();
     let device = registry.device(first.mac_address()).await?;

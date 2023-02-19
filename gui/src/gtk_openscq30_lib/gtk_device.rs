@@ -1,24 +1,24 @@
 use std::sync::Arc;
 
 use openscq30_lib::{
-    api::device::SoundcoreDevice,
+    api::device::Device,
     packets::structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
-    state::SoundcoreDeviceState,
+    state::DeviceState,
 };
 use tokio::{runtime::Runtime, sync::broadcast};
 
-pub struct GtkSoundcoreDevice<SoundcoreDeviceType: 'static>
+pub struct GtkDevice<SoundcoreDeviceType: 'static>
 where
-    SoundcoreDeviceType: SoundcoreDevice + Send + Sync,
+    SoundcoreDeviceType: Device + Send + Sync,
 {
     tokio_runtime: Arc<Runtime>,
     soundcore_device: Arc<SoundcoreDeviceType>,
 }
 
 #[allow(dead_code)]
-impl<SoundcoreDeviceType> GtkSoundcoreDevice<SoundcoreDeviceType>
+impl<SoundcoreDeviceType> GtkDevice<SoundcoreDeviceType>
 where
-    SoundcoreDeviceType: SoundcoreDevice + Send + Sync,
+    SoundcoreDeviceType: Device + Send + Sync,
 {
     pub fn new(device: Arc<SoundcoreDeviceType>, tokio_runtime: Arc<Runtime>) -> Self {
         Self {
@@ -27,7 +27,7 @@ where
         }
     }
 
-    pub fn subscribe_to_state_updates(&self) -> broadcast::Receiver<SoundcoreDeviceState> {
+    pub fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState> {
         self.soundcore_device.subscribe_to_state_updates()
     }
 

@@ -10,17 +10,17 @@ use tokio::sync::Mutex;
 use weak_table::weak_value_hash_map::Entry;
 use weak_table::WeakValueHashMap;
 
-use crate::api::connection::SoundcoreDeviceConnectionRegistry;
+use crate::api::connection::ConnectionRegistry;
 
-use super::soundcore_device_connection::BtlePlugSoundcoreDeviceConnection;
-use super::BtlePlugSoundcoreDeviceConnectionDescriptor;
+use super::btleplug_connection::BtlePlugConnection;
+use super::BtlePlugConnectionDescriptor;
 
-pub struct BtlePlugSoundcoreDeviceConnectionRegistry {
+pub struct BtlePlugConnectionRegistry {
     manager: Manager,
-    connections: Mutex<WeakValueHashMap<String, Weak<BtlePlugSoundcoreDeviceConnection>>>,
+    connections: Mutex<WeakValueHashMap<String, Weak<BtlePlugConnection>>>,
 }
 
-impl BtlePlugSoundcoreDeviceConnectionRegistry {
+impl BtlePlugConnectionRegistry {
     pub fn new(manager: Manager) -> Self {
         Self {
             manager,
@@ -28,9 +28,7 @@ impl BtlePlugSoundcoreDeviceConnectionRegistry {
         }
     }
 
-    async fn all_connected(
-        &self,
-    ) -> crate::Result<HashSet<BtlePlugSoundcoreDeviceConnectionDescriptor>> {
+    async fn all_connected(&self) -> crate::Result<HashSet<BtlePlugConnectionDescriptor>> {
         let adapters = self.manager.adapters().await?;
         let peripherals = stream::iter(adapters)
             .filter_map(|adapter| async move { Self::adapter_to_peripherals(adapter).await })
@@ -46,10 +44,7 @@ impl BtlePlugSoundcoreDeviceConnectionRegistry {
         Ok(peripherals)
     }
 
-    async fn new_connection(
-        &self,
-        mac_address: &str,
-    ) -> crate::Result<Option<BtlePlugSoundcoreDeviceConnection>> {
+    async fn new_connection(&self, mac_address: &str) -> crate::Result<Option<BtlePlugConnection>> {
         let adapters = self.manager.adapters().await?;
         let connections = stream::iter(adapters)
             .filter_map(|adapter| async move { Self::adapter_to_peripherals(adapter).await })
@@ -61,9 +56,7 @@ impl BtlePlugSoundcoreDeviceConnectionRegistry {
                     None
                 }
             })
-            .filter_map(|peripheral| async move {
-                Some(BtlePlugSoundcoreDeviceConnection::new(peripheral).await)
-            })
+            .filter_map(|peripheral| async move { Some(BtlePlugConnection::new(peripheral).await) })
             .collect::<Vec<_>>()
             .await;
         connections
@@ -109,9 +102,9 @@ impl BtlePlugSoundcoreDeviceConnectionRegistry {
 
     async fn peripheral_to_descriptor(
         peripheral: Peripheral,
-    ) -> Option<BtlePlugSoundcoreDeviceConnectionDescriptor> {
+    ) -> Option<BtlePlugConnectionDescriptor> {
         match peripheral.properties().await {
-            Ok(Some(properties)) => Some(BtlePlugSoundcoreDeviceConnectionDescriptor::new(
+            Ok(Some(properties)) => Some(BtlePlugConnectionDescriptor::new(
                 properties.local_name.unwrap_or_default(),
                 properties.address.to_string(),
             )),
@@ -128,9 +121,9 @@ impl BtlePlugSoundcoreDeviceConnectionRegistry {
 }
 
 #[async_trait]
-impl SoundcoreDeviceConnectionRegistry for BtlePlugSoundcoreDeviceConnectionRegistry {
-    type DeviceConnectionType = BtlePlugSoundcoreDeviceConnection;
-    type DescriptorType = BtlePlugSoundcoreDeviceConnectionDescriptor;
+impl ConnectionRegistry for BtlePlugConnectionRegistry {
+    type DeviceConnectionType = BtlePlugConnection;
+    type DescriptorType = BtlePlugConnectionDescriptor;
 
     async fn connection_descriptors(&self) -> crate::Result<HashSet<Self::DescriptorType>> {
         self.all_connected().await

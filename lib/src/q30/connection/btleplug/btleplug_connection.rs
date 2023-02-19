@@ -8,26 +8,26 @@ use futures::StreamExt;
 use tokio::sync::mpsc::{self, error::TrySendError};
 use tracing::{instrument, trace, trace_span, warn};
 
-use crate::{api::connection::SoundcoreDeviceConnection, soundcore_device_utils};
+use crate::{api::connection::Connection, device_utils};
 
 const WRITE_CHARACTERISTIC: Characteristic = Characteristic {
-    uuid: soundcore_device_utils::WRITE_CHARACTERISTIC_UUID,
-    service_uuid: soundcore_device_utils::SERVICE_UUID,
+    uuid: device_utils::WRITE_CHARACTERISTIC_UUID,
+    service_uuid: device_utils::SERVICE_UUID,
     properties: CharPropFlags::WRITE_WITHOUT_RESPONSE.union(CharPropFlags::WRITE),
 };
 const NOTIFY_CHARACTERISTIC: Characteristic = Characteristic {
-    uuid: soundcore_device_utils::READ_CHARACTERISTIC_UUID,
-    service_uuid: soundcore_device_utils::SERVICE_UUID,
+    uuid: device_utils::READ_CHARACTERISTIC_UUID,
+    service_uuid: device_utils::SERVICE_UUID,
     properties: CharPropFlags::READ.union(CharPropFlags::NOTIFY),
 };
 
 #[derive(Debug)]
-pub struct BtlePlugSoundcoreDeviceConnection {
+pub struct BtlePlugConnection {
     peripheral: Peripheral,
     characteristic: Characteristic,
 }
 
-impl BtlePlugSoundcoreDeviceConnection {
+impl BtlePlugConnection {
     pub async fn new(peripheral: Peripheral) -> crate::Result<Self> {
         peripheral.connect().await?;
         peripheral.discover_services().await?;
@@ -40,7 +40,7 @@ impl BtlePlugSoundcoreDeviceConnection {
                 source: Box::new(err),
             })?;
 
-        let connection = BtlePlugSoundcoreDeviceConnection {
+        let connection = BtlePlugConnection {
             peripheral,
             characteristic: WRITE_CHARACTERISTIC,
         };
@@ -50,7 +50,7 @@ impl BtlePlugSoundcoreDeviceConnection {
 }
 
 #[async_trait]
-impl SoundcoreDeviceConnection for BtlePlugSoundcoreDeviceConnection {
+impl Connection for BtlePlugConnection {
     async fn name(&self) -> crate::Result<String> {
         let maybe_name = self
             .peripheral

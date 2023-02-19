@@ -7,7 +7,7 @@ use crate::packets::{
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 pub struct SoundcoreDeviceState {
-    state: openscq30_lib::state::SoundcoreDeviceState,
+    state: openscq30_lib::state::DeviceState,
 }
 
 impl SoundcoreDeviceState {
@@ -23,7 +23,7 @@ impl SoundcoreDeviceState {
         equalizer_configuration: &EqualizerConfiguration,
     ) -> SoundcoreDeviceState {
         Self {
-            state: openscq30_lib::state::SoundcoreDeviceState::new(
+            state: openscq30_lib::state::DeviceState::new(
                 ambient_sound_mode.to_owned().into(),
                 noise_canceling_mode.to_owned().into(),
                 equalizer_configuration.to_owned().into(),
@@ -85,8 +85,8 @@ impl From<&StateUpdatePacket> for SoundcoreDeviceState {
     }
 }
 
-impl From<openscq30_lib::state::SoundcoreDeviceState> for SoundcoreDeviceState {
-    fn from(state: openscq30_lib::state::SoundcoreDeviceState) -> Self {
+impl From<openscq30_lib::state::DeviceState> for SoundcoreDeviceState {
+    fn from(state: openscq30_lib::state::DeviceState) -> Self {
         Self { state }
     }
 }

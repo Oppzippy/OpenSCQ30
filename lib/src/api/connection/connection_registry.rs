@@ -2,14 +2,12 @@ use std::{collections::HashSet, fmt::Debug, sync::Arc};
 
 use async_trait::async_trait;
 
-use super::{
-    soundcore_device_connection::SoundcoreDeviceConnection, SoundcoreDeviceConnectionDescriptor,
-};
+use super::{connection::Connection, ConnectionDescriptor};
 
 #[async_trait]
-pub trait SoundcoreDeviceConnectionRegistry {
-    type DeviceConnectionType: SoundcoreDeviceConnection + Send + Sync;
-    type DescriptorType: SoundcoreDeviceConnectionDescriptor + Debug + Send + Sync;
+pub trait ConnectionRegistry {
+    type DeviceConnectionType: Connection + Send + Sync;
+    type DescriptorType: ConnectionDescriptor + Debug + Send + Sync;
 
     async fn connection_descriptors(&self) -> crate::Result<HashSet<Self::DescriptorType>>;
 

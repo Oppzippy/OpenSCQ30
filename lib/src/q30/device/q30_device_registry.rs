@@ -4,23 +4,21 @@ use async_trait::async_trait;
 use tokio::sync::Mutex;
 use weak_table::{weak_value_hash_map::Entry, WeakValueHashMap};
 
-use crate::api::{connection::SoundcoreDeviceConnectionRegistry, device::SoundcoreDeviceRegistry};
+use crate::api::{connection::ConnectionRegistry, device::DeviceRegistry};
 
-use super::{real_soundcore_device::RealSoundcoreDevice, RealSoundcoreDeviceDescriptor};
+use super::{q30_device::Q30Device, Q30DeviceDescriptor};
 
-pub struct RealSoundcoreDeviceRegistry<RegistryType>
+pub struct Q30DeviceRegistry<RegistryType>
 where
-    RegistryType: SoundcoreDeviceConnectionRegistry + Send + Sync,
+    RegistryType: ConnectionRegistry + Send + Sync,
 {
     conneciton_registry: RegistryType,
-    devices: Mutex<
-        WeakValueHashMap<String, Weak<RealSoundcoreDevice<RegistryType::DeviceConnectionType>>>,
-    >,
+    devices: Mutex<WeakValueHashMap<String, Weak<Q30Device<RegistryType::DeviceConnectionType>>>>,
 }
 
-impl<RegistryType> RealSoundcoreDeviceRegistry<RegistryType>
+impl<RegistryType> Q30DeviceRegistry<RegistryType>
 where
-    RegistryType: SoundcoreDeviceConnectionRegistry + Send + Sync,
+    RegistryType: ConnectionRegistry + Send + Sync,
 {
     pub async fn new(connection_registry: RegistryType) -> crate::Result<Self> {
         Ok(Self {
@@ -32,11 +30,11 @@ where
     async fn new_device(
         &self,
         mac_address: &str,
-    ) -> crate::Result<Option<RealSoundcoreDevice<RegistryType::DeviceConnectionType>>> {
+    ) -> crate::Result<Option<Q30Device<RegistryType::DeviceConnectionType>>> {
         let connection = self.conneciton_registry.connection(mac_address).await?;
 
         if let Some(connection) = connection {
-            RealSoundcoreDevice::new(connection).await.map(Option::Some)
+            Q30Device::new(connection).await.map(Option::Some)
         } else {
             Ok(None)
         }
@@ -44,18 +42,18 @@ where
 }
 
 #[async_trait]
-impl<RegistryType> SoundcoreDeviceRegistry for RealSoundcoreDeviceRegistry<RegistryType>
+impl<RegistryType> DeviceRegistry for Q30DeviceRegistry<RegistryType>
 where
-    RegistryType: SoundcoreDeviceConnectionRegistry + Send + Sync,
+    RegistryType: ConnectionRegistry + Send + Sync,
 {
-    type DeviceType = RealSoundcoreDevice<RegistryType::DeviceConnectionType>;
-    type DescriptorType = RealSoundcoreDeviceDescriptor<RegistryType::DescriptorType>;
+    type DeviceType = Q30Device<RegistryType::DeviceConnectionType>;
+    type DescriptorType = Q30DeviceDescriptor<RegistryType::DescriptorType>;
 
     async fn device_descriptors(&self) -> crate::Result<Vec<Self::DescriptorType>> {
         let inner_descriptors = self.conneciton_registry.connection_descriptors().await?;
         let descriptors = inner_descriptors
             .into_iter()
-            .map(|descriptor| RealSoundcoreDeviceDescriptor::new(descriptor))
+            .map(|descriptor| Q30DeviceDescriptor::new(descriptor))
             .collect::<Vec<_>>();
         Ok(descriptors)
     }

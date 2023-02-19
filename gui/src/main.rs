@@ -7,13 +7,13 @@ use gtk::{
     traits::GtkWindowExt,
     Application,
 };
-use gtk_openscq30_lib::GtkSoundcoreDeviceRegistry;
+use gtk_openscq30_lib::GtkDeviceRegistry;
 use openscq30_lib::{
-    api::device::{SoundcoreDeviceDescriptor, SoundcoreDeviceRegistry},
+    api::device::{DeviceDescriptor, DeviceRegistry},
     packets::structures::{
         AmbientSoundMode, EqualizerBandOffsets, EqualizerConfiguration, NoiseCancelingMode,
     },
-    state::SoundcoreDeviceState,
+    state::DeviceState,
 };
 use settings::{EqualizerCustomProfile, SettingsFile};
 use swappable_broadcast::SwappableBroadcastReceiver;
@@ -91,15 +91,13 @@ fn build_ui(application: &impl IsA<Application>) {
         .block_on(openscq30_lib::api::new_soundcore_device_registry())
         .unwrap_or_else(|err| panic!("failed to initialize device registry: {err}"));
 
-    let gtk_registry = Arc::new(GtkSoundcoreDeviceRegistry::new(registry, tokio_runtime));
+    let gtk_registry = Arc::new(GtkDeviceRegistry::new(registry, tokio_runtime));
     build_ui_2(application, gtk_registry)
 }
 
 fn build_ui_2(
     application: &impl IsA<Application>,
-    gtk_registry: Arc<
-        GtkSoundcoreDeviceRegistry<impl SoundcoreDeviceRegistry + Send + Sync + 'static>,
-    >,
+    gtk_registry: Arc<GtkDeviceRegistry<impl DeviceRegistry + Send + Sync + 'static>>,
 ) {
     let settings_file = Rc::new(get_settings_file());
     let main_window = MainWindow::new(application, settings_file.to_owned());
@@ -117,7 +115,7 @@ fn build_ui_2(
         })
         .unwrap();
 
-    let state_update_receiver: Rc<SwappableBroadcastReceiver<SoundcoreDeviceState>> =
+    let state_update_receiver: Rc<SwappableBroadcastReceiver<DeviceState>> =
         Rc::new(SwappableBroadcastReceiver::new());
     let selected_device = Rc::new(RefCell::new(None));
 

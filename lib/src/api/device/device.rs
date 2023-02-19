@@ -3,12 +3,12 @@ use tokio::sync::broadcast;
 
 use crate::{
     packets::structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
-    state::SoundcoreDeviceState,
+    state::DeviceState,
 };
 
 #[async_trait]
-pub trait SoundcoreDevice {
-    fn subscribe_to_state_updates(&self) -> broadcast::Receiver<SoundcoreDeviceState>;
+pub trait Device {
+    fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState>;
 
     async fn mac_address(&self) -> crate::Result<String>;
 

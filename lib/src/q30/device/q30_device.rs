@@ -9,7 +9,7 @@ use tokio::{
 use tracing::{trace, warn};
 
 use crate::{
-    api::connection::SoundcoreDeviceConnection,
+    api::connection::Connection,
     packets::{
         outbound::{SetAmbientSoundModePacket, SetEqualizerPacket},
         structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
@@ -21,22 +21,22 @@ use crate::{
         inbound::InboundPacket,
         outbound::{OutboundPacket, RequestStatePacket},
     },
-    state::{self, SoundcoreDeviceState},
+    state::{self, DeviceState},
 };
 
-pub struct RealSoundcoreDevice<ConnectionType>
+pub struct Q30Device<ConnectionType>
 where
-    ConnectionType: SoundcoreDeviceConnection + Send + Sync,
+    ConnectionType: Connection + Send + Sync,
 {
     connection: Arc<ConnectionType>,
-    state: Arc<RwLock<SoundcoreDeviceState>>,
+    state: Arc<RwLock<DeviceState>>,
     inbound_receiver_handle: JoinHandle<()>,
-    state_update_sender: broadcast::Sender<SoundcoreDeviceState>,
+    state_update_sender: broadcast::Sender<DeviceState>,
 }
 
-impl<ConnectionType> RealSoundcoreDevice<ConnectionType>
+impl<ConnectionType> Q30Device<ConnectionType>
 where
-    ConnectionType: SoundcoreDeviceConnection + Send + Sync,
+    ConnectionType: Connection + Send + Sync,
 {
     pub async fn new(connection: Arc<ConnectionType>) -> crate::Result<Self> {
         let mut inbound_receiver = connection.inbound_packets_channel().await?;
@@ -81,7 +81,7 @@ where
     async fn fetch_initial_state(
         connection: &Arc<ConnectionType>,
         inbound_receiver: &mut Receiver<Vec<u8>>,
-    ) -> crate::Result<SoundcoreDeviceState> {
+    ) -> crate::Result<DeviceState> {
         for i in 0..3 {
             connection
                 .write_without_response(&RequestStatePacket::new().bytes())
@@ -115,11 +115,11 @@ where
 }
 
 #[async_trait]
-impl<ConnectionType> api::device::SoundcoreDevice for RealSoundcoreDevice<ConnectionType>
+impl<ConnectionType> api::device::Device for Q30Device<ConnectionType>
 where
-    ConnectionType: SoundcoreDeviceConnection + Send + Sync,
+    ConnectionType: Connection + Send + Sync,
 {
-    fn subscribe_to_state_updates(&self) -> broadcast::Receiver<SoundcoreDeviceState> {
+    fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState> {
         self.state_update_sender.subscribe()
     }
 
@@ -203,18 +203,18 @@ where
     }
 }
 
-impl<ConnectionType> Drop for RealSoundcoreDevice<ConnectionType>
+impl<ConnectionType> Drop for Q30Device<ConnectionType>
 where
-    ConnectionType: SoundcoreDeviceConnection + Send + Sync,
+    ConnectionType: Connection + Send + Sync,
 {
     fn drop(&mut self) {
         self.inbound_receiver_handle.abort();
     }
 }
 
-impl<ConnectionType> std::fmt::Debug for RealSoundcoreDevice<ConnectionType>
+impl<ConnectionType> std::fmt::Debug for Q30Device<ConnectionType>
 where
-    ConnectionType: SoundcoreDeviceConnection + Send + Sync,
+    ConnectionType: Connection + Send + Sync,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("SoundcoreDevice").finish()
@@ -227,13 +227,13 @@ mod tests {
 
     use tokio::sync::mpsc;
 
-    use super::RealSoundcoreDevice;
+    use super::Q30Device;
     use crate::{
-        api::device::SoundcoreDevice,
+        api::device::Device,
         packets::structures::{
             AmbientSoundMode, EqualizerBandOffsets, EqualizerConfiguration, NoiseCancelingMode,
         },
-        stub::connection::StubSoundcoreDeviceConnection,
+        stub::connection::StubConnection,
     };
 
     fn example_state_update_packet() -> Vec<u8> {
@@ -246,9 +246,8 @@ mod tests {
         ]
     }
 
-    async fn create_test_connection() -> (Arc<StubSoundcoreDeviceConnection>, mpsc::Sender<Vec<u8>>)
-    {
-        let connection = Arc::new(StubSoundcoreDeviceConnection::new());
+    async fn create_test_connection() -> (Arc<StubConnection>, mpsc::Sender<Vec<u8>>) {
+        let connection = Arc::new(StubConnection::new());
         connection
             .set_name_return(Ok("Soundcore Q30".to_string()))
             .await;
@@ -268,7 +267,7 @@ mod tests {
         tokio::spawn(async move {
             sender.send(example_state_update_packet()).await.unwrap();
         });
-        let device = RealSoundcoreDevice::new(connection).await.unwrap();
+        let device = Q30Device::new(connection).await.unwrap();
         assert_eq!(AmbientSoundMode::Normal, device.ambient_sound_mode().await);
         assert_eq!(
             NoiseCancelingMode::Transport,
@@ -292,7 +291,7 @@ mod tests {
             sender.send(example_state_update_packet()).await.unwrap();
         });
         let connection_clone = connection.clone();
-        RealSoundcoreDevice::new(connection_clone).await.unwrap();
+        Q30Device::new(connection_clone).await.unwrap();
         assert_eq!(0, connection.write_return_queue_length().await);
     }
 
@@ -305,7 +304,7 @@ mod tests {
         }
 
         let connection_clone = connection.clone();
-        let result = RealSoundcoreDevice::new(connection_clone).await;
+        let result = Q30Device::new(connection_clone).await;
         assert_eq!(true, result.is_err());
     }
 
@@ -320,7 +319,7 @@ mod tests {
                 .await
                 .unwrap();
         });
-        let device = RealSoundcoreDevice::new(connection).await.unwrap();
+        let device = Q30Device::new(connection).await.unwrap();
         assert_eq!(AmbientSoundMode::Normal, device.ambient_sound_mode().await);
         assert_eq!(
             NoiseCancelingMode::Transport,

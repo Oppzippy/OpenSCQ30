@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use tokio::sync::mpsc;
 
 #[async_trait]
-pub trait SoundcoreDeviceConnection {
+pub trait Connection {
     async fn name(&self) -> crate::Result<String>;
     async fn mac_address(&self) -> crate::Result<String>;
     async fn write_with_response(&self, data: &[u8]) -> crate::Result<()>;
