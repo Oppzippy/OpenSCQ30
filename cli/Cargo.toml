@@ -4,10 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
+default = ["bluetooth"]
+bluetooth = ["openscq30_lib/bluetooth"]
 demo = ["openscq30_lib/demo"]
 
 [dependencies]
-openscq30_lib = { path = "../lib", features = ["bluetooth"] }
+openscq30_lib = { path = "../lib" }
 clap = { version = "4.1", features = ["derive"] }
 tokio = { version = "1", features = ["macros"] }
 tracing = "0.1"
