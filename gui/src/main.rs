@@ -121,28 +121,6 @@ fn build_ui_2(
 
     let main_context = MainContext::default();
     main_context.spawn_local(
-        clone!(@weak main_window, @strong gtk_registry => async move {
-            match gtk_registry
-                .device_descriptors()
-                .await {
-                Ok(descriptors) => {
-                    let mut model_devices = Vec::new();
-                    for descriptor in descriptors {
-                        model_devices.push(Device {
-                            mac_address: descriptor.mac_address().to_owned(),
-                            name: descriptor.name().to_owned(),
-                        })
-                    }
-                    main_window.set_devices(&model_devices);
-                },
-                Err(err) => {
-                    tracing::warn!("error obtaining device descriptors: {err}")
-                },
-            }
-        }),
-    );
-
-    main_context.spawn_local(
         clone!(@weak main_window, @strong state_update_receiver => async move {
             loop {
                 let next_state = state_update_receiver.next().await;
@@ -178,9 +156,12 @@ fn build_ui_2(
             }),
         );
     }));
-
     main_window.add_action(&action_refresh_devices);
     application.set_accels_for_action("win.refresh-devices", &["<Ctrl>R", "F5"]);
+
+    main_context.spawn_local(clone!(@weak action_refresh_devices => async move {
+        action_refresh_devices.activate(None);
+    }));
 
     main_window.connect_closure(
         "device_selection_changed",
