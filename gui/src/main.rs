@@ -164,7 +164,7 @@ fn build_ui_2(
     }));
 
     main_window.connect_closure(
-        "device_selection_changed",
+        "device-selection-changed",
         false,
         closure_local!(@strong state_update_receiver, @strong gtk_registry, @strong selected_device => move |main_window: MainWindow| {
             if let Some(new_selected_device) = main_window.selected_device() {
