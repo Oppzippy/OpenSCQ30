@@ -131,10 +131,10 @@ fn build_ui_2(
     );
 
     let action_refresh_devices = SimpleAction::new("refresh-devices", None);
-    action_refresh_devices.connect_activate(clone!(@weak main_window, @weak gtk_registry, @weak selected_device, @weak state_update_receiver => move |_, _| {
+    action_refresh_devices.connect_activate(clone!(@weak main_window, @strong gtk_registry, @strong selected_device, @strong state_update_receiver => move |_, _| {
         let main_context = MainContext::default();
         main_context.spawn_local(
-            clone!(@weak main_window, @weak gtk_registry, @weak selected_device, @weak state_update_receiver => async move {
+            clone!(@weak main_window, @strong gtk_registry, @strong selected_device, @strong state_update_receiver => async move {
                 match gtk_registry
                     .device_descriptors()
                     .await {
@@ -159,7 +159,7 @@ fn build_ui_2(
     main_window.add_action(&action_refresh_devices);
     application.set_accels_for_action("win.refresh-devices", &["<Ctrl>R", "F5"]);
 
-    main_context.spawn_local(clone!(@weak action_refresh_devices => async move {
+    main_context.spawn_local(clone!(@strong action_refresh_devices => async move {
         action_refresh_devices.activate(None);
     }));
 
@@ -169,7 +169,7 @@ fn build_ui_2(
         closure_local!(@strong state_update_receiver, @strong gtk_registry, @strong selected_device => move |main_window: MainWindow| {
             if let Some(new_selected_device) = main_window.selected_device() {
                 let main_context = MainContext::default();
-                main_context.spawn_local(clone!(@weak main_window, @weak gtk_registry, @weak selected_device, @weak state_update_receiver => async move {
+                main_context.spawn_local(clone!(@weak main_window, @strong gtk_registry, @strong selected_device, @strong state_update_receiver => async move {
                     match gtk_registry.device(new_selected_device.mac_address.to_owned()).await {
                         Ok(Some(device)) => {
                             *selected_device.borrow_mut() = Some(device.to_owned());
@@ -197,7 +197,7 @@ fn build_ui_2(
         false,
         closure_local!(@strong selected_device => move |_main_window: MainWindow, mode_id: u8| {
             let main_context = MainContext::default();
-            main_context.spawn_local(clone!(@weak selected_device => async move {
+            main_context.spawn_local(clone!(@strong selected_device => async move {
                 let Some(device) = &*selected_device.borrow() else {
                     tracing::warn!("no device is selected");
                     return;
@@ -219,7 +219,7 @@ fn build_ui_2(
         closure_local!(@strong selected_device => move |_main_window: MainWindow, mode_id: u8| {
             let main_context = MainContext::default();
             main_context.spawn_local(
-                clone!(@weak selected_device => async move {
+                clone!(@strong selected_device => async move {
                     let Some(device) = &*selected_device.borrow() else {
                         tracing::warn!("no device is selected");
                         return;
@@ -242,7 +242,7 @@ fn build_ui_2(
         closure_local!(@strong selected_device => move |main_window: MainWindow| {
             let main_context = MainContext::default();
             main_context.spawn_local(
-                clone!(@weak selected_device => async move {
+                clone!(@strong selected_device => async move {
                     let Some(device) = &*selected_device.borrow() else {
                         tracing::warn!("no device is selected");
                         return;
