@@ -3,6 +3,7 @@ mod imp;
 use std::rc::Rc;
 
 use gtk::{
+    gio,
     glib::{self, Object},
     prelude::IsA,
     subclass::prelude::ObjectSubclassIsExt,
@@ -19,8 +20,8 @@ use super::Device;
 
 glib::wrapper! {
     pub struct MainWindow(ObjectSubclass<imp::MainWindow>)
-        @extends gtk::Window, gtk::Widget,
-        @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget, gtk::Native, gtk::Root, gtk::ShortcutManager;
+        @extends gtk::ApplicationWindow, gtk::Window, gtk::Widget,
+        @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget, gtk::Native, gtk::Root, gtk::ShortcutManager, gio::ActionGroup, gio::ActionMap;
 }
 
 impl MainWindow {

@@ -57,11 +57,6 @@ impl DeviceSelection {
                 mac_address: device_object.mac_address(),
             })
     }
-
-    #[template_callback]
-    fn handle_refresh_clicked(&self, _button: &gtk::Button) {
-        self.obj().emit_by_name("refresh-devices", &[])
-    }
 }
 
 #[glib::object_subclass]
@@ -106,12 +101,8 @@ impl ObjectImpl for DeviceSelection {
     }
 
     fn signals() -> &'static [Signal] {
-        static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
-            vec![
-                Signal::builder("refresh-devices").build(),
-                Signal::builder("selection-changed").build(),
-            ]
-        });
+        static SIGNALS: Lazy<Vec<Signal>> =
+            Lazy::new(|| vec![Signal::builder("selection-changed").build()]);
         SIGNALS.as_ref()
     }
 }

@@ -22,7 +22,7 @@
 		<child>
 			<object class="GtkButton">
 				<property name="label">Refresh</property>
-				<signal name="clicked" handler="handle_refresh_clicked" swapped="true" />
+				<property name="action-name">win.refresh-devices</property>
 			</object>
 		</child>
 	</template>

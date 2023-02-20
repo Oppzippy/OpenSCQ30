@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-	<template class="OpenSCQ30MainWindow" parent="GtkWindow">
+	<template class="OpenSCQ30MainWindow" parent="GtkApplicationWindow">
 		<child>
 			<object class="GtkBox">
 				<property name="orientation">vertical</property>
 
 				<child>
 					<object class="OpenSCQ30DeviceSelection" id="device_selection">
-						<signal name="refresh-devices" handler="handle_refresh_devices"
-							swapped="true" />
 						<signal name="selection-changed" handler="handle_device_selection_changed"
 							swapped="true" />
 						<property name="margin-start">10</property>

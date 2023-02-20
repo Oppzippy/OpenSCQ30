@@ -1,9 +1,9 @@
 use std::{cell::RefCell, rc::Rc, sync::Arc};
 
 use gtk::{
-    gio,
+    gio::{self, SimpleAction},
     glib::{self, clone, closure_local, MainContext},
-    prelude::{ApplicationExt, ApplicationExtManual, IsA, ObjectExt},
+    prelude::*,
     traits::GtkWindowExt,
     Application,
 };
@@ -152,35 +152,35 @@ fn build_ui_2(
         }),
     );
 
-    main_window.connect_closure(
-        "refresh-devices",
-        false,
-        closure_local!(@strong gtk_registry, @strong selected_device, @strong state_update_receiver => move |main_window: MainWindow| {
-            let main_context = MainContext::default();
-            main_context.spawn_local(
-                clone!(@weak main_window, @weak gtk_registry, @weak selected_device, @weak state_update_receiver => async move {
-                    match gtk_registry
-                        .device_descriptors()
-                        .await {
-                        Ok(descriptors) => {
-                            let model_devices = descriptors
-                                .iter()
-                                .map(|descriptor| Device { mac_address: descriptor.mac_address().to_owned(), name: descriptor.name().to_owned() })
-                                .collect::<Vec<_>>();
-                            if model_devices.is_empty() {
-                                state_update_receiver.replace_receiver(None).await;
-                                *selected_device.borrow_mut() = None;
-                            }
-                            main_window.set_devices(&model_devices);
-                        },
-                        Err(err) => {
-                            tracing::warn!("error obtaining device descriptors: {err}")
-                        },
-                    }
-                }),
-            );
-        }),
-    );
+    let action_refresh_devices = SimpleAction::new("refresh-devices", None);
+    action_refresh_devices.connect_activate(clone!(@weak main_window, @weak gtk_registry, @weak selected_device, @weak state_update_receiver => move |_, _| {
+        let main_context = MainContext::default();
+        main_context.spawn_local(
+            clone!(@weak main_window, @weak gtk_registry, @weak selected_device, @weak state_update_receiver => async move {
+                match gtk_registry
+                    .device_descriptors()
+                    .await {
+                    Ok(descriptors) => {
+                        let model_devices = descriptors
+                            .iter()
+                            .map(|descriptor| Device { mac_address: descriptor.mac_address().to_owned(), name: descriptor.name().to_owned() })
+                            .collect::<Vec<_>>();
+                        if model_devices.is_empty() {
+                            state_update_receiver.replace_receiver(None).await;
+                            *selected_device.borrow_mut() = None;
+                        }
+                        main_window.set_devices(&model_devices);
+                    },
+                    Err(err) => {
+                        tracing::warn!("error obtaining device descriptors: {err}")
+                    },
+                }
+            }),
+        );
+    }));
+
+    main_window.add_action(&action_refresh_devices);
+    application.set_accels_for_action("win.refresh-devices", &["<Ctrl>R", "F5"]);
 
     main_window.connect_closure(
         "device_selection_changed",

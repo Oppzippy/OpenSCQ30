@@ -4,7 +4,9 @@ use gtk::{
     glib::{self, clone, once_cell::sync::Lazy, subclass::Signal},
     prelude::{ObjectExt, StaticType},
     subclass::{
-        prelude::{ObjectImpl, ObjectImplExt, ObjectSubclass, ObjectSubclassExt},
+        prelude::{
+            ApplicationWindowImpl, ObjectImpl, ObjectImplExt, ObjectSubclass, ObjectSubclassExt,
+        },
         widget::{
             CompositeTemplateCallbacksClass, CompositeTemplateClass,
             CompositeTemplateInitializingExt, WidgetImpl,
@@ -41,11 +43,6 @@ pub struct MainWindow {
 impl MainWindow {
     pub fn set_devices(&self, devices: &[Device]) {
         self.device_selection.set_devices(devices);
-    }
-
-    #[template_callback]
-    fn handle_refresh_devices(&self, _device_selection: &DeviceSelection) {
-        self.obj().emit_by_name("refresh-devices", &[])
     }
 
     #[template_callback]
@@ -139,7 +136,7 @@ impl MainWindow {
 impl ObjectSubclass for MainWindow {
     const NAME: &'static str = "OpenSCQ30MainWindow";
     type Type = super::MainWindow;
-    type ParentType = gtk::Window;
+    type ParentType = gtk::ApplicationWindow;
 
     fn class_init(klass: &mut Self::Class) {
         klass.bind_template();
@@ -161,7 +158,6 @@ impl ObjectImpl for MainWindow {
                 Signal::builder("noise-canceling-mode-selected")
                     .param_types([u8::static_type()])
                     .build(),
-                Signal::builder("refresh-devices").build(),
                 Signal::builder("device-selection-changed").build(),
                 Signal::builder("apply-equalizer-settings").build(),
                 Signal::builder("custom-equalizer-profile-selected")
@@ -192,3 +188,5 @@ impl WindowImpl for MainWindow {
         Inhibit(false)
     }
 }
+
+impl ApplicationWindowImpl for MainWindow {}
