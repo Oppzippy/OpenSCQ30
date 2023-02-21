@@ -2,3 +2,6 @@
 /gui/target
 /lib/target
 /target
+/gui/AppDir
+/gui/appimage-build
+

@@ -1,0 +1,69 @@
+version: 1
+script:
+  - cargo build --release --features libadwaita
+  - rm -rf ./AppDir || true
+  - mkdir -p ./AppDir/usr/bin
+  - mv ../target/release/openscq30_gui ./AppDir/usr/bin
+
+AppDir:
+  app_info:
+    id: com.oppzippy.OpenSCQ30
+    name: OpenSCQ30
+    icon: application-vnd.appimage
+    version: latest
+    exec: usr/bin/openscq30_gui
+    exec_args: $@
+
+  apt:
+    arch:
+      - amd64
+    allow_unauthenticated: true
+    sources:
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy main restricted universe multiverse'
+        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
+    include:
+      - libc6
+      - libgtk-4-1
+      - libadwaita-1-0
+    exclude:
+      - adwaita-icon-theme
+      - humanity-icon-theme
+      - sensible-utils
+      - dconf-service
+      - ubuntu-mono
+      - fonts-*-core
+
+  runtime:
+    version: continuous
+
+  files:
+    include: []
+    exclude:
+      - usr/lib/x86_64-linux-gnu/gconv
+      - usr/share/man
+      - usr/share/doc/*/README.*
+      - usr/share/doc/*/changelog.*
+      - usr/share/doc/*/NEWS.*
+      - usr/share/doc/*/TODO.*
+
+  test:
+    fedora-30:
+      image: appimagecrafters/tests-env:fedora-30
+      command: ./AppRun
+    debian-stable:
+      image: appimagecrafters/tests-env:debian-stable
+      command: ./AppRun
+    archlinux-latest:
+      image: appimagecrafters/tests-env:archlinux-latest
+      command: ./AppRun
+    centos-7:
+      image: appimagecrafters/tests-env:centos-7
+      command: ./AppRun
+    ubuntu-xenial:
+      image: appimagecrafters/tests-env:ubuntu-xenial
+      command: ./AppRun
+
+AppImage:
+  arch: x86_64
+  update-information: None
+  sign-key: None
