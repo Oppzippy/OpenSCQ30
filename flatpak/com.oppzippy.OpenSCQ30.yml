@@ -1,0 +1,34 @@
+app-id: com.oppzippy.OpenSCQ30
+runtime: org.gnome.Platform
+runtime-version: "43"
+sdk: org.gnome.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.rust-stable
+command: openscq30_gui
+finish-args:
+  # x11/wayland
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --device=dri
+  - --share=ipc
+  # bluetooth
+  - --allow=bluetooth
+  - --system-talk-name=org.bluez
+
+build-options:
+  append-path: /usr/lib/sdk/rust-stable/bin
+
+modules:
+  - name: openscq30_gui
+    buildsystem: simple
+    build-options:
+      env:
+        CARGO_HOME: /run/build/openscq30_gui/cargo
+    build-commands:
+      - cargo --offline fetch --manifest-path Cargo.toml --verbose
+      - cargo --offline build --release --features libadwaita --package openscq30_gui --verbose
+      - install -Dm755 ./target/release/openscq30_gui -t /app/bin/
+    sources:
+      - type: dir
+        path: ..
+      - generated-sources.json

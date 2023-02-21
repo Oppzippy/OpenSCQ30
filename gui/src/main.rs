@@ -51,7 +51,7 @@ fn main() {
 #[cfg(not(feature = "libadwaita"))]
 fn run_application() {
     let app = gtk::Application::builder()
-        .application_id("com.oppzippy.openscq30")
+        .application_id("com.oppzippy.OpenSCQ30")
         .build();
     app.connect_activate(build_ui);
 
@@ -61,7 +61,7 @@ fn run_application() {
 #[cfg(feature = "libadwaita")]
 fn run_application() {
     let app = adw::Application::builder()
-        .application_id("com.oppzippy.openscq30")
+        .application_id("com.oppzippy.OpenSCQ30")
         .build();
     app.connect_activate(build_ui);
 
