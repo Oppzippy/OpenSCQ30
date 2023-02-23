@@ -163,10 +163,9 @@ fn build_ui_2(
         action_refresh_devices.activate(None);
     }));
 
-    main_window.connect_closure(
-        "device-selection-changed",
-        false,
-        closure_local!(@strong state_update_receiver, @strong gtk_registry, @strong selected_device => move |main_window: MainWindow| {
+    main_window.connect_notify_local(
+        Some("selected-device"),
+        clone!(@strong state_update_receiver, @strong gtk_registry, @strong selected_device => move |main_window, _| {
             if let Some(new_selected_device) = main_window.selected_device() {
                 let main_context = MainContext::default();
                 main_context.spawn_local(clone!(@weak main_window, @strong gtk_registry, @strong selected_device, @strong state_update_receiver => async move {
