@@ -123,6 +123,11 @@ impl GeneralSettings {
             )
         }
     }
+
+    #[template_callback]
+    fn handle_disconnect_clicked(&self, _: &gtk::Button) {
+        self.obj().emit_by_name("disconnect", &[])
+    }
 }
 
 #[glib::object_subclass]
@@ -156,6 +161,7 @@ impl ObjectImpl for GeneralSettings {
                 Signal::builder("noise-canceling-mode-selected")
                     .param_types([u8::static_type()])
                     .build(),
+                Signal::builder("disconnect").build(),
             ]
         });
         SIGNALS.as_ref()

@@ -170,7 +170,7 @@ fn build_ui_2(
             if let Some(new_selected_device) = main_window.selected_device() {
                 let main_context = MainContext::default();
                 main_context.spawn_local(clone!(@weak main_window, @strong gtk_registry, @strong selected_device, @strong state_update_receiver => async move {
-                    match gtk_registry.device(new_selected_device.mac_address.to_owned()).await {
+                    match gtk_registry.device(new_selected_device.mac_address()).await {
                         Ok(Some(device)) => {
                             *selected_device.borrow_mut() = Some(device.to_owned());
                             let receiver = device.subscribe_to_state_updates();

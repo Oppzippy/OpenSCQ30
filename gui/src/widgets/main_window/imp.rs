@@ -1,12 +1,10 @@
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
 use gtk::{
-    glib::{self, clone, once_cell::sync::Lazy, subclass::Signal},
-    prelude::{ObjectExt, StaticType},
+    glib::{self, clone, once_cell::sync::Lazy, subclass::Signal, ParamSpec, Properties, Value},
+    prelude::*,
     subclass::{
-        prelude::{
-            ApplicationWindowImpl, ObjectImpl, ObjectImplExt, ObjectSubclass, ObjectSubclassExt,
-        },
+        prelude::*,
         widget::{
             CompositeTemplateCallbacksClass, CompositeTemplateClass,
             CompositeTemplateInitializingExt, WidgetImpl,
@@ -21,20 +19,22 @@ use gtk::subclass::widget::WidgetClassSubclassExt;
 use once_cell::sync::OnceCell;
 
 use crate::{
-    objects::EqualizerCustomProfileObject,
+    objects::{DeviceObject, EqualizerCustomProfileObject},
     settings::SettingsFile,
-    widgets::{Device, DeviceSelection, EqualizerSettings, GeneralSettings},
+    widgets::{Device, DeviceSelection, SelectedDeviceSettings},
 };
 
-#[derive(Default, CompositeTemplate)]
+#[derive(Default, CompositeTemplate, Properties)]
+#[properties(wrapper_type=super::MainWindow)]
 #[template(resource = "/com/oppzippy/openscq30/main_window/template.ui")]
 pub struct MainWindow {
     #[template_child]
+    pub selected_device_settings: TemplateChild<SelectedDeviceSettings>,
+    #[template_child]
     pub device_selection: TemplateChild<DeviceSelection>,
-    #[template_child]
-    pub general_settings: TemplateChild<GeneralSettings>,
-    #[template_child]
-    pub equalizer_settings: TemplateChild<EqualizerSettings>,
+
+    #[property(get, set)]
+    pub selected_device: RefCell<Option<DeviceObject>>,
 
     pub settings_file: OnceCell<Rc<SettingsFile>>,
 }
@@ -46,36 +46,40 @@ impl MainWindow {
     }
 
     #[template_callback]
-    fn handle_device_selection_changed(&self, _device_selection: &DeviceSelection) {
+    fn handle_device_selection_changed(&self, _: &DeviceSelection) {
         self.obj().emit_by_name("device-selection-changed", &[])
     }
 
     #[template_callback]
-    fn handle_apply_equalizer_settings(&self, _button: &EqualizerSettings) {
+    fn handle_apply_equalizer_settings(&self, _: &SelectedDeviceSettings) {
         self.obj().emit_by_name("apply-equalizer-settings", &[])
     }
 
     #[template_callback]
     // no idea why the parameter comes before &GeneralSettings
-    fn handle_ambient_sound_mode_selected(&self, mode: u8, _: &GeneralSettings) {
+    fn handle_ambient_sound_mode_selected(&self, mode: u8, _: &SelectedDeviceSettings) {
         let obj = self.obj();
         obj.emit_by_name("ambient-sound-mode-selected", &[&mode])
     }
 
     #[template_callback]
-    fn handle_noise_canceling_mode_selected(&self, mode: u8, _: &GeneralSettings) {
+    fn handle_noise_canceling_mode_selected(&self, mode: u8, _: &SelectedDeviceSettings) {
         let obj = self.obj();
         obj.emit_by_name("noise-canceling-mode-selected", &[&mode])
     }
 
     #[template_callback]
-    fn handle_custom_equalizer_profile_selected(&self, profile: &EqualizerCustomProfileObject) {
+    fn handle_custom_equalizer_profile_selected(
+        &self,
+        profile: &EqualizerCustomProfileObject,
+        _: &SelectedDeviceSettings,
+    ) {
         self.obj()
             .emit_by_name("custom-equalizer-profile-selected", &[profile])
     }
 
     #[template_callback]
-    fn handle_create_custom_equalizer_profile(&self, profile: &EqualizerCustomProfileObject) {
+    fn handle_create_custom_equalizer_profile(&self, _: &SelectedDeviceSettings) {
         let obj = self.obj();
         let dialog = gtk::Dialog::with_buttons(
             Some("Create Custom Profile"),
@@ -109,7 +113,6 @@ impl MainWindow {
             button.set_sensitive(!is_empty);
         }));
 
-        let volume_offsets = profile.volume_offsets();
         dialog.connect_response(
             clone!(@weak self as this, @weak entry => move |dialog, response| {
                 let name = entry.text().to_string();
@@ -117,6 +120,11 @@ impl MainWindow {
                 if response != ResponseType::Accept {
                     return;
                 }
+                let volume_offsets = this
+                    .selected_device_settings
+                    .equalizer_configuration()
+                    .band_offsets()
+                    .volume_offsets();
 
                 let profile_with_name = EqualizerCustomProfileObject::new(&name, volume_offsets);
                 this.obj().emit_by_name::<()>("create-custom-equalizer-profile", &[&profile_with_name]);
@@ -126,9 +134,19 @@ impl MainWindow {
     }
 
     #[template_callback]
-    fn handle_delete_custom_equalizer_profile(&self, profile: &EqualizerCustomProfileObject) {
+    fn handle_delete_custom_equalizer_profile(
+        &self,
+        profile: &EqualizerCustomProfileObject,
+        _: &SelectedDeviceSettings,
+    ) {
         self.obj()
             .emit_by_name("delete-custom-equalizer-profile", &[&profile])
+    }
+
+    #[template_callback]
+    fn handle_disconnect(&self, _: &SelectedDeviceSettings) {
+        let selected_device: Option<DeviceObject> = None;
+        self.obj().set_property("selected-device", selected_device);
     }
 }
 
@@ -149,6 +167,44 @@ impl ObjectSubclass for MainWindow {
 }
 
 impl ObjectImpl for MainWindow {
+    fn constructed(&self) {
+        self.parent_constructed();
+
+        self.obj()
+            .bind_property("selected-device", self.obj().as_ref(), "title")
+            .transform_to(|_, value: Option<DeviceObject>| match value {
+                Some(device) => Some(format!(
+                    "OpenSCQ30 - {} ({})",
+                    device.name(),
+                    device.mac_address()
+                )),
+                None => Some("OpenSCQ30".to_string()),
+            })
+            .sync_create()
+            .build();
+
+        self.device_selection
+            .bind_property("selected-device", self.obj().as_ref(), "selected-device")
+            .sync_create()
+            .build();
+
+        self.obj()
+            .bind_property(
+                "selected-device",
+                &self.selected_device_settings.get(),
+                "visible",
+            )
+            .transform_to(|_, value: Option<DeviceObject>| Some(value.is_some()))
+            .sync_create()
+            .build();
+
+        self.obj()
+            .bind_property("selected-device", &self.device_selection.get(), "visible")
+            .transform_to(|_, value: Option<DeviceObject>| Some(value.is_none()))
+            .sync_create()
+            .build();
+    }
+
     fn signals() -> &'static [glib::subclass::Signal] {
         static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
             vec![
@@ -174,9 +230,16 @@ impl ObjectImpl for MainWindow {
         SIGNALS.as_ref()
     }
 
-    fn constructed(&self) {
-        self.parent_constructed();
-        self.obj().set_title(Some("OpenSCQ30"));
+    fn properties() -> &'static [ParamSpec] {
+        Self::derived_properties()
+    }
+
+    fn set_property(&self, id: usize, value: &Value, pspec: &ParamSpec) {
+        Self::derived_set_property(self, id, value, pspec)
+    }
+
+    fn property(&self, id: usize, pspec: &ParamSpec) -> Value {
+        Self::derived_property(self, id, pspec)
     }
 }
 impl WidgetImpl for MainWindow {}

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
 	<template class="OpenSCQ30GeneralSettings" parent="GtkBox">
+		<property name="orientation">vertical</property>
 		<child>
 			<object class="GtkGrid">
 				<property name="row-spacing">2</property>
@@ -119,6 +120,13 @@
 						</accessibility>
 					</object>
 				</child>
+			</object>
+		</child>
+		<child>
+			<object class="GtkButton">
+				<signal name="clicked" handler="handle_disconnect_clicked" swapped="true" />
+				<property name="label">Disconnect</property>
+				<property name="margin-top">10</property>
 			</object>
 		</child>
 	</template>

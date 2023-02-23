@@ -1,17 +1,17 @@
-use gtk::glib::clone;
-use gtk::glib::once_cell::sync::Lazy;
-use gtk::glib::subclass::Signal;
-use gtk::prelude::{Cast, ObjectExt, StaticType};
-use gtk::subclass::prelude::{ObjectImplExt, ObjectSubclassExt};
-use gtk::subclass::widget::{CompositeTemplateCallbacksClass, CompositeTemplateInitializingExt};
-use gtk::{gio, ClosureExpression};
+use std::cell::RefCell;
+
 use gtk::{
-    glib,
+    gio,
+    glib::{self, ParamSpec, Properties, Value},
+    prelude::*,
     subclass::{
-        prelude::{BoxImpl, ObjectImpl, ObjectSubclass},
-        widget::{CompositeTemplateClass, WidgetClassSubclassExt, WidgetImpl},
+        prelude::{BoxImpl, ObjectImpl, ObjectSubclass, *},
+        widget::{
+            CompositeTemplateCallbacksClass, CompositeTemplateClass,
+            CompositeTemplateInitializingExt, WidgetClassSubclassExt, WidgetImpl,
+        },
     },
-    CompositeTemplate, TemplateChild,
+    ClosureExpression, CompositeTemplate, TemplateChild,
 };
 use once_cell::unsync::OnceCell;
 
@@ -19,17 +19,28 @@ use crate::objects::DeviceObject;
 
 use super::Device;
 
-#[derive(Default, CompositeTemplate)]
+#[derive(Default, CompositeTemplate, Properties)]
 #[template(resource = "/com/oppzippy/openscq30/device_selection/template.ui")]
+#[properties(wrapper_type=super::DeviceSelection)]
 pub struct DeviceSelection {
     #[template_child]
     pub dropdown: TemplateChild<gtk::DropDown>,
+
+    #[property(get, set)]
+    pub selected_device: RefCell<Option<DeviceObject>>,
 
     pub devices: OnceCell<gio::ListStore>,
 }
 
 #[gtk::template_callbacks]
 impl DeviceSelection {
+    #[template_callback]
+    pub fn handle_connect_clicked(&self, _button: &gtk::Button) {
+        let selected_device: Option<DeviceObject> = self.dropdown.selected_item().and_downcast();
+        // `self.obj().set_selected_device()` from derive(Properties) doesn't allow None
+        self.obj().set_property("selected-device", selected_device);
+    }
+
     pub fn set_devices(&self, devices: &[Device]) {
         let objects = devices
             .iter()
@@ -93,17 +104,18 @@ impl ObjectImpl for DeviceSelection {
             )
         });
         self.dropdown.set_expression(Some(expression));
-
-        self.dropdown
-            .connect_selected_item_notify(clone!(@weak self as this => move |_dropdown| {
-                this.obj().emit_by_name("selection-changed", &[])
-            }));
     }
 
-    fn signals() -> &'static [Signal] {
-        static SIGNALS: Lazy<Vec<Signal>> =
-            Lazy::new(|| vec![Signal::builder("selection-changed").build()]);
-        SIGNALS.as_ref()
+    fn properties() -> &'static [ParamSpec] {
+        Self::derived_properties()
+    }
+
+    fn set_property(&self, id: usize, value: &Value, pspec: &ParamSpec) {
+        Self::derived_set_property(self, id, value, pspec)
+    }
+
+    fn property(&self, id: usize, pspec: &ParamSpec) -> Value {
+        Self::derived_property(self, id, pspec)
     }
 }
 impl WidgetImpl for DeviceSelection {}
