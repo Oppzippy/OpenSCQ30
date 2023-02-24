@@ -2,10 +2,14 @@
 <interface>
 	<template class="OpenSCQ30MainWindow" parent="GtkApplicationWindow">
 		<child>
-			<object class="GtkBox">
-				<property name="orientation">vertical</property>
+			<object class="GtkStack" id="stack">
 				<child>
 					<object class="OpenSCQ30DeviceSelection" id="device_selection"></object>
+				</child>
+				<child>
+					<object class="OpenSCQ30LoadingScreen" id="loading_screen">
+						<signal name="cancel" handler="handle_disconnect" swapped="true" />
+					</object>
 				</child>
 				<child>
 					<object class="OpenSCQ30SelectedDeviceSettings" id="selected_device_settings">

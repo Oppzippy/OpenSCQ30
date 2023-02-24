@@ -1,4 +1,7 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{
+    cell::{Cell, RefCell},
+    rc::Rc,
+};
 
 use gtk::{
     glib::{self, clone, once_cell::sync::Lazy, subclass::Signal, ParamSpec, Properties, Value},
@@ -21,7 +24,7 @@ use once_cell::sync::OnceCell;
 use crate::{
     objects::{DeviceObject, EqualizerCustomProfileObject},
     settings::SettingsFile,
-    widgets::{Device, DeviceSelection, SelectedDeviceSettings},
+    widgets::{Device, DeviceSelection, LoadingScreen, SelectedDeviceSettings},
 };
 
 #[derive(Default, CompositeTemplate, Properties)]
@@ -29,12 +32,18 @@ use crate::{
 #[template(resource = "/com/oppzippy/openscq30/main_window/template.ui")]
 pub struct MainWindow {
     #[template_child]
+    pub stack: TemplateChild<gtk::Stack>,
+    #[template_child]
     pub selected_device_settings: TemplateChild<SelectedDeviceSettings>,
     #[template_child]
     pub device_selection: TemplateChild<DeviceSelection>,
+    #[template_child]
+    pub loading_screen: TemplateChild<LoadingScreen>,
 
     #[property(get, set)]
     pub selected_device: RefCell<Option<DeviceObject>>,
+    #[property(get, set)]
+    pub loading: Cell<bool>,
 
     pub settings_file: OnceCell<Rc<SettingsFile>>,
 }
@@ -144,9 +153,20 @@ impl MainWindow {
     }
 
     #[template_callback]
-    fn handle_disconnect(&self, _: &SelectedDeviceSettings) {
+    fn handle_disconnect(&self, _: &gtk::Widget) {
         let selected_device: Option<DeviceObject> = None;
         self.obj().set_property("selected-device", selected_device);
+    }
+
+    fn update(&self) {
+        if self.loading.get() {
+            self.stack.set_visible_child(&self.loading_screen.get());
+        } else if let Some(_) = &*self.selected_device.borrow() {
+            self.stack
+                .set_visible_child(&self.selected_device_settings.get());
+        } else {
+            self.stack.set_visible_child(&self.device_selection.get());
+        }
     }
 }
 
@@ -188,21 +208,14 @@ impl ObjectImpl for MainWindow {
             .sync_create()
             .build();
 
-        self.obj()
-            .bind_property(
-                "selected-device",
-                &self.selected_device_settings.get(),
-                "visible",
-            )
-            .transform_to(|_, value: Option<DeviceObject>| Some(value.is_some()))
-            .sync_create()
-            .build();
-
-        self.obj()
-            .bind_property("selected-device", &self.device_selection.get(), "visible")
-            .transform_to(|_, value: Option<DeviceObject>| Some(value.is_none()))
-            .sync_create()
-            .build();
+        self.obj().connect_notify_local(
+            Some("selected-device"),
+            clone!(@weak self as this => move |_, _| this.update()),
+        );
+        self.obj().connect_notify_local(
+            Some("loading"),
+            clone!(@weak self as this => move |_, _| this.update()),
+        );
     }
 
     fn signals() -> &'static [glib::subclass::Signal] {

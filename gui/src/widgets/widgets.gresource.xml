@@ -6,6 +6,7 @@
 		<file preprocess="xml-stripblanks">equalizer_settings/template.ui</file>
 		<file preprocess="xml-stripblanks">general_settings/template.ui</file>
 		<file preprocess="xml-stripblanks">main_window/template.ui</file>
+		<file preprocess="xml-stripblanks">loading_screen/template.ui</file>
 		<file preprocess="xml-stripblanks">selected_device_settings/template.ui</file>
 		<file preprocess="xml-stripblanks">volume_slider/template.ui</file>
 	</gresource>

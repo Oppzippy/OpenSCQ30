@@ -2,7 +2,7 @@ use std::{cell::RefCell, rc::Rc, sync::Arc};
 
 use gtk::{
     gio::{self, SimpleAction},
-    glib::{self, clone, closure_local, MainContext},
+    glib::{self, clone, closure_local, MainContext, JoinHandle},
     prelude::*,
     traits::GtkWindowExt,
     Application,
@@ -22,7 +22,7 @@ use tracing::Level;
 use tracing_subscriber::fmt::format::FmtSpan;
 use widgets::{Device, MainWindow};
 
-use crate::objects::EqualizerCustomProfileObject;
+use crate::objects::{DeviceObject, EqualizerCustomProfileObject};
 
 mod gtk_openscq30_lib;
 mod objects;
@@ -162,31 +162,55 @@ fn build_ui_2(
     main_context.spawn_local(clone!(@strong action_refresh_devices => async move {
         action_refresh_devices.activate(None);
     }));
+    
+    let connect_to_device_handle: Arc<RefCell<Option<JoinHandle<()>>>> = Arc::new(RefCell::new(None));
 
     main_window.connect_notify_local(
         Some("selected-device"),
-        clone!(@strong state_update_receiver, @strong gtk_registry, @strong selected_device => move |main_window, _| {
+        clone!(@strong state_update_receiver, @strong gtk_registry, @strong selected_device, @strong connect_to_device_handle => move |main_window, _| {
+            // Clean up any existing devices
+            if let Some(handle) = &*connect_to_device_handle.borrow_mut() {
+                handle.abort();
+            }
+            *selected_device.borrow_mut() = None;
+            main_window.set_loading(false);
+            
+            // Connect to new device
             if let Some(new_selected_device) = main_window.selected_device() {
+                main_window.set_loading(true);
                 let main_context = MainContext::default();
-                main_context.spawn_local(clone!(@weak main_window, @strong gtk_registry, @strong selected_device, @strong state_update_receiver => async move {
-                    match gtk_registry.device(new_selected_device.mac_address()).await {
-                        Ok(Some(device)) => {
-                            *selected_device.borrow_mut() = Some(device.to_owned());
-                            let receiver = device.subscribe_to_state_updates();
-                            state_update_receiver.replace_receiver(Some(receiver)).await;
+                *connect_to_device_handle.borrow_mut() = Some(
+                    main_context.spawn_local(
+                        clone!(@weak main_window, @strong gtk_registry, @strong selected_device, @strong state_update_receiver => async move {
+                            match gtk_registry.device(new_selected_device.mac_address()).await {
+                                Ok(Some(device)) => {
+                                    *selected_device.borrow_mut() = Some(device.to_owned());
+                                    let receiver = device.subscribe_to_state_updates();
+                                    state_update_receiver.replace_receiver(Some(receiver)).await;
 
-                            let ambient_sound_mode = device.ambient_sound_mode().await;
-                            let noise_canceling_mode = device.noise_canceling_mode().await;
-                            let equalizer_configuration = device.equalizer_configuration().await;
+                                    let ambient_sound_mode = device.ambient_sound_mode().await;
+                                    let noise_canceling_mode = device.noise_canceling_mode().await;
+                                    let equalizer_configuration = device.equalizer_configuration().await;
 
-                            main_window.set_ambient_sound_mode(ambient_sound_mode);
-                            main_window.set_noise_canceling_mode(noise_canceling_mode);
-                            main_window.set_equalizer_configuration(&equalizer_configuration);
-                        },
-                        Ok(None) => tracing::warn!("could not find selected device: {:?}", new_selected_device),
-                        Err(err) => tracing::warn!("error connecting to device {:?}: {err}", new_selected_device),
-                    }
-                }));
+                                    main_window.set_ambient_sound_mode(ambient_sound_mode);
+                                    main_window.set_noise_canceling_mode(noise_canceling_mode);
+                                    main_window.set_equalizer_configuration(&equalizer_configuration);
+                                },
+                                Ok(None) => {
+                                    tracing::warn!("could not find selected device: {:?}", new_selected_device);
+                                },
+                                Err(err) => { 
+                                    tracing::warn!("error connecting to device {:?}: {err}", new_selected_device);
+                                },
+                            }
+                            
+                            main_window.set_loading(false);
+                            if selected_device.borrow().is_none() {
+                                main_window.set_property("selected-device", None as Option<DeviceObject>);
+                            }
+                        })
+                    )
+                );
             }
         }),
     );
