@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use async_trait::async_trait;
 use tokio::sync::{broadcast, Mutex};
 
@@ -18,7 +20,8 @@ pub struct DemoDevice {
 }
 
 impl DemoDevice {
-    pub fn new(name: String, mac_address: String) -> Self {
+    pub async fn new(name: String, mac_address: String) -> Self {
+        tokio::time::sleep(Duration::from_millis(500)).await; // it takes some time to connect
         let (sender, _receiver) = broadcast::channel(50);
         Self {
             name,
