@@ -51,9 +51,9 @@ impl MainWindow {
         self.settings_file()
             .edit(|settings| {
                 let size = self.default_size();
-                settings.window_width = size.0;
-                settings.window_height = size.1;
-                settings.is_maximized = self.is_maximized();
+                settings.set_window_width(size.0);
+                settings.set_window_height(size.1);
+                settings.set_maximized(self.is_maximized());
             })
             .expect("failed to edit settings");
 
@@ -63,8 +63,8 @@ impl MainWindow {
     fn load_window_size(&self) {
         self.settings_file()
             .get(|settings| {
-                self.set_default_size(settings.window_width, settings.window_height);
-                if settings.is_maximized {
+                self.set_default_size(settings.window_width(), settings.window_height());
+                if settings.is_maximized() {
                     self.maximize();
                 }
             })

@@ -105,10 +105,10 @@ fn build_ui_2(
         .get(|settings| {
             main_window.set_custom_profiles(
                 settings
-                    .equalizer_custom_profiles
+                    .custom_profiles()
                     .iter()
                     .map(|(name, profile)| {
-                        EqualizerCustomProfileObject::new(name, profile.volume_offsets)
+                        EqualizerCustomProfileObject::new(name, profile.volume_offsets())
                     })
                     .collect(),
             );
@@ -284,10 +284,10 @@ fn build_ui_2(
         false,
         closure_local!(@strong settings_file => move |main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
             let result = settings_file.get(|settings| {
-                match settings.equalizer_custom_profiles.get(&custom_profile.name()) {
+                match settings.custom_profiles().get(&custom_profile.name()) {
                     Some(profile) => {
                         main_window.set_equalizer_configuration(
-                            &EqualizerConfiguration::new_custom_profile(EqualizerBandOffsets::new(profile.volume_offsets))
+                            &EqualizerConfiguration::new_custom_profile(EqualizerBandOffsets::new(profile.volume_offsets()))
                         );
                     },
                     None => {
@@ -306,18 +306,18 @@ fn build_ui_2(
         false,
         closure_local!(@strong settings_file => move |main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
             settings_file.edit(|settings| {
-                settings.equalizer_custom_profiles.insert(
+                settings.set_custom_profile(
                     custom_profile.name(),
-                    EqualizerCustomProfile {
-                        volume_offsets: custom_profile.volume_offsets()
-                    }
+                    EqualizerCustomProfile::new (
+                        custom_profile.volume_offsets()
+                    )
                 );
             }).unwrap();
             settings_file.get(|settings| {
                 main_window.set_custom_profiles(
-                    settings.equalizer_custom_profiles
+                    settings.custom_profiles()
                         .iter()
-                        .map(|(name, profile)| EqualizerCustomProfileObject::new(name, profile.volume_offsets))
+                        .map(|(name, profile)| EqualizerCustomProfileObject::new(name, profile.volume_offsets()))
                         .collect()
                 );
             }).unwrap();
@@ -329,13 +329,13 @@ fn build_ui_2(
         false,
         closure_local!(@strong settings_file => move |main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
             settings_file.edit(|settings| {
-                settings.equalizer_custom_profiles.remove(&custom_profile.name());
+                settings.remove_custom_profile(&custom_profile.name());
             }).unwrap();
             settings_file.get(|settings| {
                 main_window.set_custom_profiles(
-                    settings.equalizer_custom_profiles
+                    settings.custom_profiles()
                         .iter()
-                        .map(|(name, profile)| EqualizerCustomProfileObject::new(name, profile.volume_offsets))
+                        .map(|(name, profile)| EqualizerCustomProfileObject::new(name, profile.volume_offsets()))
                         .collect()
                 );
             }).unwrap();
