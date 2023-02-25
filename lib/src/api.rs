@@ -1,6 +1,7 @@
 pub mod connection;
 pub mod device;
 
+#[cfg(any(feature = "bluetooth", feature = "demo"))]
 use self::device::DeviceRegistry;
 
 #[cfg(all(feature = "bluetooth", not(feature = "demo")))]
