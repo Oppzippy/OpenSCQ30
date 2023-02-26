@@ -1,11 +1,12 @@
 #define AppName "OpenSCQ30"
 #define AppExeName "openscq30_gui.exe"
-#define AppVersion "0.0.1"
+#define AppVersion GetVersionNumbersString("..\..\target\release\openscq30_gui.exe")
 
 [Setup]
 AppName={#AppName}
 AppVersion={#AppVersion}
-AppCopyright=GPL=3.0
+VersionInfoVersion={#AppVersion}
+AppCopyright=(C) Kyle Scheuing
 AppPublisher=Oppzippy
 AppPublisherURL=https://github.com/Oppzippy/OpenSCQ30
 OutputBaseFilename=OpenSCQ30_Setup
@@ -18,7 +19,6 @@ UninstallDisplayIcon={app}\{#AppExeName}
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
 PrivilegesRequiredOverridesAllowed=dialog commandline
-AllowNoIcons=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

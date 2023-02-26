@@ -28,3 +28,5 @@ glib-build-tools = "0.17"
 
 [target.'cfg(windows)'.build-dependencies]
 embed-resource = "1.8.0"
+tempfile = "3.4"
+regex = "1.7"
