@@ -7,6 +7,7 @@ fn main() {
         "src/widgets/widgets.gresource.xml",
         "widgets.gresource",
     );
+    println!("cargo:rerun-if-changed=src");
 }
 
 #[cfg(target_os = "windows")]
@@ -15,4 +16,5 @@ fn windows() {
 
     let resource_dir = Path::new("resources");
     embed_resource::compile(resource_dir.join("resources.rc"));
+    println!("cargo:rerun-if-changed=resources");
 }
