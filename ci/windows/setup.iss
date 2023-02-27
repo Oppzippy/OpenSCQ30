@@ -29,7 +29,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "..\..\target\release\{#AppExeName}"; DestDir: "{app}"
 Source: "..\..\LICENSE.txt"; DestDir: "{app}"
-Source: "dlls\*.dll"; DestDir: "{app}"
+Source: "dlls\*"; DestDir: "{app}"
 ; TODO gtk dlls
 
 [Icons]
