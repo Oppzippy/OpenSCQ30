@@ -65,7 +65,9 @@ jobs:
       - name: Get latest gtk version
         id: get-gtk-version
         run: |
-          echo "version=$(curl https://download.gnome.org/sources/gtk/cache.json | jq -r '.[2].gtk[-1]')" >> $GITHUB_OUTPUT
+          $GTK_VERSION=$(Invoke-WebRequest https://download.gnome.org/sources/gtk/cache.json).Content | jq -r '.[2].gtk[-1]'
+          echo "GTK Version $GTK_VERSION"
+          echo "version=$GTK_VERSION" >> $env:GITHUB_OUTPUT
       # Temporarily move the preinstalled git, it causes errors related to cygwin.
       - name: Move git binary
         run: |
@@ -90,7 +92,6 @@ jobs:
         run: |
           Move-Item "C:\Program Files\Git\usr\notbin" "C:\Program Files\Git\usr\bin"
           Move-Item "C:\Program Files\Git\notbin" "C:\Program Files\Git\bin"
-
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
       - name: Build gui
