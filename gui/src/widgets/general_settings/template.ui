@@ -1,133 +1,133 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-	<template class="OpenSCQ30GeneralSettings" parent="GtkBox">
-		<property name="orientation">vertical</property>
-		<child>
-			<object class="GtkGrid">
-				<property name="row-spacing">2</property>
-				<property name="column-spacing">2</property>
+    <template class="OpenSCQ30GeneralSettings" parent="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+            <object class="GtkGrid">
+                <property name="row-spacing">2</property>
+                <property name="column-spacing">2</property>
 
-				<!-- Ambient Sound Mode -->
-				<child>
-					<object class="GtkLabel" id="ambient_sound_mode_label">
-						<property name="label">Ambient Sound Mode</property>
-						<property name="margin-start">10</property>
-						<property name="margin-end">10</property>
-						<layout>
-							<property name="column">0</property>
-							<property name="row">0</property>
-						</layout>
-					</object>
-				</child>
-				<child>
-					<object class="GtkToggleButton" id="normal_mode">
-						<signal name="toggled" handler="handle_normal_mode_clicked" swapped="true" />
-						<property name="label">Normal</property>
-						<property name="hexpand">true</property>
-						<layout>
-							<property name="column">1</property>
-							<property name="row">0</property>
-						</layout>
-						<accessibility>
-							<relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">ambient_sound_mode_label</relation>
-						</accessibility>
-					</object>
-				</child>
-				<child>
-					<object class="GtkToggleButton" id="transparency_mode">
-						<signal name="toggled" handler="handle_transparency_mode_clicked" swapped="true" />
-						<property name="group">normal_mode</property>
-						<property name="label">Transparency</property>
-						<property name="hexpand">true</property>
-						<layout>
-							<property name="column">2</property>
-							<property name="row">0</property>
-						</layout>
-						<accessibility>
-							<relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">ambient_sound_mode_label</relation>
-						</accessibility>
-					</object>
-				</child>
-				<child>
-					<object class="GtkToggleButton" id="noise_canceling_mode">
-						<signal name="toggled" handler="handle_noise_canceling_mode_clicked" swapped="true" />
-						<property name="group">transparency_mode</property>
-						<property name="label">Noise Canceling</property>
-						<property name="hexpand">true</property>
-						<layout>
-							<property name="column">3</property>
-							<property name="row">0</property>
-						</layout>
-						<accessibility>
-							<relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">ambient_sound_mode_label</relation>
-						</accessibility>
-					</object>
-				</child>
+                <!-- Ambient Sound Mode -->
+                <child>
+                    <object class="GtkLabel" id="ambient_sound_mode_label">
+                        <property name="label">Ambient Sound Mode</property>
+                        <property name="margin-start">10</property>
+                        <property name="margin-end">10</property>
+                        <layout>
+                            <property name="column">0</property>
+                            <property name="row">0</property>
+                        </layout>
+                    </object>
+                </child>
+                <child>
+                    <object class="GtkToggleButton" id="normal_mode">
+                        <signal name="toggled" handler="handle_normal_mode_clicked" swapped="true" />
+                        <property name="label">Normal</property>
+                        <property name="hexpand">true</property>
+                        <layout>
+                            <property name="column">1</property>
+                            <property name="row">0</property>
+                        </layout>
+                        <accessibility>
+                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">ambient_sound_mode_label</relation>
+                        </accessibility>
+                    </object>
+                </child>
+                <child>
+                    <object class="GtkToggleButton" id="transparency_mode">
+                        <signal name="toggled" handler="handle_transparency_mode_clicked" swapped="true" />
+                        <property name="group">normal_mode</property>
+                        <property name="label">Transparency</property>
+                        <property name="hexpand">true</property>
+                        <layout>
+                            <property name="column">2</property>
+                            <property name="row">0</property>
+                        </layout>
+                        <accessibility>
+                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">ambient_sound_mode_label</relation>
+                        </accessibility>
+                    </object>
+                </child>
+                <child>
+                    <object class="GtkToggleButton" id="noise_canceling_mode">
+                        <signal name="toggled" handler="handle_noise_canceling_mode_clicked" swapped="true" />
+                        <property name="group">transparency_mode</property>
+                        <property name="label">Noise Canceling</property>
+                        <property name="hexpand">true</property>
+                        <layout>
+                            <property name="column">3</property>
+                            <property name="row">0</property>
+                        </layout>
+                        <accessibility>
+                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">ambient_sound_mode_label</relation>
+                        </accessibility>
+                    </object>
+                </child>
 
-				<!-- Noise Canceling Mode -->
-				<child>
-					<object class="GtkLabel" id="noise_canceling_mode_label">
-						<property name="label">Noise Canceling Mode</property>
-						<property name="margin-start">10</property>
-						<property name="margin-end">10</property>
-						<layout>
-							<property name="column">0</property>
-							<property name="row">1</property>
-						</layout>
-					</object>
-				</child>
-				<child>
-					<object class="GtkToggleButton" id="transport_mode">
-						<signal name="toggled" handler="handle_transport_mode_clicked" swapped="true" />
-						<property name="label">Transport</property>
-						<property name="hexpand">true</property>
-						<layout>
-							<property name="column">1</property>
-							<property name="row">1</property>
-						</layout>
-						<accessibility>
-							<relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">noise_canceling_mode_label</relation>
-						</accessibility>
-					</object>
-				</child>
-				<child>
-					<object class="GtkToggleButton" id="indoor_mode">
-						<signal name="toggled" handler="handle_indoor_mode_clicked" swapped="true" />
-						<property name="group">transport_mode</property>
-						<property name="label">Indoor</property>
-						<property name="hexpand">true</property>
-						<layout>
-							<property name="column">2</property>
-							<property name="row">1</property>
-						</layout>
-						<accessibility>
-							<relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">noise_canceling_mode_label</relation>
-						</accessibility>
-					</object>
-				</child>
-				<child>
-					<object class="GtkToggleButton" id="outdoor_mode">
-						<signal name="toggled" handler="handle_outdoor_mode_clicked" swapped="true" />
-						<property name="group">indoor_mode</property>
-						<property name="label">Outdoor</property>
-						<property name="hexpand">true</property>
-						<layout>
-							<property name="column">3</property>
-							<property name="row">1</property>
-						</layout>
-						<accessibility>
-							<relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">noise_canceling_mode_label</relation>
-						</accessibility>
-					</object>
-				</child>
-			</object>
-		</child>
-		<child>
-			<object class="GtkButton">
-				<signal name="clicked" handler="handle_disconnect_clicked" swapped="true" />
-				<property name="label">Disconnect</property>
-				<property name="margin-top">10</property>
-			</object>
-		</child>
-	</template>
+                <!-- Noise Canceling Mode -->
+                <child>
+                    <object class="GtkLabel" id="noise_canceling_mode_label">
+                        <property name="label">Noise Canceling Mode</property>
+                        <property name="margin-start">10</property>
+                        <property name="margin-end">10</property>
+                        <layout>
+                            <property name="column">0</property>
+                            <property name="row">1</property>
+                        </layout>
+                    </object>
+                </child>
+                <child>
+                    <object class="GtkToggleButton" id="transport_mode">
+                        <signal name="toggled" handler="handle_transport_mode_clicked" swapped="true" />
+                        <property name="label">Transport</property>
+                        <property name="hexpand">true</property>
+                        <layout>
+                            <property name="column">1</property>
+                            <property name="row">1</property>
+                        </layout>
+                        <accessibility>
+                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">noise_canceling_mode_label</relation>
+                        </accessibility>
+                    </object>
+                </child>
+                <child>
+                    <object class="GtkToggleButton" id="indoor_mode">
+                        <signal name="toggled" handler="handle_indoor_mode_clicked" swapped="true" />
+                        <property name="group">transport_mode</property>
+                        <property name="label">Indoor</property>
+                        <property name="hexpand">true</property>
+                        <layout>
+                            <property name="column">2</property>
+                            <property name="row">1</property>
+                        </layout>
+                        <accessibility>
+                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">noise_canceling_mode_label</relation>
+                        </accessibility>
+                    </object>
+                </child>
+                <child>
+                    <object class="GtkToggleButton" id="outdoor_mode">
+                        <signal name="toggled" handler="handle_outdoor_mode_clicked" swapped="true" />
+                        <property name="group">indoor_mode</property>
+                        <property name="label">Outdoor</property>
+                        <property name="hexpand">true</property>
+                        <layout>
+                            <property name="column">3</property>
+                            <property name="row">1</property>
+                        </layout>
+                        <accessibility>
+                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">noise_canceling_mode_label</relation>
+                        </accessibility>
+                    </object>
+                </child>
+            </object>
+        </child>
+        <child>
+            <object class="GtkButton">
+                <signal name="clicked" handler="handle_disconnect_clicked" swapped="true" />
+                <property name="label">Disconnect</property>
+                <property name="margin-top">10</property>
+            </object>
+        </child>
+    </template>
 </interface>

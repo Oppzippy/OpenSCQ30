@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-	<template class="OpenSCQ30LoadingScreen" parent="GtkBox">
-		<property name="orientation">vertical</property>
-		<property name="spacing">10</property>
-		<property name="halign">center</property>
-		<property name="valign">center</property>
-		<property name="vexpand">true</property>
-		<property name="width-request">400</property>
-		<child>
-			<object class="GtkLabel">
-				<property name="label">Loading...</property>
-			</object>
-		</child>
-		<child>
-			<object class="GtkButton">
-				<property name="label">Cancel</property>
-				<signal name="clicked" handler="handle_cancel_clicked" swapped="true" />
-			</object>
-		</child>
-	</template>
+    <template class="OpenSCQ30LoadingScreen" parent="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
+        <property name="halign">center</property>
+        <property name="valign">center</property>
+        <property name="vexpand">true</property>
+        <property name="width-request">400</property>
+        <child>
+            <object class="GtkLabel">
+                <property name="label">Loading...</property>
+            </object>
+        </child>
+        <child>
+            <object class="GtkButton">
+                <property name="label">Cancel</property>
+                <signal name="clicked" handler="handle_cancel_clicked" swapped="true" />
+            </object>
+        </child>
+    </template>
 </interface>
