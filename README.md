@@ -52,5 +52,8 @@ Instructions use Ubuntu package names. Package names may differ on other distros
 1. Checkout the repository
 2. Install rustup
 3. Add all supported cpu architecture targets: `rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android`
-4. In the `android` directory, run `./gradlew assembleRelease`
-5. The apk can be found at `android/app/build/outputs/apk/release/app-release-unsigned.apk`
+4. Install [cargo-ndk](https://github.com/bbqsrc/cargo-ndk): `cargo install cargo-ndk`
+5. If you have Android Studio installed, ensure the version of ndk listed in [android/app/build.gradle](https://github.com/Oppzippy/OpenSCQ30/blob/master/android/app/build.gradle) (ctrl+f ndkVersion) is installed. If you don't have Android Studio installed, skip this step.
+6. If you don't have Android Studio installed, [download the ndk](https://developer.android.com/ndk/downloads) and [follow the instructions on setting `ANDROID_NDK_HOME` from cargo-ndk](https://github.com/bbqsrc/cargo-ndk#usage).
+7. In the `android` directory, run `./gradlew assembleRelease`
+8. The apk can be found at `android/app/build/outputs/apk/release/app-release-unsigned.apk`
