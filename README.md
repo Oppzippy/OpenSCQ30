@@ -49,11 +49,22 @@ Instructions use Ubuntu package names. Package names may differ on other distros
 
 ### Android
 
+#### If you do not have Android Studio installed:
+
+1. Install a JDK distribution of your choice
+2. Download the [Android command line tools (scroll down a bit)](https://developer.android.com/studio), extract it, and set the `ANDROID_HOME` environment variable to the cmdline-tools directory (the one containing `NOTICE.txt`).
+3. Accept licenses by `cd`ing to cmdline-tools/bin and run `./sdkmanager --licenses --sdk_root=..`.
+4. Check the version of ndk listed in [`android/app/build.gradle`](https://github.com/Oppzippy/OpenSCQ30/blob/master/android/app/build.gradle) (Ctrl-F ndkVersion) and [download that version of the ndk](https://developer.android.com/ndk/downloads), extract it, and set the `ANDROID_NDK_HOME` environment variable to the directory inside containing `NOTICE`.
+
+#### If you do have Android Studio installed:
+
+1. Ensure the version of ndk listed in [`android/app/build.gradle`](https://github.com/Oppzippy/OpenSCQ30/blob/master/android/app/build.gradle) (Ctrl-F ndkVersion) is installed (File -> Settings -> Appearance & Behavior -> System Settings -> Android SDK -> SDK Tools).
+
+#### Then:
+
 1. Checkout the repository
 2. Install rustup
 3. Add all supported cpu architecture targets: `rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android`
 4. Install [cargo-ndk](https://github.com/bbqsrc/cargo-ndk): `cargo install cargo-ndk`
-5. If you have Android Studio installed, ensure the version of ndk listed in [android/app/build.gradle](https://github.com/Oppzippy/OpenSCQ30/blob/master/android/app/build.gradle) (ctrl+f ndkVersion) is installed. If you don't have Android Studio installed, skip this step.
-6. If you don't have Android Studio installed, [download the ndk](https://developer.android.com/ndk/downloads) and [follow the instructions on setting `ANDROID_NDK_HOME` from cargo-ndk](https://github.com/bbqsrc/cargo-ndk#usage).
-7. In the `android` directory, run `./gradlew assembleRelease`
-8. The apk can be found at `android/app/build/outputs/apk/release/app-release-unsigned.apk`
+5. In the `android` directory, run `./gradlew assembleRelease`
+6. The apk can be found at `android/app/build/outputs/apk/release/app-release-unsigned.apk`
