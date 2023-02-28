@@ -29,7 +29,7 @@ use crate::{
 
 #[derive(Default, CompositeTemplate, Properties)]
 #[properties(wrapper_type=super::MainWindow)]
-#[template(resource = "/com/oppzippy/openscq30/main_window/template.ui")]
+#[template(resource = "/com/oppzippy/OpenSCQ30/main_window/template.ui")]
 pub struct MainWindow {
     #[template_child]
     pub stack: TemplateChild<gtk::Stack>,

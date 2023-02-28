@@ -23,7 +23,7 @@ use crate::{
 };
 
 #[derive(Default, CompositeTemplate)]
-#[template(resource = "/com/oppzippy/openscq30/selected_device_settings/template.ui")]
+#[template(resource = "/com/oppzippy/OpenSCQ30/selected_device_settings/template.ui")]
 pub struct SelectedDeviceSettings {
     #[template_child]
     pub notebook: TemplateChild<gtk::Notebook>,

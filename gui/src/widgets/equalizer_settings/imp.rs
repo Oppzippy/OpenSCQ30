@@ -23,7 +23,7 @@ use crate::objects::{EqualizerCustomProfileObject, EqualizerProfileObject};
 use crate::widgets::Equalizer;
 
 #[derive(Default, CompositeTemplate)]
-#[template(resource = "/com/oppzippy/openscq30/equalizer_settings/template.ui")]
+#[template(resource = "/com/oppzippy/OpenSCQ30/equalizer_settings/template.ui")]
 pub struct EqualizerSettings {
     #[template_child]
     pub equalizer: TemplateChild<Equalizer>,

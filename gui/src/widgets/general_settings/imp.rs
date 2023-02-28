@@ -16,7 +16,7 @@ use openscq30_lib::packets::structures::AmbientSoundMode;
 use openscq30_lib::packets::structures::NoiseCancelingMode;
 
 #[derive(Default, CompositeTemplate)]
-#[template(resource = "/com/oppzippy/openscq30/general_settings/template.ui")]
+#[template(resource = "/com/oppzippy/OpenSCQ30/general_settings/template.ui")]
 pub struct GeneralSettings {
     // Ambient Sound Mode
     #[template_child]

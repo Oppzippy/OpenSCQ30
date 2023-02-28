@@ -10,7 +10,7 @@ use gtk::{
 use once_cell::sync::Lazy;
 
 #[derive(Default, CompositeTemplate)]
-#[template(resource = "/com/oppzippy/openscq30/loading_screen/template.ui")]
+#[template(resource = "/com/oppzippy/OpenSCQ30/loading_screen/template.ui")]
 pub struct LoadingScreen {}
 
 #[template_callbacks]

@@ -17,7 +17,7 @@ use gtk::{
 
 #[derive(Default, CompositeTemplate, Properties)]
 #[properties(wrapper_type = super::VolumeSlider)]
-#[template(resource = "/com/oppzippy/openscq30/volume_slider/template.ui")]
+#[template(resource = "/com/oppzippy/OpenSCQ30/volume_slider/template.ui")]
 pub struct VolumeSlider {
     #[template_child]
     pub slider: TemplateChild<Scale>,

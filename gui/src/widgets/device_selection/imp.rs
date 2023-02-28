@@ -20,7 +20,7 @@ use crate::objects::DeviceObject;
 use super::Device;
 
 #[derive(Default, CompositeTemplate, Properties)]
-#[template(resource = "/com/oppzippy/openscq30/device_selection/template.ui")]
+#[template(resource = "/com/oppzippy/OpenSCQ30/device_selection/template.ui")]
 #[properties(wrapper_type=super::DeviceSelection)]
 pub struct DeviceSelection {
     #[template_child]
