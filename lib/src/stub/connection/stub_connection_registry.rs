@@ -12,14 +12,14 @@ use super::{StubConnection, StubConnectionDescriptor};
 #[derive(Debug)]
 pub struct StubConnectionRegistry {
     connections:
-        HashMap<StubConnectionDescriptor, Arc<<Self as ConnectionRegistry>::DeviceConnectionType>>,
+        HashMap<StubConnectionDescriptor, Arc<<Self as ConnectionRegistry>::ConnectionType>>,
 }
 
 impl StubConnectionRegistry {
     pub fn new(
         connections: HashMap<
             StubConnectionDescriptor,
-            Arc<<Self as ConnectionRegistry>::DeviceConnectionType>,
+            Arc<<Self as ConnectionRegistry>::ConnectionType>,
         >,
     ) -> Self {
         Self { connections }
@@ -28,7 +28,7 @@ impl StubConnectionRegistry {
 
 #[async_trait]
 impl ConnectionRegistry for StubConnectionRegistry {
-    type DeviceConnectionType = StubConnection;
+    type ConnectionType = StubConnection;
     type DescriptorType = StubConnectionDescriptor;
 
     async fn connection_descriptors(&self) -> crate::Result<HashSet<Self::DescriptorType>> {
@@ -38,7 +38,7 @@ impl ConnectionRegistry for StubConnectionRegistry {
     async fn connection(
         &self,
         mac_address: &str,
-    ) -> crate::Result<Option<Arc<Self::DeviceConnectionType>>> {
+    ) -> crate::Result<Option<Arc<Self::ConnectionType>>> {
         Ok(self
             .connections
             .iter()

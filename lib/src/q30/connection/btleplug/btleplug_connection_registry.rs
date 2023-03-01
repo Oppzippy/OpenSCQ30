@@ -122,7 +122,7 @@ impl BtlePlugConnectionRegistry {
 
 #[async_trait]
 impl ConnectionRegistry for BtlePlugConnectionRegistry {
-    type DeviceConnectionType = BtlePlugConnection;
+    type ConnectionType = BtlePlugConnection;
     type DescriptorType = BtlePlugConnectionDescriptor;
 
     async fn connection_descriptors(&self) -> crate::Result<HashSet<Self::DescriptorType>> {
@@ -132,7 +132,7 @@ impl ConnectionRegistry for BtlePlugConnectionRegistry {
     async fn connection(
         &self,
         mac_address: &str,
-    ) -> crate::Result<Option<Arc<Self::DeviceConnectionType>>> {
+    ) -> crate::Result<Option<Arc<Self::ConnectionType>>> {
         match self.connections.lock().await.entry(mac_address.to_owned()) {
             Entry::Occupied(entry) => Ok(Some(entry.get().to_owned())),
             Entry::Vacant(entry) => {

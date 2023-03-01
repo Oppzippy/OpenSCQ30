@@ -13,7 +13,7 @@ where
     RegistryType: ConnectionRegistry + Send + Sync,
 {
     conneciton_registry: RegistryType,
-    devices: Mutex<WeakValueHashMap<String, Weak<Q30Device<RegistryType::DeviceConnectionType>>>>,
+    devices: Mutex<WeakValueHashMap<String, Weak<Q30Device<RegistryType::ConnectionType>>>>,
 }
 
 impl<RegistryType> Q30DeviceRegistry<RegistryType>
@@ -30,7 +30,7 @@ where
     async fn new_device(
         &self,
         mac_address: &str,
-    ) -> crate::Result<Option<Q30Device<RegistryType::DeviceConnectionType>>> {
+    ) -> crate::Result<Option<Q30Device<RegistryType::ConnectionType>>> {
         let connection = self.conneciton_registry.connection(mac_address).await?;
 
         if let Some(connection) = connection {
@@ -46,7 +46,7 @@ impl<RegistryType> DeviceRegistry for Q30DeviceRegistry<RegistryType>
 where
     RegistryType: ConnectionRegistry + Send + Sync,
 {
-    type DeviceType = Q30Device<RegistryType::DeviceConnectionType>;
+    type DeviceType = Q30Device<RegistryType::ConnectionType>;
     type DescriptorType = Q30DeviceDescriptor<RegistryType::DescriptorType>;
 
     async fn device_descriptors(&self) -> crate::Result<Vec<Self::DescriptorType>> {
