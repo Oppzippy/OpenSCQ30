@@ -1,19 +1,21 @@
-use std::thread;
+use std::{
+    sync::{Arc, RwLock},
+    thread,
+};
 
 use async_trait::async_trait;
 use futures::channel::oneshot;
 use macaddr::MacAddr6;
-use tokio::sync::mpsc;
+use tokio::sync::mpsc::{self, error::TrySendError};
 use windows::{
     Devices::Bluetooth::{
         BluetoothLEDevice,
         GenericAttributeProfile::{
-            GattCharacteristic,
-            GattClientCharacteristicConfigurationDescriptorValue, GattValueChangedEventArgs,
-            GattWriteOption,
+            GattCharacteristic, GattClientCharacteristicConfigurationDescriptorValue,
+            GattValueChangedEventArgs, GattWriteOption,
         },
     },
-    Foundation::TypedEventHandler,
+    Foundation::{EventRegistrationToken, TypedEventHandler},
     Storage::Streams::{DataReader, DataWriter},
 };
 
@@ -24,6 +26,7 @@ pub struct WindowsConnection {
     device: BluetoothLEDevice,
     write_characteristic: GattCharacteristic,
     read_characteristic: GattCharacteristic,
+    value_changed_token: Arc<RwLock<Option<EventRegistrationToken>>>,
 }
 
 impl WindowsConnection {
@@ -77,6 +80,7 @@ impl WindowsConnection {
                     device,
                     write_characteristic,
                     read_characteristic,
+                    value_changed_token: Arc::new(RwLock::new(None)),
                 }))
             })();
             sender.send(result).unwrap();
@@ -128,22 +132,48 @@ impl Connection for WindowsConnection {
             .await?;
 
         let (sender, receiver) = mpsc::channel(50);
-        self.read_characteristic
+        let value_changed_token = self.value_changed_token.to_owned();
+        let token = self
+            .read_characteristic
             .ValueChanged(&TypedEventHandler::new(
-                move |_characteristic: &Option<GattCharacteristic>,
+                move |characteristic: &Option<GattCharacteristic>,
                       args: &Option<GattValueChangedEventArgs>| {
-                    if let Some(args) = args {
-                        let value = args.CharacteristicValue()?;
-                        let reader = DataReader::FromBuffer(&value)?;
-                        let mut buffer = vec![0 as u8; reader.UnconsumedBufferLength()? as usize];
-                        reader.ReadBytes(&mut buffer)?;
+                    if let Some(characteristic) = characteristic {
+                        if let Some(args) = args {
+                            let value = args.CharacteristicValue()?;
+                            let reader = DataReader::FromBuffer(&value)?;
+                            let mut buffer =
+                                vec![0 as u8; reader.UnconsumedBufferLength()? as usize];
+                            reader.ReadBytes(&mut buffer)?;
 
-                        sender.try_send(buffer).unwrap();
+                            match sender.try_send(buffer) {
+                                Ok(()) => {}
+                                Err(TrySendError::Closed(_)) => {
+                                    if let Some(token) = *value_changed_token.read().unwrap() {
+                                        characteristic.RemoveValueChanged(token)?;
+                                    }
+                                }
+                                Err(_err) => {}
+                            }
+                        }
                     }
 
                     Ok(())
                 },
             ))?;
+        let mut token_lock = self.value_changed_token.write().unwrap();
+        if let Some(token) = *token_lock {
+            self.read_characteristic.RemoveValueChanged(token)?;
+        }
+        *token_lock = Some(token);
         Ok(receiver)
+    }
+}
+
+impl Drop for WindowsConnection {
+    fn drop(&mut self) {
+        if let Some(token) = *self.value_changed_token.read().unwrap() {
+            self.read_characteristic.RemoveValueChanged(token).unwrap();
+        }
     }
 }
