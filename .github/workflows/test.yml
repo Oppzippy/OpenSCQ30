@@ -4,7 +4,7 @@ on:
   - push
 
 jobs:
-  rust_test:
+  rust_test_linux:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -20,6 +20,18 @@ jobs:
         run: cargo test
       - name: Run rust tests in demo mode
         run: cargo test --features demo
+
+  # Only lib is tested on windows since building gtk takes too long, and lib is the only crate with os specific code
+  rust_test_windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+      - name: Run rust tests
+        run: cargo test --package openscq30_lib
 
   android_test:
     runs-on: ubuntu-22.04
