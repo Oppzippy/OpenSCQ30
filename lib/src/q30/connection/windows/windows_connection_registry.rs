@@ -7,7 +7,7 @@ use windows::Devices::Bluetooth::{self, BluetoothConnectionStatus, BluetoothDevi
 
 use crate::api::connection::ConnectionRegistry;
 
-use super::{WindowsConnection, WindowsConnectionDescriptor};
+use super::{WindowsConnection, WindowsConnectionDescriptor, WindowsMacAddress};
 
 pub struct WindowsConnectionRegistry {}
 
@@ -38,17 +38,12 @@ impl ConnectionRegistry for WindowsConnectionRegistry {
                     .map(|device| {
                         let id = device.Id()?;
                         let bluetooth_device = BluetoothDevice::FromIdAsync(&id)?.get()?;
-                        let addr = bluetooth_device.BluetoothAddress()?;
-                        let bytes: [u8; 8] = addr.to_le_bytes();
-                        let mac_address = MacAddr6::new(
-                            bytes[5], bytes[4], bytes[3], bytes[2], bytes[1], bytes[0],
-                        );
+                        let mac_address =
+                            MacAddr6::from_windows_u64(bluetooth_device.BluetoothAddress()?);
 
-                        // TODO properly convert u64 to mac address
                         Ok(WindowsConnectionDescriptor::new(
                             bluetooth_device.Name()?.to_string(),
                             mac_address.to_string(),
-                            addr,
                         )) as crate::Result<WindowsConnectionDescriptor>
                     })
                     .filter_map(|result| match result {
@@ -72,16 +67,13 @@ impl ConnectionRegistry for WindowsConnectionRegistry {
         &self,
         mac_address: &str,
     ) -> crate::Result<Option<Arc<Self::ConnectionType>>> {
-        let mac_address = MacAddr6::from_str(mac_address).unwrap();
-        // TODO temporary until we swap out mac address parameter for descriptor?
-        let id = mac_address
-            .into_array()
-            .into_iter()
-            .enumerate()
-            .fold(0 as u64, |acc, (i, value)| {
-                acc | ((value as u64) << (5 - i) * 8)
-            });
+        let mac_address =
+            MacAddr6::from_str(mac_address).map_err(|err| crate::Error::DeviceNotFound {
+                source: Box::new(err),
+            })?;
 
-        Ok(WindowsConnection::new(id).await?.map(Arc::new))
+        Ok(WindowsConnection::new(mac_address.as_windows_u64())
+            .await?
+            .map(Arc::new))
     }
 }

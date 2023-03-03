@@ -6,16 +6,11 @@ use crate::api::connection::ConnectionDescriptor;
 pub struct WindowsConnectionDescriptor {
     name: String,
     mac_address: String,
-    address: u64,
 }
 
 impl WindowsConnectionDescriptor {
-    pub fn new(name: String, mac_address: String, address: u64) -> Self {
-        Self {
-            name,
-            mac_address,
-            address,
-        }
+    pub fn new(name: String, mac_address: String) -> Self {
+        Self { name, mac_address }
     }
 }
 
