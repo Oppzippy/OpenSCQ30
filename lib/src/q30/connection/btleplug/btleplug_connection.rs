@@ -37,7 +37,7 @@ impl BtlePlugConnection {
             .await
             .map_err(|err| crate::Error::CharacteristicNotFound {
                 uuid: NOTIFY_CHARACTERISTIC.uuid,
-                source: Box::new(err),
+                source: Some(Box::new(err)),
             })?;
 
         let connection = BtlePlugConnection {
