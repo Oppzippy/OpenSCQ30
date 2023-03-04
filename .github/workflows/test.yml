@@ -31,7 +31,7 @@ jobs:
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
       - name: Run rust tests
-        run: cargo test --package openscq30_lib
+        run: cargo test --package openscq30_lib --features bluetooth
 
   android_test:
     runs-on: ubuntu-22.04
