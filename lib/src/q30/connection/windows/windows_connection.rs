@@ -79,7 +79,7 @@ impl WindowsConnection {
         Ok(())
     }
 
-    #[instrument(level = "trace")]
+    #[instrument(level = "trace", skip(service))]
     fn characteristic(
         service: &GattDeviceService,
         characteristic_uuid: &Uuid,
@@ -106,7 +106,7 @@ impl WindowsConnection {
             })
     }
 
-    #[instrument(level = "trace")]
+    #[instrument(level = "trace", skip(device))]
     fn service(
         device: &BluetoothLEDevice,
         service_uuid: &Uuid,
@@ -144,7 +144,7 @@ impl Connection for WindowsConnection {
         Ok(mac_address.to_string())
     }
 
-    #[instrument(level = "trace")]
+    #[instrument(level = "trace", skip(self))]
     async fn write_with_response(&self, data: &[u8]) -> crate::Result<()> {
         let characteristic = self.write_characteristic.to_owned();
         let data = data.to_owned();
@@ -161,7 +161,7 @@ impl Connection for WindowsConnection {
         })?
     }
 
-    #[instrument(level = "trace")]
+    #[instrument(level = "trace", skip(self))]
     async fn write_without_response(&self, data: &[u8]) -> crate::Result<()> {
         let characteristic = self.write_characteristic.to_owned();
         let data = data.to_owned();
@@ -178,7 +178,7 @@ impl Connection for WindowsConnection {
         })?
     }
 
-    #[instrument(level = "trace")]
+    #[instrument(level = "trace", skip(self))]
     async fn inbound_packets_channel(&self) -> crate::Result<tokio_mpsc::Receiver<Vec<u8>>> {
         self.read_characteristic
             .WriteClientCharacteristicConfigurationDescriptorAsync(
@@ -226,7 +226,7 @@ impl Connection for WindowsConnection {
 }
 
 impl Drop for WindowsConnection {
-    #[instrument(level = "trace")]
+    #[instrument(level = "trace", skip(self))]
     fn drop(&mut self) {
         if let Some(token) = *self.value_changed_token.read().unwrap() {
             if let Err(err) = self.read_characteristic.RemoveValueChanged(token) {
