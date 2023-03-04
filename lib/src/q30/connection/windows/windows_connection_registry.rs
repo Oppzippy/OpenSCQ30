@@ -2,6 +2,7 @@ use std::{collections::HashSet, str::FromStr, sync::Arc};
 
 use async_trait::async_trait;
 use macaddr::MacAddr6;
+use tracing::instrument;
 use windows::Devices::Bluetooth::{self, BluetoothConnectionStatus, BluetoothDevice};
 
 use crate::api::connection::ConnectionRegistry;
@@ -21,6 +22,7 @@ impl ConnectionRegistry for WindowsConnectionRegistry {
     type ConnectionType = WindowsConnection;
     type DescriptorType = WindowsConnectionDescriptor;
 
+    #[instrument(level = "trace", skip(self))]
     async fn connection_descriptors(&self) -> crate::Result<HashSet<Self::DescriptorType>> {
         tokio::task::spawn_blocking(move || {
             let devices = windows::Devices::Enumeration::DeviceInformation::FindAllAsyncAqsFilter(
@@ -58,6 +60,7 @@ impl ConnectionRegistry for WindowsConnectionRegistry {
         })?
     }
 
+    #[instrument(level = "trace", skip(self))]
     async fn connection(
         &self,
         mac_address: &str,

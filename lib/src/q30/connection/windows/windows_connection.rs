@@ -3,6 +3,7 @@ use std::sync::{Arc, RwLock};
 use async_trait::async_trait;
 use macaddr::MacAddr6;
 use tokio::sync::mpsc as tokio_mpsc;
+use tracing::instrument;
 use uuid::Uuid;
 use windows::{
     Devices::Bluetooth::{
@@ -29,6 +30,7 @@ pub struct WindowsConnection {
 }
 
 impl WindowsConnection {
+    #[instrument()]
     pub async fn new(address: u64) -> crate::Result<Option<Self>> {
         tokio::task::spawn_blocking(move || {
             let device = BluetoothLEDevice::FromBluetoothAddressAsync(address)?
@@ -77,6 +79,7 @@ impl WindowsConnection {
         Ok(())
     }
 
+    #[instrument(level = "trace")]
     fn characteristic(
         service: &GattDeviceService,
         characteristic_uuid: &Uuid,
@@ -103,6 +106,7 @@ impl WindowsConnection {
             })
     }
 
+    #[instrument(level = "trace")]
     fn service(
         device: &BluetoothLEDevice,
         service_uuid: &Uuid,
@@ -140,6 +144,7 @@ impl Connection for WindowsConnection {
         Ok(mac_address.to_string())
     }
 
+    #[instrument(level = "trace")]
     async fn write_with_response(&self, data: &[u8]) -> crate::Result<()> {
         let characteristic = self.write_characteristic.to_owned();
         let data = data.to_owned();
@@ -156,6 +161,7 @@ impl Connection for WindowsConnection {
         })?
     }
 
+    #[instrument(level = "trace")]
     async fn write_without_response(&self, data: &[u8]) -> crate::Result<()> {
         let characteristic = self.write_characteristic.to_owned();
         let data = data.to_owned();
@@ -172,6 +178,7 @@ impl Connection for WindowsConnection {
         })?
     }
 
+    #[instrument(level = "trace")]
     async fn inbound_packets_channel(&self) -> crate::Result<tokio_mpsc::Receiver<Vec<u8>>> {
         self.read_characteristic
             .WriteClientCharacteristicConfigurationDescriptorAsync(
@@ -219,6 +226,7 @@ impl Connection for WindowsConnection {
 }
 
 impl Drop for WindowsConnection {
+    #[instrument(level = "trace")]
     fn drop(&mut self) {
         if let Some(token) = *self.value_changed_token.read().unwrap() {
             if let Err(err) = self.read_characteristic.RemoveValueChanged(token) {
