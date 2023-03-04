@@ -1,10 +1,6 @@
-use std::{
-    sync::{Arc, RwLock},
-    thread,
-};
+use std::sync::{Arc, RwLock};
 
 use async_trait::async_trait;
-use futures::channel::oneshot;
 use macaddr::MacAddr6;
 use tokio::sync::mpsc as tokio_mpsc;
 use uuid::Uuid;
@@ -28,96 +24,55 @@ use super::WindowsMacAddress;
 pub struct WindowsConnection {
     device: BluetoothLEDevice,
     read_characteristic: GattCharacteristic,
+    write_characteristic: GattCharacteristic,
     value_changed_token: Arc<RwLock<Option<EventRegistrationToken>>>,
-    write_queue_sender: crossbeam::channel::Sender<WriteCommand>,
-    cancel_write_queue_sender: crossbeam::channel::Sender<()>,
-}
-
-struct WriteCommand {
-    data: Vec<u8>,
-    write_option: GattWriteOption,
 }
 
 impl WindowsConnection {
     pub async fn new(address: u64) -> crate::Result<Option<Self>> {
-        let (sender, receiver) = oneshot::channel();
-        thread::spawn(move || {
-            let result = (|| {
-                let device = BluetoothLEDevice::FromBluetoothAddressAsync(address)?
-                    .get()
-                    .map_err(|err| {
-                        // If there is no error but the device is not found, an error with code 0 is returned
-                        if windows::core::HRESULT::is_ok(err.code()) {
-                            crate::Error::DeviceNotFound {
-                                source: Box::new(err),
-                            }
-                        } else {
-                            err.into()
+        tokio::task::spawn_blocking(move || {
+            let device = BluetoothLEDevice::FromBluetoothAddressAsync(address)?
+                .get()
+                .map_err(|err| {
+                    // If there is no error but the device is not found, an error with code 0 is returned
+                    if windows::core::HRESULT::is_ok(err.code()) {
+                        crate::Error::DeviceNotFound {
+                            source: Box::new(err),
                         }
-                    })?;
-                let service = Self::service(&device, &device_utils::SERVICE_UUID)?;
-                let read_characteristic =
-                    Self::characteristic(&service, &device_utils::READ_CHARACTERISTIC_UUID)?;
-                let write_characteristic =
-                    Self::characteristic(&service, &device_utils::WRITE_CHARACTERISTIC_UUID)?;
+                    } else {
+                        err.into()
+                    }
+                })?;
+            let service = Self::service(&device, &device_utils::SERVICE_UUID)?;
+            let read_characteristic =
+                Self::characteristic(&service, &device_utils::READ_CHARACTERISTIC_UUID)?;
+            let write_characteristic =
+                Self::characteristic(&service, &device_utils::WRITE_CHARACTERISTIC_UUID)?;
 
-                let (command_sender, command_receiver) =
-                    crossbeam::channel::unbounded::<WriteCommand>();
-                let (cancel_sender, cancel_receiver) = crossbeam::channel::unbounded::<()>();
-                Self::start_write_queue_thread(
-                    write_characteristic,
-                    command_receiver,
-                    cancel_receiver,
-                );
-
-                Ok(Some(Self {
-                    device,
-                    read_characteristic,
-                    value_changed_token: Arc::new(RwLock::new(None)),
-                    write_queue_sender: command_sender,
-                    cancel_write_queue_sender: cancel_sender,
-                }))
-            })();
-            sender.send(result).unwrap();
-        });
-        receiver.await.unwrap()
-    }
-
-    fn start_write_queue_thread(
-        write_characteristic: GattCharacteristic,
-        command_receiver: crossbeam::channel::Receiver<WriteCommand>,
-        cancel_receiver: crossbeam::channel::Receiver<()>,
-    ) {
-        thread::spawn(move || loop {
-            crossbeam::channel::select! {
-                recv(command_receiver) -> write_command => {
-                    match write_command {
-                        Ok(write_command) => {
-                            if let Err(err) =  Self::write_to_characteristic(&write_characteristic, &write_command) {
-                                tracing::error!("failed to write to characteristic: {err}");
-                            }
-                        },
-                        Err(err) => tracing::error!("failed to receive from command_receiver on write queue thread: {err}"),
-                    };
-                }
-                recv(cancel_receiver) -> _ => {
-                    tracing::debug!("stopping write queue thread");
-                    return;
-                }
-            }
-        });
+            Ok(Some(Self {
+                device,
+                read_characteristic,
+                write_characteristic,
+                value_changed_token: Arc::new(RwLock::new(None)),
+            }))
+        })
+        .await
+        .map_err(|err| crate::Error::Other {
+            source: Box::new(err),
+        })?
     }
 
     fn write_to_characteristic(
         characteristic: &GattCharacteristic,
-        write_command: &WriteCommand,
+        data: &[u8],
+        write_option: GattWriteOption,
     ) -> crate::Result<()> {
         let writer = DataWriter::new()?;
-        writer.WriteBytes(&write_command.data)?;
+        writer.WriteBytes(data)?;
         let buffer = writer.DetachBuffer()?;
 
         characteristic
-            .WriteValueWithOptionAsync(&buffer, write_command.write_option)?
+            .WriteValueWithOptionAsync(&buffer, write_option)?
             .get()?;
         Ok(())
     }
@@ -186,25 +141,35 @@ impl Connection for WindowsConnection {
     }
 
     async fn write_with_response(&self, data: &[u8]) -> crate::Result<()> {
-        self.write_queue_sender
-            .send(WriteCommand {
-                data: data.into(),
-                write_option: GattWriteOption::WriteWithResponse,
-            })
-            .map_err(|err| crate::Error::Other {
-                source: Box::new(err),
-            })
+        let characteristic = self.write_characteristic.to_owned();
+        let data = data.to_owned();
+        tokio::task::spawn_blocking(move || {
+            Self::write_to_characteristic(
+                &characteristic,
+                &data,
+                GattWriteOption::WriteWithResponse,
+            )
+        })
+        .await
+        .map_err(|err| crate::Error::Other {
+            source: Box::new(err),
+        })?
     }
 
     async fn write_without_response(&self, data: &[u8]) -> crate::Result<()> {
-        self.write_queue_sender
-            .send(WriteCommand {
-                data: data.into(),
-                write_option: GattWriteOption::WriteWithoutResponse,
-            })
-            .map_err(|err| crate::Error::Other {
-                source: Box::new(err),
-            })
+        let characteristic = self.write_characteristic.to_owned();
+        let data = data.to_owned();
+        tokio::task::spawn_blocking(move || {
+            Self::write_to_characteristic(
+                &characteristic,
+                &data,
+                GattWriteOption::WriteWithResponse,
+            )
+        })
+        .await
+        .map_err(|err| crate::Error::Other {
+            source: Box::new(err),
+        })?
     }
 
     async fn inbound_packets_channel(&self) -> crate::Result<tokio_mpsc::Receiver<Vec<u8>>> {
@@ -255,9 +220,6 @@ impl Connection for WindowsConnection {
 
 impl Drop for WindowsConnection {
     fn drop(&mut self) {
-        if let Err(err) = self.cancel_write_queue_sender.send(()) {
-            tracing::error!("failed to cancel write queue thread: {err}");
-        }
         if let Some(token) = *self.value_changed_token.read().unwrap() {
             if let Err(err) = self.read_characteristic.RemoveValueChanged(token) {
                 tracing::error!("failed to remove ValueChanged event handler: {err}");

@@ -1,8 +1,7 @@
-use std::{collections::HashSet, str::FromStr, sync::Arc, thread};
+use std::{collections::HashSet, str::FromStr, sync::Arc};
 
 use async_trait::async_trait;
 use macaddr::MacAddr6;
-use tokio::sync::oneshot;
 use windows::Devices::Bluetooth::{self, BluetoothConnectionStatus, BluetoothDevice};
 
 use crate::api::connection::ConnectionRegistry;
@@ -23,42 +22,38 @@ impl ConnectionRegistry for WindowsConnectionRegistry {
     type DescriptorType = WindowsConnectionDescriptor;
 
     async fn connection_descriptors(&self) -> crate::Result<HashSet<Self::DescriptorType>> {
-        let (result_sender, result_receiver) = oneshot::channel();
-        thread::spawn(move || {
-            let result = (|| {
-                let devices =
-                    windows::Devices::Enumeration::DeviceInformation::FindAllAsyncAqsFilter(
-                        &Bluetooth::BluetoothDevice::GetDeviceSelectorFromConnectionStatus(
-                            BluetoothConnectionStatus::Connected,
-                        )?,
-                    )?
-                    .get()?;
-                let descriptors = devices
-                    .into_iter()
-                    .map(|device| {
-                        let id = device.Id()?;
-                        let bluetooth_device = BluetoothDevice::FromIdAsync(&id)?.get()?;
-                        let mac_address =
-                            MacAddr6::from_windows_u64(bluetooth_device.BluetoothAddress()?);
+        tokio::task::spawn_blocking(move || {
+            let devices = windows::Devices::Enumeration::DeviceInformation::FindAllAsyncAqsFilter(
+                &Bluetooth::BluetoothDevice::GetDeviceSelectorFromConnectionStatus(
+                    BluetoothConnectionStatus::Connected,
+                )?,
+            )?
+            .get()?;
+            let descriptors = devices
+                .into_iter()
+                .map(|device| {
+                    let id = device.Id()?;
+                    let bluetooth_device = BluetoothDevice::FromIdAsync(&id)?.get()?;
+                    let mac_address =
+                        MacAddr6::from_windows_u64(bluetooth_device.BluetoothAddress()?);
 
-                        Ok(WindowsConnectionDescriptor::new(
-                            bluetooth_device.Name()?.to_string(),
-                            mac_address.to_string(),
-                        )) as crate::Result<WindowsConnectionDescriptor>
-                    })
-                    .filter_map(|result| match result {
-                        Ok(descriptor) => Some(descriptor),
-                        Err(err) => {
-                            tracing::warn!("error creating device descriptor: {}", err);
-                            None
-                        }
-                    })
-                    .collect();
-                Ok(descriptors) as crate::Result<HashSet<Self::DescriptorType>>
-            })();
-            result_sender.send(result).unwrap();
-        });
-        result_receiver.await.map_err(|err| crate::Error::Other {
+                    Ok(WindowsConnectionDescriptor::new(
+                        bluetooth_device.Name()?.to_string(),
+                        mac_address.to_string(),
+                    )) as crate::Result<WindowsConnectionDescriptor>
+                })
+                .filter_map(|result| match result {
+                    Ok(descriptor) => Some(descriptor),
+                    Err(err) => {
+                        tracing::warn!("error creating device descriptor: {}", err);
+                        None
+                    }
+                })
+                .collect();
+            Ok(descriptors) as crate::Result<HashSet<Self::DescriptorType>>
+        })
+        .await
+        .map_err(|err| crate::Error::Other {
             source: Box::new(err),
         })?
     }
