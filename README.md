@@ -5,7 +5,7 @@ OpenSCQ30 is free software for controlling settings for the Soundcore Q30 headph
 Progress on supported platforms:  
 [x] Android - Ready  
 [x] Linux - Ready  
-[x] Windows - Mostly Ready
+[x] Windows - Mostly Ready  
 [ ] Mac - It compiles. It's untested beyond that. I don't have a mac, so this probably isn't going anywhere.
 
 ## Building
