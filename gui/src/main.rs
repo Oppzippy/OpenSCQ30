@@ -1,13 +1,14 @@
-use std::{cell::RefCell, rc::Rc, sync::Arc};
+use std::{cell::RefCell, rc::Rc, str::FromStr, sync::Arc};
 
 use gtk::{
     gio::{self, SimpleAction},
-    glib::{self, clone, closure_local, MainContext, JoinHandle},
+    glib::{self, clone, closure_local, JoinHandle, MainContext, OptionFlags},
     prelude::*,
     traits::GtkWindowExt,
     Application,
 };
 use gtk_openscq30_lib::GtkDeviceRegistry;
+use logging_level::LoggingLevel;
 use openscq30_lib::{
     api::device::{DeviceDescriptor, DeviceRegistry},
     packets::structures::{
@@ -18,34 +19,24 @@ use openscq30_lib::{
 use settings::{EqualizerCustomProfile, SettingsFile};
 use swappable_broadcast::SwappableBroadcastReceiver;
 use tracing::Level;
-#[cfg(debug_assertions)]
-use tracing_subscriber::fmt::format::FmtSpan;
 use widgets::{Device, MainWindow};
 
 use crate::objects::{DeviceObject, EqualizerCustomProfileObject};
 
 mod gtk_openscq30_lib;
+mod logging_level;
 mod objects;
 mod settings;
 mod swappable_broadcast;
 mod widgets;
 
 fn main() {
-    let subscriber_builder = tracing_subscriber::fmt()
-        .with_file(true)
-        .with_line_number(true)
-        .with_target(false)
-        .pretty();
-    #[cfg(debug_assertions)]
-    let subscriber_builder = subscriber_builder
-        .with_max_level(Level::TRACE)
-        .with_span_events(FmtSpan::ACTIVE);
-    #[cfg(not(debug_assertions))]
-    let subscriber_builder = subscriber_builder.with_max_level(Level::INFO);
-    subscriber_builder.init();
-
     load_resources();
     run_application();
+}
+
+fn load_resources() {
+    gio::resources_register_include!("widgets.gresource").expect("failed to load widgets");
 }
 
 #[cfg(not(feature = "libadwaita"))]
@@ -54,6 +45,7 @@ fn run_application() {
         .application_id("com.oppzippy.OpenSCQ30")
         .build();
     app.connect_activate(build_ui);
+    handle_command_line_args(&app);
 
     app.run();
 }
@@ -64,20 +56,60 @@ fn run_application() {
         .application_id("com.oppzippy.OpenSCQ30")
         .build();
     app.connect_activate(build_ui);
+    handle_command_line_args(&app);
 
     app.run();
 }
 
-fn get_settings_file() -> SettingsFile {
-    let settings = SettingsFile::new(
-        glib::user_data_dir()
-            .join("OpenSCQ30")
-            .join("settings.toml"),
+fn handle_command_line_args<T>(application: &T)
+where
+    T: IsA<gtk::Application> + IsA<gtk::gio::Application>,
+{
+    application.add_main_option(
+        "logging-level",
+        glib::char::Char('l' as i8),
+        OptionFlags::NONE,
+        glib::OptionArg::String,
+        &format!("Logging Level {}", LoggingLevel::allowed_values_string()),
+        Some("LEVEL"),
     );
-    if let Err(err) = settings.load() {
-        tracing::warn!("initial load of settings file failed: {:?}", err)
-    }
-    settings
+
+    application.connect_handle_local_options(|_application, options| {
+        let maybe_logging_level = options
+            .lookup::<String>("logging-level")
+            .expect("logging-level must be a string")
+            .map(|logging_level| LoggingLevel::from_str(&logging_level.to_uppercase()));
+
+        let logging_level = match maybe_logging_level {
+            Some(Ok(logging_level)) => logging_level,
+            Some(Err(err)) => {
+                println!(
+                    "Invalid logging level: {err}. Allowed values: {}",
+                    LoggingLevel::allowed_values_string(),
+                );
+                return 1; // Non-negative number means exit application
+            }
+            None => {
+                // In debug builds, the default logging level is lower for convenience
+                #[cfg(debug_assertions)]
+                {
+                    LoggingLevel::TRACE
+                }
+                #[cfg(not(debug_assertions))]
+                {
+                    LoggingLevel::INFO
+                }
+            }
+        };
+        tracing_subscriber::fmt()
+            .with_file(true)
+            .with_line_number(true)
+            .with_target(false)
+            .with_max_level(Level::from(logging_level))
+            .pretty()
+            .init();
+        -1 // Ok, proceed with starting application
+    });
 }
 
 fn build_ui(application: &impl IsA<Application>) {
@@ -162,8 +194,9 @@ fn build_ui_2(
     main_context.spawn_local(clone!(@strong action_refresh_devices => async move {
         action_refresh_devices.activate(None);
     }));
-    
-    let connect_to_device_handle: Arc<RefCell<Option<JoinHandle<()>>>> = Arc::new(RefCell::new(None));
+
+    let connect_to_device_handle: Arc<RefCell<Option<JoinHandle<()>>>> =
+        Arc::new(RefCell::new(None));
 
     main_window.connect_notify_local(
         Some("selected-device"),
@@ -174,7 +207,7 @@ fn build_ui_2(
             }
             *selected_device.borrow_mut() = None;
             main_window.set_loading(false);
-            
+
             // Connect to new device
             if let Some(new_selected_device) = main_window.selected_device() {
                 main_window.set_loading(true);
@@ -199,11 +232,11 @@ fn build_ui_2(
                                 Ok(None) => {
                                     tracing::warn!("could not find selected device: {:?}", new_selected_device);
                                 },
-                                Err(err) => { 
+                                Err(err) => {
                                     tracing::warn!("error connecting to device {:?}: {err}", new_selected_device);
                                 },
                             }
-                            
+
                             main_window.set_loading(false);
                             if selected_device.borrow().is_none() {
                                 main_window.set_property("selected-device", None as Option<DeviceObject>);
@@ -345,6 +378,14 @@ fn build_ui_2(
     main_window.present();
 }
 
-fn load_resources() {
-    gio::resources_register_include!("widgets.gresource").expect("failed to load widgets");
+fn get_settings_file() -> SettingsFile {
+    let settings = SettingsFile::new(
+        glib::user_data_dir()
+            .join("OpenSCQ30")
+            .join("settings.toml"),
+    );
+    if let Err(err) = settings.load() {
+        tracing::warn!("initial load of settings file failed: {:?}", err)
+    }
+    settings
 }
