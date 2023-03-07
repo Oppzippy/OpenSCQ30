@@ -1,3 +1,4 @@
+use heck::AsKebabCase;
 use openscq30_lib::api::device::Device;
 
 use crate::cli::GetCommand;
@@ -5,10 +6,14 @@ use crate::cli::GetCommand;
 pub async fn get(get_command: GetCommand, device: &impl Device) {
     match get_command {
         GetCommand::AmbientSoundMode => {
-            println!("{}", device.ambient_sound_mode().await.to_string())
+            let mode = device.ambient_sound_mode().await;
+            let cli_case = AsKebabCase(mode.to_string());
+            println!("{}", cli_case)
         }
         GetCommand::NoiseCancelingMode => {
-            println!("{}", device.noise_canceling_mode().await.to_string())
+            let mode = device.noise_canceling_mode().await;
+            let cli_case = AsKebabCase(mode.to_string());
+            println!("{}", cli_case)
         }
         GetCommand::Equalizer => {
             let equalizer_configuration = device.equalizer_configuration().await;

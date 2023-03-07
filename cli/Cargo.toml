@@ -15,3 +15,4 @@ tokio = { version = "1", features = ["macros"] }
 tracing = "0.1"
 tracing-subscriber = "0.3"
 macaddr = "1.0"
+heck = "0.4"
