@@ -14,3 +14,4 @@ clap = { version = "4.1", features = ["derive"] }
 tokio = { version = "1", features = ["macros"] }
 tracing = "0.1"
 tracing-subscriber = "0.3"
+macaddr = "1.0"

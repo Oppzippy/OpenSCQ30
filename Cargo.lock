@@ -1117,6 +1117,7 @@ name = "openscq30_cli"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "macaddr",
  "openscq30_lib",
  "tokio",
  "tracing",

@@ -1,6 +1,7 @@
-use std::error::Error;
+use std::{error::Error, sync::Arc};
 
 use clap::{command, Parser, Subcommand, ValueEnum};
+use macaddr::MacAddr6;
 use openscq30_lib::{
     api::device::{Device, DeviceDescriptor, DeviceRegistry},
     packets::structures::{EqualizerBandOffsets, EqualizerConfiguration},
@@ -12,6 +13,8 @@ use tracing_subscriber::fmt::format::FmtSpan;
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
+    #[arg(short, long)]
+    mac_address: Option<MacAddr6>,
     #[command(subcommand)]
     command: Command,
 }
@@ -22,6 +25,7 @@ enum Command {
     Set(SetCommand),
     #[command(subcommand)]
     Get(GetCommand),
+    ListDevices,
 }
 
 #[derive(Subcommand)]
@@ -119,48 +123,95 @@ async fn main() -> Result<(), Box<dyn Error>> {
 // as a workaround, we can immediately pass the return value as a parameter to another function
 async fn do_cli_command(args: Cli, registry: impl DeviceRegistry) -> Result<(), Box<dyn Error>> {
     let descriptors = registry.device_descriptors().await?;
-    let first = descriptors.first().unwrap();
-    let device = registry.device(first.mac_address()).await?;
+    let selected_descriptor = args
+        .mac_address
+        .map(|mac_address| {
+            let mac_address_string = mac_address.to_string();
+            descriptors
+                .iter()
+                .find(|descriptor| descriptor.mac_address() == &mac_address_string)
+        })
+        .or_else(|| Some(descriptors.first()))
+        .flatten();
 
-    if let Some(device) = device {
-        match args.command {
-            Command::Set(set_command) => match set_command {
-                SetCommand::AmbientSoundMode { mode } => {
-                    device.set_ambient_sound_mode(mode.into()).await?
-                }
-                SetCommand::NoiseCancelingMode { mode } => {
-                    device.set_noise_canceling_mode(mode.into()).await?
-                }
-                SetCommand::Equalizer { band_offsets } => {
-                    let band_offsets = band_offsets
-                        .try_into()
-                        .map(EqualizerBandOffsets::new)
-                        .unwrap_or_else(|values| {
-                            panic!("error converting vec of band offsets to array: expected len 8, got {}", values.len())
-                        });
-
-                    device
-                        .set_equalizer_configuration(EqualizerConfiguration::new_custom_profile(
-                            band_offsets,
-                        ))
-                        .await?
-                }
-            },
-            Command::Get(get_command) => match get_command {
-                GetCommand::AmbientSoundMode => {
-                    println!("{}", device.ambient_sound_mode().await.to_string())
-                }
-                GetCommand::NoiseCancelingMode => {
-                    println!("{}", device.noise_canceling_mode().await.to_string())
-                }
-                GetCommand::Equalizer => {
-                    let equalizer_configuration = device.equalizer_configuration().await;
-                    println!("{:?}", equalizer_configuration);
-                }
-            },
-        };
-    } else {
-        println!("Not connected to headphones.");
-    }
+    match (args.command, selected_descriptor) {
+        (Command::ListDevices, _) => list_devices(&descriptors),
+        (Command::Set(set_command), Some(descriptor)) => {
+            let device = get_device_or_err(&registry, descriptor).await?;
+            set(set_command, device.as_ref()).await?;
+        }
+        (Command::Get(get_command), Some(descriptor)) => {
+            let device = get_device_or_err(&registry, descriptor).await?;
+            get(get_command, device.as_ref()).await;
+        }
+        (_, None) => println!("No device found."),
+    };
     Ok(())
+}
+
+async fn get_device_or_err<T>(
+    registry: &T,
+    descriptor: &T::DescriptorType,
+) -> Result<Arc<T::DeviceType>, String>
+where
+    T: DeviceRegistry,
+{
+    match registry.device(descriptor.mac_address()).await {
+        Ok(Some(device)) => Ok(device),
+        Err(err) => Err(format!("Error fetching device: {err}")),
+        Ok(None) => Err("No device found.".to_string()),
+    }
+}
+
+async fn get(get_command: GetCommand, device: &impl Device) {
+    match get_command {
+        GetCommand::AmbientSoundMode => {
+            println!("{}", device.ambient_sound_mode().await.to_string())
+        }
+        GetCommand::NoiseCancelingMode => {
+            println!("{}", device.noise_canceling_mode().await.to_string())
+        }
+        GetCommand::Equalizer => {
+            let equalizer_configuration = device.equalizer_configuration().await;
+            println!("{:?}", equalizer_configuration);
+        }
+    };
+}
+
+async fn set(set_command: SetCommand, device: &impl Device) -> openscq30_lib::Result<()> {
+    match set_command {
+        SetCommand::AmbientSoundMode { mode } => device.set_ambient_sound_mode(mode.into()).await?,
+        SetCommand::NoiseCancelingMode { mode } => {
+            device.set_noise_canceling_mode(mode.into()).await?
+        }
+        SetCommand::Equalizer { band_offsets } => {
+            let band_offsets = band_offsets
+                .try_into()
+                .map(EqualizerBandOffsets::new)
+                .unwrap_or_else(|values| {
+                    panic!(
+                        "error converting vec of band offsets to array: expected len 8, got {}",
+                        values.len()
+                    )
+                });
+
+            device
+                .set_equalizer_configuration(EqualizerConfiguration::new_custom_profile(
+                    band_offsets,
+                ))
+                .await?
+        }
+    };
+    Ok(())
+}
+
+fn list_devices(descriptors: &[impl DeviceDescriptor]) {
+    println!(
+        "{}",
+        descriptors
+            .iter()
+            .map(|descriptor| descriptor.mac_address().to_owned())
+            .collect::<Vec<_>>()
+            .join("\n")
+    );
 }
