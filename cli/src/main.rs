@@ -17,6 +17,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .with_line_number(true)
         .with_target(false)
         .with_max_level(args.logging_level)
+        .with_writer(std::io::stderr)
         .pretty()
         .init();
 
