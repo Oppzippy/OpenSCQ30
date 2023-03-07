@@ -193,6 +193,8 @@ impl Connection for WindowsConnection {
             .ValueChanged(&TypedEventHandler::new(
                 move |characteristic: &Option<GattCharacteristic>,
                       args: &Option<GattValueChangedEventArgs>| {
+                    let span = tracing::trace_span!("WindowsConnection ValueChanged");
+                    let _enter = span.enter();
                     if let Some(characteristic) = characteristic {
                         if let Some(args) = args {
                             let value = args.CharacteristicValue()?;
@@ -204,11 +206,20 @@ impl Connection for WindowsConnection {
                             match sender.try_send(buffer) {
                                 Ok(()) => {}
                                 Err(tokio_mpsc::error::TrySendError::Closed(_)) => {
-                                    if let Some(token) = *value_changed_token.read().unwrap() {
+                                    let lock = match value_changed_token.read() {
+                                        Ok(lock) => lock,
+                                        Err(err) => {
+                                            tracing::warn!("lock is poisoned: {err:?}");
+                                            err.into_inner()
+                                        }
+                                    };
+                                    if let Some(token) = *lock {
                                         characteristic.RemoveValueChanged(token)?;
                                     }
                                 }
-                                Err(_err) => {}
+                                Err(err) => {
+                                    tracing::error!("error sending: {err:?}")
+                                }
                             }
                         }
                     }
@@ -216,7 +227,13 @@ impl Connection for WindowsConnection {
                     Ok(())
                 },
             ))?;
-        let mut token_lock = self.value_changed_token.write().unwrap();
+        let mut token_lock = match self.value_changed_token.write() {
+            Ok(lock) => lock,
+            Err(err) => {
+                tracing::warn!("lock is poisoned: {err:?}");
+                err.into_inner()
+            }
+        };
         if let Some(token) = *token_lock {
             self.read_characteristic.RemoveValueChanged(token)?;
         }
@@ -228,7 +245,14 @@ impl Connection for WindowsConnection {
 impl Drop for WindowsConnection {
     #[instrument(level = "trace", skip(self))]
     fn drop(&mut self) {
-        if let Some(token) = *self.value_changed_token.read().unwrap() {
+        let lock = match self.value_changed_token.read() {
+            Ok(lock) => lock,
+            Err(err) => {
+                tracing::warn!("lock is poisoned: {err:?}");
+                err.into_inner()
+            }
+        };
+        if let Some(token) = *lock {
             if let Err(err) = self.read_characteristic.RemoveValueChanged(token) {
                 tracing::error!("failed to remove ValueChanged event handler: {err}");
             }
