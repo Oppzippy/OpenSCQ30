@@ -32,5 +32,5 @@ modules:
       - install -Dm644 ./gui/resources/icon.svg /app/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg
     sources:
       - type: dir
-        path: ..
+        path: ../..
       - generated-sources.json
