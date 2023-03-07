@@ -1,11 +1,14 @@
 use clap::{command, Parser, Subcommand, ValueEnum};
 use macaddr::MacAddr6;
+use tracing::Level;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 pub struct Cli {
     #[arg(short, long)]
     pub mac_address: Option<MacAddr6>,
+    #[arg(short, long, default_value_t = Level::WARN)]
+    pub logging_level: Level,
     #[command(subcommand)]
     pub command: Command,
 }

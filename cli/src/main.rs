@@ -12,6 +12,14 @@ mod set;
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn Error>> {
     let args = Cli::parse();
+    tracing_subscriber::fmt()
+        .with_file(true)
+        .with_line_number(true)
+        .with_target(false)
+        .with_max_level(args.logging_level)
+        .pretty()
+        .init();
+
     let registry = openscq30_lib::api::new_soundcore_device_registry()
         .await
         .unwrap_or_else(|err| panic!("failed to initialize device registry: {err}"));
