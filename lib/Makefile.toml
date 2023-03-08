@@ -1,3 +1,10 @@
-[tasks.test]
+[tasks.unit-test]
+dependencies = ["unit-test-bluetooth", "unit-test-demo"]
+
+[tasks.unit-test-bluetooth]
 command = "cargo"
-args = ["test"]
+args = ["test", "--lib"]
+
+[tasks.unit-test-demo]
+command = "cargo"
+args = ["test", "--lib"]

@@ -1,2 +1,9 @@
 [env]
 CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
+
+[tasks.test]
+clear = true
+dependencies = ["unit-test", "integration-test"]
+
+[tasks.integration-test]
+env = { "CARGO_MAKE_WORKSPACE_INCLUDE_MEMBERS" = ["openscq30_cli"] }
