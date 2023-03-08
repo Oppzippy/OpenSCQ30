@@ -1,0 +1,3 @@
+[tasks.integration-test]
+command = "cargo"
+args = ["test", "--bin", "--no-default-features", "--features", "demo"]

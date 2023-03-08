@@ -16,10 +16,10 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
+      - name: Install cargo-make
+        run: cargo install --force cargo-make
       - name: Run rust tests
-        run: cargo test
-      - name: Run rust tests in demo mode
-        run: cargo test --features demo
+        run: cargo make test
 
   # Only lib is tested on windows since building gtk takes too long, and lib is the only crate with os specific code
   rust_test_windows:
@@ -30,8 +30,10 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
+      - name: Install cargo-make
+        run: cargo install --force cargo-make
       - name: Run rust tests
-        run: cargo test --package openscq30_lib --features bluetooth
+        run: cargo make test
 
   android_test:
     runs-on: ubuntu-22.04
