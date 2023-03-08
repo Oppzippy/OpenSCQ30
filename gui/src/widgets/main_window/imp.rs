@@ -92,7 +92,7 @@ impl MainWindow {
         let obj = self.obj();
         let dialog = gtk::Dialog::with_buttons(
             Some("Create Custom Profile"),
-            Some(obj.as_ref().into()),
+            Some(&*obj),
             DialogFlags::MODAL | DialogFlags::DESTROY_WITH_PARENT | DialogFlags::USE_HEADER_BAR,
             &[
                 ("Cancel", ResponseType::Cancel),
@@ -161,7 +161,7 @@ impl MainWindow {
     fn update(&self) {
         if self.loading.get() {
             self.stack.set_visible_child(&self.loading_screen.get());
-        } else if let Some(_) = &*self.selected_device.borrow() {
+        } else if self.selected_device.borrow().is_some() {
             self.stack
                 .set_visible_child(&self.selected_device_settings.get());
         } else {

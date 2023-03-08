@@ -54,7 +54,7 @@ impl Equalizer {
     }
 
     fn get_volume_sliders(&self) -> [&TemplateChild<VolumeSlider>; 8] {
-        return [
+        [
             &self.band_100,
             &self.band_200,
             &self.band_400,
@@ -63,7 +63,7 @@ impl Equalizer {
             &self.band_3200,
             &self.band_6400,
             &self.band_12800,
-        ];
+        ]
     }
 }
 

@@ -170,7 +170,7 @@ impl EqualizerSettings {
 
     pub fn set_custom_profiles(&self, mut profiles: Vec<EqualizerCustomProfileObject>) {
         if let Some(model) = self.custom_profiles.get() {
-            profiles.sort_unstable_by(|left, right| left.name().cmp(&right.name()));
+            profiles.sort_unstable_by_key(|left| left.name());
             // Notifications need to be frozen to prevent the selection changes while removing and adding items from
             // causing the profile to change. We can't force having no selection when adding new items, so it
             // will change the selection to the newly added item. We can set it back to what it's supposed to be

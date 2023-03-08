@@ -24,7 +24,7 @@ impl EqualizerSettings {
 
     pub fn set_equalizer_configuration(&self, equalizer_configuration: &EqualizerConfiguration) {
         self.imp()
-            .set_equalizer_configuration(&equalizer_configuration);
+            .set_equalizer_configuration(equalizer_configuration);
     }
 
     pub fn equalizer_configuration(&self) -> EqualizerConfiguration {

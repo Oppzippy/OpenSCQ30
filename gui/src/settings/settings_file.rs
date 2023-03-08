@@ -44,14 +44,14 @@ impl SettingsFile {
             .state
             .write()
             .map_err(|err| anyhow::anyhow!("failed to write rwlock: {err}"))?;
-        f(&mut *state);
-        self.save(&*state)?;
+        f(&mut state);
+        self.save(&state)?;
         Ok(())
     }
 
     fn save(&self, state: &SettingsState) -> anyhow::Result<()> {
         let mut file = self.get_file(Mode::WRITE)?;
-        let toml_string = toml::to_string(&*state)?;
+        let toml_string = toml::to_string(state)?;
         file.write_all(toml_string.as_bytes())?;
 
         Ok(())

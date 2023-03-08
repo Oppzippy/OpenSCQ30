@@ -58,12 +58,10 @@ where
                     },
                     None => (), // receiver is swapped out, try again
                 }
+            } else if let Some(new_receiver) = new_receiver_receiver.recv().await {
+                *maybe_receiver = new_receiver;
             } else {
-                if let Some(new_receiver) = new_receiver_receiver.recv().await {
-                    *maybe_receiver = new_receiver;
-                } else {
-                    *maybe_receiver = None;
-                }
+                *maybe_receiver = None;
             }
         }
     }

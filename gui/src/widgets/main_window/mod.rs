@@ -96,7 +96,7 @@ impl MainWindow {
             .selected_device_settings
             .imp()
             .equalizer_settings
-            .set_equalizer_configuration(&equalizer_configuration);
+            .set_equalizer_configuration(equalizer_configuration);
     }
 
     pub fn equalizer_configuration(&self) -> EqualizerConfiguration {
