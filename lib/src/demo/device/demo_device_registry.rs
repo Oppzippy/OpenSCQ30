@@ -6,6 +6,7 @@ use crate::api::device::DeviceRegistry;
 
 use super::{demo_device::DemoDevice, DemoDeviceDescriptor};
 
+#[derive(Default)]
 pub struct DemoDeviceRegistry {}
 
 impl DemoDeviceRegistry {

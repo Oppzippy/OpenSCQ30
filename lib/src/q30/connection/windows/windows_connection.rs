@@ -91,7 +91,6 @@ impl WindowsConnection {
 
         let characteristic_uuid_u128 = characteristic_uuid.as_u128();
         characteristics
-            .clone()
             .into_iter()
             .find(|characteristic| match characteristic.Uuid() {
                 Ok(uuid) => uuid.to_u128() == characteristic_uuid_u128,
@@ -199,8 +198,7 @@ impl Connection for WindowsConnection {
                         if let Some(args) = args {
                             let value = args.CharacteristicValue()?;
                             let reader = DataReader::FromBuffer(&value)?;
-                            let mut buffer =
-                                vec![0 as u8; reader.UnconsumedBufferLength()? as usize];
+                            let mut buffer = vec![0_u8; reader.UnconsumedBufferLength()? as usize];
                             reader.ReadBytes(&mut buffer)?;
 
                             match sender.try_send(buffer) {

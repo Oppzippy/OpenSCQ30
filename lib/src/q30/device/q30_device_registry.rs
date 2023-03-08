@@ -53,7 +53,7 @@ where
         let inner_descriptors = self.conneciton_registry.connection_descriptors().await?;
         let descriptors = inner_descriptors
             .into_iter()
-            .map(|descriptor| Q30DeviceDescriptor::new(descriptor))
+            .map(Q30DeviceDescriptor::new)
             .collect::<Vec<_>>();
         Ok(descriptors)
     }

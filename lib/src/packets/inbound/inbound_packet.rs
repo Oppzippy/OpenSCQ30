@@ -13,7 +13,7 @@ pub enum InboundPacket {
 impl InboundPacket {
     pub fn new(bytes: &[u8]) -> Option<InboundPacket> {
         StateUpdatePacket::new(bytes)
-            .map(|packet| InboundPacket::StateUpdate(packet))
+            .map(InboundPacket::StateUpdate)
             .or_else(|| {
                 AmbientSoundModeUpdatePacket::new(bytes).map(InboundPacket::AmbientSoundModeUpdate)
             })

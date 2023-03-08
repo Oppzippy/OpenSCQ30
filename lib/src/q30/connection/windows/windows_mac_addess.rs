@@ -12,7 +12,7 @@ impl WindowsMacAddress for MacAddr6 {
         bytes
             .into_iter()
             .enumerate()
-            .fold(0 as u64, |acc, (index, value)| {
+            .fold(0_u64, |acc, (index, value)| {
                 let inverse_index = (length - 1) - index;
                 acc | ((value as u64) << (inverse_index * 8))
             })

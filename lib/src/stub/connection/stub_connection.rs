@@ -76,3 +76,9 @@ impl Connection for StubConnection {
         self.inbound_packets_channel.lock().await.take().unwrap()
     }
 }
+
+impl Default for StubConnection {
+    fn default() -> Self {
+        Self::new()
+    }
+}
