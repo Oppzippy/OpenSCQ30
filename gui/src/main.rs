@@ -44,6 +44,7 @@ fn main() {
 static LOAD_RESOURCES: Once = Once::new();
 
 pub fn load_resources() {
+    gtk::init().unwrap();
     LOAD_RESOURCES.call_once(|| {
         gio::resources_register_include!("widgets.gresource").expect("failed to load widgets");
     });
