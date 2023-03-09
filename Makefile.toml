@@ -1,5 +1,5 @@
 [env]
-CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = false
+CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
 
 [tasks.test]
 clear = true
