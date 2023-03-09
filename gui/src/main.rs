@@ -28,6 +28,7 @@ mod logging_level;
 mod objects;
 mod settings;
 mod swappable_broadcast;
+#[allow(clippy::new_without_default)]
 mod widgets;
 
 fn main() {
