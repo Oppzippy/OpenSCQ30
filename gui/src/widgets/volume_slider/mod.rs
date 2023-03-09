@@ -16,3 +16,36 @@ impl VolumeSlider {
             .build()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use gtk::subclass::prelude::*;
+
+    use crate::load_resources;
+
+    use super::VolumeSlider;
+
+    #[gtk::test]
+    fn test_hz_below_1k() {
+        load_resources();
+        let slider = VolumeSlider::new(999, 0.0);
+        let text = slider.imp().band_label.text();
+        assert_eq!(text, "999 Hz");
+    }
+
+    #[gtk::test]
+    fn test_hz_at_1k() {
+        load_resources();
+        let slider = VolumeSlider::new(1000, 0.0);
+        let text = slider.imp().band_label.text();
+        assert_eq!(text, "1.0 kHz");
+    }
+
+    #[gtk::test]
+    fn test_hz_above_1k() {
+        load_resources();
+        let slider = VolumeSlider::new(1001, 0.0);
+        let text = slider.imp().band_label.text();
+        assert_eq!(text, "1.0 kHz");
+    }
+}

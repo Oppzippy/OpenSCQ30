@@ -1,4 +1,9 @@
-use std::{cell::RefCell, rc::Rc, str::FromStr, sync::Arc};
+use std::{
+    cell::RefCell,
+    rc::Rc,
+    str::FromStr,
+    sync::{Arc, Once},
+};
 
 use gtk::{
     gio::{self, SimpleAction},
@@ -36,8 +41,12 @@ fn main() {
     run_application();
 }
 
-fn load_resources() {
-    gio::resources_register_include!("widgets.gresource").expect("failed to load widgets");
+static LOAD_RESOURCES: Once = Once::new();
+
+pub fn load_resources() {
+    LOAD_RESOURCES.call_once(|| {
+        gio::resources_register_include!("widgets.gresource").expect("failed to load widgets");
+    });
 }
 
 #[cfg(not(feature = "libadwaita"))]

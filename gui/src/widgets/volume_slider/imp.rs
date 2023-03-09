@@ -52,7 +52,7 @@ impl ObjectImpl for VolumeSlider {
         let obj = self.obj();
         obj.bind_property("band", &self.band_label.get(), "label")
             .transform_to(|_, band: i32| {
-                if band > 1000 {
+                if band >= 1000 {
                     Some(format!("{:.1} kHz", band as f64 / 1000.0))
                 } else {
                     Some(format!("{} Hz", band))
