@@ -254,9 +254,14 @@ fn build_ui_2(
         closure_local!(@strong selected_device => move |_main_window: MainWindow, mode_id: u8| {
             let main_context = MainContext::default();
             main_context.spawn_local(clone!(@strong selected_device => async move {
-                let Some(device) = &*selected_device.borrow() else {
-                    tracing::warn!("no device is selected");
-                    return;
+                let device = {
+                    let borrow = selected_device.borrow();
+                    let Some(device) = &*borrow else {
+                        tracing::warn!("no device is selected");
+                        return;
+                    };
+                    // Clone the arc and release the borrow so we can hold the value across await points safely
+                    device.clone()
                 };
                 let Some(ambient_sound_mode) = AmbientSoundMode::from_id(mode_id) else {
                     tracing::warn!("invalid ambient sound mode: {mode_id}");
@@ -299,9 +304,14 @@ fn build_ui_2(
             let main_context = MainContext::default();
             main_context.spawn_local(
                 clone!(@strong selected_device => async move {
-                    let Some(device) = &*selected_device.borrow() else {
-                        tracing::warn!("no device is selected");
-                        return;
+                    let device = {
+                        let borrow = selected_device.borrow();
+                        let Some(device) = &*borrow else {
+                            tracing::warn!("no device is selected");
+                            return;
+                        };
+                        // Clone the arc and release the borrow so we can hold the value across await points safely
+                        device.clone()
                     };
                     let configuration = main_window.equalizer_configuration();
                     if let Err(err) = device.set_equalizer_configuration(configuration).await {

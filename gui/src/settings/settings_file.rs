@@ -65,7 +65,7 @@ impl SettingsFile {
             .state
             .read()
             .map_err(|err| anyhow::anyhow!("failed to read from rwlock: {err}"))?;
-        Ok(f(&*state))
+        Ok(f(&state))
     }
 
     fn get_file(&self, mode: Mode) -> anyhow::Result<File> {
