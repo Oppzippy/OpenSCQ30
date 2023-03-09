@@ -79,7 +79,9 @@ where
         let maybe_logging_level = options
             .lookup::<String>("logging-level")
             .expect("logging-level must be a string")
-            .map(|logging_level| LoggingLevel::from_str(&logging_level.to_uppercase()));
+            .map(|logging_level| {
+                LoggingLevel::from_str(&heck::AsUpperCamelCase(logging_level).to_string())
+            });
 
         let logging_level = match maybe_logging_level {
             Some(Ok(logging_level)) => logging_level,
@@ -94,11 +96,11 @@ where
                 // In debug builds, the default logging level is lower for convenience
                 #[cfg(debug_assertions)]
                 {
-                    LoggingLevel::TRACE
+                    LoggingLevel::Trace
                 }
                 #[cfg(not(debug_assertions))]
                 {
-                    LoggingLevel::INFO
+                    LoggingLevel::Info
                 }
             }
         };

@@ -24,7 +24,7 @@ impl SettingsFile {
     }
 
     pub fn load(&self) -> anyhow::Result<()> {
-        let mut file = self.get_file(Mode::READ).context("get config file")?;
+        let mut file = self.get_file(Mode::Read).context("get config file")?;
         let mut buffer = String::new();
         file.read_to_string(&mut buffer)
             .context("read from config file")?;
@@ -50,7 +50,7 @@ impl SettingsFile {
     }
 
     fn save(&self, state: &SettingsState) -> anyhow::Result<()> {
-        let mut file = self.get_file(Mode::WRITE)?;
+        let mut file = self.get_file(Mode::Write)?;
         let toml_string = toml::to_string(state)?;
         file.write_all(toml_string.as_bytes())?;
 
@@ -80,8 +80,8 @@ impl SettingsFile {
 
         let mut options = OpenOptions::new();
         let options = match mode {
-            Mode::READ => options.read(true),
-            Mode::WRITE => options.write(true).create(true).truncate(true),
+            Mode::Read => options.read(true),
+            Mode::Write => options.write(true).create(true).truncate(true),
         };
         let file = options
             .open(&self.settings_directory_path)
@@ -98,6 +98,6 @@ impl SettingsFile {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Mode {
-    READ,
-    WRITE,
+    Read,
+    Write,
 }

@@ -1198,6 +1198,7 @@ dependencies = [
  "futures",
  "glib-build-tools",
  "gtk4",
+ "heck",
  "libadwaita",
  "once_cell",
  "openscq30_lib",
