@@ -14,12 +14,21 @@ jobs:
           sudo apt-get install libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
       - name: Install cargo-make
         run: cargo install --force cargo-make
       - name: Run rust tests
-        run: cargo make test
+        run: cargo make test-cov
+      - name: Generate HTML test coverage report
+        run: cargo make test-cov-report-html
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: target/llvm-cov/html/
 
   # Only lib is tested on windows since building gtk takes too long, and lib is the only crate with os specific code
   rust_test_windows:

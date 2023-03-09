@@ -1,9 +1,39 @@
 [env]
-CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
+CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = false
 
 [tasks.test]
 clear = true
 dependencies = ["unit-test", "integration-test"]
 
 [tasks.integration-test]
-env = { "CARGO_MAKE_WORKSPACE_INCLUDE_MEMBERS" = ["openscq30_cli"] }
+env = { "CARGO_MAKE_WORKSPACE_INCLUDE_MEMBERS" = ["cli"] }
+
+[tasks.test-cov]
+clear = true
+workspace = false
+dependencies = [
+    "llvm-cov-clean",
+    "member-unit-test-cov",
+    "member-integration-test-cov",
+]
+
+[tasks.llvm-cov-clean]
+command = "cargo"
+args = ["llvm-cov", "clean", "--workspace"]
+
+[tasks.member-unit-test-cov]
+run_task = { name = "unit-test-cov", fork = true }
+
+[tasks.member-integration-test-cov]
+env = { "CARGO_MAKE_WORKSPACE_INCLUDE_MEMBERS" = ["cli"] }
+run_task = { name = "integration-test-cov", fork = true }
+
+[tasks.test-cov-report-html]
+workspace = false
+command = "cargo"
+args = ["llvm-cov", "report", "--html"]
+
+[tasks.test-cov-report-lcov]
+workspace = false
+command = "cargo"
+args = ["llvm-cov", "report", "--lcov", "--output-path", "lcov.info"]

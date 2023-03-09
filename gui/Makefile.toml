@@ -1,3 +1,7 @@
 [tasks.unit-test]
 command = "cargo"
 args = ["test", "--bins"]
+
+[tasks.unit-test-cov]
+command = "cargo"
+args = ["llvm-cov", "--no-report", "--bins"]

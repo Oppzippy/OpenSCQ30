@@ -5,3 +5,19 @@ args = ["test", "--bins"]
 [tasks.integration-test]
 command = "cargo"
 args = ["test", "--no-default-features", "--features", "demo", "--test", "*"]
+
+[tasks.unit-test-cov]
+command = "cargo"
+args = ["llvm-cov", "--no-report", "--bins"]
+
+[tasks.integration-test-cov]
+command = "cargo"
+args = [
+    "llvm-cov",
+    "--no-report",
+    "--no-default-features",
+    "--features",
+    "demo",
+    "--test",
+    "*",
+]

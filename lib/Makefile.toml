@@ -3,8 +3,19 @@ dependencies = ["unit-test-bluetooth", "unit-test-demo"]
 
 [tasks.unit-test-bluetooth]
 command = "cargo"
-args = ["test", "--lib"]
+args = ["test", "--lib", "--features", "bluetooth"]
 
 [tasks.unit-test-demo]
 command = "cargo"
-args = ["test", "--lib"]
+args = ["test", "--lib", "--features", "demo"]
+
+[tasks.unit-test-cov]
+dependencies = ["unit-test-cov-bluetooth", "unit-test-cov-demo"]
+
+[tasks.unit-test-cov-bluetooth]
+command = "cargo"
+args = ["llvm-cov", "--no-report", "--lib", "--features", "bluetooth"]
+
+[tasks.unit-test-cov-demo]
+command = "cargo"
+args = ["llvm-cov", "--no-report", "--lib", "--features", "demo"]
