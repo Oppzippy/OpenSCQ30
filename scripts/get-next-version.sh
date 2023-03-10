@@ -19,14 +19,13 @@ bump_version() {
         gawk \
             --assign increment_place="$2" \
             --source \
-            'match($0, /([0-9]+)\.([0-9]+)\.([0-9]+)/, version) {
+            'match($0, /v?([0-9]+)\.([0-9]+)\.([0-9]+)/, version) {
                 version[increment_place] += 1;
                 for (i = increment_place+1; i <= 3; i++) {
                     version[i] = 0;
                 }
 
-                print "v" \
-                    version[1] "." \
+                print version[1] "." \
                     version[2] "." \
                     version[3];
             }'
