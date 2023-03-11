@@ -66,3 +66,22 @@ impl PresetEqualizerProfile {
         EqualizerBandOffsets::new(offsets)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashSet;
+
+    use strum::IntoEnumIterator;
+
+    use super::PresetEqualizerProfile;
+
+    #[test]
+    fn profiles_have_unique_band_offsets() {
+        // to make sure that nothing was mistakenly copy and pasted
+        let band_offsets = PresetEqualizerProfile::iter()
+            .map(|profile| profile.band_offsets())
+            .collect::<Vec<_>>();
+        let deduplicated_band_offsets = band_offsets.iter().collect::<HashSet<_>>();
+        assert_eq!(band_offsets.len(), deduplicated_band_offsets.len());
+    }
+}

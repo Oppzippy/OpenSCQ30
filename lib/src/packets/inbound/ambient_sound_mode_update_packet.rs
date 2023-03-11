@@ -55,13 +55,33 @@ mod tests {
     };
 
     #[test]
-    fn it_parses_an_example_ambient_sound_mode_update_packet() {
+    fn it_parses_valid_packet() {
         const PACKET_BYTES: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x02, 0x02, 0x01, 0x00, 0x23,
         ];
         let packet = AmbientSoundModeUpdatePacket::new(PACKET_BYTES).unwrap();
         assert_eq!(AmbientSoundMode::Normal, packet.ambient_sound_mode());
         assert_eq!(NoiseCancelingMode::Indoor, packet.noise_canceling_mode());
+    }
+
+    #[test]
+    fn it_does_not_parse_invalid_ambient_sound_mode() {
+        const PACKET_BYTES: &[u8] = &[
+            //                                                    max value of 0x02
+            0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x03, 0x02, 0x01, 0x00, 0x23,
+        ];
+        let packet = AmbientSoundModeUpdatePacket::new(PACKET_BYTES);
+        assert_eq!(None, packet);
+    }
+
+    #[test]
+    fn it_does_not_parse_invalid_noise_canceling_mode() {
+        const PACKET_BYTES: &[u8] = &[
+            //                                                          max value of 0x02
+            0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x02, 0x03, 0x01, 0x00, 0x23,
+        ];
+        let packet = AmbientSoundModeUpdatePacket::new(PACKET_BYTES);
+        assert_eq!(None, packet);
     }
 
     #[test]

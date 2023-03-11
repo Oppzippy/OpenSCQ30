@@ -21,3 +21,14 @@ impl InboundPacket {
             .or_else(|| SetEqualizerOkPacket::new(bytes).map(InboundPacket::SetEqualizerOk))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::InboundPacket;
+
+    #[test]
+    fn it_returns_none_when_nothing_matches() {
+        let packet = InboundPacket::new(&vec![1, 2, 3]);
+        assert_eq!(None, packet);
+    }
+}
