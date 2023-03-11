@@ -31,3 +31,26 @@ impl From<EqualizerBandOffsets> for structures::EqualizerBandOffsets {
         value.inner
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::EqualizerBandOffsets;
+
+    #[test]
+    #[should_panic]
+    fn new_panics_if_slice_length_is_less_than_8() {
+        EqualizerBandOffsets::new(&vec![0; 7]);
+    }
+
+    #[test]
+    #[should_panic]
+    fn new_panics_if_slice_length_is_greater_than_8() {
+        EqualizerBandOffsets::new(&vec![0; 9]);
+    }
+
+    #[test]
+    fn new_does_not_panic_if_slice_length_is_8() {
+        EqualizerBandOffsets::new(&vec![0; 8]);
+        // It didn't panic, no assertions needed
+    }
+}
