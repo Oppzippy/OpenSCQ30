@@ -17,7 +17,7 @@ impl SetEqualizerOkPacket {
     pub fn from_bytes(bytes: &[i8]) -> Result<Option<SetEqualizerOkPacket>, String> {
         let bytes = type_conversion::i8_slice_to_u8_slice(bytes);
         Ok(
-            openscq30_lib::packets::inbound::SetEqualizerOkPacket::new(&bytes)
+            openscq30_lib::packets::inbound::SetEqualizerOkPacket::new(bytes)
                 .map(|packet| packet.into()),
         )
     }

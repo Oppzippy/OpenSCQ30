@@ -50,7 +50,7 @@ impl BtlePlugConnectionRegistry {
             .filter_map(|adapter| async move { Self::adapter_to_peripherals(adapter).await })
             .flatten()
             .filter_map(|peripheral| async move {
-                if &peripheral.address().to_string() == mac_address {
+                if peripheral.address().to_string() == mac_address {
                     Some(peripheral)
                 } else {
                     None

@@ -17,7 +17,7 @@ impl SetAmbientModeOkPacket {
     pub fn from_bytes(bytes: &[i8]) -> Result<Option<SetAmbientModeOkPacket>, String> {
         let bytes = type_conversion::i8_slice_to_u8_slice(bytes);
         Ok(
-            openscq30_lib::packets::inbound::SetAmbientModeOkPacket::new(&bytes)
+            openscq30_lib::packets::inbound::SetAmbientModeOkPacket::new(bytes)
                 .map(|packet| packet.into()),
         )
     }

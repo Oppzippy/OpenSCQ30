@@ -20,17 +20,14 @@ fn main() {
     let out_file = Path::new(&out_dir).join("java_glue.rs");
 
     rifgen::Generator::new(TypeCases::CamelCase, Language::Java, &rust_src_dir)
-        .generate_interface(&glue_file);
+        .generate_interface(glue_file);
 
     let swig_gen = flapigen::Generator::new(LanguageConfig::JavaConfig(
-        JavaConfig::new(
-            java_lib_dir.to_owned(),
-            "com.oppzippy.openscq30.lib".to_string(),
-        )
-        .use_null_annotation_from_package("androidx.annotation".to_string()),
+        JavaConfig::new(java_lib_dir, "com.oppzippy.openscq30.lib".to_string())
+            .use_null_annotation_from_package("androidx.annotation".to_string()),
     ))
     .rustfmt_bindings(true)
     .remove_not_generated_files_from_output_directory(true);
-    swig_gen.expand("android bindings", &glue_file, &out_file);
+    swig_gen.expand("android bindings", glue_file, out_file);
     println!("cargo:rerun-if-changed=src");
 }

@@ -20,7 +20,7 @@ impl StateUpdatePacket {
     pub fn from_bytes(bytes: &[i8]) -> Result<Option<StateUpdatePacket>, String> {
         let bytes = type_conversion::i8_slice_to_u8_slice(bytes);
         Ok(
-            openscq30_lib::packets::inbound::StateUpdatePacket::new(&bytes)
+            openscq30_lib::packets::inbound::StateUpdatePacket::new(bytes)
                 .map(|packet| packet.into()),
         )
     }
