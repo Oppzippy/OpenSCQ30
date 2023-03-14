@@ -15,7 +15,7 @@ use gtk::{
 use gtk_openscq30_lib::GtkDeviceRegistry;
 use logging_level::LoggingLevel;
 use openscq30_lib::{
-    api::device::{DeviceDescriptor, DeviceRegistry},
+    api::device::{Device as _, DeviceDescriptor, DeviceRegistry},
     packets::structures::{
         AmbientSoundMode, EqualizerBandOffsets, EqualizerConfiguration, NoiseCancelingMode,
     },
@@ -227,7 +227,7 @@ fn build_ui_2(
                 *connect_to_device_handle.borrow_mut() = Some(
                     main_context.spawn_local(
                         clone!(@weak main_window, @strong gtk_registry, @strong selected_device, @strong state_update_receiver => async move {
-                            match gtk_registry.device(new_selected_device.mac_address()).await {
+                            match gtk_registry.device(&new_selected_device.mac_address()).await {
                                 Ok(Some(device)) => {
                                     *selected_device.borrow_mut() = Some(device.to_owned());
                                     let receiver = device.subscribe_to_state_updates();

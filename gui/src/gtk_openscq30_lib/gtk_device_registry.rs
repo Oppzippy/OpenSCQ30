@@ -4,30 +4,29 @@ use openscq30_lib::api::device::DeviceRegistry;
 use tokio::runtime::Runtime;
 
 use super::gtk_device::GtkDevice;
+use async_trait::async_trait;
 
-pub struct GtkDeviceRegistry<RegistryType>
+pub struct GtkDeviceRegistry<InnerRegistryType>
 where
-    RegistryType: DeviceRegistry + Send + Sync,
+    InnerRegistryType: DeviceRegistry + Send + Sync,
 {
     tokio_runtime: Arc<Runtime>,
-    soundcore_device_registry: Arc<RegistryType>,
+    soundcore_device_registry: Arc<InnerRegistryType>,
 }
 
-impl<RegistryType: 'static> GtkDeviceRegistry<RegistryType>
+#[async_trait]
+impl<InnerRegistryType: 'static> DeviceRegistry for GtkDeviceRegistry<InnerRegistryType>
 where
-    RegistryType: DeviceRegistry + Send + Sync,
+    InnerRegistryType: DeviceRegistry + Send + Sync,
 {
-    pub fn new(registry: RegistryType, tokio_runtime: Runtime) -> Self {
-        Self {
-            soundcore_device_registry: Arc::new(registry),
-            tokio_runtime: Arc::new(tokio_runtime),
-        }
-    }
+    type DeviceType = GtkDevice<InnerRegistryType::DeviceType>;
+    type DescriptorType = InnerRegistryType::DescriptorType;
 
-    pub async fn device(
+    async fn device(
         &self,
-        mac_address: String,
-    ) -> openscq30_lib::Result<Option<Arc<GtkDevice<RegistryType::DeviceType>>>> {
+        mac_address: &str,
+    ) -> openscq30_lib::Result<Option<Arc<Self::DeviceType>>> {
+        let mac_address = mac_address.to_owned();
         let device_registry = self.soundcore_device_registry.to_owned();
         let maybe_device = async_runtime_bridge!(
             self.tokio_runtime,
@@ -40,20 +39,30 @@ where
         }
     }
 
-    pub async fn device_descriptors(
-        &self,
-    ) -> openscq30_lib::Result<Vec<RegistryType::DescriptorType>> {
+    async fn device_descriptors(&self) -> openscq30_lib::Result<Vec<Self::DescriptorType>> {
         let device_registry = self.soundcore_device_registry.to_owned();
         async_runtime_bridge!(
             self.tokio_runtime,
             device_registry.device_descriptors().await
         )
     }
+}
+
+impl<InnerRegistryType: 'static> GtkDeviceRegistry<InnerRegistryType>
+where
+    InnerRegistryType: DeviceRegistry + Send + Sync,
+{
+    pub fn new(registry: InnerRegistryType, tokio_runtime: Runtime) -> Self {
+        Self {
+            soundcore_device_registry: Arc::new(registry),
+            tokio_runtime: Arc::new(tokio_runtime),
+        }
+    }
 
     fn to_gtk_device(
         &self,
-        device: Arc<RegistryType::DeviceType>,
-    ) -> Arc<GtkDevice<RegistryType::DeviceType>> {
+        device: Arc<InnerRegistryType::DeviceType>,
+    ) -> Arc<GtkDevice<InnerRegistryType::DeviceType>> {
         Arc::new(GtkDevice::new(device, self.tokio_runtime.to_owned()))
     }
 }

@@ -1,5 +1,6 @@
-use std::sync::Arc;
+use std::{fmt::Debug, sync::Arc};
 
+use async_trait::async_trait;
 use openscq30_lib::{
     api::device::Device,
     packets::structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
@@ -7,41 +8,46 @@ use openscq30_lib::{
 };
 use tokio::{runtime::Runtime, sync::broadcast};
 
-pub struct GtkDevice<SoundcoreDeviceType: 'static>
+pub struct GtkDevice<InnerDeviceType: 'static>
 where
-    SoundcoreDeviceType: Device + Send + Sync,
+    InnerDeviceType: Device + Send + Sync,
 {
     tokio_runtime: Arc<Runtime>,
-    soundcore_device: Arc<SoundcoreDeviceType>,
+    soundcore_device: Arc<InnerDeviceType>,
 }
 
-#[allow(dead_code)]
-impl<SoundcoreDeviceType> GtkDevice<SoundcoreDeviceType>
+impl<InnerDeviceType> GtkDevice<InnerDeviceType>
 where
-    SoundcoreDeviceType: Device + Send + Sync,
+    InnerDeviceType: Device + Send + Sync,
 {
-    pub fn new(device: Arc<SoundcoreDeviceType>, tokio_runtime: Arc<Runtime>) -> Self {
+    pub fn new(device: Arc<InnerDeviceType>, tokio_runtime: Arc<Runtime>) -> Self {
         Self {
             tokio_runtime,
             soundcore_device: device,
         }
     }
+}
 
-    pub fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState> {
+#[async_trait]
+impl<InnerDeviceType> Device for GtkDevice<InnerDeviceType>
+where
+    InnerDeviceType: Device + Send + Sync,
+{
+    fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState> {
         self.soundcore_device.subscribe_to_state_updates()
     }
 
-    pub async fn mac_address(&self) -> openscq30_lib::Result<String> {
+    async fn mac_address(&self) -> openscq30_lib::Result<String> {
         let soundcore_device = self.soundcore_device.to_owned();
         async_runtime_bridge!(self.tokio_runtime, soundcore_device.mac_address().await)
     }
 
-    pub async fn name(&self) -> openscq30_lib::Result<String> {
+    async fn name(&self) -> openscq30_lib::Result<String> {
         let soundcore_device = self.soundcore_device.to_owned();
         async_runtime_bridge!(self.tokio_runtime, soundcore_device.name().await)
     }
 
-    pub async fn ambient_sound_mode(&self) -> AmbientSoundMode {
+    async fn ambient_sound_mode(&self) -> AmbientSoundMode {
         let soundcore_device = self.soundcore_device.to_owned();
         async_runtime_bridge!(
             self.tokio_runtime,
@@ -49,7 +55,7 @@ where
         )
     }
 
-    pub async fn set_ambient_sound_mode(
+    async fn set_ambient_sound_mode(
         &self,
         ambient_sound_mode: AmbientSoundMode,
     ) -> openscq30_lib::Result<()> {
@@ -62,7 +68,7 @@ where
         )
     }
 
-    pub async fn noise_canceling_mode(&self) -> NoiseCancelingMode {
+    async fn noise_canceling_mode(&self) -> NoiseCancelingMode {
         let soundcore_device = self.soundcore_device.to_owned();
         async_runtime_bridge!(
             self.tokio_runtime,
@@ -70,7 +76,7 @@ where
         )
     }
 
-    pub async fn set_noise_canceling_mode(
+    async fn set_noise_canceling_mode(
         &self,
         noise_canceling_mode: NoiseCancelingMode,
     ) -> openscq30_lib::Result<()> {
@@ -83,7 +89,7 @@ where
         )
     }
 
-    pub async fn equalizer_configuration(&self) -> EqualizerConfiguration {
+    async fn equalizer_configuration(&self) -> EqualizerConfiguration {
         let soundcore_device = self.soundcore_device.to_owned();
         async_runtime_bridge!(
             self.tokio_runtime,
@@ -91,7 +97,7 @@ where
         )
     }
 
-    pub async fn set_equalizer_configuration(
+    async fn set_equalizer_configuration(
         &self,
         configuration: EqualizerConfiguration,
     ) -> openscq30_lib::Result<()> {
@@ -102,5 +108,14 @@ where
                 .set_equalizer_configuration(configuration)
                 .await
         )
+    }
+}
+
+impl<InnerDeviceType> Debug for GtkDevice<InnerDeviceType>
+where
+    InnerDeviceType: Device + Send + Sync,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("GtkDevice")
     }
 }

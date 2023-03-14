@@ -1194,6 +1194,7 @@ name = "openscq30_gui"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-trait",
  "embed-resource",
  "futures",
  "glib-build-tools",
