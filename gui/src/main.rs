@@ -1,14 +1,9 @@
-use std::{
-    cell::RefCell,
-    rc::Rc,
-    str::FromStr,
-    sync::{Arc, Once},
-};
+use std::{rc::Rc, str::FromStr, sync::Once};
 
-use actions::StateUpdate;
+use actions::{State, StateUpdate};
 use gtk::{
     gio::{self, SimpleAction},
-    glib::{self, clone, closure_local, JoinHandle, MainContext, OptionFlags},
+    glib::{self, clone, closure_local, MainContext, OptionFlags},
     prelude::*,
     traits::GtkWindowExt,
     Application,
@@ -20,11 +15,8 @@ use openscq30_lib::{
     packets::structures::{
         AmbientSoundMode, EqualizerBandOffsets, EqualizerConfiguration, NoiseCancelingMode,
     },
-    state::DeviceState,
 };
 use settings::{EqualizerCustomProfile, SettingsFile};
-use swappable_broadcast::SwappableBroadcastReceiver;
-use tokio::sync::mpsc;
 use tracing::Level;
 use widgets::MainWindow;
 
@@ -140,13 +132,13 @@ fn build_ui(application: &impl IsA<Application>) {
         .block_on(openscq30_lib::api::new_soundcore_device_registry())
         .unwrap_or_else(|err| panic!("failed to initialize device registry: {err}"));
 
-    let gtk_registry = Arc::new(GtkDeviceRegistry::new(registry, tokio_runtime));
+    let gtk_registry = GtkDeviceRegistry::new(registry, tokio_runtime);
     build_ui_2(application, gtk_registry)
 }
 
 fn build_ui_2(
     application: &impl IsA<Application>,
-    gtk_registry: Arc<GtkDeviceRegistry<impl DeviceRegistry + Send + Sync + 'static>>,
+    gtk_registry: GtkDeviceRegistry<impl DeviceRegistry + Send + Sync + 'static>,
 ) {
     let settings_file = Rc::new(get_settings_file());
     let main_window = MainWindow::new(application, settings_file.to_owned());
@@ -164,11 +156,9 @@ fn build_ui_2(
         })
         .unwrap();
 
-    let state_update_receiver: Rc<SwappableBroadcastReceiver<DeviceState>> =
-        Rc::new(SwappableBroadcastReceiver::new());
-    let selected_device = Rc::new(RefCell::new(None));
+    let (state, mut ui_state_receiver) = State::new(gtk_registry);
+    let state = Rc::new(state);
 
-    let (ui_state_sender, mut ui_state_receiver) = mpsc::unbounded_channel::<StateUpdate>();
     let main_context = MainContext::default();
     main_context.spawn_local(clone!(@weak main_window => async move {
         loop {
@@ -185,19 +175,17 @@ fn build_ui_2(
         }
     }));
 
-    main_context.spawn_local(
-        clone!(@weak main_window, @strong state_update_receiver => async move {
-            loop {
-                let next_state = state_update_receiver.next().await;
-                main_window.set_ambient_sound_mode(next_state.ambient_sound_mode());
-                main_window.set_noise_canceling_mode(next_state.noise_canceling_mode());
-            }
-        }),
-    );
+    main_context.spawn_local(clone!(@weak main_window, @strong state => async move {
+        loop {
+            let next_state = state.state_update_receiver.next().await;
+            main_window.set_ambient_sound_mode(next_state.ambient_sound_mode());
+            main_window.set_noise_canceling_mode(next_state.noise_canceling_mode());
+        }
+    }));
 
     let action_refresh_devices = SimpleAction::new("refresh-devices", None);
-    action_refresh_devices.connect_activate(clone!(@strong ui_state_sender, @strong gtk_registry, @strong selected_device, @strong state_update_receiver => move |_, _| {
-        actions::refresh_devices(&ui_state_sender, &gtk_registry, &selected_device, &state_update_receiver)
+    action_refresh_devices.connect_activate(clone!(@strong state => move |_, _| {
+        actions::refresh_devices(&state);
     }));
     main_window.add_action(&action_refresh_devices);
     application.set_accels_for_action("win.refresh-devices", &["<Ctrl>R", "F5"]);
@@ -206,18 +194,11 @@ fn build_ui_2(
         action_refresh_devices.activate(None);
     }));
 
-    let connect_to_device_handle: Arc<RefCell<Option<JoinHandle<()>>>> =
-        Arc::new(RefCell::new(None));
-
     main_window.connect_notify_local(
         Some("selected-device"),
-        clone!(@strong state_update_receiver, @strong gtk_registry, @strong selected_device, @strong connect_to_device_handle => move |main_window, _| {
+        clone!(@strong state => move |main_window, _| {
             actions::select_device(
-                &ui_state_sender,
-                &gtk_registry,
-                &selected_device,
-                &connect_to_device_handle,
-                &state_update_receiver,
+                &state,
                 main_window.selected_device(),
             );
         }),
@@ -226,11 +207,11 @@ fn build_ui_2(
     main_window.connect_closure(
         "ambient-sound-mode-selected",
         false,
-        closure_local!(@strong selected_device => move |_main_window: MainWindow, mode_id: u8| {
+        closure_local!(@strong state => move |_main_window: MainWindow, mode_id: u8| {
             let main_context = MainContext::default();
-            main_context.spawn_local(clone!(@strong selected_device => async move {
+            main_context.spawn_local(clone!(@strong state => async move {
                 let device = {
-                    let borrow = selected_device.borrow();
+                    let borrow = state.selected_device.borrow();
                     let Some(device) = &*borrow else {
                         tracing::warn!("no device is selected");
                         return;
@@ -252,11 +233,11 @@ fn build_ui_2(
     main_window.connect_closure(
         "noise-canceling-mode-selected",
         false,
-        closure_local!(@strong selected_device => move |_main_window: MainWindow, mode_id: u8| {
+        closure_local!(@strong state => move |_main_window: MainWindow, mode_id: u8| {
             let main_context = MainContext::default();
             main_context.spawn_local(
-                clone!(@strong selected_device => async move {
-                    let Some(device) = &*selected_device.borrow() else {
+                clone!(@strong state => async move {
+                    let Some(device) = &*state.selected_device.borrow() else {
                         tracing::warn!("no device is selected");
                         return;
                     };
@@ -275,12 +256,12 @@ fn build_ui_2(
     main_window.connect_closure(
         "apply-equalizer-settings",
         false,
-        closure_local!(@strong selected_device => move |main_window: MainWindow| {
+        closure_local!(@strong state => move |main_window: MainWindow| {
             let main_context = MainContext::default();
             main_context.spawn_local(
-                clone!(@strong selected_device => async move {
+                clone!(@strong state => async move {
                     let device = {
-                        let borrow = selected_device.borrow();
+                        let borrow = state.selected_device.borrow();
                         let Some(device) = &*borrow else {
                             tracing::warn!("no device is selected");
                             return;
