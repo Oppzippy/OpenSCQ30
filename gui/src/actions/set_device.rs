@@ -7,7 +7,7 @@ use crate::objects::DeviceObject;
 
 use super::{State, StateUpdate};
 
-pub fn select_device<T>(state: &Rc<State<T>>, new_selected_device: Option<DeviceObject>)
+pub fn set_device<T>(state: &Rc<State<T>>, new_selected_device: Option<DeviceObject>)
 where
     T: DeviceRegistry + Send + Sync + 'static,
 {
@@ -80,7 +80,7 @@ mod tests {
         objects::DeviceObject,
     };
 
-    use super::select_device;
+    use super::set_device;
 
     #[gtk::test]
     async fn it_works() {
@@ -119,7 +119,7 @@ mod tests {
 
         let new_selected_device =
             DeviceObject::new(&"Name".to_string(), &"00:00:00:00:00:00".to_string());
-        select_device(&state, Some(new_selected_device));
+        set_device(&state, Some(new_selected_device));
         let mut expected_sequence = VecDeque::from([
             StateUpdate::SetLoading(true),
             StateUpdate::SetAmbientSoundMode(AmbientSoundMode::Transparency),

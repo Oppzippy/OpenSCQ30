@@ -27,6 +27,7 @@ async-trait = "0.1"
 
 [dev-dependencies]
 mockall = "0.11.2"
+tempfile = "3.4"
 
 [build-dependencies]
 glib-build-tools = "0.17"

@@ -10,13 +10,8 @@ use gtk::{
 };
 use gtk_openscq30_lib::GtkDeviceRegistry;
 use logging_level::LoggingLevel;
-use openscq30_lib::{
-    api::device::{Device as _, DeviceRegistry},
-    packets::structures::{
-        AmbientSoundMode, EqualizerBandOffsets, EqualizerConfiguration, NoiseCancelingMode,
-    },
-};
-use settings::{EqualizerCustomProfile, SettingsFile};
+use openscq30_lib::api::device::DeviceRegistry;
+use settings::SettingsFile;
 use tracing::Level;
 use widgets::MainWindow;
 
@@ -170,6 +165,7 @@ fn build_ui_2(
                     StateUpdate::SetNoiseCancelingMode(noise_canceling_mode) => main_window.set_noise_canceling_mode(noise_canceling_mode),
                     StateUpdate::SetEqualizerConfiguration(equalizer_configuration) => main_window.set_equalizer_configuration(&equalizer_configuration),
                     StateUpdate::SetSelectedDevice(device) => main_window.set_property("selected-device", device),
+                    StateUpdate::SetEqualizerCustomProfiles(custom_profiles) => main_window.set_custom_profiles(custom_profiles),
                 }
             }
         }
@@ -197,7 +193,7 @@ fn build_ui_2(
     main_window.connect_notify_local(
         Some("selected-device"),
         clone!(@strong state => move |main_window, _| {
-            actions::select_device(
+            actions::set_device(
                 &state,
                 main_window.selected_device(),
             );
@@ -207,49 +203,16 @@ fn build_ui_2(
     main_window.connect_closure(
         "ambient-sound-mode-selected",
         false,
-        closure_local!(@strong state => move |_main_window: MainWindow, mode_id: u8| {
-            let main_context = MainContext::default();
-            main_context.spawn_local(clone!(@strong state => async move {
-                let device = {
-                    let borrow = state.selected_device.borrow();
-                    let Some(device) = &*borrow else {
-                        tracing::warn!("no device is selected");
-                        return;
-                    };
-                    // Clone the arc and release the borrow so we can hold the value across await points safely
-                    device.clone()
-                };
-                let Some(ambient_sound_mode) = AmbientSoundMode::from_id(mode_id) else {
-                    tracing::warn!("invalid ambient sound mode: {mode_id}");
-                    return;
-                };
-                if let Err(err) = device.set_ambient_sound_mode(ambient_sound_mode).await {
-                    tracing::error!("error setting ambient sound mode: {err}")
-                }
-            }));
+        closure_local!(@strong state => move |_main_window: MainWindow, ambient_sound_mode_id: u8| {
+            actions::set_ambient_sound_mode(&state, ambient_sound_mode_id);
         }),
     );
 
     main_window.connect_closure(
         "noise-canceling-mode-selected",
         false,
-        closure_local!(@strong state => move |_main_window: MainWindow, mode_id: u8| {
-            let main_context = MainContext::default();
-            main_context.spawn_local(
-                clone!(@strong state => async move {
-                    let Some(device) = &*state.selected_device.borrow() else {
-                        tracing::warn!("no device is selected");
-                        return;
-                    };
-                    let Some(noise_canceling_mode) = NoiseCancelingMode::from_id(mode_id) else {
-                        tracing::error!("invalid noise canceling mode: {mode_id}");
-                        return;
-                    };
-                    if let Err(err) = device.set_noise_canceling_mode(noise_canceling_mode).await {
-                        tracing::error!("error setting noise canceling mode: {err}")
-                    }
-                }),
-            );
+        closure_local!(@strong state => move |_main_window: MainWindow, noise_canceling_mode_id: u8| {
+            actions::set_noise_canceling_mode(&state, noise_canceling_mode_id);
         }),
     );
 
@@ -257,87 +220,31 @@ fn build_ui_2(
         "apply-equalizer-settings",
         false,
         closure_local!(@strong state => move |main_window: MainWindow| {
-            let main_context = MainContext::default();
-            main_context.spawn_local(
-                clone!(@strong state => async move {
-                    let device = {
-                        let borrow = state.selected_device.borrow();
-                        let Some(device) = &*borrow else {
-                            tracing::warn!("no device is selected");
-                            return;
-                        };
-                        // Clone the arc and release the borrow so we can hold the value across await points safely
-                        device.clone()
-                    };
-                    let configuration = main_window.equalizer_configuration();
-                    if let Err(err) = device.set_equalizer_configuration(configuration).await {
-                        tracing::error!("error setting equalizer configuration: {err}");
-                    }
-                }),
-            );
+            actions::set_equalizer_configuration(&state, main_window.equalizer_configuration());
         }),
     );
 
     main_window.connect_closure(
         "custom-equalizer-profile-selected",
         false,
-        closure_local!(@strong settings_file => move |main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
-            let result = settings_file.get(|settings| {
-                match settings.custom_profiles().get(&custom_profile.name()) {
-                    Some(profile) => {
-                        main_window.set_equalizer_configuration(
-                            &EqualizerConfiguration::new_custom_profile(EqualizerBandOffsets::new(profile.volume_offsets()))
-                        );
-                    },
-                    None => {
-                        tracing::warn!("custom profile does not exist: {}", custom_profile.name());
-                    },
-                }
-            });
-            if let Err(err) = result {
-                tracing::warn!("unable to get settings file: {:?}", err);
-            }
+        closure_local!(@strong state, @strong settings_file => move |_main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
+            actions::set_custom_equalizer_configuration(&state, &settings_file, custom_profile);
         }),
     );
 
     main_window.connect_closure(
         "create-custom-equalizer-profile",
         false,
-        closure_local!(@strong settings_file => move |main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
-            settings_file.edit(|settings| {
-                settings.set_custom_profile(
-                    custom_profile.name(),
-                    EqualizerCustomProfile::new (
-                        custom_profile.volume_offsets()
-                    )
-                );
-            }).unwrap();
-            settings_file.get(|settings| {
-                main_window.set_custom_profiles(
-                    settings.custom_profiles()
-                        .iter()
-                        .map(|(name, profile)| EqualizerCustomProfileObject::new(name, profile.volume_offsets()))
-                        .collect()
-                );
-            }).unwrap();
+        closure_local!(@strong state, @strong settings_file => move |_main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
+            actions::create_custom_equalizer_profile(&state, &settings_file, custom_profile);
         }),
     );
 
     main_window.connect_closure(
         "delete-custom-equalizer-profile",
         false,
-        closure_local!(@strong settings_file => move |main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
-            settings_file.edit(|settings| {
-                settings.remove_custom_profile(&custom_profile.name());
-            }).unwrap();
-            settings_file.get(|settings| {
-                main_window.set_custom_profiles(
-                    settings.custom_profiles()
-                        .iter()
-                        .map(|(name, profile)| EqualizerCustomProfileObject::new(name, profile.volume_offsets()))
-                        .collect()
-                );
-            }).unwrap();
+        closure_local!(@strong state, @strong settings_file => move |_main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
+            actions::delete_custom_equalizer_profile(&state, &settings_file, &custom_profile);
         }),
     );
 
