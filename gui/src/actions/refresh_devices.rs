@@ -83,7 +83,7 @@ mod tests {
         let value = receiver.recv().await.expect("should receiver state update");
         match value {
             StateUpdate::SetDevices(devices) => assert_eq!(1, devices.len()),
-            // _ => panic!("got wrong state update: {value:?}"),
+            _ => panic!("got wrong state update: {value:?}"),
         }
     }
 }
