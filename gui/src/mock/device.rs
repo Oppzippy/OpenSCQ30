@@ -10,24 +10,24 @@ use tokio::sync::broadcast;
 mock! {
     #[derive(Debug)]
     pub Device {
-        fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState>;
-        fn mac_address(&self) -> openscq30_lib::Result<String>;
-        fn name(&self) -> openscq30_lib::Result<String>;
-        fn set_ambient_sound_mode(
+        pub fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState>;
+        pub fn mac_address(&self) -> openscq30_lib::Result<String>;
+        pub fn name(&self) -> openscq30_lib::Result<String>;
+        pub fn set_ambient_sound_mode(
             &self,
             ambient_sound_mode: AmbientSoundMode,
         ) -> openscq30_lib::Result<()>;
-        fn ambient_sound_mode(&self) -> AmbientSoundMode;
-        fn set_noise_canceling_mode(
+        pub fn ambient_sound_mode(&self) -> AmbientSoundMode;
+        pub fn set_noise_canceling_mode(
             &self,
             noise_canceling_mode: NoiseCancelingMode,
         ) -> openscq30_lib::Result<()>;
-        fn noise_canceling_mode(&self) -> NoiseCancelingMode;
-        fn set_equalizer_configuration(
+        pub fn noise_canceling_mode(&self) -> NoiseCancelingMode;
+        pub fn set_equalizer_configuration(
             &self,
             configuration: EqualizerConfiguration,
         ) -> openscq30_lib::Result<()>;
-        fn equalizer_configuration(&self) -> EqualizerConfiguration;
+        pub fn equalizer_configuration(&self) -> EqualizerConfiguration;
     }
 }
 

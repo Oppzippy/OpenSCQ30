@@ -11,7 +11,7 @@ pub use state::*;
 
 use crate::{objects::DeviceObject, widgets::Device};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum StateUpdate {
     SetDevices(Vec<Device>),
     SetLoading(bool),

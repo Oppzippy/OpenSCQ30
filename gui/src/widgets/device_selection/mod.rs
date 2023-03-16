@@ -5,7 +5,7 @@ use gtk::{
     subclass::prelude::ObjectSubclassIsExt,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Device {
     pub mac_address: String,
     pub name: String,

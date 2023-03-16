@@ -16,10 +16,6 @@ where
         handle.abort();
     }
     *state.selected_device.borrow_mut() = None;
-    state
-        .state_update_sender
-        .send(StateUpdate::SetLoading(false))
-        .unwrap();
 
     // Connect to new device
     if let Some(new_selected_device) = new_selected_device {
@@ -60,5 +56,88 @@ where
                         })
                     )
                 );
+    } else {
+        state
+            .state_update_sender
+            .send(StateUpdate::SetLoading(false))
+            .unwrap();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{collections::VecDeque, sync::Arc};
+
+    use mockall::predicate;
+    use openscq30_lib::packets::structures::{
+        AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode, PresetEqualizerProfile,
+    };
+    use tokio::sync::broadcast;
+
+    use crate::{
+        actions::{State, StateUpdate},
+        mock::{MockDevice, MockDeviceRegistry},
+        objects::DeviceObject,
+    };
+
+    use super::select_device;
+
+    #[gtk::test]
+    async fn it_works() {
+        crate::load_resources();
+        let mut registry = MockDeviceRegistry::new();
+        registry
+            .expect_device()
+            .with(predicate::eq("00:00:00:00:00:00"))
+            .return_once(|_mac_address| {
+                let mut device = MockDevice::new();
+                device
+                    .expect_subscribe_to_state_updates()
+                    .once()
+                    .return_once(|| {
+                        let (_sender, receiver) = broadcast::channel(10);
+                        receiver
+                    });
+                device
+                    .expect_ambient_sound_mode()
+                    .once()
+                    .return_const(AmbientSoundMode::Transparency);
+                device
+                    .expect_noise_canceling_mode()
+                    .once()
+                    .return_const(NoiseCancelingMode::Indoor);
+                device.expect_equalizer_configuration().once().return_const(
+                    EqualizerConfiguration::new_from_preset_profile(
+                        PresetEqualizerProfile::Acoustic,
+                    ),
+                );
+
+                Ok(Some(Arc::new(device)))
+            });
+
+        let (state, mut receiver) = State::new(registry);
+
+        let new_selected_device =
+            DeviceObject::new(&"Name".to_string(), &"00:00:00:00:00:00".to_string());
+        select_device(&state, Some(new_selected_device));
+        let mut expected_sequence = VecDeque::from([
+            StateUpdate::SetLoading(true),
+            StateUpdate::SetAmbientSoundMode(AmbientSoundMode::Transparency),
+            StateUpdate::SetNoiseCancelingMode(NoiseCancelingMode::Indoor),
+            StateUpdate::SetEqualizerConfiguration(
+                EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::Acoustic),
+            ),
+            StateUpdate::SetLoading(false),
+        ]);
+        loop {
+            if let Some(state_update) = receiver.recv().await {
+                let expected = expected_sequence.pop_front().unwrap();
+                assert_eq!(expected, state_update);
+
+                if expected_sequence.is_empty() {
+                    break;
+                }
+            }
+        }
     }
 }
