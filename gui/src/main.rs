@@ -5,6 +5,7 @@ use std::{
     sync::{Arc, Once},
 };
 
+use actions::StateUpdate;
 use gtk::{
     gio::{self, SimpleAction},
     glib::{self, clone, closure_local, JoinHandle, MainContext, OptionFlags},
@@ -15,7 +16,7 @@ use gtk::{
 use gtk_openscq30_lib::GtkDeviceRegistry;
 use logging_level::LoggingLevel;
 use openscq30_lib::{
-    api::device::{Device as _, DeviceDescriptor, DeviceRegistry},
+    api::device::{Device as _, DeviceRegistry},
     packets::structures::{
         AmbientSoundMode, EqualizerBandOffsets, EqualizerConfiguration, NoiseCancelingMode,
     },
@@ -23,13 +24,17 @@ use openscq30_lib::{
 };
 use settings::{EqualizerCustomProfile, SettingsFile};
 use swappable_broadcast::SwappableBroadcastReceiver;
+use tokio::sync::mpsc;
 use tracing::Level;
-use widgets::{Device, MainWindow};
+use widgets::MainWindow;
 
 use crate::objects::{DeviceObject, EqualizerCustomProfileObject};
 
+mod actions;
 mod gtk_openscq30_lib;
 mod logging_level;
+#[cfg(test)]
+mod mock;
 mod objects;
 mod settings;
 mod swappable_broadcast;
@@ -163,7 +168,18 @@ fn build_ui_2(
         Rc::new(SwappableBroadcastReceiver::new());
     let selected_device = Rc::new(RefCell::new(None));
 
+    let (ui_state_sender, mut ui_state_receiver) = mpsc::unbounded_channel::<StateUpdate>();
     let main_context = MainContext::default();
+    main_context.spawn_local(clone!(@weak main_window => async move {
+        loop {
+            if let Some(update) = ui_state_receiver.recv().await {
+                match update {
+                    StateUpdate::SetDevices(devices) => main_window.set_devices(&devices),
+                }
+            }
+        }
+    }));
+
     main_context.spawn_local(
         clone!(@weak main_window, @strong state_update_receiver => async move {
             loop {
@@ -175,30 +191,8 @@ fn build_ui_2(
     );
 
     let action_refresh_devices = SimpleAction::new("refresh-devices", None);
-    action_refresh_devices.connect_activate(clone!(@weak main_window, @strong gtk_registry, @strong selected_device, @strong state_update_receiver => move |_, _| {
-        let main_context = MainContext::default();
-        main_context.spawn_local(
-            clone!(@weak main_window, @strong gtk_registry, @strong selected_device, @strong state_update_receiver => async move {
-                match gtk_registry
-                    .device_descriptors()
-                    .await {
-                    Ok(descriptors) => {
-                        let model_devices = descriptors
-                            .iter()
-                            .map(|descriptor| Device { mac_address: descriptor.mac_address().to_owned(), name: descriptor.name().to_owned() })
-                            .collect::<Vec<_>>();
-                        if model_devices.is_empty() {
-                            state_update_receiver.replace_receiver(None).await;
-                            *selected_device.borrow_mut() = None;
-                        }
-                        main_window.set_devices(&model_devices);
-                    },
-                    Err(err) => {
-                        tracing::warn!("error obtaining device descriptors: {err}")
-                    },
-                }
-            }),
-        );
+    action_refresh_devices.connect_activate(clone!(@strong ui_state_sender, @strong gtk_registry, @strong selected_device, @strong state_update_receiver => move |_, _| {
+        actions::refresh_devices(&ui_state_sender, &gtk_registry, &selected_device, &state_update_receiver)
     }));
     main_window.add_action(&action_refresh_devices);
     application.set_accels_for_action("win.refresh-devices", &["<Ctrl>R", "F5"]);
