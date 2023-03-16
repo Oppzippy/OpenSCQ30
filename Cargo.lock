@@ -1275,7 +1275,7 @@ dependencies = [
  "tracing",
  "uuid",
  "weak-table",
- "windows 0.44.0",
+ "windows 0.46.0",
 ]
 
 [[package]]
@@ -2055,9 +2055,9 @@ dependencies = [
 
 [[package]]
 name = "windows"
-version = "0.44.0"
+version = "0.46.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e745dab35a0c4c77aa3ce42d595e13d2003d6902d6b08c9ef5fc326d08da12b"
+checksum = "cdacb41e6a96a052c6cb63a144f24900236121c6f63f4f8219fef5977ecb0c25"
 dependencies = [
  "windows-targets",
 ]
