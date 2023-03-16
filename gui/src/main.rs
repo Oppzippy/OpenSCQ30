@@ -228,7 +228,7 @@ fn build_ui_2(
         "custom-equalizer-profile-selected",
         false,
         closure_local!(@strong state, @strong settings_file => move |_main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
-            actions::set_custom_equalizer_configuration(&state, &settings_file, custom_profile);
+            actions::select_custom_equalizer_configuration(&state, &settings_file, custom_profile);
         }),
     );
 

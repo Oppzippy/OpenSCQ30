@@ -7,7 +7,7 @@ use crate::{objects::EqualizerCustomProfileObject, settings::SettingsFile};
 
 use super::{State, StateUpdate};
 
-pub fn set_custom_equalizer_configuration<T>(
+pub fn select_custom_equalizer_configuration<T>(
     state: &State<T>,
     settings_file: &SettingsFile,
     custom_profile: &EqualizerCustomProfileObject,
@@ -48,7 +48,7 @@ mod tests {
         settings::{EqualizerCustomProfile, SettingsFile},
     };
 
-    use super::set_custom_equalizer_configuration;
+    use super::select_custom_equalizer_configuration;
 
     #[gtk::test]
     async fn it_works() {
@@ -70,7 +70,7 @@ mod tests {
                 );
             })
             .unwrap();
-        set_custom_equalizer_configuration(&state, &settings_file, &custom_profile);
+        select_custom_equalizer_configuration(&state, &settings_file, &custom_profile);
 
         let state_update = receiver.recv().await.unwrap();
         assert_eq!(
