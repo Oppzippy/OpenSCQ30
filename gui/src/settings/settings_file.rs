@@ -11,14 +11,14 @@ use super::settings_state::SettingsState;
 
 #[derive(Debug)]
 pub struct SettingsFile {
-    settings_directory_path: PathBuf,
+    settings_file_path: PathBuf,
     state: RwLock<SettingsState>,
 }
 
 impl SettingsFile {
     pub fn new(path: PathBuf) -> Self {
         Self {
-            settings_directory_path: path,
+            settings_file_path: path,
             state: RwLock::new(SettingsState::default()),
         }
     }
@@ -69,10 +69,10 @@ impl SettingsFile {
     }
 
     fn get_file(&self, mode: Mode) -> anyhow::Result<File> {
-        let dir = self.settings_directory_path.parent().with_context(|| {
+        let dir = self.settings_file_path.parent().with_context(|| {
             format!(
                 "settings file has no parent directory: {}",
-                self.settings_directory_path.to_string_lossy()
+                self.settings_file_path.to_string_lossy()
             )
         })?;
         fs::create_dir_all(dir)
@@ -83,15 +83,13 @@ impl SettingsFile {
             Mode::Read => options.read(true),
             Mode::Write => options.write(true).create(true).truncate(true),
         };
-        let file = options
-            .open(&self.settings_directory_path)
-            .with_context(|| {
-                format!(
-                    "open file {} for {:?}",
-                    self.settings_directory_path.to_string_lossy(),
-                    mode,
-                )
-            })?;
+        let file = options.open(&self.settings_file_path).with_context(|| {
+            format!(
+                "open file {} for {:?}",
+                self.settings_file_path.to_string_lossy(),
+                mode,
+            )
+        })?;
         Ok(file)
     }
 }
