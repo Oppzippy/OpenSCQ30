@@ -2059,7 +2059,31 @@ version = "0.46.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cdacb41e6a96a052c6cb63a144f24900236121c6f63f4f8219fef5977ecb0c25"
 dependencies = [
+ "windows-implement",
+ "windows-interface",
  "windows-targets",
+]
+
+[[package]]
+name = "windows-implement"
+version = "0.46.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c9b4fb59529addad98f7677797a3449b0c79f527e1384a86f74557860d387c26"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "windows-interface"
+version = "0.46.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ac1f330b1edbef4041defea6c10bbb196add3c94c7e1b77778b6603e60ff0729"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
