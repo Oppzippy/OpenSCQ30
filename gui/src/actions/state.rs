@@ -1,4 +1,8 @@
-use std::{cell::RefCell, rc::Rc, sync::Arc};
+use std::{
+    cell::{Cell, RefCell},
+    rc::Rc,
+    sync::Arc,
+};
 
 use gtk::glib::JoinHandle;
 use openscq30_lib::{api::device::DeviceRegistry, state::DeviceState};
@@ -16,6 +20,7 @@ where
     pub registry: T,
     pub selected_device: RefCell<Option<Arc<T::DeviceType>>>,
     pub connect_to_device_handle: RefCell<Option<JoinHandle<()>>>,
+    pub is_refresh_in_progress: Cell<bool>,
     pub state_update_receiver: SwappableBroadcastReceiver<DeviceState>,
 }
 
@@ -29,6 +34,7 @@ where
             Rc::new(Self {
                 connect_to_device_handle: RefCell::new(None),
                 selected_device: RefCell::new(None),
+                is_refresh_in_progress: Cell::new(false),
                 state_update_receiver: SwappableBroadcastReceiver::new(),
                 registry,
                 state_update_sender: sender,
