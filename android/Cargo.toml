@@ -12,7 +12,7 @@ log = "0.4"
 tokio = { version = "1", features = ["rt-multi-thread"] }
 thiserror = "1.0"
 android_logger = "0.13.0"
-anyhow = "1.0.69"
+anyhow = "1.0.70"
 macaddr = "1.0.1"
 
 [build-dependencies]
