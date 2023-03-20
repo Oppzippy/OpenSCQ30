@@ -1230,7 +1230,7 @@ dependencies = [
  "heck",
  "macaddr",
  "openscq30_lib",
- "predicates 2.1.5",
+ "predicates 3.0.1",
  "tokio",
  "tracing",
  "tracing-subscriber",
@@ -1379,8 +1379,11 @@ checksum = "1ba7d6ead3e3966038f68caa9fc1f860185d95a793180bbcfe0d0da47b3961ed"
 dependencies = [
  "anstyle",
  "difflib",
+ "float-cmp",
  "itertools",
+ "normalize-line-endings",
  "predicates-core",
+ "regex",
 ]
 
 [[package]]
