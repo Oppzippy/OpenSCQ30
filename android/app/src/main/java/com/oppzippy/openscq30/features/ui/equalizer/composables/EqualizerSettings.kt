@@ -69,7 +69,7 @@ fun EqualizerSettings(
                     IconButton(onClick = { isDeleteDialogOpen = true }) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
-                            contentDescription = stringResource(R.string.add),
+                            contentDescription = stringResource(R.string.delete),
                         )
                     }
                 }
