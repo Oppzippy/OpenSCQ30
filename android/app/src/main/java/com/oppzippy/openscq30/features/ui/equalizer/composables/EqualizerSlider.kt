@@ -35,7 +35,7 @@ fun EqualizerSlider(
             TextField(
                 value = text,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.width(100.dp),
+                modifier = Modifier.testTag("equalizerInput").width(100.dp),
                 label = {
                     if (hz < 1000) {
                         Text(stringResource(R.string.hz, hz))

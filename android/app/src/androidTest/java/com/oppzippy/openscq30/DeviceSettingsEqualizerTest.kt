@@ -180,6 +180,115 @@ class DeviceSettingsEqualizerTest {
         }
     }
 
+    @Test
+    fun testCustomProfile() {
+        initializeDeviceFactoryWithOneDevice(
+            equalizerConfiguration = EqualizerConfiguration(
+                EqualizerBandOffsets(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
+            ),
+        )
+        composeRule.setContent {
+            DeviceSettingsActivityView(macAddress = "", onDeviceNotFound = {})
+        }
+        composeRule.onNode(equalizer).performClick()
+
+        composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.add))
+            .performClick()
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.name))
+            .performTextInput("Test Profile")
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.create)).performClick()
+        composeRule.onNodeWithText("Test Profile")
+            .assertExists("custom profile should be selected upon creation");
+
+        val inputs = composeRule.onAllNodesWithTag("equalizerInput")
+        inputs[0].performTextReplacement("6")
+        composeRule.onNodeWithText("Test Profile").assertDoesNotExist();
+        inputs[0].performTextReplacement("0")
+        composeRule.onNodeWithText("Test Profile")
+            .assertExists("custom profile should be selected when equalizer values change to match the custom profile");
+        composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.delete))
+            .performClick()
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.delete)).performClick()
+        composeRule.onNodeWithText("Test Profile").assertDoesNotExist()
+    }
+
+    @Test
+    fun testCustomProfileUniqueByName() {
+        initializeDeviceFactoryWithOneDevice(
+            equalizerConfiguration = EqualizerConfiguration(
+                EqualizerBandOffsets(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
+            ),
+        )
+        composeRule.setContent {
+            DeviceSettingsActivityView(macAddress = "", onDeviceNotFound = {})
+        }
+        composeRule.onNode(equalizer).performClick()
+
+        // Create first profile
+        composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.add))
+            .performClick()
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.name))
+            .performTextInput("Test Profile")
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.create)).performClick()
+
+        // Create second profile
+        val inputs = composeRule.onAllNodesWithTag("equalizerInput")
+        inputs[0].performTextReplacement("6")
+        composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.add))
+            .performClick()
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.name))
+            .performTextInput("Test Profile")
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.create)).performClick()
+
+        // Open dropdown and make sure there is only one
+        composeRule.onNodeWithText("Test Profile").performClick()
+        // 1 for the text that lists current selection, 1 for the item in the dropdown
+        composeRule.onAllNodesWithText("Test Profile").assertCountEquals(2)
+
+        composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.delete))
+            .performClick()
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.delete)).performClick()
+        composeRule.onNodeWithText("Test Profile").assertDoesNotExist()
+    }
+
+    @Test
+    fun testCustomProfileUniqueByValues() {
+        initializeDeviceFactoryWithOneDevice(
+            equalizerConfiguration = EqualizerConfiguration(
+                EqualizerBandOffsets(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
+            ),
+        )
+        composeRule.setContent {
+            DeviceSettingsActivityView(macAddress = "", onDeviceNotFound = {})
+        }
+        composeRule.onNode(equalizer).performClick()
+
+        // Create first profile
+        composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.add))
+            .performClick()
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.name))
+            .performTextInput("Test Profile 1")
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.create)).performClick()
+
+        // Create second profile
+        composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.add))
+            .performClick()
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.name))
+            .performTextInput("Test Profile 2")
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.create)).performClick()
+
+        // Open dropdown and make sure there is only one
+        composeRule.onNodeWithText("Test Profile 2").performClick()
+        // 1 for the text that lists current selection, 1 for the item in the dropdown
+        composeRule.onAllNodesWithText("Test Profile 2").assertCountEquals(2)
+        composeRule.onNodeWithText("Test Profile 1").assertDoesNotExist()
+
+        composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.delete))
+            .performClick()
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.delete)).performClick()
+        composeRule.onNodeWithText("Test Profile", substring = true).assertDoesNotExist()
+    }
+
     private fun initializeDeviceFactoryWithOneDevice(equalizerConfiguration: EqualizerConfiguration): Pair<SoundcoreDevice, SoundcoreDeviceState> {
         val device = mockk<SoundcoreDevice>()
         val state = mockk<SoundcoreDeviceState>()
