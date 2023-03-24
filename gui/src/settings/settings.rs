@@ -27,7 +27,7 @@ impl Default for Settings {
         let subdir_name: String = crate::APPLICATION_ID.application.to_lowercase();
 
         let state_dir = dirs::state_dir()
-            .or_else(|| dirs::data_local_dir())
+            .or_else(dirs::data_local_dir)
             .expect("failed to find suitable directory for state")
             .join(&subdir_name);
         let config_dir = dirs::config_dir()

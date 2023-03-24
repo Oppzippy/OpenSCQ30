@@ -260,7 +260,7 @@ fn build_ui_2(
         "delete-custom-equalizer-profile",
         false,
         closure_local!(@strong state, @strong settings => move |_main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
-            actions::delete_custom_equalizer_profile(&state, &settings.config, &custom_profile);
+            actions::delete_custom_equalizer_profile(&state, &settings.config, custom_profile);
         }),
     );
 
