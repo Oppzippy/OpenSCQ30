@@ -37,11 +37,8 @@ commits=$(get_commits_since_tag "$latest_tag")
 commits_lower_case=${commits,,}
 
 # allow for "type:" or "type(scope):"
-# explicit breaking change
-if [[ ! -z $(echo "$commits_lower_case" | grep -E "^\w+ breaking change(\([^\)]*\))?: ") ]]; then
-    bump_version "$latest_tag" 1
 # '!' suffix breaking change
-elif [[ ! -z $(echo "$commits_lower_case" | grep -E "^\w+ \w+(\([^\)]*\))?!: ") ]]; then
+if [[ ! -z $(echo "$commits_lower_case" | grep -E "^\w+ \w+(\([^\)]*\))?!: ") ]]; then
     bump_version "$latest_tag" 1
 # minor version bump
 elif [[ ! -z $(echo "$commits_lower_case" | grep -E "^\w+ feat(\([^\)]*\))?: ") ]]; then
