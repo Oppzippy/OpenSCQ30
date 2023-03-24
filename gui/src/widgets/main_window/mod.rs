@@ -14,7 +14,7 @@ use openscq30_lib::packets::structures::{
     AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode,
 };
 
-use crate::{objects::EqualizerCustomProfileObject, settings::SettingsFile};
+use crate::{objects::EqualizerCustomProfileObject, settings::Settings};
 
 use super::Device;
 
@@ -25,14 +25,14 @@ glib::wrapper! {
 }
 
 impl MainWindow {
-    pub fn new(application: &impl IsA<Application>, settings_file: Rc<SettingsFile>) -> Self {
+    pub fn new(application: &impl IsA<Application>, settings: Rc<Settings>) -> Self {
         let obj: Self = Object::builder()
             .property("application", application)
             .build();
 
         obj.imp()
-            .settings_file
-            .set(settings_file)
+            .settings
+            .set(settings)
             .expect("must be able to set settings file");
 
         obj.load_window_size();
@@ -40,20 +40,18 @@ impl MainWindow {
         obj
     }
 
-    fn settings_file(&self) -> &SettingsFile {
-        self.imp()
-            .settings_file
-            .get()
-            .expect("settings must be set")
+    fn settings_file(&self) -> &Settings {
+        self.imp().settings.get().expect("settings must be set")
     }
 
     fn save_window_size(&self) -> Result<(), glib::BoolError> {
         self.settings_file()
+            .state
             .edit(|settings| {
                 let size = self.default_size();
-                settings.set_window_width(size.0);
-                settings.set_window_height(size.1);
-                settings.set_maximized(self.is_maximized());
+                settings.window_width = size.0;
+                settings.window_height = size.1;
+                settings.is_maximized = self.is_maximized();
             })
             .expect("failed to edit settings");
 
@@ -62,9 +60,10 @@ impl MainWindow {
 
     fn load_window_size(&self) {
         self.settings_file()
+            .state
             .get(|settings| {
-                self.set_default_size(settings.window_width(), settings.window_height());
-                if settings.is_maximized() {
+                self.set_default_size(settings.window_width, settings.window_height);
+                if settings.is_maximized {
                     self.maximize();
                 }
             })

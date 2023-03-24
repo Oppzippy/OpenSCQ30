@@ -1,7 +1,11 @@
+mod config;
 mod equalizer_custom_profile;
+mod settings;
 mod settings_file;
-mod settings_state;
+mod state;
 
+pub use config::*;
 pub use equalizer_custom_profile::*;
+pub use settings::*;
 pub use settings_file::*;
-pub use settings_state::*;
+pub use state::*;

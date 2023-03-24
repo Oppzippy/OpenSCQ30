@@ -23,7 +23,7 @@ use once_cell::sync::OnceCell;
 
 use crate::{
     objects::{DeviceObject, EqualizerCustomProfileObject},
-    settings::SettingsFile,
+    settings::Settings,
     widgets::{Device, DeviceSelection, LoadingScreen, SelectedDeviceSettings},
 };
 
@@ -45,7 +45,7 @@ pub struct MainWindow {
     #[property(get, set)]
     pub loading: Cell<bool>,
 
-    pub settings_file: OnceCell<Rc<SettingsFile>>,
+    pub settings: OnceCell<Rc<Settings>>,
 }
 
 #[gtk::template_callbacks]

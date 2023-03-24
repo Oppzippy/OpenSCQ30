@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use gtk::{
     glib::{self, once_cell::sync::Lazy, subclass::Signal},
     prelude::{ObjectExt, StaticType},
@@ -14,11 +12,9 @@ use gtk::{
 };
 
 use gtk::subclass::widget::WidgetClassSubclassExt;
-use once_cell::sync::OnceCell;
 
 use crate::{
     objects::EqualizerCustomProfileObject,
-    settings::SettingsFile,
     widgets::{EqualizerSettings, GeneralSettings},
 };
 
@@ -31,8 +27,6 @@ pub struct SelectedDeviceSettings {
     pub general_settings: TemplateChild<GeneralSettings>,
     #[template_child]
     pub equalizer_settings: TemplateChild<EqualizerSettings>,
-
-    pub settings_file: OnceCell<Rc<SettingsFile>>,
 }
 
 #[gtk::template_callbacks]

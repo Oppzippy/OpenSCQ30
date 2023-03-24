@@ -2,14 +2,14 @@ use openscq30_lib::api::device::DeviceRegistry;
 
 use crate::{
     objects::EqualizerCustomProfileObject,
-    settings::{EqualizerCustomProfile, SettingsFile},
+    settings::{Config, EqualizerCustomProfile, SettingsFile},
 };
 
 use super::{State, StateUpdate};
 
 pub fn create_custom_equalizer_profile<T>(
     state: &State<T>,
-    settings_file: &SettingsFile,
+    settings_file: &SettingsFile<Config>,
     custom_profile: &EqualizerCustomProfileObject,
 ) where
     T: DeviceRegistry + Send + Sync + 'static,

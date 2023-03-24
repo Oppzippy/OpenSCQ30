@@ -6,20 +6,24 @@ use std::{
 };
 
 use anyhow::Context;
-
-use super::settings_state::SettingsState;
+use serde::{de::DeserializeOwned, Serialize};
 
 #[derive(Debug)]
-pub struct SettingsFile {
+pub struct SettingsFile<SettingsStateType> {
     settings_file_path: PathBuf,
-    state: RwLock<SettingsState>,
+    state: RwLock<SettingsStateType>,
 }
 
-impl SettingsFile {
+impl<SettingsStateType> SettingsFile<SettingsStateType>
+where
+    SettingsStateType: Default,
+    SettingsStateType: DeserializeOwned,
+    SettingsStateType: Serialize,
+{
     pub fn new(path: PathBuf) -> Self {
         Self {
             settings_file_path: path,
-            state: RwLock::new(SettingsState::default()),
+            state: RwLock::new(SettingsStateType::default()),
         }
     }
 
@@ -29,7 +33,7 @@ impl SettingsFile {
         file.read_to_string(&mut buffer)
             .context("read from config file")?;
         let settings =
-            toml::from_str::<SettingsState>(&buffer).context("parse toml config file")?;
+            toml::from_str::<SettingsStateType>(&buffer).context("parse toml config file")?;
 
         self.edit(|state| *state = settings)
             .context("update state")?;
@@ -38,7 +42,7 @@ impl SettingsFile {
 
     pub fn edit<F>(&self, f: F) -> anyhow::Result<()>
     where
-        F: FnOnce(&mut SettingsState),
+        F: FnOnce(&mut SettingsStateType),
     {
         let mut state = self
             .state
@@ -49,7 +53,7 @@ impl SettingsFile {
         Ok(())
     }
 
-    fn save(&self, state: &SettingsState) -> anyhow::Result<()> {
+    fn save(&self, state: &SettingsStateType) -> anyhow::Result<()> {
         let mut file = self.get_file(Mode::Write)?;
         let toml_string = toml::to_string(state)?;
         file.write_all(toml_string.as_bytes())?;
@@ -59,7 +63,7 @@ impl SettingsFile {
 
     pub fn get<F, T>(&self, f: F) -> anyhow::Result<T>
     where
-        F: FnOnce(&SettingsState) -> T,
+        F: FnOnce(&SettingsStateType) -> T,
     {
         let state = self
             .state

@@ -3,13 +3,16 @@ use openscq30_lib::{
     packets::structures::{EqualizerBandOffsets, EqualizerConfiguration},
 };
 
-use crate::{objects::EqualizerCustomProfileObject, settings::SettingsFile};
+use crate::{
+    objects::EqualizerCustomProfileObject,
+    settings::{Config, SettingsFile},
+};
 
 use super::{State, StateUpdate};
 
 pub fn select_custom_equalizer_configuration<T>(
     state: &State<T>,
-    settings_file: &SettingsFile,
+    settings_file: &SettingsFile<Config>,
     custom_profile: &EqualizerCustomProfileObject,
 ) where
     T: DeviceRegistry + Send + Sync + 'static,
@@ -45,7 +48,7 @@ mod tests {
         actions::{State, StateUpdate},
         mock::MockDeviceRegistry,
         objects::EqualizerCustomProfileObject,
-        settings::{EqualizerCustomProfile, SettingsFile},
+        settings::{Config, EqualizerCustomProfile, SettingsFile},
     };
 
     use super::select_custom_equalizer_configuration;
@@ -57,7 +60,7 @@ mod tests {
         let (state, mut receiver) = State::new(registry);
 
         let file = tempfile::NamedTempFile::new().unwrap();
-        let settings_file = SettingsFile::new(file.path().to_path_buf());
+        let settings_file = SettingsFile::<Config>::new(file.path().to_path_buf());
         let custom_profile = EqualizerCustomProfileObject::new(
             &"custom profile".to_string(),
             [1, 2, 3, 4, 5, 6, 7, 8],

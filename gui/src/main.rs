@@ -11,7 +11,7 @@ use gtk::{
 use gtk_openscq30_lib::GtkDeviceRegistry;
 use logging_level::LoggingLevel;
 use openscq30_lib::api::device::DeviceRegistry;
-use settings::SettingsFile;
+use settings::Settings;
 use tracing::Level;
 use widgets::MainWindow;
 
@@ -27,6 +27,18 @@ mod settings;
 mod swappable_broadcast;
 #[allow(clippy::new_without_default)]
 mod widgets;
+
+pub struct ApplicationId<'a> {
+    pub qualifier: &'a str,
+    pub organization: &'a str,
+    pub application: &'a str,
+}
+pub static APPLICATION_ID: ApplicationId = ApplicationId {
+    qualifier: "com",
+    organization: "oppzippy",
+    application: "OpenSCQ30",
+};
+pub static APPLICATION_ID_STR: &str = "com.oppzippy.OpenSCQ30";
 
 fn main() {
     load_resources();
@@ -44,7 +56,7 @@ pub fn load_resources() {
 #[cfg(not(feature = "libadwaita"))]
 fn run_application() {
     let app = gtk::Application::builder()
-        .application_id("com.oppzippy.OpenSCQ30")
+        .application_id(APPLICATION_ID_STR)
         .build();
     app.connect_activate(build_ui);
     handle_command_line_args(&app);
@@ -55,7 +67,7 @@ fn run_application() {
 #[cfg(feature = "libadwaita")]
 fn run_application() {
     let app = adw::Application::builder()
-        .application_id("com.oppzippy.OpenSCQ30")
+        .application_id(APPLICATION_ID_STR)
         .build();
     app.connect_activate(build_ui);
     handle_command_line_args(&app);
@@ -135,9 +147,13 @@ fn build_ui_2(
     application: &impl IsA<Application>,
     gtk_registry: GtkDeviceRegistry<impl DeviceRegistry + Send + Sync + 'static>,
 ) {
-    let settings_file = Rc::new(get_settings_file());
-    let main_window = MainWindow::new(application, settings_file.to_owned());
-    settings_file
+    let settings: Rc<Settings> = Default::default();
+    if let Err(err) = settings.load() {
+        tracing::warn!("initial load of settings file failed: {:?}", err)
+    }
+    let main_window = MainWindow::new(application, settings.to_owned());
+    settings
+        .config
         .get(|settings| {
             main_window.set_custom_profiles(
                 settings
@@ -227,38 +243,26 @@ fn build_ui_2(
     main_window.connect_closure(
         "custom-equalizer-profile-selected",
         false,
-        closure_local!(@strong state, @strong settings_file => move |_main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
-            actions::select_custom_equalizer_configuration(&state, &settings_file, custom_profile);
+        closure_local!(@strong state, @strong settings => move |_main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
+            actions::select_custom_equalizer_configuration(&state, &settings.config, custom_profile);
         }),
     );
 
     main_window.connect_closure(
         "create-custom-equalizer-profile",
         false,
-        closure_local!(@strong state, @strong settings_file => move |_main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
-            actions::create_custom_equalizer_profile(&state, &settings_file, custom_profile);
+        closure_local!(@strong state, @strong settings => move |_main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
+            actions::create_custom_equalizer_profile(&state, &settings.config, custom_profile);
         }),
     );
 
     main_window.connect_closure(
         "delete-custom-equalizer-profile",
         false,
-        closure_local!(@strong state, @strong settings_file => move |_main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
-            actions::delete_custom_equalizer_profile(&state, &settings_file, &custom_profile);
+        closure_local!(@strong state, @strong settings => move |_main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
+            actions::delete_custom_equalizer_profile(&state, &settings.config, &custom_profile);
         }),
     );
 
     main_window.present();
-}
-
-fn get_settings_file() -> SettingsFile {
-    let settings = SettingsFile::new(
-        glib::user_data_dir()
-            .join("OpenSCQ30")
-            .join("settings.toml"),
-    );
-    if let Err(err) = settings.load() {
-        tracing::warn!("initial load of settings file failed: {:?}", err)
-    }
-    settings
 }
