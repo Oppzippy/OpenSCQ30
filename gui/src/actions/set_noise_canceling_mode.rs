@@ -14,9 +14,14 @@ where
 {
     let main_context = MainContext::default();
     main_context.spawn_local(clone!(@strong state => async move {
-        let Some(device) = &*state.selected_device.borrow() else {
-            tracing::warn!("no device is selected");
-            return;
+        let device = {
+            let borrow = state.selected_device.borrow();
+            let Some(device) = &*borrow else {
+                tracing::warn!("no device is selected");
+                return;
+            };
+            // Clone the Arc and release the borrow so we can hold the value across await points safely
+            device.clone()
         };
         let Some(noise_canceling_mode) = NoiseCancelingMode::from_id(noise_canceling_mode_id) else {
             tracing::error!("invalid noise canceling mode: {noise_canceling_mode_id}");
