@@ -28,7 +28,7 @@ modules:
       - cargo --offline fetch --manifest-path Cargo.toml --verbose
       - cargo --offline build --release --features libadwaita --package openscq30_gui --verbose
       - install -Dm755 ./target/release/openscq30_gui -t /app/bin/
-      - install -Dm644 ./flatpak/${FLATPAK_ID}.desktop -t /app/share/applications/
+      - install -Dm644 ./ci/flatpak/${FLATPAK_ID}.desktop -t /app/share/applications/
       - install -Dm644 ./gui/resources/icon.svg /app/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg
     sources:
       - type: dir
