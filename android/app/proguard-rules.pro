@@ -19,3 +19,8 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Some of the methods are native, and others are called by native code. We can do 'native <method>'
+# to match native methods, but there's no easy way to do the same for java methods called from
+# native code. Just keep everything native related instead.
+-keep class com.oppzippy.openscq30.lib.** { *; }
