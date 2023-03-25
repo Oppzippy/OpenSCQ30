@@ -1,6 +1,5 @@
 use std::rc::Rc;
 
-use gtk::glib::{clone, MainContext};
 use openscq30_lib::{
     api::device::{Device, DeviceRegistry},
     packets::structures::AmbientSoundMode,
@@ -8,29 +7,21 @@ use openscq30_lib::{
 
 use super::State;
 
-pub fn set_ambient_sound_mode<T>(state: &Rc<State<T>>, ambient_sound_mode_id: u8)
+pub async fn set_ambient_sound_mode<T>(
+    state: &Rc<State<T>>,
+    ambient_sound_mode_id: u8,
+) -> anyhow::Result<()>
 where
     T: DeviceRegistry + Send + Sync + 'static,
 {
-    let main_context = MainContext::default();
-    main_context.spawn_local(clone!(@strong state => async move {
-        let device = {
-            let borrow = state.selected_device.borrow();
-            let Some(device) = &*borrow else {
-                tracing::warn!("no device is selected");
-                return;
-            };
-            // Clone the Arc and release the borrow so we can hold the value across await points safely
-            device.clone()
-        };
-        let Some(ambient_sound_mode) = AmbientSoundMode::from_id(ambient_sound_mode_id) else {
-            tracing::warn!("invalid ambient sound mode: {ambient_sound_mode_id}");
-            return;
-        };
-        if let Err(err) = device.set_ambient_sound_mode(ambient_sound_mode).await {
-            tracing::error!("error setting ambient sound mode: {err}")
-        }
-    }));
+    let device = state
+        .selected_device()
+        .ok_or_else(|| anyhow::anyhow!("no device is selected"))?;
+
+    let ambient_sound_mode = AmbientSoundMode::from_id(ambient_sound_mode_id)
+        .ok_or_else(|| anyhow::anyhow!("invalid ambient sound mode: {ambient_sound_mode_id}"))?;
+    device.set_ambient_sound_mode(ambient_sound_mode).await?;
+    Ok(())
 }
 
 #[cfg(test)]
@@ -60,6 +51,8 @@ mod tests {
             .return_once(|_ambient_sound_mode| Ok(()));
         *state.selected_device.borrow_mut() = Some(Arc::new(selected_device));
 
-        set_ambient_sound_mode(&state, AmbientSoundMode::NoiseCanceling.id());
+        set_ambient_sound_mode(&state, AmbientSoundMode::NoiseCanceling.id())
+            .await
+            .unwrap();
     }
 }

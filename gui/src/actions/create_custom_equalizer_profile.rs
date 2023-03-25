@@ -11,33 +11,31 @@ pub fn create_custom_equalizer_profile<T>(
     state: &State<T>,
     settings_file: &SettingsFile<Config>,
     custom_profile: &EqualizerCustomProfileObject,
-) where
+) -> anyhow::Result<()>
+where
     T: DeviceRegistry + Send + Sync + 'static,
 {
-    settings_file
-        .edit(|settings| {
-            settings.set_custom_profile(
-                custom_profile.name(),
-                EqualizerCustomProfile::new(custom_profile.volume_offsets()),
-            );
-        })
-        .unwrap();
-    settings_file
-        .get(|settings| {
-            state
-                .state_update_sender
-                .send(StateUpdate::SetEqualizerCustomProfiles(
-                    settings
-                        .custom_profiles()
-                        .iter()
-                        .map(|(name, profile)| {
-                            EqualizerCustomProfileObject::new(name, profile.volume_offsets())
-                        })
-                        .collect(),
-                ))
-                .unwrap();
-        })
-        .unwrap();
+    settings_file.edit(|settings| {
+        settings.set_custom_profile(
+            custom_profile.name(),
+            EqualizerCustomProfile::new(custom_profile.volume_offsets()),
+        );
+    })?;
+    settings_file.get(|settings| {
+        state
+            .state_update_sender
+            .send(StateUpdate::SetEqualizerCustomProfiles(
+                settings
+                    .custom_profiles()
+                    .iter()
+                    .map(|(name, profile)| {
+                        EqualizerCustomProfileObject::new(name, profile.volume_offsets())
+                    })
+                    .collect(),
+            ))
+            .unwrap();
+    })?;
+    Ok(())
 }
 
 #[cfg(test)]
@@ -63,7 +61,7 @@ mod tests {
             &"custom profile".to_string(),
             [1, 2, 3, 4, 5, 6, 7, 8],
         );
-        create_custom_equalizer_profile(&state, &settings_file, &custom_profile);
+        create_custom_equalizer_profile(&state, &settings_file, &custom_profile).unwrap();
 
         let state_update = receiver.recv().await.unwrap();
         if let StateUpdate::SetEqualizerCustomProfiles(profiles) = state_update {

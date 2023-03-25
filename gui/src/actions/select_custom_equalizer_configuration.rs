@@ -1,3 +1,4 @@
+use anyhow::Context;
 use openscq30_lib::{
     api::device::DeviceRegistry,
     packets::structures::{EqualizerBandOffsets, EqualizerConfiguration},
@@ -14,29 +15,30 @@ pub fn select_custom_equalizer_configuration<T>(
     state: &State<T>,
     settings_file: &SettingsFile<Config>,
     custom_profile: &EqualizerCustomProfileObject,
-) where
+) -> anyhow::Result<()>
+where
     T: DeviceRegistry + Send + Sync + 'static,
 {
-    let result = settings_file.get(|settings| {
-        match settings.custom_profiles().get(&custom_profile.name()) {
-            Some(profile) => {
-                state
-                    .state_update_sender
-                    .send(StateUpdate::SetEqualizerConfiguration(
-                        EqualizerConfiguration::new_custom_profile(EqualizerBandOffsets::new(
-                            profile.volume_offsets(),
-                        )),
-                    ))
-                    .unwrap();
-            }
-            None => {
-                tracing::warn!("custom profile does not exist: {}", custom_profile.name());
-            }
-        }
-    });
-    if let Err(err) = result {
-        tracing::warn!("unable to get settings file: {:?}", err);
-    }
+    settings_file
+        .get(|settings| {
+            let profile = settings
+                .custom_profiles()
+                .get(&custom_profile.name())
+                .ok_or_else(|| {
+                    anyhow::anyhow!("custom profile does not exist: {}", custom_profile.name())
+                })?;
+            state
+                .state_update_sender
+                .send(StateUpdate::SetEqualizerConfiguration(
+                    EqualizerConfiguration::new_custom_profile(EqualizerBandOffsets::new(
+                        profile.volume_offsets(),
+                    )),
+                ))
+                .map_err(|err| anyhow::anyhow!("{err}"))?;
+            Ok(()) as anyhow::Result<()>
+        })
+        .context("unable to get equalizer config from settings file")??;
+    Ok(())
 }
 
 #[cfg(test)]
@@ -73,7 +75,7 @@ mod tests {
                 );
             })
             .unwrap();
-        select_custom_equalizer_configuration(&state, &settings_file, &custom_profile);
+        select_custom_equalizer_configuration(&state, &settings_file, &custom_profile).unwrap();
 
         let state_update = receiver.recv().await.unwrap();
         assert_eq!(

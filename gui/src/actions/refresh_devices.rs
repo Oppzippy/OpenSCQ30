@@ -1,41 +1,42 @@
 use std::rc::Rc;
 
-use gtk::glib::{clone, MainContext};
 use openscq30_lib::api::device::{DeviceDescriptor, DeviceRegistry};
 
 use crate::widgets::Device;
 
 use super::{State, StateUpdate};
 
-pub fn refresh_devices<T>(state: &Rc<State<T>>)
+pub async fn refresh_devices<T>(state: &Rc<State<T>>) -> anyhow::Result<()>
 where
     T: DeviceRegistry + Send + Sync + 'static,
 {
     if !state.is_refresh_in_progress.get() {
-        state.is_refresh_in_progress.set(true);
-        MainContext::default().spawn_local(clone!(@strong state => async move {
-            match state.registry.device_descriptors().await {
-                Ok(descriptors) => {
-                    let model_devices = descriptors
-                        .iter()
-                        .map(|descriptor| Device {
-                            mac_address: descriptor.mac_address().to_owned(),
-                            name: descriptor.name().to_owned(),
-                        })
-                        .collect::<Vec<_>>();
-                    if model_devices.is_empty() {
-                        state.state_update_receiver.replace_receiver(None).await;
-                        *state.selected_device.borrow_mut() = None;
-                    }
-                    state.state_update_sender.send(StateUpdate::SetDevices(model_devices)).expect("error sending");
-                }
-                Err(err) => {
-                    tracing::warn!("error obtaining device descriptors: {err}")
-                }
-            }
+        let descriptors = {
+            state.is_refresh_in_progress.set(true);
+            let descriptors_result = state.registry.device_descriptors().await;
             state.is_refresh_in_progress.set(false);
-        }));
+            descriptors_result?
+        };
+
+        let model_devices = descriptors
+            .iter()
+            .map(|descriptor| Device {
+                mac_address: descriptor.mac_address().to_owned(),
+                name: descriptor.name().to_owned(),
+            })
+            .collect::<Vec<_>>();
+
+        if model_devices.is_empty() {
+            // Selection will not change automatically if device list is empty
+            state.state_update_receiver.replace_receiver(None).await;
+            *state.selected_device.borrow_mut() = None;
+        }
+        state
+            .state_update_sender
+            .send(StateUpdate::SetDevices(model_devices))
+            .map_err(|err| anyhow::anyhow!("{err}"))?;
     }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -45,7 +46,7 @@ mod tests {
         actions::{State, StateUpdate},
         mock::{MockDescriptor, MockDeviceRegistry},
     };
-    use gtk::glib;
+    use gtk::glib::{self, clone, MainContext};
     use std::time::Duration;
 
     #[gtk::test]
@@ -63,7 +64,7 @@ mod tests {
 
         let (state, mut receiver) = State::new(registry);
 
-        refresh_devices(&state);
+        refresh_devices(&state).await.unwrap();
         let value = receiver.recv().await.expect("should receive state update");
         match value {
             StateUpdate::SetDevices(devices) => assert_eq!(1, devices.len()),
@@ -86,8 +87,12 @@ mod tests {
 
         let (state, mut receiver) = State::new(registry);
 
-        refresh_devices(&state);
-        refresh_devices(&state);
+        MainContext::default().spawn_local(clone!(@strong state => async move {
+            refresh_devices(&state).await.unwrap();
+        }));
+        MainContext::default().spawn_local(clone!(@strong state => async move {
+            refresh_devices(&state).await.unwrap();
+        }));
         let _first_state_update = receiver
             .recv()
             .await
@@ -100,7 +105,7 @@ mod tests {
             None, second_state_update,
             "should not receive second state update"
         );
-        refresh_devices(&state);
+        refresh_devices(&state).await.unwrap();
         let _third_state_update = receiver
             .recv()
             .await

@@ -1,6 +1,7 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use async_trait::async_trait;
+use gtk::glib::timeout_future;
 use mockall::mock;
 use openscq30_lib::api::device::DeviceRegistry;
 
@@ -19,12 +20,15 @@ impl DeviceRegistry for MockDeviceRegistry {
     type DescriptorType = MockDescriptor;
 
     async fn device_descriptors(&self) -> openscq30_lib::Result<Vec<Self::DescriptorType>> {
+        timeout_future(Duration::from_millis(10)).await;
         self.device_descriptors()
     }
+
     async fn device(
         &self,
         mac_address: &str,
     ) -> openscq30_lib::Result<Option<Arc<Self::DeviceType>>> {
+        timeout_future(Duration::from_millis(10)).await;
         self.device(mac_address)
     }
 }

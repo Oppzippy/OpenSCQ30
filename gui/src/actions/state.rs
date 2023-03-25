@@ -42,4 +42,8 @@ where
             receiver,
         )
     }
+
+    pub fn selected_device(&self) -> Option<Arc<T::DeviceType>> {
+        self.selected_device.borrow().clone()
+    }
 }

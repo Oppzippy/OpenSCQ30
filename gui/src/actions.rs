@@ -26,7 +26,6 @@ use crate::{
     widgets::Device,
 };
 
-#[allow(clippy::enum_variant_names)] // It's coincidental that all names start with Set.
 #[derive(Debug, PartialEq, Eq)]
 pub enum StateUpdate {
     SetDevices(Vec<Device>),
@@ -36,4 +35,5 @@ pub enum StateUpdate {
     SetEqualizerConfiguration(EqualizerConfiguration),
     SetSelectedDevice(Option<DeviceObject>),
     SetEqualizerCustomProfiles(Vec<EqualizerCustomProfileObject>),
+    AddToast(String),
 }

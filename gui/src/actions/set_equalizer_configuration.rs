@@ -1,6 +1,5 @@
 use std::rc::Rc;
 
-use gtk::glib::{clone, MainContext};
 use openscq30_lib::{
     api::device::{Device, DeviceRegistry},
     packets::structures::EqualizerConfiguration,
@@ -8,27 +7,20 @@ use openscq30_lib::{
 
 use super::State;
 
-pub fn set_equalizer_configuration<T>(
+pub async fn set_equalizer_configuration<T>(
     state: &Rc<State<T>>,
     equalizer_configuration: EqualizerConfiguration,
-) where
+) -> anyhow::Result<()>
+where
     T: DeviceRegistry + Send + Sync + 'static,
 {
-    let main_context = MainContext::default();
-    main_context.spawn_local(clone!(@strong state => async move {
-        let device = {
-            let borrow = state.selected_device.borrow();
-            let Some(device) = &*borrow else {
-                tracing::warn!("no device is selected");
-                return;
-            };
-            // Clone the arc and release the borrow so we can hold the value across await points safely
-            device.clone()
-        };
-        if let Err(err) = device.set_equalizer_configuration(equalizer_configuration).await {
-            tracing::error!("error setting equalizer configuration: {err}");
-        }
-    }));
+    let device = state
+        .selected_device()
+        .ok_or_else(|| anyhow::anyhow!("no device is selected"))?;
+    device
+        .set_equalizer_configuration(equalizer_configuration)
+        .await?;
+    Ok(())
 }
 
 #[cfg(test)]
@@ -63,6 +55,8 @@ mod tests {
         set_equalizer_configuration(
             &state,
             EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::Acoustic),
-        );
+        )
+        .await
+        .unwrap();
     }
 }

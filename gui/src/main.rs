@@ -1,6 +1,8 @@
 use std::{rc::Rc, str::FromStr, sync::Once};
 
 use actions::{State, StateUpdate};
+use adw::Toast;
+use anyhow::Context;
 use gtk::{
     gio::{self, SimpleAction},
     glib::{self, clone, closure_local, MainContext, OptionFlags},
@@ -170,10 +172,22 @@ fn build_ui_2(
                     StateUpdate::SetEqualizerConfiguration(equalizer_configuration) => main_window.set_equalizer_configuration(&equalizer_configuration),
                     StateUpdate::SetSelectedDevice(device) => main_window.set_property("selected-device", device),
                     StateUpdate::SetEqualizerCustomProfiles(custom_profiles) => main_window.set_custom_profiles(custom_profiles),
+                    StateUpdate::AddToast(text) => main_window.add_toast(Toast::builder().title(&text).timeout(15).build()),
                 }
             }
         }
     }));
+
+    fn handle_error<T>(err: anyhow::Error, state: &State<T>)
+    where
+        T: DeviceRegistry + Send + Sync,
+    {
+        tracing::error!("{err:?}");
+        state
+            .state_update_sender
+            .send(StateUpdate::AddToast(format!("{err:#}")))
+            .unwrap();
+    }
 
     main_context.spawn_local(clone!(@weak main_window, @strong state => async move {
         loop {
@@ -185,7 +199,12 @@ fn build_ui_2(
 
     let action_refresh_devices = SimpleAction::new("refresh-devices", None);
     action_refresh_devices.connect_activate(clone!(@strong state => move |_, _| {
-        actions::refresh_devices(&state);
+        MainContext::default().spawn_local(clone!(@strong state => async move {
+            actions::refresh_devices(&state)
+                .await
+                .context("refresh devices")
+                .unwrap_or_else(|err| handle_error(err, &state));
+        }));
     }));
     main_window.add_action(&action_refresh_devices);
     application.set_accels_for_action("win.refresh-devices", &["<Ctrl>R", "F5"]);
@@ -200,7 +219,9 @@ fn build_ui_2(
             actions::set_device(
                 &state,
                 main_window.selected_device(),
-            );
+            )
+            .context("select device")
+            .unwrap_or_else(|err| handle_error(err, &state));
         }),
     );
 
@@ -208,7 +229,12 @@ fn build_ui_2(
         "ambient-sound-mode-selected",
         false,
         closure_local!(@strong state => move |_main_window: MainWindow, ambient_sound_mode_id: u8| {
-            actions::set_ambient_sound_mode(&state, ambient_sound_mode_id);
+            MainContext::default().spawn_local(clone!(@strong state => async move {
+                actions::set_ambient_sound_mode(&state, ambient_sound_mode_id)
+                .await
+                .context("ambient sound mode selected")
+                .unwrap_or_else(|err| handle_error(err, &state));
+            }));
         }),
     );
 
@@ -216,7 +242,12 @@ fn build_ui_2(
         "noise-canceling-mode-selected",
         false,
         closure_local!(@strong state => move |_main_window: MainWindow, noise_canceling_mode_id: u8| {
-            actions::set_noise_canceling_mode(&state, noise_canceling_mode_id);
+            MainContext::default().spawn_local(clone!(@strong state => async move {
+                actions::set_noise_canceling_mode(&state, noise_canceling_mode_id)
+                .await
+                .context("noise canceling mode selected")
+                .unwrap_or_else(|err| handle_error(err, &state));
+            }));
         }),
     );
 
@@ -224,7 +255,12 @@ fn build_ui_2(
         "apply-equalizer-settings",
         false,
         closure_local!(@strong state => move |main_window: MainWindow| {
-            actions::set_equalizer_configuration(&state, main_window.equalizer_configuration());
+            MainContext::default().spawn_local(clone!(@strong state => async move {
+                actions::set_equalizer_configuration(&state, main_window.equalizer_configuration())
+                .await
+                .context("apply equalizer settings")
+                .unwrap_or_else(|err| handle_error(err, &state));
+            }));
         }),
     );
 
@@ -232,7 +268,9 @@ fn build_ui_2(
         "custom-equalizer-profile-selected",
         false,
         closure_local!(@strong state, @strong settings => move |_main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
-            actions::select_custom_equalizer_configuration(&state, &settings.config, custom_profile);
+            actions::select_custom_equalizer_configuration(&state, &settings.config, custom_profile)
+                .context("custom equalizer profile selected")
+                .unwrap_or_else(|err| handle_error(err, &state));
         }),
     );
 
@@ -240,7 +278,9 @@ fn build_ui_2(
         "create-custom-equalizer-profile",
         false,
         closure_local!(@strong state, @strong settings => move |_main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
-            actions::create_custom_equalizer_profile(&state, &settings.config, custom_profile);
+            actions::create_custom_equalizer_profile(&state, &settings.config, custom_profile)
+                .context("create custom equalizer profile")
+                .unwrap_or_else(|err| handle_error(err, &state));
         }),
     );
 
@@ -248,7 +288,9 @@ fn build_ui_2(
         "delete-custom-equalizer-profile",
         false,
         closure_local!(@strong state, @strong settings => move |_main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
-            actions::delete_custom_equalizer_profile(&state, &settings.config, custom_profile);
+            actions::delete_custom_equalizer_profile(&state, &settings.config, custom_profile)
+                .context("delete custom equalizer profile")
+                .unwrap_or_else(|err| handle_error(err, &state));
         }),
     );
 

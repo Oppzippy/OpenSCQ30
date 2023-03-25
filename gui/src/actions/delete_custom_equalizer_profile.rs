@@ -11,30 +11,28 @@ pub fn delete_custom_equalizer_profile<T>(
     state: &State<T>,
     settings_file: &SettingsFile<Config>,
     custom_profile: &EqualizerCustomProfileObject,
-) where
+) -> anyhow::Result<()>
+where
     T: DeviceRegistry + Send + Sync + 'static,
 {
-    settings_file
-        .edit(|settings| {
-            settings.remove_custom_profile(&custom_profile.name());
-        })
-        .unwrap();
-    settings_file
-        .get(|settings| {
-            state
-                .state_update_sender
-                .send(StateUpdate::SetEqualizerCustomProfiles(
-                    settings
-                        .custom_profiles()
-                        .iter()
-                        .map(|(name, profile)| {
-                            EqualizerCustomProfileObject::new(name, profile.volume_offsets())
-                        })
-                        .collect(),
-                ))
-                .unwrap();
-        })
-        .unwrap();
+    settings_file.edit(|settings| {
+        settings.remove_custom_profile(&custom_profile.name());
+    })?;
+    settings_file.get(|settings| {
+        state
+            .state_update_sender
+            .send(StateUpdate::SetEqualizerCustomProfiles(
+                settings
+                    .custom_profiles()
+                    .iter()
+                    .map(|(name, profile)| {
+                        EqualizerCustomProfileObject::new(name, profile.volume_offsets())
+                    })
+                    .collect(),
+            ))
+            .unwrap();
+    })?;
+    Ok(())
 }
 
 #[cfg(test)]
@@ -68,7 +66,7 @@ mod tests {
                 );
             })
             .unwrap();
-        delete_custom_equalizer_profile(&state, &settings_file, &custom_profile);
+        delete_custom_equalizer_profile(&state, &settings_file, &custom_profile).unwrap();
 
         let state_update = receiver.recv().await.unwrap();
         assert_eq!(
