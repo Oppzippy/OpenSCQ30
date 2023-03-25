@@ -1,0 +1,8 @@
+src/widgets/device_selection/template.ui
+src/widgets/equalizer/template.ui
+src/widgets/equalizer_settings/template.ui
+src/widgets/general_settings/template.ui
+src/widgets/loading_screen/template.ui
+src/widgets/main_window/template.ui
+src/widgets/selected_device_settings/template.ui
+src/widgets/volume_slider/template.ui

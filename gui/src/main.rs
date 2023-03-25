@@ -1,8 +1,9 @@
-use std::{rc::Rc, str::FromStr, sync::Once};
+use std::{env, path::PathBuf, rc::Rc, str::FromStr, sync::Once};
 
 use actions::{State, StateUpdate};
 use adw::Toast;
-use anyhow::Context;
+use anyhow::{bail, Context};
+use gettextrs::LocaleCategory;
 use gtk::{
     gio::{self, SimpleAction},
     glib::{self, clone, closure_local, MainContext, OptionFlags},
@@ -43,8 +44,35 @@ pub static APPLICATION_ID: ApplicationId = ApplicationId {
 pub static APPLICATION_ID_STR: &str = "com.oppzippy.OpenSCQ30";
 
 fn main() {
+    if let Err(err) = set_up_gettext() {
+        eprintln!("failed to set up gettext, using default locale: {err}");
+    }
     load_resources();
     run_application();
+}
+
+fn set_up_gettext() -> anyhow::Result<()> {
+    match gettextrs::setlocale(LocaleCategory::LcAll, "") {
+        Some(_) => (),
+        None => eprintln!("failed to set locale"),
+    }
+    gettextrs::bindtextdomain(APPLICATION_ID_STR, get_locales_dir()?)?;
+    gettextrs::bind_textdomain_codeset(APPLICATION_ID_STR, "UTF-8")?;
+    gettextrs::textdomain(APPLICATION_ID_STR)?;
+    Ok(())
+}
+
+fn get_locales_dir() -> anyhow::Result<PathBuf> {
+    let locales_dir_name = "locales";
+    let installation_locale_dir = env::current_exe()?.join(locales_dir_name);
+    if installation_locale_dir.is_dir() {
+        return Ok(installation_locale_dir);
+    }
+    let pwd_locale_dir = env::current_dir()?.join(locales_dir_name);
+    if pwd_locale_dir.is_dir() {
+        return Ok(pwd_locale_dir);
+    }
+    bail!("could not find locales dir");
 }
 
 static LOAD_RESOURCES: Once = Once::new();

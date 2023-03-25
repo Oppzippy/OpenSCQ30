@@ -26,6 +26,7 @@
         </child>
         <child>
             <object class="GtkLabel" id="band_label">
+                <!-- TODO localize -->
                 <property name="label">200hz</property>
             </object>
         </child>

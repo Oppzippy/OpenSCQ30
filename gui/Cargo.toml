@@ -16,6 +16,7 @@ tracing = "0.1"
 tracing-subscriber = "0.3"
 adw = { version = "0.3", package = "libadwaita" }
 gtk = { version = "0.6", package = "gtk4" }
+gettext-rs = { version = "0.7", features = ["gettext-system"] }
 strum = { version = "0.24", features = ["derive"] }
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.7.2"

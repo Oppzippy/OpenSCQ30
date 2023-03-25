@@ -14,7 +14,8 @@
                 <property name="spacing">10</property>
                 <child>
                     <object class="GtkLabel" id="label">
-                        <property name="label">Device</property>
+                        <property name="label" translatable="yes"
+                            context="bluetooth device selection">Device</property>
                     </object>
                 </child>
 
@@ -26,7 +27,7 @@
                         </accessibility>
                     </object>
                 </child>
-                
+
             </object>
         </child>
 
@@ -37,7 +38,7 @@
                 <child>
                     <object class="GtkButton">
                         <property name="hexpand">true</property>
-                        <property name="label">Connect</property>
+                        <property name="label" translatable="yes" context="connect to device">Connect</property>
                         <signal name="clicked" handler="handle_connect_clicked" swapped="true" />
                     </object>
                 </child>
@@ -45,7 +46,7 @@
                 <child>
                     <object class="GtkButton">
                         <property name="hexpand">true</property>
-                        <property name="label">Refresh</property>
+                        <property name="label" translatable="yes" context="refresh devices">Refresh</property>
                         <property name="action-name">win.refresh-devices</property>
                     </object>
                 </child>

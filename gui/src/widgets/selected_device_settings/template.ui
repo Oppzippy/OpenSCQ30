@@ -21,7 +21,7 @@
                 </child>
                 <child type="tab">
                     <object class="GtkLabel">
-                        <property name="label">General</property>
+                        <property name="label" translatable="yes" context="general settings">General</property>
                     </object>
                 </child>
                 <child>
@@ -42,7 +42,7 @@
                 </child>
                 <child type="tab">
                     <object class="GtkLabel">
-                        <property name="label">Equalizer</property>
+                        <property name="label" translatable="yes" context="equalizer settings">Equalizer</property>
                     </object>
                 </child>
             </object>

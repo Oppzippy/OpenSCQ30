@@ -10,7 +10,7 @@
                 <!-- Ambient Sound Mode -->
                 <child>
                     <object class="GtkLabel" id="ambient_sound_mode_label">
-                        <property name="label">Ambient Sound Mode</property>
+                        <property name="label" translatable="yes">Ambient Sound Mode</property>
                         <property name="margin-start">10</property>
                         <property name="margin-end">10</property>
                         <layout>
@@ -22,7 +22,7 @@
                 <child>
                     <object class="GtkToggleButton" id="normal_mode">
                         <signal name="toggled" handler="handle_normal_mode_clicked" swapped="true" />
-                        <property name="label">Normal</property>
+                        <property name="label" translatable="yes" context="ambient sound mode">Normal</property>
                         <property name="hexpand">true</property>
                         <layout>
                             <property name="column">1</property>
@@ -35,9 +35,10 @@
                 </child>
                 <child>
                     <object class="GtkToggleButton" id="transparency_mode">
-                        <signal name="toggled" handler="handle_transparency_mode_clicked" swapped="true" />
+                        <signal name="toggled" handler="handle_transparency_mode_clicked"
+                            swapped="true" />
                         <property name="group">normal_mode</property>
-                        <property name="label">Transparency</property>
+                        <property name="label" translatable="yes" context="ambient sound mode">Transparency</property>
                         <property name="hexpand">true</property>
                         <layout>
                             <property name="column">2</property>
@@ -50,9 +51,10 @@
                 </child>
                 <child>
                     <object class="GtkToggleButton" id="noise_canceling_mode">
-                        <signal name="toggled" handler="handle_noise_canceling_mode_clicked" swapped="true" />
+                        <signal name="toggled" handler="handle_noise_canceling_mode_clicked"
+                            swapped="true" />
                         <property name="group">transparency_mode</property>
-                        <property name="label">Noise Canceling</property>
+                        <property name="label" translatable="yes" context="ambient sound mode">Noise Canceling</property>
                         <property name="hexpand">true</property>
                         <layout>
                             <property name="column">3</property>
@@ -78,8 +80,9 @@
                 </child>
                 <child>
                     <object class="GtkToggleButton" id="transport_mode">
-                        <signal name="toggled" handler="handle_transport_mode_clicked" swapped="true" />
-                        <property name="label">Transport</property>
+                        <signal name="toggled" handler="handle_transport_mode_clicked"
+                            swapped="true" />
+                        <property name="label" translatable="yes" context="noise canceling mode">Transport</property>
                         <property name="hexpand">true</property>
                         <layout>
                             <property name="column">1</property>
@@ -94,7 +97,7 @@
                     <object class="GtkToggleButton" id="indoor_mode">
                         <signal name="toggled" handler="handle_indoor_mode_clicked" swapped="true" />
                         <property name="group">transport_mode</property>
-                        <property name="label">Indoor</property>
+                        <property name="label" translatable="yes" context="noise canceling mode">Indoor</property>
                         <property name="hexpand">true</property>
                         <layout>
                             <property name="column">2</property>
@@ -109,7 +112,7 @@
                     <object class="GtkToggleButton" id="outdoor_mode">
                         <signal name="toggled" handler="handle_outdoor_mode_clicked" swapped="true" />
                         <property name="group">indoor_mode</property>
-                        <property name="label">Outdoor</property>
+                        <property name="label" translatable="yes" context="noise canceling mode">Outdoor</property>
                         <property name="hexpand">true</property>
                         <layout>
                             <property name="column">3</property>
@@ -125,7 +128,7 @@
         <child>
             <object class="GtkButton">
                 <signal name="clicked" handler="handle_disconnect_clicked" swapped="true" />
-                <property name="label">Disconnect</property>
+                <property name="label" translatable="yes" context="disconnect from device">Disconnect</property>
                 <property name="margin-top">10</property>
             </object>
         </child>
