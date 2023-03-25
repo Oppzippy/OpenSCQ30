@@ -1,13 +1,15 @@
 use std::rc::Rc;
 
+use anyhow::anyhow;
 use gtk::glib::{clone, MainContext};
 use openscq30_lib::api::device::{Device, DeviceRegistry};
+use tokio::sync::oneshot;
 
 use crate::objects::DeviceObject;
 
 use super::{State, StateUpdate};
 
-pub fn set_device<T>(
+pub async fn set_device<T>(
     state: &Rc<State<T>>,
     new_selected_device: Option<DeviceObject>,
 ) -> anyhow::Result<()>
@@ -27,37 +29,42 @@ where
             .send(StateUpdate::SetLoading(true))
             .unwrap();
         let main_context = MainContext::default();
-        let handle = main_context.spawn_local(
-            clone!(@strong state => async move {
-                match state.registry.device(&new_selected_device.mac_address()).await {
-                    Ok(Some(device)) => {
-                        *state.selected_device.borrow_mut() = Some(device.to_owned());
-                        let receiver = device.subscribe_to_state_updates();
-                        state.state_update_receiver.replace_receiver(Some(receiver)).await;
+        let (sender, receiver) = oneshot::channel();
+        let handle = main_context.spawn_local(clone!(@strong state => async move {
+            let result: anyhow::Result<()> = (async {
+                let mac_address = new_selected_device.mac_address();
+                let device = state.registry.device(&mac_address).await?.ok_or_else(|| {
+                    state.state_update_sender
+                        .send(StateUpdate::SetSelectedDevice(None))
+                        .map_err(|err| anyhow!("{err}")) // StateUpdate isn't send
+                        .err()
+                        .unwrap_or_else(|| anyhow!("device not found: {mac_address}"))
+                })?;
 
-                        let ambient_sound_mode = device.ambient_sound_mode().await;
-                        let noise_canceling_mode = device.noise_canceling_mode().await;
-                        let equalizer_configuration = device.equalizer_configuration().await;
+                *state.selected_device.borrow_mut() = Some(device.to_owned());
+                let receiver = device.subscribe_to_state_updates();
+                state.state_update_receiver.replace_receiver(Some(receiver)).await;
 
-                        state.state_update_sender.send(StateUpdate::SetAmbientSoundMode(ambient_sound_mode)).unwrap();
-                        state.state_update_sender.send(StateUpdate::SetNoiseCancelingMode(noise_canceling_mode)).unwrap();
-                        state.state_update_sender.send(StateUpdate::SetEqualizerConfiguration(equalizer_configuration)).unwrap();
-                    },
-                    Ok(None) => {
-                        tracing::warn!("could not find selected device: {:?}", new_selected_device);
-                    },
-                    Err(err) => {
-                        tracing::warn!("error connecting to device {:?}: {err}", new_selected_device);
-                    },
-                }
+                state.state_update_sender
+                    .send(StateUpdate::SetAmbientSoundMode(device.ambient_sound_mode().await))
+                    .map_err(|err| anyhow!("{err}"))?;
+                state.state_update_sender
+                    .send(StateUpdate::SetNoiseCancelingMode(device.noise_canceling_mode().await))
+                    .map_err(|err| anyhow!("{err}"))?;
+                state.state_update_sender
+                    .send(StateUpdate::SetEqualizerConfiguration(device.equalizer_configuration().await))
+                    .map_err(|err| anyhow!("{err}"))?;
 
-                state.state_update_sender.send(StateUpdate::SetLoading(false)).unwrap();
-                if state.selected_device.borrow().is_none() {
-                    state.state_update_sender.send(StateUpdate::SetSelectedDevice(None)).unwrap();
-                }
-            })
-        );
+                Ok(())
+            }).await;
+            state.state_update_sender.send(StateUpdate::SetLoading(false)).unwrap();
+            sender.send(result).unwrap();
+        }));
         *state.connect_to_device_handle.borrow_mut() = Some(handle);
+        // we don't care if the receive fails, since that just means that someone else set a new device and canceled us
+        if let Ok(result) = receiver.await {
+            return result;
+        }
     } else {
         state
             .state_update_sender
@@ -122,7 +129,7 @@ mod tests {
 
         let new_selected_device =
             DeviceObject::new(&"Name".to_string(), &"00:00:00:00:00:00".to_string());
-        set_device(&state, Some(new_selected_device)).unwrap();
+        set_device(&state, Some(new_selected_device)).await.unwrap();
         let mut expected_sequence = VecDeque::from([
             StateUpdate::SetLoading(true),
             StateUpdate::SetAmbientSoundMode(AmbientSoundMode::Transparency),

@@ -216,12 +216,15 @@ fn build_ui_2(
     main_window.connect_notify_local(
         Some("selected-device"),
         clone!(@strong state => move |main_window, _| {
-            actions::set_device(
-                &state,
-                main_window.selected_device(),
-            )
-            .context("select device")
-            .unwrap_or_else(|err| handle_error(err, &state));
+            MainContext::default().spawn_local(clone!(@strong state, @weak main_window => async move {
+                actions::set_device(
+                    &state,
+                    main_window.selected_device(),
+                )
+                .await
+                .context("select device")
+                .unwrap_or_else(|err| handle_error(err, &state));
+            }));
         }),
     );
 
