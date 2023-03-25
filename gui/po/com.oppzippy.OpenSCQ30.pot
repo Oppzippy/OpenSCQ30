@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-25 16:34-0400\n"
+"POT-Creation-Date: 2023-03-25 16:47-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -104,4 +104,13 @@ msgstr ""
 #: src/widgets/general_settings/template.ui:85
 msgctxt "noise canceling mode"
 msgid "Transport"
+msgstr ""
+
+#. listed twice so both forms are picked up for localization
+#: src/widgets/volume_slider/template.ui:30
+msgid "{} Hz"
+msgstr ""
+
+#: src/widgets/volume_slider/template.ui:31
+msgid "{} kHz"
 msgstr ""

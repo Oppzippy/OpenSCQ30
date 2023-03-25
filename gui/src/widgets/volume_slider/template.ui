@@ -26,8 +26,9 @@
         </child>
         <child>
             <object class="GtkLabel" id="band_label">
-                <!-- TODO localize -->
-                <property name="label">200hz</property>
+                <!-- listed twice so both forms are picked up for localization -->
+                <property name="label" translatable="yes">{} Hz</property>
+                <property name="label" translatable="yes">{} kHz</property>
             </object>
         </child>
     </template>
