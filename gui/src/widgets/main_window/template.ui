@@ -2,24 +2,55 @@
 <interface>
     <template class="OpenSCQ30MainWindow" parent="GtkApplicationWindow">
         <child>
-            <object class="GtkStack" id="stack">
-                <child>
-                    <object class="OpenSCQ30DeviceSelection" id="device_selection"></object>
-                </child>
-                <child>
-                    <object class="OpenSCQ30LoadingScreen" id="loading_screen">
-                        <signal name="cancel" handler="handle_disconnect" swapped="true" />
+            <!--
+                https://developer.gnome.org/documentation/tutorials/beginners/getting_started/adding_toasts.html
+                The AdwToastOverlay is the parent of what the toast shows on top of.
+            -->
+            <object class="AdwToastOverlay" id="toast_overlay">
+                <property name="child">
+                    <object class="GtkScrolledWindow">
+                        <property name="hexpand">true</property>
+                        <property name="vexpand">true</property>
+                        <property name="margin-top">6</property>
+                        <property name="margin-bottom">6</property>
+                        <property name="margin-start">6</property>
+                        <property name="margin-end">6</property>
+                        <property name="child">
+                            <object class="GtkTextView" id="toast_text_view">
+                                <property name="monospace">true</property>
+                            </object>
+                        </property>
                     </object>
-                </child>
+                </property>
                 <child>
-                    <object class="OpenSCQ30SelectedDeviceSettings" id="selected_device_settings">
-                        <signal name="apply-equalizer-settings" handler="handle_apply_equalizer_settings" swapped="true" />
-                        <signal name="ambient-sound-mode-selected" handler="handle_ambient_sound_mode_selected" swapped="true" />
-                        <signal name="noise-canceling-mode-selected" handler="handle_noise_canceling_mode_selected" swapped="true" />
-                        <signal name="custom-equalizer-profile-selected" handler="handle_custom_equalizer_profile_selected" swapped="true" />
-                        <signal name="create-custom-equalizer-profile" handler="handle_create_custom_equalizer_profile" swapped="true" />
-                        <signal name="delete-custom-equalizer-profile" handler="handle_delete_custom_equalizer_profile" swapped="true" />
-                        <signal name="disconnect" handler="handle_disconnect" swapped="true" />
+                    <object class="GtkStack" id="stack">
+                        <child>
+                            <object class="OpenSCQ30DeviceSelection" id="device_selection"></object>
+                        </child>
+                        <child>
+                            <object class="OpenSCQ30LoadingScreen" id="loading_screen">
+                                <signal name="cancel" handler="handle_disconnect" swapped="true" />
+                            </object>
+                        </child>
+                        <child>
+                            <object class="OpenSCQ30SelectedDeviceSettings"
+                                id="selected_device_settings">
+                                <signal name="apply-equalizer-settings"
+                                    handler="handle_apply_equalizer_settings" swapped="true" />
+                                <signal name="ambient-sound-mode-selected"
+                                    handler="handle_ambient_sound_mode_selected" swapped="true" />
+                                <signal name="noise-canceling-mode-selected"
+                                    handler="handle_noise_canceling_mode_selected" swapped="true" />
+                                <signal name="custom-equalizer-profile-selected"
+                                    handler="handle_custom_equalizer_profile_selected"
+                                    swapped="true" />
+                                <signal name="create-custom-equalizer-profile"
+                                    handler="handle_create_custom_equalizer_profile" swapped="true" />
+                                <signal name="delete-custom-equalizer-profile"
+                                    handler="handle_delete_custom_equalizer_profile" swapped="true" />
+                                <signal name="disconnect" handler="handle_disconnect" swapped="true" />
+                            </object>
+                        </child>
                     </object>
                 </child>
             </object>

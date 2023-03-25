@@ -2,6 +2,7 @@ mod imp;
 
 use std::rc::Rc;
 
+use adw::Toast;
 use gtk::{
     gio,
     glib::{self, Object},
@@ -112,5 +113,9 @@ impl MainWindow {
             .imp()
             .equalizer_settings
             .set_custom_profiles(custom_profiles)
+    }
+
+    pub fn add_toast(&self, toast: Toast) {
+        self.imp().toast_overlay.add_toast(toast);
     }
 }

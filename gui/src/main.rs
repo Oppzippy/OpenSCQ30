@@ -53,18 +53,6 @@ pub fn load_resources() {
     });
 }
 
-#[cfg(not(feature = "libadwaita"))]
-fn run_application() {
-    let app = gtk::Application::builder()
-        .application_id(APPLICATION_ID_STR)
-        .build();
-    app.connect_activate(build_ui);
-    handle_command_line_args(&app);
-
-    app.run();
-}
-
-#[cfg(feature = "libadwaita")]
 fn run_application() {
     let app = adw::Application::builder()
         .application_id(APPLICATION_ID_STR)

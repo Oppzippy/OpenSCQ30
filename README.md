@@ -16,7 +16,7 @@ Compiled binaries won't be provided until the first release. Instructions for co
 
 1. Checkout the repository.
 2. Install [gvsbuild](https://github.com/wingtk/gvsbuild) and its dependencies using the [instructions in the readme](https://github.com/wingtk/gvsbuild#development-environment).
-3. Follow the [instructions for building GTK4](https://github.com/wingtk/gvsbuild#build-gtk).
+3. Follow the [instructions for building GTK4 and libadwaita](https://github.com/wingtk/gvsbuild#build-gtk).
 4. Set the [environment variables from the gvsbuild instructions](https://github.com/wingtk/gvsbuild#add-gtk-to-your-environmental-variables) and run `cargo build --release --package openscq30_gui`.
 5. The compiled binary can be found at `target\release\openscq30_gui.exe`
 6. For distribution, make a new folder and copy the following into it:
@@ -31,10 +31,9 @@ Compiled binaries won't be provided until the first release. Instructions for co
 
 1. Checkout the repository
 2. Install rust
-3. Install gtk4 (`brew install gtk4`)
-4. Install libadwaita (`brew install libadwaita`) (optional)
-5. In the root project directory, run: `cargo build --release --package openscq30_gui`. To build with libadwaita, add `--features libadwaita`.
-6. The compiled binary can be found at `target/release/openscq30_gui`
+3. Install gtk4 and libadwaita (`brew install gtk4 libadwaita`)
+4. In the root project directory, run: `cargo build --release --package openscq30_gui`
+5. The compiled binary can be found at `target/release/openscq30_gui`
 
 ### Linux
 
@@ -42,10 +41,9 @@ Instructions use Ubuntu package names. Package names may differ on other distros
 
 1. Checkout the repository
 2. Install rust
-3. Install libdbus-1-dev pkg-config libgtk-4-dev
-4. Install libadwaita-1-dev (optional)
-5. In the root project directory, run: `cargo build --release --package openscq30_gui`. To build with libadwaita, add `--features libadwaita`.
-6. The compiled binary can be found at `target/release/openscq30_gui`
+3. Install libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev
+4. In the root project directory, run: `cargo build --release --package openscq30_gui`
+5. The compiled binary can be found at `target/release/openscq30_gui`
 
 ### Android
 

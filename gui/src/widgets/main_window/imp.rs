@@ -39,6 +39,8 @@ pub struct MainWindow {
     pub device_selection: TemplateChild<DeviceSelection>,
     #[template_child]
     pub loading_screen: TemplateChild<LoadingScreen>,
+    #[template_child]
+    pub toast_overlay: TemplateChild<adw::ToastOverlay>,
 
     #[property(get, set)]
     pub selected_device: RefCell<Option<DeviceObject>>,
