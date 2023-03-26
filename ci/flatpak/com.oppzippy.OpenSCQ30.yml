@@ -26,7 +26,10 @@ modules:
         CARGO_HOME: /run/build/openscq30_gui/cargo
     build-commands:
       - cargo --offline fetch --manifest-path Cargo.toml --verbose
-      - cargo --offline build --release --features libadwaita --package openscq30_gui --verbose
+      - cargo --offline build --release --package openscq30_gui --verbose
+      - ./scripts/build-locales.sh
+      - mkdir -p /app/share/locale
+      - cp -r ./gui/locale/* /app/share/locale/
       - install -Dm755 ./target/release/openscq30_gui -t /app/bin/
       - install -Dm644 ./ci/flatpak/${FLATPAK_ID}.desktop -t /app/share/applications/
       - install -Dm644 ./gui/resources/icon.svg /app/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg

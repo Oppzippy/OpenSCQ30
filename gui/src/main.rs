@@ -1,8 +1,14 @@
-use std::{env, path::PathBuf, rc::Rc, str::FromStr, sync::Once};
+use std::{
+    env,
+    path::{Path, PathBuf},
+    rc::Rc,
+    str::FromStr,
+    sync::Once,
+};
 
 use actions::{State, StateUpdate};
 use adw::Toast;
-use anyhow::{bail, Context};
+use anyhow::{anyhow, Context};
 use gettextrs::LocaleCategory;
 use gtk::{
     gio::{self, SimpleAction},
@@ -44,6 +50,7 @@ pub static APPLICATION_ID: ApplicationId = ApplicationId {
 pub static APPLICATION_ID_STR: &str = "com.oppzippy.OpenSCQ30";
 
 fn main() {
+    // tracing is not set up yet, so we have to use println
     if let Err(err) = set_up_gettext() {
         eprintln!("failed to set up gettext, using default locale: {err}");
     }
@@ -53,26 +60,40 @@ fn main() {
 
 fn set_up_gettext() -> anyhow::Result<()> {
     match gettextrs::setlocale(LocaleCategory::LcAll, "") {
-        Some(_) => (),
+        Some(what_happened) => tracing::info!(
+            "selected locale: {}",
+            std::str::from_utf8(&what_happened)
+                .context("error converting selected locale to utf8")?,
+        ),
         None => eprintln!("failed to set locale"),
     }
-    gettextrs::bindtextdomain(APPLICATION_ID_STR, get_locales_dir()?)?;
+    let locale_dir = get_locale_dir()?;
+    #[cfg(debug_assertions)]
+    eprintln!("found locale dir: {locale_dir:?}");
+    gettextrs::bindtextdomain(APPLICATION_ID_STR, locale_dir)?;
     gettextrs::bind_textdomain_codeset(APPLICATION_ID_STR, "UTF-8")?;
     gettextrs::textdomain(APPLICATION_ID_STR)?;
     Ok(())
 }
 
-fn get_locales_dir() -> anyhow::Result<PathBuf> {
-    let locales_dir_name = "locales";
-    let installation_locale_dir = env::current_exe()?.join(locales_dir_name);
-    if installation_locale_dir.is_dir() {
-        return Ok(installation_locale_dir);
+fn get_locale_dir() -> anyhow::Result<PathBuf> {
+    let current_exe = env::current_exe()?;
+    let executable_dir = current_exe
+        .parent()
+        .ok_or_else(|| anyhow!("current_exe has no parent directory"))?;
+
+    check_locale_dir(executable_dir)
+        .or_else(|| executable_dir.parent().map(check_locale_dir).flatten())
+        .ok_or_else(|| anyhow!("could not find locale dir"))
+}
+
+fn check_locale_dir(path: &Path) -> Option<PathBuf> {
+    let locale_path = path.join("share").join("locale");
+    if locale_path.is_dir() {
+        Some(locale_path)
+    } else {
+        None
     }
-    let pwd_locale_dir = env::current_dir()?.join(locales_dir_name);
-    if pwd_locale_dir.is_dir() {
-        return Ok(pwd_locale_dir);
-    }
-    bail!("could not find locales dir");
 }
 
 static LOAD_RESOURCES: Once = Once::new();
