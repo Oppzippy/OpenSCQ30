@@ -28,10 +28,11 @@ where
     ) -> openscq30_lib::Result<Option<Arc<Self::DeviceType>>> {
         let mac_address = mac_address.to_owned();
         let device_registry = self.soundcore_device_registry.to_owned();
-        let maybe_device = async_runtime_bridge!(
-            self.tokio_runtime,
-            device_registry.device(&mac_address).await
-        );
+        let maybe_device = self
+            .tokio_runtime
+            .spawn(async move { device_registry.device(&mac_address).await })
+            .await
+            .unwrap();
         match maybe_device {
             Ok(Some(device)) => Ok(Some(self.to_gtk_device(device))),
             Ok(None) => Ok(None),
@@ -41,10 +42,10 @@ where
 
     async fn device_descriptors(&self) -> openscq30_lib::Result<Vec<Self::DescriptorType>> {
         let device_registry = self.soundcore_device_registry.to_owned();
-        async_runtime_bridge!(
-            self.tokio_runtime,
-            device_registry.device_descriptors().await
-        )
+        self.tokio_runtime
+            .spawn(async move { device_registry.device_descriptors().await })
+            .await
+            .unwrap()
     }
 }
 
