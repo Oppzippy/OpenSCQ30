@@ -53,12 +53,9 @@ impl ObjectImpl for VolumeSlider {
         obj.bind_property("band", &self.band_label.get(), "label")
             .transform_to(|_, band: i32| {
                 if band >= 1000 {
-                    let localized =
-                        gettextrs::gettext!("{} kHz", format!("{:.1}", band as f64 / 1000.0));
-                    Some(localized)
+                    Some(format!("{:.1}", band as f64 / 1000.0))
                 } else {
-                    let localized = gettextrs::gettext!("{} Hz", band);
-                    Some(localized)
+                    Some(format!("{} Hz", band))
                 }
             })
             .flags(BindingFlags::SYNC_CREATE)

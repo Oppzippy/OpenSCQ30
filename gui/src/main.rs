@@ -9,7 +9,6 @@ use std::{
 use actions::{State, StateUpdate};
 use adw::Toast;
 use anyhow::{anyhow, Context};
-use gettextrs::LocaleCategory;
 use gtk::{
     gio::{self, SimpleAction},
     glib::{self, clone, closure_local, MainContext, OptionFlags},
@@ -27,6 +26,8 @@ use widgets::MainWindow;
 use crate::objects::EqualizerCustomProfileObject;
 
 mod actions;
+mod gettext;
+mod gettext_sys;
 mod gtk_openscq30_lib;
 mod logging_level;
 #[cfg(test)]
@@ -59,20 +60,16 @@ fn main() {
 }
 
 fn set_up_gettext() -> anyhow::Result<()> {
-    match gettextrs::setlocale(LocaleCategory::LcAll, "") {
-        Some(what_happened) => tracing::info!(
-            "selected locale: {}",
-            std::str::from_utf8(&what_happened)
-                .context("error converting selected locale to utf8")?,
-        ),
+    match gettext::setlocale(0 /* LC_ALL */, "") {
+        Some(selected_locale) => tracing::info!("selected locale: {selected_locale}"),
         None => eprintln!("failed to set locale"),
     }
     let locale_dir = get_locale_dir()?;
     #[cfg(debug_assertions)]
     eprintln!("found locale dir: {locale_dir:?}");
-    gettextrs::bindtextdomain(APPLICATION_ID_STR, locale_dir)?;
-    gettextrs::bind_textdomain_codeset(APPLICATION_ID_STR, "UTF-8")?;
-    gettextrs::textdomain(APPLICATION_ID_STR)?;
+    gettext::bindtextdomain(APPLICATION_ID_STR, locale_dir.to_str().unwrap())?;
+    gettext::bind_textdomain_codeset(APPLICATION_ID_STR, "UTF-8")?;
+    gettext::textdomain(APPLICATION_ID_STR)?;
     Ok(())
 }
 
