@@ -21,11 +21,11 @@ impl<T> DeviceDescriptor for Q30DeviceDescriptor<T>
 where
     T: ConnectionDescriptor + Send + Sync,
 {
-    fn name(&self) -> &String {
+    fn name(&self) -> &str {
         self.inner.name()
     }
 
-    fn mac_address(&self) -> &String {
+    fn mac_address(&self) -> &str {
         self.inner.mac_address()
     }
 }

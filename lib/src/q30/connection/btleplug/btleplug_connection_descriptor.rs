@@ -13,11 +13,11 @@ impl BtlePlugConnectionDescriptor {
 }
 
 impl ConnectionDescriptor for BtlePlugConnectionDescriptor {
-    fn name(&self) -> &String {
+    fn name(&self) -> &str {
         &self.name
     }
 
-    fn mac_address(&self) -> &String {
+    fn mac_address(&self) -> &str {
         &self.mac_address
     }
 }

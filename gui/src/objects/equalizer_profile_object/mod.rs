@@ -7,7 +7,7 @@ glib::wrapper! {
 }
 
 impl EqualizerProfileObject {
-    pub fn new(name: &String, profile_id: u32) -> Self {
+    pub fn new(name: &str, profile_id: u32) -> Self {
         Object::builder()
             .property("name", name)
             .property("profile-id", &profile_id)

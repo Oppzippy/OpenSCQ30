@@ -1,4 +1,4 @@
 pub trait ConnectionDescriptor {
-    fn name(&self) -> &String;
-    fn mac_address(&self) -> &String;
+    fn name(&self) -> &str;
+    fn mac_address(&self) -> &str;
 }

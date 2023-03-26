@@ -5,7 +5,7 @@ mock! {
     #[derive(Debug)]
     pub Descriptor {}
     impl DeviceDescriptor for Descriptor {
-        fn name(&self) -> &String;
-        fn mac_address(&self) -> &String;
+        fn name(&self) -> &str;
+        fn mac_address(&self) -> &str;
     }
 }
