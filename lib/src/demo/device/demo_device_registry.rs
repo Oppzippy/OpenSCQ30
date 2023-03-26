@@ -25,19 +25,15 @@ impl DeviceRegistry for DemoDeviceRegistry {
 
     async fn device_descriptors(&self) -> crate::Result<Vec<Self::DescriptorType>> {
         Ok(vec![DemoDeviceDescriptor::new(
-            "Demo Q30".to_string(),
-            "00:00:00:00:00:00".to_string(),
+            "Demo Q30",
+            "00:00:00:00:00:00",
         )])
     }
 
     async fn device(&self, mac_address: &str) -> crate::Result<Option<Arc<Self::DeviceType>>> {
         if mac_address == Self::DEVICE_MAC_ADDRESS {
             Ok(Some(Arc::new(
-                DemoDevice::new(
-                    Self::DEVICE_NAME.to_string(),
-                    Self::DEVICE_MAC_ADDRESS.to_string(),
-                )
-                .await,
+                DemoDevice::new(Self::DEVICE_NAME, Self::DEVICE_MAC_ADDRESS).await,
             )))
         } else {
             Ok(None)

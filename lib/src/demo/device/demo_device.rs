@@ -20,12 +20,12 @@ pub struct DemoDevice {
 }
 
 impl DemoDevice {
-    pub async fn new(name: String, mac_address: String) -> Self {
+    pub async fn new(name: impl Into<String>, mac_address: impl Into<String>) -> Self {
         tokio::time::sleep(Duration::from_millis(500)).await; // it takes some time to connect
         let (sender, _receiver) = broadcast::channel(50);
         Self {
-            name,
-            mac_address,
+            name: name.into(),
+            mac_address: mac_address.into(),
             sender,
             state: Mutex::new(DeviceState::new(
                 AmbientSoundMode::Normal,

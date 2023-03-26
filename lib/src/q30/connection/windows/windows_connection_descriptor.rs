@@ -9,7 +9,7 @@ pub struct WindowsConnectionDescriptor {
 }
 
 impl WindowsConnectionDescriptor {
-    pub fn new(name: String, mac_address: String) -> Self {
+    pub fn new(name: impl Into<String>, mac_address: impl Into<String>) -> Self {
         Self { name, mac_address }
     }
 }

@@ -96,10 +96,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_device_descriptors() {
-        let descriptor = StubConnectionDescriptor::new(
-            "Stub Device".to_string(),
-            "00:11:22:33:44:55".to_string(),
-        );
+        let descriptor = StubConnectionDescriptor::new("Stub Device", "00:11:22:33:44:55");
         let device = Arc::new(StubConnection::new());
         let devices = HashMap::from([(descriptor, device)]);
         let connection_registry = StubConnectionRegistry::new(devices.to_owned());
@@ -124,10 +121,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_device() {
-        let descriptor = StubConnectionDescriptor::new(
-            "Stub Device".to_string(),
-            "00:11:22:33:44:55".to_string(),
-        );
+        let descriptor = StubConnectionDescriptor::new("Stub Device", "00:11:22:33:44:55");
         let device = Arc::new(StubConnection::new());
         let (sender, receiver) = mpsc::channel(1);
         sender
@@ -166,10 +160,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_device_but_it_doesnt_exist() {
-        let descriptor = StubConnectionDescriptor::new(
-            "Stub Device".to_string(),
-            "00:11:22:33:44:55".to_string(),
-        );
+        let descriptor = StubConnectionDescriptor::new("Stub Device", "00:11:22:33:44:55");
         let device = Arc::new(StubConnection::new());
 
         let devices = HashMap::from([(descriptor, device)]);

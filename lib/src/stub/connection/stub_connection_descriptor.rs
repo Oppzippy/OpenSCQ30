@@ -7,8 +7,11 @@ pub struct StubConnectionDescriptor {
 }
 
 impl StubConnectionDescriptor {
-    pub fn new(name: String, mac_address: String) -> Self {
-        Self { name, mac_address }
+    pub fn new(name: impl Into<String>, mac_address: impl Into<String>) -> Self {
+        Self {
+            name: name.into(),
+            mac_address: mac_address.into(),
+        }
     }
 }
 
