@@ -1,6 +1,6 @@
 #define AppName "OpenSCQ30"
 #define AppExeName "openscq30_gui.exe"
-#define AppVersion GetVersionNumbersString("..\..\target\release\openscq30_gui.exe")
+#define AppVersion "1.0.0"
 
 [Setup]
 AppName={#AppName}
@@ -15,7 +15,7 @@ DefaultDirName={autopf}\{#AppName}
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=auto
 SetupIconFile=..\..\gui\resources\icon.ico
-UninstallDisplayIcon={app}\{#AppExeName}
+UninstallDisplayIcon={app}\bin\{#AppExeName}
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
 PrivilegesRequiredOverridesAllowed=dialog commandline
@@ -27,14 +27,14 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "..\..\target\release\{#AppExeName}"; DestDir: "{app}"
 Source: "..\..\LICENSE.txt"; DestDir: "{app}"
-Source: "..\..\gui\locales"; DestDir: "{app}"
-Source: "dlls\*"; DestDir: "{app}"
+Source: "..\..\target\debug\{#AppExeName}"; DestDir: "{app}\bin"
+Source: "dlls\*"; DestDir: "{app}\bin"
+Source: "..\..\gui\locale\*"; DestDir: "{app}\share\locale"; Flags: recursesubdirs
 
 [Icons]
-Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExeName}"
-Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExeName}"; Tasks: desktopicon
+Name: "{group}\{#AppName}"; Filename: "{app}\bin\{#AppExeName}"
+Name: "{autodesktop}\{#AppName}"; Filename: "{app}\bin\{#AppExeName}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\{#AppExeName}"; Description: "Launch program"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\bin\{#AppExeName}"; Description: "Launch program"; Flags: nowait postinstall skipifsilent
