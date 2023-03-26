@@ -29,6 +29,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "..\..\target\release\{#AppExeName}"; DestDir: "{app}"
 Source: "..\..\LICENSE.txt"; DestDir: "{app}"
+Source: "..\..\gui\locales"; DestDir: "{app}"
 Source: "dlls\*"; DestDir: "{app}"
 
 [Icons]
