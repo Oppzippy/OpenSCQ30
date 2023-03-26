@@ -1,9 +1,10 @@
 use std::collections::HashSet;
 use std::sync::{Arc, Weak};
+use std::time::Duration;
 use std::vec;
 
 use async_trait::async_trait;
-use btleplug::api::{Central, Manager as _, Peripheral as _};
+use btleplug::api::{Central, Manager as _, Peripheral as _, ScanFilter};
 use btleplug::platform::{Adapter, Manager, Peripheral};
 use futures::{stream, StreamExt};
 use tokio::sync::Mutex;
@@ -28,8 +29,22 @@ impl BtlePlugConnectionRegistry {
         }
     }
 
+    #[tracing::instrument(skip(self))]
     async fn all_connected(&self) -> crate::Result<HashSet<BtlePlugConnectionDescriptor>> {
         let adapters = self.manager.adapters().await?;
+        for adapter in adapters.iter() {
+            tracing::debug!("starting scan");
+            adapter
+                .start_scan(ScanFilter {
+                    services: vec![crate::device_utils::SERVICE_UUID],
+                })
+                .await?;
+            // The Soundcore Q30 seems to advertise around every .3s
+            // Wait some extra time to be safe
+            tokio::time::sleep(Duration::from_secs(1)).await;
+            adapter.stop_scan().await?;
+            tracing::debug!("scan finished");
+        }
         let peripherals = stream::iter(adapters)
             .filter_map(|adapter| async move { Self::adapter_to_peripherals(adapter).await })
             .flatten()
