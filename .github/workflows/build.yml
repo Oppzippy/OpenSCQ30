@@ -90,7 +90,7 @@ jobs:
           python -m pip install --user pipx
           python -m pipx ensurepath
           pipx install gvsbuild
-          gvsbuild build --ninja-opts -j2 gtk4
+          gvsbuild build --ninja-opts -j2 gtk4 libadwaita
       - name: Restore git binary
         run: |
           Move-Item "C:\Program Files\Git\usr\notbin" "C:\Program Files\Git\usr\bin"
