@@ -102,24 +102,10 @@ jobs:
           $env:Path = "C:\gtk-build\gtk\x64\release\bin;" + $env:Path
           $env:LIB = "C:\gtk-build\gtk\x64\release\lib;" + $env:LIB
           $env:INCLUDE = "C:\gtk-build\gtk\x64\release\include;C:\gtk-build\gtk\x64\release\include\cairo;C:\gtk-build\gtk\x64\release\include\glib-2.0;C:\gtk-build\gtk\x64\release\include\gobject-introspection-1.0;C:\gtk-build\gtk\x64\release\lib\glib-2.0\include;" + $env:INCLUDE
-          cargo build --release --package openscq30_gui
+          .\ci\windows\build.ps1
       - name: Build cli
         run: cargo build --release --package openscq30_cli
 
-      - name: Create resources folder
-        run: |
-          New-Item -Type Directory ci\windows\resources
-      - name: Copy dlls to folder
-        run: |
-          Copy-Item -Path C:\gtk-build\gtk\x64\release\bin\*.dll -Destination ci\windows\resources\
-          Copy-Item -Path C:\gtk-build\gtk\x64\release\bin\gdbus.exe -Destination ci\windows\resources\
-      - name: Copy resources to folder
-        run: |
-          New-Item -Type Directory ci\windows\resources\share\glib-2.0
-          Copy-Item -Recurse -Path C:\gtk-build\gtk\x64\release\share\glib-2.0\schemas -Destination ci\windows\resources\share\glib-2.0\schemas
-      - name: Create installer
-        run: |
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" ci\windows\setup.iss
       - name: Upload gui
         uses: actions/upload-artifact@v3
         with:

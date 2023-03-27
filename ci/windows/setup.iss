@@ -27,10 +27,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "..\..\LICENSE.txt"; DestDir: "{app}"
-Source: "..\..\target\debug\{#AppExeName}"; DestDir: "{app}\bin"
-Source: "dlls\*"; DestDir: "{app}\bin"
-Source: "..\..\gui\locale\*"; DestDir: "{app}\share\locale"; Flags: recursesubdirs
+Source: "root\*"; DestDir: "{app}"; Flags: recursesubdirs
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\bin\{#AppExeName}"
