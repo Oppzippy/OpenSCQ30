@@ -1,3 +1,3 @@
-[submodule "ci/flatpak/flatpak-builder-tools"]
-	path = ci/flatpak/flatpak-builder-tools
+[submodule "packaging/flatpak/flatpak-builder-tools"]
+	path = packaging/flatpak/flatpak-builder-tools
 	url = https://github.com/flatpak/flatpak-builder-tools.git

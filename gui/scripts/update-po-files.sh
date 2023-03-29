@@ -5,7 +5,7 @@ PROJECT_NAME="com.oppzippy.OpenSCQ30"
 
 script_path="$(readlink -f -- "$0")"
 script_dir="$(dirname -- $script_path)"
-cd "$script_dir/../gui"
+cd "$script_dir/.."
 
 echo "Generating template"
 if [[ -f "po/$PROJECT_NAME.pot" ]]; then

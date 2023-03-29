@@ -102,7 +102,7 @@ jobs:
           $env:Path = "C:\gtk-build\gtk\x64\release\bin;" + $env:Path
           $env:LIB = "C:\gtk-build\gtk\x64\release\lib;" + $env:LIB
           $env:INCLUDE = "C:\gtk-build\gtk\x64\release\include;C:\gtk-build\gtk\x64\release\include\cairo;C:\gtk-build\gtk\x64\release\include\glib-2.0;C:\gtk-build\gtk\x64\release\include\gobject-introspection-1.0;C:\gtk-build\gtk\x64\release\lib\glib-2.0\include;" + $env:INCLUDE
-          .\ci\windows\build.ps1
+          .\packaging\windows\build.ps1
       - name: Build cli
         run: cargo build --release --package openscq30_cli
 
@@ -110,7 +110,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: gui-windows
-          path: ci/windows/Output/OpenSCQ30_Setup.exe
+          path: packaging/windows/Output/OpenSCQ30_Setup.exe
       - name: Upload cli
         uses: actions/upload-artifact@v3
         with:

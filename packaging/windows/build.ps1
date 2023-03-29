@@ -15,20 +15,20 @@ function Write-Filtered-Errors {
 }
 
 $directoriesToCreate = @(
-    "ci\windows\root\bin"
-    "ci\windows\root\share\locale"
-    "ci\windows\root\share\glib-2.0\schemas"
+    ".\packaging\windows\root\bin"
+    ".\packaging\windows\root\share\locale"
+    ".\packaging\windows\root\share\glib-2.0\schemas"
 )
 $filesToCopyNoOverwrite = @{
-    ".\LICENSE.txt"                                         = ".\ci\windows\root";
-    "C:\gtk-build\gtk\x64\release\bin\*.dll"                = ".\ci\windows\root\bin";
-    "C:\gtk-build\gtk\x64\release\bin\gdbus.exe"            = ".\ci\windows\root\bin";
-    "C:\gtk-build\gtk\x64\release\share\glib-2.0\schemas\*" = ".\ci\windows\root\share\glib-2.0\schemas";
-    "C:\gtk-build\gtk\x64\release\share\locale\*"           = ".\ci\windows\root\share\locale";
+    ".\LICENSE.txt"                                         = ".\packaging\windows\root";
+    "C:\gtk-build\gtk\x64\release\bin\*.dll"                = ".\packaging\windows\root\bin";
+    "C:\gtk-build\gtk\x64\release\bin\gdbus.exe"            = ".\packaging\windows\root\bin";
+    "C:\gtk-build\gtk\x64\release\share\glib-2.0\schemas\*" = ".\packaging\windows\root\share\glib-2.0\schemas";
+    "C:\gtk-build\gtk\x64\release\share\locale\*"           = ".\packaging\windows\root\share\locale";
 }
 $filesToCopy = @{
-    ".\target\release\openscq30_gui.exe" = ".\ci\windows\root\bin";
-    ".\gui\locale\*"                     = ".\ci\windows\root\share\locale";
+    ".\target\release\openscq30_gui.exe" = ".\packaging\windows\root\bin";
+    ".\gui\locale\*"                     = ".\packaging\windows\root\share\locale";
 }
 
 foreach ($directory in $directoriesToCreate) {
@@ -43,4 +43,4 @@ foreach ($source in $filesToCopyNoOverwrite.Keys) {
     Write-Filtered-Errors $errors
 }
 
-& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" ci\windows\setup.iss
+& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" .\packaging\windows\setup.iss
