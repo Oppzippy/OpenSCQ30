@@ -2,7 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
 
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
@@ -21,8 +23,7 @@
             android:exported="false" />
         <activity
             android:name=".features.ui.devicesettings.DeviceSettingsActivity"
-            android:exported="false"
-            android:label="@string/title_activity_device_settings" />
+            android:exported="false" />
         <activity
             android:name=".features.ui.deviceselection.DeviceSelectionActivity"
             android:exported="true">

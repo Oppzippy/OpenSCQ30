@@ -1,8 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">OpenSCQ30</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
     <string name="general">General</string>
     <string name="equalizer">Equalizer</string>
     <string name="ambient_sound_mode">Ambient Sound Mode</string>
@@ -18,9 +15,7 @@
     <string name="refresh">Refresh</string>
     <string name="apply">Apply</string>
     <string name="loading">Loading</string>
-    <string name="title_activity_device_selection_compose">DeviceSelectionComposeActivity</string>
     <string name="no_devices_found">No Devices Found</string>
-    <string name="title_activity_device_settings">DeviceSettingsActivity</string>
     <string name="soundcore_signature">Soundcore Signature</string>
     <string name="acoustic">Acoustic</string>
     <string name="bass_booster">Bass Booster</string>
