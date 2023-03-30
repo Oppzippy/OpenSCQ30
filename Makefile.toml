@@ -1,5 +1,32 @@
 [env]
 CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
+CARGO_MAKE_CARGO_BUILD_TEST_FLAGS = ""
+OPENSCQ30_BUILD_DEMO_MODE = false
+
+[env.demo]
+OPENSCQ30_BUILD_DEMO_MODE = true
+
+[tasks.build]
+clear = true
+env = { "CARGO_MAKE_WORKSPACE_INCLUDE_MEMBERS" = ["gui", "cli"] }
+script_runner = "@duckscript"
+script.pre = '''
+cargo_profile = get_env CARGO_MAKE_PROFILE
+cargo_build_flags = set ""
+if eq ${cargo_profile} "release"
+    cargo_build_flags = set --release
+    set_env OPENSCQ30_BUILD_DIR ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/target/release
+else
+    set_env OPENSCQ30_BUILD_DIR ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/target/debug
+end
+
+is_demo_mode = get_env OPENSCQ30_BUILD_DEMO_MODE
+if eq ${is_demo_mode} "true"
+    cargo_build_flags = concat ${cargo_build_flags} " --no-default-features --features demo"
+end
+
+set_env OPENSCQ30_BUILD_FLAGS ${cargo_build_flags}
+'''
 
 [tasks.test]
 clear = true
@@ -18,13 +45,16 @@ dependencies = [
 ]
 
 [tasks.llvm-cov-clean]
+private = true
 command = "cargo"
 args = ["llvm-cov", "clean", "--workspace"]
 
 [tasks.member-unit-test-cov]
+private = true
 run_task = { name = "unit-test-cov", fork = true }
 
 [tasks.member-integration-test-cov]
+private = true
 env = { "CARGO_MAKE_WORKSPACE_INCLUDE_MEMBERS" = ["cli"] }
 run_task = { name = "integration-test-cov", fork = true }
 

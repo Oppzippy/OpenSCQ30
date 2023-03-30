@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 
 cargo build --package openscq30_gui --release
-.\scripts\build-locales.sh
+.\scripts\build-locale.sh
 
 function Write-Filtered-Errors {
     param (

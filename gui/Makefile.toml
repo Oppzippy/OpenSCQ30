@@ -1,3 +1,31 @@
+extend = "../Makefile.toml"
+
+[tasks.build]
+script_runner = "@duckscript"
+script.main = '''
+cm_run_task build-bin
+cm_run_task build-locale
+'''
+
+[tasks.build-bin]
+private = true
+script_runner = "@shell"
+script = '''
+cargo build $OPENSCQ30_BUILD_FLAGS
+'''
+
+[tasks.build-locale]
+private = true
+script_runner = "@shell"
+condition = { files_modified = { input = [
+    "./po/**/*",
+], output = [
+    "${OPENSCQ30_BUILD_DIR}/share/**/*",
+] } }
+script = '''
+./scripts/build-locale.sh $OPENSCQ30_BUILD_DIR
+'''
+
 [tasks.unit-test]
 command = "cargo"
 args = ["test", "--bins"]

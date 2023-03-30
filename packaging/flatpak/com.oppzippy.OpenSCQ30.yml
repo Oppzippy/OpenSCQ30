@@ -27,7 +27,7 @@ modules:
     build-commands:
       - cargo --offline fetch --manifest-path Cargo.toml --verbose
       - cargo --offline build --release --package openscq30_gui --verbose
-      - ./scripts/build-locales.sh
+      - ./scripts/build-locale.sh
       - mkdir -p /app/share/locale
       - cp -r ./gui/share/locale/* /app/share/locale/
       - install -Dm755 ./target/release/openscq30_gui -t /app/bin/

@@ -1,3 +1,17 @@
+extend = "../Makefile.toml"
+
+[tasks.build]
+script.main = '''
+cm_run_task build-bin
+'''
+
+[tasks.build-bin]
+private = true
+script_runner = "@shell"
+script = '''
+cargo build $OPENSCQ30_BUILD_FLAGS
+'''
+
 [tasks.unit-test]
 command = "cargo"
 args = ["test", "--bins"]
