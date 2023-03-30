@@ -27,9 +27,7 @@ modules:
     build-commands:
       - cargo --offline fetch --manifest-path Cargo.toml --verbose
       - cargo --offline build --release --package openscq30_gui --verbose
-      - ./scripts/build-locale.sh
-      - mkdir -p /app/share/locale
-      - cp -r ./gui/share/locale/* /app/share/locale/
+      - ./gui/scripts/build-locale.sh /app
       - install -Dm755 ./target/release/openscq30_gui -t /app/bin/
       - install -Dm644 ./packaging/flatpak/${FLATPAK_ID}.desktop -t /app/share/applications/
       - install -Dm644 ./gui/resources/icon.svg /app/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg

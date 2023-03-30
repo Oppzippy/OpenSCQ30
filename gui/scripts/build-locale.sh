@@ -13,7 +13,7 @@ if [[ -z $out_dir ]]; then
 fi
 
 
-existing_locales=$(find po -mindepth 1 -maxdepth 1 -type d | sed 's/^po\///')
+existing_locales=$(find "$gui_dir/po" -mindepth 1 -maxdepth 1 -type d -printf '%f\n')
 
 while read locale; do
     echo "Building $locale"
