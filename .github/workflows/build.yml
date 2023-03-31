@@ -17,24 +17,31 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev
-
+          sudo apt-get install libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev gettext libfuse2
+      - name: Install appimage-builder
+        run: |
+          curl --location -o appimage-builder https://github.com/AppImageCrafters/appimage-builder/releases/download/v1.1.0/appimage-builder-1.1.0-x86_64.AppImage
+          chmod +x appimage-builder
+          sudo mv appimage-builder /usr/bin/
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
-      - name: Build gui
-        run: cargo build --release --package openscq30_gui --features libadwaita
       - name: Build cli
         run: cargo build --release --package openscq30_cli
-      - name: Upload gui
+      - name: Build AppImage
+        working-directory: ./packaging/appimage
+        run: appimage-builder --skip-tests
+
+      - name: Move to artifacts directory
+        run: |
+          mkdir artifacts
+          mv target/release/openscq30_cli artifacts
+          mv packaging/appimage/OpenSCQ30-*.AppImage* artifacts
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: gui-linux
-          path: target/release/openscq30_gui
-      - name: Upload cli
-        uses: actions/upload-artifact@v3
-        with:
-          name: cli-linux
-          path: target/release/openscq30_cli
+          name: linux-x86_64
+          path: artifacts/*
 
   build_macos:
     runs-on: macos-12
