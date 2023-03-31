@@ -1,15 +1,18 @@
 version: 1
 script:
-  - cargo build --release --features libadwaita
+  - cargo build --package openscq30_gui --release
   - rm -rf ./AppDir || true
   - mkdir -p ./AppDir/usr/bin
-  - mv ../target/release/openscq30_gui ./AppDir/usr/bin
+  - mv ../../target/release/openscq30_gui ./AppDir/usr/bin
+  - ../../gui/scripts/build-locale.sh ./AppDir/usr
+  - mkdir -p ./AppDir/usr/share/icons/hicolor/scalable/apps
+  - cp ../../gui/resources/icon.svg ./AppDir/usr/share/icons/hicolor/scalable/apps/com.oppzippy.OpenSCQ30.svg
 
 AppDir:
   app_info:
     id: com.oppzippy.OpenSCQ30
     name: OpenSCQ30
-    icon: application-vnd.appimage
+    icon: com.oppzippy.OpenSCQ30
     version: latest
     exec: usr/bin/openscq30_gui
     exec_args: $@
@@ -19,8 +22,8 @@ AppDir:
       - amd64
     allow_unauthenticated: true
     sources:
-      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy main restricted universe multiverse'
-        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
+      - sourceline: "deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy main restricted universe multiverse"
+        key_url: "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32"
     include:
       - libc6
       - libgtk-4-1
@@ -28,10 +31,6 @@ AppDir:
     exclude:
       - adwaita-icon-theme
       - humanity-icon-theme
-      - sensible-utils
-      - dconf-service
-      - ubuntu-mono
-      - fonts-*-core
 
   runtime:
     version: continuous
