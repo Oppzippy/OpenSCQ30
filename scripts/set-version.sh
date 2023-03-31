@@ -16,6 +16,10 @@ set_version_in_appimage_builder() {
     sed --in-place --regexp-extended --null-data "s/(\n *version: *)([0-9\.]+)( *\n)/\1$2\3/" "$1"
 }
 
+set_version_in_desktop() {
+    sed --in-place --regexp-extended --null-data "s/(\nVersion=)([0-9\.]+)(\n)/\1$2\3/" "$1"
+}
+
 if [ -z "$1" ]; then
     cat <<EOF
 Usage: set-version.sh 1.0.0
@@ -34,3 +38,4 @@ set_version_in_cargo_toml gui/Cargo.toml "$1"
 set_version_in_cargo_toml lib/Cargo.toml "$1"
 set_version_in_build_gradle android/app/build.gradle "$1"
 set_version_in_appimage_builder packaging/appimage/AppImageBuilder.yml "$1"
+set_version_in_desktop packaging/flatpak/com.oppzippy.OpenSCQ30.desktop "$1"
