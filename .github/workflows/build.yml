@@ -104,8 +104,11 @@ jobs:
         run: |
           Move-Item "C:\Program Files\Git\usr\notbin" "C:\Program Files\Git\usr\bin"
           Move-Item "C:\Program Files\Git\notbin" "C:\Program Files\Git\bin"
+
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
+      - name: Install cargo-make
+        uses: davidB/rust-cargo-make@v1
       - name: Build gui
         run: |
           $env:Path = "C:\gtk-build\gtk\x64\release\bin;" + $env:Path
