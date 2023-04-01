@@ -1,12 +1,10 @@
 version: 1
 script:
-  - cargo build --package openscq30_gui --release
+  - export CARGO_MAKE_WORKSPACE_INCLUDE_MEMBERS="gui"
+  - export INSTALL_PREFIX="$(pwd)/AppDir/usr"
+  - cargo make --profile release --cwd ../.. build
   - rm -rf ./AppDir || true
-  - mkdir -p ./AppDir/usr/bin
-  - mv ../../target/release/openscq30_gui ./AppDir/usr/bin
-  - ../../gui/scripts/build-locale.sh ./AppDir/usr
-  - mkdir -p ./AppDir/usr/share/icons/hicolor/scalable/apps
-  - cp ../../gui/resources/icon.svg ./AppDir/usr/share/icons/hicolor/scalable/apps/com.oppzippy.OpenSCQ30.svg
+  - cargo make --profile release --cwd ../.. install
 
 AppDir:
   app_info:

@@ -18,6 +18,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev gettext libfuse2
+      - name: Install cargo-make
+        uses: davidB/rust-cargo-make@v1
       - name: Install appimage-builder
         run: |
           curl --location -o appimage-builder https://github.com/AppImageCrafters/appimage-builder/releases/download/v1.1.0/appimage-builder-1.1.0-x86_64.AppImage
