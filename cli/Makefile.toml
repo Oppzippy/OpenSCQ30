@@ -35,3 +35,18 @@ args = [
     "--test",
     "*",
 ]
+
+[tasks.install]
+condition.platforms = ["linux"]
+script.main = '''
+echo Installing binary
+cp ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/target/release/openscq30_cli ${INSTALL_PREFIX}/bin/openscq30_cli
+chmod 755 ${INSTALL_PREFIX}/bin/openscq30_cli
+'''
+
+[tasks.uninstall]
+condition.platforms = ["linux"]
+script.main = '''
+echo Removing binary
+rm ${INSTALL_PREFIX}/bin/openscq30_cli
+'''

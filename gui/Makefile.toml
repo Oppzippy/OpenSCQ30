@@ -33,3 +33,48 @@ args = ["test", "--bins"]
 [tasks.unit-test-cov]
 command = "cargo"
 args = ["llvm-cov", "--no-report", "--bins"]
+
+[tasks.install]
+condition.platforms = ["linux"]
+script_runner = "@duckscript"
+script.main = '''
+is_bin_built = is_file ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/target/release/openscq30_gui
+is_locale_built = is_dir ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/target/release/share
+
+if not ${is_bin_built} and ${is_locale_built}
+    echo Run `cargo make --profile release build` before installing.
+    exit 1
+end
+
+echo Installing binary ${INSTALL_PREFIX}
+cp ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/target/release/openscq30_gui ${INSTALL_PREFIX}/bin/openscq30_gui
+chmod 755 ${INSTALL_PREFIX}/bin/openscq30_gui
+
+echo Installing locales
+cp_glob ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/target/release/share/**/* ${INSTALL_PREFIX}/share/
+
+echo Installing icon
+cp ${CARGO_MAKE_WORKING_DIRECTORY}/resources/icon.svg ${INSTALL_PREFIX}/share/icons/hicolor/scalable/apps/com.oppzippy.OpenSCQ30.svg
+
+echo Installing desktop file
+cp ${CARGO_MAKE_WORKING_DIRECTORY}/resources/com.oppzippy.OpenSCQ30.desktop ${INSTALL_PREFIX}/share/applications/com.oppzippy.OpenSCQ30.desktop
+'''
+
+[tasks.uninstall]
+condition.platforms = ["linux"]
+script.main = '''
+echo Removing binary
+rm ${INSTALL_PREFIX}/bin/openscq30_gui
+
+echo Removing locales
+mo_files = glob_array ${INSTALL_PREFIX}/share/locale/*/LC_MESSAGES/com.oppzippy.OpenSCQ30.mo
+for path in ${mo_files}
+    rm ${path}
+end
+
+echo Removing icon
+rm ${INSTALL_PREFIX}/share/icons/hicolor/scalable/apps/com.oppzippy.OpenSCQ30.svg
+
+echo Removing desktop file
+rm ${INSTALL_PREFIX}/share/applications/com.oppzippy.OpenSCQ30.desktop
+'''

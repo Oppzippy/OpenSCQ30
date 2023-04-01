@@ -11,17 +11,15 @@ clear = true
 env = { "CARGO_MAKE_WORKSPACE_INCLUDE_MEMBERS" = ["gui", "cli"] }
 script_runner = "@duckscript"
 script.pre = '''
-cargo_profile = get_env CARGO_MAKE_PROFILE
 cargo_build_flags = set ""
-if eq ${cargo_profile} "release"
+if eq ${CARGO_MAKE_PROFILE} "release"
     cargo_build_flags = set --release
     set_env OPENSCQ30_BUILD_DIR ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/target/release
 else
     set_env OPENSCQ30_BUILD_DIR ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/target/debug
 end
 
-is_demo_mode = get_env OPENSCQ30_BUILD_DEMO_MODE
-if eq ${is_demo_mode} "true"
+if eq ${OPENSCQ30_BUILD_DEMO_MODE} "true"
     cargo_build_flags = concat ${cargo_build_flags} " --no-default-features --features demo"
 end
 
@@ -67,3 +65,31 @@ args = ["llvm-cov", "report", "--html"]
 workspace = false
 command = "cargo"
 args = ["llvm-cov", "report", "--lcov", "--output-path", "lcov.info"]
+
+[tasks.install]
+clear = true
+env = { "CARGO_MAKE_WORKSPACE_INCLUDE_MEMBERS" = ["gui", "cli"] }
+script_runner = "@duckscript"
+script.pre = '''
+if is_empty ${INSTALL_PREFIX}
+    echo Please specify INSTALL_PREFIX environment variable. Recommended: /usr
+    exit 1
+end
+
+install_prefix = canonicalize ${INSTALL_PREFIX}
+echo Install prefix is ${install_prefix}
+'''
+
+[tasks.uninstall]
+clear = true
+env = { "CARGO_MAKE_WORKSPACE_INCLUDE_MEMBERS" = ["gui", "cli"] }
+script_runner = "@duckscript"
+script.pre = '''
+if is_empty ${INSTALL_PREFIX}
+    echo Please specify INSTALL_PREFIX environment variable. Recommended: /usr
+    exit 1
+end
+
+install_prefix = canonicalize ${INSTALL_PREFIX}
+echo Install prefix is ${install_prefix}
+'''
