@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
+$root = "$PSScriptRoot\..\.."
 
-cargo build --package openscq30_gui --release
-.\scripts\build-locale.sh
+cargo make --profile release --env CARGO_MAKE_WORKSPACE_INCLUDE_MEMBERS=gui --cwd $root build
 
 function Write-Filtered-Errors {
     param (
@@ -15,20 +15,20 @@ function Write-Filtered-Errors {
 }
 
 $directoriesToCreate = @(
-    ".\packaging\windows\root\bin"
-    ".\packaging\windows\root\share\locale"
-    ".\packaging\windows\root\share\glib-2.0\schemas"
+    "$root\packaging\windows\root\bin"
+    "$root\packaging\windows\root\share\locale"
+    "$root\packaging\windows\root\share\glib-2.0\schemas"
 )
 $filesToCopyNoOverwrite = @{
-    ".\LICENSE.txt"                                         = ".\packaging\windows\root";
-    "C:\gtk-build\gtk\x64\release\bin\*.dll"                = ".\packaging\windows\root\bin";
-    "C:\gtk-build\gtk\x64\release\bin\gdbus.exe"            = ".\packaging\windows\root\bin";
-    "C:\gtk-build\gtk\x64\release\share\glib-2.0\schemas\*" = ".\packaging\windows\root\share\glib-2.0\schemas";
-    "C:\gtk-build\gtk\x64\release\share\locale\*"           = ".\packaging\windows\root\share\locale";
+    "$root\LICENSE.txt"                                     = "$root\packaging\windows\root";
+    "C:\gtk-build\gtk\x64\release\bin\*.dll"                = "$root\packaging\windows\root\bin";
+    "C:\gtk-build\gtk\x64\release\bin\gdbus.exe"            = "$root\packaging\windows\root\bin";
+    "C:\gtk-build\gtk\x64\release\share\glib-2.0\schemas\*" = "$root\packaging\windows\root\share\glib-2.0\schemas";
+    "C:\gtk-build\gtk\x64\release\share\locale\*"           = "$root\packaging\windows\root\share\locale";
 }
 $filesToCopy = @{
-    ".\target\release\openscq30_gui.exe" = ".\packaging\windows\root\bin";
-    ".\gui\locale\*"                     = ".\packaging\windows\root\share\locale";
+    "$root\target\release\openscq30_gui.exe" = "$root\packaging\windows\root\bin";
+    "$root\target\release\share\*"           = "$root\packaging\windows\root\share";
 }
 
 foreach ($directory in $directoriesToCreate) {
@@ -43,4 +43,4 @@ foreach ($source in $filesToCopyNoOverwrite.Keys) {
     Write-Filtered-Errors $errors
 }
 
-& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" .\packaging\windows\setup.iss
+& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "$root\packaging\windows\setup.iss"
