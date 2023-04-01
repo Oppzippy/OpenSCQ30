@@ -64,8 +64,10 @@ jobs:
         run: cargo install cargo-ndk
 
       - name: Run android unit tests
-        working-directory: android
-        run: ./gradlew test
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: test
+          build-root-directory: android
       # - name: Run android instrumented tests
       #   working-directory: android
       #   run: ./gradlew connectedAndroidTest
