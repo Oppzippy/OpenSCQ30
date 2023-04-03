@@ -121,7 +121,7 @@ jobs:
       - name: Move to artifacts directory
         run: |
           New-Item -Type Directory -Path artifacts
-          Move-Item target/release/openscq30_cli artifacts/openscq30_cli-windows-x86_64.exe
+          Move-Item .\target\release\openscq30_cli.exe artifacts\openscq30_cli-windows-x86_64.exe
           Move-Item .\packaging\windows\Output\OpenSCQ30_Setup.exe artifacts\openscq30_gui_setup-windows-x86_64.exe
 
       - name: Upload artifacts
