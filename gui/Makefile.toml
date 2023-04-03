@@ -88,3 +88,33 @@ rm ${INSTALL_PREFIX}/share/icons/hicolor/scalable/apps/com.oppzippy.OpenSCQ30.sv
 echo Removing desktop file
 rm ${INSTALL_PREFIX}/share/applications/com.oppzippy.OpenSCQ30.desktop
 '''
+
+[tasks.update-po-files]
+script_runner = "@duckscript"
+script = '''
+
+project_name = set com.oppzippy.OpenSCQ30
+
+echo Generating template
+if is_file ./po/${project_name}.pot
+    exec xgettext --files-from ./po/POTFILES.in --join-existing --add-comments --sort-output --output ./po/${project_name}.pot
+else
+    exec xgettext --files-from ./po/POTFILES.in --add-comments --sort-output --output ./po/${project_name}.pot
+end
+
+content = readfile ./po/LINGUAS
+locales = split ${content} \n
+
+for locale in ${locales}
+    is_locale_empty = is_empty ${locale}
+    if not ${is_locale_empty}
+        echo "Updating ${locale}"
+        mkdir ./po/${locale}
+        if is_file ./po/${locale}/${project_name}.po
+            exec msgmerge --update ./po/${locale}/${project_name}.po ./po/${project_name}.pot
+        else
+            exec msginit --input ./po/${project_name}.pot --locale ${locale} --output ./po/${locale}/${project_name}.po
+        end
+    end
+end
+'''
