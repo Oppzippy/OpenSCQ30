@@ -33,6 +33,6 @@ tempfile = "3.4"
 glib-build-tools = "0.17"
 
 [target.'cfg(windows)'.build-dependencies]
-embed-resource = "2.0.0"
+embed-resource = "2.1.1"
 tempfile = "3.4"
 regex = "1.7"
