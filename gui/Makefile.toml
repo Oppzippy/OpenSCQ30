@@ -9,21 +9,31 @@ cm_run_task build-locale
 
 [tasks.build-bin]
 private = true
-script_runner = "@shell"
-script = '''
-cargo build $OPENSCQ30_BUILD_FLAGS
-'''
+command = "cargo"
+args = ["build", "@@split(OPENSCQ30_BUILD_FLAGS, )"]
 
 [tasks.build-locale]
 private = true
-script_runner = "@shell"
+script_runner = "@duckscript"
 condition = { files_modified = { input = [
     "./po/**/*",
 ], output = [
     "${OPENSCQ30_BUILD_DIR}/share/**/*",
 ] } }
 script = '''
-./scripts/build-locale.sh $OPENSCQ30_BUILD_DIR
+project_name = set com.oppzippy.OpenSCQ30
+out_dir = set ${OPENSCQ30_BUILD_DIR}
+
+existing_locales = set_new
+paths = glob_array ${CARGO_MAKE_WORKING_DIRECTORY}/po/*
+for path in ${paths}
+    if is_dir ${path}
+        locale = basename ${path}
+        echo Building ${locale}
+        mkdir ${OPENSCQ30_BUILD_DIR}/share/locale/${locale}/LC_MESSAGES
+        exec msgfmt --output-file ${OPENSCQ30_BUILD_DIR}/share/locale/${locale}/LC_MESSAGES/${project_name}.mo ${CARGO_MAKE_WORKING_DIRECTORY}/po/${locale}/${project_name}.po
+    end
+end
 '''
 
 [tasks.unit-test]

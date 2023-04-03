@@ -7,10 +7,8 @@ cm_run_task build-bin
 
 [tasks.build-bin]
 private = true
-script_runner = "@shell"
-script = '''
-cargo build $OPENSCQ30_BUILD_FLAGS
-'''
+command = "cargo"
+args = ["build", "@@split(OPENSCQ30_BUILD_FLAGS, )"]
 
 [tasks.unit-test]
 command = "cargo"
