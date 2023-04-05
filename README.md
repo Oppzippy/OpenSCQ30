@@ -5,35 +5,39 @@ OpenSCQ30 is free software for controlling settings for the Soundcore Q30 headph
 Progress on supported platforms:  
 [x] Android - Ready  
 [x] Linux - Ready  
-[x] Windows - Mostly Ready  
+[x] Windows - Ready  
 [ ] Mac - It compiles. It's untested beyond that. I don't have a mac, so this probably isn't going anywhere.
 
 ## Building
 
-Compiled binaries won't be provided until the first release. Instructions for compiling are available below for [Windows](#windows), [Mac](#mac), [Linux](#linux), and [Android](#android).
-
 ### Windows
 
 1. Checkout the repository.
-2. Install [gvsbuild](https://github.com/wingtk/gvsbuild) and its dependencies using the [instructions in the readme](https://github.com/wingtk/gvsbuild#development-environment).
-3. Follow the [instructions for building GTK4 and libadwaita](https://github.com/wingtk/gvsbuild#build-gtk).
-4. Set the [environment variables from the gvsbuild instructions](https://github.com/wingtk/gvsbuild#add-gtk-to-your-environmental-variables) and run `cargo build --release --package openscq30_gui`.
-5. The compiled binary can be found at `target\release\openscq30_gui.exe`
-6. For distribution, make a new folder and copy the following into it:
+2. Install [cargo-make](https://github.com/sagiegurari/cargo-make#installation)
+3. Install [gvsbuild](https://github.com/wingtk/gvsbuild) and its dependencies using the [instructions in the readme](https://github.com/wingtk/gvsbuild#development-environment).
+4. Follow the [instructions for building GTK4 and libadwaita](https://github.com/wingtk/gvsbuild#build-gtk).
+5. Set the [environment variables from the gvsbuild instructions](https://github.com/wingtk/gvsbuild#add-gtk-to-your-environmental-variables)
+6. `cd` to the `gui` directory and run `cargo make --profile release build`. Note that `--profile release` must come before `build`.
+7. The compiled binary can be found at `target\release\openscq30_gui.exe`
+8. For distribution, make a new folder and copy the following into it:
 
--   target\release\openscq30_gui.exe
--   C:\gtk-build\gtk\x64\release\bin\\\*.dll
--   C:\gtk-build\gtk\x64\release\bin\gdbus.exe
-
-7. In the new folder, make a `share` folder, and a `glib-2.0` folder inside of that. Then copy `C:\gtk-build\gtk\x64\release\share\glib-2.0\schemas` into the newly created `glib-2.0` folder.
+| From                                                | To                     |
+| --------------------------------------------------- | ---------------------- |
+| target\release\openscq30_gui.exe                    | bin\openscq30_gui.exe  |
+| target\release\share                                | share                  |
+| C:\gtk-build\gtk\x64\release\bin\\\*.dll            | bin\\\*.dll            |
+| C:\gtk-build\gtk\x64\release\bin\gdbus.exe          | bin\gdbus.exe          |
+| C:\gtk-build\gtk\x64\release\share\glib-2.0\schemas | share\glib-2.0\schemas |
+| C:\gtk-build\gtk\x64\release\share\locale           | share\locale           |
 
 ### Mac
 
 1. Checkout the repository
 2. Install rust
-3. Install gtk4 and libadwaita (`brew install gtk4 libadwaita`)
-4. In the root project directory, run: `cargo build --release --package openscq30_gui`
-5. The compiled binary can be found at `target/release/openscq30_gui`
+3. Install [cargo-make](https://github.com/sagiegurari/cargo-make#installation)
+4. Install gtk4 and libadwaita (`brew install gtk4 libadwaita`)
+5. `cd` to the `gui` directory and run `cargo make --profile release build`. Note that `--profile release` must come before `build`.
+6. The compiled binary can be found at `target/release/openscq30_gui`. Locale files are in `target/release/share`.
 
 ### Linux
 
@@ -41,9 +45,10 @@ Instructions use Ubuntu package names. Package names may differ on other distros
 
 1. Checkout the repository
 2. Install rust
-3. Install libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev
-4. In the root project directory, run: `cargo build --release --package openscq30_gui`
-5. The compiled binary can be found at `target/release/openscq30_gui`
+3. Install [cargo-make](https://github.com/sagiegurari/cargo-make#installation)
+4. Install libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev
+5. `cd` to the `gui` directory and run `cargo make --profile release build`. Note that `--profile release` must come before `build`.
+6. The compiled binary can be found at `target/release/openscq30_gui`. Locale files are in `target/release/share`.
 
 ### Android
 
