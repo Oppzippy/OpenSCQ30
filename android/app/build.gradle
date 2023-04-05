@@ -30,7 +30,7 @@ android {
         minSdk 24
         targetSdk 33
         versionCode 1
-        versionName "1.0.0"
+        versionName "1.1.0"
         buildConfigField 'boolean', 'IS_DEMO_MODE', 'false'
 
         testInstrumentationRunner "com.oppzippy.openscq30.HiltTestRunner"
