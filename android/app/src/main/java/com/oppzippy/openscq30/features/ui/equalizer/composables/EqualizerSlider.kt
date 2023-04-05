@@ -16,6 +16,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.features.ui.equalizer.MAX_VOLUME
+import com.oppzippy.openscq30.features.ui.equalizer.MIN_VOLUME
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 import java.math.BigDecimal
 import kotlin.math.roundToInt
@@ -56,8 +58,8 @@ fun EqualizerSlider(
                 onValueChange = {
                     onValueChange(it.roundToInt().toByte())
                 },
-                valueRange = -120F..120F,
-                steps = 240,
+                valueRange = MIN_VOLUME.toFloat()..MAX_VOLUME.toFloat(),
+                steps = MAX_VOLUME - MIN_VOLUME,
                 modifier = Modifier.testTag("equalizerSlider"),
                 enabled = enabled,
             )

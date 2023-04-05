@@ -16,6 +16,9 @@ import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import javax.inject.Inject
 
+val MIN_VOLUME = -120
+val MAX_VOLUME = 120;
+
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @HiltViewModel
 class EqualizerSettingsViewModel @Inject constructor(
@@ -104,7 +107,7 @@ class EqualizerSettingsViewModel @Inject constructor(
         var reformattedText = changedText
         try {
             val value = BigDecimal(changedText).multiply(BigDecimal.TEN)
-                .coerceIn(BigDecimal(-60), BigDecimal(60))
+                .coerceIn(BigDecimal(MIN_VOLUME), BigDecimal(MAX_VOLUME))
             onValueChange(changedIndex, value.toByte())
             // don't delete trailing decimals
             if (!changedText.endsWith(".") && !changedText.endsWith(",")) {
