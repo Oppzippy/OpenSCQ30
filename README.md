@@ -3,10 +3,10 @@
 OpenSCQ30 is free software for controlling settings for the Soundcore Q30 headphones.
 
 Progress on supported platforms:  
-[x] Android - Ready  
-[x] Linux - Ready  
 [x] Windows - Ready  
-[ ] Mac - It compiles. It's untested beyond that. I don't have a mac, so this probably isn't going anywhere.
+[x] Linux - Ready  
+[x] Android - Ready  
+[ ] macOS - It compiles. It's untested beyond that. I don't have a Mac, so this probably isn't going anywhere. If you're tring to get it working on macOS, see [btleplug macOS build notes](https://github.com/deviceplug/btleplug#user-content-macos).
 
 ## Building
 
@@ -71,3 +71,7 @@ Instructions use Ubuntu package names. Package names may differ on other distros
 4. Install [cargo-ndk](https://github.com/bbqsrc/cargo-ndk): `cargo install cargo-ndk`
 5. In the `android` directory, run `./gradlew assembleRelease`
 6. The apk can be found at `android/app/build/outputs/apk/release/app-release-unsigned.apk`
+
+## Running Tests
+
+`cargo make test` will run all unit and integration tests.
