@@ -10,6 +10,8 @@ set_version_in_cargo_toml() {
 
 set_version_in_build_gradle() {
     sed --in-place --regexp-extended --null-data "s/(\n *versionName \")([0-9\.]+)(\"\n)/\1$2\3/" "$1"
+    next_version_code=$(($(git tag | wc -l) + 1))
+    sed --in-place --regexp-extended --null-data "s/(\n *versionCode )([0-9]+)(\n)/\1$next_version_code\3/" "$1"
 }
 
 set_version_in_appimage_builder() {
