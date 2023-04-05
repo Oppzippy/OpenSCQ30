@@ -397,6 +397,7 @@ fn set_ui_theme(application: &adw::Application) -> anyhow::Result<()> {
     Ok(())
 }
 
+#[cfg(target_os = "windows")]
 fn is_color_light(color: &windows::UI::Color) -> bool {
     // https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/apply-windows-themes
     let lhs = (5 * color.G as u32) + (2 * color.R as u32) + color.B as u32;
