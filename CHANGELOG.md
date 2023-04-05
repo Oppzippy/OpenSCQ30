@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.1.1
+
+### Android
+
+#### Fixes
+
+-   Fixed equalizer number input range being smaller than slider range
+
 ## v1.1.0
 
 ### General
