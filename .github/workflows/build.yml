@@ -35,7 +35,7 @@ jobs:
         run: |
           mkdir artifacts
           mv target/release/openscq30_cli artifacts/openscq30_cli-linux-x86_64
-          mv packaging/appimage/OpenSCQ30-*.AppImage* artifacts/
+          mv packaging/appimage/openscq30-*.AppImage* artifacts/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
