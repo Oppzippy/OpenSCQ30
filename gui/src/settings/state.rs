@@ -11,7 +11,7 @@ impl Default for State {
     fn default() -> Self {
         Self {
             window_width: -1,
-            window_height: -1,
+            window_height: 400,
             is_maximized: false,
         }
     }
