@@ -2,9 +2,6 @@ name: "build"
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - "*"
 
 env:
   CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
