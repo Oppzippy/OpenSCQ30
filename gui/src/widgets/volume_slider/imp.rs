@@ -68,9 +68,19 @@ impl ObjectImpl for VolumeSlider {
         let slider = self.slider.get();
         slider.set_format_value_func(|_slider, value| format!("{:.1}", value / 10.0));
 
-        slider.add_mark(-120.0, gtk::PositionType::Right, Some("-12"));
+        let lower = slider.adjustment().lower();
+        let upper = slider.adjustment().upper();
+        slider.add_mark(
+            lower,
+            gtk::PositionType::Right,
+            Some(&format!("{}", lower / 10.0)),
+        );
         slider.add_mark(0.0, gtk::PositionType::Right, Some("0"));
-        slider.add_mark(120.0, gtk::PositionType::Right, Some("+12"));
+        slider.add_mark(
+            upper,
+            gtk::PositionType::Right,
+            Some(&format!("+{}", upper / 10.0)),
+        );
     }
 
     fn properties() -> &'static [ParamSpec] {
