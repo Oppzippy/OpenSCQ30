@@ -14,7 +14,6 @@ use gtk::{
     glib::{self, clone, closure_local, MainContext, OptionFlags},
     prelude::*,
     traits::GtkWindowExt,
-    Application,
 };
 use gtk_openscq30_lib::GtkDeviceRegistry;
 use logging_level::LoggingLevel;
@@ -22,6 +21,12 @@ use openscq30_lib::api::device::DeviceRegistry;
 use settings::Settings;
 use tracing::Level;
 use widgets::MainWindow;
+#[cfg(target_os = "windows")]
+use windows::{
+    core::IInspectable,
+    Foundation::TypedEventHandler,
+    UI::ViewManagement::{UIColorType, UISettings},
+};
 
 use crate::objects::EqualizerCustomProfileObject;
 
@@ -164,7 +169,7 @@ where
     });
 }
 
-fn build_ui(application: &impl IsA<Application>) {
+fn build_ui(application: &adw::Application) {
     let tokio_runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(1)
         .enable_all()
@@ -180,9 +185,13 @@ fn build_ui(application: &impl IsA<Application>) {
 }
 
 fn build_ui_2(
-    application: &impl IsA<Application>,
+    application: &adw::Application,
     gtk_registry: GtkDeviceRegistry<impl DeviceRegistry + Send + Sync + 'static>,
 ) {
+    #[cfg(target_os = "windows")]
+    if let Err(err) = set_ui_theme(application) {
+        tracing::warn!("failed to set ui theme: {err:?}");
+    }
     let settings: Rc<Settings> = Default::default();
     if let Err(err) = settings.load() {
         tracing::warn!("initial load of settings file failed: {:?}", err)
@@ -344,4 +353,53 @@ fn build_ui_2(
     );
 
     main_window.present();
+}
+
+#[cfg(target_os = "windows")]
+fn set_ui_theme(application: &adw::Application) -> anyhow::Result<()> {
+    let settings = UISettings::new()?;
+
+    use adw::prelude::AdwApplicationExt;
+    use std::sync::Arc;
+    use tokio::sync::Notify;
+
+    let notify_colors_changed = Arc::new(Notify::new());
+    {
+        let notify_colors_changed = notify_colors_changed.to_owned();
+        settings.ColorValuesChanged(&TypedEventHandler::new(
+            move |_settings: &Option<UISettings>, _: &Option<IInspectable>| {
+                notify_colors_changed.notify_one();
+                Ok(())
+            },
+        ))?;
+    }
+
+    let style_manager = application.style_manager();
+    MainContext::default().spawn_local(async move {
+        loop {
+            // Initially set color scheme, then wait for changes
+            match settings.GetColorValue(UIColorType::Foreground) {
+                Ok(color) => {
+                    let color_scheme = if is_color_light(&color) {
+                        adw::ColorScheme::PreferLight
+                    } else {
+                        adw::ColorScheme::PreferDark
+                    };
+                    style_manager.set_color_scheme(color_scheme);
+                }
+                Err(err) => tracing::warn!("failed to set color scheme: {err:?}"),
+            }
+
+            notify_colors_changed.notified().await;
+            tracing::info!("updating ui color scheme");
+        }
+    });
+    Ok(())
+}
+
+fn is_color_light(color: &windows::UI::Color) -> bool {
+    // https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/apply-windows-themes
+    let lhs = (5 * color.G as u32) + (2 * color.R as u32) + color.B as u32;
+    let rhs = 8 * 128;
+    lhs < rhs
 }
