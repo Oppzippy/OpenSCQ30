@@ -30,7 +30,7 @@ impl EqualizerBandOffsets {
         // output should be in the 60-180 range
         let clamped = offset.clamp(MIN_VOLUME, MAX_VOLUME);
         let unsigned = clamped.wrapping_add(MIN_VOLUME.abs()) as u8;
-        unsigned + (120 - MIN_VOLUME.abs() as u8)
+        unsigned + (120 - MIN_VOLUME.unsigned_abs())
     }
 
     fn packet_byte_to_signed_offset(byte: u8) -> i8 {
@@ -38,7 +38,7 @@ impl EqualizerBandOffsets {
             Self::signed_offset_to_packet_byte(MIN_VOLUME),
             Self::signed_offset_to_packet_byte(MAX_VOLUME),
         );
-        let signed = clamped.wrapping_sub(MIN_VOLUME.abs() as u8) as i8;
+        let signed = clamped.wrapping_sub(MIN_VOLUME.unsigned_abs()) as i8;
         signed - (120 - MIN_VOLUME.abs())
     }
 }

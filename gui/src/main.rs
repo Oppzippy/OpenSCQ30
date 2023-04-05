@@ -85,7 +85,7 @@ fn get_locale_dir() -> anyhow::Result<PathBuf> {
         .ok_or_else(|| anyhow!("current_exe has no parent directory"))?;
 
     check_locale_dir(executable_dir)
-        .or_else(|| executable_dir.parent().map(check_locale_dir).flatten())
+        .or_else(|| executable_dir.parent().and_then(check_locale_dir))
         .ok_or_else(|| anyhow!("could not find locale dir"))
 }
 

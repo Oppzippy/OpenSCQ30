@@ -51,7 +51,7 @@ impl EqualizerSettings {
         self.obj().emit_by_name(
             "create-custom-equalizer-profile",
             &[&EqualizerCustomProfileObject::new(
-                &"".to_string(), // TODO use a different object that doesn't have a name field
+                "", // TODO use a different object that doesn't have a name field
                 self.equalizer.volumes(),
             )],
         )
@@ -284,7 +284,7 @@ impl EqualizerSettings {
 
     fn set_up_preset_profile_items(&self) {
         let custom_profile_iter = [EqualizerProfileObject::new(
-            &"Custom".to_string(),
+            "Custom",
             EqualizerConfiguration::CUSTOM_PROFILE_ID.into(),
         )]
         .into_iter();
