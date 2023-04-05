@@ -8,6 +8,13 @@ Progress on supported platforms:
 [x] Android - Ready  
 [ ] macOS - It compiles. It's untested beyond that. I don't have a Mac, so this probably isn't going anywhere. If you're tring to get it working on macOS, see [btleplug macOS build notes](https://github.com/deviceplug/btleplug#user-content-macos).
 
+## Demo
+### Desktop
+[Desktop GUI Demo.webm](https://user-images.githubusercontent.com/2236514/229958756-aaa2a6d3-e908-4195-aad6-b0bcfda139a8.webm)
+
+### Android
+[Android Demo.webm](https://user-images.githubusercontent.com/2236514/229958765-ef0c1322-ea00-4ce9-bdb1-71014e18d0a8.webm)
+
 ## Building
 
 ### Windows
