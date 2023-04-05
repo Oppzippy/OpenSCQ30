@@ -56,8 +56,8 @@ fun EqualizerSlider(
                 onValueChange = {
                     onValueChange(it.roundToInt().toByte())
                 },
-                valueRange = -60F..60F,
-                steps = 120,
+                valueRange = -120F..120F,
+                steps = 240,
                 modifier = Modifier.testTag("equalizerSlider"),
                 enabled = enabled,
             )

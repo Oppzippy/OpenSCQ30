@@ -33,7 +33,7 @@ pub enum SetCommand {
         mode: NoiseCancelingMode,
     },
     Equalizer {
-        #[arg(required=true, num_args = 8, value_parser = clap::value_parser!(i8).range(-60..60))]
+        #[arg(required=true, num_args = 8, value_parser = clap::value_parser!(i8).range(-120..120))]
         band_offsets: Vec<i8>,
     },
 }

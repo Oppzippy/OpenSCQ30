@@ -3,8 +3,8 @@ pub struct EqualizerBandOffsets {
     volume_offsets: [i8; 8],
 }
 
-const MIN_VOLUME: i8 = -60;
-const MAX_VOLUME: i8 = 60;
+const MIN_VOLUME: i8 = -120;
+const MAX_VOLUME: i8 = 120;
 
 impl EqualizerBandOffsets {
     pub fn new(volume_offsets: [i8; 8]) -> Self {
@@ -29,8 +29,8 @@ impl EqualizerBandOffsets {
     fn signed_offset_to_packet_byte(offset: i8) -> u8 {
         // output should be in the 60-180 range
         let clamped = offset.clamp(MIN_VOLUME, MAX_VOLUME);
-        let unsigned = (clamped + 60) as u8;
-        unsigned + 60
+        let unsigned = clamped.wrapping_add(MIN_VOLUME.abs()) as u8;
+        unsigned + (120 - MIN_VOLUME.abs() as u8)
     }
 
     fn packet_byte_to_signed_offset(byte: u8) -> i8 {
@@ -38,8 +38,8 @@ impl EqualizerBandOffsets {
             Self::signed_offset_to_packet_byte(MIN_VOLUME),
             Self::signed_offset_to_packet_byte(MAX_VOLUME),
         );
-        let signed = (clamped - 60) as i8;
-        signed - 60
+        let signed = clamped.wrapping_sub(MIN_VOLUME.abs() as u8) as i8;
+        signed - (120 - MIN_VOLUME.abs())
     }
 }
 
@@ -64,15 +64,12 @@ mod tests {
     #[test]
     fn it_clamps_bytes_outside_of_expected_range() {
         let band_offsets = EqualizerBandOffsets::from_bytes([0, 255, 120, 120, 120, 120, 120, 120]);
-        assert_eq!(
-            [60, 180, 120, 120, 120, 120, 120, 120],
-            band_offsets.bytes()
-        );
+        assert_eq!([0, 240, 120, 120, 120, 120, 120, 120], band_offsets.bytes());
     }
 
     #[test]
     fn it_clamps_volume_offsets_outside_of_expected_range() {
         let band_offsets = EqualizerBandOffsets::new([-128, 127, 0, 0, 0, 0, 0, 0]);
-        assert_eq!([-60, 60, 0, 0, 0, 0, 0, 0], band_offsets.volume_offsets());
+        assert_eq!([-120, 120, 0, 0, 0, 0, 0, 0], band_offsets.volume_offsets());
     }
 }
