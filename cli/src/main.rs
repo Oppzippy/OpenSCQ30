@@ -37,7 +37,7 @@ async fn do_cli_command(args: Cli, registry: impl DeviceRegistry) -> Result<(), 
             let mac_address_string = mac_address.to_string();
             descriptors
                 .iter()
-                .find(|descriptor| descriptor.mac_address() == &mac_address_string)
+                .find(|descriptor| descriptor.mac_address() == mac_address_string)
         })
         .or_else(|| Some(descriptors.first()))
         .flatten();
