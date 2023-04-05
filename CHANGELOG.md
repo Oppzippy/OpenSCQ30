@@ -10,6 +10,10 @@
 
 ### GUI
 
+#### Features
+
+-   Add light/dark mode support on Windows
+
 #### Fixes
 
 -   Increased default height of window
