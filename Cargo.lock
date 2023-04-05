@@ -1291,7 +1291,7 @@ checksum = "b7e5500299e16ebb147ae15a00a942af264cf3688f47923b8fc2cd5858f23ad3"
 
 [[package]]
 name = "openscq30_android"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "android_logger",
  "anyhow",
@@ -1308,7 +1308,7 @@ dependencies = [
 
 [[package]]
 name = "openscq30_cli"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "assert_cmd",
  "clap",
@@ -1323,7 +1323,7 @@ dependencies = [
 
 [[package]]
 name = "openscq30_gui"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1349,7 +1349,7 @@ dependencies = [
 
 [[package]]
 name = "openscq30_lib"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "async-trait",
  "btleplug",
