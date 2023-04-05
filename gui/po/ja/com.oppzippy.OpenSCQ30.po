@@ -105,12 +105,3 @@ msgstr ""
 msgctxt "noise canceling mode"
 msgid "Transport"
 msgstr ""
-
-#. listed twice so both forms are picked up for localization
-#: src/widgets/volume_slider/template.ui:30
-msgid "{} Hz"
-msgstr ""
-
-#: src/widgets/volume_slider/template.ui:31
-msgid "{} kHz"
-msgstr ""
