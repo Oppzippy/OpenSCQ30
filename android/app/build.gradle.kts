@@ -156,8 +156,8 @@ dependencies {
     kaptTest("com.google.dagger:hilt-compiler:$hiltVersion")
 
     testImplementation("junit:junit:4.13.2")
-    testImplementation("io.mockk:mockk:1.13.3")
-    androidTestImplementation("io.mockk:mockk-android:1.13.3")
+    testImplementation("io.mockk:mockk:1.13.5")
+    androidTestImplementation("io.mockk:mockk-android:1.13.5")
     androidTestImplementation("androidx.test:runner:1.5.2")
     androidTestImplementation("androidx.test:core-ktx:1.5.0")
     androidTestImplementation("androidx.test:rules:1.5.0")
