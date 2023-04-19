@@ -38,15 +38,14 @@ pub struct Equalizer {
 
 impl Equalizer {
     pub fn volumes(&self) -> [i8; 8] {
-        self.get_volume_sliders()
-            .map(|slider| slider.volume() as i8)
+        self.get_volume_sliders().map(|slider| slider.volume())
     }
 
     pub fn set_volumes(&self, volumes: [i8; 8]) {
         self.get_volume_sliders()
             .iter()
             .zip(volumes.into_iter())
-            .for_each(|(slider, volume)| slider.set_volume(volume as f64));
+            .for_each(|(slider, volume)| slider.set_volume(volume));
     }
 
     fn handle_volume_change(&self) {
@@ -86,7 +85,7 @@ impl ObjectImpl for Equalizer {
     fn constructed(&self) {
         for band in self.get_volume_sliders() {
             band.connect_notify_local(
-                Some("volume"),
+                Some("volume-slider-value"),
                 clone!(@weak self as this => move |_slider, _param_spec| {
                     this.handle_volume_change();
                 }),

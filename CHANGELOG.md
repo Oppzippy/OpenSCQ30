@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.2.0
+
+### GUI
+
+#### Features
+
+-   Add volume text input in addition to slider
+
 ## v1.1.1
 
 ### Android

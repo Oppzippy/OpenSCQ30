@@ -5,7 +5,6 @@ use gtk::prelude::*;
 use gtk::subclass::prelude::{ObjectImplExt, ObjectSubclassExt};
 use gtk::subclass::widget::{CompositeTemplateInitializingExt, WidgetClassSubclassExt};
 use gtk::traits::{RangeExt, ScaleExt};
-use gtk::Label;
 use gtk::{
     glib,
     subclass::{
@@ -14,6 +13,7 @@ use gtk::{
     },
     CompositeTemplate, Scale, TemplateChild,
 };
+use gtk::{Label, SpinButton};
 
 #[derive(Default, CompositeTemplate, Properties)]
 #[properties(wrapper_type = super::VolumeSlider)]
@@ -22,10 +22,12 @@ pub struct VolumeSlider {
     #[template_child]
     pub slider: TemplateChild<Scale>,
     #[template_child]
+    pub text_input: TemplateChild<SpinButton>,
+    #[template_child]
     pub band_label: TemplateChild<Label>,
 
     #[property(get, set)]
-    pub volume: Cell<f64>,
+    pub volume_slider_value: Cell<f64>,
     #[property(get, set)]
     pub band: Cell<i32>,
 }
@@ -61,25 +63,23 @@ impl ObjectImpl for VolumeSlider {
             .flags(BindingFlags::SYNC_CREATE)
             .build();
 
-        obj.bind_property("volume", &self.slider.get().adjustment(), "value")
-            .flags(BindingFlags::BIDIRECTIONAL)
-            .build();
+        obj.bind_property(
+            "volume_slider_value",
+            &self.slider.get().adjustment(),
+            "value",
+        )
+        .flags(BindingFlags::BIDIRECTIONAL)
+        .build();
 
         let slider = self.slider.get();
-        slider.set_format_value_func(|_slider, value| format!("{:.1}", value / 10.0));
-
         let lower = slider.adjustment().lower();
         let upper = slider.adjustment().upper();
-        slider.add_mark(
-            lower,
-            gtk::PositionType::Right,
-            Some(&format!("{}", lower / 10.0)),
-        );
+        slider.add_mark(lower, gtk::PositionType::Right, Some(&format!("{}", lower)));
         slider.add_mark(0.0, gtk::PositionType::Right, Some("0"));
         slider.add_mark(
             upper,
             gtk::PositionType::Right,
-            Some(&format!("+{}", upper / 10.0)),
+            Some(&format!("+{}", upper)),
         );
     }
 

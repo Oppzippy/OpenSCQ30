@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
     <object class="GtkAdjustment" id="eq-adjustment">
-        <property name="lower">-120</property>
-        <property name="upper">120</property>
-        <property name="step-increment">1</property>
-        <property name="page-increment">10</property>
+        <property name="lower">-12</property>
+        <property name="upper">12</property>
+        <property name="step-increment">0.1</property>
+        <property name="page-increment">1</property>
     </object>
     <template class="OpenSCQ30VolumeSlider" parent="GtkBox">
         <property name="orientation">vertical</property>
@@ -14,14 +14,18 @@
             <object class="GtkScale" id="slider">
                 <property name="adjustment">eq-adjustment</property>
                 <property name="orientation">vertical</property>
-                <property name="digits">1</property>
                 <property name="inverted">true</property>
                 <property name="vexpand">true</property>
-                <property name="draw-value">true</property>
-                <property name="value-pos">bottom</property>
                 <accessibility>
                     <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">band_label</relation>
                 </accessibility>
+            </object>
+        </child>
+        <child>
+            <object class="GtkSpinButton" id="text_input">
+                <property name="adjustment">eq-adjustment</property>
+                <property name="digits">1</property>
+                <property name="snap-to-ticks">true</property>
             </object>
         </child>
         <child>
