@@ -2,7 +2,7 @@ use std::cell::RefCell;
 
 use gtk::{
     glib::{self, ParamSpec, Properties, Value},
-    prelude::{ObjectExt, ParamSpecBuilderExt},
+    prelude::ObjectExt,
     subclass::prelude::{DerivedObjectProperties, ObjectImpl, ObjectSubclass},
 };
 
