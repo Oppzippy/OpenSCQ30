@@ -11,8 +11,8 @@ glib::wrapper! {
 impl VolumeSlider {
     pub fn new(band: i32, volume: f64) -> Self {
         Object::builder()
-            .property("band", &band)
-            .property("volume-slider-value", &volume)
+            .property("band", band)
+            .property("volume-slider-value", volume)
             .build()
     }
 
