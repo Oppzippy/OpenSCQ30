@@ -10,7 +10,7 @@ demo = ["openscq30_lib/demo"]
 
 [dependencies]
 openscq30_lib = { path = "../lib" }
-clap = { version = "4.1", features = ["derive"] }
+clap = { version = "4.2", features = ["derive"] }
 tokio = { version = "1", features = ["macros"] }
 tracing = "0.1"
 tracing-subscriber = "0.3"
