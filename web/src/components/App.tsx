@@ -10,7 +10,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useMemo, useState } from "react";
-import { SoundcoreDevice, selectDevice } from "./bluetooth/SoundcoreDevice";
+import { SoundcoreDevice, selectDevice } from "../bluetooth/SoundcoreDevice";
 import { DeviceSettings } from "./DeviceSettings";
 
 function App() {

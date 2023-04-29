@@ -1,4 +1,4 @@
-import { PresetEqualizerProfile } from "../wasm/pkg/openscq30_web_wasm";
+import { PresetEqualizerProfile } from "../../wasm/pkg/openscq30_web_wasm";
 import { Equalizer } from "./Equalizer";
 import {
   FormControl,

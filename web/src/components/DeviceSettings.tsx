@@ -3,12 +3,12 @@ import {
   EqualizerBandOffsets,
   EqualizerConfiguration,
   PresetEqualizerProfile,
-} from "../wasm/pkg/openscq30_web_wasm";
+} from "../../wasm/pkg/openscq30_web_wasm";
 import { AmbientSoundModeSelection } from "./AmbientSoundModeSelection";
 import { EqualizerSettings } from "./EqualizerSettings";
 import { NoiseCancelingModeSelection } from "./NoiseCancelingModeSelection";
-import { SoundcoreDevice } from "./bluetooth/SoundcoreDevice";
-import { useBehaviorSubject } from "./hooks/useObservable";
+import { SoundcoreDevice } from "../bluetooth/SoundcoreDevice";
+import { useBehaviorSubject } from "../hooks/useObservable";
 
 export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
   const state = useBehaviorSubject(device.state);
