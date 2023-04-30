@@ -27,6 +27,8 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.33.0",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/user-event": "^14.4.3",
     "@types/jsdom": "^21.1.1",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
@@ -40,7 +42,6 @@
     "eslint-plugin-react-refresh": "^0.3.4",
     "jsdom": "^21.1.1",
     "playwright": "^1.33.0",
-    "react-test-renderer": "^18.2.0",
     "typescript": "^5.0.2",
     "vite": "^4.3.0",
     "vitest": "^0.30.1"
