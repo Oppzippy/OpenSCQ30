@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { usePreview } from "./usePreview";
+import { usePreview } from "./usePreview.ts";
 
 test.describe("homepage", () => {
   const getAddress = usePreview();

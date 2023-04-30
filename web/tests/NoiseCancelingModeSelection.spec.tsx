@@ -1,7 +1,6 @@
 import { expect, test } from "vitest";
 import renderer from "react-test-renderer";
-import { NoiseCancelingModeSelection } from "../src/NoiseCancelingModeSelection";
-import React from "react";
+import { NoiseCancelingModeSelection } from "../src/components/NoiseCancelingModeSelection";
 import { NoiseCancelingMode } from "../wasm/pkg/openscq30_web_wasm";
 
 test("it renders", () => {
