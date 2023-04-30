@@ -1,6 +1,7 @@
 name: "Web"
 
-on: push
+on:
+  - push
 
 env:
   CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
@@ -63,7 +64,7 @@ jobs:
   deploy_to_pages:
     runs-on: ubuntu-latest
     needs: ["web_test", "web_e2e_test"]
-    if: github.ref == "refs/heads/master"
+    if: github.ref == 'refs/heads/master'
     # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
     permissions:
       contents: read
