@@ -7,4 +7,5 @@ import topLevelAwait from "vite-plugin-top-level-await";
 export default defineConfig({
   plugins: [wasm(), topLevelAwait(), react()],
   assetsInclude: ["../web-wasm/pkg"],
+  base: "./", // relative paths for github pages
 });
