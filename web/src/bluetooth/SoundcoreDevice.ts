@@ -1,40 +1,32 @@
 import {
   BehaviorSubject,
   Subscription,
-  debounceTime,
-  distinct,
   filter,
   first,
   firstValueFrom,
   interval,
   map,
-  pairwise,
-  startWith,
   takeUntil,
 } from "rxjs";
-import { SetEqualizerOkPacket } from "../../wasm/pkg/openscq30_web_wasm";
-import { SetAmbientModeOkPacket } from "../../wasm/pkg/openscq30_web_wasm";
-import { AmbientSoundModeUpdatePacket } from "../../wasm/pkg/openscq30_web_wasm";
-import { EqualizerConfiguration } from "../../wasm/pkg/openscq30_web_wasm";
-import { SoundcoreDeviceState } from "./SoundcoreDeviceState";
 import {
-  AmbientSoundMode,
-  NoiseCancelingMode,
+  AmbientSoundModeUpdatePacket,
   RequestStatePacket,
+  SetAmbientModeOkPacket,
+  SetEqualizerOkPacket,
   StateUpdatePacket,
 } from "../../wasm/pkg/openscq30_web_wasm";
+import { UnmodifiableBehaviorSubject } from "../UnmodifiableBehaviorSubject";
+import { transitionEqualizerState } from "./EqualizerConfigurationStateTransition";
+import { transitionSoundMode } from "./SoundModeStateTransition";
 import {
   SoundcoreDeviceConnection,
   selectDeviceConnection,
 } from "./SoundcoreDeviceConnection";
-import { transitionSoundMode } from "./SoundModeStateTransition";
-import { transitionEqualizerState } from "./EqualizerConfigurationStateTransition";
-import { UnmodifiableBehaviorSubject } from "../UnmodifiableBehaviorSubject";
+import { SoundcoreDeviceState } from "./SoundcoreDeviceState";
 
 export class SoundcoreDevice {
   private readonly connection: SoundcoreDeviceConnection;
   private readonly incomingPacketsSubscription: Subscription;
-  private readonly stateChangeSubscription: Subscription;
   private readonly _state: BehaviorSubject<SoundcoreDeviceState>;
 
   // Don't expose mutating methods
@@ -42,6 +34,8 @@ export class SoundcoreDevice {
     return this._state;
   }
 
+  // TODO when incoming packets update the state, that triggers an outgoing packet to set
+  // the state to what we just received. Incoming packets should not trigger outgoing packets.
   private packetHandlers: Array<(bytes: Uint8Array) => boolean> = [
     (bytes) => {
       const packet = AmbientSoundModeUpdatePacket.fromBytes(bytes);
@@ -88,16 +82,9 @@ export class SoundcoreDevice {
         this.onPacketReceived(value);
       }
     );
-    this.stateChangeSubscription = this._state
-      .pipe(startWith(state), distinct(), debounceTime(250), pairwise())
-      .subscribe(([previousState, newState]) => {
-        transitionSoundMode(connection, previousState, newState);
-        transitionEqualizerState(connection, previousState, newState);
-      });
   }
 
   public disconnect() {
-    this.stateChangeSubscription.unsubscribe();
     this.incomingPacketsSubscription.unsubscribe();
     this.connection.disconnect();
   }
@@ -110,39 +97,26 @@ export class SoundcoreDevice {
     return this._state.value.ambientSoundMode;
   }
 
-  public set ambientSoundMode(ambientSoundMode: AmbientSoundMode) {
-    this._state.next({
-      ...this._state.value,
-      ambientSoundMode,
-    });
-  }
-
   public get noiseCancelingMode() {
     return this._state.value.noiseCancelingMode;
-  }
-
-  public set noiseCancelingMode(noiseCancelingMode: NoiseCancelingMode) {
-    this._state.next({
-      ...this._state.value,
-      noiseCancelingMode,
-    });
   }
 
   public get equalizerConfiguration() {
     return this._state.value.equalizerConfiguration;
   }
 
-  public set equalizerConfiguration(
-    equalizerConfiguration: EqualizerConfiguration
-  ) {
+  public async transitionState(newState: SoundcoreDeviceState) {
+    await transitionSoundMode(this.connection, this.state.value, newState);
     this._state.next({
-      ...this._state.value,
-      equalizerConfiguration,
+      ...this.state.value,
+      ambientSoundMode: newState.ambientSoundMode,
+      noiseCancelingMode: newState.noiseCancelingMode,
     });
-  }
-
-  public async write(value: BufferSource) {
-    await this.connection.write(value);
+    await transitionEqualizerState(this.connection, this.state.value, newState);
+    this._state.next({
+      ...this.state.value,
+      equalizerConfiguration: newState.equalizerConfiguration,
+    });
   }
 
   public async onPacketReceived(bytes: Uint8Array) {

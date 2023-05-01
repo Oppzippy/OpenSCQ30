@@ -10,6 +10,7 @@ import {
   NoiseCancelingMode,
   PresetEqualizerProfile,
 } from "../../wasm/pkg/openscq30_web_wasm";
+import { SoundcoreDeviceState } from "../../src/bluetooth/SoundcoreDeviceState";
 
 interface HasState {
   state: BehaviorSubject<{
@@ -25,29 +26,14 @@ function decorateWithGettersAndSetters<T extends HasState>(device: T) {
     get ambientSoundMode() {
       return this.state.value.ambientSoundMode;
     },
-    set ambientSoundMode(ambientSoundMode: AmbientSoundMode) {
-      this.state.next({
-        ...this.state.value,
-        ambientSoundMode,
-      });
-    },
     get noiseCancelingMode() {
       return this.state.value.noiseCancelingMode;
-    },
-    set noiseCancelingMode(noiseCancelingMode: NoiseCancelingMode) {
-      this.state.next({
-        ...this.state.value,
-        noiseCancelingMode,
-      });
     },
     get equalizerConfiguration() {
       return this.state.value.equalizerConfiguration;
     },
-    set equalizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
-      this.state.next({
-        ...this.state.value,
-        equalizerConfiguration,
-      });
+    transitionState(newState: SoundcoreDeviceState) {
+      this.state.next(newState);
     },
   };
 }
@@ -56,6 +42,9 @@ describe("Device Settings", () => {
   let device: SoundcoreDevice;
   let user: ReturnType<typeof userEvent.setup>;
   beforeEach(() => {
+    vi.useFakeTimers({
+      shouldAdvanceTime: true,
+    });
     user = userEvent.setup();
     const mockDevice = decorateWithGettersAndSetters({
       state: new BehaviorSubject<{
@@ -76,6 +65,7 @@ describe("Device Settings", () => {
 
   afterEach(() => {
     cleanup();
+    vi.useRealTimers();
   });
 
   it("should change ambient sound mode", async () => {
@@ -109,6 +99,7 @@ describe("Device Settings", () => {
     ]).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
     await user.click(renderResult.getByText("SoundcoreSignature"));
     await user.click(renderResult.getByText("Classical"));
+    vi.advanceTimersByTime(5000);
     expect([
       ...device.equalizerConfiguration.bandOffsets.volumeOffsets,
     ]).not.toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
@@ -144,5 +135,34 @@ describe("Device Settings", () => {
     const sliders: NodeListOf<HTMLInputElement> =
       renderResult.baseElement.querySelectorAll("input[type='range']");
     expect(Number(sliders[0].value)).toEqual(12);
+  });
+
+  it("should debounce equalizer updates", async () => {
+    const renderResult = render(
+      <DeviceSettings device={device as unknown as SoundcoreDevice} />
+    );
+
+    await user.click(renderResult.getByLabelText("Profile"));
+    await user.click(renderResult.getByRole("option", { name: "Custom" }));
+
+    expect(device.state.value.equalizerConfiguration.presetProfile).toEqual(
+      PresetEqualizerProfile.SoundcoreSignature
+    );
+    vi.advanceTimersByTime(500);
+    expect(
+      device.state.value.equalizerConfiguration.presetProfile
+    ).toBeUndefined();
+
+    const numberInputs: NodeListOf<HTMLInputElement> =
+      renderResult.baseElement.querySelectorAll("input[type='number']");
+    await user.type(numberInputs[0], "1");
+
+    expect(
+      device.state.value.equalizerConfiguration.bandOffsets.volumeOffsets[0]
+    ).toEqual(0);
+    vi.advanceTimersByTime(500);
+    expect(
+      device.state.value.equalizerConfiguration.bandOffsets.volumeOffsets[0]
+    ).toEqual(10);
   });
 });
