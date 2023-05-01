@@ -11,6 +11,10 @@ node_modules
 dist
 dist-ssr
 *.local
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/coverage
 
 # Editor directories and files
 .vscode/*
@@ -22,6 +26,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-/test-results/
-/playwright-report/
-/playwright/.cache/
