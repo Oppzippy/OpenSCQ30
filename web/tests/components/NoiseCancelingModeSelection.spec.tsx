@@ -1,14 +1,9 @@
-import { cleanup, render } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { fireEvent, render } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { NoiseCancelingModeSelection } from "../../src/components/NoiseCancelingModeSelection";
 import { NoiseCancelingMode } from "../../wasm/pkg/openscq30_web_wasm";
-import { fireEvent } from "@testing-library/react";
 
 describe("NoiseCancelingModeSelection", () => {
-  afterEach(() => {
-    cleanup();
-  });
-
   it("should render", () => {
     const renderResult = render(
       <NoiseCancelingModeSelection

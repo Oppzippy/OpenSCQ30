@@ -1,4 +1,5 @@
-import { cleanup, render } from "@testing-library/react";
+import { render } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { BehaviorSubject } from "rxjs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SoundcoreDevice } from "../../src/bluetooth/SoundcoreDevice";
@@ -9,7 +10,6 @@ import {
   NoiseCancelingMode,
   PresetEqualizerProfile,
 } from "../../wasm/pkg/openscq30_web_wasm";
-import userEvent from "@testing-library/user-event";
 
 describe("App", () => {
   let user: ReturnType<typeof userEvent.setup>;
@@ -52,9 +52,6 @@ describe("App", () => {
   });
 
   afterEach(() => {
-    cleanup();
-    vi.clearAllMocks();
-    vi.unstubAllGlobals();
     const nav = navigator as object;
     if ("bluetooth" in nav) {
       delete nav.bluetooth;
