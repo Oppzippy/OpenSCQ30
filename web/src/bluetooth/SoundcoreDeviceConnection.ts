@@ -59,7 +59,26 @@ export class SoundcoreDeviceConnection {
 export async function selectDeviceConnection(): Promise<SoundcoreDeviceConnection> {
   const serviceUuid = SoundcoreDeviceUtils.getServiceUuid();
   const device = await navigator.bluetooth.requestDevice({
-    filters: [{ services: [serviceUuid] }],
+    // We would filter by available services, but this doesn't seem to work on chromium based browsers on platforms
+    // other than Linux without first going to about://bluetooth-internals/#devices, scanning for your device, and
+    // then inspecting it.
+    // filters: [{ services: [serviceUuid] }],
+    filters: [
+      {
+        manufacturerData: [
+          {
+            // Non standard manufacturer data format: mac address followed by 0x00 0x00
+            // companyIdentifier is picked up as the second and first bytes of the mac address
+            // It's writtein in reverse here due to endinaness.
+            companyIdentifier: 0x12ac,
+            // data is everything after those first two bytes. Since we want to filter by the first three bytes of the
+            // mac address, that just leaves one more byte.
+            dataPrefix: Uint8Array.of(0x2f),
+          },
+        ],
+      },
+    ],
+    optionalServices: [serviceUuid],
   });
   if (device.gatt == undefined) {
     throw new Error("Bluetooth device does not support GATT");
