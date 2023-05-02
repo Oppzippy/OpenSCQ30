@@ -9,9 +9,15 @@ set_version_in_cargo_toml() {
 }
 
 set_version_in_build_gradle() {
-    sed --in-place --regexp-extended --null-data "s/(\n *versionName \")([0-9\.]+)(\"\n)/\1$2\3/" "$1"
+    sed --in-place --regexp-extended --null-data "s/(\n *versionName *= *\")([0-9\.]+)(\"\n)/\1$2\3/" "$1"
     next_version_code=$(($(git tag | wc -l) + 1))
-    sed --in-place --regexp-extended --null-data "s/(\n *versionCode )([0-9]+)(\n)/\1$next_version_code\3/" "$1"
+    sed --in-place --regexp-extended --null-data "s/(\n *versionCode *= *)([0-9]+)(\n)/\1$next_version_code\3/" "$1"
+}
+
+set_version_in_package_json() {
+    # --null-data treats the entire file as one line. this makes it easy to only replace the first occurrance of
+    # "version =" to avoid catching any dependency versions
+    sed --in-place --regexp-extended --null-data "s/(\n *\"version\": *\")([0-9\.]+)(\",\n)/\1$2\3/" "$1"
 }
 
 set_version_in_appimage_builder() {
@@ -42,7 +48,9 @@ set_version_in_cargo_toml android/Cargo.toml "$1"
 set_version_in_cargo_toml cli/Cargo.toml "$1"
 set_version_in_cargo_toml gui/Cargo.toml "$1"
 set_version_in_cargo_toml lib/Cargo.toml "$1"
-set_version_in_build_gradle android/app/build.gradle "$1"
+set_version_in_cargo_toml web/wasm/Cargo.toml "$1"
+set_version_in_build_gradle android/app/build.gradle.kts "$1"
+set_version_in_package_json web/package.json "$1"
 set_version_in_appimage_builder packaging/appimage/AppImageBuilder.yml "$1"
 set_version_in_desktop packaging/flatpak/com.oppzippy.OpenSCQ30.desktop "$1"
 set_version_in_iss packaging/windows/setup.iss "$1"
