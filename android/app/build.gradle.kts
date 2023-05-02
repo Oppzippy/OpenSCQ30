@@ -92,7 +92,7 @@ android {
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.5"
+        kotlinCompilerExtensionVersion = "1.4.6"
     }
     ndkVersion = "25.2.9519653"
     packaging {
@@ -106,8 +106,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
 
     // Compose
-    implementation(platform("androidx.compose:compose-bom:2023.04.00"))
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.04.00"))
+    val composeBomVersion = "2023.04.01"
+    implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     implementation("androidx.compose.ui:ui")
     // Material Design 3
     implementation("androidx.compose.material3:material3")
@@ -124,7 +125,7 @@ dependencies {
     // Optional - Add full set of material icons
     implementation("androidx.compose.material:material-icons-extended")
     // Optional - Integration with activities
-    implementation("androidx.activity:activity-compose:1.7.0")
+    implementation("androidx.activity:activity-compose:1.7.1")
     // Optional - Integration with ViewModels
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     // Compose navigation
@@ -156,8 +157,10 @@ dependencies {
     kaptTest("com.google.dagger:hilt-compiler:$hiltVersion")
 
     testImplementation("junit:junit:4.13.2")
-    testImplementation("io.mockk:mockk:1.13.3")
-    androidTestImplementation("io.mockk:mockk-android:1.13.3")
+
+    val mockkVersion = "1.13.3"
+    testImplementation("io.mockk:mockk:$mockkVersion")
+    androidTestImplementation("io.mockk:mockk-android:$mockkVersion")
     androidTestImplementation("androidx.test:runner:1.5.2")
     androidTestImplementation("androidx.test:core-ktx:1.5.0")
     androidTestImplementation("androidx.test:rules:1.5.0")
