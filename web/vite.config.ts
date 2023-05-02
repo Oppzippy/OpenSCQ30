@@ -17,6 +17,9 @@ export default defineConfig({
         "masked-icon.svg",
         "locales/**/*.json",
       ],
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,wasm}"],
+      },
       manifest: {
         name: "OpenSCQ30",
         short_name: "OpenSCQ30",
