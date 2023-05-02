@@ -8,7 +8,7 @@ i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init<HttpBackendOptions>({
-    debug: true,
+    debug: import.meta.env.DEV,
     fallbackLng: "en",
     returnEmptyString: false,
     interpolation: {
