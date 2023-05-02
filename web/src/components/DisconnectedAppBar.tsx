@@ -1,10 +1,12 @@
 import { AppBar, Button, Toolbar, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   onSelectDeviceClick: () => Promise<void>;
 };
 
 export function DisconnectedAppBar(props: Props) {
+  const { t } = useTranslation();
   return (
     <AppBar position="absolute">
       <Toolbar>
@@ -15,7 +17,7 @@ export function DisconnectedAppBar(props: Props) {
           noWrap
           sx={{ flexGrow: 1 }}
         >
-          Device Selection
+          {t("deviceSelection")}
         </Typography>
         {navigator.bluetooth && (
           <Button color="inherit" onClick={() => props.onSelectDeviceClick()}>
