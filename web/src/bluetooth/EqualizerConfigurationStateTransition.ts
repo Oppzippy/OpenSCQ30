@@ -1,4 +1,4 @@
-import { isEqual } from "lodash";
+import { isEqual } from "lodash-es";
 import { SetEqualizerPacket } from "../../wasm/pkg/openscq30_web_wasm";
 import { SoundcoreDeviceConnection } from "./SoundcoreDeviceConnection";
 import { SoundcoreDeviceState } from "./SoundcoreDeviceState";

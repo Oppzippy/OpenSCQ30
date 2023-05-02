@@ -10,7 +10,7 @@ import { NoiseCancelingModeSelection } from "./NoiseCancelingModeSelection";
 import { SoundcoreDevice } from "../bluetooth/SoundcoreDevice";
 import { useBehaviorSubject } from "../hooks/useObservable";
 import { useEffect, useMemo, useState } from "react";
-import { debounce } from "lodash";
+import { debounce } from "lodash-es";
 
 export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
   const actualState = useBehaviorSubject(device.state);
