@@ -23,6 +23,17 @@ beforeEach(() => {
       },
     };
   });
+  vi.mock("virtual:pwa-register/react", () => {
+    return {
+      useRegisterSW() {
+        return {
+          needRefresh: [false, vi.fn()],
+          offlineReady: [false, vi.fn()],
+          updateServiceWorker: vi.fn(),
+        };
+      },
+    };
+  });
 });
 
 afterEach(() => {
