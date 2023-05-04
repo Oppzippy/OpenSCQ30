@@ -1,4 +1,5 @@
 import { cleanup } from "@testing-library/react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { afterEach, beforeEach, vi } from "vitest";
 
 beforeEach(() => {
@@ -24,10 +25,18 @@ beforeEach(() => {
     };
   });
   vi.mock("virtual:pwa-register/react", () => {
+    let needRefresh: boolean, setNeedRefresh: Dispatch<SetStateAction<boolean>>;
     return {
+      get needRefresh() {
+        return needRefresh;
+      },
+      set needRefresh(value: boolean) {
+        setNeedRefresh(value);
+      },
       useRegisterSW() {
+        [needRefresh, setNeedRefresh] = useState(false);
         return {
-          needRefresh: [false, vi.fn()],
+          needRefresh: [needRefresh, setNeedRefresh],
           offlineReady: [false, vi.fn()],
           updateServiceWorker: vi.fn(),
         };

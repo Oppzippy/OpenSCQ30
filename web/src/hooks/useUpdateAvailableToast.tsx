@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { ToastQueueContext } from "../components/ToastQueue";
@@ -25,13 +25,20 @@ export function useUpdateAvailableToast() {
   const { t } = useTranslation();
   const toasts = useContext(ToastQueueContext);
 
-  if (needRefresh && !hasToastBeenShown) {
-    setHasToastBeenShown(true);
-    toasts.addToast({
-      message: t("pwa.newVersionAvailable"),
-      action: (
-        <Button onClick={() => updateServiceWorker(true)}>{t("update")}</Button>
-      ),
-    });
-  }
+  // Only show toast once
+  useEffect(() => {
+    setHasToastBeenShown(
+      (hasToastBeenShown) => hasToastBeenShown || needRefresh
+    );
+    if (needRefresh && !hasToastBeenShown) {
+      toasts.addToast({
+        message: t("pwa.newVersionAvailable"),
+        action: (
+          <Button onClick={() => updateServiceWorker(true)}>
+            {t("update")}
+          </Button>
+        ),
+      });
+    }
+  }, [needRefresh, hasToastBeenShown, toasts, t, updateServiceWorker]);
 }
