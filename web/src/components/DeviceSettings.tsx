@@ -4,18 +4,18 @@ import {
   EqualizerConfiguration,
   PresetEqualizerProfile,
 } from "../../wasm/pkg/openscq30_web_wasm";
-import { AmbientSoundModeSelection } from "./AmbientSoundModeSelection";
-import { EqualizerSettings } from "./EqualizerSettings";
-import { NoiseCancelingModeSelection } from "./NoiseCancelingModeSelection";
+import { AmbientSoundModeSelection } from "./soundMode/AmbientSoundModeSelection";
 import { SoundcoreDevice } from "../bluetooth/SoundcoreDevice";
 import { useBehaviorSubject } from "../hooks/useObservable";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { debounce } from "lodash-es";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../storage/db";
-import { EqualizerNewCustomProfileDialog } from "./EqualizerNewCustomProfileDialog";
 import { SoundcoreDeviceState } from "../bluetooth/SoundcoreDeviceState";
 import { upsertCustomEqualizerProfile } from "../storage/customEqualizerProfiles";
+import { EqualizerSettings } from "./equalizer/EqualizerSettings";
+import { NewCustomProfileDialog } from "./equalizer/NewCustomProfileDialog";
+import { NoiseCancelingModeSelection } from "./soundMode/NoiseCancelingModeSelection";
 
 export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
   const actualState = useBehaviorSubject(device.state);
@@ -136,7 +136,7 @@ export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
           }
         }}
       />
-      <EqualizerNewCustomProfileDialog
+      <NewCustomProfileDialog
         isOpen={isCreateCustomProfileDialogOpen}
         onClose={() => setCreateCustomProfileDialogOpen(false)}
         onCreate={(name) => {

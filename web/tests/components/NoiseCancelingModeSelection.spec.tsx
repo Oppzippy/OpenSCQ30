@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { NoiseCancelingModeSelection } from "../../src/components/NoiseCancelingModeSelection";
+import { NoiseCancelingModeSelection } from "../../src/components/soundMode/NoiseCancelingModeSelection";
 import { NoiseCancelingMode } from "../../wasm/pkg/openscq30_web_wasm";
 
 describe("NoiseCancelingModeSelection", () => {

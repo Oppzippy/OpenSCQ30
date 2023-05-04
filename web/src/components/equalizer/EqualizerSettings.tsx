@@ -2,11 +2,11 @@ import { Add, Delete } from "@mui/icons-material";
 import { IconButton, Stack, Typography } from "@mui/material";
 import { isEqual } from "lodash-es";
 import { useTranslation } from "react-i18next";
-import { PresetEqualizerProfile } from "../../wasm/pkg/openscq30_web_wasm";
-import { CustomEqualizerProfile } from "../storage/db";
+import { PresetEqualizerProfile } from "../../../wasm/pkg/openscq30_web_wasm";
+import { CustomEqualizerProfile } from "../../storage/db";
 import { Equalizer } from "./Equalizer";
-import { EqualizerCustomProfiles } from "./EqualizerCustomProfiles";
-import { EqualizerPresetProfiles } from "./EqualizerPresetProfiles";
+import { CustomProfiles } from "./CustomProfiles";
+import { PresetProfiles } from "./PresetProfiles";
 
 // TODO -1 is custom, make this more readable
 type Props = {
@@ -28,13 +28,13 @@ export function EqualizerSettings(props: Props) {
   return (
     <Stack spacing={2}>
       <Typography>{t("equalizer.equalizer")}</Typography>
-      <EqualizerPresetProfiles
+      <PresetProfiles
         onProfileSelected={props.onProfileSelected}
         profile={props.profile}
       />
       {props.profile == -1 ? (
         <Stack direction="row" spacing={1}>
-          <EqualizerCustomProfiles
+          <CustomProfiles
             sx={{ flexGrow: 1 }}
             profiles={props.customProfiles}
             onProfileSelected={(profile) => {

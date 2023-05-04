@@ -15,7 +15,7 @@ type Props = {
   onCreate: (name: string) => void;
 };
 
-export function EqualizerNewCustomProfileDialog(props: Props) {
+export function NewCustomProfileDialog(props: Props) {
   const { t } = useTranslation();
   const [name, setName] = useState("");
 

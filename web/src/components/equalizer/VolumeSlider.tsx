@@ -6,7 +6,7 @@ type Props = {
   onValueChange: (newValue: number) => void;
 };
 
-export function EqualizerSlider(props: Props) {
+export function VolumeSlider(props: Props) {
   return (
     <Box sx={{ display: "flex", columnGap: "2rem", alignItems: "start" }}>
       <Slider

@@ -1,5 +1,5 @@
 import { Divider, Stack } from "@mui/material";
-import { EqualizerSlider } from "./EqualizerSlider";
+import { VolumeSlider } from "./VolumeSlider";
 
 type Props = {
   disabled?: boolean;
@@ -12,7 +12,7 @@ export function Equalizer(props: Props) {
     <Stack spacing={0.2} divider={<Divider />}>
       {props.values.map((value, index) => {
         return (
-          <EqualizerSlider
+          <VolumeSlider
             disabled={props.disabled}
             key={index}
             value={value}

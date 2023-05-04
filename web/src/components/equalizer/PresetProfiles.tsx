@@ -1,14 +1,14 @@
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
-import { PresetEqualizerProfile } from "../../wasm/pkg/openscq30_web_wasm";
+import { PresetEqualizerProfile } from "../../../wasm/pkg/openscq30_web_wasm";
 import { useTranslation } from "react-i18next";
-import { usePresetEqualizerProfiles } from "../hooks/usePresetEqualizerProfiles";
+import { usePresetEqualizerProfiles } from "../../hooks/usePresetEqualizerProfiles";
 
 type Props = {
   profile: PresetEqualizerProfile | -1;
   onProfileSelected: (presetProfile: PresetEqualizerProfile | -1) => void;
 };
 
-export function EqualizerPresetProfiles(props: Props) {
+export function PresetProfiles(props: Props) {
   const { t } = useTranslation();
   const presetProfiles = usePresetEqualizerProfiles();
   return (

@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import { AmbientSoundMode } from "../../wasm/pkg/openscq30_web_wasm";
+import { AmbientSoundMode } from "../../../wasm/pkg/openscq30_web_wasm";
 import { ToggleButtonRow } from "./ToggleButtonRow";
 import { useTranslation } from "react-i18next";
 

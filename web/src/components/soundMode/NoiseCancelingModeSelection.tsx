@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import { NoiseCancelingMode } from "../../wasm/pkg/openscq30_web_wasm";
+import { NoiseCancelingMode } from "../../../wasm/pkg/openscq30_web_wasm";
 import { ToggleButtonRow } from "./ToggleButtonRow";
 import { useTranslation } from "react-i18next";
 

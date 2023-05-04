@@ -7,7 +7,7 @@ import {
   Theme,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { CustomEqualizerProfile } from "../storage/db";
+import { CustomEqualizerProfile } from "../../storage/db";
 
 type Props = {
   profiles: CustomEqualizerProfile[];
@@ -16,7 +16,7 @@ type Props = {
   sx?: SxProps<Theme>;
 };
 
-export function EqualizerCustomProfiles({
+export function CustomProfiles({
   sx,
   profiles,
   selectedProfile,
