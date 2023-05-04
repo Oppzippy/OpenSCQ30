@@ -73,7 +73,7 @@ describe("Device Settings", () => {
     );
 
     expect(device.ambientSoundMode).toEqual(AmbientSoundMode.NoiseCanceling);
-    await user.click(renderResult.getByText("Normal"));
+    await user.click(renderResult.getByText("ambientSoundMode.normal"));
 
     expect(device.ambientSoundMode).toEqual(AmbientSoundMode.Normal);
   });
@@ -84,7 +84,7 @@ describe("Device Settings", () => {
     );
 
     expect(device.noiseCancelingMode).toEqual(NoiseCancelingMode.Transport);
-    await user.click(renderResult.getByText("Indoor"));
+    await user.click(renderResult.getByText("noiseCancelingMode.indoor"));
     expect(device.noiseCancelingMode).toEqual(NoiseCancelingMode.Indoor);
   });
 
@@ -96,8 +96,12 @@ describe("Device Settings", () => {
     expect([
       ...device.equalizerConfiguration.bandOffsets.volumeOffsets,
     ]).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
-    await user.click(renderResult.getByText("SoundcoreSignature"));
-    await user.click(renderResult.getByText("Classical"));
+    await user.click(
+      renderResult.getByText("equalizerPresetProfile.soundcoreSignature")
+    );
+    await user.click(
+      renderResult.getByText("equalizerPresetProfile.classical")
+    );
     vi.advanceTimersByTime(5000);
     expect([
       ...device.equalizerConfiguration.bandOffsets.volumeOffsets,
@@ -115,8 +119,10 @@ describe("Device Settings", () => {
     }
 
     expect(areSlidersDisabled()).toEqual(true);
-    await user.click(renderResult.getByLabelText("Profile"));
-    await user.click(renderResult.getByRole("option", { name: "Custom" }));
+    await user.click(renderResult.getByLabelText("equalizer.profile"));
+    await user.click(
+      renderResult.getByRole("option", { name: "equalizer.custom" })
+    );
     expect(areSlidersDisabled()).toEqual(false);
   });
 
@@ -125,8 +131,10 @@ describe("Device Settings", () => {
       <DeviceSettings device={device as unknown as SoundcoreDevice} />
     );
 
-    await user.click(renderResult.getByLabelText("Profile"));
-    await user.click(renderResult.getByRole("option", { name: "Custom" }));
+    await user.click(renderResult.getByLabelText("equalizer.profile"));
+    await user.click(
+      renderResult.getByRole("option", { name: "equalizer.custom" })
+    );
 
     const numberInputs: NodeListOf<HTMLInputElement> =
       renderResult.baseElement.querySelectorAll("input[type='number']");
@@ -141,8 +149,10 @@ describe("Device Settings", () => {
       <DeviceSettings device={device as unknown as SoundcoreDevice} />
     );
 
-    await user.click(renderResult.getByLabelText("Profile"));
-    await user.click(renderResult.getByRole("option", { name: "Custom" }));
+    await user.click(renderResult.getByLabelText("equalizer.profile"));
+    await user.click(
+      renderResult.getByRole("option", { name: "equalizer.custom" })
+    );
 
     expect(device.state.value.equalizerConfiguration.presetProfile).toEqual(
       PresetEqualizerProfile.SoundcoreSignature

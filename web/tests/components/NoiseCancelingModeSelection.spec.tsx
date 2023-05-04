@@ -33,7 +33,7 @@ describe("NoiseCancelingModeSelection", () => {
       />
     );
 
-    await user.click(renderResult.getByText("Outdoor"));
+    await user.click(renderResult.getByText("noiseCancelingMode.outdoor"));
 
     expect(setMode).toHaveBeenCalledWith(NoiseCancelingMode.Outdoor);
   });

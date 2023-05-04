@@ -8,7 +8,7 @@ exports[`NoiseCancelingModeSelection > should render 1`] = `
     <p
       class="MuiTypography-root MuiTypography-body1 css-ahj2mt-MuiTypography-root"
     >
-      Ambient Sound Mode
+      noiseCancelingMode.noiseCancelingMode
     </p>
     <div
       class="MuiToggleButtonGroup-root css-1yt1mvy-MuiToggleButtonGroup-root"
@@ -21,7 +21,7 @@ exports[`NoiseCancelingModeSelection > should render 1`] = `
         type="button"
         value="0"
       >
-        Transport
+        noiseCancelingMode.transport
         <span
           class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
         />
@@ -33,7 +33,7 @@ exports[`NoiseCancelingModeSelection > should render 1`] = `
         type="button"
         value="1"
       >
-        Outdoor
+        noiseCancelingMode.outdoor
         <span
           class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
         />
@@ -45,7 +45,7 @@ exports[`NoiseCancelingModeSelection > should render 1`] = `
         type="button"
         value="2"
       >
-        Indoor
+        noiseCancelingMode.indoor
         <span
           class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
         />

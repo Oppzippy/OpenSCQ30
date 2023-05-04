@@ -41,7 +41,9 @@ describe("Toast Queue", () => {
       name: "Check Length",
     });
     await user.click(checkLengthButton);
-    expect(renderResult.queryByRole("button", { name: "close" })).toBeNull();
+    expect(
+      renderResult.queryByRole("button", { name: "toast.close" })
+    ).toBeNull();
   });
 
   it("should queue up multiple toasts and display them in order", async () => {
@@ -71,7 +73,9 @@ describe("Toast Queue", () => {
           ).toBeNull()
         );
 
-      await user.click(renderResult.getByRole("button", { name: "close" }));
+      await user.click(
+        renderResult.getByRole("button", { name: "toast.close" })
+      );
     }
 
     const checkLengthButton = renderResult.getByRole("button", {

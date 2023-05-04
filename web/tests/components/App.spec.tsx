@@ -71,7 +71,7 @@ describe("App", () => {
     mockDevice();
     const renderResult = render(<App />);
 
-    await user.click(renderResult.getByText("Select Device"));
-    expect(renderResult.queryByText("Disconnect")).not.toBeNull();
+    await user.click(renderResult.getByText("device.selectDevice"));
+    expect(renderResult.queryByText("device.disconnect")).not.toBeNull();
   });
 });
