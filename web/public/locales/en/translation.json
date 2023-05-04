@@ -11,11 +11,17 @@
     "selectDevice": "Select Device"
   },
   "equalizer": {
-    "equalizer": "Equalizer",
+    "customProfile": "Custom Profile",
+    "profileName": "Profile Name",
     "profile": "Profile",
-    "custom": "Custom"
+    "custom": "Custom",
+    "equalizer": "Equalizer",
+    "deleteCustomProfile": "Delete Custom Profile",
+    "createCustomProfile": "Create Custom Profile"
   },
   "application": {
+    "close": "Close",
+    "create": "Create",
     "webBluetoothNotSupported": "Web Bluetooth is not supported by your browser. See <2>caniuse</2> for a list of browsers supporting Web Bluetooth.",
     "earlyDevelopmentNotice": "The web verison of OpenSCQ30 is still in early development. Please use the desktop or android version if you encounter any issues.",
     "newVersionAvailable": "A new version of OpenSCQ30 Web is available.",

@@ -1,57 +1,66 @@
-import {
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Add, Delete } from "@mui/icons-material";
+import { IconButton, Stack, Typography } from "@mui/material";
+import { isEqual } from "lodash-es";
 import { useTranslation } from "react-i18next";
 import { PresetEqualizerProfile } from "../../wasm/pkg/openscq30_web_wasm";
-import { usePresetEqualizerProfiles } from "../hooks/usePresetEqualizerProfiles";
+import { CustomEqualizerProfile } from "../storage/db";
 import { Equalizer } from "./Equalizer";
+import { EqualizerCustomProfiles } from "./EqualizerCustomProfiles";
+import { EqualizerPresetProfiles } from "./EqualizerPresetProfiles";
 
 // TODO -1 is custom, make this more readable
 type Props = {
   profile: PresetEqualizerProfile | -1;
+  customProfiles: CustomEqualizerProfile[];
   onProfileSelected: (presetProfile: PresetEqualizerProfile | -1) => void;
   values: number[];
   onValueChange: (index: number, newValue: number) => void;
+  onAddCustomProfile: () => void;
+  onDeleteCustomProfile: (profile: CustomEqualizerProfile) => void;
 };
 
 export function EqualizerSettings(props: Props) {
   const { t } = useTranslation();
-  const presetProfiles = usePresetEqualizerProfiles();
+
+  const selectedCustomProfile = props.customProfiles.find((customProfile) =>
+    isEqual(customProfile.values, props.values)
+  );
   return (
     <Stack spacing={2}>
       <Typography>{t("equalizer.equalizer")}</Typography>
-      <FormControl>
-        <InputLabel id="equalizer-profile-select-label">
-          {t("equalizer.profile")}
-        </InputLabel>
-        <Select
-          labelId="equalizer-profile-select-label"
-          label={t("equalizer.profile")}
-          value={props.profile}
-          onChange={(event) => {
-            if (typeof event.target.value == "number") {
-              props.onProfileSelected(event.target.value);
-            } else {
-              throw Error(
-                `value should be a number, but it is instead a ${typeof event
-                  .target.value}`
+      <EqualizerPresetProfiles
+        onProfileSelected={props.onProfileSelected}
+        profile={props.profile}
+      />
+      {props.profile == -1 ? (
+        <Stack direction="row" spacing={1}>
+          <EqualizerCustomProfiles
+            sx={{ flexGrow: 1 }}
+            profiles={props.customProfiles}
+            onProfileSelected={(profile) => {
+              profile.values.forEach((value, index) =>
+                props.onValueChange(index, value)
               );
-            }
-          }}
-        >
-          <MenuItem value={-1}>{t("equalizer.custom")}</MenuItem>
-          {presetProfiles.map(({ name, id }) => (
-            <MenuItem value={id} key={id}>
-              {name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+            }}
+            selectedProfile={selectedCustomProfile}
+          />
+          {selectedCustomProfile ? (
+            <IconButton
+              onClick={() => props.onDeleteCustomProfile(selectedCustomProfile)}
+              aria-label={t("equalizer.deleteCustomProfile").toString()}
+            >
+              <Delete />
+            </IconButton>
+          ) : (
+            <IconButton
+              onClick={() => props.onAddCustomProfile()}
+              aria-label={t("equalizer.createCustomProfile").toString()}
+            >
+              <Add />
+            </IconButton>
+          )}
+        </Stack>
+      ) : undefined}
       <Equalizer
         disabled={props.profile != -1}
         values={props.values}

@@ -9,12 +9,25 @@ import { EqualizerSettings } from "./EqualizerSettings";
 import { NoiseCancelingModeSelection } from "./NoiseCancelingModeSelection";
 import { SoundcoreDevice } from "../bluetooth/SoundcoreDevice";
 import { useBehaviorSubject } from "../hooks/useObservable";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { debounce } from "lodash-es";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "../storage/db";
+import { EqualizerNewCustomProfileDialog } from "./EqualizerNewCustomProfileDialog";
+import { SoundcoreDeviceState } from "../bluetooth/SoundcoreDeviceState";
+import { upsertCustomEqualizerProfile } from "../storage/customEqualizerProfiles";
 
 export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
   const actualState = useBehaviorSubject(device.state);
   const [displayState, setDisplayState] = useState(actualState);
+  const [isCreateCustomProfileDialogOpen, setCreateCustomProfileDialogOpen] =
+    useState(false);
+  const customEqualizerProfiles = useLiveQuery(() =>
+    db.customEqualizerProfiles.toArray()
+  );
+
+  // Synchronizes the displayed state with the actual state of the headphones. They are
+  // different because of the equalizer debouncing.
   useEffect(() => {
     // An equalizer configuration change can never be initiated by the headphones, only us,
     // so we don't need to worry about keeping it in sync. Not updating it here fixes a bug
@@ -38,6 +51,17 @@ export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
     }, 500);
   }, [device]);
 
+  const isInitialRender = useRef(true);
+
+  // Update real state to match displayed
+  useEffect(() => {
+    if (isInitialRender.current) {
+      isInitialRender.current = false;
+    } else {
+      setActualEqualizerConfiguration(displayState.equalizerConfiguration);
+    }
+  }, [displayState.equalizerConfiguration, setActualEqualizerConfiguration]);
+
   function onPresetProfileSelected(profile: PresetEqualizerProfile | -1) {
     const newEqualizerConfiguration =
       profile == -1
@@ -49,24 +73,26 @@ export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
       ...state,
       equalizerConfiguration: newEqualizerConfiguration,
     }));
-    setActualEqualizerConfiguration(newEqualizerConfiguration);
   }
 
   function onEqualizerValueChange(index: number, newVolume: number) {
-    const volume = [
-      ...actualState.equalizerConfiguration.bandOffsets.volumeOffsets,
-    ];
-    // EqualizerBandOffsets expects integers (-120 to +120), but the state uses decimals (-12.0 to +12.0)
-    volume[index] = newVolume * 10;
+    function transformState(state: SoundcoreDeviceState): SoundcoreDeviceState {
+      const volume = [
+        ...state.equalizerConfiguration.bandOffsets.volumeOffsets,
+      ];
+      // EqualizerBandOffsets expects integers (-120 to +120), but the state uses decimals (-12.0 to +12.0)
+      volume[index] = newVolume * 10;
+      const newEqualizerConfiguration =
+        EqualizerConfiguration.fromCustomProfile(
+          new EqualizerBandOffsets(new Int8Array(volume))
+        );
+      return {
+        ...state,
+        equalizerConfiguration: newEqualizerConfiguration,
+      };
+    }
 
-    const newEqualizerConfiguration = EqualizerConfiguration.fromCustomProfile(
-      new EqualizerBandOffsets(new Int8Array(volume))
-    );
-    setDisplayState((state) => ({
-      ...state,
-      equalizerConfiguration: newEqualizerConfiguration,
-    }));
-    setActualEqualizerConfiguration(newEqualizerConfiguration);
+    setDisplayState(transformState);
   }
 
   const fractionalEqualizerVolumes = [
@@ -98,6 +124,27 @@ export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
         onProfileSelected={onPresetProfileSelected}
         values={fractionalEqualizerVolumes}
         onValueChange={onEqualizerValueChange}
+        customProfiles={customEqualizerProfiles ?? []}
+        onAddCustomProfile={() => setCreateCustomProfileDialogOpen(true)}
+        onDeleteCustomProfile={(profileToDelete) => {
+          if (profileToDelete.id) {
+            db.customEqualizerProfiles.delete(profileToDelete.id);
+          } else {
+            throw Error(
+              `tried to delete profile with undefined id: name "${profileToDelete.name}"`
+            );
+          }
+        }}
+      />
+      <EqualizerNewCustomProfileDialog
+        isOpen={isCreateCustomProfileDialogOpen}
+        onClose={() => setCreateCustomProfileDialogOpen(false)}
+        onCreate={(name) => {
+          upsertCustomEqualizerProfile({
+            name,
+            values: fractionalEqualizerVolumes,
+          });
+        }}
       />
     </Stack>
   );

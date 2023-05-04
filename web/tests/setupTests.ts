@@ -43,6 +43,20 @@ beforeEach(() => {
       },
     };
   });
+  vi.mock("../src/storage/db", () => {
+    return {
+      db: {
+        customEqualizerProfiles: {
+          toArray: () => undefined,
+        },
+      },
+    };
+  });
+  vi.mock("dexie-react-hooks", () => {
+    return {
+      useLiveQuery: () => undefined,
+    };
+  });
 });
 
 afterEach(() => {
