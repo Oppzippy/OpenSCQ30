@@ -19,7 +19,7 @@ use openscq30_lib::packets::structures::{
 };
 use strum::IntoEnumIterator;
 
-use crate::objects::{EqualizerCustomProfileObject, EqualizerProfileObject};
+use crate::objects::{CustomEqualizerProfileObject, EqualizerProfileObject};
 use crate::widgets::Equalizer;
 
 #[derive(Default, CompositeTemplate)]
@@ -50,7 +50,7 @@ impl EqualizerSettings {
     fn handle_create_custom_profile(&self, _button: &gtk::Button) {
         self.obj().emit_by_name(
             "create-custom-equalizer-profile",
-            &[&EqualizerCustomProfileObject::new(
+            &[&CustomEqualizerProfileObject::new(
                 "", // TODO use a different object that doesn't have a name field
                 self.equalizer.volumes(),
             )],
@@ -140,7 +140,7 @@ impl EqualizerSettings {
     }
 
     fn set_up_custom_profile_selection_model(&self) {
-        let model = gio::ListStore::new(EqualizerCustomProfileObject::static_type());
+        let model = gio::ListStore::new(CustomEqualizerProfileObject::static_type());
         self.custom_profile_dropdown.set_model(Some(&model));
         self.custom_profiles
             .set(model)
@@ -150,7 +150,7 @@ impl EqualizerSettings {
     fn set_up_custom_profile_expression(&self) {
         self.custom_profile_dropdown
             .set_expression(Some(PropertyExpression::new(
-                EqualizerCustomProfileObject::static_type(),
+                CustomEqualizerProfileObject::static_type(),
                 None::<Expression>,
                 "name",
             )));
@@ -160,7 +160,7 @@ impl EqualizerSettings {
         self.custom_profile_dropdown.connect_selected_item_notify(
             clone!(@weak self as this => move |_dropdown| {
                 let maybe_selected_item = this.custom_profile_dropdown.selected_item()
-                    .map(|item| item.downcast::<EqualizerCustomProfileObject>().unwrap());
+                    .map(|item| item.downcast::<CustomEqualizerProfileObject>().unwrap());
                 if let Some(selected_item) = maybe_selected_item {
                     this.obj().emit_by_name("custom-equalizer-profile-selected", &[&selected_item])
                 }
@@ -168,7 +168,7 @@ impl EqualizerSettings {
         );
     }
 
-    pub fn set_custom_profiles(&self, mut profiles: Vec<EqualizerCustomProfileObject>) {
+    pub fn set_custom_profiles(&self, mut profiles: Vec<CustomEqualizerProfileObject>) {
         if let Some(model) = self.custom_profiles.get() {
             profiles.sort_unstable_by_key(|left| left.name());
             // Notifications need to be frozen to prevent the selection changes while removing and adding items from
@@ -187,7 +187,7 @@ impl EqualizerSettings {
             Some(custom_profiles) if self.is_custom_profile() => {
                 let volumes = self.equalizer.volumes();
                 let custom_profile_index = custom_profiles
-                    .iter::<EqualizerCustomProfileObject>()
+                    .iter::<CustomEqualizerProfileObject>()
                     .enumerate()
                     .find(|(_i, profile)| profile.as_ref().unwrap().volume_offsets() == volumes)
                     .map(|(i, _profile)| i as u32)
@@ -327,13 +327,13 @@ impl ObjectImpl for EqualizerSettings {
             vec![
                 Signal::builder("apply-equalizer-settings").build(),
                 Signal::builder("custom-equalizer-profile-selected")
-                    .param_types([EqualizerCustomProfileObject::static_type()])
+                    .param_types([CustomEqualizerProfileObject::static_type()])
                     .build(),
                 Signal::builder("create-custom-equalizer-profile")
-                    .param_types([EqualizerCustomProfileObject::static_type()])
+                    .param_types([CustomEqualizerProfileObject::static_type()])
                     .build(),
                 Signal::builder("delete-custom-equalizer-profile")
-                    .param_types([EqualizerCustomProfileObject::static_type()])
+                    .param_types([CustomEqualizerProfileObject::static_type()])
                     .build(),
             ]
         });

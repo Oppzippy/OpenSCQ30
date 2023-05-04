@@ -28,7 +28,7 @@ use windows::{
     UI::ViewManagement::{UIColorType, UISettings},
 };
 
-use crate::objects::EqualizerCustomProfileObject;
+use crate::objects::CustomEqualizerProfileObject;
 
 mod actions;
 mod gettext;
@@ -205,7 +205,7 @@ fn build_ui_2(
                     .custom_profiles()
                     .iter()
                     .map(|(name, profile)| {
-                        EqualizerCustomProfileObject::new(name, profile.volume_offsets())
+                        CustomEqualizerProfileObject::new(name, profile.volume_offsets())
                     })
                     .collect(),
             );
@@ -226,7 +226,7 @@ fn build_ui_2(
                     StateUpdate::SetNoiseCancelingMode(noise_canceling_mode) => main_window.set_noise_canceling_mode(noise_canceling_mode),
                     StateUpdate::SetEqualizerConfiguration(equalizer_configuration) => main_window.set_equalizer_configuration(&equalizer_configuration),
                     StateUpdate::SetSelectedDevice(device) => main_window.set_property("selected-device", device),
-                    StateUpdate::SetEqualizerCustomProfiles(custom_profiles) => main_window.set_custom_profiles(custom_profiles),
+                    StateUpdate::SetCustomEqualizerProfiles(custom_profiles) => main_window.set_custom_profiles(custom_profiles),
                     StateUpdate::AddToast(text) => main_window.add_toast(Toast::builder().title(&text).timeout(15).build()),
                 }
             }
@@ -325,7 +325,7 @@ fn build_ui_2(
     main_window.connect_closure(
         "custom-equalizer-profile-selected",
         false,
-        closure_local!(@strong state, @strong settings => move |_main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
+        closure_local!(@strong state, @strong settings => move |_main_window: MainWindow, custom_profile: &CustomEqualizerProfileObject| {
             actions::select_custom_equalizer_configuration(&state, &settings.config, custom_profile)
                 .context("custom equalizer profile selected")
                 .unwrap_or_else(|err| handle_error(err, &state));
@@ -335,7 +335,7 @@ fn build_ui_2(
     main_window.connect_closure(
         "create-custom-equalizer-profile",
         false,
-        closure_local!(@strong state, @strong settings => move |_main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
+        closure_local!(@strong state, @strong settings => move |_main_window: MainWindow, custom_profile: &CustomEqualizerProfileObject| {
             actions::create_custom_equalizer_profile(&state, &settings.config, custom_profile)
                 .context("create custom equalizer profile")
                 .unwrap_or_else(|err| handle_error(err, &state));
@@ -345,7 +345,7 @@ fn build_ui_2(
     main_window.connect_closure(
         "delete-custom-equalizer-profile",
         false,
-        closure_local!(@strong state, @strong settings => move |_main_window: MainWindow, custom_profile: &EqualizerCustomProfileObject| {
+        closure_local!(@strong state, @strong settings => move |_main_window: MainWindow, custom_profile: &CustomEqualizerProfileObject| {
             actions::delete_custom_equalizer_profile(&state, &settings.config, custom_profile)
                 .context("delete custom equalizer profile")
                 .unwrap_or_else(|err| handle_error(err, &state));

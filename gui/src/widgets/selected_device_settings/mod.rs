@@ -8,7 +8,7 @@ use openscq30_lib::packets::structures::{
     AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode,
 };
 
-use crate::objects::EqualizerCustomProfileObject;
+use crate::objects::CustomEqualizerProfileObject;
 
 glib::wrapper! {
     pub struct SelectedDeviceSettings(ObjectSubclass<imp::SelectedDeviceSettings>)
@@ -43,7 +43,7 @@ impl SelectedDeviceSettings {
         self.imp().equalizer_settings.equalizer_configuration()
     }
 
-    pub fn set_custom_profiles(&self, custom_profiles: Vec<EqualizerCustomProfileObject>) {
+    pub fn set_custom_profiles(&self, custom_profiles: Vec<CustomEqualizerProfileObject>) {
         self.imp()
             .equalizer_settings
             .set_custom_profiles(custom_profiles)

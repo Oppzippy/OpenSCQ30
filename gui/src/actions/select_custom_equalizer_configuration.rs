@@ -5,7 +5,7 @@ use openscq30_lib::{
 };
 
 use crate::{
-    objects::EqualizerCustomProfileObject,
+    objects::CustomEqualizerProfileObject,
     settings::{Config, SettingsFile},
 };
 
@@ -14,7 +14,7 @@ use super::{State, StateUpdate};
 pub fn select_custom_equalizer_configuration<T>(
     state: &State<T>,
     settings_file: &SettingsFile<Config>,
-    custom_profile: &EqualizerCustomProfileObject,
+    custom_profile: &CustomEqualizerProfileObject,
 ) -> anyhow::Result<()>
 where
     T: DeviceRegistry + Send + Sync + 'static,
@@ -49,8 +49,8 @@ mod tests {
     use crate::{
         actions::{State, StateUpdate},
         mock::MockDeviceRegistry,
-        objects::EqualizerCustomProfileObject,
-        settings::{Config, EqualizerCustomProfile, SettingsFile},
+        objects::CustomEqualizerProfileObject,
+        settings::{Config, CustomEqualizerProfile, SettingsFile},
     };
 
     use super::select_custom_equalizer_configuration;
@@ -63,7 +63,7 @@ mod tests {
 
         let file = tempfile::NamedTempFile::new().unwrap();
         let settings_file = SettingsFile::<Config>::new(file.path().to_path_buf());
-        let custom_profile = EqualizerCustomProfileObject::new(
+        let custom_profile = CustomEqualizerProfileObject::new(
             &"custom profile".to_string(),
             [1, 2, 3, 4, 5, 6, 7, 8],
         );
@@ -71,7 +71,7 @@ mod tests {
             .edit(|settings| {
                 settings.set_custom_profile(
                     custom_profile.name(),
-                    EqualizerCustomProfile::new(custom_profile.volume_offsets()),
+                    CustomEqualizerProfile::new(custom_profile.volume_offsets()),
                 );
             })
             .unwrap();

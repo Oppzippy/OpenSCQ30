@@ -7,20 +7,20 @@ use gtk::{
 };
 
 #[derive(Default, Properties)]
-#[properties(wrapper_type = super::EqualizerCustomProfileObject)]
-pub struct EqualizerCustomProfileObject {
+#[properties(wrapper_type = super::CustomEqualizerProfileObject)]
+pub struct CustomEqualizerProfileObject {
     #[property(get, set)]
     pub name: RefCell<String>,
     pub volume_offsets: Cell<[i8; 8]>,
 }
 
 #[glib::object_subclass]
-impl ObjectSubclass for EqualizerCustomProfileObject {
-    const NAME: &'static str = "OpenSCQ30EqualizerCustomProfileObject";
-    type Type = super::EqualizerCustomProfileObject;
+impl ObjectSubclass for CustomEqualizerProfileObject {
+    const NAME: &'static str = "OpenSCQ30CustomEqualizerProfileObject";
+    type Type = super::CustomEqualizerProfileObject;
 }
 
-impl ObjectImpl for EqualizerCustomProfileObject {
+impl ObjectImpl for CustomEqualizerProfileObject {
     fn properties() -> &'static [ParamSpec] {
         Self::derived_properties()
     }

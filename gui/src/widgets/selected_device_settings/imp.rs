@@ -14,7 +14,7 @@ use gtk::{
 use gtk::subclass::widget::WidgetClassSubclassExt;
 
 use crate::{
-    objects::EqualizerCustomProfileObject,
+    objects::CustomEqualizerProfileObject,
     widgets::{EqualizerSettings, GeneralSettings},
 };
 
@@ -50,19 +50,19 @@ impl SelectedDeviceSettings {
     }
 
     #[template_callback]
-    fn handle_custom_equalizer_profile_selected(&self, profile: &EqualizerCustomProfileObject) {
+    fn handle_custom_equalizer_profile_selected(&self, profile: &CustomEqualizerProfileObject) {
         self.obj()
             .emit_by_name("custom-equalizer-profile-selected", &[profile])
     }
 
     #[template_callback]
-    fn handle_create_custom_equalizer_profile(&self, _profile: &EqualizerCustomProfileObject) {
+    fn handle_create_custom_equalizer_profile(&self, _profile: &CustomEqualizerProfileObject) {
         self.obj()
             .emit_by_name("create-custom-equalizer-profile", &[])
     }
 
     #[template_callback]
-    fn handle_delete_custom_equalizer_profile(&self, profile: &EqualizerCustomProfileObject) {
+    fn handle_delete_custom_equalizer_profile(&self, profile: &CustomEqualizerProfileObject) {
         self.obj()
             .emit_by_name("delete-custom-equalizer-profile", &[&profile])
     }
@@ -101,11 +101,11 @@ impl ObjectImpl for SelectedDeviceSettings {
                     .build(),
                 Signal::builder("apply-equalizer-settings").build(),
                 Signal::builder("custom-equalizer-profile-selected")
-                    .param_types([EqualizerCustomProfileObject::static_type()])
+                    .param_types([CustomEqualizerProfileObject::static_type()])
                     .build(),
                 Signal::builder("create-custom-equalizer-profile").build(),
                 Signal::builder("delete-custom-equalizer-profile")
-                    .param_types([EqualizerCustomProfileObject::static_type()])
+                    .param_types([CustomEqualizerProfileObject::static_type()])
                     .build(),
                 Signal::builder("disconnect").build(),
             ]

@@ -6,10 +6,10 @@ use gtk::{
 mod imp;
 
 glib::wrapper! {
-    pub struct EqualizerCustomProfileObject(ObjectSubclass<imp::EqualizerCustomProfileObject>);
+    pub struct CustomEqualizerProfileObject(ObjectSubclass<imp::CustomEqualizerProfileObject>);
 }
 
-impl EqualizerCustomProfileObject {
+impl CustomEqualizerProfileObject {
     pub fn new(name: &str, volume_offsets: [i8; 8]) -> Self {
         let obj: Self = Object::builder().property("name", name).build();
         obj.imp().volume_offsets.replace(volume_offsets);

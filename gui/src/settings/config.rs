@@ -2,15 +2,15 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use super::equalizer_custom_profile::EqualizerCustomProfile;
+use super::custom_equalizer_profile::CustomEqualizerProfile;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub struct Config {
-    equalizer_custom_profiles: HashMap<String, EqualizerCustomProfile>,
+    equalizer_custom_profiles: HashMap<String, CustomEqualizerProfile>,
 }
 
 impl Config {
-    pub fn set_custom_profile(&mut self, name: String, profile: EqualizerCustomProfile) {
+    pub fn set_custom_profile(&mut self, name: String, profile: CustomEqualizerProfile) {
         // If multiple profiles with the same volume offsets existed, it would be ambiguous which should be selected,
         // since the selection is determined only by volume offsets.
         self.equalizer_custom_profiles
@@ -22,7 +22,7 @@ impl Config {
         self.equalizer_custom_profiles.remove(name);
     }
 
-    pub fn custom_profiles(&self) -> &HashMap<String, EqualizerCustomProfile> {
+    pub fn custom_profiles(&self) -> &HashMap<String, CustomEqualizerProfile> {
         &self.equalizer_custom_profiles
     }
 }

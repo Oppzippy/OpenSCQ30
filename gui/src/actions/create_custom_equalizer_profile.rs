@@ -1,8 +1,8 @@
 use openscq30_lib::api::device::DeviceRegistry;
 
 use crate::{
-    objects::EqualizerCustomProfileObject,
-    settings::{Config, EqualizerCustomProfile, SettingsFile},
+    objects::CustomEqualizerProfileObject,
+    settings::{Config, CustomEqualizerProfile, SettingsFile},
 };
 
 use super::{State, StateUpdate};
@@ -10,7 +10,7 @@ use super::{State, StateUpdate};
 pub fn create_custom_equalizer_profile<T>(
     state: &State<T>,
     settings_file: &SettingsFile<Config>,
-    custom_profile: &EqualizerCustomProfileObject,
+    custom_profile: &CustomEqualizerProfileObject,
 ) -> anyhow::Result<()>
 where
     T: DeviceRegistry + Send + Sync + 'static,
@@ -18,18 +18,18 @@ where
     settings_file.edit(|settings| {
         settings.set_custom_profile(
             custom_profile.name(),
-            EqualizerCustomProfile::new(custom_profile.volume_offsets()),
+            CustomEqualizerProfile::new(custom_profile.volume_offsets()),
         );
     })?;
     settings_file.get(|settings| {
         state
             .state_update_sender
-            .send(StateUpdate::SetEqualizerCustomProfiles(
+            .send(StateUpdate::SetCustomEqualizerProfiles(
                 settings
                     .custom_profiles()
                     .iter()
                     .map(|(name, profile)| {
-                        EqualizerCustomProfileObject::new(name, profile.volume_offsets())
+                        CustomEqualizerProfileObject::new(name, profile.volume_offsets())
                     })
                     .collect(),
             ))
@@ -43,7 +43,7 @@ mod tests {
     use crate::{
         actions::{State, StateUpdate},
         mock::MockDeviceRegistry,
-        objects::EqualizerCustomProfileObject,
+        objects::CustomEqualizerProfileObject,
         settings::SettingsFile,
     };
 
@@ -57,19 +57,19 @@ mod tests {
 
         let file = tempfile::NamedTempFile::new().unwrap();
         let settings_file = SettingsFile::new(file.path().to_path_buf());
-        let custom_profile = EqualizerCustomProfileObject::new(
+        let custom_profile = CustomEqualizerProfileObject::new(
             &"custom profile".to_string(),
             [1, 2, 3, 4, 5, 6, 7, 8],
         );
         create_custom_equalizer_profile(&state, &settings_file, &custom_profile).unwrap();
 
         let state_update = receiver.recv().await.unwrap();
-        if let StateUpdate::SetEqualizerCustomProfiles(profiles) = state_update {
+        if let StateUpdate::SetCustomEqualizerProfiles(profiles) = state_update {
             let profile = profiles.first().unwrap();
             assert_eq!(custom_profile.name(), profile.name());
             assert_eq!(custom_profile.volume_offsets(), profile.volume_offsets());
         } else {
-            panic!("StateUpdate was not SetEqualizerCustomProfiles");
+            panic!("StateUpdate was not SetCustomEqualizerProfiles");
         }
         assert_eq!(
             1,

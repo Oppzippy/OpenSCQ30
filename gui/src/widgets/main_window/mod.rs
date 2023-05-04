@@ -15,7 +15,7 @@ use openscq30_lib::packets::structures::{
     AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode,
 };
 
-use crate::{objects::EqualizerCustomProfileObject, settings::Settings};
+use crate::{objects::CustomEqualizerProfileObject, settings::Settings};
 
 use super::Device;
 
@@ -107,7 +107,7 @@ impl MainWindow {
             .equalizer_configuration()
     }
 
-    pub fn set_custom_profiles(&self, custom_profiles: Vec<EqualizerCustomProfileObject>) {
+    pub fn set_custom_profiles(&self, custom_profiles: Vec<CustomEqualizerProfileObject>) {
         self.imp()
             .selected_device_settings
             .imp()

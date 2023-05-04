@@ -22,7 +22,7 @@ use gtk::subclass::widget::WidgetClassSubclassExt;
 use once_cell::sync::OnceCell;
 
 use crate::{
-    objects::{DeviceObject, EqualizerCustomProfileObject},
+    objects::{CustomEqualizerProfileObject, DeviceObject},
     settings::Settings,
     widgets::{Device, DeviceSelection, LoadingScreen, SelectedDeviceSettings},
 };
@@ -82,7 +82,7 @@ impl MainWindow {
     #[template_callback]
     fn handle_custom_equalizer_profile_selected(
         &self,
-        profile: &EqualizerCustomProfileObject,
+        profile: &CustomEqualizerProfileObject,
         _: &SelectedDeviceSettings,
     ) {
         self.obj()
@@ -137,7 +137,7 @@ impl MainWindow {
                     .band_offsets()
                     .volume_offsets();
 
-                let profile_with_name = EqualizerCustomProfileObject::new(&name, volume_offsets);
+                let profile_with_name = CustomEqualizerProfileObject::new(&name, volume_offsets);
                 this.obj().emit_by_name::<()>("create-custom-equalizer-profile", &[&profile_with_name]);
             }),
         );
@@ -147,7 +147,7 @@ impl MainWindow {
     #[template_callback]
     fn handle_delete_custom_equalizer_profile(
         &self,
-        profile: &EqualizerCustomProfileObject,
+        profile: &CustomEqualizerProfileObject,
         _: &SelectedDeviceSettings,
     ) {
         self.obj()
@@ -232,13 +232,13 @@ impl ObjectImpl for MainWindow {
                 Signal::builder("device-selection-changed").build(),
                 Signal::builder("apply-equalizer-settings").build(),
                 Signal::builder("custom-equalizer-profile-selected")
-                    .param_types([EqualizerCustomProfileObject::static_type()])
+                    .param_types([CustomEqualizerProfileObject::static_type()])
                     .build(),
                 Signal::builder("create-custom-equalizer-profile")
-                    .param_types([EqualizerCustomProfileObject::static_type()])
+                    .param_types([CustomEqualizerProfileObject::static_type()])
                     .build(),
                 Signal::builder("delete-custom-equalizer-profile")
-                    .param_types([EqualizerCustomProfileObject::static_type()])
+                    .param_types([CustomEqualizerProfileObject::static_type()])
                     .build(),
             ]
         });

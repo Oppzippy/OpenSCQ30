@@ -22,7 +22,7 @@ pub use set_noise_canceling_mode::*;
 pub use state::*;
 
 use crate::{
-    objects::{DeviceObject, EqualizerCustomProfileObject},
+    objects::{CustomEqualizerProfileObject, DeviceObject},
     widgets::Device,
 };
 
@@ -34,6 +34,6 @@ pub enum StateUpdate {
     SetNoiseCancelingMode(NoiseCancelingMode),
     SetEqualizerConfiguration(EqualizerConfiguration),
     SetSelectedDevice(Option<DeviceObject>),
-    SetEqualizerCustomProfiles(Vec<EqualizerCustomProfileObject>),
+    SetCustomEqualizerProfiles(Vec<CustomEqualizerProfileObject>),
     AddToast(String),
 }
