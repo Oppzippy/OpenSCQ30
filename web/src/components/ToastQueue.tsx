@@ -6,6 +6,7 @@ import React, {
   createContext,
   useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 
 export type Toast = {
   message: string;
@@ -18,6 +19,7 @@ export const ToastQueueContext = createContext({
 });
 
 export function ToastQueue({ children }: PropsWithChildren) {
+  const { t } = useTranslation();
   const [toasts, setToasts] = useState<Toast[]>([]);
   const value = {
     toasts,
@@ -56,7 +58,7 @@ export function ToastQueue({ children }: PropsWithChildren) {
               {toasts[0].action}
               <IconButton
                 size="small"
-                aria-label="close"
+                aria-label={t("toast.close").toString()}
                 color="inherit"
                 onClick={() => popToast()}
               >

@@ -1,11 +1,57 @@
 {
-  "deviceSelection": "Device Selection",
-  "homepage": {
+  "ambientSoundMode": {
+    "ambientSoundMode": "Ambient Sound Mode",
+    "noiseCanceling": "Noise Canceling",
+    "transparency": "Transparency",
+    "normal": "Normal"
+  },
+  "device": {
+    "disconnect": "Disconnect",
+    "deviceSelection": "Device Selection",
+    "selectDevice": "Select Device"
+  },
+  "equalizer": {
+    "equalizer": "Equalizer",
+    "profile": "Profile",
+    "custom": "Custom"
+  },
+  "application": {
     "webBluetoothNotSupported": "Web Bluetooth is not supported by your browser. See <2>caniuse</2> for a list of browsers supporting Web Bluetooth.",
-    "earlyDevelopmentNotice": "The web verison of OpenSCQ30 is still in early development. Please use the desktop or android version if you encounter any issues."
+    "earlyDevelopmentNotice": "The web verison of OpenSCQ30 is still in early development. Please use the desktop or android version if you encounter any issues.",
+    "newVersionAvailable": "A new version of OpenSCQ30 Web is available.",
+    "update": "Update"
   },
-  "pwa": {
-    "newVersionAvailable": "A new version of OpenSCQ30 Web is available."
+  "noiseCancelingMode": {
+    "noiseCancelingMode": "Noise Canceling Mode",
+    "transport": "Transport",
+    "outdoor": "Outdoor",
+    "indoor": "Indoor"
   },
-  "update": "Update"
+  "toast": {
+    "close": "Close"
+  },
+  "equalizerPresetProfile": {
+    "soundcoreSignature": "Soundcore Signature",
+    "acoustic": "Acoustic",
+    "bassBooster": "Bass Booster",
+    "bassReducer": "Bass Reducer",
+    "classical": "Classical",
+    "podcast": "Podcast",
+    "dance": "Dance",
+    "deep": "Deep",
+    "electronic": "Electronic",
+    "flat": "Flat",
+    "hipHop": "Hip Hop",
+    "jazz": "Jazz",
+    "latin": "Latin",
+    "lounge": "Lounge",
+    "piano": "Piano",
+    "pop": "Pop",
+    "rnB": "RnB",
+    "rock": "Rock",
+    "smallSpeakers": "Small Speakers",
+    "spokenWord": "Spoken Word",
+    "trebleBooster": "Treble Booster",
+    "trebleReducer": "Treble Reducer"
+  }
 }

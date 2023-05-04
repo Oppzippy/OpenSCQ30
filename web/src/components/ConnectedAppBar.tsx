@@ -1,4 +1,5 @@
 import { AppBar, Button, Toolbar, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   deviceName: string;
@@ -6,6 +7,7 @@ type Props = {
 };
 
 export function ConnectedAppBar(props: Props) {
+  const { t } = useTranslation();
   return (
     <AppBar position="absolute">
       <Toolbar>
@@ -19,7 +21,7 @@ export function ConnectedAppBar(props: Props) {
           {props.deviceName}
         </Typography>
         <Button color="inherit" onClick={() => props.onDisconnectClick()}>
-          Disconnect
+          {t("device.disconnect")}
         </Button>
       </Toolbar>
     </AppBar>

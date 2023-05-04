@@ -1,5 +1,3 @@
-import { PresetEqualizerProfile } from "../../wasm/pkg/openscq30_web_wasm";
-import { Equalizer } from "./Equalizer";
 import {
   FormControl,
   InputLabel,
@@ -8,7 +6,10 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { presetProfiles } from "./EqualizerProfile";
+import { useTranslation } from "react-i18next";
+import { PresetEqualizerProfile } from "../../wasm/pkg/openscq30_web_wasm";
+import { usePresetEqualizerProfiles } from "../hooks/usePresetEqualizerProfiles";
+import { Equalizer } from "./Equalizer";
 
 // TODO -1 is custom, make this more readable
 type Props = {
@@ -19,14 +20,18 @@ type Props = {
 };
 
 export function EqualizerSettings(props: Props) {
+  const { t } = useTranslation();
+  const presetProfiles = usePresetEqualizerProfiles();
   return (
     <Stack spacing={2}>
-      <Typography>Equalizer</Typography>
+      <Typography>{t("equalizer.equalizer")}</Typography>
       <FormControl>
-        <InputLabel id="equalizer-profile-select-label">Profile</InputLabel>
+        <InputLabel id="equalizer-profile-select-label">
+          {t("equalizer.profile")}
+        </InputLabel>
         <Select
           labelId="equalizer-profile-select-label"
-          label="Profile"
+          label={t("equalizer.profile")}
           value={props.profile}
           onChange={(event) => {
             if (typeof event.target.value == "number") {
@@ -39,7 +44,7 @@ export function EqualizerSettings(props: Props) {
             }
           }}
         >
-          <MenuItem value={-1}>Custom</MenuItem>
+          <MenuItem value={-1}>{t("equalizer.custom")}</MenuItem>
           {presetProfiles.map(({ name, id }) => (
             <MenuItem value={id} key={id}>
               {name}

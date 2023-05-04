@@ -1,11 +1,57 @@
 {
-  "deviceSelection": "ディバイス選択",
-  "homepage": {
+  "ambientSoundMode": {
+    "ambientSoundMode": "",
+    "noiseCanceling": "",
+    "transparency": "",
+    "normal": ""
+  },
+  "device": {
+    "disconnect": "",
+    "deviceSelection": "",
+    "selectDevice": ""
+  },
+  "equalizer": {
+    "equalizer": "",
+    "profile": "",
+    "custom": ""
+  },
+  "application": {
     "webBluetoothNotSupported": "Web Bluetooth is not supported by your browser. See <2>caniuse</2> for a list of browsers supporting Web Bluetooth.",
-    "earlyDevelopmentNotice": ""
+    "earlyDevelopmentNotice": "",
+    "newVersionAvailable": "",
+    "update": ""
   },
-  "pwa": {
-    "newVersionAvailable": ""
+  "noiseCancelingMode": {
+    "noiseCancelingMode": "",
+    "transport": "",
+    "outdoor": "",
+    "indoor": ""
   },
-  "update": ""
+  "toast": {
+    "close": ""
+  },
+  "equalizerPresetProfile": {
+    "soundcoreSignature": "",
+    "acoustic": "",
+    "bassBooster": "",
+    "bassReducer": "",
+    "classical": "",
+    "podcast": "",
+    "dance": "",
+    "deep": "",
+    "electronic": "",
+    "flat": "",
+    "hipHop": "",
+    "jazz": "",
+    "latin": "",
+    "lounge": "",
+    "piano": "",
+    "pop": "",
+    "rnB": "",
+    "rock": "",
+    "smallSpeakers": "",
+    "spokenWord": "",
+    "trebleBooster": "",
+    "trebleReducer": ""
+  }
 }

@@ -17,11 +17,11 @@ export function DisconnectedAppBar(props: Props) {
           noWrap
           sx={{ flexGrow: 1 }}
         >
-          {t("deviceSelection")}
+          {t("device.deviceSelection")}
         </Typography>
         {navigator.bluetooth && (
           <Button color="inherit" onClick={() => props.onSelectDeviceClick()}>
-            Select Device
+            {t("device.selectDevice")}
           </Button>
         )}
       </Toolbar>

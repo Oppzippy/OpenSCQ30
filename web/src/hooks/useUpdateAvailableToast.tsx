@@ -32,10 +32,10 @@ export function useUpdateAvailableToast() {
     );
     if (needRefresh && !hasToastBeenShown) {
       toasts.addToast({
-        message: t("pwa.newVersionAvailable"),
+        message: t("application.newVersionAvailable"),
         action: (
           <Button onClick={() => updateServiceWorker(true)}>
-            {t("update")}
+            {t("application.update")}
           </Button>
         ),
       });

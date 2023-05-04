@@ -1,6 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import { AmbientSoundMode } from "../../wasm/pkg/openscq30_web_wasm";
 import { ToggleButtonRow } from "./ToggleButtonRow";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   value: AmbientSoundMode;
@@ -8,24 +9,25 @@ type Props = {
 };
 
 export function AmbientSoundModeSelection(props: Props) {
+  const { t } = useTranslation();
   return (
     <Box>
-      <Typography>Ambient Sound Mode</Typography>
+      <Typography>{t("ambientSoundMode.ambientSoundMode")}</Typography>
       <ToggleButtonRow
         value={props.value}
         onValueChanged={props.onValueChanged}
         values={[
           {
             value: AmbientSoundMode.NoiseCanceling,
-            displayText: "Noise Canceling",
+            displayText: t("ambientSoundMode.noiseCanceling"),
           },
           {
             value: AmbientSoundMode.Transparency,
-            displayText: "Transparency",
+            displayText: t("ambientSoundMode.transparency"),
           },
           {
             value: AmbientSoundMode.Normal,
-            displayText: "Normal",
+            displayText: t("ambientSoundMode.normal"),
           },
         ]}
       />
