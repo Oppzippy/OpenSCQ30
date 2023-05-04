@@ -97,10 +97,10 @@ describe("Device Settings", () => {
       ...device.equalizerConfiguration.bandOffsets.volumeOffsets,
     ]).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
     await user.click(
-      renderResult.getByText("equalizerPresetProfile.soundcoreSignature")
+      renderResult.getByText("presetEqualizerProfile.soundcoreSignature")
     );
     await user.click(
-      renderResult.getByText("equalizerPresetProfile.classical")
+      renderResult.getByText("presetEqualizerProfile.classical")
     );
     vi.advanceTimersByTime(5000);
     expect([

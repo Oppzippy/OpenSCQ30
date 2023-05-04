@@ -5,85 +5,85 @@ export function usePresetEqualizerProfiles() {
   const { t } = useTranslation();
   return [
     {
-      name: t("equalizerPresetProfile.soundcoreSignature"),
+      name: t("presetEqualizerProfile.soundcoreSignature"),
       id: PresetEqualizerProfile.SoundcoreSignature,
     },
     {
-      name: t("equalizerPresetProfile.acoustic"),
+      name: t("presetEqualizerProfile.acoustic"),
       id: PresetEqualizerProfile.Acoustic,
     },
     {
-      name: t("equalizerPresetProfile.bassBooster"),
+      name: t("presetEqualizerProfile.bassBooster"),
       id: PresetEqualizerProfile.BassBooster,
     },
     {
-      name: t("equalizerPresetProfile.bassReducer"),
+      name: t("presetEqualizerProfile.bassReducer"),
       id: PresetEqualizerProfile.BassReducer,
     },
     {
-      name: t("equalizerPresetProfile.classical"),
+      name: t("presetEqualizerProfile.classical"),
       id: PresetEqualizerProfile.Classical,
     },
     {
-      name: t("equalizerPresetProfile.podcast"),
+      name: t("presetEqualizerProfile.podcast"),
       id: PresetEqualizerProfile.Podcast,
     },
     {
-      name: t("equalizerPresetProfile.dance"),
+      name: t("presetEqualizerProfile.dance"),
       id: PresetEqualizerProfile.Dance,
     },
     {
-      name: t("equalizerPresetProfile.deep"),
+      name: t("presetEqualizerProfile.deep"),
       id: PresetEqualizerProfile.Deep,
     },
     {
-      name: t("equalizerPresetProfile.electronic"),
+      name: t("presetEqualizerProfile.electronic"),
       id: PresetEqualizerProfile.Electronic,
     },
     {
-      name: t("equalizerPresetProfile.flat"),
+      name: t("presetEqualizerProfile.flat"),
       id: PresetEqualizerProfile.Flat,
     },
     {
-      name: t("equalizerPresetProfile.hipHop"),
+      name: t("presetEqualizerProfile.hipHop"),
       id: PresetEqualizerProfile.HipHop,
     },
     {
-      name: t("equalizerPresetProfile.jazz"),
+      name: t("presetEqualizerProfile.jazz"),
       id: PresetEqualizerProfile.Jazz,
     },
     {
-      name: t("equalizerPresetProfile.latin"),
+      name: t("presetEqualizerProfile.latin"),
       id: PresetEqualizerProfile.Latin,
     },
     {
-      name: t("equalizerPresetProfile.lounge"),
+      name: t("presetEqualizerProfile.lounge"),
       id: PresetEqualizerProfile.Lounge,
     },
     {
-      name: t("equalizerPresetProfile.piano"),
+      name: t("presetEqualizerProfile.piano"),
       id: PresetEqualizerProfile.Piano,
     },
-    { name: t("equalizerPresetProfile.pop"), id: PresetEqualizerProfile.Pop },
-    { name: t("equalizerPresetProfile.rnB"), id: PresetEqualizerProfile.RnB },
+    { name: t("presetEqualizerProfile.pop"), id: PresetEqualizerProfile.Pop },
+    { name: t("presetEqualizerProfile.rnB"), id: PresetEqualizerProfile.RnB },
     {
-      name: t("equalizerPresetProfile.rock"),
+      name: t("presetEqualizerProfile.rock"),
       id: PresetEqualizerProfile.Rock,
     },
     {
-      name: t("equalizerPresetProfile.smallSpeakers"),
+      name: t("presetEqualizerProfile.smallSpeakers"),
       id: PresetEqualizerProfile.SmallSpeakers,
     },
     {
-      name: t("equalizerPresetProfile.spokenWord"),
+      name: t("presetEqualizerProfile.spokenWord"),
       id: PresetEqualizerProfile.SpokenWord,
     },
     {
-      name: t("equalizerPresetProfile.trebleBooster"),
+      name: t("presetEqualizerProfile.trebleBooster"),
       id: PresetEqualizerProfile.TrebleBooster,
     },
     {
-      name: t("equalizerPresetProfile.trebleReducer"),
+      name: t("presetEqualizerProfile.trebleReducer"),
       id: PresetEqualizerProfile.TrebleReducer,
     },
   ];

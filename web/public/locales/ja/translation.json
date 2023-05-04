@@ -1,10 +1,4 @@
 {
-  "ambientSoundMode": {
-    "ambientSoundMode": "",
-    "noiseCanceling": "",
-    "transparency": "",
-    "normal": ""
-  },
   "device": {
     "disconnect": "",
     "deviceSelection": "",
@@ -12,13 +6,12 @@
   },
   "equalizer": {
     "customProfile": "",
-    "newCustomProfile": "",
-    "profileName": "",
-    "profile": "",
-    "custom": "",
     "equalizer": "",
     "deleteCustomProfile": "",
-    "createCustomProfile": ""
+    "createCustomProfile": "",
+    "profileName": "",
+    "profile": "",
+    "custom": ""
   },
   "application": {
     "close": "",
@@ -27,6 +20,12 @@
     "earlyDevelopmentNotice": "",
     "newVersionAvailable": "",
     "update": ""
+  },
+  "ambientSoundMode": {
+    "ambientSoundMode": "",
+    "noiseCanceling": "",
+    "transparency": "",
+    "normal": ""
   },
   "noiseCancelingMode": {
     "noiseCancelingMode": "",
@@ -37,7 +36,7 @@
   "toast": {
     "close": ""
   },
-  "equalizerPresetProfile": {
+  "presetEqualizerProfile": {
     "soundcoreSignature": "",
     "acoustic": "",
     "bassBooster": "",

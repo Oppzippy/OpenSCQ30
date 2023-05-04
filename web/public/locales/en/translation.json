@@ -1,10 +1,4 @@
 {
-  "ambientSoundMode": {
-    "ambientSoundMode": "Ambient Sound Mode",
-    "noiseCanceling": "Noise Canceling",
-    "transparency": "Transparency",
-    "normal": "Normal"
-  },
   "device": {
     "disconnect": "Disconnect",
     "deviceSelection": "Device Selection",
@@ -12,12 +6,12 @@
   },
   "equalizer": {
     "customProfile": "Custom Profile",
-    "profileName": "Profile Name",
-    "profile": "Profile",
-    "custom": "Custom",
     "equalizer": "Equalizer",
     "deleteCustomProfile": "Delete Custom Profile",
-    "createCustomProfile": "Create Custom Profile"
+    "createCustomProfile": "Create Custom Profile",
+    "profileName": "Profile Name",
+    "profile": "Profile",
+    "custom": "Custom"
   },
   "application": {
     "close": "Close",
@@ -26,6 +20,12 @@
     "earlyDevelopmentNotice": "The web verison of OpenSCQ30 is still in early development. Please use the desktop or android version if you encounter any issues.",
     "newVersionAvailable": "A new version of OpenSCQ30 Web is available.",
     "update": "Update"
+  },
+  "ambientSoundMode": {
+    "ambientSoundMode": "Ambient Sound Mode",
+    "noiseCanceling": "Noise Canceling",
+    "transparency": "Transparency",
+    "normal": "Normal"
   },
   "noiseCancelingMode": {
     "noiseCancelingMode": "Noise Canceling Mode",
@@ -36,7 +36,7 @@
   "toast": {
     "close": "Close"
   },
-  "equalizerPresetProfile": {
+  "presetEqualizerProfile": {
     "soundcoreSignature": "Soundcore Signature",
     "acoustic": "Acoustic",
     "bassBooster": "Bass Booster",
