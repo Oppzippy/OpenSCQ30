@@ -11,7 +11,9 @@
     "createCustomProfile": "",
     "profileName": "",
     "profile": "",
-    "custom": ""
+    "custom": "",
+    "khz": "{{ hz }} kHz",
+    "hz": "{{ hz }} Hz"
   },
   "application": {
     "close": "",

@@ -11,7 +11,9 @@
     "createCustomProfile": "Create Custom Profile",
     "profileName": "Profile Name",
     "profile": "Profile",
-    "custom": "Custom"
+    "custom": "Custom",
+    "khz": "{{ hz }} kHz",
+    "hz": "{{ hz }} Hz"
   },
   "application": {
     "close": "Close",
