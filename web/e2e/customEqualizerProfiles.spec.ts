@@ -56,8 +56,12 @@ test.describe("custom equalizer profiles", () => {
       name: "Test Profile",
       values: [0, 0, 0, 0, 0, 0, 0, 0],
     });
+    // the create button from the dialog takes some time to fade, so we have to be more specific
+    const createButton = page.locator(
+      "button[aria-label='Create Custom Profile']:has(> svg)"
+    );
     expect(page.getByLabel("Delete Custom Profile")).toBeVisible();
-    expect(page.getByLabel("Create Custom Profile")).not.toBeVisible();
+    expect(createButton).not.toBeVisible();
   });
 
   test("should be able to delete profiles", async ({ page }) => {
