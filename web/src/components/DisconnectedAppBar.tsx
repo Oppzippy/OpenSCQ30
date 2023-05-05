@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 type Props = {
   onSelectDeviceClick: () => Promise<void>;
+  showSelectDeviceButton: boolean;
 };
 
 export function DisconnectedAppBar(props: Props) {
@@ -19,7 +20,7 @@ export function DisconnectedAppBar(props: Props) {
         >
           {t("device.deviceSelection")}
         </Typography>
-        {navigator.bluetooth && (
+        {props.showSelectDeviceButton && (
           <Button color="inherit" onClick={() => props.onSelectDeviceClick()}>
             {t("device.selectDevice")}
           </Button>

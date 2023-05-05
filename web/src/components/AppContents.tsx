@@ -18,6 +18,8 @@ import { selectDevice } from "../bluetooth/RealSoundcoreDevice";
 export function AppContents() {
   const [device, setDevice] = useState<SoundcoreDevice>();
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+  // TODO use a hook for isDemoMode
+  const isDemoMode = localStorage.getItem("openscq30:demoMode") == "true";
   const theme = useMemo(
     () =>
       createTheme({
@@ -30,10 +32,7 @@ export function AppContents() {
   useUpdateAvailableToast();
 
   async function connect() {
-    const device =
-      localStorage.getItem("openscq30:demoMode") == "true"
-        ? await selectDemoDevice()
-        : await selectDevice();
+    const device = isDemoMode ? await selectDemoDevice() : await selectDevice();
     setDevice(device);
   }
 
@@ -58,7 +57,10 @@ export function AppContents() {
             onDisconnectClick={() => disconnect()}
           />
         ) : (
-          <DisconnectedAppBar onSelectDeviceClick={() => connect()} />
+          <DisconnectedAppBar
+            onSelectDeviceClick={() => connect()}
+            showSelectDeviceButton={!!navigator.bluetooth || isDemoMode}
+          />
         )}
         <Box component="main" sx={{ flexGrow: 1 }}>
           <Toolbar />
