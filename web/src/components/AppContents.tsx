@@ -6,12 +6,14 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useMemo, useState } from "react";
-import { SoundcoreDevice, selectDevice } from "../bluetooth/SoundcoreDevice";
+import { SoundcoreDevice } from "../bluetooth/SoundcoreDevice";
 import { ConnectedAppBar } from "./ConnectedAppBar";
 import { DeviceSettings } from "./DeviceSettings";
 import { DisconnectedAppBar } from "./DisconnectedAppBar";
 import { HomePage } from "./HomePage";
 import { useUpdateAvailableToast } from "../hooks/useUpdateAvailableToast";
+import { selectDemoDevice } from "../bluetooth/DemoSoundcoreDevice";
+import { selectDevice } from "../bluetooth/RealSoundcoreDevice";
 
 export function AppContents() {
   const [device, setDevice] = useState<SoundcoreDevice>();
@@ -28,7 +30,10 @@ export function AppContents() {
   useUpdateAvailableToast();
 
   async function connect() {
-    const device = await selectDevice();
+    const device =
+      localStorage.getItem("openscq30:demoMode") == "true"
+        ? await selectDemoDevice()
+        : await selectDevice();
     setDevice(device);
   }
 
