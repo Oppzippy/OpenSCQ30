@@ -55,7 +55,7 @@ export function VolumeSlider(props: Props) {
           onChange={(event) => props.onValueChange(Number(event.target.value))}
           size="small"
           inputProps={{
-            min: -0,
+            min: -12,
             max: 12,
             step: 0.1,
             type: "number",
