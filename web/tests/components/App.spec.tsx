@@ -15,7 +15,7 @@ describe("App", () => {
   let user: ReturnType<typeof userEvent.setup>;
 
   function mockDevice() {
-    vi.mock("../../src/bluetooth/SoundcoreDevice", () => {
+    vi.mock("../../src/bluetooth/RealSoundcoreDevice", () => {
       return {
         async selectDevice() {
           const mockDevice = {
