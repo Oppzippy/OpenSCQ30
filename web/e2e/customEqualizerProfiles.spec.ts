@@ -20,7 +20,12 @@ test.describe("custom equalizer profiles", () => {
   ) {
     await selectEqualizerValues(page, profile.values);
     await page.getByLabel("Create Custom Profile").click();
-    await page.getByLabel("Profile Name").type(profile.name);
+    const profileNameInput = page.getByRole("combobox", {
+      name: "Profile Name",
+    });
+    await profileNameInput.type(profile.name);
+    // Cancel dropdown with existing profiles to get it out of the way of the create/overwrite button
+    await profileNameInput.press("Escape");
     await page
       .locator("button")
       .getByText(profile.alreadyExists ? "Overwrite" : "Create")
