@@ -1,12 +1,12 @@
 {
   "device": {
     "disconnect": "",
-    "deviceSelection": "",
+    "deviceSelection": "デバイス選択",
     "selectDevice": ""
   },
   "equalizer": {
     "customProfile": "",
-    "equalizer": "",
+    "equalizer": "イコライザ",
     "deleteCustomProfile": "",
     "createCustomProfile": "",
     "profileName": "",
