@@ -14,7 +14,7 @@ export default defineConfig({
       includeAssets: [
         "favicon.svg",
         "apple-touch-icon.png",
-        "masked-icon.svg",
+        "mask-icon.png",
         "locales/**/*.json",
       ],
       workbox: {
@@ -37,6 +37,11 @@ export default defineConfig({
             src: "pwa-512x512.png",
             sizes: "512x512",
             type: "image/png",
+          },
+          {
+            src: "mask-icon.png",
+            sizes: "640x640",
+            purpose: "any maskable",
           },
         ],
       },
