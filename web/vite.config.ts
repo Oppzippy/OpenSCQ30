@@ -45,4 +45,7 @@ export default defineConfig({
   ],
   assetsInclude: ["../web-wasm/pkg"],
   base: "./", // relative paths for github pages
+  build: {
+    sourcemap: true,
+  },
 });
