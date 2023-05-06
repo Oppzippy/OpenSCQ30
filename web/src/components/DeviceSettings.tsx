@@ -1,20 +1,20 @@
 import { Stack } from "@mui/material";
+import { useLiveQuery } from "dexie-react-hooks";
+import { debounce } from "lodash-es";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   EqualizerBandOffsets,
   EqualizerConfiguration,
   PresetEqualizerProfile,
 } from "../../wasm/pkg/openscq30_web_wasm";
-import { AmbientSoundModeSelection } from "./soundMode/AmbientSoundModeSelection";
 import { SoundcoreDevice } from "../bluetooth/SoundcoreDevice";
-import { useBehaviorSubject } from "../hooks/useObservable";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { debounce } from "lodash-es";
-import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "../storage/db";
 import { SoundcoreDeviceState } from "../bluetooth/SoundcoreDeviceState";
+import { useBehaviorSubject } from "../hooks/useObservable";
 import { upsertCustomEqualizerProfile } from "../storage/customEqualizerProfiles";
+import { db } from "../storage/db";
 import { EqualizerSettings } from "./equalizer/EqualizerSettings";
 import { NewCustomProfileDialog } from "./equalizer/NewCustomProfileDialog";
+import { AmbientSoundModeSelection } from "./soundMode/AmbientSoundModeSelection";
 import { NoiseCancelingModeSelection } from "./soundMode/NoiseCancelingModeSelection";
 
 export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
@@ -22,9 +22,8 @@ export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
   const [displayState, setDisplayState] = useState(actualState);
   const [isCreateCustomProfileDialogOpen, setCreateCustomProfileDialogOpen] =
     useState(false);
-  const customEqualizerProfiles = useLiveQuery(() =>
-    db.customEqualizerProfiles.toArray()
-  );
+  const customEqualizerProfiles =
+    useLiveQuery(() => db.customEqualizerProfiles.toArray()) ?? [];
 
   // Synchronizes the displayed state with the actual state of the headphones. They are
   // different because of the equalizer debouncing.
@@ -124,7 +123,7 @@ export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
         onProfileSelected={onPresetProfileSelected}
         values={fractionalEqualizerVolumes}
         onValueChange={onEqualizerValueChange}
-        customProfiles={customEqualizerProfiles ?? []}
+        customProfiles={customEqualizerProfiles}
         onAddCustomProfile={() => setCreateCustomProfileDialogOpen(true)}
         onDeleteCustomProfile={(profileToDelete) => {
           if (profileToDelete.id) {
@@ -138,6 +137,7 @@ export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
       />
       <NewCustomProfileDialog
         isOpen={isCreateCustomProfileDialogOpen}
+        existingProfiles={customEqualizerProfiles}
         onClose={() => setCreateCustomProfileDialogOpen(false)}
         onCreate={(name) => {
           upsertCustomEqualizerProfile({

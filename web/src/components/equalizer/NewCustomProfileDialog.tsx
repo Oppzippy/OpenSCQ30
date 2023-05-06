@@ -8,11 +8,13 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { CustomEqualizerProfile } from "../../storage/db";
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
   onCreate: (name: string) => void;
+  existingProfiles: ReadonlyArray<CustomEqualizerProfile>;
 };
 
 export function NewCustomProfileDialog(props: Props) {
@@ -22,6 +24,16 @@ export function NewCustomProfileDialog(props: Props) {
   function close() {
     props.onClose();
     setName("");
+  }
+
+  function doesCustomProfileWithNameExist(name: string) {
+    // The dexie ignoreCase implementation uses String.to(Lower|Upper)Case, so we use that here rather than
+    // LocaleCompare or anything else
+    // https://www.codeproject.com/Articles/744986/How-to-do-some-magic-with-indexedDB#pre966396
+    const lowerCaseName = name.toLowerCase();
+    return props.existingProfiles.some(
+      (profile) => profile.name.toLowerCase() == lowerCaseName
+    );
   }
 
   return (
@@ -44,7 +56,9 @@ export function NewCustomProfileDialog(props: Props) {
             close();
           }}
         >
-          {t("application.create")}
+          {doesCustomProfileWithNameExist(name)
+            ? t("application.overwrite")
+            : t("application.create")}
         </Button>
       </DialogActions>
     </Dialog>

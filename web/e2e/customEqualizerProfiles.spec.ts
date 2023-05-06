@@ -16,12 +16,15 @@ test.describe("custom equalizer profiles", () => {
 
   async function createCustomProfile(
     page: Page,
-    profile: { name: string; values: number[] }
+    profile: { name: string; values: number[]; alreadyExists?: boolean }
   ) {
     await selectEqualizerValues(page, profile.values);
     await page.getByLabel("Create Custom Profile").click();
     await page.getByLabel("Profile Name").type(profile.name);
-    await page.locator("button").getByText("Create").click();
+    await page
+      .locator("button")
+      .getByText(profile.alreadyExists ? "Overwrite" : "Create")
+      .click();
   }
 
   async function selectEqualizerValues(page: Page, values: number[]) {
@@ -84,6 +87,7 @@ test.describe("custom equalizer profiles", () => {
     await createCustomProfile(page, {
       name: "Profile 1",
       values: [1, 0, 0, 0, 0, 0, 0, 0],
+      alreadyExists: true,
     });
     await page.getByText("Profile 1").click();
     expect(await page.locator("li").getByText("Profile 1").count()).toEqual(1);

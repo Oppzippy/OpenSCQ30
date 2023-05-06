@@ -18,6 +18,7 @@
   "application": {
     "close": "",
     "create": "",
+    "overwrite": "",
     "webBluetoothNotSupported": "Web Bluetooth is not supported by your browser. See <2>caniuse</2> for a list of browsers supporting Web Bluetooth.",
     "earlyDevelopmentNotice": "",
     "newVersionAvailable": "",
