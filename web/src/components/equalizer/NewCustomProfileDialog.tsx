@@ -1,4 +1,5 @@
 import {
+  Autocomplete,
   Button,
   Dialog,
   DialogActions,
@@ -9,6 +10,7 @@ import {
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CustomEqualizerProfile } from "../../storage/db";
+import React from "react";
 
 type Props = {
   isOpen: boolean;
@@ -17,7 +19,7 @@ type Props = {
   existingProfiles: ReadonlyArray<CustomEqualizerProfile>;
 };
 
-export function NewCustomProfileDialog(props: Props) {
+export const NewCustomProfileDialog = React.memo(function (props: Props) {
   const { t } = useTranslation();
   const [name, setName] = useState("");
 
@@ -40,12 +42,16 @@ export function NewCustomProfileDialog(props: Props) {
     <Dialog open={props.isOpen} onClose={close}>
       <DialogTitle>{t("equalizer.createCustomProfile")}</DialogTitle>
       <DialogContent>
-        <TextField
-          label={t("equalizer.profileName")}
-          type="text"
-          fullWidth
-          variant="standard"
-          onChange={(event) => setName(event.target.value)}
+        <Autocomplete
+          sx={{ mt: 1 }}
+          freeSolo
+          disableClearable
+          options={props.existingProfiles.map((profile) => profile.name)}
+          renderInput={(params) => (
+            <TextField {...params} label={t("equalizer.profileName")} />
+          )}
+          value={name}
+          onInputChange={(_event, value) => setName(value)}
         />
       </DialogContent>
       <DialogActions>
@@ -63,4 +69,4 @@ export function NewCustomProfileDialog(props: Props) {
       </DialogActions>
     </Dialog>
   );
-}
+});
