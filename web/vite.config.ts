@@ -36,6 +36,7 @@ export default defineConfig({
           {
             src: "mask-icon.png",
             sizes: "640x640",
+            type: "image/png",
             purpose: "any maskable",
           },
         ],
