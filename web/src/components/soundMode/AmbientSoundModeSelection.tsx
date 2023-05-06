@@ -2,13 +2,14 @@ import { Box, Typography } from "@mui/material";
 import { AmbientSoundMode } from "../../../wasm/pkg/openscq30_web_wasm";
 import { ToggleButtonRow } from "./ToggleButtonRow";
 import { useTranslation } from "react-i18next";
+import React from "react";
 
 type Props = {
   value: AmbientSoundMode;
   onValueChanged: (newValue: AmbientSoundMode) => void;
 };
 
-export function AmbientSoundModeSelection(props: Props) {
+export const AmbientSoundModeSelection = React.memo(function (props: Props) {
   const { t } = useTranslation();
   return (
     <Box>
@@ -33,4 +34,4 @@ export function AmbientSoundModeSelection(props: Props) {
       />
     </Box>
   );
-}
+});

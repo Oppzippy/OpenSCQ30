@@ -1,15 +1,17 @@
 import { Input, Slider, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
+import React from "react";
 import { useTranslation } from "react-i18next";
 
 type Props = {
   hz: number;
   disabled?: boolean;
   value: number;
-  onValueChange: (newValue: number) => void;
+  onValueChange: (index: number, newValue: number) => void;
+  index: number;
 };
 
-export function VolumeSlider(props: Props) {
+export const VolumeSlider = React.memo(function (props: Props) {
   const { t } = useTranslation();
   return (
     <>
@@ -41,7 +43,7 @@ export function VolumeSlider(props: Props) {
           ]}
           onChange={(_, value) => {
             if (typeof value == "number") {
-              props.onValueChange(value);
+              props.onValueChange(props.index, value);
             } else {
               throw Error(`Expected single number, got number array: ${value}`);
             }
@@ -52,7 +54,9 @@ export function VolumeSlider(props: Props) {
         <Input
           disabled={props.disabled}
           value={props.value}
-          onChange={(event) => props.onValueChange(Number(event.target.value))}
+          onChange={(event) =>
+            props.onValueChange(props.index, Number(event.target.value))
+          }
           size="small"
           inputProps={{
             min: -12,
@@ -65,4 +69,4 @@ export function VolumeSlider(props: Props) {
       </Grid2>
     </>
   );
-}
+});

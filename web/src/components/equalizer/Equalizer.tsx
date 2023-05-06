@@ -1,4 +1,5 @@
 import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
+import React from "react";
 import { VolumeSlider } from "./VolumeSlider";
 
 type Props = {
@@ -7,7 +8,9 @@ type Props = {
   onValueChange: (index: number, newValue: number) => void;
 };
 
-export function Equalizer(props: Props) {
+export const Equalizer = React.memo(function (props: Props) {
+  const { onValueChange } = props;
+
   return (
     <Grid2
       container
@@ -30,10 +33,11 @@ export function Equalizer(props: Props) {
             // Starts at 100hz
             hz={100 * Math.pow(2, index)}
             value={value}
-            onValueChange={(newValue) => props.onValueChange(index, newValue)}
+            onValueChange={onValueChange}
+            index={index}
           />
         );
       })}
     </Grid2>
   );
-}
+});

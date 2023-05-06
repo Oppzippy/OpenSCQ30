@@ -1,11 +1,12 @@
 import { Add, Delete } from "@mui/icons-material";
-import { IconButton, Stack, Typography } from "@mui/material";
+import { IconButton, Stack, SxProps, Typography } from "@mui/material";
 import { isEqual } from "lodash-es";
+import React, { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { PresetEqualizerProfile } from "../../../wasm/pkg/openscq30_web_wasm";
 import { CustomEqualizerProfile } from "../../storage/db";
-import { Equalizer } from "./Equalizer";
 import { CustomProfiles } from "./CustomProfiles";
+import { Equalizer } from "./Equalizer";
 import { PresetProfiles } from "./PresetProfiles";
 
 // TODO -1 is custom, make this more readable
@@ -19,12 +20,32 @@ type Props = {
   onDeleteCustomProfile: (profile: CustomEqualizerProfile) => void;
 };
 
-export function EqualizerSettings(props: Props) {
+const customProfilesSx: SxProps = {
+  flexGrow: 1,
+};
+
+export const EqualizerSettings = React.memo(function (props: Props) {
   const { t } = useTranslation();
 
   const selectedCustomProfile = props.customProfiles.find((customProfile) =>
     isEqual(customProfile.values, props.values)
   );
+
+  const { onValueChange, onDeleteCustomProfile, onAddCustomProfile } = props;
+
+  const onCustomProfileSelected = useCallback(
+    (profile: CustomEqualizerProfile) => {
+      profile.values.forEach((value, index) => onValueChange(index, value));
+    },
+    [onValueChange]
+  );
+
+  const deleteSelectedCustomProfile = useCallback(() => {
+    if (selectedCustomProfile) {
+      onDeleteCustomProfile(selectedCustomProfile);
+    }
+  }, [onDeleteCustomProfile, selectedCustomProfile]);
+
   return (
     <Stack spacing={2}>
       <Typography>{t("equalizer.equalizer")}</Typography>
@@ -35,25 +56,21 @@ export function EqualizerSettings(props: Props) {
       {props.profile == -1 ? (
         <Stack direction="row" spacing={1}>
           <CustomProfiles
-            sx={{ flexGrow: 1 }}
+            sx={customProfilesSx}
             profiles={props.customProfiles}
-            onProfileSelected={(profile) => {
-              profile.values.forEach((value, index) =>
-                props.onValueChange(index, value)
-              );
-            }}
+            onProfileSelected={onCustomProfileSelected}
             selectedProfile={selectedCustomProfile}
           />
           {selectedCustomProfile ? (
             <IconButton
-              onClick={() => props.onDeleteCustomProfile(selectedCustomProfile)}
+              onClick={deleteSelectedCustomProfile}
               aria-label={t("equalizer.deleteCustomProfile").toString()}
             >
               <Delete />
             </IconButton>
           ) : (
             <IconButton
-              onClick={() => props.onAddCustomProfile()}
+              onClick={onAddCustomProfile}
               aria-label={t("equalizer.createCustomProfile").toString()}
             >
               <Add />
@@ -68,4 +85,4 @@ export function EqualizerSettings(props: Props) {
       />
     </Stack>
   );
-}
+});

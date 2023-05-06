@@ -1,17 +1,18 @@
 import { Stack } from "@mui/material";
 import { useLiveQuery } from "dexie-react-hooks";
 import { debounce } from "lodash-es";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  AmbientSoundMode,
   EqualizerBandOffsets,
   EqualizerConfiguration,
+  NoiseCancelingMode,
   PresetEqualizerProfile,
 } from "../../wasm/pkg/openscq30_web_wasm";
 import { SoundcoreDevice } from "../bluetooth/SoundcoreDevice";
-import { SoundcoreDeviceState } from "../bluetooth/SoundcoreDeviceState";
 import { useBehaviorSubject } from "../hooks/useObservable";
 import { upsertCustomEqualizerProfile } from "../storage/customEqualizerProfiles";
-import { db } from "../storage/db";
+import { CustomEqualizerProfile, db } from "../storage/db";
 import { EqualizerSettings } from "./equalizer/EqualizerSettings";
 import { NewCustomProfileDialog } from "./equalizer/NewCustomProfileDialog";
 import { AmbientSoundModeSelection } from "./soundMode/AmbientSoundModeSelection";
@@ -61,62 +62,94 @@ export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
     }
   }, [displayState.equalizerConfiguration, setActualEqualizerConfiguration]);
 
-  function onPresetProfileSelected(profile: PresetEqualizerProfile | -1) {
-    const newEqualizerConfiguration =
-      profile == -1
-        ? EqualizerConfiguration.fromCustomProfile(
-            actualState.equalizerConfiguration.bandOffsets
-          )
-        : EqualizerConfiguration.fromPresetProfile(profile);
-    setDisplayState((state) => ({
-      ...state,
-      equalizerConfiguration: newEqualizerConfiguration,
-    }));
-  }
-
-  function onEqualizerValueChange(index: number, newVolume: number) {
-    function transformState(state: SoundcoreDeviceState): SoundcoreDeviceState {
-      const volume = [
-        ...state.equalizerConfiguration.bandOffsets.volumeOffsets,
-      ];
-      // EqualizerBandOffsets expects integers (-120 to +120), but the state uses decimals (-12.0 to +12.0)
-      volume[index] = newVolume * 10;
+  const onPresetProfileSelected = useCallback(
+    (profile: PresetEqualizerProfile | -1) => {
       const newEqualizerConfiguration =
-        EqualizerConfiguration.fromCustomProfile(
-          new EqualizerBandOffsets(new Int8Array(volume))
-        );
-      return {
+        profile == -1
+          ? EqualizerConfiguration.fromCustomProfile(
+              actualState.equalizerConfiguration.bandOffsets
+            )
+          : EqualizerConfiguration.fromPresetProfile(profile);
+      setDisplayState((state) => ({
         ...state,
         equalizerConfiguration: newEqualizerConfiguration,
-      };
-    }
+      }));
+    },
+    [actualState.equalizerConfiguration.bandOffsets]
+  );
 
-    setDisplayState(transformState);
-  }
+  const onEqualizerValueChange = useCallback(
+    (index: number, newVolume: number) => {
+      setDisplayState((state) => {
+        const volume = new Int8Array(
+          state.equalizerConfiguration.bandOffsets.volumeOffsets
+        );
+        // EqualizerBandOffsets expects integers (-120 to +120), but the state uses decimals (-12.0 to +12.0)
+        volume[index] = newVolume * 10;
+        const newEqualizerConfiguration =
+          EqualizerConfiguration.fromCustomProfile(
+            new EqualizerBandOffsets(volume)
+          );
+        return {
+          ...state,
+          equalizerConfiguration: newEqualizerConfiguration,
+        };
+      });
+    },
+    []
+  );
 
   const fractionalEqualizerVolumes = [
     ...displayState.equalizerConfiguration.bandOffsets.volumeOffsets,
   ].map((volume) => volume / 10);
 
+  const onAmbientSoundModeChanged = useCallback(
+    (newAmbientSoundMode: AmbientSoundMode) => {
+      device.transitionState({
+        ...actualState,
+        ambientSoundMode: newAmbientSoundMode,
+      });
+    },
+    [device, actualState]
+  );
+
+  const onNoiseCancelingModeChanged = useCallback(
+    (newNoiseCancelingMode: NoiseCancelingMode) => {
+      device.transitionState({
+        ...actualState,
+        noiseCancelingMode: newNoiseCancelingMode,
+      });
+    },
+    [device, actualState]
+  );
+
+  const onAddCustomProfile = useCallback(
+    () => setCreateCustomProfileDialogOpen(true),
+    []
+  );
+
+  const onDeleteCustomProfile = useCallback(
+    (profileToDelete: CustomEqualizerProfile) => {
+      if (profileToDelete.id) {
+        db.customEqualizerProfiles.delete(profileToDelete.id);
+      } else {
+        throw Error(
+          `tried to delete profile with undefined id: name "${profileToDelete.name}"`
+        );
+      }
+    },
+    []
+  );
+
   return (
     <Stack spacing={2}>
       <AmbientSoundModeSelection
         value={actualState.ambientSoundMode}
-        onValueChanged={(newAmbientSoundMode) => {
-          device.transitionState({
-            ...actualState,
-            ambientSoundMode: newAmbientSoundMode,
-          });
-        }}
+        onValueChanged={onAmbientSoundModeChanged}
       />
       <NoiseCancelingModeSelection
         value={actualState.noiseCancelingMode}
-        onValueChanged={(newNoiseCancelingMode) => {
-          device.transitionState({
-            ...actualState,
-            noiseCancelingMode: newNoiseCancelingMode,
-          });
-        }}
+        onValueChanged={onNoiseCancelingModeChanged}
       />
       <EqualizerSettings
         profile={displayState.equalizerConfiguration.presetProfile ?? -1}
@@ -124,16 +157,8 @@ export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
         values={fractionalEqualizerVolumes}
         onValueChange={onEqualizerValueChange}
         customProfiles={customEqualizerProfiles}
-        onAddCustomProfile={() => setCreateCustomProfileDialogOpen(true)}
-        onDeleteCustomProfile={(profileToDelete) => {
-          if (profileToDelete.id) {
-            db.customEqualizerProfiles.delete(profileToDelete.id);
-          } else {
-            throw Error(
-              `tried to delete profile with undefined id: name "${profileToDelete.name}"`
-            );
-          }
-        }}
+        onAddCustomProfile={onAddCustomProfile}
+        onDeleteCustomProfile={onDeleteCustomProfile}
       />
       <NewCustomProfileDialog
         isOpen={isCreateCustomProfileDialogOpen}

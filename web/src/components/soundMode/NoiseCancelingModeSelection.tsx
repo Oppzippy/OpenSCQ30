@@ -2,13 +2,14 @@ import { Box, Typography } from "@mui/material";
 import { NoiseCancelingMode } from "../../../wasm/pkg/openscq30_web_wasm";
 import { ToggleButtonRow } from "./ToggleButtonRow";
 import { useTranslation } from "react-i18next";
+import React from "react";
 
 type Props = {
   value: NoiseCancelingMode;
   onValueChanged: (newValue: NoiseCancelingMode) => void;
 };
 
-export function NoiseCancelingModeSelection(props: Props) {
+export const NoiseCancelingModeSelection = React.memo(function (props: Props) {
   const { t } = useTranslation();
   return (
     <Box>
@@ -33,4 +34,4 @@ export function NoiseCancelingModeSelection(props: Props) {
       />
     </Box>
   );
-}
+});

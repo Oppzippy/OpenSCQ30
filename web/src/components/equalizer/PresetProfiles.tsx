@@ -1,16 +1,39 @@
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+} from "@mui/material";
 import { PresetEqualizerProfile } from "../../../wasm/pkg/openscq30_web_wasm";
 import { useTranslation } from "react-i18next";
 import { usePresetEqualizerProfiles } from "../../hooks/usePresetEqualizerProfiles";
+import React, { useCallback } from "react";
 
 type Props = {
   profile: PresetEqualizerProfile | -1;
   onProfileSelected: (presetProfile: PresetEqualizerProfile | -1) => void;
 };
 
-export function PresetProfiles(props: Props) {
+export const PresetProfiles = React.memo(function (props: Props) {
   const { t } = useTranslation();
   const presetProfiles = usePresetEqualizerProfiles();
+  const { onProfileSelected } = props;
+
+  const onSelectChange = useCallback(
+    (event: SelectChangeEvent<number>) => {
+      if (typeof event.target.value == "number") {
+        onProfileSelected(event.target.value);
+      } else {
+        throw Error(
+          `value should be a number, but it is instead a ${typeof event.target
+            .value}`
+        );
+      }
+    },
+    [onProfileSelected]
+  );
+
   return (
     <FormControl>
       <InputLabel id="equalizer-profile-select-label">
@@ -20,16 +43,7 @@ export function PresetProfiles(props: Props) {
         labelId="equalizer-profile-select-label"
         label={t("equalizer.profile")}
         value={props.profile}
-        onChange={(event) => {
-          if (typeof event.target.value == "number") {
-            props.onProfileSelected(event.target.value);
-          } else {
-            throw Error(
-              `value should be a number, but it is instead a ${typeof event
-                .target.value}`
-            );
-          }
-        }}
+        onChange={onSelectChange}
       >
         <MenuItem value={-1}>{t("equalizer.custom")}</MenuItem>
         {presetProfiles.map(({ name, id }) => (
@@ -40,4 +54,4 @@ export function PresetProfiles(props: Props) {
       </Select>
     </FormControl>
   );
-}
+});
