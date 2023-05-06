@@ -11,7 +11,7 @@ export default defineConfig({
     topLevelAwait(),
     react(),
     VitePWA({
-      includeAssets: ["favicon.svg", "apple-touch-icon.png", "mask-icon.png"],
+      includeAssets: ["icon.svg", "apple-touch-icon.png", "mask-icon.png"],
       workbox: {
         globPatterns: ["**/*.{js,css,html,wasm}"],
       },
