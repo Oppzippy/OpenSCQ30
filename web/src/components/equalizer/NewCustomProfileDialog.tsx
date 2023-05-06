@@ -55,7 +55,7 @@ export const NewCustomProfileDialog = React.memo(function (props: Props) {
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={close}>{t("application.close")}</Button>
+        <Button onClick={close}>{t("application.cancel")}</Button>
         <Button
           onClick={() => {
             props.onCreate(name);
