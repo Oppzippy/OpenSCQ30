@@ -54,7 +54,7 @@ export const EqualizerSettings = React.memo(function (props: Props) {
         profile={props.profile}
       />
       {props.profile == -1 ? (
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1} alignItems="center">
           <CustomProfiles
             sx={customProfilesSx}
             profiles={props.customProfiles}
