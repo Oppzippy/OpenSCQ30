@@ -92,7 +92,7 @@ android {
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.6"
+        kotlinCompilerExtensionVersion = "1.4.7"
     }
     ndkVersion = "25.2.9519653"
     packaging {
@@ -106,7 +106,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
 
     // Compose
-    val composeBomVersion = "2023.04.01"
+    val composeBomVersion = "2023.05.01"
     implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     androidTestImplementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     implementation("androidx.compose.ui:ui")
