@@ -24,8 +24,6 @@ jobs:
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
-      - name: Build wasm
-        run: cd wasm && wasm-pack build
       - name: Install dependencies
         run: npm ci
       - name: Run tests
@@ -48,8 +46,6 @@ jobs:
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
-      - name: Build wasm
-        run: cd wasm && wasm-pack build
       - name: Install dependencies
         run: npm ci
       - name: Install Playwright Browsers
@@ -85,8 +81,6 @@ jobs:
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
-      - name: Build wasm
-        run: cd wasm && wasm-pack build
       - name: Install dependencies
         run: npm ci
       - name: Build
