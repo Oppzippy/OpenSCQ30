@@ -62,17 +62,20 @@ fun EqualizerSettings(
                             viewModel.selectCustomProfile(it)
                         },
                     )
-                    IconButton(onClick = { isCreateDialogOpen = true }) {
-                        Icon(
-                            imageVector = Icons.Filled.AddCircle,
-                            contentDescription = stringResource(R.string.add),
-                        )
-                    }
-                    IconButton(onClick = { isDeleteDialogOpen = true }) {
-                        Icon(
-                            imageVector = Icons.Filled.Delete,
-                            contentDescription = stringResource(R.string.delete),
-                        )
+                    if (selectedCustomProfile == null) {
+                        IconButton(onClick = { isCreateDialogOpen = true }) {
+                            Icon(
+                                imageVector = Icons.Filled.AddCircle,
+                                contentDescription = stringResource(R.string.add),
+                            )
+                        }
+                    } else {
+                        IconButton(onClick = { isDeleteDialogOpen = true }) {
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = stringResource(R.string.delete),
+                            )
+                        }
                     }
                 }
             }

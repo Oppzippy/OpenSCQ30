@@ -270,23 +270,8 @@ class DeviceSettingsEqualizerTest {
             .performTextInput("Test Profile 1")
         composeRule.onNodeWithText(composeRule.activity.getString(R.string.create)).performClick()
 
-        // Create second profile
-        composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.add))
-            .performClick()
-        composeRule.onNodeWithText(composeRule.activity.getString(R.string.name))
-            .performTextInput("Test Profile 2")
-        composeRule.onNodeWithText(composeRule.activity.getString(R.string.create)).performClick()
-
-        // Open dropdown and make sure there is only one
-        composeRule.onNodeWithText("Test Profile 2").performClick()
-        // 1 for the text that lists current selection, 1 for the item in the dropdown
-        composeRule.onAllNodesWithText("Test Profile 2").assertCountEquals(2)
-        composeRule.onNodeWithText("Test Profile 1").assertDoesNotExist()
-
-        composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.delete))
-            .performClick()
-        composeRule.onNodeWithText(composeRule.activity.getString(R.string.delete)).performClick()
-        composeRule.onNodeWithText("Test Profile", substring = true).assertDoesNotExist()
+        // The button to create another profile shouldn't even be visible
+        composeRule.onNodeWithText("Delete").assertDoesNotExist()
     }
 
     private fun initializeDeviceFactoryWithOneDevice(equalizerConfiguration: EqualizerConfiguration): Pair<SoundcoreDevice, SoundcoreDeviceState> {
