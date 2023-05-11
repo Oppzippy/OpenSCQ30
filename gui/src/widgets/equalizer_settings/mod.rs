@@ -32,3 +32,44 @@ impl EqualizerSettings {
         self.imp().set_custom_profiles(custom_profiles)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use gtk::{subclass::prelude::*, traits::WidgetExt};
+
+    use crate::objects::CustomEqualizerProfileObject;
+
+    use super::EqualizerSettings;
+
+    #[gtk::test]
+    fn test_only_shows_create_button_with_no_custom_profile_selected() {
+        crate::load_resources();
+        let settings = EqualizerSettings::new();
+        assert_eq!(
+            true,
+            settings.imp().create_custom_profile_button.is_visible(),
+        );
+        assert_eq!(
+            false,
+            settings.imp().delete_custom_profile_button.is_visible(),
+        );
+    }
+
+    #[gtk::test]
+    fn test_only_shows_delete_button_with_custom_profile_selected() {
+        crate::load_resources();
+        let settings = EqualizerSettings::new();
+        settings.set_custom_profiles(vec![CustomEqualizerProfileObject::new(
+            "test profile",
+            [0, 0, 0, 0, 0, 0, 0, 0],
+        )]);
+        assert_eq!(
+            true,
+            settings.imp().create_custom_profile_button.is_visible(),
+        );
+        assert_eq!(
+            false,
+            settings.imp().delete_custom_profile_button.is_visible(),
+        );
+    }
+}

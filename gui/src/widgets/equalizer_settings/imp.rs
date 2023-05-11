@@ -137,6 +137,7 @@ impl EqualizerSettings {
         self.set_up_custom_profile_selection_model();
         self.set_up_custom_profile_expression();
         self.set_up_custom_profile_selection_changed_handler();
+        self.set_up_custom_profile_create_delete_button();
     }
 
     fn set_up_custom_profile_selection_model(&self) {
@@ -166,6 +167,29 @@ impl EqualizerSettings {
                 }
             }),
         );
+    }
+
+    fn set_up_custom_profile_create_delete_button(&self) {
+        // Show create button if no custom profile is selected
+        self.custom_profile_dropdown
+            .bind_property(
+                "selected-item",
+                &self.create_custom_profile_button.get(),
+                "visible",
+            )
+            .transform_to(|_, item: Option<CustomEqualizerProfileObject>| Some(item.is_none()))
+            .sync_create()
+            .build();
+        // Show delete button otherwise
+        self.create_custom_profile_button
+            .bind_property(
+                "visible",
+                &self.delete_custom_profile_button.get(),
+                "visible",
+            )
+            .invert_boolean()
+            .sync_create()
+            .build();
     }
 
     pub fn set_custom_profiles(&self, mut profiles: Vec<CustomEqualizerProfileObject>) {
