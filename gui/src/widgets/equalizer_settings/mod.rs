@@ -2,7 +2,6 @@ pub mod imp;
 
 use gtk::{
     glib::{self, Object},
-    prelude::ToValue,
     subclass::prelude::ObjectSubclassIsExt,
 };
 use openscq30_lib::packets::structures::EqualizerConfiguration;
@@ -17,9 +16,7 @@ glib::wrapper! {
 
 impl EqualizerSettings {
     pub fn new() -> Self {
-        Object::builder()
-            .property("is-custom-profile", &false.to_value())
-            .build()
+        Object::builder().build()
     }
 
     pub fn set_equalizer_configuration(&self, equalizer_configuration: &EqualizerConfiguration) {
