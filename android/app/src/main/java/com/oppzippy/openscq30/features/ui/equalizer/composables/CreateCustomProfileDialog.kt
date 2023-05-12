@@ -6,11 +6,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.features.ui.equalizer.storage.CustomProfile
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateCustomProfileDialog(
-    isOpen: Boolean, onDismiss: () -> Unit, onCreateCustomProfile: (name: String) -> Unit,
+    isOpen: Boolean,
+    onDismiss: () -> Unit,
+    onCreateCustomProfile: (name: String) -> Unit,
+    existingProfiles: List<CustomProfile>,
 ) {
     if (isOpen) {
         var profileName by remember { mutableStateOf("") }
@@ -32,7 +36,11 @@ fun CreateCustomProfileDialog(
                     onCreateCustomProfile(profileName)
                     onDismiss()
                 }) {
-                    Text(stringResource(R.string.create))
+                    if (existingProfiles.none {it.name == profileName}) {
+                        Text(stringResource(R.string.create))
+                    } else {
+                        Text(stringResource(R.string.replace))
+                    }
                 }
             },
             dismissButton = {

@@ -77,4 +77,5 @@
     </string>
     <string name="khz">%s kHz</string>
     <string name="replace_existing_profile">Replace Existing Profile</string>
+    <string name="replace">Replace</string>
 </resources>

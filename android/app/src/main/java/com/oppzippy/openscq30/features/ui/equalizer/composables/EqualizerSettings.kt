@@ -37,6 +37,7 @@ fun EqualizerSettings(
             isOpen = isCreateDialogOpen,
             onDismiss = { isCreateDialogOpen = false },
             onCreateCustomProfile = { viewModel.createCustomProfile(it) },
+            existingProfiles = customProfiles,
         )
         selectedCustomProfile?.let { customProfile ->
             DeleteCustomProfileDialog(

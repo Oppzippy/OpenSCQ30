@@ -238,7 +238,7 @@ class DeviceSettingsEqualizerTest {
             .performClick()
         composeRule.onNodeWithText(composeRule.activity.getString(R.string.name))
             .performTextInput("Test Profile")
-        composeRule.onNodeWithText(composeRule.activity.getString(R.string.create)).performClick()
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.replace)).performClick()
 
         // Open dropdown and make sure there is only one
         composeRule.onNodeWithText("Test Profile").performClick()
