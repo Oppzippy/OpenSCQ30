@@ -4,11 +4,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.FindReplace
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -29,6 +28,7 @@ fun EqualizerSettings(
         val isCustomProfile = profile == EqualizerProfile.Custom
         var isCreateDialogOpen by remember { mutableStateOf(false) }
         var isDeleteDialogOpen by remember { mutableStateOf(false) }
+        var isReplaceDialogOpen by remember { mutableStateOf(false) }
         val selectedCustomProfile by viewModel.selectedCustomProfile.collectAsState()
         val customProfiles by viewModel.customProfiles.collectAsState()
         val valueTexts by viewModel.valueTexts.collectAsState()
@@ -46,6 +46,14 @@ fun EqualizerSettings(
                 onDelete = { viewModel.deleteCustomProfile(customProfile.name) },
             )
         }
+        ReplaceCustomProfileDialog(
+            isOpen = isReplaceDialogOpen,
+            profiles = customProfiles,
+            onProfileSelected = {
+                viewModel.createCustomProfile(it.name)
+            },
+            onDismiss = { isReplaceDialogOpen = false },
+        )
 
         Column {
             PresetProfileSelection(value = profile, onProfileSelected = { newProfile ->
@@ -74,6 +82,14 @@ fun EqualizerSettings(
                             Icon(
                                 imageVector = Icons.Filled.Delete,
                                 contentDescription = stringResource(R.string.delete),
+                            )
+                        }
+                    }
+                    if (customProfiles.isNotEmpty()) {
+                        IconButton(onClick = { isReplaceDialogOpen = true }) {
+                            Icon(
+                                imageVector = Icons.Filled.FindReplace,
+                                contentDescription = stringResource(R.string.replace_existing_profile),
                             )
                         }
                     }

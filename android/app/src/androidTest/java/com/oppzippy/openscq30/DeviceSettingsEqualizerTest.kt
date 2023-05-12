@@ -274,6 +274,60 @@ class DeviceSettingsEqualizerTest {
         composeRule.onNodeWithText("Delete").assertDoesNotExist()
     }
 
+    @Test
+    fun testReplaceExistingCustomProfile() {
+        initializeDeviceFactoryWithOneDevice(
+            equalizerConfiguration = EqualizerConfiguration(
+                EqualizerBandOffsets(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
+            )
+        )
+
+        composeRule.setContent {
+            DeviceSettingsActivityView(macAddress = "", onDeviceNotFound = {})
+        }
+        composeRule.onNode(equalizer).performClick()
+
+        // Create a profile
+        composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.add))
+            .performClick()
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.name))
+            .performTextInput("Test Profile 1")
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.create)).performClick()
+
+        // Adjust values
+        val inputs = composeRule.onAllNodesWithTag("equalizerInput")
+        inputs[0].performTextReplacement("2.3")
+
+        // Replace the old profile
+        composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.replace_existing_profile))
+            .performClick()
+        composeRule.onNodeWithText("Test Profile 1").performClick()
+
+        // Make sure dialog is closed
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.replace_existing_profile))
+            .assertDoesNotExist()
+        composeRule.onNodeWithText("Test Profile 1").assertExists()
+        // Make sure the values were not changed
+        inputs[0].assertTextContains("2.3")
+    }
+
+    @Test
+    fun testReplaceExistingCustomProfileButtonDoesNotShowWithNoCustomProfiles() {
+        initializeDeviceFactoryWithOneDevice(
+            equalizerConfiguration = EqualizerConfiguration(
+                EqualizerBandOffsets(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
+            )
+        )
+
+        composeRule.setContent {
+            DeviceSettingsActivityView(macAddress = "", onDeviceNotFound = {})
+        }
+        composeRule.onNode(equalizer).performClick()
+
+        composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.replace_existing_profile))
+            .assertDoesNotExist()
+    }
+
     private fun initializeDeviceFactoryWithOneDevice(equalizerConfiguration: EqualizerConfiguration): Pair<SoundcoreDevice, SoundcoreDeviceState> {
         val device = mockk<SoundcoreDevice>()
         val state = mockk<SoundcoreDeviceState>()

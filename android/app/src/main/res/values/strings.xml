@@ -76,4 +76,5 @@
         along with this program.  If not, see &amp;lt;&lt;a href="https://www.gnu.org/licenses/">https://www.gnu.org/licenses/&lt;/a>&gt;.&lt;/p>
     </string>
     <string name="khz">%s kHz</string>
+    <string name="replace_existing_profile">Replace Existing Profile</string>
 </resources>
