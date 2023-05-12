@@ -22,6 +22,8 @@ Progress on supported platforms:
 
 See [GitHub Releases](https://github.com/Oppzippy/OpenSCQ30/releases). All files are signed with [my GPG key](https://kylescheuing.com/publickey.txt).
 
+[<img src="https://github.com/Oppzippy/OpenSCQ30/assets/2236514/38d21f1e-ceef-4f2e-934c-acdaed397818" width="175" alt="Get it on IzzyOnDroid">](https://apt.izzysoft.de/fdroid/index/apk/com.oppzippy.openscq30)
+
 ## EQ Recommendations
 
 Noise Canceling Mode seems to reduce the bass quite a bit, so decrease the 100 Hz band when using EQ settings designed in Noise Canceling Mode for Normal Mode.
