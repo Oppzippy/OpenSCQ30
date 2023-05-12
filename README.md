@@ -1,5 +1,7 @@
 ## About
 
+![GitHub all releases](https://img.shields.io/github/downloads/Oppzippy/OpenSCQ30/total)
+
 OpenSCQ30 is free software for controlling settings for the Soundcore Q30 headphones.
 
 Progress on supported platforms:  
@@ -20,11 +22,9 @@ Progress on supported platforms:
 
 ## Installing
 
-See [GitHub Releases](https://github.com/Oppzippy/OpenSCQ30/releases). All files are signed with [my GPG key](https://kylescheuing.com/publickey.txt).
+![](https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1/shield/com.oppzippy.openscq30)
 
-<a href="https://apt.izzysoft.de/fdroid/index/apk/com.oppzippy.openscq30">
-    <img src="https://user-images.githubusercontent.com/2236514/237888743-fa3a4914-d910-4ed9-b38f-0eaa8d4930a8.png" width="175" alt="Get it on IzzyOnDroid">
-</a>
+See [GitHub Releases](https://github.com/Oppzippy/OpenSCQ30/releases). All files are signed with [my GPG key](https://kylescheuing.com/publickey.txt).
 
 ## EQ Recommendations
 
