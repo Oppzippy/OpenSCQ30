@@ -20,7 +20,7 @@ export const VolumeSlider = React.memo(function (props: Props) {
       <Grid2 xs={3} sm={2}>
         <div id={labelId}>
           <Typography>
-            {props.hz >= 10000
+            {props.hz >= 1000
               ? t("equalizer.khz", {
                   defaultValue: "{{ hz }} kHz",
                   replace: { hz: props.hz / 1000 },
