@@ -13,21 +13,24 @@ type Props = {
 
 export const VolumeSlider = React.memo(function (props: Props) {
   const { t } = useTranslation();
+  const labelId = `${props.hz}-hz-label`;
   return (
     <>
       {/* make sure Hz doesn't go on to a second line */}
       <Grid2 xs={3} sm={2}>
-        <Typography>
-          {props.hz >= 10000
-            ? t("equalizer.khz", {
-                defaultValue: "{{ hz }} kHz",
-                replace: { hz: props.hz / 1000 },
-              })
-            : t("equalizer.hz", {
-                defaultValue: "{{ hz }} Hz",
-                replace: { hz: props.hz },
-              })}
-        </Typography>
+        <div id={labelId}>
+          <Typography>
+            {props.hz >= 10000
+              ? t("equalizer.khz", {
+                  defaultValue: "{{ hz }} kHz",
+                  replace: { hz: props.hz / 1000 },
+                })
+              : t("equalizer.hz", {
+                  defaultValue: "{{ hz }} Hz",
+                  replace: { hz: props.hz },
+                })}
+          </Typography>
+        </div>
       </Grid2>
       <Grid2 xs={7} sm={8}>
         <Slider
@@ -37,6 +40,7 @@ export const VolumeSlider = React.memo(function (props: Props) {
           max={12}
           step={0.1}
           valueLabelDisplay="auto"
+          aria-labelledby={labelId}
           marks={[
             { value: -12, label: "-12 dB" },
             { value: 12, label: "12 dB" },
@@ -59,11 +63,11 @@ export const VolumeSlider = React.memo(function (props: Props) {
           }
           size="small"
           inputProps={{
+            type: "number",
             min: -12,
             max: 12,
             step: 0.1,
-            type: "number",
-            "aria-labelledby": "input-slider",
+            "aria-labelledby": labelId,
           }}
         />
       </Grid2>

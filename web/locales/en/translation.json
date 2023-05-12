@@ -24,6 +24,7 @@
     "newVersionAvailable": "A new version of OpenSCQ30 Web is available.",
     "update": "Update"
   },
+  "github": "GitHub",
   "ambientSoundMode": {
     "ambientSoundMode": "Ambient Sound Mode",
     "noiseCanceling": "Noise Canceling",

@@ -17,7 +17,11 @@ export function HomePage() {
       )}
       <Typography>{t("application.earlyDevelopmentNotice")}</Typography>
       <Box sx={{ textAlign: "center" }}>
-        <Link href="https://github.com/oppzippy/OpenSCQ30" color="inherit">
+        <Link
+          href="https://github.com/oppzippy/OpenSCQ30"
+          color="inherit"
+          aria-label={t("github").toString()}
+        >
           <GitHub />
         </Link>
       </Box>
