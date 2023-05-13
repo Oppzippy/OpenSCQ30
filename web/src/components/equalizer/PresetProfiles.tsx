@@ -4,11 +4,13 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
+  Stack,
 } from "@mui/material";
 import { PresetEqualizerProfile } from "../../../wasm/pkg/openscq30_web_wasm";
 import { useTranslation } from "react-i18next";
 import { usePresetEqualizerProfiles } from "../../hooks/usePresetEqualizerProfiles";
 import React, { useCallback } from "react";
+import { EqualizerLine } from "./EqualizerLine";
 
 type Props = {
   profile: PresetEqualizerProfile | -1;
@@ -46,9 +48,17 @@ export const PresetProfiles = React.memo(function (props: Props) {
         onChange={onSelectChange}
       >
         <MenuItem value={-1}>{t("equalizer.custom")}</MenuItem>
-        {presetProfiles.map(({ name, id }) => (
-          <MenuItem value={id} key={id}>
-            {name}
+        {presetProfiles.map((profile) => (
+          <MenuItem value={profile.id} key={profile.id}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              width="100%"
+            >
+              {profile.name}
+              <EqualizerLine values={profile.values} />
+            </Stack>
           </MenuItem>
         ))}
       </Select>
