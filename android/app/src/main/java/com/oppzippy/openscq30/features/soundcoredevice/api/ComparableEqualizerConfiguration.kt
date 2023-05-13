@@ -7,9 +7,9 @@ fun EqualizerConfiguration.contentEquals(
 ): Boolean {
     val isEqualizerProfileIdEqual = profileId() == other.profileId()
 
-    val thisBandOffsets = ArrayList(bandOffsets().volumeOffsets().asList())
-    val otherBandOffsets = ArrayList(other.bandOffsets().volumeOffsets().asList())
-    val areEqualizerBandOffsetsEqual = thisBandOffsets == otherBandOffsets
+    val thisAdjustments = ArrayList(volumeAdjustments().adjustments().asList())
+    val otherAdustments = ArrayList(other.volumeAdjustments().adjustments().asList())
+    val areAdjustmentsEqual = thisAdjustments == otherAdustments
 
-    return isEqualizerProfileIdEqual && areEqualizerBandOffsetsEqual
+    return isEqualizerProfileIdEqual && areAdjustmentsEqual
 }

@@ -85,7 +85,7 @@ class DeviceSettingsEqualizerTest {
         val values = byteArrayOf(1, 10, -10, 50, 0, 10, -60, 60)
 
         initializeDeviceFactoryWithOneDevice(
-            equalizerConfiguration = EqualizerConfiguration(EqualizerBandOffsets(values)),
+            equalizerConfiguration = EqualizerConfiguration(VolumeAdjustments(values)),
         )
 
         composeRule.setContent {
@@ -154,7 +154,7 @@ class DeviceSettingsEqualizerTest {
         val values = byteArrayOf(0, 10, 15, -15, 60, -60, 10, -5)
         val pair = initializeDeviceFactoryWithOneDevice(
             equalizerConfiguration = EqualizerConfiguration(
-                EqualizerBandOffsets(values),
+                VolumeAdjustments(values),
             ),
         )
         val device = pair.first
@@ -175,7 +175,7 @@ class DeviceSettingsEqualizerTest {
         Thread.sleep(600) // Wait for debounce
         verify {
             device.setEqualizerConfiguration(match {
-                it.bandOffsets().volumeOffsets().first() > 0
+                it.volumeAdjustments().adjustments().first() > 0
             })
         }
     }
@@ -184,7 +184,7 @@ class DeviceSettingsEqualizerTest {
     fun testCustomProfile() {
         initializeDeviceFactoryWithOneDevice(
             equalizerConfiguration = EqualizerConfiguration(
-                EqualizerBandOffsets(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
+                VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
             ),
         )
         composeRule.setContent {
@@ -216,7 +216,7 @@ class DeviceSettingsEqualizerTest {
     fun testCustomProfileUniqueByName() {
         initializeDeviceFactoryWithOneDevice(
             equalizerConfiguration = EqualizerConfiguration(
-                EqualizerBandOffsets(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
+                VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
             ),
         )
         composeRule.setContent {
@@ -255,7 +255,7 @@ class DeviceSettingsEqualizerTest {
     fun testCustomProfileUniqueByValues() {
         initializeDeviceFactoryWithOneDevice(
             equalizerConfiguration = EqualizerConfiguration(
-                EqualizerBandOffsets(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
+                VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
             ),
         )
         composeRule.setContent {
@@ -278,7 +278,7 @@ class DeviceSettingsEqualizerTest {
     fun testReplaceExistingCustomProfile() {
         initializeDeviceFactoryWithOneDevice(
             equalizerConfiguration = EqualizerConfiguration(
-                EqualizerBandOffsets(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
+                VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
             )
         )
 
@@ -315,7 +315,7 @@ class DeviceSettingsEqualizerTest {
     fun testReplaceExistingCustomProfileButtonDoesNotShowWithNoCustomProfiles() {
         initializeDeviceFactoryWithOneDevice(
             equalizerConfiguration = EqualizerConfiguration(
-                EqualizerBandOffsets(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
+                VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
             )
         )
 

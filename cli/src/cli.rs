@@ -34,7 +34,7 @@ pub enum SetCommand {
     },
     Equalizer {
         #[arg(required=true, num_args = 8, value_parser = clap::value_parser!(i8).range(-120..120))]
-        band_offsets: Vec<i8>,
+        volume_adjustments: Vec<i8>,
     },
 }
 

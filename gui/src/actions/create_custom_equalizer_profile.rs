@@ -18,7 +18,7 @@ where
     settings_file.edit(|settings| {
         settings.set_custom_profile(
             custom_profile.name(),
-            CustomEqualizerProfile::new(custom_profile.volume_offsets()),
+            CustomEqualizerProfile::new(custom_profile.volume_adjustments()),
         );
     })?;
     settings_file.get(|settings| {
@@ -29,7 +29,7 @@ where
                     .custom_profiles()
                     .iter()
                     .map(|(name, profile)| {
-                        CustomEqualizerProfileObject::new(name, profile.volume_offsets())
+                        CustomEqualizerProfileObject::new(name, profile.volume_adjustments())
                     })
                     .collect(),
             ))
@@ -67,7 +67,10 @@ mod tests {
         if let StateUpdate::SetCustomEqualizerProfiles(profiles) = state_update {
             let profile = profiles.first().unwrap();
             assert_eq!(custom_profile.name(), profile.name());
-            assert_eq!(custom_profile.volume_offsets(), profile.volume_offsets());
+            assert_eq!(
+                custom_profile.volume_adjustments(),
+                profile.volume_adjustments()
+            );
         } else {
             panic!("StateUpdate was not SetCustomEqualizerProfiles");
         }

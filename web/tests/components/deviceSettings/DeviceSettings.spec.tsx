@@ -95,7 +95,7 @@ describe("Device Settings", () => {
     );
 
     expect([
-      ...device.equalizerConfiguration.bandOffsets.volumeOffsets,
+      ...device.equalizerConfiguration.volumeAdjustments.adjustments,
     ]).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
     await user.click(
       renderResult.getByText("presetEqualizerProfile.soundcoreSignature"),
@@ -105,7 +105,7 @@ describe("Device Settings", () => {
     );
     vi.advanceTimersByTime(5000);
     expect([
-      ...device.equalizerConfiguration.bandOffsets.volumeOffsets,
+      ...device.equalizerConfiguration.volumeAdjustments.adjustments,
     ]).not.toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
   });
 
@@ -168,11 +168,13 @@ describe("Device Settings", () => {
     await user.type(numberInputs[0], "1");
 
     expect(
-      device.state.value.equalizerConfiguration.bandOffsets.volumeOffsets[0],
+      device.state.value.equalizerConfiguration.volumeAdjustments
+        .adjustments[0],
     ).toEqual(0);
     vi.advanceTimersByTime(500);
     expect(
-      device.state.value.equalizerConfiguration.bandOffsets.volumeOffsets[0],
+      device.state.value.equalizerConfiguration.volumeAdjustments
+        .adjustments[0],
     ).toEqual(10);
   });
 

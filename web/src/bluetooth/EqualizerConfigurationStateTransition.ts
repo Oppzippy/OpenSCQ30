@@ -12,8 +12,8 @@ export async function transitionEqualizerState(
     previousState.equalizerConfiguration.presetProfile ==
       newState.equalizerConfiguration.presetProfile &&
     isEqual(
-      previousState.equalizerConfiguration.bandOffsets.volumeOffsets,
-      newState.equalizerConfiguration.bandOffsets.volumeOffsets,
+      previousState.equalizerConfiguration.volumeAdjustments.adjustments,
+      newState.equalizerConfiguration.volumeAdjustments.adjustments,
     )
   ) {
     return;

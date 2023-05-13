@@ -2,19 +2,19 @@
 package com.oppzippy.openscq30.lib;
 import androidx.annotation.NonNull;
 
-public final class EqualizerBandOffsets {
+public final class VolumeAdjustments {
 
-    public EqualizerBandOffsets(@NonNull byte [] volume_offsets) {
-        mNativeObj = init(volume_offsets);
+    public VolumeAdjustments(@NonNull byte [] volume_adjustments) {
+        mNativeObj = init(volume_adjustments);
     }
-    private static native long init(byte [] volume_offsets);
+    private static native long init(byte [] volume_adjustments);
 
-    public final byte [] volumeOffsets() {
-        byte [] ret = do_volumeOffsets(mNativeObj);
+    public final byte [] adjustments() {
+        byte [] ret = do_adjustments(mNativeObj);
 
         return ret;
     }
-    private static native byte [] do_volumeOffsets(long self);
+    private static native byte [] do_adjustments(long self);
 
     public synchronized void delete() {
         if (mNativeObj != 0) {
@@ -32,7 +32,7 @@ public final class EqualizerBandOffsets {
         }
     }
     private static native void do_delete(long me);
-    /*package*/ EqualizerBandOffsets(InternalPointerMarker marker, long ptr) {
+    /*package*/ VolumeAdjustments(InternalPointerMarker marker, long ptr) {
         assert marker == InternalPointerMarker.RAW_PTR;
         this.mNativeObj = ptr;
     }

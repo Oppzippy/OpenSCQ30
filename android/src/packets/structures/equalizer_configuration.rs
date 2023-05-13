@@ -1,7 +1,7 @@
 use openscq30_lib::packets::structures;
 use rifgen::rifgen_attr::generate_interface;
 
-use super::{EqualizerBandOffsets, PresetEqualizerProfile};
+use super::{PresetEqualizerProfile, VolumeAdjustments};
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub struct EqualizerConfiguration {
@@ -21,10 +21,10 @@ impl EqualizerConfiguration {
     }
 
     #[generate_interface(constructor)]
-    pub fn new_custom_profile(band_offsets: &EqualizerBandOffsets) -> EqualizerConfiguration {
+    pub fn new_custom_profile(volume_adjustments: &VolumeAdjustments) -> EqualizerConfiguration {
         Self {
             inner: structures::EqualizerConfiguration::new_custom_profile(
-                band_offsets.to_owned().into(),
+                volume_adjustments.to_owned().into(),
             ),
         }
     }
@@ -40,8 +40,8 @@ impl EqualizerConfiguration {
     }
 
     #[generate_interface]
-    pub fn band_offsets(&self) -> EqualizerBandOffsets {
-        self.inner.band_offsets().into()
+    pub fn volume_adjustments(&self) -> VolumeAdjustments {
+        self.inner.volume_adjustments().into()
     }
 }
 

@@ -11,10 +11,10 @@ pub struct Config {
 
 impl Config {
     pub fn set_custom_profile(&mut self, name: String, profile: CustomEqualizerProfile) {
-        // If multiple profiles with the same volume offsets existed, it would be ambiguous which should be selected,
-        // since the selection is determined only by volume offsets.
+        // If multiple profiles with the same volume adjustments existed, it would be ambiguous which should be selected,
+        // since the selection is determined only by volume adjustments.
         self.equalizer_custom_profiles
-            .retain(|_name, p| p.volume_offsets() != profile.volume_offsets());
+            .retain(|_name, p| p.volume_adjustments() != profile.volume_adjustments());
         self.equalizer_custom_profiles.insert(name, profile);
     }
 

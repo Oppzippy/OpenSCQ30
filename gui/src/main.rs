@@ -205,7 +205,7 @@ fn build_ui_2(
                     .custom_profiles()
                     .iter()
                     .map(|(name, profile)| {
-                        CustomEqualizerProfileObject::new(name, profile.volume_offsets())
+                        CustomEqualizerProfileObject::new(name, profile.volume_adjustments())
                     })
                     .collect(),
             );

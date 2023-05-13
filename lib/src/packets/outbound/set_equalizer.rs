@@ -18,7 +18,7 @@ impl OutboundPacket for SetEqualizerPacket {
         let mut bytes: Vec<u8> = vec![0x08, 0xEE, 0x00, 0x00, 0x00, 0x02, 0x81, 0x14, 0x00];
 
         bytes.extend(self.configuration.profile_id().to_le_bytes());
-        bytes.extend(self.configuration.band_offsets().bytes());
+        bytes.extend(self.configuration.volume_adjustments().bytes());
 
         bytes.push(utils::calculate_checksum(&bytes));
 
@@ -30,7 +30,7 @@ impl OutboundPacket for SetEqualizerPacket {
 mod tests {
     use crate::packets::{
         outbound::OutboundPacket,
-        structures::{EqualizerBandOffsets, EqualizerConfiguration, PresetEqualizerProfile},
+        structures::{EqualizerConfiguration, PresetEqualizerProfile, VolumeAdjustments},
     };
 
     use super::SetEqualizerPacket;
@@ -42,7 +42,7 @@ mod tests {
             0xa0, 0x8e, 0xb4, 0x74, 0x88, 0xe6,
         ];
         let packet = SetEqualizerPacket::new(EqualizerConfiguration::new_custom_profile(
-            EqualizerBandOffsets::new([-60, 60, 23, 40, 22, 60, -4, 16]),
+            VolumeAdjustments::new([-60, 60, 23, 40, 22, 60, -4, 16]),
         ));
         assert_eq!(EXPECTED, packet.bytes());
     }

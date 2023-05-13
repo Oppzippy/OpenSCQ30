@@ -3,10 +3,10 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback, useState } from "react";
 import {
   AmbientSoundMode,
-  EqualizerBandOffsets,
   EqualizerConfiguration,
   NoiseCancelingMode,
   PresetEqualizerProfile,
+  VolumeAdjustments,
 } from "../../../wasm/pkg/openscq30_web_wasm";
 import { SoundcoreDevice } from "../../bluetooth/SoundcoreDevice";
 import { db } from "../../storage/db";
@@ -31,7 +31,7 @@ export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
       const newEqualizerConfiguration =
         profile == -1
           ? EqualizerConfiguration.fromCustomProfile(
-              deviceState.equalizerConfiguration.bandOffsets,
+              deviceState.equalizerConfiguration.volumeAdjustments,
             )
           : EqualizerConfiguration.fromPresetProfile(profile);
       setDeviceState((state) => ({
@@ -39,20 +39,20 @@ export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
         equalizerConfiguration: newEqualizerConfiguration,
       }));
     },
-    [deviceState.equalizerConfiguration.bandOffsets, setDeviceState],
+    [deviceState.equalizerConfiguration.volumeAdjustments, setDeviceState],
   );
 
   const setEqualizerValue = useCallback(
     (index: number, newVolume: number) => {
       setDeviceState((state) => {
         const volume = new Int8Array(
-          state.equalizerConfiguration.bandOffsets.volumeOffsets,
+          state.equalizerConfiguration.volumeAdjustments.adjustments,
         );
-        // EqualizerBandOffsets expects integers (-120 to +120), but the state uses decimals (-12.0 to +12.0)
+        // VolumeAdjustments expects integers (-120 to +120), but the state uses decimals (-12.0 to +12.0)
         volume[index] = newVolume * 10;
         const newEqualizerConfiguration =
           EqualizerConfiguration.fromCustomProfile(
-            new EqualizerBandOffsets(volume),
+            new VolumeAdjustments(volume),
           );
         return {
           ...state,
@@ -64,7 +64,7 @@ export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
   );
 
   const fractionalEqualizerVolumes = [
-    ...deviceState.equalizerConfiguration.bandOffsets.volumeOffsets,
+    ...deviceState.equalizerConfiguration.volumeAdjustments.adjustments,
   ].map((volume) => volume / 10);
 
   const setAmbientSoundMode = useCallback(

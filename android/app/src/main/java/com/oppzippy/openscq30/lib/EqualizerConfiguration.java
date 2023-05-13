@@ -11,12 +11,12 @@ public final class EqualizerConfiguration {
     }
     private static native long init(int preset_profile);
 
-    public EqualizerConfiguration(@NonNull EqualizerBandOffsets band_offsets) {
-        long a0 = band_offsets.mNativeObj;
+    public EqualizerConfiguration(@NonNull VolumeAdjustments volume_adjustments) {
+        long a0 = volume_adjustments.mNativeObj;
         mNativeObj = init(a0);
-        JNIReachabilityFence.reachabilityFence1(band_offsets);
+        JNIReachabilityFence.reachabilityFence1(volume_adjustments);
     }
-    private static native long init(long band_offsets);
+    private static native long init(long volume_adjustments);
 
     public final int profileId() {
         int ret = do_profileId(mNativeObj);
@@ -38,13 +38,13 @@ public final class EqualizerConfiguration {
     }
     private static native int do_presetProfile(long self);
 
-    public final @NonNull EqualizerBandOffsets bandOffsets() {
-        long ret = do_bandOffsets(mNativeObj);
-        EqualizerBandOffsets convRet = new EqualizerBandOffsets(InternalPointerMarker.RAW_PTR, ret);
+    public final @NonNull VolumeAdjustments volumeAdjustments() {
+        long ret = do_volumeAdjustments(mNativeObj);
+        VolumeAdjustments convRet = new VolumeAdjustments(InternalPointerMarker.RAW_PTR, ret);
 
         return convRet;
     }
-    private static native long do_bandOffsets(long self);
+    private static native long do_volumeAdjustments(long self);
 
     public synchronized void delete() {
         if (mNativeObj != 0) {

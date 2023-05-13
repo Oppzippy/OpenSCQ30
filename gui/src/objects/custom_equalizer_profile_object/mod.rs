@@ -10,13 +10,13 @@ glib::wrapper! {
 }
 
 impl CustomEqualizerProfileObject {
-    pub fn new(name: &str, volume_offsets: [i8; 8]) -> Self {
+    pub fn new(name: &str, volume_adjustments: [i8; 8]) -> Self {
         let obj: Self = Object::builder().property("name", name).build();
-        obj.imp().volume_offsets.replace(volume_offsets);
+        obj.imp().volume_adjustments.replace(volume_adjustments);
         obj
     }
 
-    pub fn volume_offsets(&self) -> [i8; 8] {
-        self.imp().volume_offsets.get()
+    pub fn volume_adjustments(&self) -> [i8; 8] {
+        self.imp().volume_adjustments.get()
     }
 }

@@ -232,7 +232,7 @@ mod tests {
     use crate::{
         api::device::Device,
         packets::structures::{
-            AmbientSoundMode, EqualizerBandOffsets, EqualizerConfiguration, NoiseCancelingMode,
+            AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode, VolumeAdjustments,
         },
         stub::connection::StubConnection,
     };
@@ -275,7 +275,7 @@ mod tests {
             device.noise_canceling_mode().await
         );
         assert_eq!(
-            EqualizerConfiguration::new_custom_profile(EqualizerBandOffsets::new([
+            EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
                 -60, 60, 23, 40, 22, 60, -4, 16
             ])),
             device.equalizer_configuration().await

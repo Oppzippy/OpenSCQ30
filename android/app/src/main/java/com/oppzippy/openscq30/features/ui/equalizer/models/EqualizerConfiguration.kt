@@ -14,7 +14,7 @@ data class EqualizerConfiguration(
         fun fromRust(configuration: com.oppzippy.openscq30.lib.EqualizerConfiguration): EqualizerConfiguration {
             return EqualizerConfiguration(
                 EqualizerProfile.fromPresetProfile(configuration.presetProfile().getOrNull()),
-                configuration.bandOffsets().volumeOffsets().asList(),
+                configuration.volumeAdjustments().adjustments().asList(),
             )
         }
     }

@@ -17,12 +17,12 @@ pub async fn get(get_command: GetCommand, device: &impl Device) {
         }
         GetCommand::Equalizer => {
             let equalizer_configuration = device.equalizer_configuration().await;
-            let separated_band_offsets = equalizer_configuration
-                .band_offsets()
+            let separated_volume_adjustments = equalizer_configuration
+                .volume_adjustments()
                 .bytes()
                 .map(|b| b.to_string())
                 .join(" ");
-            println!("{separated_band_offsets}");
+            println!("{separated_volume_adjustments}");
         }
     };
 }

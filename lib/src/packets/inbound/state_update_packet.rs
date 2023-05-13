@@ -1,8 +1,8 @@
 use tracing::warn;
 
 use crate::packets::structures::{
-    AmbientSoundMode, EqualizerBandOffsets, EqualizerConfiguration, NoiseCancelingMode,
-    PresetEqualizerProfile,
+    AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode, PresetEqualizerProfile,
+    VolumeAdjustments,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -25,7 +25,7 @@ impl StateUpdatePacket {
                             EqualizerConfiguration::new_from_preset_profile(preset_profile)
                         }
                         None => EqualizerConfiguration::new_custom_profile(
-                            EqualizerBandOffsets::from_bytes(bytes[13..21].try_into().unwrap()),
+                            VolumeAdjustments::from_bytes(bytes[13..21].try_into().unwrap()),
                         ),
                     };
 
@@ -68,8 +68,8 @@ mod tests {
     use crate::packets::{
         inbound::StateUpdatePacket,
         structures::{
-            AmbientSoundMode, EqualizerBandOffsets, EqualizerConfiguration, NoiseCancelingMode,
-            PresetEqualizerProfile,
+            AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode, PresetEqualizerProfile,
+            VolumeAdjustments,
         },
     };
 
@@ -107,7 +107,7 @@ mod tests {
         assert_eq!(AmbientSoundMode::Normal, packet.ambient_sound_mode());
         assert_eq!(NoiseCancelingMode::Transport, packet.noise_canceling_mode());
         assert_eq!(
-            EqualizerConfiguration::new_custom_profile(EqualizerBandOffsets::new([
+            EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
                 -60, 60, 23, 40, 22, 60, -4, 16
             ])),
             packet.equalizer_configuration()
@@ -128,7 +128,7 @@ mod tests {
         assert_eq!(AmbientSoundMode::Normal, packet.ambient_sound_mode());
         assert_eq!(NoiseCancelingMode::Transport, packet.noise_canceling_mode());
         assert_eq!(
-            EqualizerConfiguration::new_custom_profile(EqualizerBandOffsets::new([
+            EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
                 -60, 60, 23, 40, 22, 60, -4, 16
             ])),
             packet.equalizer_configuration()
@@ -151,7 +151,7 @@ mod tests {
         assert_eq!(AmbientSoundMode::Normal, packet.ambient_sound_mode());
         assert_eq!(NoiseCancelingMode::Transport, packet.noise_canceling_mode());
         assert_eq!(
-            EqualizerConfiguration::new_custom_profile(EqualizerBandOffsets::new([
+            EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
                 -60, 60, 23, 40, 22, 60, -4, 16
             ])),
             packet.equalizer_configuration()

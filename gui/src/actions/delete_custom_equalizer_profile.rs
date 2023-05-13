@@ -26,7 +26,7 @@ where
                     .custom_profiles()
                     .iter()
                     .map(|(name, profile)| {
-                        CustomEqualizerProfileObject::new(name, profile.volume_offsets())
+                        CustomEqualizerProfileObject::new(name, profile.volume_adjustments())
                     })
                     .collect(),
             ))
@@ -62,7 +62,7 @@ mod tests {
             .edit(|settings| {
                 settings.set_custom_profile(
                     custom_profile.name(),
-                    CustomEqualizerProfile::new(custom_profile.volume_offsets()),
+                    CustomEqualizerProfile::new(custom_profile.volume_adjustments()),
                 );
             })
             .unwrap();

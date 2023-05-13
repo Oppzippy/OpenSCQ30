@@ -1,10 +1,10 @@
 package com.oppzippy.openscq30.features.ui.equalizer.models
 
 import android.util.Log
-import com.oppzippy.openscq30.lib.EqualizerBandOffsets
 import com.oppzippy.openscq30.lib.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.PresetEqualizerProfile
 import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.lib.VolumeAdjustments
 
 enum class EqualizerProfile(val presetProfile: PresetEqualizerProfile?, val localizationStringId: Int) {
     Custom(null, R.string.custom),
@@ -31,14 +31,14 @@ enum class EqualizerProfile(val presetProfile: PresetEqualizerProfile?, val loca
     TrebleBooster(PresetEqualizerProfile.TrebleBooster, R.string.treble_booster),
     TrebleReducer(PresetEqualizerProfile.TrebleReducer, R.string.treble_reducer);
 
-    fun toEqualizerConfiguration(volumeOffsets: ByteArray?): EqualizerConfiguration {
+    fun toEqualizerConfiguration(volumeAdjustments: ByteArray?): EqualizerConfiguration {
         return if (presetProfile != null) {
             EqualizerConfiguration(presetProfile)
         } else {
-            if (volumeOffsets != null) {
-                EqualizerConfiguration(EqualizerBandOffsets(volumeOffsets))
+            if (volumeAdjustments != null) {
+                EqualizerConfiguration(VolumeAdjustments(volumeAdjustments))
             } else {
-                throw NullPointerException("volumeOffsets is null")
+                throw NullPointerException("volumeAdjustments is null")
             }
         }
     }

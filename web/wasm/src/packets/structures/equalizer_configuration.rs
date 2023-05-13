@@ -1,7 +1,7 @@
 use openscq30_lib::packets::structures;
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use super::{EqualizerBandOffsets, PresetEqualizerProfile};
+use super::{PresetEqualizerProfile, VolumeAdjustments};
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 #[wasm_bindgen]
@@ -23,10 +23,10 @@ impl EqualizerConfiguration {
     }
 
     #[wasm_bindgen(js_name = "fromCustomProfile")]
-    pub fn new_custom_profile(band_offsets: &EqualizerBandOffsets) -> EqualizerConfiguration {
+    pub fn new_custom_profile(volume_adjustments: &VolumeAdjustments) -> EqualizerConfiguration {
         Self {
             inner: structures::EqualizerConfiguration::new_custom_profile(
-                band_offsets.to_owned().into(),
+                volume_adjustments.to_owned().into(),
             ),
         }
     }
@@ -41,9 +41,9 @@ impl EqualizerConfiguration {
         self.inner.preset_profile().map(|profile| profile.into())
     }
 
-    #[wasm_bindgen(getter = bandOffsets)]
-    pub fn band_offsets(&self) -> EqualizerBandOffsets {
-        self.inner.band_offsets().into()
+    #[wasm_bindgen(getter = volumeAdjustments)]
+    pub fn volume_adjustments(&self) -> VolumeAdjustments {
+        self.inner.volume_adjustments().into()
     }
 }
 

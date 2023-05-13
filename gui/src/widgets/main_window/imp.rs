@@ -131,13 +131,13 @@ impl MainWindow {
                 if response != ResponseType::Accept {
                     return;
                 }
-                let volume_offsets = this
+                let volume_adjustments = this
                     .selected_device_settings
                     .equalizer_configuration()
-                    .band_offsets()
-                    .volume_offsets();
+                    .volume_adjustments()
+                    .adjustments();
 
-                let profile_with_name = CustomEqualizerProfileObject::new(&name, volume_offsets);
+                let profile_with_name = CustomEqualizerProfileObject::new(&name, volume_adjustments);
                 this.obj().emit_by_name::<()>("create-custom-equalizer-profile", &[&profile_with_name]);
             }),
         );

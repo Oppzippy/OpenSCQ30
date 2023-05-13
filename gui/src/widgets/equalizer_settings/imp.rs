@@ -15,7 +15,7 @@ use gtk::{
 };
 use once_cell::unsync::OnceCell;
 use openscq30_lib::packets::structures::{
-    EqualizerBandOffsets, EqualizerConfiguration, PresetEqualizerProfile,
+    EqualizerConfiguration, PresetEqualizerProfile, VolumeAdjustments,
 };
 use strum::IntoEnumIterator;
 
@@ -88,7 +88,7 @@ impl EqualizerSettings {
 
     pub fn equalizer_configuration(&self) -> EqualizerConfiguration {
         if self.is_custom_profile() {
-            EqualizerConfiguration::new_custom_profile(EqualizerBandOffsets::new(
+            EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(
                 self.equalizer.volumes(),
             ))
         } else {
@@ -113,7 +113,7 @@ impl EqualizerSettings {
 
     pub fn set_equalizer_configuration(&self, configuration: &EqualizerConfiguration) {
         self.equalizer
-            .set_volumes(configuration.band_offsets().volume_offsets());
+            .set_volumes(configuration.volume_adjustments().adjustments());
         let profile_index = self
             .profiles
             .get()
@@ -213,7 +213,7 @@ impl EqualizerSettings {
                 let custom_profile_index = custom_profiles
                     .iter::<CustomEqualizerProfileObject>()
                     .enumerate()
-                    .find(|(_i, profile)| profile.as_ref().unwrap().volume_offsets() == volumes)
+                    .find(|(_i, profile)| profile.as_ref().unwrap().volume_adjustments() == volumes)
                     .map(|(i, _profile)| i as u32)
                     .unwrap_or(u32::MAX);
 
@@ -261,7 +261,7 @@ impl EqualizerSettings {
                     .expect("selected item must be an EqualizerProfileObject");
                 let profile_id = selected_item.profile_id() as u16;
                 let configuration = if profile_id == EqualizerConfiguration::CUSTOM_PROFILE_ID {
-                    EqualizerConfiguration::new_custom_profile(EqualizerBandOffsets::new(this.equalizer.volumes()))
+                    EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(this.equalizer.volumes()))
                 } else {
                     let preset_profile = PresetEqualizerProfile::from_id(profile_id).unwrap_or_else(|| {
                         panic!("invalid preset profile id {profile_id}");

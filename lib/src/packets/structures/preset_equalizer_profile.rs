@@ -1,6 +1,6 @@
 use strum::{Display, EnumIter, FromRepr};
 
-use super::equalizer_band_offsets::EqualizerBandOffsets;
+use super::volume_adjustments::VolumeAdjustments;
 
 #[repr(u16)]
 #[derive(FromRepr, Debug, Clone, Copy, PartialEq, Eq, Hash, Display, EnumIter)]
@@ -38,8 +38,8 @@ impl PresetEqualizerProfile {
         Self::from_repr(id)
     }
 
-    pub fn band_offsets(&self) -> EqualizerBandOffsets {
-        let offsets: [i8; 8] = match self {
+    pub fn volume_adjustments(&self) -> VolumeAdjustments {
+        let adjustments: [i8; 8] = match self {
             Self::SoundcoreSignature => [0, 0, 0, 0, 0, 0, 0, 0],
             Self::Acoustic => [40, 10, 20, 20, 40, 40, 40, 20],
             Self::BassBooster => [40, 30, 10, 0, 0, 0, 0, 0],
@@ -63,7 +63,7 @@ impl PresetEqualizerProfile {
             Self::TrebleBooster => [-20, -20, -20, -10, 10, 20, 20, 40],
             Self::TrebleReducer => [0, 0, 0, -20, -30, -40, -40, -60],
         };
-        EqualizerBandOffsets::new(offsets)
+        VolumeAdjustments::new(adjustments)
     }
 }
 
@@ -76,12 +76,12 @@ mod tests {
     use super::PresetEqualizerProfile;
 
     #[test]
-    fn profiles_have_unique_band_offsets() {
+    fn profiles_have_unique_volume_adjustments() {
         // to make sure that nothing was mistakenly copy and pasted
-        let band_offsets = PresetEqualizerProfile::iter()
-            .map(|profile| profile.band_offsets())
+        let adjustments = PresetEqualizerProfile::iter()
+            .map(|profile| profile.volume_adjustments())
             .collect::<Vec<_>>();
-        let deduplicated_band_offsets = band_offsets.iter().collect::<HashSet<_>>();
-        assert_eq!(band_offsets.len(), deduplicated_band_offsets.len());
+        let deduplicated_adjustments = adjustments.iter().collect::<HashSet<_>>();
+        assert_eq!(adjustments.len(), deduplicated_adjustments.len());
     }
 }

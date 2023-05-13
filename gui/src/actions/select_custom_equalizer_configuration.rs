@@ -1,7 +1,7 @@
 use anyhow::Context;
 use openscq30_lib::{
     api::device::DeviceRegistry,
-    packets::structures::{EqualizerBandOffsets, EqualizerConfiguration},
+    packets::structures::{EqualizerConfiguration, VolumeAdjustments},
 };
 
 use crate::{
@@ -30,8 +30,8 @@ where
             state
                 .state_update_sender
                 .send(StateUpdate::SetEqualizerConfiguration(
-                    EqualizerConfiguration::new_custom_profile(EqualizerBandOffsets::new(
-                        profile.volume_offsets(),
+                    EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(
+                        profile.volume_adjustments(),
                     )),
                 ))
                 .map_err(|err| anyhow::anyhow!("{err}"))?;
@@ -44,7 +44,7 @@ where
 #[cfg(test)]
 mod tests {
 
-    use openscq30_lib::packets::structures::{EqualizerBandOffsets, EqualizerConfiguration};
+    use openscq30_lib::packets::structures::{EqualizerConfiguration, VolumeAdjustments};
 
     use crate::{
         actions::{State, StateUpdate},
@@ -71,7 +71,7 @@ mod tests {
             .edit(|settings| {
                 settings.set_custom_profile(
                     custom_profile.name(),
-                    CustomEqualizerProfile::new(custom_profile.volume_offsets()),
+                    CustomEqualizerProfile::new(custom_profile.volume_adjustments()),
                 );
             })
             .unwrap();
@@ -80,7 +80,7 @@ mod tests {
         let state_update = receiver.recv().await.unwrap();
         assert_eq!(
             StateUpdate::SetEqualizerConfiguration(EqualizerConfiguration::new_custom_profile(
-                EqualizerBandOffsets::new(custom_profile.volume_offsets())
+                VolumeAdjustments::new(custom_profile.volume_adjustments())
             )),
             state_update,
         );
