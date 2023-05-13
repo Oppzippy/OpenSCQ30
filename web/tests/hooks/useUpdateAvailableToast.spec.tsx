@@ -36,10 +36,10 @@ describe("Device Settings", () => {
       <ToastQueue>
         <UseUpdateAvailable />
         <FailIfToastQueueDoesNotHaveLengthButton length={0} />
-      </ToastQueue>
+      </ToastQueue>,
     );
     await user.click(
-      renderResult.getByRole("button", { name: `Check Length 0` })
+      renderResult.getByRole("button", { name: `Check Length 0` }),
     );
   });
 
@@ -48,7 +48,7 @@ describe("Device Settings", () => {
       <ToastQueue>
         <UseUpdateAvailable />
         <FailIfToastQueueDoesNotHaveLengthButton length={1} />
-      </ToastQueue>
+      </ToastQueue>,
     );
     const mockPwaRegisterReact =
       pwaRegisterReact as unknown as typeof pwaRegisterReact & {
@@ -61,7 +61,7 @@ describe("Device Settings", () => {
     mockPwaRegisterReact.needRefresh = false;
     mockPwaRegisterReact.needRefresh = true;
     await user.click(
-      renderResult.getByRole("button", { name: "Check Length 1" })
+      renderResult.getByRole("button", { name: "Check Length 1" }),
     );
   });
 });

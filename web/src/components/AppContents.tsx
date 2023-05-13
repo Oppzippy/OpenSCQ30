@@ -27,7 +27,7 @@ export function AppContents() {
           mode: prefersDarkMode ? "dark" : "light",
         },
       }),
-    [prefersDarkMode]
+    [prefersDarkMode],
   );
   useUpdateAvailableToast();
 

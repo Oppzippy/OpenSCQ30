@@ -31,7 +31,7 @@ export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
       const newEqualizerConfiguration =
         profile == -1
           ? EqualizerConfiguration.fromCustomProfile(
-              deviceState.equalizerConfiguration.bandOffsets
+              deviceState.equalizerConfiguration.bandOffsets,
             )
           : EqualizerConfiguration.fromPresetProfile(profile);
       setDeviceState((state) => ({
@@ -39,20 +39,20 @@ export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
         equalizerConfiguration: newEqualizerConfiguration,
       }));
     },
-    [deviceState.equalizerConfiguration.bandOffsets, setDeviceState]
+    [deviceState.equalizerConfiguration.bandOffsets, setDeviceState],
   );
 
   const setEqualizerValue = useCallback(
     (index: number, newVolume: number) => {
       setDeviceState((state) => {
         const volume = new Int8Array(
-          state.equalizerConfiguration.bandOffsets.volumeOffsets
+          state.equalizerConfiguration.bandOffsets.volumeOffsets,
         );
         // EqualizerBandOffsets expects integers (-120 to +120), but the state uses decimals (-12.0 to +12.0)
         volume[index] = newVolume * 10;
         const newEqualizerConfiguration =
           EqualizerConfiguration.fromCustomProfile(
-            new EqualizerBandOffsets(volume)
+            new EqualizerBandOffsets(volume),
           );
         return {
           ...state,
@@ -60,7 +60,7 @@ export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
         };
       });
     },
-    [setDeviceState]
+    [setDeviceState],
   );
 
   const fractionalEqualizerVolumes = [
@@ -74,7 +74,7 @@ export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
         ambientSoundMode: newAmbientSoundMode,
       }));
     },
-    [setDeviceState]
+    [setDeviceState],
   );
 
   const setNoiseCancelingMode = useCallback(
@@ -84,22 +84,22 @@ export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
         noiseCancelingMode: newNoiseCancelingMode,
       }));
     },
-    [setDeviceState]
+    [setDeviceState],
   );
 
   const openCreateCustomProfileDialog = useCallback(
     () => setCreateCustomProfileDialogOpen(true),
-    []
+    [],
   );
   const deleteCustomProfile = useDeleteCustomProfile();
 
   const closeCreateCustomProfileDialog = useCallback(
     () => setCreateCustomProfileDialogOpen(false),
-    [setCreateCustomProfileDialogOpen]
+    [setCreateCustomProfileDialogOpen],
   );
 
   const createCustomProfileWithName = useCreateCustomProfileWithName(
-    fractionalEqualizerVolumes
+    fractionalEqualizerVolumes,
   );
 
   return (

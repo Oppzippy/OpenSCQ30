@@ -11,7 +11,7 @@ export class SoundcoreDeviceConnection {
   constructor(
     gatt: BluetoothRemoteGATTServer,
     writeCharacteristic: BluetoothRemoteGATTCharacteristic,
-    readCharacteristic: BluetoothRemoteGATTCharacteristic
+    readCharacteristic: BluetoothRemoteGATTCharacteristic,
   ) {
     this.gatt = gatt;
     this.writeCharacteristic = writeCharacteristic;
@@ -23,18 +23,18 @@ export class SoundcoreDeviceConnection {
           subscriber.next(new Uint8Array(readCharacteristic.value.buffer));
         } else {
           console.error(
-            "Read characteristic value changed, but it is undefined?"
+            "Read characteristic value changed, but it is undefined?",
           );
         }
       };
       this.readCharacteristic.addEventListener(
         "characteristicvaluechanged",
-        handler
+        handler,
       );
       return () =>
         readCharacteristic.removeEventListener(
           "characteristicvaluechanged",
-          handler
+          handler,
         );
     });
   }
@@ -42,7 +42,7 @@ export class SoundcoreDeviceConnection {
   public disconnect() {
     this.readCharacteristic.removeEventListener(
       "characteristicvaluechanged",
-      null
+      null,
     );
     this.gatt.disconnect();
   }
@@ -88,11 +88,11 @@ export async function selectDeviceConnection(): Promise<SoundcoreDeviceConnectio
   }
   const gatt = await device.gatt.connect();
   const service = await gatt.getPrimaryService(
-    SoundcoreDeviceUtils.getServiceUuid()
+    SoundcoreDeviceUtils.getServiceUuid(),
   );
   const [writeCharacteristic, readCharacteristic] = await Promise.all([
     service.getCharacteristic(
-      SoundcoreDeviceUtils.getWriteCharacteristicUuid()
+      SoundcoreDeviceUtils.getWriteCharacteristicUuid(),
     ),
     service.getCharacteristic(SoundcoreDeviceUtils.getReadCharacteristicUuid()),
   ]);
@@ -101,6 +101,6 @@ export async function selectDeviceConnection(): Promise<SoundcoreDeviceConnectio
   return new SoundcoreDeviceConnection(
     gatt,
     writeCharacteristic,
-    readCharacteristic
+    readCharacteristic,
   );
 }

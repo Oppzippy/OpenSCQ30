@@ -56,7 +56,7 @@ describe("Device Settings", () => {
         ambientSoundMode: AmbientSoundMode.NoiseCanceling,
         noiseCancelingMode: NoiseCancelingMode.Transport,
         equalizerConfiguration: EqualizerConfiguration.fromPresetProfile(
-          PresetEqualizerProfile.SoundcoreSignature
+          PresetEqualizerProfile.SoundcoreSignature,
         ),
       }),
       connect: vi.fn<unknown[], unknown>(),
@@ -70,7 +70,7 @@ describe("Device Settings", () => {
 
   it("should change ambient sound mode", async () => {
     const renderResult = render(
-      <DeviceSettings device={device as unknown as SoundcoreDevice} />
+      <DeviceSettings device={device as unknown as SoundcoreDevice} />,
     );
 
     expect(device.ambientSoundMode).toEqual(AmbientSoundMode.NoiseCanceling);
@@ -81,7 +81,7 @@ describe("Device Settings", () => {
 
   it("should change noise canceling mode", async () => {
     const renderResult = render(
-      <DeviceSettings device={device as unknown as SoundcoreDevice} />
+      <DeviceSettings device={device as unknown as SoundcoreDevice} />,
     );
 
     expect(device.noiseCancelingMode).toEqual(NoiseCancelingMode.Transport);
@@ -91,17 +91,17 @@ describe("Device Settings", () => {
 
   it("should change equalizer configuration", async () => {
     const renderResult = render(
-      <DeviceSettings device={device as unknown as SoundcoreDevice} />
+      <DeviceSettings device={device as unknown as SoundcoreDevice} />,
     );
 
     expect([
       ...device.equalizerConfiguration.bandOffsets.volumeOffsets,
     ]).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
     await user.click(
-      renderResult.getByText("presetEqualizerProfile.soundcoreSignature")
+      renderResult.getByText("presetEqualizerProfile.soundcoreSignature"),
     );
     await user.click(
-      renderResult.getByText("presetEqualizerProfile.classical")
+      renderResult.getByText("presetEqualizerProfile.classical"),
     );
     vi.advanceTimersByTime(5000);
     expect([
@@ -111,7 +111,7 @@ describe("Device Settings", () => {
 
   it("should enable sliders when a custom profile is selected", async () => {
     const renderResult = render(
-      <DeviceSettings device={device as unknown as SoundcoreDevice} />
+      <DeviceSettings device={device as unknown as SoundcoreDevice} />,
     );
     function areSlidersDisabled() {
       const sliders: NodeListOf<HTMLInputElement> =
@@ -122,19 +122,19 @@ describe("Device Settings", () => {
     expect(areSlidersDisabled()).toEqual(true);
     await user.click(renderResult.getByLabelText("equalizer.profile"));
     await user.click(
-      renderResult.getByRole("option", { name: "equalizer.custom" })
+      renderResult.getByRole("option", { name: "equalizer.custom" }),
     );
     expect(areSlidersDisabled()).toEqual(false);
   });
 
   it("should synchronize sliders and number input values", async () => {
     const renderResult = render(
-      <DeviceSettings device={device as unknown as SoundcoreDevice} />
+      <DeviceSettings device={device as unknown as SoundcoreDevice} />,
     );
 
     await user.click(renderResult.getByLabelText("equalizer.profile"));
     await user.click(
-      renderResult.getByRole("option", { name: "equalizer.custom" })
+      renderResult.getByRole("option", { name: "equalizer.custom" }),
     );
 
     const numberInputs: NodeListOf<HTMLInputElement> =
@@ -147,20 +147,20 @@ describe("Device Settings", () => {
 
   it("should debounce equalizer updates", async () => {
     const renderResult = render(
-      <DeviceSettings device={device as unknown as SoundcoreDevice} />
+      <DeviceSettings device={device as unknown as SoundcoreDevice} />,
     );
 
     await user.click(renderResult.getByLabelText("equalizer.profile"));
     await user.click(
-      renderResult.getByRole("option", { name: "equalizer.custom" })
+      renderResult.getByRole("option", { name: "equalizer.custom" }),
     );
 
     expect(device.state.value.equalizerConfiguration.presetProfile).toEqual(
-      PresetEqualizerProfile.SoundcoreSignature
+      PresetEqualizerProfile.SoundcoreSignature,
     );
     vi.advanceTimersByTime(500);
     expect(
-      device.state.value.equalizerConfiguration.presetProfile
+      device.state.value.equalizerConfiguration.presetProfile,
     ).toBeUndefined();
 
     const numberInputs: NodeListOf<HTMLInputElement> =
@@ -168,11 +168,11 @@ describe("Device Settings", () => {
     await user.type(numberInputs[0], "1");
 
     expect(
-      device.state.value.equalizerConfiguration.bandOffsets.volumeOffsets[0]
+      device.state.value.equalizerConfiguration.bandOffsets.volumeOffsets[0],
     ).toEqual(0);
     vi.advanceTimersByTime(500);
     expect(
-      device.state.value.equalizerConfiguration.bandOffsets.volumeOffsets[0]
+      device.state.value.equalizerConfiguration.bandOffsets.volumeOffsets[0],
     ).toEqual(10);
   });
 
@@ -187,21 +187,21 @@ describe("Device Settings", () => {
     const renderResult = render(
       <ToastQueue>
         <DeviceSettings device={device as unknown as SoundcoreDevice} />
-      </ToastQueue>
+      </ToastQueue>,
     );
 
     await user.click(renderResult.getByLabelText("equalizer.profile"));
     await user.click(
-      renderResult.getByRole("option", { name: "equalizer.custom" })
+      renderResult.getByRole("option", { name: "equalizer.custom" }),
     );
     await user.click(
       renderResult.getByRole("button", {
         name: "equalizer.createCustomProfile",
-      })
+      }),
     );
     await user.type(
       renderResult.getByLabelText("equalizer.profileName"),
-      "test"
+      "test",
     );
 
     const consoleErrorMock = vi
@@ -210,13 +210,13 @@ describe("Device Settings", () => {
         // do nothing
       });
     await user.click(
-      renderResult.getByRole("button", { name: "application.create" })
+      renderResult.getByRole("button", { name: "application.create" }),
     );
     expect(consoleErrorMock).toHaveBeenCalled();
     consoleErrorMock.mockRestore();
 
     expect(
-      renderResult.queryByText("errors.failedToCreateCustomProfile")
+      renderResult.queryByText("errors.failedToCreateCustomProfile"),
     ).toBeTruthy();
   });
 });

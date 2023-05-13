@@ -74,14 +74,14 @@ export class RealSoundcoreDevice implements SoundcoreDevice {
 
   public constructor(
     connection: SoundcoreDeviceConnection,
-    state: SoundcoreDeviceState
+    state: SoundcoreDeviceState,
   ) {
     this.connection = connection;
     this._state = new BehaviorSubject(state);
     this.incomingPacketsSubscription = connection.incomingPackets.subscribe(
       (value) => {
         this.onPacketReceived(value);
-      }
+      },
     );
   }
 
@@ -136,13 +136,13 @@ export async function selectDevice(): Promise<SoundcoreDevice> {
 }
 
 async function createSoundcoreDevice(
-  connection: SoundcoreDeviceConnection
+  connection: SoundcoreDeviceConnection,
 ): Promise<RealSoundcoreDevice> {
   const initialStateObservable = connection.incomingPackets.pipe(
     map((value) => StateUpdatePacket.fromBytes(new Uint8Array(value.buffer))),
     filter((packet): packet is StateUpdatePacket => packet != undefined),
     takeUntil(interval(4000)), // TODO retry on timeout
-    first()
+    first(),
   );
   const [, stateUpdatePacket] = await Promise.all([
     connection.write(new RequestStatePacket().bytes()),

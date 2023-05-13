@@ -16,7 +16,7 @@ test.describe("custom equalizer profiles", () => {
 
   async function createCustomProfile(
     page: Page,
-    profile: { name: string; values: number[]; alreadyExists?: boolean }
+    profile: { name: string; values: number[]; alreadyExists?: boolean },
   ) {
     await selectEqualizerValues(page, profile.values);
     await page.getByLabel("Create Custom Profile").click();
@@ -66,7 +66,7 @@ test.describe("custom equalizer profiles", () => {
     });
     // the create button from the dialog takes some time to fade, so we have to be more specific
     const createButton = page.locator(
-      "button[aria-label='Create Custom Profile']:has(> svg)"
+      "button[aria-label='Create Custom Profile']:has(> svg)",
     );
     expect(page.getByLabel("Delete Custom Profile")).toBeVisible();
     expect(createButton).not.toBeVisible();

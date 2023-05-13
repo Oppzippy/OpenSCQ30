@@ -12,7 +12,7 @@ import { useActualState } from "./useActualState";
  * @returns displayState and a setter for displayState
  */
 export function useDisplayState(
-  device: SoundcoreDevice
+  device: SoundcoreDevice,
 ): [SoundcoreDeviceState, Dispatch<SetStateAction<SoundcoreDeviceState>>] {
   const [actualState, setActualState] = useActualState(device);
   const [displayState, setDisplayState] = useState(actualState);
@@ -25,7 +25,7 @@ export function useDisplayState(
 
 function useUpdateDisplayFromActual(
   setDisplayState: Dispatch<SetStateAction<SoundcoreDeviceState>>,
-  actualState: SoundcoreDeviceState
+  actualState: SoundcoreDeviceState,
 ) {
   // Synchronizes the displayed state with the actual state of the headphones. They are
   // different because of the equalizer debouncing.
@@ -44,7 +44,7 @@ function useUpdateDisplayFromActual(
 function useUpdateActualFromDisplay(
   device: SoundcoreDevice,
   setActualState: (state: SoundcoreDeviceState) => void,
-  displayState: SoundcoreDeviceState
+  displayState: SoundcoreDeviceState,
 ) {
   // Debounce so we don't spam the headphones with eq update packets
   // Since the function won't be run immediately, the actual state may be out of date if we pass it to this function
@@ -58,13 +58,13 @@ function useUpdateActualFromDisplay(
           equalizerConfiguration: config,
         });
       }, 500),
-    [device, setActualState]
+    [device, setActualState],
   );
 
   // Update real equalizer configuration to match displayed with debounce
   useEffect(() => {
     debouncedSetActualEqualizerConfiguration(
-      displayState.equalizerConfiguration
+      displayState.equalizerConfiguration,
     );
   }, [
     displayState.equalizerConfiguration,

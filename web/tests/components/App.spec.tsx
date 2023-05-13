@@ -28,7 +28,7 @@ describe("App", () => {
               ambientSoundMode: AmbientSoundMode.NoiseCanceling,
               noiseCancelingMode: NoiseCancelingMode.Transport,
               equalizerConfiguration: EqualizerConfiguration.fromPresetProfile(
-                PresetEqualizerProfile.SoundcoreSignature
+                PresetEqualizerProfile.SoundcoreSignature,
               ),
             }),
             async transitionState(newState: SoundcoreDeviceState) {
@@ -65,7 +65,7 @@ describe("App", () => {
   it("should have a link to github", () => {
     const renderResult = render(<App />);
     const link = renderResult.baseElement.querySelector(
-      "a[href='https://github.com/oppzippy/OpenSCQ30']"
+      "a[href='https://github.com/oppzippy/OpenSCQ30']",
     );
     expect(link).not.toBeNull();
   });

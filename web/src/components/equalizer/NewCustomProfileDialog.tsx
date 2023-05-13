@@ -34,7 +34,7 @@ export const NewCustomProfileDialog = React.memo(function (props: Props) {
     // https://www.codeproject.com/Articles/744986/How-to-do-some-magic-with-indexedDB#pre966396
     const lowerCaseName = name.toLowerCase();
     return props.existingProfiles.some(
-      (profile) => profile.name.toLowerCase() == lowerCaseName
+      (profile) => profile.name.toLowerCase() == lowerCaseName,
     );
   }
 

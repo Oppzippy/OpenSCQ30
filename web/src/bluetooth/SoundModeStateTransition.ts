@@ -8,7 +8,7 @@ import { SoundcoreDeviceState } from "./SoundcoreDeviceState";
 export async function transitionSoundMode(
   connection: SoundcoreDeviceConnection,
   previousState: SoundcoreDeviceState,
-  newState: SoundcoreDeviceState
+  newState: SoundcoreDeviceState,
 ) {
   if (
     previousState.ambientSoundMode == newState.ambientSoundMode &&
@@ -27,8 +27,8 @@ export async function transitionSoundMode(
     await connection.write(
       new SetAmbientSoundModePacket(
         AmbientSoundMode.NoiseCanceling,
-        previousState.noiseCancelingMode
-      ).bytes()
+        previousState.noiseCancelingMode,
+      ).bytes(),
     );
   }
   // If we are changing the moise canceling mode, we must be in noise canceling mode at this point
@@ -38,8 +38,8 @@ export async function transitionSoundMode(
       didNoiseCancelingModeChange
         ? AmbientSoundMode.NoiseCanceling
         : newState.ambientSoundMode,
-      newState.noiseCancelingMode
-    ).bytes()
+      newState.noiseCancelingMode,
+    ).bytes(),
   );
   // Set the ambient sound mode to the new state if we didn't already do it in the previous step
   if (
@@ -49,8 +49,8 @@ export async function transitionSoundMode(
     await connection.write(
       new SetAmbientSoundModePacket(
         newState.ambientSoundMode,
-        newState.noiseCancelingMode
-      ).bytes()
+        newState.noiseCancelingMode,
+      ).bytes(),
     );
   }
 }

@@ -28,7 +28,7 @@ export function useUpdateAvailableToast() {
   // Only show toast once
   useEffect(() => {
     setHasToastBeenShown(
-      (hasToastBeenShown) => hasToastBeenShown || needRefresh
+      (hasToastBeenShown) => hasToastBeenShown || needRefresh,
     );
     if (needRefresh && !hasToastBeenShown) {
       toasts.addToast({

@@ -6,20 +6,20 @@ import { SoundcoreDeviceState } from "./SoundcoreDeviceState";
 export async function transitionEqualizerState(
   connection: SoundcoreDeviceConnection,
   previousState: SoundcoreDeviceState,
-  newState: SoundcoreDeviceState
+  newState: SoundcoreDeviceState,
 ) {
   if (
     previousState.equalizerConfiguration.presetProfile ==
       newState.equalizerConfiguration.presetProfile &&
     isEqual(
       previousState.equalizerConfiguration.bandOffsets.volumeOffsets,
-      newState.equalizerConfiguration.bandOffsets.volumeOffsets
+      newState.equalizerConfiguration.bandOffsets.volumeOffsets,
     )
   ) {
     return;
   }
 
   await connection.write(
-    new SetEqualizerPacket(newState.equalizerConfiguration).bytes()
+    new SetEqualizerPacket(newState.equalizerConfiguration).bytes(),
   );
 }

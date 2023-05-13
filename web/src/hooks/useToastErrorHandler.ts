@@ -10,6 +10,6 @@ export function useToastErrorHandler(message: string) {
         message,
       });
     },
-    [message, toasts]
+    [message, toasts],
   );
 }

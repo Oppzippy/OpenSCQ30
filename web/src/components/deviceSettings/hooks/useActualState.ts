@@ -9,19 +9,19 @@ import { useToastErrorHandler } from "../../../hooks/useToastErrorHandler";
  * @returns Current state of the device, and a setState function with built in error handling
  */
 export function useActualState(
-  device: SoundcoreDevice
+  device: SoundcoreDevice,
 ): [SoundcoreDeviceState, (newState: SoundcoreDeviceState) => void] {
   const actualState = useBehaviorSubject(device.state);
 
   const { t } = useTranslation();
   const errorHandler = useToastErrorHandler(
-    t("errors.failedToCommunicateStateChangeToDevice")
+    t("errors.failedToCommunicateStateChangeToDevice"),
   );
   const setActualState = useCallback(
     (newState: SoundcoreDeviceState) => {
       device.transitionState(newState).catch(errorHandler);
     },
-    [device, errorHandler]
+    [device, errorHandler],
   );
 
   return [actualState, setActualState];

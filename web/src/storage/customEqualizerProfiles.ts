@@ -1,7 +1,7 @@
 import { CustomEqualizerProfile, db } from "./db";
 
 export async function upsertCustomEqualizerProfile(
-  profile: CustomEqualizerProfile
+  profile: CustomEqualizerProfile,
 ) {
   await db.transaction("readwrite", db.customEqualizerProfiles, async () => {
     const existing = await db.customEqualizerProfiles

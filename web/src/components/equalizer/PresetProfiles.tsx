@@ -27,11 +27,11 @@ export const PresetProfiles = React.memo(function (props: Props) {
       } else {
         throw Error(
           `value should be a number, but it is instead a ${typeof event.target
-            .value}`
+            .value}`,
         );
       }
     },
-    [onProfileSelected]
+    [onProfileSelected],
   );
 
   return (

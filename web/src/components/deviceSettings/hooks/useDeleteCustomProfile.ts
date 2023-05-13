@@ -22,6 +22,6 @@ export function useDeleteCustomProfile() {
         });
       }
     },
-    [errorHandler, errorMessage, toasts]
+    [errorHandler, errorMessage, toasts],
   );
 }

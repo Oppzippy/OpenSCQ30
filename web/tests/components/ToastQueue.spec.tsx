@@ -35,14 +35,14 @@ describe("Toast Queue", () => {
     const renderResult = render(
       <ToastQueue>
         <FailIfToastQueueDoesNotHaveLengthButton length={0} />
-      </ToastQueue>
+      </ToastQueue>,
     );
     const checkLengthButton = renderResult.getByRole("button", {
       name: "Check Length",
     });
     await user.click(checkLengthButton);
     expect(
-      renderResult.queryByRole("button", { name: "toast.close" })
+      renderResult.queryByRole("button", { name: "toast.close" }),
     ).toBeNull();
   });
 
@@ -54,7 +54,7 @@ describe("Toast Queue", () => {
           <TestToastButton message={toastMessage} key={i} />
         ))}
         <FailIfToastQueueDoesNotHaveLengthButton length={0} />
-      </ToastQueue>
+      </ToastQueue>,
     );
 
     const buttons = renderResult.getAllByRole("button", { name: "Add Toast" });
@@ -69,12 +69,12 @@ describe("Toast Queue", () => {
         .forEach((otherToastMessage) =>
           expect(
             renderResult.queryByText(otherToastMessage),
-            `"${otherToastMessage}" should not be found when looking for ${targetToastMessage}`
-          ).toBeNull()
+            `"${otherToastMessage}" should not be found when looking for ${targetToastMessage}`,
+          ).toBeNull(),
         );
 
       await user.click(
-        renderResult.getByRole("button", { name: "toast.close" })
+        renderResult.getByRole("button", { name: "toast.close" }),
       );
     }
 

@@ -10,7 +10,7 @@ type Props<T> = {
 };
 
 export function ToggleButtonRow<T extends NonNullable<unknown>>(
-  props: Props<T>
+  props: Props<T>,
 ) {
   return (
     <ToggleButtonGroup

@@ -18,7 +18,7 @@ describe("NoiseCancelingModeSelection", () => {
         onValueChanged={() => {
           throw new Error("Function not implemented.");
         }}
-      />
+      />,
     );
 
     expect(renderResult.asFragment()).toMatchSnapshot();
@@ -30,7 +30,7 @@ describe("NoiseCancelingModeSelection", () => {
       <NoiseCancelingModeSelection
         value={NoiseCancelingMode.Indoor}
         onValueChanged={setMode}
-      />
+      />,
     );
 
     await user.click(renderResult.getByText("noiseCancelingMode.outdoor"));

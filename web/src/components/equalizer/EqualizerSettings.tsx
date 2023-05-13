@@ -28,7 +28,7 @@ export const EqualizerSettings = React.memo(function (props: Props) {
   const { t } = useTranslation();
 
   const selectedCustomProfile = props.customProfiles.find((customProfile) =>
-    isEqual(customProfile.values, props.values)
+    isEqual(customProfile.values, props.values),
   );
 
   const { onValueChange, onDeleteCustomProfile, onAddCustomProfile } = props;
@@ -37,7 +37,7 @@ export const EqualizerSettings = React.memo(function (props: Props) {
     (profile: CustomEqualizerProfile) => {
       profile.values.forEach((value, index) => onValueChange(index, value));
     },
-    [onValueChange]
+    [onValueChange],
   );
 
   const deleteSelectedCustomProfile = useCallback(() => {

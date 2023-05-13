@@ -29,23 +29,23 @@ export const CustomProfiles = React.memo(function ({
     (event: SelectChangeEvent<number>) => {
       if (typeof event.target.value == "number") {
         const newProfile = profiles.find(
-          (profile) => profile.id == event.target.value
+          (profile) => profile.id == event.target.value,
         );
         if (newProfile) {
           onProfileSelected(newProfile);
         } else {
           throw Error(
-            `tried to select custom profile id ${event.target.value}, but it does not exist`
+            `tried to select custom profile id ${event.target.value}, but it does not exist`,
           );
         }
       } else {
         throw Error(
           `value should be a number, but it is instead a ${typeof event.target
-            .value}`
+            .value}`,
         );
       }
     },
-    [onProfileSelected, profiles]
+    [onProfileSelected, profiles],
   );
 
   return (

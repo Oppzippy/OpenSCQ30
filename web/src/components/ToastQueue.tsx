@@ -30,7 +30,7 @@ export function ToastQueue({ children }: PropsWithChildren) {
 
   function handleClose(
     _event: Event | SyntheticEvent,
-    reason: SnackbarCloseReason
+    reason: SnackbarCloseReason,
   ) {
     if (reason == "escapeKeyDown" || reason == "timeout") {
       popToast();

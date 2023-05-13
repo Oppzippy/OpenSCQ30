@@ -4,11 +4,11 @@ import { useToastErrorHandler } from "../../../hooks/useToastErrorHandler";
 import { upsertCustomEqualizerProfile } from "../../../storage/customEqualizerProfiles";
 
 export function useCreateCustomProfileWithName(
-  fractionalEqualizerVolumes: number[]
+  fractionalEqualizerVolumes: number[],
 ) {
   const { t } = useTranslation();
   const errorHandler = useToastErrorHandler(
-    t("errors.failedToCreateCustomProfile")
+    t("errors.failedToCreateCustomProfile"),
   );
   return useCallback(
     (name: string) => {
@@ -17,6 +17,6 @@ export function useCreateCustomProfileWithName(
         values: fractionalEqualizerVolumes,
       }).catch(errorHandler);
     },
-    [errorHandler, fractionalEqualizerVolumes]
+    [errorHandler, fractionalEqualizerVolumes],
   );
 }

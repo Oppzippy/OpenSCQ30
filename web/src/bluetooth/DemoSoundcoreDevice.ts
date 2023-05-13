@@ -48,7 +48,7 @@ export async function selectDemoDevice() {
     ambientSoundMode: AmbientSoundMode.Normal,
     noiseCancelingMode: NoiseCancelingMode.Indoor,
     equalizerConfiguration: EqualizerConfiguration.fromPresetProfile(
-      PresetEqualizerProfile.SoundcoreSignature
+      PresetEqualizerProfile.SoundcoreSignature,
     ),
   });
 }
