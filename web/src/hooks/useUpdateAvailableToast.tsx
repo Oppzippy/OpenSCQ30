@@ -1,8 +1,8 @@
 import { Button } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useRegisterSW } from "virtual:pwa-register/react";
-import { ToastQueueContext } from "../components/ToastQueue";
+import { useToasts } from "./useToasts";
 
 const refreshInterval = import.meta.env.DEV ? 1000 : 1000 * 60 * 60;
 
@@ -23,7 +23,7 @@ export function useUpdateAvailableToast() {
     },
   });
   const { t } = useTranslation();
-  const toasts = useContext(ToastQueueContext);
+  const toasts = useToasts();
 
   // Only show toast once
   useEffect(() => {

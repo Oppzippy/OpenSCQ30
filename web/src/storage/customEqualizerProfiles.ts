@@ -1,7 +1,9 @@
 import { CustomEqualizerProfile, db } from "./db";
 
-export function upsertCustomEqualizerProfile(profile: CustomEqualizerProfile) {
-  db.transaction("readwrite", db.customEqualizerProfiles, async () => {
+export async function upsertCustomEqualizerProfile(
+  profile: CustomEqualizerProfile
+) {
+  await db.transaction("readwrite", db.customEqualizerProfiles, async () => {
     const existing = await db.customEqualizerProfiles
       .where("name")
       .equalsIgnoreCase(profile.name)

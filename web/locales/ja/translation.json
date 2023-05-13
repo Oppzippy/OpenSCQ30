@@ -4,6 +4,11 @@
     "deviceSelection": "デバイス選択",
     "selectDevice": ""
   },
+  "errors": {
+    "failedToCommunicateStateChangeToDevice": "",
+    "failedToCreateCustomProfile": "",
+    "failedToDeleteCustomProfile": ""
+  },
   "equalizer": {
     "customProfile": "",
     "equalizer": "イコライザ",

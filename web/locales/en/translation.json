@@ -4,6 +4,11 @@
     "deviceSelection": "Device Selection",
     "selectDevice": "Select Device"
   },
+  "errors": {
+    "failedToCommunicateStateChangeToDevice": "Failed to communicate state change to device. Check console for details.",
+    "failedToCreateCustomProfile": "Failed to create custom profile. Check console for details.",
+    "failedToDeleteCustomProfile": "Failed to delete custom profile. Check console for details."
+  },
   "equalizer": {
     "customProfile": "Custom Profile",
     "equalizer": "Equalizer",

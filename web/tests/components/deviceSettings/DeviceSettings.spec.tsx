@@ -2,15 +2,16 @@ import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { BehaviorSubject } from "rxjs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { SoundcoreDevice } from "../../src/bluetooth/SoundcoreDevice";
-import { SoundcoreDeviceState } from "../../src/bluetooth/SoundcoreDeviceState";
-import { DeviceSettings } from "../../src/components/DeviceSettings";
+import { SoundcoreDevice } from "../../../src/bluetooth/SoundcoreDevice";
+import { SoundcoreDeviceState } from "../../../src/bluetooth/SoundcoreDeviceState";
+import { ToastQueue } from "../../../src/components/ToastQueue";
+import { DeviceSettings } from "../../../src/components/deviceSettings/DeviceSettings";
 import {
   AmbientSoundMode,
   EqualizerConfiguration,
   NoiseCancelingMode,
   PresetEqualizerProfile,
-} from "../../wasm/pkg/openscq30_web_wasm";
+} from "../../../wasm/pkg/openscq30_web_wasm";
 
 interface HasState {
   state: BehaviorSubject<{
@@ -32,7 +33,7 @@ function decorateWithGettersAndSetters<T extends HasState>(device: T) {
     get equalizerConfiguration() {
       return this.state.value.equalizerConfiguration;
     },
-    transitionState(newState: SoundcoreDeviceState) {
+    async transitionState(newState: SoundcoreDeviceState) {
       this.state.next(newState);
     },
   };
@@ -173,5 +174,49 @@ describe("Device Settings", () => {
     expect(
       device.state.value.equalizerConfiguration.bandOffsets.volumeOffsets[0]
     ).toEqual(10);
+  });
+
+  it("should display a toast when creating a custom profile fails", async () => {
+    vi.mock("../../../src/storage/customEqualizerProfiles", () => {
+      return {
+        async upsertCustomEqualizerProfile() {
+          throw Error("It should error");
+        },
+      };
+    });
+    const renderResult = render(
+      <ToastQueue>
+        <DeviceSettings device={device as unknown as SoundcoreDevice} />
+      </ToastQueue>
+    );
+
+    await user.click(renderResult.getByLabelText("equalizer.profile"));
+    await user.click(
+      renderResult.getByRole("option", { name: "equalizer.custom" })
+    );
+    await user.click(
+      renderResult.getByRole("button", {
+        name: "equalizer.createCustomProfile",
+      })
+    );
+    await user.type(
+      renderResult.getByLabelText("equalizer.profileName"),
+      "test"
+    );
+
+    const consoleErrorMock = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {
+        // do nothing
+      });
+    await user.click(
+      renderResult.getByRole("button", { name: "application.create" })
+    );
+    expect(consoleErrorMock).toHaveBeenCalled();
+    consoleErrorMock.mockRestore();
+
+    expect(
+      renderResult.queryByText("errors.failedToCreateCustomProfile")
+    ).toBeTruthy();
   });
 });

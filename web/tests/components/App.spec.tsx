@@ -10,6 +10,7 @@ import {
   NoiseCancelingMode,
   PresetEqualizerProfile,
 } from "../../wasm/pkg/openscq30_web_wasm";
+import { SoundcoreDeviceState } from "../../src/bluetooth/SoundcoreDeviceState";
 
 describe("App", () => {
   let user: ReturnType<typeof userEvent.setup>;
@@ -30,6 +31,9 @@ describe("App", () => {
                 PresetEqualizerProfile.SoundcoreSignature
               ),
             }),
+            async transitionState(newState: SoundcoreDeviceState) {
+              this.state.next(newState);
+            },
             connect: vi.fn<unknown[], unknown>(),
             get ambientSoundMode() {
               return this.state.value.ambientSoundMode;
