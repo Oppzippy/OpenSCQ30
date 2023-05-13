@@ -35,6 +35,7 @@ export const EqualizerLine = React.memo(function ({
         strokeWidth={3}
         strokeOpacity={0.4}
         strokeLinecap="round"
+        strokeLinejoin="round"
         points={values
           .map((value, index) => `${getX(index)},${getY(value)}`)
           .join(" ")}
