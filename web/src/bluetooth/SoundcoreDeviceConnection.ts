@@ -52,6 +52,9 @@ export class SoundcoreDeviceConnection {
   }
 
   public async write(value: BufferSource) {
+    if (import.meta.env.DEV) {
+      console.log("Writing packet at " + new Date().toISOString());
+    }
     await this.writeCharacteristic.writeValueWithoutResponse(value);
   }
 }
