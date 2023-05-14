@@ -1,11 +1,24 @@
 package com.oppzippy.openscq30.features.ui.equalizer.composables
 
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
+import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.ui.equalizer.models.EqualizerProfile
+import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
 fun PresetProfileSelection(
@@ -15,7 +28,39 @@ fun PresetProfileSelection(
 
     Dropdown(
         value = value,
-        values = profiles.asList().map { Pair(it, stringResource(it.localizationStringId)) },
+        options = profiles.asList().map { profile ->
+            // Throws for the "custom" preset profile option, since that requires VolumeAdjustments
+            // to be passed to toEqualizerConfiguration.
+            val values = try {
+                profile.toEqualizerConfiguration(null).volumeAdjustments().adjustments().toList()
+            } catch (e: NullPointerException) {
+                null
+            }
+            DropdownOption(
+                value = profile,
+                name = stringResource(profile.localizationStringId),
+                label = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(stringResource(profile.localizationStringId))
+                        val lineHeightSp = MaterialTheme.typography.bodyMedium.fontSize
+                        val lineHeightDp = with(LocalDensity.current) {
+                            lineHeightSp.toDp()
+                        }
+                        if (values != null) {
+                            EqualizerLine(
+                                values = values,
+                                width = 80.dp,
+                                height = lineHeightDp,
+                            )
+                        }
+                    }
+                },
+            )
+        },
         label = stringResource(id = R.string.profile),
         onItemSelected = onProfileSelected,
     )
