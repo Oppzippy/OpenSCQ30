@@ -7,6 +7,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.kapt")
+    id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
 }
 
@@ -42,13 +43,6 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments += mapOf(
-                    "room.schemaLocation" to "$projectDir/schemas",
-                )
-            }
-        }
     }
 
     sourceSets {
@@ -61,7 +55,9 @@ android {
         named("debug") {
             isDebuggable = true
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+            )
         }
         create("debugDemo") {
             initWith(buildTypes["debug"])
@@ -70,7 +66,9 @@ android {
         named("release") {
             isDebuggable = false
             isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+            )
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs["release"]
             }
@@ -93,6 +91,9 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.7"
+    }
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
     }
     ndkVersion = "25.2.9519653"
     packaging {
@@ -140,7 +141,7 @@ dependencies {
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     annotationProcessor("androidx.room:room-compiler:$roomVersion")
-    kapt("androidx.room:room-compiler:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
     testImplementation("androidx.room:room-testing:$roomVersion")
 
     val hiltVersion = "2.45"
@@ -175,9 +176,9 @@ kapt {
 val rustBasePath = ".."
 val archTriplets = mapOf(
     "armeabi-v7a" to "armv7-linux-androideabi",
-    "arm64-v8a"   to "aarch64-linux-android",
-    "x86"         to "i686-linux-android",
-    "x86_64"      to "x86_64-linux-android",
+    "arm64-v8a" to "aarch64-linux-android",
+    "x86" to "i686-linux-android",
+    "x86_64" to "x86_64-linux-android",
 )
 
 archTriplets.forEach { (arch, target) ->
@@ -201,7 +202,17 @@ archTriplets.forEach { (arch, target) ->
     tasks.create<Exec>("cargo-build-${arch}") {
         description = "Building core for $arch"
         workingDir = File(rustBasePath)
-        commandLine("cargo", "ndk", "--target", arch, "--platform", "24", "build", "--profile", "release-debuginfo")
+        commandLine(
+            "cargo",
+            "ndk",
+            "--target",
+            arch,
+            "--platform",
+            "24",
+            "build",
+            "--profile",
+            "release-debuginfo"
+        )
     }
     // Sync shared native dependencies
     tasks.create<Sync>("sync-rust-deps-${arch}") {
