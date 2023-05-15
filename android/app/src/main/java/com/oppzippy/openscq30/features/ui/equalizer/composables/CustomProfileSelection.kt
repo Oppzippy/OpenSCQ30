@@ -26,24 +26,7 @@ fun CustomProfileSelection(
         value = selectedProfile,
         options = profiles.map { profile ->
             DropdownOption(value = profile, name = profile.name, label = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(IntrinsicSize.Min),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(profile.name)
-                    val lineHeightSp = MaterialTheme.typography.bodyMedium.fontSize
-                    val lineHeightDp = with(LocalDensity.current) {
-                        lineHeightSp.toDp()
-                    }
-                    EqualizerLine(
-                        values = profile.values,
-                        width = 80.dp,
-                        height = lineHeightDp,
-                    )
-                }
+                ProfileSelectionRow(name = profile.name, volumeAdjustments = profile.values)
             })
         },
         label = stringResource(R.string.custom_profile),

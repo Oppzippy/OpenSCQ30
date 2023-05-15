@@ -40,24 +40,10 @@ fun PresetProfileSelection(
                 value = profile,
                 name = stringResource(profile.localizationStringId),
                 label = {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(stringResource(profile.localizationStringId))
-                        val lineHeightSp = MaterialTheme.typography.bodyMedium.fontSize
-                        val lineHeightDp = with(LocalDensity.current) {
-                            lineHeightSp.toDp()
-                        }
-                        if (values != null) {
-                            EqualizerLine(
-                                values = values,
-                                width = 80.dp,
-                                height = lineHeightDp,
-                            )
-                        }
-                    }
+                    ProfileSelectionRow(
+                        name = stringResource(profile.localizationStringId),
+                        volumeAdjustments = values,
+                    )
                 },
             )
         },
