@@ -113,6 +113,8 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     // Material Design 3
     implementation("androidx.compose.material3:material3")
+    // Material Design 2
+    implementation("androidx.compose.material:material")
     // Android Studio Preview support
     implementation("androidx.compose.ui:ui-tooling-preview")
     debugImplementation("androidx.compose.ui:ui-tooling")
@@ -133,7 +135,6 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.5.3")
 
     val accompanistVersion = "0.30.1"
-    implementation("com.google.accompanist:accompanist-swiperefresh:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
 
     val roomVersion = "2.5.1"
