@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <template class="OpenSCQ30EqualizerProfileDropdownRow" parent="GtkBox">
+        <property name="orientation">horizontal</property>
+        <property name="spacing">2</property>
+        <property name="hexpand">true</property>
+        <child>
+            <object class="GtkLabel" id="label">
+                <property name="hexpand">true</property>
+                <property name="halign">start</property>
+            </object>
+        </child>
+        <child>
+            <object class="GtkDrawingArea" id="drawing_area">
+                <property name="hexpand">true</property>
+                <property name="halign">end</property>
+            </object>
+        </child>
+    </template>
+</interface>
