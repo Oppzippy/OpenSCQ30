@@ -4,15 +4,15 @@ updates:
     package-ecosystem: github-actions
     schedule:
       interval: weekly
-  - directory: /
-    package-ecosystem: cargo
-    schedule:
-      interval: weekly
-  - directory: /android
-    package-ecosystem: gradle
-    schedule:
-      interval: weekly
-  - directory: /web
-    package-ecosystem: npm
-    schedule:
-      interval: weekly
+  # - directory: /
+  #   package-ecosystem: cargo
+  #   schedule:
+  #     interval: weekly
+  # - directory: /android
+  #   package-ecosystem: gradle
+  #   schedule:
+  #     interval: weekly
+  # - directory: /web
+  #   package-ecosystem: npm
+  #   schedule:
+  #     interval: weekly
