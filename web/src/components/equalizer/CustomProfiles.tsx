@@ -4,14 +4,13 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
-  Stack,
   SxProps,
   Theme,
 } from "@mui/material";
 import React, { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { CustomEqualizerProfile } from "../../storage/db";
-import { EqualizerLine } from "./EqualizerLine";
+import { ProfileRow } from "./ProfileRow";
 
 type Props = {
   profiles: CustomEqualizerProfile[];
@@ -63,15 +62,10 @@ export const CustomProfiles = React.memo(function ({
       >
         {profiles.map((profile) => (
           <MenuItem value={profile.id} key={profile.id}>
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              width="100%"
-            >
-              {profile.name}
-              <EqualizerLine values={profile.values} />
-            </Stack>
+            <ProfileRow
+              name={profile.name}
+              volumeAdjustments={profile.values}
+            />
           </MenuItem>
         ))}
       </Select>
