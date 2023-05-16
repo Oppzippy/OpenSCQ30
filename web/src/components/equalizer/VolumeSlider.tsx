@@ -2,6 +2,7 @@ import { Input, Slider, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { VolumeAdjustments } from "../../../wasm/pkg/openscq30_web_wasm";
 
 type Props = {
   hz: number;
@@ -14,6 +15,9 @@ type Props = {
 export const VolumeSlider = React.memo(function (props: Props) {
   const { t } = useTranslation();
   const labelId = `${props.hz}-hz-label`;
+  const step = 0.1;
+  const minVolume = VolumeAdjustments.MIN_VOLUME * step;
+  const maxVolume = VolumeAdjustments.MAX_VOLUME * step;
   return (
     <>
       {/* make sure Hz doesn't go on to a second line */}
@@ -36,14 +40,14 @@ export const VolumeSlider = React.memo(function (props: Props) {
         <Slider
           disabled={props.disabled}
           value={props.value}
-          min={-12}
-          max={12}
-          step={0.1}
+          min={minVolume}
+          max={maxVolume}
+          step={step}
           valueLabelDisplay="auto"
           aria-labelledby={labelId}
           marks={[
-            { value: -12, label: "-12 dB" },
-            { value: 12, label: "12 dB" },
+            { value: minVolume, label: `${minVolume} dB` },
+            { value: maxVolume, label: `${maxVolume} dB` },
           ]}
           onChange={(_, value) => {
             if (typeof value == "number") {
@@ -64,9 +68,9 @@ export const VolumeSlider = React.memo(function (props: Props) {
           size="small"
           inputProps={{
             type: "number",
-            min: -12,
-            max: 12,
-            step: 0.1,
+            min: minVolume,
+            max: maxVolume,
+            step,
             "aria-labelledby": labelId,
           }}
         />

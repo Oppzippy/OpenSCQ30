@@ -20,6 +20,16 @@ impl VolumeAdjustments {
     pub fn adjustments(&self) -> Vec<i8> {
         self.inner.adjustments().into()
     }
+
+    #[wasm_bindgen(getter = MIN_VOLUME)]
+    pub fn min_volume() -> i8 {
+        structures::VolumeAdjustments::MIN_VOLUME
+    }
+
+    #[wasm_bindgen(getter = MAX_VOLUME)]
+    pub fn max_volume() -> i8 {
+        structures::VolumeAdjustments::MAX_VOLUME
+    }
 }
 
 impl From<structures::VolumeAdjustments> for VolumeAdjustments {

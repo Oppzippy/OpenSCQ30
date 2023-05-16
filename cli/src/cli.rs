@@ -1,5 +1,6 @@
 use clap::{command, Parser, Subcommand, ValueEnum};
 use macaddr::MacAddr6;
+use openscq30_lib::packets::structures::VolumeAdjustments;
 use tracing::Level;
 
 #[derive(Parser)]
@@ -33,7 +34,11 @@ pub enum SetCommand {
         mode: NoiseCancelingMode,
     },
     Equalizer {
-        #[arg(required=true, num_args = 8, value_parser = clap::value_parser!(i8).range(-120..120))]
+        #[arg(
+            required=true,
+            num_args = 8,
+            value_parser = clap::value_parser!(i8).range(VolumeAdjustments::MIN_VOLUME as i64..VolumeAdjustments::MAX_VOLUME as i64),
+        )]
         volume_adjustments: Vec<i8>,
     },
 }

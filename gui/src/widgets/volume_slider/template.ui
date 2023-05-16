@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
     <object class="GtkAdjustment" id="eq-adjustment">
-        <property name="lower">-12</property>
-        <property name="upper">12</property>
+        <!-- <property name="lower">-12</property> -->
+        <!-- <property name="upper">12</property> -->
         <property name="step-increment">0.1</property>
         <property name="page-increment">1</property>
     </object>

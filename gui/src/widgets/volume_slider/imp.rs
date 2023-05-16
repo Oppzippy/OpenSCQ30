@@ -14,6 +14,7 @@ use gtk::{
     CompositeTemplate, Scale, TemplateChild,
 };
 use gtk::{Label, SpinButton};
+use openscq30_lib::packets::structures::VolumeAdjustments;
 
 #[derive(Default, CompositeTemplate, Properties)]
 #[properties(wrapper_type = super::VolumeSlider)]
@@ -72,8 +73,10 @@ impl ObjectImpl for VolumeSlider {
         .build();
 
         let slider = self.slider.get();
-        let lower = slider.adjustment().lower();
-        let upper = slider.adjustment().upper();
+        let lower = VolumeAdjustments::MIN_VOLUME as f64 / 10.0;
+        let upper = VolumeAdjustments::MAX_VOLUME as f64 / 10.0;
+        slider.adjustment().set_lower(lower);
+        slider.adjustment().set_upper(upper);
         slider.add_mark(lower, gtk::PositionType::Right, Some(&format!("{}", lower)));
         slider.add_mark(0.0, gtk::PositionType::Right, Some("0"));
         slider.add_mark(

@@ -3,12 +3,13 @@ pub struct VolumeAdjustments {
     volume_adjustments: [i8; 8],
 }
 
-const MIN_VOLUME: i8 = -120;
-const MAX_VOLUME: i8 = 120;
-
 impl VolumeAdjustments {
+    pub const MIN_VOLUME: i8 = -120;
+    pub const MAX_VOLUME: i8 = 120;
+
     pub fn new(volume_adjustments: [i8; 8]) -> Self {
-        let clamped_adjustments = volume_adjustments.map(|vol| vol.clamp(MIN_VOLUME, MAX_VOLUME));
+        let clamped_adjustments =
+            volume_adjustments.map(|vol| vol.clamp(Self::MIN_VOLUME, Self::MAX_VOLUME));
         Self {
             volume_adjustments: clamped_adjustments,
         }
@@ -29,18 +30,18 @@ impl VolumeAdjustments {
 
     fn signed_adjustment_to_packet_byte(offset: i8) -> u8 {
         // output should be in the 60-180 range
-        let clamped = offset.clamp(MIN_VOLUME, MAX_VOLUME);
-        let unsigned = clamped.wrapping_add(MIN_VOLUME.abs()) as u8;
-        unsigned + (120 - MIN_VOLUME.unsigned_abs())
+        let clamped = offset.clamp(Self::MIN_VOLUME, Self::MAX_VOLUME);
+        let unsigned = clamped.wrapping_add(Self::MIN_VOLUME.abs()) as u8;
+        unsigned + (120 - Self::MIN_VOLUME.unsigned_abs())
     }
 
     fn packet_byte_to_signed_adjustment(byte: u8) -> i8 {
         let clamped = byte.clamp(
-            Self::signed_adjustment_to_packet_byte(MIN_VOLUME),
-            Self::signed_adjustment_to_packet_byte(MAX_VOLUME),
+            Self::signed_adjustment_to_packet_byte(Self::MIN_VOLUME),
+            Self::signed_adjustment_to_packet_byte(Self::MAX_VOLUME),
         );
-        let signed = clamped.wrapping_sub(MIN_VOLUME.unsigned_abs()) as i8;
-        signed - (120 - MIN_VOLUME.abs())
+        let signed = clamped.wrapping_sub(Self::MIN_VOLUME.unsigned_abs()) as i8;
+        signed - (120 - Self::MIN_VOLUME.abs())
     }
 }
 
