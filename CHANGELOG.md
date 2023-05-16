@@ -6,6 +6,7 @@
 
 #### Features
 
+-   Add web client (requires Web Bluetooth, currently only supported by Chromium)
 -   Add equalizer visualization for all profile dropdowns
 -   Only show create custom profile button when a custom profile is not selected, and only show delete custom profile button when one is selected
 

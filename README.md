@@ -8,7 +8,8 @@ Progress on supported platforms:
 [x] Windows - Ready  
 [x] Linux - Ready  
 [x] Android - Ready  
-[ ] macOS - It compiles. It's untested beyond that. I don't have a Mac, so this probably isn't going anywhere. If you're tring to get it working on macOS, see [btleplug macOS build notes](https://github.com/deviceplug/btleplug#user-content-macos).
+[x] Web - Ready
+[ ] macOS - It compiles. It's untested beyond that. You should probably use the web client instead. I don't have a Mac, so there's not much I can do for the desktop client. If you're tring to get it working on macOS, see [btleplug macOS build notes](https://github.com/deviceplug/btleplug#user-content-macos).
 
 ## Demo
 
