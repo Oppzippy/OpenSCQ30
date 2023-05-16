@@ -32,8 +32,17 @@ export function AppContents() {
   useUpdateAvailableToast();
 
   async function connect() {
-    const device = isDemoMode ? await selectDemoDevice() : await selectDevice();
-    setDevice(device);
+    try {
+      const device = isDemoMode
+        ? await selectDemoDevice()
+        : await selectDevice();
+      setDevice(device);
+    } catch (err) {
+      // Ignore error if the user canceled the device selection popup
+      if (!(err instanceof DOMException) || err.name != "NotFoundError") {
+        console.error(err);
+      }
+    }
   }
 
   function disconnect() {
