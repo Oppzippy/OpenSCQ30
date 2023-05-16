@@ -2,11 +2,24 @@
 
 ## v1.2.0
 
+### General
+
+#### Features
+
+-   Add equalizer visualization for all profile dropdowns
+-   Only show create custom profile button when a custom profile is not selected, and only show delete custom profile button when one is selected
+
 ### GUI
 
 #### Features
 
 -   Add volume text input in addition to slider
+
+### Android
+
+#### Features
+
+-   Add dialog for replacing existing custom profiles without retyping the name
 
 ## v1.1.1
 
