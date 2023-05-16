@@ -10,6 +10,10 @@
 -   Add equalizer visualization for all profile dropdowns
 -   Only show create custom profile button when a custom profile is not selected, and only show delete custom profile button when one is selected
 
+#### Fixes
+
+-   Fix some Soundcore devices not being detected due to a previously unknown mac address prefix
+
 ### GUI
 
 #### Features
