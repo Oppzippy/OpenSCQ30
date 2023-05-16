@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.oppzippy.openscq30.lib.VolumeAdjustments
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
@@ -25,13 +26,14 @@ fun EqualizerLine(values: List<Byte>, width: Dp, height: Dp) {
     val padding = 4
     val widthWithoutPadding = width.value - padding * 2
     val heightWithoutPadding = height.value - padding * 2
-    val minValue = -120
-    val range = 240
+    val minVolume = VolumeAdjustments.minVolume()
+    val maxVolume = VolumeAdjustments.maxVolume()
+    val range = maxVolume - minVolume
 
     val points = values.mapIndexed { index, value ->
         val normalizedX = index.toFloat() / values.size.toFloat()
         val x = normalizedX * widthWithoutPadding + padding
-        val normalizedY = 1F - ((value - minValue) / range.toFloat())
+        val normalizedY = 1F - ((value - minVolume) / range.toFloat())
         val y = normalizedY * heightWithoutPadding + padding
         if (index == 0) {
             PathNode.MoveTo(x, y)
@@ -55,9 +57,11 @@ fun EqualizerLine(values: List<Byte>, width: Dp, height: Dp) {
 
     val painter = rememberVectorPainter(image = vector)
 
-    Canvas(modifier = Modifier
-        .width(width)
-        .height(height)) {
+    Canvas(
+        modifier = Modifier
+            .width(width)
+            .height(height)
+    ) {
         with(painter) {
             draw(painter.intrinsicSize)
         }

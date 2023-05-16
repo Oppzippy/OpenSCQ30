@@ -4,20 +4,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oppzippy.openscq30.features.soundcoredevice.api.contentEquals
 import com.oppzippy.openscq30.features.soundcoredevice.impl.SoundcoreDeviceBox
-import com.oppzippy.openscq30.features.ui.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.features.ui.equalizer.models.EqualizerConfiguration
 import com.oppzippy.openscq30.features.ui.equalizer.models.EqualizerProfile
+import com.oppzippy.openscq30.features.ui.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.features.ui.equalizer.storage.CustomProfileDao
+import com.oppzippy.openscq30.lib.VolumeAdjustments
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import javax.inject.Inject
-
-val MIN_VOLUME = -120
-val MAX_VOLUME = 120;
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @HiltViewModel
@@ -25,6 +28,9 @@ class EqualizerSettingsViewModel @Inject constructor(
     private val deviceBox: SoundcoreDeviceBox,
     private val customProfileDao: CustomProfileDao,
 ) : ViewModel() {
+    private val minVolume = VolumeAdjustments.minVolume().toInt()
+    private val maxVolume = VolumeAdjustments.maxVolume().toInt()
+
     private val _displayedEqualizerConfiguration: MutableStateFlow<EqualizerConfiguration?> =
         MutableStateFlow(null)
     val displayedEqualizerConfiguration = _displayedEqualizerConfiguration.asStateFlow()
@@ -107,7 +113,7 @@ class EqualizerSettingsViewModel @Inject constructor(
         var reformattedText = changedText
         try {
             val value = BigDecimal(changedText).multiply(BigDecimal.TEN)
-                .coerceIn(BigDecimal(MIN_VOLUME), BigDecimal(MAX_VOLUME))
+                .coerceIn(BigDecimal(minVolume), BigDecimal(maxVolume))
             onValueChange(changedIndex, value.toByte())
             // don't delete trailing decimals
             if (!changedText.endsWith(".") && !changedText.endsWith(",")) {

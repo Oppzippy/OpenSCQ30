@@ -16,6 +16,10 @@ public final class VolumeAdjustments {
     }
     private static native byte [] do_adjustments(long self);
 
+    public static native byte minVolume();
+
+    public static native byte maxVolume();
+
     public synchronized void delete() {
         if (mNativeObj != 0) {
             do_delete(mNativeObj);
