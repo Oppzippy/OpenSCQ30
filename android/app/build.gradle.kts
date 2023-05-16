@@ -35,8 +35,8 @@ android {
         applicationId = "com.oppzippy.openscq30"
         minSdk = 24
         targetSdk = 33
-        versionCode = 3
-        versionName = "1.1.1"
+        versionCode = 4
+        versionName = "1.2.0"
         buildConfigField("boolean", "IS_DEMO_MODE", "false")
 
         testInstrumentationRunner = "com.oppzippy.openscq30.HiltTestRunner"
