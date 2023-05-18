@@ -29,10 +29,9 @@ impl VolumeAdjustments {
     }
 
     fn signed_adjustment_to_packet_byte(offset: i8) -> u8 {
-        // output should be in the 60-180 range
         let clamped = offset.clamp(Self::MIN_VOLUME, Self::MAX_VOLUME);
         let unsigned = clamped.wrapping_add(Self::MIN_VOLUME.abs()) as u8;
-        unsigned + (120 - Self::MIN_VOLUME.unsigned_abs())
+        unsigned
     }
 
     fn packet_byte_to_signed_adjustment(byte: u8) -> i8 {
@@ -41,15 +40,15 @@ impl VolumeAdjustments {
             Self::signed_adjustment_to_packet_byte(Self::MAX_VOLUME),
         );
         let signed = clamped.wrapping_sub(Self::MIN_VOLUME.unsigned_abs()) as i8;
-        signed - (120 - Self::MIN_VOLUME.abs())
+        signed
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::VolumeAdjustments;
-    const TEST_BYTES: [u8; 8] = [60, 80, 100, 120, 140, 160, 180, 120];
-    const TEST_ADJUSTMENTS: [i8; 8] = [-60, -40, -20, 0, 20, 40, 60, 0];
+    const TEST_BYTES: [u8; 8] = [0, 80, 100, 120, 140, 160, 180, 240];
+    const TEST_ADJUSTMENTS: [i8; 8] = [-120, -40, -20, 0, 20, 40, 60, 120];
 
     #[test]
     fn converts_volume_adjustments_to_packet_bytes() {
