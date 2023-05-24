@@ -29,9 +29,11 @@ modules:
       - cargo --offline build --release --package openscq30_gui --verbose
       - ./gui/scripts/build-locale.sh /app
       - install -Dm755 ./target/release/openscq30_gui -t /app/bin/
-      - install -Dm644 ./packaging/flatpak/${FLATPAK_ID}.desktop -t /app/share/applications/
+      - install -Dm644 ./gui/resources/${FLATPAK_ID}.desktop -t /app/share/applications/
       - install -Dm644 ./gui/resources/icon.svg /app/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg
     sources:
-      - type: dir
-        path: ../..
+      - type: git
+        url: https://github.com/Oppzippy/OpenSCQ30.git
+        tag: v1.2.0
+        commit: e35e87af6adbb0887457b91f97d46850a3c0a898
       - generated-sources.json
