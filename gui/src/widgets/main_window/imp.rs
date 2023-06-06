@@ -1,5 +1,5 @@
 use std::{
-    cell::{Cell, RefCell},
+    cell::{Cell, OnceCell, RefCell},
     rc::Rc,
 };
 
@@ -19,7 +19,6 @@ use gtk::{
 };
 
 use gtk::subclass::widget::WidgetClassSubclassExt;
-use once_cell::sync::OnceCell;
 
 use crate::{
     objects::{CustomEqualizerProfileObject, DeviceObject},

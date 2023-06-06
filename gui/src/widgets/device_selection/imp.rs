@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::cell::{OnceCell, RefCell};
 
 use gtk::{
     gio,
@@ -13,7 +13,6 @@ use gtk::{
     },
     ClosureExpression, CompositeTemplate, TemplateChild,
 };
-use once_cell::unsync::OnceCell;
 
 use crate::objects::DeviceObject;
 

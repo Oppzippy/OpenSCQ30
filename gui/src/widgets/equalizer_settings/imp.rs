@@ -1,4 +1,7 @@
-use std::{cell::RefCell, time::Duration};
+use std::{
+    cell::{OnceCell, RefCell},
+    time::Duration,
+};
 
 use gtk::{
     gio,
@@ -13,7 +16,6 @@ use gtk::{
     },
     CompositeTemplate, Expression, PropertyExpression, SignalListItemFactory, TemplateChild,
 };
-use once_cell::unsync::OnceCell;
 use openscq30_lib::packets::structures::{
     EqualizerConfiguration, PresetEqualizerProfile, VolumeAdjustments,
 };
