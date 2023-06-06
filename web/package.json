@@ -19,7 +19,7 @@
   "dependencies": {
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
-    "@fontsource/roboto": "^4.5.8",
+    "@fontsource/roboto": "^5.0.2",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.12.1",
     "dexie": "^3.2.3",
@@ -57,7 +57,7 @@
     "prettier": "^2.8.8",
     "typescript": "^5.0.2",
     "vite": "^4.3.0",
-    "vite-plugin-pwa": "^0.14.7",
+    "vite-plugin-pwa": "^0.16.3",
     "vitest": "^0.31.0"
   },
   "overrides": {
