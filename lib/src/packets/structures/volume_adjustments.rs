@@ -30,8 +30,8 @@ impl VolumeAdjustments {
 
     fn signed_adjustment_to_packet_byte(offset: i8) -> u8 {
         let clamped = offset.clamp(Self::MIN_VOLUME, Self::MAX_VOLUME);
-        let unsigned = clamped.wrapping_add(Self::MIN_VOLUME.abs()) as u8;
-        unsigned
+        
+        clamped.wrapping_add(Self::MIN_VOLUME.abs()) as u8
     }
 
     fn packet_byte_to_signed_adjustment(byte: u8) -> i8 {
@@ -39,8 +39,8 @@ impl VolumeAdjustments {
             Self::signed_adjustment_to_packet_byte(Self::MIN_VOLUME),
             Self::signed_adjustment_to_packet_byte(Self::MAX_VOLUME),
         );
-        let signed = clamped.wrapping_sub(Self::MIN_VOLUME.unsigned_abs()) as i8;
-        signed
+        
+        clamped.wrapping_sub(Self::MIN_VOLUME.unsigned_abs()) as i8
     }
 }
 
