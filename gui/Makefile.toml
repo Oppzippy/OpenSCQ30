@@ -92,7 +92,7 @@ echo Removing desktop file
 rm ${INSTALL_PREFIX}/share/applications/com.oppzippy.OpenSCQ30.desktop
 
 echo Removing AppStream Catalog XML
-cp ${INSTALL_PREFIX}/share/metainfo/com.oppzippy.OpenSCQ30.metainfo.xml
+rm ${INSTALL_PREFIX}/share/metainfo/com.oppzippy.OpenSCQ30.metainfo.xml
 '''
 
 [tasks.update-po-files]
