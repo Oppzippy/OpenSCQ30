@@ -64,10 +64,13 @@ echo Installing locales
 cp_glob ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/target/release/share/**/* ${INSTALL_PREFIX}/share/
 
 echo Installing icon
-cp ${CARGO_MAKE_WORKING_DIRECTORY}/resources/icon.svg ${INSTALL_PREFIX}/share/icons/hicolor/scalable/apps/com.oppzippy.OpenSCQ30.svg
+cp ${CARGO_MAKE_WORKING_DIRECTORY}/resources/com.oppzippy.OpenSCQ30.svg ${INSTALL_PREFIX}/share/icons/hicolor/scalable/apps/com.oppzippy.OpenSCQ30.svg
 
 echo Installing desktop file
 cp ${CARGO_MAKE_WORKING_DIRECTORY}/resources/com.oppzippy.OpenSCQ30.desktop ${INSTALL_PREFIX}/share/applications/com.oppzippy.OpenSCQ30.desktop
+
+echo Installing AppStream Catalog XML
+cp ${CARGO_MAKE_WORKING_DIRECTORY}/resources/com.oppzippy.OpenSCQ30.metainfo.xml ${INSTALL_PREFIX}/share/metainfo/com.oppzippy.OpenSCQ30.metainfo.xml
 '''
 
 [tasks.uninstall]
@@ -87,6 +90,9 @@ rm ${INSTALL_PREFIX}/share/icons/hicolor/scalable/apps/com.oppzippy.OpenSCQ30.sv
 
 echo Removing desktop file
 rm ${INSTALL_PREFIX}/share/applications/com.oppzippy.OpenSCQ30.desktop
+
+echo Removing AppStream Catalog XML
+cp ${INSTALL_PREFIX}/share/metainfo/com.oppzippy.OpenSCQ30.metainfo.xml
 '''
 
 [tasks.update-po-files]

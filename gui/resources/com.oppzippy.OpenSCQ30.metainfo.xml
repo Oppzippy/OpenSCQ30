@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+    <id>com.oppzippy.OpenSCQ30</id>
+    <metadata_license>FSFAP</metadata_license>
+    <project_license>GPL-3.0+</project_license>
+    <name>OpenSCQ30</name>
+    <summary>Control settings of Soundcore Q30 headphones</summary>
+    <description>
+        <p>Cross platform application for controlling settings of Soundcore Q30 headphones.</p>
+    </description>
+    <categories>
+        <category>Settings</category>
+    </categories>
+    <keywords>
+        <keyword>soundcore</keyword>
+        <keyword>bluetooth</keyword>
+        <keyword>wireless</keyword>
+        <keyword>headphones</keyword>
+        <keyword>q30</keyword>
+    </keywords>
+    <icon type="remote">
+        https://raw.githubusercontent.com/Oppzippy/OpenSCQ30/master/gui/resources/com.oppzippy.OpenSCQ30.svg</icon>
+    <url type="homepage">https://github.com/Oppzippy/OpenSCQ30</url>
+    <developer_name>Oppzippy</developer_name>
+    <update_contact>kyle@kylescheuing.com</update_contact>
+    <content_rating type="oars-1.0" />
+    <launchable type="desktop-id">com.oppzippy.OpenSCQ30.desktop</launchable>
+    <screenshots>
+        <screenshot>
+            <video container="webm" codec="vp9" width="902" height="386">
+                https://user-images.githubusercontent.com/2236514/229958756-aaa2a6d3-e908-4195-aad6-b0bcfda139a8.webm</video>
+        </screenshot>
+    </screenshots>
+    <provides>
+        <id>com.oppzippy.OpenSCQ30.desktop</id>
+    </provides>
+</component>
