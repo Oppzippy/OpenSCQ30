@@ -39,6 +39,8 @@ pub struct EqualizerSettings {
     pub create_custom_profile_button: TemplateChild<gtk::Button>,
     #[template_child]
     pub delete_custom_profile_button: TemplateChild<gtk::Button>,
+    #[template_child]
+    pub custom_profile_buttons: TemplateChild<gtk::Box>,
 
     profiles: OnceCell<gio::ListStore>,
     custom_profiles: OnceCell<gio::ListStore>,
@@ -215,6 +217,20 @@ impl EqualizerSettings {
     }
 
     fn set_up_custom_profile_create_delete_button(&self) {
+        // Hide buttons if a preset profile is selected
+        self.profile_dropdown
+            .bind_property(
+                "selected-item",
+                &self.custom_profile_buttons.get(),
+                "visible",
+            )
+            .transform_to(|_, item: Option<EqualizerProfileObject>| {
+                item.map(|profile| {
+                    profile.profile_id() as u16 == EqualizerConfiguration::CUSTOM_PROFILE_ID
+                })
+            })
+            .sync_create()
+            .build();
         // Show create button if no custom profile is selected
         self.custom_profile_dropdown
             .bind_property(

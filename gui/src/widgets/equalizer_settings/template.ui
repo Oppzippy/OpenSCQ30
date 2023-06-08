@@ -48,18 +48,22 @@
                             </object>
                         </child>
                         <child>
-                            <object class="GtkButton" id="create_custom_profile_button">
-                                <property name="label" translatable="yes"
-                                    context="create custom equalizer profile">Create</property>
-                                <signal name="clicked"
-                                    handler="handle_create_custom_profile" swapped="true" />
-                            </object>
-                        </child>
-                        <child>
-                            <object class="GtkButton" id="delete_custom_profile_button">
-                                <property name="label" context="delete custom equalizer profile">Delete</property>
-                                <signal name="clicked"
-                                    handler="handle_delete_custom_profile" swapped="true" />
+                            <object class="GtkBox" id="custom_profile_buttons">
+                                <child>
+                                    <object class="GtkButton" id="create_custom_profile_button">
+                                        <property name="label" translatable="yes"
+                                            context="create custom equalizer profile">Create</property>
+                                        <signal name="clicked"
+                                            handler="handle_create_custom_profile" swapped="true" />
+                                    </object>
+                                </child>
+                                <child>
+                                    <object class="GtkButton" id="delete_custom_profile_button">
+                                        <property name="label" context="delete custom equalizer profile">Delete</property>
+                                        <signal name="clicked"
+                                            handler="handle_delete_custom_profile" swapped="true" />
+                                    </object>
+                                </child>
                             </object>
                         </child>
                     </object>
