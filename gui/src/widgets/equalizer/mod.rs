@@ -32,6 +32,7 @@ mod tests {
     use gtk::{
         glib::{self, closure_local},
         prelude::ObjectExt,
+        subclass::prelude::ObjectSubclassIsExt,
     };
 
     use crate::load_resources;
@@ -59,7 +60,23 @@ mod tests {
                 received_event.set(true);
             }),
         );
-        equalizer.set_volumes([0, 1, 2, 3, 4, 5, 6, 7]);
+        equalizer.imp().band_100.set_volume(1);
         assert_eq!(received_event.get(), true);
+    }
+
+    #[gtk::test]
+    async fn test_set_volumes_does_not_fire_signal() {
+        load_resources();
+        let equalizer = Equalizer::new();
+        let received_event = Rc::new(Cell::new(false));
+        equalizer.connect_closure(
+            "volumes-changed",
+            false,
+            closure_local!(@strong received_event => move |_: Equalizer| {
+                received_event.set(true);
+            }),
+        );
+        equalizer.set_volumes([0, 1, 2, 3, 4, 5, 6, 7]);
+        assert_eq!(received_event.get(), false);
     }
 }
