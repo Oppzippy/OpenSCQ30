@@ -1,3 +1,5 @@
+use std::cell::Cell;
+
 use gtk::glib::clone;
 use gtk::glib::subclass::Signal;
 use gtk::prelude::ObjectExt;
@@ -34,6 +36,8 @@ pub struct Equalizer {
     pub band_6400: TemplateChild<VolumeSlider>,
     #[template_child]
     pub band_12800: TemplateChild<VolumeSlider>,
+
+    dont_fire_events: Cell<bool>,
 }
 
 impl Equalizer {
@@ -42,14 +46,18 @@ impl Equalizer {
     }
 
     pub fn set_volumes(&self, volumes: [i8; 8]) {
+        self.dont_fire_events.set(true);
         self.get_volume_sliders()
             .iter()
             .zip(volumes.into_iter())
             .for_each(|(slider, volume)| slider.set_volume(volume));
+        self.dont_fire_events.set(false);
     }
 
     fn handle_volume_change(&self) {
-        self.obj().emit_by_name::<()>("volumes-changed", &[]);
+        if !self.dont_fire_events.get() {
+            self.obj().emit_by_name::<()>("volumes-changed", &[]);
+        }
     }
 
     fn get_volume_sliders(&self) -> [&TemplateChild<VolumeSlider>; 8] {

@@ -56,6 +56,7 @@ impl Device for DemoDevice {
         &self,
         ambient_sound_mode: AmbientSoundMode,
     ) -> crate::Result<()> {
+        tracing::info!("set ambient sound mode to {ambient_sound_mode:?}");
         let mut state = self.state.lock().await;
         *state = state.with_ambient_sound_mode(ambient_sound_mode);
         Ok(())
@@ -69,6 +70,7 @@ impl Device for DemoDevice {
         &self,
         noise_canceling_mode: NoiseCancelingMode,
     ) -> crate::Result<()> {
+        tracing::info!("set noise canceling mode to {noise_canceling_mode:?}");
         let mut state = self.state.lock().await;
         *state = state.with_noise_canceling_mode(noise_canceling_mode);
         Ok(())
@@ -82,6 +84,7 @@ impl Device for DemoDevice {
         &self,
         configuration: EqualizerConfiguration,
     ) -> crate::Result<()> {
+        tracing::info!("set equalizer configuration to {configuration:?}");
         let mut state = self.state.lock().await;
         *state = state.with_equalizer_configuration(configuration);
         Ok(())

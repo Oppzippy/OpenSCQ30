@@ -1,14 +1,11 @@
-use std::{
-    cell::{OnceCell, RefCell},
-    time::Duration,
-};
+use std::cell::{Cell, OnceCell};
 
 use gtk::{
     gio,
-    glib::{self, clone, once_cell::sync::Lazy, subclass::Signal, timeout_future, MainContext},
+    glib::{self, clone, once_cell::sync::Lazy, subclass::Signal},
     prelude::*,
     subclass::{
-        prelude::{BoxImpl, ObjectImpl, ObjectSubclass, *},
+        prelude::*,
         widget::{
             CompositeTemplateCallbacksClass, CompositeTemplateClass, WidgetClassSubclassExt,
             WidgetImpl,
@@ -46,7 +43,7 @@ pub struct EqualizerSettings {
     profiles: OnceCell<gio::ListStore>,
     custom_profiles: OnceCell<gio::ListStore>,
 
-    update_signal_debounce_handle: RefCell<Option<glib::JoinHandle<()>>>,
+    custom_profile_index: Cell<Option<u32>>,
 }
 
 #[gtk::template_callbacks]
@@ -71,23 +68,28 @@ impl EqualizerSettings {
     }
 
     #[template_callback]
-    fn handle_volumes_changed(&self, _equalizer: &Equalizer) {
+    fn handle_volumes_changed(&self, equalizer: &Equalizer) {
         self.update_custom_profile_selection();
-        let context = MainContext::default();
-        let mut maybe_handle = self.update_signal_debounce_handle.borrow_mut();
-        if let Some(handle) = &*maybe_handle {
-            handle.abort();
-        }
         // apply-equalizer-settings fires instantly when changing the preset profile, so we only need to be concerned
         // with custom profiles here.
-        if self.is_custom_profile() {
-            *maybe_handle = Some(
-                context.spawn_local(clone!(@weak self as this => async move {
-                    timeout_future(Duration::from_secs(1)).await;
-                    *this.update_signal_debounce_handle.borrow_mut() = None;
-                    this.obj().emit_by_name::<()>("apply-equalizer-settings", &[]);
-                })),
-            );
+        let selected_profile = self.profile_dropdown.selected_item().map(|item| {
+            item.downcast::<EqualizerProfileObject>()
+                .expect("item must be EqualizerProfileObject")
+        });
+        let volume_adjustments_match_preset_profile = selected_profile
+            .map(|profile_object| {
+                PresetEqualizerProfile::from_id(profile_object.profile_id() as u16)
+            })
+            .flatten()
+            .map(|profile| profile.volume_adjustments())
+            .map(|volume_adjustments| equalizer.volumes() == volume_adjustments.adjustments())
+            .unwrap_or(false);
+        if !volume_adjustments_match_preset_profile {
+            if let Some(custom_profile_index) = self.custom_profile_index.get() {
+                self.profile_dropdown.set_selected(custom_profile_index);
+                self.obj()
+                    .emit_by_name::<()>("apply-equalizer-settings", &[]);
+            }
         }
     }
 
@@ -135,6 +137,16 @@ impl EqualizerSettings {
         if let Some(model) = self.profiles.get() {
             model.remove_all();
             model.extend_from_slice(&profiles);
+
+            self.custom_profile_index.set(
+                profiles
+                    .iter()
+                    .enumerate()
+                    .find(|(_, profile)| {
+                        profile.profile_id() as u16 == EqualizerConfiguration::CUSTOM_PROFILE_ID
+                    })
+                    .map(|(index, _)| index as u32),
+            );
         }
     }
 
@@ -195,7 +207,8 @@ impl EqualizerSettings {
                 let maybe_selected_item = this.custom_profile_dropdown.selected_item()
                     .map(|item| item.downcast::<CustomEqualizerProfileObject>().unwrap());
                 if let Some(selected_item) = maybe_selected_item {
-                    this.obj().emit_by_name("custom-equalizer-profile-selected", &[&selected_item])
+                    this.obj().emit_by_name::<()>("custom-equalizer-profile-selected", &[&selected_item]);
+                    this.obj().emit_by_name::<()>("apply-equalizer-settings", &[]);
                 }
             }),
         );
@@ -264,7 +277,6 @@ impl EqualizerSettings {
         self.set_up_preset_profile_item_factory();
         self.set_up_preset_profile_selection_changed_handler();
         self.set_up_preset_profile_items();
-        self.set_up_preset_profile_disabled_fields();
     }
 
     fn set_up_preset_profile_selection_model(&self) {
@@ -323,16 +335,17 @@ impl EqualizerSettings {
                     .downcast()
                     .expect("selected item must be an EqualizerProfileObject");
                 let profile_id = selected_item.profile_id() as u16;
-                let configuration = if profile_id == EqualizerConfiguration::CUSTOM_PROFILE_ID {
-                    EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(this.equalizer.volumes()))
-                } else {
+                let configuration = if profile_id != EqualizerConfiguration::CUSTOM_PROFILE_ID {
                     let preset_profile = PresetEqualizerProfile::from_id(profile_id).unwrap_or_else(|| {
                         panic!("invalid preset profile id {profile_id}");
                     });
                     EqualizerConfiguration::new_from_preset_profile(preset_profile)
+                } else {
+                    EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(this.equalizer.volumes()))
                 };
                 this.set_equalizer_configuration(&configuration);
-                this.obj().emit_by_name("apply-equalizer-settings", &[])
+                this.update_custom_profile_selection();
+                this.obj().emit_by_name::<()>("apply-equalizer-settings", &[]);
             }));
     }
 
@@ -345,28 +358,6 @@ impl EqualizerSettings {
             })
             .map(|profile| profile.profile_id() as u16 == EqualizerConfiguration::CUSTOM_PROFILE_ID)
             .unwrap_or(false)
-    }
-
-    fn set_up_preset_profile_disabled_fields(&self) {
-        let is_custom_profile_transform = |_, value: EqualizerProfileObject| {
-            Some(value.profile_id() as u16 == EqualizerConfiguration::CUSTOM_PROFILE_ID)
-        };
-
-        self.profile_dropdown
-            .bind_property(
-                "selected-item",
-                &self.custom_profile_selection.get(),
-                "sensitive",
-            )
-            .transform_to(is_custom_profile_transform)
-            .sync_create()
-            .build();
-
-        self.profile_dropdown
-            .bind_property("selected-item", &self.equalizer.get(), "sensitive")
-            .transform_to(is_custom_profile_transform)
-            .sync_create()
-            .build();
     }
 
     fn set_up_preset_profile_items(&self) {
