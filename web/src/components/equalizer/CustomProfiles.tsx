@@ -51,7 +51,7 @@ export const CustomProfiles = React.memo(function ({
 
   return (
     <FormControl sx={sx}>
-      <InputLabel id="equalizer-profile-select-label">
+      <InputLabel id="equalizer-custom-profile-select-label">
         {t("equalizer.customProfile")}
       </InputLabel>
       <Select
