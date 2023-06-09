@@ -328,6 +328,54 @@ class DeviceSettingsEqualizerTest {
             .assertDoesNotExist()
     }
 
+    @Test
+    fun testOnlyAllowsOneOfPresetOrCustom() {
+        initializeDeviceFactoryWithOneDevice(
+            equalizerConfiguration = EqualizerConfiguration(
+                VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
+            ),
+        )
+        composeRule.setContent {
+            DeviceSettingsActivityView(macAddress = "", onDeviceNotFound = {})
+        }
+        composeRule.onNode(equalizer).performClick()
+
+        // Create custom profile with same volume adjustments as Soundcore Signature
+        composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.add))
+            .performClick()
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.name))
+            .performTextInput("Test Profile 1")
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.create)).performClick()
+
+        // Soundcore Signature should not become selected
+        composeRule.onNode(soundcoreSignature, true).assertDoesNotExist()
+        composeRule.onNodeWithText("Test Profile 1").assertExists()
+
+        // Select Soundcore Signature and ensure the custom profile no longer is selected
+        composeRule.onNode(custom, true).performClick()
+        composeRule.onNode(soundcoreSignature, true).performClick()
+        composeRule.onNode(soundcoreSignature, true).assertExists()
+        composeRule.onNode(custom, true).assertDoesNotExist()
+    }
+
+    @Test
+    fun testHidesCreateAndDeleteButtonsWhenPresetIsSelected() {
+        initializeDeviceFactoryWithOneDevice(
+            equalizerConfiguration = EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
+        )
+        composeRule.setContent {
+            DeviceSettingsActivityView(macAddress = "", onDeviceNotFound = {})
+        }
+        composeRule.onNode(equalizer).performClick()
+
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.replace))
+            .assertDoesNotExist()
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.create))
+            .assertDoesNotExist()
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.delete))
+            .assertDoesNotExist()
+    }
+
     private fun initializeDeviceFactoryWithOneDevice(equalizerConfiguration: EqualizerConfiguration): Pair<SoundcoreDevice, SoundcoreDeviceState> {
         val device = mockk<SoundcoreDevice>()
         val state = mockk<SoundcoreDeviceState>()

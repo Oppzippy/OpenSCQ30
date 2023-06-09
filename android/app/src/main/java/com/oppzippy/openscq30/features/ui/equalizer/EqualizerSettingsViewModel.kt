@@ -134,7 +134,7 @@ class EqualizerSettingsViewModel @Inject constructor(
     fun onValueChange(changedIndex: Int, changedValue: Byte) {
         _displayedEqualizerConfiguration.value?.let { equalizerConfiguration ->
             setEqualizerConfiguration(
-                equalizerConfiguration.equalizerProfile,
+                EqualizerProfile.Custom,
                 equalizerConfiguration.values.mapIndexed { index, value ->
                     if (index == changedIndex) {
                         changedValue

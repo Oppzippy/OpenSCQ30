@@ -1,20 +1,27 @@
 package com.oppzippy.openscq30.features.ui.equalizer.composables
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FindReplace
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.oppzippy.openscq30.features.ui.equalizer.models.EqualizerProfile
-import com.oppzippy.openscq30.features.ui.equalizer.EqualizerSettingsViewModel
-import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.features.ui.equalizer.EqualizerSettingsViewModel
+import com.oppzippy.openscq30.features.ui.equalizer.models.EqualizerProfile
+import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
 fun EqualizerSettings(
@@ -60,17 +67,17 @@ fun EqualizerSettings(
             PresetProfileSelection(value = profile, onProfileSelected = { newProfile ->
                 viewModel.selectPresetProfile(newProfile)
             })
-            if (isCustomProfile) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    CustomProfileSelection(
-                        selectedProfile = selectedCustomProfile,
-                        profiles = customProfiles,
-                        onProfileSelected = {
-                            viewModel.selectCustomProfile(it)
-                        },
-                    )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                CustomProfileSelection(
+                    selectedProfile = selectedCustomProfile,
+                    profiles = customProfiles,
+                    onProfileSelected = {
+                        viewModel.selectCustomProfile(it)
+                    },
+                )
+                if (isCustomProfile) {
                     if (selectedCustomProfile == null) {
                         IconButton(onClick = { isCreateDialogOpen = true }) {
                             Icon(
@@ -98,7 +105,6 @@ fun EqualizerSettings(
             }
             Equalizer(
                 values = values,
-                enabled = isCustomProfile,
                 onValueChange = { changedIndex, changedValue ->
                     viewModel.onValueChange(changedIndex, changedValue)
                 },

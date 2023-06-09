@@ -1,9 +1,13 @@
 package com.oppzippy.openscq30.features.ui.equalizer.composables
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Divider
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -17,7 +21,6 @@ fun Equalizer(
     onValueChange: (index: Int, value: Byte) -> Unit,
     texts: List<String>,
     onTextChanged: (index: Int, value: String) -> Unit,
-    enabled: Boolean = true,
 ) {
     if (values.size != 8 || texts.size != 8) {
         throw IllegalArgumentException("There must be exactly 8 values")
@@ -37,7 +40,6 @@ fun Equalizer(
                     onTextChange = {
                         onTextChanged(index, it)
                     },
-                    enabled = enabled,
                 )
                 Divider(modifier = Modifier.padding(vertical = 4.dp))
             }

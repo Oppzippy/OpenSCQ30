@@ -27,7 +27,6 @@ fun EqualizerSlider(
     onValueChange: (value: Byte) -> Unit,
     text: String,
     onTextChange: (text: String) -> Unit,
-    enabled: Boolean = true,
 ) {
     Column {
         Row {
@@ -50,7 +49,6 @@ fun EqualizerSlider(
                     }
                 },
                 onValueChange = onTextChange,
-                enabled = enabled
             )
             Slider(
                 value = value.toFloat(),
@@ -62,7 +60,6 @@ fun EqualizerSlider(
                 steps = VolumeAdjustments.maxVolume().toInt() - VolumeAdjustments.minVolume()
                     .toInt(),
                 modifier = Modifier.testTag("equalizerSlider"),
-                enabled = enabled,
             )
         }
     }
