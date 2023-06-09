@@ -36,15 +36,38 @@ impl EqualizerSettings {
 #[cfg(test)]
 mod tests {
     use gtk::{subclass::prelude::*, traits::WidgetExt};
+    use openscq30_lib::packets::structures::{
+        EqualizerConfiguration, PresetEqualizerProfile, VolumeAdjustments,
+    };
 
     use crate::objects::CustomEqualizerProfileObject;
 
     use super::EqualizerSettings;
 
     #[gtk::test]
+    fn test_does_not_show_any_button_with_preset_profile_selected() {
+        crate::load_resources();
+        let settings = EqualizerSettings::new();
+        settings.set_equalizer_configuration(&EqualizerConfiguration::new_from_preset_profile(
+            PresetEqualizerProfile::SoundcoreSignature,
+        ));
+        assert_eq!(
+            false,
+            settings.imp().create_custom_profile_button.is_visible(),
+        );
+        assert_eq!(
+            false,
+            settings.imp().delete_custom_profile_button.is_visible(),
+        );
+    }
+
+    #[gtk::test]
     fn test_only_shows_create_button_with_no_custom_profile_selected() {
         crate::load_resources();
         let settings = EqualizerSettings::new();
+        settings.set_equalizer_configuration(&EqualizerConfiguration::new_custom_profile(
+            VolumeAdjustments::new([0, 0, 0, 0, 0, 0, 0, 0]),
+        ));
         assert_eq!(
             true,
             settings.imp().create_custom_profile_button.is_visible(),
@@ -63,12 +86,15 @@ mod tests {
             "test profile",
             [0, 0, 0, 0, 0, 0, 0, 0],
         )]);
+        settings.set_equalizer_configuration(&EqualizerConfiguration::new_custom_profile(
+            VolumeAdjustments::new([0, 0, 0, 0, 0, 0, 0, 0]),
+        ));
         assert_eq!(
-            true,
+            false,
             settings.imp().create_custom_profile_button.is_visible(),
         );
         assert_eq!(
-            false,
+            true,
             settings.imp().delete_custom_profile_button.is_visible(),
         );
     }
