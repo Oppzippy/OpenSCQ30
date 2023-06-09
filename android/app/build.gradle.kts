@@ -107,7 +107,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
 
     // Compose
-    val composeBomVersion = "2023.05.01"
+    val composeBomVersion = "2023.06.00"
     implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     androidTestImplementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     implementation("androidx.compose.ui:ui")
