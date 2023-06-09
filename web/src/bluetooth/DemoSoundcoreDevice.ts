@@ -39,6 +39,7 @@ export class DemoSoundcoreDevice implements SoundcoreDevice {
   }
 
   public async transitionState(newState: SoundcoreDeviceState) {
+    console.debug("Transition device state", newState);
     this._state.next(newState);
   }
 }

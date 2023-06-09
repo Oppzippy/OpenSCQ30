@@ -1,5 +1,4 @@
 import { Stack } from "@mui/material";
-import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback, useState } from "react";
 import {
   AmbientSoundMode,
@@ -9,12 +8,12 @@ import {
   VolumeAdjustments,
 } from "../../../wasm/pkg/openscq30_web_wasm";
 import { SoundcoreDevice } from "../../bluetooth/SoundcoreDevice";
-import { db } from "../../storage/db";
 import { EqualizerSettings } from "../equalizer/EqualizerSettings";
 import { NewCustomProfileDialog } from "../equalizer/NewCustomProfileDialog";
 import { AmbientSoundModeSelection } from "../soundMode/AmbientSoundModeSelection";
 import { NoiseCancelingModeSelection } from "../soundMode/NoiseCancelingModeSelection";
 import { useCreateCustomProfileWithName } from "./hooks/useCreateCustomProfileWithName";
+import { useCustomEqualizerProfiles } from "./hooks/useCustomEqualizerProfiles";
 import { useDeleteCustomProfile } from "./hooks/useDeleteCustomProfile";
 import { useDisplayState } from "./hooks/useDisplayState";
 
@@ -23,8 +22,7 @@ export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
 
   const [isCreateCustomProfileDialogOpen, setCreateCustomProfileDialogOpen] =
     useState(false);
-  const customEqualizerProfiles =
-    useLiveQuery(() => db.customEqualizerProfiles.toArray()) ?? [];
+  const customEqualizerProfiles = useCustomEqualizerProfiles();
 
   const setSelectedPresetProfile = useCallback(
     (profile: PresetEqualizerProfile | -1) => {

@@ -6,6 +6,8 @@ import { SoundcoreDevice } from "../../../src/bluetooth/SoundcoreDevice";
 import { SoundcoreDeviceState } from "../../../src/bluetooth/SoundcoreDeviceState";
 import { ToastQueue } from "../../../src/components/ToastQueue";
 import { DeviceSettings } from "../../../src/components/deviceSettings/DeviceSettings";
+import { useCustomEqualizerProfiles } from "../../../src/components/deviceSettings/hooks/useCustomEqualizerProfiles";
+import { upsertCustomEqualizerProfile } from "../../../src/storage/customEqualizerProfiles";
 import {
   AmbientSoundMode,
   EqualizerConfiguration,
@@ -13,31 +15,20 @@ import {
   PresetEqualizerProfile,
 } from "../../../wasm/pkg/openscq30_web_wasm";
 
-interface HasState {
-  state: BehaviorSubject<{
-    ambientSoundMode: AmbientSoundMode;
-    noiseCancelingMode: NoiseCancelingMode;
-    equalizerConfiguration: EqualizerConfiguration;
-  }>;
-}
+vi.mock(
+  "../../../src/components/deviceSettings/hooks/useCustomEqualizerProfiles",
+  () => {
+    return {
+      useCustomEqualizerProfiles: vi.fn(() => []),
+    };
+  },
+);
 
-function decorateWithGettersAndSetters<T extends HasState>(device: T) {
+vi.mock("../../../src/storage/customEqualizerProfiles", () => {
   return {
-    ...device,
-    get ambientSoundMode() {
-      return this.state.value.ambientSoundMode;
-    },
-    get noiseCancelingMode() {
-      return this.state.value.noiseCancelingMode;
-    },
-    get equalizerConfiguration() {
-      return this.state.value.equalizerConfiguration;
-    },
-    async transitionState(newState: SoundcoreDeviceState) {
-      this.state.next(newState);
-    },
+    upsertCustomEqualizerProfile: vi.fn(),
   };
-}
+});
 
 describe("Device Settings", () => {
   let device: SoundcoreDevice;
@@ -47,7 +38,7 @@ describe("Device Settings", () => {
       shouldAdvanceTime: true,
     });
     user = userEvent.setup();
-    const mockDevice = decorateWithGettersAndSetters({
+    const mockDevice = {
       state: new BehaviorSubject<{
         ambientSoundMode: AmbientSoundMode;
         noiseCancelingMode: NoiseCancelingMode;
@@ -60,7 +51,19 @@ describe("Device Settings", () => {
         ),
       }),
       connect: vi.fn<unknown[], unknown>(),
-    });
+      get ambientSoundMode() {
+        return this.state.value.ambientSoundMode;
+      },
+      get noiseCancelingMode() {
+        return this.state.value.noiseCancelingMode;
+      },
+      get equalizerConfiguration() {
+        return this.state.value.equalizerConfiguration;
+      },
+      async transitionState(newState: SoundcoreDeviceState) {
+        this.state.next(newState);
+      },
+    };
     device = mockDevice as unknown as SoundcoreDevice;
   });
 
@@ -109,22 +112,62 @@ describe("Device Settings", () => {
     ]).not.toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
   });
 
-  it("should enable sliders when a custom profile is selected", async () => {
+  it("should switch to custom profile when moving a silder", async () => {
     const renderResult = render(
       <DeviceSettings device={device as unknown as SoundcoreDevice} />,
     );
-    function areSlidersDisabled() {
-      const sliders: NodeListOf<HTMLInputElement> =
-        renderResult.baseElement.querySelectorAll("input[type='range']");
-      return [...sliders].every((slider) => slider.disabled);
-    }
 
-    expect(areSlidersDisabled()).toEqual(true);
+    const numberInputs = renderResult.baseElement.querySelectorAll(
+      "input[type='number']",
+    );
+    await user.type(numberInputs[0], "1");
+    expect(
+      renderResult.getByLabelText("equalizer.profile").textContent,
+    ).toEqual("equalizer.custom");
+  });
+
+  it("should not show custom profile create/delete buttons when a preset is selected", async () => {
+    const renderResult = render(
+      <DeviceSettings device={device as unknown as SoundcoreDevice} />,
+    );
+
+    expect(
+      renderResult.queryByRole("button", { name: "application.create" }),
+    ).toBeFalsy();
+    expect(
+      renderResult.queryByRole("button", { name: "application.delete" }),
+    ).toBeFalsy();
+  });
+
+  it("should show only one of a custom profile or a preset profile", async () => {
+    (useCustomEqualizerProfiles as ReturnType<typeof vi.fn>).mockReturnValue([
+      { name: "test", values: [0, 0, 0, 0, 0, 0, 0, 0], id: 1 },
+    ]);
+    const renderResult = render(
+      <DeviceSettings device={device as unknown as SoundcoreDevice} />,
+    );
+
+    // Check only preset profile shown
+    expect(
+      renderResult.getByLabelText("equalizer.profile").textContent,
+    ).toEqual("presetEqualizerProfile.soundcoreSignature");
+    expect(
+      renderResult.getByLabelText("equalizer.customProfile").textContent,
+    ).not.toEqual("test");
+
+    // Check only custom profile shown
     await user.click(renderResult.getByLabelText("equalizer.profile"));
     await user.click(
-      renderResult.getByRole("option", { name: "equalizer.custom" }),
+      renderResult.getByRole("option", {
+        name: "equalizer.custom",
+      }),
     );
-    expect(areSlidersDisabled()).toEqual(false);
+    expect(
+      renderResult.getByLabelText("equalizer.profile").textContent,
+    ).toEqual("equalizer.custom");
+    expect(
+      renderResult.getByLabelText("equalizer.customProfile").textContent,
+    ).toEqual("test");
   });
 
   it("should synchronize sliders and number input values", async () => {
@@ -179,13 +222,9 @@ describe("Device Settings", () => {
   });
 
   it("should display a toast when creating a custom profile fails", async () => {
-    vi.mock("../../../src/storage/customEqualizerProfiles", () => {
-      return {
-        async upsertCustomEqualizerProfile() {
-          throw Error("It should error");
-        },
-      };
-    });
+    (
+      upsertCustomEqualizerProfile as ReturnType<typeof vi.fn>
+    ).mockRejectedValue(new Error("It should error"));
     const renderResult = render(
       <ToastQueue>
         <DeviceSettings device={device as unknown as SoundcoreDevice} />

@@ -27,9 +27,14 @@ const customProfilesSx: SxProps = {
 export const EqualizerSettings = React.memo(function (props: Props) {
   const { t } = useTranslation();
 
-  const selectedCustomProfile = props.customProfiles.find((customProfile) =>
-    isEqual(customProfile.values, props.values),
-  );
+  const isCustomProfile = props.profile == -1;
+
+  let selectedCustomProfile: CustomEqualizerProfile | undefined;
+  if (isCustomProfile) {
+    selectedCustomProfile = props.customProfiles.find((customProfile) =>
+      isEqual(customProfile.values, props.values),
+    );
+  }
 
   const { onValueChange, onDeleteCustomProfile, onAddCustomProfile } = props;
 
@@ -53,15 +58,16 @@ export const EqualizerSettings = React.memo(function (props: Props) {
         onProfileSelected={props.onProfileSelected}
         profile={props.profile}
       />
-      {props.profile == -1 ? (
-        <Stack direction="row" spacing={1} alignItems="center">
-          <CustomProfiles
-            sx={customProfilesSx}
-            profiles={props.customProfiles}
-            onProfileSelected={onCustomProfileSelected}
-            selectedProfile={selectedCustomProfile}
-          />
-          {selectedCustomProfile ? (
+      <Stack direction="row" spacing={1} alignItems="center">
+        <CustomProfiles
+          sx={customProfilesSx}
+          profiles={props.customProfiles}
+          onProfileSelected={onCustomProfileSelected}
+          selectedProfile={selectedCustomProfile}
+        />
+        {/* hide buttons when preset profile is selected */}
+        {isCustomProfile &&
+          (selectedCustomProfile ? (
             <IconButton
               onClick={deleteSelectedCustomProfile}
               aria-label={t("equalizer.deleteCustomProfile").toString()}
@@ -75,14 +81,9 @@ export const EqualizerSettings = React.memo(function (props: Props) {
             >
               <Add />
             </IconButton>
-          )}
-        </Stack>
-      ) : undefined}
-      <Equalizer
-        disabled={props.profile != -1}
-        values={props.values}
-        onValueChange={props.onValueChange}
-      />
+          ))}
+      </Stack>
+      <Equalizer values={props.values} onValueChange={onValueChange} />
     </Stack>
   );
 });
