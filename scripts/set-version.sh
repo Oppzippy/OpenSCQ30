@@ -28,6 +28,13 @@ set_version_in_iss() {
     sed --in-place --regexp-extended --null-data "s/(\n#define AppVersion \")([0-9\.]+)(\"\n)/\1$2\3/" "$1"
 }
 
+add_version_to_appstream_metainfo() {
+    if [[ -z $(grep "<release version=\"$2\"" "$1" ) ]]; then
+        date=$(date --utc +"%Y-%m-%d")
+        sed --in-place --regexp-extended --null-data "s/<releases>/<releases>\n        <release version=\"$2\" date=\"$date\" \/>/" "$1"
+    fi
+}
+
 if [ -z "$1" ]; then
     cat <<EOF
 Usage: set-version.sh 1.0.0
@@ -49,3 +56,4 @@ set_version_in_build_gradle android/app/build.gradle.kts "$1"
 set_version_in_package_json web/package.json "$1"
 set_version_in_appimage_builder packaging/appimage/AppImageBuilder.yml "$1"
 set_version_in_iss packaging/windows/setup.iss "$1"
+add_version_to_appstream_metainfo gui/resources/com.oppzippy.OpenSCQ30.metainfo.xml "$1"

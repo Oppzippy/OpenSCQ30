@@ -32,4 +32,10 @@
     <provides>
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
+    <releases>
+        <release version="1.2.0" date="2023-05-16" />
+        <release version="1.1.1" date="2023-04-05" />
+        <release version="1.1.0" date="2023-04-05" />
+        <release version="1.0.0" date="2023-04-05" />
+    </releases>
 </component>
