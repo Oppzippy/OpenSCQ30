@@ -16,8 +16,8 @@ impl Equalizer {
         Object::builder().build()
     }
 
-    pub fn volumes(&self) -> [i8; 8] {
-        return self.imp().volumes();
+    pub fn volume_adjustments(&self) -> [i8; 8] {
+        return self.imp().volume_adjustments();
     }
 
     pub fn set_volumes(&self, volumes: [i8; 8]) {
@@ -45,7 +45,7 @@ mod tests {
         let equalizer = Equalizer::new();
         let expected_volumes = [0, 1, 2, 3, 4, 5, 6, 7];
         equalizer.set_volumes(expected_volumes.to_owned());
-        assert_eq!(equalizer.volumes(), expected_volumes);
+        assert_eq!(equalizer.volume_adjustments(), expected_volumes);
     }
 
     #[gtk::test]

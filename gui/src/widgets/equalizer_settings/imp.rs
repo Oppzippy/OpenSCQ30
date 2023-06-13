@@ -56,7 +56,7 @@ impl EqualizerSettings {
             "create-custom-equalizer-profile",
             &[&CustomEqualizerProfileObject::new(
                 "", // TODO use a different object that doesn't have a name field
-                self.equalizer.volumes(),
+                self.equalizer.volume_adjustments(),
             )],
         )
     }
@@ -84,7 +84,9 @@ impl EqualizerSettings {
             })
             .flatten()
             .map(|profile| profile.volume_adjustments())
-            .map(|volume_adjustments| equalizer.volumes() == volume_adjustments.adjustments())
+            .map(|volume_adjustments| {
+                equalizer.volume_adjustments() == volume_adjustments.adjustments()
+            })
             .unwrap_or(false);
         if !volume_adjustments_match_preset_profile {
             if let Some(custom_profile_index) = self.custom_profile_index.get() {
@@ -98,7 +100,7 @@ impl EqualizerSettings {
     pub fn equalizer_configuration(&self) -> EqualizerConfiguration {
         if self.is_custom_profile() {
             EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(
-                self.equalizer.volumes(),
+                self.equalizer.volume_adjustments(),
             ))
         } else {
             let selection = self
@@ -210,7 +212,10 @@ impl EqualizerSettings {
                     .map(|item| item.downcast::<CustomEqualizerProfileObject>().unwrap());
                 if let Some(selected_item) = maybe_selected_item {
                     this.obj().emit_by_name::<()>("custom-equalizer-profile-selected", &[&selected_item]);
-                    this.obj().emit_by_name::<()>("apply-equalizer-settings", &[]);
+                    // Only apply settings if something changed from the perspective of the headphones
+                    if !this.is_custom_profile() || this.equalizer.volume_adjustments() != selected_item.volume_adjustments() {
+                        this.obj().emit_by_name::<()>("apply-equalizer-settings", &[]);
+                    }
                 }
             }),
         );
@@ -270,7 +275,7 @@ impl EqualizerSettings {
     fn update_custom_profile_selection(&self) {
         match self.custom_profiles.get() {
             Some(custom_profiles) if self.is_custom_profile() => {
-                let volumes = self.equalizer.volumes();
+                let volumes = self.equalizer.volume_adjustments();
                 let custom_profile_index = custom_profiles
                     .iter::<CustomEqualizerProfileObject>()
                     .enumerate()
@@ -357,7 +362,7 @@ impl EqualizerSettings {
                     });
                     EqualizerConfiguration::new_from_preset_profile(preset_profile)
                 } else {
-                    EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(this.equalizer.volumes()))
+                    EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(this.equalizer.volume_adjustments()))
                 };
                 this.set_equalizer_configuration(&configuration);
                 this.update_custom_profile_selection();
