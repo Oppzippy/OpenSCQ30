@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Features
+
+-   Allow modifying equalizer directly from a preset profile rather than having to switch the dropdown to Custom first
+-   Allow selecting a custom profile while a preset profile is selected rather than having to select Custom first
+
+### Web
+
+#### Fixes
+
+-   Fixed custom profile dropdown having incorrect aria label
+
 ## v1.2.0
 
 ### General
