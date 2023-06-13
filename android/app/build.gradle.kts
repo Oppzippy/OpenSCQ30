@@ -53,6 +53,7 @@ android {
 
     buildTypes {
         named("debug") {
+            applicationIdSuffix = ".debug"
             isDebuggable = true
             isMinifyEnabled = false
             proguardFiles(
