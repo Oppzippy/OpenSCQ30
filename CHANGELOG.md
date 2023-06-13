@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.3.1
+
+### GUI
+
+#### Fixes
+
+-   Fix arm64 builds
+
 ## v1.3.0
 
 ### General
