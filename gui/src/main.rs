@@ -122,7 +122,8 @@ where
 {
     application.add_main_option(
         "logging-level",
-        glib::char::Char('l' as i8),
+        // Do not instantiate glib::Char(i8) directly, since on arm64 it's glib::Char(u8) instead
+        b'l'.into(),
         OptionFlags::NONE,
         glib::OptionArg::String,
         &format!("Logging Level {}", LoggingLevel::allowed_values_string()),
