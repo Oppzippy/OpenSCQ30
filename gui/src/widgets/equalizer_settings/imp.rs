@@ -79,10 +79,9 @@ impl EqualizerSettings {
                 .expect("item must be EqualizerProfileObject")
         });
         let volume_adjustments_match_preset_profile = selected_profile
-            .map(|profile_object| {
+            .and_then(|profile_object| {
                 PresetEqualizerProfile::from_id(profile_object.profile_id() as u16)
             })
-            .flatten()
             .map(|profile| profile.volume_adjustments())
             .map(|volume_adjustments| {
                 equalizer.volume_adjustments() == volume_adjustments.adjustments()

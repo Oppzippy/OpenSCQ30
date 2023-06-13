@@ -32,10 +32,13 @@ where
             .await;
         result_sender.send(result).expect("receiver dropped");
     }));
-    state
+    if let Some(old_handle) = state
         .set_equalizer_configuration_handle
         .replace(Some(new_handle))
-        .map(|old_handle| old_handle.abort());
+    {
+        old_handle.abort();
+    }
+
     match result_receiver.await {
         Ok(Ok(())) => {
             tracing::trace!("returning with no error");
