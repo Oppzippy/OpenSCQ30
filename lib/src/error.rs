@@ -25,7 +25,7 @@ pub enum Error {
         source: Option<InnerError>,
     },
 
-    #[error(transparent)]
+    #[error("{source:?}")]
     Other { source: InnerError },
 
     #[error("device didn't respond to request")]
