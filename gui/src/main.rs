@@ -238,29 +238,47 @@ fn build_ui_2(
     where
         T: DeviceRegistry + Send + Sync,
     {
+        let deselect_device = || {
+            state
+                .state_update_sender
+                .send(StateUpdate::SetSelectedDevice(None))
+                .unwrap()
+        };
+
+        let send_toast = |text| {
+            state
+                .state_update_sender
+                .send(StateUpdate::AddToast(text))
+                .unwrap()
+        };
+
         tracing::error!("{err:?}");
         match err.downcast_ref::<openscq30_lib::Error>() {
             Some(openscq30_lib::Error::NotConnected { .. }) => {
-                state
-                    .state_update_sender
-                    .send(StateUpdate::SetSelectedDevice(None))
-                    .unwrap();
-                state
-                    .state_update_sender
-                    .send(StateUpdate::AddToast("Device Disconnected".to_string()))
-                    .unwrap();
+                deselect_device();
+                send_toast("Device Disconnected".to_string());
             }
             Some(openscq30_lib::Error::DeviceNotFound { .. }) => {
-                state
-                    .state_update_sender
-                    .send(StateUpdate::SetSelectedDevice(None))
-                    .unwrap();
-                state
-                    .state_update_sender
-                    .send(StateUpdate::AddToast("Device Not Found".to_string()))
-                    .unwrap();
+                deselect_device();
+                send_toast("Device Not Found".to_string());
             }
-            _ => {
+            Some(openscq30_lib::Error::ServiceNotFound { .. }) => {
+                deselect_device();
+                send_toast("Device BLE Service Not Found".to_string());
+            }
+            Some(openscq30_lib::Error::CharacteristicNotFound { .. }) => {
+                deselect_device();
+                send_toast("Device BLE Characteristic Not Found".to_string());
+            }
+            Some(openscq30_lib::Error::NameNotFound { .. }) => {
+                deselect_device();
+                send_toast("Device Name Not Found".to_string());
+            }
+            Some(openscq30_lib::Error::NoResponse { .. }) => {
+                deselect_device();
+                send_toast("Device Didn't Respond".to_string());
+            }
+            Some(openscq30_lib::Error::Other { .. }) | None => {
                 state
                     .state_update_sender
                     .send(StateUpdate::AddToast(format!("{err:#}")))
