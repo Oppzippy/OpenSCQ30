@@ -239,10 +239,34 @@ fn build_ui_2(
         T: DeviceRegistry + Send + Sync,
     {
         tracing::error!("{err:?}");
-        state
-            .state_update_sender
-            .send(StateUpdate::AddToast(format!("{err:#}")))
-            .unwrap();
+        match err.downcast_ref::<openscq30_lib::Error>() {
+            Some(openscq30_lib::Error::NotConnected { .. }) => {
+                state
+                    .state_update_sender
+                    .send(StateUpdate::SetSelectedDevice(None))
+                    .unwrap();
+                state
+                    .state_update_sender
+                    .send(StateUpdate::AddToast("Device Disconnected".to_string()))
+                    .unwrap();
+            }
+            Some(openscq30_lib::Error::DeviceNotFound { .. }) => {
+                state
+                    .state_update_sender
+                    .send(StateUpdate::SetSelectedDevice(None))
+                    .unwrap();
+                state
+                    .state_update_sender
+                    .send(StateUpdate::AddToast("Device Not Found".to_string()))
+                    .unwrap();
+            }
+            _ => {
+                state
+                    .state_update_sender
+                    .send(StateUpdate::AddToast(format!("{err:#}")))
+                    .unwrap();
+            }
+        }
     }
 
     main_context.spawn_local(clone!(@weak main_window, @strong state => async move {

@@ -25,7 +25,9 @@
                 <child>
                     <object class="GtkStack" id="stack">
                         <child>
-                            <object class="OpenSCQ30DeviceSelection" id="device_selection"></object>
+                            <object class="OpenSCQ30DeviceSelection" id="device_selection">
+                                <signal name="connect-clicked" handler="handle_connect_clicked" swapped="true" />
+                            </object>
                         </child>
                         <child>
                             <object class="OpenSCQ30LoadingScreen" id="loading_screen">

@@ -56,8 +56,8 @@ impl MainWindow {
     }
 
     #[template_callback]
-    fn handle_device_selection_changed(&self, _: &DeviceSelection) {
-        self.obj().emit_by_name("device-selection-changed", &[])
+    fn handle_connect_clicked(&self, device: &DeviceObject) {
+        self.obj().set_selected_device(device);
     }
 
     #[template_callback]
@@ -204,11 +204,6 @@ impl ObjectImpl for MainWindow {
             .sync_create()
             .build();
 
-        self.device_selection
-            .bind_property("selected-device", self.obj().as_ref(), "selected-device")
-            .sync_create()
-            .build();
-
         self.obj().connect_notify_local(
             Some("selected-device"),
             clone!(@weak self as this => move |_, _| this.update()),
@@ -228,7 +223,6 @@ impl ObjectImpl for MainWindow {
                 Signal::builder("noise-canceling-mode-selected")
                     .param_types([u8::static_type()])
                     .build(),
-                Signal::builder("device-selection-changed").build(),
                 Signal::builder("apply-equalizer-settings").build(),
                 Signal::builder("custom-equalizer-profile-selected")
                     .param_types([CustomEqualizerProfileObject::static_type()])

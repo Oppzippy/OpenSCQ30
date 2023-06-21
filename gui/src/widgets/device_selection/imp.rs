@@ -2,7 +2,7 @@ use std::cell::{OnceCell, RefCell};
 
 use gtk::{
     gio,
-    glib::{self, ParamSpec, Properties, Value},
+    glib::{self, subclass::Signal, ParamSpec, Properties, Value},
     prelude::*,
     subclass::{
         prelude::{BoxImpl, ObjectImpl, ObjectSubclass, *},
@@ -13,6 +13,7 @@ use gtk::{
     },
     ClosureExpression, CompositeTemplate, TemplateChild,
 };
+use once_cell::sync::Lazy;
 
 use crate::objects::DeviceObject;
 
@@ -35,9 +36,11 @@ pub struct DeviceSelection {
 impl DeviceSelection {
     #[template_callback]
     pub fn handle_connect_clicked(&self, _button: &gtk::Button) {
-        let selected_device: Option<DeviceObject> = self.dropdown.selected_item().and_downcast();
-        // `self.obj().set_selected_device()` from derive(Properties) doesn't allow None
-        self.obj().set_property("selected-device", selected_device);
+        if let Some(selected_device) = self.dropdown.selected_item().and_downcast::<DeviceObject>()
+        {
+            self.obj()
+                .emit_by_name::<()>("connect-clicked", &[&selected_device]);
+        }
     }
 
     pub fn set_devices(&self, devices: &[Device]) {
@@ -103,6 +106,15 @@ impl ObjectImpl for DeviceSelection {
             )
         });
         self.dropdown.set_expression(Some(expression));
+    }
+
+    fn signals() -> &'static [glib::subclass::Signal] {
+        static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
+            vec![Signal::builder("connect-clicked")
+                .param_types([DeviceObject::static_type()])
+                .build()]
+        });
+        SIGNALS.as_ref()
     }
 
     fn properties() -> &'static [ParamSpec] {
