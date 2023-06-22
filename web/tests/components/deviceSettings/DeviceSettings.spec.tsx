@@ -73,7 +73,11 @@ describe("Device Settings", () => {
 
   it("should change ambient sound mode", async () => {
     const renderResult = render(
-      <DeviceSettings device={device as unknown as SoundcoreDevice} />,
+      <DeviceSettings
+        device={device as unknown as SoundcoreDevice}
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        disconnect={() => {}}
+      />,
     );
 
     expect(device.ambientSoundMode).toEqual(AmbientSoundMode.NoiseCanceling);
@@ -84,7 +88,11 @@ describe("Device Settings", () => {
 
   it("should change noise canceling mode", async () => {
     const renderResult = render(
-      <DeviceSettings device={device as unknown as SoundcoreDevice} />,
+      <DeviceSettings
+        device={device as unknown as SoundcoreDevice}
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        disconnect={() => {}}
+      />,
     );
 
     expect(device.noiseCancelingMode).toEqual(NoiseCancelingMode.Transport);
@@ -94,7 +102,11 @@ describe("Device Settings", () => {
 
   it("should change equalizer configuration", async () => {
     const renderResult = render(
-      <DeviceSettings device={device as unknown as SoundcoreDevice} />,
+      <DeviceSettings
+        device={device as unknown as SoundcoreDevice}
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        disconnect={() => {}}
+      />,
     );
 
     expect([
@@ -114,7 +126,11 @@ describe("Device Settings", () => {
 
   it("should switch to custom profile when moving a silder", async () => {
     const renderResult = render(
-      <DeviceSettings device={device as unknown as SoundcoreDevice} />,
+      <DeviceSettings
+        device={device as unknown as SoundcoreDevice}
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        disconnect={() => {}}
+      />,
     );
 
     const numberInputs = renderResult.baseElement.querySelectorAll(
@@ -128,7 +144,11 @@ describe("Device Settings", () => {
 
   it("should not show custom profile create/delete buttons when a preset is selected", async () => {
     const renderResult = render(
-      <DeviceSettings device={device as unknown as SoundcoreDevice} />,
+      <DeviceSettings
+        device={device as unknown as SoundcoreDevice}
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        disconnect={() => {}}
+      />,
     );
 
     expect(
@@ -144,7 +164,11 @@ describe("Device Settings", () => {
       { name: "test", values: [0, 0, 0, 0, 0, 0, 0, 0], id: 1 },
     ]);
     const renderResult = render(
-      <DeviceSettings device={device as unknown as SoundcoreDevice} />,
+      <DeviceSettings
+        device={device as unknown as SoundcoreDevice}
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        disconnect={() => {}}
+      />,
     );
 
     // Check only preset profile shown
@@ -172,7 +196,11 @@ describe("Device Settings", () => {
 
   it("should synchronize sliders and number input values", async () => {
     const renderResult = render(
-      <DeviceSettings device={device as unknown as SoundcoreDevice} />,
+      <DeviceSettings
+        device={device as unknown as SoundcoreDevice}
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        disconnect={() => {}}
+      />,
     );
 
     await user.click(renderResult.getByLabelText("equalizer.profile"));
@@ -190,7 +218,11 @@ describe("Device Settings", () => {
 
   it("should debounce equalizer updates", async () => {
     const renderResult = render(
-      <DeviceSettings device={device as unknown as SoundcoreDevice} />,
+      <DeviceSettings
+        device={device as unknown as SoundcoreDevice}
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        disconnect={() => {}}
+      />,
     );
 
     await user.click(renderResult.getByLabelText("equalizer.profile"));
@@ -227,7 +259,11 @@ describe("Device Settings", () => {
     ).mockRejectedValue(new Error("It should error"));
     const renderResult = render(
       <ToastQueue>
-        <DeviceSettings device={device as unknown as SoundcoreDevice} />
+        <DeviceSettings
+          device={device as unknown as SoundcoreDevice}
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          disconnect={() => {}}
+        />
       </ToastQueue>,
     );
 
