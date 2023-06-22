@@ -5,20 +5,20 @@
     "selectDevice": ""
   },
   "errors": {
-    "failedToCommunicateStateChangeToDevice": "",
+    "disconnected": "",
     "failedToCreateCustomProfile": "",
     "failedToDeleteCustomProfile": ""
   },
   "equalizer": {
     "customProfile": "",
+    "hz": "{{ hz }} Hz",
     "equalizer": "イコライザ",
     "deleteCustomProfile": "",
     "createCustomProfile": "",
     "profileName": "",
     "profile": "",
     "custom": "",
-    "khz": "{{ hz }} kHz",
-    "hz": "{{ hz }} Hz"
+    "khz": "{{ hz }} kHz"
   },
   "application": {
     "cancel": "",

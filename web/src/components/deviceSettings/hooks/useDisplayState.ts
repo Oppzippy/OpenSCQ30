@@ -13,8 +13,12 @@ import { useActualState } from "./useActualState";
  */
 export function useDisplayState(
   device: SoundcoreDevice,
+  onBluetoothError: (err: Error) => void,
 ): [SoundcoreDeviceState, Dispatch<SetStateAction<SoundcoreDeviceState>>] {
-  const [actualState, setActualState] = useActualState(device);
+  const [actualState, setActualState] = useActualState(
+    device,
+    onBluetoothError,
+  );
   const [displayState, setDisplayState] = useState(actualState);
 
   useUpdateActualFromDisplay(device, setActualState, displayState);

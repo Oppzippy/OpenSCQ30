@@ -4,9 +4,9 @@ import { Observable } from "rxjs";
 export class SoundcoreDeviceConnection {
   public readonly incomingPackets: Observable<Uint8Array>;
 
-  private readonly gatt: BluetoothRemoteGATTServer;
-  private readonly writeCharacteristic: BluetoothRemoteGATTCharacteristic;
-  private readonly readCharacteristic: BluetoothRemoteGATTCharacteristic;
+  private gatt: BluetoothRemoteGATTServer;
+  private writeCharacteristic: BluetoothRemoteGATTCharacteristic;
+  private readCharacteristic: BluetoothRemoteGATTCharacteristic;
 
   constructor(
     gatt: BluetoothRemoteGATTServer,
@@ -37,6 +37,28 @@ export class SoundcoreDeviceConnection {
           handler,
         );
     });
+  }
+
+  public get connected() {
+    return this.gatt.connected;
+  }
+
+  public async reconnect() {
+    if (!this.connected) {
+      this.gatt = await this.gatt.connect();
+      const service = await this.gatt.getPrimaryService(
+        SoundcoreDeviceUtils.getServiceUuid(),
+      );
+      [this.writeCharacteristic, this.readCharacteristic] = await Promise.all([
+        service.getCharacteristic(
+          SoundcoreDeviceUtils.getWriteCharacteristicUuid(),
+        ),
+        service.getCharacteristic(
+          SoundcoreDeviceUtils.getReadCharacteristicUuid(),
+        ),
+      ]);
+      await this.readCharacteristic.startNotifications();
+    }
   }
 
   public disconnect() {

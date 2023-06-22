@@ -18,12 +18,12 @@ import {
 import { UnmodifiableBehaviorSubject } from "../UnmodifiableBehaviorSubject";
 import { transitionEqualizerState } from "./EqualizerConfigurationStateTransition";
 import { transitionSoundMode } from "./SoundModeStateTransition";
+import { SoundcoreDevice } from "./SoundcoreDevice";
 import {
   SoundcoreDeviceConnection,
   selectDeviceConnection,
 } from "./SoundcoreDeviceConnection";
 import { SoundcoreDeviceState } from "./SoundcoreDeviceState";
-import { SoundcoreDevice } from "./SoundcoreDevice";
 
 export class RealSoundcoreDevice implements SoundcoreDevice {
   private readonly connection: SoundcoreDeviceConnection;
@@ -107,6 +107,23 @@ export class RealSoundcoreDevice implements SoundcoreDevice {
   }
 
   public async transitionState(newState: SoundcoreDeviceState) {
+    try {
+      await this.attemptTransitionState(newState);
+    } catch (err) {
+      if (err instanceof DOMException) {
+        // Disconnected from headphones, unsure if any other errors share the same name
+        if (err.name == "NetworkError") {
+          await this.reconnect();
+          // Only attempt once more, give up if it fails
+          await this.attemptTransitionState(newState);
+          return;
+        }
+      }
+      throw err;
+    }
+  }
+
+  private async attemptTransitionState(newState: SoundcoreDeviceState) {
     await transitionSoundMode(this.connection, this.state.value, newState);
     this._state.next({
       ...this.state.value,
@@ -118,6 +135,13 @@ export class RealSoundcoreDevice implements SoundcoreDevice {
       ...this.state.value,
       equalizerConfiguration: newState.equalizerConfiguration,
     });
+  }
+
+  private async reconnect() {
+    if (!this.connection.connected) {
+      await this.connection.reconnect();
+      await this.connection.write(new RequestStatePacket().bytes());
+    }
   }
 
   private async onPacketReceived(bytes: Uint8Array) {

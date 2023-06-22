@@ -5,7 +5,7 @@ import {
   createTheme,
   useMediaQuery,
 } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { selectDemoDevice } from "../bluetooth/DemoSoundcoreDevice";
 import { selectDevice } from "../bluetooth/RealSoundcoreDevice";
 import { SoundcoreDevice } from "../bluetooth/SoundcoreDevice";
@@ -45,10 +45,10 @@ export function AppContents() {
     }
   }
 
-  function disconnect() {
+  const disconnect = useCallback(() => {
     device?.disconnect();
     setDevice(undefined);
-  }
+  }, [device]);
 
   return (
     <>
@@ -74,7 +74,11 @@ export function AppContents() {
         <Box component="main" sx={{ flexGrow: 1 }}>
           <Toolbar />
           <Container maxWidth="sm" sx={{ my: 2 }}>
-            {device ? <DeviceSettings device={device} /> : <HomePage />}
+            {device ? (
+              <DeviceSettings device={device} disconnect={disconnect} />
+            ) : (
+              <HomePage />
+            )}
           </Container>
         </Box>
       </Box>

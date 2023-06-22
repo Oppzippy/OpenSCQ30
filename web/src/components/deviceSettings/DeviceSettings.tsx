@@ -16,9 +16,30 @@ import { useCreateCustomProfileWithName } from "./hooks/useCreateCustomProfileWi
 import { useCustomEqualizerProfiles } from "./hooks/useCustomEqualizerProfiles";
 import { useDeleteCustomProfile } from "./hooks/useDeleteCustomProfile";
 import { useDisplayState } from "./hooks/useDisplayState";
+import { useTranslation } from "react-i18next";
+import { useToastErrorHandler } from "../../hooks/useToastErrorHandler";
 
-export function DeviceSettings({ device }: { device: SoundcoreDevice }) {
-  const [deviceState, setDeviceState] = useDisplayState(device);
+export function DeviceSettings({
+  device,
+  disconnect,
+}: {
+  device: SoundcoreDevice;
+  disconnect: () => void;
+}) {
+  const { t } = useTranslation();
+  const errorHandler = useToastErrorHandler(t("errors.disconnected"));
+  const onBluetoothError = useCallback(
+    (err: Error) => {
+      errorHandler(err);
+      disconnect();
+    },
+    [errorHandler, disconnect],
+  );
+
+  const [deviceState, setDeviceState] = useDisplayState(
+    device,
+    onBluetoothError,
+  );
 
   const [isCreateCustomProfileDialogOpen, setCreateCustomProfileDialogOpen] =
     useState(false);

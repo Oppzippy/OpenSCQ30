@@ -5,20 +5,20 @@
     "selectDevice": "Select Device"
   },
   "errors": {
-    "failedToCommunicateStateChangeToDevice": "Failed to communicate state change to device. Check console for details.",
+    "disconnected": "Device is disconnected.",
     "failedToCreateCustomProfile": "Failed to create custom profile. Check console for details.",
     "failedToDeleteCustomProfile": "Failed to delete custom profile. Check console for details."
   },
   "equalizer": {
     "customProfile": "Custom Profile",
+    "hz": "{{ hz }} Hz",
     "equalizer": "Equalizer",
     "deleteCustomProfile": "Delete Custom Profile",
     "createCustomProfile": "Create Custom Profile",
     "profileName": "Profile Name",
     "profile": "Profile",
     "custom": "Custom",
-    "khz": "{{ hz }} kHz",
-    "hz": "{{ hz }} Hz"
+    "khz": "{{ hz }} kHz"
   },
   "application": {
     "cancel": "Cancel",
