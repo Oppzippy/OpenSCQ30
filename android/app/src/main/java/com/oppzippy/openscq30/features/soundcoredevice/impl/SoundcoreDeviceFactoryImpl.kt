@@ -3,6 +3,7 @@ package com.oppzippy.openscq30.features.soundcoredevice.impl
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.Context
+import android.util.Log
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
 import com.oppzippy.openscq30.lib.SoundcoreDeviceState
@@ -17,10 +18,13 @@ class SoundcoreDeviceFactoryImpl(private val context: Context): SoundcoreDeviceF
         val bluetoothDevice =
             bluetoothManager.adapter.bondedDevices.find { it.address == macAddress } ?: return null
 
-        val callbacks = SoundcoreDeviceCallbackHandler()
+        val callbacks = SoundcoreDeviceCallbackHandler(context)
         val gatt =
             bluetoothDevice.connectGatt(context, false, callbacks, BluetoothDevice.TRANSPORT_LE)
-        gatt.connect()
+        if (!gatt.connect()) {
+            Log.d("SoundcoreDeviceFactoryImpl", "gatt connect failed")
+            return null
+        }
 
         val packet = callbacks.packetsFlow.first { it is Packet.StateUpdate } as Packet.StateUpdate
         return SoundcoreDeviceImpl(gatt, callbacks, scope, SoundcoreDeviceState(packet.packet))

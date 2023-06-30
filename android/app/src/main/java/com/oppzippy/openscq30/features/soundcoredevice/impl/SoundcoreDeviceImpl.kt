@@ -26,15 +26,10 @@ class SoundcoreDeviceImpl(
             old.ambientSoundMode() == new.ambientSoundMode() && old.noiseCancelingMode() == new.noiseCancelingMode() && old.equalizerConfiguration()
                 .contentEquals(new.equalizerConfiguration())
         }
+    override val isDisconnected = callbacks.isDisconnected
 
-    override val name: String
-        get() {
-            return gatt.device.name
-        }
-    override val macAddress: String
-        get() {
-            return gatt.device.address
-        }
+    override val name: String = gatt.device.name
+    override val macAddress: String = gatt.device.address
 
     init {
         scope.launch {
@@ -45,6 +40,7 @@ class SoundcoreDeviceImpl(
                             _stateFlow.value.withAmbientSoundMode(it.packet.ambientSoundMode())
                                 .withNoiseCancelingMode(it.packet.noiseCancelingMode())
                     }
+
                     is Packet.StateUpdate -> _stateFlow.value = SoundcoreDeviceState(it.packet)
                     is Packet.SetAmbientModeOk -> {}
                     is Packet.SetEqualizerOk -> {}
@@ -54,7 +50,7 @@ class SoundcoreDeviceImpl(
     }
 
     override fun destroy() {
-        gatt.disconnect()
+        gatt.close()
     }
 
     override fun setSoundMode(

@@ -1,9 +1,11 @@
 package com.oppzippy.openscq30.features.soundcoredevice.demo
 
+import android.util.Log
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
 import com.oppzippy.openscq30.lib.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class DemoSoundcoreDevice(
     override val name: String,
@@ -16,7 +18,8 @@ class DemoSoundcoreDevice(
             EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature)
         )
     )
-    override val stateFlow: Flow<SoundcoreDeviceState> = _stateFlow
+    override val stateFlow: Flow<SoundcoreDeviceState> = _stateFlow.asStateFlow()
+    override val isDisconnected = MutableStateFlow(false).asStateFlow()
     override val state: SoundcoreDeviceState
         get() {
             return _stateFlow.value
@@ -25,14 +28,21 @@ class DemoSoundcoreDevice(
     override fun setSoundMode(
         newAmbientSoundMode: AmbientSoundMode, newNoiseCancelingMode: NoiseCancelingMode
     ) {
+        Log.i(
+            "DemoSoundcoreDevice",
+            "set ambient sound mode to $newAmbientSoundMode and noise canceling mode to $newNoiseCancelingMode",
+        )
         _stateFlow.value = _stateFlow.value.withAmbientSoundMode(newAmbientSoundMode)
             .withNoiseCancelingMode(newNoiseCancelingMode)
     }
 
     override fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
+        Log.i(
+            "DemoSoundcoreDevice",
+            "set equalizer configuration to $equalizerConfiguration",
+        )
         _stateFlow.value = _stateFlow.value.withEqualizerConfiguration(equalizerConfiguration)
     }
 
-    override fun destroy() {
-    }
+    override fun destroy() {}
 }

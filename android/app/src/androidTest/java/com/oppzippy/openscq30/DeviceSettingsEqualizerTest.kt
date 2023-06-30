@@ -1,25 +1,38 @@
 package com.oppzippy.openscq30
 
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertRangeInfoEquals
+import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
-import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipe
 import com.oppzippy.openscq30.features.soundcoredevice.api.contentEquals
-import com.oppzippy.openscq30.features.ui.devicesettings.composables.DeviceSettingsActivityView
-import com.oppzippy.openscq30.lib.*
+import com.oppzippy.openscq30.lib.AmbientSoundMode
+import com.oppzippy.openscq30.lib.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.PresetEqualizerProfile
+import com.oppzippy.openscq30.lib.SoundcoreDeviceState
+import com.oppzippy.openscq30.lib.VolumeAdjustments
+import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
+import com.oppzippy.openscq30.ui.equalizer.composables.EqualizerSettings
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
-import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import javax.inject.Inject
 
 @HiltAndroidTest
 class DeviceSettingsEqualizerTest {
@@ -30,12 +43,9 @@ class DeviceSettingsEqualizerTest {
     val hiltRule = HiltAndroidRule(this)
 
     @get:Rule(order = 2)
-    val composeRule = createAndroidComposeRule<MainActivity>()
+    val composeRule = createAndroidComposeRule<TestActivity>()
 
-    @Inject
-    lateinit var deviceFactory: SoundcoreDeviceFactory
 
-    private lateinit var equalizer: SemanticsMatcher
     private lateinit var soundcoreSignature: SemanticsMatcher
     private lateinit var acoustic: SemanticsMatcher
     private lateinit var bassBooster: SemanticsMatcher
@@ -46,7 +56,6 @@ class DeviceSettingsEqualizerTest {
     fun initialize() {
         hiltRule.inject()
 
-        equalizer = hasTextExactly(composeRule.activity.getString(R.string.equalizer))
         soundcoreSignature =
             hasTextExactly(composeRule.activity.getString(R.string.soundcore_signature))
         acoustic = hasTextExactly(composeRule.activity.getString(R.string.acoustic))
@@ -55,24 +64,29 @@ class DeviceSettingsEqualizerTest {
         custom = hasTextExactly(composeRule.activity.getString(R.string.custom))
     }
 
-    @Test
-    fun testInitialEqualizerPreset() {
-        initializeDeviceFactoryWithOneDevice(
-            equalizerConfiguration = EqualizerConfiguration(
-                PresetEqualizerProfile.Classical,
+    private fun stateWithEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration): UiDeviceState.Connected {
+        return UiDeviceState.Connected(
+            "Test Device", "00:00:00:00:00:00", SoundcoreDeviceState(
+                AmbientSoundMode.Normal,
+                NoiseCancelingMode.Indoor,
+                equalizerConfiguration,
             )
         )
+    }
 
-
+    @Test
+    fun testInitialEqualizerPreset() {
         composeRule.setContent {
-            DeviceSettingsActivityView(
-                macAddress = "",
-                onDeviceNotFound = {},
+            EqualizerSettings(
+                uiState = stateWithEqualizerConfiguration(
+                    EqualizerConfiguration(PresetEqualizerProfile.Classical)
+                )
             )
         }
-        composeRule.onNode(equalizer, true).performClick()
+
         composeRule.onNode(soundcoreSignature, true).assertDoesNotExist()
         composeRule.onNode(classical, true).assertExists()
+
         val sliders = composeRule.onAllNodesWithTag("equalizerSlider")
         val values = listOf(30F, 30F, -20F, -20F, 0F, 20F, 30F, 40F)
         for (i in 0..7) {
@@ -84,23 +98,17 @@ class DeviceSettingsEqualizerTest {
     fun testInitialEqualizerCustom() {
         val values = byteArrayOf(1, 10, -10, 50, 0, 10, -60, 60)
 
-        initializeDeviceFactoryWithOneDevice(
-            equalizerConfiguration = EqualizerConfiguration(VolumeAdjustments(values)),
-        )
-
         composeRule.setContent {
-            DeviceSettingsActivityView(
-                macAddress = "",
-                onDeviceNotFound = {},
+            EqualizerSettings(
+                uiState = stateWithEqualizerConfiguration(
+                    EqualizerConfiguration(VolumeAdjustments(values))
+                )
             )
         }
-        composeRule.onNode(equalizer, true).performClick()
         composeRule.onNode(soundcoreSignature, true).assertDoesNotExist()
         composeRule.onNode(custom, true).assertExists()
         val sliders = composeRule.onAllNodesWithTag("equalizerSlider")
-        // The 8th slider doesn't fit on the screen, so we would have to scroll to it
-        // TODO scroll down to sliders that don't fit on the screen
-        for (i in 0..6) {
+        for (i in 0..7) {
             sliders[i].assertRangeInfoEquals(
                 ProgressBarRangeInfo(
                     values[i].toFloat(), -120F..120F, 240,
@@ -111,32 +119,24 @@ class DeviceSettingsEqualizerTest {
 
     @Test
     fun testSetPreset() {
-        val pair = initializeDeviceFactoryWithOneDevice(
-            equalizerConfiguration = EqualizerConfiguration(PresetEqualizerProfile.Acoustic),
-        )
-        val device = pair.first
-        val state = pair.second
-
+        val onEqualizerConfigurationChange =
+            mockk<(equalizerConfiguration: EqualizerConfiguration) -> Unit>(relaxed = true)
         composeRule.setContent {
-            DeviceSettingsActivityView(
-                macAddress = "",
-                onDeviceNotFound = {},
+            EqualizerSettings(
+                uiState = stateWithEqualizerConfiguration(
+                    EqualizerConfiguration(PresetEqualizerProfile.Acoustic)
+                ),
+                onEqualizerConfigurationChange = onEqualizerConfigurationChange,
             )
         }
-        composeRule.onNode(equalizer, true).performClick()
         composeRule.onNode(acoustic, true).performClick()
         composeRule.onNode(bassBooster, true).performClick()
         Thread.sleep(600) // Wait for debounce
         verify {
-            device.setEqualizerConfiguration(match {
-                it.contentEquals(
-                    EqualizerConfiguration(PresetEqualizerProfile.BassBooster)
-                )
+            onEqualizerConfigurationChange(match {
+                it.contentEquals(EqualizerConfiguration(PresetEqualizerProfile.BassBooster))
             })
         }
-        every { state.equalizerConfiguration() } returns EqualizerConfiguration(
-            PresetEqualizerProfile.BassBooster
-        )
 
         val values = byteArrayOf(40, 30, 10, 0, 0, 0, 0, 0)
         val sliders = composeRule.onAllNodesWithTag("equalizerSlider")
@@ -151,30 +151,27 @@ class DeviceSettingsEqualizerTest {
 
     @Test
     fun testSetCustom() {
-        val values = byteArrayOf(0, 10, 15, -15, 60, -60, 10, -5)
-        val pair = initializeDeviceFactoryWithOneDevice(
-            equalizerConfiguration = EqualizerConfiguration(
-                VolumeAdjustments(values),
-            ),
-        )
-        val device = pair.first
+        val onEqualizerConfigurationChange =
+            mockk<(equalizerConfiguration: EqualizerConfiguration) -> Unit>(relaxed = true)
 
         composeRule.setContent {
-            DeviceSettingsActivityView(
-                macAddress = "",
-                onDeviceNotFound = {},
+            EqualizerSettings(
+                uiState = stateWithEqualizerConfiguration(
+                    EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature)
+                ),
+                onEqualizerConfigurationChange = onEqualizerConfigurationChange,
             )
         }
-        composeRule.onNode(equalizer).performClick()
 
         val sliders = composeRule.onAllNodesWithTag("equalizerSlider")
         sliders[0].performTouchInput {
             swipe(center, centerRight, 100)
         }
+        composeRule.onNode(custom, useUnmergedTree = true).assertExists()
 
         Thread.sleep(600) // Wait for debounce
         verify {
-            device.setEqualizerConfiguration(match {
+            onEqualizerConfigurationChange(match {
                 it.volumeAdjustments().adjustments().first() > 0
             })
         }
@@ -182,15 +179,15 @@ class DeviceSettingsEqualizerTest {
 
     @Test
     fun testCustomProfile() {
-        initializeDeviceFactoryWithOneDevice(
-            equalizerConfiguration = EqualizerConfiguration(
-                VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
-            ),
-        )
         composeRule.setContent {
-            DeviceSettingsActivityView(macAddress = "", onDeviceNotFound = {})
+            EqualizerSettings(
+                uiState = stateWithEqualizerConfiguration(
+                    EqualizerConfiguration(
+                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
+                    )
+                )
+            )
         }
-        composeRule.onNode(equalizer).performClick()
 
         composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.add))
             .performClick()
@@ -198,14 +195,14 @@ class DeviceSettingsEqualizerTest {
             .performTextInput("Test Profile")
         composeRule.onNodeWithText(composeRule.activity.getString(R.string.create)).performClick()
         composeRule.onNodeWithText("Test Profile")
-            .assertExists("custom profile should be selected upon creation");
+            .assertExists("custom profile should be selected upon creation")
 
         val inputs = composeRule.onAllNodesWithTag("equalizerInput")
         inputs[0].performTextReplacement("6")
-        composeRule.onNodeWithText("Test Profile").assertDoesNotExist();
+        composeRule.onNodeWithText("Test Profile").assertDoesNotExist()
         inputs[0].performTextReplacement("0")
         composeRule.onNodeWithText("Test Profile")
-            .assertExists("custom profile should be selected when equalizer values change to match the custom profile");
+            .assertExists("custom profile should be selected when equalizer values change to match the custom profile")
         composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.delete))
             .performClick()
         composeRule.onNodeWithText(composeRule.activity.getString(R.string.delete)).performClick()
@@ -214,15 +211,15 @@ class DeviceSettingsEqualizerTest {
 
     @Test
     fun testCustomProfileUniqueByName() {
-        initializeDeviceFactoryWithOneDevice(
-            equalizerConfiguration = EqualizerConfiguration(
-                VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
-            ),
-        )
         composeRule.setContent {
-            DeviceSettingsActivityView(macAddress = "", onDeviceNotFound = {})
+            EqualizerSettings(
+                uiState = stateWithEqualizerConfiguration(
+                    EqualizerConfiguration(
+                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
+                    )
+                )
+            )
         }
-        composeRule.onNode(equalizer).performClick()
 
         // Create first profile
         composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.add))
@@ -253,15 +250,15 @@ class DeviceSettingsEqualizerTest {
 
     @Test
     fun testCustomProfileUniqueByValues() {
-        initializeDeviceFactoryWithOneDevice(
-            equalizerConfiguration = EqualizerConfiguration(
-                VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
-            ),
-        )
         composeRule.setContent {
-            DeviceSettingsActivityView(macAddress = "", onDeviceNotFound = {})
+            EqualizerSettings(
+                stateWithEqualizerConfiguration(
+                    EqualizerConfiguration(
+                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
+                    )
+                )
+            )
         }
-        composeRule.onNode(equalizer).performClick()
 
         // Create first profile
         composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.add))
@@ -276,16 +273,15 @@ class DeviceSettingsEqualizerTest {
 
     @Test
     fun testReplaceExistingCustomProfile() {
-        initializeDeviceFactoryWithOneDevice(
-            equalizerConfiguration = EqualizerConfiguration(
-                VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
-            )
-        )
-
         composeRule.setContent {
-            DeviceSettingsActivityView(macAddress = "", onDeviceNotFound = {})
+            EqualizerSettings(
+                stateWithEqualizerConfiguration(
+                    EqualizerConfiguration(
+                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
+                    )
+                )
+            )
         }
-        composeRule.onNode(equalizer).performClick()
 
         // Create a profile
         composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.add))
@@ -313,16 +309,15 @@ class DeviceSettingsEqualizerTest {
 
     @Test
     fun testReplaceExistingCustomProfileButtonDoesNotShowWithNoCustomProfiles() {
-        initializeDeviceFactoryWithOneDevice(
-            equalizerConfiguration = EqualizerConfiguration(
-                VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
-            )
-        )
-
         composeRule.setContent {
-            DeviceSettingsActivityView(macAddress = "", onDeviceNotFound = {})
+            EqualizerSettings(
+                stateWithEqualizerConfiguration(
+                    EqualizerConfiguration(
+                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
+                    )
+                )
+            )
         }
-        composeRule.onNode(equalizer).performClick()
 
         composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.replace_existing_profile))
             .assertDoesNotExist()
@@ -330,15 +325,15 @@ class DeviceSettingsEqualizerTest {
 
     @Test
     fun testOnlyAllowsOneOfPresetOrCustom() {
-        initializeDeviceFactoryWithOneDevice(
-            equalizerConfiguration = EqualizerConfiguration(
-                VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
-            ),
-        )
         composeRule.setContent {
-            DeviceSettingsActivityView(macAddress = "", onDeviceNotFound = {})
+            EqualizerSettings(
+                stateWithEqualizerConfiguration(
+                    EqualizerConfiguration(
+                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
+                    )
+                )
+            )
         }
-        composeRule.onNode(equalizer).performClick()
 
         // Create custom profile with same volume adjustments as Soundcore Signature
         composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.add))
@@ -360,13 +355,15 @@ class DeviceSettingsEqualizerTest {
 
     @Test
     fun testHidesCreateAndDeleteButtonsWhenPresetIsSelected() {
-        initializeDeviceFactoryWithOneDevice(
-            equalizerConfiguration = EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
-        )
         composeRule.setContent {
-            DeviceSettingsActivityView(macAddress = "", onDeviceNotFound = {})
+            EqualizerSettings(
+                stateWithEqualizerConfiguration(
+                    EqualizerConfiguration(
+                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
+                    )
+                )
+            )
         }
-        composeRule.onNode(equalizer).performClick()
 
         composeRule.onNodeWithText(composeRule.activity.getString(R.string.replace))
             .assertDoesNotExist()
@@ -374,24 +371,5 @@ class DeviceSettingsEqualizerTest {
             .assertDoesNotExist()
         composeRule.onNodeWithText(composeRule.activity.getString(R.string.delete))
             .assertDoesNotExist()
-    }
-
-    private fun initializeDeviceFactoryWithOneDevice(equalizerConfiguration: EqualizerConfiguration): Pair<SoundcoreDevice, SoundcoreDeviceState> {
-        val device = mockk<SoundcoreDevice>()
-        val state = mockk<SoundcoreDeviceState>()
-        val stateFlow = MutableStateFlow(state)
-
-        coEvery { deviceFactory.createSoundcoreDevice(any(), any()) } returns device
-        every { device.name } returns "Test Q30"
-        every { device.macAddress } returns "00:00:00:00:00:00"
-        every { device.state } returns state
-        every { device.stateFlow } returns stateFlow
-        every { device.setEqualizerConfiguration(any()) } returns Unit
-        every { device.destroy() } returns Unit
-        every { state.ambientSoundMode() } returns AmbientSoundMode.Normal
-        every { state.noiseCancelingMode() } returns NoiseCancelingMode.Transport
-        every { state.equalizerConfiguration() } returns equalizerConfiguration
-
-        return Pair(device, state)
     }
 }

@@ -9,6 +9,7 @@ class HiltTestRunner : AndroidJUnitRunner() {
     init {
         Native.initialize()
     }
+
     override fun newApplication(
         cl: ClassLoader?, className: String?, context: Context?
     ): Application {

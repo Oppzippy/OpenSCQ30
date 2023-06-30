@@ -1,23 +1,22 @@
 package com.oppzippy.openscq30
 
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
-import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
-import com.oppzippy.openscq30.features.ui.devicesettings.composables.DeviceSettingsActivityView
-import com.oppzippy.openscq30.lib.*
+import androidx.compose.ui.test.performClick
+import com.oppzippy.openscq30.lib.AmbientSoundMode
+import com.oppzippy.openscq30.lib.NoiseCancelingMode
+import com.oppzippy.openscq30.ui.devicesettings.composables.SoundModeSettings
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
-import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import javax.inject.Inject
 
 @HiltAndroidTest
 class DeviceSettingsSoundModeTest {
@@ -28,10 +27,7 @@ class DeviceSettingsSoundModeTest {
     val hiltRule = HiltAndroidRule(this)
 
     @get:Rule(order = 2)
-    val composeRule = createAndroidComposeRule<MainActivity>()
-
-    @Inject
-    lateinit var deviceFactory: SoundcoreDeviceFactory
+    val composeRule = createAndroidComposeRule<TestActivity>()
 
     private lateinit var ambientSoundModes: List<SemanticsMatcher>
     private lateinit var normal: SemanticsMatcher
@@ -72,82 +68,49 @@ class DeviceSettingsSoundModeTest {
 
     @Test
     fun testSetAmbientSoundMode() {
-        val pair = initializeDeviceFactoryWithOneDevice()
-        val device = pair.first
-        every { device.setSoundMode(any(), any()) } returns Unit
+        val onAmbientSoundModeChange =
+            mockk<(ambientSoundMode: AmbientSoundMode) -> Unit>(relaxed = true)
 
         composeRule.setContent {
-            DeviceSettingsActivityView(
-                macAddress = "",
-                onDeviceNotFound = {},
+            SoundModeSettings(
+                ambientSoundMode = AmbientSoundMode.Normal,
+                noiseCancelingMode = NoiseCancelingMode.Indoor,
+                onAmbientSoundModeChange = onAmbientSoundModeChange,
             )
         }
         composeRule.onNode(transparency).performClick()
         verify(exactly = 1) {
-            device.setSoundMode(
-                AmbientSoundMode.Transparency, NoiseCancelingMode.Transport
-            )
+            onAmbientSoundModeChange(AmbientSoundMode.Transparency)
         }
     }
 
     @Test
     fun testSetNoiseCancelingMode() {
-        val pair = initializeDeviceFactoryWithOneDevice()
-        val device = pair.first
-        every { device.setSoundMode(any(), any()) } returns Unit
+        val onNoiseCancelingModeChange =
+            mockk<(noiseCancelingMode: NoiseCancelingMode) -> Unit>(relaxed = true)
 
         composeRule.setContent {
-            DeviceSettingsActivityView(
-                macAddress = "",
-                onDeviceNotFound = {},
+            SoundModeSettings(
+                ambientSoundMode = AmbientSoundMode.Normal,
+                noiseCancelingMode = NoiseCancelingMode.Indoor,
+                onNoiseCancelingModeChange = onNoiseCancelingModeChange,
             )
         }
-        composeRule.onNode(indoor).performClick()
+        composeRule.onNode(outdoor).performClick()
         verify(exactly = 1) {
-            device.setSoundMode(
-                AmbientSoundMode.Normal, NoiseCancelingMode.Indoor
-            )
+            onNoiseCancelingModeChange(NoiseCancelingMode.Outdoor)
         }
     }
 
     private fun renderInitialSoundMode(
         ambientSoundMode: AmbientSoundMode, noiseCancelingMode: NoiseCancelingMode
     ) {
-        val pair = initializeDeviceFactoryWithOneDevice()
-        val device = pair.first
-        val state = pair.second
-        every { state.ambientSoundMode() } returns ambientSoundMode
-        every { state.noiseCancelingMode() } returns noiseCancelingMode
-
         composeRule.setContent {
-            DeviceSettingsActivityView(
-                macAddress = "",
-                onDeviceNotFound = {},
+            SoundModeSettings(
+                ambientSoundMode = ambientSoundMode,
+                noiseCancelingMode = noiseCancelingMode,
             )
         }
-        verify(exactly = 0) { device.setSoundMode(ambientSoundMode, noiseCancelingMode) }
-    }
-
-    private fun initializeDeviceFactoryWithOneDevice(): Pair<SoundcoreDevice, SoundcoreDeviceState> {
-        val device = mockk<SoundcoreDevice>()
-        val initialState = mockk<SoundcoreDeviceState>()
-        val stateFlow = MutableStateFlow(initialState)
-
-        val equalizerConfiguration =
-            EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature)
-
-        coEvery { deviceFactory.createSoundcoreDevice(any(), any()) } returns device
-        every { device.name } returns "Test Q30"
-        every { device.macAddress } returns "00:00:00:00:00:00"
-        every { device.state } returns initialState
-        every { device.stateFlow } returns stateFlow
-        every { device.setEqualizerConfiguration(any()) } returns Unit
-        every { device.destroy() } returns Unit
-        every { initialState.ambientSoundMode() } returns AmbientSoundMode.Normal
-        every { initialState.noiseCancelingMode() } returns NoiseCancelingMode.Transport
-        every { initialState.equalizerConfiguration() } returns equalizerConfiguration
-
-        return Pair(device, initialState)
     }
 
     private fun assertOneSelected(

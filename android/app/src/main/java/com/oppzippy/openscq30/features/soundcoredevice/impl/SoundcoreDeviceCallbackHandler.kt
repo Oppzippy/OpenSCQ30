@@ -1,23 +1,30 @@
 package com.oppzippy.openscq30.features.soundcoredevice.impl
 
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
+import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.util.Log
 import com.oppzippy.openscq30.lib.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
-import kotlin.jvm.optionals.getOrNull
 
 @SuppressLint("MissingPermission")
 @Suppress("DEPRECATION")
-class SoundcoreDeviceCallbackHandler : BluetoothGattCallback() {
+class SoundcoreDeviceCallbackHandler(private val context: Context) : BluetoothGattCallback() {
     private lateinit var gatt: BluetoothGatt
     private var readCharacteristic: BluetoothGattCharacteristic? = null
     private var writeCharacteristic: BluetoothGattCharacteristic? = null
@@ -25,7 +32,27 @@ class SoundcoreDeviceCallbackHandler : BluetoothGattCallback() {
     private var isLocked: Boolean = false
     private val _packetsFlow: MutableSharedFlow<Packet> =
         MutableSharedFlow(0, 50, BufferOverflow.DROP_OLDEST)
-    val packetsFlow: SharedFlow<Packet> = _packetsFlow
+    val packetsFlow = _packetsFlow.asSharedFlow()
+    private val _isDisconnected = MutableStateFlow(false)
+    val isDisconnected = _isDisconnected.asStateFlow()
+
+    val adapter: BluetoothAdapter = context.getSystemService(BluetoothManager::class.java).adapter
+    val broadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val action = intent?.action
+            if (action == BluetoothAdapter.ACTION_STATE_CHANGED) {
+                if (adapter.state == BluetoothAdapter.STATE_TURNING_OFF || adapter.state == BluetoothAdapter.STATE_OFF) {
+                    _isDisconnected.value = true
+                }
+            }
+        }
+    }
+
+    init {
+        context.registerReceiver(
+            broadcastReceiver, IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+        )
+    }
 
     @Synchronized
     fun queueCommanad(command: Command) {
@@ -40,31 +67,26 @@ class SoundcoreDeviceCallbackHandler : BluetoothGattCallback() {
             val readCharacteristic = readCharacteristic
             if (writeCharacteristic != null && readCharacteristic != null) {
                 commandQueue.poll()?.let { command ->
-                    when (command) {
-                        Command.Read -> {
-                            if (!gatt.readCharacteristic(readCharacteristic)) {
-                                Log.w("SoundcoreDeviceCallbaks", "readCharacteristic failed")
-                            }
-                        }
+                    val isSuccess = when (command) {
+                        is Command.SetMtu -> gatt.requestMtu(command.mtu)
+
+                        Command.Read -> gatt.readCharacteristic(readCharacteristic)
+
                         is Command.Write -> {
                             writeCharacteristic.value = command.bytes
-                            if (!gatt.writeCharacteristic(writeCharacteristic)) {
-                                Log.w("SoundcoreDeviceCallbaks", "writeCharacteristic failed")
-                            }
+                            gatt.writeCharacteristic(writeCharacteristic)
                         }
-                        is Command.SetMtu -> {
-                            if (!gatt.requestMtu(command.mtu)) {
-                                Log.w("SoundcoreDeviceCallbaks", "requestMtu failed")
-                            }
-                        }
+
                         is Command.WriteDescriptor -> {
                             command.descriptor.value = command.value
-                            if (!gatt.writeDescriptor(command.descriptor)) {
-                                Log.w("SoundcoreDeviceCallbaks", "writeDescriptor failed")
-                            }
+                            gatt.writeDescriptor(command.descriptor)
                         }
                     }
-                    isLocked = true
+                    isLocked = isSuccess
+                    if (!isSuccess) {
+                        Log.w("SoundcoreDeviceCallbacks", "Command failed: $command")
+                        _isDisconnected.value = true
+                    }
                 }
             }
         }
@@ -87,6 +109,9 @@ class SoundcoreDeviceCallbackHandler : BluetoothGattCallback() {
             this.gatt = gatt
             gatt.discoverServices()
         }
+        if (newState == BluetoothProfile.STATE_DISCONNECTED || newState == BluetoothProfile.STATE_DISCONNECTING) {
+            _isDisconnected.value = true
+        }
     }
 
     @Synchronized
@@ -101,24 +126,15 @@ class SoundcoreDeviceCallbackHandler : BluetoothGattCallback() {
         _gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?
     ) {
         if (characteristic != null) {
-            val value = characteristic.value
-            AmbientSoundModeUpdatePacket.fromBytes(value).getOrNull()?.let {
-                _packetsFlow.tryEmit(Packet.AmbientSoundModeUpdate(it))
-                return
+            val bytes = characteristic.value
+            val packet = Packet.fromBytes(bytes)
+            if (packet != null) {
+                if (!_packetsFlow.tryEmit(packet)) {
+                    Log.e("SoundcoreDeviceCallbacks", "failed to emit packet to flow")
+                }
+            } else {
+                Log.i("unknown-packet", "got unknown packet: $bytes")
             }
-            StateUpdatePacket.fromBytes(value).getOrNull()?.let {
-                _packetsFlow.tryEmit(Packet.StateUpdate(it))
-                return
-            }
-            SetAmbientModeOkPacket.fromBytes(value).getOrNull()?.let {
-                _packetsFlow.tryEmit(Packet.SetAmbientModeOk(it))
-                return
-            }
-            SetEqualizerOkPacket.fromBytes(value).getOrNull()?.let {
-                _packetsFlow.tryEmit(Packet.SetEqualizerOk(it))
-                return
-            }
-            Log.i("unknown-packet", "got unknown packet")
             isLocked = false
             next()
         }

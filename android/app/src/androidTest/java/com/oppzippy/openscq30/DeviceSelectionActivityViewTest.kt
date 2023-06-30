@@ -1,18 +1,22 @@
 package com.oppzippy.openscq30
 
-import androidx.compose.ui.test.*
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.hasContentDescriptionExactly
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import com.oppzippy.openscq30.features.ui.deviceselection.composables.DeviceSelectionPermissionCheck
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
-import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDeviceProvider
+import com.oppzippy.openscq30.ui.deviceselection.DeviceSelectionRoot
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
-import io.mockk.every
 import io.mockk.junit4.MockKRule
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import javax.inject.Inject
 
 @HiltAndroidTest
 class DeviceSelectionActivityViewTest {
@@ -23,10 +27,7 @@ class DeviceSelectionActivityViewTest {
     val hiltRule = HiltAndroidRule(this)
 
     @get:Rule(order = 2)
-    val composeRule = createAndroidComposeRule<MainActivity>()
-
-    @Inject
-    lateinit var deviceProviderMock: BluetoothDeviceProvider
+    val composeRule = createAndroidComposeRule<TestActivity>()
 
     private lateinit var noDevicesFound: SemanticsMatcher
     private lateinit var refreshButton: SemanticsMatcher
@@ -43,12 +44,9 @@ class DeviceSelectionActivityViewTest {
 
     @Test
     fun testWithNoDevices() {
-        every { deviceProviderMock.getDevices() } returns listOf()
-
         composeRule.setContent {
-            DeviceSelectionPermissionCheck(
-                bluetoothDeviceProvider = deviceProviderMock,
-                onInfoClick = {},
+            DeviceSelectionRoot(
+                devices = emptyList(),
             )
         }
 
@@ -61,12 +59,10 @@ class DeviceSelectionActivityViewTest {
             BluetoothDevice("test1", "00:00:00:00:00:00"),
             BluetoothDevice("test2", "00:00:00:00:00:01"),
         )
-        every { deviceProviderMock.getDevices() } returns deviceModels
 
         composeRule.setContent {
-            DeviceSelectionPermissionCheck(
-                bluetoothDeviceProvider = deviceProviderMock,
-                onInfoClick = {},
+            DeviceSelectionRoot(
+                devices = deviceModels,
             )
         }
 
@@ -80,25 +76,28 @@ class DeviceSelectionActivityViewTest {
 
     @Test
     fun testWithNoDevicesAndThenRefreshWithDevices() {
-        every { deviceProviderMock.getDevices() } returns listOf()
+        var devices: List<BluetoothDevice> = emptyList()
+        val devicesFlow = MutableStateFlow(devices)
 
         composeRule.setContent {
-            DeviceSelectionPermissionCheck(
-                bluetoothDeviceProvider = deviceProviderMock,
-                onInfoClick = {},
+            DeviceSelectionRoot(
+                devices = devicesFlow.collectAsState().value,
+                onRefreshDevices = {
+                    devicesFlow.value = devices
+                }
             )
         }
 
         composeRule.onNode(noDevicesFound).assertExists()
 
-        val deviceModels = listOf(
+        devices = listOf(
             BluetoothDevice("test", "00:00:00:00:00:00"),
         )
-        every { deviceProviderMock.getDevices() } returns deviceModels
+        composeRule.onNode(noDevicesFound).assertExists()
 
         composeRule.onNode(refreshButton).performClick()
 
-        deviceModels.forEach {
+        devices.forEach {
             composeRule.onNodeWithText(it.name).assertExists().assertHasClickAction()
             composeRule.onNodeWithText(it.address).assertExists().assertHasClickAction()
         }

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 interface SoundcoreDevice {
     val state: SoundcoreDeviceState
     val stateFlow: Flow<SoundcoreDeviceState>
+    val isDisconnected: Flow<Boolean>
     val name: String
     val macAddress: String
     fun setSoundMode(
