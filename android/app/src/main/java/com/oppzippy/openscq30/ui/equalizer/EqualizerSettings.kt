@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.ui.equalizer.composables
+package com.oppzippy.openscq30.ui.equalizer
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,7 +25,12 @@ import com.oppzippy.openscq30.lib.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.PresetEqualizerProfile
 import com.oppzippy.openscq30.lib.SoundcoreDeviceState
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
-import com.oppzippy.openscq30.ui.equalizer.EqualizerSettingsViewModel
+import com.oppzippy.openscq30.ui.equalizer.composables.CreateCustomProfileDialog
+import com.oppzippy.openscq30.ui.equalizer.composables.CustomProfileSelection
+import com.oppzippy.openscq30.ui.equalizer.composables.DeleteCustomProfileDialog
+import com.oppzippy.openscq30.ui.equalizer.composables.Equalizer
+import com.oppzippy.openscq30.ui.equalizer.composables.PresetProfileSelection
+import com.oppzippy.openscq30.ui.equalizer.composables.ReplaceCustomProfileDialog
 import com.oppzippy.openscq30.ui.equalizer.models.EqualizerProfile
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 

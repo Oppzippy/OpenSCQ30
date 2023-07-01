@@ -9,7 +9,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
-import com.oppzippy.openscq30.ui.deviceselection.DeviceSelectionRoot
+import com.oppzippy.openscq30.ui.deviceselection.composables.DeviceSelection
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.junit4.MockKRule
@@ -45,7 +45,7 @@ class DeviceSelectionActivityViewTest {
     @Test
     fun testWithNoDevices() {
         composeRule.setContent {
-            DeviceSelectionRoot(
+            DeviceSelection(
                 devices = emptyList(),
             )
         }
@@ -61,7 +61,7 @@ class DeviceSelectionActivityViewTest {
         )
 
         composeRule.setContent {
-            DeviceSelectionRoot(
+            DeviceSelection(
                 devices = deviceModels,
             )
         }
@@ -80,7 +80,7 @@ class DeviceSelectionActivityViewTest {
         val devicesFlow = MutableStateFlow(devices)
 
         composeRule.setContent {
-            DeviceSelectionRoot(
+            DeviceSelection(
                 devices = devicesFlow.collectAsState().value,
                 onRefreshDevices = {
                     devicesFlow.value = devices

@@ -24,7 +24,7 @@ import com.oppzippy.openscq30.lib.PresetEqualizerProfile
 import com.oppzippy.openscq30.lib.SoundcoreDeviceState
 import com.oppzippy.openscq30.lib.VolumeAdjustments
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
-import com.oppzippy.openscq30.ui.equalizer.composables.EqualizerSettings
+import com.oppzippy.openscq30.ui.equalizer.EqualizerSettings
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.junit4.MockKRule

@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.ui.devicesettings.composables
+package com.oppzippy.openscq30.ui.devicesettings
 
 import DeviceSettings
 import androidx.compose.foundation.layout.fillMaxSize
@@ -6,14 +6,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.oppzippy.openscq30.lib.AmbientSoundMode
 import com.oppzippy.openscq30.lib.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.NoiseCancelingMode
+import com.oppzippy.openscq30.ui.devicesettings.composables.Disconnected
+import com.oppzippy.openscq30.ui.devicesettings.composables.Loading
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 
 @Composable
-fun DeviceSettingsRoot(
+fun DeviceSettingsScreen(
     onBack: () -> Unit = {},
     deviceState: UiDeviceState,
     onAmbientSoundModeChange: (ambientSoundMode: AmbientSoundMode) -> Unit = {},

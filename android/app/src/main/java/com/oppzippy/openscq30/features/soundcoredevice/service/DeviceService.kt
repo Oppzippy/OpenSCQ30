@@ -56,7 +56,7 @@ class DeviceService : LifecycleService() {
         connectionManager = DeviceConnectionManager(factory, lifecycleScope)
 
         lifecycleScope.launch {
-            connectionManager.connectionStateFlow.first { it is ConnectionStatus.Disconnected }
+            connectionManager.connectionStatusFlow.first { it is ConnectionStatus.Disconnected }
             stopSelf()
         }
 
@@ -85,7 +85,7 @@ class DeviceService : LifecycleService() {
         startForeground(NOTIFICATION_ID, notification)
 
         lifecycleScope.launch {
-            connectionManager.connectionStateFlow.collectLatest {
+            connectionManager.connectionStatusFlow.collectLatest {
                 val notificationManager =
                     getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.notify(NOTIFICATION_ID, buildNotification())
@@ -118,7 +118,7 @@ class DeviceService : LifecycleService() {
         val openAppIntent = Intent(this, MainActivity::class.java)
         openAppIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
-        val status = connectionManager.connectionStateFlow.value
+        val status = connectionManager.connectionStatusFlow.value
 
         val builder = Notification.Builder(this, CHANNEL_ID).setOngoing(true)
             .setSmallIcon(R.drawable.headphones).setContentTitle(

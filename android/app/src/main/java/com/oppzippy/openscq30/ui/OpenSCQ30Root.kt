@@ -15,13 +15,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.ui.deviceselection.DeviceSelectionRoot
-import com.oppzippy.openscq30.ui.devicesettings.composables.DeviceSettingsRoot
+import com.oppzippy.openscq30.ui.deviceselection.DeviceSelectionScreen
+import com.oppzippy.openscq30.ui.devicesettings.DeviceSettingsScreen
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
-fun OpenSCQ30Root(viewModel: RootViewModel = hiltViewModel()) {
+fun OpenSCQ30Root(
+    viewModel: DeviceSettingsViewModel = hiltViewModel(),
+) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
 
@@ -29,8 +31,8 @@ fun OpenSCQ30Root(viewModel: RootViewModel = hiltViewModel()) {
         DisposableEffect(viewModel) {
             val observer = LifecycleEventObserver { _, event ->
                 when (event) {
-                    Lifecycle.Event.ON_START -> viewModel.bind()
-                    Lifecycle.Event.ON_STOP -> viewModel.unbind()
+                    Lifecycle.Event.ON_START -> viewModel.bindDeviceService()
+                    Lifecycle.Event.ON_STOP -> viewModel.unbindDeviceService()
                     else -> {}
                 }
             }
@@ -39,13 +41,13 @@ fun OpenSCQ30Root(viewModel: RootViewModel = hiltViewModel()) {
                 lifecycleOwner.lifecycle.removeObserver(observer)
             }
         }
-        val deviceState by viewModel.deviceState.collectAsState()
+        val deviceState by viewModel.uiDeviceState.collectAsState()
         Crossfade(targetState = deviceState is UiDeviceState.Connected || deviceState is UiDeviceState.Loading) { isConnected ->
             BackHandler(enabled = isConnected) {
                 viewModel.deselectDevice()
             }
             if (isConnected) {
-                DeviceSettingsRoot(
+                DeviceSettingsScreen(
                     deviceState = deviceState,
                     onBack = { viewModel.deselectDevice() },
                     onAmbientSoundModeChange = {
@@ -65,10 +67,7 @@ fun OpenSCQ30Root(viewModel: RootViewModel = hiltViewModel()) {
                     },
                 )
             } else {
-                val devices by viewModel.devices.collectAsState()
-                DeviceSelectionRoot(
-                    devices = devices,
-                    onRefreshDevices = { viewModel.refreshDevices() },
+                DeviceSelectionScreen(
                     onDeviceSelected = { viewModel.selectDevice(it) },
                 )
             }

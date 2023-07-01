@@ -19,9 +19,8 @@ import com.oppzippy.openscq30.lib.SoundcoreDeviceState
 import com.oppzippy.openscq30.ui.devicesettings.Screen
 import com.oppzippy.openscq30.ui.devicesettings.composables.SoundModeSettings
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
-import com.oppzippy.openscq30.ui.equalizer.composables.EqualizerSettings
+import com.oppzippy.openscq30.ui.equalizer.EqualizerSettings
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
-import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

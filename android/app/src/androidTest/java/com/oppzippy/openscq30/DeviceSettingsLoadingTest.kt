@@ -3,7 +3,7 @@ package com.oppzippy.openscq30
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import com.oppzippy.openscq30.ui.devicesettings.composables.DeviceSettingsRoot
+import com.oppzippy.openscq30.ui.devicesettings.DeviceSettingsScreen
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -37,7 +37,7 @@ class DeviceSettingsLoadingTest {
     @Test
     fun testLoadingScreen() {
         composeRule.setContent {
-            DeviceSettingsRoot(deviceState = UiDeviceState.Loading)
+            DeviceSettingsScreen(deviceState = UiDeviceState.Loading)
         }
 
         composeRule.onNode(loading).assertExists()
@@ -46,7 +46,7 @@ class DeviceSettingsLoadingTest {
     @Test
     fun testDisconnectedScreen() {
         composeRule.setContent {
-            DeviceSettingsRoot(deviceState = UiDeviceState.Disconnected)
+            DeviceSettingsScreen(deviceState = UiDeviceState.Disconnected)
         }
 
         composeRule.onNode(disconnected).assertExists()

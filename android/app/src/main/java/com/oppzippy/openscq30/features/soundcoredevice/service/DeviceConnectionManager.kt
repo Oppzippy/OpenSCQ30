@@ -23,7 +23,7 @@ class DeviceConnectionManager @Inject constructor(
     private val mutex: Mutex = Mutex()
     private var _connectionStateFlow: MutableStateFlow<ConnectionStatus> =
         MutableStateFlow(ConnectionStatus.AwaitingConnection)
-    val connectionStateFlow = _connectionStateFlow.asStateFlow()
+    val connectionStatusFlow = _connectionStateFlow.asStateFlow()
 
     init {
         scope.launch {
@@ -122,7 +122,7 @@ class DeviceConnectionManager @Inject constructor(
 
     private suspend fun attemptReconnect() {
         mutex.withLock {
-            val status = this.connectionStateFlow.value
+            val status = this.connectionStatusFlow.value
             if (status is ConnectionStatus.Connected) {
                 connectUnconditionally(status.device.macAddress)
             }
