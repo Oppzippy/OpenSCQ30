@@ -67,6 +67,7 @@ class DeviceServiceConnection(
         serviceConnectionScope?.cancel()
         serviceConnectionScope = null
         this.service = null
+        uiDeviceStateFlow.value = UiDeviceState.Disconnected
     }
 
     fun setAmbientSoundMode(ambientSoundMode: AmbientSoundMode) {

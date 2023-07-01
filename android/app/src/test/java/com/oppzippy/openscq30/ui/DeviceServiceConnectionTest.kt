@@ -1,13 +1,8 @@
 package com.oppzippy.openscq30.ui
 
-import com.oppzippy.openscq30.Native
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
-import com.oppzippy.openscq30.lib.AmbientSoundMode
-import com.oppzippy.openscq30.lib.EqualizerConfiguration
-import com.oppzippy.openscq30.lib.NoiseCancelingMode
-import com.oppzippy.openscq30.lib.PresetEqualizerProfile
 import com.oppzippy.openscq30.lib.SoundcoreDeviceState
 import com.oppzippy.openscq30.test.MainDispatcherRule
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
@@ -75,8 +70,8 @@ class DeviceServiceConnectionTest {
         every { binder.getService() } returns service
         connection.onServiceConnected(null, binder)
 
-        val deviceStateFlow = MutableStateFlow<SoundcoreDeviceState>(mockk())
         // we aren't linked with openscq30_android.so, so we need to mock SoundcoreDeviceState
+        val deviceStateFlow = MutableStateFlow<SoundcoreDeviceState>(mockk())
         val device: SoundcoreDevice = mockk()
         every { device.name } returns "Test"
         every { device.macAddress } returns "00:00:00:00:00:00"
@@ -87,6 +82,30 @@ class DeviceServiceConnectionTest {
         val state = connection.uiDeviceStateFlow.timeout(10.milliseconds)
             .first { it is UiDeviceState.Connected } as UiDeviceState.Connected
         assertEquals(deviceStateFlow.value, state.deviceState)
+    }
+
+    @Test
+    fun movesToDisconnected() = runTest {
+        val connection = DeviceServiceConnection(unbind = {})
+
+        every { binder.getService() } returns service
+        connection.onServiceConnected(null, binder)
+
+        // we aren't linked with openscq30_android.so, so we need to mock SoundcoreDeviceState
+        val deviceStateFlow = MutableStateFlow<SoundcoreDeviceState>(mockk(relaxed = true))
+        val device: SoundcoreDevice = mockk()
+        every { device.stateFlow } returns deviceStateFlow
+        every { device.name } returns "Test"
+        every { device.macAddress } returns "00:00:00:00:00:00"
+
+        connectionStatusFlow.value = ConnectionStatus.Connected(device)
+
+        val state = connection.uiDeviceStateFlow.timeout(10.milliseconds)
+            .first { it is UiDeviceState.Connected } as UiDeviceState.Connected
+        assertEquals(deviceStateFlow.value, state.deviceState)
+
+        connection.onServiceDisconnected(mockk())
+        assertEquals(UiDeviceState.Disconnected, connection.uiDeviceStateFlow.value)
     }
 
     @Test
