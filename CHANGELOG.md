@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Fixes
+
+-   Improve handing of device disconnects. How this is implemented varies by platform. The desktop GUI could still use some more work.
+
+### Android
+
+#### Features
+
+-   The bluetooth connection is now held by a service, so it can be kept open in the background. This is in preparation for having sound mode and eq profile buttons in a notification.
+
 ## v1.3.1
 
 ### GUI
