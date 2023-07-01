@@ -19,7 +19,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @HiltAndroidTest
-class DeviceSelectionActivityViewTest {
+class DeviceSelectionTest {
     @get:Rule
     val mockkRule = MockKRule(this)
 
