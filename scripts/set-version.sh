@@ -36,11 +36,52 @@ add_version_to_appstream_metainfo() {
     metainfo_file="$1"
     version="$2"
     changelog_file="$3"
+    # If the release is already listed, don't add it again
     if [[ -z $(grep "<release version=\"$version\"" "$metainfo_file" ) ]]; then
         date=$(date --utc +"%Y-%m-%d")
-        changelog=$(get_changelog_for_version "$changelog_file" "$version")
-        escaped_changelog=$(printf '%s' "$changelog" | sed 's/[&/\]/\\&/g; s/$/\\/')
-        sed --in-place --regexp-extended --null-data "s/<releases>/<releases>\n        <release version=\"$version\" date=\"$date\">\n            <p>$escaped_changelog<\/p>\n        <\/release>/" "$metainfo_file"
+        changelog_markdown=$(get_changelog_for_version "$changelog_file" "$version")
+        changelog_html=$(printf '%s' "$changelog_markdown" | gawk '
+            # Skip empty lines
+            ! /\W/ {
+                next
+            }
+            # GUI, Android, etc.
+            /^### / {
+                category = gensub(/^### (.*)/, "\\1", "g", $0)
+                next
+            }
+            # Features, Fixes, etc
+            /^#### / {
+                subcategory = gensub(/^#### (.*)/, "\\1", "g", $0)
+                next
+            }
+            {
+                if (category == "General" || category == "GUI") {
+                    # Trim hyphen for markdown unordered lists
+                    line_text = gensub(/^- +(.*)/, "\\1", "g", $0)
+                    if (line_text) {
+                        sections[subcategory][length(sections[subcategory])+1] = line_text
+                    }
+                }
+            }
+            END {
+                for (s in sections) {
+                    print "<p>" s "</p>"
+                    print "<ul>"
+                    for (i = 1; i <= length(sections[s]); i++) {
+                        print "    <li>" sections[s][i] "</li>"
+                    }
+                    print "</ul>"
+                }
+            }
+        ' | awk '{
+            # Add indentation to match the surrounding xml tag
+            print "                " $0
+        }')
+
+        escaped_changelog=$(printf '%s' "$changelog_html" | sed 's/[&/\]/\\&/g; s/$/\\/')
+
+        sed --in-place --regexp-extended --null-data "s/<releases>/<releases>\n        <release version=\"$version\" date=\"$date\">\n            <description>\n$escaped_changelog \n            <\/description>\n        <\/release>/" "$metainfo_file"
     fi
 }
 
