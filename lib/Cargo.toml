@@ -23,8 +23,6 @@ macaddr = "1.0"
 
 [target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
 btleplug = { version = "0.10", optional = true }
-
-[target.'cfg(target_os = "linux")'.dependencies]
 regex = { version = "1.8", optional = true }
 lazy_static = { version = "1.4", optional = true }
 
