@@ -34,10 +34,12 @@
     </provides>
     <releases>
         <release version="1.4.0" date="2023-07-01">
-            <p>Fixes</p>
-            <ul>
-                <li>Improve handling of device disconnects</li>
-            </ul>
+            <description>
+                <p>Fixes</p>
+                <ul>
+                    <li>Improve handing of device disconnects. How this is implemented varies by platform. The desktop GUI could still use some more work.</li>
+                </ul> 
+            </description>
         </release>
         <release version="1.3.1" date="2023-06-13" />
         <release version="1.3.0" date="2023-06-13" />
