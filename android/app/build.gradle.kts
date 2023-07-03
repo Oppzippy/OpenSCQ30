@@ -214,7 +214,7 @@ archTriplets.forEach { (arch, target) ->
             "--target",
             arch,
             "--platform",
-            "24",
+            "26",
             "build",
             "--profile",
             "release-debuginfo"
