@@ -46,6 +46,8 @@ fun OpenSCQ30Root(
                     when (event) {
                         Lifecycle.Event.ON_START -> viewModel.bindDeviceService()
                         Lifecycle.Event.ON_STOP -> viewModel.unbindDeviceService()
+                        Lifecycle.Event.ON_DESTROY -> viewModel.stopServiceIfNotificationIsGone()
+
                         else -> {}
                     }
                 }

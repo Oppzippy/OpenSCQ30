@@ -26,8 +26,9 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class DeviceService : LifecycleService() {
     companion object {
+        private const val NOTIFICATION_CHANNEL_ID =
+            "com.oppzippy.openscq30.notification.DeviceServiceChannel"
         private const val NOTIFICATION_ID = 1
-        private const val CHANNEL_ID = "com.oppzippy.openscq30.notification.DeviceServiceChannel"
         private const val DISCONNECT = "com.oppzippy.openscq30.broadcast.Disconnect"
 
         /** Intent extra for setting mac address when launching service */
@@ -103,7 +104,7 @@ class DeviceService : LifecycleService() {
 
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
-            CHANNEL_ID,
+            NOTIFICATION_CHANNEL_ID,
             "Device Connection Service",
             NotificationManager.IMPORTANCE_LOW,
         )
@@ -120,7 +121,7 @@ class DeviceService : LifecycleService() {
 
         val status = connectionManager.connectionStatusFlow.value
 
-        val builder = Notification.Builder(this, CHANNEL_ID).setOngoing(true)
+        val builder = Notification.Builder(this, NOTIFICATION_CHANNEL_ID).setOngoing(true)
             .setSmallIcon(R.drawable.headphones).setContentTitle(
                 when (status) {
                     is ConnectionStatus.AwaitingConnection -> getString(R.string.awaiting_connection)
@@ -154,6 +155,15 @@ class DeviceService : LifecycleService() {
                 ).build()
             )
         return builder.build()
+    }
+
+    fun doesNotificationExist(): Boolean {
+        val notificationManager =
+            applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val doesNotificationExist = notificationManager.activeNotifications.any {
+            (it.notification.channelId == NOTIFICATION_CHANNEL_ID) && (it.id == NOTIFICATION_ID)
+        }
+        return doesNotificationExist
     }
 
     private val binder = MyBinder()

@@ -18,7 +18,8 @@ class DeviceSettingsViewModel @Inject constructor(
     private val application: Application,
     private val intentFactory: IntentFactory,
 ) : AndroidViewModel(application) {
-    private val deviceServiceConnection = DeviceServiceConnection(unbind = { unbindDeviceService() })
+    private val deviceServiceConnection =
+        DeviceServiceConnection(unbind = { unbindDeviceService() })
     val uiDeviceState = deviceServiceConnection.uiDeviceStateFlow.asStateFlow()
 
     override fun onCleared() {
@@ -68,5 +69,15 @@ class DeviceSettingsViewModel @Inject constructor(
 
     fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
         deviceServiceConnection.setEqualizerConfiguration(equalizerConfiguration)
+    }
+
+    fun stopServiceIfNotificationIsGone() {
+        if (!deviceServiceConnection.doesNotificationExist()) {
+            Log.i(
+                "OpenSCQ30Root",
+                "Stopping service since main activity is exiting and notification is not shown.",
+            )
+            deselectDevice()
+        }
     }
 }
