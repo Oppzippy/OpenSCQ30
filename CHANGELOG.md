@@ -10,6 +10,8 @@
 
 ### Android
 
+-   Minimum Android API level increased from 24 to 26 (Android 7.0 to Android 8.0)
+
 #### Features
 
 -   The bluetooth connection is now held by a service, so it can be kept open in the background. This is in preparation for having sound mode and eq profile buttons in a notification.
