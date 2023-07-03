@@ -65,7 +65,9 @@ private fun GroupHeader(text: String) {
 
 @Composable
 private fun <T> LabeledRadioButtonGroup(
-    selectedValue: T, values: LinkedHashMap<T, String>, onValueChange: (value: T) -> Unit
+    selectedValue: T,
+    values: LinkedHashMap<T, String>,
+    onValueChange: (value: T) -> Unit,
 ) {
     Column(Modifier.selectableGroup()) {
         values.forEach { (value, text) ->
@@ -82,7 +84,7 @@ private fun LabeledRadioButton(text: String, selected: Boolean, onClick: () -> U
         Modifier
             .fillMaxWidth()
             .selectable(selected = selected, onClick = onClick, role = Role.RadioButton)
-            .padding(horizontal = 2.dp, vertical = 2.dp)
+            .padding(horizontal = 2.dp, vertical = 2.dp),
     ) {
         RadioButton(selected = selected, onClick = null)
         Text(

@@ -45,7 +45,6 @@ class DeviceSettingsEqualizerTest {
     @get:Rule(order = 2)
     val composeRule = createAndroidComposeRule<TestActivity>()
 
-
     private lateinit var soundcoreSignature: SemanticsMatcher
     private lateinit var acoustic: SemanticsMatcher
     private lateinit var bassBooster: SemanticsMatcher
@@ -66,11 +65,13 @@ class DeviceSettingsEqualizerTest {
 
     private fun stateWithEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration): UiDeviceState.Connected {
         return UiDeviceState.Connected(
-            "Test Device", "00:00:00:00:00:00", SoundcoreDeviceState(
+            "Test Device",
+            "00:00:00:00:00:00",
+            SoundcoreDeviceState(
                 AmbientSoundMode.Normal,
                 NoiseCancelingMode.Indoor,
                 equalizerConfiguration,
-            )
+            ),
         )
     }
 
@@ -79,8 +80,8 @@ class DeviceSettingsEqualizerTest {
         composeRule.setContent {
             EqualizerSettings(
                 uiState = stateWithEqualizerConfiguration(
-                    EqualizerConfiguration(PresetEqualizerProfile.Classical)
-                )
+                    EqualizerConfiguration(PresetEqualizerProfile.Classical),
+                ),
             )
         }
 
@@ -101,8 +102,8 @@ class DeviceSettingsEqualizerTest {
         composeRule.setContent {
             EqualizerSettings(
                 uiState = stateWithEqualizerConfiguration(
-                    EqualizerConfiguration(VolumeAdjustments(values))
-                )
+                    EqualizerConfiguration(VolumeAdjustments(values)),
+                ),
             )
         }
         composeRule.onNode(soundcoreSignature, true).assertDoesNotExist()
@@ -111,8 +112,10 @@ class DeviceSettingsEqualizerTest {
         for (i in 0..7) {
             sliders[i].assertRangeInfoEquals(
                 ProgressBarRangeInfo(
-                    values[i].toFloat(), -120F..120F, 240,
-                )
+                    values[i].toFloat(),
+                    -120F..120F,
+                    240,
+                ),
             )
         }
     }
@@ -124,7 +127,7 @@ class DeviceSettingsEqualizerTest {
         composeRule.setContent {
             EqualizerSettings(
                 uiState = stateWithEqualizerConfiguration(
-                    EqualizerConfiguration(PresetEqualizerProfile.Acoustic)
+                    EqualizerConfiguration(PresetEqualizerProfile.Acoustic),
                 ),
                 onEqualizerConfigurationChange = onEqualizerConfigurationChange,
             )
@@ -133,9 +136,11 @@ class DeviceSettingsEqualizerTest {
         composeRule.onNode(bassBooster, true).performClick()
         Thread.sleep(600) // Wait for debounce
         verify {
-            onEqualizerConfigurationChange(match {
-                it.contentEquals(EqualizerConfiguration(PresetEqualizerProfile.BassBooster))
-            })
+            onEqualizerConfigurationChange(
+                match {
+                    it.contentEquals(EqualizerConfiguration(PresetEqualizerProfile.BassBooster))
+                },
+            )
         }
 
         val values = byteArrayOf(40, 30, 10, 0, 0, 0, 0, 0)
@@ -143,8 +148,10 @@ class DeviceSettingsEqualizerTest {
         for (i in 0..7) {
             sliders[i].assertRangeInfoEquals(
                 ProgressBarRangeInfo(
-                    values[i].toFloat(), -120F..120F, 240
-                )
+                    values[i].toFloat(),
+                    -120F..120F,
+                    240,
+                ),
             )
         }
     }
@@ -157,7 +164,7 @@ class DeviceSettingsEqualizerTest {
         composeRule.setContent {
             EqualizerSettings(
                 uiState = stateWithEqualizerConfiguration(
-                    EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature)
+                    EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
                 ),
                 onEqualizerConfigurationChange = onEqualizerConfigurationChange,
             )
@@ -171,9 +178,11 @@ class DeviceSettingsEqualizerTest {
 
         Thread.sleep(600) // Wait for debounce
         verify {
-            onEqualizerConfigurationChange(match {
-                it.volumeAdjustments().adjustments().first() > 0
-            })
+            onEqualizerConfigurationChange(
+                match {
+                    it.volumeAdjustments().adjustments().first() > 0
+                },
+            )
         }
     }
 
@@ -183,9 +192,9 @@ class DeviceSettingsEqualizerTest {
             EqualizerSettings(
                 uiState = stateWithEqualizerConfiguration(
                     EqualizerConfiguration(
-                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
-                    )
-                )
+                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
+                    ),
+                ),
             )
         }
 
@@ -215,9 +224,9 @@ class DeviceSettingsEqualizerTest {
             EqualizerSettings(
                 uiState = stateWithEqualizerConfiguration(
                     EqualizerConfiguration(
-                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
-                    )
-                )
+                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
+                    ),
+                ),
             )
         }
 
@@ -254,9 +263,9 @@ class DeviceSettingsEqualizerTest {
             EqualizerSettings(
                 stateWithEqualizerConfiguration(
                     EqualizerConfiguration(
-                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
-                    )
-                )
+                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
+                    ),
+                ),
             )
         }
 
@@ -277,9 +286,9 @@ class DeviceSettingsEqualizerTest {
             EqualizerSettings(
                 stateWithEqualizerConfiguration(
                     EqualizerConfiguration(
-                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
-                    )
-                )
+                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
+                    ),
+                ),
             )
         }
 
@@ -313,9 +322,9 @@ class DeviceSettingsEqualizerTest {
             EqualizerSettings(
                 stateWithEqualizerConfiguration(
                     EqualizerConfiguration(
-                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
-                    )
-                )
+                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
+                    ),
+                ),
             )
         }
 
@@ -329,9 +338,9 @@ class DeviceSettingsEqualizerTest {
             EqualizerSettings(
                 stateWithEqualizerConfiguration(
                     EqualizerConfiguration(
-                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
-                    )
-                )
+                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
+                    ),
+                ),
             )
         }
 
@@ -359,9 +368,9 @@ class DeviceSettingsEqualizerTest {
             EqualizerSettings(
                 stateWithEqualizerConfiguration(
                     EqualizerConfiguration(
-                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0))
-                    )
-                )
+                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
+                    ),
+                ),
             )
         }
 

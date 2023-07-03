@@ -68,7 +68,7 @@ fun OpenSCQ30Root(
                 transitionSpec = {
                     val widthDivisor = if (targetState) 2 else -2
                     slideInHorizontally { width -> width / widthDivisor } + fadeIn() with slideOutHorizontally { width -> width / -widthDivisor } + fadeOut() using SizeTransform(
-                        clip = false
+                        clip = false,
                     )
                 },
             ) { animationIsConnected ->
@@ -108,7 +108,9 @@ private fun withErrorToast(context: Context, f: () -> Unit) {
     } catch (ex: Exception) {
         Log.e("OpenSCQ30Root", "", ex)
         Toast.makeText(
-            context, R.string.an_error_has_occurred, Toast.LENGTH_SHORT,
+            context,
+            R.string.an_error_has_occurred,
+            Toast.LENGTH_SHORT,
         ).show()
     }
 }

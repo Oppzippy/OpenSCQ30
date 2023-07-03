@@ -128,18 +128,18 @@ class DeviceService : LifecycleService() {
                     is ConnectionStatus.Connected -> getString(R.string.connected_to).format(status.device.name)
 
                     is ConnectionStatus.Connecting -> getString(R.string.connecting_to).format(
-                        status.macAddress
+                        status.macAddress,
                     )
 
                     ConnectionStatus.Disconnected -> getString(R.string.disconnected)
-                }
+                },
             ).setContentIntent(
                 PendingIntent.getActivity(
                     this,
                     1,
                     openAppIntent,
                     PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-                )
+                ),
             ).addAction(
                 Notification.Action.Builder(
                     Icon.createWithResource(this, R.drawable.headphones),
@@ -151,8 +151,8 @@ class DeviceService : LifecycleService() {
                             action = DISCONNECT
                         },
                         PendingIntent.FLAG_IMMUTABLE,
-                    )
-                ).build()
+                    ),
+                ).build(),
             )
         return builder.build()
     }
@@ -184,5 +184,4 @@ class DeviceService : LifecycleService() {
     inner class MyBinder : Binder() {
         fun getService(): DeviceService = this@DeviceService
     }
-
 }

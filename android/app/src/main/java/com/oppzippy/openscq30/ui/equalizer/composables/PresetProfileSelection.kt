@@ -13,7 +13,8 @@ import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
 fun PresetProfileSelection(
-    value: EqualizerProfile, onProfileSelected: (profile: EqualizerProfile) -> Unit
+    value: EqualizerProfile,
+    onProfileSelected: (profile: EqualizerProfile) -> Unit,
 ) {
     val profiles = EqualizerProfile.values()
 

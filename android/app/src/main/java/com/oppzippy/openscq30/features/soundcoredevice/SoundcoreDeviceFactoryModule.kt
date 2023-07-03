@@ -8,12 +8,9 @@ import com.oppzippy.openscq30.features.soundcoredevice.impl.SoundcoreDeviceFacto
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ActivityRetainedComponent
 import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.android.scopes.ActivityRetainedScoped
 import dagger.hilt.android.scopes.ServiceScoped
-import dagger.hilt.android.scopes.ViewModelScoped
 
 @Module
 @InstallIn(ServiceComponent::class)

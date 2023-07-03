@@ -13,7 +13,6 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.junit4.MockKRule
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import org.junit.Before
 import org.junit.Rule
@@ -54,7 +53,8 @@ class OpenSCQ30RootTest {
         val mutex = Mutex(locked = true)
         coEvery {
             soundcoreDeviceFactory.createSoundcoreDevice(
-                "00:00:00:00:00:00", any()
+                "00:00:00:00:00:00",
+                any(),
             )
         } coAnswers {
             mutex.lock()

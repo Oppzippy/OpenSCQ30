@@ -18,7 +18,8 @@ import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 class DeviceConnectionManager @Inject constructor(
-    private val factory: SoundcoreDeviceFactory, private val scope: CoroutineScope,
+    private val factory: SoundcoreDeviceFactory,
+    private val scope: CoroutineScope,
 ) {
     private val mutex: Mutex = Mutex()
     private var _connectionStateFlow: MutableStateFlow<ConnectionStatus> =

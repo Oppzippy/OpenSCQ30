@@ -1,7 +1,7 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
-import java.util.Properties
-import java.io.FileInputStream
 import java.io.ByteArrayOutputStream
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     id("com.android.application")
@@ -9,6 +9,7 @@ plugins {
     id("org.jetbrains.kotlin.kapt")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 val keystorePropertiesFile: File = rootProject.file("keystore.properties")
@@ -57,7 +58,8 @@ android {
             isDebuggable = true
             isMinifyEnabled = false
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
             )
         }
         create("debugDemo") {
@@ -68,7 +70,8 @@ android {
             isDebuggable = false
             isMinifyEnabled = true
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
             )
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs["release"]
@@ -189,7 +192,7 @@ val archTriplets = mapOf(
 
 archTriplets.forEach { (arch, target) ->
     // execute cargo metadata and get path to target directory
-    tasks.create("cargo-output-dir-${arch}") {
+    tasks.create("cargo-output-dir-$arch") {
         description = "Get cargo metadata"
         val output = ByteArrayOutputStream()
         exec {
@@ -205,7 +208,7 @@ archTriplets.forEach { (arch, target) ->
         project.extensions.extraProperties.set("cargo_target_directory", targetDirectory)
     }
     // Build with cargo
-    tasks.create<Exec>("cargo-build-${arch}") {
+    tasks.create<Exec>("cargo-build-$arch") {
         description = "Building core for $arch"
         workingDir = File(rustBasePath)
         commandLine(
@@ -217,40 +220,50 @@ archTriplets.forEach { (arch, target) ->
             "26",
             "build",
             "--profile",
-            "release-debuginfo"
+            "release-debuginfo",
         )
     }
     // Sync shared native dependencies
-    tasks.create<Sync>("sync-rust-deps-${arch}") {
-        dependsOn("cargo-build-${arch}")
-        from("${rustBasePath}/src/libs/${arch}") {
+    tasks.create<Sync>("sync-rust-deps-$arch") {
+        dependsOn("cargo-build-$arch")
+        from("$rustBasePath/src/libs/$arch") {
             include("*.so")
         }
-        into("src/main/libs/${arch}")
+        into("src/main/libs/$arch")
     }
     // Copy build libs into this app's libs directory
-    tasks.create<Copy>("rust-deploy-${arch}") {
-        dependsOn("sync-rust-deps-${arch}")
+    tasks.create<Copy>("rust-deploy-$arch") {
+        dependsOn("sync-rust-deps-$arch")
         description = "Copy rust libs for ($arch) to jniLibs"
-        from("${project.extensions.extraProperties.get("cargo_target_directory")}/${target}/release-debuginfo") {
+        val cargoTargetDirectory = project.extensions.extraProperties.get("cargo_target_directory")
+        from(
+            "$cargoTargetDirectory/$target/release-debuginfo",
+        ) {
             include("*.so")
         }
-        into("src/main/libs/${arch}")
+        into("src/main/libs/$arch")
     }
 
     // Hook up tasks to execute before building java
     tasks.withType<JavaCompile> {
-        dependsOn("rust-deploy-${arch}")
+        dependsOn("rust-deploy-$arch")
     }
-    tasks.preBuild.dependsOn("rust-deploy-${arch}")
+    tasks.preBuild.dependsOn("rust-deploy-$arch")
 
     // Hook up clean tasks
-    tasks.create<Delete>("clean-${arch}") {
-        dependsOn("cargo-output-dir-${arch}")
+    tasks.create<Delete>("clean-$arch") {
+        dependsOn("cargo-output-dir-$arch")
         description = "Deleting built libs for $arch"
-        delete(fileTree("${project.extensions.extraProperties.get("cargo_target_directory")}/${target}/release-debuginfo") {
-            include("*.so")
-        })
+        delete(
+            fileTree(
+                "${project.extensions.extraProperties.get("cargo_target_directory")}/$target/release-debuginfo",
+            ) {
+                include("*.so")
+            },
+        )
     }
-    tasks.clean.dependsOn("clean-${arch}")
+    tasks.clean.dependsOn("clean-$arch")
+}
+configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+    version.set("0.49.1")
 }

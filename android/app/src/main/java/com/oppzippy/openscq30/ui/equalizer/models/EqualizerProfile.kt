@@ -1,9 +1,9 @@
 package com.oppzippy.openscq30.ui.equalizer.models
 
 import android.util.Log
+import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.PresetEqualizerProfile
-import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.VolumeAdjustments
 
 enum class EqualizerProfile(val presetProfile: PresetEqualizerProfile?, val localizationStringId: Int) {
@@ -29,7 +29,8 @@ enum class EqualizerProfile(val presetProfile: PresetEqualizerProfile?, val loca
     SmallSpeakers(PresetEqualizerProfile.SmallSpeakers, R.string.small_speakers),
     SpokenWord(PresetEqualizerProfile.SpokenWord, R.string.spoken_word),
     TrebleBooster(PresetEqualizerProfile.TrebleBooster, R.string.treble_booster),
-    TrebleReducer(PresetEqualizerProfile.TrebleReducer, R.string.treble_reducer);
+    TrebleReducer(PresetEqualizerProfile.TrebleReducer, R.string.treble_reducer),
+    ;
 
     fun toEqualizerConfiguration(volumeAdjustments: ByteArray?): EqualizerConfiguration {
         return if (presetProfile != null) {

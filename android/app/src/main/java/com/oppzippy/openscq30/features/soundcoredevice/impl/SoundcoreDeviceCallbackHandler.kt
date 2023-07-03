@@ -13,13 +13,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.util.Log
-import com.oppzippy.openscq30.lib.*
+import com.oppzippy.openscq30.lib.RequestStatePacket
+import com.oppzippy.openscq30.lib.SoundcoreDeviceUtils
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.ConcurrentLinkedQueue
 
 @SuppressLint("MissingPermission")
@@ -50,7 +51,8 @@ class SoundcoreDeviceCallbackHandler(private val context: Context) : BluetoothGa
 
     init {
         context.registerReceiver(
-            broadcastReceiver, IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+            broadcastReceiver,
+            IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED),
         )
     }
 
@@ -94,16 +96,19 @@ class SoundcoreDeviceCallbackHandler(private val context: Context) : BluetoothGa
 
     @Synchronized
     override fun onCharacteristicWrite(
-        _gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?, status: Int
+        _gatt: BluetoothGatt?,
+        characteristic: BluetoothGattCharacteristic?,
+        status: Int,
     ) {
         isLocked = false
         next()
     }
 
-
     @Synchronized
     override fun onConnectionStateChange(
-        gatt: BluetoothGatt?, status: Int, newState: Int
+        gatt: BluetoothGatt?,
+        status: Int,
+        newState: Int,
     ) {
         if (newState == BluetoothProfile.STATE_CONNECTED && gatt != null) {
             this.gatt = gatt
@@ -123,7 +128,8 @@ class SoundcoreDeviceCallbackHandler(private val context: Context) : BluetoothGa
 
     @Synchronized
     override fun onCharacteristicChanged(
-        _gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?
+        _gatt: BluetoothGatt?,
+        characteristic: BluetoothGattCharacteristic?,
     ) {
         if (characteristic != null) {
             val bytes = characteristic.value
@@ -142,7 +148,9 @@ class SoundcoreDeviceCallbackHandler(private val context: Context) : BluetoothGa
 
     @Synchronized
     override fun onDescriptorWrite(
-        _gatt: BluetoothGatt?, descriptor: BluetoothGattDescriptor?, status: Int
+        _gatt: BluetoothGatt?,
+        descriptor: BluetoothGattDescriptor?,
+        status: Int,
     ) {
         isLocked = false
         next()
@@ -150,7 +158,9 @@ class SoundcoreDeviceCallbackHandler(private val context: Context) : BluetoothGa
 
     @Synchronized
     override fun onDescriptorRead(
-        _gatt: BluetoothGatt?, descriptor: BluetoothGattDescriptor?, status: Int
+        _gatt: BluetoothGatt?,
+        descriptor: BluetoothGattDescriptor?,
+        status: Int,
     ) {
         isLocked = false
         next()
@@ -171,8 +181,9 @@ class SoundcoreDeviceCallbackHandler(private val context: Context) : BluetoothGa
 
         queueCommanad(
             Command.WriteDescriptor(
-                descriptor, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-            )
+                descriptor,
+                BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE,
+            ),
         )
         queueCommanad(Command.SetMtu(500))
         queueCommanad(Command.Write(RequestStatePacket().bytes()))

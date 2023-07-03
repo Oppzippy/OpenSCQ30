@@ -1,8 +1,18 @@
+package com.oppzippy.openscq30.ui.devicesettings.composables
+
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -17,7 +27,6 @@ import com.oppzippy.openscq30.lib.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.PresetEqualizerProfile
 import com.oppzippy.openscq30.lib.SoundcoreDeviceState
 import com.oppzippy.openscq30.ui.devicesettings.Screen
-import com.oppzippy.openscq30.ui.devicesettings.composables.SoundModeSettings
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.equalizer.EqualizerSettings
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
@@ -54,7 +63,8 @@ fun DeviceSettings(
                 val navBarStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBarStackEntry?.destination
                 navItems.forEach { screen ->
-                    NavigationBarItem(icon = { Icon(screen.icon, contentDescription = null) },
+                    NavigationBarItem(
+                        icon = { Icon(screen.icon, contentDescription = null) },
                         label = { Text(stringResource(screen.resourceId)) },
                         selected = currentDestination?.route == screen.route,
                         onClick = {
@@ -62,7 +72,8 @@ fun DeviceSettings(
                                 popUpTo(navController.graph.id)
                                 launchSingleTop = true
                             }
-                        })
+                        },
+                    )
                 }
             }
         },
@@ -70,7 +81,7 @@ fun DeviceSettings(
         NavHost(
             navController = navController,
             startDestination = Screen.General.route,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
         ) {
             composable(Screen.General.route) {
                 SoundModeSettings(
@@ -103,7 +114,7 @@ private fun DefaultPreview() {
                     NoiseCancelingMode.Indoor,
                     EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
                 ),
-            )
+            ),
         )
     }
 }

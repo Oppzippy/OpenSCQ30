@@ -38,7 +38,7 @@ import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 fun EqualizerSettings(
     uiState: UiDeviceState.Connected,
     onEqualizerConfigurationChange: (equalizerConfiguration: EqualizerConfiguration) -> Unit = {},
-    viewModel: EqualizerSettingsViewModel = hiltViewModel()
+    viewModel: EqualizerSettingsViewModel = hiltViewModel(),
 ) {
     viewModel.pushUiState(uiState)
     viewModel.setRealEqualizerConfiguration = onEqualizerConfigurationChange
@@ -139,11 +139,12 @@ private fun DefaultPreview() {
     OpenSCQ30Theme {
         EqualizerSettings(
             uiState = UiDeviceState.Connected(
-                "Test Device", "00:00:00:00:00:00",
+                "Test Device",
+                "00:00:00:00:00:00",
                 SoundcoreDeviceState(
                     AmbientSoundMode.Normal,
                     NoiseCancelingMode.Indoor,
-                    EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature)
+                    EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
                 ),
             ),
         )

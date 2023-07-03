@@ -103,7 +103,8 @@ class DeviceSettingsSoundModeTest {
     }
 
     private fun renderInitialSoundMode(
-        ambientSoundMode: AmbientSoundMode, noiseCancelingMode: NoiseCancelingMode
+        ambientSoundMode: AmbientSoundMode,
+        noiseCancelingMode: NoiseCancelingMode,
     ) {
         composeRule.setContent {
             SoundModeSettings(

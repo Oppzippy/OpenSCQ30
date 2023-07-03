@@ -61,7 +61,7 @@ fun DeviceListing(
             Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .pullRefresh(pullRefreshState)
+                .pullRefresh(pullRefreshState),
         ) {
             if (devices.isEmpty()) {
                 NoDevicesFound()
@@ -84,7 +84,6 @@ fun DeviceListing(
     })
 }
 
-
 @Preview(showBackground = true)
 @Composable
 private fun NoDevicesFoundPreview() {
@@ -99,7 +98,7 @@ private fun DevicesPreview() {
     OpenSCQ30Theme {
         val devices = ArrayList<BluetoothDevice>()
         for (i in 1..100) {
-            devices.add(BluetoothDevice("Device #${i}", "00:00:${i}"))
+            devices.add(BluetoothDevice("Device #$i", "00:00:$i"))
         }
         DeviceListing(devices)
     }

@@ -10,7 +10,7 @@ import com.oppzippy.openscq30.lib.SoundcoreDeviceState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 
-class SoundcoreDeviceFactoryImpl(private val context: Context): SoundcoreDeviceFactory {
+class SoundcoreDeviceFactoryImpl(private val context: Context) : SoundcoreDeviceFactory {
     @Throws(SecurityException::class)
     override suspend fun createSoundcoreDevice(macAddress: String, scope: CoroutineScope): SoundcoreDevice? {
         val bluetoothManager: BluetoothManager =

@@ -49,8 +49,10 @@ fun ReplaceCustomProfileDialog(
                     }
                     LazyColumn(
                         modifier = Modifier.padding(
-                            start = 16.dp, end = 16.dp, bottom = 16.dp,
-                        )
+                            start = 16.dp,
+                            end = 16.dp,
+                            bottom = 16.dp,
+                        ),
                     ) {
                         items(profiles) { profile ->
                             TextButton(

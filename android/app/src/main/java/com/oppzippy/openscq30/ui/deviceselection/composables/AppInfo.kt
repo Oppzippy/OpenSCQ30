@@ -3,10 +3,21 @@ package com.oppzippy.openscq30.ui.deviceselection.composables
 import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.widget.TextView
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -66,7 +77,6 @@ private fun HtmlText(text: String, modifier: Modifier = Modifier) {
         textView.movementMethod = LinkMovementMethod.getInstance()
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

@@ -25,12 +25,14 @@ fun DeviceList(
         userScrollEnabled = true,
     ) {
         items(devices) { device ->
-            Column(modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    onDeviceClick(device)
-                }
-                .padding(horizontal = 8.dp, vertical = 8.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        onDeviceClick(device)
+                    }
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
+            ) {
                 Text(text = device.name)
                 Text(text = device.address)
             }
@@ -44,7 +46,7 @@ private fun DefaultPreview() {
     OpenSCQ30Theme {
         val devices = ArrayList<BluetoothDevice>()
         for (i in 1..100) {
-            devices.add(BluetoothDevice("Device #${i}", "00:00:${i}"))
+            devices.add(BluetoothDevice("Device #$i", "00:00:$i"))
         }
         DeviceList(devices)
     }

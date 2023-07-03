@@ -7,7 +7,7 @@ import android.util.Log
 import androidx.annotation.RequiresPermission
 import com.oppzippy.openscq30.lib.SoundcoreDeviceUtils
 
-class BluetoothDeviceProviderImpl(private val context: Context): BluetoothDeviceProvider {
+class BluetoothDeviceProviderImpl(private val context: Context) : BluetoothDeviceProvider {
     /**
      * The caller is responsible for checking for bluetooth permission
      */

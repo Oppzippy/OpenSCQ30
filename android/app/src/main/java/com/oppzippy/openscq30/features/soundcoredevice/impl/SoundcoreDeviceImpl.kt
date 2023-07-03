@@ -4,9 +4,16 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
 import com.oppzippy.openscq30.features.soundcoredevice.api.contentEquals
-import com.oppzippy.openscq30.lib.*
+import com.oppzippy.openscq30.lib.AmbientSoundMode
+import com.oppzippy.openscq30.lib.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.SetAmbientSoundModePacket
+import com.oppzippy.openscq30.lib.SetEqualizerPacket
+import com.oppzippy.openscq30.lib.SoundcoreDeviceState
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 @SuppressLint("MissingPermission")
@@ -54,7 +61,8 @@ class SoundcoreDeviceImpl(
     }
 
     override fun setSoundMode(
-        newAmbientSoundMode: AmbientSoundMode, newNoiseCancelingMode: NoiseCancelingMode
+        newAmbientSoundMode: AmbientSoundMode,
+        newNoiseCancelingMode: NoiseCancelingMode,
     ) {
         val prevState = _stateFlow.value
         val prevAmbientSoundMode = prevState.ambientSoundMode()
@@ -73,11 +81,12 @@ class SoundcoreDeviceImpl(
     }
 
     private fun queueSetSoundMode(
-        ambientSoundMode: AmbientSoundMode, noiseCancelingMode: NoiseCancelingMode
+        ambientSoundMode: AmbientSoundMode,
+        noiseCancelingMode: NoiseCancelingMode,
     ) {
         val packet = SetAmbientSoundModePacket(ambientSoundMode, noiseCancelingMode)
         callbacks.queueCommanad(
-            Command.Write(packet.bytes())
+            Command.Write(packet.bytes()),
         )
     }
 
@@ -91,7 +100,7 @@ class SoundcoreDeviceImpl(
     private fun queueSetEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
         val packet = SetEqualizerPacket(equalizerConfiguration)
         callbacks.queueCommanad(
-            Command.Write(packet.bytes())
+            Command.Write(packet.bytes()),
         )
     }
 }

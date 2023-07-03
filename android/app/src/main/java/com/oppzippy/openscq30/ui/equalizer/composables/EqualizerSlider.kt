@@ -44,7 +44,7 @@ fun EqualizerSlider(
                             stringResource(
                                 R.string.khz,
                                 BigDecimal(hz).divide(BigDecimal(1000)).toString(),
-                            )
+                            ),
                         )
                     }
                 },

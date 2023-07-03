@@ -60,7 +60,7 @@ fun EqualizerLine(values: List<Byte>, width: Dp, height: Dp) {
     Canvas(
         modifier = Modifier
             .width(width)
-            .height(height)
+            .height(height),
     ) {
         with(painter) {
             draw(painter.intrinsicSize)

@@ -41,7 +41,6 @@ class DeviceSelectionTest {
             hasContentDescriptionExactly(composeRule.activity.getString(R.string.refresh))
     }
 
-
     @Test
     fun testWithNoDevices() {
         composeRule.setContent {
@@ -84,7 +83,7 @@ class DeviceSelectionTest {
                 devices = devicesFlow.collectAsState().value,
                 onRefreshDevices = {
                     devicesFlow.value = devices
-                }
+                },
             )
         }
 
@@ -104,5 +103,4 @@ class DeviceSelectionTest {
 
         composeRule.onNode(noDevicesFound).assertDoesNotExist()
     }
-
 }

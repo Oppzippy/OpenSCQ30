@@ -2,7 +2,11 @@ package com.oppzippy.openscq30.features.soundcoredevice.demo
 
 import android.util.Log
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
-import com.oppzippy.openscq30.lib.*
+import com.oppzippy.openscq30.lib.AmbientSoundMode
+import com.oppzippy.openscq30.lib.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.PresetEqualizerProfile
+import com.oppzippy.openscq30.lib.SoundcoreDeviceState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,8 +19,8 @@ class DemoSoundcoreDevice(
         SoundcoreDeviceState(
             AmbientSoundMode.Normal,
             NoiseCancelingMode.Indoor,
-            EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature)
-        )
+            EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
+        ),
     )
     override val stateFlow: Flow<SoundcoreDeviceState> = _stateFlow.asStateFlow()
     override val isDisconnected = MutableStateFlow(false).asStateFlow()
@@ -26,7 +30,8 @@ class DemoSoundcoreDevice(
         }
 
     override fun setSoundMode(
-        newAmbientSoundMode: AmbientSoundMode, newNoiseCancelingMode: NoiseCancelingMode
+        newAmbientSoundMode: AmbientSoundMode,
+        newNoiseCancelingMode: NoiseCancelingMode,
     ) {
         Log.i(
             "DemoSoundcoreDevice",
