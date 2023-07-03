@@ -17,3 +17,22 @@ jobs:
           components: rustfmt
       - name: Check formatting
         run: cargo fmt --check
+
+  ktlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin # See 'Supported distributions' for available options
+          java-version: 17
+      - name: Download ktlint
+        run: |
+          curl -sSL https://api.github.com/repos/pinterest/ktlint/releases/latest |
+            jq '.assets[].browser_download_url | select(endswith("ktlint"))' |
+            xargs curl -sSLO
+          chmod +x ktlint
+      - name: Run ktlint
+        run: |
+          cd android
+          ../ktlint
