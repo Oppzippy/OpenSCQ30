@@ -34,7 +34,7 @@ android {
     defaultConfig {
         applicationId = "com.oppzippy.openscq30"
         minSdk = 26
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 7
         versionName = "1.4.0"
         buildConfigField("boolean", "IS_DEMO_MODE", "false")
