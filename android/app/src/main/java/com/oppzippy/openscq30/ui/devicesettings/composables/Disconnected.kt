@@ -28,7 +28,7 @@ fun Disconnected() {
 
 @Preview(showBackground = true)
 @Composable
-private fun DefaultPreview() {
+private fun PreviewDisconnected() {
     OpenSCQ30Theme {
         Disconnected()
     }

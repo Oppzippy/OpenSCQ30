@@ -80,7 +80,7 @@ private fun HtmlText(text: String, modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true)
 @Composable
-private fun DefaultPreview() {
+private fun PreviewAppInfo() {
     OpenSCQ30Theme {
         AppInfo(onBackClick = {})
     }

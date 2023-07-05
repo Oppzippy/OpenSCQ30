@@ -70,7 +70,7 @@ fun EqualizerLine(values: List<Byte>, width: Dp, height: Dp) {
 
 @Preview(showBackground = true)
 @Composable
-private fun DefaultPreview() {
+private fun PreviewEqualizerLine() {
     val values by remember { mutableStateOf(listOf<Byte>(0, 10, 120, 0, -10, -120, 0, 0)) }
     OpenSCQ30Theme {
         EqualizerLine(values = values, width = 80.dp, height = 20.dp)

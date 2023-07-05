@@ -67,7 +67,7 @@ fun EqualizerSlider(
 
 @Preview(showBackground = true)
 @Composable
-private fun DefaultPreview() {
+private fun PreviewEqualizerSlider() {
     OpenSCQ30Theme {
         EqualizerSlider(hz = 100, value = 0, onValueChange = {}, text = "0", onTextChange = {})
     }

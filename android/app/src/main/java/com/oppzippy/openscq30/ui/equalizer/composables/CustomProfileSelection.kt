@@ -2,8 +2,10 @@ package com.oppzippy.openscq30.ui.equalizer.composables
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.ui.equalizer.storage.CustomProfile
+import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
 fun CustomProfileSelection(
@@ -21,4 +23,17 @@ fun CustomProfileSelection(
         label = stringResource(R.string.custom_profile),
         onItemSelected = onProfileSelected,
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewCustomProfileSelection() {
+    val selectedProfile = CustomProfile("Test Profile", listOf(0, 10, 20, 30, 40, 50, 60, 70))
+    OpenSCQ30Theme {
+        CustomProfileSelection(
+            selectedProfile = selectedProfile,
+            profiles = listOf(selectedProfile),
+            onProfileSelected = {},
+        )
+    }
 }

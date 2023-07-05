@@ -5,7 +5,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
 fun DeleteCustomProfileDialog(
@@ -36,6 +38,19 @@ fun DeleteCustomProfileDialog(
                     Text(stringResource(R.string.cancel))
                 }
             },
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewDeleteCustomProfileDialog() {
+    OpenSCQ30Theme {
+        DeleteCustomProfileDialog(
+            isOpen = true,
+            profileName = "Test Profile",
+            onDelete = {},
+            onDismiss = {},
         )
     }
 }

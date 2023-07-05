@@ -49,7 +49,7 @@ fun Equalizer(
 
 @Preview(showBackground = true)
 @Composable
-private fun DefaultPreview() {
+private fun PreviewEqualizer() {
     var values by remember { mutableStateOf(listOf<Byte>(0, 0, 0, 0, 0, 0, 0, 0)) }
     OpenSCQ30Theme {
         Equalizer(

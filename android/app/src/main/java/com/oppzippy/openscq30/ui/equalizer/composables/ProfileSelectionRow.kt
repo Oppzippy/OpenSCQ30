@@ -37,7 +37,7 @@ fun ProfileSelectionRow(name: String, volumeAdjustments: List<Byte>?) {
 
 @Preview(showBackground = true)
 @Composable
-private fun DefaultPreview() {
+private fun PreviewProfileSelectionRow() {
     OpenSCQ30Theme {
         ProfileSelectionRow(
             name = "Test Profile",

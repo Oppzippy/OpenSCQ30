@@ -31,7 +31,7 @@ fun NoDevicesFound(modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true)
 @Composable
-private fun DefaultPreview() {
+private fun PreviewNoDevicesFound() {
     OpenSCQ30Theme {
         NoDevicesFound()
     }

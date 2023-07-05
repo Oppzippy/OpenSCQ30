@@ -86,7 +86,7 @@ fun DeviceListing(
 
 @Preview(showBackground = true)
 @Composable
-private fun NoDevicesFoundPreview() {
+private fun PreviewNoDevicesFound() {
     OpenSCQ30Theme {
         DeviceListing(listOf())
     }
@@ -94,7 +94,7 @@ private fun NoDevicesFoundPreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun DevicesPreview() {
+private fun PreviewDeviceListing() {
     OpenSCQ30Theme {
         val devices = ArrayList<BluetoothDevice>()
         for (i in 1..100) {

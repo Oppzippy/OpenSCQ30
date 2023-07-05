@@ -60,7 +60,7 @@ fun <T> Dropdown(
 
 @Preview(showBackground = true)
 @Composable
-private fun DefaultPreview() {
+private fun PreviewDropdown() {
     OpenSCQ30Theme {
         var value by remember { mutableStateOf(1) }
         Dropdown(

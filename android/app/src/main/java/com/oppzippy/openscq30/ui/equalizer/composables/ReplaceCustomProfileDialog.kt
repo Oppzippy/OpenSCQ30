@@ -19,9 +19,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.ui.equalizer.storage.CustomProfile
+import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,5 +71,21 @@ fun ReplaceCustomProfileDialog(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewReplaceCustomProfileDialog() {
+    OpenSCQ30Theme {
+        ReplaceCustomProfileDialog(
+            isOpen = true,
+            profiles = listOf(
+                CustomProfile("Test Profile 1", listOf(0, -10, 20, 30, 40, 50, 60, 70)),
+                CustomProfile("Test Profile 2", listOf(-50, -20, 30, 40, 50, 60, 70, 80)),
+            ),
+            onDismiss = {},
+            onProfileSelected = {},
+        )
     }
 }

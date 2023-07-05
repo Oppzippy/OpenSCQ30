@@ -12,8 +12,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.ui.equalizer.storage.CustomProfile
+import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
 fun CreateCustomProfileDialog(
@@ -54,6 +56,24 @@ fun CreateCustomProfileDialog(
                     Text(stringResource(R.string.cancel))
                 }
             },
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewCreateCustomProfileDialog() {
+    OpenSCQ30Theme {
+        CreateCustomProfileDialog(
+            isOpen = true,
+            onDismiss = {},
+            onCreateCustomProfile = {},
+            existingProfiles = listOf(
+                CustomProfile(
+                    "Test Profile",
+                    listOf(1, 2, 3, 4, 5, 6, 7, 8),
+                ),
+            ),
         )
     }
 }

@@ -103,7 +103,7 @@ fun DeviceSettings(
 
 @Preview(showBackground = true)
 @Composable
-private fun DefaultPreview() {
+private fun PreviewDeviceSettings() {
     OpenSCQ30Theme {
         DeviceSettings(
             uiState = UiDeviceState.Connected(

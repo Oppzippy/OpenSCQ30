@@ -96,7 +96,7 @@ private fun LabeledRadioButton(text: String, selected: Boolean, onClick: () -> U
 
 @Preview(showBackground = true)
 @Composable
-private fun DefaultPreview() {
+private fun PreviewSoundModeSettings() {
     OpenSCQ30Theme {
         SoundModeSettings(
             ambientSoundMode = AmbientSoundMode.Normal,

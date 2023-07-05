@@ -28,7 +28,7 @@ fun Loading() {
 
 @Preview(showBackground = true)
 @Composable
-private fun DefaultPreview() {
+private fun PreviewLoading() {
     OpenSCQ30Theme {
         Loading()
     }

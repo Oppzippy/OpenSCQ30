@@ -42,7 +42,7 @@ fun DeviceList(
 
 @Preview(showBackground = true)
 @Composable
-private fun DefaultPreview() {
+private fun PreviewDeviceList() {
     OpenSCQ30Theme {
         val devices = ArrayList<BluetoothDevice>()
         for (i in 1..100) {

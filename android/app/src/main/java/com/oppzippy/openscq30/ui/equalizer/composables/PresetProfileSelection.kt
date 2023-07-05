@@ -46,7 +46,7 @@ fun PresetProfileSelection(
 
 @Preview(showBackground = true)
 @Composable
-private fun DefaultPreview() {
+private fun PreviewPresetProfileSelection() {
     OpenSCQ30Theme {
         var profile by remember { mutableStateOf(EqualizerProfile.Classical) }
         PresetProfileSelection(value = profile, onProfileSelected = {
