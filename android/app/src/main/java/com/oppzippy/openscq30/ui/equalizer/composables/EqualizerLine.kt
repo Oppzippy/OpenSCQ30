@@ -18,36 +18,29 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.oppzippy.openscq30.lib.VolumeAdjustments
+import com.oppzippy.openscq30.ui.equalizer.models.EqualizerLine
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
 fun EqualizerLine(values: List<Byte>, width: Dp, height: Dp) {
-    val padding = 4
-    val widthWithoutPadding = width.value - padding * 2
-    val heightWithoutPadding = height.value - padding * 2
-    val minVolume = VolumeAdjustments.minVolume()
-    val maxVolume = VolumeAdjustments.maxVolume()
-    val range = maxVolume - minVolume
+    val line = EqualizerLine(values)
+    val points = line.draw(width.value, height.value, 4F)
 
-    val points = values.mapIndexed { index, value ->
-        val normalizedX = index.toFloat() / values.size.toFloat()
-        val x = normalizedX * widthWithoutPadding + padding
-        val normalizedY = 1F - ((value - minVolume) / range.toFloat())
-        val y = normalizedY * heightWithoutPadding + padding
+    val pathNodes = points.mapIndexed { index, pair ->
         if (index == 0) {
-            PathNode.MoveTo(x, y)
+            PathNode.MoveTo(pair.first, pair.second)
         } else {
-            PathNode.LineTo(x, y)
+            PathNode.LineTo(pair.first, pair.second)
         }
     }
+
     val vector = ImageVector.Builder(
         defaultWidth = width,
         defaultHeight = height,
         viewportWidth = width.value,
         viewportHeight = height.value,
     ).addPath(
-        points,
+        pathNodes,
         stroke = SolidColor(MaterialTheme.colorScheme.primary),
         strokeLineWidth = 2F,
         strokeAlpha = 0.4F,

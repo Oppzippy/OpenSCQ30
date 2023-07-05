@@ -8,7 +8,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.performClick
 import com.oppzippy.openscq30.lib.AmbientSoundMode
 import com.oppzippy.openscq30.lib.NoiseCancelingMode
-import com.oppzippy.openscq30.ui.devicesettings.composables.SoundModeSettings
+import com.oppzippy.openscq30.ui.soundmode.SoundModeSettings
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.junit4.MockKRule

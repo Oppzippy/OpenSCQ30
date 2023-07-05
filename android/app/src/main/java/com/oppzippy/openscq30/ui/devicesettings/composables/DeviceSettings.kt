@@ -29,6 +29,8 @@ import com.oppzippy.openscq30.lib.SoundcoreDeviceState
 import com.oppzippy.openscq30.ui.devicesettings.Screen
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.equalizer.EqualizerSettings
+import com.oppzippy.openscq30.ui.quickpresets.QuickPresetScreen
+import com.oppzippy.openscq30.ui.soundmode.SoundModeSettings
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,6 +46,7 @@ fun DeviceSettings(
     val navItems = listOf(
         Screen.General,
         Screen.Equalizer,
+        Screen.QuickPresets,
     )
     Scaffold(
         topBar = {
@@ -96,6 +99,9 @@ fun DeviceSettings(
                     uiState = uiState,
                     onEqualizerConfigurationChange = onEqualizerConfigurationChange,
                 )
+            }
+            composable(Screen.QuickPresets.route) {
+                QuickPresetScreen()
             }
         }
     }

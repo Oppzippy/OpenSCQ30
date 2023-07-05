@@ -6,6 +6,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.ui.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
+import com.oppzippy.openscq30.ui.utils.Dropdown
+import com.oppzippy.openscq30.ui.utils.DropdownOption
 
 @Composable
 fun CustomProfileSelection(

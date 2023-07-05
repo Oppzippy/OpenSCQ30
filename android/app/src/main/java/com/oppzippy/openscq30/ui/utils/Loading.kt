@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.ui.devicesettings.composables
+package com.oppzippy.openscq30.ui.utils
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

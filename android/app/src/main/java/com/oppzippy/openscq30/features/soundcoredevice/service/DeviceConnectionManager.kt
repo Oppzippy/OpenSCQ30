@@ -105,6 +105,10 @@ class DeviceConnectionManager @Inject constructor(
             }
         }
 
+    fun setSoundMode(ambientSoundMode: AmbientSoundMode, noiseCancelingMode: NoiseCancelingMode) {
+        device?.setSoundMode(ambientSoundMode, noiseCancelingMode)
+    }
+
     fun setAmbientSoundMode(ambientSoundMode: AmbientSoundMode) {
         device?.state?.noiseCancelingMode()?.let { noiseCancelingMode ->
             device?.setSoundMode(ambientSoundMode, noiseCancelingMode)

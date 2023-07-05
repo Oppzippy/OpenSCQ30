@@ -6,8 +6,8 @@ import com.oppzippy.openscq30.lib.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.NoiseCancelingMode
 import com.oppzippy.openscq30.ui.devicesettings.composables.DeviceSettings
 import com.oppzippy.openscq30.ui.devicesettings.composables.Disconnected
-import com.oppzippy.openscq30.ui.devicesettings.composables.Loading
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
+import com.oppzippy.openscq30.ui.utils.Loading
 
 @Composable
 fun DeviceSettingsScreen(

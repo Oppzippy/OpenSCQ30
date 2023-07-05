@@ -10,4 +10,5 @@ import com.oppzippy.openscq30.R
 sealed class Screen(val route: String, @StringRes val resourceId: Int, val icon: ImageVector) {
     object General : Screen("general", R.string.general, Icons.Filled.Settings)
     object Equalizer : Screen("equalizer", R.string.equalizer, Icons.Filled.Equalizer)
+    object QuickPresets : Screen("quickPresets", R.string.quick_presets, Icons.Filled.Settings)
 }
