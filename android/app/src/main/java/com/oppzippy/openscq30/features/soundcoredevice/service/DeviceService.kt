@@ -17,7 +17,7 @@ import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactor
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_DISCONNECT
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_QUICK_PRESET
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_SEND_NOTIFICATION
-import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.INTENT_PRESET_NUMBER
+import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.INTENT_EXTRA_PRESET_ID
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_CHANNEL_ID
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_ID
 import com.oppzippy.openscq30.features.soundcoredevice.usecases.ActivateQuickPresetUseCase
@@ -78,9 +78,9 @@ class DeviceService : LifecycleService() {
                 }
 
                 ACTION_QUICK_PRESET -> {
-                    val presetNumber = intent.getIntExtra(INTENT_PRESET_NUMBER, 0)
+                    val presetId = intent.getIntExtra(INTENT_EXTRA_PRESET_ID, 0)
                     lifecycleScope.launch {
-                        activateQuickPresetUseCase(presetNumber, connectionManager)
+                        activateQuickPresetUseCase(presetId, connectionManager)
                     }
                 }
 

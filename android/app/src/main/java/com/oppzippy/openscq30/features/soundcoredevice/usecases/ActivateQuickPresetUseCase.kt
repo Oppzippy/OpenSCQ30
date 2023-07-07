@@ -11,8 +11,8 @@ class ActivateQuickPresetUseCase @Inject constructor(
     private val quickPresetDao: QuickPresetDao,
     private val customProfileDao: CustomProfileDao,
 ) {
-    suspend operator fun invoke(presetNumber: Int, connectionManager: DeviceConnectionManager) {
-        quickPresetDao.get(presetNumber)?.let { quickPreset ->
+    suspend operator fun invoke(presetId: Int, connectionManager: DeviceConnectionManager) {
+        quickPresetDao.get(presetId)?.let { quickPreset ->
             val ambientSoundMode = quickPreset.ambientSoundMode
             val noiseCancelingMode = quickPreset.noiseCancelingMode
             val equalizerConfiguration = quickPreset.equalizerProfileName?.let {

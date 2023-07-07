@@ -11,7 +11,7 @@ import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.equalizer.visualization.EqualizerLine
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_DISCONNECT
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_QUICK_PRESET
-import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.INTENT_PRESET_NUMBER
+import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.INTENT_EXTRA_PRESET_ID
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_CHANNEL_ID
 import com.oppzippy.openscq30.lib.AmbientSoundMode
 import com.oppzippy.openscq30.libextensions.resources.toStringResource
@@ -99,13 +99,13 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
                 ).build(),
             ).addAction(
                 buildQuickPresetNotificationAction(
-                    presetNumber = 1,
+                    presetId = 0,
                     name = quickPresetNames.getOrNull(0),
                     icon = Icon.createWithResource(context, R.drawable.counter_1_48px),
                 ),
             ).addAction(
                 buildQuickPresetNotificationAction(
-                    presetNumber = 2,
+                    presetId = 1,
                     name = quickPresetNames.getOrNull(1),
                     icon = Icon.createWithResource(context, R.drawable.counter_2_48px),
                 ),
@@ -114,21 +114,21 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
     }
 
     private fun buildQuickPresetNotificationAction(
-        presetNumber: Int,
+        presetId: Int,
         name: String?,
         icon: Icon,
     ): Notification.Action {
         return Notification.Action.Builder(
             icon,
-            name ?: context.getString(R.string.quick_preset_number, presetNumber),
+            name ?: context.getString(R.string.quick_preset_number, presetId + 1),
             PendingIntent.getBroadcast(
                 context,
-                1 + presetNumber,
+                presetId + 2,
                 Intent().apply {
                     action = ACTION_QUICK_PRESET
-                    putExtra(INTENT_PRESET_NUMBER, presetNumber)
+                    putExtra(INTENT_EXTRA_PRESET_ID, presetId)
                 },
-                PendingIntent.FLAG_IMMUTABLE,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
             ),
         ).build()
     }
