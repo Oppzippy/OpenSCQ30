@@ -32,12 +32,13 @@ fun <T> Dropdown(
     options: Iterable<DropdownOption<T>>,
     label: String,
     onItemSelected: (value: T) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
         TextField(
-            modifier = Modifier
+            modifier = modifier
                 .menuAnchor()
                 .width(TextFieldDefaults.MinWidth),
             readOnly = true,
