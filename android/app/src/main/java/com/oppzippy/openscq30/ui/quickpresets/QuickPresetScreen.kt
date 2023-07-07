@@ -1,6 +1,7 @@
 package com.oppzippy.openscq30.ui.quickpresets
 
 import android.Manifest
+import android.content.Intent
 import android.os.Build
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
@@ -9,11 +10,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
+import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification
 import com.oppzippy.openscq30.lib.AmbientSoundMode
 import com.oppzippy.openscq30.lib.NoiseCancelingMode
 import com.oppzippy.openscq30.ui.quickpresets.composables.QuickPresetConfiguration
@@ -26,6 +29,7 @@ import com.oppzippy.openscq30.ui.utils.PermissionCheck
 fun QuickPresetScreen(viewModel: QuickPresetViewModel = hiltViewModel()) {
     val preset = viewModel.quickPreset.collectAsState().value
     val allEqualizerProfileNames by viewModel.equalizerProfileNames.collectAsState()
+    val context = LocalContext.current
 
     // We can't nest the content inside the permission check since we need to ensure the permission
     // check doesn't run on versions of android that don't require permission for foreground service
@@ -40,6 +44,12 @@ fun QuickPresetScreen(viewModel: QuickPresetViewModel = hiltViewModel()) {
             prompt = stringResource(R.string.notification_permission_is_required),
         ) {
             permissionCheckPassed = true
+            // Since we may have not had notification permission before this point, we need to
+            // resend the notification to ensure it is visible.
+            Intent().apply {
+                action = SoundcoreDeviceNotification.ACTION_SEND_NOTIFICATION
+                context.sendBroadcast(this)
+            }
         }
     }
 

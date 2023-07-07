@@ -16,6 +16,7 @@ import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetIdAndName
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_DISCONNECT
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_QUICK_PRESET
+import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_SEND_NOTIFICATION
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.INTENT_PRESET_NUMBER
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_CHANNEL_ID
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_ID
@@ -82,6 +83,10 @@ class DeviceService : LifecycleService() {
                         activateQuickPresetUseCase(presetNumber, connectionManager)
                     }
                 }
+
+                ACTION_SEND_NOTIFICATION -> {
+                    sendNotification()
+                }
             }
         }
     }
@@ -100,6 +105,7 @@ class DeviceService : LifecycleService() {
 
         val filter = IntentFilter(ACTION_DISCONNECT).apply {
             addAction(ACTION_QUICK_PRESET)
+            addAction(ACTION_SEND_NOTIFICATION)
         }
         registerReceiver(broadcastReceiver, filter)
     }
