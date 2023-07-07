@@ -1,10 +1,12 @@
 package com.oppzippy.openscq30.ui.quickpresets.composables
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +27,8 @@ import com.oppzippy.openscq30.ui.utils.DropdownOption
 
 @Composable
 fun QuickPresetConfiguration(
+    name: String?,
+    defaultName: String,
     ambientSoundMode: AmbientSoundMode?,
     noiseCancelingMode: NoiseCancelingMode?,
     equalizerProfileName: String?,
@@ -32,8 +36,19 @@ fun QuickPresetConfiguration(
     onAmbientSoundModeChange: (ambientSoundMode: AmbientSoundMode?) -> Unit = {},
     onNoiseCancelingModeChange: (noiseCancelingMode: NoiseCancelingMode?) -> Unit = {},
     onEqualizerProfileNameChange: (profileName: String?) -> Unit = {},
+    onNameChange: (name: String?) -> Unit = {},
 ) {
     Column(Modifier.verticalScroll(rememberScrollState())) {
+        TextField(
+            value = name ?: "",
+            onValueChange = {
+                onNameChange(it.ifBlank { null })
+            },
+            placeholder = { Text(defaultName) },
+            label = { Text(stringResource(R.string.name)) },
+            maxLines = 1,
+            modifier = Modifier.fillMaxWidth(),
+        )
         CheckboxWithLabel(
             text = stringResource(R.string.ambient_sound_mode),
             isChecked = ambientSoundMode != null,
@@ -96,6 +111,8 @@ fun QuickPresetConfiguration(
 private fun PreviewQuickPresetConfiguration() {
     OpenSCQ30Theme {
         QuickPresetConfiguration(
+            name = null,
+            defaultName = "Quick Preset 1",
             ambientSoundMode = AmbientSoundMode.NoiseCanceling,
             noiseCancelingMode = NoiseCancelingMode.Transport,
             equalizerProfileName = "test",

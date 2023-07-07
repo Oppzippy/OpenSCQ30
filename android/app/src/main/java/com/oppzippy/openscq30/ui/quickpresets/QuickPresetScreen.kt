@@ -51,21 +51,20 @@ fun QuickPresetScreen(viewModel: QuickPresetViewModel = hiltViewModel()) {
                 onSelectedIndexChange = { viewModel.selectQuickPreset(it) },
                 onAmbientSoundModeChange = {
                     viewModel.upsertQuickPreset(
-                        preset.copy(
-                            ambientSoundMode = it,
-                        ),
+                        preset.copy(ambientSoundMode = it),
                     )
                 },
                 onNoiseCancelingModeChange = {
                     viewModel.upsertQuickPreset(
-                        preset.copy(
-                            noiseCancelingMode = it,
-                        ),
+                        preset.copy(noiseCancelingMode = it),
                     )
                 },
                 onEqualizerProfileNameChange = {
-                    viewModel.upsertQuickPreset(preset.copy(equalizerProfileName = it))
+                    viewModel.upsertQuickPreset(
+                        preset.copy(equalizerProfileName = it),
+                    )
                 },
+                onNameChange = { viewModel.upsertQuickPreset(preset.copy(name = it)) },
             )
         } else {
             Loading()
@@ -81,6 +80,7 @@ private fun QuickPresetScreen(
     onAmbientSoundModeChange: (ambientSoundMode: AmbientSoundMode?) -> Unit = {},
     onNoiseCancelingModeChange: (noiseCancelingMode: NoiseCancelingMode?) -> Unit = {},
     onEqualizerProfileNameChange: (name: String?) -> Unit = {},
+    onNameChange: (name: String?) -> Unit = {},
 ) {
     Column {
         QuickPresetSelection(
@@ -88,6 +88,8 @@ private fun QuickPresetScreen(
             onSelectedIndexChange = onSelectedIndexChange,
         )
         QuickPresetConfiguration(
+            name = preset.name,
+            defaultName = stringResource(R.string.quick_preset_number, preset.id + 1),
             ambientSoundMode = preset.ambientSoundMode,
             noiseCancelingMode = preset.noiseCancelingMode,
             equalizerProfileName = preset.equalizerProfileName,
@@ -95,6 +97,7 @@ private fun QuickPresetScreen(
             onAmbientSoundModeChange = onAmbientSoundModeChange,
             onNoiseCancelingModeChange = onNoiseCancelingModeChange,
             onEqualizerProfileNameChange = onEqualizerProfileNameChange,
+            onNameChange = onNameChange,
         )
     }
 }
@@ -105,10 +108,10 @@ fun PreviewQuickPresetScreenWithAllOptionsChecked() {
     OpenSCQ30Theme {
         QuickPresetScreen(
             preset = QuickPreset(
-                0,
-                AmbientSoundMode.Normal,
-                NoiseCancelingMode.Transport,
-                "Test EQ Profile",
+                id = 0,
+                ambientSoundMode = AmbientSoundMode.Normal,
+                noiseCancelingMode = NoiseCancelingMode.Transport,
+                equalizerProfileName = "Test EQ Profile",
             ),
             allEqualizerProfileNames = emptyList(),
         )

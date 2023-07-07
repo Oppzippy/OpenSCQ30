@@ -10,6 +10,7 @@ import com.oppzippy.openscq30.lib.NoiseCancelingMode
 )
 data class QuickPreset(
     @PrimaryKey val id: Int,
+    val name: String? = null,
     val ambientSoundMode: AmbientSoundMode? = null,
     val noiseCancelingMode: NoiseCancelingMode? = null,
     val equalizerProfileName: String? = null,

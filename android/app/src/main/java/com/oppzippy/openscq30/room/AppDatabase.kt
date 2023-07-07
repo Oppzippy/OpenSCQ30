@@ -10,13 +10,14 @@ import com.oppzippy.openscq30.ui.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.ui.equalizer.storage.CustomProfileDao
 
 @Database(
-    version = 2,
+    version = 3,
     entities = [
         CustomProfile::class,
         QuickPreset::class,
     ],
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
+        AutoMigration(from = 2, to = 3),
     ],
 )
 @TypeConverters(Converters::class)

@@ -19,6 +19,7 @@ import androidx.lifecycle.lifecycleScope
 import com.oppzippy.openscq30.MainActivity
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
+import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetIdAndName
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
 import com.oppzippy.openscq30.lib.AmbientSoundMode
 import com.oppzippy.openscq30.lib.EqualizerConfiguration
@@ -28,12 +29,16 @@ import com.oppzippy.openscq30.ui.equalizer.models.EqualizerLine
 import com.oppzippy.openscq30.ui.equalizer.storage.CustomProfileDao
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 @AndroidEntryPoint
 class DeviceService : LifecycleService() {
@@ -75,12 +80,11 @@ class DeviceService : LifecycleService() {
                         quickPresetDao.get(presetNumber)?.let { quickPreset ->
                             val ambientSoundMode = quickPreset.ambientSoundMode
                             val noiseCancelingMode = quickPreset.noiseCancelingMode
-                            val equalizerConfiguration =
-                                quickPreset.equalizerProfileName?.let {
-                                    customProfileDao.get(it)
-                                }?.let {
-                                    EqualizerConfiguration(VolumeAdjustments(it.values.toByteArray()))
-                                }
+                            val equalizerConfiguration = quickPreset.equalizerProfileName?.let {
+                                customProfileDao.get(it)
+                            }?.let {
+                                EqualizerConfiguration(VolumeAdjustments(it.values.toByteArray()))
+                            }
 
                             // Set them both in one go if possible to maybe save a packet
                             if (ambientSoundMode != null && noiseCancelingMode != null) {
@@ -99,9 +103,14 @@ class DeviceService : LifecycleService() {
         }
     }
 
+    private lateinit var quickPresetNames: StateFlow<List<QuickPresetIdAndName>>
+
     override fun onCreate() {
         super.onCreate()
         connectionManager = DeviceConnectionManager(factory, lifecycleScope)
+
+        quickPresetNames =
+            quickPresetDao.allNames().stateIn(lifecycleScope, SharingStarted.Eagerly, emptyList())
 
         lifecycleScope.launch {
             connectionManager.connectionStatusFlow.first { it is ConnectionStatus.Disconnected }
@@ -143,6 +152,9 @@ class DeviceService : LifecycleService() {
                 }
             }
         }
+        lifecycleScope.launch {
+            quickPresetNames.debounce(1.seconds).collectLatest { updateNotification() }
+        }
 
         intent?.getStringExtra(MAC_ADDRESS)?.let { macAddress ->
             lifecycleScope.launch {
@@ -177,6 +189,13 @@ class DeviceService : LifecycleService() {
         openAppIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
         val status = connectionManager.connectionStatusFlow.value
+
+        val quickPresets = quickPresetNames.value.let { quickPresets ->
+            Pair(
+                quickPresets.firstOrNull { it.id == 0 },
+                quickPresets.firstOrNull { it.id == 1 },
+            )
+        }
 
         val builder = Notification.Builder(this, NOTIFICATION_CHANNEL_ID).setOngoing(true)
             .setOnlyAlertOnce(true).setSmallIcon(R.drawable.headphones).setLargeIcon(
@@ -236,7 +255,7 @@ class DeviceService : LifecycleService() {
             ).addAction(
                 Notification.Action.Builder(
                     Icon.createWithResource(this, R.drawable.counter_1_48px),
-                    getString(R.string.quick_preset_number, 1),
+                    quickPresets.first?.name ?: getString(R.string.quick_preset_number, 1),
                     PendingIntent.getBroadcast(
                         this,
                         2,
@@ -250,7 +269,7 @@ class DeviceService : LifecycleService() {
             ).addAction(
                 Notification.Action.Builder(
                     Icon.createWithResource(this, R.drawable.counter_2_48px),
-                    getString(R.string.quick_preset_number, 2),
+                    quickPresets.second?.name ?: getString(R.string.quick_preset_number, 2),
                     PendingIntent.getBroadcast(
                         this,
                         3,

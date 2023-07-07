@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface QuickPresetDao {
@@ -18,4 +19,9 @@ interface QuickPresetDao {
 
     @Query("DELETE FROM quick_preset WHERE id = :id")
     suspend fun delete(id: Int)
+
+    @Query("SELECT id, name FROM quick_preset ORDER BY id ASC")
+    fun allNames(): Flow<List<QuickPresetIdAndName>>
 }
+
+data class QuickPresetIdAndName(val id: Int, val name: String?)
