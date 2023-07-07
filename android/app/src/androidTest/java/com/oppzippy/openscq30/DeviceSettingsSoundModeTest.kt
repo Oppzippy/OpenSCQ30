@@ -39,7 +39,7 @@ class DeviceSettingsSoundModeTest {
     private lateinit var transport: SemanticsMatcher
 
     @Before
-    fun initialize() {
+    fun setUp() {
         hiltRule.inject()
 
         normal = hasTextExactly(composeRule.activity.getString(R.string.normal))
@@ -53,21 +53,21 @@ class DeviceSettingsSoundModeTest {
     }
 
     @Test
-    fun testLoadInitialSoundModeNormalTransport() {
+    fun loadsInitialSoundModeNormalTransport() {
         renderInitialSoundMode(AmbientSoundMode.Normal, NoiseCancelingMode.Transport)
         assertOneSelected(normal, ambientSoundModes)
         assertOneSelected(transport, noiseCancelingModes)
     }
 
     @Test
-    fun testLoadInitialSoundModeNoiseCancelingOutdoor() {
+    fun loadsInitialSoundModeNoiseCancelingOutdoor() {
         renderInitialSoundMode(AmbientSoundMode.NoiseCanceling, NoiseCancelingMode.Outdoor)
         assertOneSelected(noiseCanceling, ambientSoundModes)
         assertOneSelected(outdoor, noiseCancelingModes)
     }
 
     @Test
-    fun testSetAmbientSoundMode() {
+    fun setsAmbientSoundMode() {
         val onAmbientSoundModeChange =
             mockk<(ambientSoundMode: AmbientSoundMode) -> Unit>(relaxed = true)
 
@@ -85,7 +85,7 @@ class DeviceSettingsSoundModeTest {
     }
 
     @Test
-    fun testSetNoiseCancelingMode() {
+    fun setsNoiseCancelingMode() {
         val onNoiseCancelingModeChange =
             mockk<(noiseCancelingMode: NoiseCancelingMode) -> Unit>(relaxed = true)
 

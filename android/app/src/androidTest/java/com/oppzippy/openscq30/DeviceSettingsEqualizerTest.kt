@@ -52,7 +52,7 @@ class DeviceSettingsEqualizerTest {
     private lateinit var custom: SemanticsMatcher
 
     @Before
-    fun initialize() {
+    fun setUp() {
         hiltRule.inject()
 
         soundcoreSignature =
@@ -76,7 +76,7 @@ class DeviceSettingsEqualizerTest {
     }
 
     @Test
-    fun testInitialEqualizerPreset() {
+    fun selectsInitialEqualizerPresetProfileByDefault() {
         composeRule.setContent {
             EqualizerSettings(
                 uiState = stateWithEqualizerConfiguration(
@@ -96,7 +96,7 @@ class DeviceSettingsEqualizerTest {
     }
 
     @Test
-    fun testInitialEqualizerCustom() {
+    fun selectsInitialEqualizerCustomProfileByDefault() {
         val values = byteArrayOf(1, 10, -10, 50, 0, 10, -60, 60)
 
         composeRule.setContent {
@@ -121,7 +121,7 @@ class DeviceSettingsEqualizerTest {
     }
 
     @Test
-    fun testSetPreset() {
+    fun changesBetweenPresetProfiles() {
         val onEqualizerConfigurationChange =
             mockk<(equalizerConfiguration: EqualizerConfiguration) -> Unit>(relaxed = true)
         composeRule.setContent {
@@ -157,7 +157,7 @@ class DeviceSettingsEqualizerTest {
     }
 
     @Test
-    fun testSetCustom() {
+    fun selectsCustomPresetProfileWhenMovingSliders() {
         val onEqualizerConfigurationChange =
             mockk<(equalizerConfiguration: EqualizerConfiguration) -> Unit>(relaxed = true)
 
@@ -187,7 +187,7 @@ class DeviceSettingsEqualizerTest {
     }
 
     @Test
-    fun testCustomProfile() {
+    fun selectsSpecificCustomProfileWhenVolumeAdjustmentsMatch() {
         composeRule.setContent {
             EqualizerSettings(
                 uiState = stateWithEqualizerConfiguration(
@@ -219,7 +219,7 @@ class DeviceSettingsEqualizerTest {
     }
 
     @Test
-    fun testCustomProfileUniqueByName() {
+    fun overwritesCustomProfileWhenCreatingUsingExistingName() {
         composeRule.setContent {
             EqualizerSettings(
                 uiState = stateWithEqualizerConfiguration(
@@ -258,7 +258,7 @@ class DeviceSettingsEqualizerTest {
     }
 
     @Test
-    fun testCustomProfileUniqueByValues() {
+    fun doesNotAllowCreatingMultipleCustomProfilesWithTheSameVolumeAdjustments() {
         composeRule.setContent {
             EqualizerSettings(
                 stateWithEqualizerConfiguration(
@@ -281,7 +281,7 @@ class DeviceSettingsEqualizerTest {
     }
 
     @Test
-    fun testReplaceExistingCustomProfile() {
+    fun replacesExistingCustomProfilesUsingReplaceButton() {
         composeRule.setContent {
             EqualizerSettings(
                 stateWithEqualizerConfiguration(
@@ -317,7 +317,7 @@ class DeviceSettingsEqualizerTest {
     }
 
     @Test
-    fun testReplaceExistingCustomProfileButtonDoesNotShowWithNoCustomProfiles() {
+    fun doesNotShowReplaceExistingCustomProfileButtonWithNoCustomProfiles() {
         composeRule.setContent {
             EqualizerSettings(
                 stateWithEqualizerConfiguration(
@@ -333,7 +333,7 @@ class DeviceSettingsEqualizerTest {
     }
 
     @Test
-    fun testOnlyAllowsOneOfPresetOrCustom() {
+    fun doesNotSelectBothPresetAndCustomProfile() {
         composeRule.setContent {
             EqualizerSettings(
                 stateWithEqualizerConfiguration(
@@ -363,7 +363,7 @@ class DeviceSettingsEqualizerTest {
     }
 
     @Test
-    fun testHidesCreateAndDeleteButtonsWhenPresetIsSelected() {
+    fun hidesCreateAndDeleteButtonsWhenPresetIsSelected() {
         composeRule.setContent {
             EqualizerSettings(
                 stateWithEqualizerConfiguration(

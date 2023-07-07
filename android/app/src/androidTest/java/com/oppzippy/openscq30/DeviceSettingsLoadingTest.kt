@@ -27,7 +27,7 @@ class DeviceSettingsLoadingTest {
     private lateinit var disconnected: SemanticsMatcher
 
     @Before
-    fun initialize() {
+    fun setUp() {
         hiltRule.inject()
 
         loading = hasTextExactly(composeRule.activity.getString(R.string.loading))
@@ -35,7 +35,7 @@ class DeviceSettingsLoadingTest {
     }
 
     @Test
-    fun testLoadingScreen() {
+    fun showsLoadingScreen() {
         composeRule.setContent {
             DeviceSettingsScreen(deviceState = UiDeviceState.Loading)
         }
@@ -44,7 +44,7 @@ class DeviceSettingsLoadingTest {
     }
 
     @Test
-    fun testDisconnectedScreen() {
+    fun showsDisconnectedScreen() {
         composeRule.setContent {
             DeviceSettingsScreen(deviceState = UiDeviceState.Disconnected)
         }

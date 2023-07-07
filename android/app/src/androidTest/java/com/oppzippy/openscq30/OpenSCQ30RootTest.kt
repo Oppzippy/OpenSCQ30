@@ -37,7 +37,7 @@ class OpenSCQ30RootTest {
     lateinit var soundcoreDeviceFactory: SoundcoreDeviceFactory
 
     @Before
-    fun initialize() {
+    fun setUp() {
         hiltRule.inject()
     }
 

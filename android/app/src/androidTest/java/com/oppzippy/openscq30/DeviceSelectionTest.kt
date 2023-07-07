@@ -33,7 +33,7 @@ class DeviceSelectionTest {
     private lateinit var refreshButton: SemanticsMatcher
 
     @Before
-    fun initialize() {
+    fun setUp() {
         hiltRule.inject()
 
         noDevicesFound = hasText(composeRule.activity.getString(R.string.no_devices_found))
@@ -42,7 +42,7 @@ class DeviceSelectionTest {
     }
 
     @Test
-    fun testWithNoDevices() {
+    fun showsNoDevicesFoundWithNoDevices() {
         composeRule.setContent {
             DeviceSelection(
                 devices = emptyList(),
@@ -53,7 +53,7 @@ class DeviceSelectionTest {
     }
 
     @Test
-    fun testWithDevices() {
+    fun showsAllAvailableDevices() {
         val deviceModels = listOf(
             BluetoothDevice("test1", "00:00:00:00:00:00"),
             BluetoothDevice("test2", "00:00:00:00:00:01"),
@@ -74,7 +74,7 @@ class DeviceSelectionTest {
     }
 
     @Test
-    fun testWithNoDevicesAndThenRefreshWithDevices() {
+    fun addsDevicesToTheListWhenRefreshIsClicked() {
         var devices: List<BluetoothDevice> = emptyList()
         val devicesFlow = MutableStateFlow(devices)
 
