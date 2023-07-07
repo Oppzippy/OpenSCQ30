@@ -72,7 +72,7 @@ class DeviceSettingsViewModel @Inject constructor(
     }
 
     fun stopServiceIfNotificationIsGone() {
-        if (!deviceServiceConnection.doesNotificationExist()) {
+        if (!DeviceService.doesNotificationExist(application)) {
             Log.i(
                 "OpenSCQ30Root",
                 "Stopping service since main activity is exiting and notification is not shown.",

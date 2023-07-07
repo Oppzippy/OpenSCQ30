@@ -81,8 +81,4 @@ class DeviceServiceConnection(
     fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
         service?.get()?.connectionManager?.setEqualizerConfiguration(equalizerConfiguration)
     }
-
-    fun doesNotificationExist(): Boolean {
-        return service?.get()?.doesNotificationExist() ?: false
-    }
 }

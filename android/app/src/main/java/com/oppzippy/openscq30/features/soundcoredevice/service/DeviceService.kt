@@ -3,29 +3,25 @@ package com.oppzippy.openscq30.features.soundcoredevice.service
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Bitmap
-import android.graphics.drawable.Icon
 import android.os.Binder
 import android.os.IBinder
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
-import com.oppzippy.openscq30.MainActivity
-import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
-import com.oppzippy.openscq30.features.equalizer.visualization.EqualizerLine
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetIdAndName
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
-import com.oppzippy.openscq30.lib.AmbientSoundMode
-import com.oppzippy.openscq30.lib.EqualizerConfiguration
-import com.oppzippy.openscq30.lib.VolumeAdjustments
-import com.oppzippy.openscq30.libextensions.resources.toStringResource
+import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_DISCONNECT
+import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_QUICK_PRESET
+import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.INTENT_PRESET_NUMBER
+import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_CHANNEL_ID
+import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_ID
+import com.oppzippy.openscq30.features.soundcoredevice.usecases.ActivateQuickPresetUseCase
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -38,29 +34,37 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
+@OptIn(FlowPreview::class)
 @AndroidEntryPoint
 class DeviceService : LifecycleService() {
     companion object {
-        private const val NOTIFICATION_CHANNEL_ID =
-            "com.oppzippy.openscq30.notification.DeviceServiceChannel"
-        private const val NOTIFICATION_ID = 1
-        private const val ACTION_QUICK_PRESET = "com.oppzippy.openscq30.broadcast.QuickPreset"
-        private const val ACTION_DISCONNECT = "com.oppzippy.openscq30.broadcast.Disconnect"
-        private const val INTENT_PRESET_NUMBER = "com.oppzippy.openscq30.presetNumber"
-
         /** Intent extra for setting mac address when launching service */
         const val MAC_ADDRESS = "com.oppzippy.openscq30.macAddress"
+
+        fun doesNotificationExist(context: Context): Boolean {
+            val notificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val doesNotificationExist = notificationManager.activeNotifications.any {
+                (it.notification.channelId == NOTIFICATION_CHANNEL_ID) && (it.id == NOTIFICATION_ID)
+            }
+            return doesNotificationExist
+        }
     }
 
     @Inject
     lateinit var factory: SoundcoreDeviceFactory
-    lateinit var connectionManager: DeviceConnectionManager
+
+    @Inject
+    lateinit var activateQuickPresetUseCase: ActivateQuickPresetUseCase
+
+    @Inject
+    lateinit var notificationBuilder: NotificationBuilder
 
     @Inject
     lateinit var quickPresetDao: QuickPresetDao
 
-    @Inject
-    lateinit var customProfileDao: CustomProfileDao
+    private lateinit var quickPresetNames: StateFlow<List<QuickPresetIdAndName>>
+    lateinit var connectionManager: DeviceConnectionManager
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -75,33 +79,12 @@ class DeviceService : LifecycleService() {
                 ACTION_QUICK_PRESET -> {
                     val presetNumber = intent.getIntExtra(INTENT_PRESET_NUMBER, 0)
                     lifecycleScope.launch {
-                        quickPresetDao.get(presetNumber)?.let { quickPreset ->
-                            val ambientSoundMode = quickPreset.ambientSoundMode
-                            val noiseCancelingMode = quickPreset.noiseCancelingMode
-                            val equalizerConfiguration = quickPreset.equalizerProfileName?.let {
-                                customProfileDao.get(it)
-                            }?.let {
-                                EqualizerConfiguration(VolumeAdjustments(it.values.toByteArray()))
-                            }
-
-                            // Set them both in one go if possible to maybe save a packet
-                            if (ambientSoundMode != null && noiseCancelingMode != null) {
-                                connectionManager.setSoundMode(ambientSoundMode, noiseCancelingMode)
-                            } else {
-                                ambientSoundMode?.let { connectionManager.setAmbientSoundMode(it) }
-                                noiseCancelingMode?.let { connectionManager.setNoiseCancelingMode(it) }
-                            }
-                            equalizerConfiguration?.let {
-                                connectionManager.setEqualizerConfiguration(it)
-                            }
-                        }
+                        activateQuickPresetUseCase(presetNumber, connectionManager)
                     }
                 }
             }
         }
     }
-
-    private lateinit var quickPresetNames: StateFlow<List<QuickPresetIdAndName>>
 
     override fun onCreate() {
         super.onCreate()
@@ -121,19 +104,6 @@ class DeviceService : LifecycleService() {
         registerReceiver(broadcastReceiver, filter)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(broadcastReceiver)
-
-        val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.cancel(NOTIFICATION_ID)
-
-        MainScope().launch {
-            connectionManager.disconnect()
-        }
-    }
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
@@ -145,22 +115,32 @@ class DeviceService : LifecycleService() {
             connectionManager.connectionStatusFlow.collectLatest {
                 if (it is ConnectionStatus.Connected) {
                     it.device.stateFlow.debounce(500.milliseconds).collectLatest {
-                        updateNotification()
+                        sendNotification()
                     }
                 }
             }
         }
         lifecycleScope.launch {
-            quickPresetNames.debounce(1.seconds).collectLatest { updateNotification() }
+            quickPresetNames.debounce(1.seconds).collectLatest { sendNotification() }
         }
 
         intent?.getStringExtra(MAC_ADDRESS)?.let { macAddress ->
             lifecycleScope.launch {
-                setMacAddress(macAddress)
+                connectionManager.connect(macAddress)
             }
         }
 
         return START_REDELIVER_INTENT
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(broadcastReceiver)
+        cancelNotification()
+
+        MainScope().launch {
+            connectionManager.disconnect()
+        }
     }
 
     private fun createNotificationChannel() {
@@ -176,132 +156,25 @@ class DeviceService : LifecycleService() {
         manager.createNotificationChannel(channel)
     }
 
-    private fun updateNotification() {
+    private fun sendNotification() {
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(NOTIFICATION_ID, buildNotification())
     }
 
-    private fun buildNotification(): Notification {
-        val openAppIntent = Intent(this, MainActivity::class.java)
-        openAppIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-
-        val status = connectionManager.connectionStatusFlow.value
-
-        val quickPresets = quickPresetNames.value.let { quickPresets ->
-            Pair(
-                quickPresets.firstOrNull { it.id == 0 },
-                quickPresets.firstOrNull { it.id == 1 },
-            )
-        }
-
-        val builder = Notification.Builder(this, NOTIFICATION_CHANNEL_ID).setOngoing(true)
-            .setOnlyAlertOnce(true).setSmallIcon(R.drawable.headphones).setLargeIcon(
-                if (status is ConnectionStatus.Connected) {
-                    val bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
-                    val volumeAdjustments =
-                        status.device.state.equalizerConfiguration().volumeAdjustments()
-                            .adjustments()
-                    EqualizerLine(volumeAdjustments.toList()).drawBitmap(
-                        bitmap = bitmap,
-                        yOffset = bitmap.height / 4F,
-                        height = bitmap.height / 2F,
-                    )
-                    bitmap
-                } else {
-                    null
-                },
-            ).setContentTitle(
-                when (status) {
-                    is ConnectionStatus.AwaitingConnection -> getString(R.string.awaiting_connection)
-                    is ConnectionStatus.Connected -> getString(R.string.connected_to).format(
-                        status.device.name,
-                    )
-
-                    is ConnectionStatus.Connecting -> getString(R.string.connecting_to).format(
-                        status.macAddress,
-                    )
-
-                    ConnectionStatus.Disconnected -> getString(R.string.disconnected)
-                },
-            ).setContentText(
-                if (status is ConnectionStatus.Connected) {
-                    val deviceState = status.device.state
-                    if (deviceState.ambientSoundMode() == AmbientSoundMode.NoiseCanceling) {
-                        getString(
-                            R.string.ambient_sound_mode_and_noise_canceling_mode_values,
-                            getString(deviceState.ambientSoundMode().toStringResource()),
-                            getString(deviceState.noiseCancelingMode().toStringResource()),
-                        )
-                    } else {
-                        getString(deviceState.ambientSoundMode().toStringResource())
-                    }
-                } else {
-                    null
-                },
-            ).setContentIntent(
-                PendingIntent.getActivity(
-                    this,
-                    1,
-                    openAppIntent,
-                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-                ),
-            ).addAction(
-                Notification.Action.Builder(
-                    Icon.createWithResource(this, R.drawable.baseline_headset_off_24),
-                    getString(R.string.disconnect),
-                    PendingIntent.getBroadcast(
-                        this,
-                        1,
-                        Intent().apply {
-                            action = ACTION_DISCONNECT
-                        },
-                        PendingIntent.FLAG_IMMUTABLE,
-                    ),
-                ).build(),
-            ).addAction(
-                buildQuickPresetNotificationAction(
-                    presetNumber = 1,
-                    name = quickPresets.first?.name,
-                    icon = Icon.createWithResource(this, R.drawable.counter_1_48px),
-                ),
-            ).addAction(
-                buildQuickPresetNotificationAction(
-                    presetNumber = 2,
-                    name = quickPresets.second?.name,
-                    icon = Icon.createWithResource(this, R.drawable.counter_2_48px),
-                ),
-            )
-        return builder.build()
-    }
-
-    private fun buildQuickPresetNotificationAction(
-        presetNumber: Int,
-        name: String?,
-        icon: Icon,
-    ): Notification.Action {
-        return Notification.Action.Builder(
-            icon,
-            name ?: getString(R.string.quick_preset_number, presetNumber),
-            PendingIntent.getBroadcast(
-                this,
-                1,
-                Intent().apply {
-                    action = ACTION_QUICK_PRESET
-                    putExtra(INTENT_PRESET_NUMBER, presetNumber)
-                },
-                PendingIntent.FLAG_IMMUTABLE,
-            ),
-        ).build()
-    }
-
-    fun doesNotificationExist(): Boolean {
+    private fun cancelNotification() {
         val notificationManager =
-            applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val doesNotificationExist = notificationManager.activeNotifications.any {
-            (it.notification.channelId == NOTIFICATION_CHANNEL_ID) && (it.id == NOTIFICATION_ID)
-        }
-        return doesNotificationExist
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(NOTIFICATION_ID)
+    }
+
+    private fun buildNotification(): Notification {
+        return notificationBuilder(
+            status = connectionManager.connectionStatusFlow.value,
+            quickPresetNames = quickPresetNames.value.let {
+                listOf(it.getOrNull(0)?.name, it.getOrNull(1)?.name)
+            },
+        )
     }
 
     private val binder = MyBinder()
@@ -309,14 +182,6 @@ class DeviceService : LifecycleService() {
     override fun onBind(intent: Intent): IBinder {
         super.onBind(intent)
         return binder
-    }
-
-    private suspend fun setMacAddress(macAddress: String?) {
-        if (macAddress != null) {
-            connectionManager.connect(macAddress)
-        } else {
-            connectionManager.disconnect()
-        }
     }
 
     inner class MyBinder : Binder() {
