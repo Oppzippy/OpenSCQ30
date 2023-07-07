@@ -4,10 +4,10 @@ import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
+import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
-import com.oppzippy.openscq30.ui.equalizer.storage.CustomProfile
-import com.oppzippy.openscq30.ui.equalizer.storage.CustomProfileDao
 
 @Database(
     version = 3,

@@ -2,13 +2,13 @@ package com.oppzippy.openscq30.ui.equalizer
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
+import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
 import com.oppzippy.openscq30.features.soundcoredevice.api.contentEquals
 import com.oppzippy.openscq30.lib.VolumeAdjustments
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.equalizer.models.EqualizerConfiguration
 import com.oppzippy.openscq30.ui.equalizer.models.EqualizerProfile
-import com.oppzippy.openscq30.ui.equalizer.storage.CustomProfile
-import com.oppzippy.openscq30.ui.equalizer.storage.CustomProfileDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview

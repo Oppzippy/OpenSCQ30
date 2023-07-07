@@ -18,13 +18,13 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.oppzippy.openscq30.ui.equalizer.models.EqualizerLine
+import com.oppzippy.openscq30.features.equalizer.visualization.EqualizerLine
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
 fun EqualizerLine(values: List<Byte>, width: Dp, height: Dp) {
     val line = EqualizerLine(values)
-    val points = line.draw(width.value, height.value, 4F)
+    val points = line.points(width.value, height.value, 4F)
 
     val pathNodes = points.mapIndexed { index, pair ->
         if (index == 0) {

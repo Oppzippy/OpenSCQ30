@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.ui.equalizer.storage.CustomProfile
+import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable

@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.ui.equalizer.storage
+package com.oppzippy.openscq30.features.equalizer.storage
 
 import com.oppzippy.openscq30.room.AppDatabase
 import dagger.Module

@@ -9,8 +9,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
 import android.graphics.drawable.Icon
 import android.os.Binder
 import android.os.IBinder
@@ -18,6 +16,8 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.oppzippy.openscq30.MainActivity
 import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
+import com.oppzippy.openscq30.features.equalizer.visualization.EqualizerLine
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetIdAndName
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
@@ -25,8 +25,6 @@ import com.oppzippy.openscq30.lib.AmbientSoundMode
 import com.oppzippy.openscq30.lib.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.VolumeAdjustments
 import com.oppzippy.openscq30.libextensions.resources.toStringResource
-import com.oppzippy.openscq30.ui.equalizer.models.EqualizerLine
-import com.oppzippy.openscq30.ui.equalizer.storage.CustomProfileDao
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -200,7 +198,16 @@ class DeviceService : LifecycleService() {
         val builder = Notification.Builder(this, NOTIFICATION_CHANNEL_ID).setOngoing(true)
             .setOnlyAlertOnce(true).setSmallIcon(R.drawable.headphones).setLargeIcon(
                 if (status is ConnectionStatus.Connected) {
-                    buildEqualizerBitmap(status)
+                    val bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
+                    val volumeAdjustments =
+                        status.device.state.equalizerConfiguration().volumeAdjustments()
+                            .adjustments()
+                    EqualizerLine(volumeAdjustments.toList()).drawBitmap(
+                        bitmap = bitmap,
+                        yOffset = bitmap.height / 4F,
+                        height = bitmap.height / 2F,
+                    )
+                    bitmap
                 } else {
                     null
                 },
@@ -253,61 +260,39 @@ class DeviceService : LifecycleService() {
                     ),
                 ).build(),
             ).addAction(
-                Notification.Action.Builder(
-                    Icon.createWithResource(this, R.drawable.counter_1_48px),
-                    quickPresets.first?.name ?: getString(R.string.quick_preset_number, 1),
-                    PendingIntent.getBroadcast(
-                        this,
-                        2,
-                        Intent().apply {
-                            action = ACTION_QUICK_PRESET
-                            putExtra(INTENT_PRESET_NUMBER, 0)
-                        },
-                        PendingIntent.FLAG_IMMUTABLE,
-                    ),
-                ).build(),
+                buildQuickPresetNotificationAction(
+                    presetNumber = 1,
+                    name = quickPresets.first?.name,
+                    icon = Icon.createWithResource(this, R.drawable.counter_1_48px),
+                ),
             ).addAction(
-                Notification.Action.Builder(
-                    Icon.createWithResource(this, R.drawable.counter_2_48px),
-                    quickPresets.second?.name ?: getString(R.string.quick_preset_number, 2),
-                    PendingIntent.getBroadcast(
-                        this,
-                        3,
-                        Intent().apply {
-                            action = ACTION_QUICK_PRESET
-                            putExtra(INTENT_PRESET_NUMBER, 1)
-                        },
-                        PendingIntent.FLAG_IMMUTABLE,
-                    ),
-                ).build(),
+                buildQuickPresetNotificationAction(
+                    presetNumber = 2,
+                    name = quickPresets.second?.name,
+                    icon = Icon.createWithResource(this, R.drawable.counter_2_48px),
+                ),
             )
         return builder.build()
     }
 
-    private fun buildEqualizerBitmap(status: ConnectionStatus.Connected): Bitmap {
-        val bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
-        val equalizerConfiguration = status.device.state.equalizerConfiguration()
-        val canvas = Canvas(bitmap)
-        val line = EqualizerLine(equalizerConfiguration.volumeAdjustments().adjustments().toList())
-        val points = line.draw(canvas.width.toFloat(), canvas.height.toFloat() / 2F, 4F)
-        val lineCoordinates = points.flatMapIndexed { index, pair ->
-            val scaledY = pair.second + canvas.height / 4
-            if (index == 0 || index == points.size - 1) {
-                listOf(pair.first, scaledY)
-            } else {
-                listOf(pair.first, scaledY, pair.first, scaledY)
-            }
-        }
-        canvas.drawLines(
-            lineCoordinates.toFloatArray(),
-            Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                strokeWidth = bitmap.height * 0.05F
-                color = 0xFF777777.toInt()
-                strokeCap = Paint.Cap.ROUND
-                strokeJoin = Paint.Join.ROUND
-            },
-        )
-        return bitmap
+    private fun buildQuickPresetNotificationAction(
+        presetNumber: Int,
+        name: String?,
+        icon: Icon,
+    ): Notification.Action {
+        return Notification.Action.Builder(
+            icon,
+            name ?: getString(R.string.quick_preset_number, presetNumber),
+            PendingIntent.getBroadcast(
+                this,
+                1,
+                Intent().apply {
+                    action = ACTION_QUICK_PRESET
+                    putExtra(INTENT_PRESET_NUMBER, presetNumber)
+                },
+                PendingIntent.FLAG_IMMUTABLE,
+            ),
+        ).build()
     }
 
     fun doesNotificationExist(): Boolean {
