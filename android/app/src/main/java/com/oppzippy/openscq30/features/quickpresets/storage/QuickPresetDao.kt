@@ -15,7 +15,7 @@ interface QuickPresetDao {
     suspend fun get(id: Int): QuickPreset?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(customProfile: QuickPreset)
+    suspend fun insert(quickPreset: QuickPreset)
 
     @Query("DELETE FROM quick_preset WHERE id = :id")
     suspend fun delete(id: Int)
