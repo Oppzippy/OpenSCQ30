@@ -1,5 +1,6 @@
 package com.oppzippy.openscq30
 
+import android.os.Build
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertHasClickAction
@@ -8,6 +9,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.test.rule.GrantPermissionRule
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.ui.deviceselection.composables.DeviceSelection
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -20,6 +22,15 @@ import org.junit.Test
 
 @HiltAndroidTest
 class DeviceSelectionTest {
+    @get:Rule
+    val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            android.Manifest.permission.BLUETOOTH_CONNECT
+        } else {
+            android.Manifest.permission.BLUETOOTH
+        },
+    )
+
     @get:Rule
     val mockkRule = MockKRule(this)
 

@@ -1,8 +1,10 @@
 package com.oppzippy.openscq30
 
+import android.os.Build
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.test.rule.GrantPermissionRule
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDeviceProvider
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
@@ -21,6 +23,16 @@ import javax.inject.Inject
 
 @HiltAndroidTest
 class OpenSCQ30RootTest {
+    @get:Rule
+    val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(
+        android.Manifest.permission.POST_NOTIFICATIONS,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            android.Manifest.permission.BLUETOOTH_CONNECT
+        } else {
+            android.Manifest.permission.BLUETOOTH
+        },
+    )
+
     @get:Rule
     val mockkRule = MockKRule(this)
 
