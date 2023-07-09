@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 import com.android.build.gradle.internal.tasks.factory.dependsOn
 import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
@@ -30,7 +32,7 @@ android {
         }
     }
     namespace = "com.oppzippy.openscq30"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.oppzippy.openscq30"

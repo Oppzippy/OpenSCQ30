@@ -39,7 +39,7 @@ class DeviceSettingsViewModelTest {
         viewModel.selectDevice(device)
         verify { mockIntent.putExtra(DeviceService.MAC_ADDRESS, "00:00:00:00:00:00") }
         verify(exactly = 1) { application.startForegroundService(mockIntent) }
-        verify(exactly = 1) { application.bindService(mockIntent, any(), any()) }
+        verify(exactly = 1) { application.bindService(mockIntent, any(), any() as Int) }
     }
 
     @Test
