@@ -84,7 +84,7 @@
     <string name="disconnect">Disconnect</string>
     <string name="awaiting_connection">Awaiting Connection</string>
     <string name="an_error_has_occurred">An error has occurred</string>
-    <string name="ambient_sound_mode_and_noise_canceling_mode_values">%s, %s</string>
+    <string name="ambient_sound_mode_and_noise_canceling_mode_values">$1%s, $2%s</string>
     <string name="quick_presets">Quick Presets</string>
     <string name="quick_preset_number">Quick Preset %d</string>
     <string name="notification_permission_is_required">Notification Permission is Required</string>
