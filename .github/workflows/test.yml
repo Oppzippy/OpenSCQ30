@@ -70,7 +70,7 @@ jobs:
       - name: Run android unit tests
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: test
+          arguments: testBluetoothDebugUnitTest
           build-root-directory: android
       # - name: Run android instrumented tests
       #   working-directory: android

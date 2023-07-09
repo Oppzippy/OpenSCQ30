@@ -144,7 +144,7 @@ jobs:
       - name: Install cargo-ndk
         run: cargo install cargo-ndk
       - name: Build
-        run: ./gradlew --no-daemon assembleRelease
+        run: ./gradlew --no-daemon assembleBluetoothRelease
         working-directory: android
       - name: Upload apk
         uses: actions/upload-artifact@v3

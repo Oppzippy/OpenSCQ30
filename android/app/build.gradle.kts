@@ -40,7 +40,6 @@ android {
         targetSdk = 34
         versionCode = 7
         versionName = "1.4.0"
-        buildConfigField("boolean", "IS_DEMO_MODE", "false")
 
         testInstrumentationRunner = "com.oppzippy.openscq30.HiltTestRunner"
         vectorDrawables {
@@ -64,10 +63,6 @@ android {
                 "proguard-rules.pro",
             )
         }
-        create("debugDemo") {
-            initWith(buildTypes["debug"])
-            buildConfigField("boolean", "IS_DEMO_MODE", "true")
-        }
         named("release") {
             isDebuggable = false
             isMinifyEnabled = true
@@ -79,8 +74,17 @@ android {
                 signingConfig = signingConfigs["release"]
             }
         }
-        create("releaseDemo") {
-            initWith(buildTypes["release"])
+    }
+    flavorDimensions += "mode"
+    productFlavors {
+        create("bluetooth") {
+            isDefault = true
+            dimension = "mode"
+            buildConfigField("boolean", "IS_DEMO_MODE", "false")
+        }
+        create("demo") {
+            isDefault = false
+            dimension = "mode"
             buildConfigField("boolean", "IS_DEMO_MODE", "true")
         }
     }
