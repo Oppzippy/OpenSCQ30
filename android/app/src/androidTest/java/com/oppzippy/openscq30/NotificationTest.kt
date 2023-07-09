@@ -24,9 +24,12 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.junit4.MockKRule
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -34,7 +37,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltAndroidTest
@@ -138,20 +141,24 @@ class NotificationTest {
         uiDevice.wait(Until.hasObject(notificationTitle), 1000)
         expandNotification()
 
-        // Not sure why the delays are necessary, but the test fails without them
-
         val quickPreset1 = By.text(composeRule.activity.getString(R.string.quick_preset_number, 1))
-        delay(100.milliseconds)
+        uiDevice.wait(Until.hasObject(quickPreset1.clickable(true)), 1000)
         notification.findObject(quickPreset1).click()
-        delay(100.milliseconds)
 
-        assertEquals(AmbientSoundMode.Transparency, device.state.ambientSoundMode())
+        // The test dispatcher skips delays, but waiting is necessary for the click event to be handled.
+        withContext(Dispatchers.Default) {
+            withTimeout(1.seconds) {
+                device.stateFlow.first { it.ambientSoundMode() == AmbientSoundMode.Transparency }
+            }
+        }
 
         val quickPreset2 = By.text("Test Preset 2")
-        delay(100.milliseconds)
         notification.findObject(quickPreset2).click()
-        delay(100.milliseconds)
-        assertEquals(AmbientSoundMode.NoiseCanceling, device.state.ambientSoundMode())
+        withContext(Dispatchers.Default) {
+            withTimeout(1.seconds) {
+                device.stateFlow.first { it.ambientSoundMode() == AmbientSoundMode.NoiseCanceling }
+            }
+        }
     }
 
     private fun setUpDevice(): DemoSoundcoreDevice {
