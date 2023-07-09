@@ -20,8 +20,8 @@ class QuickPresetViewModel @Inject constructor(
 ) : ViewModel() {
     private val _quickPreset = MutableStateFlow<QuickPreset?>(null)
     val quickPreset = _quickPreset.asStateFlow()
-    val equalizerProfileNames =
-        customProfileDao.allNames().stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+    val customEqualizerProfiles =
+        customProfileDao.all().stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     init {
         selectQuickPreset(0)

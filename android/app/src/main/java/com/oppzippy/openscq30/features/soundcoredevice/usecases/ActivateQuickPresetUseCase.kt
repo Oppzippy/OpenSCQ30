@@ -15,10 +15,16 @@ class ActivateQuickPresetUseCase @Inject constructor(
         quickPresetDao.get(presetId)?.let { quickPreset ->
             val ambientSoundMode = quickPreset.ambientSoundMode
             val noiseCancelingMode = quickPreset.noiseCancelingMode
-            val equalizerConfiguration = quickPreset.equalizerProfileName?.let {
-                customProfileDao.get(it)
-            }?.let {
-                EqualizerConfiguration(VolumeAdjustments(it.values.toByteArray()))
+
+            // TODO move quick preset to equalizer configuration logic elsewhere
+            val equalizerConfiguration = if (quickPreset.presetEqualizerProfile != null) {
+                EqualizerConfiguration(quickPreset.presetEqualizerProfile)
+            } else if (quickPreset.customEqualizerProfileName != null) {
+                customProfileDao.get(quickPreset.customEqualizerProfileName)?.let {
+                    EqualizerConfiguration(VolumeAdjustments(it.values.toByteArray()))
+                }
+            } else {
+                null
             }
 
             // Set them both in one go if possible to maybe save a packet

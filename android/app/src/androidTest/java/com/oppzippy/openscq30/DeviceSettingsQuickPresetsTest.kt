@@ -114,13 +114,13 @@ class DeviceSettingsQuickPresetsTest {
         composeRule.setContent {
             QuickPresetScreen()
         }
-        assertEquals(null, quickPresetDao.get(0)?.equalizerProfileName)
+        assertEquals(null, quickPresetDao.get(0)?.customEqualizerProfileName)
 
         composeRule.onNode(equalizer).performClick()
-        assertEquals(null, quickPresetDao.get(0)?.equalizerProfileName)
+        assertEquals(null, quickPresetDao.get(0)?.customEqualizerProfileName)
 
         composeRule.onNode(customProfile).performClick()
         composeRule.onNodeWithText("Test Profile").performClick()
-        assertEquals("Test Profile", quickPresetDao.get(0)?.equalizerProfileName)
+        assertEquals("Test Profile", quickPresetDao.get(0)?.customEqualizerProfileName)
     }
 }

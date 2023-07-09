@@ -11,8 +11,8 @@ interface CustomProfileDao {
     @Query("SELECT * FROM equalizer_custom_profile")
     suspend fun getAll(): List<CustomProfile>
 
-    @Query("SELECT name FROM equalizer_custom_profile")
-    fun allNames(): Flow<List<String>>
+    @Query("SELECT * FROM equalizer_custom_profile")
+    fun all(): Flow<List<CustomProfile>>
 
     @Query("SELECT * FROM equalizer_custom_profile WHERE name = :name")
     suspend fun get(name: String): CustomProfile?

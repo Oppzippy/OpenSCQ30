@@ -15,12 +15,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification
 import com.oppzippy.openscq30.lib.AmbientSoundMode
 import com.oppzippy.openscq30.lib.NoiseCancelingMode
 import com.oppzippy.openscq30.ui.quickpresets.composables.QuickPresetConfiguration
 import com.oppzippy.openscq30.ui.quickpresets.composables.QuickPresetSelection
+import com.oppzippy.openscq30.ui.quickpresets.models.QuickPresetEqualizerConfiguration
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 import com.oppzippy.openscq30.ui.utils.Loading
 import com.oppzippy.openscq30.ui.utils.PermissionCheck
@@ -28,7 +30,7 @@ import com.oppzippy.openscq30.ui.utils.PermissionCheck
 @Composable
 fun QuickPresetScreen(viewModel: QuickPresetViewModel = hiltViewModel()) {
     val preset = viewModel.quickPreset.collectAsState().value
-    val allEqualizerProfileNames by viewModel.equalizerProfileNames.collectAsState()
+    val customEqualizerProfiles by viewModel.customEqualizerProfiles.collectAsState()
     val context = LocalContext.current
 
     // We can't nest the content inside the permission check since we need to ensure the permission
@@ -57,7 +59,7 @@ fun QuickPresetScreen(viewModel: QuickPresetViewModel = hiltViewModel()) {
         if (preset != null) {
             QuickPresetScreen(
                 preset = preset,
-                allEqualizerProfileNames = allEqualizerProfileNames,
+                customEqualizerProfiles = customEqualizerProfiles,
                 onSelectedIndexChange = { viewModel.selectQuickPreset(it) },
                 onAmbientSoundModeChange = {
                     viewModel.upsertQuickPreset(
@@ -69,9 +71,24 @@ fun QuickPresetScreen(viewModel: QuickPresetViewModel = hiltViewModel()) {
                         preset.copy(noiseCancelingMode = it),
                     )
                 },
-                onEqualizerProfileNameChange = {
+                onEqualizerChange = {
+                    val presetEqualizerProfile =
+                        if (it is QuickPresetEqualizerConfiguration.PresetProfile) {
+                            it.profile
+                        } else {
+                            null
+                        }
+                    val customEqualizerProfile =
+                        if (it is QuickPresetEqualizerConfiguration.CustomProfile) {
+                            it.name
+                        } else {
+                            null
+                        }
                     viewModel.upsertQuickPreset(
-                        preset.copy(equalizerProfileName = it),
+                        preset.copy(
+                            presetEqualizerProfile = presetEqualizerProfile,
+                            customEqualizerProfileName = customEqualizerProfile,
+                        ),
                     )
                 },
                 onNameChange = { viewModel.upsertQuickPreset(preset.copy(name = it)) },
@@ -85,11 +102,11 @@ fun QuickPresetScreen(viewModel: QuickPresetViewModel = hiltViewModel()) {
 @Composable
 private fun QuickPresetScreen(
     preset: QuickPreset,
-    allEqualizerProfileNames: List<String>,
+    customEqualizerProfiles: List<CustomProfile>,
     onSelectedIndexChange: (index: Int) -> Unit = {},
     onAmbientSoundModeChange: (ambientSoundMode: AmbientSoundMode?) -> Unit = {},
     onNoiseCancelingModeChange: (noiseCancelingMode: NoiseCancelingMode?) -> Unit = {},
-    onEqualizerProfileNameChange: (name: String?) -> Unit = {},
+    onEqualizerChange: (config: QuickPresetEqualizerConfiguration?) -> Unit = {},
     onNameChange: (name: String?) -> Unit = {},
 ) {
     Column {
@@ -102,11 +119,17 @@ private fun QuickPresetScreen(
             defaultName = stringResource(R.string.quick_preset_number, preset.id + 1),
             ambientSoundMode = preset.ambientSoundMode,
             noiseCancelingMode = preset.noiseCancelingMode,
-            equalizerProfileName = preset.equalizerProfileName,
-            allEqualizerProfileNames = allEqualizerProfileNames,
+            equalizerConfiguration = if (preset.presetEqualizerProfile != null) {
+                QuickPresetEqualizerConfiguration.PresetProfile(preset.presetEqualizerProfile)
+            } else if (preset.customEqualizerProfileName != null) {
+                QuickPresetEqualizerConfiguration.CustomProfile(preset.customEqualizerProfileName)
+            } else {
+                null
+            },
+            customEqualizerProfiles = customEqualizerProfiles,
             onAmbientSoundModeChange = onAmbientSoundModeChange,
             onNoiseCancelingModeChange = onNoiseCancelingModeChange,
-            onEqualizerProfileNameChange = onEqualizerProfileNameChange,
+            onEqualizerChange = onEqualizerChange,
             onNameChange = onNameChange,
         )
     }
@@ -121,9 +144,9 @@ fun PreviewQuickPresetScreenWithAllOptionsChecked() {
                 id = 0,
                 ambientSoundMode = AmbientSoundMode.Normal,
                 noiseCancelingMode = NoiseCancelingMode.Transport,
-                equalizerProfileName = "Test EQ Profile",
+                customEqualizerProfileName = "Test EQ Profile",
             ),
-            allEqualizerProfileNames = emptyList(),
+            customEqualizerProfiles = emptyList(),
         )
     }
 }
@@ -134,7 +157,7 @@ fun PreviewQuickPresetScreenWithNoOptionsChecked() {
     OpenSCQ30Theme {
         QuickPresetScreen(
             preset = QuickPreset(0),
-            allEqualizerProfileNames = emptyList(),
+            customEqualizerProfiles = emptyList(),
         )
     }
 }

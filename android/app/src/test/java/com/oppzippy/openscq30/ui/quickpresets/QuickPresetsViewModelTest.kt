@@ -29,7 +29,7 @@ class QuickPresetsViewModelTest {
     @Before
     fun setUp() {
         coEvery { quickPresetDao.get(0) } returns null
-        coEvery { customProfileDao.allNames() } returns MutableStateFlow(emptyList())
+        coEvery { customProfileDao.all() } returns MutableStateFlow(emptyList())
     }
 
     @Test

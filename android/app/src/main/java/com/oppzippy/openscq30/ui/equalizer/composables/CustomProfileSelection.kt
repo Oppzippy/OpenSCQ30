@@ -1,6 +1,7 @@
 package com.oppzippy.openscq30.ui.equalizer.composables
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.oppzippy.openscq30.R
@@ -14,6 +15,7 @@ fun CustomProfileSelection(
     selectedProfile: CustomProfile?,
     profiles: List<CustomProfile>,
     onProfileSelected: (selectedProfile: CustomProfile) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Dropdown(
         value = selectedProfile,
@@ -24,6 +26,7 @@ fun CustomProfileSelection(
         },
         label = stringResource(R.string.custom_profile),
         onItemSelected = onProfileSelected,
+        modifier = modifier,
     )
 }
 

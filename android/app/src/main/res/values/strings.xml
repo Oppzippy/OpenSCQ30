@@ -88,4 +88,5 @@
     <string name="quick_presets">Quick Presets</string>
     <string name="quick_preset_number">Quick Preset %d</string>
     <string name="notification_permission_is_required">Notification Permission is Required</string>
+    <string name="preset_profile">Preset Profile</string>
 </resources>

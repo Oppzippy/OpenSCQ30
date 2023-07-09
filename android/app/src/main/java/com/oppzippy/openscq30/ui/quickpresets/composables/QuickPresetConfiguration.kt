@@ -17,8 +17,13 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.lib.AmbientSoundMode
 import com.oppzippy.openscq30.lib.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.PresetEqualizerProfile
+import com.oppzippy.openscq30.libextensions.resources.toStringResource
+import com.oppzippy.openscq30.ui.equalizer.composables.CustomProfileSelection
+import com.oppzippy.openscq30.ui.quickpresets.models.QuickPresetEqualizerConfiguration
 import com.oppzippy.openscq30.ui.soundmode.AmbientSoundModeSelection
 import com.oppzippy.openscq30.ui.soundmode.NoiseCancelingModeSelection
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
@@ -32,11 +37,11 @@ fun QuickPresetConfiguration(
     defaultName: String,
     ambientSoundMode: AmbientSoundMode?,
     noiseCancelingMode: NoiseCancelingMode?,
-    equalizerProfileName: String?,
-    allEqualizerProfileNames: List<String>,
+    equalizerConfiguration: QuickPresetEqualizerConfiguration?,
+    customEqualizerProfiles: List<CustomProfile>,
     onAmbientSoundModeChange: (ambientSoundMode: AmbientSoundMode?) -> Unit = {},
     onNoiseCancelingModeChange: (noiseCancelingMode: NoiseCancelingMode?) -> Unit = {},
-    onEqualizerProfileNameChange: (profileName: String?) -> Unit = {},
+    onEqualizerChange: (config: QuickPresetEqualizerConfiguration?) -> Unit = {},
     onNameChange: (name: String?) -> Unit = {},
 ) {
     Column(Modifier.verticalScroll(rememberScrollState())) {
@@ -81,29 +86,48 @@ fun QuickPresetConfiguration(
         }
         Divider()
 
-        var isEqualizerChecked by remember { mutableStateOf(equalizerProfileName != null) }
+        var isEqualizerChecked by remember { mutableStateOf(equalizerConfiguration != null) }
         CheckboxWithLabel(
             text = stringResource(R.string.equalizer),
-            isChecked = equalizerProfileName != null || isEqualizerChecked,
+            isChecked = equalizerConfiguration != null || isEqualizerChecked,
             onCheckedChange = {
                 isEqualizerChecked = it
                 if (!isEqualizerChecked) {
-                    onEqualizerProfileNameChange(null)
+                    onEqualizerChange(null)
                 }
             },
         )
-        if (equalizerProfileName != null || isEqualizerChecked) {
+        if (equalizerConfiguration != null || isEqualizerChecked) {
             Dropdown(
-                value = equalizerProfileName,
-                options = allEqualizerProfileNames.map {
+                value = (equalizerConfiguration as? QuickPresetEqualizerConfiguration.PresetProfile)?.profile,
+                options = PresetEqualizerProfile.values().map {
+                    val presetName = stringResource(it.toStringResource())
                     DropdownOption(
-                        name = it,
                         value = it,
-                        label = { Text(it) },
+                        label = { Text(presetName) },
+                        name = presetName,
                     )
                 },
-                label = stringResource(R.string.custom_profile),
-                onItemSelected = onEqualizerProfileNameChange,
+                label = stringResource(R.string.preset_profile),
+                onItemSelected = {
+                    onEqualizerChange(
+                        QuickPresetEqualizerConfiguration.PresetProfile(
+                            it,
+                        ),
+                    )
+                },
+            )
+
+            CustomProfileSelection(
+                selectedProfile = if (equalizerConfiguration is QuickPresetEqualizerConfiguration.CustomProfile) {
+                    customEqualizerProfiles.find { it.name == equalizerConfiguration.name }
+                } else {
+                    null
+                },
+                profiles = customEqualizerProfiles,
+                onProfileSelected = {
+                    onEqualizerChange(QuickPresetEqualizerConfiguration.CustomProfile(it.name))
+                },
                 modifier = Modifier.testTag("quickPresetCustomEqualizerProfile"),
             )
         }
@@ -119,8 +143,10 @@ private fun PreviewQuickPresetConfiguration() {
             defaultName = "Quick Preset 1",
             ambientSoundMode = AmbientSoundMode.NoiseCanceling,
             noiseCancelingMode = NoiseCancelingMode.Transport,
-            equalizerProfileName = "test",
-            allEqualizerProfileNames = emptyList(),
+            customEqualizerProfiles = emptyList(),
+            equalizerConfiguration = QuickPresetEqualizerConfiguration.PresetProfile(
+                PresetEqualizerProfile.SoundcoreSignature,
+            ),
         )
     }
 }
