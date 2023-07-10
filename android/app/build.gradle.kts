@@ -33,6 +33,7 @@ android {
     }
     namespace = "com.oppzippy.openscq30"
     compileSdk = 34
+    buildToolsVersion = "34.0.0"
 
     defaultConfig {
         applicationId = "com.oppzippy.openscq30"
