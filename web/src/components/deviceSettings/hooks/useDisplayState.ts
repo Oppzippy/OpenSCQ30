@@ -55,7 +55,7 @@ function useUpdateActualFromDisplay(
   // directly. Instead, pass the device. That way we will have a reference to the current actual state.
   const debouncedSetActualEqualizerConfiguration = useMemo(
     () =>
-      debounce(async (config: EqualizerConfiguration) => {
+      debounce((config: EqualizerConfiguration) => {
         setActualState({
           ambientSoundMode: device.state.value.ambientSoundMode,
           noiseCancelingMode: device.state.value.noiseCancelingMode,

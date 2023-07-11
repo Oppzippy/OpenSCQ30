@@ -31,19 +31,16 @@ export function AppContents() {
   );
   useUpdateAvailableToast();
 
-  async function connect() {
-    try {
-      const device = isDemoMode
-        ? await selectDemoDevice()
-        : await selectDevice();
-      setDevice(device);
-    } catch (err) {
-      // Ignore error if the user canceled the device selection popup
-      if (!(err instanceof DOMException) || err.name != "NotFoundError") {
-        console.error(err);
-      }
-    }
-  }
+  const connect = useCallback(() => {
+    (isDemoMode ? selectDemoDevice : selectDevice)()
+      .then(setDevice)
+      .catch((err) => {
+        // Ignore error if the user canceled the device selection popup
+        if (!(err instanceof DOMException) || err.name != "NotFoundError") {
+          console.error(err);
+        }
+      });
+  }, [isDemoMode]);
 
   const disconnect = useCallback(() => {
     device?.disconnect();

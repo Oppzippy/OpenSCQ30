@@ -144,7 +144,7 @@ export class RealSoundcoreDevice implements SoundcoreDevice {
     }
   }
 
-  private async onPacketReceived(bytes: Uint8Array) {
+  private onPacketReceived(bytes: Uint8Array) {
     for (const handler of this.packetHandlers) {
       if (handler(bytes)) {
         return;

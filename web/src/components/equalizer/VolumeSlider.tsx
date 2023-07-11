@@ -53,7 +53,9 @@ export const VolumeSlider = React.memo(function (props: Props) {
             if (typeof value == "number") {
               props.onValueChange(props.index, value);
             } else {
-              throw Error(`Expected single number, got number array: ${value}`);
+              throw Error(
+                `Expected single number, got number array: ${value.toString()}`,
+              );
             }
           }}
         />

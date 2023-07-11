@@ -17,7 +17,7 @@ export function ToggleButtonRow<T extends NonNullable<unknown>>(
       exclusive
       value={props.value}
       onChange={(_, value) => {
-        props.onValueChanged(value);
+        props.onValueChanged(value as T);
       }}
       sx={{
         display: "flex",

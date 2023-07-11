@@ -25,6 +25,7 @@
     "overwrite": "",
     "create": "",
     "webBluetoothNotSupported": "Web Bluetooth is not supported by your browser. See <2>caniuse</2> for a list of browsers supporting Web Bluetooth.",
+    "updateFailed": "",
     "newVersionAvailable": "",
     "update": ""
   },

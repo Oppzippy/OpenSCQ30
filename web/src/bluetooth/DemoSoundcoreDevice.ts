@@ -38,18 +38,21 @@ export class DemoSoundcoreDevice implements SoundcoreDevice {
     return this._state.value.equalizerConfiguration;
   }
 
-  public async transitionState(newState: SoundcoreDeviceState) {
+  public transitionState(newState: SoundcoreDeviceState) {
     console.debug("Transition device state", newState);
     this._state.next(newState);
+    return Promise.resolve();
   }
 }
 
-export async function selectDemoDevice() {
-  return new DemoSoundcoreDevice("Demo Device", {
-    ambientSoundMode: AmbientSoundMode.Normal,
-    noiseCancelingMode: NoiseCancelingMode.Indoor,
-    equalizerConfiguration: EqualizerConfiguration.fromPresetProfile(
-      PresetEqualizerProfile.SoundcoreSignature,
-    ),
-  });
+export function selectDemoDevice() {
+  return Promise.resolve(
+    new DemoSoundcoreDevice("Demo Device", {
+      ambientSoundMode: AmbientSoundMode.Normal,
+      noiseCancelingMode: NoiseCancelingMode.Indoor,
+      equalizerConfiguration: EqualizerConfiguration.fromPresetProfile(
+        PresetEqualizerProfile.SoundcoreSignature,
+      ),
+    }),
+  );
 }

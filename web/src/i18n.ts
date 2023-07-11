@@ -6,7 +6,7 @@ import { initReactI18next } from "react-i18next";
 import enTranslation from "../locales/en/translation.json";
 import jaTranslation from "../locales/ja/translation.json";
 
-i18n
+await i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({

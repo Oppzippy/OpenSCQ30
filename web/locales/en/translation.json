@@ -25,6 +25,7 @@
     "overwrite": "Overwrite",
     "create": "Create",
     "webBluetoothNotSupported": "Web Bluetooth is not supported by your browser. See <2>caniuse</2> for a list of browsers supporting Web Bluetooth.",
+    "updateFailed": "Update failed. See console for details.",
     "newVersionAvailable": "A new version of OpenSCQ30 Web is available.",
     "update": "Update"
   },

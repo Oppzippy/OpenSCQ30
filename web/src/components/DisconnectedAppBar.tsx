@@ -2,7 +2,7 @@ import { AppBar, Button, Toolbar, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
 type Props = {
-  onSelectDeviceClick: () => Promise<void>;
+  onSelectDeviceClick: () => void;
   showSelectDeviceButton: boolean;
 };
 
