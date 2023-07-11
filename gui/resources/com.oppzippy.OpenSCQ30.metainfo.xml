@@ -33,6 +33,7 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.5.1" date="2023-07-11" />
         <release version="1.5.0" date="2023-07-11">
             <description>
                 <p>Fixes</p>

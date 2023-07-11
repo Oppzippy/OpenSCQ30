@@ -1,6 +1,6 @@
 [package]
 name = "openscq30_gui"
-version = "1.5.0"
+version = "1.5.1"
 edition = "2021"
 
 [features]

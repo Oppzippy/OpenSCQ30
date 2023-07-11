@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.5.1
+
+### Android
+
+#### Fixes
+
+-   Fix noise canceling mode displaying in notification as $1Noise Canceling
+-   Fix text fields not being single line
+-   Fix equalizer remaining checked when moving between Quick Preset tabs
+
 ## v1.5.0
 
 ### GUI
