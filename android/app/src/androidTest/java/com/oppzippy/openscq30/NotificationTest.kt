@@ -29,11 +29,8 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.junit4.MockKRule
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -45,7 +42,6 @@ import javax.inject.Inject
 import kotlin.jvm.optionals.getOrNull
 import kotlin.time.Duration.Companion.seconds
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @HiltAndroidTest
 class NotificationTest {
     @get:Rule
@@ -136,7 +132,7 @@ class NotificationTest {
     }
 
     @Test
-    fun quickPresetButtonsWork() = runTest {
+    fun quickPresetButtonsWork(): Unit = runBlocking {
         quickPresetDao.insert(QuickPreset(id = 0, ambientSoundMode = AmbientSoundMode.Transparency))
         quickPresetDao.insert(
             QuickPreset(
@@ -155,24 +151,19 @@ class NotificationTest {
         uiDevice.wait(Until.hasObject(quickPreset1.clickable(true)), 1000)
         notification.findObject(quickPreset1).click()
 
-        // The test dispatcher skips delays, but waiting is necessary for the click event to be handled.
-        withContext(Dispatchers.Default) {
-            withTimeout(1.seconds) {
-                device.stateFlow.first { it.ambientSoundMode() == AmbientSoundMode.Transparency }
-            }
+        withTimeout(1.seconds) {
+            device.stateFlow.first { it.ambientSoundMode() == AmbientSoundMode.Transparency }
         }
 
         val quickPreset2 = By.text("Test Preset 2")
         notification.findObject(quickPreset2).click()
-        withContext(Dispatchers.Default) {
-            withTimeout(1.seconds) {
-                device.stateFlow.first { it.ambientSoundMode() == AmbientSoundMode.NoiseCanceling }
-            }
+        withTimeout(1.seconds) {
+            device.stateFlow.first { it.ambientSoundMode() == AmbientSoundMode.NoiseCanceling }
         }
     }
 
     @Test
-    fun quickPresetEqualizerConfigurationWorks() = runTest {
+    fun quickPresetEqualizerConfigurationWorks(): Unit = runBlocking {
         customProfileDao.insert(CustomProfile("Test Profile", listOf(0, 1, 2, 3, 4, 5, 6, 7)))
         quickPresetDao.insert(QuickPreset(id = 0, customEqualizerProfileName = "Test Profile"))
         quickPresetDao.insert(
@@ -189,22 +180,17 @@ class NotificationTest {
         uiDevice.wait(Until.hasObject(quickPreset1.clickable(true)), 1000)
         notification.findObject(quickPreset1).click()
 
-        // The test dispatcher skips delays, but waiting is necessary for the click event to be handled.
-        withContext(Dispatchers.Default) {
-            withTimeout(2.seconds) {
-                device.stateFlow.first { it.equalizerConfiguration().presetProfile().isEmpty }
-            }
+        withTimeout(2.seconds) {
+            device.stateFlow.first { it.equalizerConfiguration().presetProfile().isEmpty }
         }
 
         // Preset equalizer profile
         val quickPreset2 = By.text(composeRule.activity.getString(R.string.quick_preset_number, 2))
         notification.findObject(quickPreset2).click()
-        withContext(Dispatchers.Default) {
-            withTimeout(2.seconds) {
-                device.stateFlow.first {
-                    it.equalizerConfiguration()
-                        .presetProfile().getOrNull() == PresetEqualizerProfile.SoundcoreSignature
-                }
+        withTimeout(2.seconds) {
+            device.stateFlow.first {
+                it.equalizerConfiguration().presetProfile()
+                    .getOrNull() == PresetEqualizerProfile.SoundcoreSignature
             }
         }
     }
