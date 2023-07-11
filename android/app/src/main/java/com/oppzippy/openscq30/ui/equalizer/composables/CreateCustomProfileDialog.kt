@@ -37,6 +37,7 @@ fun CreateCustomProfileDialog(
                     label = { Text(stringResource(R.string.name)) },
                     onValueChange = { profileName = it },
                     modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
                 )
             },
             confirmButton = {

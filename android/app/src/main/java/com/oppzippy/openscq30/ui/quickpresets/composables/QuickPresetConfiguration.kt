@@ -52,7 +52,7 @@ fun QuickPresetConfiguration(
             },
             placeholder = { Text(defaultName) },
             label = { Text(stringResource(R.string.name)) },
-            maxLines = 1,
+            singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("quickPresetNameInput"),

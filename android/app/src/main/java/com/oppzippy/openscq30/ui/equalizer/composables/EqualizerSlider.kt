@@ -36,6 +36,7 @@ fun EqualizerSlider(
                 modifier = Modifier
                     .testTag("equalizerInput")
                     .width(100.dp),
+                singleLine = true,
                 label = {
                     if (hz < 1000) {
                         Text(stringResource(R.string.hz, hz))
