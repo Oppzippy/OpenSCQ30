@@ -116,6 +116,7 @@ fun QuickPresetConfiguration(
                         ),
                     )
                 },
+                modifier = Modifier.testTag("quickPresetPresetEqualizerProfile"),
             )
 
             CustomProfileSelection(

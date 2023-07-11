@@ -13,6 +13,7 @@ import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
 import com.oppzippy.openscq30.lib.AmbientSoundMode
 import com.oppzippy.openscq30.lib.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.PresetEqualizerProfile
 import com.oppzippy.openscq30.ui.quickpresets.QuickPresetScreen
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -51,6 +52,7 @@ class DeviceSettingsQuickPresetsTest {
     private lateinit var ambientSoundMode: SemanticsMatcher
     private lateinit var noiseCancelingMode: SemanticsMatcher
     private lateinit var equalizer: SemanticsMatcher
+    private lateinit var presetProfile: SemanticsMatcher
     private lateinit var customProfile: SemanticsMatcher
 
     @Before
@@ -63,6 +65,7 @@ class DeviceSettingsQuickPresetsTest {
         noiseCancelingMode =
             hasTextExactly(composeRule.activity.getString(R.string.noise_canceling_mode))
         equalizer = hasTextExactly(composeRule.activity.getString(R.string.equalizer))
+        presetProfile = hasTestTag("quickPresetPresetEqualizerProfile")
         customProfile = hasTestTag("quickPresetCustomEqualizerProfile")
     }
 
@@ -107,7 +110,26 @@ class DeviceSettingsQuickPresetsTest {
     }
 
     @Test
-    fun acceptsEqualizerProfileName() = runTest {
+    fun acceptsPresetEqualizerProfile() = runTest {
+        composeRule.setContent {
+            QuickPresetScreen()
+        }
+        assertEquals(null, quickPresetDao.get(0)?.presetEqualizerProfile)
+
+        composeRule.onNode(equalizer).performClick()
+        assertEquals(null, quickPresetDao.get(0)?.presetEqualizerProfile)
+
+        composeRule.onNode(presetProfile).performClick()
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.classical))
+            .performClick()
+        assertEquals(
+            PresetEqualizerProfile.Classical,
+            quickPresetDao.get(0)?.presetEqualizerProfile,
+        )
+    }
+
+    @Test
+    fun acceptsCustomEqualizerProfile() = runTest {
         customProfileDao.insert(
             CustomProfile(name = "Test Profile", values = listOf(0, 0, 0, 0, 0, 0, 0, 0)),
         )
@@ -122,5 +144,42 @@ class DeviceSettingsQuickPresetsTest {
         composeRule.onNode(customProfile).performClick()
         composeRule.onNodeWithText("Test Profile").performClick()
         assertEquals("Test Profile", quickPresetDao.get(0)?.customEqualizerProfileName)
+    }
+
+    @Test
+    fun acceptsOnlyOneOfPresetOrCustomEqualizerProfile() = runTest {
+        customProfileDao.insert(
+            CustomProfile(name = "Test Profile", values = listOf(0, 0, 0, 0, 0, 0, 0, 0)),
+        )
+        composeRule.setContent {
+            QuickPresetScreen()
+        }
+        composeRule.onNode(equalizer).performClick()
+
+        // Select a preset profile
+        composeRule.onNode(presetProfile).performClick()
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.acoustic))
+            .performClick()
+        assertEquals(
+            PresetEqualizerProfile.Acoustic,
+            quickPresetDao.get(0)?.presetEqualizerProfile,
+        )
+        assertEquals(null, quickPresetDao.get(0)?.customEqualizerProfileName)
+
+        // Select a custom profile
+        composeRule.onNode(customProfile).performClick()
+        composeRule.onNodeWithText("Test Profile").performClick()
+        assertEquals(null, quickPresetDao.get(0)?.presetEqualizerProfile)
+        assertEquals("Test Profile", quickPresetDao.get(0)?.customEqualizerProfileName)
+
+        // Go back to a preset to make sure the custom profile gets deselected
+        composeRule.onNode(presetProfile).performClick()
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.acoustic))
+            .performClick()
+        assertEquals(
+            PresetEqualizerProfile.Acoustic,
+            quickPresetDao.get(0)?.presetEqualizerProfile,
+        )
+        assertEquals(null, quickPresetDao.get(0)?.customEqualizerProfileName)
     }
 }

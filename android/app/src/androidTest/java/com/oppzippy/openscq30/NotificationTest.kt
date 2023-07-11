@@ -13,11 +13,14 @@ import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDeviceProvider
+import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
+import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
 import com.oppzippy.openscq30.features.soundcoredevice.demo.DemoSoundcoreDevice
 import com.oppzippy.openscq30.lib.AmbientSoundMode
+import com.oppzippy.openscq30.lib.PresetEqualizerProfile
 import com.oppzippy.openscq30.ui.OpenSCQ30Root
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -37,6 +40,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import javax.inject.Inject
+import kotlin.jvm.optionals.getOrNull
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -69,6 +73,9 @@ class NotificationTest {
 
     @Inject
     lateinit var quickPresetDao: QuickPresetDao
+
+    @Inject
+    lateinit var customProfileDao: CustomProfileDao
 
     private lateinit var uiDevice: UiDevice
 
@@ -157,6 +164,44 @@ class NotificationTest {
         withContext(Dispatchers.Default) {
             withTimeout(1.seconds) {
                 device.stateFlow.first { it.ambientSoundMode() == AmbientSoundMode.NoiseCanceling }
+            }
+        }
+    }
+
+    @Test
+    fun quickPresetEqualizerConfigurationWorks() = runTest {
+        customProfileDao.insert(CustomProfile("Test Profile", listOf(0, 1, 2, 3, 4, 5, 6, 7)))
+        quickPresetDao.insert(QuickPreset(id = 0, customEqualizerProfileName = "Test Profile"))
+        quickPresetDao.insert(
+            QuickPreset(id = 1, presetEqualizerProfile = PresetEqualizerProfile.SoundcoreSignature),
+        )
+        val device = setUpDevice()
+
+        uiDevice.openNotification()
+        uiDevice.wait(Until.hasObject(notificationTitle), 1000)
+        expandNotification()
+
+        // Custom equalizer profile
+        val quickPreset1 = By.text(composeRule.activity.getString(R.string.quick_preset_number, 1))
+        uiDevice.wait(Until.hasObject(quickPreset1.clickable(true)), 1000)
+        notification.findObject(quickPreset1).click()
+
+        // The test dispatcher skips delays, but waiting is necessary for the click event to be handled.
+        withContext(Dispatchers.Default) {
+            withTimeout(2.seconds) {
+                device.stateFlow.first { it.equalizerConfiguration().presetProfile().isEmpty }
+            }
+        }
+
+        // Preset equalizer profile
+        val quickPreset2 = By.text(composeRule.activity.getString(R.string.quick_preset_number, 2))
+        notification.findObject(quickPreset2).click()
+        withContext(Dispatchers.Default) {
+            withTimeout(2.seconds) {
+                device.stateFlow.first {
+                    it.equalizerConfiguration()
+                        .presetProfile().getOrNull() == PresetEqualizerProfile.SoundcoreSignature
+                }
             }
         }
     }
