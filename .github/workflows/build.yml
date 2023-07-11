@@ -147,7 +147,7 @@ jobs:
         run: ./gradlew --no-daemon assembleBluetoothRelease
         working-directory: android
       - name: Rename apk
-        run: mv android/app/build/outputs/apk/bluetooth/release/app-release-unsigned.apk openscq30_android.apk
+        run: mv android/app/build/outputs/apk/bluetooth/release/app-bluetooth-release-unsigned.apk openscq30_android.apk
       - name: Upload apk
         uses: actions/upload-artifact@v3
         with:
