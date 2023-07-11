@@ -8,6 +8,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -87,6 +88,11 @@ fun QuickPresetConfiguration(
         Divider()
 
         var isEqualizerChecked by remember { mutableStateOf(equalizerConfiguration != null) }
+        // We want isEqualizerChecked to reset when moving between tabs. defaultName is a key unique
+        // to each tab.
+        LaunchedEffect(defaultName) {
+            isEqualizerChecked = equalizerConfiguration != null
+        }
         CheckboxWithLabel(
             text = stringResource(R.string.equalizer),
             isChecked = equalizerConfiguration != null || isEqualizerChecked,
