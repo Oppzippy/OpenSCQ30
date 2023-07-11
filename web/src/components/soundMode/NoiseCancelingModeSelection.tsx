@@ -4,10 +4,10 @@ import { ToggleButtonRow } from "./ToggleButtonRow";
 import { useTranslation } from "react-i18next";
 import React from "react";
 
-type Props = {
+interface Props {
   value: NoiseCancelingMode;
   onValueChanged: (newValue: NoiseCancelingMode) => void;
-};
+}
 
 export const NoiseCancelingModeSelection = React.memo(function (props: Props) {
   const { t } = useTranslation();

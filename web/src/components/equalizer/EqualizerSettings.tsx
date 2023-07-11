@@ -10,7 +10,7 @@ import { Equalizer } from "./Equalizer";
 import { PresetProfiles } from "./PresetProfiles";
 
 // TODO -1 is custom, make this more readable
-type Props = {
+interface Props {
   profile: PresetEqualizerProfile | -1;
   customProfiles: CustomEqualizerProfile[];
   onProfileSelected: (presetProfile: PresetEqualizerProfile | -1) => void;
@@ -18,7 +18,7 @@ type Props = {
   onValueChange: (index: number, newValue: number) => void;
   onAddCustomProfile: () => void;
   onDeleteCustomProfile: (profile: CustomEqualizerProfile) => void;
-};
+}
 
 const customProfilesSx: SxProps = {
   flexGrow: 1,

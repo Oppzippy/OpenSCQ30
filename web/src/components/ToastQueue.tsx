@@ -8,13 +8,13 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 
-export type Toast = {
+export interface Toast {
   message: string;
   action?: React.ReactNode;
-};
+}
 export const ToastQueueContext = createContext({
   toasts: [] as Toast[],
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
   addToast(_toast: Toast) {},
 });
 

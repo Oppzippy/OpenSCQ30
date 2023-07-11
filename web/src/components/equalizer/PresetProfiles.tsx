@@ -11,10 +11,10 @@ import { PresetEqualizerProfile } from "../../../wasm/pkg/openscq30_web_wasm";
 import { usePresetEqualizerProfiles } from "../../hooks/usePresetEqualizerProfiles";
 import { ProfileRow } from "./ProfileRow";
 
-type Props = {
+interface Props {
   profile: PresetEqualizerProfile | -1;
   onProfileSelected: (presetProfile: PresetEqualizerProfile | -1) => void;
-};
+}
 
 export const PresetProfiles = React.memo(function (props: Props) {
   const { t } = useTranslation();

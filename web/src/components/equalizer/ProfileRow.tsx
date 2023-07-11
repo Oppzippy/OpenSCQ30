@@ -2,10 +2,10 @@ import { Stack } from "@mui/material";
 import { EqualizerLine } from "./EqualizerLine";
 import React from "react";
 
-type Props = {
+interface Props {
   name: string;
-  volumeAdjustments: ReadonlyArray<number>;
-};
+  volumeAdjustments: readonly number[];
+}
 
 export const ProfileRow = React.memo(function ({
   name,

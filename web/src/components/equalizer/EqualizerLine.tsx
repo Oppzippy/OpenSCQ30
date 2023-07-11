@@ -2,9 +2,9 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { VolumeAdjustments } from "../../../wasm/pkg/openscq30_web_wasm";
 
-type Props = {
-  volumeAdjustments: ReadonlyArray<number>;
-};
+interface Props {
+  volumeAdjustments: readonly number[];
+}
 
 export const EqualizerLine = React.memo(function ({
   volumeAdjustments,

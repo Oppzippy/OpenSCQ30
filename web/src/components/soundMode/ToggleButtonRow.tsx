@@ -1,13 +1,13 @@
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 
-type Props<T> = {
+interface Props<T> {
   value: T;
   values: {
     value: T;
     displayText: string;
   }[];
   onValueChanged: (newValue: T) => void;
-};
+}
 
 export function ToggleButtonRow<T extends NonNullable<unknown>>(
   props: Props<T>,

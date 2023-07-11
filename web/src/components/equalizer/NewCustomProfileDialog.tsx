@@ -12,12 +12,12 @@ import { useTranslation } from "react-i18next";
 import { CustomEqualizerProfile } from "../../storage/db";
 import React from "react";
 
-type Props = {
+interface Props {
   isOpen: boolean;
   onClose: () => void;
   onCreate: (name: string) => void;
-  existingProfiles: ReadonlyArray<CustomEqualizerProfile>;
-};
+  existingProfiles: readonly CustomEqualizerProfile[];
+}
 
 export const NewCustomProfileDialog = React.memo(function (props: Props) {
   const { t } = useTranslation();

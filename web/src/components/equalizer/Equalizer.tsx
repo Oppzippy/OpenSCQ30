@@ -2,11 +2,11 @@ import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import React from "react";
 import { VolumeSlider } from "./VolumeSlider";
 
-type Props = {
+interface Props {
   disabled?: boolean;
   values: number[];
   onValueChange: (index: number, newValue: number) => void;
-};
+}
 
 export const Equalizer = React.memo(function (props: Props) {
   const { onValueChange } = props;

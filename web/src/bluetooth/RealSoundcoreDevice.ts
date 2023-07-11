@@ -37,7 +37,7 @@ export class RealSoundcoreDevice implements SoundcoreDevice {
 
   // TODO when incoming packets update the state, that triggers an outgoing packet to set
   // the state to what we just received. Incoming packets should not trigger outgoing packets.
-  private packetHandlers: Array<(bytes: Uint8Array) => boolean> = [
+  private packetHandlers: ((bytes: Uint8Array) => boolean)[] = [
     (bytes) => {
       const packet = AmbientSoundModeUpdatePacket.fromBytes(bytes);
       if (packet) {

@@ -1,10 +1,10 @@
 import { AppBar, Button, Toolbar, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
-type Props = {
+interface Props {
   deviceName: string;
   onDisconnectClick: () => void;
-};
+}
 
 export function ConnectedAppBar(props: Props) {
   const { t } = useTranslation();

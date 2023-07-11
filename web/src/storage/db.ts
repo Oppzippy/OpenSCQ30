@@ -1,10 +1,10 @@
 import Dexie, { Table } from "dexie";
 
-export type CustomEqualizerProfile = {
+export interface CustomEqualizerProfile {
   id?: number;
   name: string;
   values: number[];
-};
+}
 
 export class OpenSCQ30Dexie extends Dexie {
   public customEqualizerProfiles!: Table<CustomEqualizerProfile>;

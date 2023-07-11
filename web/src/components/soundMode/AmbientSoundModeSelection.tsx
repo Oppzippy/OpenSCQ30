@@ -4,10 +4,10 @@ import { ToggleButtonRow } from "./ToggleButtonRow";
 import { useTranslation } from "react-i18next";
 import React from "react";
 
-type Props = {
+interface Props {
   value: AmbientSoundMode;
   onValueChanged: (newValue: AmbientSoundMode) => void;
-};
+}
 
 export const AmbientSoundModeSelection = React.memo(function (props: Props) {
   const { t } = useTranslation();

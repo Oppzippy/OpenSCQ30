@@ -4,13 +4,13 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { VolumeAdjustments } from "../../../wasm/pkg/openscq30_web_wasm";
 
-type Props = {
+interface Props {
   hz: number;
   disabled?: boolean;
   value: number;
   onValueChange: (index: number, newValue: number) => void;
   index: number;
-};
+}
 
 export const VolumeSlider = React.memo(function (props: Props) {
   const { t } = useTranslation();

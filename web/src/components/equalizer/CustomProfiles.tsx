@@ -12,12 +12,12 @@ import { useTranslation } from "react-i18next";
 import { CustomEqualizerProfile } from "../../storage/db";
 import { ProfileRow } from "./ProfileRow";
 
-type Props = {
+interface Props {
   profiles: CustomEqualizerProfile[];
   selectedProfile: CustomEqualizerProfile | undefined;
   onProfileSelected: (profile: CustomEqualizerProfile) => void;
   sx?: SxProps<Theme>;
-};
+}
 
 export const CustomProfiles = React.memo(function ({
   sx,
