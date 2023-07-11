@@ -1,5 +1,6 @@
 package com.oppzippy.openscq30
 
+import android.content.Intent
 import android.os.Build
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -9,6 +10,7 @@ import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDeviceProvider
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
 import com.oppzippy.openscq30.features.soundcoredevice.demo.DemoSoundcoreDevice
+import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
 import com.oppzippy.openscq30.ui.OpenSCQ30Root
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -16,6 +18,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.junit4.MockKRule
 import kotlinx.coroutines.sync.Mutex
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -51,6 +54,11 @@ class OpenSCQ30RootTest {
     @Before
     fun setUp() {
         hiltRule.inject()
+    }
+
+    @After
+    fun tearDown() {
+        composeRule.activity.stopService(Intent(composeRule.activity, DeviceService::class.java))
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.oppzippy.openscq30
 
+import android.content.Intent
 import android.os.Build
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -19,6 +20,7 @@ import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
 import com.oppzippy.openscq30.features.soundcoredevice.demo.DemoSoundcoreDevice
+import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
 import com.oppzippy.openscq30.lib.AmbientSoundMode
 import com.oppzippy.openscq30.lib.PresetEqualizerProfile
 import com.oppzippy.openscq30.ui.OpenSCQ30Root
@@ -100,6 +102,7 @@ class NotificationTest {
     @After
     fun tearDown() {
         uiDevice.pressHome()
+        composeRule.activity.stopService(Intent(composeRule.activity, DeviceService::class.java))
     }
 
     @Test
