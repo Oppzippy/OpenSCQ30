@@ -33,6 +33,14 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.5.0" date="2023-07-11">
+            <description>
+                <p>Fixes</p>
+                <ul>
+                    <li>Go back to device selection screen immediately when device disconnects</li>
+                </ul> 
+            </description>
+        </release>
         <release version="1.4.0" date="2023-07-01">
             <description>
                 <p>Fixes</p>

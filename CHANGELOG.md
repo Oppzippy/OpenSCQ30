@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.5.0
+
+### GUI
+
+#### Fixes
+
+-   Go back to device selection screen immediately when device disconnects
+
+### Android
+
+#### Features
+
+-   Added "Quick Presets", which enable changing ambient sound mode, noise canceling mode, and equalizer profile all together with the press of a notification button.
+
 ## v1.4.0
 
 ### General
