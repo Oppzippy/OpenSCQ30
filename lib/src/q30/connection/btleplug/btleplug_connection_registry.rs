@@ -48,6 +48,7 @@ impl BtlePlugConnectionRegistry {
         let peripherals = stream::iter(adapters)
             .filter_map(|adapter| async move { Self::adapter_to_peripherals(adapter).await })
             .flatten()
+            .map(|adapter_and_peripheral| adapter_and_peripheral.1)
             .filter_map(
                 |peripheral| async move { Self::filter_connected_peripherals(peripheral).await },
             )
@@ -64,14 +65,19 @@ impl BtlePlugConnectionRegistry {
         let connections = stream::iter(adapters)
             .filter_map(|adapter| async move { Self::adapter_to_peripherals(adapter).await })
             .flatten()
-            .filter_map(|peripheral| async move {
-                if peripheral.address().to_string() == mac_address {
-                    Some(peripheral)
+            .filter_map(|adapter_and_peripheral| async move {
+                if adapter_and_peripheral.1.address().to_string() == mac_address {
+                    Some(adapter_and_peripheral)
                 } else {
                     None
                 }
             })
-            .filter_map(|peripheral| async move { Some(BtlePlugConnection::new(peripheral).await) })
+            .filter_map(|adapter_and_peripheral| async move {
+                Some(
+                    BtlePlugConnection::new(adapter_and_peripheral.0, adapter_and_peripheral.1)
+                        .await,
+                )
+            })
             .collect::<Vec<_>>()
             .await;
         connections
@@ -83,9 +89,11 @@ impl BtlePlugConnectionRegistry {
 
     async fn adapter_to_peripherals(
         adapter: Adapter,
-    ) -> Option<stream::Iter<vec::IntoIter<Peripheral>>> {
+    ) -> Option<impl stream::Stream<Item = (Adapter, Peripheral)>> {
         match adapter.peripherals().await {
-            Ok(peripherals) => Some(stream::iter(peripherals)),
+            Ok(peripherals) => {
+                Some(stream::iter(peripherals).map(move |x| (adapter.to_owned(), x)))
+            }
             Err(err) => {
                 tracing::warn!(
                     "failed to obtain peripherals for adapter {:?}: {err}",

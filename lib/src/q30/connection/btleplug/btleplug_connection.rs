@@ -1,14 +1,23 @@
 use async_trait::async_trait;
 use btleplug::{
     api::Characteristic,
-    api::{CharPropFlags, Peripheral as _, WriteType},
-    platform::Peripheral,
+    api::{Central, CentralEvent, CharPropFlags, Peripheral as _, WriteType},
+    platform::{Adapter, Peripheral},
 };
 use futures::StreamExt;
-use tokio::sync::mpsc::{self, error::TrySendError};
+use tokio::{
+    sync::{
+        mpsc::{self, error::TrySendError},
+        watch,
+    },
+    task::JoinHandle,
+};
 use tracing::{instrument, trace, trace_span, warn};
 
-use crate::{api::connection::Connection, device_utils};
+use crate::{
+    api::connection::{Connection, ConnectionStatus},
+    device_utils,
+};
 
 const WRITE_CHARACTERISTIC: Characteristic = Characteristic {
     uuid: device_utils::WRITE_CHARACTERISTIC_UUID,
@@ -25,10 +34,12 @@ const NOTIFY_CHARACTERISTIC: Characteristic = Characteristic {
 pub struct BtlePlugConnection {
     peripheral: Peripheral,
     characteristic: Characteristic,
+    connection_status_receiver: watch::Receiver<ConnectionStatus>,
+    connection_status_handle: JoinHandle<()>,
 }
 
 impl BtlePlugConnection {
-    pub async fn new(peripheral: Peripheral) -> crate::Result<Self> {
+    pub async fn new(adapter: Adapter, peripheral: Peripheral) -> crate::Result<Self> {
         peripheral.connect().await?;
         peripheral.discover_services().await?;
 
@@ -40,9 +51,40 @@ impl BtlePlugConnection {
                 source: Some(Box::new(err)),
             })?;
 
+        let (connection_status_sender, connection_status_receiver) =
+            watch::channel(ConnectionStatus::Connected);
+
+        let connection_status_handle = {
+            let mut events = adapter.events().await?;
+            let peripheral = peripheral.to_owned();
+            tokio::spawn(async move {
+                loop {
+                    if let Some(event) = events.next().await {
+                        match event {
+                            CentralEvent::DeviceConnected(peripheral_id) => {
+                                if peripheral_id == peripheral.id() {
+                                    connection_status_sender
+                                        .send_replace(ConnectionStatus::Connected);
+                                }
+                            }
+                            CentralEvent::DeviceDisconnected(peripheral_id) => {
+                                if peripheral_id == peripheral.id() {
+                                    connection_status_sender
+                                        .send_replace(ConnectionStatus::Disconnected);
+                                }
+                            }
+                            _ => (),
+                        }
+                    }
+                }
+            })
+        };
+
         let connection = BtlePlugConnection {
             peripheral,
             characteristic: WRITE_CHARACTERISTIC,
+            connection_status_receiver,
+            connection_status_handle,
         };
 
         Ok(connection)
@@ -64,6 +106,10 @@ impl Connection for BtlePlugConnection {
                 mac_address: self.peripheral.address().to_string(),
             }),
         }
+    }
+
+    fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
+        self.connection_status_receiver.clone()
     }
 
     async fn mac_address(&self) -> crate::Result<String> {
@@ -109,5 +155,11 @@ impl Connection for BtlePlugConnection {
         });
 
         Ok(receiver)
+    }
+}
+
+impl Drop for BtlePlugConnection {
+    fn drop(&mut self) {
+        self.connection_status_handle.abort();
     }
 }

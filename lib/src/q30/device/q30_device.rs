@@ -2,14 +2,14 @@ use std::{sync::Arc, time::Duration};
 
 use async_trait::async_trait;
 use tokio::{
-    sync::{broadcast, mpsc::Receiver, RwLock},
+    sync::{broadcast, mpsc::Receiver, watch, RwLock},
     task::JoinHandle,
     time::timeout,
 };
 use tracing::{trace, warn};
 
 use crate::{
-    api::connection::Connection,
+    api::connection::{Connection, ConnectionStatus},
     packets::{
         outbound::{SetAmbientSoundModePacket, SetEqualizerPacket},
         structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
@@ -130,6 +130,10 @@ where
 
     async fn name(&self) -> crate::Result<String> {
         self.connection.name().await
+    }
+
+    fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
+        self.connection.connection_status()
     }
 
     async fn set_ambient_sound_mode(

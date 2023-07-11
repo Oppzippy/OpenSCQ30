@@ -1,9 +1,9 @@
 use std::collections::VecDeque;
 
 use async_trait::async_trait;
-use tokio::sync::{mpsc, Mutex, RwLock};
+use tokio::sync::{mpsc, watch, Mutex, RwLock};
 
-use crate::api::connection::Connection;
+use crate::api::connection::{Connection, ConnectionStatus};
 
 #[derive(Debug)]
 pub struct StubConnection {
@@ -60,6 +60,11 @@ impl Connection for StubConnection {
 
     async fn mac_address(&self) -> crate::Result<String> {
         self.mac_address_return.write().await.take().unwrap()
+    }
+
+    fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
+        let (_sender, receiver) = watch::channel(ConnectionStatus::Connected);
+        receiver
     }
 
     async fn write_with_response(&self, _data: &[u8]) -> crate::Result<()> {

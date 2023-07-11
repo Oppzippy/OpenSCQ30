@@ -2,11 +2,14 @@ use std::{fmt::Debug, sync::Arc};
 
 use async_trait::async_trait;
 use openscq30_lib::{
-    api::device::Device,
+    api::{connection::ConnectionStatus, device::Device},
     packets::structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
     state::DeviceState,
 };
-use tokio::{runtime::Runtime, sync::broadcast};
+use tokio::{
+    runtime::Runtime,
+    sync::{broadcast, watch},
+};
 
 pub struct GtkDevice<InnerDeviceType: 'static>
 where
@@ -35,6 +38,10 @@ where
 {
     fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState> {
         self.soundcore_device.subscribe_to_state_updates()
+    }
+
+    fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
+        self.soundcore_device.connection_status()
     }
 
     async fn mac_address(&self) -> openscq30_lib::Result<String> {

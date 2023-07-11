@@ -4,16 +4,17 @@ use async_trait::async_trait;
 use gtk::glib::timeout_future;
 use mockall::mock;
 use openscq30_lib::{
-    api::device::Device,
+    api::{connection::ConnectionStatus, device::Device},
     packets::structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
     state::DeviceState,
 };
-use tokio::sync::broadcast;
+use tokio::sync::{broadcast, watch};
 
 mock! {
     #[derive(Debug)]
     pub Device {
         pub fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState>;
+        pub fn connection_status(&self) -> watch::Receiver<ConnectionStatus>;
         pub fn mac_address(&self) -> openscq30_lib::Result<String>;
         pub fn name(&self) -> openscq30_lib::Result<String>;
         pub fn set_ambient_sound_mode(
@@ -38,6 +39,9 @@ mock! {
 impl Device for MockDevice {
     fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState> {
         self.subscribe_to_state_updates()
+    }
+    fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
+        self.connection_status()
     }
     async fn mac_address(&self) -> openscq30_lib::Result<String> {
         timeout_future(Duration::from_millis(10)).await;

@@ -1,32 +1,34 @@
 use std::time::Duration;
 
 use async_trait::async_trait;
-use tokio::sync::{broadcast, Mutex};
+use tokio::sync::{broadcast, watch, Mutex};
 
 use crate::{
-    api::device::Device,
+    api::{connection::ConnectionStatus, device::Device},
     packets::structures::{
         AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode, PresetEqualizerProfile,
     },
     state::DeviceState,
 };
 
-#[derive(Debug)]
 pub struct DemoDevice {
     name: String,
     mac_address: String,
     state: Mutex<DeviceState>,
-    sender: broadcast::Sender<DeviceState>,
+    state_sender: broadcast::Sender<DeviceState>,
+    connection_status_sender: watch::Sender<ConnectionStatus>,
 }
 
 impl DemoDevice {
     pub async fn new(name: impl Into<String>, mac_address: impl Into<String>) -> Self {
         tokio::time::sleep(Duration::from_millis(500)).await; // it takes some time to connect
-        let (sender, _receiver) = broadcast::channel(50);
+        let (state_sender, _) = broadcast::channel(50);
+        let (connection_status_sender, _) = watch::channel(ConnectionStatus::Connected);
         Self {
             name: name.into(),
             mac_address: mac_address.into(),
-            sender,
+            state_sender,
+            connection_status_sender,
             state: Mutex::new(DeviceState::new(
                 AmbientSoundMode::Normal,
                 NoiseCancelingMode::Indoor,
@@ -41,7 +43,7 @@ impl DemoDevice {
 #[async_trait]
 impl Device for DemoDevice {
     fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState> {
-        self.sender.subscribe()
+        self.state_sender.subscribe()
     }
 
     async fn mac_address(&self) -> crate::Result<String> {
@@ -50,6 +52,10 @@ impl Device for DemoDevice {
 
     async fn name(&self) -> crate::Result<String> {
         Ok(self.name.to_owned())
+    }
+
+    fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
+        self.connection_status_sender.subscribe()
     }
 
     async fn set_ambient_sound_mode(
@@ -92,5 +98,16 @@ impl Device for DemoDevice {
 
     async fn equalizer_configuration(&self) -> EqualizerConfiguration {
         self.state.lock().await.equalizer_configuration()
+    }
+}
+
+impl core::fmt::Debug for DemoDevice {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("DemoDevice")
+            .field("name", &self.name)
+            .field("mac_address", &self.mac_address)
+            .field("state", &self.state)
+            .field("state_sender", &self.state_sender)
+            .finish()
     }
 }

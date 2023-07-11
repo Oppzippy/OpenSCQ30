@@ -2,7 +2,10 @@ use std::rc::Rc;
 
 use anyhow::anyhow;
 use gtk::glib::{clone, MainContext};
-use openscq30_lib::api::device::{Device, DeviceRegistry};
+use openscq30_lib::api::{
+    connection::ConnectionStatus,
+    device::{Device, DeviceRegistry},
+};
 use tokio::sync::oneshot;
 
 use crate::objects::DeviceObject;
@@ -45,6 +48,35 @@ where
                 let receiver = device.subscribe_to_state_updates();
                 state.state_update_receiver.replace_receiver(Some(receiver)).await;
 
+                let mut connection_status_receiver = device.connection_status();
+                let state_update_sender = state.state_update_sender.clone();
+                MainContext::default().spawn_local(async move {
+                    loop {
+                        match connection_status_receiver.changed().await {
+                            Ok(_) => {
+                                let connection_status = *connection_status_receiver.borrow();
+                                if connection_status == ConnectionStatus::Disconnected {
+                                    if let Err(err) = state_update_sender.send(StateUpdate::AddToast("Device Disconnected".to_string())) {
+                                        tracing::error!(
+                                            "error sending toast: {err:?}",
+                                        );
+                                    }
+                                    if let Err(err) = state_update_sender.send(StateUpdate::SetSelectedDevice(None)) {
+                                        tracing::error!(
+                                            "setting device state to disconnected after receiving ConnectionStatus::Disconnected: {err:?}",
+                                        );
+                                    }
+                                    break
+                                }
+                            },
+                            Err(err) => {
+                                tracing::debug!("connection status sender destroyed, exiting loop: {err:?}");
+                                break
+                            },
+                        };
+                    }
+                });
+
                 state.state_update_sender
                     .send(StateUpdate::SetAmbientSoundMode(device.ambient_sound_mode().await))
                     .map_err(|err| anyhow!("{err}"))?;
@@ -79,10 +111,13 @@ mod tests {
     use std::{collections::VecDeque, sync::Arc};
 
     use mockall::predicate;
-    use openscq30_lib::packets::structures::{
-        AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode, PresetEqualizerProfile,
+    use openscq30_lib::{
+        api::connection::ConnectionStatus,
+        packets::structures::{
+            AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode, PresetEqualizerProfile,
+        },
     };
-    use tokio::sync::broadcast;
+    use tokio::sync::{broadcast, watch};
 
     use crate::{
         actions::{State, StateUpdate},
@@ -95,6 +130,7 @@ mod tests {
     #[gtk::test]
     async fn it_works() {
         crate::load_resources();
+        let (_sender, receiver) = watch::channel(ConnectionStatus::Connected);
         let mut registry = MockDeviceRegistry::new();
         registry
             .expect_device()
@@ -108,6 +144,10 @@ mod tests {
                         let (_sender, receiver) = broadcast::channel(10);
                         receiver
                     });
+                device
+                    .expect_connection_status()
+                    .once()
+                    .return_const(receiver);
                 device
                     .expect_ambient_sound_mode()
                     .once()
@@ -149,5 +189,51 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[gtk::test]
+    async fn test_sets_device_to_none_when_disconnected_is_received() {
+        crate::load_resources();
+        let (sender, receiver) = watch::channel(ConnectionStatus::Connected);
+        let mut registry = MockDeviceRegistry::new();
+        registry
+            .expect_device()
+            .with(predicate::eq("00:00:00:00:00:00"))
+            .return_once(|_mac_address| {
+                let mut device = MockDevice::new();
+                device
+                    .expect_subscribe_to_state_updates()
+                    .once()
+                    .return_once(|| {
+                        let (_sender, receiver) = broadcast::channel(10);
+                        receiver
+                    });
+                device
+                    .expect_connection_status()
+                    .once()
+                    .return_const(receiver);
+                device
+                    .expect_ambient_sound_mode()
+                    .once()
+                    .return_const(AmbientSoundMode::Transparency);
+                device
+                    .expect_noise_canceling_mode()
+                    .once()
+                    .return_const(NoiseCancelingMode::Indoor);
+                device.expect_equalizer_configuration().once().return_const(
+                    EqualizerConfiguration::new_from_preset_profile(
+                        PresetEqualizerProfile::Acoustic,
+                    ),
+                );
+
+                Ok(Some(Arc::new(device)))
+            });
+
+        let (state, _receiver) = State::new(registry);
+
+        let new_selected_device =
+            DeviceObject::new(&"Name".to_string(), &"00:00:00:00:00:00".to_string());
+        set_device(&state, Some(new_selected_device)).await.unwrap();
+        sender.send_replace(ConnectionStatus::Disconnected);
     }
 }

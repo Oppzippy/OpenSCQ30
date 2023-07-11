@@ -1,7 +1,8 @@
 use async_trait::async_trait;
-use tokio::sync::broadcast;
+use tokio::sync::{broadcast, watch};
 
 use crate::{
+    api::connection::ConnectionStatus,
     packets::structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
     state::DeviceState,
 };
@@ -13,6 +14,8 @@ pub trait Device {
     async fn mac_address(&self) -> crate::Result<String>;
 
     async fn name(&self) -> crate::Result<String>;
+
+    fn connection_status(&self) -> watch::Receiver<ConnectionStatus>;
 
     async fn set_ambient_sound_mode(
         &self,
