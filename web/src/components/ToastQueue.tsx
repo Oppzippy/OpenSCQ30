@@ -14,7 +14,7 @@ export type Toast = {
 };
 export const ToastQueueContext = createContext({
   toasts: [] as Toast[],
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   addToast(_toast: Toast) {},
 });
 
