@@ -24,7 +24,7 @@ See [GitHub Releases](https://github.com/Oppzippy/OpenSCQ30/releases). All files
 
 ### Android
 
-[Android Demo.webm](https://user-images.githubusercontent.com/2236514/229958765-ef0c1322-ea00-4ce9-bdb1-71014e18d0a8.webm)
+[android-demo.webm](https://github.com/Oppzippy/OpenSCQ30/assets/2236514/2d351d63-64b8-4253-abdf-3bb5384888c1)
 
 ## EQ Recommendations
 
