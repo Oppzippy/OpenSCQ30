@@ -5,7 +5,13 @@ use macaddr::MacAddr6;
 use tokio::sync::Mutex;
 use weak_table::{weak_value_hash_map::Entry, WeakValueHashMap};
 
-use crate::api::{connection::ConnectionRegistry, device::DeviceRegistry};
+use crate::{
+    api::{
+        connection::{ConnectionDescriptor, ConnectionRegistry},
+        device::DeviceRegistry,
+    },
+    device_utils,
+};
 
 use super::{q30_device::Q30Device, Q30DeviceDescriptor};
 
@@ -54,6 +60,9 @@ where
         let inner_descriptors = self.conneciton_registry.connection_descriptors().await?;
         let descriptors = inner_descriptors
             .into_iter()
+            .filter(|descriptor| {
+                device_utils::is_mac_address_soundcore_device(descriptor.mac_address())
+            })
             .map(Q30DeviceDescriptor::new)
             .collect::<Vec<_>>();
         Ok(descriptors)
@@ -100,7 +109,8 @@ mod tests {
     async fn test_device_descriptors() {
         let descriptor = StubConnectionDescriptor::new(
             "Stub Device",
-            MacAddr6::new(0x00, 0x11, 0x22, 0x33, 0x44, 0x55),
+            // Must start with soundcore prefix
+            MacAddr6::new(0xAC, 0x12, 0x2F, 0x01, 0x02, 0x03),
         );
         let device = Arc::new(StubConnection::new());
         let devices = HashMap::from([(descriptor, device)]);
@@ -114,7 +124,10 @@ mod tests {
             .collect::<Vec<_>>();
 
         assert_eq!(
-            vec![("Stub Device", [0x00, 0x11, 0x22, 0x33, 0x44, 0x55].into())],
+            vec![(
+                "Stub Device",
+                MacAddr6::new(0xAC, 0x12, 0x2F, 0x01, 0x02, 0x03),
+            )],
             descriptor_values,
         );
     }
