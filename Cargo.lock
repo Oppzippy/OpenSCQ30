@@ -1422,6 +1422,7 @@ dependencies = [
  "gtk4",
  "heck",
  "libadwaita",
+ "macaddr",
  "mockall",
  "once_cell",
  "openscq30_lib",

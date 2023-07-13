@@ -5,7 +5,7 @@ pub fn list_devices(descriptors: &[impl DeviceDescriptor]) {
         "{}",
         descriptors
             .iter()
-            .map(|descriptor| descriptor.mac_address().to_owned())
+            .map(|descriptor| descriptor.mac_address().to_string())
             .collect::<Vec<_>>()
             .join("\n")
     );

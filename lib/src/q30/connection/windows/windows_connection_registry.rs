@@ -1,4 +1,4 @@
-use std::{collections::HashSet, str::FromStr, sync::Arc, time::Duration};
+use std::{collections::HashSet, sync::Arc, time::Duration};
 
 use async_trait::async_trait;
 use macaddr::MacAddr6;
@@ -92,7 +92,7 @@ impl ConnectionRegistry for WindowsConnectionRegistry {
 
                     Ok(WindowsConnectionDescriptor::new(
                         bluetooth_device.Name()?.to_string(),
-                        mac_address.to_string(),
+                        mac_address,
                     )) as crate::Result<WindowsConnectionDescriptor>
                 })
                 .filter_map(|result| match result {
@@ -114,15 +114,8 @@ impl ConnectionRegistry for WindowsConnectionRegistry {
     #[instrument(level = "trace", skip(self))]
     async fn connection(
         &self,
-        mac_address: &str,
+        mac_address: MacAddr6,
     ) -> crate::Result<Option<Arc<Self::ConnectionType>>> {
-        let mac_address =
-            MacAddr6::from_str(mac_address).map_err(|err| crate::Error::DeviceNotFound {
-                source: Box::new(err),
-            })?;
-
-        Ok(WindowsConnection::new(mac_address.as_windows_u64())
-            .await?
-            .map(Arc::new))
+        Ok(WindowsConnection::new(mac_address).await?.map(Arc::new))
     }
 }

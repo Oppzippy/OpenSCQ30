@@ -1,3 +1,5 @@
+use macaddr::MacAddr6;
+
 use crate::api::{connection::ConnectionDescriptor, device::DeviceDescriptor};
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
@@ -25,7 +27,7 @@ where
         self.inner.name()
     }
 
-    fn mac_address(&self) -> &str {
+    fn mac_address(&self) -> MacAddr6 {
         self.inner.mac_address()
     }
 }

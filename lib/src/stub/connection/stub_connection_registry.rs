@@ -4,6 +4,7 @@ use std::{
 };
 
 use async_trait::async_trait;
+use macaddr::MacAddr6;
 
 use crate::api::connection::{ConnectionDescriptor, ConnectionRegistry};
 
@@ -37,7 +38,7 @@ impl ConnectionRegistry for StubConnectionRegistry {
 
     async fn connection(
         &self,
-        mac_address: &str,
+        mac_address: MacAddr6,
     ) -> crate::Result<Option<Arc<Self::ConnectionType>>> {
         Ok(self
             .connections

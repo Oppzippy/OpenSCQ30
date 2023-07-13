@@ -5,6 +5,7 @@ use btleplug::{
     platform::{Adapter, Peripheral},
 };
 use futures::StreamExt;
+use macaddr::MacAddr6;
 use tokio::{
     sync::{
         mpsc::{self, error::TrySendError},
@@ -18,6 +19,8 @@ use crate::{
     api::connection::{Connection, ConnectionStatus},
     device_utils,
 };
+
+use super::mac_address::IntoMacAddr;
 
 const WRITE_CHARACTERISTIC: Characteristic = Characteristic {
     uuid: device_utils::WRITE_CHARACTERISTIC_UUID,
@@ -112,8 +115,8 @@ impl Connection for BtlePlugConnection {
         self.connection_status_receiver.clone()
     }
 
-    async fn mac_address(&self) -> crate::Result<String> {
-        Ok(self.peripheral.address().to_string())
+    async fn mac_address(&self) -> crate::Result<MacAddr6> {
+        Ok(self.peripheral.address().into_mac_addr())
     }
 
     #[instrument(level = "trace", skip(self))]

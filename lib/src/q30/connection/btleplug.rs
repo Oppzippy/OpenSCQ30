@@ -2,6 +2,7 @@ mod btleplug_connection;
 mod btleplug_connection_descriptor;
 mod btleplug_connection_registry;
 mod btleplug_error;
+pub mod mac_address;
 
 use btleplug::platform::Manager;
 pub use btleplug_connection::*;

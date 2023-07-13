@@ -35,20 +35,21 @@ pub struct WindowsConnection {
 
 impl WindowsConnection {
     #[instrument()]
-    pub async fn new(address: u64) -> crate::Result<Option<Self>> {
+    pub async fn new(mac_address: MacAddr6) -> crate::Result<Option<Self>> {
         tokio::task::spawn_blocking(move || {
-            let device = BluetoothLEDevice::FromBluetoothAddressAsync(address)?
-                .get()
-                .map_err(|err| {
-                    // If there is no error but the device is not found, an error with code 0 is returned
-                    if windows::core::HRESULT::is_ok(err.code()) {
-                        crate::Error::DeviceNotFound {
-                            source: Box::new(err),
+            let device =
+                BluetoothLEDevice::FromBluetoothAddressAsync(mac_address.as_windows_u64())?
+                    .get()
+                    .map_err(|err| {
+                        // If there is no error but the device is not found, an error with code 0 is returned
+                        if windows::core::HRESULT::is_ok(err.code()) {
+                            crate::Error::DeviceNotFound {
+                                source: Box::new(err),
+                            }
+                        } else {
+                            err.into()
                         }
-                    } else {
-                        err.into()
-                    }
-                })?;
+                    })?;
             let service = Self::service(&device, &device_utils::SERVICE_UUID)?;
             let read_characteristic =
                 Self::characteristic(&service, &device_utils::READ_CHARACTERISTIC_UUID)?;
@@ -160,9 +161,9 @@ impl Connection for WindowsConnection {
         Ok(self.device.Name()?.to_string())
     }
 
-    async fn mac_address(&self) -> crate::Result<String> {
-        let mac_address = MacAddr6::from_windows_u64(self.device.BluetoothAddress()?);
-        Ok(mac_address.to_string())
+    async fn mac_address(&self) -> crate::Result<MacAddr6> {
+        let windows_u64_mac_address = self.device.BluetoothAddress()?;
+        Ok(MacAddr6::from_windows_u64(windows_u64_mac_address))
     }
 
     #[instrument(level = "trace", skip(self))]

@@ -21,7 +21,7 @@ where
         let model_devices = descriptors
             .iter()
             .map(|descriptor| Device {
-                mac_address: descriptor.mac_address().to_owned(),
+                mac_address: descriptor.mac_address().to_string(),
                 name: descriptor.name().to_owned(),
             })
             .collect::<Vec<_>>();
@@ -47,6 +47,7 @@ mod tests {
         mock::{MockDescriptor, MockDeviceRegistry},
     };
     use gtk::glib::{self, clone, MainContext};
+    use macaddr::MacAddr6;
     use std::time::Duration;
 
     #[gtk::test]
@@ -58,7 +59,7 @@ mod tests {
             descriptor.expect_name().return_const("Name".to_string());
             descriptor
                 .expect_mac_address()
-                .return_const("MAC Address".to_string());
+                .return_const(MacAddr6::nil());
             Ok(vec![descriptor])
         });
 
@@ -81,7 +82,7 @@ mod tests {
             descriptor.expect_name().return_const("Name".to_string());
             descriptor
                 .expect_mac_address()
-                .return_const("MAC Address".to_string());
+                .return_const(MacAddr6::nil());
             Ok(vec![descriptor])
         });
 

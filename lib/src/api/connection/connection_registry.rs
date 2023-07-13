@@ -1,6 +1,7 @@
 use std::{collections::HashSet, fmt::Debug, sync::Arc};
 
 use async_trait::async_trait;
+use macaddr::MacAddr6;
 
 use super::{connection::Connection, ConnectionDescriptor};
 
@@ -13,6 +14,6 @@ pub trait ConnectionRegistry {
 
     async fn connection(
         &self,
-        mac_address: &str,
+        mac_address: MacAddr6,
     ) -> crate::Result<Option<Arc<Self::ConnectionType>>>;
 }

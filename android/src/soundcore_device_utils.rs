@@ -11,7 +11,7 @@ impl SoundcoreDeviceUtils {
     pub fn is_mac_address_soundcore_device(mac_address: &str) -> bool {
         match MacAddr::from_str(mac_address) {
             Ok(MacAddr::V6(parsed_address)) => {
-                device_utils::is_mac_address_soundcore_device(parsed_address.into_array())
+                device_utils::is_mac_address_soundcore_device(parsed_address)
             }
             _ => false,
         }

@@ -1,6 +1,7 @@
 use std::{fmt::Debug, sync::Arc};
 
 use async_trait::async_trait;
+use macaddr::MacAddr6;
 use openscq30_lib::{
     api::{connection::ConnectionStatus, device::Device},
     packets::structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
@@ -44,7 +45,7 @@ where
         self.soundcore_device.connection_status()
     }
 
-    async fn mac_address(&self) -> openscq30_lib::Result<String> {
+    async fn mac_address(&self) -> openscq30_lib::Result<MacAddr6> {
         let soundcore_device = self.soundcore_device.to_owned();
         self.tokio_runtime
             .spawn(async move { soundcore_device.mac_address().await })

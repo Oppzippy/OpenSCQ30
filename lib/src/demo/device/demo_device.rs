@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use async_trait::async_trait;
+use macaddr::MacAddr6;
 use tokio::sync::{broadcast, watch, Mutex};
 
 use crate::{
@@ -13,20 +14,20 @@ use crate::{
 
 pub struct DemoDevice {
     name: String,
-    mac_address: String,
+    mac_address: MacAddr6,
     state: Mutex<DeviceState>,
     state_sender: broadcast::Sender<DeviceState>,
     connection_status_sender: watch::Sender<ConnectionStatus>,
 }
 
 impl DemoDevice {
-    pub async fn new(name: impl Into<String>, mac_address: impl Into<String>) -> Self {
+    pub async fn new(name: impl Into<String>, mac_address: MacAddr6) -> Self {
         tokio::time::sleep(Duration::from_millis(500)).await; // it takes some time to connect
         let (state_sender, _) = broadcast::channel(50);
         let (connection_status_sender, _) = watch::channel(ConnectionStatus::Connected);
         Self {
             name: name.into(),
-            mac_address: mac_address.into(),
+            mac_address,
             state_sender,
             connection_status_sender,
             state: Mutex::new(DeviceState::new(
@@ -46,7 +47,7 @@ impl Device for DemoDevice {
         self.state_sender.subscribe()
     }
 
-    async fn mac_address(&self) -> crate::Result<String> {
+    async fn mac_address(&self) -> crate::Result<MacAddr6> {
         Ok(self.mac_address.to_owned())
     }
 

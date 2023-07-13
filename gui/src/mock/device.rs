@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use async_trait::async_trait;
 use gtk::glib::timeout_future;
+use macaddr::MacAddr6;
 use mockall::mock;
 use openscq30_lib::{
     api::{connection::ConnectionStatus, device::Device},
@@ -15,7 +16,7 @@ mock! {
     pub Device {
         pub fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState>;
         pub fn connection_status(&self) -> watch::Receiver<ConnectionStatus>;
-        pub fn mac_address(&self) -> openscq30_lib::Result<String>;
+        pub fn mac_address(&self) -> openscq30_lib::Result<MacAddr6>;
         pub fn name(&self) -> openscq30_lib::Result<String>;
         pub fn set_ambient_sound_mode(
             &self,
@@ -43,7 +44,7 @@ impl Device for MockDevice {
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
         self.connection_status()
     }
-    async fn mac_address(&self) -> openscq30_lib::Result<String> {
+    async fn mac_address(&self) -> openscq30_lib::Result<MacAddr6> {
         timeout_future(Duration::from_millis(10)).await;
         self.mac_address()
     }

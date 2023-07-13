@@ -1,3 +1,4 @@
+use macaddr::MacAddr6;
 use uuid::Uuid;
 
 pub const SERVICE_UUID: Uuid = uuid::uuid!("011cf5da-0000-1000-8000-00805f9b34fb");
@@ -11,10 +12,10 @@ pub fn soundcore_mac_address_prefixes() -> &'static [[u8; 3]] {
     &MAC_ADDRESS_PREFIXES
 }
 
-pub fn is_mac_address_soundcore_device(mac_address: [u8; 6]) -> bool {
+pub fn is_mac_address_soundcore_device(mac_address: MacAddr6) -> bool {
     soundcore_mac_address_prefixes()
         .iter()
-        .any(|range| mac_address.starts_with(range))
+        .any(|range| mac_address.as_bytes().starts_with(range))
 }
 
 #[cfg(test)]
@@ -23,13 +24,13 @@ mod tests {
 
     #[test]
     fn test_soundcore_device_mac_address() {
-        let mac_address = [0xAC, 0x12, 0x2F, 0x00, 0x00, 0x00];
+        let mac_address = [0xAC, 0x12, 0x2F, 0x00, 0x00, 0x00].into();
         assert_eq!(true, is_mac_address_soundcore_device(mac_address));
     }
 
     #[test]
     fn test_not_soundcore_device_mac_address() {
-        let mac_address = [0xAC, 0x00, 0x00, 0x00, 0x00, 0x00];
+        let mac_address = [0xAC, 0x00, 0x00, 0x00, 0x00, 0x00].into();
         assert_eq!(false, is_mac_address_soundcore_device(mac_address));
     }
 }

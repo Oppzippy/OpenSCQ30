@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use async_trait::async_trait;
+use macaddr::MacAddr6;
 use tokio::sync::{mpsc, watch, Mutex, RwLock};
 
 use crate::api::connection::{Connection, ConnectionStatus};
@@ -8,7 +9,7 @@ use crate::api::connection::{Connection, ConnectionStatus};
 #[derive(Debug)]
 pub struct StubConnection {
     name_return: RwLock<Option<crate::Result<String>>>,
-    mac_address_return: RwLock<Option<crate::Result<String>>>,
+    mac_address_return: RwLock<Option<crate::Result<MacAddr6>>>,
     write_return_queue: Mutex<VecDeque<crate::Result<()>>>,
     inbound_packets_channel: Mutex<Option<crate::Result<mpsc::Receiver<Vec<u8>>>>>,
 }
@@ -28,7 +29,7 @@ impl StubConnection {
         *lock = Some(name_return);
     }
 
-    pub async fn set_mac_address_return(&self, mac_address_return: crate::Result<String>) {
+    pub async fn set_mac_address_return(&self, mac_address_return: crate::Result<MacAddr6>) {
         let mut lock = self.mac_address_return.write().await;
         *lock = Some(mac_address_return);
     }
@@ -58,7 +59,7 @@ impl Connection for StubConnection {
         self.name_return.write().await.take().unwrap()
     }
 
-    async fn mac_address(&self) -> crate::Result<String> {
+    async fn mac_address(&self) -> crate::Result<MacAddr6> {
         self.mac_address_return.write().await.take().unwrap()
     }
 

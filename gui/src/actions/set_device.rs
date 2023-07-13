@@ -1,7 +1,8 @@
-use std::rc::Rc;
+use std::{rc::Rc, str::FromStr};
 
 use anyhow::anyhow;
 use gtk::glib::{clone, MainContext};
+use macaddr::MacAddr6;
 use openscq30_lib::api::{
     connection::ConnectionStatus,
     device::{Device, DeviceRegistry},
@@ -35,8 +36,8 @@ where
         let (sender, receiver) = oneshot::channel();
         let handle = main_context.spawn_local(clone!(@strong state => async move {
             let result: anyhow::Result<()> = (async {
-                let mac_address = new_selected_device.mac_address();
-                let device = state.registry.device(&mac_address).await?.ok_or_else(|| {
+                let mac_address = MacAddr6::from_str(&new_selected_device.mac_address())?;
+                let device = state.registry.device(mac_address).await?.ok_or_else(|| {
                     state.state_update_sender
                         .send(StateUpdate::SetSelectedDevice(None))
                         .map_err(|err| anyhow!("{err}")) // StateUpdate isn't send
@@ -110,6 +111,7 @@ where
 mod tests {
     use std::{collections::VecDeque, sync::Arc};
 
+    use macaddr::MacAddr6;
     use mockall::predicate;
     use openscq30_lib::{
         api::connection::ConnectionStatus,
@@ -134,7 +136,7 @@ mod tests {
         let mut registry = MockDeviceRegistry::new();
         registry
             .expect_device()
-            .with(predicate::eq("00:00:00:00:00:00"))
+            .with(predicate::eq(MacAddr6::nil()))
             .return_once(|_mac_address| {
                 let mut device = MockDevice::new();
                 device
@@ -198,7 +200,7 @@ mod tests {
         let mut registry = MockDeviceRegistry::new();
         registry
             .expect_device()
-            .with(predicate::eq("00:00:00:00:00:00"))
+            .with(predicate::eq(MacAddr6::nil()))
             .return_once(|_mac_address| {
                 let mut device = MockDevice::new();
                 device

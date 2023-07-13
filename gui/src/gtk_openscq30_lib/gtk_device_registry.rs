@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use macaddr::MacAddr6;
 use openscq30_lib::api::device::DeviceRegistry;
 use tokio::runtime::Runtime;
 
@@ -24,13 +25,13 @@ where
 
     async fn device(
         &self,
-        mac_address: &str,
+        mac_address: MacAddr6,
     ) -> openscq30_lib::Result<Option<Arc<Self::DeviceType>>> {
         let mac_address = mac_address.to_owned();
         let device_registry = self.soundcore_device_registry.to_owned();
         let maybe_device = self
             .tokio_runtime
-            .spawn(async move { device_registry.device(&mac_address).await })
+            .spawn(async move { device_registry.device(mac_address).await })
             .await
             .unwrap();
         match maybe_device {

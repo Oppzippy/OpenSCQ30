@@ -1,6 +1,7 @@
 use std::{sync::Arc, time::Duration};
 
 use async_trait::async_trait;
+use macaddr::MacAddr6;
 use tokio::{
     sync::{broadcast, mpsc::Receiver, watch, RwLock},
     task::JoinHandle,
@@ -124,7 +125,7 @@ where
         self.state_update_sender.subscribe()
     }
 
-    async fn mac_address(&self) -> crate::Result<String> {
+    async fn mac_address(&self) -> crate::Result<MacAddr6> {
         self.connection.mac_address().await
     }
 
@@ -230,6 +231,7 @@ where
 mod tests {
     use std::{sync::Arc, time::Duration};
 
+    use macaddr::MacAddr6;
     use tokio::sync::mpsc;
 
     use super::Q30Device;
@@ -256,9 +258,7 @@ mod tests {
         connection
             .set_name_return(Ok("Soundcore Q30".to_string()))
             .await;
-        connection
-            .set_mac_address_return(Ok("00:00:00:00:00:00".to_string()))
-            .await;
+        connection.set_mac_address_return(Ok(MacAddr6::nil())).await;
 
         let (sender, receiver) = mpsc::channel(100);
         connection.set_inbound_packets_channel(Ok(receiver)).await;

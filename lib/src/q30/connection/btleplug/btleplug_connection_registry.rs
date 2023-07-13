@@ -4,9 +4,10 @@ use std::time::Duration;
 use std::vec;
 
 use async_trait::async_trait;
-use btleplug::api::{Central, Manager as _, Peripheral as _, ScanFilter};
+use btleplug::api::{BDAddr, Central, Manager as _, Peripheral as _, ScanFilter};
 use btleplug::platform::{Adapter, Manager, Peripheral};
 use futures::{stream, StreamExt};
+use macaddr::MacAddr6;
 use tokio::sync::Mutex;
 use weak_table::weak_value_hash_map::Entry;
 use weak_table::WeakValueHashMap;
@@ -14,11 +15,12 @@ use weak_table::WeakValueHashMap;
 use crate::api::connection::ConnectionRegistry;
 
 use super::btleplug_connection::BtlePlugConnection;
+use super::mac_address::{IntoBDAddr, IntoMacAddr};
 use super::BtlePlugConnectionDescriptor;
 
 pub struct BtlePlugConnectionRegistry {
     manager: Manager,
-    connections: Mutex<WeakValueHashMap<String, Weak<BtlePlugConnection>>>,
+    connections: Mutex<WeakValueHashMap<MacAddr6, Weak<BtlePlugConnection>>>,
 }
 
 impl BtlePlugConnectionRegistry {
@@ -60,13 +62,16 @@ impl BtlePlugConnectionRegistry {
         Ok(peripherals)
     }
 
-    async fn new_connection(&self, mac_address: &str) -> crate::Result<Option<BtlePlugConnection>> {
+    async fn new_connection(
+        &self,
+        mac_address: BDAddr,
+    ) -> crate::Result<Option<BtlePlugConnection>> {
         let adapters = self.manager.adapters().await?;
         let connections = stream::iter(adapters)
             .filter_map(|adapter| async move { Self::adapter_to_peripherals(adapter).await })
             .flatten()
             .filter_map(|adapter_and_peripheral| async move {
-                if adapter_and_peripheral.1.address().to_string() == mac_address {
+                if adapter_and_peripheral.1.address() == mac_address {
                     Some(adapter_and_peripheral)
                 } else {
                     None
@@ -129,7 +134,7 @@ impl BtlePlugConnectionRegistry {
         match peripheral.properties().await {
             Ok(Some(properties)) => Some(BtlePlugConnectionDescriptor::new(
                 properties.local_name.unwrap_or_default(),
-                properties.address.to_string(),
+                properties.address.into_mac_addr(),
             )),
             Ok(None) => None,
             Err(err) => {
@@ -154,12 +159,12 @@ impl ConnectionRegistry for BtlePlugConnectionRegistry {
 
     async fn connection(
         &self,
-        mac_address: &str,
+        mac_address: MacAddr6,
     ) -> crate::Result<Option<Arc<Self::ConnectionType>>> {
         match self.connections.lock().await.entry(mac_address.to_owned()) {
             Entry::Occupied(entry) => Ok(Some(entry.get().to_owned())),
             Entry::Vacant(entry) => {
-                if let Some(connection) = self.new_connection(mac_address).await? {
+                if let Some(connection) = self.new_connection(mac_address.into_bd_addr()).await? {
                     let connection = Arc::new(connection);
                     entry.insert(connection.to_owned());
                     Ok(Some(connection))

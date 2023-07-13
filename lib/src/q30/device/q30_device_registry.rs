@@ -1,6 +1,7 @@
 use std::sync::{Arc, Weak};
 
 use async_trait::async_trait;
+use macaddr::MacAddr6;
 use tokio::sync::Mutex;
 use weak_table::{weak_value_hash_map::Entry, WeakValueHashMap};
 
@@ -13,7 +14,7 @@ where
     RegistryType: ConnectionRegistry + Send + Sync,
 {
     conneciton_registry: RegistryType,
-    devices: Mutex<WeakValueHashMap<String, Weak<Q30Device<RegistryType::ConnectionType>>>>,
+    devices: Mutex<WeakValueHashMap<MacAddr6, Weak<Q30Device<RegistryType::ConnectionType>>>>,
 }
 
 impl<RegistryType> Q30DeviceRegistry<RegistryType>
@@ -29,7 +30,7 @@ where
 
     async fn new_device(
         &self,
-        mac_address: &str,
+        mac_address: MacAddr6,
     ) -> crate::Result<Option<Q30Device<RegistryType::ConnectionType>>> {
         let connection = self.conneciton_registry.connection(mac_address).await?;
 
@@ -58,7 +59,7 @@ where
         Ok(descriptors)
     }
 
-    async fn device(&self, mac_address: &str) -> crate::Result<Option<Arc<Self::DeviceType>>> {
+    async fn device(&self, mac_address: MacAddr6) -> crate::Result<Option<Arc<Self::DeviceType>>> {
         match self.devices.lock().await.entry(mac_address.to_owned()) {
             Entry::Occupied(entry) => {
                 tracing::debug!("{mac_address} is cached");
@@ -82,6 +83,7 @@ where
 mod tests {
     use std::{collections::HashMap, sync::Arc};
 
+    use macaddr::MacAddr6;
     use tokio::sync::mpsc;
 
     use crate::{
@@ -96,7 +98,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_device_descriptors() {
-        let descriptor = StubConnectionDescriptor::new("Stub Device", "00:11:22:33:44:55");
+        let descriptor = StubConnectionDescriptor::new(
+            "Stub Device",
+            MacAddr6::new(0x00, 0x11, 0x22, 0x33, 0x44, 0x55),
+        );
         let device = Arc::new(StubConnection::new());
         let devices = HashMap::from([(descriptor, device)]);
         let connection_registry = StubConnectionRegistry::new(devices.to_owned());
@@ -105,23 +110,21 @@ mod tests {
         let descriptors = device_registry.device_descriptors().await.unwrap();
         let descriptor_values = descriptors
             .iter()
-            .map(|descriptor| {
-                (
-                    descriptor.name().as_ref(),
-                    descriptor.mac_address().as_ref(),
-                )
-            })
+            .map(|descriptor| (descriptor.name(), descriptor.mac_address()))
             .collect::<Vec<_>>();
 
         assert_eq!(
-            vec![("Stub Device", "00:11:22:33:44:55")],
+            vec![("Stub Device", [0x00, 0x11, 0x22, 0x33, 0x44, 0x55].into())],
             descriptor_values,
         );
     }
 
     #[tokio::test]
     async fn test_get_device() {
-        let descriptor = StubConnectionDescriptor::new("Stub Device", "00:11:22:33:44:55");
+        let descriptor = StubConnectionDescriptor::new(
+            "Stub Device",
+            MacAddr6::new(0x00, 0x11, 0x22, 0x33, 0x44, 0x55),
+        );
         let device = Arc::new(StubConnection::new());
         let (sender, receiver) = mpsc::channel(1);
         sender
@@ -136,7 +139,7 @@ mod tests {
             .unwrap();
         device.set_inbound_packets_channel(Ok(receiver)).await;
         device
-            .set_mac_address_return(Ok(descriptor.mac_address().to_owned()))
+            .set_mac_address_return(Ok(descriptor.mac_address()))
             .await;
         device
             .set_name_return(Ok(descriptor.name().to_owned()))
@@ -150,17 +153,23 @@ mod tests {
         let device_registry = Q30DeviceRegistry::new(connection_registry).await.unwrap();
 
         let device = device_registry
-            .device("00:11:22:33:44:55")
+            .device(MacAddr6::new(0x00, 0x11, 0x22, 0x33, 0x44, 0x55))
             .await
             .expect("must not fail to create device")
             .expect("device must exist");
 
-        assert_eq!("00:11:22:33:44:55", device.mac_address().await.unwrap());
+        assert_eq!(
+            MacAddr6::new(0x00, 0x11, 0x22, 0x33, 0x44, 0x55),
+            device.mac_address().await.unwrap()
+        );
     }
 
     #[tokio::test]
     async fn test_get_device_but_it_doesnt_exist() {
-        let descriptor = StubConnectionDescriptor::new("Stub Device", "00:11:22:33:44:55");
+        let descriptor = StubConnectionDescriptor::new(
+            "Stub Device",
+            MacAddr6::new(0x00, 0x11, 0x22, 0x33, 0x44, 0x55),
+        );
         let device = Arc::new(StubConnection::new());
 
         let devices = HashMap::from([(descriptor, device)]);
@@ -168,7 +177,7 @@ mod tests {
         let device_registry = Q30DeviceRegistry::new(connection_registry).await.unwrap();
 
         let maybe_device = device_registry
-            .device("00:00:22:33:44:55")
+            .device(MacAddr6::new(0x00, 0x00, 0x22, 0x33, 0x44, 0x55))
             .await
             .expect("must not fail to create device");
 
