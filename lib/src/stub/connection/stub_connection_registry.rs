@@ -6,20 +6,22 @@ use std::{
 use async_trait::async_trait;
 use macaddr::MacAddr6;
 
-use crate::api::connection::{ConnectionDescriptor, ConnectionRegistry};
+use crate::api::connection::{
+    ConnectionDescriptor, ConnectionRegistry, GenericConnectionDescriptor,
+};
 
-use super::{StubConnection, StubConnectionDescriptor};
+use super::StubConnection;
 
 #[derive(Debug)]
 pub struct StubConnectionRegistry {
     connections:
-        HashMap<StubConnectionDescriptor, Arc<<Self as ConnectionRegistry>::ConnectionType>>,
+        HashMap<GenericConnectionDescriptor, Arc<<Self as ConnectionRegistry>::ConnectionType>>,
 }
 
 impl StubConnectionRegistry {
     pub fn new(
         connections: HashMap<
-            StubConnectionDescriptor,
+            GenericConnectionDescriptor,
             Arc<<Self as ConnectionRegistry>::ConnectionType>,
         >,
     ) -> Self {
@@ -30,7 +32,7 @@ impl StubConnectionRegistry {
 #[async_trait]
 impl ConnectionRegistry for StubConnectionRegistry {
     type ConnectionType = StubConnection;
-    type DescriptorType = StubConnectionDescriptor;
+    type DescriptorType = GenericConnectionDescriptor;
 
     async fn connection_descriptors(&self) -> crate::Result<HashSet<Self::DescriptorType>> {
         Ok(self.connections.keys().cloned().collect())

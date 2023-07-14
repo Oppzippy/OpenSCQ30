@@ -44,10 +44,11 @@ mod tests {
     use super::refresh_devices;
     use crate::{
         actions::{State, StateUpdate},
-        mock::{MockDescriptor, MockDeviceRegistry},
+        mock::MockDeviceRegistry,
     };
     use gtk::glib::{self, clone, MainContext};
     use macaddr::MacAddr6;
+    use openscq30_lib::api::device::GenericDeviceDescriptor;
     use std::time::Duration;
 
     #[gtk::test]
@@ -55,11 +56,7 @@ mod tests {
         crate::load_resources();
         let mut registry = MockDeviceRegistry::new();
         registry.expect_device_descriptors().return_once(|| {
-            let mut descriptor = MockDescriptor::new();
-            descriptor.expect_name().return_const("Name".to_string());
-            descriptor
-                .expect_mac_address()
-                .return_const(MacAddr6::nil());
+            let descriptor = GenericDeviceDescriptor::new("Test Device", MacAddr6::nil());
             Ok(vec![descriptor])
         });
 
@@ -78,11 +75,7 @@ mod tests {
         crate::load_resources();
         let mut registry = MockDeviceRegistry::new();
         registry.expect_device_descriptors().times(2).returning(|| {
-            let mut descriptor = MockDescriptor::new();
-            descriptor.expect_name().return_const("Name".to_string());
-            descriptor
-                .expect_mac_address()
-                .return_const(MacAddr6::nil());
+            let descriptor = GenericDeviceDescriptor::new("Test Device", MacAddr6::nil());
             Ok(vec![descriptor])
         });
 

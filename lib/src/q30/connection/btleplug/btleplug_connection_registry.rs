@@ -12,11 +12,10 @@ use tokio::sync::Mutex;
 use weak_table::weak_value_hash_map::Entry;
 use weak_table::WeakValueHashMap;
 
-use crate::api::connection::ConnectionRegistry;
+use crate::api::connection::{ConnectionRegistry, GenericConnectionDescriptor};
 
 use super::btleplug_connection::BtlePlugConnection;
 use super::mac_address::{IntoBDAddr, IntoMacAddr};
-use super::BtlePlugConnectionDescriptor;
 
 pub struct BtlePlugConnectionRegistry {
     manager: Manager,
@@ -32,7 +31,7 @@ impl BtlePlugConnectionRegistry {
     }
 
     #[tracing::instrument(skip(self))]
-    async fn all_connected(&self) -> crate::Result<HashSet<BtlePlugConnectionDescriptor>> {
+    async fn all_connected(&self) -> crate::Result<HashSet<GenericConnectionDescriptor>> {
         let adapters = self.manager.adapters().await?;
         for adapter in adapters.iter() {
             tracing::debug!("starting scan");
@@ -130,9 +129,9 @@ impl BtlePlugConnectionRegistry {
 
     async fn peripheral_to_descriptor(
         peripheral: Peripheral,
-    ) -> Option<BtlePlugConnectionDescriptor> {
+    ) -> Option<GenericConnectionDescriptor> {
         match peripheral.properties().await {
-            Ok(Some(properties)) => Some(BtlePlugConnectionDescriptor::new(
+            Ok(Some(properties)) => Some(GenericConnectionDescriptor::new(
                 properties.local_name.unwrap_or_default(),
                 properties.address.into_mac_addr(),
             )),
@@ -151,7 +150,7 @@ impl BtlePlugConnectionRegistry {
 #[async_trait]
 impl ConnectionRegistry for BtlePlugConnectionRegistry {
     type ConnectionType = BtlePlugConnection;
-    type DescriptorType = BtlePlugConnectionDescriptor;
+    type DescriptorType = GenericConnectionDescriptor;
 
     async fn connection_descriptors(&self) -> crate::Result<HashSet<Self::DescriptorType>> {
         self.all_connected().await

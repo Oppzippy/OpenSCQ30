@@ -12,9 +12,9 @@ use windows::{
     Foundation::{Collections::IVectorView, TypedEventHandler},
 };
 
-use crate::api::connection::ConnectionRegistry;
+use crate::api::connection::{ConnectionRegistry, GenericConnectionDescriptor};
 
-use super::{WindowsConnection, WindowsConnectionDescriptor, WindowsMacAddress};
+use super::{WindowsConnection, WindowsMacAddress};
 
 pub struct WindowsConnectionRegistry {}
 
@@ -69,7 +69,7 @@ impl WindowsConnectionRegistry {
 #[async_trait]
 impl ConnectionRegistry for WindowsConnectionRegistry {
     type ConnectionType = WindowsConnection;
-    type DescriptorType = WindowsConnectionDescriptor;
+    type DescriptorType = GenericConnectionDescriptor;
 
     #[instrument(level = "trace", skip(self))]
     async fn connection_descriptors(&self) -> crate::Result<HashSet<Self::DescriptorType>> {
@@ -90,10 +90,10 @@ impl ConnectionRegistry for WindowsConnectionRegistry {
                     let mac_address =
                         MacAddr6::from_windows_u64(bluetooth_device.BluetoothAddress()?);
 
-                    Ok(WindowsConnectionDescriptor::new(
+                    Ok(GenericConnectionDescriptor::new(
                         bluetooth_device.Name()?.to_string(),
                         mac_address,
-                    )) as crate::Result<WindowsConnectionDescriptor>
+                    )) as crate::Result<GenericConnectionDescriptor>
                 })
                 .filter_map(|result| match result {
                     Ok(descriptor) => Some(descriptor),

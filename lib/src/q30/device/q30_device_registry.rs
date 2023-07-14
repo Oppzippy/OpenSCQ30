@@ -8,12 +8,12 @@ use weak_table::{weak_value_hash_map::Entry, WeakValueHashMap};
 use crate::{
     api::{
         connection::{ConnectionDescriptor, ConnectionRegistry},
-        device::DeviceRegistry,
+        device::{DeviceRegistry, GenericDeviceDescriptor},
     },
     device_utils,
 };
 
-use super::{q30_device::Q30Device, Q30DeviceDescriptor};
+use super::q30_device::Q30Device;
 
 pub struct Q30DeviceRegistry<RegistryType>
 where
@@ -54,7 +54,7 @@ where
     RegistryType: ConnectionRegistry + Send + Sync,
 {
     type DeviceType = Q30Device<RegistryType::ConnectionType>;
-    type DescriptorType = Q30DeviceDescriptor<RegistryType::DescriptorType>;
+    type DescriptorType = GenericDeviceDescriptor;
 
     async fn device_descriptors(&self) -> crate::Result<Vec<Self::DescriptorType>> {
         let inner_descriptors = self.conneciton_registry.connection_descriptors().await?;
@@ -63,7 +63,7 @@ where
             .filter(|descriptor| {
                 device_utils::is_mac_address_soundcore_device(descriptor.mac_address())
             })
-            .map(Q30DeviceDescriptor::new)
+            .map(|descriptor| GenericDeviceDescriptor::from(descriptor))
             .collect::<Vec<_>>();
         Ok(descriptors)
     }
@@ -97,17 +97,17 @@ mod tests {
 
     use crate::{
         api::{
-            connection::ConnectionDescriptor,
+            connection::{ConnectionDescriptor, GenericConnectionDescriptor},
             device::{Device, DeviceDescriptor, DeviceRegistry},
         },
-        stub::connection::{StubConnection, StubConnectionDescriptor, StubConnectionRegistry},
+        stub::connection::{StubConnection, StubConnectionRegistry},
     };
 
     use super::Q30DeviceRegistry;
 
     #[tokio::test]
     async fn test_device_descriptors() {
-        let descriptor = StubConnectionDescriptor::new(
+        let descriptor = GenericConnectionDescriptor::new(
             "Stub Device",
             // Must start with soundcore prefix
             MacAddr6::new(0xAC, 0x12, 0x2F, 0x01, 0x02, 0x03),
@@ -134,7 +134,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_device() {
-        let descriptor = StubConnectionDescriptor::new(
+        let descriptor = GenericConnectionDescriptor::new(
             "Stub Device",
             MacAddr6::new(0x00, 0x11, 0x22, 0x33, 0x44, 0x55),
         );
@@ -179,7 +179,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_device_but_it_doesnt_exist() {
-        let descriptor = StubConnectionDescriptor::new(
+        let descriptor = GenericConnectionDescriptor::new(
             "Stub Device",
             MacAddr6::new(0x00, 0x11, 0x22, 0x33, 0x44, 0x55),
         );
