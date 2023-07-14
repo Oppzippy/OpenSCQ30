@@ -1,5 +1,26 @@
 # Changelog
 
+## v1.5.2
+
+### GUI
+
+#### Fixes
+
+-   Fix non-soundcore devices showing in device list
+
+### Android
+
+#### Fixes
+
+-   Pull to refresh icon now follows color scheme
+-   No longer crashes on api level 34 (android 14 beta)
+
+### Web
+
+#### Fixes
+
+-   Disallow deselecting sound mode buttons
+
 ## v1.5.1
 
 ### Android

@@ -33,6 +33,14 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.5.2" date="2023-07-14">
+            <description>
+                <p>Fixes</p>
+                <ul>
+                    <li>Fix non-soundcore devices showing in device list</li>
+                </ul> 
+            </description>
+        </release>
         <release version="1.5.1" date="2023-07-11" />
         <release version="1.5.0" date="2023-07-11">
             <description>
