@@ -2,21 +2,34 @@ import { Box, Typography } from "@mui/material";
 import { NoiseCancelingMode } from "../../../wasm/pkg/openscq30_web_wasm";
 import { ToggleButtonRow } from "./ToggleButtonRow";
 import { useTranslation } from "react-i18next";
-import React from "react";
+import React, { useCallback } from "react";
 
 interface Props {
   value: NoiseCancelingMode;
   onValueChanged: (newValue: NoiseCancelingMode) => void;
 }
 
-export const NoiseCancelingModeSelection = React.memo(function (props: Props) {
+export const NoiseCancelingModeSelection = React.memo(function ({
+  value,
+  onValueChanged,
+}: Props) {
   const { t } = useTranslation();
+  // Don't allow deselecting the button
+  const onValueChangedNotNull = useCallback(
+    (newValue: NoiseCancelingMode | undefined) => {
+      if (newValue) {
+        onValueChanged(newValue);
+      }
+    },
+    [onValueChanged],
+  );
+
   return (
     <Box>
       <Typography>{t("noiseCancelingMode.noiseCancelingMode")}</Typography>
       <ToggleButtonRow
-        value={props.value}
-        onValueChanged={props.onValueChanged}
+        value={value}
+        onValueChanged={onValueChangedNotNull}
         values={[
           {
             value: NoiseCancelingMode.Transport,
