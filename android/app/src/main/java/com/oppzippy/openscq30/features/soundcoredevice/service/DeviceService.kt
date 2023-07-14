@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Binder
 import android.os.IBinder
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
@@ -107,7 +108,12 @@ class DeviceService : LifecycleService() {
             addAction(ACTION_QUICK_PRESET)
             addAction(ACTION_SEND_NOTIFICATION)
         }
-        registerReceiver(broadcastReceiver, filter)
+        ContextCompat.registerReceiver(
+            this,
+            broadcastReceiver,
+            filter,
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
