@@ -1,12 +1,12 @@
 pub mod imp;
 
 use gtk::{
-    glib::{self, Object},
+    glib::{self, Object, Sender},
     subclass::prelude::ObjectSubclassIsExt,
 };
 use openscq30_lib::packets::structures::EqualizerConfiguration;
 
-use crate::objects::CustomEqualizerProfileObject;
+use crate::{actions::Action, objects::CustomEqualizerProfileObject};
 
 glib::wrapper! {
     pub struct EqualizerSettings(ObjectSubclass<imp::EqualizerSettings>)
@@ -17,6 +17,10 @@ glib::wrapper! {
 impl EqualizerSettings {
     pub fn new() -> Self {
         Object::builder().build()
+    }
+
+    pub fn set_sender(&self, sender: Sender<Action>) {
+        self.imp().set_sender(sender);
     }
 
     pub fn set_equalizer_configuration(&self, equalizer_configuration: &EqualizerConfiguration) {
@@ -35,7 +39,11 @@ impl EqualizerSettings {
 
 #[cfg(test)]
 mod tests {
-    use gtk::{subclass::prelude::*, traits::WidgetExt};
+    use gtk::{
+        glib::{MainContext, Priority},
+        subclass::prelude::*,
+        traits::WidgetExt,
+    };
     use openscq30_lib::packets::structures::{
         EqualizerConfiguration, PresetEqualizerProfile, VolumeAdjustments,
     };
@@ -48,6 +56,8 @@ mod tests {
     fn test_does_not_show_any_button_with_preset_profile_selected() {
         crate::load_resources();
         let settings = EqualizerSettings::new();
+        let (sender, _receiver) = MainContext::channel(Priority::default());
+        settings.set_sender(sender);
         settings.set_equalizer_configuration(&EqualizerConfiguration::new_from_preset_profile(
             PresetEqualizerProfile::SoundcoreSignature,
         ));
@@ -65,6 +75,8 @@ mod tests {
     fn test_only_shows_create_button_with_no_custom_profile_selected() {
         crate::load_resources();
         let settings = EqualizerSettings::new();
+        let (sender, _receiver) = MainContext::channel(Priority::default());
+        settings.set_sender(sender);
         settings.set_equalizer_configuration(&EqualizerConfiguration::new_custom_profile(
             VolumeAdjustments::new([0, 0, 0, 0, 0, 0, 0, 0]),
         ));
@@ -82,6 +94,8 @@ mod tests {
     fn test_only_shows_delete_button_with_custom_profile_selected() {
         crate::load_resources();
         let settings = EqualizerSettings::new();
+        let (sender, _receiver) = MainContext::channel(Priority::default());
+        settings.set_sender(sender);
         settings.set_custom_profiles(vec![CustomEqualizerProfileObject::new(
             "test profile",
             [0, 0, 0, 0, 0, 0, 0, 0],

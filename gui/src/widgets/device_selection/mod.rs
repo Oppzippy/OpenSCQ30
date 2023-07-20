@@ -1,15 +1,11 @@
 mod imp;
 
 use gtk::{
-    glib::{self, Object},
+    glib::{self, Object, Sender},
     subclass::prelude::ObjectSubclassIsExt,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Device {
-    pub mac_address: String,
-    pub name: String,
-}
+use crate::{actions::Action, objects::DeviceObject};
 
 glib::wrapper! {
     pub struct DeviceSelection(ObjectSubclass<imp::DeviceSelection>)
@@ -22,7 +18,11 @@ impl DeviceSelection {
         Object::builder().build()
     }
 
-    pub fn set_devices(&self, devices: &[Device]) {
+    pub fn set_sender(&self, sender: Sender<Action>) {
+        self.imp().set_sender(sender);
+    }
+
+    pub fn set_devices(&self, devices: &[DeviceObject]) {
         self.imp().set_devices(devices)
     }
 }

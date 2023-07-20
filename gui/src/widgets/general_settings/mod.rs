@@ -1,10 +1,12 @@
 pub mod imp;
 
 use gtk::{
-    glib::{self, Object},
+    glib::{self, Object, Sender},
     subclass::prelude::ObjectSubclassIsExt,
 };
 use openscq30_lib::packets::structures::{AmbientSoundMode, NoiseCancelingMode};
+
+use crate::actions::Action;
 
 glib::wrapper! {
     pub struct GeneralSettings(ObjectSubclass<imp::GeneralSettings>)
@@ -15,6 +17,10 @@ glib::wrapper! {
 impl GeneralSettings {
     pub fn new() -> Self {
         Object::builder().build()
+    }
+
+    pub fn set_sender(&self, sender: Sender<Action>) {
+        self.imp().set_sender(sender);
     }
 
     pub fn set_ambient_sound_mode(&self, ambient_sound_mode: AmbientSoundMode) {

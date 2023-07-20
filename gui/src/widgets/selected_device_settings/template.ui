@@ -8,11 +8,6 @@
                 <property name="tab-pos">left</property>
                 <child>
                     <object class="OpenSCQ30GeneralSettings" id="general_settings">
-                        <signal name="ambient-sound-mode-selected"
-                            handler="handle_ambient_sound_mode_selected" swapped="true" />
-                        <signal name="noise-canceling-mode-selected"
-                            handler="handle_noise_canceling_mode_selected" swapped="true" />
-                        <signal name="disconnect" handler="handle_disconnect" swapped="true" />
                         <property name="margin-start">10</property>
                         <property name="margin-end">10</property>
                         <property name="margin-top">10</property>
@@ -26,14 +21,8 @@
                 </child>
                 <child>
                     <object class="OpenSCQ30EqualizerSettings" id="equalizer_settings">
-                        <signal name="apply-equalizer-settings"
-                            handler="handle_apply_equalizer_settings" swapped="true" />
-                        <signal name="custom-equalizer-profile-selected"
-                            handler="handle_custom_equalizer_profile_selected" swapped="true" />
                         <signal name="create-custom-equalizer-profile"
                             handler="handle_create_custom_equalizer_profile" swapped="true" />
-                        <signal name="delete-custom-equalizer-profile"
-                            handler="handle_delete_custom_equalizer_profile" swapped="true" />
                         <property name="margin-start">10</property>
                         <property name="margin-end">10</property>
                         <property name="margin-top">10</property>

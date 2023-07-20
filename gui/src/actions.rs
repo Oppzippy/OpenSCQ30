@@ -10,6 +10,7 @@ mod state;
 
 pub use create_custom_equalizer_profile::*;
 pub use delete_custom_equalizer_profile::*;
+use macaddr::MacAddr6;
 use openscq30_lib::packets::structures::{
     AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode,
 };
@@ -21,14 +22,11 @@ pub use set_equalizer_configuration::*;
 pub use set_noise_canceling_mode::*;
 pub use state::*;
 
-use crate::{
-    objects::{CustomEqualizerProfileObject, DeviceObject},
-    widgets::Device,
-};
+use crate::objects::{CustomEqualizerProfileObject, DeviceObject};
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub enum StateUpdate {
-    SetDevices(Vec<Device>),
+    SetDevices(Vec<DeviceObject>),
     SetLoading(bool),
     SetAmbientSoundMode(AmbientSoundMode),
     SetNoiseCancelingMode(NoiseCancelingMode),
@@ -36,4 +34,16 @@ pub enum StateUpdate {
     SetSelectedDevice(Option<DeviceObject>),
     SetCustomEqualizerProfiles(Vec<CustomEqualizerProfileObject>),
     AddToast(String),
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Hash)]
+pub enum Action {
+    SetAmbientSoundMode(AmbientSoundMode),
+    SetNoiseCancelingMode(NoiseCancelingMode),
+    Connect(MacAddr6),
+    Disconnect,
+    SelectCustomEqualizerProfile(CustomEqualizerProfileObject),
+    CreateCustomEqualizerProfile(CustomEqualizerProfileObject),
+    DeleteCustomEqualizerProfile(CustomEqualizerProfileObject),
+    SetEqualizerConfiguration(EqualizerConfiguration),
 }

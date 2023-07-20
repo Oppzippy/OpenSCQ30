@@ -1,10 +1,10 @@
-use std::cell::Cell;
+use std::cell::{Cell, OnceCell};
 
-use gtk::prelude::{ObjectExt, StaticType};
-use gtk::subclass::prelude::{ObjectImplExt, ObjectSubclassExt};
+use gtk::glib::Sender;
+use gtk::subclass::prelude::ObjectImplExt;
 use gtk::subclass::widget::{CompositeTemplateCallbacksClass, CompositeTemplateInitializingExt};
 use gtk::{
-    glib::{self, once_cell::sync::Lazy, subclass::Signal},
+    glib,
     subclass::{
         prelude::{BoxImpl, ObjectImpl, ObjectSubclass},
         widget::{CompositeTemplateClass, WidgetClassSubclassExt, WidgetImpl},
@@ -14,6 +14,8 @@ use gtk::{
 };
 use openscq30_lib::packets::structures::AmbientSoundMode;
 use openscq30_lib::packets::structures::NoiseCancelingMode;
+
+use crate::actions::Action;
 
 #[derive(Default, CompositeTemplate)]
 #[template(resource = "/com/oppzippy/OpenSCQ30/general_settings/template.ui")]
@@ -40,10 +42,16 @@ pub struct GeneralSettings {
     // We don't want to fire events to set the headphones to the state that they're already in,
     // so we can set this flag to true when we don't want to fire events up the chain.
     ignore_button_clicks: Cell<bool>,
+
+    sender: OnceCell<Sender<Action>>,
 }
 
 #[gtk::template_callbacks]
 impl GeneralSettings {
+    pub fn set_sender(&self, sender: Sender<Action>) {
+        self.sender.set(sender.clone()).unwrap();
+    }
+
     pub fn set_ambient_sound_mode(&self, ambient_sound_mode: AmbientSoundMode) {
         self.ignore_button_clicks.replace(true);
         let button = match ambient_sound_mode {
@@ -70,76 +78,85 @@ impl GeneralSettings {
     #[template_callback]
     fn handle_normal_mode_clicked(&self, button: &gtk::ToggleButton) {
         if button.is_active() && !self.ignore_button_clicks.get() {
-            self.obj().emit_by_name(
-                "ambient-sound-mode-selected",
-                &[&AmbientSoundMode::Normal.id()],
-            )
+            self.sender
+                .get()
+                .unwrap()
+                .send(Action::SetAmbientSoundMode(AmbientSoundMode::Normal))
+                .unwrap();
         }
     }
 
     #[template_callback]
     fn handle_transparency_mode_clicked(&self, button: &gtk::ToggleButton) {
         if button.is_active() && !self.ignore_button_clicks.get() {
-            self.obj().emit_by_name(
-                "ambient-sound-mode-selected",
-                &[&AmbientSoundMode::Transparency.id()],
-            )
+            self.sender
+                .get()
+                .unwrap()
+                .send(Action::SetAmbientSoundMode(AmbientSoundMode::Transparency))
+                .unwrap();
         }
     }
 
     #[template_callback]
     fn handle_noise_canceling_mode_clicked(&self, button: &gtk::ToggleButton) {
         if button.is_active() && !self.ignore_button_clicks.get() {
-            self.obj().emit_by_name(
-                "ambient-sound-mode-selected",
-                &[&AmbientSoundMode::NoiseCanceling.id()],
-            )
+            self.sender
+                .get()
+                .unwrap()
+                .send(Action::SetAmbientSoundMode(
+                    AmbientSoundMode::NoiseCanceling,
+                ))
+                .unwrap();
         }
     }
 
     #[template_callback]
     fn handle_transport_mode_clicked(&self, button: &gtk::ToggleButton) {
         if button.is_active() && !self.ignore_button_clicks.get() {
-            self.obj().emit_by_name(
-                "noise-canceling-mode-selected",
-                &[&NoiseCancelingMode::Transport.id()],
-            )
+            self.sender
+                .get()
+                .unwrap()
+                .send(Action::SetNoiseCancelingMode(NoiseCancelingMode::Transport))
+                .unwrap();
         }
     }
 
     #[template_callback]
     fn handle_indoor_mode_clicked(&self, button: &gtk::ToggleButton) {
         if button.is_active() && !self.ignore_button_clicks.get() {
-            self.obj().emit_by_name(
-                "noise-canceling-mode-selected",
-                &[&NoiseCancelingMode::Indoor.id()],
-            )
+            self.sender
+                .get()
+                .unwrap()
+                .send(Action::SetNoiseCancelingMode(NoiseCancelingMode::Indoor))
+                .unwrap();
         }
     }
 
     #[template_callback]
     fn handle_outdoor_mode_clicked(&self, button: &gtk::ToggleButton) {
         if button.is_active() && !self.ignore_button_clicks.get() {
-            self.obj().emit_by_name(
-                "noise-canceling-mode-selected",
-                &[&NoiseCancelingMode::Outdoor.id()],
-            )
+            self.sender
+                .get()
+                .unwrap()
+                .send(Action::SetNoiseCancelingMode(NoiseCancelingMode::Outdoor))
+                .unwrap();
         }
     }
 
     #[template_callback]
     fn handle_custom_mode_clicked(&self, button: &gtk::ToggleButton) {
         if button.is_active() && !self.ignore_button_clicks.get() {
-            self.obj().emit_by_name(
-                "noise-canceling-mode-selected",
-                &[&NoiseCancelingMode::Custom.id()],
-            )
+            self.sender
+                .get()
+                .unwrap()
+                .send(Action::SetNoiseCancelingMode(NoiseCancelingMode::Custom))
+                .unwrap();
         }
     }
 
     #[template_callback]
     fn handle_disconnect_clicked(&self, _: &gtk::Button) {
-        self.obj().emit_by_name("disconnect", &[])
+        self.sender.get().unwrap().send(Action::Disconnect).unwrap();
     }
 }
 
@@ -162,22 +179,6 @@ impl ObjectSubclass for GeneralSettings {
 impl ObjectImpl for GeneralSettings {
     fn constructed(&self) {
         self.parent_constructed();
-        self.ignore_button_clicks.replace(false);
-    }
-
-    fn signals() -> &'static [Signal] {
-        static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
-            vec![
-                Signal::builder("ambient-sound-mode-selected")
-                    .param_types([u8::static_type()])
-                    .build(),
-                Signal::builder("noise-canceling-mode-selected")
-                    .param_types([u8::static_type()])
-                    .build(),
-                Signal::builder("disconnect").build(),
-            ]
-        });
-        SIGNALS.as_ref()
     }
 }
 impl WidgetImpl for GeneralSettings {}

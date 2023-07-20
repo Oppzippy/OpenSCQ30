@@ -9,7 +9,7 @@ use super::State;
 
 pub async fn set_ambient_sound_mode<T>(
     state: &Rc<State<T>>,
-    ambient_sound_mode_id: u8,
+    ambient_sound_mode: AmbientSoundMode,
 ) -> anyhow::Result<()>
 where
     T: DeviceRegistry + Send + Sync + 'static,
@@ -18,8 +18,6 @@ where
         .selected_device()
         .ok_or_else(|| anyhow::anyhow!("no device is selected"))?;
 
-    let ambient_sound_mode = AmbientSoundMode::from_id(ambient_sound_mode_id)
-        .ok_or_else(|| anyhow::anyhow!("invalid ambient sound mode: {ambient_sound_mode_id}"))?;
     device.set_ambient_sound_mode(ambient_sound_mode).await?;
     Ok(())
 }
@@ -51,7 +49,7 @@ mod tests {
             .return_once(|_ambient_sound_mode| Ok(()));
         *state.selected_device.borrow_mut() = Some(Arc::new(selected_device));
 
-        set_ambient_sound_mode(&state, AmbientSoundMode::NoiseCanceling.id())
+        set_ambient_sound_mode(&state, AmbientSoundMode::NoiseCanceling)
             .await
             .unwrap();
     }

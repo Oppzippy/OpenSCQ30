@@ -2,7 +2,7 @@ use std::cell::{Cell, OnceCell};
 
 use gtk::{
     gio,
-    glib::{self, clone, once_cell::sync::Lazy, subclass::Signal},
+    glib::{self, clone, once_cell::sync::Lazy, subclass::Signal, Sender},
     prelude::*,
     subclass::{
         prelude::*,
@@ -18,7 +18,7 @@ use openscq30_lib::packets::structures::{
 };
 use strum::IntoEnumIterator;
 
-use crate::widgets::Equalizer;
+use crate::{actions::Action, widgets::Equalizer};
 use crate::{
     objects::{CustomEqualizerProfileObject, EqualizerProfileObject},
     widgets::EqualizerProfileDropdownRow,
@@ -46,10 +46,15 @@ pub struct EqualizerSettings {
     custom_profiles: OnceCell<gio::ListStore>,
 
     custom_profile_index: Cell<Option<u32>>,
+    sender: OnceCell<Sender<Action>>,
 }
 
 #[gtk::template_callbacks]
 impl EqualizerSettings {
+    pub fn set_sender(&self, sender: Sender<Action>) {
+        self.sender.set(sender.clone()).unwrap();
+    }
+
     #[template_callback]
     fn handle_create_custom_profile(&self, _button: &gtk::Button) {
         self.obj().emit_by_name(
@@ -64,8 +69,13 @@ impl EqualizerSettings {
     #[template_callback]
     fn handle_delete_custom_profile(&self, _button: &gtk::Button) {
         if let Some(profile) = self.custom_profile_dropdown.selected_item() {
-            self.obj()
-                .emit_by_name::<()>("delete-custom-equalizer-profile", &[&profile]);
+            self.sender
+                .get()
+                .unwrap()
+                .send(Action::DeleteCustomEqualizerProfile(
+                    profile.downcast().unwrap(),
+                ))
+                .unwrap();
         }
     }
 
@@ -90,8 +100,13 @@ impl EqualizerSettings {
         if !volume_adjustments_match_preset_profile {
             if let Some(custom_profile_index) = self.custom_profile_index.get() {
                 self.profile_dropdown.set_selected(custom_profile_index);
-                self.obj()
-                    .emit_by_name::<()>("apply-equalizer-settings", &[]);
+                self.sender
+                    .get()
+                    .unwrap()
+                    .send(Action::SetEqualizerConfiguration(
+                        self.equalizer_configuration(),
+                    ))
+                    .unwrap();
             }
         }
     }
@@ -210,10 +225,14 @@ impl EqualizerSettings {
                 let maybe_selected_item = this.custom_profile_dropdown.selected_item()
                     .map(|item| item.downcast::<CustomEqualizerProfileObject>().unwrap());
                 if let Some(selected_item) = maybe_selected_item {
-                    this.obj().emit_by_name::<()>("custom-equalizer-profile-selected", &[&selected_item]);
+                    this.sender.get().unwrap().send(Action::SelectCustomEqualizerProfile(selected_item.clone())).unwrap();
                     // Only apply settings if something changed from the perspective of the headphones
                     if !this.is_custom_profile() || this.equalizer.volume_adjustments() != selected_item.volume_adjustments() {
-                        this.obj().emit_by_name::<()>("apply-equalizer-settings", &[]);
+                        this.sender
+                            .get()
+                            .unwrap()
+                            .send(Action::SetEqualizerConfiguration(this.equalizer_configuration()))
+                            .unwrap();
                     }
                 }
             }),
@@ -365,7 +384,11 @@ impl EqualizerSettings {
                 };
                 this.set_equalizer_configuration(&configuration);
                 this.update_custom_profile_selection();
-                this.obj().emit_by_name::<()>("apply-equalizer-settings", &[]);
+                // TODO this is needed because this runs once during construction (before sender is set)
+                // see if we can have sender get set before construction maybe?
+                if let Some(sender) = this.sender.get() {
+                    sender.send(Action::SetEqualizerConfiguration(configuration)).unwrap();
+                }
             }));
     }
 
@@ -422,18 +445,9 @@ impl ObjectImpl for EqualizerSettings {
 
     fn signals() -> &'static [Signal] {
         static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
-            vec![
-                Signal::builder("apply-equalizer-settings").build(),
-                Signal::builder("custom-equalizer-profile-selected")
-                    .param_types([CustomEqualizerProfileObject::static_type()])
-                    .build(),
-                Signal::builder("create-custom-equalizer-profile")
-                    .param_types([CustomEqualizerProfileObject::static_type()])
-                    .build(),
-                Signal::builder("delete-custom-equalizer-profile")
-                    .param_types([CustomEqualizerProfileObject::static_type()])
-                    .build(),
-            ]
+            vec![Signal::builder("create-custom-equalizer-profile")
+                .param_types([CustomEqualizerProfileObject::static_type()])
+                .build()]
         });
         SIGNALS.as_ref()
     }

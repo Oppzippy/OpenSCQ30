@@ -11,7 +11,7 @@ use adw::Toast;
 use anyhow::{anyhow, Context};
 use gtk::{
     gio::{self, SimpleAction},
-    glib::{self, clone, closure_local, MainContext, OptionFlags},
+    glib::{self, clone, MainContext, OptionFlags, Priority},
     prelude::*,
     traits::GtkWindowExt,
 };
@@ -28,7 +28,7 @@ use windows::{
     UI::ViewManagement::{UIColorType, UISettings},
 };
 
-use crate::objects::CustomEqualizerProfileObject;
+use crate::{actions::Action, objects::CustomEqualizerProfileObject};
 
 mod actions;
 mod gettext;
@@ -287,6 +287,59 @@ fn build_ui_2(
         }
     }
 
+    let (action_sender, action_receiver) = MainContext::channel::<Action>(Priority::default());
+    main_window.set_sender(action_sender);
+    action_receiver.attach(
+        None,
+        clone!(@strong state, @strong settings => @default-return Continue(false), move |action: Action| {
+            MainContext::default().spawn_local(clone!(@strong state, @strong settings => async move {
+                let result = match action {
+                    Action::SetAmbientSoundMode(ambient_sound_mode) => {
+                        actions::set_ambient_sound_mode(&state, ambient_sound_mode)
+                        .await
+                        .context("ambient sound mode selected")
+                    },
+                    Action::SetNoiseCancelingMode(noise_canceling_mode) => {
+                        actions::set_noise_canceling_mode(&state, noise_canceling_mode)
+                        .await
+                        .context("noise canceling mode selected")
+                    },
+                    Action::Connect(mac_address) => {
+                        actions::set_device(&state, Some(mac_address))
+                        .await
+                        .context("select device")
+                    },
+                    Action::Disconnect => {
+                        actions::set_device(&state, None)
+                        .await
+                        .context("select device")
+                    },
+                    Action::SelectCustomEqualizerProfile(profile) => {
+                        actions::select_custom_equalizer_configuration(&state, &settings.config, &profile)
+                        .context("custom equalizer profile selected")
+                    },
+                    Action::CreateCustomEqualizerProfile(profile) => {
+                        actions::create_custom_equalizer_profile(&state, &settings.config, &profile)
+                            .context("create custom equalizer profile")
+                    },
+                    Action::DeleteCustomEqualizerProfile(profile) => {
+                        actions::delete_custom_equalizer_profile(&state, &settings.config, &profile)
+                        .context("delete custom equalizer profile")
+                    },
+                    Action::SetEqualizerConfiguration(configuration) => {
+                        actions::set_equalizer_configuration(&state, configuration)
+                        .await
+                        .context("apply equalizer settings")
+                    },
+                };
+                if let Err(err) = result {
+                    handle_error(err, &state);
+                }
+            }));
+            Continue(true)
+        }),
+    );
+
     main_context.spawn_local(clone!(@weak main_window, @strong state => async move {
         loop {
             let next_state = state.state_update_receiver.next().await;
@@ -310,90 +363,6 @@ fn build_ui_2(
     main_context.spawn_local(clone!(@strong action_refresh_devices => async move {
         action_refresh_devices.activate(None);
     }));
-
-    main_window.connect_notify_local(
-        Some("selected-device"),
-        clone!(@strong state => move |main_window, _| {
-            MainContext::default().spawn_local(clone!(@strong state, @weak main_window => async move {
-                actions::set_device(
-                    &state,
-                    main_window.selected_device(),
-                )
-                .await
-                .context("select device")
-                .unwrap_or_else(|err| handle_error(err, &state));
-            }));
-        }),
-    );
-
-    main_window.connect_closure(
-        "ambient-sound-mode-selected",
-        false,
-        closure_local!(@strong state => move |_main_window: MainWindow, ambient_sound_mode_id: u8| {
-            MainContext::default().spawn_local(clone!(@strong state => async move {
-                actions::set_ambient_sound_mode(&state, ambient_sound_mode_id)
-                .await
-                .context("ambient sound mode selected")
-                .unwrap_or_else(|err| handle_error(err, &state));
-            }));
-        }),
-    );
-
-    main_window.connect_closure(
-        "noise-canceling-mode-selected",
-        false,
-        closure_local!(@strong state => move |_main_window: MainWindow, noise_canceling_mode_id: u8| {
-            MainContext::default().spawn_local(clone!(@strong state => async move {
-                actions::set_noise_canceling_mode(&state, noise_canceling_mode_id)
-                .await
-                .context("noise canceling mode selected")
-                .unwrap_or_else(|err| handle_error(err, &state));
-            }));
-        }),
-    );
-
-    main_window.connect_closure(
-        "apply-equalizer-settings",
-        false,
-        closure_local!(@strong state => move |main_window: MainWindow| {
-            MainContext::default().spawn_local(clone!(@strong state => async move {
-                actions::set_equalizer_configuration(&state, main_window.equalizer_configuration())
-                .await
-                .context("apply equalizer settings")
-                .unwrap_or_else(|err| handle_error(err, &state));
-            }));
-        }),
-    );
-
-    main_window.connect_closure(
-        "custom-equalizer-profile-selected",
-        false,
-        closure_local!(@strong state, @strong settings => move |_main_window: MainWindow, custom_profile: &CustomEqualizerProfileObject| {
-            actions::select_custom_equalizer_configuration(&state, &settings.config, custom_profile)
-                .context("custom equalizer profile selected")
-                .unwrap_or_else(|err| handle_error(err, &state));
-        }),
-    );
-
-    main_window.connect_closure(
-        "create-custom-equalizer-profile",
-        false,
-        closure_local!(@strong state, @strong settings => move |_main_window: MainWindow, custom_profile: &CustomEqualizerProfileObject| {
-            actions::create_custom_equalizer_profile(&state, &settings.config, custom_profile)
-                .context("create custom equalizer profile")
-                .unwrap_or_else(|err| handle_error(err, &state));
-        }),
-    );
-
-    main_window.connect_closure(
-        "delete-custom-equalizer-profile",
-        false,
-        closure_local!(@strong state, @strong settings => move |_main_window: MainWindow, custom_profile: &CustomEqualizerProfileObject| {
-            actions::delete_custom_equalizer_profile(&state, &settings.config, custom_profile)
-                .context("delete custom equalizer profile")
-                .unwrap_or_else(|err| handle_error(err, &state));
-        }),
-    );
 
     main_window.present();
 }

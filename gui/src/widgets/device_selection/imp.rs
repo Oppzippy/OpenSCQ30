@@ -1,8 +1,11 @@
-use std::cell::{OnceCell, RefCell};
+use std::{
+    cell::{OnceCell, RefCell},
+    str::FromStr,
+};
 
 use gtk::{
     gio,
-    glib::{self, subclass::Signal, ParamSpec, Properties, Value},
+    glib::{self, ParamSpec, Properties, Sender, Value},
     prelude::*,
     subclass::{
         prelude::{BoxImpl, ObjectImpl, ObjectSubclass, *},
@@ -13,11 +16,9 @@ use gtk::{
     },
     ClosureExpression, CompositeTemplate, TemplateChild,
 };
-use once_cell::sync::Lazy;
+use macaddr::MacAddr6;
 
-use crate::objects::DeviceObject;
-
-use super::Device;
+use crate::{actions::Action, objects::DeviceObject};
 
 #[derive(Default, CompositeTemplate, Properties)]
 #[template(resource = "/com/oppzippy/OpenSCQ30/device_selection/template.ui")]
@@ -30,45 +31,44 @@ pub struct DeviceSelection {
     pub selected_device: RefCell<Option<DeviceObject>>,
 
     pub devices: OnceCell<gio::ListStore>,
+    sender: OnceCell<Sender<Action>>,
 }
 
 #[gtk::template_callbacks]
 impl DeviceSelection {
+    pub fn set_sender(&self, sender: Sender<Action>) {
+        self.sender.set(sender).unwrap();
+    }
+
     #[template_callback]
     pub fn handle_connect_clicked(&self, _button: &gtk::Button) {
         if let Some(selected_device) = self.dropdown.selected_item().and_downcast::<DeviceObject>()
         {
-            self.obj()
-                .emit_by_name::<()>("connect-clicked", &[&selected_device]);
+            self.sender
+                .get()
+                .unwrap()
+                .send(Action::Connect(
+                    MacAddr6::from_str(&selected_device.mac_address()).unwrap(),
+                ))
+                .unwrap();
         }
     }
 
-    pub fn set_devices(&self, devices: &[Device]) {
-        let objects = devices
-            .iter()
-            .map(|device| DeviceObject::new(&device.name, &device.mac_address))
-            .collect::<Vec<_>>();
-
+    pub fn set_devices(&self, devices: &[DeviceObject]) {
         if let Some(model) = self.devices.get() {
             model.remove_all();
-            model.extend_from_slice(&objects);
+            model.extend_from_slice(&devices);
 
             self.dropdown.set_model(Some(model));
         }
     }
 
-    pub fn selected_device(&self) -> Option<Device> {
-        self.dropdown
-            .selected_item()
-            .map(|object| {
-                object
-                    .downcast::<DeviceObject>()
-                    .expect("selected item must be a DeviceObject")
-            })
-            .map(|device_object| Device {
-                name: device_object.name(),
-                mac_address: device_object.mac_address(),
-            })
+    pub fn selected_device(&self) -> Option<DeviceObject> {
+        self.dropdown.selected_item().map(|object| {
+            object
+                .downcast::<DeviceObject>()
+                .expect("selected item must be a DeviceObject")
+        })
     }
 }
 
@@ -106,15 +106,6 @@ impl ObjectImpl for DeviceSelection {
             )
         });
         self.dropdown.set_expression(Some(expression));
-    }
-
-    fn signals() -> &'static [glib::subclass::Signal] {
-        static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
-            vec![Signal::builder("connect-clicked")
-                .param_types([DeviceObject::static_type()])
-                .build()]
-        });
-        SIGNALS.as_ref()
     }
 
     fn properties() -> &'static [ParamSpec] {

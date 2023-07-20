@@ -1,23 +1,30 @@
 use gtk::{
-    glib::{self, subclass::Signal},
-    prelude::ObjectExt,
+    glib::{self, Sender},
     subclass::{
         prelude::*,
         widget::{CompositeTemplateClass, CompositeTemplateInitializingExt, WidgetImpl},
     },
     template_callbacks, CompositeTemplate,
 };
-use once_cell::sync::Lazy;
+use once_cell::sync::OnceCell;
+
+use crate::actions::Action;
 
 #[derive(Default, CompositeTemplate)]
 #[template(resource = "/com/oppzippy/OpenSCQ30/loading_screen/template.ui")]
-pub struct LoadingScreen {}
+pub struct LoadingScreen {
+    sender: OnceCell<Sender<Action>>,
+}
 
 #[template_callbacks]
 impl LoadingScreen {
+    pub fn set_sender(&self, sender: Sender<Action>) {
+        self.sender.set(sender).unwrap();
+    }
+
     #[template_callback]
     fn handle_cancel_clicked(&self, _: gtk::Button) {
-        self.obj().emit_by_name("cancel", &[])
+        self.sender.get().unwrap().send(Action::Disconnect).unwrap();
     }
 }
 
@@ -37,11 +44,6 @@ impl ObjectSubclass for LoadingScreen {
     }
 }
 
-impl ObjectImpl for LoadingScreen {
-    fn signals() -> &'static [Signal] {
-        static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| vec![Signal::builder("cancel").build()]);
-        SIGNALS.as_ref()
-    }
-}
+impl ObjectImpl for LoadingScreen {}
 impl WidgetImpl for LoadingScreen {}
 impl BoxImpl for LoadingScreen {}

@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use openscq30_lib::api::device::{DeviceDescriptor, DeviceRegistry};
 
-use crate::widgets::Device;
+use crate::objects::DeviceObject;
 
 use super::{State, StateUpdate};
 
@@ -20,9 +20,8 @@ where
 
         let model_devices = descriptors
             .iter()
-            .map(|descriptor| Device {
-                mac_address: descriptor.mac_address().to_string(),
-                name: descriptor.name().to_owned(),
+            .map(|descriptor| {
+                DeviceObject::new(descriptor.name(), &descriptor.mac_address().to_string())
             })
             .collect::<Vec<_>>();
 

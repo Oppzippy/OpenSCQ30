@@ -4,7 +4,7 @@ use std::{
 };
 
 use gtk::{
-    glib::{self, clone, once_cell::sync::Lazy, subclass::Signal, ParamSpec, Properties, Value},
+    glib::{self, clone, ParamSpec, Properties, Sender, Value},
     prelude::*,
     subclass::{
         prelude::*,
@@ -19,11 +19,13 @@ use gtk::{
 };
 
 use gtk::subclass::widget::WidgetClassSubclassExt;
+use openscq30_lib::packets::structures::{AmbientSoundMode, NoiseCancelingMode};
 
 use crate::{
+    actions::Action,
     objects::{CustomEqualizerProfileObject, DeviceObject},
     settings::Settings,
-    widgets::{Device, DeviceSelection, LoadingScreen, SelectedDeviceSettings},
+    widgets::{DeviceSelection, LoadingScreen, SelectedDeviceSettings},
 };
 
 #[derive(Default, CompositeTemplate, Properties)]
@@ -47,45 +49,43 @@ pub struct MainWindow {
     pub loading: Cell<bool>,
 
     pub settings: OnceCell<Rc<Settings>>,
+    sender: OnceCell<Sender<Action>>,
 }
 
 #[gtk::template_callbacks]
 impl MainWindow {
-    pub fn set_devices(&self, devices: &[Device]) {
+    pub fn set_sender(&self, sender: Sender<Action>) {
+        self.sender.set(sender.clone()).unwrap();
+        self.loading_screen.set_sender(sender.clone());
+        self.device_selection.set_sender(sender.clone());
+        self.selected_device_settings.set_sender(sender.clone());
+    }
+
+    pub fn set_devices(&self, devices: &[DeviceObject]) {
         self.device_selection.set_devices(devices);
-    }
-
-    #[template_callback]
-    fn handle_connect_clicked(&self, device: &DeviceObject) {
-        self.obj().set_selected_device(device);
-    }
-
-    #[template_callback]
-    fn handle_apply_equalizer_settings(&self, _: &SelectedDeviceSettings) {
-        self.obj().emit_by_name("apply-equalizer-settings", &[])
     }
 
     #[template_callback]
     // no idea why the parameter comes before &GeneralSettings
     fn handle_ambient_sound_mode_selected(&self, mode: u8, _: &SelectedDeviceSettings) {
-        let obj = self.obj();
-        obj.emit_by_name("ambient-sound-mode-selected", &[&mode])
+        self.sender
+            .get()
+            .unwrap()
+            .send(Action::SetAmbientSoundMode(
+                AmbientSoundMode::from_id(mode).unwrap(),
+            ))
+            .unwrap();
     }
 
     #[template_callback]
     fn handle_noise_canceling_mode_selected(&self, mode: u8, _: &SelectedDeviceSettings) {
-        let obj = self.obj();
-        obj.emit_by_name("noise-canceling-mode-selected", &[&mode])
-    }
-
-    #[template_callback]
-    fn handle_custom_equalizer_profile_selected(
-        &self,
-        profile: &CustomEqualizerProfileObject,
-        _: &SelectedDeviceSettings,
-    ) {
-        self.obj()
-            .emit_by_name("custom-equalizer-profile-selected", &[profile])
+        self.sender
+            .get()
+            .unwrap()
+            .send(Action::SetNoiseCancelingMode(
+                NoiseCancelingMode::from_id(mode).unwrap(),
+            ))
+            .unwrap();
     }
 
     #[template_callback]
@@ -137,26 +137,10 @@ impl MainWindow {
                     .adjustments();
 
                 let profile_with_name = CustomEqualizerProfileObject::new(&name, volume_adjustments);
-                this.obj().emit_by_name::<()>("create-custom-equalizer-profile", &[&profile_with_name]);
+                this.sender.get().unwrap().send(Action::CreateCustomEqualizerProfile(profile_with_name)).unwrap();
             }),
         );
         dialog.present();
-    }
-
-    #[template_callback]
-    fn handle_delete_custom_equalizer_profile(
-        &self,
-        profile: &CustomEqualizerProfileObject,
-        _: &SelectedDeviceSettings,
-    ) {
-        self.obj()
-            .emit_by_name("delete-custom-equalizer-profile", &[&profile])
-    }
-
-    #[template_callback]
-    fn handle_disconnect(&self, _: &gtk::Widget) {
-        let selected_device: Option<DeviceObject> = None;
-        self.obj().set_property("selected-device", selected_device);
     }
 
     fn update(&self) {
@@ -212,30 +196,6 @@ impl ObjectImpl for MainWindow {
             Some("loading"),
             clone!(@weak self as this => move |_, _| this.update()),
         );
-    }
-
-    fn signals() -> &'static [glib::subclass::Signal] {
-        static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
-            vec![
-                Signal::builder("ambient-sound-mode-selected")
-                    .param_types([u8::static_type()])
-                    .build(),
-                Signal::builder("noise-canceling-mode-selected")
-                    .param_types([u8::static_type()])
-                    .build(),
-                Signal::builder("apply-equalizer-settings").build(),
-                Signal::builder("custom-equalizer-profile-selected")
-                    .param_types([CustomEqualizerProfileObject::static_type()])
-                    .build(),
-                Signal::builder("create-custom-equalizer-profile")
-                    .param_types([CustomEqualizerProfileObject::static_type()])
-                    .build(),
-                Signal::builder("delete-custom-equalizer-profile")
-                    .param_types([CustomEqualizerProfileObject::static_type()])
-                    .build(),
-            ]
-        });
-        SIGNALS.as_ref()
     }
 
     fn properties() -> &'static [ParamSpec] {

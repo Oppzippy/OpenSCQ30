@@ -5,7 +5,7 @@ use std::rc::Rc;
 use adw::Toast;
 use gtk::{
     gio,
-    glib::{self, Object},
+    glib::{self, Object, Sender},
     prelude::IsA,
     subclass::prelude::ObjectSubclassIsExt,
     traits::GtkWindowExt,
@@ -15,9 +15,11 @@ use openscq30_lib::packets::structures::{
     AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode,
 };
 
-use crate::{objects::CustomEqualizerProfileObject, settings::Settings};
-
-use super::Device;
+use crate::{
+    actions::Action,
+    objects::{CustomEqualizerProfileObject, DeviceObject},
+    settings::Settings,
+};
 
 glib::wrapper! {
     pub struct MainWindow(ObjectSubclass<imp::MainWindow>)
@@ -71,8 +73,12 @@ impl MainWindow {
             .expect("failed to get settings");
     }
 
-    pub fn set_devices(&self, devices: &[Device]) {
+    pub fn set_devices(&self, devices: &[DeviceObject]) {
         self.imp().set_devices(devices);
+    }
+
+    pub fn set_sender(&self, sender: Sender<Action>) {
+        self.imp().set_sender(sender);
     }
 
     pub fn set_ambient_sound_mode(&self, ambient_sound_mode: AmbientSoundMode) {

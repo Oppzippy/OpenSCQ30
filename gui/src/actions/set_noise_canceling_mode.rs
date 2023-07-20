@@ -9,7 +9,7 @@ use super::State;
 
 pub async fn set_noise_canceling_mode<T>(
     state: &Rc<State<T>>,
-    noise_canceling_mode_id: u8,
+    noise_canceling_mode: NoiseCancelingMode,
 ) -> anyhow::Result<()>
 where
     T: DeviceRegistry + Send + Sync + 'static,
@@ -17,10 +17,6 @@ where
     let device = state
         .selected_device()
         .ok_or_else(|| anyhow::anyhow!("no device is selected"))?;
-    let noise_canceling_mode =
-        NoiseCancelingMode::from_id(noise_canceling_mode_id).ok_or_else(|| {
-            anyhow::anyhow!("invalid noise canceling mode: {noise_canceling_mode_id}")
-        })?;
     device
         .set_noise_canceling_mode(noise_canceling_mode)
         .await?;
@@ -54,7 +50,7 @@ mod tests {
             .return_once(|_noise_canceling_mode| Ok(()));
         *state.selected_device.borrow_mut() = Some(Arc::new(selected_device));
 
-        set_noise_canceling_mode(&state, NoiseCancelingMode::Transport.id())
+        set_noise_canceling_mode(&state, NoiseCancelingMode::Transport)
             .await
             .unwrap();
     }

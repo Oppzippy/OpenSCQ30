@@ -1,4 +1,4 @@
-use std::{rc::Rc, str::FromStr};
+use std::rc::Rc;
 
 use anyhow::anyhow;
 use gtk::glib::{clone, MainContext};
@@ -15,7 +15,7 @@ use super::{State, StateUpdate};
 
 pub async fn set_device<T>(
     state: &Rc<State<T>>,
-    new_selected_device: Option<DeviceObject>,
+    mac_address: Option<MacAddr6>,
 ) -> anyhow::Result<()>
 where
     T: DeviceRegistry + Send + Sync + 'static,
@@ -27,7 +27,7 @@ where
     *state.selected_device.borrow_mut() = None;
 
     // Connect to new device
-    if let Some(new_selected_device) = new_selected_device {
+    if let Some(mac_address) = mac_address {
         state
             .state_update_sender
             .send(StateUpdate::SetLoading(true))
@@ -36,7 +36,6 @@ where
         let (sender, receiver) = oneshot::channel();
         let handle = main_context.spawn_local(clone!(@strong state => async move {
             let result: anyhow::Result<()> = (async {
-                let mac_address = MacAddr6::from_str(&new_selected_device.mac_address())?;
                 let device = state.registry.device(mac_address).await?.ok_or_else(|| {
                     state.state_update_sender
                         .send(StateUpdate::SetSelectedDevice(None))
@@ -78,6 +77,11 @@ where
                     }
                 });
 
+                let name = device.name().await?;
+                let mac_address = device.mac_address().await?;
+                state.state_update_sender
+                    .send(StateUpdate::SetSelectedDevice(Some(DeviceObject::new(&name, &mac_address.to_string()))))
+                    .map_err(|err| anyhow!("{err}"))?;
                 state.state_update_sender
                     .send(StateUpdate::SetAmbientSoundMode(device.ambient_sound_mode().await))
                     .map_err(|err| anyhow!("{err}"))?;
@@ -99,6 +103,10 @@ where
             return result;
         }
     } else {
+        state
+            .state_update_sender
+            .send(StateUpdate::SetSelectedDevice(None))
+            .map_err(|err| anyhow!("{err}"))?;
         state
             .state_update_sender
             .send(StateUpdate::SetLoading(false))
@@ -147,6 +155,14 @@ mod tests {
                         receiver
                     });
                 device
+                    .expect_name()
+                    .once()
+                    .returning(|| Ok("Test Device".into()));
+                device
+                    .expect_mac_address()
+                    .once()
+                    .returning(|| Ok(MacAddr6::nil()));
+                device
                     .expect_connection_status()
                     .once()
                     .return_const(receiver);
@@ -169,11 +185,13 @@ mod tests {
 
         let (state, mut receiver) = State::new(registry);
 
-        let new_selected_device =
-            DeviceObject::new(&"Name".to_string(), &"00:00:00:00:00:00".to_string());
-        set_device(&state, Some(new_selected_device)).await.unwrap();
+        set_device(&state, Some(MacAddr6::nil())).await.unwrap();
         let mut expected_sequence = VecDeque::from([
             StateUpdate::SetLoading(true),
+            StateUpdate::SetSelectedDevice(Some(DeviceObject::new(
+                "Test Device",
+                "00:00:00:00:00:00",
+            ))),
             StateUpdate::SetAmbientSoundMode(AmbientSoundMode::Transparency),
             StateUpdate::SetNoiseCancelingMode(NoiseCancelingMode::Indoor),
             StateUpdate::SetEqualizerConfiguration(
@@ -184,7 +202,28 @@ mod tests {
         loop {
             if let Some(state_update) = receiver.recv().await {
                 let expected = expected_sequence.pop_front().unwrap();
-                assert_eq!(expected, state_update);
+
+                match (&expected, &state_update) {
+                    // the Eq implementation for DeviceObject compares identity rather than prop values,
+                    // so we need custom handling
+                    (
+                        StateUpdate::SetSelectedDevice(expected),
+                        StateUpdate::SetSelectedDevice(state_update),
+                    ) => {
+                        assert_eq!(
+                            expected.as_ref().unwrap().name(),
+                            state_update.as_ref().unwrap().name()
+                        );
+                        assert_eq!(
+                            expected.as_ref().unwrap().mac_address(),
+                            state_update.as_ref().unwrap().mac_address()
+                        );
+                    }
+                    // Everyhing else is ok to just compare normally
+                    _ => {
+                        assert_eq!(expected, state_update);
+                    }
+                }
 
                 if expected_sequence.is_empty() {
                     break;
@@ -211,6 +250,14 @@ mod tests {
                         receiver
                     });
                 device
+                    .expect_name()
+                    .once()
+                    .returning(|| Ok("Test Device".into()));
+                device
+                    .expect_mac_address()
+                    .once()
+                    .returning(|| Ok(MacAddr6::nil()));
+                device
                     .expect_connection_status()
                     .once()
                     .return_const(receiver);
@@ -233,9 +280,7 @@ mod tests {
 
         let (state, _receiver) = State::new(registry);
 
-        let new_selected_device =
-            DeviceObject::new(&"Name".to_string(), &"00:00:00:00:00:00".to_string());
-        set_device(&state, Some(new_selected_device)).await.unwrap();
+        set_device(&state, Some(MacAddr6::nil())).await.unwrap();
         sender.send_replace(ConnectionStatus::Disconnected);
     }
 }
