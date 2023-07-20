@@ -21,8 +21,8 @@ import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
 import com.oppzippy.openscq30.features.soundcoredevice.demo.DemoSoundcoreDevice
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
-import com.oppzippy.openscq30.lib.AmbientSoundMode
-import com.oppzippy.openscq30.lib.PresetEqualizerProfile
+import com.oppzippy.openscq30.libbindings.AmbientSoundMode
+import com.oppzippy.openscq30.libbindings.PresetEqualizerProfile
 import com.oppzippy.openscq30.ui.OpenSCQ30Root
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest

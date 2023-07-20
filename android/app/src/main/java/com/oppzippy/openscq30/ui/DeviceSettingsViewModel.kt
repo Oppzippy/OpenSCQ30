@@ -6,9 +6,9 @@ import androidx.lifecycle.AndroidViewModel
 import com.oppzippy.openscq30.android.IntentFactory
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
-import com.oppzippy.openscq30.lib.AmbientSoundMode
-import com.oppzippy.openscq30.lib.EqualizerConfiguration
-import com.oppzippy.openscq30.lib.NoiseCancelingMode
+import com.oppzippy.openscq30.libbindings.AmbientSoundMode
+import com.oppzippy.openscq30.libbindings.EqualizerConfiguration
+import com.oppzippy.openscq30.libbindings.NoiseCancelingMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject

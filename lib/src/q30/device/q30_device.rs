@@ -12,7 +12,7 @@ use tracing::{trace, warn};
 use crate::{
     api::connection::{Connection, ConnectionStatus},
     packets::{
-        outbound::{SetAmbientSoundModePacket, SetEqualizerPacket},
+        outbound::{SetEqualizerPacket, SetSoundModePacket},
         structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
     },
 };
@@ -52,7 +52,7 @@ where
         let join_handle = tokio::spawn(async move {
             while let Some(packet_bytes) = inbound_receiver.recv().await {
                 match InboundPacket::new(&packet_bytes) {
-                    Some(packet) => {
+                    Ok(packet) => {
                         if let Some(transformer) =
                             state::inbound_packet_to_state_transformer(packet)
                         {
@@ -67,7 +67,7 @@ where
                             }
                         }
                     }
-                    None => warn!("received unknown packet {:?}", packet_bytes),
+                    Err(err) => warn!("failed to parse packet: {err:?}"),
                 }
             }
         });
@@ -92,10 +92,10 @@ where
             let state_future = async {
                 while let Some(packet_bytes) = inbound_receiver.recv().await {
                     match InboundPacket::new(&packet_bytes) {
-                        Some(InboundPacket::StateUpdate(packet)) => {
+                        Ok(InboundPacket::StateUpdate(packet)) => {
                             return Some(packet.into());
                         }
-                        None => warn!("received unknown packet {:?}", packet_bytes),
+                        Err(err) => warn!("failed to parse packet: {err:?}"),
                         _ => (), // Known packet, but not the one we're looking for
                     };
                 }
@@ -141,19 +141,27 @@ where
         &self,
         ambient_sound_mode: AmbientSoundMode,
     ) -> crate::Result<()> {
-        let noise_canceling_mode = self.noise_canceling_mode().await;
         let mut state = self.state.write().await;
         self.connection
             .write_with_response(
-                &SetAmbientSoundModePacket::new(ambient_sound_mode, noise_canceling_mode).bytes(),
+                &SetSoundModePacket {
+                    ambient_sound_mode,
+                    noise_canceling_mode: state.noise_canceling_mode,
+                    transparency_mode: state.transparency_mode,
+                    custom_noise_canceling: state.custom_noise_canceling,
+                }
+                .bytes(),
             )
             .await?;
-        *state = state.with_ambient_sound_mode(ambient_sound_mode);
+        *state = DeviceState {
+            ambient_sound_mode,
+            ..*state
+        };
         Ok(())
     }
 
     async fn ambient_sound_mode(&self) -> AmbientSoundMode {
-        self.state.read().await.ambient_sound_mode()
+        self.state.read().await.ambient_sound_mode
     }
 
     async fn set_noise_canceling_mode(
@@ -167,10 +175,12 @@ where
         // set the ambient sound mode to Noise Canceling, and then change it back.
         self.connection
             .write_with_response(
-                &SetAmbientSoundModePacket::new(
-                    AmbientSoundMode::NoiseCanceling,
+                &SetSoundModePacket {
+                    ambient_sound_mode: AmbientSoundMode::NoiseCanceling,
                     noise_canceling_mode,
-                )
+                    transparency_mode: state.transparency_mode,
+                    custom_noise_canceling: state.custom_noise_canceling,
+                }
                 .bytes(),
             )
             .await?;
@@ -179,33 +189,44 @@ where
         if ambient_sound_mode != AmbientSoundMode::NoiseCanceling {
             self.connection
                 .write_with_response(
-                    &SetAmbientSoundModePacket::new(ambient_sound_mode, noise_canceling_mode)
-                        .bytes(),
+                    &SetSoundModePacket {
+                        ambient_sound_mode,
+                        noise_canceling_mode,
+                        transparency_mode: state.transparency_mode,
+                        custom_noise_canceling: state.custom_noise_canceling,
+                    }
+                    .bytes(),
                 )
                 .await?;
         }
-        *state = state.with_noise_canceling_mode(noise_canceling_mode);
+        *state = DeviceState {
+            noise_canceling_mode,
+            ..*state
+        };
         Ok(())
     }
 
     async fn noise_canceling_mode(&self) -> NoiseCancelingMode {
-        self.state.read().await.noise_canceling_mode()
+        self.state.read().await.noise_canceling_mode
     }
 
     async fn set_equalizer_configuration(
         &self,
-        configuration: EqualizerConfiguration,
+        equalizer_configuration: EqualizerConfiguration,
     ) -> crate::Result<()> {
         let mut state = self.state.write().await;
         self.connection
-            .write_with_response(&SetEqualizerPacket::new(configuration).bytes())
+            .write_with_response(&SetEqualizerPacket::new(equalizer_configuration).bytes())
             .await?;
-        *state = state.with_equalizer_configuration(configuration);
+        *state = DeviceState {
+            equalizer_configuration,
+            ..*state
+        };
         Ok(())
     }
 
     async fn equalizer_configuration(&self) -> EqualizerConfiguration {
-        self.state.read().await.equalizer_configuration()
+        self.state.read().await.equalizer_configuration
     }
 }
 

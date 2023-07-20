@@ -30,13 +30,15 @@ impl DemoDevice {
             mac_address,
             state_sender,
             connection_status_sender,
-            state: Mutex::new(DeviceState::new(
-                AmbientSoundMode::Normal,
-                NoiseCancelingMode::Indoor,
-                EqualizerConfiguration::new_from_preset_profile(
+            state: Mutex::new(DeviceState {
+                ambient_sound_mode: AmbientSoundMode::Normal,
+                noise_canceling_mode: NoiseCancelingMode::Indoor,
+                transparency_mode: Default::default(),
+                custom_noise_canceling: Default::default(),
+                equalizer_configuration: EqualizerConfiguration::new_from_preset_profile(
                     PresetEqualizerProfile::SoundcoreSignature,
                 ),
-            )),
+            }),
         }
     }
 }
@@ -65,12 +67,15 @@ impl Device for DemoDevice {
     ) -> crate::Result<()> {
         tracing::info!("set ambient sound mode to {ambient_sound_mode:?}");
         let mut state = self.state.lock().await;
-        *state = state.with_ambient_sound_mode(ambient_sound_mode);
+        *state = DeviceState {
+            ambient_sound_mode,
+            ..*state
+        };
         Ok(())
     }
 
     async fn ambient_sound_mode(&self) -> AmbientSoundMode {
-        self.state.lock().await.ambient_sound_mode()
+        self.state.lock().await.ambient_sound_mode
     }
 
     async fn set_noise_canceling_mode(
@@ -79,26 +84,32 @@ impl Device for DemoDevice {
     ) -> crate::Result<()> {
         tracing::info!("set noise canceling mode to {noise_canceling_mode:?}");
         let mut state = self.state.lock().await;
-        *state = state.with_noise_canceling_mode(noise_canceling_mode);
+        *state = DeviceState {
+            noise_canceling_mode,
+            ..*state
+        };
         Ok(())
     }
 
     async fn noise_canceling_mode(&self) -> NoiseCancelingMode {
-        self.state.lock().await.noise_canceling_mode()
+        self.state.lock().await.noise_canceling_mode
     }
 
     async fn set_equalizer_configuration(
         &self,
-        configuration: EqualizerConfiguration,
+        equalizer_configuration: EqualizerConfiguration,
     ) -> crate::Result<()> {
-        tracing::info!("set equalizer configuration to {configuration:?}");
+        tracing::info!("set equalizer configuration to {equalizer_configuration:?}");
         let mut state = self.state.lock().await;
-        *state = state.with_equalizer_configuration(configuration);
+        *state = DeviceState {
+            equalizer_configuration,
+            ..*state
+        };
         Ok(())
     }
 
     async fn equalizer_configuration(&self) -> EqualizerConfiguration {
-        self.state.lock().await.equalizer_configuration()
+        self.state.lock().await.equalizer_configuration
     }
 }
 

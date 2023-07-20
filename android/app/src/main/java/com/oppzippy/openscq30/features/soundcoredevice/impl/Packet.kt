@@ -1,39 +1,31 @@
 package com.oppzippy.openscq30.features.soundcoredevice.impl
 
-import com.oppzippy.openscq30.lib.AmbientSoundModeUpdatePacket
-import com.oppzippy.openscq30.lib.SetAmbientModeOkPacket
-import com.oppzippy.openscq30.lib.SetEqualizerOkPacket
-import com.oppzippy.openscq30.lib.StateUpdatePacket
+import android.util.Log
+import com.oppzippy.openscq30.libbindings.InboundPacket
+import com.oppzippy.openscq30.libbindings.SetEqualizerOkPacket
+import com.oppzippy.openscq30.libbindings.SetSoundModeOkPacket
+import com.oppzippy.openscq30.libbindings.SoundModeUpdatePacket
+import com.oppzippy.openscq30.libbindings.StateUpdatePacket
 import kotlin.jvm.optionals.getOrNull
 
 sealed class Packet {
     companion object {
-        fun fromBytes(bytes: ByteArray): Packet? {
-            return AmbientSoundModeUpdatePacket.fromBytes(bytes).getOrNull()?.toPacket()
-                ?: StateUpdatePacket.fromBytes(bytes).getOrNull()?.toPacket()
-                ?: SetAmbientModeOkPacket.fromBytes(bytes).getOrNull()?.toPacket()
-                ?: SetEqualizerOkPacket.fromBytes(bytes).getOrNull()?.toPacket()
+        fun fromBytes(input: ByteArray): Packet? {
+            val inboundPacket = try {
+                InboundPacket(input)
+            } catch (ex: Exception) {
+                Log.w("Packet", "received unknown or invalid packet", ex)
+                return null
+            }
+            return inboundPacket.soundModeUpdate().getOrNull()?.let { SoundModeUpdate(it) }
+                ?: inboundPacket.stateUpdate().getOrNull()?.let { StateUpdate(it) }
+                ?: inboundPacket.setSoundModeOk().getOrNull()?.let { SetSoundModeOk(it) }
+                ?: inboundPacket.setEqualizerOk().getOrNull()?.let { SetEqualizerOk(it) }
         }
     }
 
-    class AmbientSoundModeUpdate(val packet: AmbientSoundModeUpdatePacket) : Packet()
+    class SoundModeUpdate(val packet: SoundModeUpdatePacket) : Packet()
     class StateUpdate(val packet: StateUpdatePacket) : Packet()
-    class SetAmbientModeOk(val packet: SetAmbientModeOkPacket) : Packet()
+    class SetSoundModeOk(val packet: SetSoundModeOkPacket) : Packet()
     class SetEqualizerOk(val packet: SetEqualizerOkPacket) : Packet()
-}
-
-private fun AmbientSoundModeUpdatePacket.toPacket(): Packet.AmbientSoundModeUpdate {
-    return Packet.AmbientSoundModeUpdate(this)
-}
-
-private fun StateUpdatePacket.toPacket(): Packet.StateUpdate {
-    return Packet.StateUpdate(this)
-}
-
-private fun SetAmbientModeOkPacket.toPacket(): Packet.SetAmbientModeOk {
-    return Packet.SetAmbientModeOk(this)
-}
-
-private fun SetEqualizerOkPacket.toPacket(): Packet.SetEqualizerOk {
-    return Packet.SetEqualizerOk(this)
 }

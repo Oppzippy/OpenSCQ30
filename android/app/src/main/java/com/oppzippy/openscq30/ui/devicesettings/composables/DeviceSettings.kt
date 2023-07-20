@@ -21,11 +21,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.lib.AmbientSoundMode
-import com.oppzippy.openscq30.lib.EqualizerConfiguration
-import com.oppzippy.openscq30.lib.NoiseCancelingMode
-import com.oppzippy.openscq30.lib.PresetEqualizerProfile
-import com.oppzippy.openscq30.lib.SoundcoreDeviceState
+import com.oppzippy.openscq30.libbindings.AmbientSoundMode
+import com.oppzippy.openscq30.libbindings.EqualizerConfiguration
+import com.oppzippy.openscq30.libbindings.NoiseCancelingMode
+import com.oppzippy.openscq30.libbindings.PresetEqualizerProfile
+import com.oppzippy.openscq30.libbindings.SoundcoreDeviceState
 import com.oppzippy.openscq30.ui.devicesettings.Screen
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.equalizer.EqualizerSettings

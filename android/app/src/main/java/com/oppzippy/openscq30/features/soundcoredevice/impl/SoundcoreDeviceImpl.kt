@@ -4,12 +4,12 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
 import com.oppzippy.openscq30.features.soundcoredevice.api.contentEquals
-import com.oppzippy.openscq30.lib.AmbientSoundMode
-import com.oppzippy.openscq30.lib.EqualizerConfiguration
-import com.oppzippy.openscq30.lib.NoiseCancelingMode
-import com.oppzippy.openscq30.lib.SetAmbientSoundModePacket
-import com.oppzippy.openscq30.lib.SetEqualizerPacket
-import com.oppzippy.openscq30.lib.SoundcoreDeviceState
+import com.oppzippy.openscq30.libbindings.AmbientSoundMode
+import com.oppzippy.openscq30.libbindings.EqualizerConfiguration
+import com.oppzippy.openscq30.libbindings.NoiseCancelingMode
+import com.oppzippy.openscq30.libbindings.SetEqualizerPacket
+import com.oppzippy.openscq30.libbindings.SetSoundModePacket
+import com.oppzippy.openscq30.libbindings.SoundcoreDeviceState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,14 +42,14 @@ class SoundcoreDeviceImpl(
         scope.launch {
             callbacks.packetsFlow.collect {
                 when (it) {
-                    is Packet.AmbientSoundModeUpdate -> {
+                    is Packet.SoundModeUpdate -> {
                         _stateFlow.value =
                             _stateFlow.value.withAmbientSoundMode(it.packet.ambientSoundMode())
                                 .withNoiseCancelingMode(it.packet.noiseCancelingMode())
                     }
 
                     is Packet.StateUpdate -> _stateFlow.value = SoundcoreDeviceState(it.packet)
-                    is Packet.SetAmbientModeOk -> {}
+                    is Packet.SetSoundModeOk -> {}
                     is Packet.SetEqualizerOk -> {}
                 }
             }
@@ -84,7 +84,7 @@ class SoundcoreDeviceImpl(
         ambientSoundMode: AmbientSoundMode,
         noiseCancelingMode: NoiseCancelingMode,
     ) {
-        val packet = SetAmbientSoundModePacket(ambientSoundMode, noiseCancelingMode)
+        val packet = SetSoundModePacket(ambientSoundMode, noiseCancelingMode)
         callbacks.queueCommanad(
             Command.Write(packet.bytes()),
         )

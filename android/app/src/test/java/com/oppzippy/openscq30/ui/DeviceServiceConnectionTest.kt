@@ -3,7 +3,7 @@ package com.oppzippy.openscq30.ui
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
-import com.oppzippy.openscq30.lib.SoundcoreDeviceState
+import com.oppzippy.openscq30.libbindings.SoundcoreDeviceState
 import com.oppzippy.openscq30.test.MainDispatcherRule
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import io.mockk.every

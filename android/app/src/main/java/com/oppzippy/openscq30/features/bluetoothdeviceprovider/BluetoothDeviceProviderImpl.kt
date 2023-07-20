@@ -5,7 +5,7 @@ import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.util.Log
 import androidx.annotation.RequiresPermission
-import com.oppzippy.openscq30.lib.SoundcoreDeviceUtils
+import com.oppzippy.openscq30.libbindings.SoundcoreDeviceUtils
 
 class BluetoothDeviceProviderImpl(private val context: Context) : BluetoothDeviceProvider {
     /**

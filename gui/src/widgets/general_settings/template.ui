@@ -123,6 +123,21 @@
                         </accessibility>
                     </object>
                 </child>
+                <child>
+                    <object class="GtkToggleButton" id="custom_mode">
+                        <signal name="toggled" handler="handle_custom_mode_clicked" swapped="true" />
+                        <property name="group">indoor_mode</property>
+                        <property name="label" translatable="yes" context="noise canceling mode">Custom</property>
+                        <property name="hexpand">true</property>
+                        <layout>
+                            <property name="column">4</property>
+                            <property name="row">1</property>
+                        </layout>
+                        <accessibility>
+                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">noise_canceling_mode_label</relation>
+                        </accessibility>
+                    </object>
+                </child>
             </object>
         </child>
         <child>

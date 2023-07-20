@@ -1,24 +1,34 @@
+use crate::packets::{parsing::take_packet_header, structures::PacketType};
+
 use super::{
-    AmbientSoundModeUpdatePacket, SetAmbientModeOkPacket, SetEqualizerOkPacket, StateUpdatePacket,
+    take_ambient_sound_mode_update_packet, take_set_ambient_sound_mode_ok_packet,
+    take_set_equalizer_ok_packet, take_state_update_packet, SetEqualizerOkPacket,
+    SetSoundModeOkPacket, SoundModeUpdatePacket, StateUpdatePacket,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum InboundPacket {
     StateUpdate(StateUpdatePacket),
-    AmbientSoundModeUpdate(AmbientSoundModeUpdatePacket),
-    SetAmbientModeOk(SetAmbientModeOkPacket),
+    SoundModeUpdate(SoundModeUpdatePacket),
+    SetSoundModeOk(SetSoundModeOkPacket),
     SetEqualizerOk(SetEqualizerOkPacket),
 }
 
 impl InboundPacket {
-    pub fn new(bytes: &[u8]) -> Option<InboundPacket> {
-        StateUpdatePacket::new(bytes)
-            .map(InboundPacket::StateUpdate)
-            .or_else(|| {
-                AmbientSoundModeUpdatePacket::new(bytes).map(InboundPacket::AmbientSoundModeUpdate)
-            })
-            .or_else(|| SetAmbientModeOkPacket::new(bytes).map(InboundPacket::SetAmbientModeOk))
-            .or_else(|| SetEqualizerOkPacket::new(bytes).map(InboundPacket::SetEqualizerOk))
+    pub fn new(input: &[u8]) -> Result<Self, nom::Err<nom::error::Error<&[u8]>>> {
+        let (input, header) = take_packet_header(input)?;
+        Ok(match header.packet_type {
+            PacketType::SoundModeUpdate => {
+                Self::SoundModeUpdate(take_ambient_sound_mode_update_packet(input)?.1)
+            }
+            PacketType::SetSoundModeOk => {
+                Self::SetSoundModeOk(take_set_ambient_sound_mode_ok_packet(input)?.1)
+            }
+            PacketType::SetEqualizerOk => {
+                Self::SetEqualizerOk(take_set_equalizer_ok_packet(input)?.1)
+            }
+            PacketType::StateUpdate => Self::StateUpdate(take_state_update_packet(input)?.1),
+        })
     }
 }
 
@@ -27,8 +37,8 @@ mod tests {
     use super::InboundPacket;
 
     #[test]
-    fn it_returns_none_when_nothing_matches() {
-        let packet = InboundPacket::new(&vec![1, 2, 3]);
-        assert_eq!(None, packet);
+    fn it_errors_when_nothing_matches() {
+        let result = InboundPacket::new(&[1, 2, 3]);
+        assert_eq!(true, result.is_err());
     }
 }

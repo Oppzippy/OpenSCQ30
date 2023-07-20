@@ -11,8 +11,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.lib.AmbientSoundMode
-import com.oppzippy.openscq30.lib.NoiseCancelingMode
+import com.oppzippy.openscq30.libbindings.AmbientSoundMode
+import com.oppzippy.openscq30.libbindings.NoiseCancelingMode
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable

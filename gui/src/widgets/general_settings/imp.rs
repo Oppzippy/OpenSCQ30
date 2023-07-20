@@ -33,6 +33,8 @@ pub struct GeneralSettings {
     pub indoor_mode: TemplateChild<gtk::ToggleButton>,
     #[template_child]
     pub outdoor_mode: TemplateChild<gtk::ToggleButton>,
+    #[template_child]
+    pub custom_mode: TemplateChild<gtk::ToggleButton>,
 
     // The buttons fire their click signals when using set_active to set them in their initial states
     // We don't want to fire events to set the headphones to the state that they're already in,
@@ -59,6 +61,7 @@ impl GeneralSettings {
             NoiseCancelingMode::Indoor => &self.indoor_mode,
             NoiseCancelingMode::Outdoor => &self.outdoor_mode,
             NoiseCancelingMode::Transport => &self.transport_mode,
+            NoiseCancelingMode::Custom => &self.custom_mode,
         };
         button.set_active(true);
         self.ignore_button_clicks.replace(false);
@@ -120,6 +123,16 @@ impl GeneralSettings {
             self.obj().emit_by_name(
                 "noise-canceling-mode-selected",
                 &[&NoiseCancelingMode::Outdoor.id()],
+            )
+        }
+    }
+
+    #[template_callback]
+    fn handle_custom_mode_clicked(&self, button: &gtk::ToggleButton) {
+        if button.is_active() && !self.ignore_button_clicks.get() {
+            self.obj().emit_by_name(
+                "noise-canceling-mode-selected",
+                &[&NoiseCancelingMode::Custom.id()],
             )
         }
     }

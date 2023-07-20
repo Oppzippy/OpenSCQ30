@@ -1,6 +1,6 @@
 import {
   AmbientSoundMode,
-  SetAmbientSoundModePacket,
+  SetSoundModePacket,
 } from "../../wasm/pkg/openscq30_web_wasm";
 import { SoundcoreDeviceConnection } from "./SoundcoreDeviceConnection";
 import { SoundcoreDeviceState } from "./SoundcoreDeviceState";
@@ -25,7 +25,7 @@ export async function transitionSoundMode(
     previousState.ambientSoundMode != AmbientSoundMode.NoiseCanceling
   ) {
     await connection.write(
-      new SetAmbientSoundModePacket(
+      new SetSoundModePacket(
         AmbientSoundMode.NoiseCanceling,
         previousState.noiseCancelingMode,
       ).bytes(),
@@ -34,7 +34,7 @@ export async function transitionSoundMode(
   // If we are changing the moise canceling mode, we must be in noise canceling mode at this point
   // Otherwise, set the ambient sound mode to the new state.
   await connection.write(
-    new SetAmbientSoundModePacket(
+    new SetSoundModePacket(
       didNoiseCancelingModeChange
         ? AmbientSoundMode.NoiseCanceling
         : newState.ambientSoundMode,
@@ -47,7 +47,7 @@ export async function transitionSoundMode(
     newState.ambientSoundMode != AmbientSoundMode.NoiseCanceling
   ) {
     await connection.write(
-      new SetAmbientSoundModePacket(
+      new SetSoundModePacket(
         newState.ambientSoundMode,
         newState.noiseCancelingMode,
       ).bytes(),

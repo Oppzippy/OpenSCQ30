@@ -23,27 +23,29 @@ impl SoundcoreDeviceState {
         equalizer_configuration: &EqualizerConfiguration,
     ) -> SoundcoreDeviceState {
         Self {
-            state: openscq30_lib::state::DeviceState::new(
-                ambient_sound_mode.to_owned().into(),
-                noise_canceling_mode.to_owned().into(),
-                equalizer_configuration.to_owned().into(),
-            ),
+            state: openscq30_lib::state::DeviceState {
+                ambient_sound_mode: ambient_sound_mode.to_owned().into(),
+                noise_canceling_mode: noise_canceling_mode.to_owned().into(),
+                transparency_mode: Default::default(),
+                custom_noise_canceling: Default::default(),
+                equalizer_configuration: equalizer_configuration.to_owned().into(),
+            },
         }
     }
 
     #[generate_interface]
     pub fn ambient_sound_mode(&self) -> AmbientSoundMode {
-        self.state.ambient_sound_mode().into()
+        self.state.ambient_sound_mode.into()
     }
 
     #[generate_interface]
     pub fn noise_canceling_mode(&self) -> NoiseCancelingMode {
-        self.state.noise_canceling_mode().into()
+        self.state.noise_canceling_mode.into()
     }
 
     #[generate_interface]
     pub fn equalizer_configuration(&self) -> EqualizerConfiguration {
-        self.state.equalizer_configuration().into()
+        self.state.equalizer_configuration.into()
     }
 
     #[generate_interface]
@@ -51,9 +53,11 @@ impl SoundcoreDeviceState {
         &self,
         ambient_sound_mode: &AmbientSoundMode,
     ) -> SoundcoreDeviceState {
-        self.state
-            .with_ambient_sound_mode(ambient_sound_mode.to_owned().into())
-            .into()
+        openscq30_lib::state::DeviceState {
+            ambient_sound_mode: ambient_sound_mode.to_owned().into(),
+            ..self.state
+        }
+        .into()
     }
 
     #[generate_interface]
@@ -61,9 +65,11 @@ impl SoundcoreDeviceState {
         &self,
         noise_canceling_mode: &NoiseCancelingMode,
     ) -> SoundcoreDeviceState {
-        self.state
-            .with_noise_canceling_mode(noise_canceling_mode.to_owned().into())
-            .into()
+        openscq30_lib::state::DeviceState {
+            noise_canceling_mode: noise_canceling_mode.to_owned().into(),
+            ..self.state
+        }
+        .into()
     }
 
     #[generate_interface]
@@ -71,16 +77,21 @@ impl SoundcoreDeviceState {
         &self,
         equalizer_configuration: &EqualizerConfiguration,
     ) -> SoundcoreDeviceState {
-        self.state
-            .with_equalizer_configuration(equalizer_configuration.to_owned().into())
-            .into()
+        openscq30_lib::state::DeviceState {
+            equalizer_configuration: equalizer_configuration.to_owned().into(),
+            ..self.state
+        }
+        .into()
     }
 }
 
 impl From<&StateUpdatePacket> for SoundcoreDeviceState {
     fn from(packet: &StateUpdatePacket) -> Self {
         Self {
-            state: Into::<openscq30_lib::packets::inbound::StateUpdatePacket>::into(*packet).into(),
+            state: Into::<openscq30_lib::packets::inbound::StateUpdatePacket>::into(
+                packet.to_owned(),
+            )
+            .into(),
         }
     }
 }

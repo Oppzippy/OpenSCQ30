@@ -11,9 +11,9 @@ import androidx.test.rule.GrantPermissionRule
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
-import com.oppzippy.openscq30.lib.AmbientSoundMode
-import com.oppzippy.openscq30.lib.NoiseCancelingMode
-import com.oppzippy.openscq30.lib.PresetEqualizerProfile
+import com.oppzippy.openscq30.libbindings.AmbientSoundMode
+import com.oppzippy.openscq30.libbindings.NoiseCancelingMode
+import com.oppzippy.openscq30.libbindings.PresetEqualizerProfile
 import com.oppzippy.openscq30.ui.quickpresets.QuickPresetScreen
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest

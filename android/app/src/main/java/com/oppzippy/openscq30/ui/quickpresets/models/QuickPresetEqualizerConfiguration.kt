@@ -1,6 +1,6 @@
 package com.oppzippy.openscq30.ui.quickpresets.models
 
-import com.oppzippy.openscq30.lib.PresetEqualizerProfile
+import com.oppzippy.openscq30.libbindings.PresetEqualizerProfile
 
 sealed class QuickPresetEqualizerConfiguration {
     class PresetProfile(val profile: PresetEqualizerProfile) : QuickPresetEqualizerConfiguration()

@@ -1,6 +1,6 @@
 package com.oppzippy.openscq30.features.soundcoredevice.api
 
-import com.oppzippy.openscq30.lib.EqualizerConfiguration
+import com.oppzippy.openscq30.libbindings.EqualizerConfiguration
 
 fun EqualizerConfiguration.contentEquals(
     other: EqualizerConfiguration,

@@ -1,66 +1,18 @@
 use crate::packets::{
     inbound::StateUpdatePacket,
-    structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
+    structures::{
+        AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
+        TransparencyMode,
+    },
 };
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 pub struct DeviceState {
-    ambient_sound_mode: AmbientSoundMode,
-    noise_canceling_mode: NoiseCancelingMode,
-    equalizer_configuration: EqualizerConfiguration,
-}
-
-impl DeviceState {
-    pub fn new(
-        ambient_sound_mode: AmbientSoundMode,
-        noise_canceling_mode: NoiseCancelingMode,
-        equalizer_configuration: EqualizerConfiguration,
-    ) -> Self {
-        Self {
-            ambient_sound_mode,
-            noise_canceling_mode,
-            equalizer_configuration,
-        }
-    }
-
-    pub fn ambient_sound_mode(&self) -> AmbientSoundMode {
-        self.ambient_sound_mode
-    }
-
-    pub fn noise_canceling_mode(&self) -> NoiseCancelingMode {
-        self.noise_canceling_mode
-    }
-
-    pub fn equalizer_configuration(&self) -> EqualizerConfiguration {
-        self.equalizer_configuration
-    }
-
-    pub fn with_ambient_sound_mode(&self, ambient_sound_mode: AmbientSoundMode) -> Self {
-        Self {
-            ambient_sound_mode,
-            noise_canceling_mode: self.noise_canceling_mode,
-            equalizer_configuration: self.equalizer_configuration,
-        }
-    }
-
-    pub fn with_noise_canceling_mode(&self, noise_canceling_mode: NoiseCancelingMode) -> Self {
-        Self {
-            ambient_sound_mode: self.ambient_sound_mode,
-            noise_canceling_mode,
-            equalizer_configuration: self.equalizer_configuration,
-        }
-    }
-
-    pub fn with_equalizer_configuration(
-        &self,
-        equalizer_configuration: EqualizerConfiguration,
-    ) -> Self {
-        Self {
-            ambient_sound_mode: self.ambient_sound_mode,
-            noise_canceling_mode: self.noise_canceling_mode,
-            equalizer_configuration,
-        }
-    }
+    pub ambient_sound_mode: AmbientSoundMode,
+    pub noise_canceling_mode: NoiseCancelingMode,
+    pub transparency_mode: TransparencyMode,
+    pub custom_noise_canceling: CustomNoiseCanceling,
+    pub equalizer_configuration: EqualizerConfiguration,
 }
 
 impl From<&StateUpdatePacket> for DeviceState {
@@ -68,6 +20,8 @@ impl From<&StateUpdatePacket> for DeviceState {
         Self {
             ambient_sound_mode: packet.ambient_sound_mode(),
             noise_canceling_mode: packet.noise_canceling_mode(),
+            transparency_mode: packet.transparency_mode(),
+            custom_noise_canceling: packet.custom_noise_canceling(),
             equalizer_configuration: packet.equalizer_configuration(),
         }
     }

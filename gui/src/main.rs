@@ -290,8 +290,8 @@ fn build_ui_2(
     main_context.spawn_local(clone!(@weak main_window, @strong state => async move {
         loop {
             let next_state = state.state_update_receiver.next().await;
-            main_window.set_ambient_sound_mode(next_state.ambient_sound_mode());
-            main_window.set_noise_canceling_mode(next_state.noise_canceling_mode());
+            main_window.set_ambient_sound_mode(next_state.ambient_sound_mode);
+            main_window.set_noise_canceling_mode(next_state.noise_canceling_mode);
         }
     }));
 

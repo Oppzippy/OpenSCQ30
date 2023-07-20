@@ -2,9 +2,9 @@ package com.oppzippy.openscq30.ui.equalizer.models
 
 import android.util.Log
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.lib.EqualizerConfiguration
-import com.oppzippy.openscq30.lib.PresetEqualizerProfile
-import com.oppzippy.openscq30.lib.VolumeAdjustments
+import com.oppzippy.openscq30.libbindings.EqualizerConfiguration
+import com.oppzippy.openscq30.libbindings.PresetEqualizerProfile
+import com.oppzippy.openscq30.libbindings.VolumeAdjustments
 import com.oppzippy.openscq30.libextensions.resources.toStringResource
 
 enum class EqualizerProfile(val presetProfile: PresetEqualizerProfile?) {

@@ -6,6 +6,7 @@ pub enum NoiseCancelingMode {
     Transport = 0,
     Outdoor = 1,
     Indoor = 2,
+    Custom = 3,
 }
 
 impl NoiseCancelingMode {

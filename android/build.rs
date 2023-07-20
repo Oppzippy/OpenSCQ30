@@ -11,7 +11,7 @@ fn main() {
         .join("oppzippy")
         .join("openscq30");
 
-    let java_lib_dir = java_source_dir.join("lib");
+    let java_lib_dir = java_source_dir.join("libbindings");
 
     let rust_src_dir = Path::new("src");
     let glue_file = Path::new("glue.rs.in");
@@ -23,8 +23,11 @@ fn main() {
         .generate_interface(glue_file);
 
     let swig_gen = flapigen::Generator::new(LanguageConfig::JavaConfig(
-        JavaConfig::new(java_lib_dir, "com.oppzippy.openscq30.lib".to_string())
-            .use_null_annotation_from_package("androidx.annotation".to_string()),
+        JavaConfig::new(
+            java_lib_dir,
+            "com.oppzippy.openscq30.libbindings".to_string(),
+        )
+        .use_null_annotation_from_package("androidx.annotation".to_string()),
     ))
     .rustfmt_bindings(true)
     .remove_not_generated_files_from_output_directory(true);

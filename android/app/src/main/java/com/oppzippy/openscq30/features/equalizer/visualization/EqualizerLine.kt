@@ -3,7 +3,7 @@ package com.oppzippy.openscq30.features.equalizer.visualization
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
-import com.oppzippy.openscq30.lib.VolumeAdjustments
+import com.oppzippy.openscq30.libbindings.VolumeAdjustments
 
 class EqualizerLine(private val values: List<Byte>) {
     fun drawBitmap(

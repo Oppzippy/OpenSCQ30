@@ -13,7 +13,7 @@ import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNo
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_QUICK_PRESET
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.INTENT_EXTRA_PRESET_ID
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_CHANNEL_ID
-import com.oppzippy.openscq30.lib.AmbientSoundMode
+import com.oppzippy.openscq30.libbindings.AmbientSoundMode
 import com.oppzippy.openscq30.libextensions.resources.toStringResource
 import dagger.hilt.android.scopes.ServiceScoped
 import javax.inject.Inject

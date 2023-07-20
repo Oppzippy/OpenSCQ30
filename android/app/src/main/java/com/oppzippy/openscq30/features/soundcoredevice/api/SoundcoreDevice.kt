@@ -1,9 +1,9 @@
 package com.oppzippy.openscq30.features.soundcoredevice.api
 
-import com.oppzippy.openscq30.lib.AmbientSoundMode
-import com.oppzippy.openscq30.lib.EqualizerConfiguration
-import com.oppzippy.openscq30.lib.NoiseCancelingMode
-import com.oppzippy.openscq30.lib.SoundcoreDeviceState
+import com.oppzippy.openscq30.libbindings.AmbientSoundMode
+import com.oppzippy.openscq30.libbindings.EqualizerConfiguration
+import com.oppzippy.openscq30.libbindings.NoiseCancelingMode
+import com.oppzippy.openscq30.libbindings.SoundcoreDeviceState
 import kotlinx.coroutines.flow.Flow
 
 interface SoundcoreDevice {

@@ -1,75 +1,138 @@
-use tracing::warn;
+use nom::{combinator::map, error::context, number::complete::le_u8, sequence::tuple};
 
-use crate::packets::structures::{
-    AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode, PresetEqualizerProfile,
-    VolumeAdjustments,
+use crate::packets::{
+    parsing::{
+        take_age_range, take_battery_level, take_equalizer_configuration, take_firmware_version,
+        take_hear_id, take_is_battery_charging, take_serial_number, take_sound_modes, ParseResult,
+    },
+    structures::{
+        AgeRange, AmbientSoundMode, BatteryLevel, CustomNoiseCanceling, EqualizerConfiguration,
+        FirmwareVersion, HearId, IsBatteryCharging, NoiseCancelingMode, SerialNumber, SoundModes,
+        TransparencyMode, VolumeAdjustments,
+    },
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct StateUpdatePacket {
-    ambient_sound_mode: AmbientSoundMode,
-    noise_canceling_mode: NoiseCancelingMode,
+    battery_level: BatteryLevel,
+    is_battery_charging: IsBatteryCharging,
     equalizer_configuration: EqualizerConfiguration,
+    gender: u8,
+    age_range: AgeRange,
+    hear_id: HearId,
+    sound_modes: SoundModes,
+    firmware_version: FirmwareVersion,
+    serial_number: SerialNumber,
+}
+
+pub fn take_state_update_packet(input: &[u8]) -> ParseResult<StateUpdatePacket> {
+    context(
+        "StateUpdatePacket",
+        map(
+            tuple((
+                // offset 9
+                take_battery_level,
+                // offset 10
+                take_is_battery_charging,
+                // offset 11
+                take_equalizer_configuration,
+                // offset 21
+                le_u8, // gender
+                // offset 22
+                take_age_range, // age range
+                // offset 23
+                take_hear_id,
+                // offset 44
+                take_sound_modes,
+                // offset 48
+                take_firmware_version,
+                // offset 53
+                take_serial_number,
+                // offset 69
+            )),
+            |(
+                battery_level,
+                is_battery_charging,
+                equalizer_configuration,
+                gender,
+                age_range,
+                hear_id,
+                sound_modes,
+                firmware_version,
+                serial_number,
+            )| {
+                StateUpdatePacket {
+                    battery_level,
+                    is_battery_charging,
+                    equalizer_configuration,
+                    gender,
+                    age_range,
+                    hear_id,
+                    sound_modes,
+                    firmware_version,
+                    serial_number,
+                }
+            },
+        ),
+    )(input)
 }
 
 impl StateUpdatePacket {
-    pub fn new(bytes: &[u8]) -> Option<StateUpdatePacket> {
-        // TODO offset 9 has some meaning. it's sometimes 5, sometimes 4. maybe more values I hvaen't seen.
-        const PREFIX: &[u8] = &[0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01, 0x46, 0x00];
-        if bytes.starts_with(PREFIX) {
-            if bytes.len() == 70 {
-                let preset_profile_id = u16::from_le_bytes(bytes[11..13].try_into().unwrap());
-                let equalizer_configuration =
-                    match PresetEqualizerProfile::from_id(preset_profile_id) {
-                        Some(preset_profile) => {
-                            EqualizerConfiguration::new_from_preset_profile(preset_profile)
-                        }
-                        None => EqualizerConfiguration::new_custom_profile(
-                            VolumeAdjustments::from_bytes(bytes[13..21].try_into().unwrap()),
-                        ),
-                    };
-
-                let Some(ambient_sound_mode) = AmbientSoundMode::from_id(bytes[44]) else {
-                    warn!("parse_state_update: invalid ambient sound mode id {}!", bytes[44]);
-                    return None;
-                };
-                let Some(noise_canceling_mode) = NoiseCancelingMode::from_id(bytes[45]) else {
-                    warn!("parse_state_update: invalid noise canceling mode id {}!", bytes[44]);
-                    return None;
-                };
-
-                return Some(Self {
-                    ambient_sound_mode,
-                    noise_canceling_mode,
-                    equalizer_configuration,
-                });
-            } else {
-                warn!("parse_state_update: expected 70 bytes, got {}", bytes.len());
-            }
-        }
-        None
+    pub fn battery_level(&self) -> BatteryLevel {
+        self.battery_level
     }
-
-    pub fn ambient_sound_mode(&self) -> AmbientSoundMode {
-        self.ambient_sound_mode
+    pub fn is_battery_charging(&self) -> IsBatteryCharging {
+        self.is_battery_charging
     }
-
-    pub fn noise_canceling_mode(&self) -> NoiseCancelingMode {
-        self.noise_canceling_mode
-    }
-
     pub fn equalizer_configuration(&self) -> EqualizerConfiguration {
         self.equalizer_configuration
+    }
+    pub fn gender(&self) -> u8 {
+        self.gender
+    }
+    pub fn age_range(&self) -> AgeRange {
+        self.age_range
+    }
+    pub fn hear_id_switch(&self) -> bool {
+        self.hear_id.is_enabled
+    }
+    pub fn left_hear_id_volume_adjustments(&self) -> VolumeAdjustments {
+        self.hear_id.left
+    }
+    pub fn right_hear_id_volume_adjustments(&self) -> VolumeAdjustments {
+        self.hear_id.right
+    }
+    pub fn hear_id_time(&self) -> i32 {
+        self.hear_id.time
+    }
+    pub fn ambient_sound_mode(&self) -> AmbientSoundMode {
+        self.sound_modes.ambient_sound_mode
+    }
+    pub fn noise_canceling_mode(&self) -> NoiseCancelingMode {
+        self.sound_modes.noise_canceling_mode
+    }
+    pub fn transparency_mode(&self) -> TransparencyMode {
+        self.sound_modes.transparency_mode
+    }
+    pub fn custom_noise_canceling(&self) -> CustomNoiseCanceling {
+        self.sound_modes.custom_noise_canceling
+    }
+    pub fn firmware(&self) -> &str {
+        &self.firmware_version.0
+    }
+    pub fn serial_number(&self) -> &str {
+        &self.serial_number.0
     }
 }
 
 #[cfg(test)]
 mod tests {
     use crate::packets::{
-        inbound::StateUpdatePacket,
+        inbound::take_state_update_packet,
+        parsing::take_packet_header,
         structures::{
-            AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode, PresetEqualizerProfile,
-            VolumeAdjustments,
+            AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
+            PresetEqualizerProfile, TransparencyMode, VolumeAdjustments,
         },
     };
 
@@ -83,9 +146,15 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x30,
         ];
-        let packet = StateUpdatePacket::new(PACKET_BYTES).unwrap();
+        let input = take_packet_header(PACKET_BYTES).unwrap().0;
+        let packet = take_state_update_packet(input).unwrap().1;
         assert_eq!(AmbientSoundMode::Normal, packet.ambient_sound_mode());
         assert_eq!(NoiseCancelingMode::Transport, packet.noise_canceling_mode());
+        assert_eq!(TransparencyMode::default(), packet.transparency_mode());
+        assert_eq!(
+            CustomNoiseCanceling::new(0),
+            packet.custom_noise_canceling()
+        );
         assert_eq!(
             EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::Acoustic),
             packet.equalizer_configuration()
@@ -103,7 +172,8 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x30,
         ];
-        let packet = StateUpdatePacket::new(PACKET_BYTES).unwrap();
+        let input = take_packet_header(PACKET_BYTES).unwrap().0;
+        let packet = take_state_update_packet(input).unwrap().1;
         assert_eq!(AmbientSoundMode::Normal, packet.ambient_sound_mode());
         assert_eq!(NoiseCancelingMode::Transport, packet.noise_canceling_mode());
         assert_eq!(
@@ -124,7 +194,8 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x30,
         ];
-        let packet = StateUpdatePacket::new(PACKET_BYTES).unwrap();
+        let input = take_packet_header(PACKET_BYTES).unwrap().0;
+        let packet = take_state_update_packet(input).unwrap().1;
         assert_eq!(AmbientSoundMode::Normal, packet.ambient_sound_mode());
         assert_eq!(NoiseCancelingMode::Transport, packet.noise_canceling_mode());
         assert_eq!(
@@ -147,7 +218,8 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x30,
         ];
-        let packet = StateUpdatePacket::new(PACKET_BYTES).unwrap();
+        let input = take_packet_header(PACKET_BYTES).unwrap().0;
+        let packet = take_state_update_packet(input).unwrap().1;
         assert_eq!(AmbientSoundMode::Normal, packet.ambient_sound_mode());
         assert_eq!(NoiseCancelingMode::Transport, packet.noise_canceling_mode());
         assert_eq!(
@@ -169,8 +241,9 @@ mod tests {
             0x00, 0x00, 0x03, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x30,
         ];
-        let packet = StateUpdatePacket::new(PACKET_BYTES);
-        assert_eq!(packet, None);
+        let input = take_packet_header(PACKET_BYTES).unwrap().0;
+        let result = take_state_update_packet(input);
+        assert_eq!(true, result.is_err());
     }
 
     #[test]
@@ -180,18 +253,19 @@ mod tests {
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01, 0x46, 0x00, 0x05, 0x00, 0xfe, 0xfe, 0x3c,
             0xb4, 0x8f, 0xa0, 0x8e, 0xb4, 0x74, 0x88, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            //                valid range is 0x00 to 0x02
-            0x00, 0x00, 0x01, 0x03, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
+            //                valid range is 0x00 to 0x03
+            0x00, 0x00, 0x01, 0x04, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x30,
         ];
-        let packet = StateUpdatePacket::new(PACKET_BYTES);
-        assert_eq!(packet, None);
+        let input = take_packet_header(PACKET_BYTES).unwrap().0;
+        let result = take_state_update_packet(input);
+        assert_eq!(true, result.is_err());
     }
 
     #[test]
     fn it_does_not_parse_unknown_packet() {
         const PACKET_BYTES: &[u8] = &[0x01, 0x02, 0x03];
-        let packet = StateUpdatePacket::new(PACKET_BYTES);
-        assert_eq!(None, packet);
+        let result = take_state_update_packet(PACKET_BYTES);
+        assert_eq!(true, result.is_err());
     }
 }

@@ -18,8 +18,8 @@ import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification
-import com.oppzippy.openscq30.lib.AmbientSoundMode
-import com.oppzippy.openscq30.lib.NoiseCancelingMode
+import com.oppzippy.openscq30.libbindings.AmbientSoundMode
+import com.oppzippy.openscq30.libbindings.NoiseCancelingMode
 import com.oppzippy.openscq30.ui.quickpresets.composables.QuickPresetConfiguration
 import com.oppzippy.openscq30.ui.quickpresets.composables.QuickPresetSelection
 import com.oppzippy.openscq30.ui.quickpresets.models.QuickPresetEqualizerConfiguration

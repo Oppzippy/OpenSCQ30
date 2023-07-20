@@ -20,6 +20,7 @@ tracing = "0.1"
 strum = { version = "0.24", features = ["derive"] }
 weak-table = "0.3"
 macaddr = "1.0"
+nom = "7"
 
 [target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
 btleplug = { version = "0.10", optional = true }

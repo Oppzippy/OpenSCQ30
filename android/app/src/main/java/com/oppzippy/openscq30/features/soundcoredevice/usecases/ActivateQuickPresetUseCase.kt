@@ -3,8 +3,8 @@ package com.oppzippy.openscq30.features.soundcoredevice.usecases
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceConnectionManager
-import com.oppzippy.openscq30.lib.EqualizerConfiguration
-import com.oppzippy.openscq30.lib.VolumeAdjustments
+import com.oppzippy.openscq30.libbindings.EqualizerConfiguration
+import com.oppzippy.openscq30.libbindings.VolumeAdjustments
 import javax.inject.Inject
 
 class ActivateQuickPresetUseCase @Inject constructor(

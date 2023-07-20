@@ -19,9 +19,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
-import com.oppzippy.openscq30.lib.AmbientSoundMode
-import com.oppzippy.openscq30.lib.NoiseCancelingMode
-import com.oppzippy.openscq30.lib.PresetEqualizerProfile
+import com.oppzippy.openscq30.libbindings.AmbientSoundMode
+import com.oppzippy.openscq30.libbindings.NoiseCancelingMode
+import com.oppzippy.openscq30.libbindings.PresetEqualizerProfile
 import com.oppzippy.openscq30.libextensions.resources.toStringResource
 import com.oppzippy.openscq30.ui.equalizer.composables.CustomProfileSelection
 import com.oppzippy.openscq30.ui.quickpresets.models.QuickPresetEqualizerConfiguration

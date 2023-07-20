@@ -15,7 +15,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.lib.VolumeAdjustments
+import com.oppzippy.openscq30.libbindings.VolumeAdjustments
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 import java.math.BigDecimal
 import kotlin.math.roundToInt

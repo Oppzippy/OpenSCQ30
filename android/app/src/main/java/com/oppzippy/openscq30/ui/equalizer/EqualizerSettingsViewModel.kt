@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
 import com.oppzippy.openscq30.features.soundcoredevice.api.contentEquals
-import com.oppzippy.openscq30.lib.VolumeAdjustments
+import com.oppzippy.openscq30.libbindings.VolumeAdjustments
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.equalizer.models.EqualizerConfiguration
 import com.oppzippy.openscq30.ui.equalizer.models.EqualizerProfile
@@ -41,7 +41,7 @@ class EqualizerSettingsViewModel @Inject constructor(
     val valueTexts = _valueTexts.asStateFlow()
 
     var setRealEqualizerConfiguration: (
-        equalizerConfiguration: com.oppzippy.openscq30.lib.EqualizerConfiguration,
+        equalizerConfiguration: com.oppzippy.openscq30.libbindings.EqualizerConfiguration,
     ) -> Unit = {}
     private val uiStateFlow = MutableStateFlow<UiDeviceState.Connected?>(null)
 

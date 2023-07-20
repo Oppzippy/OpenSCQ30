@@ -1,7 +1,7 @@
 package com.oppzippy.openscq30.libextensions.resources
 
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.lib.PresetEqualizerProfile
+import com.oppzippy.openscq30.libbindings.PresetEqualizerProfile
 
 fun PresetEqualizerProfile.toStringResource(): Int {
     return when (this) {

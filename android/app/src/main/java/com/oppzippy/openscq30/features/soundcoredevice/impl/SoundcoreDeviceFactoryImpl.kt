@@ -6,7 +6,7 @@ import android.content.Context
 import android.util.Log
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
-import com.oppzippy.openscq30.lib.SoundcoreDeviceState
+import com.oppzippy.openscq30.libbindings.SoundcoreDeviceState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 

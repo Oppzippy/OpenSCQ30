@@ -1,6 +1,6 @@
-use crate::packets::structures::EqualizerConfiguration;
+use crate::packets::{checksum::calculate_checksum, structures::EqualizerConfiguration};
 
-use super::{outbound_packet::OutboundPacket, utils};
+use super::outbound_packet::OutboundPacket;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct SetEqualizerPacket {
@@ -20,7 +20,7 @@ impl OutboundPacket for SetEqualizerPacket {
         bytes.extend(self.configuration.profile_id().to_le_bytes());
         bytes.extend(self.configuration.volume_adjustments().bytes());
 
-        bytes.push(utils::calculate_checksum(&bytes));
+        bytes.push(calculate_checksum(&bytes));
 
         bytes
     }

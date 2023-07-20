@@ -11,8 +11,8 @@ pub fn inbound_packet_to_state_transformer(
 ) -> Option<Box<dyn DeviceStateTransformer + Send + Sync>> {
     match value {
         InboundPacket::StateUpdate(packet) => Some(Box::new(packet)),
-        InboundPacket::AmbientSoundModeUpdate(packet) => Some(Box::new(packet)),
-        InboundPacket::SetAmbientModeOk(_packet) => None,
+        InboundPacket::SoundModeUpdate(packet) => Some(Box::new(packet)),
+        InboundPacket::SetSoundModeOk(_packet) => None,
         InboundPacket::SetEqualizerOk(_packet) => None,
     }
 }

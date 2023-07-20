@@ -9,10 +9,8 @@ import {
   takeUntil,
 } from "rxjs";
 import {
-  AmbientSoundModeUpdatePacket,
+  InboundPacket,
   RequestStatePacket,
-  SetAmbientModeOkPacket,
-  SetEqualizerOkPacket,
   StateUpdatePacket,
 } from "../../wasm/pkg/openscq30_web_wasm";
 import { UnmodifiableBehaviorSubject } from "../UnmodifiableBehaviorSubject";
@@ -34,43 +32,6 @@ export class RealSoundcoreDevice implements SoundcoreDevice {
   public get state(): UnmodifiableBehaviorSubject<SoundcoreDeviceState> {
     return this._state;
   }
-
-  // TODO when incoming packets update the state, that triggers an outgoing packet to set
-  // the state to what we just received. Incoming packets should not trigger outgoing packets.
-  private packetHandlers: ((bytes: Uint8Array) => boolean)[] = [
-    (bytes) => {
-      const packet = AmbientSoundModeUpdatePacket.fromBytes(bytes);
-      if (packet) {
-        this._state.next({
-          ...this._state.value,
-          ambientSoundMode: packet.ambientSoundMode,
-          noiseCancelingMode: packet.noiseCancelingMode,
-        });
-        return true;
-      }
-      return false;
-    },
-    (bytes) => {
-      const packet = StateUpdatePacket.fromBytes(bytes);
-      if (packet) {
-        this._state.next({
-          ambientSoundMode: packet.ambientSoundMode,
-          noiseCancelingMode: packet.noiseCancelingMode,
-          equalizerConfiguration: packet.equalizerConfiguration,
-        });
-        return true;
-      }
-      return false;
-    },
-    (bytes) => {
-      const packet = SetAmbientModeOkPacket.fromBytes(bytes);
-      return !!packet;
-    },
-    (bytes) => {
-      const packet = SetEqualizerOkPacket.fromBytes(bytes);
-      return !!packet;
-    },
-  ];
 
   public constructor(
     connection: SoundcoreDeviceConnection,
@@ -144,13 +105,31 @@ export class RealSoundcoreDevice implements SoundcoreDevice {
     }
   }
 
+  // TODO when incoming packets update the state, that triggers an outgoing packet to set
+  // the state to what we just received. Incoming packets should not trigger outgoing packets.
   private onPacketReceived(bytes: Uint8Array) {
-    for (const handler of this.packetHandlers) {
-      if (handler(bytes)) {
-        return;
+    try {
+      const packet = new InboundPacket(bytes);
+      if (packet.ambientSoundModeUpdate) {
+        this._state.next({
+          ...this._state.value,
+          ambientSoundMode: packet.ambientSoundModeUpdate.ambientSoundMode,
+          noiseCancelingMode: packet.ambientSoundModeUpdate.noiseCancelingMode,
+        });
+      } else if (packet.stateUpdate) {
+        this._state.next({
+          ambientSoundMode: packet.stateUpdate.ambientSoundMode,
+          noiseCancelingMode: packet.stateUpdate.noiseCancelingMode,
+          equalizerConfiguration: packet.stateUpdate.equalizerConfiguration,
+        });
+      } else if (!!packet.setEqualizerOk || !!packet.setSoundModeOk) {
+        // ok
+      } else {
+        console.error("unhandled received packet, missing else if statement");
       }
+    } catch (err) {
+      console.error("error parsing packet", err);
     }
-    console.error("No handler found for packet", bytes);
   }
 }
 
@@ -163,7 +142,13 @@ async function createSoundcoreDevice(
   connection: SoundcoreDeviceConnection,
 ): Promise<RealSoundcoreDevice> {
   const initialStateObservable = connection.incomingPackets.pipe(
-    map((value) => StateUpdatePacket.fromBytes(new Uint8Array(value.buffer))),
+    map((value) => {
+      try {
+        return new InboundPacket(value).stateUpdate;
+      } catch (err) {
+        console.error("error parsing packet", err);
+      }
+    }),
     filter((packet): packet is StateUpdatePacket => packet != undefined),
     takeUntil(interval(4000)), // TODO retry on timeout
     first(),

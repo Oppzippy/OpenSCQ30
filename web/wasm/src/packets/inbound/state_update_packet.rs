@@ -1,49 +1,32 @@
 use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::packets::structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode};
+use openscq30_lib::packets::inbound::StateUpdatePacket as LibStateUpdatePacket;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[wasm_bindgen]
-pub struct StateUpdatePacket {
-    packet: Option<openscq30_lib::packets::inbound::StateUpdatePacket>,
-}
+pub struct StateUpdatePacket(LibStateUpdatePacket);
 
 #[wasm_bindgen]
 impl StateUpdatePacket {
-    #[wasm_bindgen(js_name = "fromBytes")]
-    pub fn from_bytes(bytes: &[u8]) -> Result<Option<StateUpdatePacket>, String> {
-        Ok(
-            openscq30_lib::packets::inbound::StateUpdatePacket::new(bytes)
-                .map(|packet| packet.into()),
-        )
-    }
-
     #[wasm_bindgen(getter = ambientSoundMode)]
     pub fn ambient_sound_mode(&self) -> AmbientSoundMode {
-        self.packet.unwrap().ambient_sound_mode().into()
+        self.0.ambient_sound_mode().into()
     }
 
     #[wasm_bindgen(getter = noiseCancelingMode)]
     pub fn noise_canceling_mode(&self) -> NoiseCancelingMode {
-        self.packet.unwrap().noise_canceling_mode().into()
+        self.0.noise_canceling_mode().into()
     }
 
     #[wasm_bindgen(getter = equalizerConfiguration)]
     pub fn equalizer_configuration(&self) -> EqualizerConfiguration {
-        self.packet.unwrap().equalizer_configuration().into()
+        self.0.equalizer_configuration().into()
     }
 }
 
-impl From<openscq30_lib::packets::inbound::StateUpdatePacket> for StateUpdatePacket {
-    fn from(packet: openscq30_lib::packets::inbound::StateUpdatePacket) -> Self {
-        Self {
-            packet: Some(packet),
-        }
-    }
-}
-
-impl From<StateUpdatePacket> for openscq30_lib::packets::inbound::StateUpdatePacket {
-    fn from(value: StateUpdatePacket) -> Self {
-        value.packet.unwrap()
+impl From<LibStateUpdatePacket> for StateUpdatePacket {
+    fn from(packet: LibStateUpdatePacket) -> Self {
+        Self(packet)
     }
 }

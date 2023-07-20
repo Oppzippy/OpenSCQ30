@@ -13,8 +13,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.util.Log
-import com.oppzippy.openscq30.lib.RequestStatePacket
-import com.oppzippy.openscq30.lib.SoundcoreDeviceUtils
+import com.oppzippy.openscq30.libbindings.RequestStatePacket
+import com.oppzippy.openscq30.libbindings.SoundcoreDeviceUtils
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 @SuppressLint("MissingPermission")
 @Suppress("DEPRECATION")
-class SoundcoreDeviceCallbackHandler(private val context: Context) : BluetoothGattCallback() {
+class SoundcoreDeviceCallbackHandler(context: Context) : BluetoothGattCallback() {
     private lateinit var gatt: BluetoothGatt
     private var readCharacteristic: BluetoothGattCharacteristic? = null
     private var writeCharacteristic: BluetoothGattCharacteristic? = null
