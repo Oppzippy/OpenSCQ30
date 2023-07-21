@@ -2,7 +2,7 @@ use std::cell::{Cell, OnceCell};
 
 use gtk::{
     gio,
-    glib::{self, clone, once_cell::sync::Lazy, subclass::Signal, Sender},
+    glib::{self, clone, Sender},
     prelude::*,
     subclass::{
         prelude::*,
@@ -18,7 +18,7 @@ use openscq30_lib::packets::structures::{
 };
 use strum::IntoEnumIterator;
 
-use crate::{actions::Action, widgets::Equalizer};
+use crate::{actions::Action, objects::BoxedVolumeAdjustments, widgets::Equalizer};
 use crate::{
     objects::{CustomEqualizerProfileObject, EqualizerProfileObject},
     widgets::EqualizerProfileDropdownRow,
@@ -57,13 +57,21 @@ impl EqualizerSettings {
 
     #[template_callback]
     fn handle_create_custom_profile(&self, _button: &gtk::Button) {
-        self.obj().emit_by_name(
-            "create-custom-equalizer-profile",
-            &[&CustomEqualizerProfileObject::new(
-                "", // TODO use a different object that doesn't have a name field
-                self.equalizer.volume_adjustments(),
-            )],
-        )
+        self.obj()
+            .activate_action(
+                "win.create-custom-equalizer-profile",
+                Some(
+                    &BoxedVolumeAdjustments(
+                        self.equalizer
+                            .volume_adjustments()
+                            .map(i16::from)
+                            .to_vec()
+                            .into(),
+                    )
+                    .to_variant(),
+                ),
+            )
+            .unwrap();
     }
 
     #[template_callback]
@@ -441,15 +449,6 @@ impl ObjectImpl for EqualizerSettings {
         self.parent_constructed();
         self.set_up_preset_profile();
         self.set_up_custom_profile();
-    }
-
-    fn signals() -> &'static [Signal] {
-        static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
-            vec![Signal::builder("create-custom-equalizer-profile")
-                .param_types([CustomEqualizerProfileObject::static_type()])
-                .build()]
-        });
-        SIGNALS.as_ref()
     }
 }
 impl WidgetImpl for EqualizerSettings {}

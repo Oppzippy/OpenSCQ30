@@ -20,3 +20,7 @@ impl CustomEqualizerProfileObject {
         self.imp().volume_adjustments.get()
     }
 }
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone, glib::Boxed, glib::Variant)]
+#[boxed_type(name = "OpenSCQ30VolumeAdjustments")]
+pub struct BoxedVolumeAdjustments(pub glib::FixedSizeVariantArray<Vec<i16>, i16>);

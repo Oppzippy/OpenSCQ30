@@ -1,10 +1,9 @@
 use std::cell::OnceCell;
 
 use gtk::{
-    glib::{self, once_cell::sync::Lazy, subclass::Signal, Sender},
-    prelude::ObjectExt,
+    glib::{self, Sender},
     subclass::{
-        prelude::{BoxImpl, ObjectImpl, ObjectSubclass, ObjectSubclassExt},
+        prelude::{BoxImpl, ObjectImpl, ObjectSubclass},
         widget::{
             CompositeTemplateCallbacksClass, CompositeTemplateClass,
             CompositeTemplateInitializingExt, WidgetImpl,
@@ -17,7 +16,6 @@ use gtk::subclass::widget::WidgetClassSubclassExt;
 
 use crate::{
     actions::Action,
-    objects::CustomEqualizerProfileObject,
     widgets::{EqualizerSettings, GeneralSettings},
 };
 
@@ -43,13 +41,7 @@ impl SelectedDeviceSettings {
 }
 
 #[gtk::template_callbacks]
-impl SelectedDeviceSettings {
-    #[template_callback]
-    fn handle_create_custom_equalizer_profile(&self, _profile: &CustomEqualizerProfileObject) {
-        self.obj()
-            .emit_by_name("create-custom-equalizer-profile", &[])
-    }
-}
+impl SelectedDeviceSettings {}
 
 #[glib::object_subclass]
 impl ObjectSubclass for SelectedDeviceSettings {
@@ -67,12 +59,6 @@ impl ObjectSubclass for SelectedDeviceSettings {
     }
 }
 
-impl ObjectImpl for SelectedDeviceSettings {
-    fn signals() -> &'static [glib::subclass::Signal] {
-        static SIGNALS: Lazy<Vec<Signal>> =
-            Lazy::new(|| vec![Signal::builder("create-custom-equalizer-profile").build()]);
-        SIGNALS.as_ref()
-    }
-}
+impl ObjectImpl for SelectedDeviceSettings {}
 impl WidgetImpl for SelectedDeviceSettings {}
 impl BoxImpl for SelectedDeviceSettings {}

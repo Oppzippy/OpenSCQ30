@@ -35,8 +35,6 @@
                         <child>
                             <object class="OpenSCQ30SelectedDeviceSettings"
                                 id="selected_device_settings">
-                                <signal name="create-custom-equalizer-profile"
-                                    handler="handle_create_custom_equalizer_profile" swapped="true" />
                             </object>
                         </child>
                     </object>

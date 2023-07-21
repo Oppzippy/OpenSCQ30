@@ -4,6 +4,7 @@ use std::{
 };
 
 use gtk::{
+    gio::SimpleAction,
     glib::{self, clone, ParamSpec, Properties, Sender, Value},
     prelude::*,
     subclass::{
@@ -23,7 +24,7 @@ use openscq30_lib::packets::structures::{AmbientSoundMode, NoiseCancelingMode};
 
 use crate::{
     actions::Action,
-    objects::{CustomEqualizerProfileObject, DeviceObject},
+    objects::{BoxedVolumeAdjustments, CustomEqualizerProfileObject, DeviceObject},
     settings::Settings,
     widgets::{DeviceSelection, LoadingScreen, SelectedDeviceSettings},
 };
@@ -88,8 +89,7 @@ impl MainWindow {
             .unwrap();
     }
 
-    #[template_callback]
-    fn handle_create_custom_equalizer_profile(&self, _: &SelectedDeviceSettings) {
+    fn create_custom_equalizer_profile(&self, volume_adjustments: [i8; 8]) {
         let obj = self.obj();
         let dialog = gtk::Dialog::with_buttons(
             Some("Create Custom Profile"),
@@ -124,17 +124,12 @@ impl MainWindow {
         }));
 
         dialog.connect_response(
-            clone!(@weak self as this, @weak entry => move |dialog, response| {
+            clone!(@weak self as this, @weak entry, @strong volume_adjustments => move |dialog, response| {
                 let name = entry.text().to_string();
                 dialog.destroy();
                 if response != ResponseType::Accept {
                     return;
                 }
-                let volume_adjustments = this
-                    .selected_device_settings
-                    .equalizer_configuration()
-                    .volume_adjustments()
-                    .adjustments();
 
                 let profile_with_name = CustomEqualizerProfileObject::new(&name, volume_adjustments);
                 this.sender.get().unwrap().send(Action::CreateCustomEqualizerProfile(profile_with_name)).unwrap();
@@ -174,6 +169,24 @@ impl ObjectSubclass for MainWindow {
 impl ObjectImpl for MainWindow {
     fn constructed(&self) {
         self.parent_constructed();
+
+        let action = SimpleAction::new(
+            "create-custom-equalizer-profile",
+            Some(&BoxedVolumeAdjustments::static_variant_type()),
+        );
+        action.connect_activate(
+            clone!(@weak self as this => move |_action, parameter| {
+                let boxed_volume_adjustments: BoxedVolumeAdjustments = parameter.unwrap().get().unwrap();
+                let volume_adjustments = boxed_volume_adjustments.0
+                    .iter()
+                    .map(|adjustment| *adjustment as i8)
+                    .collect::<Vec<i8>>()
+                    .try_into()
+                    .unwrap();
+                this.create_custom_equalizer_profile(volume_adjustments);
+            }),
+        );
+        self.obj().add_action(&action);
 
         self.obj()
             .bind_property("selected-device", self.obj().as_ref(), "title")
