@@ -17,7 +17,7 @@ export const AmbientSoundModeSelection = React.memo(function ({
   // Don't allow deselecting the button
   const onValueChangedNotNull = useCallback(
     (newValue: AmbientSoundMode | undefined) => {
-      if (newValue) {
+      if (newValue != undefined) {
         onValueChanged(newValue);
       }
     },

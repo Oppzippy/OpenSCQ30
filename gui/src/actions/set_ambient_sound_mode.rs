@@ -1,8 +1,9 @@
 use std::rc::Rc;
 
+use anyhow::bail;
 use openscq30_lib::{
     api::device::{Device, DeviceRegistry},
-    packets::structures::AmbientSoundMode,
+    packets::structures::{AmbientSoundMode, SoundModes},
 };
 
 use super::State;
@@ -18,7 +19,16 @@ where
         .selected_device()
         .ok_or_else(|| anyhow::anyhow!("no device is selected"))?;
 
-    device.set_ambient_sound_mode(ambient_sound_mode).await?;
+    let device_state = device.state().await;
+    let Some(sound_modes) = device_state.sound_modes else {
+        bail!("set_ambient_sound_mode: sound modes not supported");
+    };
+    let new_sound_modes = SoundModes {
+        ambient_sound_mode,
+        ..sound_modes
+    };
+
+    device.set_sound_modes(new_sound_modes).await?;
     Ok(())
 }
 
@@ -27,7 +37,10 @@ mod tests {
     use std::sync::Arc;
 
     use mockall::predicate;
-    use openscq30_lib::packets::structures::AmbientSoundMode;
+    use openscq30_lib::{
+        packets::structures::{AmbientSoundMode, SoundModes},
+        state::DeviceState,
+    };
 
     use crate::{
         actions::State,
@@ -43,9 +56,21 @@ mod tests {
         let (state, _receiver) = State::new(registry);
         let mut selected_device = MockDevice::new();
         selected_device
-            .expect_set_ambient_sound_mode()
+            .expect_state()
             .once()
-            .with(predicate::eq(AmbientSoundMode::NoiseCanceling))
+            .return_const(DeviceState {
+                sound_modes: Some(SoundModes {
+                    ambient_sound_mode: AmbientSoundMode::Normal,
+                    ..Default::default()
+                }),
+                ..Default::default()
+            });
+        selected_device
+            .expect_set_sound_modes()
+            .once()
+            .with(predicate::function(|sound_modes: &SoundModes| {
+                sound_modes.ambient_sound_mode == AmbientSoundMode::NoiseCanceling
+            }))
             .return_once(|_ambient_sound_mode| Ok(()));
         *state.selected_device.borrow_mut() = Some(Arc::new(selected_device));
 

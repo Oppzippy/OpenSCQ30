@@ -8,6 +8,12 @@ pub struct EqualizerConfiguration {
     volume_adjustments: VolumeAdjustments,
 }
 
+impl Default for EqualizerConfiguration {
+    fn default() -> Self {
+        Self::new_from_preset_profile(PresetEqualizerProfile::SoundcoreSignature)
+    }
+}
+
 impl EqualizerConfiguration {
     pub const CUSTOM_PROFILE_ID: u16 = 0xfefe;
 

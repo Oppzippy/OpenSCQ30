@@ -1,8 +1,9 @@
 use strum::{Display, FromRepr};
 
 #[repr(u8)]
-#[derive(FromRepr, Clone, Copy, Debug, PartialEq, Eq, Hash, Display)]
+#[derive(FromRepr, Clone, Copy, Debug, PartialEq, Eq, Hash, Display, Default)]
 pub enum NoiseCancelingMode {
+    #[default]
     Transport = 0,
     Outdoor = 1,
     Indoor = 2,

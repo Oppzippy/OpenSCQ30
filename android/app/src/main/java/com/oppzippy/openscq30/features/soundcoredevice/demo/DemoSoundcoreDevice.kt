@@ -2,11 +2,14 @@ package com.oppzippy.openscq30.features.soundcoredevice.demo
 
 import android.util.Log
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
-import com.oppzippy.openscq30.libbindings.AmbientSoundMode
-import com.oppzippy.openscq30.libbindings.EqualizerConfiguration
-import com.oppzippy.openscq30.libbindings.NoiseCancelingMode
-import com.oppzippy.openscq30.libbindings.PresetEqualizerProfile
-import com.oppzippy.openscq30.libbindings.SoundcoreDeviceState
+import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
+import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
+import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
+import com.oppzippy.openscq30.lib.bindings.SoundModes
+import com.oppzippy.openscq30.lib.bindings.TransparencyMode
+import com.oppzippy.openscq30.lib.wrapper.SoundcoreDeviceState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,9 +20,16 @@ class DemoSoundcoreDevice(
 ) : SoundcoreDevice {
     private val _stateFlow = MutableStateFlow(
         SoundcoreDeviceState(
-            AmbientSoundMode.Normal,
-            NoiseCancelingMode.Indoor,
-            EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
+            featureFlags = -1, // TODO
+            soundModes = SoundModes(
+                AmbientSoundMode.Normal,
+                NoiseCancelingMode.Indoor,
+                TransparencyMode.VocalMode,
+                CustomNoiseCanceling(0),
+            ),
+            equalizerConfiguration = EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
+            firmwareVersion = "01.00",
+            serialNumber = "0000000000000000",
         ),
     )
     override val stateFlow: Flow<SoundcoreDeviceState> = _stateFlow.asStateFlow()
@@ -29,16 +39,12 @@ class DemoSoundcoreDevice(
             return _stateFlow.value
         }
 
-    override fun setSoundMode(
-        newAmbientSoundMode: AmbientSoundMode,
-        newNoiseCancelingMode: NoiseCancelingMode,
-    ) {
+    override fun setSoundModes(newSoundModes: SoundModes) {
         Log.i(
             "DemoSoundcoreDevice",
-            "set ambient sound mode to $newAmbientSoundMode and noise canceling mode to $newNoiseCancelingMode",
+            "set ambient sound mode to ${newSoundModes.ambientSoundMode()} and noise canceling mode to ${newSoundModes.noiseCancelingMode()}",
         )
-        _stateFlow.value = _stateFlow.value.withAmbientSoundMode(newAmbientSoundMode)
-            .withNoiseCancelingMode(newNoiseCancelingMode)
+        _stateFlow.value = _stateFlow.value.copy(soundModes = newSoundModes)
     }
 
     override fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
@@ -46,7 +52,7 @@ class DemoSoundcoreDevice(
             "DemoSoundcoreDevice",
             "set equalizer configuration to $equalizerConfiguration",
         )
-        _stateFlow.value = _stateFlow.value.withEqualizerConfiguration(equalizerConfiguration)
+        _stateFlow.value = _stateFlow.value.copy(equalizerConfiguration = equalizerConfiguration)
     }
 
     override fun destroy() {}

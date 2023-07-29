@@ -11,8 +11,9 @@ use gtk::{
     traits::GtkWindowExt,
     Application,
 };
-use openscq30_lib::packets::structures::{
-    AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode,
+use openscq30_lib::{
+    packets::structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
+    state::DeviceState,
 };
 
 use crate::{
@@ -81,43 +82,41 @@ impl MainWindow {
         self.imp().set_sender(sender);
     }
 
+    pub fn set_state(&self, state: &DeviceState) {
+        self.set_equalizer_configuration(state.equalizer_configuration);
+        if let Some(sound_modes) = state.sound_modes {
+            self.set_ambient_sound_mode(sound_modes.ambient_sound_mode);
+            self.set_noise_canceling_mode(sound_modes.noise_canceling_mode);
+        }
+    }
+
     pub fn set_ambient_sound_mode(&self, ambient_sound_mode: AmbientSoundMode) {
         self.imp()
             .selected_device_settings
-            .imp()
-            .general_settings
             .set_ambient_sound_mode(ambient_sound_mode);
     }
 
     pub fn set_noise_canceling_mode(&self, noise_canceling_mode: NoiseCancelingMode) {
         self.imp()
             .selected_device_settings
-            .imp()
-            .general_settings
             .set_noise_canceling_mode(noise_canceling_mode);
     }
 
-    pub fn set_equalizer_configuration(&self, equalizer_configuration: &EqualizerConfiguration) {
+    pub fn set_equalizer_configuration(&self, equalizer_configuration: EqualizerConfiguration) {
         self.imp()
             .selected_device_settings
-            .imp()
-            .equalizer_settings
             .set_equalizer_configuration(equalizer_configuration);
     }
 
     pub fn equalizer_configuration(&self) -> EqualizerConfiguration {
         self.imp()
             .selected_device_settings
-            .imp()
-            .equalizer_settings
             .equalizer_configuration()
     }
 
     pub fn set_custom_profiles(&self, custom_profiles: Vec<CustomEqualizerProfileObject>) {
         self.imp()
             .selected_device_settings
-            .imp()
-            .equalizer_settings
             .set_custom_profiles(custom_profiles)
     }
 

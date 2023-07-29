@@ -2,10 +2,10 @@ package com.oppzippy.openscq30.ui.equalizer.models
 
 import android.util.Log
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.libbindings.EqualizerConfiguration
-import com.oppzippy.openscq30.libbindings.PresetEqualizerProfile
-import com.oppzippy.openscq30.libbindings.VolumeAdjustments
-import com.oppzippy.openscq30.libextensions.resources.toStringResource
+import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
+import com.oppzippy.openscq30.lib.bindings.VolumeAdjustments
+import com.oppzippy.openscq30.lib.extensions.resources.toStringResource
 
 enum class EqualizerProfile(val presetProfile: PresetEqualizerProfile?) {
     Custom(null),
@@ -49,19 +49,17 @@ enum class EqualizerProfile(val presetProfile: PresetEqualizerProfile?) {
             }
         }
     }
+}
 
-    companion object {
-        fun fromPresetProfile(presetProfile: PresetEqualizerProfile?): EqualizerProfile {
-            EqualizerProfile.values().forEach {
-                if (it.presetProfile == presetProfile) {
-                    return it
-                }
-            }
-            Log.e(
-                "EqualizerProfile",
-                "Couldn't find EqualizerProfile for preset $presetProfile, using Custom",
-            )
-            return Custom
+fun PresetEqualizerProfile?.toEqualizerProfile(): EqualizerProfile {
+    EqualizerProfile.values().forEach {
+        if (it.presetProfile == this) {
+            return it
         }
     }
+    Log.e(
+        "EqualizerProfile",
+        "Couldn't find EqualizerProfile for preset $this, using Custom",
+    )
+    return EqualizerProfile.Custom
 }

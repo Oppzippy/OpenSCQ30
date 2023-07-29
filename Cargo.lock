@@ -1458,6 +1458,7 @@ name = "openscq30_lib"
 version = "1.5.2"
 dependencies = [
  "async-trait",
+ "bitflags 2.3.3",
  "btleplug",
  "futures",
  "lazy_static",

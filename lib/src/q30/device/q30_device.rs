@@ -13,7 +13,7 @@ use crate::{
     api::connection::{Connection, ConnectionStatus},
     packets::{
         outbound::{SetEqualizerPacket, SetSoundModePacket},
-        structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
+        structures::{AmbientSoundMode, DeviceFeatureFlags, EqualizerConfiguration, SoundModes},
     },
 };
 use crate::{
@@ -60,7 +60,7 @@ where
                             let new_state = transformer.transform(&state);
                             if new_state != *state {
                                 trace!(event = "state_update", old_state = ?state, new_state = ?new_state);
-                                *state = new_state;
+                                *state = new_state.clone();
                                 if let Err(err) = sender_copy.send(new_state) {
                                     trace!("failed to broadcast state change: {err}");
                                 }
@@ -137,77 +137,77 @@ where
         self.connection.connection_status()
     }
 
-    async fn set_ambient_sound_mode(
-        &self,
-        ambient_sound_mode: AmbientSoundMode,
-    ) -> crate::Result<()> {
+    async fn state(&self) -> DeviceState {
+        self.state.read().await.clone()
+    }
+
+    async fn set_sound_modes(&self, sound_modes: SoundModes) -> crate::Result<()> {
         let mut state = self.state.write().await;
-        self.connection
-            .write_with_response(
-                &SetSoundModePacket {
-                    ambient_sound_mode,
-                    noise_canceling_mode: state.noise_canceling_mode,
-                    transparency_mode: state.transparency_mode,
-                    custom_noise_canceling: state.custom_noise_canceling,
-                }
-                .bytes(),
-            )
-            .await?;
-        *state = DeviceState {
-            ambient_sound_mode,
-            ..*state
+        let Some(prev_sound_modes) = state.sound_modes else {
+            return Err(crate::Error::FeatureNotSupported {
+                feature_name: "sound modes",
+            });
         };
-        Ok(())
-    }
-
-    async fn ambient_sound_mode(&self) -> AmbientSoundMode {
-        self.state.read().await.ambient_sound_mode
-    }
-
-    async fn set_noise_canceling_mode(
-        &self,
-        noise_canceling_mode: NoiseCancelingMode,
-    ) -> crate::Result<()> {
-        let ambient_sound_mode = self.ambient_sound_mode().await;
-        let mut state = self.state.write().await;
         // It will bug and put us in noise canceling mode without changing the ambient sound mode id if we change the
         // noise canceling mode with the ambient sound mode being normal or transparency. To work around this, we must
         // set the ambient sound mode to Noise Canceling, and then change it back.
+        let needs_noise_canceling = prev_sound_modes.ambient_sound_mode
+            != AmbientSoundMode::NoiseCanceling
+            && prev_sound_modes.noise_canceling_mode != sound_modes.noise_canceling_mode;
+        if needs_noise_canceling {
+            self.connection
+                .write_with_response(
+                    &SetSoundModePacket {
+                        ambient_sound_mode: AmbientSoundMode::NoiseCanceling,
+                        noise_canceling_mode: prev_sound_modes.noise_canceling_mode,
+                        transparency_mode: prev_sound_modes.transparency_mode,
+                        custom_noise_canceling: prev_sound_modes.custom_noise_canceling,
+                    }
+                    .bytes(),
+                )
+                .await?;
+        }
+
+        // If we need to temporarily be in noise canceling mode to work around the bug, set all fields besides
+        // ambient_sound_mode. Otherwise, we set all fields in one go.
         self.connection
             .write_with_response(
                 &SetSoundModePacket {
-                    ambient_sound_mode: AmbientSoundMode::NoiseCanceling,
-                    noise_canceling_mode,
-                    transparency_mode: state.transparency_mode,
-                    custom_noise_canceling: state.custom_noise_canceling,
+                    ambient_sound_mode: if needs_noise_canceling {
+                        AmbientSoundMode::NoiseCanceling
+                    } else {
+                        sound_modes.ambient_sound_mode
+                    },
+                    noise_canceling_mode: sound_modes.noise_canceling_mode,
+                    transparency_mode: sound_modes.transparency_mode,
+                    custom_noise_canceling: sound_modes.custom_noise_canceling,
                 }
                 .bytes(),
             )
             .await?;
 
-        // Set us back to the ambient sound mode we were originally in
-        if ambient_sound_mode != AmbientSoundMode::NoiseCanceling {
+        // Switch to the target sound mode if we didn't do it in the previous step.
+        // If the target sound mode is noise canceling, we already set it to that, so no change needed.
+        if needs_noise_canceling
+            && sound_modes.ambient_sound_mode != AmbientSoundMode::NoiseCanceling
+        {
             self.connection
                 .write_with_response(
                     &SetSoundModePacket {
-                        ambient_sound_mode,
-                        noise_canceling_mode,
-                        transparency_mode: state.transparency_mode,
-                        custom_noise_canceling: state.custom_noise_canceling,
+                        ambient_sound_mode: sound_modes.ambient_sound_mode,
+                        noise_canceling_mode: sound_modes.noise_canceling_mode,
+                        transparency_mode: sound_modes.transparency_mode,
+                        custom_noise_canceling: sound_modes.custom_noise_canceling,
                     }
                     .bytes(),
                 )
                 .await?;
         }
         *state = DeviceState {
-            noise_canceling_mode,
-            ..*state
+            sound_modes: Some(sound_modes),
+            ..state.clone()
         };
         Ok(())
-    }
-
-    async fn noise_canceling_mode(&self) -> NoiseCancelingMode {
-        self.state.read().await.noise_canceling_mode
     }
 
     async fn set_equalizer_configuration(
@@ -215,18 +215,24 @@ where
         equalizer_configuration: EqualizerConfiguration,
     ) -> crate::Result<()> {
         let mut state = self.state.write().await;
-        self.connection
-            .write_with_response(&SetEqualizerPacket::new(equalizer_configuration).bytes())
-            .await?;
+        if state
+            .feaure_flags
+            .contains(DeviceFeatureFlags::TWO_CHANNEL_EQUALIZER)
+        {
+            Err(crate::Error::FeatureNotSupported {
+                feature_name: "two channel equalizer",
+            })
+        } else {
+            self.connection
+                .write_with_response(&SetEqualizerPacket::new(equalizer_configuration).bytes())
+                .await?;
+            Ok(())
+        }?;
         *state = DeviceState {
             equalizer_configuration,
-            ..*state
+            ..state.clone()
         };
         Ok(())
-    }
-
-    async fn equalizer_configuration(&self) -> EqualizerConfiguration {
-        self.state.read().await.equalizer_configuration
     }
 }
 
@@ -294,16 +300,18 @@ mod tests {
             sender.send(example_state_update_packet()).await.unwrap();
         });
         let device = Q30Device::new(connection).await.unwrap();
-        assert_eq!(AmbientSoundMode::Normal, device.ambient_sound_mode().await);
+        let state = device.state().await;
+        let sound_modes = state.sound_modes.unwrap();
+        assert_eq!(AmbientSoundMode::Normal, sound_modes.ambient_sound_mode);
         assert_eq!(
             NoiseCancelingMode::Transport,
-            device.noise_canceling_mode().await
+            sound_modes.noise_canceling_mode
         );
         assert_eq!(
             EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
                 -60, 60, 23, 40, 22, 60, -4, 16
             ])),
-            device.equalizer_configuration().await
+            state.equalizer_configuration
         )
     }
 
@@ -346,10 +354,12 @@ mod tests {
                 .unwrap();
         });
         let device = Q30Device::new(connection).await.unwrap();
-        assert_eq!(AmbientSoundMode::Normal, device.ambient_sound_mode().await);
+        let state = device.state().await;
+        let sound_modes = state.sound_modes.unwrap();
+        assert_eq!(AmbientSoundMode::Normal, sound_modes.ambient_sound_mode);
         assert_eq!(
             NoiseCancelingMode::Transport,
-            device.noise_canceling_mode().await
+            sound_modes.noise_canceling_mode
         );
 
         tokio::spawn(async move {
@@ -364,13 +374,16 @@ mod tests {
         // wait for the packet to be handled asynchronously
         tokio::time::sleep(Duration::from_millis(100)).await;
 
+        let state = device.state().await;
+        let sound_modes = state.sound_modes.unwrap();
+
         assert_eq!(
             AmbientSoundMode::NoiseCanceling,
-            device.ambient_sound_mode().await
+            sound_modes.ambient_sound_mode,
         );
         assert_eq!(
             NoiseCancelingMode::Outdoor,
-            device.noise_canceling_mode().await
+            sound_modes.noise_canceling_mode,
         );
     }
 }

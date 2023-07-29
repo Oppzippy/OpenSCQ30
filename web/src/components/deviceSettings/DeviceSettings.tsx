@@ -1,23 +1,21 @@
 import { Stack } from "@mui/material";
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  AmbientSoundMode,
   EqualizerConfiguration,
-  NoiseCancelingMode,
   PresetEqualizerProfile,
   VolumeAdjustments,
 } from "../../../wasm/pkg/openscq30_web_wasm";
 import { SoundcoreDevice } from "../../bluetooth/SoundcoreDevice";
+import { SoundModesState } from "../../bluetooth/SoundcoreDeviceState";
+import { useToastErrorHandler } from "../../hooks/useToastErrorHandler";
 import { EqualizerSettings } from "../equalizer/EqualizerSettings";
 import { NewCustomProfileDialog } from "../equalizer/NewCustomProfileDialog";
-import { AmbientSoundModeSelection } from "../soundMode/AmbientSoundModeSelection";
-import { NoiseCancelingModeSelection } from "../soundMode/NoiseCancelingModeSelection";
+import { SoundModeSelection } from "./SoundModeSelection";
 import { useCreateCustomProfileWithName } from "./hooks/useCreateCustomProfileWithName";
 import { useCustomEqualizerProfiles } from "./hooks/useCustomEqualizerProfiles";
 import { useDeleteCustomProfile } from "./hooks/useDeleteCustomProfile";
 import { useDisplayState } from "./hooks/useDisplayState";
-import { useTranslation } from "react-i18next";
-import { useToastErrorHandler } from "../../hooks/useToastErrorHandler";
 
 export function DeviceSettings({
   device,
@@ -86,21 +84,11 @@ export function DeviceSettings({
     ...deviceState.equalizerConfiguration.volumeAdjustments.adjustments,
   ].map((volume) => volume / 10);
 
-  const setAmbientSoundMode = useCallback(
-    (newAmbientSoundMode: AmbientSoundMode) => {
+  const setSoundModes = useCallback(
+    (soundModes: SoundModesState) => {
       setDeviceState((state) => ({
         ...state,
-        ambientSoundMode: newAmbientSoundMode,
-      }));
-    },
-    [setDeviceState],
-  );
-
-  const setNoiseCancelingMode = useCallback(
-    (newNoiseCancelingMode: NoiseCancelingMode) => {
-      setDeviceState((state) => ({
-        ...state,
-        noiseCancelingMode: newNoiseCancelingMode,
+        soundModes: soundModes,
       }));
     },
     [setDeviceState],
@@ -123,14 +111,12 @@ export function DeviceSettings({
 
   return (
     <Stack spacing={2}>
-      <AmbientSoundModeSelection
-        value={deviceState.ambientSoundMode}
-        onValueChanged={setAmbientSoundMode}
-      />
-      <NoiseCancelingModeSelection
-        value={deviceState.noiseCancelingMode}
-        onValueChanged={setNoiseCancelingMode}
-      />
+      {deviceState.soundModes && (
+        <SoundModeSelection
+          soundModes={deviceState.soundModes}
+          setSoundModes={setSoundModes}
+        />
+      )}
       <EqualizerSettings
         profile={deviceState.equalizerConfiguration.presetProfile ?? -1}
         onProfileSelected={setSelectedPresetProfile}

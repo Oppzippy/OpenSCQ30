@@ -78,12 +78,12 @@ fun OpenSCQ30Root(
                         onBack = { viewModel.deselectDevice() },
                         onAmbientSoundModeChange = {
                             withErrorToast(context) {
-                                viewModel.setAmbientSoundMode(it)
+                                viewModel.setSoundModes(ambientSoundMode = it)
                             }
                         },
                         onNoiseCancelingModeChange = {
                             withErrorToast(context) {
-                                viewModel.setNoiseCancelingMode(it)
+                                viewModel.setSoundModes(noiseCancelingMode = it)
                             }
                         },
                         onEqualizerConfigurationChange = {

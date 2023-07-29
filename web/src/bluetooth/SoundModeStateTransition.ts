@@ -10,24 +10,28 @@ export async function transitionSoundMode(
   previousState: SoundcoreDeviceState,
   newState: SoundcoreDeviceState,
 ) {
+  const previousSoundModes = previousState.soundModes;
+  const newSoundModes = newState.soundModes;
+  if (previousSoundModes == null || newSoundModes == null) return;
+
   if (
-    previousState.ambientSoundMode == newState.ambientSoundMode &&
-    previousState.noiseCancelingMode == newState.noiseCancelingMode
+    previousSoundModes.ambientSoundMode == newSoundModes.ambientSoundMode &&
+    previousSoundModes.noiseCancelingMode == newSoundModes.noiseCancelingMode
   ) {
     return;
   }
   const didNoiseCancelingModeChange =
-    previousState.noiseCancelingMode != newState.noiseCancelingMode;
+    previousSoundModes.noiseCancelingMode != newSoundModes.noiseCancelingMode;
   // When changing noise canceling mode with ambient sound mode not set to noise canceling, things get buggy
   // First switch into noise canceling mode if needed
   if (
     didNoiseCancelingModeChange &&
-    previousState.ambientSoundMode != AmbientSoundMode.NoiseCanceling
+    previousSoundModes.ambientSoundMode != AmbientSoundMode.NoiseCanceling
   ) {
     await connection.write(
       new SetSoundModePacket(
         AmbientSoundMode.NoiseCanceling,
-        previousState.noiseCancelingMode,
+        previousSoundModes.noiseCancelingMode,
       ).bytes(),
     );
   }
@@ -37,19 +41,19 @@ export async function transitionSoundMode(
     new SetSoundModePacket(
       didNoiseCancelingModeChange
         ? AmbientSoundMode.NoiseCanceling
-        : newState.ambientSoundMode,
-      newState.noiseCancelingMode,
+        : newSoundModes.ambientSoundMode,
+      newSoundModes.noiseCancelingMode,
     ).bytes(),
   );
   // Set the ambient sound mode to the new state if we didn't already do it in the previous step
   if (
     didNoiseCancelingModeChange &&
-    newState.ambientSoundMode != AmbientSoundMode.NoiseCanceling
+    newSoundModes.ambientSoundMode != AmbientSoundMode.NoiseCanceling
   ) {
     await connection.write(
       new SetSoundModePacket(
-        newState.ambientSoundMode,
-        newState.noiseCancelingMode,
+        newSoundModes.ambientSoundMode,
+        newSoundModes.noiseCancelingMode,
       ).bytes(),
     );
   }

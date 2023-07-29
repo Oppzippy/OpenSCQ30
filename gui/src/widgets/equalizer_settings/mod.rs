@@ -23,7 +23,7 @@ impl EqualizerSettings {
         self.imp().set_sender(sender);
     }
 
-    pub fn set_equalizer_configuration(&self, equalizer_configuration: &EqualizerConfiguration) {
+    pub fn set_equalizer_configuration(&self, equalizer_configuration: EqualizerConfiguration) {
         self.imp()
             .set_equalizer_configuration(equalizer_configuration);
     }
@@ -58,7 +58,7 @@ mod tests {
         let settings = EqualizerSettings::new();
         let (sender, _receiver) = MainContext::channel(Priority::default());
         settings.set_sender(sender);
-        settings.set_equalizer_configuration(&EqualizerConfiguration::new_from_preset_profile(
+        settings.set_equalizer_configuration(EqualizerConfiguration::new_from_preset_profile(
             PresetEqualizerProfile::SoundcoreSignature,
         ));
         assert_eq!(
@@ -77,7 +77,7 @@ mod tests {
         let settings = EqualizerSettings::new();
         let (sender, _receiver) = MainContext::channel(Priority::default());
         settings.set_sender(sender);
-        settings.set_equalizer_configuration(&EqualizerConfiguration::new_custom_profile(
+        settings.set_equalizer_configuration(EqualizerConfiguration::new_custom_profile(
             VolumeAdjustments::new([0, 0, 0, 0, 0, 0, 0, 0]),
         ));
         assert_eq!(
@@ -100,7 +100,7 @@ mod tests {
             "test profile",
             [0, 0, 0, 0, 0, 0, 0, 0],
         )]);
-        settings.set_equalizer_configuration(&EqualizerConfiguration::new_custom_profile(
+        settings.set_equalizer_configuration(EqualizerConfiguration::new_custom_profile(
             VolumeAdjustments::new([0, 0, 0, 0, 0, 0, 0, 0]),
         ));
         assert_eq!(

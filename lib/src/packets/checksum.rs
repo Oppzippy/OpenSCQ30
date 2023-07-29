@@ -1,6 +1,6 @@
-pub fn calculate_checksum(checksum_data: &[u8]) -> u8 {
+pub fn calculate_checksum<'a>(checksum_data: impl IntoIterator<Item = &'a u8>) -> u8 {
     checksum_data
-        .iter()
+        .into_iter()
         .fold(0_u8, |acc, curr| acc.wrapping_add(*curr))
 }
 

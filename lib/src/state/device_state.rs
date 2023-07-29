@@ -1,34 +1,42 @@
+use std::borrow::Borrow;
+
 use crate::packets::{
-    inbound::StateUpdatePacket,
+    inbound::state_update_packet::StateUpdatePacket,
     structures::{
-        AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
-        TransparencyMode,
+        AgeRange, Battery, CustomButtonModel, DeviceFeatureFlags, EqualizerConfiguration,
+        FirmwareVersion, HearId, SerialNumber, SoundModes,
     },
 };
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash, Default)]
 pub struct DeviceState {
-    pub ambient_sound_mode: AmbientSoundMode,
-    pub noise_canceling_mode: NoiseCancelingMode,
-    pub transparency_mode: TransparencyMode,
-    pub custom_noise_canceling: CustomNoiseCanceling,
+    pub feaure_flags: DeviceFeatureFlags,
+    pub battery: Battery,
     pub equalizer_configuration: EqualizerConfiguration,
+    pub sound_modes: Option<SoundModes>,
+    pub age_range: Option<AgeRange>,
+    pub custom_hear_id: Option<HearId>,
+    pub custom_button_model: Option<CustomButtonModel>,
+    pub firmware_version: Option<FirmwareVersion>,
+    pub serial_number: Option<SerialNumber>,
 }
 
-impl From<&StateUpdatePacket> for DeviceState {
-    fn from(packet: &StateUpdatePacket) -> Self {
+impl<T> From<T> for DeviceState
+where
+    T: Borrow<StateUpdatePacket>,
+{
+    fn from(packet: T) -> Self {
+        let packet: &StateUpdatePacket = packet.borrow();
         Self {
-            ambient_sound_mode: packet.ambient_sound_mode(),
-            noise_canceling_mode: packet.noise_canceling_mode(),
-            transparency_mode: packet.transparency_mode(),
-            custom_noise_canceling: packet.custom_noise_canceling(),
-            equalizer_configuration: packet.equalizer_configuration(),
+            feaure_flags: packet.feature_flags,
+            battery: packet.battery,
+            equalizer_configuration: packet.equalizer_configuration,
+            sound_modes: packet.sound_modes,
+            age_range: packet.age_range,
+            custom_hear_id: packet.custom_hear_id,
+            custom_button_model: packet.custom_button_model,
+            firmware_version: packet.firmware_version.clone(),
+            serial_number: packet.serial_number.clone(),
         }
-    }
-}
-
-impl From<StateUpdatePacket> for DeviceState {
-    fn from(packet: StateUpdatePacket) -> Self {
-        (&packet).into()
     }
 }

@@ -1,6 +1,6 @@
 use std::array;
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, Default)]
 pub struct VolumeAdjustments {
     volume_adjustments: [i8; 8],
 }
@@ -160,6 +160,12 @@ pub fn apply_drc(volume_adjustments: VolumeAdjustments) -> VolumeAdjustments {
         .map(|band| band + pre_drc_subtraction)
         .map(|band| (band / 10.0) as i8);
     VolumeAdjustments::new(byte_bands)
+}
+
+impl From<VolumeAdjustments> for [i8; 8] {
+    fn from(volume_adjustments: VolumeAdjustments) -> Self {
+        volume_adjustments.adjustments()
+    }
 }
 
 #[cfg(test)]

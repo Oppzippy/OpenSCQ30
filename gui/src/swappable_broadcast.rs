@@ -7,7 +7,7 @@ use tracing::error;
 #[derive(Debug)]
 pub struct SwappableBroadcastReceiver<T>
 where
-    T: Clone + Copy,
+    T: Clone,
 {
     receiver: Mutex<Option<broadcast::Receiver<T>>>,
     new_receiver_receiver: Mutex<mpsc::Receiver<Option<broadcast::Receiver<T>>>>,
@@ -16,7 +16,7 @@ where
 
 impl<T> SwappableBroadcastReceiver<T>
 where
-    T: Clone + Copy,
+    T: Clone,
 {
     pub fn new() -> Self {
         let (sender, receiver) = mpsc::channel(10);

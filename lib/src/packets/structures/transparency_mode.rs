@@ -1,9 +1,10 @@
 use strum::FromRepr;
 
 #[repr(u8)]
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, FromRepr)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, FromRepr, Default)]
 pub enum TransparencyMode {
     FullyTransparent = 0,
+    #[default]
     VocalMode = 1,
 }
 
@@ -14,11 +15,5 @@ impl TransparencyMode {
 
     pub fn from_id(id: u8) -> Option<Self> {
         Self::from_repr(id)
-    }
-}
-
-impl Default for TransparencyMode {
-    fn default() -> Self {
-        TransparencyMode::VocalMode
     }
 }

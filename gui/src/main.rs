@@ -225,7 +225,7 @@ fn build_ui_2(
                     StateUpdate::SetLoading(is_loading) => main_window.set_loading(is_loading),
                     StateUpdate::SetAmbientSoundMode(ambient_sound_mode) => main_window.set_ambient_sound_mode(ambient_sound_mode),
                     StateUpdate::SetNoiseCancelingMode(noise_canceling_mode) => main_window.set_noise_canceling_mode(noise_canceling_mode),
-                    StateUpdate::SetEqualizerConfiguration(equalizer_configuration) => main_window.set_equalizer_configuration(&equalizer_configuration),
+                    StateUpdate::SetEqualizerConfiguration(equalizer_configuration) => main_window.set_equalizer_configuration(equalizer_configuration),
                     StateUpdate::SetSelectedDevice(device) => main_window.set_property("selected-device", device),
                     StateUpdate::SetCustomEqualizerProfiles(custom_profiles) => main_window.set_custom_profiles(custom_profiles),
                     StateUpdate::AddToast(text) => main_window.add_toast(Toast::builder().title(&text).timeout(15).build()),
@@ -278,6 +278,9 @@ fn build_ui_2(
                 deselect_device();
                 send_toast("Device Didn't Respond".to_string());
             }
+            Some(openscq30_lib::Error::FeatureNotSupported { feature_name }) => send_toast(
+                format!("Tried to use feature not supported by device: {feature_name}"),
+            ),
             Some(openscq30_lib::Error::Other { .. }) | None => {
                 state
                     .state_update_sender
@@ -316,6 +319,7 @@ fn build_ui_2(
                     },
                     Action::SelectCustomEqualizerProfile(profile) => {
                         actions::select_custom_equalizer_configuration(&state, &settings.config, &profile)
+                        .await
                         .context("custom equalizer profile selected")
                     },
                     Action::CreateCustomEqualizerProfile(profile) => {
@@ -343,8 +347,7 @@ fn build_ui_2(
     main_context.spawn_local(clone!(@weak main_window, @strong state => async move {
         loop {
             let next_state = state.state_update_receiver.next().await;
-            main_window.set_ambient_sound_mode(next_state.ambient_sound_mode);
-            main_window.set_noise_canceling_mode(next_state.noise_canceling_mode);
+            main_window.set_state(&next_state);
         }
     }));
 

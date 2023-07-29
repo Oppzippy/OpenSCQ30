@@ -9,8 +9,18 @@ use tokio::sync::oneshot;
 
 use super::State;
 
-#[tracing::instrument(level = "trace", skip(state))]
 pub async fn set_equalizer_configuration<T>(
+    state: &Rc<State<T>>,
+    equalizer_configuration: impl Into<EqualizerConfiguration>,
+) -> anyhow::Result<()>
+where
+    T: DeviceRegistry + Send + Sync + 'static,
+{
+    set_equalizer_configuration_impl(state, equalizer_configuration.into()).await
+}
+
+#[tracing::instrument(level = "trace", skip(state))]
+async fn set_equalizer_configuration_impl<T>(
     state: &Rc<State<T>>,
     equalizer_configuration: EqualizerConfiguration,
 ) -> anyhow::Result<()>
@@ -76,9 +86,9 @@ mod tests {
         selected_device
             .expect_set_equalizer_configuration()
             .once()
-            .with(predicate::eq(
+            .with(predicate::eq(EqualizerConfiguration::from(
                 EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::Acoustic),
-            ))
+            )))
             .return_once(|_ambient_sound_mode| Ok(()));
         *state.selected_device.borrow_mut() = Some(Arc::new(selected_device));
 
@@ -99,9 +109,9 @@ mod tests {
         selected_device
             .expect_set_equalizer_configuration()
             .once()
-            .with(predicate::eq(
+            .with(predicate::eq(EqualizerConfiguration::from(
                 EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::Acoustic),
-            ))
+            )))
             .return_once(|_ambient_sound_mode| Ok(()));
         *state.selected_device.borrow_mut() = Some(Arc::new(selected_device));
 

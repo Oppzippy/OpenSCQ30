@@ -21,7 +21,7 @@ import {
   SoundcoreDeviceConnection,
   selectDeviceConnection,
 } from "./SoundcoreDeviceConnection";
-import { SoundcoreDeviceState } from "./SoundcoreDeviceState";
+import { SoundModesState, SoundcoreDeviceState } from "./SoundcoreDeviceState";
 
 export class RealSoundcoreDevice implements SoundcoreDevice {
   private readonly connection: SoundcoreDeviceConnection;
@@ -55,12 +55,8 @@ export class RealSoundcoreDevice implements SoundcoreDevice {
     return this.connection.name;
   }
 
-  public get ambientSoundMode() {
-    return this._state.value.ambientSoundMode;
-  }
-
-  public get noiseCancelingMode() {
-    return this._state.value.noiseCancelingMode;
+  public get soundModes() {
+    return this._state.value.soundModes;
   }
 
   public get equalizerConfiguration() {
@@ -88,8 +84,7 @@ export class RealSoundcoreDevice implements SoundcoreDevice {
     await transitionSoundMode(this.connection, this.state.value, newState);
     this._state.next({
       ...this.state.value,
-      ambientSoundMode: newState.ambientSoundMode,
-      noiseCancelingMode: newState.noiseCancelingMode,
+      soundModes: newState.soundModes,
     });
     await transitionEqualizerState(this.connection, this.state.value, newState);
     this._state.next({
@@ -113,13 +108,23 @@ export class RealSoundcoreDevice implements SoundcoreDevice {
       if (packet.ambientSoundModeUpdate) {
         this._state.next({
           ...this._state.value,
-          ambientSoundMode: packet.ambientSoundModeUpdate.ambientSoundMode,
-          noiseCancelingMode: packet.ambientSoundModeUpdate.noiseCancelingMode,
+          soundModes: {
+            ambientSoundMode: packet.ambientSoundModeUpdate.ambientSoundMode,
+            noiseCancelingMode:
+              packet.ambientSoundModeUpdate.noiseCancelingMode,
+          },
         });
       } else if (packet.stateUpdate) {
+        let soundModes: SoundModesState | undefined;
+        if (packet.stateUpdate.soundModes) {
+          soundModes = {
+            ambientSoundMode: packet.stateUpdate.soundModes.ambient_sound_mode,
+            noiseCancelingMode:
+              packet.stateUpdate.soundModes.noise_canceling_mode,
+          };
+        }
         this._state.next({
-          ambientSoundMode: packet.stateUpdate.ambientSoundMode,
-          noiseCancelingMode: packet.stateUpdate.noiseCancelingMode,
+          soundModes,
           equalizerConfiguration: packet.stateUpdate.equalizerConfiguration,
         });
       } else if (!!packet.setEqualizerOk || !!packet.setSoundModeOk) {
@@ -157,9 +162,16 @@ async function createSoundcoreDevice(
     connection.write(new RequestStatePacket().bytes()),
     firstValueFrom(initialStateObservable),
   ]);
+
+  let soundModes: SoundModesState | undefined;
+  if (stateUpdatePacket.soundModes) {
+    soundModes = {
+      ambientSoundMode: stateUpdatePacket.soundModes.ambient_sound_mode,
+      noiseCancelingMode: stateUpdatePacket.soundModes.noise_canceling_mode,
+    };
+  }
   const initialState = {
-    ambientSoundMode: stateUpdatePacket.ambientSoundMode,
-    noiseCancelingMode: stateUpdatePacket.noiseCancelingMode,
+    soundModes,
     equalizerConfiguration: stateUpdatePacket.equalizerConfiguration,
   };
   return new RealSoundcoreDevice(connection, initialState);

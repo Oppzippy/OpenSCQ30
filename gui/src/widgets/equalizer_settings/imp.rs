@@ -144,15 +144,17 @@ impl EqualizerSettings {
         }
     }
 
-    pub fn set_equalizer_configuration(&self, configuration: &EqualizerConfiguration) {
+    pub fn set_equalizer_configuration(&self, equalizer_configuration: EqualizerConfiguration) {
         self.equalizer
-            .set_volumes(configuration.volume_adjustments().adjustments());
+            .set_volumes(equalizer_configuration.volume_adjustments().into());
         let profile_index = self
             .profiles
             .get()
             .expect("profiles should have been intitialized already")
             .iter::<EqualizerProfileObject>()
-            .position(|profile| profile.unwrap().profile_id() as u16 == configuration.profile_id())
+            .position(|profile| {
+                profile.unwrap().profile_id() as u16 == equalizer_configuration.profile_id()
+            })
             .unwrap_or(0)
             .try_into()
             .expect("could not convert usize to u32");
@@ -382,7 +384,7 @@ impl EqualizerSettings {
                     .downcast()
                     .expect("selected item must be an EqualizerProfileObject");
                 let profile_id = selected_item.profile_id() as u16;
-                let configuration = if profile_id != EqualizerConfiguration::CUSTOM_PROFILE_ID {
+                let equalizer_configuration = if profile_id != EqualizerConfiguration::CUSTOM_PROFILE_ID {
                     let preset_profile = PresetEqualizerProfile::from_id(profile_id).unwrap_or_else(|| {
                         panic!("invalid preset profile id {profile_id}");
                     });
@@ -390,12 +392,12 @@ impl EqualizerSettings {
                 } else {
                     EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(this.equalizer.volume_adjustments()))
                 };
-                this.set_equalizer_configuration(&configuration);
+                this.set_equalizer_configuration(equalizer_configuration);
                 this.update_custom_profile_selection();
                 // TODO this is needed because this runs once during construction (before sender is set)
                 // see if we can have sender get set before construction maybe?
                 if let Some(sender) = this.sender.get() {
-                    sender.send(Action::SetEqualizerConfiguration(configuration)).unwrap();
+                    sender.send(Action::SetEqualizerConfiguration(equalizer_configuration)).unwrap();
                 }
             }));
     }

@@ -21,8 +21,8 @@ import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
 import com.oppzippy.openscq30.features.soundcoredevice.demo.DemoSoundcoreDevice
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
-import com.oppzippy.openscq30.libbindings.AmbientSoundMode
-import com.oppzippy.openscq30.libbindings.PresetEqualizerProfile
+import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
+import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
 import com.oppzippy.openscq30.ui.OpenSCQ30Root
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -152,13 +152,13 @@ class NotificationTest {
         notification.findObject(quickPreset1).click()
 
         withTimeout(1.seconds) {
-            device.stateFlow.first { it.ambientSoundMode() == AmbientSoundMode.Transparency }
+            device.stateFlow.first { it.soundModes?.ambientSoundMode() == AmbientSoundMode.Transparency }
         }
 
         val quickPreset2 = By.text("Test Preset 2")
         notification.findObject(quickPreset2).click()
         withTimeout(1.seconds) {
-            device.stateFlow.first { it.ambientSoundMode() == AmbientSoundMode.NoiseCanceling }
+            device.stateFlow.first { it.soundModes?.ambientSoundMode() == AmbientSoundMode.NoiseCanceling }
         }
     }
 
@@ -181,7 +181,7 @@ class NotificationTest {
         notification.findObject(quickPreset1).click()
 
         withTimeout(2.seconds) {
-            device.stateFlow.first { it.equalizerConfiguration().presetProfile().isEmpty }
+            device.stateFlow.first { it.equalizerConfiguration.presetProfile().getOrNull() == null }
         }
 
         // Preset equalizer profile
@@ -189,7 +189,7 @@ class NotificationTest {
         notification.findObject(quickPreset2).click()
         withTimeout(2.seconds) {
             device.stateFlow.first {
-                it.equalizerConfiguration().presetProfile()
+                it.equalizerConfiguration.presetProfile()
                     .getOrNull() == PresetEqualizerProfile.SoundcoreSignature
             }
         }

@@ -1,9 +1,19 @@
-use super::VolumeAdjustments;
+use super::{BasicHearId, CustomHearId};
 
-#[derive(Debug, Clone, Hash, PartialEq, Eq)]
-pub struct HearId {
-    pub is_enabled: bool,
-    pub left: VolumeAdjustments,
-    pub right: VolumeAdjustments,
-    pub time: i32,
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
+pub enum HearId {
+    Basic(BasicHearId),
+    Custom(CustomHearId),
+}
+
+impl From<BasicHearId> for HearId {
+    fn from(basic_hear_id: BasicHearId) -> Self {
+        Self::Basic(basic_hear_id)
+    }
+}
+
+impl From<CustomHearId> for HearId {
+    fn from(custom_hear_id: CustomHearId) -> Self {
+        Self::Custom(custom_hear_id)
+    }
 }

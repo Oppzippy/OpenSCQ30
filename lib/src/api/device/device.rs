@@ -4,7 +4,7 @@ use tokio::sync::{broadcast, watch};
 
 use crate::{
     api::connection::ConnectionStatus,
-    packets::structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
+    packets::structures::{EqualizerConfiguration, SoundModes},
     state::DeviceState,
 };
 
@@ -18,24 +18,12 @@ pub trait Device {
 
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus>;
 
-    async fn set_ambient_sound_mode(
-        &self,
-        ambient_sound_mode: AmbientSoundMode,
-    ) -> crate::Result<()>;
+    async fn state(&self) -> DeviceState;
 
-    async fn ambient_sound_mode(&self) -> AmbientSoundMode;
-
-    async fn set_noise_canceling_mode(
-        &self,
-        noise_canceling_mode: NoiseCancelingMode,
-    ) -> crate::Result<()>;
-
-    async fn noise_canceling_mode(&self) -> NoiseCancelingMode;
+    async fn set_sound_modes(&self, sound_modes: SoundModes) -> crate::Result<()>;
 
     async fn set_equalizer_configuration(
         &self,
         configuration: EqualizerConfiguration,
     ) -> crate::Result<()>;
-
-    async fn equalizer_configuration(&self) -> EqualizerConfiguration;
 }

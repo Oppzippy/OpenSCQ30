@@ -39,23 +39,18 @@ describe("Device Settings", () => {
     });
     user = userEvent.setup();
     const mockDevice = {
-      state: new BehaviorSubject<{
-        ambientSoundMode: AmbientSoundMode;
-        noiseCancelingMode: NoiseCancelingMode;
-        equalizerConfiguration: EqualizerConfiguration;
-      }>({
-        ambientSoundMode: AmbientSoundMode.NoiseCanceling,
-        noiseCancelingMode: NoiseCancelingMode.Transport,
+      state: new BehaviorSubject<SoundcoreDeviceState>({
+        soundModes: {
+          ambientSoundMode: AmbientSoundMode.NoiseCanceling,
+          noiseCancelingMode: NoiseCancelingMode.Transport,
+        },
         equalizerConfiguration: EqualizerConfiguration.fromPresetProfile(
           PresetEqualizerProfile.SoundcoreSignature,
         ),
       }),
       connect: vi.fn<unknown[], unknown>(),
-      get ambientSoundMode() {
-        return this.state.value.ambientSoundMode;
-      },
-      get noiseCancelingMode() {
-        return this.state.value.noiseCancelingMode;
+      get soundModes() {
+        return this.state.value.soundModes;
       },
       get equalizerConfiguration() {
         return this.state.value.equalizerConfiguration;
@@ -80,10 +75,14 @@ describe("Device Settings", () => {
       />,
     );
 
-    expect(device.ambientSoundMode).toEqual(AmbientSoundMode.NoiseCanceling);
+    expect(device.soundModes?.ambientSoundMode).toEqual(
+      AmbientSoundMode.NoiseCanceling,
+    );
     await user.click(renderResult.getByText("ambientSoundMode.normal"));
 
-    expect(device.ambientSoundMode).toEqual(AmbientSoundMode.Normal);
+    expect(device.soundModes?.ambientSoundMode).toEqual(
+      AmbientSoundMode.Normal,
+    );
   });
 
   it("should change noise canceling mode", async () => {
@@ -95,9 +94,13 @@ describe("Device Settings", () => {
       />,
     );
 
-    expect(device.noiseCancelingMode).toEqual(NoiseCancelingMode.Transport);
+    expect(device.soundModes?.noiseCancelingMode).toEqual(
+      NoiseCancelingMode.Transport,
+    );
     await user.click(renderResult.getByText("noiseCancelingMode.indoor"));
-    expect(device.noiseCancelingMode).toEqual(NoiseCancelingMode.Indoor);
+    expect(device.soundModes?.noiseCancelingMode).toEqual(
+      NoiseCancelingMode.Indoor,
+    );
   });
 
   it("should change equalizer configuration", async () => {
@@ -142,7 +145,7 @@ describe("Device Settings", () => {
     ).toEqual("equalizer.custom");
   });
 
-  it("should not show custom profile create/delete buttons when a preset is selected", async () => {
+  it("should not show custom profile create/delete buttons when a preset is selected", () => {
     const renderResult = render(
       <DeviceSettings
         device={device as unknown as SoundcoreDevice}

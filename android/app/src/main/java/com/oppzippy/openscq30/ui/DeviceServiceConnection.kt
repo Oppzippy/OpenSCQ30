@@ -5,9 +5,8 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
-import com.oppzippy.openscq30.libbindings.AmbientSoundMode
-import com.oppzippy.openscq30.libbindings.EqualizerConfiguration
-import com.oppzippy.openscq30.libbindings.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.bindings.SoundModes
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -70,12 +69,8 @@ class DeviceServiceConnection(
         uiDeviceStateFlow.value = UiDeviceState.Disconnected
     }
 
-    fun setAmbientSoundMode(ambientSoundMode: AmbientSoundMode) {
-        service?.get()?.connectionManager?.setAmbientSoundMode(ambientSoundMode)
-    }
-
-    fun setNoiseCancelingMode(noiseCancelingMode: NoiseCancelingMode) {
-        service?.get()?.connectionManager?.setNoiseCancelingMode(noiseCancelingMode)
+    fun setSoundModes(soundModes: SoundModes) {
+        service?.get()?.connectionManager?.setSoundModes(soundModes)
     }
 
     fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {

@@ -11,28 +11,30 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.libbindings.AmbientSoundMode
-import com.oppzippy.openscq30.libbindings.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
+import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
+import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.bindings.SoundModes
+import com.oppzippy.openscq30.lib.bindings.TransparencyMode
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
 fun SoundModeSettings(
     modifier: Modifier = Modifier,
-    ambientSoundMode: AmbientSoundMode,
-    noiseCancelingMode: NoiseCancelingMode,
+    soundModes: SoundModes,
     onAmbientSoundModeChange: (ambientSoundMode: AmbientSoundMode) -> Unit = {},
     onNoiseCancelingModeChange: (noiseCancelingMode: NoiseCancelingMode) -> Unit = {},
 ) {
     Column(modifier = modifier) {
         GroupHeader(stringResource(R.string.ambient_sound_mode))
         AmbientSoundModeSelection(
-            ambientSoundMode = ambientSoundMode,
+            ambientSoundMode = soundModes.ambientSoundMode(),
             onAmbientSoundModeChange = onAmbientSoundModeChange,
         )
         Spacer(modifier = Modifier.padding(vertical = 8.dp))
         GroupHeader(stringResource(R.string.noise_canceling_mode))
         NoiseCancelingModeSelection(
-            noiseCancelingMode = noiseCancelingMode,
+            noiseCancelingMode = soundModes.noiseCancelingMode(),
             onNoiseCancelingModeChange = onNoiseCancelingModeChange,
         )
     }
@@ -52,8 +54,12 @@ private fun GroupHeader(text: String) {
 private fun PreviewSoundModeSettings() {
     OpenSCQ30Theme {
         SoundModeSettings(
-            ambientSoundMode = AmbientSoundMode.Normal,
-            noiseCancelingMode = NoiseCancelingMode.Indoor,
+            soundModes = SoundModes(
+                AmbientSoundMode.Normal,
+                NoiseCancelingMode.Indoor,
+                TransparencyMode.VocalMode,
+                CustomNoiseCanceling(0),
+            ),
         )
     }
 }

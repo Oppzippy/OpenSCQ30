@@ -1,9 +1,9 @@
 package com.oppzippy.openscq30.ui.devicesettings
 
 import androidx.compose.runtime.Composable
-import com.oppzippy.openscq30.libbindings.AmbientSoundMode
-import com.oppzippy.openscq30.libbindings.EqualizerConfiguration
-import com.oppzippy.openscq30.libbindings.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
+import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
 import com.oppzippy.openscq30.ui.devicesettings.composables.DeviceSettings
 import com.oppzippy.openscq30.ui.devicesettings.composables.Disconnected
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState

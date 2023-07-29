@@ -1,10 +1,17 @@
-use nom::{combinator::map, error::context, number::complete::le_u16, sequence::pair};
+use nom::{
+    combinator::map,
+    error::{context, ContextError, ParseError},
+    number::complete::le_u16,
+    sequence::pair,
+};
 
 use crate::packets::structures::{EqualizerConfiguration, PresetEqualizerProfile};
 
 use super::{take_volume_adjustments, ParseResult};
 
-pub fn take_equalizer_configuration(input: &[u8]) -> ParseResult<EqualizerConfiguration> {
+pub fn take_equalizer_configuration<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    input: &'a [u8],
+) -> ParseResult<EqualizerConfiguration, E> {
     context(
         "equalizer configuration",
         map(

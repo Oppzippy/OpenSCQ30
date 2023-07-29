@@ -1,11 +1,11 @@
 package com.oppzippy.openscq30.features.soundcoredevice.impl
 
 import android.util.Log
-import com.oppzippy.openscq30.libbindings.InboundPacket
-import com.oppzippy.openscq30.libbindings.SetEqualizerOkPacket
-import com.oppzippy.openscq30.libbindings.SetSoundModeOkPacket
-import com.oppzippy.openscq30.libbindings.SoundModeUpdatePacket
-import com.oppzippy.openscq30.libbindings.StateUpdatePacket
+import com.oppzippy.openscq30.lib.bindings.InboundPacket
+import com.oppzippy.openscq30.lib.bindings.SetEqualizerOkPacket
+import com.oppzippy.openscq30.lib.bindings.SetSoundModeOkPacket
+import com.oppzippy.openscq30.lib.bindings.SoundModeUpdatePacket
+import com.oppzippy.openscq30.lib.bindings.StateUpdatePacket
 import kotlin.jvm.optionals.getOrNull
 
 sealed class Packet {

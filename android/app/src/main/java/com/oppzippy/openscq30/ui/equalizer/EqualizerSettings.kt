@@ -19,11 +19,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.libbindings.AmbientSoundMode
-import com.oppzippy.openscq30.libbindings.EqualizerConfiguration
-import com.oppzippy.openscq30.libbindings.NoiseCancelingMode
-import com.oppzippy.openscq30.libbindings.PresetEqualizerProfile
-import com.oppzippy.openscq30.libbindings.SoundcoreDeviceState
+import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
+import com.oppzippy.openscq30.lib.wrapper.SoundcoreDeviceState
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.equalizer.composables.CreateCustomProfileDialog
 import com.oppzippy.openscq30.ui.equalizer.composables.CustomProfileSelection
@@ -32,7 +30,9 @@ import com.oppzippy.openscq30.ui.equalizer.composables.Equalizer
 import com.oppzippy.openscq30.ui.equalizer.composables.PresetProfileSelection
 import com.oppzippy.openscq30.ui.equalizer.composables.ReplaceCustomProfileDialog
 import com.oppzippy.openscq30.ui.equalizer.models.EqualizerProfile
+import com.oppzippy.openscq30.ui.equalizer.models.toEqualizerProfile
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
+import kotlin.jvm.optionals.getOrNull
 
 @Composable
 fun EqualizerSettings(
@@ -46,8 +46,8 @@ fun EqualizerSettings(
     val maybeEqualizerConfiguration by viewModel.displayedEqualizerConfiguration.collectAsState()
 
     maybeEqualizerConfiguration?.let { equalizerConfiguration ->
-        val profile = equalizerConfiguration.equalizerProfile
-        val values = equalizerConfiguration.values
+        val profile = equalizerConfiguration.presetProfile().getOrNull().toEqualizerProfile()
+        val values = equalizerConfiguration.volumeAdjustments().adjustments().toList()
         val isCustomProfile = profile == EqualizerProfile.Custom
         var isCreateDialogOpen by remember { mutableStateOf(false) }
         var isDeleteDialogOpen by remember { mutableStateOf(false) }
@@ -142,9 +142,11 @@ private fun DefaultPreview() {
                 "Test Device",
                 "00:00:00:00:00:00",
                 SoundcoreDeviceState(
-                    AmbientSoundMode.Normal,
-                    NoiseCancelingMode.Indoor,
-                    EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
+                    featureFlags = -1, // TODO
+                    equalizerConfiguration = EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
+                    soundModes = null,
+                    serialNumber = null,
+                    firmwareVersion = null,
                 ),
             ),
         )

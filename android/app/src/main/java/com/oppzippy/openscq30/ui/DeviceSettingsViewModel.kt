@@ -6,9 +6,13 @@ import androidx.lifecycle.AndroidViewModel
 import com.oppzippy.openscq30.android.IntentFactory
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
-import com.oppzippy.openscq30.libbindings.AmbientSoundMode
-import com.oppzippy.openscq30.libbindings.EqualizerConfiguration
-import com.oppzippy.openscq30.libbindings.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
+import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
+import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.bindings.SoundModes
+import com.oppzippy.openscq30.lib.bindings.TransparencyMode
+import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
@@ -59,12 +63,27 @@ class DeviceSettingsViewModel @Inject constructor(
         }
     }
 
-    fun setAmbientSoundMode(ambientSoundMode: AmbientSoundMode) {
-        deviceServiceConnection.setAmbientSoundMode(ambientSoundMode)
-    }
-
-    fun setNoiseCancelingMode(noiseCancelingMode: NoiseCancelingMode) {
-        deviceServiceConnection.setNoiseCancelingMode(noiseCancelingMode)
+    fun setSoundModes(
+        ambientSoundMode: AmbientSoundMode? = null,
+        noiseCancelingMode: NoiseCancelingMode? = null,
+        transparencyMode: TransparencyMode? = null,
+        customNoiseCanceling: CustomNoiseCanceling? = null,
+    ) {
+        deviceServiceConnection.uiDeviceStateFlow.value.let { state ->
+            if (state is UiDeviceState.Connected) {
+                state.deviceState.soundModes?.let { soundModes ->
+                    deviceServiceConnection.setSoundModes(
+                        SoundModes(
+                            ambientSoundMode ?: soundModes.ambientSoundMode(),
+                            noiseCancelingMode
+                                ?: soundModes.noiseCancelingMode(),
+                            transparencyMode ?: soundModes.transparencyMode(),
+                            customNoiseCanceling ?: soundModes.customNoiseCanceling(),
+                        ),
+                    )
+                }
+            }
+        }
     }
 
     fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {

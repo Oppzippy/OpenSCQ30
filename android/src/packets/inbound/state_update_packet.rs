@@ -1,5 +1,5 @@
-use crate::packets::structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode};
-use openscq30_lib::packets::inbound::StateUpdatePacket as LibStateUpdatePacket;
+use crate::{EqualizerConfiguration, SoundModes};
+use openscq30_lib::packets::inbound::state_update_packet::StateUpdatePacket as LibStateUpdatePacket;
 use rifgen::rifgen_attr::generate_interface;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -12,18 +12,36 @@ impl StateUpdatePacket {
     }
 
     #[generate_interface]
-    pub fn ambient_sound_mode(&self) -> AmbientSoundMode {
-        self.0.ambient_sound_mode().into()
+    pub fn feature_flags(&self) -> i32 {
+        self.0.feature_flags.bits() as i32
     }
 
     #[generate_interface]
-    pub fn noise_canceling_mode(&self) -> NoiseCancelingMode {
-        self.0.noise_canceling_mode().into()
+    pub fn sound_modes(&self) -> Option<SoundModes> {
+        self.0.sound_modes.map(Into::into)
     }
 
     #[generate_interface]
     pub fn equalizer_configuration(&self) -> EqualizerConfiguration {
-        self.0.equalizer_configuration().into()
+        self.0.equalizer_configuration.into()
+    }
+
+    #[generate_interface]
+    pub fn firmware_version(&self) -> Option<String> {
+        self.0
+            .firmware_version
+            .as_ref()
+            .map(|firmware_version| &firmware_version.0)
+            .cloned()
+    }
+
+    #[generate_interface]
+    pub fn serial_number(&self) -> Option<String> {
+        self.0
+            .serial_number
+            .as_ref()
+            .map(|serial_number| &serial_number.0)
+            .cloned()
     }
 }
 
@@ -33,7 +51,7 @@ impl From<LibStateUpdatePacket> for StateUpdatePacket {
     }
 }
 
-impl From<StateUpdatePacket> for openscq30_lib::packets::inbound::StateUpdatePacket {
+impl From<StateUpdatePacket> for LibStateUpdatePacket {
     fn from(value: StateUpdatePacket) -> Self {
         value.0
     }

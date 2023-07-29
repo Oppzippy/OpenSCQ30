@@ -12,7 +12,7 @@ impl InboundPacket {
     #[generate_interface(constructor)]
     pub fn new(input: &[i8]) -> Result<InboundPacket, String> {
         let input = type_conversion::i8_slice_to_u8_slice(input);
-        LibInboundPacket::new(&input)
+        LibInboundPacket::new(input)
             .map(Self)
             .map_err(|err| err.to_string())
     }

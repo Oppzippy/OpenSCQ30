@@ -2,9 +2,11 @@ package com.oppzippy.openscq30.features.soundcoredevice.usecases
 
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
+import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceConnectionManager
-import com.oppzippy.openscq30.libbindings.EqualizerConfiguration
-import com.oppzippy.openscq30.libbindings.VolumeAdjustments
+import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.bindings.SoundModes
+import com.oppzippy.openscq30.lib.bindings.VolumeAdjustments
 import javax.inject.Inject
 
 class ActivateQuickPresetUseCase @Inject constructor(
@@ -12,6 +14,9 @@ class ActivateQuickPresetUseCase @Inject constructor(
     private val customProfileDao: CustomProfileDao,
 ) {
     suspend operator fun invoke(presetId: Int, connectionManager: DeviceConnectionManager) {
+        val connectionStatus = connectionManager.connectionStatusFlow.value
+        if (connectionStatus !is ConnectionStatus.Connected) return
+
         quickPresetDao.get(presetId)?.let { quickPreset ->
             val ambientSoundMode = quickPreset.ambientSoundMode
             val noiseCancelingMode = quickPreset.noiseCancelingMode
@@ -27,12 +32,14 @@ class ActivateQuickPresetUseCase @Inject constructor(
                 null
             }
 
-            // Set them both in one go if possible to maybe save a packet
-            if (ambientSoundMode != null && noiseCancelingMode != null) {
-                connectionManager.setSoundMode(ambientSoundMode, noiseCancelingMode)
-            } else {
-                ambientSoundMode?.let { connectionManager.setAmbientSoundMode(it) }
-                noiseCancelingMode?.let { connectionManager.setNoiseCancelingMode(it) }
+            connectionStatus.device.state.soundModes?.let { prevSoundModes ->
+                val newSoundModes = SoundModes(
+                    ambientSoundMode ?: prevSoundModes.ambientSoundMode(),
+                    noiseCancelingMode ?: prevSoundModes.noiseCancelingMode(),
+                    prevSoundModes.transparencyMode(),
+                    prevSoundModes.customNoiseCanceling(),
+                )
+                connectionManager.setSoundModes(newSoundModes)
             }
             equalizerConfiguration?.let {
                 connectionManager.setEqualizerConfiguration(it)

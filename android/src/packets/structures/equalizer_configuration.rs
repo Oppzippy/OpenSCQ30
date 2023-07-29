@@ -43,6 +43,11 @@ impl EqualizerConfiguration {
     pub fn volume_adjustments(&self) -> VolumeAdjustments {
         self.inner.volume_adjustments().into()
     }
+
+    #[generate_interface]
+    pub fn inner_equals(&self, other: &EqualizerConfiguration) -> bool {
+        self == other
+    }
 }
 
 impl From<structures::EqualizerConfiguration> for EqualizerConfiguration {

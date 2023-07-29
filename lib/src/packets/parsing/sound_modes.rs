@@ -1,4 +1,8 @@
-use nom::{combinator::map, error::context, sequence::tuple};
+use nom::{
+    combinator::map,
+    error::{context, ContextError, ParseError},
+    sequence::tuple,
+};
 
 use crate::packets::structures::SoundModes;
 
@@ -7,7 +11,9 @@ use super::{
     take_transparency_mode, ParseResult,
 };
 
-pub fn take_sound_modes(input: &[u8]) -> ParseResult<SoundModes> {
+pub fn take_sound_modes<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    input: &'a [u8],
+) -> ParseResult<SoundModes, E> {
     context(
         "group of sound modes",
         map(

@@ -79,18 +79,22 @@ where
 
                 let name = device.name().await?;
                 let mac_address = device.mac_address().await?;
+                let device_state = device.state().await;
                 state.state_update_sender
                     .send(StateUpdate::SetSelectedDevice(Some(DeviceObject::new(&name, &mac_address.to_string()))))
                     .map_err(|err| anyhow!("{err}"))?;
                 state.state_update_sender
-                    .send(StateUpdate::SetAmbientSoundMode(device.ambient_sound_mode().await))
+                    .send(StateUpdate::SetEqualizerConfiguration(device_state.equalizer_configuration))
                     .map_err(|err| anyhow!("{err}"))?;
-                state.state_update_sender
-                    .send(StateUpdate::SetNoiseCancelingMode(device.noise_canceling_mode().await))
-                    .map_err(|err| anyhow!("{err}"))?;
-                state.state_update_sender
-                    .send(StateUpdate::SetEqualizerConfiguration(device.equalizer_configuration().await))
-                    .map_err(|err| anyhow!("{err}"))?;
+
+                if let Some(sound_modes) = device_state.sound_modes {
+                    state.state_update_sender
+                        .send(StateUpdate::SetAmbientSoundMode(sound_modes.ambient_sound_mode))
+                        .map_err(|err| anyhow!("{err}"))?;
+                    state.state_update_sender
+                        .send(StateUpdate::SetNoiseCancelingMode(sound_modes.noise_canceling_mode))
+                        .map_err(|err| anyhow!("{err}"))?;
+                }
 
                 Ok(())
             }).await;
@@ -125,7 +129,9 @@ mod tests {
         api::connection::ConnectionStatus,
         packets::structures::{
             AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode, PresetEqualizerProfile,
+            SoundModes,
         },
+        state::DeviceState,
     };
     use tokio::sync::{broadcast, watch};
 
@@ -166,19 +172,17 @@ mod tests {
                     .expect_connection_status()
                     .once()
                     .return_const(receiver);
-                device
-                    .expect_ambient_sound_mode()
-                    .once()
-                    .return_const(AmbientSoundMode::Transparency);
-                device
-                    .expect_noise_canceling_mode()
-                    .once()
-                    .return_const(NoiseCancelingMode::Indoor);
-                device.expect_equalizer_configuration().once().return_const(
-                    EqualizerConfiguration::new_from_preset_profile(
+                device.expect_state().once().return_const(DeviceState {
+                    sound_modes: Some(SoundModes {
+                        ambient_sound_mode: AmbientSoundMode::Transparency,
+                        noise_canceling_mode: NoiseCancelingMode::Indoor,
+                        ..Default::default()
+                    }),
+                    equalizer_configuration: EqualizerConfiguration::new_from_preset_profile(
                         PresetEqualizerProfile::Acoustic,
                     ),
-                );
+                    ..Default::default()
+                });
 
                 Ok(Some(Arc::new(device)))
             });
@@ -192,11 +196,11 @@ mod tests {
                 "Test Device",
                 "00:00:00:00:00:00",
             ))),
-            StateUpdate::SetAmbientSoundMode(AmbientSoundMode::Transparency),
-            StateUpdate::SetNoiseCancelingMode(NoiseCancelingMode::Indoor),
             StateUpdate::SetEqualizerConfiguration(
                 EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::Acoustic),
             ),
+            StateUpdate::SetAmbientSoundMode(AmbientSoundMode::Transparency),
+            StateUpdate::SetNoiseCancelingMode(NoiseCancelingMode::Indoor),
             StateUpdate::SetLoading(false),
         ]);
         loop {
@@ -261,19 +265,17 @@ mod tests {
                     .expect_connection_status()
                     .once()
                     .return_const(receiver);
-                device
-                    .expect_ambient_sound_mode()
-                    .once()
-                    .return_const(AmbientSoundMode::Transparency);
-                device
-                    .expect_noise_canceling_mode()
-                    .once()
-                    .return_const(NoiseCancelingMode::Indoor);
-                device.expect_equalizer_configuration().once().return_const(
-                    EqualizerConfiguration::new_from_preset_profile(
+                device.expect_state().once().return_const(DeviceState {
+                    sound_modes: Some(SoundModes {
+                        ambient_sound_mode: AmbientSoundMode::Transparency,
+                        noise_canceling_mode: NoiseCancelingMode::Indoor,
+                        ..Default::default()
+                    }),
+                    equalizer_configuration: EqualizerConfiguration::new_from_preset_profile(
                         PresetEqualizerProfile::Acoustic,
                     ),
-                );
+                    ..Default::default()
+                });
 
                 Ok(Some(Arc::new(device)))
             });

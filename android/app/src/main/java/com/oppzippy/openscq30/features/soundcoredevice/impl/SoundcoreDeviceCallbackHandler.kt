@@ -13,8 +13,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.util.Log
-import com.oppzippy.openscq30.libbindings.RequestStatePacket
-import com.oppzippy.openscq30.libbindings.SoundcoreDeviceUtils
+import com.oppzippy.openscq30.lib.bindings.RequestStatePacket
+import com.oppzippy.openscq30.lib.bindings.SoundcoreDeviceUtils
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

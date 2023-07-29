@@ -3,17 +3,18 @@ package com.oppzippy.openscq30.features.soundcoredevice.impl
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
-import com.oppzippy.openscq30.features.soundcoredevice.api.contentEquals
-import com.oppzippy.openscq30.libbindings.AmbientSoundMode
-import com.oppzippy.openscq30.libbindings.EqualizerConfiguration
-import com.oppzippy.openscq30.libbindings.NoiseCancelingMode
-import com.oppzippy.openscq30.libbindings.SetEqualizerPacket
-import com.oppzippy.openscq30.libbindings.SetSoundModePacket
-import com.oppzippy.openscq30.libbindings.SoundcoreDeviceState
+import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
+import com.oppzippy.openscq30.lib.bindings.DeviceFeatureFlags
+import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.bindings.SetEqualizerPacket
+import com.oppzippy.openscq30.lib.bindings.SetSoundModePacket
+import com.oppzippy.openscq30.lib.bindings.SoundModes
+import com.oppzippy.openscq30.lib.wrapper.SoundcoreDeviceState
+import com.oppzippy.openscq30.lib.wrapper.toSoundcoreDeviceState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 @SuppressLint("MissingPermission")
@@ -28,11 +29,7 @@ class SoundcoreDeviceImpl(
             return _stateFlow.value
         }
     private val _stateFlow: MutableStateFlow<SoundcoreDeviceState> = MutableStateFlow(initialState)
-    override val stateFlow: Flow<SoundcoreDeviceState> =
-        _stateFlow.distinctUntilChanged { old, new ->
-            old.ambientSoundMode() == new.ambientSoundMode() && old.noiseCancelingMode() == new.noiseCancelingMode() && old.equalizerConfiguration()
-                .contentEquals(new.equalizerConfiguration())
-        }
+    override val stateFlow: Flow<SoundcoreDeviceState> = _stateFlow.asStateFlow()
     override val isDisconnected = callbacks.isDisconnected
 
     override val name: String = gatt.device.name
@@ -44,11 +41,21 @@ class SoundcoreDeviceImpl(
                 when (it) {
                     is Packet.SoundModeUpdate -> {
                         _stateFlow.value =
-                            _stateFlow.value.withAmbientSoundMode(it.packet.ambientSoundMode())
-                                .withNoiseCancelingMode(it.packet.noiseCancelingMode())
+                            _stateFlow.value.let { state ->
+                                state.copy(
+                                    soundModes = state.soundModes?.let { soundModes ->
+                                        SoundModes(
+                                            soundModes.ambientSoundMode(),
+                                            soundModes.noiseCancelingMode(),
+                                            soundModes.transparencyMode(),
+                                            soundModes.customNoiseCanceling(),
+                                        )
+                                    },
+                                )
+                            }
                     }
 
-                    is Packet.StateUpdate -> _stateFlow.value = SoundcoreDeviceState(it.packet)
+                    is Packet.StateUpdate -> _stateFlow.value = it.packet.toSoundcoreDeviceState()
                     is Packet.SetSoundModeOk -> {}
                     is Packet.SetEqualizerOk -> {}
                 }
@@ -60,47 +67,52 @@ class SoundcoreDeviceImpl(
         gatt.close()
     }
 
-    override fun setSoundMode(
-        newAmbientSoundMode: AmbientSoundMode,
-        newNoiseCancelingMode: NoiseCancelingMode,
-    ) {
-        val prevState = _stateFlow.value
-        val prevAmbientSoundMode = prevState.ambientSoundMode()
-        val prevNoiseCancelingMode = prevState.noiseCancelingMode()
+    override fun setSoundModes(newSoundModes: SoundModes) {
+        val prevSoundModes = _stateFlow.value.soundModes ?: return
+        if (prevSoundModes.innerEquals(newSoundModes)) return
 
-        if (newAmbientSoundMode != AmbientSoundMode.NoiseCanceling && newNoiseCancelingMode != prevNoiseCancelingMode) {
-            queueSetSoundMode(AmbientSoundMode.NoiseCanceling, newNoiseCancelingMode)
-        }
-        if (prevAmbientSoundMode != newAmbientSoundMode || prevNoiseCancelingMode != newNoiseCancelingMode) {
-            queueSetSoundMode(newAmbientSoundMode, newNoiseCancelingMode)
+        val needsNoiseCanceling =
+            prevSoundModes.ambientSoundMode() != AmbientSoundMode.NoiseCanceling &&
+                prevSoundModes.noiseCancelingMode() != newSoundModes.noiseCancelingMode()
 
-            val newState = prevState.withAmbientSoundMode(newAmbientSoundMode)
-                .withNoiseCancelingMode(newNoiseCancelingMode)
-            _stateFlow.value = newState
+        if (needsNoiseCanceling) {
+            queueSetSoundMode(
+                SoundModes(
+                    AmbientSoundMode.NoiseCanceling,
+                    newSoundModes.noiseCancelingMode(),
+                    newSoundModes.transparencyMode(),
+                    newSoundModes.customNoiseCanceling(),
+                ),
+            )
         }
+        queueSetSoundMode(newSoundModes)
+
+        _stateFlow.value = _stateFlow.value.copy(
+            soundModes = newSoundModes,
+        )
     }
 
-    private fun queueSetSoundMode(
-        ambientSoundMode: AmbientSoundMode,
-        noiseCancelingMode: NoiseCancelingMode,
-    ) {
-        val packet = SetSoundModePacket(ambientSoundMode, noiseCancelingMode)
+    private fun queueSetSoundMode(soundModes: SoundModes) {
+        val packet = SetSoundModePacket(soundModes)
         callbacks.queueCommanad(
             Command.Write(packet.bytes()),
         )
     }
 
     override fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
-        if (!_stateFlow.value.equalizerConfiguration().contentEquals(equalizerConfiguration)) {
-            queueSetEqualizerConfiguration(equalizerConfiguration)
-            _stateFlow.value = _stateFlow.value.withEqualizerConfiguration(equalizerConfiguration)
+        if (_stateFlow.value.equalizerConfiguration != equalizerConfiguration) {
+            if (_stateFlow.value.featureFlags and DeviceFeatureFlags.twoChannelEqualizer() != 0) {
+                TODO("two channel equalizer is not yet supported")
+            } else {
+                queueSetMonoEqualizerConfiguration(equalizerConfiguration)
+            }
+            _stateFlow.value =
+                _stateFlow.value.copy(equalizerConfiguration = equalizerConfiguration)
         }
     }
 
-    private fun queueSetEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
+    private fun queueSetMonoEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
         val packet = SetEqualizerPacket(equalizerConfiguration)
-        callbacks.queueCommanad(
-            Command.Write(packet.bytes()),
-        )
+        callbacks.queueCommanad(Command.Write(packet.bytes()))
     }
 }

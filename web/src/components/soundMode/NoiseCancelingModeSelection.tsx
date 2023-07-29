@@ -17,7 +17,7 @@ export const NoiseCancelingModeSelection = React.memo(function ({
   // Don't allow deselecting the button
   const onValueChangedNotNull = useCallback(
     (newValue: NoiseCancelingMode | undefined) => {
-      if (newValue) {
+      if (newValue != undefined) {
         onValueChanged(newValue);
       }
     },

@@ -57,8 +57,7 @@ function useUpdateActualFromDisplay(
     () =>
       debounce((config: EqualizerConfiguration) => {
         setActualState({
-          ambientSoundMode: device.state.value.ambientSoundMode,
-          noiseCancelingMode: device.state.value.noiseCancelingMode,
+          soundModes: device.state.value.soundModes,
           equalizerConfiguration: config,
         });
       }, 500),
@@ -78,14 +77,12 @@ function useUpdateActualFromDisplay(
   // Update ambient sound mode and noise canceling mode instantly
   useEffect(() => {
     setActualState({
-      ambientSoundMode: displayState.ambientSoundMode,
-      noiseCancelingMode: displayState.noiseCancelingMode,
+      soundModes: displayState.soundModes,
       equalizerConfiguration: device.state.value.equalizerConfiguration,
     });
   }, [
-    device,
-    displayState.ambientSoundMode,
-    displayState.noiseCancelingMode,
+    device.state.value.equalizerConfiguration,
+    displayState.soundModes,
     setActualState,
   ]);
 }

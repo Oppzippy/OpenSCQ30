@@ -6,8 +6,11 @@ import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.performClick
-import com.oppzippy.openscq30.libbindings.AmbientSoundMode
-import com.oppzippy.openscq30.libbindings.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
+import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
+import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.bindings.SoundModes
+import com.oppzippy.openscq30.lib.bindings.TransparencyMode
 import com.oppzippy.openscq30.ui.soundmode.SoundModeSettings
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -73,8 +76,12 @@ class DeviceSettingsSoundModeTest {
 
         composeRule.setContent {
             SoundModeSettings(
-                ambientSoundMode = AmbientSoundMode.Normal,
-                noiseCancelingMode = NoiseCancelingMode.Indoor,
+                soundModes = SoundModes(
+                    AmbientSoundMode.Normal,
+                    NoiseCancelingMode.Indoor,
+                    TransparencyMode.VocalMode,
+                    CustomNoiseCanceling(0),
+                ),
                 onAmbientSoundModeChange = onAmbientSoundModeChange,
             )
         }
@@ -91,8 +98,12 @@ class DeviceSettingsSoundModeTest {
 
         composeRule.setContent {
             SoundModeSettings(
-                ambientSoundMode = AmbientSoundMode.Normal,
-                noiseCancelingMode = NoiseCancelingMode.Indoor,
+                soundModes = SoundModes(
+                    AmbientSoundMode.Normal,
+                    NoiseCancelingMode.Indoor,
+                    TransparencyMode.VocalMode,
+                    CustomNoiseCanceling(0),
+                ),
                 onNoiseCancelingModeChange = onNoiseCancelingModeChange,
             )
         }
@@ -108,8 +119,12 @@ class DeviceSettingsSoundModeTest {
     ) {
         composeRule.setContent {
             SoundModeSettings(
-                ambientSoundMode = ambientSoundMode,
-                noiseCancelingMode = noiseCancelingMode,
+                soundModes = SoundModes(
+                    ambientSoundMode,
+                    noiseCancelingMode,
+                    TransparencyMode.VocalMode,
+                    CustomNoiseCanceling(0),
+                ),
             )
         }
     }

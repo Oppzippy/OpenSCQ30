@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { BehaviorSubject } from "rxjs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SoundcoreDevice } from "../../src/bluetooth/SoundcoreDevice";
+import { SoundcoreDeviceState } from "../../src/bluetooth/SoundcoreDeviceState";
 import App from "../../src/components/App";
 import {
   AmbientSoundMode,
@@ -10,7 +11,6 @@ import {
   NoiseCancelingMode,
   PresetEqualizerProfile,
 } from "../../wasm/pkg/openscq30_web_wasm";
-import { SoundcoreDeviceState } from "../../src/bluetooth/SoundcoreDeviceState";
 
 describe("App", () => {
   let user: ReturnType<typeof userEvent.setup>;
@@ -20,13 +20,11 @@ describe("App", () => {
       return {
         async selectDevice() {
           const mockDevice = {
-            state: new BehaviorSubject<{
-              ambientSoundMode: AmbientSoundMode;
-              noiseCancelingMode: NoiseCancelingMode;
-              equalizerConfiguration: EqualizerConfiguration;
-            }>({
-              ambientSoundMode: AmbientSoundMode.NoiseCanceling,
-              noiseCancelingMode: NoiseCancelingMode.Transport,
+            state: new BehaviorSubject<SoundcoreDeviceState>({
+              soundModes: {
+                ambientSoundMode: AmbientSoundMode.NoiseCanceling,
+                noiseCancelingMode: NoiseCancelingMode.Transport,
+              },
               equalizerConfiguration: EqualizerConfiguration.fromPresetProfile(
                 PresetEqualizerProfile.SoundcoreSignature,
               ),
@@ -35,11 +33,8 @@ describe("App", () => {
               this.state.next(newState);
             },
             connect: vi.fn<unknown[], unknown>(),
-            get ambientSoundMode() {
-              return this.state.value.ambientSoundMode;
-            },
-            get noiseCancelingMode() {
-              return this.state.value.noiseCancelingMode;
+            get soundModes() {
+              return this.state.value.soundModes;
             },
             get equalizerConfiguration() {
               return this.state.value.equalizerConfiguration;

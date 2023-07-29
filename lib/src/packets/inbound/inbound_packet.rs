@@ -1,9 +1,15 @@
-use crate::packets::{parsing::take_packet_header, structures::PacketType};
+use nom::error::VerboseError;
+
+use crate::packets::{
+    parsing::{take_checksum, take_packet_header},
+    structures::PacketType,
+};
 
 use super::{
+    state_update_packet::{take_state_update_packet, StateUpdatePacket},
     take_ambient_sound_mode_update_packet, take_set_ambient_sound_mode_ok_packet,
-    take_set_equalizer_ok_packet, take_state_update_packet, SetEqualizerOkPacket,
-    SetSoundModeOkPacket, SoundModeUpdatePacket, StateUpdatePacket,
+    take_set_equalizer_ok_packet, SetEqualizerOkPacket, SetSoundModeOkPacket,
+    SoundModeUpdatePacket,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -15,7 +21,8 @@ pub enum InboundPacket {
 }
 
 impl InboundPacket {
-    pub fn new(input: &[u8]) -> Result<Self, nom::Err<nom::error::Error<&[u8]>>> {
+    pub fn new(input: &[u8]) -> Result<Self, nom::Err<VerboseError<&[u8]>>> {
+        let input = take_checksum(input)?.0;
         let (input, header) = take_packet_header(input)?;
         Ok(match header.packet_type {
             PacketType::SoundModeUpdate => {

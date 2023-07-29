@@ -3,15 +3,15 @@ use rifgen::{Language, TypeCases};
 use std::{env, path::Path};
 
 fn main() {
-    let java_source_dir = Path::new("app")
+    let java_lib_dir = Path::new("app")
         .join("src")
         .join("main")
         .join("java")
         .join("com")
         .join("oppzippy")
-        .join("openscq30");
-
-    let java_lib_dir = java_source_dir.join("libbindings");
+        .join("openscq30")
+        .join("lib")
+        .join("bindings");
 
     let rust_src_dir = Path::new("src");
     let glue_file = Path::new("glue.rs.in");
@@ -25,7 +25,7 @@ fn main() {
     let swig_gen = flapigen::Generator::new(LanguageConfig::JavaConfig(
         JavaConfig::new(
             java_lib_dir,
-            "com.oppzippy.openscq30.libbindings".to_string(),
+            "com.oppzippy.openscq30.lib.bindings".to_string(),
         )
         .use_null_annotation_from_package("androidx.annotation".to_string()),
     ))

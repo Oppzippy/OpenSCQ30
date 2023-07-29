@@ -30,6 +30,9 @@ pub enum Error {
 
     #[error("device didn't respond to request")]
     NoResponse,
+
+    #[error("feature not supported: {feature_name}")]
+    FeatureNotSupported { feature_name: &'static str },
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

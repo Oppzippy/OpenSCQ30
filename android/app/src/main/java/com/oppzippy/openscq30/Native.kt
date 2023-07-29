@@ -1,6 +1,6 @@
 package com.oppzippy.openscq30
 
-import com.oppzippy.openscq30.libbindings.Init
+import com.oppzippy.openscq30.lib.bindings.Init
 
 object Native {
     private var isInitialized = false

@@ -1,10 +1,7 @@
 use openscq30_lib::packets::outbound::OutboundPacket as _;
 use rifgen::rifgen_attr::generate_interface;
 
-use crate::{
-    packets::structures::{AmbientSoundMode, NoiseCancelingMode},
-    type_conversion,
-};
+use crate::{type_conversion, SoundModes};
 
 use super::OutboundPacket;
 
@@ -15,16 +12,13 @@ pub struct SetSoundModePacket {
 
 impl SetSoundModePacket {
     #[generate_interface(constructor)]
-    pub fn new(
-        ambient_sound_mode: &AmbientSoundMode,
-        noise_canceling_mode: &NoiseCancelingMode,
-    ) -> SetSoundModePacket {
+    pub fn new(sound_modes: &SoundModes) -> SetSoundModePacket {
         Self {
             packet: openscq30_lib::packets::outbound::SetSoundModePacket {
-                ambient_sound_mode: ambient_sound_mode.to_owned().into(),
-                noise_canceling_mode: noise_canceling_mode.to_owned().into(),
-                transparency_mode: Default::default(),
-                custom_noise_canceling: Default::default(),
+                ambient_sound_mode: sound_modes.ambient_sound_mode().into(),
+                noise_canceling_mode: sound_modes.noise_canceling_mode().into(),
+                transparency_mode: sound_modes.transparency_mode().into(),
+                custom_noise_canceling: sound_modes.custom_noise_canceling().into(),
             },
         }
     }

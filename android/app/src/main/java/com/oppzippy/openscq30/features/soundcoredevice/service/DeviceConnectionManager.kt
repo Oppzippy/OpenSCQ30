@@ -3,9 +3,8 @@ package com.oppzippy.openscq30.features.soundcoredevice.service
 import android.util.Log
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
-import com.oppzippy.openscq30.libbindings.AmbientSoundMode
-import com.oppzippy.openscq30.libbindings.EqualizerConfiguration
-import com.oppzippy.openscq30.libbindings.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.bindings.SoundModes
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -105,20 +104,8 @@ class DeviceConnectionManager @Inject constructor(
             }
         }
 
-    fun setSoundMode(ambientSoundMode: AmbientSoundMode, noiseCancelingMode: NoiseCancelingMode) {
-        device?.setSoundMode(ambientSoundMode, noiseCancelingMode)
-    }
-
-    fun setAmbientSoundMode(ambientSoundMode: AmbientSoundMode) {
-        device?.state?.noiseCancelingMode()?.let { noiseCancelingMode ->
-            device?.setSoundMode(ambientSoundMode, noiseCancelingMode)
-        }
-    }
-
-    fun setNoiseCancelingMode(noiseCancelingMode: NoiseCancelingMode) {
-        device?.state?.ambientSoundMode()?.let { ambientSoundMode ->
-            device?.setSoundMode(ambientSoundMode, noiseCancelingMode)
-        }
+    fun setSoundModes(soundModes: SoundModes) {
+        device?.setSoundModes(soundModes)
     }
 
     fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {

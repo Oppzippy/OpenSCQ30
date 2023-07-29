@@ -10,12 +10,12 @@ pub struct SoundModeUpdatePacket(LibSoundModeUpdatePacket);
 impl SoundModeUpdatePacket {
     #[wasm_bindgen(getter = ambientSoundMode)]
     pub fn ambient_sound_mode(&self) -> AmbientSoundMode {
-        self.0.ambient_sound_mode().into()
+        self.0.ambient_sound_mode.into()
     }
 
     #[wasm_bindgen(getter = noiseCancelingMode)]
     pub fn noise_canceling_mode(&self) -> NoiseCancelingMode {
-        self.0.noise_canceling_mode().into()
+        self.0.noise_canceling_mode.into()
     }
 }
 

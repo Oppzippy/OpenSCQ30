@@ -16,13 +16,16 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
-import com.oppzippy.openscq30.features.soundcoredevice.api.contentEquals
-import com.oppzippy.openscq30.libbindings.AmbientSoundMode
-import com.oppzippy.openscq30.libbindings.EqualizerConfiguration
-import com.oppzippy.openscq30.libbindings.NoiseCancelingMode
-import com.oppzippy.openscq30.libbindings.PresetEqualizerProfile
-import com.oppzippy.openscq30.libbindings.SoundcoreDeviceState
-import com.oppzippy.openscq30.libbindings.VolumeAdjustments
+import com.oppzippy.openscq30.extensions.empty
+import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
+import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
+import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
+import com.oppzippy.openscq30.lib.bindings.SoundModes
+import com.oppzippy.openscq30.lib.bindings.TransparencyMode
+import com.oppzippy.openscq30.lib.bindings.VolumeAdjustments
+import com.oppzippy.openscq30.lib.wrapper.SoundcoreDeviceState
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.equalizer.EqualizerSettings
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -67,10 +70,14 @@ class DeviceSettingsEqualizerTest {
         return UiDeviceState.Connected(
             "Test Device",
             "00:00:00:00:00:00",
-            SoundcoreDeviceState(
-                AmbientSoundMode.Normal,
-                NoiseCancelingMode.Indoor,
-                equalizerConfiguration,
+            SoundcoreDeviceState.empty().copy(
+                soundModes = SoundModes(
+                    AmbientSoundMode.Normal,
+                    NoiseCancelingMode.Indoor,
+                    TransparencyMode.VocalMode,
+                    CustomNoiseCanceling(0),
+                ),
+                equalizerConfiguration = equalizerConfiguration,
             ),
         )
     }
@@ -138,7 +145,7 @@ class DeviceSettingsEqualizerTest {
         verify {
             onEqualizerConfigurationChange(
                 match {
-                    it.contentEquals(EqualizerConfiguration(PresetEqualizerProfile.BassBooster))
+                    it.innerEquals(EqualizerConfiguration(PresetEqualizerProfile.BassBooster))
                 },
             )
         }

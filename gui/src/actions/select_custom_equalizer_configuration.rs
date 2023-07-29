@@ -11,7 +11,7 @@ use crate::{
 
 use super::{State, StateUpdate};
 
-pub fn select_custom_equalizer_configuration<T>(
+pub async fn select_custom_equalizer_configuration<T>(
     state: &State<T>,
     settings_file: &SettingsFile<Config>,
     custom_profile: &CustomEqualizerProfileObject,
@@ -75,13 +75,19 @@ mod tests {
                 );
             })
             .unwrap();
-        select_custom_equalizer_configuration(&state, &settings_file, &custom_profile).unwrap();
+
+        select_custom_equalizer_configuration(&state, &settings_file, &custom_profile)
+            .await
+            .unwrap();
 
         let state_update = receiver.recv().await.unwrap();
         assert_eq!(
-            StateUpdate::SetEqualizerConfiguration(EqualizerConfiguration::new_custom_profile(
-                VolumeAdjustments::new(custom_profile.volume_adjustments())
-            )),
+            StateUpdate::SetEqualizerConfiguration(
+                EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(
+                    custom_profile.volume_adjustments()
+                ))
+                .into()
+            ),
             state_update,
         );
     }

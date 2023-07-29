@@ -57,7 +57,7 @@ impl DeviceSelection {
     pub fn set_devices(&self, devices: &[DeviceObject]) {
         if let Some(model) = self.devices.get() {
             model.remove_all();
-            model.extend_from_slice(&devices);
+            model.extend_from_slice(devices);
 
             self.dropdown.set_model(Some(model));
         }

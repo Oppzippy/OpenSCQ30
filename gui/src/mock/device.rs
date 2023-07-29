@@ -6,7 +6,7 @@ use macaddr::MacAddr6;
 use mockall::mock;
 use openscq30_lib::{
     api::{connection::ConnectionStatus, device::Device},
-    packets::structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
+    packets::structures::{EqualizerConfiguration, SoundModes},
     state::DeviceState,
 };
 use tokio::sync::{broadcast, watch};
@@ -18,21 +18,15 @@ mock! {
         pub fn connection_status(&self) -> watch::Receiver<ConnectionStatus>;
         pub fn mac_address(&self) -> openscq30_lib::Result<MacAddr6>;
         pub fn name(&self) -> openscq30_lib::Result<String>;
-        pub fn set_ambient_sound_mode(
+        pub fn state(&self) -> DeviceState;
+        pub fn set_sound_modes(
             &self,
-            ambient_sound_mode: AmbientSoundMode,
+            sound_modes: SoundModes,
         ) -> openscq30_lib::Result<()>;
-        pub fn ambient_sound_mode(&self) -> AmbientSoundMode;
-        pub fn set_noise_canceling_mode(
-            &self,
-            noise_canceling_mode: NoiseCancelingMode,
-        ) -> openscq30_lib::Result<()>;
-        pub fn noise_canceling_mode(&self) -> NoiseCancelingMode;
         pub fn set_equalizer_configuration(
             &self,
             configuration: EqualizerConfiguration,
         ) -> openscq30_lib::Result<()>;
-        pub fn equalizer_configuration(&self) -> EqualizerConfiguration;
     }
 }
 
@@ -52,37 +46,19 @@ impl Device for MockDevice {
         timeout_future(Duration::from_millis(10)).await;
         self.name()
     }
-    async fn set_ambient_sound_mode(
-        &self,
-        ambient_sound_mode: AmbientSoundMode,
-    ) -> openscq30_lib::Result<()> {
+    async fn state(&self) -> DeviceState {
         timeout_future(Duration::from_millis(10)).await;
-        self.set_ambient_sound_mode(ambient_sound_mode)
+        self.state()
     }
-    async fn ambient_sound_mode(&self) -> AmbientSoundMode {
+    async fn set_sound_modes(&self, sound_modes: SoundModes) -> openscq30_lib::Result<()> {
         timeout_future(Duration::from_millis(10)).await;
-        self.ambient_sound_mode()
-    }
-    async fn set_noise_canceling_mode(
-        &self,
-        noise_canceling_mode: NoiseCancelingMode,
-    ) -> openscq30_lib::Result<()> {
-        timeout_future(Duration::from_millis(10)).await;
-        self.set_noise_canceling_mode(noise_canceling_mode)
-    }
-    async fn noise_canceling_mode(&self) -> NoiseCancelingMode {
-        timeout_future(Duration::from_millis(10)).await;
-        self.noise_canceling_mode()
+        self.set_sound_modes(sound_modes)
     }
     async fn set_equalizer_configuration(
         &self,
-        configuration: EqualizerConfiguration,
+        equalizer_configuration: EqualizerConfiguration,
     ) -> openscq30_lib::Result<()> {
         timeout_future(Duration::from_millis(10)).await;
-        self.set_equalizer_configuration(configuration)
-    }
-    async fn equalizer_configuration(&self) -> EqualizerConfiguration {
-        timeout_future(Duration::from_millis(10)).await;
-        self.equalizer_configuration()
+        self.set_equalizer_configuration(equalizer_configuration)
     }
 }

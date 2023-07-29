@@ -6,13 +6,16 @@ import android.content.Context
 import android.util.Log
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
-import com.oppzippy.openscq30.libbindings.SoundcoreDeviceState
+import com.oppzippy.openscq30.lib.wrapper.toSoundcoreDeviceState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 
 class SoundcoreDeviceFactoryImpl(private val context: Context) : SoundcoreDeviceFactory {
     @Throws(SecurityException::class)
-    override suspend fun createSoundcoreDevice(macAddress: String, scope: CoroutineScope): SoundcoreDevice? {
+    override suspend fun createSoundcoreDevice(
+        macAddress: String,
+        scope: CoroutineScope,
+    ): SoundcoreDevice? {
         val bluetoothManager: BluetoothManager =
             context.getSystemService(BluetoothManager::class.java)
         val bluetoothDevice =
@@ -27,6 +30,6 @@ class SoundcoreDeviceFactoryImpl(private val context: Context) : SoundcoreDevice
         }
 
         val packet = callbacks.packetsFlow.first { it is Packet.StateUpdate } as Packet.StateUpdate
-        return SoundcoreDeviceImpl(gatt, callbacks, scope, SoundcoreDeviceState(packet.packet))
+        return SoundcoreDeviceImpl(gatt, callbacks, scope, packet.packet.toSoundcoreDeviceState())
     }
 }

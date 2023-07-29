@@ -1,13 +1,13 @@
 import { BehaviorSubject } from "rxjs";
-import { UnmodifiableBehaviorSubject } from "../UnmodifiableBehaviorSubject";
-import { SoundcoreDevice } from "./SoundcoreDevice";
-import { SoundcoreDeviceState } from "./SoundcoreDeviceState";
 import {
   AmbientSoundMode,
   EqualizerConfiguration,
   NoiseCancelingMode,
   PresetEqualizerProfile,
 } from "../../wasm/pkg/openscq30_web_wasm";
+import { UnmodifiableBehaviorSubject } from "../UnmodifiableBehaviorSubject";
+import { SoundcoreDevice } from "./SoundcoreDevice";
+import { SoundcoreDeviceState } from "./SoundcoreDeviceState";
 
 export class DemoSoundcoreDevice implements SoundcoreDevice {
   public readonly name: string;
@@ -26,12 +26,8 @@ export class DemoSoundcoreDevice implements SoundcoreDevice {
     // do nothing
   }
 
-  public get ambientSoundMode() {
-    return this._state.value.ambientSoundMode;
-  }
-
-  public get noiseCancelingMode() {
-    return this._state.value.noiseCancelingMode;
+  public get soundModes() {
+    return this._state.value.soundModes;
   }
 
   public get equalizerConfiguration() {
@@ -48,8 +44,10 @@ export class DemoSoundcoreDevice implements SoundcoreDevice {
 export function selectDemoDevice() {
   return Promise.resolve(
     new DemoSoundcoreDevice("Demo Device", {
-      ambientSoundMode: AmbientSoundMode.Normal,
-      noiseCancelingMode: NoiseCancelingMode.Indoor,
+      soundModes: {
+        ambientSoundMode: AmbientSoundMode.Normal,
+        noiseCancelingMode: NoiseCancelingMode.Indoor,
+      },
       equalizerConfiguration: EqualizerConfiguration.fromPresetProfile(
         PresetEqualizerProfile.SoundcoreSignature,
       ),

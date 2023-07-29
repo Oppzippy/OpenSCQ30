@@ -7,7 +7,9 @@ use tokio::sync::{broadcast, watch, Mutex};
 use crate::{
     api::{connection::ConnectionStatus, device::Device},
     packets::structures::{
-        AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode, PresetEqualizerProfile,
+        AgeRange, AmbientSoundMode, BasicHearId, BatteryLevel, DeviceFeatureFlags,
+        EqualizerConfiguration, FirmwareVersion, IsBatteryCharging, NoiseCancelingMode,
+        PresetEqualizerProfile, SerialNumber, SingleBattery, SoundModes,
     },
     state::DeviceState,
 };
@@ -31,13 +33,33 @@ impl DemoDevice {
             state_sender,
             connection_status_sender,
             state: Mutex::new(DeviceState {
-                ambient_sound_mode: AmbientSoundMode::Normal,
-                noise_canceling_mode: NoiseCancelingMode::Indoor,
-                transparency_mode: Default::default(),
-                custom_noise_canceling: Default::default(),
+                feaure_flags: DeviceFeatureFlags::all(),
+                battery: SingleBattery {
+                    is_charging: IsBatteryCharging::No,
+                    level: BatteryLevel(4),
+                }
+                .into(),
                 equalizer_configuration: EqualizerConfiguration::new_from_preset_profile(
                     PresetEqualizerProfile::SoundcoreSignature,
                 ),
+                sound_modes: Some(SoundModes {
+                    ambient_sound_mode: AmbientSoundMode::Normal,
+                    noise_canceling_mode: NoiseCancelingMode::Indoor,
+                    transparency_mode: Default::default(),
+                    custom_noise_canceling: Default::default(),
+                }),
+                age_range: Some(AgeRange(0)),
+                custom_button_model: None,
+                custom_hear_id: Some(
+                    BasicHearId {
+                        is_enabled: true,
+                        time: 0,
+                        volume_adjustments: Default::default(),
+                    }
+                    .into(),
+                ),
+                firmware_version: Some(FirmwareVersion("01.00".into())),
+                serial_number: Some(SerialNumber("0123456789ABCDEF".into())),
             }),
         }
     }
@@ -61,38 +83,18 @@ impl Device for DemoDevice {
         self.connection_status_sender.subscribe()
     }
 
-    async fn set_ambient_sound_mode(
-        &self,
-        ambient_sound_mode: AmbientSoundMode,
-    ) -> crate::Result<()> {
-        tracing::info!("set ambient sound mode to {ambient_sound_mode:?}");
+    async fn state(&self) -> DeviceState {
+        self.state.lock().await.clone()
+    }
+
+    async fn set_sound_modes(&self, sound_modes: SoundModes) -> crate::Result<()> {
+        tracing::info!("set sound modes to {sound_modes:?}");
         let mut state = self.state.lock().await;
         *state = DeviceState {
-            ambient_sound_mode,
-            ..*state
+            sound_modes: Some(sound_modes),
+            ..state.clone()
         };
         Ok(())
-    }
-
-    async fn ambient_sound_mode(&self) -> AmbientSoundMode {
-        self.state.lock().await.ambient_sound_mode
-    }
-
-    async fn set_noise_canceling_mode(
-        &self,
-        noise_canceling_mode: NoiseCancelingMode,
-    ) -> crate::Result<()> {
-        tracing::info!("set noise canceling mode to {noise_canceling_mode:?}");
-        let mut state = self.state.lock().await;
-        *state = DeviceState {
-            noise_canceling_mode,
-            ..*state
-        };
-        Ok(())
-    }
-
-    async fn noise_canceling_mode(&self) -> NoiseCancelingMode {
-        self.state.lock().await.noise_canceling_mode
     }
 
     async fn set_equalizer_configuration(
@@ -103,13 +105,9 @@ impl Device for DemoDevice {
         let mut state = self.state.lock().await;
         *state = DeviceState {
             equalizer_configuration,
-            ..*state
+            ..state.clone()
         };
         Ok(())
-    }
-
-    async fn equalizer_configuration(&self) -> EqualizerConfiguration {
-        self.state.lock().await.equalizer_configuration
     }
 }
 

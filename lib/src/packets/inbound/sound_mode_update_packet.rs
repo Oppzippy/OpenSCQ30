@@ -1,4 +1,7 @@
-use nom::{combinator::map, error::context};
+use nom::{
+    combinator::map,
+    error::{context, ContextError, ParseError},
+};
 
 use crate::packets::{
     parsing::{take_sound_modes, ParseResult},
@@ -7,13 +10,18 @@ use crate::packets::{
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct SoundModeUpdatePacket {
-    ambient_sound_mode: AmbientSoundMode,
-    noise_canceling_mode: NoiseCancelingMode,
-    transparency_mode: TransparencyMode,
-    custom_noise_canceling: CustomNoiseCanceling,
+    pub ambient_sound_mode: AmbientSoundMode,
+    pub noise_canceling_mode: NoiseCancelingMode,
+    pub transparency_mode: TransparencyMode,
+    pub custom_noise_canceling: CustomNoiseCanceling,
 }
 
-pub fn take_ambient_sound_mode_update_packet(input: &[u8]) -> ParseResult<SoundModeUpdatePacket> {
+pub fn take_ambient_sound_mode_update_packet<
+    'a,
+    E: ParseError<&'a [u8]> + ContextError<&'a [u8]>,
+>(
+    input: &'a [u8],
+) -> ParseResult<SoundModeUpdatePacket, E> {
     // offset 9
     context(
         "SoundModeUpdatePacket",
@@ -27,18 +35,10 @@ pub fn take_ambient_sound_mode_update_packet(input: &[u8]) -> ParseResult<SoundM
     // offset 13
 }
 
-impl SoundModeUpdatePacket {
-    pub fn ambient_sound_mode(&self) -> AmbientSoundMode {
-        self.ambient_sound_mode
-    }
-
-    pub fn noise_canceling_mode(&self) -> NoiseCancelingMode {
-        self.noise_canceling_mode
-    }
-}
-
 #[cfg(test)]
 mod tests {
+    use nom::error::VerboseError;
+
     use crate::packets::{
         inbound::take_ambient_sound_mode_update_packet,
         parsing::take_packet_header,
@@ -50,10 +50,14 @@ mod tests {
         const PACKET_BYTES: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x02, 0x02, 0x01, 0x00, 0x23,
         ];
-        let input = take_packet_header(PACKET_BYTES).unwrap().0;
-        let packet = take_ambient_sound_mode_update_packet(input).unwrap().1;
-        assert_eq!(AmbientSoundMode::Normal, packet.ambient_sound_mode());
-        assert_eq!(NoiseCancelingMode::Indoor, packet.noise_canceling_mode());
+        let input = take_packet_header::<VerboseError<&[u8]>>(PACKET_BYTES)
+            .unwrap()
+            .0;
+        let packet = take_ambient_sound_mode_update_packet::<VerboseError<&[u8]>>(input)
+            .unwrap()
+            .1;
+        assert_eq!(AmbientSoundMode::Normal, packet.ambient_sound_mode);
+        assert_eq!(NoiseCancelingMode::Indoor, packet.noise_canceling_mode);
     }
 
     #[test]
@@ -62,8 +66,10 @@ mod tests {
             //                                                    max value of 0x02
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x03, 0x02, 0x01, 0x00, 0x23,
         ];
-        let input = take_packet_header(PACKET_BYTES).unwrap().0;
-        let result = take_ambient_sound_mode_update_packet(input);
+        let input = take_packet_header::<VerboseError<&[u8]>>(PACKET_BYTES)
+            .unwrap()
+            .0;
+        let result = take_ambient_sound_mode_update_packet::<VerboseError<&[u8]>>(input);
         assert_eq!(true, result.is_err());
     }
 
@@ -73,15 +79,17 @@ mod tests {
             //                                                          max value of 0x03
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x02, 0x04, 0x01, 0x00, 0x23,
         ];
-        let input = take_packet_header(PACKET_BYTES).unwrap().0;
-        let result = take_ambient_sound_mode_update_packet(input);
+        let input = take_packet_header::<VerboseError<&[u8]>>(PACKET_BYTES)
+            .unwrap()
+            .0;
+        let result = take_ambient_sound_mode_update_packet::<VerboseError<&[u8]>>(input);
         assert_eq!(true, result.is_err());
     }
 
     #[test]
     fn it_does_not_parse_unknown_packet() {
         const PACKET_BYTES: &[u8] = &[0x01, 0x02, 0x03];
-        let result = take_ambient_sound_mode_update_packet(PACKET_BYTES);
+        let result = take_ambient_sound_mode_update_packet::<VerboseError<&[u8]>>(PACKET_BYTES);
         assert_eq!(true, result.is_err());
     }
 }

@@ -1,8 +1,9 @@
 use std::rc::Rc;
 
+use anyhow::bail;
 use openscq30_lib::{
     api::device::{Device, DeviceRegistry},
-    packets::structures::NoiseCancelingMode,
+    packets::structures::{NoiseCancelingMode, SoundModes},
 };
 
 use super::State;
@@ -17,9 +18,17 @@ where
     let device = state
         .selected_device()
         .ok_or_else(|| anyhow::anyhow!("no device is selected"))?;
-    device
-        .set_noise_canceling_mode(noise_canceling_mode)
-        .await?;
+
+    let device_state = device.state().await;
+    let Some(sound_modes) = device_state.sound_modes else {
+        bail!("set_noise_canceling_mode: sound modes not supported");
+    };
+    let new_sound_modes = SoundModes {
+        noise_canceling_mode,
+        ..sound_modes
+    };
+
+    device.set_sound_modes(new_sound_modes).await?;
     Ok(())
 }
 
@@ -28,7 +37,10 @@ mod tests {
     use std::sync::Arc;
 
     use mockall::predicate;
-    use openscq30_lib::packets::structures::NoiseCancelingMode;
+    use openscq30_lib::{
+        packets::structures::{NoiseCancelingMode, SoundModes},
+        state::DeviceState,
+    };
 
     use crate::{
         actions::State,
@@ -44,9 +56,21 @@ mod tests {
         let (state, _receiver) = State::new(registry);
         let mut selected_device = MockDevice::new();
         selected_device
-            .expect_set_noise_canceling_mode()
+            .expect_state()
             .once()
-            .with(predicate::eq(NoiseCancelingMode::Transport))
+            .return_const(DeviceState {
+                sound_modes: Some(SoundModes {
+                    noise_canceling_mode: NoiseCancelingMode::Indoor,
+                    ..Default::default()
+                }),
+                ..Default::default()
+            });
+        selected_device
+            .expect_set_sound_modes()
+            .once()
+            .with(predicate::function(|sound_modes: &SoundModes| {
+                sound_modes.noise_canceling_mode == NoiseCancelingMode::Transport
+            }))
             .return_once(|_noise_canceling_mode| Ok(()));
         *state.selected_device.borrow_mut() = Some(Arc::new(selected_device));
 

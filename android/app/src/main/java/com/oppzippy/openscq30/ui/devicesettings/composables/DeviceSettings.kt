@@ -21,11 +21,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.libbindings.AmbientSoundMode
-import com.oppzippy.openscq30.libbindings.EqualizerConfiguration
-import com.oppzippy.openscq30.libbindings.NoiseCancelingMode
-import com.oppzippy.openscq30.libbindings.PresetEqualizerProfile
-import com.oppzippy.openscq30.libbindings.SoundcoreDeviceState
+import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
+import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
+import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
+import com.oppzippy.openscq30.lib.bindings.SoundModes
+import com.oppzippy.openscq30.lib.bindings.TransparencyMode
+import com.oppzippy.openscq30.lib.wrapper.SoundcoreDeviceState
 import com.oppzippy.openscq30.ui.devicesettings.Screen
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.equalizer.EqualizerSettings
@@ -86,13 +89,14 @@ fun DeviceSettings(
             startDestination = Screen.General.route,
             modifier = Modifier.padding(innerPadding),
         ) {
-            composable(Screen.General.route) {
-                SoundModeSettings(
-                    ambientSoundMode = uiState.deviceState.ambientSoundMode(),
-                    noiseCancelingMode = uiState.deviceState.noiseCancelingMode(),
-                    onAmbientSoundModeChange = onAmbientSoundModeChange,
-                    onNoiseCancelingModeChange = onNoiseCancelingModeChange,
-                )
+            uiState.deviceState.soundModes?.let { soundModes ->
+                composable(Screen.General.route) {
+                    SoundModeSettings(
+                        soundModes = soundModes,
+                        onAmbientSoundModeChange = onAmbientSoundModeChange,
+                        onNoiseCancelingModeChange = onNoiseCancelingModeChange,
+                    )
+                }
             }
             composable(Screen.Equalizer.route) {
                 EqualizerSettings(
@@ -116,9 +120,16 @@ private fun PreviewDeviceSettings() {
                 "Soundcore Q30",
                 "00:00:00:00:00:00",
                 SoundcoreDeviceState(
-                    AmbientSoundMode.Normal,
-                    NoiseCancelingMode.Indoor,
-                    EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
+                    featureFlags = -1,
+                    soundModes = SoundModes(
+                        AmbientSoundMode.Normal,
+                        NoiseCancelingMode.Indoor,
+                        TransparencyMode.VocalMode,
+                        CustomNoiseCanceling(0),
+                    ),
+                    equalizerConfiguration = EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
+                    firmwareVersion = "",
+                    serialNumber = "",
                 ),
             ),
         )

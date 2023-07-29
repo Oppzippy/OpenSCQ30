@@ -4,7 +4,7 @@ use async_trait::async_trait;
 use macaddr::MacAddr6;
 use openscq30_lib::{
     api::{connection::ConnectionStatus, device::Device},
-    packets::structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
+    packets::structures::{EqualizerConfiguration, SoundModes},
     state::DeviceState,
 };
 use tokio::{
@@ -61,56 +61,18 @@ where
             .unwrap()
     }
 
-    async fn ambient_sound_mode(&self) -> AmbientSoundMode {
+    async fn state(&self) -> DeviceState {
         let soundcore_device = self.soundcore_device.to_owned();
         self.tokio_runtime
-            .spawn(async move { soundcore_device.ambient_sound_mode().await })
+            .spawn(async move { soundcore_device.state().await })
             .await
             .unwrap()
     }
 
-    async fn set_ambient_sound_mode(
-        &self,
-        ambient_sound_mode: AmbientSoundMode,
-    ) -> openscq30_lib::Result<()> {
+    async fn set_sound_modes(&self, sound_modes: SoundModes) -> openscq30_lib::Result<()> {
         let soundcore_device = self.soundcore_device.to_owned();
         self.tokio_runtime
-            .spawn(async move {
-                soundcore_device
-                    .set_ambient_sound_mode(ambient_sound_mode)
-                    .await
-            })
-            .await
-            .unwrap()
-    }
-
-    async fn noise_canceling_mode(&self) -> NoiseCancelingMode {
-        let soundcore_device = self.soundcore_device.to_owned();
-        self.tokio_runtime
-            .spawn(async move { soundcore_device.noise_canceling_mode().await })
-            .await
-            .unwrap()
-    }
-
-    async fn set_noise_canceling_mode(
-        &self,
-        noise_canceling_mode: NoiseCancelingMode,
-    ) -> openscq30_lib::Result<()> {
-        let soundcore_device = self.soundcore_device.to_owned();
-        self.tokio_runtime
-            .spawn(async move {
-                soundcore_device
-                    .set_noise_canceling_mode(noise_canceling_mode)
-                    .await
-            })
-            .await
-            .unwrap()
-    }
-
-    async fn equalizer_configuration(&self) -> EqualizerConfiguration {
-        let soundcore_device = self.soundcore_device.to_owned();
-        self.tokio_runtime
-            .spawn(async move { soundcore_device.equalizer_configuration().await })
+            .spawn(async move { soundcore_device.set_sound_modes(sound_modes).await })
             .await
             .unwrap()
     }
