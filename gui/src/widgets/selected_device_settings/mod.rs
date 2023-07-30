@@ -4,9 +4,7 @@ use gtk::{
     glib::{self, Object, Sender},
     subclass::prelude::ObjectSubclassIsExt,
 };
-use openscq30_lib::packets::structures::{
-    AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode,
-};
+use openscq30_lib::{packets::structures::EqualizerConfiguration, state::DeviceState};
 
 use crate::{actions::Action, objects::CustomEqualizerProfileObject};
 
@@ -25,16 +23,8 @@ impl SelectedDeviceSettings {
         self.imp().set_sender(sender);
     }
 
-    pub fn set_ambient_sound_mode(&self, ambient_sound_mode: AmbientSoundMode) {
-        self.imp()
-            .general_settings
-            .set_ambient_sound_mode(ambient_sound_mode);
-    }
-
-    pub fn set_noise_canceling_mode(&self, noise_canceling_mode: NoiseCancelingMode) {
-        self.imp()
-            .general_settings
-            .set_noise_canceling_mode(noise_canceling_mode);
+    pub fn set_device_state(&self, state: &DeviceState) {
+        self.imp().set_device_state(state);
     }
 
     pub fn set_equalizer_configuration(&self, equalizer_configuration: EqualizerConfiguration) {

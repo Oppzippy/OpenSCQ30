@@ -20,7 +20,6 @@ use gtk::{
 };
 
 use gtk::subclass::widget::WidgetClassSubclassExt;
-use openscq30_lib::packets::structures::{AmbientSoundMode, NoiseCancelingMode};
 
 use crate::{
     actions::Action,
@@ -64,29 +63,6 @@ impl MainWindow {
 
     pub fn set_devices(&self, devices: &[DeviceObject]) {
         self.device_selection.set_devices(devices);
-    }
-
-    #[template_callback]
-    // no idea why the parameter comes before &GeneralSettings
-    fn handle_ambient_sound_mode_selected(&self, mode: u8, _: &SelectedDeviceSettings) {
-        self.sender
-            .get()
-            .unwrap()
-            .send(Action::SetAmbientSoundMode(
-                AmbientSoundMode::from_id(mode).unwrap(),
-            ))
-            .unwrap();
-    }
-
-    #[template_callback]
-    fn handle_noise_canceling_mode_selected(&self, mode: u8, _: &SelectedDeviceSettings) {
-        self.sender
-            .get()
-            .unwrap()
-            .send(Action::SetNoiseCancelingMode(
-                NoiseCancelingMode::from_id(mode).unwrap(),
-            ))
-            .unwrap();
     }
 
     fn create_custom_equalizer_profile(&self, volume_adjustments: [i8; 8]) {

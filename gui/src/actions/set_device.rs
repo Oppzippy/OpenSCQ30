@@ -82,19 +82,11 @@ where
                 let device_state = device.state().await;
                 state.state_update_sender
                     .send(StateUpdate::SetSelectedDevice(Some(DeviceObject::new(&name, &mac_address.to_string()))))
-                    .map_err(|err| anyhow!("{err}"))?;
-                state.state_update_sender
-                    .send(StateUpdate::SetEqualizerConfiguration(device_state.equalizer_configuration))
-                    .map_err(|err| anyhow!("{err}"))?;
+                    .map_err(|err| anyhow!("{err:?}"))?;
 
-                if let Some(sound_modes) = device_state.sound_modes {
-                    state.state_update_sender
-                        .send(StateUpdate::SetAmbientSoundMode(sound_modes.ambient_sound_mode))
-                        .map_err(|err| anyhow!("{err}"))?;
-                    state.state_update_sender
-                        .send(StateUpdate::SetNoiseCancelingMode(sound_modes.noise_canceling_mode))
-                        .map_err(|err| anyhow!("{err}"))?;
-                }
+                state.state_update_sender
+                    .send(StateUpdate::SetDeviceState(device_state))
+                    .map_err(|err| anyhow!("{err:?}"))?;
 
                 Ok(())
             }).await;
@@ -148,6 +140,19 @@ mod tests {
         crate::load_resources();
         let (_sender, receiver) = watch::channel(ConnectionStatus::Connected);
         let mut registry = MockDeviceRegistry::new();
+        let device_state = DeviceState {
+            sound_modes: Some(SoundModes {
+                ambient_sound_mode: AmbientSoundMode::Transparency,
+                noise_canceling_mode: NoiseCancelingMode::Indoor,
+                ..Default::default()
+            }),
+            equalizer_configuration: EqualizerConfiguration::new_from_preset_profile(
+                PresetEqualizerProfile::Acoustic,
+            ),
+            ..Default::default()
+        };
+
+        let device_state_2 = device_state.clone();
         registry
             .expect_device()
             .with(predicate::eq(MacAddr6::nil()))
@@ -172,17 +177,7 @@ mod tests {
                     .expect_connection_status()
                     .once()
                     .return_const(receiver);
-                device.expect_state().once().return_const(DeviceState {
-                    sound_modes: Some(SoundModes {
-                        ambient_sound_mode: AmbientSoundMode::Transparency,
-                        noise_canceling_mode: NoiseCancelingMode::Indoor,
-                        ..Default::default()
-                    }),
-                    equalizer_configuration: EqualizerConfiguration::new_from_preset_profile(
-                        PresetEqualizerProfile::Acoustic,
-                    ),
-                    ..Default::default()
-                });
+                device.expect_state().once().return_const(device_state_2);
 
                 Ok(Some(Arc::new(device)))
             });
@@ -196,11 +191,7 @@ mod tests {
                 "Test Device",
                 "00:00:00:00:00:00",
             ))),
-            StateUpdate::SetEqualizerConfiguration(
-                EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::Acoustic),
-            ),
-            StateUpdate::SetAmbientSoundMode(AmbientSoundMode::Transparency),
-            StateUpdate::SetNoiseCancelingMode(NoiseCancelingMode::Indoor),
+            StateUpdate::SetDeviceState(device_state),
             StateUpdate::SetLoading(false),
         ]);
         loop {

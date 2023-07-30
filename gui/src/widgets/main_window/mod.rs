@@ -11,10 +11,7 @@ use gtk::{
     traits::GtkWindowExt,
     Application,
 };
-use openscq30_lib::{
-    packets::structures::{AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode},
-    state::DeviceState,
-};
+use openscq30_lib::{packets::structures::EqualizerConfiguration, state::DeviceState};
 
 use crate::{
     actions::Action,
@@ -82,24 +79,9 @@ impl MainWindow {
         self.imp().set_sender(sender);
     }
 
-    pub fn set_state(&self, state: &DeviceState) {
+    pub fn set_device_state(&self, state: &DeviceState) {
+        self.imp().selected_device_settings.set_device_state(state);
         self.set_equalizer_configuration(state.equalizer_configuration);
-        if let Some(sound_modes) = state.sound_modes {
-            self.set_ambient_sound_mode(sound_modes.ambient_sound_mode);
-            self.set_noise_canceling_mode(sound_modes.noise_canceling_mode);
-        }
-    }
-
-    pub fn set_ambient_sound_mode(&self, ambient_sound_mode: AmbientSoundMode) {
-        self.imp()
-            .selected_device_settings
-            .set_ambient_sound_mode(ambient_sound_mode);
-    }
-
-    pub fn set_noise_canceling_mode(&self, noise_canceling_mode: NoiseCancelingMode) {
-        self.imp()
-            .selected_device_settings
-            .set_noise_canceling_mode(noise_canceling_mode);
     }
 
     pub fn set_equalizer_configuration(&self, equalizer_configuration: EqualizerConfiguration) {

@@ -4,15 +4,13 @@ use gtk::{
     glib::{self, Sender},
     subclass::{
         prelude::{BoxImpl, ObjectImpl, ObjectSubclass},
-        widget::{
-            CompositeTemplateCallbacksClass, CompositeTemplateClass,
-            CompositeTemplateInitializingExt, WidgetImpl,
-        },
+        widget::{CompositeTemplateClass, CompositeTemplateInitializingExt, WidgetImpl},
     },
     CompositeTemplate, TemplateChild,
 };
 
 use gtk::subclass::widget::WidgetClassSubclassExt;
+use openscq30_lib::state::DeviceState;
 
 use crate::{
     actions::Action,
@@ -40,8 +38,12 @@ impl SelectedDeviceSettings {
     }
 }
 
-#[gtk::template_callbacks]
-impl SelectedDeviceSettings {}
+impl SelectedDeviceSettings {
+    pub fn set_device_state(&self, state: &DeviceState) {
+        self.general_settings.set_device_state(state);
+        // self.equalizer_settings.set_device_state(state);
+    }
+}
 
 #[glib::object_subclass]
 impl ObjectSubclass for SelectedDeviceSettings {
@@ -51,7 +53,6 @@ impl ObjectSubclass for SelectedDeviceSettings {
 
     fn class_init(klass: &mut Self::Class) {
         klass.bind_template();
-        klass.bind_template_callbacks();
     }
 
     fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {

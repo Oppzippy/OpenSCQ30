@@ -223,8 +223,7 @@ fn build_ui_2(
                 match update {
                     StateUpdate::SetDevices(devices) => main_window.set_devices(&devices),
                     StateUpdate::SetLoading(is_loading) => main_window.set_loading(is_loading),
-                    StateUpdate::SetAmbientSoundMode(ambient_sound_mode) => main_window.set_ambient_sound_mode(ambient_sound_mode),
-                    StateUpdate::SetNoiseCancelingMode(noise_canceling_mode) => main_window.set_noise_canceling_mode(noise_canceling_mode),
+                    StateUpdate::SetDeviceState(state) => main_window.set_device_state(&state),
                     StateUpdate::SetEqualizerConfiguration(equalizer_configuration) => main_window.set_equalizer_configuration(equalizer_configuration),
                     StateUpdate::SetSelectedDevice(device) => main_window.set_property("selected-device", device),
                     StateUpdate::SetCustomEqualizerProfiles(custom_profiles) => main_window.set_custom_profiles(custom_profiles),
@@ -307,6 +306,16 @@ fn build_ui_2(
                         .await
                         .context("noise canceling mode selected")
                     },
+                    Action::SetTransparencyMode(transparency_mode) => {
+                        actions::set_transparency_mode(&state, transparency_mode)
+                        .await
+                        .context("transparency mode selected")
+                    },
+                    Action::SetCustomNoiseCanceling(custom_noise_canceling) => {
+                        actions::set_custom_noise_canceling(&state, custom_noise_canceling)
+                        .await
+                        .context("transparency mode selected")
+                    },
                     Action::Connect(mac_address) => {
                         actions::set_device(&state, Some(mac_address))
                         .await
@@ -347,7 +356,7 @@ fn build_ui_2(
     main_context.spawn_local(clone!(@weak main_window, @strong state => async move {
         loop {
             let next_state = state.state_update_receiver.next().await;
-            main_window.set_state(&next_state);
+            main_window.set_device_state(&next_state);
         }
     }));
 
