@@ -19,7 +19,7 @@ use windows::{
 
 use crate::{
     api::connection::{Connection, ConnectionStatus},
-    device_utils,
+    device_utils::{self, is_soundcore_service_uuid},
 };
 
 use super::WindowsMacAddress;
@@ -50,7 +50,7 @@ impl WindowsConnection {
                             err.into()
                         }
                     })?;
-            let service = Self::service(&device, &device_utils::SERVICE_UUID)?;
+            let service = Self::service(&device)?;
             let read_characteristic =
                 Self::characteristic(&service, &device_utils::READ_CHARACTERISTIC_UUID)?;
             let write_characteristic =
@@ -129,15 +129,11 @@ impl WindowsConnection {
     }
 
     #[instrument(level = "trace", skip(device))]
-    fn service(
-        device: &BluetoothLEDevice,
-        service_uuid: &Uuid,
-    ) -> crate::Result<GattDeviceService> {
+    fn service(device: &BluetoothLEDevice) -> crate::Result<GattDeviceService> {
         let services = device.GetGattServicesAsync()?.get()?.Services()?;
 
-        let service_uuid_u128 = service_uuid.as_u128();
         let service = services.into_iter().find(|service| match service.Uuid() {
-            Ok(uuid) => uuid.to_u128() == service_uuid_u128,
+            Ok(uuid) => is_soundcore_service_uuid(&Uuid::from_u128(uuid.to_u128())),
             Err(err) => {
                 tracing::warn!("error getting uuid: {err:?}");
                 false

@@ -1,7 +1,12 @@
 use macaddr::MacAddr6;
 use uuid::Uuid;
 
+// The devices have the same UUID except the first two bytes. I assume one device was chosen with an initial value,
+// and then the first two bytes increment by one for each device going from there. Unsure of the initial value or
+// the number of devices in existence.
 pub const SERVICE_UUID: Uuid = uuid::uuid!("011cf5da-0000-1000-8000-00805f9b34fb");
+pub const SERVICE_UUID_MASK: Uuid = uuid::uuid!("0000FFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF");
+
 pub const WRITE_CHARACTERISTIC_UUID: Uuid = uuid::uuid!("00007777-0000-1000-8000-00805f9b34fb");
 pub const READ_CHARACTERISTIC_UUID: Uuid = uuid::uuid!("00008888-0000-1000-8000-00805f9b34fb");
 
@@ -18,9 +23,20 @@ pub fn is_mac_address_soundcore_device(mac_address: MacAddr6) -> bool {
         .any(|range| mac_address.as_bytes().starts_with(range))
 }
 
+pub fn is_soundcore_service_uuid(uuid: &Uuid) -> bool {
+    let mask = SERVICE_UUID_MASK.as_u128();
+    uuid.as_u128() & mask == SERVICE_UUID.as_u128() & mask
+}
+
 #[cfg(test)]
 mod tests {
+    use std::str::FromStr;
+
+    use uuid::Uuid;
+
     use crate::device_utils::is_mac_address_soundcore_device;
+
+    use super::is_soundcore_service_uuid;
 
     #[test]
     fn test_soundcore_device_mac_address() {
@@ -32,5 +48,17 @@ mod tests {
     fn test_not_soundcore_device_mac_address() {
         let mac_address = [0xAC, 0x00, 0x00, 0x00, 0x00, 0x00].into();
         assert_eq!(false, is_mac_address_soundcore_device(mac_address));
+    }
+
+    #[test]
+    fn test_valid_service_uuid() {
+        let uuid = Uuid::from_str("1234f5da-0000-1000-8000-00805f9b34fb").unwrap();
+        assert_eq!(true, is_soundcore_service_uuid(&uuid));
+    }
+
+    #[test]
+    fn test_invalid_service_uuid() {
+        let uuid = Uuid::from_str("123455da-0000-1000-8000-00805f9b34fb").unwrap();
+        assert_eq!(false, is_soundcore_service_uuid(&uuid));
     }
 }

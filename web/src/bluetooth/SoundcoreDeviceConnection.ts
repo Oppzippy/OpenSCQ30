@@ -46,9 +46,8 @@ export class SoundcoreDeviceConnection {
   public async reconnect() {
     if (!this.connected) {
       this.gatt = await this.gatt.connect();
-      const service = await this.gatt.getPrimaryService(
-        SoundcoreDeviceUtils.getServiceUuid(),
-      );
+      // Only our whitelisted serviceUuids will be present, so there should only be one item here
+      const service = (await this.gatt.getPrimaryServices(undefined))[0];
       [this.writeCharacteristic, this.readCharacteristic] = await Promise.all([
         service.getCharacteristic(
           SoundcoreDeviceUtils.getWriteCharacteristicUuid(),
@@ -82,7 +81,10 @@ export class SoundcoreDeviceConnection {
 }
 
 export async function selectDeviceConnection(): Promise<SoundcoreDeviceConnection> {
-  const serviceUuid = SoundcoreDeviceUtils.getServiceUuid();
+  // TODO can we set the types in wasm-bindgen?
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  const serviceUuids: string[] = SoundcoreDeviceUtils.getServiceUuids();
+
   const macAddressPrefixes = SoundcoreDeviceUtils.getMacAddressPrefixes();
   const device = await navigator.bluetooth.requestDevice({
     // We would filter by available services, but this doesn't seem to work on chromium based browsers on platforms
@@ -101,15 +103,17 @@ export async function selectDeviceConnection(): Promise<SoundcoreDeviceConnectio
         },
       ],
     })),
-    optionalServices: [serviceUuid],
+    optionalServices: serviceUuids,
   });
   if (device.gatt == undefined) {
     throw new Error("Bluetooth device does not support GATT");
   }
   const gatt = await device.gatt.connect();
-  const service = await gatt.getPrimaryService(
-    SoundcoreDeviceUtils.getServiceUuid(),
-  );
+  console.log(await gatt.getPrimaryServices(undefined));
+
+  // Only our whitelisted serviceUuids will be present, so there should only be one item here
+  const service = (await gatt.getPrimaryServices(undefined))[0];
+
   const [writeCharacteristic, readCharacteristic] = await Promise.all([
     service.getCharacteristic(
       SoundcoreDeviceUtils.getWriteCharacteristicUuid(),

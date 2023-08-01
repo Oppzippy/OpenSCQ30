@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use btleplug::{
     api::Characteristic,
-    api::{Central, CentralEvent, CharPropFlags, Peripheral as _, WriteType},
+    api::{Central, CentralEvent, Peripheral as _, WriteType},
     platform::{Adapter, Peripheral},
 };
 use futures::StreamExt;
@@ -17,26 +17,19 @@ use tracing::{instrument, trace, trace_span, warn};
 
 use crate::{
     api::connection::{Connection, ConnectionStatus},
-    device_utils,
+    device_utils::{
+        is_soundcore_service_uuid, READ_CHARACTERISTIC_UUID, SERVICE_UUID,
+        WRITE_CHARACTERISTIC_UUID,
+    },
 };
 
 use super::mac_address::IntoMacAddr;
 
-const WRITE_CHARACTERISTIC: Characteristic = Characteristic {
-    uuid: device_utils::WRITE_CHARACTERISTIC_UUID,
-    service_uuid: device_utils::SERVICE_UUID,
-    properties: CharPropFlags::WRITE_WITHOUT_RESPONSE.union(CharPropFlags::WRITE),
-};
-const NOTIFY_CHARACTERISTIC: Characteristic = Characteristic {
-    uuid: device_utils::READ_CHARACTERISTIC_UUID,
-    service_uuid: device_utils::SERVICE_UUID,
-    properties: CharPropFlags::READ.union(CharPropFlags::NOTIFY),
-};
-
 #[derive(Debug)]
 pub struct BtlePlugConnection {
     peripheral: Peripheral,
-    characteristic: Characteristic,
+    write_characteristic: Characteristic,
+    read_characteristic: Characteristic,
     connection_status_receiver: watch::Receiver<ConnectionStatus>,
     connection_status_handle: JoinHandle<()>,
 }
@@ -46,13 +39,36 @@ impl BtlePlugConnection {
         peripheral.connect().await?;
         peripheral.discover_services().await?;
 
-        peripheral
-            .subscribe(&NOTIFY_CHARACTERISTIC)
-            .await
-            .map_err(|err| crate::Error::CharacteristicNotFound {
-                uuid: NOTIFY_CHARACTERISTIC.uuid,
-                source: Some(Box::new(err)),
+        let service = peripheral
+            .services()
+            .into_iter()
+            .filter(|service| is_soundcore_service_uuid(&service.uuid))
+            .next()
+            .ok_or(crate::Error::ServiceNotFound {
+                uuid: SERVICE_UUID,
+                source: None,
             })?;
+
+        let write_characteristic = service
+            .characteristics
+            .iter()
+            .filter(|characteristic| characteristic.uuid == WRITE_CHARACTERISTIC_UUID)
+            .next()
+            .ok_or(crate::Error::CharacteristicNotFound {
+                uuid: WRITE_CHARACTERISTIC_UUID,
+                source: None,
+            })?;
+        let read_characteristic = service
+            .characteristics
+            .iter()
+            .filter(|characteristic| characteristic.uuid == READ_CHARACTERISTIC_UUID)
+            .next()
+            .ok_or(crate::Error::CharacteristicNotFound {
+                uuid: READ_CHARACTERISTIC_UUID,
+                source: None,
+            })?;
+
+        peripheral.subscribe(&read_characteristic).await?;
 
         let (connection_status_sender, connection_status_receiver) =
             watch::channel(ConnectionStatus::Connected);
@@ -85,7 +101,8 @@ impl BtlePlugConnection {
 
         let connection = BtlePlugConnection {
             peripheral,
-            characteristic: WRITE_CHARACTERISTIC,
+            write_characteristic: write_characteristic.to_owned(),
+            read_characteristic: read_characteristic.to_owned(),
             connection_status_receiver,
             connection_status_handle,
         };
@@ -122,7 +139,7 @@ impl Connection for BtlePlugConnection {
     #[instrument(level = "trace", skip(self))]
     async fn write_with_response(&self, data: &[u8]) -> crate::Result<()> {
         self.peripheral
-            .write(&self.characteristic, data, WriteType::WithResponse)
+            .write(&self.write_characteristic, data, WriteType::WithResponse)
             .await?;
         Ok(())
     }
@@ -130,7 +147,7 @@ impl Connection for BtlePlugConnection {
     #[instrument(level = "trace", skip(self))]
     async fn write_without_response(&self, data: &[u8]) -> crate::Result<()> {
         self.peripheral
-            .write(&self.characteristic, data, WriteType::WithoutResponse)
+            .write(&self.write_characteristic, data, WriteType::WithoutResponse)
             .await?;
         Ok(())
     }
@@ -141,12 +158,14 @@ impl Connection for BtlePlugConnection {
 
         let mut notifications = self.peripheral.notifications().await?;
 
+        let read_characteristic_uuid = self.read_characteristic.uuid;
+
         tokio::spawn(async move {
             let span = trace_span!("inbound_packets_channel async task");
             let _enter = span.enter();
             while let Some(data) = notifications.next().await {
                 trace!(event = "btleplug notification", data = ?data);
-                if data.uuid == NOTIFY_CHARACTERISTIC.uuid {
+                if data.uuid == read_characteristic_uuid {
                     if let Err(err) = sender.try_send(data.value) {
                         if let TrySendError::Closed(_) = err {
                             break;

@@ -14,3 +14,5 @@ openscq30_lib = { path = "../../lib" }
 wasm-bindgen = "0.2"
 serde = { version = "1.0", features = ["derive"] }
 serde-wasm-bindgen = "0.5"
+uuid = "1.3"
+static_assertions = "1.1.0"

@@ -6,7 +6,7 @@ public final class SoundcoreDeviceUtils {
 
     public static native boolean isMacAddressSoundcoreDevice(@NonNull String mac_address);
 
-    public static native @NonNull String serviceUuid();
+    public static native boolean isSoundcoreServiceUuid(long most_significant_bits, long least_significant_bits);
 
     public static native @NonNull String readCharacteristicUuid();
 

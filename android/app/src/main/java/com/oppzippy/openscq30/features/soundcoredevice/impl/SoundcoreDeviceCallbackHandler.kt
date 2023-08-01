@@ -168,7 +168,13 @@ class SoundcoreDeviceCallbackHandler(context: Context) : BluetoothGattCallback()
 
     @Synchronized
     override fun onServicesDiscovered(_gatt: BluetoothGatt?, status: Int) {
-        val service = gatt.getService(UUID.fromString(SoundcoreDeviceUtils.serviceUuid()))
+        val service = gatt.services.first {
+            SoundcoreDeviceUtils.isSoundcoreServiceUuid(
+                it.uuid.mostSignificantBits,
+                it.uuid.leastSignificantBits,
+            )
+        }
+
         writeCharacteristic =
             service.getCharacteristic(UUID.fromString(SoundcoreDeviceUtils.writeCharacteristicUuid()))
         val readCharacteristic =
