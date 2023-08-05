@@ -187,7 +187,7 @@ fn build_ui(application: &adw::Application) {
 
 fn build_ui_2(
     application: &adw::Application,
-    gtk_registry: GtkDeviceRegistry<impl DeviceRegistry + Send + Sync + 'static>,
+    gtk_registry: GtkDeviceRegistry<impl DeviceRegistry + 'static>,
 ) {
     #[cfg(target_os = "windows")]
     if let Err(err) = set_ui_theme(application) {
@@ -235,7 +235,7 @@ fn build_ui_2(
 
     fn handle_error<T>(err: anyhow::Error, state: &State<T>)
     where
-        T: DeviceRegistry + Send + Sync,
+        T: DeviceRegistry,
     {
         let deselect_device = || {
             state

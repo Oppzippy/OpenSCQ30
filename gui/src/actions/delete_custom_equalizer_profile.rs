@@ -13,7 +13,7 @@ pub fn delete_custom_equalizer_profile<T>(
     custom_profile: &CustomEqualizerProfileObject,
 ) -> anyhow::Result<()>
 where
-    T: DeviceRegistry + Send + Sync + 'static,
+    T: DeviceRegistry + 'static,
 {
     settings_file.edit(|settings| {
         settings.remove_custom_profile(&custom_profile.name());

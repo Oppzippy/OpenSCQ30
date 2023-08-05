@@ -1,4 +1,4 @@
-use std::{fmt::Debug, sync::Arc};
+use std::{fmt::Debug, rc::Rc};
 
 use async_trait::async_trait;
 use macaddr::MacAddr6;
@@ -11,5 +11,5 @@ pub trait DeviceRegistry {
     type DescriptorType: DeviceDescriptor + Send + Sync + Debug;
 
     async fn device_descriptors(&self) -> crate::Result<Vec<Self::DescriptorType>>;
-    async fn device(&self, mac_address: MacAddr6) -> crate::Result<Option<Arc<Self::DeviceType>>>;
+    async fn device(&self, mac_address: MacAddr6) -> crate::Result<Option<Rc<Self::DeviceType>>>;
 }

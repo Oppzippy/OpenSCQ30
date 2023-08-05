@@ -1,7 +1,6 @@
 use std::{
     cell::{Cell, RefCell},
     rc::Rc,
-    sync::Arc,
 };
 
 use gtk::glib::JoinHandle;
@@ -14,11 +13,11 @@ use super::StateUpdate;
 
 pub struct State<T>
 where
-    T: DeviceRegistry + Send + Sync + 'static,
+    T: DeviceRegistry + 'static,
 {
     pub state_update_sender: UnboundedSender<StateUpdate>,
     pub registry: T,
-    pub selected_device: RefCell<Option<Arc<T::DeviceType>>>,
+    pub selected_device: RefCell<Option<Rc<T::DeviceType>>>,
     pub connect_to_device_handle: RefCell<Option<JoinHandle<()>>>,
     pub set_equalizer_configuration_handle: RefCell<Option<JoinHandle<()>>>,
     pub set_custom_noise_canceling_handle: RefCell<Option<JoinHandle<()>>>,
@@ -28,7 +27,7 @@ where
 
 impl<T> State<T>
 where
-    T: DeviceRegistry + Send + Sync + 'static,
+    T: DeviceRegistry + 'static,
 {
     pub fn new(registry: T) -> (Rc<Self>, UnboundedReceiver<StateUpdate>) {
         let (sender, receiver) = mpsc::unbounded_channel::<StateUpdate>();
@@ -47,7 +46,7 @@ where
         )
     }
 
-    pub fn selected_device(&self) -> Option<Arc<T::DeviceType>> {
+    pub fn selected_device(&self) -> Option<Rc<T::DeviceType>> {
         self.selected_device.borrow().clone()
     }
 }

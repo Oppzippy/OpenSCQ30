@@ -15,8 +15,8 @@ impl JoinHandle for TokioJoinHandle {
 
 // tokio's spawn_local returns a JoinHandle, but wasm_bindgen_futures does not, so we can't return
 // one here.
-pub fn spawn_local(future: impl Future + 'static) -> TokioJoinHandle {
-    let join_handle = tokio::task::spawn_local(async move {
+pub fn spawn(future: impl Future + Send + 'static) -> TokioJoinHandle {
+    let join_handle = tokio::task::spawn(async move {
         future.await;
     });
     TokioJoinHandle(join_handle)

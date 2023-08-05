@@ -1,4 +1,4 @@
-use std::{collections::HashSet, sync::Arc, time::Duration};
+use std::{collections::HashSet, rc::Rc, time::Duration};
 
 use async_trait::async_trait;
 use macaddr::MacAddr6;
@@ -115,7 +115,7 @@ impl ConnectionRegistry for WindowsConnectionRegistry {
     async fn connection(
         &self,
         mac_address: MacAddr6,
-    ) -> crate::Result<Option<Arc<Self::ConnectionType>>> {
-        Ok(WindowsConnection::new(mac_address).await?.map(Arc::new))
+    ) -> crate::Result<Option<Rc<Self::ConnectionType>>> {
+        Ok(WindowsConnection::new(mac_address).await?.map(Rc::new))
     }
 }

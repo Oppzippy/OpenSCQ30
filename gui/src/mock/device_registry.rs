@@ -1,4 +1,4 @@
-use std::{sync::Arc, time::Duration};
+use std::{rc::Rc, time::Duration};
 
 use async_trait::async_trait;
 use gtk::glib::timeout_future;
@@ -11,7 +11,7 @@ use super::MockDevice;
 mock! {
     pub DeviceRegistry {
         pub fn device_descriptors(&self) -> openscq30_lib::Result<Vec<GenericDeviceDescriptor>>;
-        pub fn device(&self, mac_address: MacAddr6) -> openscq30_lib::Result<Option<Arc<MockDevice>>>;
+        pub fn device(&self, mac_address: MacAddr6) -> openscq30_lib::Result<Option<Rc<MockDevice>>>;
     }
 }
 
@@ -28,7 +28,7 @@ impl DeviceRegistry for MockDeviceRegistry {
     async fn device(
         &self,
         mac_address: MacAddr6,
-    ) -> openscq30_lib::Result<Option<Arc<Self::DeviceType>>> {
+    ) -> openscq30_lib::Result<Option<Rc<Self::DeviceType>>> {
         timeout_future(Duration::from_millis(10)).await;
         self.device(mac_address)
     }

@@ -13,10 +13,10 @@ pub trait JoinHandle {
 
 // tokio's spawn_local returns a JoinHandle, but wasm_bindgen_futures does not, so we can't return
 // one here.
-pub fn spawn_local(future: impl Future + 'static) -> impl JoinHandle {
+pub fn spawn(future: impl Future + Send + 'static) -> impl JoinHandle {
     #[cfg(not(target_arch = "wasm32"))]
     {
-        futures_tokio::spawn_local(future)
+        futures_tokio::spawn(future)
     }
     #[cfg(target_arch = "wasm32")]
     {

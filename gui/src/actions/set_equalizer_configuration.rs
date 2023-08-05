@@ -14,7 +14,7 @@ pub async fn set_equalizer_configuration<T>(
     equalizer_configuration: impl Into<EqualizerConfiguration>,
 ) -> anyhow::Result<()>
 where
-    T: DeviceRegistry + Send + Sync + 'static,
+    T: DeviceRegistry + 'static,
 {
     set_equalizer_configuration_impl(state, equalizer_configuration.into()).await
 }
@@ -25,7 +25,7 @@ async fn set_equalizer_configuration_impl<T>(
     equalizer_configuration: EqualizerConfiguration,
 ) -> anyhow::Result<()>
 where
-    T: DeviceRegistry + Send + Sync + 'static,
+    T: DeviceRegistry + 'static,
 {
     if let Some(handle) = state.set_equalizer_configuration_handle.take() {
         handle.abort();
@@ -64,7 +64,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::{sync::Arc, time::Duration};
+    use std::{rc::Rc, time::Duration};
 
     use gtk::glib::{clone, timeout_future, MainContext};
     use mockall::predicate;
@@ -90,7 +90,7 @@ mod tests {
                 EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::Acoustic),
             )))
             .return_once(|_ambient_sound_mode| Ok(()));
-        *state.selected_device.borrow_mut() = Some(Arc::new(selected_device));
+        *state.selected_device.borrow_mut() = Some(Rc::new(selected_device));
 
         set_equalizer_configuration(
             &state,
@@ -113,7 +113,7 @@ mod tests {
                 EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::Acoustic),
             )))
             .return_once(|_ambient_sound_mode| Ok(()));
-        *state.selected_device.borrow_mut() = Some(Arc::new(selected_device));
+        *state.selected_device.borrow_mut() = Some(Rc::new(selected_device));
 
         MainContext::default().spawn_local(clone!(@strong state => async move {
             set_equalizer_configuration(

@@ -1,4 +1,4 @@
-use std::{error::Error, sync::Arc};
+use std::{error::Error, rc::Rc};
 
 use clap::Parser;
 use cli::{Cli, Command};
@@ -59,7 +59,7 @@ async fn do_cli_command(args: Cli, registry: impl DeviceRegistry) -> Result<(), 
 async fn get_device_or_err<T>(
     registry: &T,
     descriptor: &T::DescriptorType,
-) -> Result<Arc<T::DeviceType>, String>
+) -> Result<Rc<T::DeviceType>, String>
 where
     T: DeviceRegistry,
 {

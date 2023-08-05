@@ -1,4 +1,4 @@
-use std::{sync::Arc, time::Duration};
+use std::{rc::Rc, sync::Arc, time::Duration};
 
 use async_trait::async_trait;
 use futures::FutureExt;
@@ -8,7 +8,7 @@ use tracing::{trace, warn};
 
 use crate::{
     api::connection::{Connection, ConnectionStatus},
-    futures::{sleep, spawn_local, JoinHandle},
+    futures::{sleep, spawn, JoinHandle},
     packets::{
         outbound::{SetEqualizerPacket, SetSoundModePacket},
         structures::{AmbientSoundMode, DeviceFeatureFlags, EqualizerConfiguration, SoundModes},
@@ -27,7 +27,7 @@ pub struct Q30Device<ConnectionType>
 where
     ConnectionType: Connection,
 {
-    connection: Arc<ConnectionType>,
+    connection: Rc<ConnectionType>,
     state: Arc<RwLock<DeviceState>>,
     join_handle: Box<dyn JoinHandle>,
     state_update_sender: broadcast::Sender<DeviceState>,
@@ -37,7 +37,7 @@ impl<ConnectionType> Q30Device<ConnectionType>
 where
     ConnectionType: Connection,
 {
-    pub async fn new(connection: Arc<ConnectionType>) -> crate::Result<Self> {
+    pub async fn new(connection: Rc<ConnectionType>) -> crate::Result<Self> {
         let mut inbound_receiver = connection.inbound_packets_channel().await?;
         let initial_state = Self::fetch_initial_state(&connection, &mut inbound_receiver).await?;
 
@@ -47,7 +47,7 @@ where
         let (sender, _) = broadcast::channel(1);
 
         let sender_copy = sender.to_owned();
-        let join_handle = spawn_local(async move {
+        let join_handle = spawn(async move {
             while let Some(packet_bytes) = inbound_receiver.recv().await {
                 match InboundPacket::new(&packet_bytes) {
                     Ok(packet) => {
@@ -79,7 +79,7 @@ where
     }
 
     async fn fetch_initial_state(
-        connection: &Arc<ConnectionType>,
+        connection: &ConnectionType,
         inbound_receiver: &mut Receiver<Vec<u8>>,
     ) -> crate::Result<DeviceState> {
         for i in 0..3 {
@@ -250,7 +250,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::{sync::Arc, time::Duration};
+    use std::{rc::Rc, time::Duration};
 
     use macaddr::MacAddr6;
     use tokio::sync::mpsc;
@@ -274,8 +274,8 @@ mod tests {
         ]
     }
 
-    async fn create_test_connection() -> (Arc<StubConnection>, mpsc::Sender<Vec<u8>>) {
-        let connection = Arc::new(StubConnection::new());
+    async fn create_test_connection() -> (Rc<StubConnection>, mpsc::Sender<Vec<u8>>) {
+        let connection = Rc::new(StubConnection::new());
         connection
             .set_name_return(Ok("Soundcore Q30".to_string()))
             .await;

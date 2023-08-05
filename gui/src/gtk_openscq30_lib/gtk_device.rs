@@ -1,4 +1,4 @@
-use std::{fmt::Debug, sync::Arc};
+use std::{fmt::Debug, rc::Rc};
 
 use async_trait::async_trait;
 use macaddr::MacAddr6;
@@ -18,15 +18,15 @@ pub struct GtkDevice<InnerDeviceType: 'static>
 where
     InnerDeviceType: Device,
 {
-    tokio_runtime: Arc<Runtime>,
-    soundcore_device: Arc<InnerDeviceType>,
+    tokio_runtime: Rc<Runtime>,
+    soundcore_device: Rc<InnerDeviceType>,
 }
 
 impl<InnerDeviceType> GtkDevice<InnerDeviceType>
 where
     InnerDeviceType: Device,
 {
-    pub fn new(device: Arc<InnerDeviceType>, tokio_runtime: Arc<Runtime>) -> Self {
+    pub fn new(device: Rc<InnerDeviceType>, tokio_runtime: Rc<Runtime>) -> Self {
         Self {
             tokio_runtime,
             soundcore_device: device,

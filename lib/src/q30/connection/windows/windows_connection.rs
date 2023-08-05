@@ -76,7 +76,7 @@ impl WindowsConnection {
                 device,
                 read_characteristic,
                 write_characteristic,
-                value_changed_token: Arc::new(RwLock::new(None)),
+                value_changed_token: Default::default(),
                 connection_status_receiver: receiver,
                 connection_status_changed_token,
             }))

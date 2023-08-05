@@ -1,4 +1,4 @@
-use std::sync::{Arc, Weak};
+use std::rc::{Rc, Weak};
 
 use async_trait::async_trait;
 use macaddr::MacAddr6;
@@ -68,7 +68,7 @@ where
         Ok(descriptors)
     }
 
-    async fn device(&self, mac_address: MacAddr6) -> crate::Result<Option<Arc<Self::DeviceType>>> {
+    async fn device(&self, mac_address: MacAddr6) -> crate::Result<Option<Rc<Self::DeviceType>>> {
         match self.devices.lock().await.entry(mac_address.to_owned()) {
             Entry::Occupied(entry) => {
                 tracing::debug!("{mac_address} is cached");
@@ -77,7 +77,7 @@ where
             Entry::Vacant(entry) => {
                 tracing::debug!("{mac_address} is not cached");
                 if let Some(device) = self.new_device(mac_address).await? {
-                    let device = Arc::new(device);
+                    let device = Rc::new(device);
                     entry.insert(device.to_owned());
                     Ok(Some(device))
                 } else {
@@ -90,7 +90,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::HashMap, sync::Arc};
+    use std::{collections::HashMap, rc::Rc};
 
     use macaddr::MacAddr6;
     use tokio::sync::mpsc;
@@ -112,7 +112,7 @@ mod tests {
             // Must start with soundcore prefix
             MacAddr6::new(0xAC, 0x12, 0x2F, 0x01, 0x02, 0x03),
         );
-        let device = Arc::new(StubConnection::new());
+        let device = Rc::new(StubConnection::new());
         let devices = HashMap::from([(descriptor, device)]);
         let connection_registry = StubConnectionRegistry::new(devices.to_owned());
         let device_registry = Q30DeviceRegistry::new(connection_registry).await.unwrap();
@@ -138,7 +138,7 @@ mod tests {
             "Stub Device",
             MacAddr6::new(0x00, 0x11, 0x22, 0x33, 0x44, 0x55),
         );
-        let device = Arc::new(StubConnection::new());
+        let device = Rc::new(StubConnection::new());
         let (sender, receiver) = mpsc::channel(1);
         sender
             .send(vec![
@@ -183,7 +183,7 @@ mod tests {
             "Stub Device",
             MacAddr6::new(0x00, 0x11, 0x22, 0x33, 0x44, 0x55),
         );
-        let device = Arc::new(StubConnection::new());
+        let device = Rc::new(StubConnection::new());
 
         let devices = HashMap::from([(descriptor, device)]);
         let connection_registry = StubConnectionRegistry::new(devices.to_owned());

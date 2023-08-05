@@ -8,7 +8,7 @@ use super::{State, StateUpdate};
 
 pub async fn refresh_devices<T>(state: &Rc<State<T>>) -> anyhow::Result<()>
 where
-    T: DeviceRegistry + Send + Sync + 'static,
+    T: DeviceRegistry + 'static,
 {
     if !state.is_refresh_in_progress.get() {
         let descriptors = {

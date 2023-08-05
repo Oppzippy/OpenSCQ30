@@ -18,7 +18,7 @@ pub async fn set_device<T>(
     mac_address: Option<MacAddr6>,
 ) -> anyhow::Result<()>
 where
-    T: DeviceRegistry + Send + Sync + 'static,
+    T: DeviceRegistry + 'static,
 {
     // Clean up any existing devices
     if let Some(handle) = &*state.connect_to_device_handle.borrow_mut() {
@@ -113,7 +113,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::VecDeque, sync::Arc};
+    use std::{collections::VecDeque, rc::Rc};
 
     use macaddr::MacAddr6;
     use mockall::predicate;
@@ -179,7 +179,7 @@ mod tests {
                     .return_const(receiver);
                 device.expect_state().once().return_const(device_state_2);
 
-                Ok(Some(Arc::new(device)))
+                Ok(Some(Rc::new(device)))
             });
 
         let (state, mut receiver) = State::new(registry);
@@ -268,7 +268,7 @@ mod tests {
                     ..Default::default()
                 });
 
-                Ok(Some(Arc::new(device)))
+                Ok(Some(Rc::new(device)))
             });
 
         let (state, _receiver) = State::new(registry);

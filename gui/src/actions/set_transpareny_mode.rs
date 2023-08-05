@@ -13,7 +13,7 @@ pub async fn set_transparency_mode<T>(
     transparency_mode: TransparencyMode,
 ) -> anyhow::Result<()>
 where
-    T: DeviceRegistry + Send + Sync + 'static,
+    T: DeviceRegistry + 'static,
 {
     let device = state
         .selected_device()
@@ -34,7 +34,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Arc;
+    use std::rc::Rc;
 
     use mockall::predicate;
     use openscq30_lib::{
@@ -72,7 +72,7 @@ mod tests {
                 sound_modes.transparency_mode == TransparencyMode::VocalMode
             }))
             .return_once(|_transparency_mode| Ok(()));
-        *state.selected_device.borrow_mut() = Some(Arc::new(selected_device));
+        *state.selected_device.borrow_mut() = Some(Rc::new(selected_device));
 
         set_transparency_mode(&state, TransparencyMode::VocalMode)
             .await

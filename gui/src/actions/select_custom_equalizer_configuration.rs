@@ -17,7 +17,7 @@ pub async fn select_custom_equalizer_configuration<T>(
     custom_profile: &CustomEqualizerProfileObject,
 ) -> anyhow::Result<()>
 where
-    T: DeviceRegistry + Send + Sync + 'static,
+    T: DeviceRegistry + 'static,
 {
     settings_file
         .get(|settings| {

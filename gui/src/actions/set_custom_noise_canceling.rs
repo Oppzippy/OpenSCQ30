@@ -14,7 +14,7 @@ pub async fn set_custom_noise_canceling<T>(
     custom_noise_canceling: CustomNoiseCanceling,
 ) -> anyhow::Result<()>
 where
-    T: DeviceRegistry + Send + Sync + 'static,
+    T: DeviceRegistry + 'static,
 {
     if let Some(handle) = state.set_custom_noise_canceling_handle.take() {
         handle.abort();
@@ -61,7 +61,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Arc;
+    use std::rc::Rc;
 
     use mockall::predicate;
     use openscq30_lib::{
@@ -99,7 +99,7 @@ mod tests {
                 sound_modes.custom_noise_canceling == CustomNoiseCanceling::new(2)
             }))
             .return_once(|_custom_noise_canceling| Ok(()));
-        *state.selected_device.borrow_mut() = Some(Arc::new(selected_device));
+        *state.selected_device.borrow_mut() = Some(Rc::new(selected_device));
 
         set_custom_noise_canceling(&state, CustomNoiseCanceling::new(2))
             .await

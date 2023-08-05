@@ -13,7 +13,7 @@ pub fn create_custom_equalizer_profile<T>(
     custom_profile: &CustomEqualizerProfileObject,
 ) -> anyhow::Result<()>
 where
-    T: DeviceRegistry + Send + Sync + 'static,
+    T: DeviceRegistry + 'static,
 {
     settings_file.edit(|settings| {
         settings.set_custom_profile(

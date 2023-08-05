@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::rc::Rc;
 
 use macaddr::MacAddr6;
 use openscq30_lib::api::device::DeviceRegistry;
@@ -11,8 +11,8 @@ pub struct GtkDeviceRegistry<InnerRegistryType>
 where
     InnerRegistryType: DeviceRegistry,
 {
-    tokio_runtime: Arc<Runtime>,
-    soundcore_device_registry: Arc<InnerRegistryType>,
+    tokio_runtime: Rc<Runtime>,
+    soundcore_device_registry: Rc<InnerRegistryType>,
 }
 
 #[async_trait(?Send)]
@@ -26,7 +26,7 @@ where
     async fn device(
         &self,
         mac_address: MacAddr6,
-    ) -> openscq30_lib::Result<Option<Arc<Self::DeviceType>>> {
+    ) -> openscq30_lib::Result<Option<Rc<Self::DeviceType>>> {
         let mac_address = mac_address.to_owned();
         let device_registry = self.soundcore_device_registry.to_owned();
         let maybe_device = self
@@ -56,15 +56,15 @@ where
 {
     pub fn new(registry: InnerRegistryType, tokio_runtime: Runtime) -> Self {
         Self {
-            soundcore_device_registry: Arc::new(registry),
-            tokio_runtime: Arc::new(tokio_runtime),
+            soundcore_device_registry: Rc::new(registry),
+            tokio_runtime: Rc::new(tokio_runtime),
         }
     }
 
     fn to_gtk_device(
         &self,
-        device: Arc<InnerRegistryType::DeviceType>,
-    ) -> Arc<GtkDevice<InnerRegistryType::DeviceType>> {
-        Arc::new(GtkDevice::new(device, self.tokio_runtime.to_owned()))
+        device: Rc<InnerRegistryType::DeviceType>,
+    ) -> Rc<GtkDevice<InnerRegistryType::DeviceType>> {
+        Rc::new(GtkDevice::new(device, self.tokio_runtime.to_owned()))
     }
 }

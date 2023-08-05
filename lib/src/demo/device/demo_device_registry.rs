@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::rc::Rc;
 
 use async_trait::async_trait;
 use macaddr::MacAddr6;
@@ -31,9 +31,9 @@ impl DeviceRegistry for DemoDeviceRegistry {
         )])
     }
 
-    async fn device(&self, mac_address: MacAddr6) -> crate::Result<Option<Arc<Self::DeviceType>>> {
+    async fn device(&self, mac_address: MacAddr6) -> crate::Result<Option<Rc<Self::DeviceType>>> {
         if mac_address == Self::DEVICE_MAC_ADDRESS {
-            Ok(Some(Arc::new(
+            Ok(Some(Rc::new(
                 DemoDevice::new(Self::DEVICE_NAME, Self::DEVICE_MAC_ADDRESS).await,
             )))
         } else {

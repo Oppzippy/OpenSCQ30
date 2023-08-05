@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use std::sync::{Arc, Weak};
+use std::rc::{Rc, Weak};
 use std::time::Duration;
 use std::vec;
 
@@ -159,12 +159,12 @@ impl ConnectionRegistry for BtlePlugConnectionRegistry {
     async fn connection(
         &self,
         mac_address: MacAddr6,
-    ) -> crate::Result<Option<Arc<Self::ConnectionType>>> {
+    ) -> crate::Result<Option<Rc<Self::ConnectionType>>> {
         match self.connections.lock().await.entry(mac_address.to_owned()) {
             Entry::Occupied(entry) => Ok(Some(entry.get().to_owned())),
             Entry::Vacant(entry) => {
                 if let Some(connection) = self.new_connection(mac_address.into_bd_addr()).await? {
-                    let connection = Arc::new(connection);
+                    let connection = Rc::new(connection);
                     entry.insert(connection.to_owned());
                     Ok(Some(connection))
                 } else {
