@@ -1,5 +1,5 @@
 use nom::{
-    combinator::map,
+    combinator::{all_consuming, map},
     error::{context, ContextError, ParseError},
     number::complete::le_u8,
     sequence::tuple,
@@ -54,7 +54,7 @@ pub fn take_a3028_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
 ) -> ParseResult<A3028StateUpdatePacket, E> {
     context(
         "StateUpdatePacket",
-        map(
+        all_consuming(map(
             tuple((
                 take_single_battery,
                 take_equalizer_configuration,
@@ -86,7 +86,7 @@ pub fn take_a3028_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                     serial_number,
                 }
             },
-        ),
+        )),
     )(input)
 }
 
@@ -268,5 +268,23 @@ mod tests {
         let input: &[u8] = &[0x01, 0x02, 0x03];
         let result = take_a3028_state_update_packet::<VerboseError<&[u8]>>(input);
         assert_eq!(true, result.is_err());
+    }
+
+    #[test]
+    fn it_does_not_parse_packet_that_goes_over_expected_length() {
+        let input: &[u8] = &[
+            //                                                                profile id
+            0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01, 0x46, 0x00, 0x05, 0x00, 0x01, 0x00, 0x3c,
+            0xb4, 0x8f, 0xa0, 0x8e, 0xb4, 0x74, 0x88, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
+            // an extra 0x00 is added on to increase the length without affecting anything else
+            // including the checksum
+            0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x00,
+            0x35,
+        ];
+        let input = strip(input);
+        let result = take_a3028_state_update_packet::<VerboseError<&[u8]>>(input);
+        assert!(result.is_err())
     }
 }

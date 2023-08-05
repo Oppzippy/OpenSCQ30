@@ -1,5 +1,5 @@
 use nom::{
-    combinator::{map, opt},
+    combinator::{all_consuming, map, opt},
     error::{context, ContextError, ParseError},
     number::complete::{le_u16, le_u8},
     sequence::tuple,
@@ -61,7 +61,7 @@ pub fn take_a3930_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
 ) -> ParseResult<A3930StateUpdatePacket, E> {
     context(
         "StateUpdatePacket",
-        map(
+        all_consuming(map(
             tuple((
                 le_u8,
                 take_bool,
@@ -108,7 +108,7 @@ pub fn take_a3930_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                     hear_id_eq_index,
                 }
             },
-        ),
+        )),
     )(input)
 }
 

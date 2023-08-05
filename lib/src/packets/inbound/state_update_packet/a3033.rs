@@ -1,5 +1,5 @@
 use nom::{
-    combinator::map,
+    combinator::{all_consuming, map},
     error::{context, ContextError, ParseError},
     sequence::tuple,
 };
@@ -47,7 +47,7 @@ pub fn take_a3033_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
 ) -> ParseResult<A3033StateUpdatePacket, E> {
     context(
         "StateUpdatePacket",
-        map(
+        all_consuming(map(
             tuple((
                 take_single_battery,
                 take_equalizer_configuration,
@@ -70,7 +70,7 @@ pub fn take_a3033_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                     wear_detection,
                 }
             },
-        ),
+        )),
     )(input)
 }
 

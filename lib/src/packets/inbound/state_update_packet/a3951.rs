@@ -1,5 +1,5 @@
 use nom::{
-    combinator::opt,
+    combinator::{all_consuming, opt},
     error::{context, ContextError, ParseError},
     number::complete::{le_u16, le_u8},
     sequence::tuple,
@@ -67,67 +67,70 @@ impl From<A3951StateUpdatePacket> for StateUpdatePacket {
 pub fn take_a3951_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
     input: &'a [u8],
 ) -> ParseResult<A3951StateUpdatePacket, E> {
-    context("StateUpdatePacket", |input| {
-        // required fields
-        let (
-            input,
-            (
-                host_device,
-                tws_status,
-                battery,
-                equalizer_configuration,
-                gender,
-                age_range,
-                custom_hear_id,
-                custom_button_model,
-                sound_modes,
-                side_tone,
-                wear_detection,
-                touch_tone,
-            ),
-        ) = tuple((
-            le_u8,     // host device
-            take_bool, // tws status
-            take_dual_battery,
-            take_stereo_equalizer_configuration,
-            le_u8,
-            take_age_range,
-            take_custom_hear_id,
-            take_custom_button_model,
-            take_sound_modes,
-            take_bool, // side tone
-            take_bool, // wear detection
-            take_bool, // touch tone
-        ))(input)?;
+    context(
+        "StateUpdatePacket",
+        all_consuming(|input| {
+            // required fields
+            let (
+                input,
+                (
+                    host_device,
+                    tws_status,
+                    battery,
+                    equalizer_configuration,
+                    gender,
+                    age_range,
+                    custom_hear_id,
+                    custom_button_model,
+                    sound_modes,
+                    side_tone,
+                    wear_detection,
+                    touch_tone,
+                ),
+            ) = tuple((
+                le_u8,     // host device
+                take_bool, // tws status
+                take_dual_battery,
+                take_stereo_equalizer_configuration,
+                le_u8,
+                take_age_range,
+                take_custom_hear_id,
+                take_custom_button_model,
+                take_sound_modes,
+                take_bool, // side tone
+                take_bool, // wear detection
+                take_bool, // touch tone
+            ))(input)?;
 
-        // >=96 length optional fields
-        let (input, hear_id_eq_preset) = opt(le_u16)(input)?;
+            // >=96 length optional fields
+            let (input, hear_id_eq_preset) = opt(le_u16)(input)?;
 
-        // >=98 length optional fields
-        let (input, new_battery) = opt(tuple((le_u8, le_u8)))(input)?;
+            // >=98 length optional fields
+            let (input, new_battery) = opt(tuple((le_u8, le_u8)))(input)?;
 
-        Ok((
-            input,
-            A3951StateUpdatePacket {
-                host_device,
-                tws_status,
-                battery,
-                equalizer_configuration,
-                gender,
-                age_range,
-                custom_hear_id,
-                custom_button_model,
-                sound_modes,
-                side_tone,
-                wear_detection,
-                touch_tone,
-                hear_id_eq_preset,
-                supports_new_battery: new_battery.is_some(),
-                left_new_battery: new_battery.as_ref().map(|b| b.0).unwrap_or_default(),
-                right_new_battery: new_battery.as_ref().map(|b| b.1).unwrap_or_default(),
-            },
-        ))
-    })(input)
+            Ok((
+                input,
+                A3951StateUpdatePacket {
+                    host_device,
+                    tws_status,
+                    battery,
+                    equalizer_configuration,
+                    gender,
+                    age_range,
+                    custom_hear_id,
+                    custom_button_model,
+                    sound_modes,
+                    side_tone,
+                    wear_detection,
+                    touch_tone,
+                    hear_id_eq_preset,
+                    supports_new_battery: new_battery.is_some(),
+                    left_new_battery: new_battery.as_ref().map(|b| b.0).unwrap_or_default(),
+                    right_new_battery: new_battery.as_ref().map(|b| b.1).unwrap_or_default(),
+                },
+            ))
+        }),
+    )(input)
 }
 
 impl A3951StateUpdatePacket {}
