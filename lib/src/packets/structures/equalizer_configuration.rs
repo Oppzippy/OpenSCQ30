@@ -1,8 +1,11 @@
+use serde::{Deserialize, Serialize};
+
 use crate::packets::structures::volume_adjustments::VolumeAdjustments;
 
 use super::preset_equalizer_profile::PresetEqualizerProfile;
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct EqualizerConfiguration {
     preset_profile: Option<PresetEqualizerProfile>,
     volume_adjustments: VolumeAdjustments,

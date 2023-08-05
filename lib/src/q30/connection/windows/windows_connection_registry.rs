@@ -66,7 +66,7 @@ impl WindowsConnectionRegistry {
     }
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl ConnectionRegistry for WindowsConnectionRegistry {
     type ConnectionType = WindowsConnection;
     type DescriptorType = GenericConnectionDescriptor;

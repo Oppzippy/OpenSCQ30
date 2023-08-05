@@ -17,7 +17,7 @@ use super::q30_device::Q30Device;
 
 pub struct Q30DeviceRegistry<RegistryType>
 where
-    RegistryType: ConnectionRegistry + Send + Sync,
+    RegistryType: ConnectionRegistry,
 {
     conneciton_registry: RegistryType,
     devices: Mutex<WeakValueHashMap<MacAddr6, Weak<Q30Device<RegistryType::ConnectionType>>>>,
@@ -25,7 +25,7 @@ where
 
 impl<RegistryType> Q30DeviceRegistry<RegistryType>
 where
-    RegistryType: ConnectionRegistry + Send + Sync,
+    RegistryType: ConnectionRegistry,
 {
     pub async fn new(connection_registry: RegistryType) -> crate::Result<Self> {
         Ok(Self {
@@ -48,10 +48,10 @@ where
     }
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl<RegistryType> DeviceRegistry for Q30DeviceRegistry<RegistryType>
 where
-    RegistryType: ConnectionRegistry + Send + Sync,
+    RegistryType: ConnectionRegistry,
 {
     type DeviceType = Q30Device<RegistryType::ConnectionType>;
     type DescriptorType = GenericDeviceDescriptor;

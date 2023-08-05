@@ -6,6 +6,7 @@ use tokio::sync::{broadcast, watch, Mutex};
 
 use crate::{
     api::{connection::ConnectionStatus, device::Device},
+    futures::sleep,
     packets::structures::{
         AgeRange, AmbientSoundMode, BasicHearId, BatteryLevel, DeviceFeatureFlags,
         EqualizerConfiguration, FirmwareVersion, IsBatteryCharging, NoiseCancelingMode,
@@ -24,7 +25,7 @@ pub struct DemoDevice {
 
 impl DemoDevice {
     pub async fn new(name: impl Into<String>, mac_address: MacAddr6) -> Self {
-        tokio::time::sleep(Duration::from_millis(500)).await; // it takes some time to connect
+        sleep(Duration::from_millis(500)).await; // it takes some time to connect
         let (state_sender, _) = broadcast::channel(50);
         let (connection_status_sender, _) = watch::channel(ConnectionStatus::Connected);
         Self {
@@ -33,7 +34,7 @@ impl DemoDevice {
             state_sender,
             connection_status_sender,
             state: Mutex::new(DeviceState {
-                feaure_flags: DeviceFeatureFlags::all(),
+                feature_flags: DeviceFeatureFlags::all(),
                 battery: SingleBattery {
                     is_charging: IsBatteryCharging::No,
                     level: BatteryLevel(4),
@@ -65,7 +66,7 @@ impl DemoDevice {
     }
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl Device for DemoDevice {
     fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState> {
         self.state_sender.subscribe()

@@ -1,15 +1,8 @@
-mod packets;
+mod device;
+mod equalizer_helper;
 mod soundcore_device_utils;
-use wasm_bindgen::prelude::wasm_bindgen;
+pub mod web_bluetooth_connection;
 
-pub use crate::packets::inbound::*;
-pub use crate::packets::outbound::*;
-pub use crate::packets::structures::*;
-pub use crate::soundcore_device_utils::*;
-
-pub struct Init {}
-
-#[wasm_bindgen]
-impl Init {
-    pub fn logging() {}
-}
+pub use device::*;
+pub use equalizer_helper::*;
+pub use soundcore_device_utils::*;

@@ -5,7 +5,7 @@ use macaddr::MacAddr6;
 
 use super::{connection::Connection, ConnectionDescriptor};
 
-#[async_trait]
+#[async_trait(?Send)]
 pub trait ConnectionRegistry {
     type ConnectionType: Connection + Send + Sync;
     type DescriptorType: ConnectionDescriptor + Debug + Send + Sync;

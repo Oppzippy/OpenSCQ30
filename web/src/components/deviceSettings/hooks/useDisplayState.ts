@@ -1,9 +1,11 @@
 import { debounce } from "lodash-es";
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
-import { EqualizerConfiguration } from "../../../../wasm/pkg/openscq30_web_wasm";
-import { SoundcoreDevice } from "../../../bluetooth/SoundcoreDevice";
-import { SoundcoreDeviceState } from "../../../bluetooth/SoundcoreDeviceState";
-import { useActualState } from "./useActualState";
+import { Device } from "../../../bluetooth/Device";
+import { useBehaviorSubject } from "../../../hooks/useObservable";
+import {
+  DeviceState,
+  EqualizerConfiguration,
+} from "../../../libTypes/DeviceState";
 
 /**
  * This will set up display state that is backed by actual state. When either the display state
@@ -12,24 +14,21 @@ import { useActualState } from "./useActualState";
  * @returns displayState and a setter for displayState
  */
 export function useDisplayState(
-  device: SoundcoreDevice,
+  device: Device,
   onBluetoothError: (err: Error) => void,
-): [SoundcoreDeviceState, Dispatch<SetStateAction<SoundcoreDeviceState>>] {
-  const [actualState, setActualState] = useActualState(
-    device,
-    onBluetoothError,
-  );
+): [DeviceState, Dispatch<SetStateAction<DeviceState>>] {
+  const actualState = useBehaviorSubject(device.state);
   const [displayState, setDisplayState] = useState(actualState);
 
-  useUpdateActualFromDisplay(device, setActualState, displayState);
+  useUpdateActualFromDisplay(device, displayState, onBluetoothError);
   useUpdateDisplayFromActual(setDisplayState, actualState);
 
   return [displayState, setDisplayState];
 }
 
 function useUpdateDisplayFromActual(
-  setDisplayState: Dispatch<SetStateAction<SoundcoreDeviceState>>,
-  actualState: SoundcoreDeviceState,
+  setDisplayState: Dispatch<SetStateAction<DeviceState>>,
+  actualState: DeviceState,
 ) {
   // Synchronizes the displayed state with the actual state of the headphones. They are
   // different because of the equalizer debouncing.
@@ -46,22 +45,21 @@ function useUpdateDisplayFromActual(
 }
 
 function useUpdateActualFromDisplay(
-  device: SoundcoreDevice,
-  setActualState: (state: SoundcoreDeviceState) => void,
-  displayState: SoundcoreDeviceState,
+  device: Device,
+  displayState: DeviceState,
+  onBluetoothError: (err: Error) => void,
 ) {
   // Debounce so we don't spam the headphones with eq update packets
   // Since the function won't be run immediately, the actual state may be out of date if we pass it to this function
   // directly. Instead, pass the device. That way we will have a reference to the current actual state.
   const debouncedSetActualEqualizerConfiguration = useMemo(
     () =>
-      debounce((config: EqualizerConfiguration) => {
-        setActualState({
-          soundModes: device.state.value.soundModes,
-          equalizerConfiguration: config,
-        });
+      debounce((equalizerConfiguration: EqualizerConfiguration) => {
+        device
+          .setEqualizerConfiguration(equalizerConfiguration)
+          .catch(onBluetoothError);
       }, 500),
-    [device, setActualState],
+    [device, onBluetoothError],
   );
 
   // Update real equalizer configuration to match displayed with debounce
@@ -76,13 +74,8 @@ function useUpdateActualFromDisplay(
 
   // Update ambient sound mode and noise canceling mode instantly
   useEffect(() => {
-    setActualState({
-      soundModes: displayState.soundModes,
-      equalizerConfiguration: device.state.value.equalizerConfiguration,
-    });
-  }, [
-    device.state.value.equalizerConfiguration,
-    displayState.soundModes,
-    setActualState,
-  ]);
+    if (displayState.soundModes) {
+      device.setSoundModes(displayState.soundModes).catch(onBluetoothError);
+    }
+  }, [device, displayState.soundModes, onBluetoothError]);
 }

@@ -30,7 +30,7 @@ mock! {
     }
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl Device for MockDevice {
     fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState> {
         self.subscribe_to_state_updates()

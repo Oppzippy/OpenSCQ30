@@ -15,7 +15,7 @@ mock! {
     }
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl DeviceRegistry for MockDeviceRegistry {
     type DeviceType = MockDevice;
     type DescriptorType = GenericDeviceDescriptor;

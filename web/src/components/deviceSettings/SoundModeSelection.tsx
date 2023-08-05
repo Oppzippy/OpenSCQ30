@@ -2,15 +2,11 @@ import { Stack } from "@mui/material";
 import React, { useCallback } from "react";
 import { AmbientSoundModeSelection } from "../soundMode/AmbientSoundModeSelection";
 import { NoiseCancelingModeSelection } from "../soundMode/NoiseCancelingModeSelection";
-import { SoundModesState } from "../../bluetooth/SoundcoreDeviceState";
-import {
-  AmbientSoundMode,
-  NoiseCancelingMode,
-} from "../../../wasm/pkg/openscq30_web_wasm";
+import { SoundModes } from "../../libTypes/DeviceState";
 
 interface Props {
-  soundModes: SoundModesState;
-  setSoundModes: (soundModes: SoundModesState) => void;
+  soundModes: SoundModes;
+  setSoundModes: (soundModes: SoundModes) => void;
 }
 
 export const SoundModeSelection = React.memo(function ({
@@ -18,22 +14,22 @@ export const SoundModeSelection = React.memo(function ({
   setSoundModes,
 }: Props) {
   const setAmbientSoundMode = useCallback(
-    (ambientSoundMode: AmbientSoundMode) => {
+    (ambientSoundMode: SoundModes["ambientSoundMode"]) => {
       setSoundModes({
+        ...soundModes,
         ambientSoundMode,
-        noiseCancelingMode: soundModes.noiseCancelingMode,
       });
     },
-    [setSoundModes, soundModes.noiseCancelingMode],
+    [setSoundModes, soundModes],
   );
   const setNoiseCancelingMode = useCallback(
-    (noiseCancelingMode: NoiseCancelingMode) => {
+    (noiseCancelingMode: SoundModes["noiseCancelingMode"]) => {
       setSoundModes({
-        ambientSoundMode: soundModes.ambientSoundMode,
+        ...soundModes,
         noiseCancelingMode,
       });
     },
-    [setSoundModes, soundModes.ambientSoundMode],
+    [setSoundModes, soundModes],
   );
 
   return (

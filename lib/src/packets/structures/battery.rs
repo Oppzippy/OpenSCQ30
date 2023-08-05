@@ -1,4 +1,7 @@
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", tag = "type")]
 pub enum Battery {
     SingleBattery(SingleBattery),
     DualBattery(DualBattery),
@@ -22,24 +25,52 @@ impl From<DualBattery> for Battery {
     }
 }
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
+#[derive(
+    Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default, Serialize, Deserialize,
+)]
 pub struct DualBattery {
     pub left: SingleBattery,
     pub right: SingleBattery,
 }
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
+#[derive(
+    Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default, Serialize, Deserialize,
+)]
+#[serde(rename_all = "camelCase")]
 pub struct SingleBattery {
     pub is_charging: IsBatteryCharging,
     pub level: BatteryLevel,
 }
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
+#[derive(
+    Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default, Serialize, Deserialize,
+)]
+#[serde(rename_all = "camelCase", from = "bool", into = "bool")]
 pub enum IsBatteryCharging {
     #[default]
     No,
     Yes,
 }
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
+impl From<bool> for IsBatteryCharging {
+    fn from(value: bool) -> Self {
+        match value {
+            true => IsBatteryCharging::Yes,
+            false => IsBatteryCharging::No,
+        }
+    }
+}
+
+impl From<IsBatteryCharging> for bool {
+    fn from(value: IsBatteryCharging) -> Self {
+        match value {
+            IsBatteryCharging::No => false,
+            IsBatteryCharging::Yes => true,
+        }
+    }
+}
+
+#[derive(
+    Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default, Serialize, Deserialize,
+)]
 pub struct BatteryLevel(pub u8);

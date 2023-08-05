@@ -53,7 +53,7 @@ impl StubConnection {
     }
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl Connection for StubConnection {
     async fn name(&self) -> crate::Result<String> {
         self.name_return.write().await.take().unwrap()

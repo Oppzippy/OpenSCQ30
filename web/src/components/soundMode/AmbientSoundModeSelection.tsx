@@ -1,12 +1,12 @@
 import { Box, Typography } from "@mui/material";
-import { AmbientSoundMode } from "../../../wasm/pkg/openscq30_web_wasm";
 import { ToggleButtonRow } from "./ToggleButtonRow";
 import { useTranslation } from "react-i18next";
 import React, { useCallback } from "react";
+import { SoundModes } from "../../libTypes/DeviceState";
 
 interface Props {
-  value: AmbientSoundMode;
-  onValueChanged: (newValue: AmbientSoundMode) => void;
+  value: SoundModes["ambientSoundMode"];
+  onValueChanged: (newValue: SoundModes["ambientSoundMode"]) => void;
 }
 
 export const AmbientSoundModeSelection = React.memo(function ({
@@ -16,7 +16,7 @@ export const AmbientSoundModeSelection = React.memo(function ({
   const { t } = useTranslation();
   // Don't allow deselecting the button
   const onValueChangedNotNull = useCallback(
-    (newValue: AmbientSoundMode | undefined) => {
+    (newValue: SoundModes["ambientSoundMode"] | undefined) => {
       if (newValue != undefined) {
         onValueChanged(newValue);
       }
@@ -29,18 +29,18 @@ export const AmbientSoundModeSelection = React.memo(function ({
       <Typography>{t("ambientSoundMode.ambientSoundMode")}</Typography>
       <ToggleButtonRow
         value={value}
-        onValueChanged={onValueChangedNotNull}
+        onValueChanged={onValueChangedNotNull as (value: string) => void}
         values={[
           {
-            value: AmbientSoundMode.NoiseCanceling,
+            value: "noiseCanceling",
             displayText: t("ambientSoundMode.noiseCanceling"),
           },
           {
-            value: AmbientSoundMode.Transparency,
+            value: "transparency",
             displayText: t("ambientSoundMode.transparency"),
           },
           {
-            value: AmbientSoundMode.Normal,
+            value: "normal",
             displayText: t("ambientSoundMode.normal"),
           },
         ]}

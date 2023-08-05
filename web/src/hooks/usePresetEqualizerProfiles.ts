@@ -1,105 +1,102 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  EqualizerConfiguration,
-  PresetEqualizerProfile,
-} from "../../wasm/pkg/openscq30_web_wasm";
+import { EqualizerHelper } from "../../wasm/pkg/openscq30_web_wasm";
+import { PresetEqualizerProfile } from "../libTypes/DeviceState";
 
 export function usePresetEqualizerProfiles() {
   const { t } = useTranslation();
   return useMemo(() => {
-    const presetProfiles = [
+    const presetProfiles: {
+      name: string;
+      id: PresetEqualizerProfile;
+    }[] = [
       {
         name: t("presetEqualizerProfile.soundcoreSignature"),
-        id: PresetEqualizerProfile.SoundcoreSignature,
-        values: EqualizerConfiguration.fromPresetProfile(
-          PresetEqualizerProfile.SoundcoreSignature,
-        ).volumeAdjustments.adjustments,
+        id: "SoundcoreSignature",
       },
       {
         name: t("presetEqualizerProfile.acoustic"),
-        id: PresetEqualizerProfile.Acoustic,
+        id: "Acoustic",
       },
       {
         name: t("presetEqualizerProfile.bassBooster"),
-        id: PresetEqualizerProfile.BassBooster,
+        id: "BassBooster",
       },
       {
         name: t("presetEqualizerProfile.bassReducer"),
-        id: PresetEqualizerProfile.BassReducer,
+        id: "BassReducer",
       },
       {
         name: t("presetEqualizerProfile.classical"),
-        id: PresetEqualizerProfile.Classical,
+        id: "Classical",
       },
       {
         name: t("presetEqualizerProfile.podcast"),
-        id: PresetEqualizerProfile.Podcast,
+        id: "Podcast",
       },
       {
         name: t("presetEqualizerProfile.dance"),
-        id: PresetEqualizerProfile.Dance,
+        id: "Dance",
       },
       {
         name: t("presetEqualizerProfile.deep"),
-        id: PresetEqualizerProfile.Deep,
+        id: "Deep",
       },
       {
         name: t("presetEqualizerProfile.electronic"),
-        id: PresetEqualizerProfile.Electronic,
+        id: "Electronic",
       },
       {
         name: t("presetEqualizerProfile.flat"),
-        id: PresetEqualizerProfile.Flat,
+        id: "Flat",
       },
       {
         name: t("presetEqualizerProfile.hipHop"),
-        id: PresetEqualizerProfile.HipHop,
+        id: "HipHop",
       },
       {
         name: t("presetEqualizerProfile.jazz"),
-        id: PresetEqualizerProfile.Jazz,
+        id: "Jazz",
       },
       {
         name: t("presetEqualizerProfile.latin"),
-        id: PresetEqualizerProfile.Latin,
+        id: "Latin",
       },
       {
         name: t("presetEqualizerProfile.lounge"),
-        id: PresetEqualizerProfile.Lounge,
+        id: "Lounge",
       },
       {
         name: t("presetEqualizerProfile.piano"),
-        id: PresetEqualizerProfile.Piano,
+        id: "Piano",
       },
-      { name: t("presetEqualizerProfile.pop"), id: PresetEqualizerProfile.Pop },
-      { name: t("presetEqualizerProfile.rnB"), id: PresetEqualizerProfile.RnB },
+      { name: t("presetEqualizerProfile.pop"), id: "Pop" },
+      { name: t("presetEqualizerProfile.rnB"), id: "RnB" },
       {
         name: t("presetEqualizerProfile.rock"),
-        id: PresetEqualizerProfile.Rock,
+        id: "Rock",
       },
       {
         name: t("presetEqualizerProfile.smallSpeakers"),
-        id: PresetEqualizerProfile.SmallSpeakers,
+        id: "SmallSpeakers",
       },
       {
         name: t("presetEqualizerProfile.spokenWord"),
-        id: PresetEqualizerProfile.SpokenWord,
+        id: "SpokenWord",
       },
       {
         name: t("presetEqualizerProfile.trebleBooster"),
-        id: PresetEqualizerProfile.TrebleBooster,
+        id: "TrebleBooster",
       },
       {
         name: t("presetEqualizerProfile.trebleReducer"),
-        id: PresetEqualizerProfile.TrebleReducer,
+        id: "TrebleReducer",
       },
     ];
     const presetProfilesWithValues = presetProfiles.map((profile) => ({
       ...profile,
       values: [
-        ...EqualizerConfiguration.fromPresetProfile(profile.id)
-          .volumeAdjustments.adjustments,
+        ...EqualizerHelper.getPresetProfileVolumeAdjustments(profile.id),
       ].map((value) => value / 10),
     }));
     return presetProfilesWithValues;

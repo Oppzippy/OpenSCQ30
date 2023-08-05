@@ -1,7 +1,11 @@
+use serde::{Deserialize, Serialize};
 use strum::{Display, FromRepr};
 
 #[repr(u8)]
-#[derive(FromRepr, Clone, Copy, Debug, PartialEq, Eq, Hash, Display, Default)]
+#[derive(
+    FromRepr, Clone, Copy, Debug, PartialEq, Eq, Hash, Display, Default, Serialize, Deserialize,
+)]
+#[serde(rename_all = "camelCase")]
 pub enum AmbientSoundMode {
     #[default]
     NoiseCanceling = 0,

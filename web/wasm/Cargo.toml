@@ -10,9 +10,23 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-openscq30_lib = { path = "../../lib" }
-wasm-bindgen = "0.2"
+openscq30_lib = { path = "../../lib", features = ["wasm"] }
 serde = { version = "1.0", features = ["derive"] }
 serde-wasm-bindgen = "0.5"
 uuid = "1.3"
 static_assertions = "1.1.0"
+macaddr = "1.0"
+async-trait = "0.1"
+tokio = { version = "1", features = ["macros", "sync", "time", "rt"] }
+serde_json = "1.0"
+
+wasm-bindgen = "0.2"
+js-sys = "0.3"
+wasm-bindgen-futures = "0.4"
+web-sys = { version = "0.3", features = [
+    "Bluetooth",
+    "BluetoothDevice",
+    "BluetoothRemoteGattServer",
+    "BluetoothRemoteGattService",
+    "BluetoothRemoteGattCharacteristic",
+] }

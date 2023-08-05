@@ -1,6 +1,9 @@
+use serde::{Deserialize, Serialize};
+
 use super::{BasicHearId, CustomHearId};
 
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", tag = "type")]
 pub enum HearId {
     Basic(BasicHearId),
     Custom(CustomHearId),

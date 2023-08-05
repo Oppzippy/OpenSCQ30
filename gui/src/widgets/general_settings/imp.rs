@@ -82,17 +82,17 @@ impl GeneralSettings {
         let obj = self.obj();
         obj.set_has_noise_canceling_mode(
             state
-                .feaure_flags
+                .feature_flags
                 .contains(DeviceFeatureFlags::NOISE_CANCELING_MODE),
         );
         obj.set_has_custom_noise_canceling(
             state
-                .feaure_flags
+                .feature_flags
                 .contains(DeviceFeatureFlags::CUSTOM_NOISE_CANCELING),
         );
         obj.set_has_custom_transparency_modes(
             state
-                .feaure_flags
+                .feature_flags
                 .contains(DeviceFeatureFlags::TRANSPARENCY_MODES),
         );
 

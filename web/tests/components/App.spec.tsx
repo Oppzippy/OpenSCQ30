@@ -2,45 +2,63 @@ import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { BehaviorSubject } from "rxjs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { SoundcoreDevice } from "../../src/bluetooth/SoundcoreDevice";
-import { SoundcoreDeviceState } from "../../src/bluetooth/SoundcoreDeviceState";
+import { Device } from "../../src/bluetooth/Device";
 import App from "../../src/components/App";
 import {
-  AmbientSoundMode,
+  DeviceState,
   EqualizerConfiguration,
-  NoiseCancelingMode,
-  PresetEqualizerProfile,
-} from "../../wasm/pkg/openscq30_web_wasm";
+  SoundModes,
+} from "../../src/libTypes/DeviceState";
+import { EqualizerHelper } from "../../wasm/pkg/openscq30_web_wasm";
 
 describe("App", () => {
   let user: ReturnType<typeof userEvent.setup>;
 
   function mockDevice() {
-    vi.mock("../../src/bluetooth/RealSoundcoreDevice", () => {
+    vi.mock("../../src/bluetooth/Device", () => {
       return {
         async selectDevice() {
           const mockDevice = {
-            state: new BehaviorSubject<SoundcoreDeviceState>({
-              soundModes: {
-                ambientSoundMode: AmbientSoundMode.NoiseCanceling,
-                noiseCancelingMode: NoiseCancelingMode.Transport,
+            state: new BehaviorSubject<DeviceState>({
+              featureFlags: 0,
+              battery: {
+                type: "singleBattery",
+                isCharging: true,
+                level: 5,
               },
-              equalizerConfiguration: EqualizerConfiguration.fromPresetProfile(
-                PresetEqualizerProfile.SoundcoreSignature,
-              ),
+              soundModes: {
+                ambientSoundMode: "noiseCanceling",
+                noiseCancelingMode: "transport",
+                transparencyMode: "fullyTransparent",
+                customNoiseCanceling: 0,
+              },
+              equalizerConfiguration: {
+                presetProfile: "SoundcoreSignature",
+                volumeAdjustments: [
+                  ...EqualizerHelper.getPresetProfileVolumeAdjustments(
+                    "SoundcoreSignature",
+                  ),
+                ],
+              },
             }),
-            async transitionState(newState: SoundcoreDeviceState) {
-              this.state.next(newState);
-            },
             connect: vi.fn<unknown[], unknown>(),
-            get soundModes() {
-              return this.state.value.soundModes;
+            async setSoundModes(soundModes: SoundModes) {
+              this.state.next({
+                ...this.state.value,
+                soundModes,
+              });
             },
-            get equalizerConfiguration() {
-              return this.state.value.equalizerConfiguration;
+            async setEqualizerConfiguration(
+              equalizerConfiguration: EqualizerConfiguration,
+            ) {
+              this.state.next({
+                ...this.state.value,
+                equalizerConfiguration,
+              });
             },
           };
-          return mockDevice as unknown as SoundcoreDevice;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          return mockDevice as unknown as Device;
         },
       };
     });

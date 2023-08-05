@@ -19,7 +19,7 @@ exports[`NoiseCancelingModeSelection > should render 1`] = `
         class="MuiButtonBase-root MuiToggleButton-root MuiToggleButton-sizeMedium MuiToggleButton-standard MuiToggleButtonGroup-grouped MuiToggleButtonGroup-groupedHorizontal css-1psryzy-MuiButtonBase-root-MuiToggleButton-root"
         tabindex="0"
         type="button"
-        value="0"
+        value="transport"
       >
         noiseCancelingMode.transport
         <span
@@ -31,7 +31,7 @@ exports[`NoiseCancelingModeSelection > should render 1`] = `
         class="MuiButtonBase-root MuiToggleButton-root MuiToggleButton-sizeMedium MuiToggleButton-standard MuiToggleButtonGroup-grouped MuiToggleButtonGroup-groupedHorizontal css-1psryzy-MuiButtonBase-root-MuiToggleButton-root"
         tabindex="0"
         type="button"
-        value="1"
+        value="outdoor"
       >
         noiseCancelingMode.outdoor
         <span
@@ -43,7 +43,7 @@ exports[`NoiseCancelingModeSelection > should render 1`] = `
         class="MuiButtonBase-root MuiToggleButton-root Mui-selected MuiToggleButton-sizeMedium MuiToggleButton-standard MuiToggleButtonGroup-grouped MuiToggleButtonGroup-groupedHorizontal css-1psryzy-MuiButtonBase-root-MuiToggleButton-root"
         tabindex="0"
         type="button"
-        value="2"
+        value="indoor"
       >
         noiseCancelingMode.indoor
         <span

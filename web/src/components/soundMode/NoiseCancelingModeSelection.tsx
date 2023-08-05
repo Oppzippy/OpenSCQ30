@@ -1,12 +1,12 @@
 import { Box, Typography } from "@mui/material";
-import { NoiseCancelingMode } from "../../../wasm/pkg/openscq30_web_wasm";
 import { ToggleButtonRow } from "./ToggleButtonRow";
 import { useTranslation } from "react-i18next";
 import React, { useCallback } from "react";
+import { SoundModes } from "../../libTypes/DeviceState";
 
 interface Props {
-  value: NoiseCancelingMode;
-  onValueChanged: (newValue: NoiseCancelingMode) => void;
+  value: SoundModes["noiseCancelingMode"];
+  onValueChanged: (newValue: SoundModes["noiseCancelingMode"]) => void;
 }
 
 export const NoiseCancelingModeSelection = React.memo(function ({
@@ -16,7 +16,7 @@ export const NoiseCancelingModeSelection = React.memo(function ({
   const { t } = useTranslation();
   // Don't allow deselecting the button
   const onValueChangedNotNull = useCallback(
-    (newValue: NoiseCancelingMode | undefined) => {
+    (newValue: SoundModes["noiseCancelingMode"] | undefined) => {
       if (newValue != undefined) {
         onValueChanged(newValue);
       }
@@ -29,18 +29,18 @@ export const NoiseCancelingModeSelection = React.memo(function ({
       <Typography>{t("noiseCancelingMode.noiseCancelingMode")}</Typography>
       <ToggleButtonRow
         value={value}
-        onValueChanged={onValueChangedNotNull}
+        onValueChanged={onValueChangedNotNull as (value: string) => void}
         values={[
           {
-            value: NoiseCancelingMode.Transport,
+            value: "transport",
             displayText: t("noiseCancelingMode.transport"),
           },
           {
-            value: NoiseCancelingMode.Outdoor,
+            value: "outdoor",
             displayText: t("noiseCancelingMode.outdoor"),
           },
           {
-            value: NoiseCancelingMode.Indoor,
+            value: "indoor",
             displayText: t("noiseCancelingMode.indoor"),
           },
         ]}

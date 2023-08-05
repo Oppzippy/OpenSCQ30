@@ -151,7 +151,7 @@ impl WindowsConnection {
     }
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl Connection for WindowsConnection {
     async fn name(&self) -> crate::Result<String> {
         Ok(self.device.Name()?.to_string())

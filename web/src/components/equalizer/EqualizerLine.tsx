@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { VolumeAdjustments } from "../../../wasm/pkg/openscq30_web_wasm";
+import { EqualizerHelper } from "../../../wasm/pkg/openscq30_web_wasm";
 
 interface Props {
   volumeAdjustments: readonly number[];
@@ -15,8 +15,8 @@ export const EqualizerLine = React.memo(function ({
   const getX = (index: number) => (index / volumeAdjustments.length) * width;
 
   // 0,0 is the top left, but we want 0,0 to be bottom left, so invert the height
-  const minVolume = VolumeAdjustments.MIN_VOLUME / 10;
-  const maxVolume = VolumeAdjustments.MAX_VOLUME / 10;
+  const minVolume = EqualizerHelper.MIN_VOLUME / 10;
+  const maxVolume = EqualizerHelper.MAX_VOLUME / 10;
   const range = maxVolume - minVolume;
   const getY = (value: number) =>
     height - ((value - minVolume) / range) * height;

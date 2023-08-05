@@ -7,13 +7,13 @@ import {
 } from "@mui/material";
 import React, { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { PresetEqualizerProfile } from "../../../wasm/pkg/openscq30_web_wasm";
 import { usePresetEqualizerProfiles } from "../../hooks/usePresetEqualizerProfiles";
 import { ProfileRow } from "./ProfileRow";
+import { PresetEqualizerProfile } from "../../libTypes/DeviceState";
 
 interface Props {
-  profile: PresetEqualizerProfile | -1;
-  onProfileSelected: (presetProfile: PresetEqualizerProfile | -1) => void;
+  profile: PresetEqualizerProfile | "custom";
+  onProfileSelected: (presetProfile: PresetEqualizerProfile | "custom") => void;
 }
 
 export const PresetProfiles = React.memo(function (props: Props) {
@@ -22,12 +22,12 @@ export const PresetProfiles = React.memo(function (props: Props) {
   const { onProfileSelected } = props;
 
   const onSelectChange = useCallback(
-    (event: SelectChangeEvent<number>) => {
-      if (typeof event.target.value == "number") {
-        onProfileSelected(event.target.value);
+    (event: SelectChangeEvent<string>) => {
+      if (typeof event.target.value == "string") {
+        onProfileSelected(event.target.value as PresetEqualizerProfile);
       } else {
         throw Error(
-          `value should be a number, but it is instead a ${typeof event.target
+          `value should be a string, but it is instead a ${typeof event.target
             .value}`,
         );
       }
@@ -46,7 +46,7 @@ export const PresetProfiles = React.memo(function (props: Props) {
         value={props.profile}
         onChange={onSelectChange}
       >
-        <MenuItem value={-1}>{t("equalizer.custom")}</MenuItem>
+        <MenuItem value={"custom"}>{t("equalizer.custom")}</MenuItem>
         {presetProfiles.map((profile) => (
           <MenuItem value={profile.id} key={profile.id}>
             <ProfileRow

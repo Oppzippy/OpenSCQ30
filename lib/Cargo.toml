@@ -5,6 +5,7 @@ edition = "2021"
 
 [features]
 bluetooth = ["dep:btleplug", "dep:regex", "dep:lazy_static", "dep:windows"]
+wasm = ["dep:js-sys", "dep:web-sys", "dep:wasm-bindgen-futures"]
 demo = []
 
 [lib]
@@ -21,7 +22,11 @@ strum = { version = "0.24", features = ["derive"] }
 weak-table = "0.3"
 macaddr = "1.0"
 nom = "7"
-bitflags = "2"
+bitflags = { version = "2", features = ["serde"] }
+serde = { version = "1.0", features = ["derive"] }
+js-sys = { version = "0.3", optional = true }
+web-sys = { version = "0.3", optional = true, features = ["Window"] }
+wasm-bindgen-futures = { version = "0.4", optional = true }
 
 [target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
 btleplug = { version = "0.10", optional = true }

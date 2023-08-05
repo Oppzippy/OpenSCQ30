@@ -1,7 +1,9 @@
+use serde::{Deserialize, Serialize};
 use strum::FromRepr;
 
 #[repr(u8)]
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, FromRepr, Default)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, FromRepr, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum TransparencyMode {
     FullyTransparent = 0,
     #[default]

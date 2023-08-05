@@ -1,16 +1,14 @@
 use std::{sync::Arc, time::Duration};
 
 use async_trait::async_trait;
+use futures::FutureExt;
 use macaddr::MacAddr6;
-use tokio::{
-    sync::{broadcast, mpsc::Receiver, watch, RwLock},
-    task::JoinHandle,
-    time::timeout,
-};
+use tokio::sync::{broadcast, mpsc::Receiver, watch, RwLock};
 use tracing::{trace, warn};
 
 use crate::{
     api::connection::{Connection, ConnectionStatus},
+    futures::{sleep, spawn_local, JoinHandle},
     packets::{
         outbound::{SetEqualizerPacket, SetSoundModePacket},
         structures::{AmbientSoundMode, DeviceFeatureFlags, EqualizerConfiguration, SoundModes},
@@ -27,17 +25,17 @@ use crate::{
 
 pub struct Q30Device<ConnectionType>
 where
-    ConnectionType: Connection + Send + Sync,
+    ConnectionType: Connection,
 {
     connection: Arc<ConnectionType>,
     state: Arc<RwLock<DeviceState>>,
-    inbound_receiver_handle: JoinHandle<()>,
+    join_handle: Box<dyn JoinHandle>,
     state_update_sender: broadcast::Sender<DeviceState>,
 }
 
 impl<ConnectionType> Q30Device<ConnectionType>
 where
-    ConnectionType: Connection + Send + Sync,
+    ConnectionType: Connection,
 {
     pub async fn new(connection: Arc<ConnectionType>) -> crate::Result<Self> {
         let mut inbound_receiver = connection.inbound_packets_channel().await?;
@@ -49,7 +47,7 @@ where
         let (sender, _) = broadcast::channel(1);
 
         let sender_copy = sender.to_owned();
-        let join_handle = tokio::spawn(async move {
+        let join_handle = spawn_local(async move {
             while let Some(packet_bytes) = inbound_receiver.recv().await {
                 match InboundPacket::new(&packet_bytes) {
                     Ok(packet) => {
@@ -75,7 +73,7 @@ where
         Ok(Self {
             connection,
             state: current_state_lock,
-            inbound_receiver_handle: join_handle,
+            join_handle: Box::new(join_handle),
             state_update_sender: sender,
         })
     }
@@ -102,24 +100,20 @@ where
                 None
             };
 
-            match timeout(Duration::from_secs(1), state_future).await {
-                Ok(Some(state)) => return Ok(state),
-                Err(elapsed) => {
-                    warn!(
-                        "fetch_initial_state: didn't receive response after {elapsed} on try #{i}"
-                    );
-                }
-                _ => (),
-            };
+            futures::select! {
+                state = state_future.fuse() => if let Some(state) = state { return Ok(state) },
+                _ = sleep(Duration::from_secs(1)).fuse() =>
+                    warn!( "fetch_initial_state: didn't receive response after 1 second on try #{i}"),
+            }
         }
         Err(crate::Error::NoResponse)
     }
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl<ConnectionType> api::device::Device for Q30Device<ConnectionType>
 where
-    ConnectionType: Connection + Send + Sync,
+    ConnectionType: Connection,
 {
     fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState> {
         self.state_update_sender.subscribe()
@@ -216,7 +210,7 @@ where
     ) -> crate::Result<()> {
         let mut state = self.state.write().await;
         if state
-            .feaure_flags
+            .feature_flags
             .contains(DeviceFeatureFlags::TWO_CHANNEL_EQUALIZER)
         {
             Err(crate::Error::FeatureNotSupported {
@@ -238,16 +232,16 @@ where
 
 impl<ConnectionType> Drop for Q30Device<ConnectionType>
 where
-    ConnectionType: Connection + Send + Sync,
+    ConnectionType: Connection,
 {
     fn drop(&mut self) {
-        self.inbound_receiver_handle.abort();
+        self.join_handle.abort();
     }
 }
 
 impl<ConnectionType> std::fmt::Debug for Q30Device<ConnectionType>
 where
-    ConnectionType: Connection + Send + Sync,
+    ConnectionType: Connection,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("SoundcoreDevice").finish()

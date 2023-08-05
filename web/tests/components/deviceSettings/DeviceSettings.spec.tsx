@@ -2,18 +2,17 @@ import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { BehaviorSubject } from "rxjs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { SoundcoreDevice } from "../../../src/bluetooth/SoundcoreDevice";
-import { SoundcoreDeviceState } from "../../../src/bluetooth/SoundcoreDeviceState";
 import { ToastQueue } from "../../../src/components/ToastQueue";
 import { DeviceSettings } from "../../../src/components/deviceSettings/DeviceSettings";
 import { useCustomEqualizerProfiles } from "../../../src/components/deviceSettings/hooks/useCustomEqualizerProfiles";
 import { upsertCustomEqualizerProfile } from "../../../src/storage/customEqualizerProfiles";
+import { Device } from "../../../src/bluetooth/Device";
 import {
-  AmbientSoundMode,
+  DeviceState,
   EqualizerConfiguration,
-  NoiseCancelingMode,
-  PresetEqualizerProfile,
-} from "../../../wasm/pkg/openscq30_web_wasm";
+  SoundModes,
+} from "../../../src/libTypes/DeviceState";
+import { EqualizerHelper } from "../../../wasm/pkg/openscq30_web_wasm";
 
 vi.mock(
   "../../../src/components/deviceSettings/hooks/useCustomEqualizerProfiles",
@@ -31,7 +30,7 @@ vi.mock("../../../src/storage/customEqualizerProfiles", () => {
 });
 
 describe("Device Settings", () => {
-  let device: SoundcoreDevice;
+  let device: Device;
   let user: ReturnType<typeof userEvent.setup>;
   beforeEach(() => {
     vi.useFakeTimers({
@@ -39,27 +38,46 @@ describe("Device Settings", () => {
     });
     user = userEvent.setup();
     const mockDevice = {
-      state: new BehaviorSubject<SoundcoreDeviceState>({
-        soundModes: {
-          ambientSoundMode: AmbientSoundMode.NoiseCanceling,
-          noiseCancelingMode: NoiseCancelingMode.Transport,
+      state: new BehaviorSubject<DeviceState>({
+        featureFlags: 0,
+        battery: {
+          type: "singleBattery",
+          isCharging: true,
+          level: 5,
         },
-        equalizerConfiguration: EqualizerConfiguration.fromPresetProfile(
-          PresetEqualizerProfile.SoundcoreSignature,
-        ),
+        soundModes: {
+          ambientSoundMode: "noiseCanceling",
+          noiseCancelingMode: "transport",
+          transparencyMode: "fullyTransparent",
+          customNoiseCanceling: 0,
+        },
+        equalizerConfiguration: {
+          presetProfile: "SoundcoreSignature",
+          volumeAdjustments: [
+            ...EqualizerHelper.getPresetProfileVolumeAdjustments(
+              "SoundcoreSignature",
+            ),
+          ],
+        },
       }),
       connect: vi.fn<unknown[], unknown>(),
-      get soundModes() {
-        return this.state.value.soundModes;
+      async setSoundModes(soundModes: SoundModes) {
+        this.state.next({
+          ...this.state.value,
+          soundModes,
+        });
       },
-      get equalizerConfiguration() {
-        return this.state.value.equalizerConfiguration;
-      },
-      async transitionState(newState: SoundcoreDeviceState) {
-        this.state.next(newState);
+      async setEqualizerConfiguration(
+        equalizerConfiguration: EqualizerConfiguration,
+      ) {
+        this.state.next({
+          ...this.state.value,
+          equalizerConfiguration,
+        });
       },
     };
-    device = mockDevice as unknown as SoundcoreDevice;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    device = mockDevice as unknown as Device;
   });
 
   afterEach(() => {
@@ -69,51 +87,47 @@ describe("Device Settings", () => {
   it("should change ambient sound mode", async () => {
     const renderResult = render(
       <DeviceSettings
-        device={device as unknown as SoundcoreDevice}
+        device={device}
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         disconnect={() => {}}
       />,
     );
 
-    expect(device.soundModes?.ambientSoundMode).toEqual(
-      AmbientSoundMode.NoiseCanceling,
+    expect(device.state.value.soundModes?.ambientSoundMode).toEqual(
+      "noiseCanceling",
     );
     await user.click(renderResult.getByText("ambientSoundMode.normal"));
 
-    expect(device.soundModes?.ambientSoundMode).toEqual(
-      AmbientSoundMode.Normal,
-    );
+    expect(device.state.value.soundModes?.ambientSoundMode).toEqual("normal");
   });
 
   it("should change noise canceling mode", async () => {
     const renderResult = render(
       <DeviceSettings
-        device={device as unknown as SoundcoreDevice}
+        device={device}
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         disconnect={() => {}}
       />,
     );
 
-    expect(device.soundModes?.noiseCancelingMode).toEqual(
-      NoiseCancelingMode.Transport,
+    expect(device.state.value.soundModes?.noiseCancelingMode).toEqual(
+      "transport",
     );
     await user.click(renderResult.getByText("noiseCancelingMode.indoor"));
-    expect(device.soundModes?.noiseCancelingMode).toEqual(
-      NoiseCancelingMode.Indoor,
-    );
+    expect(device.state.value.soundModes?.noiseCancelingMode).toEqual("indoor");
   });
 
   it("should change equalizer configuration", async () => {
     const renderResult = render(
       <DeviceSettings
-        device={device as unknown as SoundcoreDevice}
+        device={device}
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         disconnect={() => {}}
       />,
     );
 
     expect([
-      ...device.equalizerConfiguration.volumeAdjustments.adjustments,
+      ...device.state.value.equalizerConfiguration.volumeAdjustments,
     ]).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
     await user.click(
       renderResult.getByText("presetEqualizerProfile.soundcoreSignature"),
@@ -123,14 +137,14 @@ describe("Device Settings", () => {
     );
     vi.advanceTimersByTime(5000);
     expect([
-      ...device.equalizerConfiguration.volumeAdjustments.adjustments,
+      ...device.state.value.equalizerConfiguration.volumeAdjustments,
     ]).not.toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
   });
 
   it("should switch to custom profile when moving a silder", async () => {
     const renderResult = render(
       <DeviceSettings
-        device={device as unknown as SoundcoreDevice}
+        device={device}
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         disconnect={() => {}}
       />,
@@ -148,7 +162,7 @@ describe("Device Settings", () => {
   it("should not show custom profile create/delete buttons when a preset is selected", () => {
     const renderResult = render(
       <DeviceSettings
-        device={device as unknown as SoundcoreDevice}
+        device={device}
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         disconnect={() => {}}
       />,
@@ -168,7 +182,7 @@ describe("Device Settings", () => {
     ]);
     const renderResult = render(
       <DeviceSettings
-        device={device as unknown as SoundcoreDevice}
+        device={device}
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         disconnect={() => {}}
       />,
@@ -200,7 +214,7 @@ describe("Device Settings", () => {
   it("should synchronize sliders and number input values", async () => {
     const renderResult = render(
       <DeviceSettings
-        device={device as unknown as SoundcoreDevice}
+        device={device}
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         disconnect={() => {}}
       />,
@@ -222,7 +236,7 @@ describe("Device Settings", () => {
   it("should debounce equalizer updates", async () => {
     const renderResult = render(
       <DeviceSettings
-        device={device as unknown as SoundcoreDevice}
+        device={device}
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         disconnect={() => {}}
       />,
@@ -234,7 +248,7 @@ describe("Device Settings", () => {
     );
 
     expect(device.state.value.equalizerConfiguration.presetProfile).toEqual(
-      PresetEqualizerProfile.SoundcoreSignature,
+      "SoundcoreSignature",
     );
     vi.advanceTimersByTime(500);
     expect(
@@ -246,13 +260,11 @@ describe("Device Settings", () => {
     await user.type(numberInputs[0], "1");
 
     expect(
-      device.state.value.equalizerConfiguration.volumeAdjustments
-        .adjustments[0],
+      device.state.value.equalizerConfiguration.volumeAdjustments[0],
     ).toEqual(0);
     vi.advanceTimersByTime(500);
     expect(
-      device.state.value.equalizerConfiguration.volumeAdjustments
-        .adjustments[0],
+      device.state.value.equalizerConfiguration.volumeAdjustments[0],
     ).toEqual(10);
   });
 
@@ -263,7 +275,7 @@ describe("Device Settings", () => {
     const renderResult = render(
       <ToastQueue>
         <DeviceSettings
-          device={device as unknown as SoundcoreDevice}
+          device={device}
           // eslint-disable-next-line @typescript-eslint/no-empty-function
           disconnect={() => {}}
         />

@@ -12,9 +12,11 @@ use tokio::{
     sync::{broadcast, watch},
 };
 
+use super::tokio_spawn_local::TokioSpawnLocal;
+
 pub struct GtkDevice<InnerDeviceType: 'static>
 where
-    InnerDeviceType: Device + Send + Sync,
+    InnerDeviceType: Device,
 {
     tokio_runtime: Arc<Runtime>,
     soundcore_device: Arc<InnerDeviceType>,
@@ -22,7 +24,7 @@ where
 
 impl<InnerDeviceType> GtkDevice<InnerDeviceType>
 where
-    InnerDeviceType: Device + Send + Sync,
+    InnerDeviceType: Device,
 {
     pub fn new(device: Arc<InnerDeviceType>, tokio_runtime: Arc<Runtime>) -> Self {
         Self {
@@ -32,10 +34,10 @@ where
     }
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl<InnerDeviceType> Device for GtkDevice<InnerDeviceType>
 where
-    InnerDeviceType: Device + Send + Sync,
+    InnerDeviceType: Device,
 {
     fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState> {
         self.soundcore_device.subscribe_to_state_updates()
@@ -48,7 +50,7 @@ where
     async fn mac_address(&self) -> openscq30_lib::Result<MacAddr6> {
         let soundcore_device = self.soundcore_device.to_owned();
         self.tokio_runtime
-            .spawn(async move { soundcore_device.mac_address().await })
+            .spawn_local(async move { soundcore_device.mac_address().await })
             .await
             .unwrap()
     }
@@ -56,7 +58,7 @@ where
     async fn name(&self) -> openscq30_lib::Result<String> {
         let soundcore_device = self.soundcore_device.to_owned();
         self.tokio_runtime
-            .spawn(async move { soundcore_device.name().await })
+            .spawn_local(async move { soundcore_device.name().await })
             .await
             .unwrap()
     }
@@ -64,7 +66,7 @@ where
     async fn state(&self) -> DeviceState {
         let soundcore_device = self.soundcore_device.to_owned();
         self.tokio_runtime
-            .spawn(async move { soundcore_device.state().await })
+            .spawn_local(async move { soundcore_device.state().await })
             .await
             .unwrap()
     }
@@ -72,7 +74,7 @@ where
     async fn set_sound_modes(&self, sound_modes: SoundModes) -> openscq30_lib::Result<()> {
         let soundcore_device = self.soundcore_device.to_owned();
         self.tokio_runtime
-            .spawn(async move { soundcore_device.set_sound_modes(sound_modes).await })
+            .spawn_local(async move { soundcore_device.set_sound_modes(sound_modes).await })
             .await
             .unwrap()
     }
@@ -83,7 +85,7 @@ where
     ) -> openscq30_lib::Result<()> {
         let soundcore_device = self.soundcore_device.to_owned();
         self.tokio_runtime
-            .spawn(async move {
+            .spawn_local(async move {
                 soundcore_device
                     .set_equalizer_configuration(configuration)
                     .await
@@ -95,7 +97,7 @@ where
 
 impl<InnerDeviceType> Debug for GtkDevice<InnerDeviceType>
 where
-    InnerDeviceType: Device + Send + Sync,
+    InnerDeviceType: Device,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str("GtkDevice")

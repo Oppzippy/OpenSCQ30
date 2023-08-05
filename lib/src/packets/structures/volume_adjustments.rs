@@ -1,6 +1,9 @@
 use std::array;
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, Default)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(transparent)]
 pub struct VolumeAdjustments {
     volume_adjustments: [i8; 8],
 }

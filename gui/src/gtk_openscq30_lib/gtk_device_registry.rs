@@ -4,21 +4,21 @@ use macaddr::MacAddr6;
 use openscq30_lib::api::device::DeviceRegistry;
 use tokio::runtime::Runtime;
 
-use super::gtk_device::GtkDevice;
+use super::{gtk_device::GtkDevice, tokio_spawn_local::TokioSpawnLocal};
 use async_trait::async_trait;
 
 pub struct GtkDeviceRegistry<InnerRegistryType>
 where
-    InnerRegistryType: DeviceRegistry + Send + Sync,
+    InnerRegistryType: DeviceRegistry,
 {
     tokio_runtime: Arc<Runtime>,
     soundcore_device_registry: Arc<InnerRegistryType>,
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl<InnerRegistryType: 'static> DeviceRegistry for GtkDeviceRegistry<InnerRegistryType>
 where
-    InnerRegistryType: DeviceRegistry + Send + Sync,
+    InnerRegistryType: DeviceRegistry,
 {
     type DeviceType = GtkDevice<InnerRegistryType::DeviceType>;
     type DescriptorType = InnerRegistryType::DescriptorType;
@@ -31,7 +31,7 @@ where
         let device_registry = self.soundcore_device_registry.to_owned();
         let maybe_device = self
             .tokio_runtime
-            .spawn(async move { device_registry.device(mac_address).await })
+            .spawn_local(async move { device_registry.device(mac_address).await })
             .await
             .unwrap();
         match maybe_device {
@@ -44,7 +44,7 @@ where
     async fn device_descriptors(&self) -> openscq30_lib::Result<Vec<Self::DescriptorType>> {
         let device_registry = self.soundcore_device_registry.to_owned();
         self.tokio_runtime
-            .spawn(async move { device_registry.device_descriptors().await })
+            .spawn_local(async move { device_registry.device_descriptors().await })
             .await
             .unwrap()
     }
@@ -52,7 +52,7 @@ where
 
 impl<InnerRegistryType: 'static> GtkDeviceRegistry<InnerRegistryType>
 where
-    InnerRegistryType: DeviceRegistry + Send + Sync,
+    InnerRegistryType: DeviceRegistry,
 {
     pub fn new(registry: InnerRegistryType, tokio_runtime: Runtime) -> Self {
         Self {

@@ -4,7 +4,7 @@ use tokio::sync::{mpsc, watch};
 
 use super::ConnectionStatus;
 
-#[async_trait]
+#[async_trait(?Send)]
 pub trait Connection {
     async fn name(&self) -> crate::Result<String>;
     async fn mac_address(&self) -> crate::Result<MacAddr6>;

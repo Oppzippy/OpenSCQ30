@@ -147,7 +147,7 @@ impl BtlePlugConnectionRegistry {
     }
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl ConnectionRegistry for BtlePlugConnectionRegistry {
     type ConnectionType = BtlePlugConnection;
     type DescriptorType = GenericConnectionDescriptor;

@@ -111,7 +111,7 @@ impl BtlePlugConnection {
     }
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl Connection for BtlePlugConnection {
     async fn name(&self) -> crate::Result<String> {
         let maybe_name = self

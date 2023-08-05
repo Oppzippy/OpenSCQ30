@@ -6,7 +6,7 @@ use crate::{
 impl DeviceStateTransformer for StateUpdatePacket {
     fn transform(&self, state: &DeviceState) -> DeviceState {
         DeviceState {
-            feaure_flags: state.feaure_flags,
+            feature_flags: state.feature_flags,
             battery: state.battery,
             equalizer_configuration: state.equalizer_configuration,
             age_range: self.age_range.or(state.age_range),

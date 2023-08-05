@@ -5,9 +5,9 @@ use macaddr::MacAddr6;
 
 use super::{Device, DeviceDescriptor};
 
-#[async_trait]
+#[async_trait(?Send)]
 pub trait DeviceRegistry {
-    type DeviceType: Device + Send + Sync + Debug;
+    type DeviceType: Device + Debug;
     type DescriptorType: DeviceDescriptor + Send + Sync + Debug;
 
     async fn device_descriptors(&self) -> crate::Result<Vec<Self::DescriptorType>>;

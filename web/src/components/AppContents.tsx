@@ -6,17 +6,15 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
-import { selectDemoDevice } from "../bluetooth/DemoSoundcoreDevice";
-import { selectDevice } from "../bluetooth/RealSoundcoreDevice";
-import { SoundcoreDevice } from "../bluetooth/SoundcoreDevice";
 import { useUpdateAvailableToast } from "../hooks/useUpdateAvailableToast";
 import { ConnectedAppBar } from "./ConnectedAppBar";
 import { DisconnectedAppBar } from "./DisconnectedAppBar";
 import { HomePage } from "./HomePage";
 import { DeviceSettings } from "./deviceSettings/DeviceSettings";
+import { Device, selectDemoDevice, selectDevice } from "../bluetooth/Device";
 
 export function AppContents() {
-  const [device, setDevice] = useState<SoundcoreDevice>();
+  const [device, setDevice] = useState<Device>();
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
   // TODO use a hook for isDemoMode
   const isDemoMode = localStorage.getItem("openscq30:demoMode") == "true";
@@ -43,7 +41,7 @@ export function AppContents() {
   }, [isDemoMode]);
 
   const disconnect = useCallback(() => {
-    device?.disconnect();
+    device?.destroy();
     setDevice(undefined);
   }, [device]);
 

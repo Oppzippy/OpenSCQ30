@@ -2,7 +2,7 @@ import { Input, Slider, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { VolumeAdjustments } from "../../../wasm/pkg/openscq30_web_wasm";
+import { EqualizerHelper } from "../../../wasm/pkg/openscq30_web_wasm";
 
 interface Props {
   hz: number;
@@ -16,8 +16,8 @@ export const VolumeSlider = React.memo(function (props: Props) {
   const { t } = useTranslation();
   const labelId = `${props.hz}-hz-label`;
   const step = 0.1;
-  const minVolume = VolumeAdjustments.MIN_VOLUME * step;
-  const maxVolume = VolumeAdjustments.MAX_VOLUME * step;
+  const minVolume = EqualizerHelper.MIN_VOLUME * step;
+  const maxVolume = EqualizerHelper.MAX_VOLUME * step;
   return (
     <>
       {/* make sure Hz doesn't go on to a second line */}

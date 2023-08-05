@@ -1,5 +1,7 @@
 use std::borrow::Borrow;
 
+use serde::{Deserialize, Serialize};
+
 use crate::packets::{
     inbound::state_update_packet::StateUpdatePacket,
     structures::{
@@ -8,9 +10,10 @@ use crate::packets::{
     },
 };
 
-#[derive(Debug, PartialEq, Eq, Clone, Hash, Default)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DeviceState {
-    pub feaure_flags: DeviceFeatureFlags,
+    pub feature_flags: DeviceFeatureFlags,
     pub battery: Battery,
     pub equalizer_configuration: EqualizerConfiguration,
     pub sound_modes: Option<SoundModes>,
@@ -28,7 +31,7 @@ where
     fn from(packet: T) -> Self {
         let packet: &StateUpdatePacket = packet.borrow();
         Self {
-            feaure_flags: packet.feature_flags,
+            feature_flags: packet.feature_flags,
             battery: packet.battery,
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: packet.sound_modes,

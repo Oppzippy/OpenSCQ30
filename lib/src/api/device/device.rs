@@ -8,7 +8,7 @@ use crate::{
     state::DeviceState,
 };
 
-#[async_trait]
+#[async_trait(?Send)]
 pub trait Device {
     fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState>;
 

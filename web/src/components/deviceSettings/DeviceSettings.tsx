@@ -1,13 +1,6 @@
 import { Stack } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  EqualizerConfiguration,
-  PresetEqualizerProfile,
-  VolumeAdjustments,
-} from "../../../wasm/pkg/openscq30_web_wasm";
-import { SoundcoreDevice } from "../../bluetooth/SoundcoreDevice";
-import { SoundModesState } from "../../bluetooth/SoundcoreDeviceState";
 import { useToastErrorHandler } from "../../hooks/useToastErrorHandler";
 import { EqualizerSettings } from "../equalizer/EqualizerSettings";
 import { NewCustomProfileDialog } from "../equalizer/NewCustomProfileDialog";
@@ -16,12 +9,19 @@ import { useCreateCustomProfileWithName } from "./hooks/useCreateCustomProfileWi
 import { useCustomEqualizerProfiles } from "./hooks/useCustomEqualizerProfiles";
 import { useDeleteCustomProfile } from "./hooks/useDeleteCustomProfile";
 import { useDisplayState } from "./hooks/useDisplayState";
+import { Device } from "../../bluetooth/Device";
+import {
+  EqualizerConfiguration,
+  PresetEqualizerProfile,
+  SoundModes,
+} from "../../libTypes/DeviceState";
+import { EqualizerHelper } from "../../../wasm/pkg/openscq30_web_wasm";
 
 export function DeviceSettings({
   device,
   disconnect,
 }: {
-  device: SoundcoreDevice;
+  device: Device;
   disconnect: () => void;
 }) {
   const { t } = useTranslation();
@@ -34,7 +34,7 @@ export function DeviceSettings({
     [errorHandler, disconnect],
   );
 
-  const [deviceState, setDeviceState] = useDisplayState(
+  const [displayState, setDisplayState] = useDisplayState(
     device,
     onBluetoothError,
   );
@@ -44,54 +44,60 @@ export function DeviceSettings({
   const customEqualizerProfiles = useCustomEqualizerProfiles();
 
   const setSelectedPresetProfile = useCallback(
-    (profile: PresetEqualizerProfile | -1) => {
-      const newEqualizerConfiguration =
-        profile == -1
-          ? EqualizerConfiguration.fromCustomProfile(
-              deviceState.equalizerConfiguration.volumeAdjustments,
-            )
-          : EqualizerConfiguration.fromPresetProfile(profile);
-      setDeviceState((state) => ({
+    (presetProfile: PresetEqualizerProfile | "custom") => {
+      const newEqualizerConfiguration: EqualizerConfiguration =
+        presetProfile != "custom"
+          ? {
+              presetProfile,
+              volumeAdjustments: [
+                ...EqualizerHelper.getPresetProfileVolumeAdjustments(
+                  presetProfile,
+                ),
+              ],
+            }
+          : {
+              volumeAdjustments:
+                displayState.equalizerConfiguration.volumeAdjustments,
+            };
+      setDisplayState((state) => ({
         ...state,
         equalizerConfiguration: newEqualizerConfiguration,
       }));
     },
-    [deviceState.equalizerConfiguration.volumeAdjustments, setDeviceState],
+    [displayState.equalizerConfiguration.volumeAdjustments, setDisplayState],
   );
 
   const setEqualizerValue = useCallback(
-    (index: number, newVolume: number) => {
-      setDeviceState((state) => {
-        const volume = new Int8Array(
-          state.equalizerConfiguration.volumeAdjustments.adjustments,
-        );
+    (changedIndex: number, newVolume: number) => {
+      setDisplayState((state) => {
         // VolumeAdjustments expects integers (-120 to +120), but the state uses decimals (-12.0 to +12.0)
-        volume[index] = newVolume * 10;
-        const newEqualizerConfiguration =
-          EqualizerConfiguration.fromCustomProfile(
-            new VolumeAdjustments(volume),
+        const volumeAdjustments =
+          state.equalizerConfiguration.volumeAdjustments.map((volume, index) =>
+            index == changedIndex ? newVolume * 10 : volume,
           );
         return {
           ...state,
-          equalizerConfiguration: newEqualizerConfiguration,
+          equalizerConfiguration: {
+            volumeAdjustments,
+          },
         };
       });
     },
-    [setDeviceState],
+    [setDisplayState],
   );
 
   const fractionalEqualizerVolumes = [
-    ...deviceState.equalizerConfiguration.volumeAdjustments.adjustments,
+    ...displayState.equalizerConfiguration.volumeAdjustments,
   ].map((volume) => volume / 10);
 
   const setSoundModes = useCallback(
-    (soundModes: SoundModesState) => {
-      setDeviceState((state) => ({
+    (soundModes: SoundModes) => {
+      setDisplayState((state) => ({
         ...state,
         soundModes: soundModes,
       }));
     },
-    [setDeviceState],
+    [setDisplayState],
   );
 
   const openCreateCustomProfileDialog = useCallback(
@@ -111,14 +117,14 @@ export function DeviceSettings({
 
   return (
     <Stack spacing={2}>
-      {deviceState.soundModes && (
+      {displayState.soundModes && (
         <SoundModeSelection
-          soundModes={deviceState.soundModes}
+          soundModes={displayState.soundModes}
           setSoundModes={setSoundModes}
         />
       )}
       <EqualizerSettings
-        profile={deviceState.equalizerConfiguration.presetProfile ?? -1}
+        profile={displayState.equalizerConfiguration.presetProfile ?? "custom"}
         onProfileSelected={setSelectedPresetProfile}
         values={fractionalEqualizerVolumes}
         onValueChange={setEqualizerValue}

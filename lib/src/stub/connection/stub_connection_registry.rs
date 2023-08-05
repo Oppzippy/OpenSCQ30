@@ -29,7 +29,7 @@ impl StubConnectionRegistry {
     }
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl ConnectionRegistry for StubConnectionRegistry {
     type ConnectionType = StubConnection;
     type DescriptorType = GenericConnectionDescriptor;

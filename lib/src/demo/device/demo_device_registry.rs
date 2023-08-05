@@ -19,7 +19,7 @@ impl DemoDeviceRegistry {
     }
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl DeviceRegistry for DemoDeviceRegistry {
     type DeviceType = DemoDevice;
     type DescriptorType = GenericDeviceDescriptor;

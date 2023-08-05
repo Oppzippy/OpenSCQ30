@@ -3,17 +3,16 @@ import { IconButton, Stack, SxProps, Typography } from "@mui/material";
 import { isEqual } from "lodash-es";
 import React, { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { PresetEqualizerProfile } from "../../../wasm/pkg/openscq30_web_wasm";
 import { CustomEqualizerProfile } from "../../storage/db";
 import { CustomProfiles } from "./CustomProfiles";
 import { Equalizer } from "./Equalizer";
 import { PresetProfiles } from "./PresetProfiles";
+import { PresetEqualizerProfile } from "../../libTypes/DeviceState";
 
-// TODO -1 is custom, make this more readable
 interface Props {
-  profile: PresetEqualizerProfile | -1;
+  profile: PresetEqualizerProfile | "custom";
   customProfiles: CustomEqualizerProfile[];
-  onProfileSelected: (presetProfile: PresetEqualizerProfile | -1) => void;
+  onProfileSelected: (presetProfile: PresetEqualizerProfile | "custom") => void;
   values: number[];
   onValueChange: (index: number, newValue: number) => void;
   onAddCustomProfile: () => void;
@@ -27,7 +26,7 @@ const customProfilesSx: SxProps = {
 export const EqualizerSettings = React.memo(function (props: Props) {
   const { t } = useTranslation();
 
-  const isCustomProfile = props.profile == -1;
+  const isCustomProfile = props.profile == "custom";
 
   let selectedCustomProfile: CustomEqualizerProfile | undefined;
   if (isCustomProfile) {

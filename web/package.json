@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run build:wasm && tsc && vite build",
-    "build:wasm": "wasm-pack build --no-pack ./wasm",
+    "build:wasm": "RUSTFLAGS=\"--cfg=web_sys_unstable_apis\" wasm-pack build --no-pack ./wasm",
+    "build:wasmDev": "RUSTFLAGS=\"--cfg=web_sys_unstable_apis\" wasm-pack build --no-pack --dev ./wasm",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest",
@@ -22,6 +23,8 @@
     "@fontsource/roboto": "^5.0.2",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.12.1",
+    "@sinclair/typebox": "^0.30.2",
+    "ajv": "^8.12.0",
     "dexie": "^3.2.3",
     "dexie-react-hooks": "^1.1.3",
     "i18next": "^23.2.2",
