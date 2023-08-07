@@ -142,6 +142,10 @@ where
                 feature_name: "sound modes",
             });
         };
+        if prev_sound_modes == sound_modes {
+            return Ok(());
+        }
+
         // It will bug and put us in noise canceling mode without changing the ambient sound mode id if we change the
         // noise canceling mode with the ambient sound mode being normal or transparency. To work around this, we must
         // set the ambient sound mode to Noise Canceling, and then change it back.
@@ -209,6 +213,10 @@ where
         equalizer_configuration: EqualizerConfiguration,
     ) -> crate::Result<()> {
         let mut state = self.state.write().await;
+        if equalizer_configuration == state.equalizer_configuration {
+            return Ok(());
+        }
+
         if state
             .feature_flags
             .contains(DeviceFeatureFlags::TWO_CHANNEL_EQUALIZER)
@@ -259,7 +267,8 @@ mod tests {
     use crate::{
         api::device::Device,
         packets::structures::{
-            AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode, VolumeAdjustments,
+            AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
+            SoundModes, VolumeAdjustments,
         },
         stub::connection::StubConnection,
     };
@@ -379,5 +388,47 @@ mod tests {
             NoiseCancelingMode::Outdoor,
             sound_modes.noise_canceling_mode,
         );
+    }
+
+    #[tokio::test]
+    async fn test_set_sound_mode_called_twice() {
+        let (connection, sender) = create_test_connection().await;
+        // request state update packet
+        connection.push_write_return(Ok(())).await;
+        // first set_sound_modes. second call should not send a packet.
+        connection.push_write_return(Ok(())).await;
+        sender.send(example_state_update_packet()).await.unwrap();
+
+        let device = Q30Device::new(connection.to_owned()).await.unwrap();
+        let sound_modes = SoundModes {
+            custom_noise_canceling: CustomNoiseCanceling::new(10),
+            ..Default::default()
+        };
+        device.set_sound_modes(sound_modes).await.unwrap();
+        device.set_sound_modes(sound_modes).await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn test_set_equalizer_configuration_called_twice() {
+        let (connection, sender) = create_test_connection().await;
+        // request state update packet
+        connection.push_write_return(Ok(())).await;
+        // first set_equalizer_configuration. second call should not send a packet.
+        connection.push_write_return(Ok(())).await;
+        sender.send(example_state_update_packet()).await.unwrap();
+
+        let device = Q30Device::new(connection.to_owned()).await.unwrap();
+        let equalizer_configuration =
+            EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
+                0, 10, 20, 30, 40, 50, 60, 70,
+            ]));
+        device
+            .set_equalizer_configuration(equalizer_configuration)
+            .await
+            .unwrap();
+        device
+            .set_equalizer_configuration(equalizer_configuration)
+            .await
+            .unwrap();
     }
 }
