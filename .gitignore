@@ -5,3 +5,5 @@
 /gui/AppDir
 /gui/appimage-build
 /lcov.info
+.vscode
+.cargo
