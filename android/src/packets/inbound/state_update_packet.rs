@@ -27,10 +27,10 @@ impl StateUpdatePacket {
     }
 
     #[generate_interface]
-    pub fn firmware_version(&self) -> Option<u16> {
+    pub fn firmware_version(&self) -> Option<i32> {
         self.0
             .firmware_version
-            .map(|firmware_version| firmware_version.number())
+            .map(|firmware_version| firmware_version.number().into())
     }
 
     #[generate_interface]

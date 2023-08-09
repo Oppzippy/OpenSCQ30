@@ -13,7 +13,7 @@ data class SoundcoreDeviceState(
 //    val ageRange: AgeRange?,
 //    val customHearId: HearId?,
 //    val customButtonModel: CustomButtonModel?,
-    val firmwareVersion: String?,
+    val firmwareVersion: Int?,
     val serialNumber: String?,
 ) {
     // used for static extension methods in tests
@@ -36,7 +36,11 @@ fun StateUpdatePacket.toSoundcoreDeviceState(): SoundcoreDeviceState {
         featureFlags = featureFlags(),
         equalizerConfiguration = equalizerConfiguration(),
         soundModes = soundModes().getOrNull(),
-        firmwareVersion = firmwareVersion().getOrNull(),
+        firmwareVersion = if (firmwareVersion().isPresent) {
+            firmwareVersion().asInt
+        } else {
+            null
+        },
         serialNumber = serialNumber().getOrNull(),
     )
 }

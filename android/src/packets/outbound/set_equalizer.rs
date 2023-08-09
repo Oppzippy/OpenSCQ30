@@ -1,11 +1,10 @@
-use openscq30_lib::packets::outbound::OutboundPacket as _;
+use openscq30_lib::packets::outbound::OutboundPacketBytes;
 use openscq30_lib::packets::outbound::SetEqualizerPacket as LibSetEqualizerPacket;
 
 use rifgen::rifgen_attr::generate_interface;
 
+use crate::OutboundPacket;
 use crate::{packets::structures::EqualizerConfiguration, type_conversion};
-
-use super::OutboundPacket;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct SetEqualizerPacket {

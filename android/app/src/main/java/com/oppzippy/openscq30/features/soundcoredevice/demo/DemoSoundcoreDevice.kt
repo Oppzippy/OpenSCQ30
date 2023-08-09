@@ -28,7 +28,7 @@ class DemoSoundcoreDevice(
                 CustomNoiseCanceling(0),
             ),
             equalizerConfiguration = EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
-            firmwareVersion = "01.00",
+            firmwareVersion = 100,
             serialNumber = "0000000000000000",
         ),
     )

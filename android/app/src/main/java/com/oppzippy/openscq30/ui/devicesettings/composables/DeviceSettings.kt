@@ -128,7 +128,7 @@ private fun PreviewDeviceSettings() {
                         CustomNoiseCanceling(0),
                     ),
                     equalizerConfiguration = EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
-                    firmwareVersion = "",
+                    firmwareVersion = 0,
                     serialNumber = "",
                 ),
             ),

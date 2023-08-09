@@ -38,13 +38,12 @@ public final class StateUpdatePacket {
     }
     private static native long do_equalizerConfiguration(long self);
 
-    public final @NonNull java.util.Optional<String> firmwareVersion() {
-        String ret = do_firmwareVersion(mNativeObj);
-        java.util.Optional<String> convRet = java.util.Optional.ofNullable(ret);
+    public final @NonNull java.util.OptionalInt firmwareVersion() {
+        java.util.OptionalInt ret = do_firmwareVersion(mNativeObj);
 
-        return convRet;
+        return ret;
     }
-    private static native @Nullable String do_firmwareVersion(long self);
+    private static native @NonNull java.util.OptionalInt do_firmwareVersion(long self);
 
     public final @NonNull java.util.Optional<String> serialNumber() {
         String ret = do_serialNumber(mNativeObj);

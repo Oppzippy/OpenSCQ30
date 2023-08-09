@@ -112,7 +112,7 @@ class SoundcoreDeviceImpl(
     }
 
     private fun queueSetMonoEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
-        val packet = SetEqualizerPacket(equalizerConfiguration)
+        val packet = SetEqualizerPacket(equalizerConfiguration, null)
         callbacks.queueCommanad(Command.Write(packet.bytes()))
     }
 }
