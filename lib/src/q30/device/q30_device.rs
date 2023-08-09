@@ -217,19 +217,20 @@ where
             return Ok(());
         }
 
-        if state
+        let left_channel = equalizer_configuration;
+        let right_channel = if state
             .feature_flags
             .contains(DeviceFeatureFlags::TWO_CHANNEL_EQUALIZER)
         {
-            Err(crate::Error::FeatureNotSupported {
-                feature_name: "two channel equalizer",
-            })
+            Some(equalizer_configuration)
         } else {
-            self.connection
-                .write_with_response(&SetEqualizerPacket::new(equalizer_configuration).bytes())
-                .await?;
-            Ok(())
-        }?;
+            None
+        };
+
+        self.connection
+            .write_with_response(&SetEqualizerPacket::new(left_channel, right_channel).bytes())
+            .await?;
+
         *state = DeviceState {
             equalizer_configuration,
             ..state.clone()
