@@ -52,14 +52,14 @@ test.describe("custom equalizer profiles", () => {
       values: [0, 0, 0, 0, 0, 0, 0, 0],
     });
 
-    expect(page.getByText("Test Profile")).toBeVisible();
+    await expect(page.getByText("Test Profile")).toBeVisible();
   });
 
   test("should have a delete button when a custom profile is selected, and an add button when it is not", async ({
     page,
   }) => {
-    expect(page.getByLabel("Create Custom Profile")).toBeVisible();
-    expect(page.getByLabel("Delete Custom Profile")).not.toBeVisible();
+    await expect(page.getByLabel("Create Custom Profile")).toBeVisible();
+    await expect(page.getByLabel("Delete Custom Profile")).not.toBeVisible();
     await createCustomProfile(page, {
       name: "Test Profile",
       values: [0, 0, 0, 0, 0, 0, 0, 0],
@@ -68,8 +68,8 @@ test.describe("custom equalizer profiles", () => {
     const createButton = page.locator(
       "button[aria-label='Create Custom Profile']:has(> svg)",
     );
-    expect(page.getByLabel("Delete Custom Profile")).toBeVisible();
-    expect(createButton).not.toBeVisible();
+    await expect(page.getByLabel("Delete Custom Profile")).toBeVisible();
+    await expect(createButton).not.toBeVisible();
   });
 
   test("should be able to delete profiles", async ({ page }) => {
@@ -77,9 +77,9 @@ test.describe("custom equalizer profiles", () => {
       name: "Test Profile",
       values: [0, 0, 0, 0, 0, 0, 0, 0],
     });
-    expect(page.getByText("Test Profile")).toBeVisible();
+    await expect(page.getByText("Test Profile")).toBeVisible();
     await page.getByLabel("Delete Custom Profile").click();
-    expect(page.getByText("Test Profile")).not.toBeVisible();
+    await expect(page.getByText("Test Profile")).not.toBeVisible();
   });
 
   test("should not allow multiple profiles with the same name", async ({
@@ -108,8 +108,8 @@ test.describe("custom equalizer profiles", () => {
       values: [-1, 0, 0, 0, 0, 0, 0, 0],
     });
     await page.getByText("Profile 2").click();
-    expect(page.getByText("Profile 1")).toBeVisible();
-    expect(page.locator("li").getByText("Profile 2")).toBeVisible();
+    await expect(page.getByText("Profile 1")).toBeVisible();
+    await expect(page.locator("li").getByText("Profile 2")).toBeVisible();
   });
 
   test("should select profile when changing eq values", async ({ page }) => {
@@ -117,10 +117,10 @@ test.describe("custom equalizer profiles", () => {
       name: "Profile 1",
       values: [0, 0, 0, 0, 0, 0, 0, 0],
     });
-    expect(page.getByText("Profile 1")).toBeVisible();
+    await expect(page.getByText("Profile 1")).toBeVisible();
     await selectEqualizerValues(page, [1, 0, 0, 0, 0, 0, 0, 0]);
-    expect(page.getByText("Profile 1")).not.toBeVisible();
+    await expect(page.getByText("Profile 1")).not.toBeVisible();
     await selectEqualizerValues(page, [0, 0, 0, 0, 0, 0, 0, 0]);
-    expect(page.getByText("Profile 1")).toBeVisible();
+    await expect(page.getByText("Profile 1")).toBeVisible();
   });
 });
