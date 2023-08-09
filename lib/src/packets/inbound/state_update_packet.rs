@@ -38,6 +38,7 @@ pub struct StateUpdatePacket {
     pub custom_button_model: Option<CustomButtonModel>,
     pub firmware_version: Option<FirmwareVersion>,
     pub serial_number: Option<SerialNumber>,
+    pub dynamic_range_compression_min_firmware_version: Option<FirmwareVersion>,
 }
 
 pub fn take_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(

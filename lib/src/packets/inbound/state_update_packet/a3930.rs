@@ -43,7 +43,8 @@ impl From<A3930StateUpdatePacket> for StateUpdatePacket {
             feature_flags: DeviceFeatureFlags::SOUND_MODES
                 | DeviceFeatureFlags::HEAR_ID
                 | DeviceFeatureFlags::EQUALIZER
-                | DeviceFeatureFlags::TWO_CHANNEL_EQUALIZER,
+                | DeviceFeatureFlags::TWO_CHANNEL_EQUALIZER
+                | DeviceFeatureFlags::DYNAMIC_RANGE_COMPRESSION,
             battery: packet.battery.into(),
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: Some(packet.sound_modes),
@@ -52,6 +53,7 @@ impl From<A3930StateUpdatePacket> for StateUpdatePacket {
             custom_button_model: Some(packet.custom_button_model),
             firmware_version: None,
             serial_number: None,
+            dynamic_range_compression_min_firmware_version: None,
         }
     }
 }

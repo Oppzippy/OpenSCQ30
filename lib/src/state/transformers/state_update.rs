@@ -23,6 +23,8 @@ impl DeviceStateTransformer for StateUpdatePacket {
                 .or(state.serial_number.as_ref())
                 .cloned(),
             sound_modes: self.sound_modes.or(state.sound_modes),
+            dynamic_range_compression_min_firmware_version: state
+                .dynamic_range_compression_min_firmware_version,
             // ..state.clone()
         }
     }

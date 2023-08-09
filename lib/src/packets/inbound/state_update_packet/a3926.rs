@@ -49,6 +49,7 @@ impl From<A3926StateUpdatePacket> for StateUpdatePacket {
             custom_button_model: Some(packet.custom_button_model),
             firmware_version: None,
             serial_number: None,
+            dynamic_range_compression_min_firmware_version: None,
         }
     }
 }

@@ -50,6 +50,7 @@ impl From<A3027StateUpdatePacket> for StateUpdatePacket {
             custom_button_model: None,
             firmware_version: Some(packet.firmware_version),
             serial_number: Some(packet.serial_number),
+            dynamic_range_compression_min_firmware_version: None,
         }
     }
 }

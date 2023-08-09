@@ -51,7 +51,8 @@ impl From<A3951StateUpdatePacket> for StateUpdatePacket {
                 | DeviceFeatureFlags::CUSTOM_NOISE_CANCELING
                 | DeviceFeatureFlags::TRANSPARENCY_MODES
                 | DeviceFeatureFlags::WEAR_DETECTION
-                | DeviceFeatureFlags::TOUCH_TONE,
+                | DeviceFeatureFlags::TOUCH_TONE
+                | DeviceFeatureFlags::DYNAMIC_RANGE_COMPRESSION,
             battery: packet.battery.into(),
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: Some(packet.sound_modes),
@@ -60,6 +61,7 @@ impl From<A3951StateUpdatePacket> for StateUpdatePacket {
             custom_button_model: Some(packet.custom_button_model),
             firmware_version: None,
             serial_number: None,
+            dynamic_range_compression_min_firmware_version: None,
         }
     }
 }

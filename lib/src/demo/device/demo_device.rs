@@ -59,8 +59,9 @@ impl DemoDevice {
                     }
                     .into(),
                 ),
-                firmware_version: Some(FirmwareVersion("01.00".into())),
+                firmware_version: Some(FirmwareVersion::new(01, 00)),
                 serial_number: Some(SerialNumber("0123456789ABCDEF".into())),
+                dynamic_range_compression_min_firmware_version: None,
             }),
         }
     }

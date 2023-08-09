@@ -16,6 +16,7 @@ bitflags! {
         const TOUCH_TONE                = 1 << 8;
         const AUTO_POWER_OFF            = 1 << 9;
         const TWO_CHANNEL_EQUALIZER     = 1 << 10;
+        const DYNAMIC_RANGE_COMPRESSION = 1 << 11;
     }
 }
 

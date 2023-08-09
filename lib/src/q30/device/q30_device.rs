@@ -10,7 +10,9 @@ use crate::{
     api::connection::{Connection, ConnectionStatus},
     futures::{sleep, spawn, JoinHandle},
     packets::{
-        outbound::{OutboundPacketBytes, SetEqualizerPacket, SetSoundModePacket},
+        outbound::{
+            OutboundPacketBytes, SetEqualizerPacket, SetEqualizerWithDrcPacket, SetSoundModePacket,
+        },
         structures::{AmbientSoundMode, DeviceFeatureFlags, EqualizerConfiguration, SoundModes},
     },
 };
@@ -224,9 +226,12 @@ where
             None
         };
 
-        self.connection
-            .write_with_response(&SetEqualizerPacket::new(left_channel, right_channel).bytes())
-            .await?;
+        let packet_bytes = if state.supports_dynamic_range_compression() {
+            SetEqualizerWithDrcPacket::new(left_channel, right_channel).bytes()
+        } else {
+            SetEqualizerPacket::new(left_channel, right_channel).bytes()
+        };
+        self.connection.write_with_response(&packet_bytes).await?;
 
         *state = DeviceState {
             equalizer_configuration,
