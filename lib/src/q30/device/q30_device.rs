@@ -10,16 +10,13 @@ use crate::{
     api::connection::{Connection, ConnectionStatus},
     futures::{sleep, spawn, JoinHandle},
     packets::{
-        outbound::{SetEqualizerPacket, SetSoundModePacket},
+        outbound::{OutboundPacketBytes, SetEqualizerPacket, SetSoundModePacket},
         structures::{AmbientSoundMode, DeviceFeatureFlags, EqualizerConfiguration, SoundModes},
     },
 };
 use crate::{
     api::{self},
-    packets::{
-        inbound::InboundPacket,
-        outbound::{OutboundPacket, RequestStatePacket},
-    },
+    packets::{inbound::InboundPacket, outbound::RequestStatePacket},
     state::{self, DeviceState},
 };
 

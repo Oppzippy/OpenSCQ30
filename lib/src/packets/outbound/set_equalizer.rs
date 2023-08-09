@@ -1,4 +1,4 @@
-use crate::packets::{checksum::calculate_checksum, structures::EqualizerConfiguration};
+use crate::packets::structures::EqualizerConfiguration;
 
 use super::outbound_packet::OutboundPacket;
 
@@ -21,19 +21,17 @@ impl SetEqualizerPacket {
 }
 
 impl OutboundPacket for SetEqualizerPacket {
-    fn bytes(&self) -> Vec<u8> {
-        let mut bytes: Vec<u8> = vec![0x08, 0xEE, 0x00, 0x00, 0x00, 0x02, 0x81, 0x14, 0x00];
+    fn command(&self) -> [u8; 7] {
+        [0x08, 0xEE, 0x00, 0x00, 0x00, 0x02, 0x81]
+    }
 
+    fn body(&self) -> Vec<u8> {
+        let mut bytes = Vec::with_capacity(18);
         bytes.extend(self.left_configuration.profile_id().to_le_bytes());
         bytes.extend(self.left_configuration.volume_adjustments().bytes());
-        bytes.extend(
-            self.right_configuration
-                .map(|right| right.volume_adjustments().bytes())
-                .into_iter()
-                .flatten(),
-        );
-
-        bytes.push(calculate_checksum(&bytes));
+        if let Some(right_eq) = self.right_configuration {
+            bytes.extend(right_eq.volume_adjustments().bytes());
+        }
 
         bytes
     }
@@ -42,7 +40,7 @@ impl OutboundPacket for SetEqualizerPacket {
 #[cfg(test)]
 mod tests {
     use crate::packets::{
-        outbound::OutboundPacket,
+        outbound::OutboundPacketBytes,
         structures::{EqualizerConfiguration, PresetEqualizerProfile, VolumeAdjustments},
     };
 
@@ -94,8 +92,8 @@ mod tests {
     #[test]
     fn it_sends_second_channel_if_present() {
         const EXPECTED: &[u8] = &[
-            0x08, 0xee, 0x00, 0x00, 0x00, 0x02, 0x81, 0x14, 0x00, 0x15, 0x00, 0x78, 0x78, 0x78,
-            0x64, 0x5a, 0x50, 0x50, 0x3c, 0x78, 0x78, 0x78, 0x64, 0x5a, 0x50, 0x50, 0x3c, 0xa6,
+            0x08, 0xee, 0x00, 0x00, 0x00, 0x02, 0x81, 0x1C, 0x00, 0x15, 0x00, 0x78, 0x78, 0x78,
+            0x64, 0x5a, 0x50, 0x50, 0x3c, 0x78, 0x78, 0x78, 0x64, 0x5a, 0x50, 0x50, 0x3c, 0xae,
         ];
         let configuration =
             EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::TrebleReducer);

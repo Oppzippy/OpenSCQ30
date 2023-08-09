@@ -1,6 +1,5 @@
-use crate::packets::{
-    checksum::calculate_checksum,
-    structures::{AmbientSoundMode, CustomNoiseCanceling, NoiseCancelingMode, TransparencyMode},
+use crate::packets::structures::{
+    AmbientSoundMode, CustomNoiseCanceling, NoiseCancelingMode, TransparencyMode,
 };
 
 use super::outbound_packet::OutboundPacket;
@@ -14,32 +13,24 @@ pub struct SetSoundModePacket {
 }
 
 impl OutboundPacket for SetSoundModePacket {
-    fn bytes(&self) -> Vec<u8> {
-        let mut bytes = vec![
-            0x08,
-            0xee,
-            0x00,
-            0x00,
-            0x00,
-            0x06,
-            0x81,
-            0x0e,
-            0x00,
+    fn command(&self) -> [u8; 7] {
+        [0x08, 0xee, 0x00, 0x00, 0x00, 0x06, 0x81]
+    }
+
+    fn body(&self) -> Vec<u8> {
+        vec![
             self.ambient_sound_mode.id(),
             self.noise_canceling_mode.id(),
             self.transparency_mode.id(),
             self.custom_noise_canceling.value(),
-        ];
-        bytes.push(calculate_checksum(&bytes));
-
-        bytes
+        ]
     }
 }
 
 #[cfg(test)]
 mod tests {
     use crate::packets::{
-        outbound::{OutboundPacket, SetSoundModePacket},
+        outbound::{OutboundPacketBytes, SetSoundModePacket},
         structures::{
             AmbientSoundMode, CustomNoiseCanceling, NoiseCancelingMode, TransparencyMode,
         },

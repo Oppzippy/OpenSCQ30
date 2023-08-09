@@ -10,14 +10,18 @@ impl RequestStatePacket {
 }
 
 impl OutboundPacket for RequestStatePacket {
-    fn bytes(&self) -> Vec<u8> {
-        vec![0x08, 0xEE, 0x00, 0x00, 0x00, 0x01, 0x01, 0x0A, 0x00, 0x02]
+    fn command(&self) -> [u8; 7] {
+        [0x08, 0xEE, 0x00, 0x00, 0x00, 0x01, 0x01]
+    }
+
+    fn body(&self) -> Vec<u8> {
+        Vec::new()
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::packets::outbound::{OutboundPacket, RequestStatePacket};
+    use crate::packets::outbound::{OutboundPacketBytes, RequestStatePacket};
 
     #[test]
     fn it_matches_an_example_request_state_packet() {
