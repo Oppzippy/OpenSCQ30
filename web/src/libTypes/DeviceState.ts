@@ -109,7 +109,12 @@ const deviceStateSchema = Type.Object({
       }),
     ]),
   ),
-  firmwareVersion: Type.Optional(Type.String()),
+  firmwareVersion: Type.Optional(
+    Type.Object({
+      major: Type.Number(),
+      minor: Type.Number(),
+    }),
+  ),
   serialNumber: Type.Optional(Type.String()),
 });
 export type DeviceState = Static<typeof deviceStateSchema>;
