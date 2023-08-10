@@ -38,8 +38,7 @@ impl StateUpdatePacket {
         self.0
             .serial_number
             .as_ref()
-            .map(|serial_number| &serial_number.0)
-            .cloned()
+            .map(|serial_number| serial_number.0.to_string())
     }
 }
 

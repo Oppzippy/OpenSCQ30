@@ -1,10 +1,18 @@
+use std::sync::Arc;
+
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord, Default, Serialize, Deserialize)]
-pub struct SerialNumber(pub String);
+#[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+pub struct SerialNumber(pub Arc<str>);
 
-impl From<SerialNumber> for String {
-    fn from(value: SerialNumber) -> Self {
-        value.0
+impl Default for SerialNumber {
+    fn default() -> Self {
+        Self("0000000000000000".into())
+    }
+}
+
+impl From<&str> for SerialNumber {
+    fn from(value: &str) -> Self {
+        Self(value.into())
     }
 }
