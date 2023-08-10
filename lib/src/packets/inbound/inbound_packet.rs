@@ -7,10 +7,12 @@ use crate::packets::{
 
 use super::{
     state_update_packet::{take_state_update_packet, StateUpdatePacket},
-    take_ambient_sound_mode_update_packet, take_firmware_version_update_packet,
+    take_ambient_sound_mode_update_packet, take_battery_charging_update_packet,
+    take_battery_level_update_packet, take_firmware_version_update_packet,
     take_set_ambient_sound_mode_ok_packet, take_set_equalizer_ok_packet,
-    take_set_equalizer_with_drc_ok_packet, FirmwareVersionUpdatePacket, SetEqualizerOkPacket,
-    SetEqualizerWithDrcOkPacket, SetSoundModeOkPacket, SoundModeUpdatePacket,
+    take_set_equalizer_with_drc_ok_packet, BatteryChargingUpdatePacket, BatteryLevelUpdatePacket,
+    FirmwareVersionUpdatePacket, SetEqualizerOkPacket, SetEqualizerWithDrcOkPacket,
+    SetSoundModeOkPacket, SoundModeUpdatePacket,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -21,6 +23,8 @@ pub enum InboundPacket {
     SetEqualizerOk(SetEqualizerOkPacket),
     SetEqualizerWithDrcOk(SetEqualizerWithDrcOkPacket),
     FirmwareVersionUpdate(FirmwareVersionUpdatePacket),
+    BatteryLevelUpdate(BatteryLevelUpdatePacket),
+    BatteryChargingUpdate(BatteryChargingUpdatePacket),
 }
 
 impl InboundPacket {
@@ -43,6 +47,12 @@ impl InboundPacket {
             PacketType::StateUpdate => Self::StateUpdate(take_state_update_packet(input)?.1),
             PacketType::FirmwareVersionUpdate => {
                 Self::FirmwareVersionUpdate(take_firmware_version_update_packet(input)?.1)
+            }
+            PacketType::BatteryLevelUpdate => {
+                Self::BatteryLevelUpdate(take_battery_level_update_packet(input)?.1)
+            }
+            PacketType::BatteryChargingUpdate => {
+                Self::BatteryChargingUpdate(take_battery_charging_update_packet(input)?.1)
             }
         })
     }

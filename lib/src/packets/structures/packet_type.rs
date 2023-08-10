@@ -9,4 +9,6 @@ pub enum PacketType {
     StateUpdate,
     FirmwareVersionUpdate,
     SetEqualizerWithDrcOk,
+    BatteryLevelUpdate,
+    BatteryChargingUpdate,
 }

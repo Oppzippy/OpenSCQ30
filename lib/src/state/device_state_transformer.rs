@@ -16,5 +16,7 @@ pub fn inbound_packet_to_state_transformer(
         InboundPacket::SetSoundModeOk(_packet) => None,
         InboundPacket::SetEqualizerOk(_packet) => None,
         InboundPacket::SetEqualizerWithDrcOk(_packet) => None,
+        InboundPacket::BatteryLevelUpdate(packet) => Some(Box::new(packet)),
+        InboundPacket::BatteryChargingUpdate(packet) => Some(Box::new(packet)),
     }
 }
