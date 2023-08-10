@@ -38,13 +38,12 @@ fn service_uuids() -> Vec<String> {
     const_assert!(MIN < MAX); // should not underoverflow
     const_assert!(MAX < 0xFFFF); // should not overflow
 
-    let surrounding_uuids = (MIN..MAX)
+    (MIN..MAX)
         .map(|device_specific_part| {
             let uuid = (device_specific_part << DEVICE_SPECIFIC_PART_SHIFT) | GENERIC_PART;
             Uuid::from_u128(uuid).to_string()
         })
-        .collect::<Vec<_>>();
-    surrounding_uuids
+        .collect::<Vec<_>>()
 }
 
 #[wasm_bindgen]

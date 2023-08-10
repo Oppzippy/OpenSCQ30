@@ -115,8 +115,7 @@ impl Connection for WebBluetoothConnection {
 
         self.read_characteristic
             .set_oncharacteristicvaluechanged(Some(
-                &self
-                    .packet_receive_handler
+                self.packet_receive_handler
                     .borrow()
                     .as_ref()
                     .unwrap()

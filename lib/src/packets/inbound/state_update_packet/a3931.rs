@@ -52,7 +52,7 @@ impl From<A3931StateUpdatePacket> for StateUpdatePacket {
             custom_button_model: Some(packet.custom_button_model),
             firmware_version: None,
             serial_number: None,
-            dynamic_range_compression_min_firmware_version: Some(FirmwareVersion::new(02, 00)),
+            dynamic_range_compression_min_firmware_version: Some(FirmwareVersion::new(2, 00)),
         }
     }
 }

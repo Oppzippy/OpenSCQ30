@@ -55,7 +55,7 @@ where
             tracing::trace!("sender dropped, returning");
             Ok(())
         }
-        Ok(Err(err)) => Err(err.into()),
+        Ok(Err(err)) => Err(err),
     }
 }
 

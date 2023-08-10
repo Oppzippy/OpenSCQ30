@@ -42,17 +42,17 @@ pub fn take_custom_button_model<'a, E: ParseError<&'a [u8]> + ContextError<&'a [
 }
 
 struct TwsPairWithSwitch {
-    pub tws: u8,
-    pub un_tws: u8,
-    pub switch: bool,
+    pub _tws: u8,
+    pub _un_tws: u8,
+    pub _switch: bool,
 }
 
 fn take_tws_pair<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
     input: &'a [u8],
 ) -> ParseResult<TwsPairWithSwitch, E> {
     map(pair(take_bool, le_u8), |(switch, num)| TwsPairWithSwitch {
-        tws: num & 0x0F,
-        un_tws: (num & 0xF0) >> 4,
-        switch,
+        _tws: num & 0x0F,
+        _un_tws: (num & 0xF0) >> 4,
+        _switch: switch,
     })(input)
 }

@@ -50,7 +50,7 @@ where
         }
 
         let current_state_lock = Arc::new(RwLock::new(initial_state));
-        let current_state_lock_async = current_state_lock.to_owned();
+        let current_state_lock_2 = current_state_lock.to_owned();
 
         let (sender, _) = broadcast::channel(1);
 
@@ -59,7 +59,7 @@ where
             while let Some(packet_bytes) = inbound_receiver.recv().await {
                 match InboundPacket::new(&packet_bytes) {
                     Ok(packet) => {
-                        let mut state = current_state_lock_async.write().await;
+                        let mut state = current_state_lock_2.write().await;
                         let new_state = state::transform_state(packet, &state);
                         if new_state != *state {
                             trace!(event = "state_update", old_state = ?state, new_state = ?new_state);
@@ -107,7 +107,7 @@ where
             futures::select! {
                 state = state_future.fuse() => if let Some(state) = state { return Ok(state) },
                 _ = sleep(Duration::from_secs(1)).fuse() =>
-                    warn!( "fetch_initial_state: didn't receive response after 1 second on try #{i}"),
+                    warn!("fetch_initial_state: didn't receive response after 1 second on try #{i}"),
             }
         }
         Err(crate::Error::NoResponse)

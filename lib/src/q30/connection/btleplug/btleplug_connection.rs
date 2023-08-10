@@ -42,8 +42,7 @@ impl BtlePlugConnection {
         let service = peripheral
             .services()
             .into_iter()
-            .filter(|service| is_soundcore_service_uuid(&service.uuid))
-            .next()
+            .find(|service| is_soundcore_service_uuid(&service.uuid))
             .ok_or(crate::Error::ServiceNotFound {
                 uuid: SERVICE_UUID,
                 source: None,
@@ -52,8 +51,7 @@ impl BtlePlugConnection {
         let write_characteristic = service
             .characteristics
             .iter()
-            .filter(|characteristic| characteristic.uuid == WRITE_CHARACTERISTIC_UUID)
-            .next()
+            .find(|characteristic| characteristic.uuid == WRITE_CHARACTERISTIC_UUID)
             .ok_or(crate::Error::CharacteristicNotFound {
                 uuid: WRITE_CHARACTERISTIC_UUID,
                 source: None,
@@ -61,14 +59,13 @@ impl BtlePlugConnection {
         let read_characteristic = service
             .characteristics
             .iter()
-            .filter(|characteristic| characteristic.uuid == READ_CHARACTERISTIC_UUID)
-            .next()
+            .find(|characteristic| characteristic.uuid == READ_CHARACTERISTIC_UUID)
             .ok_or(crate::Error::CharacteristicNotFound {
                 uuid: READ_CHARACTERISTIC_UUID,
                 source: None,
             })?;
 
-        peripheral.subscribe(&read_characteristic).await?;
+        peripheral.subscribe(read_characteristic).await?;
 
         let (connection_status_sender, connection_status_receiver) =
             watch::channel(ConnectionStatus::Connected);

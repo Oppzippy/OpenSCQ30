@@ -1,3 +1,6 @@
+// Properties macro creates an enum for internal use. We don't care that it is caught by this lint.
+#![allow(clippy::enum_variant_names)]
+
 use std::cell::{Cell, OnceCell};
 
 use gtk::{

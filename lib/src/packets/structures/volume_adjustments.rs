@@ -1,5 +1,3 @@
-use std::array;
-
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, Default, Serialize, Deserialize)]
