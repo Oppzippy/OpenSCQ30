@@ -8,4 +8,5 @@ pub enum PacketType {
     SetEqualizerOk,
     StateUpdate,
     FirmwareVersionUpdate,
+    SetEqualizerWithDrcOk,
 }

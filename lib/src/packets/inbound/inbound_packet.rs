@@ -9,7 +9,8 @@ use super::{
     state_update_packet::{take_state_update_packet, StateUpdatePacket},
     take_ambient_sound_mode_update_packet, take_firmware_version_update_packet,
     take_set_ambient_sound_mode_ok_packet, take_set_equalizer_ok_packet,
-    FirmwareVersionUpdatePacket, SetEqualizerOkPacket, SetSoundModeOkPacket, SoundModeUpdatePacket,
+    take_set_equalizer_with_drc_ok_packet, FirmwareVersionUpdatePacket, SetEqualizerOkPacket,
+    SetEqualizerWithDrcOkPacket, SetSoundModeOkPacket, SoundModeUpdatePacket,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -18,6 +19,7 @@ pub enum InboundPacket {
     SoundModeUpdate(SoundModeUpdatePacket),
     SetSoundModeOk(SetSoundModeOkPacket),
     SetEqualizerOk(SetEqualizerOkPacket),
+    SetEqualizerWithDrcOk(SetEqualizerWithDrcOkPacket),
     FirmwareVersionUpdate(FirmwareVersionUpdatePacket),
 }
 
@@ -34,6 +36,9 @@ impl InboundPacket {
             }
             PacketType::SetEqualizerOk => {
                 Self::SetEqualizerOk(take_set_equalizer_ok_packet(input)?.1)
+            }
+            PacketType::SetEqualizerWithDrcOk => {
+                Self::SetEqualizerWithDrcOk(take_set_equalizer_with_drc_ok_packet(input)?.1)
             }
             PacketType::StateUpdate => Self::StateUpdate(take_state_update_packet(input)?.1),
             PacketType::FirmwareVersionUpdate => {

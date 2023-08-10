@@ -15,5 +15,6 @@ pub fn inbound_packet_to_state_transformer(
         InboundPacket::FirmwareVersionUpdate(packet) => Some(Box::new(packet)),
         InboundPacket::SetSoundModeOk(_packet) => None,
         InboundPacket::SetEqualizerOk(_packet) => None,
+        InboundPacket::SetEqualizerWithDrcOk(_packet) => None,
     }
 }
