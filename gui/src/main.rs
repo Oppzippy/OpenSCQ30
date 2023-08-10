@@ -15,9 +15,8 @@ use gtk::{
     prelude::*,
     traits::GtkWindowExt,
 };
-use gtk_openscq30_lib::GtkDeviceRegistry;
 use logging_level::LoggingLevel;
-use openscq30_lib::api::device::DeviceRegistry;
+use openscq30_lib::api::{device::DeviceRegistry, new_soundcore_device_registry};
 use settings::Settings;
 use tracing::Level;
 use widgets::MainWindow;
@@ -28,12 +27,12 @@ use windows::{
     UI::ViewManagement::{UIColorType, UISettings},
 };
 
-use crate::{actions::Action, objects::CustomEqualizerProfileObject};
+use crate::{actions::Action, gtk_futures::GtkFutures, objects::CustomEqualizerProfileObject};
 
 mod actions;
 mod gettext;
 mod gettext_sys;
-mod gtk_openscq30_lib;
+mod gtk_futures;
 mod logging_level;
 #[cfg(test)]
 mod mock;
@@ -171,24 +170,11 @@ where
 }
 
 fn build_ui(application: &adw::Application) {
-    let tokio_runtime = tokio::runtime::Builder::new_multi_thread()
-        .worker_threads(1)
-        .enable_all()
-        .build()
-        .unwrap_or_else(|err| panic!("failed to start tokio runtime: {err}"));
-
-    let registry = tokio_runtime
-        .block_on(openscq30_lib::api::new_soundcore_device_registry())
+    // TODO create registry asynchronously
+    let registry = MainContext::default()
+        .block_on(new_soundcore_device_registry::<GtkFutures>())
         .unwrap_or_else(|err| panic!("failed to initialize device registry: {err}"));
 
-    let gtk_registry = GtkDeviceRegistry::new(registry, tokio_runtime);
-    build_ui_2(application, gtk_registry)
-}
-
-fn build_ui_2(
-    application: &adw::Application,
-    gtk_registry: GtkDeviceRegistry<impl DeviceRegistry + 'static>,
-) {
     #[cfg(target_os = "windows")]
     if let Err(err) = set_ui_theme(application) {
         tracing::warn!("failed to set ui theme: {err:?}");
@@ -213,7 +199,7 @@ fn build_ui_2(
         })
         .unwrap();
 
-    let (state, mut ui_state_receiver) = State::new(gtk_registry);
+    let (state, mut ui_state_receiver) = State::new(registry);
     let state = Rc::new(state);
 
     let main_context = MainContext::default();

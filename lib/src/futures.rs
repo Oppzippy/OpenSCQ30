@@ -1,36 +1,29 @@
 #[cfg(not(target_arch = "wasm32"))]
 mod futures_tokio;
-#[cfg(target_arch = "wasm32")]
+#[cfg(feature = "wasm")]
 mod futures_wasm;
 
-use std::time::Duration;
+#[cfg(not(target_arch = "wasm32"))]
+pub use futures_tokio::*;
+#[cfg(feature = "wasm")]
+pub use futures_wasm::*;
 
+use async_trait::async_trait;
 use futures::Future;
+use std::time::Duration;
 
 pub trait JoinHandle {
     fn abort(&self);
 }
 
-// tokio's spawn_local returns a JoinHandle, but wasm_bindgen_futures does not, so we can't return
-// one here.
-pub fn spawn(future: impl Future + Send + 'static) -> impl JoinHandle {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        futures_tokio::spawn(future)
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        futures_wasm::spawn_local(future)
-    }
-}
+#[async_trait(?Send)]
+pub trait Futures {
+    type JoinHandleType: JoinHandle;
 
-pub fn sleep(duration: Duration) -> impl Future + 'static {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        futures_tokio::sleep(duration)
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        futures_wasm::sleep(duration)
-    }
+    fn spawn<F, R>(future: F) -> Self::JoinHandleType
+    where
+        F: Future<Output = R> + Send + 'static,
+        R: Send + 'static;
+    fn spawn_local(future: impl Future + 'static) -> Self::JoinHandleType;
+    async fn sleep(duration: Duration);
 }

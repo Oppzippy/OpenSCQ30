@@ -8,7 +8,7 @@ use tracing::{trace, warn};
 
 use crate::{
     api::connection::{Connection, ConnectionStatus},
-    futures::{sleep, spawn, JoinHandle},
+    futures::{Futures, JoinHandle},
     packets::{
         outbound::{
             OutboundPacketBytes, RequestFirmwareVersionPacket, SetEqualizerPacket,
@@ -23,19 +23,21 @@ use crate::{
     state::{self, DeviceState},
 };
 
-pub struct Q30Device<ConnectionType>
+pub struct Q30Device<ConnectionType, FuturesType>
 where
     ConnectionType: Connection,
+    FuturesType: Futures,
 {
     connection: Rc<ConnectionType>,
     state: Arc<RwLock<DeviceState>>,
-    join_handle: Box<dyn JoinHandle>,
+    join_handle: FuturesType::JoinHandleType,
     state_update_sender: broadcast::Sender<DeviceState>,
 }
 
-impl<ConnectionType> Q30Device<ConnectionType>
+impl<ConnectionType, FuturesType> Q30Device<ConnectionType, FuturesType>
 where
     ConnectionType: Connection,
+    FuturesType: Futures,
 {
     pub async fn new(connection: Rc<ConnectionType>) -> crate::Result<Self> {
         let mut inbound_receiver = connection.inbound_packets_channel().await?;
@@ -55,7 +57,7 @@ where
         let (sender, _) = broadcast::channel(1);
 
         let sender_copy = sender.to_owned();
-        let join_handle = spawn(async move {
+        let join_handle = FuturesType::spawn(async move {
             while let Some(packet_bytes) = inbound_receiver.recv().await {
                 match InboundPacket::new(&packet_bytes) {
                     Ok(packet) => {
@@ -77,7 +79,7 @@ where
         Ok(Self {
             connection,
             state: current_state_lock,
-            join_handle: Box::new(join_handle),
+            join_handle,
             state_update_sender: sender,
         })
     }
@@ -106,7 +108,7 @@ where
 
             futures::select! {
                 state = state_future.fuse() => if let Some(state) = state { return Ok(state) },
-                _ = sleep(Duration::from_secs(1)).fuse() =>
+                _ = FuturesType::sleep(Duration::from_secs(1)).fuse() =>
                     warn!("fetch_initial_state: didn't receive response after 1 second on try #{i}"),
             }
         }
@@ -115,9 +117,10 @@ where
 }
 
 #[async_trait(?Send)]
-impl<ConnectionType> api::device::Device for Q30Device<ConnectionType>
+impl<ConnectionType, FuturesType> api::device::Device for Q30Device<ConnectionType, FuturesType>
 where
     ConnectionType: Connection,
+    FuturesType: Futures,
 {
     fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState> {
         self.state_update_sender.subscribe()
@@ -246,18 +249,20 @@ where
     }
 }
 
-impl<ConnectionType> Drop for Q30Device<ConnectionType>
+impl<ConnectionType, FuturesType> Drop for Q30Device<ConnectionType, FuturesType>
 where
     ConnectionType: Connection,
+    FuturesType: Futures,
 {
     fn drop(&mut self) {
         self.join_handle.abort();
     }
 }
 
-impl<ConnectionType> std::fmt::Debug for Q30Device<ConnectionType>
+impl<ConnectionType, FuturesType> std::fmt::Debug for Q30Device<ConnectionType, FuturesType>
 where
     ConnectionType: Connection,
+    FuturesType: Futures,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("SoundcoreDevice").finish()
@@ -274,6 +279,7 @@ mod tests {
     use super::Q30Device;
     use crate::{
         api::device::Device,
+        futures::TokioFutures,
         packets::structures::{
             AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
             SoundModes, VolumeAdjustments,
@@ -310,7 +316,7 @@ mod tests {
         tokio::spawn(async move {
             sender.send(example_state_update_packet()).await.unwrap();
         });
-        let device = Q30Device::new(connection).await.unwrap();
+        let device = Q30Device::<_, TokioFutures>::new(connection).await.unwrap();
         let state = device.state().await;
         let sound_modes = state.sound_modes.unwrap();
         assert_eq!(AmbientSoundMode::Normal, sound_modes.ambient_sound_mode);
@@ -336,7 +342,9 @@ mod tests {
             sender.send(example_state_update_packet()).await.unwrap();
         });
         let connection_clone = connection.clone();
-        Q30Device::new(connection_clone).await.unwrap();
+        Q30Device::<_, TokioFutures>::new(connection_clone)
+            .await
+            .unwrap();
         assert_eq!(0, connection.write_return_queue_length().await);
     }
 
@@ -349,7 +357,7 @@ mod tests {
         }
 
         let connection_clone = connection.clone();
-        let result = Q30Device::new(connection_clone).await;
+        let result = Q30Device::<_, TokioFutures>::new(connection_clone).await;
         assert_eq!(true, result.is_err());
     }
 
@@ -364,7 +372,7 @@ mod tests {
                 .await
                 .unwrap();
         });
-        let device = Q30Device::new(connection).await.unwrap();
+        let device = Q30Device::<_, TokioFutures>::new(connection).await.unwrap();
         let state = device.state().await;
         let sound_modes = state.sound_modes.unwrap();
         assert_eq!(AmbientSoundMode::Normal, sound_modes.ambient_sound_mode);
@@ -407,7 +415,9 @@ mod tests {
         connection.push_write_return(Ok(())).await;
         sender.send(example_state_update_packet()).await.unwrap();
 
-        let device = Q30Device::new(connection.to_owned()).await.unwrap();
+        let device = Q30Device::<_, TokioFutures>::new(connection.to_owned())
+            .await
+            .unwrap();
         let sound_modes = SoundModes {
             custom_noise_canceling: CustomNoiseCanceling::new(10),
             ..Default::default()
@@ -425,7 +435,9 @@ mod tests {
         connection.push_write_return(Ok(())).await;
         sender.send(example_state_update_packet()).await.unwrap();
 
-        let device = Q30Device::new(connection.to_owned()).await.unwrap();
+        let device = Q30Device::<_, TokioFutures>::new(connection.to_owned())
+            .await
+            .unwrap();
         let equalizer_configuration =
             EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
                 0, 10, 20, 30, 40, 50, 60, 70,

@@ -36,58 +36,51 @@ pub struct WindowsConnection {
 impl WindowsConnection {
     #[instrument()]
     pub async fn new(mac_address: MacAddr6) -> crate::Result<Option<Self>> {
-        tokio::task::spawn_blocking(move || {
-            let device =
-                BluetoothLEDevice::FromBluetoothAddressAsync(mac_address.as_windows_u64())?
-                    .get()
-                    .map_err(|err| {
-                        // If there is no error but the device is not found, an error with code 0 is returned
-                        if windows::core::HRESULT::is_ok(err.code()) {
-                            crate::Error::DeviceNotFound {
-                                source: Box::new(err),
-                            }
-                        } else {
-                            err.into()
-                        }
-                    })?;
-            let service = Self::service(&device)?;
-            let read_characteristic =
-                Self::characteristic(&service, &device_utils::READ_CHARACTERISTIC_UUID)?;
-            let write_characteristic =
-                Self::characteristic(&service, &device_utils::WRITE_CHARACTERISTIC_UUID)?;
-
-            let (sender, receiver) = watch::channel(ConnectionStatus::Connected);
-            let connection_status_changed_token = device.ConnectionStatusChanged(
-                &TypedEventHandler::new(move |device: &Option<BluetoothLEDevice>, _| {
-                    if let Some(device) = device {
-                        let is_connected =
-                            device.ConnectionStatus()? == BluetoothConnectionStatus::Connected;
-                        sender.send_replace(if is_connected {
-                            ConnectionStatus::Connected
-                        } else {
-                            ConnectionStatus::Disconnected
-                        });
+        let device = BluetoothLEDevice::FromBluetoothAddressAsync(mac_address.as_windows_u64())?
+            .await
+            .map_err(|err| {
+                // If there is no error but the device is not found, an error with code 0 is returned
+                if windows::core::HRESULT::is_ok(err.code()) {
+                    crate::Error::DeviceNotFound {
+                        source: Box::new(err),
                     }
-                    Ok(())
-                }),
-            )?;
+                } else {
+                    err.into()
+                }
+            })?;
+        let service = Self::service(&device).await?;
+        let read_characteristic =
+            Self::characteristic(&service, &device_utils::READ_CHARACTERISTIC_UUID).await?;
+        let write_characteristic =
+            Self::characteristic(&service, &device_utils::WRITE_CHARACTERISTIC_UUID).await?;
 
-            Ok(Some(Self {
-                device,
-                read_characteristic,
-                write_characteristic,
-                value_changed_token: Default::default(),
-                connection_status_receiver: receiver,
-                connection_status_changed_token,
-            }))
-        })
-        .await
-        .map_err(|err| crate::Error::Other {
-            source: Box::new(err),
-        })?
+        let (sender, receiver) = watch::channel(ConnectionStatus::Connected);
+        let connection_status_changed_token = device.ConnectionStatusChanged(
+            &TypedEventHandler::new(move |device: &Option<BluetoothLEDevice>, _| {
+                if let Some(device) = device {
+                    let is_connected =
+                        device.ConnectionStatus()? == BluetoothConnectionStatus::Connected;
+                    sender.send_replace(if is_connected {
+                        ConnectionStatus::Connected
+                    } else {
+                        ConnectionStatus::Disconnected
+                    });
+                }
+                Ok(())
+            }),
+        )?;
+
+        Ok(Some(Self {
+            device,
+            read_characteristic,
+            write_characteristic,
+            value_changed_token: Default::default(),
+            connection_status_receiver: receiver,
+            connection_status_changed_token,
+        }))
     }
 
-    fn write_to_characteristic(
+    async fn write_to_characteristic(
         characteristic: &GattCharacteristic,
         data: &[u8],
         write_option: GattWriteOption,
@@ -98,18 +91,18 @@ impl WindowsConnection {
 
         characteristic
             .WriteValueWithOptionAsync(&buffer, write_option)?
-            .get()?;
+            .await?;
         Ok(())
     }
 
     #[instrument(level = "trace", skip(service))]
-    fn characteristic(
+    async fn characteristic(
         service: &GattDeviceService,
         characteristic_uuid: &Uuid,
     ) -> crate::Result<GattCharacteristic> {
         let characteristics = service
             .GetCharacteristicsAsync()?
-            .get()?
+            .await?
             .Characteristics()?;
 
         let characteristic_uuid_u128 = characteristic_uuid.as_u128();
@@ -129,8 +122,8 @@ impl WindowsConnection {
     }
 
     #[instrument(level = "trace", skip(device))]
-    fn service(device: &BluetoothLEDevice) -> crate::Result<GattDeviceService> {
-        let services = device.GetGattServicesAsync()?.get()?.Services()?;
+    async fn service(device: &BluetoothLEDevice) -> crate::Result<GattDeviceService> {
+        let services = device.GetGattServicesAsync()?.await?.Services()?;
 
         let service = services.into_iter().find(|service| match service.Uuid() {
             Ok(uuid) => is_soundcore_service_uuid(&Uuid::from_u128(uuid.to_u128())),
@@ -171,34 +164,16 @@ impl Connection for WindowsConnection {
     async fn write_with_response(&self, data: &[u8]) -> crate::Result<()> {
         let characteristic = self.write_characteristic.to_owned();
         let data = data.to_owned();
-        tokio::task::spawn_blocking(move || {
-            Self::write_to_characteristic(
-                &characteristic,
-                &data,
-                GattWriteOption::WriteWithResponse,
-            )
-        })
-        .await
-        .map_err(|err| crate::Error::Other {
-            source: Box::new(err),
-        })?
+        Self::write_to_characteristic(&characteristic, &data, GattWriteOption::WriteWithResponse)
+            .await
     }
 
     #[instrument(level = "trace", skip(self))]
     async fn write_without_response(&self, data: &[u8]) -> crate::Result<()> {
         let characteristic = self.write_characteristic.to_owned();
         let data = data.to_owned();
-        tokio::task::spawn_blocking(move || {
-            Self::write_to_characteristic(
-                &characteristic,
-                &data,
-                GattWriteOption::WriteWithResponse,
-            )
-        })
-        .await
-        .map_err(|err| crate::Error::Other {
-            source: Box::new(err),
-        })?
+        Self::write_to_characteristic(&characteristic, &data, GattWriteOption::WriteWithResponse)
+            .await
     }
 
     #[instrument(level = "trace", skip(self))]
@@ -224,6 +199,8 @@ impl Connection for WindowsConnection {
                             let reader = DataReader::FromBuffer(&value)?;
                             let mut buffer = vec![0_u8; reader.UnconsumedBufferLength()? as usize];
                             reader.ReadBytes(&mut buffer)?;
+
+                            tracing::trace!("received packet {buffer:?}");
 
                             match sender.try_send(buffer) {
                                 Ok(()) => {}

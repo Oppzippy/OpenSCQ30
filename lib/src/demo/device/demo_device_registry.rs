@@ -1,27 +1,43 @@
-use std::rc::Rc;
+use std::{marker::PhantomData, rc::Rc};
 
 use async_trait::async_trait;
 use macaddr::MacAddr6;
 
-use crate::api::device::{DeviceRegistry, GenericDeviceDescriptor};
+use crate::{
+    api::device::{DeviceRegistry, GenericDeviceDescriptor},
+    futures::Futures,
+};
 
 use super::demo_device::DemoDevice;
 
 #[derive(Default)]
-pub struct DemoDeviceRegistry {}
+pub struct DemoDeviceRegistry<FuturesType>
+where
+    FuturesType: Futures,
+{
+    futures: PhantomData<FuturesType>,
+}
 
-impl DemoDeviceRegistry {
+impl<FuturesType> DemoDeviceRegistry<FuturesType>
+where
+    FuturesType: Futures,
+{
     const DEVICE_NAME: &str = "Demo Q30";
     const DEVICE_MAC_ADDRESS: MacAddr6 = MacAddr6::nil();
 
     pub fn new() -> Self {
-        Self {}
+        Self {
+            futures: PhantomData::default(),
+        }
     }
 }
 
 #[async_trait(?Send)]
-impl DeviceRegistry for DemoDeviceRegistry {
-    type DeviceType = DemoDevice;
+impl<FuturesType> DeviceRegistry for DemoDeviceRegistry<FuturesType>
+where
+    FuturesType: Futures,
+{
+    type DeviceType = DemoDevice<FuturesType>;
     type DescriptorType = GenericDeviceDescriptor;
 
     async fn device_descriptors(&self) -> crate::Result<Vec<Self::DescriptorType>> {

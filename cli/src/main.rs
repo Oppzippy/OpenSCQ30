@@ -2,7 +2,10 @@ use std::{error::Error, rc::Rc};
 
 use clap::Parser;
 use cli::{Cli, Command};
-use openscq30_lib::api::device::{DeviceDescriptor, DeviceRegistry};
+use openscq30_lib::{
+    api::device::{DeviceDescriptor, DeviceRegistry},
+    futures::TokioFutures,
+};
 
 mod cli;
 mod get;
@@ -21,7 +24,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .pretty()
         .init();
 
-    let registry = openscq30_lib::api::new_soundcore_device_registry()
+    let registry = openscq30_lib::api::new_soundcore_device_registry::<TokioFutures>()
         .await
         .unwrap_or_else(|err| panic!("failed to initialize device registry: {err}"));
     do_cli_command(args, registry).await

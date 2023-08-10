@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{marker::PhantomData, time::Duration};
 
 use async_trait::async_trait;
 use macaddr::MacAddr6;
@@ -6,7 +6,7 @@ use tokio::sync::{broadcast, watch, Mutex};
 
 use crate::{
     api::{connection::ConnectionStatus, device::Device},
-    futures::sleep,
+    futures::Futures,
     packets::structures::{
         AgeRange, AmbientSoundMode, BasicHearId, BatteryLevel, DeviceFeatureFlags,
         EqualizerConfiguration, FirmwareVersion, IsBatteryCharging, NoiseCancelingMode,
@@ -15,17 +15,21 @@ use crate::{
     state::DeviceState,
 };
 
-pub struct DemoDevice {
+pub struct DemoDevice<FuturesType> {
     name: String,
     mac_address: MacAddr6,
     state: Mutex<DeviceState>,
     state_sender: broadcast::Sender<DeviceState>,
     connection_status_sender: watch::Sender<ConnectionStatus>,
+    futures: PhantomData<FuturesType>,
 }
 
-impl DemoDevice {
+impl<FuturesType> DemoDevice<FuturesType>
+where
+    FuturesType: Futures,
+{
     pub async fn new(name: impl Into<String>, mac_address: MacAddr6) -> Self {
-        sleep(Duration::from_millis(500)).await; // it takes some time to connect
+        FuturesType::sleep(Duration::from_millis(500)).await; // it takes some time to connect
         let (state_sender, _) = broadcast::channel(50);
         let (connection_status_sender, _) = watch::channel(ConnectionStatus::Connected);
         Self {
@@ -33,6 +37,7 @@ impl DemoDevice {
             mac_address,
             state_sender,
             connection_status_sender,
+            futures: PhantomData::default(),
             state: Mutex::new(DeviceState {
                 feature_flags: DeviceFeatureFlags::all(),
                 battery: SingleBattery {
@@ -69,7 +74,10 @@ impl DemoDevice {
 }
 
 #[async_trait(?Send)]
-impl Device for DemoDevice {
+impl<FuturesType> Device for DemoDevice<FuturesType>
+where
+    FuturesType: Futures,
+{
     fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState> {
         self.state_sender.subscribe()
     }
@@ -114,7 +122,10 @@ impl Device for DemoDevice {
     }
 }
 
-impl core::fmt::Debug for DemoDevice {
+impl<FuturesType> core::fmt::Debug for DemoDevice<FuturesType>
+where
+    FuturesType: Futures,
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("DemoDevice")
             .field("name", &self.name)

@@ -1,4 +1,7 @@
-use std::rc::{Rc, Weak};
+use std::{
+    marker::PhantomData,
+    rc::{Rc, Weak},
+};
 
 use async_trait::async_trait;
 use macaddr::MacAddr6;
@@ -11,33 +14,40 @@ use crate::{
         device::{DeviceRegistry, GenericDeviceDescriptor},
     },
     device_utils,
+    futures::Futures,
 };
 
 use super::q30_device::Q30Device;
 
-pub struct Q30DeviceRegistry<RegistryType>
+pub struct Q30DeviceRegistry<RegistryType, FuturesType>
 where
     RegistryType: ConnectionRegistry,
+    FuturesType: Futures,
 {
     conneciton_registry: RegistryType,
-    devices: Mutex<WeakValueHashMap<MacAddr6, Weak<Q30Device<RegistryType::ConnectionType>>>>,
+    devices: Mutex<
+        WeakValueHashMap<MacAddr6, Weak<Q30Device<RegistryType::ConnectionType, FuturesType>>>,
+    >,
+    futures: PhantomData<FuturesType>,
 }
 
-impl<RegistryType> Q30DeviceRegistry<RegistryType>
+impl<RegistryType, FuturesType> Q30DeviceRegistry<RegistryType, FuturesType>
 where
     RegistryType: ConnectionRegistry,
+    FuturesType: Futures,
 {
     pub async fn new(connection_registry: RegistryType) -> crate::Result<Self> {
         Ok(Self {
             conneciton_registry: connection_registry,
             devices: Mutex::new(WeakValueHashMap::new()),
+            futures: PhantomData::default(),
         })
     }
 
     async fn new_device(
         &self,
         mac_address: MacAddr6,
-    ) -> crate::Result<Option<Q30Device<RegistryType::ConnectionType>>> {
+    ) -> crate::Result<Option<Q30Device<RegistryType::ConnectionType, FuturesType>>> {
         let connection = self.conneciton_registry.connection(mac_address).await?;
 
         if let Some(connection) = connection {
@@ -49,11 +59,12 @@ where
 }
 
 #[async_trait(?Send)]
-impl<RegistryType> DeviceRegistry for Q30DeviceRegistry<RegistryType>
+impl<RegistryType, FuturesType> DeviceRegistry for Q30DeviceRegistry<RegistryType, FuturesType>
 where
     RegistryType: ConnectionRegistry,
+    FuturesType: Futures,
 {
-    type DeviceType = Q30Device<RegistryType::ConnectionType>;
+    type DeviceType = Q30Device<RegistryType::ConnectionType, FuturesType>;
     type DescriptorType = GenericDeviceDescriptor;
 
     async fn device_descriptors(&self) -> crate::Result<Vec<Self::DescriptorType>> {
@@ -100,6 +111,7 @@ mod tests {
             connection::{ConnectionDescriptor, GenericConnectionDescriptor},
             device::{Device, DeviceDescriptor, DeviceRegistry},
         },
+        futures::TokioFutures,
         stub::connection::{StubConnection, StubConnectionRegistry},
     };
 
@@ -115,7 +127,9 @@ mod tests {
         let device = Rc::new(StubConnection::new());
         let devices = HashMap::from([(descriptor, device)]);
         let connection_registry = StubConnectionRegistry::new(devices.to_owned());
-        let device_registry = Q30DeviceRegistry::new(connection_registry).await.unwrap();
+        let device_registry = Q30DeviceRegistry::<_, TokioFutures>::new(connection_registry)
+            .await
+            .unwrap();
 
         let descriptors = device_registry.device_descriptors().await.unwrap();
         let descriptor_values = descriptors
@@ -163,7 +177,9 @@ mod tests {
 
         let devices = HashMap::from([(descriptor, device)]);
         let connection_registry = StubConnectionRegistry::new(devices.to_owned());
-        let device_registry = Q30DeviceRegistry::new(connection_registry).await.unwrap();
+        let device_registry = Q30DeviceRegistry::<_, TokioFutures>::new(connection_registry)
+            .await
+            .unwrap();
 
         let device = device_registry
             .device(MacAddr6::new(0x00, 0x11, 0x22, 0x33, 0x44, 0x55))
@@ -187,7 +203,9 @@ mod tests {
 
         let devices = HashMap::from([(descriptor, device)]);
         let connection_registry = StubConnectionRegistry::new(devices.to_owned());
-        let device_registry = Q30DeviceRegistry::new(connection_registry).await.unwrap();
+        let device_registry = Q30DeviceRegistry::<_, TokioFutures>::new(connection_registry)
+            .await
+            .unwrap();
 
         let maybe_device = device_registry
             .device(MacAddr6::new(0x00, 0x00, 0x22, 0x33, 0x44, 0x55))

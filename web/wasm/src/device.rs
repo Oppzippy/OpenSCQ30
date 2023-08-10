@@ -4,6 +4,7 @@ use js_sys::Function;
 use macaddr::MacAddr6;
 use openscq30_lib::{
     demo::device::DemoDevice,
+    futures::WasmFutures,
     packets::structures::{EqualizerConfiguration, SoundModes},
     q30::device::Q30Device,
 };
@@ -22,7 +23,7 @@ impl Device {
     #[wasm_bindgen]
     pub async fn new(device: BluetoothDevice) -> Result<Device, JsValue> {
         let connection = WebBluetoothConnection::new(device).await?;
-        let device = Q30Device::new(Rc::new(connection))
+        let device = Q30Device::<_, WasmFutures>::new(Rc::new(connection))
             .await
             .map_err(|err| format!("{err:?}"))?;
         Ok(Self {
@@ -32,7 +33,7 @@ impl Device {
 
     #[wasm_bindgen(js_name = "newDemo")]
     pub async fn new_demo() -> Device {
-        let inner_device = DemoDevice::new("Demo Device", MacAddr6::default()).await;
+        let inner_device = DemoDevice::<WasmFutures>::new("Demo Device", MacAddr6::default()).await;
         Self {
             inner: Box::new(inner_device),
         }
