@@ -109,7 +109,13 @@ const deviceStateSchema = Type.Object({
       }),
     ]),
   ),
-  firmwareVersion: Type.Optional(
+  leftFirmwareVersion: Type.Optional(
+    Type.Object({
+      major: Type.Number(),
+      minor: Type.Number(),
+    }),
+  ),
+  rightFirmwareVersion: Type.Optional(
     Type.Object({
       major: Type.Number(),
       minor: Type.Number(),

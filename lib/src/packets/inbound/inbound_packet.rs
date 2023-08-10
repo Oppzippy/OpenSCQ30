@@ -7,9 +7,9 @@ use crate::packets::{
 
 use super::{
     state_update_packet::{take_state_update_packet, StateUpdatePacket},
-    take_ambient_sound_mode_update_packet, take_set_ambient_sound_mode_ok_packet,
-    take_set_equalizer_ok_packet, SetEqualizerOkPacket, SetSoundModeOkPacket,
-    SoundModeUpdatePacket,
+    take_ambient_sound_mode_update_packet, take_firmware_version_update_packet,
+    take_set_ambient_sound_mode_ok_packet, take_set_equalizer_ok_packet,
+    FirmwareVersionUpdatePacket, SetEqualizerOkPacket, SetSoundModeOkPacket, SoundModeUpdatePacket,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -18,6 +18,7 @@ pub enum InboundPacket {
     SoundModeUpdate(SoundModeUpdatePacket),
     SetSoundModeOk(SetSoundModeOkPacket),
     SetEqualizerOk(SetEqualizerOkPacket),
+    FirmwareVersionUpdate(FirmwareVersionUpdatePacket),
 }
 
 impl InboundPacket {
@@ -35,6 +36,9 @@ impl InboundPacket {
                 Self::SetEqualizerOk(take_set_equalizer_ok_packet(input)?.1)
             }
             PacketType::StateUpdate => Self::StateUpdate(take_state_update_packet(input)?.1),
+            PacketType::FirmwareVersionUpdate => {
+                Self::FirmwareVersionUpdate(take_firmware_version_update_packet(input)?.1)
+            }
         })
     }
 }

@@ -18,7 +18,8 @@ pub struct DeviceState {
     pub age_range: Option<AgeRange>,
     pub custom_hear_id: Option<HearId>,
     pub custom_button_model: Option<CustomButtonModel>,
-    pub firmware_version: Option<FirmwareVersion>,
+    pub left_firmware_version: Option<FirmwareVersion>,
+    pub right_firmware_version: Option<FirmwareVersion>,
     pub serial_number: Option<SerialNumber>,
     pub dynamic_range_compression_min_firmware_version: Option<FirmwareVersion>,
 }
@@ -33,7 +34,8 @@ impl From<StateUpdatePacket> for DeviceState {
             age_range: packet.age_range,
             custom_hear_id: packet.custom_hear_id,
             custom_button_model: packet.custom_button_model,
-            firmware_version: packet.firmware_version,
+            left_firmware_version: packet.firmware_version,
+            right_firmware_version: None,
             serial_number: packet.serial_number.clone(),
             dynamic_range_compression_min_firmware_version: packet
                 .dynamic_range_compression_min_firmware_version,
@@ -45,11 +47,28 @@ impl DeviceState {
     // need drc:                     A3951, A3930, A3931, A3931XR, A3935, A3935W,
     // separate left/right firmware: A3951, A3930, A3931, A3931XR, A3935, A3935W,
     pub fn supports_dynamic_range_compression(&self) -> bool {
-        self.feature_flags
+        if self
+            .feature_flags
             .contains(DeviceFeatureFlags::DYNAMIC_RANGE_COMPRESSION)
-            && self.firmware_version.unwrap_or_default()
-                >= self
-                    .dynamic_range_compression_min_firmware_version
-                    .unwrap_or_default()
+        {
+            match (self.left_firmware_version, self.right_firmware_version) {
+                (Some(left), Some(right)) => {
+                    self.does_firmware_version_support_drc(left)
+                        && self.does_firmware_version_support_drc(right)
+                }
+                (Some(left), None) => self.does_firmware_version_support_drc(left),
+                (None, Some(_)) => unreachable!("right firmware version is set but not left"),
+                (None, None) => false,
+            }
+        } else {
+            false
+        }
+    }
+
+    fn does_firmware_version_support_drc(&self, firmware_version: FirmwareVersion) -> bool {
+        firmware_version
+            >= self
+                .dynamic_range_compression_min_firmware_version
+                .unwrap_or_default()
     }
 }

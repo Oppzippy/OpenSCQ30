@@ -12,6 +12,7 @@ pub fn inbound_packet_to_state_transformer(
     match value {
         InboundPacket::StateUpdate(packet) => Some(Box::new(packet)),
         InboundPacket::SoundModeUpdate(packet) => Some(Box::new(packet)),
+        InboundPacket::FirmwareVersionUpdate(packet) => Some(Box::new(packet)),
         InboundPacket::SetSoundModeOk(_packet) => None,
         InboundPacket::SetEqualizerOk(_packet) => None,
     }

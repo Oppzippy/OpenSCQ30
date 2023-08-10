@@ -7,4 +7,5 @@ pub enum PacketType {
     SetSoundModeOk,
     SetEqualizerOk,
     StateUpdate,
+    FirmwareVersionUpdate,
 }

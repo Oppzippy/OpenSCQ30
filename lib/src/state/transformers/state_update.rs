@@ -12,11 +12,12 @@ impl DeviceStateTransformer for StateUpdatePacket {
             age_range: self.age_range.or(state.age_range),
             custom_button_model: self.custom_button_model.or(state.custom_button_model),
             custom_hear_id: self.custom_hear_id.or(state.custom_hear_id),
-            firmware_version: self
+            left_firmware_version: self
                 .firmware_version
                 .as_ref()
-                .or(state.firmware_version.as_ref())
+                .or(state.left_firmware_version.as_ref())
                 .cloned(),
+            right_firmware_version: state.right_firmware_version,
             serial_number: self
                 .serial_number
                 .as_ref()
@@ -25,7 +26,6 @@ impl DeviceStateTransformer for StateUpdatePacket {
             sound_modes: self.sound_modes.or(state.sound_modes),
             dynamic_range_compression_min_firmware_version: state
                 .dynamic_range_compression_min_firmware_version,
-            // ..state.clone()
         }
     }
 }

@@ -11,7 +11,8 @@ use crate::{
     futures::{sleep, spawn, JoinHandle},
     packets::{
         outbound::{
-            OutboundPacketBytes, SetEqualizerPacket, SetEqualizerWithDrcPacket, SetSoundModePacket,
+            OutboundPacketBytes, RequestFirmwareVersionPacket, SetEqualizerPacket,
+            SetEqualizerWithDrcPacket, SetSoundModePacket,
         },
         structures::{AmbientSoundMode, DeviceFeatureFlags, EqualizerConfiguration, SoundModes},
     },
@@ -39,6 +40,14 @@ where
     pub async fn new(connection: Rc<ConnectionType>) -> crate::Result<Self> {
         let mut inbound_receiver = connection.inbound_packets_channel().await?;
         let initial_state = Self::fetch_initial_state(&connection, &mut inbound_receiver).await?;
+
+        // TODO consider making this a part of fetch_initial_state
+        // For devices that don't include the firmware version in their state update packet, we need to request it
+        if initial_state.left_firmware_version.is_none() {
+            connection
+                .write_with_response(&RequestFirmwareVersionPacket::new().bytes())
+                .await?;
+        }
 
         let current_state_lock = Arc::new(RwLock::new(initial_state));
         let current_state_lock_async = current_state_lock.to_owned();
