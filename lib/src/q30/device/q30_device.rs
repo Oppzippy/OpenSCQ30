@@ -59,17 +59,13 @@ where
             while let Some(packet_bytes) = inbound_receiver.recv().await {
                 match InboundPacket::new(&packet_bytes) {
                     Ok(packet) => {
-                        if let Some(transformer) =
-                            state::inbound_packet_to_state_transformer(packet)
-                        {
-                            let mut state = current_state_lock_async.write().await;
-                            let new_state = transformer.transform(&state);
-                            if new_state != *state {
-                                trace!(event = "state_update", old_state = ?state, new_state = ?new_state);
-                                *state = new_state.clone();
-                                if let Err(err) = sender_copy.send(new_state) {
-                                    trace!("failed to broadcast state change: {err}");
-                                }
+                        let mut state = current_state_lock_async.write().await;
+                        let new_state = state::transform_state(packet, &state);
+                        if new_state != *state {
+                            trace!(event = "state_update", old_state = ?state, new_state = ?new_state);
+                            *state = new_state.clone();
+                            if let Err(err) = sender_copy.send(new_state) {
+                                trace!("failed to broadcast state change: {err}");
                             }
                         }
                     }
