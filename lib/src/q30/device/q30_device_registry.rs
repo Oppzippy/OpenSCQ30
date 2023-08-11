@@ -101,7 +101,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::HashMap, rc::Rc};
+    use std::{collections::HashMap, sync::Arc};
 
     use macaddr::MacAddr6;
     use tokio::sync::mpsc;
@@ -124,7 +124,7 @@ mod tests {
             // Must start with soundcore prefix
             MacAddr6::new(0xAC, 0x12, 0x2F, 0x01, 0x02, 0x03),
         );
-        let device = Rc::new(StubConnection::new());
+        let device = Arc::new(StubConnection::new());
         let devices = HashMap::from([(descriptor, device)]);
         let connection_registry = StubConnectionRegistry::new(devices.to_owned());
         let device_registry = Q30DeviceRegistry::<_, TokioFutures>::new(connection_registry)
@@ -152,7 +152,7 @@ mod tests {
             "Stub Device",
             MacAddr6::new(0x00, 0x11, 0x22, 0x33, 0x44, 0x55),
         );
-        let device = Rc::new(StubConnection::new());
+        let device = Arc::new(StubConnection::new());
         let (sender, receiver) = mpsc::channel(1);
         sender
             .send(vec![
@@ -199,7 +199,7 @@ mod tests {
             "Stub Device",
             MacAddr6::new(0x00, 0x11, 0x22, 0x33, 0x44, 0x55),
         );
-        let device = Rc::new(StubConnection::new());
+        let device = Arc::new(StubConnection::new());
 
         let devices = HashMap::from([(descriptor, device)]);
         let connection_registry = StubConnectionRegistry::new(devices.to_owned());

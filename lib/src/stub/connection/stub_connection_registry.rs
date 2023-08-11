@@ -1,6 +1,6 @@
 use std::{
     collections::{HashMap, HashSet},
-    rc::Rc,
+    sync::Arc,
 };
 
 use async_trait::async_trait;
@@ -15,14 +15,14 @@ use super::StubConnection;
 #[derive(Debug)]
 pub struct StubConnectionRegistry {
     connections:
-        HashMap<GenericConnectionDescriptor, Rc<<Self as ConnectionRegistry>::ConnectionType>>,
+        HashMap<GenericConnectionDescriptor, Arc<<Self as ConnectionRegistry>::ConnectionType>>,
 }
 
 impl StubConnectionRegistry {
     pub fn new(
         connections: HashMap<
             GenericConnectionDescriptor,
-            Rc<<Self as ConnectionRegistry>::ConnectionType>,
+            Arc<<Self as ConnectionRegistry>::ConnectionType>,
         >,
     ) -> Self {
         Self { connections }
@@ -41,7 +41,7 @@ impl ConnectionRegistry for StubConnectionRegistry {
     async fn connection(
         &self,
         mac_address: MacAddr6,
-    ) -> crate::Result<Option<Rc<Self::ConnectionType>>> {
+    ) -> crate::Result<Option<Arc<Self::ConnectionType>>> {
         Ok(self
             .connections
             .iter()

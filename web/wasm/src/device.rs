@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use js_sys::Function;
 use macaddr::MacAddr6;
@@ -23,7 +23,7 @@ impl Device {
     #[wasm_bindgen]
     pub async fn new(device: BluetoothDevice) -> Result<Device, JsValue> {
         let connection = WebBluetoothConnection::new(device).await?;
-        let device = Q30Device::<_, WasmFutures>::new(Rc::new(connection))
+        let device = Q30Device::<_, WasmFutures>::new(Arc::new(connection))
             .await
             .map_err(|err| format!("{err:?}"))?;
         Ok(Self {

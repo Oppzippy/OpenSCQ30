@@ -9,6 +9,18 @@ pub use btleplug_connection_registry::*;
 pub use btleplug_error::*;
 
 pub(crate) async fn new_connection_registry() -> crate::Result<BtlePlugConnectionRegistry> {
-    let manager = Manager::new().await?;
-    Ok(BtlePlugConnectionRegistry::new(manager))
+    let runtime = tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .worker_threads(1)
+        .build()
+        .unwrap();
+    runtime
+        .handle()
+        .to_owned()
+        .spawn(async move {
+            let manager = Manager::new().await?;
+            Ok(BtlePlugConnectionRegistry::new(manager, runtime))
+        })
+        .await
+        .unwrap()
 }

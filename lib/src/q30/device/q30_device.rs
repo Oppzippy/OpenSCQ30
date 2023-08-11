@@ -1,4 +1,4 @@
-use std::{rc::Rc, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 
 use async_trait::async_trait;
 use futures::FutureExt;
@@ -28,7 +28,7 @@ where
     ConnectionType: Connection,
     FuturesType: Futures,
 {
-    connection: Rc<ConnectionType>,
+    connection: Arc<ConnectionType>,
     state: Arc<RwLock<DeviceState>>,
     join_handle: FuturesType::JoinHandleType,
     state_update_sender: broadcast::Sender<DeviceState>,
@@ -39,7 +39,7 @@ where
     ConnectionType: Connection,
     FuturesType: Futures,
 {
-    pub async fn new(connection: Rc<ConnectionType>) -> crate::Result<Self> {
+    pub async fn new(connection: Arc<ConnectionType>) -> crate::Result<Self> {
         let mut inbound_receiver = connection.inbound_packets_channel().await?;
         let initial_state = Self::fetch_initial_state(&connection, &mut inbound_receiver).await?;
 
@@ -271,7 +271,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::{rc::Rc, time::Duration};
+    use std::{sync::Arc, time::Duration};
 
     use macaddr::MacAddr6;
     use tokio::sync::mpsc;
@@ -297,8 +297,8 @@ mod tests {
         ]
     }
 
-    async fn create_test_connection() -> (Rc<StubConnection>, mpsc::Sender<Vec<u8>>) {
-        let connection = Rc::new(StubConnection::new());
+    async fn create_test_connection() -> (Arc<StubConnection>, mpsc::Sender<Vec<u8>>) {
+        let connection = Arc::new(StubConnection::new());
         connection
             .set_name_return(Ok("Soundcore Q30".to_string()))
             .await;

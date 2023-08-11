@@ -1,6 +1,7 @@
 pub mod connection;
 pub mod device;
 
+#[cfg(any(feature = "bluetooth", feature = "demo"))]
 use crate::futures::Futures;
 
 #[cfg(any(feature = "bluetooth", feature = "demo"))]
