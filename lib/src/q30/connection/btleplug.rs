@@ -7,9 +7,10 @@ use btleplug::platform::Manager;
 pub use btleplug_connection::*;
 pub use btleplug_connection_registry::*;
 pub use btleplug_error::*;
+use tokio_rt_multi_thread::new_multi_thread;
 
 pub(crate) async fn new_connection_registry() -> crate::Result<BtlePlugConnectionRegistry> {
-    let runtime = tokio::runtime::Builder::new_multi_thread()
+    let runtime = new_multi_thread()
         .enable_all()
         .worker_threads(1)
         .build()

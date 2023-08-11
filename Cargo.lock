@@ -1490,6 +1490,7 @@ dependencies = [
  "strum",
  "thiserror",
  "tokio",
+ "tokio_rt_multi_thread",
  "tracing",
  "uuid",
  "wasm-bindgen-futures",
@@ -2137,6 +2138,13 @@ dependencies = [
  "futures-core",
  "futures-sink",
  "pin-project-lite",
+ "tokio",
+]
+
+[[package]]
+name = "tokio_rt_multi_thread"
+version = "0.1.0"
+dependencies = [
  "tokio",
 ]
 

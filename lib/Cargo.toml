@@ -4,7 +4,13 @@ version = "1.5.2"
 edition = "2021"
 
 [features]
-bluetooth = ["dep:btleplug", "dep:regex", "dep:lazy_static", "dep:windows"]
+bluetooth = [
+    "dep:btleplug",
+    "dep:regex",
+    "dep:lazy_static",
+    "dep:windows",
+    "dep:tokio_rt_multi_thread",
+]
 wasm = ["dep:js-sys", "dep:web-sys", "dep:wasm-bindgen-futures"]
 demo = []
 
@@ -13,7 +19,7 @@ crate-type = ["lib"]
 
 [dependencies]
 web-sys = { version = "0.3", optional = true, features = ["Window"] }
-tokio = { version = "1", features = ["sync", "time"] }
+tokio = { version = "1", features = ["sync", "time", "rt"] }
 futures = { version = "0.3" }
 uuid = "1.3"
 thiserror = "1.0"
@@ -32,7 +38,7 @@ wasm-bindgen-futures = { version = "0.4", optional = true }
 btleplug = { version = "0.10", optional = true }
 regex = { version = "1.8", optional = true }
 lazy_static = { version = "1.4", optional = true }
-tokio = { version = "1", features = ["rt-multi-thread"] }
+tokio_rt_multi_thread = { path = "../tokio_rt_multi_thread", optional = true }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["macros", "test-util"] }
