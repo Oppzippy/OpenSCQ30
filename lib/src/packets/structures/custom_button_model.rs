@@ -12,6 +12,19 @@ pub struct CustomButtonModel {
     pub right_single_press: NoTwsButtonAction,
 }
 
+impl CustomButtonModel {
+    pub fn bytes(&self) -> Vec<u8> {
+        let mut bytes = Vec::with_capacity(12);
+        bytes.extend(self.left_double_click.bytes());
+        bytes.extend(self.left_long_press.bytes());
+        bytes.extend(self.right_double_click.bytes());
+        bytes.extend(self.right_long_press.bytes());
+        bytes.extend(self.left_single_press.bytes());
+        bytes.extend(self.right_single_press.bytes());
+        bytes
+    }
+}
+
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TwsButtonAction {
@@ -20,11 +33,27 @@ pub struct TwsButtonAction {
     pub is_enabled: bool,
 }
 
+impl TwsButtonAction {
+    pub fn bytes(&self) -> [u8; 2] {
+        [
+            self.is_enabled.into(),
+            (u8::from(self.tws_disconnected_action) << 4)
+                | (u8::from(self.tws_connected_action) & 0x0f),
+        ]
+    }
+}
+
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NoTwsButtonAction {
     pub action: ButtonAction,
     pub is_enabled: bool,
+}
+
+impl NoTwsButtonAction {
+    pub fn bytes(&self) -> [u8; 2] {
+        [self.is_enabled.into(), u8::from(self.action) & 0x0f]
+    }
 }
 
 #[derive(
@@ -40,4 +69,10 @@ pub enum ButtonAction {
     Trans = 4, // what is this?
     VoiceAssistant = 5,
     PlayPause = 6,
+}
+
+impl From<ButtonAction> for u8 {
+    fn from(value: ButtonAction) -> Self {
+        value as Self
+    }
 }
