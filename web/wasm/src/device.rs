@@ -80,13 +80,11 @@ impl Device {
     pub fn set_state_change_listener(&self, callback: Function) {
         let mut receiver = self.inner.subscribe_to_state_updates();
         wasm_bindgen_futures::spawn_local(async move {
-            loop {
-                while let Ok(state) = receiver.recv().await {
-                    let json = serde_json::to_string(&state).unwrap();
-                    callback
-                        .call1(&JsValue::null(), &json.into())
-                        .expect("error handling should be done in javascript");
-                }
+            while let Ok(state) = receiver.recv().await {
+                let json = serde_json::to_string(&state).unwrap();
+                callback
+                    .call1(&JsValue::null(), &json.into())
+                    .expect("error handling should be done in javascript");
             }
         })
     }
