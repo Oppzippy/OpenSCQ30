@@ -8,10 +8,11 @@ use crate::packets::{
 use super::{
     state_update_packet::{take_state_update_packet, StateUpdatePacket},
     take_ambient_sound_mode_update_packet, take_battery_charging_update_packet,
-    take_battery_level_update_packet, take_firmware_version_update_packet,
-    take_ldac_state_update_packet, take_set_ambient_sound_mode_ok_packet,
-    take_set_equalizer_ok_packet, take_set_equalizer_with_drc_ok_packet,
-    take_tws_status_update_packet, BatteryChargingUpdatePacket, BatteryLevelUpdatePacket,
+    take_battery_level_update_packet, take_chinese_voice_prompt_state_update_packet,
+    take_firmware_version_update_packet, take_ldac_state_update_packet,
+    take_set_ambient_sound_mode_ok_packet, take_set_equalizer_ok_packet,
+    take_set_equalizer_with_drc_ok_packet, take_tws_status_update_packet,
+    BatteryChargingUpdatePacket, BatteryLevelUpdatePacket, ChineseVoicePromptStateUpdatePacket,
     FirmwareVersionUpdatePacket, LdacStateUpdatePacket, SetEqualizerOkPacket,
     SetEqualizerWithDrcOkPacket, SetSoundModeOkPacket, SoundModeUpdatePacket,
     TwsStatusUpdatePacket,
@@ -29,6 +30,7 @@ pub enum InboundPacket {
     BatteryChargingUpdate(BatteryChargingUpdatePacket),
     TwsStatusUpdate(TwsStatusUpdatePacket),
     LdacStateUpdate(LdacStateUpdatePacket),
+    ChineseVoicePromptStateUpdate(ChineseVoicePromptStateUpdatePacket),
 }
 
 impl InboundPacket {
@@ -64,6 +66,9 @@ impl InboundPacket {
             PacketType::LdacStateUpdate => {
                 Self::LdacStateUpdate(take_ldac_state_update_packet(input)?.1)
             }
+            PacketType::ChineseVoicePromptStateUpdate => Self::ChineseVoicePromptStateUpdate(
+                take_chinese_voice_prompt_state_update_packet(input)?.1,
+            ),
         })
     }
 }

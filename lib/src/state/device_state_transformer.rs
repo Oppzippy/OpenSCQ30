@@ -18,5 +18,6 @@ pub fn transform_state(value: InboundPacket, state: &DeviceState) -> DeviceState
         InboundPacket::SetEqualizerWithDrcOk(_packet) => state.to_owned(),
         InboundPacket::TwsStatusUpdate(_packet) => state.to_owned(),
         InboundPacket::LdacStateUpdate(_packet) => state.to_owned(),
+        InboundPacket::ChineseVoicePromptStateUpdate(_packet) => state.to_owned(),
     }
 }
