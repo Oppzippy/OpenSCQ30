@@ -16,5 +16,6 @@ pub fn transform_state(value: InboundPacket, state: &DeviceState) -> DeviceState
         InboundPacket::SetSoundModeOk(_packet) => state.to_owned(),
         InboundPacket::SetEqualizerOk(_packet) => state.to_owned(),
         InboundPacket::SetEqualizerWithDrcOk(_packet) => state.to_owned(),
+        InboundPacket::TwsStatusUpdate(_packet) => state.to_owned(),
     }
 }

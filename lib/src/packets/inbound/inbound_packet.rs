@@ -10,9 +10,10 @@ use super::{
     take_ambient_sound_mode_update_packet, take_battery_charging_update_packet,
     take_battery_level_update_packet, take_firmware_version_update_packet,
     take_set_ambient_sound_mode_ok_packet, take_set_equalizer_ok_packet,
-    take_set_equalizer_with_drc_ok_packet, BatteryChargingUpdatePacket, BatteryLevelUpdatePacket,
-    FirmwareVersionUpdatePacket, SetEqualizerOkPacket, SetEqualizerWithDrcOkPacket,
-    SetSoundModeOkPacket, SoundModeUpdatePacket,
+    take_set_equalizer_with_drc_ok_packet, take_tws_status_update_packet,
+    BatteryChargingUpdatePacket, BatteryLevelUpdatePacket, FirmwareVersionUpdatePacket,
+    SetEqualizerOkPacket, SetEqualizerWithDrcOkPacket, SetSoundModeOkPacket, SoundModeUpdatePacket,
+    TwsStatusUpdatePacket,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -25,6 +26,7 @@ pub enum InboundPacket {
     FirmwareVersionUpdate(FirmwareVersionUpdatePacket),
     BatteryLevelUpdate(BatteryLevelUpdatePacket),
     BatteryChargingUpdate(BatteryChargingUpdatePacket),
+    TwsStatusUpdate(TwsStatusUpdatePacket),
 }
 
 impl InboundPacket {
@@ -53,6 +55,9 @@ impl InboundPacket {
             }
             PacketType::BatteryChargingUpdate => {
                 Self::BatteryChargingUpdate(take_battery_charging_update_packet(input)?.1)
+            }
+            PacketType::TwsStatusUpdate => {
+                Self::TwsStatusUpdate(take_tws_status_update_packet(input)?.1)
             }
         })
     }

@@ -7,6 +7,7 @@ mod set_equalizer_with_drc_ok_packet;
 mod set_sound_mode_ok_packet;
 mod sound_mode_update_packet;
 pub mod state_update_packet;
+mod tws_status_update_packet;
 
 pub use battery_charging_update_packet::*;
 pub use battery_level_update_packet::*;
@@ -16,3 +17,4 @@ pub use set_equalizer_ok_packet::*;
 pub use set_equalizer_with_drc_ok_packet::*;
 pub use set_sound_mode_ok_packet::*;
 pub use sound_mode_update_packet::*;
+pub use tws_status_update_packet::*;

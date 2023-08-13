@@ -11,4 +11,5 @@ pub enum PacketType {
     SetEqualizerWithDrcOk,
     BatteryLevelUpdate,
     BatteryChargingUpdate,
+    TwsStatusUpdate,
 }
