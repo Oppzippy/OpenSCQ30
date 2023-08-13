@@ -93,22 +93,13 @@ pub fn take_a3028_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
 
 #[cfg(test)]
 mod tests {
-    use nom::error::VerboseError;
-
     use crate::packets::{
-        inbound::state_update_packet::take_a3028_state_update_packet,
-        parsing::{take_checksum, take_packet_header},
+        inbound::InboundPacket,
         structures::{
             AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
             PresetEqualizerProfile, SoundModes, VolumeAdjustments,
         },
     };
-
-    fn strip(input: &[u8]) -> &[u8] {
-        let input = take_checksum::<VerboseError<&[u8]>>(input).unwrap().0;
-        let input = take_packet_header::<VerboseError<&[u8]>>(input).unwrap().0;
-        input
-    }
 
     #[test]
     fn it_parses_packet_with_preset_eq() {
@@ -120,17 +111,16 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x35,
         ];
-        let input = strip(input);
-        let packet = take_a3028_state_update_packet::<VerboseError<&[u8]>>(input)
-            .unwrap()
-            .1;
+        let InboundPacket::StateUpdate(packet) = InboundPacket::new(input).unwrap() else {
+            panic!("wrong packet type");
+        };
         assert_eq!(
-            SoundModes {
+            Some(SoundModes {
                 ambient_sound_mode: AmbientSoundMode::Normal,
                 noise_canceling_mode: NoiseCancelingMode::Transport,
                 transparency_mode: Default::default(),
                 custom_noise_canceling: CustomNoiseCanceling::new(0),
-            },
+            }),
             packet.sound_modes,
         );
         assert_eq!(
@@ -150,17 +140,16 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x84,
         ];
-        let input = strip(input);
-        let packet = take_a3028_state_update_packet::<VerboseError<&[u8]>>(input)
-            .unwrap()
-            .1;
+        let InboundPacket::StateUpdate(packet) = InboundPacket::new(input).unwrap() else {
+            panic!("wrong packet type");
+        };
         assert_eq!(
             AmbientSoundMode::Normal,
-            packet.sound_modes.ambient_sound_mode
+            packet.sound_modes.unwrap().ambient_sound_mode
         );
         assert_eq!(
             NoiseCancelingMode::Transport,
-            packet.sound_modes.noise_canceling_mode
+            packet.sound_modes.unwrap().noise_canceling_mode
         );
         assert_eq!(
             EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
@@ -180,17 +169,16 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x30,
         ];
-        let input = strip(input);
-        let packet = take_a3028_state_update_packet::<VerboseError<&[u8]>>(input)
-            .unwrap()
-            .1;
+        let InboundPacket::StateUpdate(packet) = InboundPacket::new(input).unwrap() else {
+            panic!("wrong packet type");
+        };
         assert_eq!(
             AmbientSoundMode::Normal,
-            packet.sound_modes.ambient_sound_mode
+            packet.sound_modes.unwrap().ambient_sound_mode
         );
         assert_eq!(
             NoiseCancelingMode::Transport,
-            packet.sound_modes.noise_canceling_mode
+            packet.sound_modes.unwrap().noise_canceling_mode
         );
         assert_eq!(
             EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
@@ -205,24 +193,22 @@ mod tests {
         // It's usually a 5 but sometimes a 4 at that byte offset. I don't know why, but it
         // doesn't seem to cause any problems.
         let input: &[u8] = &[
-            //                                                                profile id
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01, 0x46, 0x00, 0x04, 0x00, 0xfe, 0xfe, 0x3c,
             0xb4, 0x8f, 0xa0, 0x8e, 0xb4, 0x74, 0x88, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x2f,
         ];
-        let input = strip(input);
-        let packet = take_a3028_state_update_packet::<VerboseError<&[u8]>>(input)
-            .unwrap()
-            .1;
+        let InboundPacket::StateUpdate(packet) = InboundPacket::new(input).unwrap() else {
+            panic!("wrong packet type");
+        };
         assert_eq!(
             AmbientSoundMode::Normal,
-            packet.sound_modes.ambient_sound_mode
+            packet.sound_modes.unwrap().ambient_sound_mode
         );
         assert_eq!(
             NoiseCancelingMode::Transport,
-            packet.sound_modes.noise_canceling_mode
+            packet.sound_modes.unwrap().noise_canceling_mode
         );
         assert_eq!(
             EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
@@ -235,7 +221,6 @@ mod tests {
     #[test]
     fn it_does_not_parse_invalid_ambient_sound_mode() {
         let input: &[u8] = &[
-            //                                                                profile id
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01, 0x46, 0x00, 0x05, 0x00, 0xfe, 0xfe, 0x3c,
             0xb4, 0x8f, 0xa0, 0x8e, 0xb4, 0x74, 0x88, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -243,15 +228,13 @@ mod tests {
             0x00, 0x00, 0x03, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x31,
         ];
-        let input = strip(input);
-        let result = take_a3028_state_update_packet::<VerboseError<&[u8]>>(input);
+        let result = InboundPacket::new(input);
         assert_eq!(true, result.is_err());
     }
 
     #[test]
     fn it_does_not_parse_invalid_noise_canceling_mode() {
         let input: &[u8] = &[
-            //                                                                profile id
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01, 0x46, 0x00, 0x05, 0x00, 0xfe, 0xfe, 0x3c,
             0xb4, 0x8f, 0xa0, 0x8e, 0xb4, 0x74, 0x88, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -259,33 +242,23 @@ mod tests {
             0x00, 0x00, 0x01, 0x04, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x33,
         ];
-        let input = strip(input);
-        let result = take_a3028_state_update_packet::<VerboseError<&[u8]>>(input);
-        assert_eq!(true, result.is_err());
-    }
-
-    #[test]
-    fn it_does_not_parse_unknown_packet() {
-        let input: &[u8] = &[0x01, 0x02, 0x03];
-        let result = take_a3028_state_update_packet::<VerboseError<&[u8]>>(input);
+        let result = InboundPacket::new(input);
         assert_eq!(true, result.is_err());
     }
 
     #[test]
     fn it_does_not_parse_packet_that_goes_over_expected_length() {
         let input: &[u8] = &[
-            //                                                                profile id
-            0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01, 0x46, 0x00, 0x05, 0x00, 0x01, 0x00, 0x3c,
+            0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01, 0x49, 0x00, 0x05, 0x00, 0x01, 0x00, 0x3c,
             0xb4, 0x8f, 0xa0, 0x8e, 0xb4, 0x74, 0x88, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
-            // an extra 0x00 is added on to increase the length without affecting anything else
-            // including the checksum
+            // Some extra 0x00s are added on to increase the length without affecting anything
+            // the checksum. The checksum is affected by the 8th byte (packet length) though.
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x00,
-            0x35,
+            0x00, 0x00, 0x38,
         ];
-        let input = strip(input);
-        let result = take_a3028_state_update_packet::<VerboseError<&[u8]>>(input);
+        let result = InboundPacket::new(input);
         assert!(result.is_err())
     }
 }

@@ -37,59 +37,40 @@ pub fn take_ambient_sound_mode_update_packet<
 
 #[cfg(test)]
 mod tests {
-    use nom::error::VerboseError;
-
     use crate::packets::{
-        inbound::take_ambient_sound_mode_update_packet,
-        parsing::take_packet_header,
+        inbound::InboundPacket,
         structures::{AmbientSoundMode, NoiseCancelingMode},
     };
 
     #[test]
     fn it_parses_valid_packet() {
-        const PACKET_BYTES: &[u8] = &[
+        let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x02, 0x02, 0x01, 0x00, 0x23,
         ];
-        let input = take_packet_header::<VerboseError<&[u8]>>(PACKET_BYTES)
-            .unwrap()
-            .0;
-        let packet = take_ambient_sound_mode_update_packet::<VerboseError<&[u8]>>(input)
-            .unwrap()
-            .1;
+        let InboundPacket::SoundModeUpdate(packet) = InboundPacket::new(input).unwrap() else {
+            panic!("wrong packet type");
+        };
         assert_eq!(AmbientSoundMode::Normal, packet.ambient_sound_mode);
         assert_eq!(NoiseCancelingMode::Indoor, packet.noise_canceling_mode);
     }
 
     #[test]
     fn it_does_not_parse_invalid_ambient_sound_mode() {
-        const PACKET_BYTES: &[u8] = &[
+        let input: &[u8] = &[
             //                                                    max value of 0x02
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x03, 0x02, 0x01, 0x00, 0x23,
         ];
-        let input = take_packet_header::<VerboseError<&[u8]>>(PACKET_BYTES)
-            .unwrap()
-            .0;
-        let result = take_ambient_sound_mode_update_packet::<VerboseError<&[u8]>>(input);
+        let result = InboundPacket::new(input);
         assert_eq!(true, result.is_err());
     }
 
     #[test]
     fn it_does_not_parse_invalid_noise_canceling_mode() {
-        const PACKET_BYTES: &[u8] = &[
+        let input: &[u8] = &[
             //                                                          max value of 0x03
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x02, 0x04, 0x01, 0x00, 0x23,
         ];
-        let input = take_packet_header::<VerboseError<&[u8]>>(PACKET_BYTES)
-            .unwrap()
-            .0;
-        let result = take_ambient_sound_mode_update_packet::<VerboseError<&[u8]>>(input);
-        assert_eq!(true, result.is_err());
-    }
-
-    #[test]
-    fn it_does_not_parse_unknown_packet() {
-        const PACKET_BYTES: &[u8] = &[0x01, 0x02, 0x03];
-        let result = take_ambient_sound_mode_update_packet::<VerboseError<&[u8]>>(PACKET_BYTES);
+        let result = InboundPacket::new(input);
         assert_eq!(true, result.is_err());
     }
 }

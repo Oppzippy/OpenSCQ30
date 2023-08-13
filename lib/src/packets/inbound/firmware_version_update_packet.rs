@@ -42,19 +42,10 @@ pub fn take_firmware_version_update_packet<'a, E: ParseError<&'a [u8]> + Context
 
 #[cfg(test)]
 mod tests {
-    use nom::error::VerboseError;
-
     use crate::packets::{
-        inbound::take_firmware_version_update_packet,
-        parsing::{take_checksum, take_packet_header},
+        inbound::InboundPacket,
         structures::{FirmwareVersion, SerialNumber},
     };
-
-    fn strip(input: &[u8]) -> &[u8] {
-        let input = take_checksum::<VerboseError<&[u8]>>(input).unwrap().0;
-        let input = take_packet_header::<VerboseError<&[u8]>>(input).unwrap().0;
-        input
-    }
 
     #[test]
     fn it_parses_a_manually_crafted_packet() {
@@ -63,10 +54,9 @@ mod tests {
             0x32, 0x33, 0x2e, 0x34, 0x35, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
             0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0xca,
         ];
-        let input = strip(input);
-        let packet = take_firmware_version_update_packet::<VerboseError<&[u8]>>(input)
-            .unwrap()
-            .1;
+        let InboundPacket::FirmwareVersionUpdate(packet) = InboundPacket::new(input).unwrap() else {
+            panic!("wrong packet type");
+        };
         assert_eq!(FirmwareVersion::new(12, 34), packet.left_firmware_version);
         assert_eq!(FirmwareVersion::new(23, 45), packet.right_firmware_version);
         assert_eq!(
