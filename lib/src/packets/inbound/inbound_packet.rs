@@ -9,10 +9,11 @@ use super::{
     state_update_packet::{take_state_update_packet, StateUpdatePacket},
     take_ambient_sound_mode_update_packet, take_battery_charging_update_packet,
     take_battery_level_update_packet, take_firmware_version_update_packet,
-    take_set_ambient_sound_mode_ok_packet, take_set_equalizer_ok_packet,
-    take_set_equalizer_with_drc_ok_packet, take_tws_status_update_packet,
-    BatteryChargingUpdatePacket, BatteryLevelUpdatePacket, FirmwareVersionUpdatePacket,
-    SetEqualizerOkPacket, SetEqualizerWithDrcOkPacket, SetSoundModeOkPacket, SoundModeUpdatePacket,
+    take_ldac_state_update_packet, take_set_ambient_sound_mode_ok_packet,
+    take_set_equalizer_ok_packet, take_set_equalizer_with_drc_ok_packet,
+    take_tws_status_update_packet, BatteryChargingUpdatePacket, BatteryLevelUpdatePacket,
+    FirmwareVersionUpdatePacket, LdacStateUpdatePacket, SetEqualizerOkPacket,
+    SetEqualizerWithDrcOkPacket, SetSoundModeOkPacket, SoundModeUpdatePacket,
     TwsStatusUpdatePacket,
 };
 
@@ -27,6 +28,7 @@ pub enum InboundPacket {
     BatteryLevelUpdate(BatteryLevelUpdatePacket),
     BatteryChargingUpdate(BatteryChargingUpdatePacket),
     TwsStatusUpdate(TwsStatusUpdatePacket),
+    LdacStateUpdate(LdacStateUpdatePacket),
 }
 
 impl InboundPacket {
@@ -58,6 +60,9 @@ impl InboundPacket {
             }
             PacketType::TwsStatusUpdate => {
                 Self::TwsStatusUpdate(take_tws_status_update_packet(input)?.1)
+            }
+            PacketType::LdacStateUpdate => {
+                Self::LdacStateUpdate(take_ldac_state_update_packet(input)?.1)
             }
         })
     }

@@ -12,4 +12,5 @@ pub enum PacketType {
     BatteryLevelUpdate,
     BatteryChargingUpdate,
     TwsStatusUpdate,
+    LdacStateUpdate,
 }
