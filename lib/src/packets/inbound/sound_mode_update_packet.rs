@@ -1,5 +1,5 @@
 use nom::{
-    combinator::map,
+    combinator::{all_consuming, map},
     error::{context, ContextError, ParseError},
 };
 
@@ -25,12 +25,12 @@ pub fn take_ambient_sound_mode_update_packet<
     // offset 9
     context(
         "SoundModeUpdatePacket",
-        map(take_sound_modes, |sound_modes| SoundModeUpdatePacket {
+        all_consuming(map(take_sound_modes, |sound_modes| SoundModeUpdatePacket {
             ambient_sound_mode: sound_modes.ambient_sound_mode,
             noise_canceling_mode: sound_modes.noise_canceling_mode,
             transparency_mode: sound_modes.transparency_mode,
             custom_noise_canceling: sound_modes.custom_noise_canceling,
-        }),
+        })),
     )(input)
     // offset 13
 }
