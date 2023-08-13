@@ -1,11 +1,13 @@
 use nom::{
-    combinator::map,
+    combinator::{map, map_opt},
     error::{context, ContextError, ParseError},
     number::complete::le_u8,
     sequence::{pair, tuple},
 };
 
-use crate::packets::structures::CustomButtonModel;
+use crate::packets::structures::{
+    ButtonAction, CustomButtonModel, NoTwsButtonAction, TwsButtonAction,
+};
 
 use super::{take_bool, ParseResult};
 
@@ -15,44 +17,54 @@ pub fn take_custom_button_model<'a, E: ParseError<&'a [u8]> + ContextError<&'a [
     context("custom button model", |input| {
         map(
             tuple((
-                take_tws_pair, // left double click
-                take_tws_pair, // left long press
-                take_tws_pair, // right double click
-                take_tws_pair, // right long press
-                take_bool,     // left single switch
-                le_u8,         // left single click
-                take_bool,     // right single switch
-                le_u8,         // right single click
+                take_tws_button_action,    // left double click
+                take_tws_button_action,    // left long press
+                take_tws_button_action,    // right double click
+                take_tws_button_action,    // right long press
+                take_no_tws_button_action, // left single click
+                take_no_tws_button_action, // right single click
             )),
             |(
-                _left_double_click,
-                _left_long_press,
-                _right_double_click,
-                _right_long_press,
-                _left_single_click_switch,
-                _left_single_click,
-                _right_single_click_switch,
-                _right_single_click,
+                left_double_click,
+                left_long_press,
+                right_double_click,
+                right_long_press,
+                left_single_press,
+                right_single_press,
             )| {
                 // TODO
-                CustomButtonModel {}
+                CustomButtonModel {
+                    left_double_click,
+                    left_long_press,
+                    right_double_click,
+                    right_long_press,
+                    left_single_press,
+                    right_single_press,
+                }
             },
         )(input)
     })(input)
 }
 
-struct TwsPairWithSwitch {
-    pub _tws: u8,
-    pub _un_tws: u8,
-    pub _switch: bool,
+fn take_tws_button_action<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    input: &'a [u8],
+) -> ParseResult<TwsButtonAction, E> {
+    map_opt(pair(take_bool, le_u8), |(switch, num)| {
+        Some(TwsButtonAction {
+            tws_connected_action: ButtonAction::from_repr(num & 0x0F)?,
+            tws_disconnected_action: ButtonAction::from_repr((num & 0xF0) >> 4)?,
+            is_enabled: switch,
+        })
+    })(input)
 }
 
-fn take_tws_pair<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+fn take_no_tws_button_action<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
     input: &'a [u8],
-) -> ParseResult<TwsPairWithSwitch, E> {
-    map(pair(take_bool, le_u8), |(switch, num)| TwsPairWithSwitch {
-        _tws: num & 0x0F,
-        _un_tws: (num & 0xF0) >> 4,
-        _switch: switch,
+) -> ParseResult<NoTwsButtonAction, E> {
+    map_opt(pair(take_bool, le_u8), |(switch, num)| {
+        Some(NoTwsButtonAction {
+            action: ButtonAction::from_repr(num)?,
+            is_enabled: switch,
+        })
     })(input)
 }
