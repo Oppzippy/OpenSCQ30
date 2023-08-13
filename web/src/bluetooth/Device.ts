@@ -58,7 +58,12 @@ export class Device {
       return state;
     } else {
       const errors = [...DeviceStateValidator.Errors(state)];
-      throw new Error("Failed to validate device state", { cause: errors });
+      throw new Error("Failed to validate device state", {
+        cause: {
+          input: state,
+          validationErrors: errors,
+        },
+      });
     }
   }
 }

@@ -8,9 +8,10 @@ use crate::{
     api::{connection::ConnectionStatus, device::Device},
     futures::Futures,
     packets::structures::{
-        AgeRange, AmbientSoundMode, BasicHearId, BatteryLevel, DeviceFeatureFlags,
-        EqualizerConfiguration, FirmwareVersion, IsBatteryCharging, NoiseCancelingMode,
-        PresetEqualizerProfile, SerialNumber, SingleBattery, SoundModes,
+        AgeRange, AmbientSoundMode, BasicHearId, BatteryLevel, ButtonAction, CustomButtonModel,
+        DeviceFeatureFlags, EqualizerConfiguration, FirmwareVersion, IsBatteryCharging,
+        NoTwsButtonAction, NoiseCancelingMode, PresetEqualizerProfile, SerialNumber, SingleBattery,
+        SoundModes, TwsButtonAction,
     },
     state::DeviceState,
 };
@@ -55,7 +56,36 @@ where
                     custom_noise_canceling: Default::default(),
                 }),
                 age_range: Some(AgeRange(0)),
-                custom_button_model: None,
+                custom_button_model: Some(CustomButtonModel {
+                    left_double_click: TwsButtonAction {
+                        tws_connected_action: ButtonAction::NextSong,
+                        tws_disconnected_action: ButtonAction::PlayPause,
+                        is_enabled: true,
+                    },
+                    left_long_press: TwsButtonAction {
+                        tws_connected_action: ButtonAction::PreviousSong,
+                        tws_disconnected_action: ButtonAction::Trans,
+                        is_enabled: true,
+                    },
+                    right_double_click: TwsButtonAction {
+                        tws_connected_action: ButtonAction::VoiceAssistant,
+                        tws_disconnected_action: ButtonAction::VolumeDown,
+                        is_enabled: true,
+                    },
+                    right_long_press: TwsButtonAction {
+                        tws_connected_action: ButtonAction::VolumeUp,
+                        tws_disconnected_action: ButtonAction::NextSong,
+                        is_enabled: false,
+                    },
+                    left_single_press: NoTwsButtonAction {
+                        action: ButtonAction::PreviousSong,
+                        is_enabled: true,
+                    },
+                    right_single_press: NoTwsButtonAction {
+                        action: ButtonAction::NextSong,
+                        is_enabled: false,
+                    },
+                }),
                 custom_hear_id: Some(
                     BasicHearId {
                         is_enabled: true,

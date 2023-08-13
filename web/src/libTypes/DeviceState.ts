@@ -63,6 +63,27 @@ export type PresetEqualizerProfile = NonNullable<
   EqualizerConfiguration["presetProfile"]
 >;
 
+const buttonActionSchema = Type.Union([
+  Type.Literal("volumeUp"),
+  Type.Literal("volumeDown"),
+  Type.Literal("previousSong"),
+  Type.Literal("nextSong"),
+  Type.Literal("trans"),
+  Type.Literal("voiceAssistant"),
+  Type.Literal("playPause"),
+]);
+export type ButtonAction = Static<typeof buttonActionSchema>;
+
+const twsButtonActionSchema = Type.Object({
+  twsConnectedAction: buttonActionSchema,
+  twsDisconnectedAction: buttonActionSchema,
+  isEnabled: Type.Boolean(),
+});
+const noTwsButtonActionSchema = Type.Object({
+  action: buttonActionSchema,
+  isEnabled: Type.Boolean(),
+});
+
 const deviceStateSchema = Type.Object({
   featureFlags: Type.Number(),
   battery: Type.Union([
@@ -119,6 +140,16 @@ const deviceStateSchema = Type.Object({
     Type.Object({
       major: Type.Number(),
       minor: Type.Number(),
+    }),
+  ),
+  customButtonModel: Type.Optional(
+    Type.Object({
+      leftDoubleClick: twsButtonActionSchema,
+      leftLongPress: twsButtonActionSchema,
+      rightDoubleClick: twsButtonActionSchema,
+      rightLongPress: twsButtonActionSchema,
+      leftSinglePress: noTwsButtonActionSchema,
+      rightSinglePress: noTwsButtonActionSchema,
     }),
   ),
   serialNumber: Type.Optional(Type.String()),
