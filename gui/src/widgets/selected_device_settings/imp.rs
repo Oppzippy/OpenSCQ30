@@ -43,8 +43,8 @@ impl SelectedDeviceSettings {
 impl SelectedDeviceSettings {
     pub fn set_device_state(&self, state: &DeviceState) {
         self.general_settings.set_device_state(state);
-        // TODO I think I forgot to implement this
-        // self.equalizer_settings.set_device_state(state);
+        self.equalizer_settings
+            .set_equalizer_configuration(state.equalizer_configuration);
         self.device_information.set_device_state(state);
     }
 }
