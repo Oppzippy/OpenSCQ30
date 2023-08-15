@@ -31,33 +31,31 @@ const soundModesSchema = Type.Object({
 export type SoundModes = Static<typeof soundModesSchema>;
 
 const equalizerConfigurationSchema = Type.Object({
-  presetProfile: Type.Optional(
-    Type.Union([
-      Type.Null(),
-      Type.Literal("SoundcoreSignature"),
-      Type.Literal("Acoustic"),
-      Type.Literal("BassBooster"),
-      Type.Literal("BassReducer"),
-      Type.Literal("Classical"),
-      Type.Literal("Podcast"),
-      Type.Literal("Dance"),
-      Type.Literal("Deep"),
-      Type.Literal("Electronic"),
-      Type.Literal("Flat"),
-      Type.Literal("HipHop"),
-      Type.Literal("Jazz"),
-      Type.Literal("Latin"),
-      Type.Literal("Lounge"),
-      Type.Literal("Piano"),
-      Type.Literal("Pop"),
-      Type.Literal("RnB"),
-      Type.Literal("Rock"),
-      Type.Literal("SmallSpeakers"),
-      Type.Literal("SpokenWord"),
-      Type.Literal("TrebleBooster"),
-      Type.Literal("TrebleReducer"),
-    ]),
-  ),
+  presetProfile: Type.Union([
+    Type.Null(),
+    Type.Literal("SoundcoreSignature"),
+    Type.Literal("Acoustic"),
+    Type.Literal("BassBooster"),
+    Type.Literal("BassReducer"),
+    Type.Literal("Classical"),
+    Type.Literal("Podcast"),
+    Type.Literal("Dance"),
+    Type.Literal("Deep"),
+    Type.Literal("Electronic"),
+    Type.Literal("Flat"),
+    Type.Literal("HipHop"),
+    Type.Literal("Jazz"),
+    Type.Literal("Latin"),
+    Type.Literal("Lounge"),
+    Type.Literal("Piano"),
+    Type.Literal("Pop"),
+    Type.Literal("RnB"),
+    Type.Literal("Rock"),
+    Type.Literal("SmallSpeakers"),
+    Type.Literal("SpokenWord"),
+    Type.Literal("TrebleBooster"),
+    Type.Literal("TrebleReducer"),
+  ]),
   volumeAdjustments: Type.Array(Type.Number()),
 });
 export type EqualizerConfiguration = Static<
@@ -157,6 +155,12 @@ const deviceStateSchema = Type.Object({
     }),
   ),
   serialNumber: Nullable(Type.String()),
+  dynamicRangeCompressionMinFirmwareVersion: Nullable(
+    Type.Object({
+      major: Type.Number(),
+      minor: Type.Number(),
+    }),
+  ),
 });
 export type DeviceState = Static<typeof deviceStateSchema>;
 export const DeviceStateValidator = TypeCompiler.Compile(deviceStateSchema);

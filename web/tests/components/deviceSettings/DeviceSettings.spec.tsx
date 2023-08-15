@@ -65,6 +65,7 @@ describe("Device Settings", () => {
         leftFirmwareVersion: null,
         rightFirmwareVersion: null,
         serialNumber: null,
+        dynamicRangeCompressionMinFirmwareVersion: null,
       }),
       connect: vi.fn<unknown[], unknown>(),
       async setSoundModes(soundModes: SoundModes) {
@@ -257,9 +258,7 @@ describe("Device Settings", () => {
       "SoundcoreSignature",
     );
     vi.advanceTimersByTime(500);
-    expect(
-      device.state.value.equalizerConfiguration.presetProfile,
-    ).toBeUndefined();
+    expect(device.state.value.equalizerConfiguration.presetProfile).toBeNull();
 
     const numberInputs: NodeListOf<HTMLInputElement> =
       renderResult.baseElement.querySelectorAll("input[type='number']");

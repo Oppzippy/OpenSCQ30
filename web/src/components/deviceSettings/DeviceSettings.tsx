@@ -59,6 +59,7 @@ export function DeviceSettings({
               ],
             }
           : {
+              presetProfile: null,
               volumeAdjustments:
                 displayState.equalizerConfiguration.volumeAdjustments,
             };
@@ -81,6 +82,7 @@ export function DeviceSettings({
         return {
           ...state,
           equalizerConfiguration: {
+            presetProfile: null,
             volumeAdjustments,
           },
         };
