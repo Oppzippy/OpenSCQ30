@@ -32,6 +32,8 @@ use crate::actions::Action;
 pub struct GeneralSettings {
     // Ambient Sound Mode
     #[template_child]
+    pub ambient_sound_mode_label: TemplateChild<gtk::Label>,
+    #[template_child]
     pub normal_mode: TemplateChild<gtk::ToggleButton>,
     #[template_child]
     pub transparency_mode: TemplateChild<gtk::ToggleButton>,
@@ -40,11 +42,15 @@ pub struct GeneralSettings {
 
     // Transpareny Mode
     #[template_child]
+    pub transparency_mode_label: TemplateChild<gtk::Label>,
+    #[template_child]
     pub fully_transparent: TemplateChild<gtk::ToggleButton>,
     #[template_child]
     pub vocal_mode: TemplateChild<gtk::ToggleButton>,
 
     // Noise Canceling Mode
+    #[template_child]
+    pub noise_canceling_mode_label: TemplateChild<gtk::Label>,
     #[template_child]
     pub transport_mode: TemplateChild<gtk::ToggleButton>,
     #[template_child]
@@ -54,6 +60,8 @@ pub struct GeneralSettings {
     #[template_child]
     pub custom_mode: TemplateChild<gtk::ToggleButton>,
 
+    #[template_child]
+    pub custom_noise_canceling_label: TemplateChild<gtk::Label>,
     #[template_child]
     pub custom_noise_canceling: TemplateChild<gtk::Scale>,
 
@@ -257,8 +265,15 @@ impl ObjectSubclass for GeneralSettings {
 impl ObjectImpl for GeneralSettings {
     fn constructed(&self) {
         self.parent_constructed();
-
         let obj = self.obj();
+
+        obj.bind_property(
+            "has_noise_canceling_mode",
+            &self.noise_canceling_mode_label.get(),
+            "visible",
+        )
+        .sync_create()
+        .build();
         [
             &self.noise_canceling_mode.get(),
             &self.indoor_mode.get(),
@@ -267,7 +282,7 @@ impl ObjectImpl for GeneralSettings {
         ]
         .into_iter()
         .for_each(|button| {
-            obj.bind_property("has_noise_canceling_mode", button, "sensitive")
+            obj.bind_property("has_noise_canceling_mode", button, "visible")
                 .sync_create()
                 .build();
         });
@@ -275,22 +290,36 @@ impl ObjectImpl for GeneralSettings {
         obj.bind_property(
             "has_custom_noise_canceling",
             &self.custom_mode.get(),
-            "sensitive",
+            "visible",
+        )
+        .sync_create()
+        .build();
+        obj.bind_property(
+            "has_custom_noise_canceling",
+            &self.custom_noise_canceling_label.get(),
+            "visible",
         )
         .sync_create()
         .build();
         obj.bind_property(
             "has_custom_noise_canceling",
             &self.custom_noise_canceling.get(),
-            "sensitive",
+            "visible",
         )
         .sync_create()
         .build();
 
+        obj.bind_property(
+            "has_custom_transparency_modes",
+            &self.transparency_mode_label.get(),
+            "visible",
+        )
+        .sync_create()
+        .build();
         [&self.fully_transparent.get(), &self.vocal_mode.get()]
             .into_iter()
             .for_each(|button| {
-                obj.bind_property("has_custom_transparency_modes", button, "sensitive")
+                obj.bind_property("has_custom_transparency_modes", button, "visible")
                     .sync_create()
                     .build();
             });

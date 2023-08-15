@@ -40,7 +40,7 @@ where
             connection_status_sender,
             futures: PhantomData::default(),
             state: Mutex::new(DeviceState {
-                feature_flags: DeviceFeatureFlags::all(),
+                feature_flags: DeviceFeatureFlags::SOUND_MODES,
                 battery: SingleBattery {
                     is_charging: IsBatteryCharging::No,
                     level: BatteryLevel(4),
