@@ -1,5 +1,5 @@
 use nom::{
-    combinator::{all_consuming, map},
+    combinator::{all_consuming, map, opt},
     error::{context, ContextError, ParseError},
     sequence::tuple,
 };
@@ -12,7 +12,7 @@ use crate::packets::{
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct BatteryChargingUpdatePacket {
     pub left: IsBatteryCharging,
-    pub right: IsBatteryCharging,
+    pub right: Option<IsBatteryCharging>,
 }
 
 pub fn take_battery_charging_update_packet<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
@@ -21,7 +21,7 @@ pub fn take_battery_charging_update_packet<'a, E: ParseError<&'a [u8]> + Context
     context(
         "BatteryChargingUpdatePacket",
         all_consuming(map(
-            tuple((take_is_battery_charging, take_is_battery_charging)),
+            tuple((take_is_battery_charging, opt(take_is_battery_charging))),
             |(left, right)| BatteryChargingUpdatePacket { left, right },
         )),
     )(input)
@@ -41,6 +41,19 @@ mod tests {
         };
 
         assert_eq!(IsBatteryCharging::Yes, packet.left);
-        assert_eq!(IsBatteryCharging::No, packet.right);
+        assert_eq!(Some(IsBatteryCharging::No), packet.right);
+    }
+
+    #[test]
+    fn it_parses_an_actual_packet_from_q30() {
+        let input: &[u8] = &[
+            0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04, 0x0b, 0x00, 0x01, 0x1a,
+        ];
+        let InboundPacket::BatteryChargingUpdate(packet) = InboundPacket::new(input).unwrap() else {
+            panic!("wrong packet type");
+        };
+
+        assert_eq!(IsBatteryCharging::Yes, packet.left);
+        assert_eq!(None, packet.right);
     }
 }

@@ -20,7 +20,8 @@ impl DeviceStateTransformer for BatteryChargingUpdatePacket {
                         level: prev_battery.left.level,
                     },
                     right: SingleBattery {
-                        is_charging: self.right,
+                        // TODO maybe switch state over to single battery if this is None
+                        is_charging: self.right.unwrap_or_default(),
                         level: prev_battery.right.level,
                     },
                 }),
