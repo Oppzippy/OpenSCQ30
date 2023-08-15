@@ -40,7 +40,7 @@ where
         Ok(Self {
             conneciton_registry: connection_registry,
             devices: Mutex::new(WeakValueHashMap::new()),
-            futures: PhantomData::default(),
+            futures: PhantomData,
         })
     }
 

@@ -1,3 +1,6 @@
+// Until this is resolved, there's not really a good workaround for having big types
+// https://github.com/rust-lang/rust/issues/8995
+#![allow(clippy::type_complexity)]
 pub mod api;
 pub mod demo;
 pub mod device_utils;

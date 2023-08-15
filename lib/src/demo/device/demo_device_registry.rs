@@ -27,7 +27,7 @@ where
 
     pub fn new() -> Self {
         Self {
-            futures: PhantomData::default(),
+            futures: PhantomData,
         }
     }
 }

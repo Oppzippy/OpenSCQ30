@@ -38,7 +38,7 @@ where
             mac_address,
             state_sender,
             connection_status_sender,
-            futures: PhantomData::default(),
+            futures: PhantomData,
             state: Mutex::new(DeviceState {
                 feature_flags: DeviceFeatureFlags::all(),
                 battery: SingleBattery {
