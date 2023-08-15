@@ -68,8 +68,8 @@ impl Connection for WebBluetoothConnection {
     }
 
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
-        // TODO implement
-        let (sender, receiver) = watch::channel(ConnectionStatus::Connected);
+        // WebBluetooth does not have an event for the device being disconnected
+        let (_sender, receiver) = watch::channel(ConnectionStatus::Connected);
         receiver
     }
 
