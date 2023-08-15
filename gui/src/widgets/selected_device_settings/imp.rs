@@ -14,7 +14,7 @@ use openscq30_lib::state::DeviceState;
 
 use crate::{
     actions::Action,
-    widgets::{EqualizerSettings, GeneralSettings},
+    widgets::{DeviceInformation, EqualizerSettings, GeneralSettings},
 };
 
 #[derive(Default, CompositeTemplate)]
@@ -26,6 +26,8 @@ pub struct SelectedDeviceSettings {
     pub general_settings: TemplateChild<GeneralSettings>,
     #[template_child]
     pub equalizer_settings: TemplateChild<EqualizerSettings>,
+    #[template_child]
+    pub device_information: TemplateChild<DeviceInformation>,
 
     sender: OnceCell<Sender<Action>>,
 }
@@ -41,7 +43,9 @@ impl SelectedDeviceSettings {
 impl SelectedDeviceSettings {
     pub fn set_device_state(&self, state: &DeviceState) {
         self.general_settings.set_device_state(state);
+        // TODO I think I forgot to implement this
         // self.equalizer_settings.set_device_state(state);
+        self.device_information.set_device_state(state);
     }
 }
 

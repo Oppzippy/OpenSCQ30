@@ -1,3 +1,4 @@
+mod device_information;
 mod device_selection;
 mod equalizer;
 mod equalizer_profile_dropdown_row;
@@ -8,6 +9,7 @@ mod main_window;
 mod selected_device_settings;
 mod volume_slider;
 
+pub use device_information::*;
 pub use device_selection::*;
 pub use equalizer::*;
 pub use equalizer_profile_dropdown_row::*;

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <template class="OpenSCQ30DeviceInformation" parent="GtkBox">
+        <child>
+            <object class="GtkScrolledWindow">
+                <child>
+                    <object class="GtkGrid">
+                        <property name="row-spacing">8</property>
+                        <property name="column-spacing">8</property>
+                        <child>
+                            <object class="GtkLabel" id="firmware_version_label">
+                                <property name="hexpand">true</property>
+                                <property name="halign">end</property>
+                                <property name="label" translatable="yes" context="device information">Firmware Version</property>
+                                <layout>
+                                    <property name="row">0</property>
+                                    <property name="column">0</property>
+                                </layout>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkLabel" id="firmware_version">
+                                <property name="hexpand">true</property>
+                                <property name="halign">start</property>
+                                <property name="selectable">true</property>
+                                <layout>
+                                    <property name="row">0</property>
+                                    <property name="column">1</property>
+                                </layout>
+                                <accessibility>
+                                    <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">firmware_version_label</relation>
+                                </accessibility>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkLabel" id="serial_number_label">
+                                <property name="hexpand">true</property>
+                                <property name="halign">end</property>
+                                <property name="label" translatable="yes" context="device information">Serial Number</property>
+                                <layout>
+                                    <property name="row">1</property>
+                                    <property name="column">0</property>
+                                </layout>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkLabel" id="serial_number">
+                                <property name="hexpand">true</property>
+                                <property name="halign">start</property>
+                                <property name="selectable">true</property>
+                                <layout>
+                                    <property name="row">1</property>
+                                    <property name="column">1</property>
+                                </layout>
+                                <accessibility>
+                                    <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">serial_number_label</relation>
+                                </accessibility>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkLabel" id="age_range_label">
+                                <property name="hexpand">true</property>
+                                <property name="halign">end</property>
+                                <property name="label" translatable="yes" context="device information">Age Range</property>
+                                <layout>
+                                    <property name="row">2</property>
+                                    <property name="column">0</property>
+                                </layout>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkLabel" id="age_range">
+                                <property name="hexpand">true</property>
+                                <property name="halign">start</property>
+                                <property name="selectable">true</property>
+                                <layout>
+                                    <property name="row">2</property>
+                                    <property name="column">1</property>
+                                </layout>
+                                <accessibility>
+                                    <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">age_range_label</relation>
+                                </accessibility>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkLabel" id="feature_flags_label">
+                                <property name="hexpand">true</property>
+                                <property name="halign">end</property>
+                                <property name="valign">start</property>
+                                <property name="label" translatable="yes" context="device information">Feature Flags</property>
+                                <layout>
+                                    <property name="row">3</property>
+                                    <property name="column">0</property>
+                                </layout>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkLabel" id="feature_flags">
+                                <property name="hexpand">true</property>
+                                <property name="halign">start</property>
+                                <property name="selectable">true</property>
+                                <layout>
+                                    <property name="row">3</property>
+                                    <property name="column">1</property>
+                                </layout>
+                                <accessibility>
+                                    <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">feature_flags_label</relation>
+                                </accessibility>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+            </object>
+        </child>
+    </template>
+</interface>
