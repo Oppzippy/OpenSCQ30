@@ -40,6 +40,12 @@ describe("App", () => {
                   ),
                 ],
               },
+              ageRange: null,
+              customButtonModel: null,
+              customHearId: null,
+              leftFirmwareVersion: null,
+              rightFirmwareVersion: null,
+              serialNumber: null,
             }),
             connect: vi.fn<unknown[], unknown>(),
             async setSoundModes(soundModes: SoundModes) {

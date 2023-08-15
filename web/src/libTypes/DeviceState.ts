@@ -1,5 +1,8 @@
-import { Static, Type } from "@sinclair/typebox";
+import { Static, TSchema, Type } from "@sinclair/typebox";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
+
+const Nullable = <T extends TSchema>(schema: T) =>
+  Type.Union([schema, Type.Null()]);
 
 const singleBatterySchema = Type.Object({
   isCharging: Type.Boolean(),
@@ -30,6 +33,7 @@ export type SoundModes = Static<typeof soundModesSchema>;
 const equalizerConfigurationSchema = Type.Object({
   presetProfile: Type.Optional(
     Type.Union([
+      Type.Null(),
       Type.Literal("SoundcoreSignature"),
       Type.Literal("Acoustic"),
       Type.Literal("BassBooster"),
@@ -98,9 +102,9 @@ const deviceStateSchema = Type.Object({
     }),
   ]),
   equalizerConfiguration: equalizerConfigurationSchema,
-  soundModes: Type.Optional(soundModesSchema),
-  ageRange: Type.Optional(Type.Number()),
-  customHearId: Type.Optional(
+  soundModes: Nullable(soundModesSchema),
+  ageRange: Nullable(Type.Number()),
+  customHearId: Nullable(
     Type.Union([
       Type.Object({
         type: Type.Literal("basic"),
@@ -121,7 +125,7 @@ const deviceStateSchema = Type.Object({
         time: Type.Number(),
         hearIdType: Type.Number(),
         hearIdMusicType: Type.Number(),
-        customVolumeAdjustments: Type.Optional(
+        customVolumeAdjustments: Nullable(
           Type.Object({
             left: Type.Array(Type.Number()),
             right: Type.Array(Type.Number()),
@@ -130,19 +134,19 @@ const deviceStateSchema = Type.Object({
       }),
     ]),
   ),
-  leftFirmwareVersion: Type.Optional(
+  leftFirmwareVersion: Nullable(
     Type.Object({
       major: Type.Number(),
       minor: Type.Number(),
     }),
   ),
-  rightFirmwareVersion: Type.Optional(
+  rightFirmwareVersion: Nullable(
     Type.Object({
       major: Type.Number(),
       minor: Type.Number(),
     }),
   ),
-  customButtonModel: Type.Optional(
+  customButtonModel: Nullable(
     Type.Object({
       leftDoubleClick: twsButtonActionSchema,
       leftLongPress: twsButtonActionSchema,
@@ -152,7 +156,7 @@ const deviceStateSchema = Type.Object({
       rightSinglePress: noTwsButtonActionSchema,
     }),
   ),
-  serialNumber: Type.Optional(Type.String()),
+  serialNumber: Nullable(Type.String()),
 });
 export type DeviceState = Static<typeof deviceStateSchema>;
 export const DeviceStateValidator = TypeCompiler.Compile(deviceStateSchema);

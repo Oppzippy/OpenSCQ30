@@ -15,7 +15,10 @@ import {
   PresetEqualizerProfile,
   SoundModes,
 } from "../../libTypes/DeviceState";
-import { EqualizerHelper } from "../../../wasm/pkg/openscq30_web_wasm";
+import {
+  DeviceFeatureFlags,
+  EqualizerHelper,
+} from "../../../wasm/pkg/openscq30_web_wasm";
 
 export function DeviceSettings({
   device,
@@ -115,12 +118,29 @@ export function DeviceSettings({
     fractionalEqualizerVolumes,
   );
 
+  let noiseCanceling: Parameters<
+    typeof SoundModeSelection
+  >[0]["options"]["noiseCanceling"] = "none";
+  if (DeviceFeatureFlags.hasCustomNoiseCanceling(displayState.featureFlags)) {
+    noiseCanceling = "custom";
+  } else if (
+    DeviceFeatureFlags.hasNoiseCancelingMode(displayState.featureFlags)
+  ) {
+    noiseCanceling = "basic";
+  }
+
   return (
     <Stack spacing={2}>
       {displayState.soundModes && (
         <SoundModeSelection
           soundModes={displayState.soundModes}
           setSoundModes={setSoundModes}
+          options={{
+            hasTransparencyModes: DeviceFeatureFlags.hasTransparencyModes(
+              displayState.featureFlags,
+            ),
+            noiseCanceling,
+          }}
         />
       )}
       <EqualizerSettings

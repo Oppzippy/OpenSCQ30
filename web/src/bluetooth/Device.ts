@@ -10,6 +10,7 @@ import {
   SoundModes,
 } from "../libTypes/DeviceState";
 import { UnmodifiableBehaviorSubject } from "../UnmodifiableBehaviorSubject";
+import { DeviceStateValidationError } from "./StateValidationError";
 
 export class Device {
   private libDevice: LibDevice;
@@ -26,7 +27,12 @@ export class Device {
     const stateSubject = new BehaviorSubject(initialState);
     this.state = stateSubject;
     libDevice.setStateChangeListener((json: string) => {
-      stateSubject.next(Device.parseState(json));
+      try {
+        stateSubject.next(Device.parseState(json));
+      } catch (err) {
+        // TODO alert user
+        console.error(err);
+      }
     });
   }
 
@@ -58,12 +64,7 @@ export class Device {
       return state;
     } else {
       const errors = [...DeviceStateValidator.Errors(state)];
-      throw new Error("Failed to validate device state", {
-        cause: {
-          input: state,
-          validationErrors: errors,
-        },
-      });
+      throw new DeviceStateValidationError(state, errors);
     }
   }
 }

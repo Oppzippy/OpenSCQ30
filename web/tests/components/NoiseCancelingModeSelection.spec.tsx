@@ -14,6 +14,7 @@ describe("NoiseCancelingModeSelection", () => {
     const renderResult = render(
       <NoiseCancelingModeSelection
         value={"indoor"}
+        hasCustomMode={false}
         onValueChanged={() => {
           throw new Error("Function not implemented.");
         }}
@@ -26,7 +27,11 @@ describe("NoiseCancelingModeSelection", () => {
   it("should fire onValueChanged when clicked", async () => {
     const setMode = vi.fn();
     const renderResult = render(
-      <NoiseCancelingModeSelection value={"indoor"} onValueChanged={setMode} />,
+      <NoiseCancelingModeSelection
+        value={"indoor"}
+        hasCustomMode={true}
+        onValueChanged={setMode}
+      />,
     );
 
     await user.click(renderResult.getByText("noiseCancelingMode.outdoor"));

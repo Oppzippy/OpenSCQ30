@@ -7,9 +7,11 @@ import { SoundModes } from "../../libTypes/DeviceState";
 interface Props {
   value: SoundModes["noiseCancelingMode"];
   onValueChanged: (newValue: SoundModes["noiseCancelingMode"]) => void;
+  hasCustomMode: boolean;
 }
 
 export const NoiseCancelingModeSelection = React.memo(function ({
+  hasCustomMode,
   value,
   onValueChanged,
 }: Props) {
@@ -24,26 +26,37 @@ export const NoiseCancelingModeSelection = React.memo(function ({
     [onValueChanged],
   );
 
+  const values: {
+    value: SoundModes["noiseCancelingMode"];
+    displayText: string;
+  }[] = [
+    {
+      value: "transport",
+      displayText: t("noiseCancelingMode.transport"),
+    },
+    {
+      value: "outdoor",
+      displayText: t("noiseCancelingMode.outdoor"),
+    },
+    {
+      value: "indoor",
+      displayText: t("noiseCancelingMode.indoor"),
+    },
+  ];
+  if (hasCustomMode) {
+    values.push({
+      value: "custom",
+      displayText: t("noiseCancelingMode.custom"),
+    });
+  }
+
   return (
     <Box>
       <Typography>{t("noiseCancelingMode.noiseCancelingMode")}</Typography>
       <ToggleButtonRow
         value={value}
         onValueChanged={onValueChangedNotNull as (value: string) => void}
-        values={[
-          {
-            value: "transport",
-            displayText: t("noiseCancelingMode.transport"),
-          },
-          {
-            value: "outdoor",
-            displayText: t("noiseCancelingMode.outdoor"),
-          },
-          {
-            value: "indoor",
-            displayText: t("noiseCancelingMode.indoor"),
-          },
-        ]}
+        values={values}
       />
     </Box>
   );

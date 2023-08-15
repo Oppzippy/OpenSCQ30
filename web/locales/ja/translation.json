@@ -36,11 +36,20 @@
     "transparency": "",
     "normal": ""
   },
+  "customNoiseCanceling": {
+    "customNoiseCanceling": ""
+  },
   "noiseCancelingMode": {
-    "noiseCancelingMode": "",
     "transport": "",
     "outdoor": "",
-    "indoor": ""
+    "indoor": "",
+    "custom": "",
+    "noiseCancelingMode": ""
+  },
+  "transparencyMode": {
+    "transparencyMode": "",
+    "fullyTransparent": "",
+    "vocalMode": ""
   },
   "toast": {
     "close": ""

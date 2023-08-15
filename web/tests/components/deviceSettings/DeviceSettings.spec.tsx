@@ -39,7 +39,7 @@ describe("Device Settings", () => {
     user = userEvent.setup();
     const mockDevice = {
       state: new BehaviorSubject<DeviceState>({
-        featureFlags: 0,
+        featureFlags: 0xffffffff, // enable all feature flags
         battery: {
           type: "singleBattery",
           isCharging: true,
@@ -59,6 +59,12 @@ describe("Device Settings", () => {
             ),
           ],
         },
+        ageRange: null,
+        customButtonModel: null,
+        customHearId: null,
+        leftFirmwareVersion: null,
+        rightFirmwareVersion: null,
+        serialNumber: null,
       }),
       connect: vi.fn<unknown[], unknown>(),
       async setSoundModes(soundModes: SoundModes) {
