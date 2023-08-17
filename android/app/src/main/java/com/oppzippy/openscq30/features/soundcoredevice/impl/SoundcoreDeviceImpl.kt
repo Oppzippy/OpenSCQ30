@@ -111,18 +111,15 @@ class SoundcoreDeviceImpl(
 
     override fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
         if (_stateFlow.value.equalizerConfiguration != equalizerConfiguration) {
-            if (_stateFlow.value.featureFlags and DeviceFeatureFlags.twoChannelEqualizer() != 0) {
-                TODO("two channel equalizer is not yet supported")
-            } else {
-                queueSetMonoEqualizerConfiguration(equalizerConfiguration)
-            }
+            val packet =
+                if (_stateFlow.value.featureFlags and DeviceFeatureFlags.twoChannelEqualizer() != 0) {
+                    SetEqualizerPacket(equalizerConfiguration, equalizerConfiguration)
+                } else {
+                    SetEqualizerPacket(equalizerConfiguration, null)
+                }
+            callbacks.queueCommanad(Command.Write(packet.bytes()))
             _stateFlow.value =
                 _stateFlow.value.copy(equalizerConfiguration = equalizerConfiguration)
         }
-    }
-
-    private fun queueSetMonoEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
-        val packet = SetEqualizerPacket(equalizerConfiguration, null)
-        callbacks.queueCommanad(Command.Write(packet.bytes()))
     }
 }
