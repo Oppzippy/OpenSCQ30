@@ -93,6 +93,7 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
                         1,
                         Intent().apply {
                             action = ACTION_DISCONNECT
+                            `package` = context.packageName
                         },
                         PendingIntent.FLAG_IMMUTABLE,
                     ),
@@ -126,6 +127,7 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
                 presetId + 2,
                 Intent().apply {
                     action = ACTION_QUICK_PRESET
+                    `package` = context.packageName
                     putExtra(INTENT_EXTRA_PRESET_ID, presetId)
                 },
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
