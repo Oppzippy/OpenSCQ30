@@ -10,12 +10,12 @@ import com.oppzippy.openscq30.lib.bindings.SetEqualizerPacket
 import com.oppzippy.openscq30.lib.bindings.SetSoundModePacket
 import com.oppzippy.openscq30.lib.bindings.SoundModes
 import com.oppzippy.openscq30.lib.wrapper.SoundcoreDeviceState
-import com.oppzippy.openscq30.lib.wrapper.toSoundcoreDeviceState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.jvm.optionals.getOrNull
 
 @SuppressLint("MissingPermission")
 class SoundcoreDeviceImpl(
@@ -37,25 +37,35 @@ class SoundcoreDeviceImpl(
 
     init {
         scope.launch {
-            callbacks.packetsFlow.collect {
-                when (it) {
+            callbacks.packetsFlow.collect { packet ->
+                when (packet) {
                     is Packet.SoundModeUpdate -> {
                         _stateFlow.value =
-                            _stateFlow.value.let { state ->
-                                state.copy(
-                                    soundModes = state.soundModes?.let { soundModes ->
-                                        SoundModes(
-                                            soundModes.ambientSoundMode(),
-                                            soundModes.noiseCancelingMode(),
-                                            soundModes.transparencyMode(),
-                                            soundModes.customNoiseCanceling(),
-                                        )
-                                    },
-                                )
-                            }
+                            _stateFlow.value.copy(
+                                soundModes =
+                                SoundModes(
+                                    packet.inner.ambientSoundMode(),
+                                    packet.inner.noiseCancelingMode(),
+                                    packet.inner.transparencyMode(),
+                                    packet.inner.customNoiseCanceling(),
+                                ),
+                            )
                     }
 
-                    is Packet.StateUpdate -> _stateFlow.value = it.packet.toSoundcoreDeviceState()
+                    is Packet.StateUpdate ->
+                        _stateFlow.value =
+                            _stateFlow.value.copy(
+                                featureFlags = packet.inner.featureFlags(),
+                                firmwareVersion = if (packet.inner.firmwareVersion().isPresent) {
+                                    packet.inner.firmwareVersion().asInt
+                                } else {
+                                    null
+                                },
+                                equalizerConfiguration = packet.inner.equalizerConfiguration(),
+                                serialNumber = packet.inner.serialNumber().getOrNull(),
+                                soundModes = packet.inner.soundModes().getOrNull(),
+                            )
+
                     is Packet.SetSoundModeOk -> {}
                     is Packet.SetEqualizerOk -> {}
                 }

@@ -25,6 +25,22 @@ public final class SoundModeUpdatePacket {
     }
     private static native int do_noiseCancelingMode(long self);
 
+    public final TransparencyMode transparencyMode() {
+        int ret = do_transparencyMode(mNativeObj);
+        TransparencyMode convRet = TransparencyMode.fromInt(ret);
+
+        return convRet;
+    }
+    private static native int do_transparencyMode(long self);
+
+    public final @NonNull CustomNoiseCanceling customNoiseCanceling() {
+        long ret = do_customNoiseCanceling(mNativeObj);
+        CustomNoiseCanceling convRet = new CustomNoiseCanceling(InternalPointerMarker.RAW_PTR, ret);
+
+        return convRet;
+    }
+    private static native long do_customNoiseCanceling(long self);
+
     public synchronized void delete() {
         if (mNativeObj != 0) {
             do_delete(mNativeObj);

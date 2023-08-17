@@ -12,7 +12,7 @@ import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
 
 @Database(
-    version = 4,
+    version = 5,
     entities = [
         CustomProfile::class,
         QuickPreset::class,
@@ -25,6 +25,7 @@ import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
             to = 4,
             spec = AppDatabase.CustomEqualizerProfileNameMigration::class,
         ),
+        AutoMigration(from = 4, to = 5),
     ],
 )
 @TypeConverters(Converters::class)

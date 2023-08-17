@@ -12,14 +12,19 @@ import com.oppzippy.openscq30.ui.utils.LabeledRadioButtonGroup
 fun AmbientSoundModeSelection(
     ambientSoundMode: AmbientSoundMode,
     onAmbientSoundModeChange: (ambientSoundMode: AmbientSoundMode) -> Unit,
+    hasNoiseCanceling: Boolean,
 ) {
+    val values = linkedMapOf(
+        Pair(AmbientSoundMode.Normal, stringResource(R.string.normal)),
+        Pair(AmbientSoundMode.Transparency, stringResource(R.string.transparency)),
+    )
+    if (hasNoiseCanceling) {
+        values[AmbientSoundMode.NoiseCanceling] = stringResource(R.string.noise_canceling)
+    }
+
     LabeledRadioButtonGroup(
         selectedValue = ambientSoundMode,
-        values = linkedMapOf(
-            Pair(AmbientSoundMode.Normal, stringResource(R.string.normal)),
-            Pair(AmbientSoundMode.Transparency, stringResource(R.string.transparency)),
-            Pair(AmbientSoundMode.NoiseCanceling, stringResource(R.string.noise_canceling)),
-        ),
+        values = values,
         onValueChange = onAmbientSoundModeChange,
     )
 }
@@ -31,6 +36,7 @@ private fun PreviewAmbientSoundModeSelection() {
         AmbientSoundModeSelection(
             ambientSoundMode = AmbientSoundMode.Normal,
             onAmbientSoundModeChange = {},
+            hasNoiseCanceling = true,
         )
     }
 }

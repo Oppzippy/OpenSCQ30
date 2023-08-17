@@ -4,6 +4,7 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -14,6 +15,7 @@ import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
 import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
 import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
+import com.oppzippy.openscq30.lib.bindings.TransparencyMode
 import com.oppzippy.openscq30.ui.quickpresets.QuickPresetScreen
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -51,6 +53,8 @@ class DeviceSettingsQuickPresetsTest {
     private lateinit var name: SemanticsMatcher
     private lateinit var ambientSoundMode: SemanticsMatcher
     private lateinit var noiseCancelingMode: SemanticsMatcher
+    private lateinit var transparencyMode: SemanticsMatcher
+    private lateinit var customNoiseCanceling: SemanticsMatcher
     private lateinit var equalizer: SemanticsMatcher
     private lateinit var presetProfile: SemanticsMatcher
     private lateinit var customProfile: SemanticsMatcher
@@ -64,6 +68,10 @@ class DeviceSettingsQuickPresetsTest {
             hasTextExactly(composeRule.activity.getString(R.string.ambient_sound_mode))
         noiseCancelingMode =
             hasTextExactly(composeRule.activity.getString(R.string.noise_canceling_mode))
+        transparencyMode =
+            hasTextExactly(composeRule.activity.getString(R.string.transparency_mode))
+        customNoiseCanceling =
+            hasTextExactly(composeRule.activity.getString(R.string.custom_noise_canceling))
         equalizer = hasTextExactly(composeRule.activity.getString(R.string.equalizer))
         presetProfile = hasTestTag("quickPresetPresetEqualizerProfile")
         customProfile = hasTestTag("quickPresetCustomEqualizerProfile")
@@ -96,6 +104,21 @@ class DeviceSettingsQuickPresetsTest {
     }
 
     @Test
+    fun acceptsTransparencyMode() = runTest {
+        composeRule.setContent {
+            QuickPresetScreen()
+        }
+        assertEquals(null, quickPresetDao.get(0)?.transparencyMode)
+
+        composeRule.onNode(transparencyMode).performClick()
+        assertEquals(TransparencyMode.VocalMode, quickPresetDao.get(0)?.transparencyMode)
+
+        composeRule.onNodeWithText(composeRule.activity.getString(R.string.fully_transparent))
+            .performClick()
+        assertEquals(TransparencyMode.FullyTransparent, quickPresetDao.get(0)?.transparencyMode)
+    }
+
+    @Test
     fun acceptsNoiseCancelingMode() = runTest {
         composeRule.setContent {
             QuickPresetScreen()
@@ -107,6 +130,21 @@ class DeviceSettingsQuickPresetsTest {
 
         composeRule.onNodeWithText(composeRule.activity.getString(R.string.outdoor)).performClick()
         assertEquals(NoiseCancelingMode.Outdoor, quickPresetDao.get(0)?.noiseCancelingMode)
+    }
+
+    @Test
+    fun acceptsCustomNoiseCanceling() = runTest {
+        composeRule.setContent {
+            QuickPresetScreen()
+        }
+        assertEquals(null, quickPresetDao.get(0)?.customNoiseCanceling)
+
+        composeRule.onNode(customNoiseCanceling).performClick()
+        assertEquals(0.toShort(), quickPresetDao.get(0)?.customNoiseCanceling?.value())
+
+        composeRule.onNodeWithTag("customNoiseCancelingSlider").performClick()
+        // clicks in the middle of the 0-10 slider, which is 5
+        assertEquals(5.toShort(), quickPresetDao.get(0)?.customNoiseCanceling?.value())
     }
 
     @Test

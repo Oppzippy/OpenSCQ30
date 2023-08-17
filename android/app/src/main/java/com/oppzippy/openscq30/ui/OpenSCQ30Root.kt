@@ -71,6 +71,7 @@ fun OpenSCQ30Root(
                         clip = false,
                     )
                 },
+                label = "Selection to Settings animation",
             ) { animationIsConnected ->
                 if (animationIsConnected) {
                     DeviceSettingsScreen(
@@ -81,9 +82,19 @@ fun OpenSCQ30Root(
                                 viewModel.setSoundModes(ambientSoundMode = it)
                             }
                         },
+                        onTransparencyModeChange = {
+                            withErrorToast(context) {
+                                viewModel.setSoundModes(transparencyMode = it)
+                            }
+                        },
                         onNoiseCancelingModeChange = {
                             withErrorToast(context) {
                                 viewModel.setSoundModes(noiseCancelingMode = it)
+                            }
+                        },
+                        onCustomNoiseCancelingChange = {
+                            withErrorToast(context) {
+                                viewModel.setSoundModes(customNoiseCanceling = it)
                             }
                         },
                         onEqualizerConfigurationChange = {

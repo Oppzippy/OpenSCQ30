@@ -22,21 +22,45 @@ import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 fun SoundModeSettings(
     modifier: Modifier = Modifier,
     soundModes: SoundModes,
+    hasTransparencyModes: Boolean,
+    noiseCancelingType: NoiseCancelingType,
     onAmbientSoundModeChange: (ambientSoundMode: AmbientSoundMode) -> Unit = {},
+    onTransparencyModeChange: (transparencyMode: TransparencyMode) -> Unit = {},
     onNoiseCancelingModeChange: (noiseCancelingMode: NoiseCancelingMode) -> Unit = {},
+    onCustomNoiseCancelingChange: (customNoiseCanceling: CustomNoiseCanceling) -> Unit = {},
 ) {
     Column(modifier = modifier) {
         GroupHeader(stringResource(R.string.ambient_sound_mode))
         AmbientSoundModeSelection(
             ambientSoundMode = soundModes.ambientSoundMode(),
             onAmbientSoundModeChange = onAmbientSoundModeChange,
+            hasNoiseCanceling = noiseCancelingType != NoiseCancelingType.None,
         )
-        Spacer(modifier = Modifier.padding(vertical = 8.dp))
-        GroupHeader(stringResource(R.string.noise_canceling_mode))
-        NoiseCancelingModeSelection(
-            noiseCancelingMode = soundModes.noiseCancelingMode(),
-            onNoiseCancelingModeChange = onNoiseCancelingModeChange,
-        )
+        if (hasTransparencyModes) {
+            Spacer(modifier = Modifier.padding(vertical = 8.dp))
+            GroupHeader(stringResource(R.string.transparency_mode))
+            TransparencyModeSelection(
+                transparencyMode = soundModes.transparencyMode(),
+                onTransparencyModeChange = onTransparencyModeChange,
+            )
+        }
+        if (noiseCancelingType != NoiseCancelingType.None) {
+            Spacer(modifier = Modifier.padding(vertical = 8.dp))
+            GroupHeader(stringResource(R.string.noise_canceling_mode))
+            NoiseCancelingModeSelection(
+                noiseCancelingMode = soundModes.noiseCancelingMode(),
+                onNoiseCancelingModeChange = onNoiseCancelingModeChange,
+                hasCustomNoiseCanceling = true,
+            )
+        }
+        if (noiseCancelingType == NoiseCancelingType.Custom && soundModes.noiseCancelingMode() == NoiseCancelingMode.Custom) {
+            Spacer(modifier = Modifier.padding(vertical = 8.dp))
+            GroupHeader(stringResource(R.string.custom_noise_canceling))
+            CustomNoiseCancelingSelection(
+                customNoiseCanceling = soundModes.customNoiseCanceling(),
+                onCustomNoiseCancelingChange = onCustomNoiseCancelingChange,
+            )
+        }
     }
 }
 
@@ -60,6 +84,8 @@ private fun PreviewSoundModeSettings() {
                 TransparencyMode.VocalMode,
                 CustomNoiseCanceling(0),
             ),
+            hasTransparencyModes = true,
+            noiseCancelingType = NoiseCancelingType.Custom,
         )
     }
 }

@@ -23,6 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
 import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
+import com.oppzippy.openscq30.lib.bindings.DeviceFeatureFlags
 import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
@@ -33,6 +34,7 @@ import com.oppzippy.openscq30.ui.devicesettings.Screen
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.equalizer.EqualizerSettings
 import com.oppzippy.openscq30.ui.quickpresets.QuickPresetScreen
+import com.oppzippy.openscq30.ui.soundmode.NoiseCancelingType
 import com.oppzippy.openscq30.ui.soundmode.SoundModeSettings
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
@@ -42,7 +44,9 @@ fun DeviceSettings(
     uiState: UiDeviceState.Connected,
     onBack: () -> Unit = {},
     onAmbientSoundModeChange: (ambientSoundMode: AmbientSoundMode) -> Unit = {},
+    onTransparencyModeChange: (transparencyMode: TransparencyMode) -> Unit = {},
     onNoiseCancelingModeChange: (noiseCancelingMode: NoiseCancelingMode) -> Unit = {},
+    onCustomNoiseCancelingChange: (customNoiseCanceling: CustomNoiseCanceling) -> Unit = {},
     onEqualizerConfigurationChange: (equalizerConfiguration: EqualizerConfiguration) -> Unit = {},
 ) {
     val navController = rememberNavController()
@@ -93,8 +97,18 @@ fun DeviceSettings(
                 composable(Screen.General.route) {
                     SoundModeSettings(
                         soundModes = soundModes,
+                        hasTransparencyModes = uiState.deviceState.featureFlags and DeviceFeatureFlags.transparencyModes() != 0,
+                        noiseCancelingType = if (uiState.deviceState.featureFlags and DeviceFeatureFlags.customNoiseCanceling() != 0) {
+                            NoiseCancelingType.Custom
+                        } else if (uiState.deviceState.featureFlags and DeviceFeatureFlags.noiseCancelingMode() != 0) {
+                            NoiseCancelingType.Normal
+                        } else {
+                            NoiseCancelingType.None
+                        },
                         onAmbientSoundModeChange = onAmbientSoundModeChange,
+                        onTransparencyModeChange = onTransparencyModeChange,
                         onNoiseCancelingModeChange = onNoiseCancelingModeChange,
+                        onCustomNoiseCancelingChange = onCustomNoiseCancelingChange,
                     )
                 }
             }

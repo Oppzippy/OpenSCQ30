@@ -24,8 +24,8 @@ sealed class Packet {
         }
     }
 
-    class SoundModeUpdate(val packet: SoundModeUpdatePacket) : Packet()
-    class StateUpdate(val packet: StateUpdatePacket) : Packet()
-    class SetSoundModeOk(val packet: SetSoundModeOkPacket) : Packet()
-    class SetEqualizerOk(val packet: SetEqualizerOkPacket) : Packet()
+    class SoundModeUpdate(val inner: SoundModeUpdatePacket) : Packet()
+    class StateUpdate(val inner: StateUpdatePacket) : Packet()
+    class SetSoundModeOk(val inner: SetSoundModeOkPacket) : Packet()
+    class SetEqualizerOk(val inner: SetEqualizerOkPacket) : Packet()
 }

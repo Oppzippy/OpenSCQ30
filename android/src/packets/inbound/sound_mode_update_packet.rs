@@ -1,4 +1,7 @@
-use crate::packets::structures::{AmbientSoundMode, NoiseCancelingMode};
+use crate::{
+    packets::structures::{AmbientSoundMode, NoiseCancelingMode},
+    CustomNoiseCanceling, TransparencyMode,
+};
 use openscq30_lib::packets::inbound::SoundModeUpdatePacket as LibSoundModeUpdatePacket;
 use rifgen::rifgen_attr::generate_interface;
 
@@ -19,6 +22,16 @@ impl SoundModeUpdatePacket {
     #[generate_interface]
     pub fn noise_canceling_mode(&self) -> NoiseCancelingMode {
         self.0.noise_canceling_mode.into()
+    }
+
+    #[generate_interface]
+    pub fn transparency_mode(&self) -> TransparencyMode {
+        self.0.transparency_mode.into()
+    }
+
+    #[generate_interface]
+    pub fn custom_noise_canceling(&self) -> CustomNoiseCanceling {
+        self.0.custom_noise_canceling.into()
     }
 }
 

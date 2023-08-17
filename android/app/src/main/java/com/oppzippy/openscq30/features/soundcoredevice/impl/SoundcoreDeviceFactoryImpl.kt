@@ -30,6 +30,6 @@ class SoundcoreDeviceFactoryImpl(private val context: Context) : SoundcoreDevice
         }
 
         val packet = callbacks.packetsFlow.first { it is Packet.StateUpdate } as Packet.StateUpdate
-        return SoundcoreDeviceImpl(gatt, callbacks, scope, packet.packet.toSoundcoreDeviceState())
+        return SoundcoreDeviceImpl(gatt, callbacks, scope, packet.inner.toSoundcoreDeviceState())
     }
 }
