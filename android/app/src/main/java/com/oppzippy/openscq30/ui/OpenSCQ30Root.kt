@@ -5,13 +5,12 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -31,7 +30,6 @@ import com.oppzippy.openscq30.ui.devicesettings.DeviceSettingsScreen
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun OpenSCQ30Root(
     viewModel: DeviceSettingsViewModel = hiltViewModel(),
@@ -67,7 +65,7 @@ fun OpenSCQ30Root(
                 targetState = isConnected,
                 transitionSpec = {
                     val widthDivisor = if (targetState) 2 else -2
-                    slideInHorizontally { width -> width / widthDivisor } + fadeIn() with slideOutHorizontally { width -> width / -widthDivisor } + fadeOut() using SizeTransform(
+                    slideInHorizontally { width -> width / widthDivisor } + fadeIn() togetherWith slideOutHorizontally { width -> width / -widthDivisor } + fadeOut() using SizeTransform(
                         clip = false,
                     )
                 },
