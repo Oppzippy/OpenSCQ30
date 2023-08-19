@@ -55,5 +55,4 @@ sealed class Packet {
     class FirmwareVersionUpdate(val inner: FirmwareVersionUpdatePacket) : Packet()
     class LdacStateUpdate(val inner: LdacStateUpdatePacket) : Packet()
     class TwsStatusUpdate(val inner: TwsStatusUpdatePacket) : Packet()
-
 }

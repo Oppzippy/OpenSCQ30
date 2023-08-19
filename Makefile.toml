@@ -93,3 +93,7 @@ end
 install_prefix = canonicalize ${INSTALL_PREFIX}
 echo Install prefix is ${install_prefix}
 '''
+
+[tasks.fmt-check]
+command = "cargo"
+args = ["fmt", "--check"]

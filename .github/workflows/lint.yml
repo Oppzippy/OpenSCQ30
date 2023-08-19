@@ -11,17 +11,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: true
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
+      - name: Install cargo-make
+        uses: davidB/rust-cargo-make@v1
       - name: Check formatting
-        run: cargo fmt --check
+        run: cargo make fmt-check
 
   ktlint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: true
       - uses: actions/setup-java@v3
         with:
           distribution: temurin # See 'Supported distributions' for available options

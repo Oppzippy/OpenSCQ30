@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: true
       - name: Install dependencies from apt
         run: |
           sudo apt-get update
@@ -41,6 +43,8 @@ jobs:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: true
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
       - name: Cache cargo dependencies
@@ -54,6 +58,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: true
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
         with:
