@@ -173,7 +173,7 @@ class DeviceSettingsSoundModeTest {
         // clicks in the middle of the 0-10 slider, so 5
         composeRule.onNode(customNoiseCanceling).performClick()
         verify(exactly = 1) {
-            onCustomNoiseCancelingChange(any())
+            onCustomNoiseCancelingChange(CustomNoiseCanceling(5))
         }
     }
 

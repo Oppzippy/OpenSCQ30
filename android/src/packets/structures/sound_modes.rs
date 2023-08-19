@@ -1,7 +1,8 @@
 use super::{AmbientSoundMode, CustomNoiseCanceling, NoiseCancelingMode, TransparencyMode};
 use openscq30_lib::packets::structures::SoundModes as LibSoundModes;
-use rifgen::rifgen_attr::generate_interface;
+use rifgen::rifgen_attr::{generate_interface, generate_interface_doc};
 
+#[generate_interface_doc]
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct SoundModes(LibSoundModes);
 
@@ -39,11 +40,6 @@ impl SoundModes {
     #[generate_interface]
     pub fn custom_noise_canceling(&self) -> CustomNoiseCanceling {
         self.0.custom_noise_canceling.into()
-    }
-
-    #[generate_interface]
-    pub fn inner_equals(&self, other: &SoundModes) -> bool {
-        self == other
     }
 }
 

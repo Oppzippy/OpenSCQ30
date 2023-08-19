@@ -146,7 +146,12 @@ private fun DefaultPreview() {
                     equalizerConfiguration = EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
                     soundModes = null,
                     serialNumber = null,
-                    firmwareVersion = null,
+                    leftFirmwareVersion = null,
+                    rightFirmwareVersion = null,
+                    leftBatteryLevel = 0,
+                    rightBatteryLevel = 0,
+                    isLeftBatteryCharging = false,
+                    isRightBatteryCharging = false,
                 ),
             ),
         )

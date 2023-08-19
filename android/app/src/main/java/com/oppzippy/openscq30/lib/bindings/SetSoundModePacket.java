@@ -3,6 +3,23 @@ package com.oppzippy.openscq30.lib.bindings;
 import androidx.annotation.NonNull;
 
 public final class SetSoundModePacket {
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof SetSoundModePacket)
+            return ((SetSoundModePacket)obj).rustEq(this);
+        return false;
+    }
+
+
+    private final boolean rustEq(@NonNull SetSoundModePacket other) {
+        long a0 = other.mNativeObj;
+        boolean ret = do_rustEq(mNativeObj, a0);
+
+        JNIReachabilityFence.reachabilityFence1(other);
+
+        return ret;
+    }
+    private static native boolean do_rustEq(long self, long other);
 
     public SetSoundModePacket(@NonNull SoundModes sound_modes) {
         long a0 = sound_modes.mNativeObj;

@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 openscq30_lib = { path = "../lib" }
 tracing = { version = "0.1", features = ["log-always"] }
-rifgen = "0.1.61"
+rifgen = { path = "../rifgen" }
 jni-sys = "0.3.0"
 log = "0.4"
 tokio = { version = "1", features = ["rt-multi-thread"] }
@@ -17,8 +17,8 @@ macaddr = "1.0.1"
 uuid = "1.3"
 
 [build-dependencies]
-flapigen = "0.6.0-pre13"
-rifgen = "0.1.61"
+flapigen = "0.6.0"
+rifgen = { path = "../rifgen" }
 
 [lib]
 crate-type = ["cdylib"]

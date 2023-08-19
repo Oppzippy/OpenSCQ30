@@ -4,6 +4,23 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public final class SetEqualizerPacket {
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof SetEqualizerPacket)
+            return ((SetEqualizerPacket)obj).rustEq(this);
+        return false;
+    }
+
+
+    private final boolean rustEq(@NonNull SetEqualizerPacket other) {
+        long a0 = other.mNativeObj;
+        boolean ret = do_rustEq(mNativeObj, a0);
+
+        JNIReachabilityFence.reachabilityFence1(other);
+
+        return ret;
+    }
+    private static native boolean do_rustEq(long self, long other);
 
     public SetEqualizerPacket(@NonNull EqualizerConfiguration left_configuration, @Nullable EqualizerConfiguration right_configuration) {
         long a0 = left_configuration.mNativeObj;

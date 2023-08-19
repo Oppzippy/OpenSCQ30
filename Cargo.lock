@@ -1740,22 +1740,30 @@ checksum = "e5ea92a5b6195c6ef2a0295ea818b312502c6fc94dde986c5553242e18fd4ce2"
 
 [[package]]
 name = "rifgen"
-version = "0.1.61"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba139f9f8c0d72232525b60bf83a81c6801df932d80ad6b4d0c8c0ccee9fa116"
+version = "0.1.7"
 dependencies = [
  "Inflector",
  "derive-new",
  "rifgen_attr",
+ "rifgen_attributes_utils",
  "syn 1.0.109",
 ]
 
 [[package]]
 name = "rifgen_attr"
 version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3df05e0adb96c94ddb287013558ba7ff67f097219f6afa3c789506472e71272"
 dependencies = [
+ "quote",
+ "rifgen_attributes_utils",
+ "syn 1.0.109",
+]
+
+[[package]]
+name = "rifgen_attributes_utils"
+version = "0.1.0"
+dependencies = [
+ "itertools 0.10.5",
+ "proc-macro2",
  "quote",
  "syn 1.0.109",
 ]

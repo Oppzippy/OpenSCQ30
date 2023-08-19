@@ -61,6 +61,97 @@ public final class InboundPacket {
     }
     private static native long do_stateUpdate(long self);
 
+    public final @NonNull java.util.Optional<SetEqualizerWithDrcOkPacket> setEqualizerWithDrcOk() {
+        long ret = do_setEqualizerWithDrcOk(mNativeObj);
+        java.util.Optional<SetEqualizerWithDrcOkPacket> convRet;
+        if (ret != 0) {
+            convRet = java.util.Optional.of(new SetEqualizerWithDrcOkPacket(InternalPointerMarker.RAW_PTR, ret));
+        } else {
+            convRet = java.util.Optional.empty();
+        }
+
+        return convRet;
+    }
+    private static native long do_setEqualizerWithDrcOk(long self);
+
+    public final @NonNull java.util.Optional<BatteryChargingUpdatePacket> batteryChargingUpdate() {
+        long ret = do_batteryChargingUpdate(mNativeObj);
+        java.util.Optional<BatteryChargingUpdatePacket> convRet;
+        if (ret != 0) {
+            convRet = java.util.Optional.of(new BatteryChargingUpdatePacket(InternalPointerMarker.RAW_PTR, ret));
+        } else {
+            convRet = java.util.Optional.empty();
+        }
+
+        return convRet;
+    }
+    private static native long do_batteryChargingUpdate(long self);
+
+    public final @NonNull java.util.Optional<BatteryLevelUpdatePacket> batteryLevelUpdate() {
+        long ret = do_batteryLevelUpdate(mNativeObj);
+        java.util.Optional<BatteryLevelUpdatePacket> convRet;
+        if (ret != 0) {
+            convRet = java.util.Optional.of(new BatteryLevelUpdatePacket(InternalPointerMarker.RAW_PTR, ret));
+        } else {
+            convRet = java.util.Optional.empty();
+        }
+
+        return convRet;
+    }
+    private static native long do_batteryLevelUpdate(long self);
+
+    public final @NonNull java.util.Optional<ChineseVoicePromptStateUpdatePacket> chineseVoicePromptStateUpdate() {
+        long ret = do_chineseVoicePromptStateUpdate(mNativeObj);
+        java.util.Optional<ChineseVoicePromptStateUpdatePacket> convRet;
+        if (ret != 0) {
+            convRet = java.util.Optional.of(new ChineseVoicePromptStateUpdatePacket(InternalPointerMarker.RAW_PTR, ret));
+        } else {
+            convRet = java.util.Optional.empty();
+        }
+
+        return convRet;
+    }
+    private static native long do_chineseVoicePromptStateUpdate(long self);
+
+    public final @NonNull java.util.Optional<FirmwareVersionUpdatePacket> firmwareVersionUpdate() {
+        long ret = do_firmwareVersionUpdate(mNativeObj);
+        java.util.Optional<FirmwareVersionUpdatePacket> convRet;
+        if (ret != 0) {
+            convRet = java.util.Optional.of(new FirmwareVersionUpdatePacket(InternalPointerMarker.RAW_PTR, ret));
+        } else {
+            convRet = java.util.Optional.empty();
+        }
+
+        return convRet;
+    }
+    private static native long do_firmwareVersionUpdate(long self);
+
+    public final @NonNull java.util.Optional<LdacStateUpdatePacket> ldacStateUpdate() {
+        long ret = do_ldacStateUpdate(mNativeObj);
+        java.util.Optional<LdacStateUpdatePacket> convRet;
+        if (ret != 0) {
+            convRet = java.util.Optional.of(new LdacStateUpdatePacket(InternalPointerMarker.RAW_PTR, ret));
+        } else {
+            convRet = java.util.Optional.empty();
+        }
+
+        return convRet;
+    }
+    private static native long do_ldacStateUpdate(long self);
+
+    public final @NonNull java.util.Optional<TwsStatusUpdatePacket> twsStatusUpdate() {
+        long ret = do_twsStatusUpdate(mNativeObj);
+        java.util.Optional<TwsStatusUpdatePacket> convRet;
+        if (ret != 0) {
+            convRet = java.util.Optional.of(new TwsStatusUpdatePacket(InternalPointerMarker.RAW_PTR, ret));
+        } else {
+            convRet = java.util.Optional.empty();
+        }
+
+        return convRet;
+    }
+    private static native long do_twsStatusUpdate(long self);
+
     public synchronized void delete() {
         if (mNativeObj != 0) {
             do_delete(mNativeObj);

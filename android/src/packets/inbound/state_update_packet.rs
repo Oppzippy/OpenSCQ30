@@ -1,7 +1,8 @@
-use crate::{EqualizerConfiguration, SoundModes};
+use crate::{EqualizerConfiguration, FirmwareVersion, SoundModes};
 use openscq30_lib::packets::inbound::state_update_packet::StateUpdatePacket as LibStateUpdatePacket;
-use rifgen::rifgen_attr::generate_interface;
+use rifgen::rifgen_attr::{generate_interface, generate_interface_doc};
 
+#[generate_interface_doc]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct StateUpdatePacket(LibStateUpdatePacket);
 
@@ -27,10 +28,8 @@ impl StateUpdatePacket {
     }
 
     #[generate_interface]
-    pub fn firmware_version(&self) -> Option<i32> {
-        self.0
-            .firmware_version
-            .map(|firmware_version| firmware_version.number().into())
+    pub fn firmware_version(&self) -> Option<FirmwareVersion> {
+        self.0.firmware_version.map(Into::into)
     }
 
     #[generate_interface]

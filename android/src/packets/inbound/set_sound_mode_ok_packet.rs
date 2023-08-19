@@ -1,6 +1,7 @@
 use openscq30_lib::packets::inbound::SetSoundModeOkPacket as LibSetSoundModeOkPacket;
-use rifgen::rifgen_attr::generate_interface;
+use rifgen::rifgen_attr::{generate_interface, generate_interface_doc};
 
+#[generate_interface_doc]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct SetSoundModeOkPacket(LibSetSoundModeOkPacket);
 

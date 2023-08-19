@@ -22,3 +22,9 @@ impl From<&str> for SerialNumber {
         Self(value.into())
     }
 }
+
+impl ToString for SerialNumber {
+    fn to_string(&self) -> String {
+        self.0.to_string()
+    }
+}

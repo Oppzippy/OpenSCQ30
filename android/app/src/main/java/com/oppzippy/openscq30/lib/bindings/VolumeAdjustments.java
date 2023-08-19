@@ -3,6 +3,23 @@ package com.oppzippy.openscq30.lib.bindings;
 import androidx.annotation.NonNull;
 
 public final class VolumeAdjustments {
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof VolumeAdjustments)
+            return ((VolumeAdjustments)obj).rustEq(this);
+        return false;
+    }
+
+
+    private final boolean rustEq(@NonNull VolumeAdjustments other) {
+        long a0 = other.mNativeObj;
+        boolean ret = do_rustEq(mNativeObj, a0);
+
+        JNIReachabilityFence.reachabilityFence1(other);
+
+        return ret;
+    }
+    private static native boolean do_rustEq(long self, long other);
 
     public VolumeAdjustments(@NonNull byte [] volume_adjustments) {
         mNativeObj = init(volume_adjustments);

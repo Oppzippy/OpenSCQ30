@@ -1,0 +1,3 @@
+[submodule "openscq30-rifgen"]
+	path = rifgen
+	url = git@github.com:Oppzippy/openscq30-rifgen.git

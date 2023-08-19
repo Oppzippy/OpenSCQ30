@@ -1,8 +1,9 @@
 use openscq30_lib::packets::structures;
-use rifgen::rifgen_attr::generate_interface;
+use rifgen::rifgen_attr::{generate_interface, generate_interface_doc};
 
 use super::{PresetEqualizerProfile, VolumeAdjustments};
 
+#[generate_interface_doc]
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub struct EqualizerConfiguration {
     inner: structures::EqualizerConfiguration,
@@ -45,7 +46,7 @@ impl EqualizerConfiguration {
     }
 
     #[generate_interface]
-    pub fn inner_equals(&self, other: &EqualizerConfiguration) -> bool {
+    pub fn equals(&self, other: &EqualizerConfiguration) -> bool {
         self == other
     }
 }

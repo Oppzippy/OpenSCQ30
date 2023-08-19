@@ -3,6 +3,23 @@ package com.oppzippy.openscq30.lib.bindings;
 import androidx.annotation.NonNull;
 
 public final class EqualizerConfiguration {
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof EqualizerConfiguration)
+            return ((EqualizerConfiguration)obj).rustEq(this);
+        return false;
+    }
+
+
+    private final boolean rustEq(@NonNull EqualizerConfiguration other) {
+        long a0 = other.mNativeObj;
+        boolean ret = do_rustEq(mNativeObj, a0);
+
+        JNIReachabilityFence.reachabilityFence1(other);
+
+        return ret;
+    }
+    private static native boolean do_rustEq(long self, long other);
 
     public EqualizerConfiguration(@NonNull PresetEqualizerProfile preset_profile) {
         int a0 = preset_profile.getValue();
@@ -46,15 +63,15 @@ public final class EqualizerConfiguration {
     }
     private static native long do_volumeAdjustments(long self);
 
-    public final boolean innerEquals(@NonNull EqualizerConfiguration other) {
+    public final boolean equals(@NonNull EqualizerConfiguration other) {
         long a0 = other.mNativeObj;
-        boolean ret = do_innerEquals(mNativeObj, a0);
+        boolean ret = do_equals(mNativeObj, a0);
 
         JNIReachabilityFence.reachabilityFence1(other);
 
         return ret;
     }
-    private static native boolean do_innerEquals(long self, long other);
+    private static native boolean do_equals(long self, long other);
 
     public synchronized void delete() {
         if (mNativeObj != 0) {

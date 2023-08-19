@@ -8,8 +8,13 @@ fun SoundcoreDeviceState.Companion.empty(): SoundcoreDeviceState {
     return SoundcoreDeviceState(
         featureFlags = 0,
         serialNumber = null,
-        firmwareVersion = null,
+        leftFirmwareVersion = null,
+        rightFirmwareVersion = null,
         equalizerConfiguration = EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
         soundModes = null,
+        leftBatteryLevel = 0,
+        rightBatteryLevel = 0,
+        isLeftBatteryCharging = false,
+        isRightBatteryCharging = false,
     )
 }

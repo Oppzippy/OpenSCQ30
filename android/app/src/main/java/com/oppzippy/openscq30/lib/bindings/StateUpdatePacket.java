@@ -4,6 +4,23 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public final class StateUpdatePacket {
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof StateUpdatePacket)
+            return ((StateUpdatePacket)obj).rustEq(this);
+        return false;
+    }
+
+
+    private final boolean rustEq(@NonNull StateUpdatePacket other) {
+        long a0 = other.mNativeObj;
+        boolean ret = do_rustEq(mNativeObj, a0);
+
+        JNIReachabilityFence.reachabilityFence1(other);
+
+        return ret;
+    }
+    private static native boolean do_rustEq(long self, long other);
 
     public StateUpdatePacket() throws Exception {
         mNativeObj = init();
@@ -38,12 +55,18 @@ public final class StateUpdatePacket {
     }
     private static native long do_equalizerConfiguration(long self);
 
-    public final @NonNull java.util.OptionalInt firmwareVersion() {
-        java.util.OptionalInt ret = do_firmwareVersion(mNativeObj);
+    public final @NonNull java.util.Optional<FirmwareVersion> firmwareVersion() {
+        long ret = do_firmwareVersion(mNativeObj);
+        java.util.Optional<FirmwareVersion> convRet;
+        if (ret != 0) {
+            convRet = java.util.Optional.of(new FirmwareVersion(InternalPointerMarker.RAW_PTR, ret));
+        } else {
+            convRet = java.util.Optional.empty();
+        }
 
-        return ret;
+        return convRet;
     }
-    private static native @NonNull java.util.OptionalInt do_firmwareVersion(long self);
+    private static native long do_firmwareVersion(long self);
 
     public final @NonNull java.util.Optional<String> serialNumber() {
         String ret = do_serialNumber(mNativeObj);

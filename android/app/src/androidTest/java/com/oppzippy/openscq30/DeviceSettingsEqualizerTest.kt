@@ -143,11 +143,7 @@ class DeviceSettingsEqualizerTest {
         composeRule.onNode(bassBooster, true).performClick()
         Thread.sleep(600) // Wait for debounce
         verify {
-            onEqualizerConfigurationChange(
-                match {
-                    it.innerEquals(EqualizerConfiguration(PresetEqualizerProfile.BassBooster))
-                },
-            )
+            onEqualizerConfigurationChange(EqualizerConfiguration(PresetEqualizerProfile.BassBooster))
         }
 
         val values = byteArrayOf(40, 30, 10, 0, 0, 0, 0, 0)

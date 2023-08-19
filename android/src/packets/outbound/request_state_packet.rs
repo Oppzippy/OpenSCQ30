@@ -1,8 +1,9 @@
 use openscq30_lib::packets::outbound::OutboundPacketBytes;
-use rifgen::rifgen_attr::generate_interface;
+use rifgen::rifgen_attr::{generate_interface, generate_interface_doc};
 
 use crate::{type_conversion, OutboundPacket};
 
+#[generate_interface_doc]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct RequestStatePacket {
     packet: openscq30_lib::packets::outbound::RequestStatePacket,

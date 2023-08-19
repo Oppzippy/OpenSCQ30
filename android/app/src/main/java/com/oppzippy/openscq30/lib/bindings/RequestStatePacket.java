@@ -3,6 +3,23 @@ package com.oppzippy.openscq30.lib.bindings;
 import androidx.annotation.NonNull;
 
 public final class RequestStatePacket {
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof RequestStatePacket)
+            return ((RequestStatePacket)obj).rustEq(this);
+        return false;
+    }
+
+
+    private final boolean rustEq(@NonNull RequestStatePacket other) {
+        long a0 = other.mNativeObj;
+        boolean ret = do_rustEq(mNativeObj, a0);
+
+        JNIReachabilityFence.reachabilityFence1(other);
+
+        return ret;
+    }
+    private static native boolean do_rustEq(long self, long other);
 
     public RequestStatePacket() {
         mNativeObj = init();

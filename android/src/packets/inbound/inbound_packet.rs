@@ -2,8 +2,10 @@ use openscq30_lib::packets::inbound::InboundPacket as LibInboundPacket;
 use rifgen::rifgen_attr::generate_interface;
 
 use crate::{
-    type_conversion, SetEqualizerOkPacket, SetSoundModeOkPacket, SoundModeUpdatePacket,
-    StateUpdatePacket,
+    type_conversion, BatteryChargingUpdatePacket, BatteryLevelUpdatePacket,
+    ChineseVoicePromptStateUpdatePacket, FirmwareVersionUpdatePacket, LdacStateUpdatePacket,
+    SetEqualizerOkPacket, SetEqualizerWithDrcOkPacket, SetSoundModeOkPacket, SoundModeUpdatePacket,
+    StateUpdatePacket, TwsStatusUpdatePacket,
 };
 
 pub struct InboundPacket(LibInboundPacket);
@@ -47,6 +49,69 @@ impl InboundPacket {
     #[generate_interface]
     pub fn state_update(&self) -> Option<StateUpdatePacket> {
         if let LibInboundPacket::StateUpdate(packet) = &self.0 {
+            Some(packet.to_owned().into())
+        } else {
+            None
+        }
+    }
+
+    #[generate_interface]
+    pub fn set_equalizer_with_drc_ok(&self) -> Option<SetEqualizerWithDrcOkPacket> {
+        if let LibInboundPacket::SetEqualizerWithDrcOk(packet) = &self.0 {
+            Some(packet.to_owned().into())
+        } else {
+            None
+        }
+    }
+
+    #[generate_interface]
+    pub fn battery_charging_update(&self) -> Option<BatteryChargingUpdatePacket> {
+        if let LibInboundPacket::BatteryChargingUpdate(packet) = &self.0 {
+            Some(packet.to_owned().into())
+        } else {
+            None
+        }
+    }
+
+    #[generate_interface]
+    pub fn battery_level_update(&self) -> Option<BatteryLevelUpdatePacket> {
+        if let LibInboundPacket::BatteryLevelUpdate(packet) = &self.0 {
+            Some(packet.to_owned().into())
+        } else {
+            None
+        }
+    }
+
+    #[generate_interface]
+    pub fn chinese_voice_prompt_state_update(&self) -> Option<ChineseVoicePromptStateUpdatePacket> {
+        if let LibInboundPacket::ChineseVoicePromptStateUpdate(packet) = &self.0 {
+            Some(packet.to_owned().into())
+        } else {
+            None
+        }
+    }
+
+    #[generate_interface]
+    pub fn firmware_version_update(&self) -> Option<FirmwareVersionUpdatePacket> {
+        if let LibInboundPacket::FirmwareVersionUpdate(packet) = &self.0 {
+            Some(packet.to_owned().into())
+        } else {
+            None
+        }
+    }
+
+    #[generate_interface]
+    pub fn ldac_state_update(&self) -> Option<LdacStateUpdatePacket> {
+        if let LibInboundPacket::LdacStateUpdate(packet) = &self.0 {
+            Some(packet.to_owned().into())
+        } else {
+            None
+        }
+    }
+
+    #[generate_interface]
+    pub fn tws_status_update(&self) -> Option<TwsStatusUpdatePacket> {
+        if let LibInboundPacket::TwsStatusUpdate(packet) = &self.0 {
             Some(packet.to_owned().into())
         } else {
             None

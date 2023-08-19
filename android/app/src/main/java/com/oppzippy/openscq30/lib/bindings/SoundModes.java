@@ -3,6 +3,23 @@ package com.oppzippy.openscq30.lib.bindings;
 import androidx.annotation.NonNull;
 
 public final class SoundModes {
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof SoundModes)
+            return ((SoundModes)obj).rustEq(this);
+        return false;
+    }
+
+
+    private final boolean rustEq(@NonNull SoundModes other) {
+        long a0 = other.mNativeObj;
+        boolean ret = do_rustEq(mNativeObj, a0);
+
+        JNIReachabilityFence.reachabilityFence1(other);
+
+        return ret;
+    }
+    private static native boolean do_rustEq(long self, long other);
 
     public SoundModes(@NonNull AmbientSoundMode ambient_sound_mode, @NonNull NoiseCancelingMode noise_canceling_mode, @NonNull TransparencyMode transparency_mode, @NonNull CustomNoiseCanceling custom_noise_canceling) {
         int a0 = ambient_sound_mode.getValue();        int a1 = noise_canceling_mode.getValue();        int a2 = transparency_mode.getValue();
@@ -45,16 +62,6 @@ public final class SoundModes {
         return convRet;
     }
     private static native long do_customNoiseCanceling(long self);
-
-    public final boolean innerEquals(@NonNull SoundModes other) {
-        long a0 = other.mNativeObj;
-        boolean ret = do_innerEquals(mNativeObj, a0);
-
-        JNIReachabilityFence.reachabilityFence1(other);
-
-        return ret;
-    }
-    private static native boolean do_innerEquals(long self, long other);
 
     public synchronized void delete() {
         if (mNativeObj != 0) {

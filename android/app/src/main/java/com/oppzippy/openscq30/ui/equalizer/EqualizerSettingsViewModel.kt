@@ -50,9 +50,7 @@ class EqualizerSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             uiStateFlow.mapLatest { state ->
                 state?.deviceState?.equalizerConfiguration
-            }.filterNotNull().distinctUntilChanged { old, new ->
-                old.innerEquals(new)
-            }.collectLatest {
+            }.filterNotNull().distinctUntilChanged().collectLatest {
                 _displayedEqualizerConfiguration.value = it
             }
         }

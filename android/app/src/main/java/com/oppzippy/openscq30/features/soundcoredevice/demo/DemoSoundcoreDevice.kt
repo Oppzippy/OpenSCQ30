@@ -5,6 +5,7 @@ import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
 import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
 import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
 import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.bindings.FirmwareVersion
 import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
 import com.oppzippy.openscq30.lib.bindings.SoundModes
@@ -28,8 +29,13 @@ class DemoSoundcoreDevice(
                 CustomNoiseCanceling(0),
             ),
             equalizerConfiguration = EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
-            firmwareVersion = 100,
+            leftFirmwareVersion = FirmwareVersion(1, 0),
+            rightFirmwareVersion = FirmwareVersion(1, 1),
             serialNumber = "0000000000000000",
+            leftBatteryLevel = 4,
+            rightBatteryLevel = 3,
+            isLeftBatteryCharging = false,
+            isRightBatteryCharging = true,
         ),
     )
     override val stateFlow: Flow<SoundcoreDeviceState> = _stateFlow.asStateFlow()

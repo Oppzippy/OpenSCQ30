@@ -1,6 +1,7 @@
 use openscq30_lib::packets::structures::CustomNoiseCanceling as LibCustomNoiseCanceling;
-use rifgen::rifgen_attr::generate_interface;
+use rifgen::rifgen_attr::{generate_interface, generate_interface_doc};
 
+#[generate_interface_doc]
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct CustomNoiseCanceling(LibCustomNoiseCanceling);
 

@@ -3,8 +3,9 @@ use crate::{
     CustomNoiseCanceling, TransparencyMode,
 };
 use openscq30_lib::packets::inbound::SoundModeUpdatePacket as LibSoundModeUpdatePacket;
-use rifgen::rifgen_attr::generate_interface;
+use rifgen::rifgen_attr::{generate_interface, generate_interface_doc};
 
+#[generate_interface_doc]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct SoundModeUpdatePacket(LibSoundModeUpdatePacket);
 

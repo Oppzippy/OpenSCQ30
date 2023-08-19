@@ -54,20 +54,55 @@ class SoundcoreDeviceImpl(
 
                     is Packet.StateUpdate ->
                         _stateFlow.value =
-                            _stateFlow.value.copy(
-                                featureFlags = packet.inner.featureFlags(),
-                                firmwareVersion = if (packet.inner.firmwareVersion().isPresent) {
-                                    packet.inner.firmwareVersion().asInt
-                                } else {
-                                    null
-                                },
-                                equalizerConfiguration = packet.inner.equalizerConfiguration(),
-                                serialNumber = packet.inner.serialNumber().getOrNull(),
-                                soundModes = packet.inner.soundModes().getOrNull(),
-                            )
+                            _stateFlow.value.let { state ->
+                                state.copy(
+                                    featureFlags = packet.inner.featureFlags(),
+                                    leftFirmwareVersion = packet.inner.firmwareVersion().getOrNull()
+                                        ?: state.leftFirmwareVersion,
+                                    equalizerConfiguration = packet.inner.equalizerConfiguration(),
+                                    serialNumber = packet.inner.serialNumber().getOrNull()
+                                        ?: state.serialNumber,
+                                    soundModes = packet.inner.soundModes().getOrNull()
+                                        ?: state.soundModes,
+                                )
+                            }
 
                     is Packet.SetSoundModeOk -> {}
                     is Packet.SetEqualizerOk -> {}
+                    is Packet.BatteryChargingUpdate -> {
+                        _stateFlow.value = _stateFlow.value.copy(
+                            isLeftBatteryCharging = packet.inner.isLeftCharging,
+                            isRightBatteryCharging = packet.inner.isRightCharging,
+                        )
+                    }
+
+                    is Packet.BatteryLevelUpdate -> {
+                        _stateFlow.value = _stateFlow.value.copy(
+                            leftBatteryLevel = packet.inner.leftLevel(),
+                            rightBatteryLevel = packet.inner.rightLevel(),
+                        )
+                    }
+
+                    is Packet.ChineseVoicePromptStateUpdate -> {
+                        // no point in tracking this
+                    }
+
+                    is Packet.FirmwareVersionUpdate -> {
+                        _stateFlow.value =
+                            _stateFlow.value.copy(
+                                leftFirmwareVersion = packet.inner.leftFirmwareVersion(),
+                                rightFirmwareVersion = packet.inner.rightFirmwareVersion(),
+                            )
+                    }
+
+                    is Packet.LdacStateUpdate -> {
+                        // TODO implement
+                    }
+
+                    is Packet.SetEqualizerWithDrcOk -> {}
+                    is Packet.TwsStatusUpdate -> {
+                        // TODO implement
+                    }
                 }
             }
         }
@@ -79,7 +114,7 @@ class SoundcoreDeviceImpl(
 
     override fun setSoundModes(newSoundModes: SoundModes) {
         val prevSoundModes = _stateFlow.value.soundModes ?: return
-        if (prevSoundModes.innerEquals(newSoundModes)) return
+        if (prevSoundModes == newSoundModes) return
 
         val needsNoiseCanceling =
             prevSoundModes.ambientSoundMode() != AmbientSoundMode.NoiseCanceling &&
