@@ -30,6 +30,7 @@ import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
 import com.oppzippy.openscq30.lib.bindings.SoundModes
 import com.oppzippy.openscq30.lib.bindings.TransparencyMode
 import com.oppzippy.openscq30.lib.wrapper.SoundcoreDeviceState
+import com.oppzippy.openscq30.ui.deviceinfo.DeviceInfoScreen
 import com.oppzippy.openscq30.ui.devicesettings.Screen
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.equalizer.EqualizerSettings
@@ -54,6 +55,7 @@ fun DeviceSettings(
         Screen.General,
         Screen.Equalizer,
         Screen.QuickPresets,
+        Screen.DeviceInfo,
     )
     Scaffold(
         topBar = {
@@ -121,6 +123,9 @@ fun DeviceSettings(
             composable(Screen.QuickPresets.route) {
                 QuickPresetScreen()
             }
+            composable(Screen.DeviceInfo.route) {
+                DeviceInfoScreen(deviceState = uiState.deviceState)
+            }
         }
     }
 }
@@ -149,6 +154,7 @@ private fun PreviewDeviceSettings() {
                     rightBatteryLevel = 0,
                     isLeftBatteryCharging = false,
                     isRightBatteryCharging = false,
+                    ageRange = null,
                 ),
             ),
         )

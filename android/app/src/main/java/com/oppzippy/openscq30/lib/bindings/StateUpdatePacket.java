@@ -76,6 +76,13 @@ public final class StateUpdatePacket {
     }
     private static native @Nullable String do_serialNumber(long self);
 
+    public final @NonNull java.util.OptionalInt ageRange() {
+        java.util.OptionalInt ret = do_ageRange(mNativeObj);
+
+        return ret;
+    }
+    private static native @NonNull java.util.OptionalInt do_ageRange(long self);
+
     public synchronized void delete() {
         if (mNativeObj != 0) {
             do_delete(mNativeObj);

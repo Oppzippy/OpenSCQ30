@@ -39,6 +39,11 @@ impl StateUpdatePacket {
             .as_ref()
             .map(|serial_number| serial_number.0.to_string())
     }
+
+    #[generate_interface]
+    pub fn age_range(&self) -> Option<i32> {
+        self.0.age_range.map(|age_range| age_range.0.into())
+    }
 }
 
 impl From<LibStateUpdatePacket> for StateUpdatePacket {

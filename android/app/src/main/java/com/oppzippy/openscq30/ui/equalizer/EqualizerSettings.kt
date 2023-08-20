@@ -152,6 +152,7 @@ private fun DefaultPreview() {
                     rightBatteryLevel = 0,
                     isLeftBatteryCharging = false,
                     isRightBatteryCharging = false,
+                    ageRange = null,
                 ),
             ),
         )

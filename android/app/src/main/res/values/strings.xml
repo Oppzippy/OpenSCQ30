@@ -93,4 +93,9 @@
     <string name="fully_transparent">Fully Transparent</string>
     <string name="custom_noise_canceling">Custom Noise Canceling</string>
     <string name="transparency_mode">Transparency Mode</string>
+    <string name="firmware_version">Firmware Version</string>
+    <string name="serial_number">Serial Number</string>
+    <string name="age_range">Age Range</string>
+    <string name="feature_flags">Feature Flags</string>
+    <string name="device_info">Device Info</string>
 </resources>

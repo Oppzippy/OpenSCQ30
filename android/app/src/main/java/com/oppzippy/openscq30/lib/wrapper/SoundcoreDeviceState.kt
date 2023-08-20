@@ -14,7 +14,7 @@ data class SoundcoreDeviceState(
     val isRightBatteryCharging: Boolean,
     val equalizerConfiguration: EqualizerConfiguration,
     val soundModes: SoundModes?,
-//    val ageRange: AgeRange?,
+    val ageRange: Int?,
 //    val customHearId: HearId?,
 //    val customButtonModel: CustomButtonModel?,
     val leftFirmwareVersion: FirmwareVersion?,
@@ -36,5 +36,12 @@ fun StateUpdatePacket.toSoundcoreDeviceState(): SoundcoreDeviceState {
         isRightBatteryCharging = false, // TODO
         leftBatteryLevel = 0, // TODO
         rightBatteryLevel = 0, // TODO
+        ageRange = ageRange().let {
+            if (it.isPresent) {
+                it.asInt
+            } else {
+                null
+            }
+        },
     )
 }
