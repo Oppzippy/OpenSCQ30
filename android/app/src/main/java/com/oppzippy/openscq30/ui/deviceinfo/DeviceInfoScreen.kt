@@ -20,13 +20,13 @@ fun DeviceInfoScreen(deviceState: SoundcoreDeviceState) {
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Top,
         horizontalArrangement = Arrangement.Center,
-        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
     ) {
         if (deviceState.leftFirmwareVersion != null) {
             item { Text(stringResource(R.string.firmware_version)) }
             item {
                 if (deviceState.rightFirmwareVersion != null) {
-                    Text("${deviceState.leftFirmwareVersion.toString()}, ${deviceState.rightFirmwareVersion.toString()}")
+                    Text("${deviceState.leftFirmwareVersion}, ${deviceState.rightFirmwareVersion}")
                 } else {
                     Text(deviceState.leftFirmwareVersion.toString())
                 }
