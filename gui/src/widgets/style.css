@@ -1,0 +1,7 @@
+.general-settings__heading-small {
+    font-weight: 700;
+}
+
+.general-settings__heading-small:not(:first-child) {
+    margin-top: 1.2em;
+}

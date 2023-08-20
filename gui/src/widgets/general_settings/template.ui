@@ -8,32 +8,24 @@
     </object>
     <template class="OpenSCQ30GeneralSettings" parent="GtkBox">
         <property name="orientation">vertical</property>
+        <!-- Ambient Sound Mode -->
         <child>
-            <object class="GtkGrid">
-                <property name="row-spacing">2</property>
-                <property name="column-spacing">2</property>
-
-                <!-- Ambient Sound Mode -->
-                <child>
-                    <object class="GtkLabel" id="ambient_sound_mode_label">
-                        <property name="label" translatable="yes">Ambient Sound Mode</property>
-                        <property name="margin-start">10</property>
-                        <property name="margin-end">10</property>
-                        <layout>
-                            <property name="column">0</property>
-                            <property name="row">0</property>
-                        </layout>
-                    </object>
-                </child>
+            <object class="GtkLabel" id="ambient_sound_mode_label">
+                <property name="label" translatable="yes">Ambient Sound Mode</property>
+                <style>
+                    <class name="general-settings__heading-small" />
+                </style>
+            </object>
+        </child>
+        <child>
+            <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">2</property>
                 <child>
                     <object class="GtkToggleButton" id="normal_mode">
                         <signal name="toggled" handler="handle_normal_mode_clicked" swapped="true" />
                         <property name="label" translatable="yes" context="ambient sound mode">Normal</property>
                         <property name="hexpand">true</property>
-                        <layout>
-                            <property name="column">1</property>
-                            <property name="row">0</property>
-                        </layout>
                         <accessibility>
                             <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">ambient_sound_mode_label</relation>
                         </accessibility>
@@ -46,10 +38,6 @@
                         <property name="group">normal_mode</property>
                         <property name="label" translatable="yes" context="ambient sound mode">Transparency</property>
                         <property name="hexpand">true</property>
-                        <layout>
-                            <property name="column">2</property>
-                            <property name="row">0</property>
-                        </layout>
                         <accessibility>
                             <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">ambient_sound_mode_label</relation>
                         </accessibility>
@@ -62,37 +50,31 @@
                         <property name="group">transparency_mode</property>
                         <property name="label" translatable="yes" context="ambient sound mode">Noise Canceling</property>
                         <property name="hexpand">true</property>
-                        <layout>
-                            <property name="column">3</property>
-                            <property name="row">0</property>
-                        </layout>
                         <accessibility>
                             <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">ambient_sound_mode_label</relation>
                         </accessibility>
                     </object>
                 </child>
-
+            </object>
+        </child>
+        <child>
+            <object class="GtkLabel" id="transparency_mode_label">
+                <property name="label" translatable="yes">Transparency Mode</property>
+                <style>
+                    <class name="general-settings__heading-small" />
+                </style>
+            </object>
+        </child>
+        <child>
+            <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">2</property>
                 <!-- Transparency Mode -->
-                <child>
-                    <object class="GtkLabel" id="transparency_mode_label">
-                        <property name="label" translatable="yes">Transparency Mode</property>
-                        <property name="margin-start">10</property>
-                        <property name="margin-end">10</property>
-                        <layout>
-                            <property name="column">0</property>
-                            <property name="row">1</property>
-                        </layout>
-                    </object>
-                </child>
                 <child>
                     <object class="GtkToggleButton" id="fully_transparent">
                         <signal name="toggled" handler="handle_fully_transparent_clicked" swapped="true" />
                         <property name="label" translatable="yes" context="transparency mode">Fully Transparent</property>
                         <property name="hexpand">true</property>
-                        <layout>
-                            <property name="column">1</property>
-                            <property name="row">1</property>
-                        </layout>
                         <accessibility>
                             <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">transparency_mode_label</relation>
                         </accessibility>
@@ -104,38 +86,33 @@
                         <property name="group">fully_transparent</property>
                         <property name="label" translatable="yes" context="transparency mode">Vocal Mode</property>
                         <property name="hexpand">true</property>
-                        <layout>
-                            <property name="column">2</property>
-                            <property name="row">1</property>
-                        </layout>
                         <accessibility>
                             <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">transparency_mode_label</relation>
                         </accessibility>
                     </object>
                 </child>
+            </object>
+        </child>
 
-                <!-- Noise Canceling Mode -->
-                <child>
-                    <object class="GtkLabel" id="noise_canceling_mode_label">
-                        <property name="label" translatable="yes">Noise Canceling Mode</property>
-                        <property name="margin-start">10</property>
-                        <property name="margin-end">10</property>
-                        <layout>
-                            <property name="column">0</property>
-                            <property name="row">2</property>
-                        </layout>
-                    </object>
-                </child>
+        <!-- Noise Canceling Mode -->
+        <child>
+            <object class="GtkLabel" id="noise_canceling_mode_label">
+                <property name="label" translatable="yes">Noise Canceling Mode</property>
+                <style>
+                    <class name="general-settings__heading-small" />
+                </style>
+            </object>
+        </child>
+        <child>
+            <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">2</property>
                 <child>
                     <object class="GtkToggleButton" id="transport_mode">
                         <signal name="toggled" handler="handle_transport_mode_clicked"
                             swapped="true" />
                         <property name="label" translatable="yes" context="noise canceling mode">Transport</property>
                         <property name="hexpand">true</property>
-                        <layout>
-                            <property name="column">1</property>
-                            <property name="row">2</property>
-                        </layout>
                         <accessibility>
                             <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">noise_canceling_mode_label</relation>
                         </accessibility>
@@ -147,10 +124,6 @@
                         <property name="group">transport_mode</property>
                         <property name="label" translatable="yes" context="noise canceling mode">Indoor</property>
                         <property name="hexpand">true</property>
-                        <layout>
-                            <property name="column">2</property>
-                            <property name="row">2</property>
-                        </layout>
                         <accessibility>
                             <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">noise_canceling_mode_label</relation>
                         </accessibility>
@@ -162,10 +135,6 @@
                         <property name="group">indoor_mode</property>
                         <property name="label" translatable="yes" context="noise canceling mode">Outdoor</property>
                         <property name="hexpand">true</property>
-                        <layout>
-                            <property name="column">3</property>
-                            <property name="row">2</property>
-                        </layout>
                         <accessibility>
                             <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">noise_canceling_mode_label</relation>
                         </accessibility>
@@ -177,46 +146,34 @@
                         <property name="group">indoor_mode</property>
                         <property name="label" translatable="yes" context="noise canceling mode">Custom</property>
                         <property name="hexpand">true</property>
-                        <layout>
-                            <property name="column">4</property>
-                            <property name="row">2</property>
-                        </layout>
                         <accessibility>
                             <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">noise_canceling_mode_label</relation>
                         </accessibility>
                     </object>
                 </child>
+            </object>
+        </child>
 
-                <!-- Custom Noise Canceling -->
-                <child>
-                    <object class="GtkLabel" id="custom_noise_canceling_label">
-                        <property name="label" translatable="yes">Custom Noise Canceling</property>
-                        <property name="margin-start">10</property>
-                        <property name="margin-end">10</property>
-                        <layout>
-                            <property name="column">0</property>
-                            <property name="row">3</property>
-                        </layout>
-                    </object>
-                </child>
-                <child>
-                    <object class="GtkScale" id="custom_noise_canceling">
-                        <signal name="value-changed" handler="handle_custom_noise_canceling_changed" swapped="true" />
-                        <property name="hexpand">true</property>
-                        <property name="adjustment">custom-noise-canceling-adjustment</property>
-                        <property name="digits">0</property>
-                        <property name="draw-value">true</property>
-                        <property name="round-digits">0</property>
-                        <layout>
-                            <property name="column">1</property>
-                            <property name="column-span">4</property>
-                            <property name="row">3</property>
-                        </layout>
-                        <accessibility>
-                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">custom_noise_canceling_label</relation>
-                        </accessibility>
-                    </object>
-                </child>
+        <!-- Custom Noise Canceling -->
+        <child>
+            <object class="GtkLabel" id="custom_noise_canceling_label">
+                <property name="label" translatable="yes">Custom Noise Canceling</property>
+                <style>
+                    <class name="general-settings__heading-small" />
+                </style>
+            </object>
+        </child>
+        <child>
+            <object class="GtkScale" id="custom_noise_canceling">
+                <signal name="value-changed" handler="handle_custom_noise_canceling_changed" swapped="true" />
+                <property name="hexpand">true</property>
+                <property name="adjustment">custom-noise-canceling-adjustment</property>
+                <property name="digits">0</property>
+                <property name="draw-value">true</property>
+                <property name="round-digits">0</property>
+                <accessibility>
+                    <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">custom_noise_canceling_label</relation>
+                </accessibility>
             </object>
         </child>
         <child>

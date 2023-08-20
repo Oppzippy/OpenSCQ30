@@ -10,10 +10,12 @@ use actions::{State, StateUpdate};
 use adw::Toast;
 use anyhow::{anyhow, Context};
 use gtk::{
+    gdk::Display,
     gio::{self, SimpleAction},
     glib::{self, clone, MainContext, OptionFlags, Priority},
     prelude::*,
     traits::GtkWindowExt,
+    CssProvider,
 };
 use logging_level::LoggingLevel;
 use openscq30_lib::api::{device::DeviceRegistry, new_soundcore_device_registry};
@@ -109,10 +111,21 @@ fn run_application() {
     let app = adw::Application::builder()
         .application_id(APPLICATION_ID_STR)
         .build();
+    app.connect_startup(|_| load_css());
     app.connect_activate(build_ui);
     handle_command_line_args(&app);
 
     app.run();
+}
+
+fn load_css() {
+    let provider = CssProvider::new();
+    provider.load_from_resource("/com/oppzippy/OpenSCQ30/style.css");
+    gtk::style_context_add_provider_for_display(
+        &Display::default().expect("Could not connect to display"),
+        &provider,
+        gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+    );
 }
 
 fn handle_command_line_args<T>(application: &T)
