@@ -20,7 +20,6 @@ bitflags! {
     }
 }
 
-// TODO replace with TryFrom
 impl From<u32> for DeviceFeatureFlags {
     fn from(value: u32) -> Self {
         Self::from_bits_truncate(value)
