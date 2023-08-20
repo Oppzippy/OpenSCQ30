@@ -26,7 +26,7 @@ export const CustomNoiseCancelingSelection = React.memo(function ({
   return (
     <Box>
       <Typography id="custom-noise-canceling-label">
-        {t("customNoiseCanceling.customNoiseCanceling")}
+        {t("soundModes.customNoiseCanceling")}
       </Typography>
       <Slider
         value={value}

@@ -8,7 +8,7 @@ exports[`NoiseCancelingModeSelection > should render 1`] = `
     <p
       class="MuiTypography-root MuiTypography-body1 css-ahj2mt-MuiTypography-root"
     >
-      noiseCancelingMode.noiseCancelingMode
+      soundModes.noiseCancelingMode
     </p>
     <div
       class="MuiToggleButtonGroup-root css-1yt1mvy-MuiToggleButtonGroup-root"

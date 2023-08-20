@@ -5,6 +5,7 @@
     "selectDevice": "Select Device"
   },
   "deviceInfo": {
+    "deviceInfo": "Device Info",
     "firmwareVersion": "Firmware Version",
     "serialNumber": "Serial Number",
     "ageRange": "Age Range",
@@ -14,6 +15,13 @@
     "disconnected": "Device is disconnected.",
     "failedToCreateCustomProfile": "Failed to create custom profile. Check console for details.",
     "failedToDeleteCustomProfile": "Failed to delete custom profile. Check console for details."
+  },
+  "soundModes": {
+    "soundModes": "Sound Modes",
+    "ambientSoundMode": "Ambient Sound Mode",
+    "customNoiseCanceling": "Custom Noise Canceling",
+    "noiseCancelingMode": "Noise Canceling Mode",
+    "transparencyMode": "Transparency Mode"
   },
   "equalizer": {
     "customProfile": "Custom Profile",
@@ -37,23 +45,17 @@
   },
   "github": "GitHub",
   "ambientSoundMode": {
-    "ambientSoundMode": "Ambient Sound Mode",
     "noiseCanceling": "Noise Canceling",
     "transparency": "Transparency",
     "normal": "Normal"
-  },
-  "customNoiseCanceling": {
-    "customNoiseCanceling": "Custom Noise Canceling"
   },
   "noiseCancelingMode": {
     "transport": "Transport",
     "outdoor": "Outdoor",
     "indoor": "Indoor",
-    "custom": "Custom",
-    "noiseCancelingMode": "Noise Canceling Mode"
+    "custom": "Custom"
   },
   "transparencyMode": {
-    "transparencyMode": "Transparency Mode",
     "fullyTransparent": "Fully Transparent",
     "vocalMode": "Vocal Mode"
   },

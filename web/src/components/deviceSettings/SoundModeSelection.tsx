@@ -1,10 +1,11 @@
-import { Stack } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import React, { useCallback } from "react";
 import { AmbientSoundModeSelection } from "../soundMode/AmbientSoundModeSelection";
 import { NoiseCancelingModeSelection } from "../soundMode/NoiseCancelingModeSelection";
 import { SoundModes } from "../../libTypes/DeviceState";
 import { TransparencyModeSelection } from "../soundMode/TransparencyModeSelection";
 import { CustomNoiseCancelingSelection } from "../soundMode/CustomNoiseCancelingSelection";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   soundModes: SoundModes;
@@ -20,6 +21,7 @@ export const SoundModeSelection = React.memo(function ({
   soundModes,
   setSoundModes,
 }: Props) {
+  const { t } = useTranslation();
   const setAmbientSoundMode = useCallback(
     (ambientSoundMode: SoundModes["ambientSoundMode"]) => {
       setSoundModes({
@@ -59,6 +61,9 @@ export const SoundModeSelection = React.memo(function ({
 
   return (
     <Stack spacing="2">
+      <Typography component="h2" variant="h6">
+        {t("soundModes.soundModes")}
+      </Typography>
       <AmbientSoundModeSelection
         value={soundModes.ambientSoundMode}
         onValueChanged={setAmbientSoundMode}

@@ -1,20 +1,26 @@
+import { Stack, Table, TableCell, TableRow, Typography } from "@mui/material";
 import React from "react";
-import { DeviceState } from "../../libTypes/DeviceState";
 import { useTranslation } from "react-i18next";
-import { Table, TableCell, TableRow, Typography } from "@mui/material";
+import { DeviceState } from "../../libTypes/DeviceState";
 
 interface Props {
   deviceState: DeviceState;
 }
 
 export const DeviceInfo = React.memo(function ({ deviceState }: Props) {
+  const { t } = useTranslation();
   return (
-    <Table>
-      <FirmwareVersion deviceState={deviceState} />
-      <SerialNumber deviceState={deviceState} />
-      <AgeRange deviceState={deviceState} />
-      <FeatureFlags deviceState={deviceState} />
-    </Table>
+    <Stack spacing={2}>
+      <Typography component="h2" variant="h6">
+        {t("deviceInfo.deviceInfo")}
+      </Typography>
+      <Table>
+        <FirmwareVersion deviceState={deviceState} />
+        <SerialNumber deviceState={deviceState} />
+        <AgeRange deviceState={deviceState} />
+        <FeatureFlags deviceState={deviceState} />
+      </Table>
+    </Stack>
   );
 });
 

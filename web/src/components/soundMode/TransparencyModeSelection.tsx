@@ -26,7 +26,7 @@ export const TransparencyModeSelection = React.memo(function ({
 
   return (
     <Box>
-      <Typography>{t("transparencyMode.transparencyMode")}</Typography>
+      <Typography>{t("soundModes.transparencyMode")}</Typography>
       <ToggleButtonRow
         value={value}
         onValueChanged={onValueChangedNotNull as (value: string) => void}

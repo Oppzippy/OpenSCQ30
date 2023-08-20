@@ -26,7 +26,7 @@ export const AmbientSoundModeSelection = React.memo(function ({
 
   return (
     <Box>
-      <Typography>{t("ambientSoundMode.ambientSoundMode")}</Typography>
+      <Typography>{t("soundModes.ambientSoundMode")}</Typography>
       <ToggleButtonRow
         value={value}
         onValueChanged={onValueChangedNotNull as (value: string) => void}

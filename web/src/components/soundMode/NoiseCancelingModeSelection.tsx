@@ -52,7 +52,7 @@ export const NoiseCancelingModeSelection = React.memo(function ({
 
   return (
     <Box>
-      <Typography>{t("noiseCancelingMode.noiseCancelingMode")}</Typography>
+      <Typography>{t("soundModes.noiseCancelingMode")}</Typography>
       <ToggleButtonRow
         value={value}
         onValueChanged={onValueChangedNotNull as (value: string) => void}

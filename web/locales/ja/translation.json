@@ -5,6 +5,7 @@
     "selectDevice": ""
   },
   "deviceInfo": {
+    "deviceInfo": "",
     "firmwareVersion": "",
     "serialNumber": "",
     "ageRange": "",
@@ -14,6 +15,13 @@
     "disconnected": "",
     "failedToCreateCustomProfile": "",
     "failedToDeleteCustomProfile": ""
+  },
+  "soundModes": {
+    "soundModes": "",
+    "ambientSoundMode": "",
+    "customNoiseCanceling": "",
+    "noiseCancelingMode": "",
+    "transparencyMode": ""
   },
   "equalizer": {
     "customProfile": "",
@@ -37,23 +45,17 @@
   },
   "github": "",
   "ambientSoundMode": {
-    "ambientSoundMode": "",
     "noiseCanceling": "",
     "transparency": "",
     "normal": ""
-  },
-  "customNoiseCanceling": {
-    "customNoiseCanceling": ""
   },
   "noiseCancelingMode": {
     "transport": "",
     "outdoor": "",
     "indoor": "",
-    "custom": "",
-    "noiseCancelingMode": ""
+    "custom": ""
   },
   "transparencyMode": {
-    "transparencyMode": "",
     "fullyTransparent": "",
     "vocalMode": ""
   },

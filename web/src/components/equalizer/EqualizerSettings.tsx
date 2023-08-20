@@ -52,7 +52,9 @@ export const EqualizerSettings = React.memo(function (props: Props) {
 
   return (
     <Stack spacing={2}>
-      <Typography>{t("equalizer.equalizer")}</Typography>
+      <Typography component="h2" variant="h6">
+        {t("equalizer.equalizer")}
+      </Typography>
       <PresetProfiles
         onProfileSelected={props.onProfileSelected}
         profile={props.profile}
