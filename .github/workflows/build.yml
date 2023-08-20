@@ -19,14 +19,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev gettext libfuse2
       - name: Install cargo-make
-        uses: davidB/rust-cargo-make@v1
+        run: cargo install cargo-make
       - name: Install appimage-builder
         run: |
           curl --location -o appimage-builder https://github.com/AppImageCrafters/appimage-builder/releases/download/v1.1.0/appimage-builder-1.1.0-x86_64.AppImage
           chmod +x appimage-builder
           sudo mv appimage-builder /usr/bin/
-      - name: Cache cargo dependencies
-        uses: Swatinem/rust-cache@v2
       - name: Build cli
         run: cargo build --release --package openscq30_cli
       - name: Build AppImage
@@ -54,8 +52,6 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: brew install gtk4 libadwaita
 
-      - name: Cache cargo dependencies
-        uses: Swatinem/rust-cache@v2
       - name: Build gui
         run: cargo build --release --package openscq30_gui
       - name: Build cli
@@ -78,27 +74,12 @@ jobs:
         with:
           submodules: true
 
-      - name: Get latest gtk version
-        id: get-gtk-version
-        run: |
-          $GTK_VERSION=$(Invoke-WebRequest https://download.gnome.org/sources/gtk/cache.json).Content | jq -r '.[2].gtk[-1]'
-          echo "GTK Version $GTK_VERSION"
-          echo "version=$GTK_VERSION" >> $env:GITHUB_OUTPUT
       # Temporarily move the preinstalled git, it causes errors related to cygwin.
       - name: Move git binary
         run: |
           Move-Item "C:\Program Files\Git\usr\bin" "C:\Program Files\Git\usr\notbin"
           Move-Item "C:\Program Files\Git\bin" "C:\Program Files\Git\notbin"
-      - name: Restore GTK4 from cache
-        uses: actions/cache@v3
-        id: cache-gtk
-        with:
-          path: C:\gtk-build
-          key: ${{ runner.os }}-gtk-${{ steps.get-gtk-version.outputs.version }}
-          restore-keys: |
-            ${{ runner.os }}-gtk-
       - name: Build GTK4
-        if: steps.cache-gtk-outputs.cache-hit != 'true'
         run: |
           python -m pip install --user pipx
           python -m pipx ensurepath
@@ -109,10 +90,8 @@ jobs:
           Move-Item "C:\Program Files\Git\usr\notbin" "C:\Program Files\Git\usr\bin"
           Move-Item "C:\Program Files\Git\notbin" "C:\Program Files\Git\bin"
 
-      - name: Cache cargo dependencies
-        uses: Swatinem/rust-cache@v2
       - name: Install cargo-make
-        uses: davidB/rust-cargo-make@v1
+        run: cargo install cargo-make
       - name: Build gui
         run: |
           $env:Path = "C:\gtk-build\gtk\x64\release\bin;" + $env:Path
@@ -147,8 +126,6 @@ jobs:
         with:
           distribution: temurin # See 'Supported distributions' for available options
           java-version: 17
-      - name: Cache cargo dependencies
-        uses: Swatinem/rust-cache@v2
       - name: Install cargo-ndk
         run: cargo install cargo-ndk
       - name: Build

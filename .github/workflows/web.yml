@@ -86,9 +86,7 @@ jobs:
         with:
           node-version: 18
       - name: Install wasm-pack
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-      - name: Cache cargo dependencies
-        uses: Swatinem/rust-cache@v2
+        run: cargo install wasm-pack
       - name: Install dependencies
         run: npm ci
       - name: Build
