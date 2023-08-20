@@ -4,6 +4,12 @@
     "deviceSelection": "デバイス選択",
     "selectDevice": ""
   },
+  "deviceInfo": {
+    "firmwareVersion": "",
+    "serialNumber": "",
+    "ageRange": "",
+    "featureFlags": ""
+  },
   "errors": {
     "disconnected": "",
     "failedToCreateCustomProfile": "",

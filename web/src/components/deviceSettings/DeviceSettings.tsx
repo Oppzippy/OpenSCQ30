@@ -19,6 +19,7 @@ import {
   DeviceFeatureFlags,
   EqualizerHelper,
 } from "../../../wasm/pkg/openscq30_web_wasm";
+import { DeviceInfo } from "../deviceInfo/DeviceInfo";
 
 export function DeviceSettings({
   device,
@@ -154,6 +155,7 @@ export function DeviceSettings({
         onAddCustomProfile={openCreateCustomProfileDialog}
         onDeleteCustomProfile={deleteCustomProfile}
       />
+      <DeviceInfo deviceState={displayState} />
       <NewCustomProfileDialog
         isOpen={isCreateCustomProfileDialogOpen}
         existingProfiles={customEqualizerProfiles}

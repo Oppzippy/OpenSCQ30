@@ -4,6 +4,12 @@
     "deviceSelection": "Device Selection",
     "selectDevice": "Select Device"
   },
+  "deviceInfo": {
+    "firmwareVersion": "Firmware Version",
+    "serialNumber": "Serial Number",
+    "ageRange": "Age Range",
+    "featureFlags": "Feature Flags"
+  },
   "errors": {
     "disconnected": "Device is disconnected.",
     "failedToCreateCustomProfile": "Failed to create custom profile. Check console for details.",
