@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.with
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -66,7 +67,7 @@ fun OpenSCQ30Root(
                 targetState = isConnected,
                 transitionSpec = {
                     val widthDivisor = if (targetState) 2 else -2
-                    slideInHorizontally { width -> width / widthDivisor } + fadeIn() wit0 slideOutHorizontally { width -> width / -widthDivisor } + fadeOut() using SizeTransform(
+                    slideInHorizontally { width -> width / widthDivisor } + fadeIn() with slideOutHorizontally { width -> width / -widthDivisor } + fadeOut() using SizeTransform(
                         clip = false,
                     )
                 },
