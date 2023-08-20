@@ -12,9 +12,11 @@ import { DisconnectedAppBar } from "./DisconnectedAppBar";
 import { HomePage } from "./HomePage";
 import { DeviceSettings } from "./deviceSettings/DeviceSettings";
 import { Device, selectDemoDevice, selectDevice } from "../bluetooth/Device";
+import { LoadingScreen } from "./LoadingScreen";
 
 export function AppContents() {
   const [device, setDevice] = useState<Device>();
+  const [isLoading, setLoading] = useState(false);
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
   // TODO use a hook for isDemoMode
   const isDemoMode = localStorage.getItem("openscq30:demoMode") == "true";
@@ -30,9 +32,11 @@ export function AppContents() {
   useUpdateAvailableToast();
 
   const connect = useCallback(() => {
+    setLoading(true);
     (isDemoMode ? selectDemoDevice : selectDevice)()
       .then(setDevice)
       .catch((err) => {
+        setLoading(false);
         // Ignore error if the user canceled the device selection popup
         if (!(err instanceof DOMException) || err.name != "NotFoundError") {
           console.error(err);
@@ -43,6 +47,7 @@ export function AppContents() {
   const disconnect = useCallback(() => {
     device?.destroy();
     setDevice(undefined);
+    setLoading(false);
   }, [device]);
 
   return (
@@ -71,6 +76,8 @@ export function AppContents() {
           <Container maxWidth="sm" sx={{ my: 2 }}>
             {device ? (
               <DeviceSettings device={device} disconnect={disconnect} />
+            ) : isLoading ? (
+              <LoadingScreen />
             ) : (
               <HomePage />
             )}
