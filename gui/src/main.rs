@@ -279,6 +279,9 @@ fn build_ui(application: &adw::Application) {
             Some(openscq30_lib::Error::FeatureNotSupported { feature_name }) => send_toast(
                 format!("Tried to use feature not supported by device: {feature_name}"),
             ),
+            Some(openscq30_lib::Error::WriteFailed { source }) => {
+                send_toast(format!("Write to characteristic failed: {source:?}"))
+            }
             Some(openscq30_lib::Error::Other { .. }) | None => {
                 state
                     .state_update_sender

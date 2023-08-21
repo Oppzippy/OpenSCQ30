@@ -1496,6 +1496,7 @@ dependencies = [
  "serde-wasm-bindgen",
  "serde_json",
  "static_assertions",
+ "thiserror",
  "tokio",
  "tracing-wasm",
  "uuid",

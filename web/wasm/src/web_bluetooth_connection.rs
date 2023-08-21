@@ -16,6 +16,8 @@ use web_sys::{
     BluetoothRemoteGattService,
 };
 
+use crate::JsValueError;
+
 pub struct WebBluetoothConnection {
     gatt: BluetoothRemoteGattServer,
     write_characteristic: BluetoothRemoteGattCharacteristic,
@@ -74,26 +76,30 @@ impl Connection for WebBluetoothConnection {
     }
 
     async fn write_with_response(&self, data: &[u8]) -> LibResult<()> {
-        // not sure why this needs to be mutable
+        // not sure why web-sys requires that this is mutable
         let mut data = data.to_owned();
         JsFuture::from(
             self.write_characteristic
                 .write_value_with_response_with_u8_array(&mut data),
         )
         .await
-        .unwrap(); // TODO handle error
+        .map_err(|err| openscq30_lib::Error::WriteFailed {
+            source: Box::new(JsValueError::from(err)),
+        })?;
         Ok(())
     }
 
     async fn write_without_response(&self, data: &[u8]) -> LibResult<()> {
-        // not sure why this needs to be mutable
+        // not sure why web-sys requires that this is mutable
         let mut data = data.to_owned();
         JsFuture::from(
             self.write_characteristic
                 .write_value_without_response_with_u8_array(&mut data),
         )
         .await
-        .unwrap(); // TODO handle error
+        .map_err(|err| openscq30_lib::Error::WriteFailed {
+            source: Box::new(JsValueError::from(err)),
+        })?;
         Ok(())
     }
 

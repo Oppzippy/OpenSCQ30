@@ -34,6 +34,9 @@ pub enum Error {
 
     #[error("feature not supported: {feature_name}")]
     FeatureNotSupported { feature_name: &'static str },
+
+    #[error("write failed: {source:?}")]
+    WriteFailed { source: InnerError },
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
