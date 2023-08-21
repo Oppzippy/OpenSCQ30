@@ -107,7 +107,6 @@ impl Connection for WebBluetoothConnection {
         let (sender, receiver) = mpsc::channel(50);
         let read_characteristic = self.read_characteristic.to_owned();
 
-        // TODO remove event listener on disconnect?
         let handler: Closure<dyn Fn()> = Closure::new(move || {
             if let Some(value) = read_characteristic.value() {
                 let data = Uint8Array::new(&value.buffer().into()).to_vec();
@@ -134,6 +133,8 @@ impl Connection for WebBluetoothConnection {
 
 impl Drop for WebBluetoothConnection {
     fn drop(&mut self) {
+        self.read_characteristic
+            .set_oncharacteristicvaluechanged(None);
         self.gatt.disconnect();
     }
 }
