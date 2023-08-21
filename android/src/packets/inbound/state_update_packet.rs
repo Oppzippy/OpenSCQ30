@@ -44,6 +44,13 @@ impl StateUpdatePacket {
     pub fn age_range(&self) -> Option<i32> {
         self.0.age_range.map(|age_range| age_range.0.into())
     }
+
+    #[generate_interface]
+    pub fn dynamic_range_compression_min_firmware_version(&self) -> Option<FirmwareVersion> {
+        self.0
+            .dynamic_range_compression_min_firmware_version
+            .map(Into::into)
+    }
 }
 
 impl From<LibStateUpdatePacket> for StateUpdatePacket {

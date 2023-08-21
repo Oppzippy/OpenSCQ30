@@ -54,6 +54,16 @@ public final class FirmwareVersion {
     }
     private static native @NonNull String do_toString(long self);
 
+    public final int compare(@NonNull FirmwareVersion other) {
+        long a0 = other.mNativeObj;
+        int ret = do_compare(mNativeObj, a0);
+
+        JNIReachabilityFence.reachabilityFence1(other);
+
+        return ret;
+    }
+    private static native int do_compare(long self, long other);
+
     public synchronized void delete() {
         if (mNativeObj != 0) {
             do_delete(mNativeObj);

@@ -155,6 +155,7 @@ private fun PreviewDeviceSettings() {
                     isLeftBatteryCharging = false,
                     isRightBatteryCharging = false,
                     ageRange = null,
+                    dynamicRangeCompressionMinFirmwareVersion = null,
                 ),
             ),
         )

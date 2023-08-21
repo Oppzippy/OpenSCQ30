@@ -58,4 +58,9 @@ impl DeviceFeatureFlags {
     pub fn two_channel_equalizer() -> i32 {
         LibDeviceFeatureFlags::TWO_CHANNEL_EQUALIZER.bits() as i32
     }
+
+    #[generate_interface]
+    pub fn dynamic_range_compression() -> i32 {
+        LibDeviceFeatureFlags::DYNAMIC_RANGE_COMPRESSION.bits() as i32
+    }
 }

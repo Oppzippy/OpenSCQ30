@@ -1,5 +1,6 @@
 package com.oppzippy.openscq30.lib.wrapper
 
+import com.oppzippy.openscq30.lib.bindings.DeviceFeatureFlags
 import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.bindings.FirmwareVersion
 import com.oppzippy.openscq30.lib.bindings.SoundModes
@@ -20,8 +21,24 @@ data class SoundcoreDeviceState(
     val leftFirmwareVersion: FirmwareVersion?,
     val rightFirmwareVersion: FirmwareVersion?,
     val serialNumber: String?,
+    val dynamicRangeCompressionMinFirmwareVersion: FirmwareVersion?,
 ) {
     companion object // used for static extension methods in tests
+
+    fun supportsDynamicRangeCompression(): Boolean {
+        if (featureFlags and DeviceFeatureFlags.dynamicRangeCompression() != 0) {
+            if (leftFirmwareVersion == null || dynamicRangeCompressionMinFirmwareVersion == null) {
+                return false
+            }
+            return if (rightFirmwareVersion == null) {
+                leftFirmwareVersion.compare(dynamicRangeCompressionMinFirmwareVersion) >= 0
+            } else {
+                leftFirmwareVersion.compare(dynamicRangeCompressionMinFirmwareVersion) >= 0 &&
+                    rightFirmwareVersion.compare(dynamicRangeCompressionMinFirmwareVersion) >= 0
+            }
+        }
+        return false
+    }
 }
 
 fun StateUpdatePacket.toSoundcoreDeviceState(): SoundcoreDeviceState {
@@ -43,5 +60,6 @@ fun StateUpdatePacket.toSoundcoreDeviceState(): SoundcoreDeviceState {
                 null
             }
         },
+        dynamicRangeCompressionMinFirmwareVersion = dynamicRangeCompressionMinFirmwareVersion().getOrNull(),
     )
 }

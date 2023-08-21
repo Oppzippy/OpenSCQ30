@@ -7,6 +7,7 @@ import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
 import com.oppzippy.openscq30.lib.bindings.DeviceFeatureFlags
 import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.bindings.SetEqualizerPacket
+import com.oppzippy.openscq30.lib.bindings.SetEqualizerWithDrcPacket
 import com.oppzippy.openscq30.lib.bindings.SetSoundModePacket
 import com.oppzippy.openscq30.lib.bindings.SoundModes
 import com.oppzippy.openscq30.lib.wrapper.SoundcoreDeviceState
@@ -64,6 +65,9 @@ class SoundcoreDeviceImpl(
                                         ?: state.serialNumber,
                                     soundModes = packet.inner.soundModes().getOrNull()
                                         ?: state.soundModes,
+                                    dynamicRangeCompressionMinFirmwareVersion = packet.inner.dynamicRangeCompressionMinFirmwareVersion()
+                                        .getOrNull()
+                                        ?: state.dynamicRangeCompressionMinFirmwareVersion,
                                 )
                             }
 
@@ -145,14 +149,21 @@ class SoundcoreDeviceImpl(
     }
 
     override fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
-        if (_stateFlow.value.equalizerConfiguration != equalizerConfiguration) {
+        val state = _stateFlow.value
+        if (state.equalizerConfiguration != equalizerConfiguration) {
+            val featureFlags = state.featureFlags
             val packet =
-                if (_stateFlow.value.featureFlags and DeviceFeatureFlags.twoChannelEqualizer() != 0) {
-                    SetEqualizerPacket(equalizerConfiguration, equalizerConfiguration)
+                if (state.supportsDynamicRangeCompression()) {
+                    SetEqualizerWithDrcPacket(
+                        equalizerConfiguration,
+                        equalizerConfiguration,
+                    ).bytes()
+                } else if (featureFlags and DeviceFeatureFlags.twoChannelEqualizer() != 0) {
+                    SetEqualizerPacket(equalizerConfiguration, equalizerConfiguration).bytes()
                 } else {
-                    SetEqualizerPacket(equalizerConfiguration, null)
+                    SetEqualizerPacket(equalizerConfiguration, null).bytes()
                 }
-            callbacks.queueCommanad(Command.Write(packet.bytes()))
+            callbacks.queueCommanad(Command.Write(packet))
             _stateFlow.value =
                 _stateFlow.value.copy(equalizerConfiguration = equalizerConfiguration)
         }

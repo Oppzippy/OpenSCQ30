@@ -26,5 +26,7 @@ public final class DeviceFeatureFlags {
 
     public static native int twoChannelEqualizer();
 
+    public static native int dynamicRangeCompression();
+
     private DeviceFeatureFlags() {}
 }

@@ -2,7 +2,7 @@ use openscq30_lib::packets::structures::FirmwareVersion as LibFirmwareVersion;
 use rifgen::rifgen_attr::{generate_interface, generate_interface_doc};
 
 #[generate_interface_doc]
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FirmwareVersion(LibFirmwareVersion);
 
 impl FirmwareVersion {
@@ -29,6 +29,17 @@ impl FirmwareVersion {
     #[generate_interface]
     pub fn to_string(&self) -> String {
         self.0.to_string()
+    }
+
+    #[generate_interface]
+    pub fn compare(&self, other: &FirmwareVersion) -> i32 {
+        if self < other {
+            -1
+        } else if self > other {
+            1
+        } else {
+            0
+        }
     }
 }
 

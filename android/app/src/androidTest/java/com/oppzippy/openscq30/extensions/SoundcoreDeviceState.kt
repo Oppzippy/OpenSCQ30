@@ -17,5 +17,6 @@ fun SoundcoreDeviceState.Companion.empty(): SoundcoreDeviceState {
         isLeftBatteryCharging = false,
         isRightBatteryCharging = false,
         ageRange = null,
+        dynamicRangeCompressionMinFirmwareVersion = null,
     )
 }

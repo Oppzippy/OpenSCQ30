@@ -13,6 +13,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.util.Log
+import com.oppzippy.openscq30.lib.bindings.RequestFirmwareVersionPacket
 import com.oppzippy.openscq30.lib.bindings.RequestStatePacket
 import com.oppzippy.openscq30.lib.bindings.SoundcoreDeviceUtils
 import kotlinx.coroutines.channels.BufferOverflow
@@ -193,5 +194,7 @@ class SoundcoreDeviceCallbackHandler(context: Context) : BluetoothGattCallback()
         )
         queueCommanad(Command.SetMtu(500))
         queueCommanad(Command.Write(RequestStatePacket().bytes()))
+        // TODO only send this if the preceding state update packet did not get this information
+        queueCommanad(Command.Write(RequestFirmwareVersionPacket().bytes()))
     }
 }

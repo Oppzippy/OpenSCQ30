@@ -37,6 +37,7 @@ class DemoSoundcoreDevice(
             isLeftBatteryCharging = false,
             isRightBatteryCharging = true,
             ageRange = 2,
+            dynamicRangeCompressionMinFirmwareVersion = null,
         ),
     )
     override val stateFlow: Flow<SoundcoreDeviceState> = _stateFlow.asStateFlow()
