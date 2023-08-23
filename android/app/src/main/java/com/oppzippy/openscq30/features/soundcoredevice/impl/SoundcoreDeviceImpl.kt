@@ -173,7 +173,7 @@ class SoundcoreDeviceImpl(
                             equalizerConfiguration
                         } else {
                             null
-                        }
+                        },
                     ).bytes()
                 }
             callbacks.queueCommanad(Command.Write(packet))
