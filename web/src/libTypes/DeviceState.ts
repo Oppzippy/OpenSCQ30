@@ -102,6 +102,7 @@ const deviceStateSchema = Type.Object({
   equalizerConfiguration: equalizerConfigurationSchema,
   soundModes: Nullable(soundModesSchema),
   ageRange: Nullable(Type.Number()),
+  gender: Nullable(Type.Number()),
   customHearId: Nullable(
     Type.Union([
       Type.Object({

@@ -6,6 +6,7 @@ describe("libTypes", () => {
   it("should serialize/deserialize an object with as many nulls as possible", () => {
     const expected: DeviceState = {
       ageRange: null,
+      gender: null,
       battery: {
         type: "singleBattery",
         isCharging: false,
@@ -31,7 +32,8 @@ describe("libTypes", () => {
   });
   it("should serialize/deserialize an object with as many fields filled as possible", () => {
     const expected: DeviceState = {
-      ageRange: null,
+      ageRange: 1,
+      gender: 2,
       battery: {
         type: "dualBattery",
         left: {
@@ -75,9 +77,9 @@ describe("libTypes", () => {
       },
       customHearId: {
         isEnabled: true,
-        hearIdMusicType: 0,
-        hearIdType: 0,
-        time: 0,
+        hearIdMusicType: 1,
+        hearIdType: 2,
+        time: 3,
         volumeAdjustments: {
           left: [11, 12, 13, 14, 15, 16, 17, 18],
           right: [21, 22, 23, 24, 25, 26, 27, 28],
