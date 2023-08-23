@@ -282,6 +282,9 @@ fn build_ui(application: &adw::Application) {
             Some(openscq30_lib::Error::WriteFailed { source }) => {
                 send_toast(format!("Write to characteristic failed: {source:?}"))
             }
+            Some(openscq30_lib::Error::IncompleteStateError { message }) => {
+                send_toast(format!("Action failed due to incomplete state: {message}"))
+            }
             Some(openscq30_lib::Error::Other { .. }) | None => {
                 state
                     .state_update_sender

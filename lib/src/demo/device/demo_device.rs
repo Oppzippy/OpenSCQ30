@@ -9,7 +9,7 @@ use crate::{
     futures::Futures,
     packets::structures::{
         AgeRange, AmbientSoundMode, BasicHearId, BatteryLevel, ButtonAction, CustomButtonModel,
-        DeviceFeatureFlags, EqualizerConfiguration, FirmwareVersion, IsBatteryCharging,
+        DeviceFeatureFlags, EqualizerConfiguration, FirmwareVersion, Gender, IsBatteryCharging,
         NoTwsButtonAction, NoiseCancelingMode, PresetEqualizerProfile, SerialNumber, SingleBattery,
         SoundModes, TwsButtonAction,
     },
@@ -55,6 +55,7 @@ where
                     transparency_mode: Default::default(),
                     custom_noise_canceling: Default::default(),
                 }),
+                gender: Some(Gender(0)),
                 age_range: Some(AgeRange(0)),
                 custom_button_model: Some(CustomButtonModel {
                     left_double_click: TwsButtonAction {

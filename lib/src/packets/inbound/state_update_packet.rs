@@ -23,7 +23,7 @@ use crate::packets::{
     parsing::ParseResult,
     structures::{
         AgeRange, Battery, CustomButtonModel, DeviceFeatureFlags, EqualizerConfiguration,
-        FirmwareVersion, HearId, SerialNumber, SoundModes,
+        FirmwareVersion, Gender, HearId, SerialNumber, SoundModes,
     },
 };
 
@@ -34,6 +34,7 @@ pub struct StateUpdatePacket {
     pub equalizer_configuration: EqualizerConfiguration,
     pub sound_modes: Option<SoundModes>,
     pub age_range: Option<AgeRange>,
+    pub gender: Option<Gender>,
     pub custom_hear_id: Option<HearId>,
     pub custom_button_model: Option<CustomButtonModel>,
     pub firmware_version: Option<FirmwareVersion>,

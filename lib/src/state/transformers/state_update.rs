@@ -10,6 +10,7 @@ impl DeviceStateTransformer for StateUpdatePacket {
             battery: state.battery,
             equalizer_configuration: state.equalizer_configuration,
             age_range: self.age_range.or(state.age_range),
+            gender: self.gender.or(state.gender),
             custom_button_model: self.custom_button_model.or(state.custom_button_model),
             custom_hear_id: self.custom_hear_id.or(state.custom_hear_id),
             left_firmware_version: self

@@ -37,6 +37,9 @@ pub enum Error {
 
     #[error("write failed: {source:?}")]
     WriteFailed { source: InnerError },
+
+    #[error("incomplete state: {message:?}")]
+    IncompleteStateError { message: &'static str },
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

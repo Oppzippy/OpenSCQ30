@@ -4,7 +4,7 @@ use crate::packets::{
     inbound::state_update_packet::StateUpdatePacket,
     structures::{
         AgeRange, Battery, CustomButtonModel, DeviceFeatureFlags, EqualizerConfiguration,
-        FirmwareVersion, HearId, SerialNumber, SoundModes,
+        FirmwareVersion, Gender, HearId, SerialNumber, SoundModes,
     },
 };
 
@@ -16,6 +16,7 @@ pub struct DeviceState {
     pub equalizer_configuration: EqualizerConfiguration,
     pub sound_modes: Option<SoundModes>,
     pub age_range: Option<AgeRange>,
+    pub gender: Option<Gender>,
     pub custom_hear_id: Option<HearId>,
     pub custom_button_model: Option<CustomButtonModel>,
     pub left_firmware_version: Option<FirmwareVersion>,
@@ -32,6 +33,7 @@ impl From<StateUpdatePacket> for DeviceState {
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: packet.sound_modes,
             age_range: packet.age_range,
+            gender: packet.gender,
             custom_hear_id: packet.custom_hear_id,
             custom_button_model: packet.custom_button_model,
             left_firmware_version: packet.firmware_version,

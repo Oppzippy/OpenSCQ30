@@ -11,10 +11,12 @@ use crate::{
     futures::{Futures, JoinHandle},
     packets::{
         outbound::{
-            OutboundPacketBytes, RequestFirmwareVersionPacket, SetEqualizerPacket,
-            SetEqualizerWithDrcPacket, SetSoundModePacket,
+            OutboundPacketBytes, RequestFirmwareVersionPacket, SetEqualizerAndCustomHearIdPacket,
+            SetEqualizerPacket, SetEqualizerWithDrcPacket, SetSoundModePacket,
         },
-        structures::{AmbientSoundMode, DeviceFeatureFlags, EqualizerConfiguration, SoundModes},
+        structures::{
+            AmbientSoundMode, DeviceFeatureFlags, EqualizerConfiguration, HearId, SoundModes,
+        },
     },
 };
 use crate::{
@@ -234,7 +236,19 @@ where
             None
         };
 
-        let packet_bytes = if state.supports_dynamic_range_compression() {
+        let packet_bytes = if let Some(HearId::Custom(custom_hear_id)) = state.custom_hear_id {
+            SetEqualizerAndCustomHearIdPacket {
+                equalizer_configuration,
+                age_range: state.age_range.ok_or(crate::Error::IncompleteStateError {
+                    message: "age range not set",
+                })?,
+                custom_hear_id,
+                gender: state.gender.ok_or(crate::Error::IncompleteStateError {
+                    message: "gender not set",
+                })?,
+            }
+            .bytes()
+        } else if state.supports_dynamic_range_compression() {
             SetEqualizerWithDrcPacket::new(left_channel, right_channel).bytes()
         } else {
             SetEqualizerPacket::new(left_channel, right_channel).bytes()

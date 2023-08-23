@@ -2,10 +2,12 @@ package com.oppzippy.openscq30.features.soundcoredevice.demo
 
 import android.util.Log
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
+import com.oppzippy.openscq30.lib.bindings.AgeRange
 import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
 import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
 import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.bindings.FirmwareVersion
+import com.oppzippy.openscq30.lib.bindings.Gender
 import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
 import com.oppzippy.openscq30.lib.bindings.SoundModes
@@ -21,7 +23,7 @@ class DemoSoundcoreDevice(
 ) : SoundcoreDevice {
     private val _stateFlow = MutableStateFlow(
         SoundcoreDeviceState(
-            featureFlags = -1, // TODO
+            featureFlags = -1, // all features on
             soundModes = SoundModes(
                 AmbientSoundMode.Normal,
                 NoiseCancelingMode.Indoor,
@@ -36,7 +38,9 @@ class DemoSoundcoreDevice(
             rightBatteryLevel = 3,
             isLeftBatteryCharging = false,
             isRightBatteryCharging = true,
-            ageRange = 2,
+            ageRange = AgeRange(1),
+            gender = Gender(2),
+            customHearId = null,
             dynamicRangeCompressionMinFirmwareVersion = null,
         ),
     )

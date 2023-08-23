@@ -20,6 +20,7 @@ mod sound_modes;
 mod stereo_volume_adjustments;
 mod transparency_mode;
 mod volume_adjustments;
+mod gender;
 
 pub use age_range::*;
 pub use ambient_sound_mode::*;
@@ -43,3 +44,4 @@ pub use sound_modes::*;
 pub use stereo_volume_adjustments::*;
 pub use transparency_mode::*;
 pub use volume_adjustments::*;
+pub use gender::*;

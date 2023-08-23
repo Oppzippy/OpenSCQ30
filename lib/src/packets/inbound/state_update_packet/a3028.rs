@@ -1,17 +1,16 @@
 use nom::{
     combinator::{all_consuming, map},
     error::{context, ContextError, ParseError},
-    number::complete::le_u8,
     sequence::tuple,
 };
 
 use crate::packets::{
     parsing::{
         take_age_range, take_basic_hear_id, take_equalizer_configuration, take_firmware_version,
-        take_serial_number, take_single_battery, take_sound_modes, ParseResult,
+        take_gender, take_serial_number, take_single_battery, take_sound_modes, ParseResult,
     },
     structures::{
-        AgeRange, BasicHearId, DeviceFeatureFlags, EqualizerConfiguration, FirmwareVersion,
+        AgeRange, BasicHearId, DeviceFeatureFlags, EqualizerConfiguration, FirmwareVersion, Gender,
         SerialNumber, SingleBattery, SoundModes,
     },
 };
@@ -23,7 +22,7 @@ use super::StateUpdatePacket;
 pub struct A3028StateUpdatePacket {
     pub battery: SingleBattery,
     pub equalizer_configuration: EqualizerConfiguration,
-    pub gender: u8,
+    pub gender: Gender,
     pub age_range: AgeRange,
     pub hear_id: BasicHearId,
     pub sound_modes: SoundModes,
@@ -41,6 +40,7 @@ impl From<A3028StateUpdatePacket> for StateUpdatePacket {
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: Some(packet.sound_modes),
             age_range: Some(packet.age_range),
+            gender: Some(packet.gender),
             custom_hear_id: Some(packet.hear_id.into()),
             custom_button_model: None,
             firmware_version: Some(packet.firmware_version),
@@ -59,7 +59,7 @@ pub fn take_a3028_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
             tuple((
                 take_single_battery,
                 take_equalizer_configuration,
-                le_u8,
+                take_gender,
                 take_age_range,
                 take_basic_hear_id,
                 take_sound_modes,

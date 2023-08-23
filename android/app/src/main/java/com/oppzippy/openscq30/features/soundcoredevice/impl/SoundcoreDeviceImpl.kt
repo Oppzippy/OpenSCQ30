@@ -6,6 +6,7 @@ import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
 import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
 import com.oppzippy.openscq30.lib.bindings.DeviceFeatureFlags
 import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.bindings.SetEqualizerAndCustomHearIdPacket
 import com.oppzippy.openscq30.lib.bindings.SetEqualizerPacket
 import com.oppzippy.openscq30.lib.bindings.SetEqualizerWithDrcPacket
 import com.oppzippy.openscq30.lib.bindings.SetSoundModePacket
@@ -153,15 +154,27 @@ class SoundcoreDeviceImpl(
         if (state.equalizerConfiguration != equalizerConfiguration) {
             val featureFlags = state.featureFlags
             val packet =
-                if (state.supportsDynamicRangeCompression()) {
+                if (state.customHearId != null && state.gender != null && state.ageRange != null) {
+                    SetEqualizerAndCustomHearIdPacket(
+                        equalizerConfiguration,
+                        state.gender,
+                        state.ageRange,
+                        state.customHearId,
+                    ).bytes()
+                } else if (state.supportsDynamicRangeCompression()) {
                     SetEqualizerWithDrcPacket(
                         equalizerConfiguration,
                         equalizerConfiguration,
                     ).bytes()
-                } else if (featureFlags and DeviceFeatureFlags.twoChannelEqualizer() != 0) {
-                    SetEqualizerPacket(equalizerConfiguration, equalizerConfiguration).bytes()
                 } else {
-                    SetEqualizerPacket(equalizerConfiguration, null).bytes()
+                    SetEqualizerPacket(
+                        equalizerConfiguration,
+                        if (featureFlags and DeviceFeatureFlags.twoChannelEqualizer() != 0) {
+                            equalizerConfiguration
+                        } else {
+                            null
+                        }
+                    ).bytes()
                 }
             callbacks.queueCommanad(Command.Write(packet))
             _stateFlow.value =

@@ -18,5 +18,7 @@ fun SoundcoreDeviceState.Companion.empty(): SoundcoreDeviceState {
         isRightBatteryCharging = false,
         ageRange = null,
         dynamicRangeCompressionMinFirmwareVersion = null,
+        gender = null,
+        customHearId = null,
     )
 }

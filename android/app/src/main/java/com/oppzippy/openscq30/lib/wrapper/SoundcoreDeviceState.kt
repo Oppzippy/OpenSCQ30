@@ -1,8 +1,11 @@
 package com.oppzippy.openscq30.lib.wrapper
 
+import com.oppzippy.openscq30.lib.bindings.AgeRange
+import com.oppzippy.openscq30.lib.bindings.CustomHearId
 import com.oppzippy.openscq30.lib.bindings.DeviceFeatureFlags
 import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.bindings.FirmwareVersion
+import com.oppzippy.openscq30.lib.bindings.Gender
 import com.oppzippy.openscq30.lib.bindings.SoundModes
 import com.oppzippy.openscq30.lib.bindings.StateUpdatePacket
 import kotlin.jvm.optionals.getOrNull
@@ -15,8 +18,9 @@ data class SoundcoreDeviceState(
     val isRightBatteryCharging: Boolean,
     val equalizerConfiguration: EqualizerConfiguration,
     val soundModes: SoundModes?,
-    val ageRange: Int?,
-//    val customHearId: HearId?,
+    val ageRange: AgeRange?,
+    val gender: Gender?,
+    val customHearId: CustomHearId?,
 //    val customButtonModel: CustomButtonModel?,
     val leftFirmwareVersion: FirmwareVersion?,
     val rightFirmwareVersion: FirmwareVersion?,
@@ -53,13 +57,9 @@ fun StateUpdatePacket.toSoundcoreDeviceState(): SoundcoreDeviceState {
         isRightBatteryCharging = false, // TODO
         leftBatteryLevel = 0, // TODO
         rightBatteryLevel = 0, // TODO
-        ageRange = ageRange().let {
-            if (it.isPresent) {
-                it.asInt
-            } else {
-                null
-            }
-        },
+        ageRange = ageRange().getOrNull(),
+        gender = gender().getOrNull(),
         dynamicRangeCompressionMinFirmwareVersion = dynamicRangeCompressionMinFirmwareVersion().getOrNull(),
+        customHearId = customHearId().getOrNull(),
     )
 }

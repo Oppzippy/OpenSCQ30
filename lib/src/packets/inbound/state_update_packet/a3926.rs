@@ -8,11 +8,11 @@ use nom::{
 use crate::packets::{
     parsing::{
         take_age_range, take_basic_hear_id, take_bool, take_custom_button_model, take_dual_battery,
-        take_stereo_equalizer_configuration, ParseResult,
+        take_gender, take_stereo_equalizer_configuration, ParseResult,
     },
     structures::{
         AgeRange, BasicHearId, CustomButtonModel, DeviceFeatureFlags, DualBattery,
-        EqualizerConfiguration,
+        EqualizerConfiguration, Gender,
     },
 };
 
@@ -25,7 +25,7 @@ pub struct A3926StateUpdatePacket {
     tws_status: bool,
     battery: DualBattery,
     equalizer_configuration: EqualizerConfiguration,
-    gender: u8,
+    gender: Gender,
     age_range: AgeRange,
     hear_id: BasicHearId,
     custom_button_model: CustomButtonModel,
@@ -45,6 +45,7 @@ impl From<A3926StateUpdatePacket> for StateUpdatePacket {
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: None,
             age_range: Some(packet.age_range),
+            gender: Some(packet.gender),
             custom_hear_id: Some(packet.hear_id.into()),
             custom_button_model: Some(packet.custom_button_model),
             firmware_version: None,
@@ -65,7 +66,7 @@ pub fn take_a3926_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                 take_bool,
                 take_dual_battery,
                 take_stereo_equalizer_configuration,
-                le_u8,
+                take_gender,
                 take_age_range,
                 take_basic_hear_id,
                 take_custom_button_model,

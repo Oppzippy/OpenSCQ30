@@ -48,6 +48,7 @@ impl From<A3931StateUpdatePacket> for StateUpdatePacket {
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: Some(packet.sound_modes),
             age_range: None,
+            gender: None,
             custom_hear_id: None,
             custom_button_model: Some(packet.custom_button_model),
             firmware_version: None,

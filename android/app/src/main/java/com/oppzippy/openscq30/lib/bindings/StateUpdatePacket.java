@@ -76,12 +76,18 @@ public final class StateUpdatePacket {
     }
     private static native @Nullable String do_serialNumber(long self);
 
-    public final @NonNull java.util.OptionalInt ageRange() {
-        java.util.OptionalInt ret = do_ageRange(mNativeObj);
+    public final @NonNull java.util.Optional<AgeRange> ageRange() {
+        long ret = do_ageRange(mNativeObj);
+        java.util.Optional<AgeRange> convRet;
+        if (ret != 0) {
+            convRet = java.util.Optional.of(new AgeRange(InternalPointerMarker.RAW_PTR, ret));
+        } else {
+            convRet = java.util.Optional.empty();
+        }
 
-        return ret;
+        return convRet;
     }
-    private static native @NonNull java.util.OptionalInt do_ageRange(long self);
+    private static native long do_ageRange(long self);
 
     public final @NonNull java.util.Optional<FirmwareVersion> dynamicRangeCompressionMinFirmwareVersion() {
         long ret = do_dynamicRangeCompressionMinFirmwareVersion(mNativeObj);
@@ -95,6 +101,32 @@ public final class StateUpdatePacket {
         return convRet;
     }
     private static native long do_dynamicRangeCompressionMinFirmwareVersion(long self);
+
+    public final @NonNull java.util.Optional<CustomHearId> customHearId() {
+        long ret = do_customHearId(mNativeObj);
+        java.util.Optional<CustomHearId> convRet;
+        if (ret != 0) {
+            convRet = java.util.Optional.of(new CustomHearId(InternalPointerMarker.RAW_PTR, ret));
+        } else {
+            convRet = java.util.Optional.empty();
+        }
+
+        return convRet;
+    }
+    private static native long do_customHearId(long self);
+
+    public final @NonNull java.util.Optional<Gender> gender() {
+        long ret = do_gender(mNativeObj);
+        java.util.Optional<Gender> convRet;
+        if (ret != 0) {
+            convRet = java.util.Optional.of(new Gender(InternalPointerMarker.RAW_PTR, ret));
+        } else {
+            convRet = java.util.Optional.empty();
+        }
+
+        return convRet;
+    }
+    private static native long do_gender(long self);
 
     public synchronized void delete() {
         if (mNativeObj != 0) {

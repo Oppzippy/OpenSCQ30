@@ -1,8 +1,11 @@
+mod age_range;
 mod ambient_sound_mode;
+mod custom_hear_id;
 mod custom_noise_canceling;
 mod device_feature_flags;
 mod equalizer_configuration;
 mod firmware_version;
+mod gender;
 mod noise_canceling_mode;
 mod preset_equalizer_profile;
 mod sound_modes;
@@ -10,11 +13,14 @@ mod stereo_volume_adjustments;
 mod transparency_mode;
 mod volume_adjustments;
 
+pub use age_range::*;
 pub use ambient_sound_mode::*;
+pub use custom_hear_id::*;
 pub use custom_noise_canceling::*;
 pub use device_feature_flags::*;
 pub use equalizer_configuration::*;
 pub use firmware_version::*;
+pub use gender::*;
 pub use noise_canceling_mode::*;
 pub use preset_equalizer_profile::*;
 pub use sound_modes::*;

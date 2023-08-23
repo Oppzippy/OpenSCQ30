@@ -1,5 +1,7 @@
-use crate::{EqualizerConfiguration, FirmwareVersion, SoundModes};
-use openscq30_lib::packets::inbound::state_update_packet::StateUpdatePacket as LibStateUpdatePacket;
+use crate::{AgeRange, CustomHearId, EqualizerConfiguration, FirmwareVersion, Gender, SoundModes};
+use openscq30_lib::packets::{
+    inbound::state_update_packet::StateUpdatePacket as LibStateUpdatePacket, structures::HearId,
+};
 use rifgen::rifgen_attr::{generate_interface, generate_interface_doc};
 
 #[generate_interface_doc]
@@ -41,8 +43,8 @@ impl StateUpdatePacket {
     }
 
     #[generate_interface]
-    pub fn age_range(&self) -> Option<i32> {
-        self.0.age_range.map(|age_range| age_range.0.into())
+    pub fn age_range(&self) -> Option<AgeRange> {
+        self.0.age_range.map(Into::into)
     }
 
     #[generate_interface]
@@ -50,6 +52,20 @@ impl StateUpdatePacket {
         self.0
             .dynamic_range_compression_min_firmware_version
             .map(Into::into)
+    }
+
+    #[generate_interface]
+    pub fn custom_hear_id(&self) -> Option<CustomHearId> {
+        if let Some(HearId::Custom(custom_hear_id)) = self.0.custom_hear_id {
+            Some(custom_hear_id.into())
+        } else {
+            None
+        }
+    }
+
+    #[generate_interface]
+    pub fn gender(&self) -> Option<Gender> {
+        self.0.gender.map(Into::into)
     }
 }
 

@@ -154,6 +154,8 @@ private fun DefaultPreview() {
                     isRightBatteryCharging = false,
                     ageRange = null,
                     dynamicRangeCompressionMinFirmwareVersion = null,
+                    customHearId = null,
+                    gender = null,
                 ),
             ),
         )

@@ -8,11 +8,12 @@ use nom::{
 use crate::packets::{
     parsing::{
         take_age_range, take_bool, take_custom_button_model, take_custom_hear_id,
-        take_dual_battery, take_sound_modes, take_stereo_equalizer_configuration, ParseResult,
+        take_dual_battery, take_gender, take_sound_modes, take_stereo_equalizer_configuration,
+        ParseResult,
     },
     structures::{
         AgeRange, CustomButtonModel, CustomHearId, DeviceFeatureFlags, DualBattery,
-        EqualizerConfiguration, SoundModes,
+        EqualizerConfiguration, Gender, SoundModes,
     },
 };
 
@@ -25,7 +26,7 @@ pub struct A3930StateUpdatePacket {
     tws_status: bool,
     battery: DualBattery,
     equalizer_configuration: EqualizerConfiguration,
-    gender: u8,
+    gender: Gender,
     age_range: AgeRange,
     custom_hear_id: CustomHearId,
     custom_button_model: CustomButtonModel,
@@ -49,6 +50,7 @@ impl From<A3930StateUpdatePacket> for StateUpdatePacket {
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: Some(packet.sound_modes),
             age_range: Some(packet.age_range),
+            gender: Some(packet.gender),
             custom_hear_id: Some(packet.custom_hear_id.into()),
             custom_button_model: Some(packet.custom_button_model),
             firmware_version: None,
@@ -69,7 +71,7 @@ pub fn take_a3930_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                 take_bool,
                 take_dual_battery,
                 take_stereo_equalizer_configuration,
-                le_u8,
+                take_gender,
                 take_age_range,
                 take_custom_hear_id,
                 take_custom_button_model,
