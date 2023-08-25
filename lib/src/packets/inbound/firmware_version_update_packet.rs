@@ -54,7 +54,8 @@ mod tests {
             0x32, 0x33, 0x2e, 0x34, 0x35, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
             0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0xca,
         ];
-        let InboundPacket::FirmwareVersionUpdate(packet) = InboundPacket::new(input).unwrap() else {
+        let InboundPacket::FirmwareVersionUpdate(packet) = InboundPacket::new(input).unwrap()
+        else {
             panic!("wrong packet type");
         };
         assert_eq!(FirmwareVersion::new(12, 34), packet.left_firmware_version);

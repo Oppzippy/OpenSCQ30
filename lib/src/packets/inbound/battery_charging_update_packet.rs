@@ -36,7 +36,8 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04, 0x0c, 0x00, 0x01, 0x00, 0x1b,
         ];
-        let InboundPacket::BatteryChargingUpdate(packet) = InboundPacket::new(input).unwrap() else {
+        let InboundPacket::BatteryChargingUpdate(packet) = InboundPacket::new(input).unwrap()
+        else {
             panic!("wrong packet type");
         };
 
@@ -49,7 +50,8 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04, 0x0b, 0x00, 0x01, 0x1a,
         ];
-        let InboundPacket::BatteryChargingUpdate(packet) = InboundPacket::new(input).unwrap() else {
+        let InboundPacket::BatteryChargingUpdate(packet) = InboundPacket::new(input).unwrap()
+        else {
             panic!("wrong packet type");
         };
 

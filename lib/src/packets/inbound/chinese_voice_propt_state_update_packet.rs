@@ -33,7 +33,9 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x0F, 0x0c, 0x00, 0x01, 0x26,
         ];
-        let InboundPacket::ChineseVoicePromptStateUpdate(packet) = InboundPacket::new(input).unwrap() else {
+        let InboundPacket::ChineseVoicePromptStateUpdate(packet) =
+            InboundPacket::new(input).unwrap()
+        else {
             panic!("wrong packet type");
         };
         assert_eq!(true, packet.is_enabled);
