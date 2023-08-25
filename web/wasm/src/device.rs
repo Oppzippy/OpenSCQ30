@@ -23,6 +23,7 @@ impl Device {
     #[wasm_bindgen]
     pub async fn new(device: BluetoothDevice) -> Result<Device, JsValue> {
         let connection = WebBluetoothConnection::new(device).await?;
+        #[allow(clippy::arc_with_non_send_sync)]
         let device = Q30Device::<_, WasmFutures>::new(Arc::new(connection))
             .await
             .map_err(|err| format!("{err:?}"))?;

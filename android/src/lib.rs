@@ -1,3 +1,5 @@
+#![allow(clippy::inherent_to_string)]
+
 mod java_glue;
 mod packets;
 mod soundcore_device_utils;

@@ -49,7 +49,7 @@ impl Equalizer {
         self.dont_fire_events.set(true);
         self.get_volume_sliders()
             .iter()
-            .zip(volumes.into_iter())
+            .zip(volumes)
             .for_each(|(slider, volume)| slider.set_volume(volume));
         self.dont_fire_events.set(false);
     }

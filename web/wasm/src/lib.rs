@@ -21,7 +21,7 @@ pub fn initialize() {
 }
 
 #[wasm_bindgen]
-struct WasmTest;
+pub struct WasmTest;
 #[wasm_bindgen]
 impl WasmTest {
     #[wasm_bindgen(js_name = "deserializeAndReserializeForTests")]

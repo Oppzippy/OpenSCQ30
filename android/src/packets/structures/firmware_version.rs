@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use openscq30_lib::packets::structures::FirmwareVersion as LibFirmwareVersion;
 use rifgen::rifgen_attr::{generate_interface, generate_interface_doc};
 
@@ -33,12 +35,10 @@ impl FirmwareVersion {
 
     #[generate_interface]
     pub fn compare(&self, other: &FirmwareVersion) -> i32 {
-        if self < other {
-            -1
-        } else if self > other {
-            1
-        } else {
-            0
+        match self.cmp(other) {
+            Ordering::Less => -1,
+            Ordering::Equal => 0,
+            Ordering::Greater => 1,
         }
     }
 }

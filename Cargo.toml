@@ -1,5 +1,6 @@
 [workspace]
 members = ["cli", "gui", "lib", "android", "web/wasm", "tokio_rt_multi_thread"]
+resolver = "2"
 
 [profile.release]
 strip = true
