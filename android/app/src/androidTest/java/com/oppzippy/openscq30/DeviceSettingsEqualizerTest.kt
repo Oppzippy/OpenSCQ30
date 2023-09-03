@@ -96,15 +96,15 @@ class DeviceSettingsEqualizerTest {
         composeRule.onNode(classical, true).assertExists()
 
         val sliders = composeRule.onAllNodesWithTag("equalizerSlider")
-        val values = listOf(30F, 30F, -20F, -20F, 0F, 20F, 30F, 40F)
+        val values = listOf(3.0F, 3.0F, -2.0F, -2.0F, 0.0F, 2.0F, 3.0F, 4.0F)
         for (i in 0..7) {
-            sliders[i].assertRangeInfoEquals(ProgressBarRangeInfo(values[i], -120F..120F, 240))
+            sliders[i].assertRangeInfoEquals(ProgressBarRangeInfo(values[i], -12.0F..13.5F, 255))
         }
     }
 
     @Test
     fun selectsInitialEqualizerCustomProfileByDefault() {
-        val values = byteArrayOf(1, 10, -10, 50, 0, 10, -60, 60)
+        val values = doubleArrayOf(0.1, 1.0, -1.0, 5.0, 0.0, 1.0, -6.0, 6.0)
 
         composeRule.setContent {
             EqualizerSettings(
@@ -120,8 +120,8 @@ class DeviceSettingsEqualizerTest {
             sliders[i].assertRangeInfoEquals(
                 ProgressBarRangeInfo(
                     values[i].toFloat(),
-                    -120F..120F,
-                    240,
+                    -12.0F..13.5F,
+                    255,
                 ),
             )
         }
@@ -146,14 +146,14 @@ class DeviceSettingsEqualizerTest {
             onEqualizerConfigurationChange(EqualizerConfiguration(PresetEqualizerProfile.BassBooster))
         }
 
-        val values = byteArrayOf(40, 30, 10, 0, 0, 0, 0, 0)
+        val values = floatArrayOf(4.0F, 3.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F)
         val sliders = composeRule.onAllNodesWithTag("equalizerSlider")
         for (i in 0..7) {
             sliders[i].assertRangeInfoEquals(
                 ProgressBarRangeInfo(
-                    values[i].toFloat(),
-                    -120F..120F,
-                    240,
+                    values[i],
+                    -12.0F..13.5F,
+                    255,
                 ),
             )
         }
@@ -195,7 +195,7 @@ class DeviceSettingsEqualizerTest {
             EqualizerSettings(
                 uiState = stateWithEqualizerConfiguration(
                     EqualizerConfiguration(
-                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
+                        VolumeAdjustments(doubleArrayOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)),
                     ),
                 ),
             )
@@ -227,7 +227,7 @@ class DeviceSettingsEqualizerTest {
             EqualizerSettings(
                 uiState = stateWithEqualizerConfiguration(
                     EqualizerConfiguration(
-                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
+                        VolumeAdjustments(doubleArrayOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)),
                     ),
                 ),
             )
@@ -266,7 +266,7 @@ class DeviceSettingsEqualizerTest {
             EqualizerSettings(
                 stateWithEqualizerConfiguration(
                     EqualizerConfiguration(
-                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
+                        VolumeAdjustments(doubleArrayOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)),
                     ),
                 ),
             )
@@ -289,7 +289,7 @@ class DeviceSettingsEqualizerTest {
             EqualizerSettings(
                 stateWithEqualizerConfiguration(
                     EqualizerConfiguration(
-                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
+                        VolumeAdjustments(doubleArrayOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)),
                     ),
                 ),
             )
@@ -325,7 +325,7 @@ class DeviceSettingsEqualizerTest {
             EqualizerSettings(
                 stateWithEqualizerConfiguration(
                     EqualizerConfiguration(
-                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
+                        VolumeAdjustments(doubleArrayOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)),
                     ),
                 ),
             )
@@ -341,7 +341,7 @@ class DeviceSettingsEqualizerTest {
             EqualizerSettings(
                 stateWithEqualizerConfiguration(
                     EqualizerConfiguration(
-                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
+                        VolumeAdjustments(doubleArrayOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)),
                     ),
                 ),
             )
@@ -371,7 +371,7 @@ class DeviceSettingsEqualizerTest {
             EqualizerSettings(
                 stateWithEqualizerConfiguration(
                     EqualizerConfiguration(
-                        VolumeAdjustments(byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)),
+                        VolumeAdjustments(doubleArrayOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)),
                     ),
                 ),
             )

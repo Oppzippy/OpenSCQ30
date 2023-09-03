@@ -10,6 +10,7 @@ use gtk::{
     },
     CompositeTemplate,
 };
+use openscq30_lib::packets::structures::VolumeAdjustments;
 
 #[derive(Default, CompositeTemplate, Properties)]
 #[properties(wrapper_type = super::EqualizerProfileDropdownRow)]
@@ -22,11 +23,11 @@ pub struct EqualizerProfileDropdownRow {
 
     #[property(get, set)]
     pub name: RefCell<String>,
-    pub volume_adjustments: Cell<Option<[i8; 8]>>,
+    pub volume_adjustments: Cell<Option<[f64; 8]>>,
 }
 
 impl EqualizerProfileDropdownRow {
-    pub fn set_volume_adjustments(&self, volume_adjustments: Option<[i8; 8]>) {
+    pub fn set_volume_adjustments(&self, volume_adjustments: Option<[f64; 8]>) {
         self.volume_adjustments.set(volume_adjustments);
         self.drawing_area.queue_draw();
     }
@@ -79,8 +80,12 @@ impl ObjectImpl for EqualizerProfileDropdownRow {
                         (index as f64 / volume_adjustments.len() as f64) * width_without_padding
                             + padding
                     };
-                    let get_y = |value: i8| {
-                        (1.0 - (value as f64 + 120.0) / 240.0) * height_without_padding + padding
+                    let get_y = |value| {
+                        const RANGE: f64 =
+                            VolumeAdjustments::MAX_VOLUME - VolumeAdjustments::MIN_VOLUME;
+                        (1.0 - (value - VolumeAdjustments::MIN_VOLUME) / RANGE)
+                            * height_without_padding
+                            + padding
                     };
                     volume_adjustments
                         .windows(2)

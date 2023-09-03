@@ -14,8 +14,8 @@ import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDeviceProvider
-import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
+import com.oppzippy.openscq30.features.equalizer.storage.toCustomProfile
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
@@ -23,6 +23,7 @@ import com.oppzippy.openscq30.features.soundcoredevice.demo.DemoSoundcoreDevice
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
 import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
 import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
+import com.oppzippy.openscq30.lib.bindings.VolumeAdjustments
 import com.oppzippy.openscq30.ui.OpenSCQ30Root
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -164,7 +165,20 @@ class NotificationTest {
 
     @Test
     fun quickPresetEqualizerConfigurationWorks(): Unit = runBlocking {
-        customProfileDao.insert(CustomProfile("Test Profile", listOf(0, 1, 2, 3, 4, 5, 6, 7)))
+        customProfileDao.insert(
+            VolumeAdjustments(
+                doubleArrayOf(
+                    0.0,
+                    0.1,
+                    0.2,
+                    0.3,
+                    0.4,
+                    0.5,
+                    0.6,
+                    0.7,
+                ),
+            ).toCustomProfile("Test Profile"),
+        )
         quickPresetDao.insert(QuickPreset(id = 0, customEqualizerProfileName = "Test Profile"))
         quickPresetDao.insert(
             QuickPreset(id = 1, presetEqualizerProfile = PresetEqualizerProfile.SoundcoreSignature),

@@ -22,6 +22,8 @@ object InMemoryAppDatabaseModule {
     fun provideAppDatabase(
         @ApplicationContext context: Context,
     ): AppDatabase {
-        return Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
+        return Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
+            .addMigrations(migrations = AppDatabase.migrations.toTypedArray())
+            .build()
     }
 }

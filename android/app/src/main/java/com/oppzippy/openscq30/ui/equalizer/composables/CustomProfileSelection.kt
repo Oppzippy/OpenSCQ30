@@ -21,7 +21,10 @@ fun CustomProfileSelection(
         value = selectedProfile,
         options = profiles.map { profile ->
             DropdownOption(value = profile, name = profile.name, label = {
-                ProfileSelectionRow(name = profile.name, volumeAdjustments = profile.values)
+                ProfileSelectionRow(
+                    name = profile.name,
+                    volumeAdjustments = profile.getVolumeAdjustments().adjustments().toList(),
+                )
             })
         },
         label = stringResource(R.string.custom_profile),
@@ -33,7 +36,7 @@ fun CustomProfileSelection(
 @Preview(showBackground = true)
 @Composable
 private fun PreviewCustomProfileSelection() {
-    val selectedProfile = CustomProfile("Test Profile", listOf(0, 10, 20, 30, 40, 50, 60, 70))
+    val selectedProfile = CustomProfile("Test Profile", 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0)
     OpenSCQ30Theme {
         CustomProfileSelection(
             selectedProfile = selectedProfile,

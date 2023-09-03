@@ -287,6 +287,7 @@ where
 mod tests {
     use std::{sync::Arc, time::Duration};
 
+    use float_cmp::assert_approx_eq;
     use macaddr::MacAddr6;
     use tokio::sync::mpsc;
 
@@ -338,11 +339,12 @@ mod tests {
             NoiseCancelingMode::Transport,
             sound_modes.noise_canceling_mode
         );
-        assert_eq!(
-            EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
-                -60, 60, 23, 40, 22, 60, -4, 16
-            ])),
-            state.equalizer_configuration
+        assert!(state.equalizer_configuration.preset_profile().is_none());
+        assert_approx_eq!(
+            VolumeAdjustments,
+            VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]),
+            state.equalizer_configuration.volume_adjustments(),
+            VolumeAdjustments::MARGIN
         )
     }
 
@@ -454,7 +456,7 @@ mod tests {
             .unwrap();
         let equalizer_configuration =
             EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
-                0, 10, 20, 30, 40, 50, 60, 70,
+                0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0,
             ]));
         device
             .set_equalizer_configuration(equalizer_configuration)

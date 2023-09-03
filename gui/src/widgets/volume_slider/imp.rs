@@ -73,8 +73,8 @@ impl ObjectImpl for VolumeSlider {
         .build();
 
         let slider = self.slider.get();
-        let lower = VolumeAdjustments::MIN_VOLUME as f64 / 10.0;
-        let upper = VolumeAdjustments::MAX_VOLUME as f64 / 10.0;
+        let lower = VolumeAdjustments::MIN_VOLUME;
+        let upper = VolumeAdjustments::MAX_VOLUME;
         slider.adjustment().set_lower(lower);
         slider.adjustment().set_upper(upper);
         slider.add_mark(lower, gtk::PositionType::Right, Some(&format!("{}", lower)));

@@ -5,7 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import com.oppzippy.openscq30.lib.bindings.VolumeAdjustments
 
-class EqualizerLine(private val values: List<Byte>) {
+class EqualizerLine(private val values: List<Double>) {
     fun drawBitmap(
         bitmap: Bitmap,
         xOffset: Float = 0F,
@@ -52,7 +52,7 @@ class EqualizerLine(private val values: List<Byte>) {
             val x = normalizedX * widthWithoutPadding + padding
             val normalizedY = 1F - ((value - minVolume) / range.toFloat())
             val y = normalizedY * heightWithoutPadding + padding
-            Pair(x, y)
+            Pair(x, y.toFloat())
         }
         return points
     }

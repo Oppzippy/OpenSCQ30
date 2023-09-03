@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
-fun ProfileSelectionRow(name: String, volumeAdjustments: List<Byte>?) {
+fun ProfileSelectionRow(name: String, volumeAdjustments: List<Double>?) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -41,7 +41,7 @@ private fun PreviewProfileSelectionRow() {
     OpenSCQ30Theme {
         ProfileSelectionRow(
             name = "Test Profile",
-            volumeAdjustments = listOf(0, 10, 50, 100, -100, -50, -10, 0),
+            volumeAdjustments = listOf(0.0, 1.0, 5.0, 10.0, -10.0, -5.0, -1.0, 0.0),
         )
     }
 }

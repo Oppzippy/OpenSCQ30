@@ -78,7 +78,7 @@ mod tests {
         let (sender, _receiver) = MainContext::channel(Priority::default());
         settings.set_sender(sender);
         settings.set_equalizer_configuration(EqualizerConfiguration::new_custom_profile(
-            VolumeAdjustments::new([0, 0, 0, 0, 0, 0, 0, 0]),
+            VolumeAdjustments::new([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
         ));
         assert_eq!(
             true,
@@ -98,10 +98,10 @@ mod tests {
         settings.set_sender(sender);
         settings.set_custom_profiles(vec![CustomEqualizerProfileObject::new(
             "test profile",
-            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
         )]);
         settings.set_equalizer_configuration(EqualizerConfiguration::new_custom_profile(
-            VolumeAdjustments::new([0, 0, 0, 0, 0, 0, 0, 0]),
+            VolumeAdjustments::new([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
         ));
         assert_eq!(
             false,

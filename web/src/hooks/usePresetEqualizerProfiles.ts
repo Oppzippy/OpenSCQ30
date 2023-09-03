@@ -97,7 +97,7 @@ export function usePresetEqualizerProfiles() {
       ...profile,
       values: [
         ...EqualizerHelper.getPresetProfileVolumeAdjustments(profile.id),
-      ].map((value) => value / 10),
+      ].map((value) => value),
     }));
     return presetProfilesWithValues;
   }, [t]);

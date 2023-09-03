@@ -16,11 +16,11 @@ impl Equalizer {
         Object::builder().build()
     }
 
-    pub fn volume_adjustments(&self) -> [i8; 8] {
+    pub fn volume_adjustments(&self) -> [f64; 8] {
         return self.imp().volume_adjustments();
     }
 
-    pub fn set_volumes(&self, volumes: [i8; 8]) {
+    pub fn set_volumes(&self, volumes: [f64; 8]) {
         self.imp().set_volumes(volumes);
     }
 }
@@ -43,7 +43,7 @@ mod tests {
     fn test_set_and_get_volumes() {
         load_resources();
         let equalizer = Equalizer::new();
-        let expected_volumes = [0, 1, 2, 3, 4, 5, 6, 7];
+        let expected_volumes = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7];
         equalizer.set_volumes(expected_volumes.to_owned());
         assert_eq!(equalizer.volume_adjustments(), expected_volumes);
     }
@@ -60,7 +60,7 @@ mod tests {
                 received_event.set(true);
             }),
         );
-        equalizer.imp().band_100.set_volume(1);
+        equalizer.imp().band_100.set_volume(0.1);
         assert_eq!(received_event.get(), true);
     }
 
@@ -76,7 +76,7 @@ mod tests {
                 received_event.set(true);
             }),
         );
-        equalizer.set_volumes([0, 1, 2, 3, 4, 5, 6, 7]);
+        equalizer.set_volumes([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]);
         assert_eq!(received_event.get(), false);
     }
 }

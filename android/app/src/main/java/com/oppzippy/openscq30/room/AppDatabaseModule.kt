@@ -17,6 +17,8 @@ class AppDatabaseModule {
     fun provideAppDatabase(
         @ApplicationContext context: Context,
     ): AppDatabase {
-        return Room.databaseBuilder(context, AppDatabase::class.java, "database").build()
+        return Room.databaseBuilder(context, AppDatabase::class.java, "database")
+            .addMigrations(migrations = AppDatabase.migrations.toTypedArray())
+            .build()
     }
 }

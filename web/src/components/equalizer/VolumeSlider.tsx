@@ -16,8 +16,8 @@ export const VolumeSlider = React.memo(function (props: Props) {
   const { t } = useTranslation();
   const labelId = `${props.hz}-hz-label`;
   const step = 0.1;
-  const minVolume = EqualizerHelper.MIN_VOLUME * step;
-  const maxVolume = EqualizerHelper.MAX_VOLUME * step;
+  const minVolume = EqualizerHelper.MIN_VOLUME;
+  const maxVolume = EqualizerHelper.MAX_VOLUME;
   return (
     <>
       {/* make sure Hz doesn't go on to a second line */}

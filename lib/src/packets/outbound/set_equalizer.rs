@@ -54,7 +54,7 @@ mod tests {
         ];
         let packet = SetEqualizerPacket::new(
             EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
-                -60, 60, 23, 40, 22, 60, -4, 16,
+                -6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6,
             ])),
             None,
         );

@@ -4,7 +4,9 @@ use serde::{Deserialize, Serialize};
 
 use super::VolumeAdjustments;
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[derive(
+    Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize, Deserialize,
+)]
 #[serde(rename_all = "camelCase")]
 pub struct StereoVolumeAdjustments {
     pub left: VolumeAdjustments,
@@ -34,8 +36,8 @@ mod tests {
     #[test]
     fn it_orders_bytes_correctly() {
         let stereo_volume_adjustments = StereoVolumeAdjustments {
-            left: VolumeAdjustments::new([0, 1, 2, 3, 4, 5, 6, 7]),
-            right: VolumeAdjustments::new([8, 9, 10, 11, 12, 13, 14, 15]),
+            left: VolumeAdjustments::new([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]),
+            right: VolumeAdjustments::new([0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5]),
         };
         let bytes = stereo_volume_adjustments.bytes();
         assert_eq!(stereo_volume_adjustments.left.bytes(), bytes[0..8]);

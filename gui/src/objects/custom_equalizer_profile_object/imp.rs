@@ -11,7 +11,7 @@ use gtk::{
 pub struct CustomEqualizerProfileObject {
     #[property(get, set)]
     pub name: RefCell<String>,
-    pub volume_adjustments: Cell<[i8; 8]>,
+    pub volume_adjustments: Cell<[f64; 8]>,
 }
 
 #[glib::object_subclass]

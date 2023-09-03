@@ -1,57 +1,61 @@
 use std::array;
 
+use float_cmp::{ApproxEq, F64Margin};
+use ordered_float::OrderedFloat;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[derive(
+    Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+)]
 #[serde(transparent)]
 pub struct VolumeAdjustments {
-    volume_adjustments: [i8; 8],
+    volume_adjustments: [OrderedFloat<f64>; 8],
 }
 
 impl VolumeAdjustments {
-    pub const MIN_VOLUME: i8 = -120;
-    pub const MAX_VOLUME: i8 = 120;
+    pub const STEP: f64 = 0.1;
+    pub const MIN_VOLUME: f64 = -12.0;
+    pub const MAX_VOLUME: f64 = ((u8::MAX - 120) as f64) / 10.0;
+    pub const MARGIN: F64Margin = F64Margin {
+        epsilon: f64::EPSILON * 20.0,
+        ulps: 4,
+    };
 
-    pub fn new(volume_adjustments: [i8; 8]) -> Self {
+    pub fn new(volume_adjustments: [f64; 8]) -> Self {
         let clamped_adjustments =
             volume_adjustments.map(|vol| vol.clamp(Self::MIN_VOLUME, Self::MAX_VOLUME));
         Self {
-            volume_adjustments: clamped_adjustments,
+            volume_adjustments: clamped_adjustments.map(Into::into),
         }
     }
 
     pub fn bytes(&self) -> [u8; 8] {
         self.volume_adjustments
-            .map(Self::signed_adjustment_to_packet_byte)
+            .map(|adjustment| Self::signed_adjustment_to_packet_byte(adjustment.into()))
     }
 
     pub fn from_bytes(bytes: [u8; 8]) -> Self {
         Self::new(bytes.map(Self::packet_byte_to_signed_adjustment))
     }
 
-    pub fn adjustments(&self) -> [i8; 8] {
-        self.volume_adjustments
+    pub fn adjustments(&self) -> [f64; 8] {
+        self.volume_adjustments.map(|adjustment| adjustment.into())
     }
 
-    fn signed_adjustment_to_packet_byte(offset: i8) -> u8 {
-        let clamped = offset.clamp(Self::MIN_VOLUME, Self::MAX_VOLUME);
-        clamped.wrapping_add(Self::MIN_VOLUME.abs()) as u8
+    fn signed_adjustment_to_packet_byte(adjustment: f64) -> u8 {
+        let clamped = adjustment.clamp(Self::MIN_VOLUME, Self::MAX_VOLUME);
+        let shifted = (clamped - Self::MIN_VOLUME) * 10.0;
+        shifted.round() as u8
     }
 
-    fn packet_byte_to_signed_adjustment(byte: u8) -> i8 {
-        let clamped = byte.clamp(
-            Self::signed_adjustment_to_packet_byte(Self::MIN_VOLUME),
-            Self::signed_adjustment_to_packet_byte(Self::MAX_VOLUME),
-        );
-        clamped.wrapping_sub(Self::MIN_VOLUME.unsigned_abs()) as i8
+    fn packet_byte_to_signed_adjustment(byte: u8) -> f64 {
+        (byte as f64) / 10.0 + Self::MIN_VOLUME
     }
 
     pub fn apply_drc(&self) -> VolumeAdjustments {
         const PRE_DRC_SUBTRACTION: f64 = 12.0;
         let bands = self
             .adjustments()
-            // go from -120 to -120 to -12.0 to 12.0
-            .map(|x| f64::from(x) / 10.0)
             // a constant is subtracted before doing calculations, and added back at the end
             .map(|x| x - PRE_DRC_SUBTRACTION);
 
@@ -167,25 +171,42 @@ impl VolumeAdjustments {
             })
         });
 
-        let byte_bands = multiplied_bands
-            .map(|band| band + PRE_DRC_SUBTRACTION * 10.0)
-            // scale back up to -120 to 120
-            .map(|band| band.round().clamp(i8::MIN as f64, i8::MAX as f64) as i8);
+        let byte_bands = multiplied_bands.map(|band| (band / 10.0) + PRE_DRC_SUBTRACTION);
         VolumeAdjustments::new(byte_bands)
     }
 }
 
-impl From<VolumeAdjustments> for [i8; 8] {
+impl ApproxEq for VolumeAdjustments {
+    type Margin = F64Margin;
+
+    fn approx_eq<M: Into<Self::Margin>>(self, other: Self, margin: M) -> bool {
+        let margin = margin.into();
+        self.adjustments()
+            .into_iter()
+            .zip(other.adjustments())
+            .all(|(left, right)| left.approx_eq(right, margin))
+    }
+}
+
+impl From<VolumeAdjustments> for [f64; 8] {
     fn from(volume_adjustments: VolumeAdjustments) -> Self {
         volume_adjustments.adjustments()
     }
 }
 
+impl From<[f64; 8]> for VolumeAdjustments {
+    fn from(value: [f64; 8]) -> Self {
+        Self::new(value)
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use float_cmp::{assert_approx_eq, F64Margin};
+
     use super::VolumeAdjustments;
     const TEST_BYTES: [u8; 8] = [0, 80, 100, 120, 140, 160, 180, 240];
-    const TEST_ADJUSTMENTS: [i8; 8] = [-120, -40, -20, 0, 20, 40, 60, 120];
+    const TEST_ADJUSTMENTS: [f64; 8] = [-12.0, -4.0, -2.0, 0.0, 2.0, 4.0, 6.0, 12.0];
 
     #[test]
     fn converts_volume_adjustments_to_packet_bytes() {
@@ -200,20 +221,20 @@ mod tests {
     }
 
     #[test]
-    fn it_clamps_bytes_outside_of_expected_range() {
-        let band_adjustments =
-            VolumeAdjustments::from_bytes([0, 255, 120, 120, 120, 120, 120, 120]);
-        assert_eq!(
-            [0, 240, 120, 120, 120, 120, 120, 120],
-            band_adjustments.bytes()
-        );
-    }
-
-    #[test]
     fn it_clamps_volume_adjustments_outside_of_expected_range() {
-        let band_adjustments = VolumeAdjustments::new([-128, 127, 0, 0, 0, 0, 0, 0]);
+        let band_adjustments =
+            VolumeAdjustments::new([f64::MIN, f64::MAX, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]);
         assert_eq!(
-            [-120, 120, 0, 0, 0, 0, 0, 0],
+            [
+                VolumeAdjustments::MIN_VOLUME,
+                VolumeAdjustments::MAX_VOLUME,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+            ],
             band_adjustments.adjustments()
         );
     }
@@ -222,27 +243,43 @@ mod tests {
     fn it_matches_expected_drc_values() {
         let examples = [
             (
-                [-60, 60, 23, 120, 22, -120, -4, 16], // volume adjustments
-                [99, 127, 104, 127 /* 129 */, 116, 95, 119, 108], // drc
+                [-6.0, 6.0, 2.3, 12.0, 2.2, -12.0, -0.4, 1.6], // volume adjustments
+                [
+                    9.928837, 12.748025, 10.429153, 12.866665, 11.617126, 9.47635, 11.8813305,
+                    10.830467,
+                ], // drc
             ),
             (
-                [120, 120, 120, 120, 120, 120, 120, 120],
-                [120, 120, 120, 120, 120, 120, 120, 120],
+                [12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0],
+                [12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0],
             ),
             (
-                [-120, -120, -120, -120, -120, -120, -120, -120],
-                [101, 108, 105, 106, 106, 105, 105, 95],
+                [-12.0, -12.0, -12.0, -12.0, -12.0, -12.0, -12.0, -12.0],
+                [
+                    10.069848, 10.7604, 10.54368, 10.59096, 10.59096, 10.54368, 10.5324, 9.493848,
+                ],
             ),
             (
-                [-60, 60, 23, 120, 22, -120, -4, 16],
-                [99, 127, 104, 127, 116, 95, 119, 108],
+                [-6.0, 6.0, 2.3, 12.0, 2.2, -12.0, -0.4, 1.6],
+                [
+                    9.928837, 12.748025, 10.429153, 12.866665, 11.617126, 9.47635, 11.8813305,
+                    10.830467,
+                ],
             ),
         ];
 
         for example in examples {
             let actual = VolumeAdjustments::new(example.0).apply_drc();
             let expected = VolumeAdjustments::new(example.1);
-            assert_eq!(expected, actual);
+            assert_approx_eq!(
+                VolumeAdjustments,
+                expected,
+                actual,
+                F64Margin {
+                    epsilon: f32::EPSILON as f64 * 20.0,
+                    ..Default::default()
+                }
+            );
         }
     }
 }

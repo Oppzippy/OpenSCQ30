@@ -61,14 +61,8 @@ impl EqualizerSettings {
             .activate_action(
                 "win.create-custom-equalizer-profile",
                 Some(
-                    &BoxedVolumeAdjustments(
-                        self.equalizer
-                            .volume_adjustments()
-                            .map(i16::from)
-                            .to_vec()
-                            .into(),
-                    )
-                    .to_variant(),
+                    &BoxedVolumeAdjustments(self.equalizer.volume_adjustments().to_vec().into())
+                        .to_variant(),
                 ),
             )
             .unwrap();

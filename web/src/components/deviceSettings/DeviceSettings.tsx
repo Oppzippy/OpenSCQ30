@@ -75,26 +75,21 @@ export function DeviceSettings({
   const setEqualizerValue = useCallback(
     (changedIndex: number, newVolume: number) => {
       setDisplayState((state) => {
-        // VolumeAdjustments expects integers (-120 to +120), but the state uses decimals (-12.0 to +12.0)
         const volumeAdjustments =
           state.equalizerConfiguration.volumeAdjustments.map((volume, index) =>
-            index == changedIndex ? newVolume * 10 : volume,
+            index == changedIndex ? newVolume : volume,
           );
         return {
           ...state,
           equalizerConfiguration: {
             presetProfile: null,
-            volumeAdjustments,
+            volumeAdjustments: volumeAdjustments,
           },
         };
       });
     },
     [setDisplayState],
   );
-
-  const fractionalEqualizerVolumes = [
-    ...displayState.equalizerConfiguration.volumeAdjustments,
-  ].map((volume) => volume / 10);
 
   const setSoundModes = useCallback(
     (soundModes: SoundModes) => {
@@ -118,7 +113,7 @@ export function DeviceSettings({
   );
 
   const createCustomProfileWithName = useCreateCustomProfileWithName(
-    fractionalEqualizerVolumes,
+    displayState.equalizerConfiguration.volumeAdjustments,
   );
 
   let noiseCanceling: Parameters<
@@ -149,7 +144,7 @@ export function DeviceSettings({
       <EqualizerSettings
         profile={displayState.equalizerConfiguration.presetProfile ?? "custom"}
         onProfileSelected={setSelectedPresetProfile}
-        values={fractionalEqualizerVolumes}
+        values={displayState.equalizerConfiguration.volumeAdjustments}
         onValueChange={setEqualizerValue}
         customProfiles={customEqualizerProfiles}
         onAddCustomProfile={openCreateCustomProfileDialog}

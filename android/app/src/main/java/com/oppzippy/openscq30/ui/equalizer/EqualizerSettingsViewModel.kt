@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
+import com.oppzippy.openscq30.features.equalizer.storage.toCustomProfile
 import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.bindings.VolumeAdjustments
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
@@ -20,17 +21,16 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
+import java.math.RoundingMode
 import javax.inject.Inject
 import kotlin.jvm.optionals.getOrNull
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @HiltViewModel
 class EqualizerSettingsViewModel @Inject constructor(
     private val customProfileDao: CustomProfileDao,
 ) : ViewModel() {
-    private val minVolume = VolumeAdjustments.minVolume().toInt()
-    private val maxVolume = VolumeAdjustments.maxVolume().toInt()
-
     private val _displayedEqualizerConfiguration: MutableStateFlow<EqualizerConfiguration?> =
         MutableStateFlow(null)
     val displayedEqualizerConfiguration = _displayedEqualizerConfiguration.asStateFlow()
@@ -81,7 +81,7 @@ class EqualizerSettingsViewModel @Inject constructor(
         }
     }
 
-    private fun setDisplayedEqualizerConfiguration(profile: EqualizerProfile, values: ByteArray) {
+    private fun setDisplayedEqualizerConfiguration(profile: EqualizerProfile, values: DoubleArray) {
         // Values match the display, not the profile. Creating the rust EqualizerConfiguration first
         // will use proper values.
         val configuration = profile.toEqualizerConfiguration(values)
@@ -91,12 +91,7 @@ class EqualizerSettingsViewModel @Inject constructor(
     fun createCustomProfile(name: String) {
         _displayedEqualizerConfiguration.value?.let {
             viewModelScope.launch {
-                customProfileDao.insert(
-                    CustomProfile(
-                        name,
-                        it.volumeAdjustments().adjustments().toList(),
-                    ),
-                )
+                customProfileDao.insert(it.volumeAdjustments().toCustomProfile(name))
                 refreshCustomProfiles()
             }
         }
@@ -112,19 +107,23 @@ class EqualizerSettingsViewModel @Inject constructor(
     fun selectCustomProfile(customProfile: CustomProfile) {
         setDisplayedEqualizerConfiguration(
             EqualizerProfile.Custom,
-            customProfile.values.toByteArray(),
+            customProfile.getVolumeAdjustments().adjustments(),
         )
     }
 
     fun onValueTextChange(changedIndex: Int, changedText: String) {
         var reformattedText = changedText
         try {
-            val value = BigDecimal(changedText).multiply(BigDecimal.TEN)
-                .coerceIn(BigDecimal(minVolume), BigDecimal(maxVolume))
-            onValueChange(changedIndex, value.toByte())
+            val value = BigDecimal(changedText)
+                .coerceIn(
+                    BigDecimal(VolumeAdjustments.minVolume()),
+                    BigDecimal(VolumeAdjustments.maxVolume()),
+                )
+                .setScale(1, RoundingMode.HALF_UP)
+            onValueChange(changedIndex, value.toDouble())
             // don't delete trailing decimals
             if (!changedText.endsWith(".") && !changedText.endsWith(",")) {
-                reformattedText = value.div(BigDecimal.TEN).toString()
+                reformattedText = value.stripTrailingZeros().toPlainString()
             }
         } catch (_: NumberFormatException) {
         }
@@ -138,7 +137,7 @@ class EqualizerSettingsViewModel @Inject constructor(
         }
     }
 
-    fun onValueChange(changedIndex: Int, changedValue: Byte) {
+    fun onValueChange(changedIndex: Int, changedValue: Double) {
         _displayedEqualizerConfiguration.value?.let { equalizerConfiguration ->
             setDisplayedEqualizerConfiguration(
                 EqualizerProfile.Custom,
@@ -149,14 +148,14 @@ class EqualizerSettingsViewModel @Inject constructor(
                         } else {
                             value
                         }
-                    }.toByteArray(),
+                    }.toDoubleArray(),
             )
         }
     }
 
-    private fun refreshValueTexts(values: List<Byte>) {
+    private fun refreshValueTexts(values: List<Double>) {
         _valueTexts.value = values.map {
-            BigDecimal(it.toInt()).divide(BigDecimal.TEN).toString()
+            BigDecimal((it * 10).roundToInt()).divide(BigDecimal.TEN).toString()
         }
     }
 
@@ -183,8 +182,7 @@ class EqualizerSettingsViewModel @Inject constructor(
         _selectedCustomProfile.value =
             if (equalizerConfiguration.presetProfile().getOrNull() == null) {
                 _customProfiles.value.find {
-                    it.values == equalizerConfiguration.volumeAdjustments().adjustments()
-                        .toList()
+                    it.getVolumeAdjustments() == equalizerConfiguration.volumeAdjustments()
                 }
             } else {
                 null

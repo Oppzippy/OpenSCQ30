@@ -271,7 +271,7 @@ describe("Device Settings", () => {
     vi.advanceTimersByTime(500);
     expect(
       device.state.value.equalizerConfiguration.volumeAdjustments[0],
-    ).toEqual(10);
+    ).toEqual(1.0);
   });
 
   it("should display a toast when creating a custom profile fails", async () => {

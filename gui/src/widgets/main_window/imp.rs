@@ -65,7 +65,7 @@ impl MainWindow {
         self.device_selection.set_devices(devices);
     }
 
-    fn create_custom_equalizer_profile(&self, volume_adjustments: [i8; 8]) {
+    fn create_custom_equalizer_profile(&self, volume_adjustments: [f64; 8]) {
         let obj = self.obj();
         let dialog = gtk::Dialog::with_buttons(
             Some("Create Custom Profile"),
@@ -155,8 +155,8 @@ impl ObjectImpl for MainWindow {
                 let boxed_volume_adjustments: BoxedVolumeAdjustments = parameter.unwrap().get().unwrap();
                 let volume_adjustments = boxed_volume_adjustments.0
                     .iter()
-                    .map(|adjustment| *adjustment as i8)
-                    .collect::<Vec<i8>>()
+                    .map(ToOwned::to_owned)
+                    .collect::<Vec<f64>>()
                     .try_into()
                     .unwrap();
                 this.create_custom_equalizer_profile(volume_adjustments);

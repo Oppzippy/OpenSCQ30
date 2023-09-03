@@ -11,17 +11,17 @@ pub struct EqualizerHelper {}
 #[wasm_bindgen]
 impl EqualizerHelper {
     #[wasm_bindgen(getter = MIN_VOLUME)]
-    pub fn min_volume() -> i8 {
+    pub fn min_volume() -> f64 {
         VolumeAdjustments::MIN_VOLUME
     }
 
     #[wasm_bindgen(getter = MAX_VOLUME)]
-    pub fn max_volume() -> i8 {
+    pub fn max_volume() -> f64 {
         VolumeAdjustments::MAX_VOLUME
     }
 
     #[wasm_bindgen(js_name = "getPresetProfileVolumeAdjustments")]
-    pub fn preset_profile_volume_adjustments(profile_name: String) -> Result<Vec<i8>, String> {
+    pub fn preset_profile_volume_adjustments(profile_name: String) -> Result<Vec<f64>, String> {
         let preset_profile =
             PresetEqualizerProfile::from_str(&profile_name).map_err(|err| format!("{err:?}"))?;
         let equalizer_configuration =

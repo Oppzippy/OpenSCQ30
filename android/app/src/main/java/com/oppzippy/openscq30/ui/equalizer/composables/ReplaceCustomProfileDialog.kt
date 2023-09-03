@@ -81,8 +81,8 @@ private fun PreviewReplaceCustomProfileDialog() {
         ReplaceCustomProfileDialog(
             isOpen = true,
             profiles = listOf(
-                CustomProfile("Test Profile 1", listOf(0, -10, 20, 30, 40, 50, 60, 70)),
-                CustomProfile("Test Profile 2", listOf(-50, -20, 30, 40, 50, 60, 70, 80)),
+                CustomProfile("Test Profile 1", 0.0, -1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0),
+                CustomProfile("Test Profile 2", -5.0, -2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0),
             ),
             onDismiss = {},
             onProfileSelected = {},

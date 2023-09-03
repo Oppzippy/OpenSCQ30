@@ -16,12 +16,12 @@ impl VolumeSlider {
             .build()
     }
 
-    pub fn volume(&self) -> i8 {
-        (self.volume_slider_value() * 10.0).round() as i8
+    pub fn volume(&self) -> f64 {
+        self.volume_slider_value()
     }
 
-    pub fn set_volume(&self, volume: i8) {
-        self.set_volume_slider_value(volume as f64 / 10.0);
+    pub fn set_volume(&self, volume: f64) {
+        self.set_volume_slider_value(volume as f64);
     }
 }
 
@@ -79,7 +79,7 @@ mod tests {
     fn test_set_volume() {
         load_resources();
         let slider = VolumeSlider::new(80, 0.0);
-        slider.set_volume(15);
+        slider.set_volume(1.5);
         assert_eq!(slider.imp().slider.value(), 1.5);
     }
 
@@ -88,6 +88,6 @@ mod tests {
         load_resources();
         let slider = VolumeSlider::new(80, 0.0);
         slider.imp().slider.set_value(1.5);
-        assert_eq!(slider.volume(), 15);
+        assert_eq!(slider.volume(), 1.5);
     }
 }

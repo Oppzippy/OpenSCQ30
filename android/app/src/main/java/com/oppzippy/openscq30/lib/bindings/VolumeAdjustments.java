@@ -21,21 +21,23 @@ public final class VolumeAdjustments {
     }
     private static native boolean do_rustEq(long self, long other);
 
-    public VolumeAdjustments(@NonNull byte [] volume_adjustments) {
+    public VolumeAdjustments(@NonNull double [] volume_adjustments) {
         mNativeObj = init(volume_adjustments);
     }
-    private static native long init(byte [] volume_adjustments);
+    private static native long init(double [] volume_adjustments);
 
-    public final byte [] adjustments() {
-        byte [] ret = do_adjustments(mNativeObj);
+    public final double [] adjustments() {
+        double [] ret = do_adjustments(mNativeObj);
 
         return ret;
     }
-    private static native byte [] do_adjustments(long self);
+    private static native double [] do_adjustments(long self);
 
-    public static native byte minVolume();
+    public static native double minVolume();
 
-    public static native byte maxVolume();
+    public static native double maxVolume();
+
+    public static native double step();
 
     public synchronized void delete() {
         if (mNativeObj != 0) {

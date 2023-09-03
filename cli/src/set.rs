@@ -29,19 +29,20 @@ pub async fn set(set_command: SetCommand, device: &impl Device) -> openscq30_lib
             }
         }
         SetCommand::Equalizer { volume_adjustments } => {
-            let volume_adjustments = volume_adjustments
-                .try_into()
-                .map(VolumeAdjustments::new)
-                .unwrap_or_else(|values| {
-                    panic!(
-                        "error converting vec of volume adjustments to array: expected len 8, got {}",
-                        values.len()
-                    )
-                });
+            let adjustment_array: [i8; 8] =
+                volume_adjustments
+                    .try_into()
+                    .unwrap_or_else(|values: Vec<_>| {
+                        panic!(
+                            "error converting vec of volume adjustments to array: expected len 8, got {}",
+                            values.len(),
+                        )
+                    });
+            let float_adjustments = adjustment_array.map(|adjustment| (adjustment as f64) / 10.0);
 
             device
                 .set_equalizer_configuration(EqualizerConfiguration::new_custom_profile(
-                    volume_adjustments,
+                    VolumeAdjustments::new(float_adjustments),
                 ))
                 .await?
         }

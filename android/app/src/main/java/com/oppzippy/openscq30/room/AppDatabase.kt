@@ -1,18 +1,22 @@
 package com.oppzippy.openscq30.room
 
+import android.content.ContentValues
+import android.database.sqlite.SQLiteDatabase
 import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RenameColumn
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
 
 @Database(
-    version = 5,
+    version = 6,
     entities = [
         CustomProfile::class,
         QuickPreset::class,
@@ -23,13 +27,14 @@ import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
         AutoMigration(
             from = 3,
             to = 4,
-            spec = AppDatabase.CustomEqualizerProfileNameMigration::class,
+            spec = AppDatabase.AutoMigration3To4::class,
         ),
         AutoMigration(from = 4, to = 5),
     ],
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
+
     abstract fun equalizerCustomProfileDao(): CustomProfileDao
     abstract fun quickPresetDao(): QuickPresetDao
 
@@ -38,5 +43,77 @@ abstract class AppDatabase : RoomDatabase() {
         fromColumnName = "equalizerProfileName",
         toColumnName = "customEqualizerProfileName",
     )
-    class CustomEqualizerProfileNameMigration : AutoMigrationSpec
+    class AutoMigration3To4 : AutoMigrationSpec
+
+    companion object {
+        val migrations = listOf(Migration5To6)
+    }
+
+    object Migration5To6 : Migration(5, 6) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            //language=RoomSql
+            database.execSQL("ALTER TABLE equalizer_custom_profile RENAME TO custom_equalizer_profile_pre_migration")
+            //language=RoomSql
+            database.execSQL(
+                """CREATE TABLE `custom_equalizer_profile` (
+                    name TEXT PRIMARY KEY NOT NULL,
+                    band100 REAL NOT NULL,
+                    band200 REAL NOT NULL,
+                    band400 REAL NOT NULL,
+                    band800 REAL NOT NULL,
+                    band1600 REAL NOT NULL,
+                    band3200 REAL NOT NULL,
+                    band6400 REAL NOT NULL,
+                    band12800 REAL NOT NULL
+                )
+                """.trimMargin(),
+            )
+            //language=RoomSql
+            database.execSQL(
+                """CREATE UNIQUE INDEX index_custom_equalizer_profile_band100_band200_band400_band800_band1600_band3200_band6400_band12800 ON custom_equalizer_profile (
+                    band100,
+                    band200,
+                    band400,
+                    band800,
+                    band1600,
+                    band3200,
+                    band6400,
+                    band12800
+                )
+                """.trimMargin(),
+            )
+
+            database.beginTransaction()
+            try {
+                //language=RoomSql
+                val cursor =
+                    database.query("SELECT name, `values` FROM custom_equalizer_profile_pre_migration")
+                while (cursor.moveToNext()) {
+                    val name = cursor.getString(0)
+                    val byteValues = cursor.getBlob(1)
+                    val doubleValues = byteValues.map { it.toDouble() / 10.0 }
+                    database.insert(
+                        "custom_equalizer_profile",
+                        SQLiteDatabase.CONFLICT_REPLACE,
+                        ContentValues().apply {
+                            put("name", name)
+                            put("band100", doubleValues[0])
+                            put("band200", doubleValues[1])
+                            put("band400", doubleValues[2])
+                            put("band800", doubleValues[3])
+                            put("band1600", doubleValues[4])
+                            put("band3200", doubleValues[5])
+                            put("band6400", doubleValues[6])
+                            put("band12800", doubleValues[7])
+                        },
+                    )
+                }
+                database.setTransactionSuccessful()
+            } finally {
+                database.endTransaction()
+            }
+            //language=RoomSql
+            database.execSQL("DROP TABLE custom_equalizer_profile_pre_migration")
+        }
+    }
 }

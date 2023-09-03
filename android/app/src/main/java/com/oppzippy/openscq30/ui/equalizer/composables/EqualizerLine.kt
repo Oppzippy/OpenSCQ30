@@ -22,7 +22,7 @@ import com.oppzippy.openscq30.features.equalizer.visualization.EqualizerLine
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
-fun EqualizerLine(values: List<Byte>, width: Dp, height: Dp) {
+fun EqualizerLine(values: List<Double>, width: Dp, height: Dp) {
     val line = EqualizerLine(values)
     val points = line.points(width.value, height.value, 4F)
 
@@ -64,7 +64,20 @@ fun EqualizerLine(values: List<Byte>, width: Dp, height: Dp) {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewEqualizerLine() {
-    val values by remember { mutableStateOf(listOf<Byte>(0, 10, 120, 0, -10, -120, 0, 0)) }
+    val values by remember {
+        mutableStateOf(
+            listOf(
+                0.0,
+                1.0,
+                12.0,
+                0.0,
+                -1.0,
+                -12.0,
+                0.0,
+                0.0,
+            ),
+        )
+    }
     OpenSCQ30Theme {
         EqualizerLine(values = values, width = 80.dp, height = 20.dp)
     }

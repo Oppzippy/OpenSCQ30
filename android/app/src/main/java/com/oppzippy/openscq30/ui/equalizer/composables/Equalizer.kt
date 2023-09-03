@@ -17,8 +17,8 @@ import kotlin.math.roundToInt
 
 @Composable
 fun Equalizer(
-    values: List<Byte>,
-    onValueChange: (index: Int, value: Byte) -> Unit,
+    values: List<Double>,
+    onValueChange: (index: Int, value: Double) -> Unit,
     texts: List<String>,
     onTextChanged: (index: Int, value: String) -> Unit,
 ) {
@@ -50,7 +50,7 @@ fun Equalizer(
 @Preview(showBackground = true)
 @Composable
 private fun PreviewEqualizer() {
-    var values by remember { mutableStateOf(listOf<Byte>(0, 0, 0, 0, 0, 0, 0, 0)) }
+    var values by remember { mutableStateOf(listOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)) }
     OpenSCQ30Theme {
         Equalizer(
             values = values,

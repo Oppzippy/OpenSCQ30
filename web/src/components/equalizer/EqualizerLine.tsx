@@ -15,8 +15,8 @@ export const EqualizerLine = React.memo(function ({
   const getX = (index: number) => (index / volumeAdjustments.length) * width;
 
   // 0,0 is the top left, but we want 0,0 to be bottom left, so invert the height
-  const minVolume = EqualizerHelper.MIN_VOLUME / 10;
-  const maxVolume = EqualizerHelper.MAX_VOLUME / 10;
+  const minVolume = EqualizerHelper.MIN_VOLUME;
+  const maxVolume = EqualizerHelper.MAX_VOLUME;
   const range = maxVolume - minVolume;
   const getY = (value: number) =>
     height - ((value - minVolume) / range) * height;

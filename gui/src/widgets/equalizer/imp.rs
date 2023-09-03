@@ -41,11 +41,11 @@ pub struct Equalizer {
 }
 
 impl Equalizer {
-    pub fn volume_adjustments(&self) -> [i8; 8] {
+    pub fn volume_adjustments(&self) -> [f64; 8] {
         self.get_volume_sliders().map(|slider| slider.volume())
     }
 
-    pub fn set_volumes(&self, volumes: [i8; 8]) {
+    pub fn set_volumes(&self, volumes: [f64; 8]) {
         self.dont_fire_events.set(true);
         self.get_volume_sliders()
             .iter()

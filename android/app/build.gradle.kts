@@ -52,6 +52,9 @@ android {
         getByName("main") {
             jniLibs.srcDir("src/main/libs")
         }
+        getByName("androidTest") {
+            assets.srcDir("$projectDir/schemas")
+        }
     }
 
     buildTypes {
@@ -156,7 +159,7 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
     annotationProcessor("androidx.room:room-compiler:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
-    testImplementation("androidx.room:room-testing:$roomVersion")
+    androidTestImplementation("androidx.room:room-testing:$roomVersion")
 
     val hiltVersion = "2.46.1"
     implementation("com.google.dagger:hilt-android:$hiltVersion")
@@ -184,6 +187,7 @@ dependencies {
     androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0-alpha04")
 
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    androidTestImplementation(kotlin("reflect"))
 }
 
 kapt {

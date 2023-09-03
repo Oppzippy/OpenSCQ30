@@ -10,17 +10,17 @@ glib::wrapper! {
 }
 
 impl CustomEqualizerProfileObject {
-    pub fn new(name: &str, volume_adjustments: [i8; 8]) -> Self {
+    pub fn new(name: &str, volume_adjustments: [f64; 8]) -> Self {
         let obj: Self = Object::builder().property("name", name).build();
         obj.imp().volume_adjustments.replace(volume_adjustments);
         obj
     }
 
-    pub fn volume_adjustments(&self) -> [i8; 8] {
+    pub fn volume_adjustments(&self) -> [f64; 8] {
         self.imp().volume_adjustments.get()
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, glib::Boxed, glib::Variant)]
+#[derive(Debug, PartialEq, Clone, glib::Boxed, glib::Variant)]
 #[boxed_type(name = "OpenSCQ30VolumeAdjustments")]
-pub struct BoxedVolumeAdjustments(pub glib::FixedSizeVariantArray<Vec<i16>, i16>);
+pub struct BoxedVolumeAdjustments(pub glib::FixedSizeVariantArray<Vec<f64>, f64>);

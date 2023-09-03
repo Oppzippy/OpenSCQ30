@@ -6,7 +6,6 @@ import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceConnectionManager
 import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.bindings.SoundModes
-import com.oppzippy.openscq30.lib.bindings.VolumeAdjustments
 import javax.inject.Inject
 
 class ActivateQuickPresetUseCase @Inject constructor(
@@ -26,7 +25,7 @@ class ActivateQuickPresetUseCase @Inject constructor(
                 EqualizerConfiguration(quickPreset.presetEqualizerProfile)
             } else if (quickPreset.customEqualizerProfileName != null) {
                 customProfileDao.get(quickPreset.customEqualizerProfileName)?.let {
-                    EqualizerConfiguration(VolumeAdjustments(it.values.toByteArray()))
+                    EqualizerConfiguration(it.getVolumeAdjustments())
                 }
             } else {
                 null

@@ -38,7 +38,7 @@ enum class EqualizerProfile(val presetProfile: PresetEqualizerProfile?) {
             return presetProfile?.toStringResource() ?: R.string.custom
         }
 
-    fun toEqualizerConfiguration(volumeAdjustments: ByteArray?): EqualizerConfiguration {
+    fun toEqualizerConfiguration(volumeAdjustments: DoubleArray?): EqualizerConfiguration {
         return if (presetProfile != null) {
             EqualizerConfiguration(presetProfile)
         } else {

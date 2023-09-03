@@ -93,6 +93,8 @@ pub fn take_a3028_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
 
 #[cfg(test)]
 mod tests {
+    use float_cmp::assert_approx_eq;
+
     use crate::packets::{
         inbound::InboundPacket,
         structures::{
@@ -151,11 +153,12 @@ mod tests {
             NoiseCancelingMode::Transport,
             packet.sound_modes.unwrap().noise_canceling_mode
         );
-        assert_eq!(
-            EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
-                -60, 60, 23, 40, 22, 60, -4, 16
-            ])),
-            packet.equalizer_configuration
+        assert!(packet.equalizer_configuration.preset_profile().is_none());
+        assert_approx_eq!(
+            VolumeAdjustments,
+            VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]),
+            packet.equalizer_configuration.volume_adjustments(),
+            VolumeAdjustments::MARGIN
         );
     }
 
@@ -180,11 +183,12 @@ mod tests {
             NoiseCancelingMode::Transport,
             packet.sound_modes.unwrap().noise_canceling_mode
         );
-        assert_eq!(
-            EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
-                -60, 60, 23, 40, 22, 60, -4, 16
-            ])),
-            packet.equalizer_configuration
+        assert!(packet.equalizer_configuration.preset_profile().is_none());
+        assert_approx_eq!(
+            VolumeAdjustments,
+            VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]),
+            packet.equalizer_configuration.volume_adjustments(),
+            VolumeAdjustments::MARGIN
         );
     }
 
@@ -210,11 +214,12 @@ mod tests {
             NoiseCancelingMode::Transport,
             packet.sound_modes.unwrap().noise_canceling_mode
         );
-        assert_eq!(
-            EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
-                -60, 60, 23, 40, 22, 60, -4, 16
-            ])),
-            packet.equalizer_configuration
+        assert!(packet.equalizer_configuration.preset_profile().is_none());
+        assert_approx_eq!(
+            VolumeAdjustments,
+            VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]),
+            packet.equalizer_configuration.volume_adjustments(),
+            VolumeAdjustments::MARGIN
         );
     }
 

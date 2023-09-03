@@ -23,8 +23,8 @@ import kotlin.math.roundToInt
 @Composable
 fun EqualizerSlider(
     hz: Int,
-    value: Byte,
-    onValueChange: (value: Byte) -> Unit,
+    value: Double,
+    onValueChange: (value: Double) -> Unit,
     text: String,
     onTextChange: (text: String) -> Unit,
 ) {
@@ -54,12 +54,11 @@ fun EqualizerSlider(
             Slider(
                 value = value.toFloat(),
                 onValueChange = {
-                    onValueChange(it.roundToInt().toByte())
+                    onValueChange(it.toDouble())
                 },
                 valueRange = VolumeAdjustments.minVolume().toFloat()..VolumeAdjustments.maxVolume()
                     .toFloat(),
-                steps = VolumeAdjustments.maxVolume().toInt() - VolumeAdjustments.minVolume()
-                    .toInt(),
+                steps = ((VolumeAdjustments.maxVolume() - VolumeAdjustments.minVolume()) / VolumeAdjustments.step()).roundToInt(),
                 modifier = Modifier.testTag("equalizerSlider"),
             )
         }
@@ -70,6 +69,6 @@ fun EqualizerSlider(
 @Composable
 private fun PreviewEqualizerSlider() {
     OpenSCQ30Theme {
-        EqualizerSlider(hz = 100, value = 0, onValueChange = {}, text = "0", onTextChange = {})
+        EqualizerSlider(hz = 100, value = 0.0, onValueChange = {}, text = "0", onTextChange = {})
     }
 }

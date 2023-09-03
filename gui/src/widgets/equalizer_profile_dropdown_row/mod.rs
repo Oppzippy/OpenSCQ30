@@ -16,11 +16,11 @@ impl EqualizerProfileDropdownRow {
         Object::builder().build()
     }
 
-    pub fn volume_adjustments(&self) -> Option<[i8; 8]> {
+    pub fn volume_adjustments(&self) -> Option<[f64; 8]> {
         self.imp().volume_adjustments.get()
     }
 
-    pub fn set_volume_adjustments(&self, volume_adjustments: Option<[i8; 8]>) {
+    pub fn set_volume_adjustments(&self, volume_adjustments: Option<[f64; 8]>) {
         self.imp().set_volume_adjustments(volume_adjustments)
     }
 }

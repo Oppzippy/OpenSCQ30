@@ -9,13 +9,14 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.rule.GrantPermissionRule
-import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
+import com.oppzippy.openscq30.features.equalizer.storage.toCustomProfile
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
 import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
 import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
 import com.oppzippy.openscq30.lib.bindings.TransparencyMode
+import com.oppzippy.openscq30.lib.bindings.VolumeAdjustments
 import com.oppzippy.openscq30.ui.quickpresets.QuickPresetScreen
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -169,7 +170,18 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsCustomEqualizerProfile() = runTest {
         customProfileDao.insert(
-            CustomProfile(name = "Test Profile", values = listOf(0, 0, 0, 0, 0, 0, 0, 0)),
+            VolumeAdjustments(
+                doubleArrayOf(
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                ),
+            ).toCustomProfile("Test Profile"),
         )
         composeRule.setContent {
             QuickPresetScreen()
@@ -187,7 +199,18 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsOnlyOneOfPresetOrCustomEqualizerProfile() = runTest {
         customProfileDao.insert(
-            CustomProfile(name = "Test Profile", values = listOf(0, 0, 0, 0, 0, 0, 0, 0)),
+            VolumeAdjustments(
+                doubleArrayOf(
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                ),
+            ).toCustomProfile("Test Profile"),
         )
         composeRule.setContent {
             QuickPresetScreen()
