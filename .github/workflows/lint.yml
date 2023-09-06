@@ -32,13 +32,7 @@ jobs:
         with:
           distribution: temurin # See 'Supported distributions' for available options
           java-version: 17
-      - name: Download ktlint
-        run: |
-          curl -sSL https://api.github.com/repos/pinterest/ktlint/releases/latest |
-            jq '.assets[].browser_download_url | select(endswith("ktlint"))' |
-            xargs curl -sSLO
-          chmod +x ktlint
       - name: Run ktlint
         run: |
           cd android
-          ../ktlint
+          ./gradlew ktlintCheck
