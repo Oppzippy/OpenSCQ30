@@ -36,8 +36,6 @@ impl OutboundPacket for SetEqualizerWithDrcPacket {
             bytes.extend(right_eq.volume_adjustments().bytes());
         }
         // eq with drc
-        // TODO maybe a bug? DRC is clamped to -120-120 meaning the range will be 0-240 rather than 0-255.
-        // The clamping is likely unnecessary anyway.
         bytes.extend(
             self.left_configuration
                 .volume_adjustments()
