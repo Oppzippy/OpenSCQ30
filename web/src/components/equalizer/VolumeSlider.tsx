@@ -18,6 +18,7 @@ export const VolumeSlider = React.memo(function (props: Props) {
   const step = 0.1;
   const minVolume = EqualizerHelper.MIN_VOLUME;
   const maxVolume = EqualizerHelper.MAX_VOLUME;
+  const displayValue = Math.round(props.value * 10) / 10;
   return (
     <>
       {/* make sure Hz doesn't go on to a second line */}
@@ -39,7 +40,7 @@ export const VolumeSlider = React.memo(function (props: Props) {
       <Grid2 xs={7} sm={8}>
         <Slider
           disabled={props.disabled}
-          value={props.value}
+          value={displayValue}
           min={minVolume}
           max={maxVolume}
           step={step}
@@ -63,7 +64,7 @@ export const VolumeSlider = React.memo(function (props: Props) {
       <Grid2 xs={2}>
         <Input
           disabled={props.disabled}
-          value={props.value}
+          value={displayValue}
           onChange={(event) =>
             props.onValueChange(props.index, Number(event.target.value))
           }
