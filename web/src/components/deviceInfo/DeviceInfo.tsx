@@ -1,4 +1,11 @@
-import { Stack, Table, TableCell, TableRow, Typography } from "@mui/material";
+import {
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+  Typography,
+} from "@mui/material";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { DeviceState } from "../../libTypes/DeviceState";
@@ -15,10 +22,12 @@ export const DeviceInfo = React.memo(function ({ deviceState }: Props) {
         {t("deviceInfo.deviceInfo")}
       </Typography>
       <Table>
-        <FirmwareVersion deviceState={deviceState} />
-        <SerialNumber deviceState={deviceState} />
-        <AgeRange deviceState={deviceState} />
-        <FeatureFlags deviceState={deviceState} />
+        <TableBody>
+          <FirmwareVersion deviceState={deviceState} />
+          <SerialNumber deviceState={deviceState} />
+          <AgeRange deviceState={deviceState} />
+          <FeatureFlags deviceState={deviceState} />
+        </TableBody>
       </Table>
     </Stack>
   );
