@@ -1,5 +1,28 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Features
+
+-   Add experimental support for new devices: A3027, A3028, A3030, A3033, A3033EU, A3926, A3926Z11, A3930, A3931, A3931XR, A3935, A3935W, A3951
+-   Add support for custom transparency mode
+-   Add support for custom noise canceling mode
+-   Add device information tab
+
+### Android
+
+#### Fixes
+
+-   Fix notification buttons not working on API level 34 (Android 14)
+
+### Web
+
+#### Features
+
+-   Add loading indicator while in the process of connecting to device
+
 ## v1.5.2
 
 ### GUI
