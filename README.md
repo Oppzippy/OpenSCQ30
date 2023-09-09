@@ -51,7 +51,7 @@ See [GitHub Releases](https://github.com/Oppzippy/OpenSCQ30/releases). All files
 
 ### Windows
 
-1. Checkout the repository.
+1. Checkout the repository and its submodules
 2. Install [cargo-make](https://github.com/sagiegurari/cargo-make#installation)
 3. Install [gvsbuild](https://github.com/wingtk/gvsbuild) and its dependencies using the [instructions in the readme](https://github.com/wingtk/gvsbuild#development-environment).
 4. Follow the [instructions for building GTK4 and libadwaita](https://github.com/wingtk/gvsbuild#build-gtk).
@@ -71,7 +71,7 @@ See [GitHub Releases](https://github.com/Oppzippy/OpenSCQ30/releases). All files
 
 ### Mac
 
-1. Checkout the repository
+1. Checkout the repository and its submodules
 2. Install rust
 3. Install [cargo-make](https://github.com/sagiegurari/cargo-make#installation)
 4. Install gtk4 and libadwaita (`brew install gtk4 libadwaita`)
@@ -82,7 +82,7 @@ See [GitHub Releases](https://github.com/Oppzippy/OpenSCQ30/releases). All files
 
 Instructions use Ubuntu package names. Package names may differ on other distros.
 
-1. Checkout the repository
+1. Checkout the repository and its submodules
 2. Install rust
 3. Install [cargo-make](https://github.com/sagiegurari/cargo-make#installation)
 4. Install libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev
@@ -104,7 +104,7 @@ Instructions use Ubuntu package names. Package names may differ on other distros
 
 #### Then:
 
-1. Checkout the repository
+1. Checkout the repository and its submodules
 2. Install rustup
 3. Add all supported cpu architecture targets: `rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android`
 4. Install [cargo-ndk](https://github.com/bbqsrc/cargo-ndk): `cargo install cargo-ndk`
