@@ -47,13 +47,6 @@ See [GitHub Releases](https://github.com/Oppzippy/OpenSCQ30/releases). All files
 
 [android-demo.webm](https://github.com/Oppzippy/OpenSCQ30/assets/2236514/2d351d63-64b8-4253-abdf-3bb5384888c1)
 
-## EQ Recommendations
-
-Noise Canceling Mode seems to reduce the bass quite a bit, so decrease the 100 Hz band when using EQ settings designed in Noise Canceling Mode for Normal Mode.
-
--   https://www.reddit.com/r/anker/comments/uabl7t/the_best_q30_eq_so_far/
--   https://youtu.be/2d1OL92TJL8?t=93
-
 ## Building
 
 ### Windows
