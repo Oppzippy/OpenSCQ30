@@ -26,6 +26,13 @@ public final class AgeRange {
     }
     private static native long init(short age_range);
 
+    public final short value() {
+        short ret = do_value(mNativeObj);
+
+        return ret;
+    }
+    private static native short do_value(long self);
+
     public synchronized void delete() {
         if (mNativeObj != 0) {
             do_delete(mNativeObj);

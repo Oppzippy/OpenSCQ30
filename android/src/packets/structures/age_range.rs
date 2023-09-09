@@ -14,6 +14,11 @@ impl AgeRange {
             inner: LibAgeRange(age_range),
         }
     }
+
+    #[generate_interface]
+    pub fn value(&self) -> u8 {
+        self.inner.0
+    }
 }
 
 impl From<LibAgeRange> for AgeRange {

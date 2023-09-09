@@ -38,7 +38,7 @@ fun DeviceInfoScreen(deviceState: SoundcoreDeviceState) {
         }
         if (deviceState.ageRange != null) {
             item { Text(stringResource(R.string.age_range)) }
-            item { Text(deviceState.ageRange.toString()) }
+            item { Text(deviceState.ageRange.value().toString()) }
         }
         item { Text(stringResource(R.string.feature_flags)) }
         item { Text(deviceState.featureFlags.toUInt().toString()) }
