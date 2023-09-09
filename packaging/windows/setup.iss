@@ -1,6 +1,6 @@
 #define AppName "OpenSCQ30"
 #define AppExeName "openscq30_gui.exe"
-#define AppVersion "1.5.2"
+#define AppVersion "1.6.0"
 
 [Setup]
 AppName={#AppName}

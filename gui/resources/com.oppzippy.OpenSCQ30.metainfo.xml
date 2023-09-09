@@ -33,6 +33,17 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.6.0" date="2023-09-09">
+            <description>
+                <p>Features</p>
+                <ul>
+                    <li>Add experimental support for new devices: A3027, A3028, A3030, A3033, A3033EU, A3926, A3926Z11, A3930, A3931, A3931XR, A3935, A3935W, A3951</li>
+                    <li>Add support for custom transparency mode</li>
+                    <li>Add support for custom noise canceling mode</li>
+                    <li>Add device information tab</li>
+                </ul> 
+            </description>
+        </release>
         <release version="1.5.2" date="2023-07-14">
             <description>
                 <p>Fixes</p>
