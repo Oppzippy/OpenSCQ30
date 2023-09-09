@@ -2,12 +2,33 @@
 
 OpenSCQ30 is free software for controlling settings for the Soundcore Q30 headphones.
 
-Progress on supported platforms:  
+### Supported Platforms
+
 [x] Windows - Ready  
 [x] Linux - Ready  
 [x] Android - Ready  
 [x] Web - Ready  
 [ ] macOS - It compiles. It's untested beyond that. You should probably use the web client instead. I don't have a Mac, so there's not much I can do for the desktop client. If you're tring to get it working on macOS, see [btleplug macOS build notes](https://github.com/deviceplug/btleplug#user-content-macos).
+
+### Supported Devices
+
+It is intended that all devices in this list work, but since I do not own them all, I can not check. Please open an issue if you can confirm that any of the devices with "Unknown" status are working correctly.
+
+| Model    | Name              | Status  |
+| -------- | ----------------- | ------- |
+| A3027    | Life Q35          | Unknown |
+| A3028    | Life Q30          | Working |
+| A3030    | Life Tune Pro     | Unknown |
+| A3033    | Life 2 Neo        | Unknown |
+| A3033EU  | Life 2 Neo        | Unknown |
+| A3926    | Life Dot 2S       | Unknown |
+| A3926Z11 | Life Dot 2S       | Unknown |
+| A3930    | Liberty 2 Pro     | Unknown |
+| A3931    | Life Dot 2 NC     | Unknown |
+| A3931XR  | Life Dot 2 XR     | Unknown |
+| A3935    | Life A2 NC        | Unknown |
+| A3935W   | Life A2 NC        | Unknown |
+| A3951    | Liberty Air 2 Pro | Unknown |
 
 ## Installing
 
