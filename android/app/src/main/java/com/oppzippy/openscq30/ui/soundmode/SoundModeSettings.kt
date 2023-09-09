@@ -50,7 +50,7 @@ fun SoundModeSettings(
             NoiseCancelingModeSelection(
                 noiseCancelingMode = soundModes.noiseCancelingMode(),
                 onNoiseCancelingModeChange = onNoiseCancelingModeChange,
-                hasCustomNoiseCanceling = true,
+                hasCustomNoiseCanceling = noiseCancelingType == NoiseCancelingType.Custom,
             )
         }
         if (noiseCancelingType == NoiseCancelingType.Custom && soundModes.noiseCancelingMode() == NoiseCancelingMode.Custom) {
