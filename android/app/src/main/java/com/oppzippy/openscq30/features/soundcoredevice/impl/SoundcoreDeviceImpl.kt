@@ -123,11 +123,13 @@ class SoundcoreDeviceImpl(
     }
 
     override fun setSoundModes(newSoundModes: SoundModes) {
-        val prevSoundModes = _stateFlow.value.soundModes ?: return
+        val state = _stateFlow.value
+        val prevSoundModes = state.soundModes ?: return
         if (prevSoundModes == newSoundModes) return
 
         val needsNoiseCanceling =
-            prevSoundModes.ambientSoundMode() != AmbientSoundMode.NoiseCanceling &&
+            state.featureFlags and DeviceFeatureFlags.noiseCancelingMode() != 0 &&
+                prevSoundModes.ambientSoundMode() != AmbientSoundMode.NoiseCanceling &&
                 prevSoundModes.noiseCancelingMode() != newSoundModes.noiseCancelingMode()
 
         if (needsNoiseCanceling) {
@@ -140,10 +142,12 @@ class SoundcoreDeviceImpl(
                 ),
             )
         }
-        queueSetSoundMode(newSoundModes)
+        val filteredSoundModes =
+            filterSoundModeChanges(state.featureFlags, prevSoundModes, newSoundModes)
+        queueSetSoundMode(filteredSoundModes)
 
-        _stateFlow.value = _stateFlow.value.copy(
-            soundModes = newSoundModes,
+        _stateFlow.value = state.copy(
+            soundModes = filteredSoundModes,
         )
     }
 
@@ -156,7 +160,7 @@ class SoundcoreDeviceImpl(
 
     override fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
         val state = _stateFlow.value
-        if (state.equalizerConfiguration != equalizerConfiguration) {
+        if (state.featureFlags and DeviceFeatureFlags.equalizer() != 0 && state.equalizerConfiguration != equalizerConfiguration) {
             val featureFlags = state.featureFlags
             val packet =
                 if (state.customHearId != null && state.gender != null && state.ageRange != null) {
