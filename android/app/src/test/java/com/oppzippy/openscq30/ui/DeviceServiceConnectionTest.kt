@@ -21,6 +21,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(FlowPreview::class)
@@ -75,6 +76,7 @@ class DeviceServiceConnectionTest {
         val device: SoundcoreDevice = mockk()
         every { device.name } returns "Test"
         every { device.macAddress } returns "00:00:00:00:00:00"
+        every { device.bleServiceUuid } returns UUID(0, 0)
         every { device.stateFlow } returns deviceStateFlow
 
         connectionStatusFlow.value = ConnectionStatus.Connected(device)
@@ -97,6 +99,7 @@ class DeviceServiceConnectionTest {
         every { device.stateFlow } returns deviceStateFlow
         every { device.name } returns "Test"
         every { device.macAddress } returns "00:00:00:00:00:00"
+        every { device.bleServiceUuid } returns UUID(0, 0)
 
         connectionStatusFlow.value = ConnectionStatus.Connected(device)
 

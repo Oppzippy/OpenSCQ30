@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 
 @SuppressLint("MissingPermission")
@@ -36,6 +37,10 @@ class SoundcoreDeviceImpl(
 
     override val name: String = gatt.device.name
     override val macAddress: String = gatt.device.address
+
+    // SoundcoreDeviceCallbackHandler should have already received a packet by the time we reach
+    // this point, so serviceUuid should never be null
+    override val bleServiceUuid: UUID = callbacks.serviceUuid.value!!
 
     init {
         scope.launch {

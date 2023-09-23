@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,9 +29,20 @@ import com.oppzippy.openscq30.ui.quickpresets.models.QuickPresetEqualizerConfigu
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 import com.oppzippy.openscq30.ui.utils.Loading
 import com.oppzippy.openscq30.ui.utils.PermissionCheck
+import java.util.UUID
 
 @Composable
-fun QuickPresetScreen(viewModel: QuickPresetViewModel = hiltViewModel()) {
+fun QuickPresetScreen(
+    deviceBleServiceUuid: UUID,
+    viewModel: QuickPresetViewModel = hiltViewModel(),
+) {
+    DisposableEffect(deviceBleServiceUuid) {
+        viewModel.selectQuickPreset(deviceBleServiceUuid, 0)
+        onDispose {
+            viewModel.clearSelection()
+        }
+    }
+
     val preset = viewModel.quickPreset.collectAsState().value
     val customEqualizerProfiles by viewModel.customEqualizerProfiles.collectAsState()
     val context = LocalContext.current
@@ -62,7 +74,7 @@ fun QuickPresetScreen(viewModel: QuickPresetViewModel = hiltViewModel()) {
             QuickPresetScreen(
                 preset = preset,
                 customEqualizerProfiles = customEqualizerProfiles,
-                onSelectedIndexChange = { viewModel.selectQuickPreset(it) },
+                onSelectedIndexChange = { viewModel.selectQuickPreset(deviceBleServiceUuid, it) },
                 onAmbientSoundModeChange = {
                     viewModel.upsertQuickPreset(
                         preset.copy(ambientSoundMode = it),
@@ -121,12 +133,12 @@ private fun QuickPresetScreen(
 ) {
     Column {
         QuickPresetSelection(
-            selectedIndex = preset.id,
+            selectedIndex = preset.index,
             onSelectedIndexChange = onSelectedIndexChange,
         )
         QuickPresetConfiguration(
             name = preset.name,
-            defaultName = stringResource(R.string.quick_preset_number, preset.id + 1),
+            defaultName = stringResource(R.string.quick_preset_number, preset.index + 1),
             ambientSoundMode = preset.ambientSoundMode,
             noiseCancelingMode = preset.noiseCancelingMode,
             transparencyMode = preset.transparencyMode,
@@ -155,7 +167,8 @@ fun PreviewQuickPresetScreenWithAllOptionsChecked() {
     OpenSCQ30Theme {
         QuickPresetScreen(
             preset = QuickPreset(
-                id = 0,
+                deviceBleServiceUuid = UUID(0, 0),
+                index = 0,
                 ambientSoundMode = AmbientSoundMode.Normal,
                 noiseCancelingMode = NoiseCancelingMode.Transport,
                 customEqualizerProfileName = "Test EQ Profile",
@@ -170,7 +183,7 @@ fun PreviewQuickPresetScreenWithAllOptionsChecked() {
 fun PreviewQuickPresetScreenWithNoOptionsChecked() {
     OpenSCQ30Theme {
         QuickPresetScreen(
-            preset = QuickPreset(0),
+            preset = QuickPreset(UUID(0, 0), 0),
             customEqualizerProfiles = emptyList(),
         )
     }

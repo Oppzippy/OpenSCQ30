@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase
 import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RenameColumn
+import androidx.room.RenameTable
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
@@ -12,24 +13,23 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
+import com.oppzippy.openscq30.features.quickpresets.storage.FallbackQuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
 
 @Database(
-    version = 6,
+    version = 7,
     entities = [
         CustomProfile::class,
+        FallbackQuickPreset::class,
         QuickPreset::class,
     ],
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
-        AutoMigration(
-            from = 3,
-            to = 4,
-            spec = AppDatabase.AutoMigration3To4::class,
-        ),
+        AutoMigration(from = 3, to = 4, spec = AppDatabase.AutoMigration3To4::class),
         AutoMigration(from = 4, to = 5),
+        AutoMigration(from = 6, to = 7, spec = AppDatabase.AutoMigration6To7::class),
     ],
 )
 @TypeConverters(Converters::class)
@@ -44,6 +44,17 @@ abstract class AppDatabase : RoomDatabase() {
         toColumnName = "customEqualizerProfileName",
     )
     class AutoMigration3To4 : AutoMigrationSpec
+
+    @RenameTable(
+        fromTableName = "quick_preset",
+        toTableName = "fallback_quick_preset",
+    )
+    @RenameColumn(
+        tableName = "quick_preset",
+        fromColumnName = "id",
+        toColumnName = "index",
+    )
+    class AutoMigration6To7 : AutoMigrationSpec
 
     companion object {
         val migrations = listOf(Migration5To6)

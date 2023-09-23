@@ -16,6 +16,7 @@ import com.oppzippy.openscq30.lib.wrapper.SoundcoreDeviceState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.util.UUID
 
 class DemoSoundcoreDevice(
     override val name: String,
@@ -50,6 +51,7 @@ class DemoSoundcoreDevice(
         get() {
             return _stateFlow.value
         }
+    override val bleServiceUuid = UUID(0, 0)
 
     override fun setSoundModes(newSoundModes: SoundModes) {
         Log.i(

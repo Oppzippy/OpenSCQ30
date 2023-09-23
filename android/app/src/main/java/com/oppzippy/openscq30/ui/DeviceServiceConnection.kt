@@ -54,6 +54,7 @@ class DeviceServiceConnection(
                                 connectionStatus.device.name,
                                 connectionStatus.device.macAddress,
                                 deviceState,
+                                deviceBleServiceUuid = connectionStatus.device.bleServiceUuid,
                             )
                         }
                     }

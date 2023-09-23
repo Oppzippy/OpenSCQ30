@@ -38,6 +38,7 @@ import com.oppzippy.openscq30.ui.quickpresets.QuickPresetScreen
 import com.oppzippy.openscq30.ui.soundmode.NoiseCancelingType
 import com.oppzippy.openscq30.ui.soundmode.SoundModeSettings
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -121,7 +122,7 @@ fun DeviceSettings(
                 )
             }
             composable(Screen.QuickPresets.route) {
-                QuickPresetScreen()
+                QuickPresetScreen(deviceBleServiceUuid = uiState.deviceBleServiceUuid)
             }
             composable(Screen.DeviceInfo.route) {
                 DeviceInfoScreen(deviceState = uiState.deviceState)
@@ -159,6 +160,7 @@ private fun PreviewDeviceSettings() {
                     customHearId = null,
                     gender = null,
                 ),
+                UUID(0, 0),
             ),
         )
     }

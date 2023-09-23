@@ -12,8 +12,7 @@ import android.os.IBinder
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
-import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
-import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetIdAndName
+import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetRepository
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_DISCONNECT
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_QUICK_PRESET
@@ -25,12 +24,10 @@ import com.oppzippy.openscq30.features.soundcoredevice.usecases.ActivateQuickPre
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -63,9 +60,9 @@ class DeviceService : LifecycleService() {
     lateinit var notificationBuilder: NotificationBuilder
 
     @Inject
-    lateinit var quickPresetDao: QuickPresetDao
+    lateinit var quickPresetRepository: QuickPresetRepository
 
-    private lateinit var quickPresetNames: StateFlow<List<QuickPresetIdAndName>>
+    private var quickPresetNames = MutableStateFlow<List<String?>>(emptyList())
     lateinit var connectionManager: DeviceConnectionManager
 
     private val broadcastReceiver = object : BroadcastReceiver() {
@@ -96,8 +93,18 @@ class DeviceService : LifecycleService() {
         super.onCreate()
         connectionManager = DeviceConnectionManager(factory, lifecycleScope)
 
-        quickPresetNames =
-            quickPresetDao.allNames().stateIn(lifecycleScope, SharingStarted.Eagerly, emptyList())
+        lifecycleScope.launch {
+            connectionManager.connectionStatusFlow.collectLatest { connectionStatus ->
+                if (connectionStatus is ConnectionStatus.Connected) {
+                    quickPresetRepository.getNamesForDevice(connectionStatus.device.bleServiceUuid)
+                        .collectLatest { names ->
+                            quickPresetNames.value = names
+                        }
+                } else {
+                    quickPresetNames.value = emptyList()
+                }
+            }
+        }
 
         lifecycleScope.launch {
             connectionManager.connectionStatusFlow.first { it is ConnectionStatus.Disconnected }
@@ -183,9 +190,7 @@ class DeviceService : LifecycleService() {
     private fun buildNotification(): Notification {
         return notificationBuilder(
             status = connectionManager.connectionStatusFlow.value,
-            quickPresetNames = quickPresetNames.value.let {
-                listOf(it.getOrNull(0)?.name, it.getOrNull(1)?.name)
-            },
+            quickPresetNames = quickPresetNames.value,
         )
     }
 

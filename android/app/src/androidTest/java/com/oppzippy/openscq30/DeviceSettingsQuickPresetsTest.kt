@@ -11,7 +11,9 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.rule.GrantPermissionRule
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
 import com.oppzippy.openscq30.features.equalizer.storage.toCustomProfile
-import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
+import com.oppzippy.openscq30.features.quickpresets.storage.FallbackQuickPreset
+import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
+import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetRepository
 import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
 import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
@@ -27,6 +29,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.UUID
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -46,10 +49,12 @@ class DeviceSettingsQuickPresetsTest {
     val composeRule = createAndroidComposeRule<TestActivity>()
 
     @Inject
-    lateinit var quickPresetDao: QuickPresetDao
+    lateinit var quickPresetRepository: QuickPresetRepository
 
     @Inject
     lateinit var customProfileDao: CustomProfileDao
+
+    private var deviceUuid = UUID(0, 0)
 
     private lateinit var name: SemanticsMatcher
     private lateinit var ambientSoundMode: SemanticsMatcher
@@ -81,90 +86,95 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsName() = runTest {
         composeRule.setContent {
-            QuickPresetScreen()
+            QuickPresetScreen(deviceUuid)
         }
-        assertEquals(null, quickPresetDao.get(0)?.name)
+        assertEquals(null, getFirstPreset()?.name)
 
         composeRule.onNode(name).performTextInput("Test")
-        assertEquals("Test", quickPresetDao.get(0)?.name)
+        assertEquals("Test", getFirstPreset()?.name)
     }
 
     @Test
     fun acceptsAmbientSoundMode() = runTest {
         composeRule.setContent {
-            QuickPresetScreen()
+            QuickPresetScreen(deviceUuid)
         }
-        assertEquals(null, quickPresetDao.get(0)?.ambientSoundMode)
+        assertEquals(null, getFirstPreset()?.ambientSoundMode)
 
         composeRule.onNode(ambientSoundMode).performClick()
-        assertEquals(AmbientSoundMode.Normal, quickPresetDao.get(0)?.ambientSoundMode)
+        assertEquals(AmbientSoundMode.Normal, getFirstPreset()?.ambientSoundMode)
 
         composeRule.onNodeWithText(composeRule.activity.getString(R.string.transparency))
             .performClick()
-        assertEquals(AmbientSoundMode.Transparency, quickPresetDao.get(0)?.ambientSoundMode)
+        assertEquals(AmbientSoundMode.Transparency, getFirstPreset()?.ambientSoundMode)
     }
 
     @Test
     fun acceptsTransparencyMode() = runTest {
         composeRule.setContent {
-            QuickPresetScreen()
+            QuickPresetScreen(deviceUuid)
         }
-        assertEquals(null, quickPresetDao.get(0)?.transparencyMode)
+        assertEquals(null, getFirstPreset()?.transparencyMode)
 
         composeRule.onNode(transparencyMode).performClick()
-        assertEquals(TransparencyMode.VocalMode, quickPresetDao.get(0)?.transparencyMode)
+        assertEquals(TransparencyMode.VocalMode, getFirstPreset()?.transparencyMode)
 
         composeRule.onNodeWithText(composeRule.activity.getString(R.string.fully_transparent))
             .performClick()
-        assertEquals(TransparencyMode.FullyTransparent, quickPresetDao.get(0)?.transparencyMode)
+        assertEquals(TransparencyMode.FullyTransparent, getFirstPreset()?.transparencyMode)
     }
 
     @Test
     fun acceptsNoiseCancelingMode() = runTest {
         composeRule.setContent {
-            QuickPresetScreen()
+            QuickPresetScreen(deviceUuid)
         }
-        assertEquals(null, quickPresetDao.get(0)?.noiseCancelingMode)
+        assertEquals(null, getFirstPreset()?.noiseCancelingMode)
 
         composeRule.onNode(noiseCancelingMode).performClick()
-        assertEquals(NoiseCancelingMode.Transport, quickPresetDao.get(0)?.noiseCancelingMode)
+        assertEquals(NoiseCancelingMode.Transport, getFirstPreset()?.noiseCancelingMode)
 
         composeRule.onNodeWithText(composeRule.activity.getString(R.string.outdoor)).performClick()
-        assertEquals(NoiseCancelingMode.Outdoor, quickPresetDao.get(0)?.noiseCancelingMode)
+        assertEquals(NoiseCancelingMode.Outdoor, getFirstPreset()?.noiseCancelingMode)
     }
 
     @Test
     fun acceptsCustomNoiseCanceling() = runTest {
         composeRule.setContent {
-            QuickPresetScreen()
+            QuickPresetScreen(deviceUuid)
         }
-        assertEquals(null, quickPresetDao.get(0)?.customNoiseCanceling)
+        assertEquals(null, getFirstPreset()?.customNoiseCanceling)
 
         composeRule.onNode(customNoiseCanceling).performClick()
-        assertEquals(0.toShort(), quickPresetDao.get(0)?.customNoiseCanceling?.value())
+        assertEquals(
+            0.toShort(),
+            quickPresetRepository.getForDevice(deviceUuid)
+                .getOrNull(0)?.customNoiseCanceling?.value(),
+        )
 
         composeRule.onNodeWithTag("customNoiseCancelingSlider").performClick()
         // clicks in the middle of the 0-10 slider, which is 5
-        assertEquals(5.toShort(), quickPresetDao.get(0)?.customNoiseCanceling?.value())
+        assertEquals(
+            5.toShort(),
+            quickPresetRepository.getForDevice(deviceUuid)
+                .getOrNull(0)?.customNoiseCanceling?.value(),
+        )
     }
 
     @Test
     fun acceptsPresetEqualizerProfile() = runTest {
         composeRule.setContent {
-            QuickPresetScreen()
+            QuickPresetScreen(deviceUuid)
         }
-        assertEquals(null, quickPresetDao.get(0)?.presetEqualizerProfile)
+        assertEquals(null, getFirstPreset()?.presetEqualizerProfile)
 
         composeRule.onNode(equalizer).performClick()
-        assertEquals(null, quickPresetDao.get(0)?.presetEqualizerProfile)
+        assertEquals(null, getFirstPreset()?.presetEqualizerProfile)
 
         composeRule.onNode(presetProfile).performClick()
         composeRule.onNodeWithText(composeRule.activity.getString(R.string.classical))
             .performClick()
-        assertEquals(
-            PresetEqualizerProfile.Classical,
-            quickPresetDao.get(0)?.presetEqualizerProfile,
-        )
+        assertEquals(PresetEqualizerProfile.Classical, getFirstPreset()?.presetEqualizerProfile)
     }
 
     @Test
@@ -184,16 +194,16 @@ class DeviceSettingsQuickPresetsTest {
             ).toCustomProfile("Test Profile"),
         )
         composeRule.setContent {
-            QuickPresetScreen()
+            QuickPresetScreen(deviceUuid)
         }
-        assertEquals(null, quickPresetDao.get(0)?.customEqualizerProfileName)
+        assertEquals(null, getFirstPreset()?.customEqualizerProfileName)
 
         composeRule.onNode(equalizer).performClick()
-        assertEquals(null, quickPresetDao.get(0)?.customEqualizerProfileName)
+        assertEquals(null, getFirstPreset()?.customEqualizerProfileName)
 
         composeRule.onNode(customProfile).performClick()
         composeRule.onNodeWithText("Test Profile").performClick()
-        assertEquals("Test Profile", quickPresetDao.get(0)?.customEqualizerProfileName)
+        assertEquals("Test Profile", getFirstPreset()?.customEqualizerProfileName)
     }
 
     @Test
@@ -213,7 +223,7 @@ class DeviceSettingsQuickPresetsTest {
             ).toCustomProfile("Test Profile"),
         )
         composeRule.setContent {
-            QuickPresetScreen()
+            QuickPresetScreen(deviceUuid)
         }
         composeRule.onNode(equalizer).performClick()
 
@@ -221,26 +231,59 @@ class DeviceSettingsQuickPresetsTest {
         composeRule.onNode(presetProfile).performClick()
         composeRule.onNodeWithText(composeRule.activity.getString(R.string.acoustic))
             .performClick()
-        assertEquals(
-            PresetEqualizerProfile.Acoustic,
-            quickPresetDao.get(0)?.presetEqualizerProfile,
-        )
-        assertEquals(null, quickPresetDao.get(0)?.customEqualizerProfileName)
+        assertEquals(PresetEqualizerProfile.Acoustic, getFirstPreset()?.presetEqualizerProfile)
+        assertEquals(null, getFirstPreset()?.customEqualizerProfileName)
 
         // Select a custom profile
         composeRule.onNode(customProfile).performClick()
         composeRule.onNodeWithText("Test Profile").performClick()
-        assertEquals(null, quickPresetDao.get(0)?.presetEqualizerProfile)
-        assertEquals("Test Profile", quickPresetDao.get(0)?.customEqualizerProfileName)
+        assertEquals(null, getFirstPreset()?.presetEqualizerProfile)
+        assertEquals("Test Profile", getFirstPreset()?.customEqualizerProfileName)
 
         // Go back to a preset to make sure the custom profile gets deselected
         composeRule.onNode(presetProfile).performClick()
         composeRule.onNodeWithText(composeRule.activity.getString(R.string.acoustic))
             .performClick()
-        assertEquals(
-            PresetEqualizerProfile.Acoustic,
-            quickPresetDao.get(0)?.presetEqualizerProfile,
+        assertEquals(PresetEqualizerProfile.Acoustic, getFirstPreset()?.presetEqualizerProfile)
+        assertEquals(null, getFirstPreset()?.customEqualizerProfileName)
+    }
+
+    @Test
+    fun prioritizesDeviceProfilesOverFallback() = runTest {
+        quickPresetRepository.insert(
+            QuickPreset(
+                deviceUuid,
+                0,
+                "device specific 1",
+            ),
         )
-        assertEquals(null, quickPresetDao.get(0)?.customEqualizerProfileName)
+        quickPresetRepository.insertFallback(
+            FallbackQuickPreset(
+                0,
+                "fallback 1",
+            ),
+        )
+        quickPresetRepository.insertFallback(
+            FallbackQuickPreset(
+                1,
+                "fallback 2",
+            ),
+        )
+
+        composeRule.setContent {
+            QuickPresetScreen(deviceUuid)
+        }
+        assertEquals(
+            "device specific 1",
+            quickPresetRepository.getForDevice(deviceUuid).getOrNull(0)?.name,
+        )
+        assertEquals(
+            "fallback 2",
+            quickPresetRepository.getForDevice(deviceUuid).getOrNull(1)?.name,
+        )
+    }
+
+    private suspend fun getFirstPreset(): QuickPreset? {
+        return quickPresetRepository.getForDevice(deviceUuid).getOrNull(0)
     }
 }

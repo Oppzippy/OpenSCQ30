@@ -36,6 +36,7 @@ import io.mockk.verify
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.UUID
 
 @HiltAndroidTest
 class DeviceSettingsEqualizerTest {
@@ -79,6 +80,7 @@ class DeviceSettingsEqualizerTest {
                 ),
                 equalizerConfiguration = equalizerConfiguration,
             ),
+            deviceBleServiceUuid = UUID(0, 0),
         )
     }
 

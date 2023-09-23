@@ -16,8 +16,9 @@ import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDeviceProvider
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
 import com.oppzippy.openscq30.features.equalizer.storage.toCustomProfile
+import com.oppzippy.openscq30.features.quickpresets.storage.FallbackQuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
-import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
+import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetRepository
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
 import com.oppzippy.openscq30.features.soundcoredevice.demo.DemoSoundcoreDevice
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
@@ -30,19 +31,24 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.junit4.MockKRule
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.UUID
 import javax.inject.Inject
 import kotlin.jvm.optionals.getOrNull
 import kotlin.time.Duration.Companion.seconds
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltAndroidTest
 class NotificationTest {
     @get:Rule
@@ -71,13 +77,14 @@ class NotificationTest {
     lateinit var soundcoreDeviceFactory: SoundcoreDeviceFactory
 
     @Inject
-    lateinit var quickPresetDao: QuickPresetDao
+    lateinit var quickPresetRepository: QuickPresetRepository
 
     @Inject
     lateinit var customProfileDao: CustomProfileDao
 
     private lateinit var uiDevice: UiDevice
 
+    private val deviceUuid = UUID(0, 0)
     private val notificationTitle = By.text("Connected to Test Device")
     private val notification: UiObject2
         get() {
@@ -134,10 +141,17 @@ class NotificationTest {
 
     @Test
     fun quickPresetButtonsWork(): Unit = runBlocking {
-        quickPresetDao.insert(QuickPreset(id = 0, ambientSoundMode = AmbientSoundMode.Transparency))
-        quickPresetDao.insert(
+        quickPresetRepository.insert(
             QuickPreset(
-                id = 1,
+                deviceBleServiceUuid = deviceUuid,
+                index = 0,
+                ambientSoundMode = AmbientSoundMode.Transparency,
+            ),
+        )
+        quickPresetRepository.insert(
+            QuickPreset(
+                deviceBleServiceUuid = deviceUuid,
+                index = 1,
                 name = "Test Preset 2",
                 ambientSoundMode = AmbientSoundMode.NoiseCanceling,
             ),
@@ -179,9 +193,19 @@ class NotificationTest {
                 ),
             ).toCustomProfile("Test Profile"),
         )
-        quickPresetDao.insert(QuickPreset(id = 0, customEqualizerProfileName = "Test Profile"))
-        quickPresetDao.insert(
-            QuickPreset(id = 1, presetEqualizerProfile = PresetEqualizerProfile.SoundcoreSignature),
+        quickPresetRepository.insert(
+            QuickPreset(
+                deviceBleServiceUuid = deviceUuid,
+                index = 0,
+                customEqualizerProfileName = "Test Profile",
+            ),
+        )
+        quickPresetRepository.insert(
+            QuickPreset(
+                deviceBleServiceUuid = deviceUuid,
+                index = 1,
+                presetEqualizerProfile = PresetEqualizerProfile.SoundcoreSignature,
+            ),
         )
         val device = setUpDevice()
 
@@ -207,6 +231,38 @@ class NotificationTest {
                     .getOrNull() == PresetEqualizerProfile.SoundcoreSignature
             }
         }
+    }
+
+    @Test
+    fun deviceSpecificProfileNamesOverrideFallbacks() = runTest {
+        quickPresetRepository.insert(
+            QuickPreset(
+                deviceUuid,
+                0,
+                "device specific 1",
+            ),
+        )
+        quickPresetRepository.insertFallback(
+            FallbackQuickPreset(
+                0,
+                "fallback 1",
+            ),
+        )
+        quickPresetRepository.insertFallback(
+            FallbackQuickPreset(
+                1,
+                "fallback 2",
+            ),
+        )
+
+        setUpDevice()
+
+        uiDevice.openNotification()
+        uiDevice.wait(Until.hasObject(notificationTitle), 1000)
+        expandNotification()
+
+        assertNotNull("device specific 1", notification.findObject(By.text("device specific 1")))
+        assertNotNull("fallback 2", notification.findObject(By.text("fallback 2")))
     }
 
     private fun setUpDevice(): DemoSoundcoreDevice {

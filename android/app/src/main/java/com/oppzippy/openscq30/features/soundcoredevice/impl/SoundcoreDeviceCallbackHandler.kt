@@ -37,6 +37,8 @@ class SoundcoreDeviceCallbackHandler(context: Context) : BluetoothGattCallback()
     val packetsFlow = _packetsFlow.asSharedFlow()
     private val _isDisconnected = MutableStateFlow(false)
     val isDisconnected = _isDisconnected.asStateFlow()
+    private var _serviceUuid = MutableStateFlow<UUID?>(null)
+    val serviceUuid = _serviceUuid.asStateFlow()
 
     val adapter: BluetoothAdapter = context.getSystemService(BluetoothManager::class.java).adapter
     val broadcastReceiver = object : BroadcastReceiver() {
@@ -175,6 +177,7 @@ class SoundcoreDeviceCallbackHandler(context: Context) : BluetoothGattCallback()
                 it.uuid.leastSignificantBits,
             )
         }
+        _serviceUuid.value = service.uuid
 
         writeCharacteristic =
             service.getCharacteristic(UUID.fromString(SoundcoreDeviceUtils.writeCharacteristicUuid()))

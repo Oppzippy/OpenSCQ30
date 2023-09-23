@@ -32,6 +32,7 @@ import com.oppzippy.openscq30.ui.equalizer.composables.ReplaceCustomProfileDialo
 import com.oppzippy.openscq30.ui.equalizer.models.EqualizerProfile
 import com.oppzippy.openscq30.ui.equalizer.models.toEqualizerProfile
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
+import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 
 @Composable
@@ -157,6 +158,7 @@ private fun DefaultPreview() {
                     customHearId = null,
                     gender = null,
                 ),
+                UUID(0, 0),
             ),
         )
     }
