@@ -54,6 +54,7 @@ class DeviceSettingsQuickPresetsTest {
     @Inject
     lateinit var customProfileDao: CustomProfileDao
 
+    private var featureFlags = -1
     private var deviceUuid = UUID(0, 0)
 
     private lateinit var name: SemanticsMatcher
@@ -86,7 +87,7 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsName() = runTest {
         composeRule.setContent {
-            QuickPresetScreen(deviceUuid)
+            QuickPresetScreen(featureFlags, deviceUuid)
         }
         assertEquals(null, getFirstPreset()?.name)
 
@@ -97,7 +98,7 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsAmbientSoundMode() = runTest {
         composeRule.setContent {
-            QuickPresetScreen(deviceUuid)
+            QuickPresetScreen(featureFlags, deviceUuid)
         }
         assertEquals(null, getFirstPreset()?.ambientSoundMode)
 
@@ -112,7 +113,7 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsTransparencyMode() = runTest {
         composeRule.setContent {
-            QuickPresetScreen(deviceUuid)
+            QuickPresetScreen(featureFlags, deviceUuid)
         }
         assertEquals(null, getFirstPreset()?.transparencyMode)
 
@@ -127,7 +128,7 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsNoiseCancelingMode() = runTest {
         composeRule.setContent {
-            QuickPresetScreen(deviceUuid)
+            QuickPresetScreen(featureFlags, deviceUuid)
         }
         assertEquals(null, getFirstPreset()?.noiseCancelingMode)
 
@@ -141,7 +142,7 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsCustomNoiseCanceling() = runTest {
         composeRule.setContent {
-            QuickPresetScreen(deviceUuid)
+            QuickPresetScreen(featureFlags, deviceUuid)
         }
         assertEquals(null, getFirstPreset()?.customNoiseCanceling)
 
@@ -164,7 +165,7 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsPresetEqualizerProfile() = runTest {
         composeRule.setContent {
-            QuickPresetScreen(deviceUuid)
+            QuickPresetScreen(featureFlags, deviceUuid)
         }
         assertEquals(null, getFirstPreset()?.presetEqualizerProfile)
 
@@ -194,7 +195,7 @@ class DeviceSettingsQuickPresetsTest {
             ).toCustomProfile("Test Profile"),
         )
         composeRule.setContent {
-            QuickPresetScreen(deviceUuid)
+            QuickPresetScreen(featureFlags, deviceUuid)
         }
         assertEquals(null, getFirstPreset()?.customEqualizerProfileName)
 
@@ -223,7 +224,7 @@ class DeviceSettingsQuickPresetsTest {
             ).toCustomProfile("Test Profile"),
         )
         composeRule.setContent {
-            QuickPresetScreen(deviceUuid)
+            QuickPresetScreen(featureFlags, deviceUuid)
         }
         composeRule.onNode(equalizer).performClick()
 
@@ -271,7 +272,7 @@ class DeviceSettingsQuickPresetsTest {
         )
 
         composeRule.setContent {
-            QuickPresetScreen(deviceUuid)
+            QuickPresetScreen(featureFlags, deviceUuid)
         }
         assertEquals(
             "device specific 1",

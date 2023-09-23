@@ -21,6 +21,7 @@ import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
 import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
+import com.oppzippy.openscq30.lib.bindings.DeviceFeatureFlags
 import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
 import com.oppzippy.openscq30.lib.bindings.TransparencyMode
@@ -38,6 +39,7 @@ import com.oppzippy.openscq30.ui.utils.DropdownOption
 
 @Composable
 fun QuickPresetConfiguration(
+    featureFlags: Int,
     name: String?,
     defaultName: String,
     ambientSoundMode: AmbientSoundMode?,
@@ -77,56 +79,62 @@ fun QuickPresetConfiguration(
             AmbientSoundModeSelection(
                 ambientSoundMode = ambientSoundMode,
                 onAmbientSoundModeChange = onAmbientSoundModeChange,
-                hasNoiseCanceling = true,
+                hasNoiseCanceling = featureFlags and DeviceFeatureFlags.noiseCancelingMode() != 0,
             )
         }
         Divider()
 
-        CheckboxWithLabel(
-            text = stringResource(R.string.transparency_mode),
-            isChecked = transparencyMode != null,
-            onCheckedChange = {
-                onTransparencyModeChange(if (it) TransparencyMode.VocalMode else null)
-            },
-        )
-        if (transparencyMode != null) {
-            TransparencyModeSelection(
-                transparencyMode = transparencyMode,
-                onTransparencyModeChange = onTransparencyModeChange,
+        if (featureFlags and DeviceFeatureFlags.transparencyModes() != 0) {
+            CheckboxWithLabel(
+                text = stringResource(R.string.transparency_mode),
+                isChecked = transparencyMode != null,
+                onCheckedChange = {
+                    onTransparencyModeChange(if (it) TransparencyMode.VocalMode else null)
+                },
             )
+            if (transparencyMode != null) {
+                TransparencyModeSelection(
+                    transparencyMode = transparencyMode,
+                    onTransparencyModeChange = onTransparencyModeChange,
+                )
+            }
+            Divider()
         }
-        Divider()
 
-        CheckboxWithLabel(
-            text = stringResource(R.string.noise_canceling_mode),
-            isChecked = noiseCancelingMode != null,
-            onCheckedChange = {
-                onNoiseCancelingModeChange(if (it) NoiseCancelingMode.Transport else null)
-            },
-        )
-        if (noiseCancelingMode != null) {
-            NoiseCancelingModeSelection(
-                noiseCancelingMode = noiseCancelingMode,
-                onNoiseCancelingModeChange = onNoiseCancelingModeChange,
-                hasCustomNoiseCanceling = true,
+        if (featureFlags and DeviceFeatureFlags.noiseCancelingMode() != 0) {
+            CheckboxWithLabel(
+                text = stringResource(R.string.noise_canceling_mode),
+                isChecked = noiseCancelingMode != null,
+                onCheckedChange = {
+                    onNoiseCancelingModeChange(if (it) NoiseCancelingMode.Transport else null)
+                },
             )
+            if (noiseCancelingMode != null) {
+                NoiseCancelingModeSelection(
+                    noiseCancelingMode = noiseCancelingMode,
+                    onNoiseCancelingModeChange = onNoiseCancelingModeChange,
+                    hasCustomNoiseCanceling = featureFlags and DeviceFeatureFlags.customNoiseCanceling() != 0,
+                )
+            }
+            Divider()
         }
-        Divider()
 
-        CheckboxWithLabel(
-            text = stringResource(R.string.custom_noise_canceling),
-            isChecked = customNoiseCanceling != null,
-            onCheckedChange = {
-                onCustomNoiseCancelingChange(if (it) CustomNoiseCanceling(0) else null)
-            },
-        )
-        if (customNoiseCanceling != null) {
-            CustomNoiseCancelingSelection(
-                customNoiseCanceling = customNoiseCanceling,
-                onCustomNoiseCancelingChange = onCustomNoiseCancelingChange,
+        if (featureFlags and DeviceFeatureFlags.customNoiseCanceling() != 0) {
+            CheckboxWithLabel(
+                text = stringResource(R.string.custom_noise_canceling),
+                isChecked = customNoiseCanceling != null,
+                onCheckedChange = {
+                    onCustomNoiseCancelingChange(if (it) CustomNoiseCanceling(0) else null)
+                },
             )
+            if (customNoiseCanceling != null) {
+                CustomNoiseCancelingSelection(
+                    customNoiseCanceling = customNoiseCanceling,
+                    onCustomNoiseCancelingChange = onCustomNoiseCancelingChange,
+                )
+            }
+            Divider()
         }
-        Divider()
 
         var isEqualizerChecked by remember { mutableStateOf(equalizerConfiguration != null) }
         // We want isEqualizerChecked to reset when moving between tabs. defaultName is a key unique
@@ -134,50 +142,52 @@ fun QuickPresetConfiguration(
         LaunchedEffect(defaultName) {
             isEqualizerChecked = equalizerConfiguration != null
         }
-        CheckboxWithLabel(
-            text = stringResource(R.string.equalizer),
-            isChecked = equalizerConfiguration != null || isEqualizerChecked,
-            onCheckedChange = {
-                isEqualizerChecked = it
-                if (!isEqualizerChecked) {
-                    onEqualizerChange(null)
-                }
-            },
-        )
-        if (equalizerConfiguration != null || isEqualizerChecked) {
-            Dropdown(
-                value = (equalizerConfiguration as? QuickPresetEqualizerConfiguration.PresetProfile)?.profile,
-                options = PresetEqualizerProfile.values().map {
-                    val presetName = stringResource(it.toStringResource())
-                    DropdownOption(
-                        value = it,
-                        label = { Text(presetName) },
-                        name = presetName,
-                    )
+        if (featureFlags and DeviceFeatureFlags.equalizer() != 0) {
+            CheckboxWithLabel(
+                text = stringResource(R.string.equalizer),
+                isChecked = equalizerConfiguration != null || isEqualizerChecked,
+                onCheckedChange = {
+                    isEqualizerChecked = it
+                    if (!isEqualizerChecked) {
+                        onEqualizerChange(null)
+                    }
                 },
-                label = stringResource(R.string.preset_profile),
-                onItemSelected = {
-                    onEqualizerChange(
-                        QuickPresetEqualizerConfiguration.PresetProfile(
-                            it,
-                        ),
-                    )
-                },
-                modifier = Modifier.testTag("quickPresetPresetEqualizerProfile"),
             )
+            if (equalizerConfiguration != null || isEqualizerChecked) {
+                Dropdown(
+                    value = (equalizerConfiguration as? QuickPresetEqualizerConfiguration.PresetProfile)?.profile,
+                    options = PresetEqualizerProfile.values().map {
+                        val presetName = stringResource(it.toStringResource())
+                        DropdownOption(
+                            value = it,
+                            label = { Text(presetName) },
+                            name = presetName,
+                        )
+                    },
+                    label = stringResource(R.string.preset_profile),
+                    onItemSelected = {
+                        onEqualizerChange(
+                            QuickPresetEqualizerConfiguration.PresetProfile(
+                                it,
+                            ),
+                        )
+                    },
+                    modifier = Modifier.testTag("quickPresetPresetEqualizerProfile"),
+                )
 
-            CustomProfileSelection(
-                selectedProfile = if (equalizerConfiguration is QuickPresetEqualizerConfiguration.CustomProfile) {
-                    customEqualizerProfiles.find { it.name == equalizerConfiguration.name }
-                } else {
-                    null
-                },
-                profiles = customEqualizerProfiles,
-                onProfileSelected = {
-                    onEqualizerChange(QuickPresetEqualizerConfiguration.CustomProfile(it.name))
-                },
-                modifier = Modifier.testTag("quickPresetCustomEqualizerProfile"),
-            )
+                CustomProfileSelection(
+                    selectedProfile = if (equalizerConfiguration is QuickPresetEqualizerConfiguration.CustomProfile) {
+                        customEqualizerProfiles.find { it.name == equalizerConfiguration.name }
+                    } else {
+                        null
+                    },
+                    profiles = customEqualizerProfiles,
+                    onProfileSelected = {
+                        onEqualizerChange(QuickPresetEqualizerConfiguration.CustomProfile(it.name))
+                    },
+                    modifier = Modifier.testTag("quickPresetCustomEqualizerProfile"),
+                )
+            }
         }
     }
 }
@@ -187,6 +197,7 @@ fun QuickPresetConfiguration(
 private fun PreviewQuickPresetConfiguration() {
     OpenSCQ30Theme {
         QuickPresetConfiguration(
+            featureFlags = -1,
             name = null,
             defaultName = "Quick Preset 1",
             ambientSoundMode = AmbientSoundMode.NoiseCanceling,

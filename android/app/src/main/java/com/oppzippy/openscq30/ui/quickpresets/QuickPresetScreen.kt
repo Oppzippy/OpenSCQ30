@@ -33,6 +33,7 @@ import java.util.UUID
 
 @Composable
 fun QuickPresetScreen(
+    featureFlags: Int,
     deviceBleServiceUuid: UUID,
     viewModel: QuickPresetViewModel = hiltViewModel(),
 ) {
@@ -72,6 +73,7 @@ fun QuickPresetScreen(
     if (permissionCheckPassed) {
         if (preset != null) {
             QuickPresetScreen(
+                featureFlags = featureFlags,
                 preset = preset,
                 customEqualizerProfiles = customEqualizerProfiles,
                 onSelectedIndexChange = { viewModel.selectQuickPreset(deviceBleServiceUuid, it) },
@@ -121,6 +123,7 @@ fun QuickPresetScreen(
 
 @Composable
 private fun QuickPresetScreen(
+    featureFlags: Int,
     preset: QuickPreset,
     customEqualizerProfiles: List<CustomProfile>,
     onSelectedIndexChange: (index: Int) -> Unit = {},
@@ -137,6 +140,7 @@ private fun QuickPresetScreen(
             onSelectedIndexChange = onSelectedIndexChange,
         )
         QuickPresetConfiguration(
+            featureFlags = featureFlags,
             name = preset.name,
             defaultName = stringResource(R.string.quick_preset_number, preset.index + 1),
             ambientSoundMode = preset.ambientSoundMode,
@@ -166,6 +170,7 @@ private fun QuickPresetScreen(
 fun PreviewQuickPresetScreenWithAllOptionsChecked() {
     OpenSCQ30Theme {
         QuickPresetScreen(
+            featureFlags = -1,
             preset = QuickPreset(
                 deviceBleServiceUuid = UUID(0, 0),
                 index = 0,
@@ -183,6 +188,7 @@ fun PreviewQuickPresetScreenWithAllOptionsChecked() {
 fun PreviewQuickPresetScreenWithNoOptionsChecked() {
     OpenSCQ30Theme {
         QuickPresetScreen(
+            featureFlags = -1,
             preset = QuickPreset(UUID(0, 0), 0),
             customEqualizerProfiles = emptyList(),
         )

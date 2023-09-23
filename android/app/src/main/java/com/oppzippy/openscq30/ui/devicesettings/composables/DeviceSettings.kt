@@ -122,7 +122,10 @@ fun DeviceSettings(
                 )
             }
             composable(Screen.QuickPresets.route) {
-                QuickPresetScreen(deviceBleServiceUuid = uiState.deviceBleServiceUuid)
+                QuickPresetScreen(
+                    featureFlags = uiState.deviceState.featureFlags,
+                    deviceBleServiceUuid = uiState.deviceBleServiceUuid,
+                )
             }
             composable(Screen.DeviceInfo.route) {
                 DeviceInfoScreen(deviceState = uiState.deviceState)
