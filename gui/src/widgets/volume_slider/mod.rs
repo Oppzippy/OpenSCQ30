@@ -21,7 +21,7 @@ impl VolumeSlider {
     }
 
     pub fn set_volume(&self, volume: f64) {
-        self.set_volume_slider_value(volume as f64);
+        self.set_volume_slider_value(volume);
     }
 }
 
