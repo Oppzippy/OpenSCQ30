@@ -129,6 +129,34 @@ public final class StateUpdatePacket {
     }
     private static native long do_gender(long self);
 
+    public final boolean isLeftBatteryCharging() {
+        boolean ret = do_isLeftBatteryCharging(mNativeObj);
+
+        return ret;
+    }
+    private static native boolean do_isLeftBatteryCharging(long self);
+
+    public final boolean isRightBatteryCharging() {
+        boolean ret = do_isRightBatteryCharging(mNativeObj);
+
+        return ret;
+    }
+    private static native boolean do_isRightBatteryCharging(long self);
+
+    public final short leftBatteryLevel() {
+        short ret = do_leftBatteryLevel(mNativeObj);
+
+        return ret;
+    }
+    private static native short do_leftBatteryLevel(long self);
+
+    public final short rightBatteryLevel() {
+        short ret = do_rightBatteryLevel(mNativeObj);
+
+        return ret;
+    }
+    private static native short do_rightBatteryLevel(long self);
+
     public synchronized void delete() {
         if (mNativeObj != 0) {
             do_delete(mNativeObj);

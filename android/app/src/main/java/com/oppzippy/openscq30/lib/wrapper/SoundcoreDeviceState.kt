@@ -53,10 +53,10 @@ fun StateUpdatePacket.toSoundcoreDeviceState(): SoundcoreDeviceState {
         leftFirmwareVersion = firmwareVersion().getOrNull(),
         rightFirmwareVersion = null,
         serialNumber = serialNumber().getOrNull(),
-        isLeftBatteryCharging = false, // TODO
-        isRightBatteryCharging = false, // TODO
-        leftBatteryLevel = 0, // TODO
-        rightBatteryLevel = 0, // TODO
+        isLeftBatteryCharging = isLeftBatteryCharging,
+        isRightBatteryCharging = isRightBatteryCharging,
+        leftBatteryLevel = leftBatteryLevel(),
+        rightBatteryLevel = rightBatteryLevel(),
         ageRange = ageRange().getOrNull(),
         gender = gender().getOrNull(),
         dynamicRangeCompressionMinFirmwareVersion = dynamicRangeCompressionMinFirmwareVersion().getOrNull(),

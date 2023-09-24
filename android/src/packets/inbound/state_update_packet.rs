@@ -3,7 +3,8 @@ use crate::{
     SoundModes,
 };
 use openscq30_lib::packets::{
-    inbound::state_update_packet::StateUpdatePacket as LibStateUpdatePacket, structures::HearId,
+    inbound::state_update_packet::StateUpdatePacket as LibStateUpdatePacket,
+    structures::{Battery, HearId},
 };
 use rifgen::rifgen_attr::{generate_interface, generate_interface_doc};
 
@@ -69,6 +70,38 @@ impl StateUpdatePacket {
     #[generate_interface]
     pub fn gender(&self) -> Option<Gender> {
         self.0.gender.map(Into::into)
+    }
+
+    #[generate_interface]
+    pub fn is_left_battery_charging(&self) -> bool {
+        match self.0.battery {
+            Battery::SingleBattery(battery) => battery.is_charging.into(),
+            Battery::DualBattery(battery) => battery.left.is_charging.into(),
+        }
+    }
+
+    #[generate_interface]
+    pub fn is_right_battery_charging(&self) -> bool {
+        match self.0.battery {
+            Battery::SingleBattery(_) => false,
+            Battery::DualBattery(battery) => battery.right.is_charging.into(),
+        }
+    }
+
+    #[generate_interface]
+    pub fn left_battery_level(&self) -> u8 {
+        match self.0.battery {
+            Battery::SingleBattery(battery) => battery.level.0,
+            Battery::DualBattery(battery) => battery.left.level.0,
+        }
+    }
+
+    #[generate_interface]
+    pub fn right_battery_level(&self) -> u8 {
+        match self.0.battery {
+            Battery::SingleBattery(_) => 0,
+            Battery::DualBattery(battery) => battery.right.level.0,
+        }
     }
 }
 
