@@ -100,10 +100,15 @@ fun DeviceSettings(
                 composable(Screen.General.route) {
                     SoundModeSettings(
                         soundModes = soundModes,
-                        hasTransparencyModes = uiState.deviceState.featureFlags and DeviceFeatureFlags.transparencyModes() != 0,
-                        noiseCancelingType = if (uiState.deviceState.featureFlags and DeviceFeatureFlags.customNoiseCanceling() != 0) {
+                        hasTransparencyModes = uiState.deviceState.featureFlags.contains(
+                            DeviceFeatureFlags.transparencyModes(),
+                        ),
+                        noiseCancelingType = if (uiState.deviceState.featureFlags.contains(
+                                DeviceFeatureFlags.customNoiseCanceling(),
+                            )
+                        ) {
                             NoiseCancelingType.Custom
-                        } else if (uiState.deviceState.featureFlags and DeviceFeatureFlags.noiseCancelingMode() != 0) {
+                        } else if (uiState.deviceState.featureFlags.contains(DeviceFeatureFlags.noiseCancelingMode())) {
                             NoiseCancelingType.Normal
                         } else {
                             NoiseCancelingType.None
@@ -143,7 +148,7 @@ private fun PreviewDeviceSettings() {
                 "Soundcore Q30",
                 "00:00:00:00:00:00",
                 SoundcoreDeviceState(
-                    featureFlags = -1,
+                    featureFlags = DeviceFeatureFlags.all(),
                     soundModes = SoundModes(
                         AmbientSoundMode.Normal,
                         NoiseCancelingMode.Indoor,

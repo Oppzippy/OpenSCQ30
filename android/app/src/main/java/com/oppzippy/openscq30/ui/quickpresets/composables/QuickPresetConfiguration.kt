@@ -39,7 +39,7 @@ import com.oppzippy.openscq30.ui.utils.DropdownOption
 
 @Composable
 fun QuickPresetConfiguration(
-    featureFlags: Int,
+    featureFlags: DeviceFeatureFlags,
     name: String?,
     defaultName: String,
     ambientSoundMode: AmbientSoundMode?,
@@ -79,12 +79,12 @@ fun QuickPresetConfiguration(
             AmbientSoundModeSelection(
                 ambientSoundMode = ambientSoundMode,
                 onAmbientSoundModeChange = onAmbientSoundModeChange,
-                hasNoiseCanceling = featureFlags and DeviceFeatureFlags.noiseCancelingMode() != 0,
+                hasNoiseCanceling = featureFlags.contains(DeviceFeatureFlags.noiseCancelingMode()),
             )
         }
         Divider()
 
-        if (featureFlags and DeviceFeatureFlags.transparencyModes() != 0) {
+        if (featureFlags.contains(DeviceFeatureFlags.transparencyModes())) {
             CheckboxWithLabel(
                 text = stringResource(R.string.transparency_mode),
                 isChecked = transparencyMode != null,
@@ -101,7 +101,7 @@ fun QuickPresetConfiguration(
             Divider()
         }
 
-        if (featureFlags and DeviceFeatureFlags.noiseCancelingMode() != 0) {
+        if (featureFlags.contains(DeviceFeatureFlags.noiseCancelingMode())) {
             CheckboxWithLabel(
                 text = stringResource(R.string.noise_canceling_mode),
                 isChecked = noiseCancelingMode != null,
@@ -113,13 +113,13 @@ fun QuickPresetConfiguration(
                 NoiseCancelingModeSelection(
                     noiseCancelingMode = noiseCancelingMode,
                     onNoiseCancelingModeChange = onNoiseCancelingModeChange,
-                    hasCustomNoiseCanceling = featureFlags and DeviceFeatureFlags.customNoiseCanceling() != 0,
+                    hasCustomNoiseCanceling = featureFlags.contains(DeviceFeatureFlags.customNoiseCanceling()),
                 )
             }
             Divider()
         }
 
-        if (featureFlags and DeviceFeatureFlags.customNoiseCanceling() != 0) {
+        if (featureFlags.contains(DeviceFeatureFlags.customNoiseCanceling())) {
             CheckboxWithLabel(
                 text = stringResource(R.string.custom_noise_canceling),
                 isChecked = customNoiseCanceling != null,
@@ -142,7 +142,7 @@ fun QuickPresetConfiguration(
         LaunchedEffect(defaultName) {
             isEqualizerChecked = equalizerConfiguration != null
         }
-        if (featureFlags and DeviceFeatureFlags.equalizer() != 0) {
+        if (featureFlags.contains(DeviceFeatureFlags.equalizer())) {
             CheckboxWithLabel(
                 text = stringResource(R.string.equalizer),
                 isChecked = equalizerConfiguration != null || isEqualizerChecked,
@@ -197,7 +197,7 @@ fun QuickPresetConfiguration(
 private fun PreviewQuickPresetConfiguration() {
     OpenSCQ30Theme {
         QuickPresetConfiguration(
-            featureFlags = -1,
+            featureFlags = DeviceFeatureFlags.all(),
             name = null,
             defaultName = "Quick Preset 1",
             ambientSoundMode = AmbientSoundMode.NoiseCanceling,

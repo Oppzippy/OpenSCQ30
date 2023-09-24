@@ -6,32 +6,32 @@ import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.bindings.SoundModes
 
 fun filterSoundModeChanges(
-    featureFlags: Int,
+    featureFlags: DeviceFeatureFlags,
     prevSoundModes: SoundModes,
     newSoundModes: SoundModes,
 ): SoundModes {
     return SoundModes(
-        if (featureFlags and DeviceFeatureFlags.noiseCancelingMode() == 0 && newSoundModes.ambientSoundMode() == AmbientSoundMode.NoiseCanceling) {
-            prevSoundModes.ambientSoundMode()
-        } else {
+        if (featureFlags.contains(DeviceFeatureFlags.noiseCancelingMode()) || newSoundModes.ambientSoundMode() != AmbientSoundMode.NoiseCanceling) {
             newSoundModes.ambientSoundMode()
+        } else {
+            prevSoundModes.ambientSoundMode()
         },
-        if (featureFlags and DeviceFeatureFlags.noiseCancelingMode() == 0 ||
-            (featureFlags and DeviceFeatureFlags.customNoiseCanceling() == 0 && newSoundModes.noiseCancelingMode() == NoiseCancelingMode.Custom)
+        if (featureFlags.contains(DeviceFeatureFlags.noiseCancelingMode()) &&
+            (featureFlags.contains(DeviceFeatureFlags.customNoiseCanceling()) || newSoundModes.noiseCancelingMode() != NoiseCancelingMode.Custom)
         ) {
-            prevSoundModes.noiseCancelingMode()
-        } else {
             newSoundModes.noiseCancelingMode()
-        },
-        if (featureFlags and DeviceFeatureFlags.transparencyModes() == 0) {
-            prevSoundModes.transparencyMode()
         } else {
+            prevSoundModes.noiseCancelingMode()
+        },
+        if (featureFlags.contains(DeviceFeatureFlags.transparencyModes())) {
             newSoundModes.transparencyMode()
-        },
-        if (featureFlags and DeviceFeatureFlags.customNoiseCanceling() == 0) {
-            prevSoundModes.customNoiseCanceling()
         } else {
+            prevSoundModes.transparencyMode()
+        },
+        if (featureFlags.contains(DeviceFeatureFlags.customNoiseCanceling())) {
             newSoundModes.customNoiseCanceling()
+        } else {
+            prevSoundModes.customNoiseCanceling()
         },
     )
 }

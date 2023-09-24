@@ -27,12 +27,13 @@ public final class StateUpdatePacket {
     }
     private static native long init() throws Exception;
 
-    public final int featureFlags() {
-        int ret = do_featureFlags(mNativeObj);
+    public final @NonNull DeviceFeatureFlags featureFlags() {
+        long ret = do_featureFlags(mNativeObj);
+        DeviceFeatureFlags convRet = new DeviceFeatureFlags(InternalPointerMarker.RAW_PTR, ret);
 
-        return ret;
+        return convRet;
     }
-    private static native int do_featureFlags(long self);
+    private static native long do_featureFlags(long self);
 
     public final @NonNull java.util.Optional<SoundModes> soundModes() {
         long ret = do_soundModes(mNativeObj);

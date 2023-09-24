@@ -5,6 +5,7 @@ import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
 import com.oppzippy.openscq30.lib.bindings.AgeRange
 import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
 import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
+import com.oppzippy.openscq30.lib.bindings.DeviceFeatureFlags
 import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.bindings.FirmwareVersion
 import com.oppzippy.openscq30.lib.bindings.Gender
@@ -24,7 +25,7 @@ class DemoSoundcoreDevice(
 ) : SoundcoreDevice {
     private val _stateFlow = MutableStateFlow(
         SoundcoreDeviceState(
-            featureFlags = -1, // all features on
+            featureFlags = DeviceFeatureFlags.all(), // all features on
             soundModes = SoundModes(
                 AmbientSoundMode.Normal,
                 NoiseCancelingMode.Indoor,

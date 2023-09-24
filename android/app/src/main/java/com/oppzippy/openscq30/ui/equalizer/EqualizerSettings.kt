@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.lib.bindings.DeviceFeatureFlags
 import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
 import com.oppzippy.openscq30.lib.wrapper.SoundcoreDeviceState
@@ -143,7 +144,7 @@ private fun DefaultPreview() {
                 "Test Device",
                 "00:00:00:00:00:00",
                 SoundcoreDeviceState(
-                    featureFlags = -1, // TODO
+                    featureFlags = DeviceFeatureFlags.all(),
                     equalizerConfiguration = EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
                     soundModes = null,
                     serialNumber = null,

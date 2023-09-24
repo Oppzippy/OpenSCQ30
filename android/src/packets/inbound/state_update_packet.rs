@@ -1,4 +1,7 @@
-use crate::{AgeRange, CustomHearId, EqualizerConfiguration, FirmwareVersion, Gender, SoundModes};
+use crate::{
+    AgeRange, CustomHearId, DeviceFeatureFlags, EqualizerConfiguration, FirmwareVersion, Gender,
+    SoundModes,
+};
 use openscq30_lib::packets::{
     inbound::state_update_packet::StateUpdatePacket as LibStateUpdatePacket, structures::HearId,
 };
@@ -15,8 +18,8 @@ impl StateUpdatePacket {
     }
 
     #[generate_interface]
-    pub fn feature_flags(&self) -> i32 {
-        self.0.feature_flags.bits() as i32
+    pub fn feature_flags(&self) -> DeviceFeatureFlags {
+        self.0.feature_flags.into()
     }
 
     #[generate_interface]

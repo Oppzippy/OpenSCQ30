@@ -128,7 +128,7 @@ class SoundcoreDeviceImpl(
         if (prevSoundModes == newSoundModes) return
 
         val needsNoiseCanceling =
-            state.featureFlags and DeviceFeatureFlags.noiseCancelingMode() != 0 &&
+            state.featureFlags.contains(DeviceFeatureFlags.noiseCancelingMode()) &&
                 prevSoundModes.ambientSoundMode() != AmbientSoundMode.NoiseCanceling &&
                 prevSoundModes.noiseCancelingMode() != newSoundModes.noiseCancelingMode()
 
@@ -160,7 +160,7 @@ class SoundcoreDeviceImpl(
 
     override fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
         val state = _stateFlow.value
-        if (state.featureFlags and DeviceFeatureFlags.equalizer() != 0 && state.equalizerConfiguration != equalizerConfiguration) {
+        if (state.featureFlags.contains(DeviceFeatureFlags.equalizer()) && state.equalizerConfiguration != equalizerConfiguration) {
             val featureFlags = state.featureFlags
             val packet =
                 if (state.customHearId != null && state.gender != null && state.ageRange != null) {
@@ -178,7 +178,7 @@ class SoundcoreDeviceImpl(
                 } else {
                     SetEqualizerPacket(
                         equalizerConfiguration,
-                        if (featureFlags and DeviceFeatureFlags.twoChannelEqualizer() != 0) {
+                        if (featureFlags.contains(DeviceFeatureFlags.twoChannelEqualizer())) {
                             equalizerConfiguration
                         } else {
                             null

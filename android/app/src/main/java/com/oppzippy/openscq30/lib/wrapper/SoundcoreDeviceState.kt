@@ -11,7 +11,7 @@ import com.oppzippy.openscq30.lib.bindings.StateUpdatePacket
 import kotlin.jvm.optionals.getOrNull
 
 data class SoundcoreDeviceState(
-    val featureFlags: Int,
+    val featureFlags: DeviceFeatureFlags,
     val leftBatteryLevel: Short,
     val rightBatteryLevel: Short,
     val isLeftBatteryCharging: Boolean,
@@ -30,7 +30,7 @@ data class SoundcoreDeviceState(
     companion object // used for static extension methods in tests
 
     fun supportsDynamicRangeCompression(): Boolean {
-        if (featureFlags and DeviceFeatureFlags.dynamicRangeCompression() != 0) {
+        if (featureFlags.contains(DeviceFeatureFlags.dynamicRangeCompression())) {
             if (leftFirmwareVersion == null || dynamicRangeCompressionMinFirmwareVersion == null) {
                 return false
             }

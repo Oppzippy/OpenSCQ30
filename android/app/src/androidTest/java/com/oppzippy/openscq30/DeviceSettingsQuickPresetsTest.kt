@@ -15,6 +15,7 @@ import com.oppzippy.openscq30.features.quickpresets.storage.FallbackQuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetRepository
 import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
+import com.oppzippy.openscq30.lib.bindings.DeviceFeatureFlags
 import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
 import com.oppzippy.openscq30.lib.bindings.TransparencyMode
@@ -54,7 +55,7 @@ class DeviceSettingsQuickPresetsTest {
     @Inject
     lateinit var customProfileDao: CustomProfileDao
 
-    private var featureFlags = -1
+    private var featureFlags = DeviceFeatureFlags.all()
     private var deviceUuid = UUID(0, 0)
 
     private lateinit var name: SemanticsMatcher

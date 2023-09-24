@@ -23,7 +23,7 @@ class SoundModeChangeFilterTest {
     @Test
     fun preventsNoiseCancelingMode() {
         val filtered = filterSoundModeChanges(
-            0,
+            DeviceFeatureFlags.empty(),
             soundModes,
             soundModes.copy(ambientSoundMode = AmbientSoundMode.NoiseCanceling),
         )
@@ -33,7 +33,7 @@ class SoundModeChangeFilterTest {
     @Test
     fun preventsTransportMode() {
         val filtered = filterSoundModeChanges(
-            0,
+            DeviceFeatureFlags.empty(),
             soundModes,
             soundModes.copy(noiseCancelingMode = NoiseCancelingMode.Transport),
         )
@@ -53,7 +53,7 @@ class SoundModeChangeFilterTest {
     @Test
     fun preventsFullyTransparent() {
         val filtered = filterSoundModeChanges(
-            0,
+            DeviceFeatureFlags.empty(),
             soundModes,
             soundModes.copy(transparencyMode = TransparencyMode.FullyTransparent),
         )
@@ -63,7 +63,7 @@ class SoundModeChangeFilterTest {
     @Test
     fun preventsCustomNoiseCanceling1() {
         val filtered = filterSoundModeChanges(
-            0,
+            DeviceFeatureFlags.empty(),
             soundModes,
             soundModes.copy(customNoiseCanceling = CustomNoiseCanceling(1)),
         )
@@ -79,7 +79,7 @@ class SoundModeChangeFilterTest {
             CustomNoiseCanceling(1),
         )
         val filtered = filterSoundModeChanges(
-            -1,
+            DeviceFeatureFlags.all(),
             soundModes,
             newSoundModes,
         )
