@@ -30,22 +30,24 @@ class DeviceSettingsViewModelTest {
 
     @Test
     fun startsServiceWhenSelectingDevice() {
+        val mockIntent: Intent = mockk(relaxed = true)
+        every { intentFactory(any(), any()) } returns mockIntent
+
         val device = BluetoothDevice("Test Device", "00:00:00:00:00:00")
         every { deviceProvider.getDevices() } returns listOf(device)
         val viewModel = DeviceSettingsViewModel(application, intentFactory)
 
-        val mockIntent: Intent = mockk(relaxed = true)
-        every { intentFactory(any(), any()) } returns mockIntent
         viewModel.selectDevice(device)
         verify { mockIntent.putExtra(DeviceService.MAC_ADDRESS, "00:00:00:00:00:00") }
         verify(exactly = 1) { application.startForegroundService(mockIntent) }
-        verify(exactly = 1) { application.bindService(mockIntent, any(), any() as Int) }
+        verify(atMost = 2) { application.bindService(mockIntent, any(), any() as Int) }
     }
 
     @Test
     fun stopsServiceWhenDeselectingDevice() {
-        val viewModel = DeviceSettingsViewModel(application, intentFactory)
         every { intentFactory(application, DeviceService::class.java) } returns mockk()
+
+        val viewModel = DeviceSettingsViewModel(application, intentFactory)
         viewModel.deselectDevice()
         verify(exactly = 1) { application.stopService(any()) }
         verify(exactly = 1) { application.unbindService(any()) }

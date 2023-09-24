@@ -26,8 +26,13 @@ class DeviceSettingsViewModel @Inject constructor(
         DeviceServiceConnection(unbind = { unbindDeviceService() })
     val uiDeviceState = deviceServiceConnection.uiDeviceStateFlow.asStateFlow()
 
+    init {
+        bindDeviceService()
+    }
+
     override fun onCleared() {
         unbindDeviceService()
+        stopServiceIfNotificationIsGone()
     }
 
     fun selectDevice(bluetoothDevice: BluetoothDevice) {
@@ -37,12 +42,17 @@ class DeviceSettingsViewModel @Inject constructor(
         bindDeviceService()
     }
 
-    fun deselectDevice() {
-        application.stopService(intentFactory(application, DeviceService::class.java))
-        unbindDeviceService()
+    private fun stopServiceIfNotificationIsGone() {
+        if (!DeviceService.doesNotificationExist(application)) {
+            Log.i(
+                "OpenSCQ30Root",
+                "Stopping service since main activity is exiting and notification is not shown.",
+            )
+            deselectDevice()
+        }
     }
 
-    fun bindDeviceService() {
+    private fun bindDeviceService() {
         try {
             application.bindService(
                 intentFactory(application, DeviceService::class.java),
@@ -55,7 +65,12 @@ class DeviceSettingsViewModel @Inject constructor(
         }
     }
 
-    fun unbindDeviceService() {
+    fun deselectDevice() {
+        application.stopService(intentFactory(application, DeviceService::class.java))
+        unbindDeviceService()
+    }
+
+    private fun unbindDeviceService() {
         try {
             application.unbindService(deviceServiceConnection)
         } catch (_: IllegalArgumentException) {
@@ -88,15 +103,5 @@ class DeviceSettingsViewModel @Inject constructor(
 
     fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
         deviceServiceConnection.setEqualizerConfiguration(equalizerConfiguration)
-    }
-
-    fun stopServiceIfNotificationIsGone() {
-        if (!DeviceService.doesNotificationExist(application)) {
-            Log.i(
-                "OpenSCQ30Root",
-                "Stopping service since main activity is exiting and notification is not shown.",
-            )
-            deselectDevice()
-        }
     }
 }
