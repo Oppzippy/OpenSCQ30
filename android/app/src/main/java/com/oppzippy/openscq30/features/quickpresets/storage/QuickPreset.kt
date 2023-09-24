@@ -9,7 +9,7 @@ import com.oppzippy.openscq30.lib.bindings.TransparencyMode
 import java.util.UUID
 
 @Entity(
-    tableName = "device_quick_preset",
+    tableName = "quick_preset",
     primaryKeys = ["deviceBleServiceUuid", "index"],
 )
 data class QuickPreset(

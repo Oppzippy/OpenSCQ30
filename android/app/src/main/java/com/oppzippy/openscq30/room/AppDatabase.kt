@@ -18,7 +18,7 @@ import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
 
 @Database(
-    version = 7,
+    version = 8,
     entities = [
         CustomProfile::class,
         FallbackQuickPreset::class,
@@ -30,6 +30,7 @@ import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
         AutoMigration(from = 3, to = 4, spec = AppDatabase.AutoMigration3To4::class),
         AutoMigration(from = 4, to = 5),
         AutoMigration(from = 6, to = 7, spec = AppDatabase.AutoMigration6To7::class),
+        AutoMigration(from = 7, to = 8, spec = AppDatabase.AutoMigration7To8::class),
     ],
 )
 @TypeConverters(Converters::class)
@@ -55,6 +56,12 @@ abstract class AppDatabase : RoomDatabase() {
         toColumnName = "index",
     )
     class AutoMigration6To7 : AutoMigrationSpec
+
+    @RenameTable(
+        fromTableName = "device_quick_preset",
+        toTableName = "quick_preset",
+    )
+    class AutoMigration7To8 : AutoMigrationSpec
 
     companion object {
         val migrations = listOf(Migration5To6)
