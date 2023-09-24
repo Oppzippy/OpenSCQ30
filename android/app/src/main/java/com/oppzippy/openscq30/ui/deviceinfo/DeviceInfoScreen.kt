@@ -21,6 +21,7 @@ fun DeviceInfoScreen(deviceState: SoundcoreDeviceState) {
         verticalArrangement = Arrangement.Top,
         horizontalArrangement = Arrangement.Center,
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+        userScrollEnabled = true,
     ) {
         if (deviceState.leftFirmwareVersion != null) {
             item { Text(stringResource(R.string.firmware_version)) }
@@ -41,6 +42,6 @@ fun DeviceInfoScreen(deviceState: SoundcoreDeviceState) {
             item { Text(deviceState.ageRange.value().toString()) }
         }
         item { Text(stringResource(R.string.feature_flags)) }
-        item { Text(deviceState.featureFlags.bits().toString()) }
+        item { Text(deviceState.featureFlags.toString()) }
     }
 }

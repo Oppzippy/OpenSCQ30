@@ -54,6 +54,13 @@ public final class DeviceFeatureFlags {
     }
     private static native int do_bits(long self);
 
+    public final @NonNull String toString() {
+        String ret = do_toString(mNativeObj);
+
+        return ret;
+    }
+    private static native @NonNull String do_toString(long self);
+
     public static @NonNull DeviceFeatureFlags soundModes() {
         long ret = do_soundModes();
         DeviceFeatureFlags convRet = new DeviceFeatureFlags(InternalPointerMarker.RAW_PTR, ret);

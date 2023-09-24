@@ -1381,6 +1381,7 @@ dependencies = [
  "android_logger",
  "anyhow",
  "flapigen",
+ "itertools 0.11.0",
  "jni-sys",
  "log",
  "macaddr",

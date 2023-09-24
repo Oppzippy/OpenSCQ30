@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use openscq30_lib::packets::structures::DeviceFeatureFlags as LibDeviceFeatureFlags;
 use rifgen::rifgen_attr::{generate_interface, generate_interface_doc};
 
@@ -25,6 +26,11 @@ impl DeviceFeatureFlags {
     #[generate_interface]
     pub fn bits(&self) -> i32 {
         self.0.bits() as i32
+    }
+
+    #[generate_interface]
+    pub fn to_string(&self) -> String {
+        self.0.iter_names().map(|x| x.0).join("\n")
     }
 
     // constants
