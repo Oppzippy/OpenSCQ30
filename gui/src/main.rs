@@ -183,11 +183,7 @@ where
 }
 
 fn build_ui(application: &adw::Application) {
-    // TODO create registry asynchronously
-    let registry = MainContext::default()
-        .block_on(new_soundcore_device_registry::<GtkFutures>())
-        .unwrap_or_else(|err| panic!("failed to initialize device registry: {err}"));
-
+    // Display ui while initializing DeviceRegistry asynchronously
     #[cfg(target_os = "windows")]
     if let Err(err) = set_ui_theme(application) {
         tracing::warn!("failed to set ui theme: {err:?}");
@@ -197,11 +193,12 @@ fn build_ui(application: &adw::Application) {
         tracing::warn!("initial load of settings file failed: {:?}", err)
     }
     let main_window = MainWindow::new(application, settings.to_owned());
+
     settings
         .config
-        .get(|settings| {
+        .get(|config| {
             main_window.set_custom_profiles(
-                settings
+                config
                     .custom_profiles()
                     .iter()
                     .map(|(name, profile)| {
@@ -212,8 +209,30 @@ fn build_ui(application: &adw::Application) {
         })
         .unwrap();
 
+    {
+        let application = application.to_owned();
+        let main_window = main_window.to_owned();
+        MainContext::default().spawn_local(async move {
+            let registry = new_soundcore_device_registry::<GtkFutures>()
+                .await
+                .expect("failed to initialize device registry");
+            // Async initialization done, now set up event handlers and such
+            delayed_initialize_application(&application, &main_window, registry, settings);
+        });
+    }
+
+    main_window.present();
+}
+
+fn delayed_initialize_application(
+    application: &adw::Application,
+    main_window: &MainWindow,
+    registry: impl DeviceRegistry + 'static,
+    settings: Rc<Settings>,
+) {
     let (state, mut ui_state_receiver) = State::new(registry);
     let state = Rc::new(state);
+    let settings = Rc::new(settings);
 
     let main_context = MainContext::default();
     main_context.spawn_local(clone!(@weak main_window => async move {
@@ -377,11 +396,7 @@ fn build_ui(application: &adw::Application) {
     main_window.add_action(&action_refresh_devices);
     application.set_accels_for_action("win.refresh-devices", &["<Ctrl>R", "F5"]);
 
-    main_context.spawn_local(clone!(@strong action_refresh_devices => async move {
-        action_refresh_devices.activate(None);
-    }));
-
-    main_window.present();
+    action_refresh_devices.activate(None);
 }
 
 #[cfg(target_os = "windows")]
