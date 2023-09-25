@@ -1,12 +1,13 @@
 /// <reference types="vitest" />
 
-import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
-import wasm from "vite-plugin-wasm";
+import { defineConfig } from "vite";
+import { VitePWA } from "vite-plugin-pwa";
 import topLevelAwait from "vite-plugin-top-level-await";
+import wasm from "vite-plugin-wasm";
 
 export default defineConfig({
-  plugins: [wasm(), topLevelAwait(), react()],
+  plugins: [wasm(), topLevelAwait(), react(), VitePWA()],
   test: {
     dir: "tests",
     environment: "jsdom",
