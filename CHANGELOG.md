@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+### GUI
+
+#### Fixes
+
+-   Bluetooth initialization when launching the application will no longer block the window from showing
+
+### Android
+
+#### Features
+
+-   If you have more than one type of Soundcore device, they will now each have their own sets of quick presets. To avoid having this be a breaking change, any newly connected devices' quick presets will be initialized with your quick preset configuration prior to this release.
+
+#### Fixes
+
+-   Fix settings not used by the connected device showing in quick presets
+
 ## v1.6.0
 
 ### General
