@@ -18,7 +18,6 @@ export function AppContents() {
   const [device, setDevice] = useState<Device>();
   const [isLoading, setLoading] = useState(false);
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
-  // TODO use a hook for isDemoMode
   const isDemoMode = localStorage.getItem("openscq30:demoMode") == "true";
   const theme = useMemo(
     () =>
