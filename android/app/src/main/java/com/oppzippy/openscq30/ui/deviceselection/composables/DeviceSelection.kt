@@ -34,6 +34,7 @@ fun DeviceSelection(
             PermissionCheck(
                 permission = bluetoothPermission,
                 prompt = stringResource(R.string.bluetooth_permission_is_required),
+                onPermissionGranted = onRefreshDevices,
             ) {
                 DeviceListing(
                     devices,
