@@ -33,6 +33,14 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.7.0" date="2023-09-30">
+            <description>
+                <p>Fixes</p>
+                <ul>
+                    <li>Bluetooth initialization when launching the application will no longer block the window from showing</li>
+                </ul> 
+            </description>
+        </release>
         <release version="1.6.0" date="2023-09-09">
             <description>
                 <p>Features</p>

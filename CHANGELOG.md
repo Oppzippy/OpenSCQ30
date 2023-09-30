@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.7.0
 
 ### GUI
 
@@ -17,6 +17,8 @@
 #### Fixes
 
 -   Fix settings not used by the connected device showing in quick presets
+-   Fix screen rotation causing disconnect
+-   Refresh device list when granting bluetooth permission
 
 ## v1.6.0
 
