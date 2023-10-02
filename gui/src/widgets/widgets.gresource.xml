@@ -2,15 +2,15 @@
 <gresources>
     <gresource prefix="/com/oppzippy/OpenSCQ30/">
         <file compressed="true">style.css</file>
-        <file compressed="true" preprocess="xml-stripblanks">device_selection/template.ui</file>
-        <file compressed="true" preprocess="xml-stripblanks">device_information/template.ui</file>
-        <file compressed="true" preprocess="xml-stripblanks">equalizer/template.ui</file>
-        <file compressed="true" preprocess="xml-stripblanks">equalizer_profile_dropdown_row/template.ui</file>
-        <file compressed="true" preprocess="xml-stripblanks">equalizer_settings/template.ui</file>
-        <file compressed="true" preprocess="xml-stripblanks">general_settings/template.ui</file>
-        <file compressed="true" preprocess="xml-stripblanks">main_window/template.ui</file>
-        <file compressed="true" preprocess="xml-stripblanks">loading_screen/template.ui</file>
-        <file compressed="true" preprocess="xml-stripblanks">selected_device_settings/template.ui</file>
-        <file compressed="true" preprocess="xml-stripblanks">volume_slider/template.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">device_selection.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">device_information.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">equalizer.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">equalizer_profile_dropdown_row.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">equalizer_settings.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">general_settings.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">main_window.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">loading_screen.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">selected_device_settings.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">volume_slider.ui</file>
     </gresource>
 </gresources>
