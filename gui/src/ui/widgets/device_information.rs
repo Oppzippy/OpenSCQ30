@@ -34,7 +34,7 @@ mod imp {
     use openscq30_lib::state::DeviceState;
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/com/oppzippy/OpenSCQ30/device_information.ui")]
+    #[template(resource = "/com/oppzippy/OpenSCQ30/ui/widgets/device_information.ui")]
     pub struct DeviceInformation {
         #[template_child]
         firmware_version_label: TemplateChild<gtk::Label>,

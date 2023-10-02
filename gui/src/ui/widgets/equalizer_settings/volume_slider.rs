@@ -44,7 +44,7 @@ mod imp {
 
     #[derive(Default, CompositeTemplate, Properties)]
     #[properties(wrapper_type = super::VolumeSlider)]
-    #[template(resource = "/com/oppzippy/OpenSCQ30/volume_slider.ui")]
+    #[template(resource = "/com/oppzippy/OpenSCQ30/ui/widgets/equalizer_settings/volume_slider.ui")]
     pub struct VolumeSlider {
         #[template_child]
         pub slider: TemplateChild<Scale>,

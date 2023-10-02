@@ -35,7 +35,7 @@ mod imp {
     use crate::actions::Action;
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/com/oppzippy/OpenSCQ30/loading_screen.ui")]
+    #[template(resource = "/com/oppzippy/OpenSCQ30/ui/widgets/loading_screen.ui")]
     pub struct LoadingScreen {
         sender: OnceCell<Sender<Action>>,
     }

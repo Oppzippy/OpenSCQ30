@@ -7,12 +7,12 @@ use openscq30_lib::packets::structures::EqualizerConfiguration;
 use crate::{actions::Action, objects::CustomEqualizerProfileObject};
 
 glib::wrapper! {
-    pub struct EqualizerSettings(ObjectSubclass<imp::EqualizerSettings>)
+    pub struct EqualizerSettingsScreen(ObjectSubclass<imp::EqualizerSettingsScreen>)
         @extends gtk::Box, gtk::Widget,
         @implements gtk::Accessible, gtk::Actionable, gtk::Buildable, gtk::ConstraintTarget;
 }
 
-impl EqualizerSettings {
+impl EqualizerSettingsScreen {
     pub fn new() -> Self {
         Object::builder().build()
     }
@@ -56,15 +56,19 @@ mod imp {
     };
     use strum::IntoEnumIterator;
 
-    use crate::{actions::Action, objects::BoxedVolumeAdjustments, widgets::Equalizer};
     use crate::{
-        objects::{CustomEqualizerProfileObject, EqualizerProfileObject},
-        widgets::EqualizerProfileDropdownRow,
+        actions::Action,
+        objects::{BoxedVolumeAdjustments, CustomEqualizerProfileObject, EqualizerProfileObject},
+        ui::widgets::equalizer_settings::{
+            equalizer::Equalizer, profile_dropdown_row::ProfileDropdownRow,
+        },
     };
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/com/oppzippy/OpenSCQ30/equalizer_settings.ui")]
-    pub struct EqualizerSettings {
+    #[template(
+        resource = "/com/oppzippy/OpenSCQ30/ui/widgets/equalizer_settings/equalizer_settings_screen.ui"
+    )]
+    pub struct EqualizerSettingsScreen {
         #[template_child]
         pub equalizer: TemplateChild<Equalizer>,
         #[template_child]
@@ -88,7 +92,7 @@ mod imp {
     }
 
     #[gtk::template_callbacks]
-    impl EqualizerSettings {
+    impl EqualizerSettingsScreen {
         pub fn set_sender(&self, sender: Sender<Action>) {
             self.sender.set(sender.clone()).unwrap();
         }
@@ -240,7 +244,7 @@ mod imp {
         fn set_up_custom_profile_item_factory(&self) {
             let factory = SignalListItemFactory::new();
             factory.connect_setup(move |_, list_item| {
-                let row = EqualizerProfileDropdownRow::new();
+                let row = ProfileDropdownRow::new();
                 list_item.set_child(Some(&row));
             });
 
@@ -254,7 +258,7 @@ mod imp {
                 let row = list_item
                     .child()
                     .expect("must have a child")
-                    .downcast::<EqualizerProfileDropdownRow>()
+                    .downcast::<ProfileDropdownRow>()
                     .expect("child must be a Box");
 
                 row.set_name(equalizer_custom_profile_object.name());
@@ -386,7 +390,7 @@ mod imp {
         fn set_up_preset_profile_item_factory(&self) {
             let factory = SignalListItemFactory::new();
             factory.connect_setup(move |_, list_item| {
-                let row = EqualizerProfileDropdownRow::new();
+                let row = ProfileDropdownRow::new();
                 list_item.set_child(Some(&row));
             });
 
@@ -400,7 +404,7 @@ mod imp {
                 let row = list_item
                     .child()
                     .expect("must have a child")
-                    .downcast::<EqualizerProfileDropdownRow>()
+                    .downcast::<ProfileDropdownRow>()
                     .expect("child must be a Box");
 
                 row.set_name(equalizer_profile_object.name());
@@ -471,9 +475,9 @@ mod imp {
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for EqualizerSettings {
-        const NAME: &'static str = "OpenSCQ30EqualizerSettings";
-        type Type = super::EqualizerSettings;
+    impl ObjectSubclass for EqualizerSettingsScreen {
+        const NAME: &'static str = "OpenSCQ30EqualizerSettingsScreen";
+        type Type = super::EqualizerSettingsScreen;
         type ParentType = gtk::Box;
 
         fn class_init(klass: &mut Self::Class) {
@@ -486,15 +490,15 @@ mod imp {
         }
     }
 
-    impl ObjectImpl for EqualizerSettings {
+    impl ObjectImpl for EqualizerSettingsScreen {
         fn constructed(&self) {
             self.parent_constructed();
             self.set_up_preset_profile();
             self.set_up_custom_profile();
         }
     }
-    impl WidgetImpl for EqualizerSettings {}
-    impl BoxImpl for EqualizerSettings {}
+    impl WidgetImpl for EqualizerSettingsScreen {}
+    impl BoxImpl for EqualizerSettingsScreen {}
 }
 
 #[cfg(test)]
@@ -510,12 +514,12 @@ mod tests {
 
     use crate::objects::CustomEqualizerProfileObject;
 
-    use super::EqualizerSettings;
+    use super::EqualizerSettingsScreen;
 
     #[gtk::test]
     fn test_does_not_show_any_button_with_preset_profile_selected() {
         crate::load_resources();
-        let settings = EqualizerSettings::new();
+        let settings = EqualizerSettingsScreen::new();
         let (sender, _receiver) = MainContext::channel(Priority::default());
         settings.set_sender(sender);
         settings.set_equalizer_configuration(EqualizerConfiguration::new_from_preset_profile(
@@ -534,7 +538,7 @@ mod tests {
     #[gtk::test]
     fn test_only_shows_create_button_with_no_custom_profile_selected() {
         crate::load_resources();
-        let settings = EqualizerSettings::new();
+        let settings = EqualizerSettingsScreen::new();
         let (sender, _receiver) = MainContext::channel(Priority::default());
         settings.set_sender(sender);
         settings.set_equalizer_configuration(EqualizerConfiguration::new_custom_profile(
@@ -553,7 +557,7 @@ mod tests {
     #[gtk::test]
     fn test_only_shows_delete_button_with_custom_profile_selected() {
         crate::load_resources();
-        let settings = EqualizerSettings::new();
+        let settings = EqualizerSettingsScreen::new();
         let (sender, _receiver) = MainContext::channel(Priority::default());
         settings.set_sender(sender);
         settings.set_custom_profiles(vec![CustomEqualizerProfileObject::new(

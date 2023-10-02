@@ -133,12 +133,12 @@ mod imp {
         actions::Action,
         objects::{BoxedVolumeAdjustments, CustomEqualizerProfileObject, DeviceObject},
         settings::Settings,
-        widgets::{DeviceSelection, LoadingScreen, SelectedDeviceSettings},
+        ui::widgets::{DeviceSelection, LoadingScreen, SelectedDeviceSettings},
     };
 
     #[derive(Default, CompositeTemplate, Properties)]
     #[properties(wrapper_type=super::MainWindow)]
-    #[template(resource = "/com/oppzippy/OpenSCQ30/main_window.ui")]
+    #[template(resource = "/com/oppzippy/OpenSCQ30/ui/widgets/main_window.ui")]
     pub struct MainWindow {
         #[template_child]
         pub stack: TemplateChild<gtk::Stack>,

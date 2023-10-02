@@ -3,8 +3,8 @@ fn main() {
     windows();
 
     glib_build_tools::compile_resources(
-        &["src/widgets"],
-        "src/widgets/widgets.gresource.xml",
+        &["src/ui"],
+        "src/ui/widgets.gresource.xml",
         "widgets.gresource",
     );
     println!("cargo:rerun-if-changed=src");

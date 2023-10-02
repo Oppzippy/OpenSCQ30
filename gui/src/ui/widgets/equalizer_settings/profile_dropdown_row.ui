@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-    <template class="OpenSCQ30EqualizerProfileDropdownRow" parent="GtkBox">
+    <template class="OpenSCQ30EqualizerSettingsProfileDropdownRow" parent="GtkBox">
         <property name="orientation">horizontal</property>
         <property name="spacing">2</property>
         <property name="hexpand">true</property>

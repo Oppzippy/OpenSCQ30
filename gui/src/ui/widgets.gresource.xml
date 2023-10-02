@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+    <gresource prefix="/com/oppzippy/OpenSCQ30/ui/">
+        <!-- css -->
+        <file compressed="true">style.css</file>
+
+        <!-- general -->
+        <file compressed="true" preprocess="xml-stripblanks">widgets/device_selection.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">widgets/device_information.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">widgets/general_settings.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">widgets/main_window.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">widgets/loading_screen.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">widgets/selected_device_settings.ui</file>
+
+        <!-- equalizer_settings -->
+        <file compressed="true" preprocess="xml-stripblanks">widgets/equalizer_settings/equalizer.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">widgets/equalizer_settings/profile_dropdown_row.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">widgets/equalizer_settings/equalizer_settings_screen.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">widgets/equalizer_settings/volume_slider.ui</file>
+    </gresource>
+</gresources>

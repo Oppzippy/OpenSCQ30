@@ -20,7 +20,7 @@
                     </object>
                 </child>
                 <child>
-                    <object class="OpenSCQ30EqualizerSettings" id="equalizer_settings">
+                    <object class="OpenSCQ30EqualizerSettingsScreen" id="equalizer_settings">
                         <property name="margin-start">10</property>
                         <property name="margin-end">10</property>
                         <property name="margin-top">10</property>

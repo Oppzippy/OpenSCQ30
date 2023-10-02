@@ -56,7 +56,7 @@ mod imp {
     use crate::actions::Action;
 
     #[derive(Default, CompositeTemplate, Properties)]
-    #[template(resource = "/com/oppzippy/OpenSCQ30/general_settings.ui")]
+    #[template(resource = "/com/oppzippy/OpenSCQ30/ui/widgets/general_settings.ui")]
     #[properties(wrapper_type=super::GeneralSettings)]
     pub struct GeneralSettings {
         // Ambient Sound Mode

@@ -4,12 +4,12 @@ use gtk::{
 };
 
 glib::wrapper! {
-    pub struct EqualizerProfileDropdownRow(ObjectSubclass<imp::EqualizerProfileDropdownRow>)
+    pub struct ProfileDropdownRow(ObjectSubclass<imp::ProfileDropdownRow>)
         @extends gtk::Box, gtk::Widget,
         @implements gtk::Accessible, gtk::Actionable, gtk::Buildable, gtk::ConstraintTarget;
 }
 
-impl EqualizerProfileDropdownRow {
+impl ProfileDropdownRow {
     pub fn new() -> Self {
         Object::builder().build()
     }
@@ -39,9 +39,11 @@ mod imp {
     use openscq30_lib::packets::structures::VolumeAdjustments;
 
     #[derive(Default, CompositeTemplate, Properties)]
-    #[properties(wrapper_type = super::EqualizerProfileDropdownRow)]
-    #[template(resource = "/com/oppzippy/OpenSCQ30/equalizer_profile_dropdown_row.ui")]
-    pub struct EqualizerProfileDropdownRow {
+    #[properties(wrapper_type = super::ProfileDropdownRow)]
+    #[template(
+        resource = "/com/oppzippy/OpenSCQ30/ui/widgets/equalizer_settings/profile_dropdown_row.ui"
+    )]
+    pub struct ProfileDropdownRow {
         #[template_child]
         pub label: TemplateChild<gtk::Label>,
         #[template_child]
@@ -52,7 +54,7 @@ mod imp {
         pub volume_adjustments: Cell<Option<[f64; 8]>>,
     }
 
-    impl EqualizerProfileDropdownRow {
+    impl ProfileDropdownRow {
         pub fn set_volume_adjustments(&self, volume_adjustments: Option<[f64; 8]>) {
             self.volume_adjustments.set(volume_adjustments);
             self.drawing_area.queue_draw();
@@ -60,9 +62,9 @@ mod imp {
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for EqualizerProfileDropdownRow {
-        const NAME: &'static str = "OpenSCQ30EqualizerProfileDropdownRow";
-        type Type = super::EqualizerProfileDropdownRow;
+    impl ObjectSubclass for ProfileDropdownRow {
+        const NAME: &'static str = "OpenSCQ30EqualizerSettingsProfileDropdownRow";
+        type Type = super::ProfileDropdownRow;
         type ParentType = gtk::Box;
 
         fn class_init(klass: &mut Self::Class) {
@@ -74,7 +76,7 @@ mod imp {
         }
     }
 
-    impl ObjectImpl for EqualizerProfileDropdownRow {
+    impl ObjectImpl for ProfileDropdownRow {
         fn constructed(&self) {
             self.obj()
                 .bind_property("name", &self.label.get(), "label")
@@ -130,6 +132,6 @@ mod imp {
                 });
         }
     }
-    impl WidgetImpl for EqualizerProfileDropdownRow {}
-    impl BoxImpl for EqualizerProfileDropdownRow {}
+    impl WidgetImpl for ProfileDropdownRow {}
+    impl BoxImpl for ProfileDropdownRow {}
 }

@@ -49,7 +49,7 @@ mod imp {
     use crate::{actions::Action, objects::DeviceObject};
 
     #[derive(Default, CompositeTemplate, Properties)]
-    #[template(resource = "/com/oppzippy/OpenSCQ30/device_selection.ui")]
+    #[template(resource = "/com/oppzippy/OpenSCQ30/ui/widgets/device_selection.ui")]
     #[properties(wrapper_type=super::DeviceSelection)]
     pub struct DeviceSelection {
         #[template_child]

@@ -59,18 +59,18 @@ mod imp {
 
     use crate::{
         actions::Action,
-        widgets::{DeviceInformation, EqualizerSettings, GeneralSettings},
+        ui::widgets::{DeviceInformation, EqualizerSettingsScreen, GeneralSettings},
     };
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/com/oppzippy/OpenSCQ30/selected_device_settings.ui")]
+    #[template(resource = "/com/oppzippy/OpenSCQ30/ui/widgets/selected_device_settings.ui")]
     pub struct SelectedDeviceSettings {
         #[template_child]
         pub notebook: TemplateChild<gtk::Notebook>,
         #[template_child]
         pub general_settings: TemplateChild<GeneralSettings>,
         #[template_child]
-        pub equalizer_settings: TemplateChild<EqualizerSettings>,
+        pub equalizer_settings: TemplateChild<EqualizerSettingsScreen>,
         #[template_child]
         pub device_information: TemplateChild<DeviceInformation>,
 

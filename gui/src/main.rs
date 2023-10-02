@@ -21,7 +21,7 @@ use logging_level::LoggingLevel;
 use openscq30_lib::api::{device::DeviceRegistry, new_soundcore_device_registry};
 use settings::Settings;
 use tracing::Level;
-use widgets::MainWindow;
+use ui::widgets::MainWindow;
 #[cfg(target_os = "windows")]
 use windows::{
     core::IInspectable,
@@ -42,7 +42,7 @@ mod objects;
 mod settings;
 mod swappable_broadcast;
 #[allow(clippy::new_without_default)]
-mod widgets;
+mod ui;
 
 pub struct ApplicationId<'a> {
     pub qualifier: &'a str,
@@ -120,7 +120,7 @@ fn run_application() {
 
 fn load_css() {
     let provider = CssProvider::new();
-    provider.load_from_resource("/com/oppzippy/OpenSCQ30/style.css");
+    provider.load_from_resource("/com/oppzippy/OpenSCQ30/ui/style.css");
     gtk::style_context_add_provider_for_display(
         &Display::default().expect("Could not connect to display"),
         &provider,

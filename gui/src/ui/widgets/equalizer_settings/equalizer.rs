@@ -41,10 +41,10 @@ mod imp {
     };
     use once_cell::sync::Lazy;
 
-    use crate::widgets::VolumeSlider;
+    use crate::ui::widgets::equalizer_settings::volume_slider::VolumeSlider;
 
     #[derive(Default, CompositeTemplate)]
-    #[template(resource = "/com/oppzippy/OpenSCQ30/equalizer.ui")]
+    #[template(resource = "/com/oppzippy/OpenSCQ30/ui/widgets/equalizer_settings/equalizer.ui")]
     pub struct Equalizer {
         #[template_child]
         pub band_100: TemplateChild<VolumeSlider>,
