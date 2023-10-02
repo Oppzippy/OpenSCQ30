@@ -59,7 +59,7 @@ mod imp {
 
     use crate::{
         actions::Action,
-        ui::widgets::{DeviceInformation, EqualizerSettingsScreen, GeneralSettings},
+        ui::widgets::{DeviceInformation, EqualizerSettingsScreen, GeneralSettingsScreen},
     };
 
     #[derive(Default, CompositeTemplate)]
@@ -68,7 +68,7 @@ mod imp {
         #[template_child]
         pub notebook: TemplateChild<gtk::Notebook>,
         #[template_child]
-        pub general_settings: TemplateChild<GeneralSettings>,
+        pub general_settings: TemplateChild<GeneralSettingsScreen>,
         #[template_child]
         pub equalizer_settings: TemplateChild<EqualizerSettingsScreen>,
         #[template_child]

@@ -7,7 +7,7 @@
             <object class="GtkNotebook" id="notebook">
                 <property name="tab-pos">left</property>
                 <child>
-                    <object class="OpenSCQ30GeneralSettings" id="general_settings">
+                    <object class="OpenSCQ30GeneralSettingsScreen" id="general_settings">
                         <property name="margin-start">10</property>
                         <property name="margin-end">10</property>
                         <property name="margin-top">10</property>

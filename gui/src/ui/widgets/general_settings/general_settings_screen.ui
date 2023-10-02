@@ -6,55 +6,11 @@
         <property name="step-increment">1</property>
         <property name="page-increment">1</property>
     </object>
-    <template class="OpenSCQ30GeneralSettings" parent="GtkBox">
+    <template class="OpenSCQ30GeneralSettingsScreen" parent="GtkBox">
         <property name="orientation">vertical</property>
         <!-- Ambient Sound Mode -->
         <child>
-            <object class="GtkLabel" id="ambient_sound_mode_label">
-                <property name="label" translatable="yes">Ambient Sound Mode</property>
-                <style>
-                    <class name="general-settings__heading-small" />
-                </style>
-            </object>
-        </child>
-        <child>
-            <object class="GtkBox">
-                <property name="orientation">horizontal</property>
-                <property name="spacing">2</property>
-                <child>
-                    <object class="GtkToggleButton" id="normal_mode">
-                        <signal name="toggled" handler="handle_normal_mode_clicked" swapped="true" />
-                        <property name="label" translatable="yes" context="ambient sound mode">Normal</property>
-                        <property name="hexpand">true</property>
-                        <accessibility>
-                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">ambient_sound_mode_label</relation>
-                        </accessibility>
-                    </object>
-                </child>
-                <child>
-                    <object class="GtkToggleButton" id="transparency_mode">
-                        <signal name="toggled" handler="handle_transparency_mode_clicked"
-                            swapped="true" />
-                        <property name="group">normal_mode</property>
-                        <property name="label" translatable="yes" context="ambient sound mode">Transparency</property>
-                        <property name="hexpand">true</property>
-                        <accessibility>
-                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">ambient_sound_mode_label</relation>
-                        </accessibility>
-                    </object>
-                </child>
-                <child>
-                    <object class="GtkToggleButton" id="noise_canceling_mode">
-                        <signal name="toggled" handler="handle_noise_canceling_mode_clicked"
-                            swapped="true" />
-                        <property name="group">transparency_mode</property>
-                        <property name="label" translatable="yes" context="ambient sound mode">Noise Canceling</property>
-                        <property name="hexpand">true</property>
-                        <accessibility>
-                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">ambient_sound_mode_label</relation>
-                        </accessibility>
-                    </object>
-                </child>
+            <object class="OpenSCQ30AmbientSoundModeSelection" id="ambient_sound_mode_selection">
             </object>
         </child>
         <child>

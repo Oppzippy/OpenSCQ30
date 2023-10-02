@@ -9,6 +9,6 @@ pub use equalizer_profile_object::*;
 use gtk::glib;
 use openscq30_lib::packets::structures::AmbientSoundMode;
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, glib::Boxed)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, glib::Boxed, Default)]
 #[boxed_type(name = "OpenSCQ30GeneralSettingsBoxedAmbientSoundMode")]
 pub struct BoxedAmbientSoundMode(pub AmbientSoundMode);

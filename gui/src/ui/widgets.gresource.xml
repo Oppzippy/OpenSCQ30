@@ -7,10 +7,13 @@
         <!-- general -->
         <file compressed="true" preprocess="xml-stripblanks">widgets/device_selection.ui</file>
         <file compressed="true" preprocess="xml-stripblanks">widgets/device_information.ui</file>
-        <file compressed="true" preprocess="xml-stripblanks">widgets/general_settings.ui</file>
         <file compressed="true" preprocess="xml-stripblanks">widgets/main_window.ui</file>
         <file compressed="true" preprocess="xml-stripblanks">widgets/loading_screen.ui</file>
         <file compressed="true" preprocess="xml-stripblanks">widgets/selected_device_settings.ui</file>
+
+        <!-- general_settings -->
+        <file compressed="true" preprocess="xml-stripblanks">widgets/general_settings/general_settings_screen.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">widgets/general_settings/ambient_sound_mode_selection.ui</file>
 
         <!-- equalizer_settings -->
         <file compressed="true" preprocess="xml-stripblanks">widgets/equalizer_settings/equalizer.ui</file>
