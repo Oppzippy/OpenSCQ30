@@ -14,6 +14,9 @@
         <!-- general_settings -->
         <file compressed="true" preprocess="xml-stripblanks">widgets/general_settings/general_settings_screen.ui</file>
         <file compressed="true" preprocess="xml-stripblanks">widgets/general_settings/ambient_sound_mode_selection.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">widgets/general_settings/transparency_mode_selection.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">widgets/general_settings/noise_canceling_mode_selection.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">widgets/general_settings/custom_noise_canceling_selection.ui</file>
 
         <!-- equalizer_settings -->
         <file compressed="true" preprocess="xml-stripblanks">widgets/equalizer_settings/equalizer.ui</file>

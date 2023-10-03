@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <template class="OpenSCQ30NoiseCancelingModeSelection" parent="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+            <object class="GtkLabel" id="noise_canceling_mode_label">
+                <property name="label" translatable="yes">Noise Canceling Mode</property>
+                <style>
+                    <class name="general-settings__heading-small" />
+                </style>
+            </object>
+        </child>
+        <child>
+            <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">2</property>
+                <child>
+                    <object class="GtkToggleButton" id="transport_mode">
+                        <property name="label" translatable="yes" context="noise canceling mode">Transport</property>
+                        <property name="hexpand">true</property>
+                        <accessibility>
+                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">noise_canceling_mode_label</relation>
+                        </accessibility>
+                    </object>
+                </child>
+                <child>
+                    <object class="GtkToggleButton" id="indoor_mode">
+                        <property name="group">transport_mode</property>
+                        <property name="label" translatable="yes" context="noise canceling mode">Indoor</property>
+                        <property name="hexpand">true</property>
+                        <accessibility>
+                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">noise_canceling_mode_label</relation>
+                        </accessibility>
+                    </object>
+                </child>
+                <child>
+                    <object class="GtkToggleButton" id="outdoor_mode">
+                        <property name="group">indoor_mode</property>
+                        <property name="label" translatable="yes" context="noise canceling mode">Outdoor</property>
+                        <property name="hexpand">true</property>
+                        <accessibility>
+                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">noise_canceling_mode_label</relation>
+                        </accessibility>
+                    </object>
+                </child>
+                <child>
+                    <object class="GtkToggleButton" id="custom_mode">
+                        <property name="group">indoor_mode</property>
+                        <property name="label" translatable="yes" context="noise canceling mode">Custom</property>
+                        <property name="hexpand">true</property>
+                        <accessibility>
+                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">noise_canceling_mode_label</relation>
+                        </accessibility>
+                    </object>
+                </child>
+            </object>
+        </child>
+    </template>
+</interface>

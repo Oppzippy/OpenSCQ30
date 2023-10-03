@@ -1,12 +1,12 @@
 use gtk::glib::{self, Object};
 
 glib::wrapper! {
-    pub struct AmbientSoundModeSelection(ObjectSubclass<imp::AmbientSoundModeSelection>)
+    pub struct NoiseCancelingModeSelection(ObjectSubclass<imp::NoiseCancelingModeSelection>)
         @extends gtk::Box, gtk::Widget,
         @implements gtk::Accessible, gtk::Actionable, gtk::Buildable, gtk::ConstraintTarget;
 }
 
-impl AmbientSoundModeSelection {
+impl NoiseCancelingModeSelection {
     pub fn new() -> Self {
         Object::builder().build()
     }
@@ -23,42 +23,41 @@ mod imp {
         prelude::*,
         subclass::{
             prelude::*,
-            widget::{
-                CompositeTemplateClass, CompositeTemplateInitializingExt, WidgetClassSubclassExt,
-                WidgetImpl,
-            },
+            widget::{CompositeTemplateClass, CompositeTemplateInitializingExt, WidgetImpl},
         },
         CompositeTemplate, TemplateChild,
     };
-    use openscq30_lib::packets::structures::AmbientSoundMode;
+    use openscq30_lib::packets::structures::NoiseCancelingMode;
 
-    use crate::objects::BoxedAmbientSoundMode;
+    use crate::objects::BoxedNoiseCancelingMode;
 
     #[derive(Default, CompositeTemplate, Properties)]
     #[template(
-        resource = "/com/oppzippy/OpenSCQ30/ui/widgets/general_settings/ambient_sound_mode_selection.ui"
+        resource = "/com/oppzippy/OpenSCQ30/ui/widgets/general_settings/noise_canceling_mode_selection.ui"
     )]
-    #[properties(wrapper_type=super::AmbientSoundModeSelection)]
-    pub struct AmbientSoundModeSelection {
+    #[properties(wrapper_type=super::NoiseCancelingModeSelection)]
+    pub struct NoiseCancelingModeSelection {
         #[template_child]
-        pub ambient_sound_mode_label: TemplateChild<gtk::Label>,
+        pub noise_canceling_mode_label: TemplateChild<gtk::Label>,
         #[template_child]
-        pub normal_mode: TemplateChild<gtk::ToggleButton>,
+        pub transport_mode: TemplateChild<gtk::ToggleButton>,
         #[template_child]
-        pub transparency_mode: TemplateChild<gtk::ToggleButton>,
+        pub indoor_mode: TemplateChild<gtk::ToggleButton>,
         #[template_child]
-        pub noise_canceling_mode: TemplateChild<gtk::ToggleButton>,
+        pub outdoor_mode: TemplateChild<gtk::ToggleButton>,
+        #[template_child]
+        pub custom_mode: TemplateChild<gtk::ToggleButton>,
 
         #[property(set, get)]
-        has_noise_canceling_mode: Cell<bool>,
+        has_custom_noise_canceling: Cell<bool>,
         #[property(set, get)]
-        ambient_sound_mode: Cell<BoxedAmbientSoundMode>,
+        noise_canceling_mode: Cell<BoxedNoiseCancelingMode>,
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for AmbientSoundModeSelection {
-        const NAME: &'static str = "OpenSCQ30AmbientSoundModeSelection";
-        type Type = super::AmbientSoundModeSelection;
+    impl ObjectSubclass for NoiseCancelingModeSelection {
+        const NAME: &'static str = "OpenSCQ30NoiseCancelingModeSelection";
+        type Type = super::NoiseCancelingModeSelection;
         type ParentType = gtk::Box;
 
         fn class_init(klass: &mut Self::Class) {
@@ -70,41 +69,36 @@ mod imp {
         }
     }
 
-    impl ObjectImpl for AmbientSoundModeSelection {
+    impl ObjectImpl for NoiseCancelingModeSelection {
         fn constructed(&self) {
             self.parent_constructed();
             let obj = self.obj();
 
             obj.bind_property(
-                "has_noise_canceling_mode",
-                &self.noise_canceling_mode.get(),
+                "has_custom_noise_canceling",
+                &self.custom_mode.get(),
                 "visible",
             )
             .sync_create()
             .build();
 
             [
-                (AmbientSoundMode::Normal, &self.normal_mode.get()),
-                (
-                    AmbientSoundMode::Transparency,
-                    &self.transparency_mode.get(),
-                ),
-                (
-                    AmbientSoundMode::NoiseCanceling,
-                    &self.noise_canceling_mode.get(),
-                ),
+                (NoiseCancelingMode::Indoor, &self.indoor_mode.get()),
+                (NoiseCancelingMode::Outdoor, &self.outdoor_mode.get()),
+                (NoiseCancelingMode::Transport, &self.transport_mode.get()),
+                (NoiseCancelingMode::Custom, &self.custom_mode.get()),
             ]
             .into_iter()
-            .for_each(|(ambient_sound_mode, button)| {
-                obj.bind_property("ambient_sound_mode", button, "active")
+            .for_each(|(noise_canceling_mode, button)| {
+                obj.bind_property("noise_canceling_mode", button, "active")
                     .transform_to(
-                        move |_, selected_ambient_sound_mode: BoxedAmbientSoundMode| {
-                            Some(ambient_sound_mode == selected_ambient_sound_mode.0)
+                        move |_, selected_noise_canceling_mode: BoxedNoiseCancelingMode| {
+                            Some(noise_canceling_mode == selected_noise_canceling_mode.0)
                         },
                     )
                     .transform_from(move |_, is_active| {
                         if is_active {
-                            Some(BoxedAmbientSoundMode(ambient_sound_mode))
+                            Some(BoxedNoiseCancelingMode(noise_canceling_mode))
                         } else {
                             None
                         }
@@ -128,6 +122,6 @@ mod imp {
         }
     }
 
-    impl WidgetImpl for AmbientSoundModeSelection {}
-    impl BoxImpl for AmbientSoundModeSelection {}
+    impl WidgetImpl for NoiseCancelingModeSelection {}
+    impl BoxImpl for NoiseCancelingModeSelection {}
 }
