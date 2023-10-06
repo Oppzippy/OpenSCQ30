@@ -48,13 +48,12 @@ mod imp {
     use gtk::{
         glib::{self, Sender},
         subclass::{
-            prelude::{BoxImpl, ObjectImpl, ObjectSubclass},
+            prelude::*,
             widget::{CompositeTemplateClass, CompositeTemplateInitializingExt, WidgetImpl},
         },
         CompositeTemplate, TemplateChild,
     };
 
-    use gtk::subclass::widget::WidgetClassSubclassExt;
     use openscq30_lib::state::DeviceState;
 
     use crate::{

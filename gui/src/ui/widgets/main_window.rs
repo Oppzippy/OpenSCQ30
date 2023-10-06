@@ -111,10 +111,10 @@ mod imp {
         rc::Rc,
     };
 
+    use adw::prelude::*;
     use gtk::{
         gio::SimpleAction,
         glib::{self, clone, ParamSpec, Properties, Sender, Value},
-        prelude::*,
         subclass::{
             prelude::*,
             widget::{
@@ -123,11 +123,9 @@ mod imp {
             },
             window::WindowImpl,
         },
-        traits::{BoxExt, DialogExt, EditableExt, GtkWindowExt, WidgetExt},
-        CompositeTemplate, DialogFlags, Inhibit, ResponseType, TemplateChild,
+        traits::EditableExt,
+        CompositeTemplate, TemplateChild,
     };
-
-    use gtk::subclass::widget::WidgetClassSubclassExt;
 
     use crate::{
         actions::Action,
@@ -175,16 +173,13 @@ mod imp {
 
         fn create_custom_equalizer_profile(&self, volume_adjustments: [f64; 8]) {
             let obj = self.obj();
-            let dialog = gtk::Dialog::with_buttons(
-                Some("Create Custom Profile"),
-                Some(&*obj),
-                DialogFlags::MODAL | DialogFlags::DESTROY_WITH_PARENT | DialogFlags::USE_HEADER_BAR,
-                &[
-                    ("Cancel", ResponseType::Cancel),
-                    ("Create", ResponseType::Accept),
-                ],
-            );
-            dialog.set_default_response(ResponseType::Accept);
+
+            let dialog = adw::MessageDialog::new(Some(&*obj), Some("Create Custom Profile"), None);
+            dialog.add_responses(&[("cancel", "Cancel"), ("create", "Create")]);
+            dialog.set_default_response(Some("create"));
+            dialog.set_close_response("cancel");
+            dialog.set_response_enabled("create", false);
+            dialog.set_response_appearance("cancel", adw::ResponseAppearance::Destructive);
 
             let entry = gtk::Entry::builder()
                 .margin_top(12)
@@ -194,32 +189,24 @@ mod imp {
                 .placeholder_text("Name")
                 .activates_default(true)
                 .build();
-            dialog.content_area().append(&entry);
-
-            let accept_button = dialog
-                .widget_for_response(ResponseType::Accept)
-                .expect("missing accept button");
-            accept_button.set_sensitive(false);
+            dialog.set_extra_child(Some(&entry));
 
             entry.connect_changed(clone!(@weak dialog => move |entry| {
-            let button = dialog.widget_for_response(ResponseType::Accept).expect("missing accept button");
-            let is_empty = entry.text().trim().is_empty();
-            button.set_sensitive(!is_empty);
-        }));
+                let is_empty = entry.text().trim().is_empty();
+                dialog.set_response_enabled("create", !is_empty);
+            }));
 
-            dialog.connect_response(
-            clone!(@weak self as this, @weak entry, @strong volume_adjustments => move |dialog, response| {
-                let name = entry.text().to_string();
-                dialog.destroy();
-                if response != ResponseType::Accept {
-                    return;
-                }
-
-                let profile_with_name = CustomEqualizerProfileObject::new(&name, volume_adjustments);
-                this.sender.get().unwrap().send(Action::CreateCustomEqualizerProfile(profile_with_name)).unwrap();
-            }),
-        );
-            dialog.present();
+            dialog.choose(
+                gtk::gio::Cancellable::NONE,
+                clone!(@weak self as this, @weak entry, @strong volume_adjustments => move |response| {
+                    if response != "create" {
+                        return;
+                    }
+                    let name = entry.text().to_string();
+                    let profile_with_name = CustomEqualizerProfileObject::new(&name, volume_adjustments);
+                    this.sender.get().unwrap().send(Action::CreateCustomEqualizerProfile(profile_with_name)).unwrap();
+                }),
+            );
         }
 
         fn update(&self) {
@@ -309,11 +296,11 @@ mod imp {
     }
     impl WidgetImpl for MainWindow {}
     impl WindowImpl for MainWindow {
-        fn close_request(&self) -> Inhibit {
+        fn close_request(&self) -> glib::Propagation {
             self.obj()
                 .save_window_size()
                 .expect("failed to save window size");
-            Inhibit(false)
+            glib::Propagation::Proceed
         }
     }
 

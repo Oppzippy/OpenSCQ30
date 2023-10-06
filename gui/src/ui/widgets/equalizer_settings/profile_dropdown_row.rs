@@ -90,7 +90,7 @@ mod imp {
             self.drawing_area
                 .set_draw_func(move |drawing_area, context, width, height| {
                     if let Some(volume_adjustments) = this.volume_adjustments.get() {
-                        let color = drawing_area.style_context().color();
+                        let color = drawing_area.color();
                         context.set_source_rgba(
                             color.red().into(),
                             color.green().into(),

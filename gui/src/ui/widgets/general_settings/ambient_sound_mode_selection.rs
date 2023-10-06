@@ -24,7 +24,7 @@ mod imp {
         subclass::{
             prelude::*,
             widget::{
-                CompositeTemplateClass, CompositeTemplateInitializingExt, WidgetClassSubclassExt,
+                CompositeTemplateClass, CompositeTemplateInitializingExt,
                 WidgetImpl,
             },
         },

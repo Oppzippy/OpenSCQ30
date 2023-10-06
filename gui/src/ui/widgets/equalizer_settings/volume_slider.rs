@@ -26,20 +26,16 @@ impl VolumeSlider {
 mod imp {
     use std::cell::Cell;
 
-    use gtk::glib::{BindingFlags, ParamSpec, Properties, Value};
-    use gtk::prelude::*;
-    use gtk::subclass::prelude::{ObjectImplExt, ObjectSubclassExt};
-    use gtk::subclass::widget::{CompositeTemplateInitializingExt, WidgetClassSubclassExt};
-    use gtk::traits::{RangeExt, ScaleExt};
     use gtk::{
-        glib,
+        glib::{self, BindingFlags, ParamSpec, Properties, Value},
+        prelude::*,
         subclass::{
-            prelude::{BoxImpl, DerivedObjectProperties, ObjectImpl, ObjectSubclass},
-            widget::{CompositeTemplateClass, WidgetImpl},
+            prelude::{BoxImpl, DerivedObjectProperties, ObjectImpl, ObjectSubclass, *},
+            widget::{CompositeTemplateClass, CompositeTemplateInitializingExt, WidgetImpl},
         },
-        CompositeTemplate, Scale, TemplateChild,
+        traits::{RangeExt, ScaleExt},
+        CompositeTemplate, Label, Scale, SpinButton, TemplateChild,
     };
-    use gtk::{Label, SpinButton};
     use openscq30_lib::packets::structures::VolumeAdjustments;
 
     #[derive(Default, CompositeTemplate, Properties)]

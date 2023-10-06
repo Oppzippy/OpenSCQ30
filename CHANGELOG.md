@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### GUI
+
+#### Dependencies
+
+-   Minimum gtk4 version increased to v4.12 (GNOME 45)
+-   Minimum libadwaita version increased to v1.4 (GNOME 45)
+
 ## v1.7.0
 
 ### GUI

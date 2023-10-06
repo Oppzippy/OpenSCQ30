@@ -317,7 +317,7 @@ fn delayed_initialize_application(
     main_window.set_sender(action_sender);
     action_receiver.attach(
         None,
-        clone!(@strong state, @strong settings => @default-return Continue(false), move |action: Action| {
+        clone!(@strong state, @strong settings => @default-return glib::ControlFlow::Break, move |action: Action| {
             MainContext::default().spawn_local(clone!(@strong state, @strong settings => async move {
                 let result = match action {
                     Action::SetAmbientSoundMode(ambient_sound_mode) => {
@@ -373,7 +373,7 @@ fn delayed_initialize_application(
                     handle_error(err, &state);
                 }
             }));
-            Continue(true)
+            glib::ControlFlow::Continue
         }),
     );
 

@@ -44,10 +44,7 @@ mod imp {
         prelude::*,
         subclass::{
             prelude::*,
-            widget::{
-                CompositeTemplateCallbacksClass, CompositeTemplateClass, WidgetClassSubclassExt,
-                WidgetImpl,
-            },
+            widget::{CompositeTemplateCallbacksClass, CompositeTemplateClass, WidgetImpl},
         },
         CompositeTemplate, Expression, PropertyExpression, SignalListItemFactory, TemplateChild,
     };
@@ -225,7 +222,7 @@ mod imp {
         }
 
         fn set_up_custom_profile_selection_model(&self) {
-            let model = gio::ListStore::new(CustomEqualizerProfileObject::static_type());
+            let model = gio::ListStore::new::<CustomEqualizerProfileObject>();
             self.custom_profile_dropdown.set_model(Some(&model));
             self.custom_profiles
                 .set(model)
@@ -244,11 +241,13 @@ mod imp {
         fn set_up_custom_profile_item_factory(&self) {
             let factory = SignalListItemFactory::new();
             factory.connect_setup(move |_, list_item| {
+                let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
                 let row = ProfileDropdownRow::new();
                 list_item.set_child(Some(&row));
             });
 
             factory.connect_bind(move |_, list_item| {
+                let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
                 let equalizer_custom_profile_object = list_item
                     .item()
                     .expect("item must exist")
@@ -371,7 +370,7 @@ mod imp {
         }
 
         fn set_up_preset_profile_selection_model(&self) {
-            let model = gio::ListStore::new(EqualizerProfileObject::static_type());
+            let model = gio::ListStore::new::<EqualizerProfileObject>();
             self.profile_dropdown.set_model(Some(&model));
             self.profiles
                 .set(model)
@@ -390,11 +389,13 @@ mod imp {
         fn set_up_preset_profile_item_factory(&self) {
             let factory = SignalListItemFactory::new();
             factory.connect_setup(move |_, list_item| {
+                let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
                 let row = ProfileDropdownRow::new();
                 list_item.set_child(Some(&row));
             });
 
             factory.connect_bind(move |_, list_item| {
+                let list_item = list_item.downcast_ref::<gtk::ListItem>().unwrap();
                 let equalizer_profile_object = list_item
                     .item()
                     .expect("item must exist")

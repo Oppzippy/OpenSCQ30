@@ -39,7 +39,7 @@ mod imp {
             prelude::{BoxImpl, ObjectImpl, ObjectSubclass, *},
             widget::{
                 CompositeTemplateCallbacksClass, CompositeTemplateClass,
-                CompositeTemplateInitializingExt, WidgetClassSubclassExt, WidgetImpl,
+                CompositeTemplateInitializingExt, WidgetImpl,
             },
         },
         ClosureExpression, CompositeTemplate, TemplateChild,
@@ -120,7 +120,7 @@ mod imp {
     impl ObjectImpl for DeviceSelection {
         fn constructed(&self) {
             self.parent_constructed();
-            let model = gio::ListStore::new(DeviceObject::static_type());
+            let model = gio::ListStore::new::<DeviceObject>();
             self.dropdown.set_model(Some(&model));
             self.devices
                 .set(model)

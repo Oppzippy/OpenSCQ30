@@ -27,15 +27,12 @@ mod imp {
     use std::cell::Cell;
 
     use gtk::glib::clone;
-    use gtk::glib::subclass::Signal;
-    use gtk::prelude::ObjectExt;
-    use gtk::subclass::prelude::ObjectSubclassExt;
-    use gtk::subclass::widget::{CompositeTemplateInitializingExt, WidgetClassSubclassExt};
     use gtk::{
-        glib,
+        glib::{self, subclass::Signal},
+        prelude::*,
         subclass::{
-            prelude::{BoxImpl, ObjectImpl, ObjectSubclass},
-            widget::{CompositeTemplateClass, WidgetImpl},
+            prelude::*,
+            widget::{CompositeTemplateClass, CompositeTemplateInitializingExt, WidgetImpl},
         },
         CompositeTemplate, TemplateChild,
     };
