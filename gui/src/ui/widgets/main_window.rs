@@ -19,7 +19,7 @@ use crate::{
 
 glib::wrapper! {
     pub struct MainWindow(ObjectSubclass<imp::MainWindow>)
-        @extends gtk::ApplicationWindow, gtk::Window, gtk::Widget,
+        @extends adw::ApplicationWindow, gtk::ApplicationWindow, gtk::Window, gtk::Widget,
         @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget, gtk::Native, gtk::Root, gtk::ShortcutManager, gio::ActionGroup, gio::ActionMap;
 }
 
@@ -111,7 +111,7 @@ mod imp {
         rc::Rc,
     };
 
-    use adw::prelude::*;
+    use adw::{prelude::*, subclass::prelude::AdwApplicationWindowImpl};
     use gtk::{
         gio::SimpleAction,
         glib::{self, clone, ParamSpec, Properties, Sender, Value},
@@ -225,7 +225,7 @@ mod imp {
     impl ObjectSubclass for MainWindow {
         const NAME: &'static str = "OpenSCQ30MainWindow";
         type Type = super::MainWindow;
-        type ParentType = gtk::ApplicationWindow;
+        type ParentType = adw::ApplicationWindow;
 
         fn class_init(klass: &mut Self::Class) {
             klass.bind_template();
@@ -305,4 +305,5 @@ mod imp {
     }
 
     impl ApplicationWindowImpl for MainWindow {}
+    impl AdwApplicationWindowImpl for MainWindow {}
 }
