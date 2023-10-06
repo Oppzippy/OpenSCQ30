@@ -10,6 +10,7 @@ use openscq30_lib::{
     state::DeviceState,
 };
 use tokio::sync::{broadcast, watch};
+use uuid::Uuid;
 
 mock! {
     #[derive(Debug)]
@@ -18,6 +19,7 @@ mock! {
         pub fn connection_status(&self) -> watch::Receiver<ConnectionStatus>;
         pub fn mac_address(&self) -> openscq30_lib::Result<MacAddr6>;
         pub fn name(&self) -> openscq30_lib::Result<String>;
+        pub fn service_uuid(&self) -> Uuid;
         pub fn state(&self) -> DeviceState;
         pub fn set_sound_modes(
             &self,
@@ -41,6 +43,9 @@ impl Device for MockDevice {
     async fn mac_address(&self) -> openscq30_lib::Result<MacAddr6> {
         timeout_future(Duration::from_millis(10)).await;
         self.mac_address()
+    }
+    fn service_uuid(&self) -> Uuid {
+        self.service_uuid()
     }
     async fn name(&self) -> openscq30_lib::Result<String> {
         timeout_future(Duration::from_millis(10)).await;

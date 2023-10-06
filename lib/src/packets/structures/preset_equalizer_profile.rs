@@ -1,11 +1,12 @@
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumIter, EnumString, FromRepr};
+use strum::{AsRefStr, Display, EnumIter, EnumString, FromRepr};
 
 use super::volume_adjustments::VolumeAdjustments;
 
 #[repr(u16)]
 #[derive(
     FromRepr,
+    Default,
     Debug,
     Clone,
     Copy,
@@ -17,8 +18,10 @@ use super::volume_adjustments::VolumeAdjustments;
     Serialize,
     Deserialize,
     EnumString,
+    AsRefStr,
 )]
 pub enum PresetEqualizerProfile {
+    #[default]
     SoundcoreSignature = 0x0000,
     Acoustic = 0x0001,
     BassBooster = 0x0002,

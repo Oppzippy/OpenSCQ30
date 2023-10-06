@@ -13,8 +13,8 @@ use openscq30_lib::{packets::structures::EqualizerConfiguration, state::DeviceSt
 
 use crate::{
     actions::Action,
-    objects::{CustomEqualizerProfileObject, DeviceObject},
-    settings::Settings,
+    objects::{CustomEqualizerProfileObject, DeviceObject, NamedQuickPreset},
+    settings::SettingsFile,
 };
 
 glib::wrapper! {
@@ -24,13 +24,16 @@ glib::wrapper! {
 }
 
 impl MainWindow {
-    pub fn new(application: &impl IsA<Application>, settings: Rc<Settings>) -> Self {
+    pub fn new(
+        application: &impl IsA<Application>,
+        settings: Rc<SettingsFile<crate::settings::State>>,
+    ) -> Self {
         let obj: Self = Object::builder()
             .property("application", application)
             .build();
 
         obj.imp()
-            .settings
+            .window_state_settings
             .set(settings)
             .expect("must be able to set settings file");
 
@@ -39,13 +42,15 @@ impl MainWindow {
         obj
     }
 
-    fn settings_file(&self) -> &Settings {
-        self.imp().settings.get().expect("settings must be set")
+    fn window_state_settings(&self) -> &SettingsFile<crate::settings::State> {
+        self.imp()
+            .window_state_settings
+            .get()
+            .expect("settings must be set")
     }
 
     fn save_window_size(&self) -> Result<(), glib::BoolError> {
-        self.settings_file()
-            .state
+        self.window_state_settings()
             .edit(|settings| {
                 let size = self.default_size();
                 settings.window_width = size.0;
@@ -58,8 +63,7 @@ impl MainWindow {
     }
 
     fn load_window_size(&self) {
-        self.settings_file()
-            .state
+        self.window_state_settings()
             .get(|settings| {
                 self.set_default_size(settings.window_width, settings.window_height);
                 if settings.is_maximized {
@@ -100,6 +104,12 @@ impl MainWindow {
             .set_custom_profiles(custom_profiles)
     }
 
+    pub fn set_quick_presets(&self, quick_presets: Vec<NamedQuickPreset>) {
+        self.imp()
+            .selected_device_settings
+            .set_quick_presets(quick_presets)
+    }
+
     pub fn add_toast(&self, toast: Toast) {
         self.imp().toast_overlay.add_toast(toast);
     }
@@ -130,7 +140,7 @@ mod imp {
     use crate::{
         actions::Action,
         objects::{BoxedVolumeAdjustments, CustomEqualizerProfileObject, DeviceObject},
-        settings::Settings,
+        settings::SettingsFile,
         ui::widgets::{DeviceSelection, LoadingScreen, SelectedDeviceSettings},
     };
 
@@ -154,7 +164,7 @@ mod imp {
         #[property(get, set)]
         pub loading: Cell<bool>,
 
-        pub settings: OnceCell<Rc<Settings>>,
+        pub window_state_settings: OnceCell<Rc<SettingsFile<crate::settings::State>>>,
         sender: OnceCell<Sender<Action>>,
     }
 

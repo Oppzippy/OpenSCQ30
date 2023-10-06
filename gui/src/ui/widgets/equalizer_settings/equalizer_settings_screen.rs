@@ -465,7 +465,7 @@ mod imp {
             )]
             .into_iter();
             let preset_profile_iter = PresetEqualizerProfile::iter()
-                .map(|preset| EqualizerProfileObject::new(&preset.to_string(), preset.id().into()));
+                .map(|preset| EqualizerProfileObject::new(preset.as_ref(), preset.id().into()));
 
             let profiles = custom_profile_iter
                 .chain(preset_profile_iter)

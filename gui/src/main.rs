@@ -1,7 +1,6 @@
 use std::{
     env,
     path::{Path, PathBuf},
-    rc::Rc,
     str::FromStr,
     sync::Once,
 };
@@ -188,11 +187,11 @@ fn build_ui(application: &adw::Application) {
     if let Err(err) = set_ui_theme(application) {
         tracing::warn!("failed to set ui theme: {err:?}");
     }
-    let settings: Rc<Settings> = Default::default();
+    let settings = Settings::default();
     if let Err(err) = settings.load() {
         tracing::warn!("initial load of settings file failed: {:?}", err)
     }
-    let main_window = MainWindow::new(application, settings.to_owned());
+    let main_window = MainWindow::new(application, settings.state.to_owned());
 
     settings
         .config
@@ -228,14 +227,12 @@ fn delayed_initialize_application(
     application: &adw::Application,
     main_window: &MainWindow,
     registry: impl DeviceRegistry + 'static,
-    settings: Rc<Settings>,
+    settings: Settings,
 ) {
     let (state, mut ui_state_receiver) = State::new(registry);
-    let state = Rc::new(state);
-    let settings = Rc::new(settings);
 
     let main_context = MainContext::default();
-    main_context.spawn_local(clone!(@weak main_window => async move {
+    main_context.spawn_local(clone!(@weak main_window, @weak state, @weak settings.config as config => async move {
         loop {
             if let Some(update) = ui_state_receiver.recv().await {
                 match update {
@@ -246,6 +243,7 @@ fn delayed_initialize_application(
                     StateUpdate::SetSelectedDevice(device) => main_window.set_property("selected-device", device),
                     StateUpdate::SetCustomEqualizerProfiles(custom_profiles) => main_window.set_custom_profiles(custom_profiles),
                     StateUpdate::AddToast(text) => main_window.add_toast(Toast::builder().title(&text).timeout(15).build()),
+                    StateUpdate::SetQuickPresets(quick_presets) => main_window.set_quick_presets(quick_presets),
                 }
             }
         }
@@ -341,12 +339,12 @@ fn delayed_initialize_application(
                         .context("transparency mode selected")
                     },
                     Action::Connect(mac_address) => {
-                        actions::set_device(&state, Some(mac_address))
+                        actions::set_device(&state, settings.config, Some(mac_address))
                         .await
                         .context("select device")
                     },
                     Action::Disconnect => {
-                        actions::set_device(&state, None)
+                        actions::set_device(&state, settings.config, None)
                         .await
                         .context("select device")
                     },
@@ -368,6 +366,18 @@ fn delayed_initialize_application(
                         .await
                         .context("apply equalizer settings")
                     },
+                    Action::CreateQuickPreset(named_quick_preset) => {
+                        actions::create_quick_preset(&state, &settings.config, named_quick_preset)
+                        .context("create quick preset")
+                    },
+                    Action::ActivateQuickPreset(named_quick_preset) => {
+                        actions::activate_quick_preset(&state, &settings.config, &named_quick_preset.quick_preset)
+                        .await
+                        .context("actiavte quick preset")
+                    },
+                    Action::DeleteQuickPreset(name) => {
+                        actions::delete_quick_preset(&state, &settings.config, &name).context("delete quick preset")
+                    }
                 };
                 if let Err(err) = result {
                     handle_error(err, &state);

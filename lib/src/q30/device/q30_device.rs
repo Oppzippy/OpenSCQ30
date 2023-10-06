@@ -5,6 +5,7 @@ use futures::FutureExt;
 use macaddr::MacAddr6;
 use tokio::sync::{broadcast, mpsc::Receiver, watch, RwLock};
 use tracing::{trace, warn};
+use uuid::Uuid;
 
 use crate::{
     api::connection::{Connection, ConnectionStatus},
@@ -138,6 +139,10 @@ where
 
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
         self.connection.connection_status()
+    }
+
+    fn service_uuid(&self) -> Uuid {
+        self.connection.service_uuid()
     }
 
     async fn state(&self) -> DeviceState {

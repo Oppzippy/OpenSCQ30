@@ -3,6 +3,7 @@ use std::collections::VecDeque;
 use async_trait::async_trait;
 use macaddr::MacAddr6;
 use tokio::sync::{mpsc, watch, Mutex, RwLock};
+use uuid::Uuid;
 
 use crate::api::connection::{Connection, ConnectionStatus};
 
@@ -66,6 +67,10 @@ impl Connection for StubConnection {
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
         let (_sender, receiver) = watch::channel(ConnectionStatus::Connected);
         receiver
+    }
+
+    fn service_uuid(&self) -> Uuid {
+        Uuid::default()
     }
 
     async fn write_with_response(&self, _data: &[u8]) -> crate::Result<()> {

@@ -1,12 +1,36 @@
-use std::collections::HashMap;
+use std::collections::{hash_map::Entry, HashMap};
 
+use once_cell::sync::Lazy;
+use openscq30_lib::packets::structures::{
+    AmbientSoundMode, CustomNoiseCanceling, NoiseCancelingMode, PresetEqualizerProfile,
+    TransparencyMode,
+};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use super::custom_equalizer_profile::CustomEqualizerProfile;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(default)]
 pub struct Config {
     equalizer_custom_profiles: HashMap<String, CustomEqualizerProfile>,
+    quick_presets: HashMap<Uuid, HashMap<String, QuickPreset>>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Default, Hash)]
+pub struct QuickPreset {
+    pub ambient_sound_mode: Option<AmbientSoundMode>,
+    pub transparency_mode: Option<TransparencyMode>,
+    pub noise_canceling_mode: Option<NoiseCancelingMode>,
+    pub custom_noise_canceling: Option<CustomNoiseCanceling>,
+    pub equalizer_profile: Option<PresetOrCustomEqualizerProfile>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Hash)]
+#[serde(rename_all = "snake_case")]
+pub enum PresetOrCustomEqualizerProfile {
+    Preset(PresetEqualizerProfile),
+    Custom(String),
 }
 
 impl Config {
@@ -24,5 +48,36 @@ impl Config {
 
     pub fn custom_profiles(&self) -> &HashMap<String, CustomEqualizerProfile> {
         &self.equalizer_custom_profiles
+    }
+
+    pub fn quick_presets(&self, device_service_uuid: Uuid) -> &HashMap<String, QuickPreset> {
+        static EMPTY_HASHMAP: Lazy<HashMap<String, QuickPreset>> = Lazy::new(HashMap::new);
+        self.quick_presets
+            .get(&device_service_uuid)
+            .unwrap_or(&EMPTY_HASHMAP)
+    }
+
+    pub fn set_quick_preset(
+        &mut self,
+        device_service_uuid: Uuid,
+        name: impl Into<String>,
+        quick_preset: QuickPreset,
+    ) {
+        let name = name.into();
+        match self.quick_presets.entry(device_service_uuid) {
+            Entry::Occupied(mut entry) => {
+                entry.get_mut().insert(name, quick_preset);
+            }
+            Entry::Vacant(entry) => {
+                let device_quick_presets = HashMap::from([(name, quick_preset)]);
+                entry.insert(device_quick_presets);
+            }
+        }
+    }
+
+    pub fn remove_quick_preset(&mut self, device_service_uuid: Uuid, name: &str) {
+        if let Some(device_quick_presets) = self.quick_presets.get_mut(&device_service_uuid) {
+            device_quick_presets.remove(name);
+        }
     }
 }

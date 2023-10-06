@@ -26,6 +26,7 @@ async-trait = "0.1"
 dirs = "5.0.0"
 macaddr = "1.0"
 itertools = "0.11.0"
+uuid = { version = "1.3", features = ["serde"] }
 
 [dev-dependencies]
 mockall = "0.11.2"

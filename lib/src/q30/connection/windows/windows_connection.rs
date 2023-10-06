@@ -28,6 +28,7 @@ pub struct WindowsConnection {
     device: BluetoothLEDevice,
     read_characteristic: GattCharacteristic,
     write_characteristic: GattCharacteristic,
+    service_uuid: Uuid,
     value_changed_token: Arc<RwLock<Option<EventRegistrationToken>>>,
     connection_status_receiver: watch::Receiver<ConnectionStatus>,
     connection_status_changed_token: EventRegistrationToken,
@@ -49,6 +50,7 @@ impl WindowsConnection {
                 }
             })?;
         let service = Self::service(&device).await?;
+        let service_uuid = Uuid::from_u128(service.Uuid()?.to_u128());
         let read_characteristic =
             Self::characteristic(&service, &device_utils::READ_CHARACTERISTIC_UUID).await?;
         let write_characteristic =
@@ -74,6 +76,7 @@ impl WindowsConnection {
             device,
             read_characteristic,
             write_characteristic,
+            service_uuid,
             value_changed_token: Default::default(),
             connection_status_receiver: receiver,
             connection_status_changed_token,
@@ -153,6 +156,10 @@ impl Connection for WindowsConnection {
     async fn mac_address(&self) -> crate::Result<MacAddr6> {
         let windows_u64_mac_address = self.device.BluetoothAddress()?;
         Ok(MacAddr6::from_windows_u64(windows_u64_mac_address))
+    }
+
+    fn service_uuid(&self) -> Uuid {
+        self.service_uuid
     }
 
     #[instrument(level = "trace", skip(self))]

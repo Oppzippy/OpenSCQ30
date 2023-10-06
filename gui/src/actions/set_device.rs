@@ -9,12 +9,14 @@ use openscq30_lib::api::{
 };
 use tokio::sync::oneshot;
 
-use crate::objects::DeviceObject;
+use crate::{actions, settings::SettingsFile};
+use crate::{objects::DeviceObject, settings::Config};
 
 use super::{State, StateUpdate};
 
 pub async fn set_device<T>(
     state: &Rc<State<T>>,
+    config: Rc<SettingsFile<Config>>,
     mac_address: Option<MacAddr6>,
 ) -> anyhow::Result<()>
 where
@@ -88,6 +90,8 @@ where
                     .send(StateUpdate::SetDeviceState(device_state))
                     .map_err(|err| anyhow!("{err:?}"))?;
 
+                actions::refresh_quick_presets(&state, &config, device.service_uuid())?;
+
                 Ok(())
             }).await;
             state.state_update_sender.send(StateUpdate::SetLoading(false)).unwrap();
@@ -126,11 +130,13 @@ mod tests {
         state::DeviceState,
     };
     use tokio::sync::{broadcast, watch};
+    use uuid::Uuid;
 
     use crate::{
         actions::{State, StateUpdate},
         mock::{MockDevice, MockDeviceRegistry},
         objects::DeviceObject,
+        settings::SettingsFile,
     };
 
     use super::set_device;
@@ -177,6 +183,7 @@ mod tests {
                     .expect_connection_status()
                     .once()
                     .return_const(receiver);
+                device.expect_service_uuid().return_const(Uuid::default());
                 device.expect_state().once().return_const(device_state_2);
 
                 Ok(Some(Rc::new(device)))
@@ -184,7 +191,11 @@ mod tests {
 
         let (state, mut receiver) = State::new(registry);
 
-        set_device(&state, Some(MacAddr6::nil())).await.unwrap();
+        let file = tempfile::NamedTempFile::new().unwrap();
+        let settings_file = Rc::new(SettingsFile::new(file.path().to_path_buf()));
+        set_device(&state, settings_file, Some(MacAddr6::nil()))
+            .await
+            .unwrap();
         let mut expected_sequence = VecDeque::from([
             StateUpdate::SetLoading(true),
             StateUpdate::SetSelectedDevice(Some(DeviceObject::new(
@@ -192,6 +203,7 @@ mod tests {
                 "00:00:00:00:00:00",
             ))),
             StateUpdate::SetDeviceState(device_state),
+            StateUpdate::SetQuickPresets(Vec::new()),
             StateUpdate::SetLoading(false),
         ]);
         loop {
@@ -256,6 +268,7 @@ mod tests {
                     .expect_connection_status()
                     .once()
                     .return_const(receiver);
+                device.expect_service_uuid().return_const(Uuid::default());
                 device.expect_state().once().return_const(DeviceState {
                     sound_modes: Some(SoundModes {
                         ambient_sound_mode: AmbientSoundMode::Transparency,
@@ -273,7 +286,11 @@ mod tests {
 
         let (state, _receiver) = State::new(registry);
 
-        set_device(&state, Some(MacAddr6::nil())).await.unwrap();
+        let file = tempfile::NamedTempFile::new().unwrap();
+        let settings_file = Rc::new(SettingsFile::new(file.path().to_path_buf()));
+        set_device(&state, settings_file, Some(MacAddr6::nil()))
+            .await
+            .unwrap();
         sender.send_replace(ConnectionStatus::Disconnected);
     }
 }

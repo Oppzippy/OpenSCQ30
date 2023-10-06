@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <template class="OpenSCQ30EditQuickPreset" parent="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+            <object class="AdwPreferencesGroup">
+                <property name="title">Settings</property>
+                <child>
+                    <object class="AdwSwitchRow" id="ambient_sound_mode_switch">
+                        <property name="title" translatable="yes">Enable Ambient Sound Mode</property>
+                        <signal name="notify::active" handler="handle_option_changed" swapped="true" />
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwComboRow" id="ambient_sound_mode">
+                        <property name="title" translatable="yes">Ambient Sound Mode</property>
+                        <property name="visible" bind-source="ambient_sound_mode_switch" bind-property="active" bind-flags="sync-create" />
+                        <signal name="notify::selected-item" handler="handle_option_changed" swapped="true" />
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwSwitchRow" id="transparency_mode_switch">
+                        <property name="title" translatable="yes">Enable Transparency Mode</property>
+                        <signal name="notify::active" handler="handle_option_changed" swapped="true" />
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwComboRow" id="transparency_mode">
+                        <property name="title" translatable="yes">Transparency Mode</property>
+                        <property name="visible" bind-source="transparency_mode_switch" bind-property="active" bind-flags="sync-create" />
+                        <signal name="notify::selected-item" handler="handle_option_changed" swapped="true" />
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwSwitchRow" id="noise_canceling_mode_switch">
+                        <property name="title" translatable="yes">Enable Noise Canceling Mode</property>
+                        <signal name="notify::active" handler="handle_option_changed" swapped="true" />
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwComboRow" id="noise_canceling_mode">
+                        <property name="title" translatable="yes">Noise Canceling Mode</property>
+                        <property name="visible" bind-source="noise_canceling_mode_switch" bind-property="active" bind-flags="sync-create" />
+                        <signal name="notify::selected-item" handler="handle_option_changed" swapped="true" />
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwSwitchRow" id="custom_noise_canceling_switch">
+                        <property name="title" translatable="yes">Enable Custom Noise Canceling</property>
+                        <signal name="notify::active" handler="handle_option_changed" swapped="true" />
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwSpinRow" id="custom_noise_canceling">
+                        <property name="title" translatable="yes">Custom Noise Canceling</property>
+                        <property name="visible" bind-source="custom_noise_canceling_switch" bind-property="active" bind-flags="sync-create" />
+                        <property name="adjustment">
+                            <object class="GtkAdjustment">
+                                <property name="lower">0</property>
+                                <property name="upper">10</property>
+                                <property name="page-increment">1</property>
+                                <property name="step-increment">1</property>
+                            </object>
+                        </property>
+                        <signal name="notify::value" handler="handle_option_changed" swapped="true" />
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwSwitchRow" id="equalizer_profile_switch">
+                        <property name="title" translatable="yes">Enable Equalizer Profile</property>
+                        <signal name="notify::active" handler="handle_option_changed" swapped="true" />
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwComboRow" id="equalizer_profile_type">
+                        <property name="title" translatable="yes">Equalizer Profile Type</property>
+                        <property name="visible" bind-source="equalizer_profile_switch" bind-property="active" bind-flags="sync-create" />
+                        <signal name="notify::selected-item" handler="handle_option_changed" swapped="true" />
+                        <property name="model">
+                            <object class="GtkStringList">
+                                <items>
+                                    <item translatable="yes" context="equalizer profile">Preset</item>
+                                    <item translatable="yes" context="equalizer profile">Custom</item>
+                                </items>
+                            </object>
+                        </property>
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwComboRow" id="preset_equalizer_profile">
+                        <property name="title" translatable="yes">Preset Equalizer Profile</property>
+                        <signal name="notify::selected-item" handler="handle_option_changed" swapped="true" />
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwComboRow" id="custom_equalizer_profile">
+                        <property name="title" translatable="yes">Custom Equalizer Profile</property>
+                        <signal name="notify::selected-item" handler="handle_option_changed" swapped="true" />
+                    </object>
+                </child>
+            </object>
+        </child>
+    </template>
+</interface>

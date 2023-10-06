@@ -1,11 +1,13 @@
+use std::rc::Rc;
+
 use anyhow::Context;
 
 use super::{Config, SettingsFile, State};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Settings {
-    pub state: SettingsFile<State>,
-    pub config: SettingsFile<Config>,
+    pub state: Rc<SettingsFile<State>>,
+    pub config: Rc<SettingsFile<Config>>,
 }
 
 impl Settings {
@@ -35,8 +37,8 @@ impl Default for Settings {
             .join(&subdir_name);
 
         Self {
-            state: SettingsFile::new(state_dir.join("state.toml")),
-            config: SettingsFile::new(config_dir.join("config.toml")),
+            state: Rc::new(SettingsFile::new(state_dir.join("state.toml"))),
+            config: Rc::new(SettingsFile::new(config_dir.join("config.toml"))),
         }
     }
 }

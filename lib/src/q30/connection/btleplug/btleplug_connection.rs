@@ -15,6 +15,7 @@ use tokio::{
     task::JoinHandle,
 };
 use tracing::{instrument, trace, trace_span, warn};
+use uuid::Uuid;
 
 use crate::{
     api::connection::{Connection, ConnectionStatus},
@@ -150,6 +151,10 @@ impl Connection for BtlePlugConnection {
 
     async fn mac_address(&self) -> crate::Result<MacAddr6> {
         Ok(self.peripheral.address().into_mac_addr())
+    }
+
+    fn service_uuid(&self) -> Uuid {
+        self.read_characteristic.service_uuid
     }
 
     #[instrument(level = "trace", skip(self))]

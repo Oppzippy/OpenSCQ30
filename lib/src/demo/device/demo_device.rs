@@ -3,6 +3,7 @@ use std::{marker::PhantomData, time::Duration};
 use async_trait::async_trait;
 use macaddr::MacAddr6;
 use tokio::sync::{broadcast, watch, Mutex};
+use uuid::Uuid;
 
 use crate::{
     api::{connection::ConnectionStatus, device::Device},
@@ -119,6 +120,10 @@ where
 
     async fn name(&self) -> crate::Result<String> {
         Ok(self.name.to_owned())
+    }
+
+    fn service_uuid(&self) -> Uuid {
+        Uuid::default()
     }
 
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {

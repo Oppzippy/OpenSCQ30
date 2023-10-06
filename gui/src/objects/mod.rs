@@ -8,8 +8,11 @@ pub use equalizer_profile_object::*;
 
 use gtk::glib;
 use openscq30_lib::packets::structures::{
-    AmbientSoundMode, CustomNoiseCanceling, NoiseCancelingMode, TransparencyMode,
+    AmbientSoundMode, CustomNoiseCanceling, NoiseCancelingMode, PresetEqualizerProfile,
+    TransparencyMode,
 };
+
+use crate::settings::QuickPreset;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, glib::Boxed, Default)]
 #[boxed_type(name = "OpenSCQ30BoxedAmbientSoundMode")]
@@ -26,3 +29,14 @@ pub struct BoxedNoiseCancelingMode(pub NoiseCancelingMode);
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, glib::Boxed, Default)]
 #[boxed_type(name = "OpenSCQ30BoxedCustomNoiseCanceling")]
 pub struct BoxedCustomNoiseCanceling(pub CustomNoiseCanceling);
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, glib::Boxed, Default)]
+#[boxed_type(name = "OpenSCQ30BoxedPresetEqualizerProfile")]
+pub struct BoxedPresetEqualizerProfile(pub PresetEqualizerProfile);
+
+#[derive(Clone, PartialEq, Eq, Debug, Hash, glib::Boxed, Default)]
+#[boxed_type(name = "OpenSCQ30BoxedQuickPreset")]
+pub struct NamedQuickPreset {
+    pub name: String,
+    pub quick_preset: QuickPreset,
+}

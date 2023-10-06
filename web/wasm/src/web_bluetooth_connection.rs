@@ -9,6 +9,7 @@ use openscq30_lib::{
     Result as LibResult,
 };
 use tokio::sync::{mpsc, watch};
+use uuid::Uuid;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{
@@ -73,6 +74,10 @@ impl Connection for WebBluetoothConnection {
         // WebBluetooth does not have an event for the device being disconnected
         let (_sender, receiver) = watch::channel(ConnectionStatus::Connected);
         receiver
+    }
+
+    fn service_uuid(&self) -> Uuid {
+        Uuid::try_parse(&self.read_characteristic.service().uuid()).unwrap()
     }
 
     async fn write_with_response(&self, data: &[u8]) -> LibResult<()> {

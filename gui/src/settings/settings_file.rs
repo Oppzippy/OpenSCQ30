@@ -54,9 +54,12 @@ where
     }
 
     fn save(&self, state: &SettingsStateType) -> anyhow::Result<()> {
-        let mut file = self.get_file(Mode::Write)?;
-        let toml_string = toml::to_string(state)?;
-        file.write_all(toml_string.as_bytes())?;
+        let mut file = self
+            .get_file(Mode::Write)
+            .context("open file for writing")?;
+        let toml_string = toml::to_string(state).context("serializing as toml")?;
+        file.write_all(toml_string.as_bytes())
+            .context("write toml bytes to file")?;
 
         Ok(())
     }

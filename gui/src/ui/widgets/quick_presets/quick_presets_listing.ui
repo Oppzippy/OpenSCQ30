@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <template class="OpenSCQ30QuickPresetsListing" parent="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+            <object class="GtkButton">
+                <property name="label" translatable="yes" context="quick presets">New Quick Preset</property>
+                <signal name="clicked" handler="handle_create_clicked" swapped="true" />
+            </object>
+        </child>
+        <child>
+            <object class="AdwPreferencesGroup" id="quick_presets_list">
+                <property name="title">Quick Presets</property>
+            </object>
+        </child>
+    </template>
+</interface>

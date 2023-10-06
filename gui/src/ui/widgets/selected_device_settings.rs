@@ -4,7 +4,10 @@ use gtk::{
 };
 use openscq30_lib::{packets::structures::EqualizerConfiguration, state::DeviceState};
 
-use crate::{actions::Action, objects::CustomEqualizerProfileObject};
+use crate::{
+    actions::Action,
+    objects::{CustomEqualizerProfileObject, NamedQuickPreset},
+};
 
 glib::wrapper! {
     pub struct SelectedDeviceSettings(ObjectSubclass<imp::SelectedDeviceSettings>)
@@ -38,7 +41,14 @@ impl SelectedDeviceSettings {
     pub fn set_custom_profiles(&self, custom_profiles: Vec<CustomEqualizerProfileObject>) {
         self.imp()
             .equalizer_settings
-            .set_custom_profiles(custom_profiles)
+            .set_custom_profiles(custom_profiles.to_owned());
+        self.imp()
+            .quick_presets
+            .set_custom_profiles(custom_profiles);
+    }
+
+    pub fn set_quick_presets(&self, quick_presets: Vec<NamedQuickPreset>) {
+        self.imp().quick_presets.set_quick_presets(quick_presets)
     }
 }
 
@@ -58,7 +68,9 @@ mod imp {
 
     use crate::{
         actions::Action,
-        ui::widgets::{DeviceInformation, EqualizerSettingsScreen, GeneralSettingsScreen},
+        ui::widgets::{
+            DeviceInformation, EqualizerSettingsScreen, GeneralSettingsScreen, QuickPresetsScreen,
+        },
     };
 
     #[derive(Default, CompositeTemplate)]
@@ -71,6 +83,8 @@ mod imp {
         #[template_child]
         pub equalizer_settings: TemplateChild<EqualizerSettingsScreen>,
         #[template_child]
+        pub quick_presets: TemplateChild<QuickPresetsScreen>,
+        #[template_child]
         pub device_information: TemplateChild<DeviceInformation>,
 
         sender: OnceCell<Sender<Action>>,
@@ -81,6 +95,7 @@ mod imp {
             self.sender.set(sender.clone()).unwrap();
             self.general_settings.set_sender(sender.clone());
             self.equalizer_settings.set_sender(sender.clone());
+            self.quick_presets.set_sender(sender.clone());
         }
     }
 
@@ -90,6 +105,7 @@ mod imp {
             self.equalizer_settings
                 .set_equalizer_configuration(state.equalizer_configuration);
             self.device_information.set_device_state(state);
+            self.quick_presets.set_device_state(state);
         }
     }
 

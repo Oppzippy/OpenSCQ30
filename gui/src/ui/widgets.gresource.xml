@@ -18,6 +18,11 @@
         <file compressed="true" preprocess="xml-stripblanks">widgets/general_settings/noise_canceling_mode_selection.ui</file>
         <file compressed="true" preprocess="xml-stripblanks">widgets/general_settings/custom_noise_canceling_selection.ui</file>
 
+        <!-- quick_presets -->
+        <file compressed="true" preprocess="xml-stripblanks">widgets/quick_presets/quick_presets_screen.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">widgets/quick_presets/quick_presets_listing.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">widgets/quick_presets/edit_quick_preset.ui</file>
+
         <!-- equalizer_settings -->
         <file compressed="true" preprocess="xml-stripblanks">widgets/equalizer_settings/equalizer.ui</file>
         <file compressed="true" preprocess="xml-stripblanks">widgets/equalizer_settings/profile_dropdown_row.ui</file>
