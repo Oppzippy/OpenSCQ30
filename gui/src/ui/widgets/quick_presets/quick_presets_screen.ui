@@ -10,7 +10,10 @@
                         <property name="tag">quick-presets-listing</property>
                         <property name="child">
                             <object class="OpenSCQ30QuickPresetsListing" id="quick_presets_listing">
+                                <signal name="create-quick-preset" handler="handle_create_quick_preset" swapped="true" />
                                 <signal name="edit-quick-preset" handler="handle_edit_quick_preset" swapped="true" />
+                                <signal name="activate-quick-preset" handler="handle_activate_quick_preset" swapped="true" />
+                                <signal name="delete-quick-preset" handler="handle_delete_quick_preset" swapped="true" />
                             </object>
                         </property>
                     </object>
@@ -28,7 +31,9 @@
                                     </object>
                                 </child>
                                 <property name="content">
-                                    <object class="OpenSCQ30EditQuickPreset" id="edit_quick_preset" />
+                                    <object class="OpenSCQ30EditQuickPreset" id="edit_quick_preset">
+                                        <signal name="quick-preset-changed" handler="handle_quick_preset_changed" swapped="true" />
+                                    </object>
                                 </property>
                             </object>
                         </property>

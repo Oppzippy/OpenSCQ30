@@ -52,6 +52,7 @@ mod imp {
         },
         template_callbacks, CompositeTemplate,
     };
+    use once_cell::unsync::OnceCell;
 
     use crate::{
         actions::Action,
@@ -72,10 +73,25 @@ mod imp {
         pub quick_presets_listing: TemplateChild<QuickPresetsListing>,
         #[template_child]
         pub edit_quick_preset: TemplateChild<EditQuickPreset>,
+
+        sender: OnceCell<Sender<Action>>,
     }
 
     #[template_callbacks]
     impl QuickPresetsScreen {
+        #[template_callback]
+        pub fn handle_create_quick_preset(
+            &self,
+            named_quick_preset: NamedQuickPreset,
+            _: &QuickPresetsListing,
+        ) {
+            self.sender
+                .get()
+                .unwrap()
+                .send(Action::CreateQuickPreset(named_quick_preset))
+                .unwrap();
+        }
+
         #[template_callback]
         pub fn handle_edit_quick_preset(
             &self,
@@ -85,12 +101,46 @@ mod imp {
             self.edit_quick_preset.set_quick_preset(named_quick_preset);
             self.navigation.push_by_tag("edit-quick-preset");
         }
+
+        #[template_callback]
+        fn handle_activate_quick_preset(
+            &self,
+            quick_preset: NamedQuickPreset,
+            _: &QuickPresetsListing,
+        ) {
+            self.sender
+                .get()
+                .unwrap()
+                .send(Action::ActivateQuickPreset(quick_preset))
+                .unwrap();
+        }
+
+        #[template_callback]
+        fn handle_delete_quick_preset(
+            &self,
+            quick_preset: NamedQuickPreset,
+            _: &QuickPresetsListing,
+        ) {
+            self.sender
+                .get()
+                .unwrap()
+                .send(Action::DeleteQuickPreset(quick_preset.name))
+                .unwrap();
+        }
+
+        #[template_callback]
+        fn handle_quick_preset_changed(&self, quick_preset: NamedQuickPreset, _: &EditQuickPreset) {
+            self.sender
+                .get()
+                .unwrap()
+                .send(Action::CreateQuickPreset(quick_preset))
+                .unwrap();
+        }
     }
 
     impl QuickPresetsScreen {
         pub fn set_sender(&self, sender: Sender<Action>) {
-            self.quick_presets_listing.set_sender(sender.clone());
-            self.edit_quick_preset.set_sender(sender.clone());
+            self.sender.set(sender.to_owned()).unwrap();
         }
     }
 

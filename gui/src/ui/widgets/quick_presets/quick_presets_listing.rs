@@ -1,9 +1,9 @@
 use gtk::{
-    glib::{self, Object, Sender},
+    glib::{self, Object},
     subclass::prelude::ObjectSubclassIsExt,
 };
 
-use crate::{actions::Action, objects::NamedQuickPreset};
+use crate::objects::NamedQuickPreset;
 
 glib::wrapper! {
     pub struct QuickPresetsListing(ObjectSubclass<imp::QuickPresetsListing>)
@@ -16,21 +16,17 @@ impl QuickPresetsListing {
         Object::builder().build()
     }
 
-    pub fn set_sender(&self, sender: Sender<Action>) {
-        self.imp().set_sender(sender);
-    }
-
     pub fn set_quick_presets(&self, quick_presets: Vec<NamedQuickPreset>) {
         self.imp().set_quick_presets(quick_presets)
     }
 }
 
 mod imp {
-    use std::cell::{OnceCell, RefCell};
+    use std::cell::RefCell;
 
     use adw::prelude::*;
     use gtk::{
-        glib::{self, clone, subclass::Signal, Sender},
+        glib::{self, clone, subclass::Signal},
         subclass::{
             prelude::*,
             widget::{CompositeTemplateClass, CompositeTemplateInitializingExt, WidgetImpl},
@@ -39,7 +35,7 @@ mod imp {
     };
     use once_cell::sync::Lazy;
 
-    use crate::{actions::Action, objects::NamedQuickPreset, settings::QuickPreset};
+    use crate::{objects::NamedQuickPreset, settings::QuickPreset};
 
     #[derive(Default, CompositeTemplate)]
     #[template(
@@ -49,7 +45,6 @@ mod imp {
         #[template_child]
         quick_presets_list: TemplateChild<adw::PreferencesGroup>,
 
-        sender: OnceCell<Sender<Action>>,
         rows: RefCell<Vec<adw::ActionRow>>,
     }
 
@@ -90,23 +85,18 @@ mod imp {
                     if response != "create" {
                         return;
                     }
-                    this.sender.get()
-                        .unwrap()
-                        .send(Action::CreateQuickPreset(NamedQuickPreset {
-                            name: entry.text().as_str().into(),
-                            quick_preset: QuickPreset::default(),
-                        }))
-                        .unwrap();
+                    this.obj().emit_by_name::<()>("create-quick-preset", &[
+                        &NamedQuickPreset {
+                                name: entry.text().as_str().into(),
+                                quick_preset: QuickPreset::default(),
+                        }
+                    ]);
                 }),
             );
         }
     }
 
     impl QuickPresetsListing {
-        pub fn set_sender(&self, sender: Sender<Action>) {
-            self.sender.set(sender.clone()).unwrap();
-        }
-
         pub fn set_quick_presets(&self, mut named_quick_presets: Vec<NamedQuickPreset>) {
             let rows = self.rows.take();
             rows.into_iter()
@@ -159,19 +149,13 @@ mod imp {
         }
 
         fn delete_quick_preset(&self, quick_preset: &NamedQuickPreset) {
-            self.sender
-                .get()
-                .unwrap()
-                .send(Action::DeleteQuickPreset(quick_preset.name.to_owned()))
-                .unwrap();
+            self.obj()
+                .emit_by_name::<()>("delete-quick-preset", &[quick_preset]);
         }
 
         fn activate_quick_preset(&self, quick_preset: &NamedQuickPreset) {
-            self.sender
-                .get()
-                .unwrap()
-                .send(Action::ActivateQuickPreset(quick_preset.to_owned()))
-                .unwrap();
+            self.obj()
+                .emit_by_name::<()>("activate-quick-preset", &[quick_preset]);
         }
     }
 
@@ -196,10 +180,16 @@ mod imp {
         fn signals() -> &'static [Signal] {
             static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
                 vec![
+                    Signal::builder("create-quick-preset")
+                        .param_types([NamedQuickPreset::static_type()])
+                        .build(),
                     Signal::builder("edit-quick-preset")
                         .param_types([NamedQuickPreset::static_type()])
                         .build(),
                     Signal::builder("activate-quick-preset")
+                        .param_types([NamedQuickPreset::static_type()])
+                        .build(),
+                    Signal::builder("delete-quick-preset")
                         .param_types([NamedQuickPreset::static_type()])
                         .build(),
                 ]

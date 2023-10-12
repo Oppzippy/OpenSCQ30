@@ -1,13 +1,10 @@
 use gtk::{
-    glib::{self, Object, Sender},
+    glib::{self, Object},
     subclass::prelude::ObjectSubclassIsExt,
 };
 use openscq30_lib::packets::structures::DeviceFeatureFlags;
 
-use crate::{
-    actions::Action,
-    objects::{CustomEqualizerProfileObject, NamedQuickPreset},
-};
+use crate::objects::{CustomEqualizerProfileObject, NamedQuickPreset};
 
 glib::wrapper! {
     pub struct EditQuickPreset(ObjectSubclass<imp::EditQuickPreset>)
@@ -18,10 +15,6 @@ glib::wrapper! {
 impl EditQuickPreset {
     pub fn new() -> Self {
         Object::builder().build()
-    }
-
-    pub fn set_sender(&self, sender: Sender<Action>) {
-        self.imp().set_sender(sender);
     }
 
     pub fn set_quick_preset(&self, quick_preset: NamedQuickPreset) {
@@ -38,21 +31,19 @@ impl EditQuickPreset {
 }
 
 mod imp {
-    use std::{
-        cell::{OnceCell, RefCell},
-        sync::Arc,
-    };
+    use std::{cell::RefCell, sync::Arc};
 
     use adw::prelude::*;
     use gtk::{
         gio::{self, ListStore},
-        glib::{self, clone, Object, Sender},
+        glib::{self, clone, subclass::Signal, Object},
         subclass::{
             prelude::*,
             widget::{CompositeTemplateClass, CompositeTemplateInitializingExt, WidgetImpl},
         },
         template_callbacks, ClosureExpression, CompositeTemplate,
     };
+    use once_cell::sync::Lazy;
     use openscq30_lib::packets::structures::{
         AmbientSoundMode, CustomNoiseCanceling, DeviceFeatureFlags, NoiseCancelingMode,
         PresetEqualizerProfile, TransparencyMode,
@@ -60,7 +51,6 @@ mod imp {
     use strum::IntoEnumIterator;
 
     use crate::{
-        actions::Action,
         objects::{
             BoxedAmbientSoundMode, BoxedNoiseCancelingMode, BoxedPresetEqualizerProfile,
             BoxedTransparencyMode, CustomEqualizerProfileObject, NamedQuickPreset,
@@ -109,8 +99,6 @@ mod imp {
         custom_equalizer_profiles_store: RefCell<Option<ListStore>>,
 
         quick_preset_name: RefCell<Option<Arc<str>>>,
-
-        sender: OnceCell<Sender<Action>>,
     }
 
     #[template_callbacks]
@@ -122,10 +110,6 @@ mod imp {
     }
 
     impl EditQuickPreset {
-        pub fn set_sender(&self, sender: Sender<Action>) {
-            self.sender.set(sender.clone()).unwrap();
-        }
-
         fn send_quick_preset_update(&self) {
             let Some(quick_preset_name) = self.quick_preset_name.borrow().to_owned() else {
                 return;
@@ -184,14 +168,13 @@ mod imp {
                     None
                 },
             };
-            self.sender
-                .get()
-                .unwrap()
-                .send(Action::CreateQuickPreset(NamedQuickPreset {
+            self.obj().emit_by_name::<()>(
+                "quick-preset-changed",
+                &[&NamedQuickPreset {
                     quick_preset,
                     name: quick_preset_name,
-                }))
-                .unwrap();
+                }],
+            );
         }
 
         pub fn set_device_feature_flags(&self, flags: DeviceFeatureFlags) {
@@ -450,6 +433,15 @@ mod imp {
                     profile.as_ref(),
                 )
             }));
+        }
+
+        fn signals() -> &'static [Signal] {
+            static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
+                vec![Signal::builder("quick-preset-changed")
+                    .param_types([NamedQuickPreset::static_type()])
+                    .build()]
+            });
+            SIGNALS.as_ref()
         }
     }
     impl WidgetImpl for EditQuickPreset {}
