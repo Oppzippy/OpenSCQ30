@@ -14,6 +14,8 @@ mod set_noise_canceling_mode;
 mod set_transpareny_mode;
 mod state;
 
+use std::sync::Arc;
+
 pub use activate_quick_preset::*;
 pub use create_custom_equalizer_profile::*;
 pub use create_quick_preset::*;
@@ -66,5 +68,5 @@ pub enum Action {
     SetTransparencyMode(TransparencyMode),
     CreateQuickPreset(NamedQuickPreset),
     ActivateQuickPreset(NamedQuickPreset),
-    DeleteQuickPreset(String),
+    DeleteQuickPreset(Arc<str>),
 }

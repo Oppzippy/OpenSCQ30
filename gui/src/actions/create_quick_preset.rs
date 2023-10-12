@@ -25,7 +25,7 @@ where
         .edit(|settings| {
             settings.set_quick_preset(
                 device_service_uuid,
-                named_quick_preset.name,
+                named_quick_preset.name.to_string(),
                 named_quick_preset.quick_preset,
             );
         })
@@ -39,7 +39,7 @@ where
                         .quick_presets(device_service_uuid)
                         .iter()
                         .map(|(name, quick_preset)| NamedQuickPreset {
-                            name: name.to_owned(),
+                            name: name.as_str().into(),
                             quick_preset: quick_preset.to_owned(),
                         })
                         .collect(),

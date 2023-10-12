@@ -61,7 +61,12 @@ async fn set_equalizer_configuration_from_quick_preset(
             Some(EqualizerConfiguration::new_from_preset_profile(*profile))
         }
         Some(PresetOrCustomEqualizerProfile::Custom(custom_profile_name)) => settings_file
-            .get(|config| config.custom_profiles().get(custom_profile_name).cloned())
+            .get(|config| {
+                config
+                    .custom_profiles()
+                    .get(custom_profile_name.as_ref())
+                    .cloned()
+            })
             .context("get custom eq profile from config")?
             .map(|profile| {
                 EqualizerConfiguration::new_custom_profile(profile.volume_adjustments().into())

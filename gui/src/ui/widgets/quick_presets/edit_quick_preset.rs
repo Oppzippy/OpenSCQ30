@@ -38,7 +38,10 @@ impl EditQuickPreset {
 }
 
 mod imp {
-    use std::cell::{OnceCell, RefCell};
+    use std::{
+        cell::{OnceCell, RefCell},
+        sync::Arc,
+    };
 
     use adw::prelude::*;
     use gtk::{
@@ -105,7 +108,7 @@ mod imp {
         preset_equalizer_profiles_store: RefCell<Option<ListStore>>,
         custom_equalizer_profiles_store: RefCell<Option<ListStore>>,
 
-        quick_preset_name: RefCell<Option<String>>,
+        quick_preset_name: RefCell<Option<Arc<str>>>,
 
         sender: OnceCell<Sender<Action>>,
     }
@@ -173,7 +176,9 @@ mod imp {
                         self.custom_equalizer_profile
                             .selected_item()
                             .and_downcast::<CustomEqualizerProfileObject>()
-                            .map(|profile| PresetOrCustomEqualizerProfile::Custom(profile.name()))
+                            .map(|profile| {
+                                PresetOrCustomEqualizerProfile::Custom(profile.name().into())
+                            })
                     }
                 } else {
                     None
@@ -348,7 +353,7 @@ mod imp {
                                 item.downcast_ref::<CustomEqualizerProfileObject>()
                                     .unwrap()
                                     .name()
-                                    == profile_name
+                                    == profile_name.as_ref()
                             })
                             .unwrap_or_default(),
                     )

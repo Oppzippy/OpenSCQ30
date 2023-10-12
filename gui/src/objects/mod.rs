@@ -2,6 +2,8 @@ mod custom_equalizer_profile_object;
 mod device_object;
 mod equalizer_profile_object;
 
+use std::sync::Arc;
+
 pub use custom_equalizer_profile_object::*;
 pub use device_object::*;
 pub use equalizer_profile_object::*;
@@ -34,9 +36,18 @@ pub struct BoxedCustomNoiseCanceling(pub CustomNoiseCanceling);
 #[boxed_type(name = "OpenSCQ30BoxedPresetEqualizerProfile")]
 pub struct BoxedPresetEqualizerProfile(pub PresetEqualizerProfile);
 
-#[derive(Clone, PartialEq, Eq, Debug, Hash, glib::Boxed, Default)]
+#[derive(Clone, PartialEq, Eq, Debug, Hash, glib::Boxed)]
 #[boxed_type(name = "OpenSCQ30BoxedQuickPreset")]
 pub struct NamedQuickPreset {
-    pub name: String,
+    pub name: Arc<str>,
     pub quick_preset: QuickPreset,
+}
+
+impl Default for NamedQuickPreset {
+    fn default() -> Self {
+        Self {
+            name: "".into(),
+            quick_preset: Default::default(),
+        }
+    }
 }

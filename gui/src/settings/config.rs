@@ -1,4 +1,7 @@
-use std::collections::{hash_map::Entry, HashMap};
+use std::{
+    collections::{hash_map::Entry, HashMap},
+    sync::Arc,
+};
 
 use once_cell::sync::Lazy;
 use openscq30_lib::packets::structures::{
@@ -30,7 +33,7 @@ pub struct QuickPreset {
 #[serde(rename_all = "snake_case")]
 pub enum PresetOrCustomEqualizerProfile {
     Preset(PresetEqualizerProfile),
-    Custom(String),
+    Custom(Arc<str>),
 }
 
 impl Config {

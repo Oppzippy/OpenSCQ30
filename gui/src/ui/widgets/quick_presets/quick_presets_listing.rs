@@ -90,9 +90,13 @@ mod imp {
                     if response != "create" {
                         return;
                     }
-                    let name = entry.text().to_string();
-                    let quick_preset = QuickPreset::default();
-                    this.sender.get().unwrap().send(Action::CreateQuickPreset(NamedQuickPreset {name, quick_preset})).unwrap();
+                    this.sender.get()
+                        .unwrap()
+                        .send(Action::CreateQuickPreset(NamedQuickPreset {
+                            name: entry.text().as_str().into(),
+                            quick_preset: QuickPreset::default(),
+                        }))
+                        .unwrap();
                 }),
             );
         }

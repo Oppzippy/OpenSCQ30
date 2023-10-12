@@ -22,7 +22,7 @@ where
             .quick_presets(device_service_uuid)
             .iter()
             .map(|(name, quick_preset)| NamedQuickPreset {
-                name: name.to_owned(),
+                name: name.as_str().into(),
                 quick_preset: quick_preset.to_owned(),
             })
             .collect()
