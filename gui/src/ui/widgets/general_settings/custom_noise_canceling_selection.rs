@@ -29,7 +29,7 @@ mod imp {
     };
     use openscq30_lib::packets::structures::CustomNoiseCanceling;
 
-    use crate::objects::BoxedCustomNoiseCanceling;
+    use crate::objects::GlibCustomNoiseCancelingValue;
 
     #[derive(Default, CompositeTemplate, Properties)]
     #[template(
@@ -43,7 +43,7 @@ mod imp {
         pub scale: TemplateChild<gtk::Scale>,
 
         #[property(set, get)]
-        custom_noise_canceling: Cell<BoxedCustomNoiseCanceling>,
+        custom_noise_canceling: Cell<GlibCustomNoiseCancelingValue>,
     }
 
     #[glib::object_subclass]
@@ -68,12 +68,12 @@ mod imp {
 
             obj.bind_property("custom_noise_canceling", &self.scale.adjustment(), "value")
                 .transform_to(
-                    move |_, selected_custom_noise_canceling: BoxedCustomNoiseCanceling| {
+                    move |_, selected_custom_noise_canceling: GlibCustomNoiseCancelingValue| {
                         Some(selected_custom_noise_canceling.0.value() as f64)
                     },
                 )
                 .transform_from(|_, value: f64| {
-                    Some(BoxedCustomNoiseCanceling(CustomNoiseCanceling::new(
+                    Some(GlibCustomNoiseCancelingValue(CustomNoiseCanceling::new(
                         value as u8,
                     )))
                 })

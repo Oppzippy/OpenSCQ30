@@ -3,7 +3,7 @@ use gtk::{
     subclass::prelude::ObjectSubclassIsExt,
 };
 
-use crate::objects::NamedQuickPreset;
+use crate::objects::GlibNamedQuickPresetValue;
 
 glib::wrapper! {
     pub struct QuickPresetsListing(ObjectSubclass<imp::QuickPresetsListing>)
@@ -16,7 +16,7 @@ impl QuickPresetsListing {
         Object::builder().build()
     }
 
-    pub fn set_quick_presets(&self, quick_presets: Vec<NamedQuickPreset>) {
+    pub fn set_quick_presets(&self, quick_presets: Vec<GlibNamedQuickPresetValue>) {
         self.imp().set_quick_presets(quick_presets)
     }
 }
@@ -35,7 +35,7 @@ mod imp {
     };
     use once_cell::sync::Lazy;
 
-    use crate::{objects::NamedQuickPreset, settings::QuickPreset};
+    use crate::{objects::GlibNamedQuickPresetValue, settings::QuickPreset};
 
     #[derive(Default, CompositeTemplate)]
     #[template(
@@ -86,7 +86,7 @@ mod imp {
                         return;
                     }
                     this.obj().emit_by_name::<()>("create-quick-preset", &[
-                        &NamedQuickPreset {
+                        &GlibNamedQuickPresetValue {
                                 name: entry.text().as_str().into(),
                                 quick_preset: QuickPreset::default(),
                         }
@@ -97,7 +97,7 @@ mod imp {
     }
 
     impl QuickPresetsListing {
-        pub fn set_quick_presets(&self, mut named_quick_presets: Vec<NamedQuickPreset>) {
+        pub fn set_quick_presets(&self, mut named_quick_presets: Vec<GlibNamedQuickPresetValue>) {
             let rows = self.rows.take();
             rows.into_iter()
                 .for_each(|item| self.quick_presets_list.remove(&item));
@@ -143,17 +143,17 @@ mod imp {
             *self.rows.borrow_mut() = rows;
         }
 
-        fn edit_quick_preset(&self, quick_preset: &NamedQuickPreset) {
+        fn edit_quick_preset(&self, quick_preset: &GlibNamedQuickPresetValue) {
             self.obj()
                 .emit_by_name::<()>("edit-quick-preset", &[quick_preset]);
         }
 
-        fn delete_quick_preset(&self, quick_preset: &NamedQuickPreset) {
+        fn delete_quick_preset(&self, quick_preset: &GlibNamedQuickPresetValue) {
             self.obj()
                 .emit_by_name::<()>("delete-quick-preset", &[quick_preset]);
         }
 
-        fn activate_quick_preset(&self, quick_preset: &NamedQuickPreset) {
+        fn activate_quick_preset(&self, quick_preset: &GlibNamedQuickPresetValue) {
             self.obj()
                 .emit_by_name::<()>("activate-quick-preset", &[quick_preset]);
         }
@@ -181,16 +181,16 @@ mod imp {
             static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
                 vec![
                     Signal::builder("create-quick-preset")
-                        .param_types([NamedQuickPreset::static_type()])
+                        .param_types([GlibNamedQuickPresetValue::static_type()])
                         .build(),
                     Signal::builder("edit-quick-preset")
-                        .param_types([NamedQuickPreset::static_type()])
+                        .param_types([GlibNamedQuickPresetValue::static_type()])
                         .build(),
                     Signal::builder("activate-quick-preset")
-                        .param_types([NamedQuickPreset::static_type()])
+                        .param_types([GlibNamedQuickPresetValue::static_type()])
                         .build(),
                     Signal::builder("delete-quick-preset")
-                        .param_types([NamedQuickPreset::static_type()])
+                        .param_types([GlibNamedQuickPresetValue::static_type()])
                         .build(),
                 ]
             });

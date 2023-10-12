@@ -10,7 +10,7 @@ use openscq30_lib::api::{
 use tokio::sync::oneshot;
 
 use crate::{actions, settings::SettingsFile};
-use crate::{objects::DeviceObject, settings::Config};
+use crate::{objects::GlibDevice, settings::Config};
 
 use super::{State, StateUpdate};
 
@@ -83,7 +83,7 @@ where
                 let mac_address = device.mac_address().await?;
                 let device_state = device.state().await;
                 state.state_update_sender
-                    .send(StateUpdate::SetSelectedDevice(Some(DeviceObject::new(&name, &mac_address.to_string()))))
+                    .send(StateUpdate::SetSelectedDevice(Some(GlibDevice::new(&name, &mac_address.to_string()))))
                     .map_err(|err| anyhow!("{err:?}"))?;
 
                 state.state_update_sender
@@ -135,7 +135,7 @@ mod tests {
     use crate::{
         actions::{State, StateUpdate},
         mock::{MockDevice, MockDeviceRegistry},
-        objects::DeviceObject,
+        objects::GlibDevice,
         settings::SettingsFile,
     };
 
@@ -198,7 +198,7 @@ mod tests {
             .unwrap();
         let mut expected_sequence = VecDeque::from([
             StateUpdate::SetLoading(true),
-            StateUpdate::SetSelectedDevice(Some(DeviceObject::new(
+            StateUpdate::SetSelectedDevice(Some(GlibDevice::new(
                 "Test Device",
                 "00:00:00:00:00:00",
             ))),

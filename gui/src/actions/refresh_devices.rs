@@ -1,6 +1,6 @@
 use openscq30_lib::api::device::{DeviceDescriptor, DeviceRegistry};
 
-use crate::objects::DeviceObject;
+use crate::objects::GlibDevice;
 
 use super::{State, StateUpdate};
 
@@ -19,7 +19,7 @@ where
         let model_devices = descriptors
             .iter()
             .map(|descriptor| {
-                DeviceObject::new(descriptor.name(), &descriptor.mac_address().to_string())
+                GlibDevice::new(descriptor.name(), &descriptor.mac_address().to_string())
             })
             .collect::<Vec<_>>();
 

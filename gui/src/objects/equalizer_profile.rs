@@ -1,16 +1,14 @@
 use gtk::glib::{self, Object};
 
-use crate::objects::BoxedAmbientSoundMode;
-
 glib::wrapper! {
-    pub struct AmbientSoundModeModel(ObjectSubclass<imp::AmbientSoundModeModel>);
+    pub struct GlibEqualizerProfile(ObjectSubclass<imp::GlibEqualizerProfile>);
 }
 
-impl AmbientSoundModeModel {
-    pub fn new(ambient_sound_mode: BoxedAmbientSoundMode, name: &str) -> Self {
+impl GlibEqualizerProfile {
+    pub fn new(name: &str, profile_id: u32) -> Self {
         Object::builder()
-            .property("ambient-sound-mode", ambient_sound_mode)
             .property("name", name)
+            .property("profile-id", profile_id)
             .build()
     }
 }
@@ -24,24 +22,22 @@ mod imp {
         subclass::prelude::{DerivedObjectProperties, ObjectImpl, ObjectSubclass},
     };
 
-    use crate::objects::BoxedAmbientSoundMode;
-
     #[derive(Default, Properties)]
-    #[properties(wrapper_type=super::AmbientSoundModeModel)]
-    pub struct AmbientSoundModeModel {
-        #[property(set, get)]
-        pub ambient_sound_mode: Cell<BoxedAmbientSoundMode>,
-        #[property(set, get)]
+    #[properties(wrapper_type = super::GlibEqualizerProfile)]
+    pub struct GlibEqualizerProfile {
+        #[property(get, set, maximum = u16::MAX as u32)]
+        pub profile_id: Cell<u32>,
+        #[property(get, set)]
         pub name: RefCell<String>,
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for AmbientSoundModeModel {
-        const NAME: &'static str = "OpenSCQ30AmbientSoundModeModel";
-        type Type = super::AmbientSoundModeModel;
+    impl ObjectSubclass for GlibEqualizerProfile {
+        const NAME: &'static str = "OpenSCQ30ObjectsEqualizerProfile";
+        type Type = super::GlibEqualizerProfile;
     }
 
-    impl ObjectImpl for AmbientSoundModeModel {
+    impl ObjectImpl for GlibEqualizerProfile {
         fn properties() -> &'static [ParamSpec] {
             Self::derived_properties()
         }

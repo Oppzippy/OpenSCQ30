@@ -3,7 +3,7 @@ use gtk::{
     subclass::prelude::ObjectSubclassIsExt,
 };
 
-use crate::{actions::Action, objects::DeviceObject};
+use crate::{actions::Action, objects::GlibDevice};
 
 glib::wrapper! {
     pub struct DeviceSelection(ObjectSubclass<imp::DeviceSelection>)
@@ -20,7 +20,7 @@ impl DeviceSelection {
         self.imp().set_sender(sender);
     }
 
-    pub fn set_devices(&self, devices: &[DeviceObject]) {
+    pub fn set_devices(&self, devices: &[GlibDevice]) {
         self.imp().set_devices(devices)
     }
 }
@@ -46,7 +46,7 @@ mod imp {
     };
     use macaddr::MacAddr6;
 
-    use crate::{actions::Action, objects::DeviceObject};
+    use crate::{actions::Action, objects::GlibDevice};
 
     #[derive(Default, CompositeTemplate, Properties)]
     #[template(resource = "/com/oppzippy/OpenSCQ30/ui/widgets/device_selection.ui")]
@@ -56,7 +56,7 @@ mod imp {
         pub dropdown: TemplateChild<gtk::DropDown>,
 
         #[property(get, set)]
-        pub selected_device: RefCell<Option<DeviceObject>>,
+        pub selected_device: RefCell<Option<GlibDevice>>,
 
         pub devices: OnceCell<gio::ListStore>,
         sender: OnceCell<Sender<Action>>,
@@ -71,7 +71,7 @@ mod imp {
         #[template_callback]
         pub fn handle_connect_clicked(&self, _button: &gtk::Button) {
             if let Some(selected_device) =
-                self.dropdown.selected_item().and_downcast::<DeviceObject>()
+                self.dropdown.selected_item().and_downcast::<GlibDevice>()
             {
                 self.sender
                     .get()
@@ -83,7 +83,7 @@ mod imp {
             }
         }
 
-        pub fn set_devices(&self, devices: &[DeviceObject]) {
+        pub fn set_devices(&self, devices: &[GlibDevice]) {
             if let Some(model) = self.devices.get() {
                 model.remove_all();
                 model.extend_from_slice(devices);
@@ -92,10 +92,10 @@ mod imp {
             }
         }
 
-        pub fn selected_device(&self) -> Option<DeviceObject> {
+        pub fn selected_device(&self) -> Option<GlibDevice> {
             self.dropdown.selected_item().map(|object| {
                 object
-                    .downcast::<DeviceObject>()
+                    .downcast::<GlibDevice>()
                     .expect("selected item must be a DeviceObject")
             })
         }
@@ -120,14 +120,14 @@ mod imp {
     impl ObjectImpl for DeviceSelection {
         fn constructed(&self) {
             self.parent_constructed();
-            let model = gio::ListStore::new::<DeviceObject>();
+            let model = gio::ListStore::new::<GlibDevice>();
             self.dropdown.set_model(Some(&model));
             self.devices
                 .set(model)
                 .expect("constructed should only run once");
 
             let expression = ClosureExpression::with_callback(gtk::Expression::NONE, |args| {
-                let device_object: DeviceObject = args[0].get().unwrap();
+                let device_object: GlibDevice = args[0].get().unwrap();
                 format!(
                     "{}: [{}]",
                     device_object.name(),

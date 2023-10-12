@@ -1,19 +1,22 @@
 use gtk::glib::{self, Object};
-
-use crate::objects::BoxedTransparencyMode;
+use openscq30_lib::packets::structures::TransparencyMode;
 
 glib::wrapper! {
-    pub struct TransparencyModeModel(ObjectSubclass<imp::TransparencyModeModel>);
+    pub struct GlibTransparencyMode(ObjectSubclass<imp::GlibTransparencyMode>);
 }
 
-impl TransparencyModeModel {
-    pub fn new(transparency_mode: BoxedTransparencyMode, name: &str) -> Self {
+impl GlibTransparencyMode {
+    pub fn new(transparency_mode: GlibTransparencyModeValue, name: &str) -> Self {
         Object::builder()
             .property("transparency-mode", transparency_mode)
             .property("name", name)
             .build()
     }
 }
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, glib::Boxed, Default)]
+#[boxed_type(name = "OpenSCQ30BoxedTransparencyMode")]
+pub struct GlibTransparencyModeValue(pub TransparencyMode);
 
 mod imp {
     use std::cell::{Cell, RefCell};
@@ -24,24 +27,24 @@ mod imp {
         subclass::prelude::{DerivedObjectProperties, ObjectImpl, ObjectSubclass},
     };
 
-    use crate::objects::BoxedTransparencyMode;
+    use crate::objects::GlibTransparencyModeValue;
 
     #[derive(Default, Properties)]
-    #[properties(wrapper_type=super::TransparencyModeModel)]
-    pub struct TransparencyModeModel {
+    #[properties(wrapper_type=super::GlibTransparencyMode)]
+    pub struct GlibTransparencyMode {
         #[property(set, get)]
-        pub transparency_mode: Cell<BoxedTransparencyMode>,
+        pub transparency_mode: Cell<GlibTransparencyModeValue>,
         #[property(set, get)]
         pub name: RefCell<String>,
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for TransparencyModeModel {
-        const NAME: &'static str = "OpenSCQ30TransparencyModeModel";
-        type Type = super::TransparencyModeModel;
+    impl ObjectSubclass for GlibTransparencyMode {
+        const NAME: &'static str = "OpenSCQ30ObjectsTransparencyMode";
+        type Type = super::GlibTransparencyMode;
     }
 
-    impl ObjectImpl for TransparencyModeModel {
+    impl ObjectImpl for GlibTransparencyMode {
         fn properties() -> &'static [ParamSpec] {
             Self::derived_properties()
         }

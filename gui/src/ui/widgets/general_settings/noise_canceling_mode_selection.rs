@@ -29,7 +29,7 @@ mod imp {
     };
     use openscq30_lib::packets::structures::NoiseCancelingMode;
 
-    use crate::objects::BoxedNoiseCancelingMode;
+    use crate::objects::GlibNoiseCancelingModeValue;
 
     #[derive(Default, CompositeTemplate, Properties)]
     #[template(
@@ -51,7 +51,7 @@ mod imp {
         #[property(set, get)]
         has_custom_noise_canceling: Cell<bool>,
         #[property(set, get)]
-        noise_canceling_mode: Cell<BoxedNoiseCancelingMode>,
+        noise_canceling_mode: Cell<GlibNoiseCancelingModeValue>,
     }
 
     #[glib::object_subclass]
@@ -92,13 +92,13 @@ mod imp {
             .for_each(|(noise_canceling_mode, button)| {
                 obj.bind_property("noise_canceling_mode", button, "active")
                     .transform_to(
-                        move |_, selected_noise_canceling_mode: BoxedNoiseCancelingMode| {
+                        move |_, selected_noise_canceling_mode: GlibNoiseCancelingModeValue| {
                             Some(noise_canceling_mode == selected_noise_canceling_mode.0)
                         },
                     )
                     .transform_from(move |_, is_active| {
                         if is_active {
-                            Some(BoxedNoiseCancelingMode(noise_canceling_mode))
+                            Some(GlibNoiseCancelingModeValue(noise_canceling_mode))
                         } else {
                             None
                         }

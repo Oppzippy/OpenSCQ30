@@ -13,7 +13,7 @@ use openscq30_lib::{packets::structures::EqualizerConfiguration, state::DeviceSt
 
 use crate::{
     actions::Action,
-    objects::{CustomEqualizerProfileObject, DeviceObject, NamedQuickPreset},
+    objects::{GlibCustomEqualizerProfile, GlibDevice, GlibNamedQuickPresetValue},
     settings::SettingsFile,
 };
 
@@ -73,7 +73,7 @@ impl MainWindow {
             .expect("failed to get settings");
     }
 
-    pub fn set_devices(&self, devices: &[DeviceObject]) {
+    pub fn set_devices(&self, devices: &[GlibDevice]) {
         self.imp().set_devices(devices);
     }
 
@@ -98,13 +98,13 @@ impl MainWindow {
             .equalizer_configuration()
     }
 
-    pub fn set_custom_profiles(&self, custom_profiles: Vec<CustomEqualizerProfileObject>) {
+    pub fn set_custom_profiles(&self, custom_profiles: Vec<GlibCustomEqualizerProfile>) {
         self.imp()
             .selected_device_settings
             .set_custom_profiles(custom_profiles)
     }
 
-    pub fn set_quick_presets(&self, quick_presets: Vec<NamedQuickPreset>) {
+    pub fn set_quick_presets(&self, quick_presets: Vec<GlibNamedQuickPresetValue>) {
         self.imp()
             .selected_device_settings
             .set_quick_presets(quick_presets)
@@ -139,7 +139,7 @@ mod imp {
 
     use crate::{
         actions::Action,
-        objects::{BoxedVolumeAdjustments, CustomEqualizerProfileObject, DeviceObject},
+        objects::{GlibCustomEqualizerProfile, GlibDevice, GlibVolumeAdjustments},
         settings::SettingsFile,
         ui::widgets::{DeviceSelection, LoadingScreen, SelectedDeviceSettings},
     };
@@ -160,7 +160,7 @@ mod imp {
         pub toast_overlay: TemplateChild<adw::ToastOverlay>,
 
         #[property(get, set)]
-        pub selected_device: RefCell<Option<DeviceObject>>,
+        pub selected_device: RefCell<Option<GlibDevice>>,
         #[property(get, set)]
         pub loading: Cell<bool>,
 
@@ -177,7 +177,7 @@ mod imp {
             self.selected_device_settings.set_sender(sender.clone());
         }
 
-        pub fn set_devices(&self, devices: &[DeviceObject]) {
+        pub fn set_devices(&self, devices: &[GlibDevice]) {
             self.device_selection.set_devices(devices);
         }
 
@@ -213,7 +213,7 @@ mod imp {
                         return;
                     }
                     let name = entry.text().to_string();
-                    let profile_with_name = CustomEqualizerProfileObject::new(&name, volume_adjustments);
+                    let profile_with_name = GlibCustomEqualizerProfile::new(&name, volume_adjustments);
                     this.sender.get().unwrap().send(Action::CreateCustomEqualizerProfile(profile_with_name)).unwrap();
                 }),
             );
@@ -253,11 +253,11 @@ mod imp {
 
             let action = SimpleAction::new(
                 "create-custom-equalizer-profile",
-                Some(&BoxedVolumeAdjustments::static_variant_type()),
+                Some(&GlibVolumeAdjustments::static_variant_type()),
             );
             action.connect_activate(
             clone!(@weak self as this => move |_action, parameter| {
-                let boxed_volume_adjustments: BoxedVolumeAdjustments = parameter.unwrap().get().unwrap();
+                let boxed_volume_adjustments: GlibVolumeAdjustments = parameter.unwrap().get().unwrap();
                 let volume_adjustments = boxed_volume_adjustments.0
                     .iter()
                     .map(ToOwned::to_owned)
@@ -271,7 +271,7 @@ mod imp {
 
             self.obj()
                 .bind_property("selected-device", self.obj().as_ref(), "title")
-                .transform_to(|_, value: Option<DeviceObject>| match value {
+                .transform_to(|_, value: Option<GlibDevice>| match value {
                     Some(device) => Some(format!(
                         "OpenSCQ30 - {} ({})",
                         device.name(),

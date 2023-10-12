@@ -4,7 +4,7 @@ use gtk::{
 };
 use openscq30_lib::packets::structures::EqualizerConfiguration;
 
-use crate::{actions::Action, objects::CustomEqualizerProfileObject};
+use crate::{actions::Action, objects::GlibCustomEqualizerProfile};
 
 glib::wrapper! {
     pub struct EqualizerSettingsScreen(ObjectSubclass<imp::EqualizerSettingsScreen>)
@@ -30,7 +30,7 @@ impl EqualizerSettingsScreen {
         self.imp().equalizer_configuration()
     }
 
-    pub fn set_custom_profiles(&self, custom_profiles: Vec<CustomEqualizerProfileObject>) {
+    pub fn set_custom_profiles(&self, custom_profiles: Vec<GlibCustomEqualizerProfile>) {
         self.imp().set_custom_profiles(custom_profiles)
     }
 }
@@ -55,7 +55,7 @@ mod imp {
 
     use crate::{
         actions::Action,
-        objects::{BoxedVolumeAdjustments, CustomEqualizerProfileObject, EqualizerProfileObject},
+        objects::{GlibCustomEqualizerProfile, GlibEqualizerProfile, GlibVolumeAdjustments},
         ui::widgets::equalizer_settings::{
             equalizer::Equalizer, profile_dropdown_row::ProfileDropdownRow,
         },
@@ -100,10 +100,8 @@ mod imp {
                 .activate_action(
                     "win.create-custom-equalizer-profile",
                     Some(
-                        &BoxedVolumeAdjustments(
-                            self.equalizer.volume_adjustments().to_vec().into(),
-                        )
-                        .to_variant(),
+                        &GlibVolumeAdjustments(self.equalizer.volume_adjustments().to_vec().into())
+                            .to_variant(),
                     ),
                 )
                 .unwrap();
@@ -128,7 +126,7 @@ mod imp {
             // apply-equalizer-settings fires instantly when changing the preset profile, so we only need to be concerned
             // with custom profiles here.
             let selected_profile = self.profile_dropdown.selected_item().map(|item| {
-                item.downcast::<EqualizerProfileObject>()
+                item.downcast::<GlibEqualizerProfile>()
                     .expect("item must be EqualizerProfileObject")
             });
             let volume_adjustments_match_preset_profile = selected_profile
@@ -164,7 +162,7 @@ mod imp {
                     .profile_dropdown
                     .selected_item()
                     .expect("an item must be selected")
-                    .downcast::<EqualizerProfileObject>()
+                    .downcast::<GlibEqualizerProfile>()
                     .expect("selected item must be an EqualizerProfileObject");
                 EqualizerConfiguration::new_from_preset_profile(
                     PresetEqualizerProfile::from_id(selection.profile_id() as u16).unwrap_or_else(
@@ -186,7 +184,7 @@ mod imp {
                 .profiles
                 .get()
                 .expect("profiles should have been intitialized already")
-                .iter::<EqualizerProfileObject>()
+                .iter::<GlibEqualizerProfile>()
                 .position(|profile| {
                     profile.unwrap().profile_id() as u16 == equalizer_configuration.profile_id()
                 })
@@ -196,7 +194,7 @@ mod imp {
             self.profile_dropdown.set_selected(profile_index);
         }
 
-        fn set_profiles(&self, profiles: Vec<EqualizerProfileObject>) {
+        fn set_profiles(&self, profiles: Vec<GlibEqualizerProfile>) {
             if let Some(model) = self.profiles.get() {
                 model.remove_all();
                 model.extend_from_slice(&profiles);
@@ -222,7 +220,7 @@ mod imp {
         }
 
         fn set_up_custom_profile_selection_model(&self) {
-            let model = gio::ListStore::new::<CustomEqualizerProfileObject>();
+            let model = gio::ListStore::new::<GlibCustomEqualizerProfile>();
             self.custom_profile_dropdown.set_model(Some(&model));
             self.custom_profiles
                 .set(model)
@@ -232,7 +230,7 @@ mod imp {
         fn set_up_custom_profile_expression(&self) {
             self.custom_profile_dropdown
                 .set_expression(Some(PropertyExpression::new(
-                    CustomEqualizerProfileObject::static_type(),
+                    GlibCustomEqualizerProfile::static_type(),
                     None::<Expression>,
                     "name",
                 )));
@@ -251,7 +249,7 @@ mod imp {
                 let equalizer_custom_profile_object = list_item
                     .item()
                     .expect("item must exist")
-                    .downcast::<CustomEqualizerProfileObject>()
+                    .downcast::<GlibCustomEqualizerProfile>()
                     .expect("the item must be an EqualizerProfileObject");
 
                 let row = list_item
@@ -272,7 +270,7 @@ mod imp {
             self.custom_profile_dropdown.connect_selected_item_notify(
             clone!(@weak self as this => move |_dropdown| {
                 let maybe_selected_item = this.custom_profile_dropdown.selected_item()
-                    .map(|item| item.downcast::<CustomEqualizerProfileObject>().unwrap());
+                    .map(|item| item.downcast::<GlibCustomEqualizerProfile>().unwrap());
                 if let Some(selected_item) = maybe_selected_item {
                     this.sender.get().unwrap().send(Action::SelectCustomEqualizerProfile(selected_item.clone())).unwrap();
                     // Only apply settings if something changed from the perspective of the headphones
@@ -296,7 +294,7 @@ mod imp {
                     &self.custom_profile_buttons.get(),
                     "visible",
                 )
-                .transform_to(|_, item: Option<EqualizerProfileObject>| {
+                .transform_to(|_, item: Option<GlibEqualizerProfile>| {
                     item.map(|profile| {
                         profile.profile_id() as u16 == EqualizerConfiguration::CUSTOM_PROFILE_ID
                     })
@@ -310,7 +308,7 @@ mod imp {
                     &self.create_custom_profile_button.get(),
                     "visible",
                 )
-                .transform_to(|_, item: Option<CustomEqualizerProfileObject>| Some(item.is_none()))
+                .transform_to(|_, item: Option<GlibCustomEqualizerProfile>| Some(item.is_none()))
                 .sync_create()
                 .build();
             // Show delete button otherwise
@@ -325,7 +323,7 @@ mod imp {
                 .build();
         }
 
-        pub fn set_custom_profiles(&self, mut profiles: Vec<CustomEqualizerProfileObject>) {
+        pub fn set_custom_profiles(&self, mut profiles: Vec<GlibCustomEqualizerProfile>) {
             if let Some(model) = self.custom_profiles.get() {
                 profiles.sort_unstable_by_key(|left| left.name());
                 // Notifications need to be frozen to prevent the selection changes while removing and adding items from
@@ -344,7 +342,7 @@ mod imp {
                 Some(custom_profiles) if self.is_custom_profile() => {
                     let volumes = self.equalizer.volume_adjustments();
                     let custom_profile_index = custom_profiles
-                        .iter::<CustomEqualizerProfileObject>()
+                        .iter::<GlibCustomEqualizerProfile>()
                         .enumerate()
                         .find(|(_i, profile)| {
                             profile.as_ref().unwrap().volume_adjustments() == volumes
@@ -370,7 +368,7 @@ mod imp {
         }
 
         fn set_up_preset_profile_selection_model(&self) {
-            let model = gio::ListStore::new::<EqualizerProfileObject>();
+            let model = gio::ListStore::new::<GlibEqualizerProfile>();
             self.profile_dropdown.set_model(Some(&model));
             self.profiles
                 .set(model)
@@ -380,7 +378,7 @@ mod imp {
         fn set_up_preset_profile_expression(&self) {
             self.profile_dropdown
                 .set_expression(Some(PropertyExpression::new(
-                    EqualizerProfileObject::static_type(),
+                    GlibEqualizerProfile::static_type(),
                     None::<Expression>,
                     "name",
                 )));
@@ -399,7 +397,7 @@ mod imp {
                 let equalizer_profile_object = list_item
                     .item()
                     .expect("item must exist")
-                    .downcast::<EqualizerProfileObject>()
+                    .downcast::<GlibEqualizerProfile>()
                     .expect("the item must be an EqualizerProfileObject");
 
                 let row = list_item
@@ -421,7 +419,7 @@ mod imp {
         fn set_up_preset_profile_selection_changed_handler(&self) {
             self.profile_dropdown
             .connect_selected_item_notify(clone!(@weak self as this => move |_dropdown| {
-                let selected_item: EqualizerProfileObject = this.profile_dropdown
+                let selected_item: GlibEqualizerProfile = this.profile_dropdown
                     .selected_item()
                     .expect("an item must be selected")
                     .downcast()
@@ -449,7 +447,7 @@ mod imp {
             self.profile_dropdown
                 .selected_item()
                 .map(|item| {
-                    item.downcast::<EqualizerProfileObject>()
+                    item.downcast::<GlibEqualizerProfile>()
                         .expect("must be EqualizerProfileObject")
                 })
                 .map(|profile| {
@@ -459,13 +457,13 @@ mod imp {
         }
 
         fn set_up_preset_profile_items(&self) {
-            let custom_profile_iter = [EqualizerProfileObject::new(
+            let custom_profile_iter = [GlibEqualizerProfile::new(
                 "Custom",
                 EqualizerConfiguration::CUSTOM_PROFILE_ID.into(),
             )]
             .into_iter();
             let preset_profile_iter = PresetEqualizerProfile::iter()
-                .map(|preset| EqualizerProfileObject::new(preset.as_ref(), preset.id().into()));
+                .map(|preset| GlibEqualizerProfile::new(preset.as_ref(), preset.id().into()));
 
             let profiles = custom_profile_iter
                 .chain(preset_profile_iter)
@@ -513,7 +511,7 @@ mod tests {
         EqualizerConfiguration, PresetEqualizerProfile, VolumeAdjustments,
     };
 
-    use crate::objects::CustomEqualizerProfileObject;
+    use crate::objects::GlibCustomEqualizerProfile;
 
     use super::EqualizerSettingsScreen;
 
@@ -561,7 +559,7 @@ mod tests {
         let settings = EqualizerSettingsScreen::new();
         let (sender, _receiver) = MainContext::channel(Priority::default());
         settings.set_sender(sender);
-        settings.set_custom_profiles(vec![CustomEqualizerProfileObject::new(
+        settings.set_custom_profiles(vec![GlibCustomEqualizerProfile::new(
             "test profile",
             [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
         )]);

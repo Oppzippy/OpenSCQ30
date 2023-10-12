@@ -29,7 +29,7 @@ mod imp {
     };
     use openscq30_lib::packets::structures::TransparencyMode;
 
-    use crate::objects::BoxedTransparencyMode;
+    use crate::objects::GlibTransparencyModeValue;
 
     #[derive(Default, CompositeTemplate, Properties)]
     #[template(
@@ -45,7 +45,7 @@ mod imp {
         pub vocal_mode: TemplateChild<gtk::ToggleButton>,
 
         #[property(set, get)]
-        transparency_mode: Cell<BoxedTransparencyMode>,
+        transparency_mode: Cell<GlibTransparencyModeValue>,
     }
 
     #[glib::object_subclass]
@@ -79,13 +79,13 @@ mod imp {
             .for_each(|(transparency_mode, button)| {
                 obj.bind_property("transparency_mode", button, "active")
                     .transform_to(
-                        move |_, selected_transparency_mode: BoxedTransparencyMode| {
+                        move |_, selected_transparency_mode: GlibTransparencyModeValue| {
                             Some(transparency_mode == selected_transparency_mode.0)
                         },
                     )
                     .transform_from(move |_, is_active| {
                         if is_active {
-                            Some(BoxedTransparencyMode(transparency_mode))
+                            Some(GlibTransparencyModeValue(transparency_mode))
                         } else {
                             None
                         }

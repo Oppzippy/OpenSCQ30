@@ -40,18 +40,18 @@ pub use set_noise_canceling_mode::*;
 pub use set_transpareny_mode::*;
 pub use state::*;
 
-use crate::objects::{CustomEqualizerProfileObject, DeviceObject, NamedQuickPreset};
+use crate::objects::{GlibCustomEqualizerProfile, GlibDevice, GlibNamedQuickPresetValue};
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub enum StateUpdate {
-    SetDevices(Vec<DeviceObject>),
+    SetDevices(Vec<GlibDevice>),
     SetLoading(bool),
     SetDeviceState(DeviceState),
     SetEqualizerConfiguration(EqualizerConfiguration),
-    SetSelectedDevice(Option<DeviceObject>),
-    SetCustomEqualizerProfiles(Vec<CustomEqualizerProfileObject>),
+    SetSelectedDevice(Option<GlibDevice>),
+    SetCustomEqualizerProfiles(Vec<GlibCustomEqualizerProfile>),
     AddToast(String),
-    SetQuickPresets(Vec<NamedQuickPreset>),
+    SetQuickPresets(Vec<GlibNamedQuickPresetValue>),
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
@@ -60,13 +60,13 @@ pub enum Action {
     SetNoiseCancelingMode(NoiseCancelingMode),
     Connect(MacAddr6),
     Disconnect,
-    SelectCustomEqualizerProfile(CustomEqualizerProfileObject),
-    CreateCustomEqualizerProfile(CustomEqualizerProfileObject),
-    DeleteCustomEqualizerProfile(CustomEqualizerProfileObject),
+    SelectCustomEqualizerProfile(GlibCustomEqualizerProfile),
+    CreateCustomEqualizerProfile(GlibCustomEqualizerProfile),
+    DeleteCustomEqualizerProfile(GlibCustomEqualizerProfile),
     SetEqualizerConfiguration(EqualizerConfiguration),
     SetCustomNoiseCanceling(CustomNoiseCanceling),
     SetTransparencyMode(TransparencyMode),
-    CreateQuickPreset(NamedQuickPreset),
-    ActivateQuickPreset(NamedQuickPreset),
+    CreateQuickPreset(GlibNamedQuickPresetValue),
+    ActivateQuickPreset(GlibNamedQuickPresetValue),
     DeleteQuickPreset(Arc<str>),
 }

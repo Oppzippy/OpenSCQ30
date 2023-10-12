@@ -49,8 +49,8 @@ mod imp {
     use crate::{
         actions::Action,
         objects::{
-            BoxedAmbientSoundMode, BoxedCustomNoiseCanceling, BoxedNoiseCancelingMode,
-            BoxedTransparencyMode,
+            GlibAmbientSoundModeValue, GlibCustomNoiseCancelingValue, GlibNoiseCancelingModeValue,
+            GlibTransparencyModeValue,
         },
         ui::widgets::general_settings::{
             ambient_sound_mode_selection::AmbientSoundModeSelection,
@@ -126,15 +126,15 @@ mod imp {
 
             // Set selected values
             self.ambient_sound_mode_selection
-                .set_ambient_sound_mode(BoxedAmbientSoundMode(sound_modes.ambient_sound_mode));
+                .set_ambient_sound_mode(GlibAmbientSoundModeValue(sound_modes.ambient_sound_mode));
             self.transparency_mode_selection
-                .set_transparency_mode(BoxedTransparencyMode(sound_modes.transparency_mode));
+                .set_transparency_mode(GlibTransparencyModeValue(sound_modes.transparency_mode));
             self.noise_canceling_mode_selection
-                .set_noise_canceling_mode(BoxedNoiseCancelingMode(
+                .set_noise_canceling_mode(GlibNoiseCancelingModeValue(
                     sound_modes.noise_canceling_mode,
                 ));
             self.custom_noise_canceling_selection
-                .set_custom_noise_canceling(BoxedCustomNoiseCanceling(
+                .set_custom_noise_canceling(GlibCustomNoiseCancelingValue(
                     sound_modes.custom_noise_canceling,
                 ));
         }

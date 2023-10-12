@@ -23,16 +23,13 @@ mod imp {
         prelude::*,
         subclass::{
             prelude::*,
-            widget::{
-                CompositeTemplateClass, CompositeTemplateInitializingExt,
-                WidgetImpl,
-            },
+            widget::{CompositeTemplateClass, CompositeTemplateInitializingExt, WidgetImpl},
         },
         CompositeTemplate, TemplateChild,
     };
     use openscq30_lib::packets::structures::AmbientSoundMode;
 
-    use crate::objects::BoxedAmbientSoundMode;
+    use crate::objects::GlibAmbientSoundModeValue;
 
     #[derive(Default, CompositeTemplate, Properties)]
     #[template(
@@ -52,7 +49,7 @@ mod imp {
         #[property(set, get)]
         has_noise_canceling_mode: Cell<bool>,
         #[property(set, get)]
-        ambient_sound_mode: Cell<BoxedAmbientSoundMode>,
+        ambient_sound_mode: Cell<GlibAmbientSoundModeValue>,
     }
 
     #[glib::object_subclass]
@@ -98,13 +95,13 @@ mod imp {
             .for_each(|(ambient_sound_mode, button)| {
                 obj.bind_property("ambient_sound_mode", button, "active")
                     .transform_to(
-                        move |_, selected_ambient_sound_mode: BoxedAmbientSoundMode| {
+                        move |_, selected_ambient_sound_mode: GlibAmbientSoundModeValue| {
                             Some(ambient_sound_mode == selected_ambient_sound_mode.0)
                         },
                     )
                     .transform_from(move |_, is_active| {
                         if is_active {
-                            Some(BoxedAmbientSoundMode(ambient_sound_mode))
+                            Some(GlibAmbientSoundModeValue(ambient_sound_mode))
                         } else {
                             None
                         }

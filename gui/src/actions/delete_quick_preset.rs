@@ -2,7 +2,7 @@ use anyhow::Context;
 use openscq30_lib::api::device::{Device, DeviceRegistry};
 
 use crate::{
-    objects::NamedQuickPreset,
+    objects::GlibNamedQuickPresetValue,
     settings::{Config, SettingsFile},
 };
 
@@ -34,7 +34,7 @@ where
                     settings
                         .quick_presets(device_service_uuid)
                         .iter()
-                        .map(|(name, quick_preset)| NamedQuickPreset {
+                        .map(|(name, quick_preset)| GlibNamedQuickPresetValue {
                             name: name.as_str().into(),
                             quick_preset: quick_preset.to_owned(),
                         })
@@ -55,7 +55,7 @@ mod tests {
     use crate::{
         actions::{State, StateUpdate},
         mock::{MockDevice, MockDeviceRegistry},
-        objects::NamedQuickPreset,
+        objects::GlibNamedQuickPresetValue,
         settings::{Config, QuickPreset, SettingsFile},
     };
 
@@ -81,7 +81,7 @@ mod tests {
 
         let state_update = receiver.recv().await.unwrap();
         if let StateUpdate::SetQuickPresets(quick_presets) = state_update {
-            assert_eq!(Vec::<NamedQuickPreset>::new(), quick_presets);
+            assert_eq!(Vec::<GlibNamedQuickPresetValue>::new(), quick_presets);
         } else {
             panic!("StateUpdate was not RefreshQuickPresets: {state_update:?}");
         }

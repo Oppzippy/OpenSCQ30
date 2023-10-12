@@ -4,10 +4,10 @@ use gtk::{
 };
 
 glib::wrapper! {
-    pub struct CustomEqualizerProfileObject(ObjectSubclass<imp::CustomEqualizerProfileObject>);
+    pub struct GlibCustomEqualizerProfile(ObjectSubclass<imp::GlibCustomEqualizerProfile>);
 }
 
-impl CustomEqualizerProfileObject {
+impl GlibCustomEqualizerProfile {
     pub fn new(name: &str, volume_adjustments: [f64; 8]) -> Self {
         let obj: Self = Object::builder().property("name", name).build();
         obj.imp().volume_adjustments.replace(volume_adjustments);
@@ -20,8 +20,8 @@ impl CustomEqualizerProfileObject {
 }
 
 #[derive(Debug, PartialEq, Clone, glib::Boxed, glib::Variant)]
-#[boxed_type(name = "OpenSCQ30VolumeAdjustments")]
-pub struct BoxedVolumeAdjustments(pub glib::FixedSizeVariantArray<Vec<f64>, f64>);
+#[boxed_type(name = "OpenSCQ30ObjectsVolumeAdjustments")]
+pub struct GlibVolumeAdjustments(pub glib::FixedSizeVariantArray<Vec<f64>, f64>);
 
 mod imp {
     use std::cell::{Cell, RefCell};
@@ -33,20 +33,20 @@ mod imp {
     };
 
     #[derive(Default, Properties)]
-    #[properties(wrapper_type = super::CustomEqualizerProfileObject)]
-    pub struct CustomEqualizerProfileObject {
+    #[properties(wrapper_type = super::GlibCustomEqualizerProfile)]
+    pub struct GlibCustomEqualizerProfile {
         #[property(get, set)]
         pub name: RefCell<String>,
         pub volume_adjustments: Cell<[f64; 8]>,
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for CustomEqualizerProfileObject {
-        const NAME: &'static str = "OpenSCQ30CustomEqualizerProfileObject";
-        type Type = super::CustomEqualizerProfileObject;
+    impl ObjectSubclass for GlibCustomEqualizerProfile {
+        const NAME: &'static str = "OpenSCQ30ObjectsCustomEqualizerProfile";
+        type Type = super::GlibCustomEqualizerProfile;
     }
 
-    impl ObjectImpl for CustomEqualizerProfileObject {
+    impl ObjectImpl for GlibCustomEqualizerProfile {
         fn properties() -> &'static [ParamSpec] {
             Self::derived_properties()
         }

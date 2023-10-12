@@ -1,10 +1,10 @@
 use gtk::glib::{self, Object};
 
 glib::wrapper! {
-    pub struct DeviceObject(ObjectSubclass<imp::DeviceObject>);
+    pub struct GlibDevice(ObjectSubclass<imp::GlibDevice>);
 }
 
-impl DeviceObject {
+impl GlibDevice {
     pub fn new(name: &str, mac_address: &str) -> Self {
         let obj: Self = Object::builder()
             .property("name", name)
@@ -24,8 +24,8 @@ mod imp {
     };
 
     #[derive(Default, Properties)]
-    #[properties(wrapper_type=super::DeviceObject)]
-    pub struct DeviceObject {
+    #[properties(wrapper_type=super::GlibDevice)]
+    pub struct GlibDevice {
         #[property(set, get)]
         pub name: RefCell<String>,
         #[property(set, get)]
@@ -33,12 +33,12 @@ mod imp {
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for DeviceObject {
-        const NAME: &'static str = "OpenSCQ30DeviceObject";
-        type Type = super::DeviceObject;
+    impl ObjectSubclass for GlibDevice {
+        const NAME: &'static str = "OpenSCQ30ObjectsDevice";
+        type Type = super::GlibDevice;
     }
 
-    impl ObjectImpl for DeviceObject {
+    impl ObjectImpl for GlibDevice {
         fn properties() -> &'static [ParamSpec] {
             Self::derived_properties()
         }

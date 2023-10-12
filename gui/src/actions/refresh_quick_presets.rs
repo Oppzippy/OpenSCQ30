@@ -3,7 +3,7 @@ use openscq30_lib::api::device::DeviceRegistry;
 use uuid::Uuid;
 
 use crate::{
-    objects::NamedQuickPreset,
+    objects::GlibNamedQuickPresetValue,
     settings::{Config, SettingsFile},
 };
 
@@ -21,7 +21,7 @@ where
         config
             .quick_presets(device_service_uuid)
             .iter()
-            .map(|(name, quick_preset)| NamedQuickPreset {
+            .map(|(name, quick_preset)| GlibNamedQuickPresetValue {
                 name: name.as_str().into(),
                 quick_preset: quick_preset.to_owned(),
             })

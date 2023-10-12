@@ -1,7 +1,7 @@
 use openscq30_lib::api::device::DeviceRegistry;
 
 use crate::{
-    objects::CustomEqualizerProfileObject,
+    objects::GlibCustomEqualizerProfile,
     settings::{Config, SettingsFile},
 };
 
@@ -10,7 +10,7 @@ use super::{State, StateUpdate};
 pub fn delete_custom_equalizer_profile<T>(
     state: &State<T>,
     settings_file: &SettingsFile<Config>,
-    custom_profile: &CustomEqualizerProfileObject,
+    custom_profile: &GlibCustomEqualizerProfile,
 ) -> anyhow::Result<()>
 where
     T: DeviceRegistry + 'static,
@@ -26,7 +26,7 @@ where
                     .custom_profiles()
                     .iter()
                     .map(|(name, profile)| {
-                        CustomEqualizerProfileObject::new(name, profile.volume_adjustments())
+                        GlibCustomEqualizerProfile::new(name, profile.volume_adjustments())
                     })
                     .collect(),
             ))
@@ -40,7 +40,7 @@ mod tests {
     use crate::{
         actions::{State, StateUpdate},
         mock::MockDeviceRegistry,
-        objects::CustomEqualizerProfileObject,
+        objects::GlibCustomEqualizerProfile,
         settings::{Config, CustomEqualizerProfile, SettingsFile},
     };
 
@@ -54,7 +54,7 @@ mod tests {
 
         let file = tempfile::NamedTempFile::new().unwrap();
         let settings_file = SettingsFile::<Config>::new(file.path().to_path_buf());
-        let custom_profile = CustomEqualizerProfileObject::new(
+        let custom_profile = GlibCustomEqualizerProfile::new(
             &"custom profile".to_string(),
             [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
         );

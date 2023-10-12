@@ -6,7 +6,7 @@ use openscq30_lib::state::DeviceState;
 
 use crate::{
     actions::Action,
-    objects::{CustomEqualizerProfileObject, NamedQuickPreset},
+    objects::{GlibCustomEqualizerProfile, GlibNamedQuickPresetValue},
 };
 
 glib::wrapper! {
@@ -24,7 +24,7 @@ impl QuickPresetsScreen {
         self.imp().set_sender(sender);
     }
 
-    pub fn set_quick_presets(&self, quick_presets: Vec<NamedQuickPreset>) {
+    pub fn set_quick_presets(&self, quick_presets: Vec<GlibNamedQuickPresetValue>) {
         self.imp()
             .quick_presets_listing
             .set_quick_presets(quick_presets)
@@ -36,7 +36,7 @@ impl QuickPresetsScreen {
             .set_device_feature_flags(state.feature_flags);
     }
 
-    pub fn set_custom_profiles(&self, custom_profiles: Vec<CustomEqualizerProfileObject>) {
+    pub fn set_custom_profiles(&self, custom_profiles: Vec<GlibCustomEqualizerProfile>) {
         self.imp()
             .edit_quick_preset
             .set_custom_equalizer_profiles(custom_profiles);
@@ -56,7 +56,7 @@ mod imp {
 
     use crate::{
         actions::Action,
-        objects::NamedQuickPreset,
+        objects::GlibNamedQuickPresetValue,
         ui::widgets::quick_presets::{
             edit_quick_preset::EditQuickPreset, quick_presets_listing::QuickPresetsListing,
         },
@@ -82,7 +82,7 @@ mod imp {
         #[template_callback]
         pub fn handle_create_quick_preset(
             &self,
-            named_quick_preset: NamedQuickPreset,
+            named_quick_preset: GlibNamedQuickPresetValue,
             _: &QuickPresetsListing,
         ) {
             self.sender
@@ -95,7 +95,7 @@ mod imp {
         #[template_callback]
         pub fn handle_edit_quick_preset(
             &self,
-            named_quick_preset: NamedQuickPreset,
+            named_quick_preset: GlibNamedQuickPresetValue,
             _: &QuickPresetsListing,
         ) {
             self.edit_quick_preset.set_quick_preset(named_quick_preset);
@@ -105,7 +105,7 @@ mod imp {
         #[template_callback]
         fn handle_activate_quick_preset(
             &self,
-            quick_preset: NamedQuickPreset,
+            quick_preset: GlibNamedQuickPresetValue,
             _: &QuickPresetsListing,
         ) {
             self.sender
@@ -118,7 +118,7 @@ mod imp {
         #[template_callback]
         fn handle_delete_quick_preset(
             &self,
-            quick_preset: NamedQuickPreset,
+            quick_preset: GlibNamedQuickPresetValue,
             _: &QuickPresetsListing,
         ) {
             self.sender
@@ -129,7 +129,11 @@ mod imp {
         }
 
         #[template_callback]
-        fn handle_quick_preset_changed(&self, quick_preset: NamedQuickPreset, _: &EditQuickPreset) {
+        fn handle_quick_preset_changed(
+            &self,
+            quick_preset: GlibNamedQuickPresetValue,
+            _: &EditQuickPreset,
+        ) {
             self.sender
                 .get()
                 .unwrap()

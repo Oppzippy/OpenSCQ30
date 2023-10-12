@@ -6,7 +6,7 @@ use openscq30_lib::{packets::structures::EqualizerConfiguration, state::DeviceSt
 
 use crate::{
     actions::Action,
-    objects::{CustomEqualizerProfileObject, NamedQuickPreset},
+    objects::{GlibCustomEqualizerProfile, GlibNamedQuickPresetValue},
 };
 
 glib::wrapper! {
@@ -38,7 +38,7 @@ impl SelectedDeviceSettings {
         self.imp().equalizer_settings.equalizer_configuration()
     }
 
-    pub fn set_custom_profiles(&self, custom_profiles: Vec<CustomEqualizerProfileObject>) {
+    pub fn set_custom_profiles(&self, custom_profiles: Vec<GlibCustomEqualizerProfile>) {
         self.imp()
             .equalizer_settings
             .set_custom_profiles(custom_profiles.to_owned());
@@ -47,7 +47,7 @@ impl SelectedDeviceSettings {
             .set_custom_profiles(custom_profiles);
     }
 
-    pub fn set_quick_presets(&self, quick_presets: Vec<NamedQuickPreset>) {
+    pub fn set_quick_presets(&self, quick_presets: Vec<GlibNamedQuickPresetValue>) {
         self.imp().quick_presets.set_quick_presets(quick_presets)
     }
 }

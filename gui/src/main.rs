@@ -28,7 +28,7 @@ use windows::{
     UI::ViewManagement::{UIColorType, UISettings},
 };
 
-use crate::{actions::Action, gtk_futures::GtkFutures, objects::CustomEqualizerProfileObject};
+use crate::{actions::Action, gtk_futures::GtkFutures, objects::GlibCustomEqualizerProfile};
 
 mod actions;
 mod gettext;
@@ -201,7 +201,7 @@ fn build_ui(application: &adw::Application) {
                     .custom_profiles()
                     .iter()
                     .map(|(name, profile)| {
-                        CustomEqualizerProfileObject::new(name, profile.volume_adjustments())
+                        GlibCustomEqualizerProfile::new(name, profile.volume_adjustments())
                     })
                     .collect(),
             );
