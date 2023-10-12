@@ -7,6 +7,9 @@ script_path="$(readlink -f -- "$0")"
 script_dir="$(dirname -- $script_path)"
 cd "$script_dir/.."
 
+echo "Updating POTFILES.in"
+find . -type f -name "*.ui" -fprintf po/POTFILES.in "%P\n"
+
 echo "Generating template"
 if [[ -f "po/$PROJECT_NAME.pot" ]]; then
     xgettext --files-from po/POTFILES.in \
