@@ -1,4 +1,4 @@
-use std::{rc::Rc, time::Duration};
+use std::time::Duration;
 
 use gtk::glib::{self, clone, timeout_future, MainContext};
 use openscq30_lib::{
@@ -10,7 +10,7 @@ use tokio::sync::oneshot;
 use super::State;
 
 pub async fn set_custom_noise_canceling<T>(
-    state: &Rc<State<T>>,
+    state: &State<T>,
     custom_noise_canceling: CustomNoiseCanceling,
 ) -> anyhow::Result<()>
 where

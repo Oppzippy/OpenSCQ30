@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use anyhow::bail;
 use openscq30_lib::{
     api::device::{Device, DeviceRegistry},
@@ -9,7 +7,7 @@ use openscq30_lib::{
 use super::State;
 
 pub async fn set_ambient_sound_mode<T>(
-    state: &Rc<State<T>>,
+    state: &State<T>,
     ambient_sound_mode: AmbientSoundMode,
 ) -> anyhow::Result<()>
 where

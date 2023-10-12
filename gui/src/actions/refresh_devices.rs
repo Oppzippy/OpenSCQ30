@@ -1,12 +1,10 @@
-use std::rc::Rc;
-
 use openscq30_lib::api::device::{DeviceDescriptor, DeviceRegistry};
 
 use crate::objects::DeviceObject;
 
 use super::{State, StateUpdate};
 
-pub async fn refresh_devices<T>(state: &Rc<State<T>>) -> anyhow::Result<()>
+pub async fn refresh_devices<T>(state: &State<T>) -> anyhow::Result<()>
 where
     T: DeviceRegistry + 'static,
 {

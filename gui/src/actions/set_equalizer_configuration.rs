@@ -1,4 +1,4 @@
-use std::{rc::Rc, time::Duration};
+use std::time::Duration;
 
 use gtk::glib::{self, clone, timeout_future, MainContext};
 use openscq30_lib::{
@@ -10,7 +10,7 @@ use tokio::sync::oneshot;
 use super::State;
 
 pub async fn set_equalizer_configuration<T>(
-    state: &Rc<State<T>>,
+    state: &State<T>,
     equalizer_configuration: impl Into<EqualizerConfiguration>,
 ) -> anyhow::Result<()>
 where
@@ -21,7 +21,7 @@ where
 
 #[tracing::instrument(level = "trace", skip(state))]
 async fn set_equalizer_configuration_impl<T>(
-    state: &Rc<State<T>>,
+    state: &State<T>,
     equalizer_configuration: EqualizerConfiguration,
 ) -> anyhow::Result<()>
 where
