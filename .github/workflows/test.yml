@@ -8,18 +8,24 @@ env:
 
 jobs:
   rust_test_linux:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:rolling
     steps:
+      - name: Install basic requirements
+        run: |
+          apt-get update
+          apt-get install -y git curl unzip
+
       - uses: actions/checkout@v4
         with:
           submodules: true
       - name: Install dependencies from apt
         run: |
-          sudo apt-get update
-          sudo apt-get install libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev
+          apt-get install -y libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev
       - name: Install display server
         run: |
-          sudo apt-get install xvfb
+          apt-get install -y xvfb
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
       - name: Install cargo-llvm-cov
