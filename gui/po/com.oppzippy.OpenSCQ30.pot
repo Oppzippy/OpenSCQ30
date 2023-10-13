@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-12 20:10-0400\n"
+"POT-Creation-Date: 2023-10-12 20:22-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,10 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+msgctxt "preset equalizer profile"
+msgid "Acoustic"
+msgstr "Acoustic"
 
 #: src/ui/widgets/device_information.ui:64
 msgctxt "device information"
@@ -27,10 +31,22 @@ msgstr ""
 msgid "Ambient Sound Mode"
 msgstr ""
 
+msgctxt "preset equalizer profile"
+msgid "BassBooster"
+msgstr "Bass Booster"
+
+msgctxt "preset equalizer profile"
+msgid "BassReducer"
+msgstr "Bass Reducer"
+
 #: src/ui/widgets/loading_screen.ui:17
 msgctxt "cancel connecting to device"
 msgid "Cancel"
 msgstr ""
+
+msgctxt "preset equalizer profile"
+msgid "Classical"
+msgstr "Classical"
 
 #: src/ui/widgets/device_selection.ui:41
 msgctxt "connect to device"
@@ -66,6 +82,14 @@ msgctxt "custom equalizer profile"
 msgid "Custom Profile"
 msgstr ""
 
+msgctxt "preset equalizer profile"
+msgid "Dance"
+msgstr "Dance"
+
+msgctxt "preset equalizer profile"
+msgid "Deep"
+msgstr "Deep"
+
 #: src/ui/widgets/device_selection.ui:18
 msgctxt "bluetooth device selection"
 msgid "Device"
@@ -84,6 +108,10 @@ msgstr ""
 #: src/ui/widgets/quick_presets/quick_presets_screen.ui:23
 msgid "Edit Quick Preset"
 msgstr ""
+
+msgctxt "preset equalizer profile"
+msgid "Electronic"
+msgstr "Electronic"
 
 #: src/ui/widgets/quick_presets/edit_quick_preset.ui:10
 msgid "Enable Ambient Sound Mode"
@@ -124,6 +152,10 @@ msgctxt "device information"
 msgid "Firmware Version"
 msgstr ""
 
+msgctxt "preset equalizer profile"
+msgid "Flat"
+msgstr "Flat"
+
 #: src/ui/widgets/general_settings/transparency_mode_selection.ui:20
 msgctxt "transparency mode"
 msgid "FullyTransparent"
@@ -134,15 +166,31 @@ msgctxt "general settings"
 msgid "General"
 msgstr ""
 
+msgctxt "preset equalizer profile"
+msgid "HipHop"
+msgstr "Hip Hop"
+
 #: src/ui/widgets/general_settings/noise_canceling_mode_selection.ui:29
 msgctxt "noise canceling mode"
 msgid "Indoor"
 msgstr ""
 
+msgctxt "preset equalizer profile"
+msgid "Jazz"
+msgstr "Jazz"
+
+msgctxt "preset equalizer profile"
+msgid "Latin"
+msgstr "Latin"
+
 #: src/ui/widgets/loading_screen.ui:12
 msgctxt "connecting to device"
 msgid "Loading..."
 msgstr ""
+
+msgctxt "preset equalizer profile"
+msgid "Lounge"
+msgstr "Lounge"
 
 #: src/ui/widgets/quick_presets/quick_presets_listing.ui:7
 msgctxt "quick presets"
@@ -168,6 +216,18 @@ msgstr ""
 msgctxt "noise canceling mode"
 msgid "Outdoor"
 msgstr ""
+
+msgctxt "preset equalizer profile"
+msgid "Piano"
+msgstr "Piano"
+
+msgctxt "preset equalizer profile"
+msgid "Podcast"
+msgstr "Podcast"
+
+msgctxt "preset equalizer profile"
+msgid "Pop"
+msgstr "Pop"
 
 #: src/ui/widgets/quick_presets/edit_quick_preset.ui:82
 msgctxt "equalizer profile"
@@ -197,10 +257,30 @@ msgctxt "refresh devices"
 msgid "Refresh"
 msgstr ""
 
+msgctxt "preset equalizer profile"
+msgid "RnB"
+msgstr "RnB"
+
+msgctxt "preset equalizer profile"
+msgid "Rock"
+msgstr "Rock"
+
 #: src/ui/widgets/device_information.ui:39
 msgctxt "device information"
 msgid "Serial Number"
 msgstr ""
+
+msgctxt "preset equalizer profile"
+msgid "SmallSpeakers"
+msgstr "Small Speakers"
+
+msgctxt "preset equalizer profile"
+msgid "SoundcoreSignature"
+msgstr "Soundcore Signature"
+
+msgctxt "preset equalizer profile"
+msgid "SpokenWord"
+msgstr "Spoken Word"
 
 #: src/ui/widgets/general_settings/ambient_sound_mode_selection.ui:29
 msgctxt "ambient sound mode"
@@ -216,6 +296,14 @@ msgstr ""
 msgctxt "noise canceling mode"
 msgid "Transport"
 msgstr ""
+
+msgctxt "preset equalizer profile"
+msgid "TrebleBooster"
+msgstr "Treble Booster"
+
+msgctxt "preset equalizer profile"
+msgid "TrebleReducer"
+msgstr "Treble Reducer"
 
 #: src/ui/widgets/general_settings/transparency_mode_selection.ui:30
 msgctxt "transparency mode"

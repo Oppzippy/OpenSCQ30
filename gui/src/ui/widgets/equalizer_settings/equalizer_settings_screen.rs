@@ -46,7 +46,8 @@ mod imp {
             prelude::*,
             widget::{CompositeTemplateCallbacksClass, CompositeTemplateClass, WidgetImpl},
         },
-        CompositeTemplate, Expression, PropertyExpression, SignalListItemFactory, TemplateChild,
+        ClosureExpression, CompositeTemplate, Expression, PropertyExpression,
+        SignalListItemFactory, TemplateChild,
     };
     use openscq30_lib::packets::structures::{
         EqualizerConfiguration, PresetEqualizerProfile, VolumeAdjustments,
@@ -59,6 +60,7 @@ mod imp {
         ui::widgets::equalizer_settings::{
             equalizer::Equalizer, profile_dropdown_row::ProfileDropdownRow,
         },
+        APPLICATION_ID_STR,
     };
 
     #[derive(Default, CompositeTemplate)]
@@ -377,10 +379,16 @@ mod imp {
 
         fn set_up_preset_profile_expression(&self) {
             self.profile_dropdown
-                .set_expression(Some(PropertyExpression::new(
-                    GlibEqualizerProfile::static_type(),
-                    None::<Expression>,
-                    "name",
+                .set_expression(Some(&ClosureExpression::with_callback(
+                    gtk::Expression::NONE,
+                    |args| {
+                        let profile: GlibEqualizerProfile = args[0].get().unwrap();
+                        glib::dpgettext2(
+                            Some(APPLICATION_ID_STR),
+                            "preset equalizer profile",
+                            &profile.name(),
+                        )
+                    },
                 )));
         }
 
@@ -406,7 +414,11 @@ mod imp {
                     .downcast::<ProfileDropdownRow>()
                     .expect("child must be a Box");
 
-                row.set_name(equalizer_profile_object.name());
+                row.set_name(glib::dpgettext2(
+                    Some(APPLICATION_ID_STR),
+                    "preset equalizer profile",
+                    &equalizer_profile_object.name(),
+                ));
 
                 let volume_adjustments =
                     PresetEqualizerProfile::from_id(equalizer_profile_object.profile_id() as u16)
