@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenSCQ 30\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-25 16:47-0400\n"
+"POT-Creation-Date: 2023-10-12 20:10-0400\n"
 "PO-Revision-Date: 2023-03-25 16:12-0400\n"
 "Last-Translator:  <kyle@kylescheuing.com>\n"
 "Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
@@ -17,91 +17,207 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: src/widgets/general_settings/template.ui:13
+#: src/ui/widgets/device_information.ui:64
+msgctxt "device information"
+msgid "Age Range"
+msgstr ""
+
+#: src/ui/widgets/general_settings/ambient_sound_mode_selection.ui:7
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:16
 msgid "Ambient Sound Mode"
 msgstr ""
 
-#: src/widgets/loading_screen/template.ui:17
+#: src/ui/widgets/loading_screen.ui:17
 msgctxt "cancel connecting to device"
 msgid "Cancel"
 msgstr ""
 
-#: src/widgets/device_selection/template.ui:41
+#: src/ui/widgets/device_selection.ui:41
 msgctxt "connect to device"
 msgid "Connect"
 msgstr ""
 
-#: src/widgets/equalizer_settings/template.ui:53
+#: src/ui/widgets/equalizer_settings/equalizer_settings_screen.ui:55
 msgctxt "create custom equalizer profile"
 msgid "Create"
 msgstr ""
 
-#: src/widgets/equalizer_settings/template.ui:38
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:83
+msgctxt "equalizer profile"
+msgid "Custom"
+msgstr ""
+
+#: src/ui/widgets/general_settings/noise_canceling_mode_selection.ui:49
+msgctxt "noise canceling mode"
+msgid "Custom"
+msgstr ""
+
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:97
+msgid "Custom Equalizer Profile"
+msgstr ""
+
+#: src/ui/widgets/general_settings/custom_noise_canceling_selection.ui:13
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:55
+msgid "Custom Noise Canceling"
+msgstr ""
+
+#: src/ui/widgets/equalizer_settings/equalizer_settings_screen.ui:38
 msgctxt "custom equalizer profile"
 msgid "Custom Profile"
 msgstr ""
 
-#: src/widgets/device_selection/template.ui:18
+#: src/ui/widgets/device_selection.ui:18
 msgctxt "bluetooth device selection"
 msgid "Device"
 msgstr "デバイス"
 
-#: src/widgets/general_settings/template.ui:131
+#: src/ui/widgets/selected_device_settings.ui:58
+msgctxt "device information"
+msgid "Device Information"
+msgstr ""
+
+#: src/ui/widgets/general_settings/general_settings_screen.ui:27
 msgctxt "disconnect from device"
 msgid "Disconnect"
 msgstr ""
 
-#: src/widgets/selected_device_settings/template.ui:45
+#: src/ui/widgets/quick_presets/quick_presets_screen.ui:23
+msgid "Edit Quick Preset"
+msgstr ""
+
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:10
+msgid "Enable Ambient Sound Mode"
+msgstr ""
+
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:49
+msgid "Enable Custom Noise Canceling"
+msgstr ""
+
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:70
+msgid "Enable Equalizer Profile"
+msgstr ""
+
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:36
+msgid "Enable Noise Canceling Mode"
+msgstr ""
+
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:23
+msgid "Enable Transparency Mode"
+msgstr ""
+
+#: src/ui/widgets/selected_device_settings.ui:32
 msgctxt "equalizer settings"
 msgid "Equalizer"
 msgstr ""
 
-#: src/widgets/selected_device_settings/template.ui:24
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:76
+msgid "Equalizer Profile Type"
+msgstr ""
+
+#: src/ui/widgets/device_information.ui:90
+msgctxt "device information"
+msgid "Feature Flags"
+msgstr ""
+
+#: src/ui/widgets/device_information.ui:14
+msgctxt "device information"
+msgid "Firmware Version"
+msgstr ""
+
+#: src/ui/widgets/general_settings/transparency_mode_selection.ui:20
+msgctxt "transparency mode"
+msgid "FullyTransparent"
+msgstr ""
+
+#: src/ui/widgets/selected_device_settings.ui:19
 msgctxt "general settings"
 msgid "General"
 msgstr ""
 
-#: src/widgets/general_settings/template.ui:100
+#: src/ui/widgets/general_settings/noise_canceling_mode_selection.ui:29
 msgctxt "noise canceling mode"
 msgid "Indoor"
 msgstr ""
 
-#: src/widgets/loading_screen/template.ui:12
+#: src/ui/widgets/loading_screen.ui:12
 msgctxt "connecting to device"
 msgid "Loading..."
 msgstr ""
 
-#: src/widgets/general_settings/template.ui:57
-msgctxt "ambient sound mode"
-msgid "Noise Canceling"
+#: src/ui/widgets/quick_presets/quick_presets_listing.ui:7
+msgctxt "quick presets"
+msgid "New Quick Preset"
 msgstr ""
 
-#: src/widgets/general_settings/template.ui:25
+#: src/ui/widgets/general_settings/noise_canceling_mode_selection.ui:7
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:42
+msgid "Noise Canceling Mode"
+msgstr ""
+
+#: src/ui/widgets/general_settings/ambient_sound_mode_selection.ui:39
+msgctxt "ambient sound mode"
+msgid "NoiseCanceling"
+msgstr ""
+
+#: src/ui/widgets/general_settings/ambient_sound_mode_selection.ui:19
 msgctxt "ambient sound mode"
 msgid "Normal"
 msgstr ""
 
-#: src/widgets/general_settings/template.ui:115
+#: src/ui/widgets/general_settings/noise_canceling_mode_selection.ui:39
 msgctxt "noise canceling mode"
 msgid "Outdoor"
 msgstr ""
 
-#: src/widgets/equalizer_settings/template.ui:17
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:82
+msgctxt "equalizer profile"
+msgid "Preset"
+msgstr ""
+
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:91
+msgid "Preset Equalizer Profile"
+msgstr ""
+
+#: src/ui/widgets/equalizer_settings/equalizer_settings_screen.ui:17
 msgctxt "equalizer profile"
 msgid "Profile"
 msgstr ""
 
-#: src/widgets/device_selection/template.ui:49
+#: src/ui/widgets/quick_presets/quick_presets_screen.ui:9
+msgid "Quick Presets"
+msgstr ""
+
+#: src/ui/widgets/selected_device_settings.ui:45
+msgctxt "quick presets"
+msgid "Quick Presets"
+msgstr ""
+
+#: src/ui/widgets/device_selection.ui:49
 msgctxt "refresh devices"
 msgid "Refresh"
 msgstr ""
 
-#: src/widgets/general_settings/template.ui:41
+#: src/ui/widgets/device_information.ui:39
+msgctxt "device information"
+msgid "Serial Number"
+msgstr ""
+
+#: src/ui/widgets/general_settings/ambient_sound_mode_selection.ui:29
 msgctxt "ambient sound mode"
 msgid "Transparency"
 msgstr ""
 
-#: src/widgets/general_settings/template.ui:85
+#: src/ui/widgets/general_settings/transparency_mode_selection.ui:7
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:29
+msgid "Transparency Mode"
+msgstr ""
+
+#: src/ui/widgets/general_settings/noise_canceling_mode_selection.ui:19
 msgctxt "noise canceling mode"
 msgid "Transport"
+msgstr ""
+
+#: src/ui/widgets/general_settings/transparency_mode_selection.ui:30
+msgctxt "transparency mode"
+msgid "VocalMode"
 msgstr ""

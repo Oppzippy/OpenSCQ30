@@ -36,7 +36,7 @@ mod imp {
     use adw::prelude::*;
     use gtk::{
         gio::{self, ListStore},
-        glib::{self, clone, subclass::Signal, Object},
+        glib::{self, clone, subclass::Signal},
         subclass::{
             prelude::*,
             widget::{CompositeTemplateClass, CompositeTemplateInitializingExt, WidgetImpl},
@@ -58,6 +58,7 @@ mod imp {
             GlibTransparencyModeValue,
         },
         settings::{PresetOrCustomEqualizerProfile, QuickPreset},
+        APPLICATION_ID_STR,
     };
 
     #[derive(Default, CompositeTemplate)]
@@ -177,52 +178,43 @@ mod imp {
             let mut ambient_sound_modes = self.ambient_sound_modes_store.borrow_mut();
             let ambient_sound_modes = ambient_sound_modes.as_mut().unwrap();
             ambient_sound_modes.remove_all();
-            ambient_sound_modes.append(&GlibAmbientSoundMode::new(
-                GlibAmbientSoundModeValue(AmbientSoundMode::Normal),
-                "Normal",
-            ));
-            ambient_sound_modes.append(&GlibAmbientSoundMode::new(
-                GlibAmbientSoundModeValue(AmbientSoundMode::Transparency),
-                "Transparency",
-            ));
+            ambient_sound_modes.append(&GlibAmbientSoundMode::new(GlibAmbientSoundModeValue(
+                AmbientSoundMode::Normal,
+            )));
+            ambient_sound_modes.append(&GlibAmbientSoundMode::new(GlibAmbientSoundModeValue(
+                AmbientSoundMode::Transparency,
+            )));
             if flags.contains(DeviceFeatureFlags::NOISE_CANCELING_MODE) {
-                ambient_sound_modes.append(&GlibAmbientSoundMode::new(
-                    GlibAmbientSoundModeValue(AmbientSoundMode::NoiseCanceling),
-                    "Noise Canceling",
-                ));
+                ambient_sound_modes.append(&GlibAmbientSoundMode::new(GlibAmbientSoundModeValue(
+                    AmbientSoundMode::NoiseCanceling,
+                )));
             }
 
             let mut transparency_modes = self.transparency_modes_store.borrow_mut();
             let transparency_modes = transparency_modes.as_mut().unwrap();
             transparency_modes.remove_all();
-            transparency_modes.append(&GlibTransparencyMode::new(
-                GlibTransparencyModeValue(TransparencyMode::FullyTransparent),
-                "Fully Transparent",
-            ));
-            transparency_modes.append(&GlibTransparencyMode::new(
-                GlibTransparencyModeValue(TransparencyMode::VocalMode),
-                "Vocal Mode",
-            ));
+            transparency_modes.append(&GlibTransparencyMode::new(GlibTransparencyModeValue(
+                TransparencyMode::FullyTransparent,
+            )));
+            transparency_modes.append(&GlibTransparencyMode::new(GlibTransparencyModeValue(
+                TransparencyMode::VocalMode,
+            )));
 
             let mut noise_canceling_modes = self.noise_canceling_modes_store.borrow_mut();
             let noise_canceling_modes = noise_canceling_modes.as_mut().unwrap();
             noise_canceling_modes.remove_all();
             noise_canceling_modes.append(&GlibNoiseCancelingMode::new(
                 GlibNoiseCancelingModeValue(NoiseCancelingMode::Transport),
-                "Transport",
             ));
             noise_canceling_modes.append(&GlibNoiseCancelingMode::new(
                 GlibNoiseCancelingModeValue(NoiseCancelingMode::Indoor),
-                "Indoor",
             ));
             noise_canceling_modes.append(&GlibNoiseCancelingMode::new(
                 GlibNoiseCancelingModeValue(NoiseCancelingMode::Outdoor),
-                "Outdoor",
             ));
             if flags.contains(DeviceFeatureFlags::CUSTOM_NOISE_CANCELING) {
                 noise_canceling_modes.append(&GlibNoiseCancelingMode::new(
                     GlibNoiseCancelingModeValue(NoiseCancelingMode::Custom),
-                    "Custom",
                 ));
             }
         }
@@ -404,30 +396,73 @@ mod imp {
             *self.preset_equalizer_profiles_store.borrow_mut() = Some(preset_equalizer_profiles);
             *self.custom_equalizer_profiles_store.borrow_mut() = Some(custom_equalizer_profiles);
 
-            let name_expression = ClosureExpression::with_callback(gtk::Expression::NONE, |args| {
-                let object: Object = args[0].get().unwrap();
-                let name: String = object.property("name");
-                name
-            });
             self.ambient_sound_mode
-                .set_expression(Some(&name_expression));
+                .set_expression(Some(&ClosureExpression::with_callback(
+                    gtk::Expression::NONE,
+                    |args| {
+                        let ambient_sound_mode: GlibAmbientSoundMode = args[0].get().unwrap();
+                        glib::dpgettext2(
+                            Some(APPLICATION_ID_STR),
+                            "ambient sound mode",
+                            ambient_sound_mode.ambient_sound_mode().0.as_ref(),
+                        )
+                    },
+                )));
             self.transparency_mode
-                .set_expression(Some(&name_expression));
+                .set_expression(Some(&ClosureExpression::with_callback(
+                    gtk::Expression::NONE,
+                    |args| {
+                        let transparency_mode: GlibTransparencyMode = args[0].get().unwrap();
+                        glib::dpgettext2(
+                            Some(APPLICATION_ID_STR),
+                            "transparency mode",
+                            transparency_mode.transparency_mode().0.as_ref(),
+                        )
+                    },
+                )));
             self.noise_canceling_mode
-                .set_expression(Some(&name_expression));
+                .set_expression(Some(&ClosureExpression::with_callback(
+                    gtk::Expression::NONE,
+                    |args| {
+                        let noise_canceling_mode: GlibNoiseCancelingMode = args[0].get().unwrap();
+                        glib::dpgettext2(
+                            Some(APPLICATION_ID_STR),
+                            "noise canceling mode",
+                            noise_canceling_mode.noise_canceling_mode().0.as_ref(),
+                        )
+                    },
+                )));
             self.preset_equalizer_profile
-                .set_expression(Some(&name_expression));
+                .set_expression(Some(&ClosureExpression::with_callback(
+                    gtk::Expression::NONE,
+                    |args| {
+                        let preset_equalizer_profile: GlibPresetEqualizerProfile =
+                            args[0].get().unwrap();
+                        glib::dpgettext2(
+                            Some(APPLICATION_ID_STR),
+                            "preset equalizer profile",
+                            preset_equalizer_profile
+                                .preset_equalizer_profile()
+                                .0
+                                .as_ref(),
+                        )
+                    },
+                )));
             self.custom_equalizer_profile
-                .set_expression(Some(&name_expression));
+                .set_expression(Some(&ClosureExpression::with_callback(
+                    gtk::Expression::NONE,
+                    |args| {
+                        let custom_equalizer_profile: GlibCustomEqualizerProfile =
+                            args[0].get().unwrap();
+                        custom_equalizer_profile.name()
+                    },
+                )));
 
             let mut preset_equalizer_profiles = self.preset_equalizer_profiles_store.borrow_mut();
             let preset_equalizer_profiles = preset_equalizer_profiles.as_mut().unwrap();
             preset_equalizer_profiles.remove_all();
             preset_equalizer_profiles.extend(PresetEqualizerProfile::iter().map(|profile| {
-                GlibPresetEqualizerProfile::new(
-                    GlibPresetEqualizerProfileValue(profile),
-                    profile.as_ref(),
-                )
+                GlibPresetEqualizerProfile::new(GlibPresetEqualizerProfileValue(profile))
             }));
         }
 

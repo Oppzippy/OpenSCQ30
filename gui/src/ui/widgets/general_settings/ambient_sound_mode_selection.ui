@@ -36,7 +36,7 @@
                 <child>
                     <object class="GtkToggleButton" id="noise_canceling_mode">
                         <property name="group">transparency_mode</property>
-                        <property name="label" translatable="yes" context="ambient sound mode">Noise Canceling</property>
+                        <property name="label" translatable="yes" context="ambient sound mode">NoiseCanceling</property>
                         <property name="hexpand">true</property>
                         <accessibility>
                             <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">ambient_sound_mode_label</relation>

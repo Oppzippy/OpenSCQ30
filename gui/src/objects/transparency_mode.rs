@@ -6,10 +6,9 @@ glib::wrapper! {
 }
 
 impl GlibTransparencyMode {
-    pub fn new(transparency_mode: GlibTransparencyModeValue, name: &str) -> Self {
+    pub fn new(transparency_mode: GlibTransparencyModeValue) -> Self {
         Object::builder()
             .property("transparency-mode", transparency_mode)
-            .property("name", name)
             .build()
     }
 }
@@ -19,7 +18,7 @@ impl GlibTransparencyMode {
 pub struct GlibTransparencyModeValue(pub TransparencyMode);
 
 mod imp {
-    use std::cell::{Cell, RefCell};
+    use std::cell::Cell;
 
     use gtk::{
         glib::{self, ParamSpec, Properties, Value},
@@ -34,8 +33,6 @@ mod imp {
     pub struct GlibTransparencyMode {
         #[property(set, get)]
         pub transparency_mode: Cell<GlibTransparencyModeValue>,
-        #[property(set, get)]
-        pub name: RefCell<String>,
     }
 
     #[glib::object_subclass]

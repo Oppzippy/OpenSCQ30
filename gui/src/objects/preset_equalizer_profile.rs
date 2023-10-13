@@ -6,10 +6,9 @@ glib::wrapper! {
 }
 
 impl GlibPresetEqualizerProfile {
-    pub fn new(preset_equalizer_profile: GlibPresetEqualizerProfileValue, name: &str) -> Self {
+    pub fn new(preset_equalizer_profile: GlibPresetEqualizerProfileValue) -> Self {
         Object::builder()
             .property("preset-equalizer-profile", preset_equalizer_profile)
-            .property("name", name)
             .build()
     }
 }
@@ -19,7 +18,7 @@ impl GlibPresetEqualizerProfile {
 pub struct GlibPresetEqualizerProfileValue(pub PresetEqualizerProfile);
 
 mod imp {
-    use std::cell::{Cell, RefCell};
+    use std::cell::Cell;
 
     use gtk::{
         glib::{self, ParamSpec, Properties, Value},
@@ -34,8 +33,6 @@ mod imp {
     pub struct GlibPresetEqualizerProfile {
         #[property(set, get)]
         pub preset_equalizer_profile: Cell<GlibPresetEqualizerProfileValue>,
-        #[property(set, get)]
-        pub name: RefCell<String>,
     }
 
     #[glib::object_subclass]

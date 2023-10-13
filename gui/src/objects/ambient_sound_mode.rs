@@ -6,10 +6,9 @@ glib::wrapper! {
 }
 
 impl GlibAmbientSoundMode {
-    pub fn new(ambient_sound_mode: GlibAmbientSoundModeValue, name: &str) -> Self {
+    pub fn new(ambient_sound_mode: GlibAmbientSoundModeValue) -> Self {
         Object::builder()
             .property("ambient-sound-mode", ambient_sound_mode)
-            .property("name", name)
             .build()
     }
 }
@@ -19,7 +18,7 @@ impl GlibAmbientSoundMode {
 pub struct GlibAmbientSoundModeValue(pub AmbientSoundMode);
 
 mod imp {
-    use std::cell::{Cell, RefCell};
+    use std::cell::Cell;
 
     use gtk::{
         glib::{self, ParamSpec, Properties, Value},
@@ -34,8 +33,6 @@ mod imp {
     pub struct GlibAmbientSoundMode {
         #[property(set, get)]
         pub ambient_sound_mode: Cell<GlibAmbientSoundModeValue>,
-        #[property(set, get)]
-        pub name: RefCell<String>,
     }
 
     #[glib::object_subclass]

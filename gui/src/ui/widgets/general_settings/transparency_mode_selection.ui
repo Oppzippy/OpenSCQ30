@@ -17,7 +17,7 @@
                 <!-- Transparency Mode -->
                 <child>
                     <object class="GtkToggleButton" id="fully_transparent">
-                        <property name="label" translatable="yes" context="transparency mode">Fully Transparent</property>
+                        <property name="label" translatable="yes" context="transparency mode">FullyTransparent</property>
                         <property name="hexpand">true</property>
                         <accessibility>
                             <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">transparency_mode_label</relation>
@@ -27,7 +27,7 @@
                 <child>
                     <object class="GtkToggleButton" id="vocal_mode">
                         <property name="group">fully_transparent</property>
-                        <property name="label" translatable="yes" context="transparency mode">Vocal Mode</property>
+                        <property name="label" translatable="yes" context="transparency mode">VocalMode</property>
                         <property name="hexpand">true</property>
                         <accessibility>
                             <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">transparency_mode_label</relation>

@@ -6,10 +6,9 @@ glib::wrapper! {
 }
 
 impl GlibNoiseCancelingMode {
-    pub fn new(noise_canceling_mode: GlibNoiseCancelingModeValue, name: &str) -> Self {
+    pub fn new(noise_canceling_mode: GlibNoiseCancelingModeValue) -> Self {
         Object::builder()
             .property("noise-canceling-mode", noise_canceling_mode)
-            .property("name", name)
             .build()
     }
 }
@@ -19,7 +18,7 @@ impl GlibNoiseCancelingMode {
 pub struct GlibNoiseCancelingModeValue(pub NoiseCancelingMode);
 
 mod imp {
-    use std::cell::{Cell, RefCell};
+    use std::cell::Cell;
 
     use gtk::{
         glib::{self, ParamSpec, Properties, Value},
@@ -34,8 +33,6 @@ mod imp {
     pub struct GlibNoiseCancelingMode {
         #[property(set, get)]
         pub noise_canceling_mode: Cell<GlibNoiseCancelingModeValue>,
-        #[property(set, get)]
-        pub name: RefCell<String>,
     }
 
     #[glib::object_subclass]
