@@ -10,7 +10,7 @@ jobs:
   rust_test_linux:
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:rolling
+      image: ubuntu:23.10
     steps:
       - name: Install basic requirements
         run: |
