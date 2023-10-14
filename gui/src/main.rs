@@ -388,9 +388,13 @@ fn delayed_initialize_application(
     );
 
     main_context.spawn_local(clone!(@weak main_window, @strong state => async move {
+        let mut receiver = state.state_update_receiver.subscribe().await;
         loop {
-            let next_state = state.state_update_receiver.next().await;
-            main_window.set_device_state(&next_state);
+            receiver.changed().await.expect("we hold a reference to state, which holds the sender, so it should be impossible for it to be dropped");
+            let next_state = receiver.borrow_and_update();
+            if let Some(next_state) = next_state.as_ref() {
+                main_window.set_device_state(&next_state);
+            }
         }
     }));
 

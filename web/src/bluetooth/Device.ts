@@ -26,7 +26,9 @@ export class Device {
     this.name = name;
     const stateSubject = new BehaviorSubject(initialState);
     this.state = stateSubject;
-    libDevice.setStateChangeListener((json: string) => {
+
+    // State change listening is infallible and can be set up in the background
+    void libDevice.setStateChangeListener((json: string) => {
       try {
         stateSubject.next(Device.parseState(json));
       } catch (err) {

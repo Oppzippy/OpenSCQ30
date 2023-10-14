@@ -1,9 +1,9 @@
-use std::{sync::Arc, time::Duration};
+use std::{mem, sync::Arc, time::Duration};
 
 use async_trait::async_trait;
 use futures::FutureExt;
 use macaddr::MacAddr6;
-use tokio::sync::{broadcast, mpsc, watch, RwLock};
+use tokio::sync::{mpsc, watch, Mutex};
 use tracing::{trace, warn};
 use uuid::Uuid;
 
@@ -32,9 +32,8 @@ where
     FuturesType: Futures,
 {
     connection: Arc<ConnectionType>,
-    state: Arc<RwLock<DeviceState>>,
+    state_sender: Arc<Mutex<watch::Sender<DeviceState>>>,
     join_handle: FuturesType::JoinHandleType,
-    state_update_sender: broadcast::Sender<DeviceState>,
 }
 
 impl<ConnectionType, FuturesType> Q30Device<ConnectionType, FuturesType>
@@ -54,40 +53,34 @@ where
                 .await?;
         }
 
-        let current_state_lock = Arc::new(RwLock::new(initial_state));
-        let (sender, _) = broadcast::channel(1);
+        let (state_sender, _) = watch::channel(initial_state);
+        let state_sender = Arc::new(Mutex::new(state_sender));
 
-        let join_handle = Self::spawn_inbound_packet_handler(
-            inbound_receiver,
-            current_state_lock.to_owned(),
-            sender.to_owned(),
-        );
+        let join_handle =
+            Self::spawn_inbound_packet_handler(inbound_receiver, state_sender.to_owned());
 
         Ok(Self {
             connection,
-            state: current_state_lock,
             join_handle,
-            state_update_sender: sender,
+            state_sender,
         })
     }
 
     fn spawn_inbound_packet_handler(
         mut inbound_receiver: mpsc::Receiver<Vec<u8>>,
-        current_state_lock: Arc<RwLock<DeviceState>>,
-        sender: broadcast::Sender<DeviceState>,
+        state_sender_lock: Arc<Mutex<watch::Sender<DeviceState>>>,
     ) -> FuturesType::JoinHandleType {
         FuturesType::spawn(async move {
             while let Some(packet_bytes) = inbound_receiver.recv().await {
                 match InboundPacket::new(&packet_bytes) {
                     Ok(packet) => {
-                        let mut state = current_state_lock.write().await;
+                        let state_sender = state_sender_lock.lock().await;
+                        let state = state_sender.borrow();
                         let new_state = state::transform_state(packet, &state);
                         if new_state != *state {
                             trace!(event = "state_update", old_state = ?state, new_state = ?new_state);
-                            *state = new_state.clone();
-                            if let Err(err) = sender.send(new_state) {
-                                trace!("failed to broadcast state change: {err}");
-                            }
+                            mem::drop(state);
+                            state_sender.send_replace(new_state);
                         }
                     }
                     Err(err) => warn!("failed to parse packet: {err:?}"),
@@ -134,8 +127,8 @@ where
     ConnectionType: Connection,
     FuturesType: Futures,
 {
-    fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState> {
-        self.state_update_sender.subscribe()
+    async fn subscribe_to_state_updates(&self) -> watch::Receiver<DeviceState> {
+        self.state_sender.lock().await.subscribe()
     }
 
     async fn mac_address(&self) -> crate::Result<MacAddr6> {
@@ -155,11 +148,12 @@ where
     }
 
     async fn state(&self) -> DeviceState {
-        self.state.read().await.clone()
+        self.state_sender.lock().await.borrow().to_owned()
     }
 
     async fn set_sound_modes(&self, sound_modes: SoundModes) -> crate::Result<()> {
-        let mut state = self.state.write().await;
+        let state_sender = self.state_sender.lock().await;
+        let state = state_sender.borrow().to_owned();
         let Some(prev_sound_modes) = state.sound_modes else {
             return Err(crate::Error::FeatureNotSupported {
                 feature_name: "sound modes",
@@ -224,10 +218,11 @@ where
                 )
                 .await?;
         }
-        *state = DeviceState {
+
+        state_sender.send_replace(DeviceState {
             sound_modes: Some(sound_modes),
-            ..state.clone()
-        };
+            ..state
+        });
         Ok(())
     }
 
@@ -235,7 +230,8 @@ where
         &self,
         equalizer_configuration: EqualizerConfiguration,
     ) -> crate::Result<()> {
-        let mut state = self.state.write().await;
+        let state_sender = self.state_sender.lock().await;
+        let state = state_sender.borrow().to_owned();
         if equalizer_configuration == state.equalizer_configuration {
             return Ok(());
         }
@@ -269,10 +265,10 @@ where
         };
         self.connection.write_with_response(&packet_bytes).await?;
 
-        *state = DeviceState {
+        state_sender.send_replace(DeviceState {
             equalizer_configuration,
-            ..state.clone()
-        };
+            ..state
+        });
         Ok(())
     }
 }

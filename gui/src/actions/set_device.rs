@@ -77,7 +77,7 @@ where
     };
 
     *state.selected_device.borrow_mut() = Some(device.to_owned());
-    let receiver = device.subscribe_to_state_updates();
+    let receiver = device.subscribe_to_state_updates().await;
     state
         .state_update_receiver
         .replace_receiver(Some(receiver))
@@ -153,7 +153,7 @@ mod tests {
         },
         state::DeviceState,
     };
-    use tokio::sync::{broadcast, watch};
+    use tokio::sync::watch;
     use uuid::Uuid;
 
     use crate::{
@@ -192,7 +192,8 @@ mod tests {
                     .expect_subscribe_to_state_updates()
                     .once()
                     .return_once(|| {
-                        let (_sender, receiver) = broadcast::channel(10);
+                        // We don't use the channel in this test, so initializing with a meaningless value is fine
+                        let (_sender, receiver) = watch::channel(Default::default());
                         receiver
                     });
                 device
@@ -277,7 +278,8 @@ mod tests {
                     .expect_subscribe_to_state_updates()
                     .once()
                     .return_once(|| {
-                        let (_sender, receiver) = broadcast::channel(10);
+                        // We don't use the channel in this test, so initializing with a meaningless value is fine
+                        let (_sender, receiver) = watch::channel(Default::default());
                         receiver
                     });
                 device

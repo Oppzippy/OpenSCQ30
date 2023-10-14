@@ -7,7 +7,7 @@ use gtk::glib::JoinHandle;
 use openscq30_lib::{api::device::DeviceRegistry, state::DeviceState};
 use tokio::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
 
-use crate::swappable_broadcast::SwappableBroadcastReceiver;
+use crate::swappable_broadcast::SwappableBroadcast;
 
 use super::StateUpdate;
 
@@ -22,7 +22,7 @@ where
     pub set_equalizer_configuration_handle: RefCell<Option<JoinHandle<()>>>,
     pub set_custom_noise_canceling_handle: RefCell<Option<JoinHandle<()>>>,
     pub is_refresh_in_progress: Cell<bool>,
-    pub state_update_receiver: SwappableBroadcastReceiver<DeviceState>,
+    pub state_update_receiver: SwappableBroadcast<DeviceState>,
 }
 
 impl<T> State<T>
@@ -38,7 +38,7 @@ where
                 set_custom_noise_canceling_handle: RefCell::new(None),
                 selected_device: RefCell::new(None),
                 is_refresh_in_progress: Cell::new(false),
-                state_update_receiver: SwappableBroadcastReceiver::new(),
+                state_update_receiver: SwappableBroadcast::new(),
                 registry,
                 state_update_sender: sender,
             }),

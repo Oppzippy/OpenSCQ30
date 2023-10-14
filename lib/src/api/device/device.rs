@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use macaddr::MacAddr6;
-use tokio::sync::{broadcast, watch};
+use tokio::sync::watch;
 use uuid::Uuid;
 
 use crate::{
@@ -11,7 +11,7 @@ use crate::{
 
 #[async_trait(?Send)]
 pub trait Device {
-    fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState>;
+    async fn subscribe_to_state_updates(&self) -> watch::Receiver<DeviceState>;
 
     async fn mac_address(&self) -> crate::Result<MacAddr6>;
 

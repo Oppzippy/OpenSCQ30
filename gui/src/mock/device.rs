@@ -9,13 +9,13 @@ use openscq30_lib::{
     packets::structures::{EqualizerConfiguration, SoundModes},
     state::DeviceState,
 };
-use tokio::sync::{broadcast, watch};
+use tokio::sync::watch;
 use uuid::Uuid;
 
 mock! {
     #[derive(Debug)]
     pub Device {
-        pub fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState>;
+        pub fn subscribe_to_state_updates(&self) -> watch::Receiver<DeviceState>;
         pub fn connection_status(&self) -> watch::Receiver<ConnectionStatus>;
         pub fn mac_address(&self) -> openscq30_lib::Result<MacAddr6>;
         pub fn name(&self) -> openscq30_lib::Result<String>;
@@ -34,7 +34,7 @@ mock! {
 
 #[async_trait(?Send)]
 impl Device for MockDevice {
-    fn subscribe_to_state_updates(&self) -> broadcast::Receiver<DeviceState> {
+    async fn subscribe_to_state_updates(&self) -> watch::Receiver<DeviceState> {
         self.subscribe_to_state_updates()
     }
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
