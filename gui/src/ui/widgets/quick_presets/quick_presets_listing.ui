@@ -9,8 +9,13 @@
             </object>
         </child>
         <child>
-            <object class="AdwPreferencesGroup" id="quick_presets_list">
-                <property name="title">Quick Presets</property>
+            <object class="GtkScrolledWindow">
+                <property name="vexpand">true</property>
+                <child>
+                    <object class="AdwPreferencesGroup" id="quick_presets_list">
+                        <property name="title">Quick Presets</property>
+                    </object>
+                </child>
             </object>
         </child>
     </template>
