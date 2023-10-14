@@ -27,13 +27,11 @@ async fn set_equalizer_configuration_impl<T>(
 where
     T: DeviceRegistry + 'static,
 {
-    if let Some(handle) = state.set_equalizer_configuration_handle.take() {
-        handle.abort();
-    }
     let device = state
         .selected_device()
         .ok_or_else(|| anyhow::anyhow!("no device is selected"))?;
 
+    // Debounce
     let (result_sender, result_receiver) = oneshot::channel::<openscq30_lib::Result<()>>();
     let new_handle = MainContext::default().spawn_local(clone!(@weak device => async move {
         timeout_future(Duration::from_millis(500)).await;
@@ -51,11 +49,11 @@ where
 
     match result_receiver.await {
         Ok(Ok(())) => {
-            tracing::trace!("returning with no error");
+            tracing::trace!("set_equalizer_configuration: returning with no error");
             Ok(())
         }
         Err(_sender_dropped) => {
-            tracing::trace!("sender dropped, returning");
+            tracing::trace!("set_equalizer_configuration: sender dropped, returning");
             Ok(())
         }
         Ok(Err(err)) => Err(err.into()),

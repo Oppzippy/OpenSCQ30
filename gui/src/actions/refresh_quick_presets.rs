@@ -1,4 +1,4 @@
-use anyhow::anyhow;
+use anyhow::{anyhow, Context};
 use openscq30_lib::api::device::DeviceRegistry;
 use uuid::Uuid;
 
@@ -17,16 +17,18 @@ pub fn refresh_quick_presets<T>(
 where
     T: DeviceRegistry + 'static,
 {
-    let quick_presets = config.get(|config| {
-        config
-            .quick_presets(device_service_uuid)
-            .iter()
-            .map(|(name, quick_preset)| GlibNamedQuickPresetValue {
-                name: name.as_str().into(),
-                quick_preset: quick_preset.to_owned(),
-            })
-            .collect()
-    })?;
+    let quick_presets = config
+        .get(|config| {
+            config
+                .quick_presets(device_service_uuid)
+                .iter()
+                .map(|(name, quick_preset)| GlibNamedQuickPresetValue {
+                    name: name.as_str().into(),
+                    quick_preset: quick_preset.to_owned(),
+                })
+                .collect()
+        })
+        .context("get quick presets from config")?;
     state
         .state_update_sender
         .send(StateUpdate::SetQuickPresets(quick_presets))

@@ -16,21 +16,21 @@ where
             descriptors_result?
         };
 
-        let model_devices = descriptors
+        let devices = descriptors
             .iter()
             .map(|descriptor| {
                 GlibDevice::new(descriptor.name(), &descriptor.mac_address().to_string())
             })
             .collect::<Vec<_>>();
 
-        if model_devices.is_empty() {
-            // Selection will not change automatically if device list is empty
+        if devices.is_empty() {
+            // Selection will not change to None automatically if device list is empty, so we have to do it here
             state.state_update_receiver.replace_receiver(None).await;
             *state.selected_device.borrow_mut() = None;
         }
         state
             .state_update_sender
-            .send(StateUpdate::SetDevices(model_devices))
+            .send(StateUpdate::SetDevices(devices))
             .map_err(|err| anyhow::anyhow!("{err}"))?;
     }
     Ok(())

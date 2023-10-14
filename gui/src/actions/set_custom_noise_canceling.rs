@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use anyhow::Context;
 use gtk::glib::{self, clone, timeout_future, MainContext};
 use openscq30_lib::{
     api::device::{Device, DeviceRegistry},
@@ -16,31 +17,20 @@ pub async fn set_custom_noise_canceling<T>(
 where
     T: DeviceRegistry + 'static,
 {
-    if let Some(handle) = state.set_custom_noise_canceling_handle.take() {
-        handle.abort();
-    }
     let device = state
         .selected_device()
         .ok_or_else(|| anyhow::anyhow!("no device is selected"))?;
 
+    // Debounce
     let (result_sender, result_receiver) = oneshot::channel::<anyhow::Result<()>>();
     let new_handle = MainContext::default().spawn_local(clone!(@weak device => async move {
-        timeout_future(Duration::from_millis(500)).await;
-        let Some(sound_modes) = device.state().await.sound_modes else {
-            result_sender.send(Err(anyhow::anyhow!("sound modes not supported"))).expect("receiver dropped");
-            return;
-        };
-
-        let new_sound_modes = SoundModes {
-            custom_noise_canceling,
-            ..sound_modes
-        };
-
-        let result = device.set_sound_modes(new_sound_modes).await;
-        result_sender.send(result.map_err(Into::into)).expect("receiver dropped");
+        let result = set_custom_noise_canceling_after_delay(device.as_ref(), custom_noise_canceling).await;
+        result_sender.send(result).expect("receiver dropped");
     }));
+
+    // Store the handle so we can cancel it later
     if let Some(old_handle) = state
-        .set_equalizer_configuration_handle
+        .set_custom_noise_canceling_handle
         .replace(Some(new_handle))
     {
         old_handle.abort();
@@ -48,15 +38,36 @@ where
 
     match result_receiver.await {
         Ok(Ok(())) => {
-            tracing::trace!("returning with no error");
+            tracing::trace!("set_custom_noise_canceling: returning with no error");
             Ok(())
         }
         Err(_sender_dropped) => {
-            tracing::trace!("sender dropped, returning");
+            tracing::trace!("set_custom_noise_canceling: sender dropped, returning");
             Ok(())
         }
         Ok(Err(err)) => Err(err),
     }
+}
+
+async fn set_custom_noise_canceling_after_delay(
+    device: &impl Device,
+    custom_noise_canceling: CustomNoiseCanceling,
+) -> anyhow::Result<()> {
+    timeout_future(Duration::from_millis(500)).await;
+
+    let Some(sound_modes) = device.state().await.sound_modes else {
+        anyhow::bail!("sound modes not supported");
+    };
+
+    let new_sound_modes = SoundModes {
+        custom_noise_canceling,
+        ..sound_modes
+    };
+
+    device
+        .set_sound_modes(new_sound_modes)
+        .await
+        .context("set sound modes")
 }
 
 #[cfg(test)]

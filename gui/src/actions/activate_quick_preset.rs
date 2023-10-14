@@ -46,7 +46,10 @@ async fn set_sound_modes_from_quick_preset(
                 .custom_noise_canceling
                 .unwrap_or(sound_modes.custom_noise_canceling),
         };
-        device.set_sound_modes(new_sound_modes).await?;
+        device
+            .set_sound_modes(new_sound_modes)
+            .await
+            .context("set sound modes")?;
     }
     Ok(())
 }
@@ -77,7 +80,8 @@ async fn set_equalizer_configuration_from_quick_preset(
     if let Some(new_equalizer_configuration) = new_equalizer_configuration {
         device
             .set_equalizer_configuration(new_equalizer_configuration)
-            .await?;
+            .await
+            .context("set equalizer configuration")?;
     }
     Ok(())
 }

@@ -1,11 +1,12 @@
 use openscq30_lib::api::device::DeviceRegistry;
 
 use crate::{
+    actions,
     objects::GlibCustomEqualizerProfile,
     settings::{Config, SettingsFile},
 };
 
-use super::{State, StateUpdate};
+use super::State;
 
 pub fn delete_custom_equalizer_profile<T>(
     state: &State<T>,
@@ -18,20 +19,7 @@ where
     settings_file.edit(|settings| {
         settings.remove_custom_profile(&custom_profile.name());
     })?;
-    settings_file.get(|settings| {
-        state
-            .state_update_sender
-            .send(StateUpdate::SetCustomEqualizerProfiles(
-                settings
-                    .custom_profiles()
-                    .iter()
-                    .map(|(name, profile)| {
-                        GlibCustomEqualizerProfile::new(name, profile.volume_adjustments())
-                    })
-                    .collect(),
-            ))
-            .unwrap();
-    })?;
+    actions::refresh_custom_equalizer_profiles(&state.state_update_sender, settings_file)?;
     Ok(())
 }
 

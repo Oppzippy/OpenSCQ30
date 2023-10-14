@@ -1,12 +1,14 @@
 use anyhow::Context;
 use openscq30_lib::api::device::{Device, DeviceRegistry};
+use uuid::Uuid;
 
 use crate::{
+    actions,
     objects::GlibNamedQuickPresetValue,
     settings::{Config, SettingsFile},
 };
 
-use super::{State, StateUpdate};
+use super::State;
 
 pub fn create_quick_preset<T>(
     state: &State<T>,
@@ -21,6 +23,16 @@ where
     };
     let device_service_uuid = device.service_uuid();
 
+    insert_quick_preset(settings_file, named_quick_preset, device_service_uuid)?;
+    actions::refresh_quick_presets(state, settings_file, device_service_uuid)?;
+    Ok(())
+}
+
+fn insert_quick_preset(
+    settings_file: &SettingsFile<Config>,
+    named_quick_preset: GlibNamedQuickPresetValue,
+    device_service_uuid: Uuid,
+) -> anyhow::Result<()> {
     settings_file
         .edit(|settings| {
             settings.set_quick_preset(
@@ -29,25 +41,7 @@ where
                 named_quick_preset.quick_preset,
             );
         })
-        .context("edit settings")?;
-    settings_file
-        .get(|settings| {
-            state
-                .state_update_sender
-                .send(StateUpdate::SetQuickPresets(
-                    settings
-                        .quick_presets(device_service_uuid)
-                        .iter()
-                        .map(|(name, quick_preset)| GlibNamedQuickPresetValue {
-                            name: name.as_str().into(),
-                            quick_preset: quick_preset.to_owned(),
-                        })
-                        .collect(),
-                ))
-                .unwrap();
-        })
-        .context("get updated settings")?;
-    Ok(())
+        .context("insert quick preset")
 }
 
 #[cfg(test)]

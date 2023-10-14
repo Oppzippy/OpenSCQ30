@@ -2,11 +2,11 @@ use anyhow::Context;
 use openscq30_lib::api::device::{Device, DeviceRegistry};
 
 use crate::{
-    objects::GlibNamedQuickPresetValue,
+    actions,
     settings::{Config, SettingsFile},
 };
 
-use super::{State, StateUpdate};
+use super::State;
 
 pub fn delete_quick_preset<T>(
     state: &State<T>,
@@ -26,23 +26,7 @@ where
             settings.remove_quick_preset(device_service_uuid, quick_preset_name);
         })
         .context("edit settings")?;
-    settings_file
-        .get(|settings| {
-            state
-                .state_update_sender
-                .send(StateUpdate::SetQuickPresets(
-                    settings
-                        .quick_presets(device_service_uuid)
-                        .iter()
-                        .map(|(name, quick_preset)| GlibNamedQuickPresetValue {
-                            name: name.as_str().into(),
-                            quick_preset: quick_preset.to_owned(),
-                        })
-                        .collect(),
-                ))
-                .unwrap();
-        })
-        .context("get updated settings")?;
+    actions::refresh_quick_presets(state, settings_file, device_service_uuid)?;
     Ok(())
 }
 

@@ -3,6 +3,7 @@ mod create_custom_equalizer_profile;
 mod create_quick_preset;
 mod delete_custom_equalizer_profile;
 mod delete_quick_preset;
+mod refresh_custom_equalizer_profiles;
 mod refresh_devices;
 mod refresh_quick_presets;
 mod select_custom_equalizer_configuration;
@@ -29,6 +30,7 @@ use openscq30_lib::{
     },
     state::DeviceState,
 };
+pub use refresh_custom_equalizer_profiles::*;
 pub use refresh_devices::*;
 pub use refresh_quick_presets::*;
 pub use select_custom_equalizer_configuration::*;

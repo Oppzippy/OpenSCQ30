@@ -7,7 +7,7 @@ use openscq30_lib::api::{
     connection::ConnectionStatus,
     device::{Device, DeviceRegistry},
 };
-use tokio::sync::oneshot;
+use tokio::sync::{mpsc::UnboundedSender, oneshot, watch};
 
 use crate::{actions, settings::SettingsFile};
 use crate::{objects::GlibDevice, settings::Config};
@@ -28,81 +28,8 @@ where
     }
     *state.selected_device.borrow_mut() = None;
 
-    // Connect to new device
-    if let Some(mac_address) = mac_address {
-        state
-            .state_update_sender
-            .send(StateUpdate::SetLoading(true))
-            .unwrap();
-        let main_context = MainContext::default();
-        let (sender, receiver) = oneshot::channel();
-        let handle = main_context.spawn_local(clone!(@strong state => async move {
-            let result: anyhow::Result<()> = (async {
-                let device = state.registry.device(mac_address).await?.ok_or_else(|| {
-                    state.state_update_sender
-                        .send(StateUpdate::SetSelectedDevice(None))
-                        .map_err(|err| anyhow!("{err}")) // StateUpdate isn't send
-                        .err()
-                        .unwrap_or_else(|| anyhow!("device not found: {mac_address}"))
-                })?;
-
-                *state.selected_device.borrow_mut() = Some(device.to_owned());
-                let receiver = device.subscribe_to_state_updates();
-                state.state_update_receiver.replace_receiver(Some(receiver)).await;
-
-                let mut connection_status_receiver = device.connection_status();
-                let state_update_sender = state.state_update_sender.clone();
-                MainContext::default().spawn_local(async move {
-                    loop {
-                        match connection_status_receiver.changed().await {
-                            Ok(_) => {
-                                let connection_status = *connection_status_receiver.borrow();
-                                if connection_status == ConnectionStatus::Disconnected {
-                                    if let Err(err) = state_update_sender.send(StateUpdate::AddToast("Device Disconnected".to_string())) {
-                                        tracing::error!(
-                                            "error sending toast: {err:?}",
-                                        );
-                                    }
-                                    if let Err(err) = state_update_sender.send(StateUpdate::SetSelectedDevice(None)) {
-                                        tracing::error!(
-                                            "setting device state to disconnected after receiving ConnectionStatus::Disconnected: {err:?}",
-                                        );
-                                    }
-                                    break
-                                }
-                            },
-                            Err(err) => {
-                                tracing::debug!("connection status sender destroyed, exiting loop: {err:?}");
-                                break
-                            },
-                        };
-                    }
-                });
-
-                let name = device.name().await?;
-                let mac_address = device.mac_address().await?;
-                let device_state = device.state().await;
-                state.state_update_sender
-                    .send(StateUpdate::SetSelectedDevice(Some(GlibDevice::new(&name, &mac_address.to_string()))))
-                    .map_err(|err| anyhow!("{err:?}"))?;
-
-                state.state_update_sender
-                    .send(StateUpdate::SetDeviceState(device_state))
-                    .map_err(|err| anyhow!("{err:?}"))?;
-
-                actions::refresh_quick_presets(&state, &config, device.service_uuid())?;
-
-                Ok(())
-            }).await;
-            state.state_update_sender.send(StateUpdate::SetLoading(false)).unwrap();
-            sender.send(result).unwrap();
-        }));
-        *state.connect_to_device_handle.borrow_mut() = Some(handle);
-        // we don't care if the receive fails, since that just means that someone else set a new device and canceled us
-        if let Ok(result) = receiver.await {
-            return result;
-        }
-    } else {
+    let Some(mac_address) = mac_address else {
+        // Disconnect
         state
             .state_update_sender
             .send(StateUpdate::SetSelectedDevice(None))
@@ -111,8 +38,105 @@ where
             .state_update_sender
             .send(StateUpdate::SetLoading(false))
             .map_err(|err| anyhow::anyhow!("{err}"))?;
+        return Ok(());
+    };
+
+    // Connect to new device
+    state
+        .state_update_sender
+        .send(StateUpdate::SetLoading(true))
+        .unwrap();
+    let (sender, receiver) = oneshot::channel();
+    let handle = MainContext::default().spawn_local(clone!(@strong state => async move {
+        let result = connect_to_device(&state, &config, mac_address).await;
+        state.state_update_sender.send(StateUpdate::SetLoading(false)).unwrap();
+        sender.send(result).unwrap();
+    }));
+    *state.connect_to_device_handle.borrow_mut() = Some(handle);
+    match receiver.await {
+        Ok(result) => result,
+        // we don't care if the receive fails, since that just means that someone else set a new device and canceled us
+        Err(_) => Ok(()),
     }
+}
+
+async fn connect_to_device<T>(
+    state: &Rc<State<T>>,
+    settings_file: &SettingsFile<Config>,
+    mac_address: MacAddr6,
+) -> anyhow::Result<()>
+where
+    T: DeviceRegistry + 'static,
+{
+    let Some(device) = state.registry.device(mac_address).await? else {
+        state
+            .state_update_sender
+            .send(StateUpdate::SetSelectedDevice(None))
+            .map_err(|err| anyhow!("{err:?}"))?;
+        anyhow::bail!("device not found: {mac_address}");
+    };
+
+    *state.selected_device.borrow_mut() = Some(device.to_owned());
+    let receiver = device.subscribe_to_state_updates();
+    state
+        .state_update_receiver
+        .replace_receiver(Some(receiver))
+        .await;
+
+    let connection_status_receiver = device.connection_status();
+    let state_update_sender = state.state_update_sender.clone();
+    MainContext::default().spawn_local(async move {
+        wait_for_disconnect(connection_status_receiver).await;
+        handle_disconnect(state_update_sender);
+    });
+
+    let name = device.name().await?;
+    let mac_address = device.mac_address().await?;
+    let device_state = device.state().await;
+    state
+        .state_update_sender
+        .send(StateUpdate::SetSelectedDevice(Some(GlibDevice::new(
+            &name,
+            &mac_address.to_string(),
+        ))))
+        .map_err(|err| anyhow!("{err:?}"))?;
+
+    state
+        .state_update_sender
+        .send(StateUpdate::SetDeviceState(device_state))
+        .map_err(|err| anyhow!("{err:?}"))?;
+
+    actions::refresh_quick_presets(&state, &settings_file, device.service_uuid())?;
+
     Ok(())
+}
+
+async fn wait_for_disconnect(mut connection_status_receiver: watch::Receiver<ConnectionStatus>) {
+    loop {
+        match connection_status_receiver.changed().await {
+            Ok(_) => {
+                let connection_status = *connection_status_receiver.borrow();
+                if connection_status == ConnectionStatus::Disconnected {
+                    return;
+                }
+            }
+            Err(err) => {
+                tracing::debug!("connection status sender destroyed, exiting loop: {err:?}");
+                break;
+            }
+        };
+    }
+}
+
+fn handle_disconnect(state_update_sender: UnboundedSender<StateUpdate>) {
+    if let Err(err) =
+        state_update_sender.send(StateUpdate::AddToast("Device Disconnected".to_string()))
+    {
+        tracing::error!("error sending toast: {err:?}");
+    }
+    if let Err(err) = state_update_sender.send(StateUpdate::SetSelectedDevice(None)) {
+        tracing::error!("setting device state to disconnected after receiving ConnectionStatus::Disconnected: {err:?}");
+    }
 }
 
 #[cfg(test)]

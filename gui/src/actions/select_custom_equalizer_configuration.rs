@@ -27,12 +27,13 @@ where
                 .ok_or_else(|| {
                     anyhow::anyhow!("custom profile does not exist: {}", custom_profile.name())
                 })?;
+            let equalizer_configuration = EqualizerConfiguration::new_custom_profile(
+                VolumeAdjustments::new(profile.volume_adjustments()),
+            );
             state
                 .state_update_sender
                 .send(StateUpdate::SetEqualizerConfiguration(
-                    EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(
-                        profile.volume_adjustments(),
-                    )),
+                    equalizer_configuration,
                 ))
                 .map_err(|err| anyhow::anyhow!("{err}"))?;
             Ok(()) as anyhow::Result<()>

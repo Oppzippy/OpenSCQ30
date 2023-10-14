@@ -1,11 +1,13 @@
+use anyhow::Context;
 use openscq30_lib::api::device::DeviceRegistry;
 
 use crate::{
+    actions,
     objects::GlibCustomEqualizerProfile,
     settings::{Config, CustomEqualizerProfile, SettingsFile},
 };
 
-use super::{State, StateUpdate};
+use super::State;
 
 pub fn create_custom_equalizer_profile<T>(
     state: &State<T>,
@@ -15,27 +17,23 @@ pub fn create_custom_equalizer_profile<T>(
 where
     T: DeviceRegistry + 'static,
 {
-    settings_file.edit(|settings| {
-        settings.set_custom_profile(
-            custom_profile.name(),
-            CustomEqualizerProfile::new(custom_profile.volume_adjustments()),
-        );
-    })?;
-    settings_file.get(|settings| {
-        state
-            .state_update_sender
-            .send(StateUpdate::SetCustomEqualizerProfiles(
-                settings
-                    .custom_profiles()
-                    .iter()
-                    .map(|(name, profile)| {
-                        GlibCustomEqualizerProfile::new(name, profile.volume_adjustments())
-                    })
-                    .collect(),
-            ))
-            .unwrap();
-    })?;
+    insert_custom_profile(settings_file, custom_profile)?;
+    actions::refresh_custom_equalizer_profiles(&state.state_update_sender, settings_file)?;
     Ok(())
+}
+
+fn insert_custom_profile(
+    settings_file: &SettingsFile<Config>,
+    custom_profile: &GlibCustomEqualizerProfile,
+) -> anyhow::Result<()> {
+    settings_file
+        .edit(|settings| {
+            settings.set_custom_profile(
+                custom_profile.name(),
+                CustomEqualizerProfile::new(custom_profile.volume_adjustments()),
+            );
+        })
+        .context("insert custom profile")
 }
 
 #[cfg(test)]
