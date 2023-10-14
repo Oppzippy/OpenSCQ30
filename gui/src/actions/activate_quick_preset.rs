@@ -7,7 +7,7 @@ use openscq30_lib::{
 
 use crate::settings::{Config, PresetOrCustomEqualizerProfile, QuickPreset, SettingsFile};
 
-use super::State;
+use super::{State, StateUpdate};
 
 pub async fn activate_quick_preset<T>(
     state: &State<T>,
@@ -22,6 +22,13 @@ where
         set_sound_modes_from_quick_preset(device.as_ref(), &device_state, quick_preset).await?;
         set_equalizer_configuration_from_quick_preset(device.as_ref(), settings_file, quick_preset)
             .await?;
+        // The UI is unaware of the new state since subscribing to Device's state updates only fires when
+        // the state is changed from the headphones, not by us.
+        // TODO replace separate state and broadcast channel with observable
+        state
+            .state_update_sender
+            .send(StateUpdate::SetDeviceState(device.state().await))
+            .unwrap();
     }
     Ok(())
 }
