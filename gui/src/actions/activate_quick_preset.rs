@@ -121,7 +121,7 @@ mod tests {
     async fn test_set_ambient_sound_mode() {
         crate::load_resources();
         let registry = MockDeviceRegistry::new();
-        let (state, _) = State::new(registry);
+        let (state, _sender) = State::new(registry);
 
         let mut device = MockDevice::new();
         device.expect_service_uuid().return_const(Uuid::default());
@@ -166,7 +166,7 @@ mod tests {
     async fn test_set_preset_equalizer_profile() {
         crate::load_resources();
         let registry = MockDeviceRegistry::new();
-        let (state, _) = State::new(registry);
+        let (state, _sender) = State::new(registry);
 
         let mut device = MockDevice::new();
         device.expect_service_uuid().return_const(Uuid::default());
@@ -202,7 +202,7 @@ mod tests {
     async fn test_set_custom_equalizer_profile() {
         crate::load_resources();
         let registry = MockDeviceRegistry::new();
-        let (state, _) = State::new(registry);
+        let (state, _sender) = State::new(registry);
 
         const VOLUME_ADJUSTMENTS: [f64; 8] = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
 
@@ -246,7 +246,7 @@ mod tests {
     async fn test_set_deleted_custom_equalizer_profile() {
         crate::load_resources();
         let registry = MockDeviceRegistry::new();
-        let (state, _) = State::new(registry);
+        let (state, _sender) = State::new(registry);
 
         let mut device = MockDevice::new();
         device.expect_service_uuid().return_const(Uuid::default());
