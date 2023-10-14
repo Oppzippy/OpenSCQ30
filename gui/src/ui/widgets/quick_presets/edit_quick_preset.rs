@@ -65,21 +65,31 @@ mod imp {
     #[template(resource = "/com/oppzippy/OpenSCQ30/ui/widgets/quick_presets/edit_quick_preset.ui")]
     pub struct EditQuickPreset {
         #[template_child]
+        ambient_sound_mode_group: TemplateChild<adw::PreferencesGroup>,
+        #[template_child]
         ambient_sound_mode_switch: TemplateChild<adw::SwitchRow>,
         #[template_child]
         ambient_sound_mode: TemplateChild<adw::ComboRow>,
+        #[template_child]
+        transparency_mode_group: TemplateChild<adw::PreferencesGroup>,
         #[template_child]
         transparency_mode_switch: TemplateChild<adw::SwitchRow>,
         #[template_child]
         transparency_mode: TemplateChild<adw::ComboRow>,
         #[template_child]
+        noise_canceling_mode_group: TemplateChild<adw::PreferencesGroup>,
+        #[template_child]
         noise_canceling_mode_switch: TemplateChild<adw::SwitchRow>,
         #[template_child]
         noise_canceling_mode: TemplateChild<adw::ComboRow>,
         #[template_child]
+        custom_noise_canceling_group: TemplateChild<adw::PreferencesGroup>,
+        #[template_child]
         custom_noise_canceling_switch: TemplateChild<adw::SwitchRow>,
         #[template_child]
         custom_noise_canceling: TemplateChild<adw::SpinRow>,
+        #[template_child]
+        equalizer_profile_group: TemplateChild<adw::PreferencesGroup>,
         #[template_child]
         equalizer_profile_switch: TemplateChild<adw::SwitchRow>,
         #[template_child]
@@ -175,6 +185,8 @@ mod imp {
         }
 
         pub fn set_device_feature_flags(&self, flags: DeviceFeatureFlags) {
+            self.ambient_sound_mode_group
+                .set_visible(flags.contains(DeviceFeatureFlags::SOUND_MODES));
             let mut ambient_sound_modes = self.ambient_sound_modes_store.borrow_mut();
             let ambient_sound_modes = ambient_sound_modes.as_mut().unwrap();
             ambient_sound_modes.remove_all();
@@ -190,6 +202,8 @@ mod imp {
                 )));
             }
 
+            self.transparency_mode_group
+                .set_visible(flags.contains(DeviceFeatureFlags::TRANSPARENCY_MODES));
             let mut transparency_modes = self.transparency_modes_store.borrow_mut();
             let transparency_modes = transparency_modes.as_mut().unwrap();
             transparency_modes.remove_all();
@@ -200,6 +214,8 @@ mod imp {
                 TransparencyMode::VocalMode,
             )));
 
+            self.noise_canceling_mode_group
+                .set_visible(flags.contains(DeviceFeatureFlags::NOISE_CANCELING_MODE));
             let mut noise_canceling_modes = self.noise_canceling_modes_store.borrow_mut();
             let noise_canceling_modes = noise_canceling_modes.as_mut().unwrap();
             noise_canceling_modes.remove_all();
@@ -217,6 +233,12 @@ mod imp {
                     GlibNoiseCancelingModeValue(NoiseCancelingMode::Custom),
                 ));
             }
+
+            self.custom_noise_canceling_group
+                .set_visible(flags.contains(DeviceFeatureFlags::CUSTOM_NOISE_CANCELING));
+
+            self.equalizer_profile_group
+                .set_visible(flags.contains(DeviceFeatureFlags::EQUALIZER));
         }
 
         pub fn set_custom_equalizer_profiles(&self, profiles: Vec<GlibCustomEqualizerProfile>) {

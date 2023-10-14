@@ -9,7 +9,7 @@
                     <object class="GtkBox">
                         <property name="orientation">vertical</property>
                         <child>
-                            <object class="AdwPreferencesGroup">
+                            <object class="AdwPreferencesGroup" id="ambient_sound_mode_group">
                                 <property name="title" translatable="yes">Ambient Sound Mode</property>
                                 <child>
                                     <object class="AdwSwitchRow" id="ambient_sound_mode_switch">
@@ -28,7 +28,7 @@
                         </child>
 
                         <child>
-                            <object class="AdwPreferencesGroup">
+                            <object class="AdwPreferencesGroup" id="transparency_mode_group">
                                 <property name="title" translatable="yes">Transparency Mode</property>
                                 <child>
                                     <object class="AdwSwitchRow" id="transparency_mode_switch">
@@ -47,7 +47,7 @@
                         </child>
 
                         <child>
-                            <object class="AdwPreferencesGroup">
+                            <object class="AdwPreferencesGroup" id="noise_canceling_mode_group">
                                 <property name="title" translatable="yes">Noise Canceling Mode</property>
                                 <child>
                                     <object class="AdwSwitchRow" id="noise_canceling_mode_switch">
@@ -65,7 +65,7 @@
                             </object>
                         </child>
                         <child>
-                            <object class="AdwPreferencesGroup">
+                            <object class="AdwPreferencesGroup" id="custom_noise_canceling_group">
                                 <property name="title" translatable="yes">Custom Noise Canceling</property>
                                 <child>
                                     <object class="AdwSwitchRow" id="custom_noise_canceling_switch">
@@ -92,7 +92,7 @@
                         </child>
 
                         <child>
-                            <object class="AdwPreferencesGroup">
+                            <object class="AdwPreferencesGroup" id="equalizer_profile_group">
                                 <property name="title" translatable="yes">Equalizer Profile</property>
                                 <child>
                                     <object class="AdwSwitchRow" id="equalizer_profile_switch">
