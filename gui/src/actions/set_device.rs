@@ -106,7 +106,7 @@ where
         .send(StateUpdate::SetDeviceState(device_state))
         .map_err(|err| anyhow!("{err:?}"))?;
 
-    actions::refresh_quick_presets(&state, &settings_file, device.service_uuid())?;
+    actions::refresh_quick_presets(state, settings_file, device.service_uuid())?;
 
     Ok(())
 }
