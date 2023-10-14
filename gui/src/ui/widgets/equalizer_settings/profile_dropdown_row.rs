@@ -78,9 +78,6 @@ mod imp {
 
     impl ObjectImpl for ProfileDropdownRow {
         fn constructed(&self) {
-            self.obj()
-                .bind_property("name", &self.label.get(), "label")
-                .build();
             self.drawing_area.set_content_width(80);
             let this = self.to_owned();
             self.label.connect_label_notify(move |label| {

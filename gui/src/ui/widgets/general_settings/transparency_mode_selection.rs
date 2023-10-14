@@ -76,16 +76,16 @@ mod imp {
                 (TransparencyMode::VocalMode, &self.vocal_mode.get()),
             ]
             .into_iter()
-            .for_each(|(transparency_mode, button)| {
+            .for_each(|(button_transparency_mode, button)| {
                 obj.bind_property("transparency_mode", button, "active")
                     .transform_to(
                         move |_, selected_transparency_mode: GlibTransparencyModeValue| {
-                            Some(transparency_mode == selected_transparency_mode.0)
+                            Some(button_transparency_mode == selected_transparency_mode.0)
                         },
                     )
                     .transform_from(move |_, is_active| {
                         if is_active {
-                            Some(GlibTransparencyModeValue(transparency_mode))
+                            Some(GlibTransparencyModeValue(button_transparency_mode))
                         } else {
                             None
                         }

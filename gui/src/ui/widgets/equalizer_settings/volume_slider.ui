@@ -3,6 +3,7 @@
     <object class="GtkAdjustment" id="eq-adjustment">
         <property name="step-increment">0.1</property>
         <property name="page-increment">1</property>
+        <property name="value" bind-source="OpenSCQ30VolumeSlider" bind-property="volume_slider_value" bind-flags="sync-create|bidirectional" />
     </object>
     <template class="OpenSCQ30VolumeSlider" parent="GtkBox">
         <property name="orientation">vertical</property>

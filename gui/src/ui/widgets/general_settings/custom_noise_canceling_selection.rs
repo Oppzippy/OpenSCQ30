@@ -68,8 +68,8 @@ mod imp {
 
             obj.bind_property("custom_noise_canceling", &self.scale.adjustment(), "value")
                 .transform_to(
-                    move |_, selected_custom_noise_canceling: GlibCustomNoiseCancelingValue| {
-                        Some(selected_custom_noise_canceling.0.value() as f64)
+                    move |_, custom_noise_canceling: GlibCustomNoiseCancelingValue| {
+                        Some(custom_noise_canceling.0.value() as f64)
                     },
                 )
                 .transform_from(|_, value: f64| {

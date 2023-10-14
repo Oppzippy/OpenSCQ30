@@ -86,14 +86,6 @@ mod imp {
                 .flags(BindingFlags::SYNC_CREATE)
                 .build();
 
-            obj.bind_property(
-                "volume_slider_value",
-                &self.slider.get().adjustment(),
-                "value",
-            )
-            .flags(BindingFlags::BIDIRECTIONAL)
-            .build();
-
             let slider = self.slider.get();
             let lower = VolumeAdjustments::MIN_VOLUME;
             let upper = VolumeAdjustments::MAX_VOLUME;

@@ -72,14 +72,6 @@ mod imp {
             self.parent_constructed();
             let obj = self.obj();
 
-            obj.bind_property(
-                "has_noise_canceling_mode",
-                &self.noise_canceling_mode.get(),
-                "visible",
-            )
-            .sync_create()
-            .build();
-
             [
                 (AmbientSoundMode::Normal, &self.normal_mode.get()),
                 (
@@ -92,16 +84,17 @@ mod imp {
                 ),
             ]
             .into_iter()
-            .for_each(|(ambient_sound_mode, button)| {
+            .for_each(|(button_ambient_sound_mode, button)| {
                 obj.bind_property("ambient_sound_mode", button, "active")
                     .transform_to(
                         move |_, selected_ambient_sound_mode: GlibAmbientSoundModeValue| {
-                            Some(ambient_sound_mode == selected_ambient_sound_mode.0)
+                            Some(button_ambient_sound_mode == selected_ambient_sound_mode.0)
                         },
                     )
                     .transform_from(move |_, is_active| {
+                        // When a button becomes active, set the ambient sound mode. Ignore buttons becoming inactive.
                         if is_active {
-                            Some(GlibAmbientSoundModeValue(ambient_sound_mode))
+                            Some(GlibAmbientSoundModeValue(button_ambient_sound_mode))
                         } else {
                             None
                         }

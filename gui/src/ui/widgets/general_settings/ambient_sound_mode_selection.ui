@@ -38,6 +38,10 @@
                         <property name="group">transparency_mode</property>
                         <property name="label" translatable="yes" context="ambient sound mode">NoiseCanceling</property>
                         <property name="hexpand">true</property>
+                        <property name="visible"
+                            bind-source="OpenSCQ30AmbientSoundModeSelection"
+                            bind-property="has_noise_canceling_mode"
+                            bind-flags="sync-create" />
                         <accessibility>
                             <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">ambient_sound_mode_label</relation>
                         </accessibility>

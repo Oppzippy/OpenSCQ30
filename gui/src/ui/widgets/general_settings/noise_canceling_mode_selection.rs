@@ -74,14 +74,6 @@ mod imp {
             self.parent_constructed();
             let obj = self.obj();
 
-            obj.bind_property(
-                "has_custom_noise_canceling",
-                &self.custom_mode.get(),
-                "visible",
-            )
-            .sync_create()
-            .build();
-
             [
                 (NoiseCancelingMode::Indoor, &self.indoor_mode.get()),
                 (NoiseCancelingMode::Outdoor, &self.outdoor_mode.get()),
@@ -89,16 +81,16 @@ mod imp {
                 (NoiseCancelingMode::Custom, &self.custom_mode.get()),
             ]
             .into_iter()
-            .for_each(|(noise_canceling_mode, button)| {
+            .for_each(|(button_noise_canceling_mode, button)| {
                 obj.bind_property("noise_canceling_mode", button, "active")
                     .transform_to(
                         move |_, selected_noise_canceling_mode: GlibNoiseCancelingModeValue| {
-                            Some(noise_canceling_mode == selected_noise_canceling_mode.0)
+                            Some(button_noise_canceling_mode == selected_noise_canceling_mode.0)
                         },
                     )
                     .transform_from(move |_, is_active| {
                         if is_active {
-                            Some(GlibNoiseCancelingModeValue(noise_canceling_mode))
+                            Some(GlibNoiseCancelingModeValue(button_noise_canceling_mode))
                         } else {
                             None
                         }

@@ -48,6 +48,10 @@
                         <property name="group">indoor_mode</property>
                         <property name="label" translatable="yes" context="noise canceling mode">Custom</property>
                         <property name="hexpand">true</property>
+                        <property name="visible"
+                            bind-source="OpenSCQ30NoiseCancelingModeSelection"
+                            bind-property="has_custom_noise_canceling"
+                            bind-flags="sync-create" />
                         <accessibility>
                             <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">noise_canceling_mode_label</relation>
                         </accessibility>
