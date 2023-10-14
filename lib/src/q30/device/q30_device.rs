@@ -3,7 +3,7 @@ use std::{sync::Arc, time::Duration};
 use async_trait::async_trait;
 use futures::FutureExt;
 use macaddr::MacAddr6;
-use tokio::sync::{broadcast, mpsc::Receiver, watch, RwLock};
+use tokio::sync::{broadcast, mpsc, watch, RwLock};
 use tracing::{trace, warn};
 use uuid::Uuid;
 
@@ -55,29 +55,13 @@ where
         }
 
         let current_state_lock = Arc::new(RwLock::new(initial_state));
-        let current_state_lock_2 = current_state_lock.to_owned();
-
         let (sender, _) = broadcast::channel(1);
 
-        let sender_copy = sender.to_owned();
-        let join_handle = FuturesType::spawn(async move {
-            while let Some(packet_bytes) = inbound_receiver.recv().await {
-                match InboundPacket::new(&packet_bytes) {
-                    Ok(packet) => {
-                        let mut state = current_state_lock_2.write().await;
-                        let new_state = state::transform_state(packet, &state);
-                        if new_state != *state {
-                            trace!(event = "state_update", old_state = ?state, new_state = ?new_state);
-                            *state = new_state.clone();
-                            if let Err(err) = sender_copy.send(new_state) {
-                                trace!("failed to broadcast state change: {err}");
-                            }
-                        }
-                    }
-                    Err(err) => warn!("failed to parse packet: {err:?}"),
-                }
-            }
-        });
+        let join_handle = Self::spawn_inbound_packet_handler(
+            inbound_receiver,
+            current_state_lock.to_owned(),
+            sender.to_owned(),
+        );
 
         Ok(Self {
             connection,
@@ -87,9 +71,34 @@ where
         })
     }
 
+    fn spawn_inbound_packet_handler(
+        mut inbound_receiver: mpsc::Receiver<Vec<u8>>,
+        current_state_lock: Arc<RwLock<DeviceState>>,
+        sender: broadcast::Sender<DeviceState>,
+    ) -> FuturesType::JoinHandleType {
+        FuturesType::spawn(async move {
+            while let Some(packet_bytes) = inbound_receiver.recv().await {
+                match InboundPacket::new(&packet_bytes) {
+                    Ok(packet) => {
+                        let mut state = current_state_lock.write().await;
+                        let new_state = state::transform_state(packet, &state);
+                        if new_state != *state {
+                            trace!(event = "state_update", old_state = ?state, new_state = ?new_state);
+                            *state = new_state.clone();
+                            if let Err(err) = sender.send(new_state) {
+                                trace!("failed to broadcast state change: {err}");
+                            }
+                        }
+                    }
+                    Err(err) => warn!("failed to parse packet: {err:?}"),
+                }
+            }
+        })
+    }
+
     async fn fetch_initial_state(
         connection: &ConnectionType,
-        inbound_receiver: &mut Receiver<Vec<u8>>,
+        inbound_receiver: &mut mpsc::Receiver<Vec<u8>>,
     ) -> crate::Result<DeviceState> {
         for i in 0..3 {
             connection
