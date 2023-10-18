@@ -67,37 +67,64 @@ jobs:
           name: macos
           path: artifacts/*
 
-  build_windows:
+  build_windows_gui:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ucrt64
+          update: true
+          install: >-
+            base-devel
+          pacboy: >-
+            libadwaita:p
+            rust:p
+            pkg-config:p
+
+      # cargo-make does not use the current shell to run "cargo build". It spawns a new shell, and on Windows, that's cmd.
+      # Rather than trying to get cargo-make to conditionally use the msys2 shell, we can just get anything that would
+      # interfere out of the path.
+      # We want to use the msys2 cargo and linker, so that means cargo and visual studio need to be removed from the path.
+      - name: Remove Visual Studio and cargo from path
+        run: |
+          Move-Item -Path "C:\Program Files\Microsoft Visual Studio" -Destination "C:\Program Files\_Microsoft Visual Studio"
+          Move-Item -Path "~\.cargo" -Destination "~\._cargo"
+
+      - name: Install cargo-make
+        shell: msys2 {0}
+        run: |
+          cargo install cargo-make
+      - name: Build gui
+        shell: msys2 {0}
+        run: |
+          ./packaging/windows/build.sh
+
+      - name: Build installer
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" ".\packaging\windows\setup.iss"
+
+      - name: Move to artifacts directory
+        run: |
+          New-Item -Type Directory -Path artifacts
+          Move-Item .\packaging\windows\Output\OpenSCQ30_Setup.exe artifacts\openscq30_gui_setup-windows-x86_64.exe
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-gui
+          path: artifacts/*
+
+  build_windows_cli:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
 
-      # Temporarily move the preinstalled git, it causes errors related to cygwin.
-      - name: Move git binary
-        run: |
-          Move-Item "C:\Program Files\Git\usr\bin" "C:\Program Files\Git\usr\notbin"
-          Move-Item "C:\Program Files\Git\bin" "C:\Program Files\Git\notbin"
-      - name: Build GTK4
-        run: |
-          python -m pip install --user pipx
-          python -m pipx ensurepath
-          pipx install gvsbuild
-          gvsbuild build --ninja-opts -j2 gtk4 libadwaita
-      - name: Restore git binary
-        run: |
-          Move-Item "C:\Program Files\Git\usr\notbin" "C:\Program Files\Git\usr\bin"
-          Move-Item "C:\Program Files\Git\notbin" "C:\Program Files\Git\bin"
-
-      - name: Install cargo-make
-        run: cargo install cargo-make
-      - name: Build gui
-        run: |
-          $env:Path = "C:\gtk-build\gtk\x64\release\bin;" + $env:Path
-          $env:LIB = "C:\gtk-build\gtk\x64\release\lib;" + $env:LIB
-          $env:INCLUDE = "C:\gtk-build\gtk\x64\release\include;C:\gtk-build\gtk\x64\release\include\cairo;C:\gtk-build\gtk\x64\release\include\glib-2.0;C:\gtk-build\gtk\x64\release\include\gobject-introspection-1.0;C:\gtk-build\gtk\x64\release\lib\glib-2.0\include;" + $env:INCLUDE
-          .\packaging\windows\build.ps1
       - name: Build cli
         run: cargo build --release --package openscq30_cli
 
@@ -105,12 +132,11 @@ jobs:
         run: |
           New-Item -Type Directory -Path artifacts
           Move-Item .\target\release\openscq30_cli.exe artifacts\openscq30_cli-windows-x86_64.exe
-          Move-Item .\packaging\windows\Output\OpenSCQ30_Setup.exe artifacts\openscq30_gui_setup-windows-x86_64.exe
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: windows
+          name: windows-cli
           path: artifacts/*
 
   build_android:
