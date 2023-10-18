@@ -17,6 +17,7 @@ private = true
 script_runner = "@duckscript"
 condition = { files_modified = { input = [
     "./po/**/*",
+    "Makefile.toml",
 ], output = [
     "${OPENSCQ30_BUILD_DIR}/share/**/*",
 ] } }
@@ -24,7 +25,10 @@ script = '''
 project_name = set com.oppzippy.OpenSCQ30
 out_dir = set ${OPENSCQ30_BUILD_DIR}
 
-existing_locales = set_new
+echo "Building en"
+mkdir ${OPENSCQ30_BUILD_DIR}/share/locale/en/LC_MESSAGES
+exec msgfmt --output-file ${OPENSCQ30_BUILD_DIR}/share/locale/en/LC_MESSAGES/${project_name}.mo ${CARGO_MAKE_WORKING_DIRECTORY}/po/${project_name}.pot
+
 paths = glob_array ${CARGO_MAKE_WORKING_DIRECTORY}/po/*
 for path in ${paths}
     if is_dir ${path}
