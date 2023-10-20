@@ -55,6 +55,7 @@ impl SelectedDeviceSettings {
 mod imp {
     use std::cell::OnceCell;
 
+    use adw::prelude::WidgetExt;
     use gtk::{
         glib::{self, Sender},
         subclass::{
@@ -64,12 +65,13 @@ mod imp {
         CompositeTemplate, TemplateChild,
     };
 
-    use openscq30_lib::state::DeviceState;
+    use openscq30_lib::{packets::structures::DeviceFeatureFlags, state::DeviceState};
 
     use crate::{
         actions::Action,
         ui::widgets::{
-            DeviceInformation, EqualizerSettingsScreen, GeneralSettingsScreen, QuickPresetsScreen,
+            DeviceInformation, EqualizerSettingsScreen, GeneralSettingsScreen, HearIdScreen,
+            QuickPresetsScreen,
         },
     };
 
@@ -83,6 +85,8 @@ mod imp {
         #[template_child]
         pub equalizer_settings: TemplateChild<EqualizerSettingsScreen>,
         #[template_child]
+        pub hear_id: TemplateChild<HearIdScreen>,
+        #[template_child]
         pub quick_presets: TemplateChild<QuickPresetsScreen>,
         #[template_child]
         pub device_information: TemplateChild<DeviceInformation>,
@@ -95,6 +99,7 @@ mod imp {
             self.sender.set(sender.clone()).unwrap();
             self.general_settings.set_sender(sender.clone());
             self.equalizer_settings.set_sender(sender.clone());
+            self.hear_id.set_sender(sender.clone());
             self.quick_presets.set_sender(sender.clone());
         }
     }
@@ -106,6 +111,14 @@ mod imp {
                 .set_equalizer_configuration(state.equalizer_configuration);
             self.device_information.set_device_state(state);
             self.quick_presets.set_device_state(state);
+
+            if state.feature_flags.contains(DeviceFeatureFlags::HEAR_ID) && state.hear_id.is_some()
+            {
+                self.hear_id.set_visible(true);
+                self.hear_id.set_device_state(state);
+            } else {
+                self.hear_id.set_visible(false);
+            }
         }
     }
 

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <template class="OpenSCQ30HearIdScreen" parent="GtkBox">
+        <child>
+            <object class="GtkScrolledWindow">
+                <child>
+                    <object class="AdwPreferencesGroup">
+                        <property name="title">Hear ID</property>
+                        <child>
+                            <object class="AdwSwitchRow" id="is_enabled">
+                                <property name="title" translatable="yes">Enabled</property>
+                                <signal name="notify::active" handler="handle_is_enabled_toggled" swapped="true" />
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes" context="hear id">EQ (Left)</property>
+                                <child>
+                                    <object class="GtkLabel" id="volume_adjustments_left" />
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes" context="hear id">EQ (Right)</property>
+                                <child>
+                                    <object class="GtkLabel" id="volume_adjustments_right" />
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes" context="hear id">Time</property>
+                                <child>
+                                    <object class="GtkLabel" id="time" />
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow" id="hear_id_type_row">
+                                <property name="title" translatable="yes" context="hear id">Type</property>
+                                <child>
+                                    <object class="GtkLabel" id="hear_id_type" />
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow" id="hear_id_music_type_row">
+                                <property name="title" translatable="yes" context="hear id">Music Type</property>
+                                <child>
+                                    <object class="GtkLabel" id="hear_id_music_type" />
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow" id="custom_volume_adjustments_left_row">
+                                <property name="title" translatable="yes" context="hear id">Custom EQ (Left)</property>
+                                <child>
+                                    <object class="GtkLabel" id="custom_volume_adjustments_left" />
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow" id="custom_volume_adjustments_right_row">
+                                <property name="title" translatable="yes" context="hear id">Custom EQ (Right)</property>
+                                <child>
+                                    <object class="GtkLabel" id="custom_volume_adjustments_right" />
+                                </child>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+            </object>
+        </child>
+    </template>
+</interface>

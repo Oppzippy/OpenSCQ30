@@ -33,6 +33,19 @@
                     </object>
                 </child>
                 <child>
+                    <object class="OpenSCQ30HearIdScreen" id="hear_id">
+                        <property name="margin-start">10</property>
+                        <property name="margin-end">10</property>
+                        <property name="margin-top">10</property>
+                        <property name="margin-bottom">10</property>
+                    </object>
+                </child>
+                <child type="tab">
+                    <object class="GtkLabel">
+                        <property name="label" translatable="yes" context="hear id">Hear ID</property>
+                    </object>
+                </child>
+                <child>
                     <object class="OpenSCQ30QuickPresetsScreen" id="quick_presets">
                         <property name="margin-start">10</property>
                         <property name="margin-end">10</property>

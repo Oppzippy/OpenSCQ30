@@ -11,6 +11,7 @@ mod set_ambient_sound_mode;
 mod set_custom_noise_canceling;
 mod set_device;
 mod set_equalizer_configuration;
+mod set_hear_id;
 mod set_noise_canceling_mode;
 mod set_transpareny_mode;
 mod state;
@@ -25,7 +26,7 @@ pub use delete_quick_preset::*;
 use macaddr::MacAddr6;
 use openscq30_lib::{
     packets::structures::{
-        AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
+        AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, HearId, NoiseCancelingMode,
         TransparencyMode,
     },
     state::DeviceState,
@@ -38,6 +39,7 @@ pub use set_ambient_sound_mode::*;
 pub use set_custom_noise_canceling::*;
 pub use set_device::*;
 pub use set_equalizer_configuration::*;
+pub use set_hear_id::*;
 pub use set_noise_canceling_mode::*;
 pub use set_transpareny_mode::*;
 pub use state::*;
@@ -71,4 +73,5 @@ pub enum Action {
     CreateQuickPreset(GlibNamedQuickPresetValue),
     ActivateQuickPreset(GlibNamedQuickPresetValue),
     DeleteQuickPreset(Arc<str>),
+    SetHearId(HearId),
 }
