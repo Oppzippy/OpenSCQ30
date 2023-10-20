@@ -10,9 +10,9 @@ use crate::{
     futures::Futures,
     packets::structures::{
         AgeRange, AmbientSoundMode, BasicHearId, BatteryLevel, ButtonAction, CustomButtonModel,
-        DeviceFeatureFlags, EqualizerConfiguration, FirmwareVersion, Gender, IsBatteryCharging,
-        NoTwsButtonAction, NoiseCancelingMode, PresetEqualizerProfile, SerialNumber, SingleBattery,
-        SoundModes, TwsButtonAction,
+        DeviceFeatureFlags, EqualizerConfiguration, FirmwareVersion, Gender, HearId,
+        IsBatteryCharging, NoTwsButtonAction, NoiseCancelingMode, PresetEqualizerProfile,
+        SerialNumber, SingleBattery, SoundModes, TwsButtonAction,
     },
     state::DeviceState,
 };
@@ -80,7 +80,7 @@ where
                     is_enabled: false,
                 },
             }),
-            custom_hear_id: Some(
+            hear_id: Some(
                 BasicHearId {
                     is_enabled: true,
                     time: 0,
@@ -166,6 +166,25 @@ where
         tracing::info!("set equalizer configuration to {equalizer_configuration:?}");
         state_sender.send_replace(DeviceState {
             equalizer_configuration,
+            ..state
+        });
+        Ok(())
+    }
+
+    async fn set_hear_id(&self, hear_id: HearId) -> crate::Result<()> {
+        let state_sender = self.state_sender.lock().await;
+        let state = state_sender.borrow().to_owned();
+        if state.hear_id.is_none() {
+            return Err(crate::Error::FeatureNotSupported {
+                feature_name: "hear id",
+            });
+        }
+        if state.hear_id == Some(hear_id) {
+            return Ok(());
+        }
+        tracing::info!("set hear id to {hear_id:?}");
+        state_sender.send_replace(DeviceState {
+            hear_id: Some(hear_id),
             ..state
         });
         Ok(())

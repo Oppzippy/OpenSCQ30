@@ -6,7 +6,7 @@ use macaddr::MacAddr6;
 use mockall::mock;
 use openscq30_lib::{
     api::{connection::ConnectionStatus, device::Device},
-    packets::structures::{EqualizerConfiguration, SoundModes},
+    packets::structures::{EqualizerConfiguration, HearId, SoundModes},
     state::DeviceState,
 };
 use tokio::sync::watch;
@@ -28,6 +28,10 @@ mock! {
         pub fn set_equalizer_configuration(
             &self,
             configuration: EqualizerConfiguration,
+        ) -> openscq30_lib::Result<()>;
+        pub fn set_hear_id(
+            &self,
+            hear_id: HearId,
         ) -> openscq30_lib::Result<()>;
     }
 }
@@ -65,5 +69,9 @@ impl Device for MockDevice {
     ) -> openscq30_lib::Result<()> {
         timeout_future(Duration::from_millis(10)).await;
         self.set_equalizer_configuration(equalizer_configuration)
+    }
+    async fn set_hear_id(&self, hear_id: HearId) -> openscq30_lib::Result<()> {
+        timeout_future(Duration::from_millis(10)).await;
+        self.set_hear_id(hear_id)
     }
 }

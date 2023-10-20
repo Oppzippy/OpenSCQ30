@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::{
     api::connection::ConnectionStatus,
-    packets::structures::{EqualizerConfiguration, SoundModes},
+    packets::structures::{EqualizerConfiguration, HearId, SoundModes},
     state::DeviceState,
 };
 
@@ -29,4 +29,6 @@ pub trait Device {
         &self,
         configuration: EqualizerConfiguration,
     ) -> crate::Result<()>;
+
+    async fn set_hear_id(&self, hear_id: HearId) -> crate::Result<()>;
 }

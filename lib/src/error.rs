@@ -35,6 +35,9 @@ pub enum Error {
     #[error("feature not supported: {feature_name}")]
     FeatureNotSupported { feature_name: &'static str },
 
+    #[error("missing necessary data from headphones: {name}")]
+    MissingData { name: &'static str },
+
     #[error("write failed: {source:?}")]
     WriteFailed { source: InnerError },
 

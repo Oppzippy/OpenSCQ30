@@ -16,7 +16,8 @@ use crate::{
             SetEqualizerPacket, SetEqualizerWithDrcPacket, SetSoundModePacket,
         },
         structures::{
-            AmbientSoundMode, DeviceFeatureFlags, EqualizerConfiguration, HearId, SoundModes,
+            AmbientSoundMode, CustomHearId, DeviceFeatureFlags, EqualizerConfiguration, HearId,
+            HearIdMusicType, HearIdType, SoundModes,
         },
     },
 };
@@ -118,6 +119,27 @@ where
             }
         }
         Err(crate::Error::NoResponse)
+    }
+
+    async fn set_custom_hear_id(
+        &self,
+        state: &DeviceState,
+        custom_hear_id: CustomHearId,
+    ) -> crate::Result<()> {
+        let gender = state
+            .gender
+            .ok_or_else(|| crate::Error::MissingData { name: "gender" })?;
+        let age_range = state
+            .age_range
+            .ok_or_else(|| crate::Error::MissingData { name: "age range" })?;
+        let packet = SetEqualizerAndCustomHearIdPacket {
+            equalizer_configuration: state.equalizer_configuration,
+            gender,
+            age_range,
+            custom_hear_id,
+        };
+        self.connection.write_with_response(&packet.bytes()).await?;
+        Ok(())
     }
 }
 
@@ -246,7 +268,7 @@ where
             None
         };
 
-        let packet_bytes = if let Some(HearId::Custom(custom_hear_id)) = state.custom_hear_id {
+        let packet_bytes = if let Some(HearId::Custom(custom_hear_id)) = state.hear_id {
             SetEqualizerAndCustomHearIdPacket {
                 equalizer_configuration,
                 age_range: state.age_range.ok_or(crate::Error::IncompleteStateError {
@@ -267,6 +289,50 @@ where
 
         state_sender.send_replace(DeviceState {
             equalizer_configuration,
+            ..state
+        });
+        Ok(())
+    }
+
+    async fn set_hear_id(&self, hear_id: HearId) -> crate::Result<()> {
+        let state_sender = self.state_sender.lock().await;
+        let state = state_sender.borrow().to_owned();
+
+        if !state.feature_flags.contains(DeviceFeatureFlags::HEAR_ID) {
+            return Err(crate::Error::FeatureNotSupported {
+                feature_name: "hear id",
+            });
+        }
+
+        let prev_hear_id = state
+            .hear_id
+            .ok_or_else(|| crate::Error::MissingData { name: "hear id" })?;
+        if hear_id == prev_hear_id {
+            return Ok(());
+        }
+        match hear_id {
+            HearId::Basic(hear_id) => {
+                self.set_custom_hear_id(
+                    &state,
+                    CustomHearId {
+                        is_enabled: hear_id.is_enabled,
+                        volume_adjustments: hear_id.volume_adjustments,
+                        // TODO Should this be the current time? If so, what kind of timestamp?
+                        time: hear_id.time,
+                        hear_id_type: HearIdType::default(),
+                        hear_id_music_type: HearIdMusicType::default(),
+                        custom_volume_adjustments: None,
+                    },
+                )
+                .await?;
+            }
+            HearId::Custom(hear_id) => {
+                self.set_custom_hear_id(&state, hear_id).await?;
+            }
+        }
+
+        state_sender.send_replace(DeviceState {
+            hear_id: Some(hear_id),
             ..state
         });
         Ok(())

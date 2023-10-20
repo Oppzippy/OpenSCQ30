@@ -296,6 +296,9 @@ fn delayed_initialize_application(
             Some(openscq30_lib::Error::FeatureNotSupported { feature_name }) => send_toast(
                 format!("Tried to use feature not supported by device: {feature_name}"),
             ),
+            Some(openscq30_lib::Error::MissingData { name }) => {
+                send_toast(format!("Missing necessary data from device: {name}"))
+            }
             Some(openscq30_lib::Error::WriteFailed { source }) => {
                 send_toast(format!("Write to characteristic failed: {source:?}"))
             }
