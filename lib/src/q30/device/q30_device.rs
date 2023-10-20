@@ -176,9 +176,17 @@ where
     async fn set_sound_modes(&self, sound_modes: SoundModes) -> crate::Result<()> {
         let state_sender = self.state_sender.lock().await;
         let state = state_sender.borrow().to_owned();
-        let Some(prev_sound_modes) = state.sound_modes else {
+        if !state
+            .feature_flags
+            .contains(DeviceFeatureFlags::SOUND_MODES)
+        {
             return Err(crate::Error::FeatureNotSupported {
                 feature_name: "sound modes",
+            });
+        }
+        let Some(prev_sound_modes) = state.sound_modes else {
+            return Err(crate::Error::MissingData {
+                name: "sound modes",
             });
         };
         if prev_sound_modes == sound_modes {
@@ -254,6 +262,12 @@ where
     ) -> crate::Result<()> {
         let state_sender = self.state_sender.lock().await;
         let state = state_sender.borrow().to_owned();
+
+        if !state.feature_flags.contains(DeviceFeatureFlags::EQUALIZER) {
+            return Err(crate::Error::FeatureNotSupported {
+                feature_name: "equalizer",
+            });
+        }
         if equalizer_configuration == state.equalizer_configuration {
             return Ok(());
         }
