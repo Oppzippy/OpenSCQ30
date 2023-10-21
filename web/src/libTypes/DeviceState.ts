@@ -147,12 +147,12 @@ const deviceStateSchema = Type.Object({
   ),
   customButtonModel: Nullable(
     Type.Object({
+      leftSingleClick: noTwsButtonActionSchema,
       leftDoubleClick: twsButtonActionSchema,
       leftLongPress: twsButtonActionSchema,
+      rightSingleClick: noTwsButtonActionSchema,
       rightDoubleClick: twsButtonActionSchema,
       rightLongPress: twsButtonActionSchema,
-      leftSinglePress: noTwsButtonActionSchema,
-      rightSinglePress: noTwsButtonActionSchema,
     }),
   ),
   serialNumber: Nullable(Type.String()),

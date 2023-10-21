@@ -86,7 +86,7 @@ mod imp {
                 Self::set_row_button_action_no_tws(
                     &self.left_single_click,
                     button_actions,
-                    button_model.left_single_press,
+                    button_model.left_single_click,
                 );
                 Self::set_row_button_action_tws(
                     &self.left_double_click,
@@ -101,7 +101,7 @@ mod imp {
                 Self::set_row_button_action_no_tws(
                     &self.right_single_click,
                     button_actions,
-                    button_model.right_single_press,
+                    button_model.right_single_click,
                 );
                 Self::set_row_button_action_tws(
                     &self.right_double_click,
@@ -199,10 +199,10 @@ mod imp {
             let right_long_press_action = Self::get_row_action(&self.right_long_press);
 
             let model = CustomButtonModel {
-                left_single_press: NoTwsButtonAction {
+                left_single_click: NoTwsButtonAction {
                     is_enabled: left_single_click_action.is_some(),
                     action: left_single_click_action
-                        .unwrap_or(button_model.left_single_press.action),
+                        .unwrap_or(button_model.left_single_click.action),
                 },
                 left_double_click: TwsButtonAction {
                     is_enabled: left_double_click_action.is_some(),
@@ -218,10 +218,10 @@ mod imp {
                     tws_disconnected_action: left_long_press_action
                         .unwrap_or(button_model.left_long_press.tws_disconnected_action),
                 },
-                right_single_press: NoTwsButtonAction {
+                right_single_click: NoTwsButtonAction {
                     is_enabled: right_single_click_action.is_some(),
                     action: right_single_click_action
-                        .unwrap_or(button_model.right_single_press.action),
+                        .unwrap_or(button_model.right_single_click.action),
                 },
                 right_double_click: TwsButtonAction {
                     is_enabled: right_double_click_action.is_some(),

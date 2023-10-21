@@ -71,11 +71,11 @@ where
                     tws_disconnected_action: ButtonAction::NextSong,
                     is_enabled: false,
                 },
-                left_single_press: NoTwsButtonAction {
+                left_single_click: NoTwsButtonAction {
                     action: ButtonAction::PreviousSong,
                     is_enabled: true,
                 },
-                right_single_press: NoTwsButtonAction {
+                right_single_click: NoTwsButtonAction {
                     action: ButtonAction::NextSong,
                     is_enabled: false,
                 },

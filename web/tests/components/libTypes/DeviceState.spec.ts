@@ -56,7 +56,7 @@ describe("libTypes", () => {
           twsConnectedAction: "previousSong",
           twsDisconnectedAction: "trans",
         },
-        leftSinglePress: {
+        leftSingleClick: {
           isEnabled: true,
           action: "playPause",
         },
@@ -70,7 +70,7 @@ describe("libTypes", () => {
           twsConnectedAction: "volumeDown",
           twsDisconnectedAction: "volumeUp",
         },
-        rightSinglePress: {
+        rightSingleClick: {
           isEnabled: false,
           action: "playPause",
         },

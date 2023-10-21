@@ -4,12 +4,12 @@ use strum::{AsRefStr, EnumIter, FromRepr};
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CustomButtonModel {
+    pub left_single_click: NoTwsButtonAction,
     pub left_double_click: TwsButtonAction,
     pub left_long_press: TwsButtonAction,
+    pub right_single_click: NoTwsButtonAction,
     pub right_double_click: TwsButtonAction,
     pub right_long_press: TwsButtonAction,
-    pub left_single_press: NoTwsButtonAction,
-    pub right_single_press: NoTwsButtonAction,
 }
 
 impl CustomButtonModel {
@@ -19,8 +19,8 @@ impl CustomButtonModel {
         bytes.extend(self.left_long_press.bytes());
         bytes.extend(self.right_double_click.bytes());
         bytes.extend(self.right_long_press.bytes());
-        bytes.extend(self.left_single_press.bytes());
-        bytes.extend(self.right_single_press.bytes());
+        bytes.extend(self.left_single_click.bytes());
+        bytes.extend(self.right_single_click.bytes());
         bytes
     }
 }

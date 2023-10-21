@@ -37,8 +37,8 @@ pub fn take_custom_button_model<'a, E: ParseError<&'a [u8]> + ContextError<&'a [
                     left_long_press,
                     right_double_click,
                     right_long_press,
-                    left_single_press,
-                    right_single_press,
+                    left_single_click: left_single_press,
+                    right_single_click: right_single_press,
                 }
             },
         )(input)
