@@ -103,7 +103,7 @@ const deviceStateSchema = Type.Object({
   soundModes: Nullable(soundModesSchema),
   ageRange: Nullable(Type.Number()),
   gender: Nullable(Type.Number()),
-  customHearId: Nullable(
+  hearId: Nullable(
     Type.Union([
       Type.Object({
         type: Type.Literal("basic"),

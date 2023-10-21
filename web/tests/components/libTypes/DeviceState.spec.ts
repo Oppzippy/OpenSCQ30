@@ -13,7 +13,7 @@ describe("libTypes", () => {
         level: 0,
       },
       customButtonModel: null,
-      customHearId: null,
+      hearId: null,
       equalizerConfiguration: {
         presetProfile: null,
         volumeAdjustments: [0, 0, 0, 0, 0, 0, 0, 0],
@@ -75,7 +75,7 @@ describe("libTypes", () => {
           action: "playPause",
         },
       },
-      customHearId: {
+      hearId: {
         isEnabled: true,
         hearIdMusicType: 1,
         hearIdType: 2,

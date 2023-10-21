@@ -46,7 +46,7 @@ impl From<A3926StateUpdatePacket> for StateUpdatePacket {
             sound_modes: None,
             age_range: Some(packet.age_range),
             gender: Some(packet.gender),
-            custom_hear_id: Some(packet.hear_id.into()),
+            hear_id: Some(packet.hear_id.into()),
             custom_button_model: Some(packet.custom_button_model),
             firmware_version: None,
             serial_number: None,

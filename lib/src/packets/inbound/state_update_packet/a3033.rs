@@ -35,7 +35,7 @@ impl From<A3033StateUpdatePacket> for StateUpdatePacket {
             sound_modes: None,
             age_range: None,
             gender: None,
-            custom_hear_id: None,
+            hear_id: None,
             custom_button_model: None,
             firmware_version: Some(packet.firmware_version),
             serial_number: Some(packet.serial_number),

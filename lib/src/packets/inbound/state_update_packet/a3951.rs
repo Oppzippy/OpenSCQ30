@@ -59,7 +59,7 @@ impl From<A3951StateUpdatePacket> for StateUpdatePacket {
             sound_modes: Some(packet.sound_modes),
             age_range: Some(packet.age_range),
             gender: Some(packet.gender),
-            custom_hear_id: Some(packet.custom_hear_id.into()),
+            hear_id: Some(packet.custom_hear_id.into()),
             custom_button_model: Some(packet.custom_button_model),
             firmware_version: None,
             serial_number: None,

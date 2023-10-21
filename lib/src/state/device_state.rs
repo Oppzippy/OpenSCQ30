@@ -34,7 +34,7 @@ impl From<StateUpdatePacket> for DeviceState {
             sound_modes: packet.sound_modes,
             age_range: packet.age_range,
             gender: packet.gender,
-            hear_id: packet.custom_hear_id,
+            hear_id: packet.hear_id,
             custom_button_model: packet.custom_button_model,
             left_firmware_version: packet.firmware_version,
             right_firmware_version: None,

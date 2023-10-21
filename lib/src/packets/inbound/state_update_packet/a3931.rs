@@ -49,7 +49,7 @@ impl From<A3931StateUpdatePacket> for StateUpdatePacket {
             sound_modes: Some(packet.sound_modes),
             age_range: None,
             gender: None,
-            custom_hear_id: None,
+            hear_id: None,
             custom_button_model: Some(packet.custom_button_model),
             firmware_version: None,
             serial_number: None,

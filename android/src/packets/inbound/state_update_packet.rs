@@ -60,7 +60,7 @@ impl StateUpdatePacket {
 
     #[generate_interface]
     pub fn custom_hear_id(&self) -> Option<CustomHearId> {
-        if let Some(HearId::Custom(custom_hear_id)) = self.0.custom_hear_id {
+        if let Some(HearId::Custom(custom_hear_id)) = self.0.hear_id {
             Some(custom_hear_id.into())
         } else {
             None

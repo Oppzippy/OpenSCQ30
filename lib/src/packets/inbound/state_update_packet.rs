@@ -35,7 +35,7 @@ pub struct StateUpdatePacket {
     pub sound_modes: Option<SoundModes>,
     pub age_range: Option<AgeRange>,
     pub gender: Option<Gender>,
-    pub custom_hear_id: Option<HearId>,
+    pub hear_id: Option<HearId>,
     pub custom_button_model: Option<CustomButtonModel>,
     pub firmware_version: Option<FirmwareVersion>,
     pub serial_number: Option<SerialNumber>,

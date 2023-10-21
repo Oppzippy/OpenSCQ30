@@ -46,7 +46,7 @@ impl From<A3027StateUpdatePacket> for StateUpdatePacket {
             sound_modes: Some(packet.sound_modes),
             age_range: Some(packet.age_range),
             gender: Some(packet.gender),
-            custom_hear_id: Some(packet.hear_id.into()),
+            hear_id: Some(packet.hear_id.into()),
             custom_button_model: None,
             firmware_version: Some(packet.firmware_version),
             serial_number: Some(packet.serial_number),
