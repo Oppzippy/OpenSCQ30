@@ -189,6 +189,28 @@ where
         });
         Ok(())
     }
+
+    async fn set_custom_button_model(
+        &self,
+        custom_button_model: CustomButtonModel,
+    ) -> crate::Result<()> {
+        let state_sender = self.state_sender.lock().await;
+        let state = state_sender.borrow().to_owned();
+        if state.custom_button_model.is_none() {
+            return Err(crate::Error::FeatureNotSupported {
+                feature_name: "custom button model",
+            });
+        }
+        if state.custom_button_model == Some(custom_button_model) {
+            return Ok(());
+        }
+        tracing::info!("set custom button model to {custom_button_model:?}");
+        state_sender.send_replace(DeviceState {
+            custom_button_model: Some(custom_button_model),
+            ..state
+        });
+        Ok(())
+    }
 }
 
 impl<FuturesType> core::fmt::Debug for DemoDevice<FuturesType>

@@ -1,3 +1,4 @@
+mod buttons;
 mod device_information;
 mod device_selection;
 mod equalizer_settings;
@@ -8,6 +9,7 @@ mod main_window;
 mod quick_presets;
 mod selected_device_settings;
 
+pub use buttons::*;
 pub use device_information::*;
 pub use device_selection::*;
 pub use equalizer_settings::*;

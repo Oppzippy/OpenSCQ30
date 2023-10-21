@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::{
     api::connection::ConnectionStatus,
-    packets::structures::{EqualizerConfiguration, HearId, SoundModes},
+    packets::structures::{CustomButtonModel, EqualizerConfiguration, HearId, SoundModes},
     state::DeviceState,
 };
 
@@ -31,4 +31,8 @@ pub trait Device {
     ) -> crate::Result<()>;
 
     async fn set_hear_id(&self, hear_id: HearId) -> crate::Result<()>;
+    async fn set_custom_button_model(
+        &self,
+        custom_button_model: CustomButtonModel,
+    ) -> crate::Result<()>;
 }

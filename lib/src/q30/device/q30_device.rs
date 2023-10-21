@@ -12,12 +12,13 @@ use crate::{
     futures::{Futures, JoinHandle},
     packets::{
         outbound::{
-            OutboundPacketBytes, RequestFirmwareVersionPacket, SetEqualizerAndCustomHearIdPacket,
-            SetEqualizerPacket, SetEqualizerWithDrcPacket, SetSoundModePacket,
+            OutboundPacketBytes, RequestFirmwareVersionPacket, SetCustomButtonModelPacket,
+            SetEqualizerAndCustomHearIdPacket, SetEqualizerPacket, SetEqualizerWithDrcPacket,
+            SetSoundModePacket,
         },
         structures::{
-            AmbientSoundMode, CustomHearId, DeviceFeatureFlags, EqualizerConfiguration, HearId,
-            HearIdMusicType, HearIdType, SoundModes,
+            AmbientSoundMode, CustomButtonModel, CustomHearId, DeviceFeatureFlags,
+            EqualizerConfiguration, HearId, HearIdMusicType, HearIdType, SoundModes,
         },
     },
 };
@@ -347,6 +348,41 @@ where
 
         state_sender.send_replace(DeviceState {
             hear_id: Some(hear_id),
+            ..state
+        });
+        Ok(())
+    }
+    async fn set_custom_button_model(
+        &self,
+        custom_button_model: CustomButtonModel,
+    ) -> crate::Result<()> {
+        let state_sender = self.state_sender.lock().await;
+        let state = state_sender.borrow().to_owned();
+
+        if !state
+            .feature_flags
+            .contains(DeviceFeatureFlags::CUSTOM_BUTTON_MODEL)
+        {
+            return Err(crate::Error::FeatureNotSupported {
+                feature_name: "custom button model",
+            });
+        }
+
+        let prev_custom_button_model =
+            state
+                .custom_button_model
+                .ok_or_else(|| crate::Error::MissingData {
+                    name: "custom button model",
+                })?;
+        if custom_button_model == prev_custom_button_model {
+            return Ok(());
+        }
+
+        self.connection
+            .write_with_response(&SetCustomButtonModelPacket::new(custom_button_model).bytes())
+            .await?;
+        state_sender.send_replace(DeviceState {
+            custom_button_model: Some(custom_button_model),
             ..state
         });
         Ok(())

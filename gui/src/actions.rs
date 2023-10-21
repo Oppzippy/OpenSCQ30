@@ -8,6 +8,7 @@ mod refresh_devices;
 mod refresh_quick_presets;
 mod select_custom_equalizer_configuration;
 mod set_ambient_sound_mode;
+mod set_custom_button_model;
 mod set_custom_noise_canceling;
 mod set_device;
 mod set_equalizer_configuration;
@@ -26,8 +27,8 @@ pub use delete_quick_preset::*;
 use macaddr::MacAddr6;
 use openscq30_lib::{
     packets::structures::{
-        AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, HearId, NoiseCancelingMode,
-        TransparencyMode,
+        AmbientSoundMode, CustomButtonModel, CustomNoiseCanceling, EqualizerConfiguration, HearId,
+        NoiseCancelingMode, TransparencyMode,
     },
     state::DeviceState,
 };
@@ -36,6 +37,7 @@ pub use refresh_devices::*;
 pub use refresh_quick_presets::*;
 pub use select_custom_equalizer_configuration::*;
 pub use set_ambient_sound_mode::*;
+pub use set_custom_button_model::*;
 pub use set_custom_noise_canceling::*;
 pub use set_device::*;
 pub use set_equalizer_configuration::*;
@@ -74,4 +76,5 @@ pub enum Action {
     ActivateQuickPreset(GlibNamedQuickPresetValue),
     DeleteQuickPreset(Arc<str>),
     SetHearId(HearId),
+    SetCustomButtonModel(CustomButtonModel),
 }

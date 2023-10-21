@@ -6,7 +6,7 @@ use macaddr::MacAddr6;
 use mockall::mock;
 use openscq30_lib::{
     api::{connection::ConnectionStatus, device::Device},
-    packets::structures::{EqualizerConfiguration, HearId, SoundModes},
+    packets::structures::{CustomButtonModel, EqualizerConfiguration, HearId, SoundModes},
     state::DeviceState,
 };
 use tokio::sync::watch;
@@ -32,6 +32,10 @@ mock! {
         pub fn set_hear_id(
             &self,
             hear_id: HearId,
+        ) -> openscq30_lib::Result<()>;
+        pub fn set_custom_button_model(
+            &self,
+            custom_button_model: CustomButtonModel,
         ) -> openscq30_lib::Result<()>;
     }
 }
@@ -73,5 +77,12 @@ impl Device for MockDevice {
     async fn set_hear_id(&self, hear_id: HearId) -> openscq30_lib::Result<()> {
         timeout_future(Duration::from_millis(10)).await;
         self.set_hear_id(hear_id)
+    }
+    async fn set_custom_button_model(
+        &self,
+        custom_button_model: CustomButtonModel,
+    ) -> openscq30_lib::Result<()> {
+        timeout_future(Duration::from_millis(10)).await;
+        self.set_custom_button_model(custom_button_model)
     }
 }

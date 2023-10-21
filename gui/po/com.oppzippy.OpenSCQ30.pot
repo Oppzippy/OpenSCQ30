@@ -309,3 +309,35 @@ msgstr "Treble Reducer"
 msgctxt "transparency mode"
 msgid "VocalMode"
 msgstr "Vocal Mode"
+
+msgctxt "buttons"
+msgid "VolumeUp"
+msgstr "Volume Up"
+
+msgctxt "buttons"
+msgid "VolumeDown"
+msgstr "Volume Down"
+
+msgctxt "buttons"
+msgid "PreviousSong"
+msgstr "Previous Song"
+
+msgctxt "buttons"
+msgid "NextSong"
+msgstr "Next Song"
+
+msgctxt "buttons"
+msgid "Trans"
+msgstr "Trans"
+
+msgctxt "buttons"
+msgid "VoiceAssistant"
+msgstr "Voice Assistant"
+
+msgctxt "buttons"
+msgid "PlayPause"
+msgstr "Play Pause"
+
+msgctxt "buttons"
+msgid "Disabled"
+msgstr "Disabled"

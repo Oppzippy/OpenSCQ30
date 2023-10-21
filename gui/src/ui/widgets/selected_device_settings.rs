@@ -70,8 +70,8 @@ mod imp {
     use crate::{
         actions::Action,
         ui::widgets::{
-            DeviceInformation, EqualizerSettingsScreen, GeneralSettingsScreen, HearIdScreen,
-            QuickPresetsScreen,
+            ButtonsScreen, DeviceInformation, EqualizerSettingsScreen, GeneralSettingsScreen,
+            HearIdScreen, QuickPresetsScreen,
         },
     };
 
@@ -87,6 +87,8 @@ mod imp {
         #[template_child]
         pub hear_id: TemplateChild<HearIdScreen>,
         #[template_child]
+        pub buttons: TemplateChild<ButtonsScreen>,
+        #[template_child]
         pub quick_presets: TemplateChild<QuickPresetsScreen>,
         #[template_child]
         pub device_information: TemplateChild<DeviceInformation>,
@@ -101,6 +103,7 @@ mod imp {
             self.equalizer_settings.set_sender(sender.clone());
             self.hear_id.set_sender(sender.clone());
             self.quick_presets.set_sender(sender.clone());
+            self.buttons.set_sender(sender.clone());
         }
     }
 
@@ -118,6 +121,16 @@ mod imp {
                 self.hear_id.set_device_state(state);
             } else {
                 self.hear_id.set_visible(false);
+            }
+            if state
+                .feature_flags
+                .contains(DeviceFeatureFlags::CUSTOM_BUTTON_MODEL)
+                && state.custom_button_model.is_some()
+            {
+                self.buttons.set_visible(true);
+                self.buttons.set_device_state(state);
+            } else {
+                self.buttons.set_visible(false);
             }
         }
     }

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <template class="OpenSCQ30ButtonsScreen" parent="GtkBox">
+        <child>
+            <object class="GtkScrolledWindow">
+                <child>
+                    <object class="AdwPreferencesGroup">
+                        <property name="title" translatable="yes" context="buttons">Buttons</property>
+                        <child>
+                            <object class="AdwComboRow" id="left_single_click">
+                                <property name="title" translatable="yes" context="buttons">Left Single Click</property>
+                                <signal name="notify::selected" handler="handle_changed" swapped="true" />
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwComboRow" id="left_double_click">
+                                <property name="title" translatable="yes" context="buttons">Left Double Click</property>
+                                <signal name="notify::selected" handler="handle_changed" swapped="true" />
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwComboRow" id="left_long_press">
+                                <property name="title" translatable="yes" context="buttons">Left Long Press</property>
+                                <signal name="notify::selected" handler="handle_changed" swapped="true" />
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwComboRow" id="right_single_click">
+                                <property name="title" translatable="yes" context="buttons">Right Single Click</property>
+                                <signal name="notify::selected" handler="handle_changed" swapped="true" />
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwComboRow" id="right_double_click">
+                                <property name="title" translatable="yes" context="buttons">Right Double Click</property>
+                                <signal name="notify::selected" handler="handle_changed" swapped="true" />
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwComboRow" id="right_long_press">
+                                <property name="title" translatable="yes" context="buttons">Right Long Press</property>
+                                <signal name="notify::selected" handler="handle_changed" swapped="true" />
+                            </object>
+                        </child>
+                    </object>
+                </child>
+            </object>
+        </child>
+    </template>
+</interface>

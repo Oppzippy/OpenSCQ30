@@ -1,4 +1,5 @@
 mod ambient_sound_mode;
+mod button_action;
 mod custom_equalizer_profile;
 mod custom_noise_canceling;
 mod device;
@@ -9,6 +10,7 @@ mod preset_equalizer_profile;
 mod transparency_mode;
 
 pub use ambient_sound_mode::*;
+pub use button_action::*;
 pub use custom_equalizer_profile::*;
 pub use custom_noise_canceling::*;
 pub use device::*;

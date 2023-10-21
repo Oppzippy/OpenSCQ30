@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use strum::FromRepr;
+use strum::{AsRefStr, EnumIter, FromRepr};
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -57,7 +57,19 @@ impl NoTwsButtonAction {
 }
 
 #[derive(
-    Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, FromRepr,
+    Clone,
+    Copy,
+    Debug,
+    Hash,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Serialize,
+    Deserialize,
+    FromRepr,
+    EnumIter,
+    AsRefStr,
 )]
 #[repr(u8)]
 #[serde(rename_all = "camelCase")]
