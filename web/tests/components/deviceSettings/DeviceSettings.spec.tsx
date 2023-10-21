@@ -62,7 +62,7 @@ describe("Device Settings", () => {
         ageRange: null,
         gender: null,
         customButtonModel: null,
-        customHearId: null,
+        hearId: null,
         leftFirmwareVersion: null,
         rightFirmwareVersion: null,
         serialNumber: null,

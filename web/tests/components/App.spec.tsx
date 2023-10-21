@@ -43,7 +43,7 @@ describe("App", () => {
               ageRange: null,
               gender: null,
               customButtonModel: null,
-              customHearId: null,
+              hearId: null,
               dynamicRangeCompressionMinFirmwareVersion: null,
               leftFirmwareVersion: null,
               rightFirmwareVersion: null,
