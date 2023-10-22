@@ -9,15 +9,21 @@ env:
 jobs:
   build_linux:
     runs-on: ubuntu-latest
+    container:
+      image: ubuntu:23.10
     steps:
+      - name: Install basic requirements
+        run: |
+          apt-get update
+          apt-get install -y git curl unzip
+
       - uses: actions/checkout@v4
         with:
           submodules: true
       - uses: dtolnay/rust-toolchain@stable
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev gettext libfuse2
+          sudo apt-get install -y libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev gettext libfuse2
       - name: Install cargo-make
         run: cargo install cargo-make
       - name: Install appimage-builder
