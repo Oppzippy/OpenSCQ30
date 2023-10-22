@@ -33,6 +33,15 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.8.0" date="2023-10-22">
+            <description>
+                <p>Dependencies</p>
+                <ul>
+                    <li>Minimum gtk4 version increased to v4.12 (GNOME 45)</li>
+                    <li>Minimum libadwaita version increased to v1.4 (GNOME 45)</li>
+                </ul> 
+            </description>
+        </release>
         <release version="1.7.0" date="2023-09-30">
             <description>
                 <p>Fixes</p>
