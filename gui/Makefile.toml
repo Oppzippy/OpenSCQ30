@@ -49,10 +49,18 @@ command = "cargo"
 args = ["llvm-cov", "--no-report", "--bins"]
 
 [tasks.install]
-condition.platforms = ["linux"]
 script_runner = "@duckscript"
 script.main = '''
-is_bin_built = is_file ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/target/release/openscq30_gui
+os = os_family
+is_windows = eq ${os} windows
+if ${is_windows}
+    bin_name = set openscq30_gui.exe
+else
+    bin_name = set openscq30_gui
+end
+bin_path = set ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/target/release/${bin_name}
+
+is_bin_built = is_file ${bin_path}
 is_locale_built = is_dir ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/target/release/share
 
 if not ${is_bin_built} and ${is_locale_built}
@@ -60,9 +68,13 @@ if not ${is_bin_built} and ${is_locale_built}
     exit 1
 end
 
-echo Installing binary ${INSTALL_PREFIX}
-cp ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/target/release/openscq30_gui ${INSTALL_PREFIX}/bin/openscq30_gui
-chmod 755 ${INSTALL_PREFIX}/bin/openscq30_gui
+echo Installing to ${INSTALL_PREFIX}
+
+echo Installing bin
+cp ${bin_path} ${INSTALL_PREFIX}/bin/${bin_name}
+if not ${is_windows}
+    chmod 755 ${INSTALL_PREFIX}/bin/${bin_name}
+end
 
 echo Installing locales
 cp_glob ${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/target/release/share/**/* ${INSTALL_PREFIX}/share/
@@ -78,10 +90,17 @@ cp ${CARGO_MAKE_WORKING_DIRECTORY}/resources/com.oppzippy.OpenSCQ30.metainfo.xml
 '''
 
 [tasks.uninstall]
-condition.platforms = ["linux"]
 script.main = '''
+os = os_family
+is_windows = eq ${os} windows
+if ${is_windows}
+    bin_name = set "openscq30_gui.exe"
+else
+    bin_name = set "openscq30_gui"
+end
+
 echo Removing binary
-rm ${INSTALL_PREFIX}/bin/openscq30_gui
+rm ${INSTALL_PREFIX}/bin/${bin_name}
 
 echo Removing locales
 mo_files = glob_array ${INSTALL_PREFIX}/share/locale/*/LC_MESSAGES/com.oppzippy.OpenSCQ30.mo
