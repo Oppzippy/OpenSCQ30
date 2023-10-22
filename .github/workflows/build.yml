@@ -50,12 +50,6 @@ jobs:
           name: linux
           path: artifacts/*
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: linux
-          path: artifacts/*
-
   build_macos:
     runs-on: macos-latest
     steps:
