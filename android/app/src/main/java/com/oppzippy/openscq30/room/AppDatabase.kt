@@ -68,11 +68,11 @@ abstract class AppDatabase : RoomDatabase() {
     }
 
     object Migration5To6 : Migration(5, 6) {
-        override fun migrate(database: SupportSQLiteDatabase) {
+        override fun migrate(db: SupportSQLiteDatabase) {
             //language=RoomSql
-            database.execSQL("ALTER TABLE equalizer_custom_profile RENAME TO custom_equalizer_profile_pre_migration")
+            db.execSQL("ALTER TABLE equalizer_custom_profile RENAME TO custom_equalizer_profile_pre_migration")
             //language=RoomSql
-            database.execSQL(
+            db.execSQL(
                 """CREATE TABLE `custom_equalizer_profile` (
                     name TEXT PRIMARY KEY NOT NULL,
                     band100 REAL NOT NULL,
@@ -87,7 +87,7 @@ abstract class AppDatabase : RoomDatabase() {
                 """.trimMargin(),
             )
             //language=RoomSql
-            database.execSQL(
+            db.execSQL(
                 """CREATE UNIQUE INDEX index_custom_equalizer_profile_band100_band200_band400_band800_band1600_band3200_band6400_band12800 ON custom_equalizer_profile (
                     band100,
                     band200,
@@ -101,16 +101,16 @@ abstract class AppDatabase : RoomDatabase() {
                 """.trimMargin(),
             )
 
-            database.beginTransaction()
+            db.beginTransaction()
             try {
                 //language=RoomSql
                 val cursor =
-                    database.query("SELECT name, `values` FROM custom_equalizer_profile_pre_migration")
+                    db.query("SELECT name, `values` FROM custom_equalizer_profile_pre_migration")
                 while (cursor.moveToNext()) {
                     val name = cursor.getString(0)
                     val byteValues = cursor.getBlob(1)
                     val doubleValues = byteValues.map { it.toDouble() / 10.0 }
-                    database.insert(
+                    db.insert(
                         "custom_equalizer_profile",
                         SQLiteDatabase.CONFLICT_REPLACE,
                         ContentValues().apply {
@@ -126,12 +126,12 @@ abstract class AppDatabase : RoomDatabase() {
                         },
                     )
                 }
-                database.setTransactionSuccessful()
+                db.setTransactionSuccessful()
             } finally {
-                database.endTransaction()
+                db.endTransaction()
             }
             //language=RoomSql
-            database.execSQL("DROP TABLE custom_equalizer_profile_pre_migration")
+            db.execSQL("DROP TABLE custom_equalizer_profile_pre_migration")
         }
     }
 }
