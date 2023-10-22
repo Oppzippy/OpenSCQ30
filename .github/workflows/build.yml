@@ -3,9 +3,6 @@ name: "build"
 on:
   workflow_dispatch:
 
-env:
-  CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
-
 jobs:
   build_linux:
     runs-on: ubuntu-latest

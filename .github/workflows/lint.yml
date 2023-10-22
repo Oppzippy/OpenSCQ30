@@ -3,9 +3,6 @@ name: "lint"
 on:
   - push
 
-env:
-  CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
-
 jobs:
   rustfmt:
     runs-on: ubuntu-latest
