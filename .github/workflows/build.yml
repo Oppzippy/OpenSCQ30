@@ -24,14 +24,14 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Install dependencies
         run: |
-          sudo apt-get install -y libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev gettext libfuse2
+          apt-get install -y libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev gettext libfuse2
       - name: Install cargo-make
         run: cargo install cargo-make
       - name: Install appimage-builder
         run: |
           curl --location -o appimage-builder https://github.com/AppImageCrafters/appimage-builder/releases/download/v1.1.0/appimage-builder-1.1.0-x86_64.AppImage
           chmod +x appimage-builder
-          sudo mv appimage-builder /usr/bin/
+          mv appimage-builder /usr/bin/
       - name: Build cli
         run: cargo build --release --package openscq30_cli
       - name: Build AppImage
