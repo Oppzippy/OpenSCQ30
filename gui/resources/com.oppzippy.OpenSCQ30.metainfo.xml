@@ -35,11 +35,21 @@
     <releases>
         <release version="1.8.0" date="2023-10-22">
             <description>
+                <p>Features</p>
+                <ul>
+                    <li>Add quick presets</li>
+                    <li>Add button keybinding settings</li>
+                    <li>Add hear id settings</li>
+                </ul>
+                <p>Fixes</p>
+                <ul>
+                    <li>Localize equalizer preset names</li>
+                </ul>
                 <p>Dependencies</p>
                 <ul>
                     <li>Minimum gtk4 version increased to v4.12 (GNOME 45)</li>
                     <li>Minimum libadwaita version increased to v1.4 (GNOME 45)</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="1.7.0" date="2023-09-30">
@@ -47,7 +57,7 @@
                 <p>Fixes</p>
                 <ul>
                     <li>Bluetooth initialization when launching the application will no longer block the window from showing</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="1.6.0" date="2023-09-09">
@@ -58,7 +68,7 @@
                     <li>Add support for custom transparency mode</li>
                     <li>Add support for custom noise canceling mode</li>
                     <li>Add device information tab</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="1.5.2" date="2023-07-14">
@@ -66,7 +76,7 @@
                 <p>Fixes</p>
                 <ul>
                     <li>Fix non-soundcore devices showing in device list</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="1.5.1" date="2023-07-11" />
@@ -75,7 +85,7 @@
                 <p>Fixes</p>
                 <ul>
                     <li>Go back to device selection screen immediately when device disconnects</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="1.4.0" date="2023-07-01">
@@ -83,7 +93,7 @@
                 <p>Fixes</p>
                 <ul>
                     <li>Improve handing of device disconnects. How this is implemented varies by platform. The desktop GUI could still use some more work.</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="1.3.1" date="2023-06-13" />

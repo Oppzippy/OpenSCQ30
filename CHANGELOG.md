@@ -4,6 +4,16 @@
 
 ### GUI
 
+#### Features
+
+-   Add quick presets
+-   Add button keybinding settings
+-   Add hear id settings
+
+#### Fixes
+
+-   Localize equalizer preset names
+
 #### Dependencies
 
 -   Minimum gtk4 version increased to v4.12 (GNOME 45)
