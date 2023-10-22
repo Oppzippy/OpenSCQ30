@@ -46,7 +46,7 @@ jobs:
 
   # Only lib is tested on windows since building gtk takes too long, and lib is the only crate with os specific code
   rust_test_windows:
-    runs-on: windows-2022
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -61,7 +61,7 @@ jobs:
         run: cargo make integration-test
 
   android_test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
