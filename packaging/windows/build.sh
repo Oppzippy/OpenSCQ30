@@ -43,5 +43,6 @@ done
 
 # Install other dependencies
 mkdir -p "$output_dir/share/glib-2.0"
+cp -r "/$package_type/bin/gdbus.exe" "$output_dir/bin/"
 cp -r "/$package_type/share/locale" "$output_dir/share/"
 cp -r "/$package_type/share/glib-2.0/schemas" "$output_dir/share/glib-2.0/"
