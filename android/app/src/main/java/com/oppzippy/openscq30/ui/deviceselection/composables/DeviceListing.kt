@@ -54,7 +54,8 @@ fun DeviceListing(
         })
     }, content = { innerPadding ->
         val pullRefreshState = rememberPullRefreshState(
-            refreshing = false, // Refresh is instant
+            // Refresh is instant
+            refreshing = false,
             onRefresh = { onRefreshClick() },
         )
         Box(

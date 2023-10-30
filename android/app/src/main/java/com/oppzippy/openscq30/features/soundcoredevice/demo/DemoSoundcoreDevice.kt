@@ -25,7 +25,8 @@ class DemoSoundcoreDevice(
 ) : SoundcoreDevice {
     private val _stateFlow = MutableStateFlow(
         SoundcoreDeviceState(
-            featureFlags = DeviceFeatureFlags.all(), // all features on
+            // all features on
+            featureFlags = DeviceFeatureFlags.all(),
             soundModes = SoundModes(
                 AmbientSoundMode.Normal,
                 NoiseCancelingMode.Indoor,

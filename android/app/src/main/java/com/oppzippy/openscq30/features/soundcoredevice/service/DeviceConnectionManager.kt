@@ -22,13 +22,13 @@ class DeviceConnectionManager @Inject constructor(
     private val scope: CoroutineScope,
 ) {
     private val mutex: Mutex = Mutex()
-    private var _connectionStateFlow: MutableStateFlow<ConnectionStatus> =
+    private val connectionStateFlow: MutableStateFlow<ConnectionStatus> =
         MutableStateFlow(ConnectionStatus.AwaitingConnection)
-    val connectionStatusFlow = _connectionStateFlow.asStateFlow()
+    val connectionStatusFlow = connectionStateFlow.asStateFlow()
 
     init {
         scope.launch {
-            _connectionStateFlow.collectLatest { status ->
+            connectionStateFlow.collectLatest { status ->
                 if (status is ConnectionStatus.Connected) {
                     status.device.isDisconnected.first { isDisconnected -> isDisconnected }
                     disconnect()
@@ -42,7 +42,7 @@ class DeviceConnectionManager @Inject constructor(
             if (macAddress == getMacAddress()) {
                 return
             }
-            disconnectWithoutLocking(_connectionStateFlow.value)
+            disconnectWithoutLocking(connectionStateFlow.value)
             connectUnconditionally(macAddress)
         }
     }
@@ -55,17 +55,17 @@ class DeviceConnectionManager @Inject constructor(
         val job = scope.launch {
             try {
                 val device = deviceConnector.connectToSoundcoreDevice(macAddress, scope)
-                _connectionStateFlow.value = if (device != null) {
+                connectionStateFlow.value = if (device != null) {
                     ConnectionStatus.Connected(device)
                 } else {
                     ConnectionStatus.Disconnected
                 }
             } catch (ex: TimeoutException) {
                 Log.w("DeviceConnectionManager", "timeout connecting to device: $macAddress", ex)
-                _connectionStateFlow.value = ConnectionStatus.Disconnected
+                connectionStateFlow.value = ConnectionStatus.Disconnected
             }
         }
-        _connectionStateFlow.value = ConnectionStatus.Connecting(macAddress, job)
+        connectionStateFlow.value = ConnectionStatus.Connecting(macAddress, job)
         try {
             job.join()
         } catch (cancellationException: CancellationException) {
@@ -75,8 +75,8 @@ class DeviceConnectionManager @Inject constructor(
 
     suspend fun disconnect() {
         mutex.withLock {
-            disconnectWithoutLocking(_connectionStateFlow.value)
-            _connectionStateFlow.value = ConnectionStatus.Disconnected
+            disconnectWithoutLocking(connectionStateFlow.value)
+            connectionStateFlow.value = ConnectionStatus.Disconnected
         }
     }
 
@@ -90,7 +90,7 @@ class DeviceConnectionManager @Inject constructor(
     }
 
     private fun getMacAddress(): String? {
-        return _connectionStateFlow.value.let { state ->
+        return connectionStateFlow.value.let { state ->
             when (state) {
                 ConnectionStatus.AwaitingConnection -> null
                 is ConnectionStatus.Connecting -> state.macAddress
@@ -102,7 +102,7 @@ class DeviceConnectionManager @Inject constructor(
 
     private val device: SoundcoreDevice?
         get() {
-            return _connectionStateFlow.value.let {
+            return connectionStateFlow.value.let {
                 if (it is ConnectionStatus.Connected) {
                     it.device
                 } else {
