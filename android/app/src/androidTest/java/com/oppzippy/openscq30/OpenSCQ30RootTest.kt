@@ -8,7 +8,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.rule.GrantPermissionRule
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDeviceProvider
-import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
+import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceConnector
 import com.oppzippy.openscq30.features.soundcoredevice.demo.DemoSoundcoreDevice
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
 import com.oppzippy.openscq30.ui.OpenSCQ30Root
@@ -49,7 +49,7 @@ class OpenSCQ30RootTest {
     lateinit var bluetoothDeviceProvider: BluetoothDeviceProvider
 
     @Inject
-    lateinit var soundcoreDeviceFactory: SoundcoreDeviceFactory
+    lateinit var soundcoreDeviceConnector: SoundcoreDeviceConnector
 
     @Before
     fun setUp() {
@@ -72,7 +72,7 @@ class OpenSCQ30RootTest {
         val device = DemoSoundcoreDevice("test", "00:00:00:00:00:00")
         val mutex = Mutex(locked = true)
         coEvery {
-            soundcoreDeviceFactory.createSoundcoreDevice(
+            soundcoreDeviceConnector.connectToSoundcoreDevice(
                 "00:00:00:00:00:00",
                 any(),
             )

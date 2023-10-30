@@ -153,7 +153,7 @@ class SoundcoreDeviceImpl(
 
     private fun queueSetSoundMode(soundModes: SoundModes) {
         val packet = SetSoundModePacket(soundModes)
-        callbacks.queueCommanad(
+        callbacks.queueCommand(
             Command.Write(packet.bytes()),
         )
     }
@@ -185,7 +185,7 @@ class SoundcoreDeviceImpl(
                         },
                     ).bytes()
                 }
-            callbacks.queueCommanad(Command.Write(packet))
+            callbacks.queueCommand(Command.Write(packet))
             _stateFlow.value =
                 _stateFlow.value.copy(equalizerConfiguration = equalizerConfiguration)
         }

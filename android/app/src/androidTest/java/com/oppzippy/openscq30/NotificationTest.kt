@@ -19,7 +19,7 @@ import com.oppzippy.openscq30.features.equalizer.storage.toCustomProfile
 import com.oppzippy.openscq30.features.quickpresets.storage.FallbackQuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetRepository
-import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
+import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceConnector
 import com.oppzippy.openscq30.features.soundcoredevice.demo.DemoSoundcoreDevice
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
 import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
@@ -74,7 +74,7 @@ class NotificationTest {
     lateinit var bluetoothDeviceProvider: BluetoothDeviceProvider
 
     @Inject
-    lateinit var soundcoreDeviceFactory: SoundcoreDeviceFactory
+    lateinit var soundcoreDeviceConnector: SoundcoreDeviceConnector
 
     @Inject
     lateinit var quickPresetRepository: QuickPresetRepository
@@ -270,7 +270,7 @@ class NotificationTest {
         every { bluetoothDeviceProvider.getDevices() } returns bluetoothDevices
         val device = DemoSoundcoreDevice("Test Device", "00:00:00:00:00:00")
         coEvery {
-            soundcoreDeviceFactory.createSoundcoreDevice(
+            soundcoreDeviceConnector.connectToSoundcoreDevice(
                 "00:00:00:00:00:00",
                 any(),
             )

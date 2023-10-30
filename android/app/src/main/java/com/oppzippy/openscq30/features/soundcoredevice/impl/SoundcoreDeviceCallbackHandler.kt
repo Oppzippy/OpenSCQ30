@@ -13,14 +13,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.util.Log
-import com.oppzippy.openscq30.lib.bindings.RequestFirmwareVersionPacket
-import com.oppzippy.openscq30.lib.bindings.RequestStatePacket
 import com.oppzippy.openscq30.lib.bindings.SoundcoreDeviceUtils
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.util.UUID
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -41,7 +41,7 @@ class SoundcoreDeviceCallbackHandler(context: Context) : BluetoothGattCallback()
     val serviceUuid = _serviceUuid.asStateFlow()
 
     val adapter: BluetoothAdapter = context.getSystemService(BluetoothManager::class.java).adapter
-    val broadcastReceiver = object : BroadcastReceiver() {
+    private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val action = intent?.action
             if (action == BluetoothAdapter.ACTION_STATE_CHANGED) {
@@ -60,7 +60,7 @@ class SoundcoreDeviceCallbackHandler(context: Context) : BluetoothGattCallback()
     }
 
     @Synchronized
-    fun queueCommanad(command: Command) {
+    fun queueCommand(command: Command) {
         commandQueue.add(command)
         next()
     }
@@ -169,6 +169,14 @@ class SoundcoreDeviceCallbackHandler(context: Context) : BluetoothGattCallback()
         next()
     }
 
+    private val ready: Mutex = Mutex(locked = true)
+
+    suspend fun waitUntilReady() {
+        // A bit jank since we don't need the lock, we just need to wait until it is not locked
+        // A ConditionVariable would probably be better
+        ready.withLock { }
+    }
+
     @Synchronized
     override fun onServicesDiscovered(_gatt: BluetoothGatt?, status: Int) {
         val service = gatt.services.first {
@@ -189,15 +197,13 @@ class SoundcoreDeviceCallbackHandler(context: Context) : BluetoothGattCallback()
         val descriptor =
             readCharacteristic.getDescriptor(UUID(0x0000290200001000, -9223371485494954757))
 
-        queueCommanad(
+        queueCommand(
             Command.WriteDescriptor(
                 descriptor,
                 BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE,
             ),
         )
-        queueCommanad(Command.SetMtu(500))
-        queueCommanad(Command.Write(RequestStatePacket().bytes()))
-        // TODO only send this if the preceding state update packet did not get this information
-        queueCommanad(Command.Write(RequestFirmwareVersionPacket().bytes()))
+        queueCommand(Command.SetMtu(500))
+        ready.unlock()
     }
 }

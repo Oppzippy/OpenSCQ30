@@ -13,7 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetRepository
-import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
+import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceConnector
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_DISCONNECT
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_QUICK_PRESET
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_SEND_NOTIFICATION
@@ -51,7 +51,7 @@ class DeviceService : LifecycleService() {
     }
 
     @Inject
-    lateinit var factory: SoundcoreDeviceFactory
+    lateinit var deviceConnector: SoundcoreDeviceConnector
 
     @Inject
     lateinit var activateQuickPresetUseCase: ActivateQuickPresetUseCase
@@ -91,7 +91,7 @@ class DeviceService : LifecycleService() {
 
     override fun onCreate() {
         super.onCreate()
-        connectionManager = DeviceConnectionManager(factory, lifecycleScope)
+        connectionManager = DeviceConnectionManager(deviceConnector, lifecycleScope)
 
         lifecycleScope.launch {
             connectionManager.connectionStatusFlow.collectLatest { connectionStatus ->

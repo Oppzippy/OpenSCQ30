@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Android
+
+#### Fixes
+
+-   Add a few retries and a timeout when connecting to a device
+
 ## v1.8.0
 
 ### GUI

@@ -2,7 +2,7 @@ package com.oppzippy.openscq30.features.soundcoredevice.service
 
 import android.util.Log
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
-import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceFactory
+import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceConnector
 import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.bindings.SoundModes
 import kotlinx.coroutines.CancellationException
@@ -14,10 +14,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 
 class DeviceConnectionManager @Inject constructor(
-    private val factory: SoundcoreDeviceFactory,
+    private val deviceConnector: SoundcoreDeviceConnector,
     private val scope: CoroutineScope,
 ) {
     private val mutex: Mutex = Mutex()
@@ -48,14 +49,20 @@ class DeviceConnectionManager @Inject constructor(
 
     /**
      * Does not check if we're already connected or anything. Does not disconnect from existing devices.
+     * Will continue connecting even if the scope in which the function is called is canceled.
      */
     private suspend fun connectUnconditionally(macAddress: String) {
         val job = scope.launch {
-            val device = factory.createSoundcoreDevice(macAddress, scope)
-            _connectionStateFlow.value = if (device != null) {
-                ConnectionStatus.Connected(device)
-            } else {
-                ConnectionStatus.Disconnected
+            try {
+                val device = deviceConnector.connectToSoundcoreDevice(macAddress, scope)
+                _connectionStateFlow.value = if (device != null) {
+                    ConnectionStatus.Connected(device)
+                } else {
+                    ConnectionStatus.Disconnected
+                }
+            } catch (ex: TimeoutException) {
+                Log.w("DeviceConnectionManager", "timeout connecting to device: $macAddress", ex)
+                _connectionStateFlow.value = ConnectionStatus.Disconnected
             }
         }
         _connectionStateFlow.value = ConnectionStatus.Connecting(macAddress, job)
@@ -110,14 +117,5 @@ class DeviceConnectionManager @Inject constructor(
 
     fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
         device?.setEqualizerConfiguration(equalizerConfiguration)
-    }
-
-    private suspend fun attemptReconnect() {
-        mutex.withLock {
-            val status = this.connectionStatusFlow.value
-            if (status is ConnectionStatus.Connected) {
-                connectUnconditionally(status.device.macAddress)
-            }
-        }
     }
 }
