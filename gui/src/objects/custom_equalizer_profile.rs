@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use gtk::{
     glib::{self, Object},
     subclass::prelude::ObjectSubclassIsExt,
@@ -8,14 +10,14 @@ glib::wrapper! {
 }
 
 impl GlibCustomEqualizerProfile {
-    pub fn new(name: &str, volume_adjustments: [f64; 8]) -> Self {
+    pub fn new(name: &str, volume_adjustments: Arc<[f64]>) -> Self {
         let obj: Self = Object::builder().property("name", name).build();
         obj.imp().volume_adjustments.replace(volume_adjustments);
         obj
     }
 
-    pub fn volume_adjustments(&self) -> [f64; 8] {
-        self.imp().volume_adjustments.get()
+    pub fn volume_adjustments(&self) -> Arc<[f64]> {
+        self.imp().volume_adjustments.borrow().to_owned()
     }
 }
 
@@ -24,20 +26,30 @@ impl GlibCustomEqualizerProfile {
 pub struct GlibVolumeAdjustments(pub glib::FixedSizeVariantArray<Vec<f64>, f64>);
 
 mod imp {
-    use std::cell::{Cell, RefCell};
+    use std::{cell::RefCell, sync::Arc};
 
     use gtk::{
         glib::{self, ParamSpec, Properties, Value},
         prelude::ObjectExt,
         subclass::prelude::{DerivedObjectProperties, ObjectImpl, ObjectSubclass},
     };
+    use openscq30_lib::packets::structures::VolumeAdjustments;
 
-    #[derive(Default, Properties)]
+    #[derive(Properties)]
     #[properties(wrapper_type = super::GlibCustomEqualizerProfile)]
     pub struct GlibCustomEqualizerProfile {
         #[property(get, set)]
         pub name: RefCell<String>,
-        pub volume_adjustments: Cell<[f64; 8]>,
+        pub volume_adjustments: RefCell<Arc<[f64]>>,
+    }
+
+    impl Default for GlibCustomEqualizerProfile {
+        fn default() -> Self {
+            Self {
+                name: Default::default(),
+                volume_adjustments: RefCell::new(VolumeAdjustments::default().adjustments()),
+            }
+        }
     }
 
     #[glib::object_subclass]

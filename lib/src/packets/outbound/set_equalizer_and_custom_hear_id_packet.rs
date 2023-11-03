@@ -2,15 +2,15 @@ use crate::packets::structures::{AgeRange, CustomHearId, EqualizerConfiguration,
 
 use super::outbound_packet::OutboundPacket;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct SetEqualizerAndCustomHearIdPacket {
-    pub equalizer_configuration: EqualizerConfiguration,
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct SetEqualizerAndCustomHearIdPacket<'a> {
+    pub equalizer_configuration: &'a EqualizerConfiguration,
     pub gender: Gender,
     pub age_range: AgeRange,
-    pub custom_hear_id: CustomHearId,
+    pub custom_hear_id: &'a CustomHearId,
 }
 
-impl OutboundPacket for SetEqualizerAndCustomHearIdPacket {
+impl<'a> OutboundPacket for SetEqualizerAndCustomHearIdPacket<'a> {
     fn command(&self) -> [u8; 7] {
         if self.age_range.supports_hear_id() {
             [0x08, 0xee, 0x00, 0x00, 0x00, 0x03, 0x87]
@@ -35,9 +35,9 @@ impl OutboundPacket for SetEqualizerAndCustomHearIdPacket {
         if supports_hear_id {
             bytes.extend(EQ_HEAR_INDEX_ID.to_le_bytes());
         }
-        let eq_bytes = self.equalizer_configuration.volume_adjustments().bytes();
-        bytes.extend(eq_bytes); // left
-        bytes.extend(eq_bytes); // right
+        let eq = self.equalizer_configuration.volume_adjustments();
+        bytes.extend(eq.bytes()); // left
+        bytes.extend(eq.bytes()); // right
         bytes.push(if supports_hear_id {
             self.gender.0
         } else {
@@ -49,11 +49,11 @@ impl OutboundPacket for SetEqualizerAndCustomHearIdPacket {
             u8::MAX
         });
         bytes.push(0); // ??
-        bytes.extend(if supports_hear_id {
-            self.custom_hear_id.volume_adjustments.bytes()
+        if supports_hear_id {
+            bytes.extend(self.custom_hear_id.volume_adjustments.bytes());
         } else {
-            MAX_VALUE_STEREO_EQ_WAVE
-        });
+            bytes.extend(MAX_VALUE_STEREO_EQ_WAVE);
+        }
         bytes.extend(if supports_hear_id {
             self.custom_hear_id.time.to_be_bytes()
         } else {
@@ -64,21 +64,16 @@ impl OutboundPacket for SetEqualizerAndCustomHearIdPacket {
         } else {
             0
         });
-        bytes.extend(if supports_hear_id {
-            self.custom_hear_id
-                .custom_volume_adjustments
-                .map(|adjustments| adjustments.bytes())
-                .unwrap_or(MAX_VALUE_STEREO_EQ_WAVE)
-        } else {
-            MAX_VALUE_STEREO_EQ_WAVE
-        });
+        match &self.custom_hear_id.custom_volume_adjustments {
+            Some(adjustments) if supports_hear_id => bytes.extend(adjustments.bytes()),
+            _ => bytes.extend(MAX_VALUE_STEREO_EQ_WAVE),
+        }
         let drc = self
             .equalizer_configuration
             .volume_adjustments()
-            .apply_drc()
-            .bytes();
-        bytes.extend(drc); // left
-        bytes.extend(drc); // right
+            .apply_drc();
+        bytes.extend(drc.bytes()); // left
+        bytes.extend(drc.bytes()); // right
 
         bytes
     }
@@ -108,12 +103,12 @@ mod tests {
             0x6c, 0x0e,
         ];
         let actual = SetEqualizerAndCustomHearIdPacket {
-            equalizer_configuration: EqualizerConfiguration::new_custom_profile(
+            equalizer_configuration: &EqualizerConfiguration::new_custom_profile(
                 VolumeAdjustments::new([-5.2, -6.6, -6.4, -6.7, -10.8, -2.2, -4.9, -10.1]),
             ),
             gender: Gender(1),
             age_range: AgeRange(2),
-            custom_hear_id: CustomHearId {
+            custom_hear_id: &CustomHearId {
                 is_enabled: true,
                 volume_adjustments: StereoVolumeAdjustments {
                     left: VolumeAdjustments::new([
@@ -152,12 +147,12 @@ mod tests {
             0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0xb1,
         ];
         let actual = SetEqualizerAndCustomHearIdPacket {
-            equalizer_configuration: EqualizerConfiguration::new_from_preset_profile(
+            equalizer_configuration: &EqualizerConfiguration::new_from_preset_profile(
                 PresetEqualizerProfile::SoundcoreSignature,
             ),
             gender: Gender(1),
             age_range: AgeRange(255),
-            custom_hear_id: CustomHearId {
+            custom_hear_id: &CustomHearId {
                 is_enabled: true,
                 volume_adjustments: StereoVolumeAdjustments {
                     left: VolumeAdjustments::new([-3.3, -0.1, -3.3, -6.2, -0.9, -9.9, -1.9, -2.1]),

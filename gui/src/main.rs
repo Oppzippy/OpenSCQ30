@@ -239,7 +239,7 @@ fn delayed_initialize_application(
                     StateUpdate::SetDevices(devices) => main_window.set_devices(&devices),
                     StateUpdate::SetLoading(is_loading) => main_window.set_loading(is_loading),
                     StateUpdate::SetDeviceState(state) => main_window.set_device_state(&state),
-                    StateUpdate::SetEqualizerConfiguration(equalizer_configuration) => main_window.set_equalizer_configuration(equalizer_configuration),
+                    StateUpdate::SetEqualizerConfiguration(equalizer_configuration) => main_window.set_equalizer_configuration(&equalizer_configuration),
                     StateUpdate::SetSelectedDevice(device) => main_window.set_property("selected-device", device),
                     StateUpdate::SetCustomEqualizerProfiles(custom_profiles) => main_window.set_custom_profiles(custom_profiles),
                     StateUpdate::AddToast(text) => main_window.add_toast(Toast::builder().title(&text).timeout(15).build()),
@@ -402,7 +402,7 @@ fn delayed_initialize_application(
             receiver.changed().await.expect("we hold a reference to state, which holds the sender, so it should be impossible for it to be dropped");
             let next_state = receiver.borrow_and_update();
             if let Some(next_state) = next_state.as_ref() {
-                main_window.set_device_state(&next_state);
+                main_window.set_device_state(next_state);
             }
         }
     }));

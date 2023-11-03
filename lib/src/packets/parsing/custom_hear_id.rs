@@ -39,8 +39,7 @@ pub fn take_custom_hear_id<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>
             )| {
                 // The first byte of the custom volume adjustments determines whether or not they're present
                 let custom_volume_adjustments = if custom_left_values[0] != 255 {
-                    let custom_left =
-                        VolumeAdjustments::from_bytes(custom_left_values.try_into().unwrap());
+                    let custom_left = VolumeAdjustments::from_bytes(custom_left_values);
                     Some(StereoVolumeAdjustments {
                         left: custom_left,
                         right: custom_right,

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use super::{HearIdMusicType, HearIdType, StereoVolumeAdjustments};
 
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CustomHearId {
     pub is_enabled: bool,

@@ -30,7 +30,7 @@ fn insert_custom_profile(
         .edit(|settings| {
             settings.set_custom_profile(
                 custom_profile.name(),
-                CustomEqualizerProfile::new(custom_profile.volume_adjustments()),
+                CustomEqualizerProfile::new(&custom_profile.volume_adjustments()),
             );
         })
         .context("insert custom profile")
@@ -38,6 +38,8 @@ fn insert_custom_profile(
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
+
     use crate::{
         actions::{State, StateUpdate},
         mock::MockDeviceRegistry,
@@ -57,7 +59,7 @@ mod tests {
         let settings_file = SettingsFile::new(file.path().to_path_buf());
         let custom_profile = GlibCustomEqualizerProfile::new(
             &"custom profile".to_string(),
-            [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
+            Arc::new([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]),
         );
         create_custom_equalizer_profile(&state, &settings_file, &custom_profile).unwrap();
 

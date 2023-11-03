@@ -2,16 +2,16 @@ use crate::packets::structures::EqualizerConfiguration;
 
 use super::outbound_packet::OutboundPacket;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct SetEqualizerWithDrcPacket {
-    left_configuration: EqualizerConfiguration,
-    right_configuration: Option<EqualizerConfiguration>,
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct SetEqualizerWithDrcPacket<'a> {
+    left_configuration: &'a EqualizerConfiguration,
+    right_configuration: Option<&'a EqualizerConfiguration>,
 }
 
-impl SetEqualizerWithDrcPacket {
+impl<'a> SetEqualizerWithDrcPacket<'a> {
     pub fn new(
-        left_configuration: EqualizerConfiguration,
-        right_configuration: Option<EqualizerConfiguration>,
+        left_configuration: &'a EqualizerConfiguration,
+        right_configuration: Option<&'a EqualizerConfiguration>,
     ) -> Self {
         Self {
             left_configuration,
@@ -20,7 +20,7 @@ impl SetEqualizerWithDrcPacket {
     }
 }
 
-impl OutboundPacket for SetEqualizerWithDrcPacket {
+impl<'a> OutboundPacket for SetEqualizerWithDrcPacket<'a> {
     fn command(&self) -> [u8; 7] {
         [0x08, 0xEE, 0x00, 0x00, 0x00, 0x02, 0x83]
     }
@@ -64,12 +64,13 @@ mod tests {
             0xf0, 0x8e, 0x00, 0x74, 0x88, 0x6d, 0x86, 0x70, 0x88, 0x7b, 0x66, 0x7e, 0x79, 0x4f,
         ];
 
-        let packet = SetEqualizerWithDrcPacket::new(
-            EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
+        let actual = SetEqualizerWithDrcPacket::new(
+            &EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
                 -6.0, 6.0, 2.3, 12.0, 2.2, -12.0, -0.4, 1.6,
             ])),
             None,
-        );
-        assert_eq!(EXPECTED, packet.bytes());
+        )
+        .bytes();
+        assert_eq!(EXPECTED, actual);
     }
 }

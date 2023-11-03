@@ -8,9 +8,10 @@ use crate::OutboundPacket;
 use crate::{packets::structures::EqualizerConfiguration, type_conversion};
 
 #[generate_interface_doc]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct SetEqualizerWithDrcPacket {
-    packet: LibSetEqualizerWithDrcPacket,
+    left_configuration: EqualizerConfiguration,
+    right_configuration: Option<EqualizerConfiguration>,
 }
 
 impl SetEqualizerWithDrcPacket {
@@ -20,10 +21,8 @@ impl SetEqualizerWithDrcPacket {
         right_configuration: Option<&EqualizerConfiguration>,
     ) -> SetEqualizerWithDrcPacket {
         Self {
-            packet: LibSetEqualizerWithDrcPacket::new(
-                left_configuration.to_owned().into(),
-                right_configuration.copied().map(Into::into),
-            ),
+            left_configuration: left_configuration.to_owned(),
+            right_configuration: right_configuration.cloned(),
         }
     }
 }
@@ -31,6 +30,11 @@ impl SetEqualizerWithDrcPacket {
 impl OutboundPacket for SetEqualizerWithDrcPacket {
     #[generate_interface]
     fn bytes(&self) -> Vec<i8> {
-        type_conversion::u8_slice_to_i8_slice(&self.packet.bytes()).to_vec()
+        let bytes = LibSetEqualizerWithDrcPacket::new(
+            &self.left_configuration.to_owned().into(),
+            self.right_configuration.to_owned().map(Into::into).as_ref(),
+        )
+        .bytes();
+        type_conversion::u8_slice_to_i8_slice(&bytes).to_vec()
     }
 }

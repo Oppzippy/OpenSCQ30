@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use gtk::{
     glib::{self, Object},
     subclass::prelude::*,
@@ -14,17 +16,17 @@ impl ProfileDropdownRow {
         Object::builder().build()
     }
 
-    pub fn volume_adjustments(&self) -> Option<[f64; 8]> {
-        self.imp().volume_adjustments.get()
+    pub fn volume_adjustments(&self) -> Option<Arc<[f64]>> {
+        self.imp().volume_adjustments.borrow().to_owned()
     }
 
-    pub fn set_volume_adjustments(&self, volume_adjustments: Option<[f64; 8]>) {
+    pub fn set_volume_adjustments(&self, volume_adjustments: Option<Arc<[f64]>>) {
         self.imp().set_volume_adjustments(volume_adjustments)
     }
 }
 
 mod imp {
-    use std::cell::{Cell, RefCell};
+    use std::{cell::RefCell, sync::Arc};
 
     use gtk::{
         cairo::{LineCap, LineJoin},
@@ -51,12 +53,12 @@ mod imp {
 
         #[property(get, set)]
         pub name: RefCell<String>,
-        pub volume_adjustments: Cell<Option<[f64; 8]>>,
+        pub volume_adjustments: RefCell<Option<Arc<[f64]>>>,
     }
 
     impl ProfileDropdownRow {
-        pub fn set_volume_adjustments(&self, volume_adjustments: Option<[f64; 8]>) {
-            self.volume_adjustments.set(volume_adjustments);
+        pub fn set_volume_adjustments(&self, volume_adjustments: Option<Arc<[f64]>>) {
+            *self.volume_adjustments.borrow_mut() = volume_adjustments;
             self.drawing_area.queue_draw();
         }
     }
@@ -86,7 +88,7 @@ mod imp {
             let this = self.to_owned();
             self.drawing_area
                 .set_draw_func(move |drawing_area, context, width, height| {
-                    if let Some(volume_adjustments) = this.volume_adjustments.get() {
+                    if let Some(volume_adjustments) = &*this.volume_adjustments.borrow() {
                         let color = drawing_area.color();
                         context.set_source_rgba(
                             color.red().into(),

@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use gtk::{
     glib::{self, Object},
     subclass::prelude::ObjectSubclassIsExt,
@@ -14,17 +16,18 @@ impl Equalizer {
         Object::builder().build()
     }
 
-    pub fn volume_adjustments(&self) -> [f64; 8] {
+    pub fn volume_adjustments(&self) -> Arc<[f64]> {
         return self.imp().volume_adjustments();
     }
 
-    pub fn set_volumes(&self, volumes: [f64; 8]) {
+    pub fn set_volumes(&self, volumes: &[f64]) {
         self.imp().set_volumes(volumes);
     }
 }
 
 mod imp {
     use std::cell::Cell;
+    use std::sync::Arc;
 
     use gtk::glib::clone;
     use gtk::{
@@ -64,16 +67,20 @@ mod imp {
     }
 
     impl Equalizer {
-        pub fn volume_adjustments(&self) -> [f64; 8] {
-            self.get_volume_sliders().map(|slider| slider.volume())
+        pub fn volume_adjustments(&self) -> Arc<[f64]> {
+            self.get_volume_sliders()
+                .iter()
+                .map(|slider| slider.volume())
+                .collect()
         }
 
-        pub fn set_volumes(&self, volumes: [f64; 8]) {
+        pub fn set_volumes(&self, volumes: &[f64]) {
+            // TODO set number of sliders
             self.dont_fire_events.set(true);
             self.get_volume_sliders()
                 .iter()
                 .zip(volumes)
-                .for_each(|(slider, volume)| slider.set_volume(volume));
+                .for_each(|(slider, volume)| slider.set_volume(*volume));
             self.dont_fire_events.set(false);
         }
 
@@ -83,7 +90,7 @@ mod imp {
             }
         }
 
-        fn get_volume_sliders(&self) -> [&TemplateChild<VolumeSlider>; 8] {
+        fn get_volume_sliders(&self) -> Vec<&TemplateChild<VolumeSlider>> {
             [
                 &self.band_100,
                 &self.band_200,
@@ -94,6 +101,7 @@ mod imp {
                 &self.band_6400,
                 &self.band_12800,
             ]
+            .to_vec()
         }
     }
 
@@ -153,8 +161,8 @@ mod tests {
         load_resources();
         let equalizer = Equalizer::new();
         let expected_volumes = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7];
-        equalizer.set_volumes(expected_volumes.to_owned());
-        assert_eq!(equalizer.volume_adjustments(), expected_volumes);
+        equalizer.set_volumes(&expected_volumes.to_owned());
+        assert_eq!(expected_volumes, equalizer.volume_adjustments().as_ref());
     }
 
     #[gtk::test]
@@ -170,7 +178,7 @@ mod tests {
             }),
         );
         equalizer.imp().band_100.set_volume(0.1);
-        assert_eq!(received_event.get(), true);
+        assert_eq!(true, received_event.get());
     }
 
     #[gtk::test]
@@ -185,7 +193,7 @@ mod tests {
                 received_event.set(true);
             }),
         );
-        equalizer.set_volumes([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]);
-        assert_eq!(received_event.get(), false);
+        equalizer.set_volumes(&[0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]);
+        assert_eq!(false, received_event.get());
     }
 }

@@ -1,4 +1,5 @@
 use heck::AsKebabCase;
+use itertools::Itertools;
 use openscq30_lib::{api::device::Device, packets::structures::VolumeAdjustments};
 
 use crate::cli::GetCommand;
@@ -24,7 +25,7 @@ pub async fn get(get_command: GetCommand, device: &impl Device) {
     };
 }
 
-fn print_volume_adjustments(volume_adjustments: VolumeAdjustments) {
+fn print_volume_adjustments(volume_adjustments: &VolumeAdjustments) {
     let separated_volume_adjustments = volume_adjustments.bytes().map(|b| b.to_string()).join(" ");
     println!("{separated_volume_adjustments}");
 }

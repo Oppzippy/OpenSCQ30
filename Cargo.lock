@@ -1379,6 +1379,7 @@ dependencies = [
  "assert_cmd",
  "clap",
  "heck",
+ "itertools 0.11.0",
  "macaddr",
  "openscq30_lib",
  "predicates 3.0.4",

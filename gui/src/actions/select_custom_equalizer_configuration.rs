@@ -28,7 +28,7 @@ where
                     anyhow::anyhow!("custom profile does not exist: {}", custom_profile.name())
                 })?;
             let equalizer_configuration = EqualizerConfiguration::new_custom_profile(
-                VolumeAdjustments::new(profile.volume_adjustments()),
+                VolumeAdjustments::new(profile.volume_adjustments().iter().cloned()),
             );
             state
                 .state_update_sender
@@ -44,6 +44,8 @@ where
 
 #[cfg(test)]
 mod tests {
+
+    use std::sync::Arc;
 
     use openscq30_lib::packets::structures::{EqualizerConfiguration, VolumeAdjustments};
 
@@ -66,13 +68,13 @@ mod tests {
         let settings_file = SettingsFile::<Config>::new(file.path().to_path_buf());
         let custom_profile = GlibCustomEqualizerProfile::new(
             &"custom profile".to_string(),
-            [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
+            Arc::new([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]),
         );
         settings_file
             .edit(|settings| {
                 settings.set_custom_profile(
                     custom_profile.name(),
-                    CustomEqualizerProfile::new(custom_profile.volume_adjustments()),
+                    CustomEqualizerProfile::new(&custom_profile.volume_adjustments()),
                 );
             })
             .unwrap();
@@ -85,7 +87,7 @@ mod tests {
         assert_eq!(
             StateUpdate::SetEqualizerConfiguration(
                 EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(
-                    custom_profile.volume_adjustments()
+                    custom_profile.volume_adjustments().iter().cloned()
                 ))
                 .into()
             ),

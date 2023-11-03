@@ -1,7 +1,7 @@
 use anyhow::Context;
 use openscq30_lib::{
     api::device::{Device, DeviceRegistry},
-    packets::structures::{EqualizerConfiguration, SoundModes},
+    packets::structures::{EqualizerConfiguration, SoundModes, VolumeAdjustments},
     state::DeviceState,
 };
 
@@ -72,7 +72,9 @@ async fn set_equalizer_configuration_from_quick_preset(
             })
             .context("get custom eq profile from config")?
             .map(|profile| {
-                EqualizerConfiguration::new_custom_profile(profile.volume_adjustments().into())
+                EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(
+                    profile.volume_adjustments().iter().cloned(),
+                ))
             }),
         None => None,
     };
@@ -93,7 +95,7 @@ mod tests {
     use openscq30_lib::{
         packets::structures::{
             AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
-            PresetEqualizerProfile, SoundModes, TransparencyMode,
+            PresetEqualizerProfile, SoundModes, TransparencyMode, VolumeAdjustments,
         },
         state::DeviceState,
     };
@@ -206,7 +208,9 @@ mod tests {
             .expect_set_equalizer_configuration()
             .withf(move |equalizer_configuration| {
                 equalizer_configuration
-                    == &EqualizerConfiguration::new_custom_profile(VOLUME_ADJUSTMENTS.into())
+                    == &EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(
+                        VOLUME_ADJUSTMENTS,
+                    ))
             })
             .once()
             .returning(|_| Ok(()));
@@ -218,7 +222,7 @@ mod tests {
             .edit(|config: &mut Config| {
                 config.set_custom_profile(
                     "test profile".into(),
-                    CustomEqualizerProfile::new(VOLUME_ADJUSTMENTS),
+                    CustomEqualizerProfile::new(&VOLUME_ADJUSTMENTS),
                 );
             })
             .unwrap();

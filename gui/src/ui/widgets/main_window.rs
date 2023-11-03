@@ -83,10 +83,10 @@ impl MainWindow {
 
     pub fn set_device_state(&self, state: &DeviceState) {
         self.imp().selected_device_settings.set_device_state(state);
-        self.set_equalizer_configuration(state.equalizer_configuration);
+        self.set_equalizer_configuration(&state.equalizer_configuration);
     }
 
-    pub fn set_equalizer_configuration(&self, equalizer_configuration: EqualizerConfiguration) {
+    pub fn set_equalizer_configuration(&self, equalizer_configuration: &EqualizerConfiguration) {
         self.imp()
             .selected_device_settings
             .set_equalizer_configuration(equalizer_configuration);
@@ -119,6 +119,7 @@ mod imp {
     use std::{
         cell::{Cell, OnceCell, RefCell},
         rc::Rc,
+        sync::Arc,
     };
 
     use adw::{prelude::*, subclass::prelude::AdwApplicationWindowImpl};
@@ -181,7 +182,7 @@ mod imp {
             self.device_selection.set_devices(devices);
         }
 
-        fn create_custom_equalizer_profile(&self, volume_adjustments: [f64; 8]) {
+        fn create_custom_equalizer_profile(&self, volume_adjustments: Arc<[f64]>) {
             let obj = self.obj();
 
             let dialog = adw::MessageDialog::new(Some(&*obj), Some("Create Custom Profile"), None);

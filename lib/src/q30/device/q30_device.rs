@@ -125,16 +125,16 @@ where
     async fn set_custom_hear_id(
         &self,
         state: &DeviceState,
-        custom_hear_id: CustomHearId,
+        custom_hear_id: &CustomHearId,
     ) -> crate::Result<()> {
         let gender = state
             .gender
-            .ok_or_else(|| crate::Error::MissingData { name: "gender" })?;
+            .ok_or(crate::Error::MissingData { name: "gender" })?;
         let age_range = state
             .age_range
-            .ok_or_else(|| crate::Error::MissingData { name: "age range" })?;
+            .ok_or(crate::Error::MissingData { name: "age range" })?;
         let packet = SetEqualizerAndCustomHearIdPacket {
-            equalizer_configuration: state.equalizer_configuration,
+            equalizer_configuration: &state.equalizer_configuration,
             gender,
             age_range,
             custom_hear_id,
@@ -273,19 +273,19 @@ where
             return Ok(());
         }
 
-        let left_channel = equalizer_configuration;
+        let left_channel = &equalizer_configuration;
         let right_channel = if state
             .feature_flags
             .contains(DeviceFeatureFlags::TWO_CHANNEL_EQUALIZER)
         {
-            Some(equalizer_configuration)
+            Some(&equalizer_configuration)
         } else {
             None
         };
 
-        let packet_bytes = if let Some(HearId::Custom(custom_hear_id)) = state.hear_id {
+        let packet_bytes = if let Some(HearId::Custom(custom_hear_id)) = &state.hear_id {
             SetEqualizerAndCustomHearIdPacket {
-                equalizer_configuration,
+                equalizer_configuration: &equalizer_configuration,
                 age_range: state.age_range.ok_or(crate::Error::IncompleteStateError {
                     message: "age range not set",
                 })?,
@@ -321,17 +321,18 @@ where
 
         let prev_hear_id = state
             .hear_id
-            .ok_or_else(|| crate::Error::MissingData { name: "hear id" })?;
-        if hear_id == prev_hear_id {
+            .as_ref()
+            .ok_or(crate::Error::MissingData { name: "hear id" })?;
+        if &hear_id == prev_hear_id {
             return Ok(());
         }
-        match hear_id {
+        match &hear_id {
             HearId::Basic(hear_id) => {
                 self.set_custom_hear_id(
                     &state,
-                    CustomHearId {
+                    &CustomHearId {
                         is_enabled: hear_id.is_enabled,
-                        volume_adjustments: hear_id.volume_adjustments,
+                        volume_adjustments: hear_id.volume_adjustments.to_owned(),
                         // TODO Should this be the current time? If so, what kind of timestamp?
                         time: hear_id.time,
                         hear_id_type: HearIdType::default(),
@@ -352,6 +353,7 @@ where
         });
         Ok(())
     }
+
     async fn set_custom_button_model(
         &self,
         custom_button_model: CustomButtonModel,
@@ -369,11 +371,9 @@ where
         }
 
         let prev_custom_button_model =
-            state
-                .custom_button_model
-                .ok_or_else(|| crate::Error::MissingData {
-                    name: "custom button model",
-                })?;
+            state.custom_button_model.ok_or(crate::Error::MissingData {
+                name: "custom button model",
+            })?;
         if custom_button_model == prev_custom_button_model {
             return Ok(());
         }
@@ -467,9 +467,9 @@ mod tests {
         );
         assert!(state.equalizer_configuration.preset_profile().is_none());
         assert_approx_eq!(
-            VolumeAdjustments,
-            VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]),
-            state.equalizer_configuration.volume_adjustments(),
+            &VolumeAdjustments,
+            &VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]),
+            &state.equalizer_configuration.volume_adjustments(),
             VolumeAdjustments::MARGIN
         )
     }
@@ -585,7 +585,7 @@ mod tests {
                 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0,
             ]));
         device
-            .set_equalizer_configuration(equalizer_configuration)
+            .set_equalizer_configuration(equalizer_configuration.to_owned())
             .await
             .unwrap();
         device

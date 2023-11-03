@@ -6,7 +6,7 @@ use rifgen::rifgen_attr::{generate_interface, generate_interface_doc};
 use crate::StereoVolumeAdjustments;
 
 #[generate_interface_doc]
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct CustomHearId {
     inner: LibCustomHearId,
 }

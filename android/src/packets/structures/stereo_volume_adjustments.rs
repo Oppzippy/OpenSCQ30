@@ -3,7 +3,7 @@ use openscq30_lib::packets::structures::StereoVolumeAdjustments as LibStereoVolu
 use rifgen::rifgen_attr::{generate_interface, generate_interface_doc};
 
 #[generate_interface_doc]
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct StereoVolumeAdjustments(LibStereoVolumeAdjustments);
 
 impl StereoVolumeAdjustments {
@@ -17,12 +17,12 @@ impl StereoVolumeAdjustments {
 
     #[generate_interface]
     pub fn left(&self) -> VolumeAdjustments {
-        self.0.left.into()
+        self.0.left.to_owned().into()
     }
 
     #[generate_interface]
     pub fn right(&self) -> VolumeAdjustments {
-        self.0.right.into()
+        self.0.right.to_owned().into()
     }
 }
 

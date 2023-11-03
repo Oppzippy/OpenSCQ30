@@ -21,7 +21,7 @@ impl EqualizerSettingsScreen {
         self.imp().set_sender(sender);
     }
 
-    pub fn set_equalizer_configuration(&self, equalizer_configuration: EqualizerConfiguration) {
+    pub fn set_equalizer_configuration(&self, equalizer_configuration: &EqualizerConfiguration) {
         self.imp()
             .set_equalizer_configuration(equalizer_configuration);
     }
@@ -157,7 +157,7 @@ mod imp {
         pub fn equalizer_configuration(&self) -> EqualizerConfiguration {
             if self.is_custom_profile() {
                 EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(
-                    self.equalizer.volume_adjustments(),
+                    self.equalizer.volume_adjustments().iter().cloned(),
                 ))
             } else {
                 let selection = self
@@ -179,9 +179,12 @@ mod imp {
             }
         }
 
-        pub fn set_equalizer_configuration(&self, equalizer_configuration: EqualizerConfiguration) {
+        pub fn set_equalizer_configuration(
+            &self,
+            equalizer_configuration: &EqualizerConfiguration,
+        ) {
             self.equalizer
-                .set_volumes(equalizer_configuration.volume_adjustments().into());
+                .set_volumes(&equalizer_configuration.volume_adjustments().adjustments());
             let profile_index = self
                 .profiles
                 .get()
@@ -443,9 +446,9 @@ mod imp {
                     });
                     EqualizerConfiguration::new_from_preset_profile(preset_profile)
                 } else {
-                    EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(this.equalizer.volume_adjustments()))
+                    EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(this.equalizer.volume_adjustments().iter().cloned()))
                 };
-                this.set_equalizer_configuration(equalizer_configuration);
+                this.set_equalizer_configuration(&equalizer_configuration);
                 this.update_custom_profile_selection();
                 // TODO this is needed because this runs once during construction (before sender is set)
                 // see if we can have sender get set before construction maybe?
@@ -514,6 +517,8 @@ mod imp {
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
+
     use gtk::{
         glib::{MainContext, Priority},
         subclass::prelude::*,
@@ -533,7 +538,7 @@ mod tests {
         let settings = EqualizerSettingsScreen::new();
         let (sender, _receiver) = MainContext::channel(Priority::default());
         settings.set_sender(sender);
-        settings.set_equalizer_configuration(EqualizerConfiguration::new_from_preset_profile(
+        settings.set_equalizer_configuration(&EqualizerConfiguration::new_from_preset_profile(
             PresetEqualizerProfile::SoundcoreSignature,
         ));
         assert_eq!(
@@ -552,7 +557,7 @@ mod tests {
         let settings = EqualizerSettingsScreen::new();
         let (sender, _receiver) = MainContext::channel(Priority::default());
         settings.set_sender(sender);
-        settings.set_equalizer_configuration(EqualizerConfiguration::new_custom_profile(
+        settings.set_equalizer_configuration(&EqualizerConfiguration::new_custom_profile(
             VolumeAdjustments::new([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
         ));
         assert_eq!(
@@ -573,9 +578,9 @@ mod tests {
         settings.set_sender(sender);
         settings.set_custom_profiles(vec![GlibCustomEqualizerProfile::new(
             "test profile",
-            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            Arc::new([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
         )]);
-        settings.set_equalizer_configuration(EqualizerConfiguration::new_custom_profile(
+        settings.set_equalizer_configuration(&EqualizerConfiguration::new_custom_profile(
             VolumeAdjustments::new([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
         ));
         assert_eq!(

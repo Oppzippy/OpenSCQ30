@@ -28,7 +28,7 @@ impl SelectedDeviceSettings {
         self.imp().set_device_state(state);
     }
 
-    pub fn set_equalizer_configuration(&self, equalizer_configuration: EqualizerConfiguration) {
+    pub fn set_equalizer_configuration(&self, equalizer_configuration: &EqualizerConfiguration) {
         self.imp()
             .equalizer_settings
             .set_equalizer_configuration(equalizer_configuration);
@@ -111,7 +111,7 @@ mod imp {
         pub fn set_device_state(&self, state: &DeviceState) {
             self.general_settings.set_device_state(state);
             self.equalizer_settings
-                .set_equalizer_configuration(state.equalizer_configuration);
+                .set_equalizer_configuration(&state.equalizer_configuration);
             self.device_information.set_device_state(state);
             self.quick_presets.set_device_state(state);
 

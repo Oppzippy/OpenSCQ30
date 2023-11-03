@@ -27,7 +27,7 @@ impl HearIdScreen {
 }
 
 mod imp {
-    use std::cell::{Cell, OnceCell};
+    use std::cell::{OnceCell, RefCell};
 
     use adw::prelude::WidgetExt;
     use gtk::{
@@ -73,14 +73,14 @@ mod imp {
         #[template_child]
         custom_volume_adjustments_right: TemplateChild<gtk::Label>,
 
-        hear_id: Cell<Option<HearId>>,
+        hear_id: RefCell<Option<HearId>>,
         sender: OnceCell<Sender<Action>>,
     }
 
     impl HearIdScreen {
         pub fn set_device_state(&self, state: &DeviceState) {
-            self.hear_id.set(state.hear_id);
-            match state.hear_id {
+            *self.hear_id.borrow_mut() = state.hear_id.to_owned();
+            match &state.hear_id {
                 Some(HearId::Basic(hear_id)) => {
                     self.hear_id_type_row.set_visible(false);
                     self.hear_id_music_type_row.set_visible(false);
@@ -117,7 +117,7 @@ mod imp {
                     self.hear_id_music_type
                         .set_label(&hear_id.hear_id_music_type.0.to_string());
 
-                    if let Some(custom_volume_adjustments) = hear_id.custom_volume_adjustments {
+                    if let Some(custom_volume_adjustments) = &hear_id.custom_volume_adjustments {
                         self.custom_volume_adjustments_left_row.set_visible(true);
                         self.custom_volume_adjustments_right_row.set_visible(true);
                         self.custom_volume_adjustments_left.set_label(
@@ -152,16 +152,16 @@ mod imp {
     impl HearIdScreen {
         #[template_callback]
         pub fn handle_is_enabled_toggled(&self) {
-            if let Some(hear_id) = self.hear_id.get() {
+            if let Some(hear_id) = &*self.hear_id.borrow() {
                 let is_enabled = self.is_enabled.is_active();
                 let new_hear_id = match hear_id {
                     HearId::Basic(hear_id) => HearId::Basic(BasicHearId {
                         is_enabled,
-                        ..hear_id
+                        ..hear_id.to_owned()
                     }),
                     HearId::Custom(hear_id) => HearId::Custom(CustomHearId {
                         is_enabled,
-                        ..hear_id
+                        ..hear_id.to_owned()
                     }),
                 };
                 self.sender

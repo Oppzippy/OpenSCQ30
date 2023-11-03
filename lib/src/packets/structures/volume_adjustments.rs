@@ -1,15 +1,22 @@
-use std::array;
+use std::{array, sync::Arc};
 
 use float_cmp::{ApproxEq, F64Margin};
 use ordered_float::OrderedFloat;
 use serde::{Deserialize, Serialize};
 
-#[derive(
-    Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
-)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct VolumeAdjustments {
-    volume_adjustments: [OrderedFloat<f64>; 8],
+    volume_adjustments: Arc<[OrderedFloat<f64>]>,
+}
+
+impl Default for VolumeAdjustments {
+    fn default() -> Self {
+        let volume_adjustments: [OrderedFloat<f64>; 8] = Default::default();
+        Self {
+            volume_adjustments: Arc::new(volume_adjustments),
+        }
+    }
 }
 
 impl VolumeAdjustments {
@@ -21,25 +28,50 @@ impl VolumeAdjustments {
         ulps: 4,
     };
 
-    pub fn new(volume_adjustments: [f64; 8]) -> Self {
-        let clamped_adjustments =
-            volume_adjustments.map(|vol| vol.clamp(Self::MIN_VOLUME, Self::MAX_VOLUME));
+    pub fn new(volume_adjustments: impl IntoIterator<Item = f64>) -> Self {
+        let clamped_adjustments = volume_adjustments
+            .into_iter()
+            .map(|vol| vol.clamp(Self::MIN_VOLUME, Self::MAX_VOLUME))
+            .map(OrderedFloat::from)
+            .collect::<Arc<[OrderedFloat<f64>]>>();
+
+        debug_assert!(
+            clamped_adjustments.len() >= 8 && clamped_adjustments.len() <= 10,
+            "should be between 8 and 10 bands"
+        );
         Self {
-            volume_adjustments: clamped_adjustments.map(Into::into),
+            volume_adjustments: clamped_adjustments,
         }
     }
 
-    pub fn bytes(&self) -> [u8; 8] {
+    pub fn bytes(&self) -> impl Iterator<Item = u8> + '_ {
         self.volume_adjustments
+            .iter()
+            .cloned()
             .map(|adjustment| Self::signed_adjustment_to_packet_byte(adjustment.into()))
     }
 
-    pub fn from_bytes(bytes: [u8; 8]) -> Self {
-        Self::new(bytes.map(Self::packet_byte_to_signed_adjustment))
+    pub fn from_bytes(bytes: &[u8]) -> Self {
+        debug_assert!(
+            bytes.len() >= 8 && bytes.len() <= 10,
+            "should be between 8 and 10 bands"
+        );
+
+        Self::new(
+            bytes
+                .iter()
+                .cloned()
+                .map(Self::packet_byte_to_signed_adjustment),
+        )
     }
 
-    pub fn adjustments(&self) -> [f64; 8] {
-        self.volume_adjustments.map(|adjustment| adjustment.into())
+    pub fn adjustments(&self) -> Arc<[f64]> {
+        // return Arc<f64> so we have the option to avoid the allocation in the future
+        // since OrderedFloat<f64> has repr transparent
+        self.volume_adjustments
+            .iter()
+            .map(|x| x.into_inner())
+            .collect::<Arc<[f64]>>()
     }
 
     fn signed_adjustment_to_packet_byte(adjustment: f64) -> u8 {
@@ -53,12 +85,12 @@ impl VolumeAdjustments {
     }
 
     pub fn apply_drc(&self) -> VolumeAdjustments {
-        let bands = self.adjustments();
+        let bands = &self.volume_adjustments;
 
         const SMALLER_COEFFICIENT: f64 = 0.85;
         const LARGER_COEFFICIENT: f64 = 0.95;
-        let lows_subtraction = bands[2] * 0.81 * SMALLER_COEFFICIENT;
-        let highs_subtraction = bands[5] * 0.81 * SMALLER_COEFFICIENT;
+        let lows_subtraction = bands[2].into_inner() * 0.81 * SMALLER_COEFFICIENT;
+        let highs_subtraction = bands[5].into_inner() * 0.81 * SMALLER_COEFFICIENT;
 
         let band_coefficients = [
             // 0
@@ -162,7 +194,7 @@ impl VolumeAdjustments {
                 {
                     acc - highs_subtraction
                 } else {
-                    acc + curr * coefficients[index]
+                    acc + curr.into_inner() * coefficients[index]
                 }
             })
         });
@@ -176,23 +208,19 @@ impl ApproxEq for VolumeAdjustments {
     type Margin = F64Margin;
 
     fn approx_eq<M: Into<Self::Margin>>(self, other: Self, margin: M) -> bool {
+        (&self).approx_eq(&other, margin)
+    }
+}
+
+impl ApproxEq for &VolumeAdjustments {
+    type Margin = F64Margin;
+
+    fn approx_eq<M: Into<Self::Margin>>(self, other: Self, margin: M) -> bool {
         let margin = margin.into();
         self.adjustments()
-            .into_iter()
-            .zip(other.adjustments())
-            .all(|(left, right)| left.approx_eq(right, margin))
-    }
-}
-
-impl From<VolumeAdjustments> for [f64; 8] {
-    fn from(volume_adjustments: VolumeAdjustments) -> Self {
-        volume_adjustments.adjustments()
-    }
-}
-
-impl From<[f64; 8]> for VolumeAdjustments {
-    fn from(value: [f64; 8]) -> Self {
-        Self::new(value)
+            .iter()
+            .zip(other.adjustments().iter())
+            .all(|(left, right)| left.approx_eq(*right, margin))
     }
 }
 
@@ -207,13 +235,16 @@ mod tests {
     #[test]
     fn converts_volume_adjustments_to_packet_bytes() {
         let band_adjustments = VolumeAdjustments::new(TEST_ADJUSTMENTS);
-        assert_eq!(TEST_BYTES, band_adjustments.bytes());
+        assert_eq!(
+            TEST_BYTES,
+            band_adjustments.bytes().collect::<Vec<_>>().as_ref()
+        );
     }
 
     #[test]
     fn from_bytes_converts_packet_bytes_to_adjustment() {
-        let band_adjustments = VolumeAdjustments::from_bytes(TEST_BYTES);
-        assert_eq!(TEST_ADJUSTMENTS, band_adjustments.adjustments());
+        let band_adjustments = VolumeAdjustments::from_bytes(&TEST_BYTES);
+        assert_eq!(TEST_ADJUSTMENTS, band_adjustments.adjustments().as_ref());
     }
 
     #[test]
@@ -231,7 +262,7 @@ mod tests {
                 0.0,
                 0.0
             ],
-            band_adjustments.adjustments()
+            band_adjustments.adjustments().as_ref()
         );
     }
 
@@ -281,9 +312,9 @@ mod tests {
             let actual = VolumeAdjustments::new(example.0).apply_drc();
             let expected = VolumeAdjustments::new(example.1);
             assert_approx_eq!(
-                VolumeAdjustments,
-                expected,
-                actual,
+                &VolumeAdjustments,
+                &expected,
+                &actual,
                 F64Margin {
                     epsilon: f32::EPSILON as f64 * 20.0,
                     ..Default::default()

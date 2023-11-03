@@ -30,7 +30,7 @@ impl StateUpdatePacket {
 
     #[generate_interface]
     pub fn equalizer_configuration(&self) -> EqualizerConfiguration {
-        self.0.equalizer_configuration.into()
+        self.0.equalizer_configuration.to_owned().into()
     }
 
     #[generate_interface]
@@ -60,8 +60,8 @@ impl StateUpdatePacket {
 
     #[generate_interface]
     pub fn custom_hear_id(&self) -> Option<CustomHearId> {
-        if let Some(HearId::Custom(custom_hear_id)) = self.0.hear_id {
-            Some(custom_hear_id.into())
+        if let Some(HearId::Custom(custom_hear_id)) = &self.0.hear_id {
+            Some(custom_hear_id.to_owned().into())
         } else {
             None
         }

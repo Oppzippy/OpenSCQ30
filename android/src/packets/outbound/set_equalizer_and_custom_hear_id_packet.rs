@@ -10,9 +10,12 @@ use crate::{
 };
 
 #[generate_interface_doc]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct SetEqualizerAndCustomHearIdPacket {
-    packet: LibSetEqualizerAndCustomHearIdPacket,
+    pub equalizer_configuration: EqualizerConfiguration,
+    pub gender: Gender,
+    pub age_range: AgeRange,
+    pub custom_hear_id: CustomHearId,
 }
 
 impl SetEqualizerAndCustomHearIdPacket {
@@ -24,12 +27,10 @@ impl SetEqualizerAndCustomHearIdPacket {
         custom_hear_id: CustomHearId,
     ) -> SetEqualizerAndCustomHearIdPacket {
         Self {
-            packet: LibSetEqualizerAndCustomHearIdPacket {
-                equalizer_configuration: equalizer_configuration.into(),
-                gender: gender.into(),
-                age_range: age_range.into(),
-                custom_hear_id: custom_hear_id.into(),
-            },
+            equalizer_configuration,
+            gender,
+            age_range,
+            custom_hear_id,
         }
     }
 }
@@ -37,6 +38,13 @@ impl SetEqualizerAndCustomHearIdPacket {
 impl OutboundPacket for SetEqualizerAndCustomHearIdPacket {
     #[generate_interface]
     fn bytes(&self) -> Vec<i8> {
-        type_conversion::u8_slice_to_i8_slice(&self.packet.bytes()).to_vec()
+        let bytes = LibSetEqualizerAndCustomHearIdPacket {
+            equalizer_configuration: &self.equalizer_configuration.to_owned().into(),
+            custom_hear_id: &self.custom_hear_id.to_owned().into(),
+            gender: self.gender.into(),
+            age_range: self.age_range.into(),
+        }
+        .bytes();
+        type_conversion::u8_slice_to_i8_slice(&bytes).to_vec()
     }
 }

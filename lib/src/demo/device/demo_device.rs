@@ -179,7 +179,7 @@ where
                 feature_name: "hear id",
             });
         }
-        if state.hear_id == Some(hear_id) {
+        if state.hear_id.as_ref() == Some(&hear_id) {
             return Ok(());
         }
         tracing::info!("set hear id to {hear_id:?}");
