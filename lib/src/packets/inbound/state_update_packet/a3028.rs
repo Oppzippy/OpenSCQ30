@@ -156,7 +156,7 @@ mod tests {
         assert!(packet.equalizer_configuration.preset_profile().is_none());
         assert_approx_eq!(
             &VolumeAdjustments,
-            &VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]),
+            &VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]).unwrap(),
             &packet.equalizer_configuration.volume_adjustments(),
             VolumeAdjustments::MARGIN
         );
@@ -186,7 +186,7 @@ mod tests {
         assert!(packet.equalizer_configuration.preset_profile().is_none());
         assert_approx_eq!(
             &VolumeAdjustments,
-            &VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]),
+            &VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]).unwrap(),
             &packet.equalizer_configuration.volume_adjustments(),
             VolumeAdjustments::MARGIN
         );
@@ -217,7 +217,7 @@ mod tests {
         assert!(packet.equalizer_configuration.preset_profile().is_none());
         assert_approx_eq!(
             &VolumeAdjustments,
-            &VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]),
+            &VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]).unwrap(),
             &packet.equalizer_configuration.volume_adjustments(),
             VolumeAdjustments::MARGIN
         );

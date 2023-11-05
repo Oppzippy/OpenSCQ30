@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use anyhow::Context;
 use openscq30_lib::{
     api::device::DeviceRegistry,
@@ -19,7 +21,7 @@ pub async fn select_custom_equalizer_configuration<T>(
 where
     T: DeviceRegistry + 'static,
 {
-    settings_file
+    let volume_adjustments = settings_file
         .get(|settings| {
             let profile = settings
                 .custom_profiles()
@@ -27,18 +29,19 @@ where
                 .ok_or_else(|| {
                     anyhow::anyhow!("custom profile does not exist: {}", custom_profile.name())
                 })?;
-            let equalizer_configuration = EqualizerConfiguration::new_custom_profile(
-                VolumeAdjustments::new(profile.volume_adjustments().iter().cloned()),
-            );
-            state
-                .state_update_sender
-                .send(StateUpdate::SetEqualizerConfiguration(
-                    equalizer_configuration,
-                ))
-                .map_err(|err| anyhow::anyhow!("{err}"))?;
-            Ok(()) as anyhow::Result<()>
+            Ok(profile.volume_adjustments()) as anyhow::Result<Arc<[f64]>>
         })
         .context("unable to get equalizer config from settings file")??;
+
+    let volume_adjustments = VolumeAdjustments::new(volume_adjustments.iter().cloned())?;
+    let equalizer_configuration = EqualizerConfiguration::new_custom_profile(volume_adjustments);
+
+    state
+        .state_update_sender
+        .send(StateUpdate::SetEqualizerConfiguration(
+            equalizer_configuration,
+        ))
+        .map_err(|err| anyhow::anyhow!("{err}"))?;
     Ok(())
 }
 
@@ -86,9 +89,10 @@ mod tests {
         let state_update = receiver.recv().await.unwrap();
         assert_eq!(
             StateUpdate::SetEqualizerConfiguration(
-                EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(
-                    custom_profile.volume_adjustments().iter().cloned()
-                ))
+                EqualizerConfiguration::new_custom_profile(
+                    VolumeAdjustments::new(custom_profile.volume_adjustments().iter().cloned())
+                        .unwrap()
+                )
                 .into()
             ),
             state_update,

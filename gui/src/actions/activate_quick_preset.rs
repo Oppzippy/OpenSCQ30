@@ -63,19 +63,26 @@ async fn set_equalizer_configuration_from_quick_preset(
         Some(PresetOrCustomEqualizerProfile::Preset(profile)) => {
             Some(EqualizerConfiguration::new_from_preset_profile(*profile))
         }
-        Some(PresetOrCustomEqualizerProfile::Custom(custom_profile_name)) => settings_file
-            .get(|config| {
-                config
-                    .custom_profiles()
-                    .get(custom_profile_name.as_ref())
-                    .cloned()
-            })
-            .context("get custom eq profile from config")?
-            .map(|profile| {
-                EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(
-                    profile.volume_adjustments().iter().cloned(),
+        Some(PresetOrCustomEqualizerProfile::Custom(custom_profile_name)) => {
+            let profile = settings_file
+                .get(|config| {
+                    config
+                        .custom_profiles()
+                        .get(custom_profile_name.as_ref())
+                        .cloned()
+                })
+                .context("get custom eq profile from config")?;
+            if let Some(profile) = profile {
+                let volume_adjustments =
+                    VolumeAdjustments::new(profile.volume_adjustments().iter().cloned())
+                        .context("parse volume adjustments of custom eq profile")?;
+                Some(EqualizerConfiguration::new_custom_profile(
+                    volume_adjustments,
                 ))
-            }),
+            } else {
+                None
+            }
+        }
         None => None,
     };
 
@@ -208,9 +215,9 @@ mod tests {
             .expect_set_equalizer_configuration()
             .withf(move |equalizer_configuration| {
                 equalizer_configuration
-                    == &EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(
-                        VOLUME_ADJUSTMENTS,
-                    ))
+                    == &EqualizerConfiguration::new_custom_profile(
+                        VolumeAdjustments::new(VOLUME_ADJUSTMENTS).unwrap(),
+                    )
             })
             .once()
             .returning(|_| Ok(()));

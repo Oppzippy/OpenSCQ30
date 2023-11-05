@@ -42,7 +42,8 @@ pub async fn set(set_command: SetCommand, device: &impl Device) -> openscq30_lib
 
             device
                 .set_equalizer_configuration(EqualizerConfiguration::new_custom_profile(
-                    VolumeAdjustments::new(float_adjustments),
+                    VolumeAdjustments::new(float_adjustments)
+                        .expect("we already checked for valid length"),
                 ))
                 .await?
         }

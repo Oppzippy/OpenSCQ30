@@ -468,7 +468,7 @@ mod tests {
         assert!(state.equalizer_configuration.preset_profile().is_none());
         assert_approx_eq!(
             &VolumeAdjustments,
-            &VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]),
+            &VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]).unwrap(),
             &state.equalizer_configuration.volume_adjustments(),
             VolumeAdjustments::MARGIN
         )
@@ -580,10 +580,9 @@ mod tests {
         let device = Q30Device::<_, TokioFutures>::new(connection.to_owned())
             .await
             .unwrap();
-        let equalizer_configuration =
-            EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
-                0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0,
-            ]));
+        let equalizer_configuration = EqualizerConfiguration::new_custom_profile(
+            VolumeAdjustments::new([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]).unwrap(),
+        );
         device
             .set_equalizer_configuration(equalizer_configuration.to_owned())
             .await

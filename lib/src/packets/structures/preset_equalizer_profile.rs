@@ -81,6 +81,7 @@ impl PresetEqualizerProfile {
             Self::TrebleReducer => [0.0, 0.0, 0.0, -2.0, -3.0, -4.0, -4.0, -6.0],
         };
         VolumeAdjustments::new(adjustments)
+            .expect("all possible values are literals, so it must be a bug if this fails")
     }
 }
 

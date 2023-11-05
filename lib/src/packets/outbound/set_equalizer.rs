@@ -53,9 +53,9 @@ mod tests {
             0xa0, 0x8e, 0xb4, 0x74, 0x88, 0xe6,
         ];
         let actual = SetEqualizerPacket::new(
-            &EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
-                -6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6,
-            ])),
+            &EqualizerConfiguration::new_custom_profile(
+                VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]).unwrap(),
+            ),
             None,
         )
         .bytes();

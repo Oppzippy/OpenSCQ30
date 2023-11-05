@@ -65,9 +65,9 @@ mod tests {
         ];
 
         let actual = SetEqualizerWithDrcPacket::new(
-            &EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new([
-                -6.0, 6.0, 2.3, 12.0, 2.2, -12.0, -0.4, 1.6,
-            ])),
+            &EqualizerConfiguration::new_custom_profile(
+                VolumeAdjustments::new([-6.0, 6.0, 2.3, 12.0, 2.2, -12.0, -0.4, 1.6]).unwrap(),
+            ),
             None,
         )
         .bytes();

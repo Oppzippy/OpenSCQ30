@@ -1,9 +1,8 @@
-use std::sync::Arc;
-
 use gtk::{
     glib::{self, Object},
     subclass::prelude::ObjectSubclassIsExt,
 };
+use openscq30_lib::packets::structures::VolumeAdjustments;
 
 glib::wrapper! {
     pub struct Equalizer(ObjectSubclass<imp::Equalizer>)
@@ -16,7 +15,7 @@ impl Equalizer {
         Object::builder().build()
     }
 
-    pub fn volume_adjustments(&self) -> Arc<[f64]> {
+    pub fn volume_adjustments(&self) -> VolumeAdjustments {
         return self.imp().volume_adjustments();
     }
 
@@ -27,7 +26,6 @@ impl Equalizer {
 
 mod imp {
     use std::cell::Cell;
-    use std::sync::Arc;
 
     use gtk::glib::clone;
     use gtk::{
@@ -40,6 +38,7 @@ mod imp {
         CompositeTemplate, TemplateChild,
     };
     use once_cell::sync::Lazy;
+    use openscq30_lib::packets::structures::VolumeAdjustments;
 
     use crate::ui::widgets::equalizer_settings::volume_slider::VolumeSlider;
 
@@ -67,11 +66,13 @@ mod imp {
     }
 
     impl Equalizer {
-        pub fn volume_adjustments(&self) -> Arc<[f64]> {
-            self.get_volume_sliders()
-                .iter()
-                .map(|slider| slider.volume())
-                .collect()
+        pub fn volume_adjustments(&self) -> VolumeAdjustments {
+            VolumeAdjustments::new(
+                self.get_volume_sliders()
+                    .iter()
+                    .map(|slider| slider.volume()),
+            )
+            .expect("we should not allow displaying an invalid number of bands")
         }
 
         pub fn set_volumes(&self, volumes: &[f64]) {
@@ -162,7 +163,10 @@ mod tests {
         let equalizer = Equalizer::new();
         let expected_volumes = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7];
         equalizer.set_volumes(&expected_volumes.to_owned());
-        assert_eq!(expected_volumes, equalizer.volume_adjustments().as_ref());
+        assert_eq!(
+            expected_volumes,
+            equalizer.volume_adjustments().adjustments().as_ref()
+        );
     }
 
     #[gtk::test]

@@ -26,8 +26,8 @@ mod tests {
     #[test]
     fn it_orders_bytes_correctly() {
         let stereo_volume_adjustments = StereoVolumeAdjustments {
-            left: VolumeAdjustments::new([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]),
-            right: VolumeAdjustments::new([0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5]),
+            left: VolumeAdjustments::new([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]).unwrap(),
+            right: VolumeAdjustments::new([0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5]).unwrap(),
         };
         let bytes = stereo_volume_adjustments.bytes().collect::<Vec<_>>();
         assert_eq!(

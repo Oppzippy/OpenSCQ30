@@ -14,8 +14,8 @@ pub fn take_volume_adjustments<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u
     context(
         "volume adjustment",
         map(take(8usize), |volume_adjustment_bytes: &[u8]| {
-            // we already verified the length, so we can unwrap
             VolumeAdjustments::from_bytes(volume_adjustment_bytes)
+                .expect("length was already verified by take(8)")
         }),
     )(input)
 }

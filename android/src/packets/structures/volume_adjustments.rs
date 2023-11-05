@@ -9,10 +9,10 @@ pub struct VolumeAdjustments {
 
 impl VolumeAdjustments {
     #[generate_interface(constructor)]
-    pub fn new(volume_adjustments: &[f64]) -> VolumeAdjustments {
-        Self {
-            inner: structures::VolumeAdjustments::new(volume_adjustments.iter().cloned()),
-        }
+    pub fn new(volume_adjustments: &[f64]) -> Result<VolumeAdjustments, String> {
+        structures::VolumeAdjustments::new(volume_adjustments.iter().cloned())
+            .map(|inner| Self { inner })
+            .map_err(|err| err.to_string())
     }
 
     #[generate_interface]

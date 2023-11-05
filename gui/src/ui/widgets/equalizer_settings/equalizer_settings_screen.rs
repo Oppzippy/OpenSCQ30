@@ -49,9 +49,7 @@ mod imp {
         ClosureExpression, CompositeTemplate, Expression, PropertyExpression,
         SignalListItemFactory, TemplateChild,
     };
-    use openscq30_lib::packets::structures::{
-        EqualizerConfiguration, PresetEqualizerProfile, VolumeAdjustments,
-    };
+    use openscq30_lib::packets::structures::{EqualizerConfiguration, PresetEqualizerProfile};
     use strum::IntoEnumIterator;
 
     use crate::{
@@ -102,8 +100,14 @@ mod imp {
                 .activate_action(
                     "win.create-custom-equalizer-profile",
                     Some(
-                        &GlibVolumeAdjustments(self.equalizer.volume_adjustments().to_vec().into())
-                            .to_variant(),
+                        &GlibVolumeAdjustments(
+                            self.equalizer
+                                .volume_adjustments()
+                                .adjustments()
+                                .to_vec()
+                                .into(),
+                        )
+                        .to_variant(),
                     ),
                 )
                 .unwrap();
@@ -136,9 +140,7 @@ mod imp {
                     PresetEqualizerProfile::from_id(profile_object.profile_id() as u16)
                 })
                 .map(|profile| profile.volume_adjustments())
-                .map(|volume_adjustments| {
-                    equalizer.volume_adjustments() == volume_adjustments.adjustments()
-                })
+                .map(|volume_adjustments| equalizer.volume_adjustments() == volume_adjustments)
                 .unwrap_or(false);
             if !volume_adjustments_match_preset_profile {
                 if let Some(custom_profile_index) = self.custom_profile_index.get() {
@@ -156,9 +158,7 @@ mod imp {
 
         pub fn equalizer_configuration(&self) -> EqualizerConfiguration {
             if self.is_custom_profile() {
-                EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(
-                    self.equalizer.volume_adjustments().iter().cloned(),
-                ))
+                EqualizerConfiguration::new_custom_profile(self.equalizer.volume_adjustments())
             } else {
                 let selection = self
                     .profile_dropdown
@@ -279,7 +279,7 @@ mod imp {
                 if let Some(selected_item) = maybe_selected_item {
                     this.sender.get().unwrap().send(Action::SelectCustomEqualizerProfile(selected_item.clone())).unwrap();
                     // Only apply settings if something changed from the perspective of the headphones
-                    if !this.is_custom_profile() || this.equalizer.volume_adjustments() != selected_item.volume_adjustments() {
+                    if !this.is_custom_profile() || this.equalizer.volume_adjustments().adjustments() != selected_item.volume_adjustments() {
                         this.sender
                             .get()
                             .unwrap()
@@ -350,7 +350,7 @@ mod imp {
                         .iter::<GlibCustomEqualizerProfile>()
                         .enumerate()
                         .find(|(_i, profile)| {
-                            profile.as_ref().unwrap().volume_adjustments() == volumes
+                            profile.as_ref().unwrap().volume_adjustments() == volumes.adjustments()
                         })
                         .map(|(i, _profile)| i as u32)
                         .unwrap_or(u32::MAX);
@@ -446,7 +446,7 @@ mod imp {
                     });
                     EqualizerConfiguration::new_from_preset_profile(preset_profile)
                 } else {
-                    EqualizerConfiguration::new_custom_profile(VolumeAdjustments::new(this.equalizer.volume_adjustments().iter().cloned()))
+                    EqualizerConfiguration::new_custom_profile(this.equalizer.volume_adjustments())
                 };
                 this.set_equalizer_configuration(&equalizer_configuration);
                 this.update_custom_profile_selection();
@@ -558,7 +558,7 @@ mod tests {
         let (sender, _receiver) = MainContext::channel(Priority::default());
         settings.set_sender(sender);
         settings.set_equalizer_configuration(&EqualizerConfiguration::new_custom_profile(
-            VolumeAdjustments::new([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
+            VolumeAdjustments::new([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]).unwrap(),
         ));
         assert_eq!(
             true,
@@ -581,7 +581,7 @@ mod tests {
             Arc::new([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
         )]);
         settings.set_equalizer_configuration(&EqualizerConfiguration::new_custom_profile(
-            VolumeAdjustments::new([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
+            VolumeAdjustments::new([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]).unwrap(),
         ));
         assert_eq!(
             false,

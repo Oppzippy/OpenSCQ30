@@ -1,4 +1,4 @@
-use std::{array, sync::Arc};
+use std::{array, ops::Range, sync::Arc};
 
 use float_cmp::{ApproxEq, F64Margin};
 use ordered_float::OrderedFloat;
@@ -19,6 +19,12 @@ impl Default for VolumeAdjustments {
     }
 }
 
+#[derive(thiserror::Error, Debug)]
+pub enum VolumeAdjustmentsError {
+    #[error("invalid number of bands ({}), {values:?}", values.len())]
+    InvalidNumberOfBands { values: Arc<[OrderedFloat<f64>]> },
+}
+
 impl VolumeAdjustments {
     pub const STEP: f64 = 0.1;
     pub const MIN_VOLUME: f64 = -12.0;
@@ -27,21 +33,25 @@ impl VolumeAdjustments {
         epsilon: f64::EPSILON * 20.0,
         ulps: 4,
     };
+    pub const VALID_NUMBER_OF_BANDS: Range<usize> = 8..11;
 
-    pub fn new(volume_adjustments: impl IntoIterator<Item = f64>) -> Self {
+    pub fn new(
+        volume_adjustments: impl IntoIterator<Item = f64>,
+    ) -> Result<Self, VolumeAdjustmentsError> {
         let clamped_adjustments = volume_adjustments
             .into_iter()
             .map(|vol| vol.clamp(Self::MIN_VOLUME, Self::MAX_VOLUME))
             .map(OrderedFloat::from)
             .collect::<Arc<[OrderedFloat<f64>]>>();
-
-        debug_assert!(
-            clamped_adjustments.len() >= 8 && clamped_adjustments.len() <= 10,
-            "should be between 8 and 10 bands"
-        );
-        Self {
-            volume_adjustments: clamped_adjustments,
+        if !Self::VALID_NUMBER_OF_BANDS.contains(&clamped_adjustments.len()) {
+            return Err(VolumeAdjustmentsError::InvalidNumberOfBands {
+                values: clamped_adjustments,
+            });
         }
+
+        Ok(Self {
+            volume_adjustments: clamped_adjustments,
+        })
     }
 
     pub fn bytes(&self) -> impl Iterator<Item = u8> + '_ {
@@ -51,12 +61,7 @@ impl VolumeAdjustments {
             .map(|adjustment| Self::signed_adjustment_to_packet_byte(adjustment.into()))
     }
 
-    pub fn from_bytes(bytes: &[u8]) -> Self {
-        debug_assert!(
-            bytes.len() >= 8 && bytes.len() <= 10,
-            "should be between 8 and 10 bands"
-        );
-
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, VolumeAdjustmentsError> {
         Self::new(
             bytes
                 .iter()
@@ -200,7 +205,9 @@ impl VolumeAdjustments {
         });
 
         let byte_bands = multiplied_bands.map(|band| band / 10.0);
-        VolumeAdjustments::new(byte_bands)
+        VolumeAdjustments::new(byte_bands).expect(
+            "we are passing the same number of bands as self has, so it must be a valid number for self to exist",
+        )
     }
 }
 
@@ -234,7 +241,7 @@ mod tests {
 
     #[test]
     fn converts_volume_adjustments_to_packet_bytes() {
-        let band_adjustments = VolumeAdjustments::new(TEST_ADJUSTMENTS);
+        let band_adjustments = VolumeAdjustments::new(TEST_ADJUSTMENTS).unwrap();
         assert_eq!(
             TEST_BYTES,
             band_adjustments.bytes().collect::<Vec<_>>().as_ref()
@@ -243,14 +250,14 @@ mod tests {
 
     #[test]
     fn from_bytes_converts_packet_bytes_to_adjustment() {
-        let band_adjustments = VolumeAdjustments::from_bytes(&TEST_BYTES);
+        let band_adjustments = VolumeAdjustments::from_bytes(&TEST_BYTES).unwrap();
         assert_eq!(TEST_ADJUSTMENTS, band_adjustments.adjustments().as_ref());
     }
 
     #[test]
     fn it_clamps_volume_adjustments_outside_of_expected_range() {
         let band_adjustments =
-            VolumeAdjustments::new([f64::MIN, f64::MAX, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]);
+            VolumeAdjustments::new([f64::MIN, f64::MAX, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]).unwrap();
         assert_eq!(
             [
                 VolumeAdjustments::MIN_VOLUME,
@@ -309,8 +316,8 @@ mod tests {
         ];
 
         for example in examples {
-            let actual = VolumeAdjustments::new(example.0).apply_drc();
-            let expected = VolumeAdjustments::new(example.1);
+            let actual = VolumeAdjustments::new(example.0).unwrap().apply_drc();
+            let expected = VolumeAdjustments::new(example.1).unwrap();
             assert_approx_eq!(
                 &VolumeAdjustments,
                 &expected,

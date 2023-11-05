@@ -21,10 +21,10 @@ public final class VolumeAdjustments {
     }
     private static native boolean do_rustEq(long self, long other);
 
-    public VolumeAdjustments(@NonNull double [] volume_adjustments) {
+    public VolumeAdjustments(@NonNull double [] volume_adjustments) throws Exception {
         mNativeObj = init(volume_adjustments);
     }
-    private static native long init(double [] volume_adjustments);
+    private static native long init(double [] volume_adjustments) throws Exception;
 
     public final double [] adjustments() {
         double [] ret = do_adjustments(mNativeObj);
