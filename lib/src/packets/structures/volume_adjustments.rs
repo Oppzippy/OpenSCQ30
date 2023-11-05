@@ -90,12 +90,12 @@ impl VolumeAdjustments {
     }
 
     pub fn apply_drc(&self) -> VolumeAdjustments {
-        let bands = &self.volume_adjustments;
+        let adjustments = &self.volume_adjustments;
 
         const SMALLER_COEFFICIENT: f64 = 0.85;
         const LARGER_COEFFICIENT: f64 = 0.95;
-        let lows_subtraction = bands[2].into_inner() * 0.81 * SMALLER_COEFFICIENT;
-        let highs_subtraction = bands[5].into_inner() * 0.81 * SMALLER_COEFFICIENT;
+        let lows_subtraction = adjustments[2].into_inner() * 0.81 * SMALLER_COEFFICIENT;
+        let highs_subtraction = adjustments[5].into_inner() * 0.81 * SMALLER_COEFFICIENT;
 
         let band_coefficients = [
             // 0
@@ -188,24 +188,39 @@ impl VolumeAdjustments {
             ],
         ];
 
+        // The DRC algorithm only affects the first 8 bands
         // if we were to do band_coefficients.map, we wouldn't get the index, and if we converted
         // to an iterator and used enumerate, we can't easily collect back into an array.
-        let multiplied_bands: [f64; 8] = array::from_fn(|band_coefficient_index| {
+        let multiplied_adjustments_8_bands: [f64; 8] = array::from_fn(|band_coefficient_index| {
             let coefficients = band_coefficients[band_coefficient_index];
-            bands.iter().enumerate().fold(0.0, |acc, (index, curr)| {
-                if (band_coefficient_index == 1 || band_coefficient_index == 3) && index == 2 {
-                    acc - lows_subtraction
-                } else if (band_coefficient_index == 4 || band_coefficient_index == 6) && index == 5
-                {
-                    acc - highs_subtraction
-                } else {
-                    acc + curr.into_inner() * coefficients[index]
-                }
-            })
+            adjustments
+                .iter()
+                .take(8)
+                .enumerate()
+                .fold(0.0, |acc, (index, adjustment)| {
+                    // Some special cases where a particular band's adjustment is not factored in
+                    if (band_coefficient_index == 1 || band_coefficient_index == 3) && index == 2 {
+                        acc - lows_subtraction
+                    } else if (band_coefficient_index == 4 || band_coefficient_index == 6)
+                        && index == 5
+                    {
+                        acc - highs_subtraction
+                    } else {
+                        acc + adjustment.into_inner() * coefficients[index]
+                    }
+                })
         });
+        // divide afterwards
+        let new_adjustments_8_bands = multiplied_adjustments_8_bands.map(|band| band / 10.0);
 
-        let byte_bands = multiplied_bands.map(|band| band / 10.0);
-        VolumeAdjustments::new(byte_bands).expect(
+        // Add bands 9+ back on to the end
+        let new_adjustments_with_all_bands = new_adjustments_8_bands.into_iter().chain(
+            adjustments[8..]
+                .iter()
+                .map(|oredered_float| oredered_float.into_inner()),
+        );
+
+        VolumeAdjustments::new(new_adjustments_with_all_bands).expect(
             "we are passing the same number of bands as self has, so it must be a valid number for self to exist",
         )
     }
@@ -323,10 +338,32 @@ mod tests {
                 &expected,
                 &actual,
                 F64Margin {
+                    // The expected data only has f32 precision
                     epsilon: f32::EPSILON as f64 * 20.0,
                     ..Default::default()
                 }
             );
         }
+    }
+
+    #[test]
+    fn it_does_not_modify_band_9_when_applying_drc() {
+        let volume_adjustments =
+            VolumeAdjustments::new([-6.0, 6.0, 2.3, 12.0, 2.2, -12.0, -0.4, 1.6, 5.0]).unwrap(); // volume adjustments
+        let expected = VolumeAdjustments::new([
+            -1.1060872, 1.367825, -0.842687, 1.571185, 0.321646, -1.79549, 0.61513, 0.083543, 5.0,
+        ])
+        .unwrap(); // drc
+        let actual = volume_adjustments.apply_drc();
+        assert_approx_eq!(
+            &VolumeAdjustments,
+            &expected,
+            &actual,
+            F64Margin {
+                // The expected data only has f32 precision
+                epsilon: f32::EPSILON as f64 * 20.0,
+                ..Default::default()
+            }
+        )
     }
 }
