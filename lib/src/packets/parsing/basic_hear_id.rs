@@ -15,7 +15,7 @@ pub fn take_basic_hear_id<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
     context(
         "hear id",
         map(
-            tuple((take_bool, take_stereo_volume_adjustments, le_i32)),
+            tuple((take_bool, take_stereo_volume_adjustments(8), le_i32)),
             |(is_enabled, volume_adjustments, time)| BasicHearId {
                 is_enabled,
                 volume_adjustments,

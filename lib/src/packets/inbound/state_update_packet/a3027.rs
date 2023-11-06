@@ -63,7 +63,7 @@ pub fn take_a3027_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
         all_consuming(map(
             tuple((
                 take_single_battery,
-                take_equalizer_configuration,
+                take_equalizer_configuration(8),
                 take_gender,
                 take_age_range,
                 take_basic_hear_id,

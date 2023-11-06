@@ -65,7 +65,7 @@ pub fn take_a3926_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                 le_u8,
                 take_bool,
                 take_dual_battery,
-                take_stereo_equalizer_configuration,
+                take_stereo_equalizer_configuration(8),
                 take_gender,
                 take_age_range,
                 take_basic_hear_id,

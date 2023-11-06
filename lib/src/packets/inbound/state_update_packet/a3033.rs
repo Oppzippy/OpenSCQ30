@@ -52,7 +52,7 @@ pub fn take_a3033_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
         all_consuming(map(
             tuple((
                 take_single_battery,
-                take_equalizer_configuration,
+                take_equalizer_configuration(8),
                 take_firmware_version,
                 take_serial_number,
                 take_bool,

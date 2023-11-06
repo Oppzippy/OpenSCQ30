@@ -21,12 +21,12 @@ pub fn take_custom_hear_id<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>
         map(
             tuple((
                 take_bool,
-                take_stereo_volume_adjustments,
+                take_stereo_volume_adjustments(8),
                 le_i32,
                 take_hear_id_type,
                 take_hear_id_music_type,
                 take(8usize),
-                take_volume_adjustments,
+                take_volume_adjustments(8),
             )),
             |(
                 is_enabled,
