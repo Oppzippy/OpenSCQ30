@@ -7,7 +7,7 @@ use nom::{
 
 use crate::packets::{
     parsing::{
-        take_age_range, take_bool, take_custom_button_model, take_custom_hear_id,
+        take_age_range, take_bool, take_custom_button_model, take_custom_hear_id_with_all_fields,
         take_dual_battery, take_gender, take_sound_modes, take_stereo_equalizer_configuration,
         ParseResult,
     },
@@ -98,7 +98,7 @@ pub fn take_a3951_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                 take_stereo_equalizer_configuration(8),
                 take_gender,
                 take_age_range,
-                take_custom_hear_id,
+                take_custom_hear_id_with_all_fields,
                 take_custom_button_model,
                 take_sound_modes,
                 take_bool, // side tone

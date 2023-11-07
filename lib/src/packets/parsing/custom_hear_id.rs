@@ -6,14 +6,16 @@ use nom::{
     sequence::tuple,
 };
 
-use crate::packets::structures::{CustomHearId, StereoVolumeAdjustments, VolumeAdjustments};
+use crate::packets::structures::{
+    CustomHearId, HearIdMusicType, StereoVolumeAdjustments, VolumeAdjustments,
+};
 
 use super::{
     take_bool, take_hear_id_music_type, take_hear_id_type, take_stereo_volume_adjustments,
     take_volume_adjustments, ParseResult,
 };
 
-pub fn take_custom_hear_id<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+pub fn take_custom_hear_id_with_all_fields<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
     input: &'a [u8],
 ) -> ParseResult<CustomHearId, E> {
     context(
@@ -59,4 +61,35 @@ pub fn take_custom_hear_id<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>
             },
         ),
     )(input)
+}
+
+// TODO maybe use a different struct for this?
+pub fn take_custom_hear_id_without_music_type<
+    'a,
+    E: ParseError<&'a [u8]> + ContextError<&'a [u8]>,
+>(
+    num_bands: usize,
+) -> impl FnMut(&'a [u8]) -> ParseResult<CustomHearId, E> {
+    context(
+        "custom hear id without music_type",
+        map(
+            tuple((
+                take_bool,
+                take_stereo_volume_adjustments(num_bands),
+                le_i32,
+                take_hear_id_type,
+                take_stereo_volume_adjustments(num_bands),
+            )),
+            |(is_enabled, volume_adjustments, time, hear_id_type, custom_volume_adjustments)| {
+                CustomHearId {
+                    is_enabled,
+                    volume_adjustments,
+                    time,
+                    hear_id_type,
+                    hear_id_music_type: HearIdMusicType(0),
+                    custom_volume_adjustments: Some(custom_volume_adjustments),
+                }
+            },
+        ),
+    )
 }

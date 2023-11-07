@@ -26,7 +26,7 @@ impl<'a> OutboundPacket for SetEqualizerPacket<'a> {
     }
 
     fn body(&self) -> Vec<u8> {
-        let mut bytes = Vec::with_capacity(18);
+        let mut bytes = Vec::with_capacity(22);
         bytes.extend(self.left_configuration.profile_id().to_le_bytes());
         bytes.extend(self.left_configuration.volume_adjustments().bytes());
         if let Some(right_eq) = self.right_configuration {

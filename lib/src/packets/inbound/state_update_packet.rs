@@ -4,6 +4,8 @@ mod a3033;
 mod a3926;
 mod a3930;
 mod a3931;
+mod a3933;
+mod a3945;
 mod a3951;
 
 pub(crate) use a3027::*;
@@ -12,6 +14,8 @@ pub(crate) use a3033::*;
 pub(crate) use a3926::*;
 pub(crate) use a3930::*;
 pub(crate) use a3931::*;
+pub(crate) use a3933::*;
+pub(crate) use a3945::*;
 pub(crate) use a3951::*;
 use nom::{
     branch::alt,
@@ -54,6 +58,8 @@ pub fn take_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError<&'a [
             map(take_a3930_state_update_packet, StateUpdatePacket::from),
             map(take_a3931_state_update_packet, StateUpdatePacket::from),
             map(take_a3951_state_update_packet, StateUpdatePacket::from),
+            map(take_a3933_state_update_packet, StateUpdatePacket::from),
+            map(take_a3945_state_update_packet, StateUpdatePacket::from),
         ))(input)
     })(input)
 }

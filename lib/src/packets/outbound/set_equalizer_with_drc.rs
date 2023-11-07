@@ -26,7 +26,7 @@ impl<'a> OutboundPacket for SetEqualizerWithDrcPacket<'a> {
     }
 
     fn body(&self) -> Vec<u8> {
-        let mut bytes: Vec<u8> = Vec::with_capacity(34);
+        let mut bytes: Vec<u8> = Vec::with_capacity(42);
 
         // profile
         bytes.extend(self.left_configuration.profile_id().to_le_bytes());
