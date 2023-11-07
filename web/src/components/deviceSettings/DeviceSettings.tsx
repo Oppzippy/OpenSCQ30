@@ -129,27 +129,32 @@ export function DeviceSettings({
 
   return (
     <Stack spacing={2}>
-      {displayState.soundModes && (
-        <SoundModeSelection
-          soundModes={displayState.soundModes}
-          setSoundModes={setSoundModes}
-          options={{
-            hasTransparencyModes: DeviceFeatureFlags.hasTransparencyModes(
-              displayState.featureFlags,
-            ),
-            noiseCanceling,
-          }}
+      {DeviceFeatureFlags.hasSoundModes(displayState.featureFlags) &&
+        displayState.soundModes && (
+          <SoundModeSelection
+            soundModes={displayState.soundModes}
+            setSoundModes={setSoundModes}
+            options={{
+              hasTransparencyModes: DeviceFeatureFlags.hasTransparencyModes(
+                displayState.featureFlags,
+              ),
+              noiseCanceling,
+            }}
+          />
+        )}
+      {DeviceFeatureFlags.hasEqualizer(displayState.featureFlags) && (
+        <EqualizerSettings
+          profile={
+            displayState.equalizerConfiguration.presetProfile ?? "custom"
+          }
+          onProfileSelected={setSelectedPresetProfile}
+          values={displayState.equalizerConfiguration.volumeAdjustments}
+          onValueChange={setEqualizerValue}
+          customProfiles={customEqualizerProfiles}
+          onAddCustomProfile={openCreateCustomProfileDialog}
+          onDeleteCustomProfile={deleteCustomProfile}
         />
       )}
-      <EqualizerSettings
-        profile={displayState.equalizerConfiguration.presetProfile ?? "custom"}
-        onProfileSelected={setSelectedPresetProfile}
-        values={displayState.equalizerConfiguration.volumeAdjustments}
-        onValueChange={setEqualizerValue}
-        customProfiles={customEqualizerProfiles}
-        onAddCustomProfile={openCreateCustomProfileDialog}
-        onDeleteCustomProfile={deleteCustomProfile}
-      />
       <DeviceInfo deviceState={displayState} />
       <NewCustomProfileDialog
         isOpen={isCreateCustomProfileDialogOpen}

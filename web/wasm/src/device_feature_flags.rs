@@ -6,6 +6,11 @@ pub struct DeviceFeatureFlags;
 
 #[wasm_bindgen]
 impl DeviceFeatureFlags {
+    #[wasm_bindgen(js_name = hasSoundModes)]
+    pub fn has_sound_modes(flags: u32) -> bool {
+        LibDeviceFeatureFlags::from(flags).contains(LibDeviceFeatureFlags::SOUND_MODES)
+    }
+
     #[wasm_bindgen(js_name = hasTransparencyModes)]
     pub fn has_transparency_modes(flags: u32) -> bool {
         LibDeviceFeatureFlags::from(flags).contains(LibDeviceFeatureFlags::TRANSPARENCY_MODES)
@@ -22,5 +27,10 @@ impl DeviceFeatureFlags {
             LibDeviceFeatureFlags::NOISE_CANCELING_MODE
                 | LibDeviceFeatureFlags::CUSTOM_NOISE_CANCELING,
         )
+    }
+
+    #[wasm_bindgen(js_name = hasEqualizer)]
+    pub fn has_equalizer(flags: u32) -> bool {
+        LibDeviceFeatureFlags::from(flags).contains(LibDeviceFeatureFlags::EQUALIZER)
     }
 }
