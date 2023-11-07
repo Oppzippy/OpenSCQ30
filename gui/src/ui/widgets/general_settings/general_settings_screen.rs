@@ -96,6 +96,11 @@ mod imp {
             };
 
             // Set button visibility
+            self.ambient_sound_mode_selection.set_visible(
+                state
+                    .feature_flags
+                    .contains(DeviceFeatureFlags::SOUND_MODES),
+            );
             self.ambient_sound_mode_selection
                 .set_has_noise_canceling_mode(
                     state
