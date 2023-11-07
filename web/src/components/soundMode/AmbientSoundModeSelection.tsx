@@ -6,11 +6,13 @@ import { SoundModes } from "../../libTypes/DeviceState";
 
 interface Props {
   value: SoundModes["ambientSoundMode"];
+  hasNoiseCancelingMode: boolean;
   onValueChanged: (newValue: SoundModes["ambientSoundMode"]) => void;
 }
 
 export const AmbientSoundModeSelection = React.memo(function ({
   value,
+  hasNoiseCancelingMode,
   onValueChanged,
 }: Props) {
   const { t } = useTranslation();
@@ -24,26 +26,34 @@ export const AmbientSoundModeSelection = React.memo(function ({
     [onValueChanged],
   );
 
+  let values = [
+    {
+      value: "transparency",
+      displayText: t("ambientSoundMode.transparency"),
+    },
+    {
+      value: "normal",
+      displayText: t("ambientSoundMode.normal"),
+    },
+  ];
+
+  if (hasNoiseCancelingMode) {
+    values = [
+      {
+        value: "noiseCanceling",
+        displayText: t("ambientSoundMode.noiseCanceling"),
+      },
+      ...values,
+    ];
+  }
+
   return (
     <Box>
       <Typography>{t("soundModes.ambientSoundMode")}</Typography>
       <ToggleButtonRow
         value={value}
         onValueChanged={onValueChangedNotNull as (value: string) => void}
-        values={[
-          {
-            value: "noiseCanceling",
-            displayText: t("ambientSoundMode.noiseCanceling"),
-          },
-          {
-            value: "transparency",
-            displayText: t("ambientSoundMode.transparency"),
-          },
-          {
-            value: "normal",
-            displayText: t("ambientSoundMode.normal"),
-          },
-        ]}
+        values={values}
       />
     </Box>
   );

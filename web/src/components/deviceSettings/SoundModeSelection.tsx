@@ -66,6 +66,7 @@ export const SoundModeSelection = React.memo(function ({
       </Typography>
       <AmbientSoundModeSelection
         value={soundModes.ambientSoundMode}
+        hasNoiseCancelingMode={options.noiseCanceling != "none"}
         onValueChanged={setAmbientSoundMode}
       />
       {options.hasTransparencyModes && (
