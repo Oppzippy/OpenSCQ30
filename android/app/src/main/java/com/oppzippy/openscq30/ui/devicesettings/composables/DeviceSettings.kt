@@ -52,12 +52,15 @@ fun DeviceSettings(
     onEqualizerConfigurationChange: (equalizerConfiguration: EqualizerConfiguration) -> Unit = {},
 ) {
     val navController = rememberNavController()
-    val navItems = listOf(
-        Screen.General,
-        Screen.Equalizer,
-        Screen.QuickPresets,
-        Screen.DeviceInfo,
-    )
+    val navItems = ArrayList<Screen>()
+    if (uiState.deviceState.featureFlags.contains(DeviceFeatureFlags.soundModes())) {
+        navItems.add(Screen.General)
+    }
+    if (uiState.deviceState.featureFlags.contains(DeviceFeatureFlags.equalizer())) {
+        navItems.add(Screen.Equalizer)
+    }
+    navItems.add(Screen.QuickPresets)
+    navItems.add(Screen.DeviceInfo)
     Scaffold(
         topBar = {
             TopAppBar(title = {
@@ -93,7 +96,7 @@ fun DeviceSettings(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.General.route,
+            startDestination = navItems.first().route,
             modifier = Modifier.padding(innerPadding),
         ) {
             uiState.deviceState.soundModes?.let { soundModes ->
