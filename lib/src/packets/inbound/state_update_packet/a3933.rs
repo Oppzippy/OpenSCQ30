@@ -23,6 +23,7 @@ use crate::packets::{
 use super::StateUpdatePacket;
 
 // A3933 and A3939
+// Despite EQ being 10 bands, only the first 8 seem to be used?
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct A3933StateUpdatePacket {
     host_device: u8,
@@ -33,7 +34,7 @@ pub struct A3933StateUpdatePacket {
     serial_number: SerialNumber,
     equalizer_configuration: EqualizerConfiguration, // 10 bands mono
     age_range: u8,
-    hear_id: CustomHearId,
+    hear_id: CustomHearId, // 10 bands
     custom_button_model: CustomButtonModel,
     ambient_sound_mode_cycle: AmbientSoundModeCycle,
     sound_modes: SoundModes,

@@ -20,6 +20,7 @@ use crate::packets::{
 use super::StateUpdatePacket;
 
 // A3945 only
+// Despite EQ being 10 bands, only the first 8 seem to be used?
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct A3945StateUpdatePacket {
     host_device: u8,

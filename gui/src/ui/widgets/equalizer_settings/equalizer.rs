@@ -25,7 +25,7 @@ impl Equalizer {
 }
 
 mod imp {
-    use std::cell::Cell;
+    use std::cell::{Cell, RefCell};
 
     use gtk::glib::clone;
     use gtk::{
@@ -63,6 +63,7 @@ mod imp {
         pub band_12800: TemplateChild<VolumeSlider>,
 
         dont_fire_events: Cell<bool>,
+        bands_past_8: RefCell<Vec<f64>>,
     }
 
     impl Equalizer {
@@ -70,13 +71,20 @@ mod imp {
             VolumeAdjustments::new(
                 self.get_volume_sliders()
                     .iter()
-                    .map(|slider| slider.volume()),
+                    .map(|slider| slider.volume())
+                    .chain(self.bands_past_8.borrow().iter().cloned()),
             )
             .expect("we should not allow displaying an invalid number of bands")
         }
 
         pub fn set_volumes(&self, volumes: &[f64]) {
-            // TODO set number of sliders
+            // TODO set number of visible sliders once a number other than 8 is needed by a device
+            {
+                let mut bands_past_8 = self.bands_past_8.borrow_mut();
+                bands_past_8.clear();
+                bands_past_8.extend(volumes[8..].iter());
+            }
+
             self.dont_fire_events.set(true);
             self.get_volume_sliders()
                 .iter()
@@ -199,5 +207,29 @@ mod tests {
         );
         equalizer.set_volumes(&[0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]);
         assert_eq!(false, received_event.get());
+    }
+
+    #[gtk::test]
+    async fn test_input_number_of_bands_matches_output_number_of_bands() {
+        load_resources();
+        let equalizer = Equalizer::new();
+        let volumes: [f64; 10] = Default::default();
+        equalizer.set_volumes(&volumes);
+        assert_eq!(
+            volumes.len(),
+            equalizer.volume_adjustments().adjustments().len()
+        );
+    }
+
+    #[gtk::test]
+    async fn test_bands_past_8_keep_their_values() {
+        load_resources();
+        let equalizer = Equalizer::new();
+        let volumes: [f64; 10] = std::array::from_fn(|i| i as f64);
+        equalizer.set_volumes(&volumes);
+
+        let volume_adjustments = equalizer.volume_adjustments().adjustments();
+        assert_eq!(8.0, volume_adjustments[8]);
+        assert_eq!(9.0, volume_adjustments[9]);
     }
 }
