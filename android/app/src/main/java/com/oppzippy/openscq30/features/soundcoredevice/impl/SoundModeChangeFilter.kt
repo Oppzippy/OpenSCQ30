@@ -1,34 +1,36 @@
 package com.oppzippy.openscq30.features.soundcoredevice.impl
 
 import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
-import com.oppzippy.openscq30.lib.bindings.DeviceFeatureFlags
 import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.bindings.NoiseCancelingModeType
+import com.oppzippy.openscq30.lib.bindings.SoundModeProfile
 import com.oppzippy.openscq30.lib.bindings.SoundModes
+import com.oppzippy.openscq30.lib.bindings.TransparencyModeType
 
 fun filterSoundModeChanges(
-    featureFlags: DeviceFeatureFlags,
+    soundModeProfile: SoundModeProfile,
     prevSoundModes: SoundModes,
     newSoundModes: SoundModes,
 ): SoundModes {
     return SoundModes(
-        if (featureFlags.contains(DeviceFeatureFlags.noiseCancelingMode()) || newSoundModes.ambientSoundMode() != AmbientSoundMode.NoiseCanceling) {
+        if (soundModeProfile.noiseCancelingModeType() != NoiseCancelingModeType.None || newSoundModes.ambientSoundMode() != AmbientSoundMode.NoiseCanceling) {
             newSoundModes.ambientSoundMode()
         } else {
             prevSoundModes.ambientSoundMode()
         },
-        if (featureFlags.contains(DeviceFeatureFlags.noiseCancelingMode()) &&
-            (featureFlags.contains(DeviceFeatureFlags.customNoiseCanceling()) || newSoundModes.noiseCancelingMode() != NoiseCancelingMode.Custom)
+        if (soundModeProfile.noiseCancelingModeType() != NoiseCancelingModeType.None &&
+            (soundModeProfile.noiseCancelingModeType() == NoiseCancelingModeType.Custom || newSoundModes.noiseCancelingMode() != NoiseCancelingMode.Custom)
         ) {
             newSoundModes.noiseCancelingMode()
         } else {
             prevSoundModes.noiseCancelingMode()
         },
-        if (featureFlags.contains(DeviceFeatureFlags.transparencyModes())) {
+        if (soundModeProfile.transparencyModeType() == TransparencyModeType.Custom) {
             newSoundModes.transparencyMode()
         } else {
             prevSoundModes.transparencyMode()
         },
-        if (featureFlags.contains(DeviceFeatureFlags.customNoiseCanceling())) {
+        if (soundModeProfile.noiseCancelingModeType() == NoiseCancelingModeType.Custom) {
             newSoundModes.customNoiseCanceling()
         } else {
             prevSoundModes.customNoiseCanceling()

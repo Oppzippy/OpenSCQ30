@@ -27,13 +27,13 @@ public final class StateUpdatePacket {
     }
     private static native long init() throws Exception;
 
-    public final @NonNull DeviceFeatureFlags featureFlags() {
-        long ret = do_featureFlags(mNativeObj);
-        DeviceFeatureFlags convRet = new DeviceFeatureFlags(InternalPointerMarker.RAW_PTR, ret);
+    public final @NonNull DeviceProfile deviceProfile() {
+        long ret = do_deviceProfile(mNativeObj);
+        DeviceProfile convRet = new DeviceProfile(InternalPointerMarker.RAW_PTR, ret);
 
         return convRet;
     }
-    private static native long do_featureFlags(long self);
+    private static native long do_deviceProfile(long self);
 
     public final @NonNull java.util.Optional<SoundModes> soundModes() {
         long ret = do_soundModes(mNativeObj);
@@ -89,19 +89,6 @@ public final class StateUpdatePacket {
         return convRet;
     }
     private static native long do_ageRange(long self);
-
-    public final @NonNull java.util.Optional<FirmwareVersion> dynamicRangeCompressionMinFirmwareVersion() {
-        long ret = do_dynamicRangeCompressionMinFirmwareVersion(mNativeObj);
-        java.util.Optional<FirmwareVersion> convRet;
-        if (ret != 0) {
-            convRet = java.util.Optional.of(new FirmwareVersion(InternalPointerMarker.RAW_PTR, ret));
-        } else {
-            convRet = java.util.Optional.empty();
-        }
-
-        return convRet;
-    }
-    private static native long do_dynamicRangeCompressionMinFirmwareVersion(long self);
 
     public final @NonNull java.util.Optional<CustomHearId> customHearId() {
         long ret = do_customHearId(mNativeObj);

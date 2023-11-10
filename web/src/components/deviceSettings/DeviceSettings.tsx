@@ -1,7 +1,15 @@
 import { Stack } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { EqualizerHelper } from "../../../wasm/pkg/openscq30_web_wasm";
+import { Device } from "../../bluetooth/Device";
 import { useToastErrorHandler } from "../../hooks/useToastErrorHandler";
+import {
+  EqualizerConfiguration,
+  PresetEqualizerProfile,
+  SoundModes,
+} from "../../libTypes/DeviceState";
+import { DeviceInfo } from "../deviceInfo/DeviceInfo";
 import { EqualizerSettings } from "../equalizer/EqualizerSettings";
 import { NewCustomProfileDialog } from "../equalizer/NewCustomProfileDialog";
 import { SoundModeSelection } from "./SoundModeSelection";
@@ -9,17 +17,6 @@ import { useCreateCustomProfileWithName } from "./hooks/useCreateCustomProfileWi
 import { useCustomEqualizerProfiles } from "./hooks/useCustomEqualizerProfiles";
 import { useDeleteCustomProfile } from "./hooks/useDeleteCustomProfile";
 import { useDisplayState } from "./hooks/useDisplayState";
-import { Device } from "../../bluetooth/Device";
-import {
-  EqualizerConfiguration,
-  PresetEqualizerProfile,
-  SoundModes,
-} from "../../libTypes/DeviceState";
-import {
-  DeviceFeatureFlags,
-  EqualizerHelper,
-} from "../../../wasm/pkg/openscq30_web_wasm";
-import { DeviceInfo } from "../deviceInfo/DeviceInfo";
 
 export function DeviceSettings({
   device,
@@ -116,33 +113,23 @@ export function DeviceSettings({
     displayState.equalizerConfiguration.volumeAdjustments,
   );
 
-  let noiseCanceling: Parameters<
-    typeof SoundModeSelection
-  >[0]["options"]["noiseCanceling"] = "none";
-  if (DeviceFeatureFlags.hasCustomNoiseCanceling(displayState.featureFlags)) {
-    noiseCanceling = "custom";
-  } else if (
-    DeviceFeatureFlags.hasNoiseCancelingMode(displayState.featureFlags)
-  ) {
-    noiseCanceling = "basic";
-  }
-
   return (
     <Stack spacing={2}>
-      {DeviceFeatureFlags.hasSoundModes(displayState.featureFlags) &&
+      {displayState.deviceProfile.soundMode != null &&
         displayState.soundModes && (
           <SoundModeSelection
             soundModes={displayState.soundModes}
             setSoundModes={setSoundModes}
             options={{
-              hasTransparencyModes: DeviceFeatureFlags.hasTransparencyModes(
-                displayState.featureFlags,
-              ),
-              noiseCanceling,
+              hasTransparencyModes:
+                displayState.deviceProfile.soundMode.transparencyModeType ==
+                "custom",
+              noiseCanceling:
+                displayState.deviceProfile.soundMode.noiseCancelingModeType,
             }}
           />
         )}
-      {DeviceFeatureFlags.hasEqualizer(displayState.featureFlags) && (
+      {displayState.deviceProfile.numEqualizerBands > 0 && (
         <EqualizerSettings
           profile={
             displayState.equalizerConfiguration.presetProfile ?? "custom"

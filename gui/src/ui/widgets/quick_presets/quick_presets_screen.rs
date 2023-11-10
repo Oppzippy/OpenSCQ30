@@ -33,7 +33,7 @@ impl QuickPresetsScreen {
     pub fn set_device_state(&self, state: &DeviceState) {
         self.imp()
             .edit_quick_preset
-            .set_device_feature_flags(state.feature_flags);
+            .set_device_profile(&state.device_profile);
     }
 
     pub fn set_custom_profiles(&self, custom_profiles: Vec<GlibCustomEqualizerProfile>) {

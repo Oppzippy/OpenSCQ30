@@ -1,5 +1,5 @@
 use crate::{
-    AgeRange, CustomHearId, DeviceFeatureFlags, EqualizerConfiguration, FirmwareVersion, Gender,
+    AgeRange, CustomHearId, DeviceProfile, EqualizerConfiguration, FirmwareVersion, Gender,
     SoundModes,
 };
 use openscq30_lib::packets::{
@@ -19,8 +19,8 @@ impl StateUpdatePacket {
     }
 
     #[generate_interface]
-    pub fn feature_flags(&self) -> DeviceFeatureFlags {
-        self.0.feature_flags.into()
+    pub fn device_profile(&self) -> DeviceProfile {
+        self.0.device_profile.into()
     }
 
     #[generate_interface]
@@ -49,13 +49,6 @@ impl StateUpdatePacket {
     #[generate_interface]
     pub fn age_range(&self) -> Option<AgeRange> {
         self.0.age_range.map(Into::into)
-    }
-
-    #[generate_interface]
-    pub fn dynamic_range_compression_min_firmware_version(&self) -> Option<FirmwareVersion> {
-        self.0
-            .dynamic_range_compression_min_firmware_version
-            .map(Into::into)
     }
 
     #[generate_interface]

@@ -4,14 +4,18 @@ use nom::{
     sequence::tuple,
 };
 
-use crate::packets::{
-    parsing::{
-        take_age_range, take_basic_hear_id, take_equalizer_configuration, take_firmware_version,
-        take_gender, take_serial_number, take_single_battery, take_sound_modes, ParseResult,
-    },
-    structures::{
-        AgeRange, BasicHearId, DeviceFeatureFlags, EqualizerConfiguration, FirmwareVersion, Gender,
-        SerialNumber, SingleBattery, SoundModes,
+use crate::{
+    device_profiles::A3028_DEVICE_PROFILE,
+    packets::{
+        parsing::{
+            take_age_range, take_basic_hear_id, take_equalizer_configuration,
+            take_firmware_version, take_gender, take_serial_number, take_single_battery,
+            take_sound_modes, ParseResult,
+        },
+        structures::{
+            AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
+            SingleBattery, SoundModes,
+        },
     },
 };
 
@@ -33,9 +37,7 @@ pub struct A3028StateUpdatePacket {
 impl From<A3028StateUpdatePacket> for StateUpdatePacket {
     fn from(packet: A3028StateUpdatePacket) -> Self {
         Self {
-            feature_flags: DeviceFeatureFlags::SOUND_MODES
-                | DeviceFeatureFlags::NOISE_CANCELING_MODE
-                | DeviceFeatureFlags::EQUALIZER,
+            device_profile: A3028_DEVICE_PROFILE,
             battery: packet.battery.into(),
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: Some(packet.sound_modes),
@@ -45,7 +47,6 @@ impl From<A3028StateUpdatePacket> for StateUpdatePacket {
             custom_button_model: None,
             firmware_version: Some(packet.firmware_version),
             serial_number: Some(packet.serial_number),
-            dynamic_range_compression_min_firmware_version: None,
         }
     }
 }

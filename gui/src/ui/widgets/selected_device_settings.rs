@@ -65,7 +65,7 @@ mod imp {
         CompositeTemplate, TemplateChild,
     };
 
-    use openscq30_lib::{packets::structures::DeviceFeatureFlags, state::DeviceState};
+    use openscq30_lib::state::DeviceState;
 
     use crate::{
         actions::Action,
@@ -115,18 +115,13 @@ mod imp {
             self.device_information.set_device_state(state);
             self.quick_presets.set_device_state(state);
 
-            if state.feature_flags.contains(DeviceFeatureFlags::HEAR_ID) && state.hear_id.is_some()
-            {
+            if state.device_profile.has_hear_id && state.hear_id.is_some() {
                 self.hear_id.set_visible(true);
                 self.hear_id.set_device_state(state);
             } else {
                 self.hear_id.set_visible(false);
             }
-            if state
-                .feature_flags
-                .contains(DeviceFeatureFlags::CUSTOM_BUTTON_MODEL)
-                && state.custom_button_model.is_some()
-            {
+            if state.device_profile.has_custom_button_model && state.custom_button_model.is_some() {
                 self.buttons.set_visible(true);
                 self.buttons.set_device_state(state);
             } else {

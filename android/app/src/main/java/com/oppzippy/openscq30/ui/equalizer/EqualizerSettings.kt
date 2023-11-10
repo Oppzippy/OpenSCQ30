@@ -16,13 +16,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.lib.bindings.DeviceFeatureFlags
 import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
-import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
-import com.oppzippy.openscq30.lib.wrapper.SoundcoreDeviceState
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.equalizer.composables.CreateCustomProfileDialog
 import com.oppzippy.openscq30.ui.equalizer.composables.CustomProfileSelection
@@ -32,8 +28,6 @@ import com.oppzippy.openscq30.ui.equalizer.composables.PresetProfileSelection
 import com.oppzippy.openscq30.ui.equalizer.composables.ReplaceCustomProfileDialog
 import com.oppzippy.openscq30.ui.equalizer.models.EqualizerProfile
 import com.oppzippy.openscq30.ui.equalizer.models.toEqualizerProfile
-import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
-import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 
 @Composable
@@ -132,35 +126,5 @@ fun EqualizerSettings(
                 },
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun DefaultPreview() {
-    OpenSCQ30Theme {
-        EqualizerSettings(
-            uiState = UiDeviceState.Connected(
-                "Test Device",
-                "00:00:00:00:00:00",
-                SoundcoreDeviceState(
-                    featureFlags = DeviceFeatureFlags.all(),
-                    equalizerConfiguration = EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
-                    soundModes = null,
-                    serialNumber = null,
-                    leftFirmwareVersion = null,
-                    rightFirmwareVersion = null,
-                    leftBatteryLevel = 0,
-                    rightBatteryLevel = 0,
-                    isLeftBatteryCharging = false,
-                    isRightBatteryCharging = false,
-                    ageRange = null,
-                    dynamicRangeCompressionMinFirmwareVersion = null,
-                    customHearId = null,
-                    gender = null,
-                ),
-                UUID(0, 0),
-            ),
-        )
     }
 }

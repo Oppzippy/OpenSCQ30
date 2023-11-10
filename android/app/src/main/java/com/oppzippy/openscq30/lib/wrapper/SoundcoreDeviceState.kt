@@ -2,7 +2,7 @@ package com.oppzippy.openscq30.lib.wrapper
 
 import com.oppzippy.openscq30.lib.bindings.AgeRange
 import com.oppzippy.openscq30.lib.bindings.CustomHearId
-import com.oppzippy.openscq30.lib.bindings.DeviceFeatureFlags
+import com.oppzippy.openscq30.lib.bindings.DeviceProfile
 import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.bindings.FirmwareVersion
 import com.oppzippy.openscq30.lib.bindings.Gender
@@ -11,7 +11,7 @@ import com.oppzippy.openscq30.lib.bindings.StateUpdatePacket
 import kotlin.jvm.optionals.getOrNull
 
 data class SoundcoreDeviceState(
-    val featureFlags: DeviceFeatureFlags,
+    val deviceProfile: DeviceProfile,
     val leftBatteryLevel: Short,
     val rightBatteryLevel: Short,
     val isLeftBatteryCharging: Boolean,
@@ -22,24 +22,19 @@ data class SoundcoreDeviceState(
     val gender: Gender?,
     val customHearId: CustomHearId?,
 //    val customButtonModel: CustomButtonModel?,
-    val leftFirmwareVersion: FirmwareVersion?,
-    val rightFirmwareVersion: FirmwareVersion?,
+    val firmwareVersion: FirmwareVersion?,
     val serialNumber: String?,
-    val dynamicRangeCompressionMinFirmwareVersion: FirmwareVersion?,
 ) {
     companion object // used for static extension methods in tests
 
     fun supportsDynamicRangeCompression(): Boolean {
-        if (featureFlags.contains(DeviceFeatureFlags.dynamicRangeCompression())) {
-            if (leftFirmwareVersion == null || dynamicRangeCompressionMinFirmwareVersion == null) {
+        if (deviceProfile.hasDynamicRangeCompression()) {
+            val minFirmwareVersion =
+                deviceProfile.dynamicRangeCompressionMinFirmwareVersion().getOrNull() ?: return true
+            if (firmwareVersion == null) {
                 return false
             }
-            return if (rightFirmwareVersion == null) {
-                leftFirmwareVersion.compare(dynamicRangeCompressionMinFirmwareVersion) >= 0
-            } else {
-                leftFirmwareVersion.compare(dynamicRangeCompressionMinFirmwareVersion) >= 0 &&
-                    rightFirmwareVersion.compare(dynamicRangeCompressionMinFirmwareVersion) >= 0
-            }
+            return firmwareVersion.compare(minFirmwareVersion) >= 0
         }
         return false
     }
@@ -47,11 +42,10 @@ data class SoundcoreDeviceState(
 
 fun StateUpdatePacket.toSoundcoreDeviceState(): SoundcoreDeviceState {
     return SoundcoreDeviceState(
-        featureFlags = featureFlags(),
+        deviceProfile = deviceProfile(),
         equalizerConfiguration = equalizerConfiguration(),
         soundModes = soundModes().getOrNull(),
-        leftFirmwareVersion = firmwareVersion().getOrNull(),
-        rightFirmwareVersion = null,
+        firmwareVersion = firmwareVersion().getOrNull(),
         serialNumber = serialNumber().getOrNull(),
         isLeftBatteryCharging = isLeftBatteryCharging,
         isRightBatteryCharging = isRightBatteryCharging,
@@ -59,7 +53,6 @@ fun StateUpdatePacket.toSoundcoreDeviceState(): SoundcoreDeviceState {
         rightBatteryLevel = rightBatteryLevel(),
         ageRange = ageRange().getOrNull(),
         gender = gender().getOrNull(),
-        dynamicRangeCompressionMinFirmwareVersion = dynamicRangeCompressionMinFirmwareVersion().getOrNull(),
         customHearId = customHearId().getOrNull(),
     )
 }

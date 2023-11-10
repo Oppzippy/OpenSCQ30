@@ -3,10 +3,14 @@ package com.oppzippy.openscq30.features.soundcoredevice.impl
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.content.Context
-import com.oppzippy.openscq30.lib.bindings.DeviceFeatureFlags
+import com.oppzippy.openscq30.lib.bindings.DeviceProfile
 import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.bindings.FirmwareVersion
+import com.oppzippy.openscq30.lib.bindings.NoiseCancelingModeType
 import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
+import com.oppzippy.openscq30.lib.bindings.SoundModeProfile
 import com.oppzippy.openscq30.lib.bindings.StateUpdatePacket
+import com.oppzippy.openscq30.lib.bindings.TransparencyModeType
 import com.oppzippy.openscq30.lib.wrapper.SoundcoreDeviceState
 import com.oppzippy.openscq30.lib.wrapper.toSoundcoreDeviceState
 import io.mockk.coJustRun
@@ -70,7 +74,18 @@ class SoundcoreDeviceConnectorImplTest {
 
         mockkStatic(StateUpdatePacket::toSoundcoreDeviceState)
         every { stateUpdatePacket.toSoundcoreDeviceState() } returns SoundcoreDeviceState(
-            featureFlags = DeviceFeatureFlags.all(),
+            deviceProfile = DeviceProfile(
+                SoundModeProfile(NoiseCancelingModeType.Custom, TransparencyModeType.Custom),
+                true,
+                2,
+                8,
+                true,
+                true,
+                true,
+                true,
+                true,
+                FirmwareVersion(0, 1),
+            ),
             leftBatteryLevel = 0,
             rightBatteryLevel = 0,
             isLeftBatteryCharging = false,
@@ -80,10 +95,8 @@ class SoundcoreDeviceConnectorImplTest {
             ageRange = null,
             gender = null,
             customHearId = null,
-            leftFirmwareVersion = null,
-            rightFirmwareVersion = null,
+            firmwareVersion = null,
             serialNumber = null,
-            dynamicRangeCompressionMinFirmwareVersion = null,
         )
     }
 

@@ -6,14 +6,17 @@ use nom::{
     sequence::tuple,
 };
 
-use crate::packets::{
-    parsing::{
-        take_battery_level, take_bool, take_custom_button_model, take_dual_battery,
-        take_equalizer_configuration, take_firmware_version, take_serial_number, ParseResult,
-    },
-    structures::{
-        BatteryLevel, CustomButtonModel, DeviceFeatureFlags, DualBattery, EqualizerConfiguration,
-        FirmwareVersion, SerialNumber,
+use crate::{
+    device_profiles::A3945_DEVICE_PROFILE,
+    packets::{
+        parsing::{
+            take_battery_level, take_bool, take_custom_button_model, take_dual_battery,
+            take_equalizer_configuration, take_firmware_version, take_serial_number, ParseResult,
+        },
+        structures::{
+            BatteryLevel, CustomButtonModel, DualBattery, EqualizerConfiguration, FirmwareVersion,
+            SerialNumber,
+        },
     },
 };
 
@@ -42,7 +45,7 @@ pub struct A3945StateUpdatePacket {
 impl From<A3945StateUpdatePacket> for StateUpdatePacket {
     fn from(packet: A3945StateUpdatePacket) -> Self {
         Self {
-            feature_flags: DeviceFeatureFlags::EQUALIZER | DeviceFeatureFlags::CUSTOM_BUTTON_MODEL,
+            device_profile: A3945_DEVICE_PROFILE,
             battery: packet.battery.into(),
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: None,
@@ -52,7 +55,6 @@ impl From<A3945StateUpdatePacket> for StateUpdatePacket {
             custom_button_model: Some(packet.custom_button_model),
             firmware_version: Some(packet.left_firmware.min(packet.right_firmware)),
             serial_number: Some(packet.serial_number),
-            dynamic_range_compression_min_firmware_version: None,
         }
     }
 }

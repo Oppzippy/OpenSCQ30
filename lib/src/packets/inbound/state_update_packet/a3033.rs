@@ -4,13 +4,14 @@ use nom::{
     sequence::tuple,
 };
 
-use crate::packets::{
-    parsing::{
-        take_bool, take_equalizer_configuration, take_firmware_version, take_serial_number,
-        take_single_battery, ParseResult,
-    },
-    structures::{
-        DeviceFeatureFlags, EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery,
+use crate::{
+    device_profiles::A3033_DEVICE_PROFILE,
+    packets::{
+        parsing::{
+            take_bool, take_equalizer_configuration, take_firmware_version, take_serial_number,
+            take_single_battery, ParseResult,
+        },
+        structures::{EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery},
     },
 };
 
@@ -29,7 +30,7 @@ pub struct A3033StateUpdatePacket {
 impl From<A3033StateUpdatePacket> for StateUpdatePacket {
     fn from(packet: A3033StateUpdatePacket) -> Self {
         Self {
-            feature_flags: DeviceFeatureFlags::EQUALIZER,
+            device_profile: A3033_DEVICE_PROFILE,
             battery: packet.battery.into(),
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: None,
@@ -39,7 +40,6 @@ impl From<A3033StateUpdatePacket> for StateUpdatePacket {
             custom_button_model: None,
             firmware_version: Some(packet.firmware_version),
             serial_number: Some(packet.serial_number),
-            dynamic_range_compression_min_firmware_version: None,
         }
     }
 }

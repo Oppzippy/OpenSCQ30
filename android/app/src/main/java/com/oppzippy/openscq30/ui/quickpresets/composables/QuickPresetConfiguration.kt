@@ -16,15 +16,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
 import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
-import com.oppzippy.openscq30.lib.bindings.DeviceFeatureFlags
+import com.oppzippy.openscq30.lib.bindings.DeviceProfile
 import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.bindings.NoiseCancelingModeType
 import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
 import com.oppzippy.openscq30.lib.bindings.TransparencyMode
+import com.oppzippy.openscq30.lib.bindings.TransparencyModeType
 import com.oppzippy.openscq30.lib.extensions.resources.toStringResource
 import com.oppzippy.openscq30.ui.equalizer.composables.CustomProfileSelection
 import com.oppzippy.openscq30.ui.quickpresets.models.QuickPresetEqualizerConfiguration
@@ -32,14 +33,14 @@ import com.oppzippy.openscq30.ui.soundmode.AmbientSoundModeSelection
 import com.oppzippy.openscq30.ui.soundmode.CustomNoiseCancelingSelection
 import com.oppzippy.openscq30.ui.soundmode.NoiseCancelingModeSelection
 import com.oppzippy.openscq30.ui.soundmode.TransparencyModeSelection
-import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 import com.oppzippy.openscq30.ui.utils.CheckboxWithLabel
 import com.oppzippy.openscq30.ui.utils.Dropdown
 import com.oppzippy.openscq30.ui.utils.DropdownOption
+import kotlin.jvm.optionals.getOrNull
 
 @Composable
 fun QuickPresetConfiguration(
-    featureFlags: DeviceFeatureFlags,
+    deviceProfile: DeviceProfile,
     name: String?,
     defaultName: String,
     ambientSoundMode: AmbientSoundMode?,
@@ -68,72 +69,74 @@ fun QuickPresetConfiguration(
                 .fillMaxWidth()
                 .testTag("quickPresetNameInput"),
         )
-        CheckboxWithLabel(
-            text = stringResource(R.string.ambient_sound_mode),
-            isChecked = ambientSoundMode != null,
-            onCheckedChange = {
-                onAmbientSoundModeChange(if (it) AmbientSoundMode.Normal else null)
-            },
-        )
-        if (ambientSoundMode != null) {
-            AmbientSoundModeSelection(
-                ambientSoundMode = ambientSoundMode,
-                onAmbientSoundModeChange = onAmbientSoundModeChange,
-                hasNoiseCanceling = featureFlags.contains(DeviceFeatureFlags.noiseCancelingMode()),
-            )
-        }
-        Divider()
-
-        if (featureFlags.contains(DeviceFeatureFlags.transparencyModes())) {
+        deviceProfile.soundMode().getOrNull()?.let { soundModeProfile ->
             CheckboxWithLabel(
-                text = stringResource(R.string.transparency_mode),
-                isChecked = transparencyMode != null,
+                text = stringResource(R.string.ambient_sound_mode),
+                isChecked = ambientSoundMode != null,
                 onCheckedChange = {
-                    onTransparencyModeChange(if (it) TransparencyMode.VocalMode else null)
+                    onAmbientSoundModeChange(if (it) AmbientSoundMode.Normal else null)
                 },
             )
-            if (transparencyMode != null) {
-                TransparencyModeSelection(
-                    transparencyMode = transparencyMode,
-                    onTransparencyModeChange = onTransparencyModeChange,
+            if (ambientSoundMode != null) {
+                AmbientSoundModeSelection(
+                    ambientSoundMode = ambientSoundMode,
+                    onAmbientSoundModeChange = onAmbientSoundModeChange,
+                    hasNoiseCanceling = soundModeProfile.noiseCancelingModeType() != NoiseCancelingModeType.None,
                 )
             }
             Divider()
-        }
 
-        if (featureFlags.contains(DeviceFeatureFlags.noiseCancelingMode())) {
-            CheckboxWithLabel(
-                text = stringResource(R.string.noise_canceling_mode),
-                isChecked = noiseCancelingMode != null,
-                onCheckedChange = {
-                    onNoiseCancelingModeChange(if (it) NoiseCancelingMode.Transport else null)
-                },
-            )
-            if (noiseCancelingMode != null) {
-                NoiseCancelingModeSelection(
-                    noiseCancelingMode = noiseCancelingMode,
-                    onNoiseCancelingModeChange = onNoiseCancelingModeChange,
-                    hasCustomNoiseCanceling = featureFlags.contains(DeviceFeatureFlags.customNoiseCanceling()),
+            if (soundModeProfile.transparencyModeType() == TransparencyModeType.Custom) {
+                CheckboxWithLabel(
+                    text = stringResource(R.string.transparency_mode),
+                    isChecked = transparencyMode != null,
+                    onCheckedChange = {
+                        onTransparencyModeChange(if (it) TransparencyMode.VocalMode else null)
+                    },
                 )
+                if (transparencyMode != null) {
+                    TransparencyModeSelection(
+                        transparencyMode = transparencyMode,
+                        onTransparencyModeChange = onTransparencyModeChange,
+                    )
+                }
+                Divider()
             }
-            Divider()
-        }
 
-        if (featureFlags.contains(DeviceFeatureFlags.customNoiseCanceling())) {
-            CheckboxWithLabel(
-                text = stringResource(R.string.custom_noise_canceling),
-                isChecked = customNoiseCanceling != null,
-                onCheckedChange = {
-                    onCustomNoiseCancelingChange(if (it) CustomNoiseCanceling(0) else null)
-                },
-            )
-            if (customNoiseCanceling != null) {
-                CustomNoiseCancelingSelection(
-                    customNoiseCanceling = customNoiseCanceling,
-                    onCustomNoiseCancelingChange = onCustomNoiseCancelingChange,
+            if (soundModeProfile.noiseCancelingModeType() != NoiseCancelingModeType.None) {
+                CheckboxWithLabel(
+                    text = stringResource(R.string.noise_canceling_mode),
+                    isChecked = noiseCancelingMode != null,
+                    onCheckedChange = {
+                        onNoiseCancelingModeChange(if (it) NoiseCancelingMode.Transport else null)
+                    },
                 )
+                if (noiseCancelingMode != null) {
+                    NoiseCancelingModeSelection(
+                        noiseCancelingMode = noiseCancelingMode,
+                        onNoiseCancelingModeChange = onNoiseCancelingModeChange,
+                        hasCustomNoiseCanceling = soundModeProfile.noiseCancelingModeType() == NoiseCancelingModeType.Custom,
+                    )
+                }
+                Divider()
             }
-            Divider()
+
+            if (soundModeProfile.noiseCancelingModeType() == NoiseCancelingModeType.Custom) {
+                CheckboxWithLabel(
+                    text = stringResource(R.string.custom_noise_canceling),
+                    isChecked = customNoiseCanceling != null,
+                    onCheckedChange = {
+                        onCustomNoiseCancelingChange(if (it) CustomNoiseCanceling(0) else null)
+                    },
+                )
+                if (customNoiseCanceling != null) {
+                    CustomNoiseCancelingSelection(
+                        customNoiseCanceling = customNoiseCanceling,
+                        onCustomNoiseCancelingChange = onCustomNoiseCancelingChange,
+                    )
+                }
+                Divider()
+            }
         }
 
         var isEqualizerChecked by remember { mutableStateOf(equalizerConfiguration != null) }
@@ -142,7 +145,7 @@ fun QuickPresetConfiguration(
         LaunchedEffect(defaultName) {
             isEqualizerChecked = equalizerConfiguration != null
         }
-        if (featureFlags.contains(DeviceFeatureFlags.equalizer())) {
+        if (deviceProfile.numEqualizerChannels() > 0) {
             CheckboxWithLabel(
                 text = stringResource(R.string.equalizer),
                 isChecked = equalizerConfiguration != null || isEqualizerChecked,
@@ -189,25 +192,5 @@ fun QuickPresetConfiguration(
                 )
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PreviewQuickPresetConfiguration() {
-    OpenSCQ30Theme {
-        QuickPresetConfiguration(
-            featureFlags = DeviceFeatureFlags.all(),
-            name = null,
-            defaultName = "Quick Preset 1",
-            ambientSoundMode = AmbientSoundMode.NoiseCanceling,
-            noiseCancelingMode = NoiseCancelingMode.Transport,
-            transparencyMode = TransparencyMode.VocalMode,
-            customNoiseCanceling = CustomNoiseCanceling(5),
-            customEqualizerProfiles = emptyList(),
-            equalizerConfiguration = QuickPresetEqualizerConfiguration.PresetProfile(
-                PresetEqualizerProfile.SoundcoreSignature,
-            ),
-        )
     }
 }

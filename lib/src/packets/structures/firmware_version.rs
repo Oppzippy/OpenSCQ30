@@ -9,19 +9,19 @@ pub struct FirmwareVersion {
 }
 
 impl FirmwareVersion {
-    pub fn new(major: u8, minor: u8) -> Self {
+    pub const fn new(major: u8, minor: u8) -> Self {
         Self { major, minor }
     }
 
-    pub fn major(&self) -> u8 {
+    pub const fn major(&self) -> u8 {
         self.major
     }
 
-    pub fn minor(&self) -> u8 {
+    pub const fn minor(&self) -> u8 {
         self.minor
     }
 
-    pub fn number(&self) -> u16 {
+    pub const fn number(&self) -> u16 {
         (self.major as u16) * 100 + (self.minor as u16)
     }
 }

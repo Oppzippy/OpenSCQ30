@@ -26,7 +26,7 @@ export const DeviceInfo = React.memo(function ({ deviceState }: Props) {
           <FirmwareVersion deviceState={deviceState} />
           <SerialNumber deviceState={deviceState} />
           <AgeRange deviceState={deviceState} />
-          <FeatureFlags deviceState={deviceState} />
+          <DeviceProfile deviceState={deviceState} />
         </TableBody>
       </Table>
     </Stack>
@@ -40,15 +40,8 @@ interface DeviceStateProps {
 function FirmwareVersion({ deviceState }: DeviceStateProps) {
   const { t } = useTranslation();
 
-  if (deviceState.leftFirmwareVersion) {
-    let firmwareVersion = formatFirmwareVersion(
-      deviceState.leftFirmwareVersion,
-    );
-    if (deviceState.rightFirmwareVersion) {
-      firmwareVersion += `, ${formatFirmwareVersion(
-        deviceState.rightFirmwareVersion,
-      )}`;
-    }
+  if (deviceState.firmwareVersion) {
+    const firmwareVersion = formatFirmwareVersion(deviceState.firmwareVersion);
     return (
       <TableRow>
         <TableCell>
@@ -63,7 +56,7 @@ function FirmwareVersion({ deviceState }: DeviceStateProps) {
 }
 
 function formatFirmwareVersion(
-  firmwareVersion: NonNullable<DeviceState["leftFirmwareVersion"]>,
+  firmwareVersion: NonNullable<DeviceState["firmwareVersion"]>,
 ) {
   return `${firmwareVersion.major
     .toString()
@@ -104,19 +97,19 @@ function AgeRange({ deviceState }: DeviceStateProps) {
   }
 }
 
-function FeatureFlags({ deviceState }: DeviceStateProps) {
+function DeviceProfile({ deviceState }: DeviceStateProps) {
   const { t } = useTranslation();
 
-  if (deviceState.featureFlags) {
-    return (
-      <TableRow>
-        <TableCell>
-          <Typography>{t("deviceInfo.featureFlags")}</Typography>
-        </TableCell>
-        <TableCell>
-          <Typography>{deviceState.featureFlags}</Typography>
-        </TableCell>
-      </TableRow>
-    );
-  }
+  return (
+    <TableRow>
+      <TableCell>
+        <Typography>{t("deviceInfo.deviceProfile")}</Typography>
+      </TableCell>
+      <TableCell>
+        <Typography>
+          <pre>{JSON.stringify(deviceState.deviceProfile, undefined, 2)}</pre>
+        </Typography>
+      </TableCell>
+    </TableRow>
+  );
 }

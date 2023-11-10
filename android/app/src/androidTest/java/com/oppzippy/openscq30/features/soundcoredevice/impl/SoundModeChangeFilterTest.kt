@@ -2,10 +2,12 @@ package com.oppzippy.openscq30.features.soundcoredevice.impl
 
 import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
 import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
-import com.oppzippy.openscq30.lib.bindings.DeviceFeatureFlags
 import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.bindings.NoiseCancelingModeType
+import com.oppzippy.openscq30.lib.bindings.SoundModeProfile
 import com.oppzippy.openscq30.lib.bindings.SoundModes
 import com.oppzippy.openscq30.lib.bindings.TransparencyMode
+import com.oppzippy.openscq30.lib.bindings.TransparencyModeType
 import com.oppzippy.openscq30.lib.extensions.structures.copy
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Assert
@@ -23,7 +25,7 @@ class SoundModeChangeFilterTest {
     @Test
     fun preventsNoiseCancelingMode() {
         val filtered = filterSoundModeChanges(
-            DeviceFeatureFlags.empty(),
+            SoundModeProfile(NoiseCancelingModeType.None, TransparencyModeType.Basic),
             soundModes,
             soundModes.copy(ambientSoundMode = AmbientSoundMode.NoiseCanceling),
         )
@@ -33,7 +35,7 @@ class SoundModeChangeFilterTest {
     @Test
     fun preventsTransportMode() {
         val filtered = filterSoundModeChanges(
-            DeviceFeatureFlags.empty(),
+            SoundModeProfile(NoiseCancelingModeType.None, TransparencyModeType.Basic),
             soundModes,
             soundModes.copy(noiseCancelingMode = NoiseCancelingMode.Transport),
         )
@@ -43,7 +45,7 @@ class SoundModeChangeFilterTest {
     @Test
     fun preventsCustomNoiseCancelingMode() {
         val filtered = filterSoundModeChanges(
-            DeviceFeatureFlags.customNoiseCanceling(),
+            SoundModeProfile(NoiseCancelingModeType.Basic, TransparencyModeType.Basic),
             soundModes,
             soundModes.copy(noiseCancelingMode = NoiseCancelingMode.Custom),
         )
@@ -53,7 +55,7 @@ class SoundModeChangeFilterTest {
     @Test
     fun preventsFullyTransparent() {
         val filtered = filterSoundModeChanges(
-            DeviceFeatureFlags.empty(),
+            SoundModeProfile(NoiseCancelingModeType.None, TransparencyModeType.Basic),
             soundModes,
             soundModes.copy(transparencyMode = TransparencyMode.FullyTransparent),
         )
@@ -63,7 +65,7 @@ class SoundModeChangeFilterTest {
     @Test
     fun preventsCustomNoiseCanceling1() {
         val filtered = filterSoundModeChanges(
-            DeviceFeatureFlags.empty(),
+            SoundModeProfile(NoiseCancelingModeType.None, TransparencyModeType.Basic),
             soundModes,
             soundModes.copy(customNoiseCanceling = CustomNoiseCanceling(1)),
         )
@@ -79,7 +81,7 @@ class SoundModeChangeFilterTest {
             CustomNoiseCanceling(1),
         )
         val filtered = filterSoundModeChanges(
-            DeviceFeatureFlags.all(),
+            SoundModeProfile(NoiseCancelingModeType.Custom, TransparencyModeType.Custom),
             soundModes,
             newSoundModes,
         )

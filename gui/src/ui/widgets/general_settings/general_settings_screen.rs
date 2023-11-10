@@ -44,7 +44,10 @@ mod imp {
         },
         CompositeTemplate, TemplateChild,
     };
-    use openscq30_lib::{packets::structures::DeviceFeatureFlags, state::DeviceState};
+    use openscq30_lib::{
+        device_profiles::{NoiseCancelingModeType, TransparencyModeType},
+        state::DeviceState,
+    };
 
     use crate::{
         actions::Action,
@@ -94,39 +97,27 @@ mod imp {
             let Some(sound_modes) = state.sound_modes else {
                 return;
             };
+            let Some(sound_mode_profile) = state.device_profile.sound_mode else {
+                return;
+            };
 
             // Set button visibility
-            self.ambient_sound_mode_selection.set_visible(
-                state
-                    .feature_flags
-                    .contains(DeviceFeatureFlags::SOUND_MODES),
-            );
             self.ambient_sound_mode_selection
                 .set_has_noise_canceling_mode(
-                    state
-                        .feature_flags
-                        .contains(DeviceFeatureFlags::NOISE_CANCELING_MODE),
+                    sound_mode_profile.noise_canceling_mode_type != NoiseCancelingModeType::None,
                 );
             self.transparency_mode_selection.set_visible(
-                state
-                    .feature_flags
-                    .contains(DeviceFeatureFlags::TRANSPARENCY_MODES),
+                sound_mode_profile.transparency_mode_type == TransparencyModeType::Custom,
             );
             self.noise_canceling_mode_selection.set_visible(
-                state
-                    .feature_flags
-                    .contains(DeviceFeatureFlags::NOISE_CANCELING_MODE),
+                sound_mode_profile.noise_canceling_mode_type != NoiseCancelingModeType::None,
             );
             self.noise_canceling_mode_selection
                 .set_has_custom_noise_canceling(
-                    state
-                        .feature_flags
-                        .contains(DeviceFeatureFlags::CUSTOM_NOISE_CANCELING),
+                    sound_mode_profile.noise_canceling_mode_type == NoiseCancelingModeType::Custom,
                 );
             self.custom_noise_canceling_selection.set_visible(
-                state
-                    .feature_flags
-                    .contains(DeviceFeatureFlags::CUSTOM_NOISE_CANCELING),
+                sound_mode_profile.transparency_mode_type == TransparencyModeType::Custom,
             );
 
             // Set selected values

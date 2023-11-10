@@ -23,15 +23,9 @@ fun DeviceInfoScreen(deviceState: SoundcoreDeviceState) {
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
         userScrollEnabled = true,
     ) {
-        if (deviceState.leftFirmwareVersion != null) {
+        if (deviceState.firmwareVersion != null) {
             item { Text(stringResource(R.string.firmware_version)) }
-            item {
-                if (deviceState.rightFirmwareVersion != null) {
-                    Text("${deviceState.leftFirmwareVersion}, ${deviceState.rightFirmwareVersion}")
-                } else {
-                    Text(deviceState.leftFirmwareVersion.toString())
-                }
-            }
+            item { Text(deviceState.firmwareVersion.toString()) }
         }
         if (deviceState.serialNumber != null) {
             item { Text(stringResource(R.string.serial_number)) }
@@ -41,7 +35,7 @@ fun DeviceInfoScreen(deviceState: SoundcoreDeviceState) {
             item { Text(stringResource(R.string.age_range)) }
             item { Text(deviceState.ageRange.value().toString()) }
         }
-        item { Text(stringResource(R.string.feature_flags)) }
-        item { Text(deviceState.featureFlags.toString()) }
+        item { Text(stringResource(R.string.device_profile)) }
+        item { Text(deviceState.deviceProfile.toString()) }
     }
 }

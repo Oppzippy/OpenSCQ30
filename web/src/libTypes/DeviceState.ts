@@ -86,8 +86,39 @@ const noTwsButtonActionSchema = Type.Object({
   isEnabled: Type.Boolean(),
 });
 
+const firmwareVersionSchema = Type.Object({
+  major: Type.Number({ minimum: 0 }),
+  minor: Type.Number({ minimum: 0 }),
+});
+
+const deviceProfileSchema = Type.Object({
+  soundMode: Nullable(
+    Type.Object({
+      noiseCancelingModeType: Type.Union([
+        Type.Literal("none"),
+        Type.Literal("basic"),
+        Type.Literal("custom"),
+      ]),
+      transparencyModeType: Type.Union([
+        Type.Literal("basic"),
+        Type.Literal("custom"),
+      ]),
+    }),
+  ),
+  hasHearId: Type.Boolean(),
+  numEqualizerChannels: Type.Number({ minimum: 0 }),
+  numEqualizerBands: Type.Number({ minimum: 0 }),
+  hasDynamicRangeCompression: Type.Boolean(),
+  hasCustomButtonModel: Type.Boolean(),
+  hasWearDetection: Type.Boolean(),
+  hasTouchTone: Type.Boolean(),
+  hasAutoPowerOff: Type.Boolean(),
+  dynamicRangeCompressionMinFirmwareVersion: Nullable(firmwareVersionSchema),
+});
+export type DeviceProfile = Static<typeof deviceProfileSchema>;
+
 const deviceStateSchema = Type.Object({
-  featureFlags: Type.Number(),
+  deviceProfile: deviceProfileSchema,
   battery: Type.Union([
     Type.Object({
       type: Type.Literal("singleBattery"),
@@ -133,18 +164,7 @@ const deviceStateSchema = Type.Object({
       }),
     ]),
   ),
-  leftFirmwareVersion: Nullable(
-    Type.Object({
-      major: Type.Number(),
-      minor: Type.Number(),
-    }),
-  ),
-  rightFirmwareVersion: Nullable(
-    Type.Object({
-      major: Type.Number(),
-      minor: Type.Number(),
-    }),
-  ),
+  firmwareVersion: Nullable(firmwareVersionSchema),
   customButtonModel: Nullable(
     Type.Object({
       leftSingleClick: noTwsButtonActionSchema,
@@ -156,12 +176,6 @@ const deviceStateSchema = Type.Object({
     }),
   ),
   serialNumber: Nullable(Type.String()),
-  dynamicRangeCompressionMinFirmwareVersion: Nullable(
-    Type.Object({
-      major: Type.Number(),
-      minor: Type.Number(),
-    }),
-  ),
 });
 export type DeviceState = Static<typeof deviceStateSchema>;
 export const DeviceStateValidator = TypeCompiler.Compile(deviceStateSchema);

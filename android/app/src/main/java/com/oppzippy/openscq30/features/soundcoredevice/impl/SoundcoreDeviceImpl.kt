@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
 import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
-import com.oppzippy.openscq30.lib.bindings.DeviceFeatureFlags
 import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.bindings.NoiseCancelingModeType
 import com.oppzippy.openscq30.lib.bindings.SetEqualizerAndCustomHearIdPacket
 import com.oppzippy.openscq30.lib.bindings.SetEqualizerPacket
 import com.oppzippy.openscq30.lib.bindings.SetEqualizerWithDrcPacket
@@ -63,17 +63,14 @@ class SoundcoreDeviceImpl(
                         _stateFlow.value =
                             _stateFlow.value.let { state ->
                                 state.copy(
-                                    featureFlags = packet.inner.featureFlags(),
-                                    leftFirmwareVersion = packet.inner.firmwareVersion().getOrNull()
-                                        ?: state.leftFirmwareVersion,
+                                    deviceProfile = packet.inner.deviceProfile(),
+                                    firmwareVersion = packet.inner.firmwareVersion().getOrNull()
+                                        ?: state.firmwareVersion,
                                     equalizerConfiguration = packet.inner.equalizerConfiguration(),
                                     serialNumber = packet.inner.serialNumber().getOrNull()
                                         ?: state.serialNumber,
                                     soundModes = packet.inner.soundModes().getOrNull()
                                         ?: state.soundModes,
-                                    dynamicRangeCompressionMinFirmwareVersion = packet.inner.dynamicRangeCompressionMinFirmwareVersion()
-                                        .getOrNull()
-                                        ?: state.dynamicRangeCompressionMinFirmwareVersion,
                                 )
                             }
 
@@ -100,8 +97,7 @@ class SoundcoreDeviceImpl(
                     is Packet.FirmwareVersionUpdate -> {
                         _stateFlow.value =
                             _stateFlow.value.copy(
-                                leftFirmwareVersion = packet.inner.leftFirmwareVersion(),
-                                rightFirmwareVersion = packet.inner.rightFirmwareVersion(),
+                                firmwareVersion = packet.inner.firmwareVersion(),
                             )
                     }
 
@@ -126,9 +122,10 @@ class SoundcoreDeviceImpl(
         val state = _stateFlow.value
         val prevSoundModes = state.soundModes ?: return
         if (prevSoundModes == newSoundModes) return
+        val soundModeProfile = state.deviceProfile.soundMode().getOrNull() ?: return
 
         val needsNoiseCanceling =
-            state.featureFlags.contains(DeviceFeatureFlags.noiseCancelingMode()) &&
+            soundModeProfile.noiseCancelingModeType() != NoiseCancelingModeType.None &&
                 prevSoundModes.ambientSoundMode() != AmbientSoundMode.NoiseCanceling &&
                 prevSoundModes.noiseCancelingMode() != newSoundModes.noiseCancelingMode()
 
@@ -143,7 +140,7 @@ class SoundcoreDeviceImpl(
             )
         }
         val filteredSoundModes =
-            filterSoundModeChanges(state.featureFlags, prevSoundModes, newSoundModes)
+            filterSoundModeChanges(soundModeProfile, prevSoundModes, newSoundModes)
         queueSetSoundMode(filteredSoundModes)
 
         _stateFlow.value = state.copy(
@@ -160,8 +157,7 @@ class SoundcoreDeviceImpl(
 
     override fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
         val state = _stateFlow.value
-        if (state.featureFlags.contains(DeviceFeatureFlags.equalizer()) && state.equalizerConfiguration != equalizerConfiguration) {
-            val featureFlags = state.featureFlags
+        if (state.deviceProfile.numEqualizerChannels() > 0 && state.equalizerConfiguration != equalizerConfiguration) {
             val packet =
                 if (state.customHearId != null && state.gender != null && state.ageRange != null) {
                     SetEqualizerAndCustomHearIdPacket(
@@ -178,7 +174,7 @@ class SoundcoreDeviceImpl(
                 } else {
                     SetEqualizerPacket(
                         equalizerConfiguration,
-                        if (featureFlags.contains(DeviceFeatureFlags.twoChannelEqualizer())) {
+                        if (state.deviceProfile.numEqualizerChannels() == 2L) {
                             equalizerConfiguration
                         } else {
                             null

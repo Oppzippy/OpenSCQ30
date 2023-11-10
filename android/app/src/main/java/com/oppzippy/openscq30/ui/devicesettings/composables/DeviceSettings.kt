@@ -15,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -23,13 +22,11 @@ import androidx.navigation.compose.rememberNavController
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
 import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
-import com.oppzippy.openscq30.lib.bindings.DeviceFeatureFlags
 import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
-import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
-import com.oppzippy.openscq30.lib.bindings.SoundModes
+import com.oppzippy.openscq30.lib.bindings.NoiseCancelingModeType
 import com.oppzippy.openscq30.lib.bindings.TransparencyMode
-import com.oppzippy.openscq30.lib.wrapper.SoundcoreDeviceState
+import com.oppzippy.openscq30.lib.bindings.TransparencyModeType
 import com.oppzippy.openscq30.ui.deviceinfo.DeviceInfoScreen
 import com.oppzippy.openscq30.ui.devicesettings.Screen
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
@@ -37,8 +34,7 @@ import com.oppzippy.openscq30.ui.equalizer.EqualizerSettings
 import com.oppzippy.openscq30.ui.quickpresets.QuickPresetScreen
 import com.oppzippy.openscq30.ui.soundmode.NoiseCancelingType
 import com.oppzippy.openscq30.ui.soundmode.SoundModeSettings
-import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
-import java.util.UUID
+import kotlin.jvm.optionals.getOrNull
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,10 +49,10 @@ fun DeviceSettings(
 ) {
     val navController = rememberNavController()
     val navItems = ArrayList<Screen>()
-    if (uiState.deviceState.featureFlags.contains(DeviceFeatureFlags.soundModes())) {
+    if (uiState.deviceState.deviceProfile.soundMode().isPresent) {
         navItems.add(Screen.General)
     }
-    if (uiState.deviceState.featureFlags.contains(DeviceFeatureFlags.equalizer())) {
+    if (uiState.deviceState.deviceProfile.numEqualizerChannels() > 0) {
         navItems.add(Screen.Equalizer)
     }
     navItems.add(Screen.QuickPresets)
@@ -101,20 +97,16 @@ fun DeviceSettings(
         ) {
             uiState.deviceState.soundModes?.let { soundModes ->
                 composable(Screen.General.route) {
+                    val soundModeProfile = uiState.deviceState.deviceProfile.soundMode().getOrNull()
+                        ?: return@composable
                     SoundModeSettings(
                         soundModes = soundModes,
-                        hasTransparencyModes = uiState.deviceState.featureFlags.contains(
-                            DeviceFeatureFlags.transparencyModes(),
-                        ),
-                        noiseCancelingType = if (uiState.deviceState.featureFlags.contains(
-                                DeviceFeatureFlags.customNoiseCanceling(),
-                            )
-                        ) {
-                            NoiseCancelingType.Custom
-                        } else if (uiState.deviceState.featureFlags.contains(DeviceFeatureFlags.noiseCancelingMode())) {
-                            NoiseCancelingType.Normal
-                        } else {
-                            NoiseCancelingType.None
+                        hasTransparencyModes = soundModeProfile.transparencyModeType() == TransparencyModeType.Custom,
+                        noiseCancelingType = when (soundModeProfile.noiseCancelingModeType()) {
+                            NoiseCancelingModeType.None -> NoiseCancelingType.None
+                            NoiseCancelingModeType.Basic -> NoiseCancelingType.Normal
+                            NoiseCancelingModeType.Custom -> NoiseCancelingType.Custom
+                            null -> throw NotImplementedError("should be unreachable since the enum is not nullable")
                         },
                         onAmbientSoundModeChange = onAmbientSoundModeChange,
                         onTransparencyModeChange = onTransparencyModeChange,
@@ -131,7 +123,7 @@ fun DeviceSettings(
             }
             composable(Screen.QuickPresets.route) {
                 QuickPresetScreen(
-                    featureFlags = uiState.deviceState.featureFlags,
+                    deviceProfile = uiState.deviceState.deviceProfile,
                     deviceBleServiceUuid = uiState.deviceBleServiceUuid,
                 )
             }
@@ -139,40 +131,5 @@ fun DeviceSettings(
                 DeviceInfoScreen(deviceState = uiState.deviceState)
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PreviewDeviceSettings() {
-    OpenSCQ30Theme {
-        DeviceSettings(
-            uiState = UiDeviceState.Connected(
-                "Soundcore Q30",
-                "00:00:00:00:00:00",
-                SoundcoreDeviceState(
-                    featureFlags = DeviceFeatureFlags.all(),
-                    soundModes = SoundModes(
-                        AmbientSoundMode.Normal,
-                        NoiseCancelingMode.Indoor,
-                        TransparencyMode.VocalMode,
-                        CustomNoiseCanceling(0),
-                    ),
-                    equalizerConfiguration = EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
-                    leftFirmwareVersion = null,
-                    rightFirmwareVersion = null,
-                    serialNumber = "",
-                    leftBatteryLevel = 0,
-                    rightBatteryLevel = 0,
-                    isLeftBatteryCharging = false,
-                    isRightBatteryCharging = false,
-                    ageRange = null,
-                    dynamicRangeCompressionMinFirmwareVersion = null,
-                    customHearId = null,
-                    gender = null,
-                ),
-                UUID(0, 0),
-            ),
-        )
     }
 }

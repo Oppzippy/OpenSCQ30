@@ -17,8 +17,8 @@ use crate::{
             SetSoundModePacket,
         },
         structures::{
-            AmbientSoundMode, CustomButtonModel, CustomHearId, DeviceFeatureFlags,
-            EqualizerConfiguration, HearId, HearIdMusicType, HearIdType, SoundModes,
+            AmbientSoundMode, CustomButtonModel, CustomHearId, EqualizerConfiguration, HearId,
+            HearIdMusicType, HearIdType, SoundModes,
         },
     },
 };
@@ -49,7 +49,7 @@ where
 
         // TODO consider making this a part of fetch_initial_state
         // For devices that don't include the firmware version in their state update packet, we need to request it
-        if initial_state.left_firmware_version.is_none() {
+        if initial_state.firmware_version.is_none() {
             connection
                 .write_with_response(&RequestFirmwareVersionPacket::new().bytes())
                 .await?;
@@ -177,10 +177,7 @@ where
     async fn set_sound_modes(&self, sound_modes: SoundModes) -> crate::Result<()> {
         let state_sender = self.state_sender.lock().await;
         let state = state_sender.borrow().to_owned();
-        if !state
-            .feature_flags
-            .contains(DeviceFeatureFlags::SOUND_MODES)
-        {
+        if state.device_profile.sound_mode.is_none() {
             return Err(crate::Error::FeatureNotSupported {
                 feature_name: "sound modes",
             });
@@ -264,7 +261,7 @@ where
         let state_sender = self.state_sender.lock().await;
         let state = state_sender.borrow().to_owned();
 
-        if !state.feature_flags.contains(DeviceFeatureFlags::EQUALIZER) {
+        if state.device_profile.num_equalizer_channels == 0 {
             return Err(crate::Error::FeatureNotSupported {
                 feature_name: "equalizer",
             });
@@ -274,10 +271,7 @@ where
         }
 
         let left_channel = &equalizer_configuration;
-        let right_channel = if state
-            .feature_flags
-            .contains(DeviceFeatureFlags::TWO_CHANNEL_EQUALIZER)
-        {
+        let right_channel = if state.device_profile.num_equalizer_channels == 2 {
             Some(&equalizer_configuration)
         } else {
             None
@@ -313,7 +307,7 @@ where
         let state_sender = self.state_sender.lock().await;
         let state = state_sender.borrow().to_owned();
 
-        if !state.feature_flags.contains(DeviceFeatureFlags::HEAR_ID) {
+        if !state.device_profile.has_hear_id {
             return Err(crate::Error::FeatureNotSupported {
                 feature_name: "hear id",
             });
@@ -361,10 +355,7 @@ where
         let state_sender = self.state_sender.lock().await;
         let state = state_sender.borrow().to_owned();
 
-        if !state
-            .feature_flags
-            .contains(DeviceFeatureFlags::CUSTOM_BUTTON_MODEL)
-        {
+        if !state.device_profile.has_custom_button_model {
             return Err(crate::Error::FeatureNotSupported {
                 feature_name: "custom button model",
             });

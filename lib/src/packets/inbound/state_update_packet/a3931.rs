@@ -5,14 +5,14 @@ use nom::{
     sequence::tuple,
 };
 
-use crate::packets::{
-    parsing::{
-        take_bool, take_custom_button_model, take_dual_battery, take_sound_modes,
-        take_stereo_equalizer_configuration, ParseResult,
-    },
-    structures::{
-        CustomButtonModel, DeviceFeatureFlags, DualBattery, EqualizerConfiguration,
-        FirmwareVersion, SoundModes,
+use crate::{
+    device_profiles::A3931_DEVICE_PROFILE,
+    packets::{
+        parsing::{
+            take_bool, take_custom_button_model, take_dual_battery, take_sound_modes,
+            take_stereo_equalizer_configuration, ParseResult,
+        },
+        structures::{CustomButtonModel, DualBattery, EqualizerConfiguration, SoundModes},
     },
 };
 
@@ -36,14 +36,7 @@ pub struct A3931StateUpdatePacket {
 impl From<A3931StateUpdatePacket> for StateUpdatePacket {
     fn from(packet: A3931StateUpdatePacket) -> Self {
         Self {
-            feature_flags: DeviceFeatureFlags::EQUALIZER
-                | DeviceFeatureFlags::CUSTOM_BUTTON_MODEL
-                | DeviceFeatureFlags::SOUND_MODES
-                | DeviceFeatureFlags::TRANSPARENCY_MODES
-                | DeviceFeatureFlags::TOUCH_TONE
-                | DeviceFeatureFlags::AUTO_POWER_OFF
-                | DeviceFeatureFlags::TWO_CHANNEL_EQUALIZER
-                | DeviceFeatureFlags::DYNAMIC_RANGE_COMPRESSION,
+            device_profile: A3931_DEVICE_PROFILE,
             battery: packet.battery.into(),
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: Some(packet.sound_modes),
@@ -53,7 +46,6 @@ impl From<A3931StateUpdatePacket> for StateUpdatePacket {
             custom_button_model: Some(packet.custom_button_model),
             firmware_version: None,
             serial_number: None,
-            dynamic_range_compression_min_firmware_version: Some(FirmwareVersion::new(2, 00)),
         }
     }
 }

@@ -39,7 +39,21 @@ describe("Device Settings", () => {
     user = userEvent.setup();
     const mockDevice = {
       state: new BehaviorSubject<DeviceState>({
-        featureFlags: 0xffffffff, // enable all feature flags
+        deviceProfile: {
+          soundMode: {
+            noiseCancelingModeType: "custom",
+            transparencyModeType: "custom",
+          },
+          hasHearId: true,
+          numEqualizerChannels: 1,
+          numEqualizerBands: 8,
+          hasDynamicRangeCompression: true,
+          hasCustomButtonModel: true,
+          hasWearDetection: true,
+          hasTouchTone: true,
+          hasAutoPowerOff: true,
+          dynamicRangeCompressionMinFirmwareVersion: null,
+        },
         battery: {
           type: "singleBattery",
           isCharging: true,
@@ -63,10 +77,8 @@ describe("Device Settings", () => {
         gender: null,
         customButtonModel: null,
         hearId: null,
-        leftFirmwareVersion: null,
-        rightFirmwareVersion: null,
+        firmwareVersion: null,
         serialNumber: null,
-        dynamicRangeCompressionMinFirmwareVersion: null,
       }),
       connect: vi.fn<unknown[], unknown>(),
       async setSoundModes(soundModes: SoundModes) {

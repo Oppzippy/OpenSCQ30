@@ -8,15 +8,19 @@ use nom::{
 
 use bitflags::bitflags;
 
-use crate::packets::{
-    parsing::{
-        take_battery_level, take_bool, take_custom_button_model,
-        take_custom_hear_id_without_music_type, take_dual_battery, take_equalizer_configuration,
-        take_firmware_version, take_serial_number, take_sound_modes, ParseResult,
-    },
-    structures::{
-        BatteryLevel, CustomButtonModel, CustomHearId, DeviceFeatureFlags, DualBattery,
-        EqualizerConfiguration, FirmwareVersion, SerialNumber, SoundModes,
+use crate::{
+    device_profiles::A3933_DEVICE_PROFILE,
+    packets::{
+        parsing::{
+            take_battery_level, take_bool, take_custom_button_model,
+            take_custom_hear_id_without_music_type, take_dual_battery,
+            take_equalizer_configuration, take_firmware_version, take_serial_number,
+            take_sound_modes, ParseResult,
+        },
+        structures::{
+            BatteryLevel, CustomButtonModel, CustomHearId, DualBattery, EqualizerConfiguration,
+            FirmwareVersion, SerialNumber, SoundModes,
+        },
     },
 };
 
@@ -49,12 +53,7 @@ pub struct A3933StateUpdatePacket {
 impl From<A3933StateUpdatePacket> for StateUpdatePacket {
     fn from(packet: A3933StateUpdatePacket) -> Self {
         Self {
-            feature_flags: DeviceFeatureFlags::SOUND_MODES
-                | DeviceFeatureFlags::NOISE_CANCELING_MODE
-                | DeviceFeatureFlags::TRANSPARENCY_MODES
-                | DeviceFeatureFlags::EQUALIZER
-                | DeviceFeatureFlags::CUSTOM_BUTTON_MODEL
-                | DeviceFeatureFlags::DYNAMIC_RANGE_COMPRESSION,
+            device_profile: A3933_DEVICE_PROFILE,
             battery: packet.battery.into(),
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: Some(packet.sound_modes),
@@ -64,7 +63,6 @@ impl From<A3933StateUpdatePacket> for StateUpdatePacket {
             custom_button_model: Some(packet.custom_button_model),
             firmware_version: Some(packet.left_firmware.min(packet.right_firmware)),
             serial_number: Some(packet.serial_number),
-            dynamic_range_compression_min_firmware_version: None,
         }
     }
 }

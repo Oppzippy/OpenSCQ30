@@ -9,7 +9,7 @@
     "firmwareVersion": "Firmware Version",
     "serialNumber": "Serial Number",
     "ageRange": "Age Range",
-    "featureFlags": "Feature Flags"
+    "deviceProfile": "Device Profile"
   },
   "errors": {
     "disconnected": "Device is disconnected.",
@@ -45,9 +45,9 @@
   },
   "github": "GitHub",
   "ambientSoundMode": {
-    "noiseCanceling": "Noise Canceling",
     "transparency": "Transparency",
-    "normal": "Normal"
+    "normal": "Normal",
+    "noiseCanceling": "Noise Canceling"
   },
   "noiseCancelingMode": {
     "transport": "Transport",

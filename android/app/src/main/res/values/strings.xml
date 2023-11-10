@@ -98,4 +98,5 @@
     <string name="age_range">Age Range</string>
     <string name="feature_flags">Feature Flags</string>
     <string name="device_info">Device Info</string>
+    <string name="device_profile">Device Profile</string>
 </resources>

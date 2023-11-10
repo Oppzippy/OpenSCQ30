@@ -13,7 +13,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
@@ -21,20 +20,19 @@ import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification
 import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
 import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
-import com.oppzippy.openscq30.lib.bindings.DeviceFeatureFlags
+import com.oppzippy.openscq30.lib.bindings.DeviceProfile
 import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.bindings.TransparencyMode
 import com.oppzippy.openscq30.ui.quickpresets.composables.QuickPresetConfiguration
 import com.oppzippy.openscq30.ui.quickpresets.composables.QuickPresetSelection
 import com.oppzippy.openscq30.ui.quickpresets.models.QuickPresetEqualizerConfiguration
-import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 import com.oppzippy.openscq30.ui.utils.Loading
 import com.oppzippy.openscq30.ui.utils.PermissionCheck
 import java.util.UUID
 
 @Composable
 fun QuickPresetScreen(
-    featureFlags: DeviceFeatureFlags,
+    deviceProfile: DeviceProfile,
     deviceBleServiceUuid: UUID,
     viewModel: QuickPresetViewModel = hiltViewModel(),
 ) {
@@ -74,7 +72,7 @@ fun QuickPresetScreen(
     if (permissionCheckPassed) {
         if (preset != null) {
             QuickPresetScreen(
-                featureFlags = featureFlags,
+                deviceProfile = deviceProfile,
                 preset = preset,
                 customEqualizerProfiles = customEqualizerProfiles,
                 onSelectedIndexChange = { viewModel.selectQuickPreset(deviceBleServiceUuid, it) },
@@ -124,7 +122,7 @@ fun QuickPresetScreen(
 
 @Composable
 private fun QuickPresetScreen(
-    featureFlags: DeviceFeatureFlags,
+    deviceProfile: DeviceProfile,
     preset: QuickPreset,
     customEqualizerProfiles: List<CustomProfile>,
     onSelectedIndexChange: (index: Int) -> Unit = {},
@@ -141,7 +139,7 @@ private fun QuickPresetScreen(
             onSelectedIndexChange = onSelectedIndexChange,
         )
         QuickPresetConfiguration(
-            featureFlags = featureFlags,
+            deviceProfile = deviceProfile,
             name = preset.name,
             defaultName = stringResource(R.string.quick_preset_number, preset.index + 1),
             ambientSoundMode = preset.ambientSoundMode,
@@ -162,36 +160,6 @@ private fun QuickPresetScreen(
             onCustomNoiseCancelingChange = onCustomNoiseCancelingChange,
             onEqualizerChange = onEqualizerChange,
             onNameChange = onNameChange,
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewQuickPresetScreenWithAllOptionsChecked() {
-    OpenSCQ30Theme {
-        QuickPresetScreen(
-            featureFlags = DeviceFeatureFlags.all(),
-            preset = QuickPreset(
-                deviceBleServiceUuid = UUID(0, 0),
-                index = 0,
-                ambientSoundMode = AmbientSoundMode.Normal,
-                noiseCancelingMode = NoiseCancelingMode.Transport,
-                customEqualizerProfileName = "Test EQ Profile",
-            ),
-            customEqualizerProfiles = emptyList(),
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewQuickPresetScreenWithNoOptionsChecked() {
-    OpenSCQ30Theme {
-        QuickPresetScreen(
-            featureFlags = DeviceFeatureFlags.all(),
-            preset = QuickPreset(UUID(0, 0), 0),
-            customEqualizerProfiles = emptyList(),
         )
     }
 }

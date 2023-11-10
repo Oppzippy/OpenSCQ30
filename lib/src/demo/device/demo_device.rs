@@ -7,12 +7,15 @@ use uuid::Uuid;
 
 use crate::{
     api::{connection::ConnectionStatus, device::Device},
+    device_profiles::{
+        DeviceProfile, NoiseCancelingModeType, SoundModeProfile, TransparencyModeType,
+    },
     futures::Futures,
     packets::structures::{
         AgeRange, AmbientSoundMode, BasicHearId, BatteryLevel, ButtonAction, CustomButtonModel,
-        DeviceFeatureFlags, EqualizerConfiguration, FirmwareVersion, Gender, HearId,
-        IsBatteryCharging, NoTwsButtonAction, NoiseCancelingMode, PresetEqualizerProfile,
-        SerialNumber, SingleBattery, SoundModes, TwsButtonAction,
+        EqualizerConfiguration, FirmwareVersion, Gender, HearId, IsBatteryCharging,
+        NoTwsButtonAction, NoiseCancelingMode, PresetEqualizerProfile, SerialNumber, SingleBattery,
+        SoundModes, TwsButtonAction,
     },
     state::DeviceState,
 };
@@ -33,7 +36,21 @@ where
         FuturesType::sleep(Duration::from_millis(500)).await; // it takes some time to connect
                                                               //
         let (state_sender, _) = watch::channel(DeviceState {
-            feature_flags: DeviceFeatureFlags::all(),
+            device_profile: DeviceProfile {
+                sound_mode: Some(SoundModeProfile {
+                    noise_canceling_mode_type: NoiseCancelingModeType::Custom,
+                    transparency_mode_type: TransparencyModeType::Custom,
+                }),
+                has_hear_id: true,
+                num_equalizer_channels: 2,
+                num_equalizer_bands: 10,
+                has_dynamic_range_compression: true,
+                dynamic_range_compression_min_firmware_version: None,
+                has_custom_button_model: true,
+                has_wear_detection: true,
+                has_touch_tone: true,
+                has_auto_power_off: true,
+            },
             battery: SingleBattery {
                 is_charging: IsBatteryCharging::No,
                 level: BatteryLevel(4),
@@ -88,10 +105,8 @@ where
                 }
                 .into(),
             ),
-            left_firmware_version: Some(FirmwareVersion::new(2, 0)),
-            right_firmware_version: Some(FirmwareVersion::new(2, 0)),
+            firmware_version: Some(FirmwareVersion::new(2, 0)),
             serial_number: Some(SerialNumber("0123456789ABCDEF".into())),
-            dynamic_range_compression_min_firmware_version: Some(FirmwareVersion::new(2, 0)),
         });
 
         let (connection_status_sender, _) = watch::channel(ConnectionStatus::Connected);

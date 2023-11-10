@@ -30,7 +30,6 @@ mod imp {
         },
         template_callbacks, CompositeTemplate,
     };
-    use itertools::Itertools;
     use openscq30_lib::state::DeviceState;
 
     #[derive(Default, CompositeTemplate)]
@@ -62,24 +61,21 @@ mod imp {
         pub fn set_device_state(&self, state: &DeviceState) {
             self.serial_number
                 .set_text(state.serial_number.to_owned().unwrap_or_default().as_str());
-            self.firmware_version.set_text(&match (
-                state.left_firmware_version,
-                state.right_firmware_version,
-            ) {
-                (Some(left), Some(right)) => {
-                    format!("{}, {}", left.to_string(), right.to_string())
-                }
-                (Some(left), None) => left.to_string(),
-                _ => "".to_owned(),
-            });
+            self.firmware_version.set_text(
+                &state
+                    .firmware_version
+                    .map(|version| version.to_string())
+                    .unwrap_or_default(),
+            );
             self.age_range.set_text(
                 &state
                     .age_range
                     .map(|age_range| age_range.0.to_string())
                     .unwrap_or_default(),
             );
+            // TODO display as JSON or something
             self.feature_flags
-                .set_text(&state.feature_flags.iter_names().map(|x| x.0).join("\n"));
+                .set_text(&format!("{:?}", state.device_profile));
         }
     }
 

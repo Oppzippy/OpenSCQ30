@@ -20,7 +20,21 @@ describe("App", () => {
         async selectDevice() {
           const mockDevice = {
             state: new BehaviorSubject<DeviceState>({
-              featureFlags: 0,
+              deviceProfile: {
+                soundMode: {
+                  noiseCancelingModeType: "none",
+                  transparencyModeType: "basic",
+                },
+                hasHearId: false,
+                numEqualizerChannels: 0,
+                numEqualizerBands: 0,
+                hasDynamicRangeCompression: false,
+                hasCustomButtonModel: false,
+                hasWearDetection: false,
+                hasTouchTone: false,
+                hasAutoPowerOff: false,
+                dynamicRangeCompressionMinFirmwareVersion: null,
+              },
               battery: {
                 type: "singleBattery",
                 isCharging: true,
@@ -44,9 +58,7 @@ describe("App", () => {
               gender: null,
               customButtonModel: null,
               hearId: null,
-              dynamicRangeCompressionMinFirmwareVersion: null,
-              leftFirmwareVersion: null,
-              rightFirmwareVersion: null,
+              firmwareVersion: null,
               serialNumber: null,
             }),
             connect: vi.fn<unknown[], unknown>(),

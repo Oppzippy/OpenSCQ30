@@ -5,6 +5,18 @@ import { WasmTest } from "../../../wasm/pkg/openscq30_web_wasm";
 describe("libTypes", () => {
   it("should serialize/deserialize an object with as many nulls as possible", () => {
     const expected: DeviceState = {
+      deviceProfile: {
+        soundMode: null,
+        hasHearId: false,
+        numEqualizerChannels: 0,
+        numEqualizerBands: 0,
+        hasDynamicRangeCompression: false,
+        hasCustomButtonModel: false,
+        hasWearDetection: false,
+        hasTouchTone: false,
+        hasAutoPowerOff: false,
+        dynamicRangeCompressionMinFirmwareVersion: null,
+      },
       ageRange: null,
       gender: null,
       battery: {
@@ -18,12 +30,9 @@ describe("libTypes", () => {
         presetProfile: null,
         volumeAdjustments: [0, 0, 0, 0, 0, 0, 0, 0],
       },
-      featureFlags: 0,
-      leftFirmwareVersion: null,
-      rightFirmwareVersion: null,
+      firmwareVersion: null,
       serialNumber: null,
       soundModes: null,
-      dynamicRangeCompressionMinFirmwareVersion: null,
     };
     const actual: unknown = JSON.parse(
       WasmTest.deserializeAndReserializeForTests(JSON.stringify(expected)),
@@ -32,6 +41,24 @@ describe("libTypes", () => {
   });
   it("should serialize/deserialize an object with as many fields filled as possible", () => {
     const expected: DeviceState = {
+      deviceProfile: {
+        soundMode: {
+          noiseCancelingModeType: "custom",
+          transparencyModeType: "custom",
+        },
+        hasHearId: true,
+        numEqualizerChannels: 2,
+        numEqualizerBands: 8,
+        hasDynamicRangeCompression: true,
+        hasCustomButtonModel: true,
+        hasWearDetection: true,
+        hasTouchTone: true,
+        hasAutoPowerOff: true,
+        dynamicRangeCompressionMinFirmwareVersion: {
+          major: 2,
+          minor: 3,
+        },
+      },
       ageRange: 1,
       gender: 2,
       battery: {
@@ -94,14 +121,9 @@ describe("libTypes", () => {
         presetProfile: "Acoustic",
         volumeAdjustments: [0, 0, 0, 0, 0, 0, 0, 0],
       },
-      featureFlags: 1,
-      leftFirmwareVersion: {
+      firmwareVersion: {
         major: 1,
         minor: 2,
-      },
-      rightFirmwareVersion: {
-        major: 3,
-        minor: 4,
       },
       serialNumber: "0123456789ABCDEF",
       soundModes: {
@@ -109,10 +131,6 @@ describe("libTypes", () => {
         noiseCancelingMode: "custom",
         transparencyMode: "fullyTransparent",
         customNoiseCanceling: 5,
-      },
-      dynamicRangeCompressionMinFirmwareVersion: {
-        major: 5,
-        minor: 6,
       },
     };
     const actual: unknown = JSON.parse(

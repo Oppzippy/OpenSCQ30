@@ -23,17 +23,20 @@ use nom::{
     error::{context, ContextError, ParseError},
 };
 
-use crate::packets::{
-    parsing::ParseResult,
-    structures::{
-        AgeRange, Battery, CustomButtonModel, DeviceFeatureFlags, EqualizerConfiguration,
-        FirmwareVersion, Gender, HearId, SerialNumber, SoundModes,
+use crate::{
+    device_profiles::DeviceProfile,
+    packets::{
+        parsing::ParseResult,
+        structures::{
+            AgeRange, Battery, CustomButtonModel, EqualizerConfiguration, FirmwareVersion, Gender,
+            HearId, SerialNumber, SoundModes,
+        },
     },
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct StateUpdatePacket {
-    pub feature_flags: DeviceFeatureFlags,
+    pub device_profile: DeviceProfile,
     pub battery: Battery,
     pub equalizer_configuration: EqualizerConfiguration,
     pub sound_modes: Option<SoundModes>,
@@ -43,7 +46,6 @@ pub struct StateUpdatePacket {
     pub custom_button_model: Option<CustomButtonModel>,
     pub firmware_version: Option<FirmwareVersion>,
     pub serial_number: Option<SerialNumber>,
-    pub dynamic_range_compression_min_firmware_version: Option<FirmwareVersion>,
 }
 
 pub fn take_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(

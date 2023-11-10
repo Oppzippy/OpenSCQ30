@@ -14,13 +14,11 @@ impl FirmwareVersionUpdatePacket {
     }
 
     #[generate_interface]
-    pub fn left_firmware_version(&self) -> FirmwareVersion {
-        self.0.left_firmware_version.into()
-    }
-
-    #[generate_interface]
-    pub fn right_firmware_version(&self) -> FirmwareVersion {
-        self.0.right_firmware_version.into()
+    pub fn firmware_version(&self) -> FirmwareVersion {
+        self.0
+            .left_firmware_version
+            .min(self.0.right_firmware_version)
+            .into()
     }
 
     #[generate_interface]

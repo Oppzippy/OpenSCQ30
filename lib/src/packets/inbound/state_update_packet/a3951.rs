@@ -5,15 +5,18 @@ use nom::{
     sequence::tuple,
 };
 
-use crate::packets::{
-    parsing::{
-        take_age_range, take_bool, take_custom_button_model, take_custom_hear_id_with_all_fields,
-        take_dual_battery, take_gender, take_sound_modes, take_stereo_equalizer_configuration,
-        ParseResult,
-    },
-    structures::{
-        AgeRange, CustomButtonModel, CustomHearId, DeviceFeatureFlags, DualBattery,
-        EqualizerConfiguration, Gender, SoundModes,
+use crate::{
+    device_profiles::A3951_DEVICE_PROFILE,
+    packets::{
+        parsing::{
+            take_age_range, take_bool, take_custom_button_model,
+            take_custom_hear_id_with_all_fields, take_dual_battery, take_gender, take_sound_modes,
+            take_stereo_equalizer_configuration, ParseResult,
+        },
+        structures::{
+            AgeRange, CustomButtonModel, CustomHearId, DualBattery, EqualizerConfiguration, Gender,
+            SoundModes,
+        },
     },
 };
 
@@ -43,17 +46,7 @@ pub struct A3951StateUpdatePacket {
 impl From<A3951StateUpdatePacket> for StateUpdatePacket {
     fn from(packet: A3951StateUpdatePacket) -> Self {
         Self {
-            feature_flags: DeviceFeatureFlags::EQUALIZER
-                | DeviceFeatureFlags::TWO_CHANNEL_EQUALIZER
-                | DeviceFeatureFlags::HEAR_ID
-                | DeviceFeatureFlags::CUSTOM_BUTTON_MODEL
-                | DeviceFeatureFlags::SOUND_MODES
-                | DeviceFeatureFlags::NOISE_CANCELING_MODE
-                | DeviceFeatureFlags::CUSTOM_NOISE_CANCELING
-                | DeviceFeatureFlags::TRANSPARENCY_MODES
-                | DeviceFeatureFlags::WEAR_DETECTION
-                | DeviceFeatureFlags::TOUCH_TONE
-                | DeviceFeatureFlags::DYNAMIC_RANGE_COMPRESSION,
+            device_profile: A3951_DEVICE_PROFILE,
             battery: packet.battery.into(),
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: Some(packet.sound_modes),
@@ -63,7 +56,6 @@ impl From<A3951StateUpdatePacket> for StateUpdatePacket {
             custom_button_model: Some(packet.custom_button_model),
             firmware_version: None,
             serial_number: None,
-            dynamic_range_compression_min_firmware_version: None,
         }
     }
 }

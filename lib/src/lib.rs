@@ -3,6 +3,7 @@
 #![allow(clippy::type_complexity)]
 pub mod api;
 pub mod demo;
+pub mod device_profiles;
 pub mod device_utils;
 mod error;
 pub mod futures;

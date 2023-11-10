@@ -6,27 +6,24 @@ use crate::{
 impl DeviceStateTransformer for StateUpdatePacket {
     fn transform(&self, state: &DeviceState) -> DeviceState {
         DeviceState {
-            feature_flags: state.feature_flags,
+            device_profile: state.device_profile,
             battery: state.battery,
             equalizer_configuration: state.equalizer_configuration.to_owned(),
             age_range: self.age_range.or(state.age_range),
             gender: self.gender.or(state.gender),
             custom_button_model: self.custom_button_model.or(state.custom_button_model),
             hear_id: self.hear_id.to_owned().or(state.hear_id.to_owned()),
-            left_firmware_version: self
+            firmware_version: self
                 .firmware_version
                 .as_ref()
-                .or(state.left_firmware_version.as_ref())
+                .or(state.firmware_version.as_ref())
                 .cloned(),
-            right_firmware_version: state.right_firmware_version,
             serial_number: self
                 .serial_number
                 .as_ref()
                 .or(state.serial_number.as_ref())
                 .cloned(),
             sound_modes: self.sound_modes.or(state.sound_modes),
-            dynamic_range_compression_min_firmware_version: state
-                .dynamic_range_compression_min_firmware_version,
         }
     }
 }

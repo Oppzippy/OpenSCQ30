@@ -26,21 +26,13 @@ public final class FirmwareVersionUpdatePacket {
     }
     private static native long init() throws Exception;
 
-    public final @NonNull FirmwareVersion leftFirmwareVersion() {
-        long ret = do_leftFirmwareVersion(mNativeObj);
+    public final @NonNull FirmwareVersion firmwareVersion() {
+        long ret = do_firmwareVersion(mNativeObj);
         FirmwareVersion convRet = new FirmwareVersion(InternalPointerMarker.RAW_PTR, ret);
 
         return convRet;
     }
-    private static native long do_leftFirmwareVersion(long self);
-
-    public final @NonNull FirmwareVersion rightFirmwareVersion() {
-        long ret = do_rightFirmwareVersion(mNativeObj);
-        FirmwareVersion convRet = new FirmwareVersion(InternalPointerMarker.RAW_PTR, ret);
-
-        return convRet;
-    }
-    private static native long do_rightFirmwareVersion(long self);
+    private static native long do_firmwareVersion(long self);
 
     public final @NonNull String serialNumber() {
         String ret = do_serialNumber(mNativeObj);
