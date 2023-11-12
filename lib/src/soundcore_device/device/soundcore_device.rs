@@ -28,7 +28,7 @@ use crate::{
     state::{self, DeviceState},
 };
 
-pub struct Q30Device<ConnectionType, FuturesType>
+pub struct SoundcoreDevice<ConnectionType, FuturesType>
 where
     ConnectionType: Connection,
     FuturesType: Futures,
@@ -38,7 +38,7 @@ where
     join_handle: FuturesType::JoinHandleType,
 }
 
-impl<ConnectionType, FuturesType> Q30Device<ConnectionType, FuturesType>
+impl<ConnectionType, FuturesType> SoundcoreDevice<ConnectionType, FuturesType>
 where
     ConnectionType: Connection,
     FuturesType: Futures,
@@ -145,7 +145,8 @@ where
 }
 
 #[async_trait(?Send)]
-impl<ConnectionType, FuturesType> api::device::Device for Q30Device<ConnectionType, FuturesType>
+impl<ConnectionType, FuturesType> api::device::Device
+    for SoundcoreDevice<ConnectionType, FuturesType>
 where
     ConnectionType: Connection,
     FuturesType: Futures,
@@ -380,7 +381,7 @@ where
     }
 }
 
-impl<ConnectionType, FuturesType> Drop for Q30Device<ConnectionType, FuturesType>
+impl<ConnectionType, FuturesType> Drop for SoundcoreDevice<ConnectionType, FuturesType>
 where
     ConnectionType: Connection,
     FuturesType: Futures,
@@ -390,7 +391,7 @@ where
     }
 }
 
-impl<ConnectionType, FuturesType> std::fmt::Debug for Q30Device<ConnectionType, FuturesType>
+impl<ConnectionType, FuturesType> std::fmt::Debug for SoundcoreDevice<ConnectionType, FuturesType>
 where
     ConnectionType: Connection,
     FuturesType: Futures,
@@ -408,7 +409,7 @@ mod tests {
     use macaddr::MacAddr6;
     use tokio::sync::mpsc;
 
-    use super::Q30Device;
+    use super::SoundcoreDevice;
     use crate::{
         api::device::Device,
         futures::TokioFutures,
@@ -448,7 +449,9 @@ mod tests {
         tokio::spawn(async move {
             sender.send(example_state_update_packet()).await.unwrap();
         });
-        let device = Q30Device::<_, TokioFutures>::new(connection).await.unwrap();
+        let device = SoundcoreDevice::<_, TokioFutures>::new(connection)
+            .await
+            .unwrap();
         let state = device.state().await;
         let sound_modes = state.sound_modes.unwrap();
         assert_eq!(AmbientSoundMode::Normal, sound_modes.ambient_sound_mode);
@@ -475,7 +478,7 @@ mod tests {
             sender.send(example_state_update_packet()).await.unwrap();
         });
         let connection_clone = connection.clone();
-        Q30Device::<_, TokioFutures>::new(connection_clone)
+        SoundcoreDevice::<_, TokioFutures>::new(connection_clone)
             .await
             .unwrap();
         assert_eq!(0, connection.write_return_queue_length().await);
@@ -490,7 +493,7 @@ mod tests {
         }
 
         let connection_clone = connection.clone();
-        let result = Q30Device::<_, TokioFutures>::new(connection_clone).await;
+        let result = SoundcoreDevice::<_, TokioFutures>::new(connection_clone).await;
         assert_eq!(true, result.is_err());
     }
 
@@ -505,7 +508,9 @@ mod tests {
                 .await
                 .unwrap();
         });
-        let device = Q30Device::<_, TokioFutures>::new(connection).await.unwrap();
+        let device = SoundcoreDevice::<_, TokioFutures>::new(connection)
+            .await
+            .unwrap();
         let state = device.state().await;
         let sound_modes = state.sound_modes.unwrap();
         assert_eq!(AmbientSoundMode::Normal, sound_modes.ambient_sound_mode);
@@ -548,7 +553,7 @@ mod tests {
         connection.push_write_return(Ok(())).await;
         sender.send(example_state_update_packet()).await.unwrap();
 
-        let device = Q30Device::<_, TokioFutures>::new(connection.to_owned())
+        let device = SoundcoreDevice::<_, TokioFutures>::new(connection.to_owned())
             .await
             .unwrap();
         let sound_modes = SoundModes {
@@ -568,7 +573,7 @@ mod tests {
         connection.push_write_return(Ok(())).await;
         sender.send(example_state_update_packet()).await.unwrap();
 
-        let device = Q30Device::<_, TokioFutures>::new(connection.to_owned())
+        let device = SoundcoreDevice::<_, TokioFutures>::new(connection.to_owned())
             .await
             .unwrap();
         let equalizer_configuration = EqualizerConfiguration::new_custom_profile(

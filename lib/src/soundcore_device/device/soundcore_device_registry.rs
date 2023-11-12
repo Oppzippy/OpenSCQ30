@@ -17,21 +17,24 @@ use crate::{
     futures::Futures,
 };
 
-use super::q30_device::Q30Device;
+use super::soundcore_device::SoundcoreDevice;
 
-pub struct Q30DeviceRegistry<RegistryType, FuturesType>
+pub struct SoundcoreDeviceRegistry<RegistryType, FuturesType>
 where
     RegistryType: ConnectionRegistry,
     FuturesType: Futures,
 {
     conneciton_registry: RegistryType,
     devices: Mutex<
-        WeakValueHashMap<MacAddr6, Weak<Q30Device<RegistryType::ConnectionType, FuturesType>>>,
+        WeakValueHashMap<
+            MacAddr6,
+            Weak<SoundcoreDevice<RegistryType::ConnectionType, FuturesType>>,
+        >,
     >,
     futures: PhantomData<FuturesType>,
 }
 
-impl<RegistryType, FuturesType> Q30DeviceRegistry<RegistryType, FuturesType>
+impl<RegistryType, FuturesType> SoundcoreDeviceRegistry<RegistryType, FuturesType>
 where
     RegistryType: ConnectionRegistry,
     FuturesType: Futures,
@@ -47,11 +50,11 @@ where
     async fn new_device(
         &self,
         mac_address: MacAddr6,
-    ) -> crate::Result<Option<Q30Device<RegistryType::ConnectionType, FuturesType>>> {
+    ) -> crate::Result<Option<SoundcoreDevice<RegistryType::ConnectionType, FuturesType>>> {
         let connection = self.conneciton_registry.connection(mac_address).await?;
 
         if let Some(connection) = connection {
-            Q30Device::new(connection).await.map(Option::Some)
+            SoundcoreDevice::new(connection).await.map(Option::Some)
         } else {
             Ok(None)
         }
@@ -59,12 +62,13 @@ where
 }
 
 #[async_trait(?Send)]
-impl<RegistryType, FuturesType> DeviceRegistry for Q30DeviceRegistry<RegistryType, FuturesType>
+impl<RegistryType, FuturesType> DeviceRegistry
+    for SoundcoreDeviceRegistry<RegistryType, FuturesType>
 where
     RegistryType: ConnectionRegistry,
     FuturesType: Futures,
 {
-    type DeviceType = Q30Device<RegistryType::ConnectionType, FuturesType>;
+    type DeviceType = SoundcoreDevice<RegistryType::ConnectionType, FuturesType>;
     type DescriptorType = GenericDeviceDescriptor;
 
     async fn device_descriptors(&self) -> crate::Result<Vec<Self::DescriptorType>> {
@@ -115,7 +119,7 @@ mod tests {
         stub::connection::{StubConnection, StubConnectionRegistry},
     };
 
-    use super::Q30DeviceRegistry;
+    use super::SoundcoreDeviceRegistry;
 
     #[tokio::test]
     async fn test_device_descriptors() {
@@ -127,7 +131,7 @@ mod tests {
         let device = Arc::new(StubConnection::new());
         let devices = HashMap::from([(descriptor, device)]);
         let connection_registry = StubConnectionRegistry::new(devices.to_owned());
-        let device_registry = Q30DeviceRegistry::<_, TokioFutures>::new(connection_registry)
+        let device_registry = SoundcoreDeviceRegistry::<_, TokioFutures>::new(connection_registry)
             .await
             .unwrap();
 
@@ -177,7 +181,7 @@ mod tests {
 
         let devices = HashMap::from([(descriptor, device)]);
         let connection_registry = StubConnectionRegistry::new(devices.to_owned());
-        let device_registry = Q30DeviceRegistry::<_, TokioFutures>::new(connection_registry)
+        let device_registry = SoundcoreDeviceRegistry::<_, TokioFutures>::new(connection_registry)
             .await
             .unwrap();
 
@@ -203,7 +207,7 @@ mod tests {
 
         let devices = HashMap::from([(descriptor, device)]);
         let connection_registry = StubConnectionRegistry::new(devices.to_owned());
-        let device_registry = Q30DeviceRegistry::<_, TokioFutures>::new(connection_registry)
+        let device_registry = SoundcoreDeviceRegistry::<_, TokioFutures>::new(connection_registry)
             .await
             .unwrap();
 

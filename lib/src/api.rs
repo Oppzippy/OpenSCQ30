@@ -12,9 +12,10 @@ pub async fn new_soundcore_device_registry<FuturesType>() -> crate::Result<impl 
 where
     FuturesType: Futures,
 {
-    use crate::q30::device::Q30DeviceRegistry;
-    let connection_registry = crate::q30::connection::new_connection_registry().await?;
-    Q30DeviceRegistry::<_, FuturesType>::new(connection_registry).await
+    use crate::soundcore_device::device::SoundcoreDeviceRegistry;
+    let connection_registry =
+        crate::soundcore_device::connection::new_connection_registry().await?;
+    SoundcoreDeviceRegistry::<_, FuturesType>::new(connection_registry).await
 }
 
 #[cfg(feature = "demo")]
