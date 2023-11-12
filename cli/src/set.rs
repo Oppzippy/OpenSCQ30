@@ -1,6 +1,6 @@
 use openscq30_lib::{
     api::device::Device,
-    packets::structures::{EqualizerConfiguration, SoundModes, VolumeAdjustments},
+    devices::standard::structures::{EqualizerConfiguration, SoundModes, VolumeAdjustments},
 };
 
 use crate::cli::SetCommand;

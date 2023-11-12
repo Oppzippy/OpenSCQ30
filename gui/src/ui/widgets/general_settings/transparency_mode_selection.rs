@@ -27,7 +27,7 @@ mod imp {
         },
         CompositeTemplate, TemplateChild,
     };
-    use openscq30_lib::packets::structures::TransparencyMode;
+    use openscq30_lib::devices::standard::structures::TransparencyMode;
 
     use crate::objects::GlibTransparencyModeValue;
 

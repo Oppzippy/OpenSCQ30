@@ -1,7 +1,7 @@
 use anyhow::bail;
 use openscq30_lib::{
     api::device::{Device, DeviceRegistry},
-    packets::structures::{AmbientSoundMode, SoundModes},
+    devices::standard::structures::{AmbientSoundMode, SoundModes},
 };
 
 use super::State;
@@ -35,9 +35,9 @@ mod tests {
     use std::rc::Rc;
 
     use mockall::predicate;
-    use openscq30_lib::{
-        packets::structures::{AmbientSoundMode, SoundModes},
+    use openscq30_lib::devices::standard::{
         state::DeviceState,
+        structures::{AmbientSoundMode, SoundModes},
     };
 
     use crate::{

@@ -2,7 +2,7 @@ use gtk::{
     glib::{self, Object, Sender},
     subclass::prelude::ObjectSubclassIsExt,
 };
-use openscq30_lib::state::DeviceState;
+use openscq30_lib::devices::standard::state::DeviceState;
 
 use crate::actions::Action;
 
@@ -46,7 +46,7 @@ mod imp {
     };
     use openscq30_lib::{
         device_profiles::{NoiseCancelingModeType, TransparencyModeType},
-        state::DeviceState,
+        devices::standard::state::DeviceState,
     };
 
     use crate::{

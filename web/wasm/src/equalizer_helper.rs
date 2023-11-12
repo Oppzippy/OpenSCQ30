@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use openscq30_lib::packets::structures::{
+use openscq30_lib::devices::standard::structures::{
     EqualizerConfiguration, PresetEqualizerProfile, VolumeAdjustments,
 };
 use wasm_bindgen::prelude::wasm_bindgen;

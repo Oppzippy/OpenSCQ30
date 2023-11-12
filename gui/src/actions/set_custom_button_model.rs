@@ -1,6 +1,6 @@
 use openscq30_lib::{
     api::device::{Device, DeviceRegistry},
-    packets::structures::CustomButtonModel,
+    devices::standard::structures::CustomButtonModel,
 };
 
 use super::State;

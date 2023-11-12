@@ -36,7 +36,7 @@ mod imp {
         traits::{RangeExt, ScaleExt},
         CompositeTemplate, Label, Scale, SpinButton, TemplateChild,
     };
-    use openscq30_lib::packets::structures::VolumeAdjustments;
+    use openscq30_lib::devices::standard::structures::VolumeAdjustments;
 
     #[derive(Default, CompositeTemplate, Properties)]
     #[properties(wrapper_type = super::VolumeSlider)]

@@ -9,7 +9,7 @@ use gtk::{
     traits::GtkWindowExt,
     Application,
 };
-use openscq30_lib::{packets::structures::EqualizerConfiguration, state::DeviceState};
+use openscq30_lib::devices::standard::{state::DeviceState, structures::EqualizerConfiguration};
 
 use crate::{
     actions::Action,

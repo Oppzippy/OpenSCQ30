@@ -1,5 +1,5 @@
 use gtk::glib::{self, Object};
-use openscq30_lib::packets::structures::PresetEqualizerProfile;
+use openscq30_lib::devices::standard::structures::PresetEqualizerProfile;
 
 glib::wrapper! {
     pub struct GlibPresetEqualizerProfile(ObjectSubclass<imp::GlibPresetEqualizerProfile>);

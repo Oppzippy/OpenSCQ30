@@ -1,8 +1,10 @@
 use anyhow::Context;
 use openscq30_lib::{
     api::device::{Device, DeviceRegistry},
-    packets::structures::{EqualizerConfiguration, SoundModes, VolumeAdjustments},
-    state::DeviceState,
+    devices::standard::{
+        state::DeviceState,
+        structures::{EqualizerConfiguration, SoundModes, VolumeAdjustments},
+    },
 };
 
 use crate::settings::{Config, PresetOrCustomEqualizerProfile, QuickPreset, SettingsFile};
@@ -99,12 +101,12 @@ async fn set_equalizer_configuration_from_quick_preset(
 mod tests {
     use std::rc::Rc;
 
-    use openscq30_lib::{
-        packets::structures::{
+    use openscq30_lib::devices::standard::{
+        state::DeviceState,
+        structures::{
             AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
             PresetEqualizerProfile, SoundModes, TransparencyMode, VolumeAdjustments,
         },
-        state::DeviceState,
     };
     use uuid::Uuid;
 

@@ -3,7 +3,7 @@ use std::sync::Arc;
 use anyhow::Context;
 use openscq30_lib::{
     api::device::DeviceRegistry,
-    packets::structures::{EqualizerConfiguration, VolumeAdjustments},
+    devices::standard::structures::{EqualizerConfiguration, VolumeAdjustments},
 };
 
 use crate::{
@@ -50,7 +50,7 @@ mod tests {
 
     use std::sync::Arc;
 
-    use openscq30_lib::packets::structures::{EqualizerConfiguration, VolumeAdjustments};
+    use openscq30_lib::devices::standard::structures::{EqualizerConfiguration, VolumeAdjustments};
 
     use crate::{
         actions::{State, StateUpdate},

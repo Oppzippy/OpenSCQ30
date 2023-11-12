@@ -2,7 +2,7 @@ use gtk::{
     glib::{self, Object, Sender},
     subclass::prelude::ObjectSubclassIsExt,
 };
-use openscq30_lib::{packets::structures::EqualizerConfiguration, state::DeviceState};
+use openscq30_lib::devices::standard::{state::DeviceState, structures::EqualizerConfiguration};
 
 use crate::{
     actions::Action,
@@ -65,7 +65,7 @@ mod imp {
         CompositeTemplate, TemplateChild,
     };
 
-    use openscq30_lib::state::DeviceState;
+    use openscq30_lib::devices::standard::state::DeviceState;
 
     use crate::{
         actions::Action,

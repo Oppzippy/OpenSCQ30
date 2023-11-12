@@ -2,7 +2,7 @@ use gtk::{
     glib::{self, Object, Sender},
     subclass::prelude::ObjectSubclassIsExt,
 };
-use openscq30_lib::state::DeviceState;
+use openscq30_lib::devices::standard::state::DeviceState;
 
 use crate::actions::Action;
 
@@ -39,11 +39,9 @@ mod imp {
         },
         template_callbacks, ClosureExpression, CompositeTemplate,
     };
-    use openscq30_lib::{
-        packets::structures::{
-            ButtonAction, CustomButtonModel, NoTwsButtonAction, TwsButtonAction,
-        },
+    use openscq30_lib::devices::standard::{
         state::DeviceState,
+        structures::{ButtonAction, CustomButtonModel, NoTwsButtonAction, TwsButtonAction},
     };
     use strum::IntoEnumIterator;
 

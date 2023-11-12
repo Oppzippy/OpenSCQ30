@@ -1,6 +1,6 @@
 use openscq30_lib::{
     api::device::{Device, DeviceRegistry},
-    packets::structures::HearId,
+    devices::standard::structures::HearId,
 };
 
 use super::State;

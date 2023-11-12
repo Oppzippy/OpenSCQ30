@@ -38,7 +38,7 @@ mod imp {
         },
         CompositeTemplate,
     };
-    use openscq30_lib::packets::structures::VolumeAdjustments;
+    use openscq30_lib::devices::standard::structures::VolumeAdjustments;
 
     #[derive(Default, CompositeTemplate, Properties)]
     #[properties(wrapper_type = super::ProfileDropdownRow)]

@@ -27,7 +27,7 @@ mod imp {
         },
         CompositeTemplate, TemplateChild,
     };
-    use openscq30_lib::packets::structures::AmbientSoundMode;
+    use openscq30_lib::devices::standard::structures::AmbientSoundMode;
 
     use crate::objects::GlibAmbientSoundModeValue;
 

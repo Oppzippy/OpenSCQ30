@@ -4,7 +4,7 @@ use std::{
 };
 
 use gtk::glib::JoinHandle;
-use openscq30_lib::{api::device::DeviceRegistry, state::DeviceState};
+use openscq30_lib::{api::device::DeviceRegistry, devices::standard::state::DeviceState};
 use tokio::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
 
 use crate::swappable_broadcast::SwappableBroadcast;

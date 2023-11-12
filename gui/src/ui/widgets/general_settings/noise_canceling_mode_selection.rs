@@ -27,7 +27,7 @@ mod imp {
         },
         CompositeTemplate, TemplateChild,
     };
-    use openscq30_lib::packets::structures::NoiseCancelingMode;
+    use openscq30_lib::devices::standard::structures::NoiseCancelingMode;
 
     use crate::objects::GlibNoiseCancelingModeValue;
 

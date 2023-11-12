@@ -2,7 +2,7 @@ use gtk::{
     glib::{self, Object},
     subclass::prelude::ObjectSubclassIsExt,
 };
-use openscq30_lib::state::DeviceState;
+use openscq30_lib::devices::standard::state::DeviceState;
 
 glib::wrapper! {
     pub struct DeviceInformation(ObjectSubclass<imp::DeviceInformation>)
@@ -30,7 +30,7 @@ mod imp {
         },
         template_callbacks, CompositeTemplate,
     };
-    use openscq30_lib::state::DeviceState;
+    use openscq30_lib::devices::standard::state::DeviceState;
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/com/oppzippy/OpenSCQ30/ui/widgets/device_information.ui")]

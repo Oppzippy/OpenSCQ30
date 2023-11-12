@@ -4,7 +4,7 @@ use anyhow::Context;
 use gtk::glib::{self, clone, timeout_future, MainContext};
 use openscq30_lib::{
     api::device::{Device, DeviceRegistry},
-    packets::structures::{CustomNoiseCanceling, SoundModes},
+    devices::standard::structures::{CustomNoiseCanceling, SoundModes},
 };
 use tokio::sync::oneshot;
 
@@ -75,9 +75,9 @@ mod tests {
     use std::rc::Rc;
 
     use mockall::predicate;
-    use openscq30_lib::{
-        packets::structures::{CustomNoiseCanceling, SoundModes},
+    use openscq30_lib::devices::standard::{
         state::DeviceState,
+        structures::{CustomNoiseCanceling, SoundModes},
     };
 
     use crate::{

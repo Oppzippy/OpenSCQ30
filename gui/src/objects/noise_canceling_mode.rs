@@ -1,5 +1,5 @@
 use gtk::glib::{self, Object};
-use openscq30_lib::packets::structures::NoiseCancelingMode;
+use openscq30_lib::devices::standard::structures::NoiseCancelingMode;
 
 glib::wrapper! {
     pub struct GlibNoiseCancelingMode(ObjectSubclass<imp::GlibNoiseCancelingMode>);

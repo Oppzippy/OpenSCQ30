@@ -1,5 +1,5 @@
 use gtk::glib::{self, Object};
-use openscq30_lib::packets::structures::ButtonAction;
+use openscq30_lib::devices::standard::structures::ButtonAction;
 
 glib::wrapper! {
     pub struct GlibButtonAction(ObjectSubclass<imp::GlibButtonAction>);

@@ -147,11 +147,13 @@ mod tests {
     use mockall::predicate;
     use openscq30_lib::{
         api::connection::ConnectionStatus,
-        packets::structures::{
-            AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode, PresetEqualizerProfile,
-            SoundModes,
+        devices::standard::{
+            state::DeviceState,
+            structures::{
+                AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode,
+                PresetEqualizerProfile, SoundModes,
+            },
         },
-        state::DeviceState,
     };
     use tokio::sync::watch;
     use uuid::Uuid;

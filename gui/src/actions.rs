@@ -25,12 +25,12 @@ pub use create_quick_preset::*;
 pub use delete_custom_equalizer_profile::*;
 pub use delete_quick_preset::*;
 use macaddr::MacAddr6;
-use openscq30_lib::{
-    packets::structures::{
+use openscq30_lib::devices::standard::{
+    state::DeviceState,
+    structures::{
         AmbientSoundMode, CustomButtonModel, CustomNoiseCanceling, EqualizerConfiguration, HearId,
         NoiseCancelingMode, TransparencyMode,
     },
-    state::DeviceState,
 };
 pub use refresh_custom_equalizer_profiles::*;
 pub use refresh_devices::*;

@@ -33,7 +33,7 @@ mod imp {
         prelude::ObjectExt,
         subclass::prelude::{DerivedObjectProperties, ObjectImpl, ObjectSubclass},
     };
-    use openscq30_lib::packets::structures::VolumeAdjustments;
+    use openscq30_lib::devices::standard::structures::VolumeAdjustments;
 
     #[derive(Properties)]
     #[properties(wrapper_type = super::GlibCustomEqualizerProfile)]

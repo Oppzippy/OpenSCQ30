@@ -1,6 +1,6 @@
 use heck::AsKebabCase;
 use itertools::Itertools;
-use openscq30_lib::{api::device::Device, packets::structures::VolumeAdjustments};
+use openscq30_lib::{api::device::Device, devices::standard::structures::VolumeAdjustments};
 
 use crate::cli::GetCommand;
 

@@ -1,5 +1,5 @@
 use gtk::glib::{self, Object};
-use openscq30_lib::packets::structures::AmbientSoundMode;
+use openscq30_lib::devices::standard::structures::AmbientSoundMode;
 
 glib::wrapper! {
     pub struct GlibAmbientSoundMode(ObjectSubclass<imp::GlibAmbientSoundMode>);

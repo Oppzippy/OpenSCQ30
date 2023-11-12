@@ -1,25 +1,6 @@
-mod a3027;
-mod a3028;
-mod a3033;
-mod a3926;
-mod a3930;
-mod a3931;
-mod a3933;
-mod a3945;
-mod a3951;
-
-pub use a3027::*;
-pub use a3028::*;
-pub use a3033::*;
-pub use a3926::*;
-pub use a3930::*;
-pub use a3931::*;
-pub use a3933::*;
-pub use a3945::*;
-pub use a3951::*;
 use serde::{Deserialize, Serialize};
 
-use crate::packets::structures::FirmwareVersion;
+use crate::devices::standard::structures::FirmwareVersion;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

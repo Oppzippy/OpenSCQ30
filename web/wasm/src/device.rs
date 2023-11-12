@@ -4,8 +4,8 @@ use js_sys::Function;
 use macaddr::MacAddr6;
 use openscq30_lib::{
     demo::device::DemoDevice,
+    devices::standard::structures::{EqualizerConfiguration, SoundModes},
     futures::WasmFutures,
-    packets::structures::{EqualizerConfiguration, SoundModes},
     soundcore_device::device::SoundcoreDevice,
 };
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};

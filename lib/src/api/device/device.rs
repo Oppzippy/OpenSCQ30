@@ -5,8 +5,10 @@ use uuid::Uuid;
 
 use crate::{
     api::connection::ConnectionStatus,
-    packets::structures::{CustomButtonModel, EqualizerConfiguration, HearId, SoundModes},
-    state::DeviceState,
+    devices::standard::{
+        state::DeviceState,
+        structures::{CustomButtonModel, EqualizerConfiguration, HearId, SoundModes},
+    },
 };
 
 #[async_trait(?Send)]

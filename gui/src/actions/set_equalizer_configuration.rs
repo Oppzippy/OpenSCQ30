@@ -3,7 +3,7 @@ use std::time::Duration;
 use gtk::glib::{self, clone, timeout_future, MainContext};
 use openscq30_lib::{
     api::device::{Device, DeviceRegistry},
-    packets::structures::EqualizerConfiguration,
+    devices::standard::structures::EqualizerConfiguration,
 };
 use tokio::sync::oneshot;
 
@@ -66,7 +66,9 @@ mod tests {
 
     use gtk::glib::{clone, timeout_future, MainContext};
     use mockall::predicate;
-    use openscq30_lib::packets::structures::{EqualizerConfiguration, PresetEqualizerProfile};
+    use openscq30_lib::devices::standard::structures::{
+        EqualizerConfiguration, PresetEqualizerProfile,
+    };
 
     use crate::{
         actions::State,

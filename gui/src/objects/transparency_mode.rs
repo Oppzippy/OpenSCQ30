@@ -1,5 +1,5 @@
 use gtk::glib::{self, Object};
-use openscq30_lib::packets::structures::TransparencyMode;
+use openscq30_lib::devices::standard::structures::TransparencyMode;
 
 glib::wrapper! {
     pub struct GlibTransparencyMode(ObjectSubclass<imp::GlibTransparencyMode>);

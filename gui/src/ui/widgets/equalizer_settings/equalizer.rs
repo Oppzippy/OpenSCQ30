@@ -2,7 +2,7 @@ use gtk::{
     glib::{self, Object},
     subclass::prelude::ObjectSubclassIsExt,
 };
-use openscq30_lib::packets::structures::VolumeAdjustments;
+use openscq30_lib::devices::standard::structures::VolumeAdjustments;
 
 glib::wrapper! {
     pub struct Equalizer(ObjectSubclass<imp::Equalizer>)
@@ -38,7 +38,7 @@ mod imp {
         CompositeTemplate, TemplateChild,
     };
     use once_cell::sync::Lazy;
-    use openscq30_lib::packets::structures::VolumeAdjustments;
+    use openscq30_lib::devices::standard::structures::VolumeAdjustments;
 
     use crate::ui::widgets::equalizer_settings::volume_slider::VolumeSlider;
 

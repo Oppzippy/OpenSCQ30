@@ -4,7 +4,7 @@ use std::{
 };
 
 use once_cell::sync::Lazy;
-use openscq30_lib::packets::structures::{
+use openscq30_lib::devices::standard::structures::{
     AmbientSoundMode, CustomNoiseCanceling, NoiseCancelingMode, PresetEqualizerProfile,
     TransparencyMode,
 };

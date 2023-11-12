@@ -5,11 +5,10 @@ pub mod api;
 pub mod demo;
 pub mod device_profiles;
 pub mod device_utils;
+pub mod devices;
 mod error;
 pub mod futures;
-pub mod packets;
 pub mod soundcore_device;
-pub mod state;
 pub mod stub;
 
 pub use error::*;

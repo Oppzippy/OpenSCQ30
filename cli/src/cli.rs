@@ -1,6 +1,6 @@
 use clap::{command, Parser, Subcommand, ValueEnum};
 use macaddr::MacAddr6;
-use openscq30_lib::packets::structures::VolumeAdjustments;
+use openscq30_lib::devices::standard::structures::VolumeAdjustments;
 use tracing::Level;
 
 #[derive(Parser)]
@@ -57,17 +57,17 @@ pub enum AmbientSoundMode {
     NoiseCanceling,
 }
 
-impl From<AmbientSoundMode> for openscq30_lib::packets::structures::AmbientSoundMode {
+impl From<AmbientSoundMode> for openscq30_lib::devices::standard::structures::AmbientSoundMode {
     fn from(mode: AmbientSoundMode) -> Self {
         match mode {
             AmbientSoundMode::Normal => {
-                openscq30_lib::packets::structures::AmbientSoundMode::Normal
+                openscq30_lib::devices::standard::structures::AmbientSoundMode::Normal
             }
             AmbientSoundMode::Transparency => {
-                openscq30_lib::packets::structures::AmbientSoundMode::Transparency
+                openscq30_lib::devices::standard::structures::AmbientSoundMode::Transparency
             }
             AmbientSoundMode::NoiseCanceling => {
-                openscq30_lib::packets::structures::AmbientSoundMode::NoiseCanceling
+                openscq30_lib::devices::standard::structures::AmbientSoundMode::NoiseCanceling
             }
         }
     }
@@ -80,17 +80,17 @@ pub enum NoiseCancelingMode {
     Outdoor,
 }
 
-impl From<NoiseCancelingMode> for openscq30_lib::packets::structures::NoiseCancelingMode {
+impl From<NoiseCancelingMode> for openscq30_lib::devices::standard::structures::NoiseCancelingMode {
     fn from(mode: NoiseCancelingMode) -> Self {
         match mode {
             NoiseCancelingMode::Transport => {
-                openscq30_lib::packets::structures::NoiseCancelingMode::Transport
+                openscq30_lib::devices::standard::structures::NoiseCancelingMode::Transport
             }
             NoiseCancelingMode::Indoor => {
-                openscq30_lib::packets::structures::NoiseCancelingMode::Indoor
+                openscq30_lib::devices::standard::structures::NoiseCancelingMode::Indoor
             }
             NoiseCancelingMode::Outdoor => {
-                openscq30_lib::packets::structures::NoiseCancelingMode::Outdoor
+                openscq30_lib::devices::standard::structures::NoiseCancelingMode::Outdoor
             }
         }
     }

@@ -1,5 +1,5 @@
 use gtk::glib;
-use openscq30_lib::packets::structures::CustomNoiseCanceling;
+use openscq30_lib::devices::standard::structures::CustomNoiseCanceling;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, glib::Boxed, Default)]
 #[boxed_type(name = "OpenSCQ30ValuesCustomNoiseCanceling")]

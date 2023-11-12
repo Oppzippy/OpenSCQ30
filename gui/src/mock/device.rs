@@ -6,8 +6,10 @@ use macaddr::MacAddr6;
 use mockall::mock;
 use openscq30_lib::{
     api::{connection::ConnectionStatus, device::Device},
-    packets::structures::{CustomButtonModel, EqualizerConfiguration, HearId, SoundModes},
-    state::DeviceState,
+    devices::standard::{
+        state::DeviceState,
+        structures::{CustomButtonModel, EqualizerConfiguration, HearId, SoundModes},
+    },
 };
 use tokio::sync::watch;
 use uuid::Uuid;

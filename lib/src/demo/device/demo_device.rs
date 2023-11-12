@@ -10,14 +10,16 @@ use crate::{
     device_profiles::{
         DeviceProfile, NoiseCancelingModeType, SoundModeProfile, TransparencyModeType,
     },
-    futures::Futures,
-    packets::structures::{
-        AgeRange, AmbientSoundMode, BasicHearId, BatteryLevel, ButtonAction, CustomButtonModel,
-        EqualizerConfiguration, FirmwareVersion, Gender, HearId, IsBatteryCharging,
-        NoTwsButtonAction, NoiseCancelingMode, PresetEqualizerProfile, SerialNumber, SingleBattery,
-        SoundModes, TwsButtonAction,
+    devices::standard::{
+        state::DeviceState,
+        structures::{
+            AgeRange, AmbientSoundMode, BasicHearId, BatteryLevel, ButtonAction, CustomButtonModel,
+            EqualizerConfiguration, FirmwareVersion, Gender, HearId, IsBatteryCharging,
+            NoTwsButtonAction, NoiseCancelingMode, PresetEqualizerProfile, SerialNumber,
+            SingleBattery, SoundModes, TwsButtonAction,
+        },
     },
-    state::DeviceState,
+    futures::Futures,
 };
 
 pub struct DemoDevice<FuturesType> {

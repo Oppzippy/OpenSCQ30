@@ -46,7 +46,7 @@ mod imp {
     use once_cell::sync::Lazy;
     use openscq30_lib::{
         device_profiles::{DeviceProfile, NoiseCancelingModeType, TransparencyModeType},
-        packets::structures::{
+        devices::standard::structures::{
             AmbientSoundMode, CustomNoiseCanceling, NoiseCancelingMode, PresetEqualizerProfile,
             TransparencyMode,
         },

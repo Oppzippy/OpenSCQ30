@@ -9,23 +9,24 @@ use uuid::Uuid;
 
 use crate::{
     api::connection::{Connection, ConnectionStatus},
-    futures::{Futures, JoinHandle},
-    packets::{
-        outbound::{
+    devices::standard::{
+        packets::outbound::{
             OutboundPacketBytes, RequestFirmwareVersionPacket, SetCustomButtonModelPacket,
             SetEqualizerAndCustomHearIdPacket, SetEqualizerPacket, SetEqualizerWithDrcPacket,
             SetSoundModePacket,
         },
+        state,
         structures::{
             AmbientSoundMode, CustomButtonModel, CustomHearId, EqualizerConfiguration, HearId,
             HearIdMusicType, HearIdType, SoundModes,
         },
     },
+    futures::{Futures, JoinHandle},
 };
 use crate::{
     api::{self},
-    packets::{inbound::InboundPacket, outbound::RequestStatePacket},
-    state::{self, DeviceState},
+    devices::standard::packets::{inbound::InboundPacket, outbound::RequestStatePacket},
+    devices::standard::state::DeviceState,
 };
 
 pub struct SoundcoreDevice<ConnectionType, FuturesType>
@@ -412,11 +413,11 @@ mod tests {
     use super::SoundcoreDevice;
     use crate::{
         api::device::Device,
-        futures::TokioFutures,
-        packets::structures::{
+        devices::standard::structures::{
             AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
             SoundModes, VolumeAdjustments,
         },
+        futures::TokioFutures,
         stub::connection::StubConnection,
     };
 

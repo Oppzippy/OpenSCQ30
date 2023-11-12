@@ -2,7 +2,7 @@ use gtk::{
     glib::{self, Object, Sender},
     subclass::prelude::ObjectSubclassIsExt,
 };
-use openscq30_lib::packets::structures::EqualizerConfiguration;
+use openscq30_lib::devices::standard::structures::EqualizerConfiguration;
 
 use crate::{actions::Action, objects::GlibCustomEqualizerProfile};
 
@@ -49,7 +49,9 @@ mod imp {
         ClosureExpression, CompositeTemplate, Expression, PropertyExpression,
         SignalListItemFactory, TemplateChild,
     };
-    use openscq30_lib::packets::structures::{EqualizerConfiguration, PresetEqualizerProfile};
+    use openscq30_lib::devices::standard::structures::{
+        EqualizerConfiguration, PresetEqualizerProfile,
+    };
     use strum::IntoEnumIterator;
 
     use crate::{
@@ -524,7 +526,7 @@ mod tests {
         subclass::prelude::*,
         traits::WidgetExt,
     };
-    use openscq30_lib::packets::structures::{
+    use openscq30_lib::devices::standard::structures::{
         EqualizerConfiguration, PresetEqualizerProfile, VolumeAdjustments,
     };
 
