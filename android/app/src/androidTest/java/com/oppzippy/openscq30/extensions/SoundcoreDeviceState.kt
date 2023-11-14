@@ -17,7 +17,7 @@ fun SoundcoreDeviceState.Companion.empty(): SoundcoreDeviceState {
             false,
             false,
             false,
-            null
+            null,
         ),
         serialNumber = null,
         firmwareVersion = null,
