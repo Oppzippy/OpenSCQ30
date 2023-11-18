@@ -22,7 +22,7 @@ impl<FuturesType> DemoDeviceRegistry<FuturesType>
 where
     FuturesType: Futures,
 {
-    const DEVICE_NAME: &str = "Demo Q30";
+    const DEVICE_NAME: &'static str = "Demo Q30";
     const DEVICE_MAC_ADDRESS: MacAddr6 = MacAddr6::nil();
 
     pub fn new() -> Self {
