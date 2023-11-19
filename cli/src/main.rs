@@ -27,12 +27,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let registry = openscq30_lib::api::new_soundcore_device_registry::<TokioFutures>()
         .await
         .unwrap_or_else(|err| panic!("failed to initialize device registry: {err}"));
-    do_cli_command(args, registry).await
-}
 
-// rust-analyzer doesn't seem to work with the associated types of an impl Trait return value
-// as a workaround, we can immediately pass the return value as a parameter to another function
-async fn do_cli_command(args: Cli, registry: impl DeviceRegistry) -> Result<(), Box<dyn Error>> {
     let descriptors = registry.device_descriptors().await?;
     let selected_descriptor = args
         .mac_address
