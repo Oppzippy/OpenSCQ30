@@ -8,7 +8,6 @@ use btleplug::api::{BDAddr, Central, Manager as _, Peripheral as _, ScanFilter};
 use btleplug::platform::{Adapter, Manager, Peripheral};
 use futures::{stream, StreamExt};
 use macaddr::MacAddr6;
-use tokio::runtime::Runtime;
 use tokio::sync::Mutex;
 use weak_table::weak_value_hash_map::Entry;
 use weak_table::WeakValueHashMap;
@@ -17,15 +16,16 @@ use crate::api::connection::{ConnectionRegistry, GenericConnectionDescriptor};
 
 use super::btleplug_connection::BtlePlugConnection;
 use super::mac_address::{IntoBDAddr, IntoMacAddr};
+use super::RuntimeOrHandle;
 
 pub struct BtlePlugConnectionRegistry {
-    runtime: Runtime,
+    runtime: RuntimeOrHandle,
     manager: Manager,
     connections: Mutex<WeakValueHashMap<MacAddr6, Weak<BtlePlugConnection>>>,
 }
 
 impl BtlePlugConnectionRegistry {
-    pub fn new(manager: Manager, runtime: Runtime) -> Self {
+    pub fn new(manager: Manager, runtime: RuntimeOrHandle) -> Self {
         Self {
             runtime,
             manager,

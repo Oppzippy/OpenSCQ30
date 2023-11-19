@@ -17,7 +17,9 @@ use gtk::{
     CssProvider,
 };
 use logging_level::LoggingLevel;
-use openscq30_lib::api::{device::DeviceRegistry, new_soundcore_device_registry};
+use openscq30_lib::api::{
+    device::DeviceRegistry, new_soundcore_device_registry_with_custom_runtime,
+};
 use settings::Settings;
 use tracing::Level;
 use ui::widgets::MainWindow;
@@ -212,7 +214,7 @@ fn build_ui(application: &adw::Application) {
         let application = application.to_owned();
         let main_window = main_window.to_owned();
         MainContext::default().spawn_local(async move {
-            let registry = new_soundcore_device_registry::<GtkFutures>()
+            let registry = new_soundcore_device_registry_with_custom_runtime::<GtkFutures>()
                 .await
                 .expect("failed to initialize device registry");
             // Async initialization done, now set up event handlers and such
