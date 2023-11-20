@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Features
+
+-   Partial support for A3945, A3933, and A3939. Not ready for general use.
+
+### Web
+
+#### Fixes
+
+-   Noise Canceling showing on devices that should not have that option
+
 ## v1.8.1
 
 ### Android
