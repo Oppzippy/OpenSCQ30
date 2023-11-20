@@ -1742,6 +1742,7 @@ checksum = "c08c74e62047bb2de4ff487b251e4a92e24f48745648451635cec7d591162d9f"
 [[package]]
 name = "rifgen"
 version = "0.1.7"
+source = "git+https://github.com/Oppzippy/openscq30-rifgen.git#e8da7ac6b91b37731e7bd15ee651192f758214e9"
 dependencies = [
  "Inflector",
  "derive-new",
@@ -1753,6 +1754,7 @@ dependencies = [
 [[package]]
 name = "rifgen_attr"
 version = "0.1.0"
+source = "git+https://github.com/Oppzippy/openscq30-rifgen.git#e8da7ac6b91b37731e7bd15ee651192f758214e9"
 dependencies = [
  "quote",
  "rifgen_attributes_utils",
@@ -1762,6 +1764,7 @@ dependencies = [
 [[package]]
 name = "rifgen_attributes_utils"
 version = "0.1.0"
+source = "git+https://github.com/Oppzippy/openscq30-rifgen.git#e8da7ac6b91b37731e7bd15ee651192f758214e9"
 dependencies = [
  "itertools 0.10.5",
  "proc-macro2",

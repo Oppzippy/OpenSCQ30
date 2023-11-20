@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 openscq30_lib = { path = "../lib" }
 tracing = { version = "0.1", features = ["log-always"] }
-rifgen = { path = "../rifgen" }
+rifgen = { git = "https://github.com/Oppzippy/openscq30-rifgen.git" }
 jni-sys = "0.3.0"
 log = "0.4"
 tokio = { version = "1", features = ["rt-multi-thread"] }
@@ -19,7 +19,7 @@ itertools = "0.11"
 
 [build-dependencies]
 flapigen = "0.6.0"
-rifgen = { path = "../rifgen" }
+rifgen = { git = "https://github.com/Oppzippy/openscq30-rifgen.git" }
 
 [lib]
 crate-type = ["cdylib"]
