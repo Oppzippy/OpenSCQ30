@@ -224,13 +224,17 @@ impl VolumeAdjustments {
             "we are passing the same number of bands as self has, so it must be a valid number for self to exist",
         )
     }
+
+    pub fn approx_eq(&self, other: &VolumeAdjustments) -> bool {
+        ApproxEq::approx_eq(self, other, Self::MARGIN)
+    }
 }
 
 impl ApproxEq for VolumeAdjustments {
     type Margin = F64Margin;
 
     fn approx_eq<M: Into<Self::Margin>>(self, other: Self, margin: M) -> bool {
-        (&self).approx_eq(&other, margin)
+        ApproxEq::approx_eq(&self, &other, margin)
     }
 }
 

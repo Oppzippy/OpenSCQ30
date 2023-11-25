@@ -50,7 +50,7 @@ mod imp {
         SignalListItemFactory, TemplateChild,
     };
     use openscq30_lib::devices::standard::structures::{
-        EqualizerConfiguration, PresetEqualizerProfile,
+        EqualizerConfiguration, PresetEqualizerProfile, VolumeAdjustments,
     };
     use strum::IntoEnumIterator;
 
@@ -344,7 +344,17 @@ mod imp {
                         .iter::<GlibCustomEqualizerProfile>()
                         .enumerate()
                         .find(|(_i, profile)| {
-                            profile.as_ref().unwrap().volume_adjustments() == volumes.adjustments()
+                            // TODO VolumeAdjustments::from
+                            let profile_volume_adjustments = VolumeAdjustments::new(
+                                profile
+                                    .as_ref()
+                                    .unwrap()
+                                    .volume_adjustments()
+                                    .iter()
+                                    .cloned(),
+                            )
+                            .unwrap();
+                            profile_volume_adjustments.approx_eq(&volumes)
                         })
                         .map(|(i, _profile)| i as u32)
                         .unwrap_or(u32::MAX);
