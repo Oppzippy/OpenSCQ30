@@ -11,7 +11,7 @@ use crate::{
     settings::{Config, SettingsFile},
 };
 
-use super::{State, StateUpdate};
+use super::{set_equalizer_configuration, State, StateUpdate};
 
 pub async fn select_custom_equalizer_configuration<T>(
     state: &State<T>,
@@ -39,22 +39,24 @@ where
     state
         .state_update_sender
         .send(StateUpdate::SetEqualizerConfiguration(
-            equalizer_configuration,
+            equalizer_configuration.to_owned(),
         ))
         .map_err(|err| anyhow::anyhow!("{err}"))?;
+    set_equalizer_configuration(state, equalizer_configuration).await?;
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
 
-    use std::sync::Arc;
+    use std::{rc::Rc, sync::Arc};
 
+    use mockall::predicate;
     use openscq30_lib::devices::standard::structures::{EqualizerConfiguration, VolumeAdjustments};
 
     use crate::{
         actions::{State, StateUpdate},
-        mock::MockDeviceRegistry,
+        mock::{MockDevice, MockDeviceRegistry},
         objects::GlibCustomEqualizerProfile,
         settings::{Config, CustomEqualizerProfile, SettingsFile},
     };
@@ -73,6 +75,9 @@ mod tests {
             &"custom profile".to_string(),
             Arc::new([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]),
         );
+        let lib_custom_profile = EqualizerConfiguration::new_custom_profile(
+            VolumeAdjustments::new(custom_profile.volume_adjustments().iter().cloned()).unwrap(),
+        );
         settings_file
             .edit(|settings| {
                 settings.set_custom_profile(
@@ -82,19 +87,21 @@ mod tests {
             })
             .unwrap();
 
+        let mut selected_device = MockDevice::new();
+        selected_device
+            .expect_set_equalizer_configuration()
+            .once()
+            .with(predicate::eq(lib_custom_profile.to_owned()))
+            .return_once(|_ambient_sound_mode| Ok(()));
+        *state.selected_device.borrow_mut() = Some(Rc::new(selected_device));
+
         select_custom_equalizer_configuration(&state, &settings_file, &custom_profile)
             .await
             .unwrap();
 
         let state_update = receiver.recv().await.unwrap();
         assert_eq!(
-            StateUpdate::SetEqualizerConfiguration(
-                EqualizerConfiguration::new_custom_profile(
-                    VolumeAdjustments::new(custom_profile.volume_adjustments().iter().cloned())
-                        .unwrap()
-                )
-                .into()
-            ),
+            StateUpdate::SetEqualizerConfiguration(lib_custom_profile),
             state_update,
         );
     }

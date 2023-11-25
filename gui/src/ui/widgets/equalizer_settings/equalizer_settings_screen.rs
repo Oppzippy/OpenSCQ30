@@ -280,14 +280,6 @@ mod imp {
                     .map(|item| item.downcast::<GlibCustomEqualizerProfile>().unwrap());
                 if let Some(selected_item) = maybe_selected_item {
                     this.sender.get().unwrap().send(Action::SelectCustomEqualizerProfile(selected_item.clone())).unwrap();
-                    // Only apply settings if something changed from the perspective of the headphones
-                    if !this.is_custom_profile() || this.equalizer.volume_adjustments().adjustments() != selected_item.volume_adjustments() {
-                        this.sender
-                            .get()
-                            .unwrap()
-                            .send(Action::SetEqualizerConfiguration(this.equalizer_configuration()))
-                            .unwrap();
-                    }
                 }
             }),
         );
