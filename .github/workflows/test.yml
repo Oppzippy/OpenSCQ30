@@ -60,6 +60,9 @@ jobs:
   android_test:
     runs-on: ubuntu-latest
     steps:
+      - name: Set ANDROID_NDK_HOME to latest NDK version
+        run: |
+          echo "ANDROID_NDK_HOME=$ANDROID_NDK_LATEST_HOME" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
         with:
           submodules: true
