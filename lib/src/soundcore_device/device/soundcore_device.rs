@@ -268,6 +268,16 @@ where
                 feature_name: "equalizer",
             });
         }
+        if equalizer_configuration
+            .volume_adjustments()
+            .adjustments()
+            .len()
+            != state.device_profile.num_equalizer_bands
+        {
+            return Err(crate::Error::FeatureNotSupported {
+                feature_name: "wrong number of equalizer bands",
+            });
+        }
         if equalizer_configuration == state.equalizer_configuration {
             return Ok(());
         }
