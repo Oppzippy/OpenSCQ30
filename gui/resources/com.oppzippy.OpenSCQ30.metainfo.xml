@@ -33,6 +33,14 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.9.0" date="2023-11-27">
+            <description>
+                <p>Features</p>
+                <ul>
+                    <li>Partial support for A3945, A3933, and A3939. Not ready for general use.</li>
+                </ul> 
+            </description>
+        </release>
         <release version="1.8.1" date="2023-10-31" />
         <release version="1.8.0" date="2023-10-22">
             <description>

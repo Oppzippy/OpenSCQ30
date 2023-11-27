@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.9.0
 
 ### General
 
@@ -8,11 +8,25 @@
 
 -   Partial support for A3945, A3933, and A3939. Not ready for general use.
 
+### CLI
+
+#### Fixes
+
+-   Panic on exit due to nested tokio runtimes
+-   "get equalizer" returned values in the range of 0 to 255 rather than -120 to 135
+-   "set equalizer" accepted values in the range of -12 to 13 rather than -120 to 135
+
 ### Web
 
 #### Fixes
 
 -   Noise Canceling showing on devices that should not have that option
+
+### Android
+
+#### Fixes
+
+-   Custom profiles sometimes not showing as selected despite the equalizer being set correctly
 
 ## v1.8.1
 
