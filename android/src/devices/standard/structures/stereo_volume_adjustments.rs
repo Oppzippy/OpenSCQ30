@@ -3,7 +3,7 @@ use openscq30_lib::devices::standard::structures::StereoVolumeAdjustments as Lib
 use rifgen::rifgen_attr::{generate_interface, generate_interface_doc};
 
 #[generate_interface_doc]
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct StereoVolumeAdjustments(LibStereoVolumeAdjustments);
 
 impl StereoVolumeAdjustments {

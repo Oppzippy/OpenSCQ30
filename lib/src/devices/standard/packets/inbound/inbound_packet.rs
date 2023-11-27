@@ -18,7 +18,7 @@ use super::{
     TwsStatusUpdatePacket,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum InboundPacket {
     StateUpdate(StateUpdatePacket),
     SoundModeUpdate(SoundModeUpdatePacket),

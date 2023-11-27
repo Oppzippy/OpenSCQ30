@@ -2,7 +2,7 @@ use openscq30_lib::devices::standard::structures;
 use rifgen::rifgen_attr::{generate_interface, generate_interface_doc};
 
 #[generate_interface_doc]
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct VolumeAdjustments {
     inner: structures::VolumeAdjustments,
 }

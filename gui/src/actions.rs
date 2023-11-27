@@ -48,7 +48,7 @@ pub use state::*;
 
 use crate::objects::{GlibCustomEqualizerProfile, GlibDevice, GlibNamedQuickPresetValue};
 
-#[derive(Debug, PartialEq, Eq, Clone, Hash)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum StateUpdate {
     SetDevices(Vec<GlibDevice>),
     SetLoading(bool),
@@ -60,7 +60,7 @@ pub enum StateUpdate {
     SetQuickPresets(Vec<GlibNamedQuickPresetValue>),
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Hash)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Action {
     SetAmbientSoundMode(AmbientSoundMode),
     SetNoiseCancelingMode(NoiseCancelingMode),

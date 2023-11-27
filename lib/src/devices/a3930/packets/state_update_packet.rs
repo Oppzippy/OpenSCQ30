@@ -24,7 +24,7 @@ use crate::devices::{
 };
 
 // A3930
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct A3930StateUpdatePacket {
     host_device: u8,
     tws_status: bool,

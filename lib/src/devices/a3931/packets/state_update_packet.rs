@@ -20,7 +20,7 @@ use crate::devices::{
 };
 
 // A3931 and A3935 and A3931XR and A3935W
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct A3931StateUpdatePacket {
     host_device: u8,
     tws_status: bool,

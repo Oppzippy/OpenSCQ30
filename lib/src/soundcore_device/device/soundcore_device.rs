@@ -416,7 +416,6 @@ where
 mod tests {
     use std::{sync::Arc, time::Duration};
 
-    use float_cmp::assert_approx_eq;
     use macaddr::MacAddr6;
     use tokio::sync::mpsc;
 
@@ -471,11 +470,9 @@ mod tests {
             sound_modes.noise_canceling_mode
         );
         assert!(state.equalizer_configuration.preset_profile().is_none());
-        assert_approx_eq!(
-            &VolumeAdjustments,
+        assert_eq!(
             &VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]).unwrap(),
-            &state.equalizer_configuration.volume_adjustments(),
-            VolumeAdjustments::MARGIN
+            state.equalizer_configuration.volume_adjustments(),
         )
     }
 

@@ -354,7 +354,7 @@ mod imp {
                                     .cloned(),
                             )
                             .unwrap();
-                            profile_volume_adjustments.approx_eq(&volumes)
+                            profile_volume_adjustments == volumes
                         })
                         .map(|(i, _profile)| i as u32)
                         .unwrap_or(u32::MAX);

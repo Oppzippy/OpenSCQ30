@@ -23,7 +23,7 @@ use crate::devices::{
 };
 
 // A3028 and A3030
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct A3028StateUpdatePacket {
     pub battery: SingleBattery,
     pub equalizer_configuration: EqualizerConfiguration,
@@ -95,8 +95,6 @@ pub fn take_a3028_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
 
 #[cfg(test)]
 mod tests {
-    use float_cmp::assert_approx_eq;
-
     use crate::devices::standard::{
         packets::inbound::InboundPacket,
         structures::{
@@ -156,11 +154,9 @@ mod tests {
             packet.sound_modes.unwrap().noise_canceling_mode
         );
         assert!(packet.equalizer_configuration.preset_profile().is_none());
-        assert_approx_eq!(
-            &VolumeAdjustments,
+        assert_eq!(
             &VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]).unwrap(),
-            &packet.equalizer_configuration.volume_adjustments(),
-            VolumeAdjustments::MARGIN
+            packet.equalizer_configuration.volume_adjustments(),
         );
     }
 
@@ -186,11 +182,9 @@ mod tests {
             packet.sound_modes.unwrap().noise_canceling_mode
         );
         assert!(packet.equalizer_configuration.preset_profile().is_none());
-        assert_approx_eq!(
-            &VolumeAdjustments,
+        assert_eq!(
             &VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]).unwrap(),
-            &packet.equalizer_configuration.volume_adjustments(),
-            VolumeAdjustments::MARGIN
+            packet.equalizer_configuration.volume_adjustments(),
         );
     }
 
@@ -217,11 +211,9 @@ mod tests {
             packet.sound_modes.unwrap().noise_canceling_mode
         );
         assert!(packet.equalizer_configuration.preset_profile().is_none());
-        assert_approx_eq!(
-            &VolumeAdjustments,
+        assert_eq!(
             &VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]).unwrap(),
-            &packet.equalizer_configuration.volume_adjustments(),
-            VolumeAdjustments::MARGIN
+            packet.equalizer_configuration.volume_adjustments(),
         );
     }
 

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use super::{preset_equalizer_profile::PresetEqualizerProfile, VolumeAdjustments};
 
-#[derive(Clone, Debug, Hash, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EqualizerConfiguration {
     preset_profile: Option<PresetEqualizerProfile>,

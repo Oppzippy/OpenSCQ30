@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use super::VolumeAdjustments;
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StereoVolumeAdjustments {
     pub left: VolumeAdjustments,

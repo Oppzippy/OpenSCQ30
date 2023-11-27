@@ -19,7 +19,7 @@ use crate::devices::{
 };
 
 // A3033 and A3033EU
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct A3033StateUpdatePacket {
     battery: SingleBattery,
     equalizer_configuration: EqualizerConfiguration,

@@ -10,7 +10,7 @@ use crate::{
 };
 
 #[generate_interface_doc]
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct SetEqualizerAndCustomHearIdPacket {
     pub equalizer_configuration: EqualizerConfiguration,
     pub gender: Gender,

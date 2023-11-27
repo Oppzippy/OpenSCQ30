@@ -2,7 +2,7 @@ use crate::devices::standard::structures::EqualizerConfiguration;
 
 use super::outbound_packet::OutboundPacket;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct SetEqualizerWithDrcPacket<'a> {
     left_configuration: &'a EqualizerConfiguration,
     right_configuration: Option<&'a EqualizerConfiguration>,

@@ -26,7 +26,7 @@ use crate::{
     },
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StateUpdatePacket {
     pub device_profile: DeviceProfile,
     pub battery: Battery,

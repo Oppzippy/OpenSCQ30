@@ -4,10 +4,18 @@ use float_cmp::{ApproxEq, F64Margin};
 use ordered_float::OrderedFloat;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialOrd, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct VolumeAdjustments {
     volume_adjustments: Arc<[OrderedFloat<f64>]>,
+}
+
+// It's not true that a == b and b == c implies a == c here, since a could be on the lower end of
+// b's bounds and c could be on the upper end. This means we should not implement Eq, only PartialEq.
+impl PartialEq for VolumeAdjustments {
+    fn eq(&self, other: &Self) -> bool {
+        self.approx_eq(other, Self::MARGIN)
+    }
 }
 
 impl Default for VolumeAdjustments {
@@ -224,10 +232,6 @@ impl VolumeAdjustments {
             "we are passing the same number of bands as self has, so it must be a valid number for self to exist",
         )
     }
-
-    pub fn approx_eq(&self, other: &VolumeAdjustments) -> bool {
-        ApproxEq::approx_eq(self, other, Self::MARGIN)
-    }
 }
 
 impl ApproxEq for VolumeAdjustments {
@@ -359,15 +363,6 @@ mod tests {
         ])
         .unwrap(); // drc
         let actual = volume_adjustments.apply_drc();
-        assert_approx_eq!(
-            &VolumeAdjustments,
-            &expected,
-            &actual,
-            F64Margin {
-                // The expected data only has f32 precision
-                epsilon: f32::EPSILON as f64 * 20.0,
-                ..Default::default()
-            }
-        )
+        assert_eq!(expected, actual)
     }
 }

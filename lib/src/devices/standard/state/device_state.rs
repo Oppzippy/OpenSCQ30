@@ -11,7 +11,7 @@ use crate::{
     },
 };
 
-#[derive(Debug, PartialEq, Eq, Clone, Hash, Default, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DeviceState {
     pub device_profile: DeviceProfile,

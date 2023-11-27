@@ -4,7 +4,7 @@ use crate::devices::standard::structures::{
 
 use super::outbound_packet::OutboundPacket;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct SetEqualizerAndCustomHearIdPacket<'a> {
     pub equalizer_configuration: &'a EqualizerConfiguration,
     pub gender: Gender,

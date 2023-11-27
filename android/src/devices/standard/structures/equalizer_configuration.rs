@@ -4,7 +4,7 @@ use rifgen::rifgen_attr::{generate_interface, generate_interface_doc};
 use super::{PresetEqualizerProfile, VolumeAdjustments};
 
 #[generate_interface_doc]
-#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct EqualizerConfiguration {
     inner: structures::EqualizerConfiguration,
 }

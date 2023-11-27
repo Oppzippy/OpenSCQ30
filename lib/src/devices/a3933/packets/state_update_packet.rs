@@ -29,7 +29,7 @@ use crate::devices::{
 
 // A3933 and A3939
 // Despite EQ being 10 bands, only the first 8 seem to be used?
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct A3933StateUpdatePacket {
     host_device: u8,
     tws_status: bool,

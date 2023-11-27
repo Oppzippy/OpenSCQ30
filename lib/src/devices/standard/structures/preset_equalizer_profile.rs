@@ -97,7 +97,15 @@ mod tests {
     fn profiles_have_unique_volume_adjustments() {
         // to make sure that nothing was mistakenly copy and pasted
         let adjustments = PresetEqualizerProfile::iter()
-            .map(|profile| profile.volume_adjustments())
+            .map(|profile| {
+                profile
+                    .volume_adjustments()
+                    .adjustments()
+                    .iter()
+                    .cloned()
+                    .map(|adjustment| (adjustment * 10.0).round() as i32)
+                    .collect::<Vec<_>>()
+            })
             .collect::<Vec<_>>();
         let deduplicated_adjustments = adjustments.iter().collect::<HashSet<_>>();
         assert_eq!(adjustments.len(), deduplicated_adjustments.len());

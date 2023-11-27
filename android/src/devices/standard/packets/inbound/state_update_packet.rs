@@ -9,7 +9,7 @@ use openscq30_lib::devices::standard::{
 use rifgen::rifgen_attr::{generate_interface, generate_interface_doc};
 
 #[generate_interface_doc]
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StateUpdatePacket(LibStateUpdatePacket);
 
 impl StateUpdatePacket {

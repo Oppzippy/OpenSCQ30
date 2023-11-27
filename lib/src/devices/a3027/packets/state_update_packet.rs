@@ -23,7 +23,7 @@ use crate::devices::{
 };
 
 // A3027 and A3030
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct A3027StateUpdatePacket {
     pub battery: SingleBattery,
     pub equalizer_configuration: EqualizerConfiguration,
