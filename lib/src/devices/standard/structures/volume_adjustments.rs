@@ -38,7 +38,7 @@ impl VolumeAdjustments {
     pub const MIN_VOLUME: f64 = -12.0;
     pub const MAX_VOLUME: f64 = ((u8::MAX - 120) as f64) / 10.0;
     pub const MARGIN: F64Margin = F64Margin {
-        epsilon: f64::EPSILON * 20.0,
+        epsilon: f32::EPSILON as f64 * 20.0,
         ulps: 4,
     };
     pub const VALID_NUMBER_OF_BANDS: Range<usize> = 8..11;
@@ -256,8 +256,6 @@ impl ApproxEq for &VolumeAdjustments {
 
 #[cfg(test)]
 mod tests {
-    use float_cmp::{assert_approx_eq, F64Margin};
-
     use super::VolumeAdjustments;
     const TEST_BYTES: [u8; 8] = [0, 80, 100, 120, 140, 160, 180, 240];
     const TEST_ADJUSTMENTS: [f64; 8] = [-12.0, -4.0, -2.0, 0.0, 2.0, 4.0, 6.0, 12.0];
@@ -341,16 +339,7 @@ mod tests {
         for example in examples {
             let actual = VolumeAdjustments::new(example.0).unwrap().apply_drc();
             let expected = VolumeAdjustments::new(example.1).unwrap();
-            assert_approx_eq!(
-                &VolumeAdjustments,
-                &expected,
-                &actual,
-                F64Margin {
-                    // The expected data only has f32 precision
-                    epsilon: f32::EPSILON as f64 * 20.0,
-                    ..Default::default()
-                }
-            );
+            assert_eq!(expected, actual);
         }
     }
 

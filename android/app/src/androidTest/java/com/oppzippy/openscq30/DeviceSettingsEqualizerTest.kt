@@ -100,7 +100,7 @@ class DeviceSettingsEqualizerTest {
         val sliders = composeRule.onAllNodesWithTag("equalizerSlider")
         val values = listOf(3.0F, 3.0F, -2.0F, -2.0F, 0.0F, 2.0F, 3.0F, 4.0F)
         for (i in 0..7) {
-            sliders[i].assertRangeInfoEquals(ProgressBarRangeInfo(values[i], -12.0F..13.5F, 255))
+            sliders[i].assertRangeInfoEquals(ProgressBarRangeInfo(values[i], -12.0F..13.5F, 254))
         }
     }
 
@@ -123,7 +123,7 @@ class DeviceSettingsEqualizerTest {
                 ProgressBarRangeInfo(
                     values[i].toFloat(),
                     -12.0F..13.5F,
-                    255,
+                    254,
                 ),
             )
         }
@@ -155,7 +155,7 @@ class DeviceSettingsEqualizerTest {
                 ProgressBarRangeInfo(
                     values[i],
                     -12.0F..13.5F,
-                    255,
+                    254,
                 ),
             )
         }

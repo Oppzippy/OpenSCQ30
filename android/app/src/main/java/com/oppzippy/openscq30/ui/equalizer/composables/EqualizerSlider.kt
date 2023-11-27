@@ -58,7 +58,8 @@ fun EqualizerSlider(
                 },
                 valueRange = VolumeAdjustments.minVolume().toFloat()..VolumeAdjustments.maxVolume()
                     .toFloat(),
-                steps = ((VolumeAdjustments.maxVolume() - VolumeAdjustments.minVolume()) / VolumeAdjustments.step()).roundToInt(),
+                // The min/max values are not included in the steps number
+                steps = ((VolumeAdjustments.maxVolume() - VolumeAdjustments.minVolume()) / VolumeAdjustments.step()).roundToInt() - 1,
                 modifier = Modifier.testTag("equalizerSlider"),
             )
         }

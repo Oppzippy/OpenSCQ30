@@ -23,7 +23,6 @@ import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.math.RoundingMode
 import javax.inject.Inject
-import kotlin.jvm.optionals.getOrNull
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
@@ -180,7 +179,7 @@ class EqualizerSettingsViewModel @Inject constructor(
 
     private fun updateSelectedCustomProfile(equalizerConfiguration: EqualizerConfiguration) {
         _selectedCustomProfile.value =
-            if (equalizerConfiguration.presetProfile().getOrNull() == null) {
+            if (!equalizerConfiguration.presetProfile().isPresent) {
                 _customProfiles.value.find {
                     it.getVolumeAdjustments() == equalizerConfiguration.volumeAdjustments()
                 }
