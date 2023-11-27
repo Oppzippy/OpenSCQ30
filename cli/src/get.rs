@@ -26,6 +26,11 @@ pub async fn get(get_command: GetCommand, device: &impl Device) {
 }
 
 fn print_volume_adjustments(volume_adjustments: &VolumeAdjustments) {
-    let separated_volume_adjustments = volume_adjustments.bytes().map(|b| b.to_string()).join(" ");
+    let separated_volume_adjustments = volume_adjustments
+        .adjustments()
+        .iter()
+        .cloned()
+        .map(|adjustment| format!("{:.0}", adjustment * 10.0))
+        .join(" ");
     println!("{separated_volume_adjustments}");
 }
