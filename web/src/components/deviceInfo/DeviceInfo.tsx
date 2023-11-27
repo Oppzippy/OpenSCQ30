@@ -106,7 +106,7 @@ function DeviceProfile({ deviceState }: DeviceStateProps) {
         <Typography>{t("deviceInfo.deviceProfile")}</Typography>
       </TableCell>
       <TableCell>
-        <Typography>
+        <Typography component={"span"}>
           <pre>{JSON.stringify(deviceState.deviceProfile, undefined, 2)}</pre>
         </Typography>
       </TableCell>
