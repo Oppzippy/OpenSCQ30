@@ -22,3 +22,16 @@ fn test_set_noise_canceling_mode() {
         .stdout(predicate::str::is_empty())
         .stderr(predicate::str::is_empty());
 }
+
+#[test]
+fn test_set_equalizer() {
+    let mut cmd = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();
+    cmd.arg("set")
+        .arg("equalizer")
+        .arg("--")
+        .args(&["-120", "-60", "0", "0", "0", "60", "120", "135"]);
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::is_empty())
+        .stderr(predicate::str::is_empty());
+}

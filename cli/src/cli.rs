@@ -37,9 +37,9 @@ pub enum SetCommand {
         #[arg(
             required=true,
             num_args = 8,
-            value_parser = clap::value_parser!(i8).range(VolumeAdjustments::MIN_VOLUME as i64..VolumeAdjustments::MAX_VOLUME as i64),
+            value_parser = clap::value_parser!(i16).range((VolumeAdjustments::MIN_VOLUME * 10.0).round() as i64..(VolumeAdjustments::MAX_VOLUME * 10.0).round() as i64 + 1),
         )]
-        volume_adjustments: Vec<i8>,
+        volume_adjustments: Vec<i16>,
     },
 }
 

@@ -29,7 +29,7 @@ pub async fn set(set_command: SetCommand, device: &impl Device) -> openscq30_lib
             }
         }
         SetCommand::Equalizer { volume_adjustments } => {
-            let adjustment_array: [i8; 8] =
+            let adjustment_array: [i16; 8] =
                 volume_adjustments
                     .try_into()
                     .unwrap_or_else(|values: Vec<_>| {
