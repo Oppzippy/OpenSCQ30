@@ -26,6 +26,14 @@
     <launchable type="desktop-id">com.oppzippy.OpenSCQ30.desktop</launchable>
     <screenshots>
         <screenshot>
+            <image>https://raw.githubusercontent.com/Oppzippy/OpenSCQ30/dceaeaf4556ba7ef2096ab67948384a3deef8a16/screenshots/gui_general.png</image>
+            <caption>General Settings</caption>
+        </screenshot>
+        <screenshot>
+            <image>https://raw.githubusercontent.com/Oppzippy/OpenSCQ30/dceaeaf4556ba7ef2096ab67948384a3deef8a16/screenshots/gui_equalizer.png</image>
+            <caption>Equalizer Settings</caption>
+        </screenshot>
+        <screenshot>
             <video container="webm" codec="vp9" width="902" height="386">https://user-images.githubusercontent.com/2236514/229958756-aaa2a6d3-e908-4195-aad6-b0bcfda139a8.webm</video>
         </screenshot>
     </screenshots>
@@ -38,7 +46,7 @@
                 <p>Features</p>
                 <ul>
                     <li>Partial support for A3945, A3933, and A3939. Not ready for general use.</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="1.8.1" date="2023-10-31" />
