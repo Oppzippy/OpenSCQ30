@@ -12,44 +12,10 @@ use crate::devices::standard::{
 
 use super::soundcore_command::CommandResponse;
 
-pub struct CustomDispatchers {
-    pub set_sound_mode: Option<Box<dyn SetSoundModes>>,
-    pub set_equalizer_configuration: Option<Box<dyn SetEqualizerConfiguration>>,
-    pub set_hear_id: Option<Box<dyn SetHearId>>,
-    pub set_custom_button_model: Option<Box<dyn SetCustomButtonModel>>,
-}
-
-pub trait SetSoundModes {
-    fn set_sound_modes(
-        &self,
-        state: DeviceState,
-        sound_modes: SoundModes,
-    ) -> crate::Result<CommandResponse>;
-}
-
-pub trait SetEqualizerConfiguration {
-    fn set_equalizer_configuration(
-        &self,
-        state: DeviceState,
-        equalizer_configuration: EqualizerConfiguration,
-    ) -> crate::Result<CommandResponse>;
-}
-
-pub trait SetHearId {
-    fn set_hear_id(&self, state: DeviceState, hear_id: HearId) -> crate::Result<CommandResponse>;
-}
-
-pub trait SetCustomButtonModel {
-    fn set_custom_button_model(
-        &self,
-        state: DeviceState,
-        custom_button_model: CustomButtonModel,
-    ) -> crate::Result<CommandResponse>;
-}
-
 pub struct DefaultDispatcher;
+impl DeviceCommandDispatcher for DefaultDispatcher {}
 
-impl SetSoundModes for DefaultDispatcher {
+pub trait DeviceCommandDispatcher {
     fn set_sound_modes(
         &self,
         state: DeviceState,
@@ -120,9 +86,7 @@ impl SetSoundModes for DefaultDispatcher {
             },
         })
     }
-}
 
-impl SetEqualizerConfiguration for DefaultDispatcher {
     fn set_equalizer_configuration(
         &self,
         state: DeviceState,
@@ -160,9 +124,7 @@ impl SetEqualizerConfiguration for DefaultDispatcher {
             },
         })
     }
-}
 
-impl SetHearId for DefaultDispatcher {
     fn set_hear_id(&self, state: DeviceState, hear_id: HearId) -> crate::Result<CommandResponse> {
         fn set_custom_hear_id(
             state: &DeviceState,
@@ -209,9 +171,7 @@ impl SetHearId for DefaultDispatcher {
             },
         })
     }
-}
 
-impl SetCustomButtonModel for DefaultDispatcher {
     fn set_custom_button_model(
         &self,
         state: DeviceState,

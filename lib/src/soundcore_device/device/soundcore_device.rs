@@ -23,11 +23,8 @@ use crate::{
 };
 
 use super::{
+    device_command_dispatcher::{DefaultDispatcher, DeviceCommandDispatcher},
     soundcore_command::CommandResponse,
-    soundcore_dispatcher::{
-        DefaultDispatcher, SetCustomButtonModel, SetEqualizerConfiguration, SetHearId,
-        SetSoundModes,
-    },
 };
 
 pub struct SoundcoreDevice<ConnectionType, FuturesType>
@@ -38,10 +35,7 @@ where
     connection: Arc<ConnectionType>,
     state_sender: Arc<Mutex<watch::Sender<DeviceState>>>,
     join_handle: FuturesType::JoinHandleType,
-    set_sound_modes: Box<dyn SetSoundModes>,
-    set_equalizer_configuration: Box<dyn SetEqualizerConfiguration>,
-    set_hear_id: Box<dyn SetHearId>,
-    set_custom_button_model: Box<dyn SetCustomButtonModel>,
+    dispatcher: Box<dyn DeviceCommandDispatcher>,
 }
 
 impl<ConnectionType, FuturesType> SoundcoreDevice<ConnectionType, FuturesType>
@@ -61,35 +55,11 @@ where
                 .await?;
         }
 
-        struct Dispatchers {
-            set_sound_mode: Box<dyn SetSoundModes>,
-            set_equalizer_configuration: Box<dyn SetEqualizerConfiguration>,
-            set_hear_id: Box<dyn SetHearId>,
-            set_custom_button_model: Box<dyn SetCustomButtonModel>,
-        }
-
-        let dispatchers = match initial_state.device_profile.custom_dispatchers.map(|f| f()) {
-            Some(custom_dispatchers) => Dispatchers {
-                set_sound_mode: custom_dispatchers
-                    .set_sound_mode
-                    .unwrap_or_else(|| Box::new(DefaultDispatcher)),
-                set_equalizer_configuration: custom_dispatchers
-                    .set_equalizer_configuration
-                    .unwrap_or_else(|| Box::new(DefaultDispatcher)),
-                set_hear_id: custom_dispatchers
-                    .set_hear_id
-                    .unwrap_or_else(|| Box::new(DefaultDispatcher)),
-                set_custom_button_model: custom_dispatchers
-                    .set_custom_button_model
-                    .unwrap_or_else(|| Box::new(DefaultDispatcher)),
-            },
-            None => Dispatchers {
-                set_sound_mode: Box::new(DefaultDispatcher),
-                set_equalizer_configuration: Box::new(DefaultDispatcher),
-                set_hear_id: Box::new(DefaultDispatcher),
-                set_custom_button_model: Box::new(DefaultDispatcher),
-            },
-        };
+        let dispatcher = initial_state
+            .device_profile
+            .custom_dispatchers
+            .map(|f| f())
+            .unwrap_or_else(|| Box::new(DefaultDispatcher));
 
         let (state_sender, _) = watch::channel(initial_state);
         let state_sender = Arc::new(Mutex::new(state_sender));
@@ -101,10 +71,7 @@ where
             connection,
             join_handle,
             state_sender,
-            set_sound_modes: dispatchers.set_sound_mode,
-            set_equalizer_configuration: dispatchers.set_equalizer_configuration,
-            set_hear_id: dispatchers.set_hear_id,
-            set_custom_button_model: dispatchers.set_custom_button_model,
+            dispatcher,
         })
     }
 
@@ -228,7 +195,7 @@ where
             return Ok(());
         }
 
-        let response = self.set_sound_modes.set_sound_modes(state, sound_modes)?;
+        let response = self.dispatcher.set_sound_modes(state, sound_modes)?;
         self.handle_response(response, &state_sender).await?;
         Ok(())
     }
@@ -260,7 +227,7 @@ where
         }
 
         let response = self
-            .set_equalizer_configuration
+            .dispatcher
             .set_equalizer_configuration(state, equalizer_configuration)?;
         self.handle_response(response, &state_sender).await?;
         Ok(())
@@ -276,7 +243,7 @@ where
             });
         }
 
-        let response = self.set_hear_id.set_hear_id(state, hear_id)?;
+        let response = self.dispatcher.set_hear_id(state, hear_id)?;
         self.handle_response(response, &state_sender).await?;
         Ok(())
     }
@@ -303,7 +270,7 @@ where
         }
 
         let response = self
-            .set_custom_button_model
+            .dispatcher
             .set_custom_button_model(state, custom_button_model)?;
         self.handle_response(response, &state_sender).await?;
         Ok(())

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     devices::standard::structures::FirmwareVersion,
-    soundcore_device::device::soundcore_dispatcher::CustomDispatchers,
+    soundcore_device::device::device_command_dispatcher::DeviceCommandDispatcher,
 };
 
 // TODO remove deserialize
@@ -21,7 +21,7 @@ pub struct DeviceProfile {
     pub dynamic_range_compression_min_firmware_version: Option<FirmwareVersion>,
 
     #[serde(skip)]
-    pub custom_dispatchers: Option<fn() -> CustomDispatchers>,
+    pub custom_dispatchers: Option<fn() -> Box<dyn DeviceCommandDispatcher>>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Default, Serialize, Deserialize)]
