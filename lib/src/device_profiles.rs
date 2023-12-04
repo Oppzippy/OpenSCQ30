@@ -1,7 +1,11 @@
 use serde::{Deserialize, Serialize};
 
-use crate::devices::standard::structures::FirmwareVersion;
+use crate::{
+    devices::standard::structures::FirmwareVersion,
+    soundcore_device::device::soundcore_dispatcher::CustomDispatchers,
+};
 
+// TODO remove deserialize
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DeviceProfile {
@@ -15,6 +19,9 @@ pub struct DeviceProfile {
     pub has_touch_tone: bool,
     pub has_auto_power_off: bool,
     pub dynamic_range_compression_min_firmware_version: Option<FirmwareVersion>,
+
+    #[serde(skip)]
+    pub custom_dispatchers: Option<fn() -> CustomDispatchers>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Default, Serialize, Deserialize)]

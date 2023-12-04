@@ -10,16 +10,9 @@ use uuid::Uuid;
 use crate::{
     api::connection::{Connection, ConnectionStatus},
     devices::standard::{
-        packets::outbound::{
-            OutboundPacketBytes, RequestFirmwareVersionPacket, SetCustomButtonModelPacket,
-            SetEqualizerAndCustomHearIdPacket, SetEqualizerPacket, SetEqualizerWithDrcPacket,
-            SetSoundModePacket,
-        },
+        packets::outbound::{OutboundPacketBytes, RequestFirmwareVersionPacket},
         state,
-        structures::{
-            AmbientSoundMode, CustomButtonModel, CustomHearId, EqualizerConfiguration, HearId,
-            HearIdMusicType, HearIdType, SoundModes,
-        },
+        structures::{CustomButtonModel, EqualizerConfiguration, HearId, SoundModes},
     },
     futures::{Futures, JoinHandle},
 };
@@ -27,6 +20,14 @@ use crate::{
     api::{self},
     devices::standard::packets::{inbound::InboundPacket, outbound::RequestStatePacket},
     devices::standard::state::DeviceState,
+};
+
+use super::{
+    soundcore_command::CommandResponse,
+    soundcore_dispatcher::{
+        DefaultDispatcher, SetCustomButtonModel, SetEqualizerConfiguration, SetHearId,
+        SetSoundModes,
+    },
 };
 
 pub struct SoundcoreDevice<ConnectionType, FuturesType>
@@ -37,6 +38,10 @@ where
     connection: Arc<ConnectionType>,
     state_sender: Arc<Mutex<watch::Sender<DeviceState>>>,
     join_handle: FuturesType::JoinHandleType,
+    set_sound_modes: Box<dyn SetSoundModes>,
+    set_equalizer_configuration: Box<dyn SetEqualizerConfiguration>,
+    set_hear_id: Box<dyn SetHearId>,
+    set_custom_button_model: Box<dyn SetCustomButtonModel>,
 }
 
 impl<ConnectionType, FuturesType> SoundcoreDevice<ConnectionType, FuturesType>
@@ -56,6 +61,36 @@ where
                 .await?;
         }
 
+        struct Dispatchers {
+            set_sound_mode: Box<dyn SetSoundModes>,
+            set_equalizer_configuration: Box<dyn SetEqualizerConfiguration>,
+            set_hear_id: Box<dyn SetHearId>,
+            set_custom_button_model: Box<dyn SetCustomButtonModel>,
+        }
+
+        let dispatchers = match initial_state.device_profile.custom_dispatchers.map(|f| f()) {
+            Some(custom_dispatchers) => Dispatchers {
+                set_sound_mode: custom_dispatchers
+                    .set_sound_mode
+                    .unwrap_or_else(|| Box::new(DefaultDispatcher)),
+                set_equalizer_configuration: custom_dispatchers
+                    .set_equalizer_configuration
+                    .unwrap_or_else(|| Box::new(DefaultDispatcher)),
+                set_hear_id: custom_dispatchers
+                    .set_hear_id
+                    .unwrap_or_else(|| Box::new(DefaultDispatcher)),
+                set_custom_button_model: custom_dispatchers
+                    .set_custom_button_model
+                    .unwrap_or_else(|| Box::new(DefaultDispatcher)),
+            },
+            None => Dispatchers {
+                set_sound_mode: Box::new(DefaultDispatcher),
+                set_equalizer_configuration: Box::new(DefaultDispatcher),
+                set_hear_id: Box::new(DefaultDispatcher),
+                set_custom_button_model: Box::new(DefaultDispatcher),
+            },
+        };
+
         let (state_sender, _) = watch::channel(initial_state);
         let state_sender = Arc::new(Mutex::new(state_sender));
 
@@ -66,6 +101,10 @@ where
             connection,
             join_handle,
             state_sender,
+            set_sound_modes: dispatchers.set_sound_mode,
+            set_equalizer_configuration: dispatchers.set_equalizer_configuration,
+            set_hear_id: dispatchers.set_hear_id,
+            set_custom_button_model: dispatchers.set_custom_button_model,
         })
     }
 
@@ -123,24 +162,20 @@ where
         Err(crate::Error::NoResponse)
     }
 
-    async fn set_custom_hear_id(
+    async fn handle_response(
         &self,
-        state: &DeviceState,
-        custom_hear_id: &CustomHearId,
+        response: CommandResponse,
+        state_sender: &watch::Sender<DeviceState>,
     ) -> crate::Result<()> {
-        let gender = state
-            .gender
-            .ok_or(crate::Error::MissingData { name: "gender" })?;
-        let age_range = state
-            .age_range
-            .ok_or(crate::Error::MissingData { name: "age range" })?;
-        let packet = SetEqualizerAndCustomHearIdPacket {
-            equalizer_configuration: &state.equalizer_configuration,
-            gender,
-            age_range,
-            custom_hear_id,
-        };
-        self.connection.write_with_response(&packet.bytes()).await?;
+        self.send_packets(response.packets).await?;
+        state_sender.send_replace(response.new_state);
+        Ok(())
+    }
+
+    async fn send_packets(&self, packets: impl IntoIterator<Item = Vec<u8>>) -> crate::Result<()> {
+        for packet in packets {
+            self.connection.write_with_response(&packet).await?;
+        }
         Ok(())
     }
 }
@@ -193,66 +228,8 @@ where
             return Ok(());
         }
 
-        // It will bug and put us in noise canceling mode without changing the ambient sound mode id if we change the
-        // noise canceling mode with the ambient sound mode being normal or transparency. To work around this, we must
-        // set the ambient sound mode to Noise Canceling, and then change it back.
-        let needs_noise_canceling = prev_sound_modes.ambient_sound_mode
-            != AmbientSoundMode::NoiseCanceling
-            && prev_sound_modes.noise_canceling_mode != sound_modes.noise_canceling_mode;
-        if needs_noise_canceling {
-            self.connection
-                .write_with_response(
-                    &SetSoundModePacket {
-                        ambient_sound_mode: AmbientSoundMode::NoiseCanceling,
-                        noise_canceling_mode: prev_sound_modes.noise_canceling_mode,
-                        transparency_mode: prev_sound_modes.transparency_mode,
-                        custom_noise_canceling: prev_sound_modes.custom_noise_canceling,
-                    }
-                    .bytes(),
-                )
-                .await?;
-        }
-
-        // If we need to temporarily be in noise canceling mode to work around the bug, set all fields besides
-        // ambient_sound_mode. Otherwise, we set all fields in one go.
-        self.connection
-            .write_with_response(
-                &SetSoundModePacket {
-                    ambient_sound_mode: if needs_noise_canceling {
-                        AmbientSoundMode::NoiseCanceling
-                    } else {
-                        sound_modes.ambient_sound_mode
-                    },
-                    noise_canceling_mode: sound_modes.noise_canceling_mode,
-                    transparency_mode: sound_modes.transparency_mode,
-                    custom_noise_canceling: sound_modes.custom_noise_canceling,
-                }
-                .bytes(),
-            )
-            .await?;
-
-        // Switch to the target sound mode if we didn't do it in the previous step.
-        // If the target sound mode is noise canceling, we already set it to that, so no change needed.
-        if needs_noise_canceling
-            && sound_modes.ambient_sound_mode != AmbientSoundMode::NoiseCanceling
-        {
-            self.connection
-                .write_with_response(
-                    &SetSoundModePacket {
-                        ambient_sound_mode: sound_modes.ambient_sound_mode,
-                        noise_canceling_mode: sound_modes.noise_canceling_mode,
-                        transparency_mode: sound_modes.transparency_mode,
-                        custom_noise_canceling: sound_modes.custom_noise_canceling,
-                    }
-                    .bytes(),
-                )
-                .await?;
-        }
-
-        state_sender.send_replace(DeviceState {
-            sound_modes: Some(sound_modes),
-            ..state
-        });
+        let response = self.set_sound_modes.set_sound_modes(state, sound_modes)?;
+        self.handle_response(response, &state_sender).await?;
         Ok(())
     }
 
@@ -282,36 +259,10 @@ where
             return Ok(());
         }
 
-        let left_channel = &equalizer_configuration;
-        let right_channel = if state.device_profile.num_equalizer_channels == 2 {
-            Some(&equalizer_configuration)
-        } else {
-            None
-        };
-
-        let packet_bytes = if let Some(HearId::Custom(custom_hear_id)) = &state.hear_id {
-            SetEqualizerAndCustomHearIdPacket {
-                equalizer_configuration: &equalizer_configuration,
-                age_range: state.age_range.ok_or(crate::Error::IncompleteStateError {
-                    message: "age range not set",
-                })?,
-                custom_hear_id,
-                gender: state.gender.ok_or(crate::Error::IncompleteStateError {
-                    message: "gender not set",
-                })?,
-            }
-            .bytes()
-        } else if state.supports_dynamic_range_compression() {
-            SetEqualizerWithDrcPacket::new(left_channel, right_channel).bytes()
-        } else {
-            SetEqualizerPacket::new(left_channel, right_channel).bytes()
-        };
-        self.connection.write_with_response(&packet_bytes).await?;
-
-        state_sender.send_replace(DeviceState {
-            equalizer_configuration,
-            ..state
-        });
+        let response = self
+            .set_equalizer_configuration
+            .set_equalizer_configuration(state, equalizer_configuration)?;
+        self.handle_response(response, &state_sender).await?;
         Ok(())
     }
 
@@ -325,38 +276,8 @@ where
             });
         }
 
-        let prev_hear_id = state
-            .hear_id
-            .as_ref()
-            .ok_or(crate::Error::MissingData { name: "hear id" })?;
-        if &hear_id == prev_hear_id {
-            return Ok(());
-        }
-        match &hear_id {
-            HearId::Basic(hear_id) => {
-                self.set_custom_hear_id(
-                    &state,
-                    &CustomHearId {
-                        is_enabled: hear_id.is_enabled,
-                        volume_adjustments: hear_id.volume_adjustments.to_owned(),
-                        // TODO Should this be the current time? If so, what kind of timestamp?
-                        time: hear_id.time,
-                        hear_id_type: HearIdType::default(),
-                        hear_id_music_type: HearIdMusicType::default(),
-                        custom_volume_adjustments: None,
-                    },
-                )
-                .await?;
-            }
-            HearId::Custom(hear_id) => {
-                self.set_custom_hear_id(&state, hear_id).await?;
-            }
-        }
-
-        state_sender.send_replace(DeviceState {
-            hear_id: Some(hear_id),
-            ..state
-        });
+        let response = self.set_hear_id.set_hear_id(state, hear_id)?;
+        self.handle_response(response, &state_sender).await?;
         Ok(())
     }
 
@@ -381,13 +302,10 @@ where
             return Ok(());
         }
 
-        self.connection
-            .write_with_response(&SetCustomButtonModelPacket::new(custom_button_model).bytes())
-            .await?;
-        state_sender.send_replace(DeviceState {
-            custom_button_model: Some(custom_button_model),
-            ..state
-        });
+        let response = self
+            .set_custom_button_model
+            .set_custom_button_model(state, custom_button_model)?;
+        self.handle_response(response, &state_sender).await?;
         Ok(())
     }
 }

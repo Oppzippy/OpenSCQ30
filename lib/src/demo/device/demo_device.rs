@@ -52,6 +52,7 @@ where
                 has_wear_detection: true,
                 has_touch_tone: true,
                 has_auto_power_off: true,
+                custom_dispatchers: None,
             },
             battery: SingleBattery {
                 is_charging: IsBatteryCharging::No,

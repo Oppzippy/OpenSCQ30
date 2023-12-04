@@ -19,4 +19,5 @@ pub const A3931_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     has_wear_detection: false,
     has_touch_tone: true,
     has_auto_power_off: true,
+    custom_dispatchers: None,
 };

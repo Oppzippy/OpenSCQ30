@@ -36,6 +36,7 @@ impl DeviceProfile {
             has_auto_power_off,
             dynamic_range_compression_min_firmware_version:
                 dynamic_range_compression_min_firmware_version.map(Into::into),
+            custom_dispatchers: None,
         })
     }
 
