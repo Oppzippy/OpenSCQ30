@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::devices::standard::{
     packets::outbound::{
         OutboundPacketBytes, SetCustomButtonModelPacket, SetEqualizerAndCustomHearIdPacket,
@@ -16,6 +18,12 @@ pub struct DefaultDispatcher;
 impl DeviceCommandDispatcher for DefaultDispatcher {}
 
 pub trait DeviceCommandDispatcher {
+    fn packet_handlers(
+        &self,
+    ) -> HashMap<[u8; 7], Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>> {
+        HashMap::new()
+    }
+
     fn set_sound_modes(
         &self,
         state: DeviceState,

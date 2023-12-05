@@ -59,7 +59,7 @@ pub fn take_a3027_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
     input: &'a [u8],
 ) -> ParseResult<A3027StateUpdatePacket, E> {
     context(
-        "StateUpdatePacket",
+        "a3027 state update packet",
         all_consuming(map(
             tuple((
                 take_single_battery,

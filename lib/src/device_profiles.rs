@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -21,7 +23,7 @@ pub struct DeviceProfile {
     pub dynamic_range_compression_min_firmware_version: Option<FirmwareVersion>,
 
     #[serde(skip)]
-    pub custom_dispatchers: Option<fn() -> Box<dyn DeviceCommandDispatcher>>,
+    pub custom_dispatchers: Option<fn() -> Arc<dyn DeviceCommandDispatcher + Send + Sync>>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Default, Serialize, Deserialize)]

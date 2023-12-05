@@ -29,8 +29,11 @@ pub fn take_battery_charging_update_packet<'a, E: ParseError<&'a [u8]> + Context
 
 #[cfg(test)]
 mod tests {
+    use nom::error::VerboseError;
+
     use crate::devices::standard::{
-        packets::inbound::InboundPacket, structures::IsBatteryCharging,
+        packets::inbound::{take_battery_charging_update_packet, take_inbound_packet_body},
+        structures::IsBatteryCharging,
     };
 
     #[test]
@@ -38,10 +41,10 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04, 0x0c, 0x00, 0x01, 0x00, 0x1b,
         ];
-        let InboundPacket::BatteryChargingUpdate(packet) = InboundPacket::new(input).unwrap()
-        else {
-            panic!("wrong packet type");
-        };
+        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let packet = take_battery_charging_update_packet::<VerboseError<_>>(body)
+            .unwrap()
+            .1;
 
         assert_eq!(IsBatteryCharging::Yes, packet.left);
         assert_eq!(Some(IsBatteryCharging::No), packet.right);
@@ -52,10 +55,10 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04, 0x0b, 0x00, 0x01, 0x1a,
         ];
-        let InboundPacket::BatteryChargingUpdate(packet) = InboundPacket::new(input).unwrap()
-        else {
-            panic!("wrong packet type");
-        };
+        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let packet = take_battery_charging_update_packet::<VerboseError<_>>(body)
+            .unwrap()
+            .1;
 
         assert_eq!(IsBatteryCharging::Yes, packet.left);
         assert_eq!(None, packet.right);

@@ -65,7 +65,7 @@ pub fn take_a3951_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
     input: &'a [u8],
 ) -> ParseResult<A3951StateUpdatePacket, E> {
     context(
-        "StateUpdatePacket",
+        "a3951 state update packet",
         all_consuming(|input| {
             // required fields
             let (

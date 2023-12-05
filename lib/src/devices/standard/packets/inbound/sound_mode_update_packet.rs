@@ -37,8 +37,10 @@ pub fn take_ambient_sound_mode_update_packet<
 
 #[cfg(test)]
 mod tests {
+    use nom::error::VerboseError;
+
     use crate::devices::standard::{
-        packets::inbound::InboundPacket,
+        packets::inbound::{take_ambient_sound_mode_update_packet, take_inbound_packet_body},
         structures::{AmbientSoundMode, NoiseCancelingMode},
     };
 
@@ -47,9 +49,10 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x02, 0x02, 0x01, 0x00, 0x23,
         ];
-        let InboundPacket::SoundModeUpdate(packet) = InboundPacket::new(input).unwrap() else {
-            panic!("wrong packet type");
-        };
+        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let packet = take_ambient_sound_mode_update_packet::<VerboseError<_>>(body)
+            .unwrap()
+            .1;
         assert_eq!(AmbientSoundMode::Normal, packet.ambient_sound_mode);
         assert_eq!(NoiseCancelingMode::Indoor, packet.noise_canceling_mode);
     }
@@ -58,9 +61,10 @@ mod tests {
     fn it_does_not_parse_invalid_ambient_sound_mode() {
         let input: &[u8] = &[
             //                                                    max value of 0x02
-            0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x03, 0x02, 0x01, 0x00, 0x23,
+            0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x03, 0x02, 0x01, 0x00, 0x24,
         ];
-        let result = InboundPacket::new(input);
+        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let result = take_ambient_sound_mode_update_packet::<VerboseError<_>>(body);
         assert_eq!(true, result.is_err());
     }
 
@@ -68,9 +72,10 @@ mod tests {
     fn it_does_not_parse_invalid_noise_canceling_mode() {
         let input: &[u8] = &[
             //                                                          max value of 0x03
-            0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x02, 0x04, 0x01, 0x00, 0x23,
+            0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x02, 0x04, 0x01, 0x00, 0x25,
         ];
-        let result = InboundPacket::new(input);
+        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let result = take_ambient_sound_mode_update_packet::<VerboseError<_>>(body);
         assert_eq!(true, result.is_err());
     }
 }

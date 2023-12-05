@@ -1,8 +1,9 @@
-use std::{mem, sync::Arc, time::Duration};
+use std::{collections::HashMap, mem, sync::Arc, time::Duration};
 
 use async_trait::async_trait;
 use futures::FutureExt;
 use macaddr::MacAddr6;
+use nom::error::VerboseError;
 use tokio::sync::{mpsc, watch, Mutex};
 use tracing::{trace, warn};
 use uuid::Uuid;
@@ -10,20 +11,23 @@ use uuid::Uuid;
 use crate::{
     api::connection::{Connection, ConnectionStatus},
     devices::standard::{
-        packets::outbound::{OutboundPacketBytes, RequestFirmwareVersionPacket},
-        state,
-        structures::{CustomButtonModel, EqualizerConfiguration, HearId, SoundModes},
+        packets::{
+            inbound::{state_update_packet::take_state_update_packet, take_inbound_packet_body},
+            outbound::{OutboundPacketBytes, RequestFirmwareVersionPacket},
+        },
+        structures::{CustomButtonModel, EqualizerConfiguration, HearId, SoundModes, STATE_UPDATE},
     },
     futures::{Futures, JoinHandle},
 };
 use crate::{
     api::{self},
-    devices::standard::packets::{inbound::InboundPacket, outbound::RequestStatePacket},
+    devices::standard::packets::outbound::RequestStatePacket,
     devices::standard::state::DeviceState,
 };
 
 use super::{
     device_command_dispatcher::{DefaultDispatcher, DeviceCommandDispatcher},
+    packet_handlers::default_packet_handlers,
     soundcore_command::CommandResponse,
 };
 
@@ -35,7 +39,7 @@ where
     connection: Arc<ConnectionType>,
     state_sender: Arc<Mutex<watch::Sender<DeviceState>>>,
     join_handle: FuturesType::JoinHandleType,
-    dispatcher: Box<dyn DeviceCommandDispatcher>,
+    dispatcher: Arc<dyn DeviceCommandDispatcher>,
 }
 
 impl<ConnectionType, FuturesType> SoundcoreDevice<ConnectionType, FuturesType>
@@ -45,7 +49,8 @@ where
 {
     pub async fn new(connection: Arc<ConnectionType>) -> crate::Result<Self> {
         let mut inbound_receiver = connection.inbound_packets_channel().await?;
-        let initial_state = Self::fetch_initial_state(&connection, &mut inbound_receiver).await?;
+        let (initial_state, initial_state_packet) =
+            Self::fetch_initial_state(&connection, &mut inbound_receiver).await?;
 
         // TODO consider making this a part of fetch_initial_state
         // For devices that don't include the firmware version in their state update packet, we need to request it
@@ -59,13 +64,25 @@ where
             .device_profile
             .custom_dispatchers
             .map(|f| f())
-            .unwrap_or_else(|| Box::new(DefaultDispatcher));
+            .unwrap_or_else(|| Arc::new(DefaultDispatcher));
+
+        let mut packet_handlers = default_packet_handlers();
+        packet_handlers.extend(dispatcher.packet_handlers());
+        let initial_state = packet_handlers
+            .get(&STATE_UPDATE)
+            .expect("there should be a default handler for state update")(
+            &initial_state_packet,
+            initial_state,
+        );
 
         let (state_sender, _) = watch::channel(initial_state);
         let state_sender = Arc::new(Mutex::new(state_sender));
 
-        let join_handle =
-            Self::spawn_inbound_packet_handler(inbound_receiver, state_sender.to_owned());
+        let join_handle = Self::spawn_inbound_packet_handler(
+            packet_handlers,
+            inbound_receiver,
+            state_sender.to_owned(),
+        );
 
         Ok(Self {
             connection,
@@ -76,23 +93,32 @@ where
     }
 
     fn spawn_inbound_packet_handler(
+        packet_handlers: HashMap<
+            [u8; 7],
+            Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>,
+        >,
         mut inbound_receiver: mpsc::Receiver<Vec<u8>>,
         state_sender_lock: Arc<Mutex<watch::Sender<DeviceState>>>,
     ) -> FuturesType::JoinHandleType {
         FuturesType::spawn(async move {
             while let Some(packet_bytes) = inbound_receiver.recv().await {
-                match InboundPacket::new(&packet_bytes) {
-                    Ok(packet) => {
-                        let state_sender = state_sender_lock.lock().await;
-                        let state = state_sender.borrow();
-                        let new_state = state::transform_state(packet, &state);
-                        if new_state != *state {
-                            trace!(event = "state_update", old_state = ?state, new_state = ?new_state);
-                            mem::drop(state);
-                            state_sender.send_replace(new_state);
+                match take_inbound_packet_body(&packet_bytes) {
+                    Ok((packet_type, body)) => match packet_handlers.get(&packet_type) {
+                        Some(handler) => {
+                            let state_sender = state_sender_lock.lock().await;
+                            let state = state_sender.borrow();
+                            let new_state = handler(&body, state.to_owned());
+                            if new_state != *state {
+                                trace!(event = "state_update", old_state = ?state, new_state = ?new_state);
+                                mem::drop(state);
+                                state_sender.send_replace(new_state);
+                            }
                         }
-                    }
-                    Err(err) => warn!("failed to parse packet: {err:?}"),
+                        None => {
+                            warn!("no packet handler found: packet type: {packet_type:?}, body: {body:?}")
+                        }
+                    },
+                    Err(err) => warn!("failed to parse packet header: {err:?}"),
                 }
             }
         })
@@ -101,7 +127,7 @@ where
     async fn fetch_initial_state(
         connection: &ConnectionType,
         inbound_receiver: &mut mpsc::Receiver<Vec<u8>>,
-    ) -> crate::Result<DeviceState> {
+    ) -> crate::Result<(DeviceState, Vec<u8>)> {
         for i in 0..3 {
             connection
                 .write_without_response(&RequestStatePacket::new().bytes())
@@ -109,19 +135,22 @@ where
 
             let state_future = async {
                 while let Some(packet_bytes) = inbound_receiver.recv().await {
-                    match InboundPacket::new(&packet_bytes) {
-                        Ok(InboundPacket::StateUpdate(packet)) => {
-                            return Some(packet.into());
+                    match take_inbound_packet_body(&packet_bytes) {
+                        Ok((STATE_UPDATE, body)) => {
+                            match take_state_update_packet::<VerboseError<_>>(body) {
+                                Ok((_, packet)) => return Some((packet, body.to_vec())),
+                                Err(err) => warn!("failed to parse packet: {err:?}"),
+                            }
                         }
-                        Err(err) => warn!("failed to parse packet: {err:?}"),
-                        _ => (), // Known packet, but not the one we're looking for
-                    };
+                        Ok((packet_type, body)) => warn!("got wrong packet type, wanted state update: {packet_type:?}, body: {body:?}"),
+                        Err(err) => warn!("error parsing packet: {err:?}"),
+                    }
                 }
                 None
             };
 
             futures::select! {
-                state = state_future.fuse() => if let Some(state) = state { return Ok(state) },
+                state = state_future.fuse() => if let Some((packet, bytes)) = state { return Ok((packet.into(), bytes)) },
                 _ = FuturesType::sleep(Duration::from_secs(1)).fuse() =>
                     warn!("fetch_initial_state: didn't receive response after 1 second on try #{i}"),
             }

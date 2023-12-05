@@ -16,14 +16,16 @@ pub fn take_set_equalizer_with_drc_ok_packet<
 
 #[cfg(test)]
 mod tests {
-    use crate::devices::standard::packets::inbound::InboundPacket;
+    use nom::error::VerboseError;
+
+    use crate::devices::standard::packets::inbound::take_inbound_packet_body;
+
+    use super::take_set_equalizer_with_drc_ok_packet;
 
     #[test]
     fn it_parses_an_example_ok_packet() {
         let input: &[u8] = &[0x09, 0xff, 0x00, 0x00, 0x01, 0x02, 0x83, 0x0a, 0x00, 0x98];
-        let InboundPacket::SetEqualizerWithDrcOk(_packet) = InboundPacket::new(input).unwrap()
-        else {
-            panic!("wrong packet type");
-        };
+        let (_, body) = take_inbound_packet_body(input).unwrap();
+        take_set_equalizer_with_drc_ok_packet::<VerboseError<_>>(body).expect("should not error");
     }
 }

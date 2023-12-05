@@ -30,16 +30,21 @@ pub fn take_tws_status_update_packet<'a, E: ParseError<&'a [u8]> + ContextError<
 
 #[cfg(test)]
 mod tests {
-    use crate::devices::standard::packets::inbound::InboundPacket;
+    use nom::error::VerboseError;
+
+    use crate::devices::standard::packets::inbound::{
+        take_inbound_packet_body, take_tws_status_update_packet,
+    };
 
     #[test]
     fn it_parses_a_manually_crafted_packet() {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x02, 0x0c, 0x00, 0x02, 0x01, 0x1b,
         ];
-        let InboundPacket::TwsStatusUpdate(packet) = InboundPacket::new(input).unwrap() else {
-            panic!("wrong packet type");
-        };
+        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let packet = take_tws_status_update_packet::<VerboseError<_>>(body)
+            .unwrap()
+            .1;
         assert_eq!(2, packet.host_device);
         assert_eq!(true, packet.tws_status);
     }

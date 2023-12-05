@@ -1,5 +1,6 @@
 pub(crate) mod device_command_dispatcher;
-mod soundcore_command;
+pub mod packet_handlers;
+pub(crate) mod soundcore_command;
 mod soundcore_device;
 mod soundcore_device_registry;
 

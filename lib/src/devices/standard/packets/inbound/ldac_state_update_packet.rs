@@ -23,16 +23,21 @@ pub fn take_ldac_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError<
 
 #[cfg(test)]
 mod tests {
-    use crate::devices::standard::packets::inbound::InboundPacket;
+    use nom::error::VerboseError;
+
+    use crate::devices::standard::packets::inbound::{
+        take_inbound_packet_body, take_ldac_state_update_packet,
+    };
 
     #[test]
     fn it_parses_a_manually_crafted_packet() {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x7F, 0x0c, 0x00, 0x01, 0x96,
         ];
-        let InboundPacket::LdacStateUpdate(packet) = InboundPacket::new(input).unwrap() else {
-            panic!("wrong packet type");
-        };
+        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let packet = take_ldac_state_update_packet::<VerboseError<_>>(body)
+            .unwrap()
+            .1;
         assert_eq!(true, packet.is_enabled);
     }
 }

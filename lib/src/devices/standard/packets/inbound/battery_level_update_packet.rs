@@ -35,16 +35,22 @@ pub fn take_battery_level_update_packet<'a, E: ParseError<&'a [u8]> + ContextErr
 
 #[cfg(test)]
 mod tests {
-    use crate::devices::standard::{packets::inbound::InboundPacket, structures::BatteryLevel};
+    use nom::error::VerboseError;
+
+    use crate::devices::standard::{
+        packets::inbound::{take_battery_level_update_packet, take_inbound_packet_body},
+        structures::BatteryLevel,
+    };
 
     #[test]
     fn it_parses_a_manually_crafted_packet_without_new_battery() {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x03, 0x0c, 0x00, 0x03, 0x04, 0x20,
         ];
-        let InboundPacket::BatteryLevelUpdate(packet) = InboundPacket::new(input).unwrap() else {
-            panic!("wrong packet type");
-        };
+        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let packet = take_battery_level_update_packet::<VerboseError<_>>(body)
+            .unwrap()
+            .1;
         assert_eq!(BatteryLevel(3), packet.left);
         assert_eq!(Some(BatteryLevel(4)), packet.right);
     }
@@ -54,9 +60,10 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x03, 0x0e, 0x00, 0x04, 0x05, 0x01, 0x02, 0x27,
         ];
-        let InboundPacket::BatteryLevelUpdate(packet) = InboundPacket::new(input).unwrap() else {
-            panic!("wrong packet type");
-        };
+        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let packet = take_battery_level_update_packet::<VerboseError<_>>(body)
+            .unwrap()
+            .1;
         assert_eq!(BatteryLevel(4), packet.left);
         assert_eq!(Some(BatteryLevel(5)), packet.right);
     }
@@ -66,9 +73,10 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x03, 0x0b, 0x00, 0x02, 0x1a,
         ];
-        let InboundPacket::BatteryLevelUpdate(packet) = InboundPacket::new(input).unwrap() else {
-            panic!("wrong packet type");
-        };
+        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let packet = take_battery_level_update_packet::<VerboseError<_>>(body)
+            .unwrap()
+            .1;
         assert_eq!(BatteryLevel(2), packet.left);
         assert_eq!(None, packet.right);
     }

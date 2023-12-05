@@ -9,6 +9,7 @@ pub struct SetEqualizerPacket<'a> {
 }
 
 impl<'a> SetEqualizerPacket<'a> {
+    pub const COMMAND: [u8; 7] = [0x08, 0xEE, 0x00, 0x00, 0x00, 0x02, 0x81];
     pub fn new(
         left_configuration: &'a EqualizerConfiguration,
         right_configuration: Option<&'a EqualizerConfiguration>,
@@ -22,7 +23,7 @@ impl<'a> SetEqualizerPacket<'a> {
 
 impl<'a> OutboundPacket for SetEqualizerPacket<'a> {
     fn command(&self) -> [u8; 7] {
-        [0x08, 0xEE, 0x00, 0x00, 0x00, 0x02, 0x81]
+        Self::COMMAND
     }
 
     fn body(&self) -> Vec<u8> {

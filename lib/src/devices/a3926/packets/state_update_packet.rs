@@ -55,7 +55,7 @@ pub fn take_a3926_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
     input: &'a [u8],
 ) -> ParseResult<A3926StateUpdatePacket, E> {
     context(
-        "StateUpdatePacket",
+        "a3926 state update packet",
         all_consuming(map(
             tuple((
                 le_u8,

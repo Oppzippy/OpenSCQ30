@@ -56,7 +56,7 @@ pub fn take_a3028_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
     input: &'a [u8],
 ) -> ParseResult<A3028StateUpdatePacket, E> {
     context(
-        "StateUpdatePacket",
+        "a3028 state update packet",
         all_consuming(map(
             tuple((
                 take_single_battery,
@@ -95,8 +95,12 @@ pub fn take_a3028_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
 
 #[cfg(test)]
 mod tests {
+    use nom::error::VerboseError;
+
     use crate::devices::standard::{
-        packets::inbound::InboundPacket,
+        packets::inbound::{
+            state_update_packet::take_state_update_packet, take_inbound_packet_body,
+        },
         structures::{
             AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
             PresetEqualizerProfile, SoundModes, VolumeAdjustments,
@@ -113,9 +117,8 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x35,
         ];
-        let InboundPacket::StateUpdate(packet) = InboundPacket::new(input).unwrap() else {
-            panic!("wrong packet type");
-        };
+        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let packet = take_state_update_packet::<VerboseError<_>>(body).unwrap().1;
         assert_eq!(
             Some(SoundModes {
                 ambient_sound_mode: AmbientSoundMode::Normal,
@@ -142,9 +145,8 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x84,
         ];
-        let InboundPacket::StateUpdate(packet) = InboundPacket::new(input).unwrap() else {
-            panic!("wrong packet type");
-        };
+        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let packet = take_state_update_packet::<VerboseError<_>>(body).unwrap().1;
         assert_eq!(
             AmbientSoundMode::Normal,
             packet.sound_modes.unwrap().ambient_sound_mode
@@ -170,9 +172,8 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x30,
         ];
-        let InboundPacket::StateUpdate(packet) = InboundPacket::new(input).unwrap() else {
-            panic!("wrong packet type");
-        };
+        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let packet = take_state_update_packet::<VerboseError<_>>(body).unwrap().1;
         assert_eq!(
             AmbientSoundMode::Normal,
             packet.sound_modes.unwrap().ambient_sound_mode
@@ -199,9 +200,8 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x2f,
         ];
-        let InboundPacket::StateUpdate(packet) = InboundPacket::new(input).unwrap() else {
-            panic!("wrong packet type");
-        };
+        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let packet = take_state_update_packet::<VerboseError<_>>(body).unwrap().1;
         assert_eq!(
             AmbientSoundMode::Normal,
             packet.sound_modes.unwrap().ambient_sound_mode
@@ -227,7 +227,8 @@ mod tests {
             0x00, 0x00, 0x03, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x31,
         ];
-        let result = InboundPacket::new(input);
+        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let result = take_state_update_packet::<VerboseError<_>>(body);
         assert_eq!(true, result.is_err());
     }
 
@@ -241,7 +242,8 @@ mod tests {
             0x00, 0x00, 0x01, 0x04, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x33,
         ];
-        let result = InboundPacket::new(input);
+        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let result = take_state_update_packet::<VerboseError<_>>(body);
         assert_eq!(true, result.is_err());
     }
 
@@ -257,7 +259,8 @@ mod tests {
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x00,
             0x00, 0x00, 0x38,
         ];
-        let result = InboundPacket::new(input);
+        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let result = take_state_update_packet::<VerboseError<_>>(body);
         assert!(result.is_err())
     }
 }

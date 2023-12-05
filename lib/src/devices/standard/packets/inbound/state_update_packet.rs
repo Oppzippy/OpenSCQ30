@@ -1,7 +1,7 @@
 use nom::{
     branch::alt,
     combinator::map,
-    error::{context, ContextError, ParseError},
+    error::{ContextError, ParseError},
 };
 
 use crate::{
@@ -43,17 +43,15 @@ pub struct StateUpdatePacket {
 pub fn take_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
     input: &'a [u8],
 ) -> ParseResult<StateUpdatePacket, E> {
-    context("state update packet", |input| {
-        alt((
-            map(take_a3027_state_update_packet, StateUpdatePacket::from),
-            map(take_a3028_state_update_packet, StateUpdatePacket::from),
-            map(take_a3033_state_update_packet, StateUpdatePacket::from),
-            map(take_a3926_state_update_packet, StateUpdatePacket::from),
-            map(take_a3930_state_update_packet, StateUpdatePacket::from),
-            map(take_a3931_state_update_packet, StateUpdatePacket::from),
-            map(take_a3951_state_update_packet, StateUpdatePacket::from),
-            map(take_a3933_state_update_packet, StateUpdatePacket::from),
-            map(take_a3945_state_update_packet, StateUpdatePacket::from),
-        ))(input)
-    })(input)
+    alt((
+        map(take_a3027_state_update_packet, StateUpdatePacket::from),
+        map(take_a3028_state_update_packet, StateUpdatePacket::from),
+        map(take_a3033_state_update_packet, StateUpdatePacket::from),
+        map(take_a3926_state_update_packet, StateUpdatePacket::from),
+        map(take_a3930_state_update_packet, StateUpdatePacket::from),
+        map(take_a3931_state_update_packet, StateUpdatePacket::from),
+        map(take_a3951_state_update_packet, StateUpdatePacket::from),
+        map(take_a3933_state_update_packet, StateUpdatePacket::from),
+        map(take_a3945_state_update_packet, StateUpdatePacket::from),
+    ))(input)
 }

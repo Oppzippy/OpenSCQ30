@@ -1,0 +1,38 @@
+use nom::{combinator::all_consuming, error::VerboseError};
+
+use crate::devices::standard::{
+    packets::inbound::state_update_packet::take_state_update_packet, state::DeviceState,
+};
+
+pub fn state_update_handler(input: &[u8], state: DeviceState) -> DeviceState {
+    let result: Result<_, nom::Err<VerboseError<_>>> =
+        all_consuming(take_state_update_packet)(&input);
+    let packet = match result {
+        Ok((_, packet)) => packet,
+        Err(err) => {
+            tracing::error!("failed to parse packet: {err:?}");
+            return state;
+        }
+    };
+
+    DeviceState {
+        device_profile: state.device_profile,
+        battery: state.battery,
+        equalizer_configuration: state.equalizer_configuration.to_owned(),
+        age_range: packet.age_range.or(state.age_range),
+        gender: packet.gender.or(state.gender),
+        custom_button_model: packet.custom_button_model.or(state.custom_button_model),
+        hear_id: packet.hear_id.to_owned().or(state.hear_id.to_owned()),
+        firmware_version: packet
+            .firmware_version
+            .as_ref()
+            .or(state.firmware_version.as_ref())
+            .cloned(),
+        serial_number: packet
+            .serial_number
+            .as_ref()
+            .or(state.serial_number.as_ref())
+            .cloned(),
+        sound_modes: packet.sound_modes.or(state.sound_modes),
+    }
+}
