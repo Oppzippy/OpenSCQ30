@@ -1,8 +1,8 @@
-mod battery_charging_update;
-mod battery_level_update;
-mod firmware_version_update;
-mod sound_mode_update;
-mod state_update;
+pub(crate) mod battery_charging_update;
+pub(crate) mod battery_level_update;
+pub(crate) mod firmware_version_update;
+pub(crate) mod sound_mode_update;
+pub(crate) mod state_update;
 
 use std::collections::HashMap;
 
