@@ -1,6 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
 import com.android.build.gradle.internal.tasks.factory.dependsOn
+import com.google.protobuf.gradle.id
 import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import java.util.Properties
@@ -12,6 +13,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     id("org.jlleitschuh.gradle.ktlint")
+    id("com.google.protobuf")
 }
 
 val keystorePropertiesFile: File = rootProject.file("keystore.properties")
@@ -50,6 +52,7 @@ android {
 
     sourceSets {
         getByName("main") {
+            java.srcDir("${layout.buildDirectory.get()}/generated/source/uniffi/java")
             jniLibs.srcDir("src/main/libs")
         }
         getByName("androidTest") {
@@ -104,7 +107,7 @@ android {
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.4"
+        kotlinCompilerExtensionVersion = "1.5.6"
     }
     ksp {
         arg("room.schemaLocation", "$projectDir/schemas")
@@ -160,6 +163,13 @@ dependencies {
     ksp("androidx.room:room-compiler:$roomVersion")
     androidTestImplementation("androidx.room:room-testing:$roomVersion")
 
+    val protobufVersion = "3.25.1"
+    implementation("com.google.protobuf:protobuf-java:$protobufVersion")
+    implementation("com.google.protobuf:protobuf-kotlin:$protobufVersion")
+    protobuf(files("../../lib_protobuf/protobuf/"))
+
+    implementation("net.java.dev.jna:jna:5.14.0@aar")
+
     val hiltVersion = "2.48.1"
     implementation("com.google.dagger:hilt-android:$hiltVersion")
     kapt("com.google.dagger:hilt-android-compiler:$hiltVersion")
@@ -193,13 +203,59 @@ kapt {
     correctErrorTypes = true
 }
 
-val rustBasePath = ".."
+protobuf {
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                id("java")
+                id("kotlin")
+            }
+        }
+    }
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.25.1"
+    }
+}
+
+val rustProjectDir: File = layout.projectDirectory.asFile.parentFile
+val rustWorkspaceDir: File = rustProjectDir.parentFile
 val archTriplets = mapOf(
     "armeabi-v7a" to "armv7-linux-androideabi",
     "arm64-v8a" to "aarch64-linux-android",
     "x86" to "i686-linux-android",
     "x86_64" to "x86_64-linux-android",
 )
+
+// uniffi-bindgen doesn't seem to work when building with cargo ndk, so we have to build one extra
+// time. Maybe see if we can avoid this in the future.
+tasks.create<Exec>("build-openscq30-android-for-uniffi-bindings") {
+    description = "Build openscq30_android to use as a source for uniffi-bindgen"
+    workingDir = rustProjectDir
+    commandLine("cargo", "build")
+}
+tasks.create<Exec>("generate-uniffi-bindings") {
+    dependsOn("build-openscq30-android-for-uniffi-bindings")
+    description = "Generate kotlin bindings using uniffi-bindgen"
+    workingDir = rustWorkspaceDir
+    // generate bindings
+    commandLine(
+        "cargo",
+        "run",
+        "--bin",
+        "uniffi-bindgen",
+        "--",
+        "generate",
+        "--library",
+        "./target/debug/libopenscq30_android.so",
+        "--language",
+        "kotlin",
+        "--out-dir",
+        "${layout.buildDirectory.get()}/generated/source/uniffi/java",
+    )
+}
+tasks.withType<JavaCompile> {
+    dependsOn("generate-uniffi-bindings")
+}
 
 archTriplets.forEach { (arch, target) ->
     // execute cargo metadata and get path to target directory
@@ -208,7 +264,7 @@ archTriplets.forEach { (arch, target) ->
         val output = ByteArrayOutputStream()
         exec {
             commandLine("cargo", "metadata", "--format-version", "1")
-            workingDir = File(rustBasePath)
+            workingDir = rustProjectDir
             standardOutput = output
         }
         val outputAsString = output.toString()
@@ -221,7 +277,7 @@ archTriplets.forEach { (arch, target) ->
     // Build with cargo
     tasks.create<Exec>("cargo-build-$arch") {
         description = "Building core for $arch"
-        workingDir = File(rustBasePath)
+        workingDir = rustProjectDir
         commandLine(
             "cargo",
             "ndk",
@@ -237,7 +293,7 @@ archTriplets.forEach { (arch, target) ->
     // Sync shared native dependencies
     tasks.create<Sync>("sync-rust-deps-$arch") {
         dependsOn("cargo-build-$arch")
-        from("$rustBasePath/src/libs/$arch") {
+        from("${rustProjectDir.absolutePath}/src/libs/$arch") {
             include("*.so")
         }
         into("src/main/libs/$arch")

@@ -4,8 +4,8 @@ import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetRepository
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceConnectionManager
-import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
-import com.oppzippy.openscq30.lib.bindings.SoundModes
+import com.oppzippy.openscq30.lib.extensions.resources.toEqualizerConfiguration
+import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import javax.inject.Inject
 
 class ActivateQuickPresetUseCase @Inject constructor(
@@ -18,26 +18,30 @@ class ActivateQuickPresetUseCase @Inject constructor(
 
         quickPresetRepository.getForDevice(connectionStatus.device.bleServiceUuid)
             .getOrNull(presetId)?.let { quickPreset ->
-                val ambientSoundMode = quickPreset.ambientSoundMode
-                val noiseCancelingMode = quickPreset.noiseCancelingMode
-
                 // TODO move quick preset to equalizer configuration logic elsewhere
                 val equalizerConfiguration = if (quickPreset.presetEqualizerProfile != null) {
-                    EqualizerConfiguration(quickPreset.presetEqualizerProfile)
+                    quickPreset.presetEqualizerProfile.toEqualizerConfiguration()
                 } else if (quickPreset.customEqualizerProfileName != null) {
                     customProfileDao.get(quickPreset.customEqualizerProfileName)?.let {
-                        EqualizerConfiguration(it.getVolumeAdjustments())
+                        EqualizerConfiguration(
+                            volumeAdjustments = it.getVolumeAdjustments(),
+                        )
                     }
                 } else {
                     null
                 }
 
-                connectionStatus.device.state.soundModes?.let { prevSoundModes ->
-                    val newSoundModes = SoundModes(
-                        ambientSoundMode ?: prevSoundModes.ambientSoundMode(),
-                        noiseCancelingMode ?: prevSoundModes.noiseCancelingMode(),
-                        prevSoundModes.transparencyMode(),
-                        prevSoundModes.customNoiseCanceling(),
+                connectionStatus.device.stateFlow.value.soundModes?.let { prevSoundModes ->
+                    val newSoundModes = prevSoundModes.copy(
+                        ambientSoundMode = quickPreset.ambientSoundMode
+                            ?: prevSoundModes.ambientSoundMode,
+                        noiseCancelingMode =
+                        quickPreset.noiseCancelingMode ?: prevSoundModes.noiseCancelingMode,
+                        transparencyMode = quickPreset.transparencyMode
+                            ?: prevSoundModes.transparencyMode,
+                        customNoiseCanceling = quickPreset.customNoiseCanceling?.toUByte()
+                            ?: prevSoundModes.customNoiseCanceling,
+
                     )
                     connectionManager.setSoundModes(newSoundModes)
                 }

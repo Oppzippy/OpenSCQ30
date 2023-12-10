@@ -1,27 +1,162 @@
 #![allow(clippy::inherent_to_string)]
 
-mod devices;
-mod java_glue;
+pub mod connection;
+mod device;
 mod soundcore_device_utils;
-pub(crate) mod type_conversion;
-use log::LevelFilter;
-use rifgen::rifgen_attr::generate_interface;
+use std::str::FromStr;
 
-pub use crate::devices::standard::packets::inbound::*;
-pub use crate::devices::standard::packets::outbound::*;
-pub use crate::devices::standard::structures::*;
-pub use crate::java_glue::*;
+use log::LevelFilter;
+use macaddr::MacAddr6;
+use openscq30_lib::devices::standard::{
+    state::DeviceState,
+    structures::{
+        CustomButtonModel, EqualizerConfiguration, HearId, PresetEqualizerProfile, SoundModes,
+    },
+};
+use openscq30_lib_protobuf::{
+    deserialize_custom_button_model, deserialize_equalizer_configuration, deserialize_hear_id,
+    deserialize_preset_equalizer_profile, deserialize_sound_modes, serialize_device_state,
+    serialize_equalizer_configuration, serialize_preset_equalizer_profile,
+};
+use uuid::Uuid;
+
 pub use crate::soundcore_device_utils::*;
 
-pub struct Init {}
+uniffi::setup_scaffolding!();
 
-impl Init {
-    #[generate_interface]
-    pub fn logging() {
-        android_logger::init_once(
-            android_logger::Config::default()
-                .with_max_level(LevelFilter::Trace)
-                .with_tag("openscq30-lib"),
-        )
+#[uniffi::export]
+pub fn init_native_logging() {
+    android_logger::init_once(
+        android_logger::Config::default()
+            .with_max_level(LevelFilter::Trace)
+            .with_tag("openscq30-lib"),
+    )
+}
+
+uniffi::custom_type!(MacAddr6, String);
+impl UniffiCustomTypeConverter for MacAddr6 {
+    type Builtin = String;
+
+    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self>
+    where
+        Self: Sized,
+    {
+        Ok(MacAddr6::from_str(&val)?)
+    }
+
+    fn from_custom(obj: Self) -> Self::Builtin {
+        obj.to_string()
+    }
+}
+
+uniffi::custom_type!(Uuid, String);
+impl UniffiCustomTypeConverter for Uuid {
+    type Builtin = String;
+
+    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self>
+    where
+        Self: Sized,
+    {
+        Ok(Uuid::from_str(&val)?)
+    }
+
+    fn from_custom(obj: Self) -> Self::Builtin {
+        obj.to_string()
+    }
+}
+
+uniffi::custom_type!(DeviceState, Vec<u8>);
+impl UniffiCustomTypeConverter for DeviceState {
+    type Builtin = Vec<u8>;
+
+    fn into_custom(_val: Self::Builtin) -> uniffi::Result<Self>
+    where
+        Self: Sized,
+    {
+        unimplemented!()
+    }
+
+    fn from_custom(obj: Self) -> Self::Builtin {
+        serialize_device_state(obj)
+    }
+}
+
+uniffi::custom_type!(SoundModes, Vec<u8>);
+impl UniffiCustomTypeConverter for SoundModes {
+    type Builtin = Vec<u8>;
+
+    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self>
+    where
+        Self: Sized,
+    {
+        Ok(deserialize_sound_modes(&val)?)
+    }
+
+    fn from_custom(_obj: Self) -> Self::Builtin {
+        unimplemented!()
+    }
+}
+
+uniffi::custom_type!(EqualizerConfiguration, Vec<u8>);
+impl UniffiCustomTypeConverter for EqualizerConfiguration {
+    type Builtin = Vec<u8>;
+
+    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self>
+    where
+        Self: Sized,
+    {
+        Ok(deserialize_equalizer_configuration(&val)?)
+    }
+
+    fn from_custom(obj: Self) -> Self::Builtin {
+        serialize_equalizer_configuration(obj)
+    }
+}
+
+uniffi::custom_type!(HearId, Vec<u8>);
+impl UniffiCustomTypeConverter for HearId {
+    type Builtin = Vec<u8>;
+
+    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self>
+    where
+        Self: Sized,
+    {
+        Ok(deserialize_hear_id(&val)?)
+    }
+
+    fn from_custom(_obj: Self) -> Self::Builtin {
+        unimplemented!()
+    }
+}
+
+uniffi::custom_type!(CustomButtonModel, Vec<u8>);
+impl UniffiCustomTypeConverter for CustomButtonModel {
+    type Builtin = Vec<u8>;
+
+    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self>
+    where
+        Self: Sized,
+    {
+        Ok(deserialize_custom_button_model(&val)?)
+    }
+
+    fn from_custom(_obj: Self) -> Self::Builtin {
+        unimplemented!()
+    }
+}
+
+uniffi::custom_type!(PresetEqualizerProfile, Vec<u8>);
+impl UniffiCustomTypeConverter for PresetEqualizerProfile {
+    type Builtin = Vec<u8>;
+
+    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self>
+    where
+        Self: Sized,
+    {
+        Ok(deserialize_preset_equalizer_profile(&val)?)
+    }
+
+    fn from_custom(obj: Self) -> Self::Builtin {
+        serialize_preset_equalizer_profile(obj)
     }
 }

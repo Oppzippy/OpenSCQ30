@@ -1,6 +1,6 @@
 package com.oppzippy.openscq30
 
-import com.oppzippy.openscq30.lib.bindings.Init
+import com.oppzippy.openscq30.lib.bindings.initNativeLogging
 
 object Native {
     private var isInitialized = false
@@ -9,7 +9,7 @@ object Native {
     fun initialize() {
         if (!isInitialized) {
             System.loadLibrary("openscq30_android")
-            Init.logging()
+            initNativeLogging()
             isInitialized = true
         }
     }

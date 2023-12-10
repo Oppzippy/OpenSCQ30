@@ -1,11 +1,9 @@
-use async_trait::async_trait;
 use macaddr::MacAddr6;
 use tokio::sync::{mpsc, watch};
 use uuid::Uuid;
 
 use super::ConnectionStatus;
 
-#[async_trait(?Send)]
 pub trait Connection {
     async fn name(&self) -> crate::Result<String>;
     async fn mac_address(&self) -> crate::Result<MacAddr6>;

@@ -1,6 +1,5 @@
 use std::{collections::HashMap, mem, sync::Arc, time::Duration};
 
-use async_trait::async_trait;
 use futures::FutureExt;
 use macaddr::MacAddr6;
 use nom::error::VerboseError;
@@ -39,7 +38,7 @@ where
     connection: Arc<ConnectionType>,
     state_sender: Arc<Mutex<watch::Sender<DeviceState>>>,
     join_handle: FuturesType::JoinHandleType,
-    dispatcher: Arc<dyn DeviceCommandDispatcher>,
+    dispatcher: Arc<dyn DeviceCommandDispatcher + Send + Sync>,
 }
 
 impl<ConnectionType, FuturesType> SoundcoreDevice<ConnectionType, FuturesType>
@@ -176,7 +175,6 @@ where
     }
 }
 
-#[async_trait(?Send)]
 impl<ConnectionType, FuturesType> api::device::Device
     for SoundcoreDevice<ConnectionType, FuturesType>
 where

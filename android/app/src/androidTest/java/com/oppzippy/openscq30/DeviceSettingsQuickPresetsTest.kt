@@ -14,16 +14,15 @@ import com.oppzippy.openscq30.features.equalizer.storage.toCustomProfile
 import com.oppzippy.openscq30.features.quickpresets.storage.FallbackQuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetRepository
-import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
-import com.oppzippy.openscq30.lib.bindings.DeviceProfile
-import com.oppzippy.openscq30.lib.bindings.FirmwareVersion
-import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
-import com.oppzippy.openscq30.lib.bindings.NoiseCancelingModeType
-import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
-import com.oppzippy.openscq30.lib.bindings.SoundModeProfile
-import com.oppzippy.openscq30.lib.bindings.TransparencyMode
-import com.oppzippy.openscq30.lib.bindings.TransparencyModeType
-import com.oppzippy.openscq30.lib.bindings.VolumeAdjustments
+import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
+import com.oppzippy.openscq30.lib.wrapper.DeviceProfile
+import com.oppzippy.openscq30.lib.wrapper.FirmwareVersion
+import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeType
+import com.oppzippy.openscq30.lib.wrapper.PresetEqualizerProfile
+import com.oppzippy.openscq30.lib.wrapper.SoundModeProfile
+import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
+import com.oppzippy.openscq30.lib.wrapper.TransparencyModeType
 import com.oppzippy.openscq30.ui.quickpresets.QuickPresetScreen
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -58,16 +57,16 @@ class DeviceSettingsQuickPresetsTest {
     lateinit var customProfileDao: CustomProfileDao
 
     private var deviceProfile = DeviceProfile(
-        SoundModeProfile(NoiseCancelingModeType.Custom, TransparencyModeType.Custom),
-        true,
-        2,
-        8,
-        true,
-        true,
-        true,
-        true,
-        true,
-        FirmwareVersion(0, 1),
+        soundMode = SoundModeProfile(NoiseCancelingModeType.Custom, TransparencyModeType.Custom),
+        hasHearId = true,
+        numEqualizerChannels = 2,
+        numEqualizerBands = 8,
+        hasDynamicRangeCompression = true,
+        hasCustomButtonModel = true,
+        hasWearDetection = true,
+        hasTouchTone = true,
+        hasAutoPowerOff = true,
+        dynamicRangeCompressionMinFirmwareVersion = FirmwareVersion(0u, 1u),
     )
     private var deviceUuid = UUID(0, 0)
 
@@ -162,17 +161,17 @@ class DeviceSettingsQuickPresetsTest {
 
         composeRule.onNode(customNoiseCanceling).performClick()
         assertEquals(
-            0.toShort(),
+            0,
             quickPresetRepository.getForDevice(deviceUuid)
-                .getOrNull(0)?.customNoiseCanceling?.value(),
+                .getOrNull(0)?.customNoiseCanceling,
         )
 
         composeRule.onNodeWithTag("customNoiseCancelingSlider").performClick()
         // clicks in the middle of the 0-10 slider, which is 5
         assertEquals(
-            5.toShort(),
+            5,
             quickPresetRepository.getForDevice(deviceUuid)
-                .getOrNull(0)?.customNoiseCanceling?.value(),
+                .getOrNull(0)?.customNoiseCanceling,
         )
     }
 
@@ -195,17 +194,15 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsCustomEqualizerProfile() = runTest {
         customProfileDao.insert(
-            VolumeAdjustments(
-                doubleArrayOf(
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                ),
+            listOf(
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
             ).toCustomProfile("Test Profile"),
         )
         composeRule.setContent {
@@ -224,17 +221,15 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsOnlyOneOfPresetOrCustomEqualizerProfile() = runTest {
         customProfileDao.insert(
-            VolumeAdjustments(
-                doubleArrayOf(
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                ),
+            listOf(
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
             ).toCustomProfile("Test Profile"),
         )
         composeRule.setContent {

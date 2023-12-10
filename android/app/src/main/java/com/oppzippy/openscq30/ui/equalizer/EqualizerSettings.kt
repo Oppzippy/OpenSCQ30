@@ -18,7 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.equalizer.composables.CreateCustomProfileDialog
 import com.oppzippy.openscq30.ui.equalizer.composables.CustomProfileSelection
@@ -28,7 +28,6 @@ import com.oppzippy.openscq30.ui.equalizer.composables.PresetProfileSelection
 import com.oppzippy.openscq30.ui.equalizer.composables.ReplaceCustomProfileDialog
 import com.oppzippy.openscq30.ui.equalizer.models.EqualizerProfile
 import com.oppzippy.openscq30.ui.equalizer.models.toEqualizerProfile
-import kotlin.jvm.optionals.getOrNull
 
 @Composable
 fun EqualizerSettings(
@@ -42,8 +41,8 @@ fun EqualizerSettings(
     val maybeEqualizerConfiguration by viewModel.displayedEqualizerConfiguration.collectAsState()
 
     maybeEqualizerConfiguration?.let { equalizerConfiguration ->
-        val profile = equalizerConfiguration.presetProfile().getOrNull().toEqualizerProfile()
-        val values = equalizerConfiguration.volumeAdjustments().adjustments().toList()
+        val profile = equalizerConfiguration.presetProfile.toEqualizerProfile()
+        val values = equalizerConfiguration.volumeAdjustments
         val isCustomProfile = profile == EqualizerProfile.Custom
         var isCreateDialogOpen by remember { mutableStateOf(false) }
         var isDeleteDialogOpen by remember { mutableStateOf(false) }

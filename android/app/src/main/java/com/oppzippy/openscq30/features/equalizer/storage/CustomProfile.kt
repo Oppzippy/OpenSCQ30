@@ -3,7 +3,6 @@ package com.oppzippy.openscq30.features.equalizer.storage
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.oppzippy.openscq30.lib.bindings.VolumeAdjustments
 
 @Entity(
     tableName = "custom_equalizer_profile",
@@ -25,33 +24,30 @@ data class CustomProfile(
     val band6400: Double,
     val band12800: Double,
 ) {
-    fun getVolumeAdjustments(): VolumeAdjustments {
-        return VolumeAdjustments(
-            doubleArrayOf(
-                band100,
-                band200,
-                band400,
-                band800,
-                band1600,
-                band3200,
-                band6400,
-                band12800,
-            ),
+    fun getVolumeAdjustments(): List<Double> {
+        return listOf(
+            band100,
+            band200,
+            band400,
+            band800,
+            band1600,
+            band3200,
+            band6400,
+            band12800,
         )
     }
 }
 
-fun VolumeAdjustments.toCustomProfile(name: String): CustomProfile {
-    val adjustments = adjustments()
+fun List<Double>.toCustomProfile(name: String): CustomProfile {
     return CustomProfile(
         name,
-        adjustments[0],
-        adjustments[1],
-        adjustments[2],
-        adjustments[3],
-        adjustments[4],
-        adjustments[5],
-        adjustments[6],
-        adjustments[7],
+        this[0],
+        this[1],
+        this[2],
+        this[3],
+        this[4],
+        this[5],
+        this[6],
+        this[7],
     )
 }

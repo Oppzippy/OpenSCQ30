@@ -1,6 +1,5 @@
 use std::time::Duration;
 
-use async_trait::async_trait;
 use gtk::glib::timeout_future;
 use macaddr::MacAddr6;
 use mockall::mock;
@@ -42,7 +41,6 @@ mock! {
     }
 }
 
-#[async_trait(?Send)]
 impl Device for MockDevice {
     async fn subscribe_to_state_updates(&self) -> watch::Receiver<DeviceState> {
         self.subscribe_to_state_updates()

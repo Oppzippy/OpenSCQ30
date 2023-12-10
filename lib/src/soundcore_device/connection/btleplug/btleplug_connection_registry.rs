@@ -3,7 +3,6 @@ use std::sync::{Arc, Weak};
 use std::time::Duration;
 use std::vec;
 
-use async_trait::async_trait;
 use btleplug::api::{BDAddr, Central, Manager as _, Peripheral as _, ScanFilter};
 use btleplug::platform::{Adapter, Manager, Peripheral};
 use futures::{stream, StreamExt};
@@ -174,7 +173,6 @@ impl BtlePlugConnectionRegistry {
     }
 }
 
-#[async_trait(?Send)]
 impl ConnectionRegistry for BtlePlugConnectionRegistry {
     type ConnectionType = BtlePlugConnection;
     type DescriptorType = GenericConnectionDescriptor;

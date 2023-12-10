@@ -1,6 +1,5 @@
 use std::{rc::Rc, time::Duration};
 
-use async_trait::async_trait;
 use gtk::glib::timeout_future;
 use macaddr::MacAddr6;
 use mockall::mock;
@@ -15,7 +14,6 @@ mock! {
     }
 }
 
-#[async_trait(?Send)]
 impl DeviceRegistry for MockDeviceRegistry {
     type DeviceType = MockDevice;
     type DescriptorType = GenericDeviceDescriptor;

@@ -1,34 +1,34 @@
 package com.oppzippy.openscq30.extensions
 
-import com.oppzippy.openscq30.lib.bindings.DeviceProfile
-import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
-import com.oppzippy.openscq30.lib.wrapper.SoundcoreDeviceState
+import com.oppzippy.openscq30.lib.extensions.resources.toEqualizerConfiguration
+import com.oppzippy.openscq30.lib.wrapper.Battery
+import com.oppzippy.openscq30.lib.wrapper.DeviceProfile
+import com.oppzippy.openscq30.lib.wrapper.DeviceState
+import com.oppzippy.openscq30.lib.wrapper.SingleBattery
 
-fun SoundcoreDeviceState.Companion.empty(): SoundcoreDeviceState {
-    return SoundcoreDeviceState(
+fun DeviceState.Companion.empty(): DeviceState {
+    return DeviceState(
         deviceProfile = DeviceProfile(
-            null,
-            false,
-            0,
-            0,
-            false,
-            false,
-            false,
-            false,
-            false,
-            null,
+            soundMode = null,
+            hasHearId = false,
+            numEqualizerChannels = 0,
+            numEqualizerBands = 0,
+            hasDynamicRangeCompression = false,
+            hasCustomButtonModel = false,
+            hasWearDetection = false,
+            hasTouchTone = false,
+            hasAutoPowerOff = false,
+            dynamicRangeCompressionMinFirmwareVersion = null,
         ),
         serialNumber = null,
         firmwareVersion = null,
-        equalizerConfiguration = EqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature),
+        equalizerConfiguration = PresetEqualizerProfile.SoundcoreSignature.toEqualizerConfiguration(),
         soundModes = null,
-        leftBatteryLevel = 0,
-        rightBatteryLevel = 0,
-        isLeftBatteryCharging = false,
-        isRightBatteryCharging = false,
+        battery = Battery.Single(SingleBattery(false, 0u)),
         ageRange = null,
         gender = null,
-        customHearId = null,
+        customButtonModel = null,
+        hearId = null,
     )
 }

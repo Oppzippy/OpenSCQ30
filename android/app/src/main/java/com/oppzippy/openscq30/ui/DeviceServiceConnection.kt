@@ -5,8 +5,8 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
-import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
-import com.oppzippy.openscq30.lib.bindings.SoundModes
+import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.wrapper.SoundModes
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

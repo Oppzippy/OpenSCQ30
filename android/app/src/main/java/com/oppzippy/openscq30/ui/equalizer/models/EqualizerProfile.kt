@@ -2,10 +2,10 @@ package com.oppzippy.openscq30.ui.equalizer.models
 
 import android.util.Log
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
-import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
-import com.oppzippy.openscq30.lib.bindings.VolumeAdjustments
+import com.oppzippy.openscq30.lib.extensions.resources.toEqualizerConfiguration
 import com.oppzippy.openscq30.lib.extensions.resources.toStringResource
+import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.wrapper.PresetEqualizerProfile
 
 enum class EqualizerProfile(val presetProfile: PresetEqualizerProfile?) {
     Custom(null),
@@ -38,21 +38,18 @@ enum class EqualizerProfile(val presetProfile: PresetEqualizerProfile?) {
             return presetProfile?.toStringResource() ?: R.string.custom
         }
 
-    fun toEqualizerConfiguration(volumeAdjustments: DoubleArray?): EqualizerConfiguration {
-        return if (presetProfile != null) {
-            EqualizerConfiguration(presetProfile)
-        } else {
-            if (volumeAdjustments != null) {
-                EqualizerConfiguration(VolumeAdjustments(volumeAdjustments))
+    fun toEqualizerConfiguration(volumeAdjustments: List<Double>?): EqualizerConfiguration {
+        return presetProfile?.toEqualizerConfiguration()
+            ?: if (volumeAdjustments != null) {
+                EqualizerConfiguration(volumeAdjustments = volumeAdjustments)
             } else {
                 throw NullPointerException("volumeAdjustments is null")
             }
-        }
     }
 }
 
 fun PresetEqualizerProfile?.toEqualizerProfile(): EqualizerProfile {
-    EqualizerProfile.values().forEach {
+    EqualizerProfile.entries.forEach {
         if (it.presetProfile == this) {
             return it
         }

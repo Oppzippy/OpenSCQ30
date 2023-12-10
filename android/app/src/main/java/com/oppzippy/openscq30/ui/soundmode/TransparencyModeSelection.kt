@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.lib.bindings.TransparencyMode
+import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 import com.oppzippy.openscq30.ui.utils.LabeledRadioButtonGroup
 

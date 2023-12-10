@@ -20,13 +20,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
-import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
-import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
-import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
-import com.oppzippy.openscq30.lib.bindings.NoiseCancelingModeType
-import com.oppzippy.openscq30.lib.bindings.TransparencyMode
-import com.oppzippy.openscq30.lib.bindings.TransparencyModeType
+import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
+import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeType
+import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
+import com.oppzippy.openscq30.lib.wrapper.TransparencyModeType
 import com.oppzippy.openscq30.ui.deviceinfo.DeviceInfoScreen
 import com.oppzippy.openscq30.ui.devicesettings.Screen
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
@@ -34,7 +33,6 @@ import com.oppzippy.openscq30.ui.equalizer.EqualizerSettings
 import com.oppzippy.openscq30.ui.quickpresets.QuickPresetScreen
 import com.oppzippy.openscq30.ui.soundmode.NoiseCancelingType
 import com.oppzippy.openscq30.ui.soundmode.SoundModeSettings
-import kotlin.jvm.optionals.getOrNull
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,15 +42,15 @@ fun DeviceSettings(
     onAmbientSoundModeChange: (ambientSoundMode: AmbientSoundMode) -> Unit = {},
     onTransparencyModeChange: (transparencyMode: TransparencyMode) -> Unit = {},
     onNoiseCancelingModeChange: (noiseCancelingMode: NoiseCancelingMode) -> Unit = {},
-    onCustomNoiseCancelingChange: (customNoiseCanceling: CustomNoiseCanceling) -> Unit = {},
+    onCustomNoiseCancelingChange: (customNoiseCanceling: UByte) -> Unit = {},
     onEqualizerConfigurationChange: (equalizerConfiguration: EqualizerConfiguration) -> Unit = {},
 ) {
     val navController = rememberNavController()
     val navItems = ArrayList<Screen>()
-    if (uiState.deviceState.deviceProfile.soundMode().isPresent) {
+    if (uiState.deviceState.deviceProfile.soundMode != null) {
         navItems.add(Screen.General)
     }
-    if (uiState.deviceState.deviceProfile.numEqualizerChannels() > 0) {
+    if (uiState.deviceState.deviceProfile.numEqualizerChannels > 0) {
         navItems.add(Screen.Equalizer)
     }
     navItems.add(Screen.QuickPresets)
@@ -97,16 +95,15 @@ fun DeviceSettings(
         ) {
             uiState.deviceState.soundModes?.let { soundModes ->
                 composable(Screen.General.route) {
-                    val soundModeProfile = uiState.deviceState.deviceProfile.soundMode().getOrNull()
-                        ?: return@composable
+                    val soundModeProfile =
+                        uiState.deviceState.deviceProfile.soundMode ?: return@composable
                     SoundModeSettings(
                         soundModes = soundModes,
-                        hasTransparencyModes = soundModeProfile.transparencyModeType() == TransparencyModeType.Custom,
-                        noiseCancelingType = when (soundModeProfile.noiseCancelingModeType()) {
+                        hasTransparencyModes = soundModeProfile.transparencyModeType == TransparencyModeType.Custom,
+                        noiseCancelingType = when (soundModeProfile.noiseCancelingModeType) {
                             NoiseCancelingModeType.None -> NoiseCancelingType.None
                             NoiseCancelingModeType.Basic -> NoiseCancelingType.Normal
                             NoiseCancelingModeType.Custom -> NoiseCancelingType.Custom
-                            null -> throw NotImplementedError("should be unreachable since the enum is not nullable")
                         },
                         onAmbientSoundModeChange = onAmbientSoundModeChange,
                         onTransparencyModeChange = onTransparencyModeChange,

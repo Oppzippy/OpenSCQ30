@@ -1,0 +1,22 @@
+syntax = "proto2";
+package openscq30;
+
+option java_package = "com.oppzippy.openscq30.lib.protobuf";
+option java_multiple_files = true;
+
+message SingleBattery {
+  required bool is_charging = 1;
+  required uint32 level = 2;
+}
+
+message DualBattery {
+  required SingleBattery left = 1;
+  required SingleBattery right = 2;
+}
+
+message Battery {
+  oneof battery {
+    SingleBattery single_battery = 1;
+    DualBattery dual_battery = 2;
+  }
+}

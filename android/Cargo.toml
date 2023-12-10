@@ -5,8 +5,8 @@ edition = "2021"
 
 [dependencies]
 openscq30_lib = { path = "../lib" }
+openscq30_lib_protobuf = { path = "../lib_protobuf" }
 tracing = { version = "0.1", features = ["log-always"] }
-rifgen = { git = "https://github.com/Oppzippy/openscq30-rifgen.git" }
 jni-sys = "0.3.0"
 log = "0.4"
 tokio = { version = "1", features = ["rt-multi-thread"] }
@@ -16,10 +16,11 @@ anyhow = "1.0.69"
 macaddr = "1.0.1"
 uuid = "1.3"
 itertools = "0.11"
+uniffi = "0.25.3"
+prost = "0.12"
 
 [build-dependencies]
-flapigen = "0.6.0"
-rifgen = { git = "https://github.com/Oppzippy/openscq30-rifgen.git" }
+uniffi = { version = "0.25.3", features = ["build"] }
 
 [lib]
 crate-type = ["cdylib"]

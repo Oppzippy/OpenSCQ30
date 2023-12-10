@@ -1,0 +1,35 @@
+syntax = "proto2";
+package openscq30;
+
+option java_package = "com.oppzippy.openscq30.lib.protobuf";
+option java_multiple_files = true;
+
+enum ButtonAction {
+  VOLUME_UP = 0;
+  VOLUME_DOWN = 1;
+  PREVIOUS_SONG = 2;
+  NEXT_SONG = 3;
+  TRANS = 4;
+  VOICE_ASSISTANT = 5;
+  PLAY_PAUSE = 6;
+}
+
+message TwsButtonAction {
+  required bool is_enabled = 1;
+  required ButtonAction tws_connected_action = 2;
+  required ButtonAction tws_disconnected_action = 3;
+}
+
+message NoTwsButtonAction {
+  required bool is_enabled = 1;
+  required ButtonAction action = 2;
+}
+
+message CustomButtonModel {
+  required NoTwsButtonAction left_single_click = 1;
+  required TwsButtonAction left_double_click = 2;
+  required TwsButtonAction left_long_press = 3;
+  required NoTwsButtonAction right_single_click = 4;
+  required TwsButtonAction right_double_click = 5;
+  required TwsButtonAction right_long_press = 6;
+}

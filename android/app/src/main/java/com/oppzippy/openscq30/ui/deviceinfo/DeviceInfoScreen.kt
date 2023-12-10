@@ -11,10 +11,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.lib.wrapper.SoundcoreDeviceState
+import com.oppzippy.openscq30.lib.wrapper.DeviceState
 
 @Composable
-fun DeviceInfoScreen(deviceState: SoundcoreDeviceState) {
+fun DeviceInfoScreen(deviceState: DeviceState) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = Modifier.fillMaxSize(),
@@ -33,7 +33,7 @@ fun DeviceInfoScreen(deviceState: SoundcoreDeviceState) {
         }
         if (deviceState.ageRange != null) {
             item { Text(stringResource(R.string.age_range)) }
-            item { Text(deviceState.ageRange.value().toString()) }
+            item { Text(deviceState.ageRange.toString()) }
         }
         item { Text(stringResource(R.string.device_profile)) }
         item { Text(deviceState.deviceProfile.toString()) }

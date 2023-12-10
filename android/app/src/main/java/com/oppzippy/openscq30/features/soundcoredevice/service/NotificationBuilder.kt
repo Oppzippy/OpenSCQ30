@@ -13,8 +13,8 @@ import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNo
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_QUICK_PRESET
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.INTENT_EXTRA_PRESET_ID
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_CHANNEL_ID
-import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
 import com.oppzippy.openscq30.lib.extensions.resources.toStringResource
+import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
 import dagger.hilt.android.scopes.ServiceScoped
 import javax.inject.Inject
 
@@ -31,9 +31,9 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
             .setOnlyAlertOnce(true).setSmallIcon(R.drawable.headphones).setLargeIcon(
                 if (status is ConnectionStatus.Connected) {
                     val bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
-                    status.device.state.equalizerConfiguration.let { equalizerConfiguration ->
+                    status.device.stateFlow.value.equalizerConfiguration.let { equalizerConfiguration ->
                         EqualizerLine(
-                            equalizerConfiguration.volumeAdjustments().adjustments().toList(),
+                            equalizerConfiguration.volumeAdjustments,
                         ).drawBitmap(
                             bitmap = bitmap,
                             yOffset = bitmap.height / 4F,
@@ -61,9 +61,9 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
                 },
             ).setContentText(
                 if (status is ConnectionStatus.Connected) {
-                    status.device.state.soundModes?.let { soundModes ->
-                        val ambientSoundMode = soundModes.ambientSoundMode()
-                        val noiseCancelingMode = soundModes.noiseCancelingMode()
+                    status.device.stateFlow.value.soundModes?.let { soundModes ->
+                        val ambientSoundMode = soundModes.ambientSoundMode
+                        val noiseCancelingMode = soundModes.noiseCancelingMode
                         if (ambientSoundMode == AmbientSoundMode.NoiseCanceling) {
                             context.getString(
                                 R.string.ambient_sound_mode_and_noise_canceling_mode_values,

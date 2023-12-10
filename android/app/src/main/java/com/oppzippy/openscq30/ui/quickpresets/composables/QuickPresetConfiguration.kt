@@ -18,15 +18,14 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
-import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
-import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
-import com.oppzippy.openscq30.lib.bindings.DeviceProfile
-import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
-import com.oppzippy.openscq30.lib.bindings.NoiseCancelingModeType
-import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
-import com.oppzippy.openscq30.lib.bindings.TransparencyMode
-import com.oppzippy.openscq30.lib.bindings.TransparencyModeType
 import com.oppzippy.openscq30.lib.extensions.resources.toStringResource
+import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
+import com.oppzippy.openscq30.lib.wrapper.DeviceProfile
+import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeType
+import com.oppzippy.openscq30.lib.wrapper.PresetEqualizerProfile
+import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
+import com.oppzippy.openscq30.lib.wrapper.TransparencyModeType
 import com.oppzippy.openscq30.ui.equalizer.composables.CustomProfileSelection
 import com.oppzippy.openscq30.ui.quickpresets.models.QuickPresetEqualizerConfiguration
 import com.oppzippy.openscq30.ui.soundmode.AmbientSoundModeSelection
@@ -36,7 +35,6 @@ import com.oppzippy.openscq30.ui.soundmode.TransparencyModeSelection
 import com.oppzippy.openscq30.ui.utils.CheckboxWithLabel
 import com.oppzippy.openscq30.ui.utils.Dropdown
 import com.oppzippy.openscq30.ui.utils.DropdownOption
-import kotlin.jvm.optionals.getOrNull
 
 @Composable
 fun QuickPresetConfiguration(
@@ -46,13 +44,13 @@ fun QuickPresetConfiguration(
     ambientSoundMode: AmbientSoundMode?,
     noiseCancelingMode: NoiseCancelingMode?,
     transparencyMode: TransparencyMode?,
-    customNoiseCanceling: CustomNoiseCanceling?,
+    customNoiseCanceling: UByte?,
     equalizerConfiguration: QuickPresetEqualizerConfiguration?,
     customEqualizerProfiles: List<CustomProfile>,
     onAmbientSoundModeChange: (ambientSoundMode: AmbientSoundMode?) -> Unit = {},
     onNoiseCancelingModeChange: (noiseCancelingMode: NoiseCancelingMode?) -> Unit = {},
     onTransparencyModeChange: (transparencyMode: TransparencyMode?) -> Unit = {},
-    onCustomNoiseCancelingChange: (customNoiseCanceling: CustomNoiseCanceling?) -> Unit = {},
+    onCustomNoiseCancelingChange: (customNoiseCanceling: UByte?) -> Unit = {},
     onEqualizerChange: (config: QuickPresetEqualizerConfiguration?) -> Unit = {},
     onNameChange: (name: String?) -> Unit = {},
 ) {
@@ -69,7 +67,7 @@ fun QuickPresetConfiguration(
                 .fillMaxWidth()
                 .testTag("quickPresetNameInput"),
         )
-        deviceProfile.soundMode().getOrNull()?.let { soundModeProfile ->
+        deviceProfile.soundMode?.let { soundModeProfile ->
             CheckboxWithLabel(
                 text = stringResource(R.string.ambient_sound_mode),
                 isChecked = ambientSoundMode != null,
@@ -81,12 +79,12 @@ fun QuickPresetConfiguration(
                 AmbientSoundModeSelection(
                     ambientSoundMode = ambientSoundMode,
                     onAmbientSoundModeChange = onAmbientSoundModeChange,
-                    hasNoiseCanceling = soundModeProfile.noiseCancelingModeType() != NoiseCancelingModeType.None,
+                    hasNoiseCanceling = soundModeProfile.noiseCancelingModeType != NoiseCancelingModeType.None,
                 )
             }
             Divider()
 
-            if (soundModeProfile.transparencyModeType() == TransparencyModeType.Custom) {
+            if (soundModeProfile.transparencyModeType == TransparencyModeType.Custom) {
                 CheckboxWithLabel(
                     text = stringResource(R.string.transparency_mode),
                     isChecked = transparencyMode != null,
@@ -103,7 +101,7 @@ fun QuickPresetConfiguration(
                 Divider()
             }
 
-            if (soundModeProfile.noiseCancelingModeType() != NoiseCancelingModeType.None) {
+            if (soundModeProfile.noiseCancelingModeType != NoiseCancelingModeType.None) {
                 CheckboxWithLabel(
                     text = stringResource(R.string.noise_canceling_mode),
                     isChecked = noiseCancelingMode != null,
@@ -115,18 +113,18 @@ fun QuickPresetConfiguration(
                     NoiseCancelingModeSelection(
                         noiseCancelingMode = noiseCancelingMode,
                         onNoiseCancelingModeChange = onNoiseCancelingModeChange,
-                        hasCustomNoiseCanceling = soundModeProfile.noiseCancelingModeType() == NoiseCancelingModeType.Custom,
+                        hasCustomNoiseCanceling = soundModeProfile.noiseCancelingModeType == NoiseCancelingModeType.Custom,
                     )
                 }
                 Divider()
             }
 
-            if (soundModeProfile.noiseCancelingModeType() == NoiseCancelingModeType.Custom) {
+            if (soundModeProfile.noiseCancelingModeType == NoiseCancelingModeType.Custom) {
                 CheckboxWithLabel(
                     text = stringResource(R.string.custom_noise_canceling),
                     isChecked = customNoiseCanceling != null,
                     onCheckedChange = {
-                        onCustomNoiseCancelingChange(if (it) CustomNoiseCanceling(0) else null)
+                        onCustomNoiseCancelingChange(if (it) 0u else null)
                     },
                 )
                 if (customNoiseCanceling != null) {
@@ -145,7 +143,7 @@ fun QuickPresetConfiguration(
         LaunchedEffect(defaultName) {
             isEqualizerChecked = equalizerConfiguration != null
         }
-        if (deviceProfile.numEqualizerChannels() > 0) {
+        if (deviceProfile.numEqualizerChannels > 0) {
             CheckboxWithLabel(
                 text = stringResource(R.string.equalizer),
                 isChecked = equalizerConfiguration != null || isEqualizerChecked,
@@ -159,7 +157,7 @@ fun QuickPresetConfiguration(
             if (equalizerConfiguration != null || isEqualizerChecked) {
                 Dropdown(
                     value = (equalizerConfiguration as? QuickPresetEqualizerConfiguration.PresetProfile)?.profile,
-                    options = PresetEqualizerProfile.values().map {
+                    options = PresetEqualizerProfile.entries.map {
                         val presetName = stringResource(it.toStringResource())
                         DropdownOption(
                             value = it,

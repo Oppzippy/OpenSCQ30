@@ -1,0 +1,36 @@
+syntax = "proto2";
+package openscq30;
+
+import "firmware_version.proto";
+
+option java_package = "com.oppzippy.openscq30.lib.protobuf";
+option java_multiple_files = true;
+
+enum NoiseCancelingModeType {
+  NOISE_CANCELING_MODE_NONE = 0;
+  NOISE_CANCELING_MODE_BASIC = 1;
+  NOISE_CANCELING_MODE_CUSTOM = 2;
+}
+
+enum TransparencyModeType {
+  TRANSPARENCY_MODE_BASIC = 0;
+  TRANSPARENCY_MODE_CUSTOM = 1;
+}
+
+message SoundModeProfile {
+  required NoiseCancelingModeType noise_canceling_mode_type = 1;
+  required TransparencyModeType transparency_mode_type = 2;
+}
+
+message DeviceProfile {
+  optional SoundModeProfile sound_mode = 1;
+  required bool has_hear_id = 2;
+  required uint32 num_equalizer_channels = 3;
+  required uint32 num_equalizer_bands = 4;
+  required bool has_dynamic_range_compression = 5;
+  required bool has_custom_button_model = 6;
+  required bool has_wear_detection = 7;
+  required bool has_touch_tone = 8;
+  required bool has_auto_power_off = 9;
+  optional FirmwareVersion dynamic_range_compression_min_firmware_version = 10;
+}

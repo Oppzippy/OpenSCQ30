@@ -1,6 +1,5 @@
 use std::cell::RefCell;
 
-use async_trait::async_trait;
 use js_sys::{Array, Uint8Array};
 use macaddr::MacAddr6;
 use openscq30_lib::{
@@ -59,7 +58,6 @@ impl WebBluetoothConnection {
     }
 }
 
-#[async_trait(?Send)]
 impl Connection for WebBluetoothConnection {
     async fn name(&self) -> LibResult<String> {
         Ok(self.gatt.device().name().unwrap_or_default())

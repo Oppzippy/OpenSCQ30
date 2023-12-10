@@ -1,6 +1,5 @@
 use std::sync::{Arc, RwLock};
 
-use async_trait::async_trait;
 use macaddr::MacAddr6;
 use tokio::sync::{mpsc as tokio_mpsc, watch};
 use tracing::instrument;
@@ -147,7 +146,6 @@ impl WindowsConnection {
     }
 }
 
-#[async_trait(?Send)]
 impl Connection for WindowsConnection {
     async fn name(&self) -> crate::Result<String> {
         Ok(self.device.Name()?.to_string())

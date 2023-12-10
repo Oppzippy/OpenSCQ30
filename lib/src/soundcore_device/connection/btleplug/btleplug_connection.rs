@@ -1,4 +1,3 @@
-use async_trait::async_trait;
 use btleplug::{
     api::Characteristic,
     api::{Central, CentralEvent, Peripheral as _, WriteType},
@@ -123,7 +122,6 @@ impl BtlePlugConnection {
     }
 }
 
-#[async_trait(?Send)]
 impl Connection for BtlePlugConnection {
     async fn name(&self) -> crate::Result<String> {
         let peripheral = self.peripheral.to_owned();

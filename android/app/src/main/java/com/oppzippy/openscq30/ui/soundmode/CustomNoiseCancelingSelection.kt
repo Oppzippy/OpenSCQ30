@@ -5,19 +5,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
-import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 import kotlin.math.roundToInt
 
 @Composable
 fun CustomNoiseCancelingSelection(
-    customNoiseCanceling: CustomNoiseCanceling,
-    onCustomNoiseCancelingChange: (customNoiseCanceling: CustomNoiseCanceling) -> Unit,
+    customNoiseCanceling: UByte,
+    onCustomNoiseCancelingChange: (customNoiseCanceling: UByte) -> Unit,
 ) {
     Slider(
-        value = customNoiseCanceling.value().toFloat(),
+        value = customNoiseCanceling.toFloat(),
         onValueChange = {
-            onCustomNoiseCancelingChange(CustomNoiseCanceling(it.roundToInt().toShort()))
+            onCustomNoiseCancelingChange(it.roundToInt().toUByte())
         },
         valueRange = 0f..10f,
         steps = 11,
@@ -30,7 +29,7 @@ fun CustomNoiseCancelingSelection(
 private fun PreviewAmbientSoundModeSelection() {
     OpenSCQ30Theme {
         CustomNoiseCancelingSelection(
-            customNoiseCanceling = CustomNoiseCanceling(1),
+            customNoiseCanceling = 1u,
             onCustomNoiseCancelingChange = {},
         )
     }

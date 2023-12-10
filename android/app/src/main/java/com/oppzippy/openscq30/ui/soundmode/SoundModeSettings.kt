@@ -11,11 +11,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
-import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
-import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
-import com.oppzippy.openscq30.lib.bindings.SoundModes
-import com.oppzippy.openscq30.lib.bindings.TransparencyMode
+import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
+import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.wrapper.SoundModes
+import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
@@ -27,12 +26,12 @@ fun SoundModeSettings(
     onAmbientSoundModeChange: (ambientSoundMode: AmbientSoundMode) -> Unit = {},
     onTransparencyModeChange: (transparencyMode: TransparencyMode) -> Unit = {},
     onNoiseCancelingModeChange: (noiseCancelingMode: NoiseCancelingMode) -> Unit = {},
-    onCustomNoiseCancelingChange: (customNoiseCanceling: CustomNoiseCanceling) -> Unit = {},
+    onCustomNoiseCancelingChange: (customNoiseCanceling: UByte) -> Unit = {},
 ) {
     Column(modifier = modifier) {
         GroupHeader(stringResource(R.string.ambient_sound_mode))
         AmbientSoundModeSelection(
-            ambientSoundMode = soundModes.ambientSoundMode(),
+            ambientSoundMode = soundModes.ambientSoundMode,
             onAmbientSoundModeChange = onAmbientSoundModeChange,
             hasNoiseCanceling = noiseCancelingType != NoiseCancelingType.None,
         )
@@ -40,7 +39,7 @@ fun SoundModeSettings(
             Spacer(modifier = Modifier.padding(vertical = 8.dp))
             GroupHeader(stringResource(R.string.transparency_mode))
             TransparencyModeSelection(
-                transparencyMode = soundModes.transparencyMode(),
+                transparencyMode = soundModes.transparencyMode,
                 onTransparencyModeChange = onTransparencyModeChange,
             )
         }
@@ -48,16 +47,16 @@ fun SoundModeSettings(
             Spacer(modifier = Modifier.padding(vertical = 8.dp))
             GroupHeader(stringResource(R.string.noise_canceling_mode))
             NoiseCancelingModeSelection(
-                noiseCancelingMode = soundModes.noiseCancelingMode(),
+                noiseCancelingMode = soundModes.noiseCancelingMode,
                 onNoiseCancelingModeChange = onNoiseCancelingModeChange,
                 hasCustomNoiseCanceling = noiseCancelingType == NoiseCancelingType.Custom,
             )
         }
-        if (noiseCancelingType == NoiseCancelingType.Custom && soundModes.noiseCancelingMode() == NoiseCancelingMode.Custom) {
+        if (noiseCancelingType == NoiseCancelingType.Custom && soundModes.noiseCancelingMode == NoiseCancelingMode.Custom) {
             Spacer(modifier = Modifier.padding(vertical = 8.dp))
             GroupHeader(stringResource(R.string.custom_noise_canceling))
             CustomNoiseCancelingSelection(
-                customNoiseCanceling = soundModes.customNoiseCanceling(),
+                customNoiseCanceling = soundModes.customNoiseCanceling,
                 onCustomNoiseCancelingChange = onCustomNoiseCancelingChange,
             )
         }
@@ -82,7 +81,7 @@ private fun PreviewSoundModeSettings() {
                 AmbientSoundMode.Normal,
                 NoiseCancelingMode.Indoor,
                 TransparencyMode.VocalMode,
-                CustomNoiseCanceling(0),
+                0u,
             ),
             hasTransparencyModes = true,
             noiseCancelingType = NoiseCancelingType.Custom,

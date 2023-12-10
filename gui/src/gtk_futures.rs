@@ -1,13 +1,11 @@
 use std::time::Duration;
 
-use async_trait::async_trait;
 use futures::Future;
 use gtk::glib::{self, MainContext};
 use openscq30_lib::futures::{Futures, JoinHandle};
 
 pub struct GtkFutures {}
 
-#[async_trait(?Send)]
 impl Futures for GtkFutures {
     type JoinHandleType = GtkJoinHandle;
 

@@ -23,7 +23,7 @@ fun CustomProfileSelection(
             DropdownOption(value = profile, name = profile.name, label = {
                 ProfileSelectionRow(
                     name = profile.name,
-                    volumeAdjustments = profile.getVolumeAdjustments().adjustments().toList(),
+                    volumeAdjustments = profile.getVolumeAdjustments(),
                 )
             })
         },

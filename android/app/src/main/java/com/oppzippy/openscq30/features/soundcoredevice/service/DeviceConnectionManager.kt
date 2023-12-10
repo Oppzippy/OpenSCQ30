@@ -1,10 +1,10 @@
 package com.oppzippy.openscq30.features.soundcoredevice.service
 
 import android.util.Log
-import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceConnector
-import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
-import com.oppzippy.openscq30.lib.bindings.SoundModes
+import com.oppzippy.openscq30.features.soundcoredevice.impl.SoundcoreDevice
+import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.wrapper.SoundModes
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.util.concurrent.TimeoutException
+import java.lang.Exception
 import javax.inject.Inject
 
 class DeviceConnectionManager @Inject constructor(
@@ -60,8 +60,8 @@ class DeviceConnectionManager @Inject constructor(
                 } else {
                     ConnectionStatus.Disconnected
                 }
-            } catch (ex: TimeoutException) {
-                Log.w("DeviceConnectionManager", "timeout connecting to device: $macAddress", ex)
+            } catch (ex: Exception) {
+                Log.w("DeviceConnectionManager", "error connecting to device:", ex)
                 connectionStateFlow.value = ConnectionStatus.Disconnected
             }
         }
@@ -84,7 +84,7 @@ class DeviceConnectionManager @Inject constructor(
         when (state) {
             ConnectionStatus.AwaitingConnection -> {}
             is ConnectionStatus.Connecting -> state.job.cancel()
-            is ConnectionStatus.Connected -> state.device.destroy()
+            is ConnectionStatus.Connected -> state.device.close()
             ConnectionStatus.Disconnected -> {}
         }
     }
@@ -112,10 +112,14 @@ class DeviceConnectionManager @Inject constructor(
         }
 
     fun setSoundModes(soundModes: SoundModes) {
-        device?.setSoundModes(soundModes)
+        scope.launch {
+            device?.setSoundModes(soundModes)
+        }
     }
 
     fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
-        device?.setEqualizerConfiguration(equalizerConfiguration)
+        scope.launch {
+            device?.setEqualizerConfiguration(equalizerConfiguration)
+        }
     }
 }

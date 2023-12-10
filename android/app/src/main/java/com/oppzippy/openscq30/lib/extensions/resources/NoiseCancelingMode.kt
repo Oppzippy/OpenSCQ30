@@ -1,7 +1,7 @@
 package com.oppzippy.openscq30.lib.extensions.resources
 
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
 
 fun NoiseCancelingMode.toStringResource(): Int {
     return when (this) {

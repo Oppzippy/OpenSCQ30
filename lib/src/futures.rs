@@ -8,7 +8,6 @@ pub use futures_tokio::*;
 #[cfg(feature = "wasm")]
 pub use futures_wasm::*;
 
-use async_trait::async_trait;
 use futures::Future;
 use std::time::Duration;
 
@@ -16,7 +15,6 @@ pub trait JoinHandle {
     fn abort(&self);
 }
 
-#[async_trait(?Send)]
 pub trait Futures {
     type JoinHandleType: JoinHandle;
 

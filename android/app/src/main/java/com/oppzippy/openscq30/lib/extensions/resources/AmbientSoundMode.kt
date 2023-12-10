@@ -1,7 +1,7 @@
 package com.oppzippy.openscq30.lib.extensions.resources
 
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
+import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
 
 fun AmbientSoundMode.toStringResource(): Int {
     return when (this) {

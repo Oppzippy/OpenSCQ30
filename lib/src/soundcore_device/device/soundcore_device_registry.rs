@@ -3,7 +3,6 @@ use std::{
     rc::{Rc, Weak},
 };
 
-use async_trait::async_trait;
 use macaddr::MacAddr6;
 use tokio::sync::Mutex;
 use weak_table::{weak_value_hash_map::Entry, WeakValueHashMap};
@@ -61,7 +60,6 @@ where
     }
 }
 
-#[async_trait(?Send)]
 impl<RegistryType, FuturesType> DeviceRegistry
     for SoundcoreDeviceRegistry<RegistryType, FuturesType>
 where

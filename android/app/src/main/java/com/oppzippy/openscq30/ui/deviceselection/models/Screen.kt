@@ -1,6 +1,6 @@
 package com.oppzippy.openscq30.ui.deviceselection.models
 
 sealed class Screen(val route: String) {
-    object Home : Screen("/")
-    object Info : Screen("/info")
+    data object Home : Screen("/")
+    data object Info : Screen("/info")
 }

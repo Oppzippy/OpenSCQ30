@@ -13,12 +13,15 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.util.Log
-import com.oppzippy.openscq30.lib.bindings.SoundcoreDeviceUtils
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
+import com.oppzippy.openscq30.lib.bindings.ConnectionWriter
+import com.oppzippy.openscq30.lib.bindings.ManualConnection
+import com.oppzippy.openscq30.lib.bindings.isSoundcoreServiceUuid
+import com.oppzippy.openscq30.lib.bindings.readCharacteristicUuid
+import com.oppzippy.openscq30.lib.bindings.writeCharacteristicUuid
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
@@ -26,19 +29,30 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 @SuppressLint("MissingPermission")
 @Suppress("DEPRECATION")
-class SoundcoreDeviceCallbackHandler(context: Context) : BluetoothGattCallback() {
+class SoundcoreDeviceCallbackHandler(
+    context: Context,
+    private val coroutineScope: CoroutineScope,
+) :
+    BluetoothGattCallback(), ConnectionWriter, AutoCloseable {
+    // TODO make not lateinit
     private lateinit var gatt: BluetoothGatt
     private var readCharacteristic: BluetoothGattCharacteristic? = null
     private var writeCharacteristic: BluetoothGattCharacteristic? = null
     private var commandQueue: ConcurrentLinkedQueue<Command> = ConcurrentLinkedQueue()
     private var isLocked: Boolean = false
-    private val _packetsFlow: MutableSharedFlow<Packet> =
-        MutableSharedFlow(0, 50, BufferOverflow.DROP_OLDEST)
-    val packetsFlow = _packetsFlow.asSharedFlow()
     private val _isDisconnected = MutableStateFlow(false)
+
+    // TODO handle disconnects
     val isDisconnected = _isDisconnected.asStateFlow()
     private var _serviceUuid = MutableStateFlow<UUID?>(null)
     val serviceUuid = _serviceUuid.asStateFlow()
+    private var manualConnection: ManualConnection? = null
+
+    @Synchronized
+    fun setManualConnection(manualConnection: ManualConnection) {
+        this.manualConnection?.close()
+        this.manualConnection = manualConnection
+    }
 
     val adapter: BluetoothAdapter = context.getSystemService(BluetoothManager::class.java).adapter
     private val broadcastReceiver = object : BroadcastReceiver() {
@@ -57,6 +71,19 @@ class SoundcoreDeviceCallbackHandler(context: Context) : BluetoothGattCallback()
             broadcastReceiver,
             IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED),
         )
+    }
+
+    @Synchronized
+    override fun close() {
+        manualConnection?.close()
+    }
+
+    override fun writeWithResponse(data: ByteArray) {
+        queueCommand(Command.Write(data))
+    }
+
+    override fun writeWithoutResponse(data: ByteArray) {
+        queueCommand(Command.Write(data))
     }
 
     @Synchronized
@@ -129,6 +156,7 @@ class SoundcoreDeviceCallbackHandler(context: Context) : BluetoothGattCallback()
         next()
     }
 
+    @Deprecated("Deprecated in Java")
     @Synchronized
     override fun onCharacteristicChanged(
         _gatt: BluetoothGatt?,
@@ -136,13 +164,8 @@ class SoundcoreDeviceCallbackHandler(context: Context) : BluetoothGattCallback()
     ) {
         if (characteristic != null) {
             val bytes = characteristic.value
-            val packet = Packet.fromBytes(bytes)
-            if (packet != null) {
-                if (!_packetsFlow.tryEmit(packet)) {
-                    Log.e("SoundcoreDeviceCallbacks", "failed to emit packet to flow")
-                }
-            } else {
-                Log.i("unknown-packet", "got unknown packet: $bytes")
+            coroutineScope.launch {
+                manualConnection?.addInboundPacket(bytes)
             }
             isLocked = false
             next()
@@ -159,6 +182,7 @@ class SoundcoreDeviceCallbackHandler(context: Context) : BluetoothGattCallback()
         next()
     }
 
+    @Deprecated("Deprecated in Java")
     @Synchronized
     override fun onDescriptorRead(
         _gatt: BluetoothGatt?,
@@ -180,17 +204,14 @@ class SoundcoreDeviceCallbackHandler(context: Context) : BluetoothGattCallback()
     @Synchronized
     override fun onServicesDiscovered(_gatt: BluetoothGatt?, status: Int) {
         val service = gatt.services.first {
-            SoundcoreDeviceUtils.isSoundcoreServiceUuid(
-                it.uuid.mostSignificantBits,
-                it.uuid.leastSignificantBits,
-            )
+            isSoundcoreServiceUuid(it.uuid)
         }
         _serviceUuid.value = service.uuid
 
         writeCharacteristic =
-            service.getCharacteristic(UUID.fromString(SoundcoreDeviceUtils.writeCharacteristicUuid()))
+            service.getCharacteristic(UUID.fromString(writeCharacteristicUuid()))
         val readCharacteristic =
-            service.getCharacteristic(UUID.fromString(SoundcoreDeviceUtils.readCharacteristicUuid()))
+            service.getCharacteristic(UUID.fromString(readCharacteristicUuid()))
         this.readCharacteristic = readCharacteristic
 
         gatt.setCharacteristicNotification(readCharacteristic, true)

@@ -3,11 +3,16 @@ use std::sync::Arc;
 use js_sys::Function;
 use macaddr::MacAddr6;
 use openscq30_lib::{
+    api::device::Device as _,
     demo::device::DemoDevice,
-    devices::standard::structures::{EqualizerConfiguration, SoundModes},
+    devices::standard::{
+        state::DeviceState,
+        structures::{EqualizerConfiguration, SoundModes},
+    },
     futures::WasmFutures,
     soundcore_device::device::SoundcoreDevice,
 };
+use tokio::sync::watch;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 use web_sys::BluetoothDevice;
 
@@ -15,7 +20,7 @@ use crate::web_bluetooth_connection::WebBluetoothConnection;
 
 #[wasm_bindgen]
 pub struct Device {
-    inner: Box<dyn openscq30_lib::api::device::Device>,
+    inner: DeviceImplementation,
 }
 
 #[wasm_bindgen]
@@ -28,7 +33,7 @@ impl Device {
             .await
             .map_err(|err| format!("{err:?}"))?;
         Ok(Self {
-            inner: Box::new(device),
+            inner: DeviceImplementation::WebBluetooth(device),
         })
     }
 
@@ -36,7 +41,7 @@ impl Device {
     pub async fn new_demo() -> Device {
         let inner_device = DemoDevice::<WasmFutures>::new("Demo Device", MacAddr6::default()).await;
         Self {
-            inner: Box::new(inner_device),
+            inner: DeviceImplementation::Demo(inner_device),
         }
     }
 
@@ -89,5 +94,55 @@ impl Device {
                     .expect("error handling should be done in javascript");
             }
         })
+    }
+}
+
+// Dynamic dispatch does not work with async functions in traits
+enum DeviceImplementation {
+    WebBluetooth(SoundcoreDevice<WebBluetoothConnection, WasmFutures>),
+    Demo(DemoDevice<WasmFutures>),
+}
+
+impl DeviceImplementation {
+    pub async fn subscribe_to_state_updates(&self) -> watch::Receiver<DeviceState> {
+        match self {
+            DeviceImplementation::WebBluetooth(device) => device.subscribe_to_state_updates().await,
+            DeviceImplementation::Demo(device) => device.subscribe_to_state_updates().await,
+        }
+    }
+
+    pub async fn name(&self) -> openscq30_lib::Result<String> {
+        match self {
+            DeviceImplementation::WebBluetooth(device) => device.name().await,
+            DeviceImplementation::Demo(device) => device.name().await,
+        }
+    }
+
+    pub async fn state(&self) -> DeviceState {
+        match self {
+            DeviceImplementation::WebBluetooth(device) => device.state().await,
+            DeviceImplementation::Demo(device) => device.state().await,
+        }
+    }
+
+    pub async fn set_sound_modes(&self, sound_modes: SoundModes) -> openscq30_lib::Result<()> {
+        match self {
+            DeviceImplementation::WebBluetooth(device) => device.set_sound_modes(sound_modes).await,
+            DeviceImplementation::Demo(device) => device.set_sound_modes(sound_modes).await,
+        }
+    }
+
+    pub async fn set_equalizer_configuration(
+        &self,
+        configuration: EqualizerConfiguration,
+    ) -> openscq30_lib::Result<()> {
+        match self {
+            DeviceImplementation::WebBluetooth(device) => {
+                device.set_equalizer_configuration(configuration).await
+            }
+            DeviceImplementation::Demo(device) => {
+                device.set_equalizer_configuration(configuration).await
+            }
+        }
     }
 }

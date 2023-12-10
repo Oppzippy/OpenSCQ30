@@ -1,5 +1,5 @@
 [workspace]
-members = ["cli", "gui", "lib", "android", "web/wasm"]
+members = ["cli", "gui", "lib", "lib_protobuf", "android", "web/wasm", "uniffi-bindgen"]
 resolver = "2"
 
 [profile.release]

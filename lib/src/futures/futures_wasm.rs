@@ -1,6 +1,5 @@
 use std::{rc::Rc, time::Duration};
 
-use async_trait::async_trait;
 use futures::Future;
 use tokio::{select, sync::Notify};
 
@@ -8,7 +7,6 @@ use super::{Futures, JoinHandle};
 
 pub struct WasmFutures;
 
-#[async_trait(?Send)]
 impl Futures for WasmFutures {
     type JoinHandleType = WasmJoinHandle;
 

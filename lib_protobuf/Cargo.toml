@@ -1,0 +1,15 @@
+[package]
+name = "openscq30_lib_protobuf"
+version = "1.9.0"
+edition = "2021"
+
+[lib]
+crate-type = ["lib"]
+
+[dependencies]
+openscq30_lib = { path = "../lib" }
+bytes = "1.5"
+prost = "0.12"
+
+[build-dependencies]
+prost-build = "0.12"

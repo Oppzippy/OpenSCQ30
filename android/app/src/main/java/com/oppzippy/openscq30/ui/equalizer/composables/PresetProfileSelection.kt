@@ -18,15 +18,13 @@ fun PresetProfileSelection(
     value: EqualizerProfile,
     onProfileSelected: (profile: EqualizerProfile) -> Unit,
 ) {
-    val profiles = EqualizerProfile.values()
-
     Dropdown(
         value = value,
-        options = profiles.asList().map { profile ->
+        options = EqualizerProfile.entries.map { profile ->
             // Throws for the "custom" preset profile option, since that requires VolumeAdjustments
             // to be passed to toEqualizerConfiguration.
             val values = try {
-                profile.toEqualizerConfiguration(null).volumeAdjustments().adjustments().toList()
+                profile.toEqualizerConfiguration(null).volumeAdjustments
             } catch (e: NullPointerException) {
                 null
             }

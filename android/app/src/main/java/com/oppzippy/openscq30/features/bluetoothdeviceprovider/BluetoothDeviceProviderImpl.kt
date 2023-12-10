@@ -5,7 +5,7 @@ import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.util.Log
 import androidx.annotation.RequiresPermission
-import com.oppzippy.openscq30.lib.bindings.SoundcoreDeviceUtils
+import com.oppzippy.openscq30.lib.bindings.isMacAddressSoundcoreDevice
 
 class BluetoothDeviceProviderImpl(private val context: Context) : BluetoothDeviceProvider {
     /**
@@ -18,7 +18,7 @@ class BluetoothDeviceProviderImpl(private val context: Context) : BluetoothDevic
         val adapter: BluetoothAdapter? = bluetoothManager.adapter
         if (adapter != null) {
             return adapter.bondedDevices.filter {
-                SoundcoreDeviceUtils.isMacAddressSoundcoreDevice(it.address)
+                isMacAddressSoundcoreDevice(it.address)
             }.map {
                 BluetoothDevice(it.name, it.address)
             }

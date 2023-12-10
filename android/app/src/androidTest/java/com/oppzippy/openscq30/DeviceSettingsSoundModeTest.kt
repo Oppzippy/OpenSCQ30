@@ -7,11 +7,10 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.performClick
-import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
-import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
-import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
-import com.oppzippy.openscq30.lib.bindings.SoundModes
-import com.oppzippy.openscq30.lib.bindings.TransparencyMode
+import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
+import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.wrapper.SoundModes
+import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
 import com.oppzippy.openscq30.ui.soundmode.NoiseCancelingType
 import com.oppzippy.openscq30.ui.soundmode.SoundModeSettings
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -91,7 +90,7 @@ class DeviceSettingsSoundModeTest {
                     AmbientSoundMode.Normal,
                     NoiseCancelingMode.Indoor,
                     TransparencyMode.VocalMode,
-                    CustomNoiseCanceling(0),
+                    0u,
                 ),
                 onAmbientSoundModeChange = onAmbientSoundModeChange,
                 hasTransparencyModes = false,
@@ -115,7 +114,7 @@ class DeviceSettingsSoundModeTest {
                     AmbientSoundMode.Normal,
                     NoiseCancelingMode.Indoor,
                     TransparencyMode.VocalMode,
-                    CustomNoiseCanceling(0),
+                    0u,
                 ),
                 onTransparencyModeChange = onTransparencyModeChange,
                 hasTransparencyModes = true,
@@ -139,7 +138,7 @@ class DeviceSettingsSoundModeTest {
                     AmbientSoundMode.Normal,
                     NoiseCancelingMode.Indoor,
                     TransparencyMode.VocalMode,
-                    CustomNoiseCanceling(0),
+                    0u,
                 ),
                 onNoiseCancelingModeChange = onNoiseCancelingModeChange,
                 hasTransparencyModes = true,
@@ -155,7 +154,7 @@ class DeviceSettingsSoundModeTest {
     @Test
     fun setsCustomNoiseCanceling() {
         val onCustomNoiseCancelingChange =
-            mockk<(customNoiseCanceling: CustomNoiseCanceling) -> Unit>(relaxed = true)
+            mockk<(customNoiseCanceling: UByte) -> Unit>(relaxed = true)
 
         composeRule.setContent {
             SoundModeSettings(
@@ -163,7 +162,7 @@ class DeviceSettingsSoundModeTest {
                     AmbientSoundMode.Normal,
                     NoiseCancelingMode.Custom,
                     TransparencyMode.VocalMode,
-                    CustomNoiseCanceling(0),
+                    0u,
                 ),
                 onCustomNoiseCancelingChange = onCustomNoiseCancelingChange,
                 hasTransparencyModes = false,
@@ -173,7 +172,7 @@ class DeviceSettingsSoundModeTest {
         // clicks in the middle of the 0-10 slider, so 5
         composeRule.onNode(customNoiseCanceling).performClick()
         verify(exactly = 1) {
-            onCustomNoiseCancelingChange(CustomNoiseCanceling(5))
+            onCustomNoiseCancelingChange(5u)
         }
     }
 
@@ -187,7 +186,7 @@ class DeviceSettingsSoundModeTest {
                     ambientSoundMode,
                     noiseCancelingMode,
                     TransparencyMode.VocalMode,
-                    CustomNoiseCanceling(0),
+                    0u,
                 ),
                 hasTransparencyModes = true,
                 noiseCancelingType = NoiseCancelingType.Custom,

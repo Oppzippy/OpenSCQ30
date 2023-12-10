@@ -18,11 +18,10 @@ import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification
-import com.oppzippy.openscq30.lib.bindings.AmbientSoundMode
-import com.oppzippy.openscq30.lib.bindings.CustomNoiseCanceling
-import com.oppzippy.openscq30.lib.bindings.DeviceProfile
-import com.oppzippy.openscq30.lib.bindings.NoiseCancelingMode
-import com.oppzippy.openscq30.lib.bindings.TransparencyMode
+import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
+import com.oppzippy.openscq30.lib.wrapper.DeviceProfile
+import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
 import com.oppzippy.openscq30.ui.quickpresets.composables.QuickPresetConfiguration
 import com.oppzippy.openscq30.ui.quickpresets.composables.QuickPresetSelection
 import com.oppzippy.openscq30.ui.quickpresets.models.QuickPresetEqualizerConfiguration
@@ -90,7 +89,7 @@ fun QuickPresetScreen(
                     viewModel.upsertQuickPreset(preset.copy(transparencyMode = it))
                 },
                 onCustomNoiseCancelingChange = {
-                    viewModel.upsertQuickPreset(preset.copy(customNoiseCanceling = it))
+                    viewModel.upsertQuickPreset(preset.copy(customNoiseCanceling = it?.toInt()))
                 },
                 onEqualizerChange = {
                     val presetEqualizerProfile =
@@ -129,7 +128,7 @@ private fun QuickPresetScreen(
     onAmbientSoundModeChange: (ambientSoundMode: AmbientSoundMode?) -> Unit = {},
     onNoiseCancelingModeChange: (noiseCancelingMode: NoiseCancelingMode?) -> Unit = {},
     onTransparencyModeChange: (transparencyMode: TransparencyMode?) -> Unit = {},
-    onCustomNoiseCancelingChange: (customNoiseCanceling: CustomNoiseCanceling?) -> Unit = {},
+    onCustomNoiseCancelingChange: (customNoiseCanceling: UByte?) -> Unit = {},
     onEqualizerChange: (config: QuickPresetEqualizerConfiguration?) -> Unit = {},
     onNameChange: (name: String?) -> Unit = {},
 ) {
@@ -145,7 +144,7 @@ private fun QuickPresetScreen(
             ambientSoundMode = preset.ambientSoundMode,
             noiseCancelingMode = preset.noiseCancelingMode,
             transparencyMode = preset.transparencyMode,
-            customNoiseCanceling = preset.customNoiseCanceling,
+            customNoiseCanceling = preset.customNoiseCanceling?.toUByte(),
             equalizerConfiguration = if (preset.presetEqualizerProfile != null) {
                 QuickPresetEqualizerConfiguration.PresetProfile(preset.presetEqualizerProfile)
             } else if (preset.customEqualizerProfileName != null) {

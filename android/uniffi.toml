@@ -1,0 +1,62 @@
+[bindings.kotlin]
+package_name = "com.oppzippy.openscq30.lib.bindings"
+
+[bindings.kotlin.custom_types.Uuid]
+type_name = "UUID"
+imports = ["java.util.UUID"]
+into_custom = "UUID.fromString({})"
+from_custom = "{}.toString()"
+
+[bindings.kotlin.custom_types.DeviceState]
+type_name = "DeviceState"
+imports = [
+    "com.oppzippy.openscq30.lib.wrapper.toKotlin",
+    "com.oppzippy.openscq30.lib.wrapper.DeviceState",
+]
+into_custom = "com.oppzippy.openscq30.lib.protobuf.DeviceState.parseFrom({}).toKotlin()"
+from_custom = "{}.toProtobuf().toByteArray()"
+
+[bindings.kotlin.custom_types.SoundModes]
+type_name = "SoundModes"
+imports = [
+    "com.oppzippy.openscq30.lib.wrapper.toKotlin",
+    "com.oppzippy.openscq30.lib.wrapper.SoundModes",
+]
+into_custom = "com.oppzippy.openscq30.lib.protobuf.SoundModes.parseFrom({}).toKotlin()"
+from_custom = "{}.toProtobuf().toByteArray()"
+
+[bindings.kotlin.custom_types.EqualizerConfiguration]
+type_name = "EqualizerConfiguration"
+imports = [
+    "com.oppzippy.openscq30.lib.wrapper.toKotlin",
+    "com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration",
+]
+into_custom = "com.oppzippy.openscq30.lib.protobuf.EqualizerConfiguration.parseFrom({}).toKotlin()"
+from_custom = "{}.toProtobuf().toByteArray()"
+
+[bindings.kotlin.custom_types.HearId]
+type_name = "HearId"
+imports = [
+    "com.oppzippy.openscq30.lib.wrapper.toKotlin",
+    "com.oppzippy.openscq30.lib.wrapper.HearId",
+]
+into_custom = "com.oppzippy.openscq30.lib.protobuf.HearId.parseFrom({}).toKotlin()"
+from_custom = "{}.toProtobuf().toByteArray()"
+
+[bindings.kotlin.custom_types.CustomButtonModel]
+type_name = "CustomButtonModel"
+imports = [
+    "com.oppzippy.openscq30.lib.wrapper.toKotlin",
+    "com.oppzippy.openscq30.lib.wrapper.CustomButtonModel",
+]
+into_custom = "com.oppzippy.openscq30.lib.protobuf.CustomButtonModel.parseFrom({}).toKotlin()"
+from_custom = "{}.toProtobuf().toByteArray()"
+
+[bindings.kotlin.custom_types.PresetEqualizerProfile]
+type_name = "PresetEqualizerProfile"
+imports = [
+    "com.oppzippy.openscq30.lib.wrapper.toKotlin",
+    "com.oppzippy.openscq30.lib.wrapper.PresetEqualizerProfile",
+]
+into_custom = "com.oppzippy.openscq30.lib.protobuf.PresetEqualizerProfileSelection.parseFrom({}).presetProfile.toKotlin()"
+from_custom = "com.oppzippy.openscq30.lib.protobuf.PresetEqualizerProfileSelection.newBuilder().setPresetProfile({}.toProtobuf()).build().toByteArray()"

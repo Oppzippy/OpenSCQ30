@@ -1,6 +1,5 @@
 use std::{marker::PhantomData, rc::Rc};
 
-use async_trait::async_trait;
 use macaddr::MacAddr6;
 
 use crate::{
@@ -32,7 +31,6 @@ where
     }
 }
 
-#[async_trait(?Send)]
 impl<FuturesType> DeviceRegistry for DemoDeviceRegistry<FuturesType>
 where
     FuturesType: Futures,

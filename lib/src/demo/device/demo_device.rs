@@ -1,6 +1,5 @@
 use std::{marker::PhantomData, sync::Arc, time::Duration};
 
-use async_trait::async_trait;
 use macaddr::MacAddr6;
 use tokio::sync::{watch, Mutex};
 use uuid::Uuid;
@@ -124,7 +123,6 @@ where
     }
 }
 
-#[async_trait(?Send)]
 impl<FuturesType> Device for DemoDevice<FuturesType>
 where
     FuturesType: Futures,

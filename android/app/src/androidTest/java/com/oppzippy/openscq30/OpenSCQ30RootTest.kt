@@ -2,14 +2,17 @@ package com.oppzippy.openscq30
 
 import android.content.Intent
 import android.os.Build
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.lifecycle.lifecycleScope
 import androidx.test.rule.GrantPermissionRule
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDeviceProvider
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceConnector
-import com.oppzippy.openscq30.features.soundcoredevice.demo.DemoSoundcoreDevice
+import com.oppzippy.openscq30.features.soundcoredevice.impl.DemoSoundcoreDeviceConnector
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
 import com.oppzippy.openscq30.ui.OpenSCQ30Root
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -17,13 +20,14 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.junit4.MockKRule
-import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import javax.inject.Inject
 
+@OptIn(ExperimentalTestApi::class)
 @HiltAndroidTest
 class OpenSCQ30RootTest {
     @get:Rule
@@ -62,28 +66,27 @@ class OpenSCQ30RootTest {
     }
 
     @Test
-    fun itWorks() {
-        val bluetoothDevices = listOf(BluetoothDevice("Test Device", "00:00:00:00:00:00"))
+    fun itWorks() = runTest {
+        val bluetoothDevices = listOf(BluetoothDevice("Demo Device", "00:00:00:00:00:00"))
         every { bluetoothDeviceProvider.getDevices() } returns bluetoothDevices
         composeRule.setContent {
             OpenSCQ30Root()
         }
 
-        val device = DemoSoundcoreDevice("test", "00:00:00:00:00:00")
-        val mutex = Mutex(locked = true)
-        coEvery {
-            soundcoreDeviceConnector.connectToSoundcoreDevice(
-                "00:00:00:00:00:00",
-                any(),
-            )
-        } coAnswers {
-            mutex.lock()
-            device
-        }
-        composeRule.onNodeWithText("Test Device").performClick()
-        composeRule.onNodeWithText(composeRule.activity.getString(R.string.loading)).assertExists()
-        mutex.unlock()
-        composeRule.onNodeWithText(composeRule.activity.getString(R.string.ambient_sound_mode))
-            .assertExists()
+        val device = DemoSoundcoreDeviceConnector().connectToSoundcoreDevice(
+            macAddress = "00:00:00:00:00:00",
+            coroutineScope = composeRule.activity.lifecycleScope,
+        )
+        coEvery { soundcoreDeviceConnector.connectToSoundcoreDevice(any(), any()) } returns device
+
+        composeRule.onNodeWithText("Demo Device").performClick()
+        val ambientSoundMode =
+            hasTextExactly(composeRule.activity.getString(R.string.ambient_sound_mode))
+        composeRule.waitUntilNodeCount(
+            ambientSoundMode,
+            1,
+            1500,
+        )
+        composeRule.onNode(ambientSoundMode).assertExists()
     }
 }

@@ -1,9 +1,9 @@
 package com.oppzippy.openscq30.ui
 
-import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDevice
+import com.oppzippy.openscq30.features.soundcoredevice.impl.SoundcoreDevice
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
-import com.oppzippy.openscq30.lib.wrapper.SoundcoreDeviceState
+import com.oppzippy.openscq30.lib.wrapper.DeviceState
 import com.oppzippy.openscq30.test.MainDispatcherRule
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import io.mockk.every
@@ -72,7 +72,7 @@ class DeviceServiceConnectionTest {
         connection.onServiceConnected(null, binder)
 
         // we aren't linked with openscq30_android.so, so we need to mock SoundcoreDeviceState
-        val deviceStateFlow = MutableStateFlow<SoundcoreDeviceState>(mockk())
+        val deviceStateFlow = MutableStateFlow<DeviceState>(mockk())
         val device: SoundcoreDevice = mockk()
         every { device.name } returns "Test"
         every { device.macAddress } returns "00:00:00:00:00:00"
@@ -94,7 +94,7 @@ class DeviceServiceConnectionTest {
         connection.onServiceConnected(null, binder)
 
         // we aren't linked with openscq30_android.so, so we need to mock SoundcoreDeviceState
-        val deviceStateFlow = MutableStateFlow<SoundcoreDeviceState>(mockk(relaxed = true))
+        val deviceStateFlow = MutableStateFlow<DeviceState>(mockk(relaxed = true))
         val device: SoundcoreDevice = mockk()
         every { device.stateFlow } returns deviceStateFlow
         every { device.name } returns "Test"

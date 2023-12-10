@@ -1,6 +1,5 @@
 use std::collections::VecDeque;
 
-use async_trait::async_trait;
 use macaddr::MacAddr6;
 use tokio::sync::{mpsc, watch, Mutex, RwLock};
 use uuid::Uuid;
@@ -54,7 +53,6 @@ impl StubConnection {
     }
 }
 
-#[async_trait(?Send)]
 impl Connection for StubConnection {
     async fn name(&self) -> crate::Result<String> {
         self.name_return.write().await.take().unwrap()

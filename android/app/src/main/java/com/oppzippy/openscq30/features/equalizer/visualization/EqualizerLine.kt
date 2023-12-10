@@ -3,7 +3,8 @@ package com.oppzippy.openscq30.features.equalizer.visualization
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
-import com.oppzippy.openscq30.lib.bindings.VolumeAdjustments
+import com.oppzippy.openscq30.lib.bindings.volumeAdjustmentsMaxVolume
+import com.oppzippy.openscq30.lib.bindings.volumeAdjustmentsMinVolume
 
 class EqualizerLine(private val values: List<Double>) {
     fun drawBitmap(
@@ -43,8 +44,8 @@ class EqualizerLine(private val values: List<Double>) {
     fun points(width: Float, height: Float, padding: Float): List<Pair<Float, Float>> {
         val widthWithoutPadding = width - padding * 2
         val heightWithoutPadding = height - padding * 2
-        val minVolume = VolumeAdjustments.minVolume()
-        val maxVolume = VolumeAdjustments.maxVolume()
+        val minVolume = volumeAdjustmentsMinVolume()
+        val maxVolume = volumeAdjustmentsMaxVolume()
         val range = maxVolume - minVolume
 
         val points = values.mapIndexed { index, value ->

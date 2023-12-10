@@ -5,8 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
 import com.oppzippy.openscq30.features.equalizer.storage.toCustomProfile
-import com.oppzippy.openscq30.lib.bindings.EqualizerConfiguration
-import com.oppzippy.openscq30.lib.bindings.VolumeAdjustments
+import com.oppzippy.openscq30.lib.bindings.volumeAdjustmentsMaxVolume
+import com.oppzippy.openscq30.lib.bindings.volumeAdjustmentsMinVolume
+import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.equalizer.models.EqualizerProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -57,7 +58,7 @@ class EqualizerSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             _displayedEqualizerConfiguration.collectLatest {
                 if (it != null) {
-                    refreshValueTexts(it.volumeAdjustments().adjustments().toList())
+                    refreshValueTexts(it.volumeAdjustments)
                 }
             }
         }
@@ -80,7 +81,10 @@ class EqualizerSettingsViewModel @Inject constructor(
         }
     }
 
-    private fun setDisplayedEqualizerConfiguration(profile: EqualizerProfile, values: DoubleArray) {
+    private fun setDisplayedEqualizerConfiguration(
+        profile: EqualizerProfile,
+        values: List<Double>,
+    ) {
         // Values match the display, not the profile. Creating the rust EqualizerConfiguration first
         // will use proper values.
         val configuration = profile.toEqualizerConfiguration(values)
@@ -90,7 +94,7 @@ class EqualizerSettingsViewModel @Inject constructor(
     fun createCustomProfile(name: String) {
         _displayedEqualizerConfiguration.value?.let {
             viewModelScope.launch {
-                customProfileDao.insert(it.volumeAdjustments().toCustomProfile(name))
+                customProfileDao.insert(it.volumeAdjustments.toCustomProfile(name))
                 refreshCustomProfiles()
             }
         }
@@ -106,7 +110,7 @@ class EqualizerSettingsViewModel @Inject constructor(
     fun selectCustomProfile(customProfile: CustomProfile) {
         setDisplayedEqualizerConfiguration(
             EqualizerProfile.Custom,
-            customProfile.getVolumeAdjustments().adjustments(),
+            customProfile.getVolumeAdjustments(),
         )
     }
 
@@ -115,8 +119,8 @@ class EqualizerSettingsViewModel @Inject constructor(
         try {
             val value = BigDecimal(changedText)
                 .coerceIn(
-                    BigDecimal(VolumeAdjustments.minVolume()),
-                    BigDecimal(VolumeAdjustments.maxVolume()),
+                    BigDecimal(volumeAdjustmentsMinVolume()),
+                    BigDecimal(volumeAdjustmentsMaxVolume()),
                 )
                 .setScale(1, RoundingMode.HALF_UP)
             onValueChange(changedIndex, value.toDouble())
@@ -140,14 +144,14 @@ class EqualizerSettingsViewModel @Inject constructor(
         _displayedEqualizerConfiguration.value?.let { equalizerConfiguration ->
             setDisplayedEqualizerConfiguration(
                 EqualizerProfile.Custom,
-                equalizerConfiguration.volumeAdjustments().adjustments()
+                equalizerConfiguration.volumeAdjustments
                     .mapIndexed { index, value ->
                         if (index == changedIndex) {
                             changedValue
                         } else {
                             value
                         }
-                    }.toDoubleArray(),
+                    },
             )
         }
     }
@@ -162,7 +166,7 @@ class EqualizerSettingsViewModel @Inject constructor(
         _displayedEqualizerConfiguration.value?.let {
             setDisplayedEqualizerConfiguration(
                 profile,
-                it.volumeAdjustments().adjustments(),
+                it.volumeAdjustments,
             )
         }
     }
@@ -179,9 +183,9 @@ class EqualizerSettingsViewModel @Inject constructor(
 
     private fun updateSelectedCustomProfile(equalizerConfiguration: EqualizerConfiguration) {
         _selectedCustomProfile.value =
-            if (!equalizerConfiguration.presetProfile().isPresent) {
+            if (equalizerConfiguration.presetProfile == null) {
                 _customProfiles.value.find {
-                    it.getVolumeAdjustments() == equalizerConfiguration.volumeAdjustments()
+                    it.getVolumeAdjustments() == equalizerConfiguration.volumeAdjustments
                 }
             } else {
                 null

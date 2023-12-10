@@ -1,6 +1,5 @@
 use std::{collections::HashSet, sync::Arc, time::Duration};
 
-use async_trait::async_trait;
 use macaddr::MacAddr6;
 use tracing::instrument;
 use windows::{
@@ -66,7 +65,6 @@ impl WindowsConnectionRegistry {
     }
 }
 
-#[async_trait(?Send)]
 impl ConnectionRegistry for WindowsConnectionRegistry {
     type ConnectionType = WindowsConnection;
     type DescriptorType = GenericConnectionDescriptor;

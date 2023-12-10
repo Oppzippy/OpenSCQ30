@@ -3,7 +3,6 @@ use std::{
     sync::Arc,
 };
 
-use async_trait::async_trait;
 use macaddr::MacAddr6;
 
 use crate::api::connection::{
@@ -29,7 +28,6 @@ impl StubConnectionRegistry {
     }
 }
 
-#[async_trait(?Send)]
 impl ConnectionRegistry for StubConnectionRegistry {
     type ConnectionType = StubConnection;
     type DescriptorType = GenericConnectionDescriptor;

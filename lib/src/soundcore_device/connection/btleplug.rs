@@ -4,9 +4,7 @@ mod btleplug_error;
 pub mod mac_address;
 
 use btleplug::platform::Manager;
-pub use btleplug_connection::*;
 pub use btleplug_connection_registry::*;
-pub use btleplug_error::*;
 use futures::Future;
 use tokio::{
     runtime::{Handle, Runtime},
