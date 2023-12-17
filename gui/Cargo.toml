@@ -9,7 +9,7 @@ bluetooth = ["openscq30_lib/bluetooth"]
 demo = ["openscq30_lib/demo"]
 
 [dependencies]
-openscq30_lib = { path = "../lib" }
+openscq30_lib = { path = "../lib", features = ["serde"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 futures = { version = "0.3" }
 tracing = "0.1"

@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -8,8 +9,9 @@ use crate::{
 };
 
 // TODO remove deserialize
-#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Default, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct DeviceProfile {
     pub sound_mode: Option<SoundModeProfile>,
     pub has_hear_id: bool,
@@ -22,19 +24,21 @@ pub struct DeviceProfile {
     pub has_auto_power_off: bool,
     pub dynamic_range_compression_min_firmware_version: Option<FirmwareVersion>,
 
-    #[serde(skip)]
+    #[cfg_attr(feature = "serde", serde(skip))]
     pub custom_dispatchers: Option<fn() -> Arc<dyn DeviceCommandDispatcher + Send + Sync>>,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Default, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct SoundModeProfile {
     pub noise_canceling_mode_type: NoiseCancelingModeType,
     pub transparency_mode_type: TransparencyModeType,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Default, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum NoiseCancelingModeType {
     #[default]
     None,
@@ -42,8 +46,9 @@ pub enum NoiseCancelingModeType {
     Custom,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Default, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum TransparencyModeType {
     #[default]
     Basic,

@@ -2,10 +2,12 @@ use std::{array, ops::Range, sync::Arc};
 
 use float_cmp::{ApproxEq, F64Margin};
 use ordered_float::OrderedFloat;
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialOrd, Serialize, Deserialize)]
-#[serde(transparent)]
+#[derive(Clone, Debug, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(transparent))]
 pub struct VolumeAdjustments {
     volume_adjustments: Arc<[OrderedFloat<f64>]>,
 }

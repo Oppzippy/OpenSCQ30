@@ -1,3 +1,4 @@
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumIter, EnumString, FromRepr};
 
@@ -15,11 +16,10 @@ use super::volume_adjustments::VolumeAdjustments;
     Hash,
     Display,
     EnumIter,
-    Serialize,
-    Deserialize,
     EnumString,
     AsRefStr,
 )]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PresetEqualizerProfile {
     #[default]
     SoundcoreSignature = 0x0000,

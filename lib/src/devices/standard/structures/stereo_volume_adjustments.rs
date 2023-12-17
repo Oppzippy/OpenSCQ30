@@ -1,9 +1,11 @@
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 use super::VolumeAdjustments;
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Default, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Default)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct StereoVolumeAdjustments {
     pub left: VolumeAdjustments,
     pub right: VolumeAdjustments,

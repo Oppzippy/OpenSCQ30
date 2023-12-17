@@ -10,7 +10,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-openscq30_lib = { path = "../../lib", features = ["wasm"] }
+openscq30_lib = { path = "../../lib", features = ["wasm", "serde"] }
 serde = { version = "1.0", features = ["derive"] }
 serde-wasm-bindgen = "0.5"
 uuid = "1.3"

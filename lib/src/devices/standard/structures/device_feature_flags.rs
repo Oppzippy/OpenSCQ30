@@ -1,9 +1,11 @@
 use bitflags::bitflags;
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 bitflags! {
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
-    #[serde(from = "u32", into = "u32")]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    #[cfg_attr(feature = "serde", serde(from = "u32", into = "u32"))]
     pub struct DeviceFeatureFlags: u32 {
         const SOUND_MODES               = 1 << 0;
         const NOISE_CANCELING_MODE      = 1 << 1;

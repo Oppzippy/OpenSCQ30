@@ -1,9 +1,11 @@
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 use super::{BasicHearId, CustomHearId};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", tag = "type")]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase", tag = "type"))]
 pub enum HearId {
     Basic(BasicHearId),
     Custom(CustomHearId),
