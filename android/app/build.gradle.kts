@@ -153,10 +153,10 @@ dependencies {
     // Compose navigation
     implementation("androidx.navigation:navigation-compose:2.7.5")
 
-    val accompanistVersion = "0.30.1"
+    val accompanistVersion = "0.32.0"
     implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
 
-    val roomVersion = "2.6.0"
+    val roomVersion = "2.6.1"
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     annotationProcessor("androidx.room:room-compiler:$roomVersion")
