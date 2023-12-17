@@ -1545,7 +1545,6 @@ dependencies = [
  "macaddr",
  "nom",
  "ordered-float",
- "prost",
  "regex",
  "serde",
  "strum",
