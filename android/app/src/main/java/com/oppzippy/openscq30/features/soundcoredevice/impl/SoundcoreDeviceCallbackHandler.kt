@@ -34,8 +34,7 @@ class SoundcoreDeviceCallbackHandler(
     private val coroutineScope: CoroutineScope,
 ) :
     BluetoothGattCallback(), ConnectionWriter, AutoCloseable {
-    // TODO make not lateinit
-    private lateinit var gatt: BluetoothGatt
+    private var gatt: BluetoothGatt? = null
     private var readCharacteristic: BluetoothGattCharacteristic? = null
     private var writeCharacteristic: BluetoothGattCharacteristic? = null
     private var commandQueue: ConcurrentLinkedQueue<Command> = ConcurrentLinkedQueue()
@@ -95,7 +94,8 @@ class SoundcoreDeviceCallbackHandler(
         if (!isLocked) {
             val writeCharacteristic = writeCharacteristic
             val readCharacteristic = readCharacteristic
-            if (writeCharacteristic != null && readCharacteristic != null) {
+            val gatt = gatt
+            if (gatt != null && writeCharacteristic != null && readCharacteristic != null) {
                 commandQueue.poll()?.let { command ->
                     val isSuccess = when (command) {
                         is Command.SetMtu -> gatt.requestMtu(command.mtu)
@@ -124,7 +124,7 @@ class SoundcoreDeviceCallbackHandler(
 
     @Synchronized
     override fun onCharacteristicWrite(
-        _gatt: BluetoothGatt?,
+        gatt: BluetoothGatt?,
         characteristic: BluetoothGattCharacteristic?,
         status: Int,
     ) {
@@ -148,7 +148,7 @@ class SoundcoreDeviceCallbackHandler(
     }
 
     @Synchronized
-    override fun onMtuChanged(_gatt: BluetoothGatt?, mtu: Int, status: Int) {
+    override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
         Log.i("SoundcoreDeviceCallbaks", "mtu changed to $mtu, status $status")
         isLocked = false
         next()
@@ -157,7 +157,7 @@ class SoundcoreDeviceCallbackHandler(
     @Deprecated("Deprecated in Java")
     @Synchronized
     override fun onCharacteristicChanged(
-        _gatt: BluetoothGatt?,
+        gatt: BluetoothGatt?,
         characteristic: BluetoothGattCharacteristic?,
     ) {
         if (characteristic != null) {
@@ -172,7 +172,7 @@ class SoundcoreDeviceCallbackHandler(
 
     @Synchronized
     override fun onDescriptorWrite(
-        _gatt: BluetoothGatt?,
+        gatt: BluetoothGatt?,
         descriptor: BluetoothGattDescriptor?,
         status: Int,
     ) {
@@ -183,7 +183,7 @@ class SoundcoreDeviceCallbackHandler(
     @Deprecated("Deprecated in Java")
     @Synchronized
     override fun onDescriptorRead(
-        _gatt: BluetoothGatt?,
+        gatt: BluetoothGatt?,
         descriptor: BluetoothGattDescriptor?,
         status: Int,
     ) {
@@ -200,7 +200,14 @@ class SoundcoreDeviceCallbackHandler(
     }
 
     @Synchronized
-    override fun onServicesDiscovered(_gatt: BluetoothGatt?, status: Int) {
+    override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
+        if (gatt == null) {
+            Log.e(
+                "SoundcoreDeviceCallbackHandler",
+                "onServicesDiscovered: gatt is null? status $status",
+            )
+            return
+        }
         val service = gatt.services.first {
             isSoundcoreServiceUuid(it.uuid)
         }
