@@ -41,8 +41,6 @@ class SoundcoreDeviceCallbackHandler(
     private var commandQueue: ConcurrentLinkedQueue<Command> = ConcurrentLinkedQueue()
     private var isLocked: Boolean = false
     private val _isDisconnected = MutableStateFlow(false)
-
-    // TODO handle disconnects
     val isDisconnected = _isDisconnected.asStateFlow()
     private var _serviceUuid = MutableStateFlow<UUID?>(null)
     val serviceUuid = _serviceUuid.asStateFlow()

@@ -8,6 +8,7 @@ import com.oppzippy.openscq30.lib.bindings.ManualConnection
 import com.oppzippy.openscq30.lib.bindings.newSoundcoreDevice
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import java.util.concurrent.TimeoutException
 import kotlin.time.Duration.Companion.seconds
@@ -47,8 +48,9 @@ class SoundcoreDeviceConnectorImpl(
             connectionWriter = callbacks,
         )
         callbacks.setManualConnection(connection)
+
         val nativeDevice = newSoundcoreDevice(connection)
-        return SoundcoreDevice(
+        val soundcoreDevice = SoundcoreDevice(
             name = nativeDevice.name(),
             macAddress = nativeDevice.macAddress(),
             bleServiceUuid = nativeDevice.serviceUuid(),
@@ -61,5 +63,18 @@ class SoundcoreDeviceConnectorImpl(
             coroutineScope = coroutineScope,
             initialState = nativeDevice.state(),
         )
+
+        // SoundcoreDevice and SoundcoreDeviceCallbackHandler are intentionally unaware of each other,
+        // so connecting isDisconnected to SoundcoreDevice's close must be done outside of either of
+        // the two classes.
+        coroutineScope.launch {
+            callbacks.isDisconnected.collect { isDisconnected ->
+                if (isDisconnected) {
+                    soundcoreDevice.close()
+                }
+            }
+        }
+
+        return soundcoreDevice
     }
 }
