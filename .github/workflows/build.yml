@@ -45,7 +45,7 @@ jobs:
           mv packaging/appimage/openscq30_gui-*.AppImage* artifacts/
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux
           path: artifacts/*
@@ -69,7 +69,7 @@ jobs:
           mv target/release/openscq30_cli artifacts/openscq30_cli-macos-x86_64
           mv target/release/openscq30_gui artifacts/openscq30_gui-macos-x86_64
       - name: Upload gui
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: macos
           path: artifacts/*
@@ -120,7 +120,7 @@ jobs:
           Move-Item .\packaging\windows\Output\OpenSCQ30_Setup.exe artifacts\openscq30_gui_setup-windows-x86_64.exe
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-gui
           path: artifacts/*
@@ -141,7 +141,7 @@ jobs:
           Move-Item .\target\release\openscq30_cli.exe artifacts\openscq30_cli-windows-x86_64.exe
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-cli
           path: artifacts/*
@@ -170,7 +170,7 @@ jobs:
       - name: Rename apk
         run: mv android/app/build/outputs/apk/bluetooth/release/app-bluetooth-release-unsigned.apk openscq30_android.apk
       - name: Upload apk
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android
           path: openscq30_android.apk
