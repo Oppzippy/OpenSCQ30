@@ -34,9 +34,10 @@ pub const A3945_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     has_wear_detection: false,
     has_touch_tone: false,
     has_auto_power_off: false,
-    custom_dispatchers: None,
+    custom_dispatchers: Some(|| Arc::new(A3945Dispatcher::default())),
 };
 
+#[derive(Debug, Default)]
 pub struct A3945Dispatcher {
     // The official app only displays 8 bands, so I have no idea what bands 9 and 10 do. We'll just keep track
     // of their initial value and resend that.
@@ -132,5 +133,92 @@ impl<'a> OutboundPacket for CustomSetEqualizerPacket<'a> {
             .chain(self.right_channel.volume_adjustments().bytes())
             .chain(self.right_band_9_and_10.into_iter())
             .collect::<Vec<_>>()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use nom::error::VerboseError;
+
+    use crate::devices::{
+        a3945::{
+            device_profile::CustomSetEqualizerPacket, packets::take_a3945_state_update_packet,
+        },
+        standard::{
+            packets::{
+                inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_body},
+                outbound::{OutboundPacket, OutboundPacketBytes},
+            },
+            state::DeviceState,
+            structures::{EqualizerConfiguration, PresetEqualizerProfile, STATE_UPDATE},
+        },
+    };
+
+    use super::A3945_DEVICE_PROFILE;
+
+    struct A3945TestStateUpdatePacket {
+        body: Vec<u8>,
+    }
+    impl OutboundPacket for A3945TestStateUpdatePacket {
+        fn command(&self) -> [u8; 7] {
+            STATE_UPDATE
+        }
+
+        fn body(&self) -> Vec<u8> {
+            self.body.to_owned()
+        }
+    }
+
+    #[test]
+    fn it_remembers_band_9_and_10_values() {
+        let data = A3945TestStateUpdatePacket {
+            body: vec![
+                0x00, // host device
+                0x00, // tws status
+                0x00, 0x00, 0x00, 0x00, // dual battery
+                b'0', b'0', b'.', b'0', b'0', // left firmware version
+                b'0', b'0', b'.', b'0', b'0', // right firmware version
+                b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0',
+                b'0', b'0', // serial number
+                0x00, 0x00, // eq profile id
+                120, 120, 120, 120, 120, 120, 120, 120, 121, 122, // left eq
+                120, 120, 120, 120, 120, 120, 120, 120, 123, 124, // right eq
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, // custom button model
+                0x00, // tone switch
+                0x00, // wear detection
+                0x00, // gaming mode
+                0x00, // case battery
+                0x00, // bass up
+                0x00, // device color
+            ],
+        }
+        .bytes();
+
+        let body = take_inbound_packet_body(&data).unwrap().1;
+        let state_update = take_a3945_state_update_packet::<VerboseError<_>>(body)
+            .unwrap()
+            .1;
+        let state: DeviceState = StateUpdatePacket::from(state_update).into();
+        let dispatchers = A3945_DEVICE_PROFILE.custom_dispatchers.unwrap()();
+        let state = (&dispatchers.packet_handlers()[&STATE_UPDATE])(&body, state);
+
+        let equalizer_configuration =
+            EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::TrebleReducer);
+        let command_response = dispatchers
+            .set_equalizer_configuration(state, equalizer_configuration.to_owned())
+            .unwrap();
+
+        assert_eq!(1, command_response.packets.len());
+        assert_eq!(
+            &CustomSetEqualizerPacket {
+                left_channel: &equalizer_configuration,
+                right_channel: &equalizer_configuration,
+                left_band_9_and_10: [121, 122],
+                right_band_9_and_10: [123, 124],
+            }
+            .bytes(),
+            command_response.packets.first().unwrap(),
+        );
     }
 }

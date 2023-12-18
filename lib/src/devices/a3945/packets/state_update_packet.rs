@@ -14,7 +14,7 @@ use crate::devices::{
             parsing::{
                 take_battery_level, take_bool, take_custom_button_model, take_dual_battery,
                 take_equalizer_configuration, take_firmware_version, take_serial_number,
-                ParseResult,
+                take_volume_adjustments, ParseResult,
             },
         },
         structures::{
@@ -79,7 +79,7 @@ pub fn take_a3945_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                 take_serial_number,
                 take_equalizer_configuration(8),
                 take(2usize),
-                take_equalizer_configuration(8),
+                take_volume_adjustments(8),
                 take(2usize),
                 take_custom_button_model,
                 take_bool,
@@ -98,7 +98,7 @@ pub fn take_a3945_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                 serial_number,
                 left_equalizer_configuration,
                 left_band_9_and_10,
-                right_equalizer_configuration,
+                right_volume_adjustments,
                 right_band_9_and_10,
                 custom_button_model,
                 touch_tone_switch,
@@ -115,10 +115,17 @@ pub fn take_a3945_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                     left_firmware,
                     right_firmware,
                     serial_number,
+                    right_equalizer_configuration: if left_equalizer_configuration
+                        .preset_profile()
+                        .is_some()
+                    {
+                        left_equalizer_configuration.to_owned()
+                    } else {
+                        EqualizerConfiguration::new_custom_profile(right_volume_adjustments)
+                    },
+                    right_band_9_and_10: right_band_9_and_10.try_into().unwrap(),
                     left_equalizer_configuration,
                     left_band_9_and_10: left_band_9_and_10.try_into().unwrap(),
-                    right_equalizer_configuration,
-                    right_band_9_and_10: right_band_9_and_10.try_into().unwrap(),
                     custom_button_model,
                     touch_tone_switch,
                     wear_detection_switch,
