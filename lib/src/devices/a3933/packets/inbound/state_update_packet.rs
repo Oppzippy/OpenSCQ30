@@ -6,10 +6,11 @@ use nom::{
     sequence::tuple,
 };
 
-use bitflags::bitflags;
-
 use crate::devices::{
-    a3933::device_profile::A3933_DEVICE_PROFILE,
+    a3933::{
+        device_profile::A3933_DEVICE_PROFILE,
+        structures::{take_ambient_sound_mode_cycle, AmbientSoundModeCycle},
+    },
     standard::{
         packets::{
             inbound::state_update_packet::StateUpdatePacket,
@@ -135,27 +136,12 @@ fn take_optional_extra_data<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>
     input: &'a [u8],
 ) -> ParseResult<(bool, bool, bool, BatteryLevel, u8, u8, bool), E> {
     tuple((
-        take_bool,
-        take_bool,
-        take_bool,
+        take_bool, // touch tone
+        take_bool, // wear detection
+        take_bool, // game mode
         take_battery_level,
-        le_u8, // what is this byte?
-        le_u8,
-        take_bool,
+        le_u8,     // what is this byte?
+        le_u8,     // device color
+        take_bool, // wind noise detection
     ))(input)
-}
-
-bitflags! {
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-    pub struct AmbientSoundModeCycle: u8 {
-        const NOISE_CANCELING_MODE = 1 << 0;
-        const TRANSPARENCY_MODE    = 1 << 1;
-        const NORMAL_MODE          = 1 << 2;
-    }
-}
-
-fn take_ambient_sound_mode_cycle<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-    input: &'a [u8],
-) -> ParseResult<AmbientSoundModeCycle, E> {
-    map(le_u8, AmbientSoundModeCycle::from_bits_truncate)(input)
 }

@@ -13,7 +13,7 @@ use crate::{
         a3926::packets::take_a3926_state_update_packet,
         a3930::packets::take_a3930_state_update_packet,
         a3931::packets::take_a3931_state_update_packet,
-        a3933::packets::take_a3933_state_update_packet,
+        a3933::packets::inbound::take_a3933_state_update_packet,
         a3945::packets::take_a3945_state_update_packet,
         a3951::packets::take_a3951_state_update_packet,
         standard::{
