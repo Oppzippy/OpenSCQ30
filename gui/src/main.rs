@@ -11,7 +11,7 @@ use anyhow::{anyhow, Context};
 use gtk::{
     gdk::Display,
     gio::{self, SimpleAction},
-    glib::{self, clone, MainContext, OptionFlags, Priority},
+    glib::{self, clone, MainContext, OptionFlags},
     prelude::*,
     traits::GtkWindowExt,
     CssProvider,
@@ -21,6 +21,7 @@ use openscq30_lib::api::{
     device::DeviceRegistry, new_soundcore_device_registry_with_custom_runtime,
 };
 use settings::Settings;
+use tokio::sync::mpsc;
 use tracing::Level;
 use ui::widgets::MainWindow;
 #[cfg(target_os = "windows")]
@@ -316,87 +317,118 @@ fn delayed_initialize_application(
         }
     }
 
-    let (action_sender, action_receiver) = MainContext::channel::<Action>(Priority::default());
+    let (action_sender, mut action_receiver) = mpsc::unbounded_channel::<Action>();
     main_window.set_sender(action_sender);
-    action_receiver.attach(
-        None,
-        clone!(@strong state, @strong settings => @default-return glib::ControlFlow::Break, move |action: Action| {
-            MainContext::default().spawn_local(clone!(@strong state, @strong settings => async move {
-                let result = match action {
-                    Action::SetAmbientSoundMode(ambient_sound_mode) => {
-                        actions::set_ambient_sound_mode(&state, ambient_sound_mode)
+    {
+        let state = state.to_owned();
+        let settings = settings.to_owned();
+        MainContext::default().spawn_local(async move {
+            while let Some(action) = action_receiver.recv().await {
+                let state = state.to_owned();
+                let settings = settings.to_owned();
+                // Handle multiple actions concurrently rather than sequentially
+                MainContext::default().spawn_local(async move {
+                    let result = match action {
+                        Action::SetAmbientSoundMode(ambient_sound_mode) => {
+                            actions::set_ambient_sound_mode(&state, ambient_sound_mode)
+                                .await
+                                .context("ambient sound mode selected")
+                        }
+                        Action::SetNoiseCancelingMode(noise_canceling_mode) => {
+                            actions::set_noise_canceling_mode(&state, noise_canceling_mode)
+                                .await
+                                .context("noise canceling mode selected")
+                        }
+                        Action::SetTransparencyMode(transparency_mode) => {
+                            actions::set_transparency_mode(&state, transparency_mode)
+                                .await
+                                .context("transparency mode selected")
+                        }
+                        Action::SetCustomNoiseCanceling(custom_noise_canceling) => {
+                            actions::set_custom_noise_canceling(&state, custom_noise_canceling)
+                                .await
+                                .context("transparency mode selected")
+                        }
+                        Action::Connect(mac_address) => actions::set_device(
+                            &state,
+                            settings.config.to_owned(),
+                            Some(mac_address),
+                        )
                         .await
-                        .context("ambient sound mode selected")
-                    },
-                    Action::SetNoiseCancelingMode(noise_canceling_mode) => {
-                        actions::set_noise_canceling_mode(&state, noise_canceling_mode)
-                        .await
-                        .context("noise canceling mode selected")
-                    },
-                    Action::SetTransparencyMode(transparency_mode) => {
-                        actions::set_transparency_mode(&state, transparency_mode)
-                        .await
-                        .context("transparency mode selected")
-                    },
-                    Action::SetCustomNoiseCanceling(custom_noise_canceling) => {
-                        actions::set_custom_noise_canceling(&state, custom_noise_canceling)
-                        .await
-                        .context("transparency mode selected")
-                    },
-                    Action::Connect(mac_address) => {
-                        actions::set_device(&state, settings.config, Some(mac_address))
-                        .await
-                        .context("select device")
-                    },
-                    Action::Disconnect => {
-                        actions::set_device(&state, settings.config, None)
-                        .await
-                        .context("select device")
-                    },
-                    Action::SelectCustomEqualizerProfile(profile) => {
-                        actions::select_custom_equalizer_configuration(&state, &settings.config, &profile)
-                        .await
-                        .context("custom equalizer profile selected")
-                    },
-                    Action::CreateCustomEqualizerProfile(profile) => {
-                        actions::create_custom_equalizer_profile(&state, &settings.config, &profile)
+                        .context("select device"),
+                        Action::Disconnect => {
+                            actions::set_device(&state, settings.config.to_owned(), None)
+                                .await
+                                .context("select device")
+                        }
+                        Action::SelectCustomEqualizerProfile(profile) => {
+                            actions::select_custom_equalizer_configuration(
+                                &state,
+                                &settings.config,
+                                &profile,
+                            )
+                            .await
+                            .context("custom equalizer profile selected")
+                        }
+                        Action::CreateCustomEqualizerProfile(profile) => {
+                            actions::create_custom_equalizer_profile(
+                                &state,
+                                &settings.config,
+                                &profile,
+                            )
                             .context("create custom equalizer profile")
-                    },
-                    Action::DeleteCustomEqualizerProfile(profile) => {
-                        actions::delete_custom_equalizer_profile(&state, &settings.config, &profile)
-                        .context("delete custom equalizer profile")
-                    },
-                    Action::SetEqualizerConfiguration(configuration) => {
-                        actions::set_equalizer_configuration(&state, configuration)
-                        .await
-                        .context("apply equalizer settings")
-                    },
-                    Action::CreateQuickPreset(named_quick_preset) => {
-                        actions::create_quick_preset(&state, &settings.config, named_quick_preset)
-                        .context("create quick preset")
-                    },
-                    Action::ActivateQuickPreset(named_quick_preset) => {
-                        actions::activate_quick_preset(&state, &settings.config, &named_quick_preset.quick_preset)
-                        .await
-                        .context("actiavte quick preset")
-                    },
-                    Action::DeleteQuickPreset(name) => {
-                        actions::delete_quick_preset(&state, &settings.config, &name).context("delete quick preset")
+                        }
+                        Action::DeleteCustomEqualizerProfile(profile) => {
+                            actions::delete_custom_equalizer_profile(
+                                &state,
+                                &settings.config,
+                                &profile,
+                            )
+                            .context("delete custom equalizer profile")
+                        }
+                        Action::SetEqualizerConfiguration(configuration) => {
+                            actions::set_equalizer_configuration(&state, configuration)
+                                .await
+                                .context("apply equalizer settings")
+                        }
+                        Action::CreateQuickPreset(named_quick_preset) => {
+                            actions::create_quick_preset(
+                                &state,
+                                &settings.config,
+                                named_quick_preset,
+                            )
+                            .context("create quick preset")
+                        }
+                        Action::ActivateQuickPreset(named_quick_preset) => {
+                            actions::activate_quick_preset(
+                                &state,
+                                &settings.config,
+                                &named_quick_preset.quick_preset,
+                            )
+                            .await
+                            .context("actiavte quick preset")
+                        }
+                        Action::DeleteQuickPreset(name) => {
+                            actions::delete_quick_preset(&state, &settings.config, &name)
+                                .context("delete quick preset")
+                        }
+                        Action::SetHearId(hear_id) => actions::set_hear_id(&state, hear_id)
+                            .await
+                            .context("set hear id"),
+                        Action::SetCustomButtonModel(custom_button_model) => {
+                            actions::set_custom_button_model(&state, custom_button_model)
+                                .await
+                                .context("set custom button model")
+                        }
+                    };
+
+                    if let Err(err) = result {
+                        handle_error(err, &state);
                     }
-                    Action::SetHearId(hear_id) => {
-                        actions::set_hear_id(&state, hear_id).await.context("set hear id")
-                    }
-                    Action::SetCustomButtonModel(custom_button_model) => {
-                        actions::set_custom_button_model(&state, custom_button_model).await.context("set custom button model")
-                    }
-                };
-                if let Err(err) = result {
-                    handle_error(err, &state);
-                }
-            }));
-            glib::ControlFlow::Continue
-        }),
-    );
+                });
+            }
+        });
+    }
 
     main_context.spawn_local(clone!(@weak main_window, @strong state => async move {
         let mut receiver = state.state_update_receiver.subscribe().await;

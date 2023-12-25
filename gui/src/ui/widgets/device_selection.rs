@@ -1,7 +1,8 @@
 use gtk::{
-    glib::{self, Object, Sender},
+    glib::{self, Object},
     subclass::prelude::ObjectSubclassIsExt,
 };
+use tokio::sync::mpsc::UnboundedSender;
 
 use crate::{actions::Action, objects::GlibDevice};
 
@@ -16,7 +17,7 @@ impl DeviceSelection {
         Object::builder().build()
     }
 
-    pub fn set_sender(&self, sender: Sender<Action>) {
+    pub fn set_sender(&self, sender: UnboundedSender<Action>) {
         self.imp().set_sender(sender);
     }
 
@@ -33,7 +34,7 @@ mod imp {
 
     use gtk::{
         gio,
-        glib::{self, ParamSpec, Properties, Sender, Value},
+        glib::{self, ParamSpec, Properties, Value},
         prelude::*,
         subclass::{
             prelude::{BoxImpl, ObjectImpl, ObjectSubclass, *},
@@ -45,6 +46,7 @@ mod imp {
         ClosureExpression, CompositeTemplate, TemplateChild,
     };
     use macaddr::MacAddr6;
+    use tokio::sync::mpsc::UnboundedSender;
 
     use crate::{actions::Action, objects::GlibDevice};
 
@@ -59,12 +61,12 @@ mod imp {
         pub selected_device: RefCell<Option<GlibDevice>>,
 
         pub devices: OnceCell<gio::ListStore>,
-        sender: OnceCell<Sender<Action>>,
+        sender: OnceCell<UnboundedSender<Action>>,
     }
 
     #[gtk::template_callbacks]
     impl DeviceSelection {
-        pub fn set_sender(&self, sender: Sender<Action>) {
+        pub fn set_sender(&self, sender: UnboundedSender<Action>) {
             self.sender.set(sender).unwrap();
         }
 

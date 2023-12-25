@@ -1,8 +1,9 @@
 use gtk::{
-    glib::{self, Object, Sender},
+    glib::{self, Object},
     subclass::prelude::ObjectSubclassIsExt,
 };
 use openscq30_lib::devices::standard::structures::EqualizerConfiguration;
+use tokio::sync::mpsc::UnboundedSender;
 
 use crate::{actions::Action, objects::GlibCustomEqualizerProfile};
 
@@ -17,7 +18,7 @@ impl EqualizerSettingsScreen {
         Object::builder().build()
     }
 
-    pub fn set_sender(&self, sender: Sender<Action>) {
+    pub fn set_sender(&self, sender: UnboundedSender<Action>) {
         self.imp().set_sender(sender);
     }
 
@@ -40,7 +41,7 @@ mod imp {
 
     use gtk::{
         gio,
-        glib::{self, clone, Sender},
+        glib::{self, clone},
         prelude::*,
         subclass::{
             prelude::*,
@@ -53,6 +54,7 @@ mod imp {
         EqualizerConfiguration, PresetEqualizerProfile, VolumeAdjustments,
     };
     use strum::IntoEnumIterator;
+    use tokio::sync::mpsc::UnboundedSender;
 
     use crate::{
         actions::Action,
@@ -87,12 +89,12 @@ mod imp {
         custom_profiles: OnceCell<gio::ListStore>,
 
         custom_profile_index: Cell<Option<u32>>,
-        sender: OnceCell<Sender<Action>>,
+        sender: OnceCell<UnboundedSender<Action>>,
     }
 
     #[gtk::template_callbacks]
     impl EqualizerSettingsScreen {
-        pub fn set_sender(&self, sender: Sender<Action>) {
+        pub fn set_sender(&self, sender: UnboundedSender<Action>) {
             self.sender.set(sender.clone()).unwrap();
         }
 
@@ -523,14 +525,11 @@ mod imp {
 mod tests {
     use std::sync::Arc;
 
-    use gtk::{
-        glib::{MainContext, Priority},
-        subclass::prelude::*,
-        traits::WidgetExt,
-    };
+    use gtk::{subclass::prelude::*, traits::WidgetExt};
     use openscq30_lib::devices::standard::structures::{
         EqualizerConfiguration, PresetEqualizerProfile, VolumeAdjustments,
     };
+    use tokio::sync::mpsc;
 
     use crate::objects::GlibCustomEqualizerProfile;
 
@@ -540,7 +539,7 @@ mod tests {
     fn test_does_not_show_any_button_with_preset_profile_selected() {
         crate::load_resources();
         let settings = EqualizerSettingsScreen::new();
-        let (sender, _receiver) = MainContext::channel(Priority::default());
+        let (sender, _receiver) = mpsc::unbounded_channel();
         settings.set_sender(sender);
         settings.set_equalizer_configuration(&EqualizerConfiguration::new_from_preset_profile(
             PresetEqualizerProfile::SoundcoreSignature,
@@ -559,7 +558,7 @@ mod tests {
     fn test_only_shows_create_button_with_no_custom_profile_selected() {
         crate::load_resources();
         let settings = EqualizerSettingsScreen::new();
-        let (sender, _receiver) = MainContext::channel(Priority::default());
+        let (sender, _receiver) = mpsc::unbounded_channel();
         settings.set_sender(sender);
         settings.set_equalizer_configuration(&EqualizerConfiguration::new_custom_profile(
             VolumeAdjustments::new([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]).unwrap(),
@@ -578,7 +577,7 @@ mod tests {
     fn test_only_shows_delete_button_with_custom_profile_selected() {
         crate::load_resources();
         let settings = EqualizerSettingsScreen::new();
-        let (sender, _receiver) = MainContext::channel(Priority::default());
+        let (sender, _receiver) = mpsc::unbounded_channel();
         settings.set_sender(sender);
         settings.set_custom_profiles(vec![GlibCustomEqualizerProfile::new(
             "test profile",

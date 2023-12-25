@@ -3,13 +3,14 @@ use std::rc::Rc;
 use adw::Toast;
 use gtk::{
     gio,
-    glib::{self, Object, Sender},
+    glib::{self, Object},
     prelude::IsA,
     subclass::prelude::ObjectSubclassIsExt,
     traits::GtkWindowExt,
     Application,
 };
 use openscq30_lib::devices::standard::{state::DeviceState, structures::EqualizerConfiguration};
+use tokio::sync::mpsc::UnboundedSender;
 
 use crate::{
     actions::Action,
@@ -77,7 +78,7 @@ impl MainWindow {
         self.imp().set_devices(devices);
     }
 
-    pub fn set_sender(&self, sender: Sender<Action>) {
+    pub fn set_sender(&self, sender: UnboundedSender<Action>) {
         self.imp().set_sender(sender);
     }
 
@@ -125,7 +126,7 @@ mod imp {
     use adw::{prelude::*, subclass::prelude::AdwApplicationWindowImpl};
     use gtk::{
         gio::SimpleAction,
-        glib::{self, clone, ParamSpec, Properties, Sender, Value},
+        glib::{self, clone, ParamSpec, Properties, Value},
         subclass::{
             prelude::*,
             widget::{
@@ -137,6 +138,7 @@ mod imp {
         traits::EditableExt,
         CompositeTemplate, TemplateChild,
     };
+    use tokio::sync::mpsc::UnboundedSender;
 
     use crate::{
         actions::Action,
@@ -166,12 +168,12 @@ mod imp {
         pub loading: Cell<bool>,
 
         pub window_state_settings: OnceCell<Rc<SettingsFile<crate::settings::State>>>,
-        sender: OnceCell<Sender<Action>>,
+        sender: OnceCell<UnboundedSender<Action>>,
     }
 
     #[gtk::template_callbacks]
     impl MainWindow {
-        pub fn set_sender(&self, sender: Sender<Action>) {
+        pub fn set_sender(&self, sender: UnboundedSender<Action>) {
             self.sender.set(sender.clone()).unwrap();
             self.loading_screen.set_sender(sender.clone());
             self.device_selection.set_sender(sender.clone());

@@ -1,8 +1,9 @@
 use gtk::{
-    glib::{self, Object, Sender},
+    glib::{self, Object},
     subclass::prelude::ObjectSubclassIsExt,
 };
 use openscq30_lib::devices::standard::state::DeviceState;
+use tokio::sync::mpsc::UnboundedSender;
 
 use crate::actions::Action;
 
@@ -17,7 +18,7 @@ impl HearIdScreen {
         Object::builder().build()
     }
 
-    pub fn set_sender(&self, sender: Sender<Action>) {
+    pub fn set_sender(&self, sender: UnboundedSender<Action>) {
         self.imp().set_sender(sender);
     }
 
@@ -31,7 +32,7 @@ mod imp {
 
     use adw::prelude::WidgetExt;
     use gtk::{
-        glib::{self, Sender},
+        glib,
         subclass::{
             prelude::*,
             widget::{CompositeTemplateClass, CompositeTemplateInitializingExt, WidgetImpl},
@@ -42,6 +43,7 @@ mod imp {
         state::DeviceState,
         structures::{BasicHearId, CustomHearId, HearId, VolumeAdjustments},
     };
+    use tokio::sync::mpsc::UnboundedSender;
 
     use crate::actions::Action;
 
@@ -74,7 +76,7 @@ mod imp {
         custom_volume_adjustments_right: TemplateChild<gtk::Label>,
 
         hear_id: RefCell<Option<HearId>>,
-        sender: OnceCell<Sender<Action>>,
+        sender: OnceCell<UnboundedSender<Action>>,
     }
 
     impl HearIdScreen {
@@ -143,7 +145,7 @@ mod imp {
             format!("{:?}", volume_adjustments.adjustments())
         }
 
-        pub fn set_sender(&self, sender: Sender<Action>) {
+        pub fn set_sender(&self, sender: UnboundedSender<Action>) {
             self.sender.set(sender.to_owned()).unwrap();
         }
     }

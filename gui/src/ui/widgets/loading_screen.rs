@@ -1,7 +1,8 @@
 use gtk::{
-    glib::{self, Object, Sender},
+    glib::{self, Object},
     subclass::prelude::ObjectSubclassIsExt,
 };
+use tokio::sync::mpsc::UnboundedSender;
 
 use crate::actions::Action;
 
@@ -16,14 +17,14 @@ impl LoadingScreen {
         Object::builder().build()
     }
 
-    pub fn set_sender(&self, sender: Sender<Action>) {
+    pub fn set_sender(&self, sender: UnboundedSender<Action>) {
         self.imp().set_sender(sender);
     }
 }
 
 mod imp {
     use gtk::{
-        glib::{self, Sender},
+        glib,
         subclass::{
             prelude::*,
             widget::{CompositeTemplateClass, CompositeTemplateInitializingExt, WidgetImpl},
@@ -31,18 +32,19 @@ mod imp {
         template_callbacks, CompositeTemplate,
     };
     use once_cell::sync::OnceCell;
+    use tokio::sync::mpsc::UnboundedSender;
 
     use crate::actions::Action;
 
     #[derive(Default, CompositeTemplate)]
     #[template(resource = "/com/oppzippy/OpenSCQ30/ui/widgets/loading_screen.ui")]
     pub struct LoadingScreen {
-        sender: OnceCell<Sender<Action>>,
+        sender: OnceCell<UnboundedSender<Action>>,
     }
 
     #[template_callbacks]
     impl LoadingScreen {
-        pub fn set_sender(&self, sender: Sender<Action>) {
+        pub fn set_sender(&self, sender: UnboundedSender<Action>) {
             self.sender.set(sender).unwrap();
         }
 

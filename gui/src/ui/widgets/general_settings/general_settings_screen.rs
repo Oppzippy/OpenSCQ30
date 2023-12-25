@@ -1,8 +1,9 @@
 use gtk::{
-    glib::{self, Object, Sender},
+    glib::{self, Object},
     subclass::prelude::ObjectSubclassIsExt,
 };
 use openscq30_lib::devices::standard::state::DeviceState;
+use tokio::sync::mpsc::UnboundedSender;
 
 use crate::actions::Action;
 
@@ -17,7 +18,7 @@ impl GeneralSettingsScreen {
         Object::builder().build()
     }
 
-    pub fn set_sender(&self, sender: Sender<Action>) {
+    pub fn set_sender(&self, sender: UnboundedSender<Action>) {
         self.imp().set_sender(sender);
     }
 
@@ -33,7 +34,7 @@ mod imp {
     use std::cell::OnceCell;
 
     use gtk::{
-        glib::{self, Sender},
+        glib,
         prelude::*,
         subclass::{
             prelude::*,
@@ -48,6 +49,7 @@ mod imp {
         device_profiles::{NoiseCancelingModeType, TransparencyModeType},
         devices::standard::state::DeviceState,
     };
+    use tokio::sync::mpsc::UnboundedSender;
 
     use crate::{
         actions::Action,
@@ -84,12 +86,12 @@ mod imp {
         #[template_child]
         pub custom_noise_canceling_selection: TemplateChild<CustomNoiseCancelingSelection>,
 
-        sender: OnceCell<Sender<Action>>,
+        sender: OnceCell<UnboundedSender<Action>>,
     }
 
     #[gtk::template_callbacks]
     impl GeneralSettingsScreen {
-        pub fn set_sender(&self, sender: Sender<Action>) {
+        pub fn set_sender(&self, sender: UnboundedSender<Action>) {
             self.sender.set(sender.clone()).unwrap();
         }
 
