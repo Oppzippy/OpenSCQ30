@@ -9,7 +9,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          toolchain: nightly
           submodules: true
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable

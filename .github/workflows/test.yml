@@ -25,8 +25,6 @@ jobs:
           apt-get install -y xvfb
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: nightly
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
       - name: Install cargo-make
@@ -52,8 +50,6 @@ jobs:
           submodules: true
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: nightly
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
       - name: Install cargo-make
@@ -75,7 +71,6 @@ jobs:
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: nightly
           targets: armv7-linux-androideabi,aarch64-linux-android,i686-linux-android,x86_64-linux-android
       - uses: actions/setup-java@v4
         with:
