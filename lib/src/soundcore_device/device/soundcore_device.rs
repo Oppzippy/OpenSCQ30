@@ -106,7 +106,7 @@ where
                         Some(handler) => {
                             let state_sender = state_sender_lock.lock().await;
                             let state = state_sender.borrow();
-                            let new_state = handler(&body, state.to_owned());
+                            let new_state = handler(body, state.to_owned());
                             if new_state != *state {
                                 trace!(event = "state_update", old_state = ?state, new_state = ?new_state);
                                 mem::drop(state);

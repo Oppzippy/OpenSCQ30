@@ -265,8 +265,7 @@ mod imp {
                     .iter()
                     .map(ToOwned::to_owned)
                     .collect::<Vec<f64>>()
-                    .try_into()
-                    .unwrap();
+                    .into();
                 this.create_custom_equalizer_profile(volume_adjustments);
             }),
         );

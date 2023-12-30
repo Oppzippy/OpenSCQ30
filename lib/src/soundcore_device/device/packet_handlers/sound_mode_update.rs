@@ -7,7 +7,7 @@ use crate::devices::standard::{
 
 pub fn sound_mode_update_handler(input: &[u8], state: DeviceState) -> DeviceState {
     let result: Result<_, nom::Err<VerboseError<&[u8]>>> =
-        all_consuming(take_ambient_sound_mode_update_packet)(&input);
+        all_consuming(take_ambient_sound_mode_update_packet)(input);
     let packet = match result {
         Ok((_, packet)) => packet,
         Err(err) => {

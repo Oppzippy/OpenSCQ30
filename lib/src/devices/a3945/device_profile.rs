@@ -129,9 +129,9 @@ impl<'a> OutboundPacket for CustomSetEqualizerPacket<'a> {
             .to_le_bytes()
             .into_iter()
             .chain(self.left_channel.volume_adjustments().bytes())
-            .chain(self.left_band_9_and_10.into_iter())
+            .chain(self.left_band_9_and_10)
             .chain(self.right_channel.volume_adjustments().bytes())
-            .chain(self.right_band_9_and_10.into_iter())
+            .chain(self.right_band_9_and_10)
             .collect::<Vec<_>>()
     }
 }

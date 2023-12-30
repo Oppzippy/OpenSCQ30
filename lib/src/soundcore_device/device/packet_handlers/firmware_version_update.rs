@@ -6,7 +6,7 @@ use crate::devices::standard::{
 
 pub fn firmware_version_update_handler(input: &[u8], state: DeviceState) -> DeviceState {
     let result: Result<_, nom::Err<VerboseError<&[u8]>>> =
-        all_consuming(take_firmware_version_update_packet)(&input);
+        all_consuming(take_firmware_version_update_packet)(input);
     let packet = match result {
         Ok((_, packet)) => packet,
         Err(err) => {

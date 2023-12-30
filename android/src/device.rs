@@ -21,11 +21,11 @@ use crate::connection::ManualConnection;
 #[uniffi(flat_error)]
 pub enum DeviceError {
     #[error(transparent)]
-    OpenSCQ30NativeError(#[from] openscq30_lib::Error),
+    OpenSCQ30Native(#[from] openscq30_lib::Error),
     #[error(transparent)]
-    ProtobufError(#[from] prost::DecodeError),
+    Protobuf(#[from] prost::DecodeError),
     #[error(transparent)]
-    IoError(#[from] std::io::Error),
+    Io(#[from] std::io::Error),
 }
 
 #[uniffi::export(callback_interface)]
@@ -86,13 +86,8 @@ impl NativeSoundcoreDevice {
         let device = self.device.to_owned();
         self.runtime.spawn(async move {
             let mut receiver = device.subscribe_to_state_updates().await;
-            loop {
-                match receiver.changed().await {
-                    Ok(_) => {
-                        observer.on_state_changed(receiver.borrow().to_owned());
-                    }
-                    Err(_) => break,
-                }
+            while receiver.changed().await.is_ok() {
+                observer.on_state_changed(receiver.borrow().to_owned());
             }
         });
     }

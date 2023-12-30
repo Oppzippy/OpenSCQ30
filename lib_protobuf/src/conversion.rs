@@ -181,7 +181,7 @@ impl From<EqualizerConfiguration> for LibEqualizerConfiguration {
                 LibEqualizerConfiguration::new_from_preset_profile(preset_profile.into())
             }
             None => LibEqualizerConfiguration::new_custom_profile(
-                VolumeAdjustments::new(value.volume_adjustments.into_iter()).unwrap(),
+                VolumeAdjustments::new(value.volume_adjustments).unwrap(),
             ),
         }
     }
@@ -386,8 +386,8 @@ impl From<CustomHearId> for LibCustomHearId {
 impl From<StereoVolumeAdjustments> for LibStereoVolumeAdjustments {
     fn from(value: StereoVolumeAdjustments) -> Self {
         Self {
-            left: VolumeAdjustments::new(value.left.into_iter()).unwrap(),
-            right: VolumeAdjustments::new(value.right.into_iter()).unwrap(),
+            left: VolumeAdjustments::new(value.left).unwrap(),
+            right: VolumeAdjustments::new(value.right).unwrap(),
         }
     }
 }

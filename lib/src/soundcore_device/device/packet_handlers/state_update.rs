@@ -6,7 +6,7 @@ use crate::devices::standard::{
 
 pub fn state_update_handler(input: &[u8], state: DeviceState) -> DeviceState {
     let result: Result<_, nom::Err<VerboseError<_>>> =
-        all_consuming(take_state_update_packet)(&input);
+        all_consuming(take_state_update_packet)(input);
     let packet = match result {
         Ok((_, packet)) => packet,
         Err(err) => {
