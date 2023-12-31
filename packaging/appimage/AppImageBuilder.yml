@@ -62,5 +62,5 @@ AppDir:
 
 AppImage:
   arch: x86_64
-  update-information: None
+  update-information: gh-releases-zsync|Oppzippy|OpenSCQ30|latest|openscq30_gui-*x86_64.AppImage.zsync
   sign-key: None
