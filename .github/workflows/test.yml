@@ -32,14 +32,14 @@ jobs:
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
       - name: Run rust tests
-        run: xvfb-run --auto-servernum cargo make test
-      # - name: Generate HTML test coverage report
-      #   run: cargo make test-cov-report-html
-      # - name: Upload coverage report
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: coverage
-      #     path: target/llvm-cov/html/
+        run: xvfb-run --auto-servernum cargo make test-cov
+      - name: Generate HTML test coverage report
+        run: cargo make test-cov-report-html
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: target/llvm-cov/html/
 
   # Only lib is tested on windows since building gtk takes too long, and lib is the only crate with os specific code
   rust_test_windows:
