@@ -1,6 +1,7 @@
 [package]
 name = "openscq30_lib"
-version = "1.9.0"
+version.workspace = true
+license.workspace = true
 edition = "2021"
 
 [features]
@@ -13,35 +14,35 @@ demo = []
 crate-type = ["lib"]
 
 [dependencies]
-web-sys = { version = "0.3", optional = true, features = ["Window"] }
-tokio = { version = "1", features = ["sync", "time", "rt"] }
-futures = { version = "0.3" }
-uuid = "1.3"
-thiserror = "1.0"
-tracing = "0.1"
-strum = { version = "0.25", features = ["derive"] }
-weak-table = "0.3"
-macaddr = "1.0"
-nom = "7"
-bitflags = { version = "2", features = ["serde"] }
-serde = { version = "1.0", optional = true, features = ["derive", "rc"] }
-js-sys = { version = "0.3", optional = true }
-wasm-bindgen-futures = { version = "0.4", optional = true }
-ordered-float = { version = "3.9" }
-float-cmp = { version = "0.9", features = ["std"], default-features = false }
+web-sys = { workspace = true, optional = true, features = ["Window"] }
+tokio = { workspace = true, features = ["sync", "time", "rt"] }
+futures = { workspace = true }
+uuid = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+strum = { workspace = true, features = ["derive"] }
+weak-table = { workspace = true }
+macaddr = { workspace = true }
+nom = { workspace = true }
+bitflags = { workspace = true, features = ["serde"] }
+serde = { workspace = true, optional = true, features = ["derive", "rc"] }
+js-sys = { workspace = true, optional = true }
+wasm-bindgen-futures = { workspace = true, optional = true }
+ordered-float = { workspace = true }
+float-cmp = { workspace = true, features = ["std"], default-features = false }
 
 [target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
-btleplug = { version = "0.10", optional = true }
-regex = { version = "1.8", optional = true }
-lazy_static = { version = "1.4", optional = true }
-tokio = { version = "1", features = ["rt-multi-thread"] }
+btleplug = { workspace = true, optional = true }
+regex = { workspace = true, optional = true }
+lazy_static = { workspace = true, optional = true }
+tokio = { workspace = true, features = ["rt-multi-thread"] }
 
 [dev-dependencies]
-tokio = { version = "1", features = ["macros", "test-util"] }
+tokio = { workspace = true, features = ["macros", "test-util"] }
 
 [target.'cfg(target_os = "windows")'.dependencies]
-tokio = { version = "1", features = ["rt-multi-thread"] }
-windows = { version = "0.48", optional = true, features = [
+tokio = { workspace = true, features = ["rt-multi-thread"] }
+windows = { workspace = true, optional = true, features = [
     "Storage_Streams",
     "Foundation",
     "implement",

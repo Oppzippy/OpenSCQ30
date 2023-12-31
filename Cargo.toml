@@ -1,6 +1,18 @@
 [workspace]
-members = ["cli", "gui", "lib", "lib_protobuf", "android", "web/wasm", "uniffi-bindgen"]
+members = [
+    "cli",
+    "gui",
+    "lib",
+    "lib_protobuf",
+    "android",
+    "web/wasm",
+    "uniffi-bindgen",
+]
 resolver = "2"
+
+[workspace.package]
+version = "1.9.0"
+license = "GPL-3.0-or-later"
 
 [profile.release]
 strip = true
@@ -10,3 +22,51 @@ lto = true
 inherits = "release"
 strip = false
 debug = 2
+
+[workspace.dependencies]
+clap = "4"
+tokio = "1"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+macaddr = "1"
+heck = "0.4"
+itertools = "0.12"
+futures = "0.3"
+adw = { version = "0.5", package = "libadwaita" }
+gtk = { version = "0.7", package = "gtk4" }
+strum = "0.25"
+serde = "1"
+toml = "0.8"
+anyhow = "1"
+once_cell = "1"
+dirs = "5"
+uuid = "1"
+web-sys = "0.3"
+thiserror = "1"
+weak-table = "0.3"
+nom = "7"
+bitflags = "2"
+js-sys = "0.3"
+wasm-bindgen-futures = "0.4"
+ordered-float = "4"
+float-cmp = "0.9"
+log = "0.4"
+android_logger = "0.13"
+uniffi = "0.25"
+prost = "0.12"
+prost-build = "0.12"
+serde-wasm-bindgen = "0.6"
+static_assertions = "1"
+serde_json = "1"
+bytes = "1"
+btleplug = "0.11"
+regex = "1"
+lazy_static = "1"
+windows = "0.42"
+mockall = "0.12"
+tempfile = "3"
+glib-build-tools = "0.18"
+embed-resource = "2"
+console_error_panic_hook = "0.1"
+tracing-wasm = "0.2"
+wasm-bindgen = "0.2"

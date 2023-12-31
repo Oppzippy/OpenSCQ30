@@ -104,11 +104,7 @@ if [[ ! "$1" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 fi
 
 set_version_in_changelog CHANGELOG.md "$1"
-set_version_in_cargo_toml android/Cargo.toml "$1"
-set_version_in_cargo_toml cli/Cargo.toml "$1"
-set_version_in_cargo_toml gui/Cargo.toml "$1"
-set_version_in_cargo_toml lib/Cargo.toml "$1"
-set_version_in_cargo_toml web/wasm/Cargo.toml "$1"
+set_version_in_cargo_toml Cargo.toml "$1"
 set_version_in_build_gradle android/app/build.gradle.kts "$1"
 set_version_in_package_json web/package.json "$1"
 set_version_in_appimage_builder packaging/appimage/AppImageBuilder.yml "$1"
