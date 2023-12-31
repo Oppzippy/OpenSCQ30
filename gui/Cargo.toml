@@ -15,8 +15,8 @@ tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 futures = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
-adw = { workspace = true, package = "libadwaita", features = ["v1_4"] }
-gtk = { workspace = true, package = "gtk4", features = ["gnome_44"] }
+adw = { workspace = true, features = ["v1_4"] }
+gtk = { workspace = true, features = ["gnome_44"] }
 strum = { workspace = true, features = ["derive"] }
 serde = { workspace = true, features = ["derive"] }
 toml = { workspace = true }
