@@ -7,20 +7,19 @@ edition = "2021"
 openscq30_lib = { path = "../lib" }
 openscq30_lib_protobuf = { path = "../lib_protobuf" }
 tracing = { version = "0.1", features = ["log-always"] }
-jni-sys = "0.3.0"
 log = "0.4"
 tokio = { version = "1", features = ["rt-multi-thread"] }
-thiserror = "1.0"
-android_logger = "0.13.0"
-anyhow = "1.0.69"
-macaddr = "1.0.1"
+thiserror = "1"
+android_logger = "0.13"
+anyhow = "1"
+macaddr = "1"
 uuid = "1.3"
-itertools = "0.11"
-uniffi = "0.25.3"
+itertools = "0.12"
+uniffi = "0.25"
 prost = "0.12"
 
 [build-dependencies]
-uniffi = { version = "0.25.3", features = ["build"] }
+uniffi = { version = "0.25", features = ["build"] }
 
 [lib]
 crate-type = ["cdylib"]
