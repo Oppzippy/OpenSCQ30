@@ -131,6 +131,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
+      - uses: dtolnay/rust-toolchain@stable
 
       - name: Build cli
         run: cargo build --release --package openscq30_cli
