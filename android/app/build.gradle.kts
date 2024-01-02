@@ -332,5 +332,5 @@ archTriplets.forEach { (arch, target) ->
     tasks.clean.dependsOn("clean-$arch")
 }
 configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
-    version.set("1.0.1")
+    version.set("1.1.0")
 }
