@@ -2,13 +2,14 @@ use std::collections::HashMap;
 
 use crate::devices::standard::{
     packets::outbound::{
-        OutboundPacketBytes, SetCustomButtonModelPacket, SetEqualizerAndCustomHearIdPacket,
-        SetEqualizerPacket, SetEqualizerWithDrcPacket, SetSoundModePacket,
+        OutboundPacketBytes, SetAmbientSoundModeCyclePacket, SetCustomButtonModelPacket,
+        SetEqualizerAndCustomHearIdPacket, SetEqualizerPacket, SetEqualizerWithDrcPacket,
+        SetSoundModePacket,
     },
     state::DeviceState,
     structures::{
-        AmbientSoundMode, CustomButtonModel, CustomHearId, EqualizerConfiguration, HearId,
-        HearIdMusicType, HearIdType, SoundModes,
+        AmbientSoundMode, AmbientSoundModeCycle, CustomButtonModel, CustomHearId,
+        EqualizerConfiguration, HearId, HearIdMusicType, HearIdType, SoundModes,
     },
 };
 
@@ -90,6 +91,21 @@ pub trait DeviceCommandDispatcher {
             packets,
             new_state: DeviceState {
                 sound_modes: Some(sound_modes),
+                ..state
+            },
+        })
+    }
+
+    fn set_ambient_sound_mode_cycle(
+        &self,
+        state: DeviceState,
+        cycle: AmbientSoundModeCycle,
+    ) -> crate::Result<CommandResponse> {
+        let packet_bytes = SetAmbientSoundModeCyclePacket { cycle }.bytes();
+        Ok(CommandResponse {
+            packets: vec![packet_bytes],
+            new_state: DeviceState {
+                ambient_sound_mode_cycle: Some(cycle),
                 ..state
             },
         })

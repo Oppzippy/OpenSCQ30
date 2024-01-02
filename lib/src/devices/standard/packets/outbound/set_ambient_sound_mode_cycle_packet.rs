@@ -1,9 +1,9 @@
-use crate::devices::{
-    a3933::structures::AmbientSoundModeCycle, standard::packets::outbound::OutboundPacket,
+use crate::devices::standard::{
+    packets::outbound::OutboundPacket, structures::AmbientSoundModeCycle,
 };
 
 pub struct SetAmbientSoundModeCyclePacket {
-    cycle: AmbientSoundModeCycle,
+    pub cycle: AmbientSoundModeCycle,
 }
 
 impl OutboundPacket for SetAmbientSoundModeCyclePacket {
@@ -12,6 +12,6 @@ impl OutboundPacket for SetAmbientSoundModeCyclePacket {
     }
 
     fn body(&self) -> Vec<u8> {
-        vec![self.cycle.bits()]
+        vec![self.cycle.into()]
     }
 }

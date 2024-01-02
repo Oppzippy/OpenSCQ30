@@ -60,6 +60,7 @@ impl From<A3945StateUpdatePacket> for StateUpdatePacket {
             custom_button_model: Some(packet.custom_button_model),
             firmware_version: Some(packet.left_firmware.min(packet.right_firmware)),
             serial_number: Some(packet.serial_number),
+            ambient_sound_mode_cycle: None,
         }
     }
 }

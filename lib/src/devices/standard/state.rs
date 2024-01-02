@@ -12,6 +12,8 @@ use crate::{
     },
 };
 
+use super::structures::AmbientSoundModeCycle;
+
 #[derive(Debug, PartialEq, Clone, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
@@ -26,6 +28,7 @@ pub struct DeviceState {
     pub custom_button_model: Option<CustomButtonModel>,
     pub firmware_version: Option<FirmwareVersion>,
     pub serial_number: Option<SerialNumber>,
+    pub ambient_sound_mode_cycle: Option<AmbientSoundModeCycle>,
 }
 
 impl From<StateUpdatePacket> for DeviceState {
@@ -41,6 +44,7 @@ impl From<StateUpdatePacket> for DeviceState {
             custom_button_model: packet.custom_button_model,
             firmware_version: packet.firmware_version,
             serial_number: packet.serial_number.clone(),
+            ambient_sound_mode_cycle: packet.ambient_sound_mode_cycle,
         }
     }
 }

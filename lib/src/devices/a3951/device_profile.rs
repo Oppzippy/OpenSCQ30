@@ -16,5 +16,6 @@ pub const A3951_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     has_wear_detection: true,
     has_touch_tone: true,
     has_auto_power_off: false,
+    has_ambient_sound_mode_cycle: false,
     custom_dispatchers: None,
 };

@@ -30,6 +30,13 @@ const soundModesSchema = Type.Object({
 });
 export type SoundModes = Static<typeof soundModesSchema>;
 
+const ambientSoundModeCycleSchema = Type.Object({
+  noiseCancelingMode: Type.Boolean(),
+  transparencyMode: Type.Boolean(),
+  normalMode: Type.Boolean(),
+});
+export type AmbientSoundModeCycle = Static<typeof ambientSoundModeCycleSchema>;
+
 const equalizerConfigurationSchema = Type.Object({
   presetProfile: Type.Union([
     Type.Null(),
@@ -113,6 +120,7 @@ const deviceProfileSchema = Type.Object({
   hasWearDetection: Type.Boolean(),
   hasTouchTone: Type.Boolean(),
   hasAutoPowerOff: Type.Boolean(),
+  hasAmbientSoundModeCycle: Type.Boolean(),
   dynamicRangeCompressionMinFirmwareVersion: Nullable(firmwareVersionSchema),
 });
 export type DeviceProfile = Static<typeof deviceProfileSchema>;
@@ -176,6 +184,7 @@ const deviceStateSchema = Type.Object({
     }),
   ),
   serialNumber: Nullable(Type.String()),
+  ambientSoundModeCycle: Nullable(ambientSoundModeCycleSchema),
 });
 export type DeviceState = Static<typeof deviceStateSchema>;
 export const DeviceStateValidator = TypeCompiler.Compile(deviceStateSchema);

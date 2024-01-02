@@ -12,10 +12,10 @@ use crate::{
     devices::standard::{
         state::DeviceState,
         structures::{
-            AgeRange, AmbientSoundMode, BasicHearId, BatteryLevel, ButtonAction, CustomButtonModel,
-            EqualizerConfiguration, FirmwareVersion, Gender, HearId, IsBatteryCharging,
-            NoTwsButtonAction, NoiseCancelingMode, PresetEqualizerProfile, SerialNumber,
-            SingleBattery, SoundModes, TwsButtonAction,
+            AgeRange, AmbientSoundMode, AmbientSoundModeCycle, BasicHearId, BatteryLevel,
+            ButtonAction, CustomButtonModel, EqualizerConfiguration, FirmwareVersion, Gender,
+            HearId, IsBatteryCharging, NoTwsButtonAction, NoiseCancelingMode,
+            PresetEqualizerProfile, SerialNumber, SingleBattery, SoundModes, TwsButtonAction,
         },
     },
     futures::Futures,
@@ -51,6 +51,7 @@ where
                 has_wear_detection: true,
                 has_touch_tone: true,
                 has_auto_power_off: true,
+                has_ambient_sound_mode_cycle: true,
                 custom_dispatchers: None,
             },
             battery: SingleBattery {
@@ -109,6 +110,7 @@ where
             ),
             firmware_version: Some(FirmwareVersion::new(2, 0)),
             serial_number: Some(SerialNumber("0123456789ABCDEF".into())),
+            ambient_sound_mode_cycle: Some(AmbientSoundModeCycle::default()),
         });
 
         let (connection_status_sender, _) = watch::channel(ConnectionStatus::Connected);
@@ -165,6 +167,28 @@ where
         tracing::info!("set sound modes to {sound_modes:?}");
         state_sender.send_replace(DeviceState {
             sound_modes: Some(sound_modes),
+            ..state
+        });
+        Ok(())
+    }
+
+    async fn set_ambient_sound_mode_cycle(
+        &self,
+        cycle: AmbientSoundModeCycle,
+    ) -> crate::Result<()> {
+        let state_sender = self.state_sender.lock().await;
+        let state = state_sender.borrow().to_owned();
+        if state.sound_modes.is_none() {
+            return Err(crate::Error::FeatureNotSupported {
+                feature_name: "ambient sound mode cycle",
+            });
+        }
+        if state.ambient_sound_mode_cycle == Some(cycle) {
+            return Ok(());
+        }
+        tracing::info!("set ambient sound mode cycle to {cycle:?}");
+        state_sender.send_replace(DeviceState {
+            ambient_sound_mode_cycle: Some(cycle),
             ..state
         });
         Ok(())

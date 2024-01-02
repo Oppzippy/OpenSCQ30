@@ -19,8 +19,8 @@ use crate::{
         standard::{
             packets::parsing::ParseResult,
             structures::{
-                AgeRange, Battery, CustomButtonModel, EqualizerConfiguration, FirmwareVersion,
-                Gender, HearId, SerialNumber, SoundModes,
+                AgeRange, AmbientSoundModeCycle, Battery, CustomButtonModel,
+                EqualizerConfiguration, FirmwareVersion, Gender, HearId, SerialNumber, SoundModes,
             },
         },
     },
@@ -38,6 +38,7 @@ pub struct StateUpdatePacket {
     pub custom_button_model: Option<CustomButtonModel>,
     pub firmware_version: Option<FirmwareVersion>,
     pub serial_number: Option<SerialNumber>,
+    pub ambient_sound_mode_cycle: Option<AmbientSoundModeCycle>,
 }
 
 pub fn take_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(

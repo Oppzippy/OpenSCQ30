@@ -7,23 +7,20 @@ use nom::{
 };
 
 use crate::devices::{
-    a3933::{
-        device_profile::A3933_DEVICE_PROFILE,
-        structures::{take_ambient_sound_mode_cycle, AmbientSoundModeCycle},
-    },
+    a3933::device_profile::A3933_DEVICE_PROFILE,
     standard::{
         packets::{
             inbound::state_update_packet::StateUpdatePacket,
             parsing::{
-                take_battery_level, take_bool, take_custom_button_model,
-                take_custom_hear_id_without_music_type, take_dual_battery,
-                take_equalizer_configuration, take_firmware_version, take_serial_number,
-                take_sound_modes, ParseResult,
+                take_ambient_sound_mode_cycle, take_battery_level, take_bool,
+                take_custom_button_model, take_custom_hear_id_without_music_type,
+                take_dual_battery, take_equalizer_configuration, take_firmware_version,
+                take_serial_number, take_sound_modes, ParseResult,
             },
         },
         structures::{
-            BatteryLevel, CustomButtonModel, CustomHearId, DualBattery, EqualizerConfiguration,
-            FirmwareVersion, SerialNumber, SoundModes,
+            AmbientSoundModeCycle, BatteryLevel, CustomButtonModel, CustomHearId, DualBattery,
+            EqualizerConfiguration, FirmwareVersion, SerialNumber, SoundModes,
         },
     },
 };
@@ -65,6 +62,7 @@ impl From<A3933StateUpdatePacket> for StateUpdatePacket {
             custom_button_model: Some(packet.custom_button_model),
             firmware_version: Some(packet.left_firmware.min(packet.right_firmware)),
             serial_number: Some(packet.serial_number),
+            ambient_sound_mode_cycle: Some(packet.ambient_sound_mode_cycle),
         }
     }
 }

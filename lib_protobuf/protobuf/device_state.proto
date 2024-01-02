@@ -23,4 +23,5 @@ message DeviceState {
   optional FirmwareVersion firmware_version = 8;
   optional CustomButtonModel custom_button_model = 9;
   optional string serial_number = 10;
+  optional AmbientSoundModeCycle ambient_sound_mode_cycle = 11;
 }

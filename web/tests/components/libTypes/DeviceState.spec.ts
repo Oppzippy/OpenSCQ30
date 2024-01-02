@@ -16,6 +16,7 @@ describe("libTypes", () => {
         hasTouchTone: false,
         hasAutoPowerOff: false,
         dynamicRangeCompressionMinFirmwareVersion: null,
+        hasAmbientSoundModeCycle: false,
       },
       ageRange: null,
       gender: null,
@@ -33,6 +34,7 @@ describe("libTypes", () => {
       firmwareVersion: null,
       serialNumber: null,
       soundModes: null,
+      ambientSoundModeCycle: null,
     };
     const actual: unknown = JSON.parse(
       WasmTest.deserializeAndReserializeForTests(JSON.stringify(expected)),
@@ -58,6 +60,7 @@ describe("libTypes", () => {
           major: 2,
           minor: 3,
         },
+        hasAmbientSoundModeCycle: true,
       },
       ageRange: 1,
       gender: 2,
@@ -131,6 +134,11 @@ describe("libTypes", () => {
         noiseCancelingMode: "custom",
         transparencyMode: "fullyTransparent",
         customNoiseCanceling: 5,
+      },
+      ambientSoundModeCycle: {
+        noiseCancelingMode: true,
+        transparencyMode: true,
+        normalMode: true,
       },
     };
     const actual: unknown = JSON.parse(

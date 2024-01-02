@@ -34,6 +34,7 @@ describe("App", () => {
                 hasTouchTone: false,
                 hasAutoPowerOff: false,
                 dynamicRangeCompressionMinFirmwareVersion: null,
+                hasAmbientSoundModeCycle: false,
               },
               battery: {
                 type: "singleBattery",
@@ -60,6 +61,7 @@ describe("App", () => {
               hearId: null,
               firmwareVersion: null,
               serialNumber: null,
+              ambientSoundModeCycle: null,
             }),
             connect: vi.fn<unknown[], unknown>(),
             async setSoundModes(soundModes: SoundModes) {

@@ -1,5 +1,6 @@
 mod age_range;
 mod ambient_sound_mode;
+mod ambient_sound_mode_cycle;
 mod basic_hear_id;
 mod battery;
 mod custom_button_model;
@@ -23,6 +24,7 @@ mod volume_adjustments;
 
 pub use age_range::*;
 pub use ambient_sound_mode::*;
+pub use ambient_sound_mode_cycle::*;
 pub use basic_hear_id::*;
 pub use battery::*;
 pub use custom_button_model::*;

@@ -17,5 +17,6 @@ pub const A3926_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     has_wear_detection: false,
     has_touch_tone: false,
     has_auto_power_off: false,
+    has_ambient_sound_mode_cycle: false,
     custom_dispatchers: None,
 };

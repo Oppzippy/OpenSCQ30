@@ -14,7 +14,10 @@ use crate::{
             inbound::{state_update_packet::take_state_update_packet, take_inbound_packet_body},
             outbound::{OutboundPacketBytes, RequestFirmwareVersionPacket},
         },
-        structures::{CustomButtonModel, EqualizerConfiguration, HearId, SoundModes, STATE_UPDATE},
+        structures::{
+            AmbientSoundModeCycle, CustomButtonModel, EqualizerConfiguration, HearId, SoundModes,
+            STATE_UPDATE,
+        },
     },
     futures::{Futures, JoinHandle},
 };
@@ -223,6 +226,31 @@ where
         }
 
         let response = self.dispatcher.set_sound_modes(state, sound_modes)?;
+        self.handle_response(response, &state_sender).await?;
+        Ok(())
+    }
+
+    async fn set_ambient_sound_mode_cycle(
+        &self,
+        cycle: AmbientSoundModeCycle,
+    ) -> crate::Result<()> {
+        let state_sender = self.state_sender.lock().await;
+        let state = state_sender.borrow().to_owned();
+        if state.device_profile.has_ambient_sound_mode_cycle {
+            return Err(crate::Error::FeatureNotSupported {
+                feature_name: "ambient sound mode cycle",
+            });
+        }
+        let Some(prev_cycle) = state.ambient_sound_mode_cycle else {
+            return Err(crate::Error::MissingData {
+                name: "ambient sound mode cycle",
+            });
+        };
+        if prev_cycle == cycle {
+            return Ok(());
+        }
+
+        let response = self.dispatcher.set_ambient_sound_mode_cycle(state, cycle)?;
         self.handle_response(response, &state_sender).await?;
         Ok(())
     }

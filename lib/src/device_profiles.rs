@@ -22,6 +22,7 @@ pub struct DeviceProfile {
     pub has_wear_detection: bool,
     pub has_touch_tone: bool,
     pub has_auto_power_off: bool,
+    pub has_ambient_sound_mode_cycle: bool,
     pub dynamic_range_compression_min_firmware_version: Option<FirmwareVersion>,
 
     #[cfg_attr(feature = "serde", serde(skip))]

@@ -6,7 +6,8 @@ use openscq30_lib::{
     devices::standard::{
         state::DeviceState as LibDeviceState,
         structures::{
-            AmbientSoundMode as LibAmbientSoundMode, BasicHearId as LibBasicHearId,
+            AmbientSoundMode as LibAmbientSoundMode,
+            AmbientSoundModeCycle as LibAmbientSoundModeCycle, BasicHearId as LibBasicHearId,
             Battery as LibBattery, ButtonAction as LibButtonAction,
             CustomButtonModel as LibCustomButtonModel, CustomHearId as LibCustomHearId,
             CustomNoiseCanceling as LibCustomNoiseCanceling, DualBattery as LibDualBattery,
@@ -39,6 +40,7 @@ impl From<LibDeviceState> for DeviceState {
             serial_number: value
                 .serial_number
                 .map(|serial_number| serial_number.to_string()),
+            ambient_sound_mode_cycle: value.ambient_sound_mode_cycle.map(Into::into),
         }
     }
 }
@@ -302,6 +304,26 @@ impl From<LibTransparencyMode> for TransparencyMode {
         match value {
             LibTransparencyMode::FullyTransparent => Self::FullyTransparent,
             LibTransparencyMode::VocalMode => Self::VocalMode,
+        }
+    }
+}
+
+impl From<LibAmbientSoundModeCycle> for AmbientSoundModeCycle {
+    fn from(value: LibAmbientSoundModeCycle) -> Self {
+        Self {
+            noise_canceling_mode: value.noise_canceling_mode,
+            transparency_mode: value.transparency_mode,
+            normal_mode: value.normal_mode,
+        }
+    }
+}
+
+impl From<AmbientSoundModeCycle> for LibAmbientSoundModeCycle {
+    fn from(value: AmbientSoundModeCycle) -> Self {
+        Self {
+            noise_canceling_mode: value.noise_canceling_mode,
+            transparency_mode: value.transparency_mode,
+            normal_mode: value.normal_mode,
         }
     }
 }

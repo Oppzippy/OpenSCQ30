@@ -7,7 +7,9 @@ use openscq30_lib::{
     api::{connection::ConnectionStatus, device::Device},
     devices::standard::{
         state::DeviceState,
-        structures::{CustomButtonModel, EqualizerConfiguration, HearId, SoundModes},
+        structures::{
+            AmbientSoundModeCycle, CustomButtonModel, EqualizerConfiguration, HearId, SoundModes,
+        },
     },
 };
 use tokio::sync::watch;
@@ -25,6 +27,10 @@ mock! {
         pub fn set_sound_modes(
             &self,
             sound_modes: SoundModes,
+        ) -> openscq30_lib::Result<()>;
+        pub fn set_ambient_sound_mode_cycle(
+            &self,
+            cycle: AmbientSoundModeCycle,
         ) -> openscq30_lib::Result<()>;
         pub fn set_equalizer_configuration(
             &self,
@@ -66,6 +72,13 @@ impl Device for MockDevice {
     async fn set_sound_modes(&self, sound_modes: SoundModes) -> openscq30_lib::Result<()> {
         timeout_future(Duration::from_millis(10)).await;
         self.set_sound_modes(sound_modes)
+    }
+    async fn set_ambient_sound_mode_cycle(
+        &self,
+        cycle: AmbientSoundModeCycle,
+    ) -> openscq30_lib::Result<()> {
+        timeout_future(Duration::from_millis(10)).await;
+        self.set_ambient_sound_mode_cycle(cycle)
     }
     async fn set_equalizer_configuration(
         &self,
