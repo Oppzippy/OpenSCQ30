@@ -6,6 +6,12 @@
         <child>
             <object class="OpenSCQ30AmbientSoundModeSelection" id="ambient_sound_mode_selection" />
         </child>
+
+        <!-- Ambient Sound Mode Cycle -->
+        <child>
+            <object class="OpenSCQ30AmbientSoundModeCycleSelection" id="ambient_sound_mode_cycle_selection" />
+        </child>
+
         <!-- Transparency Mode -->
         <child>
             <object class="OpenSCQ30TransparencyModeSelection" id="transparency_mode_selection" />

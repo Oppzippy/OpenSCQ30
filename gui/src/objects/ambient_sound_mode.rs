@@ -1,5 +1,5 @@
 use gtk::glib::{self, Object};
-use openscq30_lib::devices::standard::structures::AmbientSoundMode;
+use openscq30_lib::devices::standard::structures::{AmbientSoundMode, AmbientSoundModeCycle};
 
 glib::wrapper! {
     pub struct GlibAmbientSoundMode(ObjectSubclass<imp::GlibAmbientSoundMode>);
@@ -16,6 +16,10 @@ impl GlibAmbientSoundMode {
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, glib::Boxed, Default)]
 #[boxed_type(name = "OpenSCQ30ValuesAmbientSoundMode")]
 pub struct GlibAmbientSoundModeValue(pub AmbientSoundMode);
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, glib::Boxed, Default)]
+#[boxed_type(name = "OpenSCQ30ValuesAmbientSoundModeCycle")]
+pub struct GlibAmbientSoundModeCycleValue(pub AmbientSoundModeCycle);
 
 mod imp {
     use std::cell::Cell;

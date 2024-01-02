@@ -420,6 +420,11 @@ fn delayed_initialize_application(
                                 .await
                                 .context("set custom button model")
                         }
+                        Action::SetAmbientSoundModeCycle(cycle) => {
+                            actions::set_ambient_sound_mode_cycle(&state, cycle)
+                                .await
+                                .context("set ambient sound mode cycle")
+                        }
                     };
 
                     if let Err(err) = result {

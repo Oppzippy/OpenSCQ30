@@ -54,10 +54,11 @@ mod imp {
     use crate::{
         actions::Action,
         objects::{
-            GlibAmbientSoundModeValue, GlibCustomNoiseCancelingValue, GlibNoiseCancelingModeValue,
-            GlibTransparencyModeValue,
+            GlibAmbientSoundModeCycleValue, GlibAmbientSoundModeValue,
+            GlibCustomNoiseCancelingValue, GlibNoiseCancelingModeValue, GlibTransparencyModeValue,
         },
         ui::widgets::general_settings::{
+            ambient_sound_mode_cycle_selection::AmbientSoundModeCycleSelection,
             ambient_sound_mode_selection::AmbientSoundModeSelection,
             custom_noise_canceling_selection::CustomNoiseCancelingSelection,
             noise_canceling_mode_selection::NoiseCancelingModeSelection,
@@ -73,6 +74,10 @@ mod imp {
         // Ambient Sound Mode
         #[template_child]
         pub ambient_sound_mode_selection: TemplateChild<AmbientSoundModeSelection>,
+
+        // Ambient Sound Mode
+        #[template_child]
+        pub ambient_sound_mode_cycle_selection: TemplateChild<AmbientSoundModeCycleSelection>,
 
         // Transpareny Mode
         #[template_child]
@@ -108,6 +113,12 @@ mod imp {
                 .set_has_noise_canceling_mode(
                     sound_mode_profile.noise_canceling_mode_type != NoiseCancelingModeType::None,
                 );
+            self.ambient_sound_mode_cycle_selection
+                .set_visible(state.device_profile.has_ambient_sound_mode_cycle);
+            self.ambient_sound_mode_cycle_selection
+                .set_has_noise_canceling_mode(
+                    sound_mode_profile.noise_canceling_mode_type != NoiseCancelingModeType::None,
+                );
             self.transparency_mode_selection.set_visible(
                 sound_mode_profile.transparency_mode_type == TransparencyModeType::Custom,
             );
@@ -125,6 +136,10 @@ mod imp {
             // Set selected values
             self.ambient_sound_mode_selection
                 .set_ambient_sound_mode(GlibAmbientSoundModeValue(sound_modes.ambient_sound_mode));
+            if let Some(cycle) = state.ambient_sound_mode_cycle {
+                self.ambient_sound_mode_cycle_selection
+                    .set_ambient_sound_mode_cycle(&cycle);
+            }
             self.transparency_mode_selection
                 .set_transparency_mode(GlibTransparencyModeValue(sound_modes.transparency_mode));
             self.noise_canceling_mode_selection
@@ -176,6 +191,19 @@ mod imp {
                             ambient_sound_mode_selection.ambient_sound_mode().0,
                         ));
                     });
+            }
+            // Ambient sound mode cycle
+            {
+                let this = self.to_owned();
+                self.ambient_sound_mode_cycle_selection.connect_local(
+                    "ambient-sound-mode-cycle-changed",
+                    false,
+                    move |parameters| {
+                        let cycle: GlibAmbientSoundModeCycleValue = parameters[1].get().unwrap();
+                        this.send_action(Action::SetAmbientSoundModeCycle(cycle.0));
+                        None
+                    },
+                );
             }
             // Transparency mode
             {
