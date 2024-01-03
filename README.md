@@ -16,7 +16,7 @@ It is intended that all devices in this list work, but since I do not own them a
 
 | Model    | Name              | Status  |
 | -------- | ----------------- | ------- |
-| A3027    | Life Q35          | Unknown |
+| A3027    | Life Q35          | Working |
 | A3028    | Life Q30          | Working |
 | A3030    | Life Tune Pro     | Unknown |
 | A3033    | Life 2 Neo        | Unknown |
