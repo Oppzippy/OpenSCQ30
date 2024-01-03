@@ -86,7 +86,7 @@ class DeviceSettingsSoundModeTest {
         ambientSoundModes = listOf(
             ambientSoundModeNormal,
             ambientSoundModeTransparency,
-            ambientSoundModeNoiseCanceling
+            ambientSoundModeNoiseCanceling,
         )
         noiseCancelingModes = listOf(outdoor, indoor, transport, custom)
     }
@@ -171,7 +171,7 @@ class DeviceSettingsSoundModeTest {
                 onNoiseCancelingModeChange = onNoiseCancelingModeChange,
                 hasTransparencyModes = true,
                 noiseCancelingType = NoiseCancelingType.Custom,
-                ambientSoundModeCycle = null
+                ambientSoundModeCycle = null,
             )
         }
         composeRule.onNode(outdoor).performClick()
@@ -196,7 +196,7 @@ class DeviceSettingsSoundModeTest {
                 onCustomNoiseCancelingChange = onCustomNoiseCancelingChange,
                 hasTransparencyModes = false,
                 noiseCancelingType = NoiseCancelingType.Custom,
-                ambientSoundModeCycle = null
+                ambientSoundModeCycle = null,
             )
         }
         // clicks in the middle of the 0-10 slider, so 5
@@ -213,7 +213,7 @@ class DeviceSettingsSoundModeTest {
                 noiseCancelingMode = true,
                 normalMode = false,
                 transparencyMode = true,
-            )
+            ),
         )
         composeRule.setContent {
             val cycle by cycleFlow.collectAsState()
@@ -227,7 +227,7 @@ class DeviceSettingsSoundModeTest {
                 hasTransparencyModes = false,
                 noiseCancelingType = NoiseCancelingType.Normal,
                 ambientSoundModeCycle = cycle,
-                onAmbientSoundModeCycleChange = { cycleFlow.value = it }
+                onAmbientSoundModeCycleChange = { cycleFlow.value = it },
             )
         }
         composeRule.onNode(ambientSoundModeCycleNoiseCanceling).performClick()
@@ -238,7 +238,7 @@ class DeviceSettingsSoundModeTest {
                 normalMode = true,
                 transparencyMode = true,
             ),
-            cycleFlow.value
+            cycleFlow.value,
         )
     }
 
@@ -256,7 +256,7 @@ class DeviceSettingsSoundModeTest {
                 ),
                 hasTransparencyModes = true,
                 noiseCancelingType = NoiseCancelingType.Custom,
-                ambientSoundModeCycle = null
+                ambientSoundModeCycle = null,
             )
         }
     }
