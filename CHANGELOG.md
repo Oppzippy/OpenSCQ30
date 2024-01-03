@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.10.0
+
+### General
+
+#### Features
+
+-   Support for A3945 (Note 3S), A3933 (Note 3), and A3939 (Life P3)
+
 ## v1.9.0
 
 ### General
