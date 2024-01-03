@@ -15,12 +15,12 @@ use crate::devices::{
                 take_ambient_sound_mode_cycle, take_battery_level, take_bool,
                 take_custom_button_model, take_custom_hear_id_without_music_type,
                 take_dual_battery, take_equalizer_configuration, take_firmware_version,
-                take_serial_number, take_sound_modes, ParseResult,
+                take_serial_number, take_sound_modes, take_volume_adjustments, ParseResult,
             },
         },
         structures::{
             AmbientSoundModeCycle, BatteryLevel, CustomButtonModel, CustomHearId, DualBattery,
-            EqualizerConfiguration, FirmwareVersion, SerialNumber, SoundModes,
+            EqualizerConfiguration, FirmwareVersion, HearId, SerialNumber, SoundModes,
         },
     },
 };
@@ -29,24 +29,27 @@ use crate::devices::{
 // Despite EQ being 10 bands, only the first 8 seem to be used?
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3933StateUpdatePacket {
-    host_device: u8,
-    tws_status: bool,
-    battery: DualBattery,
-    left_firmware: FirmwareVersion,
-    right_firmware: FirmwareVersion,
-    serial_number: SerialNumber,
-    equalizer_configuration: EqualizerConfiguration, // 10 bands mono
-    age_range: u8,
-    hear_id: CustomHearId, // 10 bands
-    custom_button_model: CustomButtonModel,
-    ambient_sound_mode_cycle: AmbientSoundModeCycle,
-    sound_modes: SoundModes,
-    touch_tone_switch: bool,
-    wear_detection_switch: bool,
-    game_mode_switch: bool,
-    charging_case_battery_level: BatteryLevel,
-    device_color: u8,
-    wind_noise_detection: bool,
+    pub host_device: u8,
+    pub tws_status: bool,
+    pub battery: DualBattery,
+    pub left_firmware: FirmwareVersion,
+    pub right_firmware: FirmwareVersion,
+    pub serial_number: SerialNumber,
+    pub left_equalizer_configuration: EqualizerConfiguration,
+    pub left_band_9_and_10: [u8; 2],
+    pub right_equalizer_configuration: EqualizerConfiguration,
+    pub right_band_9_and_10: [u8; 2],
+    pub age_range: u8,
+    pub hear_id: CustomHearId, // 10 bands
+    pub custom_button_model: CustomButtonModel,
+    pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
+    pub sound_modes: SoundModes,
+    pub touch_tone_switch: bool,
+    pub wear_detection_switch: bool,
+    pub game_mode_switch: bool,
+    pub charging_case_battery_level: BatteryLevel,
+    pub device_color: u8,
+    pub wind_noise_detection: bool,
 }
 
 impl From<A3933StateUpdatePacket> for StateUpdatePacket {
@@ -54,11 +57,11 @@ impl From<A3933StateUpdatePacket> for StateUpdatePacket {
         Self {
             device_profile: A3933_DEVICE_PROFILE,
             battery: packet.battery.into(),
-            equalizer_configuration: packet.equalizer_configuration,
+            equalizer_configuration: packet.left_equalizer_configuration,
             sound_modes: Some(packet.sound_modes),
             age_range: None,
             gender: None,
-            hear_id: None,
+            hear_id: Some(HearId::Custom(packet.hear_id)),
             custom_button_model: Some(packet.custom_button_model),
             firmware_version: Some(packet.left_firmware.min(packet.right_firmware)),
             serial_number: Some(packet.serial_number),
@@ -80,8 +83,10 @@ pub fn take_a3933_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                 take_firmware_version,
                 take_firmware_version,
                 take_serial_number,
-                take_equalizer_configuration(10),
-                take(10usize), // ??, maybe stereo eq?
+                take_equalizer_configuration(8),
+                take(2usize),
+                take_volume_adjustments(8),
+                take(2usize),
                 le_u8,
                 take_custom_hear_id_without_music_type(10),
                 take_custom_button_model,
@@ -96,8 +101,10 @@ pub fn take_a3933_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                 left_firmware,
                 right_firmware,
                 serial_number,
-                equalizer_configuration, // 10 bands mono
-                _,
+                left_equalizer_configuration,
+                left_band_9_and_10,
+                right_volume_adjustments,
+                right_band_9_and_10,
                 age_range,
                 hear_id,
                 custom_button_model,
@@ -112,7 +119,17 @@ pub fn take_a3933_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                     left_firmware,
                     right_firmware,
                     serial_number,
-                    equalizer_configuration,
+                    right_equalizer_configuration: if left_equalizer_configuration
+                        .preset_profile()
+                        .is_some()
+                    {
+                        left_equalizer_configuration.to_owned()
+                    } else {
+                        EqualizerConfiguration::new_custom_profile(right_volume_adjustments)
+                    },
+                    right_band_9_and_10: right_band_9_and_10.try_into().unwrap(),
+                    left_equalizer_configuration,
+                    left_band_9_and_10: left_band_9_and_10.try_into().unwrap(),
                     age_range,
                     hear_id,
                     custom_button_model,
