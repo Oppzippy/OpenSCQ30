@@ -13,12 +13,12 @@ demo = ["openscq30_lib/demo"]
 openscq30_lib = { path = "../lib" }
 clap = { workspace = true, features = ["derive"] }
 tokio = { workspace = true, features = ["macros"] }
-tracing = "0.1"
-tracing-subscriber = "0.3"
-macaddr = "1.0"
-heck = "0.4"
-itertools = "0.12"
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+macaddr = { workspace = true }
+heck = { workspace = true }
+itertools = { workspace = true }
 
 [dev-dependencies]
-assert_cmd = "2.0"
-predicates = "3.0"
+assert_cmd = { workspace = true }
+predicates = { workspace = true }
