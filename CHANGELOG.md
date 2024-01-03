@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.10.1
+
+### General
+
+#### Fixes
+
+-   A3933 equalizer not working
+
+### Android
+
+#### Fixes
+
+-   Immediate crash due to misconfigured proguard
+
 ## v1.10.0
 
 ### General
