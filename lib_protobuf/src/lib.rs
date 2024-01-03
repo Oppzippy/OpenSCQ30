@@ -26,6 +26,10 @@ pub fn serialize_preset_equalizer_profile(profile: PresetEqualizerProfile) -> Ve
     .encode_to_vec()
 }
 
+pub fn serialize_ambient_sound_mode_cycle(cycle: AmbientSoundModeCycle) -> Vec<u8> {
+    protobuf::AmbientSoundModeCycle::from(cycle).encode_to_vec()
+}
+
 pub fn deserialize_sound_modes(protobuf: &[u8]) -> Result<SoundModes, DecodeError> {
     protobuf::SoundModes::decode(protobuf).map(SoundModes::from)
 }

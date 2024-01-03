@@ -7,6 +7,7 @@ import com.oppzippy.openscq30.android.IntentFactory
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
+import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.wrapper.SoundModes
@@ -101,5 +102,9 @@ class DeviceSettingsViewModel @Inject constructor(
 
     fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
         deviceServiceConnection.setEqualizerConfiguration(equalizerConfiguration)
+    }
+
+    fun setAmbientSoundModeCycle(cycle: AmbientSoundModeCycle) {
+        deviceServiceConnection.setAmbientSoundModeCycle(cycle)
     }
 }

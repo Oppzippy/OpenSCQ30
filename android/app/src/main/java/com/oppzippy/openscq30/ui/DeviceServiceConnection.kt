@@ -5,6 +5,7 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
+import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.SoundModes
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
@@ -72,6 +73,10 @@ class DeviceServiceConnection(
 
     fun setSoundModes(soundModes: SoundModes) {
         service?.get()?.connectionManager?.setSoundModes(soundModes)
+    }
+
+    fun setAmbientSoundModeCycle(cycle: AmbientSoundModeCycle) {
+        service?.get()?.connectionManager?.setAmbientSoundModeCycle(cycle)
     }
 
     fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {

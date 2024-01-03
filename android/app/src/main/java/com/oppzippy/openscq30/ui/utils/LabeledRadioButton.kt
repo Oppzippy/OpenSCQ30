@@ -17,11 +17,12 @@ import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
 fun <T> LabeledRadioButtonGroup(
+    modifier: Modifier = Modifier,
     selectedValue: T,
     values: LinkedHashMap<T, String>,
     onValueChange: (value: T) -> Unit,
 ) {
-    Column(Modifier.selectableGroup()) {
+    Column(modifier.selectableGroup()) {
         values.forEach { (value, text) ->
             LabeledRadioButton(text = text, selected = selectedValue == value, onClick = {
                 onValueChange(value)

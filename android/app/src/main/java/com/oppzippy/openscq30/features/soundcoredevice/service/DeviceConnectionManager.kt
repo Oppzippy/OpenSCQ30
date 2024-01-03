@@ -3,6 +3,7 @@ package com.oppzippy.openscq30.features.soundcoredevice.service
 import android.util.Log
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceConnector
 import com.oppzippy.openscq30.features.soundcoredevice.impl.SoundcoreDevice
+import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.SoundModes
 import kotlinx.coroutines.CancellationException
@@ -114,6 +115,12 @@ class DeviceConnectionManager @Inject constructor(
     fun setSoundModes(soundModes: SoundModes) {
         scope.launch {
             device?.setSoundModes(soundModes)
+        }
+    }
+
+    fun setAmbientSoundModeCycle(cycle: AmbientSoundModeCycle) {
+        scope.launch {
+            device?.setAmbientSoundModeCycle(cycle)
         }
     }
 

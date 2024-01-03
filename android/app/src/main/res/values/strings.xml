@@ -99,4 +99,5 @@
     <string name="feature_flags">Feature Flags</string>
     <string name="device_info">Device Info</string>
     <string name="device_profile">Device Profile</string>
+    <string name="ambient_sound_mode_cycle">Ambient Sound Mode Cycle</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.oppzippy.openscq30.lib.wrapper
 
+import com.oppzippy.openscq30.lib.protobuf.ambientSoundModeCycle
 import com.oppzippy.openscq30.lib.protobuf.soundModes
 
 data class SoundModes(
@@ -48,6 +49,28 @@ fun com.oppzippy.openscq30.lib.protobuf.AmbientSoundMode.toKotlin(): AmbientSoun
         com.oppzippy.openscq30.lib.protobuf.AmbientSoundMode.TRANSPARENCY -> AmbientSoundMode.Transparency
         com.oppzippy.openscq30.lib.protobuf.AmbientSoundMode.NOISE_CANCELING -> AmbientSoundMode.NoiseCanceling
     }
+}
+
+data class AmbientSoundModeCycle(
+    val normalMode: Boolean,
+    val transparencyMode: Boolean,
+    val noiseCancelingMode: Boolean,
+) {
+    fun toProtobuf(): com.oppzippy.openscq30.lib.protobuf.AmbientSoundModeCycle {
+        return ambientSoundModeCycle {
+            normalMode = this@AmbientSoundModeCycle.normalMode
+            transparencyMode = this@AmbientSoundModeCycle.transparencyMode
+            noiseCancelingMode = this@AmbientSoundModeCycle.noiseCancelingMode
+        }
+    }
+}
+
+fun com.oppzippy.openscq30.lib.protobuf.AmbientSoundModeCycle.toKotlin(): AmbientSoundModeCycle {
+    return AmbientSoundModeCycle(
+        normalMode = normalMode,
+        transparencyMode = transparencyMode,
+        noiseCancelingMode = noiseCancelingMode,
+    )
 }
 
 enum class NoiseCancelingMode {

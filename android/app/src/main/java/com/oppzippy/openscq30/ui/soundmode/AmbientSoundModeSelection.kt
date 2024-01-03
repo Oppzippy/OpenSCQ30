@@ -1,6 +1,8 @@
 package com.oppzippy.openscq30.ui.soundmode
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.oppzippy.openscq30.R
@@ -23,6 +25,7 @@ fun AmbientSoundModeSelection(
     }
 
     LabeledRadioButtonGroup(
+        modifier = Modifier.testTag("ambientSoundModeSelection"),
         selectedValue = ambientSoundMode,
         values = values,
         onValueChange = onAmbientSoundModeChange,

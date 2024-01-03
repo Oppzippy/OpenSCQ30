@@ -60,6 +60,11 @@ fun OpenSCQ30Root(
                                 viewModel.setSoundModes(ambientSoundMode = it)
                             }
                         },
+                        onAmbientSoundModeCycleChange = {
+                            withErrorToast(context) {
+                                viewModel.setAmbientSoundModeCycle(it)
+                            }
+                        },
                         onTransparencyModeChange = {
                             withErrorToast(context) {
                                 viewModel.setSoundModes(transparencyMode = it)

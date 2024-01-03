@@ -25,6 +25,15 @@ imports = [
 into_custom = "com.oppzippy.openscq30.lib.protobuf.SoundModes.parseFrom({}).toKotlin()"
 from_custom = "{}.toProtobuf().toByteArray()"
 
+[bindings.kotlin.custom_types.AmbientSoundModeCycle]
+type_name = "AmbientSoundModeCycle"
+imports = [
+    "com.oppzippy.openscq30.lib.wrapper.toKotlin",
+    "com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle",
+]
+into_custom = "com.oppzippy.openscq30.lib.protobuf.AmbientSoundModeCycle.parseFrom({}).toKotlin()"
+from_custom = "{}.toProtobuf().toByteArray()"
+
 [bindings.kotlin.custom_types.EqualizerConfiguration]
 type_name = "EqualizerConfiguration"
 imports = [

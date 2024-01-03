@@ -30,5 +30,6 @@ fun DeviceState.Companion.empty(): DeviceState {
         gender = null,
         customButtonModel = null,
         hearId = null,
+        ambientSoundModeCycle = null,
     )
 }

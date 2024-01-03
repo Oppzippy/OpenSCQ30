@@ -21,6 +21,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
+import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeType
@@ -40,6 +41,7 @@ fun DeviceSettings(
     uiState: UiDeviceState.Connected,
     onBack: () -> Unit = {},
     onAmbientSoundModeChange: (ambientSoundMode: AmbientSoundMode) -> Unit = {},
+    onAmbientSoundModeCycleChange: (ambientSoundMode: AmbientSoundModeCycle) -> Unit = {},
     onTransparencyModeChange: (transparencyMode: TransparencyMode) -> Unit = {},
     onNoiseCancelingModeChange: (noiseCancelingMode: NoiseCancelingMode) -> Unit = {},
     onCustomNoiseCancelingChange: (customNoiseCanceling: UByte) -> Unit = {},
@@ -99,6 +101,7 @@ fun DeviceSettings(
                         uiState.deviceState.deviceProfile.soundMode ?: return@composable
                     SoundModeSettings(
                         soundModes = soundModes,
+                        ambientSoundModeCycle = uiState.deviceState.ambientSoundModeCycle,
                         hasTransparencyModes = soundModeProfile.transparencyModeType == TransparencyModeType.Custom,
                         noiseCancelingType = when (soundModeProfile.noiseCancelingModeType) {
                             NoiseCancelingModeType.None -> NoiseCancelingType.None
@@ -109,6 +112,7 @@ fun DeviceSettings(
                         onTransparencyModeChange = onTransparencyModeChange,
                         onNoiseCancelingModeChange = onNoiseCancelingModeChange,
                         onCustomNoiseCancelingChange = onCustomNoiseCancelingChange,
+                        onAmbientSoundModeCycleChange = onAmbientSoundModeCycleChange,
                     )
                 }
             }

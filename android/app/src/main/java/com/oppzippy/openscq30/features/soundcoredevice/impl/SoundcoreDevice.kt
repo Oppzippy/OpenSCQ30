@@ -3,6 +3,7 @@ package com.oppzippy.openscq30.features.soundcoredevice.impl
 import android.annotation.SuppressLint
 import com.oppzippy.openscq30.lib.bindings.NativeDeviceStateObserver
 import com.oppzippy.openscq30.lib.bindings.NativeSoundcoreDevice
+import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
 import com.oppzippy.openscq30.lib.wrapper.CustomButtonModel
 import com.oppzippy.openscq30.lib.wrapper.DeviceState
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
@@ -48,6 +49,10 @@ class SoundcoreDevice(
 
     suspend fun setSoundModes(newSoundModes: SoundModes) {
         nativeDevice.setSoundModes(newSoundModes)
+    }
+
+    suspend fun setAmbientSoundModeCycle(cycle: AmbientSoundModeCycle) {
+        nativeDevice.setAmbientSoundModeCycle(cycle)
     }
 
     suspend fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {

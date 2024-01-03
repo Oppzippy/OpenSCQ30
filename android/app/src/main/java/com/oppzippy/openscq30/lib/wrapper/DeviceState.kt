@@ -1,5 +1,6 @@
 package com.oppzippy.openscq30.lib.wrapper
 
+import com.oppzippy.openscq30.lib.protobuf.ambientSoundModeCycleOrNull
 import com.oppzippy.openscq30.lib.protobuf.customButtonModelOrNull
 import com.oppzippy.openscq30.lib.protobuf.deviceState
 import com.oppzippy.openscq30.lib.protobuf.firmwareVersionOrNull
@@ -17,6 +18,7 @@ data class DeviceState(
     val customButtonModel: CustomButtonModel?,
     val firmwareVersion: FirmwareVersion?,
     val serialNumber: String?,
+    val ambientSoundModeCycle: AmbientSoundModeCycle?,
 ) {
     companion object // used for static extension methods in tests
 
@@ -44,6 +46,7 @@ data class DeviceState(
             this@DeviceState.customButtonModel?.let { customButtonModel = it.toProtobuf() }
             this@DeviceState.firmwareVersion?.let { firmwareVersion = it.toProtobuf() }
             this@DeviceState.serialNumber?.let { serialNumber = it }
+            this@DeviceState.ambientSoundModeCycle?.let { ambientSoundModeCycle = it.toProtobuf() }
         }
     }
 }
@@ -60,5 +63,6 @@ fun com.oppzippy.openscq30.lib.protobuf.DeviceState.toKotlin(): DeviceState {
         customButtonModel = customButtonModelOrNull?.toKotlin(),
         firmwareVersion = firmwareVersionOrNull?.toKotlin(),
         serialNumber = if (hasSerialNumber()) serialNumber else null,
+        ambientSoundModeCycle = ambientSoundModeCycleOrNull?.toKotlin(),
     )
 }
