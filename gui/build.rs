@@ -42,7 +42,7 @@ fn windows() {
 fn parse_version(version: &str) -> (&str, &str, &str) {
     use regex::Regex;
 
-    let version_parts = Regex::new("([0-9])\\.([0-9])\\.([0-9])")
+    let version_parts = Regex::new("([0-9]+)\\.([0-9]+)\\.([0-9]+)")
         .unwrap()
         .captures(version)
         .unwrap();
