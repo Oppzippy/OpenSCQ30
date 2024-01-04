@@ -2,7 +2,6 @@ package com.oppzippy.openscq30.features.soundcoredevice.impl
 
 import android.bluetooth.BluetoothDevice
 import android.content.Context
-import android.util.Log
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceConnector
 import com.oppzippy.openscq30.lib.bindings.ManualConnection
 import com.oppzippy.openscq30.lib.bindings.newSoundcoreDevice
@@ -33,6 +32,7 @@ class SoundcoreDeviceConnectorImpl(
                 callbacks.waitUntilReady()
             }
         } catch (ex: TimeoutCancellationException) {
+            gatt.close()
             throw TimeoutException("Timeout waiting for GATT services").initCause(ex)
         }
 
@@ -45,7 +45,14 @@ class SoundcoreDeviceConnectorImpl(
         )
         callbacks.setManualConnection(connection)
 
-        val nativeDevice = newSoundcoreDevice(connection)
+        val nativeDevice = try {
+            newSoundcoreDevice(connection)
+        } catch (ex: Exception) {
+            gatt.close()
+            connection.close()
+            throw ex
+        }
+
         val soundcoreDevice = SoundcoreDevice(
             name = nativeDevice.name(),
             macAddress = nativeDevice.macAddress(),
