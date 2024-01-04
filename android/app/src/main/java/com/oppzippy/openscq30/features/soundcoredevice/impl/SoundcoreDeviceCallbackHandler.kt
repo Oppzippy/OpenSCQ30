@@ -208,6 +208,13 @@ class SoundcoreDeviceCallbackHandler(
             )
             return
         }
+        if (status != BluetoothGatt.GATT_SUCCESS) {
+            Log.e(
+                "SoundcoreDeviceCallbackHandler",
+                "gatt service discovery failed with status $status",
+            )
+            return
+        }
         val service = gatt.services.first {
             isSoundcoreServiceUuid(it.uuid)
         }
