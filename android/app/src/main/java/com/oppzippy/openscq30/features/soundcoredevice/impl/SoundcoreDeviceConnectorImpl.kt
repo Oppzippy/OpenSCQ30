@@ -27,10 +27,6 @@ class SoundcoreDeviceConnectorImpl(
             SoundcoreDeviceCallbackHandler(context = context, coroutineScope = coroutineScope)
         val gatt =
             bluetoothDevice.connectGatt(context, false, callbacks, BluetoothDevice.TRANSPORT_LE)
-        if (!gatt.connect()) {
-            Log.d("SoundcoreDeviceFactoryImpl", "gatt connect failed")
-            return null
-        }
 
         try {
             withTimeout(4.seconds) {
