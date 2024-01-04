@@ -2,6 +2,7 @@ package com.oppzippy.openscq30.features.soundcoredevice.impl
 
 import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.util.Log
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceConnector
 import com.oppzippy.openscq30.lib.bindings.ManualConnection
 import com.oppzippy.openscq30.lib.bindings.newSoundcoreDevice
@@ -26,6 +27,18 @@ class SoundcoreDeviceConnectorImpl(
             SoundcoreDeviceCallbackHandler(context = context, coroutineScope = coroutineScope)
         val gatt =
             bluetoothDevice.connectGatt(context, false, callbacks, BluetoothDevice.TRANSPORT_LE)
+
+        if (gatt.discoverServices()) {
+            Log.d(
+                "SoundcoreDeviceConnectorImpl",
+                "Started discovering services, so we must be connected already",
+            )
+        } else {
+            Log.d(
+                "SoundcoreDeviceConnectorImpl",
+                "Failed to start discovering services, so we must not be connected yet. Discovery should start upon connection.",
+            )
+        }
 
         try {
             withTimeout(4.seconds) {

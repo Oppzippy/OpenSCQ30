@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.lang.IllegalStateException
 import java.util.UUID
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -237,6 +238,10 @@ class SoundcoreDeviceCallbackHandler(
             ),
         )
         queueCommand(Command.SetMtu(500))
-        ready.unlock()
+        try {
+            ready.unlock()
+        } catch (ex: IllegalStateException) {
+            // ready will only be locked once, so we only care about unlocking it once.
+        }
     }
 }
