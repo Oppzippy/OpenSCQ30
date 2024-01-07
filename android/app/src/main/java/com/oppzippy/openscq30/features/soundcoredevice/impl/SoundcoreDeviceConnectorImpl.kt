@@ -1,6 +1,7 @@
 package com.oppzippy.openscq30.features.soundcoredevice.impl
 
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGatt
 import android.content.Context
 import android.util.Log
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceConnector
@@ -11,7 +12,6 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import java.util.concurrent.TimeoutException
-import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.seconds
 
 class SoundcoreDeviceConnectorImpl(
@@ -23,78 +23,77 @@ class SoundcoreDeviceConnectorImpl(
         macAddress: String,
         coroutineScope: CoroutineScope,
     ): SoundcoreDevice? {
-        val bluetoothDevice = deviceFinder.findByMacAddress(macAddress) ?: return null
-        val callbacks =
-            SoundcoreDeviceCallbackHandler(context = context, coroutineScope = coroutineScope)
-        val gatt =
-            bluetoothDevice.connectGatt(context, false, callbacks, BluetoothDevice.TRANSPORT_LE)
-
-        if (gatt.discoverServices()) {
-            Log.d(
-                "SoundcoreDeviceConnectorImpl",
-                "Started discovering services, so we must be connected already",
-            )
-        } else {
-            Log.d(
-                "SoundcoreDeviceConnectorImpl",
-                "Failed to start discovering services, so we must not be connected yet. Discovery should start upon connection.",
-            )
-        }
-
+        var gatt: BluetoothGatt? = null
+        var connection: ManualConnection? = null
         try {
-            withTimeout(4.seconds) {
-                callbacks.waitUntilReady()
+            val bluetoothDevice = deviceFinder.findByMacAddress(macAddress) ?: return null
+            val callbacks =
+                SoundcoreDeviceCallbackHandler(context = context, coroutineScope = coroutineScope)
+            gatt =
+                bluetoothDevice.connectGatt(context, false, callbacks, BluetoothDevice.TRANSPORT_LE)
+
+            if (gatt.discoverServices()) {
+                Log.d(
+                    "SoundcoreDeviceConnectorImpl",
+                    "Started discovering services, so we must be connected already",
+                )
+            } else {
+                Log.d(
+                    "SoundcoreDeviceConnectorImpl",
+                    "Failed to start discovering services, so we must not be connected yet. Discovery should start upon connection.",
+                )
             }
-        } catch (ex: TimeoutCancellationException) {
-            gatt.close()
-            throw TimeoutException("Timeout waiting for GATT services").initCause(ex)
-        } catch (ex: Exception) {
-            gatt.close()
-            throw ex
-        }
 
-        val serviceUuid = callbacks.serviceUuid.value ?: return null
-        val connection = ManualConnection(
-            name = bluetoothDevice.name,
-            macAddress = bluetoothDevice.address,
-            serviceUuid = serviceUuid,
-            connectionWriter = callbacks,
-        )
-        callbacks.setManualConnection(connection)
+            try {
+                withTimeout(4.seconds) {
+                    callbacks.waitUntilReady()
+                }
+            } catch (ex: TimeoutCancellationException) {
+                throw TimeoutException("Timeout waiting for GATT services").initCause(ex)
+            }
 
-        val nativeDevice = try {
-            newSoundcoreDevice(connection)
-        } catch (ex: Exception) {
-            gatt.close()
-            connection.close()
-            throw ex
-        }
+            val serviceUuid = callbacks.serviceUuid.value ?: return null
+            connection = ManualConnection(
+                name = bluetoothDevice.name,
+                macAddress = bluetoothDevice.address,
+                serviceUuid = serviceUuid,
+                connectionWriter = callbacks,
+            )
+            callbacks.setManualConnection(connection)
 
-        val soundcoreDevice = SoundcoreDevice(
-            name = nativeDevice.name(),
-            macAddress = nativeDevice.macAddress(),
-            bleServiceUuid = nativeDevice.serviceUuid(),
-            cleanUp = {
-                callbacks.close()
-                gatt.disconnect()
-                gatt.close()
-            },
-            nativeDevice = nativeDevice,
-            coroutineScope = coroutineScope,
-            initialState = nativeDevice.state(),
-        )
+            val nativeDevice = newSoundcoreDevice(connection)
 
-        // SoundcoreDevice and SoundcoreDeviceCallbackHandler are intentionally unaware of each other,
-        // so connecting isDisconnected to SoundcoreDevice's close must be done outside of either of
-        // the two classes.
-        coroutineScope.launch {
-            callbacks.isDisconnected.collect { isDisconnected ->
-                if (isDisconnected) {
-                    soundcoreDevice.close()
+            val soundcoreDevice = SoundcoreDevice(
+                name = nativeDevice.name(),
+                macAddress = nativeDevice.macAddress(),
+                bleServiceUuid = nativeDevice.serviceUuid(),
+                cleanUp = {
+                    callbacks.close()
+                    gatt.disconnect()
+                    gatt.close()
+                },
+                nativeDevice = nativeDevice,
+                coroutineScope = coroutineScope,
+                initialState = nativeDevice.state(),
+            )
+
+            // SoundcoreDevice and SoundcoreDeviceCallbackHandler are intentionally unaware of each other,
+            // so connecting isDisconnected to SoundcoreDevice's close must be done outside of either of
+            // the two classes.
+            coroutineScope.launch {
+                callbacks.isDisconnected.collect { isDisconnected ->
+                    if (isDisconnected) {
+                        soundcoreDevice.close()
+                    }
                 }
             }
-        }
 
-        return soundcoreDevice
+            return soundcoreDevice
+        } catch (ex: Exception) {
+            Log.d("SoundcoreDeviceConnectorImpl", "Exception thrown, cleaning up resources")
+            gatt?.close()
+            connection?.close()
+            throw ex
+        }
     }
 }
