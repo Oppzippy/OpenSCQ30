@@ -11,6 +11,7 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import java.util.concurrent.TimeoutException
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.seconds
 
 class SoundcoreDeviceConnectorImpl(
@@ -47,6 +48,9 @@ class SoundcoreDeviceConnectorImpl(
         } catch (ex: TimeoutCancellationException) {
             gatt.close()
             throw TimeoutException("Timeout waiting for GATT services").initCause(ex)
+        } catch (ex: Exception) {
+            gatt.close()
+            throw ex
         }
 
         val serviceUuid = callbacks.serviceUuid.value ?: return null
