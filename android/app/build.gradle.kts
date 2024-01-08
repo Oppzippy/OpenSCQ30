@@ -196,6 +196,7 @@ dependencies {
     androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0-beta01")
 
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation(kotlin("reflect"))
     androidTestImplementation(kotlin("reflect"))
 }
 

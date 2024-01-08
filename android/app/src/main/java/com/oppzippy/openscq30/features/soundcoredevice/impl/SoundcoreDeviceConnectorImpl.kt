@@ -5,18 +5,23 @@ import android.bluetooth.BluetoothGatt
 import android.content.Context
 import android.util.Log
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceConnector
+import com.oppzippy.openscq30.lib.bindings.ConnectionWriter
+import com.oppzippy.openscq30.lib.bindings.MacAddr6
 import com.oppzippy.openscq30.lib.bindings.ManualConnection
+import com.oppzippy.openscq30.lib.bindings.Uuid
 import com.oppzippy.openscq30.lib.bindings.newSoundcoreDevice
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import java.lang.RuntimeException
 import java.util.concurrent.TimeoutException
 import kotlin.time.Duration.Companion.seconds
 
 class SoundcoreDeviceConnectorImpl(
     private val context: Context,
     private val deviceFinder: BluetoothDeviceFinder,
+    private val createManualConnection: (name: String, macAddress: MacAddr6, serviceUuid: Uuid, connectionWriter: ConnectionWriter) -> ManualConnection,
 ) : SoundcoreDeviceConnector {
     @Throws(SecurityException::class)
     override suspend fun connectToSoundcoreDevice(
@@ -52,12 +57,12 @@ class SoundcoreDeviceConnectorImpl(
                 throw TimeoutException("Timeout waiting for GATT services").initCause(ex)
             }
 
-            val serviceUuid = callbacks.serviceUuid.value ?: return null
-            connection = ManualConnection(
-                name = bluetoothDevice.name,
-                macAddress = bluetoothDevice.address,
-                serviceUuid = serviceUuid,
-                connectionWriter = callbacks,
+            val serviceUuid = callbacks.serviceUuid.value ?: throw GattServiceNotFoundException()
+            connection = createManualConnection(
+                bluetoothDevice.name,
+                bluetoothDevice.address,
+                serviceUuid,
+                callbacks,
             )
             callbacks.setManualConnection(connection)
 
@@ -91,9 +96,12 @@ class SoundcoreDeviceConnectorImpl(
             return soundcoreDevice
         } catch (ex: Exception) {
             Log.d("SoundcoreDeviceConnectorImpl", "Exception thrown, cleaning up resources")
+            gatt?.disconnect()
             gatt?.close()
             connection?.close()
             throw ex
         }
     }
 }
+
+class GattServiceNotFoundException : RuntimeException()
