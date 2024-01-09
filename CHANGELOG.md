@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.10.2
+
+### Android
+
+#### Fixes
+
+-   Various resource leaks when failing to connect to a device
+-   Edge case where events occur in unexpected order while connecting, causing it to hang
+
 ## v1.10.1
 
 ### General
