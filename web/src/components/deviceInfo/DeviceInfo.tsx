@@ -21,7 +21,7 @@ export const DeviceInfo = React.memo(function ({ deviceState }: Props) {
       <Typography component="h2" variant="h6">
         {t("deviceInfo.deviceInfo")}
       </Typography>
-      <Table>
+      <Table sx={{ tableLayout: "fixed" }}>
         <TableBody>
           <FirmwareVersion deviceState={deviceState} />
           <SerialNumber deviceState={deviceState} />
@@ -106,7 +106,10 @@ function DeviceProfile({ deviceState }: DeviceStateProps) {
         <Typography>{t("deviceInfo.deviceProfile")}</Typography>
       </TableCell>
       <TableCell>
-        <Typography component={"span"}>
+        <Typography
+          component={"div"}
+          sx={{ maxWidth: "100%", overflowX: "scroll" }}
+        >
           <pre>{JSON.stringify(deviceState.deviceProfile, undefined, 2)}</pre>
         </Typography>
       </TableCell>
