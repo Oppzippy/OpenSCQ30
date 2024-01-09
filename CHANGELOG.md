@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.10.3
+
+### Web
+
+#### Fixes
+
+-   Device profile table cell overflowing, breaking layout
+
 ## v1.10.2
 
 ### Android
