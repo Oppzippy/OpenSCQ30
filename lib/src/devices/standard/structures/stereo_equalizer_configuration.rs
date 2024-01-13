@@ -1,5 +1,6 @@
 use super::{EqualizerConfiguration, VolumeAdjustments};
 
+#[derive(Clone, Debug, PartialEq)]
 pub struct StereoEqualizerConfiguration {
     pub left: EqualizerConfiguration,
     pub right: EqualizerConfiguration,
