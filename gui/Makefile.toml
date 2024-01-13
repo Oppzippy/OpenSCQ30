@@ -42,6 +42,8 @@ end
 
 [tasks.unit-test]
 command = "cargo"
+env.LC_ALL = "C"
+env.LANG = "C"
 args = ["test", "--bins"]
 
 [tasks.unit-test-cov]
