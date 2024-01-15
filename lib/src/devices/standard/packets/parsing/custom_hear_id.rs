@@ -79,8 +79,9 @@ pub fn take_custom_hear_id_without_music_type<
                 le_i32,
                 take_hear_id_type,
                 take_stereo_volume_adjustments(num_bands),
+                take(2usize), // hear id eq index?
             )),
-            |(is_enabled, volume_adjustments, time, hear_id_type, custom_volume_adjustments)| {
+            |(is_enabled, volume_adjustments, time, hear_id_type, custom_volume_adjustments, _)| {
                 CustomHearId {
                     is_enabled,
                     volume_adjustments,

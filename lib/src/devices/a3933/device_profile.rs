@@ -196,6 +196,7 @@ mod tests {
                 0x00, // hear id type
                 120, 120, 120, 120, 120, 120, 120, 120, 1, 2, // left hear id custom
                 120, 120, 120, 120, 120, 120, 120, 120, 3, 4, // right hear id custom
+                0x00, 0x00, // hear id eq profile
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, // custom button model
                 0x07, // ambient sound mode cycle
@@ -203,6 +204,7 @@ mod tests {
                 0x00, // noise canceling mode
                 0x00, // transparency mode
                 0x00, // custom noise canceling
+                0xFF, 0xFF, // two unknown bytes
                 0x00, // touch tone
                 0x00, // wear detection
                 0x00, // gaming mode
@@ -210,6 +212,7 @@ mod tests {
                 0x00, // ?
                 0x00, // device color
                 0x00, // wind noise detection
+                0xFF, 0xFF, 0xFF, // three unknown bytes
             ],
         }
         .bytes();
