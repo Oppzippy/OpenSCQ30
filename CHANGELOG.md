@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.10.4
+
+### General
+
+#### Fixes
+
+-   Fix A3933 and A3939 state update packet parsing
+
 ## v1.10.3
 
 ### Web
