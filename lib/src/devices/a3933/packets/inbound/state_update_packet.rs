@@ -185,7 +185,13 @@ mod tests {
 
     use crate::devices::{
         a3933::packets::inbound::take_a3933_state_update_packet,
-        standard::packets::inbound::take_inbound_packet_body,
+        standard::{
+            packets::inbound::take_inbound_packet_body,
+            structures::{
+                AmbientSoundMode, BatteryLevel, CustomNoiseCanceling, EqualizerConfiguration,
+                FirmwareVersion, IsBatteryCharging, PresetEqualizerProfile, SingleBattery,
+            },
+        },
     };
 
     #[test]
@@ -211,6 +217,32 @@ mod tests {
             255, 255, 255, 102,
         ];
         let (_, body) = take_inbound_packet_body(input).unwrap();
-        take_a3933_state_update_packet::<VerboseError<_>>(body).expect("should parse packet");
+        let (_, packet) =
+            take_a3933_state_update_packet::<VerboseError<_>>(body).expect("should parse packet");
+
+        assert_eq!(1, packet.host_device);
+        assert_eq!(true, packet.tws_status);
+        assert_eq!(
+            SingleBattery {
+                level: BatteryLevel(4),
+                is_charging: IsBatteryCharging::No,
+            },
+            packet.battery.left,
+        );
+        assert_eq!(FirmwareVersion::new(2, 61), packet.left_firmware);
+        assert_eq!(
+            EqualizerConfiguration::new_from_preset_profile(
+                PresetEqualizerProfile::SoundcoreSignature
+            ),
+            packet.left_equalizer_configuration
+        );
+        assert_eq!(
+            AmbientSoundMode::NoiseCanceling,
+            packet.sound_modes.ambient_sound_mode
+        );
+        assert_eq!(
+            CustomNoiseCanceling::new(10),
+            packet.sound_modes.custom_noise_canceling
+        );
     }
 }
