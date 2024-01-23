@@ -41,6 +41,14 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.10.5" date="2024-01-23">
+            <description>
+                <p>Fixes</p>
+                <ul>
+                    <li>Fall back to default values when device is in an invalid state rather than failing to connect</li>
+                </ul> 
+            </description>
+        </release>
         <release version="1.10.4" date="2024-01-15">
             <description>
                 <p>Fixes</p>

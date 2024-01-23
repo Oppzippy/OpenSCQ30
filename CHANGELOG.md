@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.10.5
+
+### General
+
+#### Fixes
+
+-   Fall back to default values when device is in an invalid state rather than failing to connect
+
 ## v1.10.4
 
 ### General
