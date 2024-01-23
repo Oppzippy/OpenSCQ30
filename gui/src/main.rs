@@ -192,7 +192,7 @@ fn build_ui(application: &adw::Application) {
     }
     let settings = Settings::default();
     if let Err(err) = settings.load() {
-        tracing::warn!("initial load of settings file failed: {:?}", err)
+        tracing::debug!("initial load of settings file failed: {:?}", err)
     }
     let main_window = MainWindow::new(application, settings.state.to_owned());
 
