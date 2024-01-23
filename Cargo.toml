@@ -52,7 +52,7 @@ ordered-float = "4"
 float-cmp = { version = "0.9", default-features = false }
 log = "0.4"
 android_logger = "0.13"
-uniffi = "0.25"
+uniffi = "0.26"
 prost = "0.12"
 prost-build = "0.12"
 serde-wasm-bindgen = "0.6"
