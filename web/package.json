@@ -55,7 +55,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.0",
     "i18next-parser": "^8.0.0",
-    "jsdom": "^23.0.0",
+    "jsdom": "^24.0.0",
     "playwright": "^1.33.0",
     "prettier": "^3.0.0",
     "typescript": "^5.0.2",
