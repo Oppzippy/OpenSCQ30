@@ -1,5 +1,5 @@
 use nom::{
-    combinator::map_opt,
+    combinator::map,
     error::{context, ContextError, ParseError},
     number::complete::le_u8,
 };
@@ -13,8 +13,8 @@ pub fn take_noise_canceling_mode<'a, E: ParseError<&'a [u8]> + ContextError<&'a 
 ) -> ParseResult<NoiseCancelingMode, E> {
     context(
         "noise canceling mode",
-        map_opt(le_u8, |noise_canceling_mode| {
-            NoiseCancelingMode::from_id(noise_canceling_mode)
+        map(le_u8, |noise_canceling_mode| {
+            NoiseCancelingMode::from_id(noise_canceling_mode).unwrap_or_default()
         }),
     )(input)
 }

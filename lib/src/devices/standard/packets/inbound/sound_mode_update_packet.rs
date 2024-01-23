@@ -58,24 +58,24 @@ mod tests {
     }
 
     #[test]
-    fn it_does_not_parse_invalid_ambient_sound_mode() {
+    fn it_falls_back_to_default_with_invalid_ambient_sound_mode() {
         let input: &[u8] = &[
             //                                                    max value of 0x02
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x03, 0x02, 0x01, 0x00, 0x24,
         ];
         let (_, body) = take_inbound_packet_body(input).unwrap();
-        let result = take_ambient_sound_mode_update_packet::<VerboseError<_>>(body);
-        assert_eq!(true, result.is_err());
+        let (_, packet) = take_ambient_sound_mode_update_packet::<VerboseError<_>>(body).unwrap();
+        assert_eq!(AmbientSoundMode::default(), packet.ambient_sound_mode);
     }
 
     #[test]
-    fn it_does_not_parse_invalid_noise_canceling_mode() {
+    fn it_falls_back_to_default_with_invalid_noise_canceling_mode() {
         let input: &[u8] = &[
             //                                                          max value of 0x03
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x02, 0x04, 0x01, 0x00, 0x25,
         ];
         let (_, body) = take_inbound_packet_body(input).unwrap();
-        let result = take_ambient_sound_mode_update_packet::<VerboseError<_>>(body);
-        assert_eq!(true, result.is_err());
+        let (_, packet) = take_ambient_sound_mode_update_packet::<VerboseError<_>>(body).unwrap();
+        assert_eq!(NoiseCancelingMode::default(), packet.noise_canceling_mode);
     }
 }

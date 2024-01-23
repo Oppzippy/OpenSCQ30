@@ -219,7 +219,7 @@ mod tests {
     }
 
     #[test]
-    fn it_does_not_parse_invalid_ambient_sound_mode() {
+    fn it_falls_back_to_default_with_invalid_ambient_sound_mode() {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01, 0x46, 0x00, 0x05, 0x00, 0xfe, 0xfe, 0x3c,
             0xb4, 0x8f, 0xa0, 0x8e, 0xb4, 0x74, 0x88, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -229,12 +229,15 @@ mod tests {
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x31,
         ];
         let (_, body) = take_inbound_packet_body(input).unwrap();
-        let result = take_state_update_packet::<VerboseError<_>>(body);
-        assert_eq!(true, result.is_err());
+        let (_, packet) = take_state_update_packet::<VerboseError<_>>(body).unwrap();
+        assert_eq!(
+            AmbientSoundMode::default(),
+            packet.sound_modes.unwrap().ambient_sound_mode
+        );
     }
 
     #[test]
-    fn it_does_not_parse_invalid_noise_canceling_mode() {
+    fn it_falls_back_to_default_with_invalid_noise_canceling_mode() {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01, 0x46, 0x00, 0x05, 0x00, 0xfe, 0xfe, 0x3c,
             0xb4, 0x8f, 0xa0, 0x8e, 0xb4, 0x74, 0x88, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -244,8 +247,11 @@ mod tests {
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x33,
         ];
         let (_, body) = take_inbound_packet_body(input).unwrap();
-        let result = take_state_update_packet::<VerboseError<_>>(body);
-        assert_eq!(true, result.is_err());
+        let (_, packet) = take_state_update_packet::<VerboseError<_>>(body).unwrap();
+        assert_eq!(
+            NoiseCancelingMode::default(),
+            packet.sound_modes.unwrap().noise_canceling_mode
+        );
     }
 
     #[test]
