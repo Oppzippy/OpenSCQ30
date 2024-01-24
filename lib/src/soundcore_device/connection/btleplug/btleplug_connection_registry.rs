@@ -1,7 +1,6 @@
 use std::collections::HashSet;
 use std::sync::{Arc, Weak};
 use std::time::Duration;
-use std::vec;
 
 use btleplug::api::{BDAddr, Central, Manager as _, Peripheral as _, ScanFilter};
 use btleplug::platform::{Adapter, Manager, Peripheral};
@@ -42,7 +41,7 @@ impl BtlePlugConnectionRegistry {
                     tracing::debug!("starting scan");
                     adapter
                         .start_scan(ScanFilter {
-                            services: vec![crate::device_utils::SERVICE_UUID],
+                            services: Vec::new(),
                         })
                         .await?;
                     // The Soundcore Q30 seems to advertise around every .3s
