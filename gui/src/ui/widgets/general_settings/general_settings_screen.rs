@@ -130,7 +130,7 @@ mod imp {
                     sound_mode_profile.noise_canceling_mode_type == NoiseCancelingModeType::Custom,
                 );
             self.custom_noise_canceling_selection.set_visible(
-                sound_mode_profile.transparency_mode_type == TransparencyModeType::Custom,
+                sound_mode_profile.noise_canceling_mode_type == NoiseCancelingModeType::Custom,
             );
 
             // Set selected values
