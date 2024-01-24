@@ -78,7 +78,7 @@ where
                 },
                 left_long_press: TwsButtonAction {
                     tws_connected_action: ButtonAction::PreviousSong,
-                    tws_disconnected_action: ButtonAction::Trans,
+                    tws_disconnected_action: ButtonAction::AmbientSoundMode,
                     is_enabled: true,
                 },
                 right_double_click: TwsButtonAction {

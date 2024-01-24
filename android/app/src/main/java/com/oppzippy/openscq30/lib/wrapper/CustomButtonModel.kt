@@ -78,7 +78,7 @@ enum class ButtonAction {
     VolumeDown,
     PreviousSong,
     NextSong,
-    Trans,
+    AmbientSoundMode,
     VoiceAssistant,
     PlayPause,
     ;
@@ -89,7 +89,7 @@ enum class ButtonAction {
             VolumeDown -> com.oppzippy.openscq30.lib.protobuf.ButtonAction.VOLUME_DOWN
             PreviousSong -> com.oppzippy.openscq30.lib.protobuf.ButtonAction.PREVIOUS_SONG
             NextSong -> com.oppzippy.openscq30.lib.protobuf.ButtonAction.NEXT_SONG
-            Trans -> com.oppzippy.openscq30.lib.protobuf.ButtonAction.TRANS
+            AmbientSoundMode -> com.oppzippy.openscq30.lib.protobuf.ButtonAction.AMBIENT_SOUND_MODE
             VoiceAssistant -> com.oppzippy.openscq30.lib.protobuf.ButtonAction.VOICE_ASSISTANT
             PlayPause -> com.oppzippy.openscq30.lib.protobuf.ButtonAction.PLAY_PAUSE
         }
@@ -102,7 +102,7 @@ fun com.oppzippy.openscq30.lib.protobuf.ButtonAction.toKotlin(): ButtonAction {
         com.oppzippy.openscq30.lib.protobuf.ButtonAction.VOLUME_DOWN -> ButtonAction.VolumeDown
         com.oppzippy.openscq30.lib.protobuf.ButtonAction.PREVIOUS_SONG -> ButtonAction.PreviousSong
         com.oppzippy.openscq30.lib.protobuf.ButtonAction.NEXT_SONG -> ButtonAction.NextSong
-        com.oppzippy.openscq30.lib.protobuf.ButtonAction.TRANS -> ButtonAction.Trans
+        com.oppzippy.openscq30.lib.protobuf.ButtonAction.AMBIENT_SOUND_MODE -> ButtonAction.AmbientSoundMode
         com.oppzippy.openscq30.lib.protobuf.ButtonAction.VOICE_ASSISTANT -> ButtonAction.VoiceAssistant
         com.oppzippy.openscq30.lib.protobuf.ButtonAction.PLAY_PAUSE -> ButtonAction.PlayPause
     }

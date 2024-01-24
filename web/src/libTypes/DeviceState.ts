@@ -77,7 +77,7 @@ const buttonActionSchema = Type.Union([
   Type.Literal("volumeDown"),
   Type.Literal("previousSong"),
   Type.Literal("nextSong"),
-  Type.Literal("trans"),
+  Type.Literal("ambientSoundMode"),
   Type.Literal("voiceAssistant"),
   Type.Literal("playPause"),
 ]);

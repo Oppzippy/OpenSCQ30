@@ -453,7 +453,7 @@ impl From<LibButtonAction> for ButtonAction {
             LibButtonAction::VolumeDown => Self::VolumeDown,
             LibButtonAction::PreviousSong => Self::PreviousSong,
             LibButtonAction::NextSong => Self::NextSong,
-            LibButtonAction::Trans => Self::Trans,
+            LibButtonAction::AmbientSoundMode => Self::AmbientSoundMode,
             LibButtonAction::VoiceAssistant => Self::VoiceAssistant,
             LibButtonAction::PlayPause => Self::PlayPause,
         }
@@ -503,7 +503,7 @@ impl From<ButtonAction> for LibButtonAction {
             ButtonAction::VolumeDown => Self::VolumeDown,
             ButtonAction::PreviousSong => Self::PreviousSong,
             ButtonAction::NextSong => Self::NextSong,
-            ButtonAction::Trans => Self::Trans,
+            ButtonAction::AmbientSoundMode => Self::AmbientSoundMode,
             ButtonAction::VoiceAssistant => Self::VoiceAssistant,
             ButtonAction::PlayPause => Self::PlayPause,
         }

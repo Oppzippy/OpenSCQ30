@@ -84,7 +84,7 @@ describe("libTypes", () => {
         leftLongPress: {
           isEnabled: true,
           twsConnectedAction: "previousSong",
-          twsDisconnectedAction: "trans",
+          twsDisconnectedAction: "ambientSoundMode",
         },
         leftSingleClick: {
           isEnabled: true,

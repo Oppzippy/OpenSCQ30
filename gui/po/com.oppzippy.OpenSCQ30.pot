@@ -327,10 +327,6 @@ msgid "NextSong"
 msgstr "Next Song"
 
 msgctxt "buttons"
-msgid "Trans"
-msgstr "Trans"
-
-msgctxt "buttons"
 msgid "VoiceAssistant"
 msgstr "Voice Assistant"
 

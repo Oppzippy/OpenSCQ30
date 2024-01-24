@@ -71,7 +71,7 @@ pub enum ButtonAction {
     VolumeDown = 1,
     PreviousSong = 2,
     NextSong = 3,
-    Trans = 4, // what is this?
+    AmbientSoundMode = 4,
     VoiceAssistant = 5,
     PlayPause = 6,
 }
