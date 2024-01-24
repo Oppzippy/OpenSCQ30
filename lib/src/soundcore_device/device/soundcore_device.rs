@@ -236,7 +236,7 @@ where
     ) -> crate::Result<()> {
         let state_sender = self.state_sender.lock().await;
         let state = state_sender.borrow().to_owned();
-        if state.device_profile.has_ambient_sound_mode_cycle {
+        if !state.device_profile.has_ambient_sound_mode_cycle {
             return Err(crate::Error::FeatureNotSupported {
                 feature_name: "ambient sound mode cycle",
             });
