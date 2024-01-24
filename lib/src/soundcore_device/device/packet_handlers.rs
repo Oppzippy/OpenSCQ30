@@ -11,9 +11,9 @@ use crate::{
         state::DeviceState,
         structures::{
             BATTERY_CHARGING_UPDATE, BATTERY_LEVEL_UPDATE, CHINESE_VOICE_PROMPT_STATE_UPDATE,
-            FIRMWARE_VERSION_UPDATE, LDAC_STATE_UPDATE, SET_EQUALIZER_OK,
-            SET_EQUALIZER_WITH_DRC_OK, SET_SOUND_MODE_OK, SOUND_MODE_UPDATE, STATE_UPDATE,
-            TWS_STATUS_UPDATE,
+            FIRMWARE_VERSION_UPDATE, LDAC_STATE_UPDATE, SET_AMBIENT_SOUND_MODE_CYCLE_OK,
+            SET_CUSTOM_BUTTON_MODEL_OK, SET_EQUALIZER_OK, SET_EQUALIZER_WITH_DRC_OK,
+            SET_SOUND_MODE_OK, SOUND_MODE_UPDATE, STATE_UPDATE, TWS_STATUS_UPDATE,
         },
     },
     soundcore_device::device::packet_handlers::{
@@ -29,7 +29,7 @@ pub fn default_packet_handlers(
     let handlers: [(
         [u8; 7],
         Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>,
-    ); 11] = [
+    ); 13] = [
         (SOUND_MODE_UPDATE, Box::new(sound_mode_update_handler)),
         (
             BATTERY_CHARGING_UPDATE,
@@ -46,6 +46,11 @@ pub fn default_packet_handlers(
         (SET_EQUALIZER_WITH_DRC_OK, Box::new(do_nothing_handler)),
         (TWS_STATUS_UPDATE, Box::new(do_nothing_handler)),
         (LDAC_STATE_UPDATE, Box::new(do_nothing_handler)),
+        (
+            SET_AMBIENT_SOUND_MODE_CYCLE_OK,
+            Box::new(do_nothing_handler),
+        ),
+        (SET_CUSTOM_BUTTON_MODEL_OK, Box::new(do_nothing_handler)),
         (
             CHINESE_VOICE_PROMPT_STATE_UPDATE,
             Box::new(do_nothing_handler),
