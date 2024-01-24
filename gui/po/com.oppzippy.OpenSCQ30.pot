@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-12 20:22-0400\n"
+"POT-Creation-Date: 2024-01-24 16:10-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,7 +28,13 @@ msgstr ""
 
 #: src/ui/widgets/general_settings/ambient_sound_mode_selection.ui:7
 #: src/ui/widgets/quick_presets/edit_quick_preset.ui:16
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:13
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:22
 msgid "Ambient Sound Mode"
+msgstr ""
+
+#: src/ui/widgets/general_settings/ambient_sound_mode_cycle_selection.ui:7
+msgid "Ambient Sound Mode Cycle"
 msgstr ""
 
 msgctxt "preset equalizer profile"
@@ -38,6 +44,12 @@ msgstr "Bass Booster"
 msgctxt "preset equalizer profile"
 msgid "BassReducer"
 msgstr "Bass Reducer"
+
+#: src/ui/widgets/selected_device_settings.ui:58
+#: src/ui/widgets/buttons/buttons_screen.ui:8
+msgctxt "buttons"
+msgid "Buttons"
+msgstr ""
 
 #: src/ui/widgets/loading_screen.ui:17
 msgctxt "cancel connecting to device"
@@ -59,6 +71,7 @@ msgid "Create"
 msgstr ""
 
 #: src/ui/widgets/quick_presets/edit_quick_preset.ui:83
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:112
 msgctxt "equalizer profile"
 msgid "Custom"
 msgstr ""
@@ -68,13 +81,29 @@ msgctxt "noise canceling mode"
 msgid "Custom"
 msgstr ""
 
+#: src/ui/widgets/hear_id/hear_id_screen.ui:57
+msgctxt "hear id"
+msgid "Custom EQ (Left)"
+msgstr ""
+
+#: src/ui/widgets/hear_id/hear_id_screen.ui:65
+msgctxt "hear id"
+msgid "Custom EQ (Right)"
+msgstr ""
+
 #: src/ui/widgets/quick_presets/edit_quick_preset.ui:97
 msgid "Custom Equalizer Profile"
 msgstr ""
 
 #: src/ui/widgets/general_settings/custom_noise_canceling_selection.ui:13
 #: src/ui/widgets/quick_presets/edit_quick_preset.ui:55
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:69
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:78
 msgid "Custom Noise Canceling"
+msgstr ""
+
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:126
+msgid "Custom Profile"
 msgstr ""
 
 #: src/ui/widgets/equalizer_settings/equalizer_settings_screen.ui:38
@@ -96,13 +125,29 @@ msgid "Device"
 msgstr ""
 
 #: src/ui/widgets/selected_device_settings.ui:58
+#: src/ui/widgets/selected_device_settings.ui:84
 msgctxt "device information"
 msgid "Device Information"
 msgstr ""
 
+msgctxt "buttons"
+msgid "Disabled"
+msgstr "Disabled"
+
 #: src/ui/widgets/general_settings/general_settings_screen.ui:27
+#: src/ui/widgets/general_settings/general_settings_screen.ui:33
 msgctxt "disconnect from device"
 msgid "Disconnect"
+msgstr ""
+
+#: src/ui/widgets/hear_id/hear_id_screen.ui:17
+msgctxt "hear id"
+msgid "EQ (Left)"
+msgstr ""
+
+#: src/ui/widgets/hear_id/hear_id_screen.ui:25
+msgctxt "hear id"
+msgid "EQ (Right)"
 msgstr ""
 
 #: src/ui/widgets/quick_presets/quick_presets_screen.ui:23
@@ -112,6 +157,14 @@ msgstr ""
 msgctxt "preset equalizer profile"
 msgid "Electronic"
 msgstr "Electronic"
+
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:16
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:35
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:54
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:72
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:99
+msgid "Enable"
+msgstr ""
 
 #: src/ui/widgets/quick_presets/edit_quick_preset.ui:10
 msgid "Enable Ambient Sound Mode"
@@ -133,9 +186,17 @@ msgstr ""
 msgid "Enable Transparency Mode"
 msgstr ""
 
+#: src/ui/widgets/hear_id/hear_id_screen.ui:11
+msgid "Enabled"
+msgstr ""
+
 #: src/ui/widgets/selected_device_settings.ui:32
 msgctxt "equalizer settings"
 msgid "Equalizer"
+msgstr ""
+
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:96
+msgid "Equalizer Profile"
 msgstr ""
 
 #: src/ui/widgets/quick_presets/edit_quick_preset.ui:76
@@ -166,6 +227,11 @@ msgctxt "general settings"
 msgid "General"
 msgstr ""
 
+#: src/ui/widgets/selected_device_settings.ui:45
+msgctxt "hear id"
+msgid "Hear ID"
+msgstr ""
+
 msgctxt "preset equalizer profile"
 msgid "HipHop"
 msgstr "Hip Hop"
@@ -183,6 +249,21 @@ msgctxt "preset equalizer profile"
 msgid "Latin"
 msgstr "Latin"
 
+#: src/ui/widgets/buttons/buttons_screen.ui:17
+msgctxt "buttons"
+msgid "Left Double Click"
+msgstr ""
+
+#: src/ui/widgets/buttons/buttons_screen.ui:23
+msgctxt "buttons"
+msgid "Left Long Press"
+msgstr ""
+
+#: src/ui/widgets/buttons/buttons_screen.ui:11
+msgctxt "buttons"
+msgid "Left Single Click"
+msgstr ""
+
 #: src/ui/widgets/loading_screen.ui:12
 msgctxt "connecting to device"
 msgid "Loading..."
@@ -192,22 +273,39 @@ msgctxt "preset equalizer profile"
 msgid "Lounge"
 msgstr "Lounge"
 
+#: src/ui/widgets/hear_id/hear_id_screen.ui:49
+msgctxt "hear id"
+msgid "Music Type"
+msgstr ""
+
 #: src/ui/widgets/quick_presets/quick_presets_listing.ui:7
 msgctxt "quick presets"
 msgid "New Quick Preset"
 msgstr ""
 
+msgctxt "buttons"
+msgid "NextSong"
+msgstr "Next Song"
+
+msgctxt "buttons"
+msgid "AmbientSoundMode"
+msgstr "Ambient Sound Mode"
+
 #: src/ui/widgets/general_settings/noise_canceling_mode_selection.ui:7
 #: src/ui/widgets/quick_presets/edit_quick_preset.ui:42
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:51
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:60
 msgid "Noise Canceling Mode"
 msgstr ""
 
 #: src/ui/widgets/general_settings/ambient_sound_mode_selection.ui:39
+#: src/ui/widgets/general_settings/ambient_sound_mode_cycle_selection.ui:37
 msgctxt "ambient sound mode"
 msgid "NoiseCanceling"
 msgstr "Noise Canceling"
 
 #: src/ui/widgets/general_settings/ambient_sound_mode_selection.ui:19
+#: src/ui/widgets/general_settings/ambient_sound_mode_cycle_selection.ui:19
 msgctxt "ambient sound mode"
 msgid "Normal"
 msgstr ""
@@ -221,6 +319,10 @@ msgctxt "preset equalizer profile"
 msgid "Piano"
 msgstr "Piano"
 
+msgctxt "buttons"
+msgid "PlayPause"
+msgstr "Play Pause"
+
 msgctxt "preset equalizer profile"
 msgid "Podcast"
 msgstr "Podcast"
@@ -230,6 +332,7 @@ msgid "Pop"
 msgstr "Pop"
 
 #: src/ui/widgets/quick_presets/edit_quick_preset.ui:82
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:111
 msgctxt "equalizer profile"
 msgid "Preset"
 msgstr ""
@@ -237,6 +340,14 @@ msgstr ""
 #: src/ui/widgets/quick_presets/edit_quick_preset.ui:91
 msgid "Preset Equalizer Profile"
 msgstr ""
+
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:120
+msgid "Preset Profile"
+msgstr ""
+
+msgctxt "buttons"
+msgid "PreviousSong"
+msgstr "Previous Song"
 
 #: src/ui/widgets/equalizer_settings/equalizer_settings_screen.ui:17
 msgctxt "equalizer profile"
@@ -248,6 +359,7 @@ msgid "Quick Presets"
 msgstr ""
 
 #: src/ui/widgets/selected_device_settings.ui:45
+#: src/ui/widgets/selected_device_settings.ui:71
 msgctxt "quick presets"
 msgid "Quick Presets"
 msgstr ""
@@ -255,6 +367,21 @@ msgstr ""
 #: src/ui/widgets/device_selection.ui:49
 msgctxt "refresh devices"
 msgid "Refresh"
+msgstr ""
+
+#: src/ui/widgets/buttons/buttons_screen.ui:35
+msgctxt "buttons"
+msgid "Right Double Click"
+msgstr ""
+
+#: src/ui/widgets/buttons/buttons_screen.ui:41
+msgctxt "buttons"
+msgid "Right Long Press"
+msgstr ""
+
+#: src/ui/widgets/buttons/buttons_screen.ui:29
+msgctxt "buttons"
+msgid "Right Single Click"
 msgstr ""
 
 msgctxt "preset equalizer profile"
@@ -282,13 +409,21 @@ msgctxt "preset equalizer profile"
 msgid "SpokenWord"
 msgstr "Spoken Word"
 
+#: src/ui/widgets/hear_id/hear_id_screen.ui:33
+msgctxt "hear id"
+msgid "Time"
+msgstr ""
+
 #: src/ui/widgets/general_settings/ambient_sound_mode_selection.ui:29
+#: src/ui/widgets/general_settings/ambient_sound_mode_cycle_selection.ui:28
 msgctxt "ambient sound mode"
 msgid "Transparency"
 msgstr ""
 
 #: src/ui/widgets/general_settings/transparency_mode_selection.ui:7
 #: src/ui/widgets/quick_presets/edit_quick_preset.ui:29
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:32
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:41
 msgid "Transparency Mode"
 msgstr ""
 
@@ -305,35 +440,28 @@ msgctxt "preset equalizer profile"
 msgid "TrebleReducer"
 msgstr "Treble Reducer"
 
+#: src/ui/widgets/quick_presets/edit_quick_preset.ui:105
+msgid "Type"
+msgstr ""
+
+#: src/ui/widgets/hear_id/hear_id_screen.ui:41
+msgctxt "hear id"
+msgid "Type"
+msgstr ""
+
 #: src/ui/widgets/general_settings/transparency_mode_selection.ui:30
 msgctxt "transparency mode"
 msgid "VocalMode"
 msgstr "Vocal Mode"
 
 msgctxt "buttons"
-msgid "VolumeUp"
-msgstr "Volume Up"
+msgid "VoiceAssistant"
+msgstr "Voice Assistant"
 
 msgctxt "buttons"
 msgid "VolumeDown"
 msgstr "Volume Down"
 
 msgctxt "buttons"
-msgid "PreviousSong"
-msgstr "Previous Song"
-
-msgctxt "buttons"
-msgid "NextSong"
-msgstr "Next Song"
-
-msgctxt "buttons"
-msgid "VoiceAssistant"
-msgstr "Voice Assistant"
-
-msgctxt "buttons"
-msgid "PlayPause"
-msgstr "Play Pause"
-
-msgctxt "buttons"
-msgid "Disabled"
-msgstr "Disabled"
+msgid "VolumeUp"
+msgstr "Volume Up"
