@@ -41,6 +41,17 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.10.6" date="2024-01-25">
+            <description>
+                <p>Fixes</p>
+                <ul>
+                    <li>Feature not supported error when changing ambient sound mode cycle even when the feature is supported</li>
+                    <li>Custom noise canceling option sometimes not visible when it should be, and sometimes visible when it shouldn't be</li>
+                    <li>Rename button action "Trans" to "Ambient Sound Mode", since that's what it does, cycles through ambient sound modes</li>
+                    <li>Devices other than Q30 potentially not working on Linux</li>
+                </ul> 
+            </description>
+        </release>
         <release version="1.10.5" date="2024-01-23">
             <description>
                 <p>Fixes</p>

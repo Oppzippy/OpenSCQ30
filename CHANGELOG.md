@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.10.6
+
+### General
+
+#### Fixes
+
+-   Feature not supported error when changing ambient sound mode cycle even when the feature is supported
+
+### GUI
+
+#### Fixes
+
+-   Custom noise canceling option sometimes not visible when it should be, and sometimes visible when it shouldn't be
+-   Rename button action "Trans" to "Ambient Sound Mode", since that's what it does, cycles through ambient sound modes
+-   Devices other than Q30 potentially not working on Linux
+
 ## v1.10.5
 
 ### General

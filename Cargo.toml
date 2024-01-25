@@ -11,7 +11,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "1.10.5"
+version = "1.10.6"
 license = "GPL-3.0-or-later"
 
 [profile.release]
