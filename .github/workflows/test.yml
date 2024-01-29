@@ -82,7 +82,7 @@ jobs:
         run: cargo install cargo-ndk
 
       - name: Run android unit tests
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         with:
           arguments: testBluetoothDebugUnitTest
           build-root-directory: android
