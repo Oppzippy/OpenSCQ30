@@ -4,6 +4,7 @@ import android.util.Log
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceConnector
 import com.oppzippy.openscq30.features.soundcoredevice.impl.SoundcoreDevice
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
+import com.oppzippy.openscq30.lib.wrapper.CustomButtonModel
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.SoundModes
 import kotlinx.coroutines.CancellationException
@@ -127,6 +128,12 @@ class DeviceConnectionManager @Inject constructor(
     fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
         scope.launch {
             device?.setEqualizerConfiguration(equalizerConfiguration)
+        }
+    }
+
+    fun setCustomButtonModel(buttonModel: CustomButtonModel) {
+        scope.launch {
+            device?.setCustomButtonModel(buttonModel)
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.oppzippy.openscq30.lib.wrapper
 
+import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.protobuf.customButtonModel
 import com.oppzippy.openscq30.lib.protobuf.noTwsButtonAction
 import com.oppzippy.openscq30.lib.protobuf.twsButtonAction
@@ -47,6 +48,14 @@ data class TwsButtonAction(
             twsDisconnectedAction = this@TwsButtonAction.twsDisconnectedAction.toProtobuf()
         }
     }
+
+    fun connectedActionOrNull(): ButtonAction? {
+        return if (isEnabled) {
+            twsConnectedAction
+        } else {
+            null
+        }
+    }
 }
 
 fun com.oppzippy.openscq30.lib.protobuf.TwsButtonAction.toKotlin(): TwsButtonAction {
@@ -65,6 +74,14 @@ data class NoTwsButtonAction(
         return noTwsButtonAction {
             isEnabled = this@NoTwsButtonAction.isEnabled
             action = this@NoTwsButtonAction.action.toProtobuf()
+        }
+    }
+
+    fun actionOrNull(): ButtonAction? {
+        return if (isEnabled) {
+            action
+        } else {
+            null
         }
     }
 }
@@ -92,6 +109,18 @@ enum class ButtonAction {
             AmbientSoundMode -> com.oppzippy.openscq30.lib.protobuf.ButtonAction.AMBIENT_SOUND_MODE
             VoiceAssistant -> com.oppzippy.openscq30.lib.protobuf.ButtonAction.VOICE_ASSISTANT
             PlayPause -> com.oppzippy.openscq30.lib.protobuf.ButtonAction.PLAY_PAUSE
+        }
+    }
+
+    fun toStringResource(): Int {
+        return when (this) {
+            VolumeUp -> R.string.volume_up
+            VolumeDown -> R.string.volume_down
+            PreviousSong -> R.string.previous_song
+            NextSong -> R.string.next_song
+            AmbientSoundMode -> R.string.ambient_sound_mode
+            VoiceAssistant -> R.string.voice_assistant
+            PlayPause -> R.string.play_pause
         }
     }
 }

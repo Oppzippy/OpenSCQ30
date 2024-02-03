@@ -85,6 +85,11 @@ fun OpenSCQ30Root(
                                 viewModel.setEqualizerConfiguration(it)
                             }
                         },
+                        onCustomButtonModelChange = {
+                            withErrorToast(context) {
+                                viewModel.setCustomButtonModel(it)
+                            }
+                        },
                     )
                 } else {
                     DeviceSelectionScreen(

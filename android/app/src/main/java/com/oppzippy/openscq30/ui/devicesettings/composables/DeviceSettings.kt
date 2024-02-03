@@ -22,11 +22,14 @@ import androidx.navigation.compose.rememberNavController
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
+import com.oppzippy.openscq30.lib.wrapper.CustomButtonModel
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeType
 import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
 import com.oppzippy.openscq30.lib.wrapper.TransparencyModeType
+import com.oppzippy.openscq30.ui.buttonactions.ButtonActionSelection
+import com.oppzippy.openscq30.ui.buttonactions.ButtonActions
 import com.oppzippy.openscq30.ui.deviceinfo.DeviceInfoScreen
 import com.oppzippy.openscq30.ui.devicesettings.Screen
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
@@ -46,6 +49,7 @@ fun DeviceSettings(
     onNoiseCancelingModeChange: (noiseCancelingMode: NoiseCancelingMode) -> Unit = {},
     onCustomNoiseCancelingChange: (customNoiseCanceling: UByte) -> Unit = {},
     onEqualizerConfigurationChange: (equalizerConfiguration: EqualizerConfiguration) -> Unit = {},
+    onCustomButtonModelChange: (CustomButtonModel) -> Unit = {},
 ) {
     val navController = rememberNavController()
     val navItems = ArrayList<Screen>()
@@ -56,6 +60,9 @@ fun DeviceSettings(
         navItems.add(Screen.Equalizer)
     }
     navItems.add(Screen.QuickPresets)
+    if (uiState.deviceState.deviceProfile.hasCustomButtonModel) {
+        navItems.add(Screen.ButtonActions)
+    }
     navItems.add(Screen.DeviceInfo)
     Scaffold(
         topBar = {
@@ -127,6 +134,24 @@ fun DeviceSettings(
                     deviceProfile = uiState.deviceState.deviceProfile,
                     deviceBleServiceUuid = uiState.deviceBleServiceUuid,
                 )
+            }
+            composable(Screen.ButtonActions.route) {
+                val buttonModel = uiState.deviceState.customButtonModel
+                if (buttonModel != null) {
+                    ButtonActionSelection(
+                        buttonActions = ButtonActions(
+                            buttonModel.leftSingleClick.actionOrNull(),
+                            buttonModel.leftDoubleClick.connectedActionOrNull(),
+                            buttonModel.leftLongPress.connectedActionOrNull(),
+                            buttonModel.rightSingleClick.actionOrNull(),
+                            buttonModel.rightDoubleClick.connectedActionOrNull(),
+                            buttonModel.rightLongPress.connectedActionOrNull(),
+                        ),
+                        onChange = {
+                            onCustomButtonModelChange(it.toCustomButtonModel(buttonModel))
+                        },
+                    )
+                }
             }
             composable(Screen.DeviceInfo.route) {
                 DeviceInfoScreen(deviceState = uiState.deviceState)

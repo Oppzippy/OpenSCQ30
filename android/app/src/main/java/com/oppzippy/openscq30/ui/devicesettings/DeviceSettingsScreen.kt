@@ -3,6 +3,7 @@ package com.oppzippy.openscq30.ui.devicesettings
 import androidx.compose.runtime.Composable
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
+import com.oppzippy.openscq30.lib.wrapper.CustomButtonModel
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
@@ -21,6 +22,7 @@ fun DeviceSettingsScreen(
     onNoiseCancelingModeChange: (noiseCancelingMode: NoiseCancelingMode) -> Unit = {},
     onCustomNoiseCancelingChange: (customNoiseCanceling: UByte) -> Unit = {},
     onEqualizerConfigurationChange: (equalizerConfiguration: EqualizerConfiguration) -> Unit = {},
+    onCustomButtonModelChange: (CustomButtonModel) -> Unit = {},
 ) {
     deviceState.let { uiDeviceState ->
         when (uiDeviceState) {
@@ -34,6 +36,7 @@ fun DeviceSettingsScreen(
                     onEqualizerConfigurationChange = onEqualizerConfigurationChange,
                     onTransparencyModeChange = onTransparencyModeChange,
                     onCustomNoiseCancelingChange = onCustomNoiseCancelingChange,
+                    onCustomButtonModelChange = onCustomButtonModelChange,
                 )
             }
 

@@ -100,4 +100,18 @@
     <string name="device_info">Device Info</string>
     <string name="device_profile">Device Profile</string>
     <string name="ambient_sound_mode_cycle">Ambient Sound Mode Cycle</string>
+    <string name="left_single_click">Left Single Click</string>
+    <string name="left_double_click">Left Double Click</string>
+    <string name="left_long_press">Left Long Press</string>
+    <string name="previous_song">Previous Song</string>
+    <string name="volume_up">Volume Up</string>
+    <string name="volume_down">Volume Down</string>
+    <string name="next_song">Next Song</string>
+    <string name="voice_assistant">Voice Assistant</string>
+    <string name="play_pause">Play Pause</string>
+    <string name="right_single_click">Right Single Click</string>
+    <string name="right_double_click">Right Double Click</string>
+    <string name="right_long_press">Right Long Press</string>
+    <string name="button_actions">Button Actions</string>
+    <string name="disabled">Disabled</string>
 </resources>
