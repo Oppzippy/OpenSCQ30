@@ -76,16 +76,15 @@ jobs:
         with:
           distribution: temurin # See 'Supported distributions' for available options
           java-version: 17
+      - uses: gradle/actions/setup-gradle@v3
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
       - name: Install cargo-ndk
         run: cargo install cargo-ndk
 
       - name: Run android unit tests
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: testBluetoothDebugUnitTest
-          build-root-directory: android
+        working-directory: android
+        run: ./gradlew testBluetoothDebugUnitTest
       # - name: Run android instrumented tests
       #   working-directory: android
       #   run: ./gradlew connectedAndroidTest
