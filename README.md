@@ -31,7 +31,7 @@ It is intended that all devices in this list work, but since I do not own them a
 | A3951    | Liberty Air 2 Pro | Unknown |
 | A3945    | Life Note 3S      | Unknown |
 | A3933    | Life Note 3       | Unknown |
-| A3939    | Life P3           | Unknown |
+| A3939    | Life P3           | Working |
 
 ## Installing
 
