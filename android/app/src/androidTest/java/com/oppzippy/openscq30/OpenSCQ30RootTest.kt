@@ -80,13 +80,8 @@ class OpenSCQ30RootTest {
         coEvery { soundcoreDeviceConnector.connectToSoundcoreDevice(any(), any()) } returns device
 
         composeRule.onNodeWithText("Demo Device").performClick()
-        val ambientSoundMode =
-            hasTextExactly(composeRule.activity.getString(R.string.ambient_sound_mode))
-        composeRule.waitUntilNodeCount(
-            ambientSoundMode,
-            1,
-            1500,
-        )
-        composeRule.onNode(ambientSoundMode).assertExists()
+        val general = hasTextExactly(composeRule.activity.getString(R.string.general))
+        composeRule.waitUntilNodeCount(general, 1, 1500)
+        composeRule.onNode(general).assertExists()
     }
 }

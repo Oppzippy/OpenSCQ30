@@ -2,12 +2,10 @@ package com.oppzippy.openscq30.ui.devicesettings.composables
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -17,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
@@ -52,56 +49,50 @@ fun DeviceSettings(
     onCustomButtonModelChange: (CustomButtonModel) -> Unit = {},
 ) {
     val navController = rememberNavController()
-    val navItems = ArrayList<Screen>()
+    val screens = ArrayList<Screen>()
     if (uiState.deviceState.deviceProfile.soundMode != null) {
-        navItems.add(Screen.General)
+        screens.add(Screen.General)
     }
     if (uiState.deviceState.deviceProfile.numEqualizerChannels > 0) {
-        navItems.add(Screen.Equalizer)
+        screens.add(Screen.Equalizer)
     }
-    navItems.add(Screen.QuickPresets)
+    screens.add(Screen.QuickPresets)
     if (uiState.deviceState.deviceProfile.hasCustomButtonModel) {
-        navItems.add(Screen.ButtonActions)
+        screens.add(Screen.ButtonActions)
     }
-    navItems.add(Screen.DeviceInfo)
+    screens.add(Screen.DeviceInfo)
     Scaffold(
         topBar = {
             TopAppBar(title = {
                 Text(uiState.name)
             }, navigationIcon = {
-                IconButton(onClick = onBack) {
+                IconButton(onClick = {
+                    val isAtTopOfStack = !navController.popBackStack()
+                    if (isAtTopOfStack) {
+                        onBack()
+                    }
+                }) {
                     Icon(
-                        imageVector = Icons.Filled.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.back),
                     )
                 }
             })
         },
-        bottomBar = {
-            NavigationBar {
-                val navBarStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = navBarStackEntry?.destination
-                navItems.forEach { screen ->
-                    NavigationBarItem(
-                        icon = { Icon(screen.icon, contentDescription = null) },
-                        label = { Text(stringResource(screen.resourceId)) },
-                        selected = currentDestination?.route == screen.route,
-                        onClick = {
-                            navController.navigate(screen.route) {
-                                popUpTo(navController.graph.id)
-                                launchSingleTop = true
-                            }
-                        },
-                    )
-                }
-            }
-        },
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = navItems.first().route,
+            startDestination = "/",
             modifier = Modifier.padding(innerPadding),
         ) {
+            composable("/") {
+                ScreenSelection(screens = screens, onNavigation = { screen ->
+                    navController.navigate(screen.route) {
+                        popUpTo("/")
+                        launchSingleTop = true
+                    }
+                })
+            }
             uiState.deviceState.soundModes?.let { soundModes ->
                 composable(Screen.General.route) {
                     val soundModeProfile =
@@ -135,9 +126,8 @@ fun DeviceSettings(
                     deviceBleServiceUuid = uiState.deviceBleServiceUuid,
                 )
             }
-            composable(Screen.ButtonActions.route) {
-                val buttonModel = uiState.deviceState.customButtonModel
-                if (buttonModel != null) {
+            uiState.deviceState.customButtonModel?.let { buttonModel ->
+                composable(Screen.ButtonActions.route) {
                     ButtonActionSelection(
                         buttonActions = ButtonActions(
                             buttonModel.leftSingleClick.actionOrNull(),
