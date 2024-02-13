@@ -33,7 +33,6 @@ mod imp {
             prelude::{BoxImpl, DerivedObjectProperties, ObjectImpl, ObjectSubclass, *},
             widget::{CompositeTemplateClass, CompositeTemplateInitializingExt, WidgetImpl},
         },
-        traits::{RangeExt, ScaleExt},
         CompositeTemplate, Label, Scale, SpinButton, TemplateChild,
     };
     use openscq30_lib::devices::standard::structures::VolumeAdjustments;
@@ -118,7 +117,7 @@ mod imp {
 
 #[cfg(test)]
 mod tests {
-    use gtk::{subclass::prelude::*, traits::*};
+    use gtk::{prelude::*, subclass::prelude::*};
 
     use crate::load_resources;
 

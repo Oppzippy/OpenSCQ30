@@ -525,7 +525,7 @@ mod imp {
 mod tests {
     use std::sync::Arc;
 
-    use gtk::{subclass::prelude::*, traits::WidgetExt};
+    use gtk::{prelude::*, subclass::prelude::*};
     use openscq30_lib::devices::standard::structures::{
         EqualizerConfiguration, PresetEqualizerProfile, VolumeAdjustments,
     };

@@ -4,9 +4,8 @@ use adw::Toast;
 use gtk::{
     gio,
     glib::{self, Object},
-    prelude::IsA,
+    prelude::*,
     subclass::prelude::ObjectSubclassIsExt,
-    traits::GtkWindowExt,
     Application,
 };
 use openscq30_lib::devices::standard::{state::DeviceState, structures::EqualizerConfiguration};
@@ -135,7 +134,6 @@ mod imp {
             },
             window::WindowImpl,
         },
-        traits::EditableExt,
         CompositeTemplate, TemplateChild,
     };
     use tokio::sync::mpsc::UnboundedSender;

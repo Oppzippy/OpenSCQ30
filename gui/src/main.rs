@@ -13,7 +13,6 @@ use gtk::{
     gio::{self, SimpleAction},
     glib::{self, clone, MainContext, OptionFlags},
     prelude::*,
-    traits::GtkWindowExt,
     CssProvider,
 };
 use logging_level::LoggingLevel;

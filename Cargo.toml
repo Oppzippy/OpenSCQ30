@@ -32,9 +32,9 @@ macaddr = "1"
 heck = "0.4"
 itertools = "0.12"
 futures = "0.3"
-adw = { version = "0.5", package = "libadwaita" }
-gtk = { version = "0.7", package = "gtk4" }
-strum = "0.25"
+adw = { version = "0.6", package = "libadwaita" }
+gtk = { version = "0.8", package = "gtk4" }
+strum = "0.26"
 serde = "1"
 toml = "0.8"
 anyhow = "1"
@@ -65,7 +65,7 @@ lazy_static = "1"
 windows = "0.52"
 mockall = "0.12"
 tempfile = "3"
-glib-build-tools = "0.18"
+glib-build-tools = "0.19"
 embed-resource = "2"
 console_error_panic_hook = "0.1"
 tracing-wasm = "0.2"
