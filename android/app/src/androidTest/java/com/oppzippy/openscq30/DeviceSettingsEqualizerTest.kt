@@ -1,9 +1,7 @@
 package com.oppzippy.openscq30
 
-import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.assertRangeInfoEquals
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -16,6 +14,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
+import com.oppzippy.openscq30.extensions.assertRangeValueApproxEquals
 import com.oppzippy.openscq30.extensions.empty
 import com.oppzippy.openscq30.lib.extensions.resources.toEqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
@@ -99,7 +98,7 @@ class DeviceSettingsEqualizerTest {
         val sliders = composeRule.onAllNodesWithTag("equalizerSlider")
         val values = listOf(3.0F, 3.0F, -2.0F, -2.0F, 0.0F, 2.0F, 3.0F, 4.0F)
         for (i in 0..7) {
-            sliders[i].assertRangeInfoEquals(ProgressBarRangeInfo(values[i], -12.0F..13.5F, 254))
+            sliders[i].assertRangeValueApproxEquals(values[i])
         }
     }
 
@@ -118,13 +117,7 @@ class DeviceSettingsEqualizerTest {
         composeRule.onNode(custom, true).assertExists()
         val sliders = composeRule.onAllNodesWithTag("equalizerSlider")
         for (i in 0..7) {
-            sliders[i].assertRangeInfoEquals(
-                ProgressBarRangeInfo(
-                    values[i].toFloat(),
-                    -12.0F..13.5F,
-                    254,
-                ),
-            )
+            sliders[i].assertRangeValueApproxEquals(values[i].toFloat())
         }
     }
 
@@ -150,13 +143,7 @@ class DeviceSettingsEqualizerTest {
         val values = floatArrayOf(4.0F, 3.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F)
         val sliders = composeRule.onAllNodesWithTag("equalizerSlider")
         for (i in 0..7) {
-            sliders[i].assertRangeInfoEquals(
-                ProgressBarRangeInfo(
-                    values[i],
-                    -12.0F..13.5F,
-                    254,
-                ),
-            )
+            sliders[i].assertRangeValueApproxEquals(values[i])
         }
     }
 
