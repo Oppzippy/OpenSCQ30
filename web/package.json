@@ -47,8 +47,8 @@
     "@types/react-dom": "^18.0.11",
     "@types/react-test-renderer": "^18.0.0",
     "@types/web-bluetooth": "^0.0.20",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
     "@vitejs/plugin-react-swc": "^3.0.0",
     "@vitest/coverage-v8": "^1.0.4",
     "eslint": "^8.38.0",
@@ -60,7 +60,7 @@
     "prettier": "^3.0.0",
     "typescript": "^5.0.2",
     "vite": "^5.0.10",
-    "vite-plugin-pwa": "^0.17.4",
+    "vite-plugin-pwa": "^0.18.0",
     "vitest": "^1.0.4"
   },
   "overrides": {
