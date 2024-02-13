@@ -107,7 +107,7 @@ android {
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"
+        kotlinCompilerExtensionVersion = "1.5.9"
     }
     ksp {
         arg("room.schemaLocation", "$projectDir/schemas")
@@ -126,7 +126,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-service:$lifecycleVersion")
 
     // Compose
-    val composeBomVersion = "2024.01.00"
+    val composeBomVersion = "2024.02.00"
     implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     androidTestImplementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     implementation("androidx.compose.ui:ui")
@@ -151,7 +151,7 @@ dependencies {
     // Optional - Integration with ViewModels
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     // Compose navigation
-    implementation("androidx.navigation:navigation-compose:2.7.6")
+    implementation("androidx.navigation:navigation-compose:2.7.7")
 
     val accompanistVersion = "0.34.0"
     implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
@@ -193,7 +193,7 @@ dependencies {
     androidTestImplementation("androidx.test:rules:1.5.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0-beta01")
+    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0-rc01")
 
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     testImplementation(kotlin("reflect"))
