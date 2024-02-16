@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -82,7 +82,7 @@ fun QuickPresetConfiguration(
                     hasNoiseCanceling = soundModeProfile.noiseCancelingModeType != NoiseCancelingModeType.None,
                 )
             }
-            Divider()
+            HorizontalDivider()
 
             if (soundModeProfile.transparencyModeType == TransparencyModeType.Custom) {
                 CheckboxWithLabel(
@@ -98,7 +98,7 @@ fun QuickPresetConfiguration(
                         onTransparencyModeChange = onTransparencyModeChange,
                     )
                 }
-                Divider()
+                HorizontalDivider()
             }
 
             if (soundModeProfile.noiseCancelingModeType != NoiseCancelingModeType.None) {
@@ -116,7 +116,7 @@ fun QuickPresetConfiguration(
                         hasCustomNoiseCanceling = soundModeProfile.noiseCancelingModeType == NoiseCancelingModeType.Custom,
                     )
                 }
-                Divider()
+                HorizontalDivider()
             }
 
             if (soundModeProfile.noiseCancelingModeType == NoiseCancelingModeType.Custom) {
@@ -133,7 +133,7 @@ fun QuickPresetConfiguration(
                         onCustomNoiseCancelingChange = onCustomNoiseCancelingChange,
                     )
                 }
-                Divider()
+                HorizontalDivider()
             }
         }
 
