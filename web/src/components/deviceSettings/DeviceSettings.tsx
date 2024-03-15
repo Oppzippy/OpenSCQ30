@@ -1,10 +1,10 @@
-import { Stack } from "@mui/material";
-import { useCallback, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { EqualizerHelper } from "../../../wasm/pkg/openscq30_web_wasm";
 import { Device } from "../../bluetooth/Device";
 import { useToastErrorHandler } from "../../hooks/useToastErrorHandler";
 import {
+  DeviceState,
   EqualizerConfiguration,
   PresetEqualizerProfile,
   SoundModes,
@@ -17,6 +17,7 @@ import { useCreateCustomProfileWithName } from "./hooks/useCreateCustomProfileWi
 import { useCustomEqualizerProfiles } from "./hooks/useCustomEqualizerProfiles";
 import { useDeleteCustomProfile } from "./hooks/useDeleteCustomProfile";
 import { useDisplayState } from "./hooks/useDisplayState";
+import { Stack } from "@mui/material";
 
 export function DeviceSettings({
   device,
@@ -40,10 +41,62 @@ export function DeviceSettings({
     onBluetoothError,
   );
 
-  const [isCreateCustomProfileDialogOpen, setCreateCustomProfileDialogOpen] =
-    useState(false);
-  const customEqualizerProfiles = useCustomEqualizerProfiles();
+  return (
+    <Stack spacing={2}>
+      <SoundModeSelectionPage
+        displayState={displayState}
+        setDisplayState={setDisplayState}
+      />
+      <EqualizerPage
+        displayState={displayState}
+        setDisplayState={setDisplayState}
+      />
+      <DeviceInfo deviceState={displayState} />
+    </Stack>
+  );
+}
 
+function SoundModeSelectionPage({
+  displayState,
+  setDisplayState,
+}: {
+  displayState: DeviceState;
+  setDisplayState: Dispatch<SetStateAction<DeviceState>>;
+}) {
+  const setSoundModes = useCallback(
+    (soundModes: SoundModes) => {
+      setDisplayState((state) => ({
+        ...state,
+        soundModes: soundModes,
+      }));
+    },
+    [setDisplayState],
+  );
+
+  if (displayState.deviceProfile.soundMode != null && displayState.soundModes) {
+    return (
+      <SoundModeSelection
+        soundModes={displayState.soundModes}
+        setSoundModes={setSoundModes}
+        options={{
+          hasTransparencyModes:
+            displayState.deviceProfile.soundMode.transparencyModeType ==
+            "custom",
+          noiseCanceling:
+            displayState.deviceProfile.soundMode.noiseCancelingModeType,
+        }}
+      />
+    );
+  }
+}
+
+function EqualizerPage({
+  displayState,
+  setDisplayState,
+}: {
+  displayState: DeviceState;
+  setDisplayState: Dispatch<SetStateAction<DeviceState>>;
+}) {
   const setSelectedPresetProfile = useCallback(
     (presetProfile: PresetEqualizerProfile | "custom") => {
       const newEqualizerConfiguration: EqualizerConfiguration =
@@ -88,21 +141,14 @@ export function DeviceSettings({
     [setDisplayState],
   );
 
-  const setSoundModes = useCallback(
-    (soundModes: SoundModes) => {
-      setDisplayState((state) => ({
-        ...state,
-        soundModes: soundModes,
-      }));
-    },
-    [setDisplayState],
-  );
-
   const openCreateCustomProfileDialog = useCallback(
     () => setCreateCustomProfileDialogOpen(true),
     [],
   );
-  const deleteCustomProfile = useDeleteCustomProfile();
+
+  const [isCreateCustomProfileDialogOpen, setCreateCustomProfileDialogOpen] =
+    useState(false);
+  const customEqualizerProfiles = useCustomEqualizerProfiles();
 
   const closeCreateCustomProfileDialog = useCallback(
     () => setCreateCustomProfileDialogOpen(false),
@@ -113,23 +159,10 @@ export function DeviceSettings({
     displayState.equalizerConfiguration.volumeAdjustments,
   );
 
-  return (
-    <Stack spacing={2}>
-      {displayState.deviceProfile.soundMode != null &&
-        displayState.soundModes && (
-          <SoundModeSelection
-            soundModes={displayState.soundModes}
-            setSoundModes={setSoundModes}
-            options={{
-              hasTransparencyModes:
-                displayState.deviceProfile.soundMode.transparencyModeType ==
-                "custom",
-              noiseCanceling:
-                displayState.deviceProfile.soundMode.noiseCancelingModeType,
-            }}
-          />
-        )}
-      {displayState.deviceProfile.numEqualizerBands > 0 && (
+  const deleteCustomProfile = useDeleteCustomProfile();
+  if (displayState.deviceProfile.numEqualizerBands > 0) {
+    return (
+      <>
         <EqualizerSettings
           profile={
             displayState.equalizerConfiguration.presetProfile ?? "custom"
@@ -141,14 +174,13 @@ export function DeviceSettings({
           onAddCustomProfile={openCreateCustomProfileDialog}
           onDeleteCustomProfile={deleteCustomProfile}
         />
-      )}
-      <DeviceInfo deviceState={displayState} />
-      <NewCustomProfileDialog
-        isOpen={isCreateCustomProfileDialogOpen}
-        existingProfiles={customEqualizerProfiles}
-        onClose={closeCreateCustomProfileDialog}
-        onCreate={createCustomProfileWithName}
-      />
-    </Stack>
-  );
+        <NewCustomProfileDialog
+          isOpen={isCreateCustomProfileDialogOpen}
+          existingProfiles={customEqualizerProfiles}
+          onClose={closeCreateCustomProfileDialog}
+          onCreate={createCustomProfileWithName}
+        />
+      </>
+    );
+  }
 }
