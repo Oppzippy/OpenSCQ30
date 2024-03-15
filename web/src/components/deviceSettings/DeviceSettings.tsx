@@ -4,6 +4,7 @@ import { EqualizerHelper } from "../../../wasm/pkg/openscq30_web_wasm";
 import { Device } from "../../bluetooth/Device";
 import { useToastErrorHandler } from "../../hooks/useToastErrorHandler";
 import {
+  CustomButtonModel,
   DeviceState,
   EqualizerConfiguration,
   PresetEqualizerProfile,
@@ -17,7 +18,8 @@ import { useCreateCustomProfileWithName } from "./hooks/useCreateCustomProfileWi
 import { useCustomEqualizerProfiles } from "./hooks/useCustomEqualizerProfiles";
 import { useDeleteCustomProfile } from "./hooks/useDeleteCustomProfile";
 import { useDisplayState } from "./hooks/useDisplayState";
-import { Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
+import { ButtonSettings } from "../buttonSettings/ButtonSettings";
 
 export function DeviceSettings({
   device,
@@ -43,15 +45,25 @@ export function DeviceSettings({
 
   return (
     <Stack spacing={2}>
-      <SoundModeSelectionPage
-        displayState={displayState}
-        setDisplayState={setDisplayState}
-      />
-      <EqualizerPage
-        displayState={displayState}
-        setDisplayState={setDisplayState}
-      />
-      <DeviceInfo deviceState={displayState} />
+      {[
+        <SoundModeSelectionPage
+          displayState={displayState}
+          setDisplayState={setDisplayState}
+        />,
+        <EqualizerPage
+          displayState={displayState}
+          setDisplayState={setDisplayState}
+        />,
+        <ButtonSettingsPage
+          displayState={displayState}
+          setDisplayState={setDisplayState}
+        />,
+        <DeviceInfo deviceState={displayState} />,
+      ].map((component, index) => (
+        <Box padding={2} border="1px solid grey" key={index}>
+          {component}
+        </Box>
+      ))}
     </Stack>
   );
 }
@@ -181,6 +193,37 @@ function EqualizerPage({
           onCreate={createCustomProfileWithName}
         />
       </>
+    );
+  }
+}
+
+function ButtonSettingsPage({
+  displayState,
+  setDisplayState,
+}: {
+  displayState: DeviceState;
+  setDisplayState: Dispatch<SetStateAction<DeviceState>>;
+}) {
+  const setButtonModel = useCallback(
+    (customButtonModel: CustomButtonModel) => {
+      setDisplayState((state) => {
+        return {
+          ...state,
+          customButtonModel,
+        };
+      });
+    },
+    [setDisplayState],
+  );
+  if (
+    displayState.deviceProfile.hasCustomButtonModel &&
+    displayState.customButtonModel != null
+  ) {
+    return (
+      <ButtonSettings
+        buttonModel={displayState.customButtonModel}
+        setButtonModel={setButtonModel}
+      />
     );
   }
 }

@@ -4,6 +4,7 @@ import {
   SoundcoreDeviceUtils,
 } from "../../wasm/pkg/openscq30_web_wasm";
 import {
+  CustomButtonModel,
   DeviceState,
   DeviceStateValidator,
   EqualizerConfiguration,
@@ -53,6 +54,12 @@ export class Device {
   ) {
     await this.libDevice.setEqualizerConfiguration(
       JSON.stringify(equalizerConfiguration),
+    );
+  }
+
+  public async setCustomButtonModel(customButtonModel: CustomButtonModel) {
+    await this.libDevice.setCustomButtonModel(
+      JSON.stringify(customButtonModel),
     );
   }
 

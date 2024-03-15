@@ -7,7 +7,7 @@ use openscq30_lib::{
     demo::device::DemoDevice,
     devices::standard::{
         state::DeviceState,
-        structures::{EqualizerConfiguration, SoundModes},
+        structures::{CustomButtonModel, EqualizerConfiguration, SoundModes},
     },
     futures::WasmFutures,
     soundcore_device::device::SoundcoreDevice,
@@ -70,6 +70,20 @@ impl Device {
             serde_json::from_str(&equalizer_configuration).map_err(|err| format!("{err:?}"))?;
         self.inner
             .set_equalizer_configuration(equalizer_configuration)
+            .await
+            .map_err(|err| format!("{err:?}"))?;
+        Ok(())
+    }
+
+    #[wasm_bindgen(js_name = "setCustomButtonModel")]
+    pub async fn set_custom_button_model(
+        &self,
+        custom_button_model: String,
+    ) -> Result<(), JsValue> {
+        let custom_button_model: CustomButtonModel =
+            serde_json::from_str(&custom_button_model).map_err(|err| format!("{err:?}"))?;
+        self.inner
+            .set_custom_button_model(custom_button_model)
             .await
             .map_err(|err| format!("{err:?}"))?;
         Ok(())
@@ -142,6 +156,20 @@ impl DeviceImplementation {
             }
             DeviceImplementation::Demo(device) => {
                 device.set_equalizer_configuration(configuration).await
+            }
+        }
+    }
+
+    pub async fn set_custom_button_model(
+        &self,
+        custom_button_model: CustomButtonModel,
+    ) -> openscq30_lib::Result<()> {
+        match self {
+            DeviceImplementation::WebBluetooth(device) => {
+                device.set_custom_button_model(custom_button_model).await
+            }
+            DeviceImplementation::Demo(device) => {
+                device.set_custom_button_model(custom_button_model).await
             }
         }
     }

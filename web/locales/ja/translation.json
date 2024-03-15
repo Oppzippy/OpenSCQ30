@@ -1,4 +1,22 @@
 {
+  "buttons": {
+    "leftSingleClick": "",
+    "leftDoubleClick": "",
+    "leftLongPress": "",
+    "rightSingleClick": "",
+    "rightDoubleClick": "",
+    "rightLongPress": "",
+    "Buttons": ""
+  },
+  "buttonActions": {
+    "volumeUp": "",
+    "volumeDown": "",
+    "previousSong": "",
+    "nextSong": "",
+    "ambientSoundMode": "",
+    "voiceAssistant": "",
+    "playPause": ""
+  },
   "device": {
     "disconnect": "",
     "deviceSelection": "デバイス選択",

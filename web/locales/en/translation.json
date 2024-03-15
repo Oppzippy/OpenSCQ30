@@ -1,4 +1,22 @@
 {
+  "buttons": {
+    "leftSingleClick": "Left Single Click",
+    "leftDoubleClick": "Left Double Click",
+    "leftLongPress": "Left Long Press",
+    "rightSingleClick": "Right Single Click",
+    "rightDoubleClick": "Right Double Click",
+    "rightLongPress": "Right Long Press",
+    "Buttons": "Buttons"
+  },
+  "buttonActions": {
+    "volumeUp": "Volume Up",
+    "volumeDown": "Volume Down",
+    "previousSong": "Previous Song",
+    "nextSong": "Next Song",
+    "ambientSoundMode": "Ambient Sound Mode",
+    "voiceAssistant": "Voice Assistant",
+    "playPause": "Play/Pause"
+  },
   "device": {
     "disconnect": "Disconnect",
     "deviceSelection": "Device Selection",

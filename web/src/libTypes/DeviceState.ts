@@ -125,6 +125,16 @@ const deviceProfileSchema = Type.Object({
 });
 export type DeviceProfile = Static<typeof deviceProfileSchema>;
 
+const customButtonModelSchema = Type.Object({
+  leftSingleClick: noTwsButtonActionSchema,
+  leftDoubleClick: twsButtonActionSchema,
+  leftLongPress: twsButtonActionSchema,
+  rightSingleClick: noTwsButtonActionSchema,
+  rightDoubleClick: twsButtonActionSchema,
+  rightLongPress: twsButtonActionSchema,
+});
+export type CustomButtonModel = Static<typeof customButtonModelSchema>;
+
 const deviceStateSchema = Type.Object({
   deviceProfile: deviceProfileSchema,
   battery: Type.Union([
@@ -173,16 +183,7 @@ const deviceStateSchema = Type.Object({
     ]),
   ),
   firmwareVersion: Nullable(firmwareVersionSchema),
-  customButtonModel: Nullable(
-    Type.Object({
-      leftSingleClick: noTwsButtonActionSchema,
-      leftDoubleClick: twsButtonActionSchema,
-      leftLongPress: twsButtonActionSchema,
-      rightSingleClick: noTwsButtonActionSchema,
-      rightDoubleClick: twsButtonActionSchema,
-      rightLongPress: twsButtonActionSchema,
-    }),
-  ),
+  customButtonModel: Nullable(customButtonModelSchema),
   serialNumber: Nullable(Type.String()),
   ambientSoundModeCycle: Nullable(ambientSoundModeCycleSchema),
 });
