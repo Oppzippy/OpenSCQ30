@@ -107,12 +107,12 @@ android {
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.9"
+        kotlinCompilerExtensionVersion = "1.5.10"
     }
     ksp {
         arg("room.schemaLocation", "$projectDir/schemas")
     }
-    ndkVersion = "26.1.10909125"
+    ndkVersion = "26.2.11394342"
     packaging {
         resources {
             excludes += "/META-INF/*"
@@ -126,7 +126,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-service:$lifecycleVersion")
 
     // Compose
-    val composeBomVersion = "2024.02.00"
+    val composeBomVersion = "2024.02.02"
     implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     androidTestImplementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     implementation("androidx.compose.ui:ui")
@@ -170,10 +170,10 @@ dependencies {
 
     implementation("net.java.dev.jna:jna:5.14.0@aar")
 
-    val hiltVersion = "2.50"
+    val hiltVersion = "2.51"
     implementation("com.google.dagger:hilt-android:$hiltVersion")
     kapt("com.google.dagger:hilt-android-compiler:$hiltVersion")
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     // For instrumentation tests
     androidTestImplementation("com.google.dagger:hilt-android-testing:$hiltVersion")
@@ -185,7 +185,7 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
 
-    val mockkVersion = "1.13.9"
+    val mockkVersion = "1.13.10"
     testImplementation("io.mockk:mockk:$mockkVersion")
     androidTestImplementation("io.mockk:mockk-android:$mockkVersion")
     androidTestImplementation("androidx.test:runner:1.5.2")
@@ -193,9 +193,9 @@ dependencies {
     androidTestImplementation("androidx.test:rules:1.5.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0-rc01")
+    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
 
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
     testImplementation(kotlin("reflect"))
     androidTestImplementation(kotlin("reflect"))
 }
