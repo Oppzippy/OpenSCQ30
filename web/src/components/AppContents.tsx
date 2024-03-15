@@ -72,7 +72,7 @@ export function AppContents() {
         )}
         <Box component="main" sx={{ flexGrow: 1 }}>
           <Toolbar />
-          <Container maxWidth="sm" sx={{ my: 2 }}>
+          <Container sx={{ my: 2 }}>
             {device ? (
               <DeviceSettings device={device} disconnect={disconnect} />
             ) : isLoading ? (

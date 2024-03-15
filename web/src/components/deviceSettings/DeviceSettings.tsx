@@ -18,8 +18,15 @@ import { useCreateCustomProfileWithName } from "./hooks/useCreateCustomProfileWi
 import { useCustomEqualizerProfiles } from "./hooks/useCustomEqualizerProfiles";
 import { useDeleteCustomProfile } from "./hooks/useDeleteCustomProfile";
 import { useDisplayState } from "./hooks/useDisplayState";
-import { Box, Stack } from "@mui/material";
+import { Box, styled } from "@mui/material";
 import { ButtonSettings } from "../buttonSettings/ButtonSettings";
+
+const MasonryLayout = styled(Box)(({ theme }) => ({
+  [theme.breakpoints.up("lg")]: {
+    columns: 2,
+    columnGap: "2",
+  },
+}));
 
 export function DeviceSettings({
   device,
@@ -44,31 +51,31 @@ export function DeviceSettings({
   );
 
   return (
-    <Stack spacing={2}>
+    <MasonryLayout>
       {[
-        <SoundModeSelectionPage
+        <SoundModeSelectionSection
           displayState={displayState}
           setDisplayState={setDisplayState}
         />,
-        <EqualizerPage
+        <EqualizerSection
           displayState={displayState}
           setDisplayState={setDisplayState}
         />,
-        <ButtonSettingsPage
+        <ButtonSettingsSection
           displayState={displayState}
           setDisplayState={setDisplayState}
         />,
         <DeviceInfo deviceState={displayState} />,
       ].map((component, index) => (
-        <Box padding={2} border="1px solid grey" key={index}>
+        <Box padding={2} marginBottom={2} border="1px solid grey" key={index}>
           {component}
         </Box>
       ))}
-    </Stack>
+    </MasonryLayout>
   );
 }
 
-function SoundModeSelectionPage({
+function SoundModeSelectionSection({
   displayState,
   setDisplayState,
 }: {
@@ -102,7 +109,7 @@ function SoundModeSelectionPage({
   }
 }
 
-function EqualizerPage({
+function EqualizerSection({
   displayState,
   setDisplayState,
 }: {
@@ -197,7 +204,7 @@ function EqualizerPage({
   }
 }
 
-function ButtonSettingsPage({
+function ButtonSettingsSection({
   displayState,
   setDisplayState,
 }: {

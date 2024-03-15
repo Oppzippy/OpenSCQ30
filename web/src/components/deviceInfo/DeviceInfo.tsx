@@ -21,7 +21,8 @@ export const DeviceInfo = React.memo(function ({ deviceState }: Props) {
       <Typography component="h2" variant="h6">
         {t("deviceInfo.deviceInfo")}
       </Typography>
-      <Table sx={{ tableLayout: "fixed" }}>
+      {/* The entirety of DeviceInfo has a border, so it looks weird if the last row has a trailing bottom border */}
+      <Table sx={{ tableLayout: "fixed", "& tr:last-child td": { border: 0 } }}>
         <TableBody>
           <FirmwareVersion deviceState={deviceState} />
           <SerialNumber deviceState={deviceState} />
