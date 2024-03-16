@@ -9,6 +9,7 @@
     "Buttons": "Buttons"
   },
   "buttonActions": {
+    "disabled": "Disabled",
     "volumeUp": "Volume Up",
     "volumeDown": "Volume Down",
     "previousSong": "Previous Song",

@@ -42,7 +42,7 @@ export const ButtonSettings = React.memo(function ({
             buttonKey={key}
             label={label}
             action={getButtonAction(buttonModel[key])}
-            setAction={(action: ButtonAction) => {
+            setAction={(action: ButtonAction | "disabled") => {
               setButtonModel({
                 ...buttonModel,
                 [key]: setButtonAction(buttonModel[key], action),
@@ -57,24 +57,31 @@ export const ButtonSettings = React.memo(function ({
 
 function getButtonAction(
   button: CustomButtonModel[keyof CustomButtonModel],
-): ButtonAction {
-  if ("action" in button) {
-    return button.action;
-  } else {
-    return button.twsConnectedAction;
+): ButtonAction | "disabled" {
+  if (button.isEnabled) {
+    return "action" in button ? button.action : button.twsConnectedAction;
   }
+  return "disabled";
 }
 function setButtonAction<
   ActionType extends CustomButtonModel[keyof CustomButtonModel],
->(button: ActionType, action: ButtonAction): ActionType {
+>(button: ActionType, action: ButtonAction | "disabled"): ActionType {
+  if (action == "disabled") {
+    return {
+      ...button,
+      isEnabled: false,
+    };
+  }
   if ("action" in button) {
     return {
       ...button,
+      isEnabled: true,
       action: action,
     };
   } else {
     return {
       ...button,
+      isEnabled: true,
       twsConnectedAction: action,
       twsDisconnectedAction: action,
     };
@@ -89,15 +96,16 @@ const ButtonActionSelection = React.memo(function ({
 }: {
   label: string;
   buttonKey: string;
-  action: ButtonAction;
-  setAction: (action: ButtonAction) => void;
+  action: ButtonAction | "disabled";
+  setAction: (action: ButtonAction | "disabled") => void;
 }) {
   const { t } = useTranslation();
 
   const options: {
     label: string;
-    value: ButtonAction;
+    value: ButtonAction | "disabled";
   }[] = [
+    { label: t("buttonActions.disabled"), value: "disabled" },
     { label: t("buttonActions.volumeUp"), value: "volumeUp" },
     { label: t("buttonActions.volumeDown"), value: "volumeDown" },
     { label: t("buttonActions.previousSong"), value: "previousSong" },
