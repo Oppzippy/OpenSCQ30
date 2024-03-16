@@ -23,6 +23,8 @@ impl LoadingScreen {
 }
 
 mod imp {
+    use std::cell::OnceCell;
+
     use gtk::{
         glib,
         subclass::{
@@ -31,7 +33,6 @@ mod imp {
         },
         template_callbacks, CompositeTemplate,
     };
-    use once_cell::sync::OnceCell;
     use tokio::sync::mpsc::UnboundedSender;
 
     use crate::actions::Action;

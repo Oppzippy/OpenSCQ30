@@ -45,6 +45,8 @@ impl QuickPresetsScreen {
 }
 
 mod imp {
+    use std::cell::OnceCell;
+
     use gtk::{
         glib,
         subclass::{
@@ -53,7 +55,6 @@ mod imp {
         },
         template_callbacks, CompositeTemplate,
     };
-    use once_cell::unsync::OnceCell;
     use tokio::sync::mpsc::UnboundedSender;
 
     use crate::{
