@@ -19,11 +19,13 @@ TODO
 ```mermaid
 flowchart TD
     SoundcoreDevice["SoundcoreDevice (Kotlin)"]
-    NativeSoundcoreDevice["NativeSoundcoreDevice (Rust)"]
+    NativeSoundcoreDevice["NativeSoundcoreDevice (Rust FFI)"]
+    openscq30_lib
     ManualConnection["ManualConnection (Kotlin)"]
     Headphones
 
     SoundcoreDevice-- Commands (protobuf) -->NativeSoundcoreDevice
+    NativeSoundcoreDevice<-->openscq30_lib
     NativeSoundcoreDevice-- State Updates (protobuf) -->SoundcoreDevice
     NativeSoundcoreDevice<-- Packet Bytes -->ManualConnection
     Headphones<-- BLE Packets -->ManualConnection
