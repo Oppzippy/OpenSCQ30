@@ -7,13 +7,7 @@ export function HomePage() {
   return (
     <Stack textAlign="center" spacing={2}>
       {navigator.bluetooth == undefined && (
-        <Typography>
-          <Trans i18nKey={"application.webBluetoothNotSupported"}>
-            Web Bluetooth is not supported by your browser. See{" "}
-            <Link href="https://caniuse.com/web-bluetooth">caniuse</Link> for a
-            list of browsers supporting Web Bluetooth.
-          </Trans>
-        </Typography>
+        <Typography>{t("application.webBluetoothNotSupported")}</Typography>
       )}
       <Box>
         <Link

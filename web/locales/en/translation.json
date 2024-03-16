@@ -57,7 +57,7 @@
     "cancel": "Cancel",
     "overwrite": "Overwrite",
     "create": "Create",
-    "webBluetoothNotSupported": "Web Bluetooth is not supported by your browser. See <2>caniuse</2> for a list of browsers supporting Web Bluetooth.",
+    "webBluetoothNotSupported": "Web Bluetooth is either unsupported or disabled by your browser. Currently, it is only supported in Chromium based browsers. Some browsers, such as Brave, disable Web Bluetooth by default, so the flag for it must be enabled.",
     "updateFailed": "Update failed. See console for details.",
     "newVersionAvailable": "A new version of OpenSCQ30 Web is available.",
     "update": "Update"
