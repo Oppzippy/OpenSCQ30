@@ -1,6 +1,6 @@
 import { GitHub } from "@mui/icons-material";
 import { Box, Link, Stack, Typography } from "@mui/material";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 export function HomePage() {
   const { t } = useTranslation();
