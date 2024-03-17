@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+### Android
+
+#### Features
+
+-   Add custom button settings
+-   Reorganize UI to allow for more than 5 total settings pages
+
+### Web
+
+#### Features
+
+-   Add custom button settings
+-   Improve layout on larger screens
+
 ## v1.10.6
 
 ### General
