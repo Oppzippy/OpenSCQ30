@@ -4,9 +4,9 @@
     <metadata_license>FSFAP</metadata_license>
     <project_license>GPL-3.0+</project_license>
     <name>OpenSCQ30</name>
-    <summary>Control settings of Soundcore Q30 headphones</summary>
+    <summary>Control Soundcore headphones</summary>
     <description>
-        <p>Cross platform application for controlling settings of Soundcore Q30 headphones.</p>
+        <p>Cross platform application for controlling settings of Soundcore headphones and earbuds.</p>
     </description>
     <categories>
         <category>Settings</category>
@@ -16,16 +16,19 @@
         <keyword>bluetooth</keyword>
         <keyword>wireless</keyword>
         <keyword>headphones</keyword>
+        <keyword>earbuds</keyword>
         <keyword>q30</keyword>
     </keywords>
     <icon type="remote">https://raw.githubusercontent.com/Oppzippy/OpenSCQ30/master/gui/resources/com.oppzippy.OpenSCQ30.svg</icon>
     <url type="homepage">https://github.com/Oppzippy/OpenSCQ30</url>
-    <developer_name>Oppzippy</developer_name>
+    <developer id="com.oppzippy">
+        <name>Oppzippy</name>
+    </developer>
     <update_contact>kyle@kylescheuing.com</update_contact>
     <content_rating type="oars-1.0" />
     <launchable type="desktop-id">com.oppzippy.OpenSCQ30.desktop</launchable>
     <screenshots>
-        <screenshot>
+        <screenshot type="default">
             <image>https://raw.githubusercontent.com/Oppzippy/OpenSCQ30/dceaeaf4556ba7ef2096ab67948384a3deef8a16/screenshots/gui_general.png</image>
             <caption>General Settings</caption>
         </screenshot>
@@ -35,6 +38,7 @@
         </screenshot>
         <screenshot>
             <video container="webm" codec="vp9" width="902" height="386">https://user-images.githubusercontent.com/2236514/229958756-aaa2a6d3-e908-4195-aad6-b0bcfda139a8.webm</video>
+            <caption>Clicking through the different features of the application</caption>
         </screenshot>
     </screenshots>
     <provides>
@@ -43,7 +47,7 @@
     <releases>
         <release version="1.11.0" date="2024-03-17">
             <description>
- 
+
             </description>
         </release>
         <release version="1.10.6" date="2024-01-25">
@@ -54,7 +58,7 @@
                     <li>Custom noise canceling option sometimes not visible when it should be, and sometimes visible when it shouldn't be</li>
                     <li>Rename button action "Trans" to "Ambient Sound Mode", since that's what it does, cycles through ambient sound modes</li>
                     <li>Devices other than Q30 potentially not working on Linux</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="1.10.5" date="2024-01-23">
@@ -62,7 +66,7 @@
                 <p>Fixes</p>
                 <ul>
                     <li>Fall back to default values when device is in an invalid state rather than failing to connect</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="1.10.4" date="2024-01-15">
