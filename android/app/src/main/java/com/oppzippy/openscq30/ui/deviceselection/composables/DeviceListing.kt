@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BluetoothConnected
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -34,11 +35,19 @@ fun DeviceListing(
     onRefreshClick: () -> Unit = {},
     onInfoClick: () -> Unit = {},
     onDeviceClick: (BluetoothDevice) -> Unit = {},
+    onPair: () -> Unit = {},
+    onUnpair: (BluetoothDevice) -> Unit = {},
 ) {
     Scaffold(topBar = {
         TopAppBar(title = {
             Text(text = stringResource(id = R.string.app_name))
         }, actions = {
+            IconButton(onClick = onPair) {
+                Icon(
+                    imageVector = Icons.Filled.BluetoothConnected,
+                    contentDescription = stringResource(id = R.string.pair_device),
+                )
+            }
             IconButton(onClick = onRefreshClick) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
@@ -73,6 +82,7 @@ fun DeviceListing(
                         .fillMaxWidth()
                         .fillMaxHeight(),
                     onDeviceClick = onDeviceClick,
+                    onUnpair = onUnpair,
                 )
             }
 

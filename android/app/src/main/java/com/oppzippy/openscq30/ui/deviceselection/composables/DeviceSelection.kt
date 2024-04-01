@@ -17,6 +17,8 @@ fun DeviceSelection(
     devices: List<BluetoothDevice>,
     onRefreshDevices: () -> Unit = {},
     onDeviceSelected: (device: BluetoothDevice) -> Unit = {},
+    onPair: () -> Unit = {},
+    onUnpair: (BluetoothDevice) -> Unit = {},
 ) {
     val navController = rememberNavController()
 
@@ -32,20 +34,27 @@ fun DeviceSelection(
     ) {
         composable("/") {
             PermissionCheck(
-                permission = bluetoothPermission,
-                prompt = stringResource(R.string.bluetooth_permission_is_required),
-                onPermissionGranted = onRefreshDevices,
+                permission = Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND,
+                prompt = "abc",
             ) {
-                DeviceListing(
-                    devices,
-                    onRefreshClick = onRefreshDevices,
-                    onDeviceClick = onDeviceSelected,
-                    onInfoClick = {
-                        navController.navigate(Screen.Info.route) {
-                            launchSingleTop = true
-                        }
-                    },
-                )
+                PermissionCheck(
+                    permission = bluetoothPermission,
+                    prompt = stringResource(R.string.bluetooth_permission_is_required),
+                    onPermissionGranted = onRefreshDevices,
+                ) {
+                    DeviceListing(
+                        devices,
+                        onRefreshClick = onRefreshDevices,
+                        onDeviceClick = onDeviceSelected,
+                        onPair = onPair,
+                        onUnpair = onUnpair,
+                        onInfoClick = {
+                            navController.navigate(Screen.Info.route) {
+                                launchSingleTop = true
+                            }
+                        },
+                    )
+                }
             }
         }
         composable("/info") {

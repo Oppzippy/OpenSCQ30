@@ -114,4 +114,5 @@
     <string name="right_long_press">Right Long Press</string>
     <string name="button_actions">Button Actions</string>
     <string name="disabled">Disabled</string>
+    <string name="pair_device">Pair Device</string>
 </resources>

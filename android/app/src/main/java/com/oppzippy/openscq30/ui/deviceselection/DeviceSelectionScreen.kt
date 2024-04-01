@@ -1,8 +1,10 @@
 package com.oppzippy.openscq30.ui.deviceselection
 
+import android.app.Activity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.ui.deviceselection.composables.DeviceSelection
@@ -13,9 +15,12 @@ fun DeviceSelectionScreen(
     viewModel: DeviceSelectionViewModel = hiltViewModel(),
 ) {
     val devices by viewModel.devices.collectAsState()
+    val activity = LocalContext.current as Activity
     DeviceSelection(
         devices = devices,
         onRefreshDevices = { viewModel.refreshDevices() },
         onDeviceSelected = onDeviceSelected,
+        onPair = { viewModel.pair(activity) },
+        onUnpair = { viewModel.unpair(it) },
     )
 }
