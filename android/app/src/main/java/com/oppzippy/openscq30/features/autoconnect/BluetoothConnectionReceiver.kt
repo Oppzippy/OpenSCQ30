@@ -10,7 +10,7 @@ import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
 
 class BluetoothConnectionReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
-        Log.d("BluetoothConnectionReceiver", "got onreceive")
+        Log.d("BluetoothConnectionReceiver", "got onReceive")
         if (context != null && intent != null && intent.action == BluetoothDevice.ACTION_ACL_CONNECTED) {
             Log.d("BluetoothConnectionReceiver", "attempting to start background service")
             val device = IntentCompat.getParcelableExtra(

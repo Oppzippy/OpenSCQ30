@@ -29,6 +29,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -110,26 +112,6 @@ class DeviceService : LifecycleService() {
             connectionManager.connectionStatusFlow.first { it is ConnectionStatus.Disconnected }
             stopSelf()
         }
-
-        val filter = IntentFilter(ACTION_DISCONNECT).apply {
-            addAction(ACTION_QUICK_PRESET)
-            addAction(ACTION_SEND_NOTIFICATION)
-        }
-        ContextCompat.registerReceiver(
-            this,
-            broadcastReceiver,
-            filter,
-            ContextCompat.RECEIVER_NOT_EXPORTED,
-        )
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        super.onStartCommand(intent, flags, startId)
-
-        createNotificationChannel()
-        val notification = buildNotification()
-        startForeground(NOTIFICATION_ID, notification)
-
         lifecycleScope.launch {
             connectionManager.connectionStatusFlow.collectLatest {
                 if (it is ConnectionStatus.Connected) {
@@ -143,9 +125,32 @@ class DeviceService : LifecycleService() {
             quickPresetNames.debounce(1.seconds).collectLatest { sendNotification() }
         }
 
+        val filter = IntentFilter(ACTION_DISCONNECT).apply {
+            addAction(ACTION_QUICK_PRESET)
+            addAction(ACTION_SEND_NOTIFICATION)
+        }
+        ContextCompat.registerReceiver(
+            this,
+            broadcastReceiver,
+            filter,
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
+
+        createNotificationChannel()
+    }
+
+    private val connectToDeviceMutex = Mutex()
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
+
+        val notification = buildNotification()
+        startForeground(NOTIFICATION_ID, notification)
+
         intent?.getStringExtra(MAC_ADDRESS)?.let { macAddress ->
             lifecycleScope.launch {
-                connectionManager.connect(macAddress)
+                connectToDeviceMutex.withLock {
+                    connectionManager.connect(macAddress)
+                }
             }
         }
 
