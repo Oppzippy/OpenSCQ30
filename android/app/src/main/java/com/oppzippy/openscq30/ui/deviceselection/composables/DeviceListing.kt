@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BluetoothConnected
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -35,6 +36,7 @@ fun DeviceListing(
     onRefreshClick: () -> Unit = {},
     onInfoClick: () -> Unit = {},
     onDeviceClick: (BluetoothDevice) -> Unit = {},
+    onSettingsClick: () -> Unit = {},
     onPair: () -> Unit = {},
     onUnpair: (BluetoothDevice) -> Unit = {},
 ) {
@@ -58,6 +60,12 @@ fun DeviceListing(
                 Icon(
                     imageVector = Icons.Filled.Info,
                     contentDescription = stringResource(id = R.string.info),
+                )
+            }
+            IconButton(onClick = onSettingsClick) {
+                Icon(
+                    imageVector = Icons.Filled.Settings,
+                    contentDescription = stringResource(id = R.string.settings),
                 )
             }
         })

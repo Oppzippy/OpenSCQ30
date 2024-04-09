@@ -115,4 +115,6 @@
     <string name="button_actions">Button Actions</string>
     <string name="disabled">Disabled</string>
     <string name="pair_device">Pair Device</string>
+    <string name="auto_connect">Auto Connect</string>
+    <string name="settings">Settings</string>
 </resources>

@@ -10,6 +10,7 @@ import androidx.navigation.compose.rememberNavController
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.ui.deviceselection.models.Screen
+import com.oppzippy.openscq30.ui.settings.SettingsPage
 import com.oppzippy.openscq30.ui.utils.PermissionCheck
 
 @Composable
@@ -34,31 +35,34 @@ fun DeviceSelection(
     ) {
         composable("/") {
             PermissionCheck(
-                permission = Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND,
-                prompt = "abc",
+                permission = bluetoothPermission,
+                prompt = stringResource(R.string.bluetooth_permission_is_required),
+                onPermissionGranted = onRefreshDevices,
             ) {
-                PermissionCheck(
-                    permission = bluetoothPermission,
-                    prompt = stringResource(R.string.bluetooth_permission_is_required),
-                    onPermissionGranted = onRefreshDevices,
-                ) {
-                    DeviceListing(
-                        devices,
-                        onRefreshClick = onRefreshDevices,
-                        onDeviceClick = onDeviceSelected,
-                        onPair = onPair,
-                        onUnpair = onUnpair,
-                        onInfoClick = {
-                            navController.navigate(Screen.Info.route) {
-                                launchSingleTop = true
-                            }
-                        },
-                    )
-                }
+                DeviceListing(
+                    devices,
+                    onRefreshClick = onRefreshDevices,
+                    onDeviceClick = onDeviceSelected,
+                    onPair = onPair,
+                    onUnpair = onUnpair,
+                    onInfoClick = {
+                        navController.navigate(Screen.Info.route) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onSettingsClick = {
+                        navController.navigate(Screen.Settings.route)
+                    },
+                )
             }
         }
         composable("/info") {
             AppInfo(onBackClick = {
+                navController.popBackStack()
+            })
+        }
+        composable("/settings") {
+            SettingsPage(onBackClick = {
                 navController.popBackStack()
             })
         }
