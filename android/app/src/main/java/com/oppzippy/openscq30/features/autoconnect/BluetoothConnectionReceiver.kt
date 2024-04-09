@@ -1,6 +1,7 @@
 package com.oppzippy.openscq30.features.autoconnect
 
 import android.bluetooth.BluetoothDevice
+import android.companion.CompanionDeviceManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -23,12 +24,17 @@ class BluetoothConnectionReceiver(private val preferences: Preferences) : Broadc
                 BluetoothDevice::class.java,
             )
             if (device != null) {
-                Log.d("BluetoothConnectionReceiver", "auto connecting to ${device.address}")
-                val serviceIntent = Intent(context, DeviceService::class.java)
-                serviceIntent.putExtra(DeviceService.MAC_ADDRESS, device.address)
-                context.startForegroundService(serviceIntent)
-            } else {
-                Log.e("BluetoothConnectionReceiver", "device is null?")
+                val deviceManager = context.getSystemService(CompanionDeviceManager::class.java)
+                val isPaired =
+                    deviceManager.associations.find {
+                        it.equals(device.address, ignoreCase = true)
+                    } != null
+                if (isPaired) {
+                    Log.d("BluetoothConnectionReceiver", "auto connecting to ${device.address}")
+                    val serviceIntent = Intent(context, DeviceService::class.java)
+                    serviceIntent.putExtra(DeviceService.MAC_ADDRESS, device.address)
+                    context.startForegroundService(serviceIntent)
+                }
             }
         }
     }
