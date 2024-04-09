@@ -11,7 +11,7 @@ export async function upsertCustomEqualizerProfile(
       .equals(profile.values)
       .first();
     if (existing) {
-      await db.customEqualizerProfiles.update(existing, profile);
+      await db.customEqualizerProfiles.update(existing, { ...profile });
     } else {
       await db.customEqualizerProfiles.add(profile);
     }
