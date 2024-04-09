@@ -15,7 +15,6 @@
     <string name="refresh">Refresh</string>
     <string name="apply">Apply</string>
     <string name="loading">Loading</string>
-    <string name="no_devices_found">No Devices Found</string>
     <string name="soundcore_signature">Soundcore Signature</string>
     <string name="acoustic">Acoustic</string>
     <string name="bass_booster">Bass Booster</string>
@@ -117,4 +116,7 @@
     <string name="pair_device">Pair Device</string>
     <string name="auto_connect">Auto Connect</string>
     <string name="settings">Settings</string>
+    <string name="unpair_device">Unpair Device</string>
+    <string name="unpairing_from_device_name">Unpairing From %s</string>
+    <string name="unpair">Unpair</string>
 </resources>

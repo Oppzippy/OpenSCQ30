@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BluetoothConnected
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
@@ -44,12 +43,6 @@ fun DeviceListing(
         TopAppBar(title = {
             Text(text = stringResource(id = R.string.app_name))
         }, actions = {
-            IconButton(onClick = onPair) {
-                Icon(
-                    imageVector = Icons.Filled.BluetoothConnected,
-                    contentDescription = stringResource(id = R.string.pair_device),
-                )
-            }
             IconButton(onClick = onRefreshClick) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
@@ -81,18 +74,15 @@ fun DeviceListing(
                 .fillMaxSize()
                 .pullRefresh(pullRefreshState),
         ) {
-            if (devices.isEmpty()) {
-                NoDevicesFound()
-            } else {
-                DeviceList(
-                    devices = devices,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(),
-                    onDeviceClick = onDeviceClick,
-                    onUnpair = onUnpair,
-                )
-            }
+            DeviceList(
+                devices = devices,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                onDeviceClick = onDeviceClick,
+                onPair = onPair,
+                onUnpair = onUnpair,
+            )
 
             PullRefreshIndicator(
                 refreshing = false,
@@ -105,7 +95,7 @@ fun DeviceListing(
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewNoDevicesFound() {
+private fun PreviewEmptyListing() {
     OpenSCQ30Theme {
         DeviceListing(listOf())
     }

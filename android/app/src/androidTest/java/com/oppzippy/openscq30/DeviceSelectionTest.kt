@@ -5,7 +5,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.hasContentDescriptionExactly
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -40,27 +39,14 @@ class DeviceSelectionTest {
     @get:Rule(order = 2)
     val composeRule = createAndroidComposeRule<TestActivity>()
 
-    private lateinit var noDevicesFound: SemanticsMatcher
     private lateinit var refreshButton: SemanticsMatcher
 
     @Before
     fun setUp() {
         hiltRule.inject()
 
-        noDevicesFound = hasText(composeRule.activity.getString(R.string.no_devices_found))
         refreshButton =
             hasContentDescriptionExactly(composeRule.activity.getString(R.string.refresh))
-    }
-
-    @Test
-    fun showsNoDevicesFoundWithNoDevices() {
-        composeRule.setContent {
-            DeviceSelection(
-                devices = emptyList(),
-            )
-        }
-
-        composeRule.onNode(noDevicesFound).assertExists()
     }
 
     @Test
@@ -80,8 +66,6 @@ class DeviceSelectionTest {
             composeRule.onNodeWithText(it.name).assertExists().assertHasClickAction()
             composeRule.onNodeWithText(it.address).assertExists().assertHasClickAction()
         }
-
-        composeRule.onNode(noDevicesFound).assertDoesNotExist()
     }
 
     @Test
@@ -98,12 +82,10 @@ class DeviceSelectionTest {
             )
         }
 
-        composeRule.onNode(noDevicesFound).assertExists()
-
         devices = listOf(
             BluetoothDevice("test", "00:00:00:00:00:00"),
         )
-        composeRule.onNode(noDevicesFound).assertExists()
+        composeRule.onNodeWithText("00:00:00:00:00:00").assertDoesNotExist()
 
         composeRule.onNode(refreshButton).performClick()
 
@@ -112,6 +94,6 @@ class DeviceSelectionTest {
             composeRule.onNodeWithText(it.address).assertExists().assertHasClickAction()
         }
 
-        composeRule.onNode(noDevicesFound).assertDoesNotExist()
+        composeRule.onNodeWithText("00:00:00:00:00:00").assertExists()
     }
 }

@@ -2,6 +2,7 @@ package com.oppzippy.openscq30.ui.deviceselection
 
 import android.app.Activity
 import android.app.Application
+import android.companion.AssociationInfo
 import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
 import android.companion.CompanionDeviceManager
@@ -10,12 +11,16 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDeviceProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import java.util.regex.Pattern
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class DeviceSelectionViewModel @Inject constructor(
@@ -23,6 +28,18 @@ class DeviceSelectionViewModel @Inject constructor(
     private val bluetoothDeviceProvider: BluetoothDeviceProvider,
 ) : AndroidViewModel(application) {
     val devices = MutableStateFlow(getDevices())
+
+    init {
+        // Hack to work around older android versions not having onAssociationCreated
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            viewModelScope.launch {
+                while (true) {
+                    delay(5.seconds)
+                    refreshDevices()
+                }
+            }
+        }
+    }
 
     fun pair(activity: Activity) {
         val pairingRequest = AssociationRequest.Builder()
@@ -45,6 +62,12 @@ class DeviceSelectionViewModel @Inject constructor(
                         "android.companion.CompanionDeviceManager.Callback",
                     ),
                 )
+                override fun onAssociationCreated(associationInfo: AssociationInfo) {
+                    super.onAssociationCreated(associationInfo)
+                    refreshDevices()
+                }
+
+                @Deprecated("Deprecated in Java")
                 override fun onDeviceFound(intentSender: IntentSender) {
                     super.onDeviceFound(intentSender)
                     activity.startIntentSenderForResult(
@@ -55,7 +78,6 @@ class DeviceSelectionViewModel @Inject constructor(
                         0,
                         0,
                     )
-                    refreshDevices()
                 }
 
                 override fun onFailure(error: CharSequence?) {
@@ -73,6 +95,7 @@ class DeviceSelectionViewModel @Inject constructor(
             .associations
             .find { it.equals(bluetoothDevice.address, ignoreCase = true) }
             ?.let { deviceManager.disassociate(it) }
+        refreshDevices()
     }
 
     fun refreshDevices() {
@@ -86,24 +109,7 @@ class DeviceSelectionViewModel @Inject constructor(
             application.checkSelfPermission(android.Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED
         }
         return if (hasBluetoothPermission) {
-            val deviceManager = application.getSystemService(CompanionDeviceManager::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                deviceManager.myAssociations.mapNotNull { associationInfo ->
-                    val macAddress = associationInfo.deviceMacAddress
-                    if (macAddress != null) {
-                        BluetoothDevice(
-                            associationInfo.displayName?.toString() ?: "Unknown",
-                            macAddress.toString().uppercase(),
-                        )
-                    } else {
-                        null
-                    }
-                }
-            } else {
-                deviceManager.associations.map { macAddress ->
-                    BluetoothDevice("Unknown", macAddress)
-                }
-            }
+            bluetoothDeviceProvider.getDevices()
         } else {
             emptyList()
         }

@@ -1,30 +1,37 @@
 package com.oppzippy.openscq30.features.bluetoothdeviceprovider
 
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
+import android.companion.CompanionDeviceManager
 import android.content.Context
-import android.util.Log
+import android.os.Build
 import androidx.annotation.RequiresPermission
-import com.oppzippy.openscq30.lib.bindings.isMacAddressSoundcoreDevice
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
-class BluetoothDeviceProviderImpl(private val context: Context) : BluetoothDeviceProvider {
+class BluetoothDeviceProviderImpl @Inject constructor(
+    @ApplicationContext private val context: Context,
+) : BluetoothDeviceProvider {
     /**
      * The caller is responsible for checking for bluetooth permission
      */
     @RequiresPermission(value = "android.permission.BLUETOOTH_CONNECT")
     override fun getDevices(): List<BluetoothDevice> {
-        val bluetoothManager: BluetoothManager =
-            context.getSystemService(BluetoothManager::class.java)
-        val adapter: BluetoothAdapter? = bluetoothManager.adapter
-        if (adapter != null) {
-            return adapter.bondedDevices.filter {
-                isMacAddressSoundcoreDevice(it.address)
-            }.map {
-                BluetoothDevice(it.name, it.address)
+        val deviceManager = context.getSystemService(CompanionDeviceManager::class.java)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            deviceManager.myAssociations.mapNotNull { associationInfo ->
+                val macAddress = associationInfo.deviceMacAddress
+                if (macAddress != null) {
+                    BluetoothDevice(
+                        associationInfo.displayName?.toString() ?: "Unknown",
+                        macAddress.toString().uppercase(),
+                    )
+                } else {
+                    null
+                }
             }
         } else {
-            Log.w("device-selection", "no bluetooth adapter")
+            deviceManager.associations.map { macAddress ->
+                BluetoothDevice("Unknown", macAddress)
+            }
         }
-        return listOf()
     }
 }
