@@ -21,6 +21,32 @@ pub enum Command {
     #[command(subcommand)]
     Get(GetCommand),
     ListDevices,
+    Completions {
+        #[arg(required = true)]
+        shell: Shell,
+    },
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[non_exhaustive]
+pub enum Shell {
+    Bash,
+    Elvish,
+    Fish,
+    Powershell,
+    Zsh,
+}
+
+impl From<Shell> for clap_complete::Shell {
+    fn from(value: Shell) -> Self {
+        match value {
+            Shell::Bash => clap_complete::Shell::Bash,
+            Shell::Elvish => clap_complete::Shell::Elvish,
+            Shell::Fish => clap_complete::Shell::Fish,
+            Shell::Powershell => clap_complete::Shell::PowerShell,
+            Shell::Zsh => clap_complete::Shell::Zsh,
+        }
+    }
 }
 
 #[derive(Subcommand)]

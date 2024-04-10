@@ -12,6 +12,7 @@ demo = ["openscq30_lib/demo"]
 [dependencies]
 openscq30_lib = { path = "../lib" }
 clap = { workspace = true, features = ["derive"] }
+clap_complete = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }

@@ -1,6 +1,7 @@
 use std::{error::Error, rc::Rc};
 
-use clap::Parser;
+use clap::{CommandFactory, Parser};
+use clap_complete::Shell;
 use cli::{Cli, Command};
 use openscq30_lib::api::device::{DeviceDescriptor, DeviceRegistry};
 
@@ -10,12 +11,25 @@ mod list_devices;
 mod set;
 
 fn main() -> Result<(), Box<dyn Error>> {
+    let args = Cli::parse();
+
+    let mut command = Cli::command();
+    let command_name = command.get_name().to_string();
+    if let Command::Completions { shell } = args.command {
+        clap_complete::generate(
+            Shell::from(shell),
+            &mut command,
+            command_name,
+            &mut std::io::stdout(),
+        );
+        return Ok(());
+    }
+
     let runtime = tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
         .unwrap();
     runtime.block_on(async {
-        let args = Cli::parse();
         tracing_subscriber::fmt()
             .with_file(true)
             .with_line_number(true)
@@ -51,6 +65,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 let device = get_device_or_err(&registry, descriptor).await?;
                 get::get(get_command, device.as_ref()).await;
             }
+            (Command::Completions { .. }, Some(_)) => unreachable!(),
             (_, None) => eprintln!("No device found."),
         };
         Ok(())
