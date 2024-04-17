@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.pm.PackageManager
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDeviceProvider
+import com.oppzippy.openscq30.test.MainDispatcherRule
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit4.MockKRule
@@ -14,6 +15,9 @@ import org.junit.Test
 class DeviceSelectionViewModelTest {
     @get:Rule
     val mockkRule = MockKRule(this)
+
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
 
     @RelaxedMockK
     lateinit var application: Application
