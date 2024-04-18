@@ -12,11 +12,17 @@ import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
 
 class BluetoothConnectionReceiver(private val preferences: Preferences) : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
-        Log.d("BluetoothConnectionReceiver", "got onReceive")
+        if (!preferences.autoConnect) {
+            Log.w(
+                "BluetoothConnectionReceiver",
+                "Got device connected event, but auto connect is disabled. This service should not be running.",
+            )
+            return
+        }
+
         if (context != null &&
             intent != null &&
-            intent.action == BluetoothDevice.ACTION_ACL_CONNECTED &&
-            preferences.autoConnect
+            intent.action == BluetoothDevice.ACTION_ACL_CONNECTED
         ) {
             val device = IntentCompat.getParcelableExtra(
                 intent,
