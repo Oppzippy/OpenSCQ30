@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+### CLI
+
+#### Features
+
+-   Add shell completions: `openscq30_cli completions`
+
+### Android
+
+#### Features
+
+-   Add option to auto connect to paired devices  
+    In order to implement this, the companion device API is now used, which means connected devices will no longer be listed by default. They must first be paired with the app. This was necessary to gain permission to start foreground services from the background, which is necessary for auto connect to work.
+
 ## v1.11.0
 
 ### Android
