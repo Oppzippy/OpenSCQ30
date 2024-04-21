@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.12.0
 
 ### CLI
 
