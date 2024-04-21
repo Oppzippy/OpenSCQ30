@@ -107,12 +107,12 @@ android {
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.11"
+        kotlinCompilerExtensionVersion = "1.5.12"
     }
     ksp {
         arg("room.schemaLocation", "$projectDir/schemas")
     }
-    ndkVersion = "26.2.11394342"
+    ndkVersion = "26.3.11579264"
     packaging {
         resources {
             excludes += "/META-INF/*"
