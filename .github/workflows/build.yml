@@ -16,7 +16,7 @@ jobs:
         run: |
           apt-get update
           apt-get upgrade -y
-          apt-get install -y git curl unzip clang
+          apt-get install -y git curl unzip clang gpg
 
       - uses: actions/checkout@v4
         with:
