@@ -12,7 +12,7 @@ jobs:
       - name: Install basic requirements
         run: |
           apt-get update
-          apt-get install -y git curl unzip
+          apt-get install -y git curl unzip clang
 
       - uses: actions/checkout@v4
         with:
