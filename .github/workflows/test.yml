@@ -12,7 +12,7 @@ jobs:
       - name: Install basic requirements
         run: |
           apt-get update
-          apt-get install -y git curl unzip clang
+          apt-get install -y git curl unzip clang just
 
       - uses: actions/checkout@v4
         with:
@@ -27,14 +27,12 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
-      - name: Install cargo-make
-        uses: davidB/rust-cargo-make@v1
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
       - name: Run rust tests
-        run: xvfb-run --auto-servernum cargo make test-cov
+        run: xvfb-run --auto-servernum just test-cov
       - name: Generate HTML test coverage report
-        run: cargo make test-cov-report-html
+        run: just test-cov-report html
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
@@ -48,14 +46,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
+      - name: Install just
+        run: choco install just
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
-      - name: Install cargo-make
-        uses: davidB/rust-cargo-make@v1
-      - name: Run rust tests
-        run: cargo make integration-test
+      - name: Run lib tests
+        run: just lib/ test
 
   android_test:
     runs-on: ubuntu-latest

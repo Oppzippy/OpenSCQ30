@@ -16,7 +16,7 @@ jobs:
         run: |
           apt-get update
           apt-get upgrade -y
-          apt-get install -y git curl unzip clang gpg
+          apt-get install -y git curl unzip clang gpg just
 
       - uses: actions/checkout@v4
         with:
@@ -25,8 +25,6 @@ jobs:
       - name: Install dependencies
         run: |
           apt-get install -y libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev gettext libfuse2
-      - name: Install cargo-make
-        run: cargo install cargo-make
       - name: Install appimage-builder
         run: |
           curl --location -o appimage-builder https://github.com/AppImageCrafters/appimage-builder/releases/download/v1.1.0/appimage-builder-1.1.0-x86_64.AppImage
@@ -34,6 +32,7 @@ jobs:
           mv appimage-builder /usr/bin/
       - name: Build cli
         run: cargo build --release --package openscq30_cli
+
       - name: Build AppImage
         working-directory: ./packaging/appimage
         run: appimage-builder --skip-tests
@@ -91,23 +90,16 @@ jobs:
             libadwaita:p
             rust:p
             pkg-config:p
-
-      # cargo-make does not use the current shell to run "cargo build". It spawns a new shell, and on Windows, that's cmd.
-      # Rather than trying to get cargo-make to conditionally use the msys2 shell, we can just get anything that would
-      # interfere out of the path.
-      # We want to use the msys2 cargo and linker, so that means cargo and visual studio need to be removed from the path.
-      - name: Remove Visual Studio and cargo from path
-        run: |
-          Move-Item -Path "C:\Program Files\Microsoft Visual Studio" -Destination "C:\Program Files\_Microsoft Visual Studio"
-          Move-Item -Path "~\.cargo" -Destination "~\._cargo"
-
-      - name: Install cargo-make
+      - name: Install just
         shell: msys2 {0}
         run: |
-          cargo install cargo-make
+          mkdir ~/.cargo
+          CARGO_PROFILE_RELEASE_LTO=false cargo install --root "$HOME/.cargo" just
+
       - name: Build gui
         shell: msys2 {0}
         run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
           ./packaging/windows/build.sh
 
       - name: Build installer

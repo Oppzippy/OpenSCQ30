@@ -59,10 +59,4 @@ See [GitHub Releases](https://github.com/Oppzippy/OpenSCQ30/releases). All files
 
 ## Running Tests
 
-### Rust
-
-`cargo make test` will run all unit and integration tests for the Rust code.
-
-### Web
-
-`npm run test` will run unit tests, and `npm run e2etest` will run end to end tests.
+`just test` will run all unit and integration tests. To run tests for a specific package, use `just gui/ test` for example.

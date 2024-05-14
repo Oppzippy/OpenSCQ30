@@ -1,0 +1,31 @@
+build profile='dev':
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [[ "{{profile}}" != "dev" && "{{profile}}" != "release" ]]; then
+        echo "Invalid profile: {{profile}}"
+        exit 1
+    fi
+
+    cargo build --profile {{profile}}
+    ./scripts/build-locale.sh ./share
+
+test:
+    cargo test
+
+test-cov:
+    cargo llvm-cov --no-report
+
+install install_prefix: (build 'release')
+    ./scripts/install.sh "{{install_prefix}}"
+
+uninstall install_prefix:
+    ./scripts/uninstall.sh "{{install_prefix}}"
+
+update-po-files:
+    ./scripts/update-po-files.sh
+
+format:
+    cargo fmt
+
+format-check:
+    cargo fmt --check

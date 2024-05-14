@@ -1,10 +1,7 @@
 version: 1
 script:
-  - export CARGO_MAKE_WORKSPACE_INCLUDE_MEMBERS="gui"
-  - export INSTALL_PREFIX="$(pwd)/AppDir/usr"
-  - cargo make --profile release --cwd ../.. build
   - rm -rf ./AppDir || true
-  - cargo make --profile release --cwd ../.. install
+  - just ../../gui/ install "$PWD/AppDir/usr"
 
 AppDir:
   app_info:

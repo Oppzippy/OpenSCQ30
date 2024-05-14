@@ -1,0 +1,30 @@
+build profile='dev':
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    case "{{profile}}" in
+        dev)
+            ./gradlew assembleBluetoothDebug
+            ;;
+        release)
+            ./gradlew assembleBluetoothRelease
+            ;;
+        *)
+            echo Invalid profile
+            exit 1
+    esac
+
+test:
+    cargo test
+    ./gradlew testBluetoothDebugUnitTest
+
+test-cov:
+    cargo llvm-cov --no-report
+
+format:
+    cargo fmt
+    ./gradlew ktlintFormat
+
+format-check:
+    cargo fmt --check
+    ./gradlew ktlintCheck

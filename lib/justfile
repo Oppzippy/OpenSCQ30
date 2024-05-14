@@ -1,0 +1,11 @@
+test:
+    cargo test
+
+test-cov:
+    cargo llvm-cov --no-report
+
+format:
+    cargo fmt
+
+format-check:
+    cargo fmt --check

@@ -1,0 +1,11 @@
+export RUSTFLAGS='--cfg=web_sys_unstable_apis'
+
+build:
+    wasm-pack build --no-pack
+    wasm-pack build --no-pack --dev
+
+test:
+    cargo test
+
+test-cov:
+    cargo llvm-cov --no-report

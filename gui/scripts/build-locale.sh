@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-set -e
-set -o pipefail
+set -euo pipefail
 PROJECT_NAME="com.oppzippy.OpenSCQ30"
 
 script_path="$(readlink -f -- "$0")"
-script_dir="$(dirname -- $script_path)"
+script_dir="$(dirname -- "$script_path")"
 gui_dir="$script_dir/.."
 out_dir=$1
 

@@ -4,32 +4,24 @@ on:
   - push
 
 jobs:
-  rustfmt:
+  format-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - name: Install rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt
-      - name: Install cargo-make
-        uses: davidB/rust-cargo-make@v1
-      - name: Check formatting
-        run: cargo make fmt-check
-
-  ktlint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
+      - name: Install just
+        # todo switch to apt once ubuntu-24.04 is available
+        # run: sudo apt-get install -y just
+        run: sudo snap install --edge --classic just
       - uses: actions/setup-java@v4
         with:
           distribution: temurin # See 'Supported distributions' for available options
           java-version: 17
-      - name: Run ktlint
-        run: |
-          cd android
-          ./gradlew ktlintCheck
+      - name: Install rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: Check formatting
+        run: just format-check
+
