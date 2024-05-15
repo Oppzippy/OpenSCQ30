@@ -24,7 +24,7 @@ llvm-cov-clean:
 
 test-cov-report format='lcov':
     #!/usr/bin/env bash
-    set -eou pipefail
+    set -euo pipefail
 
     case '{{format}}' in
         lcov)

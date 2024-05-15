@@ -19,7 +19,7 @@ echo "Building en"
 mkdir -p "$out_dir/share/locale/en/LC_MESSAGES"
 msgfmt --output-file "$out_dir/share/locale/en/LC_MESSAGES/$PROJECT_NAME.mo" "$gui_dir/po/$PROJECT_NAME.pot"
 
-while read locale; do
+while read -r locale; do
     echo "Building $locale"
     mkdir -p "$out_dir/share/locale/$locale/LC_MESSAGES"
     msgfmt --output-file "$out_dir/share/locale/$locale/LC_MESSAGES/$PROJECT_NAME.mo" "$gui_dir/po/$locale/$PROJECT_NAME.po"

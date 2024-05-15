@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-set -e
-set -o pipefail
+set -euo pipefail
 
 # in format "commit_hash commit_message"
 get_commits_since_tag() {
@@ -38,13 +37,13 @@ commits_lower_case=${commits,,}
 
 # allow for "type:" or "type(scope):"
 # '!' suffix breaking change
-if [[ ! -z $(echo "$commits_lower_case" | grep -E "^\w+ \w+(\([^\)]*\))?!: ") ]]; then
+if echo "$commits_lower_case" | grep --quiet -E "^\w+ \w+(\([^\)]*\))?!: "; then
     bump_version "$latest_tag" 1
 # minor version bump
-elif [[ ! -z $(echo "$commits_lower_case" | grep -E "^\w+ feat(\([^\)]*\))?: ") ]]; then
+elif echo "$commits_lower_case" | grep --quiet -E "^\w+ feat(\([^\)]*\))?: "; then
     bump_version "$latest_tag" 2
 # bump patch if there has been at least one commit
-elif [[ ! -z "$commits" ]]; then
+elif [[ -n "$commits" ]]; then
     bump_version "$latest_tag" 3
 else
     echo "$latest_tag"

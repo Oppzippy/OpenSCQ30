@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-set -e
-set -o pipefail
+set -euo pipefail
 
 set_version_in_changelog() {
     sed --in-place --regexp-extended "s/## Unreleased/## v$2/" "$1"
@@ -37,7 +36,7 @@ add_version_to_appstream_metainfo() {
     version="$2"
     changelog_file="$3"
     # If the release is already listed, don't add it again
-    if [[ -z $(grep "<release version=\"$version\"" "$metainfo_file" ) ]]; then
+    if ! grep --quiet "<release version=\"$version\"" "$metainfo_file"; then
         date=$(date --utc +"%Y-%m-%d")
         changelog_markdown=$(get_changelog_for_version "$changelog_file" "$version")
         changelog_html=$(printf '%s' "$changelog_markdown" | gawk '
@@ -88,7 +87,7 @@ add_version_to_appstream_metainfo() {
 get_changelog_for_version() {
     changelog_file="$1"
     version="$2"
-    awk --assign version="## v$version" '$0 ~ version {flag=1;next};/## v/{flag=0}flag' $changelog_file
+    awk --assign version="## v$version" '$0 ~ version {flag=1;next};/## v/{flag=0}flag' "$changelog_file"
 }
 
 if [ -z "$1" ]; then
