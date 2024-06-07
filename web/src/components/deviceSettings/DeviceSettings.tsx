@@ -1,3 +1,5 @@
+import { Masonry } from "@mui/lab";
+import { Box } from "@mui/material";
 import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { EqualizerHelper } from "../../../wasm/pkg/openscq30_web_wasm";
@@ -10,23 +12,16 @@ import {
   PresetEqualizerProfile,
   SoundModes,
 } from "../../libTypes/DeviceState";
+import { ButtonSettings } from "../buttonSettings/ButtonSettings";
 import { DeviceInfo } from "../deviceInfo/DeviceInfo";
 import { EqualizerSettings } from "../equalizer/EqualizerSettings";
 import { NewCustomProfileDialog } from "../equalizer/NewCustomProfileDialog";
+import { ImportExport } from "../importExport/ImportExport";
 import { SoundModeSelection } from "./SoundModeSelection";
 import { useCreateCustomProfileWithName } from "./hooks/useCreateCustomProfileWithName";
 import { useCustomEqualizerProfiles } from "./hooks/useCustomEqualizerProfiles";
 import { useDeleteCustomProfile } from "./hooks/useDeleteCustomProfile";
 import { useDisplayState } from "./hooks/useDisplayState";
-import { Box, styled } from "@mui/material";
-import { ButtonSettings } from "../buttonSettings/ButtonSettings";
-
-const MasonryLayout = styled(Box)(({ theme }) => ({
-  [theme.breakpoints.up("lg")]: {
-    columns: 2,
-    columnGap: "2",
-  },
-}));
 
 export function DeviceSettings({
   device,
@@ -51,7 +46,7 @@ export function DeviceSettings({
   );
 
   return (
-    <MasonryLayout>
+    <Masonry columns={{ sx: 1, lg: 2 }}>
       {[
         <SoundModeSelectionSection
           displayState={displayState}
@@ -71,7 +66,7 @@ export function DeviceSettings({
           {component}
         </Box>
       ))}
-    </MasonryLayout>
+    </Masonry>
   );
 }
 
