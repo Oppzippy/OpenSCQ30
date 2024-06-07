@@ -61,6 +61,7 @@ export function DeviceSettings({
           setDisplayState={setDisplayState}
         />,
         <DeviceInfo deviceState={displayState} />,
+        <ImportExport />,
       ].map((component, index) => (
         <Box padding={2} marginBottom={2} border="1px solid grey" key={index}>
           {component}

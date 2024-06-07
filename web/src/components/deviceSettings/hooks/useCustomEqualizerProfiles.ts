@@ -1,6 +1,12 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "../../../storage/db";
+import { CustomEqualizerProfile, db } from "../../../storage/db";
+
+const emptyArray: CustomEqualizerProfile[] = [];
 
 export function useCustomEqualizerProfiles() {
-  return useLiveQuery(() => db.customEqualizerProfiles.toArray()) ?? [];
+  return useLiveQuery(
+    () => db.customEqualizerProfiles.toArray(),
+    [],
+    emptyArray,
+  );
 }

@@ -33,7 +33,8 @@
   "errors": {
     "disconnected": "",
     "failedToCreateCustomProfile": "",
-    "failedToDeleteCustomProfile": ""
+    "failedToDeleteCustomProfile": "",
+    "failedToCopyToClipboard": ""
   },
   "soundModes": {
     "soundModes": "",
@@ -51,12 +52,20 @@
     "profileName": "",
     "profile": "",
     "custom": "",
-    "khz": "{{ hz }} kHz"
+    "khz": "{{ hz }} kHz",
+    "exportCustomProfiles": ""
   },
   "application": {
     "cancel": "",
     "overwrite": "",
     "create": "",
+    "done": "",
+    "next": "",
+    "selectAll": "",
+    "deselectAll": "",
+    "copiedToClipboard": "",
+    "copyToClipboard": "",
+    "importExport": "",
     "webBluetoothNotSupported": "",
     "updateFailed": "",
     "newVersionAvailable": "",

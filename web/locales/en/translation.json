@@ -33,7 +33,8 @@
   "errors": {
     "disconnected": "Device is disconnected.",
     "failedToCreateCustomProfile": "Failed to create custom profile. Check console for details.",
-    "failedToDeleteCustomProfile": "Failed to delete custom profile. Check console for details."
+    "failedToDeleteCustomProfile": "Failed to delete custom profile. Check console for details.",
+    "failedToCopyToClipboard": "Failed to copy to clipboard. Check console for details."
   },
   "soundModes": {
     "soundModes": "Sound Modes",
@@ -51,12 +52,20 @@
     "profileName": "Profile Name",
     "profile": "Profile",
     "custom": "Custom",
-    "khz": "{{ hz }} kHz"
+    "khz": "{{ hz }} kHz",
+    "exportCustomProfiles": "Export Custom Profiles"
   },
   "application": {
     "cancel": "Cancel",
     "overwrite": "Overwrite",
     "create": "Create",
+    "done": "Done",
+    "next": "Next",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "copiedToClipboard": "Copied to clipboard",
+    "copyToClipboard": "Copy to Clipboard",
+    "importExport": "Import/Export",
     "webBluetoothNotSupported": "Web Bluetooth is either unsupported or disabled by your browser. Currently, it is only supported in Chromium based browsers. Some browsers, such as Brave, disable Web Bluetooth by default, so the flag for it must be enabled.",
     "updateFailed": "Update failed. See console for details.",
     "newVersionAvailable": "A new version of OpenSCQ30 Web is available.",

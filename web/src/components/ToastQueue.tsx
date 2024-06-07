@@ -15,7 +15,7 @@ export interface Toast {
 export const ToastQueueContext = createContext({
   toasts: [] as Toast[],
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-  addToast(_toast: Toast) {},
+  addToast: (_toast: Toast) => {},
 });
 
 export function ToastQueue({ children }: PropsWithChildren) {
@@ -23,7 +23,7 @@ export function ToastQueue({ children }: PropsWithChildren) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const value = {
     toasts,
-    addToast(toast: Toast) {
+    addToast: (toast: Toast) => {
       setToasts([...toasts, toast]);
     },
   };

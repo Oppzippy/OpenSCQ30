@@ -54,7 +54,11 @@ beforeEach(() => {
   });
   vi.mock("dexie-react-hooks", () => {
     return {
-      useLiveQuery: () => undefined,
+      useLiveQuery: (
+        _querier: unknown,
+        _deps: unknown,
+        defaultResult: unknown,
+      ) => defaultResult,
     };
   });
 });

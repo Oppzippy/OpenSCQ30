@@ -13,12 +13,14 @@ import {
   SoundModes,
 } from "../../../src/libTypes/DeviceState";
 import { EqualizerHelper } from "../../../wasm/pkg/openscq30_web_wasm";
+import { CustomEqualizerProfile } from "../../../src/storage/db";
 
 vi.mock(
   "../../../src/components/deviceSettings/hooks/useCustomEqualizerProfiles",
   () => {
+    const emptyArray: CustomEqualizerProfile[] = [];
     return {
-      useCustomEqualizerProfiles: vi.fn(() => []),
+      useCustomEqualizerProfiles: vi.fn(() => emptyArray),
     };
   },
 );
