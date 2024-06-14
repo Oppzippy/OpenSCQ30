@@ -2,8 +2,8 @@ import { Button, Stack, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useCustomEqualizerProfiles } from "../deviceSettings/hooks/useCustomEqualizerProfiles";
-import { ExportCustomProfileDialog } from "./customProfiles/ExportCustomProfilesDialog";
-import { createExportCustomProfilesState } from "./customProfiles/ExportCustomProfilesState";
+import { ExportCustomProfileDialog } from "./exportCustomProfiles/ExportCustomProfilesDialog";
+import { createExportCustomProfilesState } from "./exportCustomProfiles/ExportCustomProfilesState";
 
 export const ImportExport = React.memo(function () {
   const { t } = useTranslation();

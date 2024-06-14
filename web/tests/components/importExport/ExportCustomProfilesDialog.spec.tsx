@@ -1,8 +1,8 @@
 import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vitest } from "vitest";
-import { ExportCustomProfileDialog } from "../../../src/components/importExport/customProfiles/ExportCustomProfilesDialog";
-import { ExportCustomProfilesState } from "../../../src/components/importExport/customProfiles/ExportCustomProfilesState";
+import { ExportCustomProfileDialog } from "../../../src/components/importExport/exportCustomProfiles/ExportCustomProfilesDialog";
+import { ExportCustomProfilesState } from "../../../src/components/importExport/exportCustomProfiles/ExportCustomProfilesState";
 
 describe("ExportCustomProfilesDialog", () => {
   let user: ReturnType<typeof userEvent.setup>;
