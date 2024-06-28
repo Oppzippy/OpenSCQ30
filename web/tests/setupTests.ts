@@ -7,6 +7,7 @@ import { OpenSCQ30Dexie } from "../src/storage/db";
 
 beforeEach(async () => {
   const db = new OpenSCQ30Dexie();
+  // TODO find a way to silence stderr messages or another way to wipe the db
   await db.delete();
 
   vi.mock("react-i18next", async () => {
