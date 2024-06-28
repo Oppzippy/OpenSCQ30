@@ -39,7 +39,9 @@ export function CustomProfileSelection({
                   edge="start"
                   checked={state.selection[i]}
                   disableRipple
-                  aria-labelledby={labelId}
+                  inputProps={{
+                    "aria-labelledby": labelId,
+                  }}
                 />
               </ListItemIcon>
               <ListItemText id={labelId} primary={profile.name} />

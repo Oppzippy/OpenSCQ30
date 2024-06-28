@@ -63,6 +63,7 @@ export function ImportOptions({ state, onStateChange }: Props) {
     if (existingProfileValues.has(JSON.stringify(profile.values))) {
       return (
         <Tooltip
+          aria-hidden={undefined}
           title={
             overwrite
               ? t("equalizer.profileWithSameSettingsAlreadyExists")
@@ -74,7 +75,10 @@ export function ImportOptions({ state, onStateChange }: Props) {
       );
     } else if (existingProfileNames.has(profileName)) {
       return (
-        <Tooltip title={t("equalizer.profileWithNameAlreadyExists")}>
+        <Tooltip
+          aria-hidden={undefined}
+          title={t("equalizer.profileWithNameAlreadyExists")}
+        >
           <Warning color="warning" />
         </Tooltip>
       );
@@ -119,10 +123,17 @@ export function ImportOptions({ state, onStateChange }: Props) {
         >
           <TableHead>
             <TableRow>
-              <TableCell>{t("application.enabled")}</TableCell>
-              <TableCell>{t("equalizer.profileName")}</TableCell>
+              <TableCell id="import-custom-profile-enabled-header">
+                {t("application.enabled")}
+              </TableCell>
+              <TableCell id="import-custom-profile-name-header">
+                {t("equalizer.profileName")}
+              </TableCell>
               <TableCell>
-                <Tooltip title={t("application.warnings")}>
+                <Tooltip
+                  aria-hidden={undefined}
+                  title={t("application.warnings")}
+                >
                   <Warning />
                 </Tooltip>
               </TableCell>
@@ -130,14 +141,16 @@ export function ImportOptions({ state, onStateChange }: Props) {
           </TableHead>
           <TableBody>
             {state.profiles.map((profile, i) => {
-              const labelId = `import-custom-profile-selection-${i}`;
               return (
                 <TableRow>
                   <TableCell>
                     <Checkbox
                       checked={state.selection[i]}
                       onClick={() => toggle(i)}
-                      aria-labelledby={labelId}
+                      inputProps={{
+                        "aria-labelledby":
+                          "import-custom-profile-enabled-header",
+                      }}
                     />
                   </TableCell>
                   <TableCell>
@@ -148,6 +161,10 @@ export function ImportOptions({ state, onStateChange }: Props) {
                         value={state.rename[i] ?? profile.name}
                         placeholder={profile.name}
                         onChange={(event) => rename(i, event.target.value)}
+                        inputProps={{
+                          "aria-labelledby":
+                            "import-custom-profile-name-header",
+                        }}
                       />
                       <IconButton
                         aria-label={t("equalizer.restoreOriginalName")}
