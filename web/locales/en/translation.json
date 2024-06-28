@@ -34,7 +34,9 @@
     "disconnected": "Device is disconnected.",
     "failedToCreateCustomProfile": "Failed to create custom profile. Check console for details.",
     "failedToDeleteCustomProfile": "Failed to delete custom profile. Check console for details.",
-    "failedToCopyToClipboard": "Failed to copy to clipboard. Check console for details."
+    "failedToCopyToClipboard": "Failed to copy to clipboard. Check console for details.",
+    "unknownError": "Unknown error. Check console for details.",
+    "importFailed": "Import failed. Check console for details."
   },
   "soundModes": {
     "soundModes": "Sound Modes",
@@ -53,20 +55,33 @@
     "profile": "Profile",
     "custom": "Custom",
     "khz": "{{ hz }} kHz",
-    "exportCustomProfiles": "Export Custom Profiles"
+    "exportCustomProfiles": "Export Custom Profiles",
+    "importCustomProfiles": "Import Custom Profiles",
+    "profileWithSameSettingsAlreadyExists": "A profile with the same settings already exists.",
+    "profileWithSameSettingsAlreadyExistsNoOverwrite": "A profile with the same settings already exists, so this profile will not be imported.",
+    "profileWithNameAlreadyExists": "A profile with the same name already exists.",
+    "importSettings": "Import Settings",
+    "overwriteExistingProfiles": "Overwrite Existing Profiles",
+    "profiles": "Profiles",
+    "restoreOriginalName": "Restore Original Name",
+    "customProfilesJSON": "Custom Profiles JSON"
   },
   "application": {
     "cancel": "Cancel",
     "overwrite": "Overwrite",
     "create": "Create",
+    "webBluetoothNotSupported": "Web Bluetooth is either unsupported or disabled by your browser. Currently, it is only supported in Chromium based browsers. Some browsers, such as Brave, disable Web Bluetooth by default, so the flag for it must be enabled.",
     "done": "Done",
     "next": "Next",
     "selectAll": "Select All",
     "deselectAll": "Deselect All",
     "copiedToClipboard": "Copied to clipboard",
     "copyToClipboard": "Copy to Clipboard",
+    "import": "Import",
+    "enabled": "Enabled",
+    "warnings": "Warnings",
+    "importSuccessful": "Import Successful",
     "importExport": "Import/Export",
-    "webBluetoothNotSupported": "Web Bluetooth is either unsupported or disabled by your browser. Currently, it is only supported in Chromium based browsers. Some browsers, such as Brave, disable Web Bluetooth by default, so the flag for it must be enabled.",
     "updateFailed": "Update failed. See console for details.",
     "newVersionAvailable": "A new version of OpenSCQ30 Web is available.",
     "update": "Update"

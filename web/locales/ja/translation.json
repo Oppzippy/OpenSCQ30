@@ -34,7 +34,9 @@
     "disconnected": "",
     "failedToCreateCustomProfile": "",
     "failedToDeleteCustomProfile": "",
-    "failedToCopyToClipboard": ""
+    "failedToCopyToClipboard": "",
+    "unknownError": "",
+    "importFailed": ""
   },
   "soundModes": {
     "soundModes": "",
@@ -53,20 +55,33 @@
     "profile": "",
     "custom": "",
     "khz": "{{ hz }} kHz",
-    "exportCustomProfiles": ""
+    "exportCustomProfiles": "",
+    "importCustomProfiles": "",
+    "profileWithSameSettingsAlreadyExists": "",
+    "profileWithSameSettingsAlreadyExistsNoOverwrite": "",
+    "profileWithNameAlreadyExists": "",
+    "importSettings": "",
+    "overwriteExistingProfiles": "",
+    "profiles": "",
+    "restoreOriginalName": "",
+    "customProfilesJSON": ""
   },
   "application": {
     "cancel": "",
     "overwrite": "",
     "create": "",
+    "webBluetoothNotSupported": "",
     "done": "",
     "next": "",
     "selectAll": "",
     "deselectAll": "",
     "copiedToClipboard": "",
     "copyToClipboard": "",
+    "import": "",
+    "enabled": "",
+    "warnings": "",
+    "importSuccessful": "",
     "importExport": "",
-    "webBluetoothNotSupported": "",
     "updateFailed": "",
     "newVersionAvailable": "",
     "update": ""
