@@ -73,3 +73,9 @@ export async function insertCustomEqualizerProfilesRenameDuplicates(
     }
   });
 }
+
+export async function fetchCustomEqualizerProfiles(): Promise<
+  CustomEqualizerProfile[]
+> {
+  return await db.customEqualizerProfiles.toArray();
+}

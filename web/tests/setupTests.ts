@@ -1,8 +1,14 @@
+import "fake-indexeddb/auto";
+
 import { cleanup } from "@testing-library/react";
 import { Dispatch, SetStateAction, useState } from "react";
 import { afterEach, beforeEach, vi } from "vitest";
+import { OpenSCQ30Dexie } from "../src/storage/db";
 
-beforeEach(() => {
+beforeEach(async () => {
+  const db = new OpenSCQ30Dexie();
+  await db.delete();
+
   vi.mock("react-i18next", async () => {
     const actual: object = await vi.importActual("react-i18next");
     const t = (str: string) => {
@@ -41,24 +47,6 @@ beforeEach(() => {
           updateServiceWorker: vi.fn(),
         };
       },
-    };
-  });
-  vi.mock("../src/storage/db", () => {
-    return {
-      db: {
-        customEqualizerProfiles: {
-          toArray: () => undefined,
-        },
-      },
-    };
-  });
-  vi.mock("dexie-react-hooks", () => {
-    return {
-      useLiveQuery: (
-        _querier: unknown,
-        _deps: unknown,
-        defaultResult: unknown,
-      ) => defaultResult,
     };
   });
 });

@@ -97,7 +97,9 @@ export function ImportOptions({ state, onStateChange }: Props) {
                 edge="start"
                 checked={state.overwrite}
                 disableRipple
-                aria-labelledby="import-custom-profile-overwrite"
+                inputProps={{
+                  "aria-labelledby": "import-custom-profile-overwrite",
+                }}
               />
             </ListItemIcon>
             <ListItemText
