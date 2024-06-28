@@ -142,7 +142,7 @@ export function ImportOptions({ state, onStateChange }: Props) {
           <TableBody>
             {state.profiles.map((profile, i) => {
               return (
-                <TableRow>
+                <TableRow key={i}>
                   <TableCell>
                     <Checkbox
                       checked={state.selection[i]}
