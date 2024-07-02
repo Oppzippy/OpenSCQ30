@@ -9,6 +9,8 @@
 /.idea/assetWizardSettings.xml
 /.idea/androidTestResultsUserPreferences.xml
 /.idea/deploymentTargetDropDown.xml
+/.idea/deploymentTargetSelector.xml
+/.idea/other.xml
 .DS_Store
 /build
 /captures
