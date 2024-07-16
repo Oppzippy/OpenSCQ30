@@ -18,7 +18,7 @@ import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
 
 @Database(
-    version = 8,
+    version = 9,
     entities = [
         CustomProfile::class,
         FallbackQuickPreset::class,
@@ -64,7 +64,7 @@ abstract class AppDatabase : RoomDatabase() {
     class AutoMigration7To8 : AutoMigrationSpec
 
     companion object {
-        val migrations = listOf(Migration5To6)
+        val migrations = listOf(Migration5To6, Migration8To9)
     }
 
     object Migration5To6 : Migration(5, 6) {
@@ -130,6 +130,66 @@ abstract class AppDatabase : RoomDatabase() {
             } finally {
                 db.endTransaction()
             }
+            //language=RoomSql
+            db.execSQL("DROP TABLE custom_equalizer_profile_pre_migration")
+        }
+    }
+
+    object Migration8To9 : Migration(8, 9) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            //language=RoomSql
+            db.execSQL("ALTER TABLE custom_equalizer_profile RENAME TO custom_equalizer_profile_pre_migration")
+            //language=RoomSql
+            db.execSQL(
+                """
+                    CREATE TABLE `custom_equalizer_profile` (
+                        name TEXT PRIMARY KEY NOT NULL,
+                        band100 INTEGER NOT NULL,
+                        band200 INTEGER NOT NULL,
+                        band400 INTEGER NOT NULL,
+                        band800 INTEGER NOT NULL,
+                        band1600 INTEGER NOT NULL,
+                        band3200 INTEGER NOT NULL,
+                        band6400 INTEGER NOT NULL,
+                        band12800 INTEGER NOT NULL
+                    )
+                """.trimIndent(),
+            )
+            //language=RoomSql
+            db.execSQL(
+                """
+                    CREATE UNIQUE INDEX
+                        index_custom_equalizer_profile_bands
+                    ON custom_equalizer_profile (
+                        band100,
+                        band200,
+                        band400,
+                        band800,
+                        band1600,
+                        band3200,
+                        band6400,
+                        band12800
+                    )
+                """.trimIndent(),
+            )
+            //language=RoomSql
+            db.execSQL(
+                """
+                    INSERT INTO custom_equalizer_profile
+                    SELECT
+                        name,
+                        CAST(ROUND(band100 * 10.0) AS INTEGER),
+                        CAST(ROUND(band200 * 10.0) AS INTEGER),
+                        CAST(ROUND(band400 * 10.0) AS INTEGER),
+                        CAST(ROUND(band800 * 10.0) AS INTEGER),
+                        CAST(ROUND(band1600 * 10.0) AS INTEGER),
+                        CAST(ROUND(band3200 * 10.0) AS INTEGER),
+                        CAST(ROUND(band6400 * 10.0) AS INTEGER),
+                        CAST(ROUND(band12800 * 10.0) AS INTEGER)
+                    FROM
+                        custom_equalizer_profile_pre_migration
+                """.trimIndent(),
+            )
             //language=RoomSql
             db.execSQL("DROP TABLE custom_equalizer_profile_pre_migration")
         }

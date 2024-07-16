@@ -13,9 +13,6 @@ import java.io.IOException
 
 @HiltAndroidTest
 class Migration5To6Test {
-
-    private lateinit var database: AppDatabase
-
     @get:Rule
     val helper: MigrationTestHelper = MigrationTestHelper(
         InstrumentationRegistry.getInstrumentation(),
