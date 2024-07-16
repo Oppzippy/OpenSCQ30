@@ -193,7 +193,7 @@ class DeviceSettingsQuickPresetsTest {
 
     @Test
     fun acceptsCustomEqualizerProfile() = runTest {
-        customProfileDao.insert(
+        customProfileDao.upsert(
             listOf(
                 0.0,
                 0.0,
@@ -220,7 +220,7 @@ class DeviceSettingsQuickPresetsTest {
 
     @Test
     fun acceptsOnlyOneOfPresetOrCustomEqualizerProfile() = runTest {
-        customProfileDao.insert(
+        customProfileDao.upsert(
             listOf(
                 0.0,
                 0.0,

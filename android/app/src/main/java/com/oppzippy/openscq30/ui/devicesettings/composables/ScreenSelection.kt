@@ -47,6 +47,7 @@ private fun PreviewScreenSelection() {
                 Screen.ButtonActions,
                 Screen.QuickPresets,
                 Screen.Equalizer,
+                Screen.ImportExport,
             ),
             onNavigation = {},
         )

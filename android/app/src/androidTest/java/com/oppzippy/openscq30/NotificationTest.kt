@@ -178,7 +178,7 @@ class NotificationTest {
 
     @Test
     fun quickPresetEqualizerConfigurationWorks(): Unit = runBlocking {
-        customProfileDao.insert(
+        customProfileDao.upsert(
             listOf(
                 0.0,
                 0.1,

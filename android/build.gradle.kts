@@ -10,6 +10,7 @@ plugins {
     id("com.google.devtools.ksp") version "2.0.0-1.0.22" apply false
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
     id("com.google.protobuf") version "0.9.4" apply false
+    kotlin("plugin.serialization") version "2.0.0"
 }
 
 configure<KtlintExtension> {

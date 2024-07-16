@@ -3,6 +3,7 @@ package com.oppzippy.openscq30.ui.devicesettings
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Equalizer
+import androidx.compose.material.icons.filled.ImportExport
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.Settings
@@ -19,4 +20,6 @@ sealed class Screen(val route: String, @StringRes val nameResourceId: Int, val i
         Screen("/buttonActions", R.string.button_actions, Icons.Filled.RadioButtonChecked)
 
     data object DeviceInfo : Screen("/deviceInfo", R.string.device_info, Icons.Filled.Info)
+    data object ImportExport :
+        Screen("/importExport", R.string.import_export, Icons.Filled.ImportExport)
 }

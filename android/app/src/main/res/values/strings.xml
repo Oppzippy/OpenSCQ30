@@ -119,4 +119,17 @@
     <string name="unpair_device">Unpair Device</string>
     <string name="unpairing_from_device_name">Unpairing From %s</string>
     <string name="unpair">Unpair</string>
+    <string name="import_export">Import/Export</string>
+    <string name="export_custom_profiles">Export Custom Profiles</string>
+    <string name="import_custom_profiles">Import Custom Profiles</string>
+    <string name="copy_to_clipboard">Copy to Clipboard</string>
+    <string name="openscq30_exported_profiles">Exported Profiles from OpenSCQ30</string>
+    <string name="next">Next</string>
+    <string name="done">Done</string>
+    <string name="import_">Import</string>
+    <string name="rename">Rename</string>
+    <string name="new_name">New Name</string>
+    <string name="import_json">Import JSON</string>
+    <string name="copied">Copied</string>
+    <string name="overwrite">Overwrite</string>
 </resources>

@@ -10,7 +10,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.NavHost
@@ -31,6 +30,7 @@ import com.oppzippy.openscq30.ui.deviceinfo.DeviceInfoScreen
 import com.oppzippy.openscq30.ui.devicesettings.Screen
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.equalizer.EqualizerSettings
+import com.oppzippy.openscq30.ui.importexport.ImportExportScreen
 import com.oppzippy.openscq30.ui.quickpresets.QuickPresetScreen
 import com.oppzippy.openscq30.ui.soundmode.NoiseCancelingType
 import com.oppzippy.openscq30.ui.soundmode.SoundModeSettings
@@ -61,6 +61,7 @@ fun DeviceSettings(
         screens.add(Screen.ButtonActions)
     }
     screens.add(Screen.DeviceInfo)
+    screens.add(Screen.ImportExport)
     Scaffold(
         topBar = {
             TopAppBar(title = {
@@ -145,6 +146,9 @@ fun DeviceSettings(
             }
             composable(Screen.DeviceInfo.route) {
                 DeviceInfoScreen(deviceState = uiState.deviceState)
+            }
+            composable(Screen.ImportExport.route) {
+                ImportExportScreen()
             }
         }
     }

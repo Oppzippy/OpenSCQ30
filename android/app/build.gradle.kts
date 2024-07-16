@@ -15,6 +15,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("org.jlleitschuh.gradle.ktlint")
     id("com.google.protobuf")
+    kotlin("plugin.serialization")
 }
 
 val keystorePropertiesFile: File = rootProject.file("keystore.properties")
@@ -119,6 +120,8 @@ android {
 }
 
 dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+
     val lifecycleVersion = "2.8.3"
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-service:$lifecycleVersion")

@@ -94,7 +94,7 @@ class EqualizerSettingsViewModel @Inject constructor(
     fun createCustomProfile(name: String) {
         _displayedEqualizerConfiguration.value?.let {
             viewModelScope.launch {
-                customProfileDao.insert(it.volumeAdjustments.toCustomProfile(name))
+                customProfileDao.upsert(it.volumeAdjustments.toCustomProfile(name))
                 refreshCustomProfiles()
             }
         }
