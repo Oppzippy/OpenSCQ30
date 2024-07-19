@@ -15,22 +15,23 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.ui.devicesettings.Screen
+import com.oppzippy.openscq30.ui.devicesettings.ScreenInfo
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun ScreenSelection(screens: List<Screen>, onNavigation: (Screen) -> Unit) {
+fun ScreenSelection(screens: List<ScreenInfo>, onNavigation: (Screen) -> Unit) {
     FlowRow(horizontalArrangement = Arrangement.SpaceBetween, maxItemsInEachRow = 2) {
-        screens.forEach { screen ->
+        screens.forEach { screenInfo ->
             Column(
                 modifier = Modifier
-                    .clickable { onNavigation(screen) }
+                    .clickable { onNavigation(screenInfo.baseRoute) }
                     .padding(16.dp)
                     .weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Icon(screen.icon, contentDescription = null)
-                Text(stringResource(screen.nameResourceId))
+                Icon(screenInfo.icon, contentDescription = null)
+                Text(stringResource(screenInfo.nameResourceId))
             }
         }
     }
@@ -42,12 +43,12 @@ private fun PreviewScreenSelection() {
     OpenSCQ30Theme(dynamicColor = false) {
         ScreenSelection(
             screens = listOf(
-                Screen.General,
-                Screen.DeviceInfo,
-                Screen.ButtonActions,
-                Screen.QuickPresets,
-                Screen.Equalizer,
-                Screen.ImportExport,
+                Screen.General.screenInfo,
+                Screen.DeviceInfo.screenInfo,
+                Screen.ButtonActions.screenInfo,
+                Screen.QuickPresets.screenInfo,
+                Screen.Equalizer.screenInfo,
+                Screen.ImportExport.screenInfo,
             ),
             onNavigation = {},
         )

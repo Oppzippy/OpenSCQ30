@@ -28,6 +28,7 @@ import com.oppzippy.openscq30.ui.buttonactions.ButtonActionSelection
 import com.oppzippy.openscq30.ui.buttonactions.ButtonActions
 import com.oppzippy.openscq30.ui.deviceinfo.DeviceInfoScreen
 import com.oppzippy.openscq30.ui.devicesettings.Screen
+import com.oppzippy.openscq30.ui.devicesettings.ScreenInfo
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.equalizer.EqualizerSettings
 import com.oppzippy.openscq30.ui.importexport.ImportExportScreen
@@ -49,19 +50,19 @@ fun DeviceSettings(
     onCustomButtonModelChange: (CustomButtonModel) -> Unit = {},
 ) {
     val navController = rememberNavController()
-    val screens = ArrayList<Screen>()
+    val listedScreens = ArrayList<ScreenInfo>()
     if (uiState.deviceState.deviceProfile.soundMode != null) {
-        screens.add(Screen.General)
+        listedScreens.add(Screen.General.screenInfo)
     }
     if (uiState.deviceState.deviceProfile.numEqualizerChannels > 0) {
-        screens.add(Screen.Equalizer)
+        listedScreens.add(Screen.Equalizer.screenInfo)
     }
-    screens.add(Screen.QuickPresets)
+    listedScreens.add(Screen.QuickPresets.screenInfo)
     if (uiState.deviceState.deviceProfile.hasCustomButtonModel) {
-        screens.add(Screen.ButtonActions)
+        listedScreens.add(Screen.ButtonActions.screenInfo)
     }
-    screens.add(Screen.DeviceInfo)
-    screens.add(Screen.ImportExport)
+    listedScreens.add(Screen.DeviceInfo.screenInfo)
+    listedScreens.add(Screen.ImportExport.screenInfo)
     Scaffold(
         topBar = {
             TopAppBar(title = {
@@ -83,19 +84,19 @@ fun DeviceSettings(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "/",
+            startDestination = Screen.ScreenSelection,
             modifier = Modifier.padding(innerPadding),
         ) {
-            composable("/") {
-                ScreenSelection(screens = screens, onNavigation = { screen ->
-                    navController.navigate(screen.route) {
-                        popUpTo("/")
+            composable<Screen.ScreenSelection> {
+                ScreenSelection(screens = listedScreens, onNavigation = { screen ->
+                    navController.navigate(screen) {
+                        popUpTo(Screen.ScreenSelection)
                         launchSingleTop = true
                     }
                 })
             }
             uiState.deviceState.soundModes?.let { soundModes ->
-                composable(Screen.General.route) {
+                composable<Screen.General> {
                     val soundModeProfile =
                         uiState.deviceState.deviceProfile.soundMode ?: return@composable
                     SoundModeSettings(
@@ -115,20 +116,20 @@ fun DeviceSettings(
                     )
                 }
             }
-            composable(Screen.Equalizer.route) {
+            composable<Screen.Equalizer> {
                 EqualizerSettings(
                     uiState = uiState,
                     onEqualizerConfigurationChange = onEqualizerConfigurationChange,
                 )
             }
-            composable(Screen.QuickPresets.route) {
+            composable<Screen.QuickPresets> {
                 QuickPresetScreen(
                     deviceProfile = uiState.deviceState.deviceProfile,
                     deviceBleServiceUuid = uiState.deviceBleServiceUuid,
                 )
             }
             uiState.deviceState.customButtonModel?.let { buttonModel ->
-                composable(Screen.ButtonActions.route) {
+                composable<Screen.ButtonActions> {
                     ButtonActionSelection(
                         buttonActions = ButtonActions(
                             buttonModel.leftSingleClick.actionOrNull(),
@@ -144,10 +145,10 @@ fun DeviceSettings(
                     )
                 }
             }
-            composable(Screen.DeviceInfo.route) {
+            composable<Screen.DeviceInfo> {
                 DeviceInfoScreen(deviceState = uiState.deviceState)
             }
-            composable(Screen.ImportExport.route) {
+            composable<Screen.ImportExport> {
                 ImportExportScreen()
             }
         }
