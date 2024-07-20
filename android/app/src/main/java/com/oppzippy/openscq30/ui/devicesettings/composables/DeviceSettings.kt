@@ -1,5 +1,9 @@
 package com.oppzippy.openscq30.ui.devicesettings.composables
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -86,6 +90,18 @@ fun DeviceSettings(
             navController = navController,
             startDestination = Screen.ScreenSelection,
             modifier = Modifier.padding(innerPadding),
+            enterTransition = {
+                slideInHorizontally { width -> width / 2 } + fadeIn()
+            },
+            exitTransition = {
+                slideOutHorizontally { width -> -width / 2 } + fadeOut()
+            },
+            popEnterTransition = {
+                slideInHorizontally { width -> -width / 2 } + fadeIn()
+            },
+            popExitTransition = {
+                slideOutHorizontally { width -> width / 2 } + fadeOut()
+            },
         ) {
             composable<Screen.ScreenSelection> {
                 ScreenSelection(screens = listedScreens, onNavigation = { screen ->
