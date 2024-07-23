@@ -42,8 +42,11 @@ sealed class Screen {
     }
 
     @Serializable
-    data object ImportExport : Screen() {
-        val screenInfo = ScreenInfo(this, R.string.import_export, Icons.Filled.ImportExport)
+    class ImportExport(val index: Int = -1) : Screen() {
+        companion object {
+            val screenInfo =
+                ScreenInfo(ImportExport(), R.string.import_export, Icons.Filled.ImportExport)
+        }
     }
 }
 

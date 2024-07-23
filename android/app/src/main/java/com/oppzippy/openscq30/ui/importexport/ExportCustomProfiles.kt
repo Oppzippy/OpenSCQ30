@@ -19,7 +19,9 @@ import com.oppzippy.openscq30.ui.utils.CheckboxWithLabel
 @Composable
 fun ExportCustomProfiles(
     state: ExportCustomProfilesState,
-    setState: (ExportCustomProfilesState?) -> Unit,
+    onSetState: (ExportCustomProfilesState) -> Unit,
+    onPushState: (ExportCustomProfilesState) -> Unit,
+    onDone: () -> Unit,
     setClipboard: (String) -> Unit,
 ) {
     when (state) {
@@ -30,7 +32,7 @@ fun ExportCustomProfiles(
                         text = profile.name,
                         isChecked = state.selectedProfiles[index],
                         onCheckedChange = {
-                            setState(
+                            onSetState(
                                 state.copy(
                                     selectedProfiles = state.selectedProfiles.let {
                                         val list = it.toMutableList()
@@ -43,7 +45,7 @@ fun ExportCustomProfiles(
                     )
                 }
                 item {
-                    Button(onClick = { setState(state.next()) }) {
+                    Button(onClick = { onPushState(state.next()) }) {
                         Text(stringResource(R.string.next))
                     }
                 }
@@ -56,7 +58,7 @@ fun ExportCustomProfiles(
                     Button(onClick = { setClipboard(state.profileString) }) {
                         Text(stringResource(R.string.copy_to_clipboard))
                     }
-                    Button(onClick = { setState(null) }) {
+                    Button(onClick = { onDone() }) {
                         Text(stringResource(R.string.done))
                     }
                 }
@@ -83,7 +85,9 @@ private fun PreviewProfileSelection() {
                 ),
                 selectedProfiles = listOf(true, false),
             ),
-            setState = {},
+            onSetState = {},
+            onPushState = {},
+            onDone = {},
             setClipboard = {},
         )
     }
@@ -95,7 +99,9 @@ private fun PreviewCopyToClipboard() {
     OpenSCQ30Theme {
         ExportCustomProfiles(
             state = ExportCustomProfilesState.CopyToClipboard("JSON here"),
-            setState = {},
+            onSetState = {},
+            onPushState = {},
+            onDone = {},
             setClipboard = {},
         )
     }

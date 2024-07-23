@@ -16,9 +16,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
@@ -36,6 +38,7 @@ import com.oppzippy.openscq30.ui.devicesettings.ScreenInfo
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.equalizer.EqualizerSettings
 import com.oppzippy.openscq30.ui.importexport.ImportExportScreen
+import com.oppzippy.openscq30.ui.importexport.ImportExportViewModel
 import com.oppzippy.openscq30.ui.quickpresets.QuickPresetScreen
 import com.oppzippy.openscq30.ui.soundmode.NoiseCancelingType
 import com.oppzippy.openscq30.ui.soundmode.SoundModeSettings
@@ -67,6 +70,11 @@ fun DeviceSettings(
     }
     listedScreens.add(Screen.DeviceInfo.screenInfo)
     listedScreens.add(Screen.ImportExport.screenInfo)
+
+    // In order to avoid multiple instance of the view model being created, it needs to be created
+    // outside of the nav controller's scope
+    val importExportViewModel = hiltViewModel<ImportExportViewModel>()
+
     Scaffold(
         topBar = {
             TopAppBar(title = {
@@ -164,8 +172,29 @@ fun DeviceSettings(
             composable<Screen.DeviceInfo> {
                 DeviceInfoScreen(deviceState = uiState.deviceState)
             }
-            composable<Screen.ImportExport> {
-                ImportExportScreen()
+
+            composable<Screen.ImportExport> { backStackEntry ->
+                val route = backStackEntry.toRoute<Screen.ImportExport>()
+                ImportExportScreen(
+                    viewModel = importExportViewModel,
+                    index = route.index,
+                    onIndexChange = { targetIndex ->
+                        if (route.index < targetIndex) {
+                            navController.navigate(Screen.ImportExport(targetIndex))
+                        } else if (route.index > targetIndex) {
+                            while (true) {
+                                val current =
+                                    navController.currentBackStackEntry?.toRoute<Screen.ImportExport>()
+                                if (current != null && current.index >= targetIndex) {
+                                    navController.popBackStack()
+                                } else {
+                                    break
+                                }
+                            }
+                            navController.navigate(Screen.ImportExport(targetIndex))
+                        }
+                    },
+                )
             }
         }
     }

@@ -1,6 +1,10 @@
 package com.oppzippy.openscq30
 
 import android.content.ClipboardManager
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -49,7 +53,8 @@ class DeviceSettingsImportExportTest {
             ),
         )
         composeRule.setContent {
-            ImportExportScreen()
+            var index by remember { mutableStateOf(-1) }
+            ImportExportScreen(index = index, onIndexChange = { index = it })
         }
 
         composeRule
@@ -83,7 +88,8 @@ class DeviceSettingsImportExportTest {
     @Test
     fun testImport() = runTest {
         composeRule.setContent {
-            ImportExportScreen()
+            var index by remember { mutableStateOf(-1) }
+            ImportExportScreen(index = index, onIndexChange = { index = it })
         }
 
         composeRule
@@ -126,7 +132,8 @@ class DeviceSettingsImportExportTest {
             ),
         )
         composeRule.setContent {
-            ImportExportScreen()
+            var index by remember { mutableStateOf(-1) }
+            ImportExportScreen(index = index, onIndexChange = { index = it })
         }
 
         composeRule
@@ -172,7 +179,8 @@ class DeviceSettingsImportExportTest {
             ),
         )
         composeRule.setContent {
-            ImportExportScreen()
+            var index by remember { mutableStateOf(-1) }
+            ImportExportScreen(index = index, onIndexChange = { index = it })
         }
 
         composeRule

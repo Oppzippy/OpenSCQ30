@@ -23,7 +23,9 @@ import com.oppzippy.openscq30.ui.utils.CheckboxWithLabel
 @Composable
 fun ImportCustomProfiles(
     state: ImportCustomProfilesState,
-    setState: (ImportCustomProfilesState?) -> Unit,
+    onSetState: (ImportCustomProfilesState) -> Unit,
+    onPushState: (ImportCustomProfilesState) -> Unit,
+    onDone: () -> Unit,
     importProfiles: (profiles: List<CustomProfile>, overwrite: Boolean) -> Unit,
 ) {
     when (state) {
@@ -33,7 +35,7 @@ fun ImportCustomProfiles(
                     modifier = Modifier.testTag("json-input"),
                     label = { Text(stringResource(R.string.import_json)) },
                     value = state.profileString,
-                    onValueChange = { setState(state.copy(profileString = it)) },
+                    onValueChange = { onSetState(state.copy(profileString = it)) },
                     singleLine = true,
                 )
                 if (state.exception != null) {
@@ -43,7 +45,7 @@ fun ImportCustomProfiles(
                         color = MaterialTheme.colorScheme.error,
                     )
                 }
-                Button(onClick = { setState(state.next()) }) {
+                Button(onClick = { onPushState(state.next()) }) {
                     Text(stringResource(R.string.next))
                 }
             }
@@ -56,7 +58,7 @@ fun ImportCustomProfiles(
                         text = stringResource(R.string.overwrite),
                         isChecked = state.overwrite,
                         onCheckedChange = {
-                            setState(state.copy(overwrite = !state.overwrite))
+                            onSetState(state.copy(overwrite = !state.overwrite))
                         },
                     )
                 }
@@ -74,7 +76,7 @@ fun ImportCustomProfiles(
                                 text = stringResource(R.string.import_),
                                 isChecked = state.selection[index],
                                 onCheckedChange = {
-                                    setState(
+                                    onSetState(
                                         state.copy(
                                             selection = state.selection.let {
                                                 val list = it.toMutableList()
@@ -90,7 +92,7 @@ fun ImportCustomProfiles(
                                     text = stringResource(R.string.rename),
                                     isChecked = state.rename[index] != null,
                                     onCheckedChange = {
-                                        setState(
+                                        onSetState(
                                             state.copy(
                                                 rename = state.rename.let {
                                                     val list = it.toMutableList()
@@ -110,7 +112,7 @@ fun ImportCustomProfiles(
                                         label = { Text(stringResource(R.string.new_name)) },
                                         value = renameTo,
                                         onValueChange = { newRenameTo ->
-                                            setState(
+                                            onSetState(
                                                 state.copy(
                                                     rename = state.rename.let {
                                                         val list = it.toMutableList()
@@ -130,7 +132,7 @@ fun ImportCustomProfiles(
                 item {
                     Button(onClick = {
                         importProfiles(state.getFilteredProfiles(), state.overwrite)
-                        setState(null)
+                        onDone()
                     }) {
                         Text(stringResource(R.string.next))
                     }
@@ -146,7 +148,9 @@ private fun PreviewStringInput() {
     OpenSCQ30Theme {
         ImportCustomProfiles(
             state = ImportCustomProfilesState.StringInput(profileString = "import string here"),
-            setState = {},
+            onPushState = {},
+            onSetState = {},
+            onDone = {},
             importProfiles = { _, _ -> },
         )
     }
@@ -165,7 +169,9 @@ private fun PreviewImportOptions() {
                 selection = listOf(true, false),
                 rename = listOf("Renamed Profile 1", null),
             ),
-            setState = {},
+            onPushState = {},
+            onSetState = {},
+            onDone = {},
             importProfiles = { _, _ -> },
         )
     }

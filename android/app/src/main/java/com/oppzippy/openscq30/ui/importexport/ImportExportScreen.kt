@@ -11,30 +11,44 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.oppzippy.openscq30.R
 
 @Composable
-fun ImportExportScreen(viewModel: ImportExportViewModel = hiltViewModel()) {
+fun ImportExportScreen(
+    viewModel: ImportExportViewModel = hiltViewModel(),
+    index: Int,
+    onIndexChange: (Int) -> Unit,
+) {
     val customProfiles by viewModel.customProfiles.collectAsState(emptyList())
 
-    when (val state = viewModel.importExportState.collectAsState().value) {
+    fun pushState(state: ImportExportState, index: Int) {
+        onIndexChange(viewModel.pushState(state, index))
+    }
+
+    fun setState(state: ImportExportState, index: Int) {
+        onIndexChange(viewModel.setState(state, index))
+    }
+
+    fun resetState() {
+        onIndexChange(viewModel.resetState())
+    }
+
+    when (val state = viewModel.stateStack.collectAsState().value.getOrNull(index)) {
         null -> ActionSelection(
             customProfiles,
-            setState = { viewModel.importExportState.value = it },
+            setState = { setState(it, index) },
         )
 
         is ImportExportState.ExportCustomProfiles -> ExportCustomProfiles(
             state = state.state,
-            setState = {
-                viewModel.importExportState.value =
-                    it?.let { ImportExportState.ExportCustomProfiles(it) }
-            },
+            onPushState = { pushState(ImportExportState.ExportCustomProfiles(it), index) },
+            onSetState = { setState(ImportExportState.ExportCustomProfiles(it), index) },
+            onDone = { resetState() },
             setClipboard = { viewModel.copyToClipboard(it) },
         )
 
         is ImportExportState.ImportCustomProfiles -> ImportCustomProfiles(
             state = state.state,
-            setState = {
-                viewModel.importExportState.value =
-                    it?.let { ImportExportState.ImportCustomProfiles(it) }
-            },
+            onPushState = { pushState(ImportExportState.ImportCustomProfiles(it), index) },
+            onSetState = { setState(ImportExportState.ImportCustomProfiles(it), index) },
+            onDone = { resetState() },
             importProfiles = { profiles, overwrite ->
                 viewModel.importCustomProfiles(
                     profiles,
