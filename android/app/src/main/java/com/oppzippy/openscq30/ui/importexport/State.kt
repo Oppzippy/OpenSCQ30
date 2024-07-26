@@ -89,4 +89,6 @@ sealed class ImportCustomProfilesState {
                 }
         }
     }
+
+    data object ImportComplete : ImportCustomProfilesState()
 }
