@@ -1,9 +1,8 @@
 use std::{
     collections::{hash_map::Entry, HashMap},
-    sync::Arc,
+    sync::{Arc, LazyLock},
 };
 
-use once_cell::sync::Lazy;
 use openscq30_lib::devices::standard::structures::{
     AmbientSoundMode, CustomNoiseCanceling, NoiseCancelingMode, PresetEqualizerProfile,
     TransparencyMode,
@@ -54,7 +53,7 @@ impl Config {
     }
 
     pub fn quick_presets(&self, device_service_uuid: Uuid) -> &HashMap<String, QuickPreset> {
-        static EMPTY_HASHMAP: Lazy<HashMap<String, QuickPreset>> = Lazy::new(HashMap::new);
+        static EMPTY_HASHMAP: LazyLock<HashMap<String, QuickPreset>> = LazyLock::new(HashMap::new);
         self.quick_presets
             .get(&device_service_uuid)
             .unwrap_or(&EMPTY_HASHMAP)

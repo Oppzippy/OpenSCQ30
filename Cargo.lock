@@ -1531,7 +1531,6 @@ dependencies = [
  "libadwaita",
  "macaddr",
  "mockall",
- "once_cell",
  "openscq30_lib",
  "regex",
  "serde",

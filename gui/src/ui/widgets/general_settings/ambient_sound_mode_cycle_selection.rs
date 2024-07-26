@@ -25,7 +25,7 @@ mod imp {
     // Properties macro creates an enum for internal use. We don't care that it is caught by this lint.
     #![allow(clippy::enum_variant_names)]
 
-    use std::cell::Cell;
+    use std::{cell::Cell, sync::LazyLock};
 
     use gtk::{
         glib::{self, clone, subclass::Signal, ParamSpec, Properties, Value},
@@ -36,7 +36,6 @@ mod imp {
         },
         CompositeTemplate, TemplateChild,
     };
-    use once_cell::sync::Lazy;
     use openscq30_lib::devices::standard::structures::AmbientSoundModeCycle;
 
     use crate::objects::GlibAmbientSoundModeCycleValue;
@@ -145,7 +144,7 @@ mod imp {
         }
 
         fn signals() -> &'static [Signal] {
-            static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
+            static SIGNALS: LazyLock<Vec<Signal>> = LazyLock::new(|| {
                 vec![Signal::builder("ambient-sound-mode-cycle-changed")
                     .param_types([GlibAmbientSoundModeCycleValue::static_type()])
                     .build()]

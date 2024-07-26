@@ -26,6 +26,7 @@ impl Equalizer {
 
 mod imp {
     use std::cell::{Cell, RefCell};
+    use std::sync::LazyLock;
 
     use gtk::glib::clone;
     use gtk::{
@@ -37,7 +38,6 @@ mod imp {
         },
         CompositeTemplate, TemplateChild,
     };
-    use once_cell::sync::Lazy;
     use openscq30_lib::devices::standard::structures::VolumeAdjustments;
 
     use crate::ui::widgets::equalizer_settings::volume_slider::VolumeSlider;
@@ -142,8 +142,8 @@ mod imp {
         }
 
         fn signals() -> &'static [Signal] {
-            static SIGNALS: Lazy<Vec<Signal>> =
-                Lazy::new(|| vec![Signal::builder("volumes-changed").build()]);
+            static SIGNALS: LazyLock<Vec<Signal>> =
+                LazyLock::new(|| vec![Signal::builder("volumes-changed").build()]);
             SIGNALS.as_ref()
         }
     }

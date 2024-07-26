@@ -22,7 +22,7 @@ impl QuickPresetsListing {
 }
 
 mod imp {
-    use std::cell::RefCell;
+    use std::{cell::RefCell, sync::LazyLock};
 
     use adw::prelude::*;
     use gtk::{
@@ -33,7 +33,6 @@ mod imp {
         },
         template_callbacks, CompositeTemplate,
     };
-    use once_cell::sync::Lazy;
 
     use crate::{objects::GlibNamedQuickPresetValue, settings::QuickPreset};
 
@@ -178,7 +177,7 @@ mod imp {
         fn constructed(&self) {}
 
         fn signals() -> &'static [Signal] {
-            static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
+            static SIGNALS: LazyLock<Vec<Signal>> = LazyLock::new(|| {
                 vec![
                     Signal::builder("create-quick-preset")
                         .param_types([GlibNamedQuickPresetValue::static_type()])

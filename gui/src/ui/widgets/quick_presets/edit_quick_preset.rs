@@ -31,7 +31,10 @@ impl EditQuickPreset {
 }
 
 mod imp {
-    use std::{cell::RefCell, sync::Arc};
+    use std::{
+        cell::RefCell,
+        sync::{Arc, LazyLock},
+    };
 
     use adw::prelude::*;
     use gtk::{
@@ -43,7 +46,6 @@ mod imp {
         },
         template_callbacks, ClosureExpression, CompositeTemplate,
     };
-    use once_cell::sync::Lazy;
     use openscq30_lib::{
         device_profiles::{DeviceProfile, NoiseCancelingModeType, TransparencyModeType},
         devices::standard::structures::{
@@ -498,7 +500,7 @@ mod imp {
         }
 
         fn signals() -> &'static [Signal] {
-            static SIGNALS: Lazy<Vec<Signal>> = Lazy::new(|| {
+            static SIGNALS: LazyLock<Vec<Signal>> = LazyLock::new(|| {
                 vec![Signal::builder("quick-preset-changed")
                     .param_types([GlibNamedQuickPresetValue::static_type()])
                     .build()]
