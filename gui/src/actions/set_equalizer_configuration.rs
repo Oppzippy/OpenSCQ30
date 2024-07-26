@@ -119,14 +119,20 @@ mod tests {
             .return_once(|_ambient_sound_mode| Ok(()));
         *state.selected_device.borrow_mut() = Some(Rc::new(selected_device));
 
-        MainContext::default().spawn_local(clone!(@strong state => async move {
-            set_equalizer_configuration(
-                &state,
-                EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::BassReducer),
-            )
-            .await
-            .unwrap();
-        }));
+        MainContext::default().spawn_local(clone!(
+            #[strong]
+            state,
+            async move {
+                set_equalizer_configuration(
+                    &state,
+                    EqualizerConfiguration::new_from_preset_profile(
+                        PresetEqualizerProfile::BassReducer,
+                    ),
+                )
+                .await
+                .unwrap();
+            }
+        ));
 
         timeout_future(Duration::from_millis(50)).await;
         set_equalizer_configuration(

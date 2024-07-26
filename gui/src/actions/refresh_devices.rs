@@ -78,12 +78,20 @@ mod tests {
 
         let (state, mut receiver) = State::new(registry);
 
-        MainContext::default().spawn_local(clone!(@strong state => async move {
-            refresh_devices(&state).await.unwrap();
-        }));
-        MainContext::default().spawn_local(clone!(@strong state => async move {
-            refresh_devices(&state).await.unwrap();
-        }));
+        MainContext::default().spawn_local(clone!(
+            #[strong]
+            state,
+            async move {
+                refresh_devices(&state).await.unwrap();
+            }
+        ));
+        MainContext::default().spawn_local(clone!(
+            #[strong]
+            state,
+            async move {
+                refresh_devices(&state).await.unwrap();
+            }
+        ));
         let _first_state_update = receiver
             .recv()
             .await
