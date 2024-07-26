@@ -185,13 +185,12 @@ fun DeviceSettings(
                             while (true) {
                                 val current =
                                     navController.currentBackStackEntry?.toRoute<Screen.ImportExport>()
-                                if (current != null && current.index >= targetIndex) {
+                                if (current != null && current.index > targetIndex) {
                                     navController.popBackStack()
                                 } else {
                                     break
                                 }
                             }
-                            navController.navigate(Screen.ImportExport(targetIndex))
                         }
                     },
                 )
