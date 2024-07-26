@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{fmt::Display, sync::Arc};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -25,8 +25,8 @@ impl From<&str> for SerialNumber {
     }
 }
 
-impl ToString for SerialNumber {
-    fn to_string(&self) -> String {
-        self.0.to_string()
+impl Display for SerialNumber {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.0)
     }
 }

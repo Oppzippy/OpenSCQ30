@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -26,9 +28,9 @@ impl FirmwareVersion {
     }
 }
 
-impl ToString for FirmwareVersion {
-    fn to_string(&self) -> String {
-        format!("{:02}.{:02}", self.major, self.minor)
+impl Display for FirmwareVersion {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:02}.{:02}", self.major, self.minor)
     }
 }
 
