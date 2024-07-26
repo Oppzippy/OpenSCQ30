@@ -390,12 +390,18 @@ mod imp {
     }
     impl ObjectImpl for EditQuickPreset {
         fn constructed(&self) {
-            let refresh_profile_type_visibility = clone!(@weak self as this => move || {
-                let is_active = this.equalizer_profile_switch.is_active();
-                let selected_type_index = this.equalizer_profile_type.selected();
-                this.preset_equalizer_profile.set_visible(is_active && selected_type_index == 0);
-                this.custom_equalizer_profile.set_visible(is_active && selected_type_index == 1);
-            });
+            let refresh_profile_type_visibility = clone!(
+                #[weak(rename_to=this)]
+                self,
+                move || {
+                    let is_active = this.equalizer_profile_switch.is_active();
+                    let selected_type_index = this.equalizer_profile_type.selected();
+                    this.preset_equalizer_profile
+                        .set_visible(is_active && selected_type_index == 0);
+                    this.custom_equalizer_profile
+                        .set_visible(is_active && selected_type_index == 1);
+                }
+            );
             refresh_profile_type_visibility();
             {
                 let refresh_profile_type_visibility = refresh_profile_type_visibility.clone();

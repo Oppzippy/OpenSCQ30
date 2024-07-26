@@ -202,21 +202,38 @@ mod imp {
                 .build();
             dialog.set_extra_child(Some(&entry));
 
-            entry.connect_changed(clone!(@weak dialog => move |entry| {
-                let is_empty = entry.text().trim().is_empty();
-                dialog.set_response_enabled("create", !is_empty);
-            }));
+            entry.connect_changed(clone!(
+                #[weak]
+                dialog,
+                move |entry| {
+                    let is_empty = entry.text().trim().is_empty();
+                    dialog.set_response_enabled("create", !is_empty);
+                }
+            ));
 
             dialog.choose(
                 gtk::gio::Cancellable::NONE,
-                clone!(@weak self as this, @weak entry, @strong volume_adjustments => move |response| {
-                    if response != "create" {
-                        return;
+                clone!(
+                    #[weak(rename_to=this)]
+                    self,
+                    #[weak]
+                    entry,
+                    #[strong]
+                    volume_adjustments,
+                    move |response| {
+                        if response != "create" {
+                            return;
+                        }
+                        let name = entry.text().to_string();
+                        let profile_with_name =
+                            GlibCustomEqualizerProfile::new(&name, volume_adjustments);
+                        this.sender
+                            .get()
+                            .unwrap()
+                            .send(Action::CreateCustomEqualizerProfile(profile_with_name))
+                            .unwrap();
                     }
-                    let name = entry.text().to_string();
-                    let profile_with_name = GlibCustomEqualizerProfile::new(&name, volume_adjustments);
-                    this.sender.get().unwrap().send(Action::CreateCustomEqualizerProfile(profile_with_name)).unwrap();
-                }),
+                ),
             );
         }
 
@@ -256,17 +273,21 @@ mod imp {
                 "create-custom-equalizer-profile",
                 Some(&GlibVolumeAdjustments::static_variant_type()),
             );
-            action.connect_activate(
-            clone!(@weak self as this => move |_action, parameter| {
-                let boxed_volume_adjustments: GlibVolumeAdjustments = parameter.unwrap().get().unwrap();
-                let volume_adjustments = boxed_volume_adjustments.0
-                    .iter()
-                    .map(ToOwned::to_owned)
-                    .collect::<Vec<f64>>()
-                    .into();
-                this.create_custom_equalizer_profile(volume_adjustments);
-            }),
-        );
+            action.connect_activate(clone!(
+                #[weak(rename_to=this)]
+                self,
+                move |_action, parameter| {
+                    let boxed_volume_adjustments: GlibVolumeAdjustments =
+                        parameter.unwrap().get().unwrap();
+                    let volume_adjustments = boxed_volume_adjustments
+                        .0
+                        .iter()
+                        .map(ToOwned::to_owned)
+                        .collect::<Vec<f64>>()
+                        .into();
+                    this.create_custom_equalizer_profile(volume_adjustments);
+                }
+            ));
             self.obj().add_action(&action);
 
             self.obj()
@@ -284,11 +305,19 @@ mod imp {
 
             self.obj().connect_notify_local(
                 Some("selected-device"),
-                clone!(@weak self as this => move |_, _| this.update()),
+                clone!(
+                    #[weak(rename_to=this)]
+                    self,
+                    move |_, _| this.update()
+                ),
             );
             self.obj().connect_notify_local(
                 Some("loading"),
-                clone!(@weak self as this => move |_, _| this.update()),
+                clone!(
+                    #[weak(rename_to=this)]
+                    self,
+                    move |_, _| this.update()
+                ),
             );
         }
 

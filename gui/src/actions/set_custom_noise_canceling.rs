@@ -23,10 +23,16 @@ where
 
     // Debounce
     let (result_sender, result_receiver) = oneshot::channel::<anyhow::Result<()>>();
-    let new_handle = MainContext::default().spawn_local(clone!(@weak device => async move {
-        let result = set_custom_noise_canceling_after_delay(device.as_ref(), custom_noise_canceling).await;
-        result_sender.send(result).expect("receiver dropped");
-    }));
+    let new_handle = MainContext::default().spawn_local(clone!(
+        #[weak]
+        device,
+        async move {
+            let result =
+                set_custom_noise_canceling_after_delay(device.as_ref(), custom_noise_canceling)
+                    .await;
+            result_sender.send(result).expect("receiver dropped");
+        }
+    ));
 
     // Store the handle so we can cancel it later
     if let Some(old_handle) = state

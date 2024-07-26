@@ -119,14 +119,20 @@ mod imp {
             .for_each(|button| {
                 button.connect_notify_local(
                     Some("active"),
-                    clone!(@weak self as this => move |_, _| {
-                        if !this.ignore_events.get() {
-                            this.obj().emit_by_name::<()>(
-                                "ambient-sound-mode-cycle-changed",
-                                &[&GlibAmbientSoundModeCycleValue(this.ambient_sound_mode_cycle())],
-                            );
+                    clone!(
+                        #[weak(rename_to=this)]
+                        self,
+                        move |_, _| {
+                            if !this.ignore_events.get() {
+                                this.obj().emit_by_name::<()>(
+                                    "ambient-sound-mode-cycle-changed",
+                                    &[&GlibAmbientSoundModeCycleValue(
+                                        this.ambient_sound_mode_cycle(),
+                                    )],
+                                );
+                            }
                         }
-                    }),
+                    ),
                 );
             });
         }

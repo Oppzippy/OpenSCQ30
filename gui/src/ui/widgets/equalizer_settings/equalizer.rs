@@ -134,9 +134,13 @@ mod imp {
             for band in self.get_volume_sliders() {
                 band.connect_notify_local(
                     Some("volume-slider-value"),
-                    clone!(@weak self as this => move |_slider, _param_spec| {
-                        this.handle_volume_change();
-                    }),
+                    clone!(
+                        #[weak(rename_to=this)]
+                        self,
+                        move |_slider, _param_spec| {
+                            this.handle_volume_change();
+                        }
+                    ),
                 );
             }
         }
@@ -185,9 +189,13 @@ mod tests {
         equalizer.connect_closure(
             "volumes-changed",
             false,
-            closure_local!(@strong received_event => move |_: Equalizer| {
-                received_event.set(true);
-            }),
+            closure_local!(
+                #[strong]
+                received_event,
+                move |_: Equalizer| {
+                    received_event.set(true);
+                }
+            ),
         );
         equalizer.imp().band_100.set_volume(0.1);
         assert_eq!(true, received_event.get());
@@ -201,9 +209,13 @@ mod tests {
         equalizer.connect_closure(
             "volumes-changed",
             false,
-            closure_local!(@strong received_event => move |_: Equalizer| {
-                received_event.set(true);
-            }),
+            closure_local!(
+                #[strong]
+                received_event,
+                move |_: Equalizer| {
+                    received_event.set(true);
+                }
+            ),
         );
         equalizer.set_volumes(&[0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]);
         assert_eq!(false, received_event.get());

@@ -234,22 +234,36 @@ fn delayed_initialize_application(
     let (state, mut ui_state_receiver) = State::new(registry);
 
     let main_context = MainContext::default();
-    main_context.spawn_local(clone!(@weak main_window, @weak state, @weak settings.config as config => async move {
-        loop {
-            if let Some(update) = ui_state_receiver.recv().await {
-                match update {
-                    StateUpdate::SetDevices(devices) => main_window.set_devices(&devices),
-                    StateUpdate::SetLoading(is_loading) => main_window.set_loading(is_loading),
-                    StateUpdate::SetDeviceState(state) => main_window.set_device_state(&state),
-                    StateUpdate::SetEqualizerConfiguration(equalizer_configuration) => main_window.set_equalizer_configuration(&equalizer_configuration),
-                    StateUpdate::SetSelectedDevice(device) => main_window.set_property("selected-device", device),
-                    StateUpdate::SetCustomEqualizerProfiles(custom_profiles) => main_window.set_custom_profiles(custom_profiles),
-                    StateUpdate::AddToast(text) => main_window.add_toast(Toast::builder().title(&text).timeout(15).build()),
-                    StateUpdate::SetQuickPresets(quick_presets) => main_window.set_quick_presets(quick_presets),
+    main_context.spawn_local(clone!(
+        #[weak]
+        main_window,
+        async move {
+            loop {
+                if let Some(update) = ui_state_receiver.recv().await {
+                    match update {
+                        StateUpdate::SetDevices(devices) => main_window.set_devices(&devices),
+                        StateUpdate::SetLoading(is_loading) => main_window.set_loading(is_loading),
+                        StateUpdate::SetDeviceState(state) => main_window.set_device_state(&state),
+                        StateUpdate::SetEqualizerConfiguration(equalizer_configuration) => {
+                            main_window.set_equalizer_configuration(&equalizer_configuration)
+                        }
+                        StateUpdate::SetSelectedDevice(device) => {
+                            main_window.set_property("selected-device", device)
+                        }
+                        StateUpdate::SetCustomEqualizerProfiles(custom_profiles) => {
+                            main_window.set_custom_profiles(custom_profiles)
+                        }
+                        StateUpdate::AddToast(text) => {
+                            main_window.add_toast(Toast::builder().title(&text).timeout(15).build())
+                        }
+                        StateUpdate::SetQuickPresets(quick_presets) => {
+                            main_window.set_quick_presets(quick_presets)
+                        }
+                    }
                 }
             }
         }
-    }));
+    ));
 
     fn handle_error<T>(err: anyhow::Error, state: &State<T>)
     where
@@ -434,7 +448,7 @@ fn delayed_initialize_application(
         });
     }
 
-    main_context.spawn_local(clone!(@weak main_window, @strong state => async move {
+    main_context.spawn_local(clone!(#[weak] main_window, #[strong] state, async move {
         let mut receiver = state.state_update_receiver.subscribe().await;
         loop {
             receiver.changed().await.expect("we hold a reference to state, which holds the sender, so it should be impossible for it to be dropped");
@@ -446,14 +460,22 @@ fn delayed_initialize_application(
     }));
 
     let action_refresh_devices = SimpleAction::new("refresh-devices", None);
-    action_refresh_devices.connect_activate(clone!(@strong state => move |_, _| {
-        MainContext::default().spawn_local(clone!(@strong state => async move {
-            actions::refresh_devices(&state)
-                .await
-                .context("refresh devices")
-                .unwrap_or_else(|err| handle_error(err, &state));
-        }));
-    }));
+    action_refresh_devices.connect_activate(clone!(
+        #[strong]
+        state,
+        move |_, _| {
+            MainContext::default().spawn_local(clone!(
+                #[strong]
+                state,
+                async move {
+                    actions::refresh_devices(&state)
+                        .await
+                        .context("refresh devices")
+                        .unwrap_or_else(|err| handle_error(err, &state));
+                }
+            ));
+        }
+    ));
     main_window.add_action(&action_refresh_devices);
     application.set_accels_for_action("win.refresh-devices", &["<Ctrl>R", "F5"]);
 

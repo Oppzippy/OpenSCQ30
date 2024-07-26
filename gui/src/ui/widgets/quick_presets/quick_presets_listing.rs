@@ -73,24 +73,35 @@ mod imp {
                 .build();
             dialog.set_extra_child(Some(&entry));
 
-            entry.connect_changed(clone!(@weak dialog => move |entry| {
-                let is_empty = entry.text().trim().is_empty();
-                dialog.set_response_enabled("create", !is_empty);
-            }));
+            entry.connect_changed(clone!(
+                #[weak]
+                dialog,
+                move |entry| {
+                    let is_empty = entry.text().trim().is_empty();
+                    dialog.set_response_enabled("create", !is_empty);
+                }
+            ));
 
             dialog.choose(
                 gtk::gio::Cancellable::NONE,
-                clone!(@weak self as this, @weak entry => move |response| {
-                    if response != "create" {
-                        return;
-                    }
-                    this.obj().emit_by_name::<()>("create-quick-preset", &[
-                        &GlibNamedQuickPresetValue {
+                clone!(
+                    #[weak(rename_to=this)]
+                    self,
+                    #[weak]
+                    entry,
+                    move |response| {
+                        if response != "create" {
+                            return;
+                        }
+                        this.obj().emit_by_name::<()>(
+                            "create-quick-preset",
+                            &[&GlibNamedQuickPresetValue {
                                 name: entry.text().as_str().into(),
                                 quick_preset: QuickPreset::default(),
-                        }
-                    ]);
-                }),
+                            }],
+                        );
+                    }
+                ),
             );
         }
     }
@@ -109,28 +120,40 @@ mod imp {
                     let row = adw::ActionRow::new();
                     row.set_title(&named_quick_preset.name);
                     row.set_activatable(true);
-                    row.connect_activated(
-                        clone!(@weak self as this, @to-owned named_quick_preset => move |_| {
+                    row.connect_activated(clone!(
+                        #[weak(rename_to=this)]
+                        self,
+                        #[to_owned]
+                        named_quick_preset,
+                        move |_| {
                             this.activate_quick_preset(&named_quick_preset);
-                        }),
-                    );
+                        }
+                    ));
 
                     let edit_button = gtk::Button::new();
                     edit_button.set_icon_name("document-edit");
-                    edit_button.connect_clicked(
-                        clone!(@weak self as this, @to-owned named_quick_preset => move |_| {
+                    edit_button.connect_clicked(clone!(
+                        #[weak(rename_to=this)]
+                        self,
+                        #[to_owned]
+                        named_quick_preset,
+                        move |_| {
                             this.edit_quick_preset(&named_quick_preset);
-                        }),
-                    );
+                        }
+                    ));
                     row.add_suffix(&edit_button);
 
                     let delete_button = gtk::Button::new();
                     delete_button.set_icon_name("edit-delete");
-                    delete_button.connect_clicked(
-                        clone!(@weak self as this, @to-owned named_quick_preset => move |_| {
+                    delete_button.connect_clicked(clone!(
+                        #[weak(rename_to=this)]
+                        self,
+                        #[to_owned]
+                        named_quick_preset,
+                        move |_| {
                             this.delete_quick_preset(&named_quick_preset);
-                        }),
-                    );
+                        }
+                    ));
                     row.add_suffix(&delete_button);
 
                     row

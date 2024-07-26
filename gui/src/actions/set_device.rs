@@ -47,11 +47,18 @@ where
         .send(StateUpdate::SetLoading(true))
         .unwrap();
     let (sender, receiver) = oneshot::channel();
-    let handle = MainContext::default().spawn_local(clone!(@strong state => async move {
-        let result = connect_to_device(&state, &config, mac_address).await;
-        state.state_update_sender.send(StateUpdate::SetLoading(false)).unwrap();
-        sender.send(result).unwrap();
-    }));
+    let handle = MainContext::default().spawn_local(clone!(
+        #[strong]
+        state,
+        async move {
+            let result = connect_to_device(&state, &config, mac_address).await;
+            state
+                .state_update_sender
+                .send(StateUpdate::SetLoading(false))
+                .unwrap();
+            sender.send(result).unwrap();
+        }
+    ));
     *state.connect_to_device_handle.borrow_mut() = Some(handle);
     match receiver.await {
         Ok(result) => result,

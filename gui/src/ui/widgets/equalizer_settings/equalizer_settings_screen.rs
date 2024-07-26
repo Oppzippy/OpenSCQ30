@@ -276,15 +276,24 @@ mod imp {
         }
 
         fn set_up_custom_profile_selection_changed_handler(&self) {
-            self.custom_profile_dropdown.connect_selected_item_notify(
-            clone!(@weak self as this => move |_dropdown| {
-                let maybe_selected_item = this.custom_profile_dropdown.selected_item()
-                    .map(|item| item.downcast::<GlibCustomEqualizerProfile>().unwrap());
-                if let Some(selected_item) = maybe_selected_item {
-                    this.sender.get().unwrap().send(Action::SelectCustomEqualizerProfile(selected_item.clone())).unwrap();
-                }
-            }),
-        );
+            self.custom_profile_dropdown
+                .connect_selected_item_notify(clone!(
+                    #[weak(rename_to=this)]
+                    self,
+                    move |_dropdown| {
+                        let maybe_selected_item = this
+                            .custom_profile_dropdown
+                            .selected_item()
+                            .map(|item| item.downcast::<GlibCustomEqualizerProfile>().unwrap());
+                        if let Some(selected_item) = maybe_selected_item {
+                            this.sender
+                                .get()
+                                .unwrap()
+                                .send(Action::SelectCustomEqualizerProfile(selected_item.clone()))
+                                .unwrap();
+                        }
+                    }
+                ));
         }
 
         fn set_up_custom_profile_create_delete_button(&self) {
@@ -438,30 +447,40 @@ mod imp {
         }
 
         fn set_up_preset_profile_selection_changed_handler(&self) {
-            self.profile_dropdown
-            .connect_selected_item_notify(clone!(@weak self as this => move |_dropdown| {
-                let selected_item: GlibEqualizerProfile = this.profile_dropdown
-                    .selected_item()
-                    .expect("an item must be selected")
-                    .downcast()
-                    .expect("selected item must be an EqualizerProfileObject");
-                let profile_id = selected_item.profile_id() as u16;
-                let equalizer_configuration = if profile_id != EqualizerConfiguration::CUSTOM_PROFILE_ID {
-                    let preset_profile = PresetEqualizerProfile::from_id(profile_id).unwrap_or_else(|| {
-                        panic!("invalid preset profile id {profile_id}");
-                    });
-                    EqualizerConfiguration::new_from_preset_profile(preset_profile)
-                } else {
-                    EqualizerConfiguration::new_custom_profile(this.equalizer.volume_adjustments())
-                };
-                this.set_equalizer_configuration(&equalizer_configuration);
-                this.update_custom_profile_selection();
-                // TODO this is needed because this runs once during construction (before sender is set)
-                // see if we can have sender get set before construction maybe?
-                if let Some(sender) = this.sender.get() {
-                    sender.send(Action::SetEqualizerConfiguration(equalizer_configuration)).unwrap();
+            self.profile_dropdown.connect_selected_item_notify(clone!(
+                #[weak(rename_to=this)]
+                self,
+                move |_dropdown| {
+                    let selected_item: GlibEqualizerProfile = this
+                        .profile_dropdown
+                        .selected_item()
+                        .expect("an item must be selected")
+                        .downcast()
+                        .expect("selected item must be an EqualizerProfileObject");
+                    let profile_id = selected_item.profile_id() as u16;
+                    let equalizer_configuration =
+                        if profile_id != EqualizerConfiguration::CUSTOM_PROFILE_ID {
+                            let preset_profile = PresetEqualizerProfile::from_id(profile_id)
+                                .unwrap_or_else(|| {
+                                    panic!("invalid preset profile id {profile_id}");
+                                });
+                            EqualizerConfiguration::new_from_preset_profile(preset_profile)
+                        } else {
+                            EqualizerConfiguration::new_custom_profile(
+                                this.equalizer.volume_adjustments(),
+                            )
+                        };
+                    this.set_equalizer_configuration(&equalizer_configuration);
+                    this.update_custom_profile_selection();
+                    // TODO this is needed because this runs once during construction (before sender is set)
+                    // see if we can have sender get set before construction maybe?
+                    if let Some(sender) = this.sender.get() {
+                        sender
+                            .send(Action::SetEqualizerConfiguration(equalizer_configuration))
+                            .unwrap();
+                    }
                 }
-            }));
+            ));
         }
 
         fn is_custom_profile(&self) -> bool {

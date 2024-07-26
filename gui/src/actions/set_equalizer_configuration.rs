@@ -33,13 +33,17 @@ where
 
     // Debounce
     let (result_sender, result_receiver) = oneshot::channel::<openscq30_lib::Result<()>>();
-    let new_handle = MainContext::default().spawn_local(clone!(@weak device => async move {
-        timeout_future(Duration::from_millis(500)).await;
-        let result = device
-            .set_equalizer_configuration(equalizer_configuration)
-            .await;
-        result_sender.send(result).expect("receiver dropped");
-    }));
+    let new_handle = MainContext::default().spawn_local(clone!(
+        #[weak]
+        device,
+        async move {
+            timeout_future(Duration::from_millis(500)).await;
+            let result = device
+                .set_equalizer_configuration(equalizer_configuration)
+                .await;
+            result_sender.send(result).expect("receiver dropped");
+        }
+    ));
     if let Some(old_handle) = state
         .set_equalizer_configuration_handle
         .replace(Some(new_handle))
