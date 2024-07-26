@@ -1,7 +1,9 @@
 package com.oppzippy.openscq30.ui.importexport
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
@@ -12,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 import com.oppzippy.openscq30.ui.utils.CheckboxWithLabel
@@ -26,48 +29,59 @@ fun ExportCustomProfiles(
 ) {
     when (state) {
         is ExportCustomProfilesState.ProfileSelection -> {
-            LazyColumn {
-                itemsIndexed(state.customProfiles) { index, profile ->
-                    CheckboxWithLabel(
-                        text = profile.name,
-                        isChecked = state.selectedProfiles[index],
-                        onCheckedChange = {
-                            onSetState(
-                                state.copy(
-                                    selectedProfiles = state.selectedProfiles.let {
-                                        val list = it.toMutableList()
-                                        list[index] = !list[index]
-                                        list
-                                    },
-                                ),
-                            )
-                        },
-                    )
-                }
-                item {
-                    Button(onClick = { onPushState(state.next()) }) {
-                        Text(stringResource(R.string.next))
+            Column {
+                LazyColumn(Modifier.weight(1F)) {
+                    itemsIndexed(state.customProfiles) { index, profile ->
+                        CheckboxWithLabel(
+                            text = profile.name,
+                            isChecked = state.selectedProfiles[index],
+                            onCheckedChange = {
+                                onSetState(
+                                    state.copy(
+                                        selectedProfiles = state.selectedProfiles.let {
+                                            val list = it.toMutableList()
+                                            list[index] = !list[index]
+                                            list
+                                        },
+                                    ),
+                                )
+                            },
+                        )
                     }
+                }
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { onPushState(state.next()) },
+                ) {
+                    Text(stringResource(R.string.next))
                 }
             }
         }
 
         is ExportCustomProfilesState.CopyToClipboard -> {
             Column {
-                Row {
-                    Button(onClick = { setClipboard(state.profileString) }) {
-                        Text(stringResource(R.string.copy_to_clipboard))
-                    }
-                    Button(onClick = { onDone() }) {
-                        Text(stringResource(R.string.done))
-                    }
-                }
                 TextField(
-                    modifier = Modifier.testTag("json-output"),
+                    modifier = Modifier
+                        .testTag("json-output")
+                        .weight(1F),
                     value = state.profileString,
                     onValueChange = {},
                     readOnly = true,
                 )
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Button(
+                        modifier = Modifier.weight(1F),
+                        onClick = { setClipboard(state.profileString) },
+                    ) {
+                        Text(stringResource(R.string.copy_to_clipboard))
+                    }
+                    Button(
+                        modifier = Modifier.weight(1F),
+                        onClick = { onDone() },
+                    ) {
+                        Text(stringResource(R.string.done))
+                    }
+                }
             }
         }
     }
