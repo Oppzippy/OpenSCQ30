@@ -68,7 +68,8 @@ fun ExportCustomProfiles(
                 TextField(
                     modifier = Modifier
                         .testTag("json-output")
-                        .weight(1F),
+                        .weight(1F)
+                        .fillMaxWidth(),
                     value = state.profileString,
                     onValueChange = {},
                     readOnly = true,
