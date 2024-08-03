@@ -79,6 +79,11 @@ fun ImportCustomProfiles(
                     modifier = Modifier.weight(1F),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
+                    if (state.profiles.isEmpty()) {
+                        item {
+                            Text(stringResource(R.string.no_profiles_found))
+                        }
+                    }
                     itemsIndexed(state.profiles) { index, profile ->
                         Card(Modifier.fillMaxWidth()) {
                             Column(Modifier.padding(10.dp)) {

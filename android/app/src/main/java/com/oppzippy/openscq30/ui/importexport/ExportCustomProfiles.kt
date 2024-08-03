@@ -31,6 +31,11 @@ fun ExportCustomProfiles(
         is ExportCustomProfilesState.ProfileSelection -> {
             Column {
                 LazyColumn(Modifier.weight(1F)) {
+                    if (state.selectedProfiles.isEmpty()) {
+                        item {
+                            Text(stringResource(R.string.no_profiles_found))
+                        }
+                    }
                     itemsIndexed(state.customProfiles) { index, profile ->
                         CheckboxWithLabel(
                             text = profile.name,
