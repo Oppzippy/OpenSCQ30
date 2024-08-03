@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.oppzippy.openscq30.R
@@ -71,27 +72,41 @@ fun DeviceSettings(
     listedScreens.add(Screen.DeviceInfo.screenInfo)
     listedScreens.add(Screen.ImportExport.screenInfo)
 
+    // compose navigation does not allow us to use polymorphism with routes, so instead a mapping of
+    // class path to route name is kept
+    val routeNames = listedScreens.associate {
+        Pair(it.baseRoute::class.qualifiedName!!, it.nameResourceId)
+    }
+
     // In order to avoid multiple instance of the view model being created, it needs to be created
     // outside of the nav controller's scope
     val importExportViewModel = hiltViewModel<ImportExportViewModel>()
 
     Scaffold(
         topBar = {
-            TopAppBar(title = {
-                Text(uiState.name)
-            }, navigationIcon = {
-                IconButton(onClick = {
-                    val isAtTopOfStack = !navController.popBackStack()
-                    if (isAtTopOfStack) {
-                        onBack()
+            TopAppBar(
+                title = {
+                    val route =
+                        navController.currentBackStackEntryAsState().value?.destination?.route
+                    val routeWithoutArgs = route?.substringBefore("?")
+                    val resourceId = routeNames[routeWithoutArgs]
+                    val title = resourceId?.let { stringResource(it) } ?: uiState.name
+                    Text(title)
+                },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        val isAtTopOfStack = !navController.popBackStack()
+                        if (isAtTopOfStack) {
+                            onBack()
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                        )
                     }
-                }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.back),
-                    )
-                }
-            })
+                },
+            )
         },
     ) { innerPadding ->
         NavHost(
