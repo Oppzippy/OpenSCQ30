@@ -1611,6 +1611,7 @@ dependencies = [
  "openscq30_lib",
  "regex",
  "serde",
+ "serde_json",
  "strum",
  "tempfile",
  "tokio",

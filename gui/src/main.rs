@@ -42,6 +42,8 @@ mod mock;
 mod objects;
 mod settings;
 mod swappable_broadcast;
+#[cfg(test)]
+mod test_utils;
 #[allow(clippy::new_without_default)]
 mod ui;
 

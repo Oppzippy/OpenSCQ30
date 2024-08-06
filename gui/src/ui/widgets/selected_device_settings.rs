@@ -45,7 +45,10 @@ impl SelectedDeviceSettings {
             .set_custom_profiles(custom_profiles.to_owned());
         self.imp()
             .quick_presets
-            .set_custom_profiles(custom_profiles);
+            .set_custom_profiles(custom_profiles.to_owned());
+        self.imp()
+            .import_export
+            .set_custom_equalizer_profiles(&custom_profiles);
     }
 
     pub fn set_quick_presets(&self, quick_presets: Vec<GlibNamedQuickPresetValue>) {
@@ -73,7 +76,7 @@ mod imp {
         actions::Action,
         ui::widgets::{
             ButtonsScreen, DeviceInformation, EqualizerSettingsScreen, GeneralSettingsScreen,
-            HearIdScreen, QuickPresetsScreen,
+            HearIdScreen, ImportExport, QuickPresetsScreen,
         },
     };
 
@@ -94,6 +97,8 @@ mod imp {
         pub quick_presets: TemplateChild<QuickPresetsScreen>,
         #[template_child]
         pub device_information: TemplateChild<DeviceInformation>,
+        #[template_child]
+        pub import_export: TemplateChild<ImportExport>,
 
         sender: OnceCell<UnboundedSender<Action>>,
     }
