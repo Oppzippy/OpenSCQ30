@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <template class="OpenSCQ30ExportProfileSelection" parent="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+            <object class="GtkBox">
+                <child>
+                    <object class="GtkButton">
+                        <property name="label" translatable="yes">Select All</property>
+                        <signal name="clicked" handler="handle_select_all_clicked" swapped="true" />
+                    </object>
+                </child>
+                <child>
+                    <object class="GtkButton">
+                        <property name="label" translatable="yes">Next</property>
+                        <signal name="clicked" handler="handle_next_clicked" swapped="true" />
+                    </object>
+                </child>
+            </object>
+        </child>
+        <child>
+            <object class="GtkScrolledWindow">
+                <property name="vexpand">true</property>
+                <child>
+                    <object class="AdwPreferencesGroup" id="profile_list">
+                        <property name="title" translatable="yes">Export Profiles</property>
+                    </object>
+                </child>
+            </object>
+        </child>
+    </template>
+</interface>

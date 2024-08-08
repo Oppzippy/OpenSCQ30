@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <template class="OpenSCQ30ImportExport" parent="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+            <object class="AdwNavigationView" id="navigation">
+                <child>
+                    <object class="AdwNavigationPage">
+                        <property name="title" translatable="yes">Import/Export</property>
+                        <property name="tag">menu</property>
+                        <property name="child">
+                            <object class="OpenSCQ30ImportExportMenu" id="import_export_menu">
+                                <signal name="export-equalizer-profiles" handler="start_equalizer_profile_export_flow" swapped="true" />
+                                <signal name="import-equalizer-profiles" handler="start_equalizer_profile_import_flow" swapped="true" />
+                            </object>
+                        </property>
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwNavigationPage">
+                        <property name="title" translatable="yes">Select Profiles for Export</property>
+                        <property name="tag">equalizer-profiles-export-profile-selection</property>
+                        <property name="child">
+                            <object class="OpenSCQ30ExportProfileSelection" id="export_profile_selection">
+                                <signal name="next" handler="navigate_to_equalizer_profiles_export_json" swapped="true" />
+                            </object>
+                        </property>
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwNavigationPage">
+                        <property name="title" translatable="yes">Export Profiles</property>
+                        <property name="tag">equalizer-profiles-export-output</property>
+                        <property name="child">
+                            <object class="OpenSCQ30ExportProfileOutput" id="export_profile_output">
+                                <signal name="done" handler="handle_reset" swapped="true" />
+                            </object>
+                        </property>
+                    </object>
+                </child>
+            </object>
+        </child>
+    </template>
+</interface>

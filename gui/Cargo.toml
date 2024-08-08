@@ -19,6 +19,7 @@ adw = { workspace = true, features = ["v1_4"] }
 gtk = { workspace = true, features = ["gnome_44"] }
 strum = { workspace = true, features = ["derive"] }
 serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
 toml = { workspace = true }
 anyhow = { workspace = true }
 heck = { workspace = true }

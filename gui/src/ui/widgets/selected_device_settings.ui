@@ -84,6 +84,19 @@
                         <property name="label" translatable="yes" context="device information">Device Information</property>
                     </object>
                 </child>
+                <child>
+                    <object class="OpenSCQ30ImportExport" id="import_export">
+                        <property name="margin-start">10</property>
+                        <property name="margin-end">10</property>
+                        <property name="margin-top">10</property>
+                        <property name="margin-bottom">10</property>
+                    </object>
+                </child>
+                <child type="tab">
+                    <object class="GtkLabel">
+                        <property name="label" translatable="yes">Import/Export</property>
+                    </object>
+                </child>
             </object>
         </child>
     </template>
