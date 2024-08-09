@@ -335,7 +335,7 @@ mod imp {
 
         pub fn set_custom_profiles(&self, mut profiles: Vec<GlibCustomEqualizerProfile>) {
             if let Some(model) = self.custom_profiles.get() {
-                profiles.sort_unstable_by_key(|left| left.name());
+                profiles.sort_by_cached_key(|left| left.name().to_lowercase());
                 // Notifications need to be frozen to prevent the selection changes while removing and adding items from
                 // causing the profile to change. We can't force having no selection when adding new items, so it
                 // will change the selection to the newly added item. We can set it back to what it's supposed to be
