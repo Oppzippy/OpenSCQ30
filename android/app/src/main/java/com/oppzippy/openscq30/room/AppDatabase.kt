@@ -175,19 +175,21 @@ abstract class AppDatabase : RoomDatabase() {
             //language=RoomSql
             db.execSQL(
                 """
-                    INSERT INTO custom_equalizer_profile
-                    SELECT
-                        name,
-                        CAST(ROUND(band100 * 10.0) AS INTEGER),
-                        CAST(ROUND(band200 * 10.0) AS INTEGER),
-                        CAST(ROUND(band400 * 10.0) AS INTEGER),
-                        CAST(ROUND(band800 * 10.0) AS INTEGER),
-                        CAST(ROUND(band1600 * 10.0) AS INTEGER),
-                        CAST(ROUND(band3200 * 10.0) AS INTEGER),
-                        CAST(ROUND(band6400 * 10.0) AS INTEGER),
-                        CAST(ROUND(band12800 * 10.0) AS INTEGER)
-                    FROM
-                        custom_equalizer_profile_pre_migration
+                   INSERT INTO custom_equalizer_profile
+                   SELECT
+                       name,
+                       CAST(ROUND(band100 * 10.0) AS INTEGER),
+                       CAST(ROUND(band200 * 10.0) AS INTEGER),
+                       CAST(ROUND(band400 * 10.0) AS INTEGER),
+                       CAST(ROUND(band800 * 10.0) AS INTEGER),
+                       CAST(ROUND(band1600 * 10.0) AS INTEGER),
+                       CAST(ROUND(band3200 * 10.0) AS INTEGER),
+                       CAST(ROUND(band6400 * 10.0) AS INTEGER),
+                       CAST(ROUND(band12800 * 10.0) AS INTEGER)
+                   FROM
+                       custom_equalizer_profile_pre_migration
+                   WHERE true
+                   ON CONFLICT DO NOTHING
                 """.trimIndent(),
             )
             //language=RoomSql
