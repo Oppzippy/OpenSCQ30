@@ -350,7 +350,15 @@ mod imp {
         fn update_custom_profile_selection(&self) {
             match self.custom_profiles.get() {
                 Some(custom_profiles) if self.is_custom_profile() => {
-                    let volumes = self.equalizer.volume_adjustments();
+                    let rounded_volumes = VolumeAdjustments::new(
+                        self.equalizer
+                            .volume_adjustments()
+                            .adjustments()
+                            .iter()
+                            .cloned()
+                            .map(|value| (value * 10.0).round() / 10.0),
+                    )
+                    .expect("number of bands should not have changed, so this can't error");
                     let custom_profile_index = custom_profiles
                         .iter::<GlibCustomEqualizerProfile>()
                         .enumerate()
@@ -362,10 +370,11 @@ mod imp {
                                     .unwrap()
                                     .volume_adjustments()
                                     .iter()
-                                    .cloned(),
+                                    .cloned()
+                                    .map(|value| (value * 10.0).round() / 10.0),
                             )
                             .unwrap();
-                            profile_volume_adjustments == volumes
+                            profile_volume_adjustments == rounded_volumes
                         })
                         .map(|(i, _profile)| i as u32)
                         .unwrap_or(u32::MAX);
