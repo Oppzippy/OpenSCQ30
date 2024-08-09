@@ -1,5 +1,46 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Build
+
+-   Replace `cargo-make` with `just`
+
+### GUI
+
+#### Features
+
+-   Add custom equalizer profile exporting
+
+#### Fixes
+
+-   Fix some circumstances where the volume adjustments matching a custom profile would be selected, but the dropdown would not show the profile as selected
+-   Custom equalizer profile sorting is now case insensitive
+
+### Android
+
+#### Features
+
+-   Add custom equalizer profile importing/exporting
+-   Show the title of the current screen rather than the device's name in the header bar
+
+#### Fixes
+
+-   To resolve inconsistent transition animations, use slides everywhere
+-   Custom equalizer profile duplicate detection issues
+
+### Web
+
+#### Features
+
+-   Add custom equalizer profile importing/exporting
+
+#### Fixes
+
+-   Accesibility issues
+
 ## v1.12.0
 
 ### CLI
