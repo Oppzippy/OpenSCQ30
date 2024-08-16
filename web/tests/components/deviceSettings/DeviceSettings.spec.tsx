@@ -84,7 +84,7 @@ describe("Device Settings", () => {
         serialNumber: null,
         ambientSoundModeCycle: null,
       }),
-      connect: vi.fn<unknown[], unknown>(),
+      connect: vi.fn<() => void>(),
       async setSoundModes(soundModes: SoundModes) {
         this.state.next({
           ...this.state.value,
