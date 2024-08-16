@@ -152,7 +152,7 @@ dependencies {
     // Optional - Integration with ViewModels
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     // Compose navigation
-    implementation("androidx.navigation:navigation-compose:2.8.0-beta06")
+    implementation("androidx.navigation:navigation-compose:2.8.0-beta07")
 
     val accompanistVersion = "0.34.0"
     implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
@@ -164,14 +164,14 @@ dependencies {
     ksp("androidx.room:room-compiler:$roomVersion")
     androidTestImplementation("androidx.room:room-testing:$roomVersion")
 
-    val protobufVersion = "4.27.2"
+    val protobufVersion = "4.27.3"
     implementation("com.google.protobuf:protobuf-java:$protobufVersion")
     implementation("com.google.protobuf:protobuf-kotlin:$protobufVersion")
     protobuf(files("../../lib_protobuf/protobuf/"))
 
     implementation("net.java.dev.jna:jna:5.14.0@aar")
 
-    val hiltVersion = "2.51.1"
+    val hiltVersion = "2.52"
     implementation("com.google.dagger:hilt-android:$hiltVersion")
     kapt("com.google.dagger:hilt-android-compiler:$hiltVersion")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
@@ -189,7 +189,7 @@ dependencies {
     val mockkVersion = "1.13.12"
     testImplementation("io.mockk:mockk:$mockkVersion")
     androidTestImplementation("io.mockk:mockk-android:$mockkVersion")
-    androidTestImplementation("androidx.test:runner:1.6.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
     androidTestImplementation("androidx.test:core-ktx:1.6.1")
     androidTestImplementation("androidx.test:rules:1.6.1")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
