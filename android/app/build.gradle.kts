@@ -152,7 +152,7 @@ dependencies {
     // Optional - Integration with ViewModels
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     // Compose navigation
-    implementation("androidx.navigation:navigation-compose:2.8.0-beta07")
+    implementation("androidx.navigation:navigation-compose:2.8.0-beta06")
 
     val accompanistVersion = "0.34.0"
     implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
