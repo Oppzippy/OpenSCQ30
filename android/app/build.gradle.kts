@@ -253,6 +253,8 @@ tasks.create<Exec>("generate-uniffi-bindings") {
         "kotlin",
         "--out-dir",
         "${layout.buildDirectory.get()}/generated/source/uniffi/java",
+        "--config",
+        "${layout.projectDirectory.asFile.parentFile.path}/uniffi.toml",
     )
 }
 tasks.withType<JavaCompile> {
