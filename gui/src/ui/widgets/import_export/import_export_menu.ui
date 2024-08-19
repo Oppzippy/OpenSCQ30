@@ -14,7 +14,7 @@
                                 <signal name="activated" handler="handle_export_equalizer_profiles_clicked" swapped="true" />
                                 <child>
                                     <object class="GtkImage">
-                                        <property name="icon-name">go-next</property>
+                                        <property name="icon-name">go-next-symbolic</property>
                                     </object>
                                 </child>
                             </object>
@@ -26,7 +26,7 @@
                                 <signal name="activated" handler="handle_import_equalizer_profiles_clicked" swapped="true" />
                                 <child>
                                     <object class="GtkImage">
-                                        <property name="icon-name">go-next</property>
+                                        <property name="icon-name">go-next-symbolic</property>
                                     </object>
                                 </child>
                             </object>

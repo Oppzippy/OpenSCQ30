@@ -131,7 +131,7 @@ mod imp {
                     ));
 
                     let edit_button = gtk::Button::new();
-                    edit_button.set_icon_name("document-edit");
+                    edit_button.set_icon_name("document-edit-symbolic");
                     edit_button.connect_clicked(clone!(
                         #[weak(rename_to=this)]
                         self,
@@ -144,7 +144,7 @@ mod imp {
                     row.add_suffix(&edit_button);
 
                     let delete_button = gtk::Button::new();
-                    delete_button.set_icon_name("edit-delete");
+                    delete_button.set_icon_name("edit-delete-symbolic");
                     delete_button.connect_clicked(clone!(
                         #[weak(rename_to=this)]
                         self,

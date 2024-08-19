@@ -6,7 +6,7 @@
             <object class="GtkCenterBox">
                 <property name="start-widget">
                     <object class="GtkButton" id="back_button">
-                        <property name="icon-name">go-previous</property>
+                        <property name="icon-name">go-previous-symbolic</property>
                         <signal name="clicked" handler="handle_reset" swapped="true" />
                         <style>
                             <class name="import-export__back-button" />
