@@ -5,3 +5,13 @@
 .general-settings__heading-small:not(:first-child) {
     margin-top: 1.2em;
 }
+
+.import-export__back-button:not(:hover):not(:active) {
+    background: none;
+}
+
+.import-export__title {
+    font-weight: 700;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}

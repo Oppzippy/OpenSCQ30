@@ -6,7 +6,7 @@
                 <property name="vexpand">true</property>
                 <child>
                     <object class="AdwPreferencesGroup" id="profile_list">
-                        <property name="title" translatable="yes">Export Profiles</property>
+                        <property name="title" translatable="yes">Actions</property>
                         <child>
                             <object class="AdwActionRow">
                                 <property name="title" translatable="yes">Export Equalizer Profiles</property>

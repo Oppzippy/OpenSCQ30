@@ -34,8 +34,10 @@ impl ImportExport {
 mod imp {
     use std::cell::OnceCell;
 
+    use adw::prelude::*;
     use gtk::{
         glib,
+        prelude::ObjectExt,
         subclass::{
             prelude::*,
             widget::{CompositeTemplateClass, CompositeTemplateInitializingExt, WidgetImpl},
@@ -56,6 +58,10 @@ mod imp {
     #[template(resource = "/com/oppzippy/OpenSCQ30/ui/widgets/import_export.ui")]
     pub struct ImportExport {
         sender: OnceCell<UnboundedSender<Action>>,
+        #[template_child]
+        title: TemplateChild<gtk::Label>,
+        #[template_child]
+        back_button: TemplateChild<gtk::Button>,
         #[template_child]
         navigation: TemplateChild<adw::NavigationView>,
         #[template_child]
@@ -135,7 +141,20 @@ mod imp {
         }
     }
 
-    impl ObjectImpl for ImportExport {}
+    impl ObjectImpl for ImportExport {
+        fn constructed(&self) {
+            self.navigation
+                .bind_property("visible-page", &self.title.get(), "label")
+                .transform_to(|_, page: adw::NavigationPage| Some(page.title()))
+                .sync_create()
+                .build();
+            self.navigation
+                .bind_property("visible-page", &self.back_button.get(), "visible")
+                .transform_to(|_, page: adw::NavigationPage| page.tag().map(|tag| tag != "menu"))
+                .sync_create()
+                .build();
+        }
+    }
     impl WidgetImpl for ImportExport {}
     impl BoxImpl for ImportExport {}
 }
