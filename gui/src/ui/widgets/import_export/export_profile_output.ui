@@ -19,10 +19,15 @@
             </object>
         </child>
         <child>
-            <object class="GtkTextView" id="text_view">
-                <property name="editable">false</property>
-                <property name="accepts-tab">false</property>
-                <property name="wrap-mode">GTK_WRAP_CHAR</property>
+            <object class="GtkScrolledWindow">
+                <property name="vexpand">true</property>
+                <child>
+                    <object class="GtkTextView" id="text_view">
+                        <property name="editable">false</property>
+                        <property name="accepts-tab">false</property>
+                        <property name="wrap-mode">GTK_WRAP_CHAR</property>
+                    </object>
+                </child>
             </object>
         </child>
     </template>
