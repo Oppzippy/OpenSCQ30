@@ -12,12 +12,13 @@
 
 #### Features
 
--   Add custom equalizer profile exporting
+-   Add custom equalizer profile importing/exporting
 
 #### Fixes
 
 -   Fix some circumstances where the volume adjustments matching a custom profile would be selected, but the dropdown would not show the profile as selected
 -   Custom equalizer profile sorting is now case insensitive
+-   Icon colors now adapt when using dark theme
 
 ### Android
 
