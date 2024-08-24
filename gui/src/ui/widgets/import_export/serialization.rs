@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::objects::GlibCustomEqualizerProfile;
 
 #[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct IOCustomEqualizerProfile {
     pub name: String,
     pub volume_adjustments: Arc<[f64]>,
