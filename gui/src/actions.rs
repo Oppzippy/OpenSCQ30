@@ -3,6 +3,7 @@ mod create_custom_equalizer_profile;
 mod create_quick_preset;
 mod delete_custom_equalizer_profile;
 mod delete_quick_preset;
+mod import_custom_equalizer_profiles;
 mod refresh_custom_equalizer_profiles;
 mod refresh_devices;
 mod refresh_quick_presets;
@@ -25,6 +26,7 @@ pub use create_custom_equalizer_profile::*;
 pub use create_quick_preset::*;
 pub use delete_custom_equalizer_profile::*;
 pub use delete_quick_preset::*;
+pub use import_custom_equalizer_profiles::*;
 use macaddr::MacAddr6;
 use openscq30_lib::devices::standard::{
     state::DeviceState,
@@ -80,4 +82,8 @@ pub enum Action {
     SetHearId(HearId),
     SetCustomButtonModel(CustomButtonModel),
     SetAmbientSoundModeCycle(AmbientSoundModeCycle),
+    ImportCustomEqualizerProfiles {
+        profiles: Vec<GlibCustomEqualizerProfile>,
+        overwrite: bool,
+    },
 }

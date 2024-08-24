@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <template class="OpenSCQ30ImportProfileSelectionRow" parent="AdwExpanderRow">
+        <property name="show-enable-switch">true</property>
+        <child>
+            <object class="AdwSwitchRow" id="rename_switch">
+                <property name="title" translatable="yes">Rename</property>
+            </object>
+        </child>
+        <child>
+            <object class="AdwEntryRow" id="rename_entry">
+                <property name="title" translatable="yes">Name</property>
+                <property name="visible" bind-source="rename_switch" bind-property="active" bind-flags="sync-create" />
+            </object>
+        </child>
+    </template>
+</interface>

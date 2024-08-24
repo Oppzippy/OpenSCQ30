@@ -59,6 +59,28 @@
                         </property>
                     </object>
                 </child>
+                <child>
+                    <object class="AdwNavigationPage">
+                        <property name="title" translatable="yes">Import Profiles</property>
+                        <property name="tag">equalizer-profiles-import-string</property>
+                        <property name="child">
+                            <object class="OpenSCQ30ImportProfileString" id="import_profile_string">
+                                <signal name="next" handler="navigate_to_equalizer_profiles_import_selection" swapped="true" />
+                            </object>
+                        </property>
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwNavigationPage">
+                        <property name="title" translatable="yes">Select Profiles</property>
+                        <property name="tag">equalizer-profiles-import-selection</property>
+                        <property name="child">
+                            <object class="OpenSCQ30ImportProfileSelection" id="import_profile_selection">
+                                <signal name="next" handler="handle_import_profiles" swapped="true" />
+                            </object>
+                        </property>
+                    </object>
+                </child>
             </object>
         </child>
     </template>

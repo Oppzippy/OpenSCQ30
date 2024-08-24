@@ -111,6 +111,7 @@ mod imp {
             self.hear_id.set_sender(sender.clone());
             self.quick_presets.set_sender(sender.clone());
             self.buttons.set_sender(sender.clone());
+            self.import_export.set_sender(sender.clone());
         }
     }
 

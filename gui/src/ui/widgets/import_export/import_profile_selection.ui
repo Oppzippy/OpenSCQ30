@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <template class="OpenSCQ30ImportProfileSelection" parent="GtkBox">
+        <child>
+            <object class="GtkScrolledWindow">
+                <property name="vexpand">true</property>
+                <property name="hexpand">true</property>
+                <child>
+                    <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <child>
+                            <object class="GtkButton">
+                                <property name="label" translatable="yes">Import</property>
+                                <signal name="clicked" handler="handle_import_clicked" swapped="true" />
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwPreferencesGroup">
+                                <property name="title" translatable="yes">Import Options</property>
+                                <child>
+                                    <object class="AdwSwitchRow" id="overwrite_switch">
+                                        <property name="title" translatable="yes">Overwrite Existing Profiles</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwPreferencesGroup" id="profile_selection_group">
+                                <property name="title" translatable="yes">Profiles</property>
+                                <property name="description" translatable="yes">Select profiles to import</property>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+            </object>
+        </child>
+    </template>
+</interface>

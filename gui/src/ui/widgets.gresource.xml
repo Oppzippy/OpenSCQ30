@@ -11,6 +11,9 @@
         <file compressed="true" preprocess="xml-stripblanks">widgets/import_export.ui</file>
         <file compressed="true" preprocess="xml-stripblanks">widgets/import_export/export_profile_selection.ui</file>
         <file compressed="true" preprocess="xml-stripblanks">widgets/import_export/export_profile_output.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">widgets/import_export/import_profile_string.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">widgets/import_export/import_profile_selection.ui</file>
+        <file compressed="true" preprocess="xml-stripblanks">widgets/import_export/import_profile_selection_row.ui</file>
         <file compressed="true" preprocess="xml-stripblanks">widgets/import_export/import_export_menu.ui</file>
         <file compressed="true" preprocess="xml-stripblanks">widgets/loading_screen.ui</file>
         <file compressed="true" preprocess="xml-stripblanks">widgets/selected_device_settings.ui</file>

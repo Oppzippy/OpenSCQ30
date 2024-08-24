@@ -440,6 +440,15 @@ fn delayed_initialize_application(
                                 .await
                                 .context("set ambient sound mode cycle")
                         }
+                        Action::ImportCustomEqualizerProfiles {
+                            profiles,
+                            overwrite,
+                        } => actions::import_custom_equalizer_profiles(
+                            &state,
+                            &settings.config,
+                            &profiles,
+                            overwrite,
+                        ),
                     };
 
                     if let Err(err) = result {

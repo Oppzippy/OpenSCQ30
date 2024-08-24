@@ -1,6 +1,9 @@
 mod export_profile_output;
 mod export_profile_selection;
 mod import_export_menu;
+mod import_profile_selection;
+mod import_profile_selection_row;
+mod import_profile_string;
 mod serialization;
 
 use gtk::{
@@ -51,7 +54,8 @@ mod imp {
     use super::{
         export_profile_output::ExportProfileOutput,
         export_profile_selection::ExportProfileSelection, import_export_menu::ImportExportMenu,
-        serialization::IOCustomEqualizerProfile,
+        import_profile_selection::ImportProfileSelection,
+        import_profile_string::ImportProfileString, serialization::IOCustomEqualizerProfile,
     };
 
     #[derive(Default, CompositeTemplate)]
@@ -70,6 +74,10 @@ mod imp {
         export_profile_selection: TemplateChild<ExportProfileSelection>,
         #[template_child]
         export_profile_output: TemplateChild<ExportProfileOutput>,
+        #[template_child]
+        import_profile_string: TemplateChild<ImportProfileString>,
+        #[template_child]
+        import_profile_selection: TemplateChild<ImportProfileSelection>,
     }
 
     #[template_callbacks]
@@ -81,11 +89,14 @@ mod imp {
         #[template_callback]
         fn start_equalizer_profile_export_flow(&self, _: ImportExportMenu) {
             self.navigation
-                .push_by_tag("equalizer-profiles-export-profile-selection")
+                .push_by_tag("equalizer-profiles-export-profile-selection");
         }
 
         #[template_callback]
-        fn start_equalizer_profile_import_flow(&self, _: ImportExportMenu) {}
+        fn start_equalizer_profile_import_flow(&self, _: ImportExportMenu) {
+            self.navigation
+                .push_by_tag("equalizer-profiles-import-string");
+        }
 
         #[template_callback]
         fn navigate_to_equalizer_profiles_export_json(
@@ -114,9 +125,37 @@ mod imp {
         }
 
         #[template_callback]
+        fn navigate_to_equalizer_profiles_import_selection(&self, _: ImportProfileString) {
+            if let Some(profiles) = self.import_profile_string.profiles_or_show_parse_error() {
+                self.import_profile_selection.set_profiles(profiles);
+                self.navigation
+                    .push_by_tag("equalizer-profiles-import-selection");
+            }
+        }
+
+        #[template_callback]
+        fn handle_import_profiles(&self, _: ImportProfileSelection) {
+            self.sender
+                .get()
+                .unwrap()
+                .send(Action::ImportCustomEqualizerProfiles {
+                    profiles: self.import_profile_selection.selected_profiles(),
+                    overwrite: self.import_profile_selection.should_overwrite(),
+                })
+                .unwrap();
+            self.reset();
+        }
+
+        #[template_callback]
         fn handle_reset(&self, _: Widget) {
+            self.reset();
+        }
+
+        fn reset(&self) {
             self.export_profile_selection.imp().reset();
             self.export_profile_output.imp().reset();
+            self.import_profile_string.imp().reset();
+            self.import_profile_selection.imp().reset();
             self.navigation.pop_to_tag("menu");
         }
 
