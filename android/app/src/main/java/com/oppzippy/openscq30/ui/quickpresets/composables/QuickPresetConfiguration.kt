@@ -113,7 +113,8 @@ fun QuickPresetConfiguration(
                     NoiseCancelingModeSelection(
                         noiseCancelingMode = noiseCancelingMode,
                         onNoiseCancelingModeChange = onNoiseCancelingModeChange,
-                        hasCustomNoiseCanceling = soundModeProfile.noiseCancelingModeType == NoiseCancelingModeType.Custom,
+                        hasCustomNoiseCanceling =
+                        soundModeProfile.noiseCancelingModeType == NoiseCancelingModeType.Custom,
                     )
                 }
                 HorizontalDivider()

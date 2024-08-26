@@ -4,6 +4,5 @@ import com.oppzippy.openscq30.lib.bindings.newEqualizerConfigurationFromPresetPr
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.PresetEqualizerProfile
 
-fun PresetEqualizerProfile.toEqualizerConfiguration(): EqualizerConfiguration {
-    return newEqualizerConfigurationFromPresetProfile(this)
-}
+fun PresetEqualizerProfile.toEqualizerConfiguration(): EqualizerConfiguration =
+    newEqualizerConfigurationFromPresetProfile(this)

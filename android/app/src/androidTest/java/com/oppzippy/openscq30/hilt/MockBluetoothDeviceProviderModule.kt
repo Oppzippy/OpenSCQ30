@@ -17,7 +17,5 @@ import javax.inject.Singleton
 object MockBluetoothDeviceProviderModule {
     @Provides
     @Singleton
-    fun provideBluetoothDeviceProvider(): BluetoothDeviceProvider {
-        return mockk()
-    }
+    fun provideBluetoothDeviceProvider(): BluetoothDeviceProvider = mockk()
 }

@@ -4,8 +4,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import kotlinx.coroutines.flow.Flow
 import java.util.UUID
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface QuickPresetDao {
@@ -30,7 +30,9 @@ interface QuickPresetDao {
     @Query("DELETE FROM quick_preset WHERE deviceBleServiceUuid = :deviceBleServiceUuid AND `index` = :index")
     suspend fun delete(deviceBleServiceUuid: UUID, index: Int)
 
-    @Query("SELECT `index`, name FROM quick_preset WHERE deviceBleServiceUuid = :deviceBleServiceUuid ORDER BY `index` ASC")
+    @Query(
+        "SELECT `index`, name FROM quick_preset WHERE deviceBleServiceUuid = :deviceBleServiceUuid ORDER BY `index` ASC",
+    )
     fun allNames(deviceBleServiceUuid: UUID): Flow<List<QuickPresetIndexAndName>>
 }
 

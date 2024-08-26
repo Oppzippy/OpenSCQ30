@@ -1,10 +1,10 @@
 package com.oppzippy.openscq30.features.quickpresets.storage
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 
 @Singleton
 class QuickPresetRepository @Inject constructor(private val quickPresetDao: QuickPresetDao) {

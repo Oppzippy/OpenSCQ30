@@ -11,7 +11,9 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
+import java.util.UUID
 import junit.framework.TestCase.assertEquals
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,8 +23,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.util.UUID
-import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(FlowPreview::class)
 class DeviceServiceConnectionTest {

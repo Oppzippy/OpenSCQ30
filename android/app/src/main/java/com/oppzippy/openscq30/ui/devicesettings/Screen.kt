@@ -50,8 +50,4 @@ sealed class Screen {
     }
 }
 
-data class ScreenInfo(
-    val baseRoute: Screen,
-    @StringRes val nameResourceId: Int,
-    val icon: ImageVector,
-)
+data class ScreenInfo(val baseRoute: Screen, @StringRes val nameResourceId: Int, val icon: ImageVector)

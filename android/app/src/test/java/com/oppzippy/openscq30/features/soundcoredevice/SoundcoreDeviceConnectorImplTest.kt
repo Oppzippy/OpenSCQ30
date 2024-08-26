@@ -22,6 +22,11 @@ import io.mockk.mockkConstructor
 import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.verify
+import java.util.UUID
+import java.util.concurrent.TimeoutException
+import kotlin.reflect.jvm.kotlinFunction
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,11 +39,6 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.util.UUID
-import java.util.concurrent.TimeoutException
-import kotlin.reflect.jvm.kotlinFunction
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.seconds
 
 class SoundcoreDeviceConnectorImplTest {
     @get:Rule

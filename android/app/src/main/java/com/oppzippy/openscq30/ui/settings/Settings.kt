@@ -13,9 +13,7 @@ import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 import com.oppzippy.openscq30.ui.utils.CheckboxWithLabel
 
 @Composable
-fun Settings(
-    viewModel: SettingsViewModel = hiltViewModel(),
-) {
+fun Settings(viewModel: SettingsViewModel = hiltViewModel()) {
     val autoConnect by viewModel.autoConnect.collectAsState()
     Settings(
         autoConnect = autoConnect,

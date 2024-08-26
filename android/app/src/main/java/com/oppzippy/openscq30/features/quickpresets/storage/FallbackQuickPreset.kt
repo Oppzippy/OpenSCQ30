@@ -21,16 +21,14 @@ data class FallbackQuickPreset(
     val presetEqualizerProfile: PresetEqualizerProfile? = null,
     val customEqualizerProfileName: String? = null,
 ) {
-    fun toQuickPreset(deviceBleServiceUuid: UUID): QuickPreset {
-        return QuickPreset(
-            deviceBleServiceUuid = deviceBleServiceUuid,
-            index,
-            name,
-            ambientSoundMode,
-            noiseCancelingMode,
-            transparencyMode,
-            customNoiseCanceling,
-            presetEqualizerProfile,
-        )
-    }
+    fun toQuickPreset(deviceBleServiceUuid: UUID): QuickPreset = QuickPreset(
+        deviceBleServiceUuid = deviceBleServiceUuid,
+        index,
+        name,
+        ambientSoundMode,
+        noiseCancelingMode,
+        transparencyMode,
+        customNoiseCanceling,
+        presetEqualizerProfile,
+    )
 }

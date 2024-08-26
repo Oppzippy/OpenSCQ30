@@ -27,9 +27,7 @@ import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
-fun OpenSCQ30Root(
-    viewModel: DeviceSettingsViewModel = hiltViewModel(),
-) {
+fun OpenSCQ30Root(viewModel: DeviceSettingsViewModel = hiltViewModel()) {
     val context = LocalContext.current
 
     OpenSCQ30Theme {
@@ -45,9 +43,11 @@ fun OpenSCQ30Root(
                 targetState = isConnected,
                 transitionSpec = {
                     val widthDivisor = if (targetState) 2 else -2
-                    slideInHorizontally { width -> width / widthDivisor } + fadeIn() togetherWith slideOutHorizontally { width -> width / -widthDivisor } + fadeOut() using SizeTransform(
-                        clip = false,
-                    )
+                    slideInHorizontally { width -> width / widthDivisor } + fadeIn() togetherWith
+                        slideOutHorizontally { width -> width / -widthDivisor } + fadeOut() using
+                        SizeTransform(
+                            clip = false,
+                        )
                 },
                 label = "Selection to Settings animation",
             ) { animationIsConnected ->

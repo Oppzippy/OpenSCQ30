@@ -10,12 +10,7 @@ import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
-fun DeleteCustomProfileDialog(
-    isOpen: Boolean,
-    profileName: String,
-    onDismiss: () -> Unit,
-    onDelete: () -> Unit,
-) {
+fun DeleteCustomProfileDialog(isOpen: Boolean, profileName: String, onDismiss: () -> Unit, onDelete: () -> Unit) {
     if (isOpen) {
         AlertDialog(
             onDismissRequest = onDismiss,

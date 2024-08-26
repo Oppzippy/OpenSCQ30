@@ -12,9 +12,5 @@ import javax.inject.Singleton
 class CustomProfileDaoModule {
     @Provides
     @Singleton
-    fun provideCustomProfileDao(
-        database: AppDatabase,
-    ): CustomProfileDao {
-        return database.equalizerCustomProfileDao()
-    }
+    fun provideCustomProfileDao(database: AppDatabase): CustomProfileDao = database.equalizerCustomProfileDao()
 }

@@ -7,6 +7,8 @@ import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
 import com.oppzippy.openscq30.lib.wrapper.CustomButtonModel
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.SoundModes
+import java.lang.Exception
+import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,8 +18,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.lang.Exception
-import javax.inject.Inject
 
 class DeviceConnectionManager @Inject constructor(
     private val deviceConnector: SoundcoreDeviceConnector,
@@ -91,14 +91,12 @@ class DeviceConnectionManager @Inject constructor(
         }
     }
 
-    private fun getMacAddress(): String? {
-        return connectionStateFlow.value.let { state ->
-            when (state) {
-                ConnectionStatus.AwaitingConnection -> null
-                is ConnectionStatus.Connecting -> state.macAddress
-                is ConnectionStatus.Connected -> state.device.macAddress
-                ConnectionStatus.Disconnected -> null
-            }
+    private fun getMacAddress(): String? = connectionStateFlow.value.let { state ->
+        when (state) {
+            ConnectionStatus.AwaitingConnection -> null
+            is ConnectionStatus.Connecting -> state.macAddress
+            is ConnectionStatus.Connected -> state.device.macAddress
+            ConnectionStatus.Disconnected -> null
         }
     }
 

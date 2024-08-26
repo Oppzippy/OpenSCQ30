@@ -45,46 +45,32 @@ data class ButtonActions(
     val rightDoubleClick: ButtonAction?,
     val rightLongPress: ButtonAction?,
 ) {
-    fun toCustomButtonModel(prevModel: CustomButtonModel): CustomButtonModel {
-        return CustomButtonModel(
-            leftSingleClick = noTwsButtonAction(prevModel.leftSingleClick, leftSingleClick),
-            leftDoubleClick = twsButtonAction(prevModel.leftDoubleClick, leftDoubleClick),
-            leftLongPress = twsButtonAction(prevModel.leftLongPress, leftLongPress),
-            rightSingleClick = noTwsButtonAction(prevModel.rightSingleClick, rightSingleClick),
-            rightDoubleClick = twsButtonAction(prevModel.rightDoubleClick, rightDoubleClick),
-            rightLongPress = twsButtonAction(prevModel.rightLongPress, rightLongPress),
-        )
-    }
+    fun toCustomButtonModel(prevModel: CustomButtonModel): CustomButtonModel = CustomButtonModel(
+        leftSingleClick = noTwsButtonAction(prevModel.leftSingleClick, leftSingleClick),
+        leftDoubleClick = twsButtonAction(prevModel.leftDoubleClick, leftDoubleClick),
+        leftLongPress = twsButtonAction(prevModel.leftLongPress, leftLongPress),
+        rightSingleClick = noTwsButtonAction(prevModel.rightSingleClick, rightSingleClick),
+        rightDoubleClick = twsButtonAction(prevModel.rightDoubleClick, rightDoubleClick),
+        rightLongPress = twsButtonAction(prevModel.rightLongPress, rightLongPress),
+    )
 
-    private fun noTwsButtonAction(
-        prevAction: NoTwsButtonAction,
-        action: ButtonAction?,
-    ): NoTwsButtonAction {
-        return NoTwsButtonAction(
+    private fun noTwsButtonAction(prevAction: NoTwsButtonAction, action: ButtonAction?): NoTwsButtonAction =
+        NoTwsButtonAction(
             isEnabled = action != null,
             action = action ?: prevAction.action,
         )
-    }
 
-    private fun twsButtonAction(
-        prevAction: TwsButtonAction,
-        action: ButtonAction?,
-    ): TwsButtonAction {
-        return TwsButtonAction(
-            isEnabled = action != null,
-            twsConnectedAction = action
-                ?: prevAction.twsConnectedAction,
-            twsDisconnectedAction = action
-                ?: prevAction.twsDisconnectedAction,
-        )
-    }
+    private fun twsButtonAction(prevAction: TwsButtonAction, action: ButtonAction?): TwsButtonAction = TwsButtonAction(
+        isEnabled = action != null,
+        twsConnectedAction = action
+            ?: prevAction.twsConnectedAction,
+        twsDisconnectedAction = action
+            ?: prevAction.twsDisconnectedAction,
+    )
 }
 
 @Composable
-fun ButtonActionSelection(
-    buttonActions: ButtonActions,
-    onChange: (ButtonActions) -> Unit,
-) {
+fun ButtonActionSelection(buttonActions: ButtonActions, onChange: (ButtonActions) -> Unit) {
     val scrollState = rememberScrollState()
     Column(
         Modifier
@@ -126,11 +112,7 @@ fun ButtonActionSelection(
 }
 
 @Composable
-private fun ButtonActionRow(
-    label: String,
-    action: ButtonAction?,
-    onChange: (ButtonAction?) -> Unit,
-) {
+private fun ButtonActionRow(label: String, action: ButtonAction?, onChange: (ButtonAction?) -> Unit) {
     var isDialogOpen by remember { mutableStateOf(false) }
     if (isDialogOpen) {
         ButtonActionSelectionDialog(
@@ -163,10 +145,7 @@ private fun ButtonActionRow(
 }
 
 @Composable
-private fun ButtonActionSelectionDialog(
-    onDismissRequest: () -> Unit,
-    onActionSelected: (ButtonAction?) -> Unit,
-) {
+private fun ButtonActionSelectionDialog(onDismissRequest: () -> Unit, onActionSelected: (ButtonAction?) -> Unit) {
     Dialog(onDismissRequest = onDismissRequest) {
         Card(
             Modifier

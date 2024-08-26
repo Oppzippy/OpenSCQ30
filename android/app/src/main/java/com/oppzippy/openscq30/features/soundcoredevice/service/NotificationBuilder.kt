@@ -20,10 +20,7 @@ import javax.inject.Inject
 
 @ServiceScoped
 class NotificationBuilder @Inject constructor(private val context: Service) {
-    operator fun invoke(
-        status: ConnectionStatus,
-        quickPresetNames: List<String?>,
-    ): Notification {
+    operator fun invoke(status: ConnectionStatus, quickPresetNames: List<String?>): Notification {
         val openAppIntent = Intent(context, MainActivity::class.java)
         openAppIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
@@ -114,12 +111,8 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
         return builder.build()
     }
 
-    private fun buildQuickPresetNotificationAction(
-        presetId: Int,
-        name: String?,
-        icon: Icon,
-    ): Notification.Action {
-        return Notification.Action.Builder(
+    private fun buildQuickPresetNotificationAction(presetId: Int, name: String?, icon: Icon): Notification.Action =
+        Notification.Action.Builder(
             icon,
             name ?: context.getString(R.string.quick_preset_number, presetId + 1),
             PendingIntent.getBroadcast(
@@ -133,5 +126,4 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
             ),
         ).build()
-    }
 }

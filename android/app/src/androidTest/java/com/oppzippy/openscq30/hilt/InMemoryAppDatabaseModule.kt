@@ -19,11 +19,8 @@ import javax.inject.Singleton
 object InMemoryAppDatabaseModule {
     @Provides
     @Singleton
-    fun provideAppDatabase(
-        @ApplicationContext context: Context,
-    ): AppDatabase {
-        return Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
+    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
+        Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
             .addMigrations(migrations = AppDatabase.migrations.toTypedArray())
             .build()
-    }
 }

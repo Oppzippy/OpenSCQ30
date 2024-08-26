@@ -19,11 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
-data class DropdownOption<T>(
-    val value: T,
-    val label: @Composable () -> Unit,
-    val name: String,
-)
+data class DropdownOption<T>(val value: T, val label: @Composable () -> Unit, val name: String)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

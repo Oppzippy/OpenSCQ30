@@ -10,6 +10,7 @@ import com.oppzippy.openscq30.lib.wrapper.CustomButtonModel
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.SoundModes
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
+import java.lang.ref.WeakReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -18,11 +19,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.lang.ref.WeakReference
 
-class DeviceServiceConnection(
-    private val unbind: () -> Unit,
-) : ServiceConnection {
+class DeviceServiceConnection(private val unbind: () -> Unit) : ServiceConnection {
     val uiDeviceStateFlow = MutableStateFlow<UiDeviceState>(UiDeviceState.Disconnected)
     private var serviceConnectionScope: CoroutineScope? = null
     private var service: WeakReference<DeviceService>? = null

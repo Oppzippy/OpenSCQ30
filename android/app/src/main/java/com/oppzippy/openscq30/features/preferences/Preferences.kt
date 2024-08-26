@@ -5,9 +5,7 @@ import androidx.core.content.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-class Preferences @Inject constructor(
-    @ApplicationContext context: Context,
-) {
+class Preferences @Inject constructor(@ApplicationContext context: Context) {
     private val preferences = context.getSharedPreferences("preferences", Context.MODE_PRIVATE)
 
     var autoConnect: Boolean

@@ -15,8 +15,8 @@ import com.oppzippy.openscq30.lib.wrapper.SoundModes
 import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
+import kotlinx.coroutines.flow.asStateFlow
 
 @HiltViewModel
 class DeviceSettingsViewModel @Inject constructor(

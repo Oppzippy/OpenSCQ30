@@ -27,13 +27,13 @@ import com.oppzippy.openscq30.ui.quickpresets.QuickPresetScreen
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.junit4.MockKRule
+import java.util.UUID
+import javax.inject.Inject
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.util.UUID
-import javax.inject.Inject
 
 @HiltAndroidTest
 class DeviceSettingsQuickPresetsTest {
@@ -293,7 +293,5 @@ class DeviceSettingsQuickPresetsTest {
         )
     }
 
-    private suspend fun getFirstPreset(): QuickPreset? {
-        return quickPresetRepository.getForDevice(deviceUuid).getOrNull(0)
-    }
+    private suspend fun getFirstPreset(): QuickPreset? = quickPresetRepository.getForDevice(deviceUuid).getOrNull(0)
 }

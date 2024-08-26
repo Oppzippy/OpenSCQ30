@@ -11,6 +11,10 @@ import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.equalizer.models.EqualizerProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.math.BigDecimal
+import java.math.RoundingMode
+import javax.inject.Inject
+import kotlin.math.roundToInt
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,16 +25,10 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
-import java.math.BigDecimal
-import java.math.RoundingMode
-import javax.inject.Inject
-import kotlin.math.roundToInt
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @HiltViewModel
-class EqualizerSettingsViewModel @Inject constructor(
-    private val customProfileDao: CustomProfileDao,
-) : ViewModel() {
+class EqualizerSettingsViewModel @Inject constructor(private val customProfileDao: CustomProfileDao) : ViewModel() {
     private val _displayedEqualizerConfiguration: MutableStateFlow<EqualizerConfiguration?> =
         MutableStateFlow(null)
     val displayedEqualizerConfiguration = _displayedEqualizerConfiguration.asStateFlow()
@@ -81,10 +79,7 @@ class EqualizerSettingsViewModel @Inject constructor(
         }
     }
 
-    private fun setDisplayedEqualizerConfiguration(
-        profile: EqualizerProfile,
-        values: List<Double>,
-    ) {
+    private fun setDisplayedEqualizerConfiguration(profile: EqualizerProfile, values: List<Double>) {
         // Values match the display, not the profile. Creating the rust EqualizerConfiguration first
         // will use proper values.
         val configuration = profile.toEqualizerConfiguration(values)

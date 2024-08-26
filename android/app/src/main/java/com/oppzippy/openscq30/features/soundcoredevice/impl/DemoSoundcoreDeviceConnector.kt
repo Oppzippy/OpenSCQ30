@@ -2,8 +2,8 @@ package com.oppzippy.openscq30.features.soundcoredevice.impl
 
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceConnector
 import com.oppzippy.openscq30.lib.bindings.newDemoSoundcoreDevice
-import kotlinx.coroutines.CoroutineScope
 import java.util.UUID
+import kotlinx.coroutines.CoroutineScope
 
 class DemoSoundcoreDeviceConnector : SoundcoreDeviceConnector {
     @Throws(SecurityException::class)

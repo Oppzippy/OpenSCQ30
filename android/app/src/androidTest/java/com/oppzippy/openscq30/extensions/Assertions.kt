@@ -6,10 +6,8 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import kotlin.math.absoluteValue
 
-fun SemanticsNodeInteraction.assertRangeValueApproxEquals(value: Float): SemanticsNodeInteraction {
-    return assert(
-        SemanticsMatcher("range value approx eq $value") {
-            (it.config[SemanticsProperties.ProgressBarRangeInfo].current - value).absoluteValue < 0.0001f
-        },
-    )
-}
+fun SemanticsNodeInteraction.assertRangeValueApproxEquals(value: Float): SemanticsNodeInteraction = assert(
+    SemanticsMatcher("range value approx eq $value") {
+        (it.config[SemanticsProperties.ProgressBarRangeInfo].current - value).absoluteValue < 0.0001f
+    },
+)

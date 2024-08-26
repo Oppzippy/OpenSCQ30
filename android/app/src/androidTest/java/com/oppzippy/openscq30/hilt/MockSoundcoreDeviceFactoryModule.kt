@@ -17,7 +17,5 @@ import javax.inject.Singleton
 object MockSoundcoreDeviceFactoryModule {
     @Provides
     @Singleton
-    fun provideSoundcoreDeviceFactoryProvider(): SoundcoreDeviceConnector {
-        return mockk()
-    }
+    fun provideSoundcoreDeviceFactoryProvider(): SoundcoreDeviceConnector = mockk()
 }

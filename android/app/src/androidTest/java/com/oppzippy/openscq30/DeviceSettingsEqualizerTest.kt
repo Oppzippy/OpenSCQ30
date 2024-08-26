@@ -31,10 +31,10 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
+import java.util.UUID
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.util.UUID
 
 @HiltAndroidTest
 class DeviceSettingsEqualizerTest {
@@ -65,22 +65,22 @@ class DeviceSettingsEqualizerTest {
         custom = hasTextExactly(composeRule.activity.getString(R.string.custom))
     }
 
-    private fun stateWithEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration): UiDeviceState.Connected {
-        return UiDeviceState.Connected(
-            "Test Device",
-            "00:00:00:00:00:00",
-            DeviceState.empty().copy(
-                soundModes = SoundModes(
-                    AmbientSoundMode.Normal,
-                    NoiseCancelingMode.Indoor,
-                    TransparencyMode.VocalMode,
-                    0u,
-                ),
-                equalizerConfiguration = equalizerConfiguration,
+    private fun stateWithEqualizerConfiguration(
+        equalizerConfiguration: EqualizerConfiguration,
+    ): UiDeviceState.Connected = UiDeviceState.Connected(
+        "Test Device",
+        "00:00:00:00:00:00",
+        DeviceState.empty().copy(
+            soundModes = SoundModes(
+                AmbientSoundMode.Normal,
+                NoiseCancelingMode.Indoor,
+                TransparencyMode.VocalMode,
+                0u,
             ),
-            deviceBleServiceUuid = UUID(0, 0),
-        )
-    }
+            equalizerConfiguration = equalizerConfiguration,
+        ),
+        deviceBleServiceUuid = UUID(0, 0),
+    )
 
     @Test
     fun selectsInitialEqualizerPresetProfileByDefault() {
@@ -154,7 +154,9 @@ class DeviceSettingsEqualizerTest {
 
         composeRule.setContent {
             EqualizerSettings(
-                uiState = stateWithEqualizerConfiguration(PresetEqualizerProfile.SoundcoreSignature.toEqualizerConfiguration()),
+                uiState = stateWithEqualizerConfiguration(
+                    PresetEqualizerProfile.SoundcoreSignature.toEqualizerConfiguration(),
+                ),
                 onEqualizerConfigurationChange = onEqualizerConfigurationChange,
             )
         }

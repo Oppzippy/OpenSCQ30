@@ -7,9 +7,8 @@ import androidx.annotation.RequiresPermission
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-class BluetoothDeviceProviderImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
-) : BluetoothDeviceProvider {
+class BluetoothDeviceProviderImpl @Inject constructor(@ApplicationContext private val context: Context) :
+    BluetoothDeviceProvider {
     /**
      * The caller is responsible for checking for bluetooth permission
      */

@@ -10,18 +10,23 @@ import com.oppzippy.openscq30.lib.bindings.MacAddr6
 import com.oppzippy.openscq30.lib.bindings.ManualConnection
 import com.oppzippy.openscq30.lib.bindings.Uuid
 import com.oppzippy.openscq30.lib.bindings.newSoundcoreDevice
+import java.lang.RuntimeException
+import java.util.concurrent.TimeoutException
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import java.lang.RuntimeException
-import java.util.concurrent.TimeoutException
-import kotlin.time.Duration.Companion.seconds
 
 class SoundcoreDeviceConnectorImpl(
     private val context: Context,
     private val deviceFinder: BluetoothDeviceFinder,
-    private val createManualConnection: (name: String, macAddress: MacAddr6, serviceUuid: Uuid, connectionWriter: ConnectionWriter) -> ManualConnection,
+    private val createManualConnection: (
+        name: String,
+        macAddress: MacAddr6,
+        serviceUuid: Uuid,
+        connectionWriter: ConnectionWriter,
+    ) -> ManualConnection,
 ) : SoundcoreDeviceConnector {
     @Throws(SecurityException::class)
     override suspend fun connectToSoundcoreDevice(

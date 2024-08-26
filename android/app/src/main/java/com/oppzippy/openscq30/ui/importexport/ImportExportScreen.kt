@@ -18,11 +18,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.oppzippy.openscq30.R
 
 @Composable
-fun ImportExportScreen(
-    viewModel: ImportExportViewModel = hiltViewModel(),
-    index: Int,
-    onIndexChange: (Int) -> Unit,
-) {
+fun ImportExportScreen(viewModel: ImportExportViewModel = hiltViewModel(), index: Int, onIndexChange: (Int) -> Unit) {
     val customProfiles by viewModel.customProfiles.collectAsState(emptyList())
 
     fun pushState(state: ImportExportState, index: Int) {
@@ -73,10 +69,7 @@ fun ImportExportScreen(
 }
 
 @Composable
-private fun ActionSelection(
-    customProfiles: List<CustomProfile>,
-    setState: (ImportExportState) -> Unit,
-) {
+private fun ActionSelection(customProfiles: List<CustomProfile>, setState: (ImportExportState) -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,

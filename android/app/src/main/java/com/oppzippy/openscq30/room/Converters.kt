@@ -4,12 +4,8 @@ import androidx.room.TypeConverter
 
 class Converters {
     @TypeConverter
-    fun fromByteList(bytes: List<Byte>): ByteArray {
-        return bytes.toByteArray()
-    }
+    fun fromByteList(bytes: List<Byte>): ByteArray = bytes.toByteArray()
 
     @TypeConverter
-    fun toByteList(bytes: ByteArray): List<Byte> {
-        return bytes.asList()
-    }
+    fun toByteList(bytes: ByteArray): List<Byte> = bytes.asList()
 }

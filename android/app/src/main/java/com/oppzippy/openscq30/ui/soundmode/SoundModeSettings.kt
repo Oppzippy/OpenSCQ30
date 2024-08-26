@@ -64,7 +64,9 @@ fun SoundModeSettings(
                 hasCustomNoiseCanceling = noiseCancelingType == NoiseCancelingType.Custom,
             )
         }
-        if (noiseCancelingType == NoiseCancelingType.Custom && soundModes.noiseCancelingMode == NoiseCancelingMode.Custom) {
+        if (noiseCancelingType == NoiseCancelingType.Custom &&
+            soundModes.noiseCancelingMode == NoiseCancelingMode.Custom
+        ) {
             Spacer(modifier = Modifier.padding(vertical = 8.dp))
             GroupHeader(stringResource(R.string.custom_noise_canceling))
             CustomNoiseCancelingSelection(

@@ -34,35 +34,31 @@ data class DeviceState(
         return false
     }
 
-    fun toProtobuf(): com.oppzippy.openscq30.lib.protobuf.DeviceState {
-        return deviceState {
-            deviceProfile = this@DeviceState.deviceProfile.toProtobuf()
-            battery = this@DeviceState.battery.toProtobuf()
-            equalizerConfiguration = this@DeviceState.equalizerConfiguration.toProtobuf()
-            this@DeviceState.soundModes?.let { soundModes = it.toProtobuf() }
-            this@DeviceState.ageRange?.let { ageRange = it.toInt() }
-            this@DeviceState.gender?.let { gender = it.toInt() }
-            this@DeviceState.hearId?.let { hearId = it.toProtobuf() }
-            this@DeviceState.customButtonModel?.let { customButtonModel = it.toProtobuf() }
-            this@DeviceState.firmwareVersion?.let { firmwareVersion = it.toProtobuf() }
-            this@DeviceState.serialNumber?.let { serialNumber = it }
-            this@DeviceState.ambientSoundModeCycle?.let { ambientSoundModeCycle = it.toProtobuf() }
-        }
+    fun toProtobuf(): com.oppzippy.openscq30.lib.protobuf.DeviceState = deviceState {
+        deviceProfile = this@DeviceState.deviceProfile.toProtobuf()
+        battery = this@DeviceState.battery.toProtobuf()
+        equalizerConfiguration = this@DeviceState.equalizerConfiguration.toProtobuf()
+        this@DeviceState.soundModes?.let { soundModes = it.toProtobuf() }
+        this@DeviceState.ageRange?.let { ageRange = it.toInt() }
+        this@DeviceState.gender?.let { gender = it.toInt() }
+        this@DeviceState.hearId?.let { hearId = it.toProtobuf() }
+        this@DeviceState.customButtonModel?.let { customButtonModel = it.toProtobuf() }
+        this@DeviceState.firmwareVersion?.let { firmwareVersion = it.toProtobuf() }
+        this@DeviceState.serialNumber?.let { serialNumber = it }
+        this@DeviceState.ambientSoundModeCycle?.let { ambientSoundModeCycle = it.toProtobuf() }
     }
 }
 
-fun com.oppzippy.openscq30.lib.protobuf.DeviceState.toKotlin(): DeviceState {
-    return DeviceState(
-        deviceProfile = deviceProfile.toKotlin(),
-        battery = battery.toKotlin(),
-        equalizerConfiguration = equalizerConfiguration.toKotlin(),
-        soundModes = soundModesOrNull?.toKotlin(),
-        ageRange = if (hasAgeRange()) ageRange.toUByte() else null,
-        gender = if (hasGender()) gender.toUByte() else null,
-        hearId = hearIdOrNull?.toKotlin(),
-        customButtonModel = customButtonModelOrNull?.toKotlin(),
-        firmwareVersion = firmwareVersionOrNull?.toKotlin(),
-        serialNumber = if (hasSerialNumber()) serialNumber else null,
-        ambientSoundModeCycle = ambientSoundModeCycleOrNull?.toKotlin(),
-    )
-}
+fun com.oppzippy.openscq30.lib.protobuf.DeviceState.toKotlin(): DeviceState = DeviceState(
+    deviceProfile = deviceProfile.toKotlin(),
+    battery = battery.toKotlin(),
+    equalizerConfiguration = equalizerConfiguration.toKotlin(),
+    soundModes = soundModesOrNull?.toKotlin(),
+    ageRange = if (hasAgeRange()) ageRange.toUByte() else null,
+    gender = if (hasGender()) gender.toUByte() else null,
+    hearId = hearIdOrNull?.toKotlin(),
+    customButtonModel = customButtonModelOrNull?.toKotlin(),
+    firmwareVersion = firmwareVersionOrNull?.toKotlin(),
+    serialNumber = if (hasSerialNumber()) serialNumber else null,
+    ambientSoundModeCycle = ambientSoundModeCycleOrNull?.toKotlin(),
+)

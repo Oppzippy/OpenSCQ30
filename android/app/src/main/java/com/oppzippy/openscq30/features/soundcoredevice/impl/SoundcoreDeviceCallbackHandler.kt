@@ -18,23 +18,22 @@ import com.oppzippy.openscq30.lib.bindings.ManualConnection
 import com.oppzippy.openscq30.lib.bindings.isSoundcoreServiceUuid
 import com.oppzippy.openscq30.lib.bindings.readCharacteristicUuid
 import com.oppzippy.openscq30.lib.bindings.writeCharacteristicUuid
+import java.lang.IllegalStateException
+import java.util.UUID
+import java.util.concurrent.ConcurrentLinkedQueue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.lang.IllegalStateException
-import java.util.UUID
-import java.util.concurrent.ConcurrentLinkedQueue
 
 @SuppressLint("MissingPermission")
 @Suppress("DEPRECATION")
-class SoundcoreDeviceCallbackHandler(
-    context: Context,
-    private val coroutineScope: CoroutineScope,
-) :
-    BluetoothGattCallback(), ConnectionWriter, AutoCloseable {
+class SoundcoreDeviceCallbackHandler(context: Context, private val coroutineScope: CoroutineScope) :
+    BluetoothGattCallback(),
+    ConnectionWriter,
+    AutoCloseable {
     private var gatt: BluetoothGatt? = null
     private var readCharacteristic: BluetoothGattCharacteristic? = null
     private var writeCharacteristic: BluetoothGattCharacteristic? = null
@@ -57,7 +56,9 @@ class SoundcoreDeviceCallbackHandler(
         override fun onReceive(context: Context?, intent: Intent?) {
             val action = intent?.action
             if (action == BluetoothAdapter.ACTION_STATE_CHANGED) {
-                if (adapter.state == BluetoothAdapter.STATE_TURNING_OFF || adapter.state == BluetoothAdapter.STATE_OFF) {
+                if (adapter.state == BluetoothAdapter.STATE_TURNING_OFF ||
+                    adapter.state == BluetoothAdapter.STATE_OFF
+                ) {
                     _isDisconnected.value = true
                 }
             }
@@ -134,11 +135,7 @@ class SoundcoreDeviceCallbackHandler(
     }
 
     @Synchronized
-    override fun onConnectionStateChange(
-        gatt: BluetoothGatt?,
-        status: Int,
-        newState: Int,
-    ) {
+    override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
         if (newState == BluetoothProfile.STATE_CONNECTED && gatt != null) {
             this.gatt = gatt
             gatt.discoverServices()
@@ -157,10 +154,7 @@ class SoundcoreDeviceCallbackHandler(
 
     @Deprecated("Deprecated in Java")
     @Synchronized
-    override fun onCharacteristicChanged(
-        gatt: BluetoothGatt?,
-        characteristic: BluetoothGattCharacteristic?,
-    ) {
+    override fun onCharacteristicChanged(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?) {
         if (characteristic != null) {
             val bytes = characteristic.value
             coroutineScope.launch {
@@ -172,22 +166,14 @@ class SoundcoreDeviceCallbackHandler(
     }
 
     @Synchronized
-    override fun onDescriptorWrite(
-        gatt: BluetoothGatt?,
-        descriptor: BluetoothGattDescriptor?,
-        status: Int,
-    ) {
+    override fun onDescriptorWrite(gatt: BluetoothGatt?, descriptor: BluetoothGattDescriptor?, status: Int) {
         isLocked = false
         next()
     }
 
     @Deprecated("Deprecated in Java")
     @Synchronized
-    override fun onDescriptorRead(
-        gatt: BluetoothGatt?,
-        descriptor: BluetoothGattDescriptor?,
-        status: Int,
-    ) {
+    override fun onDescriptorRead(gatt: BluetoothGatt?, descriptor: BluetoothGattDescriptor?, status: Int) {
         isLocked = false
         next()
     }

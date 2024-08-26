@@ -22,6 +22,9 @@ import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNo
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_ID
 import com.oppzippy.openscq30.features.soundcoredevice.usecases.ActivateQuickPresetUseCase
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,9 +34,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 
 @OptIn(FlowPreview::class)
 @AndroidEntryPoint
@@ -192,12 +192,10 @@ class DeviceService : LifecycleService() {
         notificationManager.cancel(NOTIFICATION_ID)
     }
 
-    private fun buildNotification(): Notification {
-        return notificationBuilder(
-            status = connectionManager.connectionStatusFlow.value,
-            quickPresetNames = quickPresetNames.value,
-        )
-    }
+    private fun buildNotification(): Notification = notificationBuilder(
+        status = connectionManager.connectionStatusFlow.value,
+        quickPresetNames = quickPresetNames.value,
+    )
 
     private val binder = MyBinder()
 

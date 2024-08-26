@@ -22,8 +22,14 @@ test-cov:
     cargo llvm-cov --no-report
 
 format:
+    #!/usr/bin/env bash
     cargo fmt
-    ./gradlew ktlintFormat
+
+    if command -v ktlint > /dev/null; then
+        ktlint --editorconfig=../.editorconfig -F
+    else
+        ./gradlew ktlintFormat
+    fi
 
 format-check:
     cargo fmt --check

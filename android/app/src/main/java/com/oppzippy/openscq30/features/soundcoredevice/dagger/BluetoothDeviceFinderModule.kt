@@ -11,5 +11,7 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 abstract class BluetoothDeviceFinderModule {
     @Binds
-    abstract fun bindBluetoothDeviceFinderModule(bluetoothDeviceFinder: BluetoothDeviceFinderImpl): BluetoothDeviceFinder
+    abstract fun bindBluetoothDeviceFinderModule(
+        bluetoothDeviceFinder: BluetoothDeviceFinderImpl,
+    ): BluetoothDeviceFinder
 }

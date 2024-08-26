@@ -9,12 +9,12 @@ import com.oppzippy.openscq30.lib.wrapper.DeviceState
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.HearId
 import com.oppzippy.openscq30.lib.wrapper.SoundModes
+import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 @SuppressLint("MissingPermission")
 class SoundcoreDevice(

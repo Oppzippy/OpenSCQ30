@@ -6,10 +6,10 @@ import androidx.room.testing.MigrationTestHelper
 import androidx.test.platform.app.InstrumentationRegistry
 import com.oppzippy.openscq30.room.AppDatabase
 import dagger.hilt.android.testing.HiltAndroidTest
+import java.io.IOException
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
-import java.io.IOException
 
 @HiltAndroidTest
 class Migration5To6Test {

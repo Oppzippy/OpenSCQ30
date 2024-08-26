@@ -7,13 +7,9 @@ import kotlin.math.roundToInt
 
 private const val SCALE_FACTOR = 10.0
 
-private fun scaleUpToInt(value: Double): Int {
-    return (value * SCALE_FACTOR).roundToInt()
-}
+private fun scaleUpToInt(value: Double): Int = (value * SCALE_FACTOR).roundToInt()
 
-private fun scaleDownToDouble(value: Int): Double {
-    return value.toDouble() / SCALE_FACTOR
-}
+private fun scaleDownToDouble(value: Int): Double = value.toDouble() / SCALE_FACTOR
 
 @Entity(
     tableName = "custom_equalizer_profile",
@@ -36,7 +32,9 @@ data class CustomProfile(
     val band6400: Int,
     val band12800: Int,
 ) {
-    @Deprecated("Int constructor should be used instead. If you want doubles, make your own class rather than reusing this.")
+    @Deprecated(
+        "Int constructor should be used instead. If you want doubles, make your own class rather than reusing this.",
+    )
     constructor(
         name: String,
         band100: Double,
@@ -59,30 +57,26 @@ data class CustomProfile(
         scaleUpToInt(band12800),
     )
 
-    fun getVolumeAdjustments(): List<Double> {
-        return listOf(
-            scaleDownToDouble(band100),
-            scaleDownToDouble(band200),
-            scaleDownToDouble(band400),
-            scaleDownToDouble(band800),
-            scaleDownToDouble(band1600),
-            scaleDownToDouble(band3200),
-            scaleDownToDouble(band6400),
-            scaleDownToDouble(band12800),
-        )
-    }
-}
-
-fun List<Double>.toCustomProfile(name: String): CustomProfile {
-    return CustomProfile(
-        name,
-        scaleUpToInt(this[0]),
-        scaleUpToInt(this[1]),
-        scaleUpToInt(this[2]),
-        scaleUpToInt(this[3]),
-        scaleUpToInt(this[4]),
-        scaleUpToInt(this[5]),
-        scaleUpToInt(this[6]),
-        scaleUpToInt(this[7]),
+    fun getVolumeAdjustments(): List<Double> = listOf(
+        scaleDownToDouble(band100),
+        scaleDownToDouble(band200),
+        scaleDownToDouble(band400),
+        scaleDownToDouble(band800),
+        scaleDownToDouble(band1600),
+        scaleDownToDouble(band3200),
+        scaleDownToDouble(band6400),
+        scaleDownToDouble(band12800),
     )
 }
+
+fun List<Double>.toCustomProfile(name: String): CustomProfile = CustomProfile(
+    name,
+    scaleUpToInt(this[0]),
+    scaleUpToInt(this[1]),
+    scaleUpToInt(this[2]),
+    scaleUpToInt(this[3]),
+    scaleUpToInt(this[4]),
+    scaleUpToInt(this[5]),
+    scaleUpToInt(this[6]),
+    scaleUpToInt(this[7]),
+)

@@ -15,9 +15,6 @@ import dagger.hilt.android.scopes.ActivityScoped
 object CoroutineScopeModule {
     @Provides
     @ActivityScoped
-    fun provideLifecycleCoroutineScope(
-        activity: Activity,
-    ): LifecycleCoroutineScope {
-        return (activity as ComponentActivity).lifecycleScope
-    }
+    fun provideLifecycleCoroutineScope(activity: Activity): LifecycleCoroutineScope =
+        (activity as ComponentActivity).lifecycleScope
 }

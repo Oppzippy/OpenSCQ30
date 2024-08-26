@@ -22,22 +22,20 @@ object SoundcoreDeviceConnectorModule {
     fun provideSoundcoreDeviceFactory(
         @ApplicationContext context: Context,
         bluetoothDeviceFinder: BluetoothDeviceFinder,
-    ): SoundcoreDeviceConnector {
-        return if (BuildConfig.IS_DEMO_MODE) {
-            DemoSoundcoreDeviceConnector()
-        } else {
-            SoundcoreDeviceConnectorImpl(
-                context,
-                bluetoothDeviceFinder,
-                createManualConnection = { name, macAddress, serviceUuid, connectionWriter ->
-                    ManualConnection(
-                        name,
-                        macAddress,
-                        serviceUuid,
-                        connectionWriter,
-                    )
-                },
-            )
-        }
+    ): SoundcoreDeviceConnector = if (BuildConfig.IS_DEMO_MODE) {
+        DemoSoundcoreDeviceConnector()
+    } else {
+        SoundcoreDeviceConnectorImpl(
+            context,
+            bluetoothDeviceFinder,
+            createManualConnection = { name, macAddress, serviceUuid, connectionWriter ->
+                ManualConnection(
+                    name,
+                    macAddress,
+                    serviceUuid,
+                    connectionWriter,
+                )
+            },
+        )
     }
 }

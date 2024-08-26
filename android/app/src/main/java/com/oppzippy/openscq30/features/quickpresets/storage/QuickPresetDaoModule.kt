@@ -12,7 +12,5 @@ import javax.inject.Singleton
 object QuickPresetDaoModule {
     @Provides
     @Singleton
-    fun provideQuickPresetDao(database: AppDatabase): QuickPresetDao {
-        return database.quickPresetDao()
-    }
+    fun provideQuickPresetDao(database: AppDatabase): QuickPresetDao = database.quickPresetDao()
 }

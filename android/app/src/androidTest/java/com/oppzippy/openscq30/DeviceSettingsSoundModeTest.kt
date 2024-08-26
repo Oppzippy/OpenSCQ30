@@ -242,10 +242,7 @@ class DeviceSettingsSoundModeTest {
         )
     }
 
-    private fun renderInitialSoundMode(
-        ambientSoundMode: AmbientSoundMode,
-        noiseCancelingMode: NoiseCancelingMode,
-    ) {
+    private fun renderInitialSoundMode(ambientSoundMode: AmbientSoundMode, noiseCancelingMode: NoiseCancelingMode) {
         composeRule.setContent {
             SoundModeSettings(
                 soundModes = SoundModes(
@@ -261,10 +258,7 @@ class DeviceSettingsSoundModeTest {
         }
     }
 
-    private fun assertOneSelected(
-        selectedOne: SemanticsMatcher,
-        group: List<SemanticsMatcher>,
-    ) {
+    private fun assertOneSelected(selectedOne: SemanticsMatcher, group: List<SemanticsMatcher>) {
         group.forEach {
             if (it == selectedOne) {
                 composeRule.onNode(it).assertIsSelected()

@@ -7,9 +7,9 @@ import com.oppzippy.openscq30.features.autoconnect.AutoConnectService
 import com.oppzippy.openscq30.features.preferences.Preferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(

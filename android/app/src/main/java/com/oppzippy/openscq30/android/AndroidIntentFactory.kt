@@ -13,9 +13,7 @@ interface IntentFactory {
 }
 
 class AndroidIntentFactory : IntentFactory {
-    override fun invoke(context: Context, cls: Class<*>): Intent {
-        return Intent(context, cls)
-    }
+    override fun invoke(context: Context, cls: Class<*>): Intent = Intent(context, cls)
 }
 
 @Module
@@ -23,7 +21,5 @@ class AndroidIntentFactory : IntentFactory {
 object IntentFactoryModule {
     @Provides
     @Singleton
-    fun provideLifecycleCoroutineScope(): IntentFactory {
-        return AndroidIntentFactory()
-    }
+    fun provideLifecycleCoroutineScope(): IntentFactory = AndroidIntentFactory()
 }

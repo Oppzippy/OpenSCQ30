@@ -14,13 +14,10 @@ import dagger.hilt.android.scopes.ActivityRetainedScoped
 object BluetoothDeviceProviderModule {
     @Provides
     @ActivityRetainedScoped
-    fun provideBluetoothDeviceProvider(
-        @ApplicationContext context: Context,
-    ): BluetoothDeviceProvider {
-        return if (BuildConfig.IS_DEMO_MODE) {
+    fun provideBluetoothDeviceProvider(@ApplicationContext context: Context): BluetoothDeviceProvider =
+        if (BuildConfig.IS_DEMO_MODE) {
             DemoBluetoothDeviceProvider()
         } else {
             BluetoothDeviceProviderImpl(context)
         }
-    }
 }

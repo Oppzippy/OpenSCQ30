@@ -38,14 +38,13 @@ enum class EqualizerProfile(val presetProfile: PresetEqualizerProfile?) {
             return presetProfile?.toStringResource() ?: R.string.custom
         }
 
-    fun toEqualizerConfiguration(volumeAdjustments: List<Double>?): EqualizerConfiguration {
-        return presetProfile?.toEqualizerConfiguration()
+    fun toEqualizerConfiguration(volumeAdjustments: List<Double>?): EqualizerConfiguration =
+        presetProfile?.toEqualizerConfiguration()
             ?: if (volumeAdjustments != null) {
                 EqualizerConfiguration(volumeAdjustments = volumeAdjustments)
             } else {
                 throw NullPointerException("volumeAdjustments is null")
             }
-    }
 }
 
 fun PresetEqualizerProfile?.toEqualizerProfile(): EqualizerProfile {

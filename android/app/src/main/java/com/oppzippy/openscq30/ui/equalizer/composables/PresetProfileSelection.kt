@@ -14,10 +14,7 @@ import com.oppzippy.openscq30.ui.utils.Dropdown
 import com.oppzippy.openscq30.ui.utils.DropdownOption
 
 @Composable
-fun PresetProfileSelection(
-    value: EqualizerProfile,
-    onProfileSelected: (profile: EqualizerProfile) -> Unit,
-) {
+fun PresetProfileSelection(value: EqualizerProfile, onProfileSelected: (profile: EqualizerProfile) -> Unit) {
     Dropdown(
         value = value,
         options = EqualizerProfile.entries.map { profile ->
