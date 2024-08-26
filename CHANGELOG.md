@@ -26,6 +26,7 @@
 
 -   Add custom equalizer profile importing/exporting
 -   Show the title of the current screen rather than the device's name in the header bar
+-   New color scheme generated from logo color
 
 #### Fixes
 
