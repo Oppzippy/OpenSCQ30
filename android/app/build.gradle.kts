@@ -133,8 +133,6 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     // Material Design 3
     implementation("androidx.compose.material3:material3")
-    // Material Design 2
-    implementation("androidx.compose.material:material")
     // Android Studio Preview support
     implementation("androidx.compose.ui:ui-tooling-preview")
     debugImplementation("androidx.compose.ui:ui-tooling")

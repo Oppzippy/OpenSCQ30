@@ -3,8 +3,6 @@ package com.oppzippy.openscq30.ui.theme
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -93,49 +91,11 @@ private val darkColorScheme = darkColorScheme(
     surfaceContainerHighest = surfaceContainerHighestDark,
 )
 
-private val lightColors = lightColors(
-    primary = lightColorScheme.primary,
-    onPrimary = lightColorScheme.onPrimary,
-    secondary = lightColorScheme.secondary,
-    onSecondary = lightColorScheme.onSecondary,
-    error = lightColorScheme.error,
-    onError = lightColorScheme.onError,
-    surface = lightColorScheme.surface,
-    onSurface = lightColorScheme.onSurface,
-    background = lightColorScheme.background,
-    onBackground = lightColorScheme.onBackground,
-)
-private val darkColors = darkColors(
-    primary = darkColorScheme.primary,
-    onPrimary = darkColorScheme.onPrimary,
-    secondary = darkColorScheme.secondary,
-    onSecondary = darkColorScheme.onSecondary,
-    error = darkColorScheme.error,
-    onError = darkColorScheme.onError,
-    surface = darkColorScheme.surface,
-    onSurface = darkColorScheme.onSurface,
-    background = darkColorScheme.background,
-    onBackground = darkColorScheme.onBackground,
-)
-
 @Composable
 fun OpenSCQ30Theme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
-    content: @Composable () -> Unit,
-) {
-    OpenSCQ30Material2Theme(darkTheme = darkTheme) {
-        OpenSCQ30Material3Theme(darkTheme = darkTheme, dynamicColor = dynamicColor) {
-            content()
-        }
-    }
-}
-
-@Composable
-private fun OpenSCQ30Material3Theme(
-    darkTheme: Boolean,
-    dynamicColor: Boolean,
     content: @Composable () -> Unit,
 ) {
     val colorScheme = when {
@@ -161,15 +121,4 @@ private fun OpenSCQ30Material3Theme(
         typography = Typography,
         content = content,
     )
-}
-
-@Composable
-private fun OpenSCQ30Material2Theme(
-    darkTheme: Boolean,
-    content: @Composable () -> Unit,
-) {
-    val colors = if (darkTheme) darkColors else lightColors
-    androidx.compose.material.MaterialTheme(colors = colors) {
-        content()
-    }
 }
