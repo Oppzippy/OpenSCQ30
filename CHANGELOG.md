@@ -40,6 +40,7 @@
 #### Features
 
 -   Add custom equalizer profile importing/exporting
+-   There is now a dropdown menu to select light/dark mode in addition to the default option of following the system preference
 
 #### Fixes
 

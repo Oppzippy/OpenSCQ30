@@ -1,5 +1,6 @@
 import { AppBar, Button, Toolbar, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
+import { ColorSchemeSelect } from "./ColorSchemeSelect";
 
 interface Props {
   deviceName: string;
@@ -20,6 +21,7 @@ export function ConnectedAppBar(props: Props) {
         >
           {props.deviceName}
         </Typography>
+        <ColorSchemeSelect />
         <Button color="inherit" onClick={() => props.onDisconnectClick()}>
           {t("device.disconnect")}
         </Button>

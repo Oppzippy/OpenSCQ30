@@ -1,5 +1,6 @@
 import { AppBar, Button, Toolbar, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
+import { ColorSchemeSelect } from "./ColorSchemeSelect";
 
 interface Props {
   onSelectDeviceClick: () => void;
@@ -20,6 +21,7 @@ export function DisconnectedAppBar(props: Props) {
         >
           {t("device.deviceSelection")}
         </Typography>
+        <ColorSchemeSelect />
         {props.showSelectDeviceButton && (
           <Button color="inherit" onClick={() => props.onSelectDeviceClick()}>
             {t("device.selectDevice")}

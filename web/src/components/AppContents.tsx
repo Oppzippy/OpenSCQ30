@@ -1,11 +1,5 @@
-import {
-  Box,
-  Container,
-  Toolbar,
-  createTheme,
-  useMediaQuery,
-} from "@mui/material";
-import { useCallback, useMemo, useState } from "react";
+import { Box, Container, Toolbar, useTheme } from "@mui/material";
+import { useCallback, useState } from "react";
 import { useUpdateAvailableToast } from "../hooks/useUpdateAvailableToast";
 import { ConnectedAppBar } from "./ConnectedAppBar";
 import { DisconnectedAppBar } from "./DisconnectedAppBar";
@@ -17,17 +11,8 @@ import { LoadingScreen } from "./LoadingScreen";
 export function AppContents() {
   const [device, setDevice] = useState<Device>();
   const [isLoading, setLoading] = useState(false);
-  const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
   const isDemoMode = localStorage.getItem("openscq30:demoMode") == "true";
-  const theme = useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode: prefersDarkMode ? "dark" : "light",
-        },
-      }),
-    [prefersDarkMode],
-  );
+  const theme = useTheme();
   useUpdateAvailableToast();
 
   const connect = useCallback(() => {

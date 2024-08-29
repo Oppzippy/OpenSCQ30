@@ -2,14 +2,13 @@ import { ThemeProvider, createTheme } from "@mui/material";
 import { ToastQueue } from "./ToastQueue";
 import { AppContents } from "./AppContents";
 
-const theme = createTheme({
-  colorSchemes: {
-    light: true,
-    dark: true,
-  },
-});
-
 function App() {
+  const theme = createTheme({
+    colorSchemes: {
+      light: true,
+      dark: true,
+    },
+  });
   return (
     <ThemeProvider theme={theme}>
       <ToastQueue>

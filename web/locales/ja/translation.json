@@ -18,6 +18,12 @@
     "voiceAssistant": "",
     "playPause": ""
   },
+  "colorScheme": {
+    "colorScheme": "",
+    "system": "",
+    "light": "",
+    "dark": ""
+  },
   "device": {
     "disconnect": "",
     "deviceSelection": "デバイス選択",

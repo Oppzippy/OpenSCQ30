@@ -18,6 +18,12 @@
     "voiceAssistant": "Voice Assistant",
     "playPause": "Play/Pause"
   },
+  "colorScheme": {
+    "colorScheme": "Color Scheme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  },
   "device": {
     "disconnect": "Disconnect",
     "deviceSelection": "Device Selection",
