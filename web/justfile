@@ -8,7 +8,7 @@ _build-wasm:
 
 test: (_build-wasm)
     cd wasm && cargo test
-    npm run test
+    npm run test -- run
     npm run e2etest
 
 test-cov:
