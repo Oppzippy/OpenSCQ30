@@ -1,5 +1,4 @@
-import { Input, Slider, Typography } from "@mui/material";
-import Grid2 from "@mui/material/Unstable_Grid2";
+import { Grid2, Input, Slider, Typography } from "@mui/material";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { EqualizerHelper } from "../../../wasm/pkg/openscq30_web_wasm";
@@ -22,7 +21,7 @@ export const VolumeSlider = React.memo(function (props: Props) {
   return (
     <>
       {/* make sure Hz doesn't go on to a second line */}
-      <Grid2 xs={3} sm={2}>
+      <Grid2 size={{ xs: 3, sm: 2 }}>
         <div id={labelId}>
           <Typography>
             {props.hz >= 1000
@@ -37,7 +36,7 @@ export const VolumeSlider = React.memo(function (props: Props) {
           </Typography>
         </div>
       </Grid2>
-      <Grid2 xs={7} sm={8}>
+      <Grid2 size={{ xs: 7, sm: 8 }}>
         <Slider
           disabled={props.disabled}
           value={displayValue}
@@ -61,7 +60,7 @@ export const VolumeSlider = React.memo(function (props: Props) {
           }}
         />
       </Grid2>
-      <Grid2 xs={2}>
+      <Grid2 size={2}>
         <Input
           disabled={props.disabled}
           value={displayValue}

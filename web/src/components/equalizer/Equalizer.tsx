@@ -1,6 +1,6 @@
-import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 import React from "react";
 import { VolumeSlider } from "./VolumeSlider";
+import { Grid2 } from "@mui/material";
 
 interface Props {
   disabled?: boolean;
