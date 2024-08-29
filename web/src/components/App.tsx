@@ -1,20 +1,15 @@
-import { ThemeProvider, createTheme, useMediaQuery } from "@mui/material";
-import { useMemo } from "react";
+import { ThemeProvider, createTheme } from "@mui/material";
 import { ToastQueue } from "./ToastQueue";
 import { AppContents } from "./AppContents";
 
-function App() {
-  const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
-  const theme = useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode: prefersDarkMode ? "dark" : "light",
-        },
-      }),
-    [prefersDarkMode],
-  );
+const theme = createTheme({
+  colorSchemes: {
+    light: true,
+    dark: true,
+  },
+});
 
+function App() {
   return (
     <ThemeProvider theme={theme}>
       <ToastQueue>
