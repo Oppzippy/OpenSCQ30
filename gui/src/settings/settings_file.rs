@@ -33,8 +33,11 @@ where
         let settings =
             toml::from_str::<SettingsStateType>(&buffer).context("parse toml config file")?;
 
-        self.edit(|state| *state = settings)
-            .context("update state")?;
+        let mut state = self
+            .state
+            .write()
+            .map_err(|err| anyhow::anyhow!("failed to write rwlock: {err}"))?;
+        *state = settings;
         Ok(())
     }
 
