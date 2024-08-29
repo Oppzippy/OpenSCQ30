@@ -19,6 +19,7 @@
 -   Fix some circumstances where the volume adjustments matching a custom profile would be selected, but the dropdown would not show the profile as selected
 -   Custom equalizer profile sorting is now case insensitive
 -   Icon colors now adapt when using dark theme
+-   Write config file to temp file first before overwriting to work around potential data loss if writing is interrupted
 
 ### Android
 

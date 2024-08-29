@@ -27,10 +27,10 @@ dirs = { workspace = true }
 macaddr = { workspace = true }
 itertools = { workspace = true }
 uuid = { workspace = true, features = ["serde"] }
+tempfile = { workspace = true }
 
 [dev-dependencies]
 mockall = { workspace = true }
-tempfile = { workspace = true }
 
 [build-dependencies]
 glib-build-tools = { workspace = true }
