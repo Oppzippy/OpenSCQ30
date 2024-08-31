@@ -138,6 +138,7 @@ where
 mod tests {
     use super::SettingsFile;
     use serde::{Deserialize, Serialize};
+    #[cfg(target_family = "unix")]
     use std::fs::{self, Permissions};
     #[cfg(target_family = "unix")]
     use std::os::unix::{
