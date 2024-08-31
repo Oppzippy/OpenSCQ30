@@ -45,6 +45,14 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.13.1" date="2024-08-31">
+            <description>
+                <p>Fixes</p>
+                <ul>
+                    <li>Remove broken gtk binding that was ignored and had no effect other than a critical log message</li>
+                </ul> 
+            </description>
+        </release>
         <release version="1.13.0" date="2024-08-31">
             <description>
                 <p>Features</p>

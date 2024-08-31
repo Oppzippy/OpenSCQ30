@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.13.1
 
 ### GUI
 
