@@ -153,8 +153,8 @@ mod tests {
             .returning(|_| Ok(()));
         *state.selected_device.borrow_mut() = Some(Rc::new(device));
 
-        let file = tempfile::NamedTempFile::new().unwrap();
-        let settings_file = SettingsFile::new(file.path().to_path_buf());
+        let dir = tempfile::tempdir().unwrap();
+        let settings_file = SettingsFile::new(dir.path().join("config.toml"));
 
         let quick_preset = QuickPreset {
             ambient_sound_mode: Some(AmbientSoundMode::NoiseCanceling),
@@ -187,8 +187,8 @@ mod tests {
             .returning(|_| Ok(()));
         *state.selected_device.borrow_mut() = Some(Rc::new(device));
 
-        let file = tempfile::NamedTempFile::new().unwrap();
-        let settings_file = SettingsFile::new(file.path().to_path_buf());
+        let dir = tempfile::tempdir().unwrap();
+        let settings_file = SettingsFile::new(dir.path().join("config.toml"));
 
         let quick_preset = QuickPreset {
             equalizer_profile: Some(PresetOrCustomEqualizerProfile::Preset(
@@ -225,8 +225,8 @@ mod tests {
             .returning(|_| Ok(()));
         *state.selected_device.borrow_mut() = Some(Rc::new(device));
 
-        let file = tempfile::NamedTempFile::new().unwrap();
-        let settings_file = SettingsFile::new(file.path().to_path_buf());
+        let dir = tempfile::tempdir().unwrap();
+        let settings_file = SettingsFile::new(dir.path().join("config.toml"));
         settings_file
             .edit(|config: &mut Config| {
                 config.set_custom_profile(
@@ -260,8 +260,8 @@ mod tests {
         device.expect_set_equalizer_configuration().never();
         *state.selected_device.borrow_mut() = Some(Rc::new(device));
 
-        let file = tempfile::NamedTempFile::new().unwrap();
-        let settings_file = SettingsFile::new(file.path().to_path_buf());
+        let dir = tempfile::tempdir().unwrap();
+        let settings_file = SettingsFile::new(dir.path().join("config.toml"));
 
         let quick_preset = QuickPreset {
             equalizer_profile: Some(PresetOrCustomEqualizerProfile::Custom(

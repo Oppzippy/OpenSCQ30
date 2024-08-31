@@ -68,8 +68,8 @@ mod tests {
         device.expect_service_uuid().return_const(Uuid::default());
         *state.selected_device.borrow_mut() = Some(Rc::new(device));
 
-        let file = tempfile::NamedTempFile::new().unwrap();
-        let settings_file = SettingsFile::new(file.path().to_path_buf());
+        let dir = tempfile::tempdir().unwrap();
+        let settings_file = SettingsFile::new(dir.path().join("config.toml"));
         let quick_preset = GlibNamedQuickPresetValue::default();
         create_quick_preset(&state, &settings_file, quick_preset).unwrap();
 

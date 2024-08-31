@@ -71,8 +71,8 @@ mod tests {
         let registry = MockDeviceRegistry::new();
         let (state, mut receiver) = State::new(registry);
 
-        let file = tempfile::NamedTempFile::new().unwrap();
-        let settings_file = SettingsFile::new(file.path().to_path_buf());
+        let dir = tempfile::tempdir().unwrap();
+        let settings_file = SettingsFile::new(dir.path().join("config.toml"));
 
         let custom_profiles = &[GlibCustomEqualizerProfile::new(
             &"custom profile".to_string(),
@@ -93,8 +93,8 @@ mod tests {
         let registry = MockDeviceRegistry::new();
         let (state, _receiver) = State::new(registry);
 
-        let file = tempfile::NamedTempFile::new().unwrap();
-        let settings_file = SettingsFile::new(file.path().to_path_buf());
+        let dir = tempfile::tempdir().unwrap();
+        let settings_file = SettingsFile::new(dir.path().join("config.toml"));
         insert_test_profiles(&settings_file);
 
         let custom_profiles = &[
@@ -129,8 +129,8 @@ mod tests {
         let registry = MockDeviceRegistry::new();
         let (state, _receiver) = State::new(registry);
 
-        let file = tempfile::NamedTempFile::new().unwrap();
-        let settings_file = SettingsFile::new(file.path().to_path_buf());
+        let dir = tempfile::tempdir().unwrap();
+        let settings_file = SettingsFile::new(dir.path().join("config.toml"));
         insert_test_profiles(&settings_file);
 
         let custom_profiles = &[GlibCustomEqualizerProfile::new(
@@ -159,8 +159,8 @@ mod tests {
         let registry = MockDeviceRegistry::new();
         let (state, _receiver) = State::new(registry);
 
-        let file = tempfile::NamedTempFile::new().unwrap();
-        let settings_file = SettingsFile::new(file.path().to_path_buf());
+        let dir = tempfile::tempdir().unwrap();
+        let settings_file = SettingsFile::new(dir.path().join("config.toml"));
         insert_test_profiles(&settings_file);
         settings_file
             .edit(|settings| {

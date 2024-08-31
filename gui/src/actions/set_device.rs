@@ -225,8 +225,8 @@ mod tests {
 
         let (state, mut receiver) = State::new(registry);
 
-        let file = tempfile::NamedTempFile::new().unwrap();
-        let settings_file = Rc::new(SettingsFile::new(file.path().to_path_buf()));
+        let dir = tempfile::tempdir().unwrap();
+        let settings_file = Rc::new(SettingsFile::new(dir.path().join("config.toml")));
         set_device(&state, settings_file, Some(MacAddr6::nil()))
             .await
             .unwrap();
@@ -321,8 +321,8 @@ mod tests {
 
         let (state, _receiver) = State::new(registry);
 
-        let file = tempfile::NamedTempFile::new().unwrap();
-        let settings_file = Rc::new(SettingsFile::new(file.path().to_path_buf()));
+        let dir = tempfile::tempdir().unwrap();
+        let settings_file = Rc::new(SettingsFile::new(dir.path().join("config.toml")));
         set_device(&state, settings_file, Some(MacAddr6::nil()))
             .await
             .unwrap();

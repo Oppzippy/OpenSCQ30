@@ -55,8 +55,8 @@ mod tests {
         let registry = MockDeviceRegistry::new();
         let (state, mut receiver) = State::new(registry);
 
-        let file = tempfile::NamedTempFile::new().unwrap();
-        let settings_file = SettingsFile::new(file.path().to_path_buf());
+        let dir = tempfile::tempdir().unwrap();
+        let settings_file = SettingsFile::new(dir.path().join("config.toml"));
         let custom_profile = GlibCustomEqualizerProfile::new(
             &"custom profile".to_string(),
             Arc::new([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]),
