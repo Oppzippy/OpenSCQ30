@@ -100,24 +100,36 @@ where
             Ok(metadata) => Some(metadata.permissions()),
             Err(err) => {
                 if err.kind() != std::io::ErrorKind::NotFound {
-                    tracing::warn!("failed to retrieve settings file permissions: {err:?}");
+                    tracing::warn!(
+                        "failed to retrieve settings file permissions for {}: {err:?}",
+                        self.settings_file_path.to_string_lossy()
+                    );
                 }
                 None
             }
         };
 
-        let mut file = NamedTempFile::new_in(&dir).context(
-            "create temp file in same dir as settings file to write to before persisting",
-        )?;
+        let mut file = NamedTempFile::new_in(&dir).with_context(|| {
+            format!(
+                "create temp file in same dir as settings file to write to before persisting: {}",
+                dir.to_string_lossy()
+            )
+        })?;
         if let Some(permissions) = permissions {
             if let Err(err) = fs::set_permissions(file.path(), permissions) {
                 tracing::warn!(
-                    "failed to set settings file permissions, continuing anyway: {err:?}"
+                    "failed to set settings file permissions for {}, continuing anyway: {err:?}",
+                    file.path().to_string_lossy()
                 );
             }
         }
         file.write_all(content.as_bytes())?;
-        file.persist(&self.settings_file_path)?;
+        file.persist(&self.settings_file_path).with_context(|| {
+            format!(
+                "persisting temporary file to {}",
+                &self.settings_file_path.to_string_lossy(),
+            )
+        })?;
         Ok(())
     }
 }
