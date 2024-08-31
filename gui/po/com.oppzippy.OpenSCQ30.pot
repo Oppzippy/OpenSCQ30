@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-24 16:10-0500\n"
+"POT-Creation-Date: 2024-08-30 23:48-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,6 +20,10 @@ msgstr ""
 msgctxt "preset equalizer profile"
 msgid "Acoustic"
 msgstr "Acoustic"
+
+#: src/ui/widgets/import_export/import_export_menu.ui:9
+msgid "Actions"
+msgstr ""
 
 #: src/ui/widgets/device_information.ui:64
 msgctxt "device information"
@@ -36,6 +40,10 @@ msgstr ""
 #: src/ui/widgets/general_settings/ambient_sound_mode_cycle_selection.ui:7
 msgid "Ambient Sound Mode Cycle"
 msgstr ""
+
+msgctxt "buttons"
+msgid "AmbientSoundMode"
+msgstr "Ambient Sound Mode"
 
 msgctxt "preset equalizer profile"
 msgid "BassBooster"
@@ -63,6 +71,10 @@ msgstr "Classical"
 #: src/ui/widgets/device_selection.ui:41
 msgctxt "connect to device"
 msgid "Connect"
+msgstr ""
+
+#: src/ui/widgets/import_export/export_profile_output.ui:9
+msgid "Copy to Clipboard"
 msgstr ""
 
 #: src/ui/widgets/equalizer_settings/equalizer_settings_screen.ui:55
@@ -140,6 +152,10 @@ msgctxt "disconnect from device"
 msgid "Disconnect"
 msgstr ""
 
+#: src/ui/widgets/import_export/export_profile_output.ui:15
+msgid "Done"
+msgstr ""
+
 #: src/ui/widgets/hear_id/hear_id_screen.ui:17
 msgctxt "hear id"
 msgid "EQ (Left)"
@@ -203,6 +219,15 @@ msgstr ""
 msgid "Equalizer Profile Type"
 msgstr ""
 
+#: src/ui/widgets/import_export/import_export_menu.ui:24
+msgid "Export Equalizer Profiles"
+msgstr ""
+
+#: src/ui/widgets/import_export.ui:53
+#: src/ui/widgets/import_export/export_profile_selection.ui:26
+msgid "Export Profiles"
+msgstr ""
+
 #: src/ui/widgets/device_information.ui:90
 msgctxt "device information"
 msgid "Feature Flags"
@@ -235,6 +260,27 @@ msgstr ""
 msgctxt "preset equalizer profile"
 msgid "HipHop"
 msgstr "Hip Hop"
+
+#: src/ui/widgets/import_export/import_profile_selection.ui:13
+msgid "Import"
+msgstr ""
+
+#: src/ui/widgets/import_export/import_export_menu.ui:12
+msgid "Import Equalizer Profiles"
+msgstr ""
+
+#: src/ui/widgets/import_export/import_profile_selection.ui:19
+msgid "Import Options"
+msgstr ""
+
+#: src/ui/widgets/import_export.ui:64
+msgid "Import Profiles"
+msgstr ""
+
+#: src/ui/widgets/import_export.ui:30
+#: src/ui/widgets/selected_device_settings.ui:97
+msgid "Import/Export"
+msgstr ""
 
 #: src/ui/widgets/general_settings/noise_canceling_mode_selection.ui:29
 msgctxt "noise canceling mode"
@@ -278,18 +324,23 @@ msgctxt "hear id"
 msgid "Music Type"
 msgstr ""
 
+#: src/ui/widgets/import_export/import_profile_selection_row.ui:12
+msgid "Name"
+msgstr ""
+
 #: src/ui/widgets/quick_presets/quick_presets_listing.ui:7
 msgctxt "quick presets"
 msgid "New Quick Preset"
 msgstr ""
 
+#: src/ui/widgets/import_export/export_profile_selection.ui:15
+#: src/ui/widgets/import_export/import_profile_string.ui:9
+msgid "Next"
+msgstr ""
+
 msgctxt "buttons"
 msgid "NextSong"
 msgstr "Next Song"
-
-msgctxt "buttons"
-msgid "AmbientSoundMode"
-msgstr "Ambient Sound Mode"
 
 #: src/ui/widgets/general_settings/noise_canceling_mode_selection.ui:7
 #: src/ui/widgets/quick_presets/edit_quick_preset.ui:42
@@ -313,6 +364,10 @@ msgstr ""
 #: src/ui/widgets/general_settings/noise_canceling_mode_selection.ui:39
 msgctxt "noise canceling mode"
 msgid "Outdoor"
+msgstr ""
+
+#: src/ui/widgets/import_export/import_profile_selection.ui:22
+msgid "Overwrite Existing Profiles"
 msgstr ""
 
 msgctxt "preset equalizer profile"
@@ -354,6 +409,14 @@ msgctxt "equalizer profile"
 msgid "Profile"
 msgstr ""
 
+#: src/ui/widgets/import_export/import_profile_string.ui:17
+msgid "Profile String"
+msgstr ""
+
+#: src/ui/widgets/import_export/import_profile_selection.ui:29
+msgid "Profiles"
+msgstr ""
+
 #: src/ui/widgets/quick_presets/quick_presets_screen.ui:9
 msgid "Quick Presets"
 msgstr ""
@@ -367,6 +430,10 @@ msgstr ""
 #: src/ui/widgets/device_selection.ui:49
 msgctxt "refresh devices"
 msgid "Refresh"
+msgstr ""
+
+#: src/ui/widgets/import_export/import_profile_selection_row.ui:7
+msgid "Rename"
 msgstr ""
 
 #: src/ui/widgets/buttons/buttons_screen.ui:35
@@ -391,6 +458,22 @@ msgstr "RnB"
 msgctxt "preset equalizer profile"
 msgid "Rock"
 msgstr "Rock"
+
+#: src/ui/widgets/import_export/export_profile_selection.ui:9
+msgid "Select All"
+msgstr ""
+
+#: src/ui/widgets/import_export.ui:75
+msgid "Select Profiles"
+msgstr ""
+
+#: src/ui/widgets/import_export.ui:42
+msgid "Select Profiles for Export"
+msgstr ""
+
+#: src/ui/widgets/import_export/import_profile_selection.ui:30
+msgid "Select profiles to import"
+msgstr ""
 
 #: src/ui/widgets/device_information.ui:39
 msgctxt "device information"
