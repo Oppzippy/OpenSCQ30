@@ -10,10 +10,10 @@ build profile='dev':
     ./scripts/build-locale.sh ./share
 
 test:
-    cargo test
+    LC_ALL=C LANG=C cargo test
 
 test-cov:
-    cargo llvm-cov --no-report
+    LC_ALL=C LANG=C cargo llvm-cov --no-report
 
 install install_prefix: (build 'release')
     ./scripts/install.sh "{{install_prefix}}"
