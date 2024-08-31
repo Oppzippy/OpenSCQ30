@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.13.0
 
 ### General
 

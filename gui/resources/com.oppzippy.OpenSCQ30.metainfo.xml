@@ -45,6 +45,26 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.13.0" date="2024-08-31">
+            <description>
+                <p>Features</p>
+                <ul>
+                    <li>Add custom equalizer profile importing/exporting</li>
+                </ul>
+                <p>Build</p>
+                <ul>
+                    <li>Replace `cargo-make` with `just`</li>
+                </ul>
+                <p>Fixes</p>
+                <ul>
+                    <li>Fix some circumstances where the volume adjustments matching a custom profile would be selected, but the dropdown would not show the profile as selected</li>
+                    <li>Custom equalizer profile sorting is now case insensitive</li>
+                    <li>Icon colors now adapt when using dark theme</li>
+                    <li>Write config file to temp file first before overwriting to work around potential data loss if writing is interrupted</li>
+                    <li>The config file is no longer overwritten with the exact same content during every application startup</li>
+                </ul> 
+            </description>
+        </release>
         <release version="1.12.0" date="2024-04-21" />
         <release version="1.11.0" date="2024-03-17" />
         <release version="1.10.6" date="2024-01-25">
