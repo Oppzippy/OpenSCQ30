@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### GUI
+
+#### Fixes
+
+-   Remove broken gtk binding that was ignored and had no effect other than a critical log message
+
 ## v1.13.0
 
 ### General

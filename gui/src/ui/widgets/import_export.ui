@@ -15,7 +15,6 @@
                 </property>
                 <property name="center-widget">
                     <object class="GtkLabel" id="title">
-                        <property name="label" bind-source="navigation" bind-property="visible-page.title" bind-flags="sync-create" />
                         <style>
                             <class name="import-export__title" />
                         </style>
