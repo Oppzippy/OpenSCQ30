@@ -8,7 +8,7 @@ use std::sync::atomic::{self, AtomicI32};
 
 use crate::devices::standard::{
     packets::parsing::{take_equalizer_configuration, take_volume_adjustments, ParseResult},
-    structures::{EqualizerConfiguration, StereoVolumeAdjustments},
+    structures::StereoEqualizerConfiguration,
 };
 
 #[derive(Debug, Default)]
@@ -79,7 +79,7 @@ pub fn take_stereo_equalizer_configuration_with_two_extra_bands<
     E: ParseError<&'a [u8]> + ContextError<&'a [u8]>,
 >(
     num_bands: usize,
-) -> impl Fn(&'a [u8]) -> ParseResult<(EqualizerConfiguration, TwoExtraEqBandsValues), E> {
+) -> impl Fn(&'a [u8]) -> ParseResult<(StereoEqualizerConfiguration, TwoExtraEqBandsValues), E> {
     move |input| {
         context(
             "stereo volume adjustments",
@@ -96,12 +96,15 @@ pub fn take_stereo_equalizer_configuration_with_two_extra_bands<
                     left_equalizer_configuration,
                     left_extra_1,
                     left_extra_2,
-                    right,
+                    right_volume_adjustments,
                     right_extra_1,
                     right_extra_2,
                 )| {
                     (
-                        left_equalizer_configuration,
+                        StereoEqualizerConfiguration::new(
+                            left_equalizer_configuration,
+                            right_volume_adjustments,
+                        ),
                         TwoExtraEqBandsValues {
                             left_extra_1,
                             left_extra_2,
