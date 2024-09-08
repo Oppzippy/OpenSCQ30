@@ -17,6 +17,7 @@ use crate::devices::{
                 take_volume_adjustments, ParseResult,
             },
         },
+        quirks::TwoExtraEqBandsValues,
         structures::{
             BatteryLevel, CustomButtonModel, DualBattery, EqualizerConfiguration, FirmwareVersion,
             SerialNumber,
@@ -35,9 +36,8 @@ pub struct A3945StateUpdatePacket {
     pub right_firmware: FirmwareVersion,
     pub serial_number: SerialNumber,
     pub left_equalizer_configuration: EqualizerConfiguration,
-    pub left_band_9_and_10: [u8; 2],
     pub right_equalizer_configuration: EqualizerConfiguration,
-    pub right_band_9_and_10: [u8; 2],
+    pub extra_band_values: TwoExtraEqBandsValues,
     pub custom_button_model: CustomButtonModel,
     pub touch_tone_switch: bool,
     pub wear_detection_switch: bool,
@@ -124,9 +124,13 @@ pub fn take_a3945_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                     } else {
                         EqualizerConfiguration::new_custom_profile(right_volume_adjustments)
                     },
-                    right_band_9_and_10: right_band_9_and_10.try_into().unwrap(),
                     left_equalizer_configuration,
-                    left_band_9_and_10: left_band_9_and_10.try_into().unwrap(),
+                    extra_band_values: TwoExtraEqBandsValues {
+                        left_band_9: left_band_9_and_10[0],
+                        left_band_10: left_band_9_and_10[1],
+                        right_band_9: right_band_9_and_10[0],
+                        right_band_10: right_band_9_and_10[1],
+                    },
                     custom_button_model,
                     touch_tone_switch,
                     wear_detection_switch,

@@ -1,10 +1,4 @@
-use std::{
-    collections::HashMap,
-    sync::{
-        atomic::{self, AtomicI32},
-        Arc,
-    },
-};
+use std::{collections::HashMap, sync::Arc};
 
 use nom::error::VerboseError;
 
@@ -14,6 +8,7 @@ use crate::{
     },
     devices::standard::{
         packets::outbound::{OutboundPacket, OutboundPacketBytes, SetEqualizerPacket},
+        quirks::{TwoExtraEqBands, TwoExtraEqBandsValues},
         state::DeviceState,
         structures::{EqualizerConfiguration, STATE_UPDATE},
     },
@@ -47,14 +42,14 @@ pub const A3933_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
 pub struct A3933Dispatcher {
     // The official app only displays 8 bands, so I have no idea what bands 9 and 10 do. We'll just keep track
     // of their initial value and resend that.
-    band_9_and_10_left_and_right: Arc<AtomicI32>,
+    extra_bands: Arc<TwoExtraEqBands>,
 }
 
 impl DeviceCommandDispatcher for A3933Dispatcher {
     fn packet_handlers(
         &self,
     ) -> HashMap<[u8; 7], Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>> {
-        let band_9_and_10 = self.band_9_and_10_left_and_right.to_owned();
+        let extra_bands = self.extra_bands.to_owned();
         let mut handlers: HashMap<
             [u8; 7],
             Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>,
@@ -71,13 +66,7 @@ impl DeviceCommandDispatcher for A3933Dispatcher {
                         return state;
                     }
                 };
-                let squashed_bytes = i32::from_ne_bytes([
-                    packet.left_band_9_and_10[0],
-                    packet.left_band_9_and_10[1],
-                    packet.right_band_9_and_10[0],
-                    packet.right_band_9_and_10[1],
-                ]);
-                band_9_and_10.store(squashed_bytes, atomic::Ordering::Relaxed);
+                extra_bands.set_values(packet.extra_band_values);
 
                 // We only needed to capture information. The actual state transformation is passed on to the default handler..
                 state_update_handler(packet_bytes, state)
@@ -94,16 +83,12 @@ impl DeviceCommandDispatcher for A3933Dispatcher {
     ) -> crate::Result<CommandResponse> {
         let left_channel = &equalizer_configuration;
         let right_channel = &equalizer_configuration;
-        let band_9_and_10 = self
-            .band_9_and_10_left_and_right
-            .load(atomic::Ordering::Relaxed)
-            .to_ne_bytes();
+        let extra_band_values = self.extra_bands.values();
 
         let packet_bytes = CustomSetEqualizerPacket {
             left_channel,
             right_channel,
-            left_band_9_and_10: [band_9_and_10[0], band_9_and_10[1]],
-            right_band_9_and_10: [band_9_and_10[2], band_9_and_10[3]],
+            extra_band_values,
         }
         .bytes();
 
@@ -120,8 +105,7 @@ impl DeviceCommandDispatcher for A3933Dispatcher {
 struct CustomSetEqualizerPacket<'a> {
     pub left_channel: &'a EqualizerConfiguration,
     pub right_channel: &'a EqualizerConfiguration,
-    pub left_band_9_and_10: [u8; 2],
-    pub right_band_9_and_10: [u8; 2],
+    pub extra_band_values: TwoExtraEqBandsValues,
 }
 
 impl<'a> OutboundPacket for CustomSetEqualizerPacket<'a> {
@@ -135,9 +119,9 @@ impl<'a> OutboundPacket for CustomSetEqualizerPacket<'a> {
             .to_le_bytes()
             .into_iter()
             .chain(self.left_channel.volume_adjustments().bytes())
-            .chain(self.left_band_9_and_10)
+            .chain(self.extra_band_values.left())
             .chain(self.right_channel.volume_adjustments().bytes())
-            .chain(self.right_band_9_and_10)
+            .chain(self.extra_band_values.right())
             .collect::<Vec<_>>()
     }
 }
@@ -156,6 +140,7 @@ mod tests {
                 inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_body},
                 outbound::{OutboundPacket, OutboundPacketBytes},
             },
+            quirks::TwoExtraEqBandsValues,
             state::DeviceState,
             structures::{EqualizerConfiguration, PresetEqualizerProfile, STATE_UPDATE},
         },
@@ -236,8 +221,12 @@ mod tests {
             &CustomSetEqualizerPacket {
                 left_channel: &equalizer_configuration,
                 right_channel: &equalizer_configuration,
-                left_band_9_and_10: [121, 122],
-                right_band_9_and_10: [123, 124],
+                extra_band_values: TwoExtraEqBandsValues {
+                    left_band_9: 121,
+                    left_band_10: 122,
+                    right_band_9: 123,
+                    right_band_10: 124,
+                },
             }
             .bytes(),
             command_response.packets.first().unwrap(),

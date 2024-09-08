@@ -18,6 +18,7 @@ use crate::devices::{
                 take_serial_number, take_sound_modes, take_volume_adjustments, ParseResult,
             },
         },
+        quirks::TwoExtraEqBandsValues,
         structures::{
             AmbientSoundModeCycle, BatteryLevel, CustomButtonModel, CustomHearId, DualBattery,
             EqualizerConfiguration, FirmwareVersion, HearId, SerialNumber, SoundModes,
@@ -36,9 +37,8 @@ pub struct A3933StateUpdatePacket {
     pub right_firmware: FirmwareVersion,
     pub serial_number: SerialNumber,
     pub left_equalizer_configuration: EqualizerConfiguration,
-    pub left_band_9_and_10: [u8; 2],
     pub right_equalizer_configuration: EqualizerConfiguration,
-    pub right_band_9_and_10: [u8; 2],
+    pub extra_band_values: TwoExtraEqBandsValues,
     pub age_range: u8,
     pub hear_id: Option<CustomHearId>, // 10 bands
     pub custom_button_model: CustomButtonModel,
@@ -142,9 +142,13 @@ pub fn take_a3933_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                     } else {
                         EqualizerConfiguration::new_custom_profile(right_volume_adjustments)
                     },
-                    right_band_9_and_10: right_band_9_and_10.try_into().unwrap(),
                     left_equalizer_configuration,
-                    left_band_9_and_10: left_band_9_and_10.try_into().unwrap(),
+                    extra_band_values: TwoExtraEqBandsValues {
+                        left_band_9: left_band_9_and_10[0],
+                        left_band_10: left_band_9_and_10[1],
+                        right_band_9: right_band_9_and_10[0],
+                        right_band_10: right_band_9_and_10[1],
+                    },
                     age_range,
                     hear_id,
                     custom_button_model,
