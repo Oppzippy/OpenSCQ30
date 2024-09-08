@@ -222,10 +222,10 @@ mod tests {
                 left_channel: &equalizer_configuration,
                 right_channel: &equalizer_configuration,
                 extra_band_values: TwoExtraEqBandsValues {
-                    left_band_9: 121,
-                    left_band_10: 122,
-                    right_band_9: 123,
-                    right_band_10: 124,
+                    left_extra_1: 121,
+                    left_extra_2: 122,
+                    right_extra_1: 123,
+                    right_extra_2: 124,
                 },
             }
             .bytes(),

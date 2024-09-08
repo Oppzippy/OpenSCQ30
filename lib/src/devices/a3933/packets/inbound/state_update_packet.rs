@@ -14,11 +14,11 @@ use crate::devices::{
             parsing::{
                 take_ambient_sound_mode_cycle, take_battery_level, take_bool,
                 take_custom_button_model, take_custom_hear_id_without_music_type,
-                take_dual_battery, take_equalizer_configuration, take_firmware_version,
-                take_serial_number, take_sound_modes, take_volume_adjustments, ParseResult,
+                take_dual_battery, take_firmware_version, take_serial_number, take_sound_modes,
+                ParseResult,
             },
         },
-        quirks::TwoExtraEqBandsValues,
+        quirks::{take_stereo_equalizer_configuration_with_two_extra_bands, TwoExtraEqBandsValues},
         structures::{
             AmbientSoundModeCycle, BatteryLevel, CustomButtonModel, CustomHearId, DualBattery,
             EqualizerConfiguration, FirmwareVersion, HearId, SerialNumber, SoundModes,
@@ -85,10 +85,7 @@ pub fn take_a3933_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                     left_firmware,
                     right_firmware,
                     serial_number,
-                    left_equalizer_configuration,
-                    left_band_9_and_10,
-                    right_volume_adjustments,
-                    right_band_9_and_10,
+                    (left_equalizer_configuration, extra_band_values),
                     age_range,
                 ),
             ) = tuple((
@@ -98,10 +95,7 @@ pub fn take_a3933_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                 take_firmware_version,
                 take_firmware_version,
                 take_serial_number,
-                take_equalizer_configuration(8),
-                take(2usize),
-                take_volume_adjustments(8),
-                take(2usize),
+                take_stereo_equalizer_configuration_with_two_extra_bands(8),
                 le_u8,
             ))(input)?;
 
@@ -134,21 +128,9 @@ pub fn take_a3933_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                     left_firmware,
                     right_firmware,
                     serial_number,
-                    right_equalizer_configuration: if left_equalizer_configuration
-                        .preset_profile()
-                        .is_some()
-                    {
-                        left_equalizer_configuration.to_owned()
-                    } else {
-                        EqualizerConfiguration::new_custom_profile(right_volume_adjustments)
-                    },
+                    right_equalizer_configuration: left_equalizer_configuration.to_owned(),
                     left_equalizer_configuration,
-                    extra_band_values: TwoExtraEqBandsValues {
-                        left_band_9: left_band_9_and_10[0],
-                        left_band_10: left_band_9_and_10[1],
-                        right_band_9: right_band_9_and_10[0],
-                        right_band_10: right_band_9_and_10[1],
-                    },
+                    extra_band_values,
                     age_range,
                     hear_id,
                     custom_button_model,
