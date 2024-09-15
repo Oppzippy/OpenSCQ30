@@ -6,12 +6,14 @@ import com.oppzippy.openscq30.lib.protobuf.deviceState
 import com.oppzippy.openscq30.lib.protobuf.firmwareVersionOrNull
 import com.oppzippy.openscq30.lib.protobuf.hearIdOrNull
 import com.oppzippy.openscq30.lib.protobuf.soundModesOrNull
+import com.oppzippy.openscq30.lib.protobuf.soundModesTypeTwoOrNull
 
 data class DeviceState(
     val deviceProfile: DeviceProfile,
     val battery: Battery,
     val equalizerConfiguration: EqualizerConfiguration,
     val soundModes: SoundModes?,
+    val soundModesTypeTwo: SoundModesTypeTwo?,
     val ageRange: UByte?,
     val gender: UByte?,
     val hearId: HearId?,
@@ -39,6 +41,7 @@ data class DeviceState(
         battery = this@DeviceState.battery.toProtobuf()
         equalizerConfiguration = this@DeviceState.equalizerConfiguration.toProtobuf()
         this@DeviceState.soundModes?.let { soundModes = it.toProtobuf() }
+        this@DeviceState.soundModesTypeTwo?.let { soundModesTypeTwo = it.toProtobuf() }
         this@DeviceState.ageRange?.let { ageRange = it.toInt() }
         this@DeviceState.gender?.let { gender = it.toInt() }
         this@DeviceState.hearId?.let { hearId = it.toProtobuf() }
@@ -54,6 +57,7 @@ fun com.oppzippy.openscq30.lib.protobuf.DeviceState.toKotlin(): DeviceState = De
     battery = battery.toKotlin(),
     equalizerConfiguration = equalizerConfiguration.toKotlin(),
     soundModes = soundModesOrNull?.toKotlin(),
+    soundModesTypeTwo = soundModesTypeTwoOrNull?.toKotlin(),
     ageRange = if (hasAgeRange()) ageRange.toUByte() else null,
     gender = if (hasGender()) gender.toUByte() else null,
     hearId = hearIdOrNull?.toKotlin(),

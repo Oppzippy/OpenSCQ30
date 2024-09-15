@@ -12,7 +12,7 @@ use crate::{
     },
 };
 
-use super::structures::AmbientSoundModeCycle;
+use super::structures::{AmbientSoundModeCycle, SoundModesTypeTwo};
 
 #[derive(Debug, PartialEq, Clone, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -22,6 +22,7 @@ pub struct DeviceState {
     pub battery: Battery,
     pub equalizer_configuration: EqualizerConfiguration,
     pub sound_modes: Option<SoundModes>,
+    pub sound_modes_type_two: Option<SoundModesTypeTwo>,
     pub age_range: Option<AgeRange>,
     pub gender: Option<Gender>,
     pub hear_id: Option<HearId>,
@@ -38,6 +39,7 @@ impl From<StateUpdatePacket> for DeviceState {
             battery: packet.battery,
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: packet.sound_modes,
+            sound_modes_type_two: packet.sound_modes_type_two,
             age_range: packet.age_range,
             gender: packet.gender,
             hear_id: packet.hear_id,

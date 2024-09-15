@@ -24,6 +24,7 @@ fun DeviceState.Companion.empty(): DeviceState = DeviceState(
     firmwareVersion = null,
     equalizerConfiguration = PresetEqualizerProfile.SoundcoreSignature.toEqualizerConfiguration(),
     soundModes = null,
+    soundModesTypeTwo = null,
     battery = Battery.Single(SingleBattery(false, 0u)),
     ageRange = null,
     gender = null,

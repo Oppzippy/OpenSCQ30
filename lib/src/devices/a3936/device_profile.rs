@@ -86,7 +86,10 @@ impl DeviceCommandDispatcher for A3936Dispatcher {
                             return state;
                         }
                     };
-                todo!()
+                DeviceState {
+                    sound_modes_type_two: Some(packet.sound_modes),
+                    ..state
+                }
             }),
         );
 

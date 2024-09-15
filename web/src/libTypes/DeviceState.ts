@@ -30,6 +30,36 @@ const soundModesSchema = Type.Object({
 });
 export type SoundModes = Static<typeof soundModesSchema>;
 
+const soundModesTypeTwoSchema = Type.Object({
+  ambientSoundMode: Type.Union([
+    Type.Literal("noiseCanceling"),
+    Type.Literal("transparency"),
+    Type.Literal("normal"),
+  ]),
+  transparencyMode: Type.Union([
+    Type.Literal("fullyTransparent"),
+    Type.Literal("vocalMode"),
+  ]),
+  adaptiveNoiseCanceling: Type.Union([
+    Type.Literal("lowNoise"),
+    Type.Literal("mediumNoise"),
+    Type.Literal("highNoise"),
+  ]),
+  manualNoiseCanceling: Type.Union([
+    Type.Literal("weak"),
+    Type.Literal("moderate"),
+    Type.Literal("strong"),
+  ]),
+  noiseCancelingMode: Type.Union([
+    Type.Literal("adaptive"),
+    Type.Literal("manual"),
+  ]),
+  windNoiseSuppression: Type.Boolean(),
+  detectedWindNoise: Type.Boolean(),
+  noiseCancelingAdaptiveSensitivityLevel: Type.Number(),
+});
+export type SoundModesTypeTwo = Static<typeof soundModesTypeTwoSchema>;
+
 const ambientSoundModeCycleSchema = Type.Object({
   noiseCancelingMode: Type.Boolean(),
   transparencyMode: Type.Boolean(),
@@ -150,6 +180,7 @@ const deviceStateSchema = Type.Object({
   ]),
   equalizerConfiguration: equalizerConfigurationSchema,
   soundModes: Nullable(soundModesSchema),
+  soundModesTypeTwo: Nullable(soundModesTypeTwoSchema),
   ageRange: Nullable(Type.Number()),
   gender: Nullable(Type.Number()),
   hearId: Nullable(

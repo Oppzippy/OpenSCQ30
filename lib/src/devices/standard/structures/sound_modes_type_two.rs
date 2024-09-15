@@ -14,8 +14,9 @@ use nom::{
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, FromRepr};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct SoundModesTypeTwo {
     pub ambient_sound_mode: AmbientSoundMode,
     pub transparency_mode: TransparencyMode,

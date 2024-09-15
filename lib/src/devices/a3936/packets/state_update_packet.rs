@@ -20,9 +20,8 @@ use crate::devices::{
         quirks::{take_stereo_equalizer_configuration_with_two_extra_bands, TwoExtraEqBandsValues},
         structures::{
             take_sound_modes_type_two, AgeRange, AmbientSoundModeCycle, BatteryLevel,
-            CustomButtonModel, CustomHearId, CustomNoiseCanceling, DualBattery, FirmwareVersion,
-            Gender, NoiseCancelingMode, SerialNumber, SoundModes, SoundModesTypeTwo,
-            StereoEqualizerConfiguration,
+            CustomButtonModel, CustomHearId, DualBattery, FirmwareVersion, Gender, SerialNumber,
+            SoundModesTypeTwo, StereoEqualizerConfiguration,
         },
     },
 };
@@ -63,12 +62,8 @@ impl From<A3936StateUpdatePacket> for StateUpdatePacket {
             device_profile: A3936_DEVICE_PROFILE,
             battery: packet.battery.into(),
             equalizer_configuration: packet.equalizer_configuration.left,
-            sound_modes: Some(SoundModes {
-                ambient_sound_mode: packet.sound_modes.ambient_sound_mode,
-                transparency_mode: packet.sound_modes.transparency_mode,
-                noise_canceling_mode: NoiseCancelingMode::default(),
-                custom_noise_canceling: CustomNoiseCanceling::default(),
-            }),
+            sound_modes: None,
+            sound_modes_type_two: Some(packet.sound_modes),
             age_range: Some(packet.age_range),
             gender: Some(packet.gender),
             hear_id: Some(packet.custom_hear_id.into()),

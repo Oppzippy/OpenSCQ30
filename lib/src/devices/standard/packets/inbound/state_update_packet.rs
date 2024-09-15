@@ -21,6 +21,7 @@ use crate::{
             structures::{
                 AgeRange, AmbientSoundModeCycle, Battery, CustomButtonModel,
                 EqualizerConfiguration, FirmwareVersion, Gender, HearId, SerialNumber, SoundModes,
+                SoundModesTypeTwo,
             },
         },
     },
@@ -32,6 +33,7 @@ pub struct StateUpdatePacket {
     pub battery: Battery,
     pub equalizer_configuration: EqualizerConfiguration,
     pub sound_modes: Option<SoundModes>,
+    pub sound_modes_type_two: Option<SoundModesTypeTwo>,
     pub age_range: Option<AgeRange>,
     pub gender: Option<Gender>,
     pub hear_id: Option<HearId>,

@@ -10,7 +10,7 @@ use crate::devices::standard::{
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct SoundModeTypeTwoUpdatePacket {
-    sound_modes: SoundModesTypeTwo,
+    pub sound_modes: SoundModesTypeTwo,
 }
 
 pub fn take_sound_mode_type_two_update_packet<

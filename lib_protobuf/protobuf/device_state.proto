@@ -5,6 +5,7 @@ import "device_profile.proto";
 import "battery.proto";
 import "equalizer_configuration.proto";
 import "sound_modes.proto";
+import "sound_modes_type_two.proto";
 import "hear_id.proto";
 import "firmware_version.proto";
 import "custom_button_model.proto";
@@ -24,4 +25,5 @@ message DeviceState {
   optional CustomButtonModel custom_button_model = 9;
   optional string serial_number = 10;
   optional AmbientSoundModeCycle ambient_sound_mode_cycle = 11;
+  optional SoundModesTypeTwo sound_modes_type_two = 12;
 }

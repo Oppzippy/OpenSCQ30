@@ -34,6 +34,7 @@ describe("libTypes", () => {
       firmwareVersion: null,
       serialNumber: null,
       soundModes: null,
+      soundModesTypeTwo: null,
       ambientSoundModeCycle: null,
     };
     const actual: unknown = JSON.parse(
@@ -134,6 +135,16 @@ describe("libTypes", () => {
         noiseCancelingMode: "custom",
         transparencyMode: "fullyTransparent",
         customNoiseCanceling: 5,
+      },
+      soundModesTypeTwo: {
+        adaptiveNoiseCanceling: "highNoise",
+        ambientSoundMode: "noiseCanceling",
+        detectedWindNoise: true,
+        manualNoiseCanceling: "moderate",
+        noiseCancelingAdaptiveSensitivityLevel: 1,
+        noiseCancelingMode: "adaptive",
+        transparencyMode: "fullyTransparent",
+        windNoiseSuppression: true,
       },
       ambientSoundModeCycle: {
         noiseCancelingMode: true,

@@ -34,6 +34,7 @@ pub fn state_update_handler(input: &[u8], state: DeviceState) -> DeviceState {
             .or(state.serial_number.as_ref())
             .cloned(),
         sound_modes: packet.sound_modes.or(state.sound_modes),
+        sound_modes_type_two: packet.sound_modes_type_two.or(state.sound_modes_type_two),
         ambient_sound_mode_cycle: packet
             .ambient_sound_mode_cycle
             .or(state.ambient_sound_mode_cycle),

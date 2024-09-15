@@ -1,0 +1,35 @@
+syntax = "proto2";
+package openscq30;
+
+import "sound_modes.proto";
+
+option java_package = "com.oppzippy.openscq30.lib.protobuf";
+option java_multiple_files = true;
+
+enum AdaptiveNoiseCanceling {
+  LOW_NOISE = 0;
+  MEDIUM_NOISE = 1;
+  HIGH_NOISE = 2;
+}
+
+enum ManualNoiseCanceling {
+  WEAK = 0;
+  MODERATE = 1;
+  STRONG = 2;
+}
+
+enum NoiseCancelingModeTypeTwo {
+  ADAPTIVE = 0;
+  MANUAL = 1;
+}
+
+message SoundModesTypeTwo {
+  required AmbientSoundMode ambient_sound_mode = 1;
+  required TransparencyMode transparency_mode = 2;
+  required AdaptiveNoiseCanceling adaptive_noise_canceling = 3;
+  required ManualNoiseCanceling manual_noise_canceling = 4;
+  required NoiseCancelingModeTypeTwo noise_canceling_mode = 5;
+  required bool wind_noise_suppression = 6;
+  required bool detected_wind_noise = 7;
+  required uint32 noise_canceling_adaptive_sensitivity_level = 8;
+}

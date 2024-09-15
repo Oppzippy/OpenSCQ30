@@ -47,6 +47,7 @@ describe("App", () => {
                 transparencyMode: "fullyTransparent",
                 customNoiseCanceling: 0,
               },
+              soundModesTypeTwo: null,
               equalizerConfiguration: {
                 presetProfile: "SoundcoreSignature",
                 volumeAdjustments: [

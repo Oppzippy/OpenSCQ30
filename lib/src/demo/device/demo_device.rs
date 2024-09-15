@@ -15,7 +15,8 @@ use crate::{
             AgeRange, AmbientSoundMode, AmbientSoundModeCycle, BasicHearId, BatteryLevel,
             ButtonAction, CustomButtonModel, EqualizerConfiguration, FirmwareVersion, Gender,
             HearId, IsBatteryCharging, NoTwsButtonAction, NoiseCancelingMode,
-            PresetEqualizerProfile, SerialNumber, SingleBattery, SoundModes, TwsButtonAction,
+            PresetEqualizerProfile, SerialNumber, SingleBattery, SoundModes, SoundModesTypeTwo,
+            TwsButtonAction,
         },
     },
     futures::Futures,
@@ -111,6 +112,7 @@ where
             firmware_version: Some(FirmwareVersion::new(2, 0)),
             serial_number: Some(SerialNumber("0123456789ABCDEF".into())),
             ambient_sound_mode_cycle: Some(AmbientSoundModeCycle::default()),
+            sound_modes_type_two: Some(SoundModesTypeTwo::default()),
         });
 
         let (connection_status_sender, _) = watch::channel(ConnectionStatus::Connected);

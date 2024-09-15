@@ -6,6 +6,7 @@ use openscq30_lib::{
     devices::standard::{
         state::DeviceState as LibDeviceState,
         structures::{
+            AdaptiveNoiseCanceling as LibAdaptiveNoiseCanceling,
             AmbientSoundMode as LibAmbientSoundMode,
             AmbientSoundModeCycle as LibAmbientSoundModeCycle, BasicHearId as LibBasicHearId,
             Battery as LibBattery, ButtonAction as LibButtonAction,
@@ -14,9 +15,12 @@ use openscq30_lib::{
             EqualizerConfiguration as LibEqualizerConfiguration,
             FirmwareVersion as LibFirmwareVersion, HearId as LibHearId,
             HearIdMusicType as LibHearIdMusicType, HearIdType as LibHearIdType,
+            ManualNoiseCanceling as LibManualNoiseCanceling,
             NoTwsButtonAction as LibNoTwsButtonAction, NoiseCancelingMode as LibNoiseCancelingMode,
+            NoiseCancelingModeTypeTwo as LibNoiseCancelingModeTypeTwo,
             PresetEqualizerProfile as LibPresetEqualizerProfile, SingleBattery as LibSingleBattery,
-            SoundModes as LibSoundModes, StereoVolumeAdjustments as LibStereoVolumeAdjustments,
+            SoundModes as LibSoundModes, SoundModesTypeTwo as LibSoundModesTypeTwo,
+            StereoVolumeAdjustments as LibStereoVolumeAdjustments,
             TransparencyMode as LibTransparencyMode, TwsButtonAction as LibTwsButtonAction,
             VolumeAdjustments,
         },
@@ -41,6 +45,7 @@ impl From<LibDeviceState> for DeviceState {
                 .serial_number
                 .map(|serial_number| serial_number.to_string()),
             ambient_sound_mode_cycle: value.ambient_sound_mode_cycle.map(Into::into),
+            sound_modes_type_two: value.sound_modes_type_two.map(Into::into),
         }
     }
 }
@@ -506,6 +511,112 @@ impl From<ButtonAction> for LibButtonAction {
             ButtonAction::AmbientSoundMode => Self::AmbientSoundMode,
             ButtonAction::VoiceAssistant => Self::VoiceAssistant,
             ButtonAction::PlayPause => Self::PlayPause,
+        }
+    }
+}
+
+impl From<LibSoundModesTypeTwo> for SoundModesTypeTwo {
+    fn from(value: LibSoundModesTypeTwo) -> Self {
+        Self {
+            ambient_sound_mode: AmbientSoundMode::from(value.ambient_sound_mode).into(),
+            transparency_mode: TransparencyMode::from(value.transparency_mode).into(),
+            adaptive_noise_canceling: AdaptiveNoiseCanceling::from(value.adaptive_noise_canceling)
+                .into(),
+            manual_noise_canceling: ManualNoiseCanceling::from(value.manual_noise_canceling).into(),
+            noise_canceling_mode: NoiseCancelingModeTypeTwo::from(value.noise_canceling_mode)
+                .into(),
+            wind_noise_suppression: value.wind_noise_suppression,
+            detected_wind_noise: value.detected_wind_noise,
+            noise_canceling_adaptive_sensitivity_level: value
+                .noise_canceling_adaptive_sensitivity_level
+                .into(),
+        }
+    }
+}
+
+impl From<LibAdaptiveNoiseCanceling> for AdaptiveNoiseCanceling {
+    fn from(value: LibAdaptiveNoiseCanceling) -> Self {
+        match value {
+            LibAdaptiveNoiseCanceling::LowNoise => Self::LowNoise,
+            LibAdaptiveNoiseCanceling::MediumNoise => Self::MediumNoise,
+            LibAdaptiveNoiseCanceling::HighNoise => Self::HighNoise,
+        }
+    }
+}
+
+impl From<LibManualNoiseCanceling> for ManualNoiseCanceling {
+    fn from(value: LibManualNoiseCanceling) -> Self {
+        match value {
+            LibManualNoiseCanceling::Weak => Self::Weak,
+            LibManualNoiseCanceling::Moderate => Self::Moderate,
+            LibManualNoiseCanceling::Strong => Self::Strong,
+        }
+    }
+}
+
+impl From<LibNoiseCancelingModeTypeTwo> for NoiseCancelingModeTypeTwo {
+    fn from(value: LibNoiseCancelingModeTypeTwo) -> Self {
+        match value {
+            LibNoiseCancelingModeTypeTwo::Adaptive => Self::Adaptive,
+            LibNoiseCancelingModeTypeTwo::Manual => Self::Manual,
+        }
+    }
+}
+
+impl From<SoundModesTypeTwo> for LibSoundModesTypeTwo {
+    fn from(value: SoundModesTypeTwo) -> Self {
+        Self {
+            ambient_sound_mode: AmbientSoundMode::try_from(value.ambient_sound_mode)
+                .unwrap()
+                .into(),
+            transparency_mode: TransparencyMode::try_from(value.transparency_mode)
+                .unwrap()
+                .into(),
+            adaptive_noise_canceling: AdaptiveNoiseCanceling::try_from(
+                value.adaptive_noise_canceling,
+            )
+            .unwrap()
+            .into(),
+            manual_noise_canceling: ManualNoiseCanceling::try_from(value.manual_noise_canceling)
+                .unwrap()
+                .into(),
+            noise_canceling_mode: NoiseCancelingModeTypeTwo::try_from(value.noise_canceling_mode)
+                .unwrap()
+                .into(),
+            wind_noise_suppression: value.wind_noise_suppression,
+            detected_wind_noise: value.detected_wind_noise,
+            noise_canceling_adaptive_sensitivity_level: value
+                .noise_canceling_adaptive_sensitivity_level
+                as u8,
+        }
+    }
+}
+
+impl From<AdaptiveNoiseCanceling> for LibAdaptiveNoiseCanceling {
+    fn from(value: AdaptiveNoiseCanceling) -> Self {
+        match value {
+            AdaptiveNoiseCanceling::LowNoise => LibAdaptiveNoiseCanceling::LowNoise,
+            AdaptiveNoiseCanceling::MediumNoise => LibAdaptiveNoiseCanceling::MediumNoise,
+            AdaptiveNoiseCanceling::HighNoise => LibAdaptiveNoiseCanceling::HighNoise,
+        }
+    }
+}
+
+impl From<ManualNoiseCanceling> for LibManualNoiseCanceling {
+    fn from(value: ManualNoiseCanceling) -> Self {
+        match value {
+            ManualNoiseCanceling::Weak => LibManualNoiseCanceling::Weak,
+            ManualNoiseCanceling::Moderate => LibManualNoiseCanceling::Moderate,
+            ManualNoiseCanceling::Strong => LibManualNoiseCanceling::Strong,
+        }
+    }
+}
+
+impl From<NoiseCancelingModeTypeTwo> for LibNoiseCancelingModeTypeTwo {
+    fn from(value: NoiseCancelingModeTypeTwo) -> Self {
+        match value {
+            NoiseCancelingModeTypeTwo::Adaptive => LibNoiseCancelingModeTypeTwo::Adaptive,
+            NoiseCancelingModeTypeTwo::Manual => LibNoiseCancelingModeTypeTwo::Manual,
         }
     }
 }

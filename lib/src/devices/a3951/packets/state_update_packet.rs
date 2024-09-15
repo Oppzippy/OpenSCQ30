@@ -58,6 +58,7 @@ impl From<A3951StateUpdatePacket> for StateUpdatePacket {
             firmware_version: None,
             serial_number: None,
             ambient_sound_mode_cycle: None,
+            sound_modes_type_two: None,
         }
     }
 }

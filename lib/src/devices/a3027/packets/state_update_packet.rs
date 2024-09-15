@@ -52,6 +52,7 @@ impl From<A3027StateUpdatePacket> for StateUpdatePacket {
             firmware_version: Some(packet.firmware_version),
             serial_number: Some(packet.serial_number),
             ambient_sound_mode_cycle: None,
+            sound_modes_type_two: None,
         }
     }
 }

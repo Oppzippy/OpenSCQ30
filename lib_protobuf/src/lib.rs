@@ -2,7 +2,7 @@ use openscq30_lib::devices::standard::{
     state::DeviceState,
     structures::{
         AmbientSoundModeCycle, CustomButtonModel, EqualizerConfiguration, HearId,
-        PresetEqualizerProfile, SoundModes,
+        PresetEqualizerProfile, SoundModes, SoundModesTypeTwo,
     },
 };
 use prost::{DecodeError, Message};
@@ -32,6 +32,10 @@ pub fn serialize_ambient_sound_mode_cycle(cycle: AmbientSoundModeCycle) -> Vec<u
 
 pub fn deserialize_sound_modes(protobuf: &[u8]) -> Result<SoundModes, DecodeError> {
     protobuf::SoundModes::decode(protobuf).map(SoundModes::from)
+}
+
+pub fn deserialize_sound_modes_type_two(protobuf: &[u8]) -> Result<SoundModesTypeTwo, DecodeError> {
+    protobuf::SoundModesTypeTwo::decode(protobuf).map(SoundModesTypeTwo::from)
 }
 
 pub fn deserialize_ambient_sound_mode_cycle(

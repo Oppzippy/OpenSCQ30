@@ -66,6 +66,7 @@ impl From<A3933StateUpdatePacket> for StateUpdatePacket {
             firmware_version: Some(packet.left_firmware.min(packet.right_firmware)),
             serial_number: Some(packet.serial_number),
             ambient_sound_mode_cycle: Some(packet.ambient_sound_mode_cycle),
+            sound_modes_type_two: None,
         }
     }
 }
