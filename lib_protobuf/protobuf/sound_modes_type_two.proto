@@ -30,6 +30,5 @@ message SoundModesTypeTwo {
   required ManualNoiseCanceling manual_noise_canceling = 4;
   required NoiseCancelingModeTypeTwo noise_canceling_mode = 5;
   required bool wind_noise_suppression = 6;
-  required bool detected_wind_noise = 7;
-  required uint32 noise_canceling_adaptive_sensitivity_level = 8;
+  required uint32 noise_canceling_adaptive_sensitivity_level = 7;
 }

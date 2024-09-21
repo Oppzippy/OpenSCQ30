@@ -139,7 +139,6 @@ describe("libTypes", () => {
       soundModesTypeTwo: {
         adaptiveNoiseCanceling: "highNoise",
         ambientSoundMode: "noiseCanceling",
-        detectedWindNoise: true,
         manualNoiseCanceling: "moderate",
         noiseCancelingAdaptiveSensitivityLevel: 1,
         noiseCancelingMode: "adaptive",

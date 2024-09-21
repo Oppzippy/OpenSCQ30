@@ -13,7 +13,6 @@ data class SoundModesTypeTwo(
     val manualNoiseCanceling: ManualNoiseCanceling,
     val noiseCancelingMode: NoiseCancelingModeTypeTwo,
     val windNoiseSuppression: Boolean,
-    val detectedWindNoise: Boolean,
     val noiseCancelingAdaptiveSensitivityLevel: UByte,
 ) {
     fun toProtobuf(): ProtobufSoundModesTypeTwo = soundModesTypeTwo {
@@ -23,7 +22,6 @@ data class SoundModesTypeTwo(
         manualNoiseCanceling = this@SoundModesTypeTwo.manualNoiseCanceling.toProtobuf()
         noiseCancelingMode = this@SoundModesTypeTwo.noiseCancelingMode.toProtobuf()
         windNoiseSuppression = this@SoundModesTypeTwo.windNoiseSuppression
-        detectedWindNoise = this@SoundModesTypeTwo.detectedWindNoise
         noiseCancelingAdaptiveSensitivityLevel =
             this@SoundModesTypeTwo.noiseCancelingAdaptiveSensitivityLevel.toInt()
     }
@@ -36,7 +34,6 @@ fun ProtobufSoundModesTypeTwo.toKotlin(): SoundModesTypeTwo = SoundModesTypeTwo(
     manualNoiseCanceling = manualNoiseCanceling.toKotlin(),
     noiseCancelingMode = noiseCancelingMode.toKotlin(),
     windNoiseSuppression = windNoiseSuppression,
-    detectedWindNoise = detectedWindNoise,
     noiseCancelingAdaptiveSensitivityLevel = noiseCancelingAdaptiveSensitivityLevel.toUByte(),
 )
 

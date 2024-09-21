@@ -24,7 +24,6 @@ pub struct SoundModesTypeTwo {
     pub manual_noise_canceling: ManualNoiseCanceling,
     pub noise_canceling_mode: NoiseCancelingModeTypeTwo,
     pub wind_noise_suppression: bool,
-    pub detected_wind_noise: bool,
     pub noise_canceling_adaptive_sensitivity_level: u8,
 }
 
@@ -89,7 +88,6 @@ pub(crate) fn take_sound_modes_type_two<'a, E: ParseError<&'a [u8]> + ContextErr
                     manual_noise_canceling,
                     noise_canceling_mode,
                     wind_noise_suppression: wind_noise.is_suppression_enabled,
-                    detected_wind_noise: wind_noise.is_detected,
                     noise_canceling_adaptive_sensitivity_level,
                 }
             },

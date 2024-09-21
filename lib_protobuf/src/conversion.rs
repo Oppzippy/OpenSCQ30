@@ -526,7 +526,6 @@ impl From<LibSoundModesTypeTwo> for SoundModesTypeTwo {
             noise_canceling_mode: NoiseCancelingModeTypeTwo::from(value.noise_canceling_mode)
                 .into(),
             wind_noise_suppression: value.wind_noise_suppression,
-            detected_wind_noise: value.detected_wind_noise,
             noise_canceling_adaptive_sensitivity_level: value
                 .noise_canceling_adaptive_sensitivity_level
                 .into(),
@@ -584,7 +583,6 @@ impl From<SoundModesTypeTwo> for LibSoundModesTypeTwo {
                 .unwrap()
                 .into(),
             wind_noise_suppression: value.wind_noise_suppression,
-            detected_wind_noise: value.detected_wind_noise,
             noise_canceling_adaptive_sensitivity_level: value
                 .noise_canceling_adaptive_sensitivity_level
                 as u8,

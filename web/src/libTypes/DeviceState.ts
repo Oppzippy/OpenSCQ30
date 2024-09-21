@@ -55,7 +55,6 @@ const soundModesTypeTwoSchema = Type.Object({
     Type.Literal("manual"),
   ]),
   windNoiseSuppression: Type.Boolean(),
-  detectedWindNoise: Type.Boolean(),
   noiseCancelingAdaptiveSensitivityLevel: Type.Number(),
 });
 export type SoundModesTypeTwo = Static<typeof soundModesTypeTwoSchema>;

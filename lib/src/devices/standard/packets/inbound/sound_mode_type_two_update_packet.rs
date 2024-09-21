@@ -68,7 +68,6 @@ mod tests {
         );
         assert_eq!(TransparencyMode::VocalMode, sound_modes.transparency_mode);
         assert_eq!(true, sound_modes.wind_noise_suppression);
-        assert_eq!(true, sound_modes.detected_wind_noise);
         assert_eq!(5, sound_modes.noise_canceling_adaptive_sensitivity_level);
     }
 }
