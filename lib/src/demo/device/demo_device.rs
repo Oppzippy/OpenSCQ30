@@ -174,6 +174,25 @@ where
         Ok(())
     }
 
+    async fn set_sound_modes_type_two(&self, sound_modes: SoundModesTypeTwo) -> crate::Result<()> {
+        let state_sender = self.state_sender.lock().await;
+        let state = state_sender.borrow().to_owned();
+        if state.sound_modes_type_two.is_none() {
+            return Err(crate::Error::FeatureNotSupported {
+                feature_name: "sound modes type two",
+            });
+        }
+        if state.sound_modes_type_two == Some(sound_modes) {
+            return Ok(());
+        }
+        tracing::info!("set sound modes type two to {sound_modes:?}");
+        state_sender.send_replace(DeviceState {
+            sound_modes_type_two: Some(sound_modes),
+            ..state
+        });
+        Ok(())
+    }
+
     async fn set_ambient_sound_mode_cycle(
         &self,
         cycle: AmbientSoundModeCycle,

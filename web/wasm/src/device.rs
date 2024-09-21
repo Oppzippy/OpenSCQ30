@@ -7,7 +7,7 @@ use openscq30_lib::{
     demo::device::DemoDevice,
     devices::standard::{
         state::DeviceState,
-        structures::{CustomButtonModel, EqualizerConfiguration, SoundModes},
+        structures::{CustomButtonModel, EqualizerConfiguration, SoundModes, SoundModesTypeTwo},
     },
     futures::WasmFutures,
     soundcore_device::device::SoundcoreDevice,
@@ -23,6 +23,7 @@ pub struct Device {
     inner: DeviceImplementation,
 }
 
+#[allow(non_snake_case)]
 #[wasm_bindgen]
 impl Device {
     #[wasm_bindgen]
@@ -56,6 +57,17 @@ impl Device {
             serde_json::from_str(&sound_modes).map_err(|err| format!("{err:?}"))?;
         self.inner
             .set_sound_modes(sound_modes)
+            .await
+            .map_err(|err| format!("{err:?}"))?;
+        Ok(())
+    }
+
+    #[wasm_bindgen(js_name = "setSoundModesTypeTwo")]
+    pub async fn set_sound_modes_type_two(&self, sound_modes: String) -> Result<(), JsValue> {
+        let sound_modes: SoundModesTypeTwo =
+            serde_json::from_str(&sound_modes).map_err(|err| format!("{err:?}"))?;
+        self.inner
+            .set_sound_modes_type_two(sound_modes)
             .await
             .map_err(|err| format!("{err:?}"))?;
         Ok(())
@@ -143,6 +155,20 @@ impl DeviceImplementation {
         match self {
             DeviceImplementation::WebBluetooth(device) => device.set_sound_modes(sound_modes).await,
             DeviceImplementation::Demo(device) => device.set_sound_modes(sound_modes).await,
+        }
+    }
+
+    pub async fn set_sound_modes_type_two(
+        &self,
+        sound_modes: SoundModesTypeTwo,
+    ) -> openscq30_lib::Result<()> {
+        match self {
+            DeviceImplementation::WebBluetooth(device) => {
+                device.set_sound_modes_type_two(sound_modes).await
+            }
+            DeviceImplementation::Demo(device) => {
+                device.set_sound_modes_type_two(sound_modes).await
+            }
         }
     }
 

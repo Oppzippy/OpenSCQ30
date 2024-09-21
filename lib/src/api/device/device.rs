@@ -8,6 +8,7 @@ use crate::{
         state::DeviceState,
         structures::{
             AmbientSoundModeCycle, CustomButtonModel, EqualizerConfiguration, HearId, SoundModes,
+            SoundModesTypeTwo,
         },
     },
 };
@@ -26,6 +27,7 @@ pub trait Device {
     async fn state(&self) -> DeviceState;
 
     async fn set_sound_modes(&self, sound_modes: SoundModes) -> crate::Result<()>;
+    async fn set_sound_modes_type_two(&self, sound_modes: SoundModesTypeTwo) -> crate::Result<()>;
 
     async fn set_ambient_sound_mode_cycle(&self, cycle: AmbientSoundModeCycle)
         -> crate::Result<()>;

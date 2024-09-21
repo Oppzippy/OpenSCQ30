@@ -9,6 +9,7 @@ import {
   DeviceStateValidator,
   EqualizerConfiguration,
   SoundModes,
+  SoundModesTypeTwo,
 } from "../libTypes/DeviceState";
 import { UnmodifiableBehaviorSubject } from "../UnmodifiableBehaviorSubject";
 import { DeviceStateValidationError } from "./StateValidationError";
@@ -47,6 +48,10 @@ export class Device {
 
   public async setSoundModes(soundModes: SoundModes) {
     await this.libDevice.setSoundModes(JSON.stringify(soundModes));
+  }
+
+  public async setSoundModesTypeTwo(soundModes: SoundModesTypeTwo) {
+    await this.libDevice.setSoundModesTypeTwo(JSON.stringify(soundModes));
   }
 
   public async setEqualizerConfiguration(

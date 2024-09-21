@@ -9,6 +9,7 @@ import com.oppzippy.openscq30.lib.wrapper.DeviceState
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.HearId
 import com.oppzippy.openscq30.lib.wrapper.SoundModes
+import com.oppzippy.openscq30.lib.wrapper.SoundModesTypeTwo
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,11 +34,13 @@ class SoundcoreDevice(
 
     init {
         coroutineScope.launch {
-            nativeDevice.subscribeToStateUpdates(object : NativeDeviceStateObserver {
-                override fun onStateChanged(deviceState: DeviceState) {
-                    _stateFlow.value = deviceState
-                }
-            })
+            nativeDevice.subscribeToStateUpdates(
+                object : NativeDeviceStateObserver {
+                    override fun onStateChanged(deviceState: DeviceState) {
+                        _stateFlow.value = deviceState
+                    }
+                },
+            )
         }
     }
 
@@ -49,6 +52,10 @@ class SoundcoreDevice(
 
     suspend fun setSoundModes(newSoundModes: SoundModes) {
         nativeDevice.setSoundModes(newSoundModes)
+    }
+
+    suspend fun setSoundModesTypeTwo(newSoundModes: SoundModesTypeTwo) {
+        nativeDevice.setSoundModesTypeTwo(newSoundModes)
     }
 
     suspend fun setAmbientSoundModeCycle(cycle: AmbientSoundModeCycle) {

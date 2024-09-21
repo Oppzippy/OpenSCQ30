@@ -9,6 +9,7 @@ use openscq30_lib::{
         state::DeviceState,
         structures::{
             AmbientSoundModeCycle, CustomButtonModel, EqualizerConfiguration, HearId, SoundModes,
+            SoundModesTypeTwo,
         },
     },
 };
@@ -27,6 +28,10 @@ mock! {
         pub fn set_sound_modes(
             &self,
             sound_modes: SoundModes,
+        ) -> openscq30_lib::Result<()>;
+        pub fn set_sound_modes_type_two(
+            &self,
+            sound_modes: SoundModesTypeTwo,
         ) -> openscq30_lib::Result<()>;
         pub fn set_ambient_sound_mode_cycle(
             &self,
@@ -72,6 +77,13 @@ impl Device for MockDevice {
     async fn set_sound_modes(&self, sound_modes: SoundModes) -> openscq30_lib::Result<()> {
         timeout_future(Duration::from_millis(10)).await;
         self.set_sound_modes(sound_modes)
+    }
+    async fn set_sound_modes_type_two(
+        &self,
+        sound_modes: SoundModesTypeTwo,
+    ) -> openscq30_lib::Result<()> {
+        timeout_future(Duration::from_millis(10)).await;
+        self.set_sound_modes_type_two(sound_modes)
     }
     async fn set_ambient_sound_mode_cycle(
         &self,

@@ -8,6 +8,7 @@ use openscq30_lib::{
         state::DeviceState,
         structures::{
             AmbientSoundModeCycle, CustomButtonModel, EqualizerConfiguration, HearId, SoundModes,
+            SoundModesTypeTwo,
         },
     },
     futures::TokioFutures,
@@ -123,6 +124,16 @@ impl NativeSoundcoreDevice {
             .map_err(Into::into)
     }
 
+    pub async fn set_sound_modes_type_two(
+        &self,
+        sound_modes: SoundModesTypeTwo,
+    ) -> Result<(), DeviceError> {
+        self.device
+            .set_sound_modes_type_two(sound_modes)
+            .await
+            .map_err(Into::into)
+    }
+
     pub async fn set_ambient_sound_mode_cycle(
         &self,
         cycle: AmbientSoundModeCycle,
@@ -204,6 +215,19 @@ impl DeviceImplementation {
         match self {
             DeviceImplementation::Manual(device) => device.set_sound_modes(sound_modes).await,
             DeviceImplementation::Demo(device) => device.set_sound_modes(sound_modes).await,
+        }
+    }
+    pub async fn set_sound_modes_type_two(
+        &self,
+        sound_modes: SoundModesTypeTwo,
+    ) -> openscq30_lib::Result<()> {
+        match self {
+            DeviceImplementation::Manual(device) => {
+                device.set_sound_modes_type_two(sound_modes).await
+            }
+            DeviceImplementation::Demo(device) => {
+                device.set_sound_modes_type_two(sound_modes).await
+            }
         }
     }
 

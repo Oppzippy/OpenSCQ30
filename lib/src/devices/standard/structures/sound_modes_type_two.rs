@@ -38,6 +38,12 @@ pub enum AdaptiveNoiseCanceling {
     HighNoise = 2,
 }
 
+impl AdaptiveNoiseCanceling {
+    pub fn id(&self) -> u8 {
+        *self as u8
+    }
+}
+
 #[repr(u8)]
 #[derive(FromRepr, Clone, Copy, Debug, PartialEq, Eq, Hash, Display, Default, AsRefStr)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -49,6 +55,12 @@ pub enum ManualNoiseCanceling {
     Strong = 3,
 }
 
+impl ManualNoiseCanceling {
+    pub fn id(&self) -> u8 {
+        *self as u8
+    }
+}
+
 #[repr(u8)]
 #[derive(FromRepr, Clone, Copy, Debug, PartialEq, Eq, Hash, Display, Default, AsRefStr)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -57,6 +69,12 @@ pub enum NoiseCancelingModeTypeTwo {
     #[default]
     Adaptive = 0,
     Manual = 1,
+}
+
+impl NoiseCancelingModeTypeTwo {
+    pub fn id(&self) -> u8 {
+        *self as u8
+    }
 }
 
 pub(crate) fn take_sound_modes_type_two<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(

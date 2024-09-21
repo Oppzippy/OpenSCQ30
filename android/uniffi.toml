@@ -25,6 +25,16 @@ imports = [
 into_custom = "com.oppzippy.openscq30.lib.protobuf.SoundModes.parseFrom({}).toKotlin()"
 from_custom = "{}.toProtobuf().toByteArray()"
 
+[bindings.kotlin.custom_types.SoundModesTypeTwo]
+type_name = "SoundModesTypeTwo"
+imports = [
+    "com.oppzippy.openscq30.lib.wrapper.toKotlin",
+    "com.oppzippy.openscq30.lib.wrapper.SoundModesTypeTwo",
+]
+into_custom = "com.oppzippy.openscq30.lib.protobuf.SoundModesTypeTwo.parseFrom({}).toKotlin()"
+from_custom = "{}.toProtobuf().toByteArray()"
+
+
 [bindings.kotlin.custom_types.AmbientSoundModeCycle]
 type_name = "AmbientSoundModeCycle"
 imports = [

@@ -11,14 +11,14 @@ use openscq30_lib::devices::standard::{
     state::DeviceState,
     structures::{
         AmbientSoundModeCycle, CustomButtonModel, EqualizerConfiguration, HearId,
-        PresetEqualizerProfile, SoundModes,
+        PresetEqualizerProfile, SoundModes, SoundModesTypeTwo,
     },
 };
 use openscq30_lib_protobuf::{
     deserialize_ambient_sound_mode_cycle, deserialize_custom_button_model,
     deserialize_equalizer_configuration, deserialize_hear_id, deserialize_preset_equalizer_profile,
-    deserialize_sound_modes, serialize_ambient_sound_mode_cycle, serialize_device_state,
-    serialize_equalizer_configuration, serialize_preset_equalizer_profile,
+    deserialize_sound_modes, deserialize_sound_modes_type_two, serialize_ambient_sound_mode_cycle,
+    serialize_device_state, serialize_equalizer_configuration, serialize_preset_equalizer_profile,
 };
 use uuid::Uuid;
 
@@ -92,6 +92,22 @@ impl UniffiCustomTypeConverter for SoundModes {
         Self: Sized,
     {
         Ok(deserialize_sound_modes(&val)?)
+    }
+
+    fn from_custom(_obj: Self) -> Self::Builtin {
+        unimplemented!()
+    }
+}
+
+uniffi::custom_type!(SoundModesTypeTwo, Vec<u8>);
+impl UniffiCustomTypeConverter for SoundModesTypeTwo {
+    type Builtin = Vec<u8>;
+
+    fn into_custom(val: Self::Builtin) -> uniffi::Result<Self>
+    where
+        Self: Sized,
+    {
+        Ok(deserialize_sound_modes_type_two(&val)?)
     }
 
     fn from_custom(_obj: Self) -> Self::Builtin {

@@ -16,7 +16,7 @@ use crate::{
         },
         structures::{
             AmbientSoundModeCycle, CustomButtonModel, EqualizerConfiguration, HearId, SoundModes,
-            STATE_UPDATE,
+            SoundModesTypeTwo, STATE_UPDATE,
         },
     },
     futures::{Futures, JoinHandle},
@@ -226,6 +226,25 @@ where
         }
 
         let response = self.dispatcher.set_sound_modes(state, sound_modes)?;
+        self.handle_response(response, &state_sender).await?;
+        Ok(())
+    }
+
+    async fn set_sound_modes_type_two(&self, sound_modes: SoundModesTypeTwo) -> crate::Result<()> {
+        let state_sender = self.state_sender.lock().await;
+        let state = state_sender.borrow().to_owned();
+        let Some(prev_sound_modes) = state.sound_modes_type_two else {
+            return Err(crate::Error::MissingData {
+                name: "sound modes type two",
+            });
+        };
+        if prev_sound_modes == sound_modes {
+            return Ok(());
+        }
+
+        let response = self
+            .dispatcher
+            .set_sound_modes_type_two(state, sound_modes)?;
         self.handle_response(response, &state_sender).await?;
         Ok(())
     }
