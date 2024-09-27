@@ -19,10 +19,10 @@
     "playPause": ""
   },
   "colorScheme": {
-    "colorScheme": "",
     "system": "",
     "light": "",
-    "dark": ""
+    "dark": "",
+    "colorScheme": ""
   },
   "device": {
     "disconnect": "",
@@ -49,7 +49,10 @@
     "ambientSoundMode": "",
     "customNoiseCanceling": "",
     "noiseCancelingMode": "",
-    "transparencyMode": ""
+    "transparencyMode": "",
+    "adaptiveNoiseCanceling": "",
+    "manualNoiseCanceling": "",
+    "noiseCancelingSensitivityLevel": ""
   },
   "equalizer": {
     "customProfile": "",
@@ -102,11 +105,23 @@
     "transport": "",
     "outdoor": "",
     "indoor": "",
-    "custom": ""
+    "custom": "",
+    "adaptive": "",
+    "manual": ""
   },
   "transparencyMode": {
     "fullyTransparent": "",
     "vocalMode": ""
+  },
+  "adaptiveNoiseCanceling": {
+    "lowNoise": "",
+    "mediumNoise": "",
+    "highNoise": ""
+  },
+  "manualNoiseCanceling": {
+    "weak": "",
+    "moderate": "",
+    "strong": ""
   },
   "toast": {
     "close": ""

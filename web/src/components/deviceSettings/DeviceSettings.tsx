@@ -11,7 +11,9 @@ import {
   EqualizerConfiguration,
   PresetEqualizerProfile,
   SoundModes,
+  SoundModesTypeTwo,
 } from "../../libTypes/DeviceState";
+import { SoundModeSelection as SoundModeTypeTwoSelection } from "../soundModeTypeTwo/SoundModeSelection";
 import { ButtonSettings } from "../buttonSettings/ButtonSettings";
 import { DeviceInfo } from "../deviceInfo/DeviceInfo";
 import { EqualizerSettings } from "../equalizer/EqualizerSettings";
@@ -49,6 +51,10 @@ export function DeviceSettings({
     <Masonry columns={{ sx: 1, lg: 2 }}>
       {[
         <SoundModeSelectionSection
+          displayState={displayState}
+          setDisplayState={setDisplayState}
+        />,
+        <SoundModeTypeTwoSelectionSection
           displayState={displayState}
           setDisplayState={setDisplayState}
         />,
@@ -100,6 +106,33 @@ function SoundModeSelectionSection({
           noiseCanceling:
             displayState.deviceProfile.soundMode.noiseCancelingModeType,
         }}
+      />
+    );
+  }
+}
+
+function SoundModeTypeTwoSelectionSection({
+  displayState,
+  setDisplayState,
+}: {
+  displayState: DeviceState;
+  setDisplayState: Dispatch<SetStateAction<DeviceState>>;
+}) {
+  const setSoundModes = useCallback(
+    (soundModes: SoundModesTypeTwo) => {
+      setDisplayState((state) => ({
+        ...state,
+        soundModesTypeTwo: soundModes,
+      }));
+    },
+    [setDisplayState],
+  );
+
+  if (displayState.soundModesTypeTwo) {
+    return (
+      <SoundModeTypeTwoSelection
+        soundModes={displayState.soundModesTypeTwo}
+        setSoundModes={setSoundModes}
       />
     );
   }

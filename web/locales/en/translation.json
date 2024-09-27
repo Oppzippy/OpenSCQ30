@@ -19,10 +19,10 @@
     "playPause": "Play/Pause"
   },
   "colorScheme": {
-    "colorScheme": "Color Scheme",
     "system": "System",
     "light": "Light",
-    "dark": "Dark"
+    "dark": "Dark",
+    "colorScheme": "Color Scheme"
   },
   "device": {
     "disconnect": "Disconnect",
@@ -49,7 +49,10 @@
     "ambientSoundMode": "Ambient Sound Mode",
     "customNoiseCanceling": "Custom Noise Canceling",
     "noiseCancelingMode": "Noise Canceling Mode",
-    "transparencyMode": "Transparency Mode"
+    "transparencyMode": "Transparency Mode",
+    "adaptiveNoiseCanceling": "Adaptive Noise Canceling",
+    "manualNoiseCanceling": "Manual Noise Canceling",
+    "noiseCancelingSensitivityLevel": "Noise Canceling Sensitivity Level"
   },
   "equalizer": {
     "customProfile": "Custom Profile",
@@ -102,11 +105,23 @@
     "transport": "Transport",
     "outdoor": "Outdoor",
     "indoor": "Indoor",
-    "custom": "Custom"
+    "custom": "Custom",
+    "adaptive": "Adaptive",
+    "manual": "Manual"
   },
   "transparencyMode": {
     "fullyTransparent": "Fully Transparent",
     "vocalMode": "Vocal Mode"
+  },
+  "adaptiveNoiseCanceling": {
+    "lowNoise": "Low Noise",
+    "mediumNoise": "Medium Noise",
+    "highNoise": "High Noise"
+  },
+  "manualNoiseCanceling": {
+    "weak": "Weak",
+    "moderate": "Moderate",
+    "strong": "Strong"
   },
   "toast": {
     "close": "Close"
