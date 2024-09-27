@@ -1,8 +1,9 @@
 import { Box, Typography } from "@mui/material";
 import { ToggleButtonRow } from "./ToggleButtonRow";
 import { useTranslation } from "react-i18next";
-import React, { useCallback } from "react";
+import React from "react";
 import { SoundModes } from "../../libTypes/DeviceState";
+import { useFilterNulls } from "../../hooks/useFilterNulls";
 
 interface Props {
   value: SoundModes["transparencyMode"];
@@ -15,31 +16,26 @@ export const TransparencyModeSelection = React.memo(function ({
 }: Props) {
   const { t } = useTranslation();
   // Don't allow deselecting the button
-  const onValueChangedNotNull = useCallback(
-    (newValue: SoundModes["transparencyMode"] | undefined) => {
-      if (newValue != undefined) {
-        onValueChanged(newValue);
-      }
-    },
-    [onValueChanged],
-  );
+  const onValueChangedNotNull = useFilterNulls(onValueChanged);
 
   return (
     <Box>
       <Typography>{t("soundModes.transparencyMode")}</Typography>
       <ToggleButtonRow
         value={value}
-        onValueChanged={onValueChangedNotNull as (value: string) => void}
-        values={[
-          {
-            value: "fullyTransparent",
-            displayText: t("transparencyMode.fullyTransparent"),
-          },
-          {
-            value: "vocalMode",
-            displayText: t("transparencyMode.vocalMode"),
-          },
-        ]}
+        onValueChanged={onValueChangedNotNull}
+        values={
+          [
+            {
+              value: "fullyTransparent",
+              label: t("transparencyMode.fullyTransparent"),
+            },
+            {
+              value: "vocalMode",
+              label: t("transparencyMode.vocalMode"),
+            },
+          ] as const
+        }
       />
     </Box>
   );

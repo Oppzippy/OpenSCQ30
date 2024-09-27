@@ -1,7 +1,6 @@
 import { Box, Slider, Typography } from "@mui/material";
-import React, { useCallback } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
-import { SoundModes } from "../../libTypes/DeviceState";
 
 interface Props {
   value: number;
@@ -13,15 +12,6 @@ export const CustomNoiseCancelingSelection = React.memo(function ({
   onValueChanged,
 }: Props) {
   const { t } = useTranslation();
-  // Don't allow deselecting the button
-  const onValueChangedNotNull = useCallback(
-    (newValue: SoundModes["customNoiseCanceling"] | undefined) => {
-      if (newValue != undefined) {
-        onValueChanged(newValue);
-      }
-    },
-    [onValueChanged],
-  );
 
   return (
     <Box>
@@ -35,7 +25,7 @@ export const CustomNoiseCancelingSelection = React.memo(function ({
         step={1}
         valueLabelDisplay="auto"
         aria-labelledby="custom-noise-canceling-label"
-        onChange={(_, value) => onValueChangedNotNull(value as number)}
+        onChange={(_, value) => onValueChanged(value as number)}
       />
     </Box>
   );

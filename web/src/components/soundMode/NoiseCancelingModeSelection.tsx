@@ -1,8 +1,9 @@
 import { Box, Typography } from "@mui/material";
-import { ToggleButtonRow } from "./ToggleButtonRow";
+import { ToggleButtonRow, ToggleButtonValues } from "./ToggleButtonRow";
 import { useTranslation } from "react-i18next";
-import React, { useCallback } from "react";
+import React from "react";
 import { SoundModes } from "../../libTypes/DeviceState";
+import { useFilterNulls } from "../../hooks/useFilterNulls";
 
 interface Props {
   value: SoundModes["noiseCancelingMode"];
@@ -17,36 +18,26 @@ export const NoiseCancelingModeSelection = React.memo(function ({
 }: Props) {
   const { t } = useTranslation();
   // Don't allow deselecting the button
-  const onValueChangedNotNull = useCallback(
-    (newValue: SoundModes["noiseCancelingMode"] | undefined) => {
-      if (newValue != undefined) {
-        onValueChanged(newValue);
-      }
-    },
-    [onValueChanged],
-  );
+  const onValueChangedNotNull = useFilterNulls(onValueChanged);
 
-  const values: {
-    value: SoundModes["noiseCancelingMode"];
-    displayText: string;
-  }[] = [
+  const values: ToggleButtonValues<SoundModes["noiseCancelingMode"]> = [
     {
       value: "transport",
-      displayText: t("noiseCancelingMode.transport"),
+      label: t("noiseCancelingMode.transport"),
     },
     {
       value: "outdoor",
-      displayText: t("noiseCancelingMode.outdoor"),
+      label: t("noiseCancelingMode.outdoor"),
     },
     {
       value: "indoor",
-      displayText: t("noiseCancelingMode.indoor"),
+      label: t("noiseCancelingMode.indoor"),
     },
   ];
   if (hasCustomMode) {
     values.push({
       value: "custom",
-      displayText: t("noiseCancelingMode.custom"),
+      label: t("noiseCancelingMode.custom"),
     });
   }
 
@@ -55,7 +46,7 @@ export const NoiseCancelingModeSelection = React.memo(function ({
       <Typography>{t("soundModes.noiseCancelingMode")}</Typography>
       <ToggleButtonRow
         value={value}
-        onValueChanged={onValueChangedNotNull as (value: string) => void}
+        onValueChanged={onValueChangedNotNull}
         values={values}
       />
     </Box>

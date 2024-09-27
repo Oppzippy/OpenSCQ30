@@ -1,8 +1,9 @@
 import { Box, Typography } from "@mui/material";
-import { ToggleButtonRow } from "./ToggleButtonRow";
+import React from "react";
 import { useTranslation } from "react-i18next";
-import React, { useCallback } from "react";
+import { useFilterNulls } from "../../hooks/useFilterNulls";
 import { SoundModes } from "../../libTypes/DeviceState";
+import { ToggleButtonRow, ToggleButtonValues } from "./ToggleButtonRow";
 
 interface Props {
   value: SoundModes["ambientSoundMode"];
@@ -17,23 +18,16 @@ export const AmbientSoundModeSelection = React.memo(function ({
 }: Props) {
   const { t } = useTranslation();
   // Don't allow deselecting the button
-  const onValueChangedNotNull = useCallback(
-    (newValue: SoundModes["ambientSoundMode"] | undefined) => {
-      if (newValue != undefined) {
-        onValueChanged(newValue);
-      }
-    },
-    [onValueChanged],
-  );
+  const onValueChangedNotNull = useFilterNulls(onValueChanged);
 
-  let values = [
+  let values: ToggleButtonValues<SoundModes["ambientSoundMode"]> = [
     {
       value: "transparency",
-      displayText: t("ambientSoundMode.transparency"),
+      label: t("ambientSoundMode.transparency"),
     },
     {
       value: "normal",
-      displayText: t("ambientSoundMode.normal"),
+      label: t("ambientSoundMode.normal"),
     },
   ];
 
@@ -41,7 +35,7 @@ export const AmbientSoundModeSelection = React.memo(function ({
     values = [
       {
         value: "noiseCanceling",
-        displayText: t("ambientSoundMode.noiseCanceling"),
+        label: t("ambientSoundMode.noiseCanceling"),
       },
       ...values,
     ];
@@ -52,7 +46,7 @@ export const AmbientSoundModeSelection = React.memo(function ({
       <Typography>{t("soundModes.ambientSoundMode")}</Typography>
       <ToggleButtonRow
         value={value}
-        onValueChanged={onValueChangedNotNull as (value: string) => void}
+        onValueChanged={onValueChangedNotNull}
         values={values}
       />
     </Box>
