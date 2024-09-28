@@ -24,10 +24,7 @@ use crate::{
 use super::packets::take_a3936_state_update_packet;
 
 pub const A3936_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
-    sound_mode: Some(SoundModeProfile {
-        noise_canceling_mode_type: NoiseCancelingModeType::Basic,
-        transparency_mode_type: TransparencyModeType::Custom,
-    }),
+    sound_mode: None,
     has_hear_id: true,
     num_equalizer_channels: 2,
     num_equalizer_bands: 8,
