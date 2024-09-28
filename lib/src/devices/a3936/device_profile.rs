@@ -3,9 +3,7 @@ use std::{collections::HashMap, sync::Arc};
 use nom::error::VerboseError;
 
 use crate::{
-    device_profiles::{
-        DeviceProfile, NoiseCancelingModeType, SoundModeProfile, TransparencyModeType,
-    },
+    device_profiles::DeviceProfile,
     devices::standard::{
         packets::{
             inbound::take_sound_mode_type_two_update_packet,
