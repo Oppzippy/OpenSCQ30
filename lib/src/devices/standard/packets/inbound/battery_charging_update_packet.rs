@@ -4,10 +4,7 @@ use nom::{
     sequence::tuple,
 };
 
-use crate::devices::standard::{
-    packets::parsing::{take_is_battery_charging, ParseResult},
-    structures::IsBatteryCharging,
-};
+use crate::devices::standard::{packets::parsing::ParseResult, structures::IsBatteryCharging};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct BatteryChargingUpdatePacket {
@@ -15,16 +12,18 @@ pub struct BatteryChargingUpdatePacket {
     pub right: Option<IsBatteryCharging>,
 }
 
-pub fn take_battery_charging_update_packet<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-    input: &'a [u8],
-) -> ParseResult<BatteryChargingUpdatePacket, E> {
-    context(
-        "BatteryChargingUpdatePacket",
-        all_consuming(map(
-            tuple((take_is_battery_charging, opt(take_is_battery_charging))),
-            |(left, right)| BatteryChargingUpdatePacket { left, right },
-        )),
-    )(input)
+impl BatteryChargingUpdatePacket {
+    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> ParseResult<BatteryChargingUpdatePacket, E> {
+        context(
+            "BatteryChargingUpdatePacket",
+            all_consuming(map(
+                tuple((IsBatteryCharging::take, opt(IsBatteryCharging::take))),
+                |(left, right)| BatteryChargingUpdatePacket { left, right },
+            )),
+        )(input)
+    }
 }
 
 #[cfg(test)]
@@ -32,7 +31,7 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::{
-        packets::inbound::{take_battery_charging_update_packet, take_inbound_packet_body},
+        packets::inbound::{take_inbound_packet_body, BatteryChargingUpdatePacket},
         structures::IsBatteryCharging,
     };
 
@@ -42,7 +41,7 @@ mod tests {
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04, 0x0c, 0x00, 0x01, 0x00, 0x1b,
         ];
         let (_, body) = take_inbound_packet_body(input).unwrap();
-        let packet = take_battery_charging_update_packet::<VerboseError<_>>(body)
+        let packet = BatteryChargingUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
 
@@ -56,7 +55,7 @@ mod tests {
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04, 0x0b, 0x00, 0x01, 0x1a,
         ];
         let (_, body) = take_inbound_packet_body(input).unwrap();
-        let packet = take_battery_charging_update_packet::<VerboseError<_>>(body)
+        let packet = BatteryChargingUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
 

@@ -13,19 +13,22 @@ pub struct TwsStatusUpdatePacket {
     pub tws_status: bool,
 }
 
-pub fn take_tws_status_update_packet<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-    input: &'a [u8],
-) -> ParseResult<TwsStatusUpdatePacket, E> {
-    context(
-        "TwsStatusUpdatePacket",
-        all_consuming(map(
-            tuple((le_u8, take_bool)),
-            |(host_device, tws_status)| TwsStatusUpdatePacket {
-                host_device,
-                tws_status,
-            },
-        )),
-    )(input)
+impl TwsStatusUpdatePacket {
+    #[allow(dead_code)]
+    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> ParseResult<TwsStatusUpdatePacket, E> {
+        context(
+            "TwsStatusUpdatePacket",
+            all_consuming(map(
+                tuple((le_u8, take_bool)),
+                |(host_device, tws_status)| TwsStatusUpdatePacket {
+                    host_device,
+                    tws_status,
+                },
+            )),
+        )(input)
+    }
 }
 
 #[cfg(test)]
@@ -33,7 +36,7 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::packets::inbound::{
-        take_inbound_packet_body, take_tws_status_update_packet,
+        take_inbound_packet_body, TwsStatusUpdatePacket,
     };
 
     #[test]
@@ -42,7 +45,7 @@ mod tests {
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x02, 0x0c, 0x00, 0x02, 0x01, 0x1b,
         ];
         let (_, body) = take_inbound_packet_body(input).unwrap();
-        let packet = take_tws_status_update_packet::<VerboseError<_>>(body)
+        let packet = TwsStatusUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
         assert_eq!(2, packet.host_device);

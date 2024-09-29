@@ -18,7 +18,7 @@ pub use battery_charging_update_packet::*;
 pub use battery_level_update_packet::*;
 pub use chinese_voice_propt_state_update_packet::*;
 pub use firmware_version_update_packet::*;
-pub use inbound_packet::*;
+pub(crate) use inbound_packet::*;
 pub use ldac_state_update_packet::*;
 pub use set_ambient_sound_mode_cycle_ok_packet::*;
 pub use set_custom_button_model_ok_packet::*;

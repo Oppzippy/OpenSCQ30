@@ -6,7 +6,7 @@ use crate::{
     device_profiles::DeviceProfile,
     devices::standard::{
         packets::{
-            inbound::take_sound_mode_type_two_update_packet,
+            inbound::SoundModeTypeTwoUpdatePacket,
             outbound::{OutboundPacket, OutboundPacketBytes, SetEqualizerPacket},
         },
         quirks::{TwoExtraEqBands, TwoExtraEqBandsValues},
@@ -19,7 +19,7 @@ use crate::{
     },
 };
 
-use super::packets::take_a3936_state_update_packet;
+use super::packets::A3936StateUpdatePacket;
 
 pub const A3936_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     sound_mode: None,
@@ -56,7 +56,7 @@ impl DeviceCommandDispatcher for A3936Dispatcher {
         handlers.insert(
             STATE_UPDATE,
             Box::new(move |packet_bytes, state| {
-                let result = take_a3936_state_update_packet::<VerboseError<_>>(packet_bytes);
+                let result = A3936StateUpdatePacket::take::<VerboseError<_>>(packet_bytes);
                 let packet = match result {
                     Ok((_, packet)) => packet,
                     Err(err) => {
@@ -74,7 +74,7 @@ impl DeviceCommandDispatcher for A3936Dispatcher {
             SOUND_MODE_UPDATE,
             Box::new(move |packet_bytes, state| {
                 let packet =
-                    match take_sound_mode_type_two_update_packet::<VerboseError<_>>(packet_bytes) {
+                    match SoundModeTypeTwoUpdatePacket::take::<VerboseError<_>>(packet_bytes) {
                         Ok((_, packet)) => packet,
                         Err(err) => {
                             tracing::error!("failed to parse packet: {err:?}");

@@ -18,7 +18,7 @@ use crate::{
     },
 };
 
-use super::packets::inbound::take_a3933_state_update_packet;
+use super::packets::inbound::A3933StateUpdatePacket;
 
 pub const A3933_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     sound_mode: Some(SoundModeProfile {
@@ -58,7 +58,7 @@ impl DeviceCommandDispatcher for A3933Dispatcher {
         handlers.insert(
             STATE_UPDATE,
             Box::new(move |packet_bytes, state| {
-                let result = take_a3933_state_update_packet::<VerboseError<_>>(packet_bytes);
+                let result = A3933StateUpdatePacket::take::<VerboseError<_>>(packet_bytes);
                 let packet = match result {
                     Ok((_, packet)) => packet,
                     Err(err) => {
@@ -133,7 +133,7 @@ mod tests {
     use crate::devices::{
         a3933::{
             device_profile::{CustomSetEqualizerPacket, A3933_DEVICE_PROFILE},
-            packets::inbound::take_a3933_state_update_packet,
+            packets::inbound::A3933StateUpdatePacket,
         },
         standard::{
             packets::{
@@ -203,7 +203,7 @@ mod tests {
         .bytes();
 
         let body = take_inbound_packet_body(&data).unwrap().1;
-        let state_update = take_a3933_state_update_packet::<VerboseError<_>>(body)
+        let state_update = A3933StateUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
         let state: DeviceState = StateUpdatePacket::from(state_update).into();

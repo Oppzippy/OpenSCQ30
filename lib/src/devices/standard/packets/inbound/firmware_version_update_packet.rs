@@ -5,7 +5,7 @@ use nom::{
 };
 
 use crate::devices::standard::{
-    packets::parsing::{take_firmware_version, take_serial_number, ParseResult},
+    packets::parsing::ParseResult,
     structures::{FirmwareVersion, SerialNumber},
 };
 
@@ -18,26 +18,28 @@ pub struct FirmwareVersionUpdatePacket {
     pub serial_number: SerialNumber,
 }
 
-pub fn take_firmware_version_update_packet<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-    input: &'a [u8],
-) -> ParseResult<FirmwareVersionUpdatePacket, E> {
-    context(
-        "SoundModeUpdatePacket",
-        all_consuming(map(
-            tuple((
-                take_firmware_version,
-                take_firmware_version,
-                take_serial_number,
+impl FirmwareVersionUpdatePacket {
+    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> ParseResult<FirmwareVersionUpdatePacket, E> {
+        context(
+            "SoundModeUpdatePacket",
+            all_consuming(map(
+                tuple((
+                    FirmwareVersion::take,
+                    FirmwareVersion::take,
+                    SerialNumber::take,
+                )),
+                |(left_firmware_version, right_firmware_version, serial_number)| {
+                    FirmwareVersionUpdatePacket {
+                        left_firmware_version,
+                        right_firmware_version,
+                        serial_number,
+                    }
+                },
             )),
-            |(left_firmware_version, right_firmware_version, serial_number)| {
-                FirmwareVersionUpdatePacket {
-                    left_firmware_version,
-                    right_firmware_version,
-                    serial_number,
-                }
-            },
-        )),
-    )(input)
+        )(input)
+    }
 }
 
 #[cfg(test)]
@@ -45,7 +47,7 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::{
-        packets::inbound::{take_firmware_version_update_packet, take_inbound_packet_body},
+        packets::inbound::{take_inbound_packet_body, FirmwareVersionUpdatePacket},
         structures::{FirmwareVersion, SerialNumber},
     };
 
@@ -57,7 +59,7 @@ mod tests {
             0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0xca,
         ];
         let (_, body) = take_inbound_packet_body(input).unwrap();
-        let packet = take_firmware_version_update_packet::<VerboseError<_>>(body)
+        let packet = FirmwareVersionUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
         assert_eq!(FirmwareVersion::new(12, 34), packet.left_firmware_version);

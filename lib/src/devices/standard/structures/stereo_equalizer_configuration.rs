@@ -1,4 +1,11 @@
+use crate::devices::standard::packets::parsing::ParseResult;
+
 use super::{EqualizerConfiguration, VolumeAdjustments};
+use nom::{
+    combinator::map,
+    error::{context, ContextError, ParseError},
+    sequence::tuple,
+};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct StereoEqualizerConfiguration {
@@ -18,6 +25,24 @@ impl StereoEqualizerConfiguration {
                 left,
                 right: EqualizerConfiguration::new_custom_profile(right),
             }
+        }
+    }
+
+    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        num_bands: usize,
+    ) -> impl Fn(&'a [u8]) -> ParseResult<EqualizerConfiguration, E> {
+        move |input| {
+            context(
+                "stereo equalizer configuration",
+                map(
+                    tuple((
+                        EqualizerConfiguration::take(num_bands),
+                        VolumeAdjustments::take(num_bands),
+                    )),
+                    // discard the right channel since we don't support it yet
+                    |results| results.0,
+                ),
+            )(input)
         }
     }
 }

@@ -16,7 +16,7 @@ use crate::{
     },
 };
 
-use super::packets::take_a3945_state_update_packet;
+use super::packets::A3945StateUpdatePacket;
 
 pub const A3945_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     sound_mode: None,
@@ -53,7 +53,7 @@ impl DeviceCommandDispatcher for A3945Dispatcher {
         handlers.insert(
             STATE_UPDATE,
             Box::new(move |packet_bytes, state| {
-                let packet = match take_a3945_state_update_packet::<VerboseError<_>>(packet_bytes) {
+                let packet = match A3945StateUpdatePacket::take::<VerboseError<_>>(packet_bytes) {
                     Ok((_, packet)) => packet,
                     Err(err) => {
                         tracing::error!("failed to parse packet: {err:?}");
@@ -125,9 +125,7 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::{
-        a3945::{
-            device_profile::CustomSetEqualizerPacket, packets::take_a3945_state_update_packet,
-        },
+        a3945::{device_profile::CustomSetEqualizerPacket, packets::A3945StateUpdatePacket},
         standard::{
             packets::{
                 inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_body},
@@ -181,7 +179,7 @@ mod tests {
         .bytes();
 
         let body = take_inbound_packet_body(&data).unwrap().1;
-        let state_update = take_a3945_state_update_packet::<VerboseError<_>>(body)
+        let state_update = A3945StateUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
         let state: DeviceState = StateUpdatePacket::from(state_update).into();

@@ -11,7 +11,7 @@ use crate::{
     api::connection::{Connection, ConnectionStatus},
     devices::standard::{
         packets::{
-            inbound::{state_update_packet::take_state_update_packet, take_inbound_packet_body},
+            inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_body},
             outbound::{OutboundPacketBytes, RequestFirmwareVersionPacket},
         },
         structures::{
@@ -139,7 +139,7 @@ where
                 while let Some(packet_bytes) = inbound_receiver.recv().await {
                     match take_inbound_packet_body(&packet_bytes) {
                         Ok((STATE_UPDATE, body)) => {
-                            match take_state_update_packet::<VerboseError<_>>(body) {
+                            match StateUpdatePacket::take::<VerboseError<_>>(body) {
                                 Ok((_, packet)) => return Some((packet, body.to_vec())),
                                 Err(err) => warn!("failed to parse packet: {err:?}"),
                             }

@@ -8,7 +8,7 @@ use crate::devices::standard::packets::checksum::calculate_checksum;
 
 use super::ParseResult;
 
-pub fn take_checksum<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+pub(crate) fn take_checksum<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
     input: &'a [u8],
 ) -> ParseResult<(), E> {
     context(

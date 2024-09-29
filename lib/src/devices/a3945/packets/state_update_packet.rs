@@ -10,15 +10,12 @@ use crate::devices::{
     standard::{
         packets::{
             inbound::state_update_packet::StateUpdatePacket,
-            parsing::{
-                take_battery_level, take_bool, take_custom_button_model, take_dual_battery,
-                take_firmware_version, take_serial_number, ParseResult,
-            },
+            parsing::{take_bool, ParseResult},
         },
-        quirks::{take_stereo_equalizer_configuration_with_two_extra_bands, TwoExtraEqBandsValues},
+        quirks::TwoExtraEqBandsValues,
         structures::{
             BatteryLevel, CustomButtonModel, DualBattery, EqualizerConfiguration, FirmwareVersion,
-            SerialNumber,
+            SerialNumber, StereoEqualizerConfiguration,
         },
     },
 };
@@ -64,54 +61,37 @@ impl From<A3945StateUpdatePacket> for StateUpdatePacket {
     }
 }
 
-pub fn take_a3945_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-    input: &'a [u8],
-) -> ParseResult<A3945StateUpdatePacket, E> {
-    context(
-        "a3945 state update packet",
-        all_consuming(map(
-            tuple((
-                le_u8,
-                take_bool,
-                take_dual_battery,
-                take_firmware_version,
-                take_firmware_version,
-                take_serial_number,
-                take_stereo_equalizer_configuration_with_two_extra_bands(8),
-                take_custom_button_model,
-                take_bool,
-                take_bool,
-                take_bool,
-                take_battery_level,
-                take_bool,
-                le_u8,
-            )),
-            |(
-                host_device,
-                tws_status,
-                battery,
-                left_firmware,
-                right_firmware,
-                serial_number,
-                (equalizer_configuration, extra_band_values),
-                custom_button_model,
-                touch_tone_switch,
-                wear_detection_switch,
-                game_mode_switch,
-                charging_case_battery_level,
-                bass_up_switch,
-                device_color,
-            )| {
-                A3945StateUpdatePacket {
+impl A3945StateUpdatePacket {
+    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> ParseResult<A3945StateUpdatePacket, E> {
+        context(
+            "a3945 state update packet",
+            all_consuming(map(
+                tuple((
+                    le_u8,
+                    take_bool,
+                    DualBattery::take,
+                    FirmwareVersion::take,
+                    FirmwareVersion::take,
+                    SerialNumber::take,
+                    StereoEqualizerConfiguration::take_with_two_extra_bands(8),
+                    CustomButtonModel::take,
+                    take_bool,
+                    take_bool,
+                    take_bool,
+                    BatteryLevel::take,
+                    take_bool,
+                    le_u8,
+                )),
+                |(
                     host_device,
                     tws_status,
                     battery,
                     left_firmware,
                     right_firmware,
                     serial_number,
-                    left_equalizer_configuration: equalizer_configuration.left,
-                    right_equalizer_configuration: equalizer_configuration.right,
-                    extra_band_values,
+                    (equalizer_configuration, extra_band_values),
                     custom_button_model,
                     touch_tone_switch,
                     wear_detection_switch,
@@ -119,8 +99,27 @@ pub fn take_a3945_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                     charging_case_battery_level,
                     bass_up_switch,
                     device_color,
-                }
-            },
-        )),
-    )(input)
+                )| {
+                    A3945StateUpdatePacket {
+                        host_device,
+                        tws_status,
+                        battery,
+                        left_firmware,
+                        right_firmware,
+                        serial_number,
+                        left_equalizer_configuration: equalizer_configuration.left,
+                        right_equalizer_configuration: equalizer_configuration.right,
+                        extra_band_values,
+                        custom_button_model,
+                        touch_tone_switch,
+                        wear_detection_switch,
+                        game_mode_switch,
+                        charging_case_battery_level,
+                        bass_up_switch,
+                        device_color,
+                    }
+                },
+            )),
+        )(input)
+    }
 }

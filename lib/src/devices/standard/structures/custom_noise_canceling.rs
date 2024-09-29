@@ -1,5 +1,12 @@
+use nom::{
+    combinator::map,
+    error::{context, ContextError, ParseError},
+    number::complete::le_u8,
+};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+
+use crate::devices::standard::packets::parsing::ParseResult;
 
 #[derive(Debug, Clone, Copy, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -23,5 +30,16 @@ impl CustomNoiseCanceling {
 
     pub fn value(&self) -> u8 {
         self.value
+    }
+
+    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> ParseResult<CustomNoiseCanceling, E> {
+        context(
+            "custom noise canceling",
+            map(le_u8, |custom_noise_canceling_level| {
+                CustomNoiseCanceling::new(custom_noise_canceling_level)
+            }),
+        )(input)
     }
 }

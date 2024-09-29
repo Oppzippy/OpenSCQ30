@@ -7,14 +7,7 @@ use nom::{
 use crate::devices::{
     a3028::device_profile::A3028_DEVICE_PROFILE,
     standard::{
-        packets::{
-            inbound::state_update_packet::StateUpdatePacket,
-            parsing::{
-                take_age_range, take_basic_hear_id, take_equalizer_configuration,
-                take_firmware_version, take_gender, take_serial_number, take_single_battery,
-                take_sound_modes, ParseResult,
-            },
-        },
+        packets::{inbound::state_update_packet::StateUpdatePacket, parsing::ParseResult},
         structures::{
             AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
             SingleBattery, SoundModes,
@@ -54,33 +47,24 @@ impl From<A3028StateUpdatePacket> for StateUpdatePacket {
     }
 }
 
-pub fn take_a3028_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-    input: &'a [u8],
-) -> ParseResult<A3028StateUpdatePacket, E> {
-    context(
-        "a3028 state update packet",
-        all_consuming(map(
-            tuple((
-                take_single_battery,
-                take_equalizer_configuration(8),
-                take_gender,
-                take_age_range,
-                take_basic_hear_id,
-                take_sound_modes,
-                take_firmware_version,
-                take_serial_number,
-            )),
-            |(
-                battery,
-                equalizer_configuration,
-                gender,
-                age_range,
-                hear_id,
-                sound_modes,
-                firmware_version,
-                serial_number,
-            )| {
-                A3028StateUpdatePacket {
+impl A3028StateUpdatePacket {
+    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> ParseResult<A3028StateUpdatePacket, E> {
+        context(
+            "a3028 state update packet",
+            all_consuming(map(
+                tuple((
+                    SingleBattery::take,
+                    EqualizerConfiguration::take(8),
+                    Gender::take,
+                    AgeRange::take,
+                    BasicHearId::take,
+                    SoundModes::take,
+                    FirmwareVersion::take,
+                    SerialNumber::take,
+                )),
+                |(
                     battery,
                     equalizer_configuration,
                     gender,
@@ -89,10 +73,21 @@ pub fn take_a3028_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                     sound_modes,
                     firmware_version,
                     serial_number,
-                }
-            },
-        )),
-    )(input)
+                )| {
+                    A3028StateUpdatePacket {
+                        battery,
+                        equalizer_configuration,
+                        gender,
+                        age_range,
+                        hear_id,
+                        sound_modes,
+                        firmware_version,
+                        serial_number,
+                    }
+                },
+            )),
+        )(input)
+    }
 }
 
 #[cfg(test)]
@@ -100,9 +95,7 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::{
-        packets::inbound::{
-            state_update_packet::take_state_update_packet, take_inbound_packet_body,
-        },
+        packets::inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_body},
         structures::{
             AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
             PresetEqualizerProfile, SoundModes, VolumeAdjustments,
@@ -120,7 +113,7 @@ mod tests {
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x35,
         ];
         let (_, body) = take_inbound_packet_body(input).unwrap();
-        let packet = take_state_update_packet::<VerboseError<_>>(body).unwrap().1;
+        let packet = StateUpdatePacket::take::<VerboseError<_>>(body).unwrap().1;
         assert_eq!(
             Some(SoundModes {
                 ambient_sound_mode: AmbientSoundMode::Normal,
@@ -148,7 +141,7 @@ mod tests {
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x84,
         ];
         let (_, body) = take_inbound_packet_body(input).unwrap();
-        let packet = take_state_update_packet::<VerboseError<_>>(body).unwrap().1;
+        let packet = StateUpdatePacket::take::<VerboseError<_>>(body).unwrap().1;
         assert_eq!(
             AmbientSoundMode::Normal,
             packet.sound_modes.unwrap().ambient_sound_mode
@@ -175,7 +168,7 @@ mod tests {
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x30,
         ];
         let (_, body) = take_inbound_packet_body(input).unwrap();
-        let packet = take_state_update_packet::<VerboseError<_>>(body).unwrap().1;
+        let packet = StateUpdatePacket::take::<VerboseError<_>>(body).unwrap().1;
         assert_eq!(
             AmbientSoundMode::Normal,
             packet.sound_modes.unwrap().ambient_sound_mode
@@ -203,7 +196,7 @@ mod tests {
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x2f,
         ];
         let (_, body) = take_inbound_packet_body(input).unwrap();
-        let packet = take_state_update_packet::<VerboseError<_>>(body).unwrap().1;
+        let packet = StateUpdatePacket::take::<VerboseError<_>>(body).unwrap().1;
         assert_eq!(
             AmbientSoundMode::Normal,
             packet.sound_modes.unwrap().ambient_sound_mode
@@ -230,7 +223,7 @@ mod tests {
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x31,
         ];
         let (_, body) = take_inbound_packet_body(input).unwrap();
-        let (_, packet) = take_state_update_packet::<VerboseError<_>>(body).unwrap();
+        let (_, packet) = StateUpdatePacket::take::<VerboseError<_>>(body).unwrap();
         assert_eq!(
             AmbientSoundMode::default(),
             packet.sound_modes.unwrap().ambient_sound_mode
@@ -248,7 +241,7 @@ mod tests {
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x33,
         ];
         let (_, body) = take_inbound_packet_body(input).unwrap();
-        let (_, packet) = take_state_update_packet::<VerboseError<_>>(body).unwrap();
+        let (_, packet) = StateUpdatePacket::take::<VerboseError<_>>(body).unwrap();
         assert_eq!(
             NoiseCancelingMode::default(),
             packet.sound_modes.unwrap().noise_canceling_mode
@@ -268,7 +261,7 @@ mod tests {
             0x00, 0x00, 0x38,
         ];
         let (_, body) = take_inbound_packet_body(input).unwrap();
-        let result = take_state_update_packet::<VerboseError<_>>(body);
+        let result = StateUpdatePacket::take::<VerboseError<_>>(body);
         assert!(result.is_err())
     }
 }

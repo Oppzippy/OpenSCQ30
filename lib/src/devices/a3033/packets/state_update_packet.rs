@@ -9,10 +9,7 @@ use crate::devices::{
     standard::{
         packets::{
             inbound::state_update_packet::StateUpdatePacket,
-            parsing::{
-                take_bool, take_equalizer_configuration, take_firmware_version, take_serial_number,
-                take_single_battery, ParseResult,
-            },
+            parsing::{take_bool, ParseResult},
         },
         structures::{EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery},
     },
@@ -47,36 +44,36 @@ impl From<A3033StateUpdatePacket> for StateUpdatePacket {
     }
 }
 
-pub fn take_a3033_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-    input: &'a [u8],
-) -> ParseResult<A3033StateUpdatePacket, E> {
-    context(
-        "a3033 state update packet",
-        all_consuming(map(
-            tuple((
-                take_single_battery,
-                take_equalizer_configuration(8),
-                take_firmware_version,
-                take_serial_number,
-                take_bool,
-            )),
-            |(
-                battery,
-                equalizer_configuration,
-                firmware_version,
-                serial_number,
-                wear_detection,
-            )| {
-                A3033StateUpdatePacket {
+impl A3033StateUpdatePacket {
+    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> ParseResult<A3033StateUpdatePacket, E> {
+        context(
+            "a3033 state update packet",
+            all_consuming(map(
+                tuple((
+                    SingleBattery::take,
+                    EqualizerConfiguration::take(8),
+                    FirmwareVersion::take,
+                    SerialNumber::take,
+                    take_bool,
+                )),
+                |(
                     battery,
                     equalizer_configuration,
                     firmware_version,
                     serial_number,
                     wear_detection,
-                }
-            },
-        )),
-    )(input)
+                )| {
+                    A3033StateUpdatePacket {
+                        battery,
+                        equalizer_configuration,
+                        firmware_version,
+                        serial_number,
+                        wear_detection,
+                    }
+                },
+            )),
+        )(input)
+    }
 }
-
-impl A3033StateUpdatePacket {}

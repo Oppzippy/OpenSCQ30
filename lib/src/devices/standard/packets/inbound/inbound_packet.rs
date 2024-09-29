@@ -1,12 +1,12 @@
 use nom::error::VerboseError;
 
-use crate::devices::standard::packets::parsing::{take_checksum, take_packet_header};
+use crate::devices::standard::{packets::parsing::take_checksum, structures::PacketHeader};
 
-pub fn take_inbound_packet_body(
+pub(crate) fn take_inbound_packet_body(
     input: &[u8],
 ) -> Result<([u8; 7], &[u8]), nom::Err<VerboseError<&[u8]>>> {
     let input = take_checksum(input)?.0;
-    let (input, header) = take_packet_header(input)?;
+    let (input, header) = PacketHeader::take(input)?;
     Ok((header.packet_type, input))
 }
 

@@ -1,5 +1,13 @@
+use nom::{
+    combinator::map,
+    error::{context, ContextError, ParseError},
+    number::complete::le_u16,
+    sequence::pair,
+};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+
+use crate::devices::standard::packets::parsing::ParseResult;
 
 use super::{preset_equalizer_profile::PresetEqualizerProfile, VolumeAdjustments};
 
@@ -19,6 +27,26 @@ impl Default for EqualizerConfiguration {
 
 impl EqualizerConfiguration {
     pub const CUSTOM_PROFILE_ID: u16 = 0xfefe;
+
+    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        num_bands: usize,
+    ) -> impl Fn(&'a [u8]) -> ParseResult<EqualizerConfiguration, E> {
+        move |input| {
+            context(
+                "equalizer configuration",
+                map(
+                    pair(le_u16, VolumeAdjustments::take(num_bands)),
+                    |(profile_id, volume_adjustments)| {
+                        PresetEqualizerProfile::from_id(profile_id)
+                            .map(EqualizerConfiguration::new_from_preset_profile)
+                            .unwrap_or(EqualizerConfiguration::new_custom_profile(
+                                volume_adjustments,
+                            ))
+                    },
+                ),
+            )(input)
+        }
+    }
 
     pub fn new_from_preset_profile(preset_profile: PresetEqualizerProfile) -> Self {
         Self {

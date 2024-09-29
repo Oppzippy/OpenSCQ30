@@ -4,10 +4,7 @@ use nom::{
     sequence::tuple,
 };
 
-use crate::devices::standard::{
-    packets::parsing::{take_battery_level, ParseResult},
-    structures::BatteryLevel,
-};
+use crate::devices::standard::{packets::parsing::ParseResult, structures::BatteryLevel};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct BatteryLevelUpdatePacket {
@@ -15,22 +12,24 @@ pub struct BatteryLevelUpdatePacket {
     pub right: Option<BatteryLevel>,
 }
 
-pub fn take_battery_level_update_packet<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-    input: &'a [u8],
-) -> ParseResult<BatteryLevelUpdatePacket, E> {
-    context(
-        "BatteryLevelUpdatePacket",
-        all_consuming(map(
-            tuple((
-                take_battery_level,
-                opt(take_battery_level),
-                opt(take_battery_level),
-                opt(take_battery_level),
+impl BatteryLevelUpdatePacket {
+    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> ParseResult<BatteryLevelUpdatePacket, E> {
+        context(
+            "BatteryLevelUpdatePacket",
+            all_consuming(map(
+                tuple((
+                    BatteryLevel::take,
+                    opt(BatteryLevel::take),
+                    opt(BatteryLevel::take),
+                    opt(BatteryLevel::take),
+                )),
+                // TODO unsure what new_left and new_right are
+                |(left, right, _new_left, _new_right)| BatteryLevelUpdatePacket { left, right },
             )),
-            // TODO unsure what new_left and new_right are
-            |(left, right, _new_left, _new_right)| BatteryLevelUpdatePacket { left, right },
-        )),
-    )(input)
+        )(input)
+    }
 }
 
 #[cfg(test)]
@@ -38,7 +37,7 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::{
-        packets::inbound::{take_battery_level_update_packet, take_inbound_packet_body},
+        packets::inbound::{take_inbound_packet_body, BatteryLevelUpdatePacket},
         structures::BatteryLevel,
     };
 
@@ -48,7 +47,7 @@ mod tests {
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x03, 0x0c, 0x00, 0x03, 0x04, 0x20,
         ];
         let (_, body) = take_inbound_packet_body(input).unwrap();
-        let packet = take_battery_level_update_packet::<VerboseError<_>>(body)
+        let packet = BatteryLevelUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
         assert_eq!(BatteryLevel(3), packet.left);
@@ -61,7 +60,7 @@ mod tests {
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x03, 0x0e, 0x00, 0x04, 0x05, 0x01, 0x02, 0x27,
         ];
         let (_, body) = take_inbound_packet_body(input).unwrap();
-        let packet = take_battery_level_update_packet::<VerboseError<_>>(body)
+        let packet = BatteryLevelUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
         assert_eq!(BatteryLevel(4), packet.left);
@@ -74,7 +73,7 @@ mod tests {
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x03, 0x0b, 0x00, 0x02, 0x1a,
         ];
         let (_, body) = take_inbound_packet_body(input).unwrap();
-        let packet = take_battery_level_update_packet::<VerboseError<_>>(body)
+        let packet = BatteryLevelUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
         assert_eq!(BatteryLevel(2), packet.left);

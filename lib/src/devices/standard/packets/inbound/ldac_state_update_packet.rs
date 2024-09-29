@@ -10,15 +10,18 @@ pub struct LdacStateUpdatePacket {
     pub is_enabled: bool,
 }
 
-pub fn take_ldac_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-    input: &'a [u8],
-) -> ParseResult<LdacStateUpdatePacket, E> {
-    context(
-        "LdacStateUpdatePacket",
-        all_consuming(map(take_bool, |is_enabled| LdacStateUpdatePacket {
-            is_enabled,
-        })),
-    )(input)
+impl LdacStateUpdatePacket {
+    #[allow(dead_code)]
+    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> ParseResult<LdacStateUpdatePacket, E> {
+        context(
+            "LdacStateUpdatePacket",
+            all_consuming(map(take_bool, |is_enabled| LdacStateUpdatePacket {
+                is_enabled,
+            })),
+        )(input)
+    }
 }
 
 #[cfg(test)]
@@ -26,7 +29,7 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::packets::inbound::{
-        take_inbound_packet_body, take_ldac_state_update_packet,
+        take_inbound_packet_body, LdacStateUpdatePacket,
     };
 
     #[test]
@@ -35,7 +38,7 @@ mod tests {
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x7F, 0x0c, 0x00, 0x01, 0x96,
         ];
         let (_, body) = take_inbound_packet_body(input).unwrap();
-        let packet = take_ldac_state_update_packet::<VerboseError<_>>(body)
+        let packet = LdacStateUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
         assert_eq!(true, packet.is_enabled);

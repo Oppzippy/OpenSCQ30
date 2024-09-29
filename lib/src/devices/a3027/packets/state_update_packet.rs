@@ -9,11 +9,7 @@ use crate::devices::{
     standard::{
         packets::{
             inbound::state_update_packet::StateUpdatePacket,
-            parsing::{
-                take_age_range, take_basic_hear_id, take_bool, take_equalizer_configuration,
-                take_firmware_version, take_gender, take_serial_number, take_single_battery,
-                take_sound_modes, ParseResult,
-            },
+            parsing::{take_bool, ParseResult},
         },
         structures::{
             AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
@@ -57,37 +53,26 @@ impl From<A3027StateUpdatePacket> for StateUpdatePacket {
     }
 }
 
-pub fn take_a3027_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-    input: &'a [u8],
-) -> ParseResult<A3027StateUpdatePacket, E> {
-    context(
-        "a3027 state update packet",
-        all_consuming(map(
-            tuple((
-                take_single_battery,
-                take_equalizer_configuration(8),
-                take_gender,
-                take_age_range,
-                take_basic_hear_id,
-                take_sound_modes,
-                take_firmware_version,
-                take_serial_number,
-                take_bool,
-                opt(take_bool),
-            )),
-            |(
-                battery,
-                equalizer_configuration,
-                gender,
-                age_range,
-                hear_id,
-                sound_modes,
-                firmware_version,
-                serial_number,
-                wear_detection,
-                touch_func,
-            )| {
-                A3027StateUpdatePacket {
+impl A3027StateUpdatePacket {
+    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> ParseResult<A3027StateUpdatePacket, E> {
+        context(
+            "a3027 state update packet",
+            all_consuming(map(
+                tuple((
+                    SingleBattery::take,
+                    EqualizerConfiguration::take(8),
+                    Gender::take,
+                    AgeRange::take,
+                    BasicHearId::take,
+                    SoundModes::take,
+                    FirmwareVersion::take,
+                    SerialNumber::take,
+                    take_bool,
+                    opt(take_bool),
+                )),
+                |(
                     battery,
                     equalizer_configuration,
                     gender,
@@ -97,9 +82,22 @@ pub fn take_a3027_state_update_packet<'a, E: ParseError<&'a [u8]> + ContextError
                     firmware_version,
                     serial_number,
                     wear_detection,
-                    touch_func: touch_func.unwrap_or_default(),
-                }
-            },
-        )),
-    )(input)
+                    touch_func,
+                )| {
+                    A3027StateUpdatePacket {
+                        battery,
+                        equalizer_configuration,
+                        gender,
+                        age_range,
+                        hear_id,
+                        sound_modes,
+                        firmware_version,
+                        serial_number,
+                        wear_detection,
+                        touch_func: touch_func.unwrap_or_default(),
+                    }
+                },
+            )),
+        )(input)
+    }
 }

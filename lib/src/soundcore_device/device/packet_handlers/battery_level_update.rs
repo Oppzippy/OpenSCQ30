@@ -1,14 +1,14 @@
 use nom::{combinator::all_consuming, error::VerboseError};
 
 use crate::devices::standard::{
-    packets::inbound::take_battery_level_update_packet,
+    packets::inbound::BatteryLevelUpdatePacket,
     state::DeviceState,
     structures::{Battery, DualBattery, SingleBattery},
 };
 
 pub fn battery_level_update_handler(input: &[u8], state: DeviceState) -> DeviceState {
     let result: Result<_, nom::Err<VerboseError<&[u8]>>> =
-        all_consuming(take_battery_level_update_packet)(input);
+        all_consuming(BatteryLevelUpdatePacket::take)(input);
     let packet = match result {
         Ok((_, packet)) => packet,
         Err(err) => {

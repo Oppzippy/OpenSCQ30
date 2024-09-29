@@ -1,12 +1,12 @@
 use nom::{combinator::all_consuming, error::VerboseError};
 
 use crate::devices::standard::{
-    packets::inbound::state_update_packet::take_state_update_packet, state::DeviceState,
+    packets::inbound::state_update_packet::StateUpdatePacket, state::DeviceState,
 };
 
 pub fn state_update_handler(input: &[u8], state: DeviceState) -> DeviceState {
     let result: Result<_, nom::Err<VerboseError<_>>> =
-        all_consuming(take_state_update_packet)(input);
+        all_consuming(StateUpdatePacket::take)(input);
     let packet = match result {
         Ok((_, packet)) => packet,
         Err(err) => {
