@@ -5,11 +5,8 @@ use nom::error::VerboseError;
 use crate::{
     device_profiles::DeviceProfile,
     devices::standard::{
-        packets::{
-            inbound::SoundModeTypeTwoUpdatePacket,
-            outbound::{OutboundPacket, OutboundPacketBytes, SetEqualizerPacket},
-        },
-        quirks::{TwoExtraEqBands, TwoExtraEqBandsValues},
+        packets::{inbound::SoundModeTypeTwoUpdatePacket, outbound::OutboundPacketBytes},
+        quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBands},
         state::DeviceState,
         structures::{EqualizerConfiguration, SOUND_MODE_UPDATE, STATE_UPDATE},
     },
@@ -100,7 +97,7 @@ impl DeviceCommandDispatcher for A3936Dispatcher {
         let right_channel = &equalizer_configuration;
         let extra_band_values = self.extra_bands.values();
 
-        let packet_bytes = CustomSetEqualizerPacket {
+        let packet_bytes = TwoExtraEqBandSetEqualizerPacket {
             left_channel,
             right_channel,
             extra_band_values,
@@ -114,29 +111,5 @@ impl DeviceCommandDispatcher for A3936Dispatcher {
                 ..state
             },
         })
-    }
-}
-
-struct CustomSetEqualizerPacket<'a> {
-    pub left_channel: &'a EqualizerConfiguration,
-    pub right_channel: &'a EqualizerConfiguration,
-    pub extra_band_values: TwoExtraEqBandsValues,
-}
-
-impl<'a> OutboundPacket for CustomSetEqualizerPacket<'a> {
-    fn command(&self) -> [u8; 7] {
-        SetEqualizerPacket::COMMAND
-    }
-
-    fn body(&self) -> Vec<u8> {
-        self.left_channel
-            .profile_id()
-            .to_le_bytes()
-            .into_iter()
-            .chain(self.left_channel.volume_adjustments().bytes())
-            .chain(self.extra_band_values.left())
-            .chain(self.right_channel.volume_adjustments().bytes())
-            .chain(self.extra_band_values.right())
-            .collect::<Vec<_>>()
     }
 }

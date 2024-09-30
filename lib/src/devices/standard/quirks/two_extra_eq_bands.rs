@@ -7,9 +7,36 @@ use nom::{
 use std::sync::atomic::{self, AtomicI32};
 
 use crate::devices::standard::{
-    packets::parsing::ParseResult,
+    packets::{
+        outbound::{OutboundPacket, SetEqualizerPacket},
+        parsing::ParseResult,
+    },
     structures::{EqualizerConfiguration, StereoEqualizerConfiguration, VolumeAdjustments},
 };
+
+pub struct TwoExtraEqBandSetEqualizerPacket<'a> {
+    pub left_channel: &'a EqualizerConfiguration,
+    pub right_channel: &'a EqualizerConfiguration,
+    pub extra_band_values: TwoExtraEqBandsValues,
+}
+
+impl<'a> OutboundPacket for TwoExtraEqBandSetEqualizerPacket<'a> {
+    fn command(&self) -> [u8; 7] {
+        SetEqualizerPacket::COMMAND
+    }
+
+    fn body(&self) -> Vec<u8> {
+        self.left_channel
+            .profile_id()
+            .to_le_bytes()
+            .into_iter()
+            .chain(self.left_channel.volume_adjustments().bytes())
+            .chain(self.extra_band_values.left())
+            .chain(self.right_channel.volume_adjustments().bytes())
+            .chain(self.extra_band_values.right())
+            .collect::<Vec<_>>()
+    }
+}
 
 #[derive(Debug, Default)]
 pub struct TwoExtraEqBands {

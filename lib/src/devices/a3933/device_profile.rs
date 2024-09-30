@@ -7,8 +7,8 @@ use crate::{
         DeviceProfile, NoiseCancelingModeType, SoundModeProfile, TransparencyModeType,
     },
     devices::standard::{
-        packets::outbound::{OutboundPacket, OutboundPacketBytes, SetEqualizerPacket},
-        quirks::{TwoExtraEqBands, TwoExtraEqBandsValues},
+        packets::outbound::OutboundPacketBytes,
+        quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBands},
         state::DeviceState,
         structures::{EqualizerConfiguration, STATE_UPDATE},
     },
@@ -85,7 +85,7 @@ impl DeviceCommandDispatcher for A3933Dispatcher {
         let right_channel = &equalizer_configuration;
         let extra_band_values = self.extra_bands.values();
 
-        let packet_bytes = CustomSetEqualizerPacket {
+        let packet_bytes = TwoExtraEqBandSetEqualizerPacket {
             left_channel,
             right_channel,
             extra_band_values,
@@ -102,45 +102,18 @@ impl DeviceCommandDispatcher for A3933Dispatcher {
     }
 }
 
-struct CustomSetEqualizerPacket<'a> {
-    pub left_channel: &'a EqualizerConfiguration,
-    pub right_channel: &'a EqualizerConfiguration,
-    pub extra_band_values: TwoExtraEqBandsValues,
-}
-
-impl<'a> OutboundPacket for CustomSetEqualizerPacket<'a> {
-    fn command(&self) -> [u8; 7] {
-        SetEqualizerPacket::COMMAND
-    }
-
-    fn body(&self) -> Vec<u8> {
-        self.left_channel
-            .profile_id()
-            .to_le_bytes()
-            .into_iter()
-            .chain(self.left_channel.volume_adjustments().bytes())
-            .chain(self.extra_band_values.left())
-            .chain(self.right_channel.volume_adjustments().bytes())
-            .chain(self.extra_band_values.right())
-            .collect::<Vec<_>>()
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::{
-        a3933::{
-            device_profile::{CustomSetEqualizerPacket, A3933_DEVICE_PROFILE},
-            packets::inbound::A3933StateUpdatePacket,
-        },
+        a3933::{device_profile::A3933_DEVICE_PROFILE, packets::inbound::A3933StateUpdatePacket},
         standard::{
             packets::{
                 inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_body},
                 outbound::{OutboundPacket, OutboundPacketBytes},
             },
-            quirks::TwoExtraEqBandsValues,
+            quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBandsValues},
             state::DeviceState,
             structures::{EqualizerConfiguration, PresetEqualizerProfile, STATE_UPDATE},
         },
@@ -218,7 +191,7 @@ mod tests {
 
         assert_eq!(1, command_response.packets.len());
         assert_eq!(
-            &CustomSetEqualizerPacket {
+            &TwoExtraEqBandSetEqualizerPacket {
                 left_channel: &equalizer_configuration,
                 right_channel: &equalizer_configuration,
                 extra_band_values: TwoExtraEqBandsValues {
