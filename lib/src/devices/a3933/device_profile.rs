@@ -110,7 +110,7 @@ mod tests {
         a3933::{device_profile::A3933_DEVICE_PROFILE, packets::inbound::A3933StateUpdatePacket},
         standard::{
             packets::{
-                inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_body},
+                inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_header},
                 outbound::{OutboundPacket, OutboundPacketBytes},
             },
             quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBandsValues},
@@ -175,7 +175,9 @@ mod tests {
         }
         .bytes();
 
-        let body = take_inbound_packet_body(&data).unwrap().1;
+        let body = take_inbound_packet_header::<VerboseError<_>>(&data)
+            .unwrap()
+            .0;
         let state_update = A3933StateUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;

@@ -18,14 +18,14 @@ impl SetEqualizerWithDrcOkPacket {
 mod tests {
     use nom::error::VerboseError;
 
-    use crate::devices::standard::packets::inbound::take_inbound_packet_body;
+    use crate::devices::standard::packets::inbound::take_inbound_packet_header;
 
     use super::SetEqualizerWithDrcOkPacket;
 
     #[test]
     fn it_parses_an_example_ok_packet() {
         let input: &[u8] = &[0x09, 0xff, 0x00, 0x00, 0x01, 0x02, 0x83, 0x0a, 0x00, 0x98];
-        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         SetEqualizerWithDrcOkPacket::take::<VerboseError<_>>(body).expect("should not error");
     }
 }

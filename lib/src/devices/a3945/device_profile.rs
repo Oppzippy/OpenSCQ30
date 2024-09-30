@@ -104,7 +104,7 @@ mod tests {
         a3945::packets::A3945StateUpdatePacket,
         standard::{
             packets::{
-                inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_body},
+                inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_header},
                 outbound::{OutboundPacket, OutboundPacketBytes},
             },
             quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBandsValues},
@@ -154,7 +154,9 @@ mod tests {
         }
         .bytes();
 
-        let body = take_inbound_packet_body(&data).unwrap().1;
+        let body = take_inbound_packet_header::<VerboseError<_>>(&data)
+            .unwrap()
+            .0;
         let state_update = A3945StateUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;

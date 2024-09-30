@@ -18,14 +18,14 @@ impl SetSoundModeOkPacket {
 mod tests {
     use nom::error::VerboseError;
 
-    use crate::devices::standard::packets::inbound::take_inbound_packet_body;
+    use crate::devices::standard::packets::inbound::take_inbound_packet_header;
 
     use super::SetSoundModeOkPacket;
 
     #[test]
     fn it_parses_an_example_ok_packet() {
         let input: &[u8] = &[0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x81, 0x0a, 0x00, 0x9a];
-        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         SetSoundModeOkPacket::take::<VerboseError<_>>(body).expect("should not error");
     }
 }

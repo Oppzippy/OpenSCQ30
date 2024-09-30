@@ -95,7 +95,7 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::{
-        packets::inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_body},
+        packets::inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_header},
         structures::{
             AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
             PresetEqualizerProfile, SoundModes, VolumeAdjustments,
@@ -112,7 +112,7 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x35,
         ];
-        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         let packet = StateUpdatePacket::take::<VerboseError<_>>(body).unwrap().1;
         assert_eq!(
             Some(SoundModes {
@@ -140,7 +140,7 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x84,
         ];
-        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         let packet = StateUpdatePacket::take::<VerboseError<_>>(body).unwrap().1;
         assert_eq!(
             AmbientSoundMode::Normal,
@@ -167,7 +167,7 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x30,
         ];
-        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         let packet = StateUpdatePacket::take::<VerboseError<_>>(body).unwrap().1;
         assert_eq!(
             AmbientSoundMode::Normal,
@@ -195,7 +195,7 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x2f,
         ];
-        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         let packet = StateUpdatePacket::take::<VerboseError<_>>(body).unwrap().1;
         assert_eq!(
             AmbientSoundMode::Normal,
@@ -222,7 +222,7 @@ mod tests {
             0x00, 0x00, 0x03, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x31,
         ];
-        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         let (_, packet) = StateUpdatePacket::take::<VerboseError<_>>(body).unwrap();
         assert_eq!(
             AmbientSoundMode::default(),
@@ -240,7 +240,7 @@ mod tests {
             0x00, 0x00, 0x01, 0x04, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x33,
         ];
-        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         let (_, packet) = StateUpdatePacket::take::<VerboseError<_>>(body).unwrap();
         assert_eq!(
             NoiseCancelingMode::default(),
@@ -260,7 +260,7 @@ mod tests {
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x00,
             0x00, 0x00, 0x38,
         ];
-        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         let result = StateUpdatePacket::take::<VerboseError<_>>(body);
         assert!(result.is_err())
     }

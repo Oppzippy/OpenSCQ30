@@ -29,7 +29,7 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::packets::inbound::{
-        take_inbound_packet_body, ChineseVoicePromptStateUpdatePacket,
+        take_inbound_packet_header, ChineseVoicePromptStateUpdatePacket,
     };
 
     #[test]
@@ -37,7 +37,7 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x0F, 0x0c, 0x00, 0x01, 0x26,
         ];
-        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         let packet = ChineseVoicePromptStateUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;

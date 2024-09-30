@@ -171,7 +171,7 @@ mod tests {
     use crate::devices::{
         a3933::packets::inbound::A3933StateUpdatePacket,
         standard::{
-            packets::inbound::take_inbound_packet_body,
+            packets::inbound::take_inbound_packet_header,
             structures::{
                 AmbientSoundMode, BatteryLevel, CustomNoiseCanceling, EqualizerConfiguration,
                 FirmwareVersion, IsBatteryCharging, PresetEqualizerProfile, SingleBattery,
@@ -201,7 +201,7 @@ mod tests {
             1, 82, 1, 102, 1, 84, 1, 1, 1, 0, 7, 0, 0, 0, 10, 255, 255, 0, 255, 0, 0, 0, 51, 255,
             255, 255, 255, 102,
         ];
-        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         let (_, packet) =
             A3933StateUpdatePacket::take::<VerboseError<_>>(body).expect("should parse packet");
 

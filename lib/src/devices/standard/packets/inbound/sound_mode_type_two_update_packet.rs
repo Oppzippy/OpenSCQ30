@@ -31,7 +31,7 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::{
-        packets::inbound::{take_inbound_packet_body, SoundModeTypeTwoUpdatePacket},
+        packets::inbound::{take_inbound_packet_header, SoundModeTypeTwoUpdatePacket},
         structures::{
             AdaptiveNoiseCanceling, AmbientSoundMode, ManualNoiseCanceling,
             NoiseCancelingModeTypeTwo, TransparencyMode,
@@ -44,7 +44,7 @@ mod tests {
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x02, 0x22, 0x01, 0x01, 0x03,
             0x05, 0x4C,
         ];
-        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         let sound_modes = SoundModeTypeTwoUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1

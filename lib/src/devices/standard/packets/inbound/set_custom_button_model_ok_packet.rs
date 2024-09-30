@@ -18,14 +18,14 @@ impl SetCustomButtonModelOkPacket {
 mod tests {
     use nom::error::VerboseError;
 
-    use crate::devices::standard::packets::inbound::take_inbound_packet_body;
+    use crate::devices::standard::packets::inbound::take_inbound_packet_header;
 
     use super::SetCustomButtonModelOkPacket;
 
     #[test]
     fn it_parses_an_example_ok_packet() {
         let input: &[u8] = &[0x09, 0xFF, 0x00, 0x00, 0x01, 0x04, 0x84, 0x0A, 0x00, 0x9B];
-        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         SetCustomButtonModelOkPacket::take::<VerboseError<_>>(body).expect("should not error");
     }
 }

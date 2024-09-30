@@ -41,7 +41,7 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::{
-        packets::inbound::{take_inbound_packet_body, SoundModeUpdatePacket},
+        packets::inbound::{take_inbound_packet_header, SoundModeUpdatePacket},
         structures::{AmbientSoundMode, NoiseCancelingMode},
     };
 
@@ -50,7 +50,7 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x02, 0x02, 0x01, 0x00, 0x23,
         ];
-        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         let packet = SoundModeUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
@@ -64,7 +64,7 @@ mod tests {
             //                                                    max value of 0x02
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x03, 0x02, 0x01, 0x00, 0x24,
         ];
-        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         let (_, packet) = SoundModeUpdatePacket::take::<VerboseError<_>>(body).unwrap();
         assert_eq!(AmbientSoundMode::default(), packet.ambient_sound_mode);
     }
@@ -75,7 +75,7 @@ mod tests {
             //                                                          max value of 0x03
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x02, 0x04, 0x01, 0x00, 0x25,
         ];
-        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         let (_, packet) = SoundModeUpdatePacket::take::<VerboseError<_>>(body).unwrap();
         assert_eq!(NoiseCancelingMode::default(), packet.noise_canceling_mode);
     }

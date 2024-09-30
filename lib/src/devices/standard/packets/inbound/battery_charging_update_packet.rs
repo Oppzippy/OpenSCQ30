@@ -31,7 +31,7 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::{
-        packets::inbound::{take_inbound_packet_body, BatteryChargingUpdatePacket},
+        packets::inbound::{take_inbound_packet_header, BatteryChargingUpdatePacket},
         structures::IsBatteryCharging,
     };
 
@@ -40,7 +40,7 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04, 0x0c, 0x00, 0x01, 0x00, 0x1b,
         ];
-        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         let packet = BatteryChargingUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
@@ -54,7 +54,7 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04, 0x0b, 0x00, 0x01, 0x1a,
         ];
-        let (_, body) = take_inbound_packet_body(input).unwrap();
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         let packet = BatteryChargingUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;

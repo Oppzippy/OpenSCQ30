@@ -11,7 +11,7 @@ use crate::{
     api::connection::{Connection, ConnectionStatus},
     devices::standard::{
         packets::{
-            inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_body},
+            inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_header},
             outbound::{OutboundPacketBytes, RequestFirmwareVersionPacket},
         },
         structures::{
@@ -104,8 +104,8 @@ where
     ) -> FuturesType::JoinHandleType {
         FuturesType::spawn(async move {
             while let Some(packet_bytes) = inbound_receiver.recv().await {
-                match take_inbound_packet_body(&packet_bytes) {
-                    Ok((packet_type, body)) => match packet_handlers.get(&packet_type) {
+                match take_inbound_packet_header::<VerboseError<_>>(&packet_bytes) {
+                    Ok((body, packet_type)) => match packet_handlers.get(&packet_type) {
                         Some(handler) => {
                             let state_sender = state_sender_lock.lock().await;
                             let state = state_sender.borrow();
@@ -137,14 +137,14 @@ where
 
             let state_future = async {
                 while let Some(packet_bytes) = inbound_receiver.recv().await {
-                    match take_inbound_packet_body(&packet_bytes) {
-                        Ok((STATE_UPDATE, body)) => {
+                    match take_inbound_packet_header::<VerboseError<_>>(&packet_bytes) {
+                        Ok(( body, STATE_UPDATE)) => {
                             match StateUpdatePacket::take::<VerboseError<_>>(body) {
                                 Ok((_, packet)) => return Some((packet, body.to_vec())),
                                 Err(err) => warn!("failed to parse packet: {err:?}"),
                             }
                         }
-                        Ok((packet_type, body)) => warn!("got wrong packet type, wanted state update: {packet_type:?}, body: {body:?}"),
+                        Ok(( body, packet_type)) => warn!("got wrong packet type, wanted state update: {packet_type:?}, body: {body:?}"),
                         Err(err) => warn!("error parsing packet: {err:?}"),
                     }
                 }

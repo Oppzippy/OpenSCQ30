@@ -1,21 +1,26 @@
-use nom::error::VerboseError;
+use nom::error::{ContextError, ParseError};
 
-use crate::devices::standard::{packets::parsing::take_checksum, structures::PacketHeader};
+use crate::devices::standard::{
+    packets::parsing::{take_checksum, ParseResult},
+    structures::PacketHeader,
+};
 
-pub(crate) fn take_inbound_packet_body(
-    input: &[u8],
-) -> Result<([u8; 7], &[u8]), nom::Err<VerboseError<&[u8]>>> {
+pub(crate) fn take_inbound_packet_header<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    input: &'a [u8],
+) -> ParseResult<[u8; 7], E> {
     let input = take_checksum(input)?.0;
     let (input, header) = PacketHeader::take(input)?;
-    Ok((header.packet_type, input))
+    Ok((input, header.packet_type))
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::devices::standard::packets::inbound::take_inbound_packet_body;
+    use nom::error::VerboseError;
+
+    use crate::devices::standard::packets::inbound::take_inbound_packet_header;
     #[test]
     fn it_errors_when_nothing_matches() {
-        let result = take_inbound_packet_body(&[1, 2, 3]);
+        let result = take_inbound_packet_header::<VerboseError<_>>(&[1, 2, 3]);
         assert_eq!(true, result.is_err());
     }
 }
