@@ -281,14 +281,17 @@ mod imp {
                     #[weak(rename_to=this)]
                     self,
                     move |_dropdown| {
+                        // TODO this is needed because this runs once during construction (before sender is set)
+                        // see if we can have sender get set before construction maybe?
+                        let Some(sender) = this.sender.get() else {
+                            return;
+                        };
                         let maybe_selected_item = this
                             .custom_profile_dropdown
                             .selected_item()
                             .map(|item| item.downcast::<GlibCustomEqualizerProfile>().unwrap());
                         if let Some(selected_item) = maybe_selected_item {
-                            this.sender
-                                .get()
-                                .unwrap()
+                            sender
                                 .send(Action::SelectCustomEqualizerProfile(selected_item.clone()))
                                 .unwrap();
                         }
