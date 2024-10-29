@@ -83,7 +83,8 @@ impl Connection for WebBluetoothConnection {
         let mut data = data.to_owned();
         JsFuture::from(
             self.write_characteristic
-                .write_value_with_response_with_u8_array(&mut data),
+                .write_value_with_response_with_u8_slice(&mut data)
+                .expect("if we can't pass u8 slices to js, we can't recover"),
         )
         .await
         .map_err(|err| openscq30_lib::Error::WriteFailed {
@@ -97,7 +98,8 @@ impl Connection for WebBluetoothConnection {
         let mut data = data.to_owned();
         JsFuture::from(
             self.write_characteristic
-                .write_value_without_response_with_u8_array(&mut data),
+                .write_value_without_response_with_u8_slice(&mut data)
+                .expect("if we can't pass u8 slices to js, we can't recover"),
         )
         .await
         .map_err(|err| openscq30_lib::Error::WriteFailed {
