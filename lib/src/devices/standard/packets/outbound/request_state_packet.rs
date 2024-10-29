@@ -21,7 +21,7 @@ impl OutboundPacket for RequestStatePacket {
 
 #[cfg(test)]
 mod tests {
-    use crate::devices::standard::packets::outbound::{OutboundPacketBytes, RequestStatePacket};
+    use crate::devices::standard::packets::outbound::{RequestStatePacket, SendableBytes};
 
     #[test]
     fn it_matches_an_example_request_state_packet() {

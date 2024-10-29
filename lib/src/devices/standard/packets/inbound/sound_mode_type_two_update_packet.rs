@@ -5,13 +5,19 @@ use nom::{
 
 use crate::devices::standard::{packets::parsing::ParseResult, structures::SoundModesTypeTwo};
 
+use super::InboundPacket;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct SoundModeTypeTwoUpdatePacket {
     pub sound_modes: SoundModesTypeTwo,
 }
 
-impl SoundModeTypeTwoUpdatePacket {
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+impl InboundPacket for SoundModeTypeTwoUpdatePacket {
+    fn header() -> [u8; 7] {
+        [0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01]
+    }
+
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> ParseResult<SoundModeTypeTwoUpdatePacket, E> {
         // offset 9
@@ -31,7 +37,9 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::{
-        packets::inbound::{take_inbound_packet_header, SoundModeTypeTwoUpdatePacket},
+        packets::inbound::{
+            take_inbound_packet_header, InboundPacket, SoundModeTypeTwoUpdatePacket,
+        },
         structures::{
             AdaptiveNoiseCanceling, AmbientSoundMode, ManualNoiseCanceling,
             NoiseCancelingModeTypeTwo, TransparencyMode,

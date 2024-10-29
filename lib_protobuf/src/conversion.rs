@@ -1,6 +1,6 @@
 use openscq30_lib::{
-    device_profiles::{
-        DeviceProfile as LibDeviceProfile, NoiseCancelingModeType as LibNoiseCancelingModeType,
+    device_profile::{
+        DeviceFeatures as LibDeviceFeatures, NoiseCancelingModeType as LibNoiseCancelingModeType,
         SoundModeProfile as LibSoundModeProfile, TransparencyModeType as LibTransparencyModeType,
     },
     devices::standard::{
@@ -32,7 +32,7 @@ use crate::protobuf::*;
 impl From<LibDeviceState> for DeviceState {
     fn from(value: LibDeviceState) -> Self {
         Self {
-            device_profile: value.device_profile.into(),
+            device_features: value.device_features.into(),
             battery: value.battery.into(),
             equalizer_configuration: value.equalizer_configuration.into(),
             sound_modes: value.sound_modes.map(Into::into),
@@ -50,8 +50,8 @@ impl From<LibDeviceState> for DeviceState {
     }
 }
 
-impl From<LibDeviceProfile> for DeviceProfile {
-    fn from(value: LibDeviceProfile) -> Self {
+impl From<LibDeviceFeatures> for DeviceFeatures {
+    fn from(value: LibDeviceFeatures) -> Self {
         Self {
             sound_mode: value.sound_mode.map(Into::into),
             has_hear_id: value.has_hear_id,

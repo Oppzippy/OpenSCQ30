@@ -5,7 +5,7 @@ import { WasmTest } from "../../../wasm/pkg/openscq30_web_wasm";
 describe("libTypes", () => {
   it("should serialize/deserialize an object with as many nulls as possible", () => {
     const expected: DeviceState = {
-      deviceProfile: {
+      deviceFeatures: {
         soundMode: null,
         hasHearId: false,
         numEqualizerChannels: 0,
@@ -44,7 +44,7 @@ describe("libTypes", () => {
   });
   it("should serialize/deserialize an object with as many fields filled as possible", () => {
     const expected: DeviceState = {
-      deviceProfile: {
+      deviceFeatures: {
         soundMode: {
           noiseCancelingModeType: "custom",
           transparencyModeType: "custom",

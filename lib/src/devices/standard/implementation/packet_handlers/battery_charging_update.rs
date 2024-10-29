@@ -1,7 +1,7 @@
 use nom::{combinator::all_consuming, error::VerboseError};
 
 use crate::devices::standard::{
-    packets::inbound::BatteryChargingUpdatePacket,
+    packets::inbound::{BatteryChargingUpdatePacket, InboundPacket},
     state::DeviceState,
     structures::{Battery, DualBattery, SingleBattery},
 };

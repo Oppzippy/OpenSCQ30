@@ -111,7 +111,7 @@ function DeviceProfile({ deviceState }: DeviceStateProps) {
           component={"div"}
           sx={{ maxWidth: "100%", overflowX: "scroll" }}
         >
-          <pre>{JSON.stringify(deviceState.deviceProfile, undefined, 2)}</pre>
+          <pre>{JSON.stringify(deviceState.deviceFeatures, undefined, 2)}</pre>
         </Typography>
       </TableCell>
     </TableRow>

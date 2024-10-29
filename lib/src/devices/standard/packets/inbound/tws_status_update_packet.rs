@@ -7,15 +7,21 @@ use nom::{
 
 use crate::devices::standard::packets::parsing::{take_bool, ParseResult};
 
+use super::InboundPacket;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct TwsStatusUpdatePacket {
     pub host_device: u8,
     pub tws_status: bool,
 }
 
-impl TwsStatusUpdatePacket {
+impl InboundPacket for TwsStatusUpdatePacket {
+    fn header() -> [u8; 7] {
+        [0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x02]
+    }
+
     #[allow(dead_code)]
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> ParseResult<TwsStatusUpdatePacket, E> {
         context(
@@ -36,7 +42,7 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::packets::inbound::{
-        take_inbound_packet_header, TwsStatusUpdatePacket,
+        take_inbound_packet_header, InboundPacket, TwsStatusUpdatePacket,
     };
 
     #[test]

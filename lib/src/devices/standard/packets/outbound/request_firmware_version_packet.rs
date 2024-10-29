@@ -22,7 +22,7 @@ impl OutboundPacket for RequestFirmwareVersionPacket {
 #[cfg(test)]
 mod tests {
     use crate::devices::standard::packets::outbound::{
-        OutboundPacketBytes, RequestFirmwareVersionPacket,
+        RequestFirmwareVersionPacket, SendableBytes,
     };
 
     #[test]

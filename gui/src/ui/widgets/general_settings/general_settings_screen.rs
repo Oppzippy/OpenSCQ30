@@ -46,7 +46,7 @@ mod imp {
         CompositeTemplate, TemplateChild,
     };
     use openscq30_lib::{
-        device_profiles::{NoiseCancelingModeType, TransparencyModeType},
+        device_profile::{NoiseCancelingModeType, TransparencyModeType},
         devices::standard::state::DeviceState,
     };
     use tokio::sync::mpsc::UnboundedSender;
@@ -104,7 +104,7 @@ mod imp {
             let Some(sound_modes) = state.sound_modes else {
                 return;
             };
-            let Some(sound_mode_profile) = state.device_profile.sound_mode else {
+            let Some(sound_mode_profile) = state.device_features.sound_mode else {
                 return;
             };
 
@@ -114,7 +114,7 @@ mod imp {
                     sound_mode_profile.noise_canceling_mode_type != NoiseCancelingModeType::None,
                 );
             self.ambient_sound_mode_cycle_selection
-                .set_visible(state.device_profile.has_ambient_sound_mode_cycle);
+                .set_visible(state.device_features.has_ambient_sound_mode_cycle);
             self.ambient_sound_mode_cycle_selection
                 .set_has_noise_canceling_mode(
                     sound_mode_profile.noise_canceling_mode_type != NoiseCancelingModeType::None,

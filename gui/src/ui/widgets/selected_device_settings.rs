@@ -123,13 +123,14 @@ mod imp {
             self.device_information.set_device_state(state);
             self.quick_presets.set_device_state(state);
 
-            if state.device_profile.has_hear_id && state.hear_id.is_some() {
+            if state.device_features.has_hear_id && state.hear_id.is_some() {
                 self.hear_id.set_visible(true);
                 self.hear_id.set_device_state(state);
             } else {
                 self.hear_id.set_visible(false);
             }
-            if state.device_profile.has_custom_button_model && state.custom_button_model.is_some() {
+            if state.device_features.has_custom_button_model && state.custom_button_model.is_some()
+            {
                 self.buttons.set_visible(true);
                 self.buttons.set_device_state(state);
             } else {

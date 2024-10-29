@@ -1,15 +1,15 @@
 package com.oppzippy.openscq30.lib.wrapper
 
-import com.oppzippy.openscq30.lib.protobuf.DeviceProfile as ProtobufDeviceProfile
+import com.oppzippy.openscq30.lib.protobuf.DeviceFeatures as ProtobufDeviceFeatures
 import com.oppzippy.openscq30.lib.protobuf.NoiseCancelingModeType as ProtobufNoiseCancelingModeType
 import com.oppzippy.openscq30.lib.protobuf.SoundModeProfile as ProtobufSoundModeProfile
 import com.oppzippy.openscq30.lib.protobuf.TransparencyModeType as ProtobufTransparencyModeType
-import com.oppzippy.openscq30.lib.protobuf.deviceProfile
+import com.oppzippy.openscq30.lib.protobuf.deviceFeatures
 import com.oppzippy.openscq30.lib.protobuf.dynamicRangeCompressionMinFirmwareVersionOrNull
 import com.oppzippy.openscq30.lib.protobuf.soundModeOrNull
 import com.oppzippy.openscq30.lib.protobuf.soundModeProfile
 
-data class DeviceProfile(
+data class DeviceFeatures(
     val soundMode: SoundModeProfile?,
     val hasHearId: Boolean,
     val numEqualizerChannels: Int,
@@ -21,23 +21,23 @@ data class DeviceProfile(
     val hasAutoPowerOff: Boolean,
     val dynamicRangeCompressionMinFirmwareVersion: FirmwareVersion?,
 ) {
-    fun toProtobuf(): ProtobufDeviceProfile = deviceProfile {
-        this@DeviceProfile.soundMode?.let { soundMode = it.toProtobuf() }
-        hasHearId = this@DeviceProfile.hasHearId
-        numEqualizerChannels = this@DeviceProfile.numEqualizerChannels
-        numEqualizerBands = this@DeviceProfile.numEqualizerBands
-        hasDynamicRangeCompression = this@DeviceProfile.hasDynamicRangeCompression
-        hasCustomButtonModel = this@DeviceProfile.hasCustomButtonModel
-        hasWearDetection = this@DeviceProfile.hasWearDetection
-        hasTouchTone = this@DeviceProfile.hasTouchTone
-        hasAutoPowerOff = this@DeviceProfile.hasAutoPowerOff
-        this@DeviceProfile.dynamicRangeCompressionMinFirmwareVersion?.let {
+    fun toProtobuf(): ProtobufDeviceFeatures = deviceFeatures {
+        this@DeviceFeatures.soundMode?.let { soundMode = it.toProtobuf() }
+        hasHearId = this@DeviceFeatures.hasHearId
+        numEqualizerChannels = this@DeviceFeatures.numEqualizerChannels
+        numEqualizerBands = this@DeviceFeatures.numEqualizerBands
+        hasDynamicRangeCompression = this@DeviceFeatures.hasDynamicRangeCompression
+        hasCustomButtonModel = this@DeviceFeatures.hasCustomButtonModel
+        hasWearDetection = this@DeviceFeatures.hasWearDetection
+        hasTouchTone = this@DeviceFeatures.hasTouchTone
+        hasAutoPowerOff = this@DeviceFeatures.hasAutoPowerOff
+        this@DeviceFeatures.dynamicRangeCompressionMinFirmwareVersion?.let {
             dynamicRangeCompressionMinFirmwareVersion = it.toProtobuf()
         }
     }
 }
 
-fun ProtobufDeviceProfile.toKotlin(): DeviceProfile = DeviceProfile(
+fun ProtobufDeviceFeatures.toKotlin(): DeviceFeatures = DeviceFeatures(
     soundMode = soundModeOrNull?.toKotlin(),
     hasHearId = hasHearId,
     numEqualizerChannels = numEqualizerChannels,

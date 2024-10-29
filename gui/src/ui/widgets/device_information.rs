@@ -75,7 +75,7 @@ mod imp {
             );
             // TODO display as JSON or something
             self.feature_flags
-                .set_text(&format!("{:?}", state.device_profile));
+                .set_text(&format!("{:?}", state.device_features));
         }
     }
 

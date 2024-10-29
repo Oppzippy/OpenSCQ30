@@ -37,7 +37,7 @@ pub struct A3931StateUpdatePacket {
 impl From<A3931StateUpdatePacket> for StateUpdatePacket {
     fn from(packet: A3931StateUpdatePacket) -> Self {
         Self {
-            device_profile: A3931_DEVICE_PROFILE,
+            device_profile: &A3931_DEVICE_PROFILE,
             battery: packet.battery.into(),
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: Some(packet.sound_modes),

@@ -127,7 +127,7 @@ const firmwareVersionSchema = Type.Object({
   minor: Type.Number({ minimum: 0 }),
 });
 
-const deviceProfileSchema = Type.Object({
+const deviceFeaturesSchema = Type.Object({
   soundMode: Nullable(
     Type.Object({
       noiseCancelingModeType: Type.Union([
@@ -152,7 +152,7 @@ const deviceProfileSchema = Type.Object({
   hasAmbientSoundModeCycle: Type.Boolean(),
   dynamicRangeCompressionMinFirmwareVersion: Nullable(firmwareVersionSchema),
 });
-export type DeviceProfile = Static<typeof deviceProfileSchema>;
+export type DeviceFeatures = Static<typeof deviceFeaturesSchema>;
 
 const customButtonModelSchema = Type.Object({
   leftSingleClick: noTwsButtonActionSchema,
@@ -165,7 +165,7 @@ const customButtonModelSchema = Type.Object({
 export type CustomButtonModel = Static<typeof customButtonModelSchema>;
 
 const deviceStateSchema = Type.Object({
-  deviceProfile: deviceProfileSchema,
+  deviceFeatures: deviceFeaturesSchema,
   battery: Type.Union([
     Type.Object({
       type: Type.Literal("singleBattery"),

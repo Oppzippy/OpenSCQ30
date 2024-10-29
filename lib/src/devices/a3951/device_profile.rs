@@ -1,21 +1,31 @@
-use crate::device_profiles::{
-    DeviceProfile, NoiseCancelingModeType, SoundModeProfile, TransparencyModeType,
+use crate::{
+    device_profile::{
+        DeviceFeatures, DeviceProfile, NoiseCancelingModeType, SoundModeProfile,
+        TransparencyModeType,
+    },
+    soundcore_device::device_model::DeviceModel,
+    standard_implementation,
 };
 
-pub const A3951_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
-    sound_mode: Some(SoundModeProfile {
-        noise_canceling_mode_type: NoiseCancelingModeType::Custom,
-        transparency_mode_type: TransparencyModeType::Custom,
-    }),
-    has_hear_id: true,
-    num_equalizer_channels: 2,
-    num_equalizer_bands: 8,
-    has_dynamic_range_compression: true,
-    dynamic_range_compression_min_firmware_version: None,
-    has_custom_button_model: true,
-    has_wear_detection: true,
-    has_touch_tone: true,
-    has_auto_power_off: false,
-    has_ambient_sound_mode_cycle: false,
-    custom_dispatchers: None,
+use super::packets::A3951StateUpdatePacket;
+
+pub(crate) const A3951_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
+    features: DeviceFeatures {
+        sound_mode: Some(SoundModeProfile {
+            noise_canceling_mode_type: NoiseCancelingModeType::Custom,
+            transparency_mode_type: TransparencyModeType::Custom,
+        }),
+        has_hear_id: true,
+        num_equalizer_channels: 2,
+        num_equalizer_bands: 8,
+        has_dynamic_range_compression: true,
+        dynamic_range_compression_min_firmware_version: None,
+        has_custom_button_model: true,
+        has_wear_detection: true,
+        has_touch_tone: true,
+        has_auto_power_off: false,
+        has_ambient_sound_mode_cycle: false,
+    },
+    compatible_models: &[DeviceModel::A3951],
+    implementation: standard_implementation!(A3951StateUpdatePacket),
 };

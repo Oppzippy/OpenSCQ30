@@ -31,7 +31,7 @@ pub struct A3028StateUpdatePacket {
 impl From<A3028StateUpdatePacket> for StateUpdatePacket {
     fn from(packet: A3028StateUpdatePacket) -> Self {
         Self {
-            device_profile: A3028_DEVICE_PROFILE,
+            device_profile: &A3028_DEVICE_PROFILE,
             battery: packet.battery.into(),
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: Some(packet.sound_modes),
@@ -95,7 +95,9 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::{
-        packets::inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_header},
+        packets::inbound::{
+            state_update_packet::StateUpdatePacket, take_inbound_packet_header, InboundPacket,
+        },
         structures::{
             AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
             PresetEqualizerProfile, SoundModes, VolumeAdjustments,

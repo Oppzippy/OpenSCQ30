@@ -19,7 +19,7 @@ import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
-import com.oppzippy.openscq30.lib.wrapper.DeviceProfile
+import com.oppzippy.openscq30.lib.wrapper.DeviceFeatures
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
 import com.oppzippy.openscq30.ui.quickpresets.composables.QuickPresetConfiguration
@@ -31,7 +31,7 @@ import java.util.UUID
 
 @Composable
 fun QuickPresetScreen(
-    deviceProfile: DeviceProfile,
+    deviceFeatures: DeviceFeatures,
     deviceBleServiceUuid: UUID,
     viewModel: QuickPresetViewModel = hiltViewModel(),
 ) {
@@ -71,7 +71,7 @@ fun QuickPresetScreen(
     if (permissionCheckPassed) {
         if (preset != null) {
             QuickPresetScreen(
-                deviceProfile = deviceProfile,
+                deviceFeatures = deviceFeatures,
                 preset = preset,
                 customEqualizerProfiles = customEqualizerProfiles,
                 onSelectedIndexChange = { viewModel.selectQuickPreset(deviceBleServiceUuid, it) },
@@ -121,7 +121,7 @@ fun QuickPresetScreen(
 
 @Composable
 private fun QuickPresetScreen(
-    deviceProfile: DeviceProfile,
+    deviceFeatures: DeviceFeatures,
     preset: QuickPreset,
     customEqualizerProfiles: List<CustomProfile>,
     onSelectedIndexChange: (index: Int) -> Unit = {},
@@ -138,7 +138,7 @@ private fun QuickPresetScreen(
             onSelectedIndexChange = onSelectedIndexChange,
         )
         QuickPresetConfiguration(
-            deviceProfile = deviceProfile,
+            deviceFeatures = deviceFeatures,
             name = preset.name,
             defaultName = stringResource(R.string.quick_preset_number, preset.index + 1),
             ambientSoundMode = preset.ambientSoundMode,

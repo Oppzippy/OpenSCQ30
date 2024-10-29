@@ -1,11 +1,16 @@
 use uuid::Uuid;
 
+use crate::devices::standard::structures::SerialNumber;
+
 type InnerError = Box<dyn std::error::Error + Send + Sync>;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("device not found: {source:?}")]
     DeviceNotFound { source: InnerError },
+
+    #[error("device not supported: {serial_number:?}")]
+    DeviceNotSupported { serial_number: SerialNumber },
 
     #[error("not connected: {source:?}")]
     NotConnected { source: InnerError },
@@ -29,8 +34,8 @@ pub enum Error {
     #[error("{source:?}")]
     Other { source: InnerError },
 
-    #[error("device didn't respond to request")]
-    NoResponse,
+    #[error("device didn't respond to request: {request}")]
+    NoResponse { request: &'static str },
 
     #[error("feature not supported: {feature_name}")]
     FeatureNotSupported { feature_name: &'static str },
@@ -43,6 +48,11 @@ pub enum Error {
 
     #[error("incomplete state: {message:?}")]
     IncompleteStateError { message: &'static str },
+    #[error("timed out: {action}")]
+    TimedOut { action: &'static str },
+
+    #[error("parse error: {message}")]
+    ParseError { message: String },
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

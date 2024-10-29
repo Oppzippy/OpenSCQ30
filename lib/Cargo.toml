@@ -15,7 +15,7 @@ crate-type = ["lib"]
 
 [dependencies]
 web-sys = { workspace = true, optional = true, features = ["Window"] }
-tokio = { workspace = true, features = ["sync", "time", "rt"] }
+tokio = { workspace = true, features = ["sync", "time", "rt", "macros"] }
 futures = { workspace = true }
 uuid = { workspace = true }
 thiserror = { workspace = true }

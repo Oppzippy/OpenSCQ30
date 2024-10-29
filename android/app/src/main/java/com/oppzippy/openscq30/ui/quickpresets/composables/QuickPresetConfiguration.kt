@@ -20,7 +20,7 @@ import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.lib.extensions.resources.toStringResource
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
-import com.oppzippy.openscq30.lib.wrapper.DeviceProfile
+import com.oppzippy.openscq30.lib.wrapper.DeviceFeatures
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeType
 import com.oppzippy.openscq30.lib.wrapper.PresetEqualizerProfile
@@ -38,7 +38,7 @@ import com.oppzippy.openscq30.ui.utils.DropdownOption
 
 @Composable
 fun QuickPresetConfiguration(
-    deviceProfile: DeviceProfile,
+    deviceFeatures: DeviceFeatures,
     name: String?,
     defaultName: String,
     ambientSoundMode: AmbientSoundMode?,
@@ -67,7 +67,7 @@ fun QuickPresetConfiguration(
                 .fillMaxWidth()
                 .testTag("quickPresetNameInput"),
         )
-        deviceProfile.soundMode?.let { soundModeProfile ->
+        deviceFeatures.soundMode?.let { soundModeProfile ->
             CheckboxWithLabel(
                 text = stringResource(R.string.ambient_sound_mode),
                 isChecked = ambientSoundMode != null,
@@ -144,7 +144,7 @@ fun QuickPresetConfiguration(
         LaunchedEffect(defaultName) {
             isEqualizerChecked = equalizerConfiguration != null
         }
-        if (deviceProfile.numEqualizerChannels > 0) {
+        if (deviceFeatures.numEqualizerChannels > 0) {
             CheckboxWithLabel(
                 text = stringResource(R.string.equalizer),
                 isChecked = equalizerConfiguration != null || isEqualizerChecked,

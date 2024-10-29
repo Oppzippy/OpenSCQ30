@@ -41,7 +41,7 @@ describe("Device Settings", () => {
     user = userEvent.setup();
     const mockDevice = {
       state: new BehaviorSubject<DeviceState>({
-        deviceProfile: {
+        deviceFeatures: {
           soundMode: {
             noiseCancelingModeType: "custom",
             transparencyModeType: "custom",

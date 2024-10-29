@@ -28,7 +28,7 @@ pub struct A3033StateUpdatePacket {
 impl From<A3033StateUpdatePacket> for StateUpdatePacket {
     fn from(packet: A3033StateUpdatePacket) -> Self {
         Self {
-            device_profile: A3033_DEVICE_PROFILE,
+            device_profile: &A3033_DEVICE_PROFILE,
             battery: packet.battery.into(),
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: None,

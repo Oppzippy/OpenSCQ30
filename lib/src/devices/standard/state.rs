@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    device_profiles::DeviceProfile,
+    device_profile::DeviceFeatures,
     devices::standard::{
         packets::inbound::state_update_packet::StateUpdatePacket,
         structures::{
@@ -18,7 +18,7 @@ use super::structures::{AmbientSoundModeCycle, SoundModesTypeTwo};
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct DeviceState {
-    pub device_profile: DeviceProfile,
+    pub device_features: DeviceFeatures,
     pub battery: Battery,
     pub equalizer_configuration: EqualizerConfiguration,
     pub sound_modes: Option<SoundModes>,
@@ -35,7 +35,7 @@ pub struct DeviceState {
 impl From<StateUpdatePacket> for DeviceState {
     fn from(packet: StateUpdatePacket) -> Self {
         Self {
-            device_profile: packet.device_profile,
+            device_features: packet.device_profile.features,
             battery: packet.battery,
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: packet.sound_modes,
@@ -55,7 +55,7 @@ impl DeviceState {
     // need drc:                     A3951, A3930, A3931, A3931XR, A3935, A3935W,
     // separate left/right firmware: A3951, A3930, A3931, A3931XR, A3935, A3935W,
     pub fn supports_dynamic_range_compression(&self) -> bool {
-        if self.device_profile.has_dynamic_range_compression {
+        if self.device_features.has_dynamic_range_compression {
             self.does_firmware_version_support_drc(self.firmware_version.unwrap_or_default())
         } else {
             false
@@ -65,7 +65,7 @@ impl DeviceState {
     fn does_firmware_version_support_drc(&self, firmware_version: FirmwareVersion) -> bool {
         firmware_version
             >= self
-                .device_profile
+                .device_features
                 .dynamic_range_compression_min_firmware_version
                 .unwrap_or_default()
     }

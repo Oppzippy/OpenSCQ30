@@ -10,6 +10,8 @@ use crate::devices::standard::{
     },
 };
 
+use super::InboundPacket;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct SoundModeUpdatePacket {
     pub ambient_sound_mode: AmbientSoundMode,
@@ -18,8 +20,12 @@ pub struct SoundModeUpdatePacket {
     pub custom_noise_canceling: CustomNoiseCanceling,
 }
 
-impl SoundModeUpdatePacket {
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+impl InboundPacket for SoundModeUpdatePacket {
+    fn header() -> [u8; 7] {
+        [0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01]
+    }
+
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> ParseResult<SoundModeUpdatePacket, E> {
         // offset 9
@@ -41,7 +47,7 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::{
-        packets::inbound::{take_inbound_packet_header, SoundModeUpdatePacket},
+        packets::inbound::{take_inbound_packet_header, InboundPacket, SoundModeUpdatePacket},
         structures::{AmbientSoundMode, NoiseCancelingMode},
     };
 

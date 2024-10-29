@@ -2,12 +2,18 @@ use nom::error::{ContextError, ParseError};
 
 use crate::devices::standard::packets::parsing::ParseResult;
 
+use super::InboundPacket;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct SetAmbientSoundModeCycleOkPacket {}
 
-impl SetAmbientSoundModeCycleOkPacket {
+impl InboundPacket for SetAmbientSoundModeCycleOkPacket {
+    fn header() -> [u8; 7] {
+        [0x09, 0xFF, 0x00, 0x00, 0x01, 0x06, 0x82]
+    }
+
     #[allow(dead_code)]
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> ParseResult<SetAmbientSoundModeCycleOkPacket, E> {
         Ok((input, SetAmbientSoundModeCycleOkPacket::default()))
@@ -18,7 +24,7 @@ impl SetAmbientSoundModeCycleOkPacket {
 mod tests {
     use nom::error::VerboseError;
 
-    use crate::devices::standard::packets::inbound::take_inbound_packet_header;
+    use crate::devices::standard::packets::inbound::{take_inbound_packet_header, InboundPacket};
 
     use super::SetAmbientSoundModeCycleOkPacket;
 

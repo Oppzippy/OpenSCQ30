@@ -287,6 +287,18 @@ fn delayed_initialize_application(
 
         tracing::error!("{err:?}");
         match err.downcast_ref::<openscq30_lib::Error>() {
+            Some(openscq30_lib::Error::DeviceNotSupported { serial_number }) => {
+                deselect_device();
+                send_toast(format!("Device Not Supported: {serial_number}"));
+            }
+            Some(openscq30_lib::Error::TimedOut { action }) => {
+                deselect_device();
+                send_toast(format!("Action Timed Out: {action}"));
+            }
+            Some(openscq30_lib::Error::ParseError { .. }) => {
+                deselect_device();
+                send_toast(format!("Error Parsing Response. See stderr."));
+            }
             Some(openscq30_lib::Error::NotConnected { .. }) => {
                 deselect_device();
                 send_toast("Device Disconnected".to_string());

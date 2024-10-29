@@ -1,7 +1,9 @@
 use nom::{combinator::all_consuming, error::VerboseError};
 
 use crate::devices::standard::{
-    packets::inbound::SoundModeUpdatePacket, state::DeviceState, structures::SoundModes,
+    packets::inbound::{InboundPacket, SoundModeUpdatePacket},
+    state::DeviceState,
+    structures::SoundModes,
 };
 
 pub fn sound_mode_update_handler(input: &[u8], state: DeviceState) -> DeviceState {

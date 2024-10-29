@@ -84,7 +84,7 @@ impl<'a> OutboundPacket for SetEqualizerAndCustomHearIdPacket<'a> {
 #[cfg(test)]
 mod tests {
     use crate::devices::standard::{
-        packets::outbound::OutboundPacketBytes,
+        packets::outbound::SendableBytes,
         structures::{
             AgeRange, CustomHearId, EqualizerConfiguration, Gender, HearIdMusicType, HearIdType,
             PresetEqualizerProfile, StereoVolumeAdjustments, VolumeAdjustments,

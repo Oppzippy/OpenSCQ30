@@ -1,7 +1,7 @@
 syntax = "proto2";
 package openscq30;
 
-import "device_profile.proto";
+import "device_features.proto";
 import "battery.proto";
 import "equalizer_configuration.proto";
 import "sound_modes.proto";
@@ -14,7 +14,7 @@ option java_package = "com.oppzippy.openscq30.lib.protobuf";
 option java_multiple_files = true;
 
 message DeviceState {
-  required DeviceProfile device_profile = 1;
+  required DeviceFeatures device_features = 1;
   required Battery battery = 2;
   required EqualizerConfiguration equalizer_configuration = 3;
   optional SoundModes sound_modes = 4;

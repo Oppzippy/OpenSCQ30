@@ -20,7 +20,7 @@ describe("App", () => {
         async selectDevice() {
           const mockDevice = {
             state: new BehaviorSubject<DeviceState>({
-              deviceProfile: {
+              deviceFeatures: {
                 soundMode: {
                   noiseCancelingModeType: "none",
                   transparencyModeType: "basic",

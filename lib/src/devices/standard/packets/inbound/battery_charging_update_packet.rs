@@ -6,14 +6,20 @@ use nom::{
 
 use crate::devices::standard::{packets::parsing::ParseResult, structures::IsBatteryCharging};
 
+use super::InboundPacket;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct BatteryChargingUpdatePacket {
     pub left: IsBatteryCharging,
     pub right: Option<IsBatteryCharging>,
 }
 
-impl BatteryChargingUpdatePacket {
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+impl InboundPacket for BatteryChargingUpdatePacket {
+    fn header() -> [u8; 7] {
+        [0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04]
+    }
+
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> ParseResult<BatteryChargingUpdatePacket, E> {
         context(
@@ -31,7 +37,9 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::{
-        packets::inbound::{take_inbound_packet_header, BatteryChargingUpdatePacket},
+        packets::inbound::{
+            take_inbound_packet_header, BatteryChargingUpdatePacket, InboundPacket,
+        },
         structures::IsBatteryCharging,
     };
 

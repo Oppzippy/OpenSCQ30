@@ -5,14 +5,20 @@ use nom::{
 
 use crate::devices::standard::packets::parsing::{take_bool, ParseResult};
 
+use super::InboundPacket;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ChineseVoicePromptStateUpdatePacket {
     pub is_enabled: bool,
 }
 
-impl ChineseVoicePromptStateUpdatePacket {
+impl InboundPacket for ChineseVoicePromptStateUpdatePacket {
+    fn header() -> [u8; 7] {
+        [0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x0F]
+    }
+
     #[allow(dead_code)]
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> ParseResult<ChineseVoicePromptStateUpdatePacket, E> {
         context(
@@ -29,7 +35,7 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::packets::inbound::{
-        take_inbound_packet_header, ChineseVoicePromptStateUpdatePacket,
+        take_inbound_packet_header, ChineseVoicePromptStateUpdatePacket, InboundPacket,
     };
 
     #[test]

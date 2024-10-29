@@ -59,14 +59,14 @@ fun DeviceSettings(
 ) {
     val navController = rememberNavController()
     val listedScreens = ArrayList<ScreenInfo>()
-    if (uiState.deviceState.deviceProfile.soundMode != null) {
+    if (uiState.deviceState.deviceFeatures.soundMode != null) {
         listedScreens.add(Screen.General.screenInfo)
     }
-    if (uiState.deviceState.deviceProfile.numEqualizerChannels > 0) {
+    if (uiState.deviceState.deviceFeatures.numEqualizerChannels > 0) {
         listedScreens.add(Screen.Equalizer.screenInfo)
     }
     listedScreens.add(Screen.QuickPresets.screenInfo)
-    if (uiState.deviceState.deviceProfile.hasCustomButtonModel) {
+    if (uiState.deviceState.deviceFeatures.hasCustomButtonModel) {
         listedScreens.add(Screen.ButtonActions.screenInfo)
     }
     listedScreens.add(Screen.DeviceInfo.screenInfo)
@@ -94,12 +94,14 @@ fun DeviceSettings(
                     Text(title)
                 },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        val isAtTopOfStack = !navController.popBackStack()
-                        if (isAtTopOfStack) {
-                            onBack()
-                        }
-                    }) {
+                    IconButton(
+                        onClick = {
+                            val isAtTopOfStack = !navController.popBackStack()
+                            if (isAtTopOfStack) {
+                                onBack()
+                            }
+                        },
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back),
@@ -127,17 +129,20 @@ fun DeviceSettings(
             },
         ) {
             composable<Screen.ScreenSelection> {
-                ScreenSelection(screens = listedScreens, onNavigation = { screen ->
-                    navController.navigate(screen) {
-                        popUpTo(Screen.ScreenSelection)
-                        launchSingleTop = true
-                    }
-                })
+                ScreenSelection(
+                    screens = listedScreens,
+                    onNavigation = { screen ->
+                        navController.navigate(screen) {
+                            popUpTo(Screen.ScreenSelection)
+                            launchSingleTop = true
+                        }
+                    },
+                )
             }
             uiState.deviceState.soundModes?.let { soundModes ->
                 composable<Screen.General> {
                     val soundModeProfile =
-                        uiState.deviceState.deviceProfile.soundMode ?: return@composable
+                        uiState.deviceState.deviceFeatures.soundMode ?: return@composable
                     SoundModeSettings(
                         soundModes = soundModes,
                         ambientSoundModeCycle = uiState.deviceState.ambientSoundModeCycle,
@@ -163,7 +168,7 @@ fun DeviceSettings(
             }
             composable<Screen.QuickPresets> {
                 QuickPresetScreen(
-                    deviceProfile = uiState.deviceState.deviceProfile,
+                    deviceFeatures = uiState.deviceState.deviceFeatures,
                     deviceBleServiceUuid = uiState.deviceBleServiceUuid,
                 )
             }

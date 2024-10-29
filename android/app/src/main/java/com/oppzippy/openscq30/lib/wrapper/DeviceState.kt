@@ -9,7 +9,7 @@ import com.oppzippy.openscq30.lib.protobuf.soundModesOrNull
 import com.oppzippy.openscq30.lib.protobuf.soundModesTypeTwoOrNull
 
 data class DeviceState(
-    val deviceProfile: DeviceProfile,
+    val deviceFeatures: DeviceFeatures,
     val battery: Battery,
     val equalizerConfiguration: EqualizerConfiguration,
     val soundModes: SoundModes?,
@@ -25,19 +25,19 @@ data class DeviceState(
     companion object // used for static extension methods in tests
 
     fun supportsDynamicRangeCompression(): Boolean {
-        if (deviceProfile.hasDynamicRangeCompression) {
+        if (deviceFeatures.hasDynamicRangeCompression) {
             if (firmwareVersion == null) {
                 return false
             }
             val minAllowedFirmwareVersion =
-                deviceProfile.dynamicRangeCompressionMinFirmwareVersion ?: return true
+                deviceFeatures.dynamicRangeCompressionMinFirmwareVersion ?: return true
             return firmwareVersion >= minAllowedFirmwareVersion
         }
         return false
     }
 
     fun toProtobuf(): com.oppzippy.openscq30.lib.protobuf.DeviceState = deviceState {
-        deviceProfile = this@DeviceState.deviceProfile.toProtobuf()
+        deviceFeatures = this@DeviceState.deviceFeatures.toProtobuf()
         battery = this@DeviceState.battery.toProtobuf()
         equalizerConfiguration = this@DeviceState.equalizerConfiguration.toProtobuf()
         this@DeviceState.soundModes?.let { soundModes = it.toProtobuf() }
@@ -53,7 +53,7 @@ data class DeviceState(
 }
 
 fun com.oppzippy.openscq30.lib.protobuf.DeviceState.toKotlin(): DeviceState = DeviceState(
-    deviceProfile = deviceProfile.toKotlin(),
+    deviceFeatures = deviceFeatures.toKotlin(),
     battery = battery.toKotlin(),
     equalizerConfiguration = equalizerConfiguration.toKotlin(),
     soundModes = soundModesOrNull?.toKotlin(),

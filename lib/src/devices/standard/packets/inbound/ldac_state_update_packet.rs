@@ -5,14 +5,20 @@ use nom::{
 
 use crate::devices::standard::packets::parsing::{take_bool, ParseResult};
 
+use super::InboundPacket;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct LdacStateUpdatePacket {
     pub is_enabled: bool,
 }
 
-impl LdacStateUpdatePacket {
+impl InboundPacket for LdacStateUpdatePacket {
+    fn header() -> [u8; 7] {
+        [0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x7F]
+    }
+
     #[allow(dead_code)]
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> ParseResult<LdacStateUpdatePacket, E> {
         context(
@@ -29,7 +35,7 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::packets::inbound::{
-        take_inbound_packet_header, LdacStateUpdatePacket,
+        take_inbound_packet_header, InboundPacket, LdacStateUpdatePacket,
     };
 
     #[test]

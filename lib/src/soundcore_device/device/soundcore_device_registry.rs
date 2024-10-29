@@ -103,7 +103,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::HashMap, sync::Arc};
+    use std::{collections::HashMap, sync::Arc, time::Duration};
 
     use macaddr::MacAddr6;
     use tokio::sync::mpsc;
@@ -113,7 +113,9 @@ mod tests {
             connection::{ConnectionDescriptor, GenericConnectionDescriptor},
             device::{Device, DeviceDescriptor, DeviceRegistry},
         },
+        devices::standard::packets::inbound::{FirmwareVersionUpdatePacket, InboundPacket},
         futures::TokioFutures,
+        soundcore_device::device::Packet,
         stub::connection::{StubConnection, StubConnectionRegistry},
     };
 
@@ -156,16 +158,6 @@ mod tests {
         );
         let device = Arc::new(StubConnection::new());
         let (sender, receiver) = mpsc::channel(1);
-        sender
-            .send(vec![
-                0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01, 0x46, 0x00, 0x05, 0x00, 0x01, 0x00, 0x3c,
-                0xb4, 0x8f, 0xa0, 0x8e, 0xb4, 0x74, 0x88, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
-                0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x35,
-            ])
-            .await
-            .unwrap();
         device.set_inbound_packets_channel(Ok(receiver)).await;
         device
             .set_mac_address_return(Ok(descriptor.mac_address()))
@@ -173,9 +165,6 @@ mod tests {
         device
             .set_name_return(Ok(descriptor.name().to_owned()))
             .await;
-        for _ in 0..10 {
-            device.push_write_return(Ok(())).await;
-        }
 
         let devices = HashMap::from([(descriptor, device)]);
         let connection_registry = StubConnectionRegistry::new(devices.to_owned());
@@ -183,6 +172,32 @@ mod tests {
             .await
             .unwrap();
 
+        let sender_copy = sender.clone();
+        tokio::spawn(async move {
+            tokio::time::sleep(Duration::from_millis(1)).await;
+            sender_copy
+                .send(
+                    Packet {
+                        command: FirmwareVersionUpdatePacket::header(),
+                        body: "02.0002.000000000000003028".as_bytes().to_vec(),
+                    }
+                    .bytes(),
+                )
+                .await
+                .unwrap();
+            tokio::time::sleep(Duration::from_millis(1)).await;
+            sender_copy
+                .send(vec![
+                    0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01, 0x46, 0x00, 0x05, 0x00, 0x01, 0x00,
+                    0x3c, 0xb4, 0x8f, 0xa0, 0x8e, 0xb4, 0x74, 0x88, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33,
+                    0x30, 0x33, 0x30, 0x32, 0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46,
+                    0x31, 0x32, 0x41, 0x43, 0x35,
+                ])
+                .await
+                .unwrap();
+        });
         let device = device_registry
             .device(MacAddr6::new(0x00, 0x11, 0x22, 0x33, 0x44, 0x55))
             .await

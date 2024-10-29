@@ -1,7 +1,8 @@
 use nom::{combinator::all_consuming, error::VerboseError};
 
 use crate::devices::standard::{
-    packets::inbound::state_update_packet::StateUpdatePacket, state::DeviceState,
+    packets::inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
+    state::DeviceState,
 };
 
 pub fn state_update_handler(input: &[u8], state: DeviceState) -> DeviceState {
@@ -16,7 +17,7 @@ pub fn state_update_handler(input: &[u8], state: DeviceState) -> DeviceState {
     };
 
     DeviceState {
-        device_profile: state.device_profile,
+        device_features: state.device_features,
         battery: state.battery,
         equalizer_configuration: state.equalizer_configuration.to_owned(),
         age_range: packet.age_range.or(state.age_range),

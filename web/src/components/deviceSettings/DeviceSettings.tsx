@@ -94,17 +94,20 @@ function SoundModeSelectionSection({
     [setDisplayState],
   );
 
-  if (displayState.deviceProfile.soundMode != null && displayState.soundModes) {
+  if (
+    displayState.deviceFeatures.soundMode != null &&
+    displayState.soundModes
+  ) {
     return (
       <SoundModeSelection
         soundModes={displayState.soundModes}
         setSoundModes={setSoundModes}
         options={{
           hasTransparencyModes:
-            displayState.deviceProfile.soundMode.transparencyModeType ==
+            displayState.deviceFeatures.soundMode.transparencyModeType ==
             "custom",
           noiseCanceling:
-            displayState.deviceProfile.soundMode.noiseCancelingModeType,
+            displayState.deviceFeatures.soundMode.noiseCancelingModeType,
         }}
       />
     );
@@ -208,7 +211,7 @@ function EqualizerSection({
   );
 
   const deleteCustomProfile = useDeleteCustomProfile();
-  if (displayState.deviceProfile.numEqualizerBands > 0) {
+  if (displayState.deviceFeatures.numEqualizerBands > 0) {
     return (
       <>
         <EqualizerSettings
@@ -252,7 +255,7 @@ function ButtonSettingsSection({
     [setDisplayState],
   );
   if (
-    displayState.deviceProfile.hasCustomButtonModel &&
+    displayState.deviceFeatures.hasCustomButtonModel &&
     displayState.customButtonModel != null
   ) {
     return (

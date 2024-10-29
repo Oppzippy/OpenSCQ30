@@ -6,7 +6,7 @@
 #![allow(clippy::type_complexity, async_fn_in_trait)]
 pub mod api;
 pub mod demo;
-pub mod device_profiles;
+pub mod device_profile;
 pub mod device_utils;
 pub mod devices;
 mod error;

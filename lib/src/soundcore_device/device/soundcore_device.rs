@@ -1,36 +1,32 @@
-use std::{collections::HashMap, mem, sync::Arc, time::Duration};
+use std::{collections::HashMap, mem, sync::Arc};
 
-use futures::FutureExt;
 use macaddr::MacAddr6;
-use nom::error::VerboseError;
 use tokio::sync::{mpsc, watch, Mutex};
 use tracing::{trace, warn};
 use uuid::Uuid;
 
 use crate::{
-    api::connection::{Connection, ConnectionStatus},
+    api::{
+        self,
+        connection::{Connection, ConnectionStatus},
+    },
     devices::standard::{
         packets::{
-            inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_header},
-            outbound::{OutboundPacketBytes, RequestFirmwareVersionPacket},
+            inbound::{state_update_packet::StateUpdatePacket, TryIntoInboundPacket},
+            outbound::{RequestFirmwareVersionPacket, RequestStatePacket},
         },
+        state::DeviceState,
         structures::{
             AmbientSoundModeCycle, CustomButtonModel, EqualizerConfiguration, HearId, SoundModes,
-            SoundModesTypeTwo, STATE_UPDATE,
+            SoundModesTypeTwo,
         },
     },
     futures::{Futures, JoinHandle},
 };
-use crate::{
-    api::{self},
-    devices::standard::packets::outbound::RequestStatePacket,
-    devices::standard::state::DeviceState,
-};
 
 use super::{
-    device_command_dispatcher::{DefaultDispatcher, DeviceCommandDispatcher},
-    packet_handlers::default_packet_handlers,
-    soundcore_command::CommandResponse,
+    device_implementation::DeviceImplementation, packet_io_controller::PacketIOController,
+    soundcore_command::CommandResponse, Packet,
 };
 
 pub struct SoundcoreDevice<ConnectionType, FuturesType>
@@ -38,10 +34,11 @@ where
     ConnectionType: Connection,
     FuturesType: Futures,
 {
+    controller: PacketIOController<ConnectionType, FuturesType>,
     connection: Arc<ConnectionType>,
     state_sender: Arc<Mutex<watch::Sender<DeviceState>>>,
     join_handle: FuturesType::JoinHandleType,
-    dispatcher: Arc<dyn DeviceCommandDispatcher + Send + Sync>,
+    implementation: Arc<dyn DeviceImplementation + Send + Sync>,
 }
 
 impl<ConnectionType, FuturesType> SoundcoreDevice<ConnectionType, FuturesType>
@@ -50,48 +47,47 @@ where
     FuturesType: Futures,
 {
     pub async fn new(connection: Arc<ConnectionType>) -> crate::Result<Self> {
-        let mut inbound_receiver = connection.inbound_packets_channel().await?;
-        let (initial_state, initial_state_packet) =
-            Self::fetch_initial_state(&connection, &mut inbound_receiver).await?;
+        let (controller, receiver) = PacketIOController::new(connection.clone()).await?;
+        let (initial_state, implementation) = Self::fetch_initial_state(&controller).await?;
 
-        // TODO consider making this a part of fetch_initial_state
-        // For devices that don't include the firmware version in their state update packet, we need to request it
-        if initial_state.firmware_version.is_none() {
-            connection
-                .write_with_response(&RequestFirmwareVersionPacket::new().bytes())
-                .await?;
-        }
-
-        let dispatcher = initial_state
-            .device_profile
-            .custom_dispatchers
-            .map(|f| f())
-            .unwrap_or_else(|| Arc::new(DefaultDispatcher));
-
-        let mut packet_handlers = default_packet_handlers();
-        packet_handlers.extend(dispatcher.packet_handlers());
-        let initial_state = packet_handlers
-            .get(&STATE_UPDATE)
-            .expect("there should be a default handler for state update")(
-            &initial_state_packet,
-            initial_state,
-        );
+        let is_serial_number_missing = initial_state.serial_number.is_none();
+        let packet_handlers = implementation.packet_handlers();
 
         let (state_sender, _) = watch::channel(initial_state);
         let state_sender = Arc::new(Mutex::new(state_sender));
 
-        let join_handle = Self::spawn_inbound_packet_handler(
-            packet_handlers,
-            inbound_receiver,
-            state_sender.to_owned(),
-        );
+        let join_handle =
+            Self::spawn_inbound_packet_handler(packet_handlers, receiver, state_sender.to_owned());
+
+        if is_serial_number_missing {
+            tracing::debug!(
+                "requesting serial number since it was not included in the state update packet"
+            );
+            // The implementation will handle the response, so we can send the request and forget about it
+            controller
+                .send(&RequestFirmwareVersionPacket::new().into())
+                .await?;
+        }
 
         Ok(Self {
+            controller,
             connection,
             join_handle,
             state_sender,
-            dispatcher,
+            implementation,
         })
+    }
+
+    pub async fn fetch_initial_state(
+        controller: &PacketIOController<ConnectionType, FuturesType>,
+    ) -> crate::Result<(DeviceState, Arc<dyn DeviceImplementation + Send + Sync>)> {
+        tracing::debug!("requesting state to determine model");
+        let unparsed = controller.send(&RequestStatePacket::new().into()).await?;
+        let parsed: StateUpdatePacket = unparsed.try_into_inbound_packet()?;
+        let implementation = (parsed.device_profile.implementation)();
+        let state = implementation.initialize(&unparsed.body)?;
+
+        Ok((state, implementation))
     }
 
     fn spawn_inbound_packet_handler(
@@ -99,65 +95,28 @@ where
             [u8; 7],
             Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>,
         >,
-        mut inbound_receiver: mpsc::Receiver<Vec<u8>>,
+        mut inbound_receiver: mpsc::Receiver<Packet>,
         state_sender_lock: Arc<Mutex<watch::Sender<DeviceState>>>,
     ) -> FuturesType::JoinHandleType {
         FuturesType::spawn(async move {
-            while let Some(packet_bytes) = inbound_receiver.recv().await {
-                match take_inbound_packet_header::<VerboseError<_>>(&packet_bytes) {
-                    Ok((body, packet_type)) => match packet_handlers.get(&packet_type) {
-                        Some(handler) => {
-                            let state_sender = state_sender_lock.lock().await;
-                            let state = state_sender.borrow();
-                            let new_state = handler(body, state.to_owned());
-                            if new_state != *state {
-                                trace!(event = "state_update", old_state = ?state, new_state = ?new_state);
-                                mem::drop(state);
-                                state_sender.send_replace(new_state);
-                            }
+            while let Some(packet) = inbound_receiver.recv().await {
+                match packet_handlers.get(&packet.command()) {
+                    Some(handler) => {
+                        let state_sender = state_sender_lock.lock().await;
+                        let state = state_sender.borrow();
+                        let new_state = handler(&packet.body, state.to_owned());
+                        if new_state != *state {
+                            trace!(event = "state_update", old_state = ?state, new_state = ?new_state);
+                            mem::drop(state);
+                            state_sender.send_replace(new_state);
                         }
-                        None => {
-                            warn!("no packet handler found: packet type: {packet_type:?}, body: {body:?}")
-                        }
-                    },
-                    Err(err) => warn!("failed to parse packet header: {err:?}"),
+                    }
+                    None => {
+                        warn!("no packet handler found for packet: {packet:?}")
+                    }
                 }
             }
         })
-    }
-
-    async fn fetch_initial_state(
-        connection: &ConnectionType,
-        inbound_receiver: &mut mpsc::Receiver<Vec<u8>>,
-    ) -> crate::Result<(DeviceState, Vec<u8>)> {
-        for i in 0..3 {
-            connection
-                .write_without_response(&RequestStatePacket::new().bytes())
-                .await?;
-
-            let state_future = async {
-                while let Some(packet_bytes) = inbound_receiver.recv().await {
-                    match take_inbound_packet_header::<VerboseError<_>>(&packet_bytes) {
-                        Ok(( body, STATE_UPDATE)) => {
-                            match StateUpdatePacket::take::<VerboseError<_>>(body) {
-                                Ok((_, packet)) => return Some((packet, body.to_vec())),
-                                Err(err) => warn!("failed to parse packet: {err:?}"),
-                            }
-                        }
-                        Ok(( body, packet_type)) => warn!("got wrong packet type, wanted state update: {packet_type:?}, body: {body:?}"),
-                        Err(err) => warn!("error parsing packet: {err:?}"),
-                    }
-                }
-                None
-            };
-
-            futures::select! {
-                state = state_future.fuse() => if let Some((packet, bytes)) = state { return Ok((packet.into(), bytes)) },
-                _ = FuturesType::sleep(Duration::from_secs(1)).fuse() =>
-                    warn!("fetch_initial_state: didn't receive response after 1 second on try #{i}"),
-            }
-        }
-        Err(crate::Error::NoResponse)
     }
 
     async fn handle_response(
@@ -165,14 +124,14 @@ where
         response: CommandResponse,
         state_sender: &watch::Sender<DeviceState>,
     ) -> crate::Result<()> {
-        self.send_packets(response.packets).await?;
+        self.send_packets(&response.packets).await?;
         state_sender.send_replace(response.new_state);
         Ok(())
     }
 
-    async fn send_packets(&self, packets: impl IntoIterator<Item = Vec<u8>>) -> crate::Result<()> {
+    async fn send_packets(&self, packets: &[Packet]) -> crate::Result<()> {
         for packet in packets {
-            self.connection.write_with_response(&packet).await?;
+            self.controller.send(packet).await?;
         }
         Ok(())
     }
@@ -211,7 +170,7 @@ where
     async fn set_sound_modes(&self, sound_modes: SoundModes) -> crate::Result<()> {
         let state_sender = self.state_sender.lock().await;
         let state = state_sender.borrow().to_owned();
-        if state.device_profile.sound_mode.is_none() {
+        if state.device_features.sound_mode.is_none() {
             return Err(crate::Error::FeatureNotSupported {
                 feature_name: "sound modes",
             });
@@ -225,7 +184,7 @@ where
             return Ok(());
         }
 
-        let response = self.dispatcher.set_sound_modes(state, sound_modes)?;
+        let response = self.implementation.set_sound_modes(state, sound_modes)?;
         self.handle_response(response, &state_sender).await?;
         Ok(())
     }
@@ -243,7 +202,7 @@ where
         }
 
         let response = self
-            .dispatcher
+            .implementation
             .set_sound_modes_type_two(state, sound_modes)?;
         self.handle_response(response, &state_sender).await?;
         Ok(())
@@ -255,7 +214,7 @@ where
     ) -> crate::Result<()> {
         let state_sender = self.state_sender.lock().await;
         let state = state_sender.borrow().to_owned();
-        if !state.device_profile.has_ambient_sound_mode_cycle {
+        if !state.device_features.has_ambient_sound_mode_cycle {
             return Err(crate::Error::FeatureNotSupported {
                 feature_name: "ambient sound mode cycle",
             });
@@ -269,7 +228,9 @@ where
             return Ok(());
         }
 
-        let response = self.dispatcher.set_ambient_sound_mode_cycle(state, cycle)?;
+        let response = self
+            .implementation
+            .set_ambient_sound_mode_cycle(state, cycle)?;
         self.handle_response(response, &state_sender).await?;
         Ok(())
     }
@@ -281,7 +242,7 @@ where
         let state_sender = self.state_sender.lock().await;
         let state = state_sender.borrow().to_owned();
 
-        if state.device_profile.num_equalizer_channels == 0 {
+        if state.device_features.num_equalizer_channels == 0 {
             return Err(crate::Error::FeatureNotSupported {
                 feature_name: "equalizer",
             });
@@ -290,7 +251,7 @@ where
             .volume_adjustments()
             .adjustments()
             .len()
-            != state.device_profile.num_equalizer_bands
+            != state.device_features.num_equalizer_bands
         {
             return Err(crate::Error::FeatureNotSupported {
                 feature_name: "wrong number of equalizer bands",
@@ -301,7 +262,7 @@ where
         }
 
         let response = self
-            .dispatcher
+            .implementation
             .set_equalizer_configuration(state, equalizer_configuration)?;
         self.handle_response(response, &state_sender).await?;
         Ok(())
@@ -311,13 +272,13 @@ where
         let state_sender = self.state_sender.lock().await;
         let state = state_sender.borrow().to_owned();
 
-        if !state.device_profile.has_hear_id {
+        if !state.device_features.has_hear_id {
             return Err(crate::Error::FeatureNotSupported {
                 feature_name: "hear id",
             });
         }
 
-        let response = self.dispatcher.set_hear_id(state, hear_id)?;
+        let response = self.implementation.set_hear_id(state, hear_id)?;
         self.handle_response(response, &state_sender).await?;
         Ok(())
     }
@@ -329,7 +290,7 @@ where
         let state_sender = self.state_sender.lock().await;
         let state = state_sender.borrow().to_owned();
 
-        if !state.device_profile.has_custom_button_model {
+        if !state.device_features.has_custom_button_model {
             return Err(crate::Error::FeatureNotSupported {
                 feature_name: "custom button model",
             });
@@ -344,7 +305,7 @@ where
         }
 
         let response = self
-            .dispatcher
+            .implementation
             .set_custom_button_model(state, custom_button_model)?;
         self.handle_response(response, &state_sender).await?;
         Ok(())
@@ -376,16 +337,23 @@ mod tests {
     use std::{sync::Arc, time::Duration};
 
     use macaddr::MacAddr6;
-    use tokio::sync::mpsc;
+    use tokio::sync::{mpsc, Mutex};
 
     use super::SoundcoreDevice;
     use crate::{
         api::device::Device,
-        devices::standard::structures::{
-            AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
-            SoundModes, VolumeAdjustments,
+        devices::standard::{
+            packets::inbound::{
+                FirmwareVersionUpdatePacket, InboundPacket, SetEqualizerOkPacket,
+                SetSoundModeOkPacket,
+            },
+            structures::{
+                AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
+                SoundModes, VolumeAdjustments,
+            },
         },
         futures::TokioFutures,
+        soundcore_device::device::Packet,
         stub::connection::StubConnection,
     };
 
@@ -397,6 +365,14 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x30,
         ]
+    }
+
+    fn example_firmware_version_packet() -> Vec<u8> {
+        Packet {
+            command: FirmwareVersionUpdatePacket::header(),
+            body: "02.0002.000000000000003028".as_bytes().to_vec(),
+        }
+        .bytes()
     }
 
     async fn create_test_connection() -> (Arc<StubConnection>, mpsc::Sender<Vec<u8>>) {
@@ -414,8 +390,14 @@ mod tests {
     #[tokio::test]
     async fn test_new_with_example_state_update_packet() {
         let (connection, sender) = create_test_connection().await;
-        connection.push_write_return(Ok(())).await;
+        // TODO find a better way of waiting for the request to be sent before responding
         tokio::spawn(async move {
+            tokio::time::sleep(Duration::from_millis(1)).await;
+            sender
+                .send(example_firmware_version_packet())
+                .await
+                .unwrap();
+            tokio::time::sleep(Duration::from_millis(1)).await;
             sender.send(example_state_update_packet()).await.unwrap();
         });
         let device = SoundcoreDevice::<_, TokioFutures>::new(connection)
@@ -438,11 +420,25 @@ mod tests {
     #[tokio::test]
     async fn test_new_with_retry() {
         let (connection, sender) = create_test_connection().await;
-        connection.push_write_return(Ok(())).await;
-        connection.push_write_return(Ok(())).await;
-        tokio::spawn(async move {
-            tokio::time::sleep(Duration::from_millis(1500)).await;
-            sender.send(example_state_update_packet()).await.unwrap();
+        let sender = Arc::new(Mutex::new(sender));
+        tokio::spawn({
+            let sender = sender.clone();
+            async move {
+                tokio::time::sleep(Duration::from_millis(1500)).await;
+                sender
+                    .lock()
+                    .await
+                    .send(example_firmware_version_packet())
+                    .await
+                    .unwrap();
+                tokio::time::sleep(Duration::from_millis(1500)).await;
+                sender
+                    .lock()
+                    .await
+                    .send(example_state_update_packet())
+                    .await
+                    .unwrap();
+            }
         });
         let connection_clone = connection.clone();
         SoundcoreDevice::<_, TokioFutures>::new(connection_clone)
@@ -454,10 +450,6 @@ mod tests {
     #[tokio::test]
     async fn test_new_max_retries() {
         let (connection, _) = create_test_connection().await;
-        // for the purposes of this test, we don't care how many times it retries. we only care that it stops at some point.
-        for _ in 0..100 {
-            connection.push_write_return(Ok(())).await;
-        }
 
         let connection_clone = connection.clone();
         let result = SoundcoreDevice::<_, TokioFutures>::new(connection_clone).await;
@@ -470,6 +462,12 @@ mod tests {
         connection.push_write_return(Ok(())).await;
         let sender_copy = sender.clone();
         tokio::spawn(async move {
+            tokio::time::sleep(Duration::from_millis(1)).await;
+            sender_copy
+                .send(example_firmware_version_packet())
+                .await
+                .unwrap();
+            tokio::time::sleep(Duration::from_millis(1)).await;
             sender_copy
                 .send(example_state_update_packet())
                 .await
@@ -486,17 +484,14 @@ mod tests {
             sound_modes.noise_canceling_mode
         );
 
-        tokio::spawn(async move {
-            sender
-                .send(vec![
-                    0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x00, 0x01, 0x01, 0x00,
-                    0x20,
-                ])
-                .await
-                .unwrap();
-        });
-        // wait for the packet to be handled asynchronously
-        tokio::time::sleep(Duration::from_millis(100)).await;
+        // alert from device that sound mode changed
+        sender
+            .send(vec![
+                0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x00, 0x01, 0x01, 0x00, 0x20,
+            ])
+            .await
+            .unwrap();
+        tokio::time::sleep(Duration::from_millis(1)).await;
 
         let state = device.state().await;
         let sound_modes = state.sound_modes.unwrap();
@@ -514,11 +509,43 @@ mod tests {
     #[tokio::test]
     async fn test_set_sound_mode_called_twice() {
         let (connection, sender) = create_test_connection().await;
+        // request firmware version packet
+        connection.push_write_return(Ok(())).await;
         // request state update packet
         connection.push_write_return(Ok(())).await;
         // first set_sound_modes. second call should not send a packet.
         connection.push_write_return(Ok(())).await;
-        sender.send(example_state_update_packet()).await.unwrap();
+        // there should be no next write call
+        connection
+            .push_write_return(Err(crate::Error::MissingData {
+                name: "there should not be a second set sound modes packet",
+            }))
+            .await;
+
+        let sender_copy = sender.clone();
+        tokio::spawn(async move {
+            tokio::time::sleep(Duration::from_millis(1)).await;
+            sender_copy
+                .send(example_firmware_version_packet())
+                .await
+                .unwrap();
+            tokio::time::sleep(Duration::from_millis(1)).await;
+            sender_copy
+                .send(example_state_update_packet())
+                .await
+                .unwrap();
+            tokio::time::sleep(Duration::from_millis(1)).await;
+            sender_copy
+                .send(
+                    Packet {
+                        command: SetSoundModeOkPacket::header(),
+                        body: Vec::new(),
+                    }
+                    .bytes(),
+                )
+                .await
+                .unwrap();
+        });
 
         let device = SoundcoreDevice::<_, TokioFutures>::new(connection.to_owned())
             .await
@@ -534,11 +561,43 @@ mod tests {
     #[tokio::test]
     async fn test_set_equalizer_configuration_called_twice() {
         let (connection, sender) = create_test_connection().await;
+        // request firmware version packet
+        connection.push_write_return(Ok(())).await;
         // request state update packet
         connection.push_write_return(Ok(())).await;
         // first set_equalizer_configuration. second call should not send a packet.
         connection.push_write_return(Ok(())).await;
-        sender.send(example_state_update_packet()).await.unwrap();
+        // there should be no next write call
+        connection
+            .push_write_return(Err(crate::Error::MissingData {
+                name: "there should not be a second set eq config packet",
+            }))
+            .await;
+
+        let sender_copy = sender.clone();
+        tokio::spawn(async move {
+            tokio::time::sleep(Duration::from_millis(1)).await;
+            sender_copy
+                .send(example_firmware_version_packet())
+                .await
+                .unwrap();
+            tokio::time::sleep(Duration::from_millis(1)).await;
+            sender_copy
+                .send(example_state_update_packet())
+                .await
+                .unwrap();
+            tokio::time::sleep(Duration::from_millis(1)).await;
+            sender_copy
+                .send(
+                    Packet {
+                        command: SetEqualizerOkPacket::header(),
+                        body: Vec::new(),
+                    }
+                    .bytes(),
+                )
+                .await
+                .unwrap();
+        });
 
         let device = SoundcoreDevice::<_, TokioFutures>::new(connection.to_owned())
             .await

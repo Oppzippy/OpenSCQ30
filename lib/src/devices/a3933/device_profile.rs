@@ -3,49 +3,54 @@ use std::{collections::HashMap, sync::Arc};
 use nom::error::VerboseError;
 
 use crate::{
-    device_profiles::{
-        DeviceProfile, NoiseCancelingModeType, SoundModeProfile, TransparencyModeType,
+    device_profile::{
+        DeviceFeatures, DeviceProfile, NoiseCancelingModeType, SoundModeProfile,
+        TransparencyModeType,
     },
     devices::standard::{
-        packets::outbound::OutboundPacketBytes,
+        self,
+        packets::inbound::state_update_packet::StateUpdatePacket,
         quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBands},
         state::DeviceState,
         structures::{EqualizerConfiguration, STATE_UPDATE},
     },
-    soundcore_device::device::{
-        device_command_dispatcher::DeviceCommandDispatcher,
-        packet_handlers::state_update::state_update_handler, soundcore_command::CommandResponse,
+    soundcore_device::{
+        device::{device_implementation::DeviceImplementation, soundcore_command::CommandResponse},
+        device_model::DeviceModel,
     },
 };
 
 use super::packets::inbound::A3933StateUpdatePacket;
 
-pub const A3933_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
-    sound_mode: Some(SoundModeProfile {
-        noise_canceling_mode_type: NoiseCancelingModeType::Basic,
-        transparency_mode_type: TransparencyModeType::Custom,
-    }),
-    has_hear_id: true,
-    num_equalizer_channels: 2,
-    num_equalizer_bands: 8,
-    has_dynamic_range_compression: true,
-    dynamic_range_compression_min_firmware_version: None,
-    has_custom_button_model: true,
-    has_wear_detection: false,
-    has_touch_tone: false,
-    has_auto_power_off: false,
-    has_ambient_sound_mode_cycle: true,
-    custom_dispatchers: Some(|| Arc::new(A3933Dispatcher::default())),
+pub(crate) const A3933_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
+    features: DeviceFeatures {
+        sound_mode: Some(SoundModeProfile {
+            noise_canceling_mode_type: NoiseCancelingModeType::Basic,
+            transparency_mode_type: TransparencyModeType::Custom,
+        }),
+        has_hear_id: true,
+        num_equalizer_channels: 2,
+        num_equalizer_bands: 8,
+        has_dynamic_range_compression: true,
+        dynamic_range_compression_min_firmware_version: None,
+        has_custom_button_model: true,
+        has_wear_detection: false,
+        has_touch_tone: false,
+        has_auto_power_off: false,
+        has_ambient_sound_mode_cycle: true,
+    },
+    compatible_models: &[DeviceModel::A3933, DeviceModel::A3939],
+    implementation: || Arc::new(A3933Implementation::default()),
 };
 
 #[derive(Debug, Default)]
-pub struct A3933Dispatcher {
+pub struct A3933Implementation {
     // The official app only displays 8 bands, so I have no idea what bands 9 and 10 do. We'll just keep track
     // of their initial value and resend that.
     extra_bands: Arc<TwoExtraEqBands>,
 }
 
-impl DeviceCommandDispatcher for A3933Dispatcher {
+impl DeviceImplementation for A3933Implementation {
     fn packet_handlers(
         &self,
     ) -> HashMap<[u8; 7], Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>> {
@@ -68,12 +73,20 @@ impl DeviceCommandDispatcher for A3933Dispatcher {
                 };
                 extra_bands.set_values(packet.extra_band_values);
 
-                // We only needed to capture information. The actual state transformation is passed on to the default handler..
-                state_update_handler(packet_bytes, state)
+                StateUpdatePacket::from(packet).into()
             }),
         );
 
         handlers
+    }
+
+    fn initialize(&self, packet: &[u8]) -> crate::Result<DeviceState> {
+        let packet = A3933StateUpdatePacket::take::<VerboseError<_>>(packet)
+            .map(|(_, packet)| packet)
+            .map_err(|err| crate::Error::ParseError {
+                message: format!("{err:?}"),
+            })?;
+        Ok(StateUpdatePacket::from(packet).into())
     }
 
     fn set_equalizer_configuration(
@@ -85,20 +98,59 @@ impl DeviceCommandDispatcher for A3933Dispatcher {
         let right_channel = &equalizer_configuration;
         let extra_band_values = self.extra_bands.values();
 
-        let packet_bytes = TwoExtraEqBandSetEqualizerPacket {
+        let packet = TwoExtraEqBandSetEqualizerPacket {
             left_channel,
             right_channel,
             extra_band_values,
-        }
-        .bytes();
+        };
 
         Ok(CommandResponse {
-            packets: vec![packet_bytes],
+            packets: vec![packet.into()],
             new_state: DeviceState {
                 equalizer_configuration,
                 ..state
             },
         })
+    }
+
+    fn set_sound_modes(
+        &self,
+        state: DeviceState,
+        sound_modes: crate::devices::standard::structures::SoundModes,
+    ) -> crate::Result<CommandResponse> {
+        standard::implementation::set_sound_modes(state, sound_modes)
+    }
+
+    fn set_sound_modes_type_two(
+        &self,
+        state: DeviceState,
+        sound_modes: crate::devices::standard::structures::SoundModesTypeTwo,
+    ) -> crate::Result<CommandResponse> {
+        standard::implementation::set_sound_modes_type_two(state, sound_modes)
+    }
+
+    fn set_hear_id(
+        &self,
+        state: DeviceState,
+        hear_id: crate::devices::standard::structures::HearId,
+    ) -> crate::Result<CommandResponse> {
+        standard::implementation::set_hear_id(state, hear_id)
+    }
+
+    fn set_custom_button_model(
+        &self,
+        state: DeviceState,
+        custom_button_model: crate::devices::standard::structures::CustomButtonModel,
+    ) -> crate::Result<CommandResponse> {
+        standard::implementation::set_custom_button_model(state, custom_button_model)
+    }
+
+    fn set_ambient_sound_mode_cycle(
+        &self,
+        state: DeviceState,
+        cycle: standard::structures::AmbientSoundModeCycle,
+    ) -> crate::Result<CommandResponse> {
+        standard::implementation::set_ambient_sound_mode_cycle(state, cycle)
     }
 }
 
@@ -106,17 +158,22 @@ impl DeviceCommandDispatcher for A3933Dispatcher {
 mod tests {
     use nom::error::VerboseError;
 
-    use crate::devices::{
-        a3933::{device_profile::A3933_DEVICE_PROFILE, packets::inbound::A3933StateUpdatePacket},
-        standard::{
-            packets::{
-                inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_header},
-                outbound::{OutboundPacket, OutboundPacketBytes},
+    use crate::{
+        devices::{
+            a3933::{
+                device_profile::A3933_DEVICE_PROFILE, packets::inbound::A3933StateUpdatePacket,
             },
-            quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBandsValues},
-            state::DeviceState,
-            structures::{EqualizerConfiguration, PresetEqualizerProfile, STATE_UPDATE},
+            standard::{
+                packets::{
+                    inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_header},
+                    outbound::{OutboundPacket, SendableBytes},
+                },
+                quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBandsValues},
+                state::DeviceState,
+                structures::{EqualizerConfiguration, PresetEqualizerProfile, STATE_UPDATE},
+            },
         },
+        soundcore_device::device::Packet,
     };
 
     struct A3933TestStateUpdatePacket {
@@ -182,18 +239,18 @@ mod tests {
             .unwrap()
             .1;
         let state: DeviceState = StateUpdatePacket::from(state_update).into();
-        let dispatchers = A3933_DEVICE_PROFILE.custom_dispatchers.unwrap()();
-        let state = (&dispatchers.packet_handlers()[&STATE_UPDATE])(&body, state);
+        let implementation = (A3933_DEVICE_PROFILE.implementation)();
+        let state = (&implementation.packet_handlers()[&STATE_UPDATE])(&body, state);
 
         let equalizer_configuration =
             EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::TrebleReducer);
-        let command_response = dispatchers
+        let command_response = implementation
             .set_equalizer_configuration(state, equalizer_configuration.to_owned())
             .unwrap();
 
         assert_eq!(1, command_response.packets.len());
         assert_eq!(
-            &TwoExtraEqBandSetEqualizerPacket {
+            &Packet::from(TwoExtraEqBandSetEqualizerPacket {
                 left_channel: &equalizer_configuration,
                 right_channel: &equalizer_configuration,
                 extra_band_values: TwoExtraEqBandsValues {
@@ -202,8 +259,7 @@ mod tests {
                     right_extra_1: 123,
                     right_extra_2: 124,
                 },
-            }
-            .bytes(),
+            }),
             command_response.packets.first().unwrap(),
         );
     }

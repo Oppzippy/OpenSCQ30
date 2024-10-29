@@ -6,19 +6,10 @@ use uuid::Uuid;
 
 use crate::{
     api::{connection::ConnectionStatus, device::Device},
-    device_profiles::{
-        DeviceProfile, NoiseCancelingModeType, SoundModeProfile, TransparencyModeType,
+    device_profile::{
+        DeviceFeatures, NoiseCancelingModeType, SoundModeProfile, TransparencyModeType,
     },
-    devices::standard::{
-        state::DeviceState,
-        structures::{
-            AgeRange, AmbientSoundMode, AmbientSoundModeCycle, BasicHearId, BatteryLevel,
-            ButtonAction, CustomButtonModel, EqualizerConfiguration, FirmwareVersion, Gender,
-            HearId, IsBatteryCharging, NoTwsButtonAction, NoiseCancelingMode,
-            PresetEqualizerProfile, SerialNumber, SingleBattery, SoundModes, SoundModesTypeTwo,
-            TwsButtonAction,
-        },
-    },
+    devices::standard::{state::DeviceState, structures::*},
     futures::Futures,
 };
 
@@ -38,7 +29,7 @@ where
         FuturesType::sleep(Duration::from_millis(500)).await; // it takes some time to connect
                                                               //
         let (state_sender, _) = watch::channel(DeviceState {
-            device_profile: DeviceProfile {
+            device_features: DeviceFeatures {
                 sound_mode: Some(SoundModeProfile {
                     noise_canceling_mode_type: NoiseCancelingModeType::Custom,
                     transparency_mode_type: TransparencyModeType::Custom,
@@ -53,7 +44,6 @@ where
                 has_touch_tone: true,
                 has_auto_power_off: true,
                 has_ambient_sound_mode_cycle: true,
-                custom_dispatchers: None,
             },
             battery: SingleBattery {
                 is_charging: IsBatteryCharging::No,

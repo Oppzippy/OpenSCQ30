@@ -2,7 +2,7 @@ use gtk::{
     glib::{self, Object},
     subclass::prelude::ObjectSubclassIsExt,
 };
-use openscq30_lib::device_profiles::DeviceProfile;
+use openscq30_lib::device_profile::DeviceFeatures;
 
 use crate::objects::{GlibCustomEqualizerProfile, GlibNamedQuickPresetValue};
 
@@ -21,7 +21,7 @@ impl EditQuickPreset {
         self.imp().set_quick_preset(quick_preset);
     }
 
-    pub fn set_device_profile(&self, profile: &DeviceProfile) {
+    pub fn set_device_profile(&self, profile: &DeviceFeatures) {
         self.imp().set_device_profile(profile);
     }
 
@@ -47,7 +47,7 @@ mod imp {
         template_callbacks, ClosureExpression, CompositeTemplate,
     };
     use openscq30_lib::{
-        device_profiles::{DeviceProfile, NoiseCancelingModeType, TransparencyModeType},
+        device_profile::{DeviceFeatures, NoiseCancelingModeType, TransparencyModeType},
         devices::standard::structures::{
             AmbientSoundMode, CustomNoiseCanceling, NoiseCancelingMode, PresetEqualizerProfile,
             TransparencyMode,
@@ -189,7 +189,7 @@ mod imp {
             );
         }
 
-        pub fn set_device_profile(&self, profile: &DeviceProfile) {
+        pub fn set_device_profile(&self, profile: &DeviceFeatures) {
             if let Some(sound_mode_profile) = profile.sound_mode {
                 self.ambient_sound_mode_group.set_visible(true);
                 let mut ambient_sound_modes = self.ambient_sound_modes_store.borrow_mut();

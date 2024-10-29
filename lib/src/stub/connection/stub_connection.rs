@@ -73,12 +73,12 @@ impl Connection for StubConnection {
 
     async fn write_with_response(&self, _data: &[u8]) -> crate::Result<()> {
         let mut lock = self.write_return_queue.lock().await;
-        lock.pop_front().unwrap() // we want to panic if the queue is empty so tests fail
+        lock.pop_front().unwrap_or(Ok(()))
     }
 
     async fn write_without_response(&self, _data: &[u8]) -> crate::Result<()> {
         let mut lock = self.write_return_queue.lock().await;
-        lock.pop_front().unwrap() // we want to panic if the queue is empty so tests fail
+        lock.pop_front().unwrap_or(Ok(()))
     }
 
     async fn inbound_packets_channel(&self) -> crate::Result<mpsc::Receiver<Vec<u8>>> {

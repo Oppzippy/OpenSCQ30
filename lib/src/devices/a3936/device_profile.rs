@@ -3,44 +3,50 @@ use std::{collections::HashMap, sync::Arc};
 use nom::error::VerboseError;
 
 use crate::{
-    device_profiles::DeviceProfile,
+    device_profile::{DeviceFeatures, DeviceProfile},
     devices::standard::{
-        packets::{inbound::SoundModeTypeTwoUpdatePacket, outbound::OutboundPacketBytes},
+        self,
+        packets::inbound::{
+            state_update_packet::StateUpdatePacket, InboundPacket, SoundModeTypeTwoUpdatePacket,
+        },
         quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBands},
         state::DeviceState,
-        structures::{EqualizerConfiguration, SOUND_MODE_UPDATE, STATE_UPDATE},
+        structures::*,
     },
-    soundcore_device::device::{
-        device_command_dispatcher::DeviceCommandDispatcher,
-        packet_handlers::state_update::state_update_handler, soundcore_command::CommandResponse,
+    soundcore_device::{
+        device::{device_implementation::DeviceImplementation, soundcore_command::CommandResponse},
+        device_model::DeviceModel,
     },
 };
 
 use super::packets::A3936StateUpdatePacket;
 
-pub const A3936_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
-    sound_mode: None,
-    has_hear_id: true,
-    num_equalizer_channels: 2,
-    num_equalizer_bands: 8,
-    has_dynamic_range_compression: true,
-    dynamic_range_compression_min_firmware_version: None,
-    has_custom_button_model: true,
-    has_wear_detection: false,
-    has_touch_tone: false,
-    has_auto_power_off: false,
-    has_ambient_sound_mode_cycle: true,
-    custom_dispatchers: Some(|| Arc::new(A3936Dispatcher::default())),
+pub(crate) const A3936_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
+    features: DeviceFeatures {
+        sound_mode: None,
+        has_hear_id: true,
+        num_equalizer_channels: 2,
+        num_equalizer_bands: 8,
+        has_dynamic_range_compression: true,
+        dynamic_range_compression_min_firmware_version: None,
+        has_custom_button_model: true,
+        has_wear_detection: false,
+        has_touch_tone: false,
+        has_auto_power_off: false,
+        has_ambient_sound_mode_cycle: true,
+    },
+    compatible_models: &[DeviceModel::A3936],
+    implementation: || Arc::new(A3936Implementation::default()),
 };
 
 #[derive(Debug, Default)]
-pub struct A3936Dispatcher {
+pub struct A3936Implementation {
     // The official app only displays 8 bands, so I have no idea what bands 9 and 10 do. We'll just keep track
     // of their initial value and resend that.
     extra_bands: Arc<TwoExtraEqBands>,
 }
 
-impl DeviceCommandDispatcher for A3936Dispatcher {
+impl DeviceImplementation for A3936Implementation {
     fn packet_handlers(
         &self,
     ) -> HashMap<[u8; 7], Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>> {
@@ -63,8 +69,7 @@ impl DeviceCommandDispatcher for A3936Dispatcher {
                 };
                 extra_bands.set_values(packet.extra_bands);
 
-                // We only needed to capture information. The actual state transformation is passed on to the default handler..
-                state_update_handler(packet_bytes, state)
+                StateUpdatePacket::from(packet).into()
             }),
         );
         handlers.insert(
@@ -88,6 +93,15 @@ impl DeviceCommandDispatcher for A3936Dispatcher {
         handlers
     }
 
+    fn initialize(&self, packet: &[u8]) -> crate::Result<DeviceState> {
+        let packet = A3936StateUpdatePacket::take::<VerboseError<_>>(packet)
+            .map(|(_, packet)| packet)
+            .map_err(|err| crate::Error::ParseError {
+                message: format!("{err:?}"),
+            })?;
+        Ok(StateUpdatePacket::from(packet).into())
+    }
+
     fn set_equalizer_configuration(
         &self,
         state: DeviceState,
@@ -97,19 +111,54 @@ impl DeviceCommandDispatcher for A3936Dispatcher {
         let right_channel = &equalizer_configuration;
         let extra_band_values = self.extra_bands.values();
 
-        let packet_bytes = TwoExtraEqBandSetEqualizerPacket {
+        let packet = TwoExtraEqBandSetEqualizerPacket {
             left_channel,
             right_channel,
             extra_band_values,
-        }
-        .bytes();
+        };
 
         Ok(CommandResponse {
-            packets: vec![packet_bytes],
+            packets: vec![packet.into()],
             new_state: DeviceState {
                 equalizer_configuration,
                 ..state
             },
         })
+    }
+
+    fn set_sound_modes(
+        &self,
+        state: DeviceState,
+        sound_modes: SoundModes,
+    ) -> crate::Result<CommandResponse> {
+        standard::implementation::set_sound_modes(state, sound_modes)
+    }
+
+    fn set_sound_modes_type_two(
+        &self,
+        state: DeviceState,
+        sound_modes: SoundModesTypeTwo,
+    ) -> crate::Result<CommandResponse> {
+        standard::implementation::set_sound_modes_type_two(state, sound_modes)
+    }
+
+    fn set_hear_id(&self, state: DeviceState, hear_id: HearId) -> crate::Result<CommandResponse> {
+        standard::implementation::set_hear_id(state, hear_id)
+    }
+
+    fn set_custom_button_model(
+        &self,
+        state: DeviceState,
+        custom_button_model: CustomButtonModel,
+    ) -> crate::Result<CommandResponse> {
+        standard::implementation::set_custom_button_model(state, custom_button_model)
+    }
+
+    fn set_ambient_sound_mode_cycle(
+        &self,
+        state: DeviceState,
+        cycle: AmbientSoundModeCycle,
+    ) -> crate::Result<CommandResponse> {
+        standard::implementation::set_ambient_sound_mode_cycle(state, cycle)
     }
 }

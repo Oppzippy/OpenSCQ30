@@ -15,7 +15,7 @@ import com.oppzippy.openscq30.features.quickpresets.storage.FallbackQuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetRepository
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
-import com.oppzippy.openscq30.lib.wrapper.DeviceProfile
+import com.oppzippy.openscq30.lib.wrapper.DeviceFeatures
 import com.oppzippy.openscq30.lib.wrapper.FirmwareVersion
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeType
@@ -56,7 +56,7 @@ class DeviceSettingsQuickPresetsTest {
     @Inject
     lateinit var customProfileDao: CustomProfileDao
 
-    private var deviceProfile = DeviceProfile(
+    private var deviceFeatures = DeviceFeatures(
         soundMode = SoundModeProfile(NoiseCancelingModeType.Custom, TransparencyModeType.Custom),
         hasHearId = true,
         numEqualizerChannels = 2,
@@ -100,7 +100,7 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsName() = runTest {
         composeRule.setContent {
-            QuickPresetScreen(deviceProfile, deviceUuid)
+            QuickPresetScreen(deviceFeatures, deviceUuid)
         }
         assertEquals(null, getFirstPreset()?.name)
 
@@ -111,7 +111,7 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsAmbientSoundMode() = runTest {
         composeRule.setContent {
-            QuickPresetScreen(deviceProfile, deviceUuid)
+            QuickPresetScreen(deviceFeatures, deviceUuid)
         }
         assertEquals(null, getFirstPreset()?.ambientSoundMode)
 
@@ -126,7 +126,7 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsTransparencyMode() = runTest {
         composeRule.setContent {
-            QuickPresetScreen(deviceProfile, deviceUuid)
+            QuickPresetScreen(deviceFeatures, deviceUuid)
         }
         assertEquals(null, getFirstPreset()?.transparencyMode)
 
@@ -141,7 +141,7 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsNoiseCancelingMode() = runTest {
         composeRule.setContent {
-            QuickPresetScreen(deviceProfile, deviceUuid)
+            QuickPresetScreen(deviceFeatures, deviceUuid)
         }
         assertEquals(null, getFirstPreset()?.noiseCancelingMode)
 
@@ -155,7 +155,7 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsCustomNoiseCanceling() = runTest {
         composeRule.setContent {
-            QuickPresetScreen(deviceProfile, deviceUuid)
+            QuickPresetScreen(deviceFeatures, deviceUuid)
         }
         assertEquals(null, getFirstPreset()?.customNoiseCanceling)
 
@@ -178,7 +178,7 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsPresetEqualizerProfile() = runTest {
         composeRule.setContent {
-            QuickPresetScreen(deviceProfile, deviceUuid)
+            QuickPresetScreen(deviceFeatures, deviceUuid)
         }
         assertEquals(null, getFirstPreset()?.presetEqualizerProfile)
 
@@ -206,7 +206,7 @@ class DeviceSettingsQuickPresetsTest {
             ).toCustomProfile("Test Profile"),
         )
         composeRule.setContent {
-            QuickPresetScreen(deviceProfile, deviceUuid)
+            QuickPresetScreen(deviceFeatures, deviceUuid)
         }
         assertEquals(null, getFirstPreset()?.customEqualizerProfileName)
 
@@ -233,7 +233,7 @@ class DeviceSettingsQuickPresetsTest {
             ).toCustomProfile("Test Profile"),
         )
         composeRule.setContent {
-            QuickPresetScreen(deviceProfile, deviceUuid)
+            QuickPresetScreen(deviceFeatures, deviceUuid)
         }
         composeRule.onNode(equalizer).performClick()
 
@@ -281,7 +281,7 @@ class DeviceSettingsQuickPresetsTest {
         )
 
         composeRule.setContent {
-            QuickPresetScreen(deviceProfile, deviceUuid)
+            QuickPresetScreen(deviceFeatures, deviceUuid)
         }
         assertEquals(
             "device specific 1",

@@ -36,6 +36,6 @@ fun DeviceInfoScreen(deviceState: DeviceState) {
             item { Text(deviceState.ageRange.toString()) }
         }
         item { Text(stringResource(R.string.device_profile)) }
-        item { Text(deviceState.deviceProfile.toString()) }
+        item { Text(deviceState.deviceFeatures.toString()) }
     }
 }

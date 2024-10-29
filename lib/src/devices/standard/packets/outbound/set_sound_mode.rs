@@ -4,7 +4,7 @@ use crate::devices::standard::structures::{
 
 use super::outbound_packet::OutboundPacket;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct SetSoundModePacket {
     pub ambient_sound_mode: AmbientSoundMode,
     pub noise_canceling_mode: NoiseCancelingMode,
@@ -30,7 +30,7 @@ impl OutboundPacket for SetSoundModePacket {
 #[cfg(test)]
 mod tests {
     use crate::devices::standard::{
-        packets::outbound::{OutboundPacketBytes, SetSoundModePacket},
+        packets::outbound::{SendableBytes, SetSoundModePacket},
         structures::{
             AmbientSoundMode, CustomNoiseCanceling, NoiseCancelingMode, TransparencyMode,
         },

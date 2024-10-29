@@ -9,6 +9,8 @@ use crate::devices::standard::{
     structures::{FirmwareVersion, SerialNumber},
 };
 
+use super::InboundPacket;
+
 // TODO think of a better name. this could be misleading since this does not update the firmware on the device,
 // it simply updates our state with the version number of the firmware running on the device.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
@@ -18,12 +20,16 @@ pub struct FirmwareVersionUpdatePacket {
     pub serial_number: SerialNumber,
 }
 
-impl FirmwareVersionUpdatePacket {
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+impl InboundPacket for FirmwareVersionUpdatePacket {
+    fn header() -> [u8; 7] {
+        [0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x05]
+    }
+
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> ParseResult<FirmwareVersionUpdatePacket, E> {
         context(
-            "SoundModeUpdatePacket",
+            "FirmwareVersionUpdatePacket",
             all_consuming(map(
                 tuple((
                     FirmwareVersion::take,
@@ -47,7 +53,9 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::{
-        packets::inbound::{take_inbound_packet_header, FirmwareVersionUpdatePacket},
+        packets::inbound::{
+            take_inbound_packet_header, FirmwareVersionUpdatePacket, InboundPacket,
+        },
         structures::{FirmwareVersion, SerialNumber},
     };
 

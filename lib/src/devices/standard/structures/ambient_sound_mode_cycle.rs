@@ -12,7 +12,7 @@ const NOISE_CANCELING_MODE: u8 = 1 << 0;
 const TRANSPARENCY_MODE: u8 = 1 << 1;
 const NORMAL_MODE: u8 = 1 << 2;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct AmbientSoundModeCycle {

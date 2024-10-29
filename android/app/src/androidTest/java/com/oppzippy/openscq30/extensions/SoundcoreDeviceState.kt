@@ -3,12 +3,12 @@ package com.oppzippy.openscq30.extensions
 import com.oppzippy.openscq30.lib.bindings.PresetEqualizerProfile
 import com.oppzippy.openscq30.lib.extensions.resources.toEqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.Battery
-import com.oppzippy.openscq30.lib.wrapper.DeviceProfile
+import com.oppzippy.openscq30.lib.wrapper.DeviceFeatures
 import com.oppzippy.openscq30.lib.wrapper.DeviceState
 import com.oppzippy.openscq30.lib.wrapper.SingleBattery
 
 fun DeviceState.Companion.empty(): DeviceState = DeviceState(
-    deviceProfile = DeviceProfile(
+    deviceFeatures = DeviceFeatures(
         soundMode = null,
         hasHearId = false,
         numEqualizerChannels = 0,

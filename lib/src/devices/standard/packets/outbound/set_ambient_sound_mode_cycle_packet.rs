@@ -2,6 +2,7 @@ use crate::devices::standard::{
     packets::outbound::OutboundPacket, structures::AmbientSoundModeCycle,
 };
 
+#[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SetAmbientSoundModeCyclePacket {
     pub cycle: AmbientSoundModeCycle,
 }

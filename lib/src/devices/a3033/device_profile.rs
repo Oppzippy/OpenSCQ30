@@ -1,16 +1,25 @@
-use crate::device_profiles::DeviceProfile;
+use crate::{
+    device_profile::{DeviceFeatures, DeviceProfile},
+    soundcore_device::device_model::DeviceModel,
+    standard_implementation,
+};
 
-pub const A3033_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
-    sound_mode: None,
-    has_hear_id: false,
-    num_equalizer_channels: 1,
-    num_equalizer_bands: 8,
-    has_dynamic_range_compression: false,
-    dynamic_range_compression_min_firmware_version: None,
-    has_custom_button_model: false,
-    has_wear_detection: false,
-    has_touch_tone: false,
-    has_auto_power_off: false,
-    has_ambient_sound_mode_cycle: false,
-    custom_dispatchers: None,
+use super::packets::A3033StateUpdatePacket;
+
+pub(crate) const A3033_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
+    features: DeviceFeatures {
+        sound_mode: None,
+        has_hear_id: false,
+        num_equalizer_channels: 1,
+        num_equalizer_bands: 8,
+        has_dynamic_range_compression: false,
+        dynamic_range_compression_min_firmware_version: None,
+        has_custom_button_model: false,
+        has_wear_detection: false,
+        has_touch_tone: false,
+        has_auto_power_off: false,
+        has_ambient_sound_mode_cycle: false,
+    },
+    compatible_models: &[DeviceModel::A3033],
+    implementation: standard_implementation!(A3033StateUpdatePacket),
 };
