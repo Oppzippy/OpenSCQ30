@@ -112,7 +112,11 @@ where
                         }
                     }
                     None => {
-                        warn!("no packet handler found for packet: {packet:?}")
+                        if packet.body.is_empty() {
+                            trace!("got ACK: {packet:?}");
+                        } else {
+                            warn!("no packet handler found for packet: {packet:?}")
+                        }
                     }
                 }
             }
