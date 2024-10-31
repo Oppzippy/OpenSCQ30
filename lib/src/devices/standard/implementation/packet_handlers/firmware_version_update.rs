@@ -1,6 +1,9 @@
 use nom::{combinator::all_consuming, error::VerboseError};
 
-use crate::devices::standard::{packets::inbound::{FirmwareVersionUpdatePacket, InboundPacket}, state::DeviceState};
+use crate::devices::standard::{
+    packets::inbound::{FirmwareVersionUpdatePacket, InboundPacket},
+    state::DeviceState,
+};
 
 pub fn firmware_version_update_handler(input: &[u8], state: DeviceState) -> DeviceState {
     let result: Result<_, nom::Err<VerboseError<&[u8]>>> =

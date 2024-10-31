@@ -1,3 +1,5 @@
+use crate::devices::standard::structures::Command;
+
 use super::outbound_packet::OutboundPacket;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
@@ -10,8 +12,8 @@ impl RequestStatePacket {
 }
 
 impl OutboundPacket for RequestStatePacket {
-    fn command(&self) -> [u8; 7] {
-        [0x08, 0xEE, 0x00, 0x00, 0x00, 0x01, 0x01]
+    fn command(&self) -> Command {
+        Command::new([0x08, 0xEE, 0x00, 0x00, 0x00, 0x01, 0x01])
     }
 
     fn body(&self) -> Vec<u8> {

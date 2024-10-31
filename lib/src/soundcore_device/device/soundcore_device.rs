@@ -17,8 +17,8 @@ use crate::{
         },
         state::DeviceState,
         structures::{
-            AmbientSoundModeCycle, CustomButtonModel, EqualizerConfiguration, HearId, SoundModes,
-            SoundModesTypeTwo,
+            AmbientSoundModeCycle, Command, CustomButtonModel, EqualizerConfiguration, HearId,
+            SoundModes, SoundModesTypeTwo,
         },
     },
     futures::{Futures, JoinHandle},
@@ -92,7 +92,7 @@ where
 
     fn spawn_inbound_packet_handler(
         packet_handlers: HashMap<
-            [u8; 7],
+            Command,
             Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>,
         >,
         mut inbound_receiver: mpsc::Receiver<Packet>,

@@ -3,7 +3,10 @@ use nom::{
     error::{context, ContextError, ParseError},
 };
 
-use crate::devices::standard::packets::parsing::{take_bool, ParseResult};
+use crate::devices::standard::{
+    packets::parsing::{take_bool, ParseResult},
+    structures::Command,
+};
 
 use super::InboundPacket;
 
@@ -13,8 +16,8 @@ pub struct ChineseVoicePromptStateUpdatePacket {
 }
 
 impl InboundPacket for ChineseVoicePromptStateUpdatePacket {
-    fn header() -> [u8; 7] {
-        [0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x0F]
+    fn header() -> Command {
+        Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x0F])
     }
 
     #[allow(dead_code)]

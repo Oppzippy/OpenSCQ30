@@ -15,10 +15,12 @@ pub use sound_mode_update::*;
 pub use state_update::*;
 use state_update_packet::StateUpdatePacket;
 
+use super::Command;
+
 pub fn packet_handlers(
-) -> HashMap<[u8; 7], Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>> {
+) -> HashMap<Command, Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>> {
     let handlers: [(
-        [u8; 7],
+        Command,
         Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>,
     ); 8] = [
         (

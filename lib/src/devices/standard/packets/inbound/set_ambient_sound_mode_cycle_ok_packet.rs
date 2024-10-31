@@ -1,6 +1,6 @@
 use nom::error::{ContextError, ParseError};
 
-use crate::devices::standard::packets::parsing::ParseResult;
+use crate::devices::standard::{packets::parsing::ParseResult, structures::Command};
 
 use super::InboundPacket;
 
@@ -8,8 +8,8 @@ use super::InboundPacket;
 pub struct SetAmbientSoundModeCycleOkPacket {}
 
 impl InboundPacket for SetAmbientSoundModeCycleOkPacket {
-    fn header() -> [u8; 7] {
-        [0x09, 0xFF, 0x00, 0x00, 0x01, 0x06, 0x82]
+    fn header() -> Command {
+        Command::new([0x09, 0xFF, 0x00, 0x00, 0x01, 0x06, 0x82])
     }
 
     #[allow(dead_code)]

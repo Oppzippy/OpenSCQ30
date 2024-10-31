@@ -1,5 +1,5 @@
 use crate::devices::standard::structures::{
-    AmbientSoundMode, CustomNoiseCanceling, NoiseCancelingMode, TransparencyMode,
+    AmbientSoundMode, Command, CustomNoiseCanceling, NoiseCancelingMode, TransparencyMode,
 };
 
 use super::outbound_packet::OutboundPacket;
@@ -13,8 +13,8 @@ pub struct SetSoundModePacket {
 }
 
 impl OutboundPacket for SetSoundModePacket {
-    fn command(&self) -> [u8; 7] {
-        [0x08, 0xee, 0x00, 0x00, 0x00, 0x06, 0x81]
+    fn command(&self) -> Command {
+        Command::new([0x08, 0xee, 0x00, 0x00, 0x00, 0x06, 0x81])
     }
 
     fn body(&self) -> Vec<u8> {

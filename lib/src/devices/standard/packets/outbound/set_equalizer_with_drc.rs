@@ -1,4 +1,4 @@
-use crate::devices::standard::structures::EqualizerConfiguration;
+use crate::devices::standard::structures::{Command, EqualizerConfiguration};
 
 use super::outbound_packet::OutboundPacket;
 
@@ -21,8 +21,8 @@ impl<'a> SetEqualizerWithDrcPacket<'a> {
 }
 
 impl<'a> OutboundPacket for SetEqualizerWithDrcPacket<'a> {
-    fn command(&self) -> [u8; 7] {
-        [0x08, 0xEE, 0x00, 0x00, 0x00, 0x02, 0x83]
+    fn command(&self) -> Command {
+        Command::new([0x08, 0xEE, 0x00, 0x00, 0x00, 0x02, 0x83])
     }
 
     fn body(&self) -> Vec<u8> {

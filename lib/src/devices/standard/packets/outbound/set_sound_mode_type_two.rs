@@ -1,4 +1,4 @@
-use crate::devices::standard::structures::SoundModesTypeTwo;
+use crate::devices::standard::structures::{Command, SoundModesTypeTwo};
 
 use super::outbound_packet::OutboundPacket;
 
@@ -8,8 +8,8 @@ pub struct SetSoundModeTypeTwoPacket {
 }
 
 impl OutboundPacket for SetSoundModeTypeTwoPacket {
-    fn command(&self) -> [u8; 7] {
-        [0x08, 0xee, 0x00, 0x00, 0x00, 0x06, 0x81]
+    fn command(&self) -> Command {
+        Command::new([0x08, 0xee, 0x00, 0x00, 0x00, 0x06, 0x81])
     }
 
     fn body(&self) -> Vec<u8> {

@@ -1,6 +1,6 @@
 use nom::error::{ContextError, ParseError};
 
-use crate::devices::standard::packets::parsing::ParseResult;
+use crate::devices::standard::{packets::parsing::ParseResult, structures::Command};
 
 use super::InboundPacket;
 
@@ -8,8 +8,8 @@ use super::InboundPacket;
 pub struct SetSoundModeOkPacket {}
 
 impl InboundPacket for SetSoundModeOkPacket {
-    fn header() -> [u8; 7] {
-        [0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x81]
+    fn header() -> Command {
+        Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x81])
     }
 
     #[allow(dead_code)]

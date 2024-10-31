@@ -4,7 +4,10 @@ use nom::{
     sequence::tuple,
 };
 
-use crate::devices::standard::{packets::parsing::ParseResult, structures::BatteryLevel};
+use crate::devices::standard::{
+    packets::parsing::ParseResult,
+    structures::{BatteryLevel, Command},
+};
 
 use super::InboundPacket;
 
@@ -15,8 +18,8 @@ pub struct BatteryLevelUpdatePacket {
 }
 
 impl InboundPacket for BatteryLevelUpdatePacket {
-    fn header() -> [u8; 7] {
-        [0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x03]
+    fn header() -> Command {
+        Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x03])
     }
 
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(

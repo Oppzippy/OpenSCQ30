@@ -3,7 +3,10 @@ use nom::{
     error::{context, ContextError, ParseError},
 };
 
-use crate::devices::standard::{packets::parsing::ParseResult, structures::SoundModesTypeTwo};
+use crate::devices::standard::{
+    packets::parsing::ParseResult,
+    structures::{Command, SoundModesTypeTwo},
+};
 
 use super::InboundPacket;
 
@@ -13,8 +16,8 @@ pub struct SoundModeTypeTwoUpdatePacket {
 }
 
 impl InboundPacket for SoundModeTypeTwoUpdatePacket {
-    fn header() -> [u8; 7] {
-        [0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01]
+    fn header() -> Command {
+        Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01])
     }
 
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(

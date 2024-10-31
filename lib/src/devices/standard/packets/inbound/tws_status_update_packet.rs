@@ -5,7 +5,10 @@ use nom::{
     sequence::tuple,
 };
 
-use crate::devices::standard::packets::parsing::{take_bool, ParseResult};
+use crate::devices::standard::{
+    packets::parsing::{take_bool, ParseResult},
+    structures::Command,
+};
 
 use super::InboundPacket;
 
@@ -16,8 +19,8 @@ pub struct TwsStatusUpdatePacket {
 }
 
 impl InboundPacket for TwsStatusUpdatePacket {
-    fn header() -> [u8; 7] {
-        [0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x02]
+    fn header() -> Command {
+        Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x02])
     }
 
     #[allow(dead_code)]

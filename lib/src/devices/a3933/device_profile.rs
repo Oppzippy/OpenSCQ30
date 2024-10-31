@@ -12,7 +12,7 @@ use crate::{
         packets::inbound::state_update_packet::StateUpdatePacket,
         quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBands},
         state::DeviceState,
-        structures::{EqualizerConfiguration, STATE_UPDATE},
+        structures::{Command, EqualizerConfiguration, STATE_UPDATE},
     },
     soundcore_device::{
         device::{device_implementation::DeviceImplementation, soundcore_command::CommandResponse},
@@ -53,10 +53,10 @@ pub struct A3933Implementation {
 impl DeviceImplementation for A3933Implementation {
     fn packet_handlers(
         &self,
-    ) -> HashMap<[u8; 7], Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>> {
+    ) -> HashMap<Command, Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>> {
         let extra_bands = self.extra_bands.to_owned();
         let mut handlers: HashMap<
-            [u8; 7],
+            Command,
             Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>,
         > = HashMap::new();
 
@@ -170,7 +170,9 @@ mod tests {
                 },
                 quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBandsValues},
                 state::DeviceState,
-                structures::{EqualizerConfiguration, PresetEqualizerProfile, STATE_UPDATE},
+                structures::{
+                    Command, EqualizerConfiguration, PresetEqualizerProfile, STATE_UPDATE,
+                },
             },
         },
         soundcore_device::device::Packet,
@@ -180,7 +182,7 @@ mod tests {
         body: Vec<u8>,
     }
     impl OutboundPacket for A3933TestStateUpdatePacket {
-        fn command(&self) -> [u8; 7] {
+        fn command(&self) -> Command {
             STATE_UPDATE
         }
 

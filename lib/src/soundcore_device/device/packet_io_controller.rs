@@ -5,7 +5,7 @@ use tokio::{select, sync::mpsc};
 
 use crate::{
     api::connection::Connection,
-    devices::standard::packets::inbound::take_inbound_packet_header,
+    devices::standard::{packets::inbound::take_inbound_packet_header, structures::Command},
     futures::{Futures, JoinHandle},
 };
 
@@ -13,7 +13,7 @@ use super::{multi_queue::MultiQueue, Packet};
 
 pub struct PacketIOController<ConnectionType: Connection, FuturesType: Futures> {
     connection: Arc<ConnectionType>,
-    packet_queues: Arc<MultiQueue<[u8; 7], Packet>>,
+    packet_queues: Arc<MultiQueue<Command, Packet>>,
     handle: FuturesType::JoinHandleType,
     _futures: PhantomData<FuturesType>,
 }
@@ -48,7 +48,7 @@ impl<ConnectionType: Connection, FuturesType: Futures>
     }
 
     fn spawn_packet_handler(
-        packet_queues: Arc<MultiQueue<[u8; 7], Packet>>,
+        packet_queues: Arc<MultiQueue<Command, Packet>>,
         mut incoming_receiver: mpsc::Receiver<Vec<u8>>,
     ) -> (FuturesType::JoinHandleType, mpsc::Receiver<Packet>) {
         let (outgoing_sender, outgoing_receiver) = mpsc::channel(100);
@@ -81,7 +81,7 @@ impl<ConnectionType: Connection, FuturesType: Futures>
     }
 
     pub async fn send(&self, packet: &Packet) -> crate::Result<Packet> {
-        let handle = self.packet_queues.add(packet.ok_command());
+        let handle = self.packet_queues.add(packet.command().to_inbound());
 
         handle.wait_for_start().await;
 

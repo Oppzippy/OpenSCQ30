@@ -1,4 +1,4 @@
-use crate::devices::standard::structures::CustomButtonModel;
+use crate::devices::standard::structures::{Command, CustomButtonModel};
 
 use super::OutboundPacket;
 
@@ -16,8 +16,8 @@ impl SetCustomButtonModelPacket {
 }
 
 impl OutboundPacket for SetCustomButtonModelPacket {
-    fn command(&self) -> [u8; 7] {
-        [0x08, 0xEE, 0x00, 0x00, 0x00, 0x04, 0x84]
+    fn command(&self) -> Command {
+        Command::new([0x08, 0xEE, 0x00, 0x00, 0x00, 0x04, 0x84])
     }
 
     fn body(&self) -> Vec<u8> {

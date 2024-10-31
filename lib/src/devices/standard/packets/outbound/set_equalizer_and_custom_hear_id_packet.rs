@@ -1,5 +1,5 @@
 use crate::devices::standard::structures::{
-    AgeRange, CustomHearId, EqualizerConfiguration, Gender,
+    AgeRange, Command, CustomHearId, EqualizerConfiguration, Gender,
 };
 
 use super::outbound_packet::OutboundPacket;
@@ -13,11 +13,11 @@ pub struct SetEqualizerAndCustomHearIdPacket<'a> {
 }
 
 impl<'a> OutboundPacket for SetEqualizerAndCustomHearIdPacket<'a> {
-    fn command(&self) -> [u8; 7] {
+    fn command(&self) -> Command {
         if self.age_range.supports_hear_id() {
-            [0x08, 0xee, 0x00, 0x00, 0x00, 0x03, 0x87]
+            Command::new([0x08, 0xee, 0x00, 0x00, 0x00, 0x03, 0x87])
         } else {
-            [0x08, 0xee, 0x00, 0x00, 0x00, 0x03, 0x86]
+            Command::new([0x08, 0xee, 0x00, 0x00, 0x00, 0x03, 0x86])
         }
     }
 

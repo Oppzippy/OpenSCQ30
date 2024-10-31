@@ -12,7 +12,7 @@ pub trait Sendable
 where
     Self: Sized,
 {
-    fn header() -> [u8; 7];
+    fn header() -> Command;
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> ParseResult<Self, E>;
@@ -60,7 +60,7 @@ where
 
 pub(crate) fn take_inbound_packet_header<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
     input: &'a [u8],
-) -> ParseResult<[u8; 7], E> {
+) -> ParseResult<Command, E> {
     let input = take_checksum(input)?.0;
     let (input, header) = PacketHeader::take(input)?;
     Ok((input, header.packet_type))

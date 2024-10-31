@@ -1,7 +1,7 @@
-use crate::soundcore_device::device::Packet;
+use crate::{devices::standard::structures::Command, soundcore_device::device::Packet};
 
 pub trait OutboundPacket {
-    fn command(&self) -> [u8; 7];
+    fn command(&self) -> Command;
     fn body(&self) -> Vec<u8>;
 }
 

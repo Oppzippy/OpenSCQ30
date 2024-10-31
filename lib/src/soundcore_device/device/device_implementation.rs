@@ -3,8 +3,8 @@ use std::collections::HashMap;
 use crate::devices::standard::{
     state::DeviceState,
     structures::{
-        AmbientSoundModeCycle, CustomButtonModel, EqualizerConfiguration, HearId, SoundModes,
-        SoundModesTypeTwo,
+        AmbientSoundModeCycle, Command, CustomButtonModel, EqualizerConfiguration, HearId,
+        SoundModes, SoundModesTypeTwo,
     },
 };
 
@@ -13,7 +13,7 @@ use super::soundcore_command::CommandResponse;
 pub trait DeviceImplementation {
     fn packet_handlers(
         &self,
-    ) -> HashMap<[u8; 7], Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>>;
+    ) -> HashMap<Command, Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>>;
 
     fn initialize(&self, packet: &[u8]) -> crate::Result<DeviceState>;
 

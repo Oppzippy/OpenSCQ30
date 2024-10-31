@@ -47,7 +47,7 @@ pub struct A3945Implementation {
 impl DeviceImplementation for A3945Implementation {
     fn packet_handlers(
         &self,
-    ) -> HashMap<[u8; 7], Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>> {
+    ) -> HashMap<Command, Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>> {
         let extra_bands = self.extra_bands.to_owned();
         let mut handlers = standard::implementation::packet_handlers();
 
@@ -160,13 +160,13 @@ mod tests {
         soundcore_device::device::Packet,
     };
 
-    use super::A3945_DEVICE_PROFILE;
+    use super::{Command, A3945_DEVICE_PROFILE};
 
     struct A3945TestStateUpdatePacket {
         body: Vec<u8>,
     }
     impl OutboundPacket for A3945TestStateUpdatePacket {
-        fn command(&self) -> [u8; 7] {
+        fn command(&self) -> Command {
             STATE_UPDATE
         }
 

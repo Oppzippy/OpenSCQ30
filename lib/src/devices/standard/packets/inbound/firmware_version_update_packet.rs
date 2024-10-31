@@ -6,7 +6,7 @@ use nom::{
 
 use crate::devices::standard::{
     packets::parsing::ParseResult,
-    structures::{FirmwareVersion, SerialNumber},
+    structures::{Command, FirmwareVersion, SerialNumber},
 };
 
 use super::InboundPacket;
@@ -21,8 +21,8 @@ pub struct FirmwareVersionUpdatePacket {
 }
 
 impl InboundPacket for FirmwareVersionUpdatePacket {
-    fn header() -> [u8; 7] {
-        [0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x05]
+    fn header() -> Command {
+        Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x05])
     }
 
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(

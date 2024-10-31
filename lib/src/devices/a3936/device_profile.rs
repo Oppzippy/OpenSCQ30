@@ -49,10 +49,10 @@ pub struct A3936Implementation {
 impl DeviceImplementation for A3936Implementation {
     fn packet_handlers(
         &self,
-    ) -> HashMap<[u8; 7], Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>> {
+    ) -> HashMap<Command, Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>> {
         let extra_bands = self.extra_bands.to_owned();
         let mut handlers: HashMap<
-            [u8; 7],
+            Command,
             Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>,
         > = HashMap::new();
 

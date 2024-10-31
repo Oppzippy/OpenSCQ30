@@ -19,7 +19,7 @@ use crate::{
         standard::{
             packets::parsing::ParseResult,
             structures::{
-                AgeRange, AmbientSoundModeCycle, Battery, CustomButtonModel,
+                AgeRange, AmbientSoundModeCycle, Battery, Command, CustomButtonModel,
                 EqualizerConfiguration, FirmwareVersion, Gender, HearId, SerialNumber, SoundModes,
                 SoundModesTypeTwo,
             },
@@ -46,8 +46,8 @@ pub(crate) struct StateUpdatePacket {
 }
 
 impl InboundPacket for StateUpdatePacket {
-    fn header() -> [u8; 7] {
-        [0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01]
+    fn header() -> Command {
+        Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01])
     }
 
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(

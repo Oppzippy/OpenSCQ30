@@ -1,3 +1,5 @@
+use crate::devices::standard::structures::Command;
+
 use super::OutboundPacket;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
@@ -10,8 +12,8 @@ impl RequestFirmwareVersionPacket {
 }
 
 impl OutboundPacket for RequestFirmwareVersionPacket {
-    fn command(&self) -> [u8; 7] {
-        [0x08, 0xee, 0x00, 0x00, 0x00, 0x01, 0x05]
+    fn command(&self) -> Command {
+        Command::new([0x08, 0xee, 0x00, 0x00, 0x00, 0x01, 0x05])
     }
 
     fn body(&self) -> Vec<u8> {

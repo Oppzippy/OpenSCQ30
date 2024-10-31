@@ -60,7 +60,7 @@ macro_rules! standard_implementation {
 impl DeviceImplementation for StandardImplementation {
     fn packet_handlers(
         &self,
-    ) -> HashMap<[u8; 7], Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>> {
+    ) -> HashMap<Command, Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>> {
         packet_handlers()
     }
 

@@ -4,7 +4,10 @@ use nom::{
     sequence::tuple,
 };
 
-use crate::devices::standard::{packets::parsing::ParseResult, structures::IsBatteryCharging};
+use crate::devices::standard::{
+    packets::parsing::ParseResult,
+    structures::{Command, IsBatteryCharging},
+};
 
 use super::InboundPacket;
 
@@ -15,8 +18,8 @@ pub struct BatteryChargingUpdatePacket {
 }
 
 impl InboundPacket for BatteryChargingUpdatePacket {
-    fn header() -> [u8; 7] {
-        [0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04]
+    fn header() -> Command {
+        Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04])
     }
 
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(

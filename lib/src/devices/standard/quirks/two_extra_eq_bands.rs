@@ -11,7 +11,9 @@ use crate::devices::standard::{
         outbound::{OutboundPacket, SetEqualizerPacket},
         parsing::ParseResult,
     },
-    structures::{EqualizerConfiguration, StereoEqualizerConfiguration, VolumeAdjustments},
+    structures::{
+        Command, EqualizerConfiguration, StereoEqualizerConfiguration, VolumeAdjustments,
+    },
 };
 
 pub struct TwoExtraEqBandSetEqualizerPacket<'a> {
@@ -21,7 +23,7 @@ pub struct TwoExtraEqBandSetEqualizerPacket<'a> {
 }
 
 impl<'a> OutboundPacket for TwoExtraEqBandSetEqualizerPacket<'a> {
-    fn command(&self) -> [u8; 7] {
+    fn command(&self) -> Command {
         SetEqualizerPacket::COMMAND
     }
 
