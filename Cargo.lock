@@ -1489,7 +1489,6 @@ dependencies = [
  "float-cmp",
  "futures",
  "js-sys",
- "lazy_static",
  "macaddr",
  "nom",
  "ordered-float",

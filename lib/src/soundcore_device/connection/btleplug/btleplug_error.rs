@@ -1,3 +1,5 @@
+use std::sync::LazyLock;
+
 use regex::Regex;
 use uuid::Uuid;
 
@@ -18,10 +20,11 @@ impl From<btleplug::Error> for crate::Error {
             },
             btleplug::Error::Other(_) => {
                 static NOT_CONNECTED: &str = "Not connected";
-                lazy_static::lazy_static! {
-                    static ref SERVICE_NOT_FOUND: Regex = Regex::new("Service with UUID (.*) not found.").unwrap();
-                    static ref CHARACTERISTIC_NOT_FOUND: Regex = Regex::new("Characteristic with UUID (.*) not found.").unwrap();
-                }
+                static SERVICE_NOT_FOUND: LazyLock<Regex> =
+                    LazyLock::new(|| Regex::new("Service with UUID (.*) not found.").unwrap());
+                static CHARACTERISTIC_NOT_FOUND: LazyLock<Regex> = LazyLock::new(|| {
+                    Regex::new("Characteristic with UUID (.*) not found.").unwrap()
+                });
                 // Other with string error messages is used a lot on linux
                 let error_message = err.to_string();
 
