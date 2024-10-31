@@ -6,17 +6,22 @@ mod packet_handlers;
 mod sound_modes;
 mod sound_modes_type_two;
 
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
 pub use ambient_sound_mode_cycle::*;
 pub use custom_button_model::*;
 pub use equalizer_configuration::*;
 pub use hear_id::*;
+use nom::error::VerboseError;
 pub use packet_handlers::*;
 pub use sound_modes::*;
 pub use sound_modes_type_two::*;
 
-use super::{state::DeviceState, structures::*};
+use super::{
+    packets::inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
+    state::DeviceState,
+    structures::*,
+};
 use crate::soundcore_device::device::device_implementation::DeviceImplementation;
 
 pub struct StandardImplementation {
@@ -24,37 +29,21 @@ pub struct StandardImplementation {
 }
 
 impl StandardImplementation {
-    pub fn new(
-        initializer: Box<dyn Fn(&[u8]) -> crate::Result<DeviceState> + Send + Sync>,
-    ) -> Self {
-        Self { initializer }
+    pub(crate) fn new<T>() -> Arc<dyn DeviceImplementation + Send + Sync>
+    where
+        T: InboundPacket,
+        StateUpdatePacket: From<T>,
+    {
+        Arc::new(StandardImplementation {
+            initializer: Box::new(|input| {
+                T::take::<VerboseError<_>>(input)
+                    .map(|(_, packet)| StateUpdatePacket::from(packet).into())
+                    .map_err(|err| crate::Error::ParseError {
+                        message: format!("{err:?}"),
+                    })
+            }),
+        })
     }
-}
-
-/// Creates a standard implementation instance using the inbound packet type's take function.
-/// This is a macro rather than a generic function so that we don't have to box the returned function.
-#[macro_export]
-macro_rules! standard_implementation {
-    ($inbound_packet_type:ident) => {
-        || {
-            ::std::sync::Arc::new(
-                $crate::devices::standard::implementation::StandardImplementation::new(
-                    ::std::boxed::Box::new(|input| {
-                        $inbound_packet_type::take::<::nom::error::VerboseError<_>>(input)
-                            .map(|(_, packet)| {
-                                $crate::devices::standard::packets::inbound::state_update_packet::StateUpdatePacket::from(
-                                    packet,
-                                )
-                                .into()
-                            })
-                            .map_err(|err| $crate::Error::ParseError {
-                                message: format!("{err:?}"),
-                            })
-                    }),
-                ),
-            )
-        }
-    };
 }
 
 impl DeviceImplementation for StandardImplementation {

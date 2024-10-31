@@ -8,7 +8,7 @@ use crate::devices::{
     a3033::device_profile::A3033_DEVICE_PROFILE,
     standard::{
         packets::{
-            inbound::state_update_packet::StateUpdatePacket,
+            inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
             parsing::{take_bool, ParseResult},
         },
         structures::{EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery},
@@ -44,8 +44,12 @@ impl From<A3033StateUpdatePacket> for StateUpdatePacket {
     }
 }
 
-impl A3033StateUpdatePacket {
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+impl InboundPacket for A3033StateUpdatePacket {
+    fn command() -> crate::devices::standard::structures::Command {
+        StateUpdatePacket::command()
+    }
+
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> ParseResult<A3033StateUpdatePacket, E> {
         context(

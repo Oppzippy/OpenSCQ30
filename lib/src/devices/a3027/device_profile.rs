@@ -3,10 +3,11 @@ use crate::{
         DeviceFeatures, DeviceProfile, NoiseCancelingModeType, SoundModeProfile,
         TransparencyModeType,
     },
-    devices::a3033::packets::A3033StateUpdatePacket,
+    devices::standard::implementation::StandardImplementation,
     soundcore_device::device_model::DeviceModel,
-    standard_implementation,
 };
+
+use super::packets::A3027StateUpdatePacket;
 
 pub(crate) const A3027_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     features: DeviceFeatures {
@@ -26,5 +27,5 @@ pub(crate) const A3027_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
         has_ambient_sound_mode_cycle: false,
     },
     compatible_models: &[DeviceModel::A3027, DeviceModel::A3030],
-    implementation: standard_implementation!(A3033StateUpdatePacket),
+    implementation: || StandardImplementation::new::<A3027StateUpdatePacket>(),
 };

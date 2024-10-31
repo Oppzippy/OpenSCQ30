@@ -7,7 +7,10 @@ use nom::{
 use crate::devices::{
     a3028::device_profile::A3028_DEVICE_PROFILE,
     standard::{
-        packets::{inbound::state_update_packet::StateUpdatePacket, parsing::ParseResult},
+        packets::{
+            inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
+            parsing::ParseResult,
+        },
         structures::{
             AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
             SingleBattery, SoundModes,
@@ -47,8 +50,12 @@ impl From<A3028StateUpdatePacket> for StateUpdatePacket {
     }
 }
 
-impl A3028StateUpdatePacket {
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+impl InboundPacket for A3028StateUpdatePacket {
+    fn command() -> crate::devices::standard::structures::Command {
+        StateUpdatePacket::command()
+    }
+
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> ParseResult<A3028StateUpdatePacket, E> {
         context(

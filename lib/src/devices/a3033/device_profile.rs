@@ -1,7 +1,7 @@
 use crate::{
     device_profile::{DeviceFeatures, DeviceProfile},
+    devices::standard::implementation::StandardImplementation,
     soundcore_device::device_model::DeviceModel,
-    standard_implementation,
 };
 
 use super::packets::A3033StateUpdatePacket;
@@ -21,5 +21,5 @@ pub(crate) const A3033_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
         has_ambient_sound_mode_cycle: false,
     },
     compatible_models: &[DeviceModel::A3033],
-    implementation: standard_implementation!(A3033StateUpdatePacket),
+    implementation: || StandardImplementation::new::<A3033StateUpdatePacket>(),
 };

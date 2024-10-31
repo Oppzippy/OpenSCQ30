@@ -3,8 +3,8 @@ use crate::{
         DeviceFeatures, DeviceProfile, NoiseCancelingModeType, SoundModeProfile,
         TransparencyModeType,
     },
+    devices::standard::implementation::StandardImplementation,
     soundcore_device::device_model::DeviceModel,
-    standard_implementation,
 };
 
 use super::packets::A3930StateUpdatePacket;
@@ -27,5 +27,5 @@ pub(crate) const A3930_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
         has_ambient_sound_mode_cycle: false,
     },
     compatible_models: &[DeviceModel::A3930],
-    implementation: standard_implementation!(A3930StateUpdatePacket),
+    implementation: || StandardImplementation::new::<A3930StateUpdatePacket>(),
 };

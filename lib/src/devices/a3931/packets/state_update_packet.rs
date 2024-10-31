@@ -9,7 +9,7 @@ use crate::devices::{
     a3931::device_profile::A3931_DEVICE_PROFILE,
     standard::{
         packets::{
-            inbound::state_update_packet::StateUpdatePacket,
+            inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
             parsing::{take_bool, ParseResult},
         },
         structures::{
@@ -53,8 +53,11 @@ impl From<A3931StateUpdatePacket> for StateUpdatePacket {
     }
 }
 
-impl A3931StateUpdatePacket {
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+impl InboundPacket for A3931StateUpdatePacket {
+    fn command() -> crate::devices::standard::structures::Command {
+        StateUpdatePacket::command()
+    }
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> ParseResult<A3931StateUpdatePacket, E> {
         context(
