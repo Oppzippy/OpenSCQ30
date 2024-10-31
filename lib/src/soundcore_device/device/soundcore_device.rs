@@ -343,9 +343,9 @@ mod tests {
     use crate::{
         api::device::Device,
         devices::standard::{
-            packets::inbound::{
-                FirmwareVersionUpdatePacket, InboundPacket, SetEqualizerOkPacket,
-                SetSoundModeOkPacket,
+            packets::{
+                inbound::{FirmwareVersionUpdatePacket, InboundPacket},
+                outbound::{OutboundPacket, SetEqualizerPacket, SetSoundModePacket},
             },
             structures::{
                 AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
@@ -538,7 +538,7 @@ mod tests {
             sender_copy
                 .send(
                     Packet {
-                        command: SetSoundModeOkPacket::header(),
+                        command: SetSoundModePacket::default().command().to_inbound(),
                         body: Vec::new(),
                     }
                     .bytes(),
@@ -590,7 +590,7 @@ mod tests {
             sender_copy
                 .send(
                     Packet {
-                        command: SetEqualizerOkPacket::header(),
+                        command: SetEqualizerPacket::COMMAND.to_inbound(),
                         body: Vec::new(),
                     }
                     .bytes(),

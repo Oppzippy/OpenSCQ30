@@ -112,9 +112,8 @@ mod tests {
     use tokio::sync::mpsc;
 
     use crate::{
-        devices::standard::packets::{
-            inbound::{InboundPacket, SetAmbientSoundModeCycleOkPacket},
-            outbound::{SetAmbientSoundModeCyclePacket, SetSoundModePacket},
+        devices::standard::packets::outbound::{
+            OutboundPacket, SetAmbientSoundModeCyclePacket, SetSoundModePacket,
         },
         futures::TokioFutures,
         stub::connection::StubConnection,
@@ -198,11 +197,12 @@ mod tests {
                 .0,
         );
 
+        let set_cycle_packet = SetAmbientSoundModeCyclePacket::default();
         let handle1 = tokio::spawn({
             let controller = controller.clone();
             async move {
                 controller
-                    .send(&SetAmbientSoundModeCyclePacket::default().into())
+                    .send(&set_cycle_packet.into())
                     .await
                     .expect("should receive ack");
             }
@@ -233,7 +233,7 @@ mod tests {
         sender
             .send(
                 Packet {
-                    command: SetAmbientSoundModeCycleOkPacket::header(),
+                    command: set_cycle_packet.command().to_inbound(),
                     body: Vec::new(),
                 }
                 .bytes(),
