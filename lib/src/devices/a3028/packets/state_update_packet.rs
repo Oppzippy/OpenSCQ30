@@ -18,7 +18,6 @@ use crate::devices::{
     },
 };
 
-// A3028 and A3030
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3028StateUpdatePacket {
     pub battery: SingleBattery,

@@ -9,8 +9,9 @@ use crate::devices::standard::structures::SerialNumber;
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum DeviceModel {
     A3027,
-    A3030,
     A3028,
+    A3029,
+    A3030,
     A3033,
     A3926,
     A3930,
