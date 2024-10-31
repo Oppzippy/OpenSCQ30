@@ -29,7 +29,7 @@ pub struct StandardImplementation {
 }
 
 impl StandardImplementation {
-    pub(crate) fn new<T>() -> Arc<dyn DeviceImplementation + Send + Sync>
+    pub(crate) fn new<T>() -> Arc<Self>
     where
         T: InboundPacket,
         StateUpdatePacket: From<T>,
