@@ -24,7 +24,7 @@ impl OutboundPacket for RequestBatteryChargingPacket {
 #[cfg(test)]
 mod tests {
     use crate::devices::standard::packets::outbound::{
-        RequestBatteryChargingPacket, SendableBytes,
+        OutboundPacketBytesExt, RequestBatteryChargingPacket,
     };
 
     #[test]

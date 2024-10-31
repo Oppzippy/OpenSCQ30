@@ -53,7 +53,7 @@ impl<'a> OutboundPacket for SetEqualizerWithDrcPacket<'a> {
 #[cfg(test)]
 mod tests {
     use crate::devices::standard::{
-        packets::outbound::{SendableBytes, SetEqualizerWithDrcPacket},
+        packets::outbound::{OutboundPacketBytesExt, SetEqualizerWithDrcPacket},
         structures::{EqualizerConfiguration, VolumeAdjustments},
     };
 

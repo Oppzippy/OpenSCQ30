@@ -21,7 +21,7 @@ pub struct FirmwareVersionUpdatePacket {
 }
 
 impl InboundPacket for FirmwareVersionUpdatePacket {
-    fn header() -> Command {
+    fn command() -> Command {
         Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x05])
     }
 

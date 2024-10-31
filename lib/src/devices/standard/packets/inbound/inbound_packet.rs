@@ -12,7 +12,7 @@ pub trait InboundPacket
 where
     Self: Sized,
 {
-    fn header() -> Command;
+    fn command() -> Command;
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> ParseResult<Self, E>;

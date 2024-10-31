@@ -166,7 +166,7 @@ mod tests {
             standard::{
                 packets::{
                     inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_header},
-                    outbound::{OutboundPacket, SendableBytes},
+                    outbound::{OutboundPacket, OutboundPacketBytesExt},
                 },
                 quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBandsValues},
                 state::DeviceState,

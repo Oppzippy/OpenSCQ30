@@ -30,7 +30,7 @@ impl OutboundPacket for SetSoundModePacket {
 #[cfg(test)]
 mod tests {
     use crate::devices::standard::{
-        packets::outbound::{SendableBytes, SetSoundModePacket},
+        packets::outbound::{OutboundPacketBytesExt, SetSoundModePacket},
         structures::{
             AmbientSoundMode, CustomNoiseCanceling, NoiseCancelingMode, TransparencyMode,
         },

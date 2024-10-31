@@ -24,32 +24,32 @@ pub fn packet_handlers(
         Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>,
     ); 8] = [
         (
-            SoundModeUpdatePacket::header(),
+            SoundModeUpdatePacket::command(),
             Box::new(sound_mode_update_handler),
         ),
         (
-            BatteryChargingUpdatePacket::header(),
+            BatteryChargingUpdatePacket::command(),
             Box::new(battery_charging_update_handler),
         ),
         (
-            BatteryLevelUpdatePacket::header(),
+            BatteryLevelUpdatePacket::command(),
             Box::new(battery_level_update_handler),
         ),
         (
-            FirmwareVersionUpdatePacket::header(),
+            FirmwareVersionUpdatePacket::command(),
             Box::new(firmware_version_update_handler),
         ),
-        (StateUpdatePacket::header(), Box::new(state_update_handler)),
+        (StateUpdatePacket::command(), Box::new(state_update_handler)),
         (
-            TwsStatusUpdatePacket::header(),
+            TwsStatusUpdatePacket::command(),
             Box::new(do_nothing_handler),
         ),
         (
-            LdacStateUpdatePacket::header(),
+            LdacStateUpdatePacket::command(),
             Box::new(do_nothing_handler),
         ),
         (
-            ChineseVoicePromptStateUpdatePacket::header(),
+            ChineseVoicePromptStateUpdatePacket::command(),
             Box::new(do_nothing_handler),
         ),
     ];

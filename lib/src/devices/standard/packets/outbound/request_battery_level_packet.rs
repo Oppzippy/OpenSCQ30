@@ -23,7 +23,9 @@ impl OutboundPacket for RequestBatteryLevelPacket {
 
 #[cfg(test)]
 mod tests {
-    use crate::devices::standard::packets::outbound::{RequestBatteryLevelPacket, SendableBytes};
+    use crate::devices::standard::packets::outbound::{
+        OutboundPacketBytesExt, RequestBatteryLevelPacket,
+    };
 
     #[test]
     fn it_matches_a_manually_crafted_packet() {

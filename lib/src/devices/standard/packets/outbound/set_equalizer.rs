@@ -41,7 +41,7 @@ impl<'a> OutboundPacket for SetEqualizerPacket<'a> {
 #[cfg(test)]
 mod tests {
     use crate::devices::standard::{
-        packets::outbound::SendableBytes,
+        packets::outbound::OutboundPacketBytesExt,
         structures::{EqualizerConfiguration, PresetEqualizerProfile, VolumeAdjustments},
     };
 

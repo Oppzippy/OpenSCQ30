@@ -178,7 +178,7 @@ mod tests {
             sender_copy
                 .send(
                     Packet {
-                        command: FirmwareVersionUpdatePacket::header(),
+                        command: FirmwareVersionUpdatePacket::command(),
                         body: "02.0002.000000000000003028".as_bytes().to_vec(),
                     }
                     .bytes(),

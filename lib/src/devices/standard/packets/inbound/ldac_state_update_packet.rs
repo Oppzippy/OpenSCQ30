@@ -16,7 +16,7 @@ pub struct LdacStateUpdatePacket {
 }
 
 impl InboundPacket for LdacStateUpdatePacket {
-    fn header() -> Command {
+    fn command() -> Command {
         Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x7F])
     }
 

@@ -5,11 +5,11 @@ pub trait OutboundPacket {
     fn body(&self) -> Vec<u8>;
 }
 
-pub trait SendableBytes {
+pub trait OutboundPacketBytesExt {
     fn bytes(self) -> Vec<u8>;
 }
 
-impl<T> SendableBytes for T
+impl<T> OutboundPacketBytesExt for T
 where
     T: OutboundPacket,
 {

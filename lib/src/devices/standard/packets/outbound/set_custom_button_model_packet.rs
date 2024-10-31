@@ -28,7 +28,7 @@ impl OutboundPacket for SetCustomButtonModelPacket {
 #[cfg(test)]
 mod tests {
     use crate::devices::standard::{
-        packets::outbound::{SendableBytes, SetCustomButtonModelPacket},
+        packets::outbound::{OutboundPacketBytesExt, SetCustomButtonModelPacket},
         structures::{ButtonAction, CustomButtonModel, NoTwsButtonAction, TwsButtonAction},
     };
 

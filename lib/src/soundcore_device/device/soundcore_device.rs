@@ -369,7 +369,7 @@ mod tests {
 
     fn example_firmware_version_packet() -> Vec<u8> {
         Packet {
-            command: FirmwareVersionUpdatePacket::header(),
+            command: FirmwareVersionUpdatePacket::command(),
             body: "02.0002.000000000000003028".as_bytes().to_vec(),
         }
         .bytes()

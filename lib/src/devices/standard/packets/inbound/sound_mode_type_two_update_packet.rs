@@ -16,7 +16,7 @@ pub struct SoundModeTypeTwoUpdatePacket {
 }
 
 impl InboundPacket for SoundModeTypeTwoUpdatePacket {
-    fn header() -> Command {
+    fn command() -> Command {
         Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01])
     }
 

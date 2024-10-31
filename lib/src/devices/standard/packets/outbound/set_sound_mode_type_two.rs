@@ -28,7 +28,7 @@ impl OutboundPacket for SetSoundModeTypeTwoPacket {
 #[cfg(test)]
 mod tests {
     use crate::devices::standard::{
-        packets::outbound::{SendableBytes, SetSoundModeTypeTwoPacket},
+        packets::outbound::{OutboundPacketBytesExt, SetSoundModeTypeTwoPacket},
         structures::{
             AdaptiveNoiseCanceling, AmbientSoundMode, ManualNoiseCanceling,
             NoiseCancelingModeTypeTwo, SoundModesTypeTwo, TransparencyMode,
