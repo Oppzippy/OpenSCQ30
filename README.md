@@ -20,6 +20,7 @@ It is intended that all devices in this list work, but since I do not own them a
 | A3028    | Life Q30          | Working |
 | A3029    | Life Tune         | Unknown |
 | A3030    | Life Tune Pro     | Unknown |
+| A3031    | Vortex            | Unknown |
 | A3033    | Life 2 Neo        | Unknown |
 | A3033EU  | Life 2 Neo        | Unknown |
 | A3926    | Life Dot 2S       | Unknown |

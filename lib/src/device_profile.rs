@@ -7,6 +7,8 @@ use crate::{
     devices::{
         a3027::device_profile::A3027_DEVICE_PROFILE,
         a3028::device_profile::A3028_DEVICE_PROFILE,
+        a3030::device_profile::A3030_DEVICE_PROFILE,
+        a3031::device_profile::A3031_DEVICE_PROFILE,
         a3033::device_profile::A3033_DEVICE_PROFILE,
         a3926::device_profile::A3926_DEVICE_PROFILE,
         a3930::device_profile::A3930_DEVICE_PROFILE,
@@ -84,6 +86,8 @@ pub enum ToDeviceProfileError {
 const DEVICE_PROFILES: &[&DeviceProfile] = &[
     &A3027_DEVICE_PROFILE,
     &A3028_DEVICE_PROFILE,
+    &A3030_DEVICE_PROFILE,
+    &A3031_DEVICE_PROFILE,
     &A3033_DEVICE_PROFILE,
     &A3926_DEVICE_PROFILE,
     &A3930_DEVICE_PROFILE,
