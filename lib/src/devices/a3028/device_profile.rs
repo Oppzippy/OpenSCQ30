@@ -26,6 +26,6 @@ pub(crate) const A3028_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
         has_auto_power_off: false,
         has_ambient_sound_mode_cycle: false,
     },
-    compatible_models: &[DeviceModel::A3028, DeviceModel::A3029],
+    compatible_models: &[DeviceModel::A3028],
     implementation: || StandardImplementation::new::<A3028StateUpdatePacket>(),
 };

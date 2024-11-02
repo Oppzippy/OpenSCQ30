@@ -9,7 +9,6 @@ use crate::{
     devices::{
         a3027::packets::A3027StateUpdatePacket,
         a3028::packets::A3028StateUpdatePacket,
-        a3030::packets::A3030StateUpdatePacket,
         a3031::packets::A3031StateUpdatePacket,
         a3033::packets::A3033StateUpdatePacket,
         a3926::packets::A3926StateUpdatePacket,
@@ -58,7 +57,6 @@ impl InboundPacket for StateUpdatePacket {
         alt((
             map(A3027StateUpdatePacket::take, StateUpdatePacket::from),
             map(A3028StateUpdatePacket::take, StateUpdatePacket::from),
-            map(A3030StateUpdatePacket::take, StateUpdatePacket::from),
             map(A3031StateUpdatePacket::take, StateUpdatePacket::from),
             map(A3033StateUpdatePacket::take, StateUpdatePacket::from),
             map(A3926StateUpdatePacket::take, StateUpdatePacket::from),
