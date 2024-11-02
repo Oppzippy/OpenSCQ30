@@ -32,9 +32,7 @@ pub struct A3930StateUpdatePacket {
     custom_button_model: CustomButtonModel,
     sound_modes: SoundModes,
     side_tone: bool,
-    wear_detection: bool,
-    touch_tone: bool,
-    // length >= 96
+    // length >= 94
     hear_id_eq_index: Option<u16>,
 }
 
@@ -78,8 +76,6 @@ impl InboundPacket for A3930StateUpdatePacket {
                     CustomButtonModel::take,
                     SoundModes::take,
                     take_bool,
-                    take_bool,
-                    take_bool,
                     opt(le_u16),
                 )),
                 |(
@@ -93,8 +89,6 @@ impl InboundPacket for A3930StateUpdatePacket {
                     custom_button_model,
                     sound_modes,
                     side_tone,
-                    wear_detection,
-                    touch_tone,
                     hear_id_eq_index,
                 )| {
                     A3930StateUpdatePacket {
@@ -108,8 +102,6 @@ impl InboundPacket for A3930StateUpdatePacket {
                         custom_button_model,
                         sound_modes,
                         side_tone,
-                        wear_detection,
-                        touch_tone,
                         hear_id_eq_index,
                     }
                 },
