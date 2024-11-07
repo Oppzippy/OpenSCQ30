@@ -142,12 +142,12 @@ jobs:
   build_android:
     runs-on: ubuntu-latest
     steps:
-      - name: Set ANDROID_NDK_HOME to latest NDK version
-        run: |
-          echo "ANDROID_NDK_HOME=$ANDROID_NDK_LATEST_HOME" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
         with:
           submodules: true
+      - name: Set ANDROID_NDK_HOME to version specified in build.gradle.kts
+        run: |
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/$(./android/scripts/get-ndk-version.sh)" >> "$GITHUB_ENV"
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: armv7-linux-androideabi,aarch64-linux-android,i686-linux-android,x86_64-linux-android
