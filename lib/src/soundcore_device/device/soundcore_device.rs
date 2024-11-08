@@ -391,7 +391,7 @@ mod tests {
         (connection, sender)
     }
 
-    #[tokio::test]
+    #[tokio::test(start_paused = true)]
     async fn test_new_with_example_state_update_packet() {
         let (connection, sender) = create_test_connection().await;
         // TODO find a better way of waiting for the request to be sent before responding
@@ -421,7 +421,7 @@ mod tests {
         )
     }
 
-    #[tokio::test]
+    #[tokio::test(start_paused = true)]
     async fn test_new_with_retry() {
         let (connection, sender) = create_test_connection().await;
         let sender = Arc::new(Mutex::new(sender));
@@ -451,7 +451,7 @@ mod tests {
         assert_eq!(0, connection.write_return_queue_length().await);
     }
 
-    #[tokio::test]
+    #[tokio::test(start_paused = true)]
     async fn test_new_max_retries() {
         let (connection, _) = create_test_connection().await;
 
@@ -460,7 +460,7 @@ mod tests {
         assert_eq!(true, result.is_err());
     }
 
-    #[tokio::test]
+    #[tokio::test(start_paused = true)]
     async fn test_ambient_sound_mode_update_packet() {
         let (connection, sender) = create_test_connection().await;
         connection.push_write_return(Ok(())).await;
@@ -510,7 +510,7 @@ mod tests {
         );
     }
 
-    #[tokio::test]
+    #[tokio::test(start_paused = true)]
     async fn test_set_sound_mode_called_twice() {
         let (connection, sender) = create_test_connection().await;
         // request state update packet
@@ -563,7 +563,7 @@ mod tests {
         device.set_sound_modes(sound_modes).await.unwrap();
     }
 
-    #[tokio::test]
+    #[tokio::test(start_paused = true)]
     async fn test_set_equalizer_configuration_called_twice() {
         let (connection, sender) = create_test_connection().await;
         // request firmware version packet
