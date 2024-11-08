@@ -554,6 +554,7 @@ mod tests {
         let device = SoundcoreDevice::<_, TokioFutures>::new(connection.to_owned())
             .await
             .unwrap();
+        tokio::time::sleep(Duration::from_millis(1)).await;
         let sound_modes = SoundModes {
             custom_noise_canceling: CustomNoiseCanceling::new(10),
             ..Default::default()
