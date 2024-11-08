@@ -397,12 +397,12 @@ mod tests {
         // TODO find a better way of waiting for the request to be sent before responding
         tokio::spawn(async move {
             tokio::time::sleep(Duration::from_millis(1)).await;
+            sender.send(example_state_update_packet()).await.unwrap();
+            tokio::time::sleep(Duration::from_millis(1)).await;
             sender
                 .send(example_firmware_version_packet())
                 .await
                 .unwrap();
-            tokio::time::sleep(Duration::from_millis(1)).await;
-            sender.send(example_state_update_packet()).await.unwrap();
         });
         let device = SoundcoreDevice::<_, TokioFutures>::new(connection)
             .await
@@ -432,14 +432,14 @@ mod tests {
                 sender
                     .lock()
                     .await
-                    .send(example_firmware_version_packet())
+                    .send(example_state_update_packet())
                     .await
                     .unwrap();
                 tokio::time::sleep(Duration::from_millis(1500)).await;
                 sender
                     .lock()
                     .await
-                    .send(example_state_update_packet())
+                    .send(example_firmware_version_packet())
                     .await
                     .unwrap();
             }
@@ -468,12 +468,12 @@ mod tests {
         tokio::spawn(async move {
             tokio::time::sleep(Duration::from_millis(1)).await;
             sender_copy
-                .send(example_firmware_version_packet())
+                .send(example_state_update_packet())
                 .await
                 .unwrap();
             tokio::time::sleep(Duration::from_millis(1)).await;
             sender_copy
-                .send(example_state_update_packet())
+                .send(example_firmware_version_packet())
                 .await
                 .unwrap();
         });
@@ -513,9 +513,9 @@ mod tests {
     #[tokio::test]
     async fn test_set_sound_mode_called_twice() {
         let (connection, sender) = create_test_connection().await;
-        // request firmware version packet
-        connection.push_write_return(Ok(())).await;
         // request state update packet
+        connection.push_write_return(Ok(())).await;
+        // request firmware version packet
         connection.push_write_return(Ok(())).await;
         // first set_sound_modes. second call should not send a packet.
         connection.push_write_return(Ok(())).await;
@@ -530,12 +530,12 @@ mod tests {
         tokio::spawn(async move {
             tokio::time::sleep(Duration::from_millis(1)).await;
             sender_copy
-                .send(example_firmware_version_packet())
+                .send(example_state_update_packet())
                 .await
                 .unwrap();
             tokio::time::sleep(Duration::from_millis(1)).await;
             sender_copy
-                .send(example_state_update_packet())
+                .send(example_firmware_version_packet())
                 .await
                 .unwrap();
             tokio::time::sleep(Duration::from_millis(1)).await;
@@ -582,12 +582,12 @@ mod tests {
         tokio::spawn(async move {
             tokio::time::sleep(Duration::from_millis(1)).await;
             sender_copy
-                .send(example_firmware_version_packet())
+                .send(example_state_update_packet())
                 .await
                 .unwrap();
             tokio::time::sleep(Duration::from_millis(1)).await;
             sender_copy
-                .send(example_state_update_packet())
+                .send(example_firmware_version_packet())
                 .await
                 .unwrap();
             tokio::time::sleep(Duration::from_millis(1)).await;
