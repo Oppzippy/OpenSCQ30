@@ -15,7 +15,7 @@ use crate::devices::{
         quirks::TwoExtraEqBandsValues,
         structures::{
             AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomButtonModel, CustomHearId,
-            DualBattery, FirmwareVersion, Gender, SerialNumber, SoundModesTypeTwo,
+            DualBattery, FirmwareVersion, Gender, HostDevice, SerialNumber, SoundModesTypeTwo,
             StereoEqualizerConfiguration,
         },
     },
@@ -24,8 +24,7 @@ use crate::devices::{
 // A3936
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3936StateUpdatePacket {
-    // TODO replace host device with enum, HostDevice::Left and HostDevice::Right?
-    pub host_device: u8,
+    pub host_device: HostDevice,
     pub tws_status: bool,
     pub battery: DualBattery,
     pub left_firmware: FirmwareVersion,
@@ -77,7 +76,7 @@ impl A3936StateUpdatePacket {
         context(
             "a3936 state update packet",
             all_consuming(|input| {
-                let (input, host_device) = le_u8(input)?;
+                let (input, host_device) = HostDevice::take(input)?;
                 let (input, tws_status) = take_bool(input)?;
                 let (input, battery) = DualBattery::take(input)?;
                 let (input, left_firmware) = FirmwareVersion::take(input)?;

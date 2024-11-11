@@ -13,7 +13,7 @@ use crate::devices::{
             parsing::{take_bool, ParseResult},
         },
         structures::{
-            CustomButtonModel, DualBattery, EqualizerConfiguration, SoundModes,
+            CustomButtonModel, DualBattery, EqualizerConfiguration, HostDevice, SoundModes,
             StereoEqualizerConfiguration,
         },
     },
@@ -21,7 +21,7 @@ use crate::devices::{
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3031StateUpdatePacket {
-    pub host_device: u8,
+    pub host_device: HostDevice,
     pub tws_status: bool,
     pub battery: DualBattery,
     pub equalizer_configuration: EqualizerConfiguration,
@@ -64,7 +64,7 @@ impl InboundPacket for A3031StateUpdatePacket {
             "a3031 state update packet",
             all_consuming(map(
                 tuple((
-                    le_u8,
+                    HostDevice::take,
                     take_bool,
                     DualBattery::take,
                     StereoEqualizerConfiguration::take(8),

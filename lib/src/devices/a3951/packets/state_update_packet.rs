@@ -14,7 +14,7 @@ use crate::devices::{
         },
         structures::{
             AgeRange, CustomButtonModel, CustomHearId, DualBattery, EqualizerConfiguration, Gender,
-            SoundModes, StereoEqualizerConfiguration,
+            HostDevice, SoundModes, StereoEqualizerConfiguration,
         },
     },
 };
@@ -22,7 +22,7 @@ use crate::devices::{
 // A3951
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3951StateUpdatePacket {
-    host_device: u8,
+    host_device: HostDevice,
     tws_status: bool,
     battery: DualBattery,
     equalizer_configuration: EqualizerConfiguration,
@@ -87,7 +87,7 @@ impl InboundPacket for A3951StateUpdatePacket {
                         touch_tone,
                     ),
                 ) = tuple((
-                    le_u8,     // host device
+                    HostDevice::take,
                     take_bool, // tws status
                     DualBattery::take,
                     StereoEqualizerConfiguration::take(8),

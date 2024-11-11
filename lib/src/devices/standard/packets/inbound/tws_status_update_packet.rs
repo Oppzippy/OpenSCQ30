@@ -1,20 +1,19 @@
 use nom::{
     combinator::{all_consuming, map},
     error::{context, ContextError, ParseError},
-    number::complete::le_u8,
     sequence::tuple,
 };
 
 use crate::devices::standard::{
     packets::parsing::{take_bool, ParseResult},
-    structures::Command,
+    structures::{Command, HostDevice},
 };
 
 use super::InboundPacket;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct TwsStatusUpdatePacket {
-    pub host_device: u8,
+    pub host_device: HostDevice,
     pub tws_status: bool,
 }
 
@@ -30,7 +29,7 @@ impl InboundPacket for TwsStatusUpdatePacket {
         context(
             "TwsStatusUpdatePacket",
             all_consuming(map(
-                tuple((le_u8, take_bool)),
+                tuple((HostDevice::take, take_bool)),
                 |(host_device, tws_status)| TwsStatusUpdatePacket {
                     host_device,
                     tws_status,
@@ -44,8 +43,9 @@ impl InboundPacket for TwsStatusUpdatePacket {
 mod tests {
     use nom::error::VerboseError;
 
-    use crate::devices::standard::packets::inbound::{
-        take_inbound_packet_header, InboundPacket, TwsStatusUpdatePacket,
+    use crate::devices::standard::{
+        packets::inbound::{take_inbound_packet_header, InboundPacket, TwsStatusUpdatePacket},
+        structures::HostDevice,
     };
 
     #[test]
@@ -57,7 +57,7 @@ mod tests {
         let packet = TwsStatusUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
-        assert_eq!(2, packet.host_device);
+        assert_eq!(HostDevice::Right, packet.host_device);
         assert_eq!(true, packet.tws_status);
     }
 }

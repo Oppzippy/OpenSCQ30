@@ -16,7 +16,7 @@ use crate::devices::{
         quirks::TwoExtraEqBandsValues,
         structures::{
             AmbientSoundModeCycle, BatteryLevel, CustomButtonModel, CustomHearId, DualBattery,
-            EqualizerConfiguration, FirmwareVersion, HearId, SerialNumber, SoundModes,
+            EqualizerConfiguration, FirmwareVersion, HearId, HostDevice, SerialNumber, SoundModes,
             StereoEqualizerConfiguration,
         },
     },
@@ -26,7 +26,7 @@ use crate::devices::{
 // Despite EQ being 10 bands, only the first 8 seem to be used?
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3933StateUpdatePacket {
-    pub host_device: u8,
+    pub host_device: HostDevice,
     pub tws_status: bool,
     pub battery: DualBattery,
     pub left_firmware: FirmwareVersion,
@@ -87,7 +87,7 @@ impl A3933StateUpdatePacket {
                         age_range,
                     ),
                 ) = tuple((
-                    le_u8,
+                    HostDevice::take,
                     take_bool::<E>,
                     DualBattery::take,
                     FirmwareVersion::take,
@@ -174,7 +174,8 @@ mod tests {
             packets::inbound::take_inbound_packet_header,
             structures::{
                 AmbientSoundMode, BatteryLevel, CustomNoiseCanceling, EqualizerConfiguration,
-                FirmwareVersion, IsBatteryCharging, PresetEqualizerProfile, SingleBattery,
+                FirmwareVersion, HostDevice, IsBatteryCharging, PresetEqualizerProfile,
+                SingleBattery,
             },
         },
     };
@@ -205,7 +206,7 @@ mod tests {
         let (_, packet) =
             A3933StateUpdatePacket::take::<VerboseError<_>>(body).expect("should parse packet");
 
-        assert_eq!(1, packet.host_device);
+        assert_eq!(HostDevice::Left, packet.host_device);
         assert_eq!(true, packet.tws_status);
         assert_eq!(
             SingleBattery {

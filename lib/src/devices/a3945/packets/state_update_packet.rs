@@ -15,7 +15,7 @@ use crate::devices::{
         quirks::TwoExtraEqBandsValues,
         structures::{
             BatteryLevel, CustomButtonModel, DualBattery, EqualizerConfiguration, FirmwareVersion,
-            SerialNumber, StereoEqualizerConfiguration,
+            HostDevice, SerialNumber, StereoEqualizerConfiguration,
         },
     },
 };
@@ -24,7 +24,7 @@ use crate::devices::{
 // Despite EQ being 10 bands, only the first 8 seem to be used?
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3945StateUpdatePacket {
-    pub host_device: u8,
+    pub host_device: HostDevice,
     pub tws_status: bool,
     pub battery: DualBattery,
     pub left_firmware: FirmwareVersion,
@@ -69,7 +69,7 @@ impl A3945StateUpdatePacket {
             "a3945 state update packet",
             all_consuming(map(
                 tuple((
-                    le_u8,
+                    HostDevice::take,
                     take_bool,
                     DualBattery::take,
                     FirmwareVersion::take,

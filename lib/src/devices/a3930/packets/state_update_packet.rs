@@ -1,7 +1,7 @@
 use nom::{
     combinator::{all_consuming, map, opt},
     error::{context, ContextError, ParseError},
-    number::complete::{le_u16, le_u8},
+    number::complete::le_u16,
     sequence::tuple,
 };
 
@@ -14,7 +14,7 @@ use crate::devices::{
         },
         structures::{
             AgeRange, CustomButtonModel, CustomHearId, DualBattery, EqualizerConfiguration, Gender,
-            SoundModes, StereoEqualizerConfiguration,
+            HostDevice, SoundModes, StereoEqualizerConfiguration,
         },
     },
 };
@@ -22,7 +22,7 @@ use crate::devices::{
 // A3930
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3930StateUpdatePacket {
-    host_device: u8,
+    host_device: HostDevice,
     tws_status: bool,
     battery: DualBattery,
     equalizer_configuration: EqualizerConfiguration,
@@ -66,7 +66,7 @@ impl InboundPacket for A3930StateUpdatePacket {
             "a3930 state update packet",
             all_consuming(map(
                 tuple((
-                    le_u8,
+                    HostDevice::take,
                     take_bool,
                     DualBattery::take,
                     StereoEqualizerConfiguration::take(8),
