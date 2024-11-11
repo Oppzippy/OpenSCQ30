@@ -394,7 +394,6 @@ mod tests {
     #[tokio::test(start_paused = true)]
     async fn test_new_with_example_state_update_packet() {
         let (connection, sender) = create_test_connection().await;
-        // TODO find a better way of waiting for the request to be sent before responding
         tokio::spawn(async move {
             tokio::time::sleep(Duration::from_millis(1)).await;
             sender.send(example_state_update_packet()).await.unwrap();
