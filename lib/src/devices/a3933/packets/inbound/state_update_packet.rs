@@ -15,9 +15,9 @@ use crate::devices::{
         },
         quirks::TwoExtraEqBandsValues,
         structures::{
-            AmbientSoundModeCycle, BatteryLevel, CustomButtonModel, CustomHearId, DualBattery,
-            EqualizerConfiguration, FirmwareVersion, HearId, HostDevice, SerialNumber, SoundModes,
-            StereoEqualizerConfiguration,
+            AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomButtonModel, CustomHearId,
+            DualBattery, EqualizerConfiguration, FirmwareVersion, HearId, HostDevice, SerialNumber,
+            SoundModes, StereoEqualizerConfiguration,
         },
     },
 };
@@ -35,7 +35,7 @@ pub struct A3933StateUpdatePacket {
     pub left_equalizer_configuration: EqualizerConfiguration,
     pub right_equalizer_configuration: EqualizerConfiguration,
     pub extra_band_values: TwoExtraEqBandsValues,
-    pub age_range: u8,
+    pub age_range: AgeRange,
     pub hear_id: Option<CustomHearId>, // 10 bands
     pub custom_button_model: CustomButtonModel,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
@@ -94,10 +94,10 @@ impl A3933StateUpdatePacket {
                     FirmwareVersion::take,
                     SerialNumber::take,
                     StereoEqualizerConfiguration::take_with_two_extra_bands(8),
-                    le_u8,
+                    AgeRange::take,
                 ))(input)?;
 
-                let (input, hear_id) = if age_range == 255 {
+                let (input, hear_id) = if !age_range.supports_hear_id() {
                     let (input, _) = take(48usize)(input)?;
                     (input, None)
                 } else {
