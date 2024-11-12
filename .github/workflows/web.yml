@@ -18,7 +18,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
       - name: Cache cargo dependencies
@@ -44,7 +44,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
       - name: Cache cargo dependencies
@@ -81,7 +81,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
       - name: Install wasm-pack
         run: cargo install wasm-pack
       - name: Install dependencies
@@ -93,7 +93,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
           path: web/dist/
       - name: Deploy to GitHub Pages
         id: deployment
