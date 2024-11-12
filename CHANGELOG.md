@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Features
+
+-   Add support for Space A40 (A3936)
+-   Add support for Vortex (A3031)
+
+#### Fixes
+
+-   Fix Liberty 2 Pro (A3930) packet parse error
+
 ## v1.13.1
 
 ### GUI
