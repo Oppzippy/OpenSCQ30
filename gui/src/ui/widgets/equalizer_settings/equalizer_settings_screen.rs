@@ -197,7 +197,7 @@ mod imp {
                 .position(|profile| {
                     profile.unwrap().profile_id() as u16 == equalizer_configuration.profile_id()
                 })
-                .unwrap_or(0)
+                .unwrap_or_default()
                 .try_into()
                 .expect("could not convert usize to u32");
             self.profile_dropdown.set_selected(profile_index);
@@ -291,9 +291,15 @@ mod imp {
                             .selected_item()
                             .map(|item| item.downcast::<GlibCustomEqualizerProfile>().unwrap());
                         if let Some(selected_item) = maybe_selected_item {
-                            sender
-                                .send(Action::SelectCustomEqualizerProfile(selected_item.clone()))
-                                .unwrap();
+                            if !selected_item.volume_adjustments().is_empty() {
+                                sender
+                                    .send(Action::SelectCustomEqualizerProfile(
+                                        selected_item.clone(),
+                                    ))
+                                    .unwrap();
+                            } else {
+                                this.update_custom_profile_selection();
+                            }
                         }
                     }
                 ));
@@ -321,7 +327,9 @@ mod imp {
                     &self.create_custom_profile_button.get(),
                     "visible",
                 )
-                .transform_to(|_, item: Option<GlibCustomEqualizerProfile>| Some(item.is_none()))
+                .transform_to(|_, item: Option<GlibCustomEqualizerProfile>| {
+                    item.map(|i| i.volume_adjustments().is_empty())
+                })
                 .sync_create()
                 .build();
             // Show delete button otherwise
@@ -345,6 +353,10 @@ mod imp {
                 // afterwards.
                 let _notify_freeze_guard = self.custom_profile_dropdown.freeze_notify();
                 model.remove_all();
+                model.append(&GlibCustomEqualizerProfile::new(
+                    glib::dgettext(Some("gtk40"), "(None)").as_str(),
+                    Default::default(),
+                ));
                 model.extend_from_slice(&profiles);
                 self.update_custom_profile_selection();
             }
@@ -366,11 +378,13 @@ mod imp {
                         .iter::<GlibCustomEqualizerProfile>()
                         .enumerate()
                         .find(|(_i, profile)| {
+                            let profile = profile.as_ref().unwrap();
+                            if profile.volume_adjustments().is_empty() {
+                                return false;
+                            }
                             // TODO VolumeAdjustments::from
                             let profile_volume_adjustments = VolumeAdjustments::new(
                                 profile
-                                    .as_ref()
-                                    .unwrap()
                                     .volume_adjustments()
                                     .iter()
                                     .cloned()
@@ -380,13 +394,13 @@ mod imp {
                             profile_volume_adjustments == rounded_volumes
                         })
                         .map(|(i, _profile)| i as u32)
-                        .unwrap_or(u32::MAX);
+                        .unwrap_or_default();
 
                     self.custom_profile_dropdown
                         .set_selected(custom_profile_index);
                 }
                 _ => {
-                    self.custom_profile_dropdown.set_selected(u32::MAX);
+                    self.custom_profile_dropdown.set_selected(0);
                 }
             }
         }
