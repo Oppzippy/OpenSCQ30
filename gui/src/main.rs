@@ -386,6 +386,16 @@ fn delayed_initialize_application(
                                 .await
                                 .context("manual noise canceling mode selected")
                         }
+                        Action::SetAmbientSoundModeTypeTwo(ambient_sound_mode) => {
+                            actions::set_ambient_sound_mode_type_two(&state, ambient_sound_mode)
+                                .await
+                                .context("ambient sound mode type two selected")
+                        }
+                        Action::SetTransparencyModeTypeTwo(transparency_mode) => {
+                            actions::set_transparency_mode_type_two(&state, transparency_mode)
+                                .await
+                                .context("transparency mode type two selected")
+                        }
                         Action::Connect(mac_address) => actions::set_device(
                             &state,
                             settings.config.to_owned(),

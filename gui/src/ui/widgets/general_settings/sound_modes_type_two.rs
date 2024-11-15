@@ -176,7 +176,7 @@ mod imp {
                 let this = self.to_owned();
                 self.ambient_sound_mode_selection
                     .connect_ambient_sound_mode_notify(move |ambient_sound_mode_selection| {
-                        this.send_action(Action::SetAmbientSoundMode(
+                        this.send_action(Action::SetAmbientSoundModeTypeTwo(
                             ambient_sound_mode_selection.ambient_sound_mode().0,
                         ));
                     });
@@ -199,7 +199,7 @@ mod imp {
                 let this = self.to_owned();
                 self.transparency_mode_selection
                     .connect_transparency_mode_notify(move |transparency_mode_selection| {
-                        this.send_action(Action::SetTransparencyMode(
+                        this.send_action(Action::SetTransparencyModeTypeTwo(
                             transparency_mode_selection.transparency_mode().0,
                         ));
                     });
