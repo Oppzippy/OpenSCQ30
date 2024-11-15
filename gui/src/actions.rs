@@ -8,6 +8,7 @@ mod refresh_custom_equalizer_profiles;
 mod refresh_devices;
 mod refresh_quick_presets;
 mod select_custom_equalizer_configuration;
+mod set_adaptive_noise_canceling;
 mod set_ambient_sound_mode;
 mod set_ambient_sound_mode_cycle;
 mod set_custom_button_model;
@@ -15,7 +16,10 @@ mod set_custom_noise_canceling;
 mod set_device;
 mod set_equalizer_configuration;
 mod set_hear_id;
+mod set_manual_noise_canceling;
 mod set_noise_canceling_mode;
+mod set_noise_canceling_mode_type_two;
+mod set_noise_canceling_sensitivity_level;
 mod set_transpareny_mode;
 mod state;
 
@@ -31,14 +35,16 @@ use macaddr::MacAddr6;
 use openscq30_lib::devices::standard::{
     state::DeviceState,
     structures::{
-        AmbientSoundMode, AmbientSoundModeCycle, CustomButtonModel, CustomNoiseCanceling,
-        EqualizerConfiguration, HearId, NoiseCancelingMode, TransparencyMode,
+        AdaptiveNoiseCanceling, AmbientSoundMode, AmbientSoundModeCycle, CustomButtonModel,
+        CustomNoiseCanceling, EqualizerConfiguration, HearId, ManualNoiseCanceling,
+        NoiseCancelingMode, NoiseCancelingModeTypeTwo, TransparencyMode,
     },
 };
 pub use refresh_custom_equalizer_profiles::*;
 pub use refresh_devices::*;
 pub use refresh_quick_presets::*;
 pub use select_custom_equalizer_configuration::*;
+pub use set_adaptive_noise_canceling::*;
 pub use set_ambient_sound_mode::*;
 pub use set_ambient_sound_mode_cycle::*;
 pub use set_custom_button_model::*;
@@ -46,7 +52,10 @@ pub use set_custom_noise_canceling::*;
 pub use set_device::*;
 pub use set_equalizer_configuration::*;
 pub use set_hear_id::*;
+pub use set_manual_noise_canceling::*;
 pub use set_noise_canceling_mode::*;
+pub use set_noise_canceling_mode_type_two::*;
+pub use set_noise_canceling_sensitivity_level::*;
 pub use set_transpareny_mode::*;
 pub use state::*;
 
@@ -86,4 +95,8 @@ pub enum Action {
         profiles: Vec<GlibCustomEqualizerProfile>,
         overwrite: bool,
     },
+    SetNoiseCancelingModeTypeTwo(NoiseCancelingModeTypeTwo),
+    SetAdaptiveNoiseCanceling(AdaptiveNoiseCanceling),
+    SetManualNoiseCanceling(ManualNoiseCanceling),
+    SetNoiseCancelingSensitivityLevel(u8),
 }

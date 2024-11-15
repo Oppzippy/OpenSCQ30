@@ -374,7 +374,27 @@ fn delayed_initialize_application(
                         Action::SetCustomNoiseCanceling(custom_noise_canceling) => {
                             actions::set_custom_noise_canceling(&state, custom_noise_canceling)
                                 .await
-                                .context("transparency mode selected")
+                                .context("custom noise canceling mode selected")
+                        }
+                        Action::SetNoiseCancelingModeTypeTwo(noise_canceling_mode) => {
+                            actions::set_noise_canceling_mode_type_two(&state, noise_canceling_mode)
+                                .await
+                                .context("noise canceling mode type two selected")
+                        }
+                        Action::SetAdaptiveNoiseCanceling(adaptive_noise_canceling) => {
+                            actions::set_adaptive_noise_canceling(&state, adaptive_noise_canceling)
+                                .await
+                                .context("adaptive noise canceling mode selected")
+                        }
+                        Action::SetManualNoiseCanceling(manual_noise_canceling) => {
+                            actions::set_manual_noise_canceling(&state, manual_noise_canceling)
+                                .await
+                                .context("manual noise canceling mode selected")
+                        }
+                        Action::SetNoiseCancelingSensitivityLevel(level) => {
+                            actions::set_noise_canceling_sensitivity_level(&state, level)
+                                .await
+                                .context("noise canceling sensitivity level selected")
                         }
                         Action::Connect(mac_address) => actions::set_device(
                             &state,

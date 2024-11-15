@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <template class="OpenSCQ30SoundModes" parent="GtkBox">
+        <property name="orientation">vertical</property>
+        <!-- Ambient Sound Mode -->
+        <child>
+            <object class="OpenSCQ30AmbientSoundModeSelection" id="ambient_sound_mode_selection" />
+        </child>
+
+        <!-- Ambient Sound Mode Cycle -->
+        <child>
+            <object class="OpenSCQ30AmbientSoundModeCycleSelection" id="ambient_sound_mode_cycle_selection" />
+        </child>
+
+        <!-- Transparency Mode -->
+        <child>
+            <object class="OpenSCQ30TransparencyModeSelection" id="transparency_mode_selection" />
+        </child>
+
+        <!-- Noise Canceling Mode -->
+        <child>
+            <object class="OpenSCQ30NoiseCancelingModeSelection" id="noise_canceling_mode_selection" />
+        </child>
+
+        <!-- Custom Noise Canceling -->
+        <child>
+            <object class="OpenSCQ30CustomNoiseCancelingSelection" id="custom_noise_canceling_selection" />
+        </child>
+    </template>
+</interface>

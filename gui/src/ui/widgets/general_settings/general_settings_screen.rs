@@ -1,11 +1,10 @@
+use crate::actions::Action;
 use gtk::{
     glib::{self, Object},
     subclass::prelude::ObjectSubclassIsExt,
 };
 use openscq30_lib::devices::standard::state::DeviceState;
 use tokio::sync::mpsc::UnboundedSender;
-
-use crate::actions::Action;
 
 glib::wrapper! {
     pub struct GeneralSettingsScreen(ObjectSubclass<imp::GeneralSettingsScreen>)
@@ -28,14 +27,15 @@ impl GeneralSettingsScreen {
 }
 
 mod imp {
-    // Properties macro creates an enum for internal use. We don't care that it is caught by this lint.
-    #![allow(clippy::enum_variant_names)]
-
-    use std::cell::OnceCell;
-
+    use crate::{
+        actions::Action,
+        ui::widgets::general_settings::{
+            sound_modes::SoundModes, sound_modes_type_two::SoundModesTypeTwo,
+        },
+    };
     use gtk::{
         glib,
-        prelude::*,
+        prelude::WidgetExt,
         subclass::{
             prelude::*,
             widget::{
@@ -45,51 +45,19 @@ mod imp {
         },
         CompositeTemplate, TemplateChild,
     };
-    use openscq30_lib::{
-        device_profile::{NoiseCancelingModeType, TransparencyModeType},
-        devices::standard::state::DeviceState,
-    };
+    use openscq30_lib::devices::standard::state::DeviceState;
+    use std::cell::OnceCell;
     use tokio::sync::mpsc::UnboundedSender;
-
-    use crate::{
-        actions::Action,
-        objects::{
-            GlibAmbientSoundModeCycleValue, GlibAmbientSoundModeValue,
-            GlibCustomNoiseCancelingValue, GlibNoiseCancelingModeValue, GlibTransparencyModeValue,
-        },
-        ui::widgets::general_settings::{
-            ambient_sound_mode_cycle_selection::AmbientSoundModeCycleSelection,
-            ambient_sound_mode_selection::AmbientSoundModeSelection,
-            custom_noise_canceling_selection::CustomNoiseCancelingSelection,
-            noise_canceling_mode_selection::NoiseCancelingModeSelection,
-            transparency_mode_selection::TransparencyModeSelection,
-        },
-    };
 
     #[derive(Default, CompositeTemplate)]
     #[template(
         resource = "/com/oppzippy/OpenSCQ30/ui/widgets/general_settings/general_settings_screen.ui"
     )]
     pub struct GeneralSettingsScreen {
-        // Ambient Sound Mode
         #[template_child]
-        pub ambient_sound_mode_selection: TemplateChild<AmbientSoundModeSelection>,
-
-        // Ambient Sound Mode
+        pub sound_modes: TemplateChild<SoundModes>,
         #[template_child]
-        pub ambient_sound_mode_cycle_selection: TemplateChild<AmbientSoundModeCycleSelection>,
-
-        // Transpareny Mode
-        #[template_child]
-        pub transparency_mode_selection: TemplateChild<TransparencyModeSelection>,
-
-        // Noise Canceling Mode
-        #[template_child]
-        pub noise_canceling_mode_selection: TemplateChild<NoiseCancelingModeSelection>,
-
-        // Custom noise canceling
-        #[template_child]
-        pub custom_noise_canceling_selection: TemplateChild<CustomNoiseCancelingSelection>,
+        pub sound_modes_type_two: TemplateChild<SoundModesTypeTwo>,
 
         sender: OnceCell<UnboundedSender<Action>>,
     }
@@ -97,59 +65,17 @@ mod imp {
     #[gtk::template_callbacks]
     impl GeneralSettingsScreen {
         pub fn set_sender(&self, sender: UnboundedSender<Action>) {
-            self.sender.set(sender.clone()).unwrap();
+            self.sound_modes.set_sender(sender.clone());
+            self.sound_modes_type_two.set_sender(sender.clone());
+            self.sender.set(sender).unwrap();
         }
 
         pub fn set_device_state(&self, state: &DeviceState) {
-            let Some(sound_modes) = state.sound_modes else {
-                return;
-            };
-            let Some(sound_mode_profile) = state.device_features.sound_mode else {
-                return;
-            };
-
-            // Set button visibility
-            self.ambient_sound_mode_selection
-                .set_has_noise_canceling_mode(
-                    sound_mode_profile.noise_canceling_mode_type != NoiseCancelingModeType::None,
-                );
-            self.ambient_sound_mode_cycle_selection
-                .set_visible(state.device_features.has_ambient_sound_mode_cycle);
-            self.ambient_sound_mode_cycle_selection
-                .set_has_noise_canceling_mode(
-                    sound_mode_profile.noise_canceling_mode_type != NoiseCancelingModeType::None,
-                );
-            self.transparency_mode_selection.set_visible(
-                sound_mode_profile.transparency_mode_type == TransparencyModeType::Custom,
-            );
-            self.noise_canceling_mode_selection.set_visible(
-                sound_mode_profile.noise_canceling_mode_type != NoiseCancelingModeType::None,
-            );
-            self.noise_canceling_mode_selection
-                .set_has_custom_noise_canceling(
-                    sound_mode_profile.noise_canceling_mode_type == NoiseCancelingModeType::Custom,
-                );
-            self.custom_noise_canceling_selection.set_visible(
-                sound_mode_profile.noise_canceling_mode_type == NoiseCancelingModeType::Custom,
-            );
-
-            // Set selected values
-            self.ambient_sound_mode_selection
-                .set_ambient_sound_mode(GlibAmbientSoundModeValue(sound_modes.ambient_sound_mode));
-            if let Some(cycle) = state.ambient_sound_mode_cycle {
-                self.ambient_sound_mode_cycle_selection
-                    .set_ambient_sound_mode_cycle(&cycle);
-            }
-            self.transparency_mode_selection
-                .set_transparency_mode(GlibTransparencyModeValue(sound_modes.transparency_mode));
-            self.noise_canceling_mode_selection
-                .set_noise_canceling_mode(GlibNoiseCancelingModeValue(
-                    sound_modes.noise_canceling_mode,
-                ));
-            self.custom_noise_canceling_selection
-                .set_custom_noise_canceling(GlibCustomNoiseCancelingValue(
-                    sound_modes.custom_noise_canceling,
-                ));
+            self.sound_modes.set_device_state(state);
+            self.sound_modes.set_visible(state.sound_modes.is_some());
+            self.sound_modes_type_two.set_device_state(state);
+            self.sound_modes_type_two
+                .set_visible(state.sound_modes_type_two.is_some());
         }
 
         fn send_action(&self, action: Action) {
@@ -181,62 +107,6 @@ mod imp {
     impl ObjectImpl for GeneralSettingsScreen {
         fn constructed(&self) {
             self.parent_constructed();
-
-            // Ambient sound mode
-            {
-                let this = self.to_owned();
-                self.ambient_sound_mode_selection
-                    .connect_ambient_sound_mode_notify(move |ambient_sound_mode_selection| {
-                        this.send_action(Action::SetAmbientSoundMode(
-                            ambient_sound_mode_selection.ambient_sound_mode().0,
-                        ));
-                    });
-            }
-            // Ambient sound mode cycle
-            {
-                let this = self.to_owned();
-                self.ambient_sound_mode_cycle_selection.connect_local(
-                    "ambient-sound-mode-cycle-changed",
-                    false,
-                    move |parameters| {
-                        let cycle: GlibAmbientSoundModeCycleValue = parameters[1].get().unwrap();
-                        this.send_action(Action::SetAmbientSoundModeCycle(cycle.0));
-                        None
-                    },
-                );
-            }
-            // Transparency mode
-            {
-                let this = self.to_owned();
-                self.transparency_mode_selection
-                    .connect_transparency_mode_notify(move |transparency_mode_selection| {
-                        this.send_action(Action::SetTransparencyMode(
-                            transparency_mode_selection.transparency_mode().0,
-                        ));
-                    });
-            }
-            // Noise canceling mode
-            {
-                let this = self.to_owned();
-                self.noise_canceling_mode_selection
-                    .connect_noise_canceling_mode_notify(move |noise_canceling_mode_selection| {
-                        this.send_action(Action::SetNoiseCancelingMode(
-                            noise_canceling_mode_selection.noise_canceling_mode().0,
-                        ));
-                    });
-            }
-            // Custom noise canceling
-            {
-                let this = self.to_owned();
-                self.custom_noise_canceling_selection
-                    .connect_custom_noise_canceling_notify(
-                        move |custom_noise_canceling_selection| {
-                            this.send_action(Action::SetCustomNoiseCanceling(
-                                custom_noise_canceling_selection.custom_noise_canceling().0,
-                            ));
-                        },
-                    );
-            }
         }
     }
     impl WidgetImpl for GeneralSettingsScreen {}

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <template class="OpenSCQ30AdaptiveNoiseCancelingSelection" parent="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+            <object class="GtkLabel" id="adaptive_noise_canceling_label">
+                <property name="label" translatable="yes">Adaptive Noise Canceling</property>
+                <style>
+                    <class name="general-settings__heading-small" />
+                </style>
+            </object>
+        </child>
+        <child>
+            <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">2</property>
+                <child>
+                    <object class="GtkToggleButton" id="low_noise">
+                        <property name="label" translatable="yes" context="adaptive noise canceling">Low Noise</property>
+                        <property name="hexpand">true</property>
+                        <accessibility>
+                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">adaptive_noise_canceling_label</relation>
+                        </accessibility>
+                    </object>
+                </child>
+                <child>
+                    <object class="GtkToggleButton" id="medium_noise">
+                        <property name="group">low_noise</property>
+                        <property name="label" translatable="yes" context="adaptive noise canceling">Medium Noise</property>
+                        <property name="hexpand">true</property>
+                        <accessibility>
+                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">adaptive_noise_canceling_label</relation>
+                        </accessibility>
+                    </object>
+                </child>
+                <child>
+                    <object class="GtkToggleButton" id="high_noise">
+                        <property name="group">medium_noise</property>
+                        <property name="label" translatable="yes" context="adaptive noise canceling">High Noise</property>
+                        <property name="hexpand">true</property>
+                        <accessibility>
+                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">adaptive_noise_canceling_label</relation>
+                        </accessibility>
+                    </object>
+                </child>
+            </object>
+        </child>
+    </template>
+</interface>

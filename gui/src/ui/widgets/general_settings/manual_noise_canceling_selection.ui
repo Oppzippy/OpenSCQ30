@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <template class="OpenSCQ30ManualNoiseCancelingSelection" parent="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+            <object class="GtkLabel" id="manual_noise_canceling_label">
+                <property name="label" translatable="yes">Manual Noise Canceling</property>
+                <style>
+                    <class name="general-settings__heading-small" />
+                </style>
+            </object>
+        </child>
+        <child>
+            <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">2</property>
+                <child>
+                    <object class="GtkToggleButton" id="weak">
+                        <property name="label" translatable="yes" context="manual noise canceling">Weak</property>
+                        <property name="hexpand">true</property>
+                        <accessibility>
+                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">manual_noise_canceling_label</relation>
+                        </accessibility>
+                    </object>
+                </child>
+                <child>
+                    <object class="GtkToggleButton" id="moderate">
+                        <property name="group">weak</property>
+                        <property name="label" translatable="yes" context="manual noise canceling">Moderate</property>
+                        <property name="hexpand">true</property>
+                        <accessibility>
+                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">manual_noise_canceling_label</relation>
+                        </accessibility>
+                    </object>
+                </child>
+                <child>
+                    <object class="GtkToggleButton" id="strong">
+                        <property name="group">moderate</property>
+                        <property name="label" translatable="yes" context="manual noise canceling">Strong</property>
+                        <property name="hexpand">true</property>
+                        <accessibility>
+                            <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">manual_noise_canceling_label</relation>
+                        </accessibility>
+                    </object>
+                </child>
+            </object>
+        </child>
+    </template>
+</interface>
