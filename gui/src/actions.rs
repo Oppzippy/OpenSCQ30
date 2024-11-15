@@ -19,8 +19,8 @@ mod set_hear_id;
 mod set_manual_noise_canceling;
 mod set_noise_canceling_mode;
 mod set_noise_canceling_mode_type_two;
+mod set_transparency_mode;
 mod set_transparency_mode_type_two;
-mod set_transpareny_mode;
 mod state;
 
 use std::sync::Arc;
@@ -55,8 +55,8 @@ pub use set_hear_id::*;
 pub use set_manual_noise_canceling::*;
 pub use set_noise_canceling_mode::*;
 pub use set_noise_canceling_mode_type_two::*;
+pub use set_transparency_mode::*;
 pub use set_transparency_mode_type_two::*;
-pub use set_transpareny_mode::*;
 pub use state::*;
 
 use crate::objects::{GlibCustomEqualizerProfile, GlibDevice, GlibNamedQuickPresetValue};
