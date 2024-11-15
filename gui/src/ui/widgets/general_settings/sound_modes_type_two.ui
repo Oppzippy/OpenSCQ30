@@ -4,12 +4,16 @@
         <property name="orientation">vertical</property>
         <!-- Ambient Sound Mode -->
         <child>
-            <object class="OpenSCQ30AmbientSoundModeSelection" id="ambient_sound_mode_selection" />
+            <object class="OpenSCQ30AmbientSoundModeSelection" id="ambient_sound_mode_selection">
+                <property name="has-noise-canceling-mode">true</property>
+            </object>
         </child>
 
         <!-- Ambient Sound Mode Cycle -->
         <child>
-            <object class="OpenSCQ30AmbientSoundModeCycleSelection" id="ambient_sound_mode_cycle_selection" />
+            <object class="OpenSCQ30AmbientSoundModeCycleSelection" id="ambient_sound_mode_cycle_selection">
+                <property name="has-noise-canceling-mode">true</property>
+            </object>
         </child>
 
         <!-- Transparency Mode -->
