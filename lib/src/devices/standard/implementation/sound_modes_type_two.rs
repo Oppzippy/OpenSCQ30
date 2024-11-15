@@ -9,13 +9,15 @@ use crate::{
 
 pub fn set_sound_modes_type_two(
     state: DeviceState,
-    sound_modes: SoundModesTypeTwo,
+    mut sound_modes: SoundModesTypeTwo,
 ) -> crate::Result<CommandResponse> {
     let Some(prev_sound_modes) = state.sound_modes_type_two else {
         return Err(crate::Error::MissingData {
             name: "sound modes type two",
         });
     };
+    // Adaptive noise canceling strength should only be modified by the device, not us. Ensure it doesn't change.
+    sound_modes.adaptive_noise_canceling = prev_sound_modes.adaptive_noise_canceling;
 
     // It will bug and put us in noise canceling mode without changing the ambient sound mode id if we change the
     // noise canceling mode with the ambient sound mode being normal or transparency. To work around this, we must

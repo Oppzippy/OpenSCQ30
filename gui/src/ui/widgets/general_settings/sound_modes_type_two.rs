@@ -223,20 +223,6 @@ mod imp {
                         ));
                     });
             }
-            // Adaptive noise canceling
-            {
-                let this = self.to_owned();
-                self.adaptive_noise_canceling_selection
-                    .connect_adaptive_noise_canceling_notify(
-                        move |adaptive_noise_canceling_selection| {
-                            this.send_action(Action::SetAdaptiveNoiseCanceling(
-                                adaptive_noise_canceling_selection
-                                    .adaptive_noise_canceling()
-                                    .0,
-                            ));
-                        },
-                    );
-            }
             // Manual noise canceling
             {
                 let this = self.to_owned();

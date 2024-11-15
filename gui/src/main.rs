@@ -381,11 +381,6 @@ fn delayed_initialize_application(
                                 .await
                                 .context("noise canceling mode type two selected")
                         }
-                        Action::SetAdaptiveNoiseCanceling(adaptive_noise_canceling) => {
-                            actions::set_adaptive_noise_canceling(&state, adaptive_noise_canceling)
-                                .await
-                                .context("adaptive noise canceling mode selected")
-                        }
                         Action::SetManualNoiseCanceling(manual_noise_canceling) => {
                             actions::set_manual_noise_canceling(&state, manual_noise_canceling)
                                 .await

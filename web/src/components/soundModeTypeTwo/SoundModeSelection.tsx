@@ -50,11 +50,6 @@ export const SoundModeSelection = React.memo(function ({
     soundModes,
     setSoundModes,
   );
-  const setAdaptiveNoiseCanceling = useSetter(
-    "adaptiveNoiseCanceling",
-    soundModes,
-    setSoundModes,
-  );
   const setManualNoiseCanceling = useSetter(
     "manualNoiseCanceling",
     soundModes,
@@ -87,7 +82,6 @@ export const SoundModeSelection = React.memo(function ({
       {soundModes.noiseCancelingMode == "adaptive" ? (
         <AdaptiveNoiseCancelingSelection
           value={soundModes.adaptiveNoiseCanceling}
-          onValueChanged={setAdaptiveNoiseCanceling}
         />
       ) : (
         <ManualNoiseCancelingSelection

@@ -8,7 +8,6 @@ mod refresh_custom_equalizer_profiles;
 mod refresh_devices;
 mod refresh_quick_presets;
 mod select_custom_equalizer_configuration;
-mod set_adaptive_noise_canceling;
 mod set_ambient_sound_mode;
 mod set_ambient_sound_mode_cycle;
 mod set_custom_button_model;
@@ -35,16 +34,15 @@ use macaddr::MacAddr6;
 use openscq30_lib::devices::standard::{
     state::DeviceState,
     structures::{
-        AdaptiveNoiseCanceling, AmbientSoundMode, AmbientSoundModeCycle, CustomButtonModel,
-        CustomNoiseCanceling, EqualizerConfiguration, HearId, ManualNoiseCanceling,
-        NoiseCancelingMode, NoiseCancelingModeTypeTwo, TransparencyMode,
+        AmbientSoundMode, AmbientSoundModeCycle, CustomButtonModel, CustomNoiseCanceling,
+        EqualizerConfiguration, HearId, ManualNoiseCanceling, NoiseCancelingMode,
+        NoiseCancelingModeTypeTwo, TransparencyMode,
     },
 };
 pub use refresh_custom_equalizer_profiles::*;
 pub use refresh_devices::*;
 pub use refresh_quick_presets::*;
 pub use select_custom_equalizer_configuration::*;
-pub use set_adaptive_noise_canceling::*;
 pub use set_ambient_sound_mode::*;
 pub use set_ambient_sound_mode_cycle::*;
 pub use set_custom_button_model::*;
@@ -96,7 +94,6 @@ pub enum Action {
         overwrite: bool,
     },
     SetNoiseCancelingModeTypeTwo(NoiseCancelingModeTypeTwo),
-    SetAdaptiveNoiseCanceling(AdaptiveNoiseCanceling),
     SetManualNoiseCanceling(ManualNoiseCanceling),
     SetNoiseCancelingSensitivityLevel(u8),
 }

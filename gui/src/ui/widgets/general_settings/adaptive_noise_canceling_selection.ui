@@ -18,6 +18,7 @@
                     <object class="GtkToggleButton" id="low_noise">
                         <property name="label" translatable="yes" context="adaptive noise canceling">Low Noise</property>
                         <property name="hexpand">true</property>
+                        <property name="sensitive">false</property>
                         <accessibility>
                             <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">adaptive_noise_canceling_label</relation>
                         </accessibility>
@@ -28,6 +29,7 @@
                         <property name="group">low_noise</property>
                         <property name="label" translatable="yes" context="adaptive noise canceling">Medium Noise</property>
                         <property name="hexpand">true</property>
+                        <property name="sensitive">false</property>
                         <accessibility>
                             <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">adaptive_noise_canceling_label</relation>
                         </accessibility>
@@ -38,6 +40,7 @@
                         <property name="group">medium_noise</property>
                         <property name="label" translatable="yes" context="adaptive noise canceling">High Noise</property>
                         <property name="hexpand">true</property>
+                        <property name="sensitive">false</property>
                         <accessibility>
                             <relation name="GTK_ACCESSIBLE_RELATION_LABELLED_BY">adaptive_noise_canceling_label</relation>
                         </accessibility>
