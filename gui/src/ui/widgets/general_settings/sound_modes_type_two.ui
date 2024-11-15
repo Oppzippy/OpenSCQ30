@@ -31,10 +31,5 @@
         <child>
             <object class="OpenSCQ30ManualNoiseCancelingSelection" id="manual_noise_canceling_selection" />
         </child>
-
-        <!-- Noise Canceling Sensitivity Level -->
-        <child>
-            <object class="OpenSCQ30NoiseCancelingSensitivityLevelSelection" id="noise_canceling_sensitivity_level_selection" />
-        </child>
     </template>
 </interface>

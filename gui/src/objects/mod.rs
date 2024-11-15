@@ -9,7 +9,6 @@ mod manual_noise_canceling;
 mod named_quick_preset;
 mod noise_canceling_mode;
 mod noise_canceling_mode_type_two;
-mod noise_canceling_sensitivity_level;
 mod preset_equalizer_profile;
 mod transparency_mode;
 
@@ -24,6 +23,5 @@ pub use manual_noise_canceling::*;
 pub use named_quick_preset::*;
 pub use noise_canceling_mode::*;
 pub use noise_canceling_mode_type_two::*;
-pub use noise_canceling_sensitivity_level::*;
 pub use preset_equalizer_profile::*;
 pub use transparency_mode::*;

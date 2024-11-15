@@ -52,8 +52,7 @@ mod imp {
         objects::{
             GlibAdaptiveNoiseCancelingValue, GlibAmbientSoundModeCycleValue,
             GlibAmbientSoundModeValue, GlibManualNoiseCancelingValue,
-            GlibNoiseCancelingModeTypeTwoValue, GlibNoiseCancelingSensitivityLevelValue,
-            GlibTransparencyModeValue,
+            GlibNoiseCancelingModeTypeTwoValue, GlibTransparencyModeValue,
         },
         ui::widgets::general_settings::{
             adaptive_noise_canceling_selection::AdaptiveNoiseCancelingSelection,
@@ -61,7 +60,6 @@ mod imp {
             ambient_sound_mode_selection::AmbientSoundModeSelection,
             manual_noise_canceling_selection::ManualNoiseCancelingSelection,
             noise_canceling_mode_type_two_selection::NoiseCancelingModeTypeTwoSelection,
-            noise_canceling_sensitivity_level_selection::NoiseCancelingSensitivityLevelSelection,
             transparency_mode_selection::TransparencyModeSelection,
         },
     };
@@ -83,9 +81,6 @@ mod imp {
         pub adaptive_noise_canceling_selection: TemplateChild<AdaptiveNoiseCancelingSelection>,
         #[template_child]
         pub manual_noise_canceling_selection: TemplateChild<ManualNoiseCancelingSelection>,
-        #[template_child]
-        pub noise_canceling_sensitivity_level_selection:
-            TemplateChild<NoiseCancelingSensitivityLevelSelection>,
 
         sender: OnceCell<UnboundedSender<Action>>,
     }
@@ -121,10 +116,6 @@ mod imp {
             self.manual_noise_canceling_selection
                 .set_manual_noise_canceling(GlibManualNoiseCancelingValue(
                     sound_modes.manual_noise_canceling,
-                ));
-            self.noise_canceling_sensitivity_level_selection
-                .set_noise_canceling_sensitivity_level(GlibNoiseCancelingSensitivityLevelValue(
-                    sound_modes.noise_canceling_adaptive_sensitivity_level,
                 ));
         }
 
@@ -234,16 +225,6 @@ mod imp {
                             ));
                         },
                     );
-            }
-            // Noise canceling sensitivity level
-            {
-                let this = self.to_owned();
-                self.noise_canceling_sensitivity_level_selection
-                    .connect_noise_canceling_sensitivity_level_notify(move |sensitivity_level| {
-                        this.send_action(Action::SetNoiseCancelingSensitivityLevel(
-                            sensitivity_level.noise_canceling_sensitivity_level().0,
-                        ));
-                    });
             }
         }
     }

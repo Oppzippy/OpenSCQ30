@@ -30,7 +30,6 @@
         <file compressed="true" preprocess="xml-stripblanks">widgets/general_settings/sound_modes_type_two.ui</file>
         <file compressed="true" preprocess="xml-stripblanks">widgets/general_settings/adaptive_noise_canceling_selection.ui</file>
         <file compressed="true" preprocess="xml-stripblanks">widgets/general_settings/manual_noise_canceling_selection.ui</file>
-        <file compressed="true" preprocess="xml-stripblanks">widgets/general_settings/noise_canceling_sensitivity_level_selection.ui</file>
 
         <!-- hear_id -->
         <file compressed="true" preprocess="xml-stripblanks">widgets/hear_id/hear_id_screen.ui</file>

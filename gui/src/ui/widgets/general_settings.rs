@@ -6,7 +6,6 @@ mod general_settings_screen;
 mod manual_noise_canceling_selection;
 mod noise_canceling_mode_selection;
 mod noise_canceling_mode_type_two_selection;
-mod noise_canceling_sensitivity_level_selection;
 mod sound_modes;
 mod sound_modes_type_two;
 mod transparency_mode_selection;

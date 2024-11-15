@@ -386,11 +386,6 @@ fn delayed_initialize_application(
                                 .await
                                 .context("manual noise canceling mode selected")
                         }
-                        Action::SetNoiseCancelingSensitivityLevel(level) => {
-                            actions::set_noise_canceling_sensitivity_level(&state, level)
-                                .await
-                                .context("noise canceling sensitivity level selected")
-                        }
                         Action::Connect(mac_address) => actions::set_device(
                             &state,
                             settings.config.to_owned(),

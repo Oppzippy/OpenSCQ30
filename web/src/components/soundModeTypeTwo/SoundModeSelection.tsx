@@ -7,7 +7,6 @@ import { AmbientSoundModeSelection } from "./AmbientSoundModeSelection";
 import { NoiseCancelingModeSelection } from "./NoiseCancelingModeSelection";
 import { ManualNoiseCancelingSelection } from "./ManualNoiseCancelingSelection";
 import { AdaptiveNoiseCancelingSelection } from "./AdaptiveNoiseCancelingSelection";
-import { NoiseCancelingSensitivityLevel } from "./NoiseCancelingSensitivityLevel";
 
 interface Props {
   soundModes: SoundModesTypeTwo;
@@ -55,11 +54,6 @@ export const SoundModeSelection = React.memo(function ({
     soundModes,
     setSoundModes,
   );
-  const setNoiseCancelingAdaptiveSensitivityLevel = useSetter(
-    "noiseCancelingAdaptiveSensitivityLevel",
-    soundModes,
-    setSoundModes,
-  );
 
   return (
     <Stack spacing="2">
@@ -89,10 +83,6 @@ export const SoundModeSelection = React.memo(function ({
           onValueChanged={setManualNoiseCanceling}
         />
       )}
-      <NoiseCancelingSensitivityLevel
-        value={soundModes.noiseCancelingAdaptiveSensitivityLevel}
-        onValueChanged={setNoiseCancelingAdaptiveSensitivityLevel}
-      />
     </Stack>
   );
 });

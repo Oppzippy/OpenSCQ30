@@ -21,7 +21,6 @@ where
     pub connect_to_device_handle: RefCell<Option<JoinHandle<()>>>,
     pub set_equalizer_configuration_handle: RefCell<Option<JoinHandle<()>>>,
     pub set_custom_noise_canceling_handle: RefCell<Option<JoinHandle<()>>>,
-    pub set_noise_canceling_sensitivity_level_handle: RefCell<Option<JoinHandle<()>>>,
     pub is_refresh_in_progress: Cell<bool>,
     pub state_update_receiver: SwappableBroadcast<DeviceState>,
 }
@@ -42,7 +41,6 @@ where
                 state_update_receiver: SwappableBroadcast::new(),
                 registry,
                 state_update_sender: sender,
-                set_noise_canceling_sensitivity_level_handle: RefCell::new(None),
             }),
             receiver,
         )

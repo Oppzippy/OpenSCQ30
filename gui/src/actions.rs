@@ -18,7 +18,6 @@ mod set_hear_id;
 mod set_manual_noise_canceling;
 mod set_noise_canceling_mode;
 mod set_noise_canceling_mode_type_two;
-mod set_noise_canceling_sensitivity_level;
 mod set_transpareny_mode;
 mod state;
 
@@ -53,7 +52,6 @@ pub use set_hear_id::*;
 pub use set_manual_noise_canceling::*;
 pub use set_noise_canceling_mode::*;
 pub use set_noise_canceling_mode_type_two::*;
-pub use set_noise_canceling_sensitivity_level::*;
 pub use set_transpareny_mode::*;
 pub use state::*;
 
@@ -95,5 +93,4 @@ pub enum Action {
     },
     SetNoiseCancelingModeTypeTwo(NoiseCancelingModeTypeTwo),
     SetManualNoiseCanceling(ManualNoiseCanceling),
-    SetNoiseCancelingSensitivityLevel(u8),
 }
