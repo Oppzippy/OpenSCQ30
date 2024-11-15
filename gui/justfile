@@ -29,3 +29,6 @@ format:
 
 format-check:
     cargo fmt --check
+
+demo:
+    cargo run --features demo
