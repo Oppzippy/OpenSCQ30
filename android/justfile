@@ -32,5 +32,11 @@ format:
     fi
 
 format-check:
+    #!/usr/bin/env bash
     cargo fmt --check
-    ./gradlew ktlintCheck
+
+    if command -v ktlint > /dev/null; then
+        ktlint --editorconfig=../.editorconfig
+    else
+        ./gradlew ktlintFormat
+    fi
