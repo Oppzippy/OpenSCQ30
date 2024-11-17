@@ -135,4 +135,15 @@
     <string name="import_complete">Import Complete</string>
     <string name="unknown_error">Unknown Error</string>
     <string name="no_profiles_found">No Profiles Found</string>
+    <string name="manual_noise_canceling">Manual Noise Canceling</string>
+    <string name="adaptive_noise_canceling">Adaptive Noise Canceling</string>
+    <string name="manual">Manual</string>
+    <string name="adaptive">Adaptive</string>
+    <string name="high_noise">High Noise</string>
+    <string name="medium_noise">Medium Noise</string>
+    <string name="low_noise">Low Noise</string>
+    <string name="weak">Weak</string>
+    <string name="moderate">Moderate</string>
+    <string name="strong">Strong</string>
+    <string name="sound_modes">Sound Modes</string>
 </resources>

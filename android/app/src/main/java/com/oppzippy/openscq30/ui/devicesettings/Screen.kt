@@ -3,6 +3,7 @@ package com.oppzippy.openscq30.ui.devicesettings
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Equalizer
+import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.ImportExport
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.RadioButtonChecked
@@ -19,6 +20,11 @@ sealed class Screen {
     @Serializable
     data object General : Screen() {
         val screenInfo = ScreenInfo(this, R.string.general, Icons.Filled.Settings)
+    }
+
+    @Serializable
+    data object SoundModesTypeTwo : Screen() {
+        val screenInfo = ScreenInfo(this, R.string.sound_modes, Icons.Filled.Headphones)
     }
 
     @Serializable

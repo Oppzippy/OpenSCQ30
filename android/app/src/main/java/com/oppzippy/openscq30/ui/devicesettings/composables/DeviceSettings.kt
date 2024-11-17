@@ -27,8 +27,10 @@ import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
 import com.oppzippy.openscq30.lib.wrapper.CustomButtonModel
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.wrapper.ManualNoiseCanceling
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeType
+import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeTypeTwo
 import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
 import com.oppzippy.openscq30.lib.wrapper.TransparencyModeType
 import com.oppzippy.openscq30.ui.buttonactions.ButtonActionSelection
@@ -43,17 +45,26 @@ import com.oppzippy.openscq30.ui.importexport.ImportExportViewModel
 import com.oppzippy.openscq30.ui.quickpresets.QuickPresetScreen
 import com.oppzippy.openscq30.ui.soundmode.NoiseCancelingType
 import com.oppzippy.openscq30.ui.soundmode.SoundModeSettings
+import com.oppzippy.openscq30.ui.soundmodestypetwo.SoundModeTypeTwoSettings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeviceSettings(
     uiState: UiDeviceState.Connected,
     onBack: () -> Unit = {},
+
+    // sound modes type one
     onAmbientSoundModeChange: (ambientSoundMode: AmbientSoundMode) -> Unit = {},
-    onAmbientSoundModeCycleChange: (ambientSoundMode: AmbientSoundModeCycle) -> Unit = {},
     onTransparencyModeChange: (transparencyMode: TransparencyMode) -> Unit = {},
     onNoiseCancelingModeChange: (noiseCancelingMode: NoiseCancelingMode) -> Unit = {},
     onCustomNoiseCancelingChange: (customNoiseCanceling: UByte) -> Unit = {},
+    // sound modes type two
+    onAmbientSoundModeTypeTwoChange: (ambientSoundMode: AmbientSoundMode) -> Unit = {},
+    onTransparencyModeTypeTwoChange: (transparencyMode: TransparencyMode) -> Unit = {},
+    onNoiseCancelingModeTypeTwoChange: (noiseCancelingMode: NoiseCancelingModeTypeTwo) -> Unit = {},
+    onManualNoiseCancelingChange: (manualNoiseCanceling: ManualNoiseCanceling) -> Unit = {},
+
+    onAmbientSoundModeCycleChange: (ambientSoundMode: AmbientSoundModeCycle) -> Unit = {},
     onEqualizerConfigurationChange: (equalizerConfiguration: EqualizerConfiguration) -> Unit = {},
     onCustomButtonModelChange: (CustomButtonModel) -> Unit = {},
 ) {
@@ -61,6 +72,9 @@ fun DeviceSettings(
     val listedScreens = ArrayList<ScreenInfo>()
     if (uiState.deviceState.deviceFeatures.soundMode != null) {
         listedScreens.add(Screen.General.screenInfo)
+    }
+    if (uiState.deviceState.soundModesTypeTwo != null) {
+        listedScreens.add(Screen.SoundModesTypeTwo.screenInfo)
     }
     if (uiState.deviceState.deviceFeatures.numEqualizerChannels > 0) {
         listedScreens.add(Screen.Equalizer.screenInfo)
@@ -156,6 +170,19 @@ fun DeviceSettings(
                         onTransparencyModeChange = onTransparencyModeChange,
                         onNoiseCancelingModeChange = onNoiseCancelingModeChange,
                         onCustomNoiseCancelingChange = onCustomNoiseCancelingChange,
+                        onAmbientSoundModeCycleChange = onAmbientSoundModeCycleChange,
+                    )
+                }
+            }
+            uiState.deviceState.soundModesTypeTwo?.let { soundModes ->
+                composable<Screen.SoundModesTypeTwo> {
+                    SoundModeTypeTwoSettings(
+                        soundModes = soundModes,
+                        ambientSoundModeCycle = uiState.deviceState.ambientSoundModeCycle,
+                        onAmbientSoundModeChange = onAmbientSoundModeTypeTwoChange,
+                        onTransparencyModeChange = onTransparencyModeTypeTwoChange,
+                        onNoiseCancelingModeChange = onNoiseCancelingModeTypeTwoChange,
+                        onManualNoiseCancelingChange = onManualNoiseCancelingChange,
                         onAmbientSoundModeCycleChange = onAmbientSoundModeCycleChange,
                     )
                 }

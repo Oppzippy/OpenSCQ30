@@ -7,6 +7,7 @@ import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
 import com.oppzippy.openscq30.lib.wrapper.CustomButtonModel
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.SoundModes
+import com.oppzippy.openscq30.lib.wrapper.SoundModesTypeTwo
 import java.lang.Exception
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -114,6 +115,12 @@ class DeviceConnectionManager @Inject constructor(
     fun setSoundModes(soundModes: SoundModes) {
         scope.launch {
             device?.setSoundModes(soundModes)
+        }
+    }
+
+    fun setSoundModesTypeTwo(soundModes: SoundModesTypeTwo) {
+        scope.launch {
+            device?.setSoundModesTypeTwo(soundModes)
         }
     }
 

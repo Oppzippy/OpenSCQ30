@@ -5,7 +5,9 @@ import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
 import com.oppzippy.openscq30.lib.wrapper.CustomButtonModel
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.wrapper.ManualNoiseCanceling
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeTypeTwo
 import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
 import com.oppzippy.openscq30.ui.devicesettings.composables.DeviceSettings
 import com.oppzippy.openscq30.ui.devicesettings.composables.Disconnected
@@ -23,6 +25,10 @@ fun DeviceSettingsScreen(
     onCustomNoiseCancelingChange: (customNoiseCanceling: UByte) -> Unit = {},
     onEqualizerConfigurationChange: (equalizerConfiguration: EqualizerConfiguration) -> Unit = {},
     onCustomButtonModelChange: (CustomButtonModel) -> Unit = {},
+    onAmbientSoundModeTypeTwoChange: (ambientSoundMode: AmbientSoundMode) -> Unit = {},
+    onTransparencyModeTypeTwoChange: (transparencyMode: TransparencyMode) -> Unit = {},
+    onNoiseCancelingModeTypeTwoChange: (noiseCancelingMode: NoiseCancelingModeTypeTwo) -> Unit = {},
+    onManualNoiseCancelingChange: (manualNoiseCanceling: ManualNoiseCanceling) -> Unit = {},
 ) {
     deviceState.let { uiDeviceState ->
         when (uiDeviceState) {
@@ -37,6 +43,10 @@ fun DeviceSettingsScreen(
                     onTransparencyModeChange = onTransparencyModeChange,
                     onCustomNoiseCancelingChange = onCustomNoiseCancelingChange,
                     onCustomButtonModelChange = onCustomButtonModelChange,
+                    onAmbientSoundModeTypeTwoChange = onAmbientSoundModeTypeTwoChange,
+                    onTransparencyModeTypeTwoChange = onTransparencyModeTypeTwoChange,
+                    onNoiseCancelingModeTypeTwoChange = onNoiseCancelingModeTypeTwoChange,
+                    onManualNoiseCancelingChange = onManualNoiseCancelingChange,
                 )
             }
 

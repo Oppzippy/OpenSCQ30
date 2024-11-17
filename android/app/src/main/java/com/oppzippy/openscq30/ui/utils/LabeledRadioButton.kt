@@ -21,25 +21,29 @@ fun <T> LabeledRadioButtonGroup(
     selectedValue: T,
     values: LinkedHashMap<T, String>,
     onValueChange: (value: T) -> Unit,
+    enabled: Boolean = true,
 ) {
     Column(modifier.selectableGroup()) {
         values.forEach { (value, text) ->
-            LabeledRadioButton(text = text, selected = selectedValue == value, onClick = {
-                onValueChange(value)
-            })
+            LabeledRadioButton(
+                text = text,
+                selected = selectedValue == value,
+                enabled = enabled,
+                onClick = { onValueChange(value) },
+            )
         }
     }
 }
 
 @Composable
-private fun LabeledRadioButton(text: String, selected: Boolean, onClick: () -> Unit) {
+private fun LabeledRadioButton(text: String, selected: Boolean, onClick: () -> Unit, enabled: Boolean) {
     Row(
         Modifier
             .fillMaxWidth()
             .selectable(selected = selected, onClick = onClick, role = Role.RadioButton)
             .padding(horizontal = 2.dp, vertical = 2.dp),
     ) {
-        RadioButton(selected = selected, onClick = null)
+        RadioButton(selected = selected, onClick = null, enabled = enabled)
         Text(
             text = text,
             modifier = Modifier.padding(start = 8.dp),
@@ -52,6 +56,23 @@ private fun LabeledRadioButton(text: String, selected: Boolean, onClick: () -> U
 private fun PreviewLabeledRadioButtonGroup() {
     OpenSCQ30Theme {
         LabeledRadioButtonGroup(
+            selectedValue = 1,
+            values = linkedMapOf(
+                Pair(1, "Item 1"),
+                Pair(2, "Item 2"),
+                Pair(3, "Item 3"),
+            ),
+            onValueChange = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewDisabledLabeledRadioButtonGroup() {
+    OpenSCQ30Theme {
+        LabeledRadioButtonGroup(
+            enabled = false,
             selectedValue = 1,
             values = linkedMapOf(
                 Pair(1, "Item 1"),

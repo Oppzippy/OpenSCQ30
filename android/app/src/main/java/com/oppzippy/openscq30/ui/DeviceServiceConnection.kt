@@ -9,6 +9,7 @@ import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
 import com.oppzippy.openscq30.lib.wrapper.CustomButtonModel
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.SoundModes
+import com.oppzippy.openscq30.lib.wrapper.SoundModesTypeTwo
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import java.lang.ref.WeakReference
 import kotlinx.coroutines.CoroutineScope
@@ -72,6 +73,10 @@ class DeviceServiceConnection(private val unbind: () -> Unit) : ServiceConnectio
 
     fun setSoundModes(soundModes: SoundModes) {
         service?.get()?.connectionManager?.setSoundModes(soundModes)
+    }
+
+    fun setSoundModesTypeTwo(soundModes: SoundModesTypeTwo) {
+        service?.get()?.connectionManager?.setSoundModesTypeTwo(soundModes)
     }
 
     fun setAmbientSoundModeCycle(cycle: AmbientSoundModeCycle) {

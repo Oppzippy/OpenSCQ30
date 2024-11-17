@@ -80,6 +80,26 @@ fun OpenSCQ30Root(viewModel: DeviceSettingsViewModel = hiltViewModel()) {
                                 viewModel.setSoundModes(customNoiseCanceling = it)
                             }
                         },
+                        onAmbientSoundModeTypeTwoChange = {
+                            withErrorToast(context) {
+                                viewModel.setSoundModesTypeTwo(ambientSoundMode = it)
+                            }
+                        },
+                        onTransparencyModeTypeTwoChange = {
+                            withErrorToast(context) {
+                                viewModel.setSoundModesTypeTwo(transparencyMode = it)
+                            }
+                        },
+                        onNoiseCancelingModeTypeTwoChange = {
+                            withErrorToast(context) {
+                                viewModel.setSoundModesTypeTwo(noiseCancelingMode = it)
+                            }
+                        },
+                        onManualNoiseCancelingChange = {
+                            withErrorToast(context) {
+                                viewModel.setSoundModesTypeTwo(manualNoiseCanceling = it)
+                            }
+                        },
                         onEqualizerConfigurationChange = {
                             withErrorToast(context) {
                                 viewModel.setEqualizerConfiguration(it)

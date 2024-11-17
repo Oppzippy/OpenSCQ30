@@ -6,12 +6,16 @@ import androidx.lifecycle.AndroidViewModel
 import com.oppzippy.openscq30.android.IntentFactory
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
+import com.oppzippy.openscq30.lib.wrapper.AdaptiveNoiseCanceling
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
 import com.oppzippy.openscq30.lib.wrapper.CustomButtonModel
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.wrapper.ManualNoiseCanceling
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
+import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeTypeTwo
 import com.oppzippy.openscq30.lib.wrapper.SoundModes
+import com.oppzippy.openscq30.lib.wrapper.SoundModesTypeTwo
 import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -94,6 +98,35 @@ class DeviceSettingsViewModel @Inject constructor(
                             noiseCancelingMode ?: soundModes.noiseCancelingMode,
                             transparencyMode ?: soundModes.transparencyMode,
                             customNoiseCanceling ?: soundModes.customNoiseCanceling,
+                        ),
+                    )
+                }
+            }
+        }
+    }
+
+    fun setSoundModesTypeTwo(
+        ambientSoundMode: AmbientSoundMode? = null,
+        transparencyMode: TransparencyMode? = null,
+        adaptiveNoiseCanceling: AdaptiveNoiseCanceling? = null,
+        manualNoiseCanceling: ManualNoiseCanceling? = null,
+        noiseCancelingMode: NoiseCancelingModeTypeTwo? = null,
+        windNoiseSuppression: Boolean? = null,
+        noiseCancelingAdaptiveSensitivityLevel: UByte? = null,
+    ) {
+        deviceServiceConnection.uiDeviceStateFlow.value.let { state ->
+            if (state is UiDeviceState.Connected) {
+                state.deviceState.soundModesTypeTwo?.let { soundModes ->
+                    deviceServiceConnection.setSoundModesTypeTwo(
+                        SoundModesTypeTwo(
+                            ambientSoundMode = ambientSoundMode ?: soundModes.ambientSoundMode,
+                            transparencyMode = transparencyMode ?: soundModes.transparencyMode,
+                            adaptiveNoiseCanceling = adaptiveNoiseCanceling ?: soundModes.adaptiveNoiseCanceling,
+                            manualNoiseCanceling = manualNoiseCanceling ?: soundModes.manualNoiseCanceling,
+                            noiseCancelingMode = noiseCancelingMode ?: soundModes.noiseCancelingMode,
+                            windNoiseSuppression = windNoiseSuppression ?: soundModes.windNoiseSuppression,
+                            noiseCancelingAdaptiveSensitivityLevel = noiseCancelingAdaptiveSensitivityLevel
+                                ?: soundModes.noiseCancelingAdaptiveSensitivityLevel,
                         ),
                     )
                 }
