@@ -80,8 +80,8 @@ class OpenSCQ30RootTest {
         coEvery { soundcoreDeviceConnector.connectToSoundcoreDevice(any(), any()) } returns device
 
         composeRule.onNodeWithText("Demo Device").performClick()
-        val general = hasTextExactly(composeRule.activity.getString(R.string.general))
-        composeRule.waitUntilNodeCount(general, 1, 1500)
-        composeRule.onNode(general).assertExists()
+        val equalizer = hasTextExactly(composeRule.activity.getString(R.string.equalizer))
+        composeRule.waitUntilNodeCount(equalizer, 1, 1500)
+        composeRule.onNode(equalizer).assertExists()
     }
 }

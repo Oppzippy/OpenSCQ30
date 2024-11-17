@@ -43,7 +43,7 @@ private fun PreviewScreenSelection() {
     OpenSCQ30Theme(dynamicColor = false) {
         ScreenSelection(
             screens = listOf(
-                Screen.General.screenInfo,
+                Screen.SoundModes.screenInfo,
                 Screen.DeviceInfo.screenInfo,
                 Screen.ButtonActions.screenInfo,
                 Screen.QuickPresets.screenInfo,

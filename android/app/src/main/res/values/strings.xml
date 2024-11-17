@@ -1,6 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">OpenSCQ30</string>
-    <string name="general">General</string>
     <string name="equalizer">Equalizer</string>
     <string name="ambient_sound_mode">Ambient Sound Mode</string>
     <string name="noise_canceling_mode">Noise Canceling Mode</string>

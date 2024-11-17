@@ -71,7 +71,7 @@ fun DeviceSettings(
     val navController = rememberNavController()
     val listedScreens = ArrayList<ScreenInfo>()
     if (uiState.deviceState.deviceFeatures.soundMode != null) {
-        listedScreens.add(Screen.General.screenInfo)
+        listedScreens.add(Screen.SoundModes.screenInfo)
     }
     if (uiState.deviceState.soundModesTypeTwo != null) {
         listedScreens.add(Screen.SoundModesTypeTwo.screenInfo)
@@ -154,7 +154,7 @@ fun DeviceSettings(
                 )
             }
             uiState.deviceState.soundModes?.let { soundModes ->
-                composable<Screen.General> {
+                composable<Screen.SoundModes> {
                     val soundModeProfile =
                         uiState.deviceState.deviceFeatures.soundMode ?: return@composable
                     SoundModeSettings(

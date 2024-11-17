@@ -18,8 +18,8 @@ sealed class Screen {
     data object ScreenSelection
 
     @Serializable
-    data object General : Screen() {
-        val screenInfo = ScreenInfo(this, R.string.general, Icons.Filled.Settings)
+    data object SoundModes : Screen() {
+        val screenInfo = ScreenInfo(this, R.string.sound_modes, Icons.Filled.Headphones)
     }
 
     @Serializable
