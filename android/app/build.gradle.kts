@@ -226,15 +226,8 @@ val archTriplets = mapOf(
     "x86_64" to "x86_64-linux-android",
 )
 
-// uniffi-bindgen doesn't seem to work when building with cargo ndk, so we have to build one extra
-// time. Maybe see if we can avoid this in the future.
-tasks.create<Exec>("build-openscq30-android-for-uniffi-bindings") {
-    description = "Build openscq30_android to use as a source for uniffi-bindgen"
-    workingDir = rustProjectDir
-    commandLine("cargo", "build")
-}
 tasks.create<Exec>("generate-uniffi-bindings") {
-    dependsOn("build-openscq30-android-for-uniffi-bindings")
+    dependsOn("cargo-build-arm64-v8a")
     description = "Generate kotlin bindings using uniffi-bindgen"
     workingDir = rustWorkspaceDir
     // generate bindings
@@ -246,7 +239,7 @@ tasks.create<Exec>("generate-uniffi-bindings") {
         "--",
         "generate",
         "--library",
-        "./target/debug/libopenscq30_android.so",
+        "./target/aarch64-linux-android/release-debuginfo/libopenscq30_android.so",
         "--language",
         "kotlin",
         "--out-dir",
