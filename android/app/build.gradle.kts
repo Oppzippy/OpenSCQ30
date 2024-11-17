@@ -252,12 +252,18 @@ tasks.withType<JavaCompile> {
     dependsOn("generate-uniffi-bindings")
 }
 
+interface InjectedExecOps {
+    @get:Inject
+    val execOps: ExecOperations
+}
+
 archTriplets.forEach { (arch, target) ->
     // execute cargo metadata and get path to target directory
     tasks.create("cargo-output-dir-$arch") {
+        val injectedExecOps = project.objects.newInstance<InjectedExecOps>()
         description = "Get cargo metadata"
         val output = ByteArrayOutputStream()
-        exec {
+        injectedExecOps.execOps.exec {
             commandLine("cargo", "metadata", "--format-version", "1")
             workingDir = rustProjectDir
             standardOutput = output
