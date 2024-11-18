@@ -1,5 +1,6 @@
 use anyhow::Context;
 use openscq30_lib::api::device::{Device, DeviceRegistry};
+use tracing::instrument;
 use uuid::Uuid;
 
 use crate::{
@@ -10,6 +11,7 @@ use crate::{
 
 use super::State;
 
+#[instrument(skip_all)]
 pub fn create_quick_preset<T>(
     state: &State<T>,
     settings_file: &SettingsFile<Config>,

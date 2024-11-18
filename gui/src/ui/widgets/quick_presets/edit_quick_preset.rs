@@ -21,8 +21,8 @@ impl EditQuickPreset {
         self.imp().set_quick_preset(quick_preset);
     }
 
-    pub fn set_device_profile(&self, profile: &DeviceFeatures) {
-        self.imp().set_device_profile(profile);
+    pub fn set_device_features(&self, profile: &DeviceFeatures) {
+        self.imp().set_device_features(profile);
     }
 
     pub fn set_custom_equalizer_profiles(&self, profiles: Vec<GlibCustomEqualizerProfile>) {
@@ -32,7 +32,7 @@ impl EditQuickPreset {
 
 mod imp {
     use std::{
-        cell::RefCell,
+        cell::{Cell, RefCell},
         sync::{Arc, LazyLock},
     };
 
@@ -54,6 +54,7 @@ mod imp {
         },
     };
     use strum::IntoEnumIterator;
+    use tracing::instrument;
 
     use crate::{
         objects::{
@@ -111,13 +112,19 @@ mod imp {
         custom_equalizer_profiles_store: RefCell<Option<ListStore>>,
 
         quick_preset_name: RefCell<Option<Arc<str>>>,
+
+        freeze_handle_option_changed: Cell<bool>,
     }
 
     #[template_callbacks]
     impl EditQuickPreset {
         #[template_callback]
         fn handle_option_changed(&self) {
-            self.send_quick_preset_update();
+            let frozen = self.freeze_handle_option_changed.get();
+            if !frozen {
+                tracing::trace!("quick preset option changed");
+                self.send_quick_preset_update();
+            }
         }
     }
 
@@ -189,57 +196,70 @@ mod imp {
             );
         }
 
-        pub fn set_device_profile(&self, profile: &DeviceFeatures) {
-            if let Some(sound_mode_profile) = profile.sound_mode {
+        fn update_list_values<T: IsA<glib::Object>>(
+            row: &adw::ComboRow,
+            store: &mut ListStore,
+            values: impl IntoIterator<Item = T>,
+        ) {
+            let selection = row.selected();
+            store.remove_all();
+            store.extend(values);
+            row.set_selected(selection);
+        }
+
+        #[instrument(skip_all)]
+        pub fn set_device_features(&self, features: &DeviceFeatures) {
+            self.freeze_handle_option_changed.set(true);
+
+            if let Some(sound_mode_profile) = features.sound_mode {
                 self.ambient_sound_mode_group.set_visible(true);
-                let mut ambient_sound_modes = self.ambient_sound_modes_store.borrow_mut();
-                let ambient_sound_modes = ambient_sound_modes.as_mut().unwrap();
-                ambient_sound_modes.remove_all();
-                ambient_sound_modes.append(&GlibAmbientSoundMode::new(GlibAmbientSoundModeValue(
-                    AmbientSoundMode::Normal,
-                )));
-                ambient_sound_modes.append(&GlibAmbientSoundMode::new(GlibAmbientSoundModeValue(
-                    AmbientSoundMode::Transparency,
-                )));
-                if sound_mode_profile.noise_canceling_mode_type != NoiseCancelingModeType::None {
-                    ambient_sound_modes.append(&GlibAmbientSoundMode::new(
-                        GlibAmbientSoundModeValue(AmbientSoundMode::NoiseCanceling),
-                    ));
-                }
+                let ambient_sound_modes =
+                    [AmbientSoundMode::Normal, AmbientSoundMode::Transparency]
+                        .into_iter()
+                        .chain(
+                            (sound_mode_profile.noise_canceling_mode_type
+                                != NoiseCancelingModeType::None)
+                                .then_some(AmbientSoundMode::NoiseCanceling),
+                        )
+                        .map(GlibAmbientSoundModeValue)
+                        .map(GlibAmbientSoundMode::new);
+                Self::update_list_values(
+                    &self.ambient_sound_mode,
+                    self.ambient_sound_modes_store
+                        .borrow_mut()
+                        .as_mut()
+                        .unwrap(),
+                    ambient_sound_modes,
+                );
 
                 self.transparency_mode_group.set_visible(
                     sound_mode_profile.transparency_mode_type == TransparencyModeType::Custom,
                 );
-                let mut transparency_modes = self.transparency_modes_store.borrow_mut();
-                let transparency_modes = transparency_modes.as_mut().unwrap();
-                transparency_modes.remove_all();
-                transparency_modes.append(&GlibTransparencyMode::new(GlibTransparencyModeValue(
-                    TransparencyMode::FullyTransparent,
-                )));
-                transparency_modes.append(&GlibTransparencyMode::new(GlibTransparencyModeValue(
-                    TransparencyMode::VocalMode,
-                )));
 
                 self.noise_canceling_mode_group.set_visible(
                     sound_mode_profile.noise_canceling_mode_type != NoiseCancelingModeType::None,
                 );
-                let mut noise_canceling_modes = self.noise_canceling_modes_store.borrow_mut();
-                let noise_canceling_modes = noise_canceling_modes.as_mut().unwrap();
-                noise_canceling_modes.remove_all();
-                noise_canceling_modes.append(&GlibNoiseCancelingMode::new(
-                    GlibNoiseCancelingModeValue(NoiseCancelingMode::Transport),
-                ));
-                noise_canceling_modes.append(&GlibNoiseCancelingMode::new(
-                    GlibNoiseCancelingModeValue(NoiseCancelingMode::Indoor),
-                ));
-                noise_canceling_modes.append(&GlibNoiseCancelingMode::new(
-                    GlibNoiseCancelingModeValue(NoiseCancelingMode::Outdoor),
-                ));
-                if sound_mode_profile.noise_canceling_mode_type == NoiseCancelingModeType::Custom {
-                    noise_canceling_modes.append(&GlibNoiseCancelingMode::new(
-                        GlibNoiseCancelingModeValue(NoiseCancelingMode::Custom),
-                    ));
-                }
+                let noise_canceling_modes = [
+                    NoiseCancelingMode::Transport,
+                    NoiseCancelingMode::Indoor,
+                    NoiseCancelingMode::Outdoor,
+                ]
+                .into_iter()
+                .chain(
+                    (sound_mode_profile.noise_canceling_mode_type
+                        == NoiseCancelingModeType::Custom)
+                        .then_some(NoiseCancelingMode::Custom),
+                )
+                .map(GlibNoiseCancelingModeValue)
+                .map(GlibNoiseCancelingMode::new);
+                Self::update_list_values(
+                    &self.noise_canceling_mode,
+                    self.noise_canceling_modes_store
+                        .borrow_mut()
+                        .as_mut()
+                        .unwrap(),
+                    noise_canceling_modes,
+                );
 
                 self.custom_noise_canceling_group.set_visible(
                     sound_mode_profile.noise_canceling_mode_type == NoiseCancelingModeType::Custom,
@@ -249,15 +269,20 @@ mod imp {
             }
 
             self.equalizer_profile_group
-                .set_visible(profile.num_equalizer_channels != 0);
+                .set_visible(features.num_equalizer_channels != 0);
+
+            self.freeze_handle_option_changed.set(false);
         }
 
         pub fn set_custom_equalizer_profiles(&self, profiles: Vec<GlibCustomEqualizerProfile>) {
-            let mut profiles_store = self.custom_equalizer_profiles_store.borrow_mut();
-            let profiles_store = profiles_store.as_mut().unwrap();
-
-            profiles_store.remove_all();
-            profiles_store.extend(profiles.iter());
+            Self::update_list_values(
+                &self.custom_equalizer_profile,
+                self.custom_equalizer_profiles_store
+                    .borrow_mut()
+                    .as_mut()
+                    .unwrap(),
+                profiles.into_iter(),
+            );
         }
 
         pub fn set_quick_preset(&self, named_quick_preset: GlibNamedQuickPresetValue) {
@@ -416,7 +441,15 @@ mod imp {
                 });
 
             let ambient_sound_modes = gio::ListStore::new::<GlibAmbientSoundMode>();
-            let transparency_modes = gio::ListStore::new::<GlibTransparencyMode>();
+            let mut transparency_modes = gio::ListStore::new::<GlibTransparencyMode>();
+            transparency_modes.extend(
+                [
+                    TransparencyMode::FullyTransparent,
+                    TransparencyMode::VocalMode,
+                ]
+                .map(GlibTransparencyModeValue)
+                .map(GlibTransparencyMode::new),
+            );
             let noise_canceling_modes = gio::ListStore::new::<GlibNoiseCancelingMode>();
             let preset_equalizer_profiles = gio::ListStore::new::<GlibPresetEqualizerProfile>();
             let custom_equalizer_profiles = gio::ListStore::new::<GlibCustomEqualizerProfile>();

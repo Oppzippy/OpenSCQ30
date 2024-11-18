@@ -8,6 +8,7 @@ use std::{
 use anyhow::Context;
 use serde::{de::DeserializeOwned, Serialize};
 use tempfile::NamedTempFile;
+use tracing::instrument;
 
 #[derive(Debug)]
 pub struct SettingsFile<SettingsStateType> {
@@ -86,7 +87,9 @@ where
         Ok(buffer)
     }
 
+    #[instrument(level = "trace", skip(self), fields(path = ?self.settings_file_path))]
     fn write_file(&self, content: &str) -> anyhow::Result<()> {
+        tracing::info!("writing to settings file");
         let dir = self.settings_file_path.parent().with_context(|| {
             format!(
                 "settings file has no parent directory: {}",

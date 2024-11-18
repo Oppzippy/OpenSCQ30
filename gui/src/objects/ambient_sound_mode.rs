@@ -17,6 +17,12 @@ impl GlibAmbientSoundMode {
 #[boxed_type(name = "OpenSCQ30ValuesAmbientSoundMode")]
 pub struct GlibAmbientSoundModeValue(pub AmbientSoundMode);
 
+impl From<AmbientSoundMode> for GlibAmbientSoundModeValue {
+    fn from(value: AmbientSoundMode) -> Self {
+        Self(value)
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash, glib::Boxed, Default)]
 #[boxed_type(name = "OpenSCQ30ValuesAmbientSoundModeCycle")]
 pub struct GlibAmbientSoundModeCycleValue(pub AmbientSoundModeCycle);
