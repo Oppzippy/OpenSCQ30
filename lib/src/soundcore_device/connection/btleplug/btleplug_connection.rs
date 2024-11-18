@@ -13,7 +13,7 @@ use tokio::{
     },
     task::JoinHandle,
 };
-use tracing::{instrument, trace, trace_span, warn};
+use tracing::{instrument, trace, trace_span, warn, Instrument};
 use uuid::Uuid;
 
 use crate::{
@@ -200,21 +200,24 @@ impl Connection for BtlePlugConnection {
 
         let read_characteristic_uuid = self.read_characteristic.uuid;
 
-        self.handle.spawn(async move {
-            let span = trace_span!("inbound_packets_channel async task");
-            let _enter = span.enter();
-            while let Some(data) = notifications.next().await {
-                trace!(event = "btleplug notification", data = ?data);
-                if data.uuid == read_characteristic_uuid {
-                    if let Err(err) = sender.try_send(data.value) {
-                        if let TrySendError::Closed(_) = err {
-                            break;
+        self.handle.spawn(
+            async move {
+                while let Some(data) = notifications.next().await {
+                    trace!(event = "btleplug notification", ?data);
+                    if data.uuid == read_characteristic_uuid {
+                        if let Err(err) = sender.try_send(data.value) {
+                            if let TrySendError::Closed(_) = err {
+                                break;
+                            }
+                            warn!("error forwarding packet to channel: {err}",)
                         }
-                        warn!("error forwarding packet to channel: {err}",)
                     }
                 }
             }
-        });
+            .instrument(trace_span!(
+                "btleplug_connection inbound_packets_channel reader"
+            )),
+        );
 
         Ok(receiver)
     }
