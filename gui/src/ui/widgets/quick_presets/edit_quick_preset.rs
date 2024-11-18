@@ -265,7 +265,10 @@ mod imp {
                     sound_mode_profile.noise_canceling_mode_type == NoiseCancelingModeType::Custom,
                 );
             } else {
-                self.ambient_sound_mode_group.set_visible(true);
+                self.ambient_sound_mode_group.set_visible(false);
+                self.transparency_mode_group.set_visible(false);
+                self.noise_canceling_mode_group.set_visible(false);
+                self.custom_noise_canceling_group.set_visible(false);
             }
 
             self.equalizer_profile_group
