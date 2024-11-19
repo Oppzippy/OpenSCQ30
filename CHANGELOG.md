@@ -13,6 +13,19 @@
 
 -   Fix Liberty 2 Pro (A3930) packet parse error
 
+### GUI
+
+#### Fixes
+
+-   Quick presets resetting to default values
+-   Sound mode options unsupported by the device visible in quick presets
+
+### Android
+
+#### Fixes
+
+-   Rename General menu to Sound Modes
+
 ## v1.13.1
 
 ### GUI
