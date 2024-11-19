@@ -96,11 +96,18 @@ impl NativeSoundcoreDevice {
     }
 
     pub async fn mac_address(&self) -> Result<String, DeviceError> {
-        self.device
-            .mac_address()
+        let device = self.device.clone();
+
+        self.runtime
+            .spawn(async move {
+                device
+                    .mac_address()
+                    .await
+                    .map(|mac_address| mac_address.to_string())
+                    .map_err(DeviceError::from)
+            })
             .await
-            .map(|mac_address| mac_address.to_string())
-            .map_err(Into::into)
+            .unwrap()
     }
 
     pub fn service_uuid(&self) -> Uuid {
@@ -108,64 +115,114 @@ impl NativeSoundcoreDevice {
     }
 
     pub async fn name(&self) -> Result<String, DeviceError> {
-        self.device.name().await.map_err(Into::into)
+        let device = self.device.clone();
+
+        self.runtime
+            .spawn(async move { device.name().await.map_err(DeviceError::from) })
+            .await
+            .unwrap()
     }
 
     pub fn connection_status(&self, _observer: Box<dyn NativeConnectionStatusObserver>) {}
 
     pub async fn state(&self) -> DeviceState {
-        self.device.state().await
+        let device = self.device.clone();
+
+        self.runtime
+            .spawn(async move { device.state().await })
+            .await
+            .unwrap()
     }
 
     pub async fn set_sound_modes(&self, sound_modes: SoundModes) -> Result<(), DeviceError> {
-        self.device
-            .set_sound_modes(sound_modes)
+        let device = self.device.clone();
+
+        self.runtime
+            .spawn(async move {
+                device
+                    .set_sound_modes(sound_modes)
+                    .await
+                    .map_err(DeviceError::from)
+            })
             .await
-            .map_err(Into::into)
+            .unwrap()
     }
 
     pub async fn set_sound_modes_type_two(
         &self,
         sound_modes: SoundModesTypeTwo,
     ) -> Result<(), DeviceError> {
-        self.device
-            .set_sound_modes_type_two(sound_modes)
+        let device = self.device.clone();
+
+        self.runtime
+            .spawn(async move {
+                device
+                    .set_sound_modes_type_two(sound_modes)
+                    .await
+                    .map_err(DeviceError::from)
+            })
             .await
-            .map_err(Into::into)
+            .unwrap()
     }
 
     pub async fn set_ambient_sound_mode_cycle(
         &self,
         cycle: AmbientSoundModeCycle,
     ) -> Result<(), DeviceError> {
-        self.device
-            .set_ambient_sound_mode_cycle(cycle)
+        let device = self.device.clone();
+
+        self.runtime
+            .spawn(async move {
+                device
+                    .set_ambient_sound_mode_cycle(cycle)
+                    .await
+                    .map_err(DeviceError::from)
+            })
             .await
-            .map_err(Into::into)
+            .unwrap()
     }
 
     pub async fn set_equalizer_configuration(
         &self,
         equalizer_configuration: EqualizerConfiguration,
     ) -> Result<(), DeviceError> {
-        self.device
-            .set_equalizer_configuration(equalizer_configuration)
+        let device = self.device.clone();
+
+        self.runtime
+            .spawn(async move {
+                device
+                    .set_equalizer_configuration(equalizer_configuration)
+                    .await
+                    .map_err(DeviceError::from)
+            })
             .await
-            .map_err(Into::into)
+            .unwrap()
     }
 
     pub async fn set_hear_id(&self, hear_id: HearId) -> Result<(), DeviceError> {
-        self.device.set_hear_id(hear_id).await.map_err(Into::into)
+        let device = self.device.clone();
+
+        self.runtime
+            .spawn(async move { device.set_hear_id(hear_id).await.map_err(DeviceError::from) })
+            .await
+            .unwrap()
     }
 
     pub async fn set_custom_button_model(
         &self,
         custom_button_model: CustomButtonModel,
     ) -> Result<(), DeviceError> {
-        self.device
-            .set_custom_button_model(custom_button_model)
+        let device = self.device.clone();
+
+        self.runtime
+            .spawn(async move {
+                device
+                    .set_custom_button_model(custom_button_model)
+                    .await
+                    .map_err(DeviceError::from)
+            })
             .await
-            .map_err(Into::into)
+            .unwrap()
     }
 }
 
