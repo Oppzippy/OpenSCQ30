@@ -50,29 +50,21 @@ export function DeviceSettings({
   return (
     <Masonry columns={{ sx: 1, lg: 2 }}>
       {[
-        <SoundModeSelectionSection
-          displayState={displayState}
-          setDisplayState={setDisplayState}
-        />,
-        <SoundModeTypeTwoSelectionSection
-          displayState={displayState}
-          setDisplayState={setDisplayState}
-        />,
-        <EqualizerSection
-          displayState={displayState}
-          setDisplayState={setDisplayState}
-        />,
-        <ButtonSettingsSection
-          displayState={displayState}
-          setDisplayState={setDisplayState}
-        />,
+        // Regular function call so we can filter out nulls
+        SoundModeSelectionSection({ displayState, setDisplayState }),
+        SoundModeTypeTwoSelectionSection({ displayState, setDisplayState }),
+        EqualizerSection({ displayState, setDisplayState }),
+        ButtonSettingsSection({ displayState, setDisplayState }),
+
         <DeviceInfo deviceState={displayState} />,
         <ImportExport />,
-      ].map((component, index) => (
-        <Box padding={2} marginBottom={2} border="1px solid grey" key={index}>
-          {component}
-        </Box>
-      ))}
+      ]
+        .filter((component) => component)
+        .map((component, index) => (
+          <Box padding={2} marginBottom={2} border="1px solid grey" key={index}>
+            {component}
+          </Box>
+        ))}
     </Masonry>
   );
 }
