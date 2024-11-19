@@ -1414,7 +1414,7 @@ checksum = "1261fe7e33c73b354eab43b1273a57c8f967d0391e80353e51f764ac02cf6775"
 
 [[package]]
 name = "openscq30_android"
-version = "1.13.1"
+version = "1.14.0"
 dependencies = [
  "android_logger",
  "anyhow",
@@ -1433,7 +1433,7 @@ dependencies = [
 
 [[package]]
 name = "openscq30_cli"
-version = "1.13.1"
+version = "1.14.0"
 dependencies = [
  "assert_cmd",
  "clap",
@@ -1450,7 +1450,7 @@ dependencies = [
 
 [[package]]
 name = "openscq30_gui"
-version = "1.13.1"
+version = "1.14.0"
 dependencies = [
  "anyhow",
  "dirs",
@@ -1479,7 +1479,7 @@ dependencies = [
 
 [[package]]
 name = "openscq30_lib"
-version = "1.13.1"
+version = "1.14.0"
 dependencies = [
  "btleplug",
  "float-cmp",
@@ -1503,7 +1503,7 @@ dependencies = [
 
 [[package]]
 name = "openscq30_lib_protobuf"
-version = "1.13.1"
+version = "1.14.0"
 dependencies = [
  "bytes",
  "openscq30_lib",
@@ -1513,7 +1513,7 @@ dependencies = [
 
 [[package]]
 name = "openscq30_web_wasm"
-version = "1.13.1"
+version = "1.14.0"
 dependencies = [
  "console_error_panic_hook",
  "js-sys",
@@ -2335,7 +2335,7 @@ dependencies = [
 
 [[package]]
 name = "uniffi-bindgen"
-version = "1.13.1"
+version = "1.14.0"
 dependencies = [
  "uniffi",
 ]

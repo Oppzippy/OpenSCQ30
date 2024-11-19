@@ -45,6 +45,21 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.14.0" date="2024-11-19">
+            <description>
+                <p>Features</p>
+                <ul>
+                    <li>Add support for Space A40 (A3936)</li>
+                    <li>Add support for Vortex (A3031)</li>
+                </ul>
+                <p>Fixes</p>
+                <ul>
+                    <li>Fix Liberty 2 Pro (A3930) packet parse error</li>
+                    <li>Quick presets resetting to default values</li>
+                    <li>Sound mode options unsupported by the device visible in quick presets</li>
+                </ul> 
+            </description>
+        </release>
         <release version="1.13.1" date="2024-08-31">
             <description>
                 <p>Fixes</p>
