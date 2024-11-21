@@ -19,7 +19,7 @@ use crate::{
     },
 };
 
-use super::packets::A3936StateUpdatePacket;
+use super::packets::{A3936SetCustomButtonModelPacket, A3936StateUpdatePacket};
 
 pub(crate) const A3936_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     features: DeviceFeatures {
@@ -151,7 +151,31 @@ impl DeviceImplementation for A3936Implementation {
         state: DeviceState,
         custom_button_model: CustomButtonModel,
     ) -> crate::Result<CommandResponse> {
-        standard::implementation::set_custom_button_model(state, custom_button_model)
+        if !state.device_features.has_custom_button_model {
+            return Err(crate::Error::FeatureNotSupported {
+                feature_name: "custom button model",
+            });
+        }
+
+        let prev_custom_button_model =
+            state.custom_button_model.ok_or(crate::Error::MissingData {
+                name: "custom button model",
+            })?;
+        if custom_button_model == prev_custom_button_model {
+            return Ok(CommandResponse {
+                packets: Vec::new(),
+                new_state: state,
+            });
+        }
+
+        let packet = A3936SetCustomButtonModelPacket::new(custom_button_model.into());
+        Ok(CommandResponse {
+            packets: vec![packet.into()],
+            new_state: DeviceState {
+                custom_button_model: Some(custom_button_model),
+                ..state
+            },
+        })
     }
 
     fn set_ambient_sound_mode_cycle(

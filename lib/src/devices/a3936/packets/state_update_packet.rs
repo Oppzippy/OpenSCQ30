@@ -1,12 +1,12 @@
 use nom::{
-    bytes::complete::take,
+    bytes::complete::{tag, take},
     combinator::all_consuming,
     error::{context, ContextError, ParseError},
     number::complete::le_u8,
 };
 
 use crate::devices::{
-    a3936::device_profile::A3936_DEVICE_PROFILE,
+    a3936::{device_profile::A3936_DEVICE_PROFILE, structures::A3936CustomButtonModel},
     standard::{
         packets::{
             inbound::state_update_packet::StateUpdatePacket,
@@ -14,8 +14,8 @@ use crate::devices::{
         },
         quirks::TwoExtraEqBandsValues,
         structures::{
-            AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomButtonModel, CustomHearId,
-            DualBattery, FirmwareVersion, Gender, HostDevice, SerialNumber, SoundModesTypeTwo,
+            AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
+            FirmwareVersion, HostDevice, SerialNumber, SoundModesTypeTwo,
             StereoEqualizerConfiguration,
         },
     },
@@ -35,19 +35,16 @@ pub struct A3936StateUpdatePacket {
     pub age_range: AgeRange,
     pub custom_hear_id: CustomHearId,
     pub sound_modes: SoundModesTypeTwo,
-    pub gender: Gender,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
-    pub custom_button_model: CustomButtonModel,
+    pub custom_button_model: A3936CustomButtonModel,
     pub touch_tone: bool,
     pub charging_case_battery: BatteryLevel,
     pub color: u8,
     pub ldac: bool,
     pub supports_two_cnn_switch: bool,
     pub auto_power_off_switch: bool,
-    pub auto_power_off_index: bool,
+    pub auto_power_off_index: u8,
     pub game_mode_switch: bool,
-    pub wear_detection: bool,
-    pub side_tone: bool,
 }
 
 impl From<A3936StateUpdatePacket> for StateUpdatePacket {
@@ -59,9 +56,9 @@ impl From<A3936StateUpdatePacket> for StateUpdatePacket {
             sound_modes: None,
             sound_modes_type_two: Some(packet.sound_modes),
             age_range: Some(packet.age_range),
-            gender: Some(packet.gender),
+            gender: None,
             hear_id: Some(packet.custom_hear_id.into()),
-            custom_button_model: Some(packet.custom_button_model),
+            custom_button_model: Some(packet.custom_button_model.into()),
             firmware_version: None,
             serial_number: None,
             ambient_sound_mode_cycle: None,
@@ -77,27 +74,30 @@ impl A3936StateUpdatePacket {
             "a3936 state update packet",
             all_consuming(|input| {
                 let (input, host_device) = HostDevice::take(input)?;
+                let remaining = input.len();
                 let (input, tws_status) = take_bool(input)?;
                 let (input, battery) = DualBattery::take(input)?;
                 let (input, left_firmware) = FirmwareVersion::take(input)?;
                 let (input, right_firmware) = FirmwareVersion::take(input)?;
                 let (input, serial_number) = SerialNumber::take(input)?;
                 let (input, (equalizer_configuration, extra_bands)) =
-                    StereoEqualizerConfiguration::take_with_two_extra_bands(10)(input)?;
-                let (input, gender) = Gender::take(input)?;
+                    StereoEqualizerConfiguration::take_with_two_extra_bands(8)(input)?;
                 let (input, age_range) = AgeRange::take(input)?;
-                let (input, custom_hear_id) = CustomHearId::take_without_music_type(8)(input)?;
+                let (input, custom_hear_id) = CustomHearId::take_without_music_type(10)(input)?;
 
                 // For some reason, an offset value is taken before the custom button model, which refers to how many bytes
                 // until the next data to be read. This offset includes the length of the custom button model. Presumably,
                 // there are some extra bytes between the button model and the beginning of the next data to be parsed?
                 let (input, skip_offset) = le_u8(input)?;
                 let remaining_before_button_model = input.len();
-                let (input, custom_button_model) = CustomButtonModel::take(input)?;
+                let (input, custom_button_model) = A3936CustomButtonModel::take(input)?;
+                println!("remaining: {}", remaining - input.len() + 10);
                 let button_model_size = remaining_before_button_model - input.len();
                 let (input, _) = take(
                     (skip_offset as usize)
-                        .checked_sub(button_model_size)
+                        // subtract an extra 1 since we want the number of bytes to discard, not
+                        // the offset to the first byte to read
+                        .checked_sub(button_model_size + 2)
                         .unwrap_or_default(),
                 )(input)?;
 
@@ -109,10 +109,9 @@ impl A3936StateUpdatePacket {
                 let (input, ldac) = take_bool(input)?;
                 let (input, supports_two_cnn_switch) = take_bool(input)?;
                 let (input, auto_power_off_switch) = take_bool(input)?;
-                let (input, auto_power_off_index) = take_bool(input)?;
+                let (input, auto_power_off_index) = le_u8(input)?;
                 let (input, game_mode_switch) = take_bool(input)?;
-                let (input, wear_detection) = take_bool(input)?;
-                let (input, side_tone) = take_bool(input)?;
+                let (input, _) = tag([0xFF; 12])(input)?;
                 Ok((
                     input,
                     A3936StateUpdatePacket {
@@ -128,7 +127,6 @@ impl A3936StateUpdatePacket {
                         custom_hear_id,
                         ambient_sound_mode_cycle,
                         sound_modes,
-                        gender,
                         custom_button_model,
                         touch_tone,
                         charging_case_battery,
@@ -138,11 +136,38 @@ impl A3936StateUpdatePacket {
                         auto_power_off_switch,
                         auto_power_off_index,
                         game_mode_switch,
-                        wear_detection,
-                        side_tone,
                     },
                 ))
             }),
         )(input)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use nom::error::VerboseError;
+
+    use crate::devices::standard::packets::inbound::take_inbound_packet_header;
+
+    use super::*;
+
+    #[test]
+    pub fn it_parses_a_known_good_packet() {
+        let input = &[
+            0x9, 0xff, 0x0, 0x0, 0x1, 0x1, 0x1, 0x99, 0x0, 0x1, 0x1, 0x5, 0x5, 0x1, 0x1, 0x30,
+            0x34, 0x2e, 0x31, 0x39, 0x30, 0x34, 0x2e, 0x31, 0x39, 0x33, 0x39, 0x33, 0x36, 0x61,
+            0x34, 0x37, 0x37, 0x35, 0x38, 0x34, 0x37, 0x30, 0x33, 0x36, 0x36, 0x0, 0x0, 0x78, 0x78,
+            0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x3c, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78,
+            0x78, 0x78, 0x78, 0x3c, 0x1, 0x0, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x3c,
+            0x3c, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x3c, 0x3c, 0x65, 0x26, 0x8d,
+            0xaf, 0x2, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x3c, 0x3c, 0x78, 0x78,
+            0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x3c, 0x3c, 0x0, 0x0, 0xe, 0x1, 0x11, 0x1, 0x0,
+            0x11, 0x63, 0x11, 0x66, 0x11, 0x49, 0x11, 0x44, 0x7, 0x2, 0x32, 0x0, 0x1, 0x0, 0x0,
+            0x0, 0x4, 0x31, 0x0, 0x1, 0x1, 0x0, 0x0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+            0xff, 0xff, 0xff, 0xff, 0xff, 0xdd,
+        ];
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
+        A3936StateUpdatePacket::take::<VerboseError<_>>(body)
+            .expect("it should parse successfully");
     }
 }

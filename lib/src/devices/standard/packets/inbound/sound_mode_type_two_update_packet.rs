@@ -50,6 +50,17 @@ mod tests {
     };
 
     #[test]
+    fn it_parses_a_known_good_packet() {
+        let input: &[u8] = &[
+            0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x10, 0x00, 0x01, 0x30, 0x00, 0x01, 0x00,
+            0x00, 0x52,
+        ];
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
+        SoundModeTypeTwoUpdatePacket::take::<VerboseError<_>>(body)
+            .expect("parsing should succeed");
+    }
+
+    #[test]
     fn it_parses_valid_packet() {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x02, 0x22, 0x01, 0x01, 0x03,

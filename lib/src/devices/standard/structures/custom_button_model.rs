@@ -126,12 +126,13 @@ impl NoTwsButtonAction {
 }
 
 #[derive(
-    Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, FromRepr, EnumIter, AsRefStr,
+    Default, Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, FromRepr, EnumIter, AsRefStr,
 )]
 #[repr(u8)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum ButtonAction {
+    #[default]
     VolumeUp = 0,
     VolumeDown = 1,
     PreviousSong = 2,

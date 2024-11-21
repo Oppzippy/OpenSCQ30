@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Fixes
+
+-   Fix Space A40 (A3936) state update packet parsing
+
 ## v1.14.0
 
 ### General
