@@ -145,20 +145,23 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - name: Set ANDROID_NDK_HOME to version specified in build.gradle.kts
-        run: |
-          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/$(./android/scripts/get-ndk-version.sh)" >> "$GITHUB_ENV"
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Get build tool versions
+        id: build_tool_versions
+        run: sed "s/ /=/" .build-tool-versions >> "$GITHUB_OUTPUT"
+      - name: Set ANDROID_NDK_HOME to specified version
+        run: echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ steps.build_tool_versions.outputs.ndk }}" >> "$GITHUB_ENV"
+      - uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: ${{ steps.build_tool_versions.outputs.rust }}
           targets: armv7-linux-androideabi,aarch64-linux-android,i686-linux-android,x86_64-linux-android
       - name: Install protobuf compiler
         run: sudo apt-get install protobuf-compiler
       - uses: actions/setup-java@v4
         with:
-          distribution: temurin # See 'Supported distributions' for available options
-          java-version: 17
+          distribution: temurin
+          java-version: ${{ steps.build_tool_versions.outputs.jdk }}
       - name: Install cargo-ndk
-        run: cargo install cargo-ndk
+        run: cargo install cargo-ndk --version ${{ steps.build_tool_versions.outputs.cargo-ndk }}
       - name: Build
         run: ./gradlew --no-daemon assembleBluetoothRelease
         working-directory: android
