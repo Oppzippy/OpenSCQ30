@@ -1,0 +1,45 @@
+name: Install android build tools
+description: Installs correct versions of build tools according to .build-tool-versions
+
+inputs:
+  cache:
+    description: Cache build artifacts?
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Get build tool versions
+      id: build_tool_versions
+      shell: bash
+      run: sed "s/ /=/" .build-tool-versions >> "$GITHUB_OUTPUT"
+
+    - name: Set ANDROID_NDK_HOME to specified version
+      shell: bash
+      run: echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ steps.build_tool_versions.outputs.ndk }}" >> "$GITHUB_ENV"
+
+    - uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ steps.build_tool_versions.outputs.rust }}
+        targets: armv7-linux-androideabi,aarch64-linux-android,i686-linux-android,x86_64-linux-android
+
+    - name: Cache cargo artifacts
+      if: inputs.cache == 'true'
+      uses: Swatinem/rust-cache@v2
+
+    - name: Install protobuf compiler
+      shell: bash
+      run: sudo apt-get install protobuf-compiler
+
+    - uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: ${{ steps.build_tool_versions.outputs.jdk }}
+
+    - name: Cache gradle artifacts
+      if: inputs.cache == 'true'
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Install cargo-ndk
+      shell: bash
+      run: cargo install cargo-ndk --version ${{ steps.build_tool_versions.outputs.cargo-ndk }}
