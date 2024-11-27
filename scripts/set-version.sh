@@ -15,6 +15,7 @@ set_version_in_build_gradle() {
     sed --in-place --regexp-extended --null-data "s/(\n *versionName *= *\")([0-9\.]+)(\"\n)/\1$2\3/" "$1"
     next_version_code=$(($(git tag | wc -l) + 1))
     sed --in-place --regexp-extended --null-data "s/(\n *versionCode *= *)([0-9]+)(\n)/\1$next_version_code\3/" "$1"
+    echo $next_version_code
 }
 
 set_version_in_package_json() {
@@ -84,6 +85,52 @@ add_version_to_appstream_metainfo() {
     fi
 }
 
+add_version_to_fastlane() {
+    fastlane_changelog_file="$1"
+    version="$2"
+    changelog_file="$3"
+    changelog_markdown=$(get_changelog_for_version "$changelog_file" "$version")
+    printf '%s' "$changelog_markdown" | gawk '
+        # Skip empty lines
+        ! /\W/ {
+            next
+        }
+        # GUI, Android, etc.
+        /^### / {
+            category = gensub(/^### (.*)/, "\\1", "g", $0)
+            next
+        }
+        # Features, Fixes, etc
+        /^#### / {
+            subcategory = gensub(/^#### (.*)/, "\\1", "g", $0)
+            next
+        }
+        {
+            if (category == "General" || category == "Android") {
+                # Trim hyphen for markdown unordered lists
+                line_text = gensub(/^- +(.*)/, "\\1", "g", $0)
+                if (line_text) {
+                    sections[subcategory][length(sections[subcategory])+1] = line_text
+                }
+            }
+        }
+        END {
+            skipped_first_newline = 0
+            for (s in sections) {
+                if (skipped_first_newline == 0) {
+                    skipped_first_newline = 1
+                } else {
+                    print ""
+                }
+                print "* " s
+                for (i = 1; i <= length(sections[s]); i++) {
+                    print "  - " sections[s][i]
+                }
+            }
+        }
+    ' > $fastlane_changelog_file
+}
+
 get_changelog_for_version() {
     changelog_file="$1"
     version="$2"
@@ -104,8 +151,9 @@ fi
 
 set_version_in_changelog CHANGELOG.md "$1"
 set_version_in_cargo_toml Cargo.toml "$1"
-set_version_in_build_gradle android/app/build.gradle.kts "$1"
+version_code=$(set_version_in_build_gradle android/app/build.gradle.kts "$1")
 set_version_in_package_json web/package.json "$1"
 set_version_in_appimage_builder packaging/appimage/AppImageBuilder.yml "$1"
 set_version_in_iss packaging/windows/setup.iss "$1"
 add_version_to_appstream_metainfo gui/resources/com.oppzippy.OpenSCQ30.metainfo.xml "$1" CHANGELOG.md
+add_version_to_fastlane "fastlane/metadata/android/en-US/changelogs/$version_code.txt" "$1" CHANGELOG.md

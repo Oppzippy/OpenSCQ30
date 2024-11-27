@@ -1,0 +1,1 @@
+Cross platform application for controlling settings of Soundcore headphones

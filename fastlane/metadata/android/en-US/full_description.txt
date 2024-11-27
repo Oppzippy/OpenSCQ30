@@ -1,0 +1,1 @@
+OpenSCQ30 is a cross platform application for controlling settings for Soundcore headphones and earbuds.<br><br>Supports settings such as:<ul><li>Sound Modes</li><li>Equalizer</li><li>Controls</li></ul>
