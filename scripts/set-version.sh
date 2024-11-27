@@ -128,7 +128,7 @@ add_version_to_fastlane() {
                 }
             }
         }
-    ' > $fastlane_changelog_file
+    ' > "$fastlane_changelog_file"
 }
 
 get_changelog_for_version() {
