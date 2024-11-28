@@ -297,7 +297,7 @@ fn delayed_initialize_application(
             }
             Some(openscq30_lib::Error::ParseError { .. }) => {
                 deselect_device();
-                send_toast(format!("Error Parsing Response. See stderr."));
+                send_toast("Error Parsing Response. See stderr.".to_string());
             }
             Some(openscq30_lib::Error::NotConnected { .. }) => {
                 deselect_device();

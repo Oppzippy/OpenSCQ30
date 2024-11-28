@@ -88,7 +88,7 @@ impl Config {
             }
             name.truncate(original_name_len);
         }
-        return None;
+        None
     }
 
     pub fn remove_custom_profile(&mut self, name: &str) {

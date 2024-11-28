@@ -112,7 +112,7 @@ where
             }
         };
 
-        let mut file = NamedTempFile::new_in(&dir).with_context(|| {
+        let mut file = NamedTempFile::new_in(dir).with_context(|| {
             format!(
                 "create temp file in same dir as settings file to write to before persisting: {}",
                 dir.to_string_lossy()

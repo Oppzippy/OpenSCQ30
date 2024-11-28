@@ -284,7 +284,7 @@ mod imp {
                     .borrow_mut()
                     .as_mut()
                     .unwrap(),
-                profiles.into_iter(),
+                profiles,
             );
         }
 

@@ -16,7 +16,7 @@ impl Equalizer {
     }
 
     pub fn volume_adjustments(&self) -> VolumeAdjustments {
-        return self.imp().volume_adjustments();
+        self.imp().volume_adjustments()
     }
 
     pub fn set_volumes(&self, volumes: &[f64]) {
