@@ -21,7 +21,7 @@ impl<'a> SetEqualizerPacket<'a> {
     }
 }
 
-impl<'a> OutboundPacket for SetEqualizerPacket<'a> {
+impl OutboundPacket for SetEqualizerPacket<'_> {
     fn command(&self) -> Command {
         Self::COMMAND
     }

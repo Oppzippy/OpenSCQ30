@@ -12,7 +12,7 @@ pub struct SetEqualizerAndCustomHearIdPacket<'a> {
     pub custom_hear_id: &'a CustomHearId,
 }
 
-impl<'a> OutboundPacket for SetEqualizerAndCustomHearIdPacket<'a> {
+impl OutboundPacket for SetEqualizerAndCustomHearIdPacket<'_> {
     fn command(&self) -> Command {
         if self.age_range.supports_hear_id() {
             Command::new([0x08, 0xee, 0x00, 0x00, 0x00, 0x03, 0x87])

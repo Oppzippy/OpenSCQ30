@@ -20,7 +20,7 @@ pub struct TwoExtraEqBandSetEqualizerPacket<'a> {
     pub extra_band_values: TwoExtraEqBandsValues,
 }
 
-impl<'a> OutboundPacket for TwoExtraEqBandSetEqualizerPacket<'a> {
+impl OutboundPacket for TwoExtraEqBandSetEqualizerPacket<'_> {
     fn command(&self) -> Command {
         SetEqualizerPacket::COMMAND
     }

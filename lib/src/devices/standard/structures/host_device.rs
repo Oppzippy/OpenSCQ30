@@ -21,6 +21,6 @@ impl HostDevice {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], HostDevice, E> {
-        context("host device", map_opt(le_u8, |i| HostDevice::from_repr(i)))(input)
+        context("host device", map_opt(le_u8, HostDevice::from_repr))(input)
     }
 }

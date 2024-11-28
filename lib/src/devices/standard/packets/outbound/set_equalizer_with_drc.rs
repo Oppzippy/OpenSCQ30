@@ -20,7 +20,7 @@ impl<'a> SetEqualizerWithDrcPacket<'a> {
     }
 }
 
-impl<'a> OutboundPacket for SetEqualizerWithDrcPacket<'a> {
+impl OutboundPacket for SetEqualizerWithDrcPacket<'_> {
     fn command(&self) -> Command {
         Command::new([0x08, 0xEE, 0x00, 0x00, 0x00, 0x02, 0x83])
     }
