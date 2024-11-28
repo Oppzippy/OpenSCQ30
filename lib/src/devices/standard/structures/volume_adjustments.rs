@@ -2,6 +2,7 @@ use nom::{
     bytes::complete::take,
     combinator::map,
     error::{context, ContextError, ParseError},
+    IResult,
 };
 use std::{array, ops::Range, sync::Arc};
 
@@ -9,8 +10,6 @@ use float_cmp::{ApproxEq, F64Margin};
 use ordered_float::OrderedFloat;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-
-use crate::devices::standard::packets::parsing::ParseResult;
 
 #[derive(Clone, Debug, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -73,7 +72,7 @@ impl VolumeAdjustments {
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         num_bands: usize,
-    ) -> impl Fn(&'a [u8]) -> ParseResult<VolumeAdjustments, E> {
+    ) -> impl Fn(&'a [u8]) -> IResult<&'a [u8], VolumeAdjustments, E> {
         move |input| {
             context(
                 "volume adjustment",

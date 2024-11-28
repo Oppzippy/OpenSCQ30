@@ -4,15 +4,13 @@ use nom::{
     error::{context, ContextError, ParseError},
     number::complete::le_u8,
     sequence::{pair, tuple},
+    IResult,
 };
 
 use crate::devices::{
     a3933::device_profile::A3933_DEVICE_PROFILE,
     standard::{
-        packets::{
-            inbound::state_update_packet::StateUpdatePacket,
-            parsing::{take_bool, ParseResult},
-        },
+        packets::{inbound::state_update_packet::StateUpdatePacket, parsing::take_bool},
         quirks::TwoExtraEqBandsValues,
         structures::{
             AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomButtonModel, CustomHearId,
@@ -70,7 +68,7 @@ impl From<A3933StateUpdatePacket> for StateUpdatePacket {
 impl A3933StateUpdatePacket {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<A3933StateUpdatePacket, E> {
+    ) -> IResult<&'a [u8], A3933StateUpdatePacket, E> {
         context(
             "a3933 state update packet",
             all_consuming(|input| {
@@ -148,7 +146,7 @@ impl A3933StateUpdatePacket {
 
     fn take_optional_extra_data<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<(bool, bool, bool, BatteryLevel, u8, u8, bool), E> {
+    ) -> IResult<&'a [u8], (bool, bool, bool, BatteryLevel, u8, u8, bool), E> {
         context(
             "extra data",
             tuple((

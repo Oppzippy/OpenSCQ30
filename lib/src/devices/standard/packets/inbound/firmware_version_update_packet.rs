@@ -2,12 +2,10 @@ use nom::{
     combinator::{all_consuming, map},
     error::{context, ContextError, ParseError},
     sequence::tuple,
+    IResult,
 };
 
-use crate::devices::standard::{
-    packets::parsing::ParseResult,
-    structures::{Command, FirmwareVersion, SerialNumber},
-};
+use crate::devices::standard::structures::{Command, FirmwareVersion, SerialNumber};
 
 use super::InboundPacket;
 
@@ -27,7 +25,7 @@ impl InboundPacket for FirmwareVersionUpdatePacket {
 
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<FirmwareVersionUpdatePacket, E> {
+    ) -> IResult<&'a [u8], FirmwareVersionUpdatePacket, E> {
         context(
             "FirmwareVersionUpdatePacket",
             all_consuming(map(

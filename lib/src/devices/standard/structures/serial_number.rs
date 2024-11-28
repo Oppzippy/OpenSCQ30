@@ -1,13 +1,14 @@
 use nom::{
     combinator::map_opt,
     error::{context, ContextError, ParseError},
+    IResult,
 };
 use std::{fmt::Display, sync::Arc};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::devices::standard::packets::parsing::{take_str, ParseResult};
+use crate::devices::standard::packets::parsing::take_str;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -20,7 +21,7 @@ impl SerialNumber {
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<SerialNumber, E> {
+    ) -> IResult<&'a [u8], SerialNumber, E> {
         context(
             "serial number",
             map_opt(take_str(16usize), |s| {

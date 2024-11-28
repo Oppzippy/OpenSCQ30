@@ -2,11 +2,10 @@ use nom::{
     combinator::map,
     error::{context, ContextError, ParseError},
     sequence::tuple,
+    IResult,
 };
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-
-use crate::devices::standard::packets::parsing::ParseResult;
 
 use super::{AmbientSoundMode, CustomNoiseCanceling, NoiseCancelingMode, TransparencyMode};
 
@@ -23,7 +22,7 @@ pub struct SoundModes {
 impl SoundModes {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<SoundModes, E> {
+    ) -> IResult<&'a [u8], SoundModes, E> {
         context(
             "group of sound modes",
             map(

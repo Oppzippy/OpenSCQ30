@@ -4,11 +4,12 @@ use nom::{
     error::{context, ContextError, ParseError},
     number::complete::le_i32,
     sequence::tuple,
+    IResult,
 };
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::devices::standard::packets::parsing::{take_bool, ParseResult};
+use crate::devices::standard::packets::parsing::take_bool;
 
 use super::{HearIdMusicType, HearIdType, StereoVolumeAdjustments, VolumeAdjustments};
 
@@ -27,7 +28,7 @@ pub struct CustomHearId {
 impl CustomHearId {
     pub(crate) fn take_with_all_fields<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<CustomHearId, E> {
+    ) -> IResult<&'a [u8], CustomHearId, E> {
         context(
             "custom hear id",
             map(
@@ -76,7 +77,7 @@ impl CustomHearId {
     // TODO maybe use a different struct for this?
     pub(crate) fn take_without_music_type<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         num_bands: usize,
-    ) -> impl FnMut(&'a [u8]) -> ParseResult<CustomHearId, E> {
+    ) -> impl FnMut(&'a [u8]) -> IResult<&'a [u8], CustomHearId, E> {
         context(
             "custom hear id without music_type",
             map(

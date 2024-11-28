@@ -3,6 +3,7 @@ use nom::{
     error::{context, ContextError, ParseError},
     number::complete::{le_u16, le_u8},
     sequence::tuple,
+    IResult,
 };
 
 use crate::devices::{
@@ -10,7 +11,7 @@ use crate::devices::{
     standard::{
         packets::{
             inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
-            parsing::{take_bool, ParseResult},
+            parsing::take_bool,
         },
         structures::{
             AgeRange, CustomButtonModel, CustomHearId, DualBattery, EqualizerConfiguration, Gender,
@@ -65,7 +66,7 @@ impl InboundPacket for A3951StateUpdatePacket {
     }
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<A3951StateUpdatePacket, E> {
+    ) -> IResult<&'a [u8], A3951StateUpdatePacket, E> {
         context(
             "a3951 state update packet",
             all_consuming(|input| {

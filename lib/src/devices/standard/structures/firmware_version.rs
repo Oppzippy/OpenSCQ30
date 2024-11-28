@@ -3,13 +3,12 @@ use nom::{
     combinator::{all_consuming, map, map_parser},
     error::{context, ContextError, ParseError},
     sequence::separated_pair,
+    IResult,
 };
 use std::fmt::Display;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-
-use crate::devices::standard::packets::parsing::ParseResult;
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -37,7 +36,7 @@ impl FirmwareVersion {
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<FirmwareVersion, E> {
+    ) -> IResult<&'a [u8], FirmwareVersion, E> {
         context(
             "firmware version",
             map(

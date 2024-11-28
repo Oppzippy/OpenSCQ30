@@ -3,15 +3,13 @@ use nom::{
     error::{context, ContextError, ParseError},
     number::complete::le_u8,
     sequence::tuple,
+    IResult,
 };
 
 use crate::devices::{
     a3945::device_profile::A3945_DEVICE_PROFILE,
     standard::{
-        packets::{
-            inbound::state_update_packet::StateUpdatePacket,
-            parsing::{take_bool, ParseResult},
-        },
+        packets::{inbound::state_update_packet::StateUpdatePacket, parsing::take_bool},
         quirks::TwoExtraEqBandsValues,
         structures::{
             BatteryLevel, CustomButtonModel, DualBattery, EqualizerConfiguration, FirmwareVersion,
@@ -64,7 +62,7 @@ impl From<A3945StateUpdatePacket> for StateUpdatePacket {
 impl A3945StateUpdatePacket {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<A3945StateUpdatePacket, E> {
+    ) -> IResult<&'a [u8], A3945StateUpdatePacket, E> {
         context(
             "a3945 state update packet",
             all_consuming(map(

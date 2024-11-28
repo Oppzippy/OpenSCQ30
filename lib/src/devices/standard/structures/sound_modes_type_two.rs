@@ -1,5 +1,3 @@
-use crate::devices::standard::packets::parsing::ParseResult;
-
 use super::{AmbientSoundMode, TransparencyMode};
 
 use nom::{
@@ -7,6 +5,7 @@ use nom::{
     error::{context, ContextError, ParseError},
     number::complete::le_u8,
     sequence::tuple,
+    IResult,
 };
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -28,7 +27,7 @@ pub struct SoundModesTypeTwo {
 impl SoundModesTypeTwo {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<SoundModesTypeTwo, E> {
+    ) -> IResult<&'a [u8], SoundModesTypeTwo, E> {
         context(
             "sound modes type two",
             map(
@@ -105,7 +104,7 @@ struct NoiseCancelingSettings {
 impl NoiseCancelingSettings {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<NoiseCancelingSettings, E> {
+    ) -> IResult<&'a [u8], NoiseCancelingSettings, E> {
         map(le_u8, |b| NoiseCancelingSettings {
             manual: ManualNoiseCanceling::from_repr((b & 0xF0) >> 4).unwrap_or_default(),
             adaptive: AdaptiveNoiseCanceling::from_repr(b & 0x0F).unwrap_or_default(),
@@ -126,7 +125,7 @@ pub enum NoiseCancelingModeTypeTwo {
 impl NoiseCancelingModeTypeTwo {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<NoiseCancelingModeTypeTwo, E> {
+    ) -> IResult<&'a [u8], NoiseCancelingModeTypeTwo, E> {
         context(
             "noise canceling mode type two",
             map(le_u8, |noise_canceling_mode| {
@@ -150,7 +149,7 @@ pub struct WindNoise {
 impl WindNoise {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<WindNoise, E> {
+    ) -> IResult<&'a [u8], WindNoise, E> {
         context(
             "wind noise",
             map(le_u8, |wind_noise| WindNoise {

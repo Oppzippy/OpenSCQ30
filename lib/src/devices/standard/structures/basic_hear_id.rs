@@ -3,11 +3,12 @@ use nom::{
     error::{context, ContextError, ParseError},
     number::complete::le_i32,
     sequence::tuple,
+    IResult,
 };
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::devices::standard::packets::parsing::{take_bool, ParseResult};
+use crate::devices::standard::packets::parsing::take_bool;
 
 use super::StereoVolumeAdjustments;
 
@@ -23,7 +24,7 @@ pub struct BasicHearId {
 impl BasicHearId {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<BasicHearId, E> {
+    ) -> IResult<&'a [u8], BasicHearId, E> {
         context(
             "basic hear id",
             map(

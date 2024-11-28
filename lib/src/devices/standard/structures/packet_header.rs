@@ -4,11 +4,10 @@ use nom::{
     error::{context, ContextError, ParseError},
     number::complete::le_u16,
     sequence::pair,
+    IResult,
 };
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-
-use crate::devices::standard::packets::parsing::ParseResult;
 
 use super::Command;
 
@@ -23,7 +22,7 @@ pub struct PacketHeader {
 impl PacketHeader {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<PacketHeader, E> {
+    ) -> IResult<&'a [u8], PacketHeader, E> {
         context(
             "packet header",
             map(
@@ -39,7 +38,7 @@ impl PacketHeader {
 
 fn take_command<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
     input: &'a [u8],
-) -> ParseResult<Command, E> {
+) -> IResult<&'a [u8], Command, E> {
     context(
         "packet type 7 byte prefix",
         map_opt(take(7usize), |prefix: &[u8]| {

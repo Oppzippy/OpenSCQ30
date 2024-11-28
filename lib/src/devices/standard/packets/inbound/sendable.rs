@@ -1,10 +1,7 @@
 use nom::error::{ContextError, ParseError, VerboseError};
 
 use crate::devices::standard::{
-    packets::{
-        parsing::{take_checksum, ParseResult},
-        Packet,
-    },
+    packets::{parsing::take_checksum, Packet},
     structures::PacketHeader,
 };
 
@@ -15,7 +12,7 @@ where
     fn header() -> Command;
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<Self, E>;
+    ) -> IResult<&'a [u8], Self, E>;
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -60,7 +57,7 @@ where
 
 pub(crate) fn take_inbound_packet_header<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
     input: &'a [u8],
-) -> ParseResult<Command, E> {
+) -> IResult<&'a [u8], Command, E> {
     let input = take_checksum(input)?.0;
     let (input, header) = PacketHeader::take(input)?;
     Ok((input, header.packet_type))

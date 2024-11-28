@@ -2,6 +2,7 @@ use nom::{
     branch::alt,
     combinator::map,
     error::{ContextError, ParseError},
+    IResult,
 };
 
 use crate::{
@@ -17,13 +18,10 @@ use crate::{
         a3933::packets::inbound::A3933StateUpdatePacket,
         a3945::packets::A3945StateUpdatePacket,
         a3951::packets::A3951StateUpdatePacket,
-        standard::{
-            packets::parsing::ParseResult,
-            structures::{
-                AgeRange, AmbientSoundModeCycle, Battery, Command, CustomButtonModel,
-                EqualizerConfiguration, FirmwareVersion, Gender, HearId, SerialNumber, SoundModes,
-                SoundModesTypeTwo,
-            },
+        standard::structures::{
+            AgeRange, AmbientSoundModeCycle, Battery, Command, CustomButtonModel,
+            EqualizerConfiguration, FirmwareVersion, Gender, HearId, SerialNumber, SoundModes,
+            SoundModesTypeTwo,
         },
     },
 };
@@ -53,7 +51,7 @@ impl InboundPacket for StateUpdatePacket {
 
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<StateUpdatePacket, E> {
+    ) -> IResult<&'a [u8], StateUpdatePacket, E> {
         alt((
             map(A3027StateUpdatePacket::take, StateUpdatePacket::from),
             map(A3028StateUpdatePacket::take, StateUpdatePacket::from),

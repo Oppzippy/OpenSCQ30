@@ -3,11 +3,10 @@ use nom::{
     error::{context, ContextError, ParseError},
     number::complete::le_u16,
     sequence::pair,
+    IResult,
 };
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-
-use crate::devices::standard::packets::parsing::ParseResult;
 
 use super::{preset_equalizer_profile::PresetEqualizerProfile, VolumeAdjustments};
 
@@ -30,7 +29,7 @@ impl EqualizerConfiguration {
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         num_bands: usize,
-    ) -> impl Fn(&'a [u8]) -> ParseResult<EqualizerConfiguration, E> {
+    ) -> impl Fn(&'a [u8]) -> IResult<&'a [u8], EqualizerConfiguration, E> {
         move |input| {
             context(
                 "equalizer configuration",

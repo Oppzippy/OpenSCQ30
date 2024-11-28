@@ -3,12 +3,13 @@ use nom::{
     error::{context, ContextError, ParseError},
     number::complete::le_u8,
     sequence::{pair, tuple},
+    IResult,
 };
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, EnumIter, FromRepr};
 
-use crate::devices::standard::packets::parsing::{take_bool, ParseResult};
+use crate::devices::standard::packets::parsing::take_bool;
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -36,7 +37,7 @@ impl CustomButtonModel {
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<CustomButtonModel, E> {
+    ) -> IResult<&'a [u8], CustomButtonModel, E> {
         context("custom button model", |input| {
             map(
                 tuple((
@@ -89,7 +90,7 @@ impl TwsButtonAction {
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<TwsButtonAction, E> {
+    ) -> IResult<&'a [u8], TwsButtonAction, E> {
         map_opt(pair(take_bool, le_u8), |(switch, num)| {
             Some(TwsButtonAction {
                 tws_connected_action: ButtonAction::from_repr(num & 0x0F)?,
@@ -115,7 +116,7 @@ impl NoTwsButtonAction {
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<NoTwsButtonAction, E> {
+    ) -> IResult<&'a [u8], NoTwsButtonAction, E> {
         map_opt(pair(take_bool, le_u8), |(switch, num)| {
             Some(NoTwsButtonAction {
                 action: ButtonAction::from_repr(num)?,

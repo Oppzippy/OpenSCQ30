@@ -3,15 +3,13 @@ use nom::{
     combinator::all_consuming,
     error::{context, ContextError, ParseError},
     number::complete::le_u8,
+    IResult,
 };
 
 use crate::devices::{
     a3936::{device_profile::A3936_DEVICE_PROFILE, structures::A3936CustomButtonModel},
     standard::{
-        packets::{
-            inbound::state_update_packet::StateUpdatePacket,
-            parsing::{take_bool, ParseResult},
-        },
+        packets::{inbound::state_update_packet::StateUpdatePacket, parsing::take_bool},
         quirks::TwoExtraEqBandsValues,
         structures::{
             AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
@@ -69,7 +67,7 @@ impl From<A3936StateUpdatePacket> for StateUpdatePacket {
 impl A3936StateUpdatePacket {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<A3936StateUpdatePacket, E> {
+    ) -> IResult<&'a [u8], A3936StateUpdatePacket, E> {
         context(
             "a3936 state update packet",
             all_consuming(|input| {

@@ -2,11 +2,10 @@ use nom::{
     combinator::map,
     error::{context, ContextError, ParseError},
     sequence::tuple,
+    IResult,
 };
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-
-use crate::devices::standard::packets::parsing::ParseResult;
 
 use super::VolumeAdjustments;
 
@@ -27,7 +26,7 @@ impl StereoVolumeAdjustments {
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         num_bands: usize,
-    ) -> impl Fn(&'a [u8]) -> ParseResult<StereoVolumeAdjustments, E> {
+    ) -> impl Fn(&'a [u8]) -> IResult<&'a [u8], StereoVolumeAdjustments, E> {
         move |input| {
             context(
                 "stereo volume adjustments",

@@ -2,11 +2,10 @@ use nom::{
     combinator::map,
     error::{context, ContextError, ParseError},
     number::complete::le_u8,
+    IResult,
 };
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-
-use crate::devices::standard::packets::parsing::ParseResult;
 
 use super::{BasicHearId, CustomHearId};
 
@@ -38,7 +37,7 @@ pub struct HearIdType(pub u8);
 impl HearIdType {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<HearIdType, E> {
+    ) -> IResult<&'a [u8], HearIdType, E> {
         context("hear id type", map(le_u8, HearIdType))(input)
     }
 }
@@ -50,7 +49,7 @@ pub struct HearIdMusicType(pub u8);
 impl HearIdMusicType {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<HearIdMusicType, E> {
+    ) -> IResult<&'a [u8], HearIdMusicType, E> {
         context("hear id music type", map(le_u8, HearIdMusicType))(input)
     }
 }

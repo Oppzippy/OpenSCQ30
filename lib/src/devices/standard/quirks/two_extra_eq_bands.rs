@@ -3,14 +3,12 @@ use nom::{
     error::{context, ContextError, ParseError},
     number::complete::le_u8,
     sequence::tuple,
+    IResult,
 };
 use std::sync::atomic::{self, AtomicI32};
 
 use crate::devices::standard::{
-    packets::{
-        outbound::{OutboundPacket, SetEqualizerPacket},
-        parsing::ParseResult,
-    },
+    packets::outbound::{OutboundPacket, SetEqualizerPacket},
     structures::{
         Command, EqualizerConfiguration, StereoEqualizerConfiguration, VolumeAdjustments,
     },
@@ -109,7 +107,7 @@ impl StereoEqualizerConfiguration {
         E: ParseError<&'a [u8]> + ContextError<&'a [u8]>,
     >(
         num_bands: usize,
-    ) -> impl Fn(&'a [u8]) -> ParseResult<(StereoEqualizerConfiguration, TwoExtraEqBandsValues), E>
+    ) -> impl Fn(&'a [u8]) -> IResult<&'a [u8], (StereoEqualizerConfiguration, TwoExtraEqBandsValues), E>
     {
         move |input| {
             context(

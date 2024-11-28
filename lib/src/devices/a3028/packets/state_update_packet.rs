@@ -2,15 +2,13 @@ use nom::{
     combinator::{all_consuming, map},
     error::{context, ContextError, ParseError},
     sequence::tuple,
+    IResult,
 };
 
 use crate::devices::{
     a3028::device_profile::A3028_DEVICE_PROFILE,
     standard::{
-        packets::{
-            inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
-            parsing::ParseResult,
-        },
+        packets::inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
         structures::{
             AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
             SingleBattery, SoundModes,
@@ -56,7 +54,7 @@ impl InboundPacket for A3028StateUpdatePacket {
 
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<A3028StateUpdatePacket, E> {
+    ) -> IResult<&'a [u8], A3028StateUpdatePacket, E> {
         context(
             "a3028 state update packet",
             all_consuming(map(

@@ -1,10 +1,9 @@
-use crate::devices::standard::packets::parsing::ParseResult;
-
 use super::{EqualizerConfiguration, VolumeAdjustments};
 use nom::{
     combinator::map,
     error::{context, ContextError, ParseError},
     sequence::tuple,
+    IResult,
 };
 
 #[derive(Clone, Debug, PartialEq)]
@@ -30,7 +29,7 @@ impl StereoEqualizerConfiguration {
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         num_bands: usize,
-    ) -> impl Fn(&'a [u8]) -> ParseResult<EqualizerConfiguration, E> {
+    ) -> impl Fn(&'a [u8]) -> IResult<&'a [u8], EqualizerConfiguration, E> {
         move |input| {
             context(
                 "stereo equalizer configuration",

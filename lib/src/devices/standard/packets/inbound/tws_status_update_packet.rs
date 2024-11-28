@@ -2,10 +2,11 @@ use nom::{
     combinator::{all_consuming, map},
     error::{context, ContextError, ParseError},
     sequence::tuple,
+    IResult,
 };
 
 use crate::devices::standard::{
-    packets::parsing::{take_bool, ParseResult},
+    packets::parsing::take_bool,
     structures::{Command, HostDevice},
 };
 
@@ -25,7 +26,7 @@ impl InboundPacket for TwsStatusUpdatePacket {
     #[allow(dead_code)]
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<TwsStatusUpdatePacket, E> {
+    ) -> IResult<&'a [u8], TwsStatusUpdatePacket, E> {
         context(
             "TwsStatusUpdatePacket",
             all_consuming(map(

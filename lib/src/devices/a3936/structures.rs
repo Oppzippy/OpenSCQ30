@@ -3,11 +3,11 @@ use nom::{
     error::{context, ContextError, ParseError},
     number::complete::le_u8,
     sequence::{pair, tuple},
+    IResult,
 };
 
-use crate::devices::standard::{
-    packets::parsing::ParseResult,
-    structures::{ButtonAction, CustomButtonModel, NoTwsButtonAction, TwsButtonAction},
+use crate::devices::standard::structures::{
+    ButtonAction, CustomButtonModel, NoTwsButtonAction, TwsButtonAction,
 };
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
@@ -61,7 +61,7 @@ impl A3936CustomButtonModel {
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<Self, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context("custom button model", |input| {
             map(
                 tuple((
@@ -153,7 +153,7 @@ impl A3936TwsButtonAction {
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<Self, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         map_opt(pair(le_u8, le_u8), |(switch, num)| {
             let log_and_return_default = || {
                 tracing::warn!(

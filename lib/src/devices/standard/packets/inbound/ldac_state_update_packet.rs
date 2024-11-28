@@ -1,12 +1,10 @@
 use nom::{
     combinator::{all_consuming, map},
     error::{context, ContextError, ParseError},
+    IResult,
 };
 
-use crate::devices::standard::{
-    packets::parsing::{take_bool, ParseResult},
-    structures::Command,
-};
+use crate::devices::standard::{packets::parsing::take_bool, structures::Command};
 
 use super::InboundPacket;
 
@@ -23,7 +21,7 @@ impl InboundPacket for LdacStateUpdatePacket {
     #[allow(dead_code)]
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<LdacStateUpdatePacket, E> {
+    ) -> IResult<&'a [u8], LdacStateUpdatePacket, E> {
         context(
             "LdacStateUpdatePacket",
             all_consuming(map(take_bool, |is_enabled| LdacStateUpdatePacket {

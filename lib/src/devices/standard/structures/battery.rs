@@ -3,11 +3,10 @@ use nom::{
     error::{context, ContextError, ParseError},
     number::complete::le_u8,
     sequence::tuple,
+    IResult,
 };
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-
-use crate::devices::standard::packets::parsing::ParseResult;
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -45,7 +44,7 @@ pub struct DualBattery {
 impl DualBattery {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<DualBattery, E> {
+    ) -> IResult<&'a [u8], DualBattery, E> {
         context(
             "dual battery",
             map(
@@ -81,7 +80,7 @@ pub struct SingleBattery {
 impl SingleBattery {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<SingleBattery, E> {
+    ) -> IResult<&'a [u8], SingleBattery, E> {
         context(
             "battery",
             map(
@@ -107,7 +106,7 @@ pub enum IsBatteryCharging {
 impl IsBatteryCharging {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<IsBatteryCharging, E> {
+    ) -> IResult<&'a [u8], IsBatteryCharging, E> {
         context(
             "is battery charging",
             map(le_u8, |value| -> IsBatteryCharging {
@@ -146,7 +145,7 @@ pub struct BatteryLevel(pub u8);
 impl BatteryLevel {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<BatteryLevel, E> {
+    ) -> IResult<&'a [u8], BatteryLevel, E> {
         context("battery level", map(le_u8, BatteryLevel))(input)
     }
 }

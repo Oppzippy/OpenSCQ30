@@ -2,12 +2,10 @@ use nom::{
     combinator::{all_consuming, map, opt},
     error::{context, ContextError, ParseError},
     sequence::tuple,
+    IResult,
 };
 
-use crate::devices::standard::{
-    packets::parsing::ParseResult,
-    structures::{Command, IsBatteryCharging},
-};
+use crate::devices::standard::structures::{Command, IsBatteryCharging};
 
 use super::InboundPacket;
 
@@ -24,7 +22,7 @@ impl InboundPacket for BatteryChargingUpdatePacket {
 
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<BatteryChargingUpdatePacket, E> {
+    ) -> IResult<&'a [u8], BatteryChargingUpdatePacket, E> {
         context(
             "BatteryChargingUpdatePacket",
             all_consuming(map(

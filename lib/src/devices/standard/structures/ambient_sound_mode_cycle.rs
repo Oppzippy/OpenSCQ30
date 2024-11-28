@@ -2,11 +2,10 @@ use nom::{
     combinator::map,
     error::{ContextError, ParseError},
     number::complete::le_u8,
+    IResult,
 };
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-
-use crate::devices::standard::packets::parsing::ParseResult;
 
 const NOISE_CANCELING_MODE: u8 = 1 << 0;
 const TRANSPARENCY_MODE: u8 = 1 << 1;
@@ -24,7 +23,7 @@ pub struct AmbientSoundModeCycle {
 impl AmbientSoundModeCycle {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<AmbientSoundModeCycle, E> {
+    ) -> IResult<&'a [u8], AmbientSoundModeCycle, E> {
         map(le_u8, AmbientSoundModeCycle::from)(input)
     }
 }

@@ -1,14 +1,12 @@
 use nom::{
     combinator::{all_consuming, map},
     error::{context, ContextError, ParseError},
+    IResult,
 };
 
-use crate::devices::standard::{
-    packets::parsing::ParseResult,
-    structures::{
-        AmbientSoundMode, Command, CustomNoiseCanceling, NoiseCancelingMode, SoundModes,
-        TransparencyMode,
-    },
+use crate::devices::standard::structures::{
+    AmbientSoundMode, Command, CustomNoiseCanceling, NoiseCancelingMode, SoundModes,
+    TransparencyMode,
 };
 
 use super::InboundPacket;
@@ -28,7 +26,7 @@ impl InboundPacket for SoundModeUpdatePacket {
 
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> ParseResult<SoundModeUpdatePacket, E> {
+    ) -> IResult<&'a [u8], SoundModeUpdatePacket, E> {
         // offset 9
         context(
             "SoundModeUpdatePacket",
