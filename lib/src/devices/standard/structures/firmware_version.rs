@@ -1,13 +1,15 @@
 use nom::{
-    combinator::map,
+    bytes::complete::{tag, take},
+    combinator::{all_consuming, map, map_parser},
     error::{context, ContextError, ParseError},
+    sequence::separated_pair,
 };
 use std::fmt::Display;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::devices::standard::packets::parsing::{take_str, ParseResult};
+use crate::devices::standard::packets::parsing::ParseResult;
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -38,16 +40,14 @@ impl FirmwareVersion {
     ) -> ParseResult<FirmwareVersion, E> {
         context(
             "firmware version",
-            map(take_str(5usize), |version| {
-                // format is xx.xx, so skip the decimal
-                let major_str = &version[0..2];
-                let minor_str = &version[3..5];
-
-                let major = major_str.parse::<u8>().unwrap_or_default();
-                let minor = minor_str.parse::<u8>().unwrap_or_default();
-
-                FirmwareVersion::new(major, minor)
-            }),
+            map(
+                separated_pair(
+                    map_parser(take(2usize), all_consuming(nom::character::complete::u8)),
+                    tag("."),
+                    map_parser(take(2usize), all_consuming(nom::character::complete::u8)),
+                ),
+                |(major, minor)| FirmwareVersion::new(major, minor),
+            ),
         )(input)
     }
 }
@@ -102,5 +102,19 @@ mod tests {
             .unwrap()
             .1;
         assert_eq!(FirmwareVersion::new(12, 34), firmware_version);
+    }
+
+    #[test]
+    fn test_parsing_fails_with_non_numeric() {
+        let version_str = "1a.23";
+        let result = FirmwareVersion::take::<VerboseError<&[u8]>>(version_str.as_bytes());
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parsing_fails_with_incorrect_separator() {
+        let version_str = "12_23";
+        let result = FirmwareVersion::take::<VerboseError<&[u8]>>(version_str.as_bytes());
+        assert!(result.is_err());
     }
 }
