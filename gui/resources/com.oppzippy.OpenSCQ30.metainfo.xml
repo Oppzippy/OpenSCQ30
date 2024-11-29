@@ -45,6 +45,14 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.14.1" date="2024-11-29">
+            <description>
+                <p>Fixes</p>
+                <ul>
+                    <li>Fix Space A40 (A3936) state update packet parsing</li>
+                </ul> 
+            </description>
+        </release>
         <release version="1.14.0" date="2024-11-19">
             <description>
                 <p>Features</p>
