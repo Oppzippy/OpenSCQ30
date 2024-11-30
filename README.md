@@ -1,6 +1,6 @@
 ## About
 
-OpenSCQ30 is free software for controlling settings for the Soundcore Q30 headphones.
+OpenSCQ30 is free software for controlling settings for Soundcore headphones and earbuds. It was originally intended for the Q30's, after which the project was named, but a range of devices are now supported.
 
 ### Supported Platforms
 
