@@ -12,7 +12,12 @@ pub const READ_CHARACTERISTIC_UUID: Uuid = uuid::uuid!("00008888-0000-1000-8000-
 
 // All mac address prefixes owned by Fantasia Trading LLC should be listed here.
 // See: http://standards-oui.ieee.org/oui/oui.csv
-const MAC_ADDRESS_PREFIXES: [[u8; 3]; 2] = [[0xAC, 0x12, 0x2F], [0xE8, 0xEE, 0xCC]];
+const MAC_ADDRESS_PREFIXES: [[u8; 3]; 4] = [
+    [0xAC, 0x12, 0x2F],
+    [0xE8, 0xEE, 0xCC],
+    [0xA4, 0x77, 0x58],
+    [0xA0, 0xE9, 0xDB],
+];
 pub fn soundcore_mac_address_prefixes() -> &'static [[u8; 3]] {
     &MAC_ADDRESS_PREFIXES
 }
