@@ -145,7 +145,7 @@ impl A3936StateUpdatePacket {
 mod tests {
     use nom::error::VerboseError;
 
-    use crate::devices::standard::packets::inbound::take_inbound_packet_header;
+    use crate::devices::standard::packets::inbound::{take_inbound_packet_header, InboundPacket};
 
     use super::*;
 
@@ -166,6 +166,8 @@ mod tests {
         ];
         let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         A3936StateUpdatePacket::take::<VerboseError<_>>(body)
-            .expect("it should parse successfully");
+            .expect("it should parse successfully as a A3936 state update packet");
+        StateUpdatePacket::take::<VerboseError<_>>(body)
+            .expect("it should parse successfully as a state update packet");
     }
 }
