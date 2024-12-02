@@ -24,7 +24,7 @@ pub enum Error {
         source: Option<InnerError>,
     },
 
-    #[error("service `{uuid}` not found: {source:?}")]
+    #[error("service not found: {source:?}")]
     ServiceNotFound {
         // TODO remove this field since we are looking for a range of uuids, not one in particular
         uuid: Uuid,
