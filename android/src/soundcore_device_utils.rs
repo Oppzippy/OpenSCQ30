@@ -1,6 +1,3 @@
-use std::str::FromStr;
-
-use macaddr::MacAddr;
 use openscq30_lib::{
     device_utils,
     devices::standard::structures::{
@@ -8,16 +5,6 @@ use openscq30_lib::{
     },
 };
 use uuid::Uuid;
-
-#[uniffi::export]
-pub fn is_mac_address_soundcore_device(mac_address: String) -> bool {
-    match MacAddr::from_str(&mac_address) {
-        Ok(MacAddr::V6(parsed_address)) => {
-            device_utils::is_mac_address_soundcore_device(parsed_address)
-        }
-        _ => false,
-    }
-}
 
 #[uniffi::export]
 pub fn is_soundcore_service_uuid(uuid: Uuid) -> bool {

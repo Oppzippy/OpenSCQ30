@@ -1491,6 +1491,7 @@ dependencies = [
  "ordered-float",
  "regex",
  "serde",
+ "static_assertions",
  "strum",
  "thiserror",
  "tokio",

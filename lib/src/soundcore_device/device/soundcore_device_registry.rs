@@ -9,10 +9,9 @@ use weak_table::{weak_value_hash_map::Entry, WeakValueHashMap};
 
 use crate::{
     api::{
-        connection::{ConnectionDescriptor, ConnectionRegistry},
+        connection::ConnectionRegistry,
         device::{DeviceRegistry, GenericDeviceDescriptor},
     },
-    device_utils,
     futures::Futures,
 };
 
@@ -73,9 +72,6 @@ where
         let inner_descriptors = self.conneciton_registry.connection_descriptors().await?;
         let descriptors = inner_descriptors
             .into_iter()
-            .filter(|descriptor| {
-                device_utils::is_mac_address_soundcore_device(descriptor.mac_address())
-            })
             .map(GenericDeviceDescriptor::from)
             .collect::<Vec<_>>();
         Ok(descriptors)

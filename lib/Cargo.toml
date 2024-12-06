@@ -29,6 +29,7 @@ js-sys = { workspace = true, optional = true }
 wasm-bindgen-futures = { workspace = true, optional = true }
 ordered-float = { workspace = true }
 float-cmp = { workspace = true, features = ["std"], default-features = false }
+static_assertions = { workspace = true }
 
 [target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
 btleplug = { workspace = true, optional = true }

@@ -46,8 +46,6 @@ class DeviceSelectionViewModel @Inject constructor(
             .addDeviceFilter(
                 BluetoothDeviceFilter.Builder().apply {
                     this.setNamePattern(Pattern.compile("Soundcore"))
-                    // todo
-                    // this.addServiceUuid()
                 }.build(),
             )
             .build()

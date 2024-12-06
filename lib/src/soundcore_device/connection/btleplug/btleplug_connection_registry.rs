@@ -11,6 +11,7 @@ use weak_table::weak_value_hash_map::Entry;
 use weak_table::WeakValueHashMap;
 
 use crate::api::connection::{ConnectionRegistry, GenericConnectionDescriptor};
+use crate::device_utils;
 
 use super::btleplug_connection::BtlePlugConnection;
 use super::mac_address::{IntoBDAddr, IntoMacAddr};
@@ -41,7 +42,7 @@ impl BtlePlugConnectionRegistry {
                     tracing::debug!("starting scan");
                     adapter
                         .start_scan(ScanFilter {
-                            services: Vec::new(),
+                            services: device_utils::service_uuids(),
                         })
                         .await?;
                     // The Soundcore Q30 seems to advertise around every .3s
