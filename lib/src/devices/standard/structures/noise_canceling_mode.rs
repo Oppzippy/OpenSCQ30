@@ -6,10 +6,12 @@ use nom::{
 };
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use strum::{AsRefStr, Display, FromRepr};
+use strum::{AsRefStr, Display, FromRepr, IntoStaticStr};
 
 #[repr(u8)]
-#[derive(FromRepr, Clone, Copy, Debug, PartialEq, Eq, Hash, Display, Default, AsRefStr)]
+#[derive(
+    FromRepr, Clone, Copy, Debug, PartialEq, Eq, Hash, Display, Default, AsRefStr, IntoStaticStr,
+)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum NoiseCancelingMode {

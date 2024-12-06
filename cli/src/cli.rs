@@ -1,6 +1,6 @@
+use crate::args::*;
 use clap::{command, Parser, Subcommand, ValueEnum};
 use macaddr::MacAddr6;
-use openscq30_lib::devices::standard::structures::VolumeAdjustments;
 use tracing::Level;
 
 #[derive(Parser)]
@@ -55,15 +55,24 @@ pub enum SetCommand {
         #[arg(value_enum)]
         mode: AmbientSoundMode,
     },
+    TransparencyMode {
+        #[arg(value_enum)]
+        mode: TransparencyMode,
+    },
     NoiseCancelingMode {
         #[arg(value_enum)]
         mode: NoiseCancelingMode,
+    },
+    #[command(about = "Only meaningful if noise-canceling-mode is manual")]
+    ManualNoiseCanceling {
+        #[arg(value_enum)]
+        mode: ManualNoiseCanceling,
     },
     Equalizer {
         #[arg(
             required=true,
             num_args = 8,
-            value_parser = clap::value_parser!(i16).range((VolumeAdjustments::MIN_VOLUME * 10.0).round() as i64..(VolumeAdjustments::MAX_VOLUME * 10.0).round() as i64 + 1),
+            value_parser = clap::value_parser!(i16).range(VolumeAdjustments::range()),
         )]
         volume_adjustments: Vec<i16>,
     },
@@ -72,52 +81,11 @@ pub enum SetCommand {
 #[derive(Subcommand)]
 pub enum GetCommand {
     AmbientSoundMode,
+    TransparencyMode,
     NoiseCancelingMode,
+    #[command(about = "Only meaningful if noise-canceling-mode is adaptive")]
+    AdaptiveNoiseCanceling,
+    #[command(about = "Only meaningful if noise-canceling-mode is manual")]
+    ManualNoiseCanceling,
     Equalizer,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-pub enum AmbientSoundMode {
-    Normal,
-    Transparency,
-    NoiseCanceling,
-}
-
-impl From<AmbientSoundMode> for openscq30_lib::devices::standard::structures::AmbientSoundMode {
-    fn from(mode: AmbientSoundMode) -> Self {
-        match mode {
-            AmbientSoundMode::Normal => {
-                openscq30_lib::devices::standard::structures::AmbientSoundMode::Normal
-            }
-            AmbientSoundMode::Transparency => {
-                openscq30_lib::devices::standard::structures::AmbientSoundMode::Transparency
-            }
-            AmbientSoundMode::NoiseCanceling => {
-                openscq30_lib::devices::standard::structures::AmbientSoundMode::NoiseCanceling
-            }
-        }
-    }
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-pub enum NoiseCancelingMode {
-    Transport,
-    Indoor,
-    Outdoor,
-}
-
-impl From<NoiseCancelingMode> for openscq30_lib::devices::standard::structures::NoiseCancelingMode {
-    fn from(mode: NoiseCancelingMode) -> Self {
-        match mode {
-            NoiseCancelingMode::Transport => {
-                openscq30_lib::devices::standard::structures::NoiseCancelingMode::Transport
-            }
-            NoiseCancelingMode::Indoor => {
-                openscq30_lib::devices::standard::structures::NoiseCancelingMode::Indoor
-            }
-            NoiseCancelingMode::Outdoor => {
-                openscq30_lib::devices::standard::structures::NoiseCancelingMode::Outdoor
-            }
-        }
-    }
 }

@@ -5,6 +5,7 @@ use clap_complete::Shell;
 use cli::{Cli, Command};
 use openscq30_lib::api::device::{DeviceDescriptor, DeviceRegistry};
 
+mod args;
 mod cli;
 mod get;
 mod list_devices;
@@ -63,7 +64,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
             (Command::Get(get_command), Some(descriptor)) => {
                 let device = get_device_or_err(&registry, descriptor).await?;
-                get::get(get_command, device.as_ref()).await;
+                get::get(get_command, device.as_ref()).await?;
             }
             (Command::Completions { .. }, Some(_)) => unreachable!(),
             (_, None) => eprintln!("No device found."),
