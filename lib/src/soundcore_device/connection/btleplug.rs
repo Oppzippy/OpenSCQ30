@@ -36,6 +36,7 @@ impl RuntimeOrHandle {
     }
 }
 
+#[allow(unused)]
 pub(crate) async fn new_connection_registry(
     handle: Option<Handle>,
 ) -> crate::Result<BtlePlugConnectionRegistry> {

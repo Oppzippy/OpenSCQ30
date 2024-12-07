@@ -24,6 +24,7 @@ pub struct BtlePlugConnectionRegistry {
 }
 
 impl BtlePlugConnectionRegistry {
+    #[allow(unused)]
     pub fn new(manager: Manager, runtime: RuntimeOrHandle) -> Self {
         Self {
             runtime,
