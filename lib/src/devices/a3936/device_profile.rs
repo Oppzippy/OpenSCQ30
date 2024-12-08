@@ -51,10 +51,7 @@ impl DeviceImplementation for A3936Implementation {
         &self,
     ) -> HashMap<Command, Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>> {
         let extra_bands = self.extra_bands.to_owned();
-        let mut handlers: HashMap<
-            Command,
-            Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>,
-        > = HashMap::new();
+        let mut handlers = standard::implementation::packet_handlers();
 
         handlers.insert(
             STATE_UPDATE,
