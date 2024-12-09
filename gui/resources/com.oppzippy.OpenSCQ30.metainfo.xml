@@ -45,6 +45,16 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.15.0" date="2024-12-09">
+            <description>
+                <p>Fixes</p>
+                <ul>
+                    <li>Add missing soundcore mac address ranges for device detection</li>
+                    <li>Prioritize filtering by GATT service id rather than mac address, since new mac address ranges are showing up. This isn't possible (or implemented yet) on every client, however.</li>
+                    <li>Various Space A40 issues that prevented it from working at all</li>
+                </ul> 
+            </description>
+        </release>
         <release version="1.14.1" date="2024-11-29">
             <description>
                 <p>Fixes</p>
