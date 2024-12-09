@@ -65,12 +65,12 @@ impl A3936CustomButtonModel {
         context("custom button model", |input| {
             map(
                 tuple((
-                    A3936TwsButtonAction::take,
-                    A3936TwsButtonAction::take,
-                    A3936TwsButtonAction::take,
-                    A3936TwsButtonAction::take,
-                    A3936TwsButtonAction::take,
-                    A3936TwsButtonAction::take,
+                    context("left single click", A3936TwsButtonAction::take),
+                    context("right single click", A3936TwsButtonAction::take),
+                    context("left double click", A3936TwsButtonAction::take),
+                    context("right double click", A3936TwsButtonAction::take),
+                    context("left long press", A3936TwsButtonAction::take),
+                    context("right long press", A3936TwsButtonAction::take),
                 )),
                 |(
                     left_single_click,

@@ -41,12 +41,12 @@ impl CustomButtonModel {
         context("custom button model", |input| {
             map(
                 tuple((
-                    TwsButtonAction::take,   // left double click
-                    TwsButtonAction::take,   // left long press
-                    TwsButtonAction::take,   // right double click
-                    TwsButtonAction::take,   // right long press
-                    NoTwsButtonAction::take, // left single click
-                    NoTwsButtonAction::take, // right single click
+                    context("left double click", TwsButtonAction::take), // left double click
+                    context("left long press", TwsButtonAction::take),   // left long press
+                    context("right double click", TwsButtonAction::take), // right double click
+                    context("right long press", TwsButtonAction::take),  // right long press
+                    context("left single click", NoTwsButtonAction::take), // left single click
+                    context("right single click", NoTwsButtonAction::take), // right single click
                 )),
                 |(
                     left_double_click,
