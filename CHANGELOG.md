@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Fixes
+
+-   Add missing soundcore mac address ranges for device detection
+-   Prioritize filtering by GATT service id rather than mac address, since new mac address ranges are showing up. This isn't possible (or implemented yet) on every client, however.
+-   Various Space A40 issues that prevented it from working at all
+
+### CLI
+
+#### Features
+
+-   Add support for all existing sound modes
+
 ## v1.14.1
 
 ### General
