@@ -2,7 +2,7 @@ use std::collections::HashSet;
 use std::sync::{Arc, Weak};
 use std::time::Duration;
 
-use bluer::{DiscoveryFilter, DiscoveryTransport, Session};
+use bluer::{Adapter, Address, DiscoveryFilter, DiscoveryTransport, Session};
 use futures::StreamExt;
 use macaddr::MacAddr6;
 use tokio::sync::Mutex;
@@ -40,57 +40,63 @@ impl BluerConnectionRegistry {
             .spawn(async move {
                 let adapter = session.default_adapter().await?;
                 tracing::debug!("starting scan on adapter {}", adapter.name());
-                adapter
-                    .set_discovery_filter(DiscoveryFilter {
-                        uuids: HashSet::from_iter(device_utils::service_uuids()),
-                        transport: DiscoveryTransport::Le,
-                        ..Default::default()
-                    })
-                    .await?;
-
-                let discover = adapter.discover_devices().await?;
-
-                let events = discover
-                    .take_until(tokio::time::sleep(Duration::from_secs(1)))
-                    .collect::<Vec<_>>()
-                    .await;
-
-                let mut device_addresses = HashSet::new();
-                for event in events {
-                    match event {
-                        bluer::AdapterEvent::DeviceAdded(address) => {
-                            device_addresses.insert(address);
-                        }
-                        bluer::AdapterEvent::DeviceRemoved(address) => {
-                            device_addresses.remove(&address);
-                        }
-                        bluer::AdapterEvent::PropertyChanged(_) => (),
-                    }
-                }
-
+                let device_addresses = Self::ble_scan(&adapter).await?;
+                tracing::debug!("discovered {} devices", device_addresses.len());
                 let mut descriptors = HashSet::new();
                 for address in device_addresses {
-                    let device = adapter.device(address)?;
-                    if device.is_connected().await? {
-                        let mut has_service = false;
-                        for service in device.services().await? {
-                            if device_utils::is_soundcore_service_uuid(&service.uuid().await?) {
-                                has_service = true;
-                                break;
-                            }
-                        }
-                        if has_service {
-                            descriptors.insert(GenericConnectionDescriptor::new(
-                                device.name().await?.unwrap_or_default(),
-                                device.address().0.into(),
-                            ));
-                        }
+                    if let Some(descriptor) = Self::address_to_descriptor(&adapter, address).await?
+                    {
+                        descriptors.insert(descriptor);
                     }
                 }
+                tracing::debug!("filtered down to {} descriptors", descriptors.len());
                 Ok(descriptors)
             })
             .await
             .unwrap()
+    }
+
+    /// Scans for connected BLE devices and attempt to filter out devices without the service UUID.
+    /// Not guaranteed to filter out all devices if another process is scanning at the same time.
+    async fn ble_scan(adapter: &Adapter) -> crate::Result<HashSet<Address>> {
+        adapter
+            .set_discovery_filter(DiscoveryFilter {
+                uuids: HashSet::from_iter(device_utils::service_uuids()),
+                transport: DiscoveryTransport::Le,
+                ..Default::default()
+            })
+            .await?;
+
+        let discover = adapter.discover_devices().await?;
+
+        let device_addresses = discover
+            .take_until(tokio::time::sleep(Duration::from_secs(1)))
+            .filter_map(|event| async move {
+                match event {
+                    bluer::AdapterEvent::DeviceAdded(address) => Some(address),
+                    _ => None,
+                }
+            })
+            .collect::<HashSet<_>>()
+            .await;
+
+        Ok(device_addresses)
+    }
+
+    /// Filters out devices that are not connected and returns descriptors
+    async fn address_to_descriptor(
+        adapter: &Adapter,
+        address: Address,
+    ) -> crate::Result<Option<GenericConnectionDescriptor>> {
+        let device = adapter.device(address)?;
+        if device.is_connected().await? {
+            Ok(Some(GenericConnectionDescriptor::new(
+                device.name().await?.unwrap_or_default(),
+                address.into(),
+            )))
+        } else {
+            Ok(None)
+        }
     }
 
     async fn new_connection(

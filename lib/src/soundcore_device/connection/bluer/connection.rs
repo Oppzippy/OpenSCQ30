@@ -1,6 +1,9 @@
 use std::sync::Arc;
 
-use bluer::{gatt::remote::Characteristic, Device, DeviceProperty};
+use bluer::{
+    gatt::remote::{Characteristic, Service},
+    Device, DeviceProperty,
+};
 use futures::{pin_mut, StreamExt};
 use macaddr::MacAddr6;
 use tokio::{
@@ -12,7 +15,7 @@ use tokio::{
     },
     task::JoinHandle,
 };
-use tracing::{instrument, trace, trace_span, warn, Instrument};
+use tracing::{debug, instrument, trace, trace_span, warn, Instrument};
 use uuid::Uuid;
 
 use crate::{
@@ -34,84 +37,105 @@ pub struct BluerConnection {
 
 impl BluerConnection {
     pub async fn new(device: Device, handle: Handle) -> crate::Result<Self> {
-        let handle2 = handle.clone();
         handle
+            .clone()
             .spawn(async move {
-                let handle = handle2;
-
                 device.connect().await?;
-                let mut service = None;
-                for s in device.services().await? {
-                    if device_utils::is_soundcore_service_uuid(&s.uuid().await?) {
-                        service = Some(s);
-                        break;
-                    }
-                }
-                let service = service.ok_or(crate::Error::ServiceNotFound {
-                    uuid: SERVICE_UUID,
-                    source: None,
-                })?;
+                let service = Self::get_service(&device).await?;
                 let service_uuid = service.uuid().await?;
 
-                let mut write_characteristic = None;
-                let mut read_characteristic = None;
-                for c in service.characteristics().await? {
-                    match c.uuid().await? {
-                        WRITE_CHARACTERISTIC_UUID => write_characteristic = Some(c),
-                        READ_CHARACTERISTIC_UUID => read_characteristic = Some(c),
-                        _ => (),
-                    }
-                }
+                let [read_characteristic, write_characteristic] = Self::get_characteristics(
+                    &service,
+                    [READ_CHARACTERISTIC_UUID, WRITE_CHARACTERISTIC_UUID],
+                )
+                .await?;
 
-                let read_characteristic =
-                    read_characteristic.ok_or(crate::Error::CharacteristicNotFound {
-                        uuid: READ_CHARACTERISTIC_UUID,
-                        source: None,
-                    })?;
-                let write_characteristic =
-                    write_characteristic.ok_or(crate::Error::CharacteristicNotFound {
-                        uuid: WRITE_CHARACTERISTIC_UUID,
-                        source: None,
-                    })?;
-
-                let (connection_status_sender, connection_status_receiver) =
-                    watch::channel(ConnectionStatus::Connected);
-
-                let connection_status_handle = {
-                    let mut events = device.events().await?;
-                    tokio::spawn(async move {
-                        loop {
-                            if let Some(event) = events.next().await {
-                                match event {
-                                    bluer::DeviceEvent::PropertyChanged(
-                                        DeviceProperty::Connected(is_connected),
-                                    ) => {
-                                        connection_status_sender.send_replace(match is_connected {
-                                            true => ConnectionStatus::Connected,
-                                            false => ConnectionStatus::Disconnected,
-                                        });
-                                    }
-                                    _ => (),
-                                }
-                            }
-                        }
-                    })
-                };
+                let (connection_status_receiver, connection_status_handle) =
+                    Self::spawn_connection_status(&handle, device.to_owned()).await?;
 
                 let connection = BluerConnection {
                     device,
                     service_uuid,
-                    write_characteristic: write_characteristic.to_owned(),
-                    read_characteristic: read_characteristic.to_owned(),
+                    write_characteristic,
+                    read_characteristic,
                     connection_status_receiver,
                     connection_status_handle,
-                    handle: handle.to_owned(),
+                    handle,
                     quit: Arc::new(Semaphore::new(0)),
                 };
                 Ok(connection)
             })
             .await
             .unwrap()
+    }
+
+    pub async fn get_service(device: &Device) -> crate::Result<Service> {
+        for service in device.services().await? {
+            if device_utils::is_soundcore_service_uuid(&service.uuid().await?) {
+                return Ok(service);
+            }
+        }
+        Err(crate::Error::ServiceNotFound {
+            uuid: SERVICE_UUID,
+            source: None,
+        })
+    }
+
+    pub async fn get_characteristics<const SIZE: usize>(
+        service: &Service,
+        uuids: [Uuid; SIZE],
+    ) -> crate::Result<[Characteristic; SIZE]> {
+        let mut characteristics: [Option<Characteristic>; SIZE] = [const { None }; SIZE];
+        for characteristic in service.characteristics().await? {
+            let uuid = characteristic.uuid().await?;
+            if let Some(index) = uuids.iter().position(|u| *u == uuid) {
+                characteristics[index] = Some(characteristic);
+            }
+        }
+
+        characteristics
+            .iter()
+            .enumerate()
+            .find(|(_, c)| c.is_none())
+            .map(|(i, _)| {
+                Err(crate::Error::CharacteristicNotFound {
+                    uuid: uuids[i],
+                    source: None,
+                }) as Result<(), crate::Error>
+            })
+            .transpose()?;
+        Ok(characteristics.map(|v| v.expect("we already made sure every element is some")))
+    }
+
+    pub async fn spawn_connection_status(
+        handle: &Handle,
+        device: Device,
+    ) -> crate::Result<(watch::Receiver<ConnectionStatus>, JoinHandle<()>)> {
+        let (connection_status_sender, connection_status_receiver) =
+            watch::channel(ConnectionStatus::Connected);
+
+        let connection_status_handle = {
+            let mut events = device.events().await?;
+            handle.spawn(async move {
+                loop {
+                    if let Some(event) = events.next().await {
+                        match event {
+                            bluer::DeviceEvent::PropertyChanged(DeviceProperty::Connected(
+                                is_connected,
+                            )) => {
+                                connection_status_sender.send_replace(match is_connected {
+                                    true => ConnectionStatus::Connected,
+                                    false => ConnectionStatus::Disconnected,
+                                });
+                            }
+                            _ => (),
+                        }
+                    }
+                }
+            })
+        };
+
+        Ok((connection_status_receiver, connection_status_handle))
     }
 }
 
@@ -190,7 +214,10 @@ impl Connection for BluerConnection {
                                         warn!("error forwarding packet to channel: {err}",)
                                     }
                                 }
-                                None => break,
+                                None => {
+                                    debug!("notify channel ended");
+                                    break;
+                                },
                             }
                         },
                     }
