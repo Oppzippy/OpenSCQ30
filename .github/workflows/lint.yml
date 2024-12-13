@@ -5,15 +5,13 @@ on:
 
 jobs:
   format-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
       - name: Install just
-        # todo switch to apt once ubuntu-24.04 is available
-        # run: sudo apt-get install -y just
-        run: sudo snap install --edge --classic just
+        run: sudo apt-get install -y just
       - uses: actions/setup-java@v4
         with:
           distribution: temurin # See 'Supported distributions' for available options

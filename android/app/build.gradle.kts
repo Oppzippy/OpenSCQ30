@@ -127,7 +127,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-service:$lifecycleVersion")
 
     // Compose
-    val composeBomVersion = "2024.11.00"
+    val composeBomVersion = "2024.12.01"
     implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     androidTestImplementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     implementation("androidx.compose.ui:ui")
@@ -150,9 +150,9 @@ dependencies {
     // Optional - Integration with ViewModels
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     // Compose navigation
-    implementation("androidx.navigation:navigation-compose:2.8.4")
+    implementation("androidx.navigation:navigation-compose:2.8.5")
 
-    val accompanistVersion = "0.36.0"
+    val accompanistVersion = "0.37.0"
     implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
 
     val roomVersion = "2.6.1"
@@ -162,14 +162,14 @@ dependencies {
     ksp("androidx.room:room-compiler:$roomVersion")
     androidTestImplementation("androidx.room:room-testing:$roomVersion")
 
-    val protobufVersion = "4.28.3"
+    val protobufVersion = "4.29.1"
     implementation("com.google.protobuf:protobuf-java:$protobufVersion")
     implementation("com.google.protobuf:protobuf-kotlin:$protobufVersion")
     protobuf(files("../../lib_protobuf/protobuf/"))
 
     implementation("net.java.dev.jna:jna:5.15.0@aar")
 
-    val hiltVersion = "2.52"
+    val hiltVersion = "2.53.1"
     implementation("com.google.dagger:hilt-android:$hiltVersion")
     kapt("com.google.dagger:hilt-android-compiler:$hiltVersion")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
