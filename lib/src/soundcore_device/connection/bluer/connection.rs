@@ -1,8 +1,8 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use bluer::{
     gatt::remote::{Characteristic, Service},
-    Device, DeviceProperty,
+    Device, DeviceEvent, DeviceProperty,
 };
 use futures::{pin_mut, StreamExt};
 use macaddr::MacAddr6;
@@ -15,7 +15,7 @@ use tokio::{
     },
     task::JoinHandle,
 };
-use tracing::{debug, instrument, trace, trace_span, warn, Instrument};
+use tracing::{debug, debug_span, info_span, trace, trace_span, warn, Instrument};
 use uuid::Uuid;
 
 use crate::{
@@ -41,7 +41,7 @@ impl BluerConnection {
             .clone()
             .spawn(async move {
                 device.connect().await?;
-                let service = Self::get_service(&device).await?;
+                let service = Self::get_service_with_retry(&device, Duration::from_secs(5)).await?;
                 let service_uuid = service.uuid().await?;
 
                 let [read_characteristic, write_characteristic] = Self::get_characteristics(
@@ -65,8 +65,40 @@ impl BluerConnection {
                 };
                 Ok(connection)
             })
+            .instrument(info_span!("BluerConnection::new"))
             .await
             .unwrap()
+    }
+
+    #[tracing::instrument]
+    async fn get_service_with_retry(device: &Device, timeout: Duration) -> crate::Result<Service> {
+        let service_found = device.events().await?.any(|event| async move {
+            match event {
+                DeviceEvent::PropertyChanged(DeviceProperty::Uuids(uuids)) => uuids
+                    .iter()
+                    .any(|uuid| device_utils::is_soundcore_service_uuid(uuid)),
+                _ => false,
+            }
+        });
+        match Self::get_service(device).await {
+            Ok(service) => {
+                debug!("found service on first try");
+                return Ok(service);
+            }
+            Err(err) => {
+                if let crate::Error::ServiceNotFound { source: _, uuid: _ } = err {
+                    // keep going and retry later
+                } else {
+                    return Err(err);
+                }
+            }
+        }
+        debug!("service not found, waiting for event");
+        select! {
+            _ = service_found => debug!("got service found event"),
+            _ = tokio::time::sleep(timeout) => debug!("no event, giving it one last try"),
+        }
+        Self::get_service(device).await
     }
 
     async fn get_service(device: &Device) -> crate::Result<Service> {
@@ -167,17 +199,18 @@ impl Connection for BluerConnection {
         self.service_uuid
     }
 
-    #[instrument(level = "trace", skip(self))]
     async fn write_with_response(&self, data: &[u8]) -> crate::Result<()> {
         self.write_without_response(data).await
     }
 
-    #[instrument(level = "trace", skip(self))]
     async fn write_without_response(&self, data: &[u8]) -> crate::Result<()> {
         let data = data.to_owned();
         let write_characteristic = self.write_characteristic.to_owned();
         self.handle
-            .spawn(async move { write_characteristic.write(&data).await })
+            .spawn(
+                async move { write_characteristic.write(&data).await }
+                    .instrument(debug_span!("BluerConnection::write_without_response")),
+            )
             .await
             .unwrap()
             .map_err(Into::into)
