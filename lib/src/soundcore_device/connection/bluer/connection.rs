@@ -69,7 +69,7 @@ impl BluerConnection {
             .unwrap()
     }
 
-    pub async fn get_service(device: &Device) -> crate::Result<Service> {
+    async fn get_service(device: &Device) -> crate::Result<Service> {
         for service in device.services().await? {
             if device_utils::is_soundcore_service_uuid(&service.uuid().await?) {
                 return Ok(service);
@@ -81,7 +81,7 @@ impl BluerConnection {
         })
     }
 
-    pub async fn get_characteristics<const SIZE: usize>(
+    async fn get_characteristics<const SIZE: usize>(
         service: &Service,
         uuids: [Uuid; SIZE],
     ) -> crate::Result<[Characteristic; SIZE]> {
@@ -107,7 +107,7 @@ impl BluerConnection {
         Ok(characteristics.map(|v| v.expect("we already made sure every element is some")))
     }
 
-    pub async fn spawn_connection_status(
+    async fn spawn_connection_status(
         handle: &Handle,
         device: Device,
     ) -> crate::Result<(watch::Receiver<ConnectionStatus>, JoinHandle<()>)> {
