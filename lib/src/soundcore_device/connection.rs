@@ -1,8 +1,8 @@
 #[cfg(feature = "bluetooth")]
 use crate::api::connection::ConnectionRegistry;
-#[cfg(feature = "bluer")]
-pub mod bluer;
-#[cfg(all(feature = "bluetooth", any(target_os = "macos", target_os = "linux")))]
+#[cfg(all(feature = "bluetooth", target_os = "linux"))]
+pub(crate) mod bluer;
+#[cfg(all(feature = "bluetooth", target_os = "macos"))]
 pub(crate) mod btleplug;
 #[cfg(all(feature = "bluetooth", target_os = "windows"))]
 pub(crate) mod windows;
@@ -13,14 +13,7 @@ pub async fn new_connection_registry(
 ) -> crate::Result<impl ConnectionRegistry> {
     #[cfg(target_os = "linux")]
     {
-        #[cfg(feature = "bluer")]
-        {
-            bluer::new_connection_registry(handle).await
-        }
-        #[cfg(not(feature = "bluer"))]
-        {
-            btleplug::new_connection_registry(handle).await
-        }
+        bluer::new_connection_registry(handle).await
     }
     #[cfg(target_os = "macos")]
     {

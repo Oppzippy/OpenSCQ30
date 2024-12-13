@@ -5,7 +5,7 @@ license.workspace = true
 edition = "2021"
 
 [features]
-bluetooth = ["dep:btleplug", "dep:regex", "dep:windows"]
+bluetooth = ["dep:btleplug", "dep:bluer", "dep:regex", "dep:windows"]
 wasm = ["dep:js-sys", "dep:web-sys", "dep:wasm-bindgen-futures"]
 serde = ["dep:serde", "ordered-float/serde"]
 demo = []
@@ -34,8 +34,9 @@ static_assertions = { workspace = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 bluer = { workspace = true, optional = true, features = ["bluetoothd"] }
+tokio = { workspace = true, features = ["rt-multi-thread"] }
 
-[target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
+[target.'cfg(any(target_os = "macos"))'.dependencies]
 btleplug = { workspace = true, optional = true }
 regex = { workspace = true, optional = true }
 tokio = { workspace = true, features = ["rt-multi-thread"] }

@@ -8,7 +8,6 @@ edition = "2021"
 default = ["bluetooth"]
 bluetooth = ["openscq30_lib/bluetooth"]
 demo = ["openscq30_lib/demo"]
-bluer = ["openscq30_lib/bluer"]
 
 [dependencies]
 openscq30_lib = { path = "../lib", features = ["serde"] }

@@ -11,9 +11,9 @@ use weak_table::WeakValueHashMap;
 
 use crate::api::connection::{ConnectionRegistry, GenericConnectionDescriptor};
 use crate::device_utils;
-use crate::soundcore_device::connection::btleplug::RuntimeOrHandle;
 
 use super::connection::BluerConnection;
+use super::RuntimeOrHandle;
 
 pub struct BluerConnectionRegistry {
     runtime: RuntimeOrHandle,

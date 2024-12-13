@@ -1,7 +1,10 @@
-use connection_registry::BluerConnectionRegistry;
-use tokio::runtime::Handle;
+use std::future::Future;
 
-use super::btleplug::RuntimeOrHandle;
+use connection_registry::BluerConnectionRegistry;
+use tokio::{
+    runtime::{Handle, Runtime},
+    task::JoinHandle,
+};
 
 mod bluer_error;
 mod connection;
@@ -24,4 +27,29 @@ pub(crate) async fn new_connection_registry(
         .spawn(async move { BluerConnectionRegistry::new(runtime_or_handle).await })
         .await
         .unwrap()
+}
+
+pub enum RuntimeOrHandle {
+    Runtime(Runtime),
+    Handle(Handle),
+}
+
+impl RuntimeOrHandle {
+    pub fn spawn<F>(&self, future: F) -> JoinHandle<F::Output>
+    where
+        F: Future + Send + 'static,
+        F::Output: Send + 'static,
+    {
+        match self {
+            RuntimeOrHandle::Runtime(runtime) => runtime.spawn(future),
+            RuntimeOrHandle::Handle(handle) => handle.spawn(future),
+        }
+    }
+
+    pub fn handle(&self) -> Handle {
+        match self {
+            RuntimeOrHandle::Runtime(runtime) => runtime.handle().to_owned(),
+            RuntimeOrHandle::Handle(handle) => handle.to_owned(),
+        }
+    }
 }
