@@ -61,7 +61,6 @@ impl BluerConnectionRegistry {
     async fn ble_scan(adapter: &Adapter) -> crate::Result<HashSet<Address>> {
         adapter
             .set_discovery_filter(DiscoveryFilter {
-                uuids: HashSet::from_iter(device_utils::service_uuids()),
                 transport: DiscoveryTransport::Le,
                 ..Default::default()
             })
@@ -73,7 +72,11 @@ impl BluerConnectionRegistry {
             .take_until(tokio::time::sleep(Duration::from_secs(1)))
             .filter_map(|event| async move {
                 match event {
-                    bluer::AdapterEvent::DeviceAdded(address) => Some(address),
+                    bluer::AdapterEvent::DeviceAdded(address)
+                        if device_utils::is_mac_address_soundcore_device(address.into()) =>
+                    {
+                        Some(address)
+                    }
                     _ => None,
                 }
             })

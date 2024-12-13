@@ -43,7 +43,7 @@ impl BtlePlugConnectionRegistry {
                     tracing::debug!("starting scan");
                     adapter
                         .start_scan(ScanFilter {
-                            services: device_utils::service_uuids(),
+                            services: Vec::new(),
                         })
                         .await?;
                     // The Soundcore Q30 seems to advertise around every .3s
@@ -59,7 +59,13 @@ impl BtlePlugConnectionRegistry {
                     .flatten()
                     .map(|adapter_and_peripheral| adapter_and_peripheral.1)
                     .filter_map(|peripheral| async move {
-                        Self::filter_connected_peripherals(peripheral).await
+                        if device_utils::is_mac_address_soundcore_device(
+                            peripheral.address().into_mac_addr(),
+                        ) {
+                            Self::filter_connected_peripherals(peripheral).await
+                        } else {
+                            None
+                        }
                     })
                     .filter_map(|peripheral| async move {
                         Self::peripheral_to_descriptor(peripheral).await
