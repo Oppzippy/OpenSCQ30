@@ -16,7 +16,8 @@
     "nextSong": "",
     "ambientSoundMode": "",
     "voiceAssistant": "",
-    "playPause": ""
+    "playPause": "",
+    "gameMode": ""
   },
   "colorScheme": {
     "system": "",
@@ -51,8 +52,7 @@
     "noiseCancelingMode": "",
     "transparencyMode": "",
     "adaptiveNoiseCanceling": "",
-    "manualNoiseCanceling": "",
-    "noiseCancelingSensitivityLevel": ""
+    "manualNoiseCanceling": ""
   },
   "equalizer": {
     "customProfile": "",

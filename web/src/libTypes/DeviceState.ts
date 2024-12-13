@@ -109,6 +109,7 @@ const buttonActionSchema = Type.Union([
   Type.Literal("ambientSoundMode"),
   Type.Literal("voiceAssistant"),
   Type.Literal("playPause"),
+  Type.Literal("gameMode"),
 ]);
 export type ButtonAction = Static<typeof buttonActionSchema>;
 

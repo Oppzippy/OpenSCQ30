@@ -12,6 +12,7 @@ enum ButtonAction {
   AMBIENT_SOUND_MODE = 4;
   VOICE_ASSISTANT = 5;
   PLAY_PAUSE = 6;
+  GAME_MODE = 9;
 }
 
 message TwsButtonAction {

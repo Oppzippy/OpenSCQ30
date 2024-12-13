@@ -145,4 +145,5 @@
     <string name="moderate">Moderate</string>
     <string name="strong">Strong</string>
     <string name="sound_modes">Sound Modes</string>
+    <string name="game_mode">Game Mode</string>
 </resources>

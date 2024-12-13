@@ -113,6 +113,7 @@ const ButtonActionSelection = React.memo(function ({
     { label: t("buttonActions.ambientSoundMode"), value: "ambientSoundMode" },
     { label: t("buttonActions.voiceAssistant"), value: "voiceAssistant" },
     { label: t("buttonActions.playPause"), value: "playPause" },
+    { label: t("buttonActions.gameMode"), value: "gameMode" },
   ];
   const labelId = `button-settings-${buttonKey}-label`;
 

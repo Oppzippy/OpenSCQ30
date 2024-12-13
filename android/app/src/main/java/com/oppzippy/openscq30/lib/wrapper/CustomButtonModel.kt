@@ -80,6 +80,7 @@ enum class ButtonAction {
     AmbientSoundMode,
     VoiceAssistant,
     PlayPause,
+    GameMode
     ;
 
     fun toProtobuf(): com.oppzippy.openscq30.lib.protobuf.ButtonAction = when (this) {
@@ -90,6 +91,7 @@ enum class ButtonAction {
         AmbientSoundMode -> com.oppzippy.openscq30.lib.protobuf.ButtonAction.AMBIENT_SOUND_MODE
         VoiceAssistant -> com.oppzippy.openscq30.lib.protobuf.ButtonAction.VOICE_ASSISTANT
         PlayPause -> com.oppzippy.openscq30.lib.protobuf.ButtonAction.PLAY_PAUSE
+        GameMode -> com.oppzippy.openscq30.lib.protobuf.ButtonAction.GAME_MODE
     }
 
     fun toStringResource(): Int = when (this) {
@@ -100,6 +102,7 @@ enum class ButtonAction {
         AmbientSoundMode -> R.string.ambient_sound_mode
         VoiceAssistant -> R.string.voice_assistant
         PlayPause -> R.string.play_pause
+        GameMode -> R.string.game_mode
     }
 }
 
@@ -111,4 +114,5 @@ fun com.oppzippy.openscq30.lib.protobuf.ButtonAction.toKotlin(): ButtonAction = 
     com.oppzippy.openscq30.lib.protobuf.ButtonAction.AMBIENT_SOUND_MODE -> ButtonAction.AmbientSoundMode
     com.oppzippy.openscq30.lib.protobuf.ButtonAction.VOICE_ASSISTANT -> ButtonAction.VoiceAssistant
     com.oppzippy.openscq30.lib.protobuf.ButtonAction.PLAY_PAUSE -> ButtonAction.PlayPause
+    com.oppzippy.openscq30.lib.protobuf.ButtonAction.GAME_MODE -> ButtonAction.GameMode
 }

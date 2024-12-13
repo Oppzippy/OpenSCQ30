@@ -16,7 +16,8 @@
     "nextSong": "Next Song",
     "ambientSoundMode": "Ambient Sound Mode",
     "voiceAssistant": "Voice Assistant",
-    "playPause": "Play/Pause"
+    "playPause": "Play/Pause",
+    "gameMode": "Game Mode"
   },
   "colorScheme": {
     "system": "System",
@@ -51,8 +52,7 @@
     "noiseCancelingMode": "Noise Canceling Mode",
     "transparencyMode": "Transparency Mode",
     "adaptiveNoiseCanceling": "Adaptive Noise Canceling",
-    "manualNoiseCanceling": "Manual Noise Canceling",
-    "noiseCancelingSensitivityLevel": "Noise Canceling Sensitivity Level"
+    "manualNoiseCanceling": "Manual Noise Canceling"
   },
   "equalizer": {
     "customProfile": "Custom Profile",

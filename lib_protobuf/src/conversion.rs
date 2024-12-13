@@ -461,6 +461,7 @@ impl From<LibButtonAction> for ButtonAction {
             LibButtonAction::AmbientSoundMode => Self::AmbientSoundMode,
             LibButtonAction::VoiceAssistant => Self::VoiceAssistant,
             LibButtonAction::PlayPause => Self::PlayPause,
+            LibButtonAction::GameMode => Self::GameMode,
         }
     }
 }
@@ -511,6 +512,7 @@ impl From<ButtonAction> for LibButtonAction {
             ButtonAction::AmbientSoundMode => Self::AmbientSoundMode,
             ButtonAction::VoiceAssistant => Self::VoiceAssistant,
             ButtonAction::PlayPause => Self::PlayPause,
+            ButtonAction::GameMode => Self::GameMode,
         }
     }
 }

@@ -141,6 +141,7 @@ pub enum ButtonAction {
     AmbientSoundMode = 4,
     VoiceAssistant = 5,
     PlayPause = 6,
+    GameMode = 9,
 }
 
 impl From<ButtonAction> for u8 {
