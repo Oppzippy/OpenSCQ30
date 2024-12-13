@@ -1,0 +1,5 @@
+* Features
+  - Add Game Mode button action
+
+* Fixes
+  - Fix service not found error on Linux unless `bluetoothctl connect` was manually run

@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.16.0
+
+### General
+
+#### Features
+
+-   Add Game Mode button action
+
+#### Fixes
+
+-   Fix service not found error on Linux unless `bluetoothctl connect` was manually run
+
 ## v1.15.0
 
 ### General

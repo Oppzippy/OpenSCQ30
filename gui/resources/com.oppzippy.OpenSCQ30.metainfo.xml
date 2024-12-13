@@ -45,6 +45,18 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.16.0" date="2024-12-13">
+            <description>
+                <p>Features</p>
+                <ul>
+                    <li>Add Game Mode button action</li>
+                </ul>
+                <p>Fixes</p>
+                <ul>
+                    <li>Fix service not found error on Linux unless `bluetoothctl connect` was manually run</li>
+                </ul> 
+            </description>
+        </release>
         <release version="1.15.0" date="2024-12-09">
             <description>
                 <p>Fixes</p>
