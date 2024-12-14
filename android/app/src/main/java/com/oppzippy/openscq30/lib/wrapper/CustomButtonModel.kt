@@ -80,7 +80,7 @@ enum class ButtonAction {
     AmbientSoundMode,
     VoiceAssistant,
     PlayPause,
-    GameMode
+    GameMode,
     ;
 
     fun toProtobuf(): com.oppzippy.openscq30.lib.protobuf.ButtonAction = when (this) {
