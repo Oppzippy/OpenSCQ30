@@ -22,7 +22,7 @@ pub fn packet_handlers(
     let handlers: [(
         Command,
         Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>,
-    ); 8] = [
+    ); 9] = [
         (
             SoundModeUpdatePacket::command(),
             Box::new(sound_mode_update_handler),
@@ -50,6 +50,10 @@ pub fn packet_handlers(
         ),
         (
             ChineseVoicePromptStateUpdatePacket::command(),
+            Box::new(do_nothing_handler),
+        ),
+        (
+            GameModeUpdatePacket::command(),
             Box::new(do_nothing_handler),
         ),
     ];
