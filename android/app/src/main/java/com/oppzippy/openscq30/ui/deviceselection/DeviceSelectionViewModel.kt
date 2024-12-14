@@ -45,7 +45,10 @@ class DeviceSelectionViewModel @Inject constructor(
         val pairingRequest = AssociationRequest.Builder()
             .addDeviceFilter(
                 BluetoothDeviceFilter.Builder().apply {
-                    this.setNamePattern(Pattern.compile("Soundcore"))
+                    // case insensitive since sometimes the S in Soundcore is lowercase
+                    // For some reason, when used with setNamePattern, Pattern.CASE_INSENSITIVE doesn't work.
+                    // (?i) can be used as a workaround.
+                    this.setNamePattern(Pattern.compile("(?i)soundcore"))
                 }.build(),
             )
             .build()

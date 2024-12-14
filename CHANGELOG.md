@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Android
+
+#### Fixes
+
+-   Fix devices with names containing "soundcore" (lowercase s) rather than "Soundcore" not showing up in the listing.
+
 ## v1.16.0
 
 ### General
