@@ -45,6 +45,7 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.16.1" date="2024-12-14" />
         <release version="1.16.0" date="2024-12-13">
             <description>
                 <p>Features</p>
@@ -54,7 +55,7 @@
                 <p>Fixes</p>
                 <ul>
                     <li>Fix service not found error on Linux unless `bluetoothctl connect` was manually run</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="1.15.0" date="2024-12-09">
@@ -64,7 +65,7 @@
                     <li>Add missing soundcore mac address ranges for device detection</li>
                     <li>Prioritize filtering by GATT service id rather than mac address, since new mac address ranges are showing up. This isn't possible (or implemented yet) on every client, however.</li>
                     <li>Various Space A40 issues that prevented it from working at all</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="1.14.1" date="2024-11-29">
@@ -72,7 +73,7 @@
                 <p>Fixes</p>
                 <ul>
                     <li>Fix Space A40 (A3936) state update packet parsing</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="1.14.0" date="2024-11-19">
@@ -87,7 +88,7 @@
                     <li>Fix Liberty 2 Pro (A3930) packet parse error</li>
                     <li>Quick presets resetting to default values</li>
                     <li>Sound mode options unsupported by the device visible in quick presets</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="1.13.1" date="2024-08-31">
@@ -95,7 +96,7 @@
                 <p>Fixes</p>
                 <ul>
                     <li>Remove broken gtk binding that was ignored and had no effect other than a critical log message</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="1.13.0" date="2024-08-31">
@@ -115,7 +116,7 @@
                     <li>Icon colors now adapt when using dark theme</li>
                     <li>Write config file to temp file first before overwriting to work around potential data loss if writing is interrupted</li>
                     <li>The config file is no longer overwritten with the exact same content during every application startup</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="1.12.0" date="2024-04-21" />
