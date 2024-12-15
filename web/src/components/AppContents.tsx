@@ -35,7 +35,7 @@ export function AppContents() {
     connect(true);
   }, [connect]);
   const connectUnfiltered = useCallback(() => {
-    connect(true);
+    connect(false);
   }, [connect]);
 
   const disconnect = useCallback(() => {
