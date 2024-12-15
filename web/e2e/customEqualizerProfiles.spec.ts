@@ -9,7 +9,7 @@ test.describe("custom equalizer profiles", () => {
     await page.reload();
 
     // start tests with custom profile selected
-    await page.getByText("Select Device").click();
+    await page.getByText("Select Device", { exact: true }).click();
     await page.getByText("Soundcore Signature").click();
     await page.getByRole("option", { name: "Custom", exact: true }).click();
   });
