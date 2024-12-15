@@ -41,20 +41,20 @@ pub fn service_uuids() -> Vec<Uuid> {
         .collect::<Vec<_>>()
 }
 
-// Checking for services should be preferred over checking mac address prefixes.
 // All mac address prefixes owned by the following companies should be listed here.
 // See: http://standards-oui.ieee.org/oui/oui.csv
-const MAC_ADDRESS_PREFIXES: [[u8; 3]; 6] = [
+const MAC_ADDRESS_PREFIXES: [[u8; 3]; 7] = [
     // Fantasia Trading LLC
     [0xAC, 0x12, 0x2F],
     [0xE8, 0xEE, 0xCC],
+    [0xAC, 0x12, 0x2F],
     // Ningbo FreeWings Technologies Co.,Ltd
     [0xA4, 0x77, 0x58],
     [0xA0, 0xE9, 0xDB],
+    // Shenzhen Boomtech Industrial Corporation
+    [0x98, 0x47, 0x44],
     // ???
     [0xE4, 0x9E, 0x58],
-    // ???
-    [0x98, 0x47, 0x44],
 ];
 pub fn soundcore_mac_address_prefixes() -> &'static [[u8; 3]] {
     &MAC_ADDRESS_PREFIXES
