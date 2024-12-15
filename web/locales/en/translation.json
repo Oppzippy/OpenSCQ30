@@ -28,7 +28,8 @@
   "device": {
     "disconnect": "Disconnect",
     "deviceSelection": "Device Selection",
-    "selectDevice": "Select Device"
+    "selectDevice": "Select Device",
+    "selectDeviceUnfiltered": "Select Device (Unfiltered)"
   },
   "deviceInfo": {
     "deviceInfo": "Device Info",

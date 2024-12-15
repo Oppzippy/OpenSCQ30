@@ -83,31 +83,35 @@ export class Device {
   }
 }
 
-export async function selectDevice(): Promise<Device> {
+export async function selectDevice(isFiltered: boolean): Promise<Device> {
   // TODO can we set the types in wasm-bindgen?
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const serviceUuids: string[] = SoundcoreDeviceUtils.getServiceUuids();
 
   const macAddressPrefixes = SoundcoreDeviceUtils.getMacAddressPrefixes();
-  const device = await navigator.bluetooth.requestDevice({
-    // We would filter by available services, but this doesn't seem to work on chromium based browsers on platforms
-    // other than Linux without first going to about://bluetooth-internals/#devices, scanning for your device, and
-    // then inspecting it.
-    // filters: [{ services: [serviceUuid] }],
-    filters: macAddressPrefixes.map((prefix) => ({
-      manufacturerData: [
-        {
-          // Non standard manufacturer data format: mac address followed by 0x00 0x00
-          // companyIdentifier is picked up as the first two bytes of the mac address
-          companyIdentifier: (prefix[1] << 8) | prefix[0],
-          // data is everything after those first two bytes. Since we want to filter by the first three bytes of the
-          // mac address, that just leaves one more byte.
-          dataPrefix: Uint8Array.of(prefix[2]),
-        },
-      ],
-    })),
-    optionalServices: serviceUuids,
-  });
+  const device = await navigator.bluetooth.requestDevice(
+    isFiltered
+      ? {
+          // We would filter by available services, but this doesn't seem to work on chromium based browsers on platforms
+          // other than Linux without first going to about://bluetooth-internals/#devices, scanning for your device, and
+          // then inspecting it.
+          // filters: [{ services: [serviceUuid] }],
+          filters: macAddressPrefixes.map((prefix) => ({
+            manufacturerData: [
+              {
+                // Non standard manufacturer data format: mac address followed by 0x00 0x00
+                // companyIdentifier is picked up as the first two bytes of the mac address
+                companyIdentifier: (prefix[1] << 8) | prefix[0],
+                // data is everything after those first two bytes. Since we want to filter by the first three bytes of the
+                // mac address, that just leaves one more byte.
+                dataPrefix: Uint8Array.of(prefix[2]),
+              },
+            ],
+          })),
+          optionalServices: serviceUuids,
+        }
+      : { optionalServices: serviceUuids, acceptAllDevices: true },
+  );
   const libDevice = await LibDevice.new(device);
   return await Device.new(libDevice);
 }

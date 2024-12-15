@@ -15,18 +15,28 @@ export function AppContents() {
   const theme = useTheme();
   useUpdateAvailableToast();
 
-  const connect = useCallback(() => {
-    setLoading(true);
-    (isDemoMode ? selectDemoDevice : selectDevice)()
-      .then(setDevice)
-      .catch((err) => {
-        setLoading(false);
-        // Ignore error if the user canceled the device selection popup
-        if (!(err instanceof DOMException) || err.name != "NotFoundError") {
-          console.error(err);
-        }
-      });
-  }, [isDemoMode]);
+  const connect = useCallback(
+    (isFiltered: boolean) => {
+      setLoading(true);
+      (isDemoMode ? selectDemoDevice : selectDevice)(isFiltered)
+        .then(setDevice)
+        .catch((err) => {
+          setLoading(false);
+          // Ignore error if the user canceled the device selection popup
+          if (!(err instanceof DOMException) || err.name != "NotFoundError") {
+            console.error(err);
+          }
+        });
+    },
+    [isDemoMode],
+  );
+
+  const connectFiltered = useCallback(() => {
+    connect(true);
+  }, [connect]);
+  const connectUnfiltered = useCallback(() => {
+    connect(true);
+  }, [connect]);
 
   const disconnect = useCallback(() => {
     device?.destroy();
@@ -47,11 +57,12 @@ export function AppContents() {
         {device ? (
           <ConnectedAppBar
             deviceName={device.name ?? "Unknown device"}
-            onDisconnectClick={() => disconnect()}
+            onDisconnectClick={disconnect}
           />
         ) : (
           <DisconnectedAppBar
-            onSelectDeviceClick={() => connect()}
+            onSelectDeviceClick={connectFiltered}
+            onSelectDeviceUnfilteredClick={connectUnfiltered}
             showSelectDeviceButton={!!navigator.bluetooth || isDemoMode}
           />
         )}

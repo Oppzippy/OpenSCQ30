@@ -4,6 +4,7 @@ import { ColorSchemeSelect } from "./ColorSchemeSelect";
 
 interface Props {
   onSelectDeviceClick: () => void;
+  onSelectDeviceUnfilteredClick: () => void;
   showSelectDeviceButton: boolean;
 }
 
@@ -25,6 +26,14 @@ export function DisconnectedAppBar(props: Props) {
         {props.showSelectDeviceButton && (
           <Button color="inherit" onClick={() => props.onSelectDeviceClick()}>
             {t("device.selectDevice")}
+          </Button>
+        )}
+        {props.showSelectDeviceButton && (
+          <Button
+            color="inherit"
+            onClick={() => props.onSelectDeviceUnfilteredClick()}
+          >
+            {t("device.selectDeviceUnfiltered")}
           </Button>
         )}
       </Toolbar>

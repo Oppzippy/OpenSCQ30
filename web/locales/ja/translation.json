@@ -28,7 +28,8 @@
   "device": {
     "disconnect": "",
     "deviceSelection": "デバイス選択",
-    "selectDevice": ""
+    "selectDevice": "",
+    "selectDeviceUnfiltered": ""
   },
   "deviceInfo": {
     "deviceInfo": "",
