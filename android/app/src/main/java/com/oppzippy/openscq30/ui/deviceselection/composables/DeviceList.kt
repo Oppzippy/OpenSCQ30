@@ -31,6 +31,7 @@ fun DeviceList(
     modifier: Modifier = Modifier,
     onDeviceClick: (device: BluetoothDevice) -> Unit = {},
     onPair: () -> Unit = {},
+    onPairUnfiltered: () -> Unit = {},
     onUnpair: (device: BluetoothDevice) -> Unit = {},
 ) {
     var deviceToUnpair: BluetoothDevice? by remember { mutableStateOf(null) }
@@ -78,7 +79,22 @@ fun DeviceList(
             }
         }
         item {
-            PairDeviceButton(onClick = onPair)
+            PairDeviceButton(
+                modifier = Modifier
+                    .padding(10.dp)
+                    .fillMaxWidth(1f),
+                onClick = onPair,
+                text = stringResource(R.string.pair_device),
+            )
+        }
+        item {
+            PairDeviceButton(
+                modifier = Modifier
+                    .padding(horizontal = 10.dp)
+                    .fillMaxWidth(1f),
+                onClick = onPairUnfiltered,
+                text = stringResource(R.string.pair_device_unfiltered),
+            )
         }
     }
 }
@@ -88,7 +104,7 @@ fun DeviceList(
 private fun PreviewDeviceList() {
     OpenSCQ30Theme {
         val devices = ArrayList<BluetoothDevice>()
-        for (i in 1..100) {
+        for (i in 1..3) {
             devices.add(BluetoothDevice("Device #$i", "00:00:$i"))
         }
         DeviceList(devices)

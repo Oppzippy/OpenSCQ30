@@ -19,6 +19,7 @@ fun DeviceSelection(
     onRefreshDevices: () -> Unit = {},
     onDeviceSelected: (device: BluetoothDevice) -> Unit = {},
     onPair: () -> Unit = {},
+    onPairUnfiltered: () -> Unit = {},
     onUnpair: (BluetoothDevice) -> Unit = {},
 ) {
     val navController = rememberNavController()
@@ -44,6 +45,7 @@ fun DeviceSelection(
                     onRefreshClick = onRefreshDevices,
                     onDeviceClick = onDeviceSelected,
                     onPair = onPair,
+                    onPairUnfiltered = onPairUnfiltered,
                     onUnpair = onUnpair,
                     onInfoClick = {
                         navController.navigate(Screen.Info.route) {
@@ -57,14 +59,18 @@ fun DeviceSelection(
             }
         }
         composable("/info") {
-            AppInfo(onBackClick = {
-                navController.popBackStack()
-            })
+            AppInfo(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+            )
         }
         composable("/settings") {
-            SettingsPage(onBackClick = {
-                navController.popBackStack()
-            })
+            SettingsPage(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+            )
         }
     }
 }

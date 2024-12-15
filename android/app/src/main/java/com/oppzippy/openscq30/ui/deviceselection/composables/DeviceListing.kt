@@ -35,6 +35,7 @@ fun DeviceListing(
     onDeviceClick: (BluetoothDevice) -> Unit = {},
     onSettingsClick: () -> Unit = {},
     onPair: () -> Unit = {},
+    onPairUnfiltered: () -> Unit = {},
     onUnpair: (BluetoothDevice) -> Unit = {},
 ) {
     Scaffold(
@@ -88,6 +89,7 @@ fun DeviceListing(
                         .fillMaxHeight(),
                     onDeviceClick = onDeviceClick,
                     onPair = onPair,
+                    onPairUnfiltered = onPairUnfiltered,
                     onUnpair = onUnpair,
                 )
             }

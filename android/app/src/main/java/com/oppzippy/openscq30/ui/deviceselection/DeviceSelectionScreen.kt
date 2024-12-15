@@ -20,7 +20,8 @@ fun DeviceSelectionScreen(
         devices = devices,
         onRefreshDevices = { viewModel.refreshDevices() },
         onDeviceSelected = onDeviceSelected,
-        onPair = { viewModel.pair(activity) },
+        onPair = { viewModel.pair(activity, true) },
+        onPairUnfiltered = { viewModel.pair(activity, false) },
         onUnpair = { viewModel.unpair(it) },
     )
 }
