@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
+import com.oppzippy.openscq30.lib.wrapper.AvailableSoundModes
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.wrapper.SoundModes
 import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
@@ -23,8 +24,7 @@ fun SoundModeSettings(
     modifier: Modifier = Modifier,
     soundModes: SoundModes,
     ambientSoundModeCycle: AmbientSoundModeCycle?,
-    hasTransparencyModes: Boolean,
-    noiseCancelingType: NoiseCancelingType,
+    availableSoundModes: AvailableSoundModes,
     onAmbientSoundModeChange: (ambientSoundMode: AmbientSoundMode) -> Unit = {},
     onTransparencyModeChange: (transparencyMode: TransparencyMode) -> Unit = {},
     onNoiseCancelingModeChange: (noiseCancelingMode: NoiseCancelingMode) -> Unit = {},
@@ -32,47 +32,49 @@ fun SoundModeSettings(
     onAmbientSoundModeCycleChange: (cycle: AmbientSoundModeCycle) -> Unit = {},
 ) {
     Column(modifier = modifier) {
-        GroupHeader(stringResource(R.string.ambient_sound_mode))
-        AmbientSoundModeSelection(
-            ambientSoundMode = soundModes.ambientSoundMode,
-            onAmbientSoundModeChange = onAmbientSoundModeChange,
-            hasNoiseCanceling = noiseCancelingType != NoiseCancelingType.None,
-        )
-        if (ambientSoundModeCycle != null) {
+        if (availableSoundModes.ambientSoundModes.isNotEmpty()) {
+            GroupHeader(stringResource(R.string.ambient_sound_mode))
+            AmbientSoundModeSelection(
+                ambientSoundMode = soundModes.ambientSoundMode,
+                onAmbientSoundModeChange = onAmbientSoundModeChange,
+                availableSoundModes = availableSoundModes.ambientSoundModes,
+            )
             Spacer(modifier = Modifier.padding(vertical = 8.dp))
+        }
+        if (ambientSoundModeCycle != null) {
             GroupHeader(stringResource(R.string.ambient_sound_mode_cycle))
             AmbientSoundModeCycleSelection(
                 cycle = ambientSoundModeCycle,
                 onAmbientSoundModeCycleChange = onAmbientSoundModeCycleChange,
-                hasNoiseCanceling = noiseCancelingType != NoiseCancelingType.None,
+                availableSoundModes = availableSoundModes.ambientSoundModes,
             )
-        }
-        if (hasTransparencyModes) {
             Spacer(modifier = Modifier.padding(vertical = 8.dp))
+        }
+        if (availableSoundModes.transparencyModes.isNotEmpty()) {
             GroupHeader(stringResource(R.string.transparency_mode))
             TransparencyModeSelection(
                 transparencyMode = soundModes.transparencyMode,
                 onTransparencyModeChange = onTransparencyModeChange,
+                availableSoundModes = availableSoundModes.transparencyModes,
             )
-        }
-        if (noiseCancelingType != NoiseCancelingType.None) {
             Spacer(modifier = Modifier.padding(vertical = 8.dp))
+        }
+        if (availableSoundModes.noiseCancelingModes.isNotEmpty()) {
             GroupHeader(stringResource(R.string.noise_canceling_mode))
             NoiseCancelingModeSelection(
                 noiseCancelingMode = soundModes.noiseCancelingMode,
                 onNoiseCancelingModeChange = onNoiseCancelingModeChange,
-                hasCustomNoiseCanceling = noiseCancelingType == NoiseCancelingType.Custom,
+                availableSoundModes = availableSoundModes.noiseCancelingModes,
             )
-        }
-        if (noiseCancelingType == NoiseCancelingType.Custom &&
-            soundModes.noiseCancelingMode == NoiseCancelingMode.Custom
-        ) {
             Spacer(modifier = Modifier.padding(vertical = 8.dp))
+        }
+        if (availableSoundModes.customNoiseCanceling) {
             GroupHeader(stringResource(R.string.custom_noise_canceling))
             CustomNoiseCancelingSelection(
                 customNoiseCanceling = soundModes.customNoiseCanceling,
                 onCustomNoiseCancelingChange = onCustomNoiseCancelingChange,
             )
+            Spacer(modifier = Modifier.padding(vertical = 8.dp))
         }
     }
 }
@@ -102,8 +104,12 @@ private fun PreviewSoundModeSettings() {
                 transparencyMode = false,
                 noiseCancelingMode = true,
             ),
-            hasTransparencyModes = true,
-            noiseCancelingType = NoiseCancelingType.Custom,
+            availableSoundModes = AvailableSoundModes(
+                ambientSoundModes = AmbientSoundMode.entries,
+                transparencyModes = TransparencyMode.entries,
+                noiseCancelingModes = NoiseCancelingMode.entries,
+                customNoiseCanceling = true,
+            ),
         )
     }
 }

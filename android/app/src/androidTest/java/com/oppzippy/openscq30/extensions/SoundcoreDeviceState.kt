@@ -9,7 +9,7 @@ import com.oppzippy.openscq30.lib.wrapper.SingleBattery
 
 fun DeviceState.Companion.empty(): DeviceState = DeviceState(
     deviceFeatures = DeviceFeatures(
-        soundMode = null,
+        availableSoundModes = null,
         hasHearId = false,
         numEqualizerChannels = 0,
         numEqualizerBands = 0,

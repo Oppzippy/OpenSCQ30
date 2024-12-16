@@ -42,9 +42,11 @@ describe("Device Settings", () => {
     const mockDevice = {
       state: new BehaviorSubject<DeviceState>({
         deviceFeatures: {
-          soundMode: {
-            noiseCancelingModeType: "custom",
-            transparencyModeType: "custom",
+          availableSoundModes: {
+            ambientSoundModes: ["normal", "transparency", "noiseCanceling"],
+            transparencyModes: ["fullyTransparent", "vocalMode"],
+            noiseCancelingModes: ["indoor", "outdoor", "transport", "custom"],
+            customNoiseCanceling: false,
           },
           hasHearId: true,
           numEqualizerChannels: 1,

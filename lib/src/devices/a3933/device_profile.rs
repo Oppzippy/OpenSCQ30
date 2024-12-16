@@ -3,10 +3,7 @@ use std::{collections::HashMap, sync::Arc};
 use nom::error::VerboseError;
 
 use crate::{
-    device_profile::{
-        DeviceFeatures, DeviceProfile, NoiseCancelingModeType, SoundModeProfile,
-        TransparencyModeType,
-    },
+    device_profile::{AvailableSoundModes, DeviceFeatures, DeviceProfile},
     devices::standard::{
         self,
         implementation::ButtonConfigurationImplementation,
@@ -14,8 +11,9 @@ use crate::{
         quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBands},
         state::DeviceState,
         structures::{
-            AmbientSoundModeCycle, Command, EqualizerConfiguration, HearId,
-            MultiButtonConfiguration, SoundModes, SoundModesTypeTwo, STATE_UPDATE,
+            AmbientSoundMode, AmbientSoundModeCycle, Command, EqualizerConfiguration, HearId,
+            MultiButtonConfiguration, NoiseCancelingMode, SoundModes, SoundModesTypeTwo,
+            TransparencyMode, STATE_UPDATE,
         },
     },
     soundcore_device::{
@@ -28,9 +26,22 @@ use super::packets::inbound::A3933StateUpdatePacket;
 
 pub(crate) const A3933_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     features: DeviceFeatures {
-        sound_mode: Some(SoundModeProfile {
-            noise_canceling_mode_type: NoiseCancelingModeType::Basic,
-            transparency_mode_type: TransparencyModeType::Custom,
+        available_sound_modes: Some(AvailableSoundModes {
+            ambient_sound_modes: &[
+                AmbientSoundMode::Normal,
+                AmbientSoundMode::Transparency,
+                AmbientSoundMode::NoiseCanceling,
+            ],
+            transparency_modes: &[
+                TransparencyMode::FullyTransparent,
+                TransparencyMode::VocalMode,
+            ],
+            noise_canceling_modes: &[
+                NoiseCancelingMode::Transport,
+                NoiseCancelingMode::Indoor,
+                NoiseCancelingMode::Outdoor,
+            ],
+            custom_noise_canceling: false,
         }),
         has_hear_id: true,
         num_equalizer_channels: 2,

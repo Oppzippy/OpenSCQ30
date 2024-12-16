@@ -15,14 +15,12 @@ import com.oppzippy.openscq30.features.quickpresets.storage.FallbackQuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetRepository
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
+import com.oppzippy.openscq30.lib.wrapper.AvailableSoundModes
 import com.oppzippy.openscq30.lib.wrapper.DeviceFeatures
 import com.oppzippy.openscq30.lib.wrapper.FirmwareVersion
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
-import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeType
 import com.oppzippy.openscq30.lib.wrapper.PresetEqualizerProfile
-import com.oppzippy.openscq30.lib.wrapper.SoundModeProfile
 import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
-import com.oppzippy.openscq30.lib.wrapper.TransparencyModeType
 import com.oppzippy.openscq30.ui.quickpresets.QuickPresetScreen
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -57,7 +55,21 @@ class DeviceSettingsQuickPresetsTest {
     lateinit var customProfileDao: CustomProfileDao
 
     private var deviceFeatures = DeviceFeatures(
-        soundMode = SoundModeProfile(NoiseCancelingModeType.Custom, TransparencyModeType.Custom),
+        availableSoundModes = AvailableSoundModes(
+            ambientSoundModes = listOf(
+                AmbientSoundMode.Normal,
+                AmbientSoundMode.Transparency,
+                AmbientSoundMode.NoiseCanceling,
+            ),
+            transparencyModes = listOf(TransparencyMode.FullyTransparent, TransparencyMode.VocalMode),
+            noiseCancelingModes = listOf(
+                NoiseCancelingMode.Indoor,
+                NoiseCancelingMode.Outdoor,
+                NoiseCancelingMode.Transport,
+                NoiseCancelingMode.Custom,
+            ),
+            customNoiseCanceling = true,
+        ),
         hasHearId = true,
         numEqualizerChannels = 2,
         numEqualizerBands = 8,

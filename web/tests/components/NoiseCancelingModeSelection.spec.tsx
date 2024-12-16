@@ -15,7 +15,7 @@ describe("NoiseCancelingModeSelection", () => {
     const renderResult = render(
       <NoiseCancelingModeSelection
         value={"indoor"}
-        hasCustomMode={true}
+        availableModes={["indoor", "outdoor", "transport", "custom"]}
         onValueChanged={setMode}
       />,
     );

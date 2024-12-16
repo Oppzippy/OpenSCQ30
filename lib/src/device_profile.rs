@@ -16,7 +16,9 @@ use crate::{
         a3936::device_profile::A3936_DEVICE_PROFILE,
         a3945::device_profile::A3945_DEVICE_PROFILE,
         a3951::device_profile::A3951_DEVICE_PROFILE,
-        standard::structures::{FirmwareVersion, SerialNumber},
+        standard::structures::{
+            AmbientSoundMode, FirmwareVersion, NoiseCancelingMode, SerialNumber, TransparencyMode,
+        },
     },
     soundcore_device::{
         device::device_implementation::DeviceImplementation, device_model::DeviceModel,
@@ -31,10 +33,10 @@ pub(crate) struct DeviceProfile {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct DeviceFeatures {
-    pub sound_mode: Option<SoundModeProfile>,
+    pub available_sound_modes: Option<AvailableSoundModes>,
     pub has_hear_id: bool,
     pub num_equalizer_channels: usize,
     pub num_equalizer_bands: usize,
@@ -48,11 +50,13 @@ pub struct DeviceFeatures {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
-pub struct SoundModeProfile {
-    pub noise_canceling_mode_type: NoiseCancelingModeType,
-    pub transparency_mode_type: TransparencyModeType,
+pub struct AvailableSoundModes {
+    pub ambient_sound_modes: &'static [AmbientSoundMode],
+    pub transparency_modes: &'static [TransparencyMode],
+    pub noise_canceling_modes: &'static [NoiseCancelingMode],
+    pub custom_noise_canceling: bool,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, Default)]

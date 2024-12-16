@@ -6,7 +6,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.lib.extensions.resources.toStringResource
+import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 import com.oppzippy.openscq30.ui.utils.CheckboxWithLabel
@@ -15,34 +16,24 @@ import com.oppzippy.openscq30.ui.utils.CheckboxWithLabel
 fun AmbientSoundModeCycleSelection(
     cycle: AmbientSoundModeCycle,
     onAmbientSoundModeCycleChange: (cycle: AmbientSoundModeCycle) -> Unit,
-    hasNoiseCanceling: Boolean,
+    availableSoundModes: List<AmbientSoundMode>,
 ) {
     Column(Modifier.testTag("ambientSoundModeCycleSelection")) {
-        CheckboxWithLabel(
-            text = stringResource(R.string.normal),
-            isChecked = cycle.normalMode,
-            onCheckedChange = { isChecked ->
-                onAmbientSoundModeCycleChange(
-                    cycle.copy(normalMode = isChecked),
-                )
-            },
-        )
-        CheckboxWithLabel(
-            text = stringResource(R.string.transparency),
-            isChecked = cycle.transparencyMode,
-            onCheckedChange = { isChecked ->
-                onAmbientSoundModeCycleChange(
-                    cycle.copy(transparencyMode = isChecked),
-                )
-            },
-        )
-        if (hasNoiseCanceling) {
+        availableSoundModes.forEach { mode ->
             CheckboxWithLabel(
-                text = stringResource(R.string.noise_canceling),
-                isChecked = cycle.noiseCancelingMode,
+                text = stringResource(mode.toStringResource()),
+                isChecked = when (mode) {
+                    AmbientSoundMode.Normal -> cycle.normalMode
+                    AmbientSoundMode.Transparency -> cycle.transparencyMode
+                    AmbientSoundMode.NoiseCanceling -> cycle.noiseCancelingMode
+                },
                 onCheckedChange = { isChecked ->
                     onAmbientSoundModeCycleChange(
-                        cycle.copy(noiseCancelingMode = isChecked),
+                        when (mode) {
+                            AmbientSoundMode.Normal -> cycle.copy(normalMode = isChecked)
+                            AmbientSoundMode.Transparency -> cycle.copy(transparencyMode = isChecked)
+                            AmbientSoundMode.NoiseCanceling -> cycle.copy(noiseCancelingMode = isChecked)
+                        },
                     )
                 },
             )
@@ -61,7 +52,7 @@ private fun PreviewAmbientSoundModeSelection() {
                 noiseCancelingMode = true,
             ),
             onAmbientSoundModeCycleChange = {},
-            hasNoiseCanceling = true,
+            availableSoundModes = AmbientSoundMode.entries,
         )
     }
 }

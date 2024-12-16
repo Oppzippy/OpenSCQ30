@@ -6,9 +6,7 @@ use uuid::Uuid;
 
 use crate::{
     api::{connection::ConnectionStatus, device::Device},
-    device_profile::{
-        DeviceFeatures, NoiseCancelingModeType, SoundModeProfile, TransparencyModeType,
-    },
+    device_profile::{AvailableSoundModes, DeviceFeatures},
     devices::standard::{state::DeviceState, structures::*},
     futures::Futures,
 };
@@ -27,16 +25,30 @@ where
 {
     pub async fn new(name: impl Into<String>, mac_address: MacAddr6) -> Self {
         FuturesType::sleep(Duration::from_millis(500)).await; // it takes some time to connect
-                                                              //
+
         let (state_sender, _) = watch::channel(DeviceState {
             device_features: DeviceFeatures {
-                sound_mode: Some(SoundModeProfile {
-                    noise_canceling_mode_type: NoiseCancelingModeType::Custom,
-                    transparency_mode_type: TransparencyModeType::Custom,
+                available_sound_modes: Some(AvailableSoundModes {
+                    ambient_sound_modes: &[
+                        AmbientSoundMode::Normal,
+                        AmbientSoundMode::Transparency,
+                        AmbientSoundMode::NoiseCanceling,
+                    ],
+                    transparency_modes: &[
+                        TransparencyMode::FullyTransparent,
+                        TransparencyMode::VocalMode,
+                    ],
+                    noise_canceling_modes: &[
+                        NoiseCancelingMode::Transport,
+                        NoiseCancelingMode::Indoor,
+                        NoiseCancelingMode::Outdoor,
+                        NoiseCancelingMode::Custom,
+                    ],
+                    custom_noise_canceling: true,
                 }),
                 has_hear_id: true,
                 num_equalizer_channels: 2,
-                num_equalizer_bands: 10,
+                num_equalizer_bands: 8,
                 has_dynamic_range_compression: true,
                 dynamic_range_compression_min_firmware_version: None,
                 has_button_configuration: true,

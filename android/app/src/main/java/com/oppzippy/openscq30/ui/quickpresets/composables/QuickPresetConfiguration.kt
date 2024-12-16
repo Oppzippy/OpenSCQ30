@@ -22,10 +22,8 @@ import com.oppzippy.openscq30.lib.extensions.resources.toStringResource
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
 import com.oppzippy.openscq30.lib.wrapper.DeviceFeatures
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
-import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeType
 import com.oppzippy.openscq30.lib.wrapper.PresetEqualizerProfile
 import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
-import com.oppzippy.openscq30.lib.wrapper.TransparencyModeType
 import com.oppzippy.openscq30.ui.equalizer.composables.CustomProfileSelection
 import com.oppzippy.openscq30.ui.quickpresets.models.QuickPresetEqualizerConfiguration
 import com.oppzippy.openscq30.ui.soundmode.AmbientSoundModeSelection
@@ -67,24 +65,26 @@ fun QuickPresetConfiguration(
                 .fillMaxWidth()
                 .testTag("quickPresetNameInput"),
         )
-        deviceFeatures.soundMode?.let { soundModeProfile ->
-            CheckboxWithLabel(
-                text = stringResource(R.string.ambient_sound_mode),
-                isChecked = ambientSoundMode != null,
-                onCheckedChange = {
-                    onAmbientSoundModeChange(if (it) AmbientSoundMode.Normal else null)
-                },
-            )
-            if (ambientSoundMode != null) {
-                AmbientSoundModeSelection(
-                    ambientSoundMode = ambientSoundMode,
-                    onAmbientSoundModeChange = onAmbientSoundModeChange,
-                    hasNoiseCanceling = soundModeProfile.noiseCancelingModeType != NoiseCancelingModeType.None,
+        deviceFeatures.availableSoundModes?.let { availableSoundModes ->
+            if (availableSoundModes.ambientSoundModes.isNotEmpty()) {
+                CheckboxWithLabel(
+                    text = stringResource(R.string.ambient_sound_mode),
+                    isChecked = ambientSoundMode != null,
+                    onCheckedChange = {
+                        onAmbientSoundModeChange(if (it) AmbientSoundMode.Normal else null)
+                    },
                 )
+                if (ambientSoundMode != null) {
+                    AmbientSoundModeSelection(
+                        ambientSoundMode = ambientSoundMode,
+                        onAmbientSoundModeChange = onAmbientSoundModeChange,
+                        availableSoundModes = availableSoundModes.ambientSoundModes,
+                    )
+                }
+                HorizontalDivider()
             }
-            HorizontalDivider()
 
-            if (soundModeProfile.transparencyModeType == TransparencyModeType.Custom) {
+            if (availableSoundModes.transparencyModes.isNotEmpty()) {
                 CheckboxWithLabel(
                     text = stringResource(R.string.transparency_mode),
                     isChecked = transparencyMode != null,
@@ -96,12 +96,13 @@ fun QuickPresetConfiguration(
                     TransparencyModeSelection(
                         transparencyMode = transparencyMode,
                         onTransparencyModeChange = onTransparencyModeChange,
+                        availableSoundModes = availableSoundModes.transparencyModes,
                     )
                 }
                 HorizontalDivider()
             }
 
-            if (soundModeProfile.noiseCancelingModeType != NoiseCancelingModeType.None) {
+            if (availableSoundModes.noiseCancelingModes.isNotEmpty()) {
                 CheckboxWithLabel(
                     text = stringResource(R.string.noise_canceling_mode),
                     isChecked = noiseCancelingMode != null,
@@ -113,14 +114,13 @@ fun QuickPresetConfiguration(
                     NoiseCancelingModeSelection(
                         noiseCancelingMode = noiseCancelingMode,
                         onNoiseCancelingModeChange = onNoiseCancelingModeChange,
-                        hasCustomNoiseCanceling =
-                        soundModeProfile.noiseCancelingModeType == NoiseCancelingModeType.Custom,
+                        availableSoundModes = availableSoundModes.noiseCancelingModes,
                     )
                 }
                 HorizontalDivider()
             }
 
-            if (soundModeProfile.noiseCancelingModeType == NoiseCancelingModeType.Custom) {
+            if (availableSoundModes.customNoiseCanceling) {
                 CheckboxWithLabel(
                     text = stringResource(R.string.custom_noise_canceling),
                     isChecked = customNoiseCanceling != null,

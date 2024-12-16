@@ -3,18 +3,16 @@ use std::{collections::HashMap, sync::Arc};
 use nom::error::VerboseError;
 
 use crate::{
-    device_profile::{
-        DeviceFeatures, DeviceProfile, NoiseCancelingModeType, SoundModeProfile,
-        TransparencyModeType,
-    },
+    device_profile::{AvailableSoundModes, DeviceFeatures, DeviceProfile},
     devices::standard::{
         self,
         implementation::ButtonConfigurationImplementation,
         packets::inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
         state::DeviceState,
         structures::{
-            AmbientSoundModeCycle, Command, EqualizerConfiguration, FirmwareVersion, HearId,
-            MultiButtonConfiguration, SoundModes, SoundModesTypeTwo, STATE_UPDATE,
+            AmbientSoundMode, AmbientSoundModeCycle, Command, EqualizerConfiguration,
+            FirmwareVersion, HearId, MultiButtonConfiguration, SoundModes, SoundModesTypeTwo,
+            TransparencyMode, STATE_UPDATE,
         },
     },
     soundcore_device::{
@@ -27,9 +25,14 @@ use super::packets::A3931StateUpdatePacket;
 
 pub(crate) const A3931_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     features: DeviceFeatures {
-        sound_mode: Some(SoundModeProfile {
-            noise_canceling_mode_type: NoiseCancelingModeType::None,
-            transparency_mode_type: TransparencyModeType::Custom,
+        available_sound_modes: Some(AvailableSoundModes {
+            ambient_sound_modes: &[AmbientSoundMode::Normal, AmbientSoundMode::Transparency],
+            transparency_modes: &[
+                TransparencyMode::FullyTransparent,
+                TransparencyMode::VocalMode,
+            ],
+            noise_canceling_modes: &[],
+            custom_noise_canceling: false,
         }),
         has_hear_id: false,
         num_equalizer_channels: 2,

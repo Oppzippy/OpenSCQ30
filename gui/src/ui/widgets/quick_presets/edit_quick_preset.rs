@@ -47,10 +47,9 @@ mod imp {
         template_callbacks, ClosureExpression, CompositeTemplate,
     };
     use openscq30_lib::{
-        device_profile::{DeviceFeatures, NoiseCancelingModeType, TransparencyModeType},
+        device_profile::DeviceFeatures,
         devices::standard::structures::{
-            AmbientSoundMode, CustomNoiseCanceling, NoiseCancelingMode, PresetEqualizerProfile,
-            TransparencyMode,
+            CustomNoiseCanceling, PresetEqualizerProfile, TransparencyMode,
         },
     };
     use strum::IntoEnumIterator;
@@ -211,18 +210,14 @@ mod imp {
         pub fn set_device_features(&self, features: &DeviceFeatures) {
             self.freeze_handle_option_changed.set(true);
 
-            if let Some(sound_mode_profile) = features.sound_mode {
+            if let Some(available_sound_modes) = features.available_sound_modes {
                 self.ambient_sound_mode_group.set_visible(true);
-                let ambient_sound_modes =
-                    [AmbientSoundMode::Normal, AmbientSoundMode::Transparency]
-                        .into_iter()
-                        .chain(
-                            (sound_mode_profile.noise_canceling_mode_type
-                                != NoiseCancelingModeType::None)
-                                .then_some(AmbientSoundMode::NoiseCanceling),
-                        )
-                        .map(GlibAmbientSoundModeValue)
-                        .map(GlibAmbientSoundMode::new);
+                let ambient_sound_modes = available_sound_modes
+                    .ambient_sound_modes
+                    .iter()
+                    .cloned()
+                    .map(GlibAmbientSoundModeValue)
+                    .map(GlibAmbientSoundMode::new);
                 Self::update_list_values(
                     &self.ambient_sound_mode,
                     self.ambient_sound_modes_store
@@ -232,26 +227,17 @@ mod imp {
                     ambient_sound_modes,
                 );
 
-                self.transparency_mode_group.set_visible(
-                    sound_mode_profile.transparency_mode_type == TransparencyModeType::Custom,
-                );
+                self.transparency_mode_group
+                    .set_visible(!available_sound_modes.transparency_modes.is_empty());
 
-                self.noise_canceling_mode_group.set_visible(
-                    sound_mode_profile.noise_canceling_mode_type != NoiseCancelingModeType::None,
-                );
-                let noise_canceling_modes = [
-                    NoiseCancelingMode::Transport,
-                    NoiseCancelingMode::Indoor,
-                    NoiseCancelingMode::Outdoor,
-                ]
-                .into_iter()
-                .chain(
-                    (sound_mode_profile.noise_canceling_mode_type
-                        == NoiseCancelingModeType::Custom)
-                        .then_some(NoiseCancelingMode::Custom),
-                )
-                .map(GlibNoiseCancelingModeValue)
-                .map(GlibNoiseCancelingMode::new);
+                self.noise_canceling_mode_group
+                    .set_visible(!available_sound_modes.noise_canceling_modes.is_empty());
+                let noise_canceling_modes = available_sound_modes
+                    .noise_canceling_modes
+                    .iter()
+                    .cloned()
+                    .map(GlibNoiseCancelingModeValue)
+                    .map(GlibNoiseCancelingMode::new);
                 Self::update_list_values(
                     &self.noise_canceling_mode,
                     self.noise_canceling_modes_store
@@ -261,9 +247,8 @@ mod imp {
                     noise_canceling_modes,
                 );
 
-                self.custom_noise_canceling_group.set_visible(
-                    sound_mode_profile.noise_canceling_mode_type == NoiseCancelingModeType::Custom,
-                );
+                self.custom_noise_canceling_group
+                    .set_visible(available_sound_modes.custom_noise_canceling);
             } else {
                 self.ambient_sound_mode_group.set_visible(false);
                 self.transparency_mode_group.set_visible(false);

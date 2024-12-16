@@ -1,9 +1,9 @@
 use crate::{
-    device_profile::{
-        DeviceFeatures, DeviceProfile, NoiseCancelingModeType, SoundModeProfile,
-        TransparencyModeType,
+    device_profile::{AvailableSoundModes, DeviceFeatures, DeviceProfile},
+    devices::standard::{
+        implementation::StandardImplementation,
+        structures::{AmbientSoundMode, NoiseCancelingMode},
     },
-    devices::standard::implementation::StandardImplementation,
     soundcore_device::device_model::DeviceModel,
 };
 
@@ -11,9 +11,19 @@ use super::packets::A3027StateUpdatePacket;
 
 pub(crate) const A3027_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     features: DeviceFeatures {
-        sound_mode: Some(SoundModeProfile {
-            noise_canceling_mode_type: NoiseCancelingModeType::Basic,
-            transparency_mode_type: TransparencyModeType::Basic,
+        available_sound_modes: Some(AvailableSoundModes {
+            ambient_sound_modes: &[
+                AmbientSoundMode::Normal,
+                AmbientSoundMode::Transparency,
+                AmbientSoundMode::NoiseCanceling,
+            ],
+            transparency_modes: &[],
+            noise_canceling_modes: &[
+                NoiseCancelingMode::Transport,
+                NoiseCancelingMode::Indoor,
+                NoiseCancelingMode::Outdoor,
+            ],
+            custom_noise_canceling: false,
         }),
         has_hear_id: false,
         num_equalizer_channels: 1,

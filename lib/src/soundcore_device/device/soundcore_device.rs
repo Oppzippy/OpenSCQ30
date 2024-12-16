@@ -174,7 +174,10 @@ where
     async fn set_sound_modes(&self, sound_modes: SoundModes) -> crate::Result<()> {
         let state_sender = self.state_sender.lock().await;
         let state = state_sender.borrow().to_owned();
-        if state.device_features.sound_mode.is_none() {
+        // don't actually verify that the sound modes we're setting are supported by the device,
+        // since that would make it impossible to get the settings out of a state where multiple
+        // different sound mode options are invalid
+        if state.device_features.available_sound_modes.is_none() {
             return Err(crate::Error::FeatureNotSupported {
                 feature_name: "sound modes",
             });

@@ -22,7 +22,7 @@ use super::packets::A3945StateUpdatePacket;
 
 pub(crate) const A3945_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     features: DeviceFeatures {
-        sound_mode: None,
+        available_sound_modes: None,
         has_hear_id: false,
         num_equalizer_channels: 2,
         num_equalizer_bands: 8,

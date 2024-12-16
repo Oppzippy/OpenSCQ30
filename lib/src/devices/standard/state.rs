@@ -1,5 +1,5 @@
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::{
     device_profile::DeviceFeatures,
@@ -17,7 +17,7 @@ use super::structures::{
 };
 
 #[derive(Debug, PartialEq, Clone, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct DeviceState {
     pub device_features: DeviceFeatures,

@@ -39,7 +39,11 @@ fun SoundModeTypeTwoSettings(
         AmbientSoundModeSelection(
             ambientSoundMode = soundModes.ambientSoundMode,
             onAmbientSoundModeChange = onAmbientSoundModeChange,
-            hasNoiseCanceling = true,
+            availableSoundModes = listOf(
+                AmbientSoundMode.Normal,
+                AmbientSoundMode.Transparency,
+                AmbientSoundMode.NoiseCanceling,
+            ),
         )
         if (ambientSoundModeCycle != null) {
             Spacer(modifier = Modifier.padding(vertical = 8.dp))
@@ -47,7 +51,11 @@ fun SoundModeTypeTwoSettings(
             AmbientSoundModeCycleSelection(
                 cycle = ambientSoundModeCycle,
                 onAmbientSoundModeCycleChange = onAmbientSoundModeCycleChange,
-                hasNoiseCanceling = true,
+                availableSoundModes = listOf(
+                    AmbientSoundMode.Normal,
+                    AmbientSoundMode.Transparency,
+                    AmbientSoundMode.NoiseCanceling,
+                ),
             )
         }
         Spacer(modifier = Modifier.padding(vertical = 8.dp))
@@ -55,6 +63,7 @@ fun SoundModeTypeTwoSettings(
         TransparencyModeSelection(
             transparencyMode = soundModes.transparencyMode,
             onTransparencyModeChange = onTransparencyModeChange,
+            availableSoundModes = listOf(TransparencyMode.FullyTransparent, TransparencyMode.VocalMode),
         )
         Spacer(modifier = Modifier.padding(vertical = 8.dp))
         GroupHeader(stringResource(R.string.noise_canceling_mode))

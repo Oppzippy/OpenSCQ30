@@ -19,7 +19,7 @@ import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 fun <T> LabeledRadioButtonGroup(
     modifier: Modifier = Modifier,
     selectedValue: T,
-    values: LinkedHashMap<T, String>,
+    values: Map<T, String>,
     onValueChange: (value: T) -> Unit,
     enabled: Boolean = true,
 ) {

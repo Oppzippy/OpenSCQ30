@@ -2,7 +2,7 @@ import { Stack, Typography } from "@mui/material";
 import React, { useCallback } from "react";
 import { AmbientSoundModeSelection } from "../soundMode/AmbientSoundModeSelection";
 import { NoiseCancelingModeSelection } from "../soundMode/NoiseCancelingModeSelection";
-import { SoundModes } from "../../libTypes/DeviceState";
+import { AvailableSoundModes, SoundModes } from "../../libTypes/DeviceState";
 import { TransparencyModeSelection } from "../soundMode/TransparencyModeSelection";
 import { CustomNoiseCancelingSelection } from "../soundMode/CustomNoiseCancelingSelection";
 import { useTranslation } from "react-i18next";
@@ -10,14 +10,11 @@ import { useTranslation } from "react-i18next";
 interface Props {
   soundModes: SoundModes;
   setSoundModes: (soundModes: SoundModes) => void;
-  options: {
-    hasTransparencyModes: boolean;
-    noiseCanceling: "none" | "basic" | "custom";
-  };
+  availableModes: AvailableSoundModes;
 }
 
 export const SoundModeSelection = React.memo(function ({
-  options,
+  availableModes,
   soundModes,
   setSoundModes,
 }: Props) {
@@ -66,29 +63,29 @@ export const SoundModeSelection = React.memo(function ({
       </Typography>
       <AmbientSoundModeSelection
         value={soundModes.ambientSoundMode}
-        hasNoiseCancelingMode={options.noiseCanceling != "none"}
         onValueChanged={setAmbientSoundMode}
+        availableModes={availableModes.ambientSoundModes}
       />
-      {options.hasTransparencyModes && (
+      {availableModes.transparencyModes.length != 0 && (
         <TransparencyModeSelection
           value={soundModes.transparencyMode}
           onValueChanged={setTransparencyMode}
+          availableModes={availableModes.transparencyModes}
         />
       )}
-      {options.noiseCanceling != "none" && (
+      {availableModes.noiseCancelingModes.length != 0 && (
         <NoiseCancelingModeSelection
           value={soundModes.noiseCancelingMode}
           onValueChanged={setNoiseCancelingMode}
-          hasCustomMode={options.noiseCanceling == "custom"}
+          availableModes={availableModes.noiseCancelingModes}
         />
       )}
-      {options.noiseCanceling == "custom" &&
-        soundModes.noiseCancelingMode == "custom" && (
-          <CustomNoiseCancelingSelection
-            value={soundModes.customNoiseCanceling}
-            onValueChanged={setCustomNoiseCanceling}
-          />
-        )}
+      {availableModes.customNoiseCanceling && (
+        <CustomNoiseCancelingSelection
+          value={soundModes.customNoiseCanceling}
+          onValueChanged={setCustomNoiseCanceling}
+        />
+      )}
     </Stack>
   );
 });

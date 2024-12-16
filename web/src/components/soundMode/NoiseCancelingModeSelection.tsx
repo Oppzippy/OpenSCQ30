@@ -1,45 +1,35 @@
 import { Box, Typography } from "@mui/material";
-import { ToggleButtonRow, ToggleButtonValues } from "./ToggleButtonRow";
+import { ToggleButtonRow } from "./ToggleButtonRow";
 import { useTranslation } from "react-i18next";
 import React from "react";
-import { SoundModes } from "../../libTypes/DeviceState";
+import { AvailableSoundModes, SoundModes } from "../../libTypes/DeviceState";
 import { useFilterNulls } from "../../hooks/useFilterNulls";
 
 interface Props {
   value: SoundModes["noiseCancelingMode"];
   onValueChanged: (newValue: SoundModes["noiseCancelingMode"]) => void;
-  hasCustomMode: boolean;
+  availableModes: AvailableSoundModes["noiseCancelingModes"];
 }
 
 export const NoiseCancelingModeSelection = React.memo(function ({
-  hasCustomMode,
   value,
   onValueChanged,
+  availableModes,
 }: Props) {
   const { t } = useTranslation();
   // Don't allow deselecting the button
   const onValueChangedNotNull = useFilterNulls(onValueChanged);
 
-  const values: ToggleButtonValues<SoundModes["noiseCancelingMode"]> = [
-    {
-      value: "transport",
-      label: t("noiseCancelingMode.transport"),
-    },
-    {
-      value: "outdoor",
-      label: t("noiseCancelingMode.outdoor"),
-    },
-    {
-      value: "indoor",
-      label: t("noiseCancelingMode.indoor"),
-    },
-  ];
-  if (hasCustomMode) {
-    values.push({
-      value: "custom",
-      label: t("noiseCancelingMode.custom"),
-    });
-  }
+  const translations = {
+    transport: t("noiseCancelingMode.transport"),
+    outdoor: t("noiseCancelingMode.outdoor"),
+    indoor: t("noiseCancelingMode.indoor"),
+    custom: t("noiseCancelingMode.custom"),
+  };
+  const values = availableModes.map((mode) => ({
+    value: mode,
+    label: translations[mode],
+  }));
 
   return (
     <Box>

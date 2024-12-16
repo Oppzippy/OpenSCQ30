@@ -29,7 +29,7 @@ use super::{
 
 pub(crate) const A3936_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     features: DeviceFeatures {
-        sound_mode: None,
+        available_sound_modes: None,
         has_hear_id: true,
         num_equalizer_channels: 2,
         num_equalizer_bands: 8,

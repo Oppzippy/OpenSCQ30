@@ -29,10 +29,8 @@ import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.ManualNoiseCanceling
 import com.oppzippy.openscq30.lib.wrapper.MultiButtonConfiguration
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
-import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeType
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeTypeTwo
 import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
-import com.oppzippy.openscq30.lib.wrapper.TransparencyModeType
 import com.oppzippy.openscq30.ui.buttonactions.ButtonActionSelection
 import com.oppzippy.openscq30.ui.deviceinfo.DeviceInfoScreen
 import com.oppzippy.openscq30.ui.devicesettings.Screen
@@ -42,7 +40,6 @@ import com.oppzippy.openscq30.ui.equalizer.EqualizerSettings
 import com.oppzippy.openscq30.ui.importexport.ImportExportScreen
 import com.oppzippy.openscq30.ui.importexport.ImportExportViewModel
 import com.oppzippy.openscq30.ui.quickpresets.QuickPresetScreen
-import com.oppzippy.openscq30.ui.soundmode.NoiseCancelingType
 import com.oppzippy.openscq30.ui.soundmode.SoundModeSettings
 import com.oppzippy.openscq30.ui.soundmodestypetwo.SoundModeTypeTwoSettings
 
@@ -69,7 +66,7 @@ fun DeviceSettings(
 ) {
     val navController = rememberNavController()
     val listedScreens = ArrayList<ScreenInfo>()
-    if (uiState.deviceState.deviceFeatures.soundMode != null) {
+    if (uiState.deviceState.deviceFeatures.availableSoundModes != null) {
         listedScreens.add(Screen.SoundModes.screenInfo)
     }
     if (uiState.deviceState.soundModesTypeTwo != null) {
@@ -154,17 +151,12 @@ fun DeviceSettings(
             }
             uiState.deviceState.soundModes?.let { soundModes ->
                 composable<Screen.SoundModes> {
-                    val soundModeProfile =
-                        uiState.deviceState.deviceFeatures.soundMode ?: return@composable
+                    val availableSoundModes =
+                        uiState.deviceState.deviceFeatures.availableSoundModes ?: return@composable
                     SoundModeSettings(
                         soundModes = soundModes,
                         ambientSoundModeCycle = uiState.deviceState.ambientSoundModeCycle,
-                        hasTransparencyModes = soundModeProfile.transparencyModeType == TransparencyModeType.Custom,
-                        noiseCancelingType = when (soundModeProfile.noiseCancelingModeType) {
-                            NoiseCancelingModeType.None -> NoiseCancelingType.None
-                            NoiseCancelingModeType.Basic -> NoiseCancelingType.Normal
-                            NoiseCancelingModeType.Custom -> NoiseCancelingType.Custom
-                        },
+                        availableSoundModes = availableSoundModes,
                         onAmbientSoundModeChange = onAmbientSoundModeChange,
                         onTransparencyModeChange = onTransparencyModeChange,
                         onNoiseCancelingModeChange = onNoiseCancelingModeChange,

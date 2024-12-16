@@ -21,9 +21,11 @@ describe("App", () => {
           const mockDevice = {
             state: new BehaviorSubject<DeviceState>({
               deviceFeatures: {
-                soundMode: {
-                  noiseCancelingModeType: "none",
-                  transparencyModeType: "basic",
+                availableSoundModes: {
+                  ambientSoundModes: ["normal", "transparency"],
+                  transparencyModes: [],
+                  noiseCancelingModes: [],
+                  customNoiseCanceling: false,
                 },
                 hasHearId: false,
                 numEqualizerChannels: 0,

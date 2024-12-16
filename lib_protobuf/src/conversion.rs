@@ -1,7 +1,8 @@
 use openscq30_lib::{
     device_profile::{
-        DeviceFeatures as LibDeviceFeatures, NoiseCancelingModeType as LibNoiseCancelingModeType,
-        SoundModeProfile as LibSoundModeProfile, TransparencyModeType as LibTransparencyModeType,
+        AvailableSoundModes as LibAvailableSoundModes, DeviceFeatures as LibDeviceFeatures,
+        NoiseCancelingModeType as LibNoiseCancelingModeType,
+        TransparencyModeType as LibTransparencyModeType,
     },
     devices::standard::{
         state::DeviceState as LibDeviceState,
@@ -53,7 +54,7 @@ impl From<LibDeviceState> for DeviceState {
 impl From<LibDeviceFeatures> for DeviceFeatures {
     fn from(value: LibDeviceFeatures) -> Self {
         Self {
-            sound_mode: value.sound_mode.map(Into::into),
+            available_sound_modes: value.available_sound_modes.map(Into::into),
             has_hear_id: value.has_hear_id,
             num_equalizer_channels: value.num_equalizer_channels as u32,
             num_equalizer_bands: value.num_equalizer_bands as u32,
@@ -69,14 +70,31 @@ impl From<LibDeviceFeatures> for DeviceFeatures {
     }
 }
 
-impl From<LibSoundModeProfile> for SoundModeProfile {
-    fn from(value: LibSoundModeProfile) -> Self {
+impl From<LibAvailableSoundModes> for AvailableSoundModes {
+    fn from(value: LibAvailableSoundModes) -> Self {
         Self {
-            noise_canceling_mode_type: NoiseCancelingModeType::from(
-                value.noise_canceling_mode_type,
-            )
-            .into(),
-            transparency_mode_type: TransparencyModeType::from(value.transparency_mode_type).into(),
+            ambient_sound_modes: value
+                .ambient_sound_modes
+                .iter()
+                .cloned()
+                .map(AmbientSoundMode::from)
+                .map(Into::into)
+                .collect(),
+            transparency_modes: value
+                .transparency_modes
+                .iter()
+                .cloned()
+                .map(TransparencyMode::from)
+                .map(Into::into)
+                .collect(),
+            noise_canceling_modes: value
+                .noise_canceling_modes
+                .iter()
+                .cloned()
+                .map(NoiseCancelingMode::from)
+                .map(Into::into)
+                .collect(),
+            custom_noise_canceling: value.custom_noise_canceling,
         }
     }
 }

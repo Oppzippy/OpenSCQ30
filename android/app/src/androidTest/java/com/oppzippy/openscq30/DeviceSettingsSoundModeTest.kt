@@ -12,10 +12,10 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.performClick
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
+import com.oppzippy.openscq30.lib.wrapper.AvailableSoundModes
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.wrapper.SoundModes
 import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
-import com.oppzippy.openscq30.ui.soundmode.NoiseCancelingType
 import com.oppzippy.openscq30.ui.soundmode.SoundModeSettings
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -119,8 +119,15 @@ class DeviceSettingsSoundModeTest {
                     0u,
                 ),
                 onAmbientSoundModeChange = onAmbientSoundModeChange,
-                hasTransparencyModes = false,
-                noiseCancelingType = NoiseCancelingType.None,
+                availableSoundModes = AvailableSoundModes(
+                    ambientSoundModes = listOf(
+                        AmbientSoundMode.Normal,
+                        AmbientSoundMode.Transparency,
+                    ),
+                    transparencyModes = emptyList(),
+                    noiseCancelingModes = emptyList(),
+                    customNoiseCanceling = false,
+                ),
                 ambientSoundModeCycle = null,
             )
         }
@@ -144,8 +151,15 @@ class DeviceSettingsSoundModeTest {
                     0u,
                 ),
                 onTransparencyModeChange = onTransparencyModeChange,
-                hasTransparencyModes = true,
-                noiseCancelingType = NoiseCancelingType.None,
+                availableSoundModes = AvailableSoundModes(
+                    ambientSoundModes = listOf(
+                        AmbientSoundMode.Normal,
+                        AmbientSoundMode.Transparency,
+                    ),
+                    transparencyModes = listOf(TransparencyMode.FullyTransparent, TransparencyMode.VocalMode),
+                    noiseCancelingModes = emptyList(),
+                    customNoiseCanceling = false,
+                ),
                 ambientSoundModeCycle = null,
             )
         }
@@ -169,8 +183,21 @@ class DeviceSettingsSoundModeTest {
                     0u,
                 ),
                 onNoiseCancelingModeChange = onNoiseCancelingModeChange,
-                hasTransparencyModes = true,
-                noiseCancelingType = NoiseCancelingType.Custom,
+                availableSoundModes = AvailableSoundModes(
+                    ambientSoundModes = listOf(
+                        AmbientSoundMode.Normal,
+                        AmbientSoundMode.Transparency,
+                        AmbientSoundMode.NoiseCanceling,
+                    ),
+                    transparencyModes = listOf(TransparencyMode.FullyTransparent, TransparencyMode.VocalMode),
+                    noiseCancelingModes = listOf(
+                        NoiseCancelingMode.Indoor,
+                        NoiseCancelingMode.Outdoor,
+                        NoiseCancelingMode.Transport,
+                        NoiseCancelingMode.Custom,
+                    ),
+                    customNoiseCanceling = true,
+                ),
                 ambientSoundModeCycle = null,
             )
         }
@@ -194,8 +221,21 @@ class DeviceSettingsSoundModeTest {
                     0u,
                 ),
                 onCustomNoiseCancelingChange = onCustomNoiseCancelingChange,
-                hasTransparencyModes = false,
-                noiseCancelingType = NoiseCancelingType.Custom,
+                availableSoundModes = AvailableSoundModes(
+                    ambientSoundModes = listOf(
+                        AmbientSoundMode.Normal,
+                        AmbientSoundMode.Transparency,
+                        AmbientSoundMode.NoiseCanceling,
+                    ),
+                    transparencyModes = emptyList(),
+                    noiseCancelingModes = listOf(
+                        NoiseCancelingMode.Indoor,
+                        NoiseCancelingMode.Outdoor,
+                        NoiseCancelingMode.Transport,
+                        NoiseCancelingMode.Custom,
+                    ),
+                    customNoiseCanceling = true,
+                ),
                 ambientSoundModeCycle = null,
             )
         }
@@ -224,8 +264,16 @@ class DeviceSettingsSoundModeTest {
                     TransparencyMode.VocalMode,
                     0u,
                 ),
-                hasTransparencyModes = false,
-                noiseCancelingType = NoiseCancelingType.Normal,
+                availableSoundModes = AvailableSoundModes(
+                    ambientSoundModes = listOf(
+                        AmbientSoundMode.Normal,
+                        AmbientSoundMode.Transparency,
+                        AmbientSoundMode.NoiseCanceling,
+                    ),
+                    transparencyModes = emptyList(),
+                    noiseCancelingModes = emptyList(),
+                    customNoiseCanceling = false,
+                ),
                 ambientSoundModeCycle = cycle,
                 onAmbientSoundModeCycleChange = { cycleFlow.value = it },
             )
@@ -251,8 +299,21 @@ class DeviceSettingsSoundModeTest {
                     TransparencyMode.VocalMode,
                     0u,
                 ),
-                hasTransparencyModes = true,
-                noiseCancelingType = NoiseCancelingType.Custom,
+                availableSoundModes = AvailableSoundModes(
+                    ambientSoundModes = listOf(
+                        AmbientSoundMode.Normal,
+                        AmbientSoundMode.Transparency,
+                        AmbientSoundMode.NoiseCanceling,
+                    ),
+                    transparencyModes = listOf(TransparencyMode.FullyTransparent, TransparencyMode.VocalMode),
+                    noiseCancelingModes = listOf(
+                        NoiseCancelingMode.Indoor,
+                        NoiseCancelingMode.Outdoor,
+                        NoiseCancelingMode.Transport,
+                        NoiseCancelingMode.Custom,
+                    ),
+                    customNoiseCanceling = true,
+                ),
                 ambientSoundModeCycle = null,
             )
         }

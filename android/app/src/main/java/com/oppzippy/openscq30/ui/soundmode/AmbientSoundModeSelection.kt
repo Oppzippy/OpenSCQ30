@@ -5,7 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.lib.extensions.resources.toStringResource
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 import com.oppzippy.openscq30.ui.utils.LabeledRadioButtonGroup
@@ -14,15 +14,9 @@ import com.oppzippy.openscq30.ui.utils.LabeledRadioButtonGroup
 fun AmbientSoundModeSelection(
     ambientSoundMode: AmbientSoundMode,
     onAmbientSoundModeChange: (ambientSoundMode: AmbientSoundMode) -> Unit,
-    hasNoiseCanceling: Boolean,
+    availableSoundModes: List<AmbientSoundMode>,
 ) {
-    val values = linkedMapOf(
-        Pair(AmbientSoundMode.Normal, stringResource(R.string.normal)),
-        Pair(AmbientSoundMode.Transparency, stringResource(R.string.transparency)),
-    )
-    if (hasNoiseCanceling) {
-        values[AmbientSoundMode.NoiseCanceling] = stringResource(R.string.noise_canceling)
-    }
+    val values = availableSoundModes.associateWith { stringResource(it.toStringResource()) }
 
     LabeledRadioButtonGroup(
         modifier = Modifier.testTag("ambientSoundModeSelection"),
@@ -39,7 +33,7 @@ private fun PreviewAmbientSoundModeSelection() {
         AmbientSoundModeSelection(
             ambientSoundMode = AmbientSoundMode.Normal,
             onAmbientSoundModeChange = {},
-            hasNoiseCanceling = true,
+            availableSoundModes = AmbientSoundMode.entries,
         )
     }
 }

@@ -8,7 +8,7 @@ use super::packets::A3033StateUpdatePacket;
 
 pub(crate) const A3033_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     features: DeviceFeatures {
-        sound_mode: None,
+        available_sound_modes: None,
         has_hear_id: false,
         num_equalizer_channels: 1,
         num_equalizer_bands: 8,

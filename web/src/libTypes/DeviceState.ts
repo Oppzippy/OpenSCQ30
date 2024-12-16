@@ -142,20 +142,18 @@ const firmwareVersionSchema = Type.Object({
   minor: Type.Number({ minimum: 0 }),
 });
 
-const deviceFeaturesSchema = Type.Object({
-  soundMode: Nullable(
-    Type.Object({
-      noiseCancelingModeType: Type.Union([
-        Type.Literal("none"),
-        Type.Literal("basic"),
-        Type.Literal("custom"),
-      ]),
-      transparencyModeType: Type.Union([
-        Type.Literal("basic"),
-        Type.Literal("custom"),
-      ]),
-    }),
+const availableSoundModesSchema = Type.Object({
+  ambientSoundModes: Type.Array(soundModesSchema.properties.ambientSoundMode),
+  transparencyModes: Type.Array(soundModesSchema.properties.transparencyMode),
+  noiseCancelingModes: Type.Array(
+    soundModesSchema.properties.noiseCancelingMode,
   ),
+  customNoiseCanceling: Type.Boolean(),
+});
+export type AvailableSoundModes = Static<typeof availableSoundModesSchema>;
+
+const deviceFeaturesSchema = Type.Object({
+  availableSoundModes: Nullable(availableSoundModesSchema),
   hasHearId: Type.Boolean(),
   numEqualizerChannels: Type.Number({ minimum: 0 }),
   numEqualizerBands: Type.Number({ minimum: 0 }),

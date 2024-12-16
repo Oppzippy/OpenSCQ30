@@ -42,9 +42,9 @@ mod imp {
         },
         CompositeTemplate, TemplateChild,
     };
-    use openscq30_lib::{
-        device_profile::{NoiseCancelingModeType, TransparencyModeType},
-        devices::standard::state::DeviceState,
+    use openscq30_lib::devices::standard::{
+        state::DeviceState,
+        structures::{AmbientSoundMode, NoiseCancelingMode},
     };
     use tokio::sync::mpsc::UnboundedSender;
 
@@ -99,34 +99,33 @@ mod imp {
             let Some(sound_modes) = state.sound_modes else {
                 return;
             };
-            let Some(sound_mode_profile) = state.device_features.sound_mode else {
+            let Some(available_sound_modes) = state.device_features.available_sound_modes else {
                 return;
             };
 
+            let has_noise_canceling = available_sound_modes
+                .ambient_sound_modes
+                .contains(&AmbientSoundMode::NoiseCanceling);
+
             // Set button visibility
             self.ambient_sound_mode_selection
-                .set_has_noise_canceling_mode(
-                    sound_mode_profile.noise_canceling_mode_type != NoiseCancelingModeType::None,
-                );
+                .set_has_noise_canceling_mode(has_noise_canceling);
             self.ambient_sound_mode_cycle_selection
                 .set_visible(state.device_features.has_ambient_sound_mode_cycle);
             self.ambient_sound_mode_cycle_selection
-                .set_has_noise_canceling_mode(
-                    sound_mode_profile.noise_canceling_mode_type != NoiseCancelingModeType::None,
-                );
-            self.transparency_mode_selection.set_visible(
-                sound_mode_profile.transparency_mode_type == TransparencyModeType::Custom,
-            );
-            self.noise_canceling_mode_selection.set_visible(
-                sound_mode_profile.noise_canceling_mode_type != NoiseCancelingModeType::None,
-            );
+                .set_has_noise_canceling_mode(has_noise_canceling);
+            self.transparency_mode_selection
+                .set_visible(!available_sound_modes.transparency_modes.is_empty());
+            self.noise_canceling_mode_selection
+                .set_visible(!available_sound_modes.noise_canceling_modes.is_empty());
             self.noise_canceling_mode_selection
                 .set_has_custom_noise_canceling(
-                    sound_mode_profile.noise_canceling_mode_type == NoiseCancelingModeType::Custom,
+                    available_sound_modes
+                        .noise_canceling_modes
+                        .contains(&NoiseCancelingMode::Custom),
                 );
-            self.custom_noise_canceling_selection.set_visible(
-                sound_mode_profile.noise_canceling_mode_type == NoiseCancelingModeType::Custom,
-            );
+            self.custom_noise_canceling_selection
+                .set_visible(available_sound_modes.custom_noise_canceling);
 
             // Set selected values
             self.ambient_sound_mode_selection

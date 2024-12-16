@@ -1,16 +1,16 @@
 package com.oppzippy.openscq30.lib.wrapper
 
+import com.oppzippy.openscq30.lib.protobuf.AvailableSoundModes as ProtobufAvailableSoundModes
 import com.oppzippy.openscq30.lib.protobuf.DeviceFeatures as ProtobufDeviceFeatures
 import com.oppzippy.openscq30.lib.protobuf.NoiseCancelingModeType as ProtobufNoiseCancelingModeType
-import com.oppzippy.openscq30.lib.protobuf.SoundModeProfile as ProtobufSoundModeProfile
 import com.oppzippy.openscq30.lib.protobuf.TransparencyModeType as ProtobufTransparencyModeType
+import com.oppzippy.openscq30.lib.protobuf.availableSoundModes
+import com.oppzippy.openscq30.lib.protobuf.availableSoundModesOrNull
 import com.oppzippy.openscq30.lib.protobuf.deviceFeatures
 import com.oppzippy.openscq30.lib.protobuf.dynamicRangeCompressionMinFirmwareVersionOrNull
-import com.oppzippy.openscq30.lib.protobuf.soundModeOrNull
-import com.oppzippy.openscq30.lib.protobuf.soundModeProfile
 
 data class DeviceFeatures(
-    val soundMode: SoundModeProfile?,
+    val availableSoundModes: AvailableSoundModes?,
     val hasHearId: Boolean,
     val numEqualizerChannels: Int,
     val numEqualizerBands: Int,
@@ -22,7 +22,7 @@ data class DeviceFeatures(
     val dynamicRangeCompressionMinFirmwareVersion: FirmwareVersion?,
 ) {
     fun toProtobuf(): ProtobufDeviceFeatures = deviceFeatures {
-        this@DeviceFeatures.soundMode?.let { soundMode = it.toProtobuf() }
+        this@DeviceFeatures.availableSoundModes?.let { availableSoundModes = it.toProtobuf() }
         hasHearId = this@DeviceFeatures.hasHearId
         numEqualizerChannels = this@DeviceFeatures.numEqualizerChannels
         numEqualizerBands = this@DeviceFeatures.numEqualizerBands
@@ -38,7 +38,7 @@ data class DeviceFeatures(
 }
 
 fun ProtobufDeviceFeatures.toKotlin(): DeviceFeatures = DeviceFeatures(
-    soundMode = soundModeOrNull?.toKotlin(),
+    availableSoundModes = availableSoundModesOrNull?.toKotlin(),
     hasHearId = hasHearId,
     numEqualizerChannels = numEqualizerChannels,
     numEqualizerBands = numEqualizerBands,
@@ -50,19 +50,25 @@ fun ProtobufDeviceFeatures.toKotlin(): DeviceFeatures = DeviceFeatures(
     dynamicRangeCompressionMinFirmwareVersion = dynamicRangeCompressionMinFirmwareVersionOrNull?.toKotlin(),
 )
 
-data class SoundModeProfile(
-    val noiseCancelingModeType: NoiseCancelingModeType,
-    val transparencyModeType: TransparencyModeType,
+data class AvailableSoundModes(
+    val ambientSoundModes: List<AmbientSoundMode>,
+    val transparencyModes: List<TransparencyMode>,
+    val noiseCancelingModes: List<NoiseCancelingMode>,
+    val customNoiseCanceling: Boolean,
 ) {
-    fun toProtobuf(): ProtobufSoundModeProfile = soundModeProfile {
-        noiseCancelingModeType = this@SoundModeProfile.noiseCancelingModeType.toProtobuf()
-        transparencyModeType = this@SoundModeProfile.transparencyModeType.toProtobuf()
+    fun toProtobuf(): ProtobufAvailableSoundModes = availableSoundModes {
+        ambientSoundModes.addAll(this@AvailableSoundModes.ambientSoundModes.map { it.toProtobuf() })
+        transparencyModes.addAll(this@AvailableSoundModes.transparencyModes.map { it.toProtobuf() })
+        noiseCancelingModes.addAll(this@AvailableSoundModes.noiseCancelingModes.map { it.toProtobuf() })
+        customNoiseCanceling = this@AvailableSoundModes.customNoiseCanceling
     }
 }
 
-fun ProtobufSoundModeProfile.toKotlin(): SoundModeProfile = SoundModeProfile(
-    noiseCancelingModeType = noiseCancelingModeType.toKotlin(),
-    transparencyModeType = transparencyModeType.toKotlin(),
+fun ProtobufAvailableSoundModes.toKotlin(): AvailableSoundModes = AvailableSoundModes(
+    ambientSoundModes = ambientSoundModesList.map { it.toKotlin() },
+    transparencyModes = transparencyModesList.map { it.toKotlin() },
+    noiseCancelingModes = noiseCancelingModesList.map { it.toKotlin() },
+    customNoiseCanceling = customNoiseCanceling,
 )
 
 enum class NoiseCancelingModeType {

@@ -87,20 +87,14 @@ function SoundModeSelectionSection({
   );
 
   if (
-    displayState.deviceFeatures.soundMode != null &&
+    displayState.deviceFeatures.availableSoundModes != null &&
     displayState.soundModes
   ) {
     return (
       <SoundModeSelection
         soundModes={displayState.soundModes}
         setSoundModes={setSoundModes}
-        options={{
-          hasTransparencyModes:
-            displayState.deviceFeatures.soundMode.transparencyModeType ==
-            "custom",
-          noiseCanceling:
-            displayState.deviceFeatures.soundMode.noiseCancelingModeType,
-        }}
+        availableModes={displayState.deviceFeatures.availableSoundModes}
       />
     );
   }
