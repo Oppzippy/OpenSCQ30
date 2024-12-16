@@ -45,6 +45,7 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.17.0" date="2024-12-16" />
         <release version="1.16.1" date="2024-12-14" />
         <release version="1.16.0" date="2024-12-13">
             <description>

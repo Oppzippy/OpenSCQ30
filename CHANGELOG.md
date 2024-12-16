@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.17.0
+
+### Android
+
+#### Features
+
+-   Added button for scanning for devices without any filters. Useful for devices with names not containing "Soundcore".
+
+### Web
+
+#### Features
+
+-   Added button for scanning for devices without any filters. Useful for devices with new mac address ranges.
+
 ## v1.16.1
 
 ### Android
