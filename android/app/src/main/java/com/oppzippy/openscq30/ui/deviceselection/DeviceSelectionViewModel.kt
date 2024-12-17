@@ -4,7 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.companion.AssociationInfo
 import android.companion.AssociationRequest
-import android.companion.BluetoothDeviceFilter
+import android.companion.BluetoothLeDeviceFilter
 import android.companion.CompanionDeviceManager
 import android.content.IntentSender
 import android.content.pm.PackageManager
@@ -46,7 +46,7 @@ class DeviceSelectionViewModel @Inject constructor(
             .apply {
                 if (filtered) {
                     this.addDeviceFilter(
-                        BluetoothDeviceFilter.Builder().apply {
+                        BluetoothLeDeviceFilter.Builder().apply {
                             this.setNamePattern(Pattern.compile("(?i)soundcore"))
                         }.build(),
                     )
