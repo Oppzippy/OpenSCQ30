@@ -1,36 +1,27 @@
 package com.oppzippy.openscq30.features.bluetoothdeviceprovider
 
+import android.bluetooth.BluetoothManager
 import android.companion.CompanionDeviceManager
 import android.content.Context
-import android.os.Build
 import androidx.annotation.RequiresPermission
+import com.oppzippy.openscq30.lib.bindings.isMacAddressSoundcoreDevice
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class BluetoothDeviceProviderImpl @Inject constructor(@ApplicationContext private val context: Context) :
     BluetoothDeviceProvider {
-    /**
-     * The caller is responsible for checking for bluetooth permission
-     */
     @RequiresPermission(value = "android.permission.BLUETOOTH_CONNECT")
     override fun getDevices(): List<BluetoothDevice> {
+        val bluetoothManager = context.getSystemService(BluetoothManager::class.java)
         val deviceManager = context.getSystemService(CompanionDeviceManager::class.java)
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            deviceManager.myAssociations.mapNotNull { associationInfo ->
-                val macAddress = associationInfo.deviceMacAddress
-                if (macAddress != null) {
-                    BluetoothDevice(
-                        associationInfo.displayName?.toString() ?: "Unknown",
-                        macAddress.toString().uppercase(),
-                    )
-                } else {
-                    null
-                }
-            }
-        } else {
-            deviceManager.associations.map { macAddress ->
-                BluetoothDevice("Unknown", macAddress)
-            }
+        val boundDevices = bluetoothManager.adapter.bondedDevices.filter { isMacAddressSoundcoreDevice(it.address) }
+        val associatedDevices = deviceManager.associations.toHashSet()
+        return boundDevices.map { device ->
+            BluetoothDevice(
+                name = device.name,
+                address = device.address,
+                isAssociated = associatedDevices.contains(device.address),
+            )
         }
     }
 }

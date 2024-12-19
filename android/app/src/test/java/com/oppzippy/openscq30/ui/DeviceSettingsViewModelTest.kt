@@ -33,7 +33,7 @@ class DeviceSettingsViewModelTest {
         val mockIntent: Intent = mockk(relaxed = true)
         every { intentFactory(any(), any()) } returns mockIntent
 
-        val device = BluetoothDevice("Test Device", "00:00:00:00:00:00")
+        val device = BluetoothDevice("Test Device", "00:00:00:00:00:00", true)
         every { deviceProvider.getDevices() } returns listOf(device)
         val viewModel = DeviceSettingsViewModel(application, intentFactory)
 

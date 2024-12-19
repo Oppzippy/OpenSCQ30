@@ -27,7 +27,7 @@ class DeviceSelectionViewModelTest {
 
     @Test
     fun hasInitialDevices() {
-        val devices = listOf(BluetoothDevice("Test Device", "00:00:00:00:00:00"))
+        val devices = listOf(BluetoothDevice("Test Device", "00:00:00:00:00:00", true))
         every { deviceProvider.getDevices() } returns devices
         every { application.checkSelfPermission(any()) } returns PackageManager.PERMISSION_GRANTED
 
@@ -41,7 +41,7 @@ class DeviceSelectionViewModelTest {
         every { deviceProvider.getDevices() } returns emptyList()
         val viewModel = DeviceSelectionViewModel(application, deviceProvider)
 
-        val devices = listOf(BluetoothDevice("Test Device", "00:00:00:00:00:00"))
+        val devices = listOf(BluetoothDevice("Test Device", "00:00:00:00:00:00", true))
         every { deviceProvider.getDevices() } returns devices
 
         assertEquals(emptyList<BluetoothDevice>(), viewModel.devices.value)
@@ -51,7 +51,7 @@ class DeviceSelectionViewModelTest {
 
     @Test
     fun hasNoDevicesWithoutPermission() {
-        val devices = listOf(BluetoothDevice("Test Device", "00:00:00:00:00:00"))
+        val devices = listOf(BluetoothDevice("Test Device", "00:00:00:00:00:00", true))
         every { deviceProvider.getDevices() } returns devices
         every { application.checkSelfPermission(any()) } returns PackageManager.PERMISSION_DENIED
 

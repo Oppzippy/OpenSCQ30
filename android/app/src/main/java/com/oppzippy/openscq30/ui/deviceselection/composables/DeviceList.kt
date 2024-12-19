@@ -2,12 +2,15 @@ package com.oppzippy.openscq30.ui.deviceselection.composables
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -30,8 +33,6 @@ fun DeviceList(
     devices: List<BluetoothDevice>,
     modifier: Modifier = Modifier,
     onDeviceClick: (device: BluetoothDevice) -> Unit = {},
-    onPair: () -> Unit = {},
-    onPairUnfiltered: () -> Unit = {},
     onUnpair: (device: BluetoothDevice) -> Unit = {},
 ) {
     var deviceToUnpair: BluetoothDevice? by remember { mutableStateOf(null) }
@@ -74,27 +75,17 @@ fun DeviceList(
                     )
                     .padding(horizontal = 8.dp, vertical = 8.dp),
             ) {
-                Text(text = device.name)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text(text = device.name)
+
+                    if (device.isAssociated) {
+                        Text(text = stringResource(R.string.paired))
+                    } else {
+                        Text(text = stringResource(R.string.not_paired), color = MaterialTheme.colorScheme.secondary)
+                    }
+                }
                 Text(text = device.address)
             }
-        }
-        item {
-            PairDeviceButton(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth(1f),
-                onClick = onPair,
-                text = stringResource(R.string.pair_device),
-            )
-        }
-        item {
-            PairDeviceButton(
-                modifier = Modifier
-                    .padding(horizontal = 10.dp)
-                    .fillMaxWidth(1f),
-                onClick = onPairUnfiltered,
-                text = stringResource(R.string.pair_device_unfiltered),
-            )
         }
     }
 }
@@ -105,7 +96,7 @@ private fun PreviewDeviceList() {
     OpenSCQ30Theme {
         val devices = ArrayList<BluetoothDevice>()
         for (i in 1..3) {
-            devices.add(BluetoothDevice("Device #$i", "00:00:$i"))
+            devices.add(BluetoothDevice("Device #$i", "00:00:$i", isAssociated = i % 2 == 0))
         }
         DeviceList(devices)
     }

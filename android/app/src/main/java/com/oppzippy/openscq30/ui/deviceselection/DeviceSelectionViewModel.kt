@@ -4,7 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.companion.AssociationInfo
 import android.companion.AssociationRequest
-import android.companion.BluetoothLeDeviceFilter
+import android.companion.BluetoothDeviceFilter
 import android.companion.CompanionDeviceManager
 import android.content.IntentSender
 import android.content.pm.PackageManager
@@ -15,7 +15,6 @@ import androidx.lifecycle.viewModelScope
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDeviceProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.util.regex.Pattern
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
@@ -41,14 +40,13 @@ class DeviceSelectionViewModel @Inject constructor(
         }
     }
 
-    fun pair(activity: Activity, filtered: Boolean) {
+    fun pair(activity: Activity, address: String) {
         val pairingRequest = AssociationRequest.Builder()
             .apply {
+                this.setSingleDevice(true)
                 this.addDeviceFilter(
-                    BluetoothLeDeviceFilter.Builder().apply {
-                        if (filtered) {
-                            this.setNamePattern(Pattern.compile("(?i)soundcore"))
-                        }
+                    BluetoothDeviceFilter.Builder().apply {
+                        this.setAddress(address)
                     }.build(),
                 )
             }

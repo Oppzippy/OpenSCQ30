@@ -262,7 +262,7 @@ class NotificationTest {
     }
 
     private suspend fun setUpDevice(): SoundcoreDevice {
-        val bluetoothDevices = listOf(BluetoothDevice("Demo Device", "00:00:00:00:00:00"))
+        val bluetoothDevices = listOf(BluetoothDevice("Demo Device", "00:00:00:00:00:00", true))
         every { bluetoothDeviceProvider.getDevices() } returns bluetoothDevices
 
         val device = DemoSoundcoreDeviceConnector().connectToSoundcoreDevice(

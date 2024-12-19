@@ -52,8 +52,8 @@ class DeviceSelectionTest {
     @Test
     fun showsAllAvailableDevices() {
         val deviceModels = listOf(
-            BluetoothDevice("test1", "00:00:00:00:00:00"),
-            BluetoothDevice("test2", "00:00:00:00:00:01"),
+            BluetoothDevice("test1", "00:00:00:00:00:00", true),
+            BluetoothDevice("test2", "00:00:00:00:00:01", true),
         )
 
         composeRule.setContent {
@@ -83,7 +83,7 @@ class DeviceSelectionTest {
         }
 
         devices = listOf(
-            BluetoothDevice("test", "00:00:00:00:00:00"),
+            BluetoothDevice("test", "00:00:00:00:00:00", true),
         )
         composeRule.onNodeWithText("00:00:00:00:00:00").assertDoesNotExist()
 

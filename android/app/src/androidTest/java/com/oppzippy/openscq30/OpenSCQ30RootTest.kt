@@ -67,7 +67,7 @@ class OpenSCQ30RootTest {
 
     @Test
     fun itWorks() = runTest {
-        val bluetoothDevices = listOf(BluetoothDevice("Demo Device", "00:00:00:00:00:00"))
+        val bluetoothDevices = listOf(BluetoothDevice("Demo Device", "00:00:00:00:00:00", true))
         every { bluetoothDeviceProvider.getDevices() } returns bluetoothDevices
         composeRule.setContent {
             OpenSCQ30Root()

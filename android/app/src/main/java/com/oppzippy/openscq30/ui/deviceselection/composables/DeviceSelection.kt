@@ -17,9 +17,7 @@ import com.oppzippy.openscq30.ui.utils.PermissionCheck
 fun DeviceSelection(
     devices: List<BluetoothDevice>,
     onRefreshDevices: () -> Unit = {},
-    onDeviceSelected: (device: BluetoothDevice) -> Unit = {},
-    onPair: () -> Unit = {},
-    onPairUnfiltered: () -> Unit = {},
+    onDeviceClick: (device: BluetoothDevice) -> Unit = {},
     onUnpair: (BluetoothDevice) -> Unit = {},
 ) {
     val navController = rememberNavController()
@@ -43,9 +41,7 @@ fun DeviceSelection(
                 DeviceListing(
                     devices,
                     onRefreshClick = onRefreshDevices,
-                    onDeviceClick = onDeviceSelected,
-                    onPair = onPair,
-                    onPairUnfiltered = onPairUnfiltered,
+                    onDeviceClick = onDeviceClick,
                     onUnpair = onUnpair,
                     onInfoClick = {
                         navController.navigate(Screen.Info.route) {

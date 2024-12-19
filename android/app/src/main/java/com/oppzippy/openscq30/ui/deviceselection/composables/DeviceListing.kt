@@ -34,8 +34,6 @@ fun DeviceListing(
     onInfoClick: () -> Unit = {},
     onDeviceClick: (BluetoothDevice) -> Unit = {},
     onSettingsClick: () -> Unit = {},
-    onPair: () -> Unit = {},
-    onPairUnfiltered: () -> Unit = {},
     onUnpair: (BluetoothDevice) -> Unit = {},
 ) {
     Scaffold(
@@ -88,8 +86,6 @@ fun DeviceListing(
                         .fillMaxWidth()
                         .fillMaxHeight(),
                     onDeviceClick = onDeviceClick,
-                    onPair = onPair,
-                    onPairUnfiltered = onPairUnfiltered,
                     onUnpair = onUnpair,
                 )
             }
@@ -110,8 +106,8 @@ private fun PreviewEmptyListing() {
 private fun PreviewDeviceListing() {
     OpenSCQ30Theme {
         val devices = ArrayList<BluetoothDevice>()
-        for (i in 1..100) {
-            devices.add(BluetoothDevice("Device #$i", "00:00:$i"))
+        for (i in 1..10) {
+            devices.add(BluetoothDevice("Device #$i", "00:00:$i", i % 2 == 0))
         }
         DeviceListing(devices)
     }
