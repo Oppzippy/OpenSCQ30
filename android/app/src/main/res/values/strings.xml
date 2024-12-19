@@ -150,4 +150,6 @@
     <string name="paired">Paired</string>
     <string name="not_paired">Not Paired</string>
     <string name="mac_address_filter">Mac Address Filter</string>
+    <string name="no_devices_found">No Devices Found</string>
+    <string name="bluetooth_is_disabled">Bluetooth is Disabled</string>
 </resources>

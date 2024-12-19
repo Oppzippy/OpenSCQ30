@@ -2,6 +2,7 @@ package com.oppzippy.openscq30.ui.deviceselection
 
 import android.app.Activity
 import android.app.Application
+import android.bluetooth.BluetoothManager
 import android.companion.AssociationInfo
 import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
@@ -114,5 +115,10 @@ class DeviceSelectionViewModel @Inject constructor(
         } else {
             emptyList()
         }
+    }
+
+    fun isBluetoothEnabled(): Boolean {
+        val bluetoothManager = application.getSystemService(BluetoothManager::class.java)
+        return bluetoothManager.adapter.isEnabled
     }
 }

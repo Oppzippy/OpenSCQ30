@@ -19,6 +19,7 @@ fun DeviceSelection(
     onRefreshDevices: () -> Unit = {},
     onDeviceClick: (device: BluetoothDevice) -> Unit = {},
     onUnpair: (BluetoothDevice) -> Unit = {},
+    isBluetoothEnabled: Boolean,
 ) {
     val navController = rememberNavController()
 
@@ -51,6 +52,7 @@ fun DeviceSelection(
                     onSettingsClick = {
                         navController.navigate(Screen.Settings.route)
                     },
+                    isBluetoothEnabled = isBluetoothEnabled,
                 )
             }
         }

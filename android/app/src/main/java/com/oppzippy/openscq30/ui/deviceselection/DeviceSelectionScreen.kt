@@ -27,5 +27,6 @@ fun DeviceSelectionScreen(
             }
         },
         onUnpair = { viewModel.unpair(it) },
+        isBluetoothEnabled = viewModel.isBluetoothEnabled(),
     )
 }
