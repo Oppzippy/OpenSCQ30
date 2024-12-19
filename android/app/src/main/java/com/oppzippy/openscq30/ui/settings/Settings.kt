@@ -1,7 +1,6 @@
 package com.oppzippy.openscq30.ui.settings
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -15,22 +14,33 @@ import com.oppzippy.openscq30.ui.utils.CheckboxWithLabel
 @Composable
 fun Settings(viewModel: SettingsViewModel = hiltViewModel()) {
     val autoConnect by viewModel.autoConnect.collectAsState()
+    val macAddressFilter by viewModel.macAddressFilter.collectAsState()
     Settings(
         autoConnect = autoConnect,
         onAutoConnectChange = { viewModel.setAutoConnect(it) },
+        macAddressFilter = macAddressFilter,
+        onMacAddressFilterChange = { viewModel.setMacAddressFilter(it) },
     )
 }
 
 @Composable
-private fun Settings(autoConnect: Boolean, onAutoConnectChange: (Boolean) -> Unit) {
+private fun Settings(
+    autoConnect: Boolean,
+    onAutoConnectChange: (Boolean) -> Unit,
+    macAddressFilter: Boolean,
+    onMacAddressFilterChange: (Boolean) -> Unit,
+) {
     Column {
-        Row {
-            CheckboxWithLabel(
-                text = stringResource(R.string.auto_connect),
-                isChecked = autoConnect,
-                onCheckedChange = { onAutoConnectChange(it) },
-            )
-        }
+        CheckboxWithLabel(
+            text = stringResource(R.string.auto_connect),
+            isChecked = autoConnect,
+            onCheckedChange = { onAutoConnectChange(it) },
+        )
+        CheckboxWithLabel(
+            text = stringResource(R.string.mac_address_filter),
+            isChecked = macAddressFilter,
+            onCheckedChange = { onMacAddressFilterChange(it) },
+        )
     }
 }
 
@@ -41,6 +51,8 @@ private fun PreviewSettings() {
         Settings(
             autoConnect = false,
             onAutoConnectChange = {},
+            macAddressFilter = true,
+            onMacAddressFilterChange = {},
         )
     }
 }

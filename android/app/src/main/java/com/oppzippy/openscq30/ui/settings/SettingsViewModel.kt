@@ -18,6 +18,8 @@ class SettingsViewModel @Inject constructor(
 ) : ViewModel() {
     private val _autoConnect = MutableStateFlow(preferences.autoConnect)
     val autoConnect = _autoConnect.asStateFlow()
+    private val _macAddressFilter = MutableStateFlow(preferences.macAddressFilter)
+    val macAddressFilter = _macAddressFilter.asStateFlow()
 
     fun setAutoConnect(value: Boolean) {
         _autoConnect.value = value
@@ -28,5 +30,10 @@ class SettingsViewModel @Inject constructor(
         } else {
             context.stopService(intent)
         }
+    }
+
+    fun setMacAddressFilter(value: Boolean) {
+        _macAddressFilter.value = value
+        preferences.macAddressFilter = value
     }
 }

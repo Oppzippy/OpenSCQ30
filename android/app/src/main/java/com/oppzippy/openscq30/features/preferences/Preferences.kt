@@ -17,4 +17,13 @@ class Preferences @Inject constructor(@ApplicationContext context: Context) {
                 putBoolean("autoConnect", value)
             }
         }
+    var macAddressFilter: Boolean
+        get() {
+            return preferences.getBoolean("macAddressFilter", true)
+        }
+        set(value) {
+            preferences.edit {
+                putBoolean("macAddressFilter", value)
+            }
+        }
 }

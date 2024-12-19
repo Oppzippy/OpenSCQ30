@@ -149,4 +149,5 @@
     <string name="pair_device_unfiltered">Pair Device (Unfiltered)</string>
     <string name="paired">Paired</string>
     <string name="not_paired">Not Paired</string>
+    <string name="mac_address_filter">Mac Address Filter</string>
 </resources>
