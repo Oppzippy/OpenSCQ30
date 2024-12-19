@@ -59,6 +59,7 @@ class DeviceSelectionTest {
         composeRule.setContent {
             DeviceSelection(
                 devices = deviceModels,
+                isBluetoothEnabled = true,
             )
         }
 
@@ -79,6 +80,7 @@ class DeviceSelectionTest {
                 onRefreshDevices = {
                     devicesFlow.value = devices
                 },
+                isBluetoothEnabled = true,
             )
         }
 
