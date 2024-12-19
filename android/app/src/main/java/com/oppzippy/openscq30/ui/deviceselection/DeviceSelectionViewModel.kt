@@ -44,13 +44,13 @@ class DeviceSelectionViewModel @Inject constructor(
     fun pair(activity: Activity, filtered: Boolean) {
         val pairingRequest = AssociationRequest.Builder()
             .apply {
-                if (filtered) {
-                    this.addDeviceFilter(
-                        BluetoothLeDeviceFilter.Builder().apply {
+                this.addDeviceFilter(
+                    BluetoothLeDeviceFilter.Builder().apply {
+                        if (filtered) {
                             this.setNamePattern(Pattern.compile("(?i)soundcore"))
-                        }.build(),
-                    )
-                }
+                        }
+                    }.build(),
+                )
             }
             .build()
         val deviceManager = application.getSystemService(CompanionDeviceManager::class.java)
