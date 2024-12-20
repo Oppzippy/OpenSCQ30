@@ -51,7 +51,6 @@ impl A3936CustomButtonModel {
         let mut bytes = Vec::with_capacity(12);
         bytes.extend(self.left_single_click.bytes());
         bytes.extend(self.right_single_click.bytes());
-        bytes.extend(self.right_single_click.bytes());
         bytes.extend(self.left_double_click.bytes());
         bytes.extend(self.right_double_click.bytes());
         bytes.extend(self.left_long_press.bytes());
