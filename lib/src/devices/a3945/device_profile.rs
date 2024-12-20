@@ -179,7 +179,7 @@ mod tests {
     fn it_remembers_band_9_and_10_values() {
         let data = A3945TestStateUpdatePacket {
             body: vec![
-                0x00, // host device
+                0x01, // host device
                 0x00, // tws status
                 0x00, 0x00, 0x00, 0x00, // dual battery
                 b'0', b'0', b'.', b'0', b'0', // left firmware version

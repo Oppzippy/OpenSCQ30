@@ -8,13 +8,10 @@ use nom::{
 use crate::devices::{
     a3926::device_profile::A3926_DEVICE_PROFILE,
     standard::{
-        packets::{
-            inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
-            parsing::take_bool,
-        },
+        packets::inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
         structures::{
             AgeRange, BasicHearId, CustomButtonModel, DualBattery, EqualizerConfiguration, Gender,
-            HostDevice, StereoEqualizerConfiguration,
+            StereoEqualizerConfiguration, TwsStatus,
         },
     },
 };
@@ -22,8 +19,7 @@ use crate::devices::{
 // A3926 and A3926Z11
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3926StateUpdatePacket {
-    host_device: HostDevice,
-    tws_status: bool,
+    tws_status: TwsStatus,
     battery: DualBattery,
     equalizer_configuration: EqualizerConfiguration,
     gender: Gender,
@@ -36,6 +32,7 @@ impl From<A3926StateUpdatePacket> for StateUpdatePacket {
     fn from(packet: A3926StateUpdatePacket) -> Self {
         Self {
             device_profile: &A3926_DEVICE_PROFILE,
+            tws_status: Some(packet.tws_status),
             battery: packet.battery.into(),
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: None,
@@ -62,8 +59,7 @@ impl InboundPacket for A3926StateUpdatePacket {
             "a3926 state update packet",
             all_consuming(map(
                 tuple((
-                    HostDevice::take,
-                    take_bool,
+                    TwsStatus::take,
                     DualBattery::take,
                     StereoEqualizerConfiguration::take(8),
                     Gender::take,
@@ -72,7 +68,6 @@ impl InboundPacket for A3926StateUpdatePacket {
                     CustomButtonModel::take,
                 )),
                 |(
-                    host_device,
                     tws_status,
                     battery,
                     equalizer_configuration,
@@ -82,7 +77,6 @@ impl InboundPacket for A3926StateUpdatePacket {
                     custom_button_model,
                 )| {
                     A3926StateUpdatePacket {
-                        host_device,
                         tws_status,
                         battery,
                         equalizer_configuration,

@@ -12,13 +12,14 @@ use crate::{
     },
 };
 
-use super::structures::{AmbientSoundModeCycle, SoundModesTypeTwo};
+use super::structures::{AmbientSoundModeCycle, SoundModesTypeTwo, TwsStatus};
 
 #[derive(Debug, PartialEq, Clone, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct DeviceState {
     pub device_features: DeviceFeatures,
+    pub tws_status: Option<TwsStatus>,
     pub battery: Battery,
     pub equalizer_configuration: EqualizerConfiguration,
     pub sound_modes: Option<SoundModes>,
@@ -36,6 +37,7 @@ impl From<StateUpdatePacket> for DeviceState {
     fn from(packet: StateUpdatePacket) -> Self {
         Self {
             device_features: packet.device_profile.features,
+            tws_status: packet.tws_status,
             battery: packet.battery,
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: packet.sound_modes,

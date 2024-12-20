@@ -14,16 +14,15 @@ use crate::devices::{
             parsing::take_bool,
         },
         structures::{
-            CustomButtonModel, DualBattery, EqualizerConfiguration, HostDevice, SoundModes,
-            StereoEqualizerConfiguration,
+            CustomButtonModel, DualBattery, EqualizerConfiguration, SoundModes,
+            StereoEqualizerConfiguration, TwsStatus,
         },
     },
 };
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3031StateUpdatePacket {
-    pub host_device: HostDevice,
-    pub tws_status: bool,
+    pub tws_status: TwsStatus,
     pub battery: DualBattery,
     pub equalizer_configuration: EqualizerConfiguration,
     pub button_model: CustomButtonModel,
@@ -38,6 +37,7 @@ impl From<A3031StateUpdatePacket> for StateUpdatePacket {
     fn from(packet: A3031StateUpdatePacket) -> Self {
         Self {
             device_profile: &A3031_DEVICE_PROFILE,
+            tws_status: Some(packet.tws_status),
             battery: packet.battery.into(),
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: Some(packet.sound_modes),
@@ -65,8 +65,7 @@ impl InboundPacket for A3031StateUpdatePacket {
             "a3031 state update packet",
             all_consuming(map(
                 tuple((
-                    HostDevice::take,
-                    take_bool,
+                    TwsStatus::take,
                     DualBattery::take,
                     StereoEqualizerConfiguration::take(8),
                     CustomButtonModel::take,
@@ -77,7 +76,6 @@ impl InboundPacket for A3031StateUpdatePacket {
                     le_u8,
                 )),
                 |(
-                    host_device,
                     tws_status,
                     battery,
                     equalizer_configuration,
@@ -89,7 +87,6 @@ impl InboundPacket for A3031StateUpdatePacket {
                     auto_power_off_on_index,
                 )| {
                     A3031StateUpdatePacket {
-                        host_device,
                         tws_status,
                         battery,
                         equalizer_configuration,

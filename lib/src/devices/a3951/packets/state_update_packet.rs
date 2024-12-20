@@ -15,7 +15,7 @@ use crate::devices::{
         },
         structures::{
             AgeRange, CustomButtonModel, CustomHearId, DualBattery, EqualizerConfiguration, Gender,
-            HostDevice, SoundModes, StereoEqualizerConfiguration,
+            SoundModes, StereoEqualizerConfiguration, TwsStatus,
         },
     },
 };
@@ -23,8 +23,7 @@ use crate::devices::{
 // A3951
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3951StateUpdatePacket {
-    host_device: HostDevice,
-    tws_status: bool,
+    tws_status: TwsStatus,
     battery: DualBattery,
     equalizer_configuration: EqualizerConfiguration,
     gender: Gender,
@@ -45,6 +44,7 @@ impl From<A3951StateUpdatePacket> for StateUpdatePacket {
     fn from(packet: A3951StateUpdatePacket) -> Self {
         Self {
             device_profile: &A3951_DEVICE_PROFILE,
+            tws_status: Some(packet.tws_status),
             battery: packet.battery.into(),
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: Some(packet.sound_modes),
@@ -74,7 +74,6 @@ impl InboundPacket for A3951StateUpdatePacket {
                 let (
                     input,
                     (
-                        host_device,
                         tws_status,
                         battery,
                         equalizer_configuration,
@@ -88,8 +87,7 @@ impl InboundPacket for A3951StateUpdatePacket {
                         touch_tone,
                     ),
                 ) = tuple((
-                    HostDevice::take,
-                    take_bool, // tws status
+                    TwsStatus::take,
                     DualBattery::take,
                     StereoEqualizerConfiguration::take(8),
                     Gender::take,
@@ -111,7 +109,6 @@ impl InboundPacket for A3951StateUpdatePacket {
                 Ok((
                     input,
                     A3951StateUpdatePacket {
-                        host_device,
                         tws_status,
                         battery,
                         equalizer_configuration,

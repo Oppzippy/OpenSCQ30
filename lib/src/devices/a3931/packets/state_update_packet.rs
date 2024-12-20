@@ -14,8 +14,8 @@ use crate::devices::{
             parsing::take_bool,
         },
         structures::{
-            CustomButtonModel, DualBattery, EqualizerConfiguration, HostDevice, SoundModes,
-            StereoEqualizerConfiguration,
+            CustomButtonModel, DualBattery, EqualizerConfiguration, SoundModes,
+            StereoEqualizerConfiguration, TwsStatus,
         },
     },
 };
@@ -23,8 +23,7 @@ use crate::devices::{
 // A3931 and A3935 and A3931XR and A3935W
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3931StateUpdatePacket {
-    host_device: HostDevice,
-    tws_status: bool,
+    tws_status: TwsStatus,
     battery: DualBattery,
     equalizer_configuration: EqualizerConfiguration,
     custom_button_model: CustomButtonModel,
@@ -39,6 +38,7 @@ impl From<A3931StateUpdatePacket> for StateUpdatePacket {
     fn from(packet: A3931StateUpdatePacket) -> Self {
         Self {
             device_profile: &A3931_DEVICE_PROFILE,
+            tws_status: Some(packet.tws_status),
             battery: packet.battery.into(),
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: Some(packet.sound_modes),
@@ -65,8 +65,7 @@ impl InboundPacket for A3931StateUpdatePacket {
             "a3931 state update packet",
             all_consuming(map(
                 tuple((
-                    HostDevice::take,
-                    take_bool,
+                    TwsStatus::take,
                     DualBattery::take,
                     StereoEqualizerConfiguration::take(8),
                     CustomButtonModel::take,
@@ -77,7 +76,6 @@ impl InboundPacket for A3931StateUpdatePacket {
                     le_u8,
                 )),
                 |(
-                    host_device,
                     tws_status,
                     battery,
                     equalizer_configuration,
@@ -89,7 +87,6 @@ impl InboundPacket for A3931StateUpdatePacket {
                     auto_power_off_index,
                 )| {
                     A3931StateUpdatePacket {
-                        host_device,
                         tws_status,
                         battery,
                         equalizer_configuration,

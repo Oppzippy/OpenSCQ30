@@ -22,7 +22,7 @@ use crate::{
         standard::structures::{
             AgeRange, AmbientSoundModeCycle, Battery, Command, CustomButtonModel,
             EqualizerConfiguration, FirmwareVersion, Gender, HearId, SerialNumber, SoundModes,
-            SoundModesTypeTwo,
+            SoundModesTypeTwo, TwsStatus,
         },
     },
 };
@@ -32,6 +32,7 @@ use super::InboundPacket;
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct StateUpdatePacket {
     pub device_profile: &'static DeviceProfile,
+    pub tws_status: Option<TwsStatus>,
     pub battery: Battery,
     pub equalizer_configuration: EqualizerConfiguration,
     pub sound_modes: Option<SoundModes>,

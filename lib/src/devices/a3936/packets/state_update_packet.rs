@@ -13,8 +13,8 @@ use crate::devices::{
         quirks::TwoExtraEqBandsValues,
         structures::{
             AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
-            FirmwareVersion, HostDevice, SerialNumber, SoundModesTypeTwo,
-            StereoEqualizerConfiguration,
+            FirmwareVersion, SerialNumber, SoundModesTypeTwo, StereoEqualizerConfiguration,
+            TwsStatus,
         },
     },
 };
@@ -22,8 +22,7 @@ use crate::devices::{
 // A3936
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3936StateUpdatePacket {
-    pub host_device: HostDevice,
-    pub tws_status: bool,
+    pub tws_status: TwsStatus,
     pub battery: DualBattery,
     pub left_firmware: FirmwareVersion,
     pub right_firmware: FirmwareVersion,
@@ -49,6 +48,7 @@ impl From<A3936StateUpdatePacket> for StateUpdatePacket {
     fn from(packet: A3936StateUpdatePacket) -> Self {
         Self {
             device_profile: &A3936_DEVICE_PROFILE,
+            tws_status: Some(packet.tws_status),
             battery: packet.battery.into(),
             equalizer_configuration: packet.equalizer_configuration.left,
             sound_modes: None,
@@ -71,9 +71,8 @@ impl A3936StateUpdatePacket {
         context(
             "a3936 state update packet",
             all_consuming(|input| {
-                let (input, host_device) = HostDevice::take(input)?;
-                let remaining = input.len();
-                let (input, tws_status) = take_bool(input)?;
+                let (input, tws_status) = TwsStatus::take(input)?;
+                let remaining = input.len() + 1; // remaining from between tws host device and is connected
                 let (input, battery) = DualBattery::take(input)?;
                 let (input, left_firmware) = FirmwareVersion::take(input)?;
                 let (input, right_firmware) = FirmwareVersion::take(input)?;
@@ -113,7 +112,6 @@ impl A3936StateUpdatePacket {
                 Ok((
                     input,
                     A3936StateUpdatePacket {
-                        host_device,
                         tws_status,
                         battery,
                         left_firmware,

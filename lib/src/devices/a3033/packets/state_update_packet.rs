@@ -30,6 +30,7 @@ impl From<A3033StateUpdatePacket> for StateUpdatePacket {
     fn from(packet: A3033StateUpdatePacket) -> Self {
         Self {
             device_profile: &A3033_DEVICE_PROFILE,
+            tws_status: None,
             battery: packet.battery.into(),
             equalizer_configuration: packet.equalizer_configuration,
             sound_modes: None,

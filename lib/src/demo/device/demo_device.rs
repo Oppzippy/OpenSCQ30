@@ -103,6 +103,10 @@ where
             serial_number: Some(SerialNumber("0123456789ABCDEF".into())),
             ambient_sound_mode_cycle: Some(AmbientSoundModeCycle::default()),
             sound_modes_type_two: Some(SoundModesTypeTwo::default()),
+            tws_status: Some(TwsStatus {
+                is_connected: true,
+                host_device: HostDevice::Left,
+            }),
         });
 
         let (connection_status_sender, _) = watch::channel(ConnectionStatus::Connected);

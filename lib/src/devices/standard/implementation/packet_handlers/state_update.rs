@@ -18,6 +18,7 @@ pub fn state_update_handler(input: &[u8], state: DeviceState) -> DeviceState {
 
     DeviceState {
         device_features: state.device_features,
+        tws_status: packet.tws_status,
         battery: state.battery,
         equalizer_configuration: state.equalizer_configuration.to_owned(),
         age_range: packet.age_range.or(state.age_range),

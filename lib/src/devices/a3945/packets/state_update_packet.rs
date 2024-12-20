@@ -13,7 +13,7 @@ use crate::devices::{
         quirks::TwoExtraEqBandsValues,
         structures::{
             BatteryLevel, CustomButtonModel, DualBattery, EqualizerConfiguration, FirmwareVersion,
-            HostDevice, SerialNumber, StereoEqualizerConfiguration,
+            SerialNumber, StereoEqualizerConfiguration, TwsStatus,
         },
     },
 };
@@ -22,8 +22,7 @@ use crate::devices::{
 // Despite EQ being 10 bands, only the first 8 seem to be used?
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3945StateUpdatePacket {
-    pub host_device: HostDevice,
-    pub tws_status: bool,
+    pub tws_status: TwsStatus,
     pub battery: DualBattery,
     pub left_firmware: FirmwareVersion,
     pub right_firmware: FirmwareVersion,
@@ -44,6 +43,7 @@ impl From<A3945StateUpdatePacket> for StateUpdatePacket {
     fn from(packet: A3945StateUpdatePacket) -> Self {
         Self {
             device_profile: &A3945_DEVICE_PROFILE,
+            tws_status: Some(packet.tws_status),
             battery: packet.battery.into(),
             equalizer_configuration: packet.left_equalizer_configuration,
             sound_modes: None,
@@ -67,8 +67,7 @@ impl A3945StateUpdatePacket {
             "a3945 state update packet",
             all_consuming(map(
                 tuple((
-                    HostDevice::take,
-                    take_bool,
+                    TwsStatus::take,
                     DualBattery::take,
                     FirmwareVersion::take,
                     FirmwareVersion::take,
@@ -83,7 +82,6 @@ impl A3945StateUpdatePacket {
                     le_u8,
                 )),
                 |(
-                    host_device,
                     tws_status,
                     battery,
                     left_firmware,
@@ -99,7 +97,6 @@ impl A3945StateUpdatePacket {
                     device_color,
                 )| {
                     A3945StateUpdatePacket {
-                        host_device,
                         tws_status,
                         battery,
                         left_firmware,
