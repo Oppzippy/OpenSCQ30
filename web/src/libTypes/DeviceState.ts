@@ -4,6 +4,12 @@ import { TypeCompiler } from "@sinclair/typebox/compiler";
 const Nullable = <T extends TSchema>(schema: T) =>
   Type.Union([schema, Type.Null()]);
 
+const twsStatusSchema = Type.Object({
+  isConnected: Type.Boolean(),
+  hostDevice: Type.Union([Type.Literal("left"), Type.Literal("right")]),
+});
+export type TwsStatus = Static<typeof twsStatusSchema>;
+
 const singleBatterySchema = Type.Object({
   isCharging: Type.Boolean(),
   level: Type.Number(),
@@ -167,6 +173,7 @@ export type CustomButtonModel = Static<typeof customButtonModelSchema>;
 
 const deviceStateSchema = Type.Object({
   deviceFeatures: deviceFeaturesSchema,
+  twsStatus: Nullable(twsStatusSchema),
   battery: Type.Union([
     Type.Object({
       type: Type.Literal("singleBattery"),

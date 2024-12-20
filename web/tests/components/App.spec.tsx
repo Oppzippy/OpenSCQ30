@@ -36,6 +36,7 @@ describe("App", () => {
                 dynamicRangeCompressionMinFirmwareVersion: null,
                 hasAmbientSoundModeCycle: false,
               },
+              twsStatus: null,
               battery: {
                 type: "singleBattery",
                 isCharging: true,
