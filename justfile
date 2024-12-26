@@ -8,12 +8,14 @@ build profile='dev':
     just web/ build '{{profile}}'
 
 test:
+    just lib/ test
     just gui/ test
     just cli/ test
     just android/ test
     just web/ test
 
 test-cov:
+    just lib/ test-cov
     just gui/ test-cov
     just cli/ test-cov
     just android/ test-cov
