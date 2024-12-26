@@ -41,8 +41,8 @@ impl TwsStatus {
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum HostDevice {
-    Left = 1,
-    Right = 2,
+    Left = 0,
+    Right = 1,
 }
 
 impl HostDevice {
