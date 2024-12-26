@@ -7,7 +7,9 @@ use openscq30_lib::{
     demo::device::DemoDevice,
     devices::standard::{
         state::DeviceState,
-        structures::{CustomButtonActions, EqualizerConfiguration, SoundModes, SoundModesTypeTwo},
+        structures::{
+            EqualizerConfiguration, MultiButtonConfiguration, SoundModes, SoundModesTypeTwo,
+        },
     },
     futures::WasmFutures,
     soundcore_device::device::SoundcoreDevice,
@@ -87,15 +89,15 @@ impl Device {
         Ok(())
     }
 
-    #[wasm_bindgen(js_name = "setCustomButtonActions")]
-    pub async fn set_custom_button_actions(
+    #[wasm_bindgen(js_name = "setMultiButtonConfiguration")]
+    pub async fn set_multi_button_configuration(
         &self,
-        custom_button_actions: String,
+        multi_button_configuration: String,
     ) -> Result<(), JsValue> {
-        let custom_button_actions: CustomButtonActions =
-            serde_json::from_str(&custom_button_actions).map_err(|err| format!("{err:?}"))?;
+        let multi_button_configuration: MultiButtonConfiguration =
+            serde_json::from_str(&multi_button_configuration).map_err(|err| format!("{err:?}"))?;
         self.inner
-            .set_custom_button_actions(custom_button_actions)
+            .set_multi_button_configuration(multi_button_configuration)
             .await
             .map_err(|err| format!("{err:?}"))?;
         Ok(())
@@ -186,16 +188,20 @@ impl DeviceImplementation {
         }
     }
 
-    pub async fn set_custom_button_actions(
+    pub async fn set_multi_button_configuration(
         &self,
-        custom_button_actions: CustomButtonActions,
+        button_configuration: MultiButtonConfiguration,
     ) -> openscq30_lib::Result<()> {
         match self {
             DeviceImplementation::WebBluetooth(device) => {
-                device.set_custom_button_model(custom_button_actions).await
+                device
+                    .set_multi_button_configuration(button_configuration)
+                    .await
             }
             DeviceImplementation::Demo(device) => {
-                device.set_custom_button_model(custom_button_actions).await
+                device
+                    .set_multi_button_configuration(button_configuration)
+                    .await
             }
         }
     }

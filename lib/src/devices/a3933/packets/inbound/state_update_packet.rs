@@ -14,7 +14,7 @@ use crate::devices::{
         quirks::TwoExtraEqBandsValues,
         structures::{
             AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
-            EqualizerConfiguration, FirmwareVersion, HearId, InternalCustomButtonModel,
+            EqualizerConfiguration, FirmwareVersion, HearId, InternalMultiButtonConfiguration,
             SerialNumber, SoundModes, StereoEqualizerConfiguration, TwsStatus,
         },
     },
@@ -34,7 +34,7 @@ pub struct A3933StateUpdatePacket {
     pub extra_band_values: TwoExtraEqBandsValues,
     pub age_range: AgeRange,
     pub hear_id: Option<CustomHearId>, // 10 bands
-    pub custom_button_model: InternalCustomButtonModel,
+    pub button_configuration: InternalMultiButtonConfiguration,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub sound_modes: SoundModes,
     pub touch_tone_switch: bool,
@@ -56,7 +56,7 @@ impl From<A3933StateUpdatePacket> for StateUpdatePacket {
             age_range: None,
             gender: None,
             hear_id: packet.hear_id.map(HearId::Custom),
-            custom_button_model: Some(packet.custom_button_model.into()),
+            button_configuration: Some(packet.button_configuration.into()),
             firmware_version: Some(packet.left_firmware.min(packet.right_firmware)),
             serial_number: Some(packet.serial_number),
             ambient_sound_mode_cycle: Some(packet.ambient_sound_mode_cycle),
@@ -103,9 +103,9 @@ impl A3933StateUpdatePacket {
 
                 let (
                     input,
-                    (custom_button_model, ambient_sound_mode_cycle, sound_modes, _unknown, extra),
+                    (button_configuration, ambient_sound_mode_cycle, sound_modes, _unknown, extra),
                 ) = tuple((
-                    InternalCustomButtonModel::take,
+                    InternalMultiButtonConfiguration::take,
                     AmbientSoundModeCycle::take,
                     SoundModes::take,
                     // Unsure if these two unknown bytes should be inside or outside the optional
@@ -126,7 +126,7 @@ impl A3933StateUpdatePacket {
                         extra_band_values,
                         age_range,
                         hear_id,
-                        custom_button_model,
+                        button_configuration,
                         ambient_sound_mode_cycle,
                         sound_modes,
                         touch_tone_switch: extra.map(|(e, _)| e.0).unwrap_or_default(),

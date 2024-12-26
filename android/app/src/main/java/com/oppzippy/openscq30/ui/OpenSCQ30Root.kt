@@ -105,9 +105,9 @@ fun OpenSCQ30Root(viewModel: DeviceSettingsViewModel = hiltViewModel()) {
                                 viewModel.setEqualizerConfiguration(it)
                             }
                         },
-                        onCustomButtonModelChange = {
+                        onButtonConfigurationChange = {
                             withErrorToast(context) {
-                                viewModel.setCustomButtonModel(it)
+                                viewModel.setMultiButtonConfiguration(it)
                             }
                         },
                     )

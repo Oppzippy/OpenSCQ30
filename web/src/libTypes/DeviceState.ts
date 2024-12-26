@@ -119,21 +119,23 @@ const buttonActionSchema = Type.Union([
 ]);
 export type ButtonAction = Static<typeof buttonActionSchema>;
 
-const buttonStateSchema = Type.Object({
+const buttonConfigurationSchema = Type.Object({
   isEnabled: Type.Boolean(),
   action: buttonActionSchema,
 });
-export type ButtonState = Static<typeof buttonStateSchema>;
+export type ButtonConfiguration = Static<typeof buttonConfigurationSchema>;
 
-const customButtonActionsSchema = Type.Object({
-  leftSingleClick: buttonStateSchema,
-  leftDoubleClick: buttonStateSchema,
-  leftLongPress: buttonStateSchema,
-  rightSingleClick: buttonStateSchema,
-  rightDoubleClick: buttonStateSchema,
-  rightLongPress: buttonStateSchema,
+const multiButtonConfigurationSchema = Type.Object({
+  leftSingleClick: buttonConfigurationSchema,
+  leftDoubleClick: buttonConfigurationSchema,
+  leftLongPress: buttonConfigurationSchema,
+  rightSingleClick: buttonConfigurationSchema,
+  rightDoubleClick: buttonConfigurationSchema,
+  rightLongPress: buttonConfigurationSchema,
 });
-export type CustomButtonActions = Static<typeof customButtonActionsSchema>;
+export type MultiButtonConfiguration = Static<
+  typeof multiButtonConfigurationSchema
+>;
 
 const firmwareVersionSchema = Type.Object({
   major: Type.Number({ minimum: 0 }),
@@ -158,7 +160,7 @@ const deviceFeaturesSchema = Type.Object({
   numEqualizerChannels: Type.Number({ minimum: 0 }),
   numEqualizerBands: Type.Number({ minimum: 0 }),
   hasDynamicRangeCompression: Type.Boolean(),
-  hasCustomButtonModel: Type.Boolean(),
+  hasButtonConfiguration: Type.Boolean(),
   hasWearDetection: Type.Boolean(),
   hasTouchTone: Type.Boolean(),
   hasAutoPowerOff: Type.Boolean(),
@@ -217,7 +219,7 @@ const deviceStateSchema = Type.Object({
     ]),
   ),
   firmwareVersion: Nullable(firmwareVersionSchema),
-  customButtonActions: Nullable(customButtonActionsSchema),
+  buttonConfiguration: Nullable(multiButtonConfigurationSchema),
   serialNumber: Nullable(Type.String()),
   ambientSoundModeCycle: Nullable(ambientSoundModeCycleSchema),
 });

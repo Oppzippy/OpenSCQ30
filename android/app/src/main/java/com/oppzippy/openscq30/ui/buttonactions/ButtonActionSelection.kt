@@ -32,12 +32,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.wrapper.ButtonAction
-import com.oppzippy.openscq30.lib.wrapper.ButtonState
-import com.oppzippy.openscq30.lib.wrapper.CustomButtonActions
+import com.oppzippy.openscq30.lib.wrapper.ButtonConfiguration
+import com.oppzippy.openscq30.lib.wrapper.MultiButtonConfiguration
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
-fun ButtonActionSelection(buttonActions: CustomButtonActions, onChange: (CustomButtonActions) -> Unit) {
+fun ButtonActionSelection(buttonConfiguration: MultiButtonConfiguration, onChange: (MultiButtonConfiguration) -> Unit) {
     val scrollState = rememberScrollState()
     Column(
         Modifier
@@ -47,39 +47,39 @@ fun ButtonActionSelection(buttonActions: CustomButtonActions, onChange: (CustomB
     ) {
         ButtonActionRow(
             stringResource(R.string.left_single_click),
-            buttonActions.leftSingleClick,
-            onChange = { onChange(buttonActions.copy(leftSingleClick = it)) },
+            buttonConfiguration.leftSingleClick,
+            onChange = { onChange(buttonConfiguration.copy(leftSingleClick = it)) },
         )
         ButtonActionRow(
             stringResource(R.string.left_double_click),
-            buttonActions.leftDoubleClick,
-            onChange = { onChange(buttonActions.copy(leftDoubleClick = it)) },
+            buttonConfiguration.leftDoubleClick,
+            onChange = { onChange(buttonConfiguration.copy(leftDoubleClick = it)) },
         )
         ButtonActionRow(
             stringResource(R.string.left_long_press),
-            buttonActions.leftLongPress,
-            onChange = { onChange(buttonActions.copy(leftLongPress = it)) },
+            buttonConfiguration.leftLongPress,
+            onChange = { onChange(buttonConfiguration.copy(leftLongPress = it)) },
         )
         ButtonActionRow(
             stringResource(R.string.right_single_click),
-            buttonActions.rightSingleClick,
-            onChange = { onChange(buttonActions.copy(rightSingleClick = it)) },
+            buttonConfiguration.rightSingleClick,
+            onChange = { onChange(buttonConfiguration.copy(rightSingleClick = it)) },
         )
         ButtonActionRow(
             stringResource(R.string.right_double_click),
-            buttonActions.rightDoubleClick,
-            onChange = { onChange(buttonActions.copy(rightDoubleClick = it)) },
+            buttonConfiguration.rightDoubleClick,
+            onChange = { onChange(buttonConfiguration.copy(rightDoubleClick = it)) },
         )
         ButtonActionRow(
             stringResource(R.string.right_long_press),
-            buttonActions.rightLongPress,
-            onChange = { onChange(buttonActions.copy(rightLongPress = it)) },
+            buttonConfiguration.rightLongPress,
+            onChange = { onChange(buttonConfiguration.copy(rightLongPress = it)) },
         )
     }
 }
 
 @Composable
-private fun ButtonActionRow(label: String, state: ButtonState, onChange: (ButtonState) -> Unit) {
+private fun ButtonActionRow(label: String, state: ButtonConfiguration, onChange: (ButtonConfiguration) -> Unit) {
     var isDialogOpen by remember { mutableStateOf(false) }
     if (isDialogOpen) {
         ButtonActionSelectionDialog(
@@ -88,9 +88,9 @@ private fun ButtonActionRow(label: String, state: ButtonState, onChange: (Button
                 isDialogOpen = false
                 onChange(
                     if (newAction != null) {
-                        ButtonState(true, newAction)
+                        ButtonConfiguration(true, newAction)
                     } else {
-                        ButtonState(false, state.action)
+                        ButtonConfiguration(false, state.action)
                     },
                 )
             },
@@ -147,13 +147,13 @@ private fun ButtonActionSelectionDialog(onDismissRequest: () -> Unit, onActionSe
 fun PreviewCustomButtons() {
     OpenSCQ30Theme {
         ButtonActionSelection(
-            buttonActions = CustomButtonActions(
-                ButtonState(false, ButtonAction.GameMode),
-                ButtonState(true, ButtonAction.NextSong),
-                ButtonState(true, ButtonAction.VolumeDown),
-                ButtonState(true, ButtonAction.PreviousSong),
-                ButtonState(true, ButtonAction.VoiceAssistant),
-                ButtonState(true, ButtonAction.AmbientSoundMode),
+            buttonConfiguration = MultiButtonConfiguration(
+                ButtonConfiguration(false, ButtonAction.GameMode),
+                ButtonConfiguration(true, ButtonAction.NextSong),
+                ButtonConfiguration(true, ButtonAction.VolumeDown),
+                ButtonConfiguration(true, ButtonAction.PreviousSong),
+                ButtonConfiguration(true, ButtonAction.VoiceAssistant),
+                ButtonConfiguration(true, ButtonAction.AmbientSoundMode),
             ),
             onChange = {},
         )

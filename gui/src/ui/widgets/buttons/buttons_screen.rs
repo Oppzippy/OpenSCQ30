@@ -41,7 +41,7 @@ mod imp {
     };
     use openscq30_lib::devices::standard::{
         state::DeviceState,
-        structures::{ButtonAction, ButtonState, CustomButtonActions},
+        structures::{ButtonAction, ButtonConfiguration, MultiButtonConfiguration},
     };
     use strum::IntoEnumIterator;
     use tokio::sync::mpsc::UnboundedSender;
@@ -69,7 +69,7 @@ mod imp {
         right_long_press: TemplateChild<adw::ComboRow>,
 
         button_actions: OnceCell<gio::ListStore>,
-        custom_button_model: Cell<Option<CustomButtonActions>>,
+        button_configuration: Cell<Option<MultiButtonConfiguration>>,
 
         ignore_changes: Cell<bool>,
 
@@ -79,43 +79,43 @@ mod imp {
     impl ButtonsScreen {
         pub fn set_device_state(&self, state: &DeviceState) {
             let button_actions = self.button_actions.get().unwrap();
-            if let Some(button_model) = state.custom_button_actions {
-                self.custom_button_model.set(Some(button_model));
+            if let Some(button_configuration) = state.button_configuration {
+                self.button_configuration.set(Some(button_configuration));
                 self.ignore_changes.set(true);
                 Self::set_row_button_action_no_tws(
                     &self.left_single_click,
                     button_actions,
-                    button_model.left_single_click,
+                    button_configuration.left_single_click,
                 );
                 Self::set_row_button_action_tws(
                     &self.left_double_click,
                     button_actions,
-                    button_model.left_double_click,
+                    button_configuration.left_double_click,
                 );
                 Self::set_row_button_action_tws(
                     &self.left_long_press,
                     button_actions,
-                    button_model.left_long_press,
+                    button_configuration.left_long_press,
                 );
                 Self::set_row_button_action_no_tws(
                     &self.right_single_click,
                     button_actions,
-                    button_model.right_single_click,
+                    button_configuration.right_single_click,
                 );
                 Self::set_row_button_action_tws(
                     &self.right_double_click,
                     button_actions,
-                    button_model.right_double_click,
+                    button_configuration.right_double_click,
                 );
                 Self::set_row_button_action_tws(
                     &self.right_long_press,
                     button_actions,
-                    button_model.right_long_press,
+                    button_configuration.right_long_press,
                 );
                 self.ignore_changes.set(false);
             } else {
                 tracing::error!(
-                    "Buttons screen received state with custom_button_model: None. This does nothing, since the screen should not be visible in this case."
+                    "Buttons screen received state with button_configuration: None. This does nothing, since the screen should not be visible in this case."
                 );
             }
         }
@@ -123,7 +123,7 @@ mod imp {
         fn set_row_button_action_tws(
             row: &adw::ComboRow,
             button_actions: &gio::ListStore,
-            selection: ButtonState,
+            selection: ButtonConfiguration,
         ) {
             Self::set_row_button_action(
                 row,
@@ -140,7 +140,7 @@ mod imp {
         fn set_row_button_action_no_tws(
             row: &adw::ComboRow,
             button_actions: &gio::ListStore,
-            selection: ButtonState,
+            selection: ButtonConfiguration,
         ) {
             Self::set_row_button_action(
                 row,
@@ -187,7 +187,7 @@ mod imp {
             if self.ignore_changes.get() {
                 return;
             }
-            let Some(button_model) = self.custom_button_model.get() else {
+            let Some(button_configuration) = self.button_configuration.get() else {
                 return;
             };
             let left_single_click_action = Self::get_row_action(&self.left_single_click);
@@ -197,34 +197,36 @@ mod imp {
             let right_double_click_action = Self::get_row_action(&self.right_double_click);
             let right_long_press_action = Self::get_row_action(&self.right_long_press);
 
-            let model = CustomButtonActions {
-                left_single_click: ButtonState {
+            let model = MultiButtonConfiguration {
+                left_single_click: ButtonConfiguration {
                     is_enabled: left_single_click_action.is_some(),
                     action: left_single_click_action
-                        .unwrap_or(button_model.left_single_click.action),
+                        .unwrap_or(button_configuration.left_single_click.action),
                 },
-                left_double_click: ButtonState {
+                left_double_click: ButtonConfiguration {
                     is_enabled: left_double_click_action.is_some(),
                     action: left_double_click_action
-                        .unwrap_or(button_model.left_double_click.action),
+                        .unwrap_or(button_configuration.left_double_click.action),
                 },
-                left_long_press: ButtonState {
+                left_long_press: ButtonConfiguration {
                     is_enabled: left_double_click_action.is_some(),
-                    action: left_long_press_action.unwrap_or(button_model.left_long_press.action),
+                    action: left_long_press_action
+                        .unwrap_or(button_configuration.left_long_press.action),
                 },
-                right_single_click: ButtonState {
+                right_single_click: ButtonConfiguration {
                     is_enabled: right_single_click_action.is_some(),
                     action: right_single_click_action
-                        .unwrap_or(button_model.right_single_click.action),
+                        .unwrap_or(button_configuration.right_single_click.action),
                 },
-                right_double_click: ButtonState {
+                right_double_click: ButtonConfiguration {
                     is_enabled: right_double_click_action.is_some(),
                     action: right_double_click_action
-                        .unwrap_or(button_model.right_double_click.action),
+                        .unwrap_or(button_configuration.right_double_click.action),
                 },
-                right_long_press: ButtonState {
+                right_long_press: ButtonConfiguration {
                     is_enabled: right_double_click_action.is_some(),
-                    action: right_long_press_action.unwrap_or(button_model.right_long_press.action),
+                    action: right_long_press_action
+                        .unwrap_or(button_configuration.right_long_press.action),
                 },
             };
 

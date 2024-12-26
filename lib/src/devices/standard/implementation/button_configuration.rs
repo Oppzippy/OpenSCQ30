@@ -2,25 +2,25 @@ use std::sync::Mutex;
 
 use crate::{
     devices::standard::{
-        packets::outbound::SetCustomButtonModelPacket, state::DeviceState,
-        structures::InternalCustomButtonModel,
+        packets::outbound::SetMultiButtonConfigurationPacket, state::DeviceState,
+        structures::InternalMultiButtonConfiguration,
     },
     soundcore_device::device::soundcore_command::CommandResponse,
 };
 
-use super::{CustomButtonActions, TwsStatus};
+use super::{MultiButtonConfiguration, TwsStatus};
 
 #[derive(Debug, Default)]
-pub struct CustomButtonModelImplementation {
-    data: Mutex<Option<InternalCustomButtonModel>>,
+pub struct ButtonConfigurationImplementation {
+    data: Mutex<Option<InternalMultiButtonConfiguration>>,
 }
 
-impl CustomButtonModelImplementation {
-    pub(crate) fn set_custom_button_model(
+impl ButtonConfigurationImplementation {
+    pub(crate) fn set_multi_button_configuration(
         &self,
         tws_status: &TwsStatus,
-        actions: CustomButtonActions,
-    ) -> InternalCustomButtonModel {
+        actions: MultiButtonConfiguration,
+    ) -> InternalMultiButtonConfiguration {
         let mut internal = self
             .data
             .lock()
@@ -47,17 +47,17 @@ impl CustomButtonModelImplementation {
         internal.clone()
     }
 
-    pub(crate) fn set_internal_data(&self, data: InternalCustomButtonModel) {
+    pub(crate) fn set_internal_data(&self, data: InternalMultiButtonConfiguration) {
         *self.data.lock().unwrap() = Some(data);
     }
 }
 
-pub fn set_custom_button_model(
+pub fn set_multi_button_configuration(
     state: DeviceState,
-    data: &CustomButtonModelImplementation,
-    custom_button_model: CustomButtonActions,
+    implementation: &ButtonConfigurationImplementation,
+    button_configuration: MultiButtonConfiguration,
 ) -> crate::Result<CommandResponse> {
-    if !state.device_features.has_custom_button_model {
+    if !state.device_features.has_button_configuration {
         return Err(crate::Error::FeatureNotSupported {
             feature_name: "custom button model",
         });
@@ -66,27 +66,28 @@ pub fn set_custom_button_model(
         return Err(crate::Error::MissingData { name: "tws status" });
     };
 
-    let prev_custom_button_model =
+    let prev_button_configuration =
         state
-            .custom_button_actions
+            .button_configuration
             .ok_or(crate::Error::MissingData {
                 name: "custom button model",
             })?;
-    if custom_button_model == prev_custom_button_model {
+    if button_configuration == prev_button_configuration {
         return Ok(CommandResponse {
             packets: Vec::new(),
             new_state: state,
         });
     }
 
-    // We don't want to update the state directly since CustomButtonActions -> internal representation -> CustomButtonActions
+    // We don't want to update the state directly since MultiButtonConfiguration -> internal representation -> MultiButtonConfiguration
     // is not guaranteed to be the same as the original
-    let new_button_model = data.set_custom_button_model(&tws_status, custom_button_model);
-    let packet = SetCustomButtonModelPacket::new(new_button_model);
+    let new_button_configuration =
+        implementation.set_multi_button_configuration(&tws_status, button_configuration);
+    let packet = SetMultiButtonConfigurationPacket::new(new_button_configuration);
     Ok(CommandResponse {
         packets: vec![packet.into()],
         new_state: DeviceState {
-            custom_button_actions: Some(new_button_model.into()),
+            button_configuration: Some(new_button_configuration.into()),
             ..state
         },
     })

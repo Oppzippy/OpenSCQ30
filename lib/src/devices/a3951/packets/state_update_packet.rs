@@ -15,7 +15,7 @@ use crate::devices::{
         },
         structures::{
             AgeRange, CustomHearId, DualBattery, EqualizerConfiguration, Gender,
-            InternalCustomButtonModel, SoundModes, StereoEqualizerConfiguration, TwsStatus,
+            InternalMultiButtonConfiguration, SoundModes, StereoEqualizerConfiguration, TwsStatus,
         },
     },
 };
@@ -29,7 +29,7 @@ pub struct A3951StateUpdatePacket {
     pub gender: Gender,
     pub age_range: AgeRange,
     pub custom_hear_id: CustomHearId,
-    pub custom_button_model: InternalCustomButtonModel,
+    pub button_configuration: InternalMultiButtonConfiguration,
     pub sound_modes: SoundModes,
     pub side_tone: bool,
     pub wear_detection: bool,
@@ -51,7 +51,7 @@ impl From<A3951StateUpdatePacket> for StateUpdatePacket {
             age_range: Some(packet.age_range),
             gender: Some(packet.gender),
             hear_id: Some(packet.custom_hear_id.into()),
-            custom_button_model: Some(packet.custom_button_model.into()),
+            button_configuration: Some(packet.button_configuration.into()),
             firmware_version: None,
             serial_number: None,
             ambient_sound_mode_cycle: None,
@@ -80,7 +80,7 @@ impl InboundPacket for A3951StateUpdatePacket {
                         gender,
                         age_range,
                         custom_hear_id,
-                        custom_button_model,
+                        button_configuration,
                         sound_modes,
                         side_tone,
                         wear_detection,
@@ -93,7 +93,7 @@ impl InboundPacket for A3951StateUpdatePacket {
                     Gender::take,
                     AgeRange::take,
                     CustomHearId::take_with_all_fields,
-                    InternalCustomButtonModel::take,
+                    InternalMultiButtonConfiguration::take,
                     SoundModes::take,
                     take_bool, // side tone
                     take_bool, // wear detection
@@ -115,7 +115,7 @@ impl InboundPacket for A3951StateUpdatePacket {
                         gender,
                         age_range,
                         custom_hear_id,
-                        custom_button_model,
+                        button_configuration,
                         sound_modes,
                         side_tone,
                         wear_detection,

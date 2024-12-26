@@ -7,8 +7,8 @@ use openscq30_lib::{
     devices::standard::{
         state::DeviceState,
         structures::{
-            AmbientSoundModeCycle, CustomButtonActions, EqualizerConfiguration, HearId, SoundModes,
-            SoundModesTypeTwo,
+            AmbientSoundModeCycle, EqualizerConfiguration, HearId, MultiButtonConfiguration,
+            SoundModes, SoundModesTypeTwo,
         },
     },
     futures::TokioFutures,
@@ -208,16 +208,16 @@ impl NativeSoundcoreDevice {
             .unwrap()
     }
 
-    pub async fn set_custom_button_model(
+    pub async fn set_multi_button_configuration(
         &self,
-        custom_button_model: CustomButtonActions,
+        button_configuration: MultiButtonConfiguration,
     ) -> Result<(), DeviceError> {
         let device = self.device.clone();
 
         self.runtime
             .spawn(async move {
                 device
-                    .set_custom_button_model(custom_button_model)
+                    .set_multi_button_configuration(button_configuration)
                     .await
                     .map_err(DeviceError::from)
             })
@@ -321,16 +321,20 @@ impl DeviceImplementation {
         }
     }
 
-    pub async fn set_custom_button_model(
+    pub async fn set_multi_button_configuration(
         &self,
-        custom_button_model: CustomButtonActions,
+        button_configuration: MultiButtonConfiguration,
     ) -> openscq30_lib::Result<()> {
         match self {
             DeviceImplementation::Manual(device) => {
-                device.set_custom_button_model(custom_button_model).await
+                device
+                    .set_multi_button_configuration(button_configuration)
+                    .await
             }
             DeviceImplementation::Demo(device) => {
-                device.set_custom_button_model(custom_button_model).await
+                device
+                    .set_multi_button_configuration(button_configuration)
+                    .await
             }
         }
     }

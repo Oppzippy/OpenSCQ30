@@ -3,9 +3,9 @@ package com.oppzippy.openscq30.ui.devicesettings
 import androidx.compose.runtime.Composable
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
-import com.oppzippy.openscq30.lib.wrapper.CustomButtonActions
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.ManualNoiseCanceling
+import com.oppzippy.openscq30.lib.wrapper.MultiButtonConfiguration
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeTypeTwo
 import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
@@ -24,7 +24,7 @@ fun DeviceSettingsScreen(
     onNoiseCancelingModeChange: (noiseCancelingMode: NoiseCancelingMode) -> Unit = {},
     onCustomNoiseCancelingChange: (customNoiseCanceling: UByte) -> Unit = {},
     onEqualizerConfigurationChange: (equalizerConfiguration: EqualizerConfiguration) -> Unit = {},
-    onCustomButtonModelChange: (CustomButtonActions) -> Unit = {},
+    onButtonConfigurationChange: (MultiButtonConfiguration) -> Unit = {},
     onAmbientSoundModeTypeTwoChange: (ambientSoundMode: AmbientSoundMode) -> Unit = {},
     onTransparencyModeTypeTwoChange: (transparencyMode: TransparencyMode) -> Unit = {},
     onNoiseCancelingModeTypeTwoChange: (noiseCancelingMode: NoiseCancelingModeTypeTwo) -> Unit = {},
@@ -42,7 +42,7 @@ fun DeviceSettingsScreen(
                     onEqualizerConfigurationChange = onEqualizerConfigurationChange,
                     onTransparencyModeChange = onTransparencyModeChange,
                     onCustomNoiseCancelingChange = onCustomNoiseCancelingChange,
-                    onCustomButtonModelChange = onCustomButtonModelChange,
+                    onButtonConfigurationChange = onButtonConfigurationChange,
                     onAmbientSoundModeTypeTwoChange = onAmbientSoundModeTypeTwoChange,
                     onTransparencyModeTypeTwoChange = onTransparencyModeTypeTwoChange,
                     onNoiseCancelingModeTypeTwoChange = onNoiseCancelingModeTypeTwoChange,

@@ -7,7 +7,9 @@ use nom::{
 };
 
 use crate::devices::{
-    a3936::{device_profile::A3936_DEVICE_PROFILE, structures::A3936CustomButtonModel},
+    a3936::{
+        device_profile::A3936_DEVICE_PROFILE, structures::A3936InternalMultiButtonConfiguration,
+    },
     standard::{
         packets::{inbound::state_update_packet::StateUpdatePacket, parsing::take_bool},
         quirks::TwoExtraEqBandsValues,
@@ -33,7 +35,7 @@ pub struct A3936StateUpdatePacket {
     pub custom_hear_id: CustomHearId,
     pub sound_modes: SoundModesTypeTwo,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
-    pub custom_button_model: A3936CustomButtonModel,
+    pub button_configuration: A3936InternalMultiButtonConfiguration,
     pub touch_tone: bool,
     pub charging_case_battery: BatteryLevel,
     pub color: u8,
@@ -56,9 +58,9 @@ impl From<A3936StateUpdatePacket> for StateUpdatePacket {
             age_range: Some(packet.age_range),
             gender: None,
             hear_id: Some(packet.custom_hear_id.into()),
-            custom_button_model: Some(
+            button_configuration: Some(
                 packet
-                    .custom_button_model
+                    .button_configuration
                     .into_custom_button_actions(packet.tws_status.is_connected),
             ),
             firmware_version: None,
@@ -90,15 +92,16 @@ impl A3936StateUpdatePacket {
                 // until the next data to be read. This offset includes the length of the custom button model. Presumably,
                 // there are some extra bytes between the button model and the beginning of the next data to be parsed?
                 let (input, skip_offset) = le_u8(input)?;
-                let remaining_before_button_model = input.len();
-                let (input, custom_button_model) = A3936CustomButtonModel::take(input)?;
+                let remaining_before_button_configuration = input.len();
+                let (input, button_configuration) =
+                    A3936InternalMultiButtonConfiguration::take(input)?;
                 println!("remaining: {}", remaining - input.len() + 10);
-                let button_model_size = remaining_before_button_model - input.len();
+                let button_configuration_size = remaining_before_button_configuration - input.len();
                 let (input, _) = take(
                     (skip_offset as usize)
                         // subtract an extra 1 since we want the number of bytes to discard, not
                         // the offset to the first byte to read
-                        .checked_sub(button_model_size + 2)
+                        .checked_sub(button_configuration_size + 2)
                         .unwrap_or_default(),
                 )(input)?;
 
@@ -127,7 +130,7 @@ impl A3936StateUpdatePacket {
                         custom_hear_id,
                         ambient_sound_mode_cycle,
                         sound_modes,
-                        custom_button_model,
+                        button_configuration,
                         touch_tone,
                         charging_case_battery,
                         color,

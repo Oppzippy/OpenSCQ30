@@ -39,7 +39,7 @@ pub struct DeviceFeatures {
     pub num_equalizer_channels: usize,
     pub num_equalizer_bands: usize,
     pub has_dynamic_range_compression: bool,
-    pub has_custom_button_model: bool,
+    pub has_button_configuration: bool,
     pub has_wear_detection: bool,
     pub has_touch_tone: bool,
     pub has_auto_power_off: bool,

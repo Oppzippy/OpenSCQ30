@@ -6,10 +6,12 @@ use nom::{
     IResult,
 };
 
-use crate::devices::standard::structures::{ButtonAction, ButtonState, CustomButtonActions};
+use crate::devices::standard::structures::{
+    ButtonAction, ButtonConfiguration, MultiButtonConfiguration,
+};
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct A3936CustomButtonModel {
+pub struct A3936InternalMultiButtonConfiguration {
     pub left_single_click: A3936TwsButtonAction,
     pub right_single_click: A3936TwsButtonAction,
     pub left_double_click: A3936TwsButtonAction,
@@ -18,7 +20,7 @@ pub struct A3936CustomButtonModel {
     pub right_long_press: A3936TwsButtonAction,
 }
 
-impl A3936CustomButtonModel {
+impl A3936InternalMultiButtonConfiguration {
     pub fn bytes(&self) -> Vec<u8> {
         let mut bytes = Vec::with_capacity(12);
         bytes.extend(self.left_single_click.bytes());
@@ -64,8 +66,8 @@ impl A3936CustomButtonModel {
         })(input)
     }
 
-    pub fn into_custom_button_actions(&self, is_tws_connected: bool) -> CustomButtonActions {
-        CustomButtonActions {
+    pub fn into_custom_button_actions(&self, is_tws_connected: bool) -> MultiButtonConfiguration {
+        MultiButtonConfiguration {
             left_single_click: self.left_single_click.into_button_state(is_tws_connected),
             right_single_click: self.right_single_click.into_button_state(is_tws_connected),
             left_double_click: self.left_double_click.into_button_state(is_tws_connected),
@@ -113,8 +115,8 @@ impl A3936TwsButtonAction {
         })(input)
     }
 
-    pub fn into_button_state(&self, is_tws_connected: bool) -> ButtonState {
-        ButtonState {
+    pub fn into_button_state(&self, is_tws_connected: bool) -> ButtonConfiguration {
+        ButtonConfiguration {
             action: self.active_action(is_tws_connected),
             is_enabled: self.is_enabled(is_tws_connected),
         }

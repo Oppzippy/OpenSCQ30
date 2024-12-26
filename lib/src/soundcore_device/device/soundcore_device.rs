@@ -17,8 +17,8 @@ use crate::{
         },
         state::DeviceState,
         structures::{
-            AmbientSoundModeCycle, Command, CustomButtonActions, EqualizerConfiguration, HearId,
-            SoundModes, SoundModesTypeTwo,
+            AmbientSoundModeCycle, Command, EqualizerConfiguration, HearId,
+            MultiButtonConfiguration, SoundModes, SoundModesTypeTwo,
         },
     },
     futures::{Futures, JoinHandle},
@@ -287,32 +287,32 @@ where
         Ok(())
     }
 
-    async fn set_custom_button_model(
+    async fn set_multi_button_configuration(
         &self,
-        custom_button_model: CustomButtonActions,
+        button_configuration: MultiButtonConfiguration,
     ) -> crate::Result<()> {
         let state_sender = self.state_sender.lock().await;
         let state = state_sender.borrow().to_owned();
 
-        if !state.device_features.has_custom_button_model {
+        if !state.device_features.has_button_configuration {
             return Err(crate::Error::FeatureNotSupported {
                 feature_name: "custom button model",
             });
         }
 
-        let prev_custom_button_model =
+        let prev_button_configuration =
             state
-                .custom_button_actions
+                .button_configuration
                 .ok_or(crate::Error::MissingData {
                     name: "custom button model",
                 })?;
-        if custom_button_model == prev_custom_button_model {
+        if button_configuration == prev_button_configuration {
             return Ok(());
         }
 
         let response = self
             .implementation
-            .set_custom_button_actions(state, custom_button_model)?;
+            .set_multi_button_configuration(state, button_configuration)?;
         self.handle_response(response, &state_sender).await?;
         Ok(())
     }

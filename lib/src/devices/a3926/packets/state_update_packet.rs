@@ -11,7 +11,7 @@ use crate::devices::{
         packets::inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
         structures::{
             AgeRange, BasicHearId, DualBattery, EqualizerConfiguration, Gender,
-            InternalCustomButtonModel, StereoEqualizerConfiguration, TwsStatus,
+            InternalMultiButtonConfiguration, StereoEqualizerConfiguration, TwsStatus,
         },
     },
 };
@@ -25,7 +25,7 @@ pub struct A3926StateUpdatePacket {
     pub gender: Gender,
     pub age_range: AgeRange,
     pub hear_id: BasicHearId,
-    pub custom_button_model: InternalCustomButtonModel,
+    pub button_configuration: InternalMultiButtonConfiguration,
 }
 
 impl From<A3926StateUpdatePacket> for StateUpdatePacket {
@@ -39,7 +39,7 @@ impl From<A3926StateUpdatePacket> for StateUpdatePacket {
             age_range: Some(packet.age_range),
             gender: Some(packet.gender),
             hear_id: Some(packet.hear_id.into()),
-            custom_button_model: Some(packet.custom_button_model.into()),
+            button_configuration: Some(packet.button_configuration.into()),
             firmware_version: None,
             serial_number: None,
             ambient_sound_mode_cycle: None,
@@ -65,7 +65,7 @@ impl InboundPacket for A3926StateUpdatePacket {
                     Gender::take,
                     AgeRange::take,
                     BasicHearId::take,
-                    InternalCustomButtonModel::take,
+                    InternalMultiButtonConfiguration::take,
                 )),
                 |(
                     tws_status,
@@ -74,7 +74,7 @@ impl InboundPacket for A3926StateUpdatePacket {
                     gender,
                     age_range,
                     hear_id,
-                    custom_button_model,
+                    button_configuration,
                 )| {
                     A3926StateUpdatePacket {
                         tws_status,
@@ -83,7 +83,7 @@ impl InboundPacket for A3926StateUpdatePacket {
                         gender,
                         age_range,
                         hear_id,
-                        custom_button_model,
+                        button_configuration,
                     }
                 },
             )),

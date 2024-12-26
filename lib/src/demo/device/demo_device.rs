@@ -39,7 +39,7 @@ where
                 num_equalizer_bands: 10,
                 has_dynamic_range_compression: true,
                 dynamic_range_compression_min_firmware_version: None,
-                has_custom_button_model: true,
+                has_button_configuration: true,
                 has_wear_detection: true,
                 has_touch_tone: true,
                 has_auto_power_off: true,
@@ -61,28 +61,28 @@ where
             }),
             gender: Some(Gender(0)),
             age_range: Some(AgeRange(0)),
-            custom_button_actions: Some(CustomButtonActions {
-                left_double_click: ButtonState {
+            button_configuration: Some(MultiButtonConfiguration {
+                left_double_click: ButtonConfiguration {
                     action: ButtonAction::NextSong,
                     is_enabled: true,
                 },
-                left_long_press: ButtonState {
+                left_long_press: ButtonConfiguration {
                     action: ButtonAction::PreviousSong,
                     is_enabled: true,
                 },
-                right_double_click: ButtonState {
+                right_double_click: ButtonConfiguration {
                     action: ButtonAction::VoiceAssistant,
                     is_enabled: true,
                 },
-                right_long_press: ButtonState {
+                right_long_press: ButtonConfiguration {
                     action: ButtonAction::VolumeUp,
                     is_enabled: true,
                 },
-                left_single_click: ButtonState {
+                left_single_click: ButtonConfiguration {
                     action: ButtonAction::PreviousSong,
                     is_enabled: true,
                 },
-                right_single_click: ButtonState {
+                right_single_click: ButtonConfiguration {
                     action: ButtonAction::NextSong,
                     is_enabled: true,
                 },
@@ -241,23 +241,23 @@ where
         Ok(())
     }
 
-    async fn set_custom_button_model(
+    async fn set_multi_button_configuration(
         &self,
-        custom_button_model: CustomButtonActions,
+        buttons: MultiButtonConfiguration,
     ) -> crate::Result<()> {
         let state_sender = self.state_sender.lock().await;
         let state = state_sender.borrow().to_owned();
-        if state.custom_button_actions.is_none() {
+        if state.button_configuration.is_none() {
             return Err(crate::Error::FeatureNotSupported {
                 feature_name: "custom button model",
             });
         }
-        if state.custom_button_actions == Some(custom_button_model) {
+        if state.button_configuration == Some(buttons) {
             return Ok(());
         }
-        tracing::info!("set custom button model to {custom_button_model:?}");
+        tracing::info!("set custom button model to {buttons:?}");
         state_sender.send_replace(DeviceState {
-            custom_button_actions: Some(custom_button_model),
+            button_configuration: Some(buttons),
             ..state
         });
         Ok(())

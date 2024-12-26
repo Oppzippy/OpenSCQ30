@@ -28,7 +28,7 @@ message DeviceFeatures {
   required uint32 num_equalizer_channels = 3;
   required uint32 num_equalizer_bands = 4;
   required bool has_dynamic_range_compression = 5;
-  required bool has_custom_button_model = 6;
+  required bool has_button_configuration = 6;
   required bool has_wear_detection = 7;
   required bool has_touch_tone = 8;
   required bool has_auto_power_off = 9;

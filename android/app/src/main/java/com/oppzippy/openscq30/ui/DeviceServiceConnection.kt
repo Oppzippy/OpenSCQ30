@@ -6,8 +6,8 @@ import android.os.IBinder
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
-import com.oppzippy.openscq30.lib.wrapper.CustomButtonActions
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.wrapper.MultiButtonConfiguration
 import com.oppzippy.openscq30.lib.wrapper.SoundModes
 import com.oppzippy.openscq30.lib.wrapper.SoundModesTypeTwo
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
@@ -87,7 +87,7 @@ class DeviceServiceConnection(private val unbind: () -> Unit) : ServiceConnectio
         service?.get()?.connectionManager?.setEqualizerConfiguration(equalizerConfiguration)
     }
 
-    fun setCustomButtonModel(buttonModel: CustomButtonActions) {
-        service?.get()?.connectionManager?.setCustomButtonModel(buttonModel)
+    fun setMultiButtonConfiguration(buttonConfiguration: MultiButtonConfiguration) {
+        service?.get()?.connectionManager?.setMultiButtonConfiguration(buttonConfiguration)
     }
 }

@@ -462,8 +462,8 @@ fn delayed_initialize_application(
                         Action::SetHearId(hear_id) => actions::set_hear_id(&state, hear_id)
                             .await
                             .context("set hear id"),
-                        Action::SetCustomButtonModel(custom_button_model) => {
-                            actions::set_custom_button_model(&state, custom_button_model)
+                        Action::SetCustomButtonModel(button_configuration) => {
+                            actions::set_button_configuration(&state, button_configuration)
                                 .await
                                 .context("set custom button model")
                         }

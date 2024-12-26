@@ -62,7 +62,7 @@ class DeviceSettingsQuickPresetsTest {
         numEqualizerChannels = 2,
         numEqualizerBands = 8,
         hasDynamicRangeCompression = true,
-        hasCustomButtonModel = true,
+        hasButtonConfiguration = true,
         hasWearDetection = true,
         hasTouchTone = true,
         hasAutoPowerOff = true,

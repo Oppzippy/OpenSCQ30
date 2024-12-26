@@ -9,12 +9,12 @@ use crate::{
     },
     devices::standard::{
         self,
-        implementation::CustomButtonModelImplementation,
+        implementation::ButtonConfigurationImplementation,
         packets::inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
         state::DeviceState,
         structures::{
-            AmbientSoundModeCycle, Command, CustomButtonActions, EqualizerConfiguration, HearId,
-            SoundModes, SoundModesTypeTwo, STATE_UPDATE,
+            AmbientSoundModeCycle, Command, EqualizerConfiguration, HearId,
+            MultiButtonConfiguration, SoundModes, SoundModesTypeTwo, STATE_UPDATE,
         },
     },
     soundcore_device::{
@@ -37,7 +37,7 @@ pub(crate) const A3926_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
         num_equalizer_bands: 8,
         has_dynamic_range_compression: false,
         dynamic_range_compression_min_firmware_version: None,
-        has_custom_button_model: true,
+        has_button_configuration: true,
         has_wear_detection: false,
         has_touch_tone: false,
         has_auto_power_off: false,
@@ -49,7 +49,7 @@ pub(crate) const A3926_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
 
 #[derive(Debug, Default)]
 struct A3926Implementation {
-    buttons: Arc<CustomButtonModelImplementation>,
+    buttons: Arc<ButtonConfigurationImplementation>,
 }
 
 impl DeviceImplementation for A3926Implementation {
@@ -69,7 +69,7 @@ impl DeviceImplementation for A3926Implementation {
                         return state;
                     }
                 };
-                buttons.set_internal_data(packet.custom_button_model);
+                buttons.set_internal_data(packet.button_configuration);
 
                 StateUpdatePacket::from(packet).into()
             }),
@@ -115,12 +115,16 @@ impl DeviceImplementation for A3926Implementation {
         standard::implementation::set_hear_id(state, hear_id)
     }
 
-    fn set_custom_button_actions(
+    fn set_multi_button_configuration(
         &self,
         state: DeviceState,
-        custom_button_model: CustomButtonActions,
+        button_configuration: MultiButtonConfiguration,
     ) -> crate::Result<CommandResponse> {
-        standard::implementation::set_custom_button_model(state, &self.buttons, custom_button_model)
+        standard::implementation::set_multi_button_configuration(
+            state,
+            &self.buttons,
+            button_configuration,
+        )
     }
 
     fn set_ambient_sound_mode_cycle(

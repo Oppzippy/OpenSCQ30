@@ -4,8 +4,8 @@ import android.util.Log
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceConnector
 import com.oppzippy.openscq30.features.soundcoredevice.impl.SoundcoreDevice
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
-import com.oppzippy.openscq30.lib.wrapper.CustomButtonActions
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
+import com.oppzippy.openscq30.lib.wrapper.MultiButtonConfiguration
 import com.oppzippy.openscq30.lib.wrapper.SoundModes
 import com.oppzippy.openscq30.lib.wrapper.SoundModesTypeTwo
 import java.lang.Exception
@@ -136,9 +136,9 @@ class DeviceConnectionManager @Inject constructor(
         }
     }
 
-    fun setCustomButtonModel(buttonModel: CustomButtonActions) {
+    fun setMultiButtonConfiguration(buttonConfiguration: MultiButtonConfiguration) {
         scope.launch {
-            device?.setCustomButtonModel(buttonModel)
+            device?.setMultiButtonConfiguration(buttonConfiguration)
         }
     }
 }

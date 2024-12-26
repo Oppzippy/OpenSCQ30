@@ -10,13 +10,13 @@ use macaddr::MacAddr6;
 use openscq30_lib::devices::standard::{
     state::DeviceState,
     structures::{
-        AmbientSoundModeCycle, CustomButtonActions, EqualizerConfiguration, HearId,
+        AmbientSoundModeCycle, EqualizerConfiguration, HearId, MultiButtonConfiguration,
         PresetEqualizerProfile, SoundModes, SoundModesTypeTwo,
     },
 };
 use openscq30_lib_protobuf::{
-    deserialize_ambient_sound_mode_cycle, deserialize_custom_button_model,
-    deserialize_equalizer_configuration, deserialize_hear_id, deserialize_preset_equalizer_profile,
+    deserialize_ambient_sound_mode_cycle, deserialize_equalizer_configuration, deserialize_hear_id,
+    deserialize_multi_button_configuration, deserialize_preset_equalizer_profile,
     deserialize_sound_modes, deserialize_sound_modes_type_two, serialize_ambient_sound_mode_cycle,
     serialize_device_state, serialize_equalizer_configuration, serialize_preset_equalizer_profile,
 };
@@ -163,15 +163,15 @@ impl UniffiCustomTypeConverter for HearId {
     }
 }
 
-uniffi::custom_type!(CustomButtonActions, Vec<u8>);
-impl UniffiCustomTypeConverter for CustomButtonActions {
+uniffi::custom_type!(MultiButtonConfiguration, Vec<u8>);
+impl UniffiCustomTypeConverter for MultiButtonConfiguration {
     type Builtin = Vec<u8>;
 
     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self>
     where
         Self: Sized,
     {
-        Ok(deserialize_custom_button_model(&val)?)
+        Ok(deserialize_multi_button_configuration(&val)?)
     }
 
     fn from_custom(_obj: Self) -> Self::Builtin {

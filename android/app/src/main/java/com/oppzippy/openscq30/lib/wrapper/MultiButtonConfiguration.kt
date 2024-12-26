@@ -1,40 +1,41 @@
 package com.oppzippy.openscq30.lib.wrapper
 
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.lib.protobuf.buttonState
-import com.oppzippy.openscq30.lib.protobuf.customButtonActions
+import com.oppzippy.openscq30.lib.protobuf.buttonConfiguration
+import com.oppzippy.openscq30.lib.protobuf.multiButtonConfiguration
 
-data class CustomButtonActions(
-    val leftSingleClick: ButtonState,
-    val leftDoubleClick: ButtonState,
-    val leftLongPress: ButtonState,
-    val rightSingleClick: ButtonState,
-    val rightDoubleClick: ButtonState,
-    val rightLongPress: ButtonState,
+data class MultiButtonConfiguration(
+    val leftSingleClick: ButtonConfiguration,
+    val leftDoubleClick: ButtonConfiguration,
+    val leftLongPress: ButtonConfiguration,
+    val rightSingleClick: ButtonConfiguration,
+    val rightDoubleClick: ButtonConfiguration,
+    val rightLongPress: ButtonConfiguration,
 ) {
-    fun toProtobuf(): com.oppzippy.openscq30.lib.protobuf.CustomButtonActions = customButtonActions {
-        leftSingleClick = this@CustomButtonActions.leftSingleClick.toProtobuf()
-        leftDoubleClick = this@CustomButtonActions.leftDoubleClick.toProtobuf()
-        leftLongPress = this@CustomButtonActions.leftLongPress.toProtobuf()
-        rightSingleClick = this@CustomButtonActions.rightSingleClick.toProtobuf()
-        rightDoubleClick = this@CustomButtonActions.rightDoubleClick.toProtobuf()
-        rightLongPress = this@CustomButtonActions.rightLongPress.toProtobuf()
+    fun toProtobuf(): com.oppzippy.openscq30.lib.protobuf.MultiButtonConfiguration = multiButtonConfiguration {
+        leftSingleClick = this@MultiButtonConfiguration.leftSingleClick.toProtobuf()
+        leftDoubleClick = this@MultiButtonConfiguration.leftDoubleClick.toProtobuf()
+        leftLongPress = this@MultiButtonConfiguration.leftLongPress.toProtobuf()
+        rightSingleClick = this@MultiButtonConfiguration.rightSingleClick.toProtobuf()
+        rightDoubleClick = this@MultiButtonConfiguration.rightDoubleClick.toProtobuf()
+        rightLongPress = this@MultiButtonConfiguration.rightLongPress.toProtobuf()
     }
 }
 
-fun com.oppzippy.openscq30.lib.protobuf.CustomButtonActions.toKotlin(): CustomButtonActions = CustomButtonActions(
-    leftSingleClick = leftSingleClick.toKotlin(),
-    leftDoubleClick = leftDoubleClick.toKotlin(),
-    leftLongPress = leftLongPress.toKotlin(),
-    rightSingleClick = rightSingleClick.toKotlin(),
-    rightDoubleClick = rightDoubleClick.toKotlin(),
-    rightLongPress = rightLongPress.toKotlin(),
-)
+fun com.oppzippy.openscq30.lib.protobuf.MultiButtonConfiguration.toKotlin(): MultiButtonConfiguration =
+    MultiButtonConfiguration(
+        leftSingleClick = leftSingleClick.toKotlin(),
+        leftDoubleClick = leftDoubleClick.toKotlin(),
+        leftLongPress = leftLongPress.toKotlin(),
+        rightSingleClick = rightSingleClick.toKotlin(),
+        rightDoubleClick = rightDoubleClick.toKotlin(),
+        rightLongPress = rightLongPress.toKotlin(),
+    )
 
-data class ButtonState(val isEnabled: Boolean, val action: ButtonAction) {
-    fun toProtobuf(): com.oppzippy.openscq30.lib.protobuf.ButtonState = buttonState {
-        isEnabled = this@ButtonState.isEnabled
-        action = this@ButtonState.action.toProtobuf()
+data class ButtonConfiguration(val isEnabled: Boolean, val action: ButtonAction) {
+    fun toProtobuf(): com.oppzippy.openscq30.lib.protobuf.ButtonConfiguration = buttonConfiguration {
+        isEnabled = this@ButtonConfiguration.isEnabled
+        action = this@ButtonConfiguration.action.toProtobuf()
     }
 
     fun actionOrNull(): ButtonAction? = if (isEnabled) {
@@ -44,7 +45,8 @@ data class ButtonState(val isEnabled: Boolean, val action: ButtonAction) {
     }
 }
 
-fun com.oppzippy.openscq30.lib.protobuf.ButtonState.toKotlin(): ButtonState = ButtonState(isEnabled, action.toKotlin())
+fun com.oppzippy.openscq30.lib.protobuf.ButtonConfiguration.toKotlin(): ButtonConfiguration =
+    ButtonConfiguration(isEnabled, action.toKotlin())
 
 enum class ButtonAction {
     VolumeUp,

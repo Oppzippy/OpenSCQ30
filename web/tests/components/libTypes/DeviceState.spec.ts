@@ -12,7 +12,7 @@ describe("libTypes", () => {
         numEqualizerChannels: 0,
         numEqualizerBands: 0,
         hasDynamicRangeCompression: false,
-        hasCustomButtonModel: false,
+        hasButtonConfiguration: false,
         hasWearDetection: false,
         hasTouchTone: false,
         hasAutoPowerOff: false,
@@ -26,7 +26,7 @@ describe("libTypes", () => {
         isCharging: false,
         level: 0,
       },
-      customButtonActions: null,
+      buttonConfiguration: null,
       hearId: null,
       equalizerConfiguration: {
         presetProfile: null,
@@ -58,7 +58,7 @@ describe("libTypes", () => {
         numEqualizerChannels: 2,
         numEqualizerBands: 8,
         hasDynamicRangeCompression: true,
-        hasCustomButtonModel: true,
+        hasButtonConfiguration: true,
         hasWearDetection: true,
         hasTouchTone: true,
         hasAutoPowerOff: true,
@@ -81,7 +81,7 @@ describe("libTypes", () => {
           level: 2,
         },
       },
-      customButtonActions: {
+      buttonConfiguration: {
         leftDoubleClick: {
           isEnabled: true,
           action: "nextSong",

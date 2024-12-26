@@ -2,9 +2,9 @@ import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ButtonSettings } from "../../../src/components/buttonSettings/ButtonSettings";
-import { CustomButtonActions } from "../../../src/libTypes/DeviceState";
+import { MultiButtonConfiguration } from "../../../src/libTypes/DeviceState";
 
-const testButtonActions: Readonly<CustomButtonActions> = {
+const testMultiButtonConfiguration: Readonly<MultiButtonConfiguration> = {
   leftDoubleClick: {
     isEnabled: false,
     action: "volumeUp",
@@ -38,13 +38,13 @@ describe("Button Settings", () => {
   });
 
   it("should change button actions", async () => {
-    const setButtonActions = vi.fn();
+    const setMultiButtonConfiguration = vi.fn();
     const renderResult = render(
       <ButtonSettings
-        buttonActions={{
-          ...testButtonActions,
+        buttonConfiguration={{
+          ...testMultiButtonConfiguration,
         }}
-        setButtonActions={setButtonActions}
+        setMultiButtonConfiguration={setMultiButtonConfiguration}
       />,
     );
     await user.click(renderResult.getByLabelText("buttons.rightDoubleClick"));
@@ -53,8 +53,8 @@ describe("Button Settings", () => {
         name: "buttonActions.previousSong",
       }),
     );
-    expect(setButtonActions).toHaveBeenCalledWith({
-      ...testButtonActions,
+    expect(setMultiButtonConfiguration).toHaveBeenCalledWith({
+      ...testMultiButtonConfiguration,
       rightDoubleClick: {
         isEnabled: true,
         action: "previousSong",
@@ -63,13 +63,13 @@ describe("Button Settings", () => {
   });
 
   it("should set isEnabled to true when selecting a value", async () => {
-    const setButtonActions = vi.fn();
+    const setMultiButtonConfiguration = vi.fn();
     const renderResult = render(
       <ButtonSettings
-        buttonActions={{
-          ...testButtonActions,
+        buttonConfiguration={{
+          ...testMultiButtonConfiguration,
         }}
-        setButtonActions={setButtonActions}
+        setMultiButtonConfiguration={setMultiButtonConfiguration}
       />,
     );
     await user.click(renderResult.getByLabelText("buttons.leftSingleClick"));
@@ -78,8 +78,8 @@ describe("Button Settings", () => {
         name: "buttonActions.previousSong",
       }),
     );
-    expect(setButtonActions).toHaveBeenCalledWith({
-      ...testButtonActions,
+    expect(setMultiButtonConfiguration).toHaveBeenCalledWith({
+      ...testMultiButtonConfiguration,
       leftSingleClick: {
         isEnabled: true,
         action: "previousSong",

@@ -62,13 +62,13 @@ imports = [
 into_custom = "com.oppzippy.openscq30.lib.protobuf.HearId.parseFrom({}).toKotlin()"
 from_custom = "{}.toProtobuf().toByteArray()"
 
-[bindings.kotlin.custom_types.CustomButtonActions]
-type_name = "CustomButtonActions"
+[bindings.kotlin.custom_types.MultiButtonConfiguration]
+type_name = "MultiButtonConfiguration"
 imports = [
     "com.oppzippy.openscq30.lib.wrapper.toKotlin",
-    "com.oppzippy.openscq30.lib.wrapper.CustomButtonActions",
+    "com.oppzippy.openscq30.lib.wrapper.MultiButtonConfiguration",
 ]
-into_custom = "com.oppzippy.openscq30.lib.protobuf.CustomButtonActions.parseFrom({}).toKotlin()"
+into_custom = "com.oppzippy.openscq30.lib.protobuf.MultiButtonConfiguration.parseFrom({}).toKotlin()"
 from_custom = "{}.toProtobuf().toByteArray()"
 
 [bindings.kotlin.custom_types.PresetEqualizerProfile]

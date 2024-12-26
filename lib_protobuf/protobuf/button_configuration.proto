@@ -15,16 +15,16 @@ enum ButtonAction {
   GAME_MODE = 9;
 }
 
-message ButtonState {
+message ButtonConfiguration {
   required bool is_enabled = 1;
   required ButtonAction action = 2;
 }
 
-message CustomButtonActions {
-  required ButtonState left_single_click = 1;
-  required ButtonState left_double_click = 2;
-  required ButtonState left_long_press = 3;
-  required ButtonState right_single_click = 4;
-  required ButtonState right_double_click = 5;
-  required ButtonState right_long_press = 6;
+message MultiButtonConfiguration {
+  required ButtonConfiguration left_single_click = 1;
+  required ButtonConfiguration left_double_click = 2;
+  required ButtonConfiguration left_long_press = 3;
+  required ButtonConfiguration right_single_click = 4;
+  required ButtonConfiguration right_double_click = 5;
+  required ButtonConfiguration right_long_press = 6;
 }

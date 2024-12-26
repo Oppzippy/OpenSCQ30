@@ -6,7 +6,7 @@ import { EqualizerHelper } from "../../../wasm/pkg/openscq30_web_wasm";
 import { Device } from "../../bluetooth/Device";
 import { useToastErrorHandler } from "../../hooks/useToastErrorHandler";
 import {
-  CustomButtonActions,
+  MultiButtonConfiguration,
   DeviceState,
   EqualizerConfiguration,
   PresetEqualizerProfile,
@@ -235,25 +235,25 @@ function ButtonSettingsSection({
   displayState: DeviceState;
   setDisplayState: Dispatch<SetStateAction<DeviceState>>;
 }) {
-  const setButtonActions = useCallback(
-    (customButtonActions: CustomButtonActions) => {
+  const setMultiButtonConfiguration = useCallback(
+    (buttonConfiguration: MultiButtonConfiguration) => {
       setDisplayState((state) => {
         return {
           ...state,
-          customButtonActions,
+          buttonConfiguration,
         };
       });
     },
     [setDisplayState],
   );
   if (
-    displayState.deviceFeatures.hasCustomButtonModel &&
-    displayState.customButtonActions != null
+    displayState.deviceFeatures.hasButtonConfiguration &&
+    displayState.buttonConfiguration != null
   ) {
     return (
       <ButtonSettings
-        buttonActions={displayState.customButtonActions}
-        setButtonActions={setButtonActions}
+        buttonConfiguration={displayState.buttonConfiguration}
+        setMultiButtonConfiguration={setMultiButtonConfiguration}
       />
     );
   }

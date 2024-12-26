@@ -14,19 +14,19 @@ use crate::devices::standard::packets::parsing::take_bool;
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
-pub struct CustomButtonActions {
-    pub left_single_click: ButtonState,
-    pub left_double_click: ButtonState,
-    pub left_long_press: ButtonState,
-    pub right_single_click: ButtonState,
-    pub right_double_click: ButtonState,
-    pub right_long_press: ButtonState,
+pub struct MultiButtonConfiguration {
+    pub left_single_click: ButtonConfiguration,
+    pub left_double_click: ButtonConfiguration,
+    pub left_long_press: ButtonConfiguration,
+    pub right_single_click: ButtonConfiguration,
+    pub right_double_click: ButtonConfiguration,
+    pub right_long_press: ButtonConfiguration,
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
-pub struct ButtonState {
+pub struct ButtonConfiguration {
     pub action: ButtonAction,
     pub is_enabled: bool,
 }
@@ -34,17 +34,17 @@ pub struct ButtonState {
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
-pub(crate) struct InternalCustomButtonModel {
-    pub left_single_click: NoTwsButtonAction,
-    pub left_double_click: TwsButtonAction,
-    pub left_long_press: TwsButtonAction,
-    pub right_single_click: NoTwsButtonAction,
-    pub right_double_click: TwsButtonAction,
-    pub right_long_press: TwsButtonAction,
+pub(crate) struct InternalMultiButtonConfiguration {
+    pub left_single_click: NoTwsButtonConfiguration,
+    pub left_double_click: TwsButtonConfiguration,
+    pub left_long_press: TwsButtonConfiguration,
+    pub right_single_click: NoTwsButtonConfiguration,
+    pub right_double_click: TwsButtonConfiguration,
+    pub right_long_press: TwsButtonConfiguration,
 }
 
-impl From<InternalCustomButtonModel> for CustomButtonActions {
-    fn from(value: InternalCustomButtonModel) -> Self {
+impl From<InternalMultiButtonConfiguration> for MultiButtonConfiguration {
+    fn from(value: InternalMultiButtonConfiguration) -> Self {
         Self {
             left_single_click: value.left_single_click.into(),
             left_double_click: value.left_double_click.into(),
@@ -56,7 +56,7 @@ impl From<InternalCustomButtonModel> for CustomButtonActions {
     }
 }
 
-impl InternalCustomButtonModel {
+impl InternalMultiButtonConfiguration {
     pub fn bytes(&self) -> Vec<u8> {
         let mut bytes = Vec::with_capacity(12);
         bytes.extend(self.left_double_click.bytes());
@@ -70,16 +70,16 @@ impl InternalCustomButtonModel {
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], InternalCustomButtonModel, E> {
+    ) -> IResult<&'a [u8], InternalMultiButtonConfiguration, E> {
         context("custom button model", |input| {
             map(
                 tuple((
-                    context("left double click", TwsButtonAction::take), // left double click
-                    context("left long press", TwsButtonAction::take),   // left long press
-                    context("right double click", TwsButtonAction::take), // right double click
-                    context("right long press", TwsButtonAction::take),  // right long press
-                    context("left single click", NoTwsButtonAction::take), // left single click
-                    context("right single click", NoTwsButtonAction::take), // right single click
+                    context("left double click", TwsButtonConfiguration::take), // left double click
+                    context("left long press", TwsButtonConfiguration::take),   // left long press
+                    context("right double click", TwsButtonConfiguration::take), // right double click
+                    context("right long press", TwsButtonConfiguration::take),   // right long press
+                    context("left single click", NoTwsButtonConfiguration::take), // left single click
+                    context("right single click", NoTwsButtonConfiguration::take), // right single click
                 )),
                 |(
                     left_double_click,
@@ -89,7 +89,7 @@ impl InternalCustomButtonModel {
                     left_single_press,
                     right_single_press,
                 )| {
-                    InternalCustomButtonModel {
+                    InternalMultiButtonConfiguration {
                         left_double_click,
                         left_long_press,
                         right_double_click,
@@ -106,14 +106,14 @@ impl InternalCustomButtonModel {
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
-pub(crate) struct TwsButtonAction {
+pub(crate) struct TwsButtonConfiguration {
     pub tws_connected_action: ButtonAction,
     pub tws_disconnected_action: ButtonAction,
     pub disconnected_switch: bool,
 }
 
-impl From<TwsButtonAction> for ButtonState {
-    fn from(value: TwsButtonAction) -> Self {
+impl From<TwsButtonConfiguration> for ButtonConfiguration {
+    fn from(value: TwsButtonConfiguration) -> Self {
         Self {
             action: value.active_action(),
             is_enabled: true,
@@ -121,7 +121,7 @@ impl From<TwsButtonAction> for ButtonState {
     }
 }
 
-impl TwsButtonAction {
+impl TwsButtonConfiguration {
     pub fn bytes(&self) -> [u8; 2] {
         [
             self.disconnected_switch.into(),
@@ -132,9 +132,9 @@ impl TwsButtonAction {
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], TwsButtonAction, E> {
+    ) -> IResult<&'a [u8], TwsButtonConfiguration, E> {
         map_opt(pair(take_bool, le_u8), |(switch, num)| {
-            Some(TwsButtonAction {
+            Some(TwsButtonConfiguration {
                 tws_connected_action: ButtonAction::from_repr(num & 0x0F)?,
                 tws_disconnected_action: ButtonAction::from_repr((num & 0xF0) >> 4)?,
                 disconnected_switch: switch,
@@ -163,13 +163,13 @@ impl TwsButtonAction {
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
-pub(crate) struct NoTwsButtonAction {
+pub(crate) struct NoTwsButtonConfiguration {
     pub action: ButtonAction,
     pub is_enabled: bool,
 }
 
-impl From<NoTwsButtonAction> for ButtonState {
-    fn from(value: NoTwsButtonAction) -> Self {
+impl From<NoTwsButtonConfiguration> for ButtonConfiguration {
+    fn from(value: NoTwsButtonConfiguration) -> Self {
         Self {
             action: value.action,
             is_enabled: value.is_enabled,
@@ -177,16 +177,16 @@ impl From<NoTwsButtonAction> for ButtonState {
     }
 }
 
-impl NoTwsButtonAction {
+impl NoTwsButtonConfiguration {
     pub fn bytes(&self) -> [u8; 2] {
         [self.is_enabled.into(), u8::from(self.action) & 0x0f]
     }
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], NoTwsButtonAction, E> {
+    ) -> IResult<&'a [u8], NoTwsButtonConfiguration, E> {
         map_opt(pair(take_bool, le_u8), |(switch, num)| {
-            Some(NoTwsButtonAction {
+            Some(NoTwsButtonConfiguration {
                 action: ButtonAction::from_repr(num)?,
                 is_enabled: switch,
             })

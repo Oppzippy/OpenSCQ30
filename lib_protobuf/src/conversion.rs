@@ -9,13 +9,14 @@ use openscq30_lib::{
             AdaptiveNoiseCanceling as LibAdaptiveNoiseCanceling,
             AmbientSoundMode as LibAmbientSoundMode,
             AmbientSoundModeCycle as LibAmbientSoundModeCycle, BasicHearId as LibBasicHearId,
-            Battery as LibBattery, ButtonAction as LibButtonAction, ButtonState as LibButtonState,
-            CustomButtonActions as LibCustomButtonActions, CustomHearId as LibCustomHearId,
+            Battery as LibBattery, ButtonAction as LibButtonAction,
+            ButtonConfiguration as LibButtonConfiguration, CustomHearId as LibCustomHearId,
             CustomNoiseCanceling as LibCustomNoiseCanceling, DualBattery as LibDualBattery,
             EqualizerConfiguration as LibEqualizerConfiguration,
             FirmwareVersion as LibFirmwareVersion, HearId as LibHearId,
             HearIdMusicType as LibHearIdMusicType, HearIdType as LibHearIdType,
             ManualNoiseCanceling as LibManualNoiseCanceling,
+            MultiButtonConfiguration as LibMultiButtonConfiguration,
             NoiseCancelingMode as LibNoiseCancelingMode,
             NoiseCancelingModeTypeTwo as LibNoiseCancelingModeTypeTwo,
             PresetEqualizerProfile as LibPresetEqualizerProfile, SingleBattery as LibSingleBattery,
@@ -39,7 +40,7 @@ impl From<LibDeviceState> for DeviceState {
             gender: value.gender.map(|gender| gender.0.into()),
             hear_id: value.hear_id.map(Into::into),
             firmware_version: value.firmware_version.map(Into::into),
-            custom_button_actions: value.custom_button_actions.map(Into::into),
+            button_configuration: value.button_configuration.map(Into::into),
             serial_number: value
                 .serial_number
                 .map(|serial_number| serial_number.to_string()),
@@ -57,7 +58,7 @@ impl From<LibDeviceFeatures> for DeviceFeatures {
             num_equalizer_channels: value.num_equalizer_channels as u32,
             num_equalizer_bands: value.num_equalizer_bands as u32,
             has_dynamic_range_compression: value.has_dynamic_range_compression,
-            has_custom_button_model: value.has_custom_button_model,
+            has_button_configuration: value.has_button_configuration,
             has_wear_detection: value.has_wear_detection,
             has_touch_tone: value.has_touch_tone,
             has_auto_power_off: value.has_auto_power_off,
@@ -418,8 +419,8 @@ impl From<StereoVolumeAdjustments> for LibStereoVolumeAdjustments {
     }
 }
 
-impl From<LibCustomButtonActions> for CustomButtonActions {
-    fn from(value: LibCustomButtonActions) -> Self {
+impl From<LibMultiButtonConfiguration> for MultiButtonConfiguration {
+    fn from(value: LibMultiButtonConfiguration) -> Self {
         Self {
             left_single_click: value.left_single_click.into(),
             left_double_click: value.left_double_click.into(),
@@ -431,8 +432,8 @@ impl From<LibCustomButtonActions> for CustomButtonActions {
     }
 }
 
-impl From<LibButtonState> for ButtonState {
-    fn from(value: LibButtonState) -> Self {
+impl From<LibButtonConfiguration> for ButtonConfiguration {
+    fn from(value: LibButtonConfiguration) -> Self {
         Self {
             is_enabled: value.is_enabled,
             action: ButtonAction::from(value.action).into(),
@@ -455,8 +456,8 @@ impl From<LibButtonAction> for ButtonAction {
     }
 }
 
-impl From<CustomButtonActions> for LibCustomButtonActions {
-    fn from(value: CustomButtonActions) -> Self {
+impl From<MultiButtonConfiguration> for LibMultiButtonConfiguration {
+    fn from(value: MultiButtonConfiguration) -> Self {
         Self {
             left_single_click: value.left_single_click.into(),
             left_double_click: value.left_double_click.into(),
@@ -468,8 +469,8 @@ impl From<CustomButtonActions> for LibCustomButtonActions {
     }
 }
 
-impl From<ButtonState> for LibButtonState {
-    fn from(value: ButtonState) -> Self {
+impl From<ButtonConfiguration> for LibButtonConfiguration {
+    fn from(value: ButtonConfiguration) -> Self {
         Self {
             is_enabled: value.is_enabled,
             action: ButtonAction::try_from(value.action).unwrap().into(),

@@ -11,7 +11,7 @@ mod select_custom_equalizer_configuration;
 mod set_ambient_sound_mode;
 mod set_ambient_sound_mode_cycle;
 mod set_ambient_sound_mode_type_two;
-mod set_custom_button_model;
+mod set_button_configuration;
 mod set_custom_noise_canceling;
 mod set_device;
 mod set_equalizer_configuration;
@@ -35,8 +35,8 @@ use macaddr::MacAddr6;
 use openscq30_lib::devices::standard::{
     state::DeviceState,
     structures::{
-        AmbientSoundMode, AmbientSoundModeCycle, CustomButtonActions, CustomNoiseCanceling,
-        EqualizerConfiguration, HearId, ManualNoiseCanceling, NoiseCancelingMode,
+        AmbientSoundMode, AmbientSoundModeCycle, CustomNoiseCanceling, EqualizerConfiguration,
+        HearId, ManualNoiseCanceling, MultiButtonConfiguration, NoiseCancelingMode,
         NoiseCancelingModeTypeTwo, TransparencyMode,
     },
 };
@@ -47,7 +47,7 @@ pub use select_custom_equalizer_configuration::*;
 pub use set_ambient_sound_mode::*;
 pub use set_ambient_sound_mode_cycle::*;
 pub use set_ambient_sound_mode_type_two::*;
-pub use set_custom_button_model::*;
+pub use set_button_configuration::*;
 pub use set_custom_noise_canceling::*;
 pub use set_device::*;
 pub use set_equalizer_configuration::*;
@@ -89,7 +89,7 @@ pub enum Action {
     ActivateQuickPreset(GlibNamedQuickPresetValue),
     DeleteQuickPreset(Arc<str>),
     SetHearId(HearId),
-    SetCustomButtonModel(CustomButtonActions),
+    SetCustomButtonModel(MultiButtonConfiguration),
     SetAmbientSoundModeCycle(AmbientSoundModeCycle),
     ImportCustomEqualizerProfiles {
         profiles: Vec<GlibCustomEqualizerProfile>,

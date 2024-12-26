@@ -7,8 +7,8 @@ use crate::{
     devices::standard::{
         state::DeviceState,
         structures::{
-            AmbientSoundModeCycle, CustomButtonActions, EqualizerConfiguration, HearId, SoundModes,
-            SoundModesTypeTwo,
+            AmbientSoundModeCycle, EqualizerConfiguration, HearId, MultiButtonConfiguration,
+            SoundModes, SoundModesTypeTwo,
         },
     },
 };
@@ -38,8 +38,8 @@ pub trait Device {
     ) -> crate::Result<()>;
 
     async fn set_hear_id(&self, hear_id: HearId) -> crate::Result<()>;
-    async fn set_custom_button_model(
+    async fn set_multi_button_configuration(
         &self,
-        custom_button_model: CustomButtonActions,
+        button_configuration: MultiButtonConfiguration,
     ) -> crate::Result<()>;
 }

@@ -14,7 +14,7 @@ fun DeviceState.Companion.empty(): DeviceState = DeviceState(
         numEqualizerChannels = 0,
         numEqualizerBands = 0,
         hasDynamicRangeCompression = false,
-        hasCustomButtonModel = false,
+        hasButtonConfiguration = false,
         hasWearDetection = false,
         hasTouchTone = false,
         hasAutoPowerOff = false,
@@ -28,7 +28,7 @@ fun DeviceState.Companion.empty(): DeviceState = DeviceState(
     battery = Battery.Single(SingleBattery(false, 0u)),
     ageRange = null,
     gender = null,
-    customButtonModel = null,
+    buttonConfiguration = null,
     hearId = null,
     ambientSoundModeCycle = null,
 )

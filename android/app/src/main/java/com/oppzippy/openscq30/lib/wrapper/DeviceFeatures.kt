@@ -15,7 +15,7 @@ data class DeviceFeatures(
     val numEqualizerChannels: Int,
     val numEqualizerBands: Int,
     val hasDynamicRangeCompression: Boolean,
-    val hasCustomButtonModel: Boolean,
+    val hasButtonConfiguration: Boolean,
     val hasWearDetection: Boolean,
     val hasTouchTone: Boolean,
     val hasAutoPowerOff: Boolean,
@@ -27,7 +27,7 @@ data class DeviceFeatures(
         numEqualizerChannels = this@DeviceFeatures.numEqualizerChannels
         numEqualizerBands = this@DeviceFeatures.numEqualizerBands
         hasDynamicRangeCompression = this@DeviceFeatures.hasDynamicRangeCompression
-        hasCustomButtonModel = this@DeviceFeatures.hasCustomButtonModel
+        hasButtonConfiguration = this@DeviceFeatures.hasButtonConfiguration
         hasWearDetection = this@DeviceFeatures.hasWearDetection
         hasTouchTone = this@DeviceFeatures.hasTouchTone
         hasAutoPowerOff = this@DeviceFeatures.hasAutoPowerOff
@@ -43,7 +43,7 @@ fun ProtobufDeviceFeatures.toKotlin(): DeviceFeatures = DeviceFeatures(
     numEqualizerChannels = numEqualizerChannels,
     numEqualizerBands = numEqualizerBands,
     hasDynamicRangeCompression = hasDynamicRangeCompression,
-    hasCustomButtonModel = hasCustomButtonModel,
+    hasButtonConfiguration = hasButtonConfiguration,
     hasWearDetection = hasWearDetection,
     hasTouchTone = hasTouchTone,
     hasAutoPowerOff = hasAutoPowerOff,

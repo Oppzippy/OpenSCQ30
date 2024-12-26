@@ -1,5 +1,5 @@
 mod ambient_sound_mode_cycle;
-mod custom_button_model;
+mod button_configuration;
 mod equalizer_configuration;
 mod hear_id;
 mod packet_handlers;
@@ -9,7 +9,7 @@ mod sound_modes_type_two;
 use std::{collections::HashMap, sync::Arc};
 
 pub use ambient_sound_mode_cycle::*;
-pub use custom_button_model::*;
+pub use button_configuration::*;
 pub use equalizer_configuration::*;
 pub use hear_id::*;
 use nom::error::VerboseError;
@@ -97,10 +97,10 @@ impl DeviceImplementation for StandardImplementation {
         set_hear_id(state, hear_id)
     }
 
-    fn set_custom_button_actions(
+    fn set_multi_button_configuration(
         &self,
         _state: DeviceState,
-        _custom_button_model: CustomButtonActions,
+        _button_configuration: MultiButtonConfiguration,
     ) -> crate::Result<crate::soundcore_device::device::soundcore_command::CommandResponse> {
         Err(crate::Error::FeatureNotSupported {
             feature_name: "custom button actions",

@@ -4,8 +4,8 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.oppzippy.openscq30.lib.wrapper.ButtonAction
-import com.oppzippy.openscq30.lib.wrapper.ButtonState
-import com.oppzippy.openscq30.lib.wrapper.CustomButtonActions
+import com.oppzippy.openscq30.lib.wrapper.ButtonConfiguration
+import com.oppzippy.openscq30.lib.wrapper.MultiButtonConfiguration
 import com.oppzippy.openscq30.ui.buttonactions.ButtonActionSelection
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -29,17 +29,17 @@ class DeviceSettingsButtonActionsTest {
 
     @Test
     fun itWorks() {
-        var actions = CustomButtonActions(
-            leftSingleClick = ButtonState(true, ButtonAction.NextSong),
-            leftDoubleClick = ButtonState(false, ButtonAction.NextSong),
-            leftLongPress = ButtonState(false, ButtonAction.NextSong),
-            rightSingleClick = ButtonState(false, ButtonAction.NextSong),
-            rightDoubleClick = ButtonState(false, ButtonAction.NextSong),
-            rightLongPress = ButtonState(false, ButtonAction.NextSong),
+        var actions = MultiButtonConfiguration(
+            leftSingleClick = ButtonConfiguration(true, ButtonAction.NextSong),
+            leftDoubleClick = ButtonConfiguration(false, ButtonAction.NextSong),
+            leftLongPress = ButtonConfiguration(false, ButtonAction.NextSong),
+            rightSingleClick = ButtonConfiguration(false, ButtonAction.NextSong),
+            rightDoubleClick = ButtonConfiguration(false, ButtonAction.NextSong),
+            rightLongPress = ButtonConfiguration(false, ButtonAction.NextSong),
         )
         composeRule.setContent {
             ButtonActionSelection(
-                buttonActions = actions,
+                buttonConfiguration = actions,
                 onChange = { actions = it },
             )
         }
@@ -49,13 +49,13 @@ class DeviceSettingsButtonActionsTest {
         composeRule.onNodeWithText(composeRule.activity.getString(ButtonAction.PreviousSong.toStringResource()))
             .performClick()
         Assert.assertEquals(
-            CustomButtonActions(
-                leftSingleClick = ButtonState(true, ButtonAction.PreviousSong),
-                leftDoubleClick = ButtonState(false, ButtonAction.NextSong),
-                leftLongPress = ButtonState(false, ButtonAction.NextSong),
-                rightSingleClick = ButtonState(false, ButtonAction.NextSong),
-                rightDoubleClick = ButtonState(false, ButtonAction.NextSong),
-                rightLongPress = ButtonState(false, ButtonAction.NextSong),
+            MultiButtonConfiguration(
+                leftSingleClick = ButtonConfiguration(true, ButtonAction.PreviousSong),
+                leftDoubleClick = ButtonConfiguration(false, ButtonAction.NextSong),
+                leftLongPress = ButtonConfiguration(false, ButtonAction.NextSong),
+                rightSingleClick = ButtonConfiguration(false, ButtonAction.NextSong),
+                rightDoubleClick = ButtonConfiguration(false, ButtonAction.NextSong),
+                rightLongPress = ButtonConfiguration(false, ButtonAction.NextSong),
             ),
             actions,
         )

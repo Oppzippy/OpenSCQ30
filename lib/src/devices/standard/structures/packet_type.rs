@@ -17,5 +17,5 @@ pub const CHINESE_VOICE_PROMPT_STATE_UPDATE: Command =
 pub const LDAC_STATE_UPDATE: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x7F]);
 pub const SET_AMBIENT_SOUND_MODE_CYCLE_OK: Command =
     Command::new([0x09, 0xFF, 0x00, 0x00, 0x01, 0x06, 0x82]);
-pub const SET_CUSTOM_BUTTON_MODEL_OK: Command =
+pub const SET_MULTI_BUTTON_CONFIGURATION_OK: Command =
     Command::new([0x09, 0xFF, 0x00, 0x00, 0x01, 0x04, 0x84]);

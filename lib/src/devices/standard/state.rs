@@ -12,7 +12,9 @@ use crate::{
     },
 };
 
-use super::structures::{AmbientSoundModeCycle, CustomButtonActions, SoundModesTypeTwo, TwsStatus};
+use super::structures::{
+    AmbientSoundModeCycle, MultiButtonConfiguration, SoundModesTypeTwo, TwsStatus,
+};
 
 #[derive(Debug, PartialEq, Clone, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -27,7 +29,7 @@ pub struct DeviceState {
     pub age_range: Option<AgeRange>,
     pub gender: Option<Gender>,
     pub hear_id: Option<HearId>,
-    pub custom_button_actions: Option<CustomButtonActions>,
+    pub button_configuration: Option<MultiButtonConfiguration>,
     pub firmware_version: Option<FirmwareVersion>,
     pub serial_number: Option<SerialNumber>,
     pub ambient_sound_mode_cycle: Option<AmbientSoundModeCycle>,
@@ -45,7 +47,7 @@ impl From<StateUpdatePacket> for DeviceState {
             age_range: packet.age_range,
             gender: packet.gender,
             hear_id: packet.hear_id,
-            custom_button_actions: packet.custom_button_model,
+            button_configuration: packet.button_configuration,
             firmware_version: packet.firmware_version,
             serial_number: packet.serial_number.clone(),
             ambient_sound_mode_cycle: packet.ambient_sound_mode_cycle,

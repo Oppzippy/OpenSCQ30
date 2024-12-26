@@ -25,9 +25,9 @@ import androidx.navigation.toRoute
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
-import com.oppzippy.openscq30.lib.wrapper.CustomButtonActions
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.ManualNoiseCanceling
+import com.oppzippy.openscq30.lib.wrapper.MultiButtonConfiguration
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeType
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeTypeTwo
@@ -65,7 +65,7 @@ fun DeviceSettings(
 
     onAmbientSoundModeCycleChange: (ambientSoundMode: AmbientSoundModeCycle) -> Unit = {},
     onEqualizerConfigurationChange: (equalizerConfiguration: EqualizerConfiguration) -> Unit = {},
-    onCustomButtonModelChange: (CustomButtonActions) -> Unit = {},
+    onButtonConfigurationChange: (MultiButtonConfiguration) -> Unit = {},
 ) {
     val navController = rememberNavController()
     val listedScreens = ArrayList<ScreenInfo>()
@@ -79,7 +79,7 @@ fun DeviceSettings(
         listedScreens.add(Screen.Equalizer.screenInfo)
     }
     listedScreens.add(Screen.QuickPresets.screenInfo)
-    if (uiState.deviceState.deviceFeatures.hasCustomButtonModel) {
+    if (uiState.deviceState.deviceFeatures.hasButtonConfiguration) {
         listedScreens.add(Screen.ButtonActions.screenInfo)
     }
     listedScreens.add(Screen.DeviceInfo.screenInfo)
@@ -198,12 +198,12 @@ fun DeviceSettings(
                     deviceBleServiceUuid = uiState.deviceBleServiceUuid,
                 )
             }
-            uiState.deviceState.customButtonModel?.let { buttonModel ->
+            uiState.deviceState.buttonConfiguration?.let { buttonConfiguration ->
                 composable<Screen.ButtonActions> {
                     ButtonActionSelection(
-                        buttonActions = buttonModel,
+                        buttonConfiguration = buttonConfiguration,
                         onChange = {
-                            onCustomButtonModelChange(it)
+                            onButtonConfigurationChange(it)
                         },
                     )
                 }

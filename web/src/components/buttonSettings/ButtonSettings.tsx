@@ -10,20 +10,20 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import {
   ButtonAction,
-  ButtonState,
-  CustomButtonActions,
+  ButtonConfiguration,
+  MultiButtonConfiguration,
 } from "../../libTypes/DeviceState";
 
 export const ButtonSettings = React.memo(function ({
-  buttonActions,
-  setButtonActions,
+  buttonConfiguration,
+  setMultiButtonConfiguration,
 }: {
-  buttonActions: CustomButtonActions;
-  setButtonActions: (buttonActions: CustomButtonActions) => void;
+  buttonConfiguration: MultiButtonConfiguration;
+  setMultiButtonConfiguration: (buttons: MultiButtonConfiguration) => void;
 }) {
   const { t } = useTranslation();
   const buttons: {
-    key: keyof CustomButtonActions;
+    key: keyof MultiButtonConfiguration;
     label: string;
   }[] = [
     { key: "leftSingleClick", label: t("buttons.leftSingleClick") },
@@ -45,11 +45,11 @@ export const ButtonSettings = React.memo(function ({
             key={key}
             buttonKey={key}
             label={label}
-            action={getButtonAction(buttonActions[key])}
+            action={getButtonAction(buttonConfiguration[key])}
             setAction={(action: ButtonAction | "disabled") => {
-              setButtonActions({
-                ...buttonActions,
-                [key]: setButtonAction(buttonActions[key], action),
+              setMultiButtonConfiguration({
+                ...buttonConfiguration,
+                [key]: setButtonAction(buttonConfiguration[key], action),
               });
             }}
           />
@@ -60,14 +60,14 @@ export const ButtonSettings = React.memo(function ({
 });
 
 function getButtonAction(
-  button: CustomButtonActions[keyof CustomButtonActions],
+  button: MultiButtonConfiguration[keyof MultiButtonConfiguration],
 ): ButtonAction | "disabled" {
   return button.isEnabled ? button.action : "disabled";
 }
 function setButtonAction(
-  button: ButtonState,
+  button: ButtonConfiguration,
   action: ButtonAction | "disabled",
-): ButtonState {
+): ButtonConfiguration {
   if (action == "disabled") {
     return {
       isEnabled: false,
