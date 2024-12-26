@@ -204,7 +204,7 @@ mod tests {
         assert_eq!(
             TwsStatus {
                 is_connected: true,
-                host_device: HostDevice::Left,
+                host_device: HostDevice::Right,
             },
             packet.tws_status
         );

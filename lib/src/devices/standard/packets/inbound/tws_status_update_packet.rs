@@ -52,13 +52,13 @@ mod tests {
     #[test]
     fn it_parses_a_manually_crafted_packet() {
         let input: &[u8] = &[
-            0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x02, 0x0c, 0x00, 0x02, 0x01, 0x1b,
+            0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x02, 0x0c, 0x00, 0x00, 0x01, 0x19,
         ];
         let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         let packet = TwsStatusUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
-        assert_eq!(HostDevice::Right, packet.host_device);
+        assert_eq!(HostDevice::Left, packet.host_device);
         assert_eq!(true, packet.tws_status);
     }
 }
