@@ -6,9 +6,7 @@ use nom::{
     IResult,
 };
 
-use crate::devices::standard::structures::{
-    ButtonAction, CustomButtonModel, NoTwsButtonAction, TwsButtonAction,
-};
+use crate::devices::standard::structures::{ButtonAction, ButtonState, CustomButtonActions};
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct A3936CustomButtonModel {
@@ -18,32 +16,6 @@ pub struct A3936CustomButtonModel {
     pub right_double_click: A3936TwsButtonAction,
     pub left_long_press: A3936TwsButtonAction,
     pub right_long_press: A3936TwsButtonAction,
-}
-
-impl From<A3936CustomButtonModel> for CustomButtonModel {
-    fn from(value: A3936CustomButtonModel) -> Self {
-        Self {
-            left_single_click: value.left_single_click.into(),
-            right_single_click: value.right_single_click.into(),
-            left_double_click: value.left_double_click.into(),
-            right_double_click: value.right_double_click.into(),
-            left_long_press: value.left_long_press.into(),
-            right_long_press: value.right_long_press.into(),
-        }
-    }
-}
-
-impl From<CustomButtonModel> for A3936CustomButtonModel {
-    fn from(value: CustomButtonModel) -> Self {
-        Self {
-            left_single_click: value.left_single_click.into(),
-            right_single_click: value.right_single_click.into(),
-            left_double_click: value.left_double_click.into(),
-            right_double_click: value.right_double_click.into(),
-            left_long_press: value.left_long_press.into(),
-            right_long_press: value.right_long_press.into(),
-        }
-    }
 }
 
 impl A3936CustomButtonModel {
@@ -91,6 +63,17 @@ impl A3936CustomButtonModel {
             )(input)
         })(input)
     }
+
+    pub fn into_custom_button_actions(&self, is_tws_connected: bool) -> CustomButtonActions {
+        CustomButtonActions {
+            left_single_click: self.left_single_click.into_button_state(is_tws_connected),
+            right_single_click: self.right_single_click.into_button_state(is_tws_connected),
+            left_double_click: self.left_double_click.into_button_state(is_tws_connected),
+            right_double_click: self.right_double_click.into_button_state(is_tws_connected),
+            left_long_press: self.left_long_press.into_button_state(is_tws_connected),
+            right_long_press: self.right_long_press.into_button_state(is_tws_connected),
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
@@ -99,47 +82,6 @@ pub struct A3936TwsButtonAction {
     pub tws_disconnected_action: ButtonAction,
     pub tws_connected_is_enabled: bool,
     pub tws_disconnected_is_enabled: bool,
-}
-
-impl From<A3936TwsButtonAction> for TwsButtonAction {
-    fn from(value: A3936TwsButtonAction) -> Self {
-        Self {
-            tws_connected_action: value.tws_connected_action,
-            tws_disconnected_action: value.tws_disconnected_action,
-            is_enabled: value.tws_disconnected_is_enabled && value.tws_connected_is_enabled,
-        }
-    }
-}
-
-impl From<TwsButtonAction> for A3936TwsButtonAction {
-    fn from(value: TwsButtonAction) -> Self {
-        Self {
-            tws_connected_action: value.tws_connected_action,
-            tws_disconnected_action: value.tws_disconnected_action,
-            tws_connected_is_enabled: value.is_enabled,
-            tws_disconnected_is_enabled: value.is_enabled,
-        }
-    }
-}
-
-impl From<A3936TwsButtonAction> for NoTwsButtonAction {
-    fn from(value: A3936TwsButtonAction) -> Self {
-        Self {
-            action: value.tws_connected_action,
-            is_enabled: value.tws_connected_is_enabled && value.tws_disconnected_is_enabled,
-        }
-    }
-}
-
-impl From<NoTwsButtonAction> for A3936TwsButtonAction {
-    fn from(value: NoTwsButtonAction) -> Self {
-        Self {
-            tws_connected_action: value.action,
-            tws_disconnected_action: value.action,
-            tws_connected_is_enabled: value.is_enabled,
-            tws_disconnected_is_enabled: value.is_enabled,
-        }
-    }
 }
 
 impl A3936TwsButtonAction {
@@ -169,5 +111,44 @@ impl A3936TwsButtonAction {
                     .unwrap_or_else(log_and_return_default),
             })
         })(input)
+    }
+
+    pub fn into_button_state(&self, is_tws_connected: bool) -> ButtonState {
+        ButtonState {
+            action: self.active_action(is_tws_connected),
+            is_enabled: self.is_enabled(is_tws_connected),
+        }
+    }
+
+    pub fn active_action(&self, is_tws_connected: bool) -> ButtonAction {
+        if is_tws_connected {
+            self.tws_connected_action
+        } else {
+            self.tws_disconnected_action
+        }
+    }
+
+    pub fn set_action(&mut self, action: ButtonAction, is_tws_connected: bool) {
+        if is_tws_connected {
+            self.tws_connected_action = action;
+        } else {
+            self.tws_disconnected_action = action;
+        }
+    }
+
+    pub fn is_enabled(&self, is_tws_connected: bool) -> bool {
+        if is_tws_connected {
+            self.tws_connected_is_enabled
+        } else {
+            self.tws_disconnected_is_enabled
+        }
+    }
+
+    pub fn set_enabled(&mut self, is_enabled: bool, is_tws_connected: bool) {
+        if is_tws_connected {
+            self.tws_connected_is_enabled = is_enabled;
+        } else {
+            self.tws_disconnected_is_enabled = is_enabled;
+        }
     }
 }

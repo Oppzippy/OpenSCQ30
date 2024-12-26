@@ -23,7 +23,7 @@ pub fn state_update_handler(input: &[u8], state: DeviceState) -> DeviceState {
         equalizer_configuration: state.equalizer_configuration.to_owned(),
         age_range: packet.age_range.or(state.age_range),
         gender: packet.gender.or(state.gender),
-        custom_button_model: packet.custom_button_model.or(state.custom_button_model),
+        custom_button_actions: packet.custom_button_model.or(state.custom_button_actions),
         hear_id: packet.hear_id.to_owned().or(state.hear_id.to_owned()),
         firmware_version: packet
             .firmware_version

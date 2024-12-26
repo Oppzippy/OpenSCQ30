@@ -2,13 +2,12 @@ import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ButtonSettings } from "../../../src/components/buttonSettings/ButtonSettings";
-import { CustomButtonModel } from "../../../src/libTypes/DeviceState";
+import { CustomButtonActions } from "../../../src/libTypes/DeviceState";
 
-const testButtonModel: Readonly<CustomButtonModel> = {
+const testButtonActions: Readonly<CustomButtonActions> = {
   leftDoubleClick: {
     isEnabled: false,
-    twsConnectedAction: "volumeUp",
-    twsDisconnectedAction: "volumeUp",
+    action: "volumeUp",
   },
   leftSingleClick: {
     action: "ambientSoundMode",
@@ -16,8 +15,7 @@ const testButtonModel: Readonly<CustomButtonModel> = {
   },
   leftLongPress: {
     isEnabled: false,
-    twsConnectedAction: "volumeDown",
-    twsDisconnectedAction: "volumeDown",
+    action: "volumeDown",
   },
   rightSingleClick: {
     action: "nextSong",
@@ -25,13 +23,11 @@ const testButtonModel: Readonly<CustomButtonModel> = {
   },
   rightDoubleClick: {
     isEnabled: true,
-    twsConnectedAction: "voiceAssistant",
-    twsDisconnectedAction: "voiceAssistant",
+    action: "voiceAssistant",
   },
   rightLongPress: {
     isEnabled: true,
-    twsConnectedAction: "previousSong",
-    twsDisconnectedAction: "previousSong",
+    action: "previousSong",
   },
 };
 
@@ -41,36 +37,14 @@ describe("Button Settings", () => {
     user = userEvent.setup();
   });
 
-  it("should change non tws button actions", async () => {
-    const setButtonModel = vi.fn();
+  it("should change button actions", async () => {
+    const setButtonActions = vi.fn();
     const renderResult = render(
       <ButtonSettings
-        buttonModel={{
-          ...testButtonModel,
+        buttonActions={{
+          ...testButtonActions,
         }}
-        setButtonModel={setButtonModel}
-      />,
-    );
-    await user.click(renderResult.getByLabelText("buttons.rightSingleClick"));
-    await user.click(
-      renderResult.getByRole("option", {
-        name: "buttonActions.previousSong",
-      }),
-    );
-    expect(setButtonModel).toHaveBeenCalledWith({
-      ...testButtonModel,
-      rightSingleClick: { isEnabled: true, action: "previousSong" },
-    });
-  });
-
-  it("should change both tws button actions", async () => {
-    const setButtonModel = vi.fn();
-    const renderResult = render(
-      <ButtonSettings
-        buttonModel={{
-          ...testButtonModel,
-        }}
-        setButtonModel={setButtonModel}
+        setButtonActions={setButtonActions}
       />,
     );
     await user.click(renderResult.getByLabelText("buttons.rightDoubleClick"));
@@ -79,24 +53,23 @@ describe("Button Settings", () => {
         name: "buttonActions.previousSong",
       }),
     );
-    expect(setButtonModel).toHaveBeenCalledWith({
-      ...testButtonModel,
+    expect(setButtonActions).toHaveBeenCalledWith({
+      ...testButtonActions,
       rightDoubleClick: {
         isEnabled: true,
-        twsConnectedAction: "previousSong",
-        twsDisconnectedAction: "previousSong",
+        action: "previousSong",
       },
     });
   });
 
   it("should set isEnabled to true when selecting a value", async () => {
-    const setButtonModel = vi.fn();
+    const setButtonActions = vi.fn();
     const renderResult = render(
       <ButtonSettings
-        buttonModel={{
-          ...testButtonModel,
+        buttonActions={{
+          ...testButtonActions,
         }}
-        setButtonModel={setButtonModel}
+        setButtonActions={setButtonActions}
       />,
     );
     await user.click(renderResult.getByLabelText("buttons.leftSingleClick"));
@@ -105,8 +78,8 @@ describe("Button Settings", () => {
         name: "buttonActions.previousSong",
       }),
     );
-    expect(setButtonModel).toHaveBeenCalledWith({
-      ...testButtonModel,
+    expect(setButtonActions).toHaveBeenCalledWith({
+      ...testButtonActions,
       leftSingleClick: {
         isEnabled: true,
         action: "previousSong",

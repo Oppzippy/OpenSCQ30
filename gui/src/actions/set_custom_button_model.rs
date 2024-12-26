@@ -1,6 +1,6 @@
 use openscq30_lib::{
     api::device::{Device, DeviceRegistry},
-    devices::standard::structures::CustomButtonModel,
+    devices::standard::structures::CustomButtonActions,
 };
 
 use super::State;
@@ -8,7 +8,7 @@ use super::State;
 #[tracing::instrument(level = "trace", skip(state))]
 pub async fn set_custom_button_model<T>(
     state: &State<T>,
-    custom_button_model: CustomButtonModel,
+    custom_button_model: CustomButtonActions,
 ) -> anyhow::Result<()>
 where
     T: DeviceRegistry + 'static,

@@ -1,29 +1,28 @@
 package com.oppzippy.openscq30.lib.wrapper
 
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.lib.protobuf.customButtonModel
-import com.oppzippy.openscq30.lib.protobuf.noTwsButtonAction
-import com.oppzippy.openscq30.lib.protobuf.twsButtonAction
+import com.oppzippy.openscq30.lib.protobuf.buttonState
+import com.oppzippy.openscq30.lib.protobuf.customButtonActions
 
-data class CustomButtonModel(
-    val leftSingleClick: NoTwsButtonAction,
-    val leftDoubleClick: TwsButtonAction,
-    val leftLongPress: TwsButtonAction,
-    val rightSingleClick: NoTwsButtonAction,
-    val rightDoubleClick: TwsButtonAction,
-    val rightLongPress: TwsButtonAction,
+data class CustomButtonActions(
+    val leftSingleClick: ButtonState,
+    val leftDoubleClick: ButtonState,
+    val leftLongPress: ButtonState,
+    val rightSingleClick: ButtonState,
+    val rightDoubleClick: ButtonState,
+    val rightLongPress: ButtonState,
 ) {
-    fun toProtobuf(): com.oppzippy.openscq30.lib.protobuf.CustomButtonModel = customButtonModel {
-        leftSingleClick = this@CustomButtonModel.leftSingleClick.toProtobuf()
-        leftDoubleClick = this@CustomButtonModel.leftDoubleClick.toProtobuf()
-        leftLongPress = this@CustomButtonModel.leftLongPress.toProtobuf()
-        rightSingleClick = this@CustomButtonModel.rightSingleClick.toProtobuf()
-        rightDoubleClick = this@CustomButtonModel.rightDoubleClick.toProtobuf()
-        rightLongPress = this@CustomButtonModel.rightLongPress.toProtobuf()
+    fun toProtobuf(): com.oppzippy.openscq30.lib.protobuf.CustomButtonActions = customButtonActions {
+        leftSingleClick = this@CustomButtonActions.leftSingleClick.toProtobuf()
+        leftDoubleClick = this@CustomButtonActions.leftDoubleClick.toProtobuf()
+        leftLongPress = this@CustomButtonActions.leftLongPress.toProtobuf()
+        rightSingleClick = this@CustomButtonActions.rightSingleClick.toProtobuf()
+        rightDoubleClick = this@CustomButtonActions.rightDoubleClick.toProtobuf()
+        rightLongPress = this@CustomButtonActions.rightLongPress.toProtobuf()
     }
 }
 
-fun com.oppzippy.openscq30.lib.protobuf.CustomButtonModel.toKotlin(): CustomButtonModel = CustomButtonModel(
+fun com.oppzippy.openscq30.lib.protobuf.CustomButtonActions.toKotlin(): CustomButtonActions = CustomButtonActions(
     leftSingleClick = leftSingleClick.toKotlin(),
     leftDoubleClick = leftDoubleClick.toKotlin(),
     leftLongPress = leftLongPress.toKotlin(),
@@ -32,34 +31,10 @@ fun com.oppzippy.openscq30.lib.protobuf.CustomButtonModel.toKotlin(): CustomButt
     rightLongPress = rightLongPress.toKotlin(),
 )
 
-data class TwsButtonAction(
-    val isEnabled: Boolean,
-    val twsConnectedAction: ButtonAction,
-    val twsDisconnectedAction: ButtonAction,
-) {
-    fun toProtobuf(): com.oppzippy.openscq30.lib.protobuf.TwsButtonAction = twsButtonAction {
-        isEnabled = this@TwsButtonAction.isEnabled
-        twsConnectedAction = this@TwsButtonAction.twsDisconnectedAction.toProtobuf()
-        twsDisconnectedAction = this@TwsButtonAction.twsDisconnectedAction.toProtobuf()
-    }
-
-    fun connectedActionOrNull(): ButtonAction? = if (isEnabled) {
-        twsConnectedAction
-    } else {
-        null
-    }
-}
-
-fun com.oppzippy.openscq30.lib.protobuf.TwsButtonAction.toKotlin(): TwsButtonAction = TwsButtonAction(
-    isEnabled = isEnabled,
-    twsConnectedAction = twsConnectedAction.toKotlin(),
-    twsDisconnectedAction = twsDisconnectedAction.toKotlin(),
-)
-
-data class NoTwsButtonAction(val isEnabled: Boolean, val action: ButtonAction) {
-    fun toProtobuf(): com.oppzippy.openscq30.lib.protobuf.NoTwsButtonAction = noTwsButtonAction {
-        isEnabled = this@NoTwsButtonAction.isEnabled
-        action = this@NoTwsButtonAction.action.toProtobuf()
+data class ButtonState(val isEnabled: Boolean, val action: ButtonAction) {
+    fun toProtobuf(): com.oppzippy.openscq30.lib.protobuf.ButtonState = buttonState {
+        isEnabled = this@ButtonState.isEnabled
+        action = this@ButtonState.action.toProtobuf()
     }
 
     fun actionOrNull(): ButtonAction? = if (isEnabled) {
@@ -69,8 +44,7 @@ data class NoTwsButtonAction(val isEnabled: Boolean, val action: ButtonAction) {
     }
 }
 
-fun com.oppzippy.openscq30.lib.protobuf.NoTwsButtonAction.toKotlin(): NoTwsButtonAction =
-    NoTwsButtonAction(isEnabled, action.toKotlin())
+fun com.oppzippy.openscq30.lib.protobuf.ButtonState.toKotlin(): ButtonState = ButtonState(isEnabled, action.toKotlin())
 
 enum class ButtonAction {
     VolumeUp,

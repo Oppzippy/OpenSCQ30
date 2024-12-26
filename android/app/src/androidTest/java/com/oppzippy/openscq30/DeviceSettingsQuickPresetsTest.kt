@@ -235,7 +235,7 @@ class DeviceSettingsQuickPresetsTest {
         composeRule.setContent {
             QuickPresetScreen(deviceFeatures, deviceUuid)
         }
-        composeRule.onNode(equalizer).performClick()
+        composeRule.onNode(equalizer, useUnmergedTree = true).performClick()
 
         // Select a preset profile
         composeRule.onNode(presetProfile).performClick()

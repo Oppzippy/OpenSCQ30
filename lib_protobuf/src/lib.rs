@@ -1,7 +1,7 @@
 use openscq30_lib::devices::standard::{
     state::DeviceState,
     structures::{
-        AmbientSoundModeCycle, CustomButtonModel, EqualizerConfiguration, HearId,
+        AmbientSoundModeCycle, CustomButtonActions, EqualizerConfiguration, HearId,
         PresetEqualizerProfile, SoundModes, SoundModesTypeTwo,
     },
 };
@@ -54,8 +54,10 @@ pub fn deserialize_hear_id(protobuf: &[u8]) -> Result<HearId, DecodeError> {
     protobuf::HearId::decode(protobuf).map(HearId::from)
 }
 
-pub fn deserialize_custom_button_model(protobuf: &[u8]) -> Result<CustomButtonModel, DecodeError> {
-    protobuf::CustomButtonModel::decode(protobuf).map(CustomButtonModel::from)
+pub fn deserialize_custom_button_model(
+    protobuf: &[u8],
+) -> Result<CustomButtonActions, DecodeError> {
+    protobuf::CustomButtonActions::decode(protobuf).map(CustomButtonActions::from)
 }
 
 pub fn deserialize_preset_equalizer_profile(

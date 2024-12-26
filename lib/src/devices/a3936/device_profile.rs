@@ -1,4 +1,7 @@
-use std::{collections::HashMap, sync::Arc};
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
 
 use nom::error::VerboseError;
 
@@ -19,7 +22,10 @@ use crate::{
     },
 };
 
-use super::packets::{A3936SetCustomButtonModelPacket, A3936StateUpdatePacket};
+use super::{
+    packets::{A3936SetCustomButtonModelPacket, A3936StateUpdatePacket},
+    structures::{A3936CustomButtonModel, A3936TwsButtonAction},
+};
 
 pub(crate) const A3936_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     features: DeviceFeatures {
@@ -40,10 +46,11 @@ pub(crate) const A3936_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
 };
 
 #[derive(Debug, Default)]
-pub struct A3936Implementation {
+struct A3936Implementation {
     // The official app only displays 8 bands, so I have no idea what bands 9 and 10 do. We'll just keep track
     // of their initial value and resend that.
     extra_bands: Arc<TwoExtraEqBands>,
+    buttons: Arc<A3936CustomButtonModelImplementation>,
 }
 
 impl DeviceImplementation for A3936Implementation {
@@ -51,6 +58,7 @@ impl DeviceImplementation for A3936Implementation {
         &self,
     ) -> HashMap<Command, Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>> {
         let extra_bands = self.extra_bands.to_owned();
+        let buttons = self.buttons.to_owned();
         let mut handlers = standard::implementation::packet_handlers();
 
         handlers.insert(
@@ -65,6 +73,7 @@ impl DeviceImplementation for A3936Implementation {
                     }
                 };
                 extra_bands.set_values(packet.extra_bands);
+                buttons.set_internal_data(packet.custom_button_model);
 
                 StateUpdatePacket::from(packet).into()
             }),
@@ -143,21 +152,26 @@ impl DeviceImplementation for A3936Implementation {
         standard::implementation::set_hear_id(state, hear_id)
     }
 
-    fn set_custom_button_model(
+    fn set_custom_button_actions(
         &self,
         state: DeviceState,
-        custom_button_model: CustomButtonModel,
+        custom_button_model: CustomButtonActions,
     ) -> crate::Result<CommandResponse> {
         if !state.device_features.has_custom_button_model {
             return Err(crate::Error::FeatureNotSupported {
                 feature_name: "custom button model",
             });
         }
+        let Some(tws_status) = state.tws_status else {
+            return Err(crate::Error::MissingData { name: "tws status" });
+        };
 
         let prev_custom_button_model =
-            state.custom_button_model.ok_or(crate::Error::MissingData {
-                name: "custom button model",
-            })?;
+            state
+                .custom_button_actions
+                .ok_or(crate::Error::MissingData {
+                    name: "custom button model",
+                })?;
         if custom_button_model == prev_custom_button_model {
             return Ok(CommandResponse {
                 packets: Vec::new(),
@@ -165,11 +179,14 @@ impl DeviceImplementation for A3936Implementation {
             });
         }
 
-        let packet = A3936SetCustomButtonModelPacket::new(custom_button_model.into());
+        let packet = A3936SetCustomButtonModelPacket::new(
+            self.buttons
+                .set_custom_button_model(&tws_status, custom_button_model),
+        );
         Ok(CommandResponse {
             packets: vec![packet.into()],
             new_state: DeviceState {
-                custom_button_model: Some(custom_button_model),
+                custom_button_actions: Some(custom_button_model),
                 ..state
             },
         })
@@ -181,5 +198,47 @@ impl DeviceImplementation for A3936Implementation {
         cycle: AmbientSoundModeCycle,
     ) -> crate::Result<CommandResponse> {
         standard::implementation::set_ambient_sound_mode_cycle(state, cycle)
+    }
+}
+
+#[derive(Debug, Default)]
+pub struct A3936CustomButtonModelImplementation {
+    data: Mutex<Option<A3936CustomButtonModel>>,
+}
+
+impl A3936CustomButtonModelImplementation {
+    pub fn set_custom_button_model(
+        &self,
+        tws_status: &TwsStatus,
+        actions: CustomButtonActions,
+    ) -> A3936CustomButtonModel {
+        let mut model = self
+            .data
+            .lock()
+            .unwrap()
+            .expect("internal data should be set during initialization");
+
+        let is_tws_connected = tws_status.is_connected;
+        [
+            (&mut model.left_single_click, actions.left_single_click),
+            (&mut model.left_double_click, actions.left_double_click),
+            (&mut model.left_long_press, actions.left_long_press),
+            (&mut model.right_single_click, actions.left_single_click),
+            (&mut model.right_double_click, actions.left_double_click),
+            (&mut model.right_long_press, actions.left_long_press),
+        ]
+        .into_iter()
+        .for_each(|(m, state)| Self::set_button(m, state, is_tws_connected));
+
+        model.clone()
+    }
+
+    fn set_button(button: &mut A3936TwsButtonAction, state: ButtonState, is_tws_connected: bool) {
+        button.set_action(state.action, is_tws_connected);
+        button.set_enabled(state.is_enabled, is_tws_connected);
+    }
+
+    pub fn set_internal_data(&self, data: A3936CustomButtonModel) {
+        *self.data.lock().unwrap() = Some(data);
     }
 }

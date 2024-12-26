@@ -25,7 +25,7 @@ import androidx.navigation.toRoute
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
-import com.oppzippy.openscq30.lib.wrapper.CustomButtonModel
+import com.oppzippy.openscq30.lib.wrapper.CustomButtonActions
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.ManualNoiseCanceling
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
@@ -34,7 +34,6 @@ import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeTypeTwo
 import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
 import com.oppzippy.openscq30.lib.wrapper.TransparencyModeType
 import com.oppzippy.openscq30.ui.buttonactions.ButtonActionSelection
-import com.oppzippy.openscq30.ui.buttonactions.ButtonActions
 import com.oppzippy.openscq30.ui.deviceinfo.DeviceInfoScreen
 import com.oppzippy.openscq30.ui.devicesettings.Screen
 import com.oppzippy.openscq30.ui.devicesettings.ScreenInfo
@@ -66,7 +65,7 @@ fun DeviceSettings(
 
     onAmbientSoundModeCycleChange: (ambientSoundMode: AmbientSoundModeCycle) -> Unit = {},
     onEqualizerConfigurationChange: (equalizerConfiguration: EqualizerConfiguration) -> Unit = {},
-    onCustomButtonModelChange: (CustomButtonModel) -> Unit = {},
+    onCustomButtonModelChange: (CustomButtonActions) -> Unit = {},
 ) {
     val navController = rememberNavController()
     val listedScreens = ArrayList<ScreenInfo>()
@@ -202,16 +201,9 @@ fun DeviceSettings(
             uiState.deviceState.customButtonModel?.let { buttonModel ->
                 composable<Screen.ButtonActions> {
                     ButtonActionSelection(
-                        buttonActions = ButtonActions(
-                            buttonModel.leftSingleClick.actionOrNull(),
-                            buttonModel.leftDoubleClick.connectedActionOrNull(),
-                            buttonModel.leftLongPress.connectedActionOrNull(),
-                            buttonModel.rightSingleClick.actionOrNull(),
-                            buttonModel.rightDoubleClick.connectedActionOrNull(),
-                            buttonModel.rightLongPress.connectedActionOrNull(),
-                        ),
+                        buttonActions = buttonModel,
                         onChange = {
-                            onCustomButtonModelChange(it.toCustomButtonModel(buttonModel))
+                            onCustomButtonModelChange(it)
                         },
                     )
                 }

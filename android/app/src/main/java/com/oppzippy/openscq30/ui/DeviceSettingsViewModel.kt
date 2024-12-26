@@ -9,7 +9,7 @@ import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
 import com.oppzippy.openscq30.lib.wrapper.AdaptiveNoiseCanceling
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
-import com.oppzippy.openscq30.lib.wrapper.CustomButtonModel
+import com.oppzippy.openscq30.lib.wrapper.CustomButtonActions
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.ManualNoiseCanceling
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
@@ -142,7 +142,7 @@ class DeviceSettingsViewModel @Inject constructor(
         deviceServiceConnection.setAmbientSoundModeCycle(cycle)
     }
 
-    fun setCustomButtonModel(buttonModel: CustomButtonModel) {
+    fun setCustomButtonModel(buttonModel: CustomButtonActions) {
         deviceServiceConnection.setCustomButtonModel(buttonModel)
     }
 }

@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import com.oppzippy.openscq30.lib.bindings.NativeDeviceStateObserver
 import com.oppzippy.openscq30.lib.bindings.NativeSoundcoreDevice
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
-import com.oppzippy.openscq30.lib.wrapper.CustomButtonModel
+import com.oppzippy.openscq30.lib.wrapper.CustomButtonActions
 import com.oppzippy.openscq30.lib.wrapper.DeviceState
 import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
 import com.oppzippy.openscq30.lib.wrapper.HearId
@@ -70,7 +70,7 @@ class SoundcoreDevice(
         nativeDevice.setHearId(hearId)
     }
 
-    suspend fun setCustomButtonModel(customButtonModel: CustomButtonModel) {
+    suspend fun setCustomButtonModel(customButtonModel: CustomButtonActions) {
         nativeDevice.setCustomButtonModel(customButtonModel)
     }
 }

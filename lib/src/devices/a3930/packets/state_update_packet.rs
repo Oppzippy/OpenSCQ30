@@ -14,8 +14,8 @@ use crate::devices::{
             parsing::take_bool,
         },
         structures::{
-            AgeRange, CustomButtonModel, CustomHearId, DualBattery, EqualizerConfiguration, Gender,
-            SoundModes, StereoEqualizerConfiguration, TwsStatus,
+            AgeRange, CustomHearId, DualBattery, EqualizerConfiguration, Gender,
+            InternalCustomButtonModel, SoundModes, StereoEqualizerConfiguration, TwsStatus,
         },
     },
 };
@@ -29,7 +29,7 @@ pub struct A3930StateUpdatePacket {
     gender: Gender,
     age_range: AgeRange,
     custom_hear_id: CustomHearId,
-    custom_button_model: CustomButtonModel,
+    custom_button_model: InternalCustomButtonModel,
     sound_modes: SoundModes,
     side_tone: bool,
     // length >= 94
@@ -47,7 +47,7 @@ impl From<A3930StateUpdatePacket> for StateUpdatePacket {
             age_range: Some(packet.age_range),
             gender: Some(packet.gender),
             hear_id: Some(packet.custom_hear_id.into()),
-            custom_button_model: Some(packet.custom_button_model),
+            custom_button_model: Some(packet.custom_button_model.into()),
             firmware_version: None,
             serial_number: None,
             ambient_sound_mode_cycle: None,
@@ -73,7 +73,7 @@ impl InboundPacket for A3930StateUpdatePacket {
                     Gender::take,
                     AgeRange::take,
                     CustomHearId::take_with_all_fields,
-                    CustomButtonModel::take,
+                    InternalCustomButtonModel::take,
                     SoundModes::take,
                     take_bool,
                     opt(le_u16),

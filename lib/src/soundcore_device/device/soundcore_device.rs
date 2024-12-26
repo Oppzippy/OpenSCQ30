@@ -17,7 +17,7 @@ use crate::{
         },
         state::DeviceState,
         structures::{
-            AmbientSoundModeCycle, Command, CustomButtonModel, EqualizerConfiguration, HearId,
+            AmbientSoundModeCycle, Command, CustomButtonActions, EqualizerConfiguration, HearId,
             SoundModes, SoundModesTypeTwo,
         },
     },
@@ -289,7 +289,7 @@ where
 
     async fn set_custom_button_model(
         &self,
-        custom_button_model: CustomButtonModel,
+        custom_button_model: CustomButtonActions,
     ) -> crate::Result<()> {
         let state_sender = self.state_sender.lock().await;
         let state = state_sender.borrow().to_owned();
@@ -301,16 +301,18 @@ where
         }
 
         let prev_custom_button_model =
-            state.custom_button_model.ok_or(crate::Error::MissingData {
-                name: "custom button model",
-            })?;
+            state
+                .custom_button_actions
+                .ok_or(crate::Error::MissingData {
+                    name: "custom button model",
+                })?;
         if custom_button_model == prev_custom_button_model {
             return Ok(());
         }
 
         let response = self
             .implementation
-            .set_custom_button_model(state, custom_button_model)?;
+            .set_custom_button_actions(state, custom_button_model)?;
         self.handle_response(response, &state_sender).await?;
         Ok(())
     }

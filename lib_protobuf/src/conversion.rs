@@ -9,20 +9,19 @@ use openscq30_lib::{
             AdaptiveNoiseCanceling as LibAdaptiveNoiseCanceling,
             AmbientSoundMode as LibAmbientSoundMode,
             AmbientSoundModeCycle as LibAmbientSoundModeCycle, BasicHearId as LibBasicHearId,
-            Battery as LibBattery, ButtonAction as LibButtonAction,
-            CustomButtonModel as LibCustomButtonModel, CustomHearId as LibCustomHearId,
+            Battery as LibBattery, ButtonAction as LibButtonAction, ButtonState as LibButtonState,
+            CustomButtonActions as LibCustomButtonActions, CustomHearId as LibCustomHearId,
             CustomNoiseCanceling as LibCustomNoiseCanceling, DualBattery as LibDualBattery,
             EqualizerConfiguration as LibEqualizerConfiguration,
             FirmwareVersion as LibFirmwareVersion, HearId as LibHearId,
             HearIdMusicType as LibHearIdMusicType, HearIdType as LibHearIdType,
             ManualNoiseCanceling as LibManualNoiseCanceling,
-            NoTwsButtonAction as LibNoTwsButtonAction, NoiseCancelingMode as LibNoiseCancelingMode,
+            NoiseCancelingMode as LibNoiseCancelingMode,
             NoiseCancelingModeTypeTwo as LibNoiseCancelingModeTypeTwo,
             PresetEqualizerProfile as LibPresetEqualizerProfile, SingleBattery as LibSingleBattery,
             SoundModes as LibSoundModes, SoundModesTypeTwo as LibSoundModesTypeTwo,
             StereoVolumeAdjustments as LibStereoVolumeAdjustments,
-            TransparencyMode as LibTransparencyMode, TwsButtonAction as LibTwsButtonAction,
-            VolumeAdjustments,
+            TransparencyMode as LibTransparencyMode, VolumeAdjustments,
         },
     },
 };
@@ -40,7 +39,7 @@ impl From<LibDeviceState> for DeviceState {
             gender: value.gender.map(|gender| gender.0.into()),
             hear_id: value.hear_id.map(Into::into),
             firmware_version: value.firmware_version.map(Into::into),
-            custom_button_model: value.custom_button_model.map(Into::into),
+            custom_button_actions: value.custom_button_actions.map(Into::into),
             serial_number: value
                 .serial_number
                 .map(|serial_number| serial_number.to_string()),
@@ -419,8 +418,8 @@ impl From<StereoVolumeAdjustments> for LibStereoVolumeAdjustments {
     }
 }
 
-impl From<LibCustomButtonModel> for CustomButtonModel {
-    fn from(value: LibCustomButtonModel) -> Self {
+impl From<LibCustomButtonActions> for CustomButtonActions {
+    fn from(value: LibCustomButtonActions) -> Self {
         Self {
             left_single_click: value.left_single_click.into(),
             left_double_click: value.left_double_click.into(),
@@ -432,21 +431,11 @@ impl From<LibCustomButtonModel> for CustomButtonModel {
     }
 }
 
-impl From<LibNoTwsButtonAction> for NoTwsButtonAction {
-    fn from(value: LibNoTwsButtonAction) -> Self {
+impl From<LibButtonState> for ButtonState {
+    fn from(value: LibButtonState) -> Self {
         Self {
             is_enabled: value.is_enabled,
             action: ButtonAction::from(value.action).into(),
-        }
-    }
-}
-
-impl From<LibTwsButtonAction> for TwsButtonAction {
-    fn from(value: LibTwsButtonAction) -> Self {
-        Self {
-            is_enabled: value.is_enabled,
-            tws_connected_action: ButtonAction::from(value.tws_connected_action).into(),
-            tws_disconnected_action: ButtonAction::from(value.tws_disconnected_action).into(),
         }
     }
 }
@@ -466,8 +455,8 @@ impl From<LibButtonAction> for ButtonAction {
     }
 }
 
-impl From<CustomButtonModel> for LibCustomButtonModel {
-    fn from(value: CustomButtonModel) -> Self {
+impl From<CustomButtonActions> for LibCustomButtonActions {
+    fn from(value: CustomButtonActions) -> Self {
         Self {
             left_single_click: value.left_single_click.into(),
             left_double_click: value.left_double_click.into(),
@@ -479,25 +468,11 @@ impl From<CustomButtonModel> for LibCustomButtonModel {
     }
 }
 
-impl From<NoTwsButtonAction> for LibNoTwsButtonAction {
-    fn from(value: NoTwsButtonAction) -> Self {
+impl From<ButtonState> for LibButtonState {
+    fn from(value: ButtonState) -> Self {
         Self {
             is_enabled: value.is_enabled,
             action: ButtonAction::try_from(value.action).unwrap().into(),
-        }
-    }
-}
-
-impl From<TwsButtonAction> for LibTwsButtonAction {
-    fn from(value: TwsButtonAction) -> Self {
-        Self {
-            is_enabled: value.is_enabled,
-            tws_connected_action: ButtonAction::try_from(value.tws_connected_action)
-                .unwrap()
-                .into(),
-            tws_disconnected_action: ButtonAction::try_from(value.tws_disconnected_action)
-                .unwrap()
-                .into(),
         }
     }
 }

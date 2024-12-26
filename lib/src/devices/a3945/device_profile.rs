@@ -6,6 +6,7 @@ use crate::{
     device_profile::{DeviceFeatures, DeviceProfile},
     devices::standard::{
         self,
+        implementation::CustomButtonModelImplementation,
         packets::inbound::state_update_packet::StateUpdatePacket,
         quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBands},
         state::DeviceState,
@@ -38,10 +39,11 @@ pub(crate) const A3945_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
 };
 
 #[derive(Debug, Default)]
-pub struct A3945Implementation {
+struct A3945Implementation {
     // The official app only displays 8 bands, so I have no idea what bands 9 and 10 do. We'll just keep track
     // of their initial value and resend that.
     extra_bands: Arc<TwoExtraEqBands>,
+    buttons: Arc<CustomButtonModelImplementation>,
 }
 
 impl DeviceImplementation for A3945Implementation {
@@ -49,6 +51,7 @@ impl DeviceImplementation for A3945Implementation {
         &self,
     ) -> HashMap<Command, Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>> {
         let extra_bands = self.extra_bands.to_owned();
+        let buttons = self.buttons.to_owned();
         let mut handlers = standard::implementation::packet_handlers();
 
         handlers.insert(
@@ -62,6 +65,7 @@ impl DeviceImplementation for A3945Implementation {
                     }
                 };
                 extra_bands.set_values(packet.extra_band_values);
+                buttons.set_internal_data(packet.custom_button_model);
 
                 StateUpdatePacket::from(packet).into()
             }),
@@ -123,12 +127,12 @@ impl DeviceImplementation for A3945Implementation {
         standard::implementation::set_hear_id(state, hear_id)
     }
 
-    fn set_custom_button_model(
+    fn set_custom_button_actions(
         &self,
         state: DeviceState,
-        custom_button_model: CustomButtonModel,
+        custom_button_model: CustomButtonActions,
     ) -> crate::Result<CommandResponse> {
-        standard::implementation::set_custom_button_model(state, custom_button_model)
+        standard::implementation::set_custom_button_model(state, &self.buttons, custom_button_model)
     }
 
     fn set_ambient_sound_mode_cycle(

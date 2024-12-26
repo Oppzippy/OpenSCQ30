@@ -13,9 +13,9 @@ use crate::devices::{
         packets::{inbound::state_update_packet::StateUpdatePacket, parsing::take_bool},
         quirks::TwoExtraEqBandsValues,
         structures::{
-            AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomButtonModel, CustomHearId,
-            DualBattery, EqualizerConfiguration, FirmwareVersion, HearId, SerialNumber, SoundModes,
-            StereoEqualizerConfiguration, TwsStatus,
+            AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
+            EqualizerConfiguration, FirmwareVersion, HearId, InternalCustomButtonModel,
+            SerialNumber, SoundModes, StereoEqualizerConfiguration, TwsStatus,
         },
     },
 };
@@ -34,7 +34,7 @@ pub struct A3933StateUpdatePacket {
     pub extra_band_values: TwoExtraEqBandsValues,
     pub age_range: AgeRange,
     pub hear_id: Option<CustomHearId>, // 10 bands
-    pub custom_button_model: CustomButtonModel,
+    pub custom_button_model: InternalCustomButtonModel,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub sound_modes: SoundModes,
     pub touch_tone_switch: bool,
@@ -56,7 +56,7 @@ impl From<A3933StateUpdatePacket> for StateUpdatePacket {
             age_range: None,
             gender: None,
             hear_id: packet.hear_id.map(HearId::Custom),
-            custom_button_model: Some(packet.custom_button_model),
+            custom_button_model: Some(packet.custom_button_model.into()),
             firmware_version: Some(packet.left_firmware.min(packet.right_firmware)),
             serial_number: Some(packet.serial_number),
             ambient_sound_mode_cycle: Some(packet.ambient_sound_mode_cycle),
@@ -105,7 +105,7 @@ impl A3933StateUpdatePacket {
                     input,
                     (custom_button_model, ambient_sound_mode_cycle, sound_modes, _unknown, extra),
                 ) = tuple((
-                    CustomButtonModel::take,
+                    InternalCustomButtonModel::take,
                     AmbientSoundModeCycle::take,
                     SoundModes::take,
                     // Unsure if these two unknown bytes should be inside or outside the optional

@@ -10,7 +10,7 @@ use macaddr::MacAddr6;
 use openscq30_lib::devices::standard::{
     state::DeviceState,
     structures::{
-        AmbientSoundModeCycle, CustomButtonModel, EqualizerConfiguration, HearId,
+        AmbientSoundModeCycle, CustomButtonActions, EqualizerConfiguration, HearId,
         PresetEqualizerProfile, SoundModes, SoundModesTypeTwo,
     },
 };
@@ -163,8 +163,8 @@ impl UniffiCustomTypeConverter for HearId {
     }
 }
 
-uniffi::custom_type!(CustomButtonModel, Vec<u8>);
-impl UniffiCustomTypeConverter for CustomButtonModel {
+uniffi::custom_type!(CustomButtonActions, Vec<u8>);
+impl UniffiCustomTypeConverter for CustomButtonActions {
     type Builtin = Vec<u8>;
 
     fn into_custom(val: Self::Builtin) -> uniffi::Result<Self>

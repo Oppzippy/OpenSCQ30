@@ -77,15 +77,15 @@ function useUpdateActualFromDisplay(
     if (displayState.soundModes) {
       device.setSoundModes(displayState.soundModes).catch(onBluetoothError);
     }
-    if (displayState.customButtonModel) {
+    if (displayState.customButtonActions) {
       device
-        .setCustomButtonModel(displayState.customButtonModel)
+        .setCustomButtonActions(displayState.customButtonActions)
         .catch(onBluetoothError);
     }
   }, [
     device,
     displayState.soundModes,
-    displayState.customButtonModel,
+    displayState.customButtonActions,
     onBluetoothError,
   ]);
 }

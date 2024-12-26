@@ -32,45 +32,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.wrapper.ButtonAction
-import com.oppzippy.openscq30.lib.wrapper.CustomButtonModel
-import com.oppzippy.openscq30.lib.wrapper.NoTwsButtonAction
-import com.oppzippy.openscq30.lib.wrapper.TwsButtonAction
+import com.oppzippy.openscq30.lib.wrapper.ButtonState
+import com.oppzippy.openscq30.lib.wrapper.CustomButtonActions
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
-data class ButtonActions(
-    val leftSingleClick: ButtonAction?,
-    val leftDoubleClick: ButtonAction?,
-    val leftLongPress: ButtonAction?,
-    val rightSingleClick: ButtonAction?,
-    val rightDoubleClick: ButtonAction?,
-    val rightLongPress: ButtonAction?,
-) {
-    fun toCustomButtonModel(prevModel: CustomButtonModel): CustomButtonModel = CustomButtonModel(
-        leftSingleClick = noTwsButtonAction(prevModel.leftSingleClick, leftSingleClick),
-        leftDoubleClick = twsButtonAction(prevModel.leftDoubleClick, leftDoubleClick),
-        leftLongPress = twsButtonAction(prevModel.leftLongPress, leftLongPress),
-        rightSingleClick = noTwsButtonAction(prevModel.rightSingleClick, rightSingleClick),
-        rightDoubleClick = twsButtonAction(prevModel.rightDoubleClick, rightDoubleClick),
-        rightLongPress = twsButtonAction(prevModel.rightLongPress, rightLongPress),
-    )
-
-    private fun noTwsButtonAction(prevAction: NoTwsButtonAction, action: ButtonAction?): NoTwsButtonAction =
-        NoTwsButtonAction(
-            isEnabled = action != null,
-            action = action ?: prevAction.action,
-        )
-
-    private fun twsButtonAction(prevAction: TwsButtonAction, action: ButtonAction?): TwsButtonAction = TwsButtonAction(
-        isEnabled = action != null,
-        twsConnectedAction = action
-            ?: prevAction.twsConnectedAction,
-        twsDisconnectedAction = action
-            ?: prevAction.twsDisconnectedAction,
-    )
-}
-
 @Composable
-fun ButtonActionSelection(buttonActions: ButtonActions, onChange: (ButtonActions) -> Unit) {
+fun ButtonActionSelection(buttonActions: CustomButtonActions, onChange: (CustomButtonActions) -> Unit) {
     val scrollState = rememberScrollState()
     Column(
         Modifier
@@ -112,14 +79,20 @@ fun ButtonActionSelection(buttonActions: ButtonActions, onChange: (ButtonActions
 }
 
 @Composable
-private fun ButtonActionRow(label: String, action: ButtonAction?, onChange: (ButtonAction?) -> Unit) {
+private fun ButtonActionRow(label: String, state: ButtonState, onChange: (ButtonState) -> Unit) {
     var isDialogOpen by remember { mutableStateOf(false) }
     if (isDialogOpen) {
         ButtonActionSelectionDialog(
             onDismissRequest = { isDialogOpen = false },
-            onActionSelected = {
+            onActionSelected = { newAction ->
                 isDialogOpen = false
-                onChange(it)
+                onChange(
+                    if (newAction != null) {
+                        ButtonState(true, newAction)
+                    } else {
+                        ButtonState(false, state.action)
+                    },
+                )
             },
         )
     }
@@ -134,8 +107,8 @@ private fun ButtonActionRow(label: String, action: ButtonAction?, onChange: (But
             }
             Spacer(Modifier.width(10.dp))
             Button(onClick = { isDialogOpen = true }, Modifier.weight(1f)) {
-                if (action != null) {
-                    Text(stringResource(action.toStringResource()))
+                if (state.isEnabled) {
+                    Text(stringResource(state.action.toStringResource()))
                 } else {
                     Text(stringResource(R.string.disabled))
                 }
@@ -174,13 +147,13 @@ private fun ButtonActionSelectionDialog(onDismissRequest: () -> Unit, onActionSe
 fun PreviewCustomButtons() {
     OpenSCQ30Theme {
         ButtonActionSelection(
-            buttonActions = ButtonActions(
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
+            buttonActions = CustomButtonActions(
+                ButtonState(false, ButtonAction.GameMode),
+                ButtonState(true, ButtonAction.NextSong),
+                ButtonState(true, ButtonAction.VolumeDown),
+                ButtonState(true, ButtonAction.PreviousSong),
+                ButtonState(true, ButtonAction.VoiceAssistant),
+                ButtonState(true, ButtonAction.AmbientSoundMode),
             ),
             onChange = {},
         )

@@ -20,7 +20,7 @@ use crate::{
         a3945::packets::A3945StateUpdatePacket,
         a3951::packets::A3951StateUpdatePacket,
         standard::structures::{
-            AgeRange, AmbientSoundModeCycle, Battery, Command, CustomButtonModel,
+            AgeRange, AmbientSoundModeCycle, Battery, Command, CustomButtonActions,
             EqualizerConfiguration, FirmwareVersion, Gender, HearId, SerialNumber, SoundModes,
             SoundModesTypeTwo, TwsStatus,
         },
@@ -40,7 +40,7 @@ pub(crate) struct StateUpdatePacket {
     pub age_range: Option<AgeRange>,
     pub gender: Option<Gender>,
     pub hear_id: Option<HearId>,
-    pub custom_button_model: Option<CustomButtonModel>,
+    pub custom_button_model: Option<CustomButtonActions>,
     pub firmware_version: Option<FirmwareVersion>,
     pub serial_number: Option<SerialNumber>,
     pub ambient_sound_mode_cycle: Option<AmbientSoundModeCycle>,

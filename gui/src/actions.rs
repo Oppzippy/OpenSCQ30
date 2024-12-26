@@ -35,7 +35,7 @@ use macaddr::MacAddr6;
 use openscq30_lib::devices::standard::{
     state::DeviceState,
     structures::{
-        AmbientSoundMode, AmbientSoundModeCycle, CustomButtonModel, CustomNoiseCanceling,
+        AmbientSoundMode, AmbientSoundModeCycle, CustomButtonActions, CustomNoiseCanceling,
         EqualizerConfiguration, HearId, ManualNoiseCanceling, NoiseCancelingMode,
         NoiseCancelingModeTypeTwo, TransparencyMode,
     },
@@ -89,7 +89,7 @@ pub enum Action {
     ActivateQuickPreset(GlibNamedQuickPresetValue),
     DeleteQuickPreset(Arc<str>),
     SetHearId(HearId),
-    SetCustomButtonModel(CustomButtonModel),
+    SetCustomButtonModel(CustomButtonActions),
     SetAmbientSoundModeCycle(AmbientSoundModeCycle),
     ImportCustomEqualizerProfiles {
         profiles: Vec<GlibCustomEqualizerProfile>,

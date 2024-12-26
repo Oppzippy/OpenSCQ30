@@ -97,11 +97,13 @@ impl DeviceImplementation for StandardImplementation {
         set_hear_id(state, hear_id)
     }
 
-    fn set_custom_button_model(
+    fn set_custom_button_actions(
         &self,
-        state: DeviceState,
-        custom_button_model: CustomButtonModel,
+        _state: DeviceState,
+        _custom_button_model: CustomButtonActions,
     ) -> crate::Result<crate::soundcore_device::device::soundcore_command::CommandResponse> {
-        set_custom_button_model(state, custom_button_model)
+        Err(crate::Error::FeatureNotSupported {
+            feature_name: "custom button actions",
+        })
     }
 }

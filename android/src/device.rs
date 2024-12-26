@@ -7,7 +7,7 @@ use openscq30_lib::{
     devices::standard::{
         state::DeviceState,
         structures::{
-            AmbientSoundModeCycle, CustomButtonModel, EqualizerConfiguration, HearId, SoundModes,
+            AmbientSoundModeCycle, CustomButtonActions, EqualizerConfiguration, HearId, SoundModes,
             SoundModesTypeTwo,
         },
     },
@@ -210,7 +210,7 @@ impl NativeSoundcoreDevice {
 
     pub async fn set_custom_button_model(
         &self,
-        custom_button_model: CustomButtonModel,
+        custom_button_model: CustomButtonActions,
     ) -> Result<(), DeviceError> {
         let device = self.device.clone();
 
@@ -323,7 +323,7 @@ impl DeviceImplementation {
 
     pub async fn set_custom_button_model(
         &self,
-        custom_button_model: CustomButtonModel,
+        custom_button_model: CustomButtonActions,
     ) -> openscq30_lib::Result<()> {
         match self {
             DeviceImplementation::Manual(device) => {

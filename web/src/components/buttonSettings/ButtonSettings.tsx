@@ -8,18 +8,22 @@ import {
 } from "@mui/material";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { ButtonAction, CustomButtonModel } from "../../libTypes/DeviceState";
+import {
+  ButtonAction,
+  ButtonState,
+  CustomButtonActions,
+} from "../../libTypes/DeviceState";
 
 export const ButtonSettings = React.memo(function ({
-  buttonModel,
-  setButtonModel,
+  buttonActions,
+  setButtonActions,
 }: {
-  buttonModel: CustomButtonModel;
-  setButtonModel: (buttonModel: CustomButtonModel) => void;
+  buttonActions: CustomButtonActions;
+  setButtonActions: (buttonActions: CustomButtonActions) => void;
 }) {
   const { t } = useTranslation();
   const buttons: {
-    key: keyof CustomButtonModel;
+    key: keyof CustomButtonActions;
     label: string;
   }[] = [
     { key: "leftSingleClick", label: t("buttons.leftSingleClick") },
@@ -41,11 +45,11 @@ export const ButtonSettings = React.memo(function ({
             key={key}
             buttonKey={key}
             label={label}
-            action={getButtonAction(buttonModel[key])}
+            action={getButtonAction(buttonActions[key])}
             setAction={(action: ButtonAction | "disabled") => {
-              setButtonModel({
-                ...buttonModel,
-                [key]: setButtonAction(buttonModel[key], action),
+              setButtonActions({
+                ...buttonActions,
+                [key]: setButtonAction(buttonActions[key], action),
               });
             }}
           />
@@ -56,36 +60,24 @@ export const ButtonSettings = React.memo(function ({
 });
 
 function getButtonAction(
-  button: CustomButtonModel[keyof CustomButtonModel],
+  button: CustomButtonActions[keyof CustomButtonActions],
 ): ButtonAction | "disabled" {
-  if (button.isEnabled) {
-    return "action" in button ? button.action : button.twsConnectedAction;
-  }
-  return "disabled";
+  return button.isEnabled ? button.action : "disabled";
 }
-function setButtonAction<
-  ActionType extends CustomButtonModel[keyof CustomButtonModel],
->(button: ActionType, action: ButtonAction | "disabled"): ActionType {
+function setButtonAction(
+  button: ButtonState,
+  action: ButtonAction | "disabled",
+): ButtonState {
   if (action == "disabled") {
     return {
-      ...button,
       isEnabled: false,
+      action: button.action,
     };
   }
-  if ("action" in button) {
-    return {
-      ...button,
-      isEnabled: true,
-      action: action,
-    };
-  } else {
-    return {
-      ...button,
-      isEnabled: true,
-      twsConnectedAction: action,
-      twsDisconnectedAction: action,
-    };
-  }
+  return {
+    isEnabled: true,
+    action: action,
+  };
 }
 
 const ButtonActionSelection = React.memo(function ({

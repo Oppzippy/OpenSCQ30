@@ -14,8 +14,8 @@ use crate::devices::{
             parsing::take_bool,
         },
         structures::{
-            AgeRange, CustomButtonModel, CustomHearId, DualBattery, EqualizerConfiguration, Gender,
-            SoundModes, StereoEqualizerConfiguration, TwsStatus,
+            AgeRange, CustomHearId, DualBattery, EqualizerConfiguration, Gender,
+            InternalCustomButtonModel, SoundModes, StereoEqualizerConfiguration, TwsStatus,
         },
     },
 };
@@ -23,21 +23,21 @@ use crate::devices::{
 // A3951
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3951StateUpdatePacket {
-    tws_status: TwsStatus,
-    battery: DualBattery,
-    equalizer_configuration: EqualizerConfiguration,
-    gender: Gender,
-    age_range: AgeRange,
-    custom_hear_id: CustomHearId,
-    custom_button_model: CustomButtonModel,
-    sound_modes: SoundModes,
-    side_tone: bool,
-    wear_detection: bool,
-    touch_tone: bool,
-    hear_id_eq_preset: Option<u16>,
-    supports_new_battery: bool, // yes if packet is >98, don't parse
-    left_new_battery: u8,       // 0 to 9
-    right_new_battery: u8,      // 0 to 9
+    pub tws_status: TwsStatus,
+    pub battery: DualBattery,
+    pub equalizer_configuration: EqualizerConfiguration,
+    pub gender: Gender,
+    pub age_range: AgeRange,
+    pub custom_hear_id: CustomHearId,
+    pub custom_button_model: InternalCustomButtonModel,
+    pub sound_modes: SoundModes,
+    pub side_tone: bool,
+    pub wear_detection: bool,
+    pub touch_tone: bool,
+    pub hear_id_eq_preset: Option<u16>,
+    pub supports_new_battery: bool, // yes if packet is >98, don't parse
+    pub left_new_battery: u8,       // 0 to 9
+    pub right_new_battery: u8,      // 0 to 9
 }
 
 impl From<A3951StateUpdatePacket> for StateUpdatePacket {
@@ -51,7 +51,7 @@ impl From<A3951StateUpdatePacket> for StateUpdatePacket {
             age_range: Some(packet.age_range),
             gender: Some(packet.gender),
             hear_id: Some(packet.custom_hear_id.into()),
-            custom_button_model: Some(packet.custom_button_model),
+            custom_button_model: Some(packet.custom_button_model.into()),
             firmware_version: None,
             serial_number: None,
             ambient_sound_mode_cycle: None,
@@ -93,7 +93,7 @@ impl InboundPacket for A3951StateUpdatePacket {
                     Gender::take,
                     AgeRange::take,
                     CustomHearId::take_with_all_fields,
-                    CustomButtonModel::take,
+                    InternalCustomButtonModel::take,
                     SoundModes::take,
                     take_bool, // side tone
                     take_bool, // wear detection

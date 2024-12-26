@@ -10,8 +10,8 @@ use crate::devices::{
     standard::{
         packets::inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
         structures::{
-            AgeRange, BasicHearId, CustomButtonModel, DualBattery, EqualizerConfiguration, Gender,
-            StereoEqualizerConfiguration, TwsStatus,
+            AgeRange, BasicHearId, DualBattery, EqualizerConfiguration, Gender,
+            InternalCustomButtonModel, StereoEqualizerConfiguration, TwsStatus,
         },
     },
 };
@@ -19,13 +19,13 @@ use crate::devices::{
 // A3926 and A3926Z11
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3926StateUpdatePacket {
-    tws_status: TwsStatus,
-    battery: DualBattery,
-    equalizer_configuration: EqualizerConfiguration,
-    gender: Gender,
-    age_range: AgeRange,
-    hear_id: BasicHearId,
-    custom_button_model: CustomButtonModel,
+    pub tws_status: TwsStatus,
+    pub battery: DualBattery,
+    pub equalizer_configuration: EqualizerConfiguration,
+    pub gender: Gender,
+    pub age_range: AgeRange,
+    pub hear_id: BasicHearId,
+    pub custom_button_model: InternalCustomButtonModel,
 }
 
 impl From<A3926StateUpdatePacket> for StateUpdatePacket {
@@ -39,7 +39,7 @@ impl From<A3926StateUpdatePacket> for StateUpdatePacket {
             age_range: Some(packet.age_range),
             gender: Some(packet.gender),
             hear_id: Some(packet.hear_id.into()),
-            custom_button_model: Some(packet.custom_button_model),
+            custom_button_model: Some(packet.custom_button_model.into()),
             firmware_version: None,
             serial_number: None,
             ambient_sound_mode_cycle: None,
@@ -65,7 +65,7 @@ impl InboundPacket for A3926StateUpdatePacket {
                     Gender::take,
                     AgeRange::take,
                     BasicHearId::take,
-                    CustomButtonModel::take,
+                    InternalCustomButtonModel::take,
                 )),
                 |(
                     tws_status,

@@ -4,8 +4,9 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.oppzippy.openscq30.lib.wrapper.ButtonAction
+import com.oppzippy.openscq30.lib.wrapper.ButtonState
+import com.oppzippy.openscq30.lib.wrapper.CustomButtonActions
 import com.oppzippy.openscq30.ui.buttonactions.ButtonActionSelection
-import com.oppzippy.openscq30.ui.buttonactions.ButtonActions
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Assert
@@ -28,13 +29,13 @@ class DeviceSettingsButtonActionsTest {
 
     @Test
     fun itWorks() {
-        var actions = ButtonActions(
-            leftSingleClick = ButtonAction.NextSong,
-            leftDoubleClick = null,
-            leftLongPress = null,
-            rightSingleClick = null,
-            rightDoubleClick = null,
-            rightLongPress = null,
+        var actions = CustomButtonActions(
+            leftSingleClick = ButtonState(true, ButtonAction.NextSong),
+            leftDoubleClick = ButtonState(false, ButtonAction.NextSong),
+            leftLongPress = ButtonState(false, ButtonAction.NextSong),
+            rightSingleClick = ButtonState(false, ButtonAction.NextSong),
+            rightDoubleClick = ButtonState(false, ButtonAction.NextSong),
+            rightLongPress = ButtonState(false, ButtonAction.NextSong),
         )
         composeRule.setContent {
             ButtonActionSelection(
@@ -48,13 +49,13 @@ class DeviceSettingsButtonActionsTest {
         composeRule.onNodeWithText(composeRule.activity.getString(ButtonAction.PreviousSong.toStringResource()))
             .performClick()
         Assert.assertEquals(
-            ButtonActions(
-                leftSingleClick = ButtonAction.PreviousSong,
-                leftDoubleClick = null,
-                leftLongPress = null,
-                rightSingleClick = null,
-                rightDoubleClick = null,
-                rightLongPress = null,
+            CustomButtonActions(
+                leftSingleClick = ButtonState(true, ButtonAction.PreviousSong),
+                leftDoubleClick = ButtonState(false, ButtonAction.NextSong),
+                leftLongPress = ButtonState(false, ButtonAction.NextSong),
+                rightSingleClick = ButtonState(false, ButtonAction.NextSong),
+                rightDoubleClick = ButtonState(false, ButtonAction.NextSong),
+                rightLongPress = ButtonState(false, ButtonAction.NextSong),
             ),
             actions,
         )

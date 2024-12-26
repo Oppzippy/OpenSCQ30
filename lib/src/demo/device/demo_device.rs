@@ -61,34 +61,30 @@ where
             }),
             gender: Some(Gender(0)),
             age_range: Some(AgeRange(0)),
-            custom_button_model: Some(CustomButtonModel {
-                left_double_click: TwsButtonAction {
-                    tws_connected_action: ButtonAction::NextSong,
-                    tws_disconnected_action: ButtonAction::PlayPause,
+            custom_button_actions: Some(CustomButtonActions {
+                left_double_click: ButtonState {
+                    action: ButtonAction::NextSong,
                     is_enabled: true,
                 },
-                left_long_press: TwsButtonAction {
-                    tws_connected_action: ButtonAction::PreviousSong,
-                    tws_disconnected_action: ButtonAction::AmbientSoundMode,
-                    is_enabled: true,
-                },
-                right_double_click: TwsButtonAction {
-                    tws_connected_action: ButtonAction::VoiceAssistant,
-                    tws_disconnected_action: ButtonAction::VolumeDown,
-                    is_enabled: true,
-                },
-                right_long_press: TwsButtonAction {
-                    tws_connected_action: ButtonAction::VolumeUp,
-                    tws_disconnected_action: ButtonAction::NextSong,
-                    is_enabled: false,
-                },
-                left_single_click: NoTwsButtonAction {
+                left_long_press: ButtonState {
                     action: ButtonAction::PreviousSong,
                     is_enabled: true,
                 },
-                right_single_click: NoTwsButtonAction {
+                right_double_click: ButtonState {
+                    action: ButtonAction::VoiceAssistant,
+                    is_enabled: true,
+                },
+                right_long_press: ButtonState {
+                    action: ButtonAction::VolumeUp,
+                    is_enabled: true,
+                },
+                left_single_click: ButtonState {
+                    action: ButtonAction::PreviousSong,
+                    is_enabled: true,
+                },
+                right_single_click: ButtonState {
                     action: ButtonAction::NextSong,
-                    is_enabled: false,
+                    is_enabled: true,
                 },
             }),
             hear_id: Some(
@@ -247,21 +243,21 @@ where
 
     async fn set_custom_button_model(
         &self,
-        custom_button_model: CustomButtonModel,
+        custom_button_model: CustomButtonActions,
     ) -> crate::Result<()> {
         let state_sender = self.state_sender.lock().await;
         let state = state_sender.borrow().to_owned();
-        if state.custom_button_model.is_none() {
+        if state.custom_button_actions.is_none() {
             return Err(crate::Error::FeatureNotSupported {
                 feature_name: "custom button model",
             });
         }
-        if state.custom_button_model == Some(custom_button_model) {
+        if state.custom_button_actions == Some(custom_button_model) {
             return Ok(());
         }
         tracing::info!("set custom button model to {custom_button_model:?}");
         state_sender.send_replace(DeviceState {
-            custom_button_model: Some(custom_button_model),
+            custom_button_actions: Some(custom_button_model),
             ..state
         });
         Ok(())

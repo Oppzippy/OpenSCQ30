@@ -8,7 +8,7 @@ import "sound_modes.proto";
 import "sound_modes_type_two.proto";
 import "hear_id.proto";
 import "firmware_version.proto";
-import "custom_button_model.proto";
+import "custom_button_actions.proto";
 
 option java_package = "com.oppzippy.openscq30.lib.protobuf";
 option java_multiple_files = true;
@@ -22,7 +22,7 @@ message DeviceState {
   optional uint32 gender = 6;
   optional HearId hear_id = 7;
   optional FirmwareVersion firmware_version = 8;
-  optional CustomButtonModel custom_button_model = 9;
+  optional CustomButtonActions custom_button_actions = 9;
   optional string serial_number = 10;
   optional AmbientSoundModeCycle ambient_sound_mode_cycle = 11;
   optional SoundModesTypeTwo sound_modes_type_two = 12;

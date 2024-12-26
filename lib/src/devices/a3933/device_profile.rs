@@ -9,10 +9,14 @@ use crate::{
     },
     devices::standard::{
         self,
+        implementation::CustomButtonModelImplementation,
         packets::inbound::state_update_packet::StateUpdatePacket,
         quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBands},
         state::DeviceState,
-        structures::{Command, EqualizerConfiguration, STATE_UPDATE},
+        structures::{
+            AmbientSoundModeCycle, Command, CustomButtonActions, EqualizerConfiguration, HearId,
+            SoundModes, SoundModesTypeTwo, STATE_UPDATE,
+        },
     },
     soundcore_device::{
         device::{device_implementation::DeviceImplementation, soundcore_command::CommandResponse},
@@ -44,10 +48,11 @@ pub(crate) const A3933_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
 };
 
 #[derive(Debug, Default)]
-pub struct A3933Implementation {
+struct A3933Implementation {
     // The official app only displays 8 bands, so I have no idea what bands 9 and 10 do. We'll just keep track
     // of their initial value and resend that.
     extra_bands: Arc<TwoExtraEqBands>,
+    buttons: Arc<CustomButtonModelImplementation>,
 }
 
 impl DeviceImplementation for A3933Implementation {
@@ -55,6 +60,7 @@ impl DeviceImplementation for A3933Implementation {
         &self,
     ) -> HashMap<Command, Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>> {
         let extra_bands = self.extra_bands.to_owned();
+        let buttons = self.buttons.to_owned();
         let mut handlers: HashMap<
             Command,
             Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>,
@@ -72,6 +78,7 @@ impl DeviceImplementation for A3933Implementation {
                     }
                 };
                 extra_bands.set_values(packet.extra_band_values);
+                buttons.set_internal_data(packet.custom_button_model);
 
                 StateUpdatePacket::from(packet).into()
             }),
@@ -116,7 +123,7 @@ impl DeviceImplementation for A3933Implementation {
     fn set_sound_modes(
         &self,
         state: DeviceState,
-        sound_modes: crate::devices::standard::structures::SoundModes,
+        sound_modes: SoundModes,
     ) -> crate::Result<CommandResponse> {
         standard::implementation::set_sound_modes(state, sound_modes)
     }
@@ -124,31 +131,27 @@ impl DeviceImplementation for A3933Implementation {
     fn set_sound_modes_type_two(
         &self,
         state: DeviceState,
-        sound_modes: crate::devices::standard::structures::SoundModesTypeTwo,
+        sound_modes: SoundModesTypeTwo,
     ) -> crate::Result<CommandResponse> {
         standard::implementation::set_sound_modes_type_two(state, sound_modes)
     }
 
-    fn set_hear_id(
-        &self,
-        state: DeviceState,
-        hear_id: crate::devices::standard::structures::HearId,
-    ) -> crate::Result<CommandResponse> {
+    fn set_hear_id(&self, state: DeviceState, hear_id: HearId) -> crate::Result<CommandResponse> {
         standard::implementation::set_hear_id(state, hear_id)
     }
 
-    fn set_custom_button_model(
+    fn set_custom_button_actions(
         &self,
         state: DeviceState,
-        custom_button_model: crate::devices::standard::structures::CustomButtonModel,
+        custom_button_model: CustomButtonActions,
     ) -> crate::Result<CommandResponse> {
-        standard::implementation::set_custom_button_model(state, custom_button_model)
+        standard::implementation::set_custom_button_model(state, &self.buttons, custom_button_model)
     }
 
     fn set_ambient_sound_mode_cycle(
         &self,
         state: DeviceState,
-        cycle: standard::structures::AmbientSoundModeCycle,
+        cycle: AmbientSoundModeCycle,
     ) -> crate::Result<CommandResponse> {
         standard::implementation::set_ambient_sound_mode_cycle(state, cycle)
     }

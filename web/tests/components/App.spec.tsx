@@ -59,7 +59,7 @@ describe("App", () => {
               },
               ageRange: null,
               gender: null,
-              customButtonModel: null,
+              customButtonActions: null,
               hearId: null,
               firmwareVersion: null,
               serialNumber: null,

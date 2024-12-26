@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run build:wasm && tsc && vite build",
+    "build:ts": "tsc",
     "build:wasm": "RUSTFLAGS=\"--cfg=web_sys_unstable_apis\" wasm-pack build --no-pack ./wasm",
     "build:wasmDev": "RUSTFLAGS=\"--cfg=web_sys_unstable_apis\" wasm-pack build --no-pack --dev ./wasm",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",

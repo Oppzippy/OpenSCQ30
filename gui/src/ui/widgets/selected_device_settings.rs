@@ -129,7 +129,8 @@ mod imp {
             } else {
                 self.hear_id.set_visible(false);
             }
-            if state.device_features.has_custom_button_model && state.custom_button_model.is_some()
+            if state.device_features.has_custom_button_model
+                && state.custom_button_actions.is_some()
             {
                 self.buttons.set_visible(true);
                 self.buttons.set_device_state(state);

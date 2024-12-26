@@ -14,7 +14,7 @@ use crate::devices::{
             parsing::take_bool,
         },
         structures::{
-            CustomButtonModel, DualBattery, EqualizerConfiguration, SoundModes,
+            DualBattery, EqualizerConfiguration, InternalCustomButtonModel, SoundModes,
             StereoEqualizerConfiguration, TwsStatus,
         },
     },
@@ -23,15 +23,15 @@ use crate::devices::{
 // A3931 and A3935 and A3931XR and A3935W
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3931StateUpdatePacket {
-    tws_status: TwsStatus,
-    battery: DualBattery,
-    equalizer_configuration: EqualizerConfiguration,
-    custom_button_model: CustomButtonModel,
-    sound_modes: SoundModes,
-    side_tone: bool,
-    touch_tone: bool,
-    auto_power_off_on: bool,
-    auto_power_off_index: u8, // 0 to 3
+    pub tws_status: TwsStatus,
+    pub battery: DualBattery,
+    pub equalizer_configuration: EqualizerConfiguration,
+    pub custom_button_model: InternalCustomButtonModel,
+    pub sound_modes: SoundModes,
+    pub side_tone: bool,
+    pub touch_tone: bool,
+    pub auto_power_off_on: bool,
+    pub auto_power_off_index: u8, // 0 to 3
 }
 
 impl From<A3931StateUpdatePacket> for StateUpdatePacket {
@@ -45,7 +45,7 @@ impl From<A3931StateUpdatePacket> for StateUpdatePacket {
             age_range: None,
             gender: None,
             hear_id: None,
-            custom_button_model: Some(packet.custom_button_model),
+            custom_button_model: Some(packet.custom_button_model.into()),
             firmware_version: None,
             serial_number: None,
             ambient_sound_mode_cycle: None,
@@ -68,7 +68,7 @@ impl InboundPacket for A3931StateUpdatePacket {
                     TwsStatus::take,
                     DualBattery::take,
                     StereoEqualizerConfiguration::take(8),
-                    CustomButtonModel::take,
+                    InternalCustomButtonModel::take,
                     SoundModes::take,
                     take_bool,
                     take_bool,

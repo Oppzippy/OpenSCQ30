@@ -119,15 +119,21 @@ const buttonActionSchema = Type.Union([
 ]);
 export type ButtonAction = Static<typeof buttonActionSchema>;
 
-const twsButtonActionSchema = Type.Object({
-  twsConnectedAction: buttonActionSchema,
-  twsDisconnectedAction: buttonActionSchema,
+const buttonStateSchema = Type.Object({
   isEnabled: Type.Boolean(),
-});
-const noTwsButtonActionSchema = Type.Object({
   action: buttonActionSchema,
-  isEnabled: Type.Boolean(),
 });
+export type ButtonState = Static<typeof buttonStateSchema>;
+
+const customButtonActionsSchema = Type.Object({
+  leftSingleClick: buttonStateSchema,
+  leftDoubleClick: buttonStateSchema,
+  leftLongPress: buttonStateSchema,
+  rightSingleClick: buttonStateSchema,
+  rightDoubleClick: buttonStateSchema,
+  rightLongPress: buttonStateSchema,
+});
+export type CustomButtonActions = Static<typeof customButtonActionsSchema>;
 
 const firmwareVersionSchema = Type.Object({
   major: Type.Number({ minimum: 0 }),
@@ -160,16 +166,6 @@ const deviceFeaturesSchema = Type.Object({
   dynamicRangeCompressionMinFirmwareVersion: Nullable(firmwareVersionSchema),
 });
 export type DeviceFeatures = Static<typeof deviceFeaturesSchema>;
-
-const customButtonModelSchema = Type.Object({
-  leftSingleClick: noTwsButtonActionSchema,
-  leftDoubleClick: twsButtonActionSchema,
-  leftLongPress: twsButtonActionSchema,
-  rightSingleClick: noTwsButtonActionSchema,
-  rightDoubleClick: twsButtonActionSchema,
-  rightLongPress: twsButtonActionSchema,
-});
-export type CustomButtonModel = Static<typeof customButtonModelSchema>;
 
 const deviceStateSchema = Type.Object({
   deviceFeatures: deviceFeaturesSchema,
@@ -221,7 +217,7 @@ const deviceStateSchema = Type.Object({
     ]),
   ),
   firmwareVersion: Nullable(firmwareVersionSchema),
-  customButtonModel: Nullable(customButtonModelSchema),
+  customButtonActions: Nullable(customButtonActionsSchema),
   serialNumber: Nullable(Type.String()),
   ambientSoundModeCycle: Nullable(ambientSoundModeCycleSchema),
 });

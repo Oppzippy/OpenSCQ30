@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::devices::standard::{
     state::DeviceState,
     structures::{
-        AmbientSoundModeCycle, Command, CustomButtonModel, EqualizerConfiguration, HearId,
+        AmbientSoundModeCycle, Command, CustomButtonActions, EqualizerConfiguration, HearId,
         SoundModes, SoundModesTypeTwo,
     },
 };
@@ -43,9 +43,9 @@ pub trait DeviceImplementation {
 
     fn set_hear_id(&self, state: DeviceState, hear_id: HearId) -> crate::Result<CommandResponse>;
 
-    fn set_custom_button_model(
+    fn set_custom_button_actions(
         &self,
         state: DeviceState,
-        custom_button_model: CustomButtonModel,
+        custom_button_model: CustomButtonActions,
     ) -> crate::Result<CommandResponse>;
 }

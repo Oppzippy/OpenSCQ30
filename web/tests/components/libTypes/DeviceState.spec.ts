@@ -26,7 +26,7 @@ describe("libTypes", () => {
         isCharging: false,
         level: 0,
       },
-      customButtonModel: null,
+      customButtonActions: null,
       hearId: null,
       equalizerConfiguration: {
         presetProfile: null,
@@ -81,16 +81,14 @@ describe("libTypes", () => {
           level: 2,
         },
       },
-      customButtonModel: {
+      customButtonActions: {
         leftDoubleClick: {
           isEnabled: true,
-          twsConnectedAction: "nextSong",
-          twsDisconnectedAction: "playPause",
+          action: "nextSong",
         },
         leftLongPress: {
           isEnabled: true,
-          twsConnectedAction: "previousSong",
-          twsDisconnectedAction: "ambientSoundMode",
+          action: "previousSong",
         },
         leftSingleClick: {
           isEnabled: true,
@@ -98,13 +96,11 @@ describe("libTypes", () => {
         },
         rightDoubleClick: {
           isEnabled: true,
-          twsConnectedAction: "voiceAssistant",
-          twsDisconnectedAction: "volumeDown",
+          action: "voiceAssistant",
         },
         rightLongPress: {
           isEnabled: true,
-          twsConnectedAction: "volumeDown",
-          twsDisconnectedAction: "volumeUp",
+          action: "volumeDown",
         },
         rightSingleClick: {
           isEnabled: false,

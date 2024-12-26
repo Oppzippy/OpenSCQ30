@@ -1,7 +1,7 @@
 package com.oppzippy.openscq30.lib.wrapper
 
 import com.oppzippy.openscq30.lib.protobuf.ambientSoundModeCycleOrNull
-import com.oppzippy.openscq30.lib.protobuf.customButtonModelOrNull
+import com.oppzippy.openscq30.lib.protobuf.customButtonActionsOrNull
 import com.oppzippy.openscq30.lib.protobuf.deviceState
 import com.oppzippy.openscq30.lib.protobuf.firmwareVersionOrNull
 import com.oppzippy.openscq30.lib.protobuf.hearIdOrNull
@@ -17,7 +17,7 @@ data class DeviceState(
     val ageRange: UByte?,
     val gender: UByte?,
     val hearId: HearId?,
-    val customButtonModel: CustomButtonModel?,
+    val customButtonModel: CustomButtonActions?,
     val firmwareVersion: FirmwareVersion?,
     val serialNumber: String?,
     val ambientSoundModeCycle: AmbientSoundModeCycle?,
@@ -45,7 +45,7 @@ data class DeviceState(
         this@DeviceState.ageRange?.let { ageRange = it.toInt() }
         this@DeviceState.gender?.let { gender = it.toInt() }
         this@DeviceState.hearId?.let { hearId = it.toProtobuf() }
-        this@DeviceState.customButtonModel?.let { customButtonModel = it.toProtobuf() }
+        this@DeviceState.customButtonModel?.let { customButtonActions = it.toProtobuf() }
         this@DeviceState.firmwareVersion?.let { firmwareVersion = it.toProtobuf() }
         this@DeviceState.serialNumber?.let { serialNumber = it }
         this@DeviceState.ambientSoundModeCycle?.let { ambientSoundModeCycle = it.toProtobuf() }
@@ -61,7 +61,7 @@ fun com.oppzippy.openscq30.lib.protobuf.DeviceState.toKotlin(): DeviceState = De
     ageRange = if (hasAgeRange()) ageRange.toUByte() else null,
     gender = if (hasGender()) gender.toUByte() else null,
     hearId = hearIdOrNull?.toKotlin(),
-    customButtonModel = customButtonModelOrNull?.toKotlin(),
+    customButtonModel = customButtonActionsOrNull?.toKotlin(),
     firmwareVersion = firmwareVersionOrNull?.toKotlin(),
     serialNumber = if (hasSerialNumber()) serialNumber else null,
     ambientSoundModeCycle = ambientSoundModeCycleOrNull?.toKotlin(),

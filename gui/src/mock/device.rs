@@ -8,7 +8,7 @@ use openscq30_lib::{
     devices::standard::{
         state::DeviceState,
         structures::{
-            AmbientSoundModeCycle, CustomButtonModel, EqualizerConfiguration, HearId, SoundModes,
+            AmbientSoundModeCycle, CustomButtonActions, EqualizerConfiguration, HearId, SoundModes,
             SoundModesTypeTwo,
         },
     },
@@ -47,7 +47,7 @@ mock! {
         ) -> openscq30_lib::Result<()>;
         pub fn set_custom_button_model(
             &self,
-            custom_button_model: CustomButtonModel,
+            custom_button_model: CustomButtonActions,
         ) -> openscq30_lib::Result<()>;
     }
 }
@@ -105,7 +105,7 @@ impl Device for MockDevice {
     }
     async fn set_custom_button_model(
         &self,
-        custom_button_model: CustomButtonModel,
+        custom_button_model: CustomButtonActions,
     ) -> openscq30_lib::Result<()> {
         timeout_future(Duration::from_millis(10)).await;
         self.set_custom_button_model(custom_button_model)
