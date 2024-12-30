@@ -2,10 +2,14 @@ use std::collections::HashSet;
 use std::sync::{Arc, Weak};
 use std::time::Duration;
 
-use bluer::{Adapter, Address, DiscoveryFilter, DiscoveryTransport, Session};
+use bluer::rfcomm::{Profile, ProfileHandle, ReqError};
+use bluer::{Adapter, Address, Session};
 use futures::StreamExt;
 use macaddr::MacAddr6;
+use tokio::select;
 use tokio::sync::Mutex;
+use tokio::time::sleep;
+use tracing::{debug, debug_span, warn, warn_span, Instrument};
 use weak_table::weak_value_hash_map::Entry;
 use weak_table::WeakValueHashMap;
 
@@ -18,72 +22,54 @@ use super::RuntimeOrHandle;
 pub struct BluerConnectionRegistry {
     runtime: RuntimeOrHandle,
     session: Session,
+    rfcomm_handle: Arc<Mutex<ProfileHandle>>,
     connections: Mutex<WeakValueHashMap<MacAddr6, Weak<BluerConnection>>>,
 }
 
 impl BluerConnectionRegistry {
     pub async fn new(runtime: RuntimeOrHandle) -> crate::Result<Self> {
+        let session = runtime
+            .spawn(async move { Session::new().await })
+            .await
+            .unwrap()?;
+        let rfcomm_handle = session
+            .register_profile(Profile {
+                uuid: device_utils::RFCOMM_UUID,
+                ..Default::default()
+            })
+            .await?;
         Ok(Self {
-            session: runtime
-                .spawn(async move { Session::new().await })
-                .await
-                .unwrap()?,
+            session,
             runtime,
+            rfcomm_handle: Arc::new(Mutex::new(rfcomm_handle)),
             connections: Mutex::new(WeakValueHashMap::new()),
         })
     }
 
-    #[tracing::instrument(skip(self))]
     async fn all_connected(&self) -> crate::Result<HashSet<GenericConnectionDescriptor>> {
         let session = self.session.to_owned();
         self.runtime
-            .spawn(async move {
-                let adapter = session.default_adapter().await?;
-                tracing::debug!("starting scan on adapter {}", adapter.name());
-                let device_addresses = Self::ble_scan(&adapter).await?;
-                tracing::debug!("discovered {} devices", device_addresses.len());
-                let mut descriptors = HashSet::new();
-                for address in device_addresses {
-                    if let Some(descriptor) = Self::address_to_descriptor(&adapter, address).await?
-                    {
-                        descriptors.insert(descriptor);
+            .spawn(
+                async move {
+                    let adapter = session.default_adapter().await?;
+                    let device_addresses = adapter.device_addresses().await?;
+                    let mut descriptors = HashSet::new();
+                    for address in device_addresses {
+                        if device_utils::is_mac_address_soundcore_device(address.into()) {
+                            if let Some(descriptor) =
+                                Self::address_to_descriptor(&adapter, address).await?
+                            {
+                                descriptors.insert(descriptor);
+                            }
+                        }
                     }
+                    tracing::debug!("filtered down to {} descriptors", descriptors.len());
+                    Ok(descriptors)
                 }
-                tracing::debug!("filtered down to {} descriptors", descriptors.len());
-                Ok(descriptors)
-            })
+                .instrument(debug_span!("BluerConnectionRegistry::all_connected")),
+            )
             .await
             .unwrap()
-    }
-
-    /// Scans for connected BLE devices and attempt to filter out devices without the service UUID.
-    /// Not guaranteed to filter out all devices if another process is scanning at the same time.
-    async fn ble_scan(adapter: &Adapter) -> crate::Result<HashSet<Address>> {
-        adapter
-            .set_discovery_filter(DiscoveryFilter {
-                transport: DiscoveryTransport::Le,
-                ..Default::default()
-            })
-            .await?;
-
-        let discover = adapter.discover_devices().await?;
-
-        let device_addresses = discover
-            .take_until(tokio::time::sleep(Duration::from_secs(1)))
-            .filter_map(|event| async move {
-                match event {
-                    bluer::AdapterEvent::DeviceAdded(address)
-                        if device_utils::is_mac_address_soundcore_device(address.into()) =>
-                    {
-                        Some(address)
-                    }
-                    _ => None,
-                }
-            })
-            .collect::<HashSet<_>>()
-            .await;
-
-        Ok(device_addresses)
     }
 
     /// Filters out devices that are not connected and returns descriptors
@@ -108,17 +94,50 @@ impl BluerConnectionRegistry {
     ) -> crate::Result<Option<BluerConnection>> {
         let handle = self.runtime.handle();
         let session = self.session.to_owned();
+        let rfcomm_handle_lock = self.rfcomm_handle.to_owned();
         self.runtime
-            .spawn(async move {
-                let adapter = session.default_adapter().await?;
-                match adapter.device(mac_address.into_array().into()) {
-                    Ok(device) => Ok(Some(BluerConnection::new(device, handle).await?)),
-                    Err(err) => match err.kind {
-                        bluer::ErrorKind::NotFound => Ok(None),
-                        _ => Err(crate::Error::from(err)),
-                    },
+            .spawn(
+                async move {
+                    let mut rfcomm_handle = rfcomm_handle_lock.lock().await;
+                    let adapter = session.default_adapter().await?;
+                    let device = match adapter.device(mac_address.into_array().into()) {
+                        Ok(device) => device,
+                        Err(err) => {
+                            return match err.kind {
+                                bluer::ErrorKind::NotFound => Ok(None),
+                                _ => Err(crate::Error::from(err)),
+                            }
+                        }
+                    };
+                    debug!("connecting");
+                    let stream = loop {
+                        select! {
+                            res = async {
+                                let _ = device.connect().await;
+                                device.connect_profile(&device_utils::RFCOMM_UUID).await
+                            } => {
+                                if let Err(err)=res{
+                                    warn!("connect profile failed: {err:?}")
+                                }
+                                sleep(Duration::from_secs(3)).await;
+                            }
+                            req = rfcomm_handle.next() => {
+                                let req = req.unwrap();
+                                if req.device() == device.address() {
+                                    debug!("accepting request from {}", req.device());
+                                    break req.accept()?;
+                                } else {
+                                    debug!("rejecting request from {}", req.device());
+                                    req.reject(ReqError::Rejected);
+                                }
+                            }
+                        }
+                    };
+                    debug!("connected");
+                    BluerConnection::new(device, stream, handle).await.map(Some)
                 }
-            })
+                .instrument(warn_span!("BluerConnectionRegistry::new_connection")),
+            )
             .await
             .unwrap()
     }

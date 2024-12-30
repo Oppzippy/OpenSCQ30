@@ -33,7 +33,10 @@ float-cmp = { workspace = true, features = ["std"], default-features = false }
 static_assertions = { workspace = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
-bluer = { workspace = true, optional = true, features = ["bluetoothd"] }
+bluer = { workspace = true, optional = true, features = [
+    "bluetoothd",
+    "rfcomm",
+] }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
 
 [target.'cfg(any(target_os = "macos"))'.dependencies]

@@ -11,5 +11,6 @@ pub trait Connection {
     async fn write_with_response(&self, data: &[u8]) -> crate::Result<()>;
     async fn write_without_response(&self, data: &[u8]) -> crate::Result<()>;
     async fn inbound_packets_channel(&self) -> crate::Result<mpsc::Receiver<Vec<u8>>>;
+    // TODO remove in v2
     fn service_uuid(&self) -> Uuid;
 }

@@ -2,6 +2,8 @@ use macaddr::MacAddr6;
 use static_assertions::const_assert;
 use uuid::Uuid;
 
+pub const RFCOMM_UUID: Uuid = uuid::uuid!("00001101-0000-1000-8000-00805f9b34fb");
+
 // The devices have the same UUID except the first two bytes. I assume one device was chosen with an initial value,
 // and then the first two bytes increment by one for each device going from there. Unsure of the initial value or
 // the number of devices in existence.
