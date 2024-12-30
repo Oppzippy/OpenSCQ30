@@ -10,7 +10,7 @@ import com.oppzippy.openscq30.lib.bindings.MacAddr6
 import com.oppzippy.openscq30.lib.bindings.ManualConnection
 import com.oppzippy.openscq30.lib.bindings.Uuid
 import com.oppzippy.openscq30.lib.bindings.newSoundcoreDevice
-import java.lang.RuntimeException
+import com.oppzippy.openscq30.lib.bindings.rfcommSppUuid
 import java.util.concurrent.TimeoutException
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
@@ -37,10 +37,12 @@ class SoundcoreDeviceConnectorImpl(
         var connection: ManualConnection? = null
         try {
             val bluetoothDevice = deviceFinder.findByMacAddress(macAddress) ?: return null
+            val socket = bluetoothDevice.createRfcommSocketToServiceRecord(rfcommSppUuid())
+            socket.connect()
+
             val callbacks =
-                SoundcoreDeviceCallbackHandler(context = context, coroutineScope = coroutineScope)
-            gatt =
-                bluetoothDevice.connectGatt(context, false, callbacks, BluetoothDevice.TRANSPORT_LE)
+                SoundcoreDeviceCallbackHandler(context = context, socket = socket)
+            gatt = bluetoothDevice.connectGatt(context, false, callbacks, BluetoothDevice.TRANSPORT_LE)
 
             if (gatt.discoverServices()) {
                 Log.d(
@@ -62,7 +64,7 @@ class SoundcoreDeviceConnectorImpl(
                 throw TimeoutException("Timeout waiting for GATT services").initCause(ex)
             }
 
-            val serviceUuid = callbacks.serviceUuid.value ?: throw GattServiceNotFoundException()
+            val serviceUuid = callbacks.serviceUuid.value ?: Uuid(0, 0)
             connection = createManualConnection(
                 bluetoothDevice.name,
                 bluetoothDevice.address,
@@ -78,6 +80,7 @@ class SoundcoreDeviceConnectorImpl(
                 macAddress = nativeDevice.macAddress(),
                 bleServiceUuid = nativeDevice.serviceUuid(),
                 cleanUp = {
+                    socket.close()
                     callbacks.close()
                     gatt.disconnect()
                     gatt.close()

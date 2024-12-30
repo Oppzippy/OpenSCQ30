@@ -26,6 +26,11 @@ pub fn is_soundcore_service_uuid(uuid: Uuid) -> bool {
 }
 
 #[uniffi::export]
+pub fn rfcomm_spp_uuid() -> Uuid {
+    device_utils::RFCOMM_UUID
+}
+
+#[uniffi::export]
 pub fn read_characteristic_uuid() -> String {
     device_utils::READ_CHARACTERISTIC_UUID.to_string()
 }

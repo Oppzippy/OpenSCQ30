@@ -3,7 +3,7 @@ use std::sync::Arc;
 use macaddr::MacAddr6;
 use openscq30_lib::api::connection::{Connection, ConnectionStatus};
 use thiserror::Error;
-use tokio::sync::{mpsc, watch, RwLock};
+use tokio::sync::{mpsc, watch};
 use uuid::Uuid;
 
 #[uniffi::export(callback_interface)]
@@ -18,14 +18,15 @@ pub enum ConnectionError {
     WriteQueueFullError,
 }
 
+// Locks are from std::sync, so make sure to not hold across await points
 #[derive(uniffi::Object)]
 pub struct ManualConnection {
-    name: RwLock<String>,
-    mac_address: RwLock<MacAddr6>,
+    name: std::sync::RwLock<String>,
+    mac_address: std::sync::RwLock<MacAddr6>,
     connection_status_sender: watch::Sender<ConnectionStatus>,
     connection_writer: Box<dyn ConnectionWriter>,
     service_uuid: Uuid,
-    inbound_packets_sender: RwLock<Option<mpsc::Sender<Vec<u8>>>>,
+    inbound_packets_sender: std::sync::RwLock<Option<mpsc::Sender<Vec<u8>>>>,
 }
 
 #[uniffi::export]
@@ -39,32 +40,31 @@ impl ManualConnection {
     ) -> Arc<ManualConnection> {
         let (connection_status_sender, _) = watch::channel(ConnectionStatus::Connected);
         Arc::new(ManualConnection {
-            name: RwLock::new(name),
-            mac_address: RwLock::new(mac_address),
+            name: std::sync::RwLock::new(name),
+            mac_address: std::sync::RwLock::new(mac_address),
             connection_status_sender,
             connection_writer,
             service_uuid,
-            inbound_packets_sender: RwLock::new(None),
+            inbound_packets_sender: std::sync::RwLock::new(None),
         })
     }
 }
 
 #[uniffi::export]
 impl ManualConnection {
-    pub async fn set_name(&self, name: String) {
-        *self.name.write().await = name;
+    pub fn set_name(&self, name: String) {
+        *self.name.write().unwrap() = name;
     }
 
-    pub async fn set_mac_address(&self, mac_address: MacAddr6) {
-        *self.mac_address.write().await = mac_address;
+    pub fn set_mac_address(&self, mac_address: MacAddr6) {
+        *self.mac_address.write().unwrap() = mac_address;
     }
 
-    pub async fn add_inbound_packet(&self, inbound_packet: Vec<u8>) -> Result<(), ConnectionError> {
+    pub fn add_inbound_packet(&self, inbound_packet: Vec<u8>) -> Result<(), ConnectionError> {
         tracing::info!("got packet {inbound_packet:?}");
-        match &*self.inbound_packets_sender.read().await {
+        match &*self.inbound_packets_sender.read().unwrap() {
             Some(sender) => sender
-                .send(inbound_packet)
-                .await
+                .blocking_send(inbound_packet)
                 .map_err(|_| ConnectionError::WriteQueueFullError),
             None => {
                 tracing::warn!(
@@ -78,11 +78,11 @@ impl ManualConnection {
 
 impl Connection for ManualConnection {
     async fn name(&self) -> openscq30_lib::Result<String> {
-        Ok(self.name.read().await.to_owned())
+        Ok(self.name.read().unwrap().to_owned())
     }
 
     async fn mac_address(&self) -> openscq30_lib::Result<MacAddr6> {
-        Ok(*self.mac_address.read().await)
+        Ok(*self.mac_address.read().unwrap())
     }
 
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
@@ -101,7 +101,7 @@ impl Connection for ManualConnection {
 
     async fn inbound_packets_channel(&self) -> openscq30_lib::Result<mpsc::Receiver<Vec<u8>>> {
         let (sender, receiver) = mpsc::channel(50);
-        *self.inbound_packets_sender.write().await = Some(sender);
+        *self.inbound_packets_sender.write().unwrap() = Some(sender);
 
         Ok(receiver)
     }
