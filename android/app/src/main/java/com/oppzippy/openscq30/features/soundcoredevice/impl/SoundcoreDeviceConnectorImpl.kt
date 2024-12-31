@@ -10,7 +10,6 @@ import com.oppzippy.openscq30.lib.bindings.MacAddr6
 import com.oppzippy.openscq30.lib.bindings.ManualConnection
 import com.oppzippy.openscq30.lib.bindings.Uuid
 import com.oppzippy.openscq30.lib.bindings.newSoundcoreDevice
-import com.oppzippy.openscq30.lib.bindings.rfcommSppUuid
 import java.util.concurrent.TimeoutException
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
@@ -21,6 +20,7 @@ import kotlinx.coroutines.withTimeout
 class SoundcoreDeviceConnectorImpl(
     private val context: Context,
     private val deviceFinder: BluetoothDeviceFinder,
+    private val rfcommSppUuid: Uuid,
     private val createManualConnection: (
         name: String,
         macAddress: MacAddr6,
@@ -37,7 +37,7 @@ class SoundcoreDeviceConnectorImpl(
         var connection: ManualConnection? = null
         try {
             val bluetoothDevice = deviceFinder.findByMacAddress(macAddress) ?: return null
-            val socket = bluetoothDevice.createRfcommSocketToServiceRecord(rfcommSppUuid())
+            val socket = bluetoothDevice.createRfcommSocketToServiceRecord(rfcommSppUuid)
             socket.connect()
 
             val callbacks =
@@ -75,11 +75,23 @@ class SoundcoreDeviceConnectorImpl(
 
             val nativeDevice = newSoundcoreDevice(connection)
 
-            val soundcoreDevice = SoundcoreDevice(
+            var soundcoreDevice: SoundcoreDevice? = null
+            // SoundcoreDevice and SoundcoreDeviceCallbackHandler are intentionally unaware of each other,
+            // so connecting isDisconnected to SoundcoreDevice's close must be done outside of either of
+            // the two classes.
+            val job = coroutineScope.launch {
+                callbacks.isDisconnected.collect { isDisconnected ->
+                    if (isDisconnected) {
+                        soundcoreDevice?.close()
+                    }
+                }
+            }
+            soundcoreDevice = SoundcoreDevice(
                 name = nativeDevice.name(),
                 macAddress = nativeDevice.macAddress(),
                 bleServiceUuid = nativeDevice.serviceUuid(),
                 cleanUp = {
+                    job.cancel()
                     socket.close()
                     callbacks.close()
                     gatt.disconnect()
@@ -89,17 +101,6 @@ class SoundcoreDeviceConnectorImpl(
                 coroutineScope = coroutineScope,
                 initialState = nativeDevice.state(),
             )
-
-            // SoundcoreDevice and SoundcoreDeviceCallbackHandler are intentionally unaware of each other,
-            // so connecting isDisconnected to SoundcoreDevice's close must be done outside of either of
-            // the two classes.
-            coroutineScope.launch {
-                callbacks.isDisconnected.collect { isDisconnected ->
-                    if (isDisconnected) {
-                        soundcoreDevice.close()
-                    }
-                }
-            }
 
             return soundcoreDevice
         } catch (ex: Exception) {
@@ -111,5 +112,3 @@ class SoundcoreDeviceConnectorImpl(
         }
     }
 }
-
-class GattServiceNotFoundException : RuntimeException()

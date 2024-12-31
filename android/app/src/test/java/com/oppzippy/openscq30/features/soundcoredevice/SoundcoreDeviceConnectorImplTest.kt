@@ -3,10 +3,11 @@ package com.oppzippy.openscq30.features.soundcoredevice
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothSocket
+import android.bluetooth.BluetoothSocketException
 import android.content.Context
 import android.util.Log
 import com.oppzippy.openscq30.features.soundcoredevice.impl.BluetoothDeviceFinder
-import com.oppzippy.openscq30.features.soundcoredevice.impl.GattServiceNotFoundException
 import com.oppzippy.openscq30.features.soundcoredevice.impl.SoundcoreDeviceCallbackHandler
 import com.oppzippy.openscq30.features.soundcoredevice.impl.SoundcoreDeviceConnectorImpl
 import com.oppzippy.openscq30.lib.bindings.ManualConnection
@@ -17,11 +18,15 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
 import io.mockk.just
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.mockkStatic
 import io.mockk.runs
+import io.mockk.slot
 import io.mockk.verify
+import java.io.InputStream
+import java.io.OutputStream
 import java.util.UUID
 import java.util.concurrent.TimeoutException
 import kotlin.reflect.jvm.kotlinFunction
@@ -53,6 +58,9 @@ class SoundcoreDeviceConnectorImplTest {
     @MockK
     private lateinit var bluetoothDevice: BluetoothDevice
 
+    @MockK
+    private lateinit var socket: BluetoothSocket
+
     @MockK(relaxed = true)
     private lateinit var gatt: BluetoothGatt
 
@@ -62,6 +70,8 @@ class SoundcoreDeviceConnectorImplTest {
     private lateinit var connector: SoundcoreDeviceConnectorImpl
 
     private val macAddress = "00:11:22:33:44:55"
+    private val inputStream = InputStream.nullInputStream()
+    private val outputStream = OutputStream.nullOutputStream()
 
     @Before
     fun setUp() {
@@ -72,7 +82,19 @@ class SoundcoreDeviceConnectorImplTest {
                 String::class.java,
             ).kotlinFunction!!,
         )
+        mockkStatic(
+            Log::class.java.getDeclaredMethod(
+                "i",
+                String::class.java,
+                String::class.java,
+            ).kotlinFunction!!,
+        )
         every { Log.d(any(), any()) } returns 0
+        val stringSlot = slot<String>()
+        every { Log.i(any(), capture(stringSlot)) } answers {
+            println(stringSlot.captured)
+            0
+        }
 
         mockkConstructor(ManualConnection::class)
         mockkConstructor(SoundcoreDeviceCallbackHandler::class)
@@ -83,8 +105,13 @@ class SoundcoreDeviceConnectorImplTest {
             manager
         }
         coEvery { deviceFinder.findByMacAddress(macAddress) } returns bluetoothDevice
-        connector =
-            SoundcoreDeviceConnectorImpl(context, deviceFinder) { _, _, _, _ -> manualConnection }
+
+        connector = SoundcoreDeviceConnectorImpl(
+            context = context,
+            deviceFinder = deviceFinder,
+            rfcommSppUuid = UUID(0, 0),
+            createManualConnection = { _, _, _, _ -> manualConnection },
+        )
         coEvery {
             bluetoothDevice.connectGatt(
                 context,
@@ -93,12 +120,19 @@ class SoundcoreDeviceConnectorImplTest {
                 BluetoothDevice.TRANSPORT_LE,
             )
         } returns gatt
+        every { bluetoothDevice.createRfcommSocketToServiceRecord(any()) } returns socket
         every { bluetoothDevice.address } returns macAddress
         every { bluetoothDevice.name } returns "Demo Device"
+
+        justRun { socket.connect() }
+        every { socket.inputStream } returns inputStream
+        every { socket.outputStream } returns outputStream
     }
 
     @After
     fun tearDown() {
+        inputStream.close()
+        outputStream.close()
         clearAllMocks()
     }
 
@@ -166,21 +200,30 @@ class SoundcoreDeviceConnectorImplTest {
     }
 
     @Test
-    fun shouldThrowIfServiceUuidIsNotFound() = runTest {
-        coEvery { anyConstructed<SoundcoreDeviceCallbackHandler>().waitUntilReady() } just runs
-        coEvery { anyConstructed<SoundcoreDeviceCallbackHandler>().serviceUuid } returns MutableStateFlow(
-            null,
-        )
-
-        val exception = Exception()
-        mockkStatic(::newSoundcoreDevice)
-        coEvery { newSoundcoreDevice(any()) } throws exception
-        every { manualConnection.close() } just runs
+    fun shouldThrowIfRfcommConnectionFails() = runTest {
+        every { socket.connect() } throws BluetoothSocketException(BluetoothSocketException.UNSPECIFIED)
+        justRun { manualConnection.close() }
 
         try {
             connector.connectToSoundcoreDevice(macAddress, this)
-            Assert.fail("No exception thrown")
-        } catch (_: GattServiceNotFoundException) {
+            Assert.fail("exception not thrown")
+        } catch (_: BluetoothSocketException) {
         }
+    }
+
+    @Test
+    fun shouldNotThrowIfGattServiceUuidIsNotFound() = runTest {
+        coEvery { anyConstructed<SoundcoreDeviceCallbackHandler>().waitUntilReady() } just runs
+        coEvery { anyConstructed<SoundcoreDeviceCallbackHandler>().serviceUuid } returns MutableStateFlow(null)
+        coEvery { anyConstructed<SoundcoreDeviceCallbackHandler>().isDisconnected } returns MutableStateFlow(false)
+        mockkStatic(::newSoundcoreDevice)
+        coEvery { newSoundcoreDevice(any()) } returns mockk(relaxed = true)
+
+        val device = connector.connectToSoundcoreDevice(macAddress, this)
+        Assert.assertNotNull(device)
+
+        justRun { socket.close() }
+        justRun { manualConnection.close() }
+        device?.close()
     }
 }
