@@ -16,26 +16,38 @@ class QuickPresetRepository @Inject constructor(private val quickPresetDao: Quic
         quickPresetDao.insertFallback(fallbackQuickPreset)
     }
 
-    suspend fun delete(deviceBleServiceUuid: UUID, index: Int) {
-        quickPresetDao.delete(deviceBleServiceUuid, index)
+    suspend fun delete(model: String, index: Int) {
+        quickPresetDao.delete(model, index)
     }
 
-    suspend fun getForDevice(deviceBleServiceUuid: UUID): List<QuickPreset> {
-        val presets = quickPresetDao.getForDevice(deviceBleServiceUuid)
+    suspend fun getForDevice(deviceModel: String): List<QuickPreset> {
+        val presets = quickPresetDao.getForDevice(deviceModel)
         val fallbacks = quickPresetDao.getFallbacks()
         return (0..1).map { i ->
             presets.firstOrNull { it.index == i } ?: fallbacks.firstOrNull { it.index == i }
-                ?.toQuickPreset(deviceBleServiceUuid) ?: QuickPreset(deviceBleServiceUuid, i)
+                ?.toQuickPreset(deviceModel) ?: QuickPreset(id = null, deviceModel = deviceModel, index = i)
         }
     }
 
-    fun getNamesForDevice(deviceBleServiceUuid: UUID): Flow<List<String?>> {
-        val namesFlow = quickPresetDao.allNames(deviceBleServiceUuid)
+    fun getNamesForDevice(deviceModel: String): Flow<List<String?>> {
+        val namesFlow = quickPresetDao.allNames(deviceModel)
         val fallbacksFlow = quickPresetDao.allFallbackNames()
         return namesFlow.combine(fallbacksFlow) { names, fallbacks ->
             (0..1).map { i ->
                 names.getOrNull(i)?.name ?: fallbacks.getOrNull(i)?.name
             }
+        }
+    }
+
+    suspend fun migrateBleServiceUuids(deviceModel: String, deviceBleServiceUuid: UUID) {
+        val presets = quickPresetDao.getForDeviceByServiceUuid(deviceBleServiceUuid)
+        presets.forEach {
+            insert(
+                it.copy(
+                    deviceModel = deviceModel,
+                    deviceBleServiceUuid = null,
+                ),
+            )
         }
     }
 }

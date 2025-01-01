@@ -22,18 +22,21 @@ interface QuickPresetDao {
     fun allFallbackNames(): Flow<List<QuickPresetIndexAndName>>
 
     @Query("SELECT * FROM quick_preset WHERE deviceBleServiceUuid = :deviceBleServiceUuid")
-    suspend fun getForDevice(deviceBleServiceUuid: UUID): List<QuickPreset>
+    suspend fun getForDeviceByServiceUuid(deviceBleServiceUuid: UUID): List<QuickPreset>
+
+    @Query("SELECT * FROM quick_preset WHERE deviceModel = :deviceModel")
+    suspend fun getForDevice(deviceModel: String): List<QuickPreset>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(quickPreset: QuickPreset)
 
-    @Query("DELETE FROM quick_preset WHERE deviceBleServiceUuid = :deviceBleServiceUuid AND `index` = :index")
-    suspend fun delete(deviceBleServiceUuid: UUID, index: Int)
+    @Query("DELETE FROM quick_preset WHERE deviceModel = :deviceModel AND `index` = :index")
+    suspend fun delete(deviceModel: String, index: Int)
 
     @Query(
-        "SELECT `index`, name FROM quick_preset WHERE deviceBleServiceUuid = :deviceBleServiceUuid ORDER BY `index` ASC",
+        "SELECT `index`, name FROM quick_preset WHERE deviceModel = :deviceModel ORDER BY `index` ASC",
     )
-    fun allNames(deviceBleServiceUuid: UUID): Flow<List<QuickPresetIndexAndName>>
+    fun allNames(deviceModel: String): Flow<List<QuickPresetIndexAndName>>
 }
 
 data class QuickPresetIndexAndName(val index: Int, val name: String?)

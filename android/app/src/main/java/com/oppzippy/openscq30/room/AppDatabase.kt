@@ -18,7 +18,7 @@ import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
 
 @Database(
-    version = 9,
+    version = 10,
     entities = [
         CustomProfile::class,
         FallbackQuickPreset::class,
@@ -31,6 +31,7 @@ import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
         AutoMigration(from = 4, to = 5),
         AutoMigration(from = 6, to = 7, spec = AppDatabase.AutoMigration6To7::class),
         AutoMigration(from = 7, to = 8, spec = AppDatabase.AutoMigration7To8::class),
+        AutoMigration(from = 9, to = 10),
     ],
 )
 @TypeConverters(Converters::class)

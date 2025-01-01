@@ -27,16 +27,15 @@ import com.oppzippy.openscq30.ui.quickpresets.composables.QuickPresetSelection
 import com.oppzippy.openscq30.ui.quickpresets.models.QuickPresetEqualizerConfiguration
 import com.oppzippy.openscq30.ui.utils.Loading
 import com.oppzippy.openscq30.ui.utils.PermissionCheck
-import java.util.UUID
 
 @Composable
 fun QuickPresetScreen(
     deviceFeatures: DeviceFeatures,
-    deviceBleServiceUuid: UUID,
+    deviceModel: String,
     viewModel: QuickPresetViewModel = hiltViewModel(),
 ) {
-    DisposableEffect(deviceBleServiceUuid) {
-        viewModel.selectQuickPreset(deviceBleServiceUuid, 0)
+    DisposableEffect(deviceModel) {
+        viewModel.selectQuickPreset(deviceModel, 0)
         onDispose {
             viewModel.clearSelection()
         }
@@ -74,7 +73,7 @@ fun QuickPresetScreen(
                 deviceFeatures = deviceFeatures,
                 preset = preset,
                 customEqualizerProfiles = customEqualizerProfiles,
-                onSelectedIndexChange = { viewModel.selectQuickPreset(deviceBleServiceUuid, it) },
+                onSelectedIndexChange = { viewModel.selectQuickPreset(deviceModel, it) },
                 onAmbientSoundModeChange = {
                     viewModel.upsertQuickPreset(
                         preset.copy(ambientSoundMode = it),

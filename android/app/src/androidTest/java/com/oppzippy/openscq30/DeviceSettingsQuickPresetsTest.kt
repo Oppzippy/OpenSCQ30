@@ -25,7 +25,6 @@ import com.oppzippy.openscq30.ui.quickpresets.QuickPresetScreen
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.junit4.MockKRule
-import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -80,7 +79,7 @@ class DeviceSettingsQuickPresetsTest {
         hasAutoPowerOff = true,
         dynamicRangeCompressionMinFirmwareVersion = FirmwareVersion(0u, 1u),
     )
-    private var deviceUuid = UUID(0, 0)
+    private var deviceModel = "0123"
 
     private lateinit var name: SemanticsMatcher
     private lateinit var ambientSoundMode: SemanticsMatcher
@@ -112,7 +111,7 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsName() = runTest {
         composeRule.setContent {
-            QuickPresetScreen(deviceFeatures, deviceUuid)
+            QuickPresetScreen(deviceFeatures, deviceModel)
         }
         assertEquals(null, getFirstPreset()?.name)
 
@@ -123,7 +122,7 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsAmbientSoundMode() = runTest {
         composeRule.setContent {
-            QuickPresetScreen(deviceFeatures, deviceUuid)
+            QuickPresetScreen(deviceFeatures, deviceModel)
         }
         assertEquals(null, getFirstPreset()?.ambientSoundMode)
 
@@ -138,7 +137,7 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsTransparencyMode() = runTest {
         composeRule.setContent {
-            QuickPresetScreen(deviceFeatures, deviceUuid)
+            QuickPresetScreen(deviceFeatures, deviceModel)
         }
         assertEquals(null, getFirstPreset()?.transparencyMode)
 
@@ -153,7 +152,7 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsNoiseCancelingMode() = runTest {
         composeRule.setContent {
-            QuickPresetScreen(deviceFeatures, deviceUuid)
+            QuickPresetScreen(deviceFeatures, deviceModel)
         }
         assertEquals(null, getFirstPreset()?.noiseCancelingMode)
 
@@ -167,14 +166,14 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsCustomNoiseCanceling() = runTest {
         composeRule.setContent {
-            QuickPresetScreen(deviceFeatures, deviceUuid)
+            QuickPresetScreen(deviceFeatures, deviceModel)
         }
         assertEquals(null, getFirstPreset()?.customNoiseCanceling)
 
         composeRule.onNode(customNoiseCanceling).performClick()
         assertEquals(
             0,
-            quickPresetRepository.getForDevice(deviceUuid)
+            quickPresetRepository.getForDevice(deviceModel)
                 .getOrNull(0)?.customNoiseCanceling,
         )
 
@@ -182,7 +181,7 @@ class DeviceSettingsQuickPresetsTest {
         // clicks in the middle of the 0-10 slider, which is 5
         assertEquals(
             5,
-            quickPresetRepository.getForDevice(deviceUuid)
+            quickPresetRepository.getForDevice(deviceModel)
                 .getOrNull(0)?.customNoiseCanceling,
         )
     }
@@ -190,7 +189,7 @@ class DeviceSettingsQuickPresetsTest {
     @Test
     fun acceptsPresetEqualizerProfile() = runTest {
         composeRule.setContent {
-            QuickPresetScreen(deviceFeatures, deviceUuid)
+            QuickPresetScreen(deviceFeatures, deviceModel)
         }
         assertEquals(null, getFirstPreset()?.presetEqualizerProfile)
 
@@ -218,7 +217,7 @@ class DeviceSettingsQuickPresetsTest {
             ).toCustomProfile("Test Profile"),
         )
         composeRule.setContent {
-            QuickPresetScreen(deviceFeatures, deviceUuid)
+            QuickPresetScreen(deviceFeatures, deviceModel)
         }
         assertEquals(null, getFirstPreset()?.customEqualizerProfileName)
 
@@ -245,7 +244,7 @@ class DeviceSettingsQuickPresetsTest {
             ).toCustomProfile("Test Profile"),
         )
         composeRule.setContent {
-            QuickPresetScreen(deviceFeatures, deviceUuid)
+            QuickPresetScreen(deviceFeatures, deviceModel)
         }
         composeRule.onNode(equalizer, useUnmergedTree = true).performClick()
 
@@ -274,9 +273,9 @@ class DeviceSettingsQuickPresetsTest {
     fun prioritizesDeviceProfilesOverFallback() = runTest {
         quickPresetRepository.insert(
             QuickPreset(
-                deviceUuid,
-                0,
-                "device specific 1",
+                deviceModel = deviceModel,
+                index = 0,
+                name = "device specific 1",
             ),
         )
         quickPresetRepository.insertFallback(
@@ -293,17 +292,17 @@ class DeviceSettingsQuickPresetsTest {
         )
 
         composeRule.setContent {
-            QuickPresetScreen(deviceFeatures, deviceUuid)
+            QuickPresetScreen(deviceFeatures, deviceModel)
         }
         assertEquals(
             "device specific 1",
-            quickPresetRepository.getForDevice(deviceUuid).getOrNull(0)?.name,
+            quickPresetRepository.getForDevice(deviceModel).getOrNull(0)?.name,
         )
         assertEquals(
             "fallback 2",
-            quickPresetRepository.getForDevice(deviceUuid).getOrNull(1)?.name,
+            quickPresetRepository.getForDevice(deviceModel).getOrNull(1)?.name,
         )
     }
 
-    private suspend fun getFirstPreset(): QuickPreset? = quickPresetRepository.getForDevice(deviceUuid).getOrNull(0)
+    private suspend fun getFirstPreset(): QuickPreset? = quickPresetRepository.getForDevice(deviceModel).getOrNull(0)
 }

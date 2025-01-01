@@ -6,7 +6,6 @@ import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
 import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,11 +23,11 @@ class QuickPresetViewModel @Inject constructor(
     val customEqualizerProfiles =
         customProfileDao.all().stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    fun selectQuickPreset(deviceBleServiceUuid: UUID, index: Int) {
+    fun selectQuickPreset(deviceModel: String, index: Int) {
         viewModelScope.launch {
             _quickPreset.value =
-                quickPresetRepository.getForDevice(deviceBleServiceUuid).getOrNull(index)
-                    ?: QuickPreset(deviceBleServiceUuid, index)
+                quickPresetRepository.getForDevice(deviceModel).getOrNull(index)
+                    ?: QuickPreset(id = null, deviceModel = deviceModel, index = index)
         }
     }
 

@@ -10,6 +10,7 @@ import com.oppzippy.openscq30.lib.bindings.MacAddr6
 import com.oppzippy.openscq30.lib.bindings.ManualConnection
 import com.oppzippy.openscq30.lib.bindings.Uuid
 import com.oppzippy.openscq30.lib.bindings.newSoundcoreDevice
+import java.util.UUID
 import java.util.concurrent.TimeoutException
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
@@ -64,11 +65,10 @@ class SoundcoreDeviceConnectorImpl(
                 throw TimeoutException("Timeout waiting for GATT services").initCause(ex)
             }
 
-            val serviceUuid = callbacks.serviceUuid.value ?: Uuid(0, 0)
             connection = createManualConnection(
                 bluetoothDevice.name,
                 bluetoothDevice.address,
-                serviceUuid,
+                callbacks.serviceUuid.value ?: UUID(0, 0),
                 callbacks,
             )
             callbacks.setManualConnection(connection)

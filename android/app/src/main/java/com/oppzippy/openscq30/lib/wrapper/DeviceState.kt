@@ -24,6 +24,11 @@ data class DeviceState(
 ) {
     companion object // used for static extension methods in tests
 
+    val model: String?
+        get() {
+            return serialNumber?.substring(0, 4)
+        }
+
     fun supportsDynamicRangeCompression(): Boolean {
         if (deviceFeatures.hasDynamicRangeCompression) {
             if (firmwareVersion == null) {

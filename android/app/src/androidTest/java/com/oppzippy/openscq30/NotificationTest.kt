@@ -32,7 +32,6 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.junit4.MockKRule
-import java.util.UUID
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.first
@@ -82,7 +81,7 @@ class NotificationTest {
 
     private lateinit var uiDevice: UiDevice
 
-    private val deviceUuid = UUID(0, 0)
+    private val deviceModel = "0123"
     private val notificationTitle = By.text("Connected to Demo Device")
     private val notification: UiObject2
         get() {
@@ -141,14 +140,14 @@ class NotificationTest {
     fun quickPresetButtonsWork(): Unit = runBlocking {
         quickPresetRepository.insert(
             QuickPreset(
-                deviceBleServiceUuid = deviceUuid,
+                deviceModel = deviceModel,
                 index = 0,
                 ambientSoundMode = AmbientSoundMode.Transparency,
             ),
         )
         quickPresetRepository.insert(
             QuickPreset(
-                deviceBleServiceUuid = deviceUuid,
+                deviceModel = deviceModel,
                 index = 1,
                 name = "Test Preset 2",
                 ambientSoundMode = AmbientSoundMode.NoiseCanceling,
@@ -192,14 +191,14 @@ class NotificationTest {
         )
         quickPresetRepository.insert(
             QuickPreset(
-                deviceBleServiceUuid = deviceUuid,
+                deviceModel = deviceModel,
                 index = 0,
                 customEqualizerProfileName = "Test Profile",
             ),
         )
         quickPresetRepository.insert(
             QuickPreset(
-                deviceBleServiceUuid = deviceUuid,
+                deviceModel = deviceModel,
                 index = 1,
                 presetEqualizerProfile = PresetEqualizerProfile.SoundcoreSignature,
             ),
@@ -233,9 +232,9 @@ class NotificationTest {
     fun deviceSpecificProfileNamesOverrideFallbacks() = runTest {
         quickPresetRepository.insert(
             QuickPreset(
-                deviceUuid,
-                0,
-                "device specific 1",
+                deviceModel = deviceModel,
+                index = 0,
+                name = "device specific 1",
             ),
         )
         quickPresetRepository.insertFallback(

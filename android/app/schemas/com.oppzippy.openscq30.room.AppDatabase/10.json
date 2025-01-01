@@ -1,0 +1,262 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 10,
+    "identityHash": "44757929945db498662b94b7d649fa1c",
+    "entities": [
+      {
+        "tableName": "custom_equalizer_profile",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`name` TEXT NOT NULL, `band100` INTEGER NOT NULL, `band200` INTEGER NOT NULL, `band400` INTEGER NOT NULL, `band800` INTEGER NOT NULL, `band1600` INTEGER NOT NULL, `band3200` INTEGER NOT NULL, `band6400` INTEGER NOT NULL, `band12800` INTEGER NOT NULL, PRIMARY KEY(`name`))",
+        "fields": [
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "band100",
+            "columnName": "band100",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "band200",
+            "columnName": "band200",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "band400",
+            "columnName": "band400",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "band800",
+            "columnName": "band800",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "band1600",
+            "columnName": "band1600",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "band3200",
+            "columnName": "band3200",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "band6400",
+            "columnName": "band6400",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "band12800",
+            "columnName": "band12800",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "name"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_custom_equalizer_profile_bands",
+            "unique": true,
+            "columnNames": [
+              "band100",
+              "band200",
+              "band400",
+              "band800",
+              "band1600",
+              "band3200",
+              "band6400",
+              "band12800"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_custom_equalizer_profile_bands` ON `${TABLE_NAME}` (`band100`, `band200`, `band400`, `band800`, `band1600`, `band3200`, `band6400`, `band12800`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "fallback_quick_preset",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`index` INTEGER NOT NULL, `name` TEXT, `ambientSoundMode` TEXT, `noiseCancelingMode` TEXT, `transparencyMode` TEXT, `customNoiseCanceling` INTEGER, `presetEqualizerProfile` TEXT, `customEqualizerProfileName` TEXT, PRIMARY KEY(`index`))",
+        "fields": [
+          {
+            "fieldPath": "index",
+            "columnName": "index",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ambientSoundMode",
+            "columnName": "ambientSoundMode",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "noiseCancelingMode",
+            "columnName": "noiseCancelingMode",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "transparencyMode",
+            "columnName": "transparencyMode",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "customNoiseCanceling",
+            "columnName": "customNoiseCanceling",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "presetEqualizerProfile",
+            "columnName": "presetEqualizerProfile",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "customEqualizerProfileName",
+            "columnName": "customEqualizerProfileName",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "index"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "quick_preset",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `deviceModel` TEXT, `deviceBleServiceUuid` BLOB, `index` INTEGER NOT NULL, `name` TEXT, `ambientSoundMode` TEXT, `noiseCancelingMode` TEXT, `transparencyMode` TEXT, `customNoiseCanceling` INTEGER, `presetEqualizerProfile` TEXT, `customEqualizerProfileName` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "deviceModel",
+            "columnName": "deviceModel",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "deviceBleServiceUuid",
+            "columnName": "deviceBleServiceUuid",
+            "affinity": "BLOB",
+            "notNull": false
+          },
+          {
+            "fieldPath": "index",
+            "columnName": "index",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ambientSoundMode",
+            "columnName": "ambientSoundMode",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "noiseCancelingMode",
+            "columnName": "noiseCancelingMode",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "transparencyMode",
+            "columnName": "transparencyMode",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "customNoiseCanceling",
+            "columnName": "customNoiseCanceling",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "presetEqualizerProfile",
+            "columnName": "presetEqualizerProfile",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "customEqualizerProfileName",
+            "columnName": "customEqualizerProfileName",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_quick_preset_deviceBleServiceUuid_index",
+            "unique": true,
+            "columnNames": [
+              "deviceBleServiceUuid",
+              "index"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_quick_preset_deviceBleServiceUuid_index` ON `${TABLE_NAME}` (`deviceBleServiceUuid`, `index`)"
+          },
+          {
+            "name": "index_quick_preset_deviceModel_index",
+            "unique": true,
+            "columnNames": [
+              "deviceModel",
+              "index"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_quick_preset_deviceModel_index` ON `${TABLE_NAME}` (`deviceModel`, `index`)"
+          }
+        ],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '44757929945db498662b94b7d649fa1c')"
+    ]
+  }
+}

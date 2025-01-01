@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -98,10 +99,22 @@ class DeviceService : LifecycleService() {
         lifecycleScope.launch {
             connectionManager.connectionStatusFlow.collectLatest { connectionStatus ->
                 if (connectionStatus is ConnectionStatus.Connected) {
-                    quickPresetRepository.getNamesForDevice(connectionStatus.device.bleServiceUuid)
-                        .collectLatest { names ->
-                            quickPresetNames.value = names
+                    var isMigrated = false
+                    connectionStatus.device.stateFlow.map { it.model }.collectLatest { deviceModel ->
+                        if (deviceModel != null) {
+                            if (!isMigrated) {
+                                isMigrated = true
+                                quickPresetRepository.migrateBleServiceUuids(
+                                    deviceModel,
+                                    connectionStatus.device.bleServiceUuid,
+                                )
+                            }
+                            quickPresetRepository.getNamesForDevice(deviceModel)
+                                .collectLatest { quickPresetNames.value = it }
+                        } else {
+                            quickPresetNames.value = emptyList()
                         }
+                    }
                 } else {
                     quickPresetNames.value = emptyList()
                 }

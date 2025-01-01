@@ -6,7 +6,6 @@ import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
 import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
 import com.oppzippy.openscq30.lib.wrapper.PresetEqualizerProfile
 import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
-import java.util.UUID
 
 @Entity(
     tableName = "fallback_quick_preset",
@@ -21,8 +20,10 @@ data class FallbackQuickPreset(
     val presetEqualizerProfile: PresetEqualizerProfile? = null,
     val customEqualizerProfileName: String? = null,
 ) {
-    fun toQuickPreset(deviceBleServiceUuid: UUID): QuickPreset = QuickPreset(
-        deviceBleServiceUuid = deviceBleServiceUuid,
+    fun toQuickPreset(deviceModel: String): QuickPreset = QuickPreset(
+        null,
+        deviceModel,
+        null,
         index,
         name,
         ambientSoundMode,

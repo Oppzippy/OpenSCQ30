@@ -185,10 +185,15 @@ fun DeviceSettings(
                 )
             }
             composable<Screen.QuickPresets> {
-                QuickPresetScreen(
-                    deviceFeatures = uiState.deviceState.deviceFeatures,
-                    deviceBleServiceUuid = uiState.deviceBleServiceUuid,
-                )
+                val deviceModel = uiState.deviceState.model
+                if (deviceModel != null) {
+                    QuickPresetScreen(
+                        deviceFeatures = uiState.deviceState.deviceFeatures,
+                        deviceModel = deviceModel,
+                    )
+                } else {
+                    Text("Internal error: device model missing from state")
+                }
             }
             uiState.deviceState.buttonConfiguration?.let { buttonConfiguration ->
                 composable<Screen.ButtonActions> {
