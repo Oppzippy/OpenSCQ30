@@ -100,6 +100,11 @@ where
     let name = device.name().await?;
     let mac_address = device.mac_address().await?;
     let device_state = device.state().await;
+    let device_model = device_state
+        .serial_number
+        .as_ref()
+        .map(|sn| sn.model_number().to_owned())
+        .ok_or(anyhow!("missing device serial number"))?;
     state
         .state_update_sender
         .send(StateUpdate::SetSelectedDevice(Some(GlibDevice::new(
@@ -113,7 +118,10 @@ where
         .send(StateUpdate::SetDeviceState(device_state))
         .map_err(|err| anyhow!("{err:?}"))?;
 
-    actions::refresh_quick_presets(state, settings_file, device.service_uuid())?;
+    settings_file.edit(|config| {
+        config.migrate_service_uuid_to_device_model(device.service_uuid(), device_model.to_owned())
+    })?;
+    actions::refresh_quick_presets(state, settings_file, &device_model)?;
 
     Ok(())
 }
@@ -158,7 +166,7 @@ mod tests {
             state::DeviceState,
             structures::{
                 AmbientSoundMode, EqualizerConfiguration, NoiseCancelingMode,
-                PresetEqualizerProfile, SoundModes,
+                PresetEqualizerProfile, SerialNumber, SoundModes,
             },
         },
     };
@@ -188,6 +196,7 @@ mod tests {
             equalizer_configuration: EqualizerConfiguration::new_from_preset_profile(
                 PresetEqualizerProfile::Acoustic,
             ),
+            serial_number: Some(SerialNumber("0123".into())),
             ..Default::default()
         };
 
@@ -218,7 +227,7 @@ mod tests {
                     .once()
                     .return_const(receiver);
                 device.expect_service_uuid().return_const(Uuid::default());
-                device.expect_state().once().return_const(device_state_2);
+                device.expect_state().return_const(device_state_2);
 
                 Ok(Some(Rc::new(device)))
             });
@@ -304,7 +313,7 @@ mod tests {
                     .once()
                     .return_const(receiver);
                 device.expect_service_uuid().return_const(Uuid::default());
-                device.expect_state().once().return_const(DeviceState {
+                device.expect_state().return_const(DeviceState {
                     sound_modes: Some(SoundModes {
                         ambient_sound_mode: AmbientSoundMode::Transparency,
                         noise_canceling_mode: NoiseCancelingMode::Indoor,
@@ -313,6 +322,7 @@ mod tests {
                     equalizer_configuration: EqualizerConfiguration::new_from_preset_profile(
                         PresetEqualizerProfile::Acoustic,
                     ),
+                    serial_number: Some(SerialNumber("0123".into())),
                     ..Default::default()
                 });
 

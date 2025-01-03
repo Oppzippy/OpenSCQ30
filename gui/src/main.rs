@@ -444,6 +444,7 @@ fn delayed_initialize_application(
                                 &settings.config,
                                 named_quick_preset,
                             )
+                            .await
                             .context("create quick preset")
                         }
                         Action::ActivateQuickPreset(named_quick_preset) => {
@@ -457,6 +458,7 @@ fn delayed_initialize_application(
                         }
                         Action::DeleteQuickPreset(name) => {
                             actions::delete_quick_preset(&state, &settings.config, &name)
+                                .await
                                 .context("delete quick preset")
                         }
                         Action::SetHearId(hear_id) => actions::set_hear_id(&state, hear_id)

@@ -17,7 +17,8 @@ use super::custom_equalizer_profile::CustomEqualizerProfile;
 #[serde(default)]
 pub struct Config {
     equalizer_custom_profiles: HashMap<String, CustomEqualizerProfile>,
-    quick_presets: HashMap<Uuid, HashMap<String, QuickPreset>>,
+    // model number -> (quick preset name -> quick preset settings)
+    quick_presets: HashMap<String, HashMap<String, QuickPreset>>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Default, Hash)]
@@ -99,21 +100,20 @@ impl Config {
         &self.equalizer_custom_profiles
     }
 
-    pub fn quick_presets(&self, device_service_uuid: Uuid) -> &HashMap<String, QuickPreset> {
+    pub fn quick_presets(&self, device_model: &str) -> &HashMap<String, QuickPreset> {
         static EMPTY_HASHMAP: LazyLock<HashMap<String, QuickPreset>> = LazyLock::new(HashMap::new);
         self.quick_presets
-            .get(&device_service_uuid)
+            .get(device_model)
             .unwrap_or(&EMPTY_HASHMAP)
     }
 
     pub fn set_quick_preset(
         &mut self,
-        device_service_uuid: Uuid,
-        name: impl Into<String>,
+        device_model: String,
+        name: String,
         quick_preset: QuickPreset,
     ) {
-        let name = name.into();
-        match self.quick_presets.entry(device_service_uuid) {
+        match self.quick_presets.entry(device_model) {
             Entry::Occupied(mut entry) => {
                 entry.get_mut().insert(name, quick_preset);
             }
@@ -124,9 +124,61 @@ impl Config {
         }
     }
 
-    pub fn remove_quick_preset(&mut self, device_service_uuid: Uuid, name: &str) {
-        if let Some(device_quick_presets) = self.quick_presets.get_mut(&device_service_uuid) {
+    pub fn remove_quick_preset(&mut self, device_model: String, name: &str) {
+        if let Some(device_quick_presets) = self.quick_presets.get_mut(&device_model) {
             device_quick_presets.remove(name);
         }
+    }
+
+    pub fn migrate_service_uuid_to_device_model(
+        &mut self,
+        service_uuid: Uuid,
+        device_model: String,
+    ) {
+        let Some(service_presets) = self.quick_presets.remove(&service_uuid.to_string()) else {
+            return;
+        };
+        let model_presets = match self.quick_presets.entry(device_model) {
+            Entry::Occupied(occupied_entry) => occupied_entry.into_mut(),
+            Entry::Vacant(vacant_entry) => vacant_entry.insert(HashMap::new()),
+        };
+        model_presets.extend(service_presets);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use uuid::uuid;
+
+    #[test]
+    fn test_migrate_service_uuids_with_none_target() {
+        let mut config = Config::default();
+        let uuid = uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8");
+        let mut uuid_map = HashMap::new();
+        uuid_map.insert("test1".to_string(), QuickPreset::default());
+        config.quick_presets.insert(uuid.to_string(), uuid_map);
+
+        config.migrate_service_uuid_to_device_model(uuid, "0123".to_string());
+        assert_eq!(config.quick_presets.get("0123").unwrap().len(), 1);
+        assert_eq!(config.quick_presets.get(&uuid.to_string()), None);
+    }
+
+    #[test]
+    fn test_migrate_service_uuids_with_some_target() {
+        let mut config = Config::default();
+        let uuid = uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8");
+
+        let mut uuid_map = HashMap::new();
+        uuid_map.insert("test1".to_string(), QuickPreset::default());
+        config.quick_presets.insert(uuid.to_string(), uuid_map);
+
+        let mut model_map = HashMap::new();
+        model_map.insert("test2".to_string(), QuickPreset::default());
+        config.quick_presets.insert("0123".to_string(), model_map);
+
+        config.migrate_service_uuid_to_device_model(uuid, "0123".to_string());
+        assert_eq!(config.quick_presets.get("0123").unwrap().len(), 2);
+        assert_eq!(config.quick_presets.get(&uuid.to_string()), None);
     }
 }

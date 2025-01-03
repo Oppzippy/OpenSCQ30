@@ -19,6 +19,10 @@ impl SerialNumber {
         &self.0
     }
 
+    pub fn model_number(&self) -> &str {
+        &self.0[0..4]
+    }
+
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], SerialNumber, E> {

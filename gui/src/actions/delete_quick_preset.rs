@@ -1,4 +1,4 @@
-use anyhow::Context;
+use anyhow::{anyhow, Context};
 use openscq30_lib::api::device::{Device, DeviceRegistry};
 
 use crate::{
@@ -8,7 +8,7 @@ use crate::{
 
 use super::State;
 
-pub fn delete_quick_preset<T>(
+pub async fn delete_quick_preset<T>(
     state: &State<T>,
     settings_file: &SettingsFile<Config>,
     quick_preset_name: &str,
@@ -19,14 +19,19 @@ where
     let Some(device) = state.selected_device() else {
         anyhow::bail!("cannot delete quick preset while not connected to a device");
     };
-    let device_service_uuid = device.service_uuid();
+    let device_model = device
+        .state()
+        .await
+        .serial_number
+        .map(|sn| sn.model_number().to_owned())
+        .ok_or(anyhow!("missing device serial number"))?;
 
     settings_file
         .edit(|settings| {
-            settings.remove_quick_preset(device_service_uuid, quick_preset_name);
+            settings.remove_quick_preset(device_model.to_owned(), quick_preset_name);
         })
         .context("edit settings")?;
-    actions::refresh_quick_presets(state, settings_file, device_service_uuid)?;
+    actions::refresh_quick_presets(state, settings_file, &device_model)?;
     Ok(())
 }
 
@@ -34,6 +39,7 @@ where
 mod tests {
     use std::rc::Rc;
 
+    use openscq30_lib::devices::standard::{state::DeviceState, structures::SerialNumber};
     use uuid::Uuid;
 
     use crate::{
@@ -52,16 +58,22 @@ mod tests {
         let (state, mut receiver) = State::new(registry);
         let mut device = MockDevice::new();
         device.expect_service_uuid().return_const(Uuid::default());
+        device.expect_state().return_const(DeviceState {
+            serial_number: Some(SerialNumber("0123".into())),
+            ..Default::default()
+        });
         *state.selected_device.borrow_mut() = Some(Rc::new(device));
 
         let dir = tempfile::tempdir().unwrap();
         let settings_file = SettingsFile::new(dir.path().join("config.toml"));
         settings_file
             .edit(|config: &mut Config| {
-                config.set_quick_preset(Uuid::default(), "test", QuickPreset::default());
+                config.set_quick_preset("0123".into(), "test".into(), QuickPreset::default());
             })
             .unwrap();
-        delete_quick_preset(&state, &settings_file, "test").unwrap();
+        delete_quick_preset(&state, &settings_file, "test")
+            .await
+            .unwrap();
 
         let state_update = receiver.recv().await.unwrap();
         if let StateUpdate::SetQuickPresets(quick_presets) = state_update {
