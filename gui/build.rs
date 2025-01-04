@@ -34,7 +34,9 @@ fn windows() {
     write!(temp_resource_file, "{}", resources_with_version).unwrap();
     temp_resource_file.flush().unwrap();
 
-    embed_resource::compile(temp_resource_file.path(), embed_resource::NONE);
+    embed_resource::compile(temp_resource_file.path(), embed_resource::NONE)
+        .manifest_required()
+        .unwrap();
     println!("cargo:rerun-if-changed=resources");
 }
 
