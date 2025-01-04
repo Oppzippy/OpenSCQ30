@@ -61,7 +61,7 @@ impl From<A3936StateUpdatePacket> for StateUpdatePacket {
             button_configuration: Some(
                 packet
                     .button_configuration
-                    .into_custom_button_actions(packet.tws_status.is_connected),
+                    .as_multi_button_configuration(packet.tws_status.is_connected),
             ),
             firmware_version: None,
             serial_number: None,

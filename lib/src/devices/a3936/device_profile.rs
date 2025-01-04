@@ -230,7 +230,7 @@ impl A3936ButtonConfigurationImplementation {
         .into_iter()
         .for_each(|(m, state)| Self::set_button(m, state, is_tws_connected));
 
-        model.clone()
+        model
     }
 
     fn set_button(

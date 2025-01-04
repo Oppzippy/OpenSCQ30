@@ -78,7 +78,7 @@ impl BluerConnection {
     }
 
     async fn get_service_uuid_with_retry(device: &Device) -> crate::Result<Uuid> {
-        match Self::get_service_with_retry(&device, Duration::from_secs(2)).await {
+        match Self::get_service_with_retry(device, Duration::from_secs(2)).await {
             Ok(service) => service.uuid().await.map_err(Into::into),
             Err(err) => {
                 debug!("GATT service not found, but that's okay since we're using RFCOMM: {err:?}");
@@ -91,9 +91,9 @@ impl BluerConnection {
     async fn get_service_with_retry(device: &Device, timeout: Duration) -> crate::Result<Service> {
         let service_found = device.events().await?.any(|event| async move {
             match event {
-                DeviceEvent::PropertyChanged(DeviceProperty::Uuids(uuids)) => uuids
-                    .iter()
-                    .any(|uuid| device_utils::is_soundcore_service_uuid(uuid)),
+                DeviceEvent::PropertyChanged(DeviceProperty::Uuids(uuids)) => {
+                    uuids.iter().any(device_utils::is_soundcore_service_uuid)
+                }
                 _ => false,
             }
         });
@@ -141,18 +141,14 @@ impl BluerConnection {
             let mut events = device.events().await?;
             handle.spawn(async move {
                 loop {
-                    if let Some(event) = events.next().await {
-                        match event {
-                            bluer::DeviceEvent::PropertyChanged(DeviceProperty::Connected(
-                                is_connected,
-                            )) => {
-                                connection_status_sender.send_replace(match is_connected {
-                                    true => ConnectionStatus::Connected,
-                                    false => ConnectionStatus::Disconnected,
-                                });
-                            }
-                            _ => (),
-                        }
+                    if let Some(bluer::DeviceEvent::PropertyChanged(DeviceProperty::Connected(
+                        is_connected,
+                    ))) = events.next().await
+                    {
+                        connection_status_sender.send_replace(match is_connected {
+                            true => ConnectionStatus::Connected,
+                            false => ConnectionStatus::Disconnected,
+                        });
                     }
                 }
             })

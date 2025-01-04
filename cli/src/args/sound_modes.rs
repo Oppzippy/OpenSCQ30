@@ -102,6 +102,7 @@ impl TryFrom<NoiseCancelingMode> for LibNoiseCancelingModeTypeTwo {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[allow(clippy::enum_variant_names)]
 pub enum AdaptiveNoiseCanceling {
     LowNoise,
     MediumNoise,

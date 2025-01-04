@@ -62,6 +62,7 @@ pub use state::*;
 use crate::objects::{GlibCustomEqualizerProfile, GlibDevice, GlibNamedQuickPresetValue};
 
 #[derive(Debug, PartialEq, Clone)]
+#[allow(clippy::large_enum_variant)]
 pub enum StateUpdate {
     SetDevices(Vec<GlibDevice>),
     SetLoading(bool),

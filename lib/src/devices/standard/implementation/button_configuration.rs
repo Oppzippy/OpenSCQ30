@@ -44,7 +44,7 @@ impl ButtonConfigurationImplementation {
             .right_long_press
             .set_action(actions.right_long_press.action, tws_status.is_connected);
 
-        internal.clone()
+        internal
     }
 
     pub(crate) fn set_internal_data(&self, data: InternalMultiButtonConfiguration) {
