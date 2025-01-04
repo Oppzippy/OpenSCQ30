@@ -1,19 +1,19 @@
-use std::sync::{Arc, RwLock};
+use std::thread::{self, JoinHandle};
 
 use macaddr::MacAddr6;
 use tokio::sync::{mpsc as tokio_mpsc, watch};
-use tracing::instrument;
+use tracing::{debug, debug_span, error, instrument, trace, warn};
 use uuid::Uuid;
 use windows::{
+    core::AgileReference,
     Devices::Bluetooth::{
-        BluetoothConnectionStatus, BluetoothLEDevice,
-        GenericAttributeProfile::{
-            GattCharacteristic, GattClientCharacteristicConfigurationDescriptorValue,
-            GattDeviceService, GattValueChangedEventArgs, GattWriteOption,
-        },
+        BluetoothConnectionStatus, BluetoothDevice, BluetoothLEDevice,
+        GenericAttributeProfile::{GattCharacteristic, GattDeviceService},
+        Rfcomm::RfcommDeviceService,
     },
     Foundation::{EventRegistrationToken, TypedEventHandler},
-    Storage::Streams::{DataReader, DataWriter},
+    Networking::Sockets::{SocketProtectionLevel, StreamSocket},
+    Storage::Streams::{Buffer, DataReader, DataWriter, InputStreamOptions},
 };
 
 use crate::{
@@ -24,19 +24,26 @@ use crate::{
 use super::WindowsMacAddress;
 
 pub struct WindowsConnection {
-    device: BluetoothLEDevice,
-    read_characteristic: GattCharacteristic,
-    write_characteristic: GattCharacteristic,
+    device: BluetoothDevice,
+    socket: StreamSocket,
     service_uuid: Uuid,
-    value_changed_token: Arc<RwLock<Option<EventRegistrationToken>>>,
     connection_status_receiver: watch::Receiver<ConnectionStatus>,
     connection_status_changed_token: EventRegistrationToken,
+    handle: std::sync::Mutex<Option<JoinHandle<()>>>,
 }
 
 impl WindowsConnection {
     #[instrument()]
     pub async fn new(mac_address: MacAddr6) -> crate::Result<Option<Self>> {
-        let device = BluetoothLEDevice::FromBluetoothAddressAsync(mac_address.as_windows_u64())?
+        let service_uuid = match Self::get_ble_service_uuid(mac_address).await {
+            Ok(service_uuid) => service_uuid,
+            Err(err) => {
+                debug!("failed to get gatt service uuid, but that's okay since we're using rfcomm: {err:?}");
+                Uuid::nil()
+            }
+        };
+
+        let device = BluetoothDevice::FromBluetoothAddressAsync(mac_address.as_windows_u64())?
             .await
             .map_err(|err| {
                 // If there is no error but the device is not found, an error with code 0 is returned
@@ -48,16 +55,44 @@ impl WindowsConnection {
                     err.into()
                 }
             })?;
-        let service = Self::service(&device).await?;
-        let service_uuid = Uuid::from_u128(service.Uuid()?.to_u128());
-        let read_characteristic =
-            Self::characteristic(&service, &device_utils::READ_CHARACTERISTIC_UUID).await?;
-        let write_characteristic =
-            Self::characteristic(&service, &device_utils::WRITE_CHARACTERISTIC_UUID).await?;
 
+        debug!("getting service");
+        let services = device.GetRfcommServicesAsync()?.await?.Services()?;
+        let service = services
+            .into_iter()
+            .filter_map(|service| {
+                let service_uuid = match service.ServiceId().map(|sid| sid.Uuid()) {
+                    Ok(Ok(uuid)) => uuid,
+                    Ok(Err(err)) => return Some(Err(err)),
+                    Err(err) => return Some(Err(err)),
+                };
+                if service_uuid.to_u128() == device_utils::RFCOMM_UUID.as_u128() {
+                    Some(Ok(service))
+                } else {
+                    None
+                }
+            })
+            .collect::<windows::core::Result<Vec<RfcommDeviceService>>>()?
+            .into_iter()
+            .next()
+            .ok_or(crate::Error::ServiceNotFound {
+                uuid: Uuid::nil(),
+                source: None,
+            })?;
+
+        debug!("making socket");
+        let socket = StreamSocket::new()?;
+        socket
+            .ConnectWithProtectionLevelAsync(
+                &service.ConnectionHostName()?,
+                &service.ConnectionServiceName()?,
+                SocketProtectionLevel::BluetoothEncryptionAllowNullAuthentication,
+            )?
+            .await?;
+        debug!("starting connection changed");
         let (sender, receiver) = watch::channel(ConnectionStatus::Connected);
         let connection_status_changed_token = device.ConnectionStatusChanged(
-            &TypedEventHandler::new(move |device: &Option<BluetoothLEDevice>, _| {
+            &TypedEventHandler::new(move |device: &Option<BluetoothDevice>, _| {
                 if let Some(device) = device {
                     let is_connected =
                         device.ConnectionStatus()? == BluetoothConnectionStatus::Connected;
@@ -73,28 +108,30 @@ impl WindowsConnection {
 
         Ok(Some(Self {
             device,
-            read_characteristic,
-            write_characteristic,
+            socket,
             service_uuid,
-            value_changed_token: Default::default(),
             connection_status_receiver: receiver,
             connection_status_changed_token,
+            handle: std::sync::Mutex::new(None),
         }))
     }
 
-    async fn write_to_characteristic(
-        characteristic: &GattCharacteristic,
-        data: &[u8],
-        write_option: GattWriteOption,
-    ) -> crate::Result<()> {
-        let writer = DataWriter::new()?;
-        writer.WriteBytes(data)?;
-        let buffer = writer.DetachBuffer()?;
-
-        characteristic
-            .WriteValueWithOptionAsync(&buffer, write_option)?
-            .await?;
-        Ok(())
+    async fn get_ble_service_uuid(mac_address: MacAddr6) -> crate::Result<Uuid> {
+        let ble_device =
+            BluetoothLEDevice::FromBluetoothAddressAsync(mac_address.as_windows_u64())?
+                .await
+                .map_err(|err| {
+                    // If there is no error but the device is not found, an error with code 0 is returned
+                    if windows::core::HRESULT::is_ok(err.code()) {
+                        crate::Error::DeviceNotFound {
+                            source: Box::new(err),
+                        }
+                    } else {
+                        err.into()
+                    }
+                })?;
+        let service = Self::service(&ble_device).await?;
+        Ok(Uuid::from_u128(service.Uuid()?.to_u128()))
     }
 
     #[instrument(level = "trace", skip(service))]
@@ -167,105 +204,79 @@ impl Connection for WindowsConnection {
 
     #[instrument(level = "trace", skip(self))]
     async fn write_with_response(&self, data: &[u8]) -> crate::Result<()> {
-        let characteristic = self.write_characteristic.to_owned();
-        let data = data.to_owned();
-        Self::write_to_characteristic(&characteristic, &data, GattWriteOption::WriteWithResponse)
-            .await
+        self.write_without_response(data).await
     }
 
     #[instrument(level = "trace", skip(self))]
     async fn write_without_response(&self, data: &[u8]) -> crate::Result<()> {
-        let characteristic = self.write_characteristic.to_owned();
-        let data = data.to_owned();
-        Self::write_to_characteristic(&characteristic, &data, GattWriteOption::WriteWithResponse)
-            .await
+        let writer = DataWriter::new()?;
+        writer.WriteBytes(data)?;
+        let buffer = writer.DetachBuffer()?;
+
+        let output = self.socket.OutputStream()?;
+        output.WriteAsync(&buffer)?.await?;
+        trace!("wrote packet: {data:?}");
+        Ok(())
     }
 
     #[instrument(level = "trace", skip(self))]
     async fn inbound_packets_channel(&self) -> crate::Result<tokio_mpsc::Receiver<Vec<u8>>> {
-        self.read_characteristic
-            .WriteClientCharacteristicConfigurationDescriptorAsync(
-                GattClientCharacteristicConfigurationDescriptorValue::Notify,
-            )?
-            .await?;
-
         let (sender, receiver) = tokio_mpsc::channel(50);
-        let value_changed_token = self.value_changed_token.to_owned();
-        let token = self
-            .read_characteristic
-            .ValueChanged(&TypedEventHandler::new(
-                move |characteristic: &Option<GattCharacteristic>,
-                      args: &Option<GattValueChangedEventArgs>| {
-                    let span = tracing::trace_span!("WindowsConnection ValueChanged");
-                    let _enter = span.enter();
-                    if let Some(characteristic) = characteristic {
-                        if let Some(args) = args {
-                            let value = args.CharacteristicValue()?;
-                            let reader = DataReader::FromBuffer(&value)?;
-                            let mut buffer = vec![0_u8; reader.UnconsumedBufferLength()? as usize];
-                            reader.ReadBytes(&mut buffer)?;
+        let input = self.socket.InputStream()?;
+        let input = AgileReference::new(&input)?;
 
-                            tracing::trace!("received packet {buffer:?}");
-
-                            match sender.try_send(buffer) {
-                                Ok(()) => {}
-                                Err(tokio_mpsc::error::TrySendError::Closed(_)) => {
-                                    let lock = match value_changed_token.read() {
-                                        Ok(lock) => lock,
-                                        Err(err) => {
-                                            tracing::warn!("lock is poisoned: {err:?}");
-                                            err.into_inner()
-                                        }
-                                    };
-                                    if let Some(token) = *lock {
-                                        characteristic.RemoveValueChanged(token)?;
-                                    }
-                                }
-                                Err(err) => {
-                                    tracing::error!("error sending: {err:?}")
-                                }
+        let mut handle = self.handle.lock().unwrap();
+        if let Some(_handle) = handle.as_ref() {
+            panic!("can't handle multiple inbound packet channels");
+        }
+        *handle = Some(thread::spawn(|| {
+            let span = debug_span!("WindowsConnection::inbound_packets_channel");
+            let _span_guard = span.enter();
+            let result = (move || {
+                let buffer = Buffer::Create(1000)?;
+                let input = input.resolve()?;
+                loop {
+                    trace!("waiting for packets");
+                    input
+                        .ReadAsync(&buffer, 1000, InputStreamOptions::Partial)?
+                        .get()?;
+                    let mut packet = vec![0; buffer.Length()? as usize];
+                    let reader = DataReader::FromBuffer(&buffer)?;
+                    reader.ReadBytes(&mut packet)?;
+                    trace!("got packet: {packet:?}");
+                    if !packet.is_empty() {
+                        match sender.blocking_send(packet) {
+                            Ok(_) => (),
+                            Err(_err) => {
+                                debug!("receiver is closed, aborting");
+                                break;
                             }
                         }
                     }
-
-                    Ok(())
-                },
-            ))?;
-        let mut token_lock = match self.value_changed_token.write() {
-            Ok(lock) => lock,
-            Err(err) => {
-                tracing::warn!("lock is poisoned: {err:?}");
-                err.into_inner()
+                }
+                Ok(()) as crate::Result<()>
+            })();
+            match result {
+                Ok(_) => debug!("inbound_packets_channel: ended"),
+                Err(err) => warn!("inbound_packets_channel: error receiving packet: {err:?}"),
             }
-        };
-        if let Some(token) = *token_lock {
-            self.read_characteristic.RemoveValueChanged(token)?;
-        }
-        *token_lock = Some(token);
+        }));
+
         Ok(receiver)
     }
 }
 
 impl Drop for WindowsConnection {
-    #[instrument(level = "trace", skip(self))]
+    #[instrument(level = "error", skip(self))]
     fn drop(&mut self) {
-        let lock = match self.value_changed_token.read() {
-            Ok(lock) => lock,
-            Err(err) => {
-                tracing::warn!("value changed token lock is poisoned: {err:?}");
-                err.into_inner()
-            }
-        };
-        if let Some(token) = *lock {
-            if let Err(err) = self.read_characteristic.RemoveValueChanged(token) {
-                tracing::error!("failed to remove ValueChanged event handler: {err:?}");
-            }
+        if let Err(err) = self.socket.Close() {
+            error!("failed to close socket: {err:?}");
         }
         if let Err(err) = self
             .device
             .RemoveConnectionStatusChanged(self.connection_status_changed_token)
         {
-            tracing::error!("failed to remove ConnectionStatusChanged event handler: {err:?}");
+            error!("failed to remove ConnectionStatusChanged event handler: {err:?}");
         }
     }
 }
@@ -274,9 +285,8 @@ impl core::fmt::Debug for WindowsConnection {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("WindowsConnection")
             .field("device", &self.device)
-            .field("read_characteristic", &self.read_characteristic)
-            .field("write_characteristic", &self.write_characteristic)
-            .field("value_changed_token", &self.value_changed_token)
+            .field("socket", &self.socket)
+            .field("service_uuid", &self.service_uuid)
             .field(
                 "connection_status_changed_token",
                 &self.connection_status_changed_token,

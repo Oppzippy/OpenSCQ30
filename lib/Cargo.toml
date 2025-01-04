@@ -57,4 +57,6 @@ windows = { workspace = true, optional = true, features = [
     "Devices_Enumeration",
     "Devices_Bluetooth",
     "Devices_Bluetooth_GenericAttributeProfile",
+    "Devices_Bluetooth_Rfcomm",
+    "Networking_Sockets",
 ] }
