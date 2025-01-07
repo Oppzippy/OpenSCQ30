@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
 import android.bluetooth.BluetoothSocketException
 import android.content.Context
+import android.os.ParcelUuid
 import android.util.Log
 import com.oppzippy.openscq30.features.soundcoredevice.impl.BluetoothDeviceFinder
 import com.oppzippy.openscq30.features.soundcoredevice.impl.SoundcoreDeviceCallbackHandler
@@ -109,7 +110,8 @@ class SoundcoreDeviceConnectorImplTest {
         connector = SoundcoreDeviceConnectorImpl(
             context = context,
             deviceFinder = deviceFinder,
-            rfcommSppUuid = UUID(0, 0),
+            fallbackSppUuid = UUID(0, 0),
+            isVendorSppUuid = { true },
             createManualConnection = { _, _, _, _ -> manualConnection },
         )
         coEvery {
@@ -123,6 +125,9 @@ class SoundcoreDeviceConnectorImplTest {
         every { bluetoothDevice.createRfcommSocketToServiceRecord(any()) } returns socket
         every { bluetoothDevice.address } returns macAddress
         every { bluetoothDevice.name } returns "Demo Device"
+        val uuid = mockk<ParcelUuid>()
+        every { uuid.uuid } returns UUID(0, 0)
+        every { bluetoothDevice.uuids } returns arrayOf(uuid)
 
         justRun { socket.connect() }
         every { socket.inputStream } returns inputStream

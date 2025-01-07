@@ -21,3 +21,4 @@ local.properties
 /.cargo
 /glue.rs.in
 keystore.properties
+.attach_pid*

@@ -7,6 +7,7 @@ import com.oppzippy.openscq30.features.soundcoredevice.impl.BluetoothDeviceFinde
 import com.oppzippy.openscq30.features.soundcoredevice.impl.DemoSoundcoreDeviceConnector
 import com.oppzippy.openscq30.features.soundcoredevice.impl.SoundcoreDeviceConnectorImpl
 import com.oppzippy.openscq30.lib.bindings.ManualConnection
+import com.oppzippy.openscq30.lib.bindings.isSoundcoreVendorSppUuid
 import com.oppzippy.openscq30.lib.bindings.rfcommSppUuid
 import dagger.Module
 import dagger.Provides
@@ -29,7 +30,8 @@ object SoundcoreDeviceConnectorModule {
         SoundcoreDeviceConnectorImpl(
             context,
             bluetoothDeviceFinder,
-            rfcommSppUuid = rfcommSppUuid(),
+            fallbackSppUuid = rfcommSppUuid(),
+            isVendorSppUuid = { isSoundcoreVendorSppUuid(it) },
             createManualConnection = { name, macAddress, serviceUuid, connectionWriter ->
                 ManualConnection(
                     name,
