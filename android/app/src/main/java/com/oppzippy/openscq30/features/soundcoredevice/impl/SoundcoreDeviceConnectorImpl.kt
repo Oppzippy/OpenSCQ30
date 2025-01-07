@@ -108,7 +108,7 @@ class SoundcoreDeviceConnectorImpl(
 
             return soundcoreDevice
         } catch (ex: Exception) {
-            Log.d("SoundcoreDeviceConnectorImpl", "Exception thrown, cleaning up resources")
+            Log.d("SoundcoreDeviceConnectorImpl", "Exception thrown, cleaning up resources", ex)
             gatt?.disconnect()
             gatt?.close()
             connection?.close()

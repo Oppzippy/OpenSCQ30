@@ -12,6 +12,7 @@ import com.oppzippy.openscq30.features.soundcoredevice.impl.BluetoothDeviceFinde
 import com.oppzippy.openscq30.features.soundcoredevice.impl.SoundcoreDeviceCallbackHandler
 import com.oppzippy.openscq30.features.soundcoredevice.impl.SoundcoreDeviceConnectorImpl
 import com.oppzippy.openscq30.lib.bindings.ManualConnection
+import com.oppzippy.openscq30.lib.bindings.NativeSoundcoreDevice
 import com.oppzippy.openscq30.lib.bindings.newSoundcoreDevice
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -59,7 +60,7 @@ class SoundcoreDeviceConnectorImplTest {
     @MockK
     private lateinit var bluetoothDevice: BluetoothDevice
 
-    @MockK
+    @MockK(relaxed = true)
     private lateinit var socket: BluetoothSocket
 
     @MockK(relaxed = true)
@@ -90,9 +91,29 @@ class SoundcoreDeviceConnectorImplTest {
                 String::class.java,
             ).kotlinFunction!!,
         )
-        every { Log.d(any(), any()) } returns 0
+        mockkStatic(
+            Log::class.java.getDeclaredMethod(
+                "w",
+                String::class.java,
+                String::class.java,
+            ).kotlinFunction!!,
+        )
         val stringSlot = slot<String>()
+        val throwableSlot = slot<Throwable>()
+        every { Log.d(any(), capture(stringSlot)) } answers {
+            println(stringSlot.captured)
+            0
+        }
+        every { Log.d(any(), capture(stringSlot), capture(throwableSlot)) } answers {
+            println(stringSlot.captured)
+            throwableSlot.captured.printStackTrace()
+            0
+        }
         every { Log.i(any(), capture(stringSlot)) } answers {
+            println(stringSlot.captured)
+            0
+        }
+        every { Log.w(any(), capture(stringSlot)) } answers {
             println(stringSlot.captured)
             0
         }
@@ -163,19 +184,25 @@ class SoundcoreDeviceConnectorImplTest {
     }
 
     @Test
-    fun shouldCleanUpResourcesOnWaitForReadyTimeout() = runTest {
+    fun shouldNotBailWhenGattServiceNotFound() = runTest {
         coEvery { anyConstructed<SoundcoreDeviceCallbackHandler>().waitUntilReady() } coAnswers {
             // wait for a greater amount of time than the timeout
             delay(1.hours)
         }
+        mockkStatic(::newSoundcoreDevice)
+        val device = mockk<NativeSoundcoreDevice>(relaxed = true)
+        coEvery { newSoundcoreDevice(any()) } returns device
+        justRun { manualConnection.close() }
 
         try {
             connector.connectToSoundcoreDevice(macAddress, this)
         } catch (_: TimeoutException) {
         }
 
-        verify(exactly = 1) { gatt.disconnect() }
-        verify(exactly = 1) { gatt.close() }
+        verify(exactly = 0) { gatt.disconnect() }
+        verify(exactly = 0) { gatt.close() }
+        verify(exactly = 0) { socket.close() }
+        verify(exactly = 0) { manualConnection.close() }
     }
 
     @Test
