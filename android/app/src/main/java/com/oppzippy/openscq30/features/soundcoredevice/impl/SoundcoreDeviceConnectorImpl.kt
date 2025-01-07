@@ -11,7 +11,6 @@ import com.oppzippy.openscq30.lib.bindings.ManualConnection
 import com.oppzippy.openscq30.lib.bindings.Uuid
 import com.oppzippy.openscq30.lib.bindings.newSoundcoreDevice
 import java.util.UUID
-import java.util.concurrent.TimeoutException
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
@@ -40,6 +39,7 @@ class SoundcoreDeviceConnectorImpl(
         try {
             val bluetoothDevice = deviceFinder.findByMacAddress(macAddress) ?: return null
             val uuid = bluetoothDevice.uuids.find { isVendorSppUuid(it.uuid) }?.uuid ?: fallbackSppUuid
+            Log.d("SoundcoreDeviceConnectorImpl", "selected uuid $uuid")
             val socket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid)
             socket.connect()
 
@@ -63,7 +63,10 @@ class SoundcoreDeviceConnectorImpl(
                     callbacks.waitUntilReady()
                 }
             } catch (ex: TimeoutCancellationException) {
-                throw TimeoutException("Timeout waiting for GATT services").initCause(ex)
+                Log.w(
+                    "SoundcoreDeviceConnectorImpl",
+                    "Timeout waiting for gatt services. That's okay since we're using RFCOMM.",
+                )
             }
 
             connection = createManualConnection(
