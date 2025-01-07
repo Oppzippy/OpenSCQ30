@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 use std::sync::{Arc, Weak};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use bluer::rfcomm::{Profile, ProfileHandle, ReqError};
 use bluer::{Adapter, Address, Session};
@@ -109,6 +109,7 @@ impl BluerConnectionRegistry {
                             }
                         }
                     };
+                    let timeout = Instant::now().checked_add(Duration::from_secs(5)).unwrap();
                     debug!("connecting");
                     let stream = loop {
                         select! {
@@ -130,6 +131,9 @@ impl BluerConnectionRegistry {
                                     debug!("rejecting request from {}", req.device());
                                     req.reject(ReqError::Rejected);
                                 }
+                            }
+                            _ = tokio::time::sleep_until(timeout.into()) => {
+                                return Err(crate::Error::TimedOut { action: "connect" })
                             }
                         }
                     };
