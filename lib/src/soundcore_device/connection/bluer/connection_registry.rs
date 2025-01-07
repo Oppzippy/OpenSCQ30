@@ -3,7 +3,7 @@ use std::sync::{Arc, Weak};
 use std::time::{Duration, Instant};
 
 use bluer::rfcomm::{Profile, ReqError};
-use bluer::{Adapter, Address, Session};
+use bluer::{Adapter, Address, DiscoveryFilter, DiscoveryTransport, Session};
 use futures::StreamExt;
 use macaddr::MacAddr6;
 use tokio::select;
@@ -44,6 +44,10 @@ impl BluerConnectionRegistry {
             .spawn(
                 async move {
                     let adapter = session.default_adapter().await?;
+
+                    // Needed to ensure GATT services are discovered
+                    Self::ble_scan(&adapter).await?;
+
                     let device_addresses = adapter.device_addresses().await?;
                     let mut descriptors = HashSet::new();
                     for address in device_addresses {
@@ -62,6 +66,36 @@ impl BluerConnectionRegistry {
             )
             .await
             .unwrap()
+    }
+
+    /// Scans for connected BLE devices and attempt to filter out devices without the service UUID.
+    /// Not guaranteed to filter out all devices if another process is scanning at the same time.
+    async fn ble_scan(adapter: &Adapter) -> crate::Result<HashSet<Address>> {
+        adapter
+            .set_discovery_filter(DiscoveryFilter {
+                transport: DiscoveryTransport::Le,
+                ..Default::default()
+            })
+            .await?;
+
+        let discover = adapter.discover_devices().await?;
+
+        let device_addresses = discover
+            .take_until(tokio::time::sleep(Duration::from_secs(1)))
+            .filter_map(|event| async move {
+                match event {
+                    bluer::AdapterEvent::DeviceAdded(address)
+                        if device_utils::is_mac_address_soundcore_device(address.into()) =>
+                    {
+                        Some(address)
+                    }
+                    _ => None,
+                }
+            })
+            .collect::<HashSet<_>>()
+            .await;
+
+        Ok(device_addresses)
     }
 
     /// Filters out devices that are not connected and returns descriptors
