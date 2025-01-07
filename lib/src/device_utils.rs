@@ -1,17 +1,24 @@
 use macaddr::MacAddr6;
 use static_assertions::const_assert;
-use uuid::Uuid;
+use uuid::{uuid, Uuid};
 
-pub const RFCOMM_UUID: Uuid = uuid::uuid!("00001101-0000-1000-8000-00805f9b34fb");
+pub const RFCOMM_UUID: Uuid = uuid!("00001101-0000-1000-8000-00805f9b34fb");
+pub const VENDOR_RFCOMM_UUID: Uuid = uuid!("0cf12d31-fac3-4553-bd80-d6832e7b0000");
+pub const VENDOR_RFCOMM_UUID_MASK: Uuid = uuid!("FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFF0000");
+
+pub fn is_soundcore_vendor_spp_uuid(uuid: &Uuid) -> bool {
+    let mask = VENDOR_RFCOMM_UUID_MASK.as_u128();
+    uuid.as_u128() & mask == VENDOR_RFCOMM_UUID.as_u128() & mask
+}
 
 // The devices have the same UUID except the first two bytes. I assume one device was chosen with an initial value,
 // and then the first two bytes increment by one for each device going from there. Unsure of the initial value or
 // the number of devices in existence.
-pub const SERVICE_UUID: Uuid = uuid::uuid!("011cf5da-0000-1000-8000-00805f9b34fb");
-pub const SERVICE_UUID_MASK: Uuid = uuid::uuid!("0000FFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF");
+pub const SERVICE_UUID: Uuid = uuid!("011cf5da-0000-1000-8000-00805f9b34fb");
+pub const SERVICE_UUID_MASK: Uuid = uuid!("0000FFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF");
 
-pub const WRITE_CHARACTERISTIC_UUID: Uuid = uuid::uuid!("00007777-0000-1000-8000-00805f9b34fb");
-pub const READ_CHARACTERISTIC_UUID: Uuid = uuid::uuid!("00008888-0000-1000-8000-00805f9b34fb");
+pub const WRITE_CHARACTERISTIC_UUID: Uuid = uuid!("00007777-0000-1000-8000-00805f9b34fb");
+pub const READ_CHARACTERISTIC_UUID: Uuid = uuid!("00008888-0000-1000-8000-00805f9b34fb");
 
 pub fn is_soundcore_service_uuid(uuid: &Uuid) -> bool {
     let mask = SERVICE_UUID_MASK.as_u128();

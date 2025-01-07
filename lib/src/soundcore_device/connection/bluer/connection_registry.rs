@@ -2,14 +2,14 @@ use std::collections::HashSet;
 use std::sync::{Arc, Weak};
 use std::time::{Duration, Instant};
 
-use bluer::rfcomm::{Profile, ProfileHandle, ReqError};
+use bluer::rfcomm::{Profile, ReqError};
 use bluer::{Adapter, Address, Session};
 use futures::StreamExt;
 use macaddr::MacAddr6;
 use tokio::select;
 use tokio::sync::Mutex;
 use tokio::time::sleep;
-use tracing::{debug, debug_span, warn, warn_span, Instrument};
+use tracing::{debug, debug_span, trace, warn, warn_span, Instrument};
 use weak_table::weak_value_hash_map::Entry;
 use weak_table::WeakValueHashMap;
 
@@ -22,7 +22,6 @@ use super::RuntimeOrHandle;
 pub struct BluerConnectionRegistry {
     runtime: RuntimeOrHandle,
     session: Session,
-    rfcomm_handle: Arc<Mutex<ProfileHandle>>,
     connections: Mutex<WeakValueHashMap<MacAddr6, Weak<BluerConnection>>>,
 }
 
@@ -32,16 +31,9 @@ impl BluerConnectionRegistry {
             .spawn(async move { Session::new().await })
             .await
             .unwrap()?;
-        let rfcomm_handle = session
-            .register_profile(Profile {
-                uuid: device_utils::RFCOMM_UUID,
-                ..Default::default()
-            })
-            .await?;
         Ok(Self {
             session,
             runtime,
-            rfcomm_handle: Arc::new(Mutex::new(rfcomm_handle)),
             connections: Mutex::new(WeakValueHashMap::new()),
         })
     }
@@ -94,11 +86,9 @@ impl BluerConnectionRegistry {
     ) -> crate::Result<Option<BluerConnection>> {
         let handle = self.runtime.handle();
         let session = self.session.to_owned();
-        let rfcomm_handle_lock = self.rfcomm_handle.to_owned();
         self.runtime
             .spawn(
                 async move {
-                    let mut rfcomm_handle = rfcomm_handle_lock.lock().await;
                     let adapter = session.default_adapter().await?;
                     let device = match adapter.device(mac_address.into_array().into()) {
                         Ok(device) => device,
@@ -109,13 +99,29 @@ impl BluerConnectionRegistry {
                             }
                         }
                     };
-                    let timeout = Instant::now().checked_add(Duration::from_secs(5)).unwrap();
+                    device.connect().await?;
+                    let uuids = device.uuids().await?.unwrap();
+                    let uuid = uuids
+                        .into_iter()
+                        .filter(device_utils::is_soundcore_vendor_spp_uuid)
+                        .next()
+                        .unwrap_or(device_utils::RFCOMM_UUID);
+                    debug!("using uuid {uuid} for SPP");
+
+                    let mut rfcomm_handle = session
+                        .register_profile(Profile {
+                            uuid,
+                            ..Default::default()
+                        })
+                        .await?;
+
+                    let timeout = Instant::now().checked_add(Duration::from_secs(50)).unwrap();
                     debug!("connecting");
                     let stream = loop {
                         select! {
                             res = async {
-                                let _ = device.connect().await;
-                                device.connect_profile(&device_utils::RFCOMM_UUID).await
+                                trace!("connect_profile");
+                                device.connect_profile(&uuid).await
                             } => {
                                 if let Err(err)=res{
                                     warn!("connect profile failed: {err:?}")
