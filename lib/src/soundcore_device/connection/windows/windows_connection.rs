@@ -1,4 +1,7 @@
-use std::thread::{self, JoinHandle};
+use std::{
+    collections::HashMap,
+    thread::{self, JoinHandle},
+};
 
 use macaddr::MacAddr6;
 use tokio::sync::{mpsc as tokio_mpsc, watch};
@@ -58,23 +61,23 @@ impl WindowsConnection {
 
         debug!("getting service");
         let services = device.GetRfcommServicesAsync()?.await?.Services()?;
-        let service = services
+        let services_by_uuid = services
             .into_iter()
-            .filter_map(|service| {
+            .map(|service| {
                 let service_uuid = match service.ServiceId().map(|sid| sid.Uuid()) {
                     Ok(Ok(uuid)) => uuid,
-                    Ok(Err(err)) => return Some(Err(err)),
-                    Err(err) => return Some(Err(err)),
+                    Ok(Err(err)) => return Err(err),
+                    Err(err) => return Err(err),
                 };
-                if service_uuid.to_u128() == device_utils::RFCOMM_UUID.as_u128() {
-                    Some(Ok(service))
-                } else {
-                    None
-                }
+                Ok((Uuid::from_u128(service_uuid.to_u128()), service))
             })
-            .collect::<windows::core::Result<Vec<RfcommDeviceService>>>()?
-            .into_iter()
+            .collect::<windows::core::Result<HashMap<Uuid, RfcommDeviceService>>>()?;
+        let service = services_by_uuid
+            .iter()
+            .filter(|(uuid, _)| device_utils::is_soundcore_vendor_spp_uuid(uuid))
+            .map(|(_, service)| service)
             .next()
+            .or(services_by_uuid.get(&device_utils::RFCOMM_UUID))
             .ok_or(crate::Error::ServiceNotFound {
                 uuid: Uuid::nil(),
                 source: None,
