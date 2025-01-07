@@ -11,7 +11,7 @@ plugins {
     id("com.google.devtools.ksp") version "$kotlinVersion-1.0.29" apply false
     kotlin("plugin.serialization") version kotlinVersion
 
-    id("com.google.dagger.hilt.android") version "2.53.1" apply false
+    id("com.google.dagger.hilt.android") version "2.54" apply false
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
     id("com.google.protobuf") version "0.9.4" apply false
 }
