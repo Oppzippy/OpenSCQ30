@@ -149,7 +149,7 @@ impl BluerConnectionRegistry {
                         })
                         .await?;
 
-                    let timeout = Instant::now().checked_add(Duration::from_secs(50)).unwrap();
+                    let timeout = Instant::now().checked_add(Duration::from_secs(5)).unwrap();
                     debug!("connecting");
                     let stream = loop {
                         select! {
