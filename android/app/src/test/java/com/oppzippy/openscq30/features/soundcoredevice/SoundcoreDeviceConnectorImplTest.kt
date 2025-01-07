@@ -110,8 +110,8 @@ class SoundcoreDeviceConnectorImplTest {
         connector = SoundcoreDeviceConnectorImpl(
             context = context,
             deviceFinder = deviceFinder,
-            fallbackSppUuid = UUID(0, 0),
-            isVendorSppUuid = { true },
+            fallbackRfcommUuid = UUID(0, 0),
+            isVendorRfcommUuid = { true },
             createManualConnection = { _, _, _, _ -> manualConnection },
         )
         coEvery {

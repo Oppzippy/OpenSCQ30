@@ -20,8 +20,8 @@ import kotlinx.coroutines.withTimeout
 class SoundcoreDeviceConnectorImpl(
     private val context: Context,
     private val deviceFinder: BluetoothDeviceFinder,
-    private val isVendorSppUuid: (Uuid) -> Boolean,
-    private val fallbackSppUuid: Uuid,
+    private val isVendorRfcommUuid: (Uuid) -> Boolean,
+    private val fallbackRfcommUuid: Uuid,
     private val createManualConnection: (
         name: String,
         macAddress: MacAddr6,
@@ -38,7 +38,7 @@ class SoundcoreDeviceConnectorImpl(
         var connection: ManualConnection? = null
         try {
             val bluetoothDevice = deviceFinder.findByMacAddress(macAddress) ?: return null
-            val uuid = bluetoothDevice.uuids.find { isVendorSppUuid(it.uuid) }?.uuid ?: fallbackSppUuid
+            val uuid = bluetoothDevice.uuids.find { isVendorRfcommUuid(it.uuid) }?.uuid ?: fallbackRfcommUuid
             Log.d("SoundcoreDeviceConnectorImpl", "selected uuid $uuid")
             val socket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid)
             socket.connect()

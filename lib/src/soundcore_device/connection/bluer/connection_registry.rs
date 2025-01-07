@@ -137,10 +137,10 @@ impl BluerConnectionRegistry {
                     let uuids = device.uuids().await?.unwrap();
                     let uuid = uuids
                         .into_iter()
-                        .filter(device_utils::is_soundcore_vendor_spp_uuid)
+                        .filter(device_utils::is_soundcore_vendor_rfcomm_uuid)
                         .next()
                         .unwrap_or(device_utils::RFCOMM_UUID);
-                    debug!("using uuid {uuid} for SPP");
+                    debug!("using uuid {uuid} for RFCOMM");
 
                     let mut rfcomm_handle = session
                         .register_profile(Profile {

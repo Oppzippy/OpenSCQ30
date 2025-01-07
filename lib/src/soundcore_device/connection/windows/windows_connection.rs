@@ -74,7 +74,7 @@ impl WindowsConnection {
             .collect::<windows::core::Result<HashMap<Uuid, RfcommDeviceService>>>()?;
         let service = services_by_uuid
             .iter()
-            .filter(|(uuid, _)| device_utils::is_soundcore_vendor_spp_uuid(uuid))
+            .filter(|(uuid, _)| device_utils::is_soundcore_vendor_rfcomm_uuid(uuid))
             .map(|(_, service)| service)
             .next()
             .or(services_by_uuid.get(&device_utils::RFCOMM_UUID))

@@ -6,7 +6,7 @@ pub const RFCOMM_UUID: Uuid = uuid!("00001101-0000-1000-8000-00805f9b34fb");
 pub const VENDOR_RFCOMM_UUID: Uuid = uuid!("0cf12d31-fac3-4553-bd80-d6832e7b0000");
 pub const VENDOR_RFCOMM_UUID_MASK: Uuid = uuid!("FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFF0000");
 
-pub fn is_soundcore_vendor_spp_uuid(uuid: &Uuid) -> bool {
+pub fn is_soundcore_vendor_rfcomm_uuid(uuid: &Uuid) -> bool {
     let mask = VENDOR_RFCOMM_UUID_MASK.as_u128();
     uuid.as_u128() & mask == VENDOR_RFCOMM_UUID.as_u128() & mask
 }

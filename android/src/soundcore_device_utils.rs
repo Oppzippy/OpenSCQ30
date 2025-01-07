@@ -21,8 +21,8 @@ pub fn is_mac_address_soundcore_device(mac_address: String) -> bool {
 }
 
 #[uniffi::export]
-pub fn is_soundcore_vendor_spp_uuid(uuid: &Uuid) -> bool {
-    device_utils::is_soundcore_vendor_spp_uuid(uuid)
+pub fn is_soundcore_vendor_rfcomm_uuid(uuid: &Uuid) -> bool {
+    device_utils::is_soundcore_vendor_rfcomm_uuid(uuid)
 }
 
 #[uniffi::export]
@@ -31,7 +31,7 @@ pub fn is_soundcore_service_uuid(uuid: Uuid) -> bool {
 }
 
 #[uniffi::export]
-pub fn rfcomm_spp_uuid() -> Uuid {
+pub fn soundcore_rfcomm_uuid() -> Uuid {
     device_utils::RFCOMM_UUID
 }
 
