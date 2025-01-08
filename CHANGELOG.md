@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.18.0
 
 ### General
 

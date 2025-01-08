@@ -45,6 +45,18 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.18.0" date="2025-01-08">
+            <description>
+                <p>Fixes</p>
+                <ul>
+                    <li>Incorrect button action implementation for all devices. Setting actions somewhat worked, but existing actions were parsed incorrectly.</li>
+                    <li>Life Note 3 (A3933) sound mode changes by pressing a button on the device not being handled</li>
+                    <li>Space A40 (A3936) button action packet serialization mistake</li>
+                    <li>State update packet parse error when the right earbud is the TWS host device</li>
+                    <li>Connect using BR/EDR instead of BLE. All Soundcore devices support BR/EDR, but only some support BLE.</li>
+                </ul> 
+            </description>
+        </release>
         <release version="1.17.0" date="2024-12-16" />
         <release version="1.16.1" date="2024-12-14" />
         <release version="1.16.0" date="2024-12-13">
