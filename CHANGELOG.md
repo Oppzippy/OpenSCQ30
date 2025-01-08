@@ -1,5 +1,33 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Fixes
+
+-   Incorrect button action implementation for all devices. Setting actions somewhat worked, but existing actions were parsed incorrectly.
+-   Life Note 3 (A3933) sound mode changes by pressing a button on the device not being handled
+-   Space A40 (A3936) button action packet serialization mistake
+-   State update packet parse error when the right earbud is the TWS host device
+
+### GUI
+
+#### Fixes
+
+-   Connect using BR/EDR instead of BLE. All Soundcore devices support BR/EDR, but only some support BLE.
+
+### Android
+
+#### Features
+
+-   Improve pairing process. Scanning is no longer necessary.
+-   Add setting to disable mac address filter for device listing. 
+
+#### Fixes
+
+-   Connect using BR/EDR instead of BLE. All Soundcore devices support BR/EDR, but only some support BLE.
+
 ## v1.17.0
 
 ### Android
