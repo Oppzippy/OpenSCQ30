@@ -72,7 +72,7 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let settings_file = SettingsFile::<Config>::new(dir.path().join("config.toml"));
         let custom_profile = GlibCustomEqualizerProfile::new(
-            &"custom profile".to_string(),
+            "custom profile",
             Arc::new([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]),
         );
         let lib_custom_profile = EqualizerConfiguration::new_custom_profile(

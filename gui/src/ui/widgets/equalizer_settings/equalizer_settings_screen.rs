@@ -589,14 +589,8 @@ mod tests {
         settings.set_equalizer_configuration(&EqualizerConfiguration::new_from_preset_profile(
             PresetEqualizerProfile::SoundcoreSignature,
         ));
-        assert_eq!(
-            false,
-            settings.imp().create_custom_profile_button.is_visible(),
-        );
-        assert_eq!(
-            false,
-            settings.imp().delete_custom_profile_button.is_visible(),
-        );
+        assert!(!settings.imp().create_custom_profile_button.is_visible(),);
+        assert!(!settings.imp().delete_custom_profile_button.is_visible(),);
     }
 
     #[gtk::test]
@@ -608,14 +602,8 @@ mod tests {
         settings.set_equalizer_configuration(&EqualizerConfiguration::new_custom_profile(
             VolumeAdjustments::new([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]).unwrap(),
         ));
-        assert_eq!(
-            true,
-            settings.imp().create_custom_profile_button.is_visible(),
-        );
-        assert_eq!(
-            false,
-            settings.imp().delete_custom_profile_button.is_visible(),
-        );
+        assert!(settings.imp().create_custom_profile_button.is_visible(),);
+        assert!(!settings.imp().delete_custom_profile_button.is_visible(),);
     }
 
     #[gtk::test]
@@ -631,13 +619,7 @@ mod tests {
         settings.set_equalizer_configuration(&EqualizerConfiguration::new_custom_profile(
             VolumeAdjustments::new([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]).unwrap(),
         ));
-        assert_eq!(
-            false,
-            settings.imp().create_custom_profile_button.is_visible(),
-        );
-        assert_eq!(
-            true,
-            settings.imp().delete_custom_profile_button.is_visible(),
-        );
+        assert!(!settings.imp().create_custom_profile_button.is_visible(),);
+        assert!(settings.imp().delete_custom_profile_button.is_visible(),);
     }
 }

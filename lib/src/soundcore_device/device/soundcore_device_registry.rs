@@ -225,6 +225,6 @@ mod tests {
             .await
             .expect("must not fail to create device");
 
-        assert_eq!(true, maybe_device.is_none());
+        assert!(maybe_device.is_none());
     }
 }

@@ -77,7 +77,7 @@ mod tests {
 
     #[test]
     fn test_to_string_for_numbers_starting_with_zero() {
-        let firmware_version = FirmwareVersion::new(01, 02);
+        let firmware_version = FirmwareVersion::new(1, 2);
         assert_eq!("01.02", firmware_version.to_string());
     }
 
@@ -89,8 +89,8 @@ mod tests {
 
     #[test]
     fn test_major_has_priority_in_ordering() {
-        let bigger = FirmwareVersion::new(01, 00);
-        let smaller = FirmwareVersion::new(00, 20);
+        let bigger = FirmwareVersion::new(1, 0);
+        let smaller = FirmwareVersion::new(0, 20);
         assert!(smaller < bigger)
     }
 

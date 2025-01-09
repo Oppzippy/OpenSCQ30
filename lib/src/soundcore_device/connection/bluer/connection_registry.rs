@@ -137,8 +137,7 @@ impl BluerConnectionRegistry {
                     let uuids = device.uuids().await?.unwrap();
                     let uuid = uuids
                         .into_iter()
-                        .filter(device_utils::is_soundcore_vendor_rfcomm_uuid)
-                        .next()
+                        .find(device_utils::is_soundcore_vendor_rfcomm_uuid)
                         .unwrap_or(device_utils::RFCOMM_UUID);
                     debug!("using uuid {uuid} for RFCOMM");
 

@@ -59,6 +59,6 @@ mod tests {
             .unwrap()
             .1;
         assert_eq!(HostDevice::Left, packet.host_device);
-        assert_eq!(true, packet.tws_status);
+        assert!(packet.tws_status);
     }
 }

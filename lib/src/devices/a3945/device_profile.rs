@@ -217,7 +217,7 @@ mod tests {
             .1;
         let state: DeviceState = StateUpdatePacket::from(state_update).into();
         let implementation = (A3945_DEVICE_PROFILE.implementation)();
-        let state = (&implementation.packet_handlers()[&STATE_UPDATE])(&body, state);
+        let state = implementation.packet_handlers()[&STATE_UPDATE](body, state);
 
         let equalizer_configuration =
             EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::TrebleReducer);

@@ -75,7 +75,7 @@ mod tests {
         let settings_file = SettingsFile::new(dir.path().join("config.toml"));
 
         let custom_profiles = &[GlibCustomEqualizerProfile::new(
-            &"custom profile".to_string(),
+            "custom profile",
             Arc::new([-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]),
         )];
         import_custom_equalizer_profiles(&state, &settings_file, custom_profiles, true).unwrap();
@@ -99,11 +99,11 @@ mod tests {
 
         let custom_profiles = &[
             GlibCustomEqualizerProfile::new(
-                &"custom profile".to_string(),
+                "custom profile",
                 Arc::new([-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]),
             ),
             GlibCustomEqualizerProfile::new(
-                &"all zero".to_string(),
+                "all zero",
                 Arc::new([-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0]),
             ),
         ];
@@ -134,7 +134,7 @@ mod tests {
         insert_test_profiles(&settings_file);
 
         let custom_profiles = &[GlibCustomEqualizerProfile::new(
-            &"all zero".to_string(),
+            "all zero",
             Arc::new([-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0]),
         )];
         import_custom_equalizer_profiles(&state, &settings_file, custom_profiles, false).unwrap();
@@ -173,11 +173,11 @@ mod tests {
 
         let custom_profiles = &[
             GlibCustomEqualizerProfile::new(
-                &"all zero".to_string(),
+                "all zero",
                 Arc::new([-2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0]),
             ),
             GlibCustomEqualizerProfile::new(
-                &"all zero".to_string(),
+                "all zero",
                 Arc::new([-3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0]),
             ),
         ];

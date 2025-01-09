@@ -461,7 +461,7 @@ mod tests {
 
         let connection_clone = connection.clone();
         let result = SoundcoreDevice::<_, TokioFutures>::new(connection_clone).await;
-        assert_eq!(true, result.is_err());
+        assert!(result.is_err());
     }
 
     #[tokio::test(start_paused = true)]

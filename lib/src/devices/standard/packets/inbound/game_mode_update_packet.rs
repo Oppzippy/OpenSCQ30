@@ -48,6 +48,6 @@ mod tests {
         let packet = GameModeUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
-        assert_eq!(true, packet.is_enabled);
+        assert!(packet.is_enabled);
     }
 }

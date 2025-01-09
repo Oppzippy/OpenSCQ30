@@ -191,7 +191,7 @@ mod tests {
         load_resources();
         let volume_adjustments: Arc<[f64]> = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0].into();
         let widget = ExportProfileSelection::new();
-        widget.set_profiles(&vec![
+        widget.set_profiles(&[
             GlibCustomEqualizerProfile::new("test", volume_adjustments.to_owned()),
             GlibCustomEqualizerProfile::new("test2", volume_adjustments.to_owned()),
             GlibCustomEqualizerProfile::new("test3", volume_adjustments.to_owned()),
@@ -200,7 +200,7 @@ mod tests {
             &widget.imp().profile_list,
             HashSet::from(["test2".into(), "test3".into()]),
         );
-        widget.set_profiles(&vec![
+        widget.set_profiles(&[
             GlibCustomEqualizerProfile::new("test", volume_adjustments.to_owned()),
             GlibCustomEqualizerProfile::new("test2", volume_adjustments.to_owned()),
         ]);

@@ -83,47 +83,38 @@ mod tests {
 
     #[test]
     fn test_center_service_uuid() {
-        assert_eq!(true, is_soundcore_service_uuid(&SERVICE_UUID));
+        assert!(is_soundcore_service_uuid(&SERVICE_UUID));
     }
 
     #[test]
     fn test_valid_service_uuid() {
         let uuid = Uuid::from_str("1234f5da-0000-1000-8000-00805f9b34fb").unwrap();
-        assert_eq!(true, is_soundcore_service_uuid(&uuid));
+        assert!(is_soundcore_service_uuid(&uuid));
     }
 
     #[test]
     fn test_invalid_service_uuid() {
         let uuid = Uuid::from_str("123455da-0000-1000-8000-00805f9b34fb").unwrap();
-        assert_eq!(false, is_soundcore_service_uuid(&uuid));
+        assert!(!is_soundcore_service_uuid(&uuid));
     }
 
     #[test]
     fn test_service_uuids_are_in_correct_range() {
         let uuids = service_uuids();
-        assert_eq!(
-            true,
-            uuids.contains(&uuid!("0100f5da-0000-1000-8000-00805f9b34fb"))
-        );
-        assert_eq!(
-            true,
-            uuids.contains(&uuid!("011cf5da-0000-1000-8000-00805f9b34fb"))
-        );
-        assert_eq!(
-            true,
-            uuids.contains(&uuid!("0120f5da-0000-1000-8000-00805f9b34fb"))
-        );
+        assert!(uuids.contains(&uuid!("0100f5da-0000-1000-8000-00805f9b34fb")));
+        assert!(uuids.contains(&uuid!("011cf5da-0000-1000-8000-00805f9b34fb")));
+        assert!(uuids.contains(&uuid!("0120f5da-0000-1000-8000-00805f9b34fb")));
     }
 
     #[test]
     fn test_soundcore_device_mac_address() {
         let mac_address = [0xAC, 0x12, 0x2F, 0x00, 0x00, 0x00].into();
-        assert_eq!(true, is_mac_address_soundcore_device(mac_address));
+        assert!(is_mac_address_soundcore_device(mac_address));
     }
 
     #[test]
     fn test_not_soundcore_device_mac_address() {
         let mac_address = [0xAC, 0x00, 0x00, 0x00, 0x00, 0x00].into();
-        assert_eq!(false, is_mac_address_soundcore_device(mac_address));
+        assert!(!is_mac_address_soundcore_device(mac_address));
     }
 }

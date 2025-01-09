@@ -174,7 +174,7 @@ mod tests {
         load_resources();
         let equalizer = Equalizer::new();
         let expected_volumes = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7];
-        equalizer.set_volumes(&expected_volumes.to_owned());
+        equalizer.set_volumes(expected_volumes.as_ref());
         assert_eq!(
             expected_volumes,
             equalizer.volume_adjustments().adjustments().as_ref()
@@ -198,7 +198,7 @@ mod tests {
             ),
         );
         equalizer.imp().band_100.set_volume(0.1);
-        assert_eq!(true, received_event.get());
+        assert!(received_event.get());
     }
 
     #[gtk::test]
@@ -218,7 +218,7 @@ mod tests {
             ),
         );
         equalizer.set_volumes(&[0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]);
-        assert_eq!(false, received_event.get());
+        assert!(!received_event.get());
     }
 
     #[gtk::test]

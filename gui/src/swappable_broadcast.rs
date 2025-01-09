@@ -62,7 +62,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::{sync::Arc, time::Duration};
+    use std::time::Duration;
 
     use gtk::glib::timeout_future;
     use tokio::sync::watch;
@@ -71,7 +71,7 @@ mod tests {
 
     #[gtk::test]
     async fn test_swap_receiver() {
-        let swappable: Arc<SwappableBroadcast<i8>> = Arc::new(SwappableBroadcast::new());
+        let swappable: SwappableBroadcast<i8> = SwappableBroadcast::new();
         let swappable_receiver = swappable.subscribe().await;
 
         {
@@ -100,7 +100,7 @@ mod tests {
 
     #[gtk::test]
     async fn test_unsubscribes_from_old_receiviers() {
-        let swappable: Arc<SwappableBroadcast<i8>> = Arc::new(SwappableBroadcast::new());
+        let swappable: SwappableBroadcast<i8> = SwappableBroadcast::new();
         let (sender, receiver) = watch::channel(1);
 
         swappable.replace_receiver(Some(receiver)).await;

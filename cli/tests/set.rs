@@ -29,7 +29,7 @@ fn test_set_equalizer() {
     cmd.arg("set")
         .arg("equalizer")
         .arg("--")
-        .args(&["-120", "-60", "0", "0", "0", "60", "120", "135"]);
+        .args(["-120", "-60", "0", "0", "0", "60", "120", "135"]);
     cmd.assert()
         .success()
         .stdout(predicate::str::is_empty())

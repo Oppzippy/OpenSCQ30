@@ -24,13 +24,11 @@ impl<'a, T: IsA<gtk::Widget>> GtkWidgetChildWalker<'a, T> {
     }
 }
 
-impl<'a, T: IsA<gtk::Widget>> Iterator for GtkWidgetChildWalker<'a, T> {
+impl<T: IsA<gtk::Widget>> Iterator for GtkWidgetChildWalker<'_, T> {
     type Item = gtk::Widget;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let Some(mut current) = self.current.to_owned() else {
-            return None;
-        };
+        let mut current = self.current.to_owned()?;
 
         // First visit child node if possible
         if let Some(child) = current.first_child() {
@@ -47,9 +45,7 @@ impl<'a, T: IsA<gtk::Widget>> Iterator for GtkWidgetChildWalker<'a, T> {
         // No more next nodes, so go up to the parent, which we visited already, and visit the parent's next sibling
         // Repeat if the parent has no next sibling
         loop {
-            let Some(parent) = current.parent() else {
-                return None;
-            };
+            let parent = current.parent()?;
             if &parent == self.root {
                 return None;
             }

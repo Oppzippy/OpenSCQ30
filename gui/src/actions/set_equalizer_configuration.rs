@@ -90,9 +90,9 @@ mod tests {
         selected_device
             .expect_set_equalizer_configuration()
             .once()
-            .with(predicate::eq(EqualizerConfiguration::from(
+            .with(predicate::eq(
                 EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::Acoustic),
-            )))
+            ))
             .return_once(|_ambient_sound_mode| Ok(()));
         *state.selected_device.borrow_mut() = Some(Rc::new(selected_device));
 
@@ -113,9 +113,9 @@ mod tests {
         selected_device
             .expect_set_equalizer_configuration()
             .once()
-            .with(predicate::eq(EqualizerConfiguration::from(
+            .with(predicate::eq(
                 EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::Acoustic),
-            )))
+            ))
             .return_once(|_ambient_sound_mode| Ok(()));
         *state.selected_device.borrow_mut() = Some(Rc::new(selected_device));
 

@@ -77,6 +77,6 @@ mod tests {
     #[test]
     fn it_errors_when_nothing_matches() {
         let result = take_inbound_packet_header::<VerboseError<_>>(&[1, 2, 3]);
-        assert_eq!(true, result.is_err());
+        assert!(result.is_err());
     }
 }
