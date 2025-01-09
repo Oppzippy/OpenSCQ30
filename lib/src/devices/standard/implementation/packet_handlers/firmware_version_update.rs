@@ -21,6 +21,7 @@ pub fn firmware_version_update_handler(input: &[u8], state: DeviceState) -> Devi
                 .left_firmware_version
                 .max(packet.right_firmware_version),
         ),
+        serial_number: Some(packet.serial_number),
         ..state.clone()
     }
 }

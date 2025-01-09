@@ -623,4 +623,50 @@ mod tests {
             .await
             .unwrap();
     }
+
+    #[tokio::test(start_paused = true)]
+    async fn test_fetches_serial_number_when_not_included_in_state_update_packet() {
+        const A3931_STATE_UPDATE_PACKET_BYTES: [u8; 54] = [
+            0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01, // command
+            0, 54, // length
+            0, 0, // tws status
+            0, 0, 0, 0, // battery
+            0, 0, // eq preset
+            120, 120, 120, 120, 120, 120, 120, 120, // left eq config
+            120, 120, 120, 120, 120, 120, 120, 120, // right eq config
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // button config
+            0, 0, 0, 0, // sound modes
+            0, // side tone
+            0, // touch tone
+            0, // auto power off
+            0, // auto power off index
+            193,
+        ];
+
+        let (connection, sender) = create_test_connection().await;
+        // request firmware version packet
+        connection.push_write_return(Ok(())).await;
+        // request state update packet
+        connection.push_write_return(Ok(())).await;
+
+        {
+            let sender = sender.clone();
+            tokio::spawn(async move {
+                tokio::time::sleep(Duration::from_millis(1)).await;
+                sender
+                    .send(A3931_STATE_UPDATE_PACKET_BYTES.to_vec())
+                    .await
+                    .unwrap();
+                tokio::time::sleep(Duration::from_millis(1)).await;
+                sender
+                    .send(example_firmware_version_packet())
+                    .await
+                    .unwrap();
+            });
+        }
+        let device = SoundcoreDevice::<_, TokioFutures>::new(connection.to_owned())
+            .await
+            .unwrap();
+        assert_ne!(None, device.state().await.serial_number);
+    }
 }
