@@ -1,0 +1,2 @@
+* Fixes
+  - Fix serial number not being retrieved for some devices, leading to quick presets not working

@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.18.1
+
+### General
+
+#### Fixes
+
+-   Fix serial number not being retrieved for some devices, leading to quick presets not working
+
 ## v1.18.0
 
 ### General

@@ -8,7 +8,7 @@ AppDir:
     id: com.oppzippy.OpenSCQ30
     name: openscq30_gui
     icon: com.oppzippy.OpenSCQ30
-    version: 1.18.0
+    version: 1.18.1
     exec: usr/bin/openscq30_gui
     exec_args: $@
 
