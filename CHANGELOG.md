@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.19.0
+
+### Android
+
+#### Features
+
+-   Add button in settings to copy logs to clipboard for bug reports
+
 ## v1.18.1
 
 ### General

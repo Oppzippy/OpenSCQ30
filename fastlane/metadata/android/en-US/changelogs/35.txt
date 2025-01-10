@@ -1,0 +1,2 @@
+* Features
+  - Add button in settings to copy logs to clipboard for bug reports

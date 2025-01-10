@@ -45,6 +45,11 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.19.0" date="2025-01-10">
+            <description>
+ 
+            </description>
+        </release>
         <release version="1.18.1" date="2025-01-10">
             <description>
                 <p>Fixes</p>
