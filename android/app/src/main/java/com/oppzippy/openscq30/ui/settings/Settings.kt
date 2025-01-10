@@ -1,6 +1,8 @@
 package com.oppzippy.openscq30.ui.settings
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -20,6 +22,7 @@ fun Settings(viewModel: SettingsViewModel = hiltViewModel()) {
         onAutoConnectChange = { viewModel.setAutoConnect(it) },
         macAddressFilter = macAddressFilter,
         onMacAddressFilterChange = { viewModel.setMacAddressFilter(it) },
+        onCopyLogs = { viewModel.copyLogs() },
     )
 }
 
@@ -29,6 +32,7 @@ private fun Settings(
     onAutoConnectChange: (Boolean) -> Unit,
     macAddressFilter: Boolean,
     onMacAddressFilterChange: (Boolean) -> Unit,
+    onCopyLogs: () -> Unit,
 ) {
     Column {
         CheckboxWithLabel(
@@ -40,6 +44,10 @@ private fun Settings(
             text = stringResource(R.string.mac_address_filter),
             isChecked = macAddressFilter,
             onCheckedChange = { onMacAddressFilterChange(it) },
+        )
+        Button(
+            onClick = { onCopyLogs() },
+            content = { Text(stringResource(R.string.copy_logs_to_clipboard)) },
         )
     }
 }
@@ -53,6 +61,7 @@ private fun PreviewSettings() {
             onAutoConnectChange = {},
             macAddressFilter = true,
             onMacAddressFilterChange = {},
+            onCopyLogs = {},
         )
     }
 }
