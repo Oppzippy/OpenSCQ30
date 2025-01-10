@@ -1,22 +1,23 @@
-use std::sync::LazyLock;
+use std::{panic::Location, sync::LazyLock};
 
 use regex::Regex;
 use uuid::Uuid;
 
 impl From<btleplug::Error> for crate::Error {
+    #[track_caller]
     fn from(err: btleplug::Error) -> Self {
         match err {
             btleplug::Error::DeviceNotFound => crate::Error::DeviceNotFound {
-                source: Box::new(err),
+                source: Some(Box::new(err)),
             },
             btleplug::Error::NotConnected => crate::Error::NotConnected {
-                source: Box::new(err),
+                source: Some(Box::new(err)),
             },
             btleplug::Error::InvalidBDAddr(_) => crate::Error::DeviceNotFound {
-                source: Box::new(err),
+                source: Some(Box::new(err)),
             },
             btleplug::Error::TimedOut(_) => crate::Error::NotConnected {
-                source: Box::new(err),
+                source: Some(Box::new(err)),
             },
             btleplug::Error::Other(_) => {
                 static NOT_CONNECTED: &str = "Not connected";
@@ -30,13 +31,6 @@ impl From<btleplug::Error> for crate::Error {
 
                 if let Some(captures) = SERVICE_NOT_FOUND.captures(&error_message) {
                     crate::Error::ServiceNotFound {
-                        uuid: Uuid::try_from(
-                            captures
-                                .get(1)
-                                .map(|capture| capture.as_str())
-                                .unwrap_or_default(),
-                        )
-                        .unwrap_or_default(),
                         source: Some(Box::new(err)),
                     }
                 } else if let Some(captures) = CHARACTERISTIC_NOT_FOUND.captures(&error_message) {
@@ -52,16 +46,18 @@ impl From<btleplug::Error> for crate::Error {
                     }
                 } else if error_message == NOT_CONNECTED {
                     crate::Error::NotConnected {
-                        source: Box::new(err),
+                        source: Some(Box::new(err)),
                     }
                 } else {
                     crate::Error::Other {
                         source: Box::new(err),
+                        location: Location::caller(),
                     }
                 }
             }
             _ => crate::Error::Other {
                 source: Box::new(err),
+                location: Location::caller(),
             },
         }
     }

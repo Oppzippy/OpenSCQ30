@@ -19,8 +19,7 @@ use uuid::Uuid;
 use crate::{
     api::connection::{Connection, ConnectionStatus},
     device_utils::{
-        is_soundcore_service_uuid, READ_CHARACTERISTIC_UUID, SERVICE_UUID,
-        WRITE_CHARACTERISTIC_UUID,
+        is_soundcore_service_uuid, READ_CHARACTERISTIC_UUID, WRITE_CHARACTERISTIC_UUID,
     },
 };
 
@@ -54,10 +53,7 @@ impl BtlePlugConnection {
                     .services()
                     .into_iter()
                     .find(|service| is_soundcore_service_uuid(&service.uuid))
-                    .ok_or(crate::Error::ServiceNotFound {
-                        uuid: SERVICE_UUID,
-                        source: None,
-                    })?;
+                    .ok_or(crate::Error::ServiceNotFound { source: None })?;
 
                 let write_characteristic = service
                     .characteristics
@@ -135,7 +131,8 @@ impl Connection for BtlePlugConnection {
                 match maybe_name {
                     Some(Some(name)) => Ok(name),
                     _ => Err(crate::Error::NameNotFound {
-                        mac_address: peripheral.address().to_string(),
+                        mac_address: peripheral.address().into_mac_addr(),
+                        source: None,
                     }),
                 }
             })

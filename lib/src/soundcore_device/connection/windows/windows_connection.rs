@@ -52,7 +52,7 @@ impl WindowsConnection {
                 // If there is no error but the device is not found, an error with code 0 is returned
                 if windows::core::HRESULT::is_ok(err.code()) {
                     crate::Error::DeviceNotFound {
-                        source: Box::new(err),
+                        source: Some(Box::new(err)),
                     }
                 } else {
                     err.into()
@@ -78,10 +78,7 @@ impl WindowsConnection {
             .map(|(_, service)| service)
             .next()
             .or(services_by_uuid.get(&device_utils::RFCOMM_UUID))
-            .ok_or(crate::Error::ServiceNotFound {
-                uuid: Uuid::nil(),
-                source: None,
-            })?;
+            .ok_or(crate::Error::ServiceNotFound { source: None })?;
 
         debug!("making socket");
         let socket = StreamSocket::new()?;
@@ -127,7 +124,7 @@ impl WindowsConnection {
                     // If there is no error but the device is not found, an error with code 0 is returned
                     if windows::core::HRESULT::is_ok(err.code()) {
                         crate::Error::DeviceNotFound {
-                            source: Box::new(err),
+                            source: Some(Box::new(err)),
                         }
                     } else {
                         err.into()
@@ -178,10 +175,7 @@ impl WindowsConnection {
         if let Some(service) = service {
             Ok(service)
         } else {
-            Err(crate::Error::ServiceNotFound {
-                uuid: device_utils::SERVICE_UUID,
-                source: None,
-            })
+            Err(crate::Error::ServiceNotFound { source: None })
         }
     }
 }

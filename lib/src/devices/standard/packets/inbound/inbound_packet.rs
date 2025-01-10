@@ -1,3 +1,5 @@
+use std::panic::Location;
+
 use nom::{
     error::{ContextError, ParseError, VerboseError},
     IResult,
@@ -28,9 +30,11 @@ pub struct TryIntoInboundPacketError {
 }
 
 impl From<TryIntoInboundPacketError> for crate::Error {
+    #[track_caller]
     fn from(error: TryIntoInboundPacketError) -> Self {
         Self::Other {
             source: Box::new(error),
+            location: Location::caller(),
         }
     }
 }

@@ -1,22 +1,23 @@
-use uuid::Uuid;
+use std::panic::Location;
 
-use crate::devices::standard::structures::SerialNumber;
+use macaddr::MacAddr6;
+use uuid::Uuid;
 
 type InnerError = Box<dyn std::error::Error + Send + Sync>;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("device not found: {source:?}")]
-    DeviceNotFound { source: InnerError },
-
-    #[error("device not supported: {serial_number:?}")]
-    DeviceNotSupported { serial_number: SerialNumber },
+    DeviceNotFound { source: Option<InnerError> },
 
     #[error("not connected: {source:?}")]
-    NotConnected { source: InnerError },
+    NotConnected { source: Option<InnerError> },
 
     #[error("name of device with mac address `{mac_address}` not found")]
-    NameNotFound { mac_address: String },
+    NameNotFound {
+        mac_address: MacAddr6,
+        source: Option<InnerError>,
+    },
 
     #[error("characteristic `{uuid}` not found: {source:?}")]
     CharacteristicNotFound {
@@ -25,17 +26,7 @@ pub enum Error {
     },
 
     #[error("service not found: {source:?}")]
-    ServiceNotFound {
-        // TODO remove this field since we are looking for a range of uuids, not one in particular
-        uuid: Uuid,
-        source: Option<InnerError>,
-    },
-
-    #[error("{source:?}")]
-    Other { source: InnerError },
-
-    #[error("device didn't respond to request: {request}")]
-    NoResponse { request: &'static str },
+    ServiceNotFound { source: Option<InnerError> },
 
     #[error("feature not supported: {feature_name}")]
     FeatureNotSupported { feature_name: &'static str },
@@ -51,8 +42,14 @@ pub enum Error {
     #[error("timed out: {action}")]
     TimedOut { action: &'static str },
 
-    #[error("parse error: {message}")]
+    #[error("parse error: {message:?}")]
     ParseError { message: String },
+
+    #[error("{location}: {source:?}")]
+    Other {
+        source: InnerError,
+        location: &'static Location<'static>,
+    },
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

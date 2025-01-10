@@ -25,7 +25,7 @@ use uuid::Uuid;
 
 use crate::{
     api::connection::{Connection, ConnectionStatus},
-    device_utils::{self, SERVICE_UUID},
+    device_utils::{self},
 };
 
 #[derive(Debug)]
@@ -103,7 +103,7 @@ impl BluerConnection {
                 return Ok(service);
             }
             Err(err) => {
-                if let crate::Error::ServiceNotFound { source: _, uuid: _ } = err {
+                if let crate::Error::ServiceNotFound { .. } = err {
                     // keep going and retry later
                 } else {
                     return Err(err);
@@ -124,10 +124,7 @@ impl BluerConnection {
                 return Ok(service);
             }
         }
-        Err(crate::Error::ServiceNotFound {
-            uuid: SERVICE_UUID,
-            source: None,
-        })
+        Err(crate::Error::ServiceNotFound { source: None })
     }
 
     async fn spawn_connection_status(
@@ -213,7 +210,8 @@ impl Connection for BluerConnection {
                 match device.name().await? {
                     Some(name) => Ok(name),
                     None => Err(crate::Error::NameNotFound {
-                        mac_address: device.address().to_string(),
+                        mac_address: device.address().into(),
+                        source: None,
                     }),
                 }
             })

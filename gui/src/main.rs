@@ -287,10 +287,6 @@ fn delayed_initialize_application(
 
         tracing::error!("{err:?}");
         match err.downcast_ref::<openscq30_lib::Error>() {
-            Some(openscq30_lib::Error::DeviceNotSupported { serial_number }) => {
-                deselect_device();
-                send_toast(format!("Device Not Supported: {serial_number}"));
-            }
             Some(openscq30_lib::Error::TimedOut { action }) => {
                 deselect_device();
                 send_toast(format!("Action Timed Out: {action}"));
@@ -318,10 +314,6 @@ fn delayed_initialize_application(
             Some(openscq30_lib::Error::NameNotFound { .. }) => {
                 deselect_device();
                 send_toast("Device Name Not Found".to_string());
-            }
-            Some(openscq30_lib::Error::NoResponse { .. }) => {
-                deselect_device();
-                send_toast("Device Didn't Respond".to_string());
             }
             Some(openscq30_lib::Error::FeatureNotSupported { feature_name }) => send_toast(
                 format!("Tried to use feature not supported by device: {feature_name}"),
