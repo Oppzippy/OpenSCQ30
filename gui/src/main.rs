@@ -293,7 +293,7 @@ fn delayed_initialize_application(
             }
             Some(openscq30_lib::Error::ParseError { .. }) => {
                 deselect_device();
-                send_toast("Error Parsing Response. See stderr.".to_string());
+                send_toast("Error Parsing Response. See console for details.".to_string());
             }
             Some(openscq30_lib::Error::NotConnected { .. }) => {
                 deselect_device();
@@ -330,7 +330,9 @@ fn delayed_initialize_application(
             Some(openscq30_lib::Error::Other { .. }) | None => {
                 state
                     .state_update_sender
-                    .send(StateUpdate::AddToast(format!("{err:#}")))
+                    .send(StateUpdate::AddToast(
+                        "An error has occurred. See console for details.".to_string(),
+                    ))
                     .unwrap();
             }
         }
