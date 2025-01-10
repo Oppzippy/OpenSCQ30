@@ -45,6 +45,9 @@ pub enum Error {
     #[error("parse error: {message:?}")]
     ParseError { message: String },
 
+    #[error("bluetooth adapter not available: {source:?}")]
+    BluetoothAdapterNotAvailable { source: Option<InnerError> },
+
     #[error("{location}: {source:?}")]
     Other {
         source: InnerError,

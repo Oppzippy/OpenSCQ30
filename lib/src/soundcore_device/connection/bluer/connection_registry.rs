@@ -43,7 +43,15 @@ impl BluerConnectionRegistry {
         self.runtime
             .spawn(
                 async move {
-                    let adapter = session.default_adapter().await?;
+                    let adapter = session.default_adapter().await.map_err(|err| {
+                        if err.kind == bluer::ErrorKind::NotFound {
+                            crate::Error::BluetoothAdapterNotAvailable {
+                                source: Some(Box::new(err)),
+                            }
+                        } else {
+                            err.into()
+                        }
+                    })?;
 
                     // Needed to ensure GATT services are discovered
                     Self::ble_scan(&adapter).await?;
@@ -123,7 +131,16 @@ impl BluerConnectionRegistry {
         self.runtime
             .spawn(
                 async move {
-                    let adapter = session.default_adapter().await?;
+                    let adapter = session.default_adapter().await.map_err(|err| {
+                        if err.kind == bluer::ErrorKind::NotFound {
+                            crate::Error::BluetoothAdapterNotAvailable {
+                                source: Some(Box::new(err)),
+                            }
+                        } else {
+                            err.into()
+                        }
+                    })?;
+
                     let device = match adapter.device(mac_address.into_array().into()) {
                         Ok(device) => device,
                         Err(err) => {

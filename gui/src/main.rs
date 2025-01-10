@@ -327,6 +327,9 @@ fn delayed_initialize_application(
             Some(openscq30_lib::Error::IncompleteStateError { message }) => {
                 send_toast(format!("Action failed due to incomplete state: {message}"))
             }
+            Some(openscq30_lib::Error::BluetoothAdapterNotAvailable { .. }) => {
+                send_toast("bluetooth adapter not available".to_string())
+            }
             Some(openscq30_lib::Error::Other { .. }) | None => {
                 state
                     .state_update_sender
