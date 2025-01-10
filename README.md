@@ -28,8 +28,8 @@ It is intended that all devices in this list work, but since I do not own them a
 | A3930    | Liberty 2 Pro     | Unknown |
 | A3931    | Life Dot 2 NC     | Unknown |
 | A3931XR  | Life Dot 2 XR     | Unknown |
-| A3935    | Life A2 NC        | Unknown |
-| A3935W   | Life A2 NC        | Unknown |
+| A3935    | Life A2 NC        | Working |
+| A3935W   | Life A2 NC        | Working |
 | A3936    | Space A40         | Unknown |
 | A3951    | Liberty Air 2 Pro | Unknown |
 | A3945    | Life Note 3S      | Unknown |
