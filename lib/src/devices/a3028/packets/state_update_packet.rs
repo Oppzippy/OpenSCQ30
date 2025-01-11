@@ -1,5 +1,5 @@
 use nom::{
-    combinator::{all_consuming, map},
+    combinator::{all_consuming, map, opt},
     error::{context, ContextError, ParseError},
     sequence::tuple,
     IResult,
@@ -8,7 +8,10 @@ use nom::{
 use crate::devices::{
     a3028::device_profile::A3028_DEVICE_PROFILE,
     standard::{
-        packets::inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
+        packets::{
+            inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
+            parsing::take_bool,
+        },
         structures::{
             AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
             SingleBattery, SoundModes,
@@ -68,6 +71,9 @@ impl InboundPacket for A3028StateUpdatePacket {
                     SoundModes::take,
                     FirmwareVersion::take,
                     SerialNumber::take,
+                    opt(tuple((
+                        take_bool, take_bool, take_bool, take_bool, take_bool, take_bool, take_bool,
+                    ))),
                 )),
                 |(
                     battery,
@@ -78,6 +84,7 @@ impl InboundPacket for A3028StateUpdatePacket {
                     sound_modes,
                     firmware_version,
                     serial_number,
+                    _unknown,
                 )| {
                     A3028StateUpdatePacket {
                         battery,
@@ -270,5 +277,28 @@ mod tests {
         let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         let result = StateUpdatePacket::take::<VerboseError<_>>(body);
         assert!(result.is_err())
+    }
+
+    #[test]
+    fn it_parses_packet_from_github_issue_141() {
+        let input: &[u8] = &[
+            9, 255, 0, 0, 1, 1, 1, // command
+            77, 0, // length
+            5, 0, // battery
+            14, 0, 120, 150, 150, 140, 160, 170, 150, 160, // equalizer configuration
+            0,   //gender
+            0,   //age range
+            0,   // hear id is enabled
+            0, 0, 0, 0, 0, 0, 0, 0, // hear id left
+            0, 0, 0, 0, 0, 0, 0, 0, // hear id right
+            0, 0, 0, 0, // hear id time
+            0, 0, 0, 0, // sound modes
+            48, 52, 46, 51, 51, // firmware version
+            51, 48, 50, 56, 54, 68, 67, 56, 57, 51, 52, 52, 52, 55, 57, 56, // serial number
+            0, 0, 1, 1, 1, 1, 1,   // 7 optional unknown bools ???
+            138, // checksum
+        ];
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
+        StateUpdatePacket::take::<VerboseError<_>>(body).expect("it parses successfully");
     }
 }
