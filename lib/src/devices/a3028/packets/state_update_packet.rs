@@ -1,9 +1,11 @@
 use nom::{
-    combinator::{all_consuming, map, opt},
+    combinator::{all_consuming, map, map_opt, opt},
     error::{context, ContextError, ParseError},
+    number::complete::le_u8,
     sequence::tuple,
     IResult,
 };
+use strum::FromRepr;
 
 use crate::devices::{
     a3028::device_profile::A3028_DEVICE_PROFILE,
@@ -29,6 +31,7 @@ pub struct A3028StateUpdatePacket {
     pub sound_modes: SoundModes,
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
+    pub extra_fields: Option<ExtraFields>,
 }
 
 impl From<A3028StateUpdatePacket> for StateUpdatePacket {
@@ -71,9 +74,7 @@ impl InboundPacket for A3028StateUpdatePacket {
                     SoundModes::take,
                     FirmwareVersion::take,
                     SerialNumber::take,
-                    opt(tuple((
-                        take_bool, take_bool, take_bool, take_bool, take_bool, take_bool, take_bool,
-                    ))),
+                    opt(ExtraFields::take),
                 )),
                 |(
                     battery,
@@ -84,7 +85,7 @@ impl InboundPacket for A3028StateUpdatePacket {
                     sound_modes,
                     firmware_version,
                     serial_number,
-                    _unknown,
+                    extra_fields,
                 )| {
                     A3028StateUpdatePacket {
                         battery,
@@ -95,11 +96,66 @@ impl InboundPacket for A3028StateUpdatePacket {
                         sound_modes,
                         firmware_version,
                         serial_number,
+                        extra_fields,
                     }
                 },
             )),
         )(input)
     }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ExtraFields {
+    unknown1: u8,
+    touch_control: bool,
+    dual_connections: bool,
+    auto_power_off_enabled: bool,
+    // 0 is 30 min, 1 is 60 min, 2 is 90 min, 3 is 120 min
+    auto_power_off_duration: AutoPowerOffDuration,
+    ambient_sound_prompt_tone: bool,
+    battery_alert_prompt_tone: bool,
+}
+
+impl ExtraFields {
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> IResult<&'a [u8], Self, E> {
+        map_opt(
+            tuple((
+                le_u8, take_bool, take_bool, take_bool, le_u8, take_bool, take_bool,
+            )),
+            |(
+                unknown1,
+                touch_control,
+                dual_connections,
+                auto_power_off_enabled,
+                auto_power_off_duration,
+                ambient_sound_prompt_tone,
+                battery_alert_prompt_tone,
+            )| {
+                Some(Self {
+                    unknown1,
+                    touch_control,
+                    dual_connections,
+                    auto_power_off_enabled,
+                    auto_power_off_duration: AutoPowerOffDuration::from_repr(
+                        auto_power_off_duration,
+                    )?,
+                    ambient_sound_prompt_tone,
+                    battery_alert_prompt_tone,
+                })
+            },
+        )(input)
+    }
+}
+
+#[repr(u8)]
+#[derive(FromRepr, Clone, Copy, Debug, PartialEq, Eq, Hash)]
+enum AutoPowerOffDuration {
+    ThirtyMinutes = 0,
+    OneHour = 1,
+    NinetyMinutes = 2,
+    TwoHours = 3,
 }
 
 #[cfg(test)]
