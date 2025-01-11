@@ -1,0 +1,2 @@
+* Fixes
+  - Fix newer Life Q30's failing to connect due to parsing error

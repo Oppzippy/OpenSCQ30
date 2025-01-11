@@ -43,8 +43,8 @@ android {
         applicationId = "com.oppzippy.openscq30"
         minSdk = 26
         targetSdk = 34
-        versionCode = 35
-        versionName = "1.19.0"
+        versionCode = 36
+        versionName = "1.19.1"
 
         testInstrumentationRunner = "com.oppzippy.openscq30.HiltTestRunner"
         vectorDrawables {

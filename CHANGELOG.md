@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.19.1
+
+### General
+
+#### Fixes
+
+-   Fix newer Life Q30's failing to connect due to parsing error
+
 ## v1.19.0
 
 ### Android

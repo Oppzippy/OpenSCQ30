@@ -45,6 +45,14 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.19.1" date="2025-01-11">
+            <description>
+                <p>Fixes</p>
+                <ul>
+                    <li>Fix newer Life Q30's failing to connect due to parsing error</li>
+                </ul> 
+            </description>
+        </release>
         <release version="1.19.0" date="2025-01-10">
             <description>
  
