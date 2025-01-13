@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "device_faker"
+dynamic = ["version"]
+description = "Fake Soundcore devices for reverse engineering"
+dependencies = [
+    "bumble @ git+https://github.com/google/bumble.git@509df4c6762869ca9e478cf9f8a5aa99ad4f8d86",
+    "watchdog >= 6.0.0",
+]

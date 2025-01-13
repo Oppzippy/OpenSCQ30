@@ -1,0 +1,8 @@
+/venv
+/.ruff_cache
+/build
+*.egg-info
+*.pyc
+/devices/*
+!/devices/example.toml
+
