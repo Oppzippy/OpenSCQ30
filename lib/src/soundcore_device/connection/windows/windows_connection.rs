@@ -14,7 +14,7 @@ use windows::{
         GenericAttributeProfile::{GattCharacteristic, GattDeviceService},
         Rfcomm::RfcommDeviceService,
     },
-    Foundation::{EventRegistrationToken, TypedEventHandler},
+    Foundation::TypedEventHandler,
     Networking::Sockets::{SocketProtectionLevel, StreamSocket},
     Storage::Streams::{Buffer, DataReader, DataWriter, InputStreamOptions},
 };
@@ -31,7 +31,7 @@ pub struct WindowsConnection {
     socket: StreamSocket,
     service_uuid: Uuid,
     connection_status_receiver: watch::Receiver<ConnectionStatus>,
-    connection_status_changed_token: EventRegistrationToken,
+    connection_status_changed_token: i64,
     handle: std::sync::Mutex<Option<JoinHandle<()>>>,
 }
 

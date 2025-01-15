@@ -52,11 +52,11 @@ tokio = { workspace = true, features = ["rt-multi-thread"] }
 windows = { workspace = true, optional = true, features = [
     "Storage_Streams",
     "Foundation",
-    "implement",
     "Foundation_Collections",
     "Devices_Enumeration",
     "Devices_Bluetooth",
     "Devices_Bluetooth_GenericAttributeProfile",
     "Devices_Bluetooth_Rfcomm",
     "Networking_Sockets",
+    "deprecated",
 ] }

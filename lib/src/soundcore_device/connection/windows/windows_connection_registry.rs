@@ -34,7 +34,7 @@ impl WindowsConnectionRegistry {
             HSTRING::from("System.Devices.Aep.IsConnected"),
             HSTRING::from("System.Devices.Aep.Bluetooth.Le.IsConnectable"),
         ];
-        let iterable = IVectorView::<HSTRING>::try_from(props)?;
+        let iterable = IVectorView::<HSTRING>::from(props);
         let watcher = DeviceInformation::CreateWatcherWithKindAqsFilterAndAdditionalProperties(
             // Bluetooth LE protocol ID: https://learn.microsoft.com/en-us/windows/uwp/devices-sensors/aep-service-class-ids#bluetooth-and-bluetooth-le-services
             &HSTRING::from(
