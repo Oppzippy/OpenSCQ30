@@ -1639,6 +1639,7 @@ dependencies = [
  "btleplug",
  "float-cmp 0.9.0",
  "futures",
+ "hex",
  "js-sys",
  "macaddr",
  "nom",

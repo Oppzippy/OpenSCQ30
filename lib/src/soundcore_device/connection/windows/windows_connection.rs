@@ -1,18 +1,26 @@
 use std::{
     collections::HashMap,
+    sync::Arc,
     thread::{self, JoinHandle},
+    time::Duration,
 };
 
 use macaddr::MacAddr6;
-use tokio::sync::{mpsc as tokio_mpsc, watch};
+use tokio::{
+    select,
+    sync::{mpsc as tokio_mpsc, watch, Semaphore},
+};
 use tracing::{debug, debug_span, error, instrument, trace, warn};
 use uuid::Uuid;
 use windows::{
-    core::AgileReference,
-    Devices::Bluetooth::{
-        BluetoothConnectionStatus, BluetoothDevice, BluetoothLEDevice,
-        GenericAttributeProfile::{GattCharacteristic, GattDeviceService},
-        Rfcomm::RfcommDeviceService,
+    core::{AgileReference, HSTRING},
+    Devices::{
+        Bluetooth::{
+            BluetoothConnectionStatus, BluetoothDevice, BluetoothLEDevice,
+            GenericAttributeProfile::{GattCharacteristic, GattDeviceService},
+            Rfcomm::RfcommDeviceService,
+        },
+        Enumeration::{DeviceInformation, DeviceInformationKind},
     },
     Foundation::TypedEventHandler,
     Networking::Sockets::{SocketProtectionLevel, StreamSocket},
@@ -29,7 +37,7 @@ use super::WindowsMacAddress;
 pub struct WindowsConnection {
     device: BluetoothDevice,
     socket: StreamSocket,
-    service_uuid: Uuid,
+    le_service_uuid: Uuid,
     connection_status_receiver: watch::Receiver<ConnectionStatus>,
     connection_status_changed_token: i64,
     handle: std::sync::Mutex<Option<JoinHandle<()>>>,
@@ -38,28 +46,19 @@ pub struct WindowsConnection {
 impl WindowsConnection {
     #[instrument()]
     pub async fn new(mac_address: MacAddr6) -> crate::Result<Option<Self>> {
-        let service_uuid = match Self::get_ble_service_uuid(mac_address).await {
-            Ok(service_uuid) => service_uuid,
+        trace!("getting bluetooth device");
+        let device = Self::get_bluetooth_device_from_mac_address(mac_address).await?;
+
+        trace!("getting bluetooth le service uuid");
+        let le_service_uuid = match Self::get_le_service_uuid(mac_address).await {
+            Ok(uuid) => uuid,
             Err(err) => {
                 debug!("failed to get gatt service uuid, but that's okay since we're using rfcomm: {err:?}");
                 Uuid::nil()
             }
         };
 
-        let device = BluetoothDevice::FromBluetoothAddressAsync(mac_address.as_windows_u64())?
-            .await
-            .map_err(|err| {
-                // If there is no error but the device is not found, an error with code 0 is returned
-                if windows::core::HRESULT::is_ok(err.code()) {
-                    crate::Error::DeviceNotFound {
-                        source: Some(Box::new(err)),
-                    }
-                } else {
-                    err.into()
-                }
-            })?;
-
-        debug!("getting service");
+        trace!("getting rfcomm service");
         let services = device.GetRfcommServicesAsync()?.await?.Services()?;
         let services_by_uuid = services
             .into_iter()
@@ -80,7 +79,7 @@ impl WindowsConnection {
             .or(services_by_uuid.get(&device_utils::RFCOMM_UUID))
             .ok_or(crate::Error::ServiceNotFound { source: None })?;
 
-        debug!("making socket");
+        trace!("making socket");
         let socket = StreamSocket::new()?;
         socket
             .ConnectWithProtectionLevelAsync(
@@ -89,7 +88,8 @@ impl WindowsConnection {
                 SocketProtectionLevel::BluetoothEncryptionAllowNullAuthentication,
             )?
             .await?;
-        debug!("starting connection changed");
+
+        trace!("starting connection status changed handler");
         let (sender, receiver) = watch::channel(ConnectionStatus::Connected);
         let connection_status_changed_token = device.ConnectionStatusChanged(
             &TypedEventHandler::new(move |device: &Option<BluetoothDevice>, _| {
@@ -109,29 +109,77 @@ impl WindowsConnection {
         Ok(Some(Self {
             device,
             socket,
-            service_uuid,
+            le_service_uuid,
             connection_status_receiver: receiver,
             connection_status_changed_token,
             handle: std::sync::Mutex::new(None),
         }))
     }
 
-    async fn get_ble_service_uuid(mac_address: MacAddr6) -> crate::Result<Uuid> {
-        let ble_device =
-            BluetoothLEDevice::FromBluetoothAddressAsync(mac_address.as_windows_u64())?
-                .await
-                .map_err(|err| {
-                    // If there is no error but the device is not found, an error with code 0 is returned
-                    if windows::core::HRESULT::is_ok(err.code()) {
-                        crate::Error::DeviceNotFound {
-                            source: Some(Box::new(err)),
-                        }
-                    } else {
-                        err.into()
-                    }
-                })?;
-        let service = Self::service(&ble_device).await?;
-        Ok(Uuid::from_u128(service.Uuid()?.to_u128()))
+    #[instrument]
+    async fn get_bluetooth_device_from_mac_address(
+        mac_address: MacAddr6,
+    ) -> crate::Result<BluetoothDevice> {
+        let connected_filter = BluetoothDevice::GetDeviceSelectorFromConnectionStatus(
+            BluetoothConnectionStatus::Connected,
+        )?;
+        // we can't use GetDeviceSelectorFromBluetoothAddress because that will use System.Devices.Aep.Bluetooth.IssueInquiry
+        // which causes a massive delay
+        let mac_address_filter = format!(
+            "System.DeviceInterface.Bluetooth.DeviceAddress:=\"{}\"",
+            hex::encode(mac_address)
+        );
+        let filter: HSTRING = format!("{connected_filter} AND {mac_address_filter}").into();
+        trace!("built filter {filter}");
+        let device_information_collection =
+            DeviceInformation::FindAllAsyncWithKindAqsFilterAndAdditionalProperties(
+                &filter,
+                None,
+                DeviceInformationKind::Device,
+            )?
+            .await?;
+        trace!(
+            "found {} matching devices",
+            device_information_collection.Size()?
+        );
+        if device_information_collection.Size()? == 0 {
+            return Err(crate::Error::DeviceNotFound { source: None });
+        }
+        let device_information = device_information_collection.First()?.Current()?;
+
+        Ok(BluetoothDevice::FromIdAsync(&device_information.Id()?)?.await?)
+    }
+
+    #[instrument]
+    async fn get_le_service_uuid(mac_address: MacAddr6) -> crate::Result<Uuid> {
+        trace!("getting bluetooth le device");
+        let le_device = Self::get_bluetooth_le_device_from_mac_address(mac_address).await?;
+
+        trace!("getting bluetooth le service uuid");
+        let guid = Self::service(&le_device)
+            .await
+            .and_then(|service| service.Uuid().map_err(Into::into))?;
+        Ok(Uuid::from_u128(guid.to_u128()))
+    }
+
+    #[instrument]
+    async fn get_bluetooth_le_device_from_mac_address(
+        mac_address: MacAddr6,
+    ) -> crate::Result<BluetoothLEDevice> {
+        let operation = BluetoothLEDevice::FromBluetoothAddressAsync(mac_address.as_windows_u64())?;
+        let timeout = Arc::new(Semaphore::new(0));
+        {
+            let timeout = timeout.to_owned();
+            thread::spawn(move || {
+                thread::sleep(Duration::from_secs(3));
+                timeout.close();
+            });
+        }
+
+        select! {
+            _ = timeout.acquire() => Err(crate::Error::DeviceNotFound{source:None}),
+            result = operation => result.map_err(Into::into),
+        }
     }
 
     #[instrument(level = "trace", skip(service))]
@@ -191,7 +239,7 @@ impl Connection for WindowsConnection {
     }
 
     fn service_uuid(&self) -> Uuid {
-        self.service_uuid
+        self.le_service_uuid
     }
 
     #[instrument(level = "trace", skip(self))]
@@ -283,7 +331,7 @@ impl core::fmt::Debug for WindowsConnection {
         f.debug_struct("WindowsConnection")
             .field("device", &self.device)
             .field("socket", &self.socket)
-            .field("service_uuid", &self.service_uuid)
+            .field("service_uuid", &self.le_service_uuid)
             .field(
                 "connection_status_changed_token",
                 &self.connection_status_changed_token,

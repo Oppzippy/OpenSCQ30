@@ -48,6 +48,7 @@ tokio = { workspace = true, features = ["rt-multi-thread"] }
 tokio = { workspace = true, features = ["macros", "test-util"] }
 
 [target.'cfg(target_os = "windows")'.dependencies]
+hex = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
 windows = { workspace = true, optional = true, features = [
     "Storage_Streams",
