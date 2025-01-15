@@ -1635,6 +1635,7 @@ dependencies = [
 name = "openscq30_lib"
 version = "1.19.3"
 dependencies = [
+ "async-trait",
  "bluer",
  "btleplug",
  "float-cmp 0.9.0",

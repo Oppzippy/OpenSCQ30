@@ -3,7 +3,6 @@ use nom::{combinator::all_consuming, error::VerboseError};
 use crate::devices::standard::{
     packets::inbound::{InboundPacket, SoundModeUpdatePacket},
     state::DeviceState,
-    structures::SoundModes,
 };
 
 pub fn sound_mode_update_handler(input: &[u8], state: DeviceState) -> DeviceState {
@@ -17,12 +16,7 @@ pub fn sound_mode_update_handler(input: &[u8], state: DeviceState) -> DeviceStat
         }
     };
     DeviceState {
-        sound_modes: Some(SoundModes {
-            ambient_sound_mode: packet.ambient_sound_mode,
-            noise_canceling_mode: packet.noise_canceling_mode,
-            custom_noise_canceling: packet.custom_noise_canceling,
-            transparency_mode: packet.transparency_mode,
-        }),
+        sound_modes: Some(packet.0),
         ..state.clone()
     }
 }

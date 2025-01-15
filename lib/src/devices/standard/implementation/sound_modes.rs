@@ -33,12 +33,12 @@ pub fn set_sound_modes(
 
     if needs_noise_canceling {
         packets.push(
-            SetSoundModePacket {
+            SetSoundModePacket(SoundModes {
                 ambient_sound_mode: AmbientSoundMode::NoiseCanceling,
                 noise_canceling_mode: prev_sound_modes.noise_canceling_mode,
                 transparency_mode: prev_sound_modes.transparency_mode,
                 custom_noise_canceling: prev_sound_modes.custom_noise_canceling,
-            }
+            })
             .into(),
         );
     }
@@ -46,7 +46,7 @@ pub fn set_sound_modes(
     // If we need to temporarily be in noise canceling mode to work around the bug, set all fields besides
     // ambient_sound_mode. Otherwise, we set all fields in one go.
     packets.push(
-        SetSoundModePacket {
+        SetSoundModePacket(SoundModes {
             ambient_sound_mode: if needs_noise_canceling {
                 AmbientSoundMode::NoiseCanceling
             } else {
@@ -55,7 +55,7 @@ pub fn set_sound_modes(
             noise_canceling_mode: sound_modes.noise_canceling_mode,
             transparency_mode: sound_modes.transparency_mode,
             custom_noise_canceling: sound_modes.custom_noise_canceling,
-        }
+        })
         .into(),
     );
 
@@ -63,12 +63,12 @@ pub fn set_sound_modes(
     // If the target sound mode is noise canceling, we already set it to that, so no change needed.
     if needs_ambient_sound_mode_revert {
         packets.push(
-            SetSoundModePacket {
+            SetSoundModePacket(SoundModes {
                 ambient_sound_mode: sound_modes.ambient_sound_mode,
                 noise_canceling_mode: sound_modes.noise_canceling_mode,
                 transparency_mode: sound_modes.transparency_mode,
                 custom_noise_canceling: sound_modes.custom_noise_canceling,
-            }
+            })
             .into(),
         );
     }

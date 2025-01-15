@@ -4,24 +4,20 @@ use nom::{
     IResult,
 };
 
-use crate::devices::standard::structures::{
-    AmbientSoundMode, Command, CustomNoiseCanceling, NoiseCancelingMode, SoundModes,
-    TransparencyMode,
-};
+use crate::devices::standard::structures::{Command, SoundModes};
 
 use super::InboundPacket;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct SoundModeUpdatePacket {
-    pub ambient_sound_mode: AmbientSoundMode,
-    pub noise_canceling_mode: NoiseCancelingMode,
-    pub transparency_mode: TransparencyMode,
-    pub custom_noise_canceling: CustomNoiseCanceling,
+pub struct SoundModeUpdatePacket(pub SoundModes);
+
+impl SoundModeUpdatePacket {
+    pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01]);
 }
 
 impl InboundPacket for SoundModeUpdatePacket {
     fn command() -> Command {
-        Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01])
+        Self::COMMAND
     }
 
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
@@ -30,11 +26,13 @@ impl InboundPacket for SoundModeUpdatePacket {
         // offset 9
         context(
             "SoundModeUpdatePacket",
-            all_consuming(map(SoundModes::take, |sound_modes| SoundModeUpdatePacket {
-                ambient_sound_mode: sound_modes.ambient_sound_mode,
-                noise_canceling_mode: sound_modes.noise_canceling_mode,
-                transparency_mode: sound_modes.transparency_mode,
-                custom_noise_canceling: sound_modes.custom_noise_canceling,
+            all_consuming(map(SoundModes::take, |sound_modes| {
+                SoundModeUpdatePacket(SoundModes {
+                    ambient_sound_mode: sound_modes.ambient_sound_mode,
+                    noise_canceling_mode: sound_modes.noise_canceling_mode,
+                    transparency_mode: sound_modes.transparency_mode,
+                    custom_noise_canceling: sound_modes.custom_noise_canceling,
+                })
             })),
         )(input)
         // offset 13
@@ -59,8 +57,8 @@ mod tests {
         let packet = SoundModeUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
-        assert_eq!(AmbientSoundMode::Normal, packet.ambient_sound_mode);
-        assert_eq!(NoiseCancelingMode::Indoor, packet.noise_canceling_mode);
+        assert_eq!(AmbientSoundMode::Normal, packet.0.ambient_sound_mode);
+        assert_eq!(NoiseCancelingMode::Indoor, packet.0.noise_canceling_mode);
     }
 
     #[test]
@@ -71,7 +69,7 @@ mod tests {
         ];
         let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         let (_, packet) = SoundModeUpdatePacket::take::<VerboseError<_>>(body).unwrap();
-        assert_eq!(AmbientSoundMode::default(), packet.ambient_sound_mode);
+        assert_eq!(AmbientSoundMode::default(), packet.0.ambient_sound_mode);
     }
 
     #[test]
@@ -82,6 +80,6 @@ mod tests {
         ];
         let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         let (_, packet) = SoundModeUpdatePacket::take::<VerboseError<_>>(body).unwrap();
-        assert_eq!(NoiseCancelingMode::default(), packet.noise_canceling_mode);
+        assert_eq!(NoiseCancelingMode::default(), packet.0.noise_canceling_mode);
     }
 }

@@ -31,7 +31,7 @@ pub struct A3027StateUpdatePacket {
     pub serial_number: SerialNumber,
     pub wear_detection: bool,
     // if length >= 72
-    pub touch_func: bool,
+    pub touch_func: Option<bool>,
 }
 
 impl From<A3027StateUpdatePacket> for StateUpdatePacket {
@@ -99,7 +99,7 @@ impl InboundPacket for A3027StateUpdatePacket {
                         firmware_version,
                         serial_number,
                         wear_detection,
-                        touch_func: touch_func.unwrap_or_default(),
+                        touch_func,
                     }
                 },
             )),

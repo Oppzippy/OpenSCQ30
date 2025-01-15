@@ -1,0 +1,82 @@
+use std::{
+    collections::{hash_map, HashMap},
+    sync::Arc,
+};
+
+use crate::api::settings::{CategoryId, Setting, SettingId, Value};
+
+pub struct SettingsManager<T> {
+    categories: Vec<CategoryId<'static>>,
+    categories_to_settings: HashMap<CategoryId<'static>, Vec<SettingId<'static>>>,
+    settings_to_handlers: HashMap<SettingId<'static>, Arc<dyn SettingHandler<T> + Send + Sync>>,
+}
+
+impl<T> Default for SettingsManager<T> {
+    fn default() -> Self {
+        Self {
+            categories: Vec::new(),
+            categories_to_settings: HashMap::new(),
+            settings_to_handlers: HashMap::new(),
+        }
+    }
+}
+
+impl<StateType> SettingsManager<StateType> {
+    pub fn add_handler<T: SettingHandler<StateType> + 'static + Send + Sync>(
+        &mut self,
+        category: CategoryId<'static>,
+        handler: T,
+    ) {
+        let handler = Arc::new(handler);
+        let settings = handler.settings();
+
+        match self.categories_to_settings.entry(category) {
+            hash_map::Entry::Occupied(mut occupied_entry) => {
+                occupied_entry.get_mut().extend_from_slice(&settings);
+            }
+            hash_map::Entry::Vacant(vacant_entry) => {
+                vacant_entry.insert(settings.to_vec());
+            }
+        }
+        settings.into_iter().for_each(|setting| {
+            self.settings_to_handlers
+                .insert(setting, handler.to_owned());
+        });
+    }
+
+    pub fn categories(&self) -> &[CategoryId] {
+        &self.categories
+    }
+
+    pub fn category(&self, category: &CategoryId) -> Vec<SettingId> {
+        self.categories_to_settings
+            .get(category)
+            .cloned()
+            .unwrap_or_default()
+    }
+
+    pub async fn get(
+        &self,
+        state: &StateType,
+        setting_id: &SettingId<'_>,
+    ) -> Option<crate::Result<Setting>> {
+        let handler = self.settings_to_handlers.get(setting_id)?;
+        Some(handler.get(state, setting_id))
+    }
+
+    pub async fn set(
+        &self,
+        state: &mut StateType,
+        setting_id: &SettingId<'_>,
+        value: Value,
+    ) -> Option<crate::Result<()>> {
+        let handler = self.settings_to_handlers.get(setting_id)?;
+        Some(handler.set(state, setting_id, value))
+    }
+}
+
+pub trait SettingHandler<T> {
+    fn settings(&self) -> Vec<SettingId<'static>>;
+    fn get(&self, state: &T, setting_id: &SettingId) -> crate::Result<Setting>;
+    fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> crate::Result<()>;
+}
