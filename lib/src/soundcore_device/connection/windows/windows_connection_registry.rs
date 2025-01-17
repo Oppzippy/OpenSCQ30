@@ -73,9 +73,13 @@ impl ConnectionRegistry for WindowsConnectionRegistry {
     async fn connection_descriptors(&self) -> crate::Result<HashSet<Self::DescriptorType>> {
         Self::scan_for_le_devices()?;
         let devices = DeviceInformation::FindAllAsyncAqsFilter(
-            &Bluetooth::BluetoothDevice::GetDeviceSelectorFromConnectionStatus(
-                BluetoothConnectionStatus::Connected,
-            )?,
+            &format!(
+                "{} AND System.Devices.Aep.IsPresent:=System.StructuredQueryType.Boolean#True",
+                Bluetooth::BluetoothDevice::GetDeviceSelectorFromConnectionStatus(
+                    BluetoothConnectionStatus::Connected,
+                )?
+            )
+            .into(),
         )?
         .await?;
 

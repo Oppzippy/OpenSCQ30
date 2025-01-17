@@ -129,7 +129,7 @@ impl WindowsConnection {
             "System.DeviceInterface.Bluetooth.DeviceAddress:=\"{}\"",
             hex::encode(mac_address)
         );
-        let filter: HSTRING = format!("{connected_filter} AND {mac_address_filter}").into();
+        let filter: HSTRING = format!("{connected_filter} AND {mac_address_filter} AND System.Devices.Aep.IsPresent:=System.StructuredQueryType.Boolean#True").into();
         trace!("built filter {filter}");
         let device_information_collection =
             DeviceInformation::FindAllAsyncWithKindAqsFilterAndAdditionalProperties(
