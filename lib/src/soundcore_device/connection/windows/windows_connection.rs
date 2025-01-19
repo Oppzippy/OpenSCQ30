@@ -20,7 +20,7 @@ use windows::{
             GenericAttributeProfile::{GattCharacteristic, GattDeviceService},
             Rfcomm::RfcommDeviceService,
         },
-        Enumeration::{DeviceInformation, DeviceInformationKind},
+        Enumeration::DeviceInformation,
     },
     Foundation::TypedEventHandler,
     Networking::Sockets::{SocketProtectionLevel, StreamSocket},
@@ -132,12 +132,7 @@ impl WindowsConnection {
         let filter: HSTRING = format!("{connected_filter} AND {mac_address_filter} AND System.Devices.Aep.IsPresent:=System.StructuredQueryType.Boolean#True").into();
         trace!("built filter {filter}");
         let device_information_collection =
-            DeviceInformation::FindAllAsyncWithKindAqsFilterAndAdditionalProperties(
-                &filter,
-                None,
-                DeviceInformationKind::Device,
-            )?
-            .await?;
+            DeviceInformation::FindAllAsyncAqsFilter(&filter)?.await?;
         trace!(
             "found {} matching devices",
             device_information_collection.Size()?
