@@ -62,7 +62,7 @@
     "playwright": "^1.33.0",
     "prettier": "^3.0.0",
     "typescript": "^5.0.2",
-    "vite": "^5.0.10",
+    "vite": "^5.4.14",
     "vite-plugin-pwa": "^0.20.0",
     "vitest": "^2.0.0"
   },
