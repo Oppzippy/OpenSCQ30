@@ -78,7 +78,6 @@ impl A3936StateUpdatePacket {
             "a3936 state update packet",
             all_consuming(|input| {
                 let (input, tws_status) = TwsStatus::take(input)?;
-                let remaining = input.len() + 1; // remaining from between tws host device and is connected
                 let (input, battery) = DualBattery::take(input)?;
                 let (input, left_firmware) = FirmwareVersion::take(input)?;
                 let (input, right_firmware) = FirmwareVersion::take(input)?;
@@ -95,7 +94,6 @@ impl A3936StateUpdatePacket {
                 let remaining_before_button_configuration = input.len();
                 let (input, button_configuration) =
                     A3936InternalMultiButtonConfiguration::take(input)?;
-                println!("remaining: {}", remaining - input.len() + 10);
                 let button_configuration_size = remaining_before_button_configuration - input.len();
                 let (input, _) = take(
                     (skip_offset as usize)
