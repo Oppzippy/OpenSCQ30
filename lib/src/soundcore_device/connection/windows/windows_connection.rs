@@ -298,7 +298,7 @@ impl Connection for WindowsConnection {
             })();
             match result {
                 Ok(_) => debug!("inbound_packets_channel: ended"),
-                Err(err) => warn!("inbound_packets_channel: error receiving packet: {err:?}"),
+                Err(err) => debug!("inbound_packets_channel: error receiving packet: {err:?}"),
             }
         }));
 
