@@ -12,7 +12,10 @@ use crate::{
     },
     devices::standard::{
         packets::{
-            inbound::{state_update_packet::StateUpdatePacket, TryIntoInboundPacket},
+            inbound::{
+                state_update_packet::StateUpdatePacket, FirmwareVersionUpdatePacket,
+                TryIntoInboundPacket,
+            },
             outbound::{RequestFirmwareVersionPacket, RequestStatePacket},
         },
         state::DeviceState,
@@ -63,10 +66,17 @@ where
             tracing::debug!(
                 "requesting serial number since it was not included in the state update packet"
             );
-            // The implementation will handle the response, so we can send the request and forget about it
-            controller
+            // Ideally we would fire and forget so the implementation can handle the response, but then we have a race condition
+            // where we receive the response here and return the device before it is handled by the implementation, which would cause
+            // a device with a None serial number to be returned.
+            let packet: FirmwareVersionUpdatePacket = controller
                 .send(&RequestFirmwareVersionPacket::new().into())
-                .await?;
+                .await?
+                .try_into_inbound_packet()?;
+            state_sender
+                .lock()
+                .await
+                .send_modify(|state| state.serial_number = Some(packet.serial_number));
         }
 
         Ok(Self {
