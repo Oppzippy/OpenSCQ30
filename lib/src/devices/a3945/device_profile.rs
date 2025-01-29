@@ -34,7 +34,7 @@ pub(crate) const A3945_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
         has_auto_power_off: false,
         has_ambient_sound_mode_cycle: false,
     },
-    compatible_models: &[DeviceModel::A3945],
+    compatible_models: &[DeviceModel::SoundcoreA3945],
     implementation: || Arc::new(A3945Implementation::default()),
 };
 

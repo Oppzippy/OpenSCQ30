@@ -1,28 +1,37 @@
+use std::sync::Arc;
+
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, VariantArray};
+use tokio::runtime::Handle;
 
-use crate::devices::standard::structures::SerialNumber;
+use crate::{
+    api::device::OpenSCQ30DeviceRegistry,
+    devices::{a3027::device_profile::A3027DeviceRegistry, standard::structures::SerialNumber},
+    futures::Futures,
+};
+
+use super::connection::new_connection_registry;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, VariantArray, AsRefStr, Display)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum DeviceModel {
-    A3027,
-    A3028,
-    A3029,
-    A3030,
-    A3031,
-    A3033,
-    A3926,
-    A3930,
-    A3931,
-    A3933,
-    A3936,
-    A3945,
-    A3951,
-    A3939,
-    A3935,
+    SoundcoreA3027,
+    SoundcoreA3028,
+    SoundcoreA3029,
+    SoundcoreA3030,
+    SoundcoreA3031,
+    SoundcoreA3033,
+    SoundcoreA3926,
+    SoundcoreA3930,
+    SoundcoreA3931,
+    SoundcoreA3933,
+    SoundcoreA3936,
+    SoundcoreA3945,
+    SoundcoreA3951,
+    SoundcoreA3939,
+    SoundcoreA3935,
 }
 
 impl DeviceModel {
@@ -35,6 +44,31 @@ impl DeviceModel {
             .iter()
             .find(|model| &model.as_ref()[1..] == model_number)
             .cloned()
+    }
+
+    pub async fn device_registry<F: Futures + 'static>(
+        &self,
+        runtime_handle: Option<Handle>,
+    ) -> crate::Result<Arc<dyn OpenSCQ30DeviceRegistry>> {
+        match self {
+            DeviceModel::SoundcoreA3027 => Ok(Arc::new(A3027DeviceRegistry::<_, F>::new(
+                new_connection_registry(runtime_handle).await?,
+            ))),
+            DeviceModel::SoundcoreA3028 => todo!(),
+            DeviceModel::SoundcoreA3029 => todo!(),
+            DeviceModel::SoundcoreA3030 => todo!(),
+            DeviceModel::SoundcoreA3031 => todo!(),
+            DeviceModel::SoundcoreA3033 => todo!(),
+            DeviceModel::SoundcoreA3926 => todo!(),
+            DeviceModel::SoundcoreA3930 => todo!(),
+            DeviceModel::SoundcoreA3931 => todo!(),
+            DeviceModel::SoundcoreA3933 => todo!(),
+            DeviceModel::SoundcoreA3936 => todo!(),
+            DeviceModel::SoundcoreA3945 => todo!(),
+            DeviceModel::SoundcoreA3951 => todo!(),
+            DeviceModel::SoundcoreA3939 => todo!(),
+            DeviceModel::SoundcoreA3935 => todo!(),
+        }
     }
 }
 

@@ -1,13 +1,12 @@
-use std::sync::Arc;
+use std::{marker::PhantomData, sync::Arc};
 
 use async_trait::async_trait;
-use macaddr::MacAddr6;
 use tokio::sync::watch;
 
 use crate::{
     api::{
-        connection::{Connection, ConnectionRegistry},
-        device::OpenSCQ30Device,
+        connection::{Connection, ConnectionDescriptor, ConnectionRegistry},
+        device::{GenericDeviceDescriptor, OpenSCQ30Device, OpenSCQ30DeviceRegistry},
         settings::{CategoryId, Setting, SettingId, Value},
     },
     device_profile::{DeviceFeatures, DeviceProfile},
@@ -54,9 +53,55 @@ pub(crate) const A3027_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
         has_auto_power_off: false,
         has_ambient_sound_mode_cycle: false,
     },
-    compatible_models: &[DeviceModel::A3027, DeviceModel::A3030],
+    compatible_models: &[DeviceModel::SoundcoreA3027, DeviceModel::SoundcoreA3030],
     implementation: || StandardImplementation::new::<A3027StateUpdatePacket>(),
 };
+
+pub struct A3027DeviceRegistry<C: ConnectionRegistry, F: Futures> {
+    inner: C,
+    _futures: PhantomData<F>,
+}
+
+impl<C: ConnectionRegistry, F: Futures> A3027DeviceRegistry<C, F> {
+    pub fn new(inner: C) -> Self {
+        Self {
+            inner,
+            _futures: PhantomData,
+        }
+    }
+}
+
+#[async_trait(?Send)]
+impl<C, F> OpenSCQ30DeviceRegistry for A3027DeviceRegistry<C, F>
+where
+    C: ConnectionRegistry + 'static,
+    F: Futures + 'static,
+{
+    async fn devices(&self) -> crate::Result<Vec<GenericDeviceDescriptor>> {
+        self.inner
+            .connection_descriptors()
+            .await
+            .map(|descriptors| {
+                descriptors
+                    .into_iter()
+                    .map(|d| GenericDeviceDescriptor::new(d.name(), d.mac_address()))
+                    .collect()
+            })
+    }
+
+    async fn connect(
+        &self,
+        mac_address: macaddr::MacAddr6,
+    ) -> crate::Result<Arc<dyn OpenSCQ30Device>> {
+        let connection = self
+            .inner
+            .connection(mac_address)
+            .await?
+            .ok_or(crate::Error::DeviceNotFound { source: None })?;
+        let device = A3027Device::<C::ConnectionType, F>::new(connection).await?;
+        Ok(Arc::new(device))
+    }
+}
 
 pub struct A3027Device<ConnectionType: Connection, FuturesType: Futures> {
     state_sender: watch::Sender<A3027State>,
@@ -66,15 +111,10 @@ pub struct A3027Device<ConnectionType: Connection, FuturesType: Futures> {
 
 impl<ConnectionType, FuturesType> A3027Device<ConnectionType, FuturesType>
 where
-    ConnectionType: Connection + 'static + Send + Sync,
-    FuturesType: Futures + 'static + Send + Sync,
-    FuturesType::JoinHandleType: Send + Sync,
+    ConnectionType: Connection + 'static,
+    FuturesType: Futures + 'static,
 {
-    pub async fn new<T: ConnectionRegistry<ConnectionType = ConnectionType>>(
-        connection_registry: &T,
-        mac_address: MacAddr6,
-    ) -> crate::Result<Self> {
-        let connection = connection_registry.connection(mac_address).await?.unwrap();
+    pub async fn new(connection: Arc<ConnectionType>) -> crate::Result<Self> {
         let (packet_io_controller, packet_receiver) =
             PacketIOController::<ConnectionType, FuturesType>::new(connection).await?;
         let packet_io_controller = Arc::new(packet_io_controller);
@@ -117,9 +157,8 @@ where
 #[async_trait(?Send)]
 impl<ConnectionType, FuturesType> OpenSCQ30Device for A3027Device<ConnectionType, FuturesType>
 where
-    ConnectionType: Connection + 'static + Send + Sync,
-    FuturesType: Futures + 'static + Send + Sync,
-    FuturesType::JoinHandleType: Send + Sync,
+    ConnectionType: Connection + 'static,
+    FuturesType: Futures + 'static,
 {
     async fn categories(&self) -> Vec<CategoryId> {
         self.module_collection.setting_manager.categories().to_vec()

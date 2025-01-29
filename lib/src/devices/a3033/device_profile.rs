@@ -20,6 +20,6 @@ pub(crate) const A3033_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
         has_auto_power_off: false,
         has_ambient_sound_mode_cycle: false,
     },
-    compatible_models: &[DeviceModel::A3033],
+    compatible_models: &[DeviceModel::SoundcoreA3033],
     implementation: || StandardImplementation::new::<A3033StateUpdatePacket>(),
 };

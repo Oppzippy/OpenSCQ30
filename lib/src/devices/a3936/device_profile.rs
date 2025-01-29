@@ -41,7 +41,7 @@ pub(crate) const A3936_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
         has_auto_power_off: false,
         has_ambient_sound_mode_cycle: true,
     },
-    compatible_models: &[DeviceModel::A3936],
+    compatible_models: &[DeviceModel::SoundcoreA3936],
     implementation: || Arc::new(A3936Implementation::default()),
 };
 

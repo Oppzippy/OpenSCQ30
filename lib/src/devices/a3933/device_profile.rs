@@ -54,7 +54,7 @@ pub(crate) const A3933_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
         has_auto_power_off: false,
         has_ambient_sound_mode_cycle: true,
     },
-    compatible_models: &[DeviceModel::A3933, DeviceModel::A3939],
+    compatible_models: &[DeviceModel::SoundcoreA3933, DeviceModel::SoundcoreA3939],
     implementation: || Arc::new(A3933Implementation::default()),
 };
 

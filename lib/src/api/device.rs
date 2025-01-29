@@ -16,8 +16,8 @@ use super::settings::{CategoryId, Setting, SettingId, Value};
 
 #[async_trait(?Send)]
 pub trait OpenSCQ30DeviceRegistry {
-    async fn devices(&self) -> crate::Result<GenericDeviceDescriptor>;
-    async fn device(&self, mac_address: MacAddr6) -> crate::Result<Arc<dyn OpenSCQ30Device>>;
+    async fn devices(&self) -> crate::Result<Vec<GenericDeviceDescriptor>>;
+    async fn connect(&self, mac_address: MacAddr6) -> crate::Result<Arc<dyn OpenSCQ30Device>>;
 }
 
 #[async_trait(?Send)]

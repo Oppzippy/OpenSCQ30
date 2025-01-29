@@ -54,7 +54,7 @@ pub(crate) const A3951_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
         has_auto_power_off: false,
         has_ambient_sound_mode_cycle: false,
     },
-    compatible_models: &[DeviceModel::A3951],
+    compatible_models: &[DeviceModel::SoundcoreA3951],
     implementation: || Arc::new(A3951Implementation::default()),
 };
 

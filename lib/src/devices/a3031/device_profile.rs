@@ -50,7 +50,7 @@ pub(crate) const A3031_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
         has_auto_power_off: true,
         has_ambient_sound_mode_cycle: false,
     },
-    compatible_models: &[DeviceModel::A3031],
+    compatible_models: &[DeviceModel::SoundcoreA3031],
     implementation: || Arc::new(A3031Implementation::default()),
 };
 
