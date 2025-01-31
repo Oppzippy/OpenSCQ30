@@ -7,7 +7,13 @@ use tokio::runtime::Handle;
 
 use crate::{
     api::device::OpenSCQ30DeviceRegistry,
-    devices::{a3027::device_profile::A3027DeviceRegistry, standard::structures::SerialNumber},
+    devices::{
+        a3027::{
+            demo::DemoConnectionRegistry, device_profile::A3027DeviceRegistry,
+            packets::A3027StateUpdatePacket,
+        },
+        standard::{packets::outbound::OutboundPacketBytesExt, structures::SerialNumber},
+    },
     futures::Futures,
 };
 
@@ -49,11 +55,21 @@ impl DeviceModel {
     pub async fn device_registry<F: Futures + 'static>(
         &self,
         runtime_handle: Option<Handle>,
+        is_demo: bool,
     ) -> crate::Result<Arc<dyn OpenSCQ30DeviceRegistry>> {
         match self {
-            DeviceModel::SoundcoreA3027 => Ok(Arc::new(A3027DeviceRegistry::<_, F>::new(
-                new_connection_registry(runtime_handle).await?,
-            ))),
+            DeviceModel::SoundcoreA3027 => Ok(if is_demo {
+                Arc::new(A3027DeviceRegistry::<_, F>::new(
+                    DemoConnectionRegistry::new(
+                        "A3027".to_string(),
+                        A3027StateUpdatePacket::default().bytes(),
+                    ),
+                ))
+            } else {
+                Arc::new(A3027DeviceRegistry::<_, F>::new(
+                    new_connection_registry(runtime_handle).await?,
+                ))
+            }),
             DeviceModel::SoundcoreA3028 => todo!(),
             DeviceModel::SoundcoreA3029 => todo!(),
             DeviceModel::SoundcoreA3030 => todo!(),

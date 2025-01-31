@@ -10,6 +10,7 @@ use crate::devices::{
     standard::{
         packets::{
             inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
+            outbound::OutboundPacket,
             parsing::take_bool,
         },
         structures::{
@@ -19,7 +20,7 @@ use crate::devices::{
     },
 };
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct A3027StateUpdatePacket {
     pub battery: SingleBattery,
     pub equalizer_configuration: EqualizerConfiguration,
@@ -104,5 +105,41 @@ impl InboundPacket for A3027StateUpdatePacket {
                 },
             )),
         )(input)
+    }
+}
+
+impl OutboundPacket for A3027StateUpdatePacket {
+    fn command(&self) -> crate::devices::standard::structures::Command {
+        StateUpdatePacket::command()
+    }
+
+    fn body(&self) -> Vec<u8> {
+        [self.battery.level.0, self.battery.is_charging as u8]
+            .into_iter()
+            .chain(self.equalizer_configuration.profile_id().to_le_bytes())
+            .chain(self.equalizer_configuration.volume_adjustments().bytes())
+            .chain([self.gender.0])
+            .chain([self.age_range.0])
+            .chain([self.hear_id.is_enabled as u8])
+            .chain(self.hear_id.volume_adjustments.bytes())
+            .chain(self.hear_id.time.to_le_bytes())
+            .chain([
+                self.sound_modes.ambient_sound_mode.id(),
+                self.sound_modes.noise_canceling_mode.id(),
+                self.sound_modes.transparency_mode.id(),
+                self.sound_modes.custom_noise_canceling.value(),
+            ])
+            .chain(
+                format!(
+                    "{}.{}",
+                    self.firmware_version.major(),
+                    self.firmware_version.minor()
+                )
+                .into_bytes(),
+            )
+            .chain(self.serial_number.as_str().as_bytes().iter().cloned())
+            .chain([self.wear_detection as u8])
+            .chain(self.touch_func.map(|v| v as u8))
+            .collect()
     }
 }

@@ -12,7 +12,7 @@ use crate::devices::standard::packets::parsing::take_bool;
 
 use super::StereoVolumeAdjustments;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct BasicHearId {
