@@ -14,13 +14,15 @@ use macaddr::MacAddr6;
 
 use super::settings::{CategoryId, Setting, SettingId, Value};
 
-#[async_trait(?Send)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 pub trait OpenSCQ30DeviceRegistry {
     async fn devices(&self) -> crate::Result<Vec<GenericDeviceDescriptor>>;
     async fn connect(&self, mac_address: MacAddr6) -> crate::Result<Arc<dyn OpenSCQ30Device>>;
 }
 
-#[async_trait(?Send)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 pub trait OpenSCQ30Device {
     async fn categories(&self) -> Vec<CategoryId>;
     async fn settings_in_category(&self, category_id: &CategoryId) -> Vec<SettingId>;

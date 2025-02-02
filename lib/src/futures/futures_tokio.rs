@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use futures::Future;
 
-use super::{Futures, JoinHandle};
+use super::{Futures, JoinHandle, MaybeSend};
 
 pub struct TokioFutures;
 
@@ -11,17 +11,13 @@ impl Futures for TokioFutures {
 
     fn spawn<F, R>(future: F) -> Self::JoinHandleType
     where
-        F: Future<Output = R> + Send + 'static,
-        R: Send + 'static,
+        F: Future<Output = R> + MaybeSend + 'static,
+        R: MaybeSend + 'static,
     {
         let join_handle = tokio::task::spawn(async move {
             future.await;
         });
         TokioJoinHandle(join_handle)
-    }
-
-    fn spawn_local(_future: impl Future + 'static) -> Self::JoinHandleType {
-        unimplemented!("TokioFutures::spawn_local")
     }
 
     async fn sleep(duration: Duration) {

@@ -43,7 +43,8 @@ impl<T> PacketManager<T> {
     }
 }
 
-#[async_trait(?Send)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 pub trait PacketHandler<T> {
     async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> crate::Result<()>;
 }

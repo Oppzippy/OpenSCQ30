@@ -17,10 +17,11 @@ impl SoundModesPacketHandler {
     pub const COMMAND: Command = SoundModeUpdatePacket::COMMAND;
 }
 
-#[async_trait(?Send)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 impl<T> PacketHandler<T> for SoundModesPacketHandler
 where
-    T: AsMut<SoundModes>,
+    T: AsMut<SoundModes> + Send + Sync,
 {
     async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> crate::Result<()> {
         let packet: SoundModeUpdatePacket = packet.try_into_inbound_packet()?;

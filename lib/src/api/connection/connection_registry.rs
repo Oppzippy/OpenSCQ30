@@ -1,6 +1,8 @@
-use std::{collections::HashSet, fmt::Debug, sync::Arc};
+use std::{collections::HashSet, fmt::Debug, future::Future, sync::Arc};
 
 use macaddr::MacAddr6;
+
+use crate::futures::{MaybeSend, MaybeSync};
 
 use super::{connection::Connection, ConnectionDescriptor};
 
@@ -8,10 +10,12 @@ pub trait ConnectionRegistry {
     type ConnectionType: Connection + Send + Sync;
     type DescriptorType: ConnectionDescriptor + Debug + Send + Sync;
 
-    async fn connection_descriptors(&self) -> crate::Result<HashSet<Self::DescriptorType>>;
+    fn connection_descriptors(
+        &self,
+    ) -> impl Future<Output = crate::Result<HashSet<Self::DescriptorType>>> + MaybeSend + MaybeSync;
 
-    async fn connection(
+    fn connection(
         &self,
         mac_address: MacAddr6,
-    ) -> crate::Result<Option<Arc<Self::ConnectionType>>>;
+    ) -> impl Future<Output = crate::Result<Option<Arc<Self::ConnectionType>>>> + MaybeSend + MaybeSync;
 }

@@ -11,7 +11,11 @@ use crate::{
 
 use super::{multi_queue::MultiQueue, Packet};
 
-pub struct PacketIOController<ConnectionType: Connection, FuturesType: Futures> {
+pub struct PacketIOController<ConnectionType, FuturesType>
+where
+    ConnectionType: Connection,
+    FuturesType: Futures,
+{
     connection: Arc<ConnectionType>,
     packet_queues: Arc<MultiQueue<Command, Packet>>,
     handle: FuturesType::JoinHandleType,

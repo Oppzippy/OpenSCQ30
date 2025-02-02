@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use strum::{AsRefStr, Display, VariantArray};
+use strum::{AsRefStr, Display, EnumIter, IntoStaticStr, VariantArray};
 use tokio::runtime::Handle;
 
 use crate::{
@@ -14,12 +14,24 @@ use crate::{
         },
         standard::{packets::outbound::OutboundPacketBytesExt, structures::SerialNumber},
     },
-    futures::Futures,
+    futures::{Futures, MaybeSend, MaybeSync},
 };
 
 use super::connection::new_connection_registry;
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, VariantArray, AsRefStr, Display)]
+#[derive(
+    Debug,
+    PartialEq,
+    Eq,
+    Clone,
+    Copy,
+    Hash,
+    VariantArray,
+    AsRefStr,
+    Display,
+    EnumIter,
+    IntoStaticStr,
+)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum DeviceModel {
@@ -40,6 +52,11 @@ pub enum DeviceModel {
     SoundcoreA3935,
 }
 
+#[cfg(not(target_arch = "wasm32"))]
+type MaybeSendDeviceRegistry = Arc<dyn OpenSCQ30DeviceRegistry + Send + Sync>;
+#[cfg(target_arch = "wasm32")]
+type MaybeSendDeviceRegistry = Arc<dyn OpenSCQ30DeviceRegistry>;
+
 impl DeviceModel {
     pub fn from_serial_number(serial_number: &SerialNumber) -> Option<Self> {
         Self::from_str(&serial_number.as_str()[12..])
@@ -52,11 +69,11 @@ impl DeviceModel {
             .cloned()
     }
 
-    pub async fn device_registry<F: Futures + 'static>(
+    pub async fn device_registry<F: Futures + 'static + MaybeSend + MaybeSync>(
         &self,
         runtime_handle: Option<Handle>,
         is_demo: bool,
-    ) -> crate::Result<Arc<dyn OpenSCQ30DeviceRegistry>> {
+    ) -> crate::Result<MaybeSendDeviceRegistry> {
         match self {
             DeviceModel::SoundcoreA3027 => Ok(if is_demo {
                 Arc::new(A3027DeviceRegistry::<_, F>::new(

@@ -10,7 +10,7 @@ use crate::{
         state_modifier::StateModifier,
         structures::{AmbientSoundMode, SoundModes},
     },
-    futures::Futures,
+    futures::{Futures, MaybeSend, MaybeSync},
     soundcore_device::device::packet_io_controller::PacketIOController,
 };
 
@@ -26,13 +26,14 @@ impl<ConnectionType: Connection, FuturesType: Futures>
     }
 }
 
-#[async_trait(?Send)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 impl<ConnectionType, FuturesType, T> StateModifier<T>
     for SoundModesStateModifier<ConnectionType, FuturesType>
 where
-    T: AsMut<SoundModes> + AsRef<SoundModes> + Clone,
-    ConnectionType: Connection,
-    FuturesType: Futures,
+    T: AsMut<SoundModes> + AsRef<SoundModes> + Clone + MaybeSend + MaybeSync,
+    ConnectionType: Connection + MaybeSend + MaybeSync,
+    FuturesType: Futures + MaybeSend + MaybeSync,
 {
     async fn move_to_state(
         &self,

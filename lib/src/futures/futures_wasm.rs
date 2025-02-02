@@ -3,7 +3,7 @@ use std::{rc::Rc, time::Duration};
 use futures::Future;
 use tokio::{select, sync::Notify};
 
-use super::{Futures, JoinHandle};
+use super::{Futures, JoinHandle, MaybeSend};
 
 pub struct WasmFutures;
 
@@ -12,13 +12,9 @@ impl Futures for WasmFutures {
 
     fn spawn<F, R>(future: F) -> Self::JoinHandleType
     where
-        F: Future<Output = R> + Send + 'static,
-        R: Send + 'static,
+        F: Future<Output = R> + MaybeSend + 'static,
+        R: MaybeSend + 'static,
     {
-        Self::spawn_local(future)
-    }
-
-    fn spawn_local(future: impl Future + 'static) -> Self::JoinHandleType {
         let join_handle = WasmJoinHandle {
             notify_quit: Default::default(),
         };

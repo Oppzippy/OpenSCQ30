@@ -19,7 +19,7 @@ use crate::{
         packets::{inbound::TryIntoInboundPacket, outbound::RequestStatePacket},
         structures::{AmbientSoundMode, NoiseCancelingMode},
     },
-    futures::Futures,
+    futures::{Futures, MaybeSend, MaybeSync},
     soundcore_device::{
         device::packet_io_controller::PacketIOController, device_model::DeviceModel,
     },
@@ -71,11 +71,12 @@ impl<C: ConnectionRegistry, F: Futures> A3027DeviceRegistry<C, F> {
     }
 }
 
-#[async_trait(?Send)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 impl<C, F> OpenSCQ30DeviceRegistry for A3027DeviceRegistry<C, F>
 where
-    C: ConnectionRegistry + 'static,
-    F: Futures + 'static,
+    C: ConnectionRegistry + 'static + MaybeSend + MaybeSync,
+    F: Futures + 'static + MaybeSend + MaybeSync,
 {
     async fn devices(&self) -> crate::Result<Vec<GenericDeviceDescriptor>> {
         self.inner
@@ -111,8 +112,8 @@ pub struct A3027Device<ConnectionType: Connection, FuturesType: Futures> {
 
 impl<ConnectionType, FuturesType> A3027Device<ConnectionType, FuturesType>
 where
-    ConnectionType: Connection + 'static,
-    FuturesType: Futures + 'static,
+    ConnectionType: Connection + 'static + MaybeSend + MaybeSync,
+    FuturesType: Futures + 'static + MaybeSend + MaybeSync,
 {
     pub async fn new(connection: Arc<ConnectionType>) -> crate::Result<Self> {
         let (packet_io_controller, packet_receiver) =
@@ -154,11 +155,12 @@ where
     }
 }
 
-#[async_trait(?Send)]
+#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
+#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 impl<ConnectionType, FuturesType> OpenSCQ30Device for A3027Device<ConnectionType, FuturesType>
 where
-    ConnectionType: Connection + 'static,
-    FuturesType: Futures + 'static,
+    ConnectionType: Connection + 'static + MaybeSend + MaybeSync,
+    FuturesType: Futures + 'static + MaybeSend + MaybeSync,
 {
     async fn categories(&self) -> Vec<CategoryId> {
         self.module_collection.setting_manager.categories().to_vec()
@@ -169,7 +171,7 @@ where
     }
 
     async fn setting(&self, setting_id: &SettingId) -> crate::Result<Setting> {
-        let state = self.state_sender.borrow();
+        let state = self.state_sender.borrow().to_owned();
         self.module_collection
             .setting_manager
             .get(&state, setting_id)
