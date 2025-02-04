@@ -129,17 +129,36 @@ impl OutboundPacket for A3027StateUpdatePacket {
                 self.sound_modes.transparency_mode.id(),
                 self.sound_modes.custom_noise_canceling.value(),
             ])
-            .chain(
-                format!(
-                    "{}.{}",
-                    self.firmware_version.major(),
-                    self.firmware_version.minor()
-                )
-                .into_bytes(),
-            )
+            .chain(self.firmware_version.to_string().into_bytes())
             .chain(self.serial_number.as_str().as_bytes().iter().cloned())
             .chain([self.wear_detection as u8])
             .chain(self.touch_func.map(|v| v as u8))
             .collect()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use nom::error::VerboseError;
+
+    use crate::{
+        devices::standard::packets::{
+            inbound::{take_inbound_packet_header, TryIntoInboundPacket},
+            outbound::OutboundPacketBytesExt,
+        },
+        soundcore_device::device::Packet,
+    };
+
+    use super::*;
+
+    #[test]
+    fn serializes_and_deserializes() {
+        let bytes = A3027StateUpdatePacket::default().bytes();
+        let (body, command) = take_inbound_packet_header::<VerboseError<_>>(&bytes).unwrap();
+        let packet = Packet {
+            command,
+            body: body.to_vec(),
+        };
+        let _: A3027StateUpdatePacket = packet.try_into_inbound_packet().unwrap();
     }
 }

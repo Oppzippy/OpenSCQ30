@@ -93,7 +93,7 @@ where
     async fn connect(
         &self,
         mac_address: macaddr::MacAddr6,
-    ) -> crate::Result<Arc<dyn OpenSCQ30Device>> {
+    ) -> crate::Result<Arc<dyn OpenSCQ30Device + Send + Sync>> {
         let connection = self
             .inner
             .connection(mac_address)
@@ -162,21 +162,19 @@ where
     ConnectionType: Connection + 'static + MaybeSend + MaybeSync,
     FuturesType: Futures + 'static + MaybeSend + MaybeSync,
 {
-    async fn categories(&self) -> Vec<CategoryId> {
+    fn categories(&self) -> Vec<CategoryId<'static>> {
         self.module_collection.setting_manager.categories().to_vec()
     }
 
-    async fn settings_in_category(&self, category_id: &CategoryId) -> Vec<SettingId> {
+    fn settings_in_category(&self, category_id: &CategoryId) -> Vec<SettingId<'static>> {
         self.module_collection.setting_manager.category(category_id)
     }
 
-    async fn setting(&self, setting_id: &SettingId) -> crate::Result<Setting> {
+    fn setting(&self, setting_id: &SettingId) -> Option<Setting> {
         let state = self.state_sender.borrow().to_owned();
         self.module_collection
             .setting_manager
             .get(&state, setting_id)
-            .await
-            .unwrap()
     }
 
     async fn set_setting_values(

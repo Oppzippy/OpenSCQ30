@@ -18,15 +18,21 @@ use super::settings::{CategoryId, Setting, SettingId, Value};
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 pub trait OpenSCQ30DeviceRegistry {
     async fn devices(&self) -> crate::Result<Vec<GenericDeviceDescriptor>>;
+    #[cfg(target_arch = "wasm32")]
     async fn connect(&self, mac_address: MacAddr6) -> crate::Result<Arc<dyn OpenSCQ30Device>>;
+    #[cfg(not(target_arch = "wasm32"))]
+    async fn connect(
+        &self,
+        mac_address: MacAddr6,
+    ) -> crate::Result<Arc<dyn OpenSCQ30Device + Send + Sync>>;
 }
 
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 pub trait OpenSCQ30Device {
-    async fn categories(&self) -> Vec<CategoryId>;
-    async fn settings_in_category(&self, category_id: &CategoryId) -> Vec<SettingId>;
-    async fn setting(&self, setting_id: &SettingId) -> crate::Result<Setting>;
+    fn categories(&self) -> Vec<CategoryId<'static>>;
+    fn settings_in_category(&self, category_id: &CategoryId) -> Vec<SettingId<'static>>;
+    fn setting(&self, setting_id: &SettingId) -> Option<Setting>;
     // async fn watch_for_changes(&self) -> broadcast::Receiver<()>;
     async fn set_setting_values(
         &self,

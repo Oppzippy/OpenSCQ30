@@ -35,6 +35,7 @@ impl<StateType> SettingsManager<StateType> {
                 occupied_entry.get_mut().extend_from_slice(&settings);
             }
             hash_map::Entry::Vacant(vacant_entry) => {
+                self.categories.push(category);
                 vacant_entry.insert(settings.to_vec());
             }
         }
@@ -44,24 +45,20 @@ impl<StateType> SettingsManager<StateType> {
         });
     }
 
-    pub fn categories(&self) -> &[CategoryId] {
+    pub fn categories(&self) -> &[CategoryId<'static>] {
         &self.categories
     }
 
-    pub fn category(&self, category: &CategoryId) -> Vec<SettingId> {
+    pub fn category(&self, category: &CategoryId) -> Vec<SettingId<'static>> {
         self.categories_to_settings
             .get(category)
             .cloned()
             .unwrap_or_default()
     }
 
-    pub async fn get(
-        &self,
-        state: &StateType,
-        setting_id: &SettingId<'_>,
-    ) -> Option<crate::Result<Setting>> {
+    pub fn get(&self, state: &StateType, setting_id: &SettingId<'_>) -> Option<Setting> {
         let handler = self.settings_to_handlers.get(setting_id)?;
-        Some(handler.get(state, setting_id))
+        handler.get(state, setting_id)
     }
 
     pub async fn set(
@@ -77,6 +74,6 @@ impl<StateType> SettingsManager<StateType> {
 
 pub trait SettingHandler<T> {
     fn settings(&self) -> Vec<SettingId<'static>>;
-    fn get(&self, state: &T, setting_id: &SettingId) -> crate::Result<Setting>;
+    fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting>;
     fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> crate::Result<()>;
 }

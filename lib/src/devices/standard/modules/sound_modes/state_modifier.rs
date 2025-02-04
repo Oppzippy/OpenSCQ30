@@ -51,7 +51,7 @@ where
         // set the ambient sound mode to Noise Canceling, and then change it back.
         let needs_noise_canceling = sound_modes.ambient_sound_mode
             != AmbientSoundMode::NoiseCanceling
-            && sound_modes.noise_canceling_mode != sound_modes.noise_canceling_mode;
+            && sound_modes.noise_canceling_mode != target_sound_modes.noise_canceling_mode;
         let needs_ambient_sound_mode_revert = needs_noise_canceling
             && sound_modes.ambient_sound_mode != AmbientSoundMode::NoiseCanceling;
 
@@ -73,7 +73,7 @@ where
                 ambient_sound_mode: if needs_noise_canceling {
                     AmbientSoundMode::NoiseCanceling
                 } else {
-                    sound_modes.ambient_sound_mode
+                    target_sound_modes.ambient_sound_mode
                 },
                 noise_canceling_mode: target_sound_modes.noise_canceling_mode,
                 transparency_mode: target_sound_modes.transparency_mode,

@@ -109,7 +109,7 @@ impl Connection for DemoConnection {
                 .packet_sender
                 .send(
                     Packet {
-                        command,
+                        command: command.to_inbound(),
                         body: Vec::new(),
                     }
                     .bytes(),

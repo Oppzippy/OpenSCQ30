@@ -1,3 +1,4 @@
+#[derive(Clone, Debug)]
 pub struct Select {
     pub options: Vec<&'static str>,
 }

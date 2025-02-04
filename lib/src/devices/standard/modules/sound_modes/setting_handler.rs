@@ -47,10 +47,10 @@ where
             .collect()
     }
 
-    fn get(&self, state: &T, setting_id: &SettingId) -> crate::Result<Setting> {
+    fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
         let sound_modes = state.as_ref();
-        let sound_mode_setting: SoundModeSetting = setting_id.0.parse().unwrap();
-        Ok(match sound_mode_setting {
+        let sound_mode_setting: SoundModeSetting = setting_id.0.parse().ok()?;
+        Some(match sound_mode_setting {
             SoundModeSetting::AmbientSoundMode => Setting::select_from_enum(
                 &self.available_sound_modes.ambient_sound_modes,
                 sound_modes.ambient_sound_mode,

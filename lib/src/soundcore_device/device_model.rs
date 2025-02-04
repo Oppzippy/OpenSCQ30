@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use strum::{AsRefStr, Display, EnumIter, IntoStaticStr, VariantArray};
+use strum::{AsRefStr, Display, EnumIter, EnumString, IntoStaticStr, VariantArray};
 use tokio::runtime::Handle;
 
 use crate::{
@@ -31,6 +31,7 @@ use super::connection::new_connection_registry;
     Display,
     EnumIter,
     IntoStaticStr,
+    EnumString,
 )]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
@@ -65,7 +66,7 @@ impl DeviceModel {
     fn from_str(model_number: &str) -> Option<Self> {
         Self::VARIANTS
             .iter()
-            .find(|model| &model.as_ref()[1..] == model_number)
+            .find(|model| &model.as_ref()[10..] == model_number)
             .cloned()
     }
 

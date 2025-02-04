@@ -19,6 +19,7 @@ pub struct IdentifiedSetting {
     pub setting: Setting,
 }
 
+#[derive(Clone, Debug)]
 pub enum Setting {
     Toggle { value: bool },
     I32Range { setting: Range<i32>, value: i32 },
