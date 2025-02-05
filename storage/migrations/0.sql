@@ -4,3 +4,5 @@ CREATE TABLE paired_device (
     model TEXT NOT NULL,
     created_at INTEGER NOT NULL DEFAULT (strftime('%s'))
 );
+
+CREATE INDEX paired_device_created_at ON paired_device (created_at ASC);
