@@ -8,6 +8,6 @@ license.workspace = true
 tracing = { workspace = true }
 openscq30_lib = { path = "../lib", features = ["bluetooth"] }
 dirs = { workspace = true }
-rusqlite = { workspace = true }
+rusqlite = { workspace = true, features = ["hooks"] }
 thiserror = { workspace = true }
 macaddr = { workspace = true }

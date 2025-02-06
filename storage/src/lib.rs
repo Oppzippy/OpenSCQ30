@@ -55,7 +55,7 @@ impl OpenSCQ30Database {
     #[instrument(skip(self))]
     pub fn fetch_paired_devices(&self) -> Result<Vec<PairedDevice>, Error> {
         let mut statement = self.connection.prepare_cached(
-            "SELECT name, mac_address, model FROM paired_device ORDER BY created_at ASC",
+            "SELECT name, mac_address, model FROM paired_device ORDER BY name ASC",
         )?;
         let devices = statement
             .query(())?
@@ -113,6 +113,30 @@ impl OpenSCQ30Database {
         self.connection.execute(
             "DELETE FROM paired_device WHERE mac_address = ?1",
             (SqliteMacAddr6(mac_address),),
+        )?;
+        Ok(())
+    }
+
+    pub fn upsert_quick_preset(
+        &self,
+        model: DeviceModel,
+        name: &str,
+        json: &str,
+    ) -> Result<(), Error> {
+        self.connection.execute(
+            r#"INSERT INTO quick_preset (device_model, name, settings)
+                VALUES (?1, ?2, ?3)
+            ON CONFLICT(device_model, name) DO UPDATE SET
+                settings = excluded.settings"#,
+            (SqliteDeviceModel(model), name, json),
+        )?;
+        Ok(())
+    }
+
+    pub fn delete_quick_preset(&self, model: DeviceModel, name: &str) -> Result<(), Error> {
+        self.connection.execute(
+            r#"DELETE FROM quick_preset WHERE model = ?1 AND name = ?2"#,
+            (SqliteDeviceModel(model), name),
         )?;
         Ok(())
     }
