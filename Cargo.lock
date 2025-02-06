@@ -4198,12 +4198,13 @@ dependencies = [
 name = "openscq30_gui_cosmic"
 version = "1.19.3"
 dependencies = [
+ "dirs 6.0.0",
+ "futures",
  "i18n-embed",
  "i18n-embed-fl",
  "libcosmic",
  "macaddr",
  "openscq30_lib",
- "openscq30_storage",
  "rust-embed",
  "strum",
  "tokio",
@@ -4226,6 +4227,7 @@ dependencies = [
  "nom",
  "ordered-float",
  "regex",
+ "rusqlite",
  "serde",
  "static_assertions",
  "strum",
@@ -4247,18 +4249,6 @@ dependencies = [
  "openscq30_lib",
  "prost",
  "prost-build",
-]
-
-[[package]]
-name = "openscq30_storage"
-version = "1.19.3"
-dependencies = [
- "dirs 6.0.0",
- "macaddr",
- "openscq30_lib",
- "rusqlite",
- "thiserror 2.0.11",
- "tracing",
 ]
 
 [[package]]

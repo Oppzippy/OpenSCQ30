@@ -1,15 +1,17 @@
+use std::sync::Arc;
+
 use cosmic::{
     iced::{alignment, Length, Pixels},
     iced_core::text::LineHeight,
-    widget, Apply, Element,
+    widget, Apply, Element, Task,
 };
 use macaddr::MacAddr6;
-use openscq30_storage::{OpenSCQ30Database, PairedDevice};
+use openscq30_lib::storage::{OpenSCQ30Database, PairedDevice};
 
 use crate::fl;
 
 pub struct DeviceSelectionModel {
-    database: OpenSCQ30Database,
+    database: Arc<OpenSCQ30Database>,
     paired_devices: Vec<PairedDevice>,
 }
 
@@ -18,29 +20,34 @@ pub enum Message {
     ConnectToDevice(usize),
     RemoveDevice(usize),
     AddDevice,
+    SetPairedDevices(Vec<PairedDevice>),
 }
 
 pub enum Action {
     ConnectToDevice(PairedDevice),
     RemoveDevice(MacAddr6),
     AddDevice,
+    None,
 }
 
 impl DeviceSelectionModel {
-    pub fn new(database: OpenSCQ30Database) -> Self {
-        let mut model = DeviceSelectionModel {
-            database,
+    pub fn new(database: Arc<OpenSCQ30Database>) -> (Self, Task<Message>) {
+        let model = DeviceSelectionModel {
+            database: database.clone(),
             paired_devices: Vec::new(),
         };
-        model.refresh_paired_devices();
-        model
+        (model, Self::refresh_paired_devices(database))
     }
 
-    pub fn refresh_paired_devices(&mut self) {
-        self.paired_devices = self
-            .database
-            .fetch_paired_devices()
-            .expect("TODO error handling");
+    pub fn refresh_paired_devices(database: Arc<OpenSCQ30Database>) -> Task<Message> {
+        Task::future(async move {
+            Message::SetPairedDevices(
+                database
+                    .fetch_paired_devices()
+                    .await
+                    .expect("TODO error handling"),
+            )
+        })
     }
 
     pub fn view(&self) -> Element<Message> {
@@ -117,12 +124,14 @@ impl DeviceSelectionModel {
     pub fn update(&mut self, message: Message) -> Action {
         match message {
             Message::ConnectToDevice(index) => {
-                Action::ConnectToDevice(self.paired_devices[index].clone())
+                return Action::ConnectToDevice(self.paired_devices[index].clone())
             }
             Message::RemoveDevice(index) => {
-                Action::RemoveDevice(self.paired_devices[index].mac_address)
+                return Action::RemoveDevice(self.paired_devices[index].mac_address)
             }
-            Message::AddDevice => Action::AddDevice,
+            Message::AddDevice => return Action::AddDevice,
+            Message::SetPairedDevices(paired_devices) => self.paired_devices = paired_devices,
         }
+        Action::None
     }
 }

@@ -6,7 +6,6 @@ members = [
     "android",
     "uniffi-bindgen",
     "gui_cosmic",
-    "storage",
 ]
 resolver = "2"
 

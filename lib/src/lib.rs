@@ -12,6 +12,7 @@ pub mod devices;
 mod error;
 pub mod futures;
 pub mod soundcore_device;
+pub mod storage;
 pub mod stub;
 
 pub use error::*;

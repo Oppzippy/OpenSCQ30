@@ -32,6 +32,7 @@ ordered-float = { workspace = true }
 float-cmp = { workspace = true, features = ["std"], default-features = false }
 static_assertions = { workspace = true }
 async-trait = { workspace = true }
+rusqlite = { workspace = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 bluer = { workspace = true, optional = true, features = [

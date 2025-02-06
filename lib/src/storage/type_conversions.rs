@@ -1,11 +1,12 @@
 use std::str::FromStr;
 
 use macaddr::MacAddr6;
-use openscq30_lib::soundcore_device::device_model::DeviceModel;
 use rusqlite::{
     types::{FromSql, FromSqlError, FromSqlResult, ToSqlOutput, Value, ValueRef},
     ToSql,
 };
+
+use crate::soundcore_device::device_model::DeviceModel;
 
 pub struct SqliteMacAddr6(pub MacAddr6);
 impl FromSql for SqliteMacAddr6 {

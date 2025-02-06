@@ -1,7 +1,5 @@
 #[cfg(not(target_arch = "wasm32"))]
 mod futures_tokio;
-#[cfg(feature = "wasm")]
-mod futures_wasm;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub use futures_tokio::*;

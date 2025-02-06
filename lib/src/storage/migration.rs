@@ -7,11 +7,7 @@ pub enum Migration {
 
 macro_rules! migration_file {
     ($name:literal) => {
-        Migration::Sql(include_str!(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/migrations/",
-            $name
-        )))
+        Migration::Sql(include_str!(concat!("migrations/", $name)))
     };
 }
 

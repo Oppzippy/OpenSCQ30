@@ -5,9 +5,12 @@ use cosmic::{
     widget::{self, icon, nav_bar},
     Application, ApplicationExt,
 };
+use dirs::config_dir;
 use macaddr::MacAddr6;
-use openscq30_lib::api::device::{DeviceDescriptor, OpenSCQ30Device};
-use openscq30_storage::OpenSCQ30Database;
+use openscq30_lib::{
+    api::device::{DeviceDescriptor, OpenSCQ30Device},
+    storage::{self, OpenSCQ30Database},
+};
 
 use crate::{
     add_device::{self, AddDeviceModel},
@@ -20,7 +23,7 @@ pub struct AppModel {
     screen: Screen,
     _nav: nav_bar::Model,
     dialog_page: Option<DialogPage>,
-    database: OpenSCQ30Database,
+    database: Arc<OpenSCQ30Database>,
 }
 
 #[derive(Debug, Clone)]
@@ -32,6 +35,8 @@ pub enum Message {
     RemovePairedDevice(MacAddr6),
     BackToDeviceSelection,
     ConnectToDeviceScreen(DebugOpenSCQ30Device),
+    CloseDialogAndRefreshPairedDevices,
+    ActivateDeviceSelectionScreen,
 }
 #[derive(Clone)]
 pub struct DebugOpenSCQ30Device(pub Arc<dyn OpenSCQ30Device + Send + Sync>);
@@ -83,16 +88,32 @@ impl Application for AppModel {
             .data::<Page>(Page::Page1)
             .activate();
 
-        let database = OpenSCQ30Database::new().expect("database is required to run");
+        let database = Arc::new(
+            futures::executor::block_on(OpenSCQ30Database::new(
+                config_dir()
+                    .expect("failed to find config dir")
+                    .join("openscq30")
+                    .join("database.sqlite"),
+            ))
+            .expect("database is required to run"),
+        );
+        let (model, task) = DeviceSelectionModel::new(database.clone());
         let mut app = AppModel {
             core,
             _nav: nav,
-            screen: Screen::DeviceSelection(DeviceSelectionModel::new(database.clone())),
+            screen: Screen::DeviceSelection(model),
             dialog_page: None,
             database,
         };
         let command = app.update_title();
-        (app, command)
+        (
+            app,
+            Task::batch([
+                command,
+                task.map(Message::DeviceSelectionScreen)
+                    .map(cosmic::app::Message::App),
+            ]),
+        )
     }
 
     fn nav_model(&self) -> Option<&nav_bar::Model> {
@@ -177,6 +198,7 @@ impl Application for AppModel {
                         device_selection::Action::AddDevice => {
                             self.screen = Screen::AddDevice(AddDeviceModel::new())
                         }
+                        device_selection::Action::None => (),
                     }
                 }
             }
@@ -190,19 +212,28 @@ impl Application for AppModel {
                                 .map(cosmic::app::Message::App)
                         }
                         add_device::Action::AddDevice { model, descriptor } => {
-                            self.database
-                                .upsert_paired_device(&openscq30_storage::PairedDevice {
-                                    name: descriptor.name().to_string(),
-                                    mac_address: descriptor.mac_address(),
-                                    model,
-                                })
-                                .expect("TODO error handling");
-                            self.screen = Screen::DeviceSelection(DeviceSelectionModel::new(
-                                self.database.clone(),
-                            ));
+                            let database = self.database.clone();
+                            return Task::future(async move {
+                                database
+                                    .upsert_paired_device(storage::PairedDevice {
+                                        name: descriptor.name().to_string(),
+                                        mac_address: descriptor.mac_address(),
+                                        model,
+                                    })
+                                    .await
+                                    .expect("TODO error handling");
+                                cosmic::app::Message::App(Message::ActivateDeviceSelectionScreen)
+                            });
                         }
                     }
                 }
+            }
+            Message::ActivateDeviceSelectionScreen => {
+                let (model, task) = DeviceSelectionModel::new(self.database.clone());
+                self.screen = Screen::DeviceSelection(model);
+                return task
+                    .map(Message::DeviceSelectionScreen)
+                    .map(cosmic::app::Message::App);
             }
             Message::DeviceSettingsScreen(message) => {
                 if let Screen::DeviceSettings(ref mut screen) = self.screen {
@@ -218,17 +249,31 @@ impl Application for AppModel {
             }
             Message::CloseDialog => self.dialog_page = None,
             Message::RemovePairedDevice(mac_address) => {
-                self.database
-                    .delete_paired_device(mac_address)
-                    .expect("TODO error handling");
-                if let Screen::DeviceSelection(ref mut screen) = self.screen {
+                let database = self.database.clone();
+                return Task::future(async move {
+                    database
+                        .delete_paired_device(mac_address)
+                        .await
+                        .expect("TODO error handling");
+                    cosmic::app::Message::App(Message::CloseDialogAndRefreshPairedDevices)
+                });
+            }
+            Message::CloseDialogAndRefreshPairedDevices => {
+                if let Screen::DeviceSelection(ref mut _screen) = self.screen {
                     self.dialog_page = None;
-                    screen.refresh_paired_devices();
+                    return device_selection::DeviceSelectionModel::refresh_paired_devices(
+                        self.database.clone(),
+                    )
+                    .map(Message::DeviceSelectionScreen)
+                    .map(cosmic::app::Message::App);
                 }
             }
             Message::BackToDeviceSelection => {
-                self.screen =
-                    Screen::DeviceSelection(DeviceSelectionModel::new(self.database.clone()))
+                let (model, task) = DeviceSelectionModel::new(self.database.clone());
+                self.screen = Screen::DeviceSelection(model);
+                return task
+                    .map(Message::DeviceSelectionScreen)
+                    .map(cosmic::app::Message::App);
             }
             Message::ConnectToDeviceScreen(device) => {
                 self.screen =

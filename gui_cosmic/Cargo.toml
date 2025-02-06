@@ -10,6 +10,7 @@ bluetooth = ["openscq30_lib/bluetooth"]
 
 [dependencies]
 tokio = { workspace = true }
+futures = { workspace = true }
 libcosmic = { workspace = true, features = [
     "a11y",
     "dbus-config",
@@ -28,7 +29,7 @@ i18n-embed-fl = "0.9.2"
 rust-embed = "8.5.0"
 macaddr = { workspace = true }
 openscq30_lib = { path = "../lib", features = ["serde"] }
-openscq30_storage = { path = "../storage" }
 strum = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
+dirs = { workspace = true }
