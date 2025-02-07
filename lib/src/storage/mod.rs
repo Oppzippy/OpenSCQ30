@@ -71,6 +71,10 @@ impl OpenSCQ30Database {
                         return;
                     }
                 };
+                if let Err(err) = connection.pragma_update(None, "foreign_keys", "ON") {
+                    // foreign keys won't be checked, but we can proceed
+                    tracing::warn!("failed to enable sqlite foreign key support: {err:?}");
+                }
                 match migration::migrate(&mut connection, migration::MIGRATIONS) {
                     Ok(()) => (),
                     Err(err) => {
