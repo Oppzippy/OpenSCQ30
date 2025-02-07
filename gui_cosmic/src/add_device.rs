@@ -46,6 +46,7 @@ struct SelectDeviceModel {
 }
 
 #[derive(Clone, Debug)]
+#[allow(clippy::enum_variant_names)]
 pub enum Message {
     SetDeviceModelSearchQuery(String),
     SelectModel(DeviceModel),
@@ -98,7 +99,7 @@ impl AddDeviceModel {
             .push(
                 widget::search_input(fl!("device-model"), &ui_model.search_query)
                     .id(ui_model.search_id.clone())
-                    .on_input(|text| Message::SetDeviceModelSearchQuery(text)),
+                    .on_input(Message::SetDeviceModelSearchQuery),
             )
             .push(widget::scrollable(
                 widget::column().extend(
@@ -130,7 +131,7 @@ impl AddDeviceModel {
                     .push(
                         widget::search_input(fl!("device-name"), &ui_model.search_query)
                             .id(ui_model.search_id.clone())
-                            .on_input(|text| Message::SetDeviceNameSearchQuery(text)),
+                            .on_input(Message::SetDeviceNameSearchQuery),
                     )
                     .push(
                         widget::button::standard(fl!("refresh"))

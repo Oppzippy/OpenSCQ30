@@ -79,6 +79,7 @@ enum DialogPage {
     RemoveDevice(PairedDevice),
 }
 
+#[allow(clippy::large_enum_variant)]
 enum Screen {
     DeviceSelection(device_selection::DeviceSelectionModel),
     AddDevice(add_device::AddDeviceModel),
@@ -179,12 +180,11 @@ impl Application for AppModel {
                         .map(Message::DeviceSelectionScreen),
                 ),
                 Screen::AddDevice(add_device_model) => {
-                    add_device_model.view().map(Message::AddDeviceScreen).into()
+                    add_device_model.view().map(Message::AddDeviceScreen)
                 }
                 Screen::DeviceSettings(device_settings_model) => device_settings_model
                     .view()
-                    .map(Message::DeviceSettingsScreen)
-                    .into(),
+                    .map(Message::DeviceSettingsScreen),
             })
             .into()
     }
@@ -230,7 +230,6 @@ impl Application for AppModel {
                                     .into())
                             })
                             .map(coalesce_result)
-                            .into()
                         }
                         device_selection::Action::RemoveDevice(device) => {
                             self.dialog_page = Some(DialogPage::RemoveDevice(device));
@@ -265,8 +264,7 @@ impl Application for AppModel {
                                     .map_err(handle_soft_error!())?;
                                 Ok(Message::ActivateDeviceSelectionScreen.into())
                             })
-                            .map(coalesce_result)
-                            .into();
+                            .map(coalesce_result);
                         }
                     }
                 }
@@ -299,8 +297,7 @@ impl Application for AppModel {
                         .map_err(handle_soft_error!())?;
                     Ok(Message::CloseDialogAndRefreshPairedDevices.into())
                 })
-                .map(coalesce_result)
-                .into();
+                .map(coalesce_result);
             }
             Message::CloseDialogAndRefreshPairedDevices => {
                 if let Screen::DeviceSelection(ref mut _screen) = self.screen {

@@ -64,51 +64,49 @@ impl DeviceSettingsModel {
                     .width(Length::Fill)
                     .align_x(alignment::Horizontal::Center),
             )
-            .extend(setting_ids.into_iter().cloned().filter_map(|setting_id| {
+            .extend(setting_ids.iter().cloned().map(|setting_id| {
                 let setting = self.setting_values.get(&setting_id).unwrap();
-                Some(
-                    widget::row()
-                        .align_y(alignment::Vertical::Center)
-                        .push(widget::text::text(setting_id.0).width(Length::FillPortion(1)))
-                        .push(match setting {
-                            Setting::Toggle { value } => Element::from(
-                                widget::toggler(*value)
-                                    .label(setting_id.0)
-                                    .width(Length::FillPortion(1))
-                                    .on_toggle(move |new_value| {
-                                        Message::SetSetting(setting_id, new_value.into())
-                                    }),
-                            ),
-                            Setting::I32Range { setting, value } => todo!(),
-                            Setting::Select { setting, value } => widget::row()
-                                .push(
-                                    widget::dropdown(
-                                        &setting.options,
-                                        value.map(usize::from),
-                                        move |index| {
-                                            Message::SetSetting(setting_id, (index as u16).into())
-                                        },
-                                    )
-                                    .width(Length::FillPortion(1)),
+                widget::row()
+                    .align_y(alignment::Vertical::Center)
+                    .push(widget::text::text(setting_id.0).width(Length::FillPortion(1)))
+                    .push(match setting {
+                        Setting::Toggle { value } => Element::from(
+                            widget::toggler(*value)
+                                .label(setting_id.0)
+                                .width(Length::FillPortion(1))
+                                .on_toggle(move |new_value| {
+                                    Message::SetSetting(setting_id, new_value.into())
+                                }),
+                        ),
+                        Setting::I32Range { setting, value } => todo!(),
+                        Setting::Select { setting, value } => widget::row()
+                            .push(
+                                widget::dropdown(
+                                    &setting.options,
+                                    value.map(usize::from),
+                                    move |index| {
+                                        Message::SetSetting(setting_id, (index as u16).into())
+                                    },
                                 )
-                                .into(),
-                            Setting::OptionalSelect { setting, value } => widget::row()
-                                .push(
-                                    widget::dropdown(
-                                        &setting.options,
-                                        value.map(usize::from),
-                                        move |index| {
-                                            Message::SetSetting(setting_id, (index as u16).into())
-                                        },
-                                    )
-                                    .width(Length::FillPortion(1)),
+                                .width(Length::FillPortion(1)),
+                            )
+                            .into(),
+                        Setting::OptionalSelect { setting, value } => widget::row()
+                            .push(
+                                widget::dropdown(
+                                    &setting.options,
+                                    value.map(usize::from),
+                                    move |index| {
+                                        Message::SetSetting(setting_id, (index as u16).into())
+                                    },
                                 )
-                                .into(),
-                            Setting::MultiSelect { setting, value } => todo!(),
-                            Setting::Equalizer { setting, value } => todo!(),
-                        })
-                        .into(),
-                )
+                                .width(Length::FillPortion(1)),
+                            )
+                            .into(),
+                        Setting::MultiSelect { setting, value } => todo!(),
+                        Setting::Equalizer { setting, value } => todo!(),
+                    })
+                    .into()
             }))
             .into()
     }

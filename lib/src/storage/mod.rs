@@ -43,10 +43,8 @@ pub enum StorageError {
 impl From<rusqlite::Error> for StorageError {
     fn from(err: rusqlite::Error) -> Self {
         if let Some(sqlite_err) = err.sqlite_error() {
-            #[allow(non_snake_case)]
-            match sqlite_err.extended_code {
-                SQLITE_CONSTRAINT_UNIQUE => return StorageError::AlreadyExists(err),
-                _ => (),
+            if sqlite_err.extended_code == SQLITE_CONSTRAINT_UNIQUE {
+                return StorageError::AlreadyExists(err);
             }
         }
         StorageError::Other(err)
@@ -98,7 +96,7 @@ impl OpenSCQ30Database {
             return Err(err.into());
         };
         Ok(Self {
-            command_sender: command_sender,
+            command_sender,
             closed,
         })
     }

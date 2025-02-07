@@ -32,7 +32,7 @@ pub fn migrate(
                 }
             }
         }
-        tx.pragma_update(None, "user_version", &migrations.len())?;
+        tx.pragma_update(None, "user_version", migrations.len())?;
         debug!("migrated to {}", migrations.len());
     }
     tx.commit()

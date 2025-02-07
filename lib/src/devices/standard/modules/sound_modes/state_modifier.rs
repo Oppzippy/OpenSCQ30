@@ -40,7 +40,7 @@ where
         state_sender: &watch::Sender<T>,
         target_state: &T,
     ) -> crate::Result<()> {
-        let sound_modes = state_sender.borrow().as_ref().clone();
+        let sound_modes = *state_sender.borrow().as_ref();
         let target_sound_modes = target_state.as_ref();
         if &sound_modes == target_sound_modes {
             return Ok(());
