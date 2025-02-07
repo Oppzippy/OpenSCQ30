@@ -16,3 +16,4 @@ loading-item = Loading { $item }
 device-registry = Device Registry
 device-list = Device List
 refresh = Refresh
+error-with-message = Error: { $err }

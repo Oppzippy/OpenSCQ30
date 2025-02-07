@@ -4198,6 +4198,7 @@ dependencies = [
 name = "openscq30_gui_cosmic"
 version = "1.19.3"
 dependencies = [
+ "anyhow",
  "dirs 6.0.0",
  "futures",
  "i18n-embed",

@@ -5,10 +5,9 @@ use cosmic::{
     iced_core::text::LineHeight,
     widget, Apply, Element, Task,
 };
-use macaddr::MacAddr6;
 use openscq30_lib::storage::{OpenSCQ30Database, PairedDevice};
 
-use crate::fl;
+use crate::{fl, handle_soft_error, utils::coalesce_result};
 
 pub struct DeviceSelectionModel {
     database: Arc<OpenSCQ30Database>,
@@ -21,13 +20,15 @@ pub enum Message {
     RemoveDevice(usize),
     AddDevice,
     SetPairedDevices(Vec<PairedDevice>),
+    Warning(String),
 }
 
 pub enum Action {
     ConnectToDevice(PairedDevice),
-    RemoveDevice(MacAddr6),
+    RemoveDevice(PairedDevice),
     AddDevice,
     None,
+    Warning(String),
 }
 
 impl DeviceSelectionModel {
@@ -41,13 +42,14 @@ impl DeviceSelectionModel {
 
     pub fn refresh_paired_devices(database: Arc<OpenSCQ30Database>) -> Task<Message> {
         Task::future(async move {
-            Message::SetPairedDevices(
+            Ok(Message::SetPairedDevices(
                 database
                     .fetch_paired_devices()
                     .await
-                    .expect("TODO error handling"),
-            )
+                    .map_err(handle_soft_error!())?,
+            ))
         })
+        .map(coalesce_result)
     }
 
     pub fn view(&self) -> Element<Message> {
@@ -127,10 +129,11 @@ impl DeviceSelectionModel {
                 return Action::ConnectToDevice(self.paired_devices[index].clone())
             }
             Message::RemoveDevice(index) => {
-                return Action::RemoveDevice(self.paired_devices[index].mac_address)
+                return Action::RemoveDevice(self.paired_devices[index].clone())
             }
             Message::AddDevice => return Action::AddDevice,
             Message::SetPairedDevices(paired_devices) => self.paired_devices = paired_devices,
+            Message::Warning(message) => return Action::Warning(message),
         }
         Action::None
     }

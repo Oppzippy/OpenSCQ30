@@ -5,6 +5,7 @@ mod app;
 mod device_selection;
 mod device_settings;
 mod i18n;
+pub mod utils;
 
 fn main() -> cosmic::iced::Result {
     tracing_subscriber::fmt()

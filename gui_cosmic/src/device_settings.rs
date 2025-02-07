@@ -7,15 +7,17 @@ use cosmic::{
 };
 use openscq30_lib::api::settings::{CategoryId, Setting, SettingId, Value};
 
-use crate::app::DebugOpenSCQ30Device;
+use crate::{app::DebugOpenSCQ30Device, handle_soft_error, utils::coalesce_result};
 
 #[derive(Debug, Clone)]
 pub enum Message {
     SetSetting(SettingId<'static>, Value),
     Refresh,
+    Warning(String),
 }
 pub enum Action {
     Task(Task<Message>),
+    Warning(String),
     None,
 }
 
@@ -115,18 +117,22 @@ impl DeviceSettingsModel {
         match message {
             Message::SetSetting(setting_id, value) => {
                 let device = self.device.clone();
-                Action::Task(Task::future(async move {
-                    device
-                        .set_setting_values(vec![(setting_id, value)])
-                        .await
-                        .expect("TODO error handling");
-                    Message::Refresh
-                }))
+                Action::Task(
+                    Task::future(async move {
+                        device
+                            .set_setting_values(vec![(setting_id, value)])
+                            .await
+                            .map_err(handle_soft_error!())?;
+                        Ok(Message::Refresh)
+                    })
+                    .map(coalesce_result),
+                )
             }
             Message::Refresh => {
                 self.refresh();
                 Action::None
             }
+            Message::Warning(message) => Action::Warning(message),
         }
     }
 

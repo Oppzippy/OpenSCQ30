@@ -1,21 +1,22 @@
-use std::{ops::Deref, sync::Arc};
+use std::{collections::VecDeque, ops::Deref, sync::Arc};
 
 use cosmic::{
-    app::{Core, Task},
+    app::Core,
     widget::{self, icon, nav_bar},
-    Application, ApplicationExt,
+    Application, ApplicationExt, Task,
 };
 use dirs::config_dir;
 use macaddr::MacAddr6;
 use openscq30_lib::{
     api::device::{DeviceDescriptor, OpenSCQ30Device},
-    storage::{self, OpenSCQ30Database},
+    storage::{self, OpenSCQ30Database, PairedDevice},
 };
 
 use crate::{
     add_device::{self, AddDeviceModel},
     device_selection::{self, DeviceSelectionModel},
     device_settings, fl,
+    utils::coalesce_result,
 };
 
 pub struct AppModel {
@@ -24,6 +25,7 @@ pub struct AppModel {
     _nav: nav_bar::Model,
     dialog_page: Option<DialogPage>,
     database: Arc<OpenSCQ30Database>,
+    warnings: VecDeque<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -37,6 +39,23 @@ pub enum Message {
     ConnectToDeviceScreen(DebugOpenSCQ30Device),
     CloseDialogAndRefreshPairedDevices,
     ActivateDeviceSelectionScreen,
+    Warning(String),
+    CloseWarning,
+}
+impl From<device_selection::Message> for Message {
+    fn from(message: device_selection::Message) -> Self {
+        Self::DeviceSelectionScreen(message)
+    }
+}
+impl From<add_device::Message> for Message {
+    fn from(message: add_device::Message) -> Self {
+        Self::AddDeviceScreen(message)
+    }
+}
+impl From<device_settings::Message> for Message {
+    fn from(message: device_settings::Message) -> Self {
+        Self::DeviceSettingsScreen(message)
+    }
 }
 #[derive(Clone)]
 pub struct DebugOpenSCQ30Device(pub Arc<dyn OpenSCQ30Device + Send + Sync>);
@@ -57,13 +76,25 @@ pub enum Page {
     Page1,
 }
 enum DialogPage {
-    RemoveDevice(MacAddr6),
+    RemoveDevice(PairedDevice),
 }
 
 enum Screen {
     DeviceSelection(device_selection::DeviceSelectionModel),
     AddDevice(add_device::AddDeviceModel),
     DeviceSettings(device_settings::DeviceSettingsModel),
+}
+
+// This is a macro so that the file/line number of the tracing message matches the caller
+#[macro_export]
+macro_rules! handle_soft_error {
+    () => {
+        |err| {
+            let err = ::anyhow::Error::from(err);
+            ::tracing::warn!("soft_error: {err:?}");
+            Message::Warning($crate::fl!("error-with-message", err = err.to_string()))
+        }
+    };
 }
 
 impl Application for AppModel {
@@ -104,14 +135,14 @@ impl Application for AppModel {
             screen: Screen::DeviceSelection(model),
             dialog_page: None,
             database,
+            warnings: VecDeque::with_capacity(5),
         };
         let command = app.update_title();
         (
             app,
-            Task::batch([
+            cosmic::Task::batch([
                 command,
-                task.map(Message::DeviceSelectionScreen)
-                    .map(cosmic::app::Message::App),
+                task.map(Message::DeviceSelectionScreen).map(Into::into),
             ]),
         )
     }
@@ -135,31 +166,39 @@ impl Application for AppModel {
     }
 
     fn view(&self) -> cosmic::Element<Self::Message> {
-        match &self.screen {
-            Screen::DeviceSelection(device_selection_model) => device_selection_model
-                .view()
-                .map(Message::DeviceSelectionScreen)
-                .into(),
-            Screen::AddDevice(add_device_model) => {
-                add_device_model.view().map(Message::AddDeviceScreen).into()
-            }
-            Screen::DeviceSettings(device_settings_model) => device_settings_model
-                .view()
-                .map(Message::DeviceSettingsScreen)
-                .into(),
-        }
+        widget::column()
+            .push_maybe(
+                self.warnings
+                    .front()
+                    .map(|message| widget::warning(message).on_close(Message::CloseWarning)),
+            )
+            .push(match &self.screen {
+                Screen::DeviceSelection(device_selection_model) => cosmic::Element::from(
+                    device_selection_model
+                        .view()
+                        .map(Message::DeviceSelectionScreen),
+                ),
+                Screen::AddDevice(add_device_model) => {
+                    add_device_model.view().map(Message::AddDeviceScreen).into()
+                }
+                Screen::DeviceSettings(device_settings_model) => device_settings_model
+                    .view()
+                    .map(Message::DeviceSettingsScreen)
+                    .into(),
+            })
+            .into()
     }
 
     fn dialog(&self) -> Option<cosmic::Element<Self::Message>> {
         let dialog_page = self.dialog_page.as_ref()?;
         Some(match dialog_page {
-            DialogPage::RemoveDevice(mac_address) => widget::dialog()
+            DialogPage::RemoveDevice(device) => widget::dialog()
                 .title(fl!("prompt-remove-device-title"))
-                .body(fl!("prompt-remove-device", name = "TODO device name"))
+                .body(fl!("prompt-remove-device", name = device.name.as_str()))
                 .icon(icon::from_name("dialog-warning-symbolic"))
                 .primary_action(
                     widget::button::destructive(fl!("remove"))
-                        .on_press(Message::RemovePairedDevice(*mac_address)),
+                        .on_press(Message::RemovePairedDevice(device.mac_address)),
                 )
                 .secondary_action(
                     widget::button::text(fl!("cancel")).on_press(Message::CloseDialog),
@@ -168,7 +207,7 @@ impl Application for AppModel {
         })
     }
 
-    fn update(&mut self, message: Self::Message) -> Task<Self::Message> {
+    fn update(&mut self, message: Self::Message) -> cosmic::app::Task<Self::Message> {
         match message {
             Message::DeviceSelectionScreen(message) => {
                 if let Screen::DeviceSelection(ref mut screen) = self.screen {
@@ -182,23 +221,27 @@ impl Application for AppModel {
                                         true,
                                     )
                                     .await
-                                    .expect("TODO error handling");
+                                    .map_err(handle_soft_error!())?;
                                 let device = registry
                                     .connect(paired_device.mac_address)
                                     .await
-                                    .expect("TODO error handling");
-                                cosmic::app::Message::App(Message::ConnectToDeviceScreen(
-                                    DebugOpenSCQ30Device(device),
-                                ))
+                                    .map_err(handle_soft_error!())?;
+                                Ok(Message::ConnectToDeviceScreen(DebugOpenSCQ30Device(device))
+                                    .into())
                             })
+                            .map(coalesce_result)
+                            .into()
                         }
-                        device_selection::Action::RemoveDevice(mac_address) => {
-                            self.dialog_page = Some(DialogPage::RemoveDevice(mac_address));
+                        device_selection::Action::RemoveDevice(device) => {
+                            self.dialog_page = Some(DialogPage::RemoveDevice(device));
                         }
                         device_selection::Action::AddDevice => {
                             self.screen = Screen::AddDevice(AddDeviceModel::new())
                         }
                         device_selection::Action::None => (),
+                        device_selection::Action::Warning(message) => {
+                            return Task::done(Message::Warning(message).into())
+                        }
                     }
                 }
             }
@@ -207,9 +250,7 @@ impl Application for AppModel {
                     match screen.update(message) {
                         add_device::Action::None => (),
                         add_device::Action::Task(task) => {
-                            return task
-                                .map(Message::AddDeviceScreen)
-                                .map(cosmic::app::Message::App)
+                            return task.map(Message::AddDeviceScreen).map(Into::into)
                         }
                         add_device::Action::AddDevice { model, descriptor } => {
                             let database = self.database.clone();
@@ -221,9 +262,11 @@ impl Application for AppModel {
                                         model,
                                     })
                                     .await
-                                    .expect("TODO error handling");
-                                cosmic::app::Message::App(Message::ActivateDeviceSelectionScreen)
-                            });
+                                    .map_err(handle_soft_error!())?;
+                                Ok(Message::ActivateDeviceSelectionScreen.into())
+                            })
+                            .map(coalesce_result)
+                            .into();
                         }
                     }
                 }
@@ -231,19 +274,18 @@ impl Application for AppModel {
             Message::ActivateDeviceSelectionScreen => {
                 let (model, task) = DeviceSelectionModel::new(self.database.clone());
                 self.screen = Screen::DeviceSelection(model);
-                return task
-                    .map(Message::DeviceSelectionScreen)
-                    .map(cosmic::app::Message::App);
+                return task.map(Message::DeviceSelectionScreen).map(Into::into);
             }
             Message::DeviceSettingsScreen(message) => {
                 if let Screen::DeviceSettings(ref mut screen) = self.screen {
                     match screen.update(message) {
                         device_settings::Action::Task(task) => {
-                            return task
-                                .map(Message::DeviceSettingsScreen)
-                                .map(cosmic::app::Message::App)
+                            return task.map(Message::DeviceSettingsScreen).map(Into::into)
                         }
                         device_settings::Action::None => (),
+                        device_settings::Action::Warning(message) => {
+                            return Task::done(Message::Warning(message).into())
+                        }
                     }
                 }
             }
@@ -254,9 +296,11 @@ impl Application for AppModel {
                     database
                         .delete_paired_device(mac_address)
                         .await
-                        .expect("TODO error handling");
-                    cosmic::app::Message::App(Message::CloseDialogAndRefreshPairedDevices)
-                });
+                        .map_err(handle_soft_error!())?;
+                    Ok(Message::CloseDialogAndRefreshPairedDevices.into())
+                })
+                .map(coalesce_result)
+                .into();
             }
             Message::CloseDialogAndRefreshPairedDevices => {
                 if let Screen::DeviceSelection(ref mut _screen) = self.screen {
@@ -264,20 +308,28 @@ impl Application for AppModel {
                     return device_selection::DeviceSelectionModel::refresh_paired_devices(
                         self.database.clone(),
                     )
-                    .map(Message::DeviceSelectionScreen)
-                    .map(cosmic::app::Message::App);
+                    .map(Message::from)
+                    .map(Into::into);
                 }
             }
             Message::BackToDeviceSelection => {
                 let (model, task) = DeviceSelectionModel::new(self.database.clone());
                 self.screen = Screen::DeviceSelection(model);
-                return task
-                    .map(Message::DeviceSelectionScreen)
-                    .map(cosmic::app::Message::App);
+                return task.map(Message::DeviceSelectionScreen).map(Into::into);
             }
             Message::ConnectToDeviceScreen(device) => {
                 self.screen =
                     Screen::DeviceSettings(device_settings::DeviceSettingsModel::new(device));
+            }
+            Message::Warning(message) => {
+                // cap max number of warnings, since it's bad UX to have to close a million of them if something goes wrong and spams them
+                if self.warnings.capacity() == self.warnings.len() {
+                    self.warnings.pop_front();
+                }
+                self.warnings.push_back(message);
+            }
+            Message::CloseWarning => {
+                self.warnings.pop_front();
             }
         }
         Task::none()
@@ -285,7 +337,7 @@ impl Application for AppModel {
 }
 
 impl AppModel {
-    pub fn update_title(&mut self) -> Task<Message> {
+    pub fn update_title(&mut self) -> cosmic::app::Task<Message> {
         if let Some(id) = self.core.main_window_id() {
             self.set_header_title(fl!("openscq30"));
             self.set_window_title(fl!("openscq30"), id)
