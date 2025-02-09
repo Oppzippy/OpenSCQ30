@@ -36,8 +36,8 @@ android {
         }
     }
     namespace = "com.oppzippy.openscq30"
-    compileSdk = 34
-    buildToolsVersion = "34.0.0"
+    compileSdk = 35
+    buildToolsVersion = "35.0.0"
 
     defaultConfig {
         applicationId = "com.oppzippy.openscq30"
@@ -127,7 +127,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-service:$lifecycleVersion")
 
     // Compose
-    val composeBomVersion = "2024.12.01"
+    val composeBomVersion = "2025.01.01"
     implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     androidTestImplementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     implementation("androidx.compose.ui:ui")
@@ -146,11 +146,11 @@ dependencies {
     // Optional - Add full set of material icons
     implementation("androidx.compose.material:material-icons-extended")
     // Optional - Integration with activities
-    implementation("androidx.activity:activity-compose:1.9.3")
+    implementation("androidx.activity:activity-compose:1.10.0")
     // Optional - Integration with ViewModels
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     // Compose navigation
-    implementation("androidx.navigation:navigation-compose:2.8.5")
+    implementation("androidx.navigation:navigation-compose:2.8.6")
 
     val accompanistVersion = "0.37.0"
     implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
@@ -162,14 +162,14 @@ dependencies {
     ksp("androidx.room:room-compiler:$roomVersion")
     androidTestImplementation("androidx.room:room-testing:$roomVersion")
 
-    val protobufVersion = "4.29.2"
+    val protobufVersion = "4.29.3"
     implementation("com.google.protobuf:protobuf-java:$protobufVersion")
     implementation("com.google.protobuf:protobuf-kotlin:$protobufVersion")
     protobuf(files("../../lib_protobuf/protobuf/"))
 
     implementation("net.java.dev.jna:jna:5.16.0@aar")
 
-    val hiltVersion = "2.54"
+    val hiltVersion = "2.55"
     implementation("com.google.dagger:hilt-android:$hiltVersion")
     kapt("com.google.dagger:hilt-android-compiler:$hiltVersion")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
@@ -184,7 +184,7 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
 
-    val mockkVersion = "1.13.14"
+    val mockkVersion = "1.13.16"
     testImplementation("io.mockk:mockk:$mockkVersion")
     androidTestImplementation("io.mockk:mockk-android:$mockkVersion")
     androidTestImplementation("androidx.test:runner:1.6.2")
