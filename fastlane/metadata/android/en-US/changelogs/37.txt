@@ -1,0 +1,3 @@
+* Fixes
+  - A3936 packet parsing issues
+  - Connection issues on Windows when a device is paired with multiple bluetooth adapters

@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.19.2
+
+### General
+
+#### Fixes
+
+-   A3936 packet parsing issues
+-   Connection issues on Windows when a device is paired with multiple bluetooth adapters
+
 ## v1.19.1
 
 ### General
