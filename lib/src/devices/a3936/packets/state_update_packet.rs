@@ -1,5 +1,5 @@
 use nom::{
-    bytes::complete::{tag, take},
+    bytes::complete::take,
     combinator::all_consuming,
     error::{context, ContextError, ParseError},
     number::complete::le_u8,
@@ -113,7 +113,7 @@ impl A3936StateUpdatePacket {
                 let (input, auto_power_off_switch) = take_bool(input)?;
                 let (input, auto_power_off_index) = le_u8(input)?;
                 let (input, game_mode_switch) = take_bool(input)?;
-                let (input, _) = tag([0xFF; 12])(input)?;
+                let (input, _) = take(12usize)(input)?;
                 Ok((
                     input,
                     A3936StateUpdatePacket {
@@ -166,6 +166,24 @@ mod tests {
             0x11, 0x63, 0x11, 0x66, 0x11, 0x49, 0x11, 0x44, 0x7, 0x2, 0x32, 0x0, 0x1, 0x0, 0x0,
             0x0, 0x4, 0x31, 0x0, 0x1, 0x1, 0x0, 0x0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
             0xff, 0xff, 0xff, 0xff, 0xff, 0xdd,
+        ];
+        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
+        A3936StateUpdatePacket::take::<VerboseError<_>>(body)
+            .expect("it should parse successfully as a A3936 state update packet");
+        StateUpdatePacket::take::<VerboseError<_>>(body)
+            .expect("it should parse successfully as a state update packet");
+    }
+
+    #[test]
+    fn it_parses_packet_from_github_issue_157() {
+        let input = &[
+            0x9, 0xff, 0x0, 0x0, 0x1, 0x1, 0x1, 0x99, 0x0, 1, 1, 5, 5, 1, 1, 48, 53, 46, 51, 51,
+            48, 53, 46, 51, 51, 51, 57, 51, 54, 56, 56, 48, 101, 56, 53, 48, 49, 53, 55, 97, 97, 0,
+            0, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120,
+            120, 120, 120, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 0,
+            17, 0, 0, 17, 99, 17, 102, 17, 68, 17, 68, 7, 1, 48, 0, 0, 0, 0, 0, 85, 49, 0, 1, 1, 0,
+            0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 66,
         ];
         let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
         A3936StateUpdatePacket::take::<VerboseError<_>>(body)
