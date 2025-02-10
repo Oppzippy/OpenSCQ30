@@ -45,6 +45,14 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.19.3" date="2025-02-10">
+            <description>
+                <p>Fixes</p>
+                <ul>
+                    <li>Add missing mac address prefix 88:0E:85</li>
+                </ul> 
+            </description>
+        </release>
         <release version="1.19.2" date="2025-02-09">
             <description>
                 <p>Fixes</p>

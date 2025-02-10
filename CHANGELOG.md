@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.19.3
+
+### General
+
+#### Fixes
+
+-   Add missing mac address prefix 88:0E:85
+
 ## v1.19.2
 
 ### General
