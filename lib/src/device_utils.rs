@@ -52,7 +52,7 @@ pub fn service_uuids() -> Vec<Uuid> {
 
 // All mac address prefixes owned by the following companies should be listed here.
 // See: http://standards-oui.ieee.org/oui/oui.csv
-const MAC_ADDRESS_PREFIXES: [[u8; 3]; 7] = [
+const MAC_ADDRESS_PREFIXES: [[u8; 3]; 8] = [
     // Fantasia Trading LLC
     [0xAC, 0x12, 0x2F],
     [0xE8, 0xEE, 0xCC],
@@ -64,6 +64,7 @@ const MAC_ADDRESS_PREFIXES: [[u8; 3]; 7] = [
     [0x98, 0x47, 0x44],
     // ???
     [0xE4, 0x9E, 0x58],
+    [0x88, 0x0E, 0x85],
 ];
 pub fn soundcore_mac_address_prefixes() -> &'static [[u8; 3]] {
     &MAC_ADDRESS_PREFIXES
