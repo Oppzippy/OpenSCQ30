@@ -45,6 +45,15 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="1.19.2" date="2025-02-09">
+            <description>
+                <p>Fixes</p>
+                <ul>
+                    <li>A3936 packet parsing issues</li>
+                    <li>Connection issues on Windows when a device is paired with multiple bluetooth adapters</li>
+                </ul> 
+            </description>
+        </release>
         <release version="1.19.1" date="2025-01-11">
             <description>
                 <p>Fixes</p>
