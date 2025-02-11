@@ -5,7 +5,7 @@ use cosmic::{
 };
 use openscq30_lib::api::settings::{CategoryId, Setting, SettingId, Value};
 
-use crate::{app::DebugOpenSCQ30Device, fl, handle_soft_error, utils::coalesce_result};
+use crate::{app::DebugOpenSCQ30Device, handle_soft_error, utils::coalesce_result};
 
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -85,131 +85,31 @@ impl DeviceSettingsModel {
             .extend(self.settings.iter().map(|(setting_id, setting)| {
                 let setting_id = setting_id.to_owned();
                 match setting {
-                    Setting::Toggle { value } => Element::from(
-                        widget::toggler(*value)
-                            .label(setting_id.0)
-                            .width(Length::FillPortion(1))
-                            .on_toggle(move |new_value| {
-                                Message::SetSetting(setting_id, new_value.into())
-                            }),
-                    ),
+                    Setting::Toggle { value } => {
+                        crate::settings::toggle(setting_id, *value, move |new_value| {
+                            Message::SetSetting(setting_id, new_value.into())
+                        })
+                    }
                     Setting::I32Range { setting, value } => todo!(),
-                    Setting::Select { setting, value } => with_label(
-                        setting_id.0,
-                        widget::dropdown(&setting.options, value.map(usize::from), move |index| {
+                    Setting::Select { setting, value } => {
+                        crate::settings::select(setting_id, setting, *value, move |index| {
                             Message::SetSetting(setting_id, (index as u16).into())
                         })
-                        .width(Length::FillPortion(1)),
-                    ),
-                    Setting::OptionalSelect { setting, value } => with_label(
-                        setting_id.0,
-                        widget::dropdown(&setting.options, value.map(usize::from), move |index| {
+                    }
+                    Setting::OptionalSelect { setting, value } => {
+                        crate::settings::select(setting_id, setting, *value, move |index| {
                             Message::SetSetting(setting_id, Some(index as u16).into())
                         })
-                        .width(Length::FillPortion(1)),
-                    ),
+                    }
                     Setting::MultiSelect { setting, value } => todo!(),
                     Setting::Equalizer {
                         setting,
                         values: value,
-                    } => widget::responsive(move |size| {
-                        if size.width < 700f32 || size.height < 300f32 {
-                            widget::scrollable(widget::column().extend(
-                                setting.band_hz.iter().cloned().enumerate().map(|(i, hz)| {
-                                    widget::row()
-                                        .width(Length::Fill)
-                                        .align_y(alignment::Vertical::Center)
-                                        .spacing(8)
-                                        .push(widget::text::text(fl!("hz", hz = hz)))
-                                        .push(widget::spin_button(
-                                            {
-                                                let divisor =
-                                                    10i16.pow(setting.fraction_digits as u32);
-                                                let db_integer_portion =
-                                                    value[i as usize] / divisor;
-                                                let db_decimal_portion =
-                                                    (value[i as usize] % divisor).abs();
-                                                let decimal_db = format!(
-                                                    "{db_integer_portion}.{db_decimal_portion}"
-                                                );
-                                                fl!("db", db = decimal_db)
-                                            },
-                                            value[i as usize],
-                                            1,
-                                            setting.min,
-                                            setting.max,
-                                            move |band_value| {
-                                                Message::SetEqualizerBand(
-                                                    setting_id, i as u8, band_value,
-                                                )
-                                            },
-                                        ))
-                                        .push(widget::slider(
-                                            setting.min..=setting.max,
-                                            value
-                                                .get(i as usize)
-                                                .cloned()
-                                                .unwrap_or((setting.min + setting.max) / 2),
-                                            move |band_value| {
-                                                Message::SetEqualizerBand(
-                                                    setting_id, i as u8, band_value,
-                                                )
-                                            },
-                                        ))
-                                        .into()
-                                }),
-                            ))
-                            .into()
-                        } else {
-                            widget::row()
-                                .extend(setting.band_hz.iter().cloned().enumerate().map(
-                                    |(i, hz)| {
-                                        widget::column()
-                                            .width(Length::Fill)
-                                            .align_x(alignment::Horizontal::Center)
-                                            .spacing(8)
-                                            .push(widget::vertical_slider(
-                                                setting.min..=setting.max,
-                                                value
-                                                    .get(i as usize)
-                                                    .cloned()
-                                                    .unwrap_or((setting.min + setting.max) / 2),
-                                                move |band_value| {
-                                                    Message::SetEqualizerBand(
-                                                        setting_id, i as u8, band_value,
-                                                    )
-                                                },
-                                            ))
-                                            .push(widget::vertical_spin_button(
-                                                {
-                                                    let divisor =
-                                                        10i16.pow(setting.fraction_digits as u32);
-                                                    let db_integer_portion =
-                                                        value[i as usize] / divisor;
-                                                    let db_decimal_portion =
-                                                        (value[i as usize] % divisor).abs();
-                                                    let decimal_db = format!(
-                                                        "{db_integer_portion}.{db_decimal_portion}"
-                                                    );
-                                                    fl!("db", db = decimal_db)
-                                                },
-                                                value[i as usize],
-                                                1,
-                                                setting.min,
-                                                setting.max,
-                                                move |band_value| {
-                                                    Message::SetEqualizerBand(
-                                                        setting_id, i as u8, band_value,
-                                                    )
-                                                },
-                                            ))
-                                            .push(widget::text::text(fl!("hz", hz = hz)))
-                                            .into()
-                                    },
-                                ))
-                                .into()
-                        }
-                    })
+                    } => crate::settings::responsive_equalizer(
+                        setting,
+                        value,
+                        move |index, value| Message::SetEqualizerBand(setting_id, index, value),
+                    )
                     .into(),
                 }
                 .into()
@@ -234,7 +134,7 @@ impl DeviceSettingsModel {
             }
             Message::SetEqualizerBand(setting_id, index, new_value) => {
                 let device = self.device.clone();
-                if let Some(Setting::Equalizer { setting: _, values }) =
+                if let Some(Setting::Equalizer { setting, values }) =
                     self.device.setting(&setting_id)
                 {
                     let mut new_values = values.clone();
@@ -260,15 +160,4 @@ impl DeviceSettingsModel {
             Message::Warning(message) => Action::Warning(message),
         }
     }
-}
-
-fn with_label<'a>(
-    label: &'a str,
-    element: impl Into<Element<'a, Message>>,
-) -> Element<'a, Message> {
-    widget::row()
-        .align_y(alignment::Vertical::Center)
-        .push(widget::text::text(label).width(Length::FillPortion(1)))
-        .push(element.into())
-        .into()
 }
