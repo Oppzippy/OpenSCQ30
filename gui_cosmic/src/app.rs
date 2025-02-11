@@ -25,7 +25,6 @@ use crate::{
 pub struct AppModel {
     core: Core,
     screen: Screen,
-    _nav: nav_bar::Model,
     dialog_page: Option<DialogPage>,
     session: Arc<OpenSCQ30Session>,
     warnings: VecDeque<String>,
@@ -75,9 +74,6 @@ impl Deref for DebugOpenSCQ30Device {
     }
 }
 
-pub enum Page {
-    Page1,
-}
 enum DialogPage {
     RemoveDevice(PairedDevice),
 }
@@ -117,12 +113,6 @@ impl Application for AppModel {
     }
 
     fn init(core: Core, _flags: Self::Flags) -> (Self, cosmic::app::Task<Self::Message>) {
-        let mut nav = nav_bar::Model::default();
-        nav.insert()
-            .text("page 1")
-            .data::<Page>(Page::Page1)
-            .activate();
-
         let database = Arc::new(
             futures::executor::block_on(OpenSCQ30Session::new(
                 config_dir()
@@ -135,7 +125,6 @@ impl Application for AppModel {
         let (model, task) = DeviceSelectionModel::new(database.clone());
         let mut app = AppModel {
             core,
-            _nav: nav,
             screen: Screen::DeviceSelection(model),
             dialog_page: None,
             session: database,
@@ -155,6 +144,16 @@ impl Application for AppModel {
         match &self.screen {
             Screen::DeviceSettings(model) => model.nav_model(),
             _ => None,
+        }
+    }
+
+    fn on_nav_select(&mut self, id: nav_bar::Id) -> cosmic::app::Task<Self::Message> {
+        match &mut self.screen {
+            Screen::DeviceSettings(model) => model
+                .on_nav_select(id)
+                .map(Message::DeviceSettingsScreen)
+                .map(Into::into),
+            _ => unreachable!("no nav bar is shown, so selecting an item is impossible"),
         }
     }
 

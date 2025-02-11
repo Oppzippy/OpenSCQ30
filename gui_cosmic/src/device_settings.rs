@@ -41,6 +41,7 @@ impl DeviceSettingsModel {
                 .data(category)
                 .activate();
         }
+        nav_model.activate_position(0);
         let mut model = Self {
             device,
             nav_model,
@@ -50,6 +51,11 @@ impl DeviceSettingsModel {
         };
         model.refresh();
         model
+    }
+
+    pub fn on_nav_select(&mut self, id: nav_bar::Id) -> Task<Message> {
+        self.nav_model.activate(id);
+        Task::none()
     }
 
     pub fn view(&self) -> Element<'_, Message> {
