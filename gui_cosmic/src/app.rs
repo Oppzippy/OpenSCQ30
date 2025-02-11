@@ -8,8 +8,11 @@ use cosmic::{
 use dirs::config_dir;
 use macaddr::MacAddr6;
 use openscq30_lib::{
-    api::device::{DeviceDescriptor, OpenSCQ30Device},
-    storage::{self, OpenSCQ30Database, PairedDevice},
+    api::{
+        device::{DeviceDescriptor, OpenSCQ30Device},
+        OpenSCQ30Session,
+    },
+    storage::{self, PairedDevice},
 };
 
 use crate::{
@@ -24,7 +27,7 @@ pub struct AppModel {
     screen: Screen,
     _nav: nav_bar::Model,
     dialog_page: Option<DialogPage>,
-    database: Arc<OpenSCQ30Database>,
+    session: Arc<OpenSCQ30Session>,
     warnings: VecDeque<String>,
 }
 
@@ -121,7 +124,7 @@ impl Application for AppModel {
             .activate();
 
         let database = Arc::new(
-            futures::executor::block_on(OpenSCQ30Database::new(
+            futures::executor::block_on(OpenSCQ30Session::new(
                 config_dir()
                     .expect("failed to find config dir")
                     .join("openscq30")
@@ -135,7 +138,7 @@ impl Application for AppModel {
             _nav: nav,
             screen: Screen::DeviceSelection(model),
             dialog_page: None,
-            database,
+            session: database,
             warnings: VecDeque::with_capacity(5),
         };
         let command = app.update_title();
@@ -252,10 +255,10 @@ impl Application for AppModel {
                             return task.map(Message::AddDeviceScreen).map(Into::into)
                         }
                         add_device::Action::AddDevice { model, descriptor } => {
-                            let database = self.database.clone();
+                            let database = self.session.clone();
                             return Task::future(async move {
                                 database
-                                    .upsert_paired_device(storage::PairedDevice {
+                                    .pair(storage::PairedDevice {
                                         name: descriptor.name().to_string(),
                                         mac_address: descriptor.mac_address(),
                                         model,
@@ -270,7 +273,7 @@ impl Application for AppModel {
                 }
             }
             Message::ActivateDeviceSelectionScreen => {
-                let (model, task) = DeviceSelectionModel::new(self.database.clone());
+                let (model, task) = DeviceSelectionModel::new(self.session.clone());
                 self.screen = Screen::DeviceSelection(model);
                 return task.map(Message::DeviceSelectionScreen).map(Into::into);
             }
@@ -289,10 +292,10 @@ impl Application for AppModel {
             }
             Message::CloseDialog => self.dialog_page = None,
             Message::RemovePairedDevice(mac_address) => {
-                let database = self.database.clone();
+                let database = self.session.clone();
                 return Task::future(async move {
                     database
-                        .delete_paired_device(mac_address)
+                        .unpair(mac_address)
                         .await
                         .map_err(handle_soft_error!())?;
                     Ok(Message::CloseDialogAndRefreshPairedDevices.into())
@@ -303,14 +306,14 @@ impl Application for AppModel {
                 if let Screen::DeviceSelection(ref mut _screen) = self.screen {
                     self.dialog_page = None;
                     return device_selection::DeviceSelectionModel::refresh_paired_devices(
-                        self.database.clone(),
+                        self.session.clone(),
                     )
                     .map(Message::from)
                     .map(Into::into);
                 }
             }
             Message::BackToDeviceSelection => {
-                let (model, task) = DeviceSelectionModel::new(self.database.clone());
+                let (model, task) = DeviceSelectionModel::new(self.session.clone());
                 self.screen = Screen::DeviceSelection(model);
                 return task.map(Message::DeviceSelectionScreen).map(Into::into);
             }

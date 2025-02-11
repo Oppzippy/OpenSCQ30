@@ -5,6 +5,7 @@ mod type_conversions;
 
 use std::{
     mem,
+    panic::Location,
     path::PathBuf,
     sync::{mpsc, Arc},
     thread,
@@ -38,6 +39,16 @@ pub enum StorageError {
     AlreadyExists(rusqlite::Error),
     #[error("sql error: {0:?}")]
     Other(rusqlite::Error),
+}
+
+impl From<StorageError> for crate::Error {
+    #[track_caller]
+    fn from(value: StorageError) -> Self {
+        Self::Other {
+            source: Box::new(value),
+            location: Location::caller(),
+        }
+    }
 }
 
 impl From<rusqlite::Error> for StorageError {
@@ -158,7 +169,8 @@ macro_rules! commands {
 }
 
 commands!(
-    paired_device::fetch_all => fn fetch_paired_devices() -> Result<Vec<PairedDevice>, StorageError>;
+    paired_device::fetch_all => fn fetch_all_paired_devices() -> Result<Vec<PairedDevice>, StorageError>;
+    paired_device::fetch => fn fetch_paired_device(mac_address: MacAddr6) -> Result<Option<PairedDevice>, StorageError>;
     paired_device::insert => fn insert_paired_device(paired_device: PairedDevice) -> Result<(), StorageError>;
     paired_device::upsert => fn upsert_paired_device(paired_device: PairedDevice) -> Result<(), StorageError>;
     paired_device::delete => fn delete_paired_device(mac_address: MacAddr6) -> Result<(), StorageError>;

@@ -34,6 +34,37 @@ pub fn fetch_all(connection: &Connection) -> Result<Vec<PairedDevice>, StorageEr
     Ok(devices)
 }
 
+#[instrument(skip(connection))]
+pub fn fetch(
+    connection: &Connection,
+    mac_address: MacAddr6,
+) -> Result<Option<PairedDevice>, StorageError> {
+    let mut statement = connection.prepare_cached(
+        "SELECT name, mac_address, model FROM paired_device WHERE mac_address = ?1",
+    )?;
+    let devices = statement
+        .query(())?
+        .mapped(|row| {
+            let name: String = row.get("name")?;
+            let mac_address: SqliteMacAddr6 = row.get("mac_address")?;
+            let model: SqliteDeviceModel = row.get("model")?;
+            Ok(PairedDevice {
+                name,
+                mac_address: mac_address.0,
+                model: model.0,
+            })
+        })
+        .filter_map(|result| match result {
+            Ok(device) => Some(device),
+            Err(err) => {
+                warn!("error parsing row: {err:?}");
+                None
+            }
+        })
+        .next();
+    Ok(devices)
+}
+
 pub fn insert(connection: &Connection, paired_device: PairedDevice) -> Result<(), StorageError> {
     connection.execute(
         "INSERT INTO paired_device (name, mac_address, model) VALUES (?1, ?2, ?3)",

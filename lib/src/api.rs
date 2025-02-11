@@ -1,6 +1,8 @@
 pub mod connection;
 pub mod device;
+mod session;
 pub mod settings;
+pub use session::*;
 
 #[cfg(any(feature = "bluetooth", feature = "demo"))]
 use crate::futures::Futures;

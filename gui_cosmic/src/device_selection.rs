@@ -5,12 +5,12 @@ use cosmic::{
     iced_core::text::LineHeight,
     widget, Apply, Element, Task,
 };
-use openscq30_lib::storage::{OpenSCQ30Database, PairedDevice};
+use openscq30_lib::{api::OpenSCQ30Session, storage::PairedDevice};
 
 use crate::{fl, handle_soft_error, utils::coalesce_result};
 
 pub struct DeviceSelectionModel {
-    database: Arc<OpenSCQ30Database>,
+    session: Arc<OpenSCQ30Session>,
     paired_devices: Vec<PairedDevice>,
 }
 
@@ -32,19 +32,19 @@ pub enum Action {
 }
 
 impl DeviceSelectionModel {
-    pub fn new(database: Arc<OpenSCQ30Database>) -> (Self, Task<Message>) {
+    pub fn new(session: Arc<OpenSCQ30Session>) -> (Self, Task<Message>) {
         let model = DeviceSelectionModel {
-            database: database.clone(),
+            session: session.clone(),
             paired_devices: Vec::new(),
         };
-        (model, Self::refresh_paired_devices(database))
+        (model, Self::refresh_paired_devices(session))
     }
 
-    pub fn refresh_paired_devices(database: Arc<OpenSCQ30Database>) -> Task<Message> {
+    pub fn refresh_paired_devices(session: Arc<OpenSCQ30Session>) -> Task<Message> {
         Task::future(async move {
             Ok(Message::SetPairedDevices(
-                database
-                    .fetch_paired_devices()
+                session
+                    .paired_devices()
                     .await
                     .map_err(handle_soft_error!())?,
             ))
