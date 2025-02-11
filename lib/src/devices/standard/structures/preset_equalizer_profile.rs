@@ -1,6 +1,6 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use strum::{AsRefStr, Display, EnumIter, EnumString, FromRepr};
+use strum::{AsRefStr, Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 use super::volume_adjustments::VolumeAdjustments;
 
@@ -18,6 +18,7 @@ use super::volume_adjustments::VolumeAdjustments;
     EnumIter,
     EnumString,
     AsRefStr,
+    IntoStaticStr,
 )]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PresetEqualizerProfile {

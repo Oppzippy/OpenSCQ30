@@ -30,6 +30,17 @@ impl AsRef<SoundModes> for A3027State {
     }
 }
 
+impl AsMut<EqualizerConfiguration> for A3027State {
+    fn as_mut(&mut self) -> &mut EqualizerConfiguration {
+        &mut self.equalizer_configuration
+    }
+}
+impl AsRef<EqualizerConfiguration> for A3027State {
+    fn as_ref(&self) -> &EqualizerConfiguration {
+        &self.equalizer_configuration
+    }
+}
+
 impl From<A3027StateUpdatePacket> for A3027State {
     fn from(value: A3027StateUpdatePacket) -> Self {
         Self {

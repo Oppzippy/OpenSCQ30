@@ -11,6 +11,7 @@ use super::{
     packet_manager::PacketManager, settings_manager::SettingsManager, state_modifier::StateModifier,
 };
 
+pub mod equalizer;
 pub mod sound_modes;
 
 pub struct ModuleCollection<StateType> {

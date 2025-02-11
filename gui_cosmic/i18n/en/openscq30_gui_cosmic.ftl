@@ -17,3 +17,5 @@ device-registry = Device Registry
 device-list = Device List
 refresh = Refresh
 error-with-message = Error: { $err }
+hz = { $hz } Hz
+db = { $db } dB

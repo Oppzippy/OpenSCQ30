@@ -1,7 +1,7 @@
 #[derive(Clone, Debug)]
 pub struct Equalizer {
-    pub num_bands: u8,
-    pub decimal_places: u8,
+    pub band_hz: &'static [u16],
+    pub fraction_digits: i16,
     pub min: i16,
     pub max: i16,
 }

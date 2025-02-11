@@ -1,4 +1,4 @@
-use equalizer::Equalizer;
+pub use equalizer::*;
 pub use range::*;
 pub use select::*;
 use strum::IntoEnumIterator;
@@ -26,7 +26,7 @@ pub enum Setting {
     Select { setting: Select, value: Option<u16> },
     OptionalSelect { setting: Select, value: Option<u16> },
     MultiSelect { setting: Select, value: Vec<u16> },
-    Equalizer { setting: Equalizer, value: Vec<i16> },
+    Equalizer { setting: Equalizer, values: Vec<i16> },
 }
 
 impl From<Setting> for Value {
@@ -37,7 +37,7 @@ impl From<Setting> for Value {
             Setting::Select { value, .. } => value.into(),
             Setting::OptionalSelect { value, .. } => value.into(),
             Setting::MultiSelect { value, .. } => value.into(),
-            Setting::Equalizer { value, .. } => value.into(),
+            Setting::Equalizer { values: value, .. } => value.into(),
         }
     }
 }

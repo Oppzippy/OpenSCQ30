@@ -13,6 +13,7 @@ use crate::{
     devices::standard::{
         implementation::StandardImplementation,
         modules::{
+            equalizer::AddEqualizerExt,
             sound_modes::{AddSoundModesExt, AvailableSoundModes},
             ModuleCollection, ModuleCollectionSpawnPacketHandlerExt,
         },
@@ -142,6 +143,7 @@ where
                 ],
             },
         );
+        module_collection.add_equalizer(packet_io_controller.clone(), false);
 
         let module_collection = Arc::new(module_collection);
         module_collection
