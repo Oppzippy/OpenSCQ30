@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use cosmic::{
     iced::{alignment, Length},
     widget::{self, nav_bar},
@@ -25,10 +23,7 @@ pub enum Action {
 pub struct DeviceSettingsModel {
     device: DebugOpenSCQ30Device,
     nav_model: nav_bar::Model,
-    // TODO make this more efficient
-    category_ids: Vec<CategoryId<'static>>,
-    setting_ids_by_category: HashMap<CategoryId<'static>, Vec<SettingId<'static>>>,
-    setting_values: HashMap<SettingId<'static>, Setting>,
+    settings: Vec<(SettingId<'static>, Setting)>,
 }
 
 impl DeviceSettingsModel {
@@ -45,9 +40,7 @@ impl DeviceSettingsModel {
         let mut model = Self {
             device,
             nav_model,
-            category_ids: Vec::new(),
-            setting_ids_by_category: HashMap::new(),
-            setting_values: HashMap::new(),
+            settings: Vec::new(),
         };
         model.refresh();
         model
@@ -55,15 +48,33 @@ impl DeviceSettingsModel {
 
     pub fn on_nav_select(&mut self, id: nav_bar::Id) -> Task<Message> {
         self.nav_model.activate(id);
+        self.refresh();
         Task::none()
+    }
+
+    fn refresh(&mut self) {
+        let Some(category_id) = self.nav_model.active_data::<CategoryId<'static>>() else {
+            return;
+        };
+        self.settings = self
+            .device
+            .settings_in_category(category_id)
+            .into_iter()
+            .flat_map(|setting_id| {
+                self.device
+                    .setting(&setting_id)
+                    .map(|value| (setting_id, value))
+            })
+            .collect();
+    }
+
+    pub fn nav_model(&self) -> Option<&nav_bar::Model> {
+        Some(&self.nav_model)
     }
 
     pub fn view(&self) -> Element<'_, Message> {
         let Some(category_id) = self.nav_model.active_data::<CategoryId<'static>>() else {
-            return widget::column().into();
-        };
-        let Some(setting_ids) = self.setting_ids_by_category.get(category_id) else {
-            return widget::column().into();
+            return widget::row().into();
         };
         widget::column()
             .push(
@@ -71,8 +82,8 @@ impl DeviceSettingsModel {
                     .width(Length::Fill)
                     .align_x(alignment::Horizontal::Center),
             )
-            .extend(setting_ids.iter().cloned().map(|setting_id| {
-                let setting = self.setting_values.get(&setting_id).unwrap();
+            .extend(self.settings.iter().map(|(setting_id, setting)| {
+                let setting_id = setting_id.to_owned();
                 match setting {
                     Setting::Toggle { value } => Element::from(
                         widget::toggler(*value)
@@ -223,8 +234,8 @@ impl DeviceSettingsModel {
             }
             Message::SetEqualizerBand(setting_id, index, new_value) => {
                 let device = self.device.clone();
-                if let Some(Setting::Equalizer { setting, values }) =
-                    self.setting_values.get(&setting_id)
+                if let Some(Setting::Equalizer { setting: _, values }) =
+                    self.device.setting(&setting_id)
                 {
                     let mut new_values = values.clone();
                     new_values[index as usize] = new_value;
@@ -248,25 +259,6 @@ impl DeviceSettingsModel {
             }
             Message::Warning(message) => Action::Warning(message),
         }
-    }
-
-    fn refresh(&mut self) {
-        self.category_ids = self.device.categories();
-        self.setting_ids_by_category = HashMap::new();
-        self.setting_values = HashMap::new();
-        for category_id in &self.category_ids {
-            let setting_ids = self.device.settings_in_category(category_id);
-            for setting_id in &setting_ids {
-                self.setting_values
-                    .insert(*setting_id, self.device.setting(setting_id).unwrap());
-            }
-            self.setting_ids_by_category
-                .insert(*category_id, setting_ids);
-        }
-    }
-
-    pub fn nav_model(&self) -> Option<&nav_bar::Model> {
-        Some(&self.nav_model)
     }
 }
 
