@@ -32,8 +32,8 @@ impl DeviceSettingsModel {
         for category in device.categories() {
             nav_model
                 .insert()
-                .text(category.0)
-                .data(category)
+                .text(category.0.clone())
+                .data(category.clone())
                 .activate();
         }
         nav_model.activate_position(0);
@@ -78,7 +78,7 @@ impl DeviceSettingsModel {
         };
         widget::column()
             .push(
-                widget::text::title2(category_id.0)
+                widget::text::title2(category_id.0.as_ref())
                     .width(Length::Fill)
                     .align_x(alignment::Horizontal::Center),
             )
@@ -86,19 +86,19 @@ impl DeviceSettingsModel {
                 let setting_id = setting_id.to_owned();
                 match setting {
                     Setting::Toggle { value } => {
-                        crate::settings::toggle(setting_id, *value, move |new_value| {
-                            Message::SetSetting(setting_id, new_value.into())
+                        crate::settings::toggle(setting_id.clone(), *value, move |new_value| {
+                            Message::SetSetting(setting_id.clone(), new_value.into())
                         })
                     }
                     Setting::I32Range { setting, value } => todo!(),
                     Setting::Select { setting, value } => {
-                        crate::settings::select(setting_id, setting, *value, move |index| {
-                            Message::SetSetting(setting_id, (index as u16).into())
+                        crate::settings::select(setting_id.clone(), setting, *value, move |index| {
+                            Message::SetSetting(setting_id.clone(), (index as u16).into())
                         })
                     }
                     Setting::OptionalSelect { setting, value } => {
-                        crate::settings::select(setting_id, setting, *value, move |index| {
-                            Message::SetSetting(setting_id, Some(index as u16).into())
+                        crate::settings::select(setting_id.clone(), setting, *value, move |index| {
+                            Message::SetSetting(setting_id.clone(), Some(index as u16).into())
                         })
                     }
                     Setting::MultiSelect { setting, value } => todo!(),
@@ -108,7 +108,9 @@ impl DeviceSettingsModel {
                     } => crate::settings::responsive_equalizer(
                         setting,
                         value,
-                        move |index, value| Message::SetEqualizerBand(setting_id, index, value),
+                        move |index, value| {
+                            Message::SetEqualizerBand(setting_id.clone(), index, value)
+                        },
                     )
                     .into(),
                 }

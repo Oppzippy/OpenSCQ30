@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{borrow::Cow, sync::Arc};
 
 use setting_handler::EqualizerSettingHandler;
 use state_modifier::EqualizerStateModifier;
@@ -43,8 +43,10 @@ where
         C: Connection + 'static + MaybeSend + MaybeSync,
         F: Futures + 'static + MaybeSend + MaybeSync,
     {
-        self.setting_manager
-            .add_handler(CategoryId("equalizer"), EqualizerSettingHandler::default());
+        self.setting_manager.add_handler(
+            CategoryId(Cow::Borrowed("equalizer")),
+            EqualizerSettingHandler::default(),
+        );
         self.state_modifiers
             .push(Box::new(EqualizerStateModifier::new(packet_io, is_stereo)));
     }

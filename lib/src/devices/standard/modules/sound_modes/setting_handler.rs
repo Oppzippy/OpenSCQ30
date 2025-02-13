@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use strum::IntoEnumIterator;
 
 use crate::{
@@ -43,7 +45,7 @@ where
                     .noise_canceling_modes
                     .contains(&NoiseCancelingMode::Custom),
             })
-            .map(|mode| SettingId(mode.into()))
+            .map(|mode| SettingId(Cow::Borrowed(mode.into())))
             .collect()
     }
 

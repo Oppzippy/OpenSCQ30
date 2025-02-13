@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{borrow::Cow, str::FromStr};
 
 use strum::IntoEnumIterator;
 
@@ -21,13 +21,13 @@ where
 {
     fn settings(&self) -> Vec<SettingId<'static>> {
         EqualizerSetting::iter()
-            .map(|variant| SettingId(variant.into()))
+            .map(|variant| SettingId(Cow::Borrowed(variant.into())))
             .collect()
     }
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<crate::api::settings::Setting> {
         let equalizer_configuration = state.as_ref();
-        let setting = EqualizerSetting::from_str(setting_id.0).ok()?;
+        let setting = EqualizerSetting::from_str(setting_id.0.as_ref()).ok()?;
         Some(match setting {
             EqualizerSetting::PresetProfile => Setting::OptionalSelect {
                 setting: settings::Select {
@@ -67,7 +67,7 @@ where
 
     fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> crate::Result<()> {
         let equalizer_configuration = state.as_mut();
-        let setting = EqualizerSetting::from_str(setting_id.0).unwrap();
+        let setting = EqualizerSetting::from_str(setting_id.0.as_ref()).unwrap();
         match setting {
             EqualizerSetting::PresetProfile => {
                 let Value::OptionalU16(maybe_index) = value else {

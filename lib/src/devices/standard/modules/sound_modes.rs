@@ -2,7 +2,7 @@ mod packet_handler;
 mod setting_handler;
 mod state_modifier;
 
-use std::sync::Arc;
+use std::{borrow::Cow, sync::Arc};
 
 use packet_handler::SoundModesPacketHandler;
 use setting_handler::SoundModesSettingHandler;
@@ -57,7 +57,7 @@ where
         F: Futures + 'static + MaybeSend + MaybeSync,
     {
         self.setting_manager.add_handler(
-            CategoryId("sound-modes"),
+            CategoryId(Cow::Borrowed("sound-modes")),
             SoundModesSettingHandler::new(available_sound_modes),
         );
         self.state_modifiers

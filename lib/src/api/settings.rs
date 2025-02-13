@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 pub use equalizer::*;
 pub use range::*;
 pub use select::*;
@@ -9,10 +11,10 @@ mod range;
 mod select;
 mod value;
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Hash, Clone, Copy, Default)]
-pub struct CategoryId<'a>(pub &'a str);
-#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Hash, Clone, Copy, Default)]
-pub struct SettingId<'a>(pub &'a str);
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Hash, Clone, Default)]
+pub struct CategoryId<'a>(pub Cow<'a, str>);
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Hash, Clone, Default)]
+pub struct SettingId<'a>(pub Cow<'a, str>);
 
 pub struct IdentifiedSetting {
     pub id: &'static str,
@@ -21,12 +23,29 @@ pub struct IdentifiedSetting {
 
 #[derive(Clone, Debug)]
 pub enum Setting {
-    Toggle { value: bool },
-    I32Range { setting: Range<i32>, value: i32 },
-    Select { setting: Select, value: Option<u16> },
-    OptionalSelect { setting: Select, value: Option<u16> },
-    MultiSelect { setting: Select, value: Vec<u16> },
-    Equalizer { setting: Equalizer, values: Vec<i16> },
+    Toggle {
+        value: bool,
+    },
+    I32Range {
+        setting: Range<i32>,
+        value: i32,
+    },
+    Select {
+        setting: Select,
+        value: Option<u16>,
+    },
+    OptionalSelect {
+        setting: Select,
+        value: Option<u16>,
+    },
+    MultiSelect {
+        setting: Select,
+        value: Vec<u16>,
+    },
+    Equalizer {
+        setting: Equalizer,
+        values: Vec<i16>,
+    },
 }
 
 impl From<Setting> for Value {

@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use cosmic::{
     iced::{alignment, Length},
     widget, Element,
@@ -20,7 +22,7 @@ where
     )
 }
 
-fn with_label<'a, M>(label: &'a str, element: impl Into<Element<'a, M>>) -> Element<'a, M>
+fn with_label<'a, M>(label: Cow<'a, str>, element: impl Into<Element<'a, M>>) -> Element<'a, M>
 where
     M: 'a,
 {
