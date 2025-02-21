@@ -90,13 +90,11 @@ impl BluerConnection {
 
     #[tracing::instrument]
     async fn get_service_with_retry(device: &Device, timeout: Duration) -> crate::Result<Service> {
-        let service_found = device.events().await?.any(|event| async move {
-            match event {
-                DeviceEvent::PropertyChanged(DeviceProperty::Uuids(uuids)) => {
-                    uuids.iter().any(device_utils::is_soundcore_service_uuid)
-                }
-                _ => false,
+        let service_found = device.events().await?.any(async |event| match event {
+            DeviceEvent::PropertyChanged(DeviceProperty::Uuids(uuids)) => {
+                uuids.iter().any(device_utils::is_soundcore_service_uuid)
             }
+            _ => false,
         });
         match Self::get_service(device).await {
             Ok(service) => {

@@ -90,15 +90,13 @@ impl BluerConnectionRegistry {
 
         let device_addresses = discover
             .take_until(tokio::time::sleep(Duration::from_secs(1)))
-            .filter_map(|event| async move {
-                match event {
-                    bluer::AdapterEvent::DeviceAdded(address)
-                        if device_utils::is_mac_address_soundcore_device(address.into()) =>
-                    {
-                        Some(address)
-                    }
-                    _ => None,
+            .filter_map(async |event| match event {
+                bluer::AdapterEvent::DeviceAdded(address)
+                    if device_utils::is_mac_address_soundcore_device(address.into()) =>
+                {
+                    Some(address)
                 }
+                _ => None,
             })
             .collect::<HashSet<_>>()
             .await;
