@@ -1,8 +1,9 @@
 use std::borrow::Cow;
 
 use cosmic::{
-    iced::{alignment, Length},
-    widget, Element,
+    Element,
+    iced::{Length, alignment},
+    widget,
 };
 use openscq30_lib::api::settings::{Select, SettingId};
 

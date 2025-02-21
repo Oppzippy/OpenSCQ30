@@ -1,6 +1,6 @@
 [package]
 name = "openscq30_gui_cosmic"
-edition = "2021"
+edition = "2024"
 version.workspace = true
 license.workspace = true
 

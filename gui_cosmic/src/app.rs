@@ -1,16 +1,16 @@
 use std::{collections::VecDeque, ops::Deref, sync::Arc};
 
 use cosmic::{
+    Application, ApplicationExt, Task,
     app::Core,
     widget::{self, icon, nav_bar},
-    Application, ApplicationExt, Task,
 };
 use dirs::config_dir;
 use macaddr::MacAddr6;
 use openscq30_lib::{
     api::{
-        device::{DeviceDescriptor, OpenSCQ30Device},
         OpenSCQ30Session,
+        device::{DeviceDescriptor, OpenSCQ30Device},
     },
     storage::{self, PairedDevice},
 };
@@ -246,7 +246,7 @@ impl Application for AppModel {
                         }
                         device_selection::Action::None => (),
                         device_selection::Action::Warning(message) => {
-                            return Task::done(Message::Warning(message).into())
+                            return Task::done(Message::Warning(message).into());
                         }
                     }
                 }
@@ -256,7 +256,7 @@ impl Application for AppModel {
                     match screen.update(message) {
                         add_device::Action::None => (),
                         add_device::Action::Task(task) => {
-                            return task.map(Message::AddDeviceScreen).map(Into::into)
+                            return task.map(Message::AddDeviceScreen).map(Into::into);
                         }
                         add_device::Action::AddDevice { model, descriptor } => {
                             let database = self.session.clone();
@@ -285,14 +285,14 @@ impl Application for AppModel {
                 if let Screen::DeviceSettings(ref mut screen) = self.screen {
                     match screen.update(message) {
                         device_settings::Action::Task(task) => {
-                            return task.map(Message::DeviceSettingsScreen).map(Into::into)
+                            return task.map(Message::DeviceSettingsScreen).map(Into::into);
                         }
                         device_settings::Action::None => (),
                         device_settings::Action::Warning(message) => {
-                            return Task::done(Message::Warning(message).into())
+                            return Task::done(Message::Warning(message).into());
                         }
                         device_settings::Action::FocusTextInput(id) => {
-                            return widget::text_input::focus(id)
+                            return widget::text_input::focus(id);
                         }
                     }
                 }

@@ -1,9 +1,9 @@
 use std::{borrow::Cow, collections::HashMap};
 
 use cosmic::{
-    iced::{alignment, Length},
-    widget::{self, nav_bar},
     Element, Task,
+    iced::{Length, alignment},
+    widget::{self, nav_bar},
 };
 use openscq30_lib::api::{
     quick_presets::{QuickPreset, QuickPresetsHandler},

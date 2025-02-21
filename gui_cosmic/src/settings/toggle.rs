@@ -1,4 +1,4 @@
-use cosmic::{iced::Length, widget, Element};
+use cosmic::{Element, iced::Length, widget};
 use openscq30_lib::api::settings::SettingId;
 
 pub fn toggle<'a, M>(

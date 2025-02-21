@@ -1,14 +1,14 @@
 use std::sync::Arc;
 
 use cosmic::{
-    iced::Length,
-    widget::{self, icon, Id},
     Apply, Element, Task,
+    iced::Length,
+    widget::{self, Id, icon},
 };
 use openscq30_lib::{
     api::{
-        device::{DeviceDescriptor, GenericDeviceDescriptor},
         OpenSCQ30Session,
+        device::{DeviceDescriptor, GenericDeviceDescriptor},
     },
     soundcore_device::device_model::DeviceModel,
 };

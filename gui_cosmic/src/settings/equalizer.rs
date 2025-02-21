@@ -4,8 +4,9 @@ use std::{
 };
 
 use cosmic::{
-    iced::{alignment, Alignment, Border, Length, Shadow},
-    theme, widget, Apply, Element,
+    Apply, Element,
+    iced::{Alignment, Border, Length, Shadow, alignment},
+    theme, widget,
 };
 use openscq30_lib::api::settings::Equalizer;
 

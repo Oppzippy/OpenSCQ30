@@ -1,9 +1,10 @@
 use std::sync::Arc;
 
 use cosmic::{
-    iced::{alignment, Length, Pixels},
+    Apply, Element, Task,
+    iced::{Length, Pixels, alignment},
     iced_core::text::LineHeight,
-    widget, Apply, Element, Task,
+    widget,
 };
 use openscq30_lib::{api::OpenSCQ30Session, storage::PairedDevice};
 
@@ -124,10 +125,10 @@ impl DeviceSelectionModel {
     pub fn update(&mut self, message: Message) -> Action {
         match message {
             Message::ConnectToDevice(index) => {
-                return Action::ConnectToDevice(self.paired_devices[index].clone())
+                return Action::ConnectToDevice(self.paired_devices[index].clone());
             }
             Message::RemoveDevice(index) => {
-                return Action::RemoveDevice(self.paired_devices[index].clone())
+                return Action::RemoveDevice(self.paired_devices[index].clone());
             }
             Message::AddDevice => return Action::AddDevice,
             Message::SetPairedDevices(paired_devices) => self.paired_devices = paired_devices,
