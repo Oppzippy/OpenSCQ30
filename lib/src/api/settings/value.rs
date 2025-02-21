@@ -16,7 +16,7 @@ impl Value {
     pub fn try_as_u16(&self) -> Option<u16> {
         match &self {
             Value::U16(value) => Some(*value),
-            Value::OptionalU16(maybe_value) => maybe_value.clone(),
+            Value::OptionalU16(maybe_value) => *maybe_value,
             _ => None,
         }
     }

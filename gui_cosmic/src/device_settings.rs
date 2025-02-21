@@ -195,9 +195,9 @@ impl DeviceSettingsModel {
                             .on_press(Message::ShowCreateQuickPresetDialog),
                     )
                     .push(crate::settings::quick_presets(
-                        &quick_presets,
-                        |i| Message::EditQuickPreset(i),
-                        |i| Message::ActivateQuickPreset(i),
+                        quick_presets,
+                        Message::EditQuickPreset,
+                        Message::ActivateQuickPreset,
                     ))
                     .into()
             } else {
@@ -244,10 +244,8 @@ impl DeviceSettingsModel {
                         move |index, value| {
                             Message::SetEqualizerBand(setting_id.clone(), index, value)
                         },
-                    )
-                    .into(),
+                    ),
                 }
-                .into()
             }))
             .into()
     }
@@ -294,8 +292,7 @@ impl DeviceSettingsModel {
                 let Some(name) = self
                     .quick_presets
                     .as_ref()
-                    .map(|presets| presets.get(index))
-                    .flatten()
+                    .and_then(|presets| presets.get(index))
                     .map(|preset| preset.name.clone())
                 else {
                     return Action::None;
@@ -317,8 +314,7 @@ impl DeviceSettingsModel {
                 self.editing_quick_preset = self
                     .quick_presets
                     .as_ref()
-                    .map(|presets| presets.get(index))
-                    .flatten()
+                    .and_then(|presets| presets.get(index))
                     .cloned();
                 Action::None
             }

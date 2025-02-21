@@ -61,7 +61,7 @@ where
                 values: equalizer_configuration
                     .volume_adjustments()
                     .adjustments()
-                    .into_iter()
+                    .iter()
                     .map(|adj| (adj * 10f64) as i16)
                     .collect(),
             },

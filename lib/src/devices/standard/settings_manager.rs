@@ -61,10 +61,10 @@ impl<StateType> SettingsManager<StateType> {
         handler.get(state, setting_id)
     }
 
-    pub fn get_many<'a>(
+    pub fn get_many(
         &self,
         state: &StateType,
-        desired_setting_ids: &HashSet<SettingId<'a>>,
+        desired_setting_ids: &HashSet<SettingId<'_>>,
     ) -> HashMap<SettingId<'static>, Value> {
         self.settings_to_handlers
             .iter()

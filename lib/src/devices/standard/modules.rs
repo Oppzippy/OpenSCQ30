@@ -51,7 +51,7 @@ where
                 .unwrap()?;
         }
         for modifier in &self.state_modifiers {
-            modifier.move_to_state(&state_sender, &target_state).await?;
+            modifier.move_to_state(state_sender, &target_state).await?;
         }
         Ok(())
     }

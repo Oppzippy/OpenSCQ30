@@ -51,7 +51,7 @@ where
                 .push(widget::vertical_slider(
                     setting.min..=setting.max,
                     value
-                        .get(i as usize)
+                        .get(i)
                         .cloned()
                         .unwrap_or((setting.min + setting.max) / 2),
                     {
@@ -62,12 +62,12 @@ where
                 .push(vertical_spin_button(
                     {
                         let divisor = 10i16.pow(setting.fraction_digits as u32);
-                        let db_integer_portion = value[i as usize] / divisor;
-                        let db_decimal_portion = (value[i as usize] % divisor).abs();
+                        let db_integer_portion = value[i] / divisor;
+                        let db_decimal_portion = (value[i] % divisor).abs();
                         let decimal_db = format!("{db_integer_portion}.{db_decimal_portion}");
                         fl!("db", db = decimal_db)
                     },
-                    value[i as usize],
+                    value[i],
                     1,
                     setting.min,
                     setting.max,
@@ -101,12 +101,12 @@ where
                 .push(horizontal_spin_button(
                     {
                         let divisor = 10i16.pow(setting.fraction_digits as u32);
-                        let db_integer_portion = value[i as usize] / divisor;
-                        let db_decimal_portion = (value[i as usize] % divisor).abs();
+                        let db_integer_portion = value[i] / divisor;
+                        let db_decimal_portion = (value[i] % divisor).abs();
                         let decimal_db = format!("{db_integer_portion}.{db_decimal_portion}");
                         fl!("db", db = decimal_db)
                     },
-                    value[i as usize],
+                    value[i],
                     1,
                     setting.min,
                     setting.max,
@@ -119,7 +119,7 @@ where
                 .push(widget::slider(
                     setting.min..=setting.max,
                     value
-                        .get(i as usize)
+                        .get(i)
                         .cloned()
                         .unwrap_or((setting.min + setting.max) / 2),
                     {

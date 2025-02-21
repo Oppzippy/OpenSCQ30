@@ -193,8 +193,8 @@ impl Application for AppModel {
 
     fn dialog(&self) -> Option<cosmic::Element<Self::Message>> {
         let dialog = match &self.screen {
-            Screen::DeviceSelection(device_selection_model) => None,
-            Screen::AddDevice(add_device_model) => None,
+            Screen::DeviceSelection(_device_selection_model) => None,
+            Screen::AddDevice(_add_device_model) => None,
             Screen::DeviceSettings(device_settings_model) => device_settings_model
                 .dialog()
                 .map(|e| e.map(Message::DeviceSettingsScreen)),
