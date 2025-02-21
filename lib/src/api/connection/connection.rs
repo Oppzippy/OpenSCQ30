@@ -1,5 +1,3 @@
-use std::future::Future;
-
 use macaddr::MacAddr6;
 use tokio::sync::{mpsc, watch};
 use uuid::Uuid;

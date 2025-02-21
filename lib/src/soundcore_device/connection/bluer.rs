@@ -1,5 +1,3 @@
-use std::future::Future;
-
 use connection_registry::BluerConnectionRegistry;
 use tokio::{
     runtime::{Handle, Runtime},

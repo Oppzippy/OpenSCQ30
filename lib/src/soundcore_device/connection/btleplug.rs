@@ -5,7 +5,6 @@ pub mod mac_address;
 
 use btleplug::platform::Manager;
 pub use btleplug_connection_registry::*;
-use futures::Future;
 use tokio::{
     runtime::{Handle, Runtime},
     task::JoinHandle,

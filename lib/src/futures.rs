@@ -6,7 +6,6 @@ pub use futures_tokio::*;
 #[cfg(target_arch = "wasm32")]
 pub use futures_wasm::*;
 
-use futures::Future;
 use std::time::Duration;
 
 pub trait JoinHandle {

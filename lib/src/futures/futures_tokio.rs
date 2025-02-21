@@ -1,7 +1,5 @@
 use std::time::Duration;
 
-use futures::Future;
-
 use super::{Futures, JoinHandle, MaybeSend};
 
 pub struct TokioFutures;

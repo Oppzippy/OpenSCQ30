@@ -1,4 +1,4 @@
-use std::{collections::HashSet, fmt::Debug, future::Future, sync::Arc};
+use std::{collections::HashSet, fmt::Debug, sync::Arc};
 
 use macaddr::MacAddr6;
 
