@@ -1,6 +1,11 @@
-#[derive(Clone, Debug)]
+use std::borrow::Cow;
+
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Select {
-    pub options: Vec<&'static str>,
+    pub options: Vec<Cow<'static, str>>,
 }
 
 impl Select {
@@ -8,8 +13,11 @@ impl Select {
     where
         T: Into<&'static str>,
     {
-        let options: Vec<&'static str> =
-            variants.into_iter().map(|variant| variant.into()).collect();
+        let options: Vec<Cow<'static, str>> = variants
+            .into_iter()
+            .map(|variant| variant.into())
+            .map(Cow::from)
+            .collect();
         Self { options }
     }
 }

@@ -4,6 +4,7 @@ mod quick_preset;
 mod type_conversions;
 
 use std::{
+    collections::HashMap,
     mem,
     panic::Location,
     path::PathBuf,
@@ -17,15 +18,18 @@ use thiserror::Error;
 use tokio::sync::{oneshot, Semaphore};
 use tracing::info_span;
 
-use crate::soundcore_device::device_model::DeviceModel;
+use crate::{
+    api::settings::{self, SettingId},
+    soundcore_device::device_model::DeviceModel,
+};
 
 // This needs to be Send + Sync, and rusqlite::Connection is not, so we have to spawn a new thread
 // that owns the connection and communicate with it over a channel.
+#[derive(Debug)]
 pub struct OpenSCQ30Database {
     command_sender: mpsc::Sender<Command>,
     closed: Arc<Semaphore>,
 }
-
 #[derive(Clone, Debug)]
 pub struct PairedDevice {
     pub name: String,
@@ -39,6 +43,8 @@ pub enum StorageError {
     AlreadyExists(rusqlite::Error),
     #[error("sql error: {0:?}")]
     Other(rusqlite::Error),
+    #[error("failed to deserialize json: {0:?}")]
+    JsonError(serde_json::Error),
 }
 
 impl From<StorageError> for crate::Error {
@@ -174,6 +180,17 @@ commands!(
     paired_device::insert => fn insert_paired_device(paired_device: PairedDevice) -> Result<(), StorageError>;
     paired_device::upsert => fn upsert_paired_device(paired_device: PairedDevice) -> Result<(), StorageError>;
     paired_device::delete => fn delete_paired_device(mac_address: MacAddr6) -> Result<(), StorageError>;
-    quick_preset::upsert => fn upsert_quick_preset(model: DeviceModel, name: String, json: String) -> Result<(), StorageError>;
+    quick_preset::fetch => fn fetch_quick_preset(
+        model: DeviceModel,
+        name: String,
+    ) -> Result<HashMap<SettingId<'static>, settings::Value>, StorageError>;
+    quick_preset::fetch_all => fn fetch_all_quick_presets(
+        model: DeviceModel,
+    ) -> Result<HashMap<String, HashMap<SettingId<'static>, settings::Value>>, StorageError>;
+    quick_preset::upsert => fn upsert_quick_preset(
+        model: DeviceModel,
+        name: String,
+        settings: HashMap<SettingId<'static>, settings::Value>,
+    ) -> Result<(), StorageError>;
     quick_preset::delete => fn delete_quick_preset(model: DeviceModel, name: String) -> Result<(), StorageError>;
 );

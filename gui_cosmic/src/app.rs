@@ -113,7 +113,7 @@ impl Application for AppModel {
     }
 
     fn init(core: Core, _flags: Self::Flags) -> (Self, cosmic::app::Task<Self::Message>) {
-        let database = Arc::new(
+        let session = Arc::new(
             futures::executor::block_on(OpenSCQ30Session::new(
                 config_dir()
                     .expect("failed to find config dir")
@@ -122,12 +122,12 @@ impl Application for AppModel {
             ))
             .expect("database is required to run"),
         );
-        let (model, task) = DeviceSelectionModel::new(database.clone());
+        let (model, task) = DeviceSelectionModel::new(session.clone());
         let mut app = AppModel {
             core,
             screen: Screen::DeviceSelection(model),
             dialog_page: None,
-            session: database,
+            session,
             warnings: VecDeque::with_capacity(5),
         };
         let command = app.update_title();
@@ -192,6 +192,16 @@ impl Application for AppModel {
     }
 
     fn dialog(&self) -> Option<cosmic::Element<Self::Message>> {
+        let dialog = match &self.screen {
+            Screen::DeviceSelection(device_selection_model) => None,
+            Screen::AddDevice(add_device_model) => None,
+            Screen::DeviceSettings(device_settings_model) => device_settings_model
+                .dialog()
+                .map(|e| e.map(Message::DeviceSettingsScreen)),
+        };
+        if dialog.is_some() {
+            return dialog;
+        }
         let dialog_page = self.dialog_page.as_ref()?;
         Some(match dialog_page {
             DialogPage::RemoveDevice(device) => widget::dialog()
@@ -215,29 +225,24 @@ impl Application for AppModel {
                 if let Screen::DeviceSelection(ref mut screen) = self.screen {
                     match screen.update(message) {
                         device_selection::Action::ConnectToDevice(paired_device) => {
+                            let session = self.session.clone();
                             return Task::future(async move {
-                                let registry = paired_device
-                                    .model
-                                    .device_registry::<openscq30_lib::futures::TokioFutures>(
-                                        Some(tokio::runtime::Handle::current()),
-                                        true,
-                                    )
-                                    .await
-                                    .map_err(handle_soft_error!())?;
-                                let device = registry
+                                let device = session
                                     .connect(paired_device.mac_address)
                                     .await
                                     .map_err(handle_soft_error!())?;
+
                                 Ok(Message::ConnectToDeviceScreen(DebugOpenSCQ30Device(device))
                                     .into())
                             })
-                            .map(coalesce_result)
+                            .map(coalesce_result);
                         }
                         device_selection::Action::RemoveDevice(device) => {
                             self.dialog_page = Some(DialogPage::RemoveDevice(device));
                         }
                         device_selection::Action::AddDevice => {
-                            self.screen = Screen::AddDevice(AddDeviceModel::new())
+                            self.screen =
+                                Screen::AddDevice(AddDeviceModel::new(self.session.clone()))
                         }
                         device_selection::Action::None => (),
                         device_selection::Action::Warning(message) => {
@@ -286,6 +291,9 @@ impl Application for AppModel {
                         device_settings::Action::Warning(message) => {
                             return Task::done(Message::Warning(message).into())
                         }
+                        device_settings::Action::FocusTextInput(id) => {
+                            return widget::text_input::focus(id)
+                        }
                     }
                 }
             }
@@ -317,8 +325,12 @@ impl Application for AppModel {
                 return task.map(Message::DeviceSelectionScreen).map(Into::into);
             }
             Message::ConnectToDeviceScreen(device) => {
-                self.screen =
-                    Screen::DeviceSettings(device_settings::DeviceSettingsModel::new(device));
+                let (model, task) = device_settings::DeviceSettingsModel::new(
+                    device,
+                    self.session.quick_preset_handler(),
+                );
+                self.screen = Screen::DeviceSettings(model);
+                return task.map(Message::DeviceSettingsScreen).map(Into::into);
             }
             Message::Warning(message) => {
                 // cap max number of warnings, since it's bad UX to have to close a million of them if something goes wrong and spams them

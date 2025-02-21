@@ -12,7 +12,7 @@ CREATE TABLE quick_preset (
     settings TEXT NOT NULL CHECK(json_valid(settings)),
     created_at INTEGER NOT NULL DEFAULT (strftime('%s'))
 ) STRICT;
-CREATE INDEX idx_quick_preset_device_model_name ON quick_preset (device_model, name);
+CREATE UNIQUE INDEX idx_quick_preset_device_model_name ON quick_preset (device_model, name);
 
 CREATE TABLE equalizer_profile (
     device_model TEXT NOT NULL,
@@ -20,4 +20,4 @@ CREATE TABLE equalizer_profile (
     volume_adjustments TEXT NOT NULL CHECK(json_valid(volume_adjustments)),
     created_at INTEGER NOT NULL DEFAULT (strftime('%s'))
 ) STRICT;
-CREATE INDEX idx_equalizer_profile_device_model ON equalizer_profile (device_model, name);
+CREATE UNIQUE INDEX idx_equalizer_profile_device_model ON equalizer_profile (device_model, name);

@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use nom::{
     combinator::map,
     error::{ContextError, ParseError},
@@ -69,7 +71,11 @@ impl From<AmbientSoundModeCycle> for Setting {
     fn from(cycle: AmbientSoundModeCycle) -> Self {
         Self::MultiSelect {
             setting: Select {
-                options: vec!["normal-mode", "transparency-mode", "noise-canceling-mode"],
+                options: vec![
+                    Cow::Borrowed("normal-mode"),
+                    Cow::Borrowed("transparency-mode"),
+                    Cow::Borrowed("noise-canceling-mode"),
+                ],
             },
             value: (cycle
                 .normal_mode

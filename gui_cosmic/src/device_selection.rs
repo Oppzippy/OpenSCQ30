@@ -10,7 +10,6 @@ use openscq30_lib::{api::OpenSCQ30Session, storage::PairedDevice};
 use crate::{fl, handle_soft_error, utils::coalesce_result};
 
 pub struct DeviceSelectionModel {
-    session: Arc<OpenSCQ30Session>,
     paired_devices: Vec<PairedDevice>,
 }
 
@@ -34,7 +33,6 @@ pub enum Action {
 impl DeviceSelectionModel {
     pub fn new(session: Arc<OpenSCQ30Session>) -> (Self, Task<Message>) {
         let model = DeviceSelectionModel {
-            session: session.clone(),
             paired_devices: Vec::new(),
         };
         (model, Self::refresh_paired_devices(session))

@@ -4230,6 +4230,7 @@ dependencies = [
  "regex",
  "rusqlite",
  "serde",
+ "serde_json",
  "static_assertions",
  "strum",
  "thiserror 2.0.11",

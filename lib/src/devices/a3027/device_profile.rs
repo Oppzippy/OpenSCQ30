@@ -60,13 +60,15 @@ pub(crate) const A3027_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
 
 pub struct A3027DeviceRegistry<C: ConnectionRegistry, F: Futures> {
     inner: C,
+    device_model: DeviceModel,
     _futures: PhantomData<F>,
 }
 
 impl<C: ConnectionRegistry, F: Futures> A3027DeviceRegistry<C, F> {
-    pub fn new(inner: C) -> Self {
+    pub fn new(inner: C, device_model: DeviceModel) -> Self {
         Self {
             inner,
+            device_model,
             _futures: PhantomData,
         }
     }
@@ -100,12 +102,14 @@ where
             .connection(mac_address)
             .await?
             .ok_or(crate::Error::DeviceNotFound { source: None })?;
-        let device = A3027Device::<C::ConnectionType, F>::new(connection).await?;
+        let device =
+            A3027Device::<C::ConnectionType, F>::new(connection, self.device_model).await?;
         Ok(Arc::new(device))
     }
 }
 
 pub struct A3027Device<ConnectionType: Connection, FuturesType: Futures> {
+    device_model: DeviceModel,
     state_sender: watch::Sender<A3027State>,
     module_collection: Arc<ModuleCollection<A3027State>>,
     _packet_io_controller: Arc<PacketIOController<ConnectionType, FuturesType>>,
@@ -116,7 +120,10 @@ where
     ConnectionType: Connection + 'static + MaybeSend + MaybeSync,
     FuturesType: Futures + 'static + MaybeSend + MaybeSync,
 {
-    pub async fn new(connection: Arc<ConnectionType>) -> crate::Result<Self> {
+    pub async fn new(
+        connection: Arc<ConnectionType>,
+        device_model: DeviceModel,
+    ) -> crate::Result<Self> {
         let (packet_io_controller, packet_receiver) =
             PacketIOController::<ConnectionType, FuturesType>::new(connection).await?;
         let packet_io_controller = Arc::new(packet_io_controller);
@@ -150,6 +157,7 @@ where
             .spawn_packet_handler::<FuturesType>(state_sender.clone(), packet_receiver);
 
         Ok(Self {
+            device_model,
             state_sender,
             _packet_io_controller: packet_io_controller,
             module_collection,
@@ -164,6 +172,10 @@ where
     ConnectionType: Connection + 'static + MaybeSend + MaybeSync,
     FuturesType: Futures + 'static + MaybeSend + MaybeSync,
 {
+    fn model(&self) -> DeviceModel {
+        self.device_model
+    }
+
     fn categories(&self) -> Vec<CategoryId<'static>> {
         self.module_collection.setting_manager.categories().to_vec()
     }

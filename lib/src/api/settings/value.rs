@@ -1,4 +1,7 @@
-#[derive(Clone, Debug)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(tag = "type", content = "value", rename_all = "camelCase")]
 pub enum Value {
     Bool(bool),
     U16(u16),
@@ -6,6 +9,17 @@ pub enum Value {
     OptionalU16(Option<u16>),
     I16Vec(Vec<i16>),
     I32(i32),
+}
+
+impl Value {
+    /// Converts U16 and OptionalU16 into Option<u16>
+    pub fn try_as_u16(&self) -> Option<u16> {
+        match &self {
+            Value::U16(value) => Some(*value),
+            Value::OptionalU16(maybe_value) => maybe_value.clone(),
+            _ => None,
+        }
+    }
 }
 
 impl From<bool> for Value {

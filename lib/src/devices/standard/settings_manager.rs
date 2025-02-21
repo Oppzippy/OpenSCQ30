@@ -1,5 +1,5 @@
 use std::{
-    collections::{hash_map, HashMap},
+    collections::{hash_map, HashMap, HashSet},
     sync::Arc,
 };
 
@@ -59,6 +59,33 @@ impl<StateType> SettingsManager<StateType> {
     pub fn get(&self, state: &StateType, setting_id: &SettingId<'_>) -> Option<Setting> {
         let handler = self.settings_to_handlers.get(setting_id)?;
         handler.get(state, setting_id)
+    }
+
+    pub fn get_many<'a>(
+        &self,
+        state: &StateType,
+        desired_setting_ids: &HashSet<SettingId<'a>>,
+    ) -> HashMap<SettingId<'static>, Value> {
+        self.settings_to_handlers
+            .iter()
+            .filter_map(|(id, handler)| {
+                if desired_setting_ids.contains(id) {
+                    Some((id.clone(), handler.get(state, id)?.into()))
+                } else {
+                    None
+                }
+            })
+            .collect()
+    }
+
+    pub fn get_all(&self, state: &StateType) -> HashMap<SettingId<'static>, Value> {
+        self.settings_to_handlers
+            .iter()
+            .map(|(setting_id, handler)| (setting_id.clone(), handler.get(state, setting_id)))
+            .filter_map(|(setting_id, maybe_value)| {
+                maybe_value.map(|value| (setting_id, value.into()))
+            })
+            .collect()
     }
 
     pub async fn set(

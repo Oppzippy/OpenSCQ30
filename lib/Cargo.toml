@@ -7,7 +7,7 @@ edition = "2021"
 [features]
 bluetooth = ["dep:btleplug", "dep:bluer", "dep:regex", "dep:windows"]
 wasm = ["dep:js-sys", "dep:web-sys", "dep:wasm-bindgen-futures"]
-serde = ["dep:serde", "ordered-float/serde"]
+serde = []
 demo = []
 bluer = ["dep:bluer"]
 
@@ -25,10 +25,11 @@ strum = { workspace = true, features = ["derive"] }
 weak-table = { workspace = true }
 macaddr = { workspace = true }
 nom = { workspace = true }
-serde = { workspace = true, optional = true, features = ["derive", "rc"] }
+serde = { workspace = true, features = ["derive", "rc"] }
+serde_json = { workspace = true }
 js-sys = { workspace = true, optional = true }
 wasm-bindgen-futures = { workspace = true, optional = true }
-ordered-float = { workspace = true }
+ordered-float = { workspace = true, features = ["serde"] }
 float-cmp = { workspace = true, features = ["std"], default-features = false }
 static_assertions = { workspace = true }
 async-trait = { workspace = true }

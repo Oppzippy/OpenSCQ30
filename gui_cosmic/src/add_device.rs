@@ -6,7 +6,10 @@ use cosmic::{
     Apply, Element, Task,
 };
 use openscq30_lib::{
-    api::device::{DeviceDescriptor, GenericDeviceDescriptor, OpenSCQ30DeviceRegistry},
+    api::{
+        device::{DeviceDescriptor, GenericDeviceDescriptor},
+        OpenSCQ30Session,
+    },
     soundcore_device::device_model::DeviceModel,
 };
 use strum::IntoEnumIterator;
@@ -16,11 +19,11 @@ use crate::fl;
 
 pub struct AddDeviceModel {
     stage: Stage,
+    session: Arc<OpenSCQ30Session>,
 }
 
 enum Stage {
     ModelSelection(ModelSelectionModel),
-    LoadingDeviceRegistry(LoadingDeviceRegistryModel),
     LoadingDevices(LoadingDevicesModel),
     SelectDevice(SelectDeviceModel),
     Error(String),
@@ -30,11 +33,7 @@ struct ModelSelectionModel {
     search_id: Id,
     search_query: String,
 }
-struct LoadingDeviceRegistryModel {
-    device_model: DeviceModel,
-}
 struct LoadingDevicesModel {
-    device_registry: Arc<dyn OpenSCQ30DeviceRegistry + Send + Sync>,
     device_model: DeviceModel,
 }
 struct SelectDeviceModel {
@@ -42,7 +41,6 @@ struct SelectDeviceModel {
     search_query: String,
     devices: Vec<GenericDeviceDescriptor>,
     device_model: DeviceModel,
-    device_registry: Arc<dyn OpenSCQ30DeviceRegistry + Send + Sync>,
 }
 
 #[derive(Clone, Debug)]
@@ -51,19 +49,9 @@ pub enum Message {
     SetDeviceModelSearchQuery(String),
     SelectModel(DeviceModel),
     SelectDevice(usize),
-    SetDeviceRegistry(DeviceRegistryPlusDebug),
     SetDeviceList(Vec<GenericDeviceDescriptor>),
     SetDeviceNameSearchQuery(String),
     SetErrorMessage(String),
-    RefreshDeviceList,
-}
-
-#[derive(Clone)]
-pub struct DeviceRegistryPlusDebug(pub Arc<dyn OpenSCQ30DeviceRegistry + Send + Sync>);
-impl std::fmt::Debug for DeviceRegistryPlusDebug {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("OpenSCQ30DeviceRegistry").finish()
-    }
 }
 
 pub enum Action {
@@ -76,8 +64,9 @@ pub enum Action {
 }
 
 impl AddDeviceModel {
-    pub fn new() -> Self {
+    pub fn new(session: Arc<OpenSCQ30Session>) -> Self {
         Self {
+            session,
             stage: Stage::ModelSelection(ModelSelectionModel {
                 search_id: Id::unique(),
                 search_query: String::new(),
@@ -87,7 +76,6 @@ impl AddDeviceModel {
     pub fn view(&self) -> Element<Message> {
         match &self.stage {
             Stage::ModelSelection(ui_model) => Self::device_model_selection(ui_model),
-            Stage::LoadingDeviceRegistry(_ui_model) => Self::loading(fl!("device-registry")),
             Stage::LoadingDevices(_ui_model) => Self::loading(fl!("device-list")),
             Stage::SelectDevice(ui_model) => Self::select_device(ui_model),
             Stage::Error(message) => Self::error(message),
@@ -136,7 +124,7 @@ impl AddDeviceModel {
                     .push(
                         widget::button::standard(fl!("refresh"))
                             .leading_icon(icon::from_name("view-refresh-symbolic"))
-                            .on_press(Message::RefreshDeviceList),
+                            .on_press(Message::SelectModel(ui_model.device_model)),
                     ),
             )
             .push(widget::scrollable(
@@ -186,54 +174,18 @@ impl AddDeviceModel {
                 }
             }
             Message::SelectModel(device_model) => {
-                self.stage =
-                    Stage::LoadingDeviceRegistry(LoadingDeviceRegistryModel { device_model });
+                self.stage = Stage::LoadingDevices(LoadingDevicesModel { device_model });
+                let session = self.session.clone();
                 return Action::Task(Task::perform(
-                    Self::get_device_registry(device_model),
+                    async move { session.list_devices(device_model).await },
                     move |result| match result {
-                        Ok(registry) => {
-                            Message::SetDeviceRegistry(DeviceRegistryPlusDebug(registry))
-                        }
+                        Ok(devices) => Message::SetDeviceList(devices),
                         Err(err) => {
-                            error!("{} obtaining device registry: {err:?}", device_model);
+                            error!("{} fetching devices: {err:?}", device_model);
                             Message::SetErrorMessage(format!("{err}"))
                         }
                     },
                 ));
-            }
-            Message::SetDeviceRegistry(registry) => {
-                if let Stage::LoadingDeviceRegistry(ui_model) = &self.stage {
-                    let device_model = ui_model.device_model;
-                    self.stage = Stage::LoadingDevices(LoadingDevicesModel {
-                        device_registry: registry.0.to_owned(),
-                        device_model: ui_model.device_model,
-                    });
-                    return Action::Task(Task::perform(
-                        Self::get_devices(registry.0),
-                        move |result| match result {
-                            Ok(devices) => Message::SetDeviceList(devices),
-                            Err(err) => {
-                                error!("{} fetching devices: {err:?}", device_model);
-                                Message::SetErrorMessage(format!("{err}"))
-                            }
-                        },
-                    ));
-                }
-            }
-            Message::RefreshDeviceList => {
-                if let Stage::SelectDevice(ui_model) = &self.stage {
-                    let device_model = ui_model.device_model;
-                    return Action::Task(Task::perform(
-                        Self::get_devices(ui_model.device_registry.clone()),
-                        move |result| match result {
-                            Ok(devices) => Message::SetDeviceList(devices),
-                            Err(err) => {
-                                error!("{} fetching devices: {err:?}", device_model);
-                                Message::SetErrorMessage(format!("{err}"))
-                            }
-                        },
-                    ));
-                }
             }
             Message::SetDeviceList(devices) => {
                 if let Stage::LoadingDevices(ui_model) = &self.stage {
@@ -242,7 +194,6 @@ impl AddDeviceModel {
                         search_id: Id::unique(),
                         search_query: String::new(),
                         device_model: ui_model.device_model,
-                        device_registry: ui_model.device_registry.to_owned(),
                     })
                 }
             }
@@ -262,22 +213,5 @@ impl AddDeviceModel {
             }
         }
         Action::None
-    }
-
-    async fn get_device_registry(
-        device_model: DeviceModel,
-    ) -> openscq30_lib::Result<Arc<dyn OpenSCQ30DeviceRegistry + Send + Sync>> {
-        device_model
-            .device_registry::<openscq30_lib::futures::TokioFutures>(
-                Some(tokio::runtime::Handle::current()),
-                true,
-            )
-            .await
-    }
-
-    async fn get_devices(
-        registry: Arc<dyn OpenSCQ30DeviceRegistry + Send + Sync>,
-    ) -> openscq30_lib::Result<Vec<GenericDeviceDescriptor>> {
-        registry.devices().await
     }
 }

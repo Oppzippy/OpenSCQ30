@@ -82,10 +82,12 @@ impl DeviceModel {
                         "A3027".to_string(),
                         A3027StateUpdatePacket::default().bytes(),
                     ),
+                    DeviceModel::SoundcoreA3027,
                 ))
             } else {
                 Arc::new(A3027DeviceRegistry::<_, F>::new(
                     new_connection_registry(runtime_handle).await?,
+                    DeviceModel::SoundcoreA3027,
                 ))
             }),
             DeviceModel::SoundcoreA3028 => todo!(),

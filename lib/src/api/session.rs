@@ -4,19 +4,23 @@ use macaddr::MacAddr6;
 
 use crate::{
     futures::TokioFutures,
+    soundcore_device::device_model::DeviceModel,
     storage::{OpenSCQ30Database, PairedDevice},
 };
 
-use super::device::OpenSCQ30Device;
+use super::{
+    device::{GenericDeviceDescriptor, OpenSCQ30Device},
+    quick_presets::QuickPresetsHandler,
+};
 
 pub struct OpenSCQ30Session {
-    database: OpenSCQ30Database,
+    database: Arc<OpenSCQ30Database>,
 }
 
 impl OpenSCQ30Session {
     pub async fn new(db_path: PathBuf) -> crate::Result<Self> {
         Ok(Self {
-            database: OpenSCQ30Database::new(db_path).await?,
+            database: Arc::new(OpenSCQ30Database::new(db_path).await?),
         })
     }
 
@@ -41,6 +45,17 @@ impl OpenSCQ30Session {
             .map_err(Into::into)
     }
 
+    pub async fn list_devices(
+        &self,
+        model: DeviceModel,
+    ) -> crate::Result<Vec<GenericDeviceDescriptor>> {
+        model
+            .device_registry::<TokioFutures>(None, true)
+            .await?
+            .devices()
+            .await
+    }
+
     pub async fn connect(
         &self,
         mac_address: MacAddr6,
@@ -54,5 +69,9 @@ impl OpenSCQ30Session {
         } else {
             Err(crate::Error::DeviceNotFound { source: None })
         }
+    }
+
+    pub fn quick_preset_handler(&self) -> QuickPresetsHandler {
+        QuickPresetsHandler::new(self.database.clone())
     }
 }

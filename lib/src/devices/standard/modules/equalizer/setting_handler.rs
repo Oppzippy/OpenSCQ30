@@ -31,7 +31,10 @@ where
         Some(match setting {
             EqualizerSetting::PresetProfile => Setting::OptionalSelect {
                 setting: settings::Select {
-                    options: PresetEqualizerProfile::iter().map(Into::into).collect(),
+                    options: PresetEqualizerProfile::iter()
+                        .map(Into::into)
+                        .map(Cow::Borrowed)
+                        .collect(),
                 },
                 value: equalizer_configuration
                     .preset_profile()
@@ -50,7 +53,7 @@ where
             },
             EqualizerSetting::VolumeAdjustments => Setting::Equalizer {
                 setting: settings::Equalizer {
-                    band_hz: &[100, 200, 400, 800, 1600, 3200, 6400, 12800],
+                    band_hz: Cow::Borrowed(&[100, 200, 400, 800, 1600, 3200, 6400, 12800]),
                     fraction_digits: 1,
                     min: -120,
                     max: 134,

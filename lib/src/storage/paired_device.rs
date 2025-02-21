@@ -43,7 +43,7 @@ pub fn fetch(
         "SELECT name, mac_address, model FROM paired_device WHERE mac_address = ?1",
     )?;
     let devices = statement
-        .query(())?
+        .query([SqliteMacAddr6(mac_address)])?
         .mapped(|row| {
             let name: String = row.get("name")?;
             let mac_address: SqliteMacAddr6 = row.get("mac_address")?;

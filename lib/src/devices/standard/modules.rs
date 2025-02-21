@@ -3,6 +3,7 @@ use std::sync::Arc;
 use tokio::sync::{mpsc, watch};
 
 use crate::{
+    api::settings::{SettingId, Value},
     futures::{Futures, MaybeSend, MaybeSync},
     soundcore_device::device::Packet,
 };
@@ -30,6 +31,29 @@ impl<T> Default for ModuleCollection<T> {
             packet_handlers: Default::default(),
             state_modifiers: Default::default(),
         }
+    }
+}
+
+impl<StateType> ModuleCollection<StateType>
+where
+    StateType: Clone,
+{
+    pub async fn set_setting_values(
+        &self,
+        state_sender: &watch::Sender<StateType>,
+        setting_values: impl IntoIterator<Item = (SettingId<'_>, Value)>,
+    ) -> crate::Result<()> {
+        let mut target_state = state_sender.borrow().clone();
+        for (setting_id, value) in setting_values {
+            self.setting_manager
+                .set(&mut target_state, &setting_id, value)
+                .await
+                .unwrap()?;
+        }
+        for modifier in &self.state_modifiers {
+            modifier.move_to_state(&state_sender, &target_state).await?;
+        }
+        Ok(())
     }
 }
 

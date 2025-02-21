@@ -3,6 +3,7 @@ use std::borrow::Cow;
 pub use equalizer::*;
 pub use range::*;
 pub use select::*;
+use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
 pub use value::*;
 
@@ -11,9 +12,9 @@ mod range;
 mod select;
 mod value;
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Hash, Clone, Default)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Hash, Clone, Default, Serialize, Deserialize)]
 pub struct CategoryId<'a>(pub Cow<'a, str>);
-#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Hash, Clone, Default)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Hash, Clone, Default, Serialize, Deserialize)]
 pub struct SettingId<'a>(pub Cow<'a, str>);
 
 pub struct IdentifiedSetting {
@@ -21,7 +22,8 @@ pub struct IdentifiedSetting {
     pub setting: Setting,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(tag = "type", content = "setting", rename_all = "camelCase")]
 pub enum Setting {
     Toggle {
         value: bool,
@@ -30,6 +32,8 @@ pub enum Setting {
         setting: Range<i32>,
         value: i32,
     },
+    // Select/OptionalSelect is just a hint about whether None is an acceptable value or not.
+    // The backing data is still Option<u16> for both and should be treated the same by the backend.
     Select {
         setting: Select,
         value: Option<u16>,

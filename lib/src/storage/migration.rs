@@ -28,7 +28,7 @@ pub fn migrate(
             debug!("starting migration {}", version + i);
             match migration {
                 Migration::Sql(sql) => {
-                    tx.execute(sql, ())?;
+                    tx.execute_batch(sql)?;
                 }
             }
         }

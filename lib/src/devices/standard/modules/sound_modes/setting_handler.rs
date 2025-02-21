@@ -81,21 +81,21 @@ where
         let sound_mode_setting: SoundModeSetting = setting_id.0.parse().unwrap();
         match sound_mode_setting {
             SoundModeSetting::AmbientSoundMode => {
-                let Value::U16(selected_index) = value else {
-                    panic!()
+                let Some(selected_index) = value.try_as_u16() else {
+                    panic!("got {value:?}")
                 };
                 sound_modes.ambient_sound_mode =
                     self.available_sound_modes.ambient_sound_modes[selected_index as usize];
             }
             SoundModeSetting::TransparencyMode => {
-                let Value::U16(selected_index) = value else {
+                let Some(selected_index) = value.try_as_u16() else {
                     panic!()
                 };
                 sound_modes.transparency_mode =
                     self.available_sound_modes.transparency_modes[selected_index as usize]
             }
             SoundModeSetting::NoiseCancelingMode => {
-                let Value::U16(selected_index) = value else {
+                let Some(selected_index) = value.try_as_u16() else {
                     panic!()
                 };
                 sound_modes.noise_canceling_mode =

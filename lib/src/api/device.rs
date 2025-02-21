@@ -12,6 +12,8 @@ pub use device_registry::*;
 pub use generic_device_descriptor::*;
 use macaddr::MacAddr6;
 
+use crate::soundcore_device::device_model::DeviceModel;
+
 use super::settings::{CategoryId, Setting, SettingId, Value};
 
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
@@ -30,6 +32,7 @@ pub trait OpenSCQ30DeviceRegistry {
 #[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 pub trait OpenSCQ30Device {
+    fn model(&self) -> DeviceModel;
     fn categories(&self) -> Vec<CategoryId<'static>>;
     fn settings_in_category(&self, category_id: &CategoryId) -> Vec<SettingId<'static>>;
     fn setting(&self, setting_id: &SettingId) -> Option<Setting>;
