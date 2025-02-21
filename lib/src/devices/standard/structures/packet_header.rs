@@ -1,10 +1,10 @@
 use nom::{
+    IResult,
     bytes::complete::take,
     combinator::{map, map_opt},
-    error::{context, ContextError, ParseError},
+    error::{ContextError, ParseError, context},
     number::complete::le_u16,
     sequence::pair,
-    IResult,
 };
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};

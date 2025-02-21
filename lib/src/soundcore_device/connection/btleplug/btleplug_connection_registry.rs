@@ -4,18 +4,18 @@ use std::time::Duration;
 
 use btleplug::api::{BDAddr, Central, Manager as _, Peripheral as _, ScanFilter};
 use btleplug::platform::{Adapter, Manager, Peripheral};
-use futures::{stream, StreamExt};
+use futures::{StreamExt, stream};
 use macaddr::MacAddr6;
 use tokio::sync::Mutex;
-use weak_table::weak_value_hash_map::Entry;
 use weak_table::WeakValueHashMap;
+use weak_table::weak_value_hash_map::Entry;
 
 use crate::api::connection::{ConnectionRegistry, GenericConnectionDescriptor};
 use crate::device_utils;
 
+use super::RuntimeOrHandle;
 use super::btleplug_connection::BtlePlugConnection;
 use super::mac_address::{IntoBDAddr, IntoMacAddr};
-use super::RuntimeOrHandle;
 
 pub struct BtlePlugConnectionRegistry {
     runtime: RuntimeOrHandle,

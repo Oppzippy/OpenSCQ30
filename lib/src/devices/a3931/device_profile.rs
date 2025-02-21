@@ -7,12 +7,12 @@ use crate::{
     devices::standard::{
         self,
         implementation::ButtonConfigurationImplementation,
-        packets::inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
+        packets::inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
         state::DeviceState,
         structures::{
             AmbientSoundMode, AmbientSoundModeCycle, Command, EqualizerConfiguration,
-            FirmwareVersion, HearId, MultiButtonConfiguration, SoundModes, SoundModesTypeTwo,
-            TransparencyMode, STATE_UPDATE,
+            FirmwareVersion, HearId, MultiButtonConfiguration, STATE_UPDATE, SoundModes,
+            SoundModesTypeTwo, TransparencyMode,
         },
     },
     soundcore_device::{

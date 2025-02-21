@@ -1,12 +1,12 @@
 use std::{sync::Arc, time::Duration};
 
 use bluer::{
+    Device, DeviceEvent, DeviceProperty,
     gatt::remote::Service,
     rfcomm::{
-        stream::{OwnedReadHalf, OwnedWriteHalf},
         Stream,
+        stream::{OwnedReadHalf, OwnedWriteHalf},
     },
-    Device, DeviceEvent, DeviceProperty,
 };
 use futures::StreamExt;
 use macaddr::MacAddr6;
@@ -15,12 +15,13 @@ use tokio::{
     runtime::Handle,
     select,
     sync::{
+        Mutex, Semaphore,
         mpsc::{self, error::TrySendError},
-        watch, Mutex, Semaphore,
+        watch,
     },
     task::JoinHandle,
 };
-use tracing::{debug, info_span, trace, trace_span, warn, Instrument};
+use tracing::{Instrument, debug, info_span, trace, trace_span, warn};
 use uuid::Uuid;
 
 use crate::{

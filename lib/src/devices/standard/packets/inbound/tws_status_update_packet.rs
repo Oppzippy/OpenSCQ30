@@ -1,8 +1,8 @@
 use nom::{
-    combinator::{all_consuming, map},
-    error::{context, ContextError, ParseError},
-    sequence::tuple,
     IResult,
+    combinator::{all_consuming, map},
+    error::{ContextError, ParseError, context},
+    sequence::tuple,
 };
 
 use crate::devices::standard::{
@@ -45,7 +45,7 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::{
-        packets::inbound::{take_inbound_packet_header, InboundPacket, TwsStatusUpdatePacket},
+        packets::inbound::{InboundPacket, TwsStatusUpdatePacket, take_inbound_packet_header},
         structures::HostDevice,
     };
 

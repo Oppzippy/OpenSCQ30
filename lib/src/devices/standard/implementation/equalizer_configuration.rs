@@ -6,7 +6,7 @@ use crate::{
         state::DeviceState,
         structures::{EqualizerConfiguration, HearId},
     },
-    soundcore_device::device::{soundcore_command::CommandResponse, Packet},
+    soundcore_device::device::{Packet, soundcore_command::CommandResponse},
 };
 
 pub fn set_equalizer_configuration(

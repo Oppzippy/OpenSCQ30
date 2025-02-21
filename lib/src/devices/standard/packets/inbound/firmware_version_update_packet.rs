@@ -1,8 +1,8 @@
 use nom::{
-    combinator::{all_consuming, map},
-    error::{context, ContextError, ParseError},
-    sequence::tuple,
     IResult,
+    combinator::{all_consuming, map},
+    error::{ContextError, ParseError, context},
+    sequence::tuple,
 };
 
 use crate::devices::standard::structures::{Command, FirmwareVersion, SerialNumber};
@@ -52,7 +52,7 @@ mod tests {
 
     use crate::devices::standard::{
         packets::inbound::{
-            take_inbound_packet_header, FirmwareVersionUpdatePacket, InboundPacket,
+            FirmwareVersionUpdatePacket, InboundPacket, take_inbound_packet_header,
         },
         structures::{FirmwareVersion, SerialNumber},
     };

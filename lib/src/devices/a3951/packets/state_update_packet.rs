@@ -1,16 +1,16 @@
 use nom::{
-    combinator::{all_consuming, opt},
-    error::{context, ContextError, ParseError},
-    number::complete::{le_u16, le_u8},
-    sequence::tuple,
     IResult,
+    combinator::{all_consuming, opt},
+    error::{ContextError, ParseError, context},
+    number::complete::{le_u8, le_u16},
+    sequence::tuple,
 };
 
 use crate::devices::{
     a3951::device_profile::A3951_DEVICE_PROFILE,
     standard::{
         packets::{
-            inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
+            inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
             parsing::take_bool,
         },
         structures::{

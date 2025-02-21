@@ -5,7 +5,7 @@ use std::{
 
 use macaddr::MacAddr6;
 use tokio::sync::Mutex;
-use weak_table::{weak_value_hash_map::Entry, WeakValueHashMap};
+use weak_table::{WeakValueHashMap, weak_value_hash_map::Entry};
 
 use crate::{
     api::{

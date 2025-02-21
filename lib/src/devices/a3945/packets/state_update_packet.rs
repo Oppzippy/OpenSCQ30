@@ -1,9 +1,9 @@
 use nom::{
+    IResult,
     combinator::{all_consuming, map},
-    error::{context, ContextError, ParseError},
+    error::{ContextError, ParseError, context},
     number::complete::le_u8,
     sequence::tuple,
-    IResult,
 };
 
 use crate::devices::{

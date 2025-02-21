@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
 use macaddr::MacAddr6;
-use tokio::sync::{mpsc, watch, Mutex, RwLock};
+use tokio::sync::{Mutex, RwLock, mpsc, watch};
 use uuid::Uuid;
 
 use crate::api::connection::{Connection, ConnectionStatus};

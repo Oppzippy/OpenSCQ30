@@ -7,7 +7,7 @@ use crate::{
     soundcore_device::device_model::DeviceModel,
 };
 
-use super::{type_conversions::SqliteDeviceModel, StorageError};
+use super::{StorageError, type_conversions::SqliteDeviceModel};
 
 type SettingsCollection = HashMap<SettingId<'static>, settings::Value>;
 

@@ -1,15 +1,15 @@
 use nom::{
-    combinator::{all_consuming, map, opt},
-    error::{context, ContextError, ParseError},
-    sequence::tuple,
     IResult,
+    combinator::{all_consuming, map, opt},
+    error::{ContextError, ParseError, context},
+    sequence::tuple,
 };
 
 use crate::devices::{
     a3027::device_profile::A3027_DEVICE_PROFILE,
     standard::{
         packets::{
-            inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
+            inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
             outbound::OutboundPacket,
             parsing::take_bool,
         },
@@ -143,7 +143,7 @@ mod tests {
 
     use crate::{
         devices::standard::packets::{
-            inbound::{take_inbound_packet_header, TryIntoInboundPacket},
+            inbound::{TryIntoInboundPacket, take_inbound_packet_header},
             outbound::OutboundPacketBytesExt,
         },
         soundcore_device::device::Packet,

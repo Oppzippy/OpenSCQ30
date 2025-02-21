@@ -1,9 +1,9 @@
 use nom::{
+    IResult,
     bytes::complete::{tag, take},
     combinator::{all_consuming, map, map_parser},
-    error::{context, ContextError, ParseError},
+    error::{ContextError, ParseError, context},
     sequence::separated_pair,
-    IResult,
 };
 use std::fmt::Display;
 

@@ -1,14 +1,14 @@
 use nom::{
+    IResult,
     combinator::map,
-    error::{context, ContextError, ParseError},
+    error::{ContextError, ParseError, context},
     number::complete::le_u16,
     sequence::pair,
-    IResult,
 };
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use super::{preset_equalizer_profile::PresetEqualizerProfile, VolumeAdjustments};
+use super::{VolumeAdjustments, preset_equalizer_profile::PresetEqualizerProfile};
 
 #[derive(Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]

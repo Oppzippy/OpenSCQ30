@@ -30,7 +30,7 @@ pub trait Device {
     async fn set_sound_modes_type_two(&self, sound_modes: SoundModesTypeTwo) -> crate::Result<()>;
 
     async fn set_ambient_sound_mode_cycle(&self, cycle: AmbientSoundModeCycle)
-        -> crate::Result<()>;
+    -> crate::Result<()>;
 
     async fn set_equalizer_configuration(
         &self,

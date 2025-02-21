@@ -2,7 +2,7 @@
 name = "openscq30_lib"
 version.workspace = true
 license.workspace = true
-edition = "2021"
+edition = "2024"
 
 [features]
 bluetooth = ["dep:btleplug", "dep:bluer", "dep:regex", "dep:windows"]

@@ -13,9 +13,9 @@ use crate::{
     devices::standard::{
         implementation::StandardImplementation,
         modules::{
+            ModuleCollection, ModuleCollectionSpawnPacketHandlerExt,
             equalizer::AddEqualizerExt,
             sound_modes::{AddSoundModesExt, AvailableSoundModes},
-            ModuleCollection, ModuleCollectionSpawnPacketHandlerExt,
         },
         packets::{inbound::TryIntoInboundPacket, outbound::RequestStatePacket},
         structures::{AmbientSoundMode, NoiseCancelingMode},

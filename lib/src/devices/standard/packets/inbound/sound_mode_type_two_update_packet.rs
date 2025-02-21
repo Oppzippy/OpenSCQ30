@@ -1,7 +1,7 @@
 use nom::{
-    combinator::{all_consuming, map},
-    error::{context, ContextError, ParseError},
     IResult,
+    combinator::{all_consuming, map},
+    error::{ContextError, ParseError, context},
 };
 
 use crate::devices::standard::structures::{Command, SoundModesTypeTwo};
@@ -38,7 +38,7 @@ mod tests {
 
     use crate::devices::standard::{
         packets::inbound::{
-            take_inbound_packet_header, InboundPacket, SoundModeTypeTwoUpdatePacket,
+            InboundPacket, SoundModeTypeTwoUpdatePacket, take_inbound_packet_header,
         },
         structures::{
             AdaptiveNoiseCanceling, AmbientSoundMode, ManualNoiseCanceling,

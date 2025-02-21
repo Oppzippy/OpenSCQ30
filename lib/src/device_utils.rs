@@ -1,6 +1,6 @@
 use macaddr::MacAddr6;
 use static_assertions::const_assert;
-use uuid::{uuid, Uuid};
+use uuid::{Uuid, uuid};
 
 pub const RFCOMM_UUID: Uuid = uuid!("00001101-0000-1000-8000-00805f9b34fb");
 pub const VENDOR_RFCOMM_UUID: Uuid = uuid!("0cf12d31-fac3-4553-bd80-d6832e7b0000");
@@ -80,7 +80,7 @@ pub fn is_mac_address_soundcore_device(mac_address: MacAddr6) -> bool {
 mod tests {
     use super::*;
     use std::str::FromStr;
-    use uuid::{uuid, Uuid};
+    use uuid::{Uuid, uuid};
 
     #[test]
     fn test_center_service_uuid() {

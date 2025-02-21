@@ -1,8 +1,8 @@
 use nom::{
-    combinator::{all_consuming, map, opt},
-    error::{context, ContextError, ParseError},
-    sequence::tuple,
     IResult,
+    combinator::{all_consuming, map, opt},
+    error::{ContextError, ParseError, context},
+    sequence::tuple,
 };
 
 use crate::devices::standard::structures::{Command, IsBatteryCharging};
@@ -39,7 +39,7 @@ mod tests {
 
     use crate::devices::standard::{
         packets::inbound::{
-            take_inbound_packet_header, BatteryChargingUpdatePacket, InboundPacket,
+            BatteryChargingUpdatePacket, InboundPacket, take_inbound_packet_header,
         },
         structures::IsBatteryCharging,
     };

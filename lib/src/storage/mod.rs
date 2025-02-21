@@ -8,14 +8,14 @@ use std::{
     mem,
     panic::Location,
     path::PathBuf,
-    sync::{mpsc, Arc},
+    sync::{Arc, mpsc},
     thread,
 };
 
 use macaddr::MacAddr6;
-use rusqlite::{ffi::SQLITE_CONSTRAINT_UNIQUE, Connection};
+use rusqlite::{Connection, ffi::SQLITE_CONSTRAINT_UNIQUE};
 use thiserror::Error;
-use tokio::sync::{oneshot, Semaphore};
+use tokio::sync::{Semaphore, oneshot};
 use tracing::info_span;
 
 use crate::{

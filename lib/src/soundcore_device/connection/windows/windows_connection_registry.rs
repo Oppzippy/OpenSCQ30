@@ -3,12 +3,12 @@ use std::{collections::HashSet, sync::Arc, time::Duration};
 use macaddr::MacAddr6;
 use tracing::instrument;
 use windows::{
-    core::HSTRING,
     Devices::{
         Bluetooth::{self, BluetoothConnectionStatus, BluetoothDevice},
         Enumeration::{DeviceInformation, DeviceInformationKind},
     },
     Foundation::{Collections::IVectorView, TypedEventHandler},
+    core::HSTRING,
 };
 
 use crate::api::connection::{ConnectionRegistry, GenericConnectionDescriptor};

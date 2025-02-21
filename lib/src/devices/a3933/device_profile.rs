@@ -12,8 +12,8 @@ use crate::{
         state::DeviceState,
         structures::{
             AmbientSoundMode, AmbientSoundModeCycle, Command, EqualizerConfiguration, HearId,
-            MultiButtonConfiguration, NoiseCancelingMode, SoundModes, SoundModesTypeTwo,
-            TransparencyMode, STATE_UPDATE,
+            MultiButtonConfiguration, NoiseCancelingMode, STATE_UPDATE, SoundModes,
+            SoundModesTypeTwo, TransparencyMode,
         },
     },
     soundcore_device::{

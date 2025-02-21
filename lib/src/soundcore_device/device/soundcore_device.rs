@@ -1,7 +1,7 @@
 use std::{collections::HashMap, mem, sync::Arc};
 
 use macaddr::MacAddr6;
-use tokio::sync::{mpsc, watch, Mutex};
+use tokio::sync::{Mutex, mpsc, watch};
 use tracing::{trace, warn};
 use uuid::Uuid;
 
@@ -13,8 +13,8 @@ use crate::{
     devices::standard::{
         packets::{
             inbound::{
-                state_update_packet::StateUpdatePacket, FirmwareVersionUpdatePacket,
-                TryIntoInboundPacket,
+                FirmwareVersionUpdatePacket, TryIntoInboundPacket,
+                state_update_packet::StateUpdatePacket,
             },
             outbound::{RequestFirmwareVersionPacket, RequestStatePacket},
         },
@@ -28,8 +28,8 @@ use crate::{
 };
 
 use super::{
-    device_implementation::DeviceImplementation, packet_io_controller::PacketIOController,
-    soundcore_command::CommandResponse, Packet,
+    Packet, device_implementation::DeviceImplementation, packet_io_controller::PacketIOController,
+    soundcore_command::CommandResponse,
 };
 
 pub struct SoundcoreDevice<ConnectionType, FuturesType>
@@ -356,7 +356,7 @@ mod tests {
     use std::{sync::Arc, time::Duration};
 
     use macaddr::MacAddr6;
-    use tokio::sync::{mpsc, Mutex};
+    use tokio::sync::{Mutex, mpsc};
 
     use super::SoundcoreDevice;
     use crate::{

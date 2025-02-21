@@ -22,8 +22,8 @@ pub async fn new_soundcore_device_registry(
 }
 
 #[cfg(all(feature = "bluetooth", not(feature = "demo")))]
-pub async fn new_soundcore_device_registry_with_custom_runtime<FuturesType>(
-) -> crate::Result<impl DeviceRegistry>
+pub async fn new_soundcore_device_registry_with_custom_runtime<FuturesType>()
+-> crate::Result<impl DeviceRegistry>
 where
     FuturesType: Futures,
 {
@@ -42,8 +42,8 @@ pub async fn new_soundcore_device_registry(
 }
 
 #[cfg(feature = "demo")]
-pub async fn new_soundcore_device_registry_with_custom_runtime<FuturesType>(
-) -> crate::Result<impl DeviceRegistry>
+pub async fn new_soundcore_device_registry_with_custom_runtime<FuturesType>()
+-> crate::Result<impl DeviceRegistry>
 where
     FuturesType: Futures,
 {

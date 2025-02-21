@@ -9,7 +9,7 @@ use crate::{
     futures::{Futures, JoinHandle},
 };
 
-use super::{multi_queue::MultiQueue, Packet};
+use super::{Packet, multi_queue::MultiQueue};
 
 pub struct PacketIOController<ConnectionType, FuturesType>
 where
@@ -70,15 +70,12 @@ impl<ConnectionType: Connection, FuturesType: Futures>
                     body: body.to_vec(),
                 };
                 packet_queues.pop(&header, Some(packet.clone()));
-                match outgoing_sender
-                            .send(packet)
-                            .await
-                        {
-                            Ok(_) => (),
-                            Err(err) => tracing::debug!(
-                                "received packet that wasn't an ok, but the channel is closed, so it won't be forwarded: {err:?}"
-                            ),
-                        }
+                match outgoing_sender.send(packet).await {
+                    Ok(_) => (),
+                    Err(err) => tracing::debug!(
+                        "received packet that wasn't an ok, but the channel is closed, so it won't be forwarded: {err:?}"
+                    ),
+                }
             }
         });
         (handle, outgoing_receiver)

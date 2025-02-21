@@ -1,9 +1,9 @@
 use nom::{
+    IResult,
     combinator::{all_consuming, map, map_opt, opt},
-    error::{context, ContextError, ParseError},
+    error::{ContextError, ParseError, context},
     number::complete::le_u8,
     sequence::tuple,
-    IResult,
 };
 use strum::FromRepr;
 
@@ -11,7 +11,7 @@ use crate::devices::{
     a3028::device_profile::A3028_DEVICE_PROFILE,
     standard::{
         packets::{
-            inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
+            inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
             parsing::take_bool,
         },
         structures::{
@@ -164,7 +164,7 @@ mod tests {
 
     use crate::devices::standard::{
         packets::inbound::{
-            state_update_packet::StateUpdatePacket, take_inbound_packet_header, InboundPacket,
+            InboundPacket, state_update_packet::StateUpdatePacket, take_inbound_packet_header,
         },
         structures::{
             AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,

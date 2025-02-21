@@ -1,7 +1,7 @@
 use nom::{
-    combinator::map_opt,
-    error::{context, ContextError, ParseError},
     IResult,
+    combinator::map_opt,
+    error::{ContextError, ParseError, context},
 };
 use std::{fmt::Display, sync::Arc};
 

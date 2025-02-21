@@ -1,8 +1,8 @@
 use nom::{
+    IResult,
     branch::alt,
     combinator::map,
     error::{ContextError, ParseError},
-    IResult,
 };
 
 use crate::{

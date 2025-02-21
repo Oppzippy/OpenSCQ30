@@ -1,15 +1,15 @@
 use nom::{
-    combinator::{all_consuming, map},
-    error::{context, ContextError, ParseError},
-    sequence::tuple,
     IResult,
+    combinator::{all_consuming, map},
+    error::{ContextError, ParseError, context},
+    sequence::tuple,
 };
 
 use crate::devices::{
     a3033::device_profile::A3033_DEVICE_PROFILE,
     standard::{
         packets::{
-            inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
+            inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
             parsing::take_bool,
         },
         structures::{EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery},

@@ -17,8 +17,8 @@ use state_update_packet::StateUpdatePacket;
 
 use super::Command;
 
-pub fn packet_handlers(
-) -> HashMap<Command, Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>> {
+pub fn packet_handlers()
+-> HashMap<Command, Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>> {
     let handlers: [(
         Command,
         Box<dyn Fn(&[u8], DeviceState) -> DeviceState + Send + Sync>,

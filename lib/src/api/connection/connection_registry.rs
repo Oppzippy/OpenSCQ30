@@ -4,7 +4,7 @@ use macaddr::MacAddr6;
 
 use crate::futures::{MaybeSend, MaybeSync};
 
-use super::{connection::Connection, ConnectionDescriptor};
+use super::{ConnectionDescriptor, connection::Connection};
 
 pub trait ConnectionRegistry {
     type ConnectionType: Connection + Send + Sync;

@@ -1,8 +1,8 @@
 use std::panic::Location;
 
 use nom::{
-    error::{ContextError, ParseError, VerboseError},
     IResult,
+    error::{ContextError, ParseError, VerboseError},
 };
 
 use crate::{

@@ -1,9 +1,9 @@
 use nom::{
+    IResult,
     combinator::map,
-    error::{context, ContextError, ParseError},
+    error::{ContextError, ParseError, context},
     number::complete::le_i32,
     sequence::tuple,
-    IResult,
 };
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};

@@ -3,8 +3,8 @@ use rusqlite::Connection;
 use tracing::{instrument, warn};
 
 use super::{
-    type_conversions::{SqliteDeviceModel, SqliteMacAddr6},
     PairedDevice, StorageError,
+    type_conversions::{SqliteDeviceModel, SqliteMacAddr6},
 };
 
 #[instrument(skip(connection))]

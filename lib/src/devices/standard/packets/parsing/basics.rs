@@ -1,9 +1,9 @@
 use nom::{
+    IResult,
     bytes::complete::take,
     combinator::{map, map_opt},
     error::{ContextError, ParseError},
     number::complete::le_u8,
-    IResult,
 };
 
 pub(crate) fn take_bool<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(

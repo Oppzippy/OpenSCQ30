@@ -1,7 +1,7 @@
 use nom::{combinator::all_consuming, error::VerboseError};
 
 use crate::devices::standard::{
-    packets::inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
+    packets::inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
     state::DeviceState,
 };
 

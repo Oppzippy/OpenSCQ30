@@ -1,10 +1,10 @@
 use std::borrow::Cow;
 
 use nom::{
+    IResult,
     combinator::map,
     error::{ContextError, ParseError},
     number::complete::le_u8,
-    IResult,
 };
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};

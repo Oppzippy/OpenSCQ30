@@ -10,7 +10,7 @@ use crate::{
     devices::standard::{
         self,
         packets::inbound::{
-            state_update_packet::StateUpdatePacket, InboundPacket, SoundModeTypeTwoUpdatePacket,
+            InboundPacket, SoundModeTypeTwoUpdatePacket, state_update_packet::StateUpdatePacket,
         },
         quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBands},
         state::DeviceState,

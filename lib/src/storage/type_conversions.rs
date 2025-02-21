@@ -2,8 +2,8 @@ use std::str::FromStr;
 
 use macaddr::MacAddr6;
 use rusqlite::{
-    types::{FromSql, FromSqlError, FromSqlResult, ToSqlOutput, Value, ValueRef},
     ToSql,
+    types::{FromSql, FromSqlError, FromSqlResult, ToSqlOutput, Value, ValueRef},
 };
 
 use crate::soundcore_device::device_model::DeviceModel;

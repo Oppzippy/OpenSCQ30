@@ -1,8 +1,8 @@
 use nom::{
-    combinator::map,
-    error::{context, ContextError, ParseError},
-    number::complete::le_u8,
     IResult,
+    combinator::map,
+    error::{ContextError, ParseError, context},
+    number::complete::le_u8,
 };
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};

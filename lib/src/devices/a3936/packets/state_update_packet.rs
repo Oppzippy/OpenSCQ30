@@ -1,9 +1,9 @@
 use nom::{
+    IResult,
     bytes::complete::take,
     combinator::all_consuming,
-    error::{context, ContextError, ParseError},
+    error::{ContextError, ParseError, context},
     number::complete::le_u8,
-    IResult,
 };
 
 use crate::devices::{
@@ -148,7 +148,7 @@ impl A3936StateUpdatePacket {
 mod tests {
     use nom::error::VerboseError;
 
-    use crate::devices::standard::packets::inbound::{take_inbound_packet_header, InboundPacket};
+    use crate::devices::standard::packets::inbound::{InboundPacket, take_inbound_packet_header};
 
     use super::*;
 

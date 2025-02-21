@@ -18,7 +18,7 @@ pub use sound_modes::*;
 pub use sound_modes_type_two::*;
 
 use super::{
-    packets::inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
+    packets::inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
     state::DeviceState,
     structures::*,
 };

@@ -1,8 +1,8 @@
 use nom::{
+    IResult,
     bytes::complete::take,
     combinator::map,
-    error::{context, ContextError, ParseError},
-    IResult,
+    error::{ContextError, ParseError, context},
 };
 use std::{array, ops::Range, sync::Arc};
 

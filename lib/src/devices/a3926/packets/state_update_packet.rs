@@ -1,14 +1,14 @@
 use nom::{
-    combinator::{all_consuming, map},
-    error::{context, ContextError, ParseError},
-    sequence::tuple,
     IResult,
+    combinator::{all_consuming, map},
+    error::{ContextError, ParseError, context},
+    sequence::tuple,
 };
 
 use crate::devices::{
     a3926::device_profile::A3926_DEVICE_PROFILE,
     standard::{
-        packets::inbound::{state_update_packet::StateUpdatePacket, InboundPacket},
+        packets::inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
         structures::{
             AgeRange, BasicHearId, DualBattery, EqualizerConfiguration, Gender,
             InternalMultiButtonConfiguration, StereoEqualizerConfiguration, TwsStatus,

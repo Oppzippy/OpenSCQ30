@@ -168,7 +168,7 @@ mod tests {
         soundcore_device::device::Packet,
     };
 
-    use super::{Command, A3945_DEVICE_PROFILE};
+    use super::{A3945_DEVICE_PROFILE, Command};
 
     struct A3945TestStateUpdatePacket {
         body: Vec<u8>,

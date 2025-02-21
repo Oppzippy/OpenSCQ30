@@ -1,8 +1,8 @@
 use nom::{
-    combinator::{all_consuming, map, opt},
-    error::{context, ContextError, ParseError},
-    sequence::tuple,
     IResult,
+    combinator::{all_consuming, map, opt},
+    error::{ContextError, ParseError, context},
+    sequence::tuple,
 };
 
 use crate::devices::standard::structures::{BatteryLevel, Command};
@@ -44,7 +44,7 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::{
-        packets::inbound::{take_inbound_packet_header, BatteryLevelUpdatePacket, InboundPacket},
+        packets::inbound::{BatteryLevelUpdatePacket, InboundPacket, take_inbound_packet_header},
         structures::BatteryLevel,
     };
 

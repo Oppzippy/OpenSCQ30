@@ -1,9 +1,9 @@
 use super::{EqualizerConfiguration, VolumeAdjustments};
 use nom::{
-    combinator::map,
-    error::{context, ContextError, ParseError},
-    sequence::tuple,
     IResult,
+    combinator::map,
+    error::{ContextError, ParseError, context},
+    sequence::tuple,
 };
 
 #[derive(Clone, Debug, PartialEq)]

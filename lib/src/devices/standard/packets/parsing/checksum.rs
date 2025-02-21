@@ -1,8 +1,8 @@
 use nom::{
-    combinator::map_opt,
-    error::{context, ContextError, ParseError},
-    number::complete::le_u8,
     IResult,
+    combinator::map_opt,
+    error::{ContextError, ParseError, context},
+    number::complete::le_u8,
 };
 
 use crate::devices::standard::packets::checksum::calculate_checksum;

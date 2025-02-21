@@ -1,10 +1,10 @@
 use nom::{
+    IResult,
     bytes::complete::take,
     combinator::{all_consuming, opt},
-    error::{context, ContextError, ParseError},
+    error::{ContextError, ParseError, context},
     number::complete::le_u8,
     sequence::{pair, tuple},
-    IResult,
 };
 
 use crate::devices::{

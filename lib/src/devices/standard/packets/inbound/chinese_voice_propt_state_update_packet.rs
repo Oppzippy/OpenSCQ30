@@ -1,7 +1,7 @@
 use nom::{
-    combinator::{all_consuming, map},
-    error::{context, ContextError, ParseError},
     IResult,
+    combinator::{all_consuming, map},
+    error::{ContextError, ParseError, context},
 };
 
 use crate::devices::standard::{packets::parsing::take_bool, structures::Command};
@@ -36,7 +36,7 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::standard::packets::inbound::{
-        take_inbound_packet_header, ChineseVoicePromptStateUpdatePacket, InboundPacket,
+        ChineseVoicePromptStateUpdatePacket, InboundPacket, take_inbound_packet_header,
     };
 
     #[test]

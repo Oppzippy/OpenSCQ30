@@ -13,13 +13,13 @@ use tokio::{
     },
     task::JoinHandle,
 };
-use tracing::{instrument, trace, trace_span, warn, Instrument};
+use tracing::{Instrument, instrument, trace, trace_span, warn};
 use uuid::Uuid;
 
 use crate::{
     api::connection::{Connection, ConnectionStatus},
     device_utils::{
-        is_soundcore_service_uuid, READ_CHARACTERISTIC_UUID, WRITE_CHARACTERISTIC_UUID,
+        READ_CHARACTERISTIC_UUID, WRITE_CHARACTERISTIC_UUID, is_soundcore_service_uuid,
     },
 };
 

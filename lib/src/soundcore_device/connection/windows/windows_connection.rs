@@ -8,12 +8,11 @@ use std::{
 use macaddr::MacAddr6;
 use tokio::{
     select,
-    sync::{mpsc as tokio_mpsc, watch, Semaphore},
+    sync::{Semaphore, mpsc as tokio_mpsc, watch},
 };
 use tracing::{debug, debug_span, error, instrument, trace, warn};
 use uuid::Uuid;
 use windows::{
-    core::{AgileReference, HSTRING},
     Devices::{
         Bluetooth::{
             BluetoothConnectionStatus, BluetoothDevice, BluetoothLEDevice,
@@ -25,6 +24,7 @@ use windows::{
     Foundation::TypedEventHandler,
     Networking::Sockets::{SocketProtectionLevel, StreamSocket},
     Storage::Streams::{Buffer, DataReader, DataWriter, InputStreamOptions},
+    core::{AgileReference, HSTRING},
 };
 
 use crate::{
@@ -53,7 +53,9 @@ impl WindowsConnection {
         let le_service_uuid = match Self::get_le_service_uuid(mac_address).await {
             Ok(uuid) => uuid,
             Err(err) => {
-                debug!("failed to get gatt service uuid, but that's okay since we're using rfcomm: {err:?}");
+                debug!(
+                    "failed to get gatt service uuid, but that's okay since we're using rfcomm: {err:?}"
+                );
                 Uuid::nil()
             }
         };

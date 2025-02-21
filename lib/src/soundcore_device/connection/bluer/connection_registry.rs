@@ -9,15 +9,15 @@ use macaddr::MacAddr6;
 use tokio::select;
 use tokio::sync::Mutex;
 use tokio::time::sleep;
-use tracing::{debug, debug_span, trace, warn, warn_span, Instrument};
-use weak_table::weak_value_hash_map::Entry;
+use tracing::{Instrument, debug, debug_span, trace, warn, warn_span};
 use weak_table::WeakValueHashMap;
+use weak_table::weak_value_hash_map::Entry;
 
 use crate::api::connection::{ConnectionRegistry, GenericConnectionDescriptor};
 use crate::device_utils;
 
-use super::connection::BluerConnection;
 use super::RuntimeOrHandle;
+use super::connection::BluerConnection;
 
 pub struct BluerConnectionRegistry {
     runtime: RuntimeOrHandle,
@@ -147,7 +147,7 @@ impl BluerConnectionRegistry {
                             return match err.kind {
                                 bluer::ErrorKind::NotFound => Ok(None),
                                 _ => Err(crate::Error::from(err)),
-                            }
+                            };
                         }
                     };
                     device.connect().await?;
