@@ -224,17 +224,14 @@ impl DeviceSettingsModel {
                         })
                     }
                     Setting::I32Range { setting, value } => todo!(),
-                    Setting::Select { setting, value } => crate::settings::optional_select(
-                        setting_id.clone(),
-                        setting,
-                        Some(value),
-                        move |value| {
+                    Setting::Select { setting, value } => {
+                        crate::settings::select(setting_id.clone(), setting, value, move |value| {
                             Message::SetSetting(
                                 setting_id.clone(),
-                                Cow::from(value.map(ToOwned::to_owned).unwrap()).into(),
+                                Cow::from(value.to_owned()).into(),
                             )
-                        },
-                    ),
+                        })
+                    }
                     Setting::OptionalSelect { setting, value } => crate::settings::optional_select(
                         setting_id.clone(),
                         setting,
