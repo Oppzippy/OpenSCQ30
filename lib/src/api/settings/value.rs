@@ -5,7 +5,7 @@ use strum::{EnumDiscriminants, IntoEnumIterator};
 use thiserror::Error;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, EnumDiscriminants)]
-#[serde(tag = "type", content = "value", rename_all = "camelCase")]
+#[serde(tag = "type", content = "value")]
 pub enum Value {
     Bool(bool),
     U16(u16),

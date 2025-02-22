@@ -23,7 +23,7 @@ pub struct IdentifiedSetting {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(tag = "type", content = "setting", rename_all = "camelCase")]
+#[serde(tag = "type", content = "setting")]
 pub enum Setting {
     Toggle {
         value: bool,

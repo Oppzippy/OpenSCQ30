@@ -13,7 +13,6 @@ use super::{
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct QuickPreset {
     pub name: String,
     pub is_active: bool,
@@ -21,7 +20,6 @@ pub struct QuickPreset {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct QuickPresetField {
     pub setting_id: SettingId<'static>,
     pub value: Option<Value>,
