@@ -7,19 +7,24 @@ use cosmic::{
 };
 use openscq30_lib::api::settings::{Select, SettingId};
 
-pub fn select<'a, M>(
+pub fn optional_select<'a, M>(
     setting_id: SettingId<'a>,
     setting: &'a Select,
-    value: Option<u16>,
-    on_change: impl Fn(usize) -> M + 'a,
+    value: Option<&str>,
+    on_change: impl Fn(Option<&str>) -> M + 'a,
 ) -> Element<'a, M>
 where
     M: Clone + 'a,
 {
+    let selected_index = value
+        .map(|value| setting.options.iter().position(|option| option == value))
+        .flatten();
     with_label(
         setting_id.0,
-        widget::dropdown(&setting.options, value.map(usize::from), on_change)
-            .width(Length::FillPortion(1)),
+        widget::dropdown(&setting.options, selected_index, move |index| {
+            on_change(Some(&setting.options[index]))
+        })
+        .width(Length::FillPortion(1)),
     )
 }
 

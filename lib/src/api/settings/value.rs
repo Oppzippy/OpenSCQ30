@@ -1,6 +1,10 @@
-use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+use serde::{Deserialize, Serialize};
+use strum::{EnumDiscriminants, IntoEnumIterator};
+use thiserror::Error;
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, EnumDiscriminants)]
 #[serde(tag = "type", content = "value", rename_all = "camelCase")]
 pub enum Value {
     Bool(bool),
@@ -9,15 +13,104 @@ pub enum Value {
     OptionalU16(Option<u16>),
     I16Vec(Vec<i16>),
     I32(i32),
+    String(Cow<'static, str>),
+    StringVec(Vec<Cow<'static, str>>),
+    OptionalString(Option<Cow<'static, str>>),
+}
+
+#[derive(Clone, Debug, Error)]
+pub enum ValueError {
+    #[error("expected value of type {expected:?}, got {actual:?}")]
+    WrongType {
+        expected: ValueDiscriminants,
+        actual: Value,
+    },
+
+    #[error("expected one of {variants:?}, got {actual:?}")]
+    InvalidEnumVariant {
+        variants: Box<[&'static str]>,
+        actual: Value,
+    },
 }
 
 impl Value {
-    /// Converts U16 and OptionalU16 into Option<u16>
-    pub fn try_as_u16(&self) -> Option<u16> {
+    pub fn try_as_optional_u16(&self) -> Result<Option<u16>, ValueError> {
         match &self {
-            Value::U16(value) => Some(*value),
-            Value::OptionalU16(maybe_value) => *maybe_value,
-            _ => None,
+            Value::U16(value) => Ok(Some(*value)),
+            Value::OptionalU16(maybe_value) => Ok(*maybe_value),
+            _ => Err(ValueError::WrongType {
+                expected: ValueDiscriminants::OptionalU16,
+                actual: self.clone(),
+            }),
+        }
+    }
+
+    pub fn try_as_optional_str(&self) -> Result<Option<&str>, ValueError> {
+        match &self {
+            Value::String(cow) => Ok(Some(cow)),
+            Value::OptionalString(cow) => Ok(cow.as_deref()),
+            _ => Err(ValueError::WrongType {
+                expected: ValueDiscriminants::OptionalString,
+                actual: self.clone(),
+            }),
+        }
+    }
+
+    pub fn try_as_str(&self) -> Result<&str, ValueError> {
+        if let Value::String(cow) = self {
+            Ok(cow)
+        } else {
+            Err(ValueError::WrongType {
+                expected: ValueDiscriminants::String,
+                actual: self.clone(),
+            })
+        }
+    }
+
+    pub fn try_as_enum_variant<T>(&self) -> Result<T, ValueError>
+    where
+        T: IntoEnumIterator + for<'a> TryFrom<&'a str> + Into<&'static str>,
+    {
+        let str = self.try_as_str()?;
+        T::try_from(str).map_err(|_| ValueError::InvalidEnumVariant {
+            variants: T::iter().map(Into::into).collect(),
+            actual: self.clone(),
+        })
+    }
+
+    pub fn try_as_optional_enum_variant<T>(&self) -> Result<Option<T>, ValueError>
+    where
+        T: IntoEnumIterator + for<'a> TryFrom<&'a str> + Into<&'static str>,
+    {
+        self.try_as_optional_str()?
+            .map(|str| {
+                T::try_from(str).map_err(|_| ValueError::InvalidEnumVariant {
+                    variants: T::iter().map(Into::into).collect(),
+                    actual: self.clone(),
+                })
+            })
+            .transpose()
+    }
+
+    pub fn try_as_i32(&self) -> Result<i32, ValueError> {
+        if let Value::I32(i) = self {
+            Ok(*i)
+        } else {
+            Err(ValueError::WrongType {
+                expected: ValueDiscriminants::I32,
+                actual: self.clone(),
+            })
+        }
+    }
+
+    pub fn try_as_i16_slice(&self) -> Result<&[i16], ValueError> {
+        if let Value::I16Vec(value) = self {
+            Ok(value)
+        } else {
+            Err(ValueError::WrongType {
+                expected: ValueDiscriminants::I16Vec,
+                actual: self.clone(),
+            })
         }
     }
 }
@@ -55,5 +148,23 @@ impl From<Vec<i16>> for Value {
 impl From<i32> for Value {
     fn from(value: i32) -> Self {
         Value::I32(value)
+    }
+}
+
+impl From<Cow<'static, str>> for Value {
+    fn from(value: Cow<'static, str>) -> Self {
+        Self::String(value)
+    }
+}
+
+impl From<Option<Cow<'static, str>>> for Value {
+    fn from(value: Option<Cow<'static, str>>) -> Self {
+        Self::OptionalString(value)
+    }
+}
+
+impl From<Vec<Cow<'static, str>>> for Value {
+    fn from(value: Vec<Cow<'static, str>>) -> Self {
+        Self::StringVec(value)
     }
 }

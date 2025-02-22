@@ -72,17 +72,21 @@ impl From<AmbientSoundModeCycle> for Setting {
         Self::MultiSelect {
             setting: Select {
                 options: vec![
-                    Cow::Borrowed("normal-mode"),
-                    Cow::Borrowed("transparency-mode"),
-                    Cow::Borrowed("noise-canceling-mode"),
+                    Cow::Borrowed("NormalMode"),
+                    Cow::Borrowed("TransparencyMode"),
+                    Cow::Borrowed("NoiseCancelingMode"),
                 ],
             },
             value: (cycle
                 .normal_mode
-                .then_some(0)
+                .then_some("NormalMode".into())
                 .into_iter()
-                .chain(cycle.transparency_mode.then_some(1))
-                .chain(cycle.noise_canceling_mode.then_some(2)))
+                .chain(cycle.transparency_mode.then_some("TransparencyMode".into()))
+                .chain(
+                    cycle
+                        .noise_canceling_mode
+                        .then_some("NoiseCancelingMode".into()),
+                ))
             .collect(),
         }
     }

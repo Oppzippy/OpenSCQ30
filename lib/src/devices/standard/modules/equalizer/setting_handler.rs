@@ -38,12 +38,7 @@ where
                 },
                 value: equalizer_configuration
                     .preset_profile()
-                    .and_then(|active_preset| {
-                        PresetEqualizerProfile::iter()
-                            .enumerate()
-                            .find(|(_, preset)| active_preset == *preset)
-                            .map(|(index, _)| index as u16)
-                    }),
+                    .map(|preset| Cow::Borrowed(preset.into())),
             },
             EqualizerSetting::CustomProfile => Setting::OptionalSelect {
                 setting: settings::Select {
@@ -70,16 +65,13 @@ where
 
     fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> crate::Result<()> {
         let equalizer_configuration = state.as_mut();
-        let setting = EqualizerSetting::from_str(setting_id.0.as_ref()).unwrap();
+        let setting = EqualizerSetting::from_str(setting_id.0.as_ref())
+            .expect("already filtered to valid values only by SettingsManager");
         match setting {
             EqualizerSetting::PresetProfile => {
-                let Value::OptionalU16(maybe_index) = value else {
-                    panic!();
-                };
-                if let Some(index) = maybe_index {
-                    *equalizer_configuration = EqualizerConfiguration::new_from_preset_profile(
-                        PresetEqualizerProfile::iter().nth(index as usize).unwrap(),
-                    )
+                if let Some(preset) = value.try_as_optional_enum_variant()? {
+                    *equalizer_configuration =
+                        EqualizerConfiguration::new_from_preset_profile(preset)
                 } else {
                     *equalizer_configuration = EqualizerConfiguration::new_custom_profile(
                         equalizer_configuration.volume_adjustments().to_owned(),
@@ -88,9 +80,7 @@ where
             }
             EqualizerSetting::CustomProfile => todo!(),
             EqualizerSetting::VolumeAdjustments => {
-                let Value::I16Vec(volume_adjustments) = value else {
-                    panic!();
-                };
+                let volume_adjustments = value.try_as_i16_slice()?;
                 *equalizer_configuration = EqualizerConfiguration::new_custom_profile(
                     VolumeAdjustments::new(
                         volume_adjustments.iter().map(|vol| *vol as f64 / 10f64),

@@ -78,32 +78,23 @@ where
 
     fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> crate::Result<()> {
         let sound_modes = state.as_mut();
-        let sound_mode_setting: SoundModeSetting = setting_id.0.parse().unwrap();
+        let sound_mode_setting: SoundModeSetting = setting_id
+            .0
+            .parse()
+            .expect("already filtered to valid values only by SettingsManager");
         match sound_mode_setting {
             SoundModeSetting::AmbientSoundMode => {
-                let Some(selected_index) = value.try_as_u16() else {
-                    panic!("got {value:?}")
-                };
-                sound_modes.ambient_sound_mode =
-                    self.available_sound_modes.ambient_sound_modes[selected_index as usize];
+                sound_modes.ambient_sound_mode = value.try_as_enum_variant()?;
             }
             SoundModeSetting::TransparencyMode => {
-                let Some(selected_index) = value.try_as_u16() else {
-                    panic!()
-                };
-                sound_modes.transparency_mode =
-                    self.available_sound_modes.transparency_modes[selected_index as usize]
+                sound_modes.transparency_mode = value.try_as_enum_variant()?;
             }
             SoundModeSetting::NoiseCancelingMode => {
-                let Some(selected_index) = value.try_as_u16() else {
-                    panic!()
-                };
-                sound_modes.noise_canceling_mode =
-                    self.available_sound_modes.noise_canceling_modes[selected_index as usize]
+                sound_modes.noise_canceling_mode = value.try_as_enum_variant()?;
             }
             SoundModeSetting::CustomNoiseCanceling => {
-                let Value::I32(value) = value else { panic!() };
-                sound_modes.custom_noise_canceling = CustomNoiseCanceling::new(value as u8);
+                sound_modes.custom_noise_canceling =
+                    CustomNoiseCanceling::new(value.try_as_i32()? as u8);
             }
         }
         Ok(())

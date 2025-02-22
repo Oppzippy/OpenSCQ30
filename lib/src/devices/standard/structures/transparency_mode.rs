@@ -6,11 +6,23 @@ use nom::{
 };
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use strum::{AsRefStr, Display, FromRepr, IntoStaticStr};
+use strum::{AsRefStr, Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 #[repr(u8)]
 #[derive(
-    Debug, Clone, Copy, Hash, PartialEq, Eq, FromRepr, Default, Display, AsRefStr, IntoStaticStr,
+    Debug,
+    Clone,
+    Copy,
+    Hash,
+    PartialEq,
+    Eq,
+    FromRepr,
+    Default,
+    Display,
+    AsRefStr,
+    IntoStaticStr,
+    EnumIter,
+    EnumString,
 )]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]

@@ -36,15 +36,15 @@ pub enum Setting {
     // The backing data is still Option<u16> for both and should be treated the same by the backend.
     Select {
         setting: Select,
-        value: Option<u16>,
+        value: Cow<'static, str>,
     },
     OptionalSelect {
         setting: Select,
-        value: Option<u16>,
+        value: Option<Cow<'static, str>>,
     },
     MultiSelect {
         setting: Select,
-        value: Vec<u16>,
+        value: Vec<Cow<'static, str>>,
     },
     Equalizer {
         setting: Equalizer,
@@ -73,7 +73,7 @@ impl Setting {
     {
         Self::Select {
             setting: Select::from_enum(T::iter()),
-            value: T::iter().position(|v| v == value).map(|i| i as u16),
+            value: Cow::Borrowed(value.into()),
         }
     }
 
@@ -84,36 +84,29 @@ impl Setting {
     {
         Setting::OptionalSelect {
             setting: Select::from_enum(T::iter()),
-            value: value.and_then(|selected_variant| {
-                T::iter()
-                    .position(|v| selected_variant == v)
-                    .map(|i| i as u16)
-            }),
+            value: value.map(|v| Cow::Borrowed(v.into())),
         }
     }
 
     pub(crate) fn select_from_enum<T>(variants: &[T], value: T) -> Self
     where
         for<'a> &'a T: PartialEq + Into<&'static str>,
+        T: Into<&'static str>,
     {
         Self::Select {
             setting: Select::from_enum(variants),
-            value: variants.iter().position(|v| v == &value).map(|i| i as u16),
+            value: Cow::Borrowed(value.into()),
         }
     }
 
     pub(crate) fn optional_select_from_enum<T>(variants: &[T], value: Option<T>) -> Self
     where
         for<'a> &'a T: PartialEq + Into<&'static str>,
+        T: Into<&'static str>,
     {
         Setting::OptionalSelect {
             setting: Select::from_enum(variants),
-            value: value.and_then(|selected_variant| {
-                variants
-                    .iter()
-                    .position(|v| &selected_variant == v)
-                    .map(|i| i as u16)
-            }),
+            value: value.map(|v| Cow::Borrowed(v.into())),
         }
     }
 }
