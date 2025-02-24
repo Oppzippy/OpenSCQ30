@@ -70,13 +70,11 @@ impl From<AmbientSoundModeCycle> for u8 {
 impl From<AmbientSoundModeCycle> for Setting {
     fn from(cycle: AmbientSoundModeCycle) -> Self {
         Self::MultiSelect {
-            setting: Select {
-                options: vec![
-                    Cow::Borrowed("NormalMode"),
-                    Cow::Borrowed("TransparencyMode"),
-                    Cow::Borrowed("NoiseCancelingMode"),
-                ],
-            },
+            setting: Select::new(vec![
+                Cow::Borrowed("NormalMode"),
+                Cow::Borrowed("TransparencyMode"),
+                Cow::Borrowed("NoiseCancelingMode"),
+            ]),
             value: (cycle
                 .normal_mode
                 .then_some("NormalMode".into())

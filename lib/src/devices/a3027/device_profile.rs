@@ -24,6 +24,7 @@ use crate::{
     soundcore_device::{
         device::packet_io_controller::PacketIOController, device_model::DeviceModel,
     },
+    storage::OpenSCQ30Database,
 };
 
 use super::{packets::A3027StateUpdatePacket, state::A3027State};
@@ -60,15 +61,17 @@ pub(crate) const A3027_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
 
 pub struct A3027DeviceRegistry<C: ConnectionRegistry, F: Futures> {
     inner: C,
+    database: Arc<OpenSCQ30Database>,
     device_model: DeviceModel,
     _futures: PhantomData<F>,
 }
 
 impl<C: ConnectionRegistry, F: Futures> A3027DeviceRegistry<C, F> {
-    pub fn new(inner: C, device_model: DeviceModel) -> Self {
+    pub fn new(inner: C, database: Arc<OpenSCQ30Database>, device_model: DeviceModel) -> Self {
         Self {
             inner,
             device_model,
+            database,
             _futures: PhantomData,
         }
     }
@@ -102,8 +105,12 @@ where
             .connection(mac_address)
             .await?
             .ok_or(crate::Error::DeviceNotFound { source: None })?;
-        let device =
-            A3027Device::<C::ConnectionType, F>::new(connection, self.device_model).await?;
+        let device = A3027Device::<C::ConnectionType, F>::new(
+            self.database.clone(),
+            connection,
+            self.device_model,
+        )
+        .await?;
         Ok(Arc::new(device))
     }
 }
@@ -121,6 +128,7 @@ where
     FuturesType: Futures + 'static + MaybeSend + MaybeSync,
 {
     pub async fn new(
+        database: Arc<OpenSCQ30Database>,
         connection: Arc<ConnectionType>,
         device_model: DeviceModel,
     ) -> crate::Result<Self> {
@@ -150,7 +158,9 @@ where
                 ],
             },
         );
-        module_collection.add_equalizer(packet_io_controller.clone(), false);
+        module_collection
+            .add_equalizer(packet_io_controller.clone(), database, device_model, false)
+            .await;
 
         let module_collection = Arc::new(module_collection);
         module_collection

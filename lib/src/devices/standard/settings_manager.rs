@@ -3,6 +3,8 @@ use std::{
     sync::Arc,
 };
 
+use async_trait::async_trait;
+
 use crate::api::settings::{CategoryId, Setting, SettingId, Value};
 
 pub struct SettingsManager<T> {
@@ -95,12 +97,13 @@ impl<StateType> SettingsManager<StateType> {
         value: Value,
     ) -> Option<crate::Result<()>> {
         let handler = self.settings_to_handlers.get(setting_id)?;
-        Some(handler.set(state, setting_id, value))
+        Some(handler.set(state, setting_id, value).await)
     }
 }
 
+#[async_trait]
 pub trait SettingHandler<T> {
     fn settings(&self) -> Vec<SettingId<'static>>;
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting>;
-    fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> crate::Result<()>;
+    async fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> crate::Result<()>;
 }

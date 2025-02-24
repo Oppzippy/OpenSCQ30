@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+use async_trait::async_trait;
 use strum::IntoEnumIterator;
 
 use crate::{
@@ -24,9 +25,10 @@ impl SoundModesSettingHandler {
     }
 }
 
+#[async_trait]
 impl<T> SettingHandler<T> for SoundModesSettingHandler
 where
-    T: AsMut<SoundModes> + AsRef<SoundModes>,
+    T: AsMut<SoundModes> + AsRef<SoundModes> + Send,
 {
     fn settings(&self) -> Vec<SettingId<'static>> {
         SoundModeSetting::iter()
@@ -76,7 +78,7 @@ where
         })
     }
 
-    fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> crate::Result<()> {
+    async fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> crate::Result<()> {
         let sound_modes = state.as_mut();
         let sound_mode_setting: SoundModeSetting = setting_id
             .0

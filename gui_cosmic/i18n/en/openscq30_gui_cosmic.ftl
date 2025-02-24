@@ -27,3 +27,6 @@ name = Name
 create = Create
 editing-quick-preset = Editing Quick Preset: { $name }
 save = Save
+add-item = Add { $name }
+remove-item = Remove { $name }
+remove-item-confirm = Are you sure you want to remove { $name }?

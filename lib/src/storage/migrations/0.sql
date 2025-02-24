@@ -20,4 +20,5 @@ CREATE TABLE equalizer_profile (
     volume_adjustments TEXT NOT NULL CHECK(json_valid(volume_adjustments)),
     created_at INTEGER NOT NULL DEFAULT (strftime('%s'))
 ) STRICT;
-CREATE UNIQUE INDEX idx_equalizer_profile_device_model ON equalizer_profile (device_model, name);
+CREATE UNIQUE INDEX idx_equalizer_profile_name ON equalizer_profile (device_model, name);
+CREATE UNIQUE INDEX idx_equalizer_profile_volume_adjustments ON equalizer_profile (device_model, volume_adjustments);

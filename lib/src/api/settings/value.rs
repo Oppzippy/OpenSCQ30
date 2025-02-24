@@ -113,6 +113,17 @@ impl Value {
             })
         }
     }
+
+    pub fn try_into_i16_vec(self) -> Result<Vec<i16>, ValueError> {
+        if let Value::I16Vec(value) = self {
+            Ok(value)
+        } else {
+            Err(ValueError::WrongType {
+                expected: ValueDiscriminants::I16Vec,
+                actual: self,
+            })
+        }
+    }
 }
 
 impl From<bool> for Value {

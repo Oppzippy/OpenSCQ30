@@ -50,7 +50,11 @@ impl OpenSCQ30Session {
         model: DeviceModel,
     ) -> crate::Result<Vec<GenericDeviceDescriptor>> {
         model
-            .device_registry::<TokioFutures>(None, true)
+            .device_registry::<TokioFutures>(
+                self.database.clone(),
+                Some(tokio::runtime::Handle::current()),
+                true,
+            )
             .await?
             .devices()
             .await
@@ -63,7 +67,11 @@ impl OpenSCQ30Session {
         if let Some(paired_device) = self.database.fetch_paired_device(mac_address).await? {
             let registry = paired_device
                 .model
-                .device_registry::<TokioFutures>(Some(tokio::runtime::Handle::current()), true)
+                .device_registry::<TokioFutures>(
+                    self.database.clone(),
+                    Some(tokio::runtime::Handle::current()),
+                    true,
+                )
                 .await?;
             registry.connect(mac_address).await
         } else {

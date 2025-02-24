@@ -72,7 +72,7 @@ pub fn delete(
     name: String,
 ) -> Result<(), StorageError> {
     connection.execute(
-        r#"DELETE FROM quick_preset WHERE model = ?1 AND name = ?2"#,
+        r#"DELETE FROM quick_preset WHERE device_model = ?1 AND name = ?2"#,
         (SqliteDeviceModel(model), name),
     )?;
     Ok(())

@@ -1,3 +1,4 @@
+mod equalizer_profile;
 mod migration;
 mod paired_device;
 mod quick_preset;
@@ -193,4 +194,17 @@ commands!(
         settings: HashMap<SettingId<'static>, settings::Value>,
     ) -> Result<(), StorageError>;
     quick_preset::delete => fn delete_quick_preset(model: DeviceModel, name: String) -> Result<(), StorageError>;
+    equalizer_profile::fetch => fn fetch_equalizer_profile(
+        model: DeviceModel,
+        name: String,
+    ) -> Result<Vec<i16>, StorageError>;
+    equalizer_profile::fetch_all => fn fetch_all_equalizer_profiles(
+        model: DeviceModel,
+    ) -> Result<Vec<(String, Vec<i16>)>, StorageError>;
+    equalizer_profile::upsert => fn upsert_equalizer_profile(
+        model: DeviceModel,
+        name: String,
+        volume_adjustments: Vec<i16>,
+    ) -> Result<(), StorageError>;
+    equalizer_profile::delete => fn delete_equalizer_profile(model: DeviceModel, name: String) -> Result<(), StorageError>;
 );

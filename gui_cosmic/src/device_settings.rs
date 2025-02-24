@@ -24,11 +24,16 @@ pub enum Message {
     SetQuickPresets(Vec<QuickPreset>),
     CreateQuickPreset,
     SetCreateQuickPresetName(String),
-    CancelCreateQuickPreset,
+    CancelDialog,
     EditQuickPresetToggleField(usize, bool),
     EditQuickPresetCancel,
     EditQuickPresetSave,
     EditQuickPresetDone,
+    ShowOptionalSelectAddDialog(SettingId<'static>),
+    ShowOptionalSelectRemoveDialog(SettingId<'static>),
+    OptionalSelectAddDialogSubmit,
+    OptionalSelectAddDialogSetName(String),
+    OptionalSelectRemoveDialogSubmit,
 }
 pub enum Action {
     Task(Task<Message>),
@@ -43,8 +48,14 @@ pub struct DeviceSettingsModel {
     nav_model: nav_bar::Model,
     settings: Vec<(SettingId<'static>, Setting)>,
     quick_presets: Option<Vec<QuickPreset>>,
-    create_quick_preset_name: Option<String>,
+    dialog: Option<Dialog>,
     editing_quick_preset: Option<QuickPreset>,
+}
+
+enum Dialog {
+    CreateQuickPreset(String),
+    OptionalSelectAdd(SettingId<'static>, String),
+    OptionalSelectRemove(SettingId<'static>, Cow<'static, str>),
 }
 
 impl DeviceSettingsModel {
@@ -71,8 +82,8 @@ impl DeviceSettingsModel {
             settings: Vec::new(),
             quick_presets_handler,
             quick_presets: None,
-            create_quick_preset_name: None,
             editing_quick_preset: None,
+            dialog: None,
         };
         let task = model.refresh();
         (model, task)
@@ -119,8 +130,8 @@ impl DeviceSettingsModel {
     }
 
     pub fn dialog(&self) -> Option<Element<'_, Message>> {
-        self.create_quick_preset_name.as_ref().map(|name| {
-            widget::dialog()
+        self.dialog.as_ref().map(|dialog| match dialog {
+            Dialog::CreateQuickPreset(name) => widget::dialog()
                 .title(fl!("create-quick-preset"))
                 .control(
                     widget::text_input(fl!("name"), name)
@@ -132,10 +143,38 @@ impl DeviceSettingsModel {
                     widget::button::suggested(fl!("create")).on_press(Message::CreateQuickPreset),
                 )
                 .secondary_action(
-                    widget::button::destructive(fl!("cancel"))
-                        .on_press(Message::CancelCreateQuickPreset),
+                    widget::button::destructive(fl!("cancel")).on_press(Message::CancelDialog),
                 )
-                .into()
+                .into(),
+            Dialog::OptionalSelectAdd(setting_id, name) => widget::dialog()
+                .title(fl!("add-item", name = setting_id.0.as_ref()))
+                .control(
+                    widget::text_input(fl!("name"), name)
+                        .id(widget::Id::new(
+                            "optional-select-dialog-add-item-text-input",
+                        ))
+                        .on_input(|text| Message::OptionalSelectAddDialogSetName(text))
+                        .on_submit(Message::OptionalSelectAddDialogSubmit),
+                )
+                .primary_action(
+                    widget::button::suggested(fl!("create"))
+                        .on_press(Message::OptionalSelectAddDialogSubmit),
+                )
+                .secondary_action(
+                    widget::button::destructive(fl!("cancel")).on_press(Message::CancelDialog),
+                )
+                .into(),
+            Dialog::OptionalSelectRemove(setting_id, name) => widget::dialog()
+                .title(fl!("remove-item", name = name.as_ref()))
+                .body(fl!("remove-item-confirm", name = name.as_ref()))
+                .primary_action(
+                    widget::button::destructive(fl!("remove"))
+                        .on_press(Message::OptionalSelectRemoveDialogSubmit),
+                )
+                .secondary_action(
+                    widget::button::text(fl!("cancel")).on_press(Message::CancelDialog),
+                )
+                .into(),
         })
     }
 
@@ -236,12 +275,21 @@ impl DeviceSettingsModel {
                         setting_id.clone(),
                         setting,
                         value.as_deref(),
-                        move |value| {
-                            Message::SetSetting(
-                                setting_id.clone(),
-                                value.map(ToOwned::to_owned).map(Cow::from).into(),
-                            )
+                        {
+                            let setting_id = setting_id.clone();
+                            move |value| {
+                                Message::SetSetting(
+                                    setting_id.clone(),
+                                    value.map(ToOwned::to_owned).map(Cow::from).into(),
+                                )
+                            }
                         },
+                        setting
+                            .has_add_button
+                            .then_some(Message::ShowOptionalSelectAddDialog(setting_id.clone())),
+                        setting
+                            .has_add_button
+                            .then_some(Message::ShowOptionalSelectRemoveDialog(setting_id.clone())),
                     ),
                     Setting::MultiSelect { setting, value } => todo!(),
                     Setting::Equalizer {
@@ -332,19 +380,19 @@ impl DeviceSettingsModel {
                 Action::None
             }
             Message::ShowCreateQuickPresetDialog => {
-                self.create_quick_preset_name = Some(String::new());
+                self.dialog = Some(Dialog::CreateQuickPreset(String::new()));
                 Action::FocusTextInput(widget::Id::new("create-quick-preset-name"))
             }
             Message::SetCreateQuickPresetName(name) => {
-                self.create_quick_preset_name = Some(name);
+                self.dialog = Some(Dialog::CreateQuickPreset(name));
                 Action::None
             }
-            Message::CancelCreateQuickPreset => {
-                self.create_quick_preset_name = None;
+            Message::CancelDialog => {
+                self.dialog = None;
                 Action::None
             }
             Message::CreateQuickPreset => {
-                let Some(name) = self.create_quick_preset_name.take() else {
+                let Some(Dialog::CreateQuickPreset(name)) = self.dialog.take() else {
                     return Action::None;
                 };
                 let device = self.device.clone();
@@ -405,6 +453,100 @@ impl DeviceSettingsModel {
             Message::EditQuickPresetDone => {
                 self.editing_quick_preset = None;
                 Action::Task(self.refresh())
+            }
+            Message::ShowOptionalSelectAddDialog(setting_id) => {
+                self.dialog = Some(Dialog::OptionalSelectAdd(setting_id, String::new()));
+                Action::FocusTextInput(widget::Id::new(
+                    "optional-select-dialog-add-item-text-input",
+                ))
+            }
+            Message::ShowOptionalSelectRemoveDialog(setting_id) => {
+                let selected_item = self
+                    .settings
+                    .iter()
+                    .find(|item| item.0 == setting_id)
+                    .and_then(|item| {
+                        if let (_setting_id, Setting::OptionalSelect { setting, value }) = item {
+                            value.to_owned()
+                        } else {
+                            None
+                        }
+                    });
+                if let Some(selected_item) = selected_item {
+                    self.dialog = Some(Dialog::OptionalSelectRemove(setting_id, selected_item));
+                } else {
+                    tracing::error!(
+                        r#"tried to open optional select remove dialog for {setting_id:?}, but selected item is None.
+                        current settings: {:?}
+                        "#,
+                        self.settings,
+                    );
+                }
+                Action::None
+            }
+            Message::OptionalSelectAddDialogSetName(new_name) => {
+                if let Some(Dialog::OptionalSelectAdd(_setting_id, name)) = &mut self.dialog {
+                    *name = new_name;
+                }
+                Action::None
+            }
+            Message::OptionalSelectAddDialogSubmit => {
+                if let Some(Dialog::OptionalSelectAdd(setting_id, name)) = self.dialog.take() {
+                    let device = self.device.clone();
+                    Action::Task(
+                        Task::future(async move {
+                            device
+                                .set_setting_values(vec![(
+                                    setting_id,
+                                    Value::OptionalString(Some(Cow::Owned(name))),
+                                )])
+                                .await
+                                .map_err(handle_soft_error!())?;
+                            Ok(Message::Refresh)
+                        })
+                        .map(coalesce_result),
+                    )
+                } else {
+                    Action::None
+                }
+            }
+            Message::OptionalSelectRemoveDialogSubmit => {
+                if let Some(Dialog::OptionalSelectRemove(setting_id, name)) = self.dialog.take() {
+                    let is_target_item_still_selected = self
+                        .settings
+                        .iter()
+                        .find(|item| item.0 == setting_id)
+                        .and_then(|item| {
+                            if let (_setting_id, Setting::OptionalSelect { setting: _, value }) =
+                                item
+                            {
+                                value.as_ref().map(|v| v == &name)
+                            } else {
+                                None
+                            }
+                        })
+                        .unwrap_or_default();
+                    if is_target_item_still_selected {
+                        let device = self.device.clone();
+                        Action::Task(
+                            Task::future(async move {
+                                device
+                                    .set_setting_values(vec![(
+                                        setting_id,
+                                        Value::OptionalString(None),
+                                    )])
+                                    .await
+                                    .map_err(handle_soft_error!())?;
+                                Ok(Message::Refresh)
+                            })
+                            .map(coalesce_result),
+                        )
+                    } else {
+                        Action::None
+                    }
+                } else {
+                    Action::None
+                }
             }
         }
     }

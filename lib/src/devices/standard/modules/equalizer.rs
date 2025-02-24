@@ -8,7 +8,10 @@ use crate::{
     api::{connection::Connection, settings::CategoryId},
     devices::standard::structures::EqualizerConfiguration,
     futures::{Futures, MaybeSend, MaybeSync},
-    soundcore_device::device::packet_io_controller::PacketIOController,
+    soundcore_device::{
+        device::packet_io_controller::PacketIOController, device_model::DeviceModel,
+    },
+    storage::OpenSCQ30Database,
 };
 
 use super::ModuleCollection;
@@ -24,8 +27,13 @@ enum EqualizerSetting {
 }
 
 pub trait AddEqualizerExt {
-    fn add_equalizer<C, F>(&mut self, packet_io: Arc<PacketIOController<C, F>>, is_stereo: bool)
-    where
+    async fn add_equalizer<C, F>(
+        &mut self,
+        packet_io: Arc<PacketIOController<C, F>>,
+        database: Arc<OpenSCQ30Database>,
+        device_model: DeviceModel,
+        is_stereo: bool,
+    ) where
         C: Connection + 'static + MaybeSend + MaybeSync,
         F: Futures + 'static + MaybeSend + MaybeSync;
 }
@@ -38,14 +46,19 @@ where
         + MaybeSend
         + MaybeSync,
 {
-    fn add_equalizer<C, F>(&mut self, packet_io: Arc<PacketIOController<C, F>>, is_stereo: bool)
-    where
+    async fn add_equalizer<C, F>(
+        &mut self,
+        packet_io: Arc<PacketIOController<C, F>>,
+        database: Arc<OpenSCQ30Database>,
+        device_model: DeviceModel,
+        is_stereo: bool,
+    ) where
         C: Connection + 'static + MaybeSend + MaybeSync,
         F: Futures + 'static + MaybeSend + MaybeSync,
     {
         self.setting_manager.add_handler(
             CategoryId(Cow::Borrowed("equalizer")),
-            EqualizerSettingHandler::default(),
+            EqualizerSettingHandler::new(database, device_model).await,
         );
         self.state_modifiers
             .push(Box::new(EqualizerStateModifier::new(packet_io, is_stereo)));

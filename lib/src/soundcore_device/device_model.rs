@@ -15,6 +15,7 @@ use crate::{
         standard::{packets::outbound::OutboundPacketBytesExt, structures::SerialNumber},
     },
     futures::{Futures, MaybeSend, MaybeSync},
+    storage::OpenSCQ30Database,
 };
 
 use super::connection::new_connection_registry;
@@ -72,6 +73,7 @@ impl DeviceModel {
 
     pub async fn device_registry<F: Futures + 'static + MaybeSend + MaybeSync>(
         &self,
+        database: Arc<OpenSCQ30Database>,
         runtime_handle: Option<Handle>,
         is_demo: bool,
     ) -> crate::Result<MaybeSendDeviceRegistry> {
@@ -82,11 +84,13 @@ impl DeviceModel {
                         "A3027".to_string(),
                         A3027StateUpdatePacket::default().bytes(),
                     ),
+                    database,
                     DeviceModel::SoundcoreA3027,
                 ))
             } else {
                 Arc::new(A3027DeviceRegistry::<_, F>::new(
                     new_connection_registry(runtime_handle).await?,
+                    database,
                     DeviceModel::SoundcoreA3027,
                 ))
             }),
