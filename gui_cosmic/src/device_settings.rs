@@ -1,5 +1,6 @@
 mod equalizer;
 mod quick_presets;
+mod range;
 mod select;
 mod toggle;
 
@@ -169,7 +170,7 @@ impl DeviceSettingsModel {
                     widget::button::destructive(fl!("cancel")).on_press(Message::CancelDialog),
                 )
                 .into(),
-            Dialog::OptionalSelectRemove(setting_id, name) => widget::dialog()
+            Dialog::OptionalSelectRemove(_setting_id, name) => widget::dialog()
                 .title(fl!("remove-item", name = name.as_ref()))
                 .body(fl!("remove-item-confirm", name = name.as_ref()))
                 .primary_action(
@@ -267,7 +268,12 @@ impl DeviceSettingsModel {
                             Message::SetSetting(setting_id.clone(), new_value.into())
                         })
                     }
-                    Setting::I32Range { setting, value } => todo!(),
+                    Setting::I32Range { setting, value } => range::i32_range(
+                        setting_id.clone(),
+                        setting.range.clone(),
+                        *value,
+                        move |new_value| Message::SetSetting(setting_id.clone(), new_value.into()),
+                    ),
                     Setting::Select { setting, value } => {
                         select::select(setting_id.clone(), setting, value, move |value| {
                             Message::SetSetting(
@@ -325,7 +331,7 @@ impl DeviceSettingsModel {
             }
             Message::SetEqualizerBand(setting_id, index, new_value) => {
                 let device = self.device.clone();
-                if let Some(Setting::Equalizer { setting, values }) =
+                if let Some(Setting::Equalizer { setting: _, values }) =
                     self.device.setting(&setting_id)
                 {
                     let mut new_values = values.clone();
@@ -467,7 +473,7 @@ impl DeviceSettingsModel {
                     .iter()
                     .find(|item| item.0 == setting_id)
                     .and_then(|item| {
-                        if let (_setting_id, Setting::OptionalSelect { setting, value }) = item {
+                        if let (_setting_id, Setting::OptionalSelect { setting: _, value }) = item {
                             value.to_owned()
                         } else {
                             None

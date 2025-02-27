@@ -69,8 +69,7 @@ where
             ),
             SoundModeSetting::CustomNoiseCanceling => Setting::I32Range {
                 setting: Range {
-                    min: 0,
-                    max: 10,
+                    range: 0..=10,
                     step: 1,
                 },
                 value: sound_modes.custom_noise_canceling.value().into(),
