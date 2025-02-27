@@ -82,7 +82,7 @@ where
                     .preset_profile()
                     .map(|preset| Cow::Borrowed(preset.into())),
             },
-            EqualizerSetting::CustomProfile => Setting::OptionalSelect {
+            EqualizerSetting::CustomProfile => Setting::ModifiableSelect {
                 setting: settings::Select::new({
                     // scoped so we don't hold the lock after collecting
                     self.custom_profiles
@@ -91,8 +91,7 @@ where
                         .iter()
                         .map(|(name, _)| name.to_owned().into())
                         .collect()
-                })
-                .with_add_button(true),
+                }),
                 value: equalizer_configuration
                     .preset_profile()
                     .is_none()

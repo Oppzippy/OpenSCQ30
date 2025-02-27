@@ -286,6 +286,17 @@ impl DeviceSettingsModel {
                         setting_id.clone(),
                         setting,
                         value.as_deref(),
+                        move |value| {
+                            Message::SetSetting(
+                                setting_id.clone(),
+                                value.map(ToOwned::to_owned).map(Cow::from).into(),
+                            )
+                        },
+                    ),
+                    Setting::ModifiableSelect { setting, value } => select::modifiable_select(
+                        setting_id.clone(),
+                        setting,
+                        value.as_deref(),
                         {
                             let setting_id = setting_id.clone();
                             move |value| {
@@ -295,12 +306,8 @@ impl DeviceSettingsModel {
                                 )
                             }
                         },
-                        setting
-                            .has_add_button
-                            .then_some(Message::ShowOptionalSelectAddDialog(setting_id.clone())),
-                        setting
-                            .has_add_button
-                            .then_some(Message::ShowOptionalSelectRemoveDialog(setting_id.clone())),
+                        Message::ShowOptionalSelectAddDialog(setting_id.clone()),
+                        Message::ShowOptionalSelectRemoveDialog(setting_id.clone()),
                     ),
                     Setting::MultiSelect { setting, value } => todo!(),
                     Setting::Equalizer {

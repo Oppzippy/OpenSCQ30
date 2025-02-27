@@ -42,6 +42,11 @@ pub enum Setting {
         setting: Select,
         value: Option<Cow<'static, str>>,
     },
+    /// Allows the user to add/remove items from the select
+    ModifiableSelect {
+        setting: Select,
+        value: Option<Cow<'static, str>>,
+    },
     MultiSelect {
         setting: Select,
         value: Vec<Cow<'static, str>>,
@@ -61,6 +66,7 @@ impl From<Setting> for Value {
             Setting::OptionalSelect { value, .. } => value.into(),
             Setting::MultiSelect { value, .. } => value.into(),
             Setting::Equalizer { values: value, .. } => value.into(),
+            Setting::ModifiableSelect { value, .. } => value.into(),
         }
     }
 }

@@ -7,44 +7,6 @@ use cosmic::{
 };
 use openscq30_lib::api::settings::{Select, SettingId};
 
-pub fn optional_select<'a, M>(
-    setting_id: SettingId<'a>,
-    setting: &'a Select,
-    value: Option<&str>,
-    on_change: impl Fn(Option<&str>) -> M + 'a,
-    on_add: Option<M>,
-    on_remove: Option<M>,
-) -> Element<'a, M>
-where
-    M: Clone + 'static,
-{
-    let selected_index = value
-        .map(|value| setting.options.iter().position(|option| option == value))
-        .flatten();
-    let maybe_deselect_message = if value.is_some() {
-        Some(on_remove.unwrap_or_else(|| on_change(None)))
-    } else {
-        None
-    };
-    with_label(
-        setting_id.0,
-        widget::row()
-            .push(
-                widget::dropdown(&setting.options, selected_index, move |index| {
-                    on_change(Some(&setting.options[index]))
-                })
-                .width(Length::FillPortion(1)),
-            )
-            .push_maybe(maybe_deselect_message.map(|deselect_message| {
-                widget::button::icon(widget::icon::from_name("list-remove-symbolic"))
-                    .on_press(deselect_message)
-            }))
-            .push_maybe(on_add.map(|on_add| {
-                widget::button::icon(widget::icon::from_name("list-add-symbolic")).on_press(on_add)
-            })),
-    )
-}
-
 pub fn select<'a, M>(
     setting_id: SettingId<'a>,
     setting: &'a Select,
@@ -61,6 +23,63 @@ where
             on_change(&setting.options[index])
         })
         .width(Length::FillPortion(1)),
+    )
+}
+
+pub fn optional_select<'a, M>(
+    setting_id: SettingId<'a>,
+    setting: &'a Select,
+    value: Option<&str>,
+    on_change: impl Fn(Option<&str>) -> M + 'a,
+) -> Element<'a, M>
+where
+    M: Clone + 'a,
+{
+    let selected_index = value
+        .map(|value| setting.options.iter().position(|option| option == value))
+        .flatten();
+    with_label(
+        setting_id.0,
+        widget::row().push(
+            widget::dropdown(&setting.options, selected_index, move |index| {
+                on_change(Some(&setting.options[index]))
+            })
+            .width(Length::FillPortion(1)),
+        ),
+    )
+}
+
+pub fn modifiable_select<'a, M>(
+    setting_id: SettingId<'a>,
+    setting: &'a Select,
+    value: Option<&str>,
+    on_change: impl Fn(Option<&str>) -> M + 'a,
+    on_add: M,
+    on_remove: M,
+) -> Element<'a, M>
+where
+    M: Clone + 'static,
+{
+    let selected_index = value
+        .map(|value| setting.options.iter().position(|option| option == value))
+        .flatten();
+    let maybe_deselect_message = value.is_some().then_some(on_remove);
+    with_label(
+        setting_id.0,
+        widget::row()
+            .push(
+                widget::dropdown(&setting.options, selected_index, move |index| {
+                    on_change(Some(&setting.options[index]))
+                })
+                .width(Length::FillPortion(1)),
+            )
+            .push_maybe(maybe_deselect_message.map(|deselect_message| {
+                widget::button::icon(widget::icon::from_name("list-remove-symbolic"))
+                    .on_press(deselect_message)
+            }))
+            .push(
+                widget::button::icon(widget::icon::from_name("list-add-symbolic")).on_press(on_add),
+            ),
     )
 }
 
