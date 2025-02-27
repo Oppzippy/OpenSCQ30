@@ -1,3 +1,8 @@
+mod equalizer;
+mod quick_presets;
+mod select;
+mod toggle;
+
 use std::{borrow::Cow, collections::HashMap};
 
 use cosmic::{
@@ -233,7 +238,7 @@ impl DeviceSettingsModel {
                         widget::button::standard(fl!("create-quick-preset"))
                             .on_press(Message::ShowCreateQuickPresetDialog),
                     )
-                    .push(crate::settings::quick_presets(
+                    .push(quick_presets::quick_presets(
                         quick_presets,
                         Message::EditQuickPreset,
                         Message::ActivateQuickPreset,
@@ -258,20 +263,20 @@ impl DeviceSettingsModel {
                 let setting_id = setting_id.to_owned();
                 match setting {
                     Setting::Toggle { value } => {
-                        crate::settings::toggle(setting_id.clone(), *value, move |new_value| {
+                        toggle::toggle(setting_id.clone(), *value, move |new_value| {
                             Message::SetSetting(setting_id.clone(), new_value.into())
                         })
                     }
                     Setting::I32Range { setting, value } => todo!(),
                     Setting::Select { setting, value } => {
-                        crate::settings::select(setting_id.clone(), setting, value, move |value| {
+                        select::select(setting_id.clone(), setting, value, move |value| {
                             Message::SetSetting(
                                 setting_id.clone(),
                                 Cow::from(value.to_owned()).into(),
                             )
                         })
                     }
-                    Setting::OptionalSelect { setting, value } => crate::settings::optional_select(
+                    Setting::OptionalSelect { setting, value } => select::optional_select(
                         setting_id.clone(),
                         setting,
                         value.as_deref(),
@@ -295,13 +300,9 @@ impl DeviceSettingsModel {
                     Setting::Equalizer {
                         setting,
                         values: value,
-                    } => crate::settings::responsive_equalizer(
-                        setting,
-                        value,
-                        move |index, value| {
-                            Message::SetEqualizerBand(setting_id.clone(), index, value)
-                        },
-                    ),
+                    } => equalizer::responsive_equalizer(setting, value, move |index, value| {
+                        Message::SetEqualizerBand(setting_id.clone(), index, value)
+                    }),
                 }
             }))
             .into()

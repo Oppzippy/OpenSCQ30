@@ -22,12 +22,7 @@ where
 {
     widget::responsive(move |size| {
         if size.width < 700f32 || size.height < 300f32 {
-            widget::scrollable(crate::settings::horizontal_equalizer(
-                setting,
-                value,
-                on_change.clone(),
-            ))
-            .into()
+            widget::scrollable(horizontal_equalizer(setting, value, on_change.clone())).into()
         } else {
             vertical_equalizer(setting, value, on_change.clone())
         }
