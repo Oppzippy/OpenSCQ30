@@ -4,6 +4,7 @@ use nom::{
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
+use openscq30_i18n_macros::Translate;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
@@ -23,6 +24,7 @@ use strum::{AsRefStr, Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
     IntoStaticStr,
     EnumIter,
     EnumString,
+    Translate,
 )]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]

@@ -19,7 +19,7 @@ where
     let selected_index = setting.options.iter().position(|option| option == value);
     with_label(
         setting_id.0,
-        widget::dropdown(&setting.options, selected_index, move |index| {
+        widget::dropdown(&setting.localized_options, selected_index, move |index| {
             on_change(&setting.options[index])
         })
         .width(Length::FillPortion(1)),
@@ -41,7 +41,7 @@ where
     with_label(
         setting_id.0,
         widget::row().push(
-            widget::dropdown(&setting.options, selected_index, move |index| {
+            widget::dropdown(&setting.localized_options, selected_index, move |index| {
                 on_change(Some(&setting.options[index]))
             })
             .width(Length::FillPortion(1)),
@@ -68,7 +68,7 @@ where
         setting_id.0,
         widget::row()
             .push(
-                widget::dropdown(&setting.options, selected_index, move |index| {
+                widget::dropdown(&setting.localized_options, selected_index, move |index| {
                     on_change(Some(&setting.options[index]))
                 })
                 .width(Length::FillPortion(1)),

@@ -12,9 +12,7 @@ use crate::{
     api::settings::{self, Setting, SettingId, Value},
     devices::standard::{
         settings_manager::SettingHandler,
-        structures::{
-            EqualizerConfiguration, PresetEqualizerProfile, VolumeAdjustments, VolumeAdjustments2,
-        },
+        structures::{EqualizerConfiguration, VolumeAdjustments, VolumeAdjustments2},
     },
     soundcore_device::device_model::DeviceModel,
     storage::OpenSCQ30Database,
@@ -71,27 +69,23 @@ where
             VolumeAdjustments2::from(equalizer_configuration.volume_adjustments().to_owned());
         let setting = EqualizerSetting::from_str(setting_id.0.as_ref()).ok()?;
         Some(match setting {
-            EqualizerSetting::PresetProfile => Setting::OptionalSelect {
-                setting: settings::Select::new(
-                    PresetEqualizerProfile::iter()
-                        .map(Into::into)
-                        .map(Cow::Borrowed)
-                        .collect(),
-                ),
-                value: equalizer_configuration
-                    .preset_profile()
-                    .map(|preset| Cow::Borrowed(preset.into())),
-            },
+            EqualizerSetting::PresetProfile => Setting::optional_select_from_enum_all_variants(
+                equalizer_configuration.preset_profile(),
+            ),
             EqualizerSetting::CustomProfile => Setting::ModifiableSelect {
-                setting: settings::Select::new({
-                    // scoped so we don't hold the lock after collecting
-                    self.custom_profiles
-                        .lock()
-                        .unwrap()
-                        .iter()
-                        .map(|(name, _)| name.to_owned().into())
-                        .collect()
-                }),
+                setting: {
+                    let custom_profiles = self.custom_profiles.lock().unwrap();
+                    settings::Select {
+                        options: custom_profiles
+                            .iter()
+                            .map(|(name, _)| name.to_owned().into())
+                            .collect(),
+                        localized_options: custom_profiles
+                            .iter()
+                            .map(|(name, _)| name.to_owned())
+                            .collect(),
+                    }
+                },
                 value: equalizer_configuration
                     .preset_profile()
                     .is_none()

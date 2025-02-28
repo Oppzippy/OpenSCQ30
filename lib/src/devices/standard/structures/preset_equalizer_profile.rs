@@ -1,3 +1,4 @@
+use openscq30_i18n_macros::Translate;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
@@ -19,6 +20,7 @@ use super::volume_adjustments::VolumeAdjustments;
     EnumString,
     AsRefStr,
     IntoStaticStr,
+    Translate,
 )]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PresetEqualizerProfile {
@@ -39,6 +41,7 @@ pub enum PresetEqualizerProfile {
     Lounge = 0x000d,
     Piano = 0x000e,
     Pop = 0x000f,
+    #[translate("rnb")]
     RnB = 0x0010,
     Rock = 0x0011,
     SmallSpeakers = 0x0012,

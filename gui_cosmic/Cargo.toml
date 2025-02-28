@@ -21,12 +21,12 @@ libcosmic = { workspace = true, features = [
     "wgpu",
     "about",
 ] }
-i18n-embed = { version = "0.15", features = [
+i18n-embed = { workspace = true, features = [
     "fluent-system",
     "desktop-requester",
 ] }
-i18n-embed-fl = "0.9.2"
-rust-embed = "8.5.0"
+i18n-embed-fl = { workspace = true }
+rust-embed = { workspace = true }
 macaddr = { workspace = true }
 openscq30_lib = { path = "../lib", features = ["serde"] }
 strum = { workspace = true }

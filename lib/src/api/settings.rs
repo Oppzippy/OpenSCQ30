@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 pub use equalizer::*;
+use openscq30_i18n::Translate;
 pub use range::*;
 pub use select::*;
 use serde::{Deserialize, Serialize};
@@ -60,7 +61,7 @@ pub enum Setting {
 impl From<Setting> for Value {
     fn from(setting: Setting) -> Self {
         match setting {
-            Setting::Toggle { value } => value.into(),
+            Setting::Toggle { value, .. } => value.into(),
             Setting::I32Range { value, .. } => value.into(),
             Setting::Select { value, .. } => value.into(),
             Setting::OptionalSelect { value, .. } => value.into(),
@@ -74,8 +75,7 @@ impl From<Setting> for Value {
 impl Setting {
     pub(crate) fn select_from_enum_all_variants<T>(value: T) -> Self
     where
-        T: IntoEnumIterator,
-        T: PartialEq + Into<&'static str>,
+        T: PartialEq + Into<&'static str> + IntoEnumIterator + Translate,
     {
         Self::Select {
             setting: Select::from_enum(T::iter()),
@@ -85,8 +85,7 @@ impl Setting {
 
     pub(crate) fn optional_select_from_enum_all_variants<T>(value: Option<T>) -> Self
     where
-        T: IntoEnumIterator,
-        T: PartialEq + Into<&'static str>,
+        T: PartialEq + Into<&'static str> + IntoEnumIterator + Translate,
     {
         Setting::OptionalSelect {
             setting: Select::from_enum(T::iter()),
@@ -97,7 +96,7 @@ impl Setting {
     pub(crate) fn select_from_enum<T>(variants: &[T], value: T) -> Self
     where
         for<'a> &'a T: PartialEq + Into<&'static str>,
-        T: Into<&'static str>,
+        T: Into<&'static str> + Translate,
     {
         Self::Select {
             setting: Select::from_enum(variants),
@@ -107,7 +106,7 @@ impl Setting {
 
     pub(crate) fn optional_select_from_enum<T>(variants: &[T], value: Option<T>) -> Self
     where
-        for<'a> &'a T: PartialEq + Into<&'static str>,
+        for<'a> &'a T: PartialEq + Into<&'static str> + Translate,
         T: Into<&'static str>,
     {
         Setting::OptionalSelect {

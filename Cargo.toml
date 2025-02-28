@@ -6,6 +6,8 @@ members = [
     "android",
     "uniffi-bindgen",
     "gui_cosmic",
+    "i18n",
+    "i18n_macros",
 ]
 resolver = "2"
 
@@ -74,3 +76,9 @@ hex = "0.4.3"
 async-trait = "0.1"
 libcosmic = { git = "https://github.com/pop-os/libcosmic.git" }
 rusqlite = "0.33.0"
+syn = "2"
+quote = "1"
+proc-macro2 = "1"
+i18n-embed = "0.15"
+i18n-embed-fl = "0.9"
+rust-embed = "8"

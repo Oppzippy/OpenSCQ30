@@ -1,0 +1,15 @@
+[package]
+name = "openscq30_i18n_macros"
+edition = "2024"
+version.workspace = true
+license.workspace = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+openscq30_i18n = { path = "../i18n" }
+syn = { workspace = true }
+quote = { workspace = true }
+proc-macro2 = { workspace = true }
+heck = { workspace = true }

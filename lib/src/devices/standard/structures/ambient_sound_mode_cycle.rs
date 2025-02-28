@@ -9,7 +9,10 @@ use nom::{
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::api::settings::{Select, Setting};
+use crate::{
+    api::settings::{Select, Setting},
+    fl,
+};
 
 const NOISE_CANCELING_MODE: u8 = 1 << 0;
 const TRANSPARENCY_MODE: u8 = 1 << 1;
@@ -70,11 +73,14 @@ impl From<AmbientSoundModeCycle> for u8 {
 impl From<AmbientSoundModeCycle> for Setting {
     fn from(cycle: AmbientSoundModeCycle) -> Self {
         Self::MultiSelect {
-            setting: Select::new(vec![
-                Cow::Borrowed("NormalMode"),
-                Cow::Borrowed("TransparencyMode"),
-                Cow::Borrowed("NoiseCancelingMode"),
-            ]),
+            setting: Select {
+                options: vec![
+                    Cow::Borrowed("NormalMode"),
+                    Cow::Borrowed("TransparencyMode"),
+                    Cow::Borrowed("NoiseCancelingMode"),
+                ],
+                localized_options: vec![fl!("normal"), fl!("transparency"), fl!("noise-canceling")],
+            },
             value: (cycle
                 .normal_mode
                 .then_some("NormalMode".into())
