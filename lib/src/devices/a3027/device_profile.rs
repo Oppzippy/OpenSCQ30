@@ -186,7 +186,7 @@ where
         self.device_model
     }
 
-    fn categories(&self) -> Vec<CategoryId<'static>> {
+    fn categories(&self) -> Vec<CategoryId> {
         self.module_collection.setting_manager.categories().to_vec()
     }
 

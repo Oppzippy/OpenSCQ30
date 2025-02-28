@@ -8,8 +8,8 @@ use async_trait::async_trait;
 use crate::api::settings::{CategoryId, Setting, SettingId, Value};
 
 pub struct SettingsManager<T> {
-    categories: Vec<CategoryId<'static>>,
-    categories_to_settings: HashMap<CategoryId<'static>, Vec<SettingId<'static>>>,
+    categories: Vec<CategoryId>,
+    categories_to_settings: HashMap<CategoryId, Vec<SettingId<'static>>>,
     settings_to_handlers: HashMap<SettingId<'static>, Arc<dyn SettingHandler<T> + Send + Sync>>,
 }
 
@@ -26,7 +26,7 @@ impl<T> Default for SettingsManager<T> {
 impl<StateType> SettingsManager<StateType> {
     pub fn add_handler<T: SettingHandler<StateType> + 'static + Send + Sync>(
         &mut self,
-        category: CategoryId<'static>,
+        category: CategoryId,
         handler: T,
     ) {
         let handler = Arc::new(handler);
@@ -47,7 +47,7 @@ impl<StateType> SettingsManager<StateType> {
         });
     }
 
-    pub fn categories(&self) -> &[CategoryId<'static>] {
+    pub fn categories(&self) -> &[CategoryId] {
         &self.categories
     }
 

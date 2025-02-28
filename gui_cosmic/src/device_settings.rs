@@ -11,6 +11,7 @@ use cosmic::{
     iced::{Length, alignment},
     widget::{self, nav_bar},
 };
+use openscq30_i18n::Translate;
 use openscq30_lib::api::{
     quick_presets::{QuickPreset, QuickPresetsHandler},
     settings::{CategoryId, Setting, SettingId, Value},
@@ -64,6 +65,10 @@ enum Dialog {
     OptionalSelectRemove(SettingId<'static>, Cow<'static, str>),
 }
 
+enum CustomCategory {
+    QuickPresets,
+}
+
 impl DeviceSettingsModel {
     pub fn new(
         device: DebugOpenSCQ30Device,
@@ -73,13 +78,13 @@ impl DeviceSettingsModel {
         for category in device.categories() {
             nav_model
                 .insert()
-                .text(category.0.clone())
+                .text(category.translate())
                 .data(category.clone());
         }
         nav_model
             .insert()
             .text(fl!("quick-presets"))
-            .data(CategoryId(Cow::Borrowed("QuickPresets")));
+            .data(CustomCategory::QuickPresets);
         nav_model.activate_position(0);
 
         let mut model = Self {
@@ -101,10 +106,7 @@ impl DeviceSettingsModel {
     }
 
     fn refresh(&mut self) -> Task<Message> {
-        let Some(category_id) = self.nav_model.active_data::<CategoryId<'static>>() else {
-            return Task::none();
-        };
-        if category_id == &CategoryId(Cow::Borrowed("QuickPresets")) {
+        if let Some(CustomCategory::QuickPresets) = self.nav_model.active_data() {
             self.quick_presets = None;
             let device = self.device.clone();
             let quick_presets_handler = self.quick_presets_handler.clone();
@@ -116,7 +118,7 @@ impl DeviceSettingsModel {
                     .map_err(handle_soft_error!())
             })
             .map(coalesce_result)
-        } else {
+        } else if let Some(category_id) = self.nav_model.active_data::<CategoryId>() {
             self.settings = self
                 .device
                 .settings_in_category(category_id)
@@ -127,6 +129,8 @@ impl DeviceSettingsModel {
                         .map(|value| (setting_id, value))
                 })
                 .collect();
+            Task::none()
+        } else {
             Task::none()
         }
     }
@@ -185,10 +189,7 @@ impl DeviceSettingsModel {
     }
 
     pub fn view(&self) -> Element<'_, Message> {
-        let Some(category_id) = self.nav_model.active_data::<CategoryId<'static>>() else {
-            return widget::row().into();
-        };
-        if category_id == &CategoryId(Cow::Borrowed("QuickPresets")) {
+        if let Some(CustomCategory::QuickPresets) = self.nav_model.active_data() {
             if let Some(editing_quick_preset) = &self.editing_quick_preset {
                 widget::column()
                     .push(widget::text::title4(fl!(
@@ -248,15 +249,17 @@ impl DeviceSettingsModel {
             } else {
                 widget::text(fl!("loading-item", item = fl!("quick-presets"))).into()
             }
-        } else {
+        } else if let Some(category_id) = self.nav_model.active_data::<CategoryId>() {
             self.view_settings(category_id)
+        } else {
+            widget::row().into()
         }
     }
 
-    fn view_settings<'a>(&'a self, category_id: &'a CategoryId<'a>) -> Element<'a, Message> {
+    fn view_settings<'a>(&'a self, category_id: &'a CategoryId) -> Element<'a, Message> {
         widget::column()
             .push(
-                widget::text::title2(category_id.0.as_ref())
+                widget::text::title2(category_id.translate())
                     .width(Length::Fill)
                     .align_x(alignment::Horizontal::Center),
             )

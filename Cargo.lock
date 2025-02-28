@@ -4205,6 +4205,7 @@ dependencies = [
  "i18n-embed-fl",
  "libcosmic",
  "macaddr",
+ "openscq30_i18n",
  "openscq30_lib",
  "rust-embed",
  "strum",

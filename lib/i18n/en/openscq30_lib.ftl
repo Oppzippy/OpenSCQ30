@@ -1,3 +1,6 @@
+general = General
+sound-modes = Sound Modes
+equalizer = Equalizer
 noise-canceling = Noise Canceling
 transparency = Transparency
 normal = Normal

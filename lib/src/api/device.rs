@@ -33,7 +33,7 @@ pub trait OpenSCQ30DeviceRegistry {
 #[cfg_attr(not(target_arch = "wasm32"), async_trait)]
 pub trait OpenSCQ30Device {
     fn model(&self) -> DeviceModel;
-    fn categories(&self) -> Vec<CategoryId<'static>>;
+    fn categories(&self) -> Vec<CategoryId>;
     fn settings_in_category(&self, category_id: &CategoryId) -> Vec<SettingId<'static>>;
     fn setting(&self, setting_id: &SettingId) -> Option<Setting>;
     // async fn watch_for_changes(&self) -> broadcast::Receiver<()>;

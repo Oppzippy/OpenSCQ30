@@ -2,6 +2,7 @@ use std::borrow::Cow;
 
 pub use equalizer::*;
 use openscq30_i18n::Translate;
+use openscq30_i18n_macros::Translate;
 pub use range::*;
 pub use select::*;
 use serde::{Deserialize, Serialize};
@@ -13,15 +14,15 @@ mod range;
 mod select;
 mod value;
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Hash, Clone, Default, Serialize, Deserialize)]
-pub struct CategoryId<'a>(pub Cow<'a, str>);
-#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Hash, Clone, Default, Serialize, Deserialize)]
-pub struct SettingId<'a>(pub Cow<'a, str>);
-
-pub struct IdentifiedSetting {
-    pub id: &'static str,
-    pub setting: Setting,
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Hash, Clone, Serialize, Deserialize, Translate)]
+pub enum CategoryId {
+    General,
+    SoundModes,
+    Equalizer,
 }
+
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Hash, Clone, Serialize, Deserialize)]
+pub struct SettingId<'a>(pub Cow<'a, str>);
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", content = "setting")]

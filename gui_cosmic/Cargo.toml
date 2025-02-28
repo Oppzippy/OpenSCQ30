@@ -29,6 +29,7 @@ i18n-embed-fl = { workspace = true }
 rust-embed = { workspace = true }
 macaddr = { workspace = true }
 openscq30_lib = { path = "../lib", features = ["serde"] }
+openscq30_i18n = { path = "../i18n" }
 strum = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }

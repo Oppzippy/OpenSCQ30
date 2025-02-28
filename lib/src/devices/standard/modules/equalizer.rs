@@ -1,4 +1,4 @@
-use std::{borrow::Cow, sync::Arc};
+use std::sync::Arc;
 
 use setting_handler::EqualizerSettingHandler;
 use state_modifier::EqualizerStateModifier;
@@ -57,7 +57,7 @@ where
         F: Futures + 'static + MaybeSend + MaybeSync,
     {
         self.setting_manager.add_handler(
-            CategoryId(Cow::Borrowed("equalizer")),
+            CategoryId::Equalizer,
             EqualizerSettingHandler::new(database, device_model).await,
         );
         self.state_modifiers
