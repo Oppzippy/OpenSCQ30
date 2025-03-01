@@ -2,8 +2,7 @@ use std::sync::Arc;
 
 use cosmic::{
     Apply, Element, Task,
-    iced::{Length, Pixels, alignment},
-    iced_core::text::LineHeight,
+    iced::{Length, alignment},
     widget,
 };
 use openscq30_lib::{api::OpenSCQ30Session, storage::PairedDevice};
@@ -60,8 +59,6 @@ impl DeviceSelectionModel {
                         .push(widget::text::title2(fl!("select-device")).width(Length::Fill))
                         .push(
                             widget::button::standard(fl!("add-device"))
-                                .font_size(16)
-                                .height(32)
                                 .on_press(Message::AddDevice),
                         ),
                 )
@@ -83,34 +80,18 @@ impl DeviceSelectionModel {
                     .align_y(alignment::Vertical::Center)
                     .push(
                         widget::column()
-                            .push(
-                                widget::text::heading(&device.name)
-                                    .size(16)
-                                    .line_height(LineHeight::Absolute(Pixels(24.0))),
-                            )
-                            .push(
-                                widget::text::body(device.mac_address.to_string())
-                                    .size(16)
-                                    .line_height(LineHeight::Absolute(Pixels(24.0))),
-                            )
-                            .push(
-                                widget::text::body(device.model.to_string())
-                                    .size(16)
-                                    .line_height(LineHeight::Absolute(Pixels(24.0))),
-                            )
+                            .push(widget::text::heading(&device.name))
+                            .push(widget::text::body(device.mac_address.to_string()))
+                            .push(widget::text::body(device.model.to_string()))
                             .width(Length::Fill),
                     )
                     .push(
                         widget::button::destructive(fl!("remove"))
-                            .font_size(16)
-                            .height(32)
                             .on_press(Message::RemoveDevice(index)),
                     )
                     .push(widget::horizontal_space().width(Length::Fixed(6f32)))
                     .push(
                         widget::button::suggested(fl!("connect"))
-                            .font_size(16)
-                            .height(32)
                             .on_press(Message::ConnectToDevice(index)),
                     )
                     .apply(widget::container)
