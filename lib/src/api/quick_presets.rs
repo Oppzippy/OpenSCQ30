@@ -21,13 +21,13 @@ pub struct QuickPreset {
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct QuickPresetField {
-    pub setting_id: SettingId<'static>,
+    pub setting_id: SettingId,
     pub value: Option<Value>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum QuickPresetAction {
-    Create(String, HashSet<SettingId<'static>>),
+    Create(String, HashSet<SettingId>),
     Activate(String),
     Delete(String),
 }
@@ -75,7 +75,7 @@ impl QuickPresetsHandler {
         &self,
         device: &(dyn OpenSCQ30Device + Send + Sync),
         name: String,
-        settings: HashMap<SettingId<'static>, Value>,
+        settings: HashMap<SettingId, Value>,
     ) -> crate::Result<()> {
         self.database
             .upsert_quick_preset(device.model(), name, settings)

@@ -9,7 +9,7 @@ use crate::{
 
 use super::{StorageError, type_conversions::SqliteDeviceModel};
 
-type SettingsCollection = HashMap<SettingId<'static>, settings::Value>;
+type SettingsCollection = HashMap<SettingId, settings::Value>;
 
 pub fn fetch(
     connection: &Connection,

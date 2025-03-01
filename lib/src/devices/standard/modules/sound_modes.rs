@@ -10,7 +10,10 @@ use state_modifier::SoundModesStateModifier;
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use crate::{
-    api::{connection::Connection, settings::CategoryId},
+    api::{
+        connection::Connection,
+        settings::{CategoryId, SettingId},
+    },
     devices::standard::structures::{
         AmbientSoundMode, NoiseCancelingMode, SoundModes, TransparencyMode,
     },
@@ -26,6 +29,31 @@ enum SoundModeSetting {
     TransparencyMode,
     NoiseCancelingMode,
     CustomNoiseCanceling,
+}
+
+impl From<SoundModeSetting> for SettingId {
+    fn from(setting: SoundModeSetting) -> Self {
+        match setting {
+            SoundModeSetting::AmbientSoundMode => SettingId::AmbientSoundMode,
+            SoundModeSetting::TransparencyMode => SettingId::TransparencyMode,
+            SoundModeSetting::NoiseCancelingMode => SettingId::NoiseCancelingMode,
+            SoundModeSetting::CustomNoiseCanceling => SettingId::CustomNoiseCanceling,
+        }
+    }
+}
+
+impl TryFrom<&SettingId> for SoundModeSetting {
+    type Error = ();
+
+    fn try_from(setting_id: &SettingId) -> Result<Self, Self::Error> {
+        match setting_id {
+            SettingId::AmbientSoundMode => Ok(Self::AmbientSoundMode),
+            SettingId::TransparencyMode => Ok(Self::TransparencyMode),
+            SettingId::NoiseCancelingMode => Ok(Self::NoiseCancelingMode),
+            SettingId::CustomNoiseCanceling => Ok(Self::CustomNoiseCanceling),
+            _ => Err(()),
+        }
+    }
 }
 
 pub struct AvailableSoundModes {

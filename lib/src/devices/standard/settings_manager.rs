@@ -9,8 +9,8 @@ use crate::api::settings::{CategoryId, Setting, SettingId, Value};
 
 pub struct SettingsManager<T> {
     categories: Vec<CategoryId>,
-    categories_to_settings: HashMap<CategoryId, Vec<SettingId<'static>>>,
-    settings_to_handlers: HashMap<SettingId<'static>, Arc<dyn SettingHandler<T> + Send + Sync>>,
+    categories_to_settings: HashMap<CategoryId, Vec<SettingId>>,
+    settings_to_handlers: HashMap<SettingId, Arc<dyn SettingHandler<T> + Send + Sync>>,
 }
 
 impl<T> Default for SettingsManager<T> {
@@ -51,14 +51,14 @@ impl<StateType> SettingsManager<StateType> {
         &self.categories
     }
 
-    pub fn category(&self, category: &CategoryId) -> Vec<SettingId<'static>> {
+    pub fn category(&self, category: &CategoryId) -> Vec<SettingId> {
         self.categories_to_settings
             .get(category)
             .cloned()
             .unwrap_or_default()
     }
 
-    pub fn get(&self, state: &StateType, setting_id: &SettingId<'_>) -> Option<Setting> {
+    pub fn get(&self, state: &StateType, setting_id: &SettingId) -> Option<Setting> {
         let handler = self.settings_to_handlers.get(setting_id)?;
         handler.get(state, setting_id)
     }
@@ -66,8 +66,8 @@ impl<StateType> SettingsManager<StateType> {
     pub fn get_many(
         &self,
         state: &StateType,
-        desired_setting_ids: &HashSet<SettingId<'_>>,
-    ) -> HashMap<SettingId<'static>, Value> {
+        desired_setting_ids: &HashSet<SettingId>,
+    ) -> HashMap<SettingId, Value> {
         self.settings_to_handlers
             .iter()
             .filter_map(|(id, handler)| {
@@ -80,7 +80,7 @@ impl<StateType> SettingsManager<StateType> {
             .collect()
     }
 
-    pub fn get_all(&self, state: &StateType) -> HashMap<SettingId<'static>, Value> {
+    pub fn get_all(&self, state: &StateType) -> HashMap<SettingId, Value> {
         self.settings_to_handlers
             .iter()
             .map(|(setting_id, handler)| (setting_id.clone(), handler.get(state, setting_id)))
@@ -93,7 +93,7 @@ impl<StateType> SettingsManager<StateType> {
     pub async fn set(
         &self,
         state: &mut StateType,
-        setting_id: &SettingId<'_>,
+        setting_id: &SettingId,
         value: Value,
     ) -> Option<crate::Result<()>> {
         let handler = self.settings_to_handlers.get(setting_id)?;
@@ -103,7 +103,7 @@ impl<StateType> SettingsManager<StateType> {
 
 #[async_trait]
 pub trait SettingHandler<T> {
-    fn settings(&self) -> Vec<SettingId<'static>>;
+    fn settings(&self) -> Vec<SettingId>;
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting>;
     async fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> crate::Result<()>;
 }

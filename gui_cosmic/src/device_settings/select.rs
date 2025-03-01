@@ -5,10 +5,11 @@ use cosmic::{
     iced::{Length, alignment},
     widget,
 };
+use openscq30_i18n::Translate;
 use openscq30_lib::api::settings::{Select, SettingId};
 
 pub fn select<'a, M>(
-    setting_id: SettingId<'a>,
+    setting_id: SettingId,
     setting: &'a Select,
     value: &str,
     on_change: impl Fn(&str) -> M + 'a,
@@ -18,7 +19,7 @@ where
 {
     let selected_index = setting.options.iter().position(|option| option == value);
     with_label(
-        setting_id.0,
+        setting_id.translate(),
         widget::dropdown(&setting.localized_options, selected_index, move |index| {
             on_change(&setting.options[index])
         })
@@ -27,7 +28,7 @@ where
 }
 
 pub fn optional_select<'a, M>(
-    setting_id: SettingId<'a>,
+    setting_id: SettingId,
     setting: &'a Select,
     value: Option<&str>,
     on_change: impl Fn(Option<&str>) -> M + 'a,
@@ -39,7 +40,7 @@ where
         .map(|value| setting.options.iter().position(|option| option == value))
         .flatten();
     with_label(
-        setting_id.0,
+        setting_id.translate(),
         widget::row().push(
             widget::dropdown(&setting.localized_options, selected_index, move |index| {
                 on_change(Some(&setting.options[index]))
@@ -50,7 +51,7 @@ where
 }
 
 pub fn modifiable_select<'a, M>(
-    setting_id: SettingId<'a>,
+    setting_id: SettingId,
     setting: &'a Select,
     value: Option<&str>,
     on_change: impl Fn(Option<&str>) -> M + 'a,
@@ -65,7 +66,7 @@ where
         .flatten();
     let maybe_deselect_message = value.is_some().then_some(on_remove);
     with_label(
-        setting_id.0,
+        setting_id.translate(),
         widget::row()
             .push(
                 widget::dropdown(&setting.localized_options, selected_index, move |index| {
@@ -83,7 +84,10 @@ where
     )
 }
 
-fn with_label<'a, M>(label: Cow<'a, str>, element: impl Into<Element<'a, M>>) -> Element<'a, M>
+fn with_label<'a, M>(
+    label: impl Into<Cow<'a, str>> + 'a,
+    element: impl Into<Element<'a, M>>,
+) -> Element<'a, M>
 where
     M: 'a,
 {

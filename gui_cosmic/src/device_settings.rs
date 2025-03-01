@@ -21,8 +21,8 @@ use crate::{app::DebugOpenSCQ30Device, fl, handle_soft_error, utils::coalesce_re
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    SetSetting(SettingId<'static>, Value),
-    SetEqualizerBand(SettingId<'static>, u8, i16),
+    SetSetting(SettingId, Value),
+    SetEqualizerBand(SettingId, u8, i16),
     Refresh,
     Warning(String),
     ShowCreateQuickPresetDialog,
@@ -36,8 +36,8 @@ pub enum Message {
     EditQuickPresetCancel,
     EditQuickPresetSave,
     EditQuickPresetDone,
-    ShowOptionalSelectAddDialog(SettingId<'static>),
-    ShowOptionalSelectRemoveDialog(SettingId<'static>),
+    ShowOptionalSelectAddDialog(SettingId),
+    ShowOptionalSelectRemoveDialog(SettingId),
     OptionalSelectAddDialogSubmit,
     OptionalSelectAddDialogSetName(String),
     OptionalSelectRemoveDialogSubmit,
@@ -53,7 +53,7 @@ pub struct DeviceSettingsModel {
     device: DebugOpenSCQ30Device,
     quick_presets_handler: QuickPresetsHandler,
     nav_model: nav_bar::Model,
-    settings: Vec<(SettingId<'static>, Setting)>,
+    settings: Vec<(SettingId, Setting)>,
     quick_presets: Option<Vec<QuickPreset>>,
     dialog: Option<Dialog>,
     editing_quick_preset: Option<QuickPreset>,
@@ -61,8 +61,8 @@ pub struct DeviceSettingsModel {
 
 enum Dialog {
     CreateQuickPreset(String),
-    OptionalSelectAdd(SettingId<'static>, String),
-    OptionalSelectRemove(SettingId<'static>, Cow<'static, str>),
+    OptionalSelectAdd(SettingId, String),
+    OptionalSelectRemove(SettingId, Cow<'static, str>),
 }
 
 enum CustomCategory {
@@ -157,7 +157,10 @@ impl DeviceSettingsModel {
                 )
                 .into(),
             Dialog::OptionalSelectAdd(setting_id, name) => widget::dialog()
-                .title(fl!("add-item", name = setting_id.0.as_ref()))
+                .title({
+                    let setting_name = setting_id.translate();
+                    fl!("add-item", name = setting_name.as_str())
+                })
                 .control(
                     widget::text_input(fl!("name"), name)
                         .id(widget::Id::new(
@@ -218,7 +221,7 @@ impl DeviceSettingsModel {
                                     .padding(5)
                                     .push(
                                         widget::toggler(field.value.is_some())
-                                            .label(&field.setting_id.0)
+                                            .label(field.setting_id.translate())
                                             .width(Length::Fill)
                                             .on_toggle(move |enabled| {
                                                 Message::EditQuickPresetToggleField(i, enabled)

@@ -5,7 +5,10 @@ use state_modifier::EqualizerStateModifier;
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use crate::{
-    api::{connection::Connection, settings::CategoryId},
+    api::{
+        connection::Connection,
+        settings::{CategoryId, SettingId},
+    },
     devices::standard::structures::EqualizerConfiguration,
     futures::{Futures, MaybeSend, MaybeSync},
     soundcore_device::{
@@ -24,6 +27,29 @@ enum EqualizerSetting {
     PresetProfile,
     CustomProfile,
     VolumeAdjustments,
+}
+
+impl TryFrom<&SettingId> for EqualizerSetting {
+    type Error = ();
+
+    fn try_from(setting_id: &SettingId) -> Result<Self, Self::Error> {
+        match setting_id {
+            SettingId::PresetProfile => Ok(Self::PresetProfile),
+            SettingId::CustomProfile => Ok(Self::CustomProfile),
+            SettingId::VolumeAdjustments => Ok(Self::VolumeAdjustments),
+            _ => Err(()),
+        }
+    }
+}
+
+impl From<EqualizerSetting> for SettingId {
+    fn from(setting: EqualizerSetting) -> Self {
+        match setting {
+            EqualizerSetting::PresetProfile => SettingId::PresetProfile,
+            EqualizerSetting::CustomProfile => SettingId::CustomProfile,
+            EqualizerSetting::VolumeAdjustments => SettingId::VolumeAdjustments,
+        }
+    }
 }
 
 pub trait AddEqualizerExt {

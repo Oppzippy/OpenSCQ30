@@ -89,7 +89,7 @@ impl ToTokens for TranslatableEnumVariant {
             translation_key,
         } = self;
         tokens.extend(quote! {
-            #enum_ident::#variant_ident => crate::fl!(#translation_key),
+            #enum_ident::#variant_ident => crate::i18n::fl!(#translation_key),
         });
     }
 }

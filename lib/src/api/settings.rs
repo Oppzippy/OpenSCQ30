@@ -6,7 +6,7 @@ use openscq30_i18n_macros::Translate;
 pub use range::*;
 pub use select::*;
 use serde::{Deserialize, Serialize};
-use strum::IntoEnumIterator;
+use strum::{EnumString, IntoEnumIterator};
 pub use value::*;
 
 mod equalizer;
@@ -21,8 +21,28 @@ pub enum CategoryId {
     Equalizer,
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Hash, Clone, Serialize, Deserialize)]
-pub struct SettingId<'a>(pub Cow<'a, str>);
+#[derive(
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Debug,
+    Hash,
+    Clone,
+    Serialize,
+    Deserialize,
+    EnumString,
+    Translate,
+)]
+pub enum SettingId {
+    AmbientSoundMode,
+    TransparencyMode,
+    NoiseCancelingMode,
+    CustomNoiseCanceling,
+    PresetProfile,
+    CustomProfile,
+    VolumeAdjustments,
+}
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", content = "setting")]

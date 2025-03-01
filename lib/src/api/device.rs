@@ -34,11 +34,11 @@ pub trait OpenSCQ30DeviceRegistry {
 pub trait OpenSCQ30Device {
     fn model(&self) -> DeviceModel;
     fn categories(&self) -> Vec<CategoryId>;
-    fn settings_in_category(&self, category_id: &CategoryId) -> Vec<SettingId<'static>>;
+    fn settings_in_category(&self, category_id: &CategoryId) -> Vec<SettingId>;
     fn setting(&self, setting_id: &SettingId) -> Option<Setting>;
     // async fn watch_for_changes(&self) -> broadcast::Receiver<()>;
     async fn set_setting_values(
         &self,
-        setting_values: Vec<(SettingId<'_>, Value)>,
+        setting_values: Vec<(SettingId, Value)>,
     ) -> crate::Result<()>;
 }

@@ -1,6 +1,5 @@
 use std::{
     borrow::Cow,
-    str::FromStr,
     sync::{Arc, Mutex},
 };
 
@@ -57,17 +56,15 @@ impl<T> SettingHandler<T> for EqualizerSettingHandler
 where
     T: AsMut<EqualizerConfiguration> + AsRef<EqualizerConfiguration> + Send,
 {
-    fn settings(&self) -> Vec<SettingId<'static>> {
-        EqualizerSetting::iter()
-            .map(|variant| SettingId(Cow::Borrowed(variant.into())))
-            .collect()
+    fn settings(&self) -> Vec<SettingId> {
+        EqualizerSetting::iter().map(Into::into).collect()
     }
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<crate::api::settings::Setting> {
         let equalizer_configuration = state.as_ref();
         let volume_adjustments_2 =
             VolumeAdjustments2::from(equalizer_configuration.volume_adjustments().to_owned());
-        let setting = EqualizerSetting::from_str(setting_id.0.as_ref()).ok()?;
+        let setting = setting_id.try_into().ok()?;
         Some(match setting {
             EqualizerSetting::PresetProfile => Setting::optional_select_from_enum_all_variants(
                 equalizer_configuration.preset_profile(),
@@ -120,7 +117,8 @@ where
         let equalizer_configuration = state.as_mut();
         let volume_adjustments_2 =
             VolumeAdjustments2::from(equalizer_configuration.volume_adjustments().to_owned());
-        let setting = EqualizerSetting::from_str(setting_id.0.as_ref())
+        let setting = setting_id
+            .try_into()
             .expect("already filtered to valid values only by SettingsManager");
         match setting {
             EqualizerSetting::PresetProfile => {

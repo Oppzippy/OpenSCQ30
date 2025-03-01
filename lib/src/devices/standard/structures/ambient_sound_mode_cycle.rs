@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     api::settings::{Select, Setting},
-    fl,
+    i18n::fl,
 };
 
 const NOISE_CANCELING_MODE: u8 = 1 << 0;

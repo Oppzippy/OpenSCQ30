@@ -41,7 +41,7 @@ where
     pub async fn set_setting_values(
         &self,
         state_sender: &watch::Sender<StateType>,
-        setting_values: impl IntoIterator<Item = (SettingId<'_>, Value)>,
+        setting_values: impl IntoIterator<Item = (SettingId, Value)>,
     ) -> crate::Result<()> {
         let mut target_state = state_sender.borrow().clone();
         for (setting_id, value) in setting_values {

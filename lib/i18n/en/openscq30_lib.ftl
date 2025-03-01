@@ -1,6 +1,15 @@
 general = General
 sound-modes = Sound Modes
 equalizer = Equalizer
+
+ambient-sound-mode = Ambient Sound Mode
+transparency-mode = Transparency Mode
+noise-canceling-mode = Noise Canceling Mode
+custom-noise-canceling = Custom Noise Canceling
+preset-profile = Preset Profile
+custom-profile = Custom Profile
+volume-adjustments = Volume Adjustments
+
 noise-canceling = Noise Canceling
 transparency = Transparency
 normal = Normal

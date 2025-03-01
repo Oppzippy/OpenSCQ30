@@ -184,14 +184,14 @@ commands!(
     quick_preset::fetch => fn fetch_quick_preset(
         model: DeviceModel,
         name: String,
-    ) -> Result<HashMap<SettingId<'static>, settings::Value>, StorageError>;
+    ) -> Result<HashMap<SettingId, settings::Value>, StorageError>;
     quick_preset::fetch_all => fn fetch_all_quick_presets(
         model: DeviceModel,
-    ) -> Result<HashMap<String, HashMap<SettingId<'static>, settings::Value>>, StorageError>;
+    ) -> Result<HashMap<String, HashMap<SettingId, settings::Value>>, StorageError>;
     quick_preset::upsert => fn upsert_quick_preset(
         model: DeviceModel,
         name: String,
-        settings: HashMap<SettingId<'static>, settings::Value>,
+        settings: HashMap<SettingId, settings::Value>,
     ) -> Result<(), StorageError>;
     quick_preset::delete => fn delete_quick_preset(model: DeviceModel, name: String) -> Result<(), StorageError>;
     equalizer_profile::fetch => fn fetch_equalizer_profile(

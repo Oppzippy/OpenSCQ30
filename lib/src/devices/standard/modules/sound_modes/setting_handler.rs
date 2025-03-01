@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use async_trait::async_trait;
 use strum::IntoEnumIterator;
 
@@ -30,7 +28,7 @@ impl<T> SettingHandler<T> for SoundModesSettingHandler
 where
     T: AsMut<SoundModes> + AsRef<SoundModes> + Send,
 {
-    fn settings(&self) -> Vec<SettingId<'static>> {
+    fn settings(&self) -> Vec<SettingId> {
         SoundModeSetting::iter()
             .filter(|setting| match setting {
                 SoundModeSetting::AmbientSoundMode => {
@@ -47,13 +45,13 @@ where
                     .noise_canceling_modes
                     .contains(&NoiseCancelingMode::Custom),
             })
-            .map(|mode| SettingId(Cow::Borrowed(mode.into())))
+            .map(Into::into)
             .collect()
     }
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
         let sound_modes = state.as_ref();
-        let sound_mode_setting: SoundModeSetting = setting_id.0.parse().ok()?;
+        let sound_mode_setting: SoundModeSetting = setting_id.try_into().ok()?;
         Some(match sound_mode_setting {
             SoundModeSetting::AmbientSoundMode => Setting::select_from_enum(
                 &self.available_sound_modes.ambient_sound_modes,
@@ -80,8 +78,7 @@ where
     async fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> crate::Result<()> {
         let sound_modes = state.as_mut();
         let sound_mode_setting: SoundModeSetting = setting_id
-            .0
-            .parse()
+            .try_into()
             .expect("already filtered to valid values only by SettingsManager");
         match sound_mode_setting {
             SoundModeSetting::AmbientSoundMode => {

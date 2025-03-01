@@ -190,7 +190,7 @@ where
         self.module_collection.setting_manager.categories().to_vec()
     }
 
-    fn settings_in_category(&self, category_id: &CategoryId) -> Vec<SettingId<'static>> {
+    fn settings_in_category(&self, category_id: &CategoryId) -> Vec<SettingId> {
         self.module_collection.setting_manager.category(category_id)
     }
 
@@ -203,7 +203,7 @@ where
 
     async fn set_setting_values(
         &self,
-        setting_values: Vec<(SettingId<'_>, Value)>,
+        setting_values: Vec<(SettingId, Value)>,
     ) -> crate::Result<()> {
         let mut target_state = self.state_sender.borrow().clone();
         for (setting_id, value) in setting_values {
