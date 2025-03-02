@@ -1,4 +1,4 @@
-use std::{marker::PhantomData, sync::Arc};
+use std::sync::Arc;
 
 use async_trait::async_trait;
 use tokio::sync::watch;
@@ -20,7 +20,6 @@ use crate::{
         packets::{inbound::TryIntoInboundPacket, outbound::RequestStatePacket},
         structures::{AmbientSoundMode, NoiseCancelingMode},
     },
-    futures::{Futures, MaybeSend, MaybeSync},
     soundcore_device::{
         device::packet_io_controller::PacketIOController, device_model::DeviceModel,
     },
@@ -59,30 +58,26 @@ pub(crate) const A3027_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     implementation: || StandardImplementation::new::<A3027StateUpdatePacket>(),
 };
 
-pub struct A3027DeviceRegistry<C: ConnectionRegistry, F: Futures> {
+pub struct A3027DeviceRegistry<C: ConnectionRegistry> {
     inner: C,
     database: Arc<OpenSCQ30Database>,
     device_model: DeviceModel,
-    _futures: PhantomData<F>,
 }
 
-impl<C: ConnectionRegistry, F: Futures> A3027DeviceRegistry<C, F> {
+impl<C: ConnectionRegistry> A3027DeviceRegistry<C> {
     pub fn new(inner: C, database: Arc<OpenSCQ30Database>, device_model: DeviceModel) -> Self {
         Self {
             inner,
             device_model,
             database,
-            _futures: PhantomData,
         }
     }
 }
 
-#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
-impl<C, F> OpenSCQ30DeviceRegistry for A3027DeviceRegistry<C, F>
+#[async_trait]
+impl<C> OpenSCQ30DeviceRegistry for A3027DeviceRegistry<C>
 where
-    C: ConnectionRegistry + 'static + MaybeSend + MaybeSync,
-    F: Futures + 'static + MaybeSend + MaybeSync,
+    C: ConnectionRegistry + 'static + Send + Sync,
 {
     async fn devices(&self) -> crate::Result<Vec<GenericDeviceDescriptor>> {
         self.inner
@@ -105,7 +100,7 @@ where
             .connection(mac_address)
             .await?
             .ok_or(crate::Error::DeviceNotFound { source: None })?;
-        let device = A3027Device::<C::ConnectionType, F>::new(
+        let device = A3027Device::<C::ConnectionType>::new(
             self.database.clone(),
             connection,
             self.device_model,
@@ -115,17 +110,16 @@ where
     }
 }
 
-pub struct A3027Device<ConnectionType: Connection, FuturesType: Futures> {
+pub struct A3027Device<ConnectionType: Connection> {
     device_model: DeviceModel,
     state_sender: watch::Sender<A3027State>,
     module_collection: Arc<ModuleCollection<A3027State>>,
-    _packet_io_controller: Arc<PacketIOController<ConnectionType, FuturesType>>,
+    _packet_io_controller: Arc<PacketIOController<ConnectionType>>,
 }
 
-impl<ConnectionType, FuturesType> A3027Device<ConnectionType, FuturesType>
+impl<ConnectionType> A3027Device<ConnectionType>
 where
-    ConnectionType: Connection + 'static + MaybeSend + MaybeSync,
-    FuturesType: Futures + 'static + MaybeSend + MaybeSync,
+    ConnectionType: Connection + 'static + Send + Sync,
 {
     pub async fn new(
         database: Arc<OpenSCQ30Database>,
@@ -133,7 +127,7 @@ where
         device_model: DeviceModel,
     ) -> crate::Result<Self> {
         let (packet_io_controller, packet_receiver) =
-            PacketIOController::<ConnectionType, FuturesType>::new(connection).await?;
+            PacketIOController::<ConnectionType>::new(connection).await?;
         let packet_io_controller = Arc::new(packet_io_controller);
         let state_update_packet: A3027StateUpdatePacket = packet_io_controller
             .send(&RequestStatePacket::new().into())
@@ -163,8 +157,7 @@ where
             .await;
 
         let module_collection = Arc::new(module_collection);
-        module_collection
-            .spawn_packet_handler::<FuturesType>(state_sender.clone(), packet_receiver);
+        module_collection.spawn_packet_handler(state_sender.clone(), packet_receiver);
 
         Ok(Self {
             device_model,
@@ -175,12 +168,10 @@ where
     }
 }
 
-#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
-impl<ConnectionType, FuturesType> OpenSCQ30Device for A3027Device<ConnectionType, FuturesType>
+#[async_trait]
+impl<ConnectionType> OpenSCQ30Device for A3027Device<ConnectionType>
 where
-    ConnectionType: Connection + 'static + MaybeSend + MaybeSync,
-    FuturesType: Futures + 'static + MaybeSend + MaybeSync,
+    ConnectionType: Connection + 'static + Send + Sync,
 {
     fn model(&self) -> DeviceModel {
         self.device_model

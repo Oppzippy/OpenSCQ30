@@ -10,7 +10,6 @@ use crate::{
         settings::{CategoryId, SettingId},
     },
     devices::standard::structures::EqualizerConfiguration,
-    futures::{Futures, MaybeSend, MaybeSync},
     soundcore_device::{
         device::packet_io_controller::PacketIOController, device_model::DeviceModel,
     },
@@ -53,34 +52,28 @@ impl From<EqualizerSetting> for SettingId {
 }
 
 pub trait AddEqualizerExt {
-    async fn add_equalizer<C, F>(
+    async fn add_equalizer<C>(
         &mut self,
-        packet_io: Arc<PacketIOController<C, F>>,
+        packet_io: Arc<PacketIOController<C>>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
         is_stereo: bool,
     ) where
-        C: Connection + 'static + MaybeSend + MaybeSync,
-        F: Futures + 'static + MaybeSend + MaybeSync;
+        C: Connection + 'static + Send + Sync;
 }
 
 impl<T> AddEqualizerExt for ModuleCollection<T>
 where
-    T: AsMut<EqualizerConfiguration>
-        + AsRef<EqualizerConfiguration>
-        + Clone
-        + MaybeSend
-        + MaybeSync,
+    T: AsMut<EqualizerConfiguration> + AsRef<EqualizerConfiguration> + Clone + Send + Sync,
 {
-    async fn add_equalizer<C, F>(
+    async fn add_equalizer<C>(
         &mut self,
-        packet_io: Arc<PacketIOController<C, F>>,
+        packet_io: Arc<PacketIOController<C>>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
         is_stereo: bool,
     ) where
-        C: Connection + 'static + MaybeSend + MaybeSync,
-        F: Futures + 'static + MaybeSend + MaybeSync,
+        C: Connection + 'static + Send + Sync,
     {
         self.setting_manager.add_handler(
             CategoryId::Equalizer,

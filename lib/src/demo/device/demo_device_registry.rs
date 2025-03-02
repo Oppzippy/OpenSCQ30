@@ -1,41 +1,25 @@
-use std::{marker::PhantomData, rc::Rc};
+use std::rc::Rc;
 
 use macaddr::MacAddr6;
 
-use crate::{
-    api::device::{DeviceRegistry, GenericDeviceDescriptor},
-    futures::Futures,
-};
+use crate::api::device::{DeviceRegistry, GenericDeviceDescriptor};
 
 use super::demo_device::DemoDevice;
 
 #[derive(Default)]
-pub struct DemoDeviceRegistry<FuturesType>
-where
-    FuturesType: Futures,
-{
-    futures: PhantomData<FuturesType>,
-}
+pub struct DemoDeviceRegistry {}
 
-impl<FuturesType> DemoDeviceRegistry<FuturesType>
-where
-    FuturesType: Futures,
-{
+impl DemoDeviceRegistry {
     const DEVICE_NAME: &'static str = "Demo Q30";
     const DEVICE_MAC_ADDRESS: MacAddr6 = MacAddr6::nil();
 
     pub fn new() -> Self {
-        Self {
-            futures: PhantomData,
-        }
+        Self {}
     }
 }
 
-impl<FuturesType> DeviceRegistry for DemoDeviceRegistry<FuturesType>
-where
-    FuturesType: Futures,
-{
-    type DeviceType = DemoDevice<FuturesType>;
+impl DeviceRegistry for DemoDeviceRegistry {
+    type DeviceType = DemoDevice;
     type DescriptorType = GenericDeviceDescriptor;
 
     async fn device_descriptors(&self) -> crate::Result<Vec<Self::DescriptorType>> {

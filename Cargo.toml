@@ -3,7 +3,7 @@ members = [
     "cli",
     "lib",
     "lib_protobuf",
-    "android",
+    # "android",
     "uniffi-bindgen",
     "gui_cosmic",
     "i18n",

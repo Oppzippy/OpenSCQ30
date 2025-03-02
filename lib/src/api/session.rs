@@ -3,7 +3,6 @@ use std::{path::PathBuf, sync::Arc};
 use macaddr::MacAddr6;
 
 use crate::{
-    futures::TokioFutures,
     soundcore_device::device_model::DeviceModel,
     storage::{OpenSCQ30Database, PairedDevice},
 };
@@ -50,11 +49,7 @@ impl OpenSCQ30Session {
         model: DeviceModel,
     ) -> crate::Result<Vec<GenericDeviceDescriptor>> {
         model
-            .device_registry::<TokioFutures>(
-                self.database.clone(),
-                Some(tokio::runtime::Handle::current()),
-                true,
-            )
+            .device_registry(self.database.clone(), true)
             .await?
             .devices()
             .await
@@ -67,11 +62,7 @@ impl OpenSCQ30Session {
         if let Some(paired_device) = self.database.fetch_paired_device(mac_address).await? {
             let registry = paired_device
                 .model
-                .device_registry::<TokioFutures>(
-                    self.database.clone(),
-                    Some(tokio::runtime::Handle::current()),
-                    true,
-                )
+                .device_registry(self.database.clone(), true)
                 .await?;
             registry.connect(mac_address).await
         } else {

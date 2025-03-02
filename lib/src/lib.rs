@@ -10,7 +10,6 @@ pub mod device_profile;
 pub mod device_utils;
 pub mod devices;
 mod error;
-pub mod futures;
 pub mod i18n;
 pub mod soundcore_device;
 pub mod storage;

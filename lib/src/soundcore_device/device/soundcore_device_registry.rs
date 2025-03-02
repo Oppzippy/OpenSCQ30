@@ -1,54 +1,39 @@
-use std::{
-    marker::PhantomData,
-    rc::{Rc, Weak},
-};
+use std::rc::{Rc, Weak};
 
 use macaddr::MacAddr6;
 use tokio::sync::Mutex;
 use weak_table::{WeakValueHashMap, weak_value_hash_map::Entry};
 
-use crate::{
-    api::{
-        connection::ConnectionRegistry,
-        device::{DeviceRegistry, GenericDeviceDescriptor},
-    },
-    futures::Futures,
+use crate::api::{
+    connection::ConnectionRegistry,
+    device::{DeviceRegistry, GenericDeviceDescriptor},
 };
 
 use super::soundcore_device::SoundcoreDevice;
 
-pub struct SoundcoreDeviceRegistry<RegistryType, FuturesType>
+pub struct SoundcoreDeviceRegistry<RegistryType>
 where
     RegistryType: ConnectionRegistry,
-    FuturesType: Futures,
 {
     conneciton_registry: RegistryType,
-    devices: Mutex<
-        WeakValueHashMap<
-            MacAddr6,
-            Weak<SoundcoreDevice<RegistryType::ConnectionType, FuturesType>>,
-        >,
-    >,
-    futures: PhantomData<FuturesType>,
+    devices: Mutex<WeakValueHashMap<MacAddr6, Weak<SoundcoreDevice<RegistryType::ConnectionType>>>>,
 }
 
-impl<RegistryType, FuturesType> SoundcoreDeviceRegistry<RegistryType, FuturesType>
+impl<RegistryType> SoundcoreDeviceRegistry<RegistryType>
 where
     RegistryType: ConnectionRegistry,
-    FuturesType: Futures,
 {
     pub async fn new(connection_registry: RegistryType) -> crate::Result<Self> {
         Ok(Self {
             conneciton_registry: connection_registry,
             devices: Mutex::new(WeakValueHashMap::new()),
-            futures: PhantomData,
         })
     }
 
     async fn new_device(
         &self,
         mac_address: MacAddr6,
-    ) -> crate::Result<Option<SoundcoreDevice<RegistryType::ConnectionType, FuturesType>>> {
+    ) -> crate::Result<Option<SoundcoreDevice<RegistryType::ConnectionType>>> {
         let connection = self.conneciton_registry.connection(mac_address).await?;
 
         if let Some(connection) = connection {
@@ -59,13 +44,11 @@ where
     }
 }
 
-impl<RegistryType, FuturesType> DeviceRegistry
-    for SoundcoreDeviceRegistry<RegistryType, FuturesType>
+impl<RegistryType> DeviceRegistry for SoundcoreDeviceRegistry<RegistryType>
 where
     RegistryType: ConnectionRegistry,
-    FuturesType: Futures,
 {
-    type DeviceType = SoundcoreDevice<RegistryType::ConnectionType, FuturesType>;
+    type DeviceType = SoundcoreDevice<RegistryType::ConnectionType>;
     type DescriptorType = GenericDeviceDescriptor;
 
     async fn device_descriptors(&self) -> crate::Result<Vec<Self::DescriptorType>> {
@@ -110,7 +93,6 @@ mod tests {
             device::{Device, DeviceDescriptor, DeviceRegistry},
         },
         devices::standard::packets::inbound::{FirmwareVersionUpdatePacket, InboundPacket},
-        futures::TokioFutures,
         soundcore_device::device::Packet,
         stub::connection::{StubConnection, StubConnectionRegistry},
     };
@@ -127,7 +109,7 @@ mod tests {
         let device = Arc::new(StubConnection::new());
         let devices = HashMap::from([(descriptor, device)]);
         let connection_registry = StubConnectionRegistry::new(devices.to_owned());
-        let device_registry = SoundcoreDeviceRegistry::<_, TokioFutures>::new(connection_registry)
+        let device_registry = SoundcoreDeviceRegistry::new(connection_registry)
             .await
             .unwrap();
 
@@ -164,7 +146,7 @@ mod tests {
 
         let devices = HashMap::from([(descriptor, device)]);
         let connection_registry = StubConnectionRegistry::new(devices.to_owned());
-        let device_registry = SoundcoreDeviceRegistry::<_, TokioFutures>::new(connection_registry)
+        let device_registry = SoundcoreDeviceRegistry::new(connection_registry)
             .await
             .unwrap();
 
@@ -216,7 +198,7 @@ mod tests {
 
         let devices = HashMap::from([(descriptor, device)]);
         let connection_registry = StubConnectionRegistry::new(devices.to_owned());
-        let device_registry = SoundcoreDeviceRegistry::<_, TokioFutures>::new(connection_registry)
+        let device_registry = SoundcoreDeviceRegistry::new(connection_registry)
             .await
             .unwrap();
 

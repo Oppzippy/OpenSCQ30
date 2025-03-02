@@ -1,7 +1,10 @@
 use std::{collections::HashMap, mem, sync::Arc};
 
 use macaddr::MacAddr6;
-use tokio::sync::{Mutex, mpsc, watch};
+use tokio::{
+    sync::{Mutex, mpsc, watch},
+    task::JoinHandle,
+};
 use tracing::{trace, warn};
 use uuid::Uuid;
 
@@ -24,7 +27,6 @@ use crate::{
             MultiButtonConfiguration, SoundModes, SoundModesTypeTwo,
         },
     },
-    futures::{Futures, JoinHandle},
 };
 
 use super::{
@@ -32,22 +34,20 @@ use super::{
     soundcore_command::CommandResponse,
 };
 
-pub struct SoundcoreDevice<ConnectionType, FuturesType>
+pub struct SoundcoreDevice<ConnectionType>
 where
     ConnectionType: Connection,
-    FuturesType: Futures,
 {
-    controller: PacketIOController<ConnectionType, FuturesType>,
+    controller: PacketIOController<ConnectionType>,
     connection: Arc<ConnectionType>,
     state_sender: Arc<Mutex<watch::Sender<DeviceState>>>,
-    join_handle: FuturesType::JoinHandleType,
+    join_handle: JoinHandle<()>,
     implementation: Arc<dyn DeviceImplementation + Send + Sync>,
 }
 
-impl<ConnectionType, FuturesType> SoundcoreDevice<ConnectionType, FuturesType>
+impl<ConnectionType> SoundcoreDevice<ConnectionType>
 where
     ConnectionType: Connection,
-    FuturesType: Futures,
 {
     pub async fn new(connection: Arc<ConnectionType>) -> crate::Result<Self> {
         let (controller, receiver) = PacketIOController::new(connection.clone()).await?;
@@ -89,7 +89,7 @@ where
     }
 
     pub async fn fetch_initial_state(
-        controller: &PacketIOController<ConnectionType, FuturesType>,
+        controller: &PacketIOController<ConnectionType>,
     ) -> crate::Result<(DeviceState, Arc<dyn DeviceImplementation + Send + Sync>)> {
         tracing::debug!("requesting state to determine model");
         let unparsed = controller.send(&RequestStatePacket::new().into()).await?;
@@ -107,8 +107,8 @@ where
         >,
         mut inbound_receiver: mpsc::Receiver<Packet>,
         state_sender_lock: Arc<Mutex<watch::Sender<DeviceState>>>,
-    ) -> FuturesType::JoinHandleType {
-        FuturesType::spawn(async move {
+    ) -> JoinHandle<()> {
+        tokio::spawn(async move {
             while let Some(packet) = inbound_receiver.recv().await {
                 match packet_handlers.get(&packet.command()) {
                     Some(handler) => {
@@ -151,11 +151,9 @@ where
     }
 }
 
-impl<ConnectionType, FuturesType> api::device::Device
-    for SoundcoreDevice<ConnectionType, FuturesType>
+impl<ConnectionType> api::device::Device for SoundcoreDevice<ConnectionType>
 where
     ConnectionType: Connection,
-    FuturesType: Futures,
 {
     async fn subscribe_to_state_updates(&self) -> watch::Receiver<DeviceState> {
         self.state_sender.lock().await.subscribe()
@@ -331,20 +329,18 @@ where
     }
 }
 
-impl<ConnectionType, FuturesType> Drop for SoundcoreDevice<ConnectionType, FuturesType>
+impl<ConnectionType> Drop for SoundcoreDevice<ConnectionType>
 where
     ConnectionType: Connection,
-    FuturesType: Futures,
 {
     fn drop(&mut self) {
         self.join_handle.abort();
     }
 }
 
-impl<ConnectionType, FuturesType> std::fmt::Debug for SoundcoreDevice<ConnectionType, FuturesType>
+impl<ConnectionType> std::fmt::Debug for SoundcoreDevice<ConnectionType>
 where
     ConnectionType: Connection,
-    FuturesType: Futures,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("SoundcoreDevice").finish()
@@ -371,7 +367,6 @@ mod tests {
                 SoundModes, VolumeAdjustments,
             },
         },
-        futures::TokioFutures,
         soundcore_device::device::Packet,
         stub::connection::StubConnection,
     };
@@ -418,9 +413,7 @@ mod tests {
                 .await
                 .unwrap();
         });
-        let device = SoundcoreDevice::<_, TokioFutures>::new(connection)
-            .await
-            .unwrap();
+        let device = SoundcoreDevice::new(connection).await.unwrap();
         let state = device.state().await;
         let sound_modes = state.sound_modes.unwrap();
         assert_eq!(AmbientSoundMode::Normal, sound_modes.ambient_sound_mode);
@@ -459,9 +452,7 @@ mod tests {
             }
         });
         let connection_clone = connection.clone();
-        SoundcoreDevice::<_, TokioFutures>::new(connection_clone)
-            .await
-            .unwrap();
+        SoundcoreDevice::new(connection_clone).await.unwrap();
         assert_eq!(0, connection.write_return_queue_length().await);
     }
 
@@ -470,7 +461,7 @@ mod tests {
         let (connection, _) = create_test_connection().await;
 
         let connection_clone = connection.clone();
-        let result = SoundcoreDevice::<_, TokioFutures>::new(connection_clone).await;
+        let result = SoundcoreDevice::new(connection_clone).await;
         assert!(result.is_err());
     }
 
@@ -491,9 +482,7 @@ mod tests {
                 .await
                 .unwrap();
         });
-        let device = SoundcoreDevice::<_, TokioFutures>::new(connection)
-            .await
-            .unwrap();
+        let device = SoundcoreDevice::new(connection).await.unwrap();
         let state = device.state().await;
         let sound_modes = state.sound_modes.unwrap();
         assert_eq!(AmbientSoundMode::Normal, sound_modes.ambient_sound_mode);
@@ -565,9 +554,7 @@ mod tests {
                 .unwrap();
         });
 
-        let device = SoundcoreDevice::<_, TokioFutures>::new(connection.to_owned())
-            .await
-            .unwrap();
+        let device = SoundcoreDevice::new(connection.to_owned()).await.unwrap();
         tokio::time::sleep(Duration::from_millis(1)).await;
         let sound_modes = SoundModes {
             custom_noise_canceling: CustomNoiseCanceling::new(10),
@@ -618,9 +605,7 @@ mod tests {
                 .unwrap();
         });
 
-        let device = SoundcoreDevice::<_, TokioFutures>::new(connection.to_owned())
-            .await
-            .unwrap();
+        let device = SoundcoreDevice::new(connection.to_owned()).await.unwrap();
         let equalizer_configuration = EqualizerConfiguration::new_custom_profile(
             VolumeAdjustments::new([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]).unwrap(),
         );
@@ -674,9 +659,7 @@ mod tests {
                     .unwrap();
             });
         }
-        let device = SoundcoreDevice::<_, TokioFutures>::new(connection.to_owned())
-            .await
-            .unwrap();
+        let device = SoundcoreDevice::new(connection.to_owned()).await.unwrap();
         assert_ne!(None, device.state().await.serial_number);
     }
 }

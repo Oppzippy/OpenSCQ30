@@ -8,22 +8,16 @@ use crate::{
         packets::outbound::SetEqualizerPacket, state_modifier::StateModifier,
         structures::EqualizerConfiguration,
     },
-    futures::{Futures, MaybeSend, MaybeSync},
     soundcore_device::device::packet_io_controller::PacketIOController,
 };
 
-pub struct EqualizerStateModifier<ConnectionType: Connection, FuturesType: Futures> {
-    packet_io: Arc<PacketIOController<ConnectionType, FuturesType>>,
+pub struct EqualizerStateModifier<ConnectionType: Connection> {
+    packet_io: Arc<PacketIOController<ConnectionType>>,
     is_stereo: bool,
 }
 
-impl<ConnectionType: Connection, FuturesType: Futures>
-    EqualizerStateModifier<ConnectionType, FuturesType>
-{
-    pub fn new(
-        packet_io: Arc<PacketIOController<ConnectionType, FuturesType>>,
-        is_stereo: bool,
-    ) -> Self {
+impl<ConnectionType: Connection> EqualizerStateModifier<ConnectionType> {
+    pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>, is_stereo: bool) -> Self {
         Self {
             packet_io,
             is_stereo,
@@ -31,18 +25,11 @@ impl<ConnectionType: Connection, FuturesType: Futures>
     }
 }
 
-#[cfg_attr(target_arch = "wasm32", async_trait(?Send))]
-#[cfg_attr(not(target_arch = "wasm32"), async_trait)]
-impl<ConnectionType, FuturesType, T> StateModifier<T>
-    for EqualizerStateModifier<ConnectionType, FuturesType>
+#[async_trait]
+impl<ConnectionType, T> StateModifier<T> for EqualizerStateModifier<ConnectionType>
 where
-    T: AsMut<EqualizerConfiguration>
-        + AsRef<EqualizerConfiguration>
-        + Clone
-        + MaybeSend
-        + MaybeSync,
-    ConnectionType: Connection + MaybeSend + MaybeSync,
-    FuturesType: Futures + MaybeSend + MaybeSync,
+    T: AsMut<EqualizerConfiguration> + AsRef<EqualizerConfiguration> + Clone + Send + Sync,
+    ConnectionType: Connection + Send + Sync,
 {
     async fn move_to_state(
         &self,

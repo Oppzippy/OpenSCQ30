@@ -17,7 +17,6 @@ use crate::{
     devices::standard::structures::{
         AmbientSoundMode, NoiseCancelingMode, SoundModes, TransparencyMode,
     },
-    futures::{Futures, MaybeSend, MaybeSync},
     soundcore_device::device::packet_io_controller::PacketIOController,
 };
 
@@ -63,26 +62,24 @@ pub struct AvailableSoundModes {
 }
 
 pub trait AddSoundModesExt {
-    fn add_sound_modes<C, F>(
+    fn add_sound_modes<C>(
         &mut self,
-        packet_io: Arc<PacketIOController<C, F>>,
+        packet_io: Arc<PacketIOController<C>>,
         available_sound_modes: AvailableSoundModes,
     ) where
-        C: Connection + 'static + MaybeSend + MaybeSync,
-        F: Futures + 'static + MaybeSend + MaybeSync;
+        C: Connection + 'static + Send + Sync;
 }
 
 impl<T> AddSoundModesExt for ModuleCollection<T>
 where
-    T: AsMut<SoundModes> + AsRef<SoundModes> + Clone + MaybeSend + MaybeSync,
+    T: AsMut<SoundModes> + AsRef<SoundModes> + Clone + Send + Sync,
 {
-    fn add_sound_modes<C, F>(
+    fn add_sound_modes<C>(
         &mut self,
-        packet_io: Arc<PacketIOController<C, F>>,
+        packet_io: Arc<PacketIOController<C>>,
         available_sound_modes: AvailableSoundModes,
     ) where
-        C: Connection + 'static + MaybeSend + MaybeSync,
-        F: Futures + 'static + MaybeSend + MaybeSync,
+        C: Connection + 'static + Send + Sync,
     {
         self.setting_manager.add_handler(
             CategoryId::SoundModes,

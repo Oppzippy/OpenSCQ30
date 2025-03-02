@@ -1,10 +1,12 @@
 use std::sync::Arc;
 
-use tokio::sync::{mpsc, watch};
+use tokio::{
+    sync::{mpsc, watch},
+    task::JoinHandle,
+};
 
 use crate::{
     api::settings::{SettingId, Value},
-    futures::{Futures, MaybeSend, MaybeSync},
     soundcore_device::device::Packet,
 };
 
@@ -18,9 +20,6 @@ pub mod sound_modes;
 pub struct ModuleCollection<StateType> {
     pub setting_manager: SettingsManager<StateType>,
     pub packet_handlers: PacketManager<StateType>,
-    #[cfg(target_arch = "wasm32")]
-    pub state_modifiers: Vec<Box<dyn StateModifier<StateType>>>,
-    #[cfg(not(target_arch = "wasm32"))]
     pub state_modifiers: Vec<Box<dyn StateModifier<StateType> + Send + Sync>>,
 }
 
@@ -58,29 +57,27 @@ where
 }
 
 pub trait ModuleCollectionSpawnPacketHandlerExt<T> {
-    fn spawn_packet_handler<F>(
+    fn spawn_packet_handler(
         &self,
         state_sender: watch::Sender<T>,
         packet_receiver: mpsc::Receiver<Packet>,
-    ) -> F::JoinHandleType
+    ) -> JoinHandle<()>
     where
-        F: Futures + MaybeSend + MaybeSync,
-        T: 'static + MaybeSend + MaybeSync;
+        T: 'static + Send + Sync;
 }
 
 impl<T> ModuleCollectionSpawnPacketHandlerExt<T> for Arc<ModuleCollection<T>> {
-    fn spawn_packet_handler<F>(
+    fn spawn_packet_handler(
         &self,
         state_sender: watch::Sender<T>,
         mut packet_receiver: mpsc::Receiver<Packet>,
-    ) -> F::JoinHandleType
+    ) -> JoinHandle<()>
     where
-        F: Futures + MaybeSend + MaybeSync,
-        T: 'static + MaybeSend + MaybeSync,
+        T: 'static + Send + Sync,
     {
         let module_collection = self.clone();
         let state_sender = state_sender.clone();
-        F::spawn(async move {
+        tokio::spawn(async move {
             while let Some(packet) = packet_receiver.recv().await {
                 match module_collection
                     .packet_handlers

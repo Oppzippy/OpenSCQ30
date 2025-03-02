@@ -1,38 +1,31 @@
-use std::{marker::PhantomData, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 
 use nom::error::VerboseError;
-use tokio::{select, sync::mpsc};
+use tokio::{select, sync::mpsc, task::JoinHandle};
 
 use crate::{
     api::connection::Connection,
     devices::standard::{packets::inbound::take_inbound_packet_header, structures::Command},
-    futures::{Futures, JoinHandle},
 };
 
 use super::{Packet, multi_queue::MultiQueue};
 
-pub struct PacketIOController<ConnectionType, FuturesType>
+pub struct PacketIOController<ConnectionType>
 where
     ConnectionType: Connection,
-    FuturesType: Futures,
 {
     connection: Arc<ConnectionType>,
     packet_queues: Arc<MultiQueue<Command, Packet>>,
-    handle: FuturesType::JoinHandleType,
-    _futures: PhantomData<FuturesType>,
+    handle: JoinHandle<()>,
 }
 
-impl<ConnectionType: Connection, FuturesType: Futures> Drop
-    for PacketIOController<ConnectionType, FuturesType>
-{
+impl<ConnectionType: Connection> Drop for PacketIOController<ConnectionType> {
     fn drop(&mut self) {
         self.handle.abort();
     }
 }
 
-impl<ConnectionType: Connection, FuturesType: Futures>
-    PacketIOController<ConnectionType, FuturesType>
-{
+impl<ConnectionType: Connection> PacketIOController<ConnectionType> {
     pub async fn new(
         connection: Arc<ConnectionType>,
     ) -> crate::Result<(Self, mpsc::Receiver<Packet>)> {
@@ -45,7 +38,6 @@ impl<ConnectionType: Connection, FuturesType: Futures>
                 connection,
                 packet_queues,
                 handle,
-                _futures: PhantomData,
             },
             outgoing_receiver,
         ))
@@ -54,9 +46,9 @@ impl<ConnectionType: Connection, FuturesType: Futures>
     fn spawn_packet_handler(
         packet_queues: Arc<MultiQueue<Command, Packet>>,
         mut incoming_receiver: mpsc::Receiver<Vec<u8>>,
-    ) -> (FuturesType::JoinHandleType, mpsc::Receiver<Packet>) {
+    ) -> (JoinHandle<()>, mpsc::Receiver<Packet>) {
         let (outgoing_sender, outgoing_receiver) = mpsc::channel(100);
-        let handle = FuturesType::spawn(async move {
+        let handle = tokio::spawn(async move {
             while let Some(bytes) = incoming_receiver.recv().await {
                 let (body, header) = match take_inbound_packet_header::<VerboseError<_>>(&bytes) {
                     Ok(parsed) => parsed,
@@ -91,7 +83,7 @@ impl<ConnectionType: Connection, FuturesType: Futures>
             self.connection.write_with_response(&packet.bytes()).await?;
             let result = select! {
                 result = handle.wait_for_end() => result,
-                _ = FuturesType::sleep(Duration::from_millis(500 * i)) => None,
+                _ = tokio::time::sleep(Duration::from_millis(500 * i)) => None,
             };
             if let Some(response) = result {
                 return Ok(response);
@@ -116,7 +108,6 @@ mod tests {
         devices::standard::packets::outbound::{
             OutboundPacket, SetAmbientSoundModeCyclePacket, SetSoundModePacket,
         },
-        futures::TokioFutures,
         stub::connection::StubConnection,
     };
 
@@ -136,12 +127,7 @@ mod tests {
         for _ in 1..10 {
             connection.push_write_return(Ok(())).await;
         }
-        let controller = Arc::new(
-            PacketIOController::<_, TokioFutures>::new(connection)
-                .await
-                .unwrap()
-                .0,
-        );
+        let controller = Arc::new(PacketIOController::new(connection).await.unwrap().0);
 
         let handle1 = tokio::spawn({
             let controller = controller.clone();
@@ -191,12 +177,7 @@ mod tests {
         for _ in 1..10 {
             connection.push_write_return(Ok(())).await;
         }
-        let controller = Arc::new(
-            PacketIOController::<_, TokioFutures>::new(connection)
-                .await
-                .unwrap()
-                .0,
-        );
+        let controller = Arc::new(PacketIOController::new(connection).await.unwrap().0);
 
         let set_cycle_packet = SetAmbientSoundModeCyclePacket::default();
         let handle1 = tokio::spawn({

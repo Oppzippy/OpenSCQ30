@@ -2,8 +2,6 @@ use macaddr::MacAddr6;
 use tokio::sync::{mpsc, watch};
 use uuid::Uuid;
 
-use crate::futures::{MaybeSend, MaybeSync};
-
 use super::ConnectionStatus;
 
 pub trait Connection {
@@ -13,11 +11,11 @@ pub trait Connection {
     fn write_with_response(
         &self,
         data: &[u8],
-    ) -> impl Future<Output = crate::Result<()>> + MaybeSend + MaybeSync;
+    ) -> impl Future<Output = crate::Result<()>> + Send + Sync;
     async fn write_without_response(&self, data: &[u8]) -> crate::Result<()>;
     fn inbound_packets_channel(
         &self,
-    ) -> impl Future<Output = crate::Result<mpsc::Receiver<Vec<u8>>>> + MaybeSend + MaybeSync;
+    ) -> impl Future<Output = crate::Result<mpsc::Receiver<Vec<u8>>>> + Send + Sync;
     // TODO remove in v2
     fn service_uuid(&self) -> Uuid;
 }

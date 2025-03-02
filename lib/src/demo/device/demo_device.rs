@@ -1,4 +1,4 @@
-use std::{marker::PhantomData, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 
 use macaddr::MacAddr6;
 use tokio::sync::{Mutex, watch};
@@ -8,23 +8,18 @@ use crate::{
     api::{connection::ConnectionStatus, device::Device},
     device_profile::{AvailableSoundModes, DeviceFeatures},
     devices::standard::{state::DeviceState, structures::*},
-    futures::Futures,
 };
 
-pub struct DemoDevice<FuturesType> {
+pub struct DemoDevice {
     name: String,
     mac_address: MacAddr6,
     state_sender: Arc<Mutex<watch::Sender<DeviceState>>>,
     connection_status_sender: watch::Sender<ConnectionStatus>,
-    futures: PhantomData<FuturesType>,
 }
 
-impl<FuturesType> DemoDevice<FuturesType>
-where
-    FuturesType: Futures,
-{
+impl DemoDevice {
     pub async fn new(name: impl Into<String>, mac_address: MacAddr6) -> Self {
-        FuturesType::sleep(Duration::from_millis(500)).await; // it takes some time to connect
+        tokio::time::sleep(Duration::from_millis(500)).await; // it takes some time to connect
 
         let (state_sender, _) = watch::channel(DeviceState {
             device_features: DeviceFeatures {
@@ -124,15 +119,11 @@ where
             mac_address,
             state_sender: Arc::new(Mutex::new(state_sender)),
             connection_status_sender,
-            futures: PhantomData,
         }
     }
 }
 
-impl<FuturesType> Device for DemoDevice<FuturesType>
-where
-    FuturesType: Futures,
-{
+impl Device for DemoDevice {
     async fn subscribe_to_state_updates(&self) -> watch::Receiver<DeviceState> {
         self.state_sender.lock().await.subscribe()
     }
@@ -276,10 +267,7 @@ where
     }
 }
 
-impl<FuturesType> core::fmt::Debug for DemoDevice<FuturesType>
-where
-    FuturesType: Futures,
-{
+impl core::fmt::Debug for DemoDevice {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("DemoDevice")
             .field("name", &self.name)

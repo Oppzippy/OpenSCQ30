@@ -3,7 +3,6 @@ use std::sync::Arc;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumIter, EnumString, IntoStaticStr, VariantArray};
-use tokio::runtime::Handle;
 
 use crate::{
     api::device::OpenSCQ30DeviceRegistry,
@@ -14,7 +13,6 @@ use crate::{
         },
         standard::{packets::outbound::OutboundPacketBytesExt, structures::SerialNumber},
     },
-    futures::{Futures, MaybeSend, MaybeSync},
     storage::OpenSCQ30Database,
 };
 
@@ -54,11 +52,6 @@ pub enum DeviceModel {
     SoundcoreA3935,
 }
 
-#[cfg(not(target_arch = "wasm32"))]
-type MaybeSendDeviceRegistry = Arc<dyn OpenSCQ30DeviceRegistry + Send + Sync>;
-#[cfg(target_arch = "wasm32")]
-type MaybeSendDeviceRegistry = Arc<dyn OpenSCQ30DeviceRegistry>;
-
 impl DeviceModel {
     pub fn from_serial_number(serial_number: &SerialNumber) -> Option<Self> {
         Self::from_str(&serial_number.as_str()[12..])
@@ -71,15 +64,14 @@ impl DeviceModel {
             .cloned()
     }
 
-    pub async fn device_registry<F: Futures + 'static + MaybeSend + MaybeSync>(
+    pub async fn device_registry(
         &self,
         database: Arc<OpenSCQ30Database>,
-        runtime_handle: Option<Handle>,
         is_demo: bool,
-    ) -> crate::Result<MaybeSendDeviceRegistry> {
+    ) -> crate::Result<Arc<dyn OpenSCQ30DeviceRegistry + Send + Sync>> {
         match self {
             DeviceModel::SoundcoreA3027 => Ok(if is_demo {
-                Arc::new(A3027DeviceRegistry::<_, F>::new(
+                Arc::new(A3027DeviceRegistry::new(
                     DemoConnectionRegistry::new(
                         "A3027".to_string(),
                         A3027StateUpdatePacket::default().bytes(),
@@ -88,8 +80,8 @@ impl DeviceModel {
                     DeviceModel::SoundcoreA3027,
                 ))
             } else {
-                Arc::new(A3027DeviceRegistry::<_, F>::new(
-                    new_connection_registry(runtime_handle).await?,
+                Arc::new(A3027DeviceRegistry::new(
+                    new_connection_registry(None).await?,
                     database,
                     DeviceModel::SoundcoreA3027,
                 ))
