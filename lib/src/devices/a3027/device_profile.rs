@@ -5,11 +5,12 @@ use tokio::sync::watch;
 
 use crate::{
     api::{
-        connection::{Connection, ConnectionDescriptor, ConnectionRegistry},
+        connection::{RfcommBackend, RfcommConnection},
         device::{GenericDeviceDescriptor, OpenSCQ30Device, OpenSCQ30DeviceRegistry},
         settings::{CategoryId, Setting, SettingId, Value},
     },
     device_profile::{DeviceFeatures, DeviceProfile},
+    device_utils,
     devices::standard::{
         implementation::StandardImplementation,
         modules::{
@@ -58,16 +59,16 @@ pub(crate) const A3027_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     implementation: || StandardImplementation::new::<A3027StateUpdatePacket>(),
 };
 
-pub struct A3027DeviceRegistry<C: ConnectionRegistry> {
-    inner: C,
+pub struct A3027DeviceRegistry<B: RfcommBackend> {
+    backend: B,
     database: Arc<OpenSCQ30Database>,
     device_model: DeviceModel,
 }
 
-impl<C: ConnectionRegistry> A3027DeviceRegistry<C> {
-    pub fn new(inner: C, database: Arc<OpenSCQ30Database>, device_model: DeviceModel) -> Self {
+impl<B: RfcommBackend> A3027DeviceRegistry<B> {
+    pub fn new(backend: B, database: Arc<OpenSCQ30Database>, device_model: DeviceModel) -> Self {
         Self {
-            inner,
+            backend,
             device_model,
             database,
         }
@@ -75,20 +76,17 @@ impl<C: ConnectionRegistry> A3027DeviceRegistry<C> {
 }
 
 #[async_trait]
-impl<C> OpenSCQ30DeviceRegistry for A3027DeviceRegistry<C>
+impl<B> OpenSCQ30DeviceRegistry for A3027DeviceRegistry<B>
 where
-    C: ConnectionRegistry + 'static + Send + Sync,
+    B: RfcommBackend + 'static + Send + Sync,
 {
     async fn devices(&self) -> crate::Result<Vec<GenericDeviceDescriptor>> {
-        self.inner
-            .connection_descriptors()
-            .await
-            .map(|descriptors| {
-                descriptors
-                    .into_iter()
-                    .map(|d| GenericDeviceDescriptor::new(d.name(), d.mac_address()))
-                    .collect()
-            })
+        self.backend.devices().await.map(|descriptors| {
+            descriptors
+                .into_iter()
+                .map(|d| GenericDeviceDescriptor::new(d.name, d.mac_address))
+                .collect()
+        })
     }
 
     async fn connect(
@@ -96,11 +94,14 @@ where
         mac_address: macaddr::MacAddr6,
     ) -> crate::Result<Arc<dyn OpenSCQ30Device + Send + Sync>> {
         let connection = self
-            .inner
-            .connection(mac_address)
-            .await?
-            .ok_or(crate::Error::DeviceNotFound { source: None })?;
-        let device = A3027Device::<C::ConnectionType>::new(
+            .backend
+            .connect(mac_address, |addr| {
+                addr.into_iter()
+                    .find(device_utils::is_soundcore_vendor_rfcomm_uuid)
+                    .unwrap_or(device_utils::RFCOMM_UUID)
+            })
+            .await?;
+        let device = A3027Device::<B::ConnectionType>::new(
             self.database.clone(),
             connection,
             self.device_model,
@@ -110,7 +111,7 @@ where
     }
 }
 
-pub struct A3027Device<ConnectionType: Connection> {
+pub struct A3027Device<ConnectionType: RfcommConnection + Send + Sync> {
     device_model: DeviceModel,
     state_sender: watch::Sender<A3027State>,
     module_collection: Arc<ModuleCollection<A3027State>>,
@@ -119,15 +120,15 @@ pub struct A3027Device<ConnectionType: Connection> {
 
 impl<ConnectionType> A3027Device<ConnectionType>
 where
-    ConnectionType: Connection + 'static + Send + Sync,
+    ConnectionType: RfcommConnection + 'static + Send + Sync,
 {
     pub async fn new(
         database: Arc<OpenSCQ30Database>,
-        connection: Arc<ConnectionType>,
+        connection: ConnectionType,
         device_model: DeviceModel,
     ) -> crate::Result<Self> {
         let (packet_io_controller, packet_receiver) =
-            PacketIOController::<ConnectionType>::new(connection).await?;
+            PacketIOController::<ConnectionType>::new(Arc::new(connection)).await?;
         let packet_io_controller = Arc::new(packet_io_controller);
         let state_update_packet: A3027StateUpdatePacket = packet_io_controller
             .send(&RequestStatePacket::new().into())
@@ -171,7 +172,7 @@ where
 #[async_trait]
 impl<ConnectionType> OpenSCQ30Device for A3027Device<ConnectionType>
 where
-    ConnectionType: Connection + 'static + Send + Sync,
+    ConnectionType: RfcommConnection + 'static + Send + Sync,
 {
     fn model(&self) -> DeviceModel {
         self.device_model

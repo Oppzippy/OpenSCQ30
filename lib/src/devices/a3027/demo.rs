@@ -10,7 +10,8 @@ use uuid::Uuid;
 
 use crate::{
     api::connection::{
-        Connection, ConnectionRegistry, ConnectionStatus, GenericConnectionDescriptor,
+        Connection, ConnectionDescriptor, ConnectionRegistry, ConnectionStatus, DeviceDescriptor,
+        GenericConnectionDescriptor, RfcommBackend, RfcommConnection,
     },
     devices::standard::{packets::inbound::take_inbound_packet_header, structures::STATE_UPDATE},
     soundcore_device::device::Packet,
@@ -80,24 +81,35 @@ impl DemoConnection {
     }
 }
 
-impl Connection for DemoConnection {
-    async fn name(&self) -> crate::Result<String> {
-        Ok(self.name.to_owned())
+impl RfcommBackend for DemoConnectionRegistry {
+    type ConnectionType = DemoConnection;
+
+    async fn devices(&self) -> crate::Result<HashSet<crate::api::connection::DeviceDescriptor>> {
+        Ok(ConnectionRegistry::connection_descriptors(self)
+            .await?
+            .into_iter()
+            .map(|d| DeviceDescriptor {
+                name: d.name().to_owned(),
+                mac_address: d.mac_address(),
+            })
+            .collect())
     }
-    async fn mac_address(&self) -> crate::Result<MacAddr6> {
-        Ok(self.mac_address)
+
+    async fn connect(
+        &self,
+        mac_address: MacAddr6,
+        _select_uuid: impl Fn(HashSet<Uuid>) -> Uuid + Send,
+    ) -> crate::Result<Self::ConnectionType> {
+        Ok(DemoConnection::new(
+            self.name.to_owned(),
+            mac_address,
+            self.state_update_packet.to_owned(),
+        ))
     }
-    fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
-        self.connection_status_receiver
-            .lock()
-            .unwrap()
-            .take()
-            .unwrap()
-    }
-    async fn write_with_response(&self, data: &[u8]) -> crate::Result<()> {
-        self.write_without_response(data).await
-    }
-    async fn write_without_response(&self, data: &[u8]) -> crate::Result<()> {
+}
+
+impl RfcommConnection for DemoConnection {
+    async fn write(&self, data: &[u8]) -> crate::Result<()> {
         let (_body, command) = take_inbound_packet_header::<VerboseError<_>>(data).unwrap();
         match command.to_inbound() {
             STATE_UPDATE => self
@@ -119,10 +131,16 @@ impl Connection for DemoConnection {
         }
         Ok(())
     }
-    async fn inbound_packets_channel(&self) -> crate::Result<mpsc::Receiver<Vec<u8>>> {
-        Ok(self.packet_receiver.lock().unwrap().take().unwrap())
+
+    fn read_channel(&self) -> mpsc::Receiver<Vec<u8>> {
+        futures::executor::block_on(async { self.inbound_packets_channel().await }).unwrap()
     }
-    fn service_uuid(&self) -> Uuid {
-        Uuid::nil()
+
+    fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
+        self.connection_status_receiver
+            .lock()
+            .unwrap()
+            .take()
+            .unwrap()
     }
 }

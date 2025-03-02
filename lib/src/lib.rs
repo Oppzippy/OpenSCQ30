@@ -5,6 +5,7 @@
 // This crate should not be used outside of this git repository, so breaking api changes are fine.
 #![allow(clippy::type_complexity, async_fn_in_trait)]
 pub mod api;
+mod connection_backend;
 pub mod demo;
 pub mod device_profile;
 pub mod device_utils;

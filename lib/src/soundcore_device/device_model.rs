@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumIter, EnumString, IntoStaticStr, VariantArray};
 
 use crate::{
-    api::device::OpenSCQ30DeviceRegistry,
+    api::{connection::ConnectionBackends, device::OpenSCQ30DeviceRegistry},
     devices::{
         a3027::{
             demo::DemoConnectionRegistry, device_profile::A3027DeviceRegistry,
@@ -15,8 +15,6 @@ use crate::{
     },
     storage::OpenSCQ30Database,
 };
-
-use super::connection::new_connection_registry;
 
 #[derive(
     Debug,
@@ -66,6 +64,7 @@ impl DeviceModel {
 
     pub async fn device_registry(
         &self,
+        backends: impl ConnectionBackends + 'static,
         database: Arc<OpenSCQ30Database>,
         is_demo: bool,
     ) -> crate::Result<Arc<dyn OpenSCQ30DeviceRegistry + Send + Sync>> {
@@ -81,7 +80,10 @@ impl DeviceModel {
                 ))
             } else {
                 Arc::new(A3027DeviceRegistry::new(
-                    new_connection_registry(None).await?,
+                    backends
+                        .rfcomm()
+                        .await
+                        .expect("TODO return no backend available error"),
                     database,
                     DeviceModel::SoundcoreA3027,
                 ))

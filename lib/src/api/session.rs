@@ -8,6 +8,7 @@ use crate::{
 };
 
 use super::{
+    connection::{self, ConnectionBackends, RfcommBackend},
     device::{GenericDeviceDescriptor, OpenSCQ30Device},
     quick_presets::QuickPresetsHandler,
 };
@@ -48,8 +49,17 @@ impl OpenSCQ30Session {
         &self,
         model: DeviceModel,
     ) -> crate::Result<Vec<GenericDeviceDescriptor>> {
+        self.list_devices_with_backends(connection::default_backends(), model)
+            .await
+    }
+
+    pub async fn list_devices_with_backends(
+        &self,
+        backends: impl ConnectionBackends + 'static,
+        model: DeviceModel,
+    ) -> crate::Result<Vec<GenericDeviceDescriptor>> {
         model
-            .device_registry(self.database.clone(), true)
+            .device_registry(backends, self.database.clone(), true)
             .await?
             .devices()
             .await
@@ -59,10 +69,19 @@ impl OpenSCQ30Session {
         &self,
         mac_address: MacAddr6,
     ) -> crate::Result<Arc<dyn OpenSCQ30Device + Send + Sync>> {
+        self.connect_with_backends(connection::default_backends(), mac_address)
+            .await
+    }
+
+    pub async fn connect_with_backends(
+        &self,
+        backends: impl ConnectionBackends + 'static,
+        mac_address: MacAddr6,
+    ) -> crate::Result<Arc<dyn OpenSCQ30Device + Send + Sync>> {
         if let Some(paired_device) = self.database.fetch_paired_device(mac_address).await? {
             let registry = paired_device
                 .model
-                .device_registry(self.database.clone(), true)
+                .device_registry(backends, self.database.clone(), true)
                 .await?;
             registry.connect(mac_address).await
         } else {
