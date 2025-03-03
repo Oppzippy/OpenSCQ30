@@ -1,23 +1,32 @@
+use async_trait::async_trait;
 use nom::{
     IResult,
     combinator::{all_consuming, map, opt},
     error::{ContextError, ParseError, context},
     sequence::tuple,
 };
+use tokio::sync::watch;
 
-use crate::devices::{
-    a3027::device_profile::A3027_DEVICE_PROFILE,
-    standard::{
-        packets::{
-            inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
-            outbound::OutboundPacket,
-            parsing::take_bool,
-        },
-        structures::{
-            AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
-            SingleBattery, SoundModes,
+use crate::{
+    devices::{
+        a3027::{device_profile::A3027_DEVICE_PROFILE, state::A3027State},
+        standard::{
+            modules::ModuleCollection,
+            packet_manager::PacketHandler,
+            packets::{
+                inbound::{
+                    InboundPacket, TryIntoInboundPacket, state_update_packet::StateUpdatePacket,
+                },
+                outbound::OutboundPacket,
+                parsing::take_bool,
+            },
+            structures::{
+                AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender,
+                SerialNumber, SingleBattery, SoundModes,
+            },
         },
     },
+    soundcore_device::device::Packet,
 };
 
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -134,6 +143,30 @@ impl OutboundPacket for A3027StateUpdatePacket {
             .chain([self.wear_detection as u8])
             .chain(self.touch_func.map(|v| v as u8))
             .collect()
+    }
+}
+
+struct StateUpdatePacketHandler {}
+
+#[async_trait]
+impl PacketHandler<A3027State> for StateUpdatePacketHandler {
+    async fn handle_packet(
+        &self,
+        state: &watch::Sender<A3027State>,
+        packet: &Packet,
+    ) -> crate::Result<()> {
+        let packet: A3027StateUpdatePacket = packet.try_into_inbound_packet()?;
+        state.send_modify(|state| *state = packet.into());
+        Ok(())
+    }
+}
+
+impl ModuleCollection<A3027State> {
+    pub fn add_state_update(&mut self) {
+        self.packet_handlers.set_handler(
+            StateUpdatePacket::command(),
+            Box::new(StateUpdatePacketHandler {}),
+        );
     }
 }
 

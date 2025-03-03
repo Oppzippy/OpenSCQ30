@@ -114,7 +114,8 @@ where
             .try_into_inbound_packet()?;
         let (state_sender, _) = watch::channel::<A3028State>(state_update_packet.into());
 
-        let mut module_collection = ModuleCollection::default();
+        let mut module_collection = ModuleCollection::<A3028State>::default();
+        module_collection.add_state_update();
         module_collection.add_sound_modes(
             packet_io_controller.clone(),
             AvailableSoundModes {

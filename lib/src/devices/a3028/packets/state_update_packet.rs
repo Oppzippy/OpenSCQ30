@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use nom::{
     IResult,
     combinator::{all_consuming, map, map_opt, opt},
@@ -6,20 +7,28 @@ use nom::{
     sequence::tuple,
 };
 use strum::FromRepr;
+use tokio::sync::watch;
 
-use crate::devices::{
-    a3028::device_profile::A3028_DEVICE_PROFILE,
-    standard::{
-        packets::{
-            inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
-            outbound::OutboundPacket,
-            parsing::take_bool,
-        },
-        structures::{
-            AgeRange, BasicHearId, Command, EqualizerConfiguration, FirmwareVersion, Gender,
-            SerialNumber, SingleBattery, SoundModes,
+use crate::{
+    devices::{
+        a3028::{device_profile::A3028_DEVICE_PROFILE, state::A3028State},
+        standard::{
+            modules::ModuleCollection,
+            packet_manager::PacketHandler,
+            packets::{
+                inbound::{
+                    InboundPacket, TryIntoInboundPacket, state_update_packet::StateUpdatePacket,
+                },
+                outbound::OutboundPacket,
+                parsing::take_bool,
+            },
+            structures::{
+                AgeRange, BasicHearId, Command, EqualizerConfiguration, FirmwareVersion, Gender,
+                SerialNumber, SingleBattery, SoundModes,
+            },
         },
     },
+    soundcore_device::device::Packet,
 };
 
 #[derive(Default, Debug, Clone, PartialEq)]
@@ -184,6 +193,30 @@ enum AutoPowerOffDuration {
     OneHour = 1,
     NinetyMinutes = 2,
     TwoHours = 3,
+}
+
+struct StateUpdatePacketHandler {}
+
+#[async_trait]
+impl PacketHandler<A3028State> for StateUpdatePacketHandler {
+    async fn handle_packet(
+        &self,
+        state: &watch::Sender<A3028State>,
+        packet: &Packet,
+    ) -> crate::Result<()> {
+        let packet: A3028StateUpdatePacket = packet.try_into_inbound_packet()?;
+        state.send_modify(|state| *state = packet.into());
+        Ok(())
+    }
+}
+
+impl ModuleCollection<A3028State> {
+    pub fn add_state_update(&mut self) {
+        self.packet_handlers.set_handler(
+            StateUpdatePacket::command(),
+            Box::new(StateUpdatePacketHandler {}),
+        );
+    }
 }
 
 #[cfg(test)]
