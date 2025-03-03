@@ -1,6 +1,9 @@
-use crate::devices::standard::structures::{
-    AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
-    SingleBattery, SoundModes,
+use crate::{
+    devices::standard::structures::{
+        AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
+        SingleBattery, SoundModes,
+    },
+    macros::impl_as_ref_for_field,
 };
 
 use super::packets::A3027StateUpdatePacket;
@@ -19,27 +22,12 @@ pub struct A3027State {
     pub touch_func: Option<bool>,
 }
 
-impl AsMut<SoundModes> for A3027State {
-    fn as_mut(&mut self) -> &mut SoundModes {
-        &mut self.sound_modes
+impl_as_ref_for_field!(
+    struct A3027State {
+        sound_modes: SoundModes,
+        equalizer_configuration: EqualizerConfiguration,
     }
-}
-impl AsRef<SoundModes> for A3027State {
-    fn as_ref(&self) -> &SoundModes {
-        &self.sound_modes
-    }
-}
-
-impl AsMut<EqualizerConfiguration> for A3027State {
-    fn as_mut(&mut self) -> &mut EqualizerConfiguration {
-        &mut self.equalizer_configuration
-    }
-}
-impl AsRef<EqualizerConfiguration> for A3027State {
-    fn as_ref(&self) -> &EqualizerConfiguration {
-        &self.equalizer_configuration
-    }
-}
+);
 
 impl From<A3027StateUpdatePacket> for A3027State {
     fn from(value: A3027StateUpdatePacket) -> Self {
