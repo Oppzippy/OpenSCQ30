@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use nom::{
     IResult,
     combinator::{all_consuming, map},
@@ -5,22 +6,31 @@ use nom::{
     number::complete::le_u8,
     sequence::tuple,
 };
+use tokio::sync::watch;
 
-use crate::devices::{
-    a3031::device_profile::A3031_DEVICE_PROFILE,
-    standard::{
-        packets::{
-            inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
-            parsing::take_bool,
-        },
-        structures::{
-            DualBattery, EqualizerConfiguration, InternalMultiButtonConfiguration, SoundModes,
-            StereoEqualizerConfiguration, TwsStatus,
+use crate::{
+    devices::{
+        a3031::{device_profile::A3031_DEVICE_PROFILE, state::A3031State},
+        standard::{
+            modules::ModuleCollection,
+            packet_manager::PacketHandler,
+            packets::{
+                inbound::{
+                    InboundPacket, TryIntoInboundPacket, state_update_packet::StateUpdatePacket,
+                },
+                outbound::OutboundPacket,
+                parsing::take_bool,
+            },
+            structures::{
+                Command, DualBattery, EqualizerConfiguration, InternalMultiButtonConfiguration,
+                SoundModes, StereoEqualizerConfiguration, TwsStatus,
+            },
         },
     },
+    soundcore_device::device::Packet,
 };
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct A3031StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
@@ -54,7 +64,7 @@ impl From<A3031StateUpdatePacket> for StateUpdatePacket {
 }
 
 impl InboundPacket for A3031StateUpdatePacket {
-    fn command() -> crate::devices::standard::structures::Command {
+    fn command() -> Command {
         StateUpdatePacket::command()
     }
 
@@ -100,5 +110,64 @@ impl InboundPacket for A3031StateUpdatePacket {
                 },
             )),
         )(input)
+    }
+}
+
+impl OutboundPacket for A3031StateUpdatePacket {
+    fn command(&self) -> Command {
+        StateUpdatePacket::command()
+    }
+
+    fn body(&self) -> Vec<u8> {
+        self.tws_status
+            .bytes()
+            .into_iter()
+            .chain([
+                self.battery.left.level.0,
+                self.battery.right.level.0,
+                self.battery.left.is_charging as u8,
+                self.battery.right.is_charging as u8,
+            ])
+            .chain(self.equalizer_configuration.profile_id().to_le_bytes())
+            .chain(self.equalizer_configuration.volume_adjustments().bytes())
+            .chain(self.equalizer_configuration.volume_adjustments().bytes())
+            .chain(self.button_configuration.bytes())
+            .chain([
+                self.sound_modes.ambient_sound_mode.id(),
+                self.sound_modes.noise_canceling_mode.id(),
+                self.sound_modes.transparency_mode.id(),
+                self.sound_modes.custom_noise_canceling.value(),
+            ])
+            .chain([
+                self.side_tone as u8,
+                self.touch_tone as u8,
+                self.auto_power_off_on as u8,
+                self.auto_power_off_on_index,
+            ])
+            .collect()
+    }
+}
+
+struct StateUpdatePacketHandler {}
+
+#[async_trait]
+impl PacketHandler<A3031State> for StateUpdatePacketHandler {
+    async fn handle_packet(
+        &self,
+        state: &watch::Sender<A3031State>,
+        packet: &Packet,
+    ) -> crate::Result<()> {
+        let packet: A3031StateUpdatePacket = packet.try_into_inbound_packet()?;
+        state.send_modify(|state| *state = packet.into());
+        Ok(())
+    }
+}
+
+impl ModuleCollection<A3031State> {
+    pub fn add_state_update(&mut self) {
+        self.packet_handlers.set_handler(
+            StateUpdatePacket::command(),
+            Box::new(StateUpdatePacketHandler {}),
+        );
     }
 }

@@ -11,7 +11,7 @@ use strum::FromRepr;
 
 use crate::devices::standard::packets::parsing::take_bool;
 
-#[derive(Debug, Clone, PartialEq, Eq, Copy, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Copy, PartialOrd, Ord, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct TwsStatus {
@@ -34,13 +34,18 @@ impl TwsStatus {
             ),
         )(input)
     }
+
+    pub fn bytes(&self) -> [u8; 2] {
+        [self.host_device as u8, self.is_connected as u8]
+    }
 }
 
 #[repr(u8)]
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, FromRepr)]
+#[derive(Default, Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, FromRepr)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum HostDevice {
+    #[default]
     Left = 0,
     Right = 1,
 }
