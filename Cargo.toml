@@ -1,8 +1,7 @@
 [workspace]
 members = [
-    "cli",
+    # "cli",
     "lib",
-    "lib_protobuf",
     # "android",
     "uniffi-bindgen",
     "gui_cosmic",

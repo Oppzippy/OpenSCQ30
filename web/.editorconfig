@@ -1,3 +1,0 @@
-[*.{ts,js,cjs,json,tsx,jsx}]
-indent_style = space
-indent_size = 2
