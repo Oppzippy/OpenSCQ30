@@ -345,8 +345,10 @@ mod tests {
             let actual = VolumeAdjustments2::new(example.0.to_vec())
                 .unwrap()
                 .apply_drc();
-            let expected =
-                VolumeAdjustments2::new(example.1.map(|v: f64| v.round() as i16).to_vec()).unwrap();
+            let expected = VolumeAdjustments2::new(
+                example.1.map(|v: f64| (v * 10f64).round() as i16).to_vec(),
+            )
+            .unwrap();
             assert_eq!(expected, actual);
         }
     }
