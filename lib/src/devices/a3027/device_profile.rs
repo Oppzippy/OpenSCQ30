@@ -11,6 +11,7 @@ use crate::{
     },
     device_profile::{DeviceFeatures, DeviceProfile},
     devices::standard::{
+        demo::DemoConnectionRegistry,
         device::{SoundcoreDevice, SoundcoreDeviceRegistry},
         implementation::StandardImplementation,
         modules::{
@@ -30,7 +31,7 @@ use crate::{
     storage::OpenSCQ30Database,
 };
 
-use super::{demo::DemoConnectionRegistry, packets::A3027StateUpdatePacket, state::A3027State};
+use super::{packets::A3027StateUpdatePacket, state::A3027State};
 pub(crate) const A3027_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     features: DeviceFeatures {
         available_sound_modes: Some(crate::device_profile::AvailableSoundModes {

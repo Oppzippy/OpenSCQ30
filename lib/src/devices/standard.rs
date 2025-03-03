@@ -1,3 +1,4 @@
+pub mod demo;
 pub mod device;
 pub mod implementation;
 pub mod modules;

@@ -10,22 +10,20 @@ use crate::{
         settings::{CategoryId, Setting, SettingId, Value},
     },
     device_profile::{DeviceFeatures, DeviceProfile},
-    devices::{
-        a3027::demo::DemoConnectionRegistry,
-        standard::{
-            device::{SoundcoreDevice, SoundcoreDeviceRegistry},
-            implementation::StandardImplementation,
-            modules::{
-                ModuleCollection, ModuleCollectionSpawnPacketHandlerExt,
-                equalizer::AddEqualizerExt,
-                sound_modes::{AddSoundModesExt, AvailableSoundModes},
-            },
-            packets::{
-                inbound::TryIntoInboundPacket,
-                outbound::{OutboundPacketBytesExt, RequestStatePacket},
-            },
-            structures::{AmbientSoundMode, NoiseCancelingMode},
+    devices::standard::{
+        demo::DemoConnectionRegistry,
+        device::{SoundcoreDevice, SoundcoreDeviceRegistry},
+        implementation::StandardImplementation,
+        modules::{
+            ModuleCollection, ModuleCollectionSpawnPacketHandlerExt,
+            equalizer::AddEqualizerExt,
+            sound_modes::{AddSoundModesExt, AvailableSoundModes},
         },
+        packets::{
+            inbound::TryIntoInboundPacket,
+            outbound::{OutboundPacketBytesExt, RequestStatePacket},
+        },
+        structures::{AmbientSoundMode, NoiseCancelingMode},
     },
     soundcore_device::{
         device::packet_io_controller::PacketIOController, device_model::DeviceModel,
