@@ -77,7 +77,7 @@ impl DeviceModel {
                         A3027StateUpdatePacket::default().bytes(),
                     ),
                     database,
-                    DeviceModel::SoundcoreA3027,
+                    *self,
                 ))
             } else {
                 Arc::new(A3027DeviceRegistry::new(
@@ -86,12 +86,30 @@ impl DeviceModel {
                         .await
                         .expect("TODO return no backend available error"),
                     database,
-                    DeviceModel::SoundcoreA3027,
+                    *self,
                 ))
             }),
             DeviceModel::SoundcoreA3028 => todo!(),
             DeviceModel::SoundcoreA3029 => todo!(),
-            DeviceModel::SoundcoreA3030 => todo!(),
+            DeviceModel::SoundcoreA3030 => Ok(if is_demo {
+                Arc::new(A3027DeviceRegistry::new(
+                    DemoConnectionRegistry::new(
+                        "A3030".to_string(),
+                        A3027StateUpdatePacket::default().bytes(),
+                    ),
+                    database,
+                    *self,
+                ))
+            } else {
+                Arc::new(A3027DeviceRegistry::new(
+                    backends
+                        .rfcomm()
+                        .await
+                        .expect("TODO return no backend available error"),
+                    database,
+                    *self,
+                ))
+            }),
             DeviceModel::SoundcoreA3031 => todo!(),
             DeviceModel::SoundcoreA3033 => todo!(),
             DeviceModel::SoundcoreA3926 => todo!(),
