@@ -1,3 +1,4 @@
+pub mod device;
 pub mod implementation;
 pub mod modules;
 pub mod packet_manager;

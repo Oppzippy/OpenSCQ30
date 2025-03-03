@@ -6,12 +6,12 @@ use tokio::sync::watch;
 use crate::{
     api::{
         connection::{RfcommBackend, RfcommConnection},
-        device::{GenericDeviceDescriptor, OpenSCQ30Device, OpenSCQ30DeviceRegistry},
+        device::OpenSCQ30Device,
         settings::{CategoryId, Setting, SettingId, Value},
     },
     device_profile::{DeviceFeatures, DeviceProfile},
-    device_utils,
     devices::standard::{
+        device::{SoundcoreDevice, SoundcoreDeviceRegistry},
         implementation::StandardImplementation,
         modules::{
             ModuleCollection, ModuleCollectionSpawnPacketHandlerExt,
@@ -59,57 +59,8 @@ pub(crate) const A3027_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     implementation: || StandardImplementation::new::<A3027StateUpdatePacket>(),
 };
 
-pub struct A3027DeviceRegistry<B: RfcommBackend> {
-    backend: B,
-    database: Arc<OpenSCQ30Database>,
-    device_model: DeviceModel,
-}
-
-impl<B: RfcommBackend> A3027DeviceRegistry<B> {
-    pub fn new(backend: B, database: Arc<OpenSCQ30Database>, device_model: DeviceModel) -> Self {
-        Self {
-            backend,
-            device_model,
-            database,
-        }
-    }
-}
-
-#[async_trait]
-impl<B> OpenSCQ30DeviceRegistry for A3027DeviceRegistry<B>
-where
-    B: RfcommBackend + 'static + Send + Sync,
-{
-    async fn devices(&self) -> crate::Result<Vec<GenericDeviceDescriptor>> {
-        self.backend.devices().await.map(|descriptors| {
-            descriptors
-                .into_iter()
-                .map(|d| GenericDeviceDescriptor::new(d.name, d.mac_address))
-                .collect()
-        })
-    }
-
-    async fn connect(
-        &self,
-        mac_address: macaddr::MacAddr6,
-    ) -> crate::Result<Arc<dyn OpenSCQ30Device + Send + Sync>> {
-        let connection = self
-            .backend
-            .connect(mac_address, |addr| {
-                addr.into_iter()
-                    .find(device_utils::is_soundcore_vendor_rfcomm_uuid)
-                    .unwrap_or(device_utils::RFCOMM_UUID)
-            })
-            .await?;
-        let device = A3027Device::<B::ConnectionType>::new(
-            self.database.clone(),
-            connection,
-            self.device_model,
-        )
-        .await?;
-        Ok(Arc::new(device))
-    }
-}
+pub type A3027DeviceRegistry<B: RfcommBackend> =
+    SoundcoreDeviceRegistry<B, A3027Device<B::ConnectionType>>;
 
 pub struct A3027Device<ConnectionType: RfcommConnection + Send + Sync> {
     device_model: DeviceModel,
@@ -118,11 +69,11 @@ pub struct A3027Device<ConnectionType: RfcommConnection + Send + Sync> {
     _packet_io_controller: Arc<PacketIOController<ConnectionType>>,
 }
 
-impl<ConnectionType> A3027Device<ConnectionType>
+impl<ConnectionType> SoundcoreDevice<ConnectionType> for A3027Device<ConnectionType>
 where
     ConnectionType: RfcommConnection + 'static + Send + Sync,
 {
-    pub async fn new(
+    async fn new(
         database: Arc<OpenSCQ30Database>,
         connection: ConnectionType,
         device_model: DeviceModel,
