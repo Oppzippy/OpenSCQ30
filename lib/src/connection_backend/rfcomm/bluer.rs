@@ -1,5 +1,6 @@
 use std::{
     collections::HashSet,
+    panic::Location,
     sync::Arc,
     time::{Duration, Instant},
 };
@@ -287,5 +288,15 @@ impl Drop for BluerRfcommConnection {
     fn drop(&mut self) {
         self.connection_status_handle.abort();
         self.quit.close();
+    }
+}
+
+impl From<bluer::Error> for crate::Error {
+    #[track_caller]
+    fn from(error: bluer::Error) -> Self {
+        crate::Error::Other {
+            source: Box::new(error),
+            location: Location::caller(),
+        }
     }
 }

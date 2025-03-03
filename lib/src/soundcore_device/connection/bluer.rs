@@ -4,7 +4,6 @@ use tokio::{
     task::JoinHandle,
 };
 
-mod bluer_error;
 mod connection;
 mod connection_registry;
 

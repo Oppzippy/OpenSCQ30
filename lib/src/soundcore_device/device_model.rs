@@ -5,7 +5,8 @@ use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumIter, EnumString, IntoStaticStr, VariantArray};
 
 use crate::{
-    api::{connection::ConnectionBackends, device::OpenSCQ30DeviceRegistry},
+    api::device::OpenSCQ30DeviceRegistry,
+    connection_backend::ConnectionBackends,
     devices::{
         a3027::{
             demo::DemoConnectionRegistry, device_profile::A3027DeviceRegistry,

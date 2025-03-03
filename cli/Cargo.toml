@@ -7,7 +7,6 @@ edition = "2021"
 [features]
 default = ["bluetooth"]
 bluetooth = ["openscq30_lib/bluetooth"]
-demo = ["openscq30_lib/demo"]
 
 [dependencies]
 openscq30_lib = { path = "../lib" }

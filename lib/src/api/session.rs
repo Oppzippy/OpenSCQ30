@@ -3,12 +3,12 @@ use std::{path::PathBuf, sync::Arc};
 use macaddr::MacAddr6;
 
 use crate::{
+    connection_backend::{self, ConnectionBackends},
     soundcore_device::device_model::DeviceModel,
     storage::{OpenSCQ30Database, PairedDevice},
 };
 
 use super::{
-    connection::{self, ConnectionBackends, RfcommBackend},
     device::{GenericDeviceDescriptor, OpenSCQ30Device},
     quick_presets::QuickPresetsHandler,
 };
@@ -49,8 +49,11 @@ impl OpenSCQ30Session {
         &self,
         model: DeviceModel,
     ) -> crate::Result<Vec<GenericDeviceDescriptor>> {
-        self.list_devices_with_backends(connection::default_backends(), model)
-            .await
+        self.list_devices_with_backends(
+            connection_backend::default_backends().expect("no default backends available"),
+            model,
+        )
+        .await
     }
 
     pub async fn list_devices_with_backends(
@@ -69,8 +72,11 @@ impl OpenSCQ30Session {
         &self,
         mac_address: MacAddr6,
     ) -> crate::Result<Arc<dyn OpenSCQ30Device + Send + Sync>> {
-        self.connect_with_backends(connection::default_backends(), mac_address)
-            .await
+        self.connect_with_backends(
+            connection_backend::default_backends().expect("no default backends available"),
+            mac_address,
+        )
+        .await
     }
 
     pub async fn connect_with_backends(

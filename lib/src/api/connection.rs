@@ -14,29 +14,6 @@ use macaddr::MacAddr6;
 use tokio::sync::{mpsc, watch};
 use uuid::Uuid;
 
-use crate::connection_backend;
-
-pub trait ConnectionBackends {
-    type Rfcomm: RfcommBackend + Send + Sync;
-
-    fn rfcomm(&self) -> impl Future<Output = crate::Result<Self::Rfcomm>> + Send;
-}
-
-pub fn default_backends() -> impl ConnectionBackends {
-    PlatformConnectionBackends {}
-}
-
-#[cfg(target_os = "linux")]
-struct PlatformConnectionBackends {}
-#[cfg(target_os = "linux")]
-impl ConnectionBackends for PlatformConnectionBackends {
-    type Rfcomm = connection_backend::rfcomm::BluerRfcommBackend;
-
-    async fn rfcomm(&self) -> crate::Result<Self::Rfcomm> {
-        connection_backend::rfcomm::BluerRfcommBackend::new().await
-    }
-}
-
 pub trait RfcommBackend {
     type ConnectionType: RfcommConnection + Send + Sync;
 
