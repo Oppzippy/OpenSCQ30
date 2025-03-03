@@ -16,8 +16,7 @@ use crate::{
         implementation::StandardImplementation,
         modules::{
             ModuleCollection, ModuleCollectionSpawnPacketHandlerExt,
-            equalizer::AddEqualizerExt,
-            sound_modes::{AddSoundModesExt, AvailableSoundModes},
+            sound_modes::AvailableSoundModes,
         },
         packets::{
             inbound::TryIntoInboundPacket,

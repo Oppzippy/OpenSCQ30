@@ -61,20 +61,11 @@ pub struct AvailableSoundModes {
     pub noise_canceling_modes: Vec<NoiseCancelingMode>,
 }
 
-pub trait AddSoundModesExt {
-    fn add_sound_modes<C>(
-        &mut self,
-        packet_io: Arc<PacketIOController<C>>,
-        available_sound_modes: AvailableSoundModes,
-    ) where
-        C: Connection + 'static + Send + Sync;
-}
-
-impl<T> AddSoundModesExt for ModuleCollection<T>
+impl<T> ModuleCollection<T>
 where
     T: AsMut<SoundModes> + AsRef<SoundModes> + Clone + Send + Sync,
 {
-    fn add_sound_modes<C>(
+    pub fn add_sound_modes<C>(
         &mut self,
         packet_io: Arc<PacketIOController<C>>,
         available_sound_modes: AvailableSoundModes,

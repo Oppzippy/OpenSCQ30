@@ -51,22 +51,11 @@ impl From<EqualizerSetting> for SettingId {
     }
 }
 
-pub trait AddEqualizerExt {
-    async fn add_equalizer<C>(
-        &mut self,
-        packet_io: Arc<PacketIOController<C>>,
-        database: Arc<OpenSCQ30Database>,
-        device_model: DeviceModel,
-        is_stereo: bool,
-    ) where
-        C: Connection + 'static + Send + Sync;
-}
-
-impl<T> AddEqualizerExt for ModuleCollection<T>
+impl<T> ModuleCollection<T>
 where
     T: AsMut<EqualizerConfiguration> + AsRef<EqualizerConfiguration> + Clone + Send + Sync,
 {
-    async fn add_equalizer<C>(
+    pub async fn add_equalizer<C>(
         &mut self,
         packet_io: Arc<PacketIOController<C>>,
         database: Arc<OpenSCQ30Database>,
