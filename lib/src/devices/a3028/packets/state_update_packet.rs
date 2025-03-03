@@ -12,16 +12,17 @@ use crate::devices::{
     standard::{
         packets::{
             inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
+            outbound::OutboundPacket,
             parsing::take_bool,
         },
         structures::{
-            AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
-            SingleBattery, SoundModes,
+            AgeRange, BasicHearId, Command, EqualizerConfiguration, FirmwareVersion, Gender,
+            SerialNumber, SingleBattery, SoundModes,
         },
     },
 };
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Default, Debug, Clone, PartialEq)]
 pub struct A3028StateUpdatePacket {
     pub battery: SingleBattery,
     pub equalizer_configuration: EqualizerConfiguration,
@@ -101,6 +102,33 @@ impl InboundPacket for A3028StateUpdatePacket {
                 },
             )),
         )(input)
+    }
+}
+
+impl OutboundPacket for A3028StateUpdatePacket {
+    fn command(&self) -> Command {
+        StateUpdatePacket::command()
+    }
+
+    fn body(&self) -> Vec<u8> {
+        [self.battery.level.0, self.battery.is_charging as u8]
+            .into_iter()
+            .chain(self.equalizer_configuration.profile_id().to_le_bytes())
+            .chain(self.equalizer_configuration.volume_adjustments().bytes())
+            .chain([self.gender.0])
+            .chain([self.age_range.0])
+            .chain([self.hear_id.is_enabled as u8])
+            .chain(self.hear_id.volume_adjustments.bytes())
+            .chain(self.hear_id.time.to_le_bytes())
+            .chain([
+                self.sound_modes.ambient_sound_mode.id(),
+                self.sound_modes.noise_canceling_mode.id(),
+                self.sound_modes.transparency_mode.id(),
+                self.sound_modes.custom_noise_canceling.value(),
+            ])
+            .chain(self.firmware_version.to_string().into_bytes())
+            .chain(self.serial_number.as_str().as_bytes().iter().cloned())
+            .collect()
     }
 }
 

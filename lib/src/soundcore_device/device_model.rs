@@ -7,13 +7,7 @@ use strum::{AsRefStr, Display, EnumIter, EnumString, IntoStaticStr, VariantArray
 use crate::{
     api::device::OpenSCQ30DeviceRegistry,
     connection_backend::ConnectionBackends,
-    devices::{
-        a3027::{
-            demo::DemoConnectionRegistry, device_profile::A3027DeviceRegistry,
-            packets::A3027StateUpdatePacket,
-        },
-        standard::{packets::outbound::OutboundPacketBytesExt, structures::SerialNumber},
-    },
+    devices::{a3027, a3028, standard::structures::SerialNumber},
     storage::OpenSCQ30Database,
 };
 
@@ -63,53 +57,31 @@ impl DeviceModel {
             .cloned()
     }
 
-    pub async fn device_registry(
+    pub async fn device_registry<B: ConnectionBackends + 'static>(
         &self,
-        backends: impl ConnectionBackends + 'static,
+        backends: B,
         database: Arc<OpenSCQ30Database>,
         is_demo: bool,
     ) -> crate::Result<Arc<dyn OpenSCQ30DeviceRegistry + Send + Sync>> {
+        macro_rules! new_soundcore_device {
+            ($module:ident) => {
+                if is_demo {
+                    Ok(Arc::new($module::demo_device_registry(database, *self)))
+                } else {
+                    Ok(Arc::new($module::device_registry::<B::Rfcomm>(
+                        backends.rfcomm().await?,
+                        database,
+                        *self,
+                    )))
+                }
+            };
+        }
         match self {
-            DeviceModel::SoundcoreA3027 => Ok(if is_demo {
-                Arc::new(A3027DeviceRegistry::new(
-                    DemoConnectionRegistry::new(
-                        "A3027".to_string(),
-                        A3027StateUpdatePacket::default().bytes(),
-                    ),
-                    database,
-                    *self,
-                ))
-            } else {
-                Arc::new(A3027DeviceRegistry::new(
-                    backends
-                        .rfcomm()
-                        .await
-                        .expect("TODO return no backend available error"),
-                    database,
-                    *self,
-                ))
-            }),
-            DeviceModel::SoundcoreA3028 => todo!(),
+            DeviceModel::SoundcoreA3027 | DeviceModel::SoundcoreA3030 => {
+                new_soundcore_device!(a3027)
+            }
+            DeviceModel::SoundcoreA3028 => new_soundcore_device!(a3028),
             DeviceModel::SoundcoreA3029 => todo!(),
-            DeviceModel::SoundcoreA3030 => Ok(if is_demo {
-                Arc::new(A3027DeviceRegistry::new(
-                    DemoConnectionRegistry::new(
-                        "A3030".to_string(),
-                        A3027StateUpdatePacket::default().bytes(),
-                    ),
-                    database,
-                    *self,
-                ))
-            } else {
-                Arc::new(A3027DeviceRegistry::new(
-                    backends
-                        .rfcomm()
-                        .await
-                        .expect("TODO return no backend available error"),
-                    database,
-                    *self,
-                ))
-            }),
             DeviceModel::SoundcoreA3031 => todo!(),
             DeviceModel::SoundcoreA3033 => todo!(),
             DeviceModel::SoundcoreA3926 => todo!(),

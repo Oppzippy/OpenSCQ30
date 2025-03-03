@@ -10,7 +10,7 @@ use uuid::Uuid;
 
 use crate::{
     api::connection::{
-        Connection, ConnectionDescriptor, ConnectionRegistry, ConnectionStatus, DeviceDescriptor,
+        ConnectionDescriptor, ConnectionRegistry, ConnectionStatus, DeviceDescriptor,
         GenericConnectionDescriptor, RfcommBackend, RfcommConnection,
     },
     devices::standard::{packets::inbound::take_inbound_packet_header, structures::STATE_UPDATE},
@@ -37,7 +37,7 @@ impl ConnectionRegistry for DemoConnectionRegistry {
     async fn connection_descriptors(&self) -> crate::Result<HashSet<Self::DescriptorType>> {
         let mut descriptors = HashSet::new();
         descriptors.insert(GenericConnectionDescriptor::new(
-            "Demo A3027",
+            format!("Demo {}", self.name),
             MacAddr6::nil(),
         ));
         Ok(descriptors)
@@ -133,7 +133,7 @@ impl RfcommConnection for DemoConnection {
     }
 
     fn read_channel(&self) -> mpsc::Receiver<Vec<u8>> {
-        futures::executor::block_on(async { self.inbound_packets_channel().await }).unwrap()
+        self.packet_receiver.lock().unwrap().take().unwrap()
     }
 
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {

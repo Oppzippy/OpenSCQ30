@@ -18,7 +18,10 @@ use crate::{
             equalizer::AddEqualizerExt,
             sound_modes::{AddSoundModesExt, AvailableSoundModes},
         },
-        packets::{inbound::TryIntoInboundPacket, outbound::RequestStatePacket},
+        packets::{
+            inbound::TryIntoInboundPacket,
+            outbound::{OutboundPacketBytesExt, RequestStatePacket},
+        },
         structures::{AmbientSoundMode, NoiseCancelingMode},
     },
     soundcore_device::{
@@ -27,7 +30,7 @@ use crate::{
     storage::OpenSCQ30Database,
 };
 
-use super::{packets::A3027StateUpdatePacket, state::A3027State};
+use super::{demo::DemoConnectionRegistry, packets::A3027StateUpdatePacket, state::A3027State};
 pub(crate) const A3027_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     features: DeviceFeatures {
         available_sound_modes: Some(crate::device_profile::AvailableSoundModes {
@@ -59,8 +62,30 @@ pub(crate) const A3027_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     implementation: || StandardImplementation::new::<A3027StateUpdatePacket>(),
 };
 
-pub type A3027DeviceRegistry<B: RfcommBackend> =
-    SoundcoreDeviceRegistry<B, A3027Device<B::ConnectionType>>;
+pub fn device_registry<B: RfcommBackend>(
+    backend: B,
+    database: Arc<OpenSCQ30Database>,
+    device_model: DeviceModel,
+) -> SoundcoreDeviceRegistry<B, A3027Device<B::ConnectionType>> {
+    SoundcoreDeviceRegistry::new(backend, database, device_model)
+}
+
+pub fn demo_device_registry(
+    database: Arc<OpenSCQ30Database>,
+    device_model: DeviceModel,
+) -> SoundcoreDeviceRegistry<
+    DemoConnectionRegistry,
+    A3027Device<<DemoConnectionRegistry as RfcommBackend>::ConnectionType>,
+> {
+    SoundcoreDeviceRegistry::new(
+        DemoConnectionRegistry::new(
+            device_model.to_string(),
+            A3027StateUpdatePacket::default().bytes(),
+        ),
+        database,
+        device_model,
+    )
+}
 
 pub struct A3027Device<ConnectionType: RfcommConnection + Send + Sync> {
     device_model: DeviceModel,
