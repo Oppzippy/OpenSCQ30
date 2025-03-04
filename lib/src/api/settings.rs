@@ -19,6 +19,7 @@ pub enum CategoryId {
     General,
     SoundModes,
     Equalizer,
+    ButtonConfiguration,
 }
 
 #[derive(
@@ -44,6 +45,12 @@ pub enum SettingId {
     PresetProfile,
     CustomProfile,
     VolumeAdjustments,
+    LeftSinglePress,
+    LeftDoublePress,
+    LeftLongPress,
+    RightSinglePress,
+    RightDoublePress,
+    RightLongPress,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

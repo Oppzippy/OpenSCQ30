@@ -236,6 +236,7 @@ where
         module_collection
             .add_equalizer(packet_io_controller.clone(), database, device_model, true)
             .await;
+        module_collection.add_button_configuration(packet_io_controller.clone());
 
         let module_collection = Arc::new(module_collection);
         module_collection.spawn_packet_handler(state_sender.clone(), packet_receiver);

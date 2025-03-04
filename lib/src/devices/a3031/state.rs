@@ -23,6 +23,7 @@ pub(crate) struct A3031State {
 
 impl_as_ref_for_field!(
     struct A3031State {
+        tws_status: TwsStatus,
         sound_modes: SoundModes,
         equalizer_configuration: EqualizerConfiguration,
         button_configuration: InternalMultiButtonConfiguration,

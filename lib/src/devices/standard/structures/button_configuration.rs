@@ -5,9 +5,10 @@ use nom::{
     number::complete::le_u8,
     sequence::{pair, tuple},
 };
+use openscq30_i18n_macros::Translate;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use strum::{AsRefStr, EnumIter, FromRepr};
+use strum::{AsRefStr, EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 use crate::devices::standard::packets::parsing::take_bool;
 
@@ -29,6 +30,12 @@ pub struct MultiButtonConfiguration {
 pub struct ButtonConfiguration {
     pub action: ButtonAction,
     pub is_enabled: bool,
+}
+
+impl ButtonConfiguration {
+    pub fn enabled_action(&self) -> Option<ButtonAction> {
+        self.is_enabled.then_some(self.action)
+    }
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
@@ -178,6 +185,10 @@ impl From<NoTwsButtonConfiguration> for ButtonConfiguration {
 }
 
 impl NoTwsButtonConfiguration {
+    pub fn enabled_action(&self) -> Option<ButtonAction> {
+        self.is_enabled.then_some(self.action)
+    }
+
     pub fn bytes(&self) -> [u8; 2] {
         [self.is_enabled.into(), u8::from(self.action) & 0x0f]
     }
@@ -195,7 +206,21 @@ impl NoTwsButtonConfiguration {
 }
 
 #[derive(
-    Default, Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, FromRepr, EnumIter, AsRefStr,
+    Default,
+    Clone,
+    Copy,
+    Debug,
+    Hash,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    FromRepr,
+    EnumIter,
+    AsRefStr,
+    IntoStaticStr,
+    EnumString,
+    Translate,
 )]
 #[repr(u8)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
