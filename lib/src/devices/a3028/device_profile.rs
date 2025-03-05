@@ -9,7 +9,7 @@ use crate::{
         demo::DemoConnectionRegistry,
         device::{SoundcoreDevice, SoundcoreDeviceRegistry},
         implementation::StandardImplementation,
-        macros::impl_soundcore_device,
+        macros::{impl_soundcore_device, soundcore_device},
         modules::{
             ModuleCollection, ModuleCollectionSpawnPacketHandlerExt,
             sound_modes::AvailableSoundModes,
@@ -59,93 +59,20 @@ pub(crate) const A3028_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     implementation: || StandardImplementation::new::<A3028StateUpdatePacket>(),
 };
 
-pub fn device_registry<B: RfcommBackend>(
-    backend: B,
-    database: Arc<OpenSCQ30Database>,
-    device_model: DeviceModel,
-) -> SoundcoreDeviceRegistry<B, A3028Device<B::ConnectionType>> {
-    SoundcoreDeviceRegistry::new(backend, database, device_model)
-}
-
-pub fn demo_device_registry(
-    database: Arc<OpenSCQ30Database>,
-    device_model: DeviceModel,
-) -> SoundcoreDeviceRegistry<
-    DemoConnectionRegistry,
-    A3028Device<<DemoConnectionRegistry as RfcommBackend>::ConnectionType>,
-> {
-    SoundcoreDeviceRegistry::new(
-        DemoConnectionRegistry::new(
-            device_model.to_string(),
-            A3028StateUpdatePacket::default().bytes(),
-        ),
-        database,
-        device_model,
-    )
-}
-
-pub struct A3028Device<ConnectionType: RfcommConnection + Send + Sync> {
-    device_model: DeviceModel,
-    state_sender: watch::Sender<A3028State>,
-    module_collection: Arc<ModuleCollection<A3028State>>,
-    _packet_io_controller: Arc<PacketIOController<ConnectionType>>,
-}
-
-impl<ConnectionType> SoundcoreDevice<ConnectionType> for A3028Device<ConnectionType>
-where
-    ConnectionType: RfcommConnection + 'static + Send + Sync,
-{
-    async fn new(
-        database: Arc<OpenSCQ30Database>,
-        connection: ConnectionType,
-        device_model: DeviceModel,
-    ) -> crate::Result<Self> {
-        let (packet_io_controller, packet_receiver) =
-            PacketIOController::<ConnectionType>::new(Arc::new(connection)).await?;
-        let packet_io_controller = Arc::new(packet_io_controller);
-        let state_update_packet: A3028StateUpdatePacket = packet_io_controller
-            .send(&RequestStatePacket::new().into())
-            .await?
-            .try_into_inbound_packet()?;
-        let (state_sender, _) = watch::channel::<A3028State>(state_update_packet.into());
-
-        let mut module_collection = ModuleCollection::<A3028State>::default();
-        module_collection.add_state_update();
-        module_collection.add_sound_modes(
-            packet_io_controller.clone(),
-            AvailableSoundModes {
-                ambient_sound_modes: vec![
-                    AmbientSoundMode::Normal,
-                    AmbientSoundMode::Transparency,
-                    AmbientSoundMode::NoiseCanceling,
-                ],
-                transparency_modes: vec![],
-                noise_canceling_modes: vec![
-                    NoiseCancelingMode::Transport,
-                    NoiseCancelingMode::Indoor,
-                    NoiseCancelingMode::Outdoor,
-                ],
-            },
-        );
-        module_collection
-            .add_equalizer(packet_io_controller.clone(), database, device_model, false)
-            .await;
-
-        let module_collection = Arc::new(module_collection);
-        module_collection.spawn_packet_handler(state_sender.clone(), packet_receiver);
-
-        Ok(Self {
-            device_model,
-            state_sender,
-            _packet_io_controller: packet_io_controller,
-            module_collection,
-        })
-    }
-}
-
-impl_soundcore_device!(
-    A3028Device,
-    model = device_model,
-    module_collection = module_collection,
-    state_sender = state_sender
-);
+soundcore_device!(A3028Device with A3028State initialized by A3028StateUpdatePacket => {
+    state_update();
+    sound_modes(AvailableSoundModes {
+        ambient_sound_modes: vec![
+            AmbientSoundMode::Normal,
+            AmbientSoundMode::Transparency,
+            AmbientSoundMode::NoiseCanceling,
+        ],
+        transparency_modes: vec![],
+        noise_canceling_modes: vec![
+            NoiseCancelingMode::Transport,
+            NoiseCancelingMode::Indoor,
+            NoiseCancelingMode::Outdoor,
+        ],
+    });
+    equalizer(mono);
+});
