@@ -1,13 +1,28 @@
 use std::{collections::HashMap, sync::Arc};
 
+use async_trait::async_trait;
 use nom::error::VerboseError;
+use tokio::sync::watch;
 
 use crate::{
-    device_profile::{AvailableSoundModes, DeviceFeatures, DeviceProfile},
+    api::{
+        connection::{RfcommBackend, RfcommConnection},
+        device::OpenSCQ30Device,
+        settings::{CategoryId, Setting, SettingId, Value},
+    },
+    device_profile::{DeviceFeatures, DeviceProfile},
     devices::standard::{
         self,
+        demo::DemoConnectionRegistry,
+        device::{SoundcoreDevice, SoundcoreDeviceRegistry},
         implementation::ButtonConfigurationImplementation,
-        packets::inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
+        modules::{ModuleCollection, ModuleCollectionSpawnPacketHandlerExt},
+        packets::{
+            inbound::{
+                InboundPacket, TryIntoInboundPacket, state_update_packet::StateUpdatePacket,
+            },
+            outbound::{OutboundPacketBytesExt, RequestStatePacket},
+        },
         state::DeviceState,
         structures::{
             AmbientSoundMode, AmbientSoundModeCycle, Command, EqualizerConfiguration, HearId,
@@ -16,17 +31,21 @@ use crate::{
         },
     },
     soundcore_device::{
-        device::{device_implementation::DeviceImplementation, soundcore_command::CommandResponse},
+        device::{
+            device_implementation::DeviceImplementation, packet_io_controller::PacketIOController,
+            soundcore_command::CommandResponse,
+        },
         device_model::DeviceModel,
     },
+    storage::OpenSCQ30Database,
 };
 
-use super::packets::A3926StateUpdatePacket;
+use super::{packets::A3926StateUpdatePacket, state::A3926State};
 
 // TODO does it support custom noise canceling or transparency modes?
 pub(crate) const A3926_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     features: DeviceFeatures {
-        available_sound_modes: Some(AvailableSoundModes {
+        available_sound_modes: Some(crate::device_profile::AvailableSoundModes {
             ambient_sound_modes: &[
                 AmbientSoundMode::Normal,
                 AmbientSoundMode::Transparency,
@@ -141,5 +160,119 @@ impl DeviceImplementation for A3926Implementation {
         cycle: AmbientSoundModeCycle,
     ) -> crate::Result<CommandResponse> {
         standard::implementation::set_ambient_sound_mode_cycle(state, cycle)
+    }
+}
+
+pub fn device_registry<B: RfcommBackend>(
+    backend: B,
+    database: Arc<OpenSCQ30Database>,
+    device_model: DeviceModel,
+) -> SoundcoreDeviceRegistry<B, A3926Device<B::ConnectionType>> {
+    SoundcoreDeviceRegistry::new(backend, database, device_model)
+}
+
+pub fn demo_device_registry(
+    database: Arc<OpenSCQ30Database>,
+    device_model: DeviceModel,
+) -> SoundcoreDeviceRegistry<
+    DemoConnectionRegistry,
+    A3926Device<<DemoConnectionRegistry as RfcommBackend>::ConnectionType>,
+> {
+    SoundcoreDeviceRegistry::new(
+        DemoConnectionRegistry::new(
+            device_model.to_string(),
+            A3926StateUpdatePacket::default().bytes(),
+        ),
+        database,
+        device_model,
+    )
+}
+
+pub struct A3926Device<ConnectionType: RfcommConnection + Send + Sync> {
+    device_model: DeviceModel,
+    state_sender: watch::Sender<A3926State>,
+    module_collection: Arc<ModuleCollection<A3926State>>,
+    _packet_io_controller: Arc<PacketIOController<ConnectionType>>,
+}
+
+impl<ConnectionType> SoundcoreDevice<ConnectionType> for A3926Device<ConnectionType>
+where
+    ConnectionType: RfcommConnection + 'static + Send + Sync,
+{
+    async fn new(
+        database: Arc<OpenSCQ30Database>,
+        connection: ConnectionType,
+        device_model: DeviceModel,
+    ) -> crate::Result<Self> {
+        let (packet_io_controller, packet_receiver) =
+            PacketIOController::<ConnectionType>::new(Arc::new(connection)).await?;
+        let packet_io_controller = Arc::new(packet_io_controller);
+        let state_update_packet: A3926StateUpdatePacket = packet_io_controller
+            .send(&RequestStatePacket::new().into())
+            .await?
+            .try_into_inbound_packet()?;
+        let (state_sender, _) = watch::channel::<A3926State>(state_update_packet.into());
+
+        let mut module_collection = ModuleCollection::<A3926State>::default();
+        module_collection.add_state_update();
+        module_collection
+            .add_equalizer_with_basic_hear_id(packet_io_controller.clone(), database, device_model)
+            .await;
+        module_collection.add_button_configuration(packet_io_controller.clone());
+
+        let module_collection = Arc::new(module_collection);
+        module_collection.spawn_packet_handler(state_sender.clone(), packet_receiver);
+
+        Ok(Self {
+            device_model,
+            state_sender,
+            _packet_io_controller: packet_io_controller,
+            module_collection,
+        })
+    }
+}
+
+#[async_trait]
+impl<ConnectionType> OpenSCQ30Device for A3926Device<ConnectionType>
+where
+    ConnectionType: RfcommConnection + 'static + Send + Sync,
+{
+    fn model(&self) -> DeviceModel {
+        self.device_model
+    }
+
+    fn categories(&self) -> Vec<CategoryId> {
+        self.module_collection.setting_manager.categories().to_vec()
+    }
+
+    fn settings_in_category(&self, category_id: &CategoryId) -> Vec<SettingId> {
+        self.module_collection.setting_manager.category(category_id)
+    }
+
+    fn setting(&self, setting_id: &SettingId) -> Option<Setting> {
+        let state = self.state_sender.borrow().to_owned();
+        self.module_collection
+            .setting_manager
+            .get(&state, setting_id)
+    }
+
+    async fn set_setting_values(
+        &self,
+        setting_values: Vec<(SettingId, Value)>,
+    ) -> crate::Result<()> {
+        let mut target_state = self.state_sender.borrow().clone();
+        for (setting_id, value) in setting_values {
+            self.module_collection
+                .setting_manager
+                .set(&mut target_state, &setting_id, value)
+                .await
+                .unwrap()?;
+        }
+        for modifier in &self.module_collection.state_modifiers {
+            modifier
+                .move_to_state(&self.state_sender, &target_state)
+                .await?;
+        }
+        Ok(())
     }
 }

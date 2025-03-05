@@ -1,23 +1,35 @@
+use async_trait::async_trait;
 use nom::{
     IResult,
     combinator::{all_consuming, map},
     error::{ContextError, ParseError, context},
     sequence::tuple,
 };
+use tokio::sync::watch;
 
-use crate::devices::{
-    a3926::device_profile::A3926_DEVICE_PROFILE,
-    standard::{
-        packets::inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
-        structures::{
-            AgeRange, BasicHearId, DualBattery, EqualizerConfiguration, Gender,
-            InternalMultiButtonConfiguration, StereoEqualizerConfiguration, TwsStatus,
+use crate::{
+    devices::{
+        a3926::{device_profile::A3926_DEVICE_PROFILE, state::A3926State},
+        standard::{
+            modules::ModuleCollection,
+            packet_manager::PacketHandler,
+            packets::{
+                inbound::{
+                    InboundPacket, TryIntoInboundPacket, state_update_packet::StateUpdatePacket,
+                },
+                outbound::OutboundPacket,
+            },
+            structures::{
+                AgeRange, BasicHearId, DualBattery, EqualizerConfiguration, Gender,
+                InternalMultiButtonConfiguration, StereoEqualizerConfiguration, TwsStatus,
+            },
         },
     },
+    soundcore_device::device::Packet,
 };
 
 // A3926 and A3926Z11
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct A3926StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
@@ -88,5 +100,56 @@ impl InboundPacket for A3926StateUpdatePacket {
                 },
             )),
         )(input)
+    }
+}
+
+impl OutboundPacket for A3926StateUpdatePacket {
+    fn command(&self) -> crate::devices::standard::structures::Command {
+        StateUpdatePacket::command()
+    }
+
+    fn body(&self) -> Vec<u8> {
+        self.tws_status
+            .bytes()
+            .into_iter()
+            .chain([
+                self.battery.left.is_charging as u8,
+                self.battery.right.is_charging as u8,
+                self.battery.left.level.0,
+                self.battery.right.level.0,
+            ])
+            .chain(self.equalizer_configuration.profile_id().to_le_bytes())
+            .chain(self.equalizer_configuration.volume_adjustments().bytes())
+            .chain(self.equalizer_configuration.volume_adjustments().bytes())
+            .chain([self.gender.0, self.age_range.0])
+            .chain([self.hear_id.is_enabled as u8])
+            .chain(self.hear_id.volume_adjustments.bytes())
+            .chain(self.hear_id.time.to_le_bytes())
+            .chain(self.button_configuration.bytes())
+            .collect()
+    }
+}
+
+struct StateUpdatePacketHandler {}
+
+#[async_trait]
+impl PacketHandler<A3926State> for StateUpdatePacketHandler {
+    async fn handle_packet(
+        &self,
+        state: &watch::Sender<A3926State>,
+        packet: &Packet,
+    ) -> crate::Result<()> {
+        let packet: A3926StateUpdatePacket = packet.try_into_inbound_packet()?;
+        state.send_modify(|state| *state = packet.into());
+        Ok(())
+    }
+}
+
+impl ModuleCollection<A3926State> {
+    pub fn add_state_update(&mut self) {
+        self.packet_handlers.set_handler(
+            StateUpdatePacket::command(),
+            Box::new(StateUpdatePacketHandler {}),
+        );
     }
 }

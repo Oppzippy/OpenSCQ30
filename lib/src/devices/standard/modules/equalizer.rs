@@ -2,7 +2,8 @@ use std::sync::Arc;
 
 use setting_handler::EqualizerSettingHandler;
 use state_modifier::{
-    EqualizerStateModifier, EqualizerStateModifierOptions, EqualizerWithHearIdStateModifier,
+    EqualizerStateModifier, EqualizerStateModifierOptions, EqualizerWithBasicHearIdStateModifier,
+    EqualizerWithCustomHearIdStateModifier,
 };
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
@@ -11,7 +12,9 @@ use crate::{
         connection::Connection,
         settings::{CategoryId, SettingId},
     },
-    devices::standard::structures::{AgeRange, CustomHearId, EqualizerConfiguration, Gender},
+    devices::standard::structures::{
+        AgeRange, BasicHearId, CustomHearId, EqualizerConfiguration, Gender,
+    },
     soundcore_device::{
         device::packet_io_controller::PacketIOController, device_model::DeviceModel,
     },
@@ -102,21 +105,52 @@ where
                 },
             )));
     }
+}
 
-    pub async fn add_equalizer_with_hear_id<C>(
+impl<T> ModuleCollection<T>
+where
+    T: AsMut<EqualizerConfiguration> + AsRef<EqualizerConfiguration> + Clone + Send + Sync,
+    T: AsRef<BasicHearId> + AsRef<Gender> + AsRef<AgeRange>,
+{
+    pub async fn add_equalizer_with_basic_hear_id<C>(
         &mut self,
         packet_io: Arc<PacketIOController<C>>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
     ) where
         C: Connection + 'static + Send + Sync,
-        T: AsRef<CustomHearId> + AsRef<Gender> + AsRef<AgeRange>,
     {
         self.setting_manager.add_handler(
             CategoryId::Equalizer,
             EqualizerSettingHandler::new(database, device_model).await,
         );
         self.state_modifiers
-            .push(Box::new(EqualizerWithHearIdStateModifier::new(packet_io)));
+            .push(Box::new(EqualizerWithBasicHearIdStateModifier::new(
+                packet_io,
+            )));
+    }
+}
+
+impl<T> ModuleCollection<T>
+where
+    T: AsMut<EqualizerConfiguration> + AsRef<EqualizerConfiguration> + Clone + Send + Sync,
+    T: AsRef<CustomHearId> + AsRef<Gender> + AsRef<AgeRange>,
+{
+    pub async fn add_equalizer_with_custom_hear_id<C>(
+        &mut self,
+        packet_io: Arc<PacketIOController<C>>,
+        database: Arc<OpenSCQ30Database>,
+        device_model: DeviceModel,
+    ) where
+        C: Connection + 'static + Send + Sync,
+    {
+        self.setting_manager.add_handler(
+            CategoryId::Equalizer,
+            EqualizerSettingHandler::new(database, device_model).await,
+        );
+        self.state_modifiers
+            .push(Box::new(EqualizerWithCustomHearIdStateModifier::new(
+                packet_io,
+            )));
     }
 }
