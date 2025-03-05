@@ -1,29 +1,12 @@
-use std::sync::Arc;
-
-use tokio::sync::watch;
-
 use crate::{
-    api::connection::{RfcommBackend, RfcommConnection},
     device_profile::{DeviceFeatures, DeviceProfile},
     devices::standard::{
-        demo::DemoConnectionRegistry,
-        device::{SoundcoreDevice, SoundcoreDeviceRegistry},
         implementation::StandardImplementation,
-        macros::{impl_soundcore_device, soundcore_device},
-        modules::{
-            ModuleCollection, ModuleCollectionSpawnPacketHandlerExt,
-            sound_modes::AvailableSoundModes,
-        },
-        packets::{
-            inbound::TryIntoInboundPacket,
-            outbound::{OutboundPacketBytesExt, RequestStatePacket},
-        },
+        macros::soundcore_device,
+        modules::sound_modes::AvailableSoundModes,
         structures::{AmbientSoundMode, NoiseCancelingMode},
     },
-    soundcore_device::{
-        device::packet_io_controller::PacketIOController, device_model::DeviceModel,
-    },
-    storage::OpenSCQ30Database,
+    soundcore_device::device_model::DeviceModel,
 };
 
 use super::{packets::A3028StateUpdatePacket, state::A3028State};

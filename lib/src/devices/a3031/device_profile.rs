@@ -1,27 +1,15 @@
 use std::{collections::HashMap, sync::Arc};
 
 use nom::error::VerboseError;
-use tokio::sync::watch;
 
 use crate::{
-    api::connection::{RfcommBackend, RfcommConnection},
     device_profile::{DeviceFeatures, DeviceProfile},
     devices::standard::{
         self,
-        demo::DemoConnectionRegistry,
-        device::{SoundcoreDevice, SoundcoreDeviceRegistry},
         implementation::ButtonConfigurationImplementation,
-        macros::{impl_soundcore_device, soundcore_device},
-        modules::{
-            ModuleCollection, ModuleCollectionSpawnPacketHandlerExt,
-            sound_modes::AvailableSoundModes,
-        },
-        packets::{
-            inbound::{
-                InboundPacket, TryIntoInboundPacket, state_update_packet::StateUpdatePacket,
-            },
-            outbound::{OutboundPacketBytesExt, RequestStatePacket},
-        },
+        macros::soundcore_device,
+        modules::sound_modes::AvailableSoundModes,
+        packets::inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
         state::DeviceState,
         structures::{
             AmbientSoundMode, AmbientSoundModeCycle, Command, EqualizerConfiguration, HearId,
@@ -30,13 +18,9 @@ use crate::{
         },
     },
     soundcore_device::{
-        device::{
-            device_implementation::DeviceImplementation, packet_io_controller::PacketIOController,
-            soundcore_command::CommandResponse,
-        },
+        device::{device_implementation::DeviceImplementation, soundcore_command::CommandResponse},
         device_model::DeviceModel,
     },
-    storage::OpenSCQ30Database,
 };
 
 use super::{packets::A3031StateUpdatePacket, state::A3031State};
