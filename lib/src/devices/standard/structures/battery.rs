@@ -97,10 +97,11 @@ impl SingleBattery {
     feature = "serde",
     serde(rename_all = "camelCase", from = "bool", into = "bool")
 )]
+#[repr(u8)]
 pub enum IsBatteryCharging {
     #[default]
-    No,
-    Yes,
+    No = 0,
+    Yes = 1,
 }
 
 impl IsBatteryCharging {
