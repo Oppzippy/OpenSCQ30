@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use nom::{
     IResult,
     combinator::{all_consuming, map},
@@ -5,23 +6,32 @@ use nom::{
     number::complete::le_u8,
     sequence::tuple,
 };
+use tokio::sync::watch;
 
-use crate::devices::{
-    a3931::device_profile::A3931_DEVICE_PROFILE,
-    standard::{
-        packets::{
-            inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
-            parsing::take_bool,
-        },
-        structures::{
-            DualBattery, EqualizerConfiguration, InternalMultiButtonConfiguration, SoundModes,
-            StereoEqualizerConfiguration, TwsStatus,
+use crate::{
+    devices::{
+        a3931::{device_profile::A3931_DEVICE_PROFILE, state::A3931State},
+        standard::{
+            modules::ModuleCollection,
+            packet_manager::PacketHandler,
+            packets::{
+                inbound::{
+                    InboundPacket, TryIntoInboundPacket, state_update_packet::StateUpdatePacket,
+                },
+                outbound::OutboundPacket,
+                parsing::take_bool,
+            },
+            structures::{
+                DualBattery, EqualizerConfiguration, InternalMultiButtonConfiguration, SoundModes,
+                StereoEqualizerConfiguration, TwsStatus,
+            },
         },
     },
+    soundcore_device::device::Packet,
 };
 
 // A3931 and A3935 and A3931XR and A3935W
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct A3931StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
@@ -100,5 +110,73 @@ impl InboundPacket for A3931StateUpdatePacket {
                 },
             )),
         )(input)
+    }
+}
+
+impl OutboundPacket for A3931StateUpdatePacket {
+    fn command(&self) -> crate::devices::standard::structures::Command {
+        StateUpdatePacket::command()
+    }
+
+    fn body(&self) -> Vec<u8> {
+        // TwsStatus::take,
+        // DualBattery::take,
+        // StereoEqualizerConfiguration::take(8),
+        // InternalMultiButtonConfiguration::take,
+        // SoundModes::take,
+        // take_bool,
+        // take_bool,
+        // take_bool,
+        // le_u8,
+        self.tws_status
+            .bytes()
+            .into_iter()
+            .chain([
+                self.battery.left.is_charging as u8,
+                self.battery.right.is_charging as u8,
+                self.battery.left.level.0,
+                self.battery.right.level.0,
+            ])
+            .chain(self.equalizer_configuration.profile_id().to_le_bytes())
+            .chain(self.equalizer_configuration.volume_adjustments().bytes())
+            .chain(self.equalizer_configuration.volume_adjustments().bytes())
+            .chain(self.button_configuration.bytes())
+            .chain([
+                self.sound_modes.ambient_sound_mode as u8,
+                self.sound_modes.noise_canceling_mode as u8,
+                self.sound_modes.transparency_mode as u8,
+                self.sound_modes.custom_noise_canceling.value(),
+            ])
+            .chain([
+                self.side_tone as u8,
+                self.touch_tone as u8,
+                self.auto_power_off_on as u8,
+                self.auto_power_off_index,
+            ])
+            .collect()
+    }
+}
+
+struct StateUpdatePacketHandler {}
+
+#[async_trait]
+impl PacketHandler<A3931State> for StateUpdatePacketHandler {
+    async fn handle_packet(
+        &self,
+        state: &watch::Sender<A3931State>,
+        packet: &Packet,
+    ) -> crate::Result<()> {
+        let packet: A3931StateUpdatePacket = packet.try_into_inbound_packet()?;
+        state.send_modify(|state| *state = packet.into());
+        Ok(())
+    }
+}
+
+impl ModuleCollection<A3931State> {
+    pub fn add_state_update(&mut self) {
+        self.packet_handlers.set_handler(
+            StateUpdatePacket::command(),
+            Box::new(StateUpdatePacketHandler {}),
+        );
     }
 }

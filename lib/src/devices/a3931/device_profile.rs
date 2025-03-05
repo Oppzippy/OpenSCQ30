@@ -3,10 +3,12 @@ use std::{collections::HashMap, sync::Arc};
 use nom::error::VerboseError;
 
 use crate::{
-    device_profile::{AvailableSoundModes, DeviceFeatures, DeviceProfile},
+    device_profile::{DeviceFeatures, DeviceProfile},
     devices::standard::{
         self,
         implementation::ButtonConfigurationImplementation,
+        macros::soundcore_device,
+        modules::sound_modes::AvailableSoundModes,
         packets::inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
         state::DeviceState,
         structures::{
@@ -21,11 +23,11 @@ use crate::{
     },
 };
 
-use super::packets::A3931StateUpdatePacket;
+use super::{packets::A3931StateUpdatePacket, state::A3931State};
 
 pub(crate) const A3931_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     features: DeviceFeatures {
-        available_sound_modes: Some(AvailableSoundModes {
+        available_sound_modes: Some(crate::device_profile::AvailableSoundModes {
             ambient_sound_modes: &[AmbientSoundMode::Normal, AmbientSoundMode::Transparency],
             transparency_modes: &[
                 TransparencyMode::FullyTransparent,
@@ -137,3 +139,17 @@ impl DeviceImplementation for A3931Implementation {
         standard::implementation::set_ambient_sound_mode_cycle(state, cycle)
     }
 }
+
+soundcore_device!(A3931Device with A3931State initialized by A3931StateUpdatePacket => {
+    state_update();
+    sound_modes(AvailableSoundModes {
+        ambient_sound_modes: vec![AmbientSoundMode::Normal, AmbientSoundMode::Transparency],
+        transparency_modes: vec![
+            TransparencyMode::FullyTransparent,
+            TransparencyMode::VocalMode,
+        ],
+        noise_canceling_modes: Vec::new(),
+    });
+    equalizer_with_drc(stereo);
+    button_configuration();
+});

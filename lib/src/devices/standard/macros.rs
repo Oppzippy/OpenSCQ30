@@ -111,6 +111,22 @@ macro_rules! soundcore_device {
             true,
         ).await;
     };
+    ($module_collection:ident, $packet_io_controller:ident, $database:ident, $device_model:ident, equalizer_with_drc (mono)) => {
+        $module_collection.add_equalizer_with_drc(
+            $packet_io_controller.clone(),
+            $database.clone(),
+            $device_model,
+            false
+        ).await;
+    };
+    ($module_collection:ident, $packet_io_controller:ident, $database:ident, $device_model:ident, equalizer_with_drc (stereo)) => {
+        $module_collection.add_equalizer_with_drc(
+            $packet_io_controller.clone(),
+            $database.clone(),
+            $device_model,
+            true
+        ).await;
+    };
     ($module_collection:ident, $packet_io_controller:ident, $database:ident, $device_model:ident, equalizer_with_basic_hear_id ()) => {
         $module_collection.add_equalizer_with_basic_hear_id(
             $packet_io_controller.clone(),

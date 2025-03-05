@@ -7,7 +7,9 @@ use strum::{AsRefStr, Display, EnumIter, EnumString, IntoStaticStr, VariantArray
 use crate::{
     api::device::OpenSCQ30DeviceRegistry,
     connection_backend::ConnectionBackends,
-    devices::{a3027, a3028, a3031, a3033, a3926, a3930, standard::structures::SerialNumber},
+    devices::{
+        a3027, a3028, a3031, a3033, a3926, a3930, a3931, standard::structures::SerialNumber,
+    },
     storage::OpenSCQ30Database,
 };
 
@@ -86,13 +88,14 @@ impl DeviceModel {
             DeviceModel::SoundcoreA3033 => new_soundcore_device!(a3033),
             DeviceModel::SoundcoreA3926 => new_soundcore_device!(a3926),
             DeviceModel::SoundcoreA3930 => new_soundcore_device!(a3930),
-            DeviceModel::SoundcoreA3931 => todo!(),
+            DeviceModel::SoundcoreA3931 | DeviceModel::SoundcoreA3935 => {
+                new_soundcore_device!(a3931)
+            }
             DeviceModel::SoundcoreA3933 => todo!(),
             DeviceModel::SoundcoreA3936 => todo!(),
             DeviceModel::SoundcoreA3945 => todo!(),
             DeviceModel::SoundcoreA3951 => todo!(),
             DeviceModel::SoundcoreA3939 => todo!(),
-            DeviceModel::SoundcoreA3935 => todo!(),
         }
     }
 }
