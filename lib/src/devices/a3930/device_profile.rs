@@ -1,19 +1,15 @@
 use std::sync::Arc;
 
-use async_trait::async_trait;
 use tokio::sync::watch;
 
 use crate::{
-    api::{
-        connection::{RfcommBackend, RfcommConnection},
-        device::OpenSCQ30Device,
-        settings::{CategoryId, Setting, SettingId, Value},
-    },
+    api::connection::{RfcommBackend, RfcommConnection},
     device_profile::{DeviceFeatures, DeviceProfile},
     devices::standard::{
         demo::DemoConnectionRegistry,
         device::{SoundcoreDevice, SoundcoreDeviceRegistry},
         implementation::StandardImplementation,
+        macros::impl_soundcore_device,
         modules::{
             ModuleCollection, ModuleCollectionSpawnPacketHandlerExt,
             sound_modes::AvailableSoundModes,
@@ -132,47 +128,9 @@ where
     }
 }
 
-#[async_trait]
-impl<ConnectionType> OpenSCQ30Device for A3930Device<ConnectionType>
-where
-    ConnectionType: RfcommConnection + 'static + Send + Sync,
-{
-    fn model(&self) -> DeviceModel {
-        self.device_model
-    }
-
-    fn categories(&self) -> Vec<CategoryId> {
-        self.module_collection.setting_manager.categories().to_vec()
-    }
-
-    fn settings_in_category(&self, category_id: &CategoryId) -> Vec<SettingId> {
-        self.module_collection.setting_manager.category(category_id)
-    }
-
-    fn setting(&self, setting_id: &SettingId) -> Option<Setting> {
-        let state = self.state_sender.borrow().to_owned();
-        self.module_collection
-            .setting_manager
-            .get(&state, setting_id)
-    }
-
-    async fn set_setting_values(
-        &self,
-        setting_values: Vec<(SettingId, Value)>,
-    ) -> crate::Result<()> {
-        let mut target_state = self.state_sender.borrow().clone();
-        for (setting_id, value) in setting_values {
-            self.module_collection
-                .setting_manager
-                .set(&mut target_state, &setting_id, value)
-                .await
-                .unwrap()?;
-        }
-        for modifier in &self.module_collection.state_modifiers {
-            modifier
-                .move_to_state(&self.state_sender, &target_state)
-                .await?;
-        }
-        Ok(())
-    }
-}
+impl_soundcore_device!(
+    A3930Device,
+    model = device_model,
+    module_collection = module_collection,
+    state_sender = state_sender
+);
