@@ -1,7 +1,9 @@
 use std::sync::Arc;
 
 use setting_handler::EqualizerSettingHandler;
-use state_modifier::EqualizerStateModifier;
+use state_modifier::{
+    EqualizerStateModifier, EqualizerStateModifierOptions, EqualizerWithHearIdStateModifier,
+};
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use crate::{
@@ -9,7 +11,7 @@ use crate::{
         connection::Connection,
         settings::{CategoryId, SettingId},
     },
-    devices::standard::structures::EqualizerConfiguration,
+    devices::standard::structures::{AgeRange, CustomHearId, EqualizerConfiguration, Gender},
     soundcore_device::{
         device::packet_io_controller::PacketIOController, device_model::DeviceModel,
     },
@@ -69,6 +71,52 @@ where
             EqualizerSettingHandler::new(database, device_model).await,
         );
         self.state_modifiers
-            .push(Box::new(EqualizerStateModifier::new(packet_io, is_stereo)));
+            .push(Box::new(EqualizerStateModifier::new(
+                packet_io,
+                EqualizerStateModifierOptions {
+                    is_stereo,
+                    has_drc: false,
+                },
+            )));
+    }
+
+    pub async fn add_equalizer_with_drc<C>(
+        &mut self,
+        packet_io: Arc<PacketIOController<C>>,
+        database: Arc<OpenSCQ30Database>,
+        device_model: DeviceModel,
+        is_stereo: bool,
+    ) where
+        C: Connection + 'static + Send + Sync,
+    {
+        self.setting_manager.add_handler(
+            CategoryId::Equalizer,
+            EqualizerSettingHandler::new(database, device_model).await,
+        );
+        self.state_modifiers
+            .push(Box::new(EqualizerStateModifier::new(
+                packet_io,
+                EqualizerStateModifierOptions {
+                    is_stereo,
+                    has_drc: true,
+                },
+            )));
+    }
+
+    pub async fn add_equalizer_with_hear_id<C>(
+        &mut self,
+        packet_io: Arc<PacketIOController<C>>,
+        database: Arc<OpenSCQ30Database>,
+        device_model: DeviceModel,
+    ) where
+        C: Connection + 'static + Send + Sync,
+        T: AsRef<CustomHearId> + AsRef<Gender> + AsRef<AgeRange>,
+    {
+        self.setting_manager.add_handler(
+            CategoryId::Equalizer,
+            EqualizerSettingHandler::new(database, device_model).await,
+        );
+        self.state_modifiers
+            .push(Box::new(EqualizerWithHearIdStateModifier::new(packet_io)));
     }
 }
