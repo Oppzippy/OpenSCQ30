@@ -23,7 +23,7 @@ where
         widget::dropdown(&setting.localized_options, selected_index, move |index| {
             on_change(&setting.options[index])
         })
-        .width(Length::FillPortion(1)),
+        .width(Length::Fill),
     )
 }
 
@@ -45,7 +45,7 @@ where
             widget::dropdown(&setting.localized_options, selected_index, move |index| {
                 on_change(Some(&setting.options[index]))
             })
-            .width(Length::FillPortion(1)),
+            .width(Length::Fill),
         ),
     )
 }
@@ -72,7 +72,7 @@ where
                 widget::dropdown(&setting.localized_options, selected_index, move |index| {
                     on_change(Some(&setting.options[index]))
                 })
-                .width(Length::FillPortion(1)),
+                .width(Length::Fill),
             )
             .push_maybe(maybe_deselect_message.map(|deselect_message| {
                 widget::button::icon(widget::icon::from_name("list-remove-symbolic"))
@@ -93,7 +93,7 @@ where
 {
     widget::row()
         .align_y(alignment::Vertical::Center)
-        .push(widget::text::text(label).width(Length::FillPortion(1)))
+        .push(widget::text::text(label).width(Length::Fill))
         .push(element.into())
         .into()
 }

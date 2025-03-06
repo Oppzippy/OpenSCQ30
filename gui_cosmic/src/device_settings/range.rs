@@ -1,6 +1,10 @@
 use std::ops::RangeInclusive;
 
-use cosmic::{Element, widget};
+use cosmic::{
+    Element,
+    iced::{Length, alignment},
+    widget,
+};
 use openscq30_i18n::Translate;
 use openscq30_lib::api::settings::SettingId;
 
@@ -14,7 +18,8 @@ where
     M: Clone + 'a,
 {
     widget::row()
-        .push(widget::text::body(setting_id.translate()))
-        .push(widget::slider(range, value, on_change))
+        .align_y(alignment::Vertical::Center)
+        .push(widget::text::body(setting_id.translate()).width(Length::Fill))
+        .push(widget::slider(range, value, on_change).width(Length::Fill))
         .into()
 }
