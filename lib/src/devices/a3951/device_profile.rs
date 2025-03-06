@@ -3,10 +3,12 @@ use std::{collections::HashMap, sync::Arc};
 use nom::error::VerboseError;
 
 use crate::{
-    device_profile::{AvailableSoundModes, DeviceFeatures, DeviceProfile},
+    device_profile::{DeviceFeatures, DeviceProfile},
     devices::standard::{
         self,
         implementation::ButtonConfigurationImplementation,
+        macros::soundcore_device,
+        modules::sound_modes::AvailableSoundModes,
         packets::inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
         state::DeviceState,
         structures::{
@@ -21,11 +23,11 @@ use crate::{
     },
 };
 
-use super::packets::A3951StateUpdatePacket;
+use super::{packets::A3951StateUpdatePacket, state::A3951State};
 
 pub(crate) const A3951_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     features: DeviceFeatures {
-        available_sound_modes: Some(AvailableSoundModes {
+        available_sound_modes: Some(crate::device_profile::AvailableSoundModes {
             ambient_sound_modes: &[
                 AmbientSoundMode::Normal,
                 AmbientSoundMode::Transparency,
@@ -146,3 +148,26 @@ impl DeviceImplementation for A3951Implementation {
         standard::implementation::set_ambient_sound_mode_cycle(state, cycle)
     }
 }
+
+soundcore_device!(A3951Device with A3951State initialized by A3951StateUpdatePacket => {
+    state_update();
+    sound_modes(AvailableSoundModes {
+            ambient_sound_modes: vec![
+                AmbientSoundMode::Normal,
+                AmbientSoundMode::Transparency,
+                AmbientSoundMode::NoiseCanceling,
+            ],
+            transparency_modes: vec![
+                TransparencyMode::FullyTransparent,
+                TransparencyMode::VocalMode,
+            ],
+            noise_canceling_modes: vec![
+                NoiseCancelingMode::Transport,
+                NoiseCancelingMode::Indoor,
+                NoiseCancelingMode::Outdoor,
+                NoiseCancelingMode::Custom,
+            ],
+        });
+    equalizer_with_custom_hear_id();
+    button_configuration();
+});
