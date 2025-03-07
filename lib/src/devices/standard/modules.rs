@@ -14,6 +14,7 @@ use super::{
     packet_manager::PacketManager, settings_manager::SettingsManager, state_modifier::StateModifier,
 };
 
+pub mod ambient_sound_mode_cycle;
 pub mod button_configuration;
 pub mod equalizer;
 pub mod sound_modes;

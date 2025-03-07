@@ -58,3 +58,6 @@ ambient-sound-mode = Ambient Sound Mode
 voice-assistant = Voice Assistant
 play-pause = Play Pause
 game-mode = Game Mode
+normal-mode-in-cycle = Normal Mode in Cycle
+transparency-mode-in-cycle = Transparency Mode in Cycle
+noise-canceling-mode-in-cycle = Noise Canceling Mode in Cycle

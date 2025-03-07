@@ -51,6 +51,9 @@ pub enum SettingId {
     RightSinglePress,
     RightDoublePress,
     RightLongPress,
+    NormalModeInCycle,
+    TransparencyModeInCycle,
+    NoiseCancelingModeInCycle,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

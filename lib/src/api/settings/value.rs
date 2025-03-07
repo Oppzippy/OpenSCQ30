@@ -34,6 +34,17 @@ pub enum ValueError {
 }
 
 impl Value {
+    pub fn try_as_bool(&self) -> Result<bool, ValueError> {
+        if let Value::Bool(value) = self {
+            Ok(*value)
+        } else {
+            Err(ValueError::WrongType {
+                expected: ValueDiscriminants::Bool,
+                actual: self.clone(),
+            })
+        }
+    }
+
     pub fn try_as_optional_u16(&self) -> Result<Option<u16>, ValueError> {
         match &self {
             Value::U16(value) => Ok(Some(*value)),
