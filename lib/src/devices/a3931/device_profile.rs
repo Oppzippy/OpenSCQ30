@@ -140,9 +140,9 @@ impl DeviceImplementation for A3931Implementation {
     }
 }
 
-soundcore_device!(A3931Device with A3931State initialized by A3931StateUpdatePacket => {
-    state_update();
-    sound_modes(AvailableSoundModes {
+soundcore_device!(A3931State, A3931StateUpdatePacket, async |builder| {
+    builder.module_collection().add_state_update();
+    builder.sound_modes(AvailableSoundModes {
         ambient_sound_modes: vec![AmbientSoundMode::Normal, AmbientSoundMode::Transparency],
         transparency_modes: vec![
             TransparencyMode::FullyTransparent,
@@ -150,6 +150,6 @@ soundcore_device!(A3931Device with A3931State initialized by A3931StateUpdatePac
         ],
         noise_canceling_modes: Vec::new(),
     });
-    equalizer_with_drc(stereo);
-    button_configuration();
+    builder.stereo_equalizer_with_drc().await;
+    builder.button_configuration();
 });

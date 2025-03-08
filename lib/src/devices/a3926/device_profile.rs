@@ -145,8 +145,8 @@ impl DeviceImplementation for A3926Implementation {
     }
 }
 
-soundcore_device!(A3926Device with A3926State initialized by A3926StateUpdatePacket => {
-    state_update();
-    equalizer_with_basic_hear_id();
-    button_configuration();
+soundcore_device!(A3926State, A3926StateUpdatePacket, async |builder| {
+    builder.module_collection().add_state_update();
+    builder.stereo_equalizer_with_basic_hear_id().await;
+    builder.button_configuration();
 });

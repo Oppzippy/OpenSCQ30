@@ -42,9 +42,9 @@ pub(crate) const A3028_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     implementation: || StandardImplementation::new::<A3028StateUpdatePacket>(),
 };
 
-soundcore_device!(A3028Device with A3028State initialized by A3028StateUpdatePacket => {
-    state_update();
-    sound_modes(AvailableSoundModes {
+soundcore_device!(A3028State, A3028StateUpdatePacket, async |builder| {
+    builder.module_collection().add_state_update();
+    builder.sound_modes(AvailableSoundModes {
         ambient_sound_modes: vec![
             AmbientSoundMode::Normal,
             AmbientSoundMode::Transparency,
@@ -57,5 +57,5 @@ soundcore_device!(A3028Device with A3028State initialized by A3028StateUpdatePac
             NoiseCancelingMode::Outdoor,
         ],
     });
-    equalizer(mono);
+    builder.mono_equalizer().await;
 });

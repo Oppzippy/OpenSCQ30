@@ -32,13 +32,13 @@ pub(crate) const A3930_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     implementation: || StandardImplementation::new::<A3930StateUpdatePacket>(),
 };
 
-soundcore_device!(A3930Device with A3930State initialized by A3930StateUpdatePacket => {
-    state_update();
-    sound_modes(AvailableSoundModes {
+soundcore_device!(A3930State, A3930StateUpdatePacket, async |builder| {
+    builder.module_collection().add_state_update();
+    builder.sound_modes(AvailableSoundModes {
         ambient_sound_modes: vec![AmbientSoundMode::Normal, AmbientSoundMode::Transparency],
         transparency_modes: Vec::new(),
         noise_canceling_modes: Vec::new(),
     });
-    equalizer_with_custom_hear_id();
-    button_configuration();
+    builder.stereo_equalizer_with_custom_hear_id().await;
+    builder.button_configuration();
 });

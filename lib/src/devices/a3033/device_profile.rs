@@ -24,7 +24,7 @@ pub(crate) const A3033_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     implementation: || StandardImplementation::new::<A3033StateUpdatePacket>(),
 };
 
-soundcore_device!(A3033Device with A3033State initialized by A3033StateUpdatePacket => {
-    state_update();
-    equalizer(mono);
+soundcore_device!(A3033State, A3033StateUpdatePacket, async |builder| {
+    builder.module_collection().add_state_update();
+    builder.mono_equalizer().await;
 });

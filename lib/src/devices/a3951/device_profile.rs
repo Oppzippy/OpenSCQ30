@@ -149,25 +149,25 @@ impl DeviceImplementation for A3951Implementation {
     }
 }
 
-soundcore_device!(A3951Device with A3951State initialized by A3951StateUpdatePacket => {
-    state_update();
-    sound_modes(AvailableSoundModes {
-            ambient_sound_modes: vec![
-                AmbientSoundMode::Normal,
-                AmbientSoundMode::Transparency,
-                AmbientSoundMode::NoiseCanceling,
-            ],
-            transparency_modes: vec![
-                TransparencyMode::FullyTransparent,
-                TransparencyMode::VocalMode,
-            ],
-            noise_canceling_modes: vec![
-                NoiseCancelingMode::Transport,
-                NoiseCancelingMode::Indoor,
-                NoiseCancelingMode::Outdoor,
-                NoiseCancelingMode::Custom,
-            ],
-        });
-    equalizer_with_custom_hear_id();
-    button_configuration();
+soundcore_device!(A3951State, A3951StateUpdatePacket, async |builder| {
+    builder.module_collection().add_state_update();
+    builder.sound_modes(AvailableSoundModes {
+        ambient_sound_modes: vec![
+            AmbientSoundMode::Normal,
+            AmbientSoundMode::Transparency,
+            AmbientSoundMode::NoiseCanceling,
+        ],
+        transparency_modes: vec![
+            TransparencyMode::FullyTransparent,
+            TransparencyMode::VocalMode,
+        ],
+        noise_canceling_modes: vec![
+            NoiseCancelingMode::Transport,
+            NoiseCancelingMode::Indoor,
+            NoiseCancelingMode::Outdoor,
+            NoiseCancelingMode::Custom,
+        ],
+    });
+    builder.stereo_equalizer_with_custom_hear_id().await;
+    builder.button_configuration();
 });

@@ -145,9 +145,9 @@ impl DeviceImplementation for A3031Implementation {
     }
 }
 
-soundcore_device!(A3031Device with A3031State initialized by A3031StateUpdatePacket => {
-    state_update();
-    sound_modes(AvailableSoundModes {
+soundcore_device!(A3031State, A3031StateUpdatePacket, async |builder| {
+    builder.module_collection().add_state_update();
+    builder.sound_modes(AvailableSoundModes {
         ambient_sound_modes: vec![
             AmbientSoundMode::Normal,
             AmbientSoundMode::Transparency,
@@ -160,6 +160,5 @@ soundcore_device!(A3031Device with A3031State initialized by A3031StateUpdatePac
             NoiseCancelingMode::Outdoor,
         ],
     });
-    equalizer(mono);
-    button_configuration();
+    builder.mono_equalizer().await;
 });
