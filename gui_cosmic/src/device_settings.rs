@@ -8,6 +8,7 @@ use std::{borrow::Cow, collections::HashMap};
 
 use cosmic::{
     Element, Task,
+    app::context_drawer::ContextDrawer,
     iced::{Length, alignment},
     widget::{self, nav_bar},
 };
@@ -193,51 +194,7 @@ impl DeviceSettingsModel {
 
     pub fn view(&self) -> Element<'_, Message> {
         if let Some(CustomCategory::QuickPresets) = self.nav_model.active_data() {
-            if let Some(editing_quick_preset) = &self.editing_quick_preset {
-                widget::column()
-                    .push(widget::text::title4(fl!(
-                        "editing-quick-preset",
-                        name = editing_quick_preset.name.as_str()
-                    )))
-                    .push(
-                        widget::row()
-                            .push(
-                                widget::button::destructive(fl!("cancel"))
-                                    .on_press(Message::EditQuickPresetCancel),
-                            )
-                            .push(
-                                widget::button::suggested(fl!("save"))
-                                    .on_press(Message::EditQuickPresetSave),
-                            ),
-                    )
-                    .extend(
-                        editing_quick_preset
-                            .settings
-                            .iter()
-                            .enumerate()
-                            .map(|(i, field)| {
-                                widget::row()
-                                    .align_y(alignment::Vertical::Center)
-                                    .padding(5)
-                                    .push(
-                                        widget::toggler(field.value.is_some())
-                                            .label(field.setting_id.translate())
-                                            .width(Length::Fill)
-                                            .on_toggle(move |enabled| {
-                                                Message::EditQuickPresetToggleField(i, enabled)
-                                            }),
-                                    )
-                                    .push_maybe(
-                                        field
-                                            .value
-                                            .as_ref()
-                                            .map(|v| widget::text::body(format!("{v:?}"))),
-                                    )
-                                    .into()
-                            }),
-                    )
-                    .into()
-            } else if let Some(quick_presets) = &self.quick_presets {
+            if let Some(quick_presets) = &self.quick_presets {
                 widget::column()
                     .push(
                         widget::button::standard(fl!("create-quick-preset"))
@@ -325,6 +282,49 @@ impl DeviceSettingsModel {
                 }
             }))
             .into()
+    }
+
+    pub fn context_drawer(&self) -> Option<ContextDrawer<Message>> {
+        if let Some(CustomCategory::QuickPresets) = self.nav_model.active_data() {
+            self.editing_quick_preset
+                .as_ref()
+                .map(|editing_quick_preset| ContextDrawer {
+                    title: Some(editing_quick_preset.name.as_str().into()),
+                    header_actions: vec![
+                        widget::button::suggested(fl!("save"))
+                            .on_press(Message::EditQuickPresetSave)
+                            .into(),
+                    ],
+                    header: None,
+                    content: widget::column()
+                        .extend(editing_quick_preset.settings.iter().enumerate().map(
+                            |(i, field)| {
+                                widget::column()
+                                    .padding(8)
+                                    .push(
+                                        widget::toggler(field.value.is_some())
+                                            .label(field.setting_id.translate())
+                                            .width(Length::Fill)
+                                            .on_toggle(move |enabled| {
+                                                Message::EditQuickPresetToggleField(i, enabled)
+                                            }),
+                                    )
+                                    .push_maybe(
+                                        field
+                                            .value
+                                            .as_ref()
+                                            .map(|v| widget::text::body(format!("{v:?}"))),
+                                    )
+                                    .into()
+                            },
+                        ))
+                        .into(),
+                    footer: None,
+                    on_close: Message::EditQuickPresetCancel,
+                })
+        } else {
+            None
+        }
     }
 
     pub fn update(&mut self, message: Message) -> Action {

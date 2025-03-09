@@ -2,7 +2,7 @@ use std::{collections::VecDeque, ops::Deref, sync::Arc};
 
 use cosmic::{
     Application, ApplicationExt, Task,
-    app::Core,
+    app::{Core, context_drawer::ContextDrawer},
     widget::{self, icon, nav_bar},
 };
 use dirs::config_dir;
@@ -19,7 +19,7 @@ use crate::{
     add_device::{self, AddDeviceModel},
     device_selection::{self, DeviceSelectionModel},
     device_settings, fl,
-    utils::coalesce_result,
+    utils::{ContextDrawerMapExt, coalesce_result},
 };
 
 pub struct AppModel {
@@ -217,6 +217,16 @@ impl Application for AppModel {
                 )
                 .into(),
         })
+    }
+
+    fn context_drawer(&self) -> Option<ContextDrawer<Self::Message>> {
+        match &self.screen {
+            Screen::DeviceSelection(_device_selection_model) => None,
+            Screen::AddDevice(_add_device_model) => None,
+            Screen::DeviceSettings(device_settings_model) => device_settings_model
+                .context_drawer()
+                .map(|drawer| drawer.map(Message::DeviceSettingsScreen)),
+        }
     }
 
     fn update(&mut self, message: Self::Message) -> cosmic::app::Task<Self::Message> {
