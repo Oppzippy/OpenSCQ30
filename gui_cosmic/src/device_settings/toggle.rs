@@ -1,4 +1,10 @@
-use cosmic::{Element, iced::Length, widget};
+use std::borrow::Cow;
+
+use cosmic::{
+    Apply, Element,
+    iced::{Length, alignment},
+    widget,
+};
 use openscq30_i18n::Translate;
 use openscq30_lib::api::settings::SettingId;
 
@@ -10,9 +16,26 @@ pub fn toggle<'a, M>(
 where
     M: Clone + 'a,
 {
-    widget::toggler(value)
-        .label(setting_id.translate())
-        .width(Length::FillPortion(1))
-        .on_toggle(on_change)
+    with_label(
+        setting_id.translate(),
+        widget::toggler(value)
+            .on_toggle(on_change)
+            .apply(widget::container)
+            .width(Length::Fill)
+            .align_x(alignment::Horizontal::Right),
+    )
+}
+
+fn with_label<'a, M>(
+    label: impl Into<Cow<'a, str>> + 'a,
+    element: impl Into<Element<'a, M>>,
+) -> Element<'a, M>
+where
+    M: 'a,
+{
+    widget::row()
+        .align_y(alignment::Vertical::Center)
+        .push(widget::text::text(label).width(Length::Fill))
+        .push(element.into())
         .into()
 }
