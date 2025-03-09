@@ -11,7 +11,7 @@ use crate::{
     api::settings::{self, Setting, SettingId, Value},
     devices::standard::{
         settings_manager::SettingHandler,
-        structures::{EqualizerConfiguration, VolumeAdjustments, VolumeAdjustments2},
+        structures::{EqualizerConfiguration, VolumeAdjustments2},
     },
     soundcore_device::device_model::DeviceModel,
     storage::OpenSCQ30Database,
@@ -48,6 +48,27 @@ impl EqualizerSettingHandler {
             .fetch_all_equalizer_profiles(self.device_model)
             .await?;
         Ok(())
+    }
+
+    fn values_to_volume_adjustments(
+        &self,
+        values: impl Iterator<Item = i16>,
+        existing_volume_adjustments: &VolumeAdjustments2,
+    ) -> VolumeAdjustments2 {
+        // Some devices have extra bands, but those aren't exposed to the user, so I have no idea what they're for
+        // We can just add back in whatever was there before (we're only showing the user the first 8 bands)
+        VolumeAdjustments2::new(
+            values
+                .take(8)
+                .chain(
+                    existing_volume_adjustments
+                        .adjustments()
+                        .iter()
+                        .cloned()
+                        .skip(8),
+                )
+                .collect(),
+        ).expect("we have control over the number of values in these vecs, so it should always be a valid number")
     }
 }
 
@@ -143,9 +164,11 @@ where
                     {
                         // Select existing profile
                         *state.as_mut() = EqualizerConfiguration::new_custom_profile(
-                            VolumeAdjustments2::new(volume_adjustments.to_owned())
-                                .unwrap()
-                                .into(),
+                            self.values_to_volume_adjustments(
+                                volume_adjustments.iter().cloned(),
+                                &volume_adjustments_2,
+                            )
+                            .into(),
                         )
                     } else {
                         // Create new profile
@@ -181,10 +204,11 @@ where
             EqualizerSetting::VolumeAdjustments => {
                 let volume_adjustments = value.try_as_i16_slice()?;
                 *equalizer_configuration = EqualizerConfiguration::new_custom_profile(
-                    VolumeAdjustments::new(
-                        volume_adjustments.iter().map(|vol| *vol as f64 / 10f64),
+                    self.values_to_volume_adjustments(
+                        volume_adjustments.iter().cloned(),
+                        &volume_adjustments_2,
                     )
-                    .unwrap(),
+                    .into(),
                 );
             }
         }

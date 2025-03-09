@@ -6,7 +6,7 @@ use nom::{
     sequence::tuple,
 };
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct StereoEqualizerConfiguration {
     pub left: EqualizerConfiguration,
     pub right: EqualizerConfiguration,

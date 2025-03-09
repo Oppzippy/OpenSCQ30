@@ -26,7 +26,7 @@ use super::{
         outbound::RequestStatePacket,
     },
     structures::{
-        AgeRange, BasicHearId, CustomHearId, EqualizerConfiguration, Gender,
+        AgeRange, AmbientSoundModeCycle, BasicHearId, CustomHearId, EqualizerConfiguration, Gender,
         InternalMultiButtonConfiguration, SoundModes, TwsStatus,
     },
 };
@@ -264,6 +264,14 @@ where
     {
         self.module_collection
             .add_button_configuration(self.packet_io_controller.clone())
+    }
+
+    pub fn ambient_sound_mode_cycle(&mut self)
+    where
+        StateType: AsRef<AmbientSoundModeCycle> + AsMut<AmbientSoundModeCycle>,
+    {
+        self.module_collection
+            .add_ambient_sound_mode_cycle(self.packet_io_controller.clone())
     }
 }
 

@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use nom::{
     IResult,
     combinator::map,
-    error::{ContextError, ParseError},
+    error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
 #[cfg(feature = "serde")]
@@ -31,7 +31,10 @@ impl AmbientSoundModeCycle {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], AmbientSoundModeCycle, E> {
-        map(le_u8, AmbientSoundModeCycle::from)(input)
+        context(
+            "ambient sound mode cycle",
+            map(le_u8, AmbientSoundModeCycle::from),
+        )(input)
     }
 }
 

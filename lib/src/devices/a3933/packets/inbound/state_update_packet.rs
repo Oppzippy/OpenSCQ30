@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use nom::{
     IResult,
     bytes::complete::take,
@@ -6,18 +7,30 @@ use nom::{
     number::complete::le_u8,
     sequence::{pair, tuple},
 };
+use tokio::sync::watch;
 
-use crate::devices::{
-    a3933::device_profile::A3933_DEVICE_PROFILE,
-    standard::{
-        packets::{inbound::state_update_packet::StateUpdatePacket, parsing::take_bool},
-        quirks::TwoExtraEqBandsValues,
-        structures::{
-            AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
-            EqualizerConfiguration, FirmwareVersion, HearId, InternalMultiButtonConfiguration,
-            SerialNumber, SoundModes, StereoEqualizerConfiguration, TwsStatus,
+use crate::{
+    devices::{
+        a3933::{device_profile::A3933_DEVICE_PROFILE, state::A3933State},
+        standard::{
+            modules::ModuleCollection,
+            packet_manager::PacketHandler,
+            packets::{
+                inbound::{
+                    InboundPacket, TryIntoInboundPacket, state_update_packet::StateUpdatePacket,
+                },
+                outbound::OutboundPacket,
+                parsing::take_bool,
+            },
+            structures::{
+                AgeRange, AmbientSoundModeCycle, BatteryLevel, Command, CustomHearId, DualBattery,
+                EqualizerConfiguration, FirmwareVersion, HearId, InternalMultiButtonConfiguration,
+                SerialNumber, SoundModes, StereoEqualizerConfiguration, StereoVolumeAdjustments,
+                TwsStatus, VolumeAdjustments,
+            },
         },
     },
+    soundcore_device::device::Packet,
 };
 
 // A3933 and A3939
@@ -29,9 +42,7 @@ pub struct A3933StateUpdatePacket {
     pub left_firmware: FirmwareVersion,
     pub right_firmware: FirmwareVersion,
     pub serial_number: SerialNumber,
-    pub left_equalizer_configuration: EqualizerConfiguration,
-    pub right_equalizer_configuration: EqualizerConfiguration,
-    pub extra_band_values: TwoExtraEqBandsValues,
+    pub equalizer_configuration: EqualizerConfiguration,
     pub age_range: AgeRange,
     pub hear_id: Option<CustomHearId>, // 10 bands
     pub button_configuration: InternalMultiButtonConfiguration,
@@ -45,13 +56,52 @@ pub struct A3933StateUpdatePacket {
     pub wind_noise_detection: bool,
 }
 
+impl Default for A3933StateUpdatePacket {
+    fn default() -> Self {
+        Self {
+            tws_status: Default::default(),
+            battery: Default::default(),
+            left_firmware: Default::default(),
+            right_firmware: Default::default(),
+            serial_number: Default::default(),
+            equalizer_configuration: EqualizerConfiguration::new_custom_profile(
+                VolumeAdjustments::new(vec![0f64; 10]).unwrap(),
+            ),
+            age_range: Default::default(),
+            hear_id: Some(CustomHearId {
+                is_enabled: Default::default(),
+                volume_adjustments: StereoVolumeAdjustments {
+                    left: VolumeAdjustments::new(vec![0f64; 10]).unwrap(),
+                    right: VolumeAdjustments::new(vec![0f64; 10]).unwrap(),
+                },
+                time: Default::default(),
+                hear_id_type: Default::default(),
+                hear_id_music_type: Default::default(),
+                custom_volume_adjustments: Some(StereoVolumeAdjustments {
+                    left: VolumeAdjustments::new(vec![0f64; 10]).unwrap(),
+                    right: VolumeAdjustments::new(vec![0f64; 10]).unwrap(),
+                }),
+            }),
+            button_configuration: Default::default(),
+            ambient_sound_mode_cycle: Default::default(),
+            sound_modes: Default::default(),
+            touch_tone_switch: Default::default(),
+            wear_detection_switch: Default::default(),
+            game_mode_switch: Default::default(),
+            charging_case_battery_level: Default::default(),
+            device_color: Default::default(),
+            wind_noise_detection: Default::default(),
+        }
+    }
+}
+
 impl From<A3933StateUpdatePacket> for StateUpdatePacket {
     fn from(packet: A3933StateUpdatePacket) -> Self {
         Self {
             device_profile: &A3933_DEVICE_PROFILE,
             tws_status: Some(packet.tws_status),
             battery: packet.battery.into(),
-            equalizer_configuration: packet.left_equalizer_configuration,
+            equalizer_configuration: packet.equalizer_configuration,
             sound_modes: Some(packet.sound_modes),
             age_range: None,
             gender: None,
@@ -65,8 +115,11 @@ impl From<A3933StateUpdatePacket> for StateUpdatePacket {
     }
 }
 
-impl A3933StateUpdatePacket {
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+impl InboundPacket for A3933StateUpdatePacket {
+    fn command() -> Command {
+        StateUpdatePacket::command()
+    }
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], A3933StateUpdatePacket, E> {
         context(
@@ -80,7 +133,7 @@ impl A3933StateUpdatePacket {
                         left_firmware,
                         right_firmware,
                         serial_number,
-                        (equalizer_configuration, extra_band_values),
+                        equalizer_configuration,
                         age_range,
                     ),
                 ) = tuple((
@@ -89,7 +142,7 @@ impl A3933StateUpdatePacket {
                     FirmwareVersion::take,
                     FirmwareVersion::take,
                     SerialNumber::take,
-                    StereoEqualizerConfiguration::take_with_two_extra_bands(8),
+                    StereoEqualizerConfiguration::take(10),
                     AgeRange::take,
                 ))(input)?;
 
@@ -109,7 +162,7 @@ impl A3933StateUpdatePacket {
                     AmbientSoundModeCycle::take,
                     SoundModes::take,
                     // Unsure if these two unknown bytes should be inside or outside the optional
-                    take(2usize), // unknown bytes
+                    context("unknown bytes", take(2usize)), // unknown bytes
                     opt(pair(Self::take_optional_extra_data, take(3usize))),
                 ))(input)?;
 
@@ -121,26 +174,26 @@ impl A3933StateUpdatePacket {
                         left_firmware,
                         right_firmware,
                         serial_number,
-                        left_equalizer_configuration: equalizer_configuration.left,
-                        right_equalizer_configuration: equalizer_configuration.right,
-                        extra_band_values,
+                        equalizer_configuration,
                         age_range,
                         hear_id,
                         button_configuration,
                         ambient_sound_mode_cycle,
                         sound_modes,
-                        touch_tone_switch: extra.map(|(e, _)| e.0).unwrap_or_default(),
-                        wear_detection_switch: extra.map(|(e, _)| e.1).unwrap_or_default(),
-                        game_mode_switch: extra.map(|(e, _)| e.2).unwrap_or_default(),
-                        charging_case_battery_level: extra.map(|(e, _)| e.3).unwrap_or_default(),
-                        device_color: extra.map(|(e, _)| e.5).unwrap_or_default(),
-                        wind_noise_detection: extra.map(|(e, _)| e.6).unwrap_or_default(),
+                        touch_tone_switch: extra.map(|e| e.0.0).unwrap_or_default(),
+                        wear_detection_switch: extra.map(|e| e.0.1).unwrap_or_default(),
+                        game_mode_switch: extra.map(|e| e.0.2).unwrap_or_default(),
+                        charging_case_battery_level: extra.map(|e| e.0.3).unwrap_or_default(),
+                        device_color: extra.map(|e| e.0.5).unwrap_or_default(),
+                        wind_noise_detection: extra.map(|e| e.0.6).unwrap_or_default(),
                     },
                 ))
             }),
         )(input)
     }
+}
 
+impl A3933StateUpdatePacket {
     fn take_optional_extra_data<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], (bool, bool, bool, BatteryLevel, u8, u8, bool), E> {
@@ -159,6 +212,90 @@ impl A3933StateUpdatePacket {
     }
 }
 
+impl OutboundPacket for A3933StateUpdatePacket {
+    fn command(&self) -> Command {
+        StateUpdatePacket::command()
+    }
+
+    fn body(&self) -> Vec<u8> {
+        self.tws_status
+            .bytes()
+            .into_iter()
+            .chain([
+                self.battery.left.is_charging as u8,
+                self.battery.right.is_charging as u8,
+                self.battery.left.level.0,
+                self.battery.right.level.0,
+            ])
+            .chain(self.left_firmware.to_string().into_bytes())
+            .chain(self.right_firmware.to_string().into_bytes())
+            .chain(self.serial_number.0.as_bytes().iter().cloned())
+            .chain(self.equalizer_configuration.profile_id().to_le_bytes())
+            .chain(self.equalizer_configuration.volume_adjustments().bytes())
+            .chain(self.equalizer_configuration.volume_adjustments().bytes())
+            .chain([self.age_range.0])
+            .chain(
+                self.hear_id
+                    .as_ref()
+                    .map(|hear_id| {
+                        [hear_id.is_enabled as u8]
+                            .into_iter()
+                            .chain(hear_id.volume_adjustments.bytes())
+                            .chain(hear_id.time.to_le_bytes())
+                            .chain([hear_id.hear_id_type.0])
+                            .chain(hear_id.custom_volume_adjustments.as_ref().unwrap().bytes())
+                            .chain([0, 0])
+                            .collect()
+                    })
+                    .unwrap_or_else(|| vec![0; 48]),
+            )
+            .chain(self.button_configuration.bytes())
+            .chain([self.ambient_sound_mode_cycle.into()])
+            .chain([
+                self.sound_modes.ambient_sound_mode as u8,
+                self.sound_modes.noise_canceling_mode as u8,
+                self.sound_modes.transparency_mode as u8,
+                self.sound_modes.custom_noise_canceling.value(),
+            ])
+            .chain([0, 0])
+            .chain([
+                self.touch_tone_switch as u8,
+                self.wear_detection_switch as u8,
+                self.game_mode_switch as u8,
+                self.charging_case_battery_level.0 as u8,
+                0,
+                self.device_color,
+                self.wind_noise_detection as u8,
+            ])
+            .chain([0, 0, 0])
+            .collect()
+    }
+}
+
+struct StateUpdatePacketHandler {}
+
+#[async_trait]
+impl PacketHandler<A3933State> for StateUpdatePacketHandler {
+    async fn handle_packet(
+        &self,
+        state: &watch::Sender<A3933State>,
+        packet: &Packet,
+    ) -> crate::Result<()> {
+        let packet: A3933StateUpdatePacket = packet.try_into_inbound_packet()?;
+        state.send_modify(|state| *state = packet.into());
+        Ok(())
+    }
+}
+
+impl ModuleCollection<A3933State> {
+    pub fn add_state_update(&mut self) {
+        self.packet_handlers.set_handler(
+            StateUpdatePacket::command(),
+            Box::new(StateUpdatePacketHandler {}),
+        );
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use nom::error::VerboseError;
@@ -166,7 +303,7 @@ mod tests {
     use crate::devices::{
         a3933::packets::inbound::A3933StateUpdatePacket,
         standard::{
-            packets::inbound::take_inbound_packet_header,
+            packets::inbound::{InboundPacket, take_inbound_packet_header},
             structures::{
                 AmbientSoundMode, BatteryLevel, CustomNoiseCanceling, EqualizerConfiguration,
                 FirmwareVersion, HostDevice, IsBatteryCharging, PresetEqualizerProfile,
@@ -220,7 +357,7 @@ mod tests {
             EqualizerConfiguration::new_from_preset_profile(
                 PresetEqualizerProfile::SoundcoreSignature
             ),
-            packet.left_equalizer_configuration
+            packet.equalizer_configuration
         );
         assert_eq!(
             AmbientSoundMode::NoiseCanceling,

@@ -119,15 +119,6 @@ impl OutboundPacket for A3931StateUpdatePacket {
     }
 
     fn body(&self) -> Vec<u8> {
-        // TwsStatus::take,
-        // DualBattery::take,
-        // StereoEqualizerConfiguration::take(8),
-        // InternalMultiButtonConfiguration::take,
-        // SoundModes::take,
-        // take_bool,
-        // take_bool,
-        // take_bool,
-        // le_u8,
         self.tws_status
             .bytes()
             .into_iter()

@@ -3,11 +3,13 @@ use std::{collections::HashMap, sync::Arc};
 use nom::error::VerboseError;
 
 use crate::{
-    device_profile::{AvailableSoundModes, DeviceFeatures, DeviceProfile},
+    device_profile::{DeviceFeatures, DeviceProfile},
     devices::standard::{
         self,
         implementation::ButtonConfigurationImplementation,
-        packets::inbound::state_update_packet::StateUpdatePacket,
+        macros::soundcore_device,
+        modules::sound_modes::AvailableSoundModes,
+        packets::inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
         quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBands},
         state::DeviceState,
         structures::{
@@ -22,11 +24,11 @@ use crate::{
     },
 };
 
-use super::packets::inbound::A3933StateUpdatePacket;
+use super::{packets::inbound::A3933StateUpdatePacket, state::A3933State};
 
 pub(crate) const A3933_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     features: DeviceFeatures {
-        available_sound_modes: Some(AvailableSoundModes {
+        available_sound_modes: Some(crate::device_profile::AvailableSoundModes {
             ambient_sound_modes: &[
                 AmbientSoundMode::Normal,
                 AmbientSoundMode::Transparency,
@@ -85,7 +87,7 @@ impl DeviceImplementation for A3933Implementation {
                         return state;
                     }
                 };
-                extra_bands.set_values(packet.extra_band_values);
+                // extra_bands.set_values(packet.extra_band_values);
                 buttons.set_internal_data(packet.button_configuration);
 
                 StateUpdatePacket::from(packet).into()
@@ -169,6 +171,29 @@ impl DeviceImplementation for A3933Implementation {
     }
 }
 
+soundcore_device!(A3933State, A3933StateUpdatePacket, async |builder| {
+    builder.module_collection().add_state_update();
+    builder.sound_modes(AvailableSoundModes {
+        ambient_sound_modes: vec![
+            AmbientSoundMode::Normal,
+            AmbientSoundMode::Transparency,
+            AmbientSoundMode::NoiseCanceling,
+        ],
+        transparency_modes: vec![
+            TransparencyMode::FullyTransparent,
+            TransparencyMode::VocalMode,
+        ],
+        noise_canceling_modes: vec![
+            NoiseCancelingMode::Transport,
+            NoiseCancelingMode::Indoor,
+            NoiseCancelingMode::Outdoor,
+        ],
+    });
+    builder.stereo_equalizer().await;
+    builder.button_configuration();
+    builder.ambient_sound_mode_cycle();
+});
+
 #[cfg(test)]
 mod tests {
     use nom::error::VerboseError;
@@ -180,7 +205,10 @@ mod tests {
             },
             standard::{
                 packets::{
-                    inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_header},
+                    inbound::{
+                        InboundPacket, state_update_packet::StateUpdatePacket,
+                        take_inbound_packet_header,
+                    },
                     outbound::{OutboundPacket, OutboundPacketBytesExt},
                 },
                 quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBandsValues},
