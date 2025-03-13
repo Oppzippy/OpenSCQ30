@@ -13,15 +13,7 @@ impl OutboundPacket for SetSoundModeTypeTwoPacket {
     }
 
     fn body(&self) -> Vec<u8> {
-        vec![
-            self.sound_modes.ambient_sound_mode.id(),
-            (self.sound_modes.manual_noise_canceling.id() << 4)
-                | self.sound_modes.adaptive_noise_canceling.id(),
-            self.sound_modes.transparency_mode.id(),
-            self.sound_modes.noise_canceling_mode.id(), // ANC automation mode?
-            self.sound_modes.wind_noise_suppression.into(),
-            self.sound_modes.noise_canceling_adaptive_sensitivity_level,
-        ]
+        self.sound_modes.bytes().to_vec()
     }
 }
 

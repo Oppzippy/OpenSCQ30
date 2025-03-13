@@ -36,6 +36,10 @@ impl AmbientSoundModeCycle {
             map(le_u8, AmbientSoundModeCycle::from),
         )(input)
     }
+
+    pub(crate) fn bytes(&self) -> [u8; 1] {
+        [(*self).into()]
+    }
 }
 
 impl Default for AmbientSoundModeCycle {

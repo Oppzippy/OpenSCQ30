@@ -10,7 +10,7 @@ use crate::devices::standard::structures::{
     ButtonAction, ButtonConfiguration, MultiButtonConfiguration,
 };
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub struct A3936InternalMultiButtonConfiguration {
     pub left_single_click: A3936TwsButtonAction,
     pub right_single_click: A3936TwsButtonAction,
@@ -93,7 +93,7 @@ impl A3936InternalMultiButtonConfiguration {
     }
 }
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub struct A3936TwsButtonAction {
     pub tws_connected_action: ButtonAction,
     pub tws_disconnected_action: ButtonAction,
@@ -134,6 +134,14 @@ impl A3936TwsButtonAction {
         ButtonConfiguration {
             action: self.active_action(is_tws_connected),
             is_enabled: self.is_enabled(is_tws_connected),
+        }
+    }
+
+    pub fn action_if_enabled(&self, is_tws_connected: bool) -> Option<ButtonAction> {
+        if self.is_enabled(is_tws_connected) {
+            Some(self.active_action(is_tws_connected))
+        } else {
+            None
         }
     }
 

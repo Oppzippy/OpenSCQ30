@@ -9,6 +9,7 @@ use crate::{
     device_profile::{DeviceFeatures, DeviceProfile},
     devices::standard::{
         self,
+        macros::soundcore_device,
         packets::inbound::{
             InboundPacket, SoundModeTypeTwoUpdatePacket, state_update_packet::StateUpdatePacket,
         },
@@ -24,6 +25,7 @@ use crate::{
 
 use super::{
     packets::{A3936SetMultiButtonConfigurationPacket, A3936StateUpdatePacket},
+    state::A3936State,
     structures::{A3936InternalMultiButtonConfiguration, A3936TwsButtonAction},
 };
 
@@ -72,7 +74,7 @@ impl DeviceImplementation for A3936Implementation {
                         return state;
                     }
                 };
-                extra_bands.set_values(packet.extra_bands);
+                // extra_bands.set_values(packet.extra_bands);
                 buttons.set_internal_data(packet.button_configuration);
 
                 StateUpdatePacket::from(packet).into()
@@ -246,3 +248,10 @@ impl A3936ButtonConfigurationImplementation {
         *self.data.lock().unwrap() = Some(data);
     }
 }
+
+soundcore_device!(A3936State, A3936StateUpdatePacket, async |builder| {
+    builder.module_collection().add_state_update();
+    builder.stereo_equalizer_with_custom_hear_id().await;
+    builder.a3936_button_configuration();
+    builder.ambient_sound_mode_cycle();
+});

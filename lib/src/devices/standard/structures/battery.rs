@@ -42,6 +42,17 @@ pub struct DualBattery {
 }
 
 impl DualBattery {
+    pub fn bytes(&self) -> [u8; 4] {
+        [
+            self.left.is_charging as u8,
+            self.right.is_charging as u8,
+            self.left.level.0,
+            self.right.level.0,
+        ]
+    }
+}
+
+impl DualBattery {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], DualBattery, E> {

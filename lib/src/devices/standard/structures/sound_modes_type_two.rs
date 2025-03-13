@@ -60,6 +60,17 @@ impl SoundModesTypeTwo {
             ),
         )(input)
     }
+
+    pub(crate) fn bytes(&self) -> [u8; 6] {
+        [
+            self.ambient_sound_mode.id(),
+            (self.manual_noise_canceling.id() << 4) | self.adaptive_noise_canceling.id(),
+            self.transparency_mode.id(),
+            self.noise_canceling_mode.id(), // ANC automation mode?
+            self.wind_noise_suppression.into(),
+            self.noise_canceling_adaptive_sensitivity_level,
+        ]
+    }
 }
 
 #[repr(u8)]

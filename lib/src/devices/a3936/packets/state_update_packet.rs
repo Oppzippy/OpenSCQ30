@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use nom::{
     IResult,
     bytes::complete::take,
@@ -5,20 +6,33 @@ use nom::{
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
+use tokio::sync::watch;
 
-use crate::devices::{
-    a3936::{
-        device_profile::A3936_DEVICE_PROFILE, structures::A3936InternalMultiButtonConfiguration,
-    },
-    standard::{
-        packets::{inbound::state_update_packet::StateUpdatePacket, parsing::take_bool},
-        quirks::TwoExtraEqBandsValues,
-        structures::{
-            AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
-            FirmwareVersion, SerialNumber, SoundModesTypeTwo, StereoEqualizerConfiguration,
-            TwsStatus,
+use crate::{
+    devices::{
+        a3936::{
+            device_profile::A3936_DEVICE_PROFILE, state::A3936State,
+            structures::A3936InternalMultiButtonConfiguration,
+        },
+        standard::{
+            modules::ModuleCollection,
+            packet_manager::PacketHandler,
+            packets::{
+                inbound::{
+                    InboundPacket, TryIntoInboundPacket, state_update_packet::StateUpdatePacket,
+                },
+                outbound::OutboundPacket,
+                parsing::take_bool,
+            },
+            structures::{
+                AgeRange, AmbientSoundModeCycle, BatteryLevel, Command, CustomHearId, DualBattery,
+                EqualizerConfiguration, FirmwareVersion, SerialNumber, SoundModesTypeTwo,
+                StereoEqualizerConfiguration, StereoVolumeAdjustments, TwsStatus,
+                VolumeAdjustments,
+            },
         },
     },
+    soundcore_device::device::Packet,
 };
 
 // A3936
@@ -29,8 +43,7 @@ pub struct A3936StateUpdatePacket {
     pub left_firmware: FirmwareVersion,
     pub right_firmware: FirmwareVersion,
     pub serial_number: SerialNumber,
-    pub equalizer_configuration: StereoEqualizerConfiguration,
-    pub extra_bands: TwoExtraEqBandsValues,
+    pub equalizer_configuration: EqualizerConfiguration,
     pub age_range: AgeRange,
     pub custom_hear_id: CustomHearId,
     pub sound_modes: SoundModesTypeTwo,
@@ -46,13 +59,54 @@ pub struct A3936StateUpdatePacket {
     pub game_mode_switch: bool,
 }
 
+impl Default for A3936StateUpdatePacket {
+    fn default() -> Self {
+        Self {
+            tws_status: Default::default(),
+            battery: Default::default(),
+            left_firmware: Default::default(),
+            right_firmware: Default::default(),
+            serial_number: Default::default(),
+            equalizer_configuration: EqualizerConfiguration::new_custom_profile(
+                VolumeAdjustments::new(vec![0f64; 10]).unwrap(),
+            ),
+            age_range: Default::default(),
+            custom_hear_id: CustomHearId {
+                is_enabled: Default::default(),
+                volume_adjustments: StereoVolumeAdjustments {
+                    left: VolumeAdjustments::new(vec![0f64; 10]).unwrap(),
+                    right: VolumeAdjustments::new(vec![0f64; 10]).unwrap(),
+                },
+                time: Default::default(),
+                hear_id_type: Default::default(),
+                hear_id_music_type: Default::default(),
+                custom_volume_adjustments: Some(StereoVolumeAdjustments {
+                    left: VolumeAdjustments::new(vec![0f64; 10]).unwrap(),
+                    right: VolumeAdjustments::new(vec![0f64; 10]).unwrap(),
+                }),
+            },
+            sound_modes: Default::default(),
+            ambient_sound_mode_cycle: Default::default(),
+            button_configuration: Default::default(),
+            touch_tone: Default::default(),
+            charging_case_battery: Default::default(),
+            color: Default::default(),
+            ldac: Default::default(),
+            supports_two_cnn_switch: Default::default(),
+            auto_power_off_switch: Default::default(),
+            auto_power_off_index: Default::default(),
+            game_mode_switch: Default::default(),
+        }
+    }
+}
+
 impl From<A3936StateUpdatePacket> for StateUpdatePacket {
     fn from(packet: A3936StateUpdatePacket) -> Self {
         Self {
             device_profile: &A3936_DEVICE_PROFILE,
             tws_status: Some(packet.tws_status),
             battery: packet.battery.into(),
-            equalizer_configuration: packet.equalizer_configuration.left,
+            equalizer_configuration: packet.equalizer_configuration,
             sound_modes: None,
             sound_modes_type_two: Some(packet.sound_modes),
             age_range: Some(packet.age_range),
@@ -70,8 +124,12 @@ impl From<A3936StateUpdatePacket> for StateUpdatePacket {
     }
 }
 
-impl A3936StateUpdatePacket {
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+impl InboundPacket for A3936StateUpdatePacket {
+    fn command() -> Command {
+        StateUpdatePacket::command()
+    }
+
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], A3936StateUpdatePacket, E> {
         context(
@@ -82,8 +140,8 @@ impl A3936StateUpdatePacket {
                 let (input, left_firmware) = FirmwareVersion::take(input)?;
                 let (input, right_firmware) = FirmwareVersion::take(input)?;
                 let (input, serial_number) = SerialNumber::take(input)?;
-                let (input, (equalizer_configuration, extra_bands)) =
-                    StereoEqualizerConfiguration::take_with_two_extra_bands(8)(input)?;
+                let (input, equalizer_configuration) =
+                    StereoEqualizerConfiguration::take(10)(input)?;
                 let (input, age_range) = AgeRange::take(input)?;
                 let (input, custom_hear_id) = CustomHearId::take_without_music_type(10)(input)?;
 
@@ -123,7 +181,6 @@ impl A3936StateUpdatePacket {
                         right_firmware,
                         serial_number,
                         equalizer_configuration,
-                        extra_bands,
                         age_range,
                         custom_hear_id,
                         ambient_sound_mode_cycle,
@@ -141,6 +198,118 @@ impl A3936StateUpdatePacket {
                 ))
             }),
         )(input)
+    }
+}
+
+impl OutboundPacket for A3936StateUpdatePacket {
+    fn command(&self) -> Command {
+        StateUpdatePacket::command()
+    }
+
+    fn body(&self) -> Vec<u8> {
+        // let (input, tws_status) = TwsStatus::take(input)?;
+        // let (input, battery) = DualBattery::take(input)?;
+        // let (input, left_firmware) = FirmwareVersion::take(input)?;
+        // let (input, right_firmware) = FirmwareVersion::take(input)?;
+        // let (input, serial_number) = SerialNumber::take(input)?;
+        // let (input, (equalizer_configuration, extra_bands)) =
+        //     StereoEqualizerConfiguration::take_with_two_extra_bands(8)(input)?;
+        // let (input, age_range) = AgeRange::take(input)?;
+        // let (input, custom_hear_id) = CustomHearId::take_without_music_type(10)(input)?;
+        //
+        // // For some reason, an offset value is taken before the custom button model, which refers to how many bytes
+        // // until the next data to be read. This offset includes the length of the custom button model. Presumably,
+        // // there are some extra bytes between the button model and the beginning of the next data to be parsed?
+        // let (input, skip_offset) = le_u8(input)?;
+        // let remaining_before_button_configuration = input.len();
+        // let (input, button_configuration) =
+        //     A3936InternalMultiButtonConfiguration::take(input)?;
+        // let button_configuration_size = remaining_before_button_configuration - input.len();
+        // let (input, _) = take(
+        //     (skip_offset as usize)
+        //         // subtract an extra 1 since we want the number of bytes to discard, not
+        //         // the offset to the first byte to read
+        //         .checked_sub(button_configuration_size + 2)
+        //         .unwrap_or_default(),
+        // )(input)?;
+        //
+        // let (input, ambient_sound_mode_cycle) = AmbientSoundModeCycle::take(input)?;
+        // let (input, sound_modes) = SoundModesTypeTwo::take(input)?;
+        // let (input, touch_tone) = take_bool(input)?;
+        // let (input, charging_case_battery) = BatteryLevel::take(input)?;
+        // let (input, color) = le_u8(input)?;
+        // let (input, ldac) = take_bool(input)?;
+        // let (input, supports_two_cnn_switch) = take_bool(input)?;
+        // let (input, auto_power_off_switch) = take_bool(input)?;
+        // let (input, auto_power_off_index) = le_u8(input)?;
+        // let (input, game_mode_switch) = take_bool(input)?;
+        // let (input, _) = take(12usize)(input)?;
+        self.tws_status
+            .bytes()
+            .into_iter()
+            .chain(self.battery.bytes())
+            .chain(self.left_firmware.to_string().into_bytes())
+            .chain(self.right_firmware.to_string().into_bytes())
+            .chain(self.serial_number.to_string().into_bytes())
+            .chain(self.equalizer_configuration.profile_id().to_le_bytes())
+            .chain(self.equalizer_configuration.volume_adjustments().bytes())
+            .chain(self.equalizer_configuration.volume_adjustments().bytes())
+            .chain([self.age_range.0])
+            .chain(
+                [self.custom_hear_id.is_enabled as u8]
+                    .into_iter()
+                    .chain(self.custom_hear_id.volume_adjustments.bytes())
+                    .chain(self.custom_hear_id.time.to_le_bytes())
+                    .chain([self.custom_hear_id.hear_id_type.0])
+                    .chain(
+                        self.custom_hear_id
+                            .custom_volume_adjustments
+                            .as_ref()
+                            .unwrap()
+                            .bytes(),
+                    )
+                    .chain([0, 0]),
+            )
+            .chain([0]) // TODO skip offset
+            .chain(self.button_configuration.bytes())
+            .chain(self.ambient_sound_mode_cycle.bytes())
+            .chain(self.sound_modes.bytes())
+            .chain([
+                self.touch_tone as u8,
+                self.charging_case_battery.0,
+                self.color,
+                self.ldac as u8,
+                self.supports_two_cnn_switch as u8,
+                self.auto_power_off_switch as u8,
+                self.auto_power_off_index,
+                self.game_mode_switch as u8,
+            ])
+            .chain([0; 12])
+            .collect()
+    }
+}
+
+struct StateUpdatePacketHandler {}
+
+#[async_trait]
+impl PacketHandler<A3936State> for StateUpdatePacketHandler {
+    async fn handle_packet(
+        &self,
+        state: &watch::Sender<A3936State>,
+        packet: &Packet,
+    ) -> crate::Result<()> {
+        let packet: A3936StateUpdatePacket = packet.try_into_inbound_packet()?;
+        state.send_modify(|state| *state = packet.into());
+        Ok(())
+    }
+}
+
+impl ModuleCollection<A3936State> {
+    pub fn add_state_update(&mut self) {
+        self.packet_handlers.set_handler(
+            StateUpdatePacket::command(),
+            Box::new(StateUpdatePacketHandler {}),
+        );
     }
 }
 

@@ -164,6 +164,10 @@ where
         &mut self.module_collection
     }
 
+    pub fn packet_io_controller(&mut self) -> &Arc<PacketIOController<ConnectionType>> {
+        &self.packet_io_controller
+    }
+
     pub fn sound_modes(&mut self, available_sound_modes: AvailableSoundModes)
     where
         StateType: AsRef<SoundModes> + AsMut<SoundModes>,
