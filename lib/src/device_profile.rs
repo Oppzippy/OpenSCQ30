@@ -5,17 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     devices::{
-        a3027::device_profile::A3027_DEVICE_PROFILE,
-        a3028::device_profile::A3028_DEVICE_PROFILE,
-        a3031::device_profile::A3031_DEVICE_PROFILE,
-        a3033::device_profile::A3033_DEVICE_PROFILE,
-        a3926::device_profile::A3926_DEVICE_PROFILE,
-        a3930::device_profile::A3930_DEVICE_PROFILE,
-        a3931::device_profile::A3931_DEVICE_PROFILE,
-        a3933::device_profile::A3933_DEVICE_PROFILE,
         a3936::device_profile::A3936_DEVICE_PROFILE,
-        a3945::device_profile::A3945_DEVICE_PROFILE,
-        a3951::device_profile::A3951_DEVICE_PROFILE,
         standard::structures::{
             AmbientSoundMode, FirmwareVersion, NoiseCancelingMode, SerialNumber, TransparencyMode,
         },
@@ -86,19 +76,7 @@ pub enum ToDeviceProfileError {
 // TODO decide if this is worth keeping, since it's non-trivial to determine a device's serial
 // number without knowing in advance what device it is
 #[allow(dead_code)]
-const DEVICE_PROFILES: &[&DeviceProfile] = &[
-    &A3027_DEVICE_PROFILE,
-    &A3028_DEVICE_PROFILE,
-    &A3031_DEVICE_PROFILE,
-    &A3033_DEVICE_PROFILE,
-    &A3926_DEVICE_PROFILE,
-    &A3930_DEVICE_PROFILE,
-    &A3931_DEVICE_PROFILE,
-    &A3933_DEVICE_PROFILE,
-    &A3936_DEVICE_PROFILE,
-    &A3945_DEVICE_PROFILE,
-    &A3951_DEVICE_PROFILE,
-];
+const DEVICE_PROFILES: &[&DeviceProfile] = &[&A3936_DEVICE_PROFILE];
 
 #[allow(dead_code)]
 impl DeviceProfile {

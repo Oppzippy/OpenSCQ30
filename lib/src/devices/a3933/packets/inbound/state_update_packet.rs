@@ -11,7 +11,7 @@ use tokio::sync::watch;
 
 use crate::{
     devices::{
-        a3933::{device_profile::A3933_DEVICE_PROFILE, state::A3933State},
+        a3933::state::A3933State,
         standard::{
             modules::ModuleCollection,
             packet_manager::PacketHandler,
@@ -24,7 +24,7 @@ use crate::{
             },
             structures::{
                 AgeRange, AmbientSoundModeCycle, BatteryLevel, Command, CustomHearId, DualBattery,
-                EqualizerConfiguration, FirmwareVersion, HearId, InternalMultiButtonConfiguration,
+                EqualizerConfiguration, FirmwareVersion, InternalMultiButtonConfiguration,
                 SerialNumber, SoundModes, StereoEqualizerConfiguration, StereoVolumeAdjustments,
                 TwsStatus, VolumeAdjustments,
             },
@@ -91,26 +91,6 @@ impl Default for A3933StateUpdatePacket {
             charging_case_battery_level: Default::default(),
             device_color: Default::default(),
             wind_noise_detection: Default::default(),
-        }
-    }
-}
-
-impl From<A3933StateUpdatePacket> for StateUpdatePacket {
-    fn from(packet: A3933StateUpdatePacket) -> Self {
-        Self {
-            device_profile: &A3933_DEVICE_PROFILE,
-            tws_status: Some(packet.tws_status),
-            battery: packet.battery.into(),
-            equalizer_configuration: packet.equalizer_configuration,
-            sound_modes: Some(packet.sound_modes),
-            age_range: None,
-            gender: None,
-            hear_id: packet.hear_id.map(HearId::Custom),
-            button_configuration: Some(packet.button_configuration.into()),
-            firmware_version: Some(packet.left_firmware.min(packet.right_firmware)),
-            serial_number: Some(packet.serial_number),
-            ambient_sound_mode_cycle: Some(packet.ambient_sound_mode_cycle),
-            sound_modes_type_two: None,
         }
     }
 }

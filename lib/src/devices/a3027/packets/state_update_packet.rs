@@ -9,7 +9,7 @@ use tokio::sync::watch;
 
 use crate::{
     devices::{
-        a3027::{device_profile::A3027_DEVICE_PROFILE, state::A3027State},
+        a3027::state::A3027State,
         standard::{
             modules::ModuleCollection,
             packet_manager::PacketHandler,
@@ -42,26 +42,6 @@ pub struct A3027StateUpdatePacket {
     pub wear_detection: bool,
     // if length >= 72
     pub touch_func: Option<bool>,
-}
-
-impl From<A3027StateUpdatePacket> for StateUpdatePacket {
-    fn from(packet: A3027StateUpdatePacket) -> Self {
-        Self {
-            device_profile: &A3027_DEVICE_PROFILE,
-            tws_status: None,
-            battery: packet.battery.into(),
-            equalizer_configuration: packet.equalizer_configuration,
-            sound_modes: Some(packet.sound_modes),
-            age_range: Some(packet.age_range),
-            gender: Some(packet.gender),
-            hear_id: Some(packet.hear_id.into()),
-            button_configuration: None,
-            firmware_version: Some(packet.firmware_version),
-            serial_number: Some(packet.serial_number),
-            ambient_sound_mode_cycle: None,
-            sound_modes_type_two: None,
-        }
-    }
 }
 
 impl InboundPacket for A3027StateUpdatePacket {

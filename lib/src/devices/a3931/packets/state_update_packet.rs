@@ -10,7 +10,7 @@ use tokio::sync::watch;
 
 use crate::{
     devices::{
-        a3931::{device_profile::A3931_DEVICE_PROFILE, state::A3931State},
+        a3931::state::A3931State,
         standard::{
             modules::ModuleCollection,
             packet_manager::PacketHandler,
@@ -42,26 +42,6 @@ pub struct A3931StateUpdatePacket {
     pub touch_tone: bool,
     pub auto_power_off_on: bool,
     pub auto_power_off_index: u8, // 0 to 3
-}
-
-impl From<A3931StateUpdatePacket> for StateUpdatePacket {
-    fn from(packet: A3931StateUpdatePacket) -> Self {
-        Self {
-            device_profile: &A3931_DEVICE_PROFILE,
-            tws_status: Some(packet.tws_status),
-            battery: packet.battery.into(),
-            equalizer_configuration: packet.equalizer_configuration,
-            sound_modes: Some(packet.sound_modes),
-            age_range: None,
-            gender: None,
-            hear_id: None,
-            button_configuration: Some(packet.button_configuration.into()),
-            firmware_version: None,
-            serial_number: None,
-            ambient_sound_mode_cycle: None,
-            sound_modes_type_two: None,
-        }
-    }
 }
 
 impl InboundPacket for A3931StateUpdatePacket {

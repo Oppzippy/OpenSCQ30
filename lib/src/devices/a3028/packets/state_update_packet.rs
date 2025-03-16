@@ -11,7 +11,7 @@ use tokio::sync::watch;
 
 use crate::{
     devices::{
-        a3028::{device_profile::A3028_DEVICE_PROFILE, state::A3028State},
+        a3028::state::A3028State,
         standard::{
             modules::ModuleCollection,
             packet_manager::PacketHandler,
@@ -42,26 +42,6 @@ pub struct A3028StateUpdatePacket {
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
     pub extra_fields: Option<ExtraFields>,
-}
-
-impl From<A3028StateUpdatePacket> for StateUpdatePacket {
-    fn from(packet: A3028StateUpdatePacket) -> Self {
-        Self {
-            device_profile: &A3028_DEVICE_PROFILE,
-            tws_status: None,
-            battery: packet.battery.into(),
-            equalizer_configuration: packet.equalizer_configuration,
-            sound_modes: Some(packet.sound_modes),
-            age_range: Some(packet.age_range),
-            gender: Some(packet.gender),
-            hear_id: Some(packet.hear_id.into()),
-            button_configuration: None,
-            firmware_version: Some(packet.firmware_version),
-            serial_number: Some(packet.serial_number),
-            ambient_sound_mode_cycle: None,
-            sound_modes_type_two: None,
-        }
-    }
 }
 
 impl InboundPacket for A3028StateUpdatePacket {

@@ -250,6 +250,7 @@ impl A3936ButtonConfigurationImplementation {
 }
 
 soundcore_device!(A3936State, A3936StateUpdatePacket, async |builder| {
+    // TODO sound modes type two
     builder.module_collection().add_state_update();
     builder.stereo_equalizer_with_custom_hear_id().await;
     builder.a3936_button_configuration();
