@@ -1,14 +1,14 @@
 use nom::{
     IResult,
-    branch::alt,
-    combinator::map,
+    combinator::map_opt,
     error::{ContextError, ParseError},
+    number::complete::le_u8,
 };
 
 use crate::{
     device_profile::DeviceProfile,
     devices::{
-        a3936::{packets::A3936StateUpdatePacket, structures::A3936SoundModes},
+        a3936::structures::A3936SoundModes,
         standard::structures::{
             AgeRange, AmbientSoundModeCycle, Battery, Command, EqualizerConfiguration,
             FirmwareVersion, Gender, HearId, MultiButtonConfiguration, SerialNumber, SoundModes,
@@ -44,6 +44,6 @@ impl InboundPacket for StateUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], StateUpdatePacket, E> {
-        alt((map(A3936StateUpdatePacket::take, StateUpdatePacket::from),))(input)
+        map_opt(le_u8, |_| None)(input)
     }
 }

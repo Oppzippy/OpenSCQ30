@@ -11,7 +11,6 @@ use tokio::sync::watch;
 use crate::{
     devices::{
         a3936::{
-            device_profile::A3936_DEVICE_PROFILE,
             state::A3936State,
             structures::{A3936InternalMultiButtonConfiguration, A3936SoundModes},
         },
@@ -97,30 +96,6 @@ impl Default for A3936StateUpdatePacket {
             auto_power_off_switch: Default::default(),
             auto_power_off_index: Default::default(),
             game_mode_switch: Default::default(),
-        }
-    }
-}
-
-impl From<A3936StateUpdatePacket> for StateUpdatePacket {
-    fn from(packet: A3936StateUpdatePacket) -> Self {
-        Self {
-            device_profile: &A3936_DEVICE_PROFILE,
-            tws_status: Some(packet.tws_status),
-            battery: packet.battery.into(),
-            equalizer_configuration: packet.equalizer_configuration,
-            sound_modes: None,
-            sound_modes_type_two: Some(packet.sound_modes),
-            age_range: Some(packet.age_range),
-            gender: None,
-            hear_id: Some(packet.custom_hear_id.into()),
-            button_configuration: Some(
-                packet
-                    .button_configuration
-                    .as_multi_button_configuration(packet.tws_status.is_connected),
-            ),
-            firmware_version: None,
-            serial_number: None,
-            ambient_sound_mode_cycle: None,
         }
     }
 }

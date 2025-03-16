@@ -4,11 +4,8 @@ use std::sync::Arc;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    devices::{
-        a3936::device_profile::A3936_DEVICE_PROFILE,
-        standard::structures::{
-            AmbientSoundMode, FirmwareVersion, NoiseCancelingMode, SerialNumber, TransparencyMode,
-        },
+    devices::standard::structures::{
+        AmbientSoundMode, FirmwareVersion, NoiseCancelingMode, SerialNumber, TransparencyMode,
     },
     soundcore_device::{
         device::device_implementation::DeviceImplementation, device_model::DeviceModel,
@@ -76,7 +73,7 @@ pub enum ToDeviceProfileError {
 // TODO decide if this is worth keeping, since it's non-trivial to determine a device's serial
 // number without knowing in advance what device it is
 #[allow(dead_code)]
-const DEVICE_PROFILES: &[&DeviceProfile] = &[&A3936_DEVICE_PROFILE];
+const DEVICE_PROFILES: &[&DeviceProfile] = &[];
 
 #[allow(dead_code)]
 impl DeviceProfile {
