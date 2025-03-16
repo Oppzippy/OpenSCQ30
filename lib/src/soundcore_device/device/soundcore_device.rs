@@ -13,18 +13,21 @@ use crate::{
         self,
         connection::{Connection, ConnectionStatus},
     },
-    devices::standard::{
-        packets::{
-            inbound::{
-                FirmwareVersionUpdatePacket, TryIntoInboundPacket,
-                state_update_packet::StateUpdatePacket,
+    devices::{
+        a3936::structures::A3936SoundModes,
+        standard::{
+            packets::{
+                inbound::{
+                    FirmwareVersionUpdatePacket, TryIntoInboundPacket,
+                    state_update_packet::StateUpdatePacket,
+                },
+                outbound::{RequestFirmwareVersionPacket, RequestStatePacket},
             },
-            outbound::{RequestFirmwareVersionPacket, RequestStatePacket},
-        },
-        state::DeviceState,
-        structures::{
-            AmbientSoundModeCycle, Command, EqualizerConfiguration, HearId,
-            MultiButtonConfiguration, SoundModes, SoundModesTypeTwo,
+            state::DeviceState,
+            structures::{
+                AmbientSoundModeCycle, Command, EqualizerConfiguration, HearId,
+                MultiButtonConfiguration, SoundModes,
+            },
         },
     },
 };
@@ -204,7 +207,7 @@ where
         Ok(())
     }
 
-    async fn set_sound_modes_type_two(&self, sound_modes: SoundModesTypeTwo) -> crate::Result<()> {
+    async fn set_sound_modes_type_two(&self, sound_modes: A3936SoundModes) -> crate::Result<()> {
         let state_sender = self.state_sender.lock().await;
         let state = state_sender.borrow().to_owned();
         let Some(prev_sound_modes) = state.sound_modes_type_two else {

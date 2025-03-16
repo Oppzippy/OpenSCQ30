@@ -5,6 +5,7 @@ license.workspace = true
 edition = "2024"
 
 [features]
+default = ["serde"]
 serde = []
 bluetooth = []
 

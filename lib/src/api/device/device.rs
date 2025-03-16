@@ -4,11 +4,14 @@ use uuid::Uuid;
 
 use crate::{
     api::connection::ConnectionStatus,
-    devices::standard::{
-        state::DeviceState,
-        structures::{
-            AmbientSoundModeCycle, EqualizerConfiguration, HearId, MultiButtonConfiguration,
-            SoundModes, SoundModesTypeTwo,
+    devices::{
+        a3936::structures::A3936SoundModes,
+        standard::{
+            state::DeviceState,
+            structures::{
+                AmbientSoundModeCycle, EqualizerConfiguration, HearId, MultiButtonConfiguration,
+                SoundModes,
+            },
         },
     },
 };
@@ -27,7 +30,7 @@ pub trait Device {
     async fn state(&self) -> DeviceState;
 
     async fn set_sound_modes(&self, sound_modes: SoundModes) -> crate::Result<()>;
-    async fn set_sound_modes_type_two(&self, sound_modes: SoundModesTypeTwo) -> crate::Result<()>;
+    async fn set_sound_modes_type_two(&self, sound_modes: A3936SoundModes) -> crate::Result<()>;
 
     async fn set_ambient_sound_mode_cycle(&self, cycle: AmbientSoundModeCycle)
     -> crate::Result<()>;

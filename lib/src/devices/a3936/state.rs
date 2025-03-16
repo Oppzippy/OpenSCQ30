@@ -1,13 +1,15 @@
 use crate::{
     devices::standard::structures::{
         AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
-        EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber, SoundModesTypeTwo,
-        TwsStatus,
+        EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber, TwsStatus,
     },
     macros::impl_as_ref_for_field,
 };
 
-use super::{packets::A3936StateUpdatePacket, structures::A3936InternalMultiButtonConfiguration};
+use super::{
+    packets::A3936StateUpdatePacket,
+    structures::{A3936InternalMultiButtonConfiguration, A3936SoundModes},
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3936State {
@@ -19,7 +21,7 @@ pub struct A3936State {
     pub equalizer_configuration: EqualizerConfiguration,
     pub age_range: AgeRange,
     pub custom_hear_id: CustomHearId,
-    pub sound_modes: SoundModesTypeTwo,
+    pub sound_modes: A3936SoundModes,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub button_configuration: A3936InternalMultiButtonConfiguration,
     pub touch_tone: bool,
@@ -41,7 +43,7 @@ impl_as_ref_for_field!(
         equalizer_configuration: EqualizerConfiguration,
         age_range: AgeRange,
         custom_hear_id: CustomHearId,
-        sound_modes: SoundModesTypeTwo,
+        sound_modes: A3936SoundModes,
         ambient_sound_mode_cycle: AmbientSoundModeCycle,
         button_configuration: A3936InternalMultiButtonConfiguration,
     }

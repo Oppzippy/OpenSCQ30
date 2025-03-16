@@ -1,13 +1,14 @@
-use crate::devices::standard::structures::{Command, SoundModesTypeTwo};
-
-use super::outbound_packet::OutboundPacket;
+use crate::devices::{
+    a3936::structures::A3936SoundModes,
+    standard::{packets::outbound::OutboundPacket, structures::Command},
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct SetSoundModeTypeTwoPacket {
-    pub sound_modes: SoundModesTypeTwo,
+pub struct A3936SetSoundModesPacket {
+    pub sound_modes: A3936SoundModes,
 }
 
-impl OutboundPacket for SetSoundModeTypeTwoPacket {
+impl OutboundPacket for A3936SetSoundModesPacket {
     fn command(&self) -> Command {
         Command::new([0x08, 0xee, 0x00, 0x00, 0x00, 0x06, 0x81])
     }
@@ -19,11 +20,17 @@ impl OutboundPacket for SetSoundModeTypeTwoPacket {
 
 #[cfg(test)]
 mod tests {
-    use crate::devices::standard::{
-        packets::outbound::{OutboundPacketBytesExt, SetSoundModeTypeTwoPacket},
-        structures::{
-            AdaptiveNoiseCanceling, AmbientSoundMode, ManualNoiseCanceling,
-            NoiseCancelingModeTypeTwo, SoundModesTypeTwo, TransparencyMode,
+    use crate::devices::{
+        a3936::{
+            packets::set_sound_modes::A3936SetSoundModesPacket,
+            structures::{
+                A3936NoiseCancelingMode, A3936SoundModes, AdaptiveNoiseCanceling,
+                ManualNoiseCanceling,
+            },
+        },
+        standard::{
+            packets::outbound::OutboundPacketBytesExt,
+            structures::{AmbientSoundMode, TransparencyMode},
         },
     };
 
@@ -33,13 +40,13 @@ mod tests {
             0x08, 0xee, 0x00, 0x00, 0x00, 0x06, 0x81, 0x10, 0x00, 0x02, 0x12, 0x00, 0x01, 0x01,
             0x02, 0xa5,
         ];
-        let packet = SetSoundModeTypeTwoPacket {
-            sound_modes: SoundModesTypeTwo {
+        let packet = A3936SetSoundModesPacket {
+            sound_modes: A3936SoundModes {
                 ambient_sound_mode: AmbientSoundMode::Normal,
                 manual_noise_canceling: ManualNoiseCanceling::Weak,
                 adaptive_noise_canceling: AdaptiveNoiseCanceling::HighNoise,
                 transparency_mode: TransparencyMode::FullyTransparent,
-                noise_canceling_mode: NoiseCancelingModeTypeTwo::Manual,
+                noise_canceling_mode: A3936NoiseCancelingMode::Manual,
                 wind_noise_suppression: true,
                 noise_canceling_adaptive_sensitivity_level: 2,
             },

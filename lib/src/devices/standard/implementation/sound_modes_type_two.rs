@@ -1,15 +1,14 @@
 use crate::{
-    devices::standard::{
-        packets::outbound::SetSoundModeTypeTwoPacket,
-        state::DeviceState,
-        structures::{AmbientSoundMode, SoundModesTypeTwo},
+    devices::{
+        a3936::{packets::A3936SetSoundModesPacket, structures::A3936SoundModes},
+        standard::{state::DeviceState, structures::AmbientSoundMode},
     },
     soundcore_device::device::soundcore_command::CommandResponse,
 };
 
 pub fn set_sound_modes_type_two(
     state: DeviceState,
-    mut sound_modes: SoundModesTypeTwo,
+    mut sound_modes: A3936SoundModes,
 ) -> crate::Result<CommandResponse> {
     let Some(prev_sound_modes) = state.sound_modes_type_two else {
         return Err(crate::Error::MissingData {
@@ -35,8 +34,8 @@ pub fn set_sound_modes_type_two(
 
     if needs_noise_canceling {
         packets.push(
-            SetSoundModeTypeTwoPacket {
-                sound_modes: SoundModesTypeTwo {
+            A3936SetSoundModesPacket {
+                sound_modes: A3936SoundModes {
                     ambient_sound_mode: AmbientSoundMode::NoiseCanceling,
                     ..sound_modes
                 },
@@ -48,8 +47,8 @@ pub fn set_sound_modes_type_two(
     // If we need to temporarily be in noise canceling mode to work around the bug, set all fields besides
     // ambient_sound_mode. Otherwise, we set all fields in one go.
     packets.push(
-        SetSoundModeTypeTwoPacket {
-            sound_modes: SoundModesTypeTwo {
+        A3936SetSoundModesPacket {
+            sound_modes: A3936SoundModes {
                 ambient_sound_mode: if needs_noise_canceling {
                     AmbientSoundMode::NoiseCanceling
                 } else {
@@ -64,7 +63,7 @@ pub fn set_sound_modes_type_two(
     // Switch to the target sound mode if we didn't do it in the previous step.
     // If the target sound mode is noise canceling, we already set it to that, so no change needed.
     if needs_ambient_sound_mode_revert {
-        packets.push(SetSoundModeTypeTwoPacket { sound_modes }.into());
+        packets.push(A3936SetSoundModesPacket { sound_modes }.into());
     }
 
     Ok(CommandResponse {

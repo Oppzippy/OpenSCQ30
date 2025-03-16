@@ -54,6 +54,10 @@ pub enum SettingId {
     NormalModeInCycle,
     TransparencyModeInCycle,
     NoiseCancelingModeInCycle,
+    AdaptiveNoiseCanceling,
+    ManualNoiseCanceling,
+    WindNoiseSuppression,
+    AdaptiveNoiseCancelingSensitivityLevel,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

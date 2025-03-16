@@ -1,10 +1,13 @@
 use std::collections::HashMap;
 
-use crate::devices::standard::{
-    state::DeviceState,
-    structures::{
-        AmbientSoundModeCycle, Command, EqualizerConfiguration, HearId, MultiButtonConfiguration,
-        SoundModes, SoundModesTypeTwo,
+use crate::devices::{
+    a3936::structures::A3936SoundModes,
+    standard::{
+        state::DeviceState,
+        structures::{
+            AmbientSoundModeCycle, Command, EqualizerConfiguration, HearId,
+            MultiButtonConfiguration, SoundModes,
+        },
     },
 };
 
@@ -26,7 +29,7 @@ pub trait DeviceImplementation {
     fn set_sound_modes_type_two(
         &self,
         state: DeviceState,
-        sound_modes: SoundModesTypeTwo,
+        sound_modes: A3936SoundModes,
     ) -> crate::Result<CommandResponse>;
 
     fn set_ambient_sound_mode_cycle(

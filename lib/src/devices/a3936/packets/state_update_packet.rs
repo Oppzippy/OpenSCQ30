@@ -11,8 +11,9 @@ use tokio::sync::watch;
 use crate::{
     devices::{
         a3936::{
-            device_profile::A3936_DEVICE_PROFILE, state::A3936State,
-            structures::A3936InternalMultiButtonConfiguration,
+            device_profile::A3936_DEVICE_PROFILE,
+            state::A3936State,
+            structures::{A3936InternalMultiButtonConfiguration, A3936SoundModes},
         },
         standard::{
             modules::ModuleCollection,
@@ -26,7 +27,7 @@ use crate::{
             },
             structures::{
                 AgeRange, AmbientSoundModeCycle, BatteryLevel, Command, CustomHearId, DualBattery,
-                EqualizerConfiguration, FirmwareVersion, SerialNumber, SoundModesTypeTwo,
+                EqualizerConfiguration, FirmwareVersion, SerialNumber,
                 StereoEqualizerConfiguration, StereoVolumeAdjustments, TwsStatus,
                 VolumeAdjustments,
             },
@@ -46,7 +47,7 @@ pub struct A3936StateUpdatePacket {
     pub equalizer_configuration: EqualizerConfiguration,
     pub age_range: AgeRange,
     pub custom_hear_id: CustomHearId,
-    pub sound_modes: SoundModesTypeTwo,
+    pub sound_modes: A3936SoundModes,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub button_configuration: A3936InternalMultiButtonConfiguration,
     pub touch_tone: bool,
@@ -162,7 +163,7 @@ impl InboundPacket for A3936StateUpdatePacket {
                 )(input)?;
 
                 let (input, ambient_sound_mode_cycle) = AmbientSoundModeCycle::take(input)?;
-                let (input, sound_modes) = SoundModesTypeTwo::take(input)?;
+                let (input, sound_modes) = A3936SoundModes::take(input)?;
                 let (input, touch_tone) = take_bool(input)?;
                 let (input, charging_case_battery) = BatteryLevel::take(input)?;
                 let (input, color) = le_u8(input)?;
@@ -207,43 +208,6 @@ impl OutboundPacket for A3936StateUpdatePacket {
     }
 
     fn body(&self) -> Vec<u8> {
-        // let (input, tws_status) = TwsStatus::take(input)?;
-        // let (input, battery) = DualBattery::take(input)?;
-        // let (input, left_firmware) = FirmwareVersion::take(input)?;
-        // let (input, right_firmware) = FirmwareVersion::take(input)?;
-        // let (input, serial_number) = SerialNumber::take(input)?;
-        // let (input, (equalizer_configuration, extra_bands)) =
-        //     StereoEqualizerConfiguration::take_with_two_extra_bands(8)(input)?;
-        // let (input, age_range) = AgeRange::take(input)?;
-        // let (input, custom_hear_id) = CustomHearId::take_without_music_type(10)(input)?;
-        //
-        // // For some reason, an offset value is taken before the custom button model, which refers to how many bytes
-        // // until the next data to be read. This offset includes the length of the custom button model. Presumably,
-        // // there are some extra bytes between the button model and the beginning of the next data to be parsed?
-        // let (input, skip_offset) = le_u8(input)?;
-        // let remaining_before_button_configuration = input.len();
-        // let (input, button_configuration) =
-        //     A3936InternalMultiButtonConfiguration::take(input)?;
-        // let button_configuration_size = remaining_before_button_configuration - input.len();
-        // let (input, _) = take(
-        //     (skip_offset as usize)
-        //         // subtract an extra 1 since we want the number of bytes to discard, not
-        //         // the offset to the first byte to read
-        //         .checked_sub(button_configuration_size + 2)
-        //         .unwrap_or_default(),
-        // )(input)?;
-        //
-        // let (input, ambient_sound_mode_cycle) = AmbientSoundModeCycle::take(input)?;
-        // let (input, sound_modes) = SoundModesTypeTwo::take(input)?;
-        // let (input, touch_tone) = take_bool(input)?;
-        // let (input, charging_case_battery) = BatteryLevel::take(input)?;
-        // let (input, color) = le_u8(input)?;
-        // let (input, ldac) = take_bool(input)?;
-        // let (input, supports_two_cnn_switch) = take_bool(input)?;
-        // let (input, auto_power_off_switch) = take_bool(input)?;
-        // let (input, auto_power_off_index) = le_u8(input)?;
-        // let (input, game_mode_switch) = take_bool(input)?;
-        // let (input, _) = take(12usize)(input)?;
         self.tws_status
             .bytes()
             .into_iter()

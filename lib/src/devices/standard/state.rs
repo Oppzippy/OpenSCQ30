@@ -3,18 +3,19 @@ use serde::Serialize;
 
 use crate::{
     device_profile::DeviceFeatures,
-    devices::standard::{
-        packets::inbound::state_update_packet::StateUpdatePacket,
-        structures::{
-            AgeRange, Battery, EqualizerConfiguration, FirmwareVersion, Gender, HearId,
-            SerialNumber, SoundModes,
+    devices::{
+        a3936::structures::A3936SoundModes,
+        standard::{
+            packets::inbound::state_update_packet::StateUpdatePacket,
+            structures::{
+                AgeRange, Battery, EqualizerConfiguration, FirmwareVersion, Gender, HearId,
+                SerialNumber, SoundModes,
+            },
         },
     },
 };
 
-use super::structures::{
-    AmbientSoundModeCycle, MultiButtonConfiguration, SoundModesTypeTwo, TwsStatus,
-};
+use super::structures::{AmbientSoundModeCycle, MultiButtonConfiguration, TwsStatus};
 
 #[derive(Debug, PartialEq, Clone, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
@@ -25,7 +26,7 @@ pub struct DeviceState {
     pub battery: Battery,
     pub equalizer_configuration: EqualizerConfiguration,
     pub sound_modes: Option<SoundModes>,
-    pub sound_modes_type_two: Option<SoundModesTypeTwo>,
+    pub sound_modes_type_two: Option<A3936SoundModes>,
     pub age_range: Option<AgeRange>,
     pub gender: Option<Gender>,
     pub hear_id: Option<HearId>,

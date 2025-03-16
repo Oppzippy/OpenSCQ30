@@ -1,5 +1,3 @@
-use super::{AmbientSoundMode, TransparencyMode};
-
 use nom::{
     IResult,
     combinator::map,
@@ -7,27 +5,28 @@ use nom::{
     number::complete::le_u8,
     sequence::tuple,
 };
-#[cfg(feature = "serde")]
+use openscq30_i18n_macros::Translate;
 use serde::{Deserialize, Serialize};
-use strum::{AsRefStr, Display, FromRepr, IntoStaticStr};
+use strum::{Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
-pub struct SoundModesTypeTwo {
+use crate::devices::standard::structures::{AmbientSoundMode, TransparencyMode};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct A3936SoundModes {
     pub ambient_sound_mode: AmbientSoundMode,
     pub transparency_mode: TransparencyMode,
     pub adaptive_noise_canceling: AdaptiveNoiseCanceling,
     pub manual_noise_canceling: ManualNoiseCanceling,
-    pub noise_canceling_mode: NoiseCancelingModeTypeTwo,
+    pub noise_canceling_mode: A3936NoiseCancelingMode,
     pub wind_noise_suppression: bool,
     pub noise_canceling_adaptive_sensitivity_level: u8,
 }
 
-impl SoundModesTypeTwo {
+impl A3936SoundModes {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], SoundModesTypeTwo, E> {
+    ) -> IResult<&'a [u8], A3936SoundModes, E> {
         context(
             "sound modes type two",
             map(
@@ -35,7 +34,7 @@ impl SoundModesTypeTwo {
                     AmbientSoundMode::take,
                     NoiseCancelingSettings::take,
                     TransparencyMode::take,
-                    NoiseCancelingModeTypeTwo::take,
+                    A3936NoiseCancelingMode::take,
                     WindNoise::take,
                     le_u8,
                 )),
@@ -47,7 +46,7 @@ impl SoundModesTypeTwo {
                     wind_noise,
                     noise_canceling_adaptive_sensitivity_level,
                 )| {
-                    SoundModesTypeTwo {
+                    A3936SoundModes {
                         ambient_sound_mode,
                         transparency_mode,
                         adaptive_noise_canceling: noise_canceling_settings.adaptive,
@@ -74,9 +73,24 @@ impl SoundModesTypeTwo {
 }
 
 #[repr(u8)]
-#[derive(FromRepr, Clone, Copy, Debug, PartialEq, Eq, Hash, Display, Default, AsRefStr)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+#[derive(
+    FromRepr,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    Display,
+    Default,
+    IntoStaticStr,
+    EnumString,
+    EnumIter,
+    Translate,
+    Serialize,
+    Deserialize,
+)]
+#[serde(rename_all = "camelCase")]
 pub enum AdaptiveNoiseCanceling {
     #[default]
     LowNoise = 0,
@@ -91,9 +105,24 @@ impl AdaptiveNoiseCanceling {
 }
 
 #[repr(u8)]
-#[derive(FromRepr, Clone, Copy, Debug, PartialEq, Eq, Hash, Display, Default, AsRefStr)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+#[derive(
+    FromRepr,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    Display,
+    Default,
+    IntoStaticStr,
+    EnumString,
+    EnumIter,
+    Translate,
+    Serialize,
+    Deserialize,
+)]
+#[serde(rename_all = "camelCase")]
 pub enum ManualNoiseCanceling {
     #[default]
     Weak = 1,
@@ -125,30 +154,43 @@ impl NoiseCancelingSettings {
 
 #[repr(u8)]
 #[derive(
-    FromRepr, Clone, Copy, Debug, PartialEq, Eq, Hash, Display, Default, AsRefStr, IntoStaticStr,
+    FromRepr,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    Display,
+    Default,
+    IntoStaticStr,
+    EnumString,
+    EnumIter,
+    Translate,
+    Serialize,
+    Deserialize,
 )]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
-pub enum NoiseCancelingModeTypeTwo {
+#[serde(rename_all = "camelCase")]
+pub enum A3936NoiseCancelingMode {
     #[default]
     Adaptive = 0,
     Manual = 1,
 }
 
-impl NoiseCancelingModeTypeTwo {
+impl A3936NoiseCancelingMode {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], NoiseCancelingModeTypeTwo, E> {
+    ) -> IResult<&'a [u8], A3936NoiseCancelingMode, E> {
         context(
             "noise canceling mode type two",
             map(le_u8, |noise_canceling_mode| {
-                NoiseCancelingModeTypeTwo::from_repr(noise_canceling_mode).unwrap_or_default()
+                A3936NoiseCancelingMode::from_repr(noise_canceling_mode).unwrap_or_default()
             }),
         )(input)
     }
 }
 
-impl NoiseCancelingModeTypeTwo {
+impl A3936NoiseCancelingMode {
     pub fn id(&self) -> u8 {
         *self as u8
     }

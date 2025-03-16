@@ -10,9 +10,7 @@ use crate::{
     devices::standard::{
         self,
         macros::soundcore_device,
-        packets::inbound::{
-            InboundPacket, SoundModeTypeTwoUpdatePacket, state_update_packet::StateUpdatePacket,
-        },
+        packets::inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
         quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBands},
         state::DeviceState,
         structures::*,
@@ -24,9 +22,11 @@ use crate::{
 };
 
 use super::{
-    packets::{A3936SetMultiButtonConfigurationPacket, A3936StateUpdatePacket},
+    packets::{
+        A3936SetMultiButtonConfigurationPacket, A3936SoundModesUpdatePacket, A3936StateUpdatePacket,
+    },
     state::A3936State,
-    structures::{A3936InternalMultiButtonConfiguration, A3936TwsButtonAction},
+    structures::{A3936InternalMultiButtonConfiguration, A3936SoundModes, A3936TwsButtonAction},
 };
 
 pub(crate) const A3936_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
@@ -84,7 +84,7 @@ impl DeviceImplementation for A3936Implementation {
             SOUND_MODE_UPDATE,
             Box::new(move |packet_bytes, state| {
                 let packet =
-                    match SoundModeTypeTwoUpdatePacket::take::<VerboseError<_>>(packet_bytes) {
+                    match A3936SoundModesUpdatePacket::take::<VerboseError<_>>(packet_bytes) {
                         Ok((_, packet)) => packet,
                         Err(err) => {
                             tracing::error!("failed to parse packet: {err:?}");
@@ -145,7 +145,7 @@ impl DeviceImplementation for A3936Implementation {
     fn set_sound_modes_type_two(
         &self,
         state: DeviceState,
-        sound_modes: SoundModesTypeTwo,
+        sound_modes: A3936SoundModes,
     ) -> crate::Result<CommandResponse> {
         standard::implementation::set_sound_modes_type_two(state, sound_modes)
     }
@@ -250,8 +250,8 @@ impl A3936ButtonConfigurationImplementation {
 }
 
 soundcore_device!(A3936State, A3936StateUpdatePacket, async |builder| {
-    // TODO sound modes type two
     builder.module_collection().add_state_update();
+    builder.a3936_sound_modes();
     builder.stereo_equalizer_with_custom_hear_id().await;
     builder.a3936_button_configuration();
     builder.ambient_sound_mode_cycle();

@@ -7,7 +7,10 @@ use uuid::Uuid;
 use crate::{
     api::{connection::ConnectionStatus, device::Device},
     device_profile::{AvailableSoundModes, DeviceFeatures},
-    devices::standard::{state::DeviceState, structures::*},
+    devices::{
+        a3936::structures::A3936SoundModes,
+        standard::{state::DeviceState, structures::*},
+    },
 };
 
 pub struct DemoDevice {
@@ -106,7 +109,7 @@ impl DemoDevice {
             firmware_version: Some(FirmwareVersion::new(2, 0)),
             serial_number: Some(SerialNumber("0123456789ABCDEF".into())),
             ambient_sound_mode_cycle: Some(AmbientSoundModeCycle::default()),
-            sound_modes_type_two: Some(SoundModesTypeTwo::default()),
+            sound_modes_type_two: Some(A3936SoundModes::default()),
             tws_status: Some(TwsStatus {
                 is_connected: true,
                 host_device: HostDevice::Left,
@@ -168,7 +171,7 @@ impl Device for DemoDevice {
         Ok(())
     }
 
-    async fn set_sound_modes_type_two(&self, sound_modes: SoundModesTypeTwo) -> crate::Result<()> {
+    async fn set_sound_modes_type_two(&self, sound_modes: A3936SoundModes) -> crate::Result<()> {
         let state_sender = self.state_sender.lock().await;
         let state = state_sender.borrow().to_owned();
         if state.sound_modes_type_two.is_none() {

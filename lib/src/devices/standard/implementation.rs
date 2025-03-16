@@ -22,7 +22,10 @@ use super::{
     state::DeviceState,
     structures::*,
 };
-use crate::soundcore_device::device::device_implementation::DeviceImplementation;
+use crate::{
+    devices::a3936::structures::A3936SoundModes,
+    soundcore_device::device::device_implementation::DeviceImplementation,
+};
 
 pub struct StandardImplementation {
     initializer: Box<dyn Fn(&[u8]) -> crate::Result<DeviceState> + Send + Sync>,
@@ -68,7 +71,7 @@ impl DeviceImplementation for StandardImplementation {
     fn set_sound_modes_type_two(
         &self,
         state: DeviceState,
-        sound_modes: SoundModesTypeTwo,
+        sound_modes: A3936SoundModes,
     ) -> crate::Result<crate::soundcore_device::device::soundcore_command::CommandResponse> {
         set_sound_modes_type_two(state, sound_modes)
     }

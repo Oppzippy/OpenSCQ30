@@ -8,11 +8,11 @@ use nom::{
 use crate::{
     device_profile::DeviceProfile,
     devices::{
-        a3936::packets::A3936StateUpdatePacket,
+        a3936::{packets::A3936StateUpdatePacket, structures::A3936SoundModes},
         standard::structures::{
             AgeRange, AmbientSoundModeCycle, Battery, Command, EqualizerConfiguration,
             FirmwareVersion, Gender, HearId, MultiButtonConfiguration, SerialNumber, SoundModes,
-            SoundModesTypeTwo, TwsStatus,
+            TwsStatus,
         },
     },
 };
@@ -26,7 +26,7 @@ pub(crate) struct StateUpdatePacket {
     pub battery: Battery,
     pub equalizer_configuration: EqualizerConfiguration,
     pub sound_modes: Option<SoundModes>,
-    pub sound_modes_type_two: Option<SoundModesTypeTwo>,
+    pub sound_modes_type_two: Option<A3936SoundModes>,
     pub age_range: Option<AgeRange>,
     pub gender: Option<Gender>,
     pub hear_id: Option<HearId>,

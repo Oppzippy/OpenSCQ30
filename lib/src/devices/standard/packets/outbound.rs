@@ -9,7 +9,6 @@ mod set_equalizer_and_custom_hear_id_packet;
 mod set_equalizer_with_drc;
 mod set_multi_button_configuration_packet;
 mod set_sound_mode;
-mod set_sound_mode_type_two;
 
 pub use outbound_packet::*;
 pub use request_battery_charging_packet::*;
@@ -22,4 +21,3 @@ pub use set_equalizer_and_custom_hear_id_packet::*;
 pub use set_equalizer_with_drc::*;
 pub use set_multi_button_configuration_packet::*;
 pub use set_sound_mode::*;
-pub use set_sound_mode_type_two::*;

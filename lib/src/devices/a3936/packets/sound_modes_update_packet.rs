@@ -4,28 +4,33 @@ use nom::{
     error::{ContextError, ParseError, context},
 };
 
-use crate::devices::standard::structures::{Command, SoundModesTypeTwo};
-
-use super::InboundPacket;
+use crate::devices::{
+    a3936::structures::A3936SoundModes,
+    standard::{packets::inbound::InboundPacket, structures::Command},
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct SoundModeTypeTwoUpdatePacket {
-    pub sound_modes: SoundModesTypeTwo,
+pub struct A3936SoundModesUpdatePacket {
+    pub sound_modes: A3936SoundModes,
 }
 
-impl InboundPacket for SoundModeTypeTwoUpdatePacket {
+impl A3936SoundModesUpdatePacket {
+    pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01]);
+}
+
+impl InboundPacket for A3936SoundModesUpdatePacket {
     fn command() -> Command {
-        Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01])
+        Self::COMMAND
     }
 
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], SoundModeTypeTwoUpdatePacket, E> {
+    ) -> IResult<&'a [u8], A3936SoundModesUpdatePacket, E> {
         // offset 9
         context(
             "SoundModeTypeTwoUpdatePacket",
-            all_consuming(map(SoundModesTypeTwo::take, |sound_modes| {
-                SoundModeTypeTwoUpdatePacket { sound_modes }
+            all_consuming(map(A3936SoundModes::take, |sound_modes| {
+                A3936SoundModesUpdatePacket { sound_modes }
             })),
         )(input)
         // offset 15
@@ -36,13 +41,14 @@ impl InboundPacket for SoundModeTypeTwoUpdatePacket {
 mod tests {
     use nom::error::VerboseError;
 
-    use crate::devices::standard::{
-        packets::inbound::{
-            InboundPacket, SoundModeTypeTwoUpdatePacket, take_inbound_packet_header,
+    use crate::devices::{
+        a3936::{
+            packets::A3936SoundModesUpdatePacket,
+            structures::{A3936NoiseCancelingMode, AdaptiveNoiseCanceling, ManualNoiseCanceling},
         },
-        structures::{
-            AdaptiveNoiseCanceling, AmbientSoundMode, ManualNoiseCanceling,
-            NoiseCancelingModeTypeTwo, TransparencyMode,
+        standard::{
+            packets::inbound::{InboundPacket, take_inbound_packet_header},
+            structures::{AmbientSoundMode, TransparencyMode},
         },
     };
 
@@ -53,8 +59,7 @@ mod tests {
             0x00, 0x52,
         ];
         let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        SoundModeTypeTwoUpdatePacket::take::<VerboseError<_>>(body)
-            .expect("parsing should succeed");
+        A3936SoundModesUpdatePacket::take::<VerboseError<_>>(body).expect("parsing should succeed");
     }
 
     #[test]
@@ -64,13 +69,13 @@ mod tests {
             0x05, 0x4C,
         ];
         let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let sound_modes = SoundModeTypeTwoUpdatePacket::take::<VerboseError<_>>(body)
+        let sound_modes = A3936SoundModesUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1
             .sound_modes;
         assert_eq!(AmbientSoundMode::Normal, sound_modes.ambient_sound_mode);
         assert_eq!(
-            NoiseCancelingModeTypeTwo::Manual,
+            A3936NoiseCancelingMode::Manual,
             sound_modes.noise_canceling_mode
         );
         assert_eq!(
