@@ -20,7 +20,7 @@ pub struct OpenSCQ30Session {
 impl OpenSCQ30Session {
     pub async fn new(db_path: PathBuf) -> crate::Result<Self> {
         Ok(Self {
-            database: Arc::new(OpenSCQ30Database::new(db_path).await?),
+            database: Arc::new(OpenSCQ30Database::new_file(db_path).await?),
         })
     }
 

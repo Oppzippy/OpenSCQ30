@@ -70,7 +70,17 @@ impl From<rusqlite::Error> for StorageError {
 }
 
 impl OpenSCQ30Database {
-    pub async fn new(path: PathBuf) -> Result<Self, StorageError> {
+    pub async fn new_file(path: PathBuf) -> Result<Self, StorageError> {
+        Self::new(|| Connection::open(path)).await
+    }
+
+    pub async fn new_in_memory() -> Result<Self, StorageError> {
+        Self::new(|| Connection::open_in_memory()).await
+    }
+
+    async fn new(
+        open_connection: impl FnOnce() -> Result<Connection, rusqlite::Error> + Send + 'static,
+    ) -> Result<Self, StorageError> {
         let (init_error_sender, init_error_receiver) = oneshot::channel();
         let (command_sender, command_receiver) = mpsc::channel::<Command>();
 
@@ -80,7 +90,7 @@ impl OpenSCQ30Database {
             thread::spawn(move || {
                 let span = info_span!("OpenSCQ30Database");
                 let _guard = span.enter();
-                let mut connection = match Connection::open(path) {
+                let mut connection = match open_connection() {
                     Ok(connection) => connection,
                     Err(err) => {
                         let _ = init_error_sender.send(err);
