@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use nom::{
     IResult,
     combinator::{all_consuming, map},
@@ -5,23 +6,35 @@ use nom::{
     number::complete::le_u8,
     sequence::tuple,
 };
+use tokio::sync::watch;
 
-use crate::devices::{
-    a3945::device_profile::A3945_DEVICE_PROFILE,
-    standard::{
-        packets::{inbound::state_update_packet::StateUpdatePacket, parsing::take_bool},
-        quirks::TwoExtraEqBandsValues,
-        structures::{
-            BatteryLevel, DualBattery, EqualizerConfiguration, FirmwareVersion,
-            InternalMultiButtonConfiguration, SerialNumber, StereoEqualizerConfiguration,
-            TwsStatus,
+use crate::{
+    devices::{
+        a3945::{device_profile::A3945_DEVICE_PROFILE, state::A3945State},
+        standard::{
+            modules::ModuleCollection,
+            packet_manager::PacketHandler,
+            packets::{
+                inbound::{
+                    InboundPacket, TryIntoInboundPacket, state_update_packet::StateUpdatePacket,
+                },
+                outbound::OutboundPacket,
+                parsing::take_bool,
+            },
+            quirks::TwoExtraEqBandsValues,
+            structures::{
+                BatteryLevel, Command, DualBattery, EqualizerConfiguration, FirmwareVersion,
+                InternalMultiButtonConfiguration, SerialNumber, StereoEqualizerConfiguration,
+                TwsStatus,
+            },
         },
     },
+    soundcore_device::device::Packet,
 };
 
 // A3945 only
 // Despite EQ being 10 bands, only the first 8 seem to be used?
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct A3945StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
@@ -60,8 +73,12 @@ impl From<A3945StateUpdatePacket> for StateUpdatePacket {
     }
 }
 
-impl A3945StateUpdatePacket {
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+impl InboundPacket for A3945StateUpdatePacket {
+    fn command() -> Command {
+        StateUpdatePacket::command()
+    }
+
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], A3945StateUpdatePacket, E> {
         context(
@@ -117,5 +134,66 @@ impl A3945StateUpdatePacket {
                 },
             )),
         )(input)
+    }
+}
+
+impl OutboundPacket for A3945StateUpdatePacket {
+    fn command(&self) -> Command {
+        StateUpdatePacket::command()
+    }
+
+    fn body(&self) -> Vec<u8> {
+        self.tws_status
+            .bytes()
+            .into_iter()
+            .chain(self.battery.bytes())
+            .chain(self.left_firmware.to_string().into_bytes())
+            .chain(self.right_firmware.to_string().into_bytes())
+            .chain(self.serial_number.to_string().into_bytes())
+            .chain(self.left_equalizer_configuration.profile_id().to_le_bytes())
+            .chain(
+                self.left_equalizer_configuration
+                    .volume_adjustments()
+                    .bytes(),
+            )
+            .chain(
+                self.right_equalizer_configuration
+                    .volume_adjustments()
+                    .bytes(),
+            )
+            .chain(self.button_configuration.bytes())
+            .chain([
+                self.touch_tone_switch as u8,
+                self.wear_detection_switch as u8,
+                self.game_mode_switch as u8,
+                self.charging_case_battery_level.0,
+                self.bass_up_switch as u8,
+                self.device_color,
+            ])
+            .collect()
+    }
+}
+
+struct StateUpdatePacketHandler {}
+
+#[async_trait]
+impl PacketHandler<A3945State> for StateUpdatePacketHandler {
+    async fn handle_packet(
+        &self,
+        state: &watch::Sender<A3945State>,
+        packet: &Packet,
+    ) -> crate::Result<()> {
+        let packet: A3945StateUpdatePacket = packet.try_into_inbound_packet()?;
+        state.send_modify(|state| *state = packet.into());
+        Ok(())
+    }
+}
+
+impl ModuleCollection<A3945State> {
+    pub fn add_state_update(&mut self) {
+        self.packet_handlers.set_handler(
+            StateUpdatePacket::command(),
+            Box::new(StateUpdatePacketHandler {}),
+        );
     }
 }

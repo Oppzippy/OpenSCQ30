@@ -7,7 +7,8 @@ use crate::{
     devices::standard::{
         self,
         implementation::ButtonConfigurationImplementation,
-        packets::inbound::state_update_packet::StateUpdatePacket,
+        macros::soundcore_device,
+        packets::inbound::{InboundPacket, state_update_packet::StateUpdatePacket},
         quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBands},
         state::DeviceState,
         structures::*,
@@ -18,7 +19,7 @@ use crate::{
     },
 };
 
-use super::packets::A3945StateUpdatePacket;
+use super::{packets::A3945StateUpdatePacket, state::A3945State};
 
 pub(crate) const A3945_DEVICE_PROFILE: DeviceProfile = DeviceProfile {
     features: DeviceFeatures {
@@ -148,6 +149,12 @@ impl DeviceImplementation for A3945Implementation {
     }
 }
 
+soundcore_device!(A3945State, A3945StateUpdatePacket, async |builder| {
+    builder.module_collection().add_state_update();
+    builder.stereo_equalizer().await;
+    builder.button_configuration();
+});
+
 #[cfg(test)]
 mod tests {
     use nom::error::VerboseError;
@@ -157,7 +164,10 @@ mod tests {
             a3945::packets::A3945StateUpdatePacket,
             standard::{
                 packets::{
-                    inbound::{state_update_packet::StateUpdatePacket, take_inbound_packet_header},
+                    inbound::{
+                        InboundPacket, state_update_packet::StateUpdatePacket,
+                        take_inbound_packet_header,
+                    },
                     outbound::{OutboundPacket, OutboundPacketBytesExt},
                 },
                 quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBandsValues},

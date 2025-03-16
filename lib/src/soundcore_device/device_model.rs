@@ -8,7 +8,7 @@ use crate::{
     api::device::OpenSCQ30DeviceRegistry,
     connection_backend::ConnectionBackends,
     devices::{
-        a3027, a3028, a3031, a3033, a3926, a3930, a3931, a3933, a3936, a3951,
+        a3027, a3028, a3031, a3033, a3926, a3930, a3931, a3933, a3936, a3945, a3951,
         standard::structures::SerialNumber,
     },
     storage::OpenSCQ30Database,
@@ -96,7 +96,7 @@ impl DeviceModel {
                 new_soundcore_device!(a3933)
             }
             DeviceModel::SoundcoreA3936 => new_soundcore_device!(a3936),
-            DeviceModel::SoundcoreA3945 => todo!(),
+            DeviceModel::SoundcoreA3945 => new_soundcore_device!(a3945),
             DeviceModel::SoundcoreA3951 => new_soundcore_device!(a3951),
         }
     }
