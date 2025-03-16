@@ -144,8 +144,15 @@ where
         match setting {
             EqualizerSetting::PresetProfile => {
                 if let Some(preset) = value.try_as_optional_enum_variant()? {
-                    *equalizer_configuration =
-                        EqualizerConfiguration::new_from_preset_profile(preset)
+                    *equalizer_configuration = EqualizerConfiguration::new_from_preset_profile(
+                        preset,
+                        equalizer_configuration
+                            .volume_adjustments()
+                            .adjustments()
+                            .iter()
+                            .cloned()
+                            .skip(8),
+                    )
                 } else {
                     *equalizer_configuration = EqualizerConfiguration::new_custom_profile(
                         equalizer_configuration.volume_adjustments().to_owned(),

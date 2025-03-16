@@ -355,7 +355,8 @@ mod tests {
         assert_eq!(FirmwareVersion::new(2, 61), packet.left_firmware);
         assert_eq!(
             EqualizerConfiguration::new_from_preset_profile(
-                PresetEqualizerProfile::SoundcoreSignature
+                PresetEqualizerProfile::SoundcoreSignature,
+                []
             ),
             packet.equalizer_configuration
         );

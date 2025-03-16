@@ -255,7 +255,7 @@ mod tests {
             packet.sound_modes,
         );
         assert_eq!(
-            EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::Acoustic),
+            EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::Acoustic, []),
             packet.equalizer_configuration
         );
     }

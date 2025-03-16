@@ -59,6 +59,7 @@ impl DemoDevice {
             .into(),
             equalizer_configuration: EqualizerConfiguration::new_from_preset_profile(
                 PresetEqualizerProfile::SoundcoreSignature,
+                [],
             ),
             sound_modes: Some(SoundModes {
                 ambient_sound_mode: AmbientSoundMode::Normal,

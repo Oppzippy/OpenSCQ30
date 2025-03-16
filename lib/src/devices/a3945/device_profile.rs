@@ -65,7 +65,7 @@ impl DeviceImplementation for A3945Implementation {
                         return state;
                     }
                 };
-                extra_bands.set_values(packet.extra_band_values);
+                // extra_bands.set_values(packet.extra_band_values);
                 buttons.set_internal_data(packet.button_configuration);
 
                 StateUpdatePacket::from(packet).into()
@@ -157,28 +157,26 @@ soundcore_device!(A3945State, A3945StateUpdatePacket, async |builder| {
 
 #[cfg(test)]
 mod tests {
-    use nom::error::VerboseError;
+    use std::{sync::Arc, time::Duration};
+
+    use macaddr::MacAddr6;
+    use tokio::sync::mpsc;
 
     use crate::{
-        devices::{
-            a3945::packets::A3945StateUpdatePacket,
-            standard::{
-                packets::{
-                    inbound::{
-                        InboundPacket, state_update_packet::StateUpdatePacket,
-                        take_inbound_packet_header,
-                    },
-                    outbound::{OutboundPacket, OutboundPacketBytesExt},
-                },
-                quirks::{TwoExtraEqBandSetEqualizerPacket, TwoExtraEqBandsValues},
-                state::DeviceState,
-                structures::{EqualizerConfiguration, PresetEqualizerProfile, STATE_UPDATE},
-            },
+        api::{
+            device::OpenSCQ30DeviceRegistry,
+            settings::{SettingId, Value},
         },
-        soundcore_device::device::Packet,
+        connection_backend::rfcomm::MockRfcommBackend,
+        devices::standard::{
+            packets::outbound::{OutboundPacket, OutboundPacketBytesExt, SetEqualizerPacket},
+            structures::{EqualizerConfiguration, PresetEqualizerProfile, STATE_UPDATE},
+        },
+        soundcore_device::{device::Packet, device_model::DeviceModel},
+        storage::OpenSCQ30Database,
     };
 
-    use super::{A3945_DEVICE_PROFILE, Command};
+    use super::Command;
 
     struct A3945TestStateUpdatePacket {
         body: Vec<u8>,
@@ -193,8 +191,8 @@ mod tests {
         }
     }
 
-    #[test]
-    fn it_remembers_band_9_and_10_values() {
+    #[tokio::test]
+    async fn it_remembers_band_9_and_10_values() {
         let data = A3945TestStateUpdatePacket {
             body: vec![
                 0x01, // host device
@@ -219,35 +217,56 @@ mod tests {
         }
         .bytes();
 
-        let body = take_inbound_packet_header::<VerboseError<_>>(&data)
-            .unwrap()
-            .0;
-        let state_update = A3945StateUpdatePacket::take::<VerboseError<_>>(body)
-            .unwrap()
-            .1;
-        let state: DeviceState = StateUpdatePacket::from(state_update).into();
-        let implementation = (A3945_DEVICE_PROFILE.implementation)();
-        let state = implementation.packet_handlers()[&STATE_UPDATE](body, state);
+        let (inbound_sender, inbound_receiver) = mpsc::channel(10);
+        let (outbound_sender, mut outbound_receiver) = mpsc::channel(10);
+        let database = Arc::new(OpenSCQ30Database::new_in_memory().await.unwrap());
+        let registry = super::device_registry(
+            MockRfcommBackend::new(inbound_receiver, outbound_sender),
+            database,
+            DeviceModel::SoundcoreA3945,
+        );
+        inbound_sender.send(data).await.unwrap();
+        let device = registry.connect(MacAddr6::nil()).await.unwrap();
+        _ = outbound_receiver
+            .recv()
+            .await
+            .expect("state update packet request");
 
-        let equalizer_configuration =
-            EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::TrebleReducer);
-        let command_response = implementation
-            .set_equalizer_configuration(state, equalizer_configuration.to_owned())
+        tokio::spawn(async move {
+            tokio::time::sleep(Duration::from_millis(10)).await;
+            inbound_sender
+                .send(
+                    Packet {
+                        command: SetEqualizerPacket::COMMAND.to_inbound(),
+                        body: Vec::new(),
+                    }
+                    .bytes(),
+                )
+                .await
+                .unwrap();
+        });
+        device
+            .set_setting_values(vec![(
+                SettingId::PresetProfile,
+                Value::OptionalString(Some("TrebleReducer".into())),
+            )])
+            .await
             .unwrap();
 
-        assert_eq!(1, command_response.packets.len());
+        let set_eq_packet_bytes = outbound_receiver.recv().await.unwrap();
         assert_eq!(
-            &Packet::from(TwoExtraEqBandSetEqualizerPacket {
-                left_channel: &equalizer_configuration,
-                right_channel: &equalizer_configuration,
-                extra_band_values: TwoExtraEqBandsValues {
-                    left_extra_1: 121,
-                    left_extra_2: 122,
-                    right_extra_1: 123,
-                    right_extra_2: 124
-                },
-            }),
-            command_response.packets.first().unwrap(),
+            Packet::from(SetEqualizerPacket::new(
+                &EqualizerConfiguration::new_from_preset_profile(
+                    PresetEqualizerProfile::TrebleReducer,
+                    [0.1f64, 0.2f64]
+                ),
+                Some(&EqualizerConfiguration::new_from_preset_profile(
+                    PresetEqualizerProfile::TrebleReducer,
+                    [0.3f64, 0.4f64]
+                )),
+            ))
+            .bytes(),
+            set_eq_packet_bytes
         );
     }
 }

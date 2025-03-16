@@ -155,6 +155,7 @@ mod tests {
         let actual = SetEqualizerAndCustomHearIdPacket {
             equalizer_configuration: &EqualizerConfiguration::new_from_preset_profile(
                 PresetEqualizerProfile::SoundcoreSignature,
+                [],
             ),
             gender: Gender(1),
             age_range: AgeRange(255),

@@ -20,7 +20,7 @@ pub struct EqualizerConfiguration {
 
 impl Default for EqualizerConfiguration {
     fn default() -> Self {
-        Self::new_from_preset_profile(PresetEqualizerProfile::SoundcoreSignature)
+        Self::new_from_preset_profile(PresetEqualizerProfile::SoundcoreSignature, [])
     }
 }
 
@@ -37,7 +37,12 @@ impl EqualizerConfiguration {
                     pair(le_u16, VolumeAdjustments::take(num_bands)),
                     |(profile_id, volume_adjustments)| {
                         PresetEqualizerProfile::from_id(profile_id)
-                            .map(EqualizerConfiguration::new_from_preset_profile)
+                            .map(|preset| {
+                                EqualizerConfiguration::new_from_preset_profile(
+                                    preset,
+                                    volume_adjustments.adjustments().iter().cloned().skip(8),
+                                )
+                            })
                             .unwrap_or(EqualizerConfiguration::new_custom_profile(
                                 volume_adjustments,
                             ))
@@ -47,10 +52,21 @@ impl EqualizerConfiguration {
         }
     }
 
-    pub fn new_from_preset_profile(preset_profile: PresetEqualizerProfile) -> Self {
+    pub fn new_from_preset_profile(
+        preset_profile: PresetEqualizerProfile,
+        extra_adjustments: impl IntoIterator<Item = f64>,
+    ) -> Self {
         Self {
             preset_profile: Some(preset_profile),
-            volume_adjustments: preset_profile.volume_adjustments(),
+            volume_adjustments: VolumeAdjustments::new(
+                preset_profile
+                    .volume_adjustments()
+                    .adjustments()
+                    .iter()
+                    .cloned()
+                    .chain(extra_adjustments.into_iter()),
+            )
+            .unwrap(),
         }
     }
 

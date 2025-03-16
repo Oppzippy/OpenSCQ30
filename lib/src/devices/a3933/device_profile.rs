@@ -287,8 +287,10 @@ mod tests {
         let implementation = (A3933_DEVICE_PROFILE.implementation)();
         let state = implementation.packet_handlers()[&STATE_UPDATE](body, state);
 
-        let equalizer_configuration =
-            EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::TrebleReducer);
+        let equalizer_configuration = EqualizerConfiguration::new_from_preset_profile(
+            PresetEqualizerProfile::TrebleReducer,
+            [],
+        );
         let command_response = implementation
             .set_equalizer_configuration(state, equalizer_configuration.to_owned())
             .unwrap();

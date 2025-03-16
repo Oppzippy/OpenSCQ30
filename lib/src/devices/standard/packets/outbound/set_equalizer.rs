@@ -72,6 +72,7 @@ mod tests {
         let actual = SetEqualizerPacket::new(
             &EqualizerConfiguration::new_from_preset_profile(
                 PresetEqualizerProfile::SoundcoreSignature,
+                [],
             ),
             None,
         )
@@ -86,7 +87,10 @@ mod tests {
             0x64, 0x5a, 0x50, 0x50, 0x3c, 0xa4,
         ];
         let actual = SetEqualizerPacket::new(
-            &EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::TrebleReducer),
+            &EqualizerConfiguration::new_from_preset_profile(
+                PresetEqualizerProfile::TrebleReducer,
+                [],
+            ),
             None,
         )
         .bytes();
@@ -99,8 +103,10 @@ mod tests {
             0x08, 0xee, 0x00, 0x00, 0x00, 0x02, 0x81, 0x1C, 0x00, 0x15, 0x00, 0x78, 0x78, 0x78,
             0x64, 0x5a, 0x50, 0x50, 0x3c, 0x78, 0x78, 0x78, 0x64, 0x5a, 0x50, 0x50, 0x3c, 0xae,
         ];
-        let configuration =
-            EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::TrebleReducer);
+        let configuration = EqualizerConfiguration::new_from_preset_profile(
+            PresetEqualizerProfile::TrebleReducer,
+            [],
+        );
         let packet = SetEqualizerPacket::new(&configuration, Some(&configuration));
         assert_eq!(EXPECTED, packet.bytes());
     }
