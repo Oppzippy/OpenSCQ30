@@ -5,9 +5,13 @@ use super::outbound_packet::OutboundPacket;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct SetSoundModePacket(pub SoundModes);
 
+impl SetSoundModePacket {
+    pub const COMMAND: Command = Command::new([0x08, 0xee, 0x00, 0x00, 0x00, 0x06, 0x81]);
+}
+
 impl OutboundPacket for SetSoundModePacket {
     fn command(&self) -> Command {
-        Command::new([0x08, 0xee, 0x00, 0x00, 0x00, 0x06, 0x81])
+        Self::COMMAND
     }
 
     fn body(&self) -> Vec<u8> {
