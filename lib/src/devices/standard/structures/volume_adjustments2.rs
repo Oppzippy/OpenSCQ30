@@ -21,7 +21,7 @@ impl From<VolumeAdjustments> for VolumeAdjustments2 {
             value
                 .adjustments()
                 .iter()
-                .map(|adjustment| (*adjustment * 10_f64) as i16)
+                .map(|adjustment| (*adjustment * 10_f64).round() as i16)
                 .collect(),
         )
         .unwrap()

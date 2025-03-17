@@ -128,7 +128,7 @@ where
                     .volume_adjustments()
                     .adjustments()
                     .iter()
-                    .map(|adj| (adj * 10f64) as i16)
+                    .map(|adj| (adj * 10f64).round() as i16)
                     .collect(),
             },
         })
