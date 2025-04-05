@@ -1,7 +1,7 @@
 use crate::{
     devices::soundcore::standard::structures::{
         AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
-        EqualizerConfiguration, FirmwareVersion, InternalMultiButtonConfiguration, SerialNumber,
+        EqualizerConfiguration, FirmwareVersion, MultiButtonConfiguration, SerialNumber,
         SoundModes, TwsStatus,
     },
     macros::impl_as_ref_for_field,
@@ -19,7 +19,7 @@ pub struct A3933State {
     pub equalizer_configuration: EqualizerConfiguration,
     pub age_range: AgeRange,
     pub hear_id: Option<CustomHearId>, // 10 bands
-    pub button_configuration: InternalMultiButtonConfiguration,
+    pub button_configuration: MultiButtonConfiguration,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub sound_modes: SoundModes,
     pub touch_tone_switch: bool,
@@ -62,7 +62,7 @@ impl_as_ref_for_field!(
         equalizer_configuration: EqualizerConfiguration,
         age_range: AgeRange,
         hear_id: Option<CustomHearId>, // 10 bands
-        button_configuration: InternalMultiButtonConfiguration,
+        button_configuration: MultiButtonConfiguration,
         ambient_sound_mode_cycle: AmbientSoundModeCycle,
         sound_modes: SoundModes,
     }

@@ -11,7 +11,7 @@ use crate::{
     },
     devices::soundcore::standard::{
         packets::packet_io_controller::PacketIOController,
-        structures::{InternalMultiButtonConfiguration, TwsStatus},
+        structures::{MultiButtonConfiguration, TwsStatus},
     },
 };
 
@@ -61,8 +61,8 @@ impl From<ButtonConfigurationSetting> for SettingId {
 
 impl<T> ModuleCollection<T>
 where
-    T: AsMut<InternalMultiButtonConfiguration>
-        + AsRef<InternalMultiButtonConfiguration>
+    T: AsMut<MultiButtonConfiguration>
+        + AsRef<MultiButtonConfiguration>
         + Clone
         + Send
         + Sync,

@@ -19,7 +19,7 @@ use crate::devices::soundcore::{
         },
         structures::{
             AgeRange, BasicHearId, DualBattery, EqualizerConfiguration, Gender,
-            InternalMultiButtonConfiguration, StereoEqualizerConfiguration, TwsStatus,
+            MultiButtonConfiguration, StereoEqualizerConfiguration, TwsStatus,
         },
     },
 };
@@ -33,7 +33,7 @@ pub struct A3926StateUpdatePacket {
     pub gender: Gender,
     pub age_range: AgeRange,
     pub hear_id: BasicHearId,
-    pub button_configuration: InternalMultiButtonConfiguration,
+    pub button_configuration: MultiButtonConfiguration,
 }
 
 impl InboundPacket for A3926StateUpdatePacket {
@@ -53,7 +53,7 @@ impl InboundPacket for A3926StateUpdatePacket {
                     Gender::take,
                     AgeRange::take,
                     BasicHearId::take,
-                    InternalMultiButtonConfiguration::take,
+                    MultiButtonConfiguration::take,
                 )),
                 |(
                     tws_status,

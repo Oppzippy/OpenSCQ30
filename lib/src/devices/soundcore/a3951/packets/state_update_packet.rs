@@ -21,7 +21,7 @@ use crate::devices::soundcore::{
         },
         structures::{
             AgeRange, CustomHearId, DualBattery, EqualizerConfiguration, Gender,
-            InternalMultiButtonConfiguration, SoundModes, StereoEqualizerConfiguration,
+            MultiButtonConfiguration, SoundModes, StereoEqualizerConfiguration,
             StereoVolumeAdjustments, TwsStatus, VolumeAdjustments,
         },
     },
@@ -36,7 +36,7 @@ pub struct A3951StateUpdatePacket {
     pub gender: Gender,
     pub age_range: AgeRange,
     pub custom_hear_id: CustomHearId,
-    pub button_configuration: InternalMultiButtonConfiguration,
+    pub button_configuration: MultiButtonConfiguration,
     pub sound_modes: SoundModes,
     pub side_tone: bool,
     pub wear_detection: bool,
@@ -80,7 +80,7 @@ impl InboundPacket for A3951StateUpdatePacket {
                     Gender::take,
                     AgeRange::take,
                     CustomHearId::take_with_all_fields,
-                    InternalMultiButtonConfiguration::take,
+                    MultiButtonConfiguration::take,
                     SoundModes::take,
                     take_bool, // side tone
                     take_bool, // wear detection

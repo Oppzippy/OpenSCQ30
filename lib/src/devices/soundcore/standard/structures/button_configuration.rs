@@ -12,36 +12,10 @@ use strum::{AsRefStr, EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 use crate::devices::soundcore::standard::packets::parsing::take_bool;
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
-pub struct MultiButtonConfiguration {
-    pub left_single_click: ButtonConfiguration,
-    pub left_double_click: ButtonConfiguration,
-    pub left_long_press: ButtonConfiguration,
-    pub right_single_click: ButtonConfiguration,
-    pub right_double_click: ButtonConfiguration,
-    pub right_long_press: ButtonConfiguration,
-}
-
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
-pub struct ButtonConfiguration {
-    pub action: ButtonAction,
-    pub is_enabled: bool,
-}
-
-impl ButtonConfiguration {
-    pub fn enabled_action(&self) -> Option<ButtonAction> {
-        self.is_enabled.then_some(self.action)
-    }
-}
-
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
-pub(crate) struct InternalMultiButtonConfiguration {
+pub(crate) struct MultiButtonConfiguration {
     pub left_single_click: NoTwsButtonConfiguration,
     pub left_double_click: TwsButtonConfiguration,
     pub left_long_press: TwsButtonConfiguration,
@@ -50,20 +24,7 @@ pub(crate) struct InternalMultiButtonConfiguration {
     pub right_long_press: TwsButtonConfiguration,
 }
 
-impl From<InternalMultiButtonConfiguration> for MultiButtonConfiguration {
-    fn from(value: InternalMultiButtonConfiguration) -> Self {
-        Self {
-            left_single_click: value.left_single_click.into(),
-            left_double_click: value.left_double_click.into(),
-            left_long_press: value.left_long_press.into(),
-            right_single_click: value.right_single_click.into(),
-            right_double_click: value.right_double_click.into(),
-            right_long_press: value.right_long_press.into(),
-        }
-    }
-}
-
-impl InternalMultiButtonConfiguration {
+impl MultiButtonConfiguration {
     pub fn bytes(&self) -> Vec<u8> {
         let mut bytes = Vec::with_capacity(12);
         bytes.extend(self.left_double_click.bytes());
@@ -77,7 +38,7 @@ impl InternalMultiButtonConfiguration {
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], InternalMultiButtonConfiguration, E> {
+    ) -> IResult<&'a [u8], MultiButtonConfiguration, E> {
         context("custom button model", |input| {
             map(
                 tuple((
@@ -96,7 +57,7 @@ impl InternalMultiButtonConfiguration {
                     left_single_press,
                     right_single_press,
                 )| {
-                    InternalMultiButtonConfiguration {
+                    MultiButtonConfiguration {
                         left_double_click,
                         left_long_press,
                         right_double_click,
@@ -117,15 +78,6 @@ pub(crate) struct TwsButtonConfiguration {
     pub tws_connected_action: ButtonAction,
     pub tws_disconnected_action: ButtonAction,
     pub disconnected_switch: bool,
-}
-
-impl From<TwsButtonConfiguration> for ButtonConfiguration {
-    fn from(value: TwsButtonConfiguration) -> Self {
-        Self {
-            action: value.active_action(),
-            is_enabled: true,
-        }
-    }
 }
 
 impl TwsButtonConfiguration {
@@ -173,15 +125,6 @@ impl TwsButtonConfiguration {
 pub(crate) struct NoTwsButtonConfiguration {
     pub action: ButtonAction,
     pub is_enabled: bool,
-}
-
-impl From<NoTwsButtonConfiguration> for ButtonConfiguration {
-    fn from(value: NoTwsButtonConfiguration) -> Self {
-        Self {
-            action: value.action,
-            is_enabled: value.is_enabled,
-        }
-    }
 }
 
 impl NoTwsButtonConfiguration {

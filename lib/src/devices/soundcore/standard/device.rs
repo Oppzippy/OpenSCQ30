@@ -26,7 +26,7 @@ use super::{
     },
     structures::{
         AgeRange, AmbientSoundModeCycle, BasicHearId, CustomHearId, EqualizerConfiguration, Gender,
-        InternalMultiButtonConfiguration, SoundModes, TwsStatus,
+        MultiButtonConfiguration, SoundModes, TwsStatus,
     },
 };
 
@@ -265,7 +265,7 @@ where
     pub fn button_configuration(&mut self)
     where
         StateType:
-            AsRef<InternalMultiButtonConfiguration> + AsMut<InternalMultiButtonConfiguration>,
+            AsRef<MultiButtonConfiguration> + AsMut<MultiButtonConfiguration>,
         StateType: AsRef<TwsStatus>,
     {
         self.module_collection

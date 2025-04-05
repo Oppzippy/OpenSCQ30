@@ -6,9 +6,7 @@ use nom::{
     sequence::{pair, tuple},
 };
 
-use crate::devices::soundcore::standard::structures::{
-    ButtonAction, ButtonConfiguration, MultiButtonConfiguration,
-};
+use crate::devices::soundcore::standard::structures::ButtonAction;
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub struct A3936InternalMultiButtonConfiguration {
@@ -65,32 +63,6 @@ impl A3936InternalMultiButtonConfiguration {
             )(input)
         })(input)
     }
-
-    pub fn as_multi_button_configuration(
-        &self,
-        is_tws_connected: bool,
-    ) -> MultiButtonConfiguration {
-        MultiButtonConfiguration {
-            left_single_click: self
-                .left_single_click
-                .as_button_configuration(is_tws_connected),
-            right_single_click: self
-                .right_single_click
-                .as_button_configuration(is_tws_connected),
-            left_double_click: self
-                .left_double_click
-                .as_button_configuration(is_tws_connected),
-            right_double_click: self
-                .right_double_click
-                .as_button_configuration(is_tws_connected),
-            left_long_press: self
-                .left_long_press
-                .as_button_configuration(is_tws_connected),
-            right_long_press: self
-                .right_long_press
-                .as_button_configuration(is_tws_connected),
-        }
-    }
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
@@ -128,13 +100,6 @@ impl A3936TwsButtonAction {
                     .unwrap_or_else(log_and_return_default),
             })
         })(input)
-    }
-
-    pub fn as_button_configuration(&self, is_tws_connected: bool) -> ButtonConfiguration {
-        ButtonConfiguration {
-            action: self.active_action(is_tws_connected),
-            is_enabled: self.is_enabled(is_tws_connected),
-        }
     }
 
     pub fn action_if_enabled(&self, is_tws_connected: bool) -> Option<ButtonAction> {

@@ -9,7 +9,7 @@ use crate::{
             outbound::SetMultiButtonConfigurationPacket, packet_io_controller::PacketIOController,
         },
         state_modifier::StateModifier,
-        structures::InternalMultiButtonConfiguration,
+        structures::MultiButtonConfiguration,
     },
 };
 
@@ -26,8 +26,8 @@ impl<ConnectionType: Connection> ButtonConfigurationStateModifier<ConnectionType
 #[async_trait]
 impl<ConnectionType, T> StateModifier<T> for ButtonConfigurationStateModifier<ConnectionType>
 where
-    T: AsMut<InternalMultiButtonConfiguration>
-        + AsRef<InternalMultiButtonConfiguration>
+    T: AsMut<MultiButtonConfiguration>
+        + AsRef<MultiButtonConfiguration>
         + Clone
         + Send
         + Sync,

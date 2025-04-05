@@ -5,7 +5,7 @@ use crate::{
     api::settings::{Setting, SettingId, Value},
     devices::soundcore::standard::{
         settings_manager::SettingHandler,
-        structures::{InternalMultiButtonConfiguration, TwsStatus},
+        structures::{MultiButtonConfiguration, TwsStatus},
     },
 };
 
@@ -22,7 +22,7 @@ impl ButtonConfigurationSettingHandler {
 #[async_trait]
 impl<T> SettingHandler<T> for ButtonConfigurationSettingHandler
 where
-    T: AsMut<InternalMultiButtonConfiguration> + AsRef<InternalMultiButtonConfiguration> + Send,
+    T: AsMut<MultiButtonConfiguration> + AsRef<MultiButtonConfiguration> + Send,
     T: AsRef<TwsStatus>,
 {
     fn settings(&self) -> Vec<SettingId> {
@@ -30,7 +30,7 @@ where
     }
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
-        let button_config: &InternalMultiButtonConfiguration = state.as_ref();
+        let button_config: &MultiButtonConfiguration = state.as_ref();
         let setting: ButtonConfigurationSetting = setting_id.try_into().ok()?;
         Some(match setting {
             ButtonConfigurationSetting::LeftSinglePress => {
@@ -60,7 +60,7 @@ where
 
     async fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> crate::Result<()> {
         let tws_status: TwsStatus = *state.as_ref();
-        let button_config: &mut InternalMultiButtonConfiguration = state.as_mut();
+        let button_config: &mut MultiButtonConfiguration = state.as_mut();
         let setting: ButtonConfigurationSetting = setting_id
             .try_into()
             .expect("already filtered to valid values only by SettingsManager");

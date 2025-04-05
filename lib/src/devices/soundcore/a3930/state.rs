@@ -1,7 +1,7 @@
 use crate::{
     devices::soundcore::standard::structures::{
         AgeRange, CustomHearId, DualBattery, EqualizerConfiguration, Gender,
-        InternalMultiButtonConfiguration, SoundModes, TwsStatus,
+        MultiButtonConfiguration, SoundModes, TwsStatus,
     },
     macros::impl_as_ref_for_field,
 };
@@ -16,7 +16,7 @@ pub struct A3930State {
     gender: Gender,
     age_range: AgeRange,
     custom_hear_id: CustomHearId,
-    button_configuration: InternalMultiButtonConfiguration,
+    button_configuration: MultiButtonConfiguration,
     sound_modes: SoundModes,
     side_tone: bool,
     hear_id_eq_index: Option<u16>,
@@ -30,7 +30,7 @@ impl_as_ref_for_field!(
         gender: Gender,
         age_range: AgeRange,
         custom_hear_id: CustomHearId,
-        button_configuration: InternalMultiButtonConfiguration,
+        button_configuration: MultiButtonConfiguration,
         sound_modes: SoundModes,
     }
 );

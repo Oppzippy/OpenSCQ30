@@ -1,7 +1,7 @@
 use crate::{
     devices::soundcore::standard::structures::{
         BatteryLevel, DualBattery, EqualizerConfiguration, FirmwareVersion,
-        InternalMultiButtonConfiguration, SerialNumber, TwsStatus,
+        MultiButtonConfiguration, SerialNumber, TwsStatus,
     },
     macros::impl_as_ref_for_field,
 };
@@ -16,7 +16,7 @@ pub struct A3945State {
     pub right_firmware: FirmwareVersion,
     pub serial_number: SerialNumber,
     pub equalizer_configuration: EqualizerConfiguration,
-    pub button_configuration: InternalMultiButtonConfiguration,
+    pub button_configuration: MultiButtonConfiguration,
     pub touch_tone_switch: bool,
     pub wear_detection_switch: bool,
     pub game_mode_switch: bool,
@@ -31,7 +31,7 @@ impl_as_ref_for_field!(
         battery: DualBattery,
         serial_number: SerialNumber,
         equalizer_configuration: EqualizerConfiguration,
-        button_configuration: InternalMultiButtonConfiguration,
+        button_configuration: MultiButtonConfiguration,
     }
 );
 

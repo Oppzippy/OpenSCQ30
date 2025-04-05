@@ -20,8 +20,8 @@ use crate::devices::soundcore::{
             parsing::take_bool,
         },
         structures::{
-            Command, DualBattery, EqualizerConfiguration, InternalMultiButtonConfiguration,
-            SoundModes, StereoEqualizerConfiguration, TwsStatus,
+            Command, DualBattery, EqualizerConfiguration, MultiButtonConfiguration, SoundModes,
+            StereoEqualizerConfiguration, TwsStatus,
         },
     },
 };
@@ -31,7 +31,7 @@ pub struct A3031StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
     pub equalizer_configuration: EqualizerConfiguration,
-    pub button_configuration: InternalMultiButtonConfiguration,
+    pub button_configuration: MultiButtonConfiguration,
     pub sound_modes: SoundModes,
     pub side_tone: bool,
     pub touch_tone: bool,
@@ -54,7 +54,7 @@ impl InboundPacket for A3031StateUpdatePacket {
                     TwsStatus::take,
                     DualBattery::take,
                     StereoEqualizerConfiguration::take(8),
-                    InternalMultiButtonConfiguration::take,
+                    MultiButtonConfiguration::take,
                     SoundModes::take,
                     take_bool,
                     take_bool,

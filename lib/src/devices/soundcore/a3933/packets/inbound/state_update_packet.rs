@@ -22,7 +22,7 @@ use crate::devices::soundcore::{
         },
         structures::{
             AgeRange, AmbientSoundModeCycle, BatteryLevel, Command, CustomHearId, DualBattery,
-            EqualizerConfiguration, FirmwareVersion, InternalMultiButtonConfiguration,
+            EqualizerConfiguration, FirmwareVersion, MultiButtonConfiguration,
             SerialNumber, SoundModes, StereoEqualizerConfiguration, StereoVolumeAdjustments,
             TwsStatus, VolumeAdjustments,
         },
@@ -41,7 +41,7 @@ pub struct A3933StateUpdatePacket {
     pub equalizer_configuration: EqualizerConfiguration,
     pub age_range: AgeRange,
     pub hear_id: Option<CustomHearId>, // 10 bands
-    pub button_configuration: InternalMultiButtonConfiguration,
+    pub button_configuration: MultiButtonConfiguration,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub sound_modes: SoundModes,
     pub touch_tone_switch: bool,
@@ -134,7 +134,7 @@ impl InboundPacket for A3933StateUpdatePacket {
                     input,
                     (button_configuration, ambient_sound_mode_cycle, sound_modes, _unknown, extra),
                 ) = tuple((
-                    InternalMultiButtonConfiguration::take,
+                    MultiButtonConfiguration::take,
                     AmbientSoundModeCycle::take,
                     SoundModes::take,
                     // Unsure if these two unknown bytes should be inside or outside the optional
