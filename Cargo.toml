@@ -4,7 +4,7 @@ members = [
     "lib",
     # "android",
     "uniffi-bindgen",
-    "gui_cosmic",
+    "gui",
     "i18n",
     "i18n_macros",
 ]
