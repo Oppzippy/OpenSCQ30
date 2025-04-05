@@ -4,13 +4,12 @@ use macaddr::MacAddr6;
 
 use crate::{
     connection_backend::{self, ConnectionBackends},
-    soundcore_device::device_model::DeviceModel,
+    devices::DeviceModel,
     storage::{OpenSCQ30Database, PairedDevice},
 };
 
 use super::{
-    device::{GenericDeviceDescriptor, OpenSCQ30Device},
-    quick_presets::QuickPresetsHandler,
+    connection::DeviceDescriptor, device::OpenSCQ30Device, quick_presets::QuickPresetsHandler,
 };
 
 pub struct OpenSCQ30Session {
@@ -45,10 +44,7 @@ impl OpenSCQ30Session {
             .map_err(Into::into)
     }
 
-    pub async fn list_devices(
-        &self,
-        model: DeviceModel,
-    ) -> crate::Result<Vec<GenericDeviceDescriptor>> {
+    pub async fn list_devices(&self, model: DeviceModel) -> crate::Result<Vec<DeviceDescriptor>> {
         self.list_devices_with_backends(
             connection_backend::default_backends().expect("no default backends available"),
             model,
@@ -60,7 +56,7 @@ impl OpenSCQ30Session {
         &self,
         backends: impl ConnectionBackends + 'static,
         model: DeviceModel,
-    ) -> crate::Result<Vec<GenericDeviceDescriptor>> {
+    ) -> crate::Result<Vec<DeviceDescriptor>> {
         model
             .device_registry(backends, self.database.clone(), true)
             .await?

@@ -15,19 +15,16 @@ crate-type = ["lib"]
 [dependencies]
 openscq30_i18n = { path = "../i18n" }
 openscq30_i18n_macros = { path = "../i18n_macros" }
-web-sys = { workspace = true, optional = true, features = ["Window"] }
 tokio = { workspace = true, features = ["sync", "time", "rt", "macros"] }
 futures = { workspace = true }
 uuid = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 strum = { workspace = true, features = ["derive"] }
-weak-table = { workspace = true }
 macaddr = { workspace = true }
 nom = { workspace = true }
 serde = { workspace = true, features = ["derive", "rc"] }
 serde_json = { workspace = true }
-js-sys = { workspace = true, optional = true }
 ordered-float = { workspace = true, features = ["serde"] }
 float-cmp = { workspace = true, features = ["std"], default-features = false }
 static_assertions = { workspace = true }

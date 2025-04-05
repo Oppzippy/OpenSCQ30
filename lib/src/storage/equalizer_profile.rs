@@ -1,6 +1,6 @@
 use rusqlite::Connection;
 
-use crate::soundcore_device::device_model::DeviceModel;
+use crate::devices::DeviceModel;
 
 use super::{StorageError, type_conversions::SqliteDeviceModel};
 

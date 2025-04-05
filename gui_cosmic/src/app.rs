@@ -8,10 +8,7 @@ use cosmic::{
 use dirs::config_dir;
 use macaddr::MacAddr6;
 use openscq30_lib::{
-    api::{
-        OpenSCQ30Session,
-        device::{DeviceDescriptor, OpenSCQ30Device},
-    },
+    api::{OpenSCQ30Session, device::OpenSCQ30Device},
     storage::{self, PairedDevice},
 };
 
@@ -273,8 +270,8 @@ impl Application for AppModel {
                             return Task::future(async move {
                                 database
                                     .pair(storage::PairedDevice {
-                                        name: descriptor.name().to_string(),
-                                        mac_address: descriptor.mac_address(),
+                                        name: descriptor.name,
+                                        mac_address: descriptor.mac_address,
                                         model,
                                     })
                                     .await

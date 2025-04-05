@@ -4,7 +4,7 @@ use rusqlite::Connection;
 
 use crate::{
     api::settings::{self, SettingId},
-    soundcore_device::device_model::DeviceModel,
+    devices::DeviceModel,
 };
 
 use super::{StorageError, type_conversions::SqliteDeviceModel};

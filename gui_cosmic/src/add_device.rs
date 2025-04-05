@@ -6,11 +6,8 @@ use cosmic::{
     widget::{self, Id, icon},
 };
 use openscq30_lib::{
-    api::{
-        OpenSCQ30Session,
-        device::{DeviceDescriptor, GenericDeviceDescriptor},
-    },
-    soundcore_device::device_model::DeviceModel,
+    api::{OpenSCQ30Session, connection::DeviceDescriptor},
+    devices::DeviceModel,
 };
 use strum::IntoEnumIterator;
 use tracing::error;
@@ -39,7 +36,7 @@ struct LoadingDevicesModel {
 struct SelectDeviceModel {
     search_id: Id,
     search_query: String,
-    devices: Vec<GenericDeviceDescriptor>,
+    devices: Vec<DeviceDescriptor>,
     device_model: DeviceModel,
 }
 
@@ -49,7 +46,7 @@ pub enum Message {
     SetDeviceModelSearchQuery(String),
     SelectModel(DeviceModel),
     SelectDevice(usize),
-    SetDeviceList(Vec<GenericDeviceDescriptor>),
+    SetDeviceList(Vec<DeviceDescriptor>),
     SetDeviceNameSearchQuery(String),
     SetErrorMessage(String),
 }
@@ -59,7 +56,7 @@ pub enum Action {
     Task(Task<Message>),
     AddDevice {
         model: DeviceModel,
-        descriptor: GenericDeviceDescriptor,
+        descriptor: DeviceDescriptor,
     },
 }
 
@@ -135,12 +132,12 @@ impl AddDeviceModel {
                         .enumerate()
                         .filter(|(_, device)| {
                             device
-                                .name()
+                                .name
                                 .to_lowercase()
                                 .contains(&ui_model.search_query.to_lowercase())
                         })
                         .map(|(index, device)| {
-                            widget::button::text(device.name())
+                            widget::button::text(&device.name)
                                 .width(Length::Fill)
                                 .on_press(Message::SelectDevice(index))
                                 .into()

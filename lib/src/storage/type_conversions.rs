@@ -6,7 +6,7 @@ use rusqlite::{
     types::{FromSql, FromSqlError, FromSqlResult, ToSqlOutput, Value, ValueRef},
 };
 
-use crate::soundcore_device::device_model::DeviceModel;
+use crate::devices::DeviceModel;
 
 pub struct SqliteMacAddr6(pub MacAddr6);
 impl FromSql for SqliteMacAddr6 {

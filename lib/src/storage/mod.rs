@@ -21,7 +21,7 @@ use tracing::info_span;
 
 use crate::{
     api::settings::{self, SettingId},
-    soundcore_device::device_model::DeviceModel,
+    devices::DeviceModel,
 };
 
 // This needs to be Send + Sync, and rusqlite::Connection is not, so we have to spawn a new thread

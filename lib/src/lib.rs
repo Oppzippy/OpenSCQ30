@@ -6,14 +6,11 @@
 #![allow(clippy::type_complexity, async_fn_in_trait)]
 pub mod api;
 mod connection_backend;
-pub mod demo;
-pub mod device_profile;
 pub mod device_utils;
 pub mod devices;
 mod error;
 pub mod i18n;
 pub(crate) mod macros;
-pub mod soundcore_device;
 pub mod storage;
 pub mod stub;
 
