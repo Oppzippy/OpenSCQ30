@@ -15,7 +15,7 @@ use crate::devices::soundcore::standard::packets::parsing::take_bool;
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
-pub(crate) struct MultiButtonConfiguration {
+pub struct MultiButtonConfiguration {
     pub left_single_click: NoTwsButtonConfiguration,
     pub left_double_click: TwsButtonConfiguration,
     pub left_long_press: TwsButtonConfiguration,
@@ -36,7 +36,7 @@ impl MultiButtonConfiguration {
         bytes
     }
 
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], MultiButtonConfiguration, E> {
         context("custom button model", |input| {
@@ -74,7 +74,7 @@ impl MultiButtonConfiguration {
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
-pub(crate) struct TwsButtonConfiguration {
+pub struct TwsButtonConfiguration {
     pub tws_connected_action: ButtonAction,
     pub tws_disconnected_action: ButtonAction,
     pub disconnected_switch: bool,
@@ -89,7 +89,7 @@ impl TwsButtonConfiguration {
         ]
     }
 
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], TwsButtonConfiguration, E> {
         map_opt(pair(take_bool, le_u8), |(switch, num)| {
@@ -122,7 +122,7 @@ impl TwsButtonConfiguration {
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
-pub(crate) struct NoTwsButtonConfiguration {
+pub struct NoTwsButtonConfiguration {
     pub action: ButtonAction,
     pub is_enabled: bool,
 }
@@ -136,7 +136,7 @@ impl NoTwsButtonConfiguration {
         [self.is_enabled.into(), u8::from(self.action) & 0x0f]
     }
 
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], NoTwsButtonConfiguration, E> {
         map_opt(pair(take_bool, le_u8), |(switch, num)| {

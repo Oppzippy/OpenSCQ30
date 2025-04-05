@@ -42,7 +42,6 @@ mod tests {
             soundcore::standard::{
                 packets::{
                     Packet,
-                    inbound::{FirmwareVersionUpdatePacket, InboundPacket},
                     outbound::{SetEqualizerPacket, SetSoundModePacket},
                 },
                 structures::{AmbientSoundMode, NoiseCancelingMode, PresetEqualizerProfile},
@@ -59,14 +58,6 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x30,
         ]
-    }
-
-    fn example_firmware_version_packet() -> Vec<u8> {
-        Packet {
-            command: FirmwareVersionUpdatePacket::command(),
-            body: "02.0002.000000000000003028".as_bytes().to_vec(),
-        }
-        .bytes()
     }
 
     async fn create_test_connection() -> (

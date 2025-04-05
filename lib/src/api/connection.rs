@@ -1,7 +1,6 @@
 mod connection;
 mod connection_descriptor;
 mod connection_registry;
-mod connection_status;
 mod generic_connection_descriptor;
 
 use std::collections::HashSet;

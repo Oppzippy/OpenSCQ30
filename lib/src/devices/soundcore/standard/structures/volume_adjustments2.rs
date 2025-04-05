@@ -68,7 +68,7 @@ impl VolumeAdjustments2 {
         Ok(Self { inner: clamped })
     }
 
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         num_bands: usize,
     ) -> impl Fn(&'a [u8]) -> IResult<&'a [u8], VolumeAdjustments2, E> {
         move |input| {

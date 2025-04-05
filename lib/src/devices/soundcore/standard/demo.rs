@@ -47,19 +47,15 @@ impl ConnectionRegistry for DemoConnectionRegistry {
     }
     async fn connection(
         &self,
-        mac_address: MacAddr6,
+        _mac_address: MacAddr6,
     ) -> crate::Result<Option<Arc<Self::ConnectionType>>> {
         Ok(Some(Arc::new(DemoConnection::new(
-            self.name.to_owned(),
-            mac_address,
             self.state_update_packet.to_owned(),
         ))))
     }
 }
 
 pub struct DemoConnection {
-    name: String,
-    mac_address: MacAddr6,
     _connection_status_sender: watch::Sender<ConnectionStatus>,
     connection_status_receiver: Mutex<Option<watch::Receiver<ConnectionStatus>>>,
     packet_sender: mpsc::Sender<Vec<u8>>,
@@ -68,13 +64,11 @@ pub struct DemoConnection {
 }
 
 impl DemoConnection {
-    pub fn new(name: String, mac_address: MacAddr6, state_update_packet: Vec<u8>) -> Self {
+    pub fn new(state_update_packet: Vec<u8>) -> Self {
         let (connection_status_sender, connection_status_receiver) =
             watch::channel(ConnectionStatus::Connected);
         let (packet_sender, packet_receiver) = mpsc::channel(10);
         Self {
-            name,
-            mac_address,
             _connection_status_sender: connection_status_sender,
             connection_status_receiver: Mutex::new(Some(connection_status_receiver)),
             packet_sender,
@@ -100,14 +94,10 @@ impl RfcommBackend for DemoConnectionRegistry {
 
     async fn connect(
         &self,
-        mac_address: MacAddr6,
+        _mac_address: MacAddr6,
         _select_uuid: impl Fn(HashSet<Uuid>) -> Uuid + Send,
     ) -> crate::Result<Self::ConnectionType> {
-        Ok(DemoConnection::new(
-            self.name.to_owned(),
-            mac_address,
-            self.state_update_packet.to_owned(),
-        ))
+        Ok(DemoConnection::new(self.state_update_packet.to_owned()))
     }
 }
 
