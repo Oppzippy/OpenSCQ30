@@ -18,6 +18,6 @@ soundcore_device!(A3926State, A3926StateUpdatePacket, async |builder| {
     //         NoiseCancelingMode::Outdoor,
     //     ],
     // });
-    builder.stereo_equalizer_with_basic_hear_id().await;
+    builder.equalizer_with_basic_hear_id().await;
     builder.button_configuration();
 });

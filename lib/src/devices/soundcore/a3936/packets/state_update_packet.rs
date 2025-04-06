@@ -24,8 +24,7 @@ use crate::devices::soundcore::{
         },
         structures::{
             AgeRange, AmbientSoundModeCycle, BatteryLevel, Command, CustomHearId, DualBattery,
-            EqualizerConfiguration, FirmwareVersion, SerialNumber, StereoEqualizerConfiguration,
-            StereoVolumeAdjustments, TwsStatus, VolumeAdjustments,
+            EqualizerConfiguration, FirmwareVersion, SerialNumber, TwsStatus, VolumeAdjustments,
         },
     },
 };
@@ -62,23 +61,24 @@ impl Default for A3936StateUpdatePacket {
             left_firmware: Default::default(),
             right_firmware: Default::default(),
             serial_number: Default::default(),
-            equalizer_configuration: EqualizerConfiguration::new_custom_profile(
+            equalizer_configuration: EqualizerConfiguration::new_custom_profile(vec![
                 VolumeAdjustments::new(vec![0; 10]).unwrap(),
-            ),
+                VolumeAdjustments::new(vec![0; 10]).unwrap(),
+            ]),
             age_range: Default::default(),
             custom_hear_id: CustomHearId {
                 is_enabled: Default::default(),
-                volume_adjustments: StereoVolumeAdjustments {
-                    left: VolumeAdjustments::new(vec![0; 10]).unwrap(),
-                    right: VolumeAdjustments::new(vec![0; 10]).unwrap(),
-                },
+                volume_adjustments: vec![
+                    VolumeAdjustments::new(vec![0; 10]).unwrap(),
+                    VolumeAdjustments::new(vec![0; 10]).unwrap(),
+                ],
                 time: Default::default(),
                 hear_id_type: Default::default(),
                 hear_id_music_type: Default::default(),
-                custom_volume_adjustments: Some(StereoVolumeAdjustments {
-                    left: VolumeAdjustments::new(vec![0; 10]).unwrap(),
-                    right: VolumeAdjustments::new(vec![0; 10]).unwrap(),
-                }),
+                custom_volume_adjustments: Some(vec![
+                    VolumeAdjustments::new(vec![0; 10]).unwrap(),
+                    VolumeAdjustments::new(vec![0; 10]).unwrap(),
+                ]),
             },
             sound_modes: Default::default(),
             ambient_sound_mode_cycle: Default::default(),
@@ -111,8 +111,7 @@ impl InboundPacket for A3936StateUpdatePacket {
                 let (input, left_firmware) = FirmwareVersion::take(input)?;
                 let (input, right_firmware) = FirmwareVersion::take(input)?;
                 let (input, serial_number) = SerialNumber::take(input)?;
-                let (input, equalizer_configuration) =
-                    StereoEqualizerConfiguration::take(10)(input)?;
+                let (input, equalizer_configuration) = EqualizerConfiguration::take(2, 10)(input)?;
                 let (input, age_range) = AgeRange::take(input)?;
                 let (input, custom_hear_id) = CustomHearId::take_without_music_type(10)(input)?;
 
@@ -185,14 +184,18 @@ impl OutboundPacket for A3936StateUpdatePacket {
             .chain(self.left_firmware.to_string().into_bytes())
             .chain(self.right_firmware.to_string().into_bytes())
             .chain(self.serial_number.to_string().into_bytes())
-            .chain(self.equalizer_configuration.profile_id().to_le_bytes())
-            .chain(self.equalizer_configuration.volume_adjustments().bytes())
-            .chain(self.equalizer_configuration.volume_adjustments().bytes())
+            .chain(self.equalizer_configuration.bytes())
             .chain([self.age_range.0])
             .chain(
                 [self.custom_hear_id.is_enabled as u8]
                     .into_iter()
-                    .chain(self.custom_hear_id.volume_adjustments.bytes())
+                    .chain(
+                        self.custom_hear_id
+                            .volume_adjustments
+                            .iter()
+                            .map(|v| v.bytes())
+                            .flatten(),
+                    )
                     .chain(self.custom_hear_id.time.to_le_bytes())
                     .chain([self.custom_hear_id.hear_id_type.0])
                     .chain(
@@ -200,7 +203,9 @@ impl OutboundPacket for A3936StateUpdatePacket {
                             .custom_volume_adjustments
                             .as_ref()
                             .unwrap()
-                            .bytes(),
+                            .iter()
+                            .map(|v| v.bytes())
+                            .flatten(),
                     )
                     .chain([0, 0]),
             )

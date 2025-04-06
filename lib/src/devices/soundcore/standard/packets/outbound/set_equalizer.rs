@@ -4,21 +4,11 @@ use super::outbound_packet::OutboundPacket;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SetEqualizerPacket<'a> {
-    left_configuration: &'a EqualizerConfiguration,
-    right_configuration: Option<&'a EqualizerConfiguration>,
+    pub equalizer_configuration: &'a EqualizerConfiguration,
 }
 
 impl<'a> SetEqualizerPacket<'a> {
     pub const COMMAND: Command = Command::new([0x08, 0xEE, 0x00, 0x00, 0x00, 0x02, 0x81]);
-    pub fn new(
-        left_configuration: &'a EqualizerConfiguration,
-        right_configuration: Option<&'a EqualizerConfiguration>,
-    ) -> Self {
-        Self {
-            left_configuration,
-            right_configuration,
-        }
-    }
 }
 
 impl OutboundPacket for SetEqualizerPacket<'_> {
@@ -27,14 +17,7 @@ impl OutboundPacket for SetEqualizerPacket<'_> {
     }
 
     fn body(&self) -> Vec<u8> {
-        let mut bytes = Vec::with_capacity(22);
-        bytes.extend(self.left_configuration.profile_id().to_le_bytes());
-        bytes.extend(self.left_configuration.volume_adjustments().bytes());
-        if let Some(right_eq) = self.right_configuration {
-            bytes.extend(right_eq.volume_adjustments().bytes());
-        }
-
-        bytes
+        self.equalizer_configuration.bytes().collect()
     }
 }
 
@@ -53,12 +36,11 @@ mod tests {
             0x08, 0xee, 0x00, 0x00, 0x00, 0x02, 0x81, 0x14, 0x00, 0xfe, 0xfe, 0x3c, 0xb4, 0x8f,
             0xa0, 0x8e, 0xb4, 0x74, 0x88, 0xe6,
         ];
-        let actual = SetEqualizerPacket::new(
-            &EqualizerConfiguration::new_custom_profile(
+        let actual = SetEqualizerPacket {
+            equalizer_configuration: &EqualizerConfiguration::new_custom_profile(vec![
                 VolumeAdjustments::new(vec![-60, 60, 23, 40, 22, 60, -4, 16]).unwrap(),
-            ),
-            None,
-        )
+            ]),
+        }
         .bytes();
         assert_eq!(EXPECTED, actual);
     }
@@ -69,13 +51,13 @@ mod tests {
             0x08, 0xee, 0x00, 0x00, 0x00, 0x02, 0x81, 0x14, 0x00, 0x00, 0x00, 0x78, 0x78, 0x78,
             0x78, 0x78, 0x78, 0x78, 0x78, 0x4d,
         ];
-        let actual = SetEqualizerPacket::new(
-            &EqualizerConfiguration::new_from_preset_profile(
+        let actual = SetEqualizerPacket {
+            equalizer_configuration: &EqualizerConfiguration::new_from_preset_profile(
+                1,
                 PresetEqualizerProfile::SoundcoreSignature,
-                [],
+                Vec::new(),
             ),
-            None,
-        )
+        }
         .bytes();
         assert_eq!(EXPECTED, actual);
     }
@@ -86,13 +68,13 @@ mod tests {
             0x08, 0xee, 0x00, 0x00, 0x00, 0x02, 0x81, 0x14, 0x00, 0x15, 0x00, 0x78, 0x78, 0x78,
             0x64, 0x5a, 0x50, 0x50, 0x3c, 0xa4,
         ];
-        let actual = SetEqualizerPacket::new(
-            &EqualizerConfiguration::new_from_preset_profile(
+        let actual = SetEqualizerPacket {
+            equalizer_configuration: &EqualizerConfiguration::new_from_preset_profile(
+                1,
                 PresetEqualizerProfile::TrebleReducer,
-                [],
+                Vec::new(),
             ),
-            None,
-        )
+        }
         .bytes();
         assert_eq!(EXPECTED, actual);
     }
@@ -103,11 +85,13 @@ mod tests {
             0x08, 0xee, 0x00, 0x00, 0x00, 0x02, 0x81, 0x1C, 0x00, 0x15, 0x00, 0x78, 0x78, 0x78,
             0x64, 0x5a, 0x50, 0x50, 0x3c, 0x78, 0x78, 0x78, 0x64, 0x5a, 0x50, 0x50, 0x3c, 0xae,
         ];
-        let configuration = EqualizerConfiguration::new_from_preset_profile(
-            PresetEqualizerProfile::TrebleReducer,
-            [],
-        );
-        let packet = SetEqualizerPacket::new(&configuration, Some(&configuration));
+        let packet = SetEqualizerPacket {
+            equalizer_configuration: &EqualizerConfiguration::new_from_preset_profile(
+                2,
+                PresetEqualizerProfile::TrebleReducer,
+                Vec::new(),
+            ),
+        };
         assert_eq!(EXPECTED, packet.bytes());
     }
 }

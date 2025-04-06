@@ -24,7 +24,7 @@ soundcore_device!(A3933State, A3933StateUpdatePacket, async |builder| {
             NoiseCancelingMode::Outdoor,
         ],
     });
-    builder.stereo_equalizer().await;
+    builder.equalizer().await;
     builder.button_configuration();
     builder.ambient_sound_mode_cycle();
 });
@@ -151,16 +151,13 @@ mod tests {
 
         let set_eq_packet_bytes = outbound_receiver.recv().await.unwrap();
         assert_eq!(
-            Packet::from(SetEqualizerPacket::new(
-                &EqualizerConfiguration::new_from_preset_profile(
+            Packet::from(SetEqualizerPacket {
+                equalizer_configuration: &EqualizerConfiguration::new_from_preset_profile(
+                    2,
                     PresetEqualizerProfile::TrebleReducer,
-                    [1, 2]
+                    vec![vec![1, 2], vec![3, 4]],
                 ),
-                Some(&EqualizerConfiguration::new_from_preset_profile(
-                    PresetEqualizerProfile::TrebleReducer,
-                    [3, 4]
-                )),
-            ))
+            })
             .bytes(),
             set_eq_packet_bytes
         );

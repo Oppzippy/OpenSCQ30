@@ -4,20 +4,7 @@ use super::outbound_packet::OutboundPacket;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SetEqualizerWithDrcPacket<'a> {
-    left_configuration: &'a EqualizerConfiguration,
-    right_configuration: Option<&'a EqualizerConfiguration>,
-}
-
-impl<'a> SetEqualizerWithDrcPacket<'a> {
-    pub fn new(
-        left_configuration: &'a EqualizerConfiguration,
-        right_configuration: Option<&'a EqualizerConfiguration>,
-    ) -> Self {
-        Self {
-            left_configuration,
-            right_configuration,
-        }
-    }
+    pub equalizer_configuration: &'a EqualizerConfiguration,
 }
 
 impl OutboundPacket for SetEqualizerWithDrcPacket<'_> {
@@ -26,27 +13,16 @@ impl OutboundPacket for SetEqualizerWithDrcPacket<'_> {
     }
 
     fn body(&self) -> Vec<u8> {
-        let mut bytes: Vec<u8> = Vec::with_capacity(42);
-
-        // profile
-        bytes.extend(self.left_configuration.profile_id().to_le_bytes());
-        // eq without drc
-        bytes.extend(self.left_configuration.volume_adjustments().bytes());
-        if let Some(right_eq) = self.right_configuration {
-            bytes.extend(right_eq.volume_adjustments().bytes());
-        }
-        // eq with drc
-        bytes.extend(
-            self.left_configuration
-                .volume_adjustments()
-                .apply_drc()
-                .bytes(),
-        );
-        if let Some(right_eq) = self.right_configuration {
-            bytes.extend(right_eq.volume_adjustments().apply_drc().bytes());
-        }
-
-        bytes
+        self.equalizer_configuration
+            .bytes()
+            .chain(
+                self.equalizer_configuration
+                    .volume_adjustments()
+                    .iter()
+                    .map(|v| v.apply_drc().into_bytes())
+                    .flatten(),
+            )
+            .collect()
     }
 }
 
@@ -64,12 +40,11 @@ mod tests {
             0xf0, 0x8e, 0x00, 0x74, 0x88, 0x6d, 0x86, 0x70, 0x88, 0x7b, 0x66, 0x7e, 0x79, 0x4f,
         ];
 
-        let actual = SetEqualizerWithDrcPacket::new(
-            &EqualizerConfiguration::new_custom_profile(
+        let actual = SetEqualizerWithDrcPacket {
+            equalizer_configuration: &EqualizerConfiguration::new_custom_profile(vec![
                 VolumeAdjustments::new(vec![-60, 60, 23, 120, 22, -120, -4, 16]).unwrap(),
-            ),
-            None,
-        )
+            ]),
+        }
         .bytes();
         assert_eq!(EXPECTED, actual);
     }

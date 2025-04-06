@@ -23,8 +23,7 @@ use crate::devices::soundcore::{
         structures::{
             AgeRange, AmbientSoundModeCycle, BatteryLevel, Command, CustomHearId, DualBattery,
             EqualizerConfiguration, FirmwareVersion, MultiButtonConfiguration, SerialNumber,
-            SoundModes, StereoEqualizerConfiguration, StereoVolumeAdjustments, TwsStatus,
-            VolumeAdjustments,
+            SoundModes, TwsStatus, VolumeAdjustments,
         },
     },
 };
@@ -60,23 +59,24 @@ impl Default for A3933StateUpdatePacket {
             left_firmware: Default::default(),
             right_firmware: Default::default(),
             serial_number: Default::default(),
-            equalizer_configuration: EqualizerConfiguration::new_custom_profile(
+            equalizer_configuration: EqualizerConfiguration::new_custom_profile(vec![
                 VolumeAdjustments::new(vec![0; 10]).unwrap(),
-            ),
+                VolumeAdjustments::new(vec![0; 10]).unwrap(),
+            ]),
             age_range: Default::default(),
             hear_id: Some(CustomHearId {
                 is_enabled: Default::default(),
-                volume_adjustments: StereoVolumeAdjustments {
-                    left: VolumeAdjustments::new(vec![0; 10]).unwrap(),
-                    right: VolumeAdjustments::new(vec![0; 10]).unwrap(),
-                },
+                volume_adjustments: vec![
+                    VolumeAdjustments::new(vec![0; 10]).unwrap(),
+                    VolumeAdjustments::new(vec![0; 10]).unwrap(),
+                ],
                 time: Default::default(),
                 hear_id_type: Default::default(),
                 hear_id_music_type: Default::default(),
-                custom_volume_adjustments: Some(StereoVolumeAdjustments {
-                    left: VolumeAdjustments::new(vec![0; 10]).unwrap(),
-                    right: VolumeAdjustments::new(vec![0; 10]).unwrap(),
-                }),
+                custom_volume_adjustments: Some(vec![
+                    VolumeAdjustments::new(vec![0; 10]).unwrap(),
+                    VolumeAdjustments::new(vec![0; 10]).unwrap(),
+                ]),
             }),
             button_configuration: Default::default(),
             ambient_sound_mode_cycle: Default::default(),
@@ -118,7 +118,7 @@ impl InboundPacket for A3933StateUpdatePacket {
                     FirmwareVersion::take,
                     FirmwareVersion::take,
                     SerialNumber::take,
-                    StereoEqualizerConfiguration::take(10),
+                    EqualizerConfiguration::take(2, 10),
                     AgeRange::take,
                 ))(input)?;
 
@@ -206,9 +206,7 @@ impl OutboundPacket for A3933StateUpdatePacket {
             .chain(self.left_firmware.to_string().into_bytes())
             .chain(self.right_firmware.to_string().into_bytes())
             .chain(self.serial_number.0.as_bytes().iter().cloned())
-            .chain(self.equalizer_configuration.profile_id().to_le_bytes())
-            .chain(self.equalizer_configuration.volume_adjustments().bytes())
-            .chain(self.equalizer_configuration.volume_adjustments().bytes())
+            .chain(self.equalizer_configuration.bytes())
             .chain([self.age_range.0])
             .chain(
                 self.hear_id
@@ -216,10 +214,24 @@ impl OutboundPacket for A3933StateUpdatePacket {
                     .map(|hear_id| {
                         [hear_id.is_enabled as u8]
                             .into_iter()
-                            .chain(hear_id.volume_adjustments.bytes())
+                            .chain(
+                                hear_id
+                                    .volume_adjustments
+                                    .iter()
+                                    .map(|v| v.bytes())
+                                    .flatten(),
+                            )
                             .chain(hear_id.time.to_le_bytes())
                             .chain([hear_id.hear_id_type.0])
-                            .chain(hear_id.custom_volume_adjustments.as_ref().unwrap().bytes())
+                            .chain(
+                                hear_id
+                                    .custom_volume_adjustments
+                                    .as_ref()
+                                    .unwrap()
+                                    .iter()
+                                    .map(|v| v.bytes())
+                                    .flatten(),
+                            )
                             .chain([0, 0])
                             .collect()
                     })
@@ -227,12 +239,7 @@ impl OutboundPacket for A3933StateUpdatePacket {
             )
             .chain(self.button_configuration.bytes())
             .chain([self.ambient_sound_mode_cycle.into()])
-            .chain([
-                self.sound_modes.ambient_sound_mode as u8,
-                self.sound_modes.noise_canceling_mode as u8,
-                self.sound_modes.transparency_mode as u8,
-                self.sound_modes.custom_noise_canceling.value(),
-            ])
+            .chain(self.sound_modes.bytes())
             .chain([0, 0])
             .chain([
                 self.touch_tone_switch as u8,
@@ -331,8 +338,9 @@ mod tests {
         assert_eq!(FirmwareVersion::new(2, 61), packet.left_firmware);
         assert_eq!(
             EqualizerConfiguration::new_from_preset_profile(
+                2,
                 PresetEqualizerProfile::SoundcoreSignature,
-                [0, 0]
+                vec![vec![0, 0], vec![255 - 120, 255 - 120]] // subtract 120 to convert from byte value to volume adjustment
             ),
             packet.equalizer_configuration
         );

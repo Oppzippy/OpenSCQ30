@@ -63,6 +63,13 @@ impl VolumeAdjustments {
             .map(|adjustment| Self::signed_adjustment_to_packet_byte(adjustment.into()))
     }
 
+    pub fn into_bytes(self) -> Vec<u8> {
+        self.inner
+            .into_iter()
+            .map(|adjustment| Self::signed_adjustment_to_packet_byte(adjustment.into()))
+            .collect()
+    }
+
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, VolumeAdjustmentsError> {
         Self::new(
             bytes

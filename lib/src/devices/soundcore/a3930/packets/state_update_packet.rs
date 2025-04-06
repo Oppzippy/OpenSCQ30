@@ -21,8 +21,7 @@ use crate::devices::soundcore::{
         },
         structures::{
             AgeRange, CustomHearId, DualBattery, EqualizerConfiguration, Gender,
-            MultiButtonConfiguration, SoundModes, StereoEqualizerConfiguration,
-            StereoVolumeAdjustments, TwsStatus, VolumeAdjustments,
+            MultiButtonConfiguration, SoundModes, TwsStatus, VolumeAdjustments,
         },
     },
 };
@@ -56,7 +55,7 @@ impl InboundPacket for A3930StateUpdatePacket {
                 tuple((
                     TwsStatus::take,
                     DualBattery::take,
-                    StereoEqualizerConfiguration::take(8),
+                    EqualizerConfiguration::take(2, 8),
                     Gender::take,
                     AgeRange::take,
                     CustomHearId::take_with_all_fields,
@@ -109,12 +108,16 @@ impl OutboundPacket for A3930StateUpdatePacket {
                 self.battery.left.level.0,
                 self.battery.right.level.0,
             ])
-            .chain(self.equalizer_configuration.profile_id().to_le_bytes())
-            .chain(self.equalizer_configuration.volume_adjustments().bytes())
-            .chain(self.equalizer_configuration.volume_adjustments().bytes())
+            .chain(self.equalizer_configuration.bytes())
             .chain([self.gender.0, self.age_range.0])
             .chain([self.custom_hear_id.is_enabled as u8])
-            .chain(self.custom_hear_id.volume_adjustments.bytes())
+            .chain(
+                self.custom_hear_id
+                    .volume_adjustments
+                    .iter()
+                    .map(|v| v.bytes())
+                    .flatten(),
+            )
             .chain(self.custom_hear_id.time.to_le_bytes())
             .chain([
                 self.custom_hear_id.hear_id_type.0,
@@ -124,19 +127,16 @@ impl OutboundPacket for A3930StateUpdatePacket {
                 self.custom_hear_id
                     .custom_volume_adjustments
                     .as_ref()
-                    .unwrap_or(&StereoVolumeAdjustments {
-                        left: VolumeAdjustments::new(vec![0; 8]).unwrap(),
-                        right: VolumeAdjustments::new(vec![0; 8]).unwrap(),
-                    })
-                    .bytes(),
+                    .unwrap_or(&vec![
+                        VolumeAdjustments::new(vec![0; 8]).unwrap(),
+                        VolumeAdjustments::new(vec![0; 8]).unwrap(),
+                    ])
+                    .iter()
+                    .map(|v| v.bytes())
+                    .flatten(),
             )
             .chain(self.button_configuration.bytes())
-            .chain([
-                self.sound_modes.ambient_sound_mode as u8,
-                self.sound_modes.noise_canceling_mode as u8,
-                self.sound_modes.transparency_mode as u8,
-                self.sound_modes.custom_noise_canceling.value(),
-            ])
+            .chain(self.sound_modes.bytes())
             .chain([self.side_tone as u8])
             .chain(
                 self.hear_id_eq_index

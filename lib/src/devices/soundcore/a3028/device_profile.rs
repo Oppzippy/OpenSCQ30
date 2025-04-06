@@ -21,7 +21,7 @@ soundcore_device!(A3028State, A3028StateUpdatePacket, async |builder| {
             NoiseCancelingMode::Outdoor,
         ],
     });
-    builder.mono_equalizer().await;
+    builder.equalizer().await;
 });
 
 #[cfg(test)]

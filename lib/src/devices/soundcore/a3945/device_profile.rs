@@ -4,7 +4,7 @@ use super::{packets::A3945StateUpdatePacket, state::A3945State};
 
 soundcore_device!(A3945State, A3945StateUpdatePacket, async |builder| {
     builder.module_collection().add_state_update();
-    builder.stereo_equalizer().await;
+    builder.equalizer().await;
     builder.button_configuration();
 });
 
@@ -113,16 +113,13 @@ mod tests {
 
         let set_eq_packet_bytes = outbound_receiver.recv().await.unwrap();
         assert_eq!(
-            Packet::from(SetEqualizerPacket::new(
-                &EqualizerConfiguration::new_from_preset_profile(
+            Packet::from(SetEqualizerPacket {
+                equalizer_configuration: &EqualizerConfiguration::new_from_preset_profile(
+                    2,
                     PresetEqualizerProfile::TrebleReducer,
-                    [1, 2]
+                    vec![vec![1, 2], vec![3, 4]],
                 ),
-                Some(&EqualizerConfiguration::new_from_preset_profile(
-                    PresetEqualizerProfile::TrebleReducer,
-                    [3, 4]
-                )),
-            ))
+            })
             .bytes(),
             set_eq_packet_bytes
         );

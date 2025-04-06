@@ -54,23 +54,26 @@ impl EqualizerSettingHandler {
 
     fn values_to_volume_adjustments(
         &self,
-        values: impl Iterator<Item = i16>,
-        existing_volume_adjustments: &VolumeAdjustments,
-    ) -> VolumeAdjustments {
+        values: &[i16],
+        existing_volume_adjustments: &[VolumeAdjustments],
+    ) -> Vec<VolumeAdjustments> {
         // Some devices have extra bands, but those aren't exposed to the user, so I have no idea what they're for
         // We can just add back in whatever was there before (we're only showing the user the first 8 bands)
-        VolumeAdjustments::new(
-            values
+        existing_volume_adjustments.iter().map(|volume_adjustments| {
+            VolumeAdjustments::new(
+                values
+                .iter()
                 .take(8)
                 .chain(
-                    existing_volume_adjustments
+                    volume_adjustments
                         .adjustments()
                         .iter()
-                        .cloned()
                         .skip(8),
                 )
+                .cloned()
                 .collect(),
-        ).expect("we have control over the number of values in these vecs, so it should always be a valid number")
+            ).expect("we have control over the number of values in these vecs, so it should always be a valid number")
+        }).collect()
     }
 }
 
@@ -85,8 +88,6 @@ where
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<crate::api::settings::Setting> {
         let equalizer_configuration = state.as_ref();
-        let volume_adjustments_2 =
-            VolumeAdjustments::from(equalizer_configuration.volume_adjustments().to_owned());
         let setting = setting_id.try_into().ok()?;
         Some(match setting {
             EqualizerSetting::PresetProfile => Setting::optional_select_from_enum_all_variants(
@@ -114,7 +115,11 @@ where
                             .lock()
                             .unwrap()
                             .iter()
-                            .find(|(_, v)| v == volume_adjustments_2.adjustments())
+                            .find(|(_, v)| {
+                                v == equalizer_configuration
+                                    .volume_adjustments_channel_1()
+                                    .adjustments()
+                            })
                             .map(|(name, _)| name.clone().into())
                     })
                     .flatten(),
@@ -127,7 +132,7 @@ where
                     max: 134,
                 },
                 values: equalizer_configuration
-                    .volume_adjustments()
+                    .volume_adjustments_channel_1()
                     .adjustments()
                     .to_vec(),
             },
@@ -136,8 +141,6 @@ where
 
     async fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> crate::Result<()> {
         let equalizer_configuration = state.as_mut();
-        let volume_adjustments_2 =
-            VolumeAdjustments::from(equalizer_configuration.volume_adjustments().to_owned());
         let setting = setting_id
             .try_into()
             .expect("already filtered to valid values only by SettingsManager");
@@ -145,13 +148,13 @@ where
             EqualizerSetting::PresetProfile => {
                 if let Some(preset) = value.try_as_optional_enum_variant()? {
                     *equalizer_configuration = EqualizerConfiguration::new_from_preset_profile(
+                        equalizer_configuration.channels(),
                         preset,
                         equalizer_configuration
                             .volume_adjustments()
-                            .adjustments()
                             .iter()
-                            .cloned()
-                            .skip(8),
+                            .map(|v| v.adjustments().iter().cloned().skip(8).collect())
+                            .collect(),
                     )
                 } else {
                     *equalizer_configuration = EqualizerConfiguration::new_custom_profile(
@@ -169,13 +172,12 @@ where
                         .find(|(n, _)| n == name)
                         .map(|(_, volume_adjustments)| volume_adjustments)
                     {
-                        // Select existing profile
+                        // Activate existing profile
                         *state.as_mut() = EqualizerConfiguration::new_custom_profile(
                             self.values_to_volume_adjustments(
-                                volume_adjustments.iter().cloned(),
-                                &volume_adjustments_2,
-                            )
-                            .into(),
+                                volume_adjustments,
+                                &equalizer_configuration.volume_adjustments(),
+                            ),
                         )
                     } else {
                         // Create new profile
@@ -183,7 +185,10 @@ where
                             .upsert_equalizer_profile(
                                 self.device_model,
                                 name.to_owned(),
-                                volume_adjustments_2.adjustments().to_vec(),
+                                equalizer_configuration
+                                    .volume_adjustments_channel_1()
+                                    .adjustments()
+                                    .to_vec(),
                             )
                             .await?;
                         self.refresh().await?;
@@ -196,7 +201,10 @@ where
                         .unwrap()
                         .iter()
                         .find(|(_, volume_adjustments)| {
-                            volume_adjustments == volume_adjustments_2.adjustments()
+                            volume_adjustments
+                                == equalizer_configuration
+                                    .volume_adjustments_channel_1()
+                                    .adjustments()
                         })
                         .map(|(name, _)| name)
                         .cloned();
@@ -212,8 +220,8 @@ where
                 let volume_adjustments = value.try_as_i16_slice()?;
                 *equalizer_configuration = EqualizerConfiguration::new_custom_profile(
                     self.values_to_volume_adjustments(
-                        volume_adjustments.iter().cloned(),
-                        &volume_adjustments_2,
+                        volume_adjustments,
+                        equalizer_configuration.volume_adjustments(),
                     )
                     .into(),
                 );

@@ -66,7 +66,6 @@ where
         packet_io: Arc<PacketIOController<C>>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
-        is_stereo: bool,
     ) where
         C: Connection + 'static + Send + Sync,
     {
@@ -77,10 +76,7 @@ where
         self.state_modifiers
             .push(Box::new(EqualizerStateModifier::new(
                 packet_io,
-                EqualizerStateModifierOptions {
-                    is_stereo,
-                    has_drc: false,
-                },
+                EqualizerStateModifierOptions { has_drc: false },
             )));
     }
 
@@ -89,7 +85,6 @@ where
         packet_io: Arc<PacketIOController<C>>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
-        is_stereo: bool,
     ) where
         C: Connection + 'static + Send + Sync,
     {
@@ -100,10 +95,7 @@ where
         self.state_modifiers
             .push(Box::new(EqualizerStateModifier::new(
                 packet_io,
-                EqualizerStateModifierOptions {
-                    is_stereo,
-                    has_drc: true,
-                },
+                EqualizerStateModifierOptions { has_drc: true },
             )));
     }
 }

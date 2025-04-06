@@ -45,7 +45,7 @@ impl InboundPacket for A3033StateUpdatePacket {
             all_consuming(map(
                 tuple((
                     SingleBattery::take,
-                    EqualizerConfiguration::take(8),
+                    EqualizerConfiguration::take(1, 8),
                     FirmwareVersion::take,
                     SerialNumber::take,
                     take_bool,
@@ -78,8 +78,7 @@ impl OutboundPacket for A3033StateUpdatePacket {
     fn body(&self) -> Vec<u8> {
         [self.battery.is_charging as u8, self.battery.level.0]
             .into_iter()
-            .chain(self.equalizer_configuration.profile_id().to_le_bytes())
-            .chain(self.equalizer_configuration.volume_adjustments().bytes())
+            .chain(self.equalizer_configuration.bytes())
             .chain(self.firmware_version.to_string().into_bytes())
             .chain(self.serial_number.0.as_bytes().iter().cloned())
             .chain([self.wear_detection as u8])

@@ -21,7 +21,7 @@ use crate::devices::soundcore::{
         },
         structures::{
             Command, DualBattery, EqualizerConfiguration, MultiButtonConfiguration, SoundModes,
-            StereoEqualizerConfiguration, TwsStatus,
+            TwsStatus,
         },
     },
 };
@@ -53,7 +53,7 @@ impl InboundPacket for A3031StateUpdatePacket {
                 tuple((
                     TwsStatus::take,
                     DualBattery::take,
-                    StereoEqualizerConfiguration::take(8),
+                    EqualizerConfiguration::take(2, 8),
                     MultiButtonConfiguration::take,
                     SoundModes::take,
                     take_bool,
@@ -104,16 +104,9 @@ impl OutboundPacket for A3031StateUpdatePacket {
                 self.battery.left.is_charging as u8,
                 self.battery.right.is_charging as u8,
             ])
-            .chain(self.equalizer_configuration.profile_id().to_le_bytes())
-            .chain(self.equalizer_configuration.volume_adjustments().bytes())
-            .chain(self.equalizer_configuration.volume_adjustments().bytes())
+            .chain(self.equalizer_configuration.bytes())
             .chain(self.button_configuration.bytes())
-            .chain([
-                self.sound_modes.ambient_sound_mode.id(),
-                self.sound_modes.noise_canceling_mode.id(),
-                self.sound_modes.transparency_mode.id(),
-                self.sound_modes.custom_noise_canceling.value(),
-            ])
+            .chain(self.sound_modes.bytes())
             .chain([
                 self.side_tone as u8,
                 self.touch_tone as u8,

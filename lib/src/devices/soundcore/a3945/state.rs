@@ -43,7 +43,7 @@ impl From<A3945StateUpdatePacket> for A3945State {
             left_firmware: value.left_firmware,
             right_firmware: value.right_firmware,
             serial_number: value.serial_number,
-            equalizer_configuration: value.left_equalizer_configuration,
+            equalizer_configuration: value.equalizer_configuration,
             button_configuration: value.button_configuration,
             touch_tone_switch: value.touch_tone_switch,
             wear_detection_switch: value.wear_detection_switch,

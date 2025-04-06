@@ -19,7 +19,7 @@ use crate::devices::soundcore::{
         },
         structures::{
             AgeRange, BasicHearId, DualBattery, EqualizerConfiguration, Gender,
-            MultiButtonConfiguration, StereoEqualizerConfiguration, TwsStatus,
+            MultiButtonConfiguration, TwsStatus,
         },
     },
 };
@@ -49,7 +49,7 @@ impl InboundPacket for A3926StateUpdatePacket {
                 tuple((
                     TwsStatus::take,
                     DualBattery::take,
-                    StereoEqualizerConfiguration::take(8),
+                    EqualizerConfiguration::take(2, 8),
                     Gender::take,
                     AgeRange::take,
                     BasicHearId::take,
@@ -94,13 +94,9 @@ impl OutboundPacket for A3926StateUpdatePacket {
                 self.battery.left.level.0,
                 self.battery.right.level.0,
             ])
-            .chain(self.equalizer_configuration.profile_id().to_le_bytes())
-            .chain(self.equalizer_configuration.volume_adjustments().bytes())
-            .chain(self.equalizer_configuration.volume_adjustments().bytes())
+            .chain(self.equalizer_configuration.bytes())
             .chain([self.gender.0, self.age_range.0])
-            .chain([self.hear_id.is_enabled as u8])
-            .chain(self.hear_id.volume_adjustments.bytes())
-            .chain(self.hear_id.time.to_le_bytes())
+            .chain(self.hear_id.bytes())
             .chain(self.button_configuration.bytes())
             .collect()
     }

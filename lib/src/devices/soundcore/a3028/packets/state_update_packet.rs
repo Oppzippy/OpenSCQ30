@@ -53,7 +53,7 @@ impl InboundPacket for A3028StateUpdatePacket {
             all_consuming(map(
                 tuple((
                     SingleBattery::take,
-                    EqualizerConfiguration::take(8),
+                    EqualizerConfiguration::take(1, 8),
                     Gender::take,
                     AgeRange::take,
                     BasicHearId::take,
@@ -98,19 +98,11 @@ impl OutboundPacket for A3028StateUpdatePacket {
     fn body(&self) -> Vec<u8> {
         [self.battery.level.0, self.battery.is_charging as u8]
             .into_iter()
-            .chain(self.equalizer_configuration.profile_id().to_le_bytes())
-            .chain(self.equalizer_configuration.volume_adjustments().bytes())
+            .chain(self.equalizer_configuration.bytes())
             .chain([self.gender.0])
             .chain([self.age_range.0])
-            .chain([self.hear_id.is_enabled as u8])
-            .chain(self.hear_id.volume_adjustments.bytes())
-            .chain(self.hear_id.time.to_le_bytes())
-            .chain([
-                self.sound_modes.ambient_sound_mode.id(),
-                self.sound_modes.noise_canceling_mode.id(),
-                self.sound_modes.transparency_mode.id(),
-                self.sound_modes.custom_noise_canceling.value(),
-            ])
+            .chain(self.hear_id.bytes())
+            .chain(self.sound_modes.bytes())
             .chain(self.firmware_version.to_string().into_bytes())
             .chain(self.serial_number.as_str().as_bytes().iter().cloned())
             .collect()
@@ -232,7 +224,11 @@ mod tests {
             packet.sound_modes,
         );
         assert_eq!(
-            EqualizerConfiguration::new_from_preset_profile(PresetEqualizerProfile::Acoustic, []),
+            EqualizerConfiguration::new_from_preset_profile(
+                1,
+                PresetEqualizerProfile::Acoustic,
+                Vec::new()
+            ),
             packet.equalizer_configuration
         );
     }
@@ -263,7 +259,9 @@ mod tests {
         assert!(packet.equalizer_configuration.preset_profile().is_none());
         assert_eq!(
             &VolumeAdjustments::new(vec![-60, 60, 23, 40, 22, 60, -4, 16]).unwrap(),
-            packet.equalizer_configuration.volume_adjustments(),
+            packet
+                .equalizer_configuration
+                .volume_adjustments_channel_1(),
         );
     }
 
@@ -292,7 +290,9 @@ mod tests {
         assert!(packet.equalizer_configuration.preset_profile().is_none());
         assert_eq!(
             &VolumeAdjustments::new(vec![-60, 60, 23, 40, 22, 60, -4, 16]).unwrap(),
-            packet.equalizer_configuration.volume_adjustments(),
+            packet
+                .equalizer_configuration
+                .volume_adjustments_channel_1(),
         );
     }
 
@@ -322,7 +322,9 @@ mod tests {
         assert!(packet.equalizer_configuration.preset_profile().is_none());
         assert_eq!(
             &VolumeAdjustments::new(vec![-60, 60, 23, 40, 22, 60, -4, 16]).unwrap(),
-            packet.equalizer_configuration.volume_adjustments(),
+            packet
+                .equalizer_configuration
+                .volume_adjustments_channel_1(),
         );
     }
 

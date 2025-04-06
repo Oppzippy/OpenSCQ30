@@ -22,7 +22,6 @@ pub struct EqualizerStateModifier<ConnectionType: Connection> {
 }
 
 pub struct EqualizerStateModifierOptions {
-    pub is_stereo: bool,
     pub has_drc: bool,
 }
 
@@ -55,15 +54,17 @@ where
             }
         }
 
-        let right_side = self
-            .options
-            .is_stereo
-            .then_some(target_equalizer_configuration);
         self.packet_io
             .send(&if self.options.has_drc {
-                SetEqualizerWithDrcPacket::new(target_equalizer_configuration, right_side).into()
+                SetEqualizerWithDrcPacket {
+                    equalizer_configuration: target_equalizer_configuration,
+                }
+                .into()
             } else {
-                SetEqualizerPacket::new(target_equalizer_configuration, right_side).into()
+                SetEqualizerPacket {
+                    equalizer_configuration: target_equalizer_configuration,
+                }
+                .into()
             })
             .await?;
         state_sender.send_modify(|state| *state.as_mut() = target_equalizer_configuration.clone());

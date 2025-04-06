@@ -21,8 +21,7 @@ use crate::devices::soundcore::{
         },
         structures::{
             BatteryLevel, Command, DualBattery, EqualizerConfiguration, FirmwareVersion,
-            MultiButtonConfiguration, SerialNumber, StereoEqualizerConfiguration,
-            TwsStatus,
+            MultiButtonConfiguration, SerialNumber, TwsStatus,
         },
     },
 };
@@ -36,8 +35,7 @@ pub struct A3945StateUpdatePacket {
     pub left_firmware: FirmwareVersion,
     pub right_firmware: FirmwareVersion,
     pub serial_number: SerialNumber,
-    pub left_equalizer_configuration: EqualizerConfiguration,
-    pub right_equalizer_configuration: EqualizerConfiguration,
+    pub equalizer_configuration: EqualizerConfiguration,
     pub button_configuration: MultiButtonConfiguration,
     pub touch_tone_switch: bool,
     pub wear_detection_switch: bool,
@@ -64,7 +62,7 @@ impl InboundPacket for A3945StateUpdatePacket {
                     FirmwareVersion::take,
                     FirmwareVersion::take,
                     SerialNumber::take,
-                    StereoEqualizerConfiguration::take(10),
+                    EqualizerConfiguration::take(2, 10),
                     MultiButtonConfiguration::take,
                     take_bool,
                     take_bool,
@@ -94,8 +92,7 @@ impl InboundPacket for A3945StateUpdatePacket {
                         left_firmware,
                         right_firmware,
                         serial_number,
-                        left_equalizer_configuration: equalizer_configuration.clone(),
-                        right_equalizer_configuration: equalizer_configuration,
+                        equalizer_configuration,
                         button_configuration,
                         touch_tone_switch,
                         wear_detection_switch,
@@ -123,17 +120,7 @@ impl OutboundPacket for A3945StateUpdatePacket {
             .chain(self.left_firmware.to_string().into_bytes())
             .chain(self.right_firmware.to_string().into_bytes())
             .chain(self.serial_number.to_string().into_bytes())
-            .chain(self.left_equalizer_configuration.profile_id().to_le_bytes())
-            .chain(
-                self.left_equalizer_configuration
-                    .volume_adjustments()
-                    .bytes(),
-            )
-            .chain(
-                self.right_equalizer_configuration
-                    .volume_adjustments()
-                    .bytes(),
-            )
+            .chain(self.equalizer_configuration.bytes())
             .chain(self.button_configuration.bytes())
             .chain([
                 self.touch_tone_switch as u8,

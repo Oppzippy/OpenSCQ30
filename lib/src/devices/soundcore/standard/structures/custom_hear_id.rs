@@ -3,6 +3,7 @@ use nom::{
     bytes::complete::take,
     combinator::map,
     error::{ContextError, ParseError, context},
+    multi::count,
     number::complete::le_i32,
     sequence::tuple,
 };
@@ -11,18 +12,31 @@ use serde::{Deserialize, Serialize};
 
 use crate::devices::soundcore::standard::packets::parsing::take_bool;
 
-use super::{HearIdMusicType, HearIdType, StereoVolumeAdjustments, VolumeAdjustments};
+use super::{HearIdMusicType, HearIdType, VolumeAdjustments};
 
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct CustomHearId {
     pub is_enabled: bool,
-    pub volume_adjustments: StereoVolumeAdjustments,
+    pub volume_adjustments: Vec<VolumeAdjustments>,
     pub time: i32,
     pub hear_id_type: HearIdType,
     pub hear_id_music_type: HearIdMusicType,
-    pub custom_volume_adjustments: Option<StereoVolumeAdjustments>,
+    pub custom_volume_adjustments: Option<Vec<VolumeAdjustments>>,
+}
+
+impl Default for CustomHearId {
+    fn default() -> Self {
+        Self {
+            is_enabled: Default::default(),
+            volume_adjustments: vec![Default::default(), Default::default()],
+            time: Default::default(),
+            hear_id_type: Default::default(),
+            hear_id_music_type: Default::default(),
+            custom_volume_adjustments: Default::default(),
+        }
+    }
 }
 
 impl CustomHearId {
@@ -34,7 +48,7 @@ impl CustomHearId {
             map(
                 tuple((
                     take_bool,
-                    StereoVolumeAdjustments::take(8),
+                    count(VolumeAdjustments::take(8), 2),
                     le_i32,
                     HearIdType::take,
                     HearIdMusicType::take,
@@ -54,10 +68,7 @@ impl CustomHearId {
                     let custom_volume_adjustments = if custom_left_values[0] != 255 {
                         let custom_left = VolumeAdjustments::from_bytes(custom_left_values)
                             .expect("length was already verified by take(8)");
-                        Some(StereoVolumeAdjustments {
-                            left: custom_left,
-                            right: custom_right,
-                        })
+                        Some(vec![custom_left, custom_right])
                     } else {
                         None
                     };
@@ -83,10 +94,10 @@ impl CustomHearId {
             map(
                 tuple((
                     take_bool,
-                    StereoVolumeAdjustments::take(num_bands),
+                    count(VolumeAdjustments::take(num_bands), 2),
                     le_i32,
                     HearIdType::take,
-                    StereoVolumeAdjustments::take(num_bands),
+                    count(VolumeAdjustments::take(num_bands), 2),
                     take(2usize), // hear id eq index?
                 )),
                 |(

@@ -29,7 +29,8 @@ impl OutboundPacket for SetEqualizerAndCustomHearIdPacket<'_> {
         // - 0xee00 (some sort of initial value?)
         const EQ_HEAR_INDEX_ID: u16 = 0xfefe;
 
-        const MAX_VALUE_STEREO_EQ_WAVE: [u8; 16] = [255; 16];
+        let max_value_stereo_eq_wave = [255]
+            .repeat(self.equalizer_configuration.channels() * self.equalizer_configuration.bands());
         let mut bytes = Vec::with_capacity(76);
         let supports_hear_id = self.age_range.supports_hear_id();
 
@@ -38,8 +39,7 @@ impl OutboundPacket for SetEqualizerAndCustomHearIdPacket<'_> {
             bytes.extend(EQ_HEAR_INDEX_ID.to_le_bytes());
         }
         let eq = self.equalizer_configuration.volume_adjustments();
-        bytes.extend(eq.bytes()); // left
-        bytes.extend(eq.bytes()); // right
+        bytes.extend(eq.iter().map(|v| v.bytes()).flatten());
         bytes.push(if supports_hear_id {
             self.gender.0
         } else {
@@ -52,9 +52,15 @@ impl OutboundPacket for SetEqualizerAndCustomHearIdPacket<'_> {
         });
         bytes.push(0); // ??
         if supports_hear_id {
-            bytes.extend(self.custom_hear_id.volume_adjustments.bytes());
+            bytes.extend(
+                self.custom_hear_id
+                    .volume_adjustments
+                    .iter()
+                    .map(|v| v.bytes())
+                    .flatten(),
+            );
         } else {
-            bytes.extend(MAX_VALUE_STEREO_EQ_WAVE);
+            bytes.extend(&max_value_stereo_eq_wave);
         }
         bytes.extend(if supports_hear_id {
             self.custom_hear_id.time.to_be_bytes()
@@ -67,15 +73,18 @@ impl OutboundPacket for SetEqualizerAndCustomHearIdPacket<'_> {
             0
         });
         match &self.custom_hear_id.custom_volume_adjustments {
-            Some(adjustments) if supports_hear_id => bytes.extend(adjustments.bytes()),
-            _ => bytes.extend(MAX_VALUE_STEREO_EQ_WAVE),
+            Some(adjustments) if supports_hear_id => {
+                bytes.extend(adjustments.iter().map(|v| v.bytes()).flatten())
+            }
+            _ => bytes.extend(&max_value_stereo_eq_wave),
         }
-        let drc = self
-            .equalizer_configuration
-            .volume_adjustments()
-            .apply_drc();
-        bytes.extend(drc.bytes()); // left
-        bytes.extend(drc.bytes()); // right
+        bytes.extend(
+            self.equalizer_configuration
+                .volume_adjustments()
+                .iter()
+                .map(|v| v.apply_drc().into_bytes())
+                .flatten(),
+        );
 
         bytes
     }
@@ -87,7 +96,7 @@ mod tests {
         packets::outbound::OutboundPacketBytesExt,
         structures::{
             AgeRange, CustomHearId, EqualizerConfiguration, Gender, HearIdMusicType, HearIdType,
-            PresetEqualizerProfile, StereoVolumeAdjustments, VolumeAdjustments,
+            PresetEqualizerProfile, VolumeAdjustments,
         },
     };
 
@@ -105,28 +114,27 @@ mod tests {
             0x6c, 0x0e,
         ];
         let actual = SetEqualizerAndCustomHearIdPacket {
-            equalizer_configuration: &EqualizerConfiguration::new_custom_profile(
+            equalizer_configuration: &EqualizerConfiguration::new_custom_profile(vec![
                 VolumeAdjustments::new(vec![-52, -66, -64, -67, -108, -22, -49, -101]).unwrap(),
-            ),
+                VolumeAdjustments::new(vec![-52, -66, -64, -67, -108, -22, -49, -101]).unwrap(),
+            ]),
             gender: Gender(1),
             age_range: AgeRange(2),
             custom_hear_id: &CustomHearId {
                 is_enabled: true,
-                volume_adjustments: StereoVolumeAdjustments {
-                    left: VolumeAdjustments::new(vec![-67, -104, -72, -111, -44, -51, -76, -50])
-                        .unwrap(),
-                    right: VolumeAdjustments::new(vec![-78, -104, -10, -95, -04, -92, -80, -66])
-                        .unwrap(),
-                },
+                volume_adjustments: vec![
+                    VolumeAdjustments::new(vec![-67, -104, -72, -111, -44, -51, -76, -50]).unwrap(),
+                    VolumeAdjustments::new(vec![-78, -104, -10, -95, -04, -92, -80, -66]).unwrap(),
+                ],
                 time: 100000,
                 hear_id_type: HearIdType(5),
                 hear_id_music_type: HearIdMusicType(0),
-                custom_volume_adjustments: Some(StereoVolumeAdjustments {
-                    left: VolumeAdjustments::new(vec![-109, -52, -73, -02, -101, -116, -118, -39])
+                custom_volume_adjustments: Some(vec![
+                    VolumeAdjustments::new(vec![-109, -52, -73, -02, -101, -116, -118, -39])
                         .unwrap(),
-                    right: VolumeAdjustments::new(vec![-12, -112, -36, -41, -24, -113, -106, -21])
+                    VolumeAdjustments::new(vec![-12, -112, -36, -41, -24, -113, -106, -21])
                         .unwrap(),
-                }),
+                ]),
             },
         }
         .bytes();
@@ -146,28 +154,25 @@ mod tests {
         ];
         let actual = SetEqualizerAndCustomHearIdPacket {
             equalizer_configuration: &EqualizerConfiguration::new_from_preset_profile(
+                2,
                 PresetEqualizerProfile::SoundcoreSignature,
-                [],
+                Vec::new(),
             ),
             gender: Gender(1),
             age_range: AgeRange(255),
             custom_hear_id: &CustomHearId {
                 is_enabled: true,
-                volume_adjustments: StereoVolumeAdjustments {
-                    left: VolumeAdjustments::new(vec![-33, -01, -33, -62, -9, -99, -19, -21])
-                        .unwrap(),
-                    right: VolumeAdjustments::new(vec![-46, -19, -111, -2, -10, -06, -100, -101])
-                        .unwrap(),
-                },
+                volume_adjustments: vec![
+                    VolumeAdjustments::new(vec![-33, -01, -33, -62, -9, -99, -19, -21]).unwrap(),
+                    VolumeAdjustments::new(vec![-46, -19, -111, -2, -10, -06, -100, -101]).unwrap(),
+                ],
                 time: 100000,
                 hear_id_type: HearIdType(5),
                 hear_id_music_type: HearIdMusicType(0),
-                custom_volume_adjustments: Some(StereoVolumeAdjustments {
-                    left: VolumeAdjustments::new(vec![-90, -67, -53, -79, -13, -12, -73, -99])
-                        .unwrap(),
-                    right: VolumeAdjustments::new(vec![-24, -67, -40, -41, -38, -102, -119, -24])
-                        .unwrap(),
-                }),
+                custom_volume_adjustments: Some(vec![
+                    VolumeAdjustments::new(vec![-90, -67, -53, -79, -13, -12, -73, -99]).unwrap(),
+                    VolumeAdjustments::new(vec![-24, -67, -40, -41, -38, -102, -119, -24]).unwrap(),
+                ]),
             },
         }
         .bytes();

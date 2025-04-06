@@ -21,5 +21,5 @@ soundcore_device!(A3027State, A3027StateUpdatePacket, async |builder| {
             NoiseCancelingMode::Outdoor,
         ],
     });
-    builder.mono_equalizer().await;
+    builder.equalizer().await;
 });

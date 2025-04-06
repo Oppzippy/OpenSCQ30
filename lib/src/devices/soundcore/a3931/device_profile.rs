@@ -16,6 +16,6 @@ soundcore_device!(A3931State, A3931StateUpdatePacket, async |builder| {
         ],
         noise_canceling_modes: Vec::new(),
     });
-    builder.stereo_equalizer_with_drc().await;
+    builder.equalizer_with_drc().await;
     builder.button_configuration();
 });

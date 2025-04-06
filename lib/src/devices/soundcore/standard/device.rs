@@ -178,7 +178,7 @@ where
             .add_sound_modes(self.packet_io_controller.clone(), available_sound_modes);
     }
 
-    pub async fn mono_equalizer(&mut self)
+    pub async fn equalizer(&mut self)
     where
         StateType: AsRef<EqualizerConfiguration> + AsMut<EqualizerConfiguration>,
     {
@@ -187,26 +187,11 @@ where
                 self.packet_io_controller.clone(),
                 self.database.clone(),
                 self.device_model,
-                false,
             )
             .await;
     }
 
-    pub async fn stereo_equalizer(&mut self)
-    where
-        StateType: AsRef<EqualizerConfiguration> + AsMut<EqualizerConfiguration>,
-    {
-        self.module_collection
-            .add_equalizer(
-                self.packet_io_controller.clone(),
-                self.database.clone(),
-                self.device_model,
-                true,
-            )
-            .await;
-    }
-
-    pub async fn mono_equalizer_with_drc(&mut self)
+    pub async fn equalizer_with_drc(&mut self)
     where
         StateType: AsRef<EqualizerConfiguration> + AsMut<EqualizerConfiguration>,
     {
@@ -215,26 +200,11 @@ where
                 self.packet_io_controller.clone(),
                 self.database.clone(),
                 self.device_model,
-                false,
             )
             .await
     }
 
-    pub async fn stereo_equalizer_with_drc(&mut self)
-    where
-        StateType: AsRef<EqualizerConfiguration> + AsMut<EqualizerConfiguration>,
-    {
-        self.module_collection
-            .add_equalizer_with_drc(
-                self.packet_io_controller.clone(),
-                self.database.clone(),
-                self.device_model,
-                true,
-            )
-            .await
-    }
-
-    pub async fn stereo_equalizer_with_basic_hear_id(&mut self)
+    pub async fn equalizer_with_basic_hear_id(&mut self)
     where
         StateType: AsMut<EqualizerConfiguration> + AsRef<EqualizerConfiguration>,
         StateType: AsRef<BasicHearId> + AsRef<Gender> + AsRef<AgeRange>,
@@ -248,7 +218,7 @@ where
             .await
     }
 
-    pub async fn stereo_equalizer_with_custom_hear_id(&mut self)
+    pub async fn equalizer_with_custom_hear_id(&mut self)
     where
         StateType: AsMut<EqualizerConfiguration> + AsRef<EqualizerConfiguration>,
         StateType: AsRef<CustomHearId> + AsRef<Gender> + AsRef<AgeRange>,
@@ -264,8 +234,7 @@ where
 
     pub fn button_configuration(&mut self)
     where
-        StateType:
-            AsRef<MultiButtonConfiguration> + AsMut<MultiButtonConfiguration>,
+        StateType: AsRef<MultiButtonConfiguration> + AsMut<MultiButtonConfiguration>,
         StateType: AsRef<TwsStatus>,
     {
         self.module_collection

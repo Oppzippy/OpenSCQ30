@@ -12,6 +12,6 @@ soundcore_device!(A3930State, A3930StateUpdatePacket, async |builder| {
         transparency_modes: Vec::new(),
         noise_canceling_modes: Vec::new(),
     });
-    builder.stereo_equalizer_with_custom_hear_id().await;
+    builder.equalizer_with_custom_hear_id().await;
     builder.button_configuration();
 });

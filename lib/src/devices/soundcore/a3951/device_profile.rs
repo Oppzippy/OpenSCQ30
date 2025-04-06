@@ -25,6 +25,6 @@ soundcore_device!(A3951State, A3951StateUpdatePacket, async |builder| {
             NoiseCancelingMode::Custom,
         ],
     });
-    builder.stereo_equalizer_with_custom_hear_id().await;
+    builder.equalizer_with_custom_hear_id().await;
     builder.button_configuration();
 });
