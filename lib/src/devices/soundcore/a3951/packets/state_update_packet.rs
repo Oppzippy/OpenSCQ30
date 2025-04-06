@@ -176,8 +176,8 @@ impl OutboundPacket for A3951StateUpdatePacket {
                     .custom_volume_adjustments
                     .as_ref()
                     .unwrap_or(&StereoVolumeAdjustments {
-                        left: VolumeAdjustments::new(vec![0f64; 8]).unwrap(),
-                        right: VolumeAdjustments::new(vec![0f64; 8]).unwrap(),
+                        left: VolumeAdjustments::new(vec![0; 8]).unwrap(),
+                        right: VolumeAdjustments::new(vec![0; 8]).unwrap(),
                     })
                     .bytes(),
             )

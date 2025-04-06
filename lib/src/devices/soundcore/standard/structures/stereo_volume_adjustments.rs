@@ -50,8 +50,8 @@ mod tests {
     #[test]
     fn it_orders_bytes_correctly() {
         let stereo_volume_adjustments = StereoVolumeAdjustments {
-            left: VolumeAdjustments::new([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]).unwrap(),
-            right: VolumeAdjustments::new([0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5]).unwrap(),
+            left: VolumeAdjustments::new(vec![0, 1, 2, 3, 4, 5, 6, 7]).unwrap(),
+            right: VolumeAdjustments::new(vec![8, 9, 10, 11, 12, 13, 14, 15]).unwrap(),
         };
         let bytes = stereo_volume_adjustments.bytes().collect::<Vec<_>>();
         assert_eq!(

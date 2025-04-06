@@ -54,7 +54,7 @@ impl EqualizerConfiguration {
 
     pub fn new_from_preset_profile(
         preset_profile: PresetEqualizerProfile,
-        extra_adjustments: impl IntoIterator<Item = f64>,
+        extra_adjustments: impl IntoIterator<Item = i16>,
     ) -> Self {
         Self {
             preset_profile: Some(preset_profile),
@@ -64,7 +64,8 @@ impl EqualizerConfiguration {
                     .adjustments()
                     .iter()
                     .cloned()
-                    .chain(extra_adjustments.into_iter()),
+                    .chain(extra_adjustments.into_iter())
+                    .collect(),
             )
             .unwrap(),
         }

@@ -4,73 +4,45 @@ use nom::{
     combinator::map,
     error::{ContextError, ParseError, context},
 };
-use std::{array, ops::Range, sync::Arc};
-
-use float_cmp::{ApproxEq, F64Margin};
-use ordered_float::OrderedFloat;
-#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+use std::{array, ops::RangeInclusive};
 
-#[derive(Clone, Debug, PartialOrd)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(transparent))]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct VolumeAdjustments {
-    volume_adjustments: Arc<[OrderedFloat<f64>]>,
-}
-
-// It's not true that a == b and b == c implies a == c here, since a could be on the lower end of
-// b's bounds and c could be on the upper end. This means we should not implement Eq, only PartialEq.
-impl PartialEq for VolumeAdjustments {
-    fn eq(&self, other: &Self) -> bool {
-        self.approx_eq(other, Self::MARGIN)
-    }
+    inner: Vec<i16>,
 }
 
 impl Default for VolumeAdjustments {
     fn default() -> Self {
-        let volume_adjustments: [OrderedFloat<f64>; 8] = Default::default();
-        Self {
-            volume_adjustments: Arc::new(volume_adjustments),
-        }
+        Self { inner: vec![0; 8] }
     }
 }
 
 #[derive(thiserror::Error, Debug)]
 pub enum VolumeAdjustmentsError {
     #[error("invalid number of bands ({}), {values:?}", values.len())]
-    InvalidNumberOfBands { values: Arc<[OrderedFloat<f64>]> },
+    InvalidNumberOfBands { values: Vec<i16> },
 }
 
 impl VolumeAdjustments {
-    pub const STEP: f64 = 0.1;
-    pub const MIN_VOLUME: f64 = -12.0;
-    pub const MAX_VOLUME: f64 = ((u8::MAX - 120) as f64) / 10.0;
-    pub const MARGIN: F64Margin = F64Margin {
-        epsilon: f32::EPSILON as f64 * 20.0,
-        ulps: 4,
-    };
-    pub const VALID_NUMBER_OF_BANDS: Range<usize> = 8..11;
+    pub const FRACTION_DIGITS: u8 = 1;
+    pub const MIN_VOLUME: i16 = -120;
+    pub const MAX_VOLUME: i16 = (u8::MAX - 121) as i16;
+    pub const VALID_NUMBER_OF_BANDS: RangeInclusive<usize> = 8..=10;
 
-    pub fn new(
-        volume_adjustments: impl IntoIterator<Item = f64>,
-    ) -> Result<Self, VolumeAdjustmentsError> {
-        let clamped_adjustments = volume_adjustments
+    pub fn new(volume_adjustments: Vec<i16>) -> Result<Self, VolumeAdjustmentsError> {
+        let clamped = volume_adjustments
             .into_iter()
             .map(|vol| vol.clamp(Self::MIN_VOLUME, Self::MAX_VOLUME))
-            .map(OrderedFloat::from)
-            .collect::<Arc<[OrderedFloat<f64>]>>();
-        if !Self::VALID_NUMBER_OF_BANDS.contains(&clamped_adjustments.len()) {
-            return Err(VolumeAdjustmentsError::InvalidNumberOfBands {
-                values: clamped_adjustments,
-            });
+            .collect::<Vec<i16>>();
+        if !Self::VALID_NUMBER_OF_BANDS.contains(&clamped.len()) {
+            return Err(VolumeAdjustmentsError::InvalidNumberOfBands { values: clamped });
         }
 
-        Ok(Self {
-            volume_adjustments: clamped_adjustments,
-        })
+        Ok(Self { inner: clamped })
     }
 
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         num_bands: usize,
     ) -> impl Fn(&'a [u8]) -> IResult<&'a [u8], VolumeAdjustments, E> {
         move |input| {
@@ -85,7 +57,7 @@ impl VolumeAdjustments {
     }
 
     pub fn bytes(&self) -> impl Iterator<Item = u8> + '_ {
-        self.volume_adjustments
+        self.inner
             .iter()
             .cloned()
             .map(|adjustment| Self::signed_adjustment_to_packet_byte(adjustment.into()))
@@ -96,36 +68,38 @@ impl VolumeAdjustments {
             bytes
                 .iter()
                 .cloned()
-                .map(Self::packet_byte_to_signed_adjustment),
+                .map(Self::packet_byte_to_signed_adjustment)
+                .collect(),
         )
     }
 
-    pub fn adjustments(&self) -> Arc<[f64]> {
-        // return Arc<f64> so we have the option to avoid the allocation in the future
-        // since OrderedFloat<f64> has repr transparent
-        self.volume_adjustments
-            .iter()
-            .map(|x| x.into_inner())
-            .collect::<Arc<[f64]>>()
+    pub fn adjustments(&self) -> &[i16] {
+        &self.inner
     }
 
-    fn signed_adjustment_to_packet_byte(adjustment: f64) -> u8 {
+    fn signed_adjustment_to_packet_byte(adjustment: i16) -> u8 {
         let clamped = adjustment.clamp(Self::MIN_VOLUME, Self::MAX_VOLUME);
-        let shifted = (clamped - Self::MIN_VOLUME) * 10.0;
-        shifted.round() as u8
+        let shifted = clamped - Self::MIN_VOLUME;
+        shifted
+            .try_into()
+            .expect("value is already clamped, so it can't overflow")
     }
 
-    fn packet_byte_to_signed_adjustment(byte: u8) -> f64 {
-        (byte as f64) / 10.0 + Self::MIN_VOLUME
+    fn packet_byte_to_signed_adjustment(byte: u8) -> i16 {
+        (byte as i16) + (Self::MIN_VOLUME as i16)
     }
 
     pub fn apply_drc(&self) -> VolumeAdjustments {
-        let adjustments = &self.volume_adjustments;
+        let adjustments = self
+            .inner
+            .iter()
+            .map(|adjustment| *adjustment as f64 / 10_i16.pow(Self::FRACTION_DIGITS as u32) as f64)
+            .collect::<Vec<_>>();
 
         const SMALLER_COEFFICIENT: f64 = 0.85;
         const LARGER_COEFFICIENT: f64 = 0.95;
-        let lows_subtraction = adjustments[2].into_inner() * 0.81 * SMALLER_COEFFICIENT;
-        let highs_subtraction = adjustments[5].into_inner() * 0.81 * SMALLER_COEFFICIENT;
+        let lows_subtraction = adjustments[2] * 0.81 * SMALLER_COEFFICIENT;
+        let highs_subtraction = adjustments[5] * 0.81 * SMALLER_COEFFICIENT;
 
         let band_coefficients = [
             // 0
@@ -236,7 +210,7 @@ impl VolumeAdjustments {
                     {
                         acc - highs_subtraction
                     } else {
-                        acc + adjustment.into_inner() * coefficients[index]
+                        acc + adjustment * coefficients[index]
                     }
                 })
         });
@@ -244,11 +218,14 @@ impl VolumeAdjustments {
         let new_adjustments_8_bands = multiplied_adjustments_8_bands.map(|band| band / 10.0);
 
         // Add bands 9+ back on to the end
-        let new_adjustments_with_all_bands = new_adjustments_8_bands.into_iter().chain(
-            adjustments[8..]
-                .iter()
-                .map(|oredered_float| oredered_float.into_inner()),
-        );
+        let new_adjustments_with_all_bands = new_adjustments_8_bands
+            .into_iter()
+            .chain(adjustments[8..].iter().cloned())
+            // convert back to ints from floats
+            .map(|adjustment| {
+                (adjustment * 10_i16.pow(Self::FRACTION_DIGITS as u32) as f64).round() as i16
+            })
+            .collect::<Vec<_>>();
 
         VolumeAdjustments::new(new_adjustments_with_all_bands).expect(
             "we are passing the same number of bands as self has, so it must be a valid number for self to exist",
@@ -256,35 +233,15 @@ impl VolumeAdjustments {
     }
 }
 
-impl ApproxEq for VolumeAdjustments {
-    type Margin = F64Margin;
-
-    fn approx_eq<M: Into<Self::Margin>>(self, other: Self, margin: M) -> bool {
-        ApproxEq::approx_eq(&self, &other, margin)
-    }
-}
-
-impl ApproxEq for &VolumeAdjustments {
-    type Margin = F64Margin;
-
-    fn approx_eq<M: Into<Self::Margin>>(self, other: Self, margin: M) -> bool {
-        let margin = margin.into();
-        self.adjustments()
-            .iter()
-            .zip(other.adjustments().iter())
-            .all(|(left, right)| left.approx_eq(*right, margin))
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::VolumeAdjustments;
     const TEST_BYTES: [u8; 8] = [0, 80, 100, 120, 140, 160, 180, 240];
-    const TEST_ADJUSTMENTS: [f64; 8] = [-12.0, -4.0, -2.0, 0.0, 2.0, 4.0, 6.0, 12.0];
+    const TEST_ADJUSTMENTS: [i16; 8] = [-120, -40, -20, 0, 20, 40, 60, 120];
 
     #[test]
     fn converts_volume_adjustments_to_packet_bytes() {
-        let band_adjustments = VolumeAdjustments::new(TEST_ADJUSTMENTS).unwrap();
+        let band_adjustments = VolumeAdjustments::new(TEST_ADJUSTMENTS.to_vec()).unwrap();
         assert_eq!(
             TEST_BYTES,
             band_adjustments.bytes().collect::<Vec<_>>().as_ref()
@@ -300,17 +257,17 @@ mod tests {
     #[test]
     fn it_clamps_volume_adjustments_outside_of_expected_range() {
         let band_adjustments =
-            VolumeAdjustments::new([f64::MIN, f64::MAX, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]).unwrap();
+            VolumeAdjustments::new([i16::MIN, i16::MAX, 0, 0, 0, 0, 0, 0].to_vec()).unwrap();
         assert_eq!(
             [
                 VolumeAdjustments::MIN_VOLUME,
                 VolumeAdjustments::MAX_VOLUME,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
             ],
             band_adjustments.adjustments().as_ref()
         );
@@ -320,20 +277,20 @@ mod tests {
     fn it_matches_expected_drc_values() {
         let examples = [
             (
-                [-6.0, 6.0, 2.3, 12.0, 2.2, -12.0, -0.4, 1.6], // volume adjustments
+                [-60, 60, 23, 120, 22, -120, -04, 16], // volume adjustments
                 [
                     -1.1060872, 1.367825, -0.842687, 1.571185, 0.321646, -1.79549, 0.61513,
                     0.083543,
                 ], // drc
             ),
             (
-                [12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0],
+                [120, 120, 120, 120, 120, 120, 120, 120],
                 [
                     0.96507597, 0.6198, 0.72816, 0.70452, 0.70452, 0.72816, 0.7338, 1.253076,
                 ],
             ),
             (
-                [-12.0, -12.0, -12.0, -12.0, -12.0, -12.0, -12.0, -12.0],
+                [-120, -120, -120, -120, -120, -120, -120, -120],
                 [
                     -0.96507597,
                     -0.6198,
@@ -346,21 +303,25 @@ mod tests {
                 ],
             ),
             (
-                [-6.0, 6.0, 2.3, 12.0, 2.2, -12.0, -0.4, 1.6],
+                [-60, 60, 23, 120, 22, -120, -04, 16],
                 [
                     -1.1060872, 1.367825, -0.842687, 1.571185, 0.321646, -1.79549, 0.61513,
                     0.083543,
                 ],
             ),
             (
-                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [00, 00, 00, 00, 00, 00, 00, 00],
                 [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
             ),
         ];
 
         for example in examples {
-            let actual = VolumeAdjustments::new(example.0).unwrap().apply_drc();
-            let expected = VolumeAdjustments::new(example.1).unwrap();
+            let actual = VolumeAdjustments::new(example.0.to_vec())
+                .unwrap()
+                .apply_drc();
+            let expected =
+                VolumeAdjustments::new(example.1.map(|v: f64| (v * 10f64).round() as i16).to_vec())
+                    .unwrap();
             assert_eq!(expected, actual);
         }
     }
@@ -368,10 +329,15 @@ mod tests {
     #[test]
     fn it_does_not_modify_band_9_when_applying_drc() {
         let volume_adjustments =
-            VolumeAdjustments::new([-6.0, 6.0, 2.3, 12.0, 2.2, -12.0, -0.4, 1.6, 5.0]).unwrap(); // volume adjustments
-        let expected = VolumeAdjustments::new([
-            -1.1060872, 1.367825, -0.842687, 1.571185, 0.321646, -1.79549, 0.61513, 0.083543, 5.0,
-        ])
+            VolumeAdjustments::new([-60, 60, 23, 120, 22, -120, -04, 16, 50].to_vec()).unwrap(); // volume adjustments
+        let expected = VolumeAdjustments::new(
+            [
+                -1.1060872, 1.367825, -0.842687, 1.571185, 0.321646, -1.79549, 0.61513, 0.083543,
+                5.0,
+            ]
+            .map(|v| (v * 10.0f64).round() as i16)
+            .to_vec(),
+        )
         .unwrap(); // drc
         let actual = volume_adjustments.apply_drc();
         assert_eq!(expected, actual)

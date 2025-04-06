@@ -63,21 +63,21 @@ impl Default for A3936StateUpdatePacket {
             right_firmware: Default::default(),
             serial_number: Default::default(),
             equalizer_configuration: EqualizerConfiguration::new_custom_profile(
-                VolumeAdjustments::new(vec![0f64; 10]).unwrap(),
+                VolumeAdjustments::new(vec![0; 10]).unwrap(),
             ),
             age_range: Default::default(),
             custom_hear_id: CustomHearId {
                 is_enabled: Default::default(),
                 volume_adjustments: StereoVolumeAdjustments {
-                    left: VolumeAdjustments::new(vec![0f64; 10]).unwrap(),
-                    right: VolumeAdjustments::new(vec![0f64; 10]).unwrap(),
+                    left: VolumeAdjustments::new(vec![0; 10]).unwrap(),
+                    right: VolumeAdjustments::new(vec![0; 10]).unwrap(),
                 },
                 time: Default::default(),
                 hear_id_type: Default::default(),
                 hear_id_music_type: Default::default(),
                 custom_volume_adjustments: Some(StereoVolumeAdjustments {
-                    left: VolumeAdjustments::new(vec![0f64; 10]).unwrap(),
-                    right: VolumeAdjustments::new(vec![0f64; 10]).unwrap(),
+                    left: VolumeAdjustments::new(vec![0; 10]).unwrap(),
+                    right: VolumeAdjustments::new(vec![0; 10]).unwrap(),
                 }),
             },
             sound_modes: Default::default(),

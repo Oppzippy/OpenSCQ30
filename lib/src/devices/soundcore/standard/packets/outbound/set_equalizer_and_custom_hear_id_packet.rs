@@ -106,34 +106,26 @@ mod tests {
         ];
         let actual = SetEqualizerAndCustomHearIdPacket {
             equalizer_configuration: &EqualizerConfiguration::new_custom_profile(
-                VolumeAdjustments::new([-5.2, -6.6, -6.4, -6.7, -10.8, -2.2, -4.9, -10.1]).unwrap(),
+                VolumeAdjustments::new(vec![-52, -66, -64, -67, -108, -22, -49, -101]).unwrap(),
             ),
             gender: Gender(1),
             age_range: AgeRange(2),
             custom_hear_id: &CustomHearId {
                 is_enabled: true,
                 volume_adjustments: StereoVolumeAdjustments {
-                    left: VolumeAdjustments::new([
-                        -6.7, -10.4, -7.2, -11.1, -4.4, -5.1, -7.6, -5.0,
-                    ])
-                    .unwrap(),
-                    right: VolumeAdjustments::new([
-                        -7.8, -10.4, -1.0, -9.5, -0.4, -9.2, -8.0, -6.6,
-                    ])
-                    .unwrap(),
+                    left: VolumeAdjustments::new(vec![-67, -104, -72, -111, -44, -51, -76, -50])
+                        .unwrap(),
+                    right: VolumeAdjustments::new(vec![-78, -104, -10, -95, -04, -92, -80, -66])
+                        .unwrap(),
                 },
                 time: 100000,
                 hear_id_type: HearIdType(5),
                 hear_id_music_type: HearIdMusicType(0),
                 custom_volume_adjustments: Some(StereoVolumeAdjustments {
-                    left: VolumeAdjustments::new([
-                        -10.9, -5.2, -7.3, -0.2, -10.1, -11.6, -11.8, -3.9,
-                    ])
-                    .unwrap(),
-                    right: VolumeAdjustments::new([
-                        -1.2, -11.2, -3.6, -4.1, -2.4, -11.3, -10.6, -2.1,
-                    ])
-                    .unwrap(),
+                    left: VolumeAdjustments::new(vec![-109, -52, -73, -02, -101, -116, -118, -39])
+                        .unwrap(),
+                    right: VolumeAdjustments::new(vec![-12, -112, -36, -41, -24, -113, -106, -21])
+                        .unwrap(),
                 }),
             },
         }
@@ -162,23 +154,19 @@ mod tests {
             custom_hear_id: &CustomHearId {
                 is_enabled: true,
                 volume_adjustments: StereoVolumeAdjustments {
-                    left: VolumeAdjustments::new([-3.3, -0.1, -3.3, -6.2, -0.9, -9.9, -1.9, -2.1])
+                    left: VolumeAdjustments::new(vec![-33, -01, -33, -62, -9, -99, -19, -21])
                         .unwrap(),
-                    right: VolumeAdjustments::new([
-                        -4.6, -1.9, -11.1, -0.2, -1.0, -0.6, -10.0, -10.1,
-                    ])
-                    .unwrap(),
+                    right: VolumeAdjustments::new(vec![-46, -19, -111, -2, -10, -06, -100, -101])
+                        .unwrap(),
                 },
                 time: 100000,
                 hear_id_type: HearIdType(5),
                 hear_id_music_type: HearIdMusicType(0),
                 custom_volume_adjustments: Some(StereoVolumeAdjustments {
-                    left: VolumeAdjustments::new([-9.0, -6.7, -5.3, -7.9, -1.3, -1.2, -7.3, -9.9])
+                    left: VolumeAdjustments::new(vec![-90, -67, -53, -79, -13, -12, -73, -99])
                         .unwrap(),
-                    right: VolumeAdjustments::new([
-                        -2.4, -6.7, -4.0, -4.1, -3.8, -10.2, -11.9, -2.4,
-                    ])
-                    .unwrap(),
+                    right: VolumeAdjustments::new(vec![-24, -67, -40, -41, -38, -102, -119, -24])
+                        .unwrap(),
                 }),
             },
         }

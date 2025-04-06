@@ -22,9 +22,9 @@ use crate::devices::soundcore::{
         },
         structures::{
             AgeRange, AmbientSoundModeCycle, BatteryLevel, Command, CustomHearId, DualBattery,
-            EqualizerConfiguration, FirmwareVersion, MultiButtonConfiguration,
-            SerialNumber, SoundModes, StereoEqualizerConfiguration, StereoVolumeAdjustments,
-            TwsStatus, VolumeAdjustments,
+            EqualizerConfiguration, FirmwareVersion, MultiButtonConfiguration, SerialNumber,
+            SoundModes, StereoEqualizerConfiguration, StereoVolumeAdjustments, TwsStatus,
+            VolumeAdjustments,
         },
     },
 };
@@ -61,21 +61,21 @@ impl Default for A3933StateUpdatePacket {
             right_firmware: Default::default(),
             serial_number: Default::default(),
             equalizer_configuration: EqualizerConfiguration::new_custom_profile(
-                VolumeAdjustments::new(vec![0f64; 10]).unwrap(),
+                VolumeAdjustments::new(vec![0; 10]).unwrap(),
             ),
             age_range: Default::default(),
             hear_id: Some(CustomHearId {
                 is_enabled: Default::default(),
                 volume_adjustments: StereoVolumeAdjustments {
-                    left: VolumeAdjustments::new(vec![0f64; 10]).unwrap(),
-                    right: VolumeAdjustments::new(vec![0f64; 10]).unwrap(),
+                    left: VolumeAdjustments::new(vec![0; 10]).unwrap(),
+                    right: VolumeAdjustments::new(vec![0; 10]).unwrap(),
                 },
                 time: Default::default(),
                 hear_id_type: Default::default(),
                 hear_id_music_type: Default::default(),
                 custom_volume_adjustments: Some(StereoVolumeAdjustments {
-                    left: VolumeAdjustments::new(vec![0f64; 10]).unwrap(),
-                    right: VolumeAdjustments::new(vec![0f64; 10]).unwrap(),
+                    left: VolumeAdjustments::new(vec![0; 10]).unwrap(),
+                    right: VolumeAdjustments::new(vec![0; 10]).unwrap(),
                 }),
             }),
             button_configuration: Default::default(),
@@ -332,7 +332,7 @@ mod tests {
         assert_eq!(
             EqualizerConfiguration::new_from_preset_profile(
                 PresetEqualizerProfile::SoundcoreSignature,
-                []
+                [0, 0]
             ),
             packet.equalizer_configuration
         );

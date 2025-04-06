@@ -22,7 +22,6 @@ mod stereo_volume_adjustments;
 mod transparency_mode;
 mod tws_status;
 mod volume_adjustments;
-mod volume_adjustments2;
 
 pub use age_range::*;
 pub use ambient_sound_mode::*;
@@ -48,4 +47,3 @@ pub use stereo_volume_adjustments::*;
 pub use transparency_mode::*;
 pub use tws_status::*;
 pub use volume_adjustments::*;
-pub use volume_adjustments2::*;

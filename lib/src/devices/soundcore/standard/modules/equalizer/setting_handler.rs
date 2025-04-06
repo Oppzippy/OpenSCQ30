@@ -13,7 +13,7 @@ use crate::{
         DeviceModel,
         soundcore::standard::{
             settings_manager::SettingHandler,
-            structures::{EqualizerConfiguration, VolumeAdjustments2},
+            structures::{EqualizerConfiguration, VolumeAdjustments},
         },
     },
     storage::OpenSCQ30Database,
@@ -55,11 +55,11 @@ impl EqualizerSettingHandler {
     fn values_to_volume_adjustments(
         &self,
         values: impl Iterator<Item = i16>,
-        existing_volume_adjustments: &VolumeAdjustments2,
-    ) -> VolumeAdjustments2 {
+        existing_volume_adjustments: &VolumeAdjustments,
+    ) -> VolumeAdjustments {
         // Some devices have extra bands, but those aren't exposed to the user, so I have no idea what they're for
         // We can just add back in whatever was there before (we're only showing the user the first 8 bands)
-        VolumeAdjustments2::new(
+        VolumeAdjustments::new(
             values
                 .take(8)
                 .chain(
@@ -86,7 +86,7 @@ where
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<crate::api::settings::Setting> {
         let equalizer_configuration = state.as_ref();
         let volume_adjustments_2 =
-            VolumeAdjustments2::from(equalizer_configuration.volume_adjustments().to_owned());
+            VolumeAdjustments::from(equalizer_configuration.volume_adjustments().to_owned());
         let setting = setting_id.try_into().ok()?;
         Some(match setting {
             EqualizerSetting::PresetProfile => Setting::optional_select_from_enum_all_variants(
@@ -129,9 +129,7 @@ where
                 values: equalizer_configuration
                     .volume_adjustments()
                     .adjustments()
-                    .iter()
-                    .map(|adj| (adj * 10f64).round() as i16)
-                    .collect(),
+                    .to_vec(),
             },
         })
     }
@@ -139,7 +137,7 @@ where
     async fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> crate::Result<()> {
         let equalizer_configuration = state.as_mut();
         let volume_adjustments_2 =
-            VolumeAdjustments2::from(equalizer_configuration.volume_adjustments().to_owned());
+            VolumeAdjustments::from(equalizer_configuration.volume_adjustments().to_owned());
         let setting = setting_id
             .try_into()
             .expect("already filtered to valid values only by SettingsManager");

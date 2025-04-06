@@ -116,11 +116,11 @@ mod tests {
             Packet::from(SetEqualizerPacket::new(
                 &EqualizerConfiguration::new_from_preset_profile(
                     PresetEqualizerProfile::TrebleReducer,
-                    [0.1f64, 0.2f64]
+                    [1, 2]
                 ),
                 Some(&EqualizerConfiguration::new_from_preset_profile(
                     PresetEqualizerProfile::TrebleReducer,
-                    [0.3f64, 0.4f64]
+                    [3, 4]
                 )),
             ))
             .bytes(),

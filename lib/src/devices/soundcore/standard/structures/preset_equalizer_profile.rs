@@ -61,30 +61,30 @@ impl PresetEqualizerProfile {
 
     pub fn volume_adjustments(&self) -> VolumeAdjustments {
         let adjustments = match self {
-            Self::SoundcoreSignature => [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            Self::Acoustic => [4.0, 1.0, 2.0, 2.0, 4.0, 4.0, 4.0, 2.0],
-            Self::BassBooster => [4.0, 3.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            Self::BassReducer => [-4.0, -3.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            Self::Classical => [3.0, 3.0, -2.0, -2.0, 0.0, 2.0, 3.0, 4.0],
-            Self::Podcast => [-3.0, 2.0, 4.0, 4.0, 3.0, 2.0, 0.0, -2.0],
-            Self::Dance => [2.0, -3.0, -1.0, 1.0, 2.0, 2.0, 1.0, -3.0],
-            Self::Deep => [2.0, 1.0, 3.0, 3.0, 2.0, -2.0, -4.0, -5.0],
-            Self::Electronic => [3.0, 2.0, -2.0, 2.0, 1.0, 2.0, 3.0, 3.0],
-            Self::Flat => [-2.0, -2.0, -1.0, 0.0, 0.0, 0.0, -2.0, -2.0],
-            Self::HipHop => [2.0, 3.0, -1.0, -1.0, 2.0, -1.0, 2.0, 3.0],
-            Self::Jazz => [2.0, 2.0, -2.0, -2.0, 0.0, 2.0, 3.0, 4.0],
-            Self::Latin => [0.0, 0.0, -2.0, -2.0, -2.0, 0.0, 3.0, 5.0],
-            Self::Lounge => [-1.0, 2.0, 4.0, 3.0, 0.0, -2.0, 2.0, 1.0],
-            Self::Piano => [0.0, 3.0, 3.0, 2.0, 4.0, 5.0, 3.0, 4.0],
-            Self::Pop => [-1.0, 1.0, 3.0, 3.0, 1.0, -1.0, -2.0, -3.0],
-            Self::RnB => [6.0, 2.0, -2.0, -2.0, 2.0, 3.0, 3.0, 4.0],
-            Self::Rock => [3.0, 2.0, -1.0, -1.0, 1.0, 3.0, 3.0, 3.0],
-            Self::SmallSpeakers => [4.0, 3.0, 1.0, 0.0, -2.0, -3.0, -4.0, -4.0],
-            Self::SpokenWord => [-3.0, -2.0, 1.0, 2.0, 2.0, 1.0, 0.0, -3.0],
-            Self::TrebleBooster => [-2.0, -2.0, -2.0, -1.0, 1.0, 2.0, 2.0, 4.0],
-            Self::TrebleReducer => [0.0, 0.0, 0.0, -2.0, -3.0, -4.0, -4.0, -6.0],
+            Self::SoundcoreSignature => [0, 0, 0, 0, 0, 0, 0, 0],
+            Self::Acoustic => [40, 10, 20, 20, 40, 40, 40, 20],
+            Self::BassBooster => [40, 30, 10, 0, 0, 0, 0, 0],
+            Self::BassReducer => [-40, -30, -10, 0, 0, 0, 0, 0],
+            Self::Classical => [30, 30, -20, -20, 0, 20, 30, 40],
+            Self::Podcast => [-30, 20, 40, 40, 30, 20, 0, -20],
+            Self::Dance => [20, -30, -10, 10, 20, 20, 10, -30],
+            Self::Deep => [20, 10, 30, 30, 20, -20, -40, -50],
+            Self::Electronic => [30, 20, -20, 20, 10, 20, 30, 30],
+            Self::Flat => [-20, -20, -10, 0, 0, 0, -20, -20],
+            Self::HipHop => [20, 30, -10, -10, 20, -10, 20, 30],
+            Self::Jazz => [20, 20, -20, -20, 0, 20, 30, 40],
+            Self::Latin => [0, 0, -20, -20, -20, 0, 30, 50],
+            Self::Lounge => [-10, 20, 40, 30, 0, -20, 20, 10],
+            Self::Piano => [0, 30, 30, 20, 40, 50, 30, 40],
+            Self::Pop => [-10, 10, 30, 30, 10, -10, -20, -30],
+            Self::RnB => [60, 20, -20, -20, 20, 30, 30, 40],
+            Self::Rock => [30, 20, -10, -10, 10, 30, 30, 30],
+            Self::SmallSpeakers => [40, 30, 10, 0, -20, -30, -40, -40],
+            Self::SpokenWord => [-30, -20, 10, 20, 20, 10, 0, -30],
+            Self::TrebleBooster => [-20, -20, -20, -10, 10, 20, 20, 40],
+            Self::TrebleReducer => [0, 0, 0, -20, -30, -40, -40, -60],
         };
-        VolumeAdjustments::new(adjustments)
+        VolumeAdjustments::new(adjustments.to_vec())
             .expect("all possible values are literals, so it must be a bug if this fails")
     }
 }
@@ -107,7 +107,6 @@ mod tests {
                     .adjustments()
                     .iter()
                     .cloned()
-                    .map(|adjustment| (adjustment * 10.0).round() as i32)
                     .collect::<Vec<_>>()
             })
             .collect::<Vec<_>>();

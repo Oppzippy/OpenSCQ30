@@ -262,7 +262,7 @@ mod tests {
         );
         assert!(packet.equalizer_configuration.preset_profile().is_none());
         assert_eq!(
-            &VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]).unwrap(),
+            &VolumeAdjustments::new(vec![-60, 60, 23, 40, 22, 60, -4, 16]).unwrap(),
             packet.equalizer_configuration.volume_adjustments(),
         );
     }
@@ -291,7 +291,7 @@ mod tests {
         );
         assert!(packet.equalizer_configuration.preset_profile().is_none());
         assert_eq!(
-            &VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]).unwrap(),
+            &VolumeAdjustments::new(vec![-60, 60, 23, 40, 22, 60, -4, 16]).unwrap(),
             packet.equalizer_configuration.volume_adjustments(),
         );
     }
@@ -321,7 +321,7 @@ mod tests {
         );
         assert!(packet.equalizer_configuration.preset_profile().is_none());
         assert_eq!(
-            &VolumeAdjustments::new([-6.0, 6.0, 2.3, 4.0, 2.2, 6.0, -0.4, 1.6]).unwrap(),
+            &VolumeAdjustments::new(vec![-60, 60, 23, 40, 22, 60, -4, 16]).unwrap(),
             packet.equalizer_configuration.volume_adjustments(),
         );
     }
