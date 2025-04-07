@@ -26,7 +26,7 @@ use crate::devices::soundcore::{
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct A3033StateUpdatePacket {
     pub battery: SingleBattery,
-    pub equalizer_configuration: EqualizerConfiguration,
+    pub equalizer_configuration: EqualizerConfiguration<1, 8>,
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
     pub wear_detection: bool,
@@ -45,7 +45,7 @@ impl InboundPacket for A3033StateUpdatePacket {
             all_consuming(map(
                 tuple((
                     SingleBattery::take,
-                    EqualizerConfiguration::take(1, 8),
+                    EqualizerConfiguration::take,
                     FirmwareVersion::take,
                     SerialNumber::take,
                     take_bool,

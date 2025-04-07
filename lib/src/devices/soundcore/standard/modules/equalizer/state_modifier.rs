@@ -16,7 +16,7 @@ use crate::{
     },
 };
 
-pub struct EqualizerStateModifier<ConnectionType: Connection> {
+pub struct EqualizerStateModifier<ConnectionType: Connection, const C: usize, const B: usize> {
     packet_io: Arc<PacketIOController<ConnectionType>>,
     options: EqualizerStateModifierOptions,
 }
@@ -25,7 +25,9 @@ pub struct EqualizerStateModifierOptions {
     pub has_drc: bool,
 }
 
-impl<ConnectionType: Connection> EqualizerStateModifier<ConnectionType> {
+impl<ConnectionType: Connection, const C: usize, const B: usize>
+    EqualizerStateModifier<ConnectionType, C, B>
+{
     pub fn new(
         packet_io: Arc<PacketIOController<ConnectionType>>,
         options: EqualizerStateModifierOptions,
@@ -35,9 +37,14 @@ impl<ConnectionType: Connection> EqualizerStateModifier<ConnectionType> {
 }
 
 #[async_trait]
-impl<ConnectionType, T> StateModifier<T> for EqualizerStateModifier<ConnectionType>
+impl<ConnectionType, T, const C: usize, const B: usize> StateModifier<T>
+    for EqualizerStateModifier<ConnectionType, C, B>
 where
-    T: AsMut<EqualizerConfiguration> + AsRef<EqualizerConfiguration> + Clone + Send + Sync,
+    T: AsMut<EqualizerConfiguration<C, B>>
+        + AsRef<EqualizerConfiguration<C, B>>
+        + Clone
+        + Send
+        + Sync,
     ConnectionType: Connection + Send + Sync,
 {
     async fn move_to_state(
@@ -72,21 +79,32 @@ where
     }
 }
 
-pub struct EqualizerWithBasicHearIdStateModifier<ConnectionType: Connection> {
+pub struct EqualizerWithBasicHearIdStateModifier<
+    ConnectionType: Connection,
+    const C: usize,
+    const B: usize,
+> {
     packet_io: Arc<PacketIOController<ConnectionType>>,
 }
 
-impl<ConnectionType: Connection> EqualizerWithBasicHearIdStateModifier<ConnectionType> {
+impl<ConnectionType: Connection, const C: usize, const B: usize>
+    EqualizerWithBasicHearIdStateModifier<ConnectionType, C, B>
+{
     pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
         Self { packet_io }
     }
 }
 
 #[async_trait]
-impl<ConnectionType, T> StateModifier<T> for EqualizerWithBasicHearIdStateModifier<ConnectionType>
+impl<ConnectionType, T, const C: usize, const B: usize> StateModifier<T>
+    for EqualizerWithBasicHearIdStateModifier<ConnectionType, C, B>
 where
-    T: AsMut<EqualizerConfiguration> + AsRef<EqualizerConfiguration> + Clone + Send + Sync,
-    T: AsRef<BasicHearId> + AsRef<Gender> + AsRef<AgeRange>,
+    T: AsMut<EqualizerConfiguration<C, B>>
+        + AsRef<EqualizerConfiguration<C, B>>
+        + Clone
+        + Send
+        + Sync,
+    T: AsRef<BasicHearId<C, B>> + AsRef<Gender> + AsRef<AgeRange>,
     ConnectionType: Connection + Send + Sync,
 {
     async fn move_to_state(
@@ -94,10 +112,10 @@ where
         state_sender: &watch::Sender<T>,
         target_state: &T,
     ) -> crate::Result<()> {
-        let target_equalizer_configuration: &EqualizerConfiguration = target_state.as_ref();
+        let target_equalizer_configuration: &EqualizerConfiguration<C, B> = target_state.as_ref();
         {
             let state = state_sender.borrow();
-            let equalizer_configuration: &EqualizerConfiguration = state.as_ref();
+            let equalizer_configuration: &EqualizerConfiguration<C, B> = state.as_ref();
             if equalizer_configuration == target_equalizer_configuration {
                 return Ok(());
             }
@@ -110,7 +128,7 @@ where
                     gender: *target_state.as_ref(),
                     age_range: *target_state.as_ref(),
                     custom_hear_id: &{
-                        let basic_hear_id: &BasicHearId = target_state.as_ref();
+                        let basic_hear_id: &BasicHearId<C, B> = target_state.as_ref();
                         // TODO have SetEqualizerAndCustomHearIdPacket take only the wanted fields rather than an entire CustomHearId struct
                         CustomHearId {
                             is_enabled: basic_hear_id.is_enabled,
@@ -130,21 +148,32 @@ where
     }
 }
 
-pub struct EqualizerWithCustomHearIdStateModifier<ConnectionType: Connection> {
+pub struct EqualizerWithCustomHearIdStateModifier<
+    ConnectionType: Connection,
+    const C: usize,
+    const B: usize,
+> {
     packet_io: Arc<PacketIOController<ConnectionType>>,
 }
 
-impl<ConnectionType: Connection> EqualizerWithCustomHearIdStateModifier<ConnectionType> {
+impl<ConnectionType: Connection, const C: usize, const B: usize>
+    EqualizerWithCustomHearIdStateModifier<ConnectionType, C, B>
+{
     pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
         Self { packet_io }
     }
 }
 
 #[async_trait]
-impl<ConnectionType, T> StateModifier<T> for EqualizerWithCustomHearIdStateModifier<ConnectionType>
+impl<ConnectionType, T, const C: usize, const B: usize> StateModifier<T>
+    for EqualizerWithCustomHearIdStateModifier<ConnectionType, C, B>
 where
-    T: AsMut<EqualizerConfiguration> + AsRef<EqualizerConfiguration> + Clone + Send + Sync,
-    T: AsRef<CustomHearId> + AsRef<Gender> + AsRef<AgeRange>,
+    T: AsMut<EqualizerConfiguration<C, B>>
+        + AsRef<EqualizerConfiguration<C, B>>
+        + Clone
+        + Send
+        + Sync,
+    T: AsRef<CustomHearId<C, B>> + AsRef<Gender> + AsRef<AgeRange>,
     ConnectionType: Connection + Send + Sync,
 {
     async fn move_to_state(
@@ -152,10 +181,10 @@ where
         state_sender: &watch::Sender<T>,
         target_state: &T,
     ) -> crate::Result<()> {
-        let target_equalizer_configuration: &EqualizerConfiguration = target_state.as_ref();
+        let target_equalizer_configuration: &EqualizerConfiguration<C, B> = target_state.as_ref();
         {
             let state = state_sender.borrow();
-            let equalizer_configuration: &EqualizerConfiguration = state.as_ref();
+            let equalizer_configuration: &EqualizerConfiguration<C, B> = state.as_ref();
             if equalizer_configuration == target_equalizer_configuration {
                 return Ok(());
             }

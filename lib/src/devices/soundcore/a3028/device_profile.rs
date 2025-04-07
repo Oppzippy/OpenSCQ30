@@ -247,7 +247,7 @@ mod tests {
             inbound_sender
                 .send(
                     Packet {
-                        command: SetEqualizerPacket::COMMAND.to_inbound(),
+                        command: SetEqualizerPacket::<0, 0>::COMMAND.to_inbound(),
                         body: Vec::new(),
                     }
                     .bytes(),

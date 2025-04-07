@@ -59,7 +59,7 @@ impl PresetEqualizerProfile {
         Self::from_repr(id)
     }
 
-    pub fn volume_adjustments(&self) -> VolumeAdjustments {
+    pub fn volume_adjustments(&self) -> VolumeAdjustments<8> {
         let adjustments = match self {
             Self::SoundcoreSignature => [0, 0, 0, 0, 0, 0, 0, 0],
             Self::Acoustic => [40, 10, 20, 20, 40, 40, 40, 20],
@@ -84,8 +84,7 @@ impl PresetEqualizerProfile {
             Self::TrebleBooster => [-20, -20, -20, -10, 10, 20, 20, 40],
             Self::TrebleReducer => [0, 0, 0, -20, -30, -40, -40, -60],
         };
-        VolumeAdjustments::new(adjustments.to_vec())
-            .expect("all possible values are literals, so it must be a bug if this fails")
+        VolumeAdjustments::new(adjustments)
     }
 }
 

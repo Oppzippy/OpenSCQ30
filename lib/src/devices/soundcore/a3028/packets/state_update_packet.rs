@@ -30,10 +30,10 @@ use crate::devices::soundcore::{
 #[derive(Default, Debug, Clone, PartialEq)]
 pub struct A3028StateUpdatePacket {
     pub battery: SingleBattery,
-    pub equalizer_configuration: EqualizerConfiguration,
+    pub equalizer_configuration: EqualizerConfiguration<1, 8>,
     pub gender: Gender,
     pub age_range: AgeRange,
-    pub hear_id: BasicHearId,
+    pub hear_id: BasicHearId<2, 8>,
     pub sound_modes: SoundModes,
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
@@ -53,7 +53,7 @@ impl InboundPacket for A3028StateUpdatePacket {
             all_consuming(map(
                 tuple((
                     SingleBattery::take,
-                    EqualizerConfiguration::take(1, 8),
+                    EqualizerConfiguration::take,
                     Gender::take,
                     AgeRange::take,
                     BasicHearId::take,
@@ -225,9 +225,8 @@ mod tests {
         );
         assert_eq!(
             EqualizerConfiguration::new_from_preset_profile(
-                1,
                 PresetEqualizerProfile::Acoustic,
-                Vec::new()
+                [Vec::new()]
             ),
             packet.equalizer_configuration
         );
@@ -258,7 +257,7 @@ mod tests {
         );
         assert!(packet.equalizer_configuration.preset_profile().is_none());
         assert_eq!(
-            &VolumeAdjustments::new(vec![-60, 60, 23, 40, 22, 60, -4, 16]).unwrap(),
+            &VolumeAdjustments::new([-60, 60, 23, 40, 22, 60, -4, 16]),
             packet
                 .equalizer_configuration
                 .volume_adjustments_channel_1(),
@@ -289,7 +288,7 @@ mod tests {
         );
         assert!(packet.equalizer_configuration.preset_profile().is_none());
         assert_eq!(
-            &VolumeAdjustments::new(vec![-60, 60, 23, 40, 22, 60, -4, 16]).unwrap(),
+            &VolumeAdjustments::new([-60, 60, 23, 40, 22, 60, -4, 16]),
             packet
                 .equalizer_configuration
                 .volume_adjustments_channel_1(),
@@ -321,7 +320,7 @@ mod tests {
         );
         assert!(packet.equalizer_configuration.preset_profile().is_none());
         assert_eq!(
-            &VolumeAdjustments::new(vec![-60, 60, 23, 40, 22, 60, -4, 16]).unwrap(),
+            &VolumeAdjustments::new([-60, 60, 23, 40, 22, 60, -4, 16]),
             packet
                 .equalizer_configuration
                 .volume_adjustments_channel_1(),

@@ -1,4 +1,5 @@
 use std::{
+    array,
     borrow::Cow,
     sync::{Arc, Mutex},
 };
@@ -21,13 +22,13 @@ use crate::{
 
 use super::EqualizerSetting;
 
-pub struct EqualizerSettingHandler {
+pub struct EqualizerSettingHandler<const C: usize, const B: usize> {
     device_model: DeviceModel,
     database: Arc<OpenSCQ30Database>,
     custom_profiles: Mutex<Vec<(String, Vec<i16>)>>,
 }
 
-impl EqualizerSettingHandler {
+impl<const C: usize, const B: usize> EqualizerSettingHandler<C, B> {
     #[instrument(skip(database))]
     pub async fn new(database: Arc<OpenSCQ30Database>, device_model: DeviceModel) -> Self {
         let custom_profiles = database
@@ -55,32 +56,26 @@ impl EqualizerSettingHandler {
     fn values_to_volume_adjustments(
         &self,
         values: &[i16],
-        existing_volume_adjustments: &[VolumeAdjustments],
-    ) -> Vec<VolumeAdjustments> {
+        existing_volume_adjustments: &[VolumeAdjustments<B>; C],
+    ) -> [VolumeAdjustments<B>; C] {
         // Some devices have extra bands, but those aren't exposed to the user, so I have no idea what they're for
         // We can just add back in whatever was there before (we're only showing the user the first 8 bands)
-        existing_volume_adjustments.iter().map(|volume_adjustments| {
-            VolumeAdjustments::new(
-                values
-                .iter()
-                .take(8)
-                .chain(
-                    volume_adjustments
-                        .adjustments()
-                        .iter()
-                        .skip(8),
-                )
-                .cloned()
-                .collect(),
-            ).expect("we have control over the number of values in these vecs, so it should always be a valid number")
-        }).collect()
+        array::from_fn(|i| {
+            VolumeAdjustments::new(array::from_fn(|j| {
+                if j < values.len() {
+                    values[j]
+                } else {
+                    existing_volume_adjustments[i].adjustments()[j - values.len()]
+                }
+            }))
+        })
     }
 }
 
 #[async_trait]
-impl<T> SettingHandler<T> for EqualizerSettingHandler
+impl<T, const C: usize, const B: usize> SettingHandler<T> for EqualizerSettingHandler<C, B>
 where
-    T: AsMut<EqualizerConfiguration> + AsRef<EqualizerConfiguration> + Send,
+    T: AsMut<EqualizerConfiguration<C, B>> + AsRef<EqualizerConfiguration<C, B>> + Send,
 {
     fn settings(&self) -> Vec<SettingId> {
         EqualizerSetting::iter().map(Into::into).collect()
@@ -148,13 +143,10 @@ where
             EqualizerSetting::PresetProfile => {
                 if let Some(preset) = value.try_as_optional_enum_variant()? {
                     *equalizer_configuration = EqualizerConfiguration::new_from_preset_profile(
-                        equalizer_configuration.channels(),
                         preset,
                         equalizer_configuration
                             .volume_adjustments()
-                            .iter()
-                            .map(|v| v.adjustments().iter().cloned().skip(8).collect())
-                            .collect(),
+                            .map(|v| v.adjustments().iter().cloned().skip(8).collect()),
                     )
                 } else {
                     *equalizer_configuration = EqualizerConfiguration::new_custom_profile(

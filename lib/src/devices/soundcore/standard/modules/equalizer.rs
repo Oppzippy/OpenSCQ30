@@ -57,17 +57,19 @@ impl From<EqualizerSetting> for SettingId {
     }
 }
 
-impl<T> ModuleCollection<T>
-where
-    T: AsMut<EqualizerConfiguration> + AsRef<EqualizerConfiguration> + Clone + Send + Sync,
-{
-    pub async fn add_equalizer<C>(
+impl<T> ModuleCollection<T> {
+    pub async fn add_equalizer<Conn, const CHANNELS: usize, const BANDS: usize>(
         &mut self,
-        packet_io: Arc<PacketIOController<C>>,
+        packet_io: Arc<PacketIOController<Conn>>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
     ) where
-        C: Connection + 'static + Send + Sync,
+        Conn: Connection + 'static + Send + Sync,
+        T: AsMut<EqualizerConfiguration<CHANNELS, BANDS>>
+            + AsRef<EqualizerConfiguration<CHANNELS, BANDS>>
+            + Clone
+            + Send
+            + Sync,
     {
         self.setting_manager.add_handler(
             CategoryId::Equalizer,
@@ -80,13 +82,18 @@ where
             )));
     }
 
-    pub async fn add_equalizer_with_drc<C>(
+    pub async fn add_equalizer_with_drc<Conn, const CHANNELS: usize, const BANDS: usize>(
         &mut self,
-        packet_io: Arc<PacketIOController<C>>,
+        packet_io: Arc<PacketIOController<Conn>>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
     ) where
-        C: Connection + 'static + Send + Sync,
+        Conn: Connection + 'static + Send + Sync,
+        T: AsMut<EqualizerConfiguration<CHANNELS, BANDS>>
+            + AsRef<EqualizerConfiguration<CHANNELS, BANDS>>
+            + Clone
+            + Send
+            + Sync,
     {
         self.setting_manager.add_handler(
             CategoryId::Equalizer,
@@ -98,44 +105,49 @@ where
                 EqualizerStateModifierOptions { has_drc: true },
             )));
     }
-}
-
-impl<T> ModuleCollection<T>
-where
-    T: AsMut<EqualizerConfiguration> + AsRef<EqualizerConfiguration> + Clone + Send + Sync,
-    T: AsRef<BasicHearId> + AsRef<Gender> + AsRef<AgeRange>,
-{
-    pub async fn add_equalizer_with_basic_hear_id<C>(
+    pub async fn add_equalizer_with_basic_hear_id<Conn, const CHANNELS: usize, const BANDS: usize>(
         &mut self,
-        packet_io: Arc<PacketIOController<C>>,
+        packet_io: Arc<PacketIOController<Conn>>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
     ) where
-        C: Connection + 'static + Send + Sync,
+        Conn: Connection + 'static + Send + Sync,
+        T: AsMut<EqualizerConfiguration<CHANNELS, BANDS>>
+            + AsRef<EqualizerConfiguration<CHANNELS, BANDS>>
+            + Clone
+            + Send
+            + Sync,
+        T: AsRef<BasicHearId<CHANNELS, BANDS>> + AsRef<Gender> + AsRef<AgeRange>,
     {
         self.setting_manager.add_handler(
             CategoryId::Equalizer,
-            EqualizerSettingHandler::new(database, device_model).await,
+            EqualizerSettingHandler::<CHANNELS, BANDS>::new(database, device_model).await,
         );
         self.state_modifiers
-            .push(Box::new(EqualizerWithBasicHearIdStateModifier::new(
-                packet_io,
-            )));
+            .push(Box::new(EqualizerWithBasicHearIdStateModifier::<
+                Conn,
+                CHANNELS,
+                BANDS,
+            >::new(packet_io)));
     }
-}
 
-impl<T> ModuleCollection<T>
-where
-    T: AsMut<EqualizerConfiguration> + AsRef<EqualizerConfiguration> + Clone + Send + Sync,
-    T: AsRef<CustomHearId> + AsRef<Gender> + AsRef<AgeRange>,
-{
-    pub async fn add_equalizer_with_custom_hear_id<C>(
+    pub async fn add_equalizer_with_custom_hear_id<
+        Conn,
+        const CHANNELS: usize,
+        const BANDS: usize,
+    >(
         &mut self,
-        packet_io: Arc<PacketIOController<C>>,
+        packet_io: Arc<PacketIOController<Conn>>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
     ) where
-        C: Connection + 'static + Send + Sync,
+        Conn: Connection + 'static + Send + Sync,
+        T: AsMut<EqualizerConfiguration<CHANNELS, BANDS>>
+            + AsRef<EqualizerConfiguration<CHANNELS, BANDS>>
+            + Clone
+            + Send
+            + Sync,
+        T: AsRef<CustomHearId<CHANNELS, BANDS>> + AsRef<Gender> + AsRef<AgeRange>,
     {
         self.setting_manager.add_handler(
             CategoryId::Equalizer,

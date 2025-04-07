@@ -3,11 +3,11 @@ use crate::devices::soundcore::standard::structures::{Command, EqualizerConfigur
 use super::outbound_packet::OutboundPacket;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct SetEqualizerWithDrcPacket<'a> {
-    pub equalizer_configuration: &'a EqualizerConfiguration,
+pub struct SetEqualizerWithDrcPacket<'a, const C: usize, const B: usize> {
+    pub equalizer_configuration: &'a EqualizerConfiguration<C, B>,
 }
 
-impl OutboundPacket for SetEqualizerWithDrcPacket<'_> {
+impl<'a, const C: usize, const B: usize> OutboundPacket for SetEqualizerWithDrcPacket<'a, C, B> {
     fn command(&self) -> Command {
         Command::new([0x08, 0xEE, 0x00, 0x00, 0x00, 0x02, 0x83])
     }
@@ -19,7 +19,7 @@ impl OutboundPacket for SetEqualizerWithDrcPacket<'_> {
                 self.equalizer_configuration
                     .volume_adjustments()
                     .iter()
-                    .map(|v| v.apply_drc().into_bytes())
+                    .map(|v| v.apply_drc().bytes())
                     .flatten(),
             )
             .collect()
@@ -41,8 +41,8 @@ mod tests {
         ];
 
         let actual = SetEqualizerWithDrcPacket {
-            equalizer_configuration: &EqualizerConfiguration::new_custom_profile(vec![
-                VolumeAdjustments::new(vec![-60, 60, 23, 120, 22, -120, -4, 16]).unwrap(),
+            equalizer_configuration: &EqualizerConfiguration::new_custom_profile([
+                VolumeAdjustments::new([-60, 60, 23, 120, 22, -120, -4, 16]),
             ]),
         }
         .bytes();

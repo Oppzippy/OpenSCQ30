@@ -133,7 +133,7 @@ mod tests {
             inbound_sender
                 .send(
                     Packet {
-                        command: SetEqualizerPacket::COMMAND.to_inbound(),
+                        command: SetEqualizerPacket::<0, 0>::COMMAND.to_inbound(),
                         body: Vec::new(),
                     }
                     .bytes(),
@@ -152,10 +152,9 @@ mod tests {
         let set_eq_packet_bytes = outbound_receiver.recv().await.unwrap();
         assert_eq!(
             Packet::from(SetEqualizerPacket {
-                equalizer_configuration: &EqualizerConfiguration::new_from_preset_profile(
-                    2,
+                equalizer_configuration: &EqualizerConfiguration::<2, 10>::new_from_preset_profile(
                     PresetEqualizerProfile::TrebleReducer,
-                    vec![vec![1, 2], vec![3, 4]],
+                    [vec![1, 2], vec![3, 4]],
                 ),
             })
             .bytes(),

@@ -11,10 +11,10 @@ use super::packets::{A3028StateUpdatePacket, ExtraFields};
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3028State {
     pub battery: SingleBattery,
-    pub equalizer_configuration: EqualizerConfiguration,
+    pub equalizer_configuration: EqualizerConfiguration<1, 8>,
     pub gender: Gender,
     pub age_range: AgeRange,
-    pub hear_id: BasicHearId,
+    pub hear_id: BasicHearId<2, 8>,
     pub sound_modes: SoundModes,
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
@@ -24,7 +24,7 @@ pub struct A3028State {
 impl_as_ref_for_field!(
     struct A3028State {
         sound_modes: SoundModes,
-        equalizer_configuration: EqualizerConfiguration,
+        equalizer_configuration: EqualizerConfiguration<1, 8>,
     }
 );
 

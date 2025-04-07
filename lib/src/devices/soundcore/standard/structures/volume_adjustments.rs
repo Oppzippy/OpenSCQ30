@@ -4,111 +4,80 @@ use nom::{
     combinator::map,
     error::{ContextError, ParseError, context},
 };
-use serde::{Deserialize, Serialize};
-use std::{array, ops::RangeInclusive};
+use std::array;
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
-pub struct VolumeAdjustments {
-    inner: Vec<i16>,
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct VolumeAdjustments<const BANDS: usize> {
+    inner: [i16; BANDS],
 }
 
-impl Default for VolumeAdjustments {
+impl<const B: usize> Default for VolumeAdjustments<B> {
     fn default() -> Self {
-        Self { inner: vec![0; 8] }
+        Self { inner: [0; B] }
     }
 }
 
-#[derive(thiserror::Error, Debug)]
-pub enum VolumeAdjustmentsError {
-    #[error("invalid number of bands ({}), {values:?}", values.len())]
-    InvalidNumberOfBands { values: Vec<i16> },
-}
+const FRACTION_DIGITS: u8 = 1;
+const MIN_VOLUME: i16 = -120;
+const MAX_VOLUME: i16 = (u8::MAX - 121) as i16;
 
-impl VolumeAdjustments {
-    pub const FRACTION_DIGITS: u8 = 1;
-    pub const MIN_VOLUME: i16 = -120;
-    pub const MAX_VOLUME: i16 = (u8::MAX - 121) as i16;
-    pub const VALID_NUMBER_OF_BANDS: RangeInclusive<usize> = 8..=10;
-
-    pub fn new(volume_adjustments: Vec<i16>) -> Result<Self, VolumeAdjustmentsError> {
-        let clamped = volume_adjustments
-            .into_iter()
-            .map(|vol| vol.clamp(Self::MIN_VOLUME, Self::MAX_VOLUME))
-            .collect::<Vec<i16>>();
-        if !Self::VALID_NUMBER_OF_BANDS.contains(&clamped.len()) {
-            return Err(VolumeAdjustmentsError::InvalidNumberOfBands { values: clamped });
-        }
-
-        Ok(Self { inner: clamped })
+impl<const B: usize> VolumeAdjustments<B> {
+    pub fn new(volume_adjustments: [i16; B]) -> Self {
+        let clamped = volume_adjustments.map(|vol| vol.clamp(MIN_VOLUME, MAX_VOLUME));
+        Self { inner: clamped }
     }
 
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        num_bands: usize,
-    ) -> impl Fn(&'a [u8]) -> IResult<&'a [u8], VolumeAdjustments, E> {
-        move |input| {
-            context(
-                "volume adjustment",
-                map(take(num_bands), |volume_adjustment_bytes: &[u8]| {
-                    VolumeAdjustments::from_bytes(volume_adjustment_bytes)
-                        .expect("length was already verified by take(8)")
-                }),
-            )(input)
-        }
+        input: &'a [u8],
+    ) -> IResult<&'a [u8], Self, E> {
+        context(
+            "volume adjustment",
+            map(take(B), |volume_adjustment_bytes: &[u8]| {
+                VolumeAdjustments::from_bytes(
+                    volume_adjustment_bytes
+                        .try_into()
+                        .expect("take guarantees that the length will be B"),
+                )
+            }),
+        )(input)
     }
 
-    pub fn bytes(&self) -> impl Iterator<Item = u8> + '_ {
+    pub fn bytes(&self) -> [u8; B] {
         self.inner
-            .iter()
-            .cloned()
             .map(|adjustment| Self::signed_adjustment_to_packet_byte(adjustment.into()))
     }
 
-    pub fn into_bytes(self) -> Vec<u8> {
-        self.inner
-            .into_iter()
-            .map(|adjustment| Self::signed_adjustment_to_packet_byte(adjustment.into()))
-            .collect()
+    pub fn from_bytes(bytes: [u8; B]) -> Self {
+        Self::new(bytes.map(Self::packet_byte_to_signed_adjustment))
     }
 
-    pub fn from_bytes(bytes: &[u8]) -> Result<Self, VolumeAdjustmentsError> {
-        Self::new(
-            bytes
-                .iter()
-                .cloned()
-                .map(Self::packet_byte_to_signed_adjustment)
-                .collect(),
-        )
-    }
-
-    pub fn adjustments(&self) -> &[i16] {
+    pub fn adjustments(&self) -> &[i16; B] {
         &self.inner
     }
 
     fn signed_adjustment_to_packet_byte(adjustment: i16) -> u8 {
-        let clamped = adjustment.clamp(Self::MIN_VOLUME, Self::MAX_VOLUME);
-        let shifted = clamped - Self::MIN_VOLUME;
+        let clamped = adjustment.clamp(MIN_VOLUME, MAX_VOLUME);
+        let shifted = clamped - MIN_VOLUME;
         shifted
             .try_into()
             .expect("value is already clamped, so it can't overflow")
     }
 
     fn packet_byte_to_signed_adjustment(byte: u8) -> i16 {
-        (byte as i16) + (Self::MIN_VOLUME as i16)
+        (byte as i16) + (MIN_VOLUME as i16)
     }
 
-    pub fn apply_drc(&self) -> VolumeAdjustments {
+    pub fn apply_drc(&self) -> Self {
         let adjustments = self
             .inner
-            .iter()
-            .map(|adjustment| *adjustment as f64 / 10_i16.pow(Self::FRACTION_DIGITS as u32) as f64)
-            .collect::<Vec<_>>();
+            .map(|adjustment| adjustment as f64 / 10_i16.pow(FRACTION_DIGITS as u32) as f64);
 
         const SMALLER_COEFFICIENT: f64 = 0.85;
         const LARGER_COEFFICIENT: f64 = 0.95;
         let lows_subtraction = adjustments[2] * 0.81 * SMALLER_COEFFICIENT;
         let highs_subtraction = adjustments[5] * 0.81 * SMALLER_COEFFICIENT;
 
-        let band_coefficients = [
+        const BAND_COEFFICIENTS: [[f64; 8]; 8] = [
             // 0
             [
                 1.26,
@@ -203,7 +172,7 @@ impl VolumeAdjustments {
         // if we were to do band_coefficients.map, we wouldn't get the index, and if we converted
         // to an iterator and used enumerate, we can't easily collect back into an array.
         let multiplied_adjustments_8_bands: [f64; 8] = array::from_fn(|band_coefficient_index| {
-            let coefficients = band_coefficients[band_coefficient_index];
+            let coefficients = BAND_COEFFICIENTS[band_coefficient_index];
             adjustments
                 .iter()
                 .take(8)
@@ -225,57 +194,41 @@ impl VolumeAdjustments {
         let new_adjustments_8_bands = multiplied_adjustments_8_bands.map(|band| band / 10.0);
 
         // Add bands 9+ back on to the end
-        let new_adjustments_with_all_bands = new_adjustments_8_bands
-            .into_iter()
-            .chain(adjustments[8..].iter().cloned())
-            // convert back to ints from floats
-            .map(|adjustment| {
-                (adjustment * 10_i16.pow(Self::FRACTION_DIGITS as u32) as f64).round() as i16
-            })
-            .collect::<Vec<_>>();
+        let new_adjustments_with_all_bands: [i16; B] = array::from_fn(|i| {
+            new_adjustments_8_bands
+                .get(i)
+                .cloned()
+                .unwrap_or(adjustments[i])
+        })
+        .map(|adjustment| (adjustment * 10_i16.pow(FRACTION_DIGITS as u32) as f64).round() as i16);
 
-        VolumeAdjustments::new(new_adjustments_with_all_bands).expect(
-            "we are passing the same number of bands as self has, so it must be a valid number for self to exist",
-        )
+        VolumeAdjustments::new(new_adjustments_with_all_bands)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::VolumeAdjustments;
+    use super::*;
     const TEST_BYTES: [u8; 8] = [0, 80, 100, 120, 140, 160, 180, 240];
     const TEST_ADJUSTMENTS: [i16; 8] = [-120, -40, -20, 0, 20, 40, 60, 120];
 
     #[test]
     fn converts_volume_adjustments_to_packet_bytes() {
-        let band_adjustments = VolumeAdjustments::new(TEST_ADJUSTMENTS.to_vec()).unwrap();
-        assert_eq!(
-            TEST_BYTES,
-            band_adjustments.bytes().collect::<Vec<_>>().as_ref()
-        );
+        let band_adjustments = VolumeAdjustments::new(TEST_ADJUSTMENTS);
+        assert_eq!(TEST_BYTES, band_adjustments.bytes());
     }
 
     #[test]
     fn from_bytes_converts_packet_bytes_to_adjustment() {
-        let band_adjustments = VolumeAdjustments::from_bytes(&TEST_BYTES).unwrap();
+        let band_adjustments = VolumeAdjustments::from_bytes(TEST_BYTES);
         assert_eq!(TEST_ADJUSTMENTS, band_adjustments.adjustments().as_ref());
     }
 
     #[test]
     fn it_clamps_volume_adjustments_outside_of_expected_range() {
-        let band_adjustments =
-            VolumeAdjustments::new([i16::MIN, i16::MAX, 0, 0, 0, 0, 0, 0].to_vec()).unwrap();
+        let band_adjustments = VolumeAdjustments::new([i16::MIN, i16::MAX, 0, 0, 0, 0, 0, 0]);
         assert_eq!(
-            [
-                VolumeAdjustments::MIN_VOLUME,
-                VolumeAdjustments::MAX_VOLUME,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-            ],
+            [MIN_VOLUME, MAX_VOLUME, 0, 0, 0, 0, 0, 0,],
             band_adjustments.adjustments().as_ref()
         );
     }
@@ -323,29 +276,23 @@ mod tests {
         ];
 
         for example in examples {
-            let actual = VolumeAdjustments::new(example.0.to_vec())
-                .unwrap()
-                .apply_drc();
+            let actual = VolumeAdjustments::new(example.0).apply_drc();
             let expected =
-                VolumeAdjustments::new(example.1.map(|v: f64| (v * 10f64).round() as i16).to_vec())
-                    .unwrap();
+                VolumeAdjustments::new(example.1.map(|v: f64| (v * 10f64).round() as i16));
             assert_eq!(expected, actual);
         }
     }
 
     #[test]
     fn it_does_not_modify_band_9_when_applying_drc() {
-        let volume_adjustments =
-            VolumeAdjustments::new([-60, 60, 23, 120, 22, -120, -04, 16, 50].to_vec()).unwrap(); // volume adjustments
+        let volume_adjustments = VolumeAdjustments::new([-60, 60, 23, 120, 22, -120, -04, 16, 50]);
         let expected = VolumeAdjustments::new(
             [
                 -1.1060872, 1.367825, -0.842687, 1.571185, 0.321646, -1.79549, 0.61513, 0.083543,
                 5.0,
             ]
-            .map(|v| (v * 10.0f64).round() as i16)
-            .to_vec(),
-        )
-        .unwrap(); // drc
+            .map(|v| (v * 10.0f64).round() as i16),
+        );
         let actual = volume_adjustments.apply_drc();
         assert_eq!(expected, actual)
     }

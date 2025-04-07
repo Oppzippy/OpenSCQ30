@@ -12,10 +12,10 @@ use super::packets::A3930StateUpdatePacket;
 pub struct A3930State {
     tws_status: TwsStatus,
     battery: DualBattery,
-    equalizer_configuration: EqualizerConfiguration,
+    equalizer_configuration: EqualizerConfiguration<2, 8>,
     gender: Gender,
     age_range: AgeRange,
-    custom_hear_id: CustomHearId,
+    custom_hear_id: CustomHearId<2, 8>,
     button_configuration: MultiButtonConfiguration,
     sound_modes: SoundModes,
     side_tone: bool,
@@ -26,10 +26,10 @@ impl_as_ref_for_field!(
     struct A3930State {
         tws_status: TwsStatus,
         battery: DualBattery,
-        equalizer_configuration: EqualizerConfiguration,
+        equalizer_configuration: EqualizerConfiguration<2, 8>,
         gender: Gender,
         age_range: AgeRange,
-        custom_hear_id: CustomHearId,
+        custom_hear_id: CustomHearId<2, 8>,
         button_configuration: MultiButtonConfiguration,
         sound_modes: SoundModes,
     }

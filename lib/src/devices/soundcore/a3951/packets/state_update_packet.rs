@@ -31,10 +31,10 @@ use crate::devices::soundcore::{
 pub struct A3951StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
-    pub equalizer_configuration: EqualizerConfiguration,
+    pub equalizer_configuration: EqualizerConfiguration<2, 8>,
     pub gender: Gender,
     pub age_range: AgeRange,
-    pub custom_hear_id: CustomHearId,
+    pub custom_hear_id: CustomHearId<2, 8>,
     pub button_configuration: MultiButtonConfiguration,
     pub sound_modes: SoundModes,
     pub side_tone: bool,
@@ -75,7 +75,7 @@ impl InboundPacket for A3951StateUpdatePacket {
                 ) = tuple((
                     TwsStatus::take,
                     DualBattery::take,
-                    EqualizerConfiguration::take(2, 8),
+                    EqualizerConfiguration::take,
                     Gender::take,
                     AgeRange::take,
                     CustomHearId::take_with_all_fields,
@@ -151,9 +151,9 @@ impl OutboundPacket for A3951StateUpdatePacket {
                 self.custom_hear_id
                     .custom_volume_adjustments
                     .as_ref()
-                    .unwrap_or(&vec![
-                        VolumeAdjustments::new(vec![0; 8]).unwrap(),
-                        VolumeAdjustments::new(vec![0; 8]).unwrap(),
+                    .unwrap_or(&[
+                        VolumeAdjustments::new([0; 8]),
+                        VolumeAdjustments::new([0; 8]),
                     ])
                     .iter()
                     .map(|v| v.bytes())

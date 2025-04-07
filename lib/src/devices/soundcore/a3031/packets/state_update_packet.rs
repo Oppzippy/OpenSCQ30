@@ -30,7 +30,7 @@ use crate::devices::soundcore::{
 pub struct A3031StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
-    pub equalizer_configuration: EqualizerConfiguration,
+    pub equalizer_configuration: EqualizerConfiguration<2, 8>,
     pub button_configuration: MultiButtonConfiguration,
     pub sound_modes: SoundModes,
     pub side_tone: bool,
@@ -53,7 +53,7 @@ impl InboundPacket for A3031StateUpdatePacket {
                 tuple((
                     TwsStatus::take,
                     DualBattery::take,
-                    EqualizerConfiguration::take(2, 8),
+                    EqualizerConfiguration::take,
                     MultiButtonConfiguration::take,
                     SoundModes::take,
                     take_bool,

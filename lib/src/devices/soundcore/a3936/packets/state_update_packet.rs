@@ -37,9 +37,9 @@ pub struct A3936StateUpdatePacket {
     pub left_firmware: FirmwareVersion,
     pub right_firmware: FirmwareVersion,
     pub serial_number: SerialNumber,
-    pub equalizer_configuration: EqualizerConfiguration,
+    pub equalizer_configuration: EqualizerConfiguration<2, 10>,
     pub age_range: AgeRange,
-    pub custom_hear_id: CustomHearId,
+    pub custom_hear_id: CustomHearId<2, 10>,
     pub sound_modes: A3936SoundModes,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub button_configuration: A3936InternalMultiButtonConfiguration,
@@ -61,23 +61,23 @@ impl Default for A3936StateUpdatePacket {
             left_firmware: Default::default(),
             right_firmware: Default::default(),
             serial_number: Default::default(),
-            equalizer_configuration: EqualizerConfiguration::new_custom_profile(vec![
-                VolumeAdjustments::new(vec![0; 10]).unwrap(),
-                VolumeAdjustments::new(vec![0; 10]).unwrap(),
+            equalizer_configuration: EqualizerConfiguration::new_custom_profile([
+                VolumeAdjustments::new([0; 10]),
+                VolumeAdjustments::new([0; 10]),
             ]),
             age_range: Default::default(),
             custom_hear_id: CustomHearId {
                 is_enabled: Default::default(),
-                volume_adjustments: vec![
-                    VolumeAdjustments::new(vec![0; 10]).unwrap(),
-                    VolumeAdjustments::new(vec![0; 10]).unwrap(),
+                volume_adjustments: [
+                    VolumeAdjustments::new([0; 10]),
+                    VolumeAdjustments::new([0; 10]),
                 ],
                 time: Default::default(),
                 hear_id_type: Default::default(),
                 hear_id_music_type: Default::default(),
-                custom_volume_adjustments: Some(vec![
-                    VolumeAdjustments::new(vec![0; 10]).unwrap(),
-                    VolumeAdjustments::new(vec![0; 10]).unwrap(),
+                custom_volume_adjustments: Some([
+                    VolumeAdjustments::new([0; 10]),
+                    VolumeAdjustments::new([0; 10]),
                 ]),
             },
             sound_modes: Default::default(),
@@ -111,9 +111,9 @@ impl InboundPacket for A3936StateUpdatePacket {
                 let (input, left_firmware) = FirmwareVersion::take(input)?;
                 let (input, right_firmware) = FirmwareVersion::take(input)?;
                 let (input, serial_number) = SerialNumber::take(input)?;
-                let (input, equalizer_configuration) = EqualizerConfiguration::take(2, 10)(input)?;
+                let (input, equalizer_configuration) = EqualizerConfiguration::take(input)?;
                 let (input, age_range) = AgeRange::take(input)?;
-                let (input, custom_hear_id) = CustomHearId::take_without_music_type(10)(input)?;
+                let (input, custom_hear_id) = CustomHearId::take_without_music_type(input)?;
 
                 // For some reason, an offset value is taken before the custom button model, which refers to how many bytes
                 // until the next data to be read. This offset includes the length of the custom button model. Presumably,

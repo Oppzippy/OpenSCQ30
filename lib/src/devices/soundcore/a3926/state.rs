@@ -12,10 +12,10 @@ use super::packets::A3926StateUpdatePacket;
 pub struct A3926State {
     tws_status: TwsStatus,
     battery: DualBattery,
-    equalizer_configuration: EqualizerConfiguration,
+    equalizer_configuration: EqualizerConfiguration<2, 8>,
     gender: Gender,
     age_range: AgeRange,
-    hear_id: BasicHearId,
+    hear_id: BasicHearId<2, 8>,
     button_configuration: MultiButtonConfiguration,
 }
 
@@ -23,10 +23,10 @@ impl_as_ref_for_field!(
     struct A3926State {
         tws_status: TwsStatus,
         battery: DualBattery,
-        equalizer_configuration: EqualizerConfiguration,
+        equalizer_configuration: EqualizerConfiguration<2, 8>,
         gender: Gender,
         age_range: AgeRange,
-        hear_id: BasicHearId,
+        hear_id: BasicHearId<2, 8>,
         button_configuration: MultiButtonConfiguration,
     }
 );

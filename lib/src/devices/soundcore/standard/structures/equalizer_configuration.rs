@@ -1,3 +1,5 @@
+use std::array;
+
 use nom::{
     IResult,
     combinator::map,
@@ -6,55 +8,51 @@ use nom::{
     number::complete::le_u16,
     sequence::pair,
 };
-use serde::{Deserialize, Serialize};
 
 use super::{VolumeAdjustments, preset_equalizer_profile::PresetEqualizerProfile};
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct EqualizerConfiguration {
+#[derive(Clone, Debug, PartialEq)]
+pub struct EqualizerConfiguration<const CHANNELS: usize, const BANDS: usize> {
     preset_profile: Option<PresetEqualizerProfile>,
-    volume_adjustments: Vec<VolumeAdjustments>,
+    volume_adjustments: [VolumeAdjustments<BANDS>; CHANNELS],
 }
 
-impl Default for EqualizerConfiguration {
+impl<const C: usize, const B: usize> Default for EqualizerConfiguration<C, B> {
     fn default() -> Self {
-        Self::new_from_preset_profile(1, PresetEqualizerProfile::SoundcoreSignature, Vec::new())
+        Self::new_from_preset_profile(
+            PresetEqualizerProfile::SoundcoreSignature,
+            array::from_fn(|_| Vec::new()),
+        )
     }
 }
 
-impl EqualizerConfiguration {
+impl<const C: usize, const B: usize> EqualizerConfiguration<C, B> {
     pub const CUSTOM_PROFILE_ID: u16 = 0xfefe;
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        num_channels: usize,
-        num_bands: usize,
-    ) -> impl Fn(&'a [u8]) -> IResult<&'a [u8], EqualizerConfiguration, E> {
-        move |input| {
-            context(
-                "equalizer configuration",
-                map(
-                    pair(
-                        le_u16,
-                        count(VolumeAdjustments::take(num_bands), num_channels),
-                    ),
-                    |(profile_id, volume_adjustments)| match PresetEqualizerProfile::from_id(
-                        profile_id,
-                    ) {
-                        Some(preset) => EqualizerConfiguration::new_from_preset_profile(
-                            num_channels,
+        input: &'a [u8],
+    ) -> IResult<&'a [u8], Self, E> {
+        context(
+            "equalizer configuration",
+            map(
+                pair(le_u16, count(VolumeAdjustments::<B>::take, C)),
+                |(profile_id, volume_adjustments)| {
+                    let volume_adjustments: [VolumeAdjustments<B>; C] = volume_adjustments
+                        .try_into()
+                        .expect("count vec is guaranteed to be the specified length");
+
+                    match PresetEqualizerProfile::from_id(profile_id) {
+                        Some(preset) => Self::new_from_preset_profile(
                             preset,
-                            volume_adjustments
-                                .into_iter()
-                                .map(|channel| {
-                                    channel.adjustments().iter().skip(8).cloned().collect()
-                                })
-                                .collect(),
+                            volume_adjustments.map(|channel| {
+                                channel.adjustments().iter().skip(8).cloned().collect()
+                            }),
                         ),
                         None => EqualizerConfiguration::new_custom_profile(volume_adjustments),
-                    },
-                ),
-            )(input)
-        }
+                    }
+                },
+            ),
+        )(input)
     }
 
     pub fn bytes(&self) -> impl Iterator<Item = u8> {
@@ -65,36 +63,25 @@ impl EqualizerConfiguration {
     }
 
     pub fn new_from_preset_profile(
-        num_channels: usize,
         preset_profile: PresetEqualizerProfile,
-        extra_adjustments: Vec<Vec<i16>>,
+        extra_adjustments: [Vec<i16>; C],
     ) -> Self {
-        assert!(
-            num_channels == extra_adjustments.len() || extra_adjustments.is_empty(),
-            "num_channels ({num_channels}) should be consistent with extra_adjustments's ({}) number of channels",
-            extra_adjustments.len()
-        );
+        let preset_adjustments = preset_profile.volume_adjustments();
         Self {
             preset_profile: Some(preset_profile),
-            volume_adjustments: (0..num_channels)
-                .into_iter()
-                .map(|i| {
-                    VolumeAdjustments::new(
-                        preset_profile
-                            .volume_adjustments()
-                            .adjustments()
-                            .iter()
-                            .chain(extra_adjustments.get(i).into_iter().flatten())
-                            .cloned()
-                            .collect(),
-                    )
-                    .expect("all preset profiles should be valid")
-                })
-                .collect(),
+            volume_adjustments: array::from_fn(|i| {
+                VolumeAdjustments::new(array::from_fn(|j| {
+                    if j < preset_adjustments.adjustments().len() {
+                        preset_adjustments.adjustments()[j]
+                    } else {
+                        extra_adjustments[i][j - preset_adjustments.adjustments().len()]
+                    }
+                }))
+            }),
         }
     }
 
-    pub fn new_custom_profile(volume_adjustments: Vec<VolumeAdjustments>) -> Self {
+    pub fn new_custom_profile(volume_adjustments: [VolumeAdjustments<B>; C]) -> Self {
         Self {
             preset_profile: None,
             volume_adjustments,
@@ -111,11 +98,11 @@ impl EqualizerConfiguration {
         self.preset_profile
     }
 
-    pub fn volume_adjustments_channel_1(&self) -> &VolumeAdjustments {
-        &self.volume_adjustments.first().unwrap()
+    pub fn volume_adjustments_channel_1(&self) -> &VolumeAdjustments<B> {
+        &self.volume_adjustments[0]
     }
 
-    pub fn volume_adjustments(&self) -> &[VolumeAdjustments] {
+    pub fn volume_adjustments(&self) -> &[VolumeAdjustments<B>; C] {
         &self.volume_adjustments
     }
 

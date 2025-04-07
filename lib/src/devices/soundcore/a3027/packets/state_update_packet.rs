@@ -28,10 +28,11 @@ use crate::devices::soundcore::{
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct A3027StateUpdatePacket {
     pub battery: SingleBattery,
-    pub equalizer_configuration: EqualizerConfiguration,
+    pub equalizer_configuration: EqualizerConfiguration<1, 8>,
     pub gender: Gender,
     pub age_range: AgeRange,
-    pub hear_id: BasicHearId,
+    // Two channels, but the second one is ignored
+    pub hear_id: BasicHearId<2, 8>,
     pub sound_modes: SoundModes,
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
@@ -53,7 +54,7 @@ impl InboundPacket for A3027StateUpdatePacket {
             all_consuming(map(
                 tuple((
                     SingleBattery::take,
-                    EqualizerConfiguration::take(1, 8),
+                    EqualizerConfiguration::take,
                     Gender::take,
                     AgeRange::take,
                     BasicHearId::take,

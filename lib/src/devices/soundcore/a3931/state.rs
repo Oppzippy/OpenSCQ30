@@ -1,7 +1,6 @@
 use crate::{
     devices::soundcore::standard::structures::{
-        DualBattery, EqualizerConfiguration, MultiButtonConfiguration, SoundModes,
-        TwsStatus,
+        DualBattery, EqualizerConfiguration, MultiButtonConfiguration, SoundModes, TwsStatus,
     },
     macros::impl_as_ref_for_field,
 };
@@ -12,7 +11,7 @@ use super::packets::A3931StateUpdatePacket;
 pub struct A3931State {
     tws_status: TwsStatus,
     battery: DualBattery,
-    equalizer_configuration: EqualizerConfiguration,
+    equalizer_configuration: EqualizerConfiguration<2, 8>,
     button_configuration: MultiButtonConfiguration,
     sound_modes: SoundModes,
     side_tone: bool,
@@ -25,7 +24,7 @@ impl_as_ref_for_field!(
     struct A3931State {
         tws_status: TwsStatus,
         battery: DualBattery,
-        equalizer_configuration: EqualizerConfiguration,
+        equalizer_configuration: EqualizerConfiguration<2, 8>,
         button_configuration: MultiButtonConfiguration,
         sound_modes: SoundModes,
     }

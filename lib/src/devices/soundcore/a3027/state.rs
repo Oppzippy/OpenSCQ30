@@ -11,10 +11,11 @@ use super::packets::A3027StateUpdatePacket;
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3027State {
     pub battery: SingleBattery,
-    pub equalizer_configuration: EqualizerConfiguration,
+    pub equalizer_configuration: EqualizerConfiguration<1, 8>,
     pub gender: Gender,
     pub age_range: AgeRange,
-    pub hear_id: BasicHearId,
+    // Two channels, but the second one is ignored
+    pub hear_id: BasicHearId<2, 8>,
     pub sound_modes: SoundModes,
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
@@ -25,7 +26,7 @@ pub struct A3027State {
 impl_as_ref_for_field!(
     struct A3027State {
         sound_modes: SoundModes,
-        equalizer_configuration: EqualizerConfiguration,
+        equalizer_configuration: EqualizerConfiguration<1, 8>,
     }
 );
 

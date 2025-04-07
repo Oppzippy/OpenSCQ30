@@ -29,10 +29,10 @@ use crate::devices::soundcore::{
 pub struct A3926StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
-    pub equalizer_configuration: EqualizerConfiguration,
+    pub equalizer_configuration: EqualizerConfiguration<2, 8>,
     pub gender: Gender,
     pub age_range: AgeRange,
-    pub hear_id: BasicHearId,
+    pub hear_id: BasicHearId<2, 8>,
     pub button_configuration: MultiButtonConfiguration,
 }
 
@@ -49,7 +49,7 @@ impl InboundPacket for A3926StateUpdatePacket {
                 tuple((
                     TwsStatus::take,
                     DualBattery::take,
-                    EqualizerConfiguration::take(2, 8),
+                    EqualizerConfiguration::take,
                     Gender::take,
                     AgeRange::take,
                     BasicHearId::take,

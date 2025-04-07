@@ -15,7 +15,7 @@ pub struct A3945State {
     pub left_firmware: FirmwareVersion,
     pub right_firmware: FirmwareVersion,
     pub serial_number: SerialNumber,
-    pub equalizer_configuration: EqualizerConfiguration,
+    pub equalizer_configuration: EqualizerConfiguration<2, 10>,
     pub button_configuration: MultiButtonConfiguration,
     pub touch_tone_switch: bool,
     pub wear_detection_switch: bool,
@@ -30,7 +30,7 @@ impl_as_ref_for_field!(
         tws_status: TwsStatus,
         battery: DualBattery,
         serial_number: SerialNumber,
-        equalizer_configuration: EqualizerConfiguration,
+        equalizer_configuration: EqualizerConfiguration<2, 10>,
         button_configuration: MultiButtonConfiguration,
     }
 );

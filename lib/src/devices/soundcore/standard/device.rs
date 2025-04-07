@@ -178,9 +178,9 @@ where
             .add_sound_modes(self.packet_io_controller.clone(), available_sound_modes);
     }
 
-    pub async fn equalizer(&mut self)
+    pub async fn equalizer<const C: usize, const B: usize>(&mut self)
     where
-        StateType: AsRef<EqualizerConfiguration> + AsMut<EqualizerConfiguration>,
+        StateType: AsRef<EqualizerConfiguration<C, B>> + AsMut<EqualizerConfiguration<C, B>>,
     {
         self.module_collection
             .add_equalizer(
@@ -191,9 +191,9 @@ where
             .await;
     }
 
-    pub async fn equalizer_with_drc(&mut self)
+    pub async fn equalizer_with_drc<const C: usize, const B: usize>(&mut self)
     where
-        StateType: AsRef<EqualizerConfiguration> + AsMut<EqualizerConfiguration>,
+        StateType: AsRef<EqualizerConfiguration<C, B>> + AsMut<EqualizerConfiguration<C, B>>,
     {
         self.module_collection
             .add_equalizer_with_drc(
@@ -204,10 +204,10 @@ where
             .await
     }
 
-    pub async fn equalizer_with_basic_hear_id(&mut self)
+    pub async fn equalizer_with_basic_hear_id<const C: usize, const B: usize>(&mut self)
     where
-        StateType: AsMut<EqualizerConfiguration> + AsRef<EqualizerConfiguration>,
-        StateType: AsRef<BasicHearId> + AsRef<Gender> + AsRef<AgeRange>,
+        StateType: AsMut<EqualizerConfiguration<C, B>> + AsRef<EqualizerConfiguration<C, B>>,
+        StateType: AsRef<BasicHearId<C, B>> + AsRef<Gender> + AsRef<AgeRange>,
     {
         self.module_collection
             .add_equalizer_with_basic_hear_id(
@@ -218,10 +218,10 @@ where
             .await
     }
 
-    pub async fn equalizer_with_custom_hear_id(&mut self)
+    pub async fn equalizer_with_custom_hear_id<const C: usize, const B: usize>(&mut self)
     where
-        StateType: AsMut<EqualizerConfiguration> + AsRef<EqualizerConfiguration>,
-        StateType: AsRef<CustomHearId> + AsRef<Gender> + AsRef<AgeRange>,
+        StateType: AsMut<EqualizerConfiguration<C, B>> + AsRef<EqualizerConfiguration<C, B>>,
+        StateType: AsRef<CustomHearId<C, B>> + AsRef<Gender> + AsRef<AgeRange>,
     {
         self.module_collection
             .add_equalizer_with_custom_hear_id(

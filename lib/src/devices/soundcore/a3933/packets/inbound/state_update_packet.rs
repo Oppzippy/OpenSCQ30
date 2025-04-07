@@ -37,9 +37,9 @@ pub struct A3933StateUpdatePacket {
     pub left_firmware: FirmwareVersion,
     pub right_firmware: FirmwareVersion,
     pub serial_number: SerialNumber,
-    pub equalizer_configuration: EqualizerConfiguration,
+    pub equalizer_configuration: EqualizerConfiguration<2, 10>,
     pub age_range: AgeRange,
-    pub hear_id: Option<CustomHearId>, // 10 bands
+    pub hear_id: Option<CustomHearId<2, 10>>,
     pub button_configuration: MultiButtonConfiguration,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub sound_modes: SoundModes,
@@ -59,23 +59,23 @@ impl Default for A3933StateUpdatePacket {
             left_firmware: Default::default(),
             right_firmware: Default::default(),
             serial_number: Default::default(),
-            equalizer_configuration: EqualizerConfiguration::new_custom_profile(vec![
-                VolumeAdjustments::new(vec![0; 10]).unwrap(),
-                VolumeAdjustments::new(vec![0; 10]).unwrap(),
+            equalizer_configuration: EqualizerConfiguration::new_custom_profile([
+                VolumeAdjustments::new([0; 10]),
+                VolumeAdjustments::new([0; 10]),
             ]),
             age_range: Default::default(),
             hear_id: Some(CustomHearId {
                 is_enabled: Default::default(),
-                volume_adjustments: vec![
-                    VolumeAdjustments::new(vec![0; 10]).unwrap(),
-                    VolumeAdjustments::new(vec![0; 10]).unwrap(),
+                volume_adjustments: [
+                    VolumeAdjustments::new([0; 10]),
+                    VolumeAdjustments::new([0; 10]),
                 ],
                 time: Default::default(),
                 hear_id_type: Default::default(),
                 hear_id_music_type: Default::default(),
-                custom_volume_adjustments: Some(vec![
-                    VolumeAdjustments::new(vec![0; 10]).unwrap(),
-                    VolumeAdjustments::new(vec![0; 10]).unwrap(),
+                custom_volume_adjustments: Some([
+                    VolumeAdjustments::new([0; 10]),
+                    VolumeAdjustments::new([0; 10]),
                 ]),
             }),
             button_configuration: Default::default(),
@@ -118,7 +118,7 @@ impl InboundPacket for A3933StateUpdatePacket {
                     FirmwareVersion::take,
                     FirmwareVersion::take,
                     SerialNumber::take,
-                    EqualizerConfiguration::take(2, 10),
+                    EqualizerConfiguration::take,
                     AgeRange::take,
                 ))(input)?;
 
@@ -126,7 +126,7 @@ impl InboundPacket for A3933StateUpdatePacket {
                     let (input, _) = take(48usize)(input)?;
                     (input, None)
                 } else {
-                    let (input, hear_id) = CustomHearId::take_without_music_type(10)(input)?;
+                    let (input, hear_id) = CustomHearId::take_without_music_type(input)?;
                     (input, Some(hear_id))
                 };
 
@@ -338,9 +338,8 @@ mod tests {
         assert_eq!(FirmwareVersion::new(2, 61), packet.left_firmware);
         assert_eq!(
             EqualizerConfiguration::new_from_preset_profile(
-                2,
                 PresetEqualizerProfile::SoundcoreSignature,
-                vec![vec![0, 0], vec![255 - 120, 255 - 120]] // subtract 120 to convert from byte value to volume adjustment
+                [vec![0, 0], vec![255 - 120, 255 - 120]] // subtract 120 to convert from byte value to volume adjustment
             ),
             packet.equalizer_configuration
         );

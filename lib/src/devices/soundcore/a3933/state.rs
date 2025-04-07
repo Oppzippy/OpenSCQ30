@@ -16,9 +16,9 @@ pub struct A3933State {
     pub left_firmware: FirmwareVersion,
     pub right_firmware: FirmwareVersion,
     pub serial_number: SerialNumber,
-    pub equalizer_configuration: EqualizerConfiguration,
+    pub equalizer_configuration: EqualizerConfiguration<2, 10>,
     pub age_range: AgeRange,
-    pub hear_id: Option<CustomHearId>, // 10 bands
+    pub hear_id: Option<CustomHearId<2, 10>>,
     pub button_configuration: MultiButtonConfiguration,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub sound_modes: SoundModes,
@@ -59,9 +59,9 @@ impl_as_ref_for_field!(
         tws_status: TwsStatus,
         battery: DualBattery,
         serial_number: SerialNumber,
-        equalizer_configuration: EqualizerConfiguration,
+        equalizer_configuration: EqualizerConfiguration<2, 10>,
         age_range: AgeRange,
-        hear_id: Option<CustomHearId>, // 10 bands
+        hear_id: Option<CustomHearId<2, 10>>,
         button_configuration: MultiButtonConfiguration,
         ambient_sound_mode_cycle: AmbientSoundModeCycle,
         sound_modes: SoundModes,

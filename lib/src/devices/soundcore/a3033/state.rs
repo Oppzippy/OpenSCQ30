@@ -10,7 +10,7 @@ use super::packets::A3033StateUpdatePacket;
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3033State {
     battery: SingleBattery,
-    equalizer_configuration: EqualizerConfiguration,
+    equalizer_configuration: EqualizerConfiguration<1, 8>,
     firmware_version: FirmwareVersion,
     serial_number: SerialNumber,
     wear_detection: bool,
@@ -18,7 +18,7 @@ pub struct A3033State {
 
 impl_as_ref_for_field!(
     struct A3033State {
-        equalizer_configuration: EqualizerConfiguration,
+        equalizer_configuration: EqualizerConfiguration<1, 8>,
     }
 );
 
