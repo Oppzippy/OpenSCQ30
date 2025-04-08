@@ -26,7 +26,7 @@ where
         let packet: SoundModeUpdatePacket = packet.try_into_inbound_packet()?;
         state.send_if_modified(|state| {
             let sound_modes = state.as_mut();
-            let modified = packet.0 == *sound_modes;
+            let modified = packet.0 != *sound_modes;
             *sound_modes = packet.0;
             modified
         });
