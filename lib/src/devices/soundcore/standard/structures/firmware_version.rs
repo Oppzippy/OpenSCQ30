@@ -19,6 +19,8 @@ pub struct FirmwareVersion {
 
 impl FirmwareVersion {
     pub const fn new(major: u8, minor: u8) -> Self {
+        debug_assert!(major < 100, "major version must fit within in two digits");
+        debug_assert!(minor < 100, "minor version must fit within in two digits");
         Self { major, minor }
     }
 
