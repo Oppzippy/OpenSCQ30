@@ -7,7 +7,7 @@ use crate::{
     devices::soundcore::standard::{
         packets::{
             outbound::{
-                SetEqualizerAndCustomHearIdPacket, SetEqualizerPacket, SetEqualizerWithDrcPacket,
+                SetEqualizerAndCustomHearIdPacket, SetEqualizerWithDrcPacket, set_equalizer,
             },
             packet_io_controller::PacketIOController,
         },
@@ -68,7 +68,7 @@ where
                 }
                 .into()
             } else {
-                SetEqualizerPacket {
+                set_equalizer::SetEqualizerPacket {
                     equalizer_configuration: target_equalizer_configuration,
                 }
                 .into()

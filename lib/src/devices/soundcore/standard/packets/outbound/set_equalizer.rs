@@ -9,13 +9,11 @@ pub struct SetEqualizerPacket<'a, const C: usize, const B: usize> {
     pub equalizer_configuration: &'a EqualizerConfiguration<C, B>,
 }
 
-impl<'a, const C: usize, const B: usize> SetEqualizerPacket<'a, C, B> {
-    pub const COMMAND: Command = Command::new([0x08, 0xEE, 0x00, 0x00, 0x00, 0x02, 0x81]);
-}
+pub const COMMAND: Command = Command::new([0x08, 0xEE, 0x00, 0x00, 0x00, 0x02, 0x81]);
 
 impl<'a, const C: usize, const B: usize> OutboundPacket for SetEqualizerPacket<'a, C, B> {
     fn command(&self) -> Command {
-        Self::COMMAND
+        COMMAND
     }
 
     fn body(&self) -> Vec<u8> {

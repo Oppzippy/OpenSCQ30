@@ -42,7 +42,7 @@ mod tests {
             soundcore::standard::{
                 packets::{
                     Packet,
-                    outbound::{SetEqualizerPacket, SetSoundModePacket},
+                    outbound::{SetSoundModePacket, set_equalizer},
                 },
                 structures::{AmbientSoundMode, NoiseCancelingMode, PresetEqualizerProfile},
             },
@@ -247,7 +247,7 @@ mod tests {
             inbound_sender
                 .send(
                     Packet {
-                        command: SetEqualizerPacket::<0, 0>::COMMAND.to_inbound(),
+                        command: set_equalizer::COMMAND.to_inbound(),
                         body: Vec::new(),
                     }
                     .bytes(),

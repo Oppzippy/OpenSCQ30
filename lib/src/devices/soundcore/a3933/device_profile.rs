@@ -47,7 +47,7 @@ mod tests {
             soundcore::standard::{
                 packets::{
                     Packet,
-                    outbound::{OutboundPacket, OutboundPacketBytesExt, SetEqualizerPacket},
+                    outbound::{OutboundPacket, OutboundPacketBytesExt, set_equalizer},
                 },
                 structures::{
                     Command, EqualizerConfiguration, PresetEqualizerProfile, STATE_UPDATE,
@@ -133,7 +133,7 @@ mod tests {
             inbound_sender
                 .send(
                     Packet {
-                        command: SetEqualizerPacket::<0, 0>::COMMAND.to_inbound(),
+                        command: set_equalizer::COMMAND.to_inbound(),
                         body: Vec::new(),
                     }
                     .bytes(),
@@ -151,7 +151,7 @@ mod tests {
 
         let set_eq_packet_bytes = outbound_receiver.recv().await.unwrap();
         assert_eq!(
-            Packet::from(SetEqualizerPacket {
+            Packet::from(set_equalizer::SetEqualizerPacket {
                 equalizer_configuration: &EqualizerConfiguration::<2, 10>::new_from_preset_profile(
                     PresetEqualizerProfile::TrebleReducer,
                     [vec![1, 2], vec![3, 4]],
