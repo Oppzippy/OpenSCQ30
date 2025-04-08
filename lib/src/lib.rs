@@ -11,6 +11,7 @@ pub mod devices;
 pub mod i18n;
 pub(crate) mod macros;
 pub mod storage;
+#[cfg(test)]
 pub(crate) mod stub;
 
 mod error;
