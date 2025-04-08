@@ -18,4 +18,5 @@ soundcore_device!(A3931State, A3931StateUpdatePacket, async |builder| {
     });
     builder.equalizer_with_drc().await;
     builder.button_configuration();
+    builder.dual_battery();
 });

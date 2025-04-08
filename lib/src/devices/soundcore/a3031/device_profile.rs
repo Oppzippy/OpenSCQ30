@@ -22,4 +22,5 @@ soundcore_device!(A3031State, A3031StateUpdatePacket, async |builder| {
         ],
     });
     builder.equalizer().await;
+    builder.dual_battery();
 });

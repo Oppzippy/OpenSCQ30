@@ -8,4 +8,5 @@ soundcore_device!(A3936State, A3936StateUpdatePacket, async |builder| {
     builder.equalizer_with_custom_hear_id().await;
     builder.a3936_button_configuration();
     builder.ambient_sound_mode_cycle();
+    builder.dual_battery();
 });

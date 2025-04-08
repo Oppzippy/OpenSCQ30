@@ -6,6 +6,7 @@ soundcore_device!(A3945State, A3945StateUpdatePacket, async |builder| {
     builder.module_collection().add_state_update();
     builder.equalizer().await;
     builder.button_configuration();
+    builder.dual_battery();
 });
 
 #[cfg(test)]

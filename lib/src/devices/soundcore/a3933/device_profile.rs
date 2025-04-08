@@ -27,6 +27,7 @@ soundcore_device!(A3933State, A3933StateUpdatePacket, async |builder| {
     builder.equalizer().await;
     builder.button_configuration();
     builder.ambient_sound_mode_cycle();
+    builder.dual_battery();
 });
 
 #[cfg(test)]

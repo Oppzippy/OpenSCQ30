@@ -23,6 +23,7 @@ pub struct A3028State {
 
 impl_as_ref_for_field!(
     struct A3028State {
+        battery: SingleBattery,
         sound_modes: SoundModes,
         equalizer_configuration: EqualizerConfiguration<1, 8>,
     }

@@ -25,8 +25,9 @@ use super::{
         packet_io_controller::PacketIOController,
     },
     structures::{
-        AgeRange, AmbientSoundModeCycle, BasicHearId, CustomHearId, EqualizerConfiguration, Gender,
-        MultiButtonConfiguration, SoundModes, TwsStatus,
+        AgeRange, AmbientSoundModeCycle, BasicHearId, CustomHearId, DualBattery,
+        EqualizerConfiguration, Gender, MultiButtonConfiguration, SingleBattery, SoundModes,
+        TwsStatus,
     },
 };
 
@@ -247,6 +248,20 @@ where
     {
         self.module_collection
             .add_ambient_sound_mode_cycle(self.packet_io_controller.clone())
+    }
+
+    pub fn single_battery(&mut self)
+    where
+        StateType: AsRef<SingleBattery> + AsMut<SingleBattery>,
+    {
+        self.module_collection.add_single_battery();
+    }
+
+    pub fn dual_battery(&mut self)
+    where
+        StateType: AsRef<DualBattery> + AsMut<DualBattery>,
+    {
+        self.module_collection.add_dual_battery();
     }
 }
 

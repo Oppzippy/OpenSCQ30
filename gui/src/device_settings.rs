@@ -1,4 +1,5 @@
 mod equalizer;
+mod information;
 mod quick_presets;
 mod range;
 mod select;
@@ -279,6 +280,9 @@ impl DeviceSettingsModel {
                     } => equalizer::responsive_equalizer(setting, value, move |index, value| {
                         Message::SetEqualizerBand(setting_id.clone(), index, value)
                     }),
+                    Setting::Information { text } => {
+                        information::information(setting_id, text.into())
+                    }
                 }
             }))
             .into()

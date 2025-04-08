@@ -27,4 +27,5 @@ soundcore_device!(A3951State, A3951StateUpdatePacket, async |builder| {
     });
     builder.equalizer_with_custom_hear_id().await;
     builder.button_configuration();
+    builder.dual_battery();
 });

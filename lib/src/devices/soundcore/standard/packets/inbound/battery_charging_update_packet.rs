@@ -15,9 +15,13 @@ pub struct BatteryChargingUpdatePacket {
     pub right: Option<IsBatteryCharging>,
 }
 
+impl BatteryChargingUpdatePacket {
+    pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04]);
+}
+
 impl InboundPacket for BatteryChargingUpdatePacket {
     fn command() -> Command {
-        Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04])
+        Self::COMMAND
     }
 
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(

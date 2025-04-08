@@ -20,6 +20,7 @@ pub enum CategoryId {
     SoundModes,
     Equalizer,
     ButtonConfiguration,
+    DeviceInformation,
 }
 
 #[derive(
@@ -58,6 +59,12 @@ pub enum SettingId {
     ManualNoiseCanceling,
     WindNoiseSuppression,
     AdaptiveNoiseCancelingSensitivityLevel,
+    IsCharging,
+    BatteryLevel,
+    IsChargingLeft,
+    BatteryLevelLeft,
+    IsChargingRight,
+    BatteryLevelRight,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -93,6 +100,9 @@ pub enum Setting {
         setting: Equalizer,
         values: Vec<i16>,
     },
+    Information {
+        text: String,
+    },
 }
 
 impl From<Setting> for Value {
@@ -105,6 +115,7 @@ impl From<Setting> for Value {
             Setting::MultiSelect { value, .. } => value.into(),
             Setting::Equalizer { values: value, .. } => value.into(),
             Setting::ModifiableSelect { value, .. } => value.into(),
+            Setting::Information { text } => Cow::<str>::Owned(text).into(),
         }
     }
 }

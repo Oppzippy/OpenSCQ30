@@ -20,4 +20,5 @@ soundcore_device!(A3926State, A3926StateUpdatePacket, async |builder| {
     // });
     builder.equalizer_with_basic_hear_id().await;
     builder.button_configuration();
+    builder.dual_battery();
 });

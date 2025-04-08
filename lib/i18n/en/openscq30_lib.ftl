@@ -1,6 +1,7 @@
 general = General
 sound-modes = Sound Modes
 equalizer = Equalizer
+device-information = Device Information
 
 ambient-sound-mode = Ambient Sound Mode
 transparency-mode = Transparency Mode
@@ -73,3 +74,12 @@ game-mode = Game Mode
 normal-mode-in-cycle = Normal Mode in Cycle
 transparency-mode-in-cycle = Transparency Mode in Cycle
 noise-canceling-mode-in-cycle = Noise Canceling Mode in Cycle
+
+is-charging = Is Charging
+battery-level = Battery Level
+is-charging-left = Is Charging (Left)
+battery-level-left = Battery Level (Left)
+is-charging-right = Is Charging (Right)
+battery-level-right = Battery Level (Right)
+charging = Charging
+not-charging = Not Charging

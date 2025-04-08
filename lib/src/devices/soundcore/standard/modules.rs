@@ -14,7 +14,9 @@ use super::{
 
 pub mod ambient_sound_mode_cycle;
 pub mod button_configuration;
+pub mod dual_battery;
 pub mod equalizer;
+pub mod single_battery;
 pub mod sound_modes;
 
 pub struct ModuleCollection<StateType> {

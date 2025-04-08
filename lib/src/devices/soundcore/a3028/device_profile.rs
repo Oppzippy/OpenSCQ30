@@ -22,6 +22,7 @@ soundcore_device!(A3028State, A3028StateUpdatePacket, async |builder| {
         ],
     });
     builder.equalizer().await;
+    builder.single_battery();
 });
 
 #[cfg(test)]
