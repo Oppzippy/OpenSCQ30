@@ -26,7 +26,7 @@ where
         let packet: BatteryLevelUpdatePacket = packet.try_into_inbound_packet()?;
         state.send_if_modified(|state| {
             let battery = state.as_mut();
-            let modified = packet.left == battery.level;
+            let modified = packet.left != battery.level;
             battery.level = packet.left;
             modified
         });
