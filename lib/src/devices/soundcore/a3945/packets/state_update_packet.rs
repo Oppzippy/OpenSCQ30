@@ -20,7 +20,7 @@ use crate::devices::soundcore::{
             parsing::take_bool,
         },
         structures::{
-            BatteryLevel, Command, DualBattery, EqualizerConfiguration, FirmwareVersion,
+            BatteryLevel, Command, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
             MultiButtonConfiguration, SerialNumber, TwsStatus,
         },
     },
@@ -32,8 +32,7 @@ use crate::devices::soundcore::{
 pub struct A3945StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
-    pub left_firmware: FirmwareVersion,
-    pub right_firmware: FirmwareVersion,
+    pub dual_firmware_version: DualFirmwareVersion,
     pub serial_number: SerialNumber,
     pub equalizer_configuration: EqualizerConfiguration<2, 10>,
     pub button_configuration: MultiButtonConfiguration,
@@ -59,8 +58,7 @@ impl InboundPacket for A3945StateUpdatePacket {
                 tuple((
                     TwsStatus::take,
                     DualBattery::take,
-                    FirmwareVersion::take,
-                    FirmwareVersion::take,
+                    DualFirmwareVersion::take,
                     SerialNumber::take,
                     EqualizerConfiguration::take,
                     MultiButtonConfiguration::take,
@@ -74,8 +72,7 @@ impl InboundPacket for A3945StateUpdatePacket {
                 |(
                     tws_status,
                     battery,
-                    left_firmware,
-                    right_firmware,
+                    dual_firmware_version,
                     serial_number,
                     equalizer_configuration,
                     button_configuration,
@@ -89,8 +86,7 @@ impl InboundPacket for A3945StateUpdatePacket {
                     A3945StateUpdatePacket {
                         tws_status,
                         battery,
-                        left_firmware,
-                        right_firmware,
+                        dual_firmware_version,
                         serial_number,
                         equalizer_configuration,
                         button_configuration,
@@ -117,8 +113,7 @@ impl OutboundPacket for A3945StateUpdatePacket {
             .bytes()
             .into_iter()
             .chain(self.battery.bytes())
-            .chain(self.left_firmware.to_string().into_bytes())
-            .chain(self.right_firmware.to_string().into_bytes())
+            .chain(self.dual_firmware_version.bytes())
             .chain(self.serial_number.to_string().into_bytes())
             .chain(self.equalizer_configuration.bytes())
             .chain(self.button_configuration.bytes())

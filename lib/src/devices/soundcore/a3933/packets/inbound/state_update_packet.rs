@@ -22,7 +22,7 @@ use crate::devices::soundcore::{
         },
         structures::{
             AgeRange, AmbientSoundModeCycle, BatteryLevel, Command, CustomHearId, DualBattery,
-            EqualizerConfiguration, FirmwareVersion, MultiButtonConfiguration, SerialNumber,
+            DualFirmwareVersion, EqualizerConfiguration, MultiButtonConfiguration, SerialNumber,
             SoundModes, TwsStatus, VolumeAdjustments,
         },
     },
@@ -34,8 +34,7 @@ use crate::devices::soundcore::{
 pub struct A3933StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
-    pub left_firmware: FirmwareVersion,
-    pub right_firmware: FirmwareVersion,
+    pub dual_firmware_version: DualFirmwareVersion,
     pub serial_number: SerialNumber,
     pub equalizer_configuration: EqualizerConfiguration<2, 10>,
     pub age_range: AgeRange,
@@ -56,8 +55,7 @@ impl Default for A3933StateUpdatePacket {
         Self {
             tws_status: Default::default(),
             battery: Default::default(),
-            left_firmware: Default::default(),
-            right_firmware: Default::default(),
+            dual_firmware_version: Default::default(),
             serial_number: Default::default(),
             equalizer_configuration: EqualizerConfiguration::new_custom_profile([
                 VolumeAdjustments::new([0; 10]),
@@ -106,8 +104,7 @@ impl InboundPacket for A3933StateUpdatePacket {
                     (
                         tws_status,
                         battery,
-                        left_firmware,
-                        right_firmware,
+                        dual_firmware_version,
                         serial_number,
                         equalizer_configuration,
                         age_range,
@@ -115,8 +112,7 @@ impl InboundPacket for A3933StateUpdatePacket {
                 ) = tuple((
                     TwsStatus::take,
                     DualBattery::take,
-                    FirmwareVersion::take,
-                    FirmwareVersion::take,
+                    DualFirmwareVersion::take,
                     SerialNumber::take,
                     EqualizerConfiguration::take,
                     AgeRange::take,
@@ -147,8 +143,7 @@ impl InboundPacket for A3933StateUpdatePacket {
                     A3933StateUpdatePacket {
                         tws_status,
                         battery,
-                        left_firmware,
-                        right_firmware,
+                        dual_firmware_version,
                         serial_number,
                         equalizer_configuration,
                         age_range,
@@ -203,8 +198,7 @@ impl OutboundPacket for A3933StateUpdatePacket {
                 self.battery.left.level.0,
                 self.battery.right.level.0,
             ])
-            .chain(self.left_firmware.to_string().into_bytes())
-            .chain(self.right_firmware.to_string().into_bytes())
+            .chain(self.dual_firmware_version.bytes())
             .chain(self.serial_number.0.as_bytes().iter().cloned())
             .chain(self.equalizer_configuration.bytes())
             .chain([self.age_range.0])
@@ -335,7 +329,10 @@ mod tests {
             },
             packet.battery.left,
         );
-        assert_eq!(FirmwareVersion::new(2, 61), packet.left_firmware);
+        assert_eq!(
+            FirmwareVersion::new(2, 61),
+            packet.dual_firmware_version.left
+        );
         assert_eq!(
             EqualizerConfiguration::new_from_preset_profile(
                 PresetEqualizerProfile::SoundcoreSignature,

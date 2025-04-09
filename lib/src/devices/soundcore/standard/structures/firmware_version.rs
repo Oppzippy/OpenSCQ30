@@ -3,12 +3,36 @@ use nom::{
     bytes::complete::{tag, take},
     combinator::{all_consuming, map, map_parser},
     error::{ContextError, ParseError, context},
-    sequence::separated_pair,
+    sequence::{pair, separated_pair},
 };
 use std::fmt::Display;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
+pub struct DualFirmwareVersion {
+    pub left: FirmwareVersion,
+    pub right: FirmwareVersion,
+}
+
+impl DualFirmwareVersion {
+    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> IResult<&'a [u8], Self, E> {
+        context(
+            "dual firmware version",
+            map(
+                pair(FirmwareVersion::take, FirmwareVersion::take),
+                |(left, right)| DualFirmwareVersion { left, right },
+            ),
+        )(input)
+    }
+
+    pub fn bytes(&self) -> impl Iterator<Item = u8> {
+        self.left.bytes().into_iter().chain(self.right.bytes())
+    }
+}
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -50,6 +74,10 @@ impl FirmwareVersion {
                 |(major, minor)| FirmwareVersion::new(major, minor),
             ),
         )(input)
+    }
+
+    pub fn bytes(&self) -> Vec<u8> {
+        self.to_string().into_bytes()
     }
 }
 

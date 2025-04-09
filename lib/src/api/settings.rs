@@ -65,6 +65,10 @@ pub enum SettingId {
     BatteryLevelLeft,
     IsChargingRight,
     BatteryLevelRight,
+    SerialNumber,
+    FirmwareVersion,
+    FirmwareVersionLeft,
+    FirmwareVersionRight,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

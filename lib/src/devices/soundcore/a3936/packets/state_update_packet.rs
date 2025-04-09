@@ -24,7 +24,8 @@ use crate::devices::soundcore::{
         },
         structures::{
             AgeRange, AmbientSoundModeCycle, BatteryLevel, Command, CustomHearId, DualBattery,
-            EqualizerConfiguration, FirmwareVersion, SerialNumber, TwsStatus, VolumeAdjustments,
+            DualFirmwareVersion, EqualizerConfiguration, SerialNumber, TwsStatus,
+            VolumeAdjustments,
         },
     },
 };
@@ -34,8 +35,7 @@ use crate::devices::soundcore::{
 pub struct A3936StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
-    pub left_firmware: FirmwareVersion,
-    pub right_firmware: FirmwareVersion,
+    pub dual_firmware_version: DualFirmwareVersion,
     pub serial_number: SerialNumber,
     pub equalizer_configuration: EqualizerConfiguration<2, 10>,
     pub age_range: AgeRange,
@@ -58,8 +58,7 @@ impl Default for A3936StateUpdatePacket {
         Self {
             tws_status: Default::default(),
             battery: Default::default(),
-            left_firmware: Default::default(),
-            right_firmware: Default::default(),
+            dual_firmware_version: Default::default(),
             serial_number: Default::default(),
             equalizer_configuration: EqualizerConfiguration::new_custom_profile([
                 VolumeAdjustments::new([0; 10]),
@@ -108,8 +107,7 @@ impl InboundPacket for A3936StateUpdatePacket {
             all_consuming(|input| {
                 let (input, tws_status) = TwsStatus::take(input)?;
                 let (input, battery) = DualBattery::take(input)?;
-                let (input, left_firmware) = FirmwareVersion::take(input)?;
-                let (input, right_firmware) = FirmwareVersion::take(input)?;
+                let (input, dual_firmware_version) = DualFirmwareVersion::take(input)?;
                 let (input, serial_number) = SerialNumber::take(input)?;
                 let (input, equalizer_configuration) = EqualizerConfiguration::take(input)?;
                 let (input, age_range) = AgeRange::take(input)?;
@@ -147,8 +145,7 @@ impl InboundPacket for A3936StateUpdatePacket {
                     A3936StateUpdatePacket {
                         tws_status,
                         battery,
-                        left_firmware,
-                        right_firmware,
+                        dual_firmware_version,
                         serial_number,
                         equalizer_configuration,
                         age_range,
@@ -181,8 +178,7 @@ impl OutboundPacket for A3936StateUpdatePacket {
             .bytes()
             .into_iter()
             .chain(self.battery.bytes())
-            .chain(self.left_firmware.to_string().into_bytes())
-            .chain(self.right_firmware.to_string().into_bytes())
+            .chain(self.dual_firmware_version.bytes())
             .chain(self.serial_number.to_string().into_bytes())
             .chain(self.equalizer_configuration.bytes())
             .chain([self.age_range.0])

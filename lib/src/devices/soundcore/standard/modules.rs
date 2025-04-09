@@ -16,6 +16,8 @@ pub mod ambient_sound_mode_cycle;
 pub mod button_configuration;
 pub mod dual_battery;
 pub mod equalizer;
+pub mod serial_number_and_dual_firmware_version;
+pub mod serial_number_and_firmware_version;
 pub mod single_battery;
 pub mod sound_modes;
 

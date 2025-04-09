@@ -20,6 +20,8 @@ impl_as_ref_for_field!(
     struct A3033State {
         battery: SingleBattery,
         equalizer_configuration: EqualizerConfiguration<1, 8>,
+        firmware_version: FirmwareVersion,
+        serial_number: SerialNumber,
     }
 );
 

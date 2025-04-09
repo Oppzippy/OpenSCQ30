@@ -1,7 +1,8 @@
 use crate::{
     devices::soundcore::standard::structures::{
         AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
-        EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber, TwsStatus,
+        DualFirmwareVersion, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
+        TwsStatus,
     },
     macros::impl_as_ref_for_field,
 };
@@ -15,8 +16,7 @@ use super::{
 pub struct A3936State {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
-    pub left_firmware: FirmwareVersion,
-    pub right_firmware: FirmwareVersion,
+    pub dual_firmware_version: DualFirmwareVersion,
     pub serial_number: SerialNumber,
     pub equalizer_configuration: EqualizerConfiguration<2, 10>,
     pub age_range: AgeRange,
@@ -38,7 +38,7 @@ impl_as_ref_for_field!(
     struct A3936State {
         tws_status: TwsStatus,
         battery: DualBattery,
-        left_firmware: FirmwareVersion,
+        dual_firmware_version: DualFirmwareVersion,
         serial_number: SerialNumber,
         equalizer_configuration: EqualizerConfiguration<2, 10>,
         age_range: AgeRange,
@@ -60,8 +60,7 @@ impl From<A3936StateUpdatePacket> for A3936State {
         Self {
             tws_status: value.tws_status,
             battery: value.battery,
-            left_firmware: value.left_firmware,
-            right_firmware: value.right_firmware,
+            dual_firmware_version: value.dual_firmware_version,
             serial_number: value.serial_number,
             equalizer_configuration: value.equalizer_configuration,
             age_range: value.age_range,

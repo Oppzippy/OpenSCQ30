@@ -1,6 +1,6 @@
 use crate::{
     devices::soundcore::standard::structures::{
-        BatteryLevel, DualBattery, EqualizerConfiguration, FirmwareVersion,
+        BatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration, FirmwareVersion,
         MultiButtonConfiguration, SerialNumber, TwsStatus,
     },
     macros::impl_as_ref_for_field,
@@ -12,8 +12,7 @@ use super::packets::A3945StateUpdatePacket;
 pub struct A3945State {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
-    pub left_firmware: FirmwareVersion,
-    pub right_firmware: FirmwareVersion,
+    pub dual_firmware_version: DualFirmwareVersion,
     pub serial_number: SerialNumber,
     pub equalizer_configuration: EqualizerConfiguration<2, 10>,
     pub button_configuration: MultiButtonConfiguration,
@@ -29,6 +28,7 @@ impl_as_ref_for_field!(
     struct A3945State {
         tws_status: TwsStatus,
         battery: DualBattery,
+        dual_firmware_version: DualFirmwareVersion,
         serial_number: SerialNumber,
         equalizer_configuration: EqualizerConfiguration<2, 10>,
         button_configuration: MultiButtonConfiguration,
@@ -40,8 +40,7 @@ impl From<A3945StateUpdatePacket> for A3945State {
         Self {
             tws_status: value.tws_status,
             battery: value.battery,
-            left_firmware: value.left_firmware,
-            right_firmware: value.right_firmware,
+            dual_firmware_version: value.dual_firmware_version,
             serial_number: value.serial_number,
             equalizer_configuration: value.equalizer_configuration,
             button_configuration: value.button_configuration,

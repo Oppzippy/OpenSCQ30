@@ -26,6 +26,8 @@ impl_as_ref_for_field!(
         battery: SingleBattery,
         sound_modes: SoundModes,
         equalizer_configuration: EqualizerConfiguration<1, 8>,
+        firmware_version: FirmwareVersion,
+        serial_number: SerialNumber,
     }
 );
 

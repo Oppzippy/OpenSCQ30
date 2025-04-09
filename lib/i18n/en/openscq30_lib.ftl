@@ -83,3 +83,8 @@ is-charging-right = Is Charging (Right)
 battery-level-right = Battery Level (Right)
 charging = Charging
 not-charging = Not Charging
+
+serial-number = Serial Number
+firmware-version = Firmware Version
+firmware-version-left = Firmware Version (Left)
+firmware-version-right = Firmware Version (Right)

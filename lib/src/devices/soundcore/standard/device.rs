@@ -26,8 +26,8 @@ use super::{
     },
     structures::{
         AgeRange, AmbientSoundModeCycle, BasicHearId, CustomHearId, DualBattery,
-        EqualizerConfiguration, Gender, MultiButtonConfiguration, SingleBattery, SoundModes,
-        TwsStatus,
+        DualFirmwareVersion, EqualizerConfiguration, FirmwareVersion, Gender,
+        MultiButtonConfiguration, SerialNumber, SingleBattery, SoundModes, TwsStatus,
     },
 };
 
@@ -262,6 +262,28 @@ where
         StateType: AsRef<DualBattery> + AsMut<DualBattery>,
     {
         self.module_collection.add_dual_battery();
+    }
+
+    pub fn serial_number_and_firmware_version(&mut self)
+    where
+        StateType: AsRef<SerialNumber>
+            + AsMut<SerialNumber>
+            + AsRef<FirmwareVersion>
+            + AsMut<FirmwareVersion>,
+    {
+        self.module_collection
+            .add_serial_number_and_firmware_version();
+    }
+
+    pub fn serial_number_and_dual_firmware_version(&mut self)
+    where
+        StateType: AsRef<SerialNumber>
+            + AsMut<SerialNumber>
+            + AsRef<DualFirmwareVersion>
+            + AsMut<DualFirmwareVersion>,
+    {
+        self.module_collection
+            .add_serial_number_and_dual_firmware_version();
     }
 }
 

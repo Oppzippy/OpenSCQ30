@@ -9,4 +9,5 @@ soundcore_device!(A3936State, A3936StateUpdatePacket, async |builder| {
     builder.a3936_button_configuration();
     builder.ambient_sound_mode_cycle();
     builder.dual_battery();
+    builder.serial_number_and_dual_firmware_version();
 });

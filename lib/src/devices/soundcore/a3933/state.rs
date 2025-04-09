@@ -1,7 +1,7 @@
 use crate::{
     devices::soundcore::standard::structures::{
         AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
-        EqualizerConfiguration, FirmwareVersion, MultiButtonConfiguration, SerialNumber,
+        DualFirmwareVersion, EqualizerConfiguration, MultiButtonConfiguration, SerialNumber,
         SoundModes, TwsStatus,
     },
     macros::impl_as_ref_for_field,
@@ -13,8 +13,7 @@ use super::packets::inbound::A3933StateUpdatePacket;
 pub struct A3933State {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
-    pub left_firmware: FirmwareVersion,
-    pub right_firmware: FirmwareVersion,
+    pub dual_firmware_version: DualFirmwareVersion,
     pub serial_number: SerialNumber,
     pub equalizer_configuration: EqualizerConfiguration<2, 10>,
     pub age_range: AgeRange,
@@ -35,8 +34,7 @@ impl From<A3933StateUpdatePacket> for A3933State {
         Self {
             tws_status: value.tws_status,
             battery: value.battery,
-            left_firmware: value.left_firmware,
-            right_firmware: value.right_firmware,
+            dual_firmware_version: value.dual_firmware_version,
             serial_number: value.serial_number,
             equalizer_configuration: value.equalizer_configuration,
             age_range: value.age_range,
@@ -58,6 +56,7 @@ impl_as_ref_for_field!(
     struct A3933State {
         tws_status: TwsStatus,
         battery: DualBattery,
+        dual_firmware_version: DualFirmwareVersion,
         serial_number: SerialNumber,
         equalizer_configuration: EqualizerConfiguration<2, 10>,
         age_range: AgeRange,

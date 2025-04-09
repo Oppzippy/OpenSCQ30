@@ -6,4 +6,5 @@ soundcore_device!(A3033State, A3033StateUpdatePacket, async |builder| {
     builder.module_collection().add_state_update();
     builder.equalizer().await;
     builder.single_battery();
+    builder.serial_number_and_firmware_version();
 });

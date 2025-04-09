@@ -1,0 +1,59 @@
+use async_trait::async_trait;
+use strum::IntoEnumIterator;
+
+use crate::{
+    api::settings::{Setting, SettingId, Value},
+    devices::soundcore::standard::{
+        settings_manager::SettingHandler,
+        structures::{DualFirmwareVersion, SerialNumber},
+    },
+};
+
+use super::SerialNumberAndDualFirmwareVersionSetting;
+
+#[derive(Default)]
+pub struct SerialNumberAndFirmwareVersionSettingHandler {}
+
+#[async_trait]
+impl<T> SettingHandler<T> for SerialNumberAndFirmwareVersionSettingHandler
+where
+    T: AsRef<SerialNumber> + AsRef<DualFirmwareVersion> + Send,
+{
+    fn settings(&self) -> Vec<SettingId> {
+        SerialNumberAndDualFirmwareVersionSetting::iter()
+            .map(Into::into)
+            .collect()
+    }
+
+    fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
+        let setting: SerialNumberAndDualFirmwareVersionSetting = setting_id.try_into().ok()?;
+        Some(match setting {
+            SerialNumberAndDualFirmwareVersionSetting::SerialNumber => Setting::Information {
+                text: <T as AsRef<SerialNumber>>::as_ref(state).to_string(),
+            },
+            SerialNumberAndDualFirmwareVersionSetting::FirmwareVersionLeft => {
+                Setting::Information {
+                    text: <T as AsRef<DualFirmwareVersion>>::as_ref(state)
+                        .left
+                        .to_string(),
+                }
+            }
+            SerialNumberAndDualFirmwareVersionSetting::FirmwareVersionRight => {
+                Setting::Information {
+                    text: <T as AsRef<DualFirmwareVersion>>::as_ref(state)
+                        .right
+                        .to_string(),
+                }
+            }
+        })
+    }
+
+    async fn set(
+        &self,
+        _state: &mut T,
+        _setting_id: &SettingId,
+        _value: Value,
+    ) -> crate::Result<()> {
+        unimplemented!("serial number and firmware vesrion are read only")
+    }
+}
