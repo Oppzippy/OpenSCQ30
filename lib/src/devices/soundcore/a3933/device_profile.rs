@@ -1,4 +1,5 @@
 use crate::devices::soundcore::standard::{
+    device::fetch_state_from_state_update_packet,
     macros::soundcore_device,
     modules::sound_modes::AvailableSoundModes,
     structures::{AmbientSoundMode, NoiseCancelingMode, TransparencyMode},
@@ -6,30 +7,38 @@ use crate::devices::soundcore::standard::{
 
 use super::{packets::inbound::A3933StateUpdatePacket, state::A3933State};
 
-soundcore_device!(A3933State, A3933StateUpdatePacket, async |builder| {
-    builder.module_collection().add_state_update();
-    builder.sound_modes(AvailableSoundModes {
-        ambient_sound_modes: vec![
-            AmbientSoundMode::Normal,
-            AmbientSoundMode::Transparency,
-            AmbientSoundMode::NoiseCanceling,
-        ],
-        transparency_modes: vec![
-            TransparencyMode::FullyTransparent,
-            TransparencyMode::VocalMode,
-        ],
-        noise_canceling_modes: vec![
-            NoiseCancelingMode::Transport,
-            NoiseCancelingMode::Indoor,
-            NoiseCancelingMode::Outdoor,
-        ],
-    });
-    builder.equalizer().await;
-    builder.button_configuration();
-    builder.ambient_sound_mode_cycle();
-    builder.dual_battery();
-    builder.serial_number_and_dual_firmware_version();
-});
+soundcore_device!(
+    A3933State,
+    A3933StateUpdatePacket,
+    async |packet_io| {
+        fetch_state_from_state_update_packet::<_, A3933State, A3933StateUpdatePacket>(packet_io)
+            .await
+    },
+    async |builder| {
+        builder.module_collection().add_state_update();
+        builder.sound_modes(AvailableSoundModes {
+            ambient_sound_modes: vec![
+                AmbientSoundMode::Normal,
+                AmbientSoundMode::Transparency,
+                AmbientSoundMode::NoiseCanceling,
+            ],
+            transparency_modes: vec![
+                TransparencyMode::FullyTransparent,
+                TransparencyMode::VocalMode,
+            ],
+            noise_canceling_modes: vec![
+                NoiseCancelingMode::Transport,
+                NoiseCancelingMode::Indoor,
+                NoiseCancelingMode::Outdoor,
+            ],
+        });
+        builder.equalizer().await;
+        builder.button_configuration();
+        builder.ambient_sound_mode_cycle();
+        builder.dual_battery();
+        builder.serial_number_and_dual_firmware_version();
+    }
+);
 
 #[cfg(test)]
 mod tests {

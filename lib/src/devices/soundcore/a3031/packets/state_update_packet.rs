@@ -127,7 +127,7 @@ impl PacketHandler<A3031State> for StateUpdatePacketHandler {
         packet: &Packet,
     ) -> crate::Result<()> {
         let packet: A3031StateUpdatePacket = packet.try_into_inbound_packet()?;
-        state.send_modify(|state| *state = packet.into());
+        state.send_modify(|state| state.update_from_state_update_packet(packet));
         Ok(())
     }
 }

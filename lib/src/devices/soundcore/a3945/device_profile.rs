@@ -1,14 +1,24 @@
-use crate::devices::soundcore::standard::macros::soundcore_device;
+use crate::devices::soundcore::standard::{
+    device::fetch_state_from_state_update_packet, macros::soundcore_device,
+};
 
 use super::{packets::A3945StateUpdatePacket, state::A3945State};
 
-soundcore_device!(A3945State, A3945StateUpdatePacket, async |builder| {
-    builder.module_collection().add_state_update();
-    builder.equalizer().await;
-    builder.button_configuration();
-    builder.dual_battery();
-    builder.serial_number_and_dual_firmware_version();
-});
+soundcore_device!(
+    A3945State,
+    A3945StateUpdatePacket,
+    async |packet_io| {
+        fetch_state_from_state_update_packet::<_, A3945State, A3945StateUpdatePacket>(packet_io)
+            .await
+    },
+    async |builder| {
+        builder.module_collection().add_state_update();
+        builder.equalizer().await;
+        builder.button_configuration();
+        builder.dual_battery();
+        builder.serial_number_and_dual_firmware_version();
+    }
+);
 
 #[cfg(test)]
 mod tests {

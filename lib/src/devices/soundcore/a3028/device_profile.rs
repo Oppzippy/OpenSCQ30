@@ -1,4 +1,5 @@
 use crate::devices::soundcore::standard::{
+    device::fetch_state_from_state_update_packet,
     macros::soundcore_device,
     modules::sound_modes::AvailableSoundModes,
     structures::{AmbientSoundMode, NoiseCancelingMode},
@@ -6,25 +7,33 @@ use crate::devices::soundcore::standard::{
 
 use super::{packets::A3028StateUpdatePacket, state::A3028State};
 
-soundcore_device!(A3028State, A3028StateUpdatePacket, async |builder| {
-    builder.module_collection().add_state_update();
-    builder.sound_modes(AvailableSoundModes {
-        ambient_sound_modes: vec![
-            AmbientSoundMode::Normal,
-            AmbientSoundMode::Transparency,
-            AmbientSoundMode::NoiseCanceling,
-        ],
-        transparency_modes: vec![],
-        noise_canceling_modes: vec![
-            NoiseCancelingMode::Transport,
-            NoiseCancelingMode::Indoor,
-            NoiseCancelingMode::Outdoor,
-        ],
-    });
-    builder.equalizer().await;
-    builder.single_battery();
-    builder.serial_number_and_firmware_version();
-});
+soundcore_device!(
+    A3028State,
+    A3028StateUpdatePacket,
+    async |packet_io| {
+        fetch_state_from_state_update_packet::<_, A3028State, A3028StateUpdatePacket>(packet_io)
+            .await
+    },
+    async |builder| {
+        builder.module_collection().add_state_update();
+        builder.sound_modes(AvailableSoundModes {
+            ambient_sound_modes: vec![
+                AmbientSoundMode::Normal,
+                AmbientSoundMode::Transparency,
+                AmbientSoundMode::NoiseCanceling,
+            ],
+            transparency_modes: vec![],
+            noise_canceling_modes: vec![
+                NoiseCancelingMode::Transport,
+                NoiseCancelingMode::Indoor,
+                NoiseCancelingMode::Outdoor,
+            ],
+        });
+        builder.equalizer().await;
+        builder.single_battery();
+        builder.serial_number_and_firmware_version();
+    }
+);
 
 #[cfg(test)]
 mod tests {

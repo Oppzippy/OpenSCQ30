@@ -1,5 +1,5 @@
 macro_rules! soundcore_device {
-    ($state: ty, $state_update_packet: ty, async |$builder:ident| $block:block) => {
+    ($state: ty, $state_update_packet: ty, async |$packet_io_controller:ident| $fetch_state:block, async |$builder:ident| $block:block) => {
         pub fn device_registry<B>(
             backend: B,
             database: std::sync::Arc<$crate::storage::OpenSCQ30Database>,
@@ -10,12 +10,13 @@ macro_rules! soundcore_device {
             $state_update_packet,
         >
         where
-            B: $crate::api::connection::RfcommBackend + Send + Sync,
+            B: $crate::api::connection::RfcommBackend + Send + Sync + 'static,
         {
             $crate::devices::soundcore::standard::device::SoundcoreDeviceRegistry::new(
                 backend,
                 database,
                 device_model,
+                Box::new(|$packet_io_controller| Box::pin(async move { $fetch_state })),
             )
         }
 
@@ -35,6 +36,7 @@ macro_rules! soundcore_device {
                 ),
                 database,
                 device_model,
+                Box::new(|$packet_io_controller| Box::pin(async move { $fetch_state })),
             )
         }
 
@@ -50,7 +52,7 @@ macro_rules! soundcore_device {
                 $state_update_packet,
             >
         where
-            B: $crate::api::connection::RfcommBackend + Send + Sync,
+            B: $crate::api::connection::RfcommBackend + Send + Sync + 'static,
         {
             async fn build_device(
                 $builder: &mut $crate::devices::soundcore::standard::device::SoundcoreDeviceBuilder<

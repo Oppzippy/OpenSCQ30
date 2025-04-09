@@ -1,6 +1,10 @@
 use crate::{
-    devices::soundcore::standard::structures::{
-        DualBattery, EqualizerConfiguration, MultiButtonConfiguration, SoundModes, TwsStatus,
+    devices::soundcore::standard::{
+        packets::inbound::SerialNumberAndFirmwareVersionUpdatePacket,
+        structures::{
+            DualBattery, DualFirmwareVersion, EqualizerConfiguration, MultiButtonConfiguration,
+            SerialNumber, SoundModes, TwsStatus,
+        },
     },
     macros::impl_as_ref_for_field,
 };
@@ -18,6 +22,8 @@ pub(crate) struct A3031State {
     pub touch_tone: bool,
     pub auto_power_off_on: bool,
     pub auto_power_off_on_index: u8,
+    pub serial_number: SerialNumber,
+    pub dual_firmware_version: DualFirmwareVersion,
 }
 
 impl_as_ref_for_field!(
@@ -27,21 +33,51 @@ impl_as_ref_for_field!(
         sound_modes: SoundModes,
         equalizer_configuration: EqualizerConfiguration<2, 8>,
         button_configuration: MultiButtonConfiguration,
+        serial_number: SerialNumber,
+        dual_firmware_version: DualFirmwareVersion,
     }
 );
 
-impl From<A3031StateUpdatePacket> for A3031State {
-    fn from(value: A3031StateUpdatePacket) -> Self {
+impl A3031State {
+    pub fn new(
+        state_update_packet: A3031StateUpdatePacket,
+        sn_and_firmware: SerialNumberAndFirmwareVersionUpdatePacket,
+    ) -> Self {
         Self {
-            tws_status: value.tws_status,
-            battery: value.battery,
-            equalizer_configuration: value.equalizer_configuration,
-            button_configuration: value.button_configuration,
-            sound_modes: value.sound_modes,
-            side_tone: value.side_tone,
-            touch_tone: value.touch_tone,
-            auto_power_off_on: value.auto_power_off_on,
-            auto_power_off_on_index: value.auto_power_off_on_index,
+            tws_status: state_update_packet.tws_status,
+            battery: state_update_packet.battery,
+            equalizer_configuration: state_update_packet.equalizer_configuration,
+            button_configuration: state_update_packet.button_configuration,
+            sound_modes: state_update_packet.sound_modes,
+            side_tone: state_update_packet.side_tone,
+            touch_tone: state_update_packet.touch_tone,
+            auto_power_off_on: state_update_packet.auto_power_off_on,
+            auto_power_off_on_index: state_update_packet.auto_power_off_on_index,
+            serial_number: sn_and_firmware.serial_number,
+            dual_firmware_version: sn_and_firmware.dual_firmware_version,
         }
+    }
+
+    pub fn update_from_state_update_packet(&mut self, packet: A3031StateUpdatePacket) {
+        let A3031StateUpdatePacket {
+            tws_status,
+            battery,
+            equalizer_configuration,
+            button_configuration,
+            sound_modes,
+            side_tone,
+            touch_tone,
+            auto_power_off_on,
+            auto_power_off_on_index,
+        } = packet;
+        self.tws_status = tws_status;
+        self.battery = battery;
+        self.equalizer_configuration = equalizer_configuration;
+        self.button_configuration = button_configuration;
+        self.sound_modes = sound_modes;
+        self.side_tone = side_tone;
+        self.touch_tone = touch_tone;
+        self.auto_power_off_on = auto_power_off_on;
+        self.auto_power_off_on_index = auto_power_off_on_index;
     }
 }
