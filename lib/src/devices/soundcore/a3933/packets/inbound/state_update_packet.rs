@@ -212,8 +212,7 @@ impl OutboundPacket for A3933StateUpdatePacket {
                                 hear_id
                                     .volume_adjustments
                                     .iter()
-                                    .map(|v| v.bytes())
-                                    .flatten(),
+                                    .flat_map(|v| v.bytes()),
                             )
                             .chain(hear_id.time.to_le_bytes())
                             .chain([hear_id.hear_id_type.0])
@@ -223,8 +222,7 @@ impl OutboundPacket for A3933StateUpdatePacket {
                                     .as_ref()
                                     .unwrap()
                                     .iter()
-                                    .map(|v| v.bytes())
-                                    .flatten(),
+                                    .flat_map(|v| v.bytes()),
                             )
                             .chain([0, 0])
                             .collect()
@@ -239,7 +237,7 @@ impl OutboundPacket for A3933StateUpdatePacket {
                 self.touch_tone_switch as u8,
                 self.wear_detection_switch as u8,
                 self.game_mode_switch as u8,
-                self.charging_case_battery_level.0 as u8,
+                self.charging_case_battery_level.0,
                 0,
                 self.device_color,
                 self.wind_noise_detection as u8,

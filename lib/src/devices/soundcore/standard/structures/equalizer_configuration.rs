@@ -59,7 +59,7 @@ impl<const C: usize, const B: usize> EqualizerConfiguration<C, B> {
         self.profile_id()
             .to_le_bytes()
             .into_iter()
-            .chain(self.volume_adjustments.iter().map(|v| v.bytes()).flatten())
+            .chain(self.volume_adjustments.iter().flat_map(|v| v.bytes()))
     }
 
     pub fn new_from_preset_profile(

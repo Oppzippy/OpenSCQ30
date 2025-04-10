@@ -1,4 +1,3 @@
-
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Default, Hash)]
 pub struct Command([u8; 7]);
 
@@ -19,12 +18,11 @@ impl Command {
         }
     }
 
-    pub fn to_inbound(&self) -> Self {
-        let mut bytes = self.0;
-        bytes[0] = 0x09;
-        bytes[1] = 0xff;
-        bytes[4] = 0x01;
-        Self(bytes)
+    pub fn to_inbound(mut self) -> Self {
+        self.0[0] = 0x09;
+        self.0[1] = 0xff;
+        self.0[4] = 0x01;
+        self
     }
 }
 

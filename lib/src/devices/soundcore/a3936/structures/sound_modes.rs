@@ -86,6 +86,7 @@ impl A3936SoundModes {
     EnumIter,
     Translate,
 )]
+#[allow(clippy::enum_variant_names)]
 pub enum AdaptiveNoiseCanceling {
     #[default]
     LowNoise = 0,

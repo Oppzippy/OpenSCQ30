@@ -7,7 +7,7 @@ pub struct SetEqualizerWithDrcPacket<'a, const C: usize, const B: usize> {
     pub equalizer_configuration: &'a EqualizerConfiguration<C, B>,
 }
 
-impl<'a, const C: usize, const B: usize> OutboundPacket for SetEqualizerWithDrcPacket<'a, C, B> {
+impl<const C: usize, const B: usize> OutboundPacket for SetEqualizerWithDrcPacket<'_, C, B> {
     fn command(&self) -> Command {
         Command::new([0x08, 0xEE, 0x00, 0x00, 0x00, 0x02, 0x83])
     }
@@ -19,8 +19,7 @@ impl<'a, const C: usize, const B: usize> OutboundPacket for SetEqualizerWithDrcP
                 self.equalizer_configuration
                     .volume_adjustments()
                     .iter()
-                    .map(|v| v.apply_drc().bytes())
-                    .flatten(),
+                    .flat_map(|v| v.apply_drc().bytes()),
             )
             .collect()
     }

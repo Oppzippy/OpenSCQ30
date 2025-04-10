@@ -43,8 +43,7 @@ impl<const B: usize> VolumeAdjustments<B> {
     }
 
     pub fn bytes(&self) -> [u8; B] {
-        self.inner
-            .map(|adjustment| Self::signed_adjustment_to_packet_byte(adjustment.into()))
+        self.inner.map(Self::signed_adjustment_to_packet_byte)
     }
 
     pub fn from_bytes(bytes: [u8; B]) -> Self {
@@ -64,7 +63,7 @@ impl<const B: usize> VolumeAdjustments<B> {
     }
 
     fn packet_byte_to_signed_adjustment(byte: u8) -> i16 {
-        (byte as i16) + (MIN_VOLUME as i16)
+        (byte as i16) + MIN_VOLUME
     }
 
     pub fn apply_drc(&self) -> Self {

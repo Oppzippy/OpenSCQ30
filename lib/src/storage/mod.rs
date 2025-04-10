@@ -75,7 +75,7 @@ impl OpenSCQ30Database {
     }
 
     pub async fn new_in_memory() -> Result<Self, StorageError> {
-        Self::new(|| Connection::open_in_memory()).await
+        Self::new(Connection::open_in_memory).await
     }
 
     async fn new(

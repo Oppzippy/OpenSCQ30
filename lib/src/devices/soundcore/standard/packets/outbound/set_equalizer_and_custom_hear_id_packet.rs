@@ -12,8 +12,8 @@ pub struct SetEqualizerAndCustomHearIdPacket<'a, const C: usize, const B: usize>
     pub custom_hear_id: &'a CustomHearId<C, B>,
 }
 
-impl<'a, const C: usize, const B: usize> OutboundPacket
-    for SetEqualizerAndCustomHearIdPacket<'a, C, B>
+impl<const C: usize, const B: usize> OutboundPacket
+    for SetEqualizerAndCustomHearIdPacket<'_, C, B>
 {
     fn command(&self) -> Command {
         if self.age_range.supports_hear_id() {
@@ -41,7 +41,7 @@ impl<'a, const C: usize, const B: usize> OutboundPacket
             bytes.extend(EQ_HEAR_INDEX_ID.to_le_bytes());
         }
         let eq = self.equalizer_configuration.volume_adjustments();
-        bytes.extend(eq.iter().map(|v| v.bytes()).flatten());
+        bytes.extend(eq.iter().flat_map(|v| v.bytes()));
         bytes.push(if supports_hear_id {
             self.gender.0
         } else {
@@ -58,8 +58,7 @@ impl<'a, const C: usize, const B: usize> OutboundPacket
                 self.custom_hear_id
                     .volume_adjustments
                     .iter()
-                    .map(|v| v.bytes())
-                    .flatten(),
+                    .flat_map(|v| v.bytes()),
             );
         } else {
             bytes.extend(&max_value_stereo_eq_wave);
@@ -76,7 +75,7 @@ impl<'a, const C: usize, const B: usize> OutboundPacket
         });
         match &self.custom_hear_id.custom_volume_adjustments {
             Some(adjustments) if supports_hear_id => {
-                bytes.extend(adjustments.iter().map(|v| v.bytes()).flatten())
+                bytes.extend(adjustments.iter().flat_map(|v| v.bytes()))
             }
             _ => bytes.extend(&max_value_stereo_eq_wave),
         }
@@ -84,8 +83,7 @@ impl<'a, const C: usize, const B: usize> OutboundPacket
             self.equalizer_configuration
                 .volume_adjustments()
                 .iter()
-                .map(|v| v.apply_drc().bytes())
-                .flatten(),
+                .flat_map(|v| v.apply_drc().bytes()),
         );
 
         bytes

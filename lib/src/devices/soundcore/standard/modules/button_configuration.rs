@@ -21,6 +21,7 @@ mod setting_handler;
 mod state_modifier;
 
 #[derive(EnumString, EnumIter, IntoStaticStr)]
+#[allow(clippy::enum_variant_names)]
 enum ButtonConfigurationSetting {
     LeftSinglePress,
     LeftDoublePress,
@@ -61,11 +62,7 @@ impl From<ButtonConfigurationSetting> for SettingId {
 
 impl<T> ModuleCollection<T>
 where
-    T: AsMut<MultiButtonConfiguration>
-        + AsRef<MultiButtonConfiguration>
-        + Clone
-        + Send
-        + Sync,
+    T: AsMut<MultiButtonConfiguration> + AsRef<MultiButtonConfiguration> + Clone + Send + Sync,
     T: AsRef<TwsStatus>,
 {
     pub fn add_button_configuration<C>(&mut self, packet_io: Arc<PacketIOController<C>>)

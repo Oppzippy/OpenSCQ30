@@ -168,7 +168,7 @@ where
                         *state.as_mut() = EqualizerConfiguration::new_custom_profile(
                             self.values_to_volume_adjustments(
                                 volume_adjustments,
-                                &equalizer_configuration.volume_adjustments(),
+                                equalizer_configuration.volume_adjustments(),
                             ),
                         )
                     } else {
@@ -214,8 +214,7 @@ where
                     self.values_to_volume_adjustments(
                         volume_adjustments,
                         equalizer_configuration.volume_adjustments(),
-                    )
-                    .into(),
+                    ),
                 );
             }
         }

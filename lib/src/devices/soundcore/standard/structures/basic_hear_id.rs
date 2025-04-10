@@ -50,7 +50,7 @@ impl<const C: usize, const B: usize> BasicHearId<C, B> {
     pub fn bytes(&self) -> impl Iterator<Item = u8> {
         [self.is_enabled as u8]
             .into_iter()
-            .chain(self.volume_adjustments.iter().map(|v| v.bytes()).flatten())
+            .chain(self.volume_adjustments.iter().flat_map(|v| v.bytes()))
             .chain(self.time.to_le_bytes())
     }
 }

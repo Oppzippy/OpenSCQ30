@@ -139,8 +139,7 @@ impl OutboundPacket for A3951StateUpdatePacket {
                 self.custom_hear_id
                     .volume_adjustments
                     .iter()
-                    .map(|v| v.bytes())
-                    .flatten(),
+                    .flat_map(|v| v.bytes()),
             )
             .chain(self.custom_hear_id.time.to_le_bytes())
             .chain([
@@ -156,8 +155,7 @@ impl OutboundPacket for A3951StateUpdatePacket {
                         VolumeAdjustments::new([0; 8]),
                     ])
                     .iter()
-                    .map(|v| v.bytes())
-                    .flatten(),
+                    .flat_map(|v| v.bytes()),
             )
             .chain(self.button_configuration.bytes())
             .chain(self.sound_modes.bytes())

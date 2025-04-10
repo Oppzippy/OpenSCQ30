@@ -189,8 +189,7 @@ impl OutboundPacket for A3936StateUpdatePacket {
                         self.custom_hear_id
                             .volume_adjustments
                             .iter()
-                            .map(|v| v.bytes())
-                            .flatten(),
+                            .flat_map(|v| v.bytes()),
                     )
                     .chain(self.custom_hear_id.time.to_le_bytes())
                     .chain([self.custom_hear_id.hear_id_type.0])
@@ -200,8 +199,7 @@ impl OutboundPacket for A3936StateUpdatePacket {
                             .as_ref()
                             .unwrap()
                             .iter()
-                            .map(|v| v.bytes())
-                            .flatten(),
+                            .flat_map(|v| v.bytes()),
                     )
                     .chain([0, 0]),
             )

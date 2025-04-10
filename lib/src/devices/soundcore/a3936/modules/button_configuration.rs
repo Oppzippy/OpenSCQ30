@@ -22,6 +22,7 @@ mod setting_handler;
 mod state_modifier;
 
 #[derive(EnumString, EnumIter, IntoStaticStr)]
+#[allow(clippy::enum_variant_names)]
 enum ButtonConfigurationSetting {
     LeftSinglePress,
     LeftDoublePress,

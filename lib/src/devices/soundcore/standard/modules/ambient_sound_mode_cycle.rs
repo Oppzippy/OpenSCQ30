@@ -20,6 +20,7 @@ mod setting_handler;
 mod state_modifier;
 
 #[derive(EnumIter, EnumString)]
+#[allow(clippy::enum_variant_names)]
 enum SoundModeCycleSetting {
     NormalModeInCycle,
     TransparencyModeInCycle,
