@@ -6,13 +6,11 @@ use nom::{
     sequence::tuple,
 };
 use openscq30_i18n_macros::Translate;
-use serde::{Deserialize, Serialize};
 use strum::{Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 use crate::devices::soundcore::standard::structures::{AmbientSoundMode, TransparencyMode};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct A3936SoundModes {
     pub ambient_sound_mode: AmbientSoundMode,
     pub transparency_mode: TransparencyMode,
@@ -87,10 +85,7 @@ impl A3936SoundModes {
     EnumString,
     EnumIter,
     Translate,
-    Serialize,
-    Deserialize,
 )]
-#[serde(rename_all = "camelCase")]
 pub enum AdaptiveNoiseCanceling {
     #[default]
     LowNoise = 0,
@@ -119,10 +114,7 @@ impl AdaptiveNoiseCanceling {
     EnumString,
     EnumIter,
     Translate,
-    Serialize,
-    Deserialize,
 )]
-#[serde(rename_all = "camelCase")]
 pub enum ManualNoiseCanceling {
     #[default]
     Weak = 1,
@@ -167,10 +159,7 @@ impl NoiseCancelingSettings {
     EnumString,
     EnumIter,
     Translate,
-    Serialize,
-    Deserialize,
 )]
-#[serde(rename_all = "camelCase")]
 pub enum A3936NoiseCancelingMode {
     #[default]
     Adaptive = 0,

@@ -6,15 +6,11 @@ use nom::{
     sequence::{pair, tuple},
 };
 use openscq30_i18n_macros::Translate;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 use crate::devices::soundcore::standard::packets::parsing::take_bool;
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct MultiButtonConfiguration {
     pub left_single_click: NoTwsButtonConfiguration,
     pub left_double_click: TwsButtonConfiguration,
@@ -72,8 +68,6 @@ impl MultiButtonConfiguration {
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct TwsButtonConfiguration {
     pub tws_connected_action: ButtonAction,
     pub tws_disconnected_action: ButtonAction,
@@ -120,8 +114,6 @@ impl TwsButtonConfiguration {
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct NoTwsButtonConfiguration {
     pub action: ButtonAction,
     pub is_enabled: bool,
@@ -166,8 +158,6 @@ impl NoTwsButtonConfiguration {
     Translate,
 )]
 #[repr(u8)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum ButtonAction {
     #[default]
     VolumeUp = 0,

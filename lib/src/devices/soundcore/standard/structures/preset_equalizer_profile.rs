@@ -1,6 +1,4 @@
 use openscq30_i18n_macros::Translate;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 use super::volume_adjustments::VolumeAdjustments;
@@ -22,7 +20,6 @@ use super::volume_adjustments::VolumeAdjustments;
     IntoStaticStr,
     Translate,
 )]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum PresetEqualizerProfile {
     #[default]
     SoundcoreSignature = 0x0000,

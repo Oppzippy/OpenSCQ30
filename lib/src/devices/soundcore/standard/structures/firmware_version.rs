@@ -7,8 +7,6 @@ use nom::{
 };
 use std::fmt::Display;
 
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub struct DualFirmwareVersion {
@@ -35,7 +33,6 @@ impl DualFirmwareVersion {
 }
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct FirmwareVersion {
     major: u8,
     minor: u8,

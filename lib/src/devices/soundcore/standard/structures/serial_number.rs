@@ -5,13 +5,9 @@ use nom::{
 };
 use std::{fmt::Display, sync::Arc};
 
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
-
 use crate::devices::soundcore::standard::packets::parsing::take_str;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct SerialNumber(pub Arc<str>);
 
 impl SerialNumber {

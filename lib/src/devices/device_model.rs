@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumIter, EnumString, IntoStaticStr, VariantArray};
 
@@ -22,9 +21,10 @@ use crate::{
     EnumIter,
     IntoStaticStr,
     EnumString,
+    Serialize,
+    Deserialize,
 )]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+#[serde(rename_all = "camelCase")]
 pub enum DeviceModel {
     SoundcoreA3027,
     SoundcoreA3028,

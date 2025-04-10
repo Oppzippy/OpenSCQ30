@@ -4,11 +4,8 @@ use nom::{
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Gender(pub u8);
 
 impl Gender {

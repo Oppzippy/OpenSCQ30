@@ -6,14 +6,10 @@ use nom::{
     number::complete::le_u16,
     sequence::pair,
 };
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 use super::Command;
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct PacketHeader {
     pub packet_type: Command,
     pub length: u16,

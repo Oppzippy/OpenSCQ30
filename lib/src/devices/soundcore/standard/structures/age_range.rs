@@ -4,11 +4,8 @@ use nom::{
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct AgeRange(pub u8);
 
 impl AgeRange {

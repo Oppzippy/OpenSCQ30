@@ -5,13 +5,9 @@ use nom::{
     number::complete::le_u8,
     sequence::tuple,
 };
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 use strum::Display;
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "camelCase", tag = "type"))]
 pub enum Battery {
     SingleBattery(SingleBattery),
     DualBattery(DualBattery),
@@ -36,7 +32,6 @@ impl From<DualBattery> for Battery {
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct DualBattery {
     pub left: SingleBattery,
     pub right: SingleBattery,
@@ -82,8 +77,6 @@ impl DualBattery {
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct SingleBattery {
     pub is_charging: IsBatteryCharging,
     pub level: BatteryLevel,
@@ -104,11 +97,6 @@ impl SingleBattery {
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default, Display)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(
-    feature = "serde",
-    serde(rename_all = "camelCase", from = "bool", into = "bool")
-)]
 #[repr(u8)]
 pub enum IsBatteryCharging {
     #[default]
@@ -152,7 +140,6 @@ impl From<IsBatteryCharging> for bool {
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BatteryLevel(pub u8);
 
 impl BatteryLevel {

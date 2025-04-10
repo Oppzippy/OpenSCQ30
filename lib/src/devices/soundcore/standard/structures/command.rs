@@ -1,9 +1,5 @@
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Default, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct Command([u8; 7]);
 
 impl Command {

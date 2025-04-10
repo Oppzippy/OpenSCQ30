@@ -6,15 +6,11 @@ use nom::{
     sequence::pair,
 };
 use openscq30_i18n_macros::Translate;
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
 use strum::{Display, FromRepr};
 
 use crate::devices::soundcore::standard::packets::parsing::take_bool;
 
 #[derive(Debug, Clone, PartialEq, Eq, Copy, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct TwsStatus {
     pub is_connected: bool,
     pub host_device: HostDevice,
@@ -45,8 +41,6 @@ impl TwsStatus {
 #[derive(
     Default, Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, FromRepr, Display, Translate,
 )]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum HostDevice {
     #[default]
     Left = 0,
