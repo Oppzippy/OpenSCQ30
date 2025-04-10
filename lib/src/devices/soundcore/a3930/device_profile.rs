@@ -5,7 +5,9 @@ use crate::devices::soundcore::standard::{
     modules::sound_modes::AvailableSoundModes,
     packets::{
         inbound::{SerialNumberAndFirmwareVersionUpdatePacket, TryIntoInboundPacket},
-        outbound::{OutboundPacketBytesExt, RequestFirmwareVersionPacket, RequestStatePacket},
+        outbound::{
+            OutboundPacketBytesExt, RequestSerialNumberAndFirmwareVersionPacket, RequestStatePacket,
+        },
     },
     structures::AmbientSoundMode,
 };
@@ -21,7 +23,7 @@ soundcore_device!(
             .await?
             .try_into_inbound_packet()?;
         let sn_and_firmware: SerialNumberAndFirmwareVersionUpdatePacket = packet_io
-            .send(&RequestFirmwareVersionPacket::new().into())
+            .send(&RequestSerialNumberAndFirmwareVersionPacket::new().into())
             .await?
             .try_into_inbound_packet()?;
         Ok(A3930State::new(state_update_packet, sn_and_firmware))
@@ -46,7 +48,7 @@ soundcore_device!(
                 A3930StateUpdatePacket::default().bytes(),
             ),
             (
-                RequestFirmwareVersionPacket::COMMAND,
+                RequestSerialNumberAndFirmwareVersionPacket::COMMAND,
                 SerialNumberAndFirmwareVersionUpdatePacket::default().bytes(),
             ),
         ])

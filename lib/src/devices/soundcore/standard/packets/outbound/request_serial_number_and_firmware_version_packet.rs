@@ -3,9 +3,9 @@ use crate::devices::soundcore::standard::structures::Command;
 use super::OutboundPacket;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-pub struct RequestFirmwareVersionPacket {}
+pub struct RequestSerialNumberAndFirmwareVersionPacket {}
 
-impl RequestFirmwareVersionPacket {
+impl RequestSerialNumberAndFirmwareVersionPacket {
     pub const COMMAND: Command = Command::new([0x08, 0xee, 0x00, 0x00, 0x00, 0x01, 0x05]);
 
     pub fn new() -> Self {
@@ -13,7 +13,7 @@ impl RequestFirmwareVersionPacket {
     }
 }
 
-impl OutboundPacket for RequestFirmwareVersionPacket {
+impl OutboundPacket for RequestSerialNumberAndFirmwareVersionPacket {
     fn command(&self) -> Command {
         Self::COMMAND
     }
@@ -26,12 +26,15 @@ impl OutboundPacket for RequestFirmwareVersionPacket {
 #[cfg(test)]
 mod tests {
     use crate::devices::soundcore::standard::packets::outbound::{
-        OutboundPacketBytesExt, RequestFirmwareVersionPacket,
+        OutboundPacketBytesExt, RequestSerialNumberAndFirmwareVersionPacket,
     };
 
     #[test]
     fn it_matches_a_manually_crafted_packet() {
         let expected: &[u8] = &[0x08, 0xee, 0x00, 0x00, 0x00, 0x01, 0x05, 0x0a, 0x00, 0x06];
-        assert_eq!(expected, RequestFirmwareVersionPacket::new().bytes())
+        assert_eq!(
+            expected,
+            RequestSerialNumberAndFirmwareVersionPacket::new().bytes()
+        )
     }
 }
