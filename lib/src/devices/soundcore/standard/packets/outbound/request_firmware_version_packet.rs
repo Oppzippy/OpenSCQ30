@@ -6,6 +6,8 @@ use super::OutboundPacket;
 pub struct RequestFirmwareVersionPacket {}
 
 impl RequestFirmwareVersionPacket {
+    pub const COMMAND: Command = Command::new([0x08, 0xee, 0x00, 0x00, 0x00, 0x01, 0x05]);
+
     pub fn new() -> Self {
         Self {}
     }
@@ -13,7 +15,7 @@ impl RequestFirmwareVersionPacket {
 
 impl OutboundPacket for RequestFirmwareVersionPacket {
     fn command(&self) -> Command {
-        Command::new([0x08, 0xee, 0x00, 0x00, 0x00, 0x01, 0x05])
+        Self::COMMAND
     }
 
     fn body(&self) -> Vec<u8> {

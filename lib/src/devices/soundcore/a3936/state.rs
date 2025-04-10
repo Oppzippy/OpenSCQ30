@@ -1,8 +1,7 @@
 use crate::{
     devices::soundcore::standard::structures::{
         AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
-        DualFirmwareVersion, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
-        TwsStatus,
+        DualFirmwareVersion, EqualizerConfiguration, Gender, SerialNumber, TwsStatus,
     },
     macros::impl_as_ref_for_field,
 };

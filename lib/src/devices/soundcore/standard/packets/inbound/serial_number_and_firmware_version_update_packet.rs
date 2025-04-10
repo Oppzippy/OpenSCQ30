@@ -5,7 +5,10 @@ use nom::{
     sequence::tuple,
 };
 
-use crate::devices::soundcore::standard::structures::{Command, DualFirmwareVersion, SerialNumber};
+use crate::devices::soundcore::standard::{
+    packets::outbound::OutboundPacket,
+    structures::{Command, DualFirmwareVersion, SerialNumber},
+};
 
 use super::InboundPacket;
 
@@ -41,6 +44,19 @@ impl InboundPacket for SerialNumberAndFirmwareVersionUpdatePacket {
                 },
             )),
         )(input)
+    }
+}
+
+impl OutboundPacket for SerialNumberAndFirmwareVersionUpdatePacket {
+    fn command(&self) -> Command {
+        Self::COMMAND
+    }
+
+    fn body(&self) -> Vec<u8> {
+        self.dual_firmware_version
+            .bytes()
+            .chain(self.serial_number.0.to_string().into_bytes())
+            .collect()
     }
 }
 

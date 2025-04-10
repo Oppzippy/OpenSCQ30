@@ -1,7 +1,10 @@
+use std::collections::HashMap;
+
 use crate::devices::soundcore::standard::{
     device::fetch_state_from_state_update_packet,
     macros::soundcore_device,
     modules::sound_modes::AvailableSoundModes,
+    packets::outbound::{OutboundPacketBytesExt, RequestStatePacket},
     structures::{AmbientSoundMode, NoiseCancelingMode},
 };
 
@@ -32,5 +35,11 @@ soundcore_device!(
         builder.equalizer().await;
         builder.single_battery();
         builder.serial_number_and_firmware_version();
-    }
+    },
+    {
+        HashMap::from([(
+            RequestStatePacket::COMMAND,
+            A3027StateUpdatePacket::default().bytes(),
+        )])
+    },
 );

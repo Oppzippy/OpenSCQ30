@@ -1,9 +1,11 @@
+use std::collections::HashMap;
+
 use crate::devices::soundcore::standard::{
     macros::soundcore_device,
     modules::sound_modes::AvailableSoundModes,
     packets::{
         inbound::{SerialNumberAndFirmwareVersionUpdatePacket, TryIntoInboundPacket},
-        outbound::{RequestFirmwareVersionPacket, RequestStatePacket},
+        outbound::{OutboundPacketBytesExt, RequestFirmwareVersionPacket, RequestStatePacket},
     },
     structures::{AmbientSoundMode, NoiseCancelingMode},
 };
@@ -43,5 +45,17 @@ soundcore_device!(
         builder.tws_status();
         builder.dual_battery();
         builder.serial_number_and_dual_firmware_version();
-    }
+    },
+    {
+        HashMap::from([
+            (
+                RequestStatePacket::COMMAND,
+                A3031StateUpdatePacket::default().bytes(),
+            ),
+            (
+                RequestFirmwareVersionPacket::COMMAND,
+                SerialNumberAndFirmwareVersionUpdatePacket::default().bytes(),
+            ),
+        ])
+    },
 );

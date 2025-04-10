@@ -1,6 +1,6 @@
 use crate::{
     devices::soundcore::standard::structures::{
-        BatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration, FirmwareVersion,
+        BatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
         MultiButtonConfiguration, SerialNumber, TwsStatus,
     },
     macros::impl_as_ref_for_field,

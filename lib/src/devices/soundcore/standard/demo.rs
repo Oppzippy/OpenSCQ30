@@ -1,5 +1,5 @@
 use std::{
-    collections::HashSet,
+    collections::{HashMap, HashSet},
     sync::{Arc, Mutex},
 };
 
@@ -13,23 +13,21 @@ use crate::{
         ConnectionDescriptor, ConnectionRegistry, ConnectionStatus, DeviceDescriptor,
         GenericConnectionDescriptor, RfcommBackend, RfcommConnection,
     },
-    devices::soundcore::standard::{
-        packets::inbound::take_inbound_packet_header, structures::STATE_UPDATE,
-    },
+    devices::soundcore::standard::packets::inbound::take_inbound_packet_header,
 };
 
-use super::packets::Packet;
+use super::{packets::Packet, structures::Command};
 
 pub struct DemoConnectionRegistry {
     name: String,
-    state_update_packet: Vec<u8>,
+    packet_responses: HashMap<Command, Vec<u8>>,
 }
 
 impl DemoConnectionRegistry {
-    pub fn new(name: String, state_update_packet: Vec<u8>) -> Self {
+    pub fn new(name: String, packet_responses: HashMap<Command, Vec<u8>>) -> Self {
         Self {
             name,
-            state_update_packet,
+            packet_responses,
         }
     }
 }
@@ -50,7 +48,7 @@ impl ConnectionRegistry for DemoConnectionRegistry {
         _mac_address: MacAddr6,
     ) -> crate::Result<Option<Arc<Self::ConnectionType>>> {
         Ok(Some(Arc::new(DemoConnection::new(
-            self.state_update_packet.to_owned(),
+            self.packet_responses.to_owned(),
         ))))
     }
 }
@@ -60,11 +58,11 @@ pub struct DemoConnection {
     connection_status_receiver: Mutex<Option<watch::Receiver<ConnectionStatus>>>,
     packet_sender: mpsc::Sender<Vec<u8>>,
     packet_receiver: Mutex<Option<mpsc::Receiver<Vec<u8>>>>,
-    state_update_packet: Vec<u8>,
+    packet_responses: HashMap<Command, Vec<u8>>,
 }
 
 impl DemoConnection {
-    pub fn new(state_update_packet: Vec<u8>) -> Self {
+    pub fn new(packet_responses: HashMap<Command, Vec<u8>>) -> Self {
         let (connection_status_sender, connection_status_receiver) =
             watch::channel(ConnectionStatus::Connected);
         let (packet_sender, packet_receiver) = mpsc::channel(10);
@@ -73,7 +71,7 @@ impl DemoConnection {
             connection_status_receiver: Mutex::new(Some(connection_status_receiver)),
             packet_sender,
             packet_receiver: Mutex::new(Some(packet_receiver)),
-            state_update_packet,
+            packet_responses,
         }
     }
 }
@@ -97,21 +95,18 @@ impl RfcommBackend for DemoConnectionRegistry {
         _mac_address: MacAddr6,
         _select_uuid: impl Fn(HashSet<Uuid>) -> Uuid + Send,
     ) -> crate::Result<Self::ConnectionType> {
-        Ok(DemoConnection::new(self.state_update_packet.to_owned()))
+        Ok(DemoConnection::new(self.packet_responses.to_owned()))
     }
 }
 
 impl RfcommConnection for DemoConnection {
     async fn write(&self, data: &[u8]) -> crate::Result<()> {
         let (_body, command) = take_inbound_packet_header::<VerboseError<_>>(data).unwrap();
-        match command.to_inbound() {
-            STATE_UPDATE => self
-                .packet_sender
-                .send(self.state_update_packet.clone())
-                .await
-                .unwrap(),
-            _ => self
-                .packet_sender
+        if let Some(response) = self.packet_responses.get(&command) {
+            self.packet_sender.send(response.to_owned()).await.unwrap();
+        } else {
+            // ACK
+            self.packet_sender
                 .send(
                     Packet {
                         command: command.to_inbound(),
@@ -120,7 +115,7 @@ impl RfcommConnection for DemoConnection {
                     .bytes(),
                 )
                 .await
-                .unwrap(),
+                .unwrap()
         }
         Ok(())
     }

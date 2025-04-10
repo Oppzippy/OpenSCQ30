@@ -1,5 +1,9 @@
+use std::collections::HashMap;
+
 use crate::devices::soundcore::standard::{
-    device::fetch_state_from_state_update_packet, macros::soundcore_device,
+    device::fetch_state_from_state_update_packet,
+    macros::soundcore_device,
+    packets::outbound::{OutboundPacketBytesExt, RequestStatePacket},
 };
 
 use super::{packets::A3936StateUpdatePacket, state::A3936State};
@@ -20,5 +24,11 @@ soundcore_device!(
         builder.tws_status();
         builder.dual_battery();
         builder.serial_number_and_dual_firmware_version();
-    }
+    },
+    {
+        HashMap::from([(
+            RequestStatePacket::COMMAND,
+            A3936StateUpdatePacket::default().bytes(),
+        )])
+    },
 );

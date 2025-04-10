@@ -1,5 +1,11 @@
 macro_rules! soundcore_device {
-    ($state: ty, $state_update_packet: ty, async |$packet_io_controller:ident| $fetch_state:block, async |$builder:ident| $block:block) => {
+    (
+        $state: ty,
+        $state_update_packet: ty,
+        async |$packet_io_controller:ident| $fetch_state:block,
+        async |$builder:ident| $block:block,
+        $demo_packets:expr$(,)?
+    ) => {
         pub fn device_registry<B>(
             backend: B,
             database: std::sync::Arc<$crate::storage::OpenSCQ30Database>,
@@ -28,11 +34,10 @@ macro_rules! soundcore_device {
             $state,
             $state_update_packet,
         > {
-            use $crate::devices::soundcore::standard::packets::outbound::OutboundPacketBytesExt;
             $crate::devices::soundcore::standard::device::SoundcoreDeviceRegistry::new(
                 $crate::devices::soundcore::standard::demo::DemoConnectionRegistry::new(
                     device_model.to_string(),
-                    <$state_update_packet>::default().bytes(),
+                    $demo_packets,
                 ),
                 database,
                 device_model,
@@ -67,4 +72,16 @@ macro_rules! soundcore_device {
     };
 }
 
+macro_rules! default_demo_responses {
+    ($($command:expr => $packet_type:ty),* $(,)?) => {{
+        ::std::collections::HashMap::from([
+            $((
+                $command,
+                <$packet_type as $crate::devices::soundcore::standard::packets::outbound::OutboundPacketBytesExt>::bytes(<$packet_type>::default()),
+            ),)*
+        ])
+    }};
+}
+
+pub(crate) use default_demo_responses;
 pub(crate) use soundcore_device;
