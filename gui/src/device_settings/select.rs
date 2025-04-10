@@ -37,8 +37,7 @@ where
     M: Clone + 'a,
 {
     let selected_index = value
-        .map(|value| setting.options.iter().position(|option| option == value))
-        .flatten();
+        .and_then(|value| setting.options.iter().position(|option| option == value));
     with_label(
         setting_id.translate(),
         widget::row().push(
@@ -62,8 +61,7 @@ where
     M: Clone + 'static,
 {
     let selected_index = value
-        .map(|value| setting.options.iter().position(|option| option == value))
-        .flatten();
+        .and_then(|value| setting.options.iter().position(|option| option == value));
     let maybe_deselect_message = value.is_some().then_some(on_remove);
     with_label(
         setting_id.translate(),

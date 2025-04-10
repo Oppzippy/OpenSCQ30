@@ -168,7 +168,7 @@ impl DeviceSettingsModel {
                         .id(widget::Id::new(
                             "optional-select-dialog-add-item-text-input",
                         ))
-                        .on_input(|text| Message::OptionalSelectAddDialogSetName(text))
+                        .on_input(Message::OptionalSelectAddDialogSetName)
                         .on_submit(Message::OptionalSelectAddDialogSubmit),
                 )
                 .primary_action(
