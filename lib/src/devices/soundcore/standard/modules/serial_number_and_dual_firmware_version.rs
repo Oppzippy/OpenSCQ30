@@ -7,6 +7,7 @@ use crate::{
 
 use super::ModuleCollection;
 
+mod packet_handler;
 mod setting_handler;
 
 #[derive(EnumString, EnumIter, IntoStaticStr)]
@@ -45,12 +46,22 @@ impl TryFrom<&SettingId> for SerialNumberAndDualFirmwareVersionSetting {
 
 impl<T> ModuleCollection<T>
 where
-    T: AsRef<SerialNumber> + AsRef<DualFirmwareVersion> + Clone + Send + Sync,
+    T: AsRef<SerialNumber>
+        + AsMut<SerialNumber>
+        + AsRef<DualFirmwareVersion>
+        + AsMut<DualFirmwareVersion>
+        + Clone
+        + Send
+        + Sync,
 {
     pub fn add_serial_number_and_dual_firmware_version(&mut self) {
         self.setting_manager.add_handler(
             CategoryId::DeviceInformation,
             setting_handler::SerialNumberAndFirmwareVersionSettingHandler::default(),
+        );
+        self.packet_handlers.set_handler(
+            packet_handler::SerialNumberAndDualFirmwareVersionPacketHandler::COMMAND,
+            Box::new(packet_handler::SerialNumberAndDualFirmwareVersionPacketHandler::default()),
         );
     }
 }
