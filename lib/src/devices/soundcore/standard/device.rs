@@ -5,7 +5,7 @@ use tokio::sync::{mpsc, watch};
 
 use crate::{
     api::{
-        connection::{Connection, DeviceDescriptor, RfcommBackend, RfcommConnection},
+        connection::{DeviceDescriptor, RfcommBackend, RfcommConnection},
         device::{OpenSCQ30Device, OpenSCQ30DeviceRegistry},
         settings::{CategoryId, Setting, SettingId, Value},
     },
@@ -43,7 +43,7 @@ pub async fn fetch_state_from_state_update_packet<C, State, StateUpdate>(
     packet_io: Arc<PacketIOController<C>>,
 ) -> crate::Result<State>
 where
-    C: Connection,
+    C: RfcommConnection,
     StateUpdate: InboundPacket + Default + Into<State>,
 {
     let state_update_packet: StateUpdate = packet_io

@@ -4,7 +4,7 @@ use nom::error::VerboseError;
 use tokio::{select, sync::mpsc, task::JoinHandle};
 
 use crate::{
-    api::connection::Connection,
+    api::connection::RfcommConnection,
     devices::soundcore::standard::{
         packets::inbound::take_inbound_packet_header, structures::Command,
     },
@@ -14,25 +14,25 @@ use super::{Packet, multi_queue::MultiQueue};
 
 pub struct PacketIOController<ConnectionType>
 where
-    ConnectionType: Connection,
+    ConnectionType: RfcommConnection,
 {
     connection: Arc<ConnectionType>,
     packet_queues: Arc<MultiQueue<Command, Packet>>,
     handle: JoinHandle<()>,
 }
 
-impl<ConnectionType: Connection> Drop for PacketIOController<ConnectionType> {
+impl<ConnectionType: RfcommConnection> Drop for PacketIOController<ConnectionType> {
     fn drop(&mut self) {
         self.handle.abort();
     }
 }
 
-impl<ConnectionType: Connection> PacketIOController<ConnectionType> {
+impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
     pub async fn new(
         connection: Arc<ConnectionType>,
     ) -> crate::Result<(Self, mpsc::Receiver<Packet>)> {
         let packet_queues = Arc::new(MultiQueue::new());
-        let incoming_receiver = connection.inbound_packets_channel().await?;
+        let incoming_receiver = connection.read_channel();
         let (handle, outgoing_receiver) =
             Self::spawn_packet_handler(packet_queues.clone(), incoming_receiver);
         Ok((
@@ -82,7 +82,7 @@ impl<ConnectionType: Connection> PacketIOController<ConnectionType> {
 
         // retry
         for i in 1..=3 {
-            self.connection.write_with_response(&packet.bytes()).await?;
+            self.connection.write(&packet.bytes()).await?;
             let result = select! {
                 result = handle.wait_for_end() => result,
                 _ = tokio::time::sleep(Duration::from_millis(500 * i)) => None,
@@ -104,32 +104,24 @@ impl<ConnectionType: Connection> PacketIOController<ConnectionType> {
 mod tests {
     use std::time::Duration;
 
-    use tokio::sync::mpsc;
-
     use crate::{
+        api::connection::test_stub::StubRfcommConnection,
         devices::soundcore::standard::packets::outbound::{
             OutboundPacket, SetAmbientSoundModeCyclePacket, SetSoundModePacket,
         },
-        stub::connection::StubConnection,
     };
 
     use super::*;
 
-    async fn create_test_connection() -> (Arc<StubConnection>, mpsc::Sender<Vec<u8>>) {
-        let connection = Arc::new(StubConnection::new());
-
-        let (sender, receiver) = mpsc::channel(100);
-        connection.set_inbound_packets_channel(Ok(receiver)).await;
-        (connection, sender)
-    }
-
     #[tokio::test]
     async fn test_send_multiple() {
-        let (connection, sender) = create_test_connection().await;
-        for _ in 1..10 {
-            connection.push_write_return(Ok(())).await;
-        }
-        let controller = Arc::new(PacketIOController::new(connection).await.unwrap().0);
+        let (connection, sender, _receiver) = StubRfcommConnection::new();
+        let controller = Arc::new(
+            PacketIOController::new(Arc::new(connection))
+                .await
+                .unwrap()
+                .0,
+        );
 
         let handle1 = tokio::spawn({
             let controller = controller.clone();
@@ -175,11 +167,13 @@ mod tests {
 
     #[tokio::test]
     async fn test_out_of_order_responses() {
-        let (connection, sender) = create_test_connection().await;
-        for _ in 1..10 {
-            connection.push_write_return(Ok(())).await;
-        }
-        let controller = Arc::new(PacketIOController::new(connection).await.unwrap().0);
+        let (connection, sender, _receiver) = StubRfcommConnection::new();
+        let controller = Arc::new(
+            PacketIOController::new(Arc::new(connection))
+                .await
+                .unwrap()
+                .0,
+        );
 
         let set_cycle_packet = SetAmbientSoundModeCyclePacket::default();
         let handle1 = tokio::spawn({

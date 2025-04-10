@@ -4,7 +4,7 @@ use async_trait::async_trait;
 use tokio::sync::watch;
 
 use crate::{
-    api::connection::Connection,
+    api::connection::RfcommConnection,
     devices::soundcore::standard::{
         packets::{outbound::SetSoundModePacket, packet_io_controller::PacketIOController},
         state_modifier::StateModifier,
@@ -12,11 +12,11 @@ use crate::{
     },
 };
 
-pub struct SoundModesStateModifier<ConnectionType: Connection> {
+pub struct SoundModesStateModifier<ConnectionType: RfcommConnection> {
     packet_io: Arc<PacketIOController<ConnectionType>>,
 }
 
-impl<ConnectionType: Connection> SoundModesStateModifier<ConnectionType> {
+impl<ConnectionType: RfcommConnection> SoundModesStateModifier<ConnectionType> {
     pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
         Self { packet_io }
     }
@@ -26,7 +26,7 @@ impl<ConnectionType: Connection> SoundModesStateModifier<ConnectionType> {
 impl<ConnectionType, T> StateModifier<T> for SoundModesStateModifier<ConnectionType>
 where
     T: AsMut<SoundModes> + AsRef<SoundModes> + Clone + Send + Sync,
-    ConnectionType: Connection + Send + Sync,
+    ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
         &self,

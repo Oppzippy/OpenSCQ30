@@ -3,7 +3,7 @@ use std::sync::Arc;
 use tokio::sync::watch;
 
 use crate::{
-    api::connection::Connection,
+    api::connection::RfcommConnection,
     devices::soundcore::standard::{
         packets::{
             outbound::SetMultiButtonConfigurationPacket, packet_io_controller::PacketIOController,
@@ -13,11 +13,11 @@ use crate::{
     },
 };
 
-pub struct ButtonConfigurationStateModifier<ConnectionType: Connection> {
+pub struct ButtonConfigurationStateModifier<ConnectionType: RfcommConnection> {
     packet_io: Arc<PacketIOController<ConnectionType>>,
 }
 
-impl<ConnectionType: Connection> ButtonConfigurationStateModifier<ConnectionType> {
+impl<ConnectionType: RfcommConnection> ButtonConfigurationStateModifier<ConnectionType> {
     pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
         Self { packet_io }
     }
@@ -26,12 +26,8 @@ impl<ConnectionType: Connection> ButtonConfigurationStateModifier<ConnectionType
 #[async_trait]
 impl<ConnectionType, T> StateModifier<T> for ButtonConfigurationStateModifier<ConnectionType>
 where
-    T: AsMut<MultiButtonConfiguration>
-        + AsRef<MultiButtonConfiguration>
-        + Clone
-        + Send
-        + Sync,
-    ConnectionType: Connection + Send + Sync,
+    T: AsMut<MultiButtonConfiguration> + AsRef<MultiButtonConfiguration> + Clone + Send + Sync,
+    ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
         &self,

@@ -9,7 +9,7 @@ use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use crate::{
     api::{
-        connection::Connection,
+        connection::RfcommConnection,
         settings::{CategoryId, SettingId},
     },
     devices::{
@@ -64,7 +64,7 @@ impl<T> ModuleCollection<T> {
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
     ) where
-        Conn: Connection + 'static + Send + Sync,
+        Conn: RfcommConnection + 'static + Send + Sync,
         T: AsMut<EqualizerConfiguration<CHANNELS, BANDS>>
             + AsRef<EqualizerConfiguration<CHANNELS, BANDS>>
             + Clone
@@ -88,7 +88,7 @@ impl<T> ModuleCollection<T> {
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
     ) where
-        Conn: Connection + 'static + Send + Sync,
+        Conn: RfcommConnection + 'static + Send + Sync,
         T: AsMut<EqualizerConfiguration<CHANNELS, BANDS>>
             + AsRef<EqualizerConfiguration<CHANNELS, BANDS>>
             + Clone
@@ -111,7 +111,7 @@ impl<T> ModuleCollection<T> {
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
     ) where
-        Conn: Connection + 'static + Send + Sync,
+        Conn: RfcommConnection + 'static + Send + Sync,
         T: AsMut<EqualizerConfiguration<CHANNELS, BANDS>>
             + AsRef<EqualizerConfiguration<CHANNELS, BANDS>>
             + Clone
@@ -141,7 +141,7 @@ impl<T> ModuleCollection<T> {
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
     ) where
-        Conn: Connection + 'static + Send + Sync,
+        Conn: RfcommConnection + 'static + Send + Sync,
         T: AsMut<EqualizerConfiguration<CHANNELS, BANDS>>
             + AsRef<EqualizerConfiguration<CHANNELS, BANDS>>
             + Clone

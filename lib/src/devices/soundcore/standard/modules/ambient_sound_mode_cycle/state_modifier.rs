@@ -3,7 +3,7 @@ use std::sync::Arc;
 use tokio::sync::watch;
 
 use crate::{
-    api::connection::Connection,
+    api::connection::RfcommConnection,
     devices::soundcore::standard::{
         packets::{
             outbound::SetAmbientSoundModeCyclePacket, packet_io_controller::PacketIOController,
@@ -13,11 +13,11 @@ use crate::{
     },
 };
 
-pub struct AmbientSoundModeCycleStateModifier<ConnectionType: Connection> {
+pub struct AmbientSoundModeCycleStateModifier<ConnectionType: RfcommConnection> {
     packet_io: Arc<PacketIOController<ConnectionType>>,
 }
 
-impl<ConnectionType: Connection> AmbientSoundModeCycleStateModifier<ConnectionType> {
+impl<ConnectionType: RfcommConnection> AmbientSoundModeCycleStateModifier<ConnectionType> {
     pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
         Self { packet_io }
     }
@@ -26,7 +26,7 @@ impl<ConnectionType: Connection> AmbientSoundModeCycleStateModifier<ConnectionTy
 #[async_trait]
 impl<ConnectionType, T> StateModifier<T> for AmbientSoundModeCycleStateModifier<ConnectionType>
 where
-    ConnectionType: Connection + Send + Sync,
+    ConnectionType: RfcommConnection + Send + Sync,
     T: AsMut<AmbientSoundModeCycle> + AsRef<AmbientSoundModeCycle> + Clone + Send + Sync,
 {
     async fn move_to_state(

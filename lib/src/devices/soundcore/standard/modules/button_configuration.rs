@@ -6,7 +6,7 @@ use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use crate::{
     api::{
-        connection::Connection,
+        connection::RfcommConnection,
         settings::{CategoryId, SettingId},
     },
     devices::soundcore::standard::{
@@ -67,7 +67,7 @@ where
 {
     pub fn add_button_configuration<C>(&mut self, packet_io: Arc<PacketIOController<C>>)
     where
-        C: Connection + 'static + Send + Sync,
+        C: RfcommConnection + 'static + Send + Sync,
     {
         self.setting_manager.add_handler(
             CategoryId::ButtonConfiguration,

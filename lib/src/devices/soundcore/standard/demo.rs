@@ -1,6 +1,6 @@
 use std::{
     collections::{HashMap, HashSet},
-    sync::{Arc, Mutex},
+    sync::Mutex,
 };
 
 use macaddr::MacAddr6;
@@ -9,10 +9,7 @@ use tokio::sync::{mpsc, watch};
 use uuid::Uuid;
 
 use crate::{
-    api::connection::{
-        ConnectionDescriptor, ConnectionRegistry, ConnectionStatus, DeviceDescriptor,
-        GenericConnectionDescriptor, RfcommBackend, RfcommConnection,
-    },
+    api::connection::{ConnectionStatus, DeviceDescriptor, RfcommBackend, RfcommConnection},
     devices::soundcore::standard::packets::inbound::take_inbound_packet_header,
 };
 
@@ -32,24 +29,22 @@ impl DemoConnectionRegistry {
     }
 }
 
-impl ConnectionRegistry for DemoConnectionRegistry {
+impl RfcommBackend for DemoConnectionRegistry {
     type ConnectionType = DemoConnection;
-    type DescriptorType = GenericConnectionDescriptor;
-    async fn connection_descriptors(&self) -> crate::Result<HashSet<Self::DescriptorType>> {
-        let mut descriptors = HashSet::new();
-        descriptors.insert(GenericConnectionDescriptor::new(
-            format!("Demo {}", self.name),
-            MacAddr6::nil(),
-        ));
-        Ok(descriptors)
+
+    async fn devices(&self) -> crate::Result<HashSet<DeviceDescriptor>> {
+        Ok(HashSet::from([DeviceDescriptor {
+            name: self.name.clone(),
+            mac_address: MacAddr6::nil(),
+        }]))
     }
-    async fn connection(
+
+    async fn connect(
         &self,
         _mac_address: MacAddr6,
-    ) -> crate::Result<Option<Arc<Self::ConnectionType>>> {
-        Ok(Some(Arc::new(DemoConnection::new(
-            self.packet_responses.to_owned(),
-        ))))
+        _select_uuid: impl Fn(HashSet<Uuid>) -> Uuid + Send,
+    ) -> crate::Result<Self::ConnectionType> {
+        Ok(DemoConnection::new(self.packet_responses.to_owned()))
     }
 }
 
@@ -73,29 +68,6 @@ impl DemoConnection {
             packet_receiver: Mutex::new(Some(packet_receiver)),
             packet_responses,
         }
-    }
-}
-
-impl RfcommBackend for DemoConnectionRegistry {
-    type ConnectionType = DemoConnection;
-
-    async fn devices(&self) -> crate::Result<HashSet<crate::api::connection::DeviceDescriptor>> {
-        Ok(ConnectionRegistry::connection_descriptors(self)
-            .await?
-            .into_iter()
-            .map(|d| DeviceDescriptor {
-                name: d.name().to_owned(),
-                mac_address: d.mac_address(),
-            })
-            .collect())
-    }
-
-    async fn connect(
-        &self,
-        _mac_address: MacAddr6,
-        _select_uuid: impl Fn(HashSet<Uuid>) -> Uuid + Send,
-    ) -> crate::Result<Self::ConnectionType> {
-        Ok(DemoConnection::new(self.packet_responses.to_owned()))
     }
 }
 

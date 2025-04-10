@@ -3,7 +3,7 @@ use std::sync::Arc;
 use tokio::sync::watch;
 
 use crate::{
-    api::connection::Connection,
+    api::connection::RfcommConnection,
     devices::soundcore::standard::{
         packets::{
             outbound::{
@@ -16,7 +16,8 @@ use crate::{
     },
 };
 
-pub struct EqualizerStateModifier<ConnectionType: Connection, const C: usize, const B: usize> {
+pub struct EqualizerStateModifier<ConnectionType: RfcommConnection, const C: usize, const B: usize>
+{
     packet_io: Arc<PacketIOController<ConnectionType>>,
     options: EqualizerStateModifierOptions,
 }
@@ -25,7 +26,7 @@ pub struct EqualizerStateModifierOptions {
     pub has_drc: bool,
 }
 
-impl<ConnectionType: Connection, const C: usize, const B: usize>
+impl<ConnectionType: RfcommConnection, const C: usize, const B: usize>
     EqualizerStateModifier<ConnectionType, C, B>
 {
     pub fn new(
@@ -45,7 +46,7 @@ where
         + Clone
         + Send
         + Sync,
-    ConnectionType: Connection + Send + Sync,
+    ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
         &self,
@@ -80,14 +81,14 @@ where
 }
 
 pub struct EqualizerWithBasicHearIdStateModifier<
-    ConnectionType: Connection,
+    ConnectionType: RfcommConnection,
     const C: usize,
     const B: usize,
 > {
     packet_io: Arc<PacketIOController<ConnectionType>>,
 }
 
-impl<ConnectionType: Connection, const C: usize, const B: usize>
+impl<ConnectionType: RfcommConnection, const C: usize, const B: usize>
     EqualizerWithBasicHearIdStateModifier<ConnectionType, C, B>
 {
     pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
@@ -105,7 +106,7 @@ where
         + Send
         + Sync,
     T: AsRef<BasicHearId<C, B>> + AsRef<Gender> + AsRef<AgeRange>,
-    ConnectionType: Connection + Send + Sync,
+    ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
         &self,
@@ -149,14 +150,14 @@ where
 }
 
 pub struct EqualizerWithCustomHearIdStateModifier<
-    ConnectionType: Connection,
+    ConnectionType: RfcommConnection,
     const C: usize,
     const B: usize,
 > {
     packet_io: Arc<PacketIOController<ConnectionType>>,
 }
 
-impl<ConnectionType: Connection, const C: usize, const B: usize>
+impl<ConnectionType: RfcommConnection, const C: usize, const B: usize>
     EqualizerWithCustomHearIdStateModifier<ConnectionType, C, B>
 {
     pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
@@ -174,7 +175,7 @@ where
         + Send
         + Sync,
     T: AsRef<CustomHearId<C, B>> + AsRef<Gender> + AsRef<AgeRange>,
-    ConnectionType: Connection + Send + Sync,
+    ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
         &self,

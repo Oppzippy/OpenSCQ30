@@ -3,7 +3,7 @@ use std::sync::Arc;
 use tokio::sync::watch;
 
 use crate::{
-    api::connection::Connection,
+    api::connection::RfcommConnection,
     devices::soundcore::{
         a3936::{
             packets::A3936SetMultiButtonConfigurationPacket,
@@ -15,11 +15,11 @@ use crate::{
     },
 };
 
-pub struct ButtonConfigurationStateModifier<ConnectionType: Connection> {
+pub struct ButtonConfigurationStateModifier<ConnectionType: RfcommConnection> {
     packet_io: Arc<PacketIOController<ConnectionType>>,
 }
 
-impl<ConnectionType: Connection> ButtonConfigurationStateModifier<ConnectionType> {
+impl<ConnectionType: RfcommConnection> ButtonConfigurationStateModifier<ConnectionType> {
     pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
         Self { packet_io }
     }
@@ -33,7 +33,7 @@ where
         + Clone
         + Send
         + Sync,
-    ConnectionType: Connection + Send + Sync,
+    ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
         &self,
