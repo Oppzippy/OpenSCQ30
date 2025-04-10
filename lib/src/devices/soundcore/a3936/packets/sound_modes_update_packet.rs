@@ -28,7 +28,7 @@ impl InboundPacket for A3936SoundModesUpdatePacket {
     ) -> IResult<&'a [u8], A3936SoundModesUpdatePacket, E> {
         // offset 9
         context(
-            "SoundModeTypeTwoUpdatePacket",
+            "A3936SoundModesUpdatePacket",
             all_consuming(map(A3936SoundModes::take, |sound_modes| {
                 A3936SoundModesUpdatePacket { sound_modes }
             })),

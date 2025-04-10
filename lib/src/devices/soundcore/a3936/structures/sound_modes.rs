@@ -26,7 +26,7 @@ impl A3936SoundModes {
         input: &'a [u8],
     ) -> IResult<&'a [u8], A3936SoundModes, E> {
         context(
-            "sound modes type two",
+            "a3936 sound modes",
             map(
                 tuple((
                     AmbientSoundMode::take,
@@ -172,7 +172,7 @@ impl A3936NoiseCancelingMode {
         input: &'a [u8],
     ) -> IResult<&'a [u8], A3936NoiseCancelingMode, E> {
         context(
-            "noise canceling mode type two",
+            "a3936 noise canceling mode",
             map(le_u8, |noise_canceling_mode| {
                 A3936NoiseCancelingMode::from_repr(noise_canceling_mode).unwrap_or_default()
             }),
