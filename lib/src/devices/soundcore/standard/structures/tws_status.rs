@@ -8,7 +8,7 @@ use nom::{
 use openscq30_i18n_macros::Translate;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use strum::{Display, FromRepr, IntoStaticStr};
+use strum::{Display, FromRepr};
 
 use crate::devices::soundcore::standard::packets::parsing::take_bool;
 

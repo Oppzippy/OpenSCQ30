@@ -72,16 +72,4 @@ macro_rules! soundcore_device {
     };
 }
 
-macro_rules! default_demo_responses {
-    ($($command:expr => $packet_type:ty),* $(,)?) => {{
-        ::std::collections::HashMap::from([
-            $((
-                $command,
-                <$packet_type as $crate::devices::soundcore::standard::packets::outbound::OutboundPacketBytesExt>::bytes(<$packet_type>::default()),
-            ),)*
-        ])
-    }};
-}
-
-pub(crate) use default_demo_responses;
 pub(crate) use soundcore_device;

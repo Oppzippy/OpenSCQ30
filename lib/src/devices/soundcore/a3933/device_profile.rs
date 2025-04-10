@@ -68,11 +68,10 @@ mod tests {
             soundcore::standard::{
                 packets::{
                     Packet,
+                    inbound::state_update_packet,
                     outbound::{OutboundPacket, OutboundPacketBytesExt, set_equalizer},
                 },
-                structures::{
-                    Command, EqualizerConfiguration, PresetEqualizerProfile, STATE_UPDATE,
-                },
+                structures::{Command, EqualizerConfiguration, PresetEqualizerProfile},
             },
         },
         storage::OpenSCQ30Database,
@@ -83,7 +82,7 @@ mod tests {
     }
     impl OutboundPacket for A3933TestStateUpdatePacket {
         fn command(&self) -> Command {
-            STATE_UPDATE
+            state_update_packet::COMMAND
         }
 
         fn body(&self) -> Vec<u8> {
