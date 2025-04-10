@@ -45,6 +45,7 @@ soundcore_device!(
         });
         builder.equalizer_with_custom_hear_id().await;
         builder.button_configuration();
+        builder.tws_status();
         builder.dual_battery();
         builder.serial_number_and_dual_firmware_version();
     }

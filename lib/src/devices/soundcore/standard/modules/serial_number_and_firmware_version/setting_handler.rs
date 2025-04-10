@@ -26,13 +26,17 @@ where
     }
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
+        let serial_number: &SerialNumber = state.as_ref();
+        let firmware_version: &FirmwareVersion = state.as_ref();
         let setting: SerialNumberAndFirmwareVersionSetting = setting_id.try_into().ok()?;
         Some(match setting {
             SerialNumberAndFirmwareVersionSetting::SerialNumber => Setting::Information {
-                text: <T as AsRef<SerialNumber>>::as_ref(state).to_string(),
+                text: serial_number.to_string(),
+                translated_text: serial_number.to_string(),
             },
             SerialNumberAndFirmwareVersionSetting::FirmwareVersion => Setting::Information {
-                text: <T as AsRef<FirmwareVersion>>::as_ref(state).to_string(),
+                text: firmware_version.to_string(),
+                translated_text: firmware_version.to_string(),
             },
         })
     }

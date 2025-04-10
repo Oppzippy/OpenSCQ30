@@ -15,6 +15,7 @@ soundcore_device!(
         builder.module_collection().add_state_update();
         builder.equalizer().await;
         builder.button_configuration();
+        builder.tws_status();
         builder.dual_battery();
         builder.serial_number_and_dual_firmware_version();
     }

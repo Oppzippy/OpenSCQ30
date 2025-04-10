@@ -40,6 +40,7 @@ soundcore_device!(
             ],
         });
         builder.equalizer().await;
+        builder.tws_status();
         builder.dual_battery();
         builder.serial_number_and_dual_firmware_version();
     }

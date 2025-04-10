@@ -280,9 +280,10 @@ impl DeviceSettingsModel {
                     } => equalizer::responsive_equalizer(setting, value, move |index, value| {
                         Message::SetEqualizerBand(setting_id.clone(), index, value)
                     }),
-                    Setting::Information { text } => {
-                        information::information(setting_id, text.into())
-                    }
+                    Setting::Information {
+                        text: _,
+                        translated_text,
+                    } => information::information(setting_id, Cow::Borrowed(translated_text)),
                 }
             }))
             .into()

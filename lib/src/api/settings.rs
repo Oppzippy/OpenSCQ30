@@ -69,6 +69,8 @@ pub enum SettingId {
     FirmwareVersion,
     FirmwareVersionLeft,
     FirmwareVersionRight,
+    TwsStatus,
+    HostDevice,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -106,6 +108,7 @@ pub enum Setting {
     },
     Information {
         text: String,
+        translated_text: String,
     },
 }
 
@@ -119,7 +122,10 @@ impl From<Setting> for Value {
             Setting::MultiSelect { value, .. } => value.into(),
             Setting::Equalizer { values: value, .. } => value.into(),
             Setting::ModifiableSelect { value, .. } => value.into(),
-            Setting::Information { text } => Cow::<str>::Owned(text).into(),
+            Setting::Information {
+                text,
+                translated_text: _,
+            } => Cow::<str>::Owned(text).into(),
         }
     }
 }

@@ -26,14 +26,16 @@ where
         let setting: BatterySetting = setting_id.try_into().ok()?;
         Some(match setting {
             BatterySetting::IsCharging => Setting::Information {
-                text: if battery.is_charging.into() {
+                text: battery.is_charging.to_string(),
+                translated_text: if battery.is_charging.into() {
                     fl!("charging")
                 } else {
                     fl!("not-charging")
                 },
             },
             BatterySetting::BatteryLevel => Setting::Information {
-                text: format!("{}/5", battery.level.0),
+                text: battery.level.0.to_string(),
+                translated_text: format!("{}/5", battery.level.0),
             },
         })
     }

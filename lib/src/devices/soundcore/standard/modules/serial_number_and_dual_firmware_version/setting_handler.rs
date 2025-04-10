@@ -26,23 +26,24 @@ where
     }
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
+        let serial_number: &SerialNumber = state.as_ref();
+        let dual_firmware_version: &DualFirmwareVersion = state.as_ref();
         let setting: SerialNumberAndDualFirmwareVersionSetting = setting_id.try_into().ok()?;
         Some(match setting {
             SerialNumberAndDualFirmwareVersionSetting::SerialNumber => Setting::Information {
-                text: <T as AsRef<SerialNumber>>::as_ref(state).to_string(),
+                text: serial_number.to_string(),
+                translated_text: serial_number.to_string(),
             },
             SerialNumberAndDualFirmwareVersionSetting::FirmwareVersionLeft => {
                 Setting::Information {
-                    text: <T as AsRef<DualFirmwareVersion>>::as_ref(state)
-                        .left
-                        .to_string(),
+                    text: dual_firmware_version.left.to_string(),
+                    translated_text: dual_firmware_version.left.to_string(),
                 }
             }
             SerialNumberAndDualFirmwareVersionSetting::FirmwareVersionRight => {
                 Setting::Information {
-                    text: <T as AsRef<DualFirmwareVersion>>::as_ref(state)
-                        .right
-                        .to_string(),
+                    text: dual_firmware_version.right.to_string(),
+                    translated_text: dual_firmware_version.right.to_string(),
                 }
             }
         })

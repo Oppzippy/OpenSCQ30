@@ -26,24 +26,28 @@ where
         let setting: BatterySetting = setting_id.try_into().ok()?;
         Some(match setting {
             BatterySetting::IsChargingLeft => Setting::Information {
-                text: if battery.left.is_charging.into() {
+                text: battery.left.is_charging.to_string(),
+                translated_text: if battery.left.is_charging.into() {
                     fl!("charging")
                 } else {
                     fl!("not-charging")
                 },
             },
             BatterySetting::IsChargingRight => Setting::Information {
-                text: if battery.right.is_charging.into() {
+                text: battery.right.is_charging.to_string(),
+                translated_text: if battery.right.is_charging.into() {
                     fl!("charging")
                 } else {
                     fl!("not-charging")
                 },
             },
             BatterySetting::BatteryLevelLeft => Setting::Information {
-                text: format!("{}/5", battery.left.level.0),
+                text: battery.right.level.0.to_string(),
+                translated_text: format!("{}/5", battery.left.level.0),
             },
             BatterySetting::BatteryLevelRight => Setting::Information {
-                text: format!("{}/5", battery.left.level.0),
+                text: battery.right.level.0.to_string(),
+                translated_text: format!("{}/5", battery.left.level.0),
             },
         })
     }

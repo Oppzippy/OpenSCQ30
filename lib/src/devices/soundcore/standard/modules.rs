@@ -20,6 +20,7 @@ pub mod serial_number_and_dual_firmware_version;
 pub mod serial_number_and_firmware_version;
 pub mod single_battery;
 pub mod sound_modes;
+pub mod tws_status;
 
 pub struct ModuleCollection<StateType> {
     pub setting_manager: SettingsManager<StateType>,

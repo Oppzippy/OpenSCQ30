@@ -5,9 +5,10 @@ use nom::{
     number::complete::le_u8,
     sequence::pair,
 };
+use openscq30_i18n_macros::Translate;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use strum::FromRepr;
+use strum::{Display, FromRepr, IntoStaticStr};
 
 use crate::devices::soundcore::standard::packets::parsing::take_bool;
 
@@ -41,7 +42,9 @@ impl TwsStatus {
 }
 
 #[repr(u8)]
-#[derive(Default, Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, FromRepr)]
+#[derive(
+    Default, Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, FromRepr, Display, Translate,
+)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum HostDevice {

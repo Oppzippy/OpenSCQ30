@@ -88,3 +88,10 @@ serial-number = Serial Number
 firmware-version = Firmware Version
 firmware-version-left = Firmware Version (Left)
 firmware-version-right = Firmware Version (Right)
+
+tws-status = True Wireless (TWS) Status
+host-device = Host Device
+connected = Connected
+disconnected = Disconnected
+left = Left
+right = Right

@@ -2,25 +2,22 @@ use nom::{
     IResult,
     combinator::{all_consuming, map},
     error::{ContextError, ParseError, context},
-    sequence::tuple,
 };
 
-use crate::devices::soundcore::standard::{
-    packets::parsing::take_bool,
-    structures::{Command, HostDevice},
-};
+use crate::devices::soundcore::standard::structures::{Command, TwsStatus};
 
 use super::InboundPacket;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct TwsStatusUpdatePacket {
-    pub host_device: HostDevice,
-    pub tws_status: bool,
+pub struct TwsStatusUpdatePacket(pub TwsStatus);
+
+impl TwsStatusUpdatePacket {
+    pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x02]);
 }
 
 impl InboundPacket for TwsStatusUpdatePacket {
     fn command() -> Command {
-        Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x02])
+        Self::COMMAND
     }
 
     #[allow(dead_code)]
@@ -29,13 +26,7 @@ impl InboundPacket for TwsStatusUpdatePacket {
     ) -> IResult<&'a [u8], TwsStatusUpdatePacket, E> {
         context(
             "TwsStatusUpdatePacket",
-            all_consuming(map(
-                tuple((HostDevice::take, take_bool)),
-                |(host_device, tws_status)| TwsStatusUpdatePacket {
-                    host_device,
-                    tws_status,
-                },
-            )),
+            all_consuming(map(TwsStatus::take, TwsStatusUpdatePacket)),
         )(input)
     }
 }
@@ -58,7 +49,7 @@ mod tests {
         let packet = TwsStatusUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
-        assert_eq!(HostDevice::Left, packet.host_device);
-        assert!(packet.tws_status);
+        assert_eq!(HostDevice::Left, packet.0.host_device);
+        assert!(packet.0.is_connected);
     }
 }

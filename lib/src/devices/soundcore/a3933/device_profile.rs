@@ -35,6 +35,7 @@ soundcore_device!(
         builder.equalizer().await;
         builder.button_configuration();
         builder.ambient_sound_mode_cycle();
+        builder.tws_status();
         builder.dual_battery();
         builder.serial_number_and_dual_firmware_version();
     }

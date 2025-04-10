@@ -316,6 +316,13 @@ where
         self.module_collection
             .add_serial_number_and_dual_firmware_version();
     }
+
+    pub fn tws_status(&mut self)
+    where
+        StateType: AsRef<TwsStatus> + AsMut<TwsStatus>,
+    {
+        self.module_collection.add_tws_status();
+    }
 }
 
 pub struct SoundcoreDeviceTemplate<ConnectionType, StateType, StateUpdatePacketType>
