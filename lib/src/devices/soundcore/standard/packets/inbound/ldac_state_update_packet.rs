@@ -13,12 +13,11 @@ pub struct LdacStateUpdatePacket {
     pub is_enabled: bool,
 }
 
-impl InboundPacket for LdacStateUpdatePacket {
-    fn command() -> Command {
-        Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x7F])
-    }
+impl LdacStateUpdatePacket {
+    pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x7F]);
+}
 
-    #[allow(dead_code)]
+impl InboundPacket for LdacStateUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], LdacStateUpdatePacket, E> {

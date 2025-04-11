@@ -19,10 +19,6 @@ impl A3936SoundModesUpdatePacket {
 }
 
 impl InboundPacket for A3936SoundModesUpdatePacket {
-    fn command() -> Command {
-        Self::COMMAND
-    }
-
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], A3936SoundModesUpdatePacket, E> {

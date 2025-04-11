@@ -273,7 +273,6 @@ impl DeviceSettingsModel {
                         Message::ShowOptionalSelectAddDialog(setting_id.clone()),
                         Message::ShowOptionalSelectRemoveDialog(setting_id.clone()),
                     ),
-                    Setting::MultiSelect { setting, value } => todo!(),
                     Setting::Equalizer {
                         setting,
                         values: value,

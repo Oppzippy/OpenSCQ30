@@ -1,15 +1,8 @@
-use std::borrow::Cow;
-
 use nom::{
     IResult,
     combinator::map,
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
-};
-
-use crate::{
-    api::settings::{Select, Setting},
-    i18n::fl,
 };
 
 const NOISE_CANCELING_MODE: u8 = 1 << 0;
@@ -70,31 +63,5 @@ impl From<AmbientSoundModeCycle> for u8 {
             0,
             |acc, (is_enabled, bit)| if is_enabled { acc | bit } else { acc },
         )
-    }
-}
-
-impl From<AmbientSoundModeCycle> for Setting {
-    fn from(cycle: AmbientSoundModeCycle) -> Self {
-        Self::MultiSelect {
-            setting: Select {
-                options: vec![
-                    Cow::Borrowed("NormalMode"),
-                    Cow::Borrowed("TransparencyMode"),
-                    Cow::Borrowed("NoiseCancelingMode"),
-                ],
-                localized_options: vec![fl!("normal"), fl!("transparency"), fl!("noise-canceling")],
-            },
-            value: (cycle
-                .normal_mode
-                .then_some("NormalMode".into())
-                .into_iter()
-                .chain(cycle.transparency_mode.then_some("TransparencyMode".into()))
-                .chain(
-                    cycle
-                        .noise_canceling_mode
-                        .then_some("NoiseCancelingMode".into()),
-                ))
-            .collect(),
-        }
     }
 }

@@ -13,12 +13,11 @@ pub struct GameModeUpdatePacket {
     pub is_enabled: bool,
 }
 
-impl InboundPacket for GameModeUpdatePacket {
-    fn command() -> Command {
-        Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x11])
-    }
+impl GameModeUpdatePacket {
+    pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x11]);
+}
 
-    #[allow(dead_code)]
+impl InboundPacket for GameModeUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], GameModeUpdatePacket, E> {

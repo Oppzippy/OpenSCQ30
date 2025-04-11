@@ -90,9 +90,6 @@ impl Default for A3933StateUpdatePacket {
 }
 
 impl InboundPacket for A3933StateUpdatePacket {
-    fn command() -> Command {
-        state_update_packet::COMMAND
-    }
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], A3933StateUpdatePacket, E> {
@@ -208,12 +205,7 @@ impl OutboundPacket for A3933StateUpdatePacket {
                     .map(|hear_id| {
                         [hear_id.is_enabled as u8]
                             .into_iter()
-                            .chain(
-                                hear_id
-                                    .volume_adjustments
-                                    .iter()
-                                    .flat_map(|v| v.bytes()),
-                            )
+                            .chain(hear_id.volume_adjustments.iter().flat_map(|v| v.bytes()))
                             .chain(hear_id.time.to_le_bytes())
                             .chain([hear_id.hear_id_type.0])
                             .chain(

@@ -98,10 +98,6 @@ pub enum Setting {
         setting: Select,
         value: Option<Cow<'static, str>>,
     },
-    MultiSelect {
-        setting: Select,
-        value: Vec<Cow<'static, str>>,
-    },
     Equalizer {
         setting: Equalizer,
         values: Vec<i16>,
@@ -119,7 +115,6 @@ impl From<Setting> for Value {
             Setting::I32Range { value, .. } => value.into(),
             Setting::Select { value, .. } => value.into(),
             Setting::OptionalSelect { value, .. } => value.into(),
-            Setting::MultiSelect { value, .. } => value.into(),
             Setting::Equalizer { values: value, .. } => value.into(),
             Setting::ModifiableSelect { value, .. } => value.into(),
             Setting::Information {
@@ -159,17 +154,6 @@ impl Setting {
         Self::Select {
             setting: Select::from_enum(variants),
             value: Cow::Borrowed(value.into()),
-        }
-    }
-
-    pub(crate) fn optional_select_from_enum<T>(variants: &[T], value: Option<T>) -> Self
-    where
-        for<'a> &'a T: PartialEq + Into<&'static str> + Translate,
-        T: Into<&'static str>,
-    {
-        Setting::OptionalSelect {
-            setting: Select::from_enum(variants),
-            value: value.map(|v| Cow::Borrowed(v.into())),
         }
     }
 }

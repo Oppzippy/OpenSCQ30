@@ -20,10 +20,6 @@ impl BatteryLevelUpdatePacket {
 }
 
 impl InboundPacket for BatteryLevelUpdatePacket {
-    fn command() -> Command {
-        Self::COMMAND
-    }
-
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], BatteryLevelUpdatePacket, E> {

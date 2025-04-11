@@ -395,19 +395,8 @@ where
         &self,
         setting_values: Vec<(SettingId, Value)>,
     ) -> crate::Result<()> {
-        let mut target_state = self.state_sender.borrow().clone();
-        for (setting_id, value) in setting_values {
-            self.module_collection
-                .setting_manager
-                .set(&mut target_state, &setting_id, value)
-                .await
-                .unwrap()?;
-        }
-        for modifier in &self.module_collection.state_modifiers {
-            modifier
-                .move_to_state(&self.state_sender, &target_state)
-                .await?;
-        }
-        Ok(())
+        self.module_collection
+            .set_setting_values(&self.state_sender, setting_values)
+            .await
     }
 }

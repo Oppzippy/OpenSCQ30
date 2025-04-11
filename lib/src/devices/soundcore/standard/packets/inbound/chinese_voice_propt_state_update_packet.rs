@@ -13,12 +13,11 @@ pub struct ChineseVoicePromptStateUpdatePacket {
     pub is_enabled: bool,
 }
 
-impl InboundPacket for ChineseVoicePromptStateUpdatePacket {
-    fn command() -> Command {
-        Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x0F])
-    }
+impl ChineseVoicePromptStateUpdatePacket {
+    pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x0F]);
+}
 
-    #[allow(dead_code)]
+impl InboundPacket for ChineseVoicePromptStateUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], ChineseVoicePromptStateUpdatePacket, E> {

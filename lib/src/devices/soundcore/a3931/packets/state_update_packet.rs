@@ -40,9 +40,6 @@ pub struct A3931StateUpdatePacket {
 }
 
 impl InboundPacket for A3931StateUpdatePacket {
-    fn command() -> crate::devices::soundcore::standard::structures::Command {
-        state_update_packet::COMMAND
-    }
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], A3931StateUpdatePacket, E> {
