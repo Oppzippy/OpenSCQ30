@@ -270,7 +270,11 @@ mod tests {
     use crate::devices::soundcore::{
         a3933::packets::inbound::A3933StateUpdatePacket,
         standard::{
-            packets::inbound::{InboundPacket, take_inbound_packet_header},
+            packets::{
+                Packet,
+                inbound::{InboundPacket, TryIntoInboundPacket, take_inbound_packet_header},
+                outbound::OutboundPacketBytesExt,
+            },
             structures::{
                 AmbientSoundMode, BatteryLevel, CustomNoiseCanceling, EqualizerConfiguration,
                 FirmwareVersion, HostDevice, IsBatteryCharging, PresetEqualizerProfile,
@@ -278,6 +282,17 @@ mod tests {
             },
         },
     };
+
+    #[test]
+    fn serialize_and_deserialize() {
+        let bytes = A3933StateUpdatePacket::default().bytes();
+        let (body, command) = take_inbound_packet_header::<VerboseError<_>>(&bytes).unwrap();
+        let packet = Packet {
+            command,
+            body: body.to_vec(),
+        };
+        let _: A3933StateUpdatePacket = packet.try_into_inbound_packet().unwrap();
+    }
 
     #[test]
     fn it_parses_packet() {

@@ -136,3 +136,26 @@ impl ModuleCollection<A3931State> {
         );
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use nom::error::VerboseError;
+
+    use crate::devices::soundcore::standard::packets::{
+        inbound::{TryIntoInboundPacket, take_inbound_packet_header},
+        outbound::OutboundPacketBytesExt,
+    };
+
+    use super::*;
+
+    #[test]
+    fn serialize_and_deserialize() {
+        let bytes = A3931StateUpdatePacket::default().bytes();
+        let (body, command) = take_inbound_packet_header::<VerboseError<_>>(&bytes).unwrap();
+        let packet = Packet {
+            command,
+            body: body.to_vec(),
+        };
+        let _: A3931StateUpdatePacket = packet.try_into_inbound_packet().unwrap();
+    }
+}

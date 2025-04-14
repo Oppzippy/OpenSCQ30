@@ -246,11 +246,23 @@ impl ModuleCollection<A3936State> {
 mod tests {
     use nom::error::VerboseError;
 
-    use crate::devices::soundcore::standard::packets::inbound::{
-        InboundPacket, take_inbound_packet_header,
+    use crate::devices::soundcore::standard::packets::{
+        inbound::{InboundPacket, take_inbound_packet_header},
+        outbound::OutboundPacketBytesExt,
     };
 
     use super::*;
+
+    #[test]
+    fn serialize_and_deserialize() {
+        let bytes = A3936StateUpdatePacket::default().bytes();
+        let (body, command) = take_inbound_packet_header::<VerboseError<_>>(&bytes).unwrap();
+        let packet = Packet {
+            command,
+            body: body.to_vec(),
+        };
+        let _: A3936StateUpdatePacket = packet.try_into_inbound_packet().unwrap();
+    }
 
     #[test]
     pub fn it_parses_a_known_good_packet() {

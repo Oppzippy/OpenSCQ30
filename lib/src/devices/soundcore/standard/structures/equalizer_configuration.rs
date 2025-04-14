@@ -17,16 +17,18 @@ pub struct EqualizerConfiguration<const CHANNELS: usize, const BANDS: usize> {
     volume_adjustments: [VolumeAdjustments<BANDS>; CHANNELS],
 }
 
-impl<const C: usize, const B: usize> Default for EqualizerConfiguration<C, B> {
+impl<const CHANNELS: usize, const BANDS: usize> Default
+    for EqualizerConfiguration<CHANNELS, BANDS>
+{
     fn default() -> Self {
         Self::new_from_preset_profile(
             PresetEqualizerProfile::SoundcoreSignature,
-            array::from_fn(|_| Vec::new()),
+            array::from_fn(|_| vec![0; BANDS - 8]),
         )
     }
 }
 
-impl<const C: usize, const B: usize> EqualizerConfiguration<C, B> {
+impl<const CHANNELS: usize, const BANDS: usize> EqualizerConfiguration<CHANNELS, BANDS> {
     pub const CUSTOM_PROFILE_ID: u16 = 0xfefe;
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
@@ -35,11 +37,12 @@ impl<const C: usize, const B: usize> EqualizerConfiguration<C, B> {
         context(
             "equalizer configuration",
             map(
-                pair(le_u16, count(VolumeAdjustments::<B>::take, C)),
+                pair(le_u16, count(VolumeAdjustments::<BANDS>::take, CHANNELS)),
                 |(profile_id, volume_adjustments)| {
-                    let volume_adjustments: [VolumeAdjustments<B>; C] = volume_adjustments
-                        .try_into()
-                        .expect("count vec is guaranteed to be the specified length");
+                    let volume_adjustments: [VolumeAdjustments<BANDS>; CHANNELS] =
+                        volume_adjustments
+                            .try_into()
+                            .expect("count vec is guaranteed to be the specified length");
 
                     match PresetEqualizerProfile::from_id(profile_id) {
                         Some(preset) => Self::new_from_preset_profile(
@@ -62,26 +65,32 @@ impl<const C: usize, const B: usize> EqualizerConfiguration<C, B> {
             .chain(self.volume_adjustments.iter().flat_map(|v| v.bytes()))
     }
 
+    /// The number of extra adjustments should be BANDS - 8. This function will panic otherwise.
     pub fn new_from_preset_profile(
         preset_profile: PresetEqualizerProfile,
-        extra_adjustments: [Vec<i16>; C],
+        extra_adjustments: [Vec<i16>; CHANNELS],
     ) -> Self {
         let preset_adjustments = preset_profile.volume_adjustments();
         Self {
             preset_profile: Some(preset_profile),
-            volume_adjustments: array::from_fn(|i| {
-                VolumeAdjustments::new(array::from_fn(|j| {
-                    if j < preset_adjustments.adjustments().len() {
-                        preset_adjustments.adjustments()[j]
+            volume_adjustments: extra_adjustments.map(|channel_extras| {
+                assert_eq!(
+                    8 + channel_extras.len(),
+                    BANDS,
+                    "incorrect number of extra bands",
+                );
+                VolumeAdjustments::new(array::from_fn(|i| {
+                    if i < preset_adjustments.adjustments().len() {
+                        preset_adjustments.adjustments()[i]
                     } else {
-                        extra_adjustments[i][j - preset_adjustments.adjustments().len()]
+                        channel_extras[i - preset_adjustments.adjustments().len()]
                     }
                 }))
             }),
         }
     }
 
-    pub fn new_custom_profile(volume_adjustments: [VolumeAdjustments<B>; C]) -> Self {
+    pub fn new_custom_profile(volume_adjustments: [VolumeAdjustments<BANDS>; CHANNELS]) -> Self {
         Self {
             preset_profile: None,
             volume_adjustments,
@@ -98,11 +107,11 @@ impl<const C: usize, const B: usize> EqualizerConfiguration<C, B> {
         self.preset_profile
     }
 
-    pub fn volume_adjustments_channel_1(&self) -> &VolumeAdjustments<B> {
+    pub fn volume_adjustments_channel_1(&self) -> &VolumeAdjustments<BANDS> {
         &self.volume_adjustments[0]
     }
 
-    pub fn volume_adjustments(&self) -> &[VolumeAdjustments<B>; C] {
+    pub fn volume_adjustments(&self) -> &[VolumeAdjustments<BANDS>; CHANNELS] {
         &self.volume_adjustments
     }
 
@@ -112,5 +121,60 @@ impl<const C: usize, const B: usize> EqualizerConfiguration<C, B> {
 
     pub fn bands(&self) -> usize {
         self.volume_adjustments_channel_1().adjustments().len()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use nom::error::VerboseError;
+
+    use super::*;
+
+    #[test]
+    fn new_from_preset_profile_with_no_extra_bands() {
+        EqualizerConfiguration::<2, 8>::new_from_preset_profile(
+            PresetEqualizerProfile::SoundcoreSignature,
+            [Vec::new(), Vec::new()],
+        );
+    }
+
+    #[test]
+    fn new_from_preset_profile_with_correct_extra_bands() {
+        EqualizerConfiguration::<2, 10>::new_from_preset_profile(
+            PresetEqualizerProfile::SoundcoreSignature,
+            [vec![1, 2], vec![3, 4]],
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn new_from_preset_profile_with_missing_extra_bands_fails() {
+        EqualizerConfiguration::<2, 10>::new_from_preset_profile(
+            PresetEqualizerProfile::SoundcoreSignature,
+            [Vec::new(), Vec::new()],
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn new_from_preset_profile_with_not_enough_extra_bands_fails() {
+        EqualizerConfiguration::<2, 10>::new_from_preset_profile(
+            PresetEqualizerProfile::SoundcoreSignature,
+            [vec![1], vec![2]],
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn new_from_preset_profile_with_too_many_extra_bands_fails() {
+        EqualizerConfiguration::<2, 10>::new_from_preset_profile(
+            PresetEqualizerProfile::SoundcoreSignature,
+            [vec![1, 2, 3], vec![4, 5, 6]],
+        );
+    }
+
+    #[test]
+    fn take_with_extra_bands() {
+        EqualizerConfiguration::<2, 10>::take::<VerboseError<_>>(&[0; 22]).unwrap();
     }
 }

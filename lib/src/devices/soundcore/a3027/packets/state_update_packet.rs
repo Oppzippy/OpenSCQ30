@@ -147,7 +147,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn serializes_and_deserializes() {
+    fn serialize_and_deserialize() {
         let bytes = A3027StateUpdatePacket::default().bytes();
         let (body, command) = take_inbound_packet_header::<VerboseError<_>>(&bytes).unwrap();
         let packet = Packet {

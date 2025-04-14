@@ -189,12 +189,23 @@ mod tests {
     use nom::error::VerboseError;
 
     use crate::devices::soundcore::standard::{
-        packets::inbound::take_inbound_packet_header,
+        packets::{inbound::take_inbound_packet_header, outbound::OutboundPacketBytesExt},
         structures::{
             AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
             PresetEqualizerProfile, SoundModes, VolumeAdjustments,
         },
     };
+
+    #[test]
+    fn serialize_and_deserialize() {
+        let bytes = A3028StateUpdatePacket::default().bytes();
+        let (body, command) = take_inbound_packet_header::<VerboseError<_>>(&bytes).unwrap();
+        let packet = Packet {
+            command,
+            body: body.to_vec(),
+        };
+        let _: A3028StateUpdatePacket = packet.try_into_inbound_packet().unwrap();
+    }
 
     #[test]
     fn it_parses_packet_with_preset_eq() {
