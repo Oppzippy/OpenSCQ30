@@ -1,0 +1,20 @@
+build profile='dev':
+    cargo build --profile {{profile}}
+
+test:
+    cargo test --bins
+
+test-cov:
+    cargo llvm-cov --no-report --bins
+
+install path:
+    ./scripts/install.sh "{{path}}"
+
+uninstall path:
+    ./scripts/uninstall.sh "{{path}}"
+
+format:
+    cargo fmt
+
+format-check:
+    cargo fmt --check
