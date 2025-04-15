@@ -1,0 +1,23 @@
+[package]
+name = "openscq30_cli"
+edition = "2024"
+version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "openscq30"
+path = "src/main.rs"
+
+[dependencies]
+openscq30_lib = { path = "../lib" }
+tokio = { workspace = true, features = ["rt"] }
+anyhow = { workspace = true }
+clap = { workspace = true }
+clap_complete = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+macaddr = { workspace = true }
+dirs = { workspace = true }
+strum = { workspace = true }
+tabled = { workspace = true }
+terminal_size = { workspace = true }

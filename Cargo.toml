@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    # "cli",
+    "cli",
     "lib",
     # "android",
     "uniffi-bindgen",
@@ -74,3 +74,5 @@ i18n-embed = "0.15"
 i18n-embed-fl = "0.9"
 rust-embed = "8"
 cfg-if = "1.0"
+tabled = "0.18"
+terminal_size = "0.4"

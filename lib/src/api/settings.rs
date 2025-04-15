@@ -6,7 +6,7 @@ use openscq30_i18n_macros::Translate;
 pub use range::*;
 pub use select::*;
 use serde::{Deserialize, Serialize};
-use strum::{EnumString, IntoEnumIterator};
+use strum::{Display, EnumString, IntoEnumIterator, IntoStaticStr, VariantArray, VariantNames};
 pub use value::*;
 
 mod equalizer;
@@ -14,7 +14,9 @@ mod range;
 mod select;
 mod value;
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Hash, Clone, Serialize, Deserialize, Translate)]
+#[derive(
+    PartialEq, Eq, PartialOrd, Ord, Debug, Hash, Clone, Serialize, Deserialize, Translate, Display,
+)]
 pub enum CategoryId {
     General,
     SoundModes,
@@ -31,10 +33,14 @@ pub enum CategoryId {
     Debug,
     Hash,
     Clone,
+    Copy,
     Serialize,
     Deserialize,
     EnumString,
     Translate,
+    Display,
+    VariantArray,
+    IntoStaticStr,
 )]
 // Removing or renaming anything here will break quick presets, so this enum should be append only.
 // If something really needs to be renamed, use #[strum(serialize = "...")] to keep the representation the same.
