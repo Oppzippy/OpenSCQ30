@@ -6,7 +6,7 @@ use crate::devices::soundcore::standard::{
     packets::{
         Packet,
         inbound::{
-            BatteryChargingUpdatePacket, DualBatteryLevelUpdatePacket, TryIntoInboundPacket,
+            DualBatteryChargingUpdatePacket, DualBatteryLevelUpdatePacket, TryIntoInboundPacket,
         },
     },
     structures::{Command, DualBattery},
@@ -41,7 +41,7 @@ where
 pub struct BatteryChargingPacketHandler {}
 
 impl BatteryChargingPacketHandler {
-    pub const COMMAND: Command = BatteryChargingUpdatePacket::COMMAND;
+    pub const COMMAND: Command = DualBatteryChargingUpdatePacket::COMMAND;
 }
 
 #[async_trait]
@@ -50,16 +50,13 @@ where
     T: AsMut<DualBattery> + Send + Sync,
 {
     async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> crate::Result<()> {
-        let packet: BatteryChargingUpdatePacket = packet.try_into_inbound_packet()?;
+        let packet: DualBatteryChargingUpdatePacket = packet.try_into_inbound_packet()?;
         state.send_if_modified(|state| {
             let battery = state.as_mut();
             let modified = packet.left != battery.left.is_charging
-                || packet
-                    .right
-                    .expect("TODO make separate packet so this is guaranteed to exist")
-                    != battery.right.is_charging;
+                || packet.right != battery.right.is_charging;
             battery.left.is_charging = packet.left;
-            battery.right.is_charging = packet.right.unwrap();
+            battery.right.is_charging = packet.right;
             modified
         });
         Ok(())

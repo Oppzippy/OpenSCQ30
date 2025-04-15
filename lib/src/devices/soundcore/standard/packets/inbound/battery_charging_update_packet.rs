@@ -1,8 +1,8 @@
 use nom::{
     IResult,
-    combinator::{all_consuming, map, opt},
+    combinator::{all_consuming, map},
     error::{ContextError, ParseError, context},
-    sequence::tuple,
+    sequence::pair,
 };
 
 use crate::devices::soundcore::standard::structures::{Command, IsBatteryCharging};
@@ -10,24 +10,46 @@ use crate::devices::soundcore::standard::structures::{Command, IsBatteryCharging
 use super::InboundPacket;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct BatteryChargingUpdatePacket {
-    pub left: IsBatteryCharging,
-    pub right: Option<IsBatteryCharging>,
+pub struct SingleBatteryChargingUpdatePacket {
+    pub is_charging: IsBatteryCharging,
 }
 
-impl BatteryChargingUpdatePacket {
+impl SingleBatteryChargingUpdatePacket {
     pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04]);
 }
 
-impl InboundPacket for BatteryChargingUpdatePacket {
+impl InboundPacket for SingleBatteryChargingUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], BatteryChargingUpdatePacket, E> {
+    ) -> IResult<&'a [u8], SingleBatteryChargingUpdatePacket, E> {
         context(
-            "BatteryChargingUpdatePacket",
+            "SingleBatteryChargingUpdatePacket",
+            all_consuming(map(IsBatteryCharging::take, |is_charging| {
+                SingleBatteryChargingUpdatePacket { is_charging }
+            })),
+        )(input)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct DualBatteryChargingUpdatePacket {
+    pub left: IsBatteryCharging,
+    pub right: IsBatteryCharging,
+}
+
+impl DualBatteryChargingUpdatePacket {
+    pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04]);
+}
+
+impl InboundPacket for DualBatteryChargingUpdatePacket {
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> IResult<&'a [u8], DualBatteryChargingUpdatePacket, E> {
+        context(
+            "DualBatteryChargingUpdatePacket",
             all_consuming(map(
-                tuple((IsBatteryCharging::take, opt(IsBatteryCharging::take))),
-                |(left, right)| BatteryChargingUpdatePacket { left, right },
+                pair(IsBatteryCharging::take, IsBatteryCharging::take),
+                |(left, right)| DualBatteryChargingUpdatePacket { left, right },
             )),
         )(input)
     }
@@ -35,14 +57,10 @@ impl InboundPacket for BatteryChargingUpdatePacket {
 
 #[cfg(test)]
 mod tests {
-    use nom::error::VerboseError;
+    use crate::devices::soundcore::standard::packets::inbound::take_inbound_packet_header;
 
-    use crate::devices::soundcore::standard::{
-        packets::inbound::{
-            BatteryChargingUpdatePacket, InboundPacket, take_inbound_packet_header,
-        },
-        structures::IsBatteryCharging,
-    };
+    use super::*;
+    use nom::error::VerboseError;
 
     #[test]
     fn it_parses_a_manually_crafted_packet() {
@@ -50,12 +68,12 @@ mod tests {
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04, 0x0c, 0x00, 0x01, 0x00, 0x1b,
         ];
         let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let packet = BatteryChargingUpdatePacket::take::<VerboseError<_>>(body)
+        let packet = DualBatteryChargingUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
 
         assert_eq!(IsBatteryCharging::Yes, packet.left);
-        assert_eq!(Some(IsBatteryCharging::No), packet.right);
+        assert_eq!(IsBatteryCharging::No, packet.right);
     }
 
     #[test]
@@ -64,11 +82,10 @@ mod tests {
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04, 0x0b, 0x00, 0x01, 0x1a,
         ];
         let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let packet = BatteryChargingUpdatePacket::take::<VerboseError<_>>(body)
+        let packet = SingleBatteryChargingUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
 
-        assert_eq!(IsBatteryCharging::Yes, packet.left);
-        assert_eq!(None, packet.right);
+        assert_eq!(IsBatteryCharging::Yes, packet.is_charging);
     }
 }
