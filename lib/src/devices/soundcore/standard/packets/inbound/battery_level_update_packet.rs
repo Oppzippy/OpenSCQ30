@@ -10,30 +10,52 @@ use crate::devices::soundcore::standard::structures::{BatteryLevel, Command};
 use super::InboundPacket;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct BatteryLevelUpdatePacket {
-    pub left: BatteryLevel,
-    pub right: Option<BatteryLevel>,
+pub struct SingleBatteryLevelUpdatePacket {
+    pub level: BatteryLevel,
 }
 
-impl BatteryLevelUpdatePacket {
+impl SingleBatteryLevelUpdatePacket {
     pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x03]);
 }
 
-impl InboundPacket for BatteryLevelUpdatePacket {
+impl InboundPacket for SingleBatteryLevelUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], BatteryLevelUpdatePacket, E> {
+    ) -> IResult<&'a [u8], SingleBatteryLevelUpdatePacket, E> {
         context(
-            "BatteryLevelUpdatePacket",
+            "SingleBatteryLevelUpdatePacket",
+            all_consuming(map(BatteryLevel::take, |level| {
+                SingleBatteryLevelUpdatePacket { level }
+            })),
+        )(input)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct DualBatteryLevelUpdatePacket {
+    pub left: BatteryLevel,
+    pub right: BatteryLevel,
+}
+
+impl DualBatteryLevelUpdatePacket {
+    pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x03]);
+}
+
+impl InboundPacket for DualBatteryLevelUpdatePacket {
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> IResult<&'a [u8], DualBatteryLevelUpdatePacket, E> {
+        context(
+            "DualBatteryLevelUpdatePacket",
             all_consuming(map(
                 tuple((
                     BatteryLevel::take,
-                    opt(BatteryLevel::take),
+                    BatteryLevel::take,
                     opt(BatteryLevel::take),
                     opt(BatteryLevel::take),
                 )),
                 // TODO unsure what new_left and new_right are
-                |(left, right, _new_left, _new_right)| BatteryLevelUpdatePacket { left, right },
+                |(left, right, _new_left, _new_right)| DualBatteryLevelUpdatePacket { left, right },
             )),
         )(input)
     }
@@ -43,10 +65,9 @@ impl InboundPacket for BatteryLevelUpdatePacket {
 mod tests {
     use nom::error::VerboseError;
 
-    use crate::devices::soundcore::standard::{
-        packets::inbound::{BatteryLevelUpdatePacket, InboundPacket, take_inbound_packet_header},
-        structures::BatteryLevel,
-    };
+    use crate::devices::soundcore::standard::packets::inbound::take_inbound_packet_header;
+
+    use super::*;
 
     #[test]
     fn it_parses_a_manually_crafted_packet_without_new_battery() {
@@ -54,11 +75,11 @@ mod tests {
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x03, 0x0c, 0x00, 0x03, 0x04, 0x20,
         ];
         let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let packet = BatteryLevelUpdatePacket::take::<VerboseError<_>>(body)
+        let packet = DualBatteryLevelUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
         assert_eq!(BatteryLevel(3), packet.left);
-        assert_eq!(Some(BatteryLevel(4)), packet.right);
+        assert_eq!(BatteryLevel(4), packet.right);
     }
 
     #[test]
@@ -67,11 +88,11 @@ mod tests {
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x03, 0x0e, 0x00, 0x04, 0x05, 0x01, 0x02, 0x27,
         ];
         let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let packet = BatteryLevelUpdatePacket::take::<VerboseError<_>>(body)
+        let packet = DualBatteryLevelUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
         assert_eq!(BatteryLevel(4), packet.left);
-        assert_eq!(Some(BatteryLevel(5)), packet.right);
+        assert_eq!(BatteryLevel(5), packet.right);
     }
 
     #[test]
@@ -80,10 +101,9 @@ mod tests {
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x03, 0x0b, 0x00, 0x02, 0x1a,
         ];
         let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let packet = BatteryLevelUpdatePacket::take::<VerboseError<_>>(body)
+        let packet = SingleBatteryLevelUpdatePacket::take::<VerboseError<_>>(body)
             .unwrap()
             .1;
-        assert_eq!(BatteryLevel(2), packet.left);
-        assert_eq!(None, packet.right);
+        assert_eq!(BatteryLevel(2), packet.level);
     }
 }

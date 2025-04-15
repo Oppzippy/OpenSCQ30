@@ -5,7 +5,9 @@ use crate::devices::soundcore::standard::{
     packet_manager::PacketHandler,
     packets::{
         Packet,
-        inbound::{BatteryChargingUpdatePacket, BatteryLevelUpdatePacket, TryIntoInboundPacket},
+        inbound::{
+            BatteryChargingUpdatePacket, SingleBatteryLevelUpdatePacket, TryIntoInboundPacket,
+        },
     },
     structures::{Command, SingleBattery},
 };
@@ -14,7 +16,7 @@ use crate::devices::soundcore::standard::{
 pub struct BatteryLevelPacketHandler {}
 
 impl BatteryLevelPacketHandler {
-    pub const COMMAND: Command = BatteryLevelUpdatePacket::COMMAND;
+    pub const COMMAND: Command = SingleBatteryLevelUpdatePacket::COMMAND;
 }
 
 #[async_trait]
@@ -23,11 +25,11 @@ where
     T: AsMut<SingleBattery> + Send + Sync,
 {
     async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> crate::Result<()> {
-        let packet: BatteryLevelUpdatePacket = packet.try_into_inbound_packet()?;
+        let packet: SingleBatteryLevelUpdatePacket = packet.try_into_inbound_packet()?;
         state.send_if_modified(|state| {
             let battery = state.as_mut();
-            let modified = packet.left != battery.level;
-            battery.level = packet.left;
+            let modified = packet.level != battery.level;
+            battery.level = packet.level;
             modified
         });
         Ok(())
