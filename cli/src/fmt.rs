@@ -66,18 +66,16 @@ impl std::fmt::Display for DisplayableValue {
 
 pub fn apply_tabled_settings(table: &mut Table) {
     if std::io::stdout().is_terminal() {
-        let settings = tabled::settings::Settings::default();
-
         if let Some((width, _)) = terminal_size::terminal_size() {
-            settings.with(
-                tabled::settings::Width::wrap(width.0 as usize)
-                    .priority(tabled::settings::peaker::Priority::max(true)),
-            );
+            let settings = tabled::settings::Settings::default()
+                .with(
+                    tabled::settings::Width::wrap(width.0 as usize)
+                        .priority(tabled::settings::peaker::Priority::max(true)),
+                )
+                .with(tabled::settings::style::Style::sharp());
+            table.with(settings);
         } else {
-            tracing::warn!("could not determine terminal size");
+            tracing::warn!("could not determine terminal size for table formatting");
         }
-        settings.with(tabled::settings::style::Style::sharp());
-
-        table.with(settings);
     }
 }
