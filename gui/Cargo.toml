@@ -4,6 +4,10 @@ edition = "2024"
 version.workspace = true
 license.workspace = true
 
+[[bin]]
+name = "openscq30-gui"
+path = "src/main.rs"
+
 [features]
 default = ["bluetooth"]
 bluetooth = ["openscq30_lib/bluetooth"]
