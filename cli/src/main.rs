@@ -1,6 +1,10 @@
 use anyhow::{anyhow, bail};
 use dirs::config_dir;
-use std::{fmt, io::IsTerminal, str::FromStr};
+use std::{
+    fmt,
+    io::{self, IsTerminal},
+    str::FromStr,
+};
 use strum::VariantArray;
 use tabled::{
     Table, Tabled,
@@ -21,10 +25,34 @@ use openscq30_lib::{
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    let matches = build_cli().get_matches();
+
+    match matches.subcommand().unwrap() {
+        ("paired-devices", matches) => handle_paired_devices(matches).await?,
+        ("device", matches) => handle_device(matches).await?,
+        ("completions", matches) => {
+            let mut command = build_cli();
+            let command_name = command.get_name().to_string();
+            clap_complete::generate(
+                matches
+                    .get_one::<clap_complete::Shell>("shell")
+                    .copied()
+                    .unwrap(),
+                &mut command,
+                command_name,
+                &mut io::stdout(),
+            );
+        }
+        _ => (),
+    }
+    Ok(())
+}
+
+fn build_cli() -> Command {
     let mac_address_arg = arg!(-a --"mac-address" <MAC_ADDRESS> "Device's mac address")
         .required(true)
         .value_parser(value_parser!(MacAddr6));
-    let matches = Command::new(env!("CARGO_BIN_NAME"))
+    Command::new(env!("CARGO_BIN_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .subcommand_required(true)
         .subcommand(
@@ -64,13 +92,14 @@ async fn main() -> anyhow::Result<()> {
                         ),
                 )
         )
-        .get_matches();
-
-    match matches.subcommand().unwrap() {
-        ("paired-devices", matches) => handle_paired_devices(matches).await,
-        ("device", matches) => handle_device(matches).await,
-        _ => Ok(()),
-    }
+        .subcommand(
+            Command::new("completions")
+                .arg(
+                    arg!(-s --shell <SHELL> "Target shell to generate completions for")
+                        .required(true)
+                        .value_parser(value_parser!(clap_complete::Shell))
+                )
+        )
 }
 
 async fn openscq30_session() -> anyhow::Result<OpenSCQ30Session> {
