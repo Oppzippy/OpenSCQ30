@@ -9,7 +9,10 @@ use strum::IntoEnumIterator;
 use tracing::{instrument, warn};
 
 use crate::{
-    api::settings::{self, Setting, SettingId, Value},
+    api::{
+        device,
+        settings::{self, Setting, SettingId, Value},
+    },
     devices::{
         DeviceModel,
         soundcore::standard::{
@@ -45,7 +48,7 @@ impl<const C: usize, const B: usize> EqualizerSettingHandler<C, B> {
         }
     }
 
-    async fn refresh(&self) -> crate::Result<()> {
+    async fn refresh(&self) -> device::Result<()> {
         *self.custom_profiles.lock().unwrap() = self
             .database
             .fetch_all_equalizer_profiles(self.device_model)
@@ -134,7 +137,7 @@ where
         })
     }
 
-    async fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> crate::Result<()> {
+    async fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> device::Result<()> {
         let equalizer_configuration = state.as_mut();
         let setting = setting_id
             .try_into()
@@ -210,12 +213,11 @@ where
             }
             EqualizerSetting::VolumeAdjustments => {
                 let volume_adjustments = value.try_as_i16_slice()?;
-                *equalizer_configuration = EqualizerConfiguration::new_custom_profile(
-                    self.values_to_volume_adjustments(
+                *equalizer_configuration =
+                    EqualizerConfiguration::new_custom_profile(self.values_to_volume_adjustments(
                         volume_adjustments,
                         equalizer_configuration.volume_adjustments(),
-                    ),
-                );
+                    ));
             }
         }
         Ok(())

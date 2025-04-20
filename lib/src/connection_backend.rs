@@ -1,11 +1,11 @@
-use crate::api::connection::RfcommBackend;
+use crate::api::connection::{self, RfcommBackend};
 
 pub mod rfcomm;
 
 pub trait ConnectionBackends {
     type Rfcomm: RfcommBackend + Send + Sync;
 
-    fn rfcomm(&self) -> impl Future<Output = crate::Result<Self::Rfcomm>> + Send;
+    fn rfcomm(&self) -> impl Future<Output = connection::Result<Self::Rfcomm>> + Send;
 }
 
 pub fn default_backends() -> Option<impl ConnectionBackends> {
@@ -25,7 +25,7 @@ struct PlatformConnectionBackends {}
 impl ConnectionBackends for PlatformConnectionBackends {
     type Rfcomm = rfcomm::BluerRfcommBackend;
 
-    async fn rfcomm(&self) -> crate::Result<Self::Rfcomm> {
+    async fn rfcomm(&self) -> connection::Result<Self::Rfcomm> {
         rfcomm::BluerRfcommBackend::new().await
     }
 }

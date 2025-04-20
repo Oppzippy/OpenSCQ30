@@ -5,10 +5,10 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-use crate::storage::OpenSCQ30Database;
+use crate::storage::{self, OpenSCQ30Database};
 
 use super::{
-    device::OpenSCQ30Device,
+    device::{self, OpenSCQ30Device},
     settings::{SettingId, Value},
 };
 
@@ -45,7 +45,7 @@ impl QuickPresetsHandler {
     pub async fn quick_presets(
         &self,
         device: &(dyn OpenSCQ30Device + Send + Sync),
-    ) -> crate::Result<Vec<QuickPreset>> {
+    ) -> storage::Result<Vec<QuickPreset>> {
         let all_setting_ids = device
             .categories()
             .iter()
@@ -76,7 +76,7 @@ impl QuickPresetsHandler {
         device: &(dyn OpenSCQ30Device + Send + Sync),
         name: String,
         settings: HashMap<SettingId, Value>,
-    ) -> crate::Result<()> {
+    ) -> storage::Result<()> {
         self.database
             .upsert_quick_preset(device.model(), name, settings)
             .await
@@ -87,7 +87,7 @@ impl QuickPresetsHandler {
         &self,
         device: &(dyn OpenSCQ30Device + Send + Sync),
         name: impl Into<String>,
-    ) -> crate::Result<()> {
+    ) -> device::Result<()> {
         let settings = self
             .database
             .fetch_quick_preset(device.model(), name.into())
@@ -101,7 +101,7 @@ impl QuickPresetsHandler {
         &self,
         device: &(dyn OpenSCQ30Device + Send + Sync),
         name: String,
-    ) -> crate::Result<()> {
+    ) -> storage::Result<()> {
         self.database
             .delete_quick_preset(device.model(), name)
             .await

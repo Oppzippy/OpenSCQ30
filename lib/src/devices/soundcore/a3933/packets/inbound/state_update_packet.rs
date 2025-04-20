@@ -9,21 +9,24 @@ use nom::{
 };
 use tokio::sync::watch;
 
-use crate::devices::soundcore::{
-    a3933::state::A3933State,
-    standard::{
-        modules::ModuleCollection,
-        packet_manager::PacketHandler,
-        packets::{
-            Packet,
-            inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
-            outbound::OutboundPacket,
-            parsing::take_bool,
-        },
-        structures::{
-            AgeRange, AmbientSoundModeCycle, BatteryLevel, Command, CustomHearId, DualBattery,
-            DualFirmwareVersion, EqualizerConfiguration, MultiButtonConfiguration, SerialNumber,
-            SoundModes, TwsStatus, VolumeAdjustments,
+use crate::{
+    api::device,
+    devices::soundcore::{
+        a3933::state::A3933State,
+        standard::{
+            modules::ModuleCollection,
+            packet_manager::PacketHandler,
+            packets::{
+                Packet,
+                inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
+                outbound::OutboundPacket,
+                parsing::take_bool,
+            },
+            structures::{
+                AgeRange, AmbientSoundModeCycle, BatteryLevel, Command, CustomHearId, DualBattery,
+                DualFirmwareVersion, EqualizerConfiguration, MultiButtonConfiguration,
+                SerialNumber, SoundModes, TwsStatus, VolumeAdjustments,
+            },
         },
     },
 };
@@ -247,7 +250,7 @@ impl PacketHandler<A3933State> for StateUpdatePacketHandler {
         &self,
         state: &watch::Sender<A3933State>,
         packet: &Packet,
-    ) -> crate::Result<()> {
+    ) -> device::Result<()> {
         let packet: A3933StateUpdatePacket = packet.try_into_inbound_packet()?;
         state.send_modify(|state| *state = packet.into());
         Ok(())

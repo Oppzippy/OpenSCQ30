@@ -11,6 +11,3 @@ pub mod devices;
 pub mod i18n;
 pub(crate) mod macros;
 pub mod storage;
-
-mod error;
-pub use error::*;

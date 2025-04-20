@@ -1,13 +1,14 @@
-use std::panic::Location;
-
 use nom::{
     IResult,
     error::{ContextError, ParseError, VerboseError},
 };
 
-use crate::devices::soundcore::standard::{
-    packets::{Packet, parsing::take_checksum},
-    structures::{Command, PacketHeader},
+use crate::{
+    api::device,
+    devices::soundcore::standard::{
+        packets::{Packet, parsing::take_checksum},
+        structures::{Command, PacketHeader},
+    },
 };
 
 pub trait InboundPacket
@@ -25,13 +26,9 @@ pub struct TryIntoInboundPacketError {
     message: String,
 }
 
-impl From<TryIntoInboundPacketError> for crate::Error {
-    #[track_caller]
-    fn from(error: TryIntoInboundPacketError) -> Self {
-        Self::Other {
-            source: Box::new(error),
-            location: Location::caller(),
-        }
+impl From<TryIntoInboundPacketError> for device::Error {
+    fn from(err: TryIntoInboundPacketError) -> Self {
+        Self::Other(Box::new(err))
     }
 }
 

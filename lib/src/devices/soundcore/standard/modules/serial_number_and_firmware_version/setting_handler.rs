@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use strum::IntoEnumIterator;
 
 use crate::{
-    api::settings::{Setting, SettingId, Value},
+    api::{device, settings::{Setting, SettingId, Value}},
     devices::soundcore::standard::{
         settings_manager::SettingHandler,
         structures::{FirmwareVersion, SerialNumber},
@@ -46,7 +46,7 @@ where
         _state: &mut T,
         _setting_id: &SettingId,
         _value: Value,
-    ) -> crate::Result<()> {
+    ) -> device::Result<()> {
         unimplemented!("serial number and firmware vesrion are read only")
     }
 }

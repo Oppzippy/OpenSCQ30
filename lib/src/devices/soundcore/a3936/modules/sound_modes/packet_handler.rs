@@ -1,12 +1,15 @@
 use async_trait::async_trait;
 use tokio::sync::watch;
 
-use crate::devices::soundcore::{
-    a3936::{packets::A3936SoundModesUpdatePacket, structures::A3936SoundModes},
-    standard::{
-        packet_manager::PacketHandler,
-        packets::{Packet, inbound::TryIntoInboundPacket},
-        structures::Command,
+use crate::{
+    api::device,
+    devices::soundcore::{
+        a3936::{packets::A3936SoundModesUpdatePacket, structures::A3936SoundModes},
+        standard::{
+            packet_manager::PacketHandler,
+            packets::{Packet, inbound::TryIntoInboundPacket},
+            structures::Command,
+        },
     },
 };
 
@@ -22,7 +25,7 @@ impl<T> PacketHandler<T> for SoundModesPacketHandler
 where
     T: AsMut<A3936SoundModes> + Send + Sync,
 {
-    async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> crate::Result<()> {
+    async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> device::Result<()> {
         let packet: A3936SoundModesUpdatePacket = packet.try_into_inbound_packet()?;
         state.send_if_modified(|state| {
             let sound_modes = state.as_mut();

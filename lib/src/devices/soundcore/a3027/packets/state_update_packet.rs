@@ -7,20 +7,23 @@ use nom::{
 };
 use tokio::sync::watch;
 
-use crate::devices::soundcore::{
-    a3027::state::A3027State,
-    standard::{
-        modules::ModuleCollection,
-        packet_manager::PacketHandler,
-        packets::{
-            Packet,
-            inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
-            outbound::OutboundPacket,
-            parsing::take_bool,
-        },
-        structures::{
-            AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
-            SingleBattery, SoundModes,
+use crate::{
+    api::device,
+    devices::soundcore::{
+        a3027::state::A3027State,
+        standard::{
+            modules::ModuleCollection,
+            packet_manager::PacketHandler,
+            packets::{
+                Packet,
+                inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
+                outbound::OutboundPacket,
+                parsing::take_bool,
+            },
+            structures::{
+                AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender,
+                SerialNumber, SingleBattery, SoundModes,
+            },
         },
     },
 };
@@ -119,7 +122,7 @@ impl PacketHandler<A3027State> for StateUpdatePacketHandler {
         &self,
         state: &watch::Sender<A3027State>,
         packet: &Packet,
-    ) -> crate::Result<()> {
+    ) -> device::Result<()> {
         let packet: A3027StateUpdatePacket = packet.try_into_inbound_packet()?;
         state.send_modify(|state| *state = packet.into());
         Ok(())

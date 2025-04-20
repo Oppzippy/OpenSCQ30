@@ -1,6 +1,5 @@
 use std::{
     collections::HashSet,
-    panic::Location,
     sync::Arc,
     time::{Duration, Instant},
 };
@@ -27,14 +26,16 @@ use tokio::{
 use tracing::{Instrument, debug, instrument, trace, trace_span, warn};
 use uuid::Uuid;
 
-use crate::api::connection::{ConnectionStatus, DeviceDescriptor, RfcommBackend, RfcommConnection};
+use crate::api::connection::{
+    self, ConnectionStatus, DeviceDescriptor, RfcommBackend, RfcommConnection,
+};
 
 pub struct BluerRfcommBackend {
     session: Session,
 }
 
 impl BluerRfcommBackend {
-    pub async fn new() -> crate::Result<Self> {
+    pub async fn new() -> connection::Result<Self> {
         Ok(Self {
             session: Session::new().await?,
         })
@@ -44,7 +45,7 @@ impl BluerRfcommBackend {
     async fn address_to_descriptor(
         adapter: &Adapter,
         address: Address,
-    ) -> crate::Result<Option<DeviceDescriptor>> {
+    ) -> connection::Result<Option<DeviceDescriptor>> {
         let device = adapter.device(address)?;
         if device.is_connected().await? {
             Ok(Some(DeviceDescriptor {
@@ -61,10 +62,10 @@ impl RfcommBackend for BluerRfcommBackend {
     type ConnectionType = BluerRfcommConnection;
 
     #[instrument(skip(self))]
-    async fn devices(&self) -> crate::Result<HashSet<DeviceDescriptor>> {
+    async fn devices(&self) -> connection::Result<HashSet<DeviceDescriptor>> {
         let adapter = self.session.default_adapter().await.map_err(|err| {
             if err.kind == bluer::ErrorKind::NotFound {
-                crate::Error::BluetoothAdapterNotAvailable {
+                connection::Error::BluetoothAdapterUnavailable {
                     source: Some(Box::new(err)),
                 }
             } else {
@@ -88,10 +89,10 @@ impl RfcommBackend for BluerRfcommBackend {
         &self,
         mac_address: MacAddr6,
         select_uuid: impl Fn(HashSet<Uuid>) -> Uuid + Send,
-    ) -> crate::Result<Self::ConnectionType> {
+    ) -> connection::Result<Self::ConnectionType> {
         let adapter = self.session.default_adapter().await.map_err(|err| {
             if err.kind == bluer::ErrorKind::NotFound {
-                crate::Error::BluetoothAdapterNotAvailable {
+                connection::Error::BluetoothAdapterUnavailable {
                     source: Some(Box::new(err)),
                 }
             } else {
@@ -103,10 +104,10 @@ impl RfcommBackend for BluerRfcommBackend {
             Ok(device) => device,
             Err(err) => {
                 return match err.kind {
-                    bluer::ErrorKind::NotFound => Err(crate::Error::DeviceNotFound {
+                    bluer::ErrorKind::NotFound => Err(connection::Error::DeviceNotFound {
                         source: Some(Box::new(err)),
                     }),
-                    _ => Err(crate::Error::from(err)),
+                    _ => Err(connection::Error::from(err)),
                 };
             }
         };
@@ -147,7 +148,7 @@ impl RfcommBackend for BluerRfcommBackend {
                     }
                 }
                 _ = tokio::time::sleep_until(timeout.into()) => {
-                    return Err(crate::Error::TimedOut { action: "connect" })
+                    return Err(connection::Error::TimedOut { action: "connect" })
                 }
             }
         };
@@ -168,7 +169,7 @@ pub struct BluerRfcommConnection {
 
 impl BluerRfcommConnection {
     #[instrument(skip(stream))]
-    pub async fn new(device: Device, stream: Stream) -> crate::Result<Self> {
+    pub async fn new(device: Device, stream: Stream) -> connection::Result<Self> {
         let (connection_status_receiver, connection_status_handle) =
             Self::spawn_connection_status(device.to_owned()).await?;
         let (read_stream, write_stream) = stream.into_split();
@@ -188,7 +189,7 @@ impl BluerRfcommConnection {
 
     async fn spawn_connection_status(
         device: Device,
-    ) -> crate::Result<(watch::Receiver<ConnectionStatus>, JoinHandle<()>)> {
+    ) -> connection::Result<(watch::Receiver<ConnectionStatus>, JoinHandle<()>)> {
         let (connection_status_sender, connection_status_receiver) =
             watch::channel(ConnectionStatus::Connected);
 
@@ -215,7 +216,7 @@ impl BluerRfcommConnection {
     async fn spawn_inbound_packet_channel(
         mut read_stream: OwnedReadHalf,
         quit: Arc<Semaphore>,
-    ) -> crate::Result<mpsc::Receiver<Vec<u8>>> {
+    ) -> connection::Result<mpsc::Receiver<Vec<u8>>> {
         // This queue should always be really small unless something is malfunctioning
         let (sender, receiver) = mpsc::channel(100);
         tokio::spawn(
@@ -264,14 +265,14 @@ impl RfcommConnection for BluerRfcommConnection {
         self.connection_status_receiver.clone()
     }
 
-    async fn write(&self, data: &[u8]) -> crate::Result<()> {
+    async fn write(&self, data: &[u8]) -> connection::Result<()> {
         self.write_stream
             .lock()
             .await
             .write_all(data)
             .await
-            .map_err(|err| crate::Error::WriteFailed {
-                source: Box::new(err),
+            .map_err(|err| connection::Error::WriteError {
+                source: Some(Box::new(err)),
             })
     }
 
@@ -291,12 +292,8 @@ impl Drop for BluerRfcommConnection {
     }
 }
 
-impl From<bluer::Error> for crate::Error {
-    #[track_caller]
+impl From<bluer::Error> for connection::Error {
     fn from(error: bluer::Error) -> Self {
-        crate::Error::Other {
-            source: Box::new(error),
-            location: Location::caller(),
-        }
+        connection::Error::Other(Box::new(error))
     }
 }

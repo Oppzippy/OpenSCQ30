@@ -6,7 +6,7 @@ use tokio::sync::{mpsc, watch};
 use crate::{
     api::{
         connection::{DeviceDescriptor, RfcommBackend, RfcommConnection},
-        device::{OpenSCQ30Device, OpenSCQ30DeviceRegistry},
+        device::{self, OpenSCQ30Device, OpenSCQ30DeviceRegistry},
         settings::{CategoryId, Setting, SettingId, Value},
     },
     device_utils,
@@ -34,14 +34,14 @@ use super::{
 type FetchStateFn<ConnectionType, StateType> = Box<
     dyn Fn(
             Arc<PacketIOController<ConnectionType>>,
-        ) -> Pin<Box<dyn Future<Output = crate::Result<StateType>> + Send>>
+        ) -> Pin<Box<dyn Future<Output = device::Result<StateType>> + Send>>
         + Send
         + Sync,
 >;
 
 pub async fn fetch_state_from_state_update_packet<C, State, StateUpdate>(
     packet_io: Arc<PacketIOController<C>>,
-) -> crate::Result<State>
+) -> device::Result<State>
 where
     C: RfcommConnection,
     StateUpdate: InboundPacket + Default + Into<State>,
@@ -49,7 +49,8 @@ where
     let state_update_packet: StateUpdate = packet_io
         .send(&RequestStatePacket::new().into())
         .await?
-        .try_into_inbound_packet()?;
+        .try_into_inbound_packet()
+        .map_err(|err| device::Error::Other(Box::new(err)))?;
     Ok(state_update_packet.into())
 }
 
@@ -91,22 +92,26 @@ where
     StateUpdatePacketType: InboundPacket + Send + Sync + 'static,
     Self: BuildDevice<B::ConnectionType, StateType, StateUpdatePacketType>,
 {
-    async fn devices(&self) -> crate::Result<Vec<DeviceDescriptor>> {
-        self.backend.devices().await.map(|descriptors| {
-            descriptors
-                .into_iter()
-                .map(|d| DeviceDescriptor {
-                    name: d.name,
-                    mac_address: d.mac_address,
-                })
-                .collect()
-        })
+    async fn devices(&self) -> device::Result<Vec<DeviceDescriptor>> {
+        self.backend
+            .devices()
+            .await
+            .map(|descriptors| {
+                descriptors
+                    .into_iter()
+                    .map(|d| DeviceDescriptor {
+                        name: d.name,
+                        mac_address: d.mac_address,
+                    })
+                    .collect()
+            })
+            .map_err(Into::into)
     }
 
     async fn connect(
         &self,
         mac_address: macaddr::MacAddr6,
-    ) -> crate::Result<Arc<dyn OpenSCQ30Device + Send + Sync>> {
+    ) -> device::Result<Arc<dyn OpenSCQ30Device + Send + Sync>> {
         let connection = self
             .backend
             .connect(mac_address, |addr| {
@@ -162,7 +167,7 @@ where
         connection: ConnectionType,
         device_model: DeviceModel,
         fetch_state: &FetchStateFn<ConnectionType, StateType>,
-    ) -> crate::Result<Self> {
+    ) -> device::Result<Self> {
         let (packet_io_controller, packet_receiver) =
             PacketIOController::<ConnectionType>::new(Arc::new(connection)).await?;
         let packet_io_controller = Arc::new(packet_io_controller);
@@ -394,7 +399,7 @@ where
     async fn set_setting_values(
         &self,
         setting_values: Vec<(SettingId, Value)>,
-    ) -> crate::Result<()> {
+    ) -> device::Result<()> {
         self.module_collection
             .set_setting_values(&self.state_sender, setting_values)
             .await

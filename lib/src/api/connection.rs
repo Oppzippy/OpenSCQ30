@@ -4,19 +4,41 @@ use macaddr::MacAddr6;
 use tokio::sync::{mpsc, watch};
 use uuid::Uuid;
 
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    #[error("bluetooth adapter unavailable: {source:?}")]
+    BluetoothAdapterUnavailable {
+        source: Option<Box<dyn std::error::Error + Send + Sync>>,
+    },
+    #[error("device not found: {source:?}")]
+    DeviceNotFound {
+        source: Option<Box<dyn std::error::Error + Send + Sync>>,
+    },
+    #[error("write error: {source:?}")]
+    WriteError {
+        source: Option<Box<dyn std::error::Error + Send + Sync>>,
+    },
+    #[error(transparent)]
+    Other(Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("{action} timed out")]
+    TimedOut { action: &'static str },
+}
+pub type Result<T> = std::result::Result<T, Error>;
+
 pub trait RfcommBackend {
     type ConnectionType: RfcommConnection + Send + Sync;
 
-    fn devices(&self) -> impl Future<Output = crate::Result<HashSet<DeviceDescriptor>>> + Send;
+    fn devices(&self) -> impl Future<Output = Result<HashSet<DeviceDescriptor>>> + Send;
     fn connect(
         &self,
         mac_address: MacAddr6,
         select_uuid: impl Fn(HashSet<Uuid>) -> Uuid + Send,
-    ) -> impl Future<Output = crate::Result<Self::ConnectionType>> + Send;
+    ) -> impl Future<Output = Result<Self::ConnectionType>> + Send;
 }
 
 pub trait RfcommConnection {
-    fn write(&self, data: &[u8]) -> impl Future<Output = crate::Result<()>> + Send;
+    fn write(&self, data: &[u8]) -> impl Future<Output = Result<()>> + Send;
     fn read_channel(&self) -> mpsc::Receiver<Vec<u8>>;
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus>;
 }
@@ -61,7 +83,7 @@ pub mod test_stub {
     }
 
     impl RfcommConnection for StubRfcommConnection {
-        async fn write(&self, data: &[u8]) -> crate::Result<()> {
+        async fn write(&self, data: &[u8]) -> Result<()> {
             self.outbound_sender.send(data.to_owned()).await.unwrap();
             Ok(())
         }

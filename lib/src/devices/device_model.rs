@@ -4,8 +4,10 @@ use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumIter, EnumString, IntoStaticStr, VariantArray};
 
 use crate::{
-    api::device::OpenSCQ30DeviceRegistry, connection_backend::ConnectionBackends,
-    devices::soundcore, storage::OpenSCQ30Database,
+    api::device::{self, OpenSCQ30DeviceRegistry},
+    connection_backend::ConnectionBackends,
+    devices::soundcore,
+    storage::OpenSCQ30Database,
 };
 
 #[derive(
@@ -49,7 +51,7 @@ impl DeviceModel {
         backends: B,
         database: Arc<OpenSCQ30Database>,
         is_demo: bool,
-    ) -> crate::Result<Arc<dyn OpenSCQ30DeviceRegistry + Send + Sync>> {
+    ) -> device::Result<Arc<dyn OpenSCQ30DeviceRegistry + Send + Sync>> {
         macro_rules! new_soundcore_device {
             ($($module:tt)*) => {
                 if is_demo {

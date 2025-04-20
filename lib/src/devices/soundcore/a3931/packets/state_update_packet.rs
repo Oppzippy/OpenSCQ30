@@ -8,19 +8,23 @@ use nom::{
 };
 use tokio::sync::watch;
 
-use crate::devices::soundcore::{
-    a3931::state::A3931State,
-    standard::{
-        modules::ModuleCollection,
-        packet_manager::PacketHandler,
-        packets::{
-            Packet,
-            inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
-            outbound::OutboundPacket,
-            parsing::take_bool,
-        },
-        structures::{
-            DualBattery, EqualizerConfiguration, MultiButtonConfiguration, SoundModes, TwsStatus,
+use crate::{
+    api::device,
+    devices::soundcore::{
+        a3931::state::A3931State,
+        standard::{
+            modules::ModuleCollection,
+            packet_manager::PacketHandler,
+            packets::{
+                Packet,
+                inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
+                outbound::OutboundPacket,
+                parsing::take_bool,
+            },
+            structures::{
+                DualBattery, EqualizerConfiguration, MultiButtonConfiguration, SoundModes,
+                TwsStatus,
+            },
         },
     },
 };
@@ -121,7 +125,7 @@ impl PacketHandler<A3931State> for StateUpdatePacketHandler {
         &self,
         state: &watch::Sender<A3931State>,
         packet: &Packet,
-    ) -> crate::Result<()> {
+    ) -> device::Result<()> {
         let packet: A3931StateUpdatePacket = packet.try_into_inbound_packet()?;
         state.send_modify(|state| state.update_from_state_update_packet(packet));
         Ok(())

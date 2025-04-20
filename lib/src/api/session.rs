@@ -9,7 +9,9 @@ use crate::{
 };
 
 use super::{
-    connection::DeviceDescriptor, device::OpenSCQ30Device, quick_presets::QuickPresetsHandler,
+    connection::DeviceDescriptor,
+    device::{self, OpenSCQ30Device},
+    quick_presets::QuickPresetsHandler,
 };
 
 pub struct OpenSCQ30Session {
@@ -17,34 +19,34 @@ pub struct OpenSCQ30Session {
 }
 
 impl OpenSCQ30Session {
-    pub async fn new(db_path: PathBuf) -> crate::Result<Self> {
+    pub async fn new(db_path: PathBuf) -> device::Result<Self> {
         Ok(Self {
             database: Arc::new(OpenSCQ30Database::new_file(db_path).await?),
         })
     }
 
-    pub async fn pair(&self, paired_device: PairedDevice) -> crate::Result<()> {
+    pub async fn pair(&self, paired_device: PairedDevice) -> device::Result<()> {
         self.database
             .upsert_paired_device(paired_device)
             .await
             .map_err(Into::into)
     }
 
-    pub async fn unpair(&self, mac_address: MacAddr6) -> crate::Result<()> {
+    pub async fn unpair(&self, mac_address: MacAddr6) -> device::Result<()> {
         self.database
             .delete_paired_device(mac_address)
             .await
             .map_err(Into::into)
     }
 
-    pub async fn paired_devices(&self) -> crate::Result<Vec<PairedDevice>> {
+    pub async fn paired_devices(&self) -> device::Result<Vec<PairedDevice>> {
         self.database
             .fetch_all_paired_devices()
             .await
             .map_err(Into::into)
     }
 
-    pub async fn list_devices(&self, model: DeviceModel) -> crate::Result<Vec<DeviceDescriptor>> {
+    pub async fn list_devices(&self, model: DeviceModel) -> device::Result<Vec<DeviceDescriptor>> {
         self.list_devices_with_backends(
             connection_backend::default_backends().expect("no default backends available"),
             model,
@@ -56,7 +58,7 @@ impl OpenSCQ30Session {
         &self,
         backends: impl ConnectionBackends + 'static,
         model: DeviceModel,
-    ) -> crate::Result<Vec<DeviceDescriptor>> {
+    ) -> device::Result<Vec<DeviceDescriptor>> {
         model
             .device_registry(backends, self.database.clone(), true)
             .await?
@@ -67,7 +69,7 @@ impl OpenSCQ30Session {
     pub async fn connect(
         &self,
         mac_address: MacAddr6,
-    ) -> crate::Result<Arc<dyn OpenSCQ30Device + Send + Sync>> {
+    ) -> device::Result<Arc<dyn OpenSCQ30Device + Send + Sync>> {
         self.connect_with_backends(
             connection_backend::default_backends().expect("no default backends available"),
             mac_address,
@@ -79,7 +81,7 @@ impl OpenSCQ30Session {
         &self,
         backends: impl ConnectionBackends + 'static,
         mac_address: MacAddr6,
-    ) -> crate::Result<Arc<dyn OpenSCQ30Device + Send + Sync>> {
+    ) -> device::Result<Arc<dyn OpenSCQ30Device + Send + Sync>> {
         if let Some(paired_device) = self.database.fetch_paired_device(mac_address).await? {
             let registry = paired_device
                 .model
@@ -87,7 +89,7 @@ impl OpenSCQ30Session {
                 .await?;
             registry.connect(mac_address).await
         } else {
-            Err(crate::Error::DeviceNotFound { source: None })
+            Err(device::Error::DeviceNotFound { mac_address })
         }
     }
 

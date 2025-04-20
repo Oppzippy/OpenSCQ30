@@ -4,7 +4,7 @@ use async_trait::async_trait;
 use tokio::sync::watch;
 
 use crate::{
-    api::connection::RfcommConnection,
+    api::{connection::RfcommConnection, device},
     devices::soundcore::standard::{
         packets::{outbound::SetSoundModePacket, packet_io_controller::PacketIOController},
         state_modifier::StateModifier,
@@ -32,7 +32,7 @@ where
         &self,
         state_sender: &watch::Sender<T>,
         target_state: &T,
-    ) -> crate::Result<()> {
+    ) -> device::Result<()> {
         let sound_modes = *state_sender.borrow().as_ref();
         let target_sound_modes = target_state.as_ref();
         if &sound_modes == target_sound_modes {

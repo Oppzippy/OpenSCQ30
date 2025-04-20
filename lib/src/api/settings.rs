@@ -6,7 +6,7 @@ use openscq30_i18n_macros::Translate;
 pub use range::*;
 pub use select::*;
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumString, IntoEnumIterator, IntoStaticStr, VariantArray, VariantNames};
+use strum::{Display, EnumString, IntoEnumIterator, IntoStaticStr, VariantArray};
 pub use value::*;
 
 mod equalizer;

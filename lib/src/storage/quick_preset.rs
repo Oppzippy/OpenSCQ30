@@ -7,7 +7,7 @@ use crate::{
     devices::DeviceModel,
 };
 
-use super::{StorageError, type_conversions::SqliteDeviceModel};
+use super::{Error, type_conversions::SqliteDeviceModel};
 
 type SettingsCollection = HashMap<SettingId, settings::Value>;
 
@@ -15,20 +15,20 @@ pub fn fetch(
     connection: &Connection,
     model: DeviceModel,
     name: String,
-) -> Result<SettingsCollection, StorageError> {
+) -> Result<SettingsCollection, Error> {
     let json: String = connection.query_row(
         r#"SELECT settings FROM quick_preset WHERE device_model = ?1 AND name = ?2"#,
         (SqliteDeviceModel(model), name),
         |row| row.get(0),
     )?;
-    let settings = serde_json::from_str(&json).map_err(StorageError::JsonError)?;
+    let settings = serde_json::from_str(&json).map_err(Error::JsonError)?;
     Ok(settings)
 }
 
 pub fn fetch_all(
     connection: &Connection,
     model: DeviceModel,
-) -> Result<HashMap<String, SettingsCollection>, StorageError> {
+) -> Result<HashMap<String, SettingsCollection>, Error> {
     let mut query = connection.prepare_cached(
         r#"SELECT name, settings FROM quick_preset WHERE device_model = ?1 ORDER BY name"#,
     )?;
@@ -41,12 +41,12 @@ pub fn fetch_all(
     .map(|result| match result {
         Ok((name, json)) => {
             let settings: SettingsCollection =
-                serde_json::from_str(&json).map_err(StorageError::JsonError)?;
+                serde_json::from_str(&json).map_err(Error::JsonError)?;
             Ok((name, settings))
         }
-        Err(err) => Err(StorageError::Other(err)),
+        Err(err) => Err(Error::RusqliteError(err)),
     })
-    .collect::<Result<HashMap<String, SettingsCollection>, StorageError>>()
+    .collect::<Result<HashMap<String, SettingsCollection>, Error>>()
 }
 
 pub fn upsert(
@@ -54,8 +54,8 @@ pub fn upsert(
     model: DeviceModel,
     name: String,
     settings: SettingsCollection,
-) -> Result<(), StorageError> {
-    let json = serde_json::to_string(&settings).map_err(StorageError::JsonError)?;
+) -> Result<(), Error> {
+    let json = serde_json::to_string(&settings).map_err(Error::JsonError)?;
     connection.execute(
         r#"INSERT INTO quick_preset (device_model, name, settings)
                 VALUES (?1, ?2, ?3)
@@ -66,11 +66,7 @@ pub fn upsert(
     Ok(())
 }
 
-pub fn delete(
-    connection: &Connection,
-    model: DeviceModel,
-    name: String,
-) -> Result<(), StorageError> {
+pub fn delete(connection: &Connection, model: DeviceModel, name: String) -> Result<(), Error> {
     connection.execute(
         r#"DELETE FROM quick_preset WHERE device_model = ?1 AND name = ?2"#,
         (SqliteDeviceModel(model), name),

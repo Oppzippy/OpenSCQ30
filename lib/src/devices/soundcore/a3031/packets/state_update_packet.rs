@@ -121,7 +121,7 @@ impl PacketHandler<A3031State> for StateUpdatePacketHandler {
         &self,
         state: &watch::Sender<A3031State>,
         packet: &Packet,
-    ) -> crate::Result<()> {
+    ) -> crate::api::device::Result<()> {
         let packet: A3031StateUpdatePacket = packet.try_into_inbound_packet()?;
         state.send_modify(|state| state.update_from_state_update_packet(packet));
         Ok(())

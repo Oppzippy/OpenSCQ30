@@ -2,26 +2,22 @@ use rusqlite::Connection;
 
 use crate::devices::DeviceModel;
 
-use super::{StorageError, type_conversions::SqliteDeviceModel};
+use super::{Error, type_conversions::SqliteDeviceModel};
 
-pub fn fetch(
-    connection: &Connection,
-    model: DeviceModel,
-    name: String,
-) -> Result<Vec<i16>, StorageError> {
+pub fn fetch(connection: &Connection, model: DeviceModel, name: String) -> Result<Vec<i16>, Error> {
     let json: String = connection.query_row(
         r#"SELECT volume_adjustments FROM equalizer_profile WHERE device_model = ?1 AND name = ?2"#,
         (SqliteDeviceModel(model), name),
         |row| row.get(0),
     )?;
-    let volume_adjustments = serde_json::from_str(&json).map_err(StorageError::JsonError)?;
+    let volume_adjustments = serde_json::from_str(&json).map_err(Error::JsonError)?;
     Ok(volume_adjustments)
 }
 
 pub fn fetch_all(
     connection: &Connection,
     model: DeviceModel,
-) -> Result<Vec<(String, Vec<i16>)>, StorageError> {
+) -> Result<Vec<(String, Vec<i16>)>, Error> {
     let mut query = connection.prepare_cached(
         r#"SELECT name, volume_adjustments FROM equalizer_profile WHERE device_model = ?1 ORDER BY name"#,
     )?;
@@ -34,12 +30,12 @@ pub fn fetch_all(
     .map(|result| match result {
         Ok((name, volume_adjustments_json)) => {
             let volume_adjustments: Vec<i16> =
-                serde_json::from_str(&volume_adjustments_json).map_err(StorageError::JsonError)?;
+                serde_json::from_str(&volume_adjustments_json).map_err(Error::JsonError)?;
             Ok((name, volume_adjustments))
         }
-        Err(err) => Err(StorageError::Other(err)),
+        Err(err) => Err(Error::RusqliteError(err)),
     })
-    .collect::<Result<Vec<(String, Vec<i16>)>, StorageError>>()
+    .collect::<Result<Vec<(String, Vec<i16>)>, Error>>()
 }
 
 pub fn upsert(
@@ -47,8 +43,8 @@ pub fn upsert(
     model: DeviceModel,
     name: String,
     volume_adjustments: Vec<i16>,
-) -> Result<(), StorageError> {
-    let json = serde_json::to_string(&volume_adjustments).map_err(StorageError::JsonError)?;
+) -> Result<(), Error> {
+    let json = serde_json::to_string(&volume_adjustments).map_err(Error::JsonError)?;
     // by calling sqlite's json(...) function, we ensure it is minified so that formatting is standardized, making it okay to
     // perform equality comparisons. this is necessary for the unique index on volume_adjustments.
     connection.execute(
@@ -64,11 +60,7 @@ pub fn upsert(
     Ok(())
 }
 
-pub fn delete(
-    connection: &Connection,
-    model: DeviceModel,
-    name: String,
-) -> Result<(), StorageError> {
+pub fn delete(connection: &Connection, model: DeviceModel, name: String) -> Result<(), Error> {
     connection.execute(
         r#"DELETE FROM equalizer_profile WHERE device_model = ?1 AND name = ?2"#,
         (SqliteDeviceModel(model), name),

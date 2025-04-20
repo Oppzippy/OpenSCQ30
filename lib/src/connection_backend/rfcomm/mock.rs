@@ -4,7 +4,9 @@ use macaddr::MacAddr6;
 use tokio::sync::{mpsc, watch};
 use uuid::Uuid;
 
-use crate::api::connection::{ConnectionStatus, DeviceDescriptor, RfcommBackend, RfcommConnection};
+use crate::api::connection::{
+    self, ConnectionStatus, DeviceDescriptor, RfcommBackend, RfcommConnection,
+};
 
 pub struct MockRfcommBackend {
     inbound: Mutex<Option<mpsc::Receiver<Vec<u8>>>>,
@@ -23,7 +25,7 @@ impl MockRfcommBackend {
 impl RfcommBackend for MockRfcommBackend {
     type ConnectionType = MockRfcommConnection;
 
-    async fn devices(&self) -> crate::Result<HashSet<DeviceDescriptor>> {
+    async fn devices(&self) -> connection::Result<HashSet<DeviceDescriptor>> {
         Ok([DeviceDescriptor {
             name: "Mock Device".to_owned(),
             mac_address: MacAddr6::nil(),
@@ -36,7 +38,7 @@ impl RfcommBackend for MockRfcommBackend {
         &self,
         _mac_address: MacAddr6,
         _select_uuid: impl Fn(HashSet<Uuid>) -> Uuid + Send,
-    ) -> crate::Result<Self::ConnectionType> {
+    ) -> connection::Result<Self::ConnectionType> {
         Ok(MockRfcommConnection::new(
             self.inbound
                 .lock()
@@ -69,7 +71,7 @@ impl MockRfcommConnection {
 }
 
 impl RfcommConnection for MockRfcommConnection {
-    async fn write(&self, data: &[u8]) -> crate::Result<()> {
+    async fn write(&self, data: &[u8]) -> connection::Result<()> {
         self.outbound.send(data.to_vec()).await.unwrap();
         Ok(())
     }

@@ -3,12 +3,12 @@ use rusqlite::Connection;
 use tracing::{instrument, warn};
 
 use super::{
-    PairedDevice, StorageError,
+    PairedDevice, Error,
     type_conversions::{SqliteDeviceModel, SqliteMacAddr6},
 };
 
 #[instrument(skip(connection))]
-pub fn fetch_all(connection: &Connection) -> Result<Vec<PairedDevice>, StorageError> {
+pub fn fetch_all(connection: &Connection) -> Result<Vec<PairedDevice>, Error> {
     let mut statement = connection
         .prepare_cached("SELECT name, mac_address, model FROM paired_device ORDER BY name ASC")?;
     let devices = statement
@@ -38,7 +38,7 @@ pub fn fetch_all(connection: &Connection) -> Result<Vec<PairedDevice>, StorageEr
 pub fn fetch(
     connection: &Connection,
     mac_address: MacAddr6,
-) -> Result<Option<PairedDevice>, StorageError> {
+) -> Result<Option<PairedDevice>, Error> {
     let mut statement = connection.prepare_cached(
         "SELECT name, mac_address, model FROM paired_device WHERE mac_address = ?1",
     )?;
@@ -65,7 +65,7 @@ pub fn fetch(
     Ok(devices)
 }
 
-pub fn insert(connection: &Connection, paired_device: PairedDevice) -> Result<(), StorageError> {
+pub fn insert(connection: &Connection, paired_device: PairedDevice) -> Result<(), Error> {
     connection.execute(
         "INSERT INTO paired_device (name, mac_address, model) VALUES (?1, ?2, ?3)",
         (
@@ -77,7 +77,7 @@ pub fn insert(connection: &Connection, paired_device: PairedDevice) -> Result<()
     Ok(())
 }
 
-pub fn upsert(connection: &Connection, paired_device: PairedDevice) -> Result<(), StorageError> {
+pub fn upsert(connection: &Connection, paired_device: PairedDevice) -> Result<(), Error> {
     connection.execute(
         r#"INSERT INTO paired_device (name, mac_address, model)
                     VALUES (?1, ?2, ?3)
@@ -94,7 +94,7 @@ pub fn upsert(connection: &Connection, paired_device: PairedDevice) -> Result<()
     Ok(())
 }
 
-pub fn delete(connection: &Connection, mac_address: MacAddr6) -> Result<(), StorageError> {
+pub fn delete(connection: &Connection, mac_address: MacAddr6) -> Result<(), Error> {
     connection.execute(
         "DELETE FROM paired_device WHERE mac_address = ?1",
         (SqliteMacAddr6(mac_address),),

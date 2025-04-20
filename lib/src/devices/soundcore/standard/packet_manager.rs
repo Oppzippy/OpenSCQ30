@@ -4,6 +4,8 @@ use async_trait::async_trait;
 use tokio::sync::watch;
 use tracing::warn;
 
+use crate::api::device;
+
 use super::{packets::Packet, structures::Command};
 
 pub struct PacketManager<T> {
@@ -31,7 +33,7 @@ impl<T> PacketManager<T> {
         &self,
         state_sender: &watch::Sender<T>,
         packet: &Packet,
-    ) -> crate::Result<()> {
+    ) -> device::Result<()> {
         if let Some(handler) = self.handlers.get(&packet.command) {
             handler.handle_packet(state_sender, packet).await?;
         } else {
@@ -43,5 +45,5 @@ impl<T> PacketManager<T> {
 
 #[async_trait]
 pub trait PacketHandler<T> {
-    async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> crate::Result<()>;
+    async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> device::Result<()>;
 }

@@ -5,7 +5,10 @@ use tokio::{
     task::JoinHandle,
 };
 
-use crate::api::settings::{SettingId, Value};
+use crate::api::{
+    device,
+    settings::{SettingId, Value},
+};
 
 use super::{
     packet_manager::PacketManager, packets::Packet, settings_manager::SettingsManager,
@@ -46,7 +49,7 @@ where
         &self,
         state_sender: &watch::Sender<StateType>,
         setting_values: impl IntoIterator<Item = (SettingId, Value)>,
-    ) -> crate::Result<()> {
+    ) -> device::Result<()> {
         let mut target_state = state_sender.borrow().clone();
         for (setting_id, value) in setting_values {
             self.setting_manager

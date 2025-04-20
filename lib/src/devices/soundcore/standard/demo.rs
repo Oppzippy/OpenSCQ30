@@ -9,7 +9,7 @@ use tokio::sync::{mpsc, watch};
 use uuid::Uuid;
 
 use crate::{
-    api::connection::{ConnectionStatus, DeviceDescriptor, RfcommBackend, RfcommConnection},
+    api::connection::{self, ConnectionStatus, DeviceDescriptor, RfcommBackend, RfcommConnection},
     devices::soundcore::standard::packets::inbound::take_inbound_packet_header,
 };
 
@@ -32,7 +32,7 @@ impl DemoConnectionRegistry {
 impl RfcommBackend for DemoConnectionRegistry {
     type ConnectionType = DemoConnection;
 
-    async fn devices(&self) -> crate::Result<HashSet<DeviceDescriptor>> {
+    async fn devices(&self) -> connection::Result<HashSet<DeviceDescriptor>> {
         Ok(HashSet::from([DeviceDescriptor {
             name: self.name.clone(),
             mac_address: MacAddr6::nil(),
@@ -43,7 +43,7 @@ impl RfcommBackend for DemoConnectionRegistry {
         &self,
         _mac_address: MacAddr6,
         _select_uuid: impl Fn(HashSet<Uuid>) -> Uuid + Send,
-    ) -> crate::Result<Self::ConnectionType> {
+    ) -> connection::Result<Self::ConnectionType> {
         Ok(DemoConnection::new(self.packet_responses.to_owned()))
     }
 }
@@ -72,7 +72,7 @@ impl DemoConnection {
 }
 
 impl RfcommConnection for DemoConnection {
-    async fn write(&self, data: &[u8]) -> crate::Result<()> {
+    async fn write(&self, data: &[u8]) -> connection::Result<()> {
         let (_body, command) = take_inbound_packet_header::<VerboseError<_>>(data).unwrap();
         if let Some(response) = self.packet_responses.get(&command) {
             self.packet_sender.send(response.to_owned()).await.unwrap();

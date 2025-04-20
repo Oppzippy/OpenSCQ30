@@ -2,7 +2,10 @@ use async_trait::async_trait;
 use strum::IntoEnumIterator;
 
 use crate::{
-    api::settings::{Range, Setting, SettingId, Value},
+    api::{
+        device,
+        settings::{Range, Setting, SettingId, Value},
+    },
     devices::soundcore::{
         a3936::structures::A3936SoundModes, standard::settings_manager::SettingHandler,
     },
@@ -56,7 +59,7 @@ where
         })
     }
 
-    async fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> crate::Result<()> {
+    async fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> device::Result<()> {
         let sound_modes = state.as_mut();
         let sound_mode_setting: SoundModeSetting = setting_id
             .try_into()

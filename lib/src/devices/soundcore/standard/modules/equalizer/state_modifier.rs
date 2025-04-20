@@ -3,7 +3,7 @@ use std::sync::Arc;
 use tokio::sync::watch;
 
 use crate::{
-    api::connection::RfcommConnection,
+    api::{connection::RfcommConnection, device},
     devices::soundcore::standard::{
         packets::{
             outbound::{
@@ -52,7 +52,7 @@ where
         &self,
         state_sender: &watch::Sender<T>,
         target_state: &T,
-    ) -> crate::Result<()> {
+    ) -> device::Result<()> {
         let target_equalizer_configuration = target_state.as_ref();
         {
             let state = state_sender.borrow();
@@ -112,7 +112,7 @@ where
         &self,
         state_sender: &watch::Sender<T>,
         target_state: &T,
-    ) -> crate::Result<()> {
+    ) -> device::Result<()> {
         let target_equalizer_configuration: &EqualizerConfiguration<C, B> = target_state.as_ref();
         {
             let state = state_sender.borrow();
@@ -181,7 +181,7 @@ where
         &self,
         state_sender: &watch::Sender<T>,
         target_state: &T,
-    ) -> crate::Result<()> {
+    ) -> device::Result<()> {
         let target_equalizer_configuration: &EqualizerConfiguration<C, B> = target_state.as_ref();
         {
             let state = state_sender.borrow();

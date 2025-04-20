@@ -1,16 +1,15 @@
 use async_trait::async_trait;
 use tokio::sync::watch;
 
-use crate::devices::soundcore::standard::{
+use crate::{api::device, devices::soundcore::standard::{
     packet_manager::PacketHandler,
     packets::{
-        Packet,
         inbound::{
             SingleBatteryChargingUpdatePacket, SingleBatteryLevelUpdatePacket, TryIntoInboundPacket,
-        },
+        }, Packet
     },
     structures::{Command, SingleBattery},
-};
+}};
 
 #[derive(Default)]
 pub struct BatteryLevelPacketHandler {}
@@ -24,7 +23,7 @@ impl<T> PacketHandler<T> for BatteryLevelPacketHandler
 where
     T: AsMut<SingleBattery> + Send + Sync,
 {
-    async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> crate::Result<()> {
+    async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> device::Result<()> {
         let packet: SingleBatteryLevelUpdatePacket = packet.try_into_inbound_packet()?;
         state.send_if_modified(|state| {
             let battery = state.as_mut();
@@ -48,7 +47,7 @@ impl<T> PacketHandler<T> for BatteryChargingPacketHandler
 where
     T: AsMut<SingleBattery> + Send + Sync,
 {
-    async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> crate::Result<()> {
+    async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> device::Result<()> {
         let packet: SingleBatteryChargingUpdatePacket = packet.try_into_inbound_packet()?;
         state.send_if_modified(|state| {
             let battery = state.as_mut();

@@ -8,24 +8,27 @@ use nom::{
 };
 use tokio::sync::watch;
 
-use crate::devices::soundcore::{
-    a3936::{
-        state::A3936State,
-        structures::{A3936InternalMultiButtonConfiguration, A3936SoundModes},
-    },
-    standard::{
-        modules::ModuleCollection,
-        packet_manager::PacketHandler,
-        packets::{
-            Packet,
-            inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
-            outbound::OutboundPacket,
-            parsing::take_bool,
+use crate::{
+    api::device,
+    devices::soundcore::{
+        a3936::{
+            state::A3936State,
+            structures::{A3936InternalMultiButtonConfiguration, A3936SoundModes},
         },
-        structures::{
-            AgeRange, AmbientSoundModeCycle, BatteryLevel, Command, CustomHearId, DualBattery,
-            DualFirmwareVersion, EqualizerConfiguration, SerialNumber, TwsStatus,
-            VolumeAdjustments,
+        standard::{
+            modules::ModuleCollection,
+            packet_manager::PacketHandler,
+            packets::{
+                Packet,
+                inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
+                outbound::OutboundPacket,
+                parsing::take_bool,
+            },
+            structures::{
+                AgeRange, AmbientSoundModeCycle, BatteryLevel, Command, CustomHearId, DualBattery,
+                DualFirmwareVersion, EqualizerConfiguration, SerialNumber, TwsStatus,
+                VolumeAdjustments,
+            },
         },
     },
 };
@@ -226,7 +229,7 @@ impl PacketHandler<A3936State> for StateUpdatePacketHandler {
         &self,
         state: &watch::Sender<A3936State>,
         packet: &Packet,
-    ) -> crate::Result<()> {
+    ) -> device::Result<()> {
         let packet: A3936StateUpdatePacket = packet.try_into_inbound_packet()?;
         state.send_modify(|state| *state = packet.into());
         Ok(())

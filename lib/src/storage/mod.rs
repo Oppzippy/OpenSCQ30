@@ -7,7 +7,6 @@ mod type_conversions;
 use std::{
     collections::HashMap,
     mem,
-    panic::Location,
     path::PathBuf,
     sync::{Arc, mpsc},
     thread,
@@ -39,48 +38,39 @@ pub struct PairedDevice {
 }
 
 #[derive(Error, Debug)]
-pub enum StorageError {
+pub enum Error {
     #[error("sql error: {0:?}")]
     AlreadyExists(rusqlite::Error),
     #[error("sql error: {0:?}")]
-    Other(rusqlite::Error),
+    RusqliteError(rusqlite::Error),
     #[error("failed to deserialize json: {0:?}")]
     JsonError(serde_json::Error),
 }
+pub type Result<T> = std::result::Result<T, Error>;
 
-impl From<StorageError> for crate::Error {
-    #[track_caller]
-    fn from(value: StorageError) -> Self {
-        Self::Other {
-            source: Box::new(value),
-            location: Location::caller(),
-        }
-    }
-}
-
-impl From<rusqlite::Error> for StorageError {
+impl From<rusqlite::Error> for Error {
     fn from(err: rusqlite::Error) -> Self {
         if let Some(sqlite_err) = err.sqlite_error() {
             if sqlite_err.extended_code == SQLITE_CONSTRAINT_UNIQUE {
-                return StorageError::AlreadyExists(err);
+                return Error::AlreadyExists(err);
             }
         }
-        StorageError::Other(err)
+        Error::RusqliteError(err)
     }
 }
 
 impl OpenSCQ30Database {
-    pub async fn new_file(path: PathBuf) -> Result<Self, StorageError> {
+    pub async fn new_file(path: PathBuf) -> Result<Self> {
         Self::new(|| Connection::open(path)).await
     }
 
-    pub async fn new_in_memory() -> Result<Self, StorageError> {
+    pub async fn new_in_memory() -> Result<Self> {
         Self::new(Connection::open_in_memory).await
     }
 
     async fn new(
-        open_connection: impl FnOnce() -> Result<Connection, rusqlite::Error> + Send + 'static,
-    ) -> Result<Self, StorageError> {
+        open_connection: impl FnOnce() -> rusqlite::Result<Connection> + Send + 'static,
+    ) -> Result<Self> {
         let (init_error_sender, init_error_receiver) = oneshot::channel();
         let (command_sender, command_receiver) = mpsc::channel::<Command>();
 
@@ -186,35 +176,35 @@ macro_rules! commands {
 }
 
 commands!(
-    paired_device::fetch_all => fn fetch_all_paired_devices() -> Result<Vec<PairedDevice>, StorageError>;
-    paired_device::fetch => fn fetch_paired_device(mac_address: MacAddr6) -> Result<Option<PairedDevice>, StorageError>;
-    paired_device::insert => fn insert_paired_device(paired_device: PairedDevice) -> Result<(), StorageError>;
-    paired_device::upsert => fn upsert_paired_device(paired_device: PairedDevice) -> Result<(), StorageError>;
-    paired_device::delete => fn delete_paired_device(mac_address: MacAddr6) -> Result<(), StorageError>;
+    paired_device::fetch_all => fn fetch_all_paired_devices() -> Result<Vec<PairedDevice>>;
+    paired_device::fetch => fn fetch_paired_device(mac_address: MacAddr6) -> Result<Option<PairedDevice>>;
+    paired_device::insert => fn insert_paired_device(paired_device: PairedDevice) -> Result<()>;
+    paired_device::upsert => fn upsert_paired_device(paired_device: PairedDevice) -> Result<()>;
+    paired_device::delete => fn delete_paired_device(mac_address: MacAddr6) -> Result<()>;
     quick_preset::fetch => fn fetch_quick_preset(
         model: DeviceModel,
         name: String,
-    ) -> Result<HashMap<SettingId, settings::Value>, StorageError>;
+    ) -> Result<HashMap<SettingId, settings::Value>>;
     quick_preset::fetch_all => fn fetch_all_quick_presets(
         model: DeviceModel,
-    ) -> Result<HashMap<String, HashMap<SettingId, settings::Value>>, StorageError>;
+    ) -> Result<HashMap<String, HashMap<SettingId, settings::Value>>>;
     quick_preset::upsert => fn upsert_quick_preset(
         model: DeviceModel,
         name: String,
         settings: HashMap<SettingId, settings::Value>,
-    ) -> Result<(), StorageError>;
-    quick_preset::delete => fn delete_quick_preset(model: DeviceModel, name: String) -> Result<(), StorageError>;
+    ) -> Result<()>;
+    quick_preset::delete => fn delete_quick_preset(model: DeviceModel, name: String) -> Result<()>;
     equalizer_profile::fetch => fn fetch_equalizer_profile(
         model: DeviceModel,
         name: String,
-    ) -> Result<Vec<i16>, StorageError>;
+    ) -> Result<Vec<i16>>;
     equalizer_profile::fetch_all => fn fetch_all_equalizer_profiles(
         model: DeviceModel,
-    ) -> Result<Vec<(String, Vec<i16>)>, StorageError>;
+    ) -> Result<Vec<(String, Vec<i16>)>>;
     equalizer_profile::upsert => fn upsert_equalizer_profile(
         model: DeviceModel,
         name: String,
         volume_adjustments: Vec<i16>,
-    ) -> Result<(), StorageError>;
-    equalizer_profile::delete => fn delete_equalizer_profile(model: DeviceModel, name: String) -> Result<(), StorageError>;
+    ) -> Result<()>;
+    equalizer_profile::delete => fn delete_equalizer_profile(model: DeviceModel, name: String) -> Result<()>;
 );

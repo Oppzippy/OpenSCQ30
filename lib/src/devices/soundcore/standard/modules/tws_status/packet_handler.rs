@@ -1,13 +1,16 @@
 use async_trait::async_trait;
 use tokio::sync::watch;
 
-use crate::devices::soundcore::standard::{
-    packet_manager::PacketHandler,
-    packets::{
-        Packet,
-        inbound::{TryIntoInboundPacket, TwsStatusUpdatePacket},
+use crate::{
+    api::device,
+    devices::soundcore::standard::{
+        packet_manager::PacketHandler,
+        packets::{
+            Packet,
+            inbound::{TryIntoInboundPacket, TwsStatusUpdatePacket},
+        },
+        structures::{Command, TwsStatus},
     },
-    structures::{Command, TwsStatus},
 };
 
 #[derive(Default)]
@@ -22,7 +25,7 @@ impl<T> PacketHandler<T> for TwsStatusPacketHandler
 where
     T: AsMut<TwsStatus> + Send + Sync,
 {
-    async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> crate::Result<()> {
+    async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> device::Result<()> {
         let packet: TwsStatusUpdatePacket = packet.try_into_inbound_packet()?;
         state.send_if_modified(|state| {
             let tws_status = state.as_mut();

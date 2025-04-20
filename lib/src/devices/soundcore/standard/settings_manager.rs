@@ -5,7 +5,10 @@ use std::{
 
 use async_trait::async_trait;
 
-use crate::api::settings::{CategoryId, Setting, SettingId, Value};
+use crate::api::{
+    device,
+    settings::{CategoryId, Setting, SettingId, Value},
+};
 
 pub struct SettingsManager<T> {
     categories: Vec<CategoryId>,
@@ -68,7 +71,7 @@ impl<StateType> SettingsManager<StateType> {
         state: &mut StateType,
         setting_id: &SettingId,
         value: Value,
-    ) -> Option<crate::Result<()>> {
+    ) -> Option<device::Result<()>> {
         let handler = self.settings_to_handlers.get(setting_id)?;
         Some(handler.set(state, setting_id, value).await)
     }
@@ -78,5 +81,5 @@ impl<StateType> SettingsManager<StateType> {
 pub trait SettingHandler<T> {
     fn settings(&self) -> Vec<SettingId>;
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting>;
-    async fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> crate::Result<()>;
+    async fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> device::Result<()>;
 }

@@ -2,7 +2,10 @@ use async_trait::async_trait;
 use strum::IntoEnumIterator;
 
 use crate::{
-    api::settings::{Setting, SettingId, Value},
+    api::{
+        device,
+        settings::{Setting, SettingId, Value},
+    },
     devices::soundcore::standard::{settings_manager::SettingHandler, structures::DualBattery},
     i18n::fl,
 };
@@ -57,7 +60,7 @@ where
         _state: &mut T,
         _setting_id: &SettingId,
         _value: Value,
-    ) -> crate::Result<()> {
+    ) -> device::Result<()> {
         unimplemented!("battery is read only")
     }
 }

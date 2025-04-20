@@ -4,7 +4,7 @@ use nom::error::VerboseError;
 use tokio::{select, sync::mpsc, task::JoinHandle};
 
 use crate::{
-    api::connection::RfcommConnection,
+    api::{connection::RfcommConnection, device},
     devices::soundcore::standard::{
         packets::inbound::take_inbound_packet_header, structures::Command,
     },
@@ -30,7 +30,7 @@ impl<ConnectionType: RfcommConnection> Drop for PacketIOController<ConnectionTyp
 impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
     pub async fn new(
         connection: Arc<ConnectionType>,
-    ) -> crate::Result<(Self, mpsc::Receiver<Packet>)> {
+    ) -> device::Result<(Self, mpsc::Receiver<Packet>)> {
         let packet_queues = Arc::new(MultiQueue::new());
         let incoming_receiver = connection.read_channel();
         let (handle, outgoing_receiver) =
@@ -75,7 +75,7 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
         (handle, outgoing_receiver)
     }
 
-    pub async fn send(&self, packet: &Packet) -> crate::Result<Packet> {
+    pub async fn send(&self, packet: &Packet) -> device::Result<Packet> {
         let handle = self.packet_queues.add(packet.command().to_inbound());
 
         handle.wait_for_start().await;
@@ -94,7 +94,7 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
 
         handle.cancel();
 
-        Err(crate::Error::TimedOut {
+        Err(device::Error::ActionTimedOut {
             action: "resending packet until ack received",
         })
     }

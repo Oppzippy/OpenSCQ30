@@ -9,20 +9,23 @@ use nom::{
 use strum::FromRepr;
 use tokio::sync::watch;
 
-use crate::devices::soundcore::{
-    a3028::state::A3028State,
-    standard::{
-        modules::ModuleCollection,
-        packet_manager::PacketHandler,
-        packets::{
-            Packet,
-            inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
-            outbound::OutboundPacket,
-            parsing::take_bool,
-        },
-        structures::{
-            AgeRange, BasicHearId, Command, EqualizerConfiguration, FirmwareVersion, Gender,
-            SerialNumber, SingleBattery, SoundModes,
+use crate::{
+    api::device,
+    devices::soundcore::{
+        a3028::state::A3028State,
+        standard::{
+            modules::ModuleCollection,
+            packet_manager::PacketHandler,
+            packets::{
+                Packet,
+                inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
+                outbound::OutboundPacket,
+                parsing::take_bool,
+            },
+            structures::{
+                AgeRange, BasicHearId, Command, EqualizerConfiguration, FirmwareVersion, Gender,
+                SerialNumber, SingleBattery, SoundModes,
+            },
         },
     },
 };
@@ -167,7 +170,7 @@ impl PacketHandler<A3028State> for StateUpdatePacketHandler {
         &self,
         state: &watch::Sender<A3028State>,
         packet: &Packet,
-    ) -> crate::Result<()> {
+    ) -> device::Result<()> {
         let packet: A3028StateUpdatePacket = packet.try_into_inbound_packet()?;
         state.send_modify(|state| *state = packet.into());
         Ok(())
