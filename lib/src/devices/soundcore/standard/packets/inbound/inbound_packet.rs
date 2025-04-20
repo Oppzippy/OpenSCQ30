@@ -27,8 +27,9 @@ pub struct TryIntoInboundPacketError {
 }
 
 impl From<TryIntoInboundPacketError> for device::Error {
+    #[track_caller]
     fn from(err: TryIntoInboundPacketError) -> Self {
-        Self::Other(Box::new(err))
+        (Box::new(err) as Box<dyn std::error::Error + Send + Sync>).into()
     }
 }
 

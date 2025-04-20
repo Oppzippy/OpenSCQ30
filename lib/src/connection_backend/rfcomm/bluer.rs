@@ -1,5 +1,6 @@
 use std::{
     collections::HashSet,
+    panic::Location,
     sync::Arc,
     time::{Duration, Instant},
 };
@@ -67,6 +68,7 @@ impl RfcommBackend for BluerRfcommBackend {
             if err.kind == bluer::ErrorKind::NotFound {
                 connection::Error::BluetoothAdapterUnavailable {
                     source: Some(Box::new(err)),
+                    location: Location::caller(),
                 }
             } else {
                 err.into()
@@ -94,6 +96,7 @@ impl RfcommBackend for BluerRfcommBackend {
             if err.kind == bluer::ErrorKind::NotFound {
                 connection::Error::BluetoothAdapterUnavailable {
                     source: Some(Box::new(err)),
+                    location: Location::caller(),
                 }
             } else {
                 err.into()
@@ -106,6 +109,7 @@ impl RfcommBackend for BluerRfcommBackend {
                 return match err.kind {
                     bluer::ErrorKind::NotFound => Err(connection::Error::DeviceNotFound {
                         source: Some(Box::new(err)),
+                        location: Location::caller(),
                     }),
                     _ => Err(connection::Error::from(err)),
                 };
@@ -273,6 +277,7 @@ impl RfcommConnection for BluerRfcommConnection {
             .await
             .map_err(|err| connection::Error::WriteError {
                 source: Some(Box::new(err)),
+                location: Location::caller(),
             })
     }
 
@@ -293,7 +298,11 @@ impl Drop for BluerRfcommConnection {
 }
 
 impl From<bluer::Error> for connection::Error {
+    #[track_caller]
     fn from(error: bluer::Error) -> Self {
-        connection::Error::Other(Box::new(error))
+        connection::Error::Other {
+            source: Box::new(error),
+            location: Location::caller(),
+        }
     }
 }

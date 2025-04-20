@@ -21,7 +21,7 @@ pub fn fetch(
         (SqliteDeviceModel(model), name),
         |row| row.get(0),
     )?;
-    let settings = serde_json::from_str(&json).map_err(Error::JsonError)?;
+    let settings = serde_json::from_str(&json).map_err(Error::from)?;
     Ok(settings)
 }
 
@@ -38,14 +38,16 @@ pub fn fetch_all(
         let json: String = row.get(1)?;
         Ok((name, json))
     })
-    .map(|result| match result {
-        Ok((name, json)) => {
-            let settings: SettingsCollection =
-                serde_json::from_str(&json).map_err(Error::JsonError)?;
-            Ok((name, settings))
-        }
-        Err(err) => Err(Error::RusqliteError(err)),
-    })
+    .map(
+        |result: Result<(String, String), rusqlite::Error>| match result {
+            Ok((name, json)) => {
+                let settings: SettingsCollection =
+                    serde_json::from_str(&json).map_err(Error::from)?;
+                Ok((name, settings))
+            }
+            Err(err) => Err(Error::from(err)),
+        },
+    )
     .collect::<Result<HashMap<String, SettingsCollection>, Error>>()
 }
 
@@ -55,7 +57,7 @@ pub fn upsert(
     name: String,
     settings: SettingsCollection,
 ) -> Result<(), Error> {
-    let json = serde_json::to_string(&settings).map_err(Error::JsonError)?;
+    let json = serde_json::to_string(&settings).map_err(Error::from)?;
     connection.execute(
         r#"INSERT INTO quick_preset (device_model, name, settings)
                 VALUES (?1, ?2, ?3)

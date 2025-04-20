@@ -7,6 +7,7 @@ mod type_conversions;
 use std::{
     collections::HashMap,
     mem,
+    panic::Location,
     path::PathBuf,
     sync::{Arc, mpsc},
     thread,
@@ -21,6 +22,7 @@ use tracing::info_span;
 use crate::{
     api::settings::{self, SettingId},
     devices::DeviceModel,
+    macros::impl_from_source_error_with_location,
 };
 
 // This needs to be Send + Sync, and rusqlite::Connection is not, so we have to spawn a new thread
@@ -39,23 +41,35 @@ pub struct PairedDevice {
 
 #[derive(Error, Debug)]
 pub enum Error {
-    #[error("sql error: {0:?}")]
-    AlreadyExists(rusqlite::Error),
-    #[error("sql error: {0:?}")]
-    RusqliteError(rusqlite::Error),
-    #[error("failed to deserialize json: {0:?}")]
-    JsonError(serde_json::Error),
+    #[error("sql error: {source:?}")]
+    AlreadyExists { source: rusqlite::Error },
+    #[error("sql error: {source:?}")]
+    RusqliteError {
+        source: rusqlite::Error,
+        location: &'static Location<'static>,
+    },
+    #[error("failed to deserialize json: {source:?}")]
+    JsonError {
+        source: serde_json::Error,
+        location: &'static Location<'static>,
+    },
 }
 pub type Result<T> = std::result::Result<T, Error>;
 
+impl_from_source_error_with_location!(Error::JsonError(serde_json::Error));
+
 impl From<rusqlite::Error> for Error {
+    #[track_caller]
     fn from(err: rusqlite::Error) -> Self {
         if let Some(sqlite_err) = err.sqlite_error() {
             if sqlite_err.extended_code == SQLITE_CONSTRAINT_UNIQUE {
-                return Error::AlreadyExists(err);
+                return Error::AlreadyExists { source: err };
             }
         }
-        Error::RusqliteError(err)
+        Error::RusqliteError {
+            source: err,
+            location: Location::caller(),
+        }
     }
 }
 

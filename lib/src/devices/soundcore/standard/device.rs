@@ -50,7 +50,7 @@ where
         .send(&RequestStatePacket::new().into())
         .await?
         .try_into_inbound_packet()
-        .map_err(|err| device::Error::Other(Box::new(err)))?;
+        .map_err(|err| device::Error::other(err))?;
     Ok(state_update_packet.into())
 }
 

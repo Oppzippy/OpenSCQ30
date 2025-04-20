@@ -10,7 +10,7 @@ pub fn fetch(connection: &Connection, model: DeviceModel, name: String) -> Resul
         (SqliteDeviceModel(model), name),
         |row| row.get(0),
     )?;
-    let volume_adjustments = serde_json::from_str(&json).map_err(Error::JsonError)?;
+    let volume_adjustments = serde_json::from_str(&json).map_err(Error::from)?;
     Ok(volume_adjustments)
 }
 
@@ -27,14 +27,16 @@ pub fn fetch_all(
         let volume_adjustments_json: String = row.get(1)?;
         Ok((name, volume_adjustments_json))
     })
-    .map(|result| match result {
-        Ok((name, volume_adjustments_json)) => {
-            let volume_adjustments: Vec<i16> =
-                serde_json::from_str(&volume_adjustments_json).map_err(Error::JsonError)?;
-            Ok((name, volume_adjustments))
-        }
-        Err(err) => Err(Error::RusqliteError(err)),
-    })
+    .map(
+        |result: Result<(String, String), rusqlite::Error>| match result {
+            Ok((name, volume_adjustments_json)) => {
+                let volume_adjustments: Vec<i16> =
+                    serde_json::from_str(&volume_adjustments_json).map_err(Error::from)?;
+                Ok((name, volume_adjustments))
+            }
+            Err(err) => Err(Error::from(err)),
+        },
+    )
     .collect::<Result<Vec<(String, Vec<i16>)>, Error>>()
 }
 
@@ -44,7 +46,7 @@ pub fn upsert(
     name: String,
     volume_adjustments: Vec<i16>,
 ) -> Result<(), Error> {
-    let json = serde_json::to_string(&volume_adjustments).map_err(Error::JsonError)?;
+    let json = serde_json::to_string(&volume_adjustments).map_err(Error::from)?;
     // by calling sqlite's json(...) function, we ensure it is minified so that formatting is standardized, making it okay to
     // perform equality comparisons. this is necessary for the unique index on volume_adjustments.
     connection.execute(

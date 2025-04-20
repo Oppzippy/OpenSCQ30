@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, panic::Location};
 
 use macaddr::MacAddr6;
 use tokio::sync::{mpsc, watch};
@@ -9,17 +9,23 @@ pub enum Error {
     #[error("bluetooth adapter unavailable: {source:?}")]
     BluetoothAdapterUnavailable {
         source: Option<Box<dyn std::error::Error + Send + Sync>>,
+        location: &'static Location<'static>,
     },
     #[error("device not found: {source:?}")]
     DeviceNotFound {
         source: Option<Box<dyn std::error::Error + Send + Sync>>,
+        location: &'static Location<'static>,
     },
     #[error("write error: {source:?}")]
     WriteError {
         source: Option<Box<dyn std::error::Error + Send + Sync>>,
+        location: &'static Location<'static>,
     },
-    #[error(transparent)]
-    Other(Box<dyn std::error::Error + Send + Sync>),
+    #[error("other: {source:?}")]
+    Other {
+        source: Box<dyn std::error::Error + Send + Sync>,
+        location: &'static Location<'static>,
+    },
 
     #[error("{action} timed out")]
     TimedOut { action: &'static str },
