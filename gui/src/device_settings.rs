@@ -1,5 +1,6 @@
 mod equalizer;
 mod information;
+mod legacy_migration;
 mod quick_presets;
 mod range;
 mod select;
@@ -7,19 +8,26 @@ mod toggle;
 
 use std::{borrow::Cow, collections::HashMap};
 
+use anyhow::{anyhow, bail};
 use cosmic::{
     Element, Task,
     app::context_drawer::ContextDrawer,
     iced::{Length, alignment},
     widget::{self, nav_bar},
 };
+use legacy_migration::LegacyMigrationModel;
 use openscq30_i18n::Translate;
 use openscq30_lib::api::{
     quick_presets::{QuickPreset, QuickPresetsHandler},
     settings::{CategoryId, Setting, SettingId, Value},
 };
 
-use crate::{app::DebugOpenSCQ30Device, fl, handle_soft_error, utils::coalesce_result};
+use crate::{
+    app::DebugOpenSCQ30Device,
+    fl, handle_soft_error,
+    openscq30_v1_migration::{self, LegacyEqualizerProfile},
+    utils::coalesce_result,
+};
 
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -43,6 +51,9 @@ pub enum Message {
     OptionalSelectAddDialogSubmit,
     OptionalSelectAddDialogSetName(String),
     OptionalSelectRemoveDialogSubmit,
+    AddLegacyEqualizerMigrationPage(HashMap<String, LegacyEqualizerProfile>),
+    LegacyMigrationMessage(legacy_migration::Message),
+    None,
 }
 pub enum Action {
     Task(Task<Message>),
@@ -59,6 +70,7 @@ pub struct DeviceSettingsModel {
     quick_presets: Option<Vec<QuickPreset>>,
     dialog: Option<Dialog>,
     editing_quick_preset: Option<QuickPreset>,
+    legacy_equalizer_migration: Option<legacy_migration::LegacyMigrationModel>,
 }
 
 enum Dialog {
@@ -69,6 +81,7 @@ enum Dialog {
 
 enum CustomCategory {
     QuickPresets,
+    LegacyEqualizerMigration,
 }
 
 impl DeviceSettingsModel {
@@ -97,9 +110,28 @@ impl DeviceSettingsModel {
             quick_presets: None,
             editing_quick_preset: None,
             dialog: None,
+            legacy_equalizer_migration: None,
         };
-        let task = model.refresh();
+        let task = Task::batch([model.refresh(), Self::initialize_legacy_migration()]);
         (model, task)
+    }
+
+    fn initialize_legacy_migration() -> Task<Message> {
+        Task::future(async move {
+            let profiles = match openscq30_v1_migration::all_equalizer_profiles().await {
+                Ok(profiles) => profiles,
+                Err(err) => match err {
+                    openscq30_v1_migration::FetchProfilesError::NoLegacyConfig => {
+                        return Message::None;
+                    }
+                    _ => {
+                        tracing::error!("error loading legacy config file: {err:?}");
+                        return Message::None;
+                    }
+                },
+            };
+            Message::AddLegacyEqualizerMigrationPage(profiles)
+        })
     }
 
     pub fn on_nav_select(&mut self, id: nav_bar::Id) -> Task<Message> {
@@ -194,21 +226,32 @@ impl DeviceSettingsModel {
     }
 
     pub fn view(&self) -> Element<'_, Message> {
-        if let Some(CustomCategory::QuickPresets) = self.nav_model.active_data() {
-            if let Some(quick_presets) = &self.quick_presets {
-                widget::column()
-                    .push(
-                        widget::button::standard(fl!("create-quick-preset"))
-                            .on_press(Message::ShowCreateQuickPresetDialog),
-                    )
-                    .push(quick_presets::quick_presets(
-                        quick_presets,
-                        Message::EditQuickPreset,
-                        Message::ActivateQuickPreset,
-                    ))
-                    .into()
-            } else {
-                widget::text(fl!("loading-item", item = fl!("quick-presets"))).into()
+        if let Some(custom_category) = self.nav_model.active_data::<CustomCategory>() {
+            match custom_category {
+                CustomCategory::QuickPresets => {
+                    if let Some(quick_presets) = &self.quick_presets {
+                        widget::column()
+                            .push(
+                                widget::button::standard(fl!("create-quick-preset"))
+                                    .on_press(Message::ShowCreateQuickPresetDialog),
+                            )
+                            .push(quick_presets::quick_presets(
+                                quick_presets,
+                                Message::EditQuickPreset,
+                                Message::ActivateQuickPreset,
+                            ))
+                            .into()
+                    } else {
+                        widget::text(fl!("loading-item", item = fl!("quick-presets"))).into()
+                    }
+                }
+                CustomCategory::LegacyEqualizerMigration => {
+                    if let Some(model) = &self.legacy_equalizer_migration {
+                        model.view().map(Message::LegacyMigrationMessage)
+                    } else {
+                        widget::text("unreachable").into()
+                    }
+                }
             }
         } else if let Some(category_id) = self.nav_model.active_data::<CategoryId>() {
             self.view_settings(category_id)
@@ -572,6 +615,52 @@ impl DeviceSettingsModel {
                     Action::None
                 }
             }
+            Message::AddLegacyEqualizerMigrationPage(profiles) => {
+                self.legacy_equalizer_migration = Some(LegacyMigrationModel::new(profiles));
+                self.nav_model
+                    .insert()
+                    .text(fl!("legacy-equalizer-profile-migration"))
+                    .data(CustomCategory::LegacyEqualizerMigration);
+
+                Action::None
+            }
+            Message::None => Action::None,
+            Message::LegacyMigrationMessage(message) => match message {
+                legacy_migration::Message::Migrate(name, volume_adjustments) => {
+                    let device = self.device.to_owned();
+                    Action::Task(
+                        Task::future(async move {
+                            let Setting::Equalizer {
+                                values: old_volume_adjustments,
+                                ..
+                            } = device
+                                .setting(&SettingId::VolumeAdjustments)
+                                .ok_or_else(|| {
+                                    anyhow!("device does not have VolumeAdjustments setting")
+                                })?
+                            else {
+                                bail!("VolumeAdjustments is not an equalizer");
+                            };
+                            // By setting the volume adjustments, saving the profile, and reverting all in one go,
+                            // we won't send any packets, since the end result will be equivalent to what we started with,
+                            // and that is checked before performing any actions.
+                            device
+                                .set_setting_values(vec![
+                                    (SettingId::VolumeAdjustments, volume_adjustments.into()),
+                                    (
+                                        SettingId::CustomProfile,
+                                        Value::OptionalString(Some(name.into())),
+                                    ),
+                                    (SettingId::VolumeAdjustments, old_volume_adjustments.into()),
+                                ])
+                                .await?;
+                            Ok(Message::Refresh)
+                        })
+                        .map(|r| r.map_err(handle_soft_error!()))
+                        .map(coalesce_result),
+                    )
+                }
+            },
         }
     }
 }

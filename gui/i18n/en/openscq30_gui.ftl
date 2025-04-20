@@ -30,3 +30,5 @@ save = Save
 add-item = Add { $name }
 remove-item = Remove { $name }
 remove-item-confirm = Are you sure you want to remove { $name }?
+legacy-equalizer-profile-migration = Legacy Equalizer Profile Migration
+migrate = Migrate
