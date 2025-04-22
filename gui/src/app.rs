@@ -16,7 +16,7 @@ use crate::{
     add_device::{self, AddDeviceModel},
     device_selection::{self, DeviceSelectionModel},
     device_settings, fl,
-    utils::{ContextDrawerMapExt, coalesce_result},
+    utils::coalesce_result,
 };
 
 pub struct AppModel {

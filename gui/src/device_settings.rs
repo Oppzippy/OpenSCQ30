@@ -39,7 +39,7 @@ pub enum Message {
     ActivateQuickPreset(usize),
     EditQuickPreset(usize),
     SetQuickPresets(Vec<QuickPreset>),
-    CreateQuickPreset,
+    CreateQuickPreset(Option<String>),
     SetCreateQuickPresetName(String),
     CancelDialog,
     EditQuickPresetToggleField(usize, bool),
@@ -48,7 +48,7 @@ pub enum Message {
     EditQuickPresetDone,
     ShowOptionalSelectAddDialog(SettingId),
     ShowOptionalSelectRemoveDialog(SettingId),
-    OptionalSelectAddDialogSubmit,
+    OptionalSelectAddDialogSubmit(Option<String>),
     OptionalSelectAddDialogSetName(String),
     OptionalSelectRemoveDialogSubmit,
     AddLegacyEqualizerMigrationPage(HashMap<String, LegacyEqualizerProfile>),
@@ -181,10 +181,11 @@ impl DeviceSettingsModel {
                     widget::text_input(fl!("name"), name)
                         .id(widget::Id::new("create-quick-preset-name"))
                         .on_input(Message::SetCreateQuickPresetName)
-                        .on_submit(Message::CreateQuickPreset),
+                        .on_submit(|name| Message::CreateQuickPreset(Some(name))),
                 )
                 .primary_action(
-                    widget::button::suggested(fl!("create")).on_press(Message::CreateQuickPreset),
+                    widget::button::suggested(fl!("create"))
+                        .on_press(Message::CreateQuickPreset(None)),
                 )
                 .secondary_action(
                     widget::button::destructive(fl!("cancel")).on_press(Message::CancelDialog),
@@ -201,11 +202,11 @@ impl DeviceSettingsModel {
                             "optional-select-dialog-add-item-text-input",
                         ))
                         .on_input(Message::OptionalSelectAddDialogSetName)
-                        .on_submit(Message::OptionalSelectAddDialogSubmit),
+                        .on_submit(|name| Message::OptionalSelectAddDialogSubmit(Some(name))),
                 )
                 .primary_action(
                     widget::button::suggested(fl!("create"))
-                        .on_press(Message::OptionalSelectAddDialogSubmit),
+                        .on_press(Message::OptionalSelectAddDialogSubmit(None)),
                 )
                 .secondary_action(
                     widget::button::destructive(fl!("cancel")).on_press(Message::CancelDialog),
@@ -458,10 +459,12 @@ impl DeviceSettingsModel {
                 self.dialog = None;
                 Action::None
             }
-            Message::CreateQuickPreset => {
+            Message::CreateQuickPreset(override_name) => {
                 let Some(Dialog::CreateQuickPreset(name)) = self.dialog.take() else {
                     return Action::None;
                 };
+                let name = override_name.unwrap_or(name);
+
                 let device = self.device.clone();
                 let quick_presets_handler = self.quick_presets_handler.clone();
                 Action::Task(
@@ -557,8 +560,10 @@ impl DeviceSettingsModel {
                 }
                 Action::None
             }
-            Message::OptionalSelectAddDialogSubmit => {
+            Message::OptionalSelectAddDialogSubmit(override_name) => {
                 if let Some(Dialog::OptionalSelectAdd(setting_id, name)) = self.dialog.take() {
+                    let name = override_name.unwrap_or(name);
+
                     let device = self.device.clone();
                     Action::Task(
                         Task::future(async move {
