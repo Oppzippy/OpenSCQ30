@@ -82,19 +82,6 @@ android {
             }
         }
     }
-    flavorDimensions += "mode"
-    productFlavors {
-        create("bluetooth") {
-            isDefault = true
-            dimension = "mode"
-            buildConfigField("boolean", "IS_DEMO_MODE", "false")
-        }
-        create("demo") {
-            isDefault = false
-            dimension = "mode"
-            buildConfigField("boolean", "IS_DEMO_MODE", "true")
-        }
-    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
