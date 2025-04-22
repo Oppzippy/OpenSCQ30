@@ -1,7 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
 import com.android.build.gradle.internal.tasks.factory.dependsOn
-import com.google.protobuf.gradle.id
 import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import java.util.Properties
@@ -14,7 +13,6 @@ plugins {
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     id("org.jlleitschuh.gradle.ktlint")
-    id("com.google.protobuf")
     kotlin("plugin.serialization")
 }
 
@@ -162,11 +160,6 @@ dependencies {
     ksp("androidx.room:room-compiler:$roomVersion")
     androidTestImplementation("androidx.room:room-testing:$roomVersion")
 
-    val protobufVersion = "4.29.3"
-    implementation("com.google.protobuf:protobuf-java:$protobufVersion")
-    implementation("com.google.protobuf:protobuf-kotlin:$protobufVersion")
-    protobuf(files("../../lib_protobuf/protobuf/"))
-
     implementation("net.java.dev.jna:jna:5.16.0@aar")
 
     val hiltVersion = "2.55"
@@ -201,20 +194,6 @@ dependencies {
 
 kapt {
     correctErrorTypes = true
-}
-
-protobuf {
-    generateProtoTasks {
-        all().forEach { task ->
-            task.builtins {
-                id("java")
-                id("kotlin")
-            }
-        }
-    }
-    protoc {
-        artifact = "com.google.protobuf:protoc:3.25.1"
-    }
 }
 
 val rustProjectDir: File = layout.projectDirectory.asFile.parentFile
