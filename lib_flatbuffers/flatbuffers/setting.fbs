@@ -1,0 +1,61 @@
+union SettingUnion {
+    SettingToggle,
+    SettingI32Range,
+    SettingSelect,
+    SettingOptionalSelect,
+    SettingModifiableSelect,
+    SettingEqualizer,
+    SettingInformation,
+}
+
+table SettingToggle {
+    value: bool;
+}
+
+table SettingI32Range {
+    start:int32;
+    end:int32;
+    step:int32;
+    value:int32;
+}
+
+table Select {
+    options:[string] (required);
+    localized_options:[string] (required);
+}
+
+table SettingSelect {
+    select:Select (required);
+    value:string (required);
+}
+
+table SettingOptionalSelect {
+    select:Select (required);
+    value:string;
+}
+
+table SettingModifiableSelect {
+    select:Select (required);
+    value:string;
+}
+
+table Equalizer {
+    band_hz: [uint16] (required);
+    fraction_digits: int16;
+    min: int16;
+    max: int16;
+}
+
+table SettingEqualizer {
+    equalizer: Equalizer (required);
+    value: [int16] (required);
+}
+
+table SettingInformation {
+    text: string (required);
+    translated_text: string (required);
+}
+
+table Setting {
+    inner:SettingUnion (required);
+}
