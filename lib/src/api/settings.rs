@@ -15,7 +15,18 @@ mod select;
 mod value;
 
 #[derive(
-    PartialEq, Eq, PartialOrd, Ord, Debug, Hash, Clone, Serialize, Deserialize, Translate, Display,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Debug,
+    Hash,
+    Clone,
+    Serialize,
+    Deserialize,
+    Translate,
+    Display,
+    EnumString,
 )]
 pub enum CategoryId {
     General,

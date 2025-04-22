@@ -1,6 +1,17 @@
+use cfg_if::cfg_if;
+
 use crate::api::connection::{self, RfcommBackend};
 
-pub mod rfcomm;
+cfg_if! {
+    if #[cfg(target_os = "linux")] {
+        mod linux;
+    } else {
+        mod none;
+    }
+
+}
+#[cfg(test)]
+pub mod mock;
 
 pub trait ConnectionBackends {
     type Rfcomm: RfcommBackend + Send + Sync;
@@ -11,21 +22,9 @@ pub trait ConnectionBackends {
 pub fn default_backends() -> Option<impl ConnectionBackends> {
     cfg_if::cfg_if! {
         if #[cfg(target_os = "linux")] {
-            Some(PlatformConnectionBackends {})
+            Some(linux::PlatformConnectionBackends::default())
         } else {
-            None
+            None::<none::NoneConnectionBackends>
         }
-    }
-}
-
-#[cfg(target_os = "linux")]
-struct PlatformConnectionBackends {}
-
-#[cfg(target_os = "linux")]
-impl ConnectionBackends for PlatformConnectionBackends {
-    type Rfcomm = rfcomm::BluerRfcommBackend;
-
-    async fn rfcomm(&self) -> connection::Result<Self::Rfcomm> {
-        rfcomm::BluerRfcommBackend::new().await
     }
 }

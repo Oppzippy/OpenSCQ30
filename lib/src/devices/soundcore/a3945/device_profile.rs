@@ -43,7 +43,7 @@ mod tests {
             device::OpenSCQ30DeviceRegistry,
             settings::{SettingId, Value},
         },
-        connection_backend::rfcomm::MockRfcommBackend,
+        connection_backend::mock::rfcomm::MockRfcommBackend,
         devices::{
             DeviceModel,
             soundcore::standard::{
