@@ -1,6 +1,7 @@
 use std::{collections::HashSet, panic::Location};
 
 use macaddr::MacAddr6;
+use serde::{Deserialize, Serialize};
 use tokio::sync::{mpsc, watch};
 use uuid::Uuid;
 
@@ -39,7 +40,7 @@ pub trait RfcommBackend {
     fn connect(
         &self,
         mac_address: MacAddr6,
-        select_uuid: impl Fn(HashSet<Uuid>) -> Uuid + Send,
+        select_uuid: impl Fn(HashSet<Uuid>) -> Uuid + Send + Sync + 'static,
     ) -> impl Future<Output = Result<Self::ConnectionType>> + Send;
 }
 
@@ -49,7 +50,7 @@ pub trait RfcommConnection {
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus>;
 }
 
-#[derive(PartialEq, Eq, Debug, Clone, PartialOrd, Ord, Hash)]
+#[derive(PartialEq, Eq, Debug, Clone, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct DeviceDescriptor {
     pub name: String,
     pub mac_address: MacAddr6,

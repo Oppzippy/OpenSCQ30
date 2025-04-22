@@ -15,6 +15,7 @@ use std::{
 
 use macaddr::MacAddr6;
 use rusqlite::{Connection, ffi::SQLITE_CONSTRAINT_UNIQUE};
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tokio::sync::{Semaphore, oneshot};
 use tracing::info_span;
@@ -32,7 +33,7 @@ pub struct OpenSCQ30Database {
     command_sender: mpsc::Sender<Command>,
     closed: Arc<Semaphore>,
 }
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PairedDevice {
     pub name: String,
     pub mac_address: MacAddr6,

@@ -48,7 +48,7 @@ impl OpenSCQ30Session {
 
     pub async fn list_devices(&self, model: DeviceModel) -> device::Result<Vec<DeviceDescriptor>> {
         self.list_devices_with_backends(
-            connection_backend::default_backends().expect("no default backends available"),
+            &connection_backend::default_backends().expect("no default backends available"),
             model,
         )
         .await
@@ -56,7 +56,7 @@ impl OpenSCQ30Session {
 
     pub async fn list_devices_with_backends(
         &self,
-        backends: impl ConnectionBackends + 'static,
+        backends: &(impl ConnectionBackends + 'static),
         model: DeviceModel,
     ) -> device::Result<Vec<DeviceDescriptor>> {
         model
@@ -71,7 +71,7 @@ impl OpenSCQ30Session {
         mac_address: MacAddr6,
     ) -> device::Result<Arc<dyn OpenSCQ30Device + Send + Sync>> {
         self.connect_with_backends(
-            connection_backend::default_backends().expect("no default backends available"),
+            &connection_backend::default_backends().expect("no default backends available"),
             mac_address,
         )
         .await
@@ -79,7 +79,7 @@ impl OpenSCQ30Session {
 
     pub async fn connect_with_backends(
         &self,
-        backends: impl ConnectionBackends + 'static,
+        backends: &(impl ConnectionBackends + 'static),
         mac_address: MacAddr6,
     ) -> device::Result<Arc<dyn OpenSCQ30Device + Send + Sync>> {
         if let Some(paired_device) = self.database.fetch_paired_device(mac_address).await? {

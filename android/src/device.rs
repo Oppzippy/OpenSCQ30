@@ -1,341 +1,67 @@
 use std::sync::Arc;
 
-use macaddr::MacAddr6;
-use openscq30_lib::{
-    api::device::Device,
-    demo::device::DemoDevice,
-    devices::standard::{
-        state::DeviceState,
-        structures::{
-            AmbientSoundModeCycle, EqualizerConfiguration, HearId, MultiButtonConfiguration,
-            SoundModes, SoundModesTypeTwo,
-        },
-    },
-    futures::TokioFutures,
-    soundcore_device::device::SoundcoreDevice,
-};
-use thiserror::Error;
-use tokio::{runtime::Runtime, sync::watch};
-use uuid::Uuid;
+use openscq30_lib::api::device::OpenSCQ30Device as LibOpenSCQ30Device;
 
-use crate::connection::ManualConnection;
-
-#[derive(Error, Debug, uniffi::Error)]
-#[uniffi(flat_error)]
-pub enum DeviceError {
-    #[error(transparent)]
-    OpenSCQ30Native(#[from] openscq30_lib::Error),
-    #[error(transparent)]
-    Protobuf(#[from] prost::DecodeError),
-    #[error(transparent)]
-    Io(#[from] std::io::Error),
-}
-
-#[uniffi::export(callback_interface)]
-pub trait NativeDeviceStateObserver: Send + Sync {
-    fn on_state_changed(&self, device_state: DeviceState);
-}
-
-#[uniffi::export(callback_interface)]
-pub trait NativeConnectionStatusObserver: Send + Sync {
-    fn on_status_changed(&self, connection_status: Vec<u8>);
-}
+use crate::serializable;
 
 #[derive(uniffi::Object)]
-pub struct NativeSoundcoreDevice {
-    device: Arc<DeviceImplementation>,
-    runtime: Runtime,
+pub struct OpenSCQ30Device {
+    pub inner: Arc<dyn LibOpenSCQ30Device + Send + Sync>,
 }
 
-#[uniffi::export]
-pub async fn new_soundcore_device(
-    connection: Arc<ManualConnection>,
-) -> Result<Arc<NativeSoundcoreDevice>, DeviceError> {
-    let runtime = tokio::runtime::Builder::new_multi_thread()
-        .enable_all()
-        .worker_threads(1)
-        .build()?;
-    let device = Arc::new(DeviceImplementation::Manual({
-        let connection = connection.to_owned();
-        runtime
-            .spawn(async move { SoundcoreDevice::new(connection).await })
-            .await
-            .unwrap()?
-    }));
-    Ok(Arc::new(NativeSoundcoreDevice { device, runtime }))
-}
-
-#[uniffi::export]
-pub async fn new_demo_soundcore_device(
-    name: String,
-    mac_address: MacAddr6,
-) -> Result<Arc<NativeSoundcoreDevice>, DeviceError> {
-    let runtime = tokio::runtime::Builder::new_multi_thread()
-        .enable_all()
-        .worker_threads(1)
-        .build()?;
-    let device = Arc::new(DeviceImplementation::Demo(
-        runtime
-            .spawn(async move { DemoDevice::<TokioFutures>::new(name, mac_address).await })
-            .await
-            .unwrap(),
-    ));
-    Ok(Arc::new(NativeSoundcoreDevice { device, runtime }))
-}
-
-#[uniffi::export]
-impl NativeSoundcoreDevice {
-    pub fn subscribe_to_state_updates(&self, observer: Box<dyn NativeDeviceStateObserver>) {
-        let device = self.device.to_owned();
-        self.runtime.spawn(async move {
-            let mut receiver = device.subscribe_to_state_updates().await;
-            while receiver.changed().await.is_ok() {
-                observer.on_state_changed(receiver.borrow().to_owned());
-            }
-        });
-    }
-
-    pub async fn mac_address(&self) -> Result<String, DeviceError> {
-        let device = self.device.clone();
-
-        self.runtime
-            .spawn(async move {
-                device
-                    .mac_address()
-                    .await
-                    .map(|mac_address| mac_address.to_string())
-                    .map_err(DeviceError::from)
-            })
-            .await
-            .unwrap()
-    }
-
-    pub fn service_uuid(&self) -> Uuid {
-        self.device.service_uuid()
-    }
-
-    pub async fn name(&self) -> Result<String, DeviceError> {
-        let device = self.device.clone();
-
-        self.runtime
-            .spawn(async move { device.name().await.map_err(DeviceError::from) })
-            .await
-            .unwrap()
-    }
-
-    pub fn connection_status(&self, _observer: Box<dyn NativeConnectionStatusObserver>) {}
-
-    pub async fn state(&self) -> DeviceState {
-        let device = self.device.clone();
-
-        self.runtime
-            .spawn(async move { device.state().await })
-            .await
-            .unwrap()
-    }
-
-    pub async fn set_sound_modes(&self, sound_modes: SoundModes) -> Result<(), DeviceError> {
-        let device = self.device.clone();
-
-        self.runtime
-            .spawn(async move {
-                device
-                    .set_sound_modes(sound_modes)
-                    .await
-                    .map_err(DeviceError::from)
-            })
-            .await
-            .unwrap()
-    }
-
-    pub async fn set_sound_modes_type_two(
-        &self,
-        sound_modes: SoundModesTypeTwo,
-    ) -> Result<(), DeviceError> {
-        let device = self.device.clone();
-
-        self.runtime
-            .spawn(async move {
-                device
-                    .set_sound_modes_type_two(sound_modes)
-                    .await
-                    .map_err(DeviceError::from)
-            })
-            .await
-            .unwrap()
-    }
-
-    pub async fn set_ambient_sound_mode_cycle(
-        &self,
-        cycle: AmbientSoundModeCycle,
-    ) -> Result<(), DeviceError> {
-        let device = self.device.clone();
-
-        self.runtime
-            .spawn(async move {
-                device
-                    .set_ambient_sound_mode_cycle(cycle)
-                    .await
-                    .map_err(DeviceError::from)
-            })
-            .await
-            .unwrap()
-    }
-
-    pub async fn set_equalizer_configuration(
-        &self,
-        equalizer_configuration: EqualizerConfiguration,
-    ) -> Result<(), DeviceError> {
-        let device = self.device.clone();
-
-        self.runtime
-            .spawn(async move {
-                device
-                    .set_equalizer_configuration(equalizer_configuration)
-                    .await
-                    .map_err(DeviceError::from)
-            })
-            .await
-            .unwrap()
-    }
-
-    pub async fn set_hear_id(&self, hear_id: HearId) -> Result<(), DeviceError> {
-        let device = self.device.clone();
-
-        self.runtime
-            .spawn(async move { device.set_hear_id(hear_id).await.map_err(DeviceError::from) })
-            .await
-            .unwrap()
-    }
-
-    pub async fn set_multi_button_configuration(
-        &self,
-        button_configuration: MultiButtonConfiguration,
-    ) -> Result<(), DeviceError> {
-        let device = self.device.clone();
-
-        self.runtime
-            .spawn(async move {
-                device
-                    .set_multi_button_configuration(button_configuration)
-                    .await
-                    .map_err(DeviceError::from)
-            })
-            .await
-            .unwrap()
+impl From<Arc<dyn LibOpenSCQ30Device + Send + Sync>> for OpenSCQ30Device {
+    fn from(inner: Arc<dyn LibOpenSCQ30Device + Send + Sync>) -> Self {
+        Self { inner }
     }
 }
 
-// Dynamic dispatch does not work with async functions in traits
-enum DeviceImplementation {
-    Manual(SoundcoreDevice<ManualConnection, TokioFutures>),
-    Demo(DemoDevice<TokioFutures>),
+#[uniffi::export(async_runtime = "tokio")]
+impl OpenSCQ30Device {
+    fn model(&self) -> serializable::DeviceModel {
+        serializable::DeviceModel(self.inner.model())
+    }
+
+    fn categories(&self) -> Vec<serializable::CategoryId> {
+        self.inner
+            .categories()
+            .into_iter()
+            .map(serializable::CategoryId)
+            .collect()
+    }
+
+    fn settings_in_category(
+        &self,
+        category_id: serializable::CategoryId,
+    ) -> Vec<serializable::SettingId> {
+        self.inner
+            .settings_in_category(&category_id.0)
+            .into_iter()
+            .map(serializable::SettingId)
+            .collect()
+    }
+
+    fn setting(&self, setting_id: serializable::SettingId) -> Option<serializable::Setting> {
+        self.inner.setting(&setting_id.0).map(serializable::Setting)
+    }
+
+    async fn set_setting_values(
+        &self,
+        setting_values: Vec<SettingIdValuePair>,
+    ) -> Result<(), crate::Error> {
+        self.inner
+            .set_setting_values(
+                setting_values
+                    .into_iter()
+                    .map(|pair| (pair.setting.0, pair.value.0))
+                    .collect(),
+            )
+            .await
+            .map_err(Into::into)
+    }
 }
 
-impl DeviceImplementation {
-    pub async fn subscribe_to_state_updates(&self) -> watch::Receiver<DeviceState> {
-        match self {
-            DeviceImplementation::Manual(device) => device.subscribe_to_state_updates().await,
-            DeviceImplementation::Demo(device) => device.subscribe_to_state_updates().await,
-        }
-    }
-
-    pub async fn name(&self) -> openscq30_lib::Result<String> {
-        match self {
-            DeviceImplementation::Manual(device) => device.name().await,
-            DeviceImplementation::Demo(device) => device.name().await,
-        }
-    }
-
-    pub async fn mac_address(&self) -> openscq30_lib::Result<MacAddr6> {
-        match self {
-            DeviceImplementation::Manual(device) => device.mac_address().await,
-            DeviceImplementation::Demo(device) => device.mac_address().await,
-        }
-    }
-
-    pub fn service_uuid(&self) -> Uuid {
-        match self {
-            DeviceImplementation::Manual(device) => device.service_uuid(),
-            DeviceImplementation::Demo(device) => device.service_uuid(),
-        }
-    }
-
-    pub async fn state(&self) -> DeviceState {
-        match self {
-            DeviceImplementation::Manual(device) => device.state().await,
-            DeviceImplementation::Demo(device) => device.state().await,
-        }
-    }
-
-    pub async fn set_sound_modes(&self, sound_modes: SoundModes) -> openscq30_lib::Result<()> {
-        match self {
-            DeviceImplementation::Manual(device) => device.set_sound_modes(sound_modes).await,
-            DeviceImplementation::Demo(device) => device.set_sound_modes(sound_modes).await,
-        }
-    }
-    pub async fn set_sound_modes_type_two(
-        &self,
-        sound_modes: SoundModesTypeTwo,
-    ) -> openscq30_lib::Result<()> {
-        match self {
-            DeviceImplementation::Manual(device) => {
-                device.set_sound_modes_type_two(sound_modes).await
-            }
-            DeviceImplementation::Demo(device) => {
-                device.set_sound_modes_type_two(sound_modes).await
-            }
-        }
-    }
-
-    pub async fn set_ambient_sound_mode_cycle(
-        &self,
-        cycle: AmbientSoundModeCycle,
-    ) -> openscq30_lib::Result<()> {
-        match self {
-            DeviceImplementation::Manual(device) => {
-                device.set_ambient_sound_mode_cycle(cycle).await
-            }
-            DeviceImplementation::Demo(device) => device.set_ambient_sound_mode_cycle(cycle).await,
-        }
-    }
-
-    pub async fn set_equalizer_configuration(
-        &self,
-        configuration: EqualizerConfiguration,
-    ) -> openscq30_lib::Result<()> {
-        match self {
-            DeviceImplementation::Manual(device) => {
-                device.set_equalizer_configuration(configuration).await
-            }
-            DeviceImplementation::Demo(device) => {
-                device.set_equalizer_configuration(configuration).await
-            }
-        }
-    }
-
-    pub async fn set_hear_id(&self, hear_id: HearId) -> openscq30_lib::Result<()> {
-        match self {
-            DeviceImplementation::Manual(device) => device.set_hear_id(hear_id).await,
-            DeviceImplementation::Demo(device) => device.set_hear_id(hear_id).await,
-        }
-    }
-
-    pub async fn set_multi_button_configuration(
-        &self,
-        button_configuration: MultiButtonConfiguration,
-    ) -> openscq30_lib::Result<()> {
-        match self {
-            DeviceImplementation::Manual(device) => {
-                device
-                    .set_multi_button_configuration(button_configuration)
-                    .await
-            }
-            DeviceImplementation::Demo(device) => {
-                device
-                    .set_multi_button_configuration(button_configuration)
-                    .await
-            }
-        }
-    }
+#[derive(uniffi::Record)]
+pub struct SettingIdValuePair {
+    setting: serializable::SettingId,
+    value: serializable::Value,
 }

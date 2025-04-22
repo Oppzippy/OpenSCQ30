@@ -20,7 +20,7 @@ uuid = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 strum = { workspace = true, features = ["derive"] }
-macaddr = { workspace = true }
+macaddr = { workspace = true, features = ["serde"] }
 nom = { workspace = true }
 serde = { workspace = true, features = ["derive", "rc"] }
 serde_json = { workspace = true }

@@ -48,7 +48,7 @@ pub enum DeviceModel {
 impl DeviceModel {
     pub async fn device_registry<B: ConnectionBackends + 'static>(
         &self,
-        backends: B,
+        backends: &B,
         database: Arc<OpenSCQ30Database>,
         is_demo: bool,
     ) -> device::Result<Arc<dyn OpenSCQ30DeviceRegistry + Send + Sync>> {

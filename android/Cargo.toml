@@ -2,25 +2,25 @@
 name = "openscq30_android"
 version.workspace = true
 license.workspace = true
-edition = "2021"
+edition = "2024"
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
 openscq30_lib = { path = "../lib" }
-openscq30_lib_protobuf = { path = "../lib_protobuf" }
 tracing = { workspace = true, features = ["log-always"] }
 log = { workspace = true }
-tokio = { workspace = true, features = ["rt-multi-thread"] }
+tokio = { workspace = true }
 thiserror = { workspace = true }
 android_logger = { workspace = true }
 anyhow = { workspace = true }
 macaddr = { workspace = true }
 uuid = { workspace = true }
 itertools = { workspace = true }
-uniffi = { workspace = true }
-prost = { workspace = true }
+uniffi = { workspace = true, features = ["tokio"] }
+serde_json = { workspace = true }
+async-trait = { workspace = true }
 
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }
