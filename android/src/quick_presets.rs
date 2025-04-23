@@ -9,12 +9,6 @@ pub struct QuickPresetsHandler {
 
 #[uniffi::export(async_runtime = "tokio")]
 impl QuickPresetsHandler {
-    #[uniffi::constructor]
-    #[allow(clippy::new_without_default)]
-    pub fn new() -> Self {
-        unimplemented!()
-    }
-
     pub async fn quick_presets(
         &self,
         device: &OpenSCQ30Device,

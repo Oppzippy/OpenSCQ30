@@ -5,7 +5,7 @@ use tokio::sync::{mpsc, watch};
 
 use crate::{
     api::{
-        connection::{DeviceDescriptor, RfcommBackend, RfcommConnection},
+        connection::{ConnectionDescriptor, RfcommBackend, RfcommConnection},
         device::{self, OpenSCQ30Device, OpenSCQ30DeviceRegistry},
         settings::{CategoryId, Setting, SettingId, Value},
     },
@@ -92,14 +92,14 @@ where
     StateUpdatePacketType: InboundPacket + Send + Sync + 'static,
     Self: BuildDevice<B::ConnectionType, StateType, StateUpdatePacketType>,
 {
-    async fn devices(&self) -> device::Result<Vec<DeviceDescriptor>> {
+    async fn devices(&self) -> device::Result<Vec<ConnectionDescriptor>> {
         self.backend
             .devices()
             .await
             .map(|descriptors| {
                 descriptors
                     .into_iter()
-                    .map(|d| DeviceDescriptor {
+                    .map(|d| ConnectionDescriptor {
                         name: d.name,
                         mac_address: d.mac_address,
                     })

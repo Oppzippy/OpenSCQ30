@@ -9,7 +9,7 @@ use tokio::sync::{mpsc, watch};
 use uuid::Uuid;
 
 use crate::{
-    api::connection::{self, ConnectionStatus, DeviceDescriptor, RfcommBackend, RfcommConnection},
+    api::connection::{self, ConnectionStatus, ConnectionDescriptor, RfcommBackend, RfcommConnection},
     devices::soundcore::standard::packets::inbound::take_inbound_packet_header,
 };
 
@@ -32,8 +32,8 @@ impl DemoConnectionRegistry {
 impl RfcommBackend for DemoConnectionRegistry {
     type ConnectionType = DemoConnection;
 
-    async fn devices(&self) -> connection::Result<HashSet<DeviceDescriptor>> {
-        Ok(HashSet::from([DeviceDescriptor {
+    async fn devices(&self) -> connection::Result<HashSet<ConnectionDescriptor>> {
+        Ok(HashSet::from([ConnectionDescriptor {
             name: self.name.clone(),
             mac_address: MacAddr6::nil(),
         }]))

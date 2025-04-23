@@ -28,7 +28,7 @@ use tracing::{Instrument, debug, instrument, trace, trace_span, warn};
 use uuid::Uuid;
 
 use crate::api::connection::{
-    self, ConnectionStatus, DeviceDescriptor, RfcommBackend, RfcommConnection,
+    self, ConnectionStatus, ConnectionDescriptor, RfcommBackend, RfcommConnection,
 };
 
 pub struct BluerRfcommBackend {
@@ -46,10 +46,10 @@ impl BluerRfcommBackend {
     async fn address_to_descriptor(
         adapter: &Adapter,
         address: Address,
-    ) -> connection::Result<Option<DeviceDescriptor>> {
+    ) -> connection::Result<Option<ConnectionDescriptor>> {
         let device = adapter.device(address)?;
         if device.is_connected().await? {
-            Ok(Some(DeviceDescriptor {
+            Ok(Some(ConnectionDescriptor {
                 name: device.name().await?.unwrap_or_default(),
                 mac_address: address.into(),
             }))
@@ -63,7 +63,7 @@ impl RfcommBackend for BluerRfcommBackend {
     type ConnectionType = BluerRfcommConnection;
 
     #[instrument(skip(self))]
-    async fn devices(&self) -> connection::Result<HashSet<DeviceDescriptor>> {
+    async fn devices(&self) -> connection::Result<HashSet<ConnectionDescriptor>> {
         let adapter = self.session.default_adapter().await.map_err(|err| {
             if err.kind == bluer::ErrorKind::NotFound {
                 connection::Error::BluetoothAdapterUnavailable {

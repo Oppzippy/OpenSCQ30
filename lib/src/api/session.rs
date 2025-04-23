@@ -9,7 +9,7 @@ use crate::{
 };
 
 use super::{
-    connection::DeviceDescriptor,
+    connection::ConnectionDescriptor,
     device::{self, OpenSCQ30Device},
     quick_presets::QuickPresetsHandler,
 };
@@ -46,7 +46,10 @@ impl OpenSCQ30Session {
             .map_err(Into::into)
     }
 
-    pub async fn list_devices(&self, model: DeviceModel) -> device::Result<Vec<DeviceDescriptor>> {
+    pub async fn list_devices(
+        &self,
+        model: DeviceModel,
+    ) -> device::Result<Vec<ConnectionDescriptor>> {
         self.list_devices_with_backends(
             &connection_backend::default_backends().expect("no default backends available"),
             model,
@@ -58,7 +61,7 @@ impl OpenSCQ30Session {
         &self,
         backends: &(impl ConnectionBackends + 'static),
         model: DeviceModel,
-    ) -> device::Result<Vec<DeviceDescriptor>> {
+    ) -> device::Result<Vec<ConnectionDescriptor>> {
         model
             .device_registry(backends, self.database.clone(), true)
             .await?

@@ -36,7 +36,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub trait RfcommBackend {
     type ConnectionType: RfcommConnection + Send + Sync;
 
-    fn devices(&self) -> impl Future<Output = Result<HashSet<DeviceDescriptor>>> + Send;
+    fn devices(&self) -> impl Future<Output = Result<HashSet<ConnectionDescriptor>>> + Send;
     fn connect(
         &self,
         mac_address: MacAddr6,
@@ -51,7 +51,7 @@ pub trait RfcommConnection {
 }
 
 #[derive(PartialEq, Eq, Debug, Clone, PartialOrd, Ord, Hash, Serialize, Deserialize)]
-pub struct DeviceDescriptor {
+pub struct ConnectionDescriptor {
     pub name: String,
     pub mac_address: MacAddr6,
 }

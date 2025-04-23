@@ -13,19 +13,32 @@ use uuid::Uuid;
 use crate::{AndroidError, serializable};
 
 #[derive(uniffi::Object)]
-pub struct ManualConnectionBackends {}
+pub struct ManualConnectionBackends {
+    rfcomm: Arc<dyn AndroidRfcommConnectionBackend>,
+}
+
+#[uniffi::export]
+impl ManualConnectionBackends {
+    #[uniffi::constructor]
+    pub fn new(rfcomm: Arc<dyn AndroidRfcommConnectionBackend>) -> Self {
+        Self { rfcomm }
+    }
+}
+
 impl ConnectionBackends for ManualConnectionBackends {
     type Rfcomm = ManualRfcommConnectionBackend;
 
     async fn rfcomm(&self) -> connection::Result<Self::Rfcomm> {
-        todo!()
+        Ok(ManualRfcommConnectionBackend {
+            inner: self.rfcomm.to_owned(),
+        })
     }
 }
 
 #[uniffi::export(with_foreign)]
 #[async_trait]
 pub trait AndroidRfcommConnectionBackend: Send + Sync {
-    async fn devices(&self) -> Result<Vec<serializable::DeviceDescriptor>, AndroidError>;
+    async fn devices(&self) -> Result<Vec<serializable::ConnectionDescriptor>, AndroidError>;
     async fn connect(
         &self,
         mac_address: serializable::MacAddr6,
@@ -55,13 +68,14 @@ pub struct RfcommConnectionWriterBox {
     inner: std::sync::Mutex<Option<Arc<dyn AndroidRfcommConnectionWriter>>>,
 }
 
+#[uniffi::export]
 impl RfcommConnectionWriterBox {
-    pub fn set(&self, inner: Arc<dyn AndroidRfcommConnectionWriter>) {
-        *self.inner.lock().unwrap() = Some(inner);
+    pub fn set(&self, inner: Option<Arc<dyn AndroidRfcommConnectionWriter>>) {
+        *self.inner.lock().unwrap() = inner;
     }
 
-    pub fn get(&self) -> Arc<dyn AndroidRfcommConnectionWriter> {
-        self.inner.lock().unwrap().take().unwrap()
+    pub fn get(&self) -> Option<Arc<dyn AndroidRfcommConnectionWriter>> {
+        self.inner.lock().unwrap().take()
     }
 }
 
@@ -72,7 +86,7 @@ pub struct ManualRfcommConnectionBackend {
 impl RfcommBackend for ManualRfcommConnectionBackend {
     type ConnectionType = ManualRfcommConnection;
 
-    async fn devices(&self) -> connection::Result<HashSet<connection::DeviceDescriptor>> {
+    async fn devices(&self) -> connection::Result<HashSet<connection::ConnectionDescriptor>> {
         let descriptors = self
             .inner
             .devices()
@@ -109,13 +123,19 @@ impl RfcommBackend for ManualRfcommConnectionBackend {
                 source: Box::new(err),
                 location: Location::caller(),
             })?;
-        Ok(ManualRfcommConnection::new(output_box.get()))
+        Ok(ManualRfcommConnection::new(output_box.get().ok_or_else(
+            || connection::Error::DeviceNotFound {
+                source: None,
+                location: Location::caller(),
+            },
+        )?))
     }
 }
 
 #[uniffi::export(with_foreign)]
+#[async_trait]
 pub trait AndroidRfcommConnectionWriter: Send + Sync {
-    fn write(&self, data: Vec<u8>);
+    async fn write(&self, data: Vec<u8>);
 }
 
 #[derive(Error, Debug, uniffi::Error)]
@@ -171,7 +191,7 @@ impl RfcommConnection for ManualRfcommConnection {
     }
 
     async fn write(&self, data: &[u8]) -> connection::Result<()> {
-        self.connection_writer.write(data.to_owned());
+        self.connection_writer.write(data.to_owned()).await;
         Ok(())
     }
 

@@ -6,7 +6,7 @@ use macaddr::MacAddr6;
 use crate::{devices::DeviceModel, macros::impl_from_source_error_with_location, storage};
 
 use super::{
-    connection::{self, DeviceDescriptor},
+    connection::{self, ConnectionDescriptor},
     settings::{self, CategoryId, Setting, SettingId, Value},
 };
 
@@ -54,7 +54,7 @@ impl Error {
 
 #[async_trait]
 pub trait OpenSCQ30DeviceRegistry {
-    async fn devices(&self) -> Result<Vec<DeviceDescriptor>>;
+    async fn devices(&self) -> Result<Vec<ConnectionDescriptor>>;
     async fn connect(
         &self,
         mac_address: MacAddr6,

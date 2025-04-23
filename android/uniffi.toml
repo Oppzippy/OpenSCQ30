@@ -6,3 +6,57 @@ type_name = "UUID"
 imports = ["java.util.UUID"]
 into_custom = "UUID.fromString({})"
 from_custom = "{}.toString()"
+
+[bindings.kotlin.custom_types.PairedDevice]
+type_name = "PairedDevice"
+imports = [
+    "kotlinx.serialization.json.Json",
+    "com.oppzippy.openscq30.lib.wrapper.PairedDevice",
+]
+into_custom = "Json.decodeFromString<PairedDevice>({})"
+from_custom = "Json.encodeToString({})"
+
+[bindings.kotlin.custom_types.ConnectionDescriptor]
+type_name = "ConnectionDescriptor"
+imports = [
+    "kotlinx.serialization.json.Json",
+    "com.oppzippy.openscq30.lib.wrapper.ConnectionDescriptor",
+]
+into_custom = "Json.decodeFromString<ConnectionDescriptor>({})"
+from_custom = "Json.encodeToString({})"
+
+[bindings.kotlin.custom_types.DeviceDescriptor]
+type_name = "DeviceDescriptor"
+imports = [
+    "kotlinx.serialization.json.Json",
+    "com.oppzippy.openscq30.lib.wrapper.DeviceDescriptor",
+]
+into_custom = "Json.decodeFromString<DeviceDescriptor>({})"
+from_custom = "Json.encodeToString({})"
+
+[bindings.kotlin.custom_types.Setting]
+type_name = "Setting"
+imports = [
+    "kotlinx.serialization.json.Json",
+    "com.oppzippy.openscq30.lib.wrapper.Setting",
+]
+into_custom = "Json.decodeFromString<Setting>({})"
+from_custom = "Json.encodeToString({})"
+
+[bindings.kotlin.custom_types.Value]
+type_name = "Value"
+imports = [
+    "kotlinx.serialization.json.Json",
+    "com.oppzippy.openscq30.lib.wrapper.Value",
+]
+into_custom = "Json.decodeFromString<Value>({})"
+from_custom = "Json.encodeToString({})"
+
+[bindings.kotlin.custom_types.QuickPreset]
+type_name = "QuickPreset"
+imports = [
+    "kotlinx.serialization.json.Json",
+    "com.oppzippy.openscq30.lib.wrapper.QuickPreset",
+]
+into_custom = "Json.decodeFromString<QuickPreset>({})"
+from_custom = "Json.encodeToString({})"

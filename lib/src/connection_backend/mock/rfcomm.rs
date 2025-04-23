@@ -5,7 +5,7 @@ use tokio::sync::{mpsc, watch};
 use uuid::Uuid;
 
 use crate::api::connection::{
-    self, ConnectionStatus, DeviceDescriptor, RfcommBackend, RfcommConnection,
+    self, ConnectionStatus, ConnectionDescriptor, RfcommBackend, RfcommConnection,
 };
 
 pub struct MockRfcommBackend {
@@ -25,8 +25,8 @@ impl MockRfcommBackend {
 impl RfcommBackend for MockRfcommBackend {
     type ConnectionType = MockRfcommConnection;
 
-    async fn devices(&self) -> connection::Result<HashSet<DeviceDescriptor>> {
-        Ok([DeviceDescriptor {
+    async fn devices(&self) -> connection::Result<HashSet<ConnectionDescriptor>> {
+        Ok([ConnectionDescriptor {
             name: "Mock Device".to_owned(),
             mac_address: MacAddr6::nil(),
         }]

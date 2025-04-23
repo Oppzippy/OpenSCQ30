@@ -11,7 +11,7 @@ pub struct NoneRfcommConnection {}
 impl RfcommBackend for NoneRfcommBackend {
     type ConnectionType = NoneRfcommConnection;
 
-    async fn devices(&self) -> connection::Result<HashSet<connection::DeviceDescriptor>> {
+    async fn devices(&self) -> connection::Result<HashSet<connection::ConnectionDescriptor>> {
         unimplemented!()
     }
 

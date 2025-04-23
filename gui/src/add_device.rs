@@ -6,7 +6,7 @@ use cosmic::{
     widget::{self, Id, icon},
 };
 use openscq30_lib::{
-    api::{OpenSCQ30Session, connection::DeviceDescriptor},
+    api::{OpenSCQ30Session, connection::ConnectionDescriptor},
     devices::DeviceModel,
 };
 use strum::IntoEnumIterator;
@@ -36,7 +36,7 @@ struct LoadingDevicesModel {
 struct SelectDeviceModel {
     search_id: Id,
     search_query: String,
-    devices: Vec<DeviceDescriptor>,
+    devices: Vec<ConnectionDescriptor>,
     device_model: DeviceModel,
 }
 
@@ -46,7 +46,7 @@ pub enum Message {
     SetDeviceModelSearchQuery(String),
     SelectModel(DeviceModel),
     SelectDevice(usize),
-    SetDeviceList(Vec<DeviceDescriptor>),
+    SetDeviceList(Vec<ConnectionDescriptor>),
     SetDeviceNameSearchQuery(String),
     SetErrorMessage(String),
 }
@@ -56,7 +56,7 @@ pub enum Action {
     Task(Task<Message>),
     AddDevice {
         model: DeviceModel,
-        descriptor: DeviceDescriptor,
+        descriptor: ConnectionDescriptor,
     },
 }
 

@@ -13,10 +13,8 @@ pub struct OpenSCQ30Session {
 }
 
 #[uniffi::export(async_runtime = "tokio")]
-pub async fn new_session(db_path: String) -> Result<OpenSCQ30Session, String> {
-    let inner_session = LibSession::new(PathBuf::from(db_path))
-        .await
-        .map_err(|err| format!("{err:?}"))?;
+pub async fn new_session(db_path: String) -> Result<OpenSCQ30Session, crate::Error> {
+    let inner_session = LibSession::new(PathBuf::from(db_path)).await?;
     Ok(OpenSCQ30Session {
         inner: inner_session,
     })
@@ -24,11 +22,6 @@ pub async fn new_session(db_path: String) -> Result<OpenSCQ30Session, String> {
 
 #[uniffi::export(async_runtime = "tokio")]
 impl OpenSCQ30Session {
-    #[uniffi::constructor]
-    pub fn _construct() -> Self {
-        unimplemented!()
-    }
-
     pub async fn pair(
         &self,
         paired_device: serializable::PairedDevice,
@@ -53,11 +46,11 @@ impl OpenSCQ30Session {
     pub async fn list_devices(
         &self,
         model: serializable::DeviceModel,
-    ) -> Result<Vec<serializable::DeviceDescriptor>, crate::Error> {
+    ) -> Result<Vec<serializable::ConnectionDescriptor>, crate::Error> {
         let descriptors = self.inner.list_devices(model.0).await?;
         Ok(descriptors
             .into_iter()
-            .map(serializable::DeviceDescriptor)
+            .map(serializable::ConnectionDescriptor)
             .collect())
     }
 
@@ -65,7 +58,7 @@ impl OpenSCQ30Session {
         &self,
         backends: Arc<ManualConnectionBackends>,
         model_json: &str,
-    ) -> Result<Vec<serializable::DeviceDescriptor>, crate::Error> {
+    ) -> Result<Vec<serializable::ConnectionDescriptor>, crate::Error> {
         let model = serde_json::from_str(model_json)?;
         let descriptors = self
             .inner
@@ -73,7 +66,7 @@ impl OpenSCQ30Session {
             .await?;
         Ok(descriptors
             .into_iter()
-            .map(serializable::DeviceDescriptor)
+            .map(serializable::ConnectionDescriptor)
             .collect())
     }
 

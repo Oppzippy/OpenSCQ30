@@ -23,29 +23,29 @@ uniffi::custom_type!(PairedDevice, String, {
     lower: |val| serde_json::to_string(&val.0).expect("json serialization shouldn't fail"),
 });
 
-pub struct DeviceDescriptor(pub connection::DeviceDescriptor);
-uniffi::custom_type!(DeviceDescriptor, String, {
-    try_lift: |json| Ok(DeviceDescriptor(serde_json::from_str(&json)?)),
+pub struct ConnectionDescriptor(pub connection::ConnectionDescriptor);
+uniffi::custom_type!(ConnectionDescriptor, String, {
+    try_lift: |json| Ok(ConnectionDescriptor(serde_json::from_str(&json)?)),
     lower: |val| serde_json::to_string(&val.0).expect("json serialization shouldn't fail"),
 });
 
 pub struct DeviceModel(pub devices::DeviceModel);
 uniffi::custom_type!(DeviceModel, String, {
-    try_lift: |json| Ok(DeviceModel(serde_json::from_str(&json)?)),
-    lower: |val| serde_json::to_string(&val.0).expect("json serialization shouldn't fail"),
+    try_lift: |model| Ok(DeviceModel(devices::DeviceModel::from_str(&model)?)),
+    lower: |val| val.0.to_string(),
 });
 
 pub struct CategoryId(pub settings::CategoryId);
 uniffi::custom_type!(CategoryId, String, {
-    try_lift: |json| Ok(CategoryId(serde_json::from_str(&json)?)),
-    lower: |val| serde_json::to_string(&val.0).expect("json serialization shouldn't fail"),
+    try_lift: |category_id| Ok(CategoryId(settings::CategoryId::from_str(&category_id)?)),
+    lower: |val| val.0.to_string(),
 });
 
 #[derive(Hash, PartialEq, Eq)]
 pub struct SettingId(pub settings::SettingId);
 uniffi::custom_type!(SettingId, String, {
-    try_lift: |json| Ok(SettingId(serde_json::from_str(&json)?)),
-    lower: |val| serde_json::to_string(&val.0).expect("json serialization shouldn't fail"),
+    try_lift: |setting_id| Ok(SettingId(settings::SettingId::from_str(&setting_id)?)),
+    lower: |val| val.0.to_string(),
 });
 
 pub struct Setting(pub settings::Setting);

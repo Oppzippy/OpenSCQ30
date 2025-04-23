@@ -12,8 +12,6 @@ import android.os.IBinder
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
-import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetRepository
-import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceConnector
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_DISCONNECT
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_QUICK_PRESET
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_SEND_NOTIFICATION
@@ -21,20 +19,19 @@ import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNo
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_CHANNEL_ID
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_ID
 import com.oppzippy.openscq30.features.soundcoredevice.usecases.ActivateQuickPresetUseCase
+import com.oppzippy.openscq30.lib.bindings.OpenScq30Device
+import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(FlowPreview::class)
 @AndroidEntryPoint
@@ -54,7 +51,7 @@ class DeviceService : LifecycleService() {
     }
 
     @Inject
-    lateinit var deviceConnector: SoundcoreDeviceConnector
+    lateinit var session: OpenScq30Session
 
     @Inject
     lateinit var activateQuickPresetUseCase: ActivateQuickPresetUseCase
@@ -62,26 +59,35 @@ class DeviceService : LifecycleService() {
     @Inject
     lateinit var notificationBuilder: NotificationBuilder
 
-    @Inject
-    lateinit var quickPresetRepository: QuickPresetRepository
-
     private var quickPresetNames = MutableStateFlow<List<String?>>(emptyList())
-    lateinit var connectionManager: DeviceConnectionManager
+    private var _device = MutableStateFlow<OpenScq30Device?>(null)
+    var device: OpenScq30Device?
+        get() {
+            return _device.value
+        }
+        set(newDevice) {
+            val oldDevice = _device.value
+            _device.value = newDevice
+            oldDevice?.close()
+            stopSelf()
+        }
+
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
-                ACTION_DISCONNECT -> {
-                    MainScope().launch {
-                        // Disconnecting will trigger stopping this service
-                        connectionManager.disconnect()
-                    }
-                }
-
+                ACTION_DISCONNECT -> device = null
                 ACTION_QUICK_PRESET -> {
-                    val presetId = intent.getIntExtra(INTENT_EXTRA_PRESET_ID, 0)
+                    val presetIndex = intent.getIntExtra(INTENT_EXTRA_PRESET_ID, 0)
                     lifecycleScope.launch {
-                        activateQuickPresetUseCase(presetId, connectionManager)
+                        device?.let { device ->
+                            session.quickPresetHandler().use { quickPresetHandler ->
+                                val quickPresets = quickPresetHandler.quickPresets(device)
+                                quickPresets.getOrNull(presetIndex)?.let { preset ->
+                                    quickPresetHandler.activate(device, preset.name)
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -94,7 +100,6 @@ class DeviceService : LifecycleService() {
 
     override fun onCreate() {
         super.onCreate()
-        connectionManager = DeviceConnectionManager(deviceConnector, lifecycleScope)
 
         lifecycleScope.launch {
             connectionManager.connectionStatusFlow.collectLatest { connectionStatus ->
@@ -152,7 +157,6 @@ class DeviceService : LifecycleService() {
         createNotificationChannel()
     }
 
-    private val connectToDeviceMutex = Mutex()
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
@@ -161,9 +165,7 @@ class DeviceService : LifecycleService() {
 
         intent?.getStringExtra(MAC_ADDRESS)?.let { macAddress ->
             lifecycleScope.launch {
-                connectToDeviceMutex.withLock {
-                    connectionManager.connect(macAddress)
-                }
+                device = session.connect(macAddress)
             }
         }
 
@@ -174,10 +176,7 @@ class DeviceService : LifecycleService() {
         super.onDestroy()
         unregisterReceiver(broadcastReceiver)
         cancelNotification()
-
-        MainScope().launch {
-            connectionManager.disconnect()
-        }
+        device = null
     }
 
     private fun createNotificationChannel() {
