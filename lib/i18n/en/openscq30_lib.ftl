@@ -67,7 +67,6 @@ volume-up = Volume Up
 volume-down = Volume Down
 previous-song = Previous Song
 next-song = Next Song
-ambient-sound-mode = Ambient Sound Mode
 voice-assistant = Voice Assistant
 play-pause = Play Pause
 game-mode = Game Mode
