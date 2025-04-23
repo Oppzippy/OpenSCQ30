@@ -13,16 +13,11 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
-import com.oppzippy.openscq30.features.quickpresets.storage.FallbackQuickPreset
-import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
-import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
 
 @Database(
-    version = 10,
+    version = 11,
     entities = [
         CustomProfile::class,
-        FallbackQuickPreset::class,
-        QuickPreset::class,
     ],
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -38,7 +33,6 @@ import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetDao
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun equalizerCustomProfileDao(): CustomProfileDao
-    abstract fun quickPresetDao(): QuickPresetDao
 
     @RenameColumn(
         tableName = "quick_preset",
