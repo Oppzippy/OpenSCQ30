@@ -56,7 +56,7 @@ pub struct ConnectionDescriptor {
     pub mac_address: MacAddr6,
 }
 
-#[derive(PartialEq, Eq, Debug, Clone, Copy, PartialOrd, Ord, Hash)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub enum ConnectionStatus {
     Connected,
     Disconnected,

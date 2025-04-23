@@ -11,20 +11,26 @@ import com.oppzippy.openscq30.lib.bindings.AndroidRfcommConnectionBackend
 import com.oppzippy.openscq30.lib.bindings.AndroidRfcommConnectionWriter
 import com.oppzippy.openscq30.lib.bindings.MacAddr6
 import com.oppzippy.openscq30.lib.bindings.ManualConnectionBackends
-import com.oppzippy.openscq30.lib.bindings.RfcommConnectionWriterBox
+import com.oppzippy.openscq30.lib.bindings.ManualRfcommConnection
+import com.oppzippy.openscq30.lib.bindings.ManualRfcommConnectionBox
 import com.oppzippy.openscq30.lib.bindings.UuidSelector
 import com.oppzippy.openscq30.lib.wrapper.ConnectionDescriptor
+import com.oppzippy.openscq30.lib.wrapper.ConnectionStatus
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.IOException
 
-fun connectionBackends(context: Context): ManualConnectionBackends {
+fun connectionBackends(context: Context, coroutineScope: CoroutineScope): ManualConnectionBackends {
     return ManualConnectionBackends(
-        rfcomm = AndroidRfcommConnectionBackendImpl(context),
+        rfcomm = AndroidRfcommConnectionBackendImpl(context, coroutineScope),
     )
 }
 
-class AndroidRfcommConnectionBackendImpl(private val context: Context) : AndroidRfcommConnectionBackend {
+class AndroidRfcommConnectionBackendImpl(private val context: Context, private val coroutineScope: CoroutineScope) :
+    AndroidRfcommConnectionBackend {
     override suspend fun devices(): List<ConnectionDescriptor> {
         val bluetoothManager: BluetoothManager = context.getSystemService(BluetoothManager::class.java)
         return if (ActivityCompat.checkSelfPermission(
@@ -41,7 +47,7 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context) : Android
         }
     }
 
-    override suspend fun connect(macAddress: MacAddr6, selectUuid: UuidSelector, outputBox: RfcommConnectionWriterBox) {
+    override suspend fun connect(macAddress: MacAddr6, selectUuid: UuidSelector, outputBox: ManualRfcommConnectionBox) {
         if (ActivityCompat.checkSelfPermission(
                 context,
                 Manifest.permission.BLUETOOTH_CONNECT,
@@ -61,14 +67,47 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context) : Android
         } catch (ex: CancellationException) {
             socket.close()
         }
-        outputBox.set(AndroidRfcommConnectionWriterImpl(socket))
+
+        var manualRfcommConnection: ManualRfcommConnection? = null
+        manualRfcommConnection =
+            ManualRfcommConnection(
+                AndroidRfcommConnectionWriterImpl(
+                    socket,
+                    { manualRfcommConnection?.setConnectionStatus(it) },
+                ),
+            )
+        coroutineScope.launch {
+            withContext(Dispatchers.IO) {
+                while (true) {
+                    try {
+                        val inboundPacket = socket.inputStream.readBytes()
+                        manualRfcommConnection.addInboundPacket(inboundPacket)
+                    } catch (ex: IOException) {
+                        Log.d("AndroidRfcommConnectionBackendImpl", "disconnected", ex)
+                        break
+                    }
+                }
+                manualRfcommConnection.setConnectionStatus(ConnectionStatus.Disconnected)
+                socket.close()
+            }
+        }
+
+        outputBox.set(manualRfcommConnection)
     }
 }
 
-class AndroidRfcommConnectionWriterImpl(private val socket: BluetoothSocket) : AndroidRfcommConnectionWriter {
+class AndroidRfcommConnectionWriterImpl(
+    private val socket: BluetoothSocket,
+    private val setConnectionStatus: (ConnectionStatus) -> Unit,
+) : AndroidRfcommConnectionWriter {
     override suspend fun write(data: ByteArray) {
         withContext(Dispatchers.IO) {
-            socket.outputStream.write(data)
+            try {
+                socket.outputStream.write(data)
+            } catch (ex: IOException) {
+                Log.d("AndroidRfcommConnectionWriterImpl", "disconnected", ex)
+                setConnectionStatus(ConnectionStatus.Disconnected)
+            }
         }
     }
 }

@@ -29,6 +29,12 @@ uniffi::custom_type!(ConnectionDescriptor, String, {
     lower: |val| serde_json::to_string(&val.0).expect("json serialization shouldn't fail"),
 });
 
+pub struct ConnectionStatus(pub connection::ConnectionStatus);
+uniffi::custom_type!(ConnectionStatus, String, {
+    try_lift: |json| Ok(ConnectionStatus(serde_json::from_str(&json)?)),
+    lower: |val| serde_json::to_string(&val.0).expect("json serialization shouldn't fail"),
+});
+
 pub struct DeviceModel(pub devices::DeviceModel);
 uniffi::custom_type!(DeviceModel, String, {
     try_lift: |model| Ok(DeviceModel(devices::DeviceModel::from_str(&model)?)),

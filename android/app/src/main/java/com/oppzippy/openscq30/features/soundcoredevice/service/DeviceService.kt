@@ -18,8 +18,6 @@ import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNo
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.INTENT_EXTRA_PRESET_ID
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_CHANNEL_ID
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_ID
-import com.oppzippy.openscq30.features.soundcoredevice.usecases.ActivateQuickPresetUseCase
-import com.oppzippy.openscq30.lib.bindings.OpenScq30Device
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.FlowPreview
@@ -27,7 +25,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -54,37 +51,27 @@ class DeviceService : LifecycleService() {
     lateinit var session: OpenScq30Session
 
     @Inject
-    lateinit var activateQuickPresetUseCase: ActivateQuickPresetUseCase
-
-    @Inject
     lateinit var notificationBuilder: NotificationBuilder
 
     private var quickPresetNames = MutableStateFlow<List<String?>>(emptyList())
-    private var _device = MutableStateFlow<OpenScq30Device?>(null)
-    var device: OpenScq30Device?
-        get() {
-            return _device.value
-        }
-        set(newDevice) {
-            val oldDevice = _device.value
-            _device.value = newDevice
-            oldDevice?.close()
-            stopSelf()
-        }
-
+    private val connectionStatusFlow: MutableStateFlow<ConnectionStatus> =
+        MutableStateFlow(ConnectionStatus.AwaitingConnection)
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
-                ACTION_DISCONNECT -> device = null
+                ACTION_DISCONNECT -> stopSelf()
                 ACTION_QUICK_PRESET -> {
                     val presetIndex = intent.getIntExtra(INTENT_EXTRA_PRESET_ID, 0)
                     lifecycleScope.launch {
-                        device?.let { device ->
-                            session.quickPresetHandler().use { quickPresetHandler ->
-                                val quickPresets = quickPresetHandler.quickPresets(device)
-                                quickPresets.getOrNull(presetIndex)?.let { preset ->
-                                    quickPresetHandler.activate(device, preset.name)
+                        connectionStatusFlow.value.let {
+                            if (it is ConnectionStatus.Connected) {
+                                val device = it.deviceManager.device
+                                session.quickPresetHandler().use { quickPresetHandler ->
+                                    val quickPresets = quickPresetHandler.quickPresets(device)
+                                    quickPresets.getOrNull(presetIndex)?.let { preset ->
+                                        quickPresetHandler.activate(device, preset.name)
+                                    }
                                 }
                             }
                         }
@@ -101,44 +88,6 @@ class DeviceService : LifecycleService() {
     override fun onCreate() {
         super.onCreate()
 
-        lifecycleScope.launch {
-            connectionManager.connectionStatusFlow.collectLatest { connectionStatus ->
-                if (connectionStatus is ConnectionStatus.Connected) {
-                    var isMigrated = false
-                    connectionStatus.device.stateFlow.map { it.model }.collectLatest { deviceModel ->
-                        if (deviceModel != null) {
-                            if (!isMigrated) {
-                                isMigrated = true
-                                quickPresetRepository.migrateBleServiceUuids(
-                                    deviceModel,
-                                    connectionStatus.device.bleServiceUuid,
-                                )
-                            }
-                            quickPresetRepository.getNamesForDevice(deviceModel)
-                                .collectLatest { quickPresetNames.value = it }
-                        } else {
-                            quickPresetNames.value = emptyList()
-                        }
-                    }
-                } else {
-                    quickPresetNames.value = emptyList()
-                }
-            }
-        }
-
-        lifecycleScope.launch {
-            connectionManager.connectionStatusFlow.first { it is ConnectionStatus.Disconnected }
-            stopSelf()
-        }
-        lifecycleScope.launch {
-            connectionManager.connectionStatusFlow.collectLatest {
-                if (it is ConnectionStatus.Connected) {
-                    it.device.stateFlow.debounce(500.milliseconds).collectLatest {
-                        sendNotification()
-                    }
-                }
-            }
-        }
         lifecycleScope.launch {
             quickPresetNames.debounce(1.seconds).collectLatest { sendNotification() }
         }
@@ -164,8 +113,28 @@ class DeviceService : LifecycleService() {
         startForeground(NOTIFICATION_ID, notification)
 
         intent?.getStringExtra(MAC_ADDRESS)?.let { macAddress ->
-            lifecycleScope.launch {
-                device = session.connect(macAddress)
+            val job = lifecycleScope.launch {
+                connectionStatusFlow.value = ConnectionStatus.Connected(
+                    DeviceConnectionManager(session.connect(macAddress)),
+                )
+            }
+            connectionStatusFlow.compareAndSet(
+                ConnectionStatus.AwaitingConnection,
+                ConnectionStatus.Connecting(macAddress, job),
+            )
+        }
+
+        lifecycleScope.launch {
+            connectionStatusFlow.first { it == ConnectionStatus.Disconnected }
+            stopSelf()
+        }
+        lifecycleScope.launch {
+            connectionStatusFlow.collectLatest {
+                if (it is ConnectionStatus.Connected) {
+                    it.deviceManager.watchForChangeNotification.debounce(500.milliseconds).collectLatest {
+                        sendNotification()
+                    }
+                }
             }
         }
 
@@ -176,7 +145,11 @@ class DeviceService : LifecycleService() {
         super.onDestroy()
         unregisterReceiver(broadcastReceiver)
         cancelNotification()
-        device = null
+        connectionStatusFlow.value.let {
+            if (it is ConnectionStatus.Connected) {
+                it.deviceManager.close()
+            }
+        }
     }
 
     private fun createNotificationChannel() {
@@ -205,7 +178,7 @@ class DeviceService : LifecycleService() {
     }
 
     private fun buildNotification(): Notification = notificationBuilder(
-        status = connectionManager.connectionStatusFlow.value,
+        status = connectionStatusFlow.value,
         quickPresetNames = quickPresetNames.value,
     )
 

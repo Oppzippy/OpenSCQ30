@@ -16,6 +16,15 @@ imports = [
 into_custom = "Json.decodeFromString<PairedDevice>({})"
 from_custom = "Json.encodeToString({})"
 
+[bindings.kotlin.custom_types.ConnectionStatus]
+type_name = "ConnectionStatus"
+imports = [
+    "kotlinx.serialization.json.Json",
+    "com.oppzippy.openscq30.lib.wrapper.ConnectionStatus",
+]
+into_custom = "Json.decodeFromString<ConnectionStatus>({})"
+from_custom = "Json.encodeToString({})"
+
 [bindings.kotlin.custom_types.ConnectionDescriptor]
 type_name = "ConnectionDescriptor"
 imports = [

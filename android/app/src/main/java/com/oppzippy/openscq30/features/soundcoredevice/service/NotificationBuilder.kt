@@ -13,8 +13,8 @@ import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNo
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_QUICK_PRESET
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.INTENT_EXTRA_PRESET_ID
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_CHANNEL_ID
-import com.oppzippy.openscq30.lib.extensions.resources.toStringResource
-import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
+import com.oppzippy.openscq30.lib.bindings.OpenScq30Device
+import com.oppzippy.openscq30.lib.wrapper.Setting
 import dagger.hilt.android.scopes.ServiceScoped
 import javax.inject.Inject
 
@@ -24,55 +24,29 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
         val openAppIntent = Intent(context, MainActivity::class.java)
         openAppIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
+        val device = if (status is ConnectionStatus.Connected) {
+            status.deviceManager.device
+        } else {
+            null
+        }
+
         val builder = Notification.Builder(context, NOTIFICATION_CHANNEL_ID).setOngoing(true)
             .setOnlyAlertOnce(true).setSmallIcon(R.drawable.headphones).setLargeIcon(
-                if (status is ConnectionStatus.Connected) {
-                    val bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
-                    status.device.stateFlow.value.equalizerConfiguration.let { equalizerConfiguration ->
-                        EqualizerLine(
-                            equalizerConfiguration.volumeAdjustments,
-                        ).drawBitmap(
-                            bitmap = bitmap,
-                            yOffset = bitmap.height / 4F,
-                            height = bitmap.height / 2F,
-                        )
-                    }
-                    bitmap
-                } else {
-                    null
-                },
+                device?.let { drawEqualizerLine(it) },
             ).setContentTitle(
                 when (status) {
                     is ConnectionStatus.AwaitingConnection -> context.getString(R.string.awaiting_connection)
                     is ConnectionStatus.Connected -> context.getString(R.string.connected_to)
-                        .format(
-                            status.device.name,
-                        )
+                        .format(status.deviceManager.device.model())
 
                     is ConnectionStatus.Connecting -> context.getString(R.string.connecting_to)
-                        .format(
-                            status.macAddress,
-                        )
+                        .format(status.macAddress)
 
                     ConnectionStatus.Disconnected -> context.getString(R.string.disconnected)
                 },
             ).setContentText(
-                if (status is ConnectionStatus.Connected) {
-                    status.device.stateFlow.value.soundModes?.let { soundModes ->
-                        val ambientSoundMode = soundModes.ambientSoundMode
-                        val noiseCancelingMode = soundModes.noiseCancelingMode
-                        if (ambientSoundMode == AmbientSoundMode.NoiseCanceling) {
-                            context.getString(
-                                R.string.ambient_sound_mode_and_noise_canceling_mode_values,
-                                context.getString(ambientSoundMode.toStringResource()),
-                                context.getString(noiseCancelingMode.toStringResource()),
-                            )
-                        } else {
-                            context.getString(ambientSoundMode.toStringResource())
-                        }
-                    }
-                } else {
-                    null
+                device?.let {
+                    "TODO featured settings"
                 },
             ).setContentIntent(
                 PendingIntent.getActivity(
@@ -109,6 +83,26 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
                 ),
             )
         return builder.build()
+    }
+
+    private fun drawEqualizerLine(device: OpenScq30Device): Bitmap? {
+        device.setting("volumeAdjustments")?.let { equalizer ->
+            if (equalizer is Setting.EqualizerSetting) {
+                val bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
+
+                EqualizerLine(
+                    values = equalizer.value,
+                    minVolume = equalizer.setting.min,
+                    maxVolume = equalizer.setting.max,
+                ).drawBitmap(
+                    bitmap = bitmap,
+                    yOffset = bitmap.height / 4F,
+                    height = bitmap.height / 2F,
+                )
+                return bitmap
+            }
+        }
+        return null
     }
 
     private fun buildQuickPresetNotificationAction(presetId: Int, name: String?, icon: Icon): Notification.Action =

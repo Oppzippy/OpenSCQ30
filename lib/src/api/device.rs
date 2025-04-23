@@ -7,7 +7,7 @@ use tokio::sync::watch;
 use crate::{devices::DeviceModel, macros::impl_from_source_error_with_location, storage};
 
 use super::{
-    connection::{self, ConnectionDescriptor},
+    connection::{self, ConnectionDescriptor, ConnectionStatus},
     settings::{self, CategoryId, Setting, SettingId, Value},
 };
 
@@ -64,6 +64,7 @@ pub trait OpenSCQ30DeviceRegistry {
 
 #[async_trait]
 pub trait OpenSCQ30Device {
+    fn connection_status(&self) -> watch::Receiver<ConnectionStatus>;
     fn model(&self) -> DeviceModel;
     fn categories(&self) -> Vec<CategoryId>;
     fn settings_in_category(&self, category_id: &CategoryId) -> Vec<SettingId>;

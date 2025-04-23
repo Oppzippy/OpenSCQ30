@@ -43,7 +43,7 @@ pub trait AndroidRfcommConnectionBackend: Send + Sync {
         &self,
         mac_address: serializable::MacAddr6,
         select_uuid: Arc<UuidSelector>,
-        output_box: Arc<RfcommConnectionWriterBox>,
+        output_box: Arc<ManualRfcommConnectionBox>,
     ) -> Result<(), AndroidError>;
 }
 
@@ -64,17 +64,17 @@ impl UuidSelector {
 #[derive(Default, uniffi::Object)]
 /// Having a uniffi foreign trait return another uniffi foreign trait doesn't seem to work,
 /// so having an output parameter rather than returning the value directly is used as a workaround.
-pub struct RfcommConnectionWriterBox {
-    inner: std::sync::Mutex<Option<Arc<dyn AndroidRfcommConnectionWriter>>>,
+pub struct ManualRfcommConnectionBox {
+    inner: std::sync::Mutex<Option<Arc<ManualRfcommConnection>>>,
 }
 
 #[uniffi::export]
-impl RfcommConnectionWriterBox {
-    pub fn set(&self, inner: Option<Arc<dyn AndroidRfcommConnectionWriter>>) {
+impl ManualRfcommConnectionBox {
+    pub fn set(&self, inner: Option<Arc<ManualRfcommConnection>>) {
         *self.inner.lock().unwrap() = inner;
     }
 
-    pub fn get(&self) -> Option<Arc<dyn AndroidRfcommConnectionWriter>> {
+    pub fn get(&self) -> Option<Arc<ManualRfcommConnection>> {
         self.inner.lock().unwrap().take()
     }
 }
@@ -84,7 +84,7 @@ pub struct ManualRfcommConnectionBackend {
 }
 
 impl RfcommBackend for ManualRfcommConnectionBackend {
-    type ConnectionType = ManualRfcommConnection;
+    type ConnectionType = WrappedManualRfcommConnection;
 
     async fn devices(&self) -> connection::Result<HashSet<connection::ConnectionDescriptor>> {
         let descriptors = self
@@ -109,7 +109,7 @@ impl RfcommBackend for ManualRfcommConnectionBackend {
         + Sync
         + 'static,
     ) -> connection::Result<Self::ConnectionType> {
-        let output_box = Arc::new(RfcommConnectionWriterBox::default());
+        let output_box = Arc::new(ManualRfcommConnectionBox::default());
         self.inner
             .connect(
                 serializable::MacAddr6(mac_address),
@@ -123,7 +123,7 @@ impl RfcommBackend for ManualRfcommConnectionBackend {
                 source: Box::new(err),
                 location: Location::caller(),
             })?;
-        Ok(ManualRfcommConnection::new(output_box.get().ok_or_else(
+        Ok(WrappedManualRfcommConnection(output_box.get().ok_or_else(
             || connection::Error::DeviceNotFound {
                 source: None,
                 location: Location::caller(),
@@ -183,21 +183,28 @@ impl ManualRfcommConnection {
             }
         }
     }
+
+    pub fn set_connection_status(&self, connection_status: serializable::ConnectionStatus) {
+        self.connection_status_sender
+            .send_replace(connection_status.0);
+    }
 }
 
-impl RfcommConnection for ManualRfcommConnection {
+pub struct WrappedManualRfcommConnection(Arc<ManualRfcommConnection>);
+
+impl RfcommConnection for WrappedManualRfcommConnection {
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
-        self.connection_status_sender.subscribe()
+        self.0.connection_status_sender.subscribe()
     }
 
     async fn write(&self, data: &[u8]) -> connection::Result<()> {
-        self.connection_writer.write(data.to_owned()).await;
+        self.0.connection_writer.write(data.to_owned()).await;
         Ok(())
     }
 
     fn read_channel(&self) -> mpsc::Receiver<Vec<u8>> {
         let (sender, receiver) = mpsc::channel(50);
-        *self.inbound_packets_sender.write().unwrap() = Some(sender);
+        *self.0.inbound_packets_sender.write().unwrap() = Some(sender);
 
         receiver
     }

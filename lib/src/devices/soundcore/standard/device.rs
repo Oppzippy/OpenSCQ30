@@ -5,7 +5,7 @@ use tokio::sync::{mpsc, watch};
 
 use crate::{
     api::{
-        connection::{ConnectionDescriptor, RfcommBackend, RfcommConnection},
+        connection::{ConnectionDescriptor, ConnectionStatus, RfcommBackend, RfcommConnection},
         device::{self, OpenSCQ30Device, OpenSCQ30DeviceRegistry},
         settings::{CategoryId, Setting, SettingId, Value},
     },
@@ -338,7 +338,7 @@ where
     device_model: DeviceModel,
     state_sender: watch::Sender<StateType>,
     module_collection: Arc<ModuleCollection<StateType>>,
-    _packet_io_controller: Arc<PacketIOController<ConnectionType>>,
+    packet_io_controller: Arc<PacketIOController<ConnectionType>>,
     _state_update: PhantomData<StateUpdatePacketType>,
 }
 
@@ -362,7 +362,7 @@ where
         Self {
             device_model,
             state_sender,
-            _packet_io_controller: packet_io_controller,
+            packet_io_controller,
             module_collection,
             _state_update: PhantomData,
         }
@@ -377,6 +377,10 @@ where
     StateType: Clone + Send + Sync + 'static,
     StateUpdatePacketType: InboundPacket + Send + Sync,
 {
+    fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
+        self.packet_io_controller.connection_status()
+    }
+
     fn model(&self) -> DeviceModel {
         self.device_model
     }

@@ -1,10 +1,17 @@
 use std::{sync::Arc, time::Duration};
 
 use nom::error::VerboseError;
-use tokio::{select, sync::mpsc, task::JoinHandle};
+use tokio::{
+    select,
+    sync::{mpsc, watch},
+    task::JoinHandle,
+};
 
 use crate::{
-    api::{connection::RfcommConnection, device},
+    api::{
+        connection::{ConnectionStatus, RfcommConnection},
+        device,
+    },
     devices::soundcore::standard::{
         packets::inbound::take_inbound_packet_header, structures::Command,
     },
@@ -73,6 +80,10 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
             }
         });
         (handle, outgoing_receiver)
+    }
+
+    pub fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
+        self.connection.connection_status()
     }
 
     pub async fn send(&self, packet: &Packet) -> device::Result<Packet> {

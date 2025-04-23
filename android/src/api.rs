@@ -74,12 +74,9 @@ impl OpenSCQ30Session {
         &self,
         mac_address: serializable::MacAddr6,
     ) -> Result<Arc<OpenSCQ30Device>, crate::Error> {
-        self.inner
-            .connect(mac_address.0)
-            .await
-            .map(OpenSCQ30Device::from)
-            .map(Arc::new)
-            .map_err(Into::into)
+        let device = self.inner.connect(mac_address.0).await?;
+        let wrapped_device = OpenSCQ30Device::new(device).await;
+        Ok(Arc::new(wrapped_device))
     }
 
     pub async fn connect_with_backends(
@@ -87,12 +84,12 @@ impl OpenSCQ30Session {
         backends: Arc<ManualConnectionBackends>,
         mac_address: serializable::MacAddr6,
     ) -> Result<Arc<OpenSCQ30Device>, crate::Error> {
-        self.inner
+        let device = self
+            .inner
             .connect_with_backends(backends.as_ref(), mac_address.0)
-            .await
-            .map(OpenSCQ30Device::from)
-            .map(Arc::new)
-            .map_err(Into::into)
+            .await?;
+        let wrapped_device = OpenSCQ30Device::new(device).await;
+        Ok(Arc::new(wrapped_device))
     }
 
     pub fn quick_preset_handler(&self) -> QuickPresetsHandler {

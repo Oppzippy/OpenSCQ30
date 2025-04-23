@@ -11,6 +11,16 @@ data class ConnectionDescriptor(
 )
 
 @Serializable
+@SerialName("ConnectionStatus")
+enum class ConnectionStatus {
+    @SerialName("connected")
+    Connected,
+
+    @SerialName("disconnected")
+    Disconnected,
+}
+
+@Serializable
 @SerialName("DeviceDescriptor")
 data class DeviceDescriptor(
     val name: String,
