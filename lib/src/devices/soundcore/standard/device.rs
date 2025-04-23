@@ -396,6 +396,20 @@ where
             .get(&state, setting_id)
     }
 
+    fn watch_for_changes(&self) -> watch::Receiver<()> {
+        let mut receiver = self.state_sender.subscribe();
+        let (change_sender, change_receiver) = watch::channel(());
+        // receiver will close when self is dropped, so this will clean itself up
+        tokio::spawn(async move {
+            while let Ok(_) = receiver.changed().await {
+                if let Err(_) = change_sender.send(()) {
+                    return;
+                }
+            }
+        });
+        change_receiver
+    }
+
     async fn set_setting_values(
         &self,
         setting_values: Vec<(SettingId, Value)>,

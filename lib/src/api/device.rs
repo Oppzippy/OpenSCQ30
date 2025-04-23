@@ -2,6 +2,7 @@ use std::{panic::Location, sync::Arc};
 
 use async_trait::async_trait;
 use macaddr::MacAddr6;
+use tokio::sync::watch;
 
 use crate::{devices::DeviceModel, macros::impl_from_source_error_with_location, storage};
 
@@ -67,6 +68,6 @@ pub trait OpenSCQ30Device {
     fn categories(&self) -> Vec<CategoryId>;
     fn settings_in_category(&self, category_id: &CategoryId) -> Vec<SettingId>;
     fn setting(&self, setting_id: &SettingId) -> Option<Setting>;
-    // async fn watch_for_changes(&self) -> broadcast::Receiver<()>;
+    fn watch_for_changes(&self) -> watch::Receiver<()>;
     async fn set_setting_values(&self, setting_values: Vec<(SettingId, Value)>) -> Result<()>;
 }

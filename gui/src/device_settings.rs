@@ -102,6 +102,17 @@ impl DeviceSettingsModel {
             .data(CustomCategory::QuickPresets);
         nav_model.activate_position(0);
 
+        // watch will close when we drop the device, so this will clean itself up
+        let mut watch = device.0.watch_for_changes();
+        let stream = cosmic::iced::stream::channel(1, |mut output| async move {
+            while watch.changed().await.is_ok() {
+                match output.try_send(Message::Refresh) {
+                    Err(err) if err.is_disconnected() => return,
+                    _ => (),
+                }
+            }
+        });
+
         let mut model = Self {
             device,
             nav_model,
@@ -112,7 +123,11 @@ impl DeviceSettingsModel {
             dialog: None,
             legacy_equalizer_migration: None,
         };
-        let task = Task::batch([model.refresh(), Self::initialize_legacy_migration()]);
+        let task = Task::batch([
+            model.refresh(),
+            Self::initialize_legacy_migration(),
+            Task::stream(stream),
+        ]);
         (model, task)
     }
 
