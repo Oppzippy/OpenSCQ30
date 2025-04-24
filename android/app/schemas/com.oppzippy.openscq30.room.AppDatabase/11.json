@@ -1,0 +1,97 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 11,
+    "identityHash": "964c0367f0cd8f5489f4365251c44b44",
+    "entities": [
+      {
+        "tableName": "custom_equalizer_profile",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`name` TEXT NOT NULL, `band100` INTEGER NOT NULL, `band200` INTEGER NOT NULL, `band400` INTEGER NOT NULL, `band800` INTEGER NOT NULL, `band1600` INTEGER NOT NULL, `band3200` INTEGER NOT NULL, `band6400` INTEGER NOT NULL, `band12800` INTEGER NOT NULL, PRIMARY KEY(`name`))",
+        "fields": [
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "band100",
+            "columnName": "band100",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "band200",
+            "columnName": "band200",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "band400",
+            "columnName": "band400",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "band800",
+            "columnName": "band800",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "band1600",
+            "columnName": "band1600",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "band3200",
+            "columnName": "band3200",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "band6400",
+            "columnName": "band6400",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "band12800",
+            "columnName": "band12800",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "name"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_custom_equalizer_profile_bands",
+            "unique": true,
+            "columnNames": [
+              "band100",
+              "band200",
+              "band400",
+              "band800",
+              "band1600",
+              "band3200",
+              "band6400",
+              "band12800"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_custom_equalizer_profile_bands` ON `${TABLE_NAME}` (`band100`, `band200`, `band400`, `band800`, `band1600`, `band3200`, `band6400`, `band12800`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '964c0367f0cd8f5489f4365251c44b44')"
+    ]
+  }
+}
