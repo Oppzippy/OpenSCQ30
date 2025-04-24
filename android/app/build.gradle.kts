@@ -192,7 +192,7 @@ val archTriplets = mapOf(
     "x86_64" to "x86_64-linux-android",
 )
 
-tasks.create<Exec>("generate-uniffi-bindings") {
+tasks.register<Exec>("generate-uniffi-bindings") {
     dependsOn("cargo-build-arm64-v8a")
     description = "Generate kotlin bindings using uniffi-bindgen"
     workingDir = rustWorkspaceDir
@@ -225,7 +225,7 @@ interface InjectedExecOps {
 
 archTriplets.forEach { (arch, target) ->
     // execute cargo metadata and get path to target directory
-    tasks.create("cargo-output-dir-$arch") {
+    tasks.register("cargo-output-dir-$arch") {
         val injectedExecOps = project.objects.newInstance<InjectedExecOps>()
         description = "Get cargo metadata"
         val output = ByteArrayOutputStream()
@@ -242,7 +242,7 @@ archTriplets.forEach { (arch, target) ->
         project.extensions.extraProperties.set("cargo_target_directory", targetDirectory)
     }
     // Build with cargo
-    tasks.create<Exec>("cargo-build-$arch") {
+    tasks.register<Exec>("cargo-build-$arch") {
         description = "Building core for $arch"
         workingDir = rustProjectDir
         commandLine(
@@ -258,7 +258,7 @@ archTriplets.forEach { (arch, target) ->
         )
     }
     // Sync shared native dependencies
-    tasks.create<Sync>("sync-rust-deps-$arch") {
+    tasks.register<Sync>("sync-rust-deps-$arch") {
         dependsOn("cargo-build-$arch")
         from("${rustProjectDir.absolutePath}/src/libs/$arch") {
             include("*.so")
@@ -266,7 +266,7 @@ archTriplets.forEach { (arch, target) ->
         into("src/main/libs/$arch")
     }
     // Copy build libs into this app's libs directory
-    tasks.create<Copy>("rust-deploy-$arch") {
+    tasks.register<Copy>("rust-deploy-$arch") {
         dependsOn("sync-rust-deps-$arch")
         description = "Copy rust libs for ($arch) to jniLibs"
         val cargoTargetDirectory = project.extensions.extraProperties.get("cargo_target_directory")
@@ -285,7 +285,7 @@ archTriplets.forEach { (arch, target) ->
     tasks.preBuild.dependsOn("rust-deploy-$arch")
 
     // Hook up clean tasks
-    tasks.create<Delete>("clean-$arch") {
+    tasks.register<Delete>("clean-$arch") {
         dependsOn("cargo-output-dir-$arch")
         description = "Deleting built libs for $arch"
         delete(
