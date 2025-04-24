@@ -9,8 +9,15 @@ import android.util.Log
 import androidx.core.content.IntentCompat
 import com.oppzippy.openscq30.features.preferences.Preferences
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
+import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
-class BluetoothConnectionReceiver(private val preferences: Preferences) : BroadcastReceiver() {
+class BluetoothConnectionReceiver(
+    private val preferences: Preferences,
+    private val session: OpenScq30Session,
+    private val coroutineScope: CoroutineScope,
+) : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         if (!preferences.autoConnect) {
             Log.w(
@@ -30,18 +37,23 @@ class BluetoothConnectionReceiver(private val preferences: Preferences) : Broadc
                 BluetoothDevice::class.java,
             )
             if (device != null) {
-                val deviceManager = context.getSystemService(CompanionDeviceManager::class.java)
-                val isPaired =
-                    deviceManager.associations.find {
-                        it.equals(device.address, ignoreCase = true)
-                    } != null
-                if (isPaired) {
-                    Log.d("BluetoothConnectionReceiver", "auto connecting to ${device.address}")
-                    val serviceIntent = Intent(context, DeviceService::class.java)
-                    serviceIntent.putExtra(DeviceService.MAC_ADDRESS, device.address)
-                    context.startForegroundService(serviceIntent)
+                coroutineScope.launch {
+                    if (isPaired(context, device.address)) {
+                        Log.d("BluetoothConnectionReceiver", "auto connecting to ${device.address}")
+                        val serviceIntent = Intent(context, DeviceService::class.java)
+                        serviceIntent.putExtra(DeviceService.MAC_ADDRESS, device.address)
+                        context.startForegroundService(serviceIntent)
+                    }
                 }
             }
         }
+    }
+
+    private suspend fun isPaired(context: Context, macAddress: String): Boolean {
+        val deviceManager = context.getSystemService(CompanionDeviceManager::class.java)
+        val isAssociated = deviceManager.associations.find { it.equals(macAddress, ignoreCase = true) } != null
+        val isPairedWithOpenSCQ30 =
+            session.pairedDevices().find { it.macAddress.equals(macAddress, ignoreCase = true) } != null
+        return isAssociated && isPairedWithOpenSCQ30
     }
 }

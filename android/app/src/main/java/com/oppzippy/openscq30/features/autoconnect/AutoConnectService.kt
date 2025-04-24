@@ -4,7 +4,9 @@ import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.lifecycleScope
 import com.oppzippy.openscq30.features.preferences.Preferences
+import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -13,11 +15,18 @@ class AutoConnectService : LifecycleService() {
     @Inject
     lateinit var preferences: Preferences
 
+    @Inject
+    lateinit var session: OpenScq30Session
+
     private lateinit var receiver: BluetoothConnectionReceiver
 
     override fun onCreate() {
         super.onCreate()
-        receiver = BluetoothConnectionReceiver(preferences)
+        receiver = BluetoothConnectionReceiver(
+            preferences = preferences,
+            session = session,
+            coroutineScope = lifecycleScope,
+        )
         // TODO check if any devices are currently connected, since they could have connected before we registered the receiver.
         application.registerReceiver(
             receiver,
