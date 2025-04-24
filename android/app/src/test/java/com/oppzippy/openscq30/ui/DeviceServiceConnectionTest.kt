@@ -49,7 +49,7 @@ class DeviceServiceConnectionTest {
     @Test
     fun startsDisconnected() {
         val connection = DeviceServiceConnection(unbind = {})
-        assertEquals(UiDeviceState.Disconnected, connection.uiDeviceStateFlow.value)
+        assertEquals(UiDeviceState.Disconnected, connection.connectionStatusFlow.value)
     }
 
     @Test
@@ -61,7 +61,7 @@ class DeviceServiceConnectionTest {
         connectionStatusFlow.value = ConnectionStatus.Connecting("00:00:00:00:00:00", Job())
 
         // It will throw an exception if it times out, so no need to assert
-        connection.uiDeviceStateFlow.timeout(10.milliseconds).first { it is UiDeviceState.Loading }
+        connection.connectionStatusFlow.timeout(10.milliseconds).first { it is UiDeviceState.Loading }
     }
 
     @Test
@@ -81,7 +81,7 @@ class DeviceServiceConnectionTest {
 
         connectionStatusFlow.value = ConnectionStatus.Connected(device)
 
-        val state = connection.uiDeviceStateFlow.timeout(10.milliseconds)
+        val state = connection.connectionStatusFlow.timeout(10.milliseconds)
             .first { it is UiDeviceState.Connected } as UiDeviceState.Connected
         assertEquals(deviceStateFlow.value, state.deviceState)
     }
@@ -103,12 +103,12 @@ class DeviceServiceConnectionTest {
 
         connectionStatusFlow.value = ConnectionStatus.Connected(device)
 
-        val state = connection.uiDeviceStateFlow.timeout(10.milliseconds)
+        val state = connection.connectionStatusFlow.timeout(10.milliseconds)
             .first { it is UiDeviceState.Connected } as UiDeviceState.Connected
         assertEquals(deviceStateFlow.value, state.deviceState)
 
         connection.onServiceDisconnected(mockk())
-        assertEquals(UiDeviceState.Disconnected, connection.uiDeviceStateFlow.value)
+        assertEquals(UiDeviceState.Disconnected, connection.connectionStatusFlow.value)
     }
 
     @Test

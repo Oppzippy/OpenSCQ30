@@ -2,14 +2,12 @@ package com.oppzippy.openscq30.ui.devicesettings
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Equalizer
-import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.ImportExport
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.RadioButtonChecked
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.lib.bindings.translateCategoryId
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -18,42 +16,37 @@ sealed class Screen {
     data object ScreenSelection
 
     @Serializable
-    data object SoundModes : Screen() {
-        val screenInfo = ScreenInfo(this, R.string.sound_modes, Icons.Filled.Headphones)
-    }
-
-    @Serializable
-    data object SoundModesTypeTwo : Screen() {
-        val screenInfo = ScreenInfo(this, R.string.sound_modes, Icons.Filled.Headphones)
-    }
-
-    @Serializable
-    data object Equalizer : Screen() {
-        val screenInfo = ScreenInfo(this, R.string.equalizer, Icons.Filled.Equalizer)
-    }
-
-    @Serializable
-    data object QuickPresets : Screen() {
-        val screenInfo = ScreenInfo(this, R.string.quick_presets, Icons.Filled.Settings)
-    }
-
-    @Serializable
-    data object ButtonActions : Screen() {
-        val screenInfo = ScreenInfo(this, R.string.button_actions, Icons.Filled.RadioButtonChecked)
-    }
-
-    @Serializable
-    data object DeviceInfo : Screen() {
-        val screenInfo = ScreenInfo(this, R.string.device_info, Icons.Filled.Info)
+    data class SettingsCategory(val categoryId: String) : Screen() {
+        fun screenInfo(): ScreenInfo {
+            ScreenInfo(
+                this,
+                StringResourceOrString.RawString(translateCategoryId(categoryId)),
+            )
+        }
     }
 
     @Serializable
     class ImportExport(val index: Int = -1) : Screen() {
         companion object {
             val screenInfo =
-                ScreenInfo(ImportExport(), R.string.import_export, Icons.Filled.ImportExport)
+                ScreenInfo(
+                    ImportExport(),
+                    StringResourceOrString.StringResource(R.string.import_export),
+                    Icons.Filled.ImportExport,
+                )
         }
     }
 }
 
-data class ScreenInfo(val baseRoute: Screen, @StringRes val nameResourceId: Int, val icon: ImageVector)
+data class ScreenInfo(val baseRoute: Screen, val name: StringResourceOrString, val icon: ImageVector)
+
+sealed class StringResourceOrString {
+    data class StringResource(@StringRes val nameResourceId: Int) : StringResourceOrString()
+    data class RawString(val string: String) : StringResourceOrString()
+
+    @Composable
+    fun translated(): String = when (this) {
+        is StringResource -> stringResource(nameResourceId)
+        is RawString -> string
+    }
+}

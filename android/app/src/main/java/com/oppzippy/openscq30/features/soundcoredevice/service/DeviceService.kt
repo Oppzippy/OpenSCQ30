@@ -20,15 +20,15 @@ import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNo
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_ID
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 
 @OptIn(FlowPreview::class)
 @AndroidEntryPoint
@@ -54,7 +54,7 @@ class DeviceService : LifecycleService() {
     lateinit var notificationBuilder: NotificationBuilder
 
     private var quickPresetNames = MutableStateFlow<List<String?>>(emptyList())
-    private val connectionStatusFlow: MutableStateFlow<ConnectionStatus> =
+    val connectionStatusFlow: MutableStateFlow<ConnectionStatus> =
         MutableStateFlow(ConnectionStatus.AwaitingConnection)
 
     private val broadcastReceiver = object : BroadcastReceiver() {

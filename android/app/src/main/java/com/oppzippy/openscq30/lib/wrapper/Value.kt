@@ -28,7 +28,7 @@ sealed class Value {
 
     @Serializable
     @SerialName("I32")
-    data class I32Value(val value: List<Int>) : Value()
+    data class I32Value(val value: Int) : Value()
 
     @Serializable
     @SerialName("String")
@@ -41,5 +41,22 @@ sealed class Value {
     @Serializable
     @SerialName("OptionalString")
     data class OptionalStringValue(val value: String?) : Value()
-
 }
+
+fun Boolean.toValue(): Value.BoolValue = Value.BoolValue(this)
+
+fun UShort.toValue(): Value.U16Value = Value.U16Value(this)
+
+fun List<UShort>.toValue(): Value.U16VecValue = Value.U16VecValue(this)
+
+fun UShort?.toValue(): Value.OptionalU16Value = Value.OptionalU16Value(this)
+
+fun List<Short>.toValue(): Value.I16VecValue = Value.I16VecValue(this)
+
+fun Int.toValue(): Value.I32Value = Value.I32Value(this)
+
+fun String.toValue(): Value.StringValue = Value.StringValue(this)
+
+fun List<String>.toValue(): Value.StringVecValue = Value.StringVecValue(this)
+
+fun String?.toValue(): Value.OptionalStringValue = Value.OptionalStringValue(this)

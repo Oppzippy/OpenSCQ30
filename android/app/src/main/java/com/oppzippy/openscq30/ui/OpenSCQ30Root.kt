@@ -21,9 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.ui.deviceselection.DeviceSelectionScreen
 import com.oppzippy.openscq30.ui.devicesettings.DeviceSettingsScreen
-import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
@@ -34,8 +34,7 @@ fun OpenSCQ30Root(viewModel: DeviceSettingsViewModel = hiltViewModel()) {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             val deviceState by viewModel.uiDeviceState.collectAsState()
 
-            val isConnected =
-                deviceState is UiDeviceState.Connected || deviceState is UiDeviceState.Loading
+            val isConnected = deviceState is ConnectionStatus.Connected || deviceState is ConnectionStatus.Connecting
             BackHandler(enabled = isConnected) {
                 viewModel.deselectDevice()
             }
@@ -53,63 +52,7 @@ fun OpenSCQ30Root(viewModel: DeviceSettingsViewModel = hiltViewModel()) {
             ) { animationIsConnected ->
                 if (animationIsConnected) {
                     DeviceSettingsScreen(
-                        deviceState = deviceState,
                         onBack = { viewModel.deselectDevice() },
-                        onAmbientSoundModeChange = {
-                            withErrorToast(context) {
-                                viewModel.setSoundModes(ambientSoundMode = it)
-                            }
-                        },
-                        onAmbientSoundModeCycleChange = {
-                            withErrorToast(context) {
-                                viewModel.setAmbientSoundModeCycle(it)
-                            }
-                        },
-                        onTransparencyModeChange = {
-                            withErrorToast(context) {
-                                viewModel.setSoundModes(transparencyMode = it)
-                            }
-                        },
-                        onNoiseCancelingModeChange = {
-                            withErrorToast(context) {
-                                viewModel.setSoundModes(noiseCancelingMode = it)
-                            }
-                        },
-                        onCustomNoiseCancelingChange = {
-                            withErrorToast(context) {
-                                viewModel.setSoundModes(customNoiseCanceling = it)
-                            }
-                        },
-                        onAmbientSoundModeTypeTwoChange = {
-                            withErrorToast(context) {
-                                viewModel.setSoundModesTypeTwo(ambientSoundMode = it)
-                            }
-                        },
-                        onTransparencyModeTypeTwoChange = {
-                            withErrorToast(context) {
-                                viewModel.setSoundModesTypeTwo(transparencyMode = it)
-                            }
-                        },
-                        onNoiseCancelingModeTypeTwoChange = {
-                            withErrorToast(context) {
-                                viewModel.setSoundModesTypeTwo(noiseCancelingMode = it)
-                            }
-                        },
-                        onManualNoiseCancelingChange = {
-                            withErrorToast(context) {
-                                viewModel.setSoundModesTypeTwo(manualNoiseCanceling = it)
-                            }
-                        },
-                        onEqualizerConfigurationChange = {
-                            withErrorToast(context) {
-                                viewModel.setEqualizerConfiguration(it)
-                            }
-                        },
-                        onButtonConfigurationChange = {
-                            withErrorToast(context) {
-                                viewModel.setMultiButtonConfiguration(it)
-                            }
-                        },
                     )
                 } else {
                     DeviceSelectionScreen(

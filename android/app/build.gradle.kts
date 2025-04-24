@@ -196,23 +196,25 @@ tasks.register<Exec>("generate-uniffi-bindings") {
     dependsOn("cargo-build-arm64-v8a")
     description = "Generate kotlin bindings using uniffi-bindgen"
     workingDir = rustWorkspaceDir
-    // generate bindings
-    commandLine(
-        "cargo",
-        "run",
-        "--bin",
-        "uniffi-bindgen",
-        "--",
-        "generate",
-        "--library",
-        "./target/aarch64-linux-android/release-debuginfo/libopenscq30_android.so",
-        "--language",
-        "kotlin",
-        "--out-dir",
-        "${layout.buildDirectory.get()}/generated/source/uniffi/java",
-        "--config",
-        "${layout.projectDirectory.asFile.parentFile.path}/uniffi.toml",
-    )
+    doFirst {
+        // generate bindings
+        commandLine(
+            "cargo",
+            "run",
+            "--bin",
+            "uniffi-bindgen",
+            "--",
+            "generate",
+            "--library",
+            "./target/aarch64-linux-android/release-debuginfo/libopenscq30_android.so",
+            "--language",
+            "kotlin",
+            "--out-dir",
+            "${layout.buildDirectory.get()}/generated/source/uniffi/java",
+            "--config",
+            "${layout.projectDirectory.asFile.parentFile.path}/uniffi.toml",
+        )
+    }
 }
 tasks.withType<JavaCompile> {
     dependsOn("generate-uniffi-bindings")
@@ -226,56 +228,64 @@ interface InjectedExecOps {
 archTriplets.forEach { (arch, target) ->
     // execute cargo metadata and get path to target directory
     tasks.register("cargo-output-dir-$arch") {
-        val injectedExecOps = project.objects.newInstance<InjectedExecOps>()
         description = "Get cargo metadata"
-        val output = ByteArrayOutputStream()
-        injectedExecOps.execOps.exec {
-            commandLine("cargo", "metadata", "--format-version", "1")
-            workingDir = rustProjectDir
-            standardOutput = output
-        }
-        val outputAsString = output.toString()
-        val json = groovy.json.JsonSlurper().parseText(outputAsString) as Map<*, *>
-        val targetDirectory = json["target_directory"] as String
+        doFirst {
+            val injectedExecOps = project.objects.newInstance<InjectedExecOps>()
+            val output = ByteArrayOutputStream()
+            injectedExecOps.execOps.exec {
+                commandLine("cargo", "metadata", "--format-version", "1")
+                workingDir = rustProjectDir
+                standardOutput = output
+            }
+            val outputAsString = output.toString()
+            val json = groovy.json.JsonSlurper().parseText(outputAsString) as Map<*, *>
+            val targetDirectory = json["target_directory"] as String
 
-        logger.info("cargo target directory: $targetDirectory")
-        project.extensions.extraProperties.set("cargo_target_directory", targetDirectory)
+            logger.info("cargo target directory: $targetDirectory")
+            project.extensions.extraProperties.set("cargo_target_directory", targetDirectory)
+        }
     }
     // Build with cargo
     tasks.register<Exec>("cargo-build-$arch") {
         description = "Building core for $arch"
         workingDir = rustProjectDir
-        commandLine(
-            "cargo",
-            "ndk",
-            "--target",
-            arch,
-            "--platform",
-            "26",
-            "build",
-            "--profile",
-            "release-debuginfo",
-        )
+        doFirst {
+            commandLine(
+                "cargo",
+                "ndk",
+                "--target",
+                arch,
+                "--platform",
+                "26",
+                "build",
+                "--profile",
+                "release-debuginfo",
+            )
+        }
     }
     // Sync shared native dependencies
     tasks.register<Sync>("sync-rust-deps-$arch") {
         dependsOn("cargo-build-$arch")
-        from("${rustProjectDir.absolutePath}/src/libs/$arch") {
-            include("*.so")
+        doFirst {
+            from("${rustProjectDir.absolutePath}/src/libs/$arch") {
+                include("*.so")
+            }
+            into("src/main/libs/$arch")
         }
-        into("src/main/libs/$arch")
     }
     // Copy build libs into this app's libs directory
     tasks.register<Copy>("rust-deploy-$arch") {
-        dependsOn("sync-rust-deps-$arch")
+        dependsOn("sync-rust-deps-$arch", "cargo-output-dir-$arch")
         description = "Copy rust libs for ($arch) to jniLibs"
-        val cargoTargetDirectory = project.extensions.extraProperties.get("cargo_target_directory")
-        from(
-            "$cargoTargetDirectory/$target/release-debuginfo",
-        ) {
-            include("*.so")
+        doFirst {
+            val cargoTargetDirectory = project.extensions.extraProperties.get("cargo_target_directory")
+            from(
+                "$cargoTargetDirectory/$target/release-debuginfo",
+            ) {
+                include("*.so")
+            }
+            into("src/main/libs/$arch")
         }
-        into("src/main/libs/$arch")
     }
 
     // Hook up tasks to execute before building java
@@ -288,13 +298,15 @@ archTriplets.forEach { (arch, target) ->
     tasks.register<Delete>("clean-$arch") {
         dependsOn("cargo-output-dir-$arch")
         description = "Deleting built libs for $arch"
-        delete(
-            fileTree(
-                "${project.extensions.extraProperties.get("cargo_target_directory")}/$target/release-debuginfo",
-            ) {
-                include("*.so")
-            },
-        )
+        doFirst {
+            delete(
+                fileTree(
+                    "${project.extensions.extraProperties.get("cargo_target_directory")}/$target/release-debuginfo",
+                ) {
+                    include("*.so")
+                },
+            )
+        }
     }
     tasks.clean.dependsOn("clean-$arch")
 }

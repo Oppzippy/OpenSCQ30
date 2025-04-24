@@ -9,6 +9,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 openscq30_lib = { path = "../lib", features = ["bundled-sqlite"] }
+openscq30_i18n = { path = "../i18n" }
 tracing = { workspace = true, features = ["log-always"] }
 log = { workspace = true }
 tokio = { workspace = true }

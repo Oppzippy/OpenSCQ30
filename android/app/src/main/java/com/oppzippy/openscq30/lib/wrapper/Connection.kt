@@ -5,10 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("ConnectionDescriptor")
-data class ConnectionDescriptor(
-    val name: String,
-    val macAddress: String,
-)
+data class ConnectionDescriptor(val name: String, val macAddress: String)
 
 @Serializable
 @SerialName("ConnectionStatus")
@@ -22,8 +19,4 @@ enum class ConnectionStatus {
 
 @Serializable
 @SerialName("DeviceDescriptor")
-data class DeviceDescriptor(
-    val name: String,
-    val macAddress: String,
-    val model: String,
-)
+data class DeviceDescriptor(val name: String, val macAddress: String, val model: String)

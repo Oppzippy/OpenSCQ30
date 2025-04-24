@@ -7,9 +7,7 @@ import com.oppzippy.openscq30.lib.wrapper.ConnectionStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 
-class DeviceConnectionManager(
-    val device: OpenScq30Device,
-) : AutoCloseable {
+class DeviceConnectionManager(val device: OpenScq30Device) : AutoCloseable {
     val connectionStatusFlow = MutableStateFlow(ConnectionStatus.Connected)
 
     val watchForChangeNotification = MutableStateFlow(0)

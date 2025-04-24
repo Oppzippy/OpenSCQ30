@@ -4,23 +4,16 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import com.oppzippy.openscq30.android.IntentFactory
-import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
-import com.oppzippy.openscq30.lib.wrapper.AdaptiveNoiseCanceling
-import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
-import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
-import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
-import com.oppzippy.openscq30.lib.wrapper.ManualNoiseCanceling
-import com.oppzippy.openscq30.lib.wrapper.MultiButtonConfiguration
-import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
-import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeTypeTwo
-import com.oppzippy.openscq30.lib.wrapper.SoundModes
-import com.oppzippy.openscq30.lib.wrapper.SoundModesTypeTwo
-import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
-import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
+import com.oppzippy.openscq30.lib.bindings.SettingIdValuePair
+import com.oppzippy.openscq30.lib.wrapper.Setting
+import com.oppzippy.openscq30.lib.wrapper.Value
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.map
 
 @HiltViewModel
 class DeviceSettingsViewModel @Inject constructor(
@@ -29,7 +22,7 @@ class DeviceSettingsViewModel @Inject constructor(
 ) : AndroidViewModel(application) {
     private val deviceServiceConnection =
         DeviceServiceConnection(unbind = { unbindDeviceService() })
-    val uiDeviceState = deviceServiceConnection.uiDeviceStateFlow.asStateFlow()
+    val uiDeviceState = deviceServiceConnection.connectionStatusFlow.asStateFlow()
 
     init {
         bindDeviceService()
@@ -40,9 +33,9 @@ class DeviceSettingsViewModel @Inject constructor(
         stopServiceIfNotificationIsGone()
     }
 
-    fun selectDevice(bluetoothDevice: BluetoothDevice) {
+    fun selectDevice(macAddress: String) {
         val intent = intentFactory(application, DeviceService::class.java)
-        intent.putExtra(DeviceService.MAC_ADDRESS, bluetoothDevice.address)
+        intent.putExtra(DeviceService.MAC_ADDRESS, macAddress)
         application.startForegroundService(intent)
         bindDeviceService()
     }
@@ -83,66 +76,20 @@ class DeviceSettingsViewModel @Inject constructor(
         }
     }
 
-    fun setSoundModes(
-        ambientSoundMode: AmbientSoundMode? = null,
-        noiseCancelingMode: NoiseCancelingMode? = null,
-        transparencyMode: TransparencyMode? = null,
-        customNoiseCanceling: UByte? = null,
-    ) {
-        deviceServiceConnection.uiDeviceStateFlow.value.let { state ->
-            if (state is UiDeviceState.Connected) {
-                state.deviceState.soundModes?.let { soundModes ->
-                    deviceServiceConnection.setSoundModes(
-                        SoundModes(
-                            ambientSoundMode ?: soundModes.ambientSoundMode,
-                            noiseCancelingMode ?: soundModes.noiseCancelingMode,
-                            transparencyMode ?: soundModes.transparencyMode,
-                            customNoiseCanceling ?: soundModes.customNoiseCanceling,
-                        ),
-                    )
-                }
-            }
+    suspend fun setSettingValues(settingValues: List<Pair<String, Value>>) {
+        deviceServiceConnection.deviceManager?.device?.let { device ->
+            device.setSettingValues(
+                settingValues.map { valuePair ->
+                    SettingIdValuePair(valuePair.first, valuePair.second)
+                },
+            )
         }
     }
 
-    fun setSoundModesTypeTwo(
-        ambientSoundMode: AmbientSoundMode? = null,
-        transparencyMode: TransparencyMode? = null,
-        adaptiveNoiseCanceling: AdaptiveNoiseCanceling? = null,
-        manualNoiseCanceling: ManualNoiseCanceling? = null,
-        noiseCancelingMode: NoiseCancelingModeTypeTwo? = null,
-        windNoiseSuppression: Boolean? = null,
-        noiseCancelingAdaptiveSensitivityLevel: UByte? = null,
-    ) {
-        deviceServiceConnection.uiDeviceStateFlow.value.let { state ->
-            if (state is UiDeviceState.Connected) {
-                state.deviceState.soundModesTypeTwo?.let { soundModes ->
-                    deviceServiceConnection.setSoundModesTypeTwo(
-                        SoundModesTypeTwo(
-                            ambientSoundMode = ambientSoundMode ?: soundModes.ambientSoundMode,
-                            transparencyMode = transparencyMode ?: soundModes.transparencyMode,
-                            adaptiveNoiseCanceling = adaptiveNoiseCanceling ?: soundModes.adaptiveNoiseCanceling,
-                            manualNoiseCanceling = manualNoiseCanceling ?: soundModes.manualNoiseCanceling,
-                            noiseCancelingMode = noiseCancelingMode ?: soundModes.noiseCancelingMode,
-                            windNoiseSuppression = windNoiseSuppression ?: soundModes.windNoiseSuppression,
-                            noiseCancelingAdaptiveSensitivityLevel = noiseCancelingAdaptiveSensitivityLevel
-                                ?: soundModes.noiseCancelingAdaptiveSensitivityLevel,
-                        ),
-                    )
-                }
+    fun getSettingFlow(settingId: String): Flow<Setting?> =
+        deviceServiceConnection.deviceManager?.let { deviceManager ->
+            deviceManager.watchForChangeNotification.map {
+                deviceManager.device.setting(settingId)
             }
-        }
-    }
-
-    fun setEqualizerConfiguration(equalizerConfiguration: EqualizerConfiguration) {
-        deviceServiceConnection.setEqualizerConfiguration(equalizerConfiguration)
-    }
-
-    fun setAmbientSoundModeCycle(cycle: AmbientSoundModeCycle) {
-        deviceServiceConnection.setAmbientSoundModeCycle(cycle)
-    }
-
-    fun setMultiButtonConfiguration(buttonConfigu: MultiButtonConfiguration) {
-        deviceServiceConnection.setMultiButtonConfiguration(buttonConfigu)
-    }
+        } ?: emptyFlow()
 }

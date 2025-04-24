@@ -41,16 +41,8 @@ data class Range<T>(val from: T, val to: T, val step: T)
 
 @Serializable
 @SerialName("Select")
-data class Select(
-    val options: List<String>,
-    val localizedOptions: List<String>,
-)
+data class Select(val options: List<String>, val localizedOptions: List<String>)
 
 @Serializable
 @SerialName("Equalizer")
-data class Equalizer(
-    val bandHz: List<UShort>,
-    val fractionDigits: Short,
-    val min: Short,
-    val max: Short,
-)
+data class Equalizer(val bandHz: List<UShort>, val fractionDigits: Short, val min: Short, val max: Short)

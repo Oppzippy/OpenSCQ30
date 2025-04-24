@@ -5,9 +5,4 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("PairedDevice")
-data class PairedDevice(
-    val name: String,
-    val macAddress: String,
-    val model: String,
-)
-
+data class PairedDevice(val name: String, val macAddress: String, val model: String)

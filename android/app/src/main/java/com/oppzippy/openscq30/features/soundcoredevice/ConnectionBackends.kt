@@ -16,18 +16,17 @@ import com.oppzippy.openscq30.lib.bindings.ManualRfcommConnectionBox
 import com.oppzippy.openscq30.lib.bindings.UuidSelector
 import com.oppzippy.openscq30.lib.wrapper.ConnectionDescriptor
 import com.oppzippy.openscq30.lib.wrapper.ConnectionStatus
+import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.IOException
 
-fun connectionBackends(context: Context, coroutineScope: CoroutineScope): ManualConnectionBackends {
-    return ManualConnectionBackends(
+fun connectionBackends(context: Context, coroutineScope: CoroutineScope): ManualConnectionBackends =
+    ManualConnectionBackends(
         rfcomm = AndroidRfcommConnectionBackendImpl(context, coroutineScope),
     )
-}
 
 class AndroidRfcommConnectionBackendImpl(private val context: Context, private val coroutineScope: CoroutineScope) :
     AndroidRfcommConnectionBackend {
@@ -111,4 +110,3 @@ class AndroidRfcommConnectionWriterImpl(
         }
     }
 }
-

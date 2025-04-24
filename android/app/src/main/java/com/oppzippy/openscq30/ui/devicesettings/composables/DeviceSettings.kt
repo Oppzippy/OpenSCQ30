@@ -23,69 +23,34 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
-import com.oppzippy.openscq30.lib.wrapper.AmbientSoundModeCycle
-import com.oppzippy.openscq30.lib.wrapper.EqualizerConfiguration
-import com.oppzippy.openscq30.lib.wrapper.ManualNoiseCanceling
-import com.oppzippy.openscq30.lib.wrapper.MultiButtonConfiguration
-import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingMode
-import com.oppzippy.openscq30.lib.wrapper.NoiseCancelingModeTypeTwo
-import com.oppzippy.openscq30.lib.wrapper.TransparencyMode
-import com.oppzippy.openscq30.ui.buttonactions.ButtonActionSelection
-import com.oppzippy.openscq30.ui.deviceinfo.DeviceInfoScreen
+import com.oppzippy.openscq30.lib.wrapper.Setting
+import com.oppzippy.openscq30.lib.wrapper.Value
 import com.oppzippy.openscq30.ui.devicesettings.Screen
 import com.oppzippy.openscq30.ui.devicesettings.ScreenInfo
 import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
-import com.oppzippy.openscq30.ui.equalizer.EqualizerSettings
 import com.oppzippy.openscq30.ui.importexport.ImportExportScreen
 import com.oppzippy.openscq30.ui.importexport.ImportExportViewModel
-import com.oppzippy.openscq30.ui.quickpresets.QuickPresetScreen
 import com.oppzippy.openscq30.ui.soundmode.SoundModeSettings
-import com.oppzippy.openscq30.ui.soundmodestypetwo.SoundModeTypeTwoSettings
+import kotlinx.coroutines.flow.Flow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeviceSettings(
     uiState: UiDeviceState.Connected,
     onBack: () -> Unit = {},
-
-    // sound modes type one
-    onAmbientSoundModeChange: (ambientSoundMode: AmbientSoundMode) -> Unit = {},
-    onTransparencyModeChange: (transparencyMode: TransparencyMode) -> Unit = {},
-    onNoiseCancelingModeChange: (noiseCancelingMode: NoiseCancelingMode) -> Unit = {},
-    onCustomNoiseCancelingChange: (customNoiseCanceling: UByte) -> Unit = {},
-    // sound modes type two
-    onAmbientSoundModeTypeTwoChange: (ambientSoundMode: AmbientSoundMode) -> Unit = {},
-    onTransparencyModeTypeTwoChange: (transparencyMode: TransparencyMode) -> Unit = {},
-    onNoiseCancelingModeTypeTwoChange: (noiseCancelingMode: NoiseCancelingModeTypeTwo) -> Unit = {},
-    onManualNoiseCancelingChange: (manualNoiseCanceling: ManualNoiseCanceling) -> Unit = {},
-
-    onAmbientSoundModeCycleChange: (ambientSoundMode: AmbientSoundModeCycle) -> Unit = {},
-    onEqualizerConfigurationChange: (equalizerConfiguration: EqualizerConfiguration) -> Unit = {},
-    onButtonConfigurationChange: (MultiButtonConfiguration) -> Unit = {},
+    categoryIds: List<String>,
+    getSettingFlow: (String) -> Flow<Setting?>,
+    setSettings: suspend (List<Pair<String, Value>>) -> Unit,
 ) {
     val navController = rememberNavController()
-    val listedScreens = ArrayList<ScreenInfo>()
-    if (uiState.deviceState.deviceFeatures.availableSoundModes != null) {
-        listedScreens.add(Screen.SoundModes.screenInfo)
-    }
-    if (uiState.deviceState.soundModesTypeTwo != null) {
-        listedScreens.add(Screen.SoundModesTypeTwo.screenInfo)
-    }
-    if (uiState.deviceState.deviceFeatures.numEqualizerChannels > 0) {
-        listedScreens.add(Screen.Equalizer.screenInfo)
-    }
-    listedScreens.add(Screen.QuickPresets.screenInfo)
-    if (uiState.deviceState.deviceFeatures.hasButtonConfiguration) {
-        listedScreens.add(Screen.ButtonActions.screenInfo)
-    }
-    listedScreens.add(Screen.DeviceInfo.screenInfo)
+    val listedScreens: MutableList<ScreenInfo> =
+        categoryIds.map { Screen.SettingsCategory(it).screenInfo() }.toMutableList()
     listedScreens.add(Screen.ImportExport.screenInfo)
 
     // compose navigation does not allow us to use polymorphism with routes, so instead a mapping of
     // class path to route name is kept
     val routeNames = listedScreens.associate {
-        Pair(it.baseRoute::class.qualifiedName!!, it.nameResourceId)
+        Pair(it.baseRoute::class.qualifiedName!!, it.name.translated())
     }
 
     // In order to avoid multiple instance of the view model being created, it needs to be created
@@ -100,7 +65,7 @@ fun DeviceSettings(
                         navController.currentBackStackEntryAsState().value?.destination?.route
                     val routeWithoutArgs = route?.substringBefore("?")
                     val resourceId = routeNames[routeWithoutArgs]
-                    val title = resourceId?.let { stringResource(it) } ?: uiState.name
+                    val title = resourceId ?: uiState.name
                     Text(title)
                 },
                 navigationIcon = {
@@ -149,64 +114,13 @@ fun DeviceSettings(
                     },
                 )
             }
-            uiState.deviceState.soundModes?.let { soundModes ->
-                composable<Screen.SoundModes> {
-                    val availableSoundModes =
-                        uiState.deviceState.deviceFeatures.availableSoundModes ?: return@composable
-                    SoundModeSettings(
-                        soundModes = soundModes,
-                        ambientSoundModeCycle = uiState.deviceState.ambientSoundModeCycle,
-                        availableSoundModes = availableSoundModes,
-                        onAmbientSoundModeChange = onAmbientSoundModeChange,
-                        onTransparencyModeChange = onTransparencyModeChange,
-                        onNoiseCancelingModeChange = onNoiseCancelingModeChange,
-                        onCustomNoiseCancelingChange = onCustomNoiseCancelingChange,
-                        onAmbientSoundModeCycleChange = onAmbientSoundModeCycleChange,
-                    )
-                }
-            }
-            uiState.deviceState.soundModesTypeTwo?.let { soundModes ->
-                composable<Screen.SoundModesTypeTwo> {
-                    SoundModeTypeTwoSettings(
-                        soundModes = soundModes,
-                        ambientSoundModeCycle = uiState.deviceState.ambientSoundModeCycle,
-                        onAmbientSoundModeChange = onAmbientSoundModeTypeTwoChange,
-                        onTransparencyModeChange = onTransparencyModeTypeTwoChange,
-                        onNoiseCancelingModeChange = onNoiseCancelingModeTypeTwoChange,
-                        onManualNoiseCancelingChange = onManualNoiseCancelingChange,
-                        onAmbientSoundModeCycleChange = onAmbientSoundModeCycleChange,
-                    )
-                }
-            }
-            composable<Screen.Equalizer> {
-                EqualizerSettings(
-                    uiState = uiState,
-                    onEqualizerConfigurationChange = onEqualizerConfigurationChange,
+            composable<Screen.SettingsCategory> { backStackEntry ->
+                val route = backStackEntry.toRoute<Screen.SettingsCategory>()
+                SoundModeSettings(
+                    categoryIds = categoryIds,
+                    getSettingFlow = getSettingFlow,
+                    setSettings = setSettings,
                 )
-            }
-            composable<Screen.QuickPresets> {
-                val deviceModel = uiState.deviceState.model
-                if (deviceModel != null) {
-                    QuickPresetScreen(
-                        deviceFeatures = uiState.deviceState.deviceFeatures,
-                        deviceModel = deviceModel,
-                    )
-                } else {
-                    Text("Internal error: device model missing from state")
-                }
-            }
-            uiState.deviceState.buttonConfiguration?.let { buttonConfiguration ->
-                composable<Screen.ButtonActions> {
-                    ButtonActionSelection(
-                        buttonConfiguration = buttonConfiguration,
-                        onChange = {
-                            onButtonConfigurationChange(it)
-                        },
-                    )
-                }
-            }
-            composable<Screen.DeviceInfo> {
-                DeviceInfoScreen(deviceState = uiState.deviceState)
             }
 
             composable<Screen.ImportExport> { backStackEntry ->

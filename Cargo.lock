@@ -4085,6 +4085,7 @@ dependencies = [
  "itertools 0.14.0",
  "log",
  "macaddr",
+ "openscq30_i18n",
  "openscq30_lib",
  "serde_json",
  "thiserror 2.0.12",

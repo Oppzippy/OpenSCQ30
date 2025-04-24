@@ -7,10 +7,10 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.runBlocking
 import javax.inject.Singleton
 import kotlin.io.path.Path
 import kotlin.io.path.pathString
+import kotlinx.coroutines.runBlocking
 
 @Module
 @InstallIn(SingletonComponent::class)

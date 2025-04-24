@@ -3,6 +3,7 @@
 mod api;
 pub mod connection;
 mod device;
+pub mod i18n;
 pub mod quick_presets;
 pub mod serializable;
 
