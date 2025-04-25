@@ -112,7 +112,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-service:$lifecycleVersion")
 
     // Compose
-    val composeBomVersion = "2025.04.00"
+    val composeBomVersion = "2025.04.01"
     implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     androidTestImplementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     implementation("androidx.compose.ui:ui")
@@ -140,7 +140,7 @@ dependencies {
     val accompanistVersion = "0.37.2"
     implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
 
-    val roomVersion = "2.7.0"
+    val roomVersion = "2.7.1"
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     annotationProcessor("androidx.room:room-compiler:$roomVersion")
