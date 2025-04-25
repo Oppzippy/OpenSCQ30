@@ -47,7 +47,7 @@
     <string name="cancel">Cancel</string>
     <string name="name">Name</string>
     <string name="delete_custom_profile">Delete Custom Profile</string>
-    <string name="custom_profile_delete_confirm">Are you sure you want to delete \"%s\"?</string>
+    <string name="delete_confirm">Are you sure you want to delete \"%s\"?</string>
     <string name="delete">Delete</string>
     <string name="back">Back</string>
     <string name="info">Info</string>
@@ -153,4 +153,6 @@
     <string name="no_devices_found">No Devices Found</string>
     <string name="bluetooth_is_disabled">Bluetooth is Disabled</string>
     <string name="copy_logs_to_clipboard">Copy Logs to Clipboard</string>
+    <string name="unknown">Unknown</string>
+    <string name="add_item">Add Item</string>
 </resources>
