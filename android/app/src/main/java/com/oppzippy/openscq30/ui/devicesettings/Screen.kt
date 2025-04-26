@@ -2,7 +2,12 @@ package com.oppzippy.openscq30.ui.devicesettings
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.ImportExport
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.RadioButtonChecked
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Speaker
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -18,9 +23,17 @@ sealed class Screen {
     @Serializable
     data class SettingsCategory(val categoryId: String) : Screen() {
         fun screenInfo(): ScreenInfo {
-            ScreenInfo(
+            return ScreenInfo(
                 this,
                 StringResourceOrString.RawString(translateCategoryId(categoryId)),
+                when (categoryId) {
+                    "General" -> Icons.Filled.Settings
+                    "SoundModes" -> Icons.Filled.Speaker
+                    "Equalizer" -> Icons.Filled.Equalizer
+                    "ButtonConfiguration" -> Icons.Filled.RadioButtonChecked
+                    "DeviceInformation" -> Icons.Filled.Info
+                    else -> Icons.Filled.Settings
+                },
             )
         }
     }
