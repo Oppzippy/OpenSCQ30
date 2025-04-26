@@ -18,7 +18,6 @@ import com.oppzippy.openscq30.lib.wrapper.Value
 import com.oppzippy.openscq30.lib.wrapper.toValue
 import com.oppzippy.openscq30.ui.utils.CheckboxWithLabel
 import com.oppzippy.openscq30.ui.utils.Select
-import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.Flow
 
@@ -104,22 +103,23 @@ private fun I32Range(name: String, range: Range<Int>, value: Int, onChange: (Int
 
 @Composable
 private fun Equalizer(name: String, setting: Setting.EqualizerSetting, onChange: (List<Short>) -> Unit) {
-    val divisor = 10.0.pow(setting.setting.fractionDigits.toInt())
     com.oppzippy.openscq30.ui.devicesettings.composables.equalizer.Equalizer(
-        values = setting.value.map { it.toDouble() / divisor },
+        bands = setting.setting.bandHz,
+        values = setting.value,
+        minValue = setting.setting.min,
+        maxValue = setting.setting.max,
+        fractionDigits = setting.setting.fractionDigits,
         onValueChange = { changedIndex, newValue ->
             onChange(
                 setting.value.mapIndexed { index, oldValue ->
                     if (index == changedIndex) {
-                        (newValue * divisor).roundToInt().toShort()
+                        newValue
                     } else {
                         oldValue
                     }
                 },
             )
         },
-        texts = setting.setting.bandHz.map { it.toString() },
-        onTextChanged = { _, _ -> TODO() },
     )
 }
 
