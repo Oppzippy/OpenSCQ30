@@ -16,12 +16,9 @@ import com.oppzippy.openscq30.ui.utils.CheckboxWithLabel
 @Composable
 fun Settings(viewModel: SettingsViewModel = hiltViewModel()) {
     val autoConnect by viewModel.autoConnect.collectAsState()
-    val macAddressFilter by viewModel.macAddressFilter.collectAsState()
     Settings(
         autoConnect = autoConnect,
         onAutoConnectChange = { viewModel.setAutoConnect(it) },
-        macAddressFilter = macAddressFilter,
-        onMacAddressFilterChange = { viewModel.setMacAddressFilter(it) },
         onCopyLogs = { viewModel.copyLogs() },
     )
 }
@@ -30,8 +27,6 @@ fun Settings(viewModel: SettingsViewModel = hiltViewModel()) {
 private fun Settings(
     autoConnect: Boolean,
     onAutoConnectChange: (Boolean) -> Unit,
-    macAddressFilter: Boolean,
-    onMacAddressFilterChange: (Boolean) -> Unit,
     onCopyLogs: () -> Unit,
 ) {
     Column {
@@ -39,11 +34,6 @@ private fun Settings(
             text = stringResource(R.string.auto_connect),
             isChecked = autoConnect,
             onCheckedChange = { onAutoConnectChange(it) },
-        )
-        CheckboxWithLabel(
-            text = stringResource(R.string.mac_address_filter),
-            isChecked = macAddressFilter,
-            onCheckedChange = { onMacAddressFilterChange(it) },
         )
         Button(
             onClick = { onCopyLogs() },
@@ -59,8 +49,6 @@ private fun PreviewSettings() {
         Settings(
             autoConnect = false,
             onAutoConnectChange = {},
-            macAddressFilter = true,
-            onMacAddressFilterChange = {},
             onCopyLogs = {},
         )
     }
