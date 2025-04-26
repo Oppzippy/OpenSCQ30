@@ -22,20 +22,18 @@ sealed class Screen {
 
     @Serializable
     data class SettingsCategory(val categoryId: String) : Screen() {
-        fun screenInfo(): ScreenInfo {
-            return ScreenInfo(
-                this,
-                StringResourceOrString.RawString(translateCategoryId(categoryId)),
-                when (categoryId) {
-                    "General" -> Icons.Filled.Settings
-                    "SoundModes" -> Icons.Filled.Speaker
-                    "Equalizer" -> Icons.Filled.Equalizer
-                    "ButtonConfiguration" -> Icons.Filled.RadioButtonChecked
-                    "DeviceInformation" -> Icons.Filled.Info
-                    else -> Icons.Filled.Settings
-                },
-            )
-        }
+        fun screenInfo(): ScreenInfo = ScreenInfo(
+            this,
+            StringResourceOrString.RawString(translateCategoryId(categoryId)),
+            when (categoryId) {
+                "General" -> Icons.Filled.Settings
+                "SoundModes" -> Icons.Filled.Speaker
+                "Equalizer" -> Icons.Filled.Equalizer
+                "ButtonConfiguration" -> Icons.Filled.RadioButtonChecked
+                "DeviceInformation" -> Icons.Filled.Info
+                else -> Icons.Filled.Settings
+            },
+        )
     }
 
     @Serializable

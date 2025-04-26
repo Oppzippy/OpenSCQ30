@@ -24,11 +24,7 @@ fun Settings(viewModel: SettingsViewModel = hiltViewModel()) {
 }
 
 @Composable
-private fun Settings(
-    autoConnect: Boolean,
-    onAutoConnectChange: (Boolean) -> Unit,
-    onCopyLogs: () -> Unit,
-) {
+private fun Settings(autoConnect: Boolean, onAutoConnectChange: (Boolean) -> Unit, onCopyLogs: () -> Unit) {
     Column {
         CheckboxWithLabel(
             text = stringResource(R.string.auto_connect),

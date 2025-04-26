@@ -7,8 +7,8 @@ import com.oppzippy.openscq30.lib.wrapper.Value
 import com.oppzippy.openscq30.ui.devicesettings.composables.DeviceSettings
 import com.oppzippy.openscq30.ui.devicesettings.composables.Disconnected
 import com.oppzippy.openscq30.ui.utils.Loading
-import kotlinx.coroutines.flow.Flow
 import kotlin.String
+import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun DeviceSettingsScreen(
