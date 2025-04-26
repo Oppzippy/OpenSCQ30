@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
@@ -28,13 +27,12 @@ import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
 fun OpenSCQ30Root(viewModel: DeviceSettingsViewModel = hiltViewModel()) {
-    val context = LocalContext.current
-
     OpenSCQ30Theme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            val deviceState by viewModel.uiDeviceState.collectAsState()
+            val connectionStatus by viewModel.uiDeviceState.collectAsState()
 
-            val isConnected = deviceState is ConnectionStatus.Connected || deviceState is ConnectionStatus.Connecting
+            val isConnected =
+                connectionStatus is ConnectionStatus.Connected || connectionStatus is ConnectionStatus.Connecting
             BackHandler(enabled = isConnected) {
                 viewModel.deselectDevice()
             }
@@ -52,7 +50,11 @@ fun OpenSCQ30Root(viewModel: DeviceSettingsViewModel = hiltViewModel()) {
             ) { animationIsConnected ->
                 if (animationIsConnected) {
                     DeviceSettingsScreen(
+                        connectionStatus = connectionStatus,
                         onBack = { viewModel.deselectDevice() },
+                        categoryIds = viewModel.getCategoriesFlow().collectAsState(emptyList()).value,
+                        getSettingsInCategoryFlow = { viewModel.getSettingsInCategoryFlow(it) },
+                        setSettings = { viewModel.setSettingValues(it) },
                     )
                 } else {
                     DeviceSelectionScreen(

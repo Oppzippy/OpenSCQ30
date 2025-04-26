@@ -14,6 +14,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -23,24 +25,23 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.lib.wrapper.Setting
 import com.oppzippy.openscq30.lib.wrapper.Value
 import com.oppzippy.openscq30.ui.devicesettings.Screen
 import com.oppzippy.openscq30.ui.devicesettings.ScreenInfo
-import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import com.oppzippy.openscq30.ui.importexport.ImportExportScreen
 import com.oppzippy.openscq30.ui.importexport.ImportExportViewModel
-import com.oppzippy.openscq30.ui.soundmode.SoundModeSettings
 import kotlinx.coroutines.flow.Flow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeviceSettings(
-    uiState: UiDeviceState.Connected,
+    connectionStatus: ConnectionStatus.Connected,
     onBack: () -> Unit = {},
     categoryIds: List<String>,
-    getSettingFlow: (String) -> Flow<Setting?>,
-    setSettings: suspend (List<Pair<String, Value>>) -> Unit,
+    getSettingsInCategoryFlow: (String) -> Flow<List<Pair<String, Setting>>>,
+    setSettings: (List<Pair<String, Value>>) -> Unit,
 ) {
     val navController = rememberNavController()
     val listedScreens: MutableList<ScreenInfo> =
@@ -65,7 +66,7 @@ fun DeviceSettings(
                         navController.currentBackStackEntryAsState().value?.destination?.route
                     val routeWithoutArgs = route?.substringBefore("?")
                     val resourceId = routeNames[routeWithoutArgs]
-                    val title = resourceId ?: uiState.name
+                    val title = resourceId ?: connectionStatus.deviceManager.device.model()
                     Text(title)
                 },
                 navigationIcon = {
@@ -116,9 +117,9 @@ fun DeviceSettings(
             }
             composable<Screen.SettingsCategory> { backStackEntry ->
                 val route = backStackEntry.toRoute<Screen.SettingsCategory>()
-                SoundModeSettings(
-                    categoryIds = categoryIds,
-                    getSettingFlow = getSettingFlow,
+                val settings by getSettingsInCategoryFlow(route.categoryId).collectAsState(emptyList())
+                SettingPage(
+                    settings = settings,
                     setSettings = setSettings,
                 )
             }

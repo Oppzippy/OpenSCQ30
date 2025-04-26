@@ -24,54 +24,54 @@ import kotlinx.coroutines.flow.Flow
 @Composable
 fun SettingPage(
     modifier: Modifier = Modifier,
-    settingIds: List<String>,
-    getSettingFlow: (String) -> Flow<Setting?>,
-    setSetting: (String, Value) -> Unit,
+    settings: List<Pair<String, Setting>>,
+    setSettings: (List<Pair<String, Value>>) -> Unit,
 ) {
+    fun setSetting(settingId: String, value: Value) {
+        setSettings(listOf(Pair(settingId, value)))
+    }
     Column(modifier = modifier) {
-        settingIds.forEach { settingId ->
-            getSettingFlow(settingId).collectAsState(null).value?.let { setting ->
-                val name = translateSettingId(settingId)
-                when (setting) {
-                    is Setting.ToggleSetting -> Toggle(
-                        name = name,
-                        isEnabled = setting.value,
-                        onChange = { setSetting(settingId, it.toValue()) },
-                    )
+        settings.forEach { (settingId, setting) ->
+            val name = translateSettingId(settingId)
+            when (setting) {
+                is Setting.ToggleSetting -> Toggle(
+                    name = name,
+                    isEnabled = setting.value,
+                    onChange = { setSetting(settingId, it.toValue()) },
+                )
 
-                    is Setting.EqualizerSetting -> Equalizer(
-                        name = name,
-                        setting = setting,
-                        onChange = { setSetting(settingId, it.toValue()) },
-                    )
+                is Setting.EqualizerSetting -> Equalizer(
+                    name = name,
+                    setting = setting,
+                    onChange = { setSetting(settingId, it.toValue()) },
+                )
 
-                    is Setting.I32RangeSetting -> I32Range(
-                        name = name,
-                        range = setting.setting,
-                        value = setting.value,
-                        onChange = { setSetting(settingId, it.toValue()) },
-                    )
+                is Setting.I32RangeSetting -> I32Range(
+                    name = name,
+                    range = setting.setting,
+                    value = setting.value,
+                    onChange = { setSetting(settingId, it.toValue()) },
+                )
 
-                    is Setting.InformationSetting -> InformationSetting(name, setting.translatedText)
+                is Setting.InformationSetting -> InformationSetting(name, setting.translatedText)
 
-                    is Setting.SelectSetting -> StandardSelect(
-                        name = name,
-                        setting = setting,
-                        onChange = { setSetting(settingId, it.toValue()) },
-                    )
+                is Setting.SelectSetting -> StandardSelect(
+                    name = name,
+                    setting = setting,
+                    onChange = { setSetting(settingId, it.toValue()) },
+                )
 
-                    is Setting.OptionalSelectSetting -> OptionalSelect(
-                        name = name,
-                        setting = setting,
-                        onChange = { setSetting(settingId, it.toValue()) },
-                    )
+                is Setting.OptionalSelectSetting -> OptionalSelect(
+                    name = name,
+                    setting = setting,
+                    onChange = { setSetting(settingId, it.toValue()) },
+                )
 
-                    is Setting.ModifiableSelectSetting -> ModifiableSelect(
-                        name = name,
-                        setting = setting,
-                        onChange = { setSetting(settingId, it) },
-                    )
-                }
+                is Setting.ModifiableSelectSetting -> ModifiableSelect(
+                    name = name,
+                    setting = setting,
+                    onChange = { setSetting(settingId, it) },
+                )
             }
         }
     }

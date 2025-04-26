@@ -37,7 +37,7 @@ class DeviceSettingsLoadingTest {
     @Test
     fun showsLoadingScreen() {
         composeRule.setContent {
-            DeviceSettingsScreen(deviceState = UiDeviceState.Loading)
+            DeviceSettingsScreen(connectionStatus = UiDeviceState.Loading)
         }
 
         composeRule.onNode(loading).assertExists()
@@ -46,7 +46,7 @@ class DeviceSettingsLoadingTest {
     @Test
     fun showsDisconnectedScreen() {
         composeRule.setContent {
-            DeviceSettingsScreen(deviceState = UiDeviceState.Disconnected)
+            DeviceSettingsScreen(connectionStatus = UiDeviceState.Disconnected)
         }
 
         composeRule.onNode(disconnected).assertExists()
