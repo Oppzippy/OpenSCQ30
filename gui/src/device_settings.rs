@@ -19,7 +19,7 @@ use legacy_migration::LegacyMigrationModel;
 use openscq30_i18n::Translate;
 use openscq30_lib::api::{
     quick_presets::{QuickPreset, QuickPresetsHandler},
-    settings::{CategoryId, Setting, SettingId, Value},
+    settings::{self, CategoryId, Setting, SettingId, Value},
 };
 
 use crate::{
@@ -46,11 +46,11 @@ pub enum Message {
     EditQuickPresetCancel,
     EditQuickPresetSave,
     EditQuickPresetDone,
-    ShowOptionalSelectAddDialog(SettingId),
-    ShowOptionalSelectRemoveDialog(SettingId),
-    OptionalSelectAddDialogSubmit(Option<String>),
-    OptionalSelectAddDialogSetName(String),
-    OptionalSelectRemoveDialogSubmit,
+    ShowModifiableSelectAddDialog(SettingId),
+    ShowModifiableSelectRemoveDialog(SettingId),
+    ModifiableSelectAddDialogSubmit(Option<String>),
+    ModifiableSelectAddDialogSetName(String),
+    ModifiableSelectRemoveDialogSubmit,
     AddLegacyEqualizerMigrationPage(HashMap<String, LegacyEqualizerProfile>),
     LegacyMigrationMessage(legacy_migration::Message),
     None,
@@ -75,8 +75,8 @@ pub struct DeviceSettingsModel {
 
 enum Dialog {
     CreateQuickPreset(String),
-    OptionalSelectAdd(SettingId, String),
-    OptionalSelectRemove(SettingId, Cow<'static, str>),
+    ModifiableSelectAdd(SettingId, String),
+    ModifiableSelectRemove(SettingId, Cow<'static, str>),
 }
 
 enum CustomCategory {
@@ -206,7 +206,7 @@ impl DeviceSettingsModel {
                     widget::button::destructive(fl!("cancel")).on_press(Message::CancelDialog),
                 )
                 .into(),
-            Dialog::OptionalSelectAdd(setting_id, name) => widget::dialog()
+            Dialog::ModifiableSelectAdd(setting_id, name) => widget::dialog()
                 .title({
                     let setting_name = setting_id.translate();
                     fl!("add-item", name = setting_name.as_str())
@@ -216,23 +216,23 @@ impl DeviceSettingsModel {
                         .id(widget::Id::new(
                             "optional-select-dialog-add-item-text-input",
                         ))
-                        .on_input(Message::OptionalSelectAddDialogSetName)
-                        .on_submit(|name| Message::OptionalSelectAddDialogSubmit(Some(name))),
+                        .on_input(Message::ModifiableSelectAddDialogSetName)
+                        .on_submit(|name| Message::ModifiableSelectAddDialogSubmit(Some(name))),
                 )
                 .primary_action(
                     widget::button::suggested(fl!("create"))
-                        .on_press(Message::OptionalSelectAddDialogSubmit(None)),
+                        .on_press(Message::ModifiableSelectAddDialogSubmit(None)),
                 )
                 .secondary_action(
                     widget::button::destructive(fl!("cancel")).on_press(Message::CancelDialog),
                 )
                 .into(),
-            Dialog::OptionalSelectRemove(_setting_id, name) => widget::dialog()
+            Dialog::ModifiableSelectRemove(_setting_id, name) => widget::dialog()
                 .title(fl!("remove-item", name = name.as_ref()))
                 .body(fl!("remove-item-confirm", name = name.as_ref()))
                 .primary_action(
                     widget::button::destructive(fl!("remove"))
-                        .on_press(Message::OptionalSelectRemoveDialogSubmit),
+                        .on_press(Message::ModifiableSelectRemoveDialogSubmit),
                 )
                 .secondary_action(
                     widget::button::text(fl!("cancel")).on_press(Message::CancelDialog),
@@ -325,12 +325,12 @@ impl DeviceSettingsModel {
                             move |value| {
                                 Message::SetSetting(
                                     setting_id.clone(),
-                                    value.map(ToOwned::to_owned).map(Cow::from).into(),
+                                    Cow::from(value.to_owned()).into(),
                                 )
                             }
                         },
-                        Message::ShowOptionalSelectAddDialog(setting_id.clone()),
-                        Message::ShowOptionalSelectRemoveDialog(setting_id.clone()),
+                        Message::ShowModifiableSelectAddDialog(setting_id.clone()),
+                        Message::ShowModifiableSelectRemoveDialog(setting_id.clone()),
                     ),
                     Setting::Equalizer {
                         setting,
@@ -539,29 +539,30 @@ impl DeviceSettingsModel {
                 self.editing_quick_preset = None;
                 Action::Task(self.refresh())
             }
-            Message::ShowOptionalSelectAddDialog(setting_id) => {
-                self.dialog = Some(Dialog::OptionalSelectAdd(setting_id, String::new()));
+            Message::ShowModifiableSelectAddDialog(setting_id) => {
+                self.dialog = Some(Dialog::ModifiableSelectAdd(setting_id, String::new()));
                 Action::FocusTextInput(widget::Id::new(
-                    "optional-select-dialog-add-item-text-input",
+                    "modifiable-select-dialog-add-item-text-input",
                 ))
             }
-            Message::ShowOptionalSelectRemoveDialog(setting_id) => {
+            Message::ShowModifiableSelectRemoveDialog(setting_id) => {
                 let selected_item = self
                     .settings
                     .iter()
                     .find(|item| item.0 == setting_id)
                     .and_then(|item| {
-                        if let (_setting_id, Setting::OptionalSelect { setting: _, value }) = item {
+                        if let (_setting_id, Setting::ModifiableSelect { setting: _, value }) = item
+                        {
                             value.to_owned()
                         } else {
                             None
                         }
                     });
                 if let Some(selected_item) = selected_item {
-                    self.dialog = Some(Dialog::OptionalSelectRemove(setting_id, selected_item));
+                    self.dialog = Some(Dialog::ModifiableSelectRemove(setting_id, selected_item));
                 } else {
                     tracing::error!(
-                        r#"tried to open optional select remove dialog for {setting_id:?}, but selected item is None.
+                        r#"tried to open modifiable select remove dialog for {setting_id:?}, but selected item is None.
                         current settings: {:?}
                         "#,
                         self.settings,
@@ -569,14 +570,14 @@ impl DeviceSettingsModel {
                 }
                 Action::None
             }
-            Message::OptionalSelectAddDialogSetName(new_name) => {
-                if let Some(Dialog::OptionalSelectAdd(_setting_id, name)) = &mut self.dialog {
+            Message::ModifiableSelectAddDialogSetName(new_name) => {
+                if let Some(Dialog::ModifiableSelectAdd(_setting_id, name)) = &mut self.dialog {
                     *name = new_name;
                 }
                 Action::None
             }
-            Message::OptionalSelectAddDialogSubmit(override_name) => {
-                if let Some(Dialog::OptionalSelectAdd(setting_id, name)) = self.dialog.take() {
+            Message::ModifiableSelectAddDialogSubmit(override_name) => {
+                if let Some(Dialog::ModifiableSelectAdd(setting_id, name)) = self.dialog.take() {
                     let name = override_name.unwrap_or(name);
 
                     let device = self.device.clone();
@@ -585,7 +586,9 @@ impl DeviceSettingsModel {
                             device
                                 .set_setting_values(vec![(
                                     setting_id,
-                                    Value::OptionalString(Some(Cow::Owned(name))),
+                                    Value::ModifiableSelectCommand(
+                                        settings::ModifiableSelectCommand::Add(name.into()),
+                                    ),
                                 )])
                                 .await
                                 .map_err(handle_soft_error!())?;
@@ -597,40 +600,24 @@ impl DeviceSettingsModel {
                     Action::None
                 }
             }
-            Message::OptionalSelectRemoveDialogSubmit => {
-                if let Some(Dialog::OptionalSelectRemove(setting_id, name)) = self.dialog.take() {
-                    let is_target_item_still_selected = self
-                        .settings
-                        .iter()
-                        .find(|item| item.0 == setting_id)
-                        .and_then(|item| {
-                            if let (_setting_id, Setting::OptionalSelect { setting: _, value }) =
-                                item
-                            {
-                                value.as_ref().map(|v| v == &name)
-                            } else {
-                                None
-                            }
+            Message::ModifiableSelectRemoveDialogSubmit => {
+                if let Some(Dialog::ModifiableSelectRemove(setting_id, name)) = self.dialog.take() {
+                    let device = self.device.clone();
+                    Action::Task(
+                        Task::future(async move {
+                            device
+                                .set_setting_values(vec![(
+                                    setting_id,
+                                    Value::ModifiableSelectCommand(
+                                        settings::ModifiableSelectCommand::Remove(name),
+                                    ),
+                                )])
+                                .await
+                                .map_err(handle_soft_error!())?;
+                            Ok(Message::Refresh)
                         })
-                        .unwrap_or_default();
-                    if is_target_item_still_selected {
-                        let device = self.device.clone();
-                        Action::Task(
-                            Task::future(async move {
-                                device
-                                    .set_setting_values(vec![(
-                                        setting_id,
-                                        Value::OptionalString(None),
-                                    )])
-                                    .await
-                                    .map_err(handle_soft_error!())?;
-                                Ok(Message::Refresh)
-                            })
-                            .map(coalesce_result),
-                        )
-                    } else {
-                        Action::None
-                    }
+                        .map(coalesce_result),
+                    )
                 } else {
                     Action::None
                 }

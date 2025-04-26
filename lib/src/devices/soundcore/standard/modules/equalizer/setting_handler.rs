@@ -158,7 +158,7 @@ where
                 }
             }
             EqualizerSetting::CustomProfile => {
-                if let Some(name) = value.try_as_optional_str()? {
+                if let Ok(name) = value.try_as_str() {
                     if let Some(volume_adjustments) = self
                         .custom_profiles
                         .lock()
@@ -167,47 +167,34 @@ where
                         .find(|(n, _)| n == name)
                         .map(|(_, volume_adjustments)| volume_adjustments)
                     {
-                        // Activate existing profile
                         *state.as_mut() = EqualizerConfiguration::new_custom_profile(
                             self.values_to_volume_adjustments(
                                 volume_adjustments,
                                 equalizer_configuration.volume_adjustments(),
                             ),
                         )
-                    } else {
-                        // Create new profile
-                        self.database
-                            .upsert_equalizer_profile(
-                                self.device_model,
-                                name.to_owned(),
-                                equalizer_configuration
-                                    .volume_adjustments_channel_1()
-                                    .adjustments()
-                                    .to_vec(),
-                            )
-                            .await?;
-                        self.refresh().await?;
                     }
-                } else {
-                    // Delete
-                    let maybe_name = self
-                        .custom_profiles
-                        .lock()
-                        .unwrap()
-                        .iter()
-                        .find(|(_, volume_adjustments)| {
-                            volume_adjustments
-                                == equalizer_configuration
-                                    .volume_adjustments_channel_1()
-                                    .adjustments()
-                        })
-                        .map(|(name, _)| name)
-                        .cloned();
-                    if let Some(name) = maybe_name {
-                        self.database
-                            .delete_equalizer_profile(self.device_model, name.to_owned())
-                            .await?;
-                        self.refresh().await?;
+                } else if let Value::ModifiableSelectCommand(command) = value {
+                    match command {
+                        settings::ModifiableSelectCommand::Add(name) => {
+                            self.database
+                                .upsert_equalizer_profile(
+                                    self.device_model,
+                                    name.into_owned(),
+                                    equalizer_configuration
+                                        .volume_adjustments_channel_1()
+                                        .adjustments()
+                                        .to_vec(),
+                                )
+                                .await?;
+                            self.refresh().await?;
+                        }
+                        settings::ModifiableSelectCommand::Remove(name) => {
+                            self.database
+                                .delete_equalizer_profile(self.device_model, name.into_owned())
+                                .await?;
+                            self.refresh().await?;
+                        }
                     }
                 }
             }

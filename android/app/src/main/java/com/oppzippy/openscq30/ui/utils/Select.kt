@@ -121,9 +121,9 @@ fun ModifiableSelect(
     name: String,
     options: List<String>,
     selectedIndex: Int?,
-    onSelect: (Int?) -> Unit,
+    onSelect: (Int) -> Unit,
     onAddOption: (String) -> Unit,
-    onRemoveOption: () -> Unit,
+    onRemoveOption: (Int) -> Unit,
 ) {
     var dialogState by remember { mutableStateOf<ModifiableSelectDialog?>(null) }
     dialogState?.let { dialog ->
@@ -176,7 +176,9 @@ fun ModifiableSelect(
                     confirmButton = {
                         Button(
                             onClick = {
-                                onRemoveOption()
+                                if (selectedIndex != null) {
+                                    onRemoveOption(selectedIndex)
+                                }
                                 dialogState = null
                             },
                         ) {
@@ -198,7 +200,7 @@ fun ModifiableSelect(
             name = name,
             options = listOf(stringResource(R.string.none)).plus(options),
             selectedIndex = if (selectedIndex != null) selectedIndex + 1 else 0,
-            onSelect = { if (it == 0) onSelect(null) else onSelect(it - 1) },
+            onSelect = { if (it != 0) onSelect(it - 1) },
         )
 
         if (selectedIndex == null) {

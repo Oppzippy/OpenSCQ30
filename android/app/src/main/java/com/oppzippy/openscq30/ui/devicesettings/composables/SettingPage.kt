@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import com.oppzippy.openscq30.lib.bindings.translateSettingId
+import com.oppzippy.openscq30.lib.wrapper.ModifiableSelectCommandInner
 import com.oppzippy.openscq30.lib.wrapper.Range
 import com.oppzippy.openscq30.lib.wrapper.Setting
 import com.oppzippy.openscq30.lib.wrapper.Value
@@ -69,7 +70,7 @@ fun SettingPage(
                     is Setting.ModifiableSelectSetting -> ModifiableSelect(
                         name = name,
                         setting = setting,
-                        onChange = { setSetting(settingId, it.toValue()) },
+                        onChange = { setSetting(settingId, it) },
                     )
                 }
             }
@@ -143,15 +144,15 @@ private fun OptionalSelect(name: String, setting: Setting.OptionalSelectSetting,
 }
 
 @Composable
-private fun ModifiableSelect(name: String, setting: Setting.ModifiableSelectSetting, onChange: (String?) -> Unit) {
+private fun ModifiableSelect(name: String, setting: Setting.ModifiableSelectSetting, onChange: (Value) -> Unit) {
     Row {
         com.oppzippy.openscq30.ui.utils.ModifiableSelect(
             name = name,
             options = setting.setting.localizedOptions,
             selectedIndex = setting.value?.let { setting.setting.options.indexOf(it) },
-            onSelect = { onChange(it?.let { setting.setting.options[it] }) },
-            onAddOption = { onChange(it) },
-            onRemoveOption = { onChange(null) },
+            onSelect = { onChange(setting.setting.options[it].toValue()) },
+            onAddOption = { onChange(ModifiableSelectCommandInner.Add(it).toValue()) },
+            onRemoveOption = { onChange(ModifiableSelectCommandInner.Remove(setting.setting.options[it]).toValue()) },
         )
     }
 }

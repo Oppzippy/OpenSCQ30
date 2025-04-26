@@ -55,7 +55,7 @@ pub fn modifiable_select<'a, M>(
     setting_id: SettingId,
     setting: &'a Select,
     value: Option<&str>,
-    on_change: impl Fn(Option<&str>) -> M + Send + Sync + 'static,
+    on_change: impl Fn(&str) -> M + Send + Sync + 'static,
     on_add: M,
     on_remove: M,
 ) -> Element<'a, M>
@@ -71,7 +71,7 @@ where
         widget::row()
             .push(
                 widget::dropdown(&setting.localized_options, selected_index, move |index| {
-                    on_change(Some(&options[index]))
+                    on_change(&options[index])
                 })
                 .width(Length::Fill),
             )

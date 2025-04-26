@@ -16,6 +16,14 @@ pub enum Value {
     String(Cow<'static, str>),
     StringVec(Vec<Cow<'static, str>>),
     OptionalString(Option<Cow<'static, str>>),
+    ModifiableSelectCommand(ModifiableSelectCommand),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, EnumDiscriminants)]
+#[serde(tag = "type", content = "name")]
+pub enum ModifiableSelectCommand {
+    Add(Cow<'static, str>),
+    Remove(Cow<'static, str>),
 }
 
 #[derive(Clone, Debug, Error)]

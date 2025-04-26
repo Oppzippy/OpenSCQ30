@@ -41,6 +41,24 @@ sealed class Value {
     @Serializable
     @SerialName("OptionalString")
     data class OptionalStringValue(val value: String?) : Value()
+
+    @Serializable
+    @SerialName("ModifiableSelectCommand")
+    data class ModifiableSelectCommand(val value: ModifiableSelectCommandInner) : Value()
+}
+
+@Serializable
+@SerialName("ModifiableSelectCommand")
+sealed class ModifiableSelectCommandInner {
+    @Serializable
+    @SerialName("Add")
+    data class Add(val name: String) : ModifiableSelectCommandInner()
+
+    @Serializable
+    @SerialName("Remove")
+    data class Remove(val name: String) : ModifiableSelectCommandInner()
+
+    fun toValue(): Value.ModifiableSelectCommand = Value.ModifiableSelectCommand(this)
 }
 
 fun Boolean.toValue(): Value.BoolValue = Value.BoolValue(this)

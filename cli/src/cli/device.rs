@@ -6,7 +6,7 @@ use macaddr::MacAddr6;
 use openscq30_lib::api::{
     OpenSCQ30Session,
     device::OpenSCQ30Device,
-    settings::{Setting, SettingId, Value},
+    settings::{ModifiableSelectCommand, Setting, SettingId, Value},
 };
 use strum::VariantArray;
 use tabled::{Table, Tabled};
@@ -215,7 +215,21 @@ fn parse_setting_value(setting: &Setting, unparsed_value: String) -> anyhow::Res
             Value::OptionalString(value.cloned())
         }
         Setting::ModifiableSelect { setting: _, .. } => {
-            Value::OptionalString((!unparsed_value.is_empty()).then_some(unparsed_value.into()))
+            if let Some(rest) = unparsed_value.strip_prefix("+") {
+                Value::ModifiableSelectCommand(ModifiableSelectCommand::Add(rest.to_owned().into()))
+            } else if let Some(rest) = unparsed_value.strip_prefix("-") {
+                Value::ModifiableSelectCommand(ModifiableSelectCommand::Remove(
+                    rest.to_owned().into(),
+                ))
+            } else {
+                // To allow selecting profiles that start with a '+' or '-' without triggering the other
+                // branches, '\' can be used as a prefix that will be ignored.
+                let name = unparsed_value
+                    .strip_prefix("\\")
+                    .map(ToOwned::to_owned)
+                    .unwrap_or(unparsed_value);
+                Value::String(name.into())
+            }
         }
         Setting::Equalizer { setting, .. } => {
             let values = unparsed_value

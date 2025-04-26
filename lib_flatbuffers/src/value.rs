@@ -107,6 +107,7 @@ impl<'a> AsFlatbufferExt<'a> for settings::Value {
                 );
                 to_value(fbb, ValueUnion::OptionalString, wrapper_offset)
             }
+            settings::Value::ModifiableSelectCommand(_modifiable_select_command) => todo!(),
         }
     }
 }

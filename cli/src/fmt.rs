@@ -60,6 +60,9 @@ impl std::fmt::Display for DisplayableValue {
                     Ok(())
                 }
             }
+            Value::ModifiableSelectCommand(_) => {
+                unimplemented!("this should not be shown to the user")
+            }
         }
     }
 }
