@@ -2,32 +2,33 @@ package com.oppzippy.openscq30.ui.deviceselection
 
 import android.app.Activity
 import android.app.Application
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.companion.AssociationInfo
 import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
 import android.companion.CompanionDeviceManager
+import android.content.Intent
 import android.content.IntentSender
-import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
-import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDeviceProvider
+import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
+import com.oppzippy.openscq30.lib.wrapper.PairedDevice
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class DeviceSelectionViewModel @Inject constructor(
     private val application: Application,
-    private val bluetoothDeviceProvider: BluetoothDeviceProvider,
+    private val session: OpenScq30Session,
 ) : AndroidViewModel(application) {
-    val devices = MutableStateFlow(getDevices())
+    val devices = MutableStateFlow(emptyList<PairedDevice>())
 
     init {
         // Hack to work around older android versions not having onAssociationCreated
@@ -35,13 +36,13 @@ class DeviceSelectionViewModel @Inject constructor(
             viewModelScope.launch {
                 while (true) {
                     delay(5.seconds)
-                    refreshDevices()
+                    refreshPairedDevices()
                 }
             }
         }
     }
 
-    fun pair(activity: Activity, address: String) {
+    fun pair(activity: Activity, address: String, model: String) {
         val pairingRequest = AssociationRequest.Builder()
             .apply {
                 this.setSingleDevice(true)
@@ -65,7 +66,7 @@ class DeviceSelectionViewModel @Inject constructor(
                 )
                 override fun onAssociationCreated(associationInfo: AssociationInfo) {
                     super.onAssociationCreated(associationInfo)
-                    refreshDevices()
+                    viewModelScope.launch { refreshPairedDevices() }
                 }
 
                 @Deprecated("Deprecated in Java")
@@ -74,7 +75,7 @@ class DeviceSelectionViewModel @Inject constructor(
                     activity.startIntentSenderForResult(
                         intentSender,
                         0,
-                        null,
+                        Intent().putExtra("deviceModel", model),
                         0,
                         0,
                         0,
@@ -90,31 +91,23 @@ class DeviceSelectionViewModel @Inject constructor(
     }
 
     fun unpair(bluetoothDevice: BluetoothDevice) {
-        val deviceManager = application.getSystemService(CompanionDeviceManager::class.java)
-        // CompanionDeviceManager.disassociate is case sensitive
-        deviceManager
-            .associations
-            .find { it.equals(bluetoothDevice.address, ignoreCase = true) }
-            ?.let { deviceManager.disassociate(it) }
-        refreshDevices()
+        viewModelScope.launch {
+            val deviceManager = application.getSystemService(CompanionDeviceManager::class.java)
+            // Unpair before removing the association, since if something goes wrong, it's less broken to still be
+            // associated but not be paired with openscq30_lib rather than the other way around. The other way around would
+            // show the user a device available to connect to that we can't actually connect to.
+            session.unpair(bluetoothDevice.address)
+            // CompanionDeviceManager.disassociate is case sensitive
+            deviceManager
+                .associations
+                .find { it.equals(bluetoothDevice.address, ignoreCase = true) }
+                ?.let { deviceManager.disassociate(it) }
+            refreshPairedDevices()
+        }
     }
 
-    fun refreshDevices() {
-        devices.value = getDevices()
-    }
-
-    private fun getDevices(): List<BluetoothDevice> {
-        val hasBluetoothPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            application.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) ==
-                PackageManager.PERMISSION_GRANTED
-        } else {
-            application.checkSelfPermission(android.Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED
-        }
-        return if (hasBluetoothPermission) {
-            bluetoothDeviceProvider.getDevices()
-        } else {
-            emptyList()
-        }
+    private suspend fun refreshPairedDevices() {
+        devices.value = session.pairedDevices()
     }
 
     fun isBluetoothEnabled(): Boolean {

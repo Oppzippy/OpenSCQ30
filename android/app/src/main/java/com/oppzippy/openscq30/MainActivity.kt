@@ -11,11 +11,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.app.ActivityCompat
 import androidx.core.content.IntentCompat
+import androidx.lifecycle.lifecycleScope
+import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
+import com.oppzippy.openscq30.lib.wrapper.PairedDevice
 import com.oppzippy.openscq30.ui.OpenSCQ30Root
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity @Inject constructor(private val session: OpenScq30Session) : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         actionBar?.hide()
@@ -41,7 +46,8 @@ class MainActivity : ComponentActivity() {
                         CompanionDeviceManager.EXTRA_DEVICE,
                         BluetoothDevice::class.java,
                     )
-                }
+                } ?: return
+                val deviceModel = intent.getStringExtra("deviceModel") ?: return
                 if (ActivityCompat.checkSelfPermission(
                         this,
                         Manifest.permission.BLUETOOTH_CONNECT,
@@ -56,7 +62,16 @@ class MainActivity : ComponentActivity() {
                     // for ActivityCompat#requestPermissions for more details.
                     return
                 }
-                deviceToPair?.createBond()
+                deviceToPair.createBond()
+                lifecycleScope.launch {
+                    session.pair(
+                        PairedDevice(
+                            name = deviceToPair.name,
+                            macAddress = deviceToPair.address,
+                            model = deviceModel,
+                        ),
+                    )
+                }
             }
         }
     }
