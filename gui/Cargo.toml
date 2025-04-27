@@ -21,9 +21,7 @@ libcosmic = { workspace = true, features = [
     "single-instance",
     "tokio",
     "winit",
-    "wayland",
     "wgpu",
-    "about",
 ] }
 i18n-embed = { workspace = true, features = [
     "fluent-system",
@@ -43,3 +41,6 @@ thiserror = { workspace = true }
 serde = { workspace = true }
 toml = { workspace = true }
 itertools = { workspace = true }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+libcosmic = { workspace = true, features = ["wayland", "about"] }

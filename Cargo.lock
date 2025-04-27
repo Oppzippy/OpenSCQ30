@@ -4776,9 +4776,9 @@ dependencies = [
 
 [[package]]
 name = "reword"
-version = "7.0.0"
+version = "7.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe272098dce9ed76b479995953f748d1851261390b08f8a0ff619c885a1f0765"
+checksum = "d2de73ec80cfacafa51b73b0db31d6c3a4718fc6b0d479ef445609704020c1b0"
 dependencies = [
  "unicode-segmentation",
 ]
