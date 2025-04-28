@@ -97,25 +97,17 @@ impl OpenSCQ30Session {
         mac_address: MacAddr6,
     ) -> device::Result<Arc<dyn OpenSCQ30Device + Send + Sync>> {
         if let Some(paired_device) = self.database.fetch_paired_device(mac_address).await? {
-            let registry = paired_device
-                .model
-                .device_registry(backends, self.database.clone())
-                .await?;
-            registry.connect(mac_address).await
-        } else {
-            Err(device::Error::DeviceNotFound { mac_address })
-        }
-    }
-
-    pub async fn connect_demo(
-        &self,
-        mac_address: MacAddr6,
-    ) -> device::Result<Arc<dyn OpenSCQ30Device + Send + Sync>> {
-        if let Some(paired_device) = self.database.fetch_paired_device(mac_address).await? {
-            let registry = paired_device
-                .model
-                .demo_device_registry(self.database.clone())
-                .await?;
+            let registry = if paired_device.is_demo {
+                paired_device
+                    .model
+                    .demo_device_registry(self.database.clone())
+                    .await?
+            } else {
+                paired_device
+                    .model
+                    .device_registry(backends, self.database.clone())
+                    .await?
+            };
             registry.connect(mac_address).await
         } else {
             Err(device::Error::DeviceNotFound { mac_address })

@@ -25,6 +25,9 @@ async fn handle_add(matches: &ArgMatches, session: &OpenSCQ30Session) -> anyhow:
                 .unwrap()
                 .to_owned(),
             model: matches.get_one::<DeviceModel>("model").unwrap().to_owned(),
+            is_demo: std::env::var("OPENSCQ30_DEMO")
+                .map(|var| var == "1")
+                .unwrap_or_default(),
         })
         .await?;
     println!("Paired");

@@ -8,6 +8,7 @@ use cosmic::{
 use openscq30_lib::{
     api::{OpenSCQ30Session, connection::ConnectionDescriptor},
     devices::DeviceModel,
+    storage::PairedDevice,
 };
 use strum::IntoEnumIterator;
 use tracing::error;
@@ -46,7 +47,7 @@ struct SelectDeviceModel {
 pub enum Message {
     SetDeviceModelSearchQuery(String),
     SelectModel(DeviceModel, bool),
-    SelectDevice(usize),
+    SelectDevice(usize, bool),
     SetDeviceList(Vec<ConnectionDescriptor>, bool),
     SetDeviceNameSearchQuery(String),
     SetErrorMessage(String),
@@ -55,10 +56,7 @@ pub enum Message {
 pub enum Action {
     None,
     Task(Task<Message>),
-    AddDevice {
-        model: DeviceModel,
-        descriptor: ConnectionDescriptor,
-    },
+    AddDevice(PairedDevice),
 }
 
 impl AddDeviceModel {
@@ -150,7 +148,7 @@ impl AddDeviceModel {
                         .map(|(index, device)| {
                             widget::button::text(&device.name)
                                 .width(Length::Fill)
-                                .on_press(Message::SelectDevice(index))
+                                .on_press(Message::SelectDevice(index, ui_model.is_demo_mode))
                                 .into()
                         }),
                 ),
@@ -218,12 +216,15 @@ impl AddDeviceModel {
                 }
             }
             Message::SetErrorMessage(message) => self.stage = Stage::Error(message),
-            Message::SelectDevice(index) => {
+            Message::SelectDevice(index, is_demo) => {
                 if let Stage::SelectDevice(ui_model) = &self.stage {
-                    return Action::AddDevice {
+                    let descriptor = ui_model.devices[index].clone();
+                    return Action::AddDevice(PairedDevice {
+                        name: descriptor.name,
+                        mac_address: descriptor.mac_address,
                         model: ui_model.device_model,
-                        descriptor: ui_model.devices[index].clone(),
-                    };
+                        is_demo,
+                    });
                 }
             }
         }

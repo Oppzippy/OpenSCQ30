@@ -9,7 +9,7 @@ use dirs::config_dir;
 use macaddr::MacAddr6;
 use openscq30_lib::{
     api::{OpenSCQ30Session, device::OpenSCQ30Device},
-    storage::{self, PairedDevice},
+    storage::PairedDevice,
 };
 
 use crate::{
@@ -244,19 +244,6 @@ impl Application for AppModel {
                             })
                             .map(coalesce_result);
                         }
-                        device_selection::Action::ConnectToDemoDevice(paired_device) => {
-                            let session = self.session.clone();
-                            return Task::future(async move {
-                                let device = session
-                                    .connect_demo(paired_device.mac_address)
-                                    .await
-                                    .map_err(handle_soft_error!())?;
-
-                                Ok(Message::ConnectToDeviceScreen(DebugOpenSCQ30Device(device))
-                                    .into())
-                            })
-                            .map(coalesce_result);
-                        }
                         device_selection::Action::RemoveDevice(device) => {
                             self.dialog_page = Some(DialogPage::RemoveDevice(device));
                         }
@@ -278,15 +265,11 @@ impl Application for AppModel {
                         add_device::Action::Task(task) => {
                             return task.map(Message::AddDeviceScreen).map(Into::into);
                         }
-                        add_device::Action::AddDevice { model, descriptor } => {
+                        add_device::Action::AddDevice(paired_device) => {
                             let database = self.session.clone();
                             return Task::future(async move {
                                 database
-                                    .pair(storage::PairedDevice {
-                                        name: descriptor.name,
-                                        mac_address: descriptor.mac_address,
-                                        model,
-                                    })
+                                    .pair(paired_device)
                                     .await
                                     .map_err(handle_soft_error!())?;
                                 Ok(Message::ActivateDeviceSelectionScreen.into())
