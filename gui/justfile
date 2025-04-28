@@ -1,3 +1,6 @@
+run-filtered-logs level='debug':
+    RUST_LOG=none,openscq30_lib={{level}},openscq30_gui={{level}},openscq30_i18n={{level}} cargo run
+
 build profile='dev':
     cargo build --profile {{profile}}
 

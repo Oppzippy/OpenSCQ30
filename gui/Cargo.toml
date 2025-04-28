@@ -34,7 +34,7 @@ openscq30_lib = { path = "../lib" }
 openscq30_i18n = { path = "../i18n" }
 strum = { workspace = true }
 tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
 dirs = { workspace = true }
 anyhow = { workspace = true }
 thiserror = { workspace = true }

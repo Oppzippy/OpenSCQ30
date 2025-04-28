@@ -21,6 +21,7 @@ use openscq30_lib::api::{
     quick_presets::{QuickPreset, QuickPresetsHandler},
     settings::{self, CategoryId, Setting, SettingId, Value},
 };
+use tracing::debug;
 
 use crate::{
     app::DebugOpenSCQ30Device,
@@ -111,6 +112,7 @@ impl DeviceSettingsModel {
                     _ => (),
                 }
             }
+            debug!("stopping state change watcher task");
         });
 
         let mut model = Self {
