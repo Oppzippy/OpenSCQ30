@@ -11,6 +11,7 @@ use crate::{fl, handle_soft_error, utils::coalesce_result};
 
 pub struct DeviceSelectionModel {
     paired_devices: Vec<PairedDevice>,
+    is_demo_mode: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -20,10 +21,12 @@ pub enum Message {
     AddDevice,
     SetPairedDevices(Vec<PairedDevice>),
     Warning(String),
+    SetDemoMode(bool),
 }
 
 pub enum Action {
     ConnectToDevice(PairedDevice),
+    ConnectToDemoDevice(PairedDevice),
     RemoveDevice(PairedDevice),
     AddDevice,
     None,
@@ -34,6 +37,7 @@ impl DeviceSelectionModel {
     pub fn new(session: Arc<OpenSCQ30Session>) -> (Self, Task<Message>) {
         let model = DeviceSelectionModel {
             paired_devices: Vec::new(),
+            is_demo_mode: false,
         };
         (model, Self::refresh_paired_devices(session))
     }
@@ -57,6 +61,11 @@ impl DeviceSelectionModel {
                     widget::row()
                         .align_y(alignment::Vertical::Center)
                         .push(widget::text::title2(fl!("select-device")).width(Length::Fill))
+                        .push(
+                            widget::toggler(self.is_demo_mode)
+                                .label(fl!("demo-mode"))
+                                .on_toggle(Message::SetDemoMode),
+                        )
                         .push(
                             widget::button::standard(fl!("add-device"))
                                 .on_press(Message::AddDevice),
@@ -106,7 +115,11 @@ impl DeviceSelectionModel {
     pub fn update(&mut self, message: Message) -> Action {
         match message {
             Message::ConnectToDevice(index) => {
-                return Action::ConnectToDevice(self.paired_devices[index].clone());
+                if self.is_demo_mode {
+                    return Action::ConnectToDemoDevice(self.paired_devices[index].clone());
+                } else {
+                    return Action::ConnectToDevice(self.paired_devices[index].clone());
+                }
             }
             Message::RemoveDevice(index) => {
                 return Action::RemoveDevice(self.paired_devices[index].clone());
@@ -114,6 +127,7 @@ impl DeviceSelectionModel {
             Message::AddDevice => return Action::AddDevice,
             Message::SetPairedDevices(paired_devices) => self.paired_devices = paired_devices,
             Message::Warning(message) => return Action::Warning(message),
+            Message::SetDemoMode(enabled) => self.is_demo_mode = enabled,
         }
         Action::None
     }

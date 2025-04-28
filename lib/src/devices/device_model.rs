@@ -50,19 +50,45 @@ impl DeviceModel {
         &self,
         backends: &B,
         database: Arc<OpenSCQ30Database>,
-        is_demo: bool,
     ) -> device::Result<Arc<dyn OpenSCQ30DeviceRegistry + Send + Sync>> {
         macro_rules! new_soundcore_device {
             ($($module:tt)*) => {
-                if is_demo {
-                    Ok(Arc::new($($module)*::demo_device_registry(database, *self)))
-                } else {
-                    Ok(Arc::new($($module)*::device_registry::<B::Rfcomm>(
-                        backends.rfcomm().await?,
-                        database,
-                        *self,
-                    )))
-                }
+                Ok(Arc::new($($module)*::device_registry::<B::Rfcomm>(
+                    backends.rfcomm().await?,
+                    database,
+                    *self,
+                )))
+            };
+        }
+        match self {
+            DeviceModel::SoundcoreA3027 | DeviceModel::SoundcoreA3030 => {
+                new_soundcore_device!(soundcore::a3027)
+            }
+            DeviceModel::SoundcoreA3028 => new_soundcore_device!(soundcore::a3028),
+            DeviceModel::SoundcoreA3029 => todo!(),
+            DeviceModel::SoundcoreA3031 => new_soundcore_device!(soundcore::a3031),
+            DeviceModel::SoundcoreA3033 => new_soundcore_device!(soundcore::a3033),
+            DeviceModel::SoundcoreA3926 => new_soundcore_device!(soundcore::a3926),
+            DeviceModel::SoundcoreA3930 => new_soundcore_device!(soundcore::a3930),
+            DeviceModel::SoundcoreA3931 | DeviceModel::SoundcoreA3935 => {
+                new_soundcore_device!(soundcore::a3931)
+            }
+            DeviceModel::SoundcoreA3933 | DeviceModel::SoundcoreA3939 => {
+                new_soundcore_device!(soundcore::a3933)
+            }
+            DeviceModel::SoundcoreA3936 => new_soundcore_device!(soundcore::a3936),
+            DeviceModel::SoundcoreA3945 => new_soundcore_device!(soundcore::a3945),
+            DeviceModel::SoundcoreA3951 => new_soundcore_device!(soundcore::a3951),
+        }
+    }
+
+    pub async fn demo_device_registry(
+        &self,
+        database: Arc<OpenSCQ30Database>,
+    ) -> device::Result<Arc<dyn OpenSCQ30DeviceRegistry + Send + Sync>> {
+        macro_rules! new_soundcore_device {
+            ($($module:tt)*) => {
+                Ok(Arc::new($($module)*::demo_device_registry(database, *self)))
             };
         }
         match self {

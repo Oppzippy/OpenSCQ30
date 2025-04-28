@@ -244,6 +244,19 @@ impl Application for AppModel {
                             })
                             .map(coalesce_result);
                         }
+                        device_selection::Action::ConnectToDemoDevice(paired_device) => {
+                            let session = self.session.clone();
+                            return Task::future(async move {
+                                let device = session
+                                    .connect_demo(paired_device.mac_address)
+                                    .await
+                                    .map_err(handle_soft_error!())?;
+
+                                Ok(Message::ConnectToDeviceScreen(DebugOpenSCQ30Device(device))
+                                    .into())
+                            })
+                            .map(coalesce_result);
+                        }
                         device_selection::Action::RemoveDevice(device) => {
                             self.dialog_page = Some(DialogPage::RemoveDevice(device));
                         }

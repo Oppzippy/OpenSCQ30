@@ -38,15 +38,16 @@ struct SelectDeviceModel {
     search_query: String,
     devices: Vec<ConnectionDescriptor>,
     device_model: DeviceModel,
+    is_demo_mode: bool,
 }
 
 #[derive(Clone, Debug)]
 #[allow(clippy::enum_variant_names)]
 pub enum Message {
     SetDeviceModelSearchQuery(String),
-    SelectModel(DeviceModel),
+    SelectModel(DeviceModel, bool),
     SelectDevice(usize),
-    SetDeviceList(Vec<ConnectionDescriptor>),
+    SetDeviceList(Vec<ConnectionDescriptor>, bool),
     SetDeviceNameSearchQuery(String),
     SetErrorMessage(String),
 }
@@ -97,7 +98,7 @@ impl AddDeviceModel {
                         .map(|device_type| {
                             widget::button::text(<&'static str>::from(device_type))
                                 .width(Length::Fill)
-                                .on_press(Message::SelectModel(device_type))
+                                .on_press(Message::SelectModel(device_type, false))
                                 .into()
                         }),
                 ),
@@ -119,9 +120,19 @@ impl AddDeviceModel {
                             .on_input(Message::SetDeviceNameSearchQuery),
                     )
                     .push(
+                        widget::toggler(ui_model.is_demo_mode)
+                            .label(fl!("demo-mode"))
+                            .on_toggle(|enabled| {
+                                Message::SelectModel(ui_model.device_model, enabled)
+                            }),
+                    )
+                    .push(
                         widget::button::standard(fl!("refresh"))
                             .leading_icon(icon::from_name("view-refresh-symbolic"))
-                            .on_press(Message::SelectModel(ui_model.device_model)),
+                            .on_press(Message::SelectModel(
+                                ui_model.device_model,
+                                ui_model.is_demo_mode,
+                            )),
                     ),
             )
             .push(widget::scrollable(
@@ -170,13 +181,19 @@ impl AddDeviceModel {
                     ui_model.search_query = query;
                 }
             }
-            Message::SelectModel(device_model) => {
+            Message::SelectModel(device_model, is_demo_mode) => {
                 self.stage = Stage::LoadingDevices(LoadingDevicesModel { device_model });
                 let session = self.session.clone();
                 return Action::Task(Task::perform(
-                    async move { session.list_devices(device_model).await },
+                    async move {
+                        if is_demo_mode {
+                            session.list_demo_devices(device_model).await
+                        } else {
+                            session.list_devices(device_model).await
+                        }
+                    },
                     move |result| match result {
-                        Ok(devices) => Message::SetDeviceList(devices),
+                        Ok(devices) => Message::SetDeviceList(devices, is_demo_mode),
                         Err(err) => {
                             error!("{} fetching devices: {err:?}", device_model);
                             Message::SetErrorMessage(format!("{err}"))
@@ -184,13 +201,14 @@ impl AddDeviceModel {
                     },
                 ));
             }
-            Message::SetDeviceList(devices) => {
+            Message::SetDeviceList(devices, is_demo_mode) => {
                 if let Stage::LoadingDevices(ui_model) = &self.stage {
                     self.stage = Stage::SelectDevice(SelectDeviceModel {
                         devices,
                         search_id: Id::unique(),
                         search_query: String::new(),
                         device_model: ui_model.device_model,
+                        is_demo_mode,
                     })
                 }
             }
