@@ -5,6 +5,7 @@ use cosmic::{
     iced::Length,
     widget::{self, Id, icon},
 };
+use openscq30_i18n::Translate;
 use openscq30_lib::{
     api::{OpenSCQ30Session, connection::ConnectionDescriptor},
     devices::DeviceModel,
@@ -88,15 +89,16 @@ impl AddDeviceModel {
             .push(widget::scrollable(
                 widget::column().extend(
                     DeviceModel::iter()
-                        .filter(|device_type| {
-                            let name: &'static str = device_type.into();
-                            name.to_lowercase()
+                        .filter(|device_model| {
+                            device_model
+                                .translate()
+                                .to_lowercase()
                                 .contains(&ui_model.search_query.to_lowercase())
                         })
-                        .map(|device_type| {
-                            widget::button::text(<&'static str>::from(device_type))
+                        .map(|device_model| {
+                            widget::button::text(device_model.translate())
                                 .width(Length::Fill)
-                                .on_press(Message::SelectModel(device_type, false))
+                                .on_press(Message::SelectModel(device_model, false))
                                 .into()
                         }),
                 ),
@@ -220,7 +222,7 @@ impl AddDeviceModel {
                 if let Stage::SelectDevice(ui_model) = &self.stage {
                     let descriptor = ui_model.devices[index].clone();
                     return Action::AddDevice(PairedDevice {
-                        name: descriptor.name,
+                        name: ui_model.device_model.translate(),
                         mac_address: descriptor.mac_address,
                         model: ui_model.device_model,
                         is_demo,

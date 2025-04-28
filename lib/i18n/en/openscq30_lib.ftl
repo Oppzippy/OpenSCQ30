@@ -1,3 +1,19 @@
+soundcore-a3027 = Soundcore Life Q35
+soundcore-a3028 = Soundcore Life Q30
+soundcore-a3029 = Soundcore Life Tune
+soundcore-a3030 = Soundcore Life Tune Pro
+soundcore-a3031 = Soundcore Vortex
+soundcore-a3033 = Soundcore Life 2 Neo
+soundcore-a3926 = Soundcore Life Dot 2S
+soundcore-a3930 = Soundcore Liberty 2 Pro
+soundcore-a3931 = Soundcore Life Dot 2 NC
+soundcore-a3933 = Soundcore Life Note 3
+soundcore-a3936 = Soundcore Space A40
+soundcore-a3945 = Soundcore Life Note 3S
+soundcore-a3951 = Soundcore Liberty Air 2 Pro
+soundcore-a3939 = Soundcore Life P3
+soundcore-a3935 = Soundcore Life A2 NC
+
 general = General
 sound-modes = Sound Modes
 equalizer = Equalizer

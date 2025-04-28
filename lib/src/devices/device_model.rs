@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use openscq30_i18n_macros::Translate;
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumIter, EnumString, IntoStaticStr, VariantArray};
 
@@ -25,8 +26,8 @@ use crate::{
     EnumString,
     Serialize,
     Deserialize,
+    Translate,
 )]
-#[serde(rename_all = "camelCase")]
 pub enum DeviceModel {
     SoundcoreA3027,
     SoundcoreA3028,
