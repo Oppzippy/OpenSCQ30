@@ -19,7 +19,6 @@ pub async fn handle(matches: &ArgMatches) -> anyhow::Result<()> {
 async fn handle_add(matches: &ArgMatches, session: &OpenSCQ30Session) -> anyhow::Result<()> {
     session
         .pair(PairedDevice {
-            name: matches.get_one::<String>("name").unwrap().to_owned(),
             mac_address: matches
                 .get_one::<MacAddr6>("mac-address")
                 .unwrap()
@@ -62,18 +61,15 @@ async fn handle_list(_matches: &ArgMatches, session: &OpenSCQ30Session) -> anyho
 
 #[derive(Tabled)]
 struct PairedDeviceTableItem {
-    #[tabled(rename = "Name")]
-    name: String,
-    #[tabled(rename = "MAC Address")]
-    mac_address: MacAddr6,
     #[tabled(rename = "Device Model")]
     model: DeviceModel,
+    #[tabled(rename = "MAC Address")]
+    mac_address: MacAddr6,
 }
 
 impl From<PairedDevice> for PairedDeviceTableItem {
     fn from(value: PairedDevice) -> Self {
         Self {
-            name: value.name,
             mac_address: value.mac_address,
             model: value.model,
         }

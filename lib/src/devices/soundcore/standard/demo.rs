@@ -5,25 +5,28 @@ use std::{
 
 use macaddr::MacAddr6;
 use nom::error::VerboseError;
+use openscq30_i18n::Translate;
 use tokio::sync::{mpsc, watch};
 use uuid::Uuid;
 
 use crate::{
-    api::connection::{self, ConnectionStatus, ConnectionDescriptor, RfcommBackend, RfcommConnection},
-    devices::soundcore::standard::packets::inbound::take_inbound_packet_header,
+    api::connection::{
+        self, ConnectionDescriptor, ConnectionStatus, RfcommBackend, RfcommConnection,
+    },
+    devices::{DeviceModel, soundcore::standard::packets::inbound::take_inbound_packet_header},
 };
 
 use super::{packets::Packet, structures::Command};
 
 pub struct DemoConnectionRegistry {
-    name: String,
+    model: DeviceModel,
     packet_responses: HashMap<Command, Vec<u8>>,
 }
 
 impl DemoConnectionRegistry {
-    pub fn new(name: String, packet_responses: HashMap<Command, Vec<u8>>) -> Self {
+    pub fn new(model: DeviceModel, packet_responses: HashMap<Command, Vec<u8>>) -> Self {
         Self {
-            name,
+            model,
             packet_responses,
         }
     }
@@ -34,8 +37,8 @@ impl RfcommBackend for DemoConnectionRegistry {
 
     async fn devices(&self) -> connection::Result<HashSet<ConnectionDescriptor>> {
         Ok(HashSet::from([ConnectionDescriptor {
-            name: self.name.clone(),
-            mac_address: MacAddr6::nil(),
+            name: self.model.translate().clone(),
+            mac_address: self.model.demo_mac_address(),
         }]))
     }
 

@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use macaddr::MacAddr6;
 use openscq30_i18n_macros::Translate;
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumIter, EnumString, IntoStaticStr, VariantArray};
@@ -112,5 +113,14 @@ impl DeviceModel {
             DeviceModel::SoundcoreA3945 => new_soundcore_device!(soundcore::a3945),
             DeviceModel::SoundcoreA3951 => new_soundcore_device!(soundcore::a3951),
         }
+    }
+
+    pub fn demo_mac_address(&self) -> MacAddr6 {
+        let index = Self::VARIANTS
+            .iter()
+            .position(|variant| variant == self)
+            .unwrap_or_default();
+        let mac_address_bytes: [u8; 6] = (index as u64).to_be_bytes()[2..].try_into().unwrap();
+        MacAddr6::from(mac_address_bytes)
     }
 }

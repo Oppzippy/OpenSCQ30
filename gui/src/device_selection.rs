@@ -5,6 +5,7 @@ use cosmic::{
     iced::{Length, alignment},
     widget,
 };
+use openscq30_i18n::Translate;
 use openscq30_lib::{api::OpenSCQ30Session, storage::PairedDevice};
 
 use crate::{fl, handle_soft_error, utils::coalesce_result};
@@ -80,15 +81,15 @@ impl DeviceSelectionModel {
                     .align_y(alignment::Vertical::Center)
                     .push(
                         widget::column()
-                            .push(widget::text::heading(&device.name))
+                            .push(widget::text::heading(device.model.translate()))
+                            .push(widget::text::body(device.model.to_string()))
+                            .push(widget::text::body(device.mac_address.to_string()))
                             .push_maybe(
                                 device
                                     .is_demo
                                     .then(|| fl!("demo-mode").to_uppercase())
                                     .map(widget::text::body),
                             )
-                            .push(widget::text::body(device.mac_address.to_string()))
-                            .push(widget::text::body(device.model.to_string()))
                             .width(Length::Fill),
                     )
                     .push(

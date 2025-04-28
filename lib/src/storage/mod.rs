@@ -35,7 +35,6 @@ pub struct OpenSCQ30Database {
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PairedDevice {
-    pub name: String,
     pub mac_address: MacAddr6,
     pub model: DeviceModel,
     pub is_demo: bool,

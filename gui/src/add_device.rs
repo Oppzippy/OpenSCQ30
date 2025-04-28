@@ -222,7 +222,6 @@ impl AddDeviceModel {
                 if let Stage::SelectDevice(ui_model) = &self.stage {
                     let descriptor = ui_model.devices[index].clone();
                     return Action::AddDevice(PairedDevice {
-                        name: ui_model.device_model.translate(),
                         mac_address: descriptor.mac_address,
                         model: ui_model.device_model,
                         is_demo,

@@ -36,7 +36,7 @@ macro_rules! soundcore_device {
         > {
             $crate::devices::soundcore::standard::device::SoundcoreDeviceRegistry::new(
                 $crate::devices::soundcore::standard::demo::DemoConnectionRegistry::new(
-                    device_model.to_string(),
+                    device_model,
                     $demo_packets,
                 ),
                 database,

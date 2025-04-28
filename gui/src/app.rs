@@ -7,6 +7,7 @@ use cosmic::{
 };
 use dirs::config_dir;
 use macaddr::MacAddr6;
+use openscq30_i18n::Translate;
 use openscq30_lib::{
     api::{OpenSCQ30Session, device::OpenSCQ30Device},
     storage::PairedDevice,
@@ -203,7 +204,7 @@ impl Application for AppModel {
         Some(match dialog_page {
             DialogPage::RemoveDevice(device) => widget::dialog()
                 .title(fl!("prompt-remove-device-title"))
-                .body(fl!("prompt-remove-device", name = device.name.as_str()))
+                .body(fl!("prompt-remove-device", name = device.model.translate()))
                 .icon(icon::from_name("dialog-warning-symbolic"))
                 .primary_action(
                     widget::button::destructive(fl!("remove"))

@@ -1,11 +1,10 @@
 CREATE TABLE paired_device (
-    name TEXT NOT NULL,
     mac_address TEXT NOT NULL UNIQUE,
     model TEXT NOT NULL,
     is_demo INTEGER NOT NULL,
     created_at INTEGER NOT NULL DEFAULT (strftime('%s'))
 ) STRICT;
-CREATE INDEX idx_paired_device_created_at ON paired_device (name);
+CREATE INDEX idx_paired_device_created_at ON paired_device (model);
 
 CREATE TABLE quick_preset (
     device_model TEXT NOT NULL,
