@@ -1,9 +1,11 @@
 use std::sync::Arc;
 
 use tokio::{
-    sync::{mpsc, watch},
+    select,
+    sync::{Semaphore, mpsc, watch},
     task::JoinHandle,
 };
+use tracing::{Instrument, debug_span, trace};
 
 use crate::api::{
     device,
@@ -69,6 +71,7 @@ pub trait ModuleCollectionSpawnPacketHandlerExt<T> {
         &self,
         state_sender: watch::Sender<T>,
         packet_receiver: mpsc::Receiver<Packet>,
+        exit_signal: Arc<Semaphore>,
     ) -> JoinHandle<()>
     where
         T: 'static + Send + Sync;
@@ -79,25 +82,40 @@ impl<T> ModuleCollectionSpawnPacketHandlerExt<T> for Arc<ModuleCollection<T>> {
         &self,
         state_sender: watch::Sender<T>,
         mut packet_receiver: mpsc::Receiver<Packet>,
+        exit_signal: Arc<Semaphore>,
     ) -> JoinHandle<()>
     where
         T: 'static + Send + Sync,
     {
         let module_collection = self.clone();
         let state_sender = state_sender.clone();
-        tokio::spawn(async move {
-            while let Some(packet) = packet_receiver.recv().await {
-                match module_collection
-                    .packet_handlers
-                    .handle(&state_sender, &packet)
-                    .await
-                {
-                    Ok(()) => (),
-                    Err(err) => {
-                        tracing::warn!("error handling packet: {packet:?}, error: {err:?}")
+        tokio::spawn(
+            async move {
+                trace!("started receiving");
+                loop {
+                    select! {
+                        maybe_packet = packet_receiver.recv() => {
+                            if let Some(packet) = maybe_packet {
+                                match module_collection
+                                    .packet_handlers
+                                    .handle(&state_sender, &packet)
+                                    .await
+                                {
+                                    Ok(()) => (),
+                                    Err(err) => {
+                                        tracing::warn!("error handling packet: {packet:?}, error: {err:?}")
+                                    }
+                                }
+                            }
+                        }
+                        _ = exit_signal.acquire() => break,
                     }
                 }
+                trace!("done receiving");
             }
-        })
+            .instrument(debug_span!(
+                "ModuleCollectionSpawnPacketHandlerExt::spawn_packet_handler"
+            )),
+        )
     }
 }

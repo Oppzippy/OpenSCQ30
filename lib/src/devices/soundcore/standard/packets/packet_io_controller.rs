@@ -6,6 +6,7 @@ use tokio::{
     sync::{mpsc, watch},
     task::JoinHandle,
 };
+use tracing::trace;
 
 use crate::{
     api::{
@@ -31,6 +32,7 @@ where
 impl<ConnectionType: RfcommConnection> Drop for PacketIOController<ConnectionType> {
     fn drop(&mut self) {
         self.handle.abort();
+        trace!("dropped PacketIOController");
     }
 }
 

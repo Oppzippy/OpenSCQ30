@@ -1,7 +1,7 @@
 use std::{marker::PhantomData, pin::Pin, sync::Arc};
 
 use async_trait::async_trait;
-use tokio::sync::{mpsc, watch};
+use tokio::sync::{Semaphore, mpsc, watch};
 
 use crate::{
     api::{
@@ -339,6 +339,8 @@ where
     state_sender: watch::Sender<StateType>,
     module_collection: Arc<ModuleCollection<StateType>>,
     packet_io_controller: Arc<PacketIOController<ConnectionType>>,
+    // TODO exit signal is necessary due to the PacketIOController Arc spaghetti.
+    exit_signal: Arc<Semaphore>,
     _state_update: PhantomData<StateUpdatePacketType>,
 }
 
@@ -356,16 +358,33 @@ where
         packet_receiver: mpsc::Receiver<Packet>,
         device_model: DeviceModel,
     ) -> Self {
+        let exit_signal = Arc::new(Semaphore::new(0));
         let module_collection = Arc::new(module_collection);
-        module_collection.spawn_packet_handler(state_sender.clone(), packet_receiver);
+        module_collection.spawn_packet_handler(
+            state_sender.clone(),
+            packet_receiver,
+            exit_signal.clone(),
+        );
 
         Self {
             device_model,
             state_sender,
             packet_io_controller,
             module_collection,
+            exit_signal,
             _state_update: PhantomData,
         }
+    }
+}
+
+impl<ConnectionType, StateType, StateUpdatePacketType> Drop
+    for SoundcoreDeviceTemplate<ConnectionType, StateType, StateUpdatePacketType>
+where
+    ConnectionType: RfcommConnection + Send + Sync,
+    StateType: Clone + Send + Sync,
+{
+    fn drop(&mut self) {
+        self.exit_signal.close();
     }
 }
 
