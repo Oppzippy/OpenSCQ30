@@ -16,7 +16,7 @@ build profile='dev':
 
 test:
     cargo test
-    ./gradlew testBluetoothDebugUnitTest
+    ./gradlew testDebugUnitTest
 
 test-cov:
     cargo llvm-cov --no-report
@@ -33,6 +33,8 @@ format:
 
 format-check:
     #!/usr/bin/env bash
+    set -euo pipefail
+
     cargo fmt --check
 
     if command -v ktlint > /dev/null; then

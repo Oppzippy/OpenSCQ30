@@ -10,16 +10,12 @@ test:
     just lib/ test
     just cli/ test
     just gui/ test
-    just i18n/ test
-    just i18n_macros/ test
     just android/ test
 
 test-cov:
     just lib/ test-cov
     just cli/ test-cov
     just gui/ test-cov
-    just i18n/ test-cov
-    just i18n_macros/ test-cov
     just android/ test-cov
 
 llvm-cov-clean:
@@ -54,14 +50,18 @@ uninstall path:
 
 alias fmt := format
 format:
-    just android/ format
-    just cli/ format
-    just gui/ format
-    just lib/ format
+    -just android/ format
+    -just cli/ format
+    -just gui/ format
+    -just i18n/ format
+    -just i18n_macros/ format
+    -just lib/ format
 
 format-check:
     just android/ format-check
     just cli/ format-check
     just gui/ format-check
+    just i18n/ format-check
+    just i18n_macros/ format-check
     just lib/ format-check
 
