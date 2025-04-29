@@ -122,7 +122,7 @@ mod tests {
         );
         assert_eq!(
             None,
-            Value::from(device.setting(&SettingId::PresetProfile).unwrap())
+            Value::from(device.setting(&SettingId::PresetEqualizerProfile).unwrap())
                 .try_as_optional_enum_variant::<PresetEqualizerProfile>()
                 .unwrap()
         );
@@ -285,7 +285,7 @@ mod tests {
         // Changed equalizer
         device
             .set_setting_values(vec![(
-                SettingId::PresetProfile,
+                SettingId::PresetEqualizerProfile,
                 Cow::from("Acoustic").into(),
             )])
             .await
@@ -294,7 +294,7 @@ mod tests {
         // Unchanged equaalizer
         device
             .set_setting_values(vec![(
-                SettingId::PresetProfile,
+                SettingId::PresetEqualizerProfile,
                 Cow::from("Acoustic").into(),
             )])
             .await

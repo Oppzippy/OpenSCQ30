@@ -60,8 +60,10 @@ pub enum SettingId {
     TransparencyMode,
     NoiseCancelingMode,
     CustomNoiseCanceling,
-    PresetProfile,
-    CustomProfile,
+    #[translate("preset-profile")]
+    PresetEqualizerProfile,
+    #[translate("custom-profile")]
+    CustomEqualizerProfile,
     VolumeAdjustments,
     LeftSinglePress,
     LeftDoublePress,

@@ -65,7 +65,7 @@ pub async fn migrate_legacy_profile(
         .set_setting_values(vec![
             (SettingId::VolumeAdjustments, volume_adjustments.into()),
             (
-                SettingId::CustomProfile,
+                SettingId::CustomEqualizerProfile,
                 Value::ModifiableSelectCommand(settings::ModifiableSelectCommand::Add(name.into())),
             ),
             (SettingId::VolumeAdjustments, old_volume_adjustments.into()),
@@ -107,7 +107,7 @@ mod tests {
         let device = session.connect(MacAddr6::nil()).await.unwrap();
 
         let Setting::ModifiableSelect { setting, .. } =
-            device.setting(&SettingId::CustomProfile).unwrap()
+            device.setting(&SettingId::CustomEqualizerProfile).unwrap()
         else {
             panic!("CustomProfile is not a ModifiableSelect");
         };
@@ -116,7 +116,7 @@ mod tests {
             .await
             .unwrap();
         let Setting::ModifiableSelect { setting, .. } =
-            device.setting(&SettingId::CustomProfile).unwrap()
+            device.setting(&SettingId::CustomEqualizerProfile).unwrap()
         else {
             panic!("CustomProfile is not a ModifiableSelect");
         };
@@ -139,7 +139,7 @@ mod tests {
 
         device
             .set_setting_values(vec![(
-                SettingId::CustomProfile,
+                SettingId::CustomEqualizerProfile,
                 Value::String("Test Profile".into()),
             )])
             .await

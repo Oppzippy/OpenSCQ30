@@ -39,8 +39,8 @@ impl TryFrom<&SettingId> for EqualizerSetting {
 
     fn try_from(setting_id: &SettingId) -> Result<Self, Self::Error> {
         match setting_id {
-            SettingId::PresetProfile => Ok(Self::PresetProfile),
-            SettingId::CustomProfile => Ok(Self::CustomProfile),
+            SettingId::PresetEqualizerProfile => Ok(Self::PresetProfile),
+            SettingId::CustomEqualizerProfile => Ok(Self::CustomProfile),
             SettingId::VolumeAdjustments => Ok(Self::VolumeAdjustments),
             _ => Err(()),
         }
@@ -50,8 +50,8 @@ impl TryFrom<&SettingId> for EqualizerSetting {
 impl From<EqualizerSetting> for SettingId {
     fn from(setting: EqualizerSetting) -> Self {
         match setting {
-            EqualizerSetting::PresetProfile => SettingId::PresetProfile,
-            EqualizerSetting::CustomProfile => SettingId::CustomProfile,
+            EqualizerSetting::PresetProfile => SettingId::PresetEqualizerProfile,
+            EqualizerSetting::CustomProfile => SettingId::CustomEqualizerProfile,
             EqualizerSetting::VolumeAdjustments => SettingId::VolumeAdjustments,
         }
     }

@@ -127,7 +127,7 @@ mod tests {
         });
         device
             .set_setting_values(vec![(
-                SettingId::PresetProfile,
+                SettingId::PresetEqualizerProfile,
                 Value::OptionalString(Some("TrebleReducer".into())),
             )])
             .await
