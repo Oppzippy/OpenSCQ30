@@ -8,7 +8,6 @@ mod toggle;
 
 use std::{borrow::Cow, collections::HashMap, path::PathBuf};
 
-use anyhow::{anyhow, bail};
 use cosmic::{
     Element, Task,
     app::context_drawer::ContextDrawer,
@@ -639,31 +638,13 @@ impl DeviceSettingsModel {
                 legacy_migration::Message::Migrate(name, volume_adjustments) => {
                     let device = self.device.to_owned();
                     Action::Task(
-                        Task::future(async move {
-                            let Setting::Equalizer {
-                                values: old_volume_adjustments,
-                                ..
-                            } = device
-                                .setting(&SettingId::VolumeAdjustments)
-                                .ok_or_else(|| {
-                                    anyhow!("device does not have VolumeAdjustments setting")
-                                })?
-                            else {
-                                bail!("VolumeAdjustments is not an equalizer");
-                            };
-                            // By setting the volume adjustments, saving the profile, and reverting all in one go,
-                            // we won't send any packets, since the end result will be equivalent to what we started with,
-                            // and that is checked before performing any actions.
-                            device
-                                .set_setting_values(vec![
-                                    (SettingId::VolumeAdjustments, volume_adjustments.into()),
-                                    (
-                                        SettingId::CustomProfile,
-                                        Value::OptionalString(Some(name.into())),
-                                    ),
-                                    (SettingId::VolumeAdjustments, old_volume_adjustments.into()),
-                                ])
-                                .await?;
+                        Task::<anyhow::Result<Message>>::future(async move {
+                            openscq30_v1_migration::migrate_legacy_profile(
+                                device.as_ref(),
+                                name,
+                                volume_adjustments,
+                            )
+                            .await?;
                             Ok(Message::Refresh)
                         })
                         .map(|r| r.map_err(handle_soft_error!()))
