@@ -1,13 +1,17 @@
 use async_trait::async_trait;
 use tokio::sync::watch;
 
-use crate::{api::device, devices::soundcore::standard::{
-    packet_manager::PacketHandler,
-    packets::{
-        inbound::{SerialNumberAndFirmwareVersionUpdatePacket, TryIntoInboundPacket}, Packet
+use crate::{
+    api::device,
+    devices::soundcore::standard::{
+        packet_manager::PacketHandler,
+        packets::{
+            Packet,
+            inbound::{SerialNumberAndFirmwareVersionUpdatePacket, TryIntoInboundPacket},
+        },
+        structures::{Command, DualFirmwareVersion, SerialNumber},
     },
-    structures::{Command, DualFirmwareVersion, SerialNumber},
-}};
+};
 
 #[derive(Default)]
 pub struct SerialNumberAndDualFirmwareVersionPacketHandler {}

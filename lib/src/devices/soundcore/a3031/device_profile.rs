@@ -5,7 +5,9 @@ use crate::devices::soundcore::standard::{
     modules::sound_modes::AvailableSoundModes,
     packets::{
         inbound::{SerialNumberAndFirmwareVersionUpdatePacket, TryIntoInboundPacket},
-        outbound::{OutboundPacketBytesExt, RequestSerialNumberAndFirmwareVersionPacket, RequestStatePacket},
+        outbound::{
+            OutboundPacketBytesExt, RequestSerialNumberAndFirmwareVersionPacket, RequestStatePacket,
+        },
     },
     structures::{AmbientSoundMode, NoiseCancelingMode},
 };

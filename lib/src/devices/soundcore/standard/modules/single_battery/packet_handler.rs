@@ -1,15 +1,20 @@
 use async_trait::async_trait;
 use tokio::sync::watch;
 
-use crate::{api::device, devices::soundcore::standard::{
-    packet_manager::PacketHandler,
-    packets::{
-        inbound::{
-            SingleBatteryChargingUpdatePacket, SingleBatteryLevelUpdatePacket, TryIntoInboundPacket,
-        }, Packet
+use crate::{
+    api::device,
+    devices::soundcore::standard::{
+        packet_manager::PacketHandler,
+        packets::{
+            Packet,
+            inbound::{
+                SingleBatteryChargingUpdatePacket, SingleBatteryLevelUpdatePacket,
+                TryIntoInboundPacket,
+            },
+        },
+        structures::{Command, SingleBattery},
     },
-    structures::{Command, SingleBattery},
-}};
+};
 
 #[derive(Default)]
 pub struct BatteryLevelPacketHandler {}

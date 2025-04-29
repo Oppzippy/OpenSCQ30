@@ -4,7 +4,9 @@ use crate::devices::soundcore::standard::{
     macros::soundcore_device,
     packets::{
         inbound::{SerialNumberAndFirmwareVersionUpdatePacket, TryIntoInboundPacket},
-        outbound::{OutboundPacketBytesExt, RequestSerialNumberAndFirmwareVersionPacket, RequestStatePacket},
+        outbound::{
+            OutboundPacketBytesExt, RequestSerialNumberAndFirmwareVersionPacket, RequestStatePacket,
+        },
     },
 };
 

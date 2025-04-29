@@ -5,7 +5,7 @@ use tokio::sync::{mpsc, watch};
 use uuid::Uuid;
 
 use crate::api::connection::{
-    self, ConnectionStatus, ConnectionDescriptor, RfcommBackend, RfcommConnection,
+    self, ConnectionDescriptor, ConnectionStatus, RfcommBackend, RfcommConnection,
 };
 
 pub struct MockRfcommBackend {

@@ -7,7 +7,6 @@ use nom::{
 };
 use std::fmt::Display;
 
-
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub struct DualFirmwareVersion {
     pub left: FirmwareVersion,

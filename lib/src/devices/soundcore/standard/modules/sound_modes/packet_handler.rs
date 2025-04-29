@@ -1,13 +1,17 @@
 use async_trait::async_trait;
 use tokio::sync::watch;
 
-use crate::{api::device, devices::soundcore::standard::{
-    packet_manager::PacketHandler,
-    packets::{
-        inbound::{SoundModeUpdatePacket, TryIntoInboundPacket}, Packet
+use crate::{
+    api::device,
+    devices::soundcore::standard::{
+        packet_manager::PacketHandler,
+        packets::{
+            Packet,
+            inbound::{SoundModeUpdatePacket, TryIntoInboundPacket},
+        },
+        structures::{Command, SoundModes},
     },
-    structures::{Command, SoundModes},
-}};
+};
 
 #[derive(Default)]
 pub struct SoundModesPacketHandler {}

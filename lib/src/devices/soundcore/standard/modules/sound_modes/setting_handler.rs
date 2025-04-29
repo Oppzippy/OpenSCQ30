@@ -2,7 +2,10 @@ use async_trait::async_trait;
 use strum::IntoEnumIterator;
 
 use crate::{
-    api::{device, settings::{Range, Setting, SettingId, Value}},
+    api::{
+        device,
+        settings::{Range, Setting, SettingId, Value},
+    },
     devices::soundcore::standard::{
         settings_manager::SettingHandler,
         structures::{CustomNoiseCanceling, NoiseCancelingMode, SoundModes},

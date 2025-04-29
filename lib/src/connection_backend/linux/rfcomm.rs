@@ -28,7 +28,7 @@ use tracing::{Instrument, debug, instrument, trace, trace_span, warn};
 use uuid::Uuid;
 
 use crate::api::connection::{
-    self, ConnectionStatus, ConnectionDescriptor, RfcommBackend, RfcommConnection,
+    self, ConnectionDescriptor, ConnectionStatus, RfcommBackend, RfcommConnection,
 };
 
 pub struct BluerRfcommBackend {
