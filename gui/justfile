@@ -1,14 +1,56 @@
+set dotenv-load := true
+
 run-filtered-logs level='debug':
     RUST_LOG=none,openscq30_lib={{level}},openscq30_gui={{level}},openscq30_i18n={{level}} cargo run
+
+# This can be used to build and run opencq30-gui on a remote windows machine (typically a VM) when developing on Linux
+# Make sure to set the OPENSCQ30_WINDOWS_REMOTE_* environment variables. A .env file can be used.
+run-remote-windows level='debug':
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    user="$OPENSCQ30_WINDOWS_REMOTE_USER"
+    password="$OPENSCQ30_WINDOWS_REMOTE_PASSWORD"
+    host="$OPENSCQ30_WINDOWS_REMOTE_HOST"
+
+    dest="$user@$host"
+    path="C:/Users/$user/OpenSCQ30"
+    log_level="${1:-{{level}}}"
+
+    CC=x86_64-w64-mingw32-gcc \
+        cargo build \
+        --target x86_64-pc-windows-gnu \
+        --features bundled-sqlite \
+        --features rust-embed/debug-embed
+
+    scp ../target/x86_64-pc-windows-gnu/debug/openscq30-gui.exe "$dest:$path/"
+
+    # We can't easily set an environment variable and run openscq30-gui.exe in one go with psexec,
+    # so a script is generated and uploaded as a workaround.
+    echo """
+    \$env:RUST_LOG='none,openscq30_lib=$log_level,openscq30_gui=$log_level,openscq30_i18n=$log_level'
+    C:/Users/$user/openscq30-gui.exe
+    """ | curl -T - "sftp://$dest/$path/launch.ps1"
+
+    ssh "$dest" \
+        -t "psexec \
+            -d \
+            -nobanner \
+            -accepteula \
+            -u \"$user\" \
+            -p \"$password\" \
+            -i 1 \
+            powershell -NonInteractive -Command \"$path/launch.ps1\""
+
 
 build profile='dev':
     cargo build --profile {{profile}}
 
 test:
-    cargo test --bins
+    cargo test
 
 test-cov:
-    cargo llvm-cov --no-report --bins
+    cargo llvm-cov --no-report
 
 install path:
     ./scripts/install.sh "{{path}}"
@@ -16,6 +58,7 @@ install path:
 uninstall path:
     ./scripts/uninstall.sh "{{path}}"
 
+alias fmt := format
 format:
     cargo fmt
 
