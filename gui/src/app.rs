@@ -1,11 +1,10 @@
-use std::{collections::VecDeque, ops::Deref, sync::Arc};
+use std::{collections::VecDeque, ops::Deref, path::PathBuf, sync::Arc};
 
 use cosmic::{
     Application, ApplicationExt, Task,
     app::{Core, context_drawer::ContextDrawer},
     widget::{self, icon, nav_bar},
 };
-use dirs::config_dir;
 use macaddr::MacAddr6;
 use openscq30_i18n::Translate;
 use openscq30_lib::{
@@ -26,6 +25,10 @@ pub struct AppModel {
     dialog_page: Option<DialogPage>,
     session: Arc<OpenSCQ30Session>,
     warnings: VecDeque<String>,
+    config_dir: PathBuf,
+}
+pub struct AppFlags {
+    pub config_dir: PathBuf,
 }
 
 #[derive(Debug, Clone)]
@@ -97,7 +100,7 @@ macro_rules! handle_soft_error {
 
 impl Application for AppModel {
     type Executor = cosmic::executor::Default;
-    type Flags = ();
+    type Flags = AppFlags;
     type Message = Message;
 
     const APP_ID: &'static str = "com.oppzippy.OpenSCQ30";
@@ -110,13 +113,10 @@ impl Application for AppModel {
         &mut self.core
     }
 
-    fn init(core: Core, _flags: Self::Flags) -> (Self, cosmic::app::Task<Self::Message>) {
+    fn init(core: Core, flags: Self::Flags) -> (Self, cosmic::app::Task<Self::Message>) {
         let session = Arc::new(
             futures::executor::block_on(OpenSCQ30Session::new(
-                config_dir()
-                    .expect("failed to find config dir")
-                    .join("openscq30")
-                    .join("database.sqlite"),
+                flags.config_dir.join("database.sqlite"),
             ))
             .expect("database is required to run"),
         );
@@ -127,6 +127,7 @@ impl Application for AppModel {
             dialog_page: None,
             session,
             warnings: VecDeque::with_capacity(5),
+            config_dir: flags.config_dir,
         };
         let command = app.update_title();
         (
@@ -332,6 +333,7 @@ impl Application for AppModel {
                 let (model, task) = device_settings::DeviceSettingsModel::new(
                     device,
                     self.session.quick_preset_handler(),
+                    self.config_dir.to_owned(),
                 );
                 self.screen = Screen::DeviceSettings(model);
                 return task.map(Message::DeviceSettingsScreen).map(Into::into);

@@ -27,7 +27,14 @@ fn main() -> anyhow::Result<()> {
     openscq30_lib::i18n::init(&requested_languages);
 
     let settings = cosmic::app::Settings::default();
-    cosmic::app::run::<app::AppModel>(settings, ())?;
+    cosmic::app::run::<app::AppModel>(
+        settings,
+        app::AppFlags {
+            config_dir: dirs::config_dir()
+                .expect("failed to find config dir")
+                .join("openscq30"),
+        },
+    )?;
 
     Ok(())
 }

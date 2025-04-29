@@ -6,7 +6,7 @@ mod range;
 mod select;
 mod toggle;
 
-use std::{borrow::Cow, collections::HashMap};
+use std::{borrow::Cow, collections::HashMap, path::PathBuf};
 
 use anyhow::{anyhow, bail};
 use cosmic::{
@@ -89,6 +89,7 @@ impl DeviceSettingsModel {
     pub fn new(
         device: DebugOpenSCQ30Device,
         quick_presets_handler: QuickPresetsHandler,
+        config_dir: PathBuf,
     ) -> (Self, Task<Message>) {
         let mut nav_model = nav_bar::Model::default();
         for category in device.categories() {
@@ -127,15 +128,15 @@ impl DeviceSettingsModel {
         };
         let task = Task::batch([
             model.refresh(),
-            Self::initialize_legacy_migration(),
+            Self::initialize_legacy_migration(config_dir),
             Task::stream(stream),
         ]);
         (model, task)
     }
 
-    fn initialize_legacy_migration() -> Task<Message> {
+    fn initialize_legacy_migration(config_dir: PathBuf) -> Task<Message> {
         Task::future(async move {
-            let profiles = match openscq30_v1_migration::all_equalizer_profiles().await {
+            let profiles = match openscq30_v1_migration::all_equalizer_profiles(config_dir).await {
                 Ok(profiles) => profiles,
                 Err(err) => match err {
                     openscq30_v1_migration::FetchProfilesError::NoLegacyConfig => {
