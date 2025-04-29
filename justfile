@@ -5,21 +5,22 @@ build profile='dev':
     just gui/ build '{{profile}}'
     just cli/ build '{{profile}}'
     just android/ build '{{profile}}'
-    just web/ build '{{profile}}'
 
 test:
     just lib/ test
-    just gui/ test
     just cli/ test
+    just gui/ test
+    just i18n/ test
+    just i18n_macros/ test
     just android/ test
-    just web/ test
 
 test-cov:
     just lib/ test-cov
-    just gui/ test-cov
     just cli/ test-cov
+    just gui/ test-cov
+    just i18n/ test-cov
+    just i18n_macros/ test-cov
     just android/ test-cov
-    just web/ test-cov
 
 llvm-cov-clean:
     cargo llvm-cov clean --workspace
@@ -43,27 +44,24 @@ test-cov-report format='lcov':
 
     cargo llvm-cov report $format_args
 
-install prefix:
-    just gui/ install '{{prefix}}'
-    just cli/ install '{{prefix}}'
+install path:
+    just gui/ install '{{path}}'
+    just cli/ install '{{path}}'
 
-uninstall prefix:
-    just gui/ uninstall '{{prefix}}'
-    just cli/ uninstall '{{prefix}}'
+uninstall path:
+    just gui/ uninstall '{{path}}'
+    just cli/ uninstall '{{path}}'
 
+alias fmt := format
 format:
     just android/ format
     just cli/ format
     just gui/ format
     just lib/ format
-    just lib_protobuf/ format
-    just web/ format
 
 format-check:
     just android/ format-check
     just cli/ format-check
     just gui/ format-check
     just lib/ format-check
-    just lib_protobuf/ format-check
-    just web/ format-check
 

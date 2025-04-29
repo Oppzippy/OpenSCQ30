@@ -17,6 +17,7 @@ install path:
 uninstall path:
     ./scripts/uninstall.sh "{{path}}"
 
+alias fmt := format
 format:
     cargo fmt
 

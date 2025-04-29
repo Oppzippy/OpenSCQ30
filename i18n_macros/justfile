@@ -1,9 +1,3 @@
-test:
-    cargo test
-
-test-cov:
-    cargo llvm-cov --no-report
-
 alias fmt := format
 format:
     cargo fmt
