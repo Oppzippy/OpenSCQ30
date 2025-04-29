@@ -1912,16 +1912,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "flatbuffers"
-version = "25.2.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1045398c1bfd89168b5fd3f1fc11f6e70b34f6f66300c87d44d3de849463abf1"
-dependencies = [
- "bitflags 2.9.0",
- "rustc_version",
-]
-
-[[package]]
 name = "flate2"
 version = "1.0.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4193,19 +4183,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "openscq30_lib_flatbuffers"
-version = "1.19.3"
-dependencies = [
- "flatbuffers",
- "glob",
- "macaddr",
- "openscq30_lib",
- "static_assertions",
- "thiserror 2.0.12",
- "uuid",
-]
-
-[[package]]
 name = "option-ext"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4963,15 +4940,6 @@ name = "rustc-hash"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c7fb8039b3032c191086b10f11f319a6e99e1e82889c5cc6046f515c9db1d497"
-
-[[package]]
-name = "rustc_version"
-version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cfcb3a22ef46e85b45de6ee7e79d063319ebb6594faafcf1c225ea92ab6e9b92"
-dependencies = [
- "semver",
-]
 
 [[package]]
 name = "rustix"

@@ -7,7 +7,6 @@ members = [
     "gui",
     "i18n",
     "i18n_macros",
-    "lib_flatbuffers",
 ]
 resolver = "2"
 
