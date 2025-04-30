@@ -54,6 +54,17 @@ impl OpenSCQ30Session {
             .collect())
     }
 
+    pub async fn list_demo_devices(
+        &self,
+        model: serializable::DeviceModel,
+    ) -> Result<Vec<serializable::ConnectionDescriptor>, crate::Error> {
+        let descriptors = self.inner.list_demo_devices(model.0).await?;
+        Ok(descriptors
+            .into_iter()
+            .map(serializable::ConnectionDescriptor)
+            .collect())
+    }
+
     pub async fn list_devices_with_backends(
         &self,
         backends: Arc<ManualConnectionBackends>,

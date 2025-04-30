@@ -8,18 +8,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
+import com.oppzippy.openscq30.lib.wrapper.PairedDevice
 import com.oppzippy.openscq30.ui.deviceselection.models.Screen
 import com.oppzippy.openscq30.ui.settings.SettingsPage
 import com.oppzippy.openscq30.ui.utils.PermissionCheck
 
 @Composable
 fun DeviceSelection(
-    devices: List<BluetoothDevice>,
+    devices: List<PairedDevice>,
     onRefreshDevices: () -> Unit = {},
-    onDeviceClick: (device: BluetoothDevice) -> Unit = {},
-    onUnpair: (BluetoothDevice) -> Unit = {},
-    isBluetoothEnabled: Boolean,
+    onDeviceClick: (device: PairedDevice) -> Unit = {},
+    onUnpair: (PairedDevice) -> Unit = {},
 ) {
     val navController = rememberNavController()
 
@@ -52,7 +51,6 @@ fun DeviceSelection(
                     onSettingsClick = {
                         navController.navigate(Screen.Settings.route)
                     },
-                    isBluetoothEnabled = isBluetoothEnabled,
                 )
             }
         }

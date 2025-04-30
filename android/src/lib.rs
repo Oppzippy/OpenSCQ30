@@ -8,6 +8,8 @@ pub mod quick_presets;
 pub mod serializable;
 
 use log::LevelFilter;
+use openscq30_lib::devices::DeviceModel;
+use strum::IntoEnumIterator;
 
 uniffi::setup_scaffolding!();
 
@@ -34,4 +36,9 @@ pub enum Error {
 pub enum AndroidError {
     #[error("{0}")]
     Other(String),
+}
+
+#[uniffi::export]
+pub fn device_models() -> Vec<serializable::DeviceModel> {
+    DeviceModel::iter().map(serializable::DeviceModel).collect()
 }

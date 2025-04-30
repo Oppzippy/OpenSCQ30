@@ -12,7 +12,6 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -25,20 +24,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
+import com.oppzippy.openscq30.lib.wrapper.PairedDevice
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeviceListing(
-    devices: List<BluetoothDevice>,
+    devices: List<PairedDevice>,
     onRefreshClick: () -> Unit = {},
     onInfoClick: () -> Unit = {},
-    onDeviceClick: (BluetoothDevice) -> Unit = {},
+    onDeviceClick: (PairedDevice) -> Unit = {},
     onSettingsClick: () -> Unit = {},
-    onUnpair: (BluetoothDevice) -> Unit = {},
-    isBluetoothEnabled: Boolean,
+    onUnpair: (PairedDevice) -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -85,14 +83,7 @@ fun DeviceListing(
                 state = pullToRefreshState,
             ) {
                 // child needs to be scrollable so that pull to refresh works
-                if (!isBluetoothEnabled) {
-                    CenteredScrollableBox {
-                        Text(
-                            stringResource(R.string.bluetooth_is_disabled),
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                    }
-                } else if (devices.isEmpty()) {
+                if (devices.isEmpty()) {
                     CenteredScrollableBox {
                         Text(stringResource(R.string.no_devices_found))
                     }
@@ -123,17 +114,9 @@ private fun CenteredScrollableBox(content: @Composable () -> Unit) {
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewBluetoothDisabled() {
-    OpenSCQ30Theme {
-        DeviceListing(listOf(), isBluetoothEnabled = false)
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
 private fun PreviewEmptyListing() {
     OpenSCQ30Theme {
-        DeviceListing(listOf(), isBluetoothEnabled = true)
+        DeviceListing(listOf())
     }
 }
 
@@ -141,10 +124,10 @@ private fun PreviewEmptyListing() {
 @Composable
 private fun PreviewDeviceListing() {
     OpenSCQ30Theme {
-        val devices = ArrayList<BluetoothDevice>()
+        val devices = ArrayList<PairedDevice>()
         for (i in 1..10) {
-            devices.add(BluetoothDevice("Device #$i", "00:00:$i", i % 2 == 0))
+            devices.add(PairedDevice("Device #$i", "00:00:$i", i % 2 == 0))
         }
-        DeviceListing(devices, isBluetoothEnabled = true)
+        DeviceListing(devices)
     }
 }

@@ -1,6 +1,5 @@
 package com.oppzippy.openscq30.ui.deviceselection.composables
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,24 +23,31 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
+import com.oppzippy.openscq30.lib.bindings.translateDeviceModel
+import com.oppzippy.openscq30.lib.wrapper.PairedDevice
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DeviceList(
-    devices: List<BluetoothDevice>,
+    devices: List<PairedDevice>,
     modifier: Modifier = Modifier,
-    onDeviceClick: (device: BluetoothDevice) -> Unit = {},
-    onUnpair: (device: BluetoothDevice) -> Unit = {},
+    onDeviceClick: (device: PairedDevice) -> Unit = {},
+    onUnpair: (device: PairedDevice) -> Unit = {},
 ) {
-    var deviceToUnpair: BluetoothDevice? by remember { mutableStateOf(null) }
+    var deviceToUnpair: PairedDevice? by remember { mutableStateOf(null) }
 
     deviceToUnpair?.let { device ->
         AlertDialog(
             onDismissRequest = { deviceToUnpair = null },
             title = { Text(stringResource(id = R.string.unpair_device)) },
-            text = { Text(stringResource(id = R.string.unpairing_from_device_name, device.name)) },
+            text = {
+                Text(
+                    stringResource(
+                        id = R.string.unpairing_from_device_name,
+                        translateDeviceModel(device.model),
+                    ),
+                )
+            },
             dismissButton = {
                 TextButton(onClick = { deviceToUnpair = null }) {
                     Text(stringResource(R.string.cancel))
@@ -76,15 +82,13 @@ fun DeviceList(
                     .padding(horizontal = 8.dp, vertical = 8.dp),
             ) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(text = device.name)
+                    Text(text = translateDeviceModel(device.model))
 
-                    if (device.isAssociated) {
-                        Text(text = stringResource(R.string.paired))
-                    } else {
-                        Text(text = stringResource(R.string.not_paired), color = MaterialTheme.colorScheme.secondary)
+                    if (device.isDemo) {
+                        Text(text = stringResource(R.string.demo), color = MaterialTheme.colorScheme.secondary)
                     }
                 }
-                Text(text = device.address)
+                Text(text = device.macAddress)
             }
         }
     }
@@ -94,9 +98,9 @@ fun DeviceList(
 @Composable
 private fun PreviewDeviceList() {
     OpenSCQ30Theme {
-        val devices = ArrayList<BluetoothDevice>()
+        val devices = ArrayList<PairedDevice>()
         for (i in 1..3) {
-            devices.add(BluetoothDevice("Device #$i", "00:00:$i", isAssociated = i % 2 == 0))
+            devices.add(PairedDevice("Device #$i", "00:00:$i", isDemo = i % 2 == 0))
         }
         DeviceList(devices)
     }

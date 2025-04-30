@@ -155,4 +155,8 @@
     <string name="copy_logs_to_clipboard">Copy Logs to Clipboard</string>
     <string name="unknown">Unknown</string>
     <string name="add_item">Add Item</string>
+    <string name="demo">Demo</string>
+    <string name="select_device_model">Select Device Model</string>
+    <string name="select_x">Select %s</string>
+    <string name="demo_mode">Demo Mode</string>
 </resources>

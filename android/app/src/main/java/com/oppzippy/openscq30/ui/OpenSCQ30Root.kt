@@ -58,7 +58,7 @@ fun OpenSCQ30Root(viewModel: DeviceSettingsViewModel = hiltViewModel()) {
                     )
                 } else {
                     DeviceSelectionScreen(
-                        onDeviceSelected = { viewModel.selectDevice(it) },
+                        onDeviceSelected = { viewModel.selectDevice(it.macAddress) },
                     )
                 }
             }
