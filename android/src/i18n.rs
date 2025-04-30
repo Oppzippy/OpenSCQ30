@@ -11,3 +11,8 @@ pub fn translate_category_id(category_id: serializable::CategoryId) -> String {
 pub fn translate_setting_id(setting_id: serializable::SettingId) -> String {
     setting_id.0.translate()
 }
+
+#[uniffi::export]
+pub fn translate_device_model(device_model: serializable::DeviceModel) -> String {
+    device_model.0.translate()
+}

@@ -42,13 +42,13 @@ class DeviceSelectionViewModel @Inject constructor(
         }
     }
 
-    fun pair(activity: Activity, address: String, model: String) {
+    fun pair(activity: Activity, pairedDevice: PairedDevice) {
         val pairingRequest = AssociationRequest.Builder()
             .apply {
                 this.setSingleDevice(true)
                 this.addDeviceFilter(
                     BluetoothDeviceFilter.Builder().apply {
-                        this.setAddress(address)
+                        this.setAddress(pairedDevice.macAddress)
                     }.build(),
                 )
             }
@@ -75,7 +75,7 @@ class DeviceSelectionViewModel @Inject constructor(
                     activity.startIntentSenderForResult(
                         intentSender,
                         0,
-                        Intent().putExtra("deviceModel", model),
+                        Intent().putExtra("pairedDevice", pairedDevice),
                         0,
                         0,
                         0,

@@ -14,6 +14,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("org.jlleitschuh.gradle.ktlint")
     kotlin("plugin.serialization")
+    id("kotlin-parcelize")
 }
 
 val keystorePropertiesFile: File = rootProject.file("keystore.properties")

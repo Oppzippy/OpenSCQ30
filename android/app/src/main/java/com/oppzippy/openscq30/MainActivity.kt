@@ -7,6 +7,7 @@ import android.companion.CompanionDeviceManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.app.ActivityCompat
@@ -47,31 +48,19 @@ class MainActivity @Inject constructor(private val session: OpenScq30Session) : 
                         BluetoothDevice::class.java,
                     )
                 } ?: return
-                val deviceModel = intent.getStringExtra("deviceModel") ?: return
+                val pairedDevice =
+                    IntentCompat.getParcelableExtra(intent, "pairedDevice", PairedDevice::class.java) ?: return
                 if (ActivityCompat.checkSelfPermission(
                         this,
                         Manifest.permission.BLUETOOTH_CONNECT,
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
+                    Toast.makeText(this, getString(R.string.bluetooth_permission_is_required), Toast.LENGTH_SHORT)
+                        .show()
                     return
                 }
                 deviceToPair.createBond()
-                lifecycleScope.launch {
-                    session.pair(
-                        PairedDevice(
-                            name = deviceToPair.name,
-                            macAddress = deviceToPair.address,
-                            model = deviceModel,
-                        ),
-                    )
-                }
+                lifecycleScope.launch { session.pair(pairedDevice) }
             }
         }
     }
