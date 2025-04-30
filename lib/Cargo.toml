@@ -40,11 +40,6 @@ cfg-if = { workspace = true }
 bluer = { workspace = true, features = ["bluetoothd", "rfcomm"] }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
 
-[target.'cfg(any(target_os = "macos"))'.dependencies]
-btleplug = { workspace = true, optional = true }
-regex = { workspace = true, optional = true }
-tokio = { workspace = true, features = ["rt-multi-thread"] }
-
 [dev-dependencies]
 tokio = { workspace = true, features = ["macros", "test-util"] }
 
