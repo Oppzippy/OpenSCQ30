@@ -21,7 +21,10 @@ import javax.inject.Inject
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class MainActivity @Inject constructor(private val session: OpenScq30Session) : ComponentActivity() {
+class MainActivity : ComponentActivity() {
+    @Inject
+    lateinit var session: OpenScq30Session
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         actionBar?.hide()
