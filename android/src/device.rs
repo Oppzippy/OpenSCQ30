@@ -42,7 +42,7 @@ impl OpenSCQ30Device {
                         break;
                     }
                     if let Some(callback) = watch_for_changes_callback.lock().unwrap().as_ref() {
-                        callback.notify();
+                        callback.on_notify();
                     }
                 }
             });
@@ -121,5 +121,5 @@ pub trait ConnectionStatusCallback: Send + Sync {
 
 #[uniffi::export(with_foreign)]
 pub trait NotificationCallback: Send + Sync {
-    fn notify(&self);
+    fn on_notify(&self);
 }
