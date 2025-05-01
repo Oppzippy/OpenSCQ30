@@ -80,7 +80,6 @@ impl QuickPresetsHandler {
         self.database
             .upsert_quick_preset(device.model(), name, settings)
             .await
-            .map_err(Into::into)
     }
 
     pub async fn activate(
@@ -105,6 +104,5 @@ impl QuickPresetsHandler {
         self.database
             .delete_quick_preset(device.model(), name)
             .await
-            .map_err(Into::into)
     }
 }

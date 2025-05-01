@@ -1,5 +1,8 @@
 use nom::{
-    combinator::map, error::{context, ContextError, ParseError}, number::complete::le_u8, IResult, Parser
+    IResult, Parser,
+    combinator::map,
+    error::{ContextError, ParseError, context},
+    number::complete::le_u8,
 };
 use openscq30_i18n_macros::Translate;
 use strum::{AsRefStr, Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
@@ -44,6 +47,7 @@ impl TransparencyMode {
             map(le_u8, |transparency_mode| {
                 TransparencyMode::from_id(transparency_mode).unwrap_or_default()
             }),
-        ).parse_complete(input)
+        )
+        .parse_complete(input)
     }
 }

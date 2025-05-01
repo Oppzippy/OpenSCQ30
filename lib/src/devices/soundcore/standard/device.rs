@@ -424,8 +424,8 @@ where
         let (change_sender, change_receiver) = watch::channel(());
         // receiver will close when self is dropped, so this will clean itself up
         tokio::spawn(async move {
-            while let Ok(_) = receiver.changed().await {
-                if let Err(_) = change_sender.send(()) {
+            while receiver.changed().await.is_ok() {
+                if change_sender.send(()).is_err() {
                     return;
                 }
             }
