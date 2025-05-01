@@ -21,24 +21,15 @@ test:
 test-cov:
     cargo llvm-cov --no-report
 
+ktlint-paths := "build.gradle.kts app/build.gradle.kts app/src/**/*.kt"
+alias fmt := format
 format:
-    #!/usr/bin/env bash
-    cargo fmt
-
-    if command -v ktlint > /dev/null; then
-        ktlint --editorconfig=../.editorconfig -F
-    else
-        ./gradlew ktlintFormat
-    fi
+    -cargo fmt
+    -ktlint --editorconfig=../.editorconfig -F {{ ktlint-paths }}
 
 format-check:
     #!/usr/bin/env bash
     set -euo pipefail
 
     cargo fmt --check
-
-    if command -v ktlint > /dev/null; then
-        ktlint --editorconfig=../.editorconfig
-    else
-        ./gradlew ktlintFormat
-    fi
+    ktlint --editorconfig=../.editorconfig {{ ktlint-paths }}
