@@ -7,9 +7,11 @@ pub mod i18n;
 pub mod quick_presets;
 pub mod serializable;
 
+use i18n_embed::unic_langid::LanguageIdentifier;
 use log::LevelFilter;
 use openscq30_lib::devices::DeviceModel;
 use strum::IntoEnumIterator;
+use tracing::instrument;
 
 uniffi::setup_scaffolding!();
 
@@ -19,7 +21,27 @@ pub fn init_native_logging() {
         android_logger::Config::default()
             .with_max_level(LevelFilter::Trace)
             .with_tag("openscq30-lib"),
-    )
+    );
+}
+
+#[uniffi::export]
+#[instrument]
+pub fn init_native_i18n(languages: Vec<serializable::LanguageIdentifier>) {
+    openscq30_lib::i18n::langs();
+    let languages = languages
+        .into_iter()
+        .filter_map(|language| match LanguageIdentifier::try_from(&language) {
+            Ok(language) => Some(language),
+            Err(err) => {
+                tracing::error!("failed to parse language, skipping: {err:?}: {language:?}");
+                None
+            }
+        })
+        .collect::<Vec<_>>();
+    if languages.len() == 0 {
+        tracing::error!("initializing i18n with no languages");
+    }
+    openscq30_lib::i18n::init(&languages);
 }
 
 #[derive(thiserror::Error, Debug, uniffi::Error)]

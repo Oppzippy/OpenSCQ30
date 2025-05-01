@@ -20,7 +20,7 @@ run-remote-windows level='debug':
     CC=x86_64-w64-mingw32-gcc \
         cargo build \
         --target x86_64-pc-windows-gnu \
-        --features bundled-sqlite \
+        --features bundled-dependencies \
         --features rust-embed/debug-embed
 
     scp ../target/x86_64-pc-windows-gnu/debug/openscq30-gui.exe "$dest:$path/"

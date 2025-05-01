@@ -8,7 +8,7 @@ edition = "2024"
 crate-type = ["cdylib"]
 
 [dependencies]
-openscq30_lib = { path = "../lib", features = ["bundled-sqlite"] }
+openscq30_lib = { path = "../lib", features = ["bundled-dependencies"] }
 openscq30_i18n = { path = "../i18n" }
 tracing = { workspace = true, features = ["log-always"] }
 log = { workspace = true }
@@ -23,6 +23,8 @@ uniffi = { workspace = true, features = ["tokio"] }
 serde_json = { workspace = true }
 async-trait = { workspace = true }
 strum = { workspace = true }
+i18n-embed = { workspace = true, features = ["fluent-system"] }
+i18n-embed-fl = { workspace = true }
 
 [build-dependencies]
 uniffi = { workspace = true, features = ["build"] }

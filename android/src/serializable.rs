@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use i18n_embed::unic_langid::subtags;
 use openscq30_lib::{
     api::{connection, settings},
     devices, storage,
@@ -71,3 +72,36 @@ uniffi::custom_type!(QuickPreset, String, {
     try_lift: |json| Ok(QuickPreset(serde_json::from_str(&json)?)),
     lower: |val| serde_json::to_string(&val.0).expect("json serialization shouldn't fail"),
 });
+
+#[derive(Debug, uniffi::Record)]
+pub struct LanguageIdentifier {
+    language: String,
+    script: Option<String>,
+    region: Option<String>,
+    variants: Vec<String>,
+}
+
+impl TryFrom<&LanguageIdentifier> for i18n_embed::unic_langid::LanguageIdentifier {
+    type Error = i18n_embed::unic_langid::parser::ParserError;
+
+    fn try_from(value: &LanguageIdentifier) -> Result<Self, Self::Error> {
+        Ok(Self::from_parts(
+            subtags::Language::from_str(&value.language)?,
+            value
+                .script
+                .as_ref()
+                .map(|script| subtags::Script::from_str(&script))
+                .transpose()?,
+            value
+                .region
+                .as_ref()
+                .map(|region| subtags::Region::from_str(&region))
+                .transpose()?,
+            &value
+                .variants
+                .iter()
+                .map(|variant| subtags::Variant::from_str(&variant))
+                .collect::<Result<Vec<_>, _>>()?,
+        ))
+    }
+}

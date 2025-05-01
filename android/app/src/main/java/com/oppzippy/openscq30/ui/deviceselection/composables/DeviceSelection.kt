@@ -19,6 +19,7 @@ fun DeviceSelection(
     onRefreshDevices: () -> Unit = {},
     onDeviceClick: (device: PairedDevice) -> Unit = {},
     onUnpair: (PairedDevice) -> Unit = {},
+    onAddDeviceClick: () -> Unit,
 ) {
     val navController = rememberNavController()
 
@@ -51,6 +52,7 @@ fun DeviceSelection(
                     onSettingsClick = {
                         navController.navigate(Screen.Settings.route)
                     },
+                    onAddDeviceClick = onAddDeviceClick,
                 )
             }
         }

@@ -7,7 +7,7 @@ edition = "2024"
 [features]
 default = []
 bluetooth = []
-bundled-sqlite = ["rusqlite/bundled"]
+bundled-dependencies = ["rusqlite/bundled", "rust-embed/debug-embed"]
 
 [lib]
 crate-type = ["lib"]

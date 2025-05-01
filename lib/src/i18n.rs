@@ -24,6 +24,11 @@ pub(crate) fn localizer() -> Box<dyn Localizer> {
 #[folder = "i18n/"]
 struct Localizations;
 
+pub fn langs() {
+    tracing::info!("==I18n PATHS==");
+    Localizations::iter().for_each(|path| tracing::info!("I18n PATH: {path}"));
+}
+
 pub(crate) static LANGUAGE_LOADER: LazyLock<FluentLanguageLoader> = LazyLock::new(|| {
     let loader: FluentLanguageLoader = fluent_language_loader!();
 

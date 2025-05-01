@@ -3969,6 +3969,8 @@ dependencies = [
  "android_logger",
  "anyhow",
  "async-trait",
+ "i18n-embed",
+ "i18n-embed-fl",
  "itertools",
  "log",
  "macaddr",

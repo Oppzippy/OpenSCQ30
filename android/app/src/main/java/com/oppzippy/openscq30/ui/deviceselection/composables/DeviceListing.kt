@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
@@ -37,6 +38,7 @@ fun DeviceListing(
     onDeviceClick: (PairedDevice) -> Unit = {},
     onSettingsClick: () -> Unit = {},
     onUnpair: (PairedDevice) -> Unit = {},
+    onAddDeviceClick: () -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -45,6 +47,12 @@ fun DeviceListing(
                     Text(text = stringResource(id = R.string.app_name))
                 },
                 actions = {
+                    IconButton(onClick = onAddDeviceClick) {
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = stringResource(id = R.string.add),
+                        )
+                    }
                     IconButton(onClick = onRefreshClick) {
                         Icon(
                             imageVector = Icons.Filled.Refresh,

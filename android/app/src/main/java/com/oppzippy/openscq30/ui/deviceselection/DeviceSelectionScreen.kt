@@ -45,6 +45,9 @@ fun DeviceSelectionScreen(
                 onRefreshDevices = {},
                 onDeviceClick = { onDeviceSelected(it) },
                 onUnpair = { viewModel.unpair(it) },
+                onAddDeviceClick = {
+                    viewModel.state.value = DeviceSelectionState.SelectModelForPairing
+                },
             )
         }
 
