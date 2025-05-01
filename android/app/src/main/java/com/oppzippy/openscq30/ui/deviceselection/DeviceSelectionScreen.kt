@@ -141,4 +141,3 @@ fun SelectDeviceForPairing(
         },
     )
 }
-

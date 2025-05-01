@@ -43,17 +43,6 @@ impl OpenSCQ30Session {
             .collect())
     }
 
-    pub async fn list_devices(
-        &self,
-        model: serializable::DeviceModel,
-    ) -> Result<Vec<serializable::ConnectionDescriptor>, crate::Error> {
-        let descriptors = self.inner.list_devices(model.0).await?;
-        Ok(descriptors
-            .into_iter()
-            .map(serializable::ConnectionDescriptor)
-            .collect())
-    }
-
     pub async fn list_demo_devices(
         &self,
         model: serializable::DeviceModel,
@@ -79,15 +68,6 @@ impl OpenSCQ30Session {
             .into_iter()
             .map(serializable::ConnectionDescriptor)
             .collect())
-    }
-
-    pub async fn connect(
-        &self,
-        mac_address: serializable::MacAddr6,
-    ) -> Result<Arc<OpenSCQ30Device>, crate::Error> {
-        let device = self.inner.connect(mac_address.0).await?;
-        let wrapped_device = OpenSCQ30Device::new(device).await;
-        Ok(Arc::new(wrapped_device))
     }
 
     pub async fn connect_with_backends(

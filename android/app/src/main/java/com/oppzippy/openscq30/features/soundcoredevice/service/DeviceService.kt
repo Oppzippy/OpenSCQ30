@@ -12,6 +12,7 @@ import android.os.IBinder
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
+import com.oppzippy.openscq30.features.soundcoredevice.connectionBackends
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_DISCONNECT
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_QUICK_PRESET
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_SEND_NOTIFICATION
@@ -115,7 +116,12 @@ class DeviceService : LifecycleService() {
         intent?.getStringExtra(MAC_ADDRESS)?.let { macAddress ->
             val job = lifecycleScope.launch {
                 connectionStatusFlow.value = ConnectionStatus.Connected(
-                    DeviceConnectionManager(session.connect(macAddress)),
+                    DeviceConnectionManager(
+                        session.connectWithBackends(
+                            connectionBackends(applicationContext, lifecycleScope),
+                            macAddress,
+                        ),
+                    ),
                 )
             }
             connectionStatusFlow.compareAndSet(

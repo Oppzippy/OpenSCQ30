@@ -12,6 +12,7 @@ import android.os.Build
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.oppzippy.openscq30.features.soundcoredevice.connectionBackends
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
 import com.oppzippy.openscq30.lib.wrapper.ConnectionDescriptor
 import com.oppzippy.openscq30.lib.wrapper.PairedDevice
@@ -130,7 +131,11 @@ class DeviceSelectionViewModel @Inject constructor(
     private fun launchSelectDeviceForPairing(model: String, isDemo: Boolean) {
         this@DeviceSelectionViewModel.state.value = DeviceSelectionState.Loading
         viewModelScope.launch {
-            val devices = if (isDemo) session.listDemoDevices(model) else session.listDevices(model)
+            val devices = if (isDemo) {
+                session.listDemoDevices(model)
+            } else {
+                session.listDevicesWithBackends(connectionBackends(application, viewModelScope), model)
+            }
             this@DeviceSelectionViewModel.state.value =
                 DeviceSelectionState.SelectDeviceForPairing(model = model, isDemoMode = false, devices = devices)
         }
