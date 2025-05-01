@@ -1,7 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
 import com.android.build.gradle.internal.tasks.factory.dependsOn
-import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -52,9 +51,14 @@ android {
     }
 
     sourceSets {
+        getByName("debug") {
+            jniLibs.srcDir("src/main/jniLibs/debug")
+        }
+        getByName("release") {
+            jniLibs.srcDir("src/main/jniLibs/release")
+        }
         getByName("main") {
             java.srcDir("${layout.buildDirectory.get()}/generated/source/uniffi/java")
-            jniLibs.srcDir("src/main/libs")
         }
         getByName("androidTest") {
             assets.srcDir("$projectDir/schemas")
@@ -184,8 +188,13 @@ kapt {
     correctErrorTypes = true
 }
 
+configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+    version.set("1.3.1")
+}
+
 val rustProjectDir: File = layout.projectDirectory.asFile.parentFile
 val rustWorkspaceDir: File = rustProjectDir.parentFile
+val cargoTargetDirectory: File = rustWorkspaceDir.resolve("target")
 val archTriplets = mapOf(
     "armeabi-v7a" to "armv7-linux-androideabi",
     "arm64-v8a" to "aarch64-linux-android",
@@ -193,64 +202,17 @@ val archTriplets = mapOf(
     "x86_64" to "x86_64-linux-android",
 )
 
-tasks.register<Exec>("generate-uniffi-bindings") {
-    dependsOn("cargo-build-arm64-v8a")
-    description = "Generate kotlin bindings using uniffi-bindgen"
-    workingDir = rustWorkspaceDir
-    doFirst {
-        // generate bindings
-        commandLine(
-            "cargo",
-            "run",
-            "--bin",
-            "uniffi-bindgen",
-            "--",
-            "generate",
-            "--library",
-            "./target/aarch64-linux-android/release-debuginfo/libopenscq30_android.so",
-            "--language",
-            "kotlin",
-            "--out-dir",
-            "${layout.buildDirectory.get()}/generated/source/uniffi/java",
-            "--config",
-            "${layout.projectDirectory.asFile.parentFile.path}/uniffi.toml",
-        )
-    }
-}
-tasks.withType<JavaCompile> {
-    dependsOn("generate-uniffi-bindings")
-}
-
 interface InjectedExecOps {
     @get:Inject
     val execOps: ExecOperations
 }
 
-archTriplets.forEach { (arch, target) ->
-    // execute cargo metadata and get path to target directory
-    tasks.register("cargo-output-dir-$arch") {
-        description = "Get cargo metadata"
-        doFirst {
-            val injectedExecOps = project.objects.newInstance<InjectedExecOps>()
-            val output = ByteArrayOutputStream()
-            injectedExecOps.execOps.exec {
-                commandLine("cargo", "metadata", "--format-version", "1")
-                workingDir = rustProjectDir
-                standardOutput = output
-            }
-            val outputAsString = output.toString()
-            val json = groovy.json.JsonSlurper().parseText(outputAsString) as Map<*, *>
-            val targetDirectory = json["target_directory"] as String
-
-            logger.info("cargo target directory: $targetDirectory")
-            project.extensions.extraProperties.set("cargo_target_directory", targetDirectory)
-        }
-    }
-    // Build with cargo
-    tasks.register<Exec>("cargo-build-$arch") {
-        description = "Building core for $arch"
-        workingDir = rustProjectDir
-        doFirst {
+listOf("debug", "release").forEach { profile ->
+    archTriplets.forEach { (arch, target) ->
+        // Build with cargo
+        tasks.register<Exec>("cargo-build-$profile-$arch") {
+            description = "Building core for $profile-$arch"
+            workingDir = rustProjectDir
             commandLine(
                 "cargo",
                 "ndk",
@@ -260,57 +222,59 @@ archTriplets.forEach { (arch, target) ->
                 "26",
                 "build",
                 "--profile",
-                "release-debuginfo",
+                if (profile == "debug") "dev" else profile,
             )
         }
-    }
-    // Sync shared native dependencies
-    tasks.register<Sync>("sync-rust-deps-$arch") {
-        dependsOn("cargo-build-$arch")
-        doFirst {
-            from("${rustProjectDir.absolutePath}/src/libs/$arch") {
-                include("*.so")
-            }
-            into("src/main/libs/$arch")
+        // Copy build libs into this app's libs directory
+        tasks.register<Copy>("rust-deploy-$profile-$arch") {
+            dependsOn("cargo-build-$profile-$arch")
+            description = "Copy rust libs for ($profile-$arch) to jniLibs"
+            println("$cargoTargetDirectory/$target/$profile/libopenscq30_android.so")
+            from("$cargoTargetDirectory/$target/$profile/libopenscq30_android.so")
+            into("src/main/jniLibs/$profile/$arch")
         }
-    }
-    // Copy build libs into this app's libs directory
-    tasks.register<Copy>("rust-deploy-$arch") {
-        dependsOn("sync-rust-deps-$arch", "cargo-output-dir-$arch")
-        description = "Copy rust libs for ($arch) to jniLibs"
-        doFirst {
-            val cargoTargetDirectory = project.extensions.extraProperties.get("cargo_target_directory")
-            from(
-                "$cargoTargetDirectory/$target/release-debuginfo",
-            ) {
-                include("*.so")
-            }
-            into("src/main/libs/$arch")
+
+        // Hook up clean tasks
+        tasks.register<Delete>("clean-$profile-$arch") {
+            description = "Deleting built libs for $profile-$arch"
+            delete(file("$cargoTargetDirectory/$target/$profile"))
         }
+        tasks.clean.dependsOn("clean-$profile-$arch")
     }
 
-    // Hook up tasks to execute before building java
-    tasks.withType<JavaCompile> {
-        dependsOn("rust-deploy-$arch")
+    tasks.register<Exec>("generate-uniffi-bindings-$profile") {
+        dependsOn("cargo-build-$profile-arm64-v8a")
+        description = "Generate kotlin bindings using uniffi-bindgen"
+        workingDir = rustWorkspaceDir
+        // generate bindings
+        commandLine(
+            "cargo",
+            "run",
+            "--bin",
+            "uniffi-bindgen",
+            "--",
+            "generate",
+            "--library",
+            "./target/aarch64-linux-android/$profile/libopenscq30_android.so",
+            "--language",
+            "kotlin",
+            "--out-dir",
+            "${layout.buildDirectory.get()}/generated/source/uniffi/java",
+            "--config",
+            "${layout.projectDirectory.asFile.parentFile.path}/uniffi.toml",
+        )
     }
-    tasks.preBuild.dependsOn("rust-deploy-$arch")
-
-    // Hook up clean tasks
-    tasks.register<Delete>("clean-$arch") {
-        dependsOn("cargo-output-dir-$arch")
-        description = "Deleting built libs for $arch"
-        doFirst {
-            delete(
-                fileTree(
-                    "${project.extensions.extraProperties.get("cargo_target_directory")}/$target/release-debuginfo",
-                ) {
-                    include("*.so")
-                },
-            )
-        }
-    }
-    tasks.clean.dependsOn("clean-$arch")
 }
-configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
-    version.set("1.3.1")
+
+afterEvaluate {
+    android.applicationVariants.forEach { variant ->
+        val profile = if (variant.buildType.isDebuggable) "debug" else "release"
+        // Hook up tasks to execute before building java
+        variant.preBuildProvider.configure {
+            archTriplets.forEach { (arch, _) ->
+                dependsOn("rust-deploy-$profile-$arch")
+            }
+            dependsOn("generate-uniffi-bindings-$profile")
+        }
+    }
 }
