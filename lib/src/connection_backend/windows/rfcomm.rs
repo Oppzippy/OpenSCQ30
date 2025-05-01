@@ -157,8 +157,8 @@ impl WindowsRfcommConnection {
             device
                 .resolve()?
                 .ConnectionStatusChanged(&TypedEventHandler::new(
-                    move |device: &Option<BluetoothDevice>, _| {
-                        if let Some(device) = device {
+                    move |device: windows::core::Ref<'_, BluetoothDevice>, _| {
+                        if let Some(device) = device.as_ref() {
                             let connection_status = if device.ConnectionStatus()?
                                 == BluetoothConnectionStatus::Connected
                             {
