@@ -1,9 +1,9 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::{map, map_opt},
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
-    sequence::{pair, tuple},
+    sequence::pair,
 };
 
 use crate::devices::soundcore::standard::structures::ButtonAction;
@@ -33,16 +33,17 @@ impl A3936InternalMultiButtonConfiguration {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
-        context("custom button model", |input| {
+        context(
+            "custom button model",
             map(
-                tuple((
+                (
                     context("left single click", A3936TwsButtonAction::take),
                     context("right single click", A3936TwsButtonAction::take),
                     context("left double click", A3936TwsButtonAction::take),
                     context("right double click", A3936TwsButtonAction::take),
                     context("left long press", A3936TwsButtonAction::take),
                     context("right long press", A3936TwsButtonAction::take),
-                )),
+                ),
                 |(
                     left_single_click,
                     right_single_click,
@@ -60,8 +61,9 @@ impl A3936InternalMultiButtonConfiguration {
                         right_single_click,
                     }
                 },
-            )(input)
-        })(input)
+            ),
+        )
+        .parse_complete(input)
     }
 }
 
@@ -99,7 +101,8 @@ impl A3936TwsButtonAction {
                 tws_disconnected_action: ButtonAction::from_repr((num & 0xF0) >> 4)
                     .unwrap_or_else(log_and_return_default),
             })
-        })(input)
+        })
+        .parse_complete(input)
     }
 
     pub fn action_if_enabled(&self, is_tws_connected: bool) -> Option<ButtonAction> {

@@ -23,6 +23,7 @@ tracing = { workspace = true }
 strum = { workspace = true, features = ["derive"] }
 macaddr = { workspace = true, features = ["serde"] }
 nom = { workspace = true }
+nom-language = { workspace = true }
 serde = { workspace = true, features = ["derive", "rc"] }
 serde_json = { workspace = true }
 static_assertions = { workspace = true }

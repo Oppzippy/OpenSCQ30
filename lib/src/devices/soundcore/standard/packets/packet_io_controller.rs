@@ -1,6 +1,6 @@
 use std::{sync::Arc, time::Duration};
 
-use nom::error::VerboseError;
+use nom_language::error::VerboseError;
 use tokio::{
     select,
     sync::{mpsc, watch},

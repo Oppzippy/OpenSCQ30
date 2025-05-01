@@ -1,10 +1,9 @@
 use async_trait::async_trait;
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::{all_consuming, opt},
     error::{ContextError, ParseError, context},
     number::complete::{le_u8, le_u16},
-    sequence::tuple,
 };
 use tokio::sync::watch;
 
@@ -72,7 +71,7 @@ impl InboundPacket for A3951StateUpdatePacket {
                         wear_detection,
                         touch_tone,
                     ),
-                ) = tuple((
+                ) = (
                     TwsStatus::take,
                     DualBattery::take,
                     EqualizerConfiguration::take,
@@ -84,13 +83,14 @@ impl InboundPacket for A3951StateUpdatePacket {
                     take_bool, // side tone
                     take_bool, // wear detection
                     take_bool, // touch tone
-                ))(input)?;
+                )
+                    .parse_complete(input)?;
 
                 // >=96 length optional fields
-                let (input, hear_id_eq_preset) = opt(le_u16)(input)?;
+                let (input, hear_id_eq_preset) = opt(le_u16).parse_complete(input)?;
 
                 // >=98 length optional fields
-                let (input, new_battery) = opt(tuple((le_u8, le_u8)))(input)?;
+                let (input, new_battery) = opt((le_u8, le_u8)).parse_complete(input)?;
 
                 Ok((
                     input,
@@ -113,7 +113,8 @@ impl InboundPacket for A3951StateUpdatePacket {
                     },
                 ))
             }),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
@@ -194,7 +195,7 @@ impl ModuleCollection<A3951State> {
 
 #[cfg(test)]
 mod tests {
-    use nom::error::VerboseError;
+    use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::packets::{
         inbound::{TryIntoInboundPacket, take_inbound_packet_header},

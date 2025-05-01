@@ -1,9 +1,8 @@
 use async_trait::async_trait;
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::{all_consuming, map},
     error::{ContextError, ParseError, context},
-    sequence::tuple,
 };
 use tokio::sync::watch;
 
@@ -42,13 +41,13 @@ impl InboundPacket for A3033StateUpdatePacket {
         context(
             "a3033 state update packet",
             all_consuming(map(
-                tuple((
+                (
                     SingleBattery::take,
                     EqualizerConfiguration::take,
                     FirmwareVersion::take,
                     SerialNumber::take,
                     take_bool,
-                )),
+                ),
                 |(
                     battery,
                     equalizer_configuration,
@@ -65,7 +64,8 @@ impl InboundPacket for A3033StateUpdatePacket {
                     }
                 },
             )),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
@@ -111,7 +111,7 @@ impl ModuleCollection<A3033State> {
 
 #[cfg(test)]
 mod tests {
-    use nom::error::VerboseError;
+    use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::packets::{
         inbound::{TryIntoInboundPacket, take_inbound_packet_header},

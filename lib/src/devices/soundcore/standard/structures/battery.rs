@@ -1,9 +1,8 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::map,
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
-    sequence::tuple,
 };
 use strum::Display;
 
@@ -55,12 +54,12 @@ impl DualBattery {
         context(
             "dual battery",
             map(
-                tuple((
+                (
                     BatteryLevel::take,
                     BatteryLevel::take,
                     IsBatteryCharging::take,
                     IsBatteryCharging::take,
-                )),
+                ),
                 |(left_level, right_level, is_left_charging, is_right_charging)| DualBattery {
                     left: SingleBattery {
                         level: left_level,
@@ -72,7 +71,8 @@ impl DualBattery {
                     },
                 },
             ),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
@@ -89,10 +89,11 @@ impl SingleBattery {
         context(
             "battery",
             map(
-                tuple((BatteryLevel::take, IsBatteryCharging::take)),
+                (BatteryLevel::take, IsBatteryCharging::take),
                 |(level, is_charging)| SingleBattery { level, is_charging },
             ),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
@@ -117,7 +118,8 @@ impl IsBatteryCharging {
                     IsBatteryCharging::No
                 }
             }),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
@@ -146,6 +148,6 @@ impl BatteryLevel {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], BatteryLevel, E> {
-        context("battery level", map(le_u8, BatteryLevel))(input)
+        context("battery level", map(le_u8, BatteryLevel)).parse_complete(input)
     }
 }

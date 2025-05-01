@@ -1,8 +1,5 @@
 use nom::{
-    IResult,
-    bytes::complete::take,
-    combinator::map,
-    error::{ContextError, ParseError, context},
+    bytes::complete::take, combinator::map, error::{context, ContextError, ParseError}, IResult, Parser
 };
 use std::array;
 
@@ -39,7 +36,7 @@ impl<const B: usize> VolumeAdjustments<B> {
                         .expect("take guarantees that the length will be B"),
                 )
             }),
-        )(input)
+        ).parse_complete(input)
     }
 
     pub fn bytes(&self) -> [u8; B] {

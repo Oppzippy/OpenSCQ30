@@ -1,8 +1,7 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::{all_consuming, map},
     error::{ContextError, ParseError, context},
-    sequence::tuple,
 };
 
 use crate::devices::soundcore::standard::{
@@ -31,7 +30,7 @@ impl InboundPacket for SerialNumberAndFirmwareVersionUpdatePacket {
         context(
             "FirmwareVersionUpdatePacket",
             all_consuming(map(
-                tuple((DualFirmwareVersion::take, SerialNumber::take)),
+                (DualFirmwareVersion::take, SerialNumber::take),
                 |(dual_firmware_version, serial_number)| {
                     SerialNumberAndFirmwareVersionUpdatePacket {
                         dual_firmware_version,
@@ -39,7 +38,8 @@ impl InboundPacket for SerialNumberAndFirmwareVersionUpdatePacket {
                     }
                 },
             )),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
@@ -58,7 +58,7 @@ impl OutboundPacket for SerialNumberAndFirmwareVersionUpdatePacket {
 
 #[cfg(test)]
 mod tests {
-    use nom::error::VerboseError;
+    use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::{
         packets::inbound::{

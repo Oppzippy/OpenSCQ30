@@ -1,5 +1,5 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::{all_consuming, map},
     error::{ContextError, ParseError, context},
 };
@@ -26,13 +26,14 @@ impl InboundPacket for GameModeUpdatePacket {
             all_consuming(map(take_bool, |is_enabled| GameModeUpdatePacket {
                 is_enabled,
             })),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use nom::error::VerboseError;
+    use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::packets::inbound::{
         GameModeUpdatePacket, InboundPacket, take_inbound_packet_header,

@@ -1,5 +1,5 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::{all_consuming, map},
     error::{ContextError, ParseError, context},
     sequence::pair,
@@ -27,7 +27,8 @@ impl InboundPacket for SingleBatteryChargingUpdatePacket {
             all_consuming(map(IsBatteryCharging::take, |is_charging| {
                 SingleBatteryChargingUpdatePacket { is_charging }
             })),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
@@ -51,16 +52,18 @@ impl InboundPacket for DualBatteryChargingUpdatePacket {
                 pair(IsBatteryCharging::take, IsBatteryCharging::take),
                 |(left, right)| DualBatteryChargingUpdatePacket { left, right },
             )),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use nom_language::error::VerboseError;
+
     use crate::devices::soundcore::standard::packets::inbound::take_inbound_packet_header;
 
     use super::*;
-    use nom::error::VerboseError;
 
     #[test]
     fn it_parses_a_manually_crafted_packet() {

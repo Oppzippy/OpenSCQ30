@@ -1,8 +1,7 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::map,
     error::{ContextError, ParseError, context},
-    sequence::tuple,
 };
 
 use super::{AmbientSoundMode, CustomNoiseCanceling, NoiseCancelingMode, TransparencyMode};
@@ -22,12 +21,12 @@ impl SoundModes {
         context(
             "group of sound modes",
             map(
-                tuple((
+                (
                     AmbientSoundMode::take,
                     NoiseCancelingMode::take,
                     TransparencyMode::take,
                     CustomNoiseCanceling::take,
-                )),
+                ),
                 |(
                     ambient_sound_mode,
                     noise_canceling_mode,
@@ -42,7 +41,8 @@ impl SoundModes {
                     }
                 },
             ),
-        )(input)
+        )
+        .parse_complete(input)
     }
 
     pub fn bytes(&self) -> [u8; 4] {

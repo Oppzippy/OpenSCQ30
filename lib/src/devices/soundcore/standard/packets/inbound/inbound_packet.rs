@@ -1,7 +1,8 @@
 use nom::{
     IResult,
-    error::{ContextError, ParseError, VerboseError},
+    error::{ContextError, ParseError},
 };
+use nom_language::error::VerboseError;
 
 use crate::{
     api::device,
@@ -69,7 +70,7 @@ pub(crate) fn take_inbound_packet_header<'a, E: ParseError<&'a [u8]> + ContextEr
 
 #[cfg(test)]
 mod tests {
-    use nom::error::VerboseError;
+    use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::packets::inbound::take_inbound_packet_header;
     #[test]

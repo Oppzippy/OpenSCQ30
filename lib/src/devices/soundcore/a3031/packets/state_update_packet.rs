@@ -1,10 +1,9 @@
 use async_trait::async_trait;
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::{all_consuming, map},
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
-    sequence::tuple,
 };
 use tokio::sync::watch;
 
@@ -46,7 +45,7 @@ impl InboundPacket for A3031StateUpdatePacket {
         context(
             "a3031 state update packet",
             all_consuming(map(
-                tuple((
+                (
                     TwsStatus::take,
                     DualBattery::take,
                     EqualizerConfiguration::take,
@@ -56,7 +55,7 @@ impl InboundPacket for A3031StateUpdatePacket {
                     take_bool,
                     take_bool,
                     le_u8,
-                )),
+                ),
                 |(
                     tws_status,
                     battery,
@@ -81,7 +80,8 @@ impl InboundPacket for A3031StateUpdatePacket {
                     }
                 },
             )),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
@@ -139,7 +139,7 @@ impl ModuleCollection<A3031State> {
 
 #[cfg(test)]
 mod tests {
-    use nom::error::VerboseError;
+    use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::packets::{
         inbound::{TryIntoInboundPacket, take_inbound_packet_header},

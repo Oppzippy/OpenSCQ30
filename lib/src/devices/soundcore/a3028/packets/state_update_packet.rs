@@ -1,10 +1,9 @@
 use async_trait::async_trait;
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::{all_consuming, map, map_opt, opt},
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
-    sequence::tuple,
 };
 use strum::FromRepr;
 use tokio::sync::watch;
@@ -50,7 +49,7 @@ impl InboundPacket for A3028StateUpdatePacket {
         context(
             "a3028 state update packet",
             all_consuming(map(
-                tuple((
+                (
                     SingleBattery::take,
                     EqualizerConfiguration::take,
                     Gender::take,
@@ -60,7 +59,7 @@ impl InboundPacket for A3028StateUpdatePacket {
                     FirmwareVersion::take,
                     SerialNumber::take,
                     opt(ExtraFields::take),
-                )),
+                ),
                 |(
                     battery,
                     equalizer_configuration,
@@ -85,7 +84,8 @@ impl InboundPacket for A3028StateUpdatePacket {
                     }
                 },
             )),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
@@ -125,9 +125,9 @@ impl ExtraFields {
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         map_opt(
-            tuple((
+            (
                 le_u8, take_bool, take_bool, take_bool, le_u8, take_bool, take_bool,
-            )),
+            ),
             |(
                 unknown1,
                 touch_control,
@@ -149,7 +149,8 @@ impl ExtraFields {
                     battery_alert_prompt_tone,
                 })
             },
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
@@ -189,7 +190,7 @@ impl ModuleCollection<A3028State> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use nom::error::VerboseError;
+    use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::{
         packets::{inbound::take_inbound_packet_header, outbound::OutboundPacketBytesExt},

@@ -1,11 +1,11 @@
 use async_trait::async_trait;
 use nom::{
-    IResult,
+    IResult, Parser,
     bytes::complete::take,
     combinator::{all_consuming, opt},
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
-    sequence::{pair, tuple},
+    sequence::pair,
 };
 use tokio::sync::watch;
 
@@ -109,14 +109,15 @@ impl InboundPacket for A3933StateUpdatePacket {
                         equalizer_configuration,
                         age_range,
                     ),
-                ) = tuple((
+                ) = (
                     TwsStatus::take,
                     DualBattery::take,
                     DualFirmwareVersion::take,
                     SerialNumber::take,
                     EqualizerConfiguration::take,
                     AgeRange::take,
-                ))(input)?;
+                )
+                    .parse_complete(input)?;
 
                 let (input, hear_id) = if !age_range.supports_hear_id() {
                     let (input, _) = take(48usize)(input)?;
@@ -129,14 +130,15 @@ impl InboundPacket for A3933StateUpdatePacket {
                 let (
                     input,
                     (button_configuration, ambient_sound_mode_cycle, sound_modes, _unknown, extra),
-                ) = tuple((
+                ) = (
                     MultiButtonConfiguration::take,
                     AmbientSoundModeCycle::take,
                     SoundModes::take,
                     // Unsure if these two unknown bytes should be inside or outside the optional
                     context("unknown bytes", take(2usize)), // unknown bytes
                     opt(pair(Self::take_optional_extra_data, take(3usize))),
-                ))(input)?;
+                )
+                    .parse_complete(input)?;
 
                 Ok((
                     input,
@@ -160,7 +162,8 @@ impl InboundPacket for A3933StateUpdatePacket {
                     },
                 ))
             }),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
@@ -170,7 +173,7 @@ impl A3933StateUpdatePacket {
     ) -> IResult<&'a [u8], (bool, bool, bool, BatteryLevel, u8, u8, bool), E> {
         context(
             "extra data",
-            tuple((
+            (
                 take_bool, // touch tone
                 take_bool, // wear detection
                 take_bool, // game mode
@@ -178,8 +181,9 @@ impl A3933StateUpdatePacket {
                 le_u8,     // what is this byte?
                 le_u8,     // device color
                 take_bool, // wind noise detection
-            )),
-        )(input)
+            ),
+        )
+        .parse_complete(input)
     }
 }
 
@@ -268,7 +272,7 @@ impl ModuleCollection<A3933State> {
 
 #[cfg(test)]
 mod tests {
-    use nom::error::VerboseError;
+    use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::{
         a3933::packets::inbound::A3933StateUpdatePacket,

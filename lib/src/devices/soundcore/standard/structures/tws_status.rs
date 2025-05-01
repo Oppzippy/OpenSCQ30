@@ -1,9 +1,5 @@
 use nom::{
-    IResult,
-    combinator::{map, map_opt},
-    error::{ContextError, ParseError, context},
-    number::complete::le_u8,
-    sequence::pair,
+    combinator::{map, map_opt}, error::{context, ContextError, ParseError}, number::complete::le_u8, sequence::pair, IResult, Parser
 };
 use openscq30_i18n_macros::Translate;
 use strum::{Display, FromRepr};
@@ -29,7 +25,7 @@ impl TwsStatus {
                     host_device,
                 },
             ),
-        )(input)
+        ).parse_complete(input)
     }
 
     pub fn bytes(&self) -> [u8; 2] {
@@ -51,6 +47,6 @@ impl HostDevice {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], HostDevice, E> {
-        context("host device", map_opt(le_u8, HostDevice::from_repr))(input)
+        context("host device", map_opt(le_u8, HostDevice::from_repr)).parse_complete(input)
     }
 }

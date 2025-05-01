@@ -1,5 +1,5 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     bytes::complete::take,
     combinator::{map, map_opt},
     error::{ContextError, ParseError, context},
@@ -28,7 +28,8 @@ impl PacketHeader {
                     length,
                 },
             ),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
@@ -40,5 +41,6 @@ fn take_command<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         map_opt(take(7usize), |prefix: &[u8]| {
             prefix.try_into().map(Command::new).ok()
         }),
-    )(input)
+    )
+    .parse_complete(input)
 }

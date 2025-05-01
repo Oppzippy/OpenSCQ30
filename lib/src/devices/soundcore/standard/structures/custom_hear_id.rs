@@ -1,11 +1,10 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     bytes::complete::take,
     combinator::map,
     error::{ContextError, ParseError, context},
     multi::count,
     number::complete::le_i32,
-    sequence::tuple,
 };
 
 use crate::devices::soundcore::standard::packets::parsing::take_bool;
@@ -42,14 +41,14 @@ impl<const C: usize, const B: usize> CustomHearId<C, B> {
         context(
             "custom hear id",
             map(
-                tuple((
+                (
                     take_bool,
                     count(VolumeAdjustments::take, C),
                     le_i32,
                     HearIdType::take,
                     HearIdMusicType::take,
                     count(VolumeAdjustments::take, C),
-                )),
+                ),
                 |(
                     is_enabled,
                     volume_adjustments,
@@ -80,7 +79,8 @@ impl<const C: usize, const B: usize> CustomHearId<C, B> {
                     }
                 },
             ),
-        )(input)
+        )
+        .parse_complete(input)
     }
 
     // TODO maybe use a different struct for this?
@@ -90,14 +90,14 @@ impl<const C: usize, const B: usize> CustomHearId<C, B> {
         context(
             "custom hear id without music_type",
             map(
-                tuple((
+                (
                     take_bool,
                     count(VolumeAdjustments::take, C),
                     le_i32,
                     HearIdType::take,
                     count(VolumeAdjustments::take, C),
                     take(2usize), // hear id eq index?
-                )),
+                ),
                 |(
                     is_enabled,
                     volume_adjustments,
@@ -122,6 +122,7 @@ impl<const C: usize, const B: usize> CustomHearId<C, B> {
                     }
                 },
             ),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }

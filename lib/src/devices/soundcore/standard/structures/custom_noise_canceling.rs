@@ -1,5 +1,5 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::map,
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
@@ -35,6 +35,7 @@ impl CustomNoiseCanceling {
             map(le_u8, |custom_noise_canceling_level| {
                 CustomNoiseCanceling::new(custom_noise_canceling_level)
             }),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }

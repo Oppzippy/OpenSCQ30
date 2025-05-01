@@ -1,10 +1,9 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::map,
     error::{ContextError, ParseError, context},
     multi::count,
     number::complete::le_i32,
-    sequence::tuple,
 };
 
 use crate::devices::soundcore::standard::packets::parsing::take_bool;
@@ -35,7 +34,7 @@ impl<const C: usize, const B: usize> BasicHearId<C, B> {
         context(
             "basic hear id",
             map(
-                tuple((take_bool, count(VolumeAdjustments::take, 2), le_i32)),
+                (take_bool, count(VolumeAdjustments::take, 2), le_i32),
                 |(is_enabled, volume_adjustments, time)| BasicHearId {
                     is_enabled,
                     volume_adjustments: volume_adjustments
@@ -44,7 +43,8 @@ impl<const C: usize, const B: usize> BasicHearId<C, B> {
                     time,
                 },
             ),
-        )(input)
+        )
+        .parse_complete(input)
     }
 
     pub fn bytes(&self) -> impl Iterator<Item = u8> {

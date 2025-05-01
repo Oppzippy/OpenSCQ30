@@ -1,9 +1,9 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::{map, map_opt},
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
-    sequence::{pair, tuple},
+    sequence::pair,
 };
 use openscq30_i18n_macros::Translate;
 use strum::{AsRefStr, EnumIter, EnumString, FromRepr, IntoStaticStr};
@@ -35,16 +35,17 @@ impl MultiButtonConfiguration {
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], MultiButtonConfiguration, E> {
-        context("custom button model", |input| {
+        context(
+            "custom button model",
             map(
-                tuple((
+                (
                     context("left double click", TwsButtonConfiguration::take), // left double click
                     context("left long press", TwsButtonConfiguration::take),   // left long press
                     context("right double click", TwsButtonConfiguration::take), // right double click
                     context("right long press", TwsButtonConfiguration::take),   // right long press
                     context("left single click", NoTwsButtonConfiguration::take), // left single click
                     context("right single click", NoTwsButtonConfiguration::take), // right single click
-                )),
+                ),
                 |(
                     left_double_click,
                     left_long_press,
@@ -62,8 +63,9 @@ impl MultiButtonConfiguration {
                         right_single_click: right_single_press,
                     }
                 },
-            )(input)
-        })(input)
+            ),
+        )
+        .parse_complete(input)
     }
 }
 
@@ -92,7 +94,8 @@ impl TwsButtonConfiguration {
                 tws_disconnected_action: ButtonAction::from_repr((num & 0xF0) >> 4)?,
                 disconnected_switch: switch,
             })
-        })(input)
+        })
+        .parse_complete(input)
     }
 
     pub fn set_action(&mut self, action: ButtonAction, is_tws_connected: bool) {
@@ -136,7 +139,8 @@ impl NoTwsButtonConfiguration {
                 action: ButtonAction::from_repr(num)?,
                 is_enabled: switch,
             })
-        })(input)
+        })
+        .parse_complete(input)
     }
 }
 

@@ -4,7 +4,7 @@ use std::{
 };
 
 use macaddr::MacAddr6;
-use nom::error::VerboseError;
+use nom_language::error::VerboseError;
 use openscq30_i18n::Translate;
 use tokio::sync::{mpsc, watch};
 use uuid::Uuid;

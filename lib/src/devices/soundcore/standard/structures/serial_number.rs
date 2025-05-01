@@ -1,5 +1,5 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::map_opt,
     error::{ContextError, ParseError, context},
 };
@@ -31,7 +31,8 @@ impl SerialNumber {
                     None
                 }
             }),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 

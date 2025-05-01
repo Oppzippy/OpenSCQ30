@@ -1,9 +1,8 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::map,
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
-    sequence::tuple,
 };
 use openscq30_i18n_macros::Translate;
 use strum::{Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
@@ -28,14 +27,14 @@ impl A3936SoundModes {
         context(
             "a3936 sound modes",
             map(
-                tuple((
+                (
                     AmbientSoundMode::take,
                     NoiseCancelingSettings::take,
                     TransparencyMode::take,
                     A3936NoiseCancelingMode::take,
                     WindNoise::take,
                     le_u8,
-                )),
+                ),
                 |(
                     ambient_sound_mode,
                     noise_canceling_settings,
@@ -55,7 +54,8 @@ impl A3936SoundModes {
                     }
                 },
             ),
-        )(input)
+        )
+        .parse_complete(input)
     }
 
     pub(crate) fn bytes(&self) -> [u8; 6] {
@@ -141,7 +141,8 @@ impl NoiseCancelingSettings {
         map(le_u8, |b| NoiseCancelingSettings {
             manual: ManualNoiseCanceling::from_repr((b & 0xF0) >> 4).unwrap_or_default(),
             adaptive: AdaptiveNoiseCanceling::from_repr(b & 0x0F).unwrap_or_default(),
-        })(input)
+        })
+        .parse_complete(input)
     }
 }
 
@@ -176,7 +177,8 @@ impl A3936NoiseCancelingMode {
             map(le_u8, |noise_canceling_mode| {
                 A3936NoiseCancelingMode::from_repr(noise_canceling_mode).unwrap_or_default()
             }),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
@@ -201,6 +203,7 @@ impl WindNoise {
                 is_suppression_enabled: wind_noise & 1 != 0,
                 is_detected: wind_noise & 2 != 0,
             }),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }

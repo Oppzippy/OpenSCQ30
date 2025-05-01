@@ -1,7 +1,7 @@
 use std::array;
 
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::map,
     error::{ContextError, ParseError, context},
     multi::count,
@@ -55,7 +55,8 @@ impl<const CHANNELS: usize, const BANDS: usize> EqualizerConfiguration<CHANNELS,
                     }
                 },
             ),
-        )(input)
+        )
+        .parse_complete(input)
     }
 
     pub fn bytes(&self) -> impl Iterator<Item = u8> {
@@ -126,7 +127,7 @@ impl<const CHANNELS: usize, const BANDS: usize> EqualizerConfiguration<CHANNELS,
 
 #[cfg(test)]
 mod tests {
-    use nom::error::VerboseError;
+    use nom_language::error::VerboseError;
 
     use super::*;
 

@@ -1,5 +1,5 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::map_opt,
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
@@ -19,7 +19,8 @@ pub(crate) fn take_checksum<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>
             }
             None
         }),
-    )(input)
+    )
+    .parse_complete(input)
 }
 
 fn take_last_byte<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(

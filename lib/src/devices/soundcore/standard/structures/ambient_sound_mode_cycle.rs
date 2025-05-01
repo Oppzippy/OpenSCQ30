@@ -1,5 +1,5 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::map,
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
@@ -23,7 +23,8 @@ impl AmbientSoundModeCycle {
         context(
             "ambient sound mode cycle",
             map(le_u8, AmbientSoundModeCycle::from),
-        )(input)
+        )
+        .parse_complete(input)
     }
 
     pub(crate) fn bytes(&self) -> [u8; 1] {

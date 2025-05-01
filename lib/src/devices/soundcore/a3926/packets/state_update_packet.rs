@@ -1,9 +1,8 @@
 use async_trait::async_trait;
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::{all_consuming, map},
     error::{ContextError, ParseError, context},
-    sequence::tuple,
 };
 use tokio::sync::watch;
 
@@ -46,7 +45,7 @@ impl InboundPacket for A3926StateUpdatePacket {
         context(
             "a3926 state update packet",
             all_consuming(map(
-                tuple((
+                (
                     TwsStatus::take,
                     DualBattery::take,
                     EqualizerConfiguration::take,
@@ -54,7 +53,7 @@ impl InboundPacket for A3926StateUpdatePacket {
                     AgeRange::take,
                     BasicHearId::take,
                     MultiButtonConfiguration::take,
-                )),
+                ),
                 |(
                     tws_status,
                     battery,
@@ -75,7 +74,8 @@ impl InboundPacket for A3926StateUpdatePacket {
                     }
                 },
             )),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
@@ -128,7 +128,7 @@ impl ModuleCollection<A3926State> {
 
 #[cfg(test)]
 mod tests {
-    use nom::error::VerboseError;
+    use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::packets::{
         inbound::{TryIntoInboundPacket, take_inbound_packet_header},

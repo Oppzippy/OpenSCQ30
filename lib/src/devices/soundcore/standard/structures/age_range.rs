@@ -1,5 +1,5 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::map,
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
@@ -16,6 +16,6 @@ impl AgeRange {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], AgeRange, E> {
-        context("age range", map(le_u8, AgeRange))(input)
+        context("age range", map(le_u8, AgeRange)).parse_complete(input)
     }
 }

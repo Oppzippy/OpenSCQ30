@@ -1,5 +1,5 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     bytes::complete::{tag, take},
     combinator::{all_consuming, map, map_parser},
     error::{ContextError, ParseError, context},
@@ -23,7 +23,8 @@ impl DualFirmwareVersion {
                 pair(FirmwareVersion::take, FirmwareVersion::take),
                 |(left, right)| DualFirmwareVersion { left, right },
             ),
-        )(input)
+        )
+        .parse_complete(input)
     }
 
     pub fn bytes(&self) -> impl Iterator<Item = u8> {
@@ -69,7 +70,8 @@ impl FirmwareVersion {
                 ),
                 |(major, minor)| FirmwareVersion::new(major, minor),
             ),
-        )(input)
+        )
+        .parse_complete(input)
     }
 
     pub fn bytes(&self) -> Vec<u8> {
@@ -85,7 +87,7 @@ impl Display for FirmwareVersion {
 
 #[cfg(test)]
 mod tests {
-    use nom::error::VerboseError;
+    use nom_language::error::VerboseError;
 
     use super::FirmwareVersion;
 

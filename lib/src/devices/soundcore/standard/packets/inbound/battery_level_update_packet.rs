@@ -1,8 +1,7 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::{all_consuming, map, opt},
     error::{ContextError, ParseError, context},
-    sequence::tuple,
 };
 
 use crate::devices::soundcore::standard::structures::{BatteryLevel, Command};
@@ -27,7 +26,8 @@ impl InboundPacket for SingleBatteryLevelUpdatePacket {
             all_consuming(map(BatteryLevel::take, |level| {
                 SingleBatteryLevelUpdatePacket { level }
             })),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
@@ -48,22 +48,23 @@ impl InboundPacket for DualBatteryLevelUpdatePacket {
         context(
             "DualBatteryLevelUpdatePacket",
             all_consuming(map(
-                tuple((
+                (
                     BatteryLevel::take,
                     BatteryLevel::take,
                     opt(BatteryLevel::take),
                     opt(BatteryLevel::take),
-                )),
+                ),
                 // TODO unsure what new_left and new_right are
                 |(left, right, _new_left, _new_right)| DualBatteryLevelUpdatePacket { left, right },
             )),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use nom::error::VerboseError;
+    use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::packets::inbound::take_inbound_packet_header;
 

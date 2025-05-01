@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use nom::{
-    IResult,
+    IResult, Parser,
     bytes::complete::take,
     combinator::all_consuming,
     error::{ContextError, ParseError, context},
@@ -163,7 +163,8 @@ impl InboundPacket for A3936StateUpdatePacket {
                     },
                 ))
             }),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
@@ -247,7 +248,7 @@ impl ModuleCollection<A3936State> {
 
 #[cfg(test)]
 mod tests {
-    use nom::error::VerboseError;
+    use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::packets::{
         inbound::{InboundPacket, take_inbound_packet_header},

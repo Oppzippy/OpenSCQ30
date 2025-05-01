@@ -1,5 +1,5 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::{all_consuming, map},
     error::{ContextError, ParseError, context},
 };
@@ -28,14 +28,15 @@ impl InboundPacket for A3936SoundModesUpdatePacket {
             all_consuming(map(A3936SoundModes::take, |sound_modes| {
                 A3936SoundModesUpdatePacket { sound_modes }
             })),
-        )(input)
+        )
+        .parse_complete(input)
         // offset 15
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use nom::error::VerboseError;
+    use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::{
         a3936::{

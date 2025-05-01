@@ -1,5 +1,5 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::{all_consuming, map},
     error::{ContextError, ParseError, context},
 };
@@ -30,14 +30,15 @@ impl InboundPacket for SoundModeUpdatePacket {
                     custom_noise_canceling: sound_modes.custom_noise_canceling,
                 })
             })),
-        )(input)
+        )
+        .parse_complete(input)
         // offset 13
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use nom::error::VerboseError;
+    use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::{
         packets::inbound::{InboundPacket, SoundModeUpdatePacket, take_inbound_packet_header},

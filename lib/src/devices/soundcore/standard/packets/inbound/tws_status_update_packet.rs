@@ -1,5 +1,5 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::{all_consuming, map},
     error::{ContextError, ParseError, context},
 };
@@ -22,13 +22,14 @@ impl InboundPacket for TwsStatusUpdatePacket {
         context(
             "TwsStatusUpdatePacket",
             all_consuming(map(TwsStatus::take, TwsStatusUpdatePacket)),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use nom::error::VerboseError;
+    use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::{
         packets::inbound::{InboundPacket, TwsStatusUpdatePacket, take_inbound_packet_header},

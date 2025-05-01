@@ -1,5 +1,5 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     combinator::map,
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
@@ -48,7 +48,8 @@ impl AmbientSoundMode {
             map(le_u8, |ambient_sound_mode_id| {
                 AmbientSoundMode::from_id(ambient_sound_mode_id).unwrap_or_default()
             }),
-        )(input)
+        )
+        .parse_complete(input)
     }
 }
 
