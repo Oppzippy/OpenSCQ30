@@ -52,7 +52,7 @@ pub enum Message {
     ModifiableSelectAddDialogSetName(String),
     ModifiableSelectRemoveDialogSubmit,
     AddLegacyEqualizerMigrationPage(HashMap<String, LegacyEqualizerProfile>),
-    LegacyMigrationMessage(legacy_migration::Message),
+    LegacyMigration(legacy_migration::Message),
     None,
 }
 pub enum Action {
@@ -265,7 +265,7 @@ impl DeviceSettingsModel {
                 }
                 CustomCategory::LegacyEqualizerMigration => {
                     if let Some(model) = &self.legacy_equalizer_migration {
-                        model.view().map(Message::LegacyMigrationMessage)
+                        model.view().map(Message::LegacyMigration)
                     } else {
                         widget::text("unreachable").into()
                     }
@@ -289,56 +289,49 @@ impl DeviceSettingsModel {
                 let setting_id = setting_id.to_owned();
                 match setting {
                     Setting::Toggle { value } => {
-                        toggle::toggle(setting_id.clone(), *value, move |new_value| {
-                            Message::SetSetting(setting_id.clone(), new_value.into())
+                        toggle::toggle(setting_id, *value, move |new_value| {
+                            Message::SetSetting(setting_id, new_value.into())
                         })
                     }
                     Setting::I32Range { setting, value } => range::i32_range(
-                        setting_id.clone(),
+                        setting_id,
                         setting.range.clone(),
                         *value,
-                        move |new_value| Message::SetSetting(setting_id.clone(), new_value.into()),
+                        move |new_value| Message::SetSetting(setting_id, new_value.into()),
                     ),
                     Setting::Select { setting, value } => {
-                        select::select(setting_id.clone(), setting, value, move |value| {
-                            Message::SetSetting(
-                                setting_id.clone(),
-                                Cow::from(value.to_owned()).into(),
-                            )
+                        select::select(setting_id, setting, value, move |value| {
+                            Message::SetSetting(setting_id, Cow::from(value.to_owned()).into())
                         })
                     }
                     Setting::OptionalSelect { setting, value } => select::optional_select(
-                        setting_id.clone(),
+                        setting_id,
                         setting,
                         value.as_deref(),
                         move |value| {
                             Message::SetSetting(
-                                setting_id.clone(),
+                                setting_id,
                                 value.map(ToOwned::to_owned).map(Cow::from).into(),
                             )
                         },
                     ),
                     Setting::ModifiableSelect { setting, value } => select::modifiable_select(
-                        setting_id.clone(),
+                        setting_id,
                         setting,
                         value.as_deref(),
                         {
-                            let setting_id = setting_id.clone();
                             move |value| {
-                                Message::SetSetting(
-                                    setting_id.clone(),
-                                    Cow::from(value.to_owned()).into(),
-                                )
+                                Message::SetSetting(setting_id, Cow::from(value.to_owned()).into())
                             }
                         },
-                        Message::ShowModifiableSelectAddDialog(setting_id.clone()),
-                        Message::ShowModifiableSelectRemoveDialog(setting_id.clone()),
+                        Message::ShowModifiableSelectAddDialog(setting_id),
+                        Message::ShowModifiableSelectRemoveDialog(setting_id),
                     ),
                     Setting::Equalizer {
                         setting,
                         values: value,
                     } => equalizer::responsive_equalizer(setting, value, move |index, value| {
-                        Message::SetEqualizerBand(setting_id.clone(), index, value)
+                        Message::SetEqualizerBand(setting_id, index, value)
                     }),
                     Setting::Information {
                         text: _,
@@ -634,7 +627,7 @@ impl DeviceSettingsModel {
                 Action::None
             }
             Message::None => Action::None,
-            Message::LegacyMigrationMessage(message) => match message {
+            Message::LegacyMigration(message) => match message {
                 legacy_migration::Message::Migrate(name, volume_adjustments) => {
                     let device = self.device.to_owned();
                     Action::Task(
