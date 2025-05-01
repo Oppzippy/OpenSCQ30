@@ -1,5 +1,7 @@
 [bindings.kotlin]
 package_name = "com.oppzippy.openscq30.lib.bindings"
+android = true
+kotlin_target_version = "2.1.20"
 
 [bindings.kotlin.custom_types.Uuid]
 type_name = "UUID"
