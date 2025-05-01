@@ -52,10 +52,10 @@ android {
 
     sourceSets {
         getByName("debug") {
-            jniLibs.srcDir("src/main/jniLibs/debug")
+            jniLibs.srcDir("src/main/debug/jniLibs")
         }
         getByName("release") {
-            jniLibs.srcDir("src/main/jniLibs/release")
+            jniLibs.srcDir("src/main/release/jniLibs")
         }
         getByName("main") {
             java.srcDir("${layout.buildDirectory.get()}/generated/source/uniffi/java")
@@ -229,15 +229,14 @@ listOf("debug", "release").forEach { profile ->
         tasks.register<Copy>("rust-deploy-$profile-$arch") {
             dependsOn("cargo-build-$profile-$arch")
             description = "Copy rust libs for ($profile-$arch) to jniLibs"
-            println("$cargoTargetDirectory/$target/$profile/libopenscq30_android.so")
             from("$cargoTargetDirectory/$target/$profile/libopenscq30_android.so")
-            into("src/main/jniLibs/$profile/$arch")
+            into("src/main/$profile/jniLibs/$arch")
         }
 
         // Hook up clean tasks
         tasks.register<Delete>("clean-$profile-$arch") {
             description = "Deleting built libs for $profile-$arch"
-            delete(file("src/main/jniLibs/$profile/$arch/libopenscq30_android.so"))
+            delete(file("src/main/$profile/jniLibs/$arch/libopenscq30_android.so"))
         }
         tasks.clean.dependsOn("clean-$profile-$arch")
     }

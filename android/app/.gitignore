@@ -1,3 +1,4 @@
 /build
-/src/main/jniLibs
+/src/main/debug/jniLibs
+/src/main/release/jniLibs
 /release
