@@ -22,13 +22,14 @@ pub fn init_native_logging() {
     )
 }
 
-#[derive(thiserror::Error, Debug, uniffi::Object)]
+#[derive(thiserror::Error, Debug, uniffi::Error)]
+#[uniffi(flat_error)]
 pub enum Error {
-    #[error(transparent)]
+    #[error("JsonError: {0:?}")]
     JsonError(#[from] serde_json::Error),
-    #[error(transparent)]
+    #[error("DeviceError: {0:?}")]
     DeviceError(#[from] openscq30_lib::api::device::Error),
-    #[error(transparent)]
+    #[error("StorageError: {0:?}")]
     StorageError(#[from] openscq30_lib::storage::Error),
 }
 

@@ -237,7 +237,7 @@ listOf("debug", "release").forEach { profile ->
         // Hook up clean tasks
         tasks.register<Delete>("clean-$profile-$arch") {
             description = "Deleting built libs for $profile-$arch"
-            delete(file("$cargoTargetDirectory/$target/$profile"))
+            delete(file("src/main/jniLibs/$profile/$arch/libopenscq30_android.so"))
         }
         tasks.clean.dependsOn("clean-$profile-$arch")
     }
