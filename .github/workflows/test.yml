@@ -6,23 +6,12 @@ on:
 jobs:
   rust_test_linux:
     runs-on: ubuntu-latest
-    container:
-      image: ubuntu:24.04
     steps:
-      - name: Install basic requirements
-        run: |
-          apt-get update
-          apt-get install -y git curl unzip clang just
-
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - name: Install dependencies from apt
-        run: |
-          apt-get install -y libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev protobuf-compiler
-      - name: Install display server
-        run: |
-          apt-get install -y xvfb
+      - name: Install basic requirements
+        run: sudo apt-get install -y just
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
       - name: Install cargo-llvm-cov
@@ -30,7 +19,7 @@ jobs:
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
       - name: Run rust tests
-        run: xvfb-run --auto-servernum just test-cov
+        run: just test-cov
       - name: Generate HTML test coverage report
         run: just test-cov-report html
       - name: Upload coverage report
@@ -39,7 +28,8 @@ jobs:
           name: coverage
           path: target/llvm-cov/html/
 
-  # Only lib is tested on windows since building gtk takes too long, and lib is the only crate with os specific code
+  # Only lib is tested on windows since building the gui/cli would take
+  # a lot longer, and they don't contain any platform specific code
   rust_test_windows:
     runs-on: windows-latest
     steps:
@@ -68,7 +58,8 @@ jobs:
 
       - name: Run android unit tests
         working-directory: android
-        run: ./gradlew testBluetoothDebugUnitTest
+        run: ./gradlew testDebugUnitTest
+      # disabled since they're really slow
       # - name: Run android instrumented tests
       #   working-directory: android
       #   run: ./gradlew connectedAndroidTest

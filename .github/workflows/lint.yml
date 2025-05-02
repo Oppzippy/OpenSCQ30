@@ -5,21 +5,24 @@ on:
 
 jobs:
   format-check:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
       - name: Install just
         run: sudo apt-get install -y just
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin # See 'Supported distributions' for available options
-          java-version: 17
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
+      - name: Install ktlint
+        run: |
+          curl -sSLO \
+            https://github.com/pinterest/ktlint/releases/download/1.5.0/ktlint \
+            https://github.com/pinterest/ktlint/releases/download/1.5.0/ktlint.asc
+          curl -sS https://keybase.io/ktlint/pgp_keys.asc | gpg --import && gpg --verify ktlint.asc
+          chmod a+x ktlint && sudo mv ktlint /usr/local/bin/
       - name: Check formatting
         run: just format-check
 

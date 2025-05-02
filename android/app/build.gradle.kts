@@ -11,7 +11,6 @@ plugins {
     id("org.jetbrains.kotlin.kapt")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
-    id("org.jlleitschuh.gradle.ktlint")
     kotlin("plugin.serialization")
     id("kotlin-parcelize")
 }
@@ -186,10 +185,6 @@ dependencies {
 
 kapt {
     correctErrorTypes = true
-}
-
-configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
-    version.set("1.3.1")
 }
 
 val rustProjectDir: File = layout.projectDirectory.asFile.parentFile

@@ -6,42 +6,24 @@ on:
 jobs:
   build_linux:
     runs-on: ubuntu-latest
-    container:
-      image: ubuntu:24.04
-      volumes:
-        - /lib/modules:/lib/modules
-      options: --privileged
     steps:
-      - name: Install basic requirements
-        run: |
-          apt-get update
-          apt-get upgrade -y
-          apt-get install -y git curl unzip clang gpg just
-
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Install dependencies
-        run: |
-          apt-get install -y libdbus-1-dev pkg-config libgtk-4-dev libadwaita-1-dev gettext libfuse2
-      - name: Install appimage-builder
-        run: |
-          curl --location -o appimage-builder https://github.com/AppImageCrafters/appimage-builder/releases/download/v1.1.0/appimage-builder-1.1.0-x86_64.AppImage
-          chmod +x appimage-builder
-          mv appimage-builder /usr/bin/
-      - name: Build cli
-        run: cargo build --release --package openscq30_cli
 
-      - name: Build AppImage
-        working-directory: ./packaging/appimage
-        run: appimage-builder --skip-tests
+      - name: Install basic requirements
+        run: sudo apt-get install just
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build cli
+        run: cargo build --release --package openscq30-cli
+      - name: Build gui
+        run: cargo build --release --package openscq30-gui
 
       - name: Move to artifacts directory
         run: |
           mkdir artifacts
-          mv target/release/openscq30_cli artifacts/openscq30_cli-linux-x86_64
-          mv packaging/appimage/openscq30_gui-*.AppImage* artifacts/
+          mv target/release/openscq30 artifacts/openscq30-cli-linux-x86_64
+          mv target/release/openscq30-gui artifacts/openscq30-gui-linux-x86_64
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -49,94 +31,33 @@ jobs:
           name: linux
           path: artifacts/*
 
-  build_macos:
-    runs-on: macos-latest
+  build_windows:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - uses: dtolnay/rust-toolchain@stable
-      - run: brew install gtk4 libadwaita
 
-      - name: Build gui
-        run: cargo build --release --package openscq30_gui
+      - name: Install basic requirements
+        run: sudo apt-get install just
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-gnu
       - name: Build cli
-        run: cargo build --release --package openscq30_cli
+        run: cargo build --target x86_64-pc-windows-gnu --release --package openscq30-cli
+      - name: Build gui
+        run: cargo build --target x86_64-pc-windows-gnu --release --package openscq30-gui
+
       - name: Move to artifacts directory
         run: |
           mkdir artifacts
-          mv target/release/openscq30_cli artifacts/openscq30_cli-macos-x86_64
-          mv target/release/openscq30_gui artifacts/openscq30_gui-macos-x86_64
-      - name: Upload gui
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos
-          path: artifacts/*
-
-  build_windows_gui:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - name: Setup MSYS2
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: ucrt64
-          update: true
-          install: >-
-            base-devel
-          pacboy: >-
-            libadwaita:p
-            rust:p
-            pkg-config:p
-      - name: Install just
-        shell: msys2 {0}
-        run: |
-          mkdir ~/.cargo
-          CARGO_PROFILE_RELEASE_LTO=false cargo install --root "$HOME/.cargo" just
-
-      - name: Build gui
-        shell: msys2 {0}
-        run: |
-          export PATH="$HOME/.cargo/bin:$PATH"
-          ./packaging/windows/build.sh
-
-      - name: Build installer
-        run: |
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" ".\packaging\windows\setup.iss"
-
-      - name: Move to artifacts directory
-        run: |
-          New-Item -Type Directory -Path artifacts
-          Move-Item .\packaging\windows\Output\OpenSCQ30_Setup.exe artifacts\openscq30_gui_setup-windows-x86_64.exe
+          mv target/release/openscq30 artifacts/openscq30-cli-linux-x86_64
+          mv target/release/openscq30-gui artifacts/openscq30-gui-linux-x86_64
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-gui
-          path: artifacts/*
-
-  build_windows_cli:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - uses: dtolnay/rust-toolchain@stable
-
-      - name: Build cli
-        run: cargo build --release --package openscq30_cli
-
-      - name: Move to artifacts directory
-        run: |
-          New-Item -Type Directory -Path artifacts
-          Move-Item .\target\release\openscq30_cli.exe artifacts\openscq30_cli-windows-x86_64.exe
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-cli
+          name: linux
           path: artifacts/*
 
   build_android:
@@ -154,9 +75,9 @@ jobs:
         run: ./gradlew --no-daemon assembleBluetoothRelease
         working-directory: android
       - name: Rename apk
-        run: mv android/app/build/outputs/apk/bluetooth/release/app-bluetooth-release-unsigned.apk openscq30_android.apk
+        run: mv android/app/build/outputs/apk/bluetooth/release/app-bluetooth-release-unsigned.apk openscq30-android.apk
       - name: Upload apk
         uses: actions/upload-artifact@v4
         with:
           name: android
-          path: openscq30_android.apk
+          path: openscq30-android.apk

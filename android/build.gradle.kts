@@ -1,5 +1,3 @@
-import org.jlleitschuh.gradle.ktlint.KtlintExtension
-
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
     id("com.android.application") version "8.9.2" apply false
@@ -12,9 +10,4 @@ plugins {
     kotlin("plugin.serialization") version kotlinVersion
 
     id("com.google.dagger.hilt.android") version "2.56.2" apply false
-    id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
-}
-
-configure<KtlintExtension> {
-    android.set(true)
 }
