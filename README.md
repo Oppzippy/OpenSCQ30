@@ -1,3 +1,7 @@
+## This branch is for v2, which is a work in progress. See the v1 branch.
+
+[v1 branch here](https://github.com/Oppzippy/OpenSCQ30/tree/v1)
+
 ## About
 
 OpenSCQ30 is free software for controlling settings for Soundcore headphones and earbuds. It was originally intended for the Q30's, after which the project was named, but a range of devices are now supported.
@@ -7,8 +11,6 @@ OpenSCQ30 is free software for controlling settings for Soundcore headphones and
 [x] Windows - Ready  
 [x] Linux - Ready  
 [x] Android - Ready  
-[x] Web - Ready  
-[ ] macOS - It compiles. It's untested beyond that. You should probably use the web client instead. I don't have a Mac, so there's not much I can do for the desktop client. If you're tring to get it working on macOS, see [btleplug macOS build notes](https://github.com/deviceplug/btleplug#user-content-macos).
 
 ### Supported Devices
 
