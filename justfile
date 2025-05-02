@@ -54,7 +54,7 @@ format:
     -just cli/ format
     -just gui/ format
     -just i18n/ format
-    -just i18n_macros/ format
+    -just i18n-macros/ format
     -just lib/ format
 
 format-check:
@@ -62,6 +62,6 @@ format-check:
     just cli/ format-check
     just gui/ format-check
     just i18n/ format-check
-    just i18n_macros/ format-check
+    just i18n-macros/ format-check
     just lib/ format-check
 
