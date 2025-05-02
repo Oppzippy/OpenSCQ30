@@ -6,7 +6,6 @@ edition = "2024"
 
 [features]
 default = []
-bluetooth = []
 bundled-dependencies = ["rusqlite/bundled", "rust-embed/debug-embed"]
 
 [lib]
@@ -41,10 +40,8 @@ cfg-if = { workspace = true }
 bluer = { workspace = true, features = ["bluetoothd", "rfcomm"] }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
 
-[dev-dependencies]
-tokio = { workspace = true, features = ["macros", "test-util"] }
-
 [target.'cfg(target_os = "windows")'.dependencies]
+rusqlite = { workspace = true, features = ["bundled"] }
 hex = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
 windows = { workspace = true, features = [
@@ -58,3 +55,10 @@ windows = { workspace = true, features = [
     "Networking_Sockets",
     "deprecated",
 ] }
+
+[target.'cfg(target_os = "android")'.dependencies]
+rusqlite = { workspace = true, features = ["bundled"] }
+rust-embed = { workspace = true, features = ["debug-embed"] }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "test-util"] }

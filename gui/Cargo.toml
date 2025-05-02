@@ -5,8 +5,7 @@ version.workspace = true
 license.workspace = true
 
 [features]
-default = ["bluetooth"]
-bluetooth = ["openscq30-lib/bluetooth"]
+default = []
 bundled-dependencies = ["openscq30-lib/bundled-dependencies"]
 
 [dependencies]
