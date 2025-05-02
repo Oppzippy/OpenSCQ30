@@ -7,7 +7,7 @@ project_dir="$script_dir/.."
 output_path="$project_dir/.build-tool-versions"
 
 rustup_version=$(rustup --version 2>/dev/null | awk '{ print $2 }')
-rust_version=$(rustup show | awk '$1 == "rustc" { print $2 }')
+rust_version=$(rustc --version | awk '$1 == "rustc" { print $2 }')
 if [[ -f "$output_path" ]]; then
     java_version=$(awk '$1 == "jdk" { print $2 }' "$output_path")
 else
