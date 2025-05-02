@@ -50,7 +50,7 @@ test:
     cargo test
 
 test-cov:
-    cargo llvm-cov --no-report
+    cargo llvm-cov --no-report --no-cfg-coverage
 
 install path:
     ./scripts/install.sh "{{path}}"
