@@ -1,5 +1,5 @@
 [package]
-name = "openscq30_lib"
+name = "openscq30-lib"
 version.workspace = true
 license.workspace = true
 edition = "2024"
@@ -13,8 +13,8 @@ bundled-dependencies = ["rusqlite/bundled", "rust-embed/debug-embed"]
 crate-type = ["lib"]
 
 [dependencies]
-openscq30_i18n = { path = "../i18n" }
-openscq30_i18n_macros = { path = "../i18n_macros" }
+openscq30-i18n = { path = "../i18n" }
+openscq30-i18n-macros = { path = "../i18n-macros" }
 tokio = { workspace = true, features = ["sync", "time", "rt", "macros"] }
 futures = { workspace = true }
 uuid = { workspace = true }

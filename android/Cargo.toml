@@ -1,5 +1,5 @@
 [package]
-name = "openscq30_android"
+name = "openscq30-android"
 version.workspace = true
 license.workspace = true
 edition = "2024"
@@ -8,8 +8,8 @@ edition = "2024"
 crate-type = ["cdylib"]
 
 [dependencies]
-openscq30_lib = { path = "../lib", features = ["bundled-dependencies"] }
-openscq30_i18n = { path = "../i18n" }
+openscq30-lib = { path = "../lib", features = ["bundled-dependencies"] }
+openscq30-i18n = { path = "../i18n" }
 tracing = { workspace = true, features = ["log-always"] }
 log = { workspace = true }
 tokio = { workspace = true }

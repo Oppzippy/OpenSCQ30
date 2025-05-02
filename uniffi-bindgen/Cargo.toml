@@ -2,7 +2,7 @@
 name = "uniffi-bindgen"
 version.workspace = true
 license.workspace = true
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 uniffi = { workspace = true, features = ["cli"] }

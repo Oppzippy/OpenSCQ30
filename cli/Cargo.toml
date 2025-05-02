@@ -1,5 +1,5 @@
 [package]
-name = "openscq30_cli"
+name = "openscq30-cli"
 edition = "2024"
 version.workspace = true
 license.workspace = true
@@ -9,7 +9,7 @@ name = "openscq30"
 path = "src/main.rs"
 
 [dependencies]
-openscq30_lib = { path = "../lib" }
+openscq30-lib = { path = "../lib" }
 tokio = { workspace = true, features = ["rt"] }
 anyhow = { workspace = true }
 clap = { workspace = true }

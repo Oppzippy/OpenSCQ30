@@ -6,7 +6,7 @@ members = [
     "uniffi-bindgen",
     "gui",
     "i18n",
-    "i18n_macros",
+    "i18n-macros",
 ]
 resolver = "2"
 

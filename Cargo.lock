@@ -3960,7 +3960,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "42f5e15c9953c5e4ccceeb2e7382a716482c34515315f7b03532b8b4e8393d2d"
 
 [[package]]
-name = "openscq30_android"
+name = "openscq30-android"
 version = "1.19.3"
 dependencies = [
  "android_logger",
@@ -3971,8 +3971,8 @@ dependencies = [
  "itertools",
  "log",
  "macaddr",
- "openscq30_i18n",
- "openscq30_lib",
+ "openscq30-i18n",
+ "openscq30-lib",
  "serde_json",
  "strum 0.27.1",
  "thiserror 2.0.12",
@@ -3983,7 +3983,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "openscq30_cli"
+name = "openscq30-cli"
 version = "1.19.3"
 dependencies = [
  "anyhow",
@@ -3991,7 +3991,7 @@ dependencies = [
  "clap_complete",
  "dirs 6.0.0",
  "macaddr",
- "openscq30_lib",
+ "openscq30-lib",
  "strum 0.27.1",
  "tabled",
  "terminal_size",
@@ -4001,7 +4001,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "openscq30_gui"
+name = "openscq30-gui"
 version = "1.19.3"
 dependencies = [
  "anyhow",
@@ -4012,8 +4012,8 @@ dependencies = [
  "itertools",
  "libcosmic",
  "macaddr",
- "openscq30_i18n",
- "openscq30_lib",
+ "openscq30-i18n",
+ "openscq30-lib",
  "rust-embed",
  "serde",
  "strum 0.27.1",
@@ -4026,22 +4026,22 @@ dependencies = [
 ]
 
 [[package]]
-name = "openscq30_i18n"
+name = "openscq30-i18n"
 version = "1.19.3"
 
 [[package]]
-name = "openscq30_i18n_macros"
+name = "openscq30-i18n-macros"
 version = "1.19.3"
 dependencies = [
  "heck 0.5.0",
- "openscq30_i18n",
+ "openscq30-i18n",
  "proc-macro2",
  "quote",
  "syn 2.0.101",
 ]
 
 [[package]]
-name = "openscq30_lib"
+name = "openscq30-lib"
 version = "1.19.3"
 dependencies = [
  "async-trait",
@@ -4054,8 +4054,8 @@ dependencies = [
  "macaddr",
  "nom 8.0.0",
  "nom-language",
- "openscq30_i18n",
- "openscq30_i18n_macros",
+ "openscq30-i18n",
+ "openscq30-i18n-macros",
  "rusqlite",
  "rust-embed",
  "serde",

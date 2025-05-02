@@ -1,17 +1,13 @@
 [package]
-name = "openscq30_gui"
+name = "openscq30-gui"
 edition = "2024"
 version.workspace = true
 license.workspace = true
 
-[[bin]]
-name = "openscq30-gui"
-path = "src/main.rs"
-
 [features]
 default = ["bluetooth"]
-bluetooth = ["openscq30_lib/bluetooth"]
-bundled-dependencies = ["openscq30_lib/bundled-dependencies"]
+bluetooth = ["openscq30-lib/bluetooth"]
+bundled-dependencies = ["openscq30-lib/bundled-dependencies"]
 
 [dependencies]
 tokio = { workspace = true }
@@ -31,8 +27,8 @@ i18n-embed = { workspace = true, features = [
 i18n-embed-fl = { workspace = true }
 rust-embed = { workspace = true }
 macaddr = { workspace = true }
-openscq30_lib = { path = "../lib" }
-openscq30_i18n = { path = "../i18n" }
+openscq30-lib = { path = "../lib" }
+openscq30-i18n = { path = "../i18n" }
 strum = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter"] }
