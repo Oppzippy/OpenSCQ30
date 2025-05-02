@@ -28,6 +28,7 @@ mod value;
     Display,
     EnumString,
 )]
+#[serde(rename_all = "camelCase")]
 pub enum CategoryId {
     General,
     SoundModes,
@@ -53,6 +54,7 @@ pub enum CategoryId {
     VariantArray,
     IntoStaticStr,
 )]
+#[serde(rename_all = "camelCase")]
 // Removing or renaming anything here will break quick presets, so this enum should be append only.
 // If something really needs to be renamed, use #[strum(serialize = "...")] to keep the representation the same.
 pub enum SettingId {
@@ -93,7 +95,7 @@ pub enum SettingId {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(tag = "type", content = "setting")]
+#[serde(tag = "type", content = "setting", rename_all = "camelCase")]
 pub enum Setting {
     Toggle {
         value: bool,

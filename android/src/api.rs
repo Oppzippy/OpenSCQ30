@@ -57,12 +57,11 @@ impl OpenSCQ30Session {
     pub async fn list_devices_with_backends(
         &self,
         backends: Arc<ManualConnectionBackends>,
-        model_json: &str,
+        model: serializable::DeviceModel,
     ) -> Result<Vec<serializable::ConnectionDescriptor>, crate::Error> {
-        let model = serde_json::from_str(model_json)?;
         let descriptors = self
             .inner
-            .list_devices_with_backends(backends.as_ref(), model)
+            .list_devices_with_backends(backends.as_ref(), model.0)
             .await?;
         Ok(descriptors
             .into_iter()

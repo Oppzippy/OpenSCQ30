@@ -4,58 +4,57 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@SerialName("Value")
+@SerialName("value")
 sealed class Value {
     @Serializable
-    @SerialName("Bool")
+    @SerialName("bool")
     data class BoolValue(val value: Boolean) : Value()
 
     @Serializable
-    @SerialName("U16")
+    @SerialName("u16")
     data class U16Value(val value: UShort) : Value()
 
     @Serializable
-    @SerialName("U16Vec")
+    @SerialName("u16Vec")
     data class U16VecValue(val value: List<UShort>) : Value()
 
     @Serializable
-    @SerialName("OptionalU16")
+    @SerialName("optionalU16")
     data class OptionalU16Value(val value: UShort?) : Value()
 
     @Serializable
-    @SerialName("I16Vec")
+    @SerialName("i16Vec")
     data class I16VecValue(val value: List<Short>) : Value()
 
     @Serializable
-    @SerialName("I32")
+    @SerialName("i32")
     data class I32Value(val value: Int) : Value()
 
     @Serializable
-    @SerialName("String")
+    @SerialName("string")
     data class StringValue(val value: String) : Value()
 
     @Serializable
-    @SerialName("StringVec")
+    @SerialName("stringVec")
     data class StringVecValue(val value: List<String>) : Value()
 
     @Serializable
-    @SerialName("OptionalString")
+    @SerialName("optionalString")
     data class OptionalStringValue(val value: String?) : Value()
 
     @Serializable
-    @SerialName("ModifiableSelectCommand")
+    @SerialName("modifiableSelectCommand")
     data class ModifiableSelectCommand(val value: ModifiableSelectCommandInner) : Value()
 }
 
 @Serializable
-@SerialName("ModifiableSelectCommand")
 sealed class ModifiableSelectCommandInner {
     @Serializable
-    @SerialName("Add")
+    @SerialName("add")
     data class Add(val name: String) : ModifiableSelectCommandInner()
 
     @Serializable
-    @SerialName("Remove")
+    @SerialName("remove")
     data class Remove(val name: String) : ModifiableSelectCommandInner()
 
     fun toValue(): Value.ModifiableSelectCommand = Value.ModifiableSelectCommand(this)

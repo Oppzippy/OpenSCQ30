@@ -10,4 +10,5 @@ pub mod device_utils;
 pub mod devices;
 pub mod i18n;
 pub(crate) mod macros;
+pub(crate) mod serialization;
 pub mod storage;

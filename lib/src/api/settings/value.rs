@@ -5,7 +5,7 @@ use strum::{EnumDiscriminants, IntoEnumIterator};
 use thiserror::Error;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, EnumDiscriminants)]
-#[serde(tag = "type", content = "value")]
+#[serde(tag = "type", content = "value", rename_all = "camelCase")]
 pub enum Value {
     Bool(bool),
     U16(u16),
@@ -20,7 +20,7 @@ pub enum Value {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, EnumDiscriminants)]
-#[serde(tag = "type", content = "name")]
+#[serde(tag = "type", content = "name", rename_all = "camelCase")]
 pub enum ModifiableSelectCommand {
     Add(Cow<'static, str>),
     Remove(Cow<'static, str>),

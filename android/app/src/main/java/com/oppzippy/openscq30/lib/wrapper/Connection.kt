@@ -7,11 +7,9 @@ import kotlinx.serialization.Serializable
 
 @Parcelize
 @Serializable
-@SerialName("ConnectionDescriptor")
 data class ConnectionDescriptor(val name: String, val macAddress: String) : Parcelable
 
 @Serializable
-@SerialName("ConnectionStatus")
 enum class ConnectionStatus {
     @SerialName("connected")
     Connected,
@@ -21,5 +19,4 @@ enum class ConnectionStatus {
 }
 
 @Serializable
-@SerialName("DeviceDescriptor")
 data class DeviceDescriptor(val name: String, val macAddress: String, val model: String)

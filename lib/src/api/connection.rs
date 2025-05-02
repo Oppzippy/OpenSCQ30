@@ -51,12 +51,15 @@ pub trait RfcommConnection {
 }
 
 #[derive(PartialEq, Eq, Debug, Clone, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ConnectionDescriptor {
     pub name: String,
+    #[serde(with = "crate::serialization::mac_addr")]
     pub mac_address: MacAddr6,
 }
 
 #[derive(PartialEq, Eq, Debug, Clone, Copy, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum ConnectionStatus {
     Connected,
     Disconnected,
