@@ -41,6 +41,7 @@ class DeviceServiceConnection(private val unbind: () -> Unit) : ServiceConnectio
 
         serviceConnectionScope?.launch {
             service.connectionStatusFlow.first { it is ConnectionStatus.Disconnected }
+            connectionStatusFlow.value = ConnectionStatus.Disconnected
             unbind()
         }
         serviceConnectionScope?.launch {
@@ -55,5 +56,17 @@ class DeviceServiceConnection(private val unbind: () -> Unit) : ServiceConnectio
         serviceConnectionScope = null
         this.service = null
         connectionStatusFlow.value = ConnectionStatus.Disconnected
+    }
+
+    override fun onBindingDied(name: ComponentName?) {
+        onServiceDisconnected(name)
+    }
+
+    override fun onNullBinding(name: ComponentName?) {
+        onServiceDisconnected(name)
+    }
+
+    fun onUnbind() {
+        onServiceDisconnected(null)
     }
 }

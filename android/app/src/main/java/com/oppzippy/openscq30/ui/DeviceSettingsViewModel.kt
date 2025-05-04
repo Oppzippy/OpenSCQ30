@@ -73,7 +73,9 @@ class DeviceSettingsViewModel @Inject constructor(
 
     private fun unbindDeviceService() {
         try {
+            application.stopService(intentFactory(application, DeviceService::class.java))
             application.unbindService(deviceServiceConnection)
+            deviceServiceConnection.onUnbind()
         } catch (_: IllegalArgumentException) {
             // service is not bound
         }
