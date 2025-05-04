@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -23,6 +24,8 @@ import java.math.BigDecimal
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
+val removeSecondDecimalRegex = Regex("^([^.]*\\.[^.]*)\\..*$")
+
 @Composable
 fun EqualizerSlider(
     hz: UShort,
@@ -34,13 +37,26 @@ fun EqualizerSlider(
 ) {
     Column {
         Row {
-            val text by remember(hz, value) {
+            var text by remember(hz, value) {
                 mutableStateOf(BigDecimal(value.toInt()).scaleByPowerOfTen(-fractionDigits).toString())
             }
+            val matches = removeSecondDecimalRegex.matchEntire(text)
+            val reformattedText = if (matches != null) {
+                matches.groupValues[1]
+            } else {
+                text
+            }
             TextField(
-                value = text,
+                value = reformattedText,
                 onValueChange = {
-                    onValueChange(BigDecimal(it).scaleByPowerOfTen(fractionDigits.toInt()).toShort())
+                    text = it
+                    try {
+                        val newValue = BigDecimal(it).scaleByPowerOfTen(fractionDigits.toInt()).toShort()
+                        if (newValue in minValue..maxValue) {
+                            onValueChange(newValue)
+                        }
+                    } catch (_: NumberFormatException) {
+                    }
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier
@@ -49,7 +65,7 @@ fun EqualizerSlider(
                 singleLine = true,
                 label = {
                     if (hz < 1000u) {
-                        Text(stringResource(R.string.hz, hz))
+                        Text(stringResource(R.string.hz, hz.toInt()))
                     } else {
                         Text(
                             stringResource(
@@ -60,12 +76,13 @@ fun EqualizerSlider(
                     }
                 },
             )
+            val divisor = 10f.pow(fractionDigits.toInt())
             Slider(
-                value = value.toFloat(),
+                value = value.toFloat() / divisor,
                 onValueChange = {
-                    onValueChange((it * 10f.pow(fractionDigits.toInt())).roundToInt().toShort())
+                    onValueChange((it * divisor).roundToInt().toShort())
                 },
-                valueRange = minValue.toFloat()..maxValue.toFloat(),
+                valueRange = (minValue.toFloat() / divisor)..(maxValue.toFloat() / divisor),
                 // The min/max values are not included in the steps number
                 steps = (maxValue - minValue) - 1,
                 modifier = Modifier.testTag("equalizerSlider"),
