@@ -34,6 +34,7 @@ pub struct OpenSCQ30Database {
     closed: Arc<Semaphore>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PairedDevice {
     #[serde(with = "crate::serialization::mac_addr")]
     pub mac_address: MacAddr6,

@@ -28,7 +28,7 @@ class DeviceSelectionViewModel @Inject constructor(
     private val application: Application,
     private val session: OpenScq30Session,
 ) : AndroidViewModel(application) {
-    val state = MutableStateFlow<DeviceSelectionState>(DeviceSelectionState.Loading)
+    val pageState = MutableStateFlow<DeviceSelectionPage>(DeviceSelectionPage.Loading)
 
     init {
         // Hack to work around older android versions not having onAssociationCreated
@@ -37,11 +37,11 @@ class DeviceSelectionViewModel @Inject constructor(
                 while (true) {
                     delay(5.seconds)
                     // check once to avoid doing unnecessary work
-                    if (state.value is DeviceSelectionState.Connect) {
+                    if (pageState.value is DeviceSelectionPage.Connect) {
                         val devices = session.pairedDevices()
                         // check again in case the state is no longer Connect, since pairedDevices is suspend
-                        if (state.value is DeviceSelectionState.Connect) {
-                            state.value = DeviceSelectionState.Connect(devices)
+                        if (pageState.value is DeviceSelectionPage.Connect) {
+                            pageState.value = DeviceSelectionPage.Connect(devices)
                         }
                     }
                 }
@@ -50,13 +50,24 @@ class DeviceSelectionViewModel @Inject constructor(
         viewModelScope.launch { launchConnectScreen() }
     }
 
-    fun pair(activity: Activity, descriptor: ConnectionDescriptor) {
+    fun pair(activity: Activity, pairedDevice: PairedDevice) {
+        if (pairedDevice.isDemo) {
+            viewModelScope.launch {
+                session.pair(pairedDevice)
+                launchConnectScreen()
+            }
+        } else {
+            pairReal(activity, pairedDevice)
+        }
+    }
+
+    private fun pairReal(activity: Activity, pairedDevice: PairedDevice) {
         val pairingRequest = AssociationRequest.Builder()
             .apply {
                 this.setSingleDevice(true)
                 this.addDeviceFilter(
                     BluetoothDeviceFilter.Builder().apply {
-                        this.setAddress(descriptor.macAddress)
+                        this.setAddress(pairedDevice.macAddress)
                     }.build(),
                 )
             }
@@ -83,7 +94,7 @@ class DeviceSelectionViewModel @Inject constructor(
                     activity.startIntentSenderForResult(
                         intentSender,
                         0,
-                        Intent().putExtra("connectionDescriptor", descriptor),
+                        Intent().putExtra("pairedDevice", pairedDevice),
                         0,
                         0,
                         0,
@@ -114,42 +125,82 @@ class DeviceSelectionViewModel @Inject constructor(
         }
     }
 
-    private suspend fun launchConnectScreen() {
-        state.value = DeviceSelectionState.Loading
+    fun refreshDevices() {
+        viewModelScope.launch { launchConnectScreen() }
+    }
+
+    suspend fun launchConnectScreen() {
+        pageState.value = DeviceSelectionPage.Loading
         val devices = session.pairedDevices()
-        state.value = DeviceSelectionState.Connect(devices)
+        pageState.value = DeviceSelectionPage.Connect(devices)
     }
 
     fun selectModel(model: String) {
         launchSelectDeviceForPairing(model, false)
     }
 
-    fun setDemoMode(state: DeviceSelectionState.SelectDeviceForPairing, isDemo: Boolean) {
-        launchSelectDeviceForPairing(state.model, isDemo)
+    fun setDemoMode(pageState: DeviceSelectionPage.SelectDeviceForPairing, isDemo: Boolean) {
+        launchSelectDeviceForPairing(pageState.model, isDemo)
     }
 
-    private fun launchSelectDeviceForPairing(model: String, isDemo: Boolean) {
-        this@DeviceSelectionViewModel.state.value = DeviceSelectionState.Loading
+    private fun launchSelectDeviceForPairing(model: String, isDemoMode: Boolean) {
+        this@DeviceSelectionViewModel.pageState.value = DeviceSelectionPage.Loading
         viewModelScope.launch {
-            val devices = if (isDemo) {
+            val devices = if (isDemoMode) {
                 session.listDemoDevices(model)
             } else {
                 session.listDevicesWithBackends(connectionBackends(application, viewModelScope), model)
             }
-            this@DeviceSelectionViewModel.state.value =
-                DeviceSelectionState.SelectDeviceForPairing(model = model, isDemoMode = false, devices = devices)
+            this@DeviceSelectionViewModel.pageState.value =
+                DeviceSelectionPage.SelectDeviceForPairing(model = model, isDemoMode = isDemoMode, devices = devices)
         }
     }
+
+    fun back() {
+        pageState.value.let {
+            if (it is Back) {
+                it.back(this)
+            }
+        }
+    }
+
+    val hasBack: Boolean
+        get() = pageState.value is Back
 }
 
-sealed class DeviceSelectionState {
-    data object Loading : DeviceSelectionState()
-    data class Connect(val devices: List<PairedDevice>) : DeviceSelectionState()
-    data object SelectModelForPairing : DeviceSelectionState()
+interface Back {
+    fun back(viewModel: DeviceSelectionViewModel)
+}
+
+sealed class DeviceSelectionPage {
+    data object Loading : DeviceSelectionPage()
+    data class Connect(val devices: List<PairedDevice>) : DeviceSelectionPage()
+    data object SelectModelForPairing : DeviceSelectionPage(), Back {
+        override fun back(viewModel: DeviceSelectionViewModel) {
+            viewModel.viewModelScope.launch { viewModel.launchConnectScreen() }
+        }
+    }
 
     data class SelectDeviceForPairing(
         val model: String,
         val isDemoMode: Boolean,
         val devices: List<ConnectionDescriptor>,
-    ) : DeviceSelectionState()
+    ) : DeviceSelectionPage(),
+        Back {
+        override fun back(viewModel: DeviceSelectionViewModel) {
+            viewModel.pageState.value = SelectModelForPairing
+        }
+    }
+
+    data object Info : DeviceSelectionPage(), Back {
+        override fun back(viewModel: DeviceSelectionViewModel) {
+            viewModel.viewModelScope.launch { viewModel.launchConnectScreen() }
+        }
+    }
+
+    data object Settings : DeviceSelectionPage(), Back {
+        override fun back(viewModel: DeviceSelectionViewModel) {
+            viewModel.viewModelScope.launch { viewModel.launchConnectScreen() }
+        }
+    }
 }

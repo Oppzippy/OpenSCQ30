@@ -40,7 +40,7 @@ fun AppInfo(onBackClick: () -> Unit) {
     Scaffold(topBar = {
         TopAppBar(
             title = {
-                Text(text = stringResource(id = R.string.app_name))
+                Text(text = stringResource(id = R.string.info))
             },
             navigationIcon = {
                 IconButton(onClick = onBackClick) {
