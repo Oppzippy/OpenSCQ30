@@ -51,7 +51,7 @@ fun SettingPage(
                     onChange = { setSetting(settingId, it.toValue()) },
                 )
 
-                is Setting.InformationSetting -> InformationSetting(name, setting.translatedText)
+                is Setting.InformationSetting -> InformationSetting(name, setting.translatedValue)
 
                 is Setting.SelectSetting -> StandardSelect(
                     name = name,

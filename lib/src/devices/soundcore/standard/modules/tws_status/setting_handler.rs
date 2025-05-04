@@ -30,16 +30,16 @@ where
         let setting: TwsStatusSetting = setting_id.try_into().ok()?;
         Some(match setting {
             TwsStatusSetting::HostDevice => Setting::Information {
-                text: tws_status.host_device.to_string(),
-                translated_text: tws_status.host_device.translate(),
+                value: tws_status.host_device.to_string(),
+                translated_value: tws_status.host_device.translate(),
             },
             TwsStatusSetting::TwsStatus => Setting::Information {
-                text: if tws_status.is_connected {
+                value: if tws_status.is_connected {
                     "Connected".to_owned()
                 } else {
                     "Disconnected".to_owned()
                 },
-                translated_text: if tws_status.is_connected {
+                translated_value: if tws_status.is_connected {
                     fl!("connected")
                 } else {
                     fl!("disconnected")

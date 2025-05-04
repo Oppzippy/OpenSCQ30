@@ -129,7 +129,7 @@ where
                     min: -120,
                     max: 134,
                 },
-                values: equalizer_configuration
+                value: equalizer_configuration
                     .volume_adjustments_channel_1()
                     .adjustments()
                     .to_vec(),

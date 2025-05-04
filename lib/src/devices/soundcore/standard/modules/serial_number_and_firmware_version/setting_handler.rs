@@ -34,12 +34,12 @@ where
         let setting: SerialNumberAndFirmwareVersionSetting = setting_id.try_into().ok()?;
         Some(match setting {
             SerialNumberAndFirmwareVersionSetting::SerialNumber => Setting::Information {
-                text: serial_number.to_string(),
-                translated_text: serial_number.to_string(),
+                value: serial_number.to_string(),
+                translated_value: serial_number.to_string(),
             },
             SerialNumberAndFirmwareVersionSetting::FirmwareVersion => Setting::Information {
-                text: firmware_version.to_string(),
-                translated_text: firmware_version.to_string(),
+                value: firmware_version.to_string(),
+                translated_value: firmware_version.to_string(),
             },
         })
     }

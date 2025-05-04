@@ -29,6 +29,7 @@ mod value;
     EnumString,
 )]
 #[serde(rename_all = "camelCase")]
+#[strum(serialize_all = "camelCase")]
 pub enum CategoryId {
     General,
     SoundModes,
@@ -55,6 +56,7 @@ pub enum CategoryId {
     IntoStaticStr,
 )]
 #[serde(rename_all = "camelCase")]
+#[strum(serialize_all = "camelCase")]
 // Removing or renaming anything here will break quick presets, so this enum should be append only.
 // If something really needs to be renamed, use #[strum(serialize = "...")] to keep the representation the same.
 pub enum SettingId {
@@ -95,7 +97,7 @@ pub enum SettingId {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(tag = "type", content = "setting", rename_all = "camelCase")]
+#[serde(tag = "type", rename_all = "camelCase")]
 pub enum Setting {
     Toggle {
         value: bool,
@@ -121,11 +123,11 @@ pub enum Setting {
     },
     Equalizer {
         setting: Equalizer,
-        values: Vec<i16>,
+        value: Vec<i16>,
     },
     Information {
-        text: String,
-        translated_text: String,
+        value: String,
+        translated_value: String,
     },
 }
 
@@ -136,11 +138,11 @@ impl From<Setting> for Value {
             Setting::I32Range { value, .. } => value.into(),
             Setting::Select { value, .. } => value.into(),
             Setting::OptionalSelect { value, .. } => value.into(),
-            Setting::Equalizer { values: value, .. } => value.into(),
+            Setting::Equalizer { value, .. } => value.into(),
             Setting::ModifiableSelect { value, .. } => value.into(),
             Setting::Information {
-                text,
-                translated_text: _,
+                value: text,
+                translated_value: _,
             } => Cow::<str>::Owned(text).into(),
         }
     }

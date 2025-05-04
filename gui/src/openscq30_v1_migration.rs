@@ -50,7 +50,7 @@ pub async fn migrate_legacy_profile(
     volume_adjustments: Vec<i16>,
 ) -> anyhow::Result<()> {
     let Setting::Equalizer {
-        values: old_volume_adjustments,
+        value: old_volume_adjustments,
         ..
     } = device
         .setting(&SettingId::VolumeAdjustments)
@@ -126,13 +126,13 @@ mod tests {
             "custom profile should be added to the dropdown",
         );
 
-        let Setting::Equalizer { values, .. } =
+        let Setting::Equalizer { value, .. } =
             device.setting(&SettingId::VolumeAdjustments).unwrap()
         else {
             panic!("VolumeAdjustments is not an Equalizer");
         };
         assert_eq!(
-            values,
+            value,
             vec![0; 8],
             "the migrated custom profile should not be activated"
         );
@@ -144,13 +144,13 @@ mod tests {
             )])
             .await
             .unwrap();
-        let Setting::Equalizer { values, .. } =
+        let Setting::Equalizer { value, .. } =
             device.setting(&SettingId::VolumeAdjustments).unwrap()
         else {
             panic!("VolumeAdjustments is not an Equalizer");
         };
         assert_eq!(
-            values, [1; 8],
+            value, [1; 8],
             "the migrated profile should have the correct volume adjustments"
         );
     }

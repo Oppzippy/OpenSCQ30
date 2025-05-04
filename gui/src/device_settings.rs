@@ -327,15 +327,14 @@ impl DeviceSettingsModel {
                         Message::ShowModifiableSelectAddDialog(setting_id),
                         Message::ShowModifiableSelectRemoveDialog(setting_id),
                     ),
-                    Setting::Equalizer {
-                        setting,
-                        values: value,
-                    } => equalizer::responsive_equalizer(setting, value, move |index, value| {
-                        Message::SetEqualizerBand(setting_id, index, value)
-                    }),
+                    Setting::Equalizer { setting, value } => {
+                        equalizer::responsive_equalizer(setting, value, move |index, value| {
+                            Message::SetEqualizerBand(setting_id, index, value)
+                        })
+                    }
                     Setting::Information {
-                        text: _,
-                        translated_text,
+                        value: _,
+                        translated_value: translated_text,
                     } => information::information(setting_id, Cow::Borrowed(translated_text)),
                 }
             }))
@@ -402,8 +401,10 @@ impl DeviceSettingsModel {
             }
             Message::SetEqualizerBand(setting_id, index, new_value) => {
                 let device = self.device.clone();
-                if let Some(Setting::Equalizer { setting: _, values }) =
-                    self.device.setting(&setting_id)
+                if let Some(Setting::Equalizer {
+                    setting: _,
+                    value: values,
+                }) = self.device.setting(&setting_id)
                 {
                     let mut new_values = values.clone();
                     new_values[index as usize] = new_value;

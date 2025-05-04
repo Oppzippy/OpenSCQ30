@@ -34,19 +34,19 @@ where
         let setting: SerialNumberAndDualFirmwareVersionSetting = setting_id.try_into().ok()?;
         Some(match setting {
             SerialNumberAndDualFirmwareVersionSetting::SerialNumber => Setting::Information {
-                text: serial_number.to_string(),
-                translated_text: serial_number.to_string(),
+                value: serial_number.to_string(),
+                translated_value: serial_number.to_string(),
             },
             SerialNumberAndDualFirmwareVersionSetting::FirmwareVersionLeft => {
                 Setting::Information {
-                    text: dual_firmware_version.left.to_string(),
-                    translated_text: dual_firmware_version.left.to_string(),
+                    value: dual_firmware_version.left.to_string(),
+                    translated_value: dual_firmware_version.left.to_string(),
                 }
             }
             SerialNumberAndDualFirmwareVersionSetting::FirmwareVersionRight => {
                 Setting::Information {
-                    text: dual_firmware_version.right.to_string(),
-                    translated_text: dual_firmware_version.right.to_string(),
+                    value: dual_firmware_version.right.to_string(),
+                    translated_value: dual_firmware_version.right.to_string(),
                 }
             }
         })

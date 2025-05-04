@@ -32,7 +32,7 @@ sealed class Setting {
 
     @Serializable
     @SerialName("information")
-    data class InformationSetting(val text: String, val translatedText: String) : Setting()
+    data class InformationSetting(val value: String, val translatedValue: String) : Setting()
 }
 
 @Serializable
