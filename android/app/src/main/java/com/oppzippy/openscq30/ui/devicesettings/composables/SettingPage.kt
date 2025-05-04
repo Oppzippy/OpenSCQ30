@@ -2,19 +2,23 @@
 
 package com.oppzippy.openscq30.ui.devicesettings.composables
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.lib.bindings.translateSettingId
 import com.oppzippy.openscq30.lib.wrapper.ModifiableSelectCommandInner
 import com.oppzippy.openscq30.lib.wrapper.Range
 import com.oppzippy.openscq30.lib.wrapper.Setting
 import com.oppzippy.openscq30.lib.wrapper.Value
 import com.oppzippy.openscq30.lib.wrapper.toValue
+import com.oppzippy.openscq30.ui.utils.Labeled
 import com.oppzippy.openscq30.ui.utils.LabeledSwitch
 import com.oppzippy.openscq30.ui.utils.Select
 import kotlin.math.roundToInt
@@ -28,7 +32,7 @@ fun SettingPage(
     fun setSetting(settingId: String, value: Value) {
         setSettings(listOf(Pair(settingId, value)))
     }
-    Column(modifier = modifier) {
+    Column(modifier = modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         settings.forEach { (settingId, setting) ->
             val name = translateSettingId(settingId)
             when (setting) {
@@ -82,8 +86,7 @@ private fun Toggle(name: String, isEnabled: Boolean, onChange: (Boolean) -> Unit
 
 @Composable
 private fun InformationSetting(name: String, text: String) {
-    Row {
-        Text(name)
+    Labeled(label = name) {
         Text(text)
     }
 }
