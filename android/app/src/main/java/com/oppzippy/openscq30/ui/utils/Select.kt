@@ -18,8 +18,8 @@ import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Surface
@@ -46,6 +46,7 @@ fun Select(
     options: List<String>,
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
+    buttons: @Composable () -> Unit = {},
 ) {
     var isPickerOpen by remember { mutableStateOf(false) }
     if (isPickerOpen) {
@@ -89,8 +90,11 @@ fun Select(
     }
 
     Labeled(modifier, label = name) {
-        Button(modifier = Modifier.fillMaxWidth(), onClick = { isPickerOpen = true }) {
-            Text(options.getOrElse(selectedIndex) { stringResource(R.string.unknown) })
+        Row {
+            Button(modifier = Modifier.weight(1f), onClick = { isPickerOpen = true }) {
+                Text(options.getOrElse(selectedIndex) { stringResource(R.string.unknown) })
+            }
+            buttons()
         }
     }
 }
@@ -203,17 +207,18 @@ fun ModifiableSelect(
             options = listOf(stringResource(R.string.none)).plus(options),
             selectedIndex = if (selectedIndex != null) selectedIndex + 1 else 0,
             onSelect = { if (it != 0) onSelect(it - 1) },
+            buttons = {
+                if (selectedIndex == null) {
+                    FilledIconButton(onClick = { dialogState = ModifiableSelectDialog.AddOption("") }) {
+                        Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add))
+                    }
+                } else {
+                    FilledIconButton(onClick = { dialogState = ModifiableSelectDialog.RemoveOption }) {
+                        Icon(Icons.Filled.Remove, contentDescription = stringResource(R.string.delete))
+                    }
+                }
+            },
         )
-
-        if (selectedIndex == null) {
-            IconButton(onClick = { dialogState = ModifiableSelectDialog.AddOption("") }) {
-                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add))
-            }
-        } else {
-            IconButton(onClick = { dialogState = ModifiableSelectDialog.RemoveOption }) {
-                Icon(Icons.Filled.Remove, contentDescription = stringResource(R.string.delete))
-            }
-        }
     }
 }
 
@@ -226,6 +231,21 @@ private fun PreviewSelect() {
             selectedIndex = 0,
             options = listOf("One", "Two", "Three"),
             onSelect = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewModifiableSelect() {
+    OpenSCQ30Theme {
+        ModifiableSelect(
+            name = "Number",
+            selectedIndex = 0,
+            options = listOf("One", "Two", "Three"),
+            onSelect = {},
+            onAddOption = {},
+            onRemoveOption = {},
         )
     }
 }

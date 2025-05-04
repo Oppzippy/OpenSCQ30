@@ -4,7 +4,6 @@ package com.oppzippy.openscq30.ui.devicesettings.composables
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -153,14 +152,12 @@ private fun OptionalSelect(name: String, setting: Setting.OptionalSelectSetting,
 
 @Composable
 private fun ModifiableSelect(name: String, setting: Setting.ModifiableSelectSetting, onChange: (Value) -> Unit) {
-    Row {
-        com.oppzippy.openscq30.ui.utils.ModifiableSelect(
-            name = name,
-            options = setting.setting.localizedOptions,
-            selectedIndex = setting.value?.let { setting.setting.options.indexOf(it) },
-            onSelect = { onChange(setting.setting.options[it].toValue()) },
-            onAddOption = { onChange(ModifiableSelectCommandInner.Add(it).toValue()) },
-            onRemoveOption = { onChange(ModifiableSelectCommandInner.Remove(setting.setting.options[it]).toValue()) },
-        )
-    }
+    com.oppzippy.openscq30.ui.utils.ModifiableSelect(
+        name = name,
+        options = setting.setting.localizedOptions,
+        selectedIndex = setting.value?.let { setting.setting.options.indexOf(it) },
+        onSelect = { onChange(setting.setting.options[it].toValue()) },
+        onAddOption = { onChange(ModifiableSelectCommandInner.Add(it).toValue()) },
+        onRemoveOption = { onChange(ModifiableSelectCommandInner.Remove(setting.setting.options[it]).toValue()) },
+    )
 }
