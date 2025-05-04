@@ -2,9 +2,9 @@ default:
     @just --choose
 
 build profile='dev':
-    just gui/ build '{{profile}}'
-    just cli/ build '{{profile}}'
-    just android/ build '{{profile}}'
+    just gui/ build '{{ profile }}'
+    just cli/ build '{{ profile }}'
+    just android/ build '{{ profile }}'
 
 test:
     just lib/ test
@@ -41,27 +41,24 @@ test-cov-report format='lcov':
     cargo llvm-cov report $format_args
 
 install path:
-    just gui/ install '{{path}}'
-    just cli/ install '{{path}}'
+    just gui/ install '{{ path }}'
+    just cli/ install '{{ path }}'
 
 uninstall path:
-    just gui/ uninstall '{{path}}'
-    just cli/ uninstall '{{path}}'
+    just gui/ uninstall '{{ path }}'
+    just cli/ uninstall '{{ path }}'
 
 alias fmt := format
+format_dirs := 'android/ cli/ gui/ i18n/ i18n-macros/ lib/'
 format:
-    -just android/ format
-    -just cli/ format
-    -just gui/ format
-    -just i18n/ format
-    -just i18n-macros/ format
-    -just lib/ format
+    #!/usr/bin/env bash
+    if command -v parallel > /dev/null; then
+        parallel --jobs {{ num_cpus() }} just {} format ::: {{ format_dirs }}
+    else
+        printf '%s' '{{ format_dirs }}' | xargs -d ' ' -I {} just {} format
+    fi
 
 format-check:
-    just android/ format-check
-    just cli/ format-check
-    just gui/ format-check
-    just i18n/ format-check
-    just i18n-macros/ format-check
-    just lib/ format-check
-
+    #!/usr/bin/env bash
+    set -euo pipefail
+    printf '%s' '{{ format_dirs }}' | xargs -d ' ' -I {} just {} format-check
