@@ -17,7 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
-import com.oppzippy.openscq30.ui.utils.CheckboxWithLabel
+import com.oppzippy.openscq30.ui.utils.LabeledSwitch
 
 @Composable
 fun ExportCustomProfiles(
@@ -37,8 +37,8 @@ fun ExportCustomProfiles(
                         }
                     }
                     itemsIndexed(state.customProfiles) { index, profile ->
-                        CheckboxWithLabel(
-                            text = profile.name,
+                        LabeledSwitch(
+                            label = profile.name,
                             isChecked = state.selectedProfiles[index],
                             onCheckedChange = {
                                 onSetState(

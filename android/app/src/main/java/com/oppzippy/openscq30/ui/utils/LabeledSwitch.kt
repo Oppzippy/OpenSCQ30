@@ -1,49 +1,40 @@
 package com.oppzippy.openscq30.ui.utils
 
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Text
+import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
-fun CheckboxWithLabel(
-    text: String,
+fun LabeledSwitch(
+    label: String,
     isChecked: Boolean,
     onCheckedChange: (value: Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    Labeled(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(2.dp)
             .toggleable(
                 value = isChecked,
                 onValueChange = onCheckedChange,
-                role = Role.Checkbox,
+                role = Role.Switch,
             ),
-        verticalAlignment = Alignment.CenterVertically,
+        label = label,
     ) {
-        Checkbox(
+        Switch(
             checked = isChecked,
             onCheckedChange = null,
         )
-        Text(text, modifier = Modifier.padding(start = 8.dp))
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewCheckboxWithLabel() {
+private fun PreviewLabeledSwitch() {
     OpenSCQ30Theme {
-        CheckboxWithLabel(text = "Checkbox", isChecked = true, onCheckedChange = {})
+        LabeledSwitch(label = "Switch", isChecked = true, onCheckedChange = {})
     }
 }

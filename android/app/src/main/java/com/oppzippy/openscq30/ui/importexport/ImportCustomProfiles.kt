@@ -24,7 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
-import com.oppzippy.openscq30.ui.utils.CheckboxWithLabel
+import com.oppzippy.openscq30.ui.utils.LabeledSwitch
 
 @Composable
 fun ImportCustomProfiles(
@@ -94,8 +94,8 @@ fun ImportCustomProfiles(
                                     fontWeight = MaterialTheme.typography.titleSmall.fontWeight,
                                     color = MaterialTheme.typography.titleSmall.color,
                                 )
-                                CheckboxWithLabel(
-                                    text = stringResource(R.string.import_),
+                                LabeledSwitch(
+                                    label = stringResource(R.string.import_),
                                     isChecked = state.selection[index],
                                     onCheckedChange = {
                                         onSetState(
@@ -110,8 +110,8 @@ fun ImportCustomProfiles(
                                     },
                                 )
                                 if (state.selection[index]) {
-                                    CheckboxWithLabel(
-                                        text = stringResource(R.string.rename),
+                                    LabeledSwitch(
+                                        label = stringResource(R.string.rename),
                                         isChecked = state.rename[index] != null,
                                         onCheckedChange = {
                                             onSetState(
@@ -156,9 +156,9 @@ fun ImportCustomProfiles(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    CheckboxWithLabel(
+                    LabeledSwitch(
                         modifier = Modifier.weight(1F),
-                        text = stringResource(R.string.overwrite),
+                        label = stringResource(R.string.overwrite),
                         isChecked = state.overwrite,
                         onCheckedChange = {
                             onSetState(state.copy(overwrite = !state.overwrite))

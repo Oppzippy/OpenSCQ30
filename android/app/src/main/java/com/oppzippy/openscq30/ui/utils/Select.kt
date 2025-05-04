@@ -88,8 +88,10 @@ fun Select(
         }
     }
 
-    Button(modifier = modifier, onClick = { isPickerOpen = true }) {
-        Text(options.getOrElse(selectedIndex) { stringResource(R.string.unknown) })
+    Labeled(modifier, label = name) {
+        Button(modifier = Modifier.fillMaxWidth(), onClick = { isPickerOpen = true }) {
+            Text(options.getOrElse(selectedIndex) { stringResource(R.string.unknown) })
+        }
     }
 }
 

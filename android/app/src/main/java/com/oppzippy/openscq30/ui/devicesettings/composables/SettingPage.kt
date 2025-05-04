@@ -15,7 +15,7 @@ import com.oppzippy.openscq30.lib.wrapper.Range
 import com.oppzippy.openscq30.lib.wrapper.Setting
 import com.oppzippy.openscq30.lib.wrapper.Value
 import com.oppzippy.openscq30.lib.wrapper.toValue
-import com.oppzippy.openscq30.ui.utils.CheckboxWithLabel
+import com.oppzippy.openscq30.ui.utils.LabeledSwitch
 import com.oppzippy.openscq30.ui.utils.Select
 import kotlin.math.roundToInt
 
@@ -77,7 +77,7 @@ fun SettingPage(
 
 @Composable
 private fun Toggle(name: String, isEnabled: Boolean, onChange: (Boolean) -> Unit) {
-    CheckboxWithLabel(name, isEnabled, onChange)
+    LabeledSwitch(name, isEnabled, onChange)
 }
 
 @Composable

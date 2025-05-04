@@ -11,7 +11,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
-import com.oppzippy.openscq30.ui.utils.CheckboxWithLabel
+import com.oppzippy.openscq30.ui.utils.LabeledSwitch
 
 @Composable
 fun Settings(viewModel: SettingsViewModel = hiltViewModel()) {
@@ -26,8 +26,8 @@ fun Settings(viewModel: SettingsViewModel = hiltViewModel()) {
 @Composable
 private fun Settings(autoConnect: Boolean, onAutoConnectChange: (Boolean) -> Unit, onCopyLogs: () -> Unit) {
     Column {
-        CheckboxWithLabel(
-            text = stringResource(R.string.auto_connect),
+        LabeledSwitch(
+            label = stringResource(R.string.auto_connect),
             isChecked = autoConnect,
             onCheckedChange = { onAutoConnectChange(it) },
         )

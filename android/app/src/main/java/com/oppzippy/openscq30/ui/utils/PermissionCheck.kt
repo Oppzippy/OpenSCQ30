@@ -23,7 +23,7 @@ fun PermissionCheck(
     permission: String,
     prompt: String,
     onPermissionGranted: () -> Unit = {},
-    children: @Composable () -> Unit,
+    content: @Composable () -> Unit,
 ) {
     val permissionState = rememberPermissionState(permission)
 
@@ -51,6 +51,6 @@ fun PermissionCheck(
             }
         }
     } else {
-        children()
+        content()
     }
 }

@@ -7,7 +7,6 @@ import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,7 +36,8 @@ import com.oppzippy.openscq30.lib.wrapper.PairedDevice
 import com.oppzippy.openscq30.ui.deviceselection.composables.AppInfo
 import com.oppzippy.openscq30.ui.deviceselection.composables.DeviceListing
 import com.oppzippy.openscq30.ui.settings.SettingsPage
-import com.oppzippy.openscq30.ui.utils.CheckboxWithLabel
+import com.oppzippy.openscq30.ui.utils.LabeledSwitch
+import com.oppzippy.openscq30.ui.utils.Loading
 import com.oppzippy.openscq30.ui.utils.PermissionCheck
 
 @Composable
@@ -60,7 +60,7 @@ fun DeviceSelectionScreen(
 
         when (val pageState = viewModel.pageState.collectAsState().value) {
             DeviceSelectionPage.Loading -> {
-                Box { Text(stringResource(R.string.loading)) }
+                Loading()
             }
 
             is DeviceSelectionPage.Connect -> {
@@ -186,8 +186,8 @@ fun SelectDeviceForPairing(
                     .fillMaxSize(),
             ) {
                 item {
-                    CheckboxWithLabel(
-                        text = stringResource(R.string.demo_mode),
+                    LabeledSwitch(
+                        label = stringResource(R.string.demo_mode),
                         isChecked = isDemoMode,
                         onCheckedChange = { onDemoModeChange(it) },
                     )
