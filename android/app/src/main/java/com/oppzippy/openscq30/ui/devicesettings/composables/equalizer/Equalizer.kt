@@ -1,8 +1,7 @@
 package com.oppzippy.openscq30.ui.devicesettings.composables.equalizer
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,8 +22,8 @@ fun Equalizer(
     fractionDigits: Short,
     onValueChange: (index: Int, value: Short) -> Unit,
 ) {
-    LazyColumn {
-        itemsIndexed(bands.zip(values)) { index, (hz, value) ->
+    Column {
+        bands.zip(values).forEachIndexed { index, (hz, value) ->
             EqualizerSlider(
                 hz = hz,
                 value = value,

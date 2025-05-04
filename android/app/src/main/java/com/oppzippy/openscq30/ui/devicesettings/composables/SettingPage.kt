@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -32,7 +34,12 @@ fun SettingPage(
     fun setSetting(settingId: String, value: Value) {
         setSettings(listOf(Pair(settingId, value)))
     }
-    Column(modifier = modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(
+        modifier = modifier
+            .padding(8.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
         settings.forEach { (settingId, setting) ->
             val name = translateSettingId(settingId)
             when (setting) {
