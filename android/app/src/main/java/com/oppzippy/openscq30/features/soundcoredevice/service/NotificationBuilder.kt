@@ -14,6 +14,7 @@ import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNo
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.INTENT_EXTRA_PRESET_ID
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_CHANNEL_ID
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Device
+import com.oppzippy.openscq30.lib.bindings.translateDeviceModel
 import com.oppzippy.openscq30.lib.wrapper.Setting
 import dagger.hilt.android.scopes.ServiceScoped
 import javax.inject.Inject
@@ -36,12 +37,12 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
             ).setContentTitle(
                 when (status) {
                     is ConnectionStatus.AwaitingConnection -> context.getString(R.string.awaiting_connection)
-                    is ConnectionStatus.Connected -> context.getString(R.string.connected_to)
-                        .format(status.deviceManager.device.model())
+                    is ConnectionStatus.Connected -> context.getString(
+                        R.string.connected_to,
+                        translateDeviceModel(status.deviceManager.device.model()),
+                    )
 
-                    is ConnectionStatus.Connecting -> context.getString(R.string.connecting_to)
-                        .format(status.macAddress)
-
+                    is ConnectionStatus.Connecting -> context.getString(R.string.connecting_to, status.macAddress)
                     ConnectionStatus.Disconnected -> context.getString(R.string.disconnected)
                 },
             ).setContentText(
