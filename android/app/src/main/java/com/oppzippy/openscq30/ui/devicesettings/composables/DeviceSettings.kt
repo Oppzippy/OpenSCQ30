@@ -26,6 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
+import com.oppzippy.openscq30.lib.bindings.translateDeviceModel
 import com.oppzippy.openscq30.lib.wrapper.Setting
 import com.oppzippy.openscq30.lib.wrapper.Value
 import com.oppzippy.openscq30.ui.devicesettings.Screen
@@ -66,7 +67,7 @@ fun DeviceSettings(
                         navController.currentBackStackEntryAsState().value?.destination?.route
                     val routeWithoutArgs = route?.substringBefore("?")
                     val resourceId = routeNames[routeWithoutArgs]
-                    val title = resourceId ?: connectionStatus.deviceManager.device.model()
+                    val title = resourceId ?: translateDeviceModel(connectionStatus.deviceManager.device.model())
                     Text(title)
                 },
                 navigationIcon = {
