@@ -6,6 +6,7 @@ use state_modifier::{
     EqualizerWithCustomHearIdStateModifier,
 };
 use strum::{EnumIter, EnumString, IntoStaticStr};
+use tokio::sync::watch;
 
 use crate::{
     api::{
@@ -63,6 +64,7 @@ impl<T> ModuleCollection<T> {
         packet_io: Arc<PacketIOController<Conn>>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
+        change_notify: watch::Sender<()>,
     ) where
         Conn: RfcommConnection + 'static + Send + Sync,
         T: AsMut<EqualizerConfiguration<CHANNELS, BANDS>>
@@ -73,7 +75,7 @@ impl<T> ModuleCollection<T> {
     {
         self.setting_manager.add_handler(
             CategoryId::Equalizer,
-            EqualizerSettingHandler::new(database, device_model).await,
+            EqualizerSettingHandler::new(database, device_model, change_notify).await,
         );
         self.state_modifiers
             .push(Box::new(EqualizerStateModifier::new(
@@ -87,6 +89,7 @@ impl<T> ModuleCollection<T> {
         packet_io: Arc<PacketIOController<Conn>>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
+        change_notify: watch::Sender<()>,
     ) where
         Conn: RfcommConnection + 'static + Send + Sync,
         T: AsMut<EqualizerConfiguration<CHANNELS, BANDS>>
@@ -97,7 +100,7 @@ impl<T> ModuleCollection<T> {
     {
         self.setting_manager.add_handler(
             CategoryId::Equalizer,
-            EqualizerSettingHandler::new(database, device_model).await,
+            EqualizerSettingHandler::new(database, device_model, change_notify).await,
         );
         self.state_modifiers
             .push(Box::new(EqualizerStateModifier::new(
@@ -110,6 +113,7 @@ impl<T> ModuleCollection<T> {
         packet_io: Arc<PacketIOController<Conn>>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
+        change_notify: watch::Sender<()>,
     ) where
         Conn: RfcommConnection + 'static + Send + Sync,
         T: AsMut<EqualizerConfiguration<CHANNELS, BANDS>>
@@ -121,7 +125,8 @@ impl<T> ModuleCollection<T> {
     {
         self.setting_manager.add_handler(
             CategoryId::Equalizer,
-            EqualizerSettingHandler::<CHANNELS, BANDS>::new(database, device_model).await,
+            EqualizerSettingHandler::<CHANNELS, BANDS>::new(database, device_model, change_notify)
+                .await,
         );
         self.state_modifiers
             .push(Box::new(EqualizerWithBasicHearIdStateModifier::<
@@ -140,6 +145,7 @@ impl<T> ModuleCollection<T> {
         packet_io: Arc<PacketIOController<Conn>>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
+        change_notify: watch::Sender<()>,
     ) where
         Conn: RfcommConnection + 'static + Send + Sync,
         T: AsMut<EqualizerConfiguration<CHANNELS, BANDS>>
@@ -151,7 +157,7 @@ impl<T> ModuleCollection<T> {
     {
         self.setting_manager.add_handler(
             CategoryId::Equalizer,
-            EqualizerSettingHandler::new(database, device_model).await,
+            EqualizerSettingHandler::new(database, device_model, change_notify).await,
         );
         self.state_modifiers
             .push(Box::new(EqualizerWithCustomHearIdStateModifier::new(

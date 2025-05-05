@@ -1,7 +1,10 @@
 use std::{marker::PhantomData, pin::Pin, sync::Arc};
 
 use async_trait::async_trait;
-use tokio::sync::{Semaphore, mpsc, watch};
+use tokio::{
+    select,
+    sync::{Semaphore, mpsc, watch},
+};
 
 use crate::{
     api::{
@@ -152,6 +155,7 @@ where
     packet_io_controller: Arc<PacketIOController<ConnectionType>>,
     database: Arc<OpenSCQ30Database>,
     packet_receiver: mpsc::Receiver<Packet>,
+    change_notify: watch::Sender<()>,
     _state_update: PhantomData<StateUpdatePacketType>,
 }
 
@@ -184,6 +188,7 @@ where
             database,
             packet_receiver,
             _state_update: PhantomData,
+            change_notify: watch::channel(()).0,
         })
     }
 
@@ -196,6 +201,7 @@ where
             self.module_collection,
             self.packet_receiver,
             self.device_model,
+            self.change_notify.subscribe(),
         )
     }
 
@@ -224,6 +230,7 @@ where
                 self.packet_io_controller.clone(),
                 self.database.clone(),
                 self.device_model,
+                self.change_notify.clone(),
             )
             .await;
     }
@@ -237,6 +244,7 @@ where
                 self.packet_io_controller.clone(),
                 self.database.clone(),
                 self.device_model,
+                self.change_notify.clone(),
             )
             .await
     }
@@ -251,6 +259,7 @@ where
                 self.packet_io_controller.clone(),
                 self.database.clone(),
                 self.device_model,
+                self.change_notify.clone(),
             )
             .await
     }
@@ -265,6 +274,7 @@ where
                 self.packet_io_controller.clone(),
                 self.database.clone(),
                 self.device_model,
+                self.change_notify.clone(),
             )
             .await
     }
@@ -341,6 +351,7 @@ where
     packet_io_controller: Arc<PacketIOController<ConnectionType>>,
     // TODO exit signal is necessary due to the PacketIOController Arc spaghetti.
     exit_signal: Arc<Semaphore>,
+    change_notify: watch::Receiver<()>,
     _state_update: PhantomData<StateUpdatePacketType>,
 }
 
@@ -357,6 +368,7 @@ where
         module_collection: ModuleCollection<StateType>,
         packet_receiver: mpsc::Receiver<Packet>,
         device_model: DeviceModel,
+        change_notify: watch::Receiver<()>,
     ) -> Self {
         let exit_signal = Arc::new(Semaphore::new(0));
         let module_collection = Arc::new(module_collection);
@@ -373,6 +385,7 @@ where
             module_collection,
             exit_signal,
             _state_update: PhantomData,
+            change_notify,
         }
     }
 }
@@ -422,9 +435,14 @@ where
     fn watch_for_changes(&self) -> watch::Receiver<()> {
         let mut receiver = self.state_sender.subscribe();
         let (change_sender, change_receiver) = watch::channel(());
+        let mut change_notify = self.change_notify.clone();
         // receiver will close when self is dropped, so this will clean itself up
         tokio::spawn(async move {
-            while receiver.changed().await.is_ok() {
+            loop {
+                select! {
+                    result = receiver.changed() => if result.is_err() { return },
+                    result = change_notify.changed() => if result.is_err() { return },
+                }
                 if change_sender.send(()).is_err() {
                     return;
                 }

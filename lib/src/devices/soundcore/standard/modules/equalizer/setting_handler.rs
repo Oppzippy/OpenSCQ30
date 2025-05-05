@@ -6,6 +6,7 @@ use std::{
 
 use async_trait::async_trait;
 use strum::IntoEnumIterator;
+use tokio::sync::watch;
 use tracing::{instrument, warn};
 
 use crate::{
@@ -29,11 +30,16 @@ pub struct EqualizerSettingHandler<const C: usize, const B: usize> {
     device_model: DeviceModel,
     database: Arc<OpenSCQ30Database>,
     custom_profiles: Mutex<Vec<(String, Vec<i16>)>>,
+    change_notify: watch::Sender<()>,
 }
 
 impl<const C: usize, const B: usize> EqualizerSettingHandler<C, B> {
     #[instrument(skip(database))]
-    pub async fn new(database: Arc<OpenSCQ30Database>, device_model: DeviceModel) -> Self {
+    pub async fn new(
+        database: Arc<OpenSCQ30Database>,
+        device_model: DeviceModel,
+        change_notify: watch::Sender<()>,
+    ) -> Self {
         let custom_profiles = database
             .fetch_all_equalizer_profiles(device_model)
             .await
@@ -45,6 +51,7 @@ impl<const C: usize, const B: usize> EqualizerSettingHandler<C, B> {
             device_model,
             database,
             custom_profiles: Mutex::new(custom_profiles),
+            change_notify,
         }
     }
 
@@ -188,12 +195,14 @@ where
                                 )
                                 .await?;
                             self.refresh().await?;
+                            self.change_notify.send_replace(());
                         }
                         settings::ModifiableSelectCommand::Remove(name) => {
                             self.database
                                 .delete_equalizer_profile(self.device_model, name.into_owned())
                                 .await?;
                             self.refresh().await?;
+                            self.change_notify.send_replace(());
                         }
                     }
                 }

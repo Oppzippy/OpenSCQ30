@@ -37,8 +37,9 @@ impl OpenSCQ30Device {
             let watch_for_changes_callback = watch_for_changes_callback.clone();
             let inner = inner.clone();
             tokio::spawn(async move {
+                let mut watcher = inner.watch_for_changes();
                 loop {
-                    if inner.watch_for_changes().changed().await.is_err() {
+                    if watcher.changed().await.is_err() {
                         break;
                     }
                     if let Some(callback) = watch_for_changes_callback.lock().unwrap().as_ref() {
