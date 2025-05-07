@@ -99,7 +99,12 @@ private fun CreateQuickPresetFloatingButton(onCreate: (String) -> Unit) {
         AlertDialog(
             onDismissRequest = { isDialogShown = false },
             confirmButton = {
-                Button(onClick = { onCreate(name) }) {
+                Button(
+                    onClick = {
+                        isDialogShown = false
+                        onCreate(name)
+                    },
+                ) {
                     Text(stringResource(R.string.create))
                 }
             },
