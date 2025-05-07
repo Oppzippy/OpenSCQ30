@@ -19,8 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -28,6 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
+import com.oppzippy.openscq30.lib.bindings.translateCategoryId
 import com.oppzippy.openscq30.lib.bindings.translateDeviceModel
 import com.oppzippy.openscq30.ui.devicesettings.DeviceSettingsViewModel
 import com.oppzippy.openscq30.ui.devicesettings.Screen
@@ -63,12 +62,19 @@ fun DeviceSettings(
         topBar = {
             TopAppBar(
                 title = {
-                    val route =
-                        navController.currentBackStackEntryAsState().value?.destination?.route
-                    val routeWithoutArgs = route?.substringBefore("?")
-                    val resourceId = routeNames[routeWithoutArgs]
-                    val title = resourceId ?: translateDeviceModel(connectionStatus.deviceManager.device.model())
-                    Text(title)
+                    val backStackEntry = navController.currentBackStackEntryAsState().value
+                    if (backStackEntry != null) {
+                        val routeName =
+                            backStackEntry.destination.route?.let { routeNames[it] }
+                        val settingsCategory = try {
+                            translateCategoryId(backStackEntry.toRoute<Screen.SettingsCategory>().categoryId)
+                        } catch (_: Exception) {
+                            null
+                        }
+                        val modelName = translateDeviceModel(connectionStatus.deviceManager.device.model())
+
+                        Text(routeName ?: settingsCategory ?: modelName)
+                    }
                 },
                 navigationIcon = {
                     IconButton(
