@@ -120,9 +120,7 @@ class DeviceSettingsManager(
     val quickPresetsFlow = _quickPresetsFlow.asStateFlow()
 
     init {
-        coroutineScope.launch {
-            _quickPresetsFlow.value = quickPresetHandler.quickPresets(device)
-        }
+        coroutineScope.launch { refreshQuickPresets() }
     }
 
     override fun close() {
@@ -152,11 +150,17 @@ class DeviceSettingsManager(
         }
 
     fun activateQuickPreset(name: String) {
-        coroutineScope.launch { quickPresetHandler.activate(device, name) }
+        coroutineScope.launch {
+            quickPresetHandler.activate(device, name)
+            refreshQuickPresets()
+        }
     }
 
     fun createQuickPreset(name: String) {
-        coroutineScope.launch { quickPresetHandler.save(device, name, emptyMap()) }
+        coroutineScope.launch {
+            quickPresetHandler.save(device, name, emptyMap())
+            refreshQuickPresets()
+        }
     }
 
     fun toggleQuickPresetSetting(name: String, settingId: String, enabled: Boolean) {
@@ -174,7 +178,11 @@ class DeviceSettingsManager(
         }.filter { it.value != null }.associate { Pair(it.settingId, it.value!!) }
         coroutineScope.launch {
             quickPresetHandler.save(device, name, newSettings)
-            _quickPresetsFlow.value = quickPresetHandler.quickPresets(device)
+            refreshQuickPresets()
         }
+    }
+
+    private suspend fun refreshQuickPresets() {
+        _quickPresetsFlow.value = quickPresetHandler.quickPresets(device)
     }
 }
