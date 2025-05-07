@@ -18,7 +18,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -28,24 +27,27 @@ import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.lib.bindings.translateCategoryId
 import com.oppzippy.openscq30.lib.bindings.translateDeviceModel
-import com.oppzippy.openscq30.ui.devicesettings.DeviceSettingsViewModel
+import com.oppzippy.openscq30.lib.wrapper.QuickPreset
+import com.oppzippy.openscq30.lib.wrapper.Setting
+import com.oppzippy.openscq30.lib.wrapper.Value
 import com.oppzippy.openscq30.ui.devicesettings.Screen
 import com.oppzippy.openscq30.ui.devicesettings.ScreenInfo
+import kotlinx.coroutines.flow.Flow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeviceSettings(
     connectionStatus: ConnectionStatus.Connected,
     onBack: () -> Unit = {},
-    viewModel: DeviceSettingsViewModel = hiltViewModel(
-        creationCallback = { factory: DeviceSettingsViewModel.DeviceSettingsViewModelFactory ->
-            factory.create(
-                connectionStatus.deviceManager,
-            )
-        },
-    ),
+    setSettingValues: (settingValues: List<Pair<String, Value>>) -> Unit,
+    categoryIdsFlow: Flow<List<String>>,
+    getSettingsInCategoryFlow: (categoryId: String) -> Flow<List<Pair<String, Setting>>>,
+    quickPresetsFlow: Flow<List<QuickPreset>>,
+    activateQuickPreset: (name: String) -> Unit,
+    createQuickPreset: (name: String) -> Unit,
+    toggleQuickPresetSetting: (name: String, settingId: String, enabled: Boolean) -> Unit,
 ) {
-    val categoryIds by viewModel.categoryIdsFlow.collectAsState(emptyList())
+    val categoryIds by categoryIdsFlow.collectAsState(emptyList())
 
     val listedScreens: MutableList<ScreenInfo> =
         categoryIds.map { Screen.SettingsCategory(it).screenInfo() }.toMutableList()
@@ -129,40 +131,32 @@ fun DeviceSettings(
             }
             composable<Screen.SettingsCategory> { backStackEntry ->
                 val route = backStackEntry.toRoute<Screen.SettingsCategory>()
-                val settings by viewModel.getSettingsInCategoryFlow(route.categoryId).collectAsState(emptyList())
+                val settings by getSettingsInCategoryFlow(route.categoryId).collectAsState(emptyList())
                 SettingPage(
                     settings = settings,
-                    setSettings = { viewModel.setSettingValues(it) },
+                    setSettings = setSettingValues,
                 )
             }
 
             composable<Screen.QuickPresets> {
-                val quickPresets by viewModel.quickPresetsFlow.collectAsState()
+                val quickPresets by quickPresetsFlow.collectAsState(emptyList())
                 QuickPresetsPage(
                     quickPresets = quickPresets,
-                    onActivate = { viewModel.activateQuickPreset(it) },
-                    onCreate = { viewModel.createQuickPreset(it) },
+                    onActivate = activateQuickPreset,
+                    onCreate = createQuickPreset,
                     onEdit = { navController.navigate(Screen.EditQuickPreset(it)) },
                 )
             }
 
             composable<Screen.EditQuickPreset> { backStackEntry ->
                 val route = backStackEntry.toRoute<Screen.EditQuickPreset>()
-                val quickPresets by viewModel.quickPresetsFlow.collectAsState()
+                val quickPresets by quickPresetsFlow.collectAsState(emptyList())
                 val quickPreset = quickPresets.find { it.name == route.name }
                 if (quickPreset != null) {
                     EditQuickPresetPage(
                         quickPreset = quickPreset,
-                        onToggleSetting = { name: String, settingId: String, isEnabled: Boolean ->
-                            viewModel.toggleQuickPresetSetting(
-                                name,
-                                settingId,
-                                isEnabled,
-                            )
-                        },
+                        onToggleSetting = toggleQuickPresetSetting,
                     )
-                } else {
-                    navController.popBackStack()
                 }
             }
         }

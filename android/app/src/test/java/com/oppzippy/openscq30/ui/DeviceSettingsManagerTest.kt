@@ -15,7 +15,7 @@ import io.mockk.verify
 import org.junit.Rule
 import org.junit.Test
 
-class DeviceSettingsViewModelTest {
+class DeviceSettingsManagerTest {
     @get:Rule
     val mockkRule = MockKRule(this)
 
@@ -35,7 +35,7 @@ class DeviceSettingsViewModelTest {
 
         val device = BluetoothDevice("Test Device", "00:00:00:00:00:00", true)
         every { deviceProvider.getDevices() } returns listOf(device)
-        val viewModel = DeviceSettingsViewModel(application, intentFactory)
+        val viewModel = DeviceSettingsManager(application, intentFactory)
 
         viewModel.selectDevice(device)
         verify { mockIntent.putExtra(DeviceService.MAC_ADDRESS, "00:00:00:00:00:00") }
@@ -47,7 +47,7 @@ class DeviceSettingsViewModelTest {
     fun stopsServiceWhenDeselectingDevice() {
         every { intentFactory(application, DeviceService::class.java) } returns mockk()
 
-        val viewModel = DeviceSettingsViewModel(application, intentFactory)
+        val viewModel = DeviceSettingsManager(application, intentFactory)
         viewModel.deselectDevice()
         verify(exactly = 1) { application.stopService(any()) }
         verify(exactly = 1) { application.unbindService(any()) }

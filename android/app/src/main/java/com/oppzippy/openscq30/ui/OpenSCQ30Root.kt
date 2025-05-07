@@ -1,8 +1,5 @@
 package com.oppzippy.openscq30.ui
 
-import android.content.Context
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
@@ -19,17 +16,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.ui.deviceselection.DeviceSelectionScreen
 import com.oppzippy.openscq30.ui.devicesettings.DeviceSettingsScreen
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
+import com.oppzippy.openscq30.ui.utils.Loading
 
 @Composable
 fun OpenSCQ30Root(viewModel: OpenSCQ30RootViewModel = hiltViewModel()) {
     OpenSCQ30Theme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            val connectionStatus by viewModel.uiDeviceState.collectAsState()
+            val connectionStatus by viewModel.connectionStatusFlow.collectAsState()
 
             val isConnected =
                 connectionStatus is ConnectionStatus.Connected || connectionStatus is ConnectionStatus.Connecting
@@ -49,10 +46,24 @@ fun OpenSCQ30Root(viewModel: OpenSCQ30RootViewModel = hiltViewModel()) {
                 label = "Selection to Settings animation",
             ) { animationIsConnected ->
                 if (animationIsConnected) {
-                    DeviceSettingsScreen(
-                        connectionStatus = connectionStatus,
-                        onBack = { viewModel.deselectDevice() },
-                    )
+                    val deviceSettings = viewModel.deviceSettingsManager.collectAsState().value
+                    if (deviceSettings != null) {
+                        DeviceSettingsScreen(
+                            connectionStatus = connectionStatus,
+                            onBack = { viewModel.deselectDevice() },
+                            setSettingValues = { deviceSettings.setSettingValues(it) },
+                            categoryIdsFlow = deviceSettings.categoryIdsFlow,
+                            getSettingsInCategoryFlow = { deviceSettings.getSettingsInCategoryFlow(it) },
+                            quickPresetsFlow = deviceSettings.quickPresetsFlow,
+                            activateQuickPreset = { deviceSettings.activateQuickPreset(it) },
+                            createQuickPreset = { deviceSettings.createQuickPreset(it) },
+                            toggleQuickPresetSetting = { name: String, settingId: String, enabled: Boolean ->
+                                deviceSettings.toggleQuickPresetSetting(name, settingId, enabled)
+                            },
+                        )
+                    } else {
+                        Loading()
+                    }
                 } else {
                     DeviceSelectionScreen(
                         onDeviceSelected = { viewModel.selectDevice(it.macAddress) },
@@ -60,18 +71,5 @@ fun OpenSCQ30Root(viewModel: OpenSCQ30RootViewModel = hiltViewModel()) {
                 }
             }
         }
-    }
-}
-
-private fun withErrorToast(context: Context, f: () -> Unit) {
-    try {
-        f()
-    } catch (ex: Exception) {
-        Log.e("OpenSCQ30Root", "", ex)
-        Toast.makeText(
-            context,
-            R.string.an_error_has_occurred,
-            Toast.LENGTH_SHORT,
-        ).show()
     }
 }
