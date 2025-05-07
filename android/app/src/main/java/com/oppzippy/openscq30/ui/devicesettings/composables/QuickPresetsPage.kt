@@ -69,17 +69,8 @@ private fun QuickPresetsList(quickPresets: List<QuickPreset>, onActivate: (Strin
                 ) {
                     Text(preset.name)
                     Row {
-                        Button(
-                            onClick = { onActivate(preset.name) },
-                            enabled = !preset.isActive,
-                        ) {
-                            Text(
-                                if (preset.isActive) {
-                                    stringResource(R.string.active)
-                                } else {
-                                    stringResource(R.string.activate)
-                                },
-                            )
+                        Button(onClick = { onActivate(preset.name) }) {
+                            Text(stringResource(R.string.activate))
                         }
                         Button(onClick = { onEdit(preset.name) }) { Text(stringResource(R.string.edit)) }
                     }
