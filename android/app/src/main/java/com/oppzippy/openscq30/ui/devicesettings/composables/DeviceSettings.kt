@@ -19,6 +19,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -123,8 +125,20 @@ fun DeviceSettings(
                 )
             }
 
-            composable<Screen.QuickPresets> { backStackEntry ->
-                val route = backStackEntry.toRoute<Screen.QuickPresets>()
+            composable<Screen.QuickPresets> {
+                val quickPresets by viewModel.quickPresetsFlow.collectAsState()
+                QuickPresetsPage(
+                    quickPresets = quickPresets,
+                    onActivate = { viewModel.activateQuickPreset(it) },
+                    onToggleSetting = { name: String, settingId: String, isEnabled: Boolean ->
+                        viewModel.toggleQuickPresetSetting(
+                            name,
+                            settingId,
+                            isEnabled,
+                        )
+                    },
+                    onCreate = { viewModel.createQuickPreset(it) },
+                )
             }
         }
     }

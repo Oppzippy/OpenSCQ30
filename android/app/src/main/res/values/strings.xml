@@ -163,4 +163,5 @@
     <string name="edit">Edit</string>
     <string name="no_quick_presets">No Quick Presets</string>
     <string name="active">Active</string>
+    <string name="create_quick_preset">Create Quick Preset</string>
 </resources>

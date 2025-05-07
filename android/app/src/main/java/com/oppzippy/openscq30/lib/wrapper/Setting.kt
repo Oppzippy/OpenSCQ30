@@ -6,33 +6,49 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("Setting")
 sealed class Setting {
+    abstract fun toValue(): Value
+
     @Serializable
     @SerialName("toggle")
-    data class ToggleSetting(val value: Boolean) : Setting()
+    data class ToggleSetting(val value: Boolean) : Setting() {
+        override fun toValue() = value.toValue()
+    }
 
     @Serializable
     @SerialName("i32Range")
-    data class I32RangeSetting(val setting: Range<Int>, val value: Int) : Setting()
+    data class I32RangeSetting(val setting: Range<Int>, val value: Int) : Setting() {
+        override fun toValue() = value.toValue()
+    }
 
     @Serializable
     @SerialName("select")
-    data class SelectSetting(val setting: Select, val value: String) : Setting()
+    data class SelectSetting(val setting: Select, val value: String) : Setting() {
+        override fun toValue() = value.toValue()
+    }
 
     @Serializable
     @SerialName("optionalSelect")
-    data class OptionalSelectSetting(val setting: Select, val value: String?) : Setting()
+    data class OptionalSelectSetting(val setting: Select, val value: String?) : Setting() {
+        override fun toValue() = value.toValue()
+    }
 
     @Serializable
     @SerialName("modifiableSelect")
-    data class ModifiableSelectSetting(val setting: Select, val value: String?) : Setting()
+    data class ModifiableSelectSetting(val setting: Select, val value: String?) : Setting() {
+        override fun toValue() = value.toValue()
+    }
 
     @Serializable
     @SerialName("equalizer")
-    data class EqualizerSetting(val setting: Equalizer, val value: List<Short>) : Setting()
+    data class EqualizerSetting(val setting: Equalizer, val value: List<Short>) : Setting() {
+        override fun toValue() = value.toValue()
+    }
 
     @Serializable
     @SerialName("information")
-    data class InformationSetting(val value: String, val translatedValue: String) : Setting()
+    data class InformationSetting(val value: String, val translatedValue: String) : Setting() {
+        override fun toValue() = value.toValue()
+    }
 }
 
 @Serializable

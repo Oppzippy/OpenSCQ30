@@ -2,8 +2,13 @@
 
 package com.oppzippy.openscq30.ui.devicesettings.composables
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -13,6 +18,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -21,6 +27,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.oppzippy.openscq30.R
@@ -31,18 +39,28 @@ import com.oppzippy.openscq30.ui.utils.LabeledSwitch
 
 @Composable
 fun QuickPresetsPage(
-    allSettings: List<String>,
     quickPresets: List<QuickPreset>,
     onActivate: (String) -> Unit,
-    onCreate: (String) -> Unit,
     onToggleSetting: (presetName: String, settingId: String, isEnabled: Boolean) -> Unit,
+    onCreate: (String) -> Unit,
 ) {
-    var editing by remember { mutableStateOf<QuickPreset?>(null) }
-    editing.let { quickPreset ->
-        if (quickPreset == null) {
-            QuickPresetsList(quickPresets, onCreate, onActivate, onEdit = { editing = it })
+    var editingName by remember { mutableStateOf<String?>(null) }
+    editingName.let { editing ->
+        val editingPreset = quickPresets.find { it.name == editing }
+        if (editing == null || editingPreset == null) {
+            Scaffold(
+                floatingActionButton = { CreateQuickPresetFloatingButton(onCreate = onCreate) },
+            ) { innerPadding ->
+                Box(Modifier.padding(innerPadding)) {
+                    QuickPresetsList(
+                        quickPresets = quickPresets,
+                        onActivate = onActivate,
+                        onEdit = { editingName = it },
+                    )
+                }
+            }
         } else {
-            QuickPresetEdit(allSettings, quickPreset, onToggleSetting)
+            EditQuickPresetPage(quickPreset = editingPreset, onToggleSetting = onToggleSetting)
         }
     }
 }
@@ -50,32 +68,32 @@ fun QuickPresetsPage(
 @Composable
 private fun QuickPresetsList(
     quickPresets: List<QuickPreset>,
-    onCreate: (String) -> Unit,
     onActivate: (String) -> Unit,
-    onEdit: (QuickPreset) -> Unit,
+    onEdit: (String) -> Unit,
 ) {
-    CreateQuickPresetButton(onCreate = onCreate)
     if (quickPresets.isNotEmpty()) {
-        LazyColumn {
+        LazyColumn(Modifier.fillMaxSize()) {
             items(quickPresets) { preset ->
-                Row {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Text(preset.name)
                     Row {
                         Button(
                             onClick = { onActivate(preset.name) },
-                            enabled = preset.isActive,
+                            enabled = !preset.isActive,
                         ) {
                             Text(
                                 if (preset.isActive) {
-                                    stringResource(
-                                        R.string.active,
-                                    )
+                                    stringResource(R.string.active)
                                 } else {
                                     stringResource(R.string.activate)
                                 },
                             )
                         }
-                        Button(onClick = { onEdit(preset) }) { Text(stringResource(R.string.edit)) }
+                        Button(onClick = { onEdit(preset.name) }) { Text(stringResource(R.string.edit)) }
                     }
                 }
             }
@@ -86,7 +104,7 @@ private fun QuickPresetsList(
 }
 
 @Composable
-private fun CreateQuickPresetButton(onCreate: (String) -> Unit) {
+private fun CreateQuickPresetFloatingButton(onCreate: (String) -> Unit) {
     var isDialogShown by remember { mutableStateOf(false) }
     if (isDialogShown) {
         var name by remember { mutableStateOf("") }
@@ -102,6 +120,7 @@ private fun CreateQuickPresetButton(onCreate: (String) -> Unit) {
                     Text(stringResource(R.string.cancel))
                 }
             },
+            title = { Text(stringResource(R.string.create_quick_preset)) },
             text = {
                 TextField(
                     value = name,
@@ -121,23 +140,20 @@ private fun CreateQuickPresetButton(onCreate: (String) -> Unit) {
 }
 
 @Composable
-private fun QuickPresetEdit(
-    allSettings: List<String>,
+private fun EditQuickPresetPage(
     quickPreset: QuickPreset,
     onToggleSetting: (name: String, setting: String, isEnabled: Boolean) -> Unit,
 ) {
-    val fields = quickPreset.settings.associate { Pair(it.settingId, it.value) }
     LazyColumn {
-        items(allSettings) { settingId ->
+        items(quickPreset.settings) { field ->
             Column {
-                val isEnabled = fields.containsKey(settingId)
                 LabeledSwitch(
-                    label = translateSettingId(settingId),
-                    isChecked = isEnabled,
-                    onCheckedChange = { onToggleSetting(quickPreset.name, settingId, it) },
+                    label = translateSettingId(field.settingId),
+                    isChecked = field.value != null,
+                    onCheckedChange = { onToggleSetting(quickPreset.name, field.settingId, it) },
                 )
-                if (isEnabled) {
-                    Text(fields[settingId].toString())
+                if (field.value != null) {
+                    Text(field.value.toString())
                 }
             }
         }
@@ -155,7 +171,6 @@ private fun PreviewQuickPresetsList() {
                 QuickPreset(name = "Preset 3", isActive = false, settings = emptyList()),
             ),
             onEdit = {},
-            onCreate = {},
             onActivate = {},
         )
     }

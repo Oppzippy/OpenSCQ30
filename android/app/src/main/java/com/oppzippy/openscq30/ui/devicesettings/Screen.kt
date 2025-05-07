@@ -37,15 +37,13 @@ sealed class Screen {
     }
 
     @Serializable
-    class QuickPresets : Screen() {
-        companion object {
-            val screenInfo =
-                ScreenInfo(
-                    QuickPresets(),
-                    StringResourceOrString.StringResource(R.string.quick_presets),
-                    Icons.Filled.Notifications,
-                )
-        }
+    data object QuickPresets : Screen() {
+        val screenInfo =
+            ScreenInfo(
+                this,
+                StringResourceOrString.StringResource(R.string.quick_presets),
+                Icons.Filled.Settings,
+            )
     }
 }
 
