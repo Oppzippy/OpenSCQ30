@@ -29,9 +29,8 @@ pub fn fetch_all(
     connection: &Connection,
     model: DeviceModel,
 ) -> Result<HashMap<String, SettingsCollection>, Error> {
-    let mut query = connection.prepare_cached(
-        r#"SELECT name, settings FROM quick_preset WHERE device_model = ?1 ORDER BY name"#,
-    )?;
+    let mut query = connection
+        .prepare_cached(r#"SELECT name, settings FROM quick_preset WHERE device_model = ?1"#)?;
     let rows = query.query([SqliteDeviceModel(model)])?;
     rows.and_then(|row| {
         let name: String = row.get(0)?;
