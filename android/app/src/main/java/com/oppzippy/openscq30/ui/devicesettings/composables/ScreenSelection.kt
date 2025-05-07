@@ -43,7 +43,7 @@ private fun PreviewScreenSelection() {
                 Screen.SettingsCategory("general").screenInfo(),
                 Screen.SettingsCategory("equalizer").screenInfo(),
                 Screen.SettingsCategory("buttonConfiguration").screenInfo(),
-                Screen.ImportExport.screenInfo,
+                Screen.QuickPresets.screenInfo,
             ),
             onNavigation = {},
         )

@@ -3,8 +3,8 @@ package com.oppzippy.openscq30.ui.devicesettings
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Equalizer
-import androidx.compose.material.icons.filled.ImportExport
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Speaker
@@ -37,13 +37,13 @@ sealed class Screen {
     }
 
     @Serializable
-    class ImportExport(val index: Int = -1) : Screen() {
+    class QuickPresets() : Screen() {
         companion object {
             val screenInfo =
                 ScreenInfo(
-                    ImportExport(),
-                    StringResourceOrString.StringResource(R.string.import_export),
-                    Icons.Filled.ImportExport,
+                    QuickPresets(),
+                    StringResourceOrString.StringResource(R.string.quick_presets),
+                    Icons.Filled.Notifications,
                 )
         }
     }

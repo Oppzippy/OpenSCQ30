@@ -18,7 +18,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -31,8 +30,6 @@ import com.oppzippy.openscq30.lib.wrapper.Setting
 import com.oppzippy.openscq30.lib.wrapper.Value
 import com.oppzippy.openscq30.ui.devicesettings.Screen
 import com.oppzippy.openscq30.ui.devicesettings.ScreenInfo
-import com.oppzippy.openscq30.ui.importexport.ImportExportScreen
-import com.oppzippy.openscq30.ui.importexport.ImportExportViewModel
 import kotlinx.coroutines.flow.Flow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,17 +44,13 @@ fun DeviceSettings(
     val navController = rememberNavController()
     val listedScreens: MutableList<ScreenInfo> =
         categoryIds.map { Screen.SettingsCategory(it).screenInfo() }.toMutableList()
-    listedScreens.add(Screen.ImportExport.screenInfo)
+    listedScreens.add(Screen.QuickPresets.screenInfo)
 
     // compose navigation does not allow us to use polymorphism with routes, so instead a mapping of
     // class path to route name is kept
     val routeNames = listedScreens.associate {
         Pair(it.baseRoute::class.qualifiedName!!, it.name.translated())
     }
-
-    // In order to avoid multiple instance of the view model being created, it needs to be created
-    // outside of the nav controller's scope
-    val importExportViewModel = hiltViewModel<ImportExportViewModel>()
 
     Scaffold(
         topBar = {
@@ -125,27 +118,8 @@ fun DeviceSettings(
                 )
             }
 
-            composable<Screen.ImportExport> { backStackEntry ->
-                val route = backStackEntry.toRoute<Screen.ImportExport>()
-                ImportExportScreen(
-                    viewModel = importExportViewModel,
-                    index = route.index,
-                    onIndexChange = { targetIndex ->
-                        if (route.index < targetIndex) {
-                            navController.navigate(Screen.ImportExport(targetIndex))
-                        } else if (route.index > targetIndex) {
-                            while (true) {
-                                val current =
-                                    navController.currentBackStackEntry?.toRoute<Screen.ImportExport>()
-                                if (current != null && current.index > targetIndex) {
-                                    navController.popBackStack()
-                                } else {
-                                    break
-                                }
-                            }
-                        }
-                    },
-                )
+            composable<Screen.QuickPresets> { backStackEntry ->
+                val route = backStackEntry.toRoute<Screen.QuickPresets>()
             }
         }
     }
