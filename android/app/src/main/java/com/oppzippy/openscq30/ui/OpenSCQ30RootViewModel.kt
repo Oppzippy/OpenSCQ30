@@ -183,6 +183,6 @@ class DeviceSettingsManager(
     }
 
     private suspend fun refreshQuickPresets() {
-        _quickPresetsFlow.value = quickPresetHandler.quickPresets(device)
+        _quickPresetsFlow.value = quickPresetHandler.quickPresets(device).sortedBy { it.name }
     }
 }
