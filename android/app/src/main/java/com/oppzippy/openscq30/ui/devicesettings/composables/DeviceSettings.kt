@@ -71,9 +71,14 @@ fun DeviceSettings(
                         } catch (_: Exception) {
                             null
                         }
+                        val editQuickPreset = try {
+                            backStackEntry.toRoute<Screen.EditQuickPreset>().name
+                        } catch (_: Exception) {
+                            null
+                        }
                         val modelName = translateDeviceModel(connectionStatus.deviceManager.device.model())
 
-                        Text(routeName ?: settingsCategory ?: modelName)
+                        Text(routeName ?: settingsCategory ?: editQuickPreset ?: modelName)
                     }
                 },
                 navigationIcon = {
@@ -136,15 +141,29 @@ fun DeviceSettings(
                 QuickPresetsPage(
                     quickPresets = quickPresets,
                     onActivate = { viewModel.activateQuickPreset(it) },
-                    onToggleSetting = { name: String, settingId: String, isEnabled: Boolean ->
-                        viewModel.toggleQuickPresetSetting(
-                            name,
-                            settingId,
-                            isEnabled,
-                        )
-                    },
                     onCreate = { viewModel.createQuickPreset(it) },
+                    onEdit = { navController.navigate(Screen.EditQuickPreset(it)) },
                 )
+            }
+
+            composable<Screen.EditQuickPreset> { backStackEntry ->
+                val route = backStackEntry.toRoute<Screen.EditQuickPreset>()
+                val quickPresets by viewModel.quickPresetsFlow.collectAsState()
+                val quickPreset = quickPresets.find { it.name == route.name }
+                if (quickPreset != null) {
+                    EditQuickPresetPage(
+                        quickPreset = quickPreset,
+                        onToggleSetting = { name: String, settingId: String, isEnabled: Boolean ->
+                            viewModel.toggleQuickPresetSetting(
+                                name,
+                                settingId,
+                                isEnabled,
+                            )
+                        },
+                    )
+                } else {
+                    navController.popBackStack()
+                }
             }
         }
     }

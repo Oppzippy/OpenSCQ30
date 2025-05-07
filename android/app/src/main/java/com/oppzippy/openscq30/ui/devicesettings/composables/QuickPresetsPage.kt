@@ -41,36 +41,24 @@ import com.oppzippy.openscq30.ui.utils.LabeledSwitch
 fun QuickPresetsPage(
     quickPresets: List<QuickPreset>,
     onActivate: (String) -> Unit,
-    onToggleSetting: (presetName: String, settingId: String, isEnabled: Boolean) -> Unit,
     onCreate: (String) -> Unit,
+    onEdit: (String) -> Unit,
 ) {
-    var editingName by remember { mutableStateOf<String?>(null) }
-    editingName.let { editing ->
-        val editingPreset = quickPresets.find { it.name == editing }
-        if (editing == null || editingPreset == null) {
-            Scaffold(
-                floatingActionButton = { CreateQuickPresetFloatingButton(onCreate = onCreate) },
-            ) { innerPadding ->
-                Box(Modifier.padding(innerPadding)) {
-                    QuickPresetsList(
-                        quickPresets = quickPresets,
-                        onActivate = onActivate,
-                        onEdit = { editingName = it },
-                    )
-                }
-            }
-        } else {
-            EditQuickPresetPage(quickPreset = editingPreset, onToggleSetting = onToggleSetting)
+    Scaffold(
+        floatingActionButton = { CreateQuickPresetFloatingButton(onCreate = onCreate) },
+    ) { innerPadding ->
+        Box(Modifier.padding(innerPadding)) {
+            QuickPresetsList(
+                quickPresets = quickPresets,
+                onActivate = onActivate,
+                onEdit = onEdit,
+            )
         }
     }
 }
 
 @Composable
-private fun QuickPresetsList(
-    quickPresets: List<QuickPreset>,
-    onActivate: (String) -> Unit,
-    onEdit: (String) -> Unit,
-) {
+private fun QuickPresetsList(quickPresets: List<QuickPreset>, onActivate: (String) -> Unit, onEdit: (String) -> Unit) {
     if (quickPresets.isNotEmpty()) {
         LazyColumn(Modifier.fillMaxSize()) {
             items(quickPresets) { preset ->
@@ -140,7 +128,7 @@ private fun CreateQuickPresetFloatingButton(onCreate: (String) -> Unit) {
 }
 
 @Composable
-private fun EditQuickPresetPage(
+fun EditQuickPresetPage(
     quickPreset: QuickPreset,
     onToggleSetting: (name: String, setting: String, isEnabled: Boolean) -> Unit,
 ) {

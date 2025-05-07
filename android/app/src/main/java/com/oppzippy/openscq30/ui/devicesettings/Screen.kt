@@ -4,7 +4,6 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Speaker
@@ -45,6 +44,9 @@ sealed class Screen {
                 Icons.Filled.Settings,
             )
     }
+
+    @Serializable
+    data class EditQuickPreset(val name: String) : Screen()
 }
 
 data class ScreenInfo(val baseRoute: Screen, val name: StringResourceOrString, val icon: ImageVector)
