@@ -26,11 +26,11 @@ sealed class Screen {
             this,
             StringResourceOrString.RawString(translateCategoryId(categoryId)),
             when (categoryId) {
-                "General" -> Icons.Filled.Settings
-                "SoundModes" -> Icons.Filled.Speaker
-                "Equalizer" -> Icons.Filled.Equalizer
-                "ButtonConfiguration" -> Icons.Filled.RadioButtonChecked
-                "DeviceInformation" -> Icons.Filled.Info
+                "general" -> Icons.Filled.Settings
+                "soundModes" -> Icons.Filled.Speaker
+                "equalizer" -> Icons.Filled.Equalizer
+                "buttonConfiguration" -> Icons.Filled.RadioButtonChecked
+                "deviceInformation" -> Icons.Filled.Info
                 else -> Icons.Filled.Settings
             },
         )
