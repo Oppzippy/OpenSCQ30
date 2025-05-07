@@ -26,7 +26,7 @@ import com.oppzippy.openscq30.ui.devicesettings.DeviceSettingsScreen
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
-fun OpenSCQ30Root(viewModel: DeviceSettingsViewModel = hiltViewModel()) {
+fun OpenSCQ30Root(viewModel: OpenSCQ30RootViewModel = hiltViewModel()) {
     OpenSCQ30Theme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             val connectionStatus by viewModel.uiDeviceState.collectAsState()
@@ -52,9 +52,6 @@ fun OpenSCQ30Root(viewModel: DeviceSettingsViewModel = hiltViewModel()) {
                     DeviceSettingsScreen(
                         connectionStatus = connectionStatus,
                         onBack = { viewModel.deselectDevice() },
-                        categoryIds = viewModel.getCategoriesFlow().collectAsState(emptyList()).value,
-                        getSettingsInCategoryFlow = { viewModel.getSettingsInCategoryFlow(it) },
-                        setSettings = { viewModel.setSettingValues(it) },
                     )
                 } else {
                     DeviceSelectionScreen(

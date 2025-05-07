@@ -18,6 +18,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -26,22 +27,25 @@ import androidx.navigation.toRoute
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.lib.bindings.translateDeviceModel
-import com.oppzippy.openscq30.lib.wrapper.Setting
-import com.oppzippy.openscq30.lib.wrapper.Value
+import com.oppzippy.openscq30.ui.devicesettings.DeviceSettingsViewModel
 import com.oppzippy.openscq30.ui.devicesettings.Screen
 import com.oppzippy.openscq30.ui.devicesettings.ScreenInfo
-import kotlinx.coroutines.flow.Flow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeviceSettings(
     connectionStatus: ConnectionStatus.Connected,
     onBack: () -> Unit = {},
-    categoryIds: List<String>,
-    getSettingsInCategoryFlow: (String) -> Flow<List<Pair<String, Setting>>>,
-    setSettings: (List<Pair<String, Value>>) -> Unit,
+    viewModel: DeviceSettingsViewModel = hiltViewModel(
+        creationCallback = { factory: DeviceSettingsViewModel.DeviceSettingsViewModelFactory ->
+            factory.create(
+                connectionStatus.deviceManager,
+            )
+        },
+    ),
 ) {
-    val navController = rememberNavController()
+    val categoryIds by viewModel.getCategoryIdsFlow().collectAsState(emptyList())
+
     val listedScreens: MutableList<ScreenInfo> =
         categoryIds.map { Screen.SettingsCategory(it).screenInfo() }.toMutableList()
     listedScreens.add(Screen.QuickPresets.screenInfo)
@@ -52,6 +56,7 @@ fun DeviceSettings(
         Pair(it.baseRoute::class.qualifiedName!!, it.name.translated())
     }
 
+    val navController = rememberNavController()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -111,10 +116,10 @@ fun DeviceSettings(
             }
             composable<Screen.SettingsCategory> { backStackEntry ->
                 val route = backStackEntry.toRoute<Screen.SettingsCategory>()
-                val settings by getSettingsInCategoryFlow(route.categoryId).collectAsState(emptyList())
+                val settings by viewModel.getSettingsInCategoryFlow(route.categoryId).collectAsState(emptyList())
                 SettingPage(
                     settings = settings,
-                    setSettings = setSettings,
+                    setSettings = { viewModel.setSettingValues(it) },
                 )
             }
 
