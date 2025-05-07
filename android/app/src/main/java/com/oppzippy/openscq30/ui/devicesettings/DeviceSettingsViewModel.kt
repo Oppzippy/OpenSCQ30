@@ -50,9 +50,10 @@ class DeviceSettingsViewModel @AssistedInject constructor(
         }
     }
 
-    fun getCategoryIdsFlow(): Flow<List<String>> = deviceManager.watchForChangeNotification.map {
-        device.categories()
-    }
+    val categoryIdsFlow: Flow<List<String>>
+        get() = deviceManager.watchForChangeNotification.map {
+            device.categories()
+        }
 
     fun getSettingsInCategoryFlow(categoryId: String): Flow<List<Pair<String, Setting>>> =
         deviceManager.watchForChangeNotification.map {

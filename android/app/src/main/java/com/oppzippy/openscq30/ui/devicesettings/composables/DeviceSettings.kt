@@ -45,7 +45,7 @@ fun DeviceSettings(
         },
     ),
 ) {
-    val categoryIds by viewModel.getCategoryIdsFlow().collectAsState(emptyList())
+    val categoryIds by viewModel.categoryIdsFlow.collectAsState(emptyList())
 
     val listedScreens: MutableList<ScreenInfo> =
         categoryIds.map { Screen.SettingsCategory(it).screenInfo() }.toMutableList()
