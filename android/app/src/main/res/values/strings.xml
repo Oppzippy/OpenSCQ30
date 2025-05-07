@@ -159,4 +159,8 @@
     <string name="select_device_model">Select Device Model</string>
     <string name="select_x">Select %s</string>
     <string name="demo_mode">Demo Mode</string>
+    <string name="activate">Activate</string>
+    <string name="edit">Edit</string>
+    <string name="no_quick_presets">No Quick Presets</string>
+    <string name="active">Active</string>
 </resources>

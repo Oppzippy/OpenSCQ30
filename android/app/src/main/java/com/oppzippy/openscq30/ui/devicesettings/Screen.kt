@@ -37,7 +37,7 @@ sealed class Screen {
     }
 
     @Serializable
-    class QuickPresets() : Screen() {
+    class QuickPresets : Screen() {
         companion object {
             val screenInfo =
                 ScreenInfo(
