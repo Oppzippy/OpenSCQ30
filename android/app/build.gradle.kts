@@ -141,7 +141,7 @@ dependencies {
     // Compose navigation
     implementation("androidx.navigation:navigation-compose:2.8.9")
 
-    val accompanistVersion = "0.37.2"
+    val accompanistVersion = "0.37.3"
     implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
 
     val roomVersion = "2.7.1"
@@ -168,7 +168,7 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
 
-    val mockkVersion = "1.14.0"
+    val mockkVersion = "1.14.2"
     testImplementation("io.mockk:mockk:$mockkVersion")
     androidTestImplementation("io.mockk:mockk-android:$mockkVersion")
     androidTestImplementation("androidx.test:runner:1.6.2")
