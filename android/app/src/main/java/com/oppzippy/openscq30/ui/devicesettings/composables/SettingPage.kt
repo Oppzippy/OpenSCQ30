@@ -110,7 +110,7 @@ private fun I32Range(name: String, range: Range<Int>, value: Int, onChange: (Int
 
 @Composable
 private fun Equalizer(name: String, setting: Setting.EqualizerSetting, onChange: (List<Short>) -> Unit) {
-    com.oppzippy.openscq30.ui.devicesettings.composables.equalizer.Equalizer(
+    Equalizer(
         bands = setting.setting.bandHz,
         values = setting.value,
         minValue = setting.setting.min,
