@@ -3,13 +3,16 @@ name: "test"
 on:
   - push
 
+permissions:
+  contents: read
+
 jobs:
   rust_test_linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
+          persist-credentials: false
       - name: Install basic requirements
         run: sudo apt-get install -y just pkg-config libdbus-1-dev libxkbcommon-dev
       - name: Install rust
@@ -35,7 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
+          persist-credentials: false
       - name: Install just
         run: choco install just
       - name: Install rust
@@ -50,7 +53,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
+          persist-credentials: false
       - name: Install build tools
         uses: ./.github/actions/install-android-build-tools
         with:

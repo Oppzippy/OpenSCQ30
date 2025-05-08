@@ -3,13 +3,16 @@ name: "build"
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build_linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
+          persist-credentials: false
 
       - name: Install basic requirements
         run: sudo apt-get install just
@@ -36,7 +39,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
+          persist-credentials: false
 
       - name: Install basic requirements
         run: sudo apt-get install just
@@ -65,7 +68,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
+          persist-credentials: false
       - name: Install build tools
         uses: ./.github/actions/install-android-build-tools
         with:

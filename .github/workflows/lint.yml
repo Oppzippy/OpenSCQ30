@@ -3,13 +3,16 @@ name: "lint"
 on:
   - push
 
+permissions:
+  contents: read
+
 jobs:
   format-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
+          persist-credentials: false
       - name: Install just
         run: sudo apt-get install -y just
       - name: Install rust
@@ -28,6 +31,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Install dependencies
         run: sudo apt-get install -y shellcheck fd-find
       - name: Run shellcheck
