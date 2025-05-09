@@ -6,6 +6,7 @@ import android.app.Service
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Icon
+import androidx.core.graphics.createBitmap
 import com.oppzippy.openscq30.MainActivity
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.equalizer.visualization.EqualizerLine
@@ -89,7 +90,7 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
     private fun drawEqualizerLine(device: OpenScq30Device): Bitmap? {
         device.setting("volumeAdjustments")?.let { equalizer ->
             if (equalizer is Setting.EqualizerSetting) {
-                val bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
+                val bitmap = createBitmap(100, 100)
 
                 EqualizerLine(
                     values = equalizer.value,

@@ -39,7 +39,7 @@ class EqualizerLine(private val values: List<Short>, private val minVolume: Shor
         )
     }
 
-    fun points(width: Float, height: Float, padding: Float): List<Pair<Float, Float>> {
+    private fun points(width: Float, height: Float, padding: Float): List<Pair<Float, Float>> {
         val widthWithoutPadding = width - padding * 2
         val heightWithoutPadding = height - padding * 2
         val range = maxVolume - minVolume

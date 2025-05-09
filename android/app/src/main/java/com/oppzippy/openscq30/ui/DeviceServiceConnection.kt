@@ -4,7 +4,6 @@ import android.content.ComponentName
 import android.content.ServiceConnection
 import android.os.IBinder
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
-import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceConnectionManager
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
 import java.lang.ref.WeakReference
 import kotlinx.coroutines.CoroutineScope
@@ -20,16 +19,6 @@ class DeviceServiceConnection(private val unbind: () -> Unit) : ServiceConnectio
     val connectionStatusFlow = MutableStateFlow<ConnectionStatus>(ConnectionStatus.Disconnected)
     private var serviceConnectionScope: CoroutineScope? = null
     private var service: WeakReference<DeviceService>? = null
-    val deviceManager: DeviceConnectionManager?
-        get() {
-            return service?.get()?.connectionStatusFlow?.value?.let { connectionStatus ->
-                if (connectionStatus is ConnectionStatus.Connected) {
-                    connectionStatus.deviceManager
-                } else {
-                    null
-                }
-            }
-        }
 
     override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
         val myServiceBinder = binder as DeviceService.MyBinder

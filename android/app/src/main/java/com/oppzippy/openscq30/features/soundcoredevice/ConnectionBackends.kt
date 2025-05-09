@@ -71,8 +71,8 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
         manualRfcommConnection =
             ManualRfcommConnection(
                 AndroidRfcommConnectionWriterImpl(
-                    socket,
-                    { manualRfcommConnection?.setConnectionStatus(it) },
+                    socket = socket,
+                    setConnectionStatus = { manualRfcommConnection?.setConnectionStatus(it) },
                 ),
             )
         coroutineScope.launch {

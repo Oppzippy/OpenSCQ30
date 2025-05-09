@@ -1,7 +1,6 @@
 package com.oppzippy.openscq30
 
 import android.Manifest
-import android.app.Activity
 import android.bluetooth.BluetoothDevice
 import android.companion.CompanionDeviceManager
 import android.content.Intent
@@ -45,7 +44,7 @@ class MainActivity : ComponentActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
-            Activity.RESULT_OK -> {
+            RESULT_OK -> {
                 val deviceToPair = data?.let {
                     IntentCompat.getParcelableExtra(
                         it,
