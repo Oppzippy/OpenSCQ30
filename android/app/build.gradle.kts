@@ -111,12 +111,12 @@ android {
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
 
-    val lifecycleVersion = "2.8.7"
+    val lifecycleVersion = "2.9.0"
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-service:$lifecycleVersion")
 
     // Compose
-    val composeBomVersion = "2025.04.01"
+    val composeBomVersion = "2025.05.00"
     implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     androidTestImplementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     implementation("androidx.compose.ui:ui")
@@ -139,7 +139,7 @@ dependencies {
     // Optional - Integration with ViewModels
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     // Compose navigation
-    implementation("androidx.navigation:navigation-compose:2.8.9")
+    implementation("androidx.navigation:navigation-compose:2.9.0")
 
     val accompanistVersion = "0.37.3"
     implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
