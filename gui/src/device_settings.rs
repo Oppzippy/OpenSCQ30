@@ -369,16 +369,7 @@ impl DeviceSettingsModel {
                                                 }),
                                         )
                                         .push(widget::text::body(settings::localize_value(
-                                            // TODO fix O(n^2)
-                                            self.settings.iter().find_map(
-                                                |(setting_id, setting)| {
-                                                    if *setting_id == field.setting_id {
-                                                        Some(setting)
-                                                    } else {
-                                                        None
-                                                    }
-                                                },
-                                            ),
+                                            self.device.setting(&field.setting_id).as_ref(),
                                             &field.value,
                                         )))
                                         .into()
