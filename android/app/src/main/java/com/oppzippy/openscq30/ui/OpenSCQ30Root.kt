@@ -58,6 +58,7 @@ fun OpenSCQ30Root(viewModel: OpenSCQ30RootViewModel = hiltViewModel()) {
                                 connectionStatus = connectionStatus,
                                 onBack = { viewModel.deselectDevice() },
                                 setSettingValues = { deviceSettings.setSettingValues(it) },
+                                allSettingsFlow = deviceSettings.allSettingsFlow,
                                 categoryIdsFlow = deviceSettings.categoryIdsFlow,
                                 getSettingsInCategoryFlow = { deviceSettings.getSettingsInCategoryFlow(it) },
                                 quickPresetsFlow = deviceSettings.quickPresetsFlow,

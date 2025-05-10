@@ -41,6 +41,7 @@ fun DeviceSettings(
     onBack: () -> Unit = {},
     setSettingValues: (settingValues: List<Pair<String, Value>>) -> Unit,
     categoryIdsFlow: Flow<List<String>>,
+    allSettingsFlow: Flow<List<Pair<String, Setting>>>,
     getSettingsInCategoryFlow: (categoryId: String) -> Flow<List<Pair<String, Setting>>>,
     quickPresetsFlow: Flow<List<QuickPreset>>,
     activateQuickPreset: (name: String) -> Unit,
@@ -152,8 +153,10 @@ fun DeviceSettings(
                 val route = backStackEntry.toRoute<Screen.EditQuickPreset>()
                 val quickPresets by quickPresetsFlow.collectAsState(emptyList())
                 val quickPreset = quickPresets.find { it.name == route.name }
+                val settings by allSettingsFlow.collectAsState(emptyList())
                 if (quickPreset != null) {
                     EditQuickPresetPage(
+                        settings = settings.toMap(),
                         quickPreset = quickPreset,
                         onToggleSetting = toggleQuickPresetSetting,
                     )

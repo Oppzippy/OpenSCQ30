@@ -110,3 +110,5 @@ connected = Connected
 disconnected = Disconnected
 left = Left
 right = Right
+
+none = None

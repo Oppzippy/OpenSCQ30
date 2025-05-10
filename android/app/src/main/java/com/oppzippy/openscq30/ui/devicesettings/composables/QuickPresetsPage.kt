@@ -33,7 +33,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.bindings.translateSettingId
+import com.oppzippy.openscq30.lib.bindings.translateValue
 import com.oppzippy.openscq30.lib.wrapper.QuickPreset
+import com.oppzippy.openscq30.lib.wrapper.Setting
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 import com.oppzippy.openscq30.ui.utils.LabeledSwitch
 
@@ -125,6 +127,7 @@ private fun CreateQuickPresetFloatingButton(onCreate: (String) -> Unit) {
 
 @Composable
 fun EditQuickPresetPage(
+    settings: Map<String, Setting>,
     quickPreset: QuickPreset,
     onToggleSetting: (name: String, setting: String, isEnabled: Boolean) -> Unit,
 ) {
@@ -136,7 +139,7 @@ fun EditQuickPresetPage(
                     isChecked = field.isEnabled,
                     onCheckedChange = { onToggleSetting(quickPreset.name, field.settingId, it) },
                 )
-                Text(field.value.toString())
+                Text(translateValue(settings[field.settingId], field.value))
             }
         }
     }

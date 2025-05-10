@@ -9,6 +9,8 @@ use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, IntoEnumIterator, IntoStaticStr, VariantArray};
 pub use value::*;
 
+use crate::i18n::fl;
+
 mod equalizer;
 mod range;
 mod select;
@@ -182,5 +184,26 @@ impl Setting {
             setting: Select::from_enum(variants),
             value: Cow::Borrowed(value.into()),
         }
+    }
+}
+
+pub fn localize_value(setting: Option<&Setting>, value: &Value) -> String {
+    match setting {
+        Some(
+            Setting::Select { setting, .. }
+            | Setting::OptionalSelect { setting, .. }
+            | Setting::ModifiableSelect { setting, .. },
+        ) => match value.try_as_optional_str() {
+            Ok(Some(selection)) => setting
+                .options
+                .iter()
+                .position(|option| option == selection)
+                .and_then(|index| setting.localized_options.get(index))
+                .cloned()
+                .unwrap_or_else(|| fl!("none")),
+            Ok(None) => fl!("none"),
+            Err(_) => value.to_string(),
+        },
+        _ => value.to_string(),
     }
 }

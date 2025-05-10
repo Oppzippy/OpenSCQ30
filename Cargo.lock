@@ -4051,6 +4051,7 @@ dependencies = [
  "hex",
  "i18n-embed",
  "i18n-embed-fl",
+ "itertools",
  "macaddr",
  "nom 8.0.0",
  "nom-language",

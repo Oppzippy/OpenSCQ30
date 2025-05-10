@@ -1,8 +1,11 @@
 use std::borrow::Cow;
 
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use strum::{EnumDiscriminants, IntoEnumIterator};
 use thiserror::Error;
+
+use crate::i18n::fl;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, EnumDiscriminants)]
 #[serde(tag = "type", content = "value", rename_all = "camelCase")]
@@ -39,6 +42,37 @@ pub enum ValueError {
         variants: Box<[&'static str]>,
         actual: Value,
     },
+}
+
+impl std::fmt::Display for Value {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Value::Bool(value) => write!(f, "{value}"),
+            Value::U16(value) => write!(f, "{value}"),
+            Value::U16Vec(value) => write!(f, "{value:?}"),
+            Value::OptionalU16(value) => {
+                if let Some(value) = value {
+                    write!(f, "{value}")
+                } else {
+                    f.write_str(&fl!("none"))
+                }
+            }
+            Value::I16Vec(values) => write!(f, "{values:?}"),
+            Value::I32(value) => write!(f, "{value}"),
+            Value::String(value) => f.write_str(value),
+            Value::StringVec(values) => f.write_str(&values.iter().join(", ")),
+            Value::OptionalString(value) => {
+                if let Some(value) = value {
+                    f.write_str(value)
+                } else {
+                    f.write_str(&fl!("none"))
+                }
+            }
+            Value::ModifiableSelectCommand(_modifiable_select_command) => {
+                f.write_str("ModifiableSelectCommand")
+            }
+        }
+    }
 }
 
 impl Value {

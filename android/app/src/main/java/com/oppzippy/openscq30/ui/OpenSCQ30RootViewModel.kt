@@ -149,6 +149,15 @@ class DeviceSettingsManager(
             }
         }
 
+    val allSettingsFlow: Flow<List<Pair<String, Setting>>>
+        get() = deviceManager.watchForChangeNotification.map {
+            device.categories()
+                .flatMap { device.settingsInCategory(it) }
+                .mapNotNull { settingId ->
+                    device.setting(settingId)?.let { setting -> Pair(settingId, setting) }
+                }
+        }
+
     fun activateQuickPreset(name: String) {
         coroutineScope.launch {
             quickPresetHandler.activate(device, name)
