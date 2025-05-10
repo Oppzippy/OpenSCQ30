@@ -9,7 +9,7 @@ CREATE INDEX idx_paired_device_created_at ON paired_device (model);
 CREATE TABLE quick_preset (
     device_model TEXT NOT NULL,
     name TEXT NOT NULL,
-    fields TEXT NOT NULL CHECK(json_valid(fields)),
+    fields BLOB NOT NULL CHECK(json_valid(fields, 4)), -- JSONB non-strict https://sqlite.org/json1.html#jvalid
     created_at INTEGER NOT NULL DEFAULT (strftime('%s'))
 ) STRICT;
 CREATE UNIQUE INDEX idx_quick_preset_device_model_name ON quick_preset (device_model, name);

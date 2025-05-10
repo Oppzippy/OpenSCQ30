@@ -31,7 +31,7 @@ pub fn fetch(
     name: String,
 ) -> Result<QuickPreset, Error> {
     let json: String = connection.query_row(
-        r#"SELECT fields FROM quick_preset WHERE device_model = ?1 AND name = ?2"#,
+        r#"SELECT json(fields) FROM quick_preset WHERE device_model = ?1 AND name = ?2"#,
         (SqliteDeviceModel(model), &name),
         |row| row.get(0),
     )?;
@@ -41,7 +41,7 @@ pub fn fetch(
 
 pub fn fetch_all(connection: &Connection, model: DeviceModel) -> Result<Vec<QuickPreset>, Error> {
     let mut query = connection
-        .prepare_cached(r#"SELECT name, fields FROM quick_preset WHERE device_model = ?1"#)?;
+        .prepare_cached(r#"SELECT name, json(fields) FROM quick_preset WHERE device_model = ?1"#)?;
     let rows = query.query([SqliteDeviceModel(model)])?;
     rows.and_then(|row| {
         let name: String = row.get(0)?;
@@ -86,7 +86,7 @@ pub fn upsert(
 
     tx.execute(
         r#"INSERT INTO quick_preset (device_model, name, fields)
-                VALUES (?1, ?2, ?3)
+                VALUES (?1, ?2, jsonb(?3))
             ON CONFLICT(device_model, name) DO UPDATE SET
                 fields = excluded.fields"#,
         (SqliteDeviceModel(model), quick_preset.name, fields_json),
@@ -147,7 +147,7 @@ pub fn toggle_field(
         )
         UPDATE quick_preset
         SET
-            fields = json_replace(fields, '$[' || (SELECT key FROM target_field_index) || '].isEnabled', json(?4))
+            fields = jsonb_replace(fields, '$[' || (SELECT key FROM target_field_index) || '].isEnabled', json(?4))
         WHERE
             device_model = ?1 AND name = ?2"#,
         (
