@@ -38,7 +38,7 @@ pub fn init_native_i18n(languages: Vec<serializable::LanguageIdentifier>) {
             }
         })
         .collect::<Vec<_>>();
-    if languages.len() == 0 {
+    if languages.is_empty() {
         tracing::error!("initializing i18n with no languages");
     }
     openscq30_lib::i18n::init(&languages);

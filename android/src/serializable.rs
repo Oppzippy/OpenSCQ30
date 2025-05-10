@@ -90,17 +90,17 @@ impl TryFrom<&LanguageIdentifier> for i18n_embed::unic_langid::LanguageIdentifie
             value
                 .script
                 .as_ref()
-                .map(|script| subtags::Script::from_str(&script))
+                .map(|script| subtags::Script::from_str(script))
                 .transpose()?,
             value
                 .region
                 .as_ref()
-                .map(|region| subtags::Region::from_str(&region))
+                .map(|region| subtags::Region::from_str(region))
                 .transpose()?,
             &value
                 .variants
                 .iter()
-                .map(|variant| subtags::Variant::from_str(&variant))
+                .map(|variant| subtags::Variant::from_str(variant))
                 .collect::<Result<Vec<_>, _>>()?,
         ))
     }

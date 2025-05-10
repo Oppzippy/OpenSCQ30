@@ -31,10 +31,7 @@ impl QuickPresetsHandler {
         &self,
         device: &(dyn OpenSCQ30Device + Send + Sync),
     ) -> storage::Result<Vec<QuickPreset>> {
-        Ok(self
-            .database
-            .fetch_all_quick_presets(device.model())
-            .await?)
+        self.database.fetch_all_quick_presets(device.model()).await
     }
 
     pub async fn save(

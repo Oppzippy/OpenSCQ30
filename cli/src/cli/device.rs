@@ -137,7 +137,7 @@ fn collect_commands(matches: &ArgMatches) -> anyhow::Result<Vec<ExecCommand>> {
 
 fn setting_id_from_str(setting_id: &str) -> anyhow::Result<SettingId> {
     Ok(*SettingId::VARIANTS
-        .into_iter()
+        .iter()
         .find(|variant| <&'static str>::from(*variant).eq_ignore_ascii_case(setting_id))
         .ok_or_else(|| anyhow!("setting id {setting_id} does not exist"))?)
 }
