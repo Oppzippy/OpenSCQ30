@@ -5,7 +5,6 @@ mod quick_preset;
 mod type_conversions;
 
 use std::{
-    collections::HashMap,
     mem,
     panic::Location,
     path::PathBuf,
@@ -15,16 +14,16 @@ use std::{
 
 use macaddr::MacAddr6;
 use rusqlite::{Connection, ffi::SQLITE_CONSTRAINT_UNIQUE};
-use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tokio::sync::{Semaphore, oneshot};
 use tracing::info_span;
 
 use crate::{
-    api::settings::{self, SettingId},
-    devices::DeviceModel,
-    macros::impl_from_source_error_with_location,
+    api::settings::SettingId, devices::DeviceModel, macros::impl_from_source_error_with_location,
 };
+
+pub use paired_device::PairedDevice;
+pub use quick_preset::{QuickPreset, QuickPresetField};
 
 // This needs to be Send + Sync, and rusqlite::Connection is not, so we have to spawn a new thread
 // that owns the connection and communicate with it over a channel.
@@ -33,19 +32,15 @@ pub struct OpenSCQ30Database {
     command_sender: mpsc::Sender<Command>,
     closed: Arc<Semaphore>,
 }
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PairedDevice {
-    #[serde(with = "crate::serialization::mac_addr")]
-    pub mac_address: MacAddr6,
-    pub model: DeviceModel,
-    pub is_demo: bool,
-}
 
 #[derive(Error, Debug)]
 pub enum Error {
     #[error("sql error: {source:?}")]
     AlreadyExists { source: rusqlite::Error },
+    #[error("not found")]
+    NotFound {
+        location: &'static Location<'static>,
+    },
     #[error("sql error: {source:?}")]
     RusqliteError {
         source: rusqlite::Error,
@@ -56,10 +51,16 @@ pub enum Error {
         source: serde_json::Error,
         location: &'static Location<'static>,
     },
+    #[error("failed to parse value: {source:?}")]
+    ParseError {
+        source: strum::ParseError,
+        location: &'static Location<'static>,
+    },
 }
 pub type Result<T> = std::result::Result<T, Error>;
 
 impl_from_source_error_with_location!(Error::JsonError(serde_json::Error));
+impl_from_source_error_with_location!(Error::ParseError(strum::ParseError));
 
 impl From<rusqlite::Error> for Error {
     #[track_caller]
@@ -201,14 +202,19 @@ commands!(
     quick_preset::fetch => fn fetch_quick_preset(
         model: DeviceModel,
         name: String,
-    ) -> Result<HashMap<SettingId, settings::Value>>;
+    ) -> Result<QuickPreset>;
     quick_preset::fetch_all => fn fetch_all_quick_presets(
         model: DeviceModel,
-    ) -> Result<HashMap<String, HashMap<SettingId, settings::Value>>>;
+    ) -> Result<Vec<QuickPreset>>;
     quick_preset::upsert => fn upsert_quick_preset(
         model: DeviceModel,
+        quick_preset: QuickPreset,
+    ) -> Result<()>;
+    quick_preset::toggle_field => fn toggle_quick_preset_field(
+        model: DeviceModel,
         name: String,
-        settings: HashMap<SettingId, settings::Value>,
+        setting_id: SettingId,
+        is_enabled: bool,
     ) -> Result<()>;
     quick_preset::delete => fn delete_quick_preset(model: DeviceModel, name: String) -> Result<()>;
     equalizer_profile::fetch => fn fetch_equalizer_profile(

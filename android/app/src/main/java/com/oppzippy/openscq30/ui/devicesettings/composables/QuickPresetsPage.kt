@@ -129,16 +129,14 @@ fun EditQuickPresetPage(
     onToggleSetting: (name: String, setting: String, isEnabled: Boolean) -> Unit,
 ) {
     LazyColumn {
-        items(quickPreset.settings) { field ->
+        items(quickPreset.fields) { field ->
             Column {
                 LabeledSwitch(
                     label = translateSettingId(field.settingId),
-                    isChecked = field.value != null,
+                    isChecked = field.isEnabled,
                     onCheckedChange = { onToggleSetting(quickPreset.name, field.settingId, it) },
                 )
-                if (field.value != null) {
-                    Text(field.value.toString())
-                }
+                Text(field.value.toString())
             }
         }
     }
@@ -150,9 +148,9 @@ private fun PreviewQuickPresetsList() {
     OpenSCQ30Theme {
         QuickPresetsList(
             quickPresets = listOf(
-                QuickPreset(name = "Preset 1", isActive = true, settings = emptyList()),
-                QuickPreset(name = "Preset 2", isActive = false, settings = emptyList()),
-                QuickPreset(name = "Preset 3", isActive = false, settings = emptyList()),
+                QuickPreset(name = "Preset 1", fields = emptyList()),
+                QuickPreset(name = "Preset 2", fields = emptyList()),
+                QuickPreset(name = "Preset 3", fields = emptyList()),
             ),
             onEdit = {},
             onActivate = {},

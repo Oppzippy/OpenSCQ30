@@ -67,7 +67,7 @@ uniffi::custom_type!(Value, String, {
     lower: |val| serde_json::to_string(&val.0).expect("json serialization shouldn't fail"),
 });
 
-pub struct QuickPreset(pub openscq30_lib::api::quick_presets::QuickPreset);
+pub struct QuickPreset(pub openscq30_lib::storage::QuickPreset);
 uniffi::custom_type!(QuickPreset, String, {
     try_lift: |json| Ok(QuickPreset(serde_json::from_str(&json)?)),
     lower: |val| serde_json::to_string(&val.0).expect("json serialization shouldn't fail"),

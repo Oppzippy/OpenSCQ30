@@ -158,26 +158,15 @@ class DeviceSettingsManager(
 
     fun createQuickPreset(name: String) {
         coroutineScope.launch {
-            quickPresetHandler.save(device, name, emptyMap())
+            quickPresetHandler.save(device, name)
             refreshQuickPresets()
         }
     }
 
     fun toggleQuickPresetSetting(name: String, settingId: String, enabled: Boolean) {
-        val quickPreset = _quickPresetsFlow.value.find { it.name == name } ?: return
-        val newSettings = quickPreset.settings.map { field ->
-            if (field.settingId == settingId) {
-                if (enabled) {
-                    field.copy(value = device.setting(field.settingId)?.toValue())
-                } else {
-                    field.copy(value = null)
-                }
-            } else {
-                field
-            }
-        }.filter { it.value != null }.associate { Pair(it.settingId, it.value!!) }
         coroutineScope.launch {
-            quickPresetHandler.save(device, name, newSettings)
+            quickPresetHandler.toggleField(device, name, settingId, enabled)
+            // TODO either modify in place instead of re-fetching all presets, or fetch only the modified preset
             refreshQuickPresets()
         }
     }

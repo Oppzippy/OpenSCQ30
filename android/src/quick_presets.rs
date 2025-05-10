@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use crate::{device::OpenSCQ30Device, serializable};
 
 #[derive(uniffi::Object)]
@@ -20,21 +18,22 @@ impl QuickPresetsHandler {
             .collect())
     }
 
-    pub async fn save(
+    pub async fn save(&self, device: &OpenSCQ30Device, name: String) -> Result<(), crate::Error> {
+        self.inner
+            .save(device.inner.as_ref(), name)
+            .await
+            .map_err(Into::into)
+    }
+
+    pub async fn toggle_field(
         &self,
         device: &OpenSCQ30Device,
         name: String,
-        settings: HashMap<serializable::SettingId, serializable::Value>,
+        setting_id: serializable::SettingId,
+        is_enabled: bool,
     ) -> Result<(), crate::Error> {
         self.inner
-            .save(
-                device.inner.as_ref(),
-                name,
-                settings
-                    .into_iter()
-                    .map(|(id, value)| (id.0, value.0))
-                    .collect(),
-            )
+            .toggle_field(device.inner.as_ref(), name, setting_id.0, is_enabled)
             .await
             .map_err(Into::into)
     }

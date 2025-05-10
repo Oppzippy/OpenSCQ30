@@ -1,11 +1,23 @@
 use macaddr::MacAddr6;
 use rusqlite::Connection;
+use serde::{Deserialize, Serialize};
 use tracing::{instrument, warn};
 
+use crate::devices::DeviceModel;
+
 use super::{
-    Error, PairedDevice,
+    Error,
     type_conversions::{SqliteDeviceModel, SqliteMacAddr6},
 };
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PairedDevice {
+    #[serde(with = "crate::serialization::mac_addr")]
+    pub mac_address: MacAddr6,
+    pub model: DeviceModel,
+    pub is_demo: bool,
+}
 
 #[instrument(skip(connection))]
 pub fn fetch_all(connection: &Connection) -> Result<Vec<PairedDevice>, Error> {

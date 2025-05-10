@@ -16,9 +16,12 @@ use cosmic::{
 };
 use legacy_migration::LegacyMigrationModel;
 use openscq30_i18n::Translate;
-use openscq30_lib::api::{
-    quick_presets::{QuickPreset, QuickPresetsHandler},
-    settings::{self, CategoryId, Setting, SettingId, Value},
+use openscq30_lib::{
+    api::{
+        quick_presets::QuickPresetsHandler,
+        settings::{self, CategoryId, Setting, SettingId, Value},
+    },
+    storage::QuickPreset,
 };
 use tracing::debug;
 
@@ -43,9 +46,8 @@ pub enum Message {
     SetCreateQuickPresetName(String),
     CancelDialog,
     EditQuickPresetToggleField(usize, bool),
-    EditQuickPresetCancel,
-    EditQuickPresetSave,
-    EditQuickPresetDone,
+    EditQuickPresetClose,
+    EditQuickPresetModified,
     ShowModifiableSelectAddDialog(SettingId),
     ShowModifiableSelectRemoveDialog(SettingId),
     ModifiableSelectAddDialogSubmit(Option<String>),
@@ -347,37 +349,32 @@ impl DeviceSettingsModel {
                 .as_ref()
                 .map(|editing_quick_preset| ContextDrawer {
                     title: Some(editing_quick_preset.name.as_str().into()),
-                    header_actions: vec![
-                        widget::button::suggested(fl!("save"))
-                            .on_press(Message::EditQuickPresetSave)
-                            .into(),
-                    ],
+                    header_actions: Vec::new(),
                     header: None,
                     content: widget::column()
-                        .extend(editing_quick_preset.settings.iter().enumerate().map(
-                            |(i, field)| {
-                                widget::column()
-                                    .padding(8)
-                                    .push(
-                                        widget::toggler(field.value.is_some())
-                                            .label(field.setting_id.translate())
-                                            .width(Length::Fill)
-                                            .on_toggle(move |enabled| {
-                                                Message::EditQuickPresetToggleField(i, enabled)
-                                            }),
-                                    )
-                                    .push_maybe(
-                                        field
-                                            .value
-                                            .as_ref()
-                                            .map(|v| widget::text::body(format!("{v:?}"))),
-                                    )
-                                    .into()
-                            },
-                        ))
+                        .extend(
+                            editing_quick_preset
+                                .fields
+                                .iter()
+                                .enumerate()
+                                .map(|(i, field)| {
+                                    widget::column()
+                                        .padding(8)
+                                        .push(
+                                            widget::toggler(field.is_enabled)
+                                                .label(field.setting_id.translate())
+                                                .width(Length::Fill)
+                                                .on_toggle(move |enabled| {
+                                                    Message::EditQuickPresetToggleField(i, enabled)
+                                                }),
+                                        )
+                                        .push(widget::text::body(format!("{:?}", field.value)))
+                                        .into()
+                                }),
+                        )
                         .into(),
                     footer: None,
-                    on_close: Message::EditQuickPresetCancel,
+                    on_close: Message::EditQuickPresetClose,
                 })
         } else {
             None
@@ -481,7 +478,7 @@ impl DeviceSettingsModel {
                 Action::Task(
                     Task::future(async move {
                         quick_presets_handler
-                            .save(device.as_ref(), name, HashMap::new())
+                            .save(device.as_ref(), name)
                             .await
                             .map_err(handle_soft_error!())?;
                         Ok(Message::Refresh)
@@ -491,49 +488,47 @@ impl DeviceSettingsModel {
             }
             Message::EditQuickPresetToggleField(field_index, is_enabled) => {
                 if let Some(preset) = &mut self.editing_quick_preset {
-                    let field = &mut preset.settings[field_index];
-                    field.value = is_enabled
-                        .then(|| self.device.setting(&field.setting_id).map(Into::into))
-                        .flatten();
-                } else {
-                    return Action::None;
+                    let preset_name = preset.name.to_owned();
+
+                    // eagerly update the dispalyed value. ideally we would revert back to
+                    // what it was if the returned future fails.
+                    let field = &mut preset.fields[field_index];
+                    field.is_enabled = is_enabled;
+
+                    let setting_id = field.setting_id;
+                    let device = self.device.clone();
+                    let quick_presets_handler = self.quick_presets_handler.clone();
+                    return Action::Task(
+                        Task::future(async move {
+                            quick_presets_handler
+                                .toggle_field(device.as_ref(), preset_name, setting_id, is_enabled)
+                                .await
+                                .map_err(handle_soft_error!())?;
+                            Ok(Message::EditQuickPresetModified)
+                        })
+                        .map(coalesce_result),
+                    );
                 }
                 Action::None
             }
-            Message::EditQuickPresetCancel => {
+            Message::EditQuickPresetClose => {
                 self.editing_quick_preset = None;
                 Action::None
             }
-            Message::EditQuickPresetSave => {
-                let Some(quick_preset) = self.editing_quick_preset.take() else {
-                    return Action::None;
-                };
-                let device = self.device.clone();
+            Message::EditQuickPresetModified => {
+                // TODO either modify in place instead of re-fetching all presets, or fetch only the modified preset
                 let quick_presets_handler = self.quick_presets_handler.clone();
+                let device = self.device.clone();
                 Action::Task(
                     Task::future(async move {
                         quick_presets_handler
-                            .save(
-                                device.as_ref(),
-                                quick_preset.name,
-                                quick_preset
-                                    .settings
-                                    .into_iter()
-                                    .flat_map(|field| {
-                                        field.value.map(|value| (field.setting_id, value))
-                                    })
-                                    .collect(),
-                            )
+                            .quick_presets(device.as_ref())
                             .await
-                            .map_err(handle_soft_error!())?;
-                        Ok(Message::EditQuickPresetDone)
+                            .map(Message::SetQuickPresets)
+                            .map_err(handle_soft_error!())
                     })
                     .map(coalesce_result),
                 )
-            }
-            Message::EditQuickPresetDone => {
-                self.editing_quick_preset = None;
-                Action::Task(self.refresh())
             }
             Message::ShowModifiableSelectAddDialog(setting_id) => {
                 self.dialog = Some(Dialog::ModifiableSelectAdd(setting_id, String::new()));

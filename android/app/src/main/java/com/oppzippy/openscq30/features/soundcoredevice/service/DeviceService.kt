@@ -126,7 +126,7 @@ class DeviceService : LifecycleService() {
             }
             connectionStatusFlow.compareAndSet(
                 ConnectionStatus.AwaitingConnection,
-                ConnectionStatus.Connecting(macAddress, job),
+                ConnectionStatus.Connecting(macAddress),
             )
         }
 

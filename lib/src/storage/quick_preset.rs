@@ -1,6 +1,7 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, panic::Location, str::FromStr};
 
 use rusqlite::Connection;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     api::settings::{self, SettingId},
@@ -9,28 +10,38 @@ use crate::{
 
 use super::{Error, type_conversions::SqliteDeviceModel};
 
-type SettingsCollection = HashMap<SettingId, settings::Value>;
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct QuickPreset {
+    pub name: String,
+    pub fields: Vec<QuickPresetField>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct QuickPresetField {
+    pub setting_id: SettingId,
+    pub value: settings::Value,
+    pub is_enabled: bool,
+}
 
 pub fn fetch(
     connection: &Connection,
     model: DeviceModel,
     name: String,
-) -> Result<SettingsCollection, Error> {
+) -> Result<QuickPreset, Error> {
     let json: String = connection.query_row(
-        r#"SELECT settings FROM quick_preset WHERE device_model = ?1 AND name = ?2"#,
-        (SqliteDeviceModel(model), name),
+        r#"SELECT fields FROM quick_preset WHERE device_model = ?1 AND name = ?2"#,
+        (SqliteDeviceModel(model), &name),
         |row| row.get(0),
     )?;
-    let settings = serde_json::from_str(&json).map_err(Error::from)?;
-    Ok(settings)
+    let fields = serde_json::from_str(&json).map_err(Error::from)?;
+    Ok(QuickPreset { name, fields })
 }
 
-pub fn fetch_all(
-    connection: &Connection,
-    model: DeviceModel,
-) -> Result<HashMap<String, SettingsCollection>, Error> {
+pub fn fetch_all(connection: &Connection, model: DeviceModel) -> Result<Vec<QuickPreset>, Error> {
     let mut query = connection
-        .prepare_cached(r#"SELECT name, settings FROM quick_preset WHERE device_model = ?1"#)?;
+        .prepare_cached(r#"SELECT name, fields FROM quick_preset WHERE device_model = ?1"#)?;
     let rows = query.query([SqliteDeviceModel(model)])?;
     rows.and_then(|row| {
         let name: String = row.get(0)?;
@@ -40,31 +51,121 @@ pub fn fetch_all(
     .map(
         |result: Result<(String, String), rusqlite::Error>| match result {
             Ok((name, json)) => {
-                let settings: SettingsCollection =
+                let fields: Vec<QuickPresetField> =
                     serde_json::from_str(&json).map_err(Error::from)?;
-                Ok((name, settings))
+                Ok(QuickPreset { name, fields })
             }
             Err(err) => Err(Error::from(err)),
         },
     )
-    .collect::<Result<HashMap<String, SettingsCollection>, Error>>()
+    // TODO collect to Vec<Result<...>> instead so if something goes wrong parsing one quick preset, they don't all fail
+    .collect::<Result<Vec<QuickPreset>, Error>>()
 }
 
+/// If the QuickPreset does not exist yet, inserts it as is.
+/// If it does exist, the fields will be replaced while retaining whether or not each field is enabled.
 pub fn upsert(
+    connection: &mut Connection,
+    model: DeviceModel,
+    mut quick_preset: QuickPreset,
+) -> Result<(), Error> {
+    // Ensure that the currently enabled fields can't change between when we read them and write them back
+    let tx = connection.transaction_with_behavior(rusqlite::TransactionBehavior::Exclusive)?;
+    let enabled_fields = enabled_fields(&*tx, model, &quick_preset.name)?;
+
+    for field in &mut quick_preset.fields {
+        if enabled_fields
+            .get(&field.setting_id)
+            .cloned()
+            .unwrap_or_default()
+        {
+            field.is_enabled = true
+        }
+    }
+    let fields_json = serde_json::to_string(&quick_preset.fields)?;
+
+    tx.execute(
+        r#"INSERT INTO quick_preset (device_model, name, fields)
+                VALUES (?1, ?2, ?3)
+            ON CONFLICT(device_model, name) DO UPDATE SET
+                fields = excluded.fields"#,
+        (SqliteDeviceModel(model), quick_preset.name, fields_json),
+    )?;
+    tx.commit()?;
+    Ok(())
+}
+
+fn enabled_fields(
+    connection: &Connection,
+    model: DeviceModel,
+    name: &str,
+) -> Result<HashMap<SettingId, bool>, Error> {
+    let mut statement = connection.prepare_cached(
+        r#"SELECT
+                value ->> 'settingId',
+                value ->> 'isEnabled'
+            FROM
+                quick_preset, json_each(quick_preset.fields)
+            WHERE
+                device_model = ?1 AND name = ?2"#,
+    )?;
+    statement
+        .query_map((SqliteDeviceModel(model), name), |row| {
+            let setting_id_string: String = row.get(0)?;
+            let is_enabled: bool = row.get(1)?;
+            Ok((setting_id_string, is_enabled))
+        })?
+        .map(|result| match result {
+            Ok((setting_id_string, is_enabled)) => {
+                let setting_id: SettingId =
+                    SettingId::from_str(&setting_id_string).map_err(Error::from)?;
+                Ok((setting_id, is_enabled))
+            }
+            Err(err) => Err(Error::from(err)),
+        })
+        .collect::<Result<HashMap<_, _>, _>>()
+}
+
+pub fn toggle_field(
     connection: &Connection,
     model: DeviceModel,
     name: String,
-    settings: SettingsCollection,
+    setting_id: SettingId,
+    is_enabled: bool,
 ) -> Result<(), Error> {
-    let json = serde_json::to_string(&settings).map_err(Error::from)?;
-    connection.execute(
-        r#"INSERT INTO quick_preset (device_model, name, settings)
-                VALUES (?1, ?2, ?3)
-            ON CONFLICT(device_model, name) DO UPDATE SET
-                settings = excluded.settings"#,
-        (SqliteDeviceModel(model), name, json),
+    // Find the index of the field, then set isEnabled for that index
+    let changed_rows = connection.execute(
+        r#"
+        WITH target_field_index AS (
+            SELECT
+                key
+            FROM
+                quick_preset, json_each(quick_preset.fields)
+            WHERE
+                device_model = ?1 AND name = ?2 AND
+                value ->> 'settingId' = ?3
+        )
+        UPDATE quick_preset
+        SET
+            fields = json_replace(fields, '$[' || (SELECT key FROM target_field_index) || '].isEnabled', json(?4))
+        WHERE
+            device_model = ?1 AND name = ?2"#,
+        (
+            SqliteDeviceModel(model),
+            name,
+            setting_id.to_string(),
+            if is_enabled { "true" } else { "false" },
+        ),
     )?;
-    Ok(())
+
+    // In case something went wrong with the where clause, causing 0 rows to be found
+    if changed_rows == 1 {
+        Ok(())
+    } else {
+        Err(Error::NotFound {
+            location: Location::caller(),
+        })
+    }
 }
 
 pub fn delete(connection: &Connection, model: DeviceModel, name: String) -> Result<(), Error> {

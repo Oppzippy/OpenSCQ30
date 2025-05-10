@@ -3,7 +3,7 @@ use cosmic::{
     iced::{Length, alignment},
     widget,
 };
-use openscq30_lib::api::quick_presets::QuickPreset;
+use openscq30_lib::storage::QuickPreset;
 
 use crate::fl;
 
@@ -33,13 +33,7 @@ where
         .padding(10)
         .align_y(alignment::Vertical::Center)
         .push(widget::text(&quick_preset.name).width(Length::Fill))
-        .push(if quick_preset.is_active {
-            Element::from(widget::text(fl!("active")))
-        } else {
-            widget::button::standard(fl!("activate"))
-                .on_press(on_activate)
-                .into()
-        })
+        .push(widget::button::standard(fl!("activate")).on_press(on_activate))
         .push(widget::button::standard(fl!("edit")).on_press(on_edit))
         .into()
 }
