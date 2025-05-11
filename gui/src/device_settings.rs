@@ -36,7 +36,8 @@ use crate::{
 pub enum Message {
     SetSetting(SettingId, Value),
     SetEqualizerBand(SettingId, u8, i16),
-    Refresh,
+    RefreshQuickPresets,
+    RefreshSettings,
     Warning(String),
     ShowCreateQuickPresetDialog,
     ActivateQuickPreset(usize),
@@ -109,7 +110,7 @@ impl DeviceSettingsModel {
         let mut watch = device.0.watch_for_changes();
         let stream = cosmic::iced::stream::channel(1, |mut output| async move {
             while watch.changed().await.is_ok() {
-                match output.try_send(Message::Refresh) {
+                match output.try_send(Message::RefreshSettings) {
                     Err(err) if err.is_disconnected() => return,
                     _ => (),
                 }
@@ -159,6 +160,26 @@ impl DeviceSettingsModel {
     }
 
     fn refresh(&mut self) -> Task<Message> {
+        Task::batch([self.refresh_settings(), self.refresh_quick_presets()])
+    }
+
+    fn refresh_settings(&mut self) -> Task<Message> {
+        if let Some(category_id) = self.nav_model.active_data::<CategoryId>() {
+            self.settings = self
+                .device
+                .settings_in_category(category_id)
+                .into_iter()
+                .flat_map(|setting_id| {
+                    self.device
+                        .setting(&setting_id)
+                        .map(|value| (setting_id, value))
+                })
+                .collect();
+        }
+        Task::none()
+    }
+
+    fn refresh_quick_presets(&mut self) -> Task<Message> {
         if let Some(CustomCategory::QuickPresets) = self.nav_model.active_data() {
             self.quick_presets = None;
             let device = self.device.clone();
@@ -171,18 +192,6 @@ impl DeviceSettingsModel {
                     .map_err(handle_soft_error!())
             })
             .map(coalesce_result)
-        } else if let Some(category_id) = self.nav_model.active_data::<CategoryId>() {
-            self.settings = self
-                .device
-                .settings_in_category(category_id)
-                .into_iter()
-                .flat_map(|setting_id| {
-                    self.device
-                        .setting(&setting_id)
-                        .map(|value| (setting_id, value))
-                })
-                .collect();
-            Task::none()
         } else {
             Task::none()
         }
@@ -394,7 +403,7 @@ impl DeviceSettingsModel {
                             .set_setting_values(vec![(setting_id, value)])
                             .await
                             .map_err(handle_soft_error!())?;
-                        Ok(Message::Refresh)
+                        Ok(Message::RefreshSettings)
                     })
                     .map(coalesce_result),
                 )
@@ -414,7 +423,7 @@ impl DeviceSettingsModel {
                                 .set_setting_values(vec![(setting_id, new_values.into())])
                                 .await
                                 .map_err(handle_soft_error!())?;
-                            Ok(Message::Refresh)
+                            Ok(Message::RefreshSettings)
                         })
                         .map(coalesce_result),
                     )
@@ -422,7 +431,8 @@ impl DeviceSettingsModel {
                     Action::None
                 }
             }
-            Message::Refresh => Action::Task(self.refresh()),
+            Message::RefreshQuickPresets => Action::Task(self.refresh_quick_presets()),
+            Message::RefreshSettings => Action::Task(self.refresh_settings()),
             Message::Warning(message) => Action::Warning(message),
             Message::ActivateQuickPreset(index) => {
                 let Some(name) = self
@@ -441,7 +451,7 @@ impl DeviceSettingsModel {
                             .activate(device.as_ref(), name)
                             .await
                             .map_err(handle_soft_error!())?;
-                        Ok(Message::Refresh)
+                        Ok(Message::RefreshQuickPresets)
                     })
                     .map(coalesce_result),
                 )
@@ -484,7 +494,7 @@ impl DeviceSettingsModel {
                             .save(device.as_ref(), name)
                             .await
                             .map_err(handle_soft_error!())?;
-                        Ok(Message::Refresh)
+                        Ok(Message::RefreshQuickPresets)
                     })
                     .map(coalesce_result),
                 )
@@ -586,7 +596,7 @@ impl DeviceSettingsModel {
                                 )])
                                 .await
                                 .map_err(handle_soft_error!())?;
-                            Ok(Message::Refresh)
+                            Ok(Message::RefreshSettings)
                         })
                         .map(coalesce_result),
                     )
@@ -608,7 +618,7 @@ impl DeviceSettingsModel {
                                 )])
                                 .await
                                 .map_err(handle_soft_error!())?;
-                            Ok(Message::Refresh)
+                            Ok(Message::RefreshSettings)
                         })
                         .map(coalesce_result),
                     )
@@ -637,7 +647,7 @@ impl DeviceSettingsModel {
                                 volume_adjustments,
                             )
                             .await?;
-                            Ok(Message::Refresh)
+                            Ok(Message::RefreshSettings)
                         })
                         .map(|r| r.map_err(handle_soft_error!()))
                         .map(coalesce_result),
