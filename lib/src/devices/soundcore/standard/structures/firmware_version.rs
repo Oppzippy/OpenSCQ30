@@ -53,10 +53,6 @@ impl FirmwareVersion {
         self.minor
     }
 
-    pub const fn number(&self) -> u16 {
-        (self.major as u16) * 100 + (self.minor as u16)
-    }
-
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], FirmwareVersion, E> {
@@ -81,7 +77,7 @@ impl FirmwareVersion {
 
 impl Display for FirmwareVersion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:02}.{:02}", self.major, self.minor)
+        write!(f, "{:02}.{:02}", self.major(), self.minor())
     }
 }
 
@@ -90,12 +86,6 @@ mod tests {
     use nom_language::error::VerboseError;
 
     use super::FirmwareVersion;
-
-    #[test]
-    fn test_combined_version_number() {
-        let firmware_version = FirmwareVersion::new(98, 76);
-        assert_eq!(9876, firmware_version.number());
-    }
 
     #[test]
     fn test_to_string() {
