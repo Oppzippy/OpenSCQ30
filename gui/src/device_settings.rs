@@ -44,6 +44,7 @@ pub enum Message {
     EditQuickPreset(usize),
     SetQuickPresets(Vec<QuickPreset>),
     CreateQuickPreset(Option<String>),
+    SnapshotQuickPresetSettings(String),
     SetCreateQuickPresetName(String),
     CancelDialog,
     EditQuickPresetToggleField(usize, bool),
@@ -181,7 +182,6 @@ impl DeviceSettingsModel {
 
     fn refresh_quick_presets(&mut self) -> Task<Message> {
         if let Some(CustomCategory::QuickPresets) = self.nav_model.active_data() {
-            self.quick_presets = None;
             let device = self.device.clone();
             let quick_presets_handler = self.quick_presets_handler.clone();
             Task::future(async move {
@@ -384,6 +384,12 @@ impl DeviceSettingsModel {
                                         .into()
                                 }),
                         )
+                        .push(
+                            widget::button::standard(fl!("overwrite-with-current-settings"))
+                                .on_press(Message::SnapshotQuickPresetSettings(
+                                    editing_quick_preset.name.to_owned(),
+                                )),
+                        )
                         .into(),
                     footer: None,
                     on_close: Message::EditQuickPresetClose,
@@ -465,6 +471,12 @@ impl DeviceSettingsModel {
                 Action::None
             }
             Message::SetQuickPresets(quick_presets) => {
+                if let Some(editing_quick_preset) = &self.editing_quick_preset {
+                    self.editing_quick_preset = quick_presets
+                        .iter()
+                        .find(|preset| preset.name == editing_quick_preset.name)
+                        .cloned()
+                }
                 self.quick_presets = Some(quick_presets);
                 Action::None
             }
@@ -486,6 +498,20 @@ impl DeviceSettingsModel {
                 };
                 let name = override_name.unwrap_or(name);
 
+                let device = self.device.clone();
+                let quick_presets_handler = self.quick_presets_handler.clone();
+                Action::Task(
+                    Task::future(async move {
+                        quick_presets_handler
+                            .save(device.as_ref(), name)
+                            .await
+                            .map_err(handle_soft_error!())?;
+                        Ok(Message::RefreshQuickPresets)
+                    })
+                    .map(coalesce_result),
+                )
+            }
+            Message::SnapshotQuickPresetSettings(name) => {
                 let device = self.device.clone();
                 let quick_presets_handler = self.quick_presets_handler.clone();
                 Action::Task(
