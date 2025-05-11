@@ -58,6 +58,8 @@ pub enum Message {
     AddLegacyEqualizerMigrationPage(HashMap<String, LegacyEqualizerProfile>),
     LegacyMigration(legacy_migration::Message),
     None,
+    ShowDeleteQuickPresetDialog(usize),
+    DeleteQuickPreset(String),
 }
 pub enum Action {
     Task(Task<Message>),
@@ -81,6 +83,7 @@ enum Dialog {
     CreateQuickPreset(String),
     ModifiableSelectAdd(SettingId, String),
     ModifiableSelectRemove(SettingId, Cow<'static, str>),
+    DeleteQuickPreset(String),
 }
 
 enum CustomCategory {
@@ -219,6 +222,17 @@ impl DeviceSettingsModel {
                     widget::button::destructive(fl!("cancel")).on_press(Message::CancelDialog),
                 )
                 .into(),
+            Dialog::DeleteQuickPreset(name) => widget::dialog()
+                .title(fl!("delete-quick-preset"))
+                .body(fl!("delete-confirm", name = name))
+                .primary_action(
+                    widget::button::destructive(fl!("delete"))
+                        .on_press(Message::DeleteQuickPreset(name.to_owned())),
+                )
+                .secondary_action(
+                    widget::button::text(fl!("cancel")).on_press(Message::CancelDialog),
+                )
+                .into(),
             Dialog::ModifiableSelectAdd(setting_id, name) => widget::dialog()
                 .title({
                     let setting_name = setting_id.translate();
@@ -268,6 +282,7 @@ impl DeviceSettingsModel {
                                 quick_presets,
                                 Message::EditQuickPreset,
                                 Message::ActivateQuickPreset,
+                                Message::ShowDeleteQuickPresetDialog,
                             ))
                             .into()
                     } else {
@@ -504,6 +519,29 @@ impl DeviceSettingsModel {
                     Task::future(async move {
                         quick_presets_handler
                             .save(device.as_ref(), name)
+                            .await
+                            .map_err(handle_soft_error!())?;
+                        Ok(Message::RefreshQuickPresets)
+                    })
+                    .map(coalesce_result),
+                )
+            }
+            Message::ShowDeleteQuickPresetDialog(index) => {
+                if let Some(quick_presets) = &self.quick_presets {
+                    self.dialog = quick_presets
+                        .get(index)
+                        .map(|preset| Dialog::DeleteQuickPreset(preset.name.to_owned()));
+                }
+                Action::None
+            }
+            Message::DeleteQuickPreset(name) => {
+                self.dialog = None;
+                let quick_presets_handler = self.quick_presets_handler.clone();
+                let device = self.device.clone();
+                Action::Task(
+                    Task::future(async move {
+                        quick_presets_handler
+                            .delete(device.as_ref(), name)
                             .await
                             .map_err(handle_soft_error!())?;
                         Ok(Message::RefreshQuickPresets)
