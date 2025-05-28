@@ -56,7 +56,7 @@ bluer = "0.17"
 hex = "0.4"
 async-trait = "0.1"
 libcosmic = { git = "https://github.com/pop-os/libcosmic.git" }
-rusqlite = "0.35"
+rusqlite = "0.36"
 syn = "2"
 quote = "1"
 proc-macro2 = "1"
