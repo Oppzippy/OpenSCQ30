@@ -43,6 +43,8 @@ fun DeviceSettings(
     categoryIdsFlow: Flow<List<String>>,
     allSettingsFlow: Flow<List<Pair<String, Setting>>>,
     getSettingsInCategoryFlow: (categoryId: String) -> Flow<List<Pair<String, Setting>>>,
+    quickPresetSlotsFlow: Flow<List<String?>>,
+    onQuickPresetSlotChange: (Int, String?) -> Unit,
     quickPresetsFlow: Flow<List<QuickPreset>>,
     activateQuickPreset: (name: String) -> Unit,
     createQuickPreset: (name: String) -> Unit,
@@ -53,6 +55,7 @@ fun DeviceSettings(
     val listedScreens: MutableList<ScreenInfo> =
         categoryIds.map { Screen.SettingsCategory(it).screenInfo() }.toMutableList()
     listedScreens.add(Screen.QuickPresets.screenInfo)
+    listedScreens.add(Screen.StatusNotification.screenInfo)
 
     // compose navigation does not allow us to use polymorphism with routes, so instead a mapping of
     // class path to route name is kept
@@ -161,6 +164,16 @@ fun DeviceSettings(
                         onToggleSetting = toggleQuickPresetSetting,
                     )
                 }
+            }
+
+            composable<Screen.StatusNotification> {
+                val quickPresets by quickPresetsFlow.collectAsState(emptyList())
+                val quickPresetSlots by quickPresetSlotsFlow.collectAsState(emptyList())
+                StatusNotificationPage(
+                    quickPresets = quickPresets.map { it.name },
+                    quickPresetSlots = quickPresetSlots,
+                    onQuickPresetSlotChange = onQuickPresetSlotChange,
+                )
             }
         }
     }

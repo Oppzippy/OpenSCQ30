@@ -12,6 +12,7 @@ import android.os.IBinder
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
+import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetSlotDao
 import com.oppzippy.openscq30.features.soundcoredevice.connectionBackends
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_DISCONNECT
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_QUICK_PRESET
@@ -23,15 +24,19 @@ import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-@OptIn(FlowPreview::class)
+@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 @AndroidEntryPoint
 class DeviceService : LifecycleService() {
     companion object {
@@ -54,9 +59,20 @@ class DeviceService : LifecycleService() {
     @Inject
     lateinit var notificationBuilder: NotificationBuilder
 
-    private var quickPresetNames = MutableStateFlow<List<String?>>(emptyList())
+    @Inject
+    lateinit var quickPresetSlotDao: QuickPresetSlotDao
+
     val connectionStatusFlow: MutableStateFlow<ConnectionStatus> =
         MutableStateFlow(ConnectionStatus.AwaitingConnection)
+
+    private var quickPresetNames = connectionStatusFlow.flatMapLatest { connectionStatus ->
+        if (connectionStatus is ConnectionStatus.Connected) {
+            val device = connectionStatus.deviceManager.device
+            quickPresetSlotDao.allNames(device.model())
+        } else {
+            emptyFlow()
+        }
+    }.stateIn(lifecycleScope, SharingStarted.Lazily, emptyList())
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -89,9 +105,7 @@ class DeviceService : LifecycleService() {
     override fun onCreate() {
         super.onCreate()
 
-        lifecycleScope.launch {
-            quickPresetNames.debounce(1.seconds).collectLatest { sendNotification() }
-        }
+        lifecycleScope.launch { quickPresetNames.collectLatest { sendNotification() } }
 
         val filter = IntentFilter(ACTION_DISCONNECT).apply {
             addAction(ACTION_QUICK_PRESET)

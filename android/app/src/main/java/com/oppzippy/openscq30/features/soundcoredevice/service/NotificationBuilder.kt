@@ -71,19 +71,21 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
                         PendingIntent.FLAG_IMMUTABLE,
                     ),
                 ).build(),
-            ).addAction(
+            )
+
+        quickPresetNames.take(2).filterNotNull().forEachIndexed { index, name ->
+            builder.addAction(
                 buildQuickPresetNotificationAction(
-                    presetId = 0,
-                    name = quickPresetNames.getOrNull(0),
-                    icon = Icon.createWithResource(context, R.drawable.counter_1_48px),
-                ),
-            ).addAction(
-                buildQuickPresetNotificationAction(
-                    presetId = 1,
-                    name = quickPresetNames.getOrNull(1),
-                    icon = Icon.createWithResource(context, R.drawable.counter_2_48px),
+                    index,
+                    name,
+                    icon = Icon.createWithResource(
+                        context,
+                        if (index == 0) R.drawable.counter_1_48px else R.drawable.counter_2_48px,
+                    ),
                 ),
             )
+        }
+
         return builder.build()
     }
 
@@ -107,10 +109,10 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
         return null
     }
 
-    private fun buildQuickPresetNotificationAction(presetId: Int, name: String?, icon: Icon): Notification.Action =
+    private fun buildQuickPresetNotificationAction(presetId: Int, name: String, icon: Icon): Notification.Action =
         Notification.Action.Builder(
             icon,
-            name ?: context.getString(R.string.quick_preset_number, presetId + 1),
+            name,
             PendingIntent.getBroadcast(
                 context,
                 presetId + 2,

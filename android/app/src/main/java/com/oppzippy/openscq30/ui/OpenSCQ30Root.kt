@@ -61,6 +61,13 @@ fun OpenSCQ30Root(viewModel: OpenSCQ30RootViewModel = hiltViewModel()) {
                                 allSettingsFlow = deviceSettings.allSettingsFlow,
                                 categoryIdsFlow = deviceSettings.categoryIdsFlow,
                                 getSettingsInCategoryFlow = { deviceSettings.getSettingsInCategoryFlow(it) },
+                                quickPresetSlotsFlow = deviceSettings.quickPresetSlots,
+                                onQuickPresetSlotChange = { index, name ->
+                                    deviceSettings.setQuickPresetSlot(
+                                        index,
+                                        name,
+                                    )
+                                },
                                 quickPresetsFlow = deviceSettings.quickPresetsFlow,
                                 activateQuickPreset = { deviceSettings.activateQuickPreset(it) },
                                 createQuickPreset = { deviceSettings.createQuickPreset(it) },

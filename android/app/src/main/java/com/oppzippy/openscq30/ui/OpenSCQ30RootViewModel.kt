@@ -5,6 +5,8 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.oppzippy.openscq30.android.IntentFactory
+import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetSlot
+import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetSlotDao
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceConnectionManager
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
@@ -30,6 +32,7 @@ class OpenSCQ30RootViewModel @Inject constructor(
     private val session: OpenScq30Session,
     private val application: Application,
     private val intentFactory: IntentFactory,
+    private val quickPresetSlotDao: QuickPresetSlotDao,
 ) : AndroidViewModel(application) {
     private val deviceServiceConnection =
         DeviceServiceConnection(unbind = { unbindDeviceService() })
@@ -48,6 +51,7 @@ class OpenSCQ30RootViewModel @Inject constructor(
                         session = session,
                         deviceManager = it.deviceManager,
                         parent = coroutineContext.job,
+                        quickPresetSlotDao = quickPresetSlotDao,
                     )
                 } else {
                     deviceSettingsManager.value = null
@@ -109,8 +113,9 @@ class OpenSCQ30RootViewModel @Inject constructor(
 
 class DeviceSettingsManager(
     session: OpenScq30Session,
-    private val deviceManager: DeviceConnectionManager,
     parent: Job,
+    private val deviceManager: DeviceConnectionManager,
+    private val quickPresetSlotDao: QuickPresetSlotDao,
 ) : AutoCloseable {
     private val coroutineScope = CoroutineScope(Job(parent))
     private val quickPresetHandler = session.quickPresetHandler()
@@ -157,6 +162,18 @@ class DeviceSettingsManager(
                     device.setting(settingId)?.let { setting -> Pair(settingId, setting) }
                 }
         }
+
+    val quickPresetSlots = quickPresetSlotDao.allNames(device.model())
+
+    fun setQuickPresetSlot(index: Int, name: String?) {
+        coroutineScope.launch {
+            if (name != null) {
+                quickPresetSlotDao.upsert(QuickPresetSlot(device.model(), index, name))
+            } else {
+                quickPresetSlotDao.delete(device.model(), index)
+            }
+        }
+    }
 
     fun activateQuickPreset(name: String) {
         coroutineScope.launch {

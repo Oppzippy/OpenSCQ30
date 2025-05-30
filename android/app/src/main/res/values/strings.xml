@@ -82,4 +82,7 @@
     <string name="edit">Edit</string>
     <string name="no_quick_presets">No Quick Presets</string>
     <string name="create_quick_preset">Create Quick Preset</string>
+    <string name="quick_preset_slot_x">Quick Preset Slot %d</string>
+    <string name="notification_permission_is_required">Notification Permission is Required</string>
+    <string name="status_notification">Status Notification</string>
 </resources>
