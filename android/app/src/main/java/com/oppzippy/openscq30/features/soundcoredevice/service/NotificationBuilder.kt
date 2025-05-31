@@ -16,13 +16,19 @@ import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNo
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_CHANNEL_ID
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Device
 import com.oppzippy.openscq30.lib.bindings.translateDeviceModel
+import com.oppzippy.openscq30.lib.bindings.translateSettingId
+import com.oppzippy.openscq30.lib.bindings.translateValue
 import com.oppzippy.openscq30.lib.wrapper.Setting
 import dagger.hilt.android.scopes.ServiceScoped
 import javax.inject.Inject
 
 @ServiceScoped
 class NotificationBuilder @Inject constructor(private val context: Service) {
-    operator fun invoke(status: ConnectionStatus, quickPresetNames: List<String?>): Notification {
+    operator fun invoke(
+        status: ConnectionStatus,
+        quickPresetNames: List<String?>,
+        featuredSettingIds: List<String?>,
+    ): Notification {
         val openAppIntent = Intent(context, MainActivity::class.java)
         openAppIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
@@ -48,7 +54,15 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
                 },
             ).setContentText(
                 device?.let {
-                    "TODO featured settings"
+                    featuredSettingIds.filterNotNull()
+                        .mapNotNull { device.setting(it)?.let { setting -> Pair(it, setting) } }
+                        .joinToString(separator = "\n") { (settingId, setting) ->
+                            context.getString(
+                                R.string.setting_id_with_value,
+                                translateSettingId(settingId),
+                                translateValue(setting, setting.toValue()),
+                            )
+                        }
                 },
             ).setContentIntent(
                 PendingIntent.getActivity(

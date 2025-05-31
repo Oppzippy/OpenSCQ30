@@ -12,7 +12,6 @@ import android.os.IBinder
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
-import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetSlotDao
 import com.oppzippy.openscq30.features.soundcoredevice.connectionBackends
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_DISCONNECT
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_QUICK_PRESET
@@ -20,6 +19,8 @@ import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNo
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.INTENT_EXTRA_PRESET_ID
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_CHANNEL_ID
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_ID
+import com.oppzippy.openscq30.features.statusnotification.storage.FeaturedSettingSlotDao
+import com.oppzippy.openscq30.features.statusnotification.storage.QuickPresetSlotDao
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -62,6 +63,9 @@ class DeviceService : LifecycleService() {
     @Inject
     lateinit var quickPresetSlotDao: QuickPresetSlotDao
 
+    @Inject
+    lateinit var featuredSettingSlotDao: FeaturedSettingSlotDao
+
     val connectionStatusFlow: MutableStateFlow<ConnectionStatus> =
         MutableStateFlow(ConnectionStatus.AwaitingConnection)
 
@@ -69,6 +73,14 @@ class DeviceService : LifecycleService() {
         if (connectionStatus is ConnectionStatus.Connected) {
             val device = connectionStatus.deviceManager.device
             quickPresetSlotDao.allNames(device.model())
+        } else {
+            emptyFlow()
+        }
+    }.stateIn(lifecycleScope, SharingStarted.Lazily, emptyList())
+    private var featuredSettingIds = connectionStatusFlow.flatMapLatest { connectionStatus ->
+        if (connectionStatus is ConnectionStatus.Connected) {
+            val device = connectionStatus.deviceManager.device
+            featuredSettingSlotDao.allSettingIds(device.model())
         } else {
             emptyFlow()
         }
@@ -106,6 +118,7 @@ class DeviceService : LifecycleService() {
         super.onCreate()
 
         lifecycleScope.launch { quickPresetNames.collectLatest { sendNotification() } }
+        lifecycleScope.launch { featuredSettingIds.collectLatest { sendNotification() } }
 
         val filter = IntentFilter(ACTION_DISCONNECT).apply {
             addAction(ACTION_QUICK_PRESET)
@@ -200,6 +213,7 @@ class DeviceService : LifecycleService() {
     private fun buildNotification(): Notification = notificationBuilder(
         status = connectionStatusFlow.value,
         quickPresetNames = quickPresetNames.value,
+        featuredSettingIds = featuredSettingIds.value,
     )
 
     private val binder = MyBinder()

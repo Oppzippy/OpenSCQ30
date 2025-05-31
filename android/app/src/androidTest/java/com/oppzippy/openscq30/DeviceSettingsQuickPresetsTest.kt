@@ -11,9 +11,9 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.rule.GrantPermissionRule
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
 import com.oppzippy.openscq30.features.equalizer.storage.toCustomProfile
-import com.oppzippy.openscq30.features.quickpresets.storage.FallbackQuickPreset
-import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
-import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetRepository
+import com.oppzippy.openscq30.features.statusnotification.storage.FallbackQuickPreset
+import com.oppzippy.openscq30.features.statusnotification.storage.QuickPreset
+import com.oppzippy.openscq30.features.statusnotification.storage.QuickPresetRepository
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
 import com.oppzippy.openscq30.lib.wrapper.AvailableSoundModes
 import com.oppzippy.openscq30.lib.wrapper.DeviceFeatures

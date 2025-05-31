@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.features.quickpresets.storage
+package com.oppzippy.openscq30.features.statusnotification.storage
 
 import androidx.room.Entity
 

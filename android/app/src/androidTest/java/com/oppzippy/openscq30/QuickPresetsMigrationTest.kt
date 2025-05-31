@@ -2,8 +2,8 @@ package com.oppzippy.openscq30
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.sqlite.db.SimpleSQLiteQuery
-import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
-import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetRepository
+import com.oppzippy.openscq30.features.statusnotification.storage.QuickPreset
+import com.oppzippy.openscq30.features.statusnotification.storage.QuickPresetRepository
 import com.oppzippy.openscq30.room.AppDatabase
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest

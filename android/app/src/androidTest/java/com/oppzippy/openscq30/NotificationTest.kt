@@ -17,13 +17,13 @@ import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
 import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDeviceProvider
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
 import com.oppzippy.openscq30.features.equalizer.storage.toCustomProfile
-import com.oppzippy.openscq30.features.quickpresets.storage.FallbackQuickPreset
-import com.oppzippy.openscq30.features.quickpresets.storage.QuickPreset
-import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetRepository
 import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceConnector
 import com.oppzippy.openscq30.features.soundcoredevice.impl.DemoSoundcoreDeviceConnector
 import com.oppzippy.openscq30.features.soundcoredevice.impl.SoundcoreDevice
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
+import com.oppzippy.openscq30.features.statusnotification.storage.FallbackQuickPreset
+import com.oppzippy.openscq30.features.statusnotification.storage.QuickPreset
+import com.oppzippy.openscq30.features.statusnotification.storage.QuickPresetRepository
 import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
 import com.oppzippy.openscq30.lib.wrapper.PresetEqualizerProfile
 import com.oppzippy.openscq30.ui.OpenSCQ30Root

@@ -50,6 +50,8 @@ fun DeviceSettings(
     activateQuickPreset: (name: String) -> Unit,
     createQuickPreset: (name: String) -> Unit,
     toggleQuickPresetSetting: (name: String, settingId: String, enabled: Boolean) -> Unit,
+    featuredSettingSlotsFlow: Flow<List<String?>>,
+    onFeaturedSettingSlotChange: (Int, String?) -> Unit,
 ) {
     val categoryIds by categoryIdsFlow.collectAsState(emptyList())
 
@@ -170,9 +172,14 @@ fun DeviceSettings(
             }
 
             composable<Screen.StatusNotification> {
+                val settings by allSettingsFlow.collectAsState(emptyList())
+                val featuredSettingSlots by featuredSettingSlotsFlow.collectAsState(emptyList())
                 val quickPresets by quickPresetsFlow.collectAsState(emptyList())
                 val quickPresetSlots by quickPresetSlotsFlow.collectAsState(emptyList())
                 StatusNotificationPage(
+                    settingIds = settings.map { it.first },
+                    featuredSettingSlots = featuredSettingSlots,
+                    onFeaturedSettingSlotChange = onFeaturedSettingSlotChange,
                     quickPresets = quickPresets.map { it.name },
                     quickPresetSlots = quickPresetSlots,
                     onQuickPresetSlotChange = onQuickPresetSlotChange,

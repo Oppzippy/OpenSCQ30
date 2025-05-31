@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.features.quickpresets.storage
+package com.oppzippy.openscq30.features.statusnotification.storage
 
 import com.oppzippy.openscq30.room.AppDatabase
 import dagger.Module

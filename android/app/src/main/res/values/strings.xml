@@ -85,4 +85,6 @@
     <string name="quick_preset_slot_x">Quick Preset Slot %d</string>
     <string name="notification_permission_is_required">Notification Permission is Required</string>
     <string name="status_notification">Status Notification</string>
+    <string name="featured_setting_x">Featured Setting %d</string>
+    <string name="setting_id_with_value">%s: %s</string>
 </resources>

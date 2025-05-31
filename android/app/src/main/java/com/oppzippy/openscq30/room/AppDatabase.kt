@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import androidx.room.AutoMigration
 import androidx.room.Database
+import androidx.room.DeleteTable
 import androidx.room.RenameColumn
 import androidx.room.RenameTable
 import androidx.room.RoomDatabase
@@ -13,14 +14,17 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
 import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
-import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetSlot
-import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetSlotDao
+import com.oppzippy.openscq30.features.statusnotification.storage.FeaturedSettingSlot
+import com.oppzippy.openscq30.features.statusnotification.storage.FeaturedSettingSlotDao
+import com.oppzippy.openscq30.features.statusnotification.storage.QuickPresetSlot
+import com.oppzippy.openscq30.features.statusnotification.storage.QuickPresetSlotDao
 
 @Database(
-    version = 12,
+    version = 13,
     entities = [
         CustomProfile::class,
         QuickPresetSlot::class,
+        FeaturedSettingSlot::class,
     ],
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -30,6 +34,9 @@ import com.oppzippy.openscq30.features.quickpresets.storage.QuickPresetSlotDao
         AutoMigration(from = 6, to = 7, spec = AppDatabase.AutoMigration6To7::class),
         AutoMigration(from = 7, to = 8, spec = AppDatabase.AutoMigration7To8::class),
         AutoMigration(from = 9, to = 10),
+        AutoMigration(from = 10, to = 11, spec = AppDatabase.AutoMigration10To11::class),
+        AutoMigration(from = 11, to = 12),
+        AutoMigration(from = 12, to = 13),
     ],
 )
 @TypeConverters(Converters::class)
@@ -37,6 +44,7 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun equalizerCustomProfileDao(): CustomProfileDao
     abstract fun quickPresetSlotDao(): QuickPresetSlotDao
+    abstract fun featuredSettingSlotDao(): FeaturedSettingSlotDao
 
     @RenameColumn(
         tableName = "quick_preset",
@@ -61,6 +69,14 @@ abstract class AppDatabase : RoomDatabase() {
         toTableName = "quick_preset",
     )
     class AutoMigration7To8 : AutoMigrationSpec
+
+    @DeleteTable(
+        tableName = "fallback_quick_preset",
+    )
+    @DeleteTable(
+        tableName = "quick_preset",
+    )
+    class AutoMigration10To11 : AutoMigrationSpec
 
     companion object {
         val migrations = listOf(Migration5To6, Migration8To9)
