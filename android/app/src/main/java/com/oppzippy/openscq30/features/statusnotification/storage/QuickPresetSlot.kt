@@ -23,9 +23,13 @@ abstract class QuickPresetSlotDao {
     abstract fun all(deviceModel: String): Flow<List<QuickPresetSlot>>
 
     fun allNames(deviceModel: String): Flow<List<String?>> = all(deviceModel).map { slots ->
-        val max = slots.maxBy { it.slotIndex }.slotIndex
-        val slotsByIndex = slots.associateBy { it.slotIndex }
-        (0..max).map { slotsByIndex[it]?.name }
+        val max = slots.maxByOrNull { it.slotIndex }?.slotIndex
+        if (max != null) {
+            val slotsByIndex = slots.associateBy { it.slotIndex }
+            (0..max).map { slotsByIndex[it]?.name }
+        } else {
+            emptyList()
+        }
     }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
