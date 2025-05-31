@@ -15,10 +15,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -30,14 +32,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.bindings.translateSettingId
 import com.oppzippy.openscq30.lib.bindings.translateValue
 import com.oppzippy.openscq30.lib.wrapper.QuickPreset
 import com.oppzippy.openscq30.lib.wrapper.Setting
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
-import com.oppzippy.openscq30.ui.utils.LabeledSwitch
 
 @Composable
 fun QuickPresetsPage(
@@ -70,7 +73,7 @@ private fun QuickPresetsList(quickPresets: List<QuickPreset>, onActivate: (Strin
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(preset.name)
-                    Row {
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         Button(onClick = { onActivate(preset.name) }) {
                             Text(stringResource(R.string.activate))
                         }
@@ -131,15 +134,25 @@ fun EditQuickPresetPage(
     quickPreset: QuickPreset,
     onToggleSetting: (name: String, setting: String, isEnabled: Boolean) -> Unit,
 ) {
-    LazyColumn {
+    LazyColumn(verticalArrangement = Arrangement.spacedBy(5.dp)) {
         items(quickPreset.fields) { field ->
-            Column {
-                LabeledSwitch(
-                    label = translateSettingId(field.settingId),
-                    isChecked = field.isEnabled,
-                    onCheckedChange = { onToggleSetting(quickPreset.name, field.settingId, it) },
-                )
-                Text(translateValue(settings[field.settingId], field.value))
+            Card(onClick = { onToggleSetting(quickPreset.name, field.settingId, !field.isEnabled) }) {
+                Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = translateSettingId(field.settingId),
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Switch(
+                            checked = field.isEnabled,
+                            onCheckedChange = null,
+                        )
+                    }
+                    Text(
+                        text = translateValue(settings[field.settingId], field.value),
+                    )
+                }
             }
         }
     }

@@ -4,7 +4,6 @@ package com.oppzippy.openscq30.ui.devicesettings.composables
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,9 +33,7 @@ fun SettingPage(
         setSettings(listOf(Pair(settingId, value)))
     }
     Column(
-        modifier = modifier
-            .padding(8.dp)
-            .verticalScroll(rememberScrollState()),
+        modifier = modifier.verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         settings.forEach { (settingId, setting) ->
