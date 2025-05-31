@@ -75,6 +75,7 @@ fun OpenSCQ30Root(viewModel: OpenSCQ30RootViewModel = hiltViewModel()) {
                                 onFeaturedSettingSlotChange = { index, name ->
                                     deviceSettings.setFeaturedSettingSlot(index, name)
                                 },
+                                onQuickPresetLoadCurrentSettings = { deviceSettings.createQuickPreset(it) },
                             )
                         } else {
                             Loading()

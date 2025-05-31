@@ -10,9 +10,9 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import javax.inject.Singleton
 
 @Entity(primaryKeys = ["deviceModel", "slotIndex"])
 data class QuickPresetSlot(val deviceModel: String, val slotIndex: Int, val name: String)

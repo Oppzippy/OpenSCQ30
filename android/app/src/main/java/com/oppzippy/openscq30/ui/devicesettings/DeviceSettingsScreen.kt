@@ -26,6 +26,7 @@ fun DeviceSettingsScreen(
     toggleQuickPresetSetting: (name: String, settingId: String, enabled: Boolean) -> Unit,
     featuredSettingSlotsFlow: Flow<List<String?>>,
     onFeaturedSettingSlotChange: (Int, String?) -> Unit,
+    onQuickPresetLoadCurrentSettings: (String) -> Unit,
 ) {
     when (connectionStatus) {
         is ConnectionStatus.Connected -> {
@@ -44,6 +45,7 @@ fun DeviceSettingsScreen(
                 toggleQuickPresetSetting = toggleQuickPresetSetting,
                 featuredSettingSlotsFlow = featuredSettingSlotsFlow,
                 onFeaturedSettingSlotChange = onFeaturedSettingSlotChange,
+                onQuickPresetLoadCurrentSettings = onQuickPresetLoadCurrentSettings,
             )
         }
 

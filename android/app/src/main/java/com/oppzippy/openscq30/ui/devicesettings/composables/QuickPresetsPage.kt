@@ -13,12 +13,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -39,7 +41,10 @@ import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.bindings.translateSettingId
 import com.oppzippy.openscq30.lib.bindings.translateValue
 import com.oppzippy.openscq30.lib.wrapper.QuickPreset
+import com.oppzippy.openscq30.lib.wrapper.QuickPresetField
+import com.oppzippy.openscq30.lib.wrapper.Select
 import com.oppzippy.openscq30.lib.wrapper.Setting
+import com.oppzippy.openscq30.lib.wrapper.toValue
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
@@ -133,8 +138,34 @@ fun EditQuickPresetPage(
     settings: Map<String, Setting>,
     quickPreset: QuickPreset,
     onToggleSetting: (name: String, setting: String, isEnabled: Boolean) -> Unit,
+    onLoadCurrentSettings: () -> Unit,
 ) {
+    var isInfoDialogOpen by remember { mutableStateOf(false) }
+    if (isInfoDialogOpen) {
+        AlertDialog(
+            onDismissRequest = { isInfoDialogOpen = false },
+            confirmButton = {},
+            dismissButton = { Button(onClick = { isInfoDialogOpen = false }) { Text(stringResource(R.string.close)) } },
+            title = { Text(stringResource(R.string.load_current_settings)) },
+            text = { Text(stringResource(R.string.load_current_settings_help)) },
+        )
+    }
+
     LazyColumn(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+        item {
+            Row {
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = onLoadCurrentSettings,
+                ) { Text(stringResource(R.string.load_current_settings)) }
+                IconButton(onClick = { isInfoDialogOpen = true }) {
+                    Icon(
+                        imageVector = Icons.Filled.Info,
+                        contentDescription = stringResource(R.string.information),
+                    )
+                }
+            }
+        }
         items(quickPreset.fields) { field ->
             Card(onClick = { onToggleSetting(quickPreset.name, field.settingId, !field.isEnabled) }) {
                 Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp)) {
@@ -170,6 +201,33 @@ private fun PreviewQuickPresetsList() {
             ),
             onEdit = {},
             onActivate = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewEditQuickPresetPage() {
+    OpenSCQ30Theme {
+        EditQuickPresetPage(
+            settings = mapOf(
+                Pair(
+                    "test",
+                    Setting.SelectSetting(
+                        setting = Select(
+                            options = listOf("a", "b", "c"),
+                            localizedOptions = listOf("A", "B", "C"),
+                        ),
+                        value = "b",
+                    ),
+                ),
+            ),
+            quickPreset = QuickPreset(
+                name = "Preset 1",
+                fields = listOf(QuickPresetField("test", "b".toValue(), true)),
+            ),
+            onToggleSetting = { _, _, _ -> },
+            onLoadCurrentSettings = {},
         )
     }
 }

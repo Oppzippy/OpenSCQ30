@@ -52,6 +52,7 @@ fun DeviceSettings(
     toggleQuickPresetSetting: (name: String, settingId: String, enabled: Boolean) -> Unit,
     featuredSettingSlotsFlow: Flow<List<String?>>,
     onFeaturedSettingSlotChange: (Int, String?) -> Unit,
+    onQuickPresetLoadCurrentSettings: (String) -> Unit,
 ) {
     val categoryIds by categoryIdsFlow.collectAsState(emptyList())
 
@@ -167,6 +168,7 @@ fun DeviceSettings(
                         settings = settings.toMap(),
                         quickPreset = quickPreset,
                         onToggleSetting = toggleQuickPresetSetting,
+                        onLoadCurrentSettings = { onQuickPresetLoadCurrentSettings(quickPreset.name) },
                     )
                 }
             }
