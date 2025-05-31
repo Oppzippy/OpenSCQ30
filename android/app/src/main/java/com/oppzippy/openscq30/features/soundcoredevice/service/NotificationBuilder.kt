@@ -39,9 +39,7 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
         }
 
         val builder = Notification.Builder(context, NOTIFICATION_CHANNEL_ID).setOngoing(true)
-            .setOnlyAlertOnce(true).setSmallIcon(R.drawable.headphones).setLargeIcon(
-                device?.let { drawEqualizerLine(it) },
-            ).setContentTitle(
+            .setOnlyAlertOnce(true).setSmallIcon(R.drawable.headphones).setContentTitle(
                 when (status) {
                     is ConnectionStatus.AwaitingConnection -> context.getString(R.string.awaiting_connection)
                     is ConnectionStatus.Connected -> context.getString(
