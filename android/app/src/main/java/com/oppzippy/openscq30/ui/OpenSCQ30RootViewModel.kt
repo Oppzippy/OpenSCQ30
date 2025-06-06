@@ -5,6 +5,8 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.oppzippy.openscq30.android.IntentFactory
+import com.oppzippy.openscq30.features.equalizer.storage.LegacyEqualizerProfile
+import com.oppzippy.openscq30.features.equalizer.storage.LegacyEqualizerProfileDao
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceConnectionManager
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
@@ -14,11 +16,14 @@ import com.oppzippy.openscq30.features.statusnotification.storage.QuickPresetSlo
 import com.oppzippy.openscq30.features.statusnotification.storage.QuickPresetSlotDao
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
 import com.oppzippy.openscq30.lib.bindings.SettingIdValuePair
+import com.oppzippy.openscq30.lib.wrapper.ModifiableSelectCommandInner
 import com.oppzippy.openscq30.lib.wrapper.QuickPreset
 import com.oppzippy.openscq30.lib.wrapper.Setting
 import com.oppzippy.openscq30.lib.wrapper.Value
+import com.oppzippy.openscq30.lib.wrapper.toValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -36,6 +41,7 @@ class OpenSCQ30RootViewModel @Inject constructor(
     private val intentFactory: IntentFactory,
     private val quickPresetSlotDao: QuickPresetSlotDao,
     private val featuredSettingSlotDao: FeaturedSettingSlotDao,
+    private val legacyEqualizerProfileDao: LegacyEqualizerProfileDao,
 ) : AndroidViewModel(application) {
     private val deviceServiceConnection =
         DeviceServiceConnection(unbind = { unbindDeviceService() })
@@ -56,6 +62,7 @@ class OpenSCQ30RootViewModel @Inject constructor(
                         parent = coroutineContext.job,
                         quickPresetSlotDao = quickPresetSlotDao,
                         featuredSettingSlotDao = featuredSettingSlotDao,
+                        legacyEqualizerProfileDao = legacyEqualizerProfileDao,
                     )
                 } else {
                     deviceSettingsManager.value = null
@@ -121,6 +128,7 @@ class DeviceSettingsManager(
     private val deviceManager: DeviceConnectionManager,
     private val quickPresetSlotDao: QuickPresetSlotDao,
     private val featuredSettingSlotDao: FeaturedSettingSlotDao,
+    private val legacyEqualizerProfileDao: LegacyEqualizerProfileDao,
 ) : AutoCloseable {
     private val coroutineScope = CoroutineScope(Job(parent))
     private val quickPresetHandler = session.quickPresetHandler()
@@ -222,5 +230,29 @@ class DeviceSettingsManager(
 
     private suspend fun refreshQuickPresets() {
         _quickPresetsFlow.value = quickPresetHandler.quickPresets(device).sortedBy { it.name }
+    }
+
+    val legacyEqualizerProfilesFlow = legacyEqualizerProfileDao.all()
+
+    fun migrateLegacyEqualizerProfile(legacyEqualizerProfile: LegacyEqualizerProfile) {
+        val oldVolumeAdjustments = device.setting("volumeAdjustments") ?: return
+        if (oldVolumeAdjustments !is Setting.EqualizerSetting) return
+
+        coroutineScope.launch {
+            device.setSettingValues(
+                listOf(
+                    SettingIdValuePair(
+                        "volumeAdjustments",
+                        legacyEqualizerProfile.getVolumeAdjustments().map { (it * 10.0).roundToInt().toShort() }
+                            .toValue(),
+                    ),
+                    SettingIdValuePair(
+                        "customEqualizerProfile",
+                        Value.ModifiableSelectCommand(ModifiableSelectCommandInner.Add(legacyEqualizerProfile.name)),
+                    ),
+                    SettingIdValuePair("volumeAdjustments", oldVolumeAdjustments.toValue()),
+                ),
+            )
+        }
     }
 }

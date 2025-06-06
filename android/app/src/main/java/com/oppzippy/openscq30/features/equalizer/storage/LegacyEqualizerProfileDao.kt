@@ -8,33 +8,33 @@ import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-abstract class CustomProfileDao {
+abstract class LegacyEqualizerProfileDao {
     @Query("SELECT * FROM custom_equalizer_profile")
-    abstract suspend fun getAll(): List<CustomProfile>
+    abstract suspend fun getAll(): List<LegacyEqualizerProfile>
 
     @Query("SELECT * FROM custom_equalizer_profile")
-    abstract fun all(): Flow<List<CustomProfile>>
+    abstract fun all(): Flow<List<LegacyEqualizerProfile>>
 
     @Query("SELECT * FROM custom_equalizer_profile WHERE name = :name")
-    abstract suspend fun get(name: String): CustomProfile?
+    abstract suspend fun get(name: String): LegacyEqualizerProfile?
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
-    abstract suspend fun insert(customProfile: CustomProfile)
+    abstract suspend fun insert(customProfile: LegacyEqualizerProfile)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    abstract suspend fun insertIgnoreConflicts(customProfile: CustomProfile)
+    abstract suspend fun insertIgnoreConflicts(customProfile: LegacyEqualizerProfile)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun upsert(customProfile: CustomProfile)
+    abstract suspend fun upsert(customProfile: LegacyEqualizerProfile)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun upsertAll(customProfile: List<CustomProfile>)
+    abstract suspend fun upsertAll(customProfile: List<LegacyEqualizerProfile>)
 
     @Query("DELETE FROM custom_equalizer_profile WHERE name = :name")
     abstract suspend fun delete(name: String)
 
     @Transaction
-    open suspend fun insertAndRename(profiles: List<CustomProfile>) {
+    open suspend fun insertAndRename(profiles: List<LegacyEqualizerProfile>) {
         profiles.forEach { profile ->
             val name = findRename(profile.name)
             // skip if we can't find a suitable name

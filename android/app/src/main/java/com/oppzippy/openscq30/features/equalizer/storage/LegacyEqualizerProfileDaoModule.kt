@@ -9,8 +9,8 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class CustomProfileDaoModule {
+class LegacyEqualizerProfileDaoModule {
     @Provides
     @Singleton
-    fun provideCustomProfileDao(database: AppDatabase): CustomProfileDao = database.equalizerCustomProfileDao()
+    fun provideCustomProfileDao(database: AppDatabase): LegacyEqualizerProfileDao = database.equalizerCustomProfileDao()
 }

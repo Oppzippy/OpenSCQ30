@@ -1,6 +1,7 @@
 package com.oppzippy.openscq30.ui.devicesettings
 
 import androidx.compose.runtime.Composable
+import com.oppzippy.openscq30.features.equalizer.storage.LegacyEqualizerProfile
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.lib.wrapper.QuickPreset
 import com.oppzippy.openscq30.lib.wrapper.Setting
@@ -27,6 +28,8 @@ fun DeviceSettingsScreen(
     featuredSettingSlotsFlow: Flow<List<String?>>,
     onFeaturedSettingSlotChange: (Int, String?) -> Unit,
     onQuickPresetLoadCurrentSettings: (String) -> Unit,
+    legacyEqualizerProfilesFlow: Flow<List<LegacyEqualizerProfile>>,
+    onMigrateLegacyEqualizerProfile: (LegacyEqualizerProfile) -> Unit,
 ) {
     when (connectionStatus) {
         is ConnectionStatus.Connected -> {
@@ -46,6 +49,8 @@ fun DeviceSettingsScreen(
                 featuredSettingSlotsFlow = featuredSettingSlotsFlow,
                 onFeaturedSettingSlotChange = onFeaturedSettingSlotChange,
                 onQuickPresetLoadCurrentSettings = onQuickPresetLoadCurrentSettings,
+                legacyEqualizerProfilesFlow = legacyEqualizerProfilesFlow,
+                onMigrateLegacyEqualizerProfile = onMigrateLegacyEqualizerProfile,
             )
         }
 

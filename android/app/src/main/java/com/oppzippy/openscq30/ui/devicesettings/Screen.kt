@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Speaker
+import androidx.compose.material.icons.filled.Update
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -56,6 +57,16 @@ sealed class Screen {
             StringResourceOrString.StringResource(R.string.status_notification),
             Icons.Filled.Notifications,
         )
+    }
+
+    @Serializable
+    data object MigrateLegacyEqualizerProfiles : Screen() {
+        val screenInfo =
+            ScreenInfo(
+                this,
+                StringResourceOrString.StringResource(R.string.migrate_legacy_equalizer_profiles),
+                Icons.Filled.Update,
+            )
     }
 }
 

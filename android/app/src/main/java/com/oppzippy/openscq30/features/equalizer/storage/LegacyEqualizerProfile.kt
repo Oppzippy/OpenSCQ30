@@ -21,7 +21,7 @@ private fun scaleDownToDouble(value: Int): Double = value.toDouble() / SCALE_FAC
         ),
     ],
 )
-data class CustomProfile(
+data class LegacyEqualizerProfile(
     @PrimaryKey val name: String,
     val band100: Int,
     val band200: Int,
@@ -69,7 +69,7 @@ data class CustomProfile(
     )
 }
 
-fun List<Double>.toCustomProfile(name: String): CustomProfile = CustomProfile(
+fun List<Double>.toCustomProfile(name: String): LegacyEqualizerProfile = LegacyEqualizerProfile(
     name,
     scaleUpToInt(this[0]),
     scaleUpToInt(this[1]),

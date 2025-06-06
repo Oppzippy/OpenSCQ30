@@ -12,8 +12,8 @@ import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.oppzippy.openscq30.features.equalizer.storage.CustomProfile
-import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
+import com.oppzippy.openscq30.features.equalizer.storage.LegacyEqualizerProfile
+import com.oppzippy.openscq30.features.equalizer.storage.LegacyEqualizerProfileDao
 import com.oppzippy.openscq30.features.statusnotification.storage.FeaturedSettingSlot
 import com.oppzippy.openscq30.features.statusnotification.storage.FeaturedSettingSlotDao
 import com.oppzippy.openscq30.features.statusnotification.storage.QuickPresetSlot
@@ -22,7 +22,7 @@ import com.oppzippy.openscq30.features.statusnotification.storage.QuickPresetSlo
 @Database(
     version = 13,
     entities = [
-        CustomProfile::class,
+        LegacyEqualizerProfile::class,
         QuickPresetSlot::class,
         FeaturedSettingSlot::class,
     ],
@@ -42,7 +42,7 @@ import com.oppzippy.openscq30.features.statusnotification.storage.QuickPresetSlo
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
-    abstract fun equalizerCustomProfileDao(): CustomProfileDao
+    abstract fun equalizerCustomProfileDao(): LegacyEqualizerProfileDao
     abstract fun quickPresetSlotDao(): QuickPresetSlotDao
     abstract fun featuredSettingSlotDao(): FeaturedSettingSlotDao
 

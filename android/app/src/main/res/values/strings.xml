@@ -91,4 +91,6 @@
     <string name="information">Information</string>
     <string name="load_current_settings_help">Load Current Settings will replace all settings in the quick preset with their current values. This will not affect which settings are enabled as a part of the quick preset.</string>
     <string name="close">Close</string>
+    <string name="migrate_legacy_equalizer_profiles">Migrate Legacy Equalizer Profiles</string>
+    <string name="migrate">Migrate</string>
 </resources>

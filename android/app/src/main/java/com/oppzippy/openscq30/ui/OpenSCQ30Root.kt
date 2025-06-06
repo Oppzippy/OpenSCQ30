@@ -76,6 +76,8 @@ fun OpenSCQ30Root(viewModel: OpenSCQ30RootViewModel = hiltViewModel()) {
                                     deviceSettings.setFeaturedSettingSlot(index, name)
                                 },
                                 onQuickPresetLoadCurrentSettings = { deviceSettings.createQuickPreset(it) },
+                                legacyEqualizerProfilesFlow = deviceSettings.legacyEqualizerProfilesFlow,
+                                onMigrateLegacyEqualizerProfile = { deviceSettings.migrateLegacyEqualizerProfile(it) },
                             )
                         } else {
                             Loading()

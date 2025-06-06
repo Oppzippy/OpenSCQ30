@@ -25,6 +25,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.features.equalizer.storage.LegacyEqualizerProfile
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.lib.bindings.translateCategoryId
 import com.oppzippy.openscq30.lib.bindings.translateDeviceModel
@@ -53,6 +54,8 @@ fun DeviceSettings(
     featuredSettingSlotsFlow: Flow<List<String?>>,
     onFeaturedSettingSlotChange: (Int, String?) -> Unit,
     onQuickPresetLoadCurrentSettings: (String) -> Unit,
+    legacyEqualizerProfilesFlow: Flow<List<LegacyEqualizerProfile>>,
+    onMigrateLegacyEqualizerProfile: (LegacyEqualizerProfile) -> Unit,
 ) {
     val categoryIds by categoryIdsFlow.collectAsState(emptyList())
 
@@ -60,6 +63,7 @@ fun DeviceSettings(
         categoryIds.map { Screen.SettingsCategory(it).screenInfo() }.toMutableList()
     listedScreens.add(Screen.QuickPresets.screenInfo)
     listedScreens.add(Screen.StatusNotification.screenInfo)
+    listedScreens.add(Screen.MigrateLegacyEqualizerProfiles.screenInfo)
 
     // compose navigation does not allow us to use polymorphism with routes, so instead a mapping of
     // class path to route name is kept
@@ -185,6 +189,14 @@ fun DeviceSettings(
                     quickPresets = quickPresets.map { it.name },
                     quickPresetSlots = quickPresetSlots,
                     onQuickPresetSlotChange = onQuickPresetSlotChange,
+                )
+            }
+
+            composable<Screen.MigrateLegacyEqualizerProfiles> {
+                val legacyEqualizerProfiles by legacyEqualizerProfilesFlow.collectAsState(emptyList())
+                MigrateLegacyEqualizerProfilesPage(
+                    legacyEqualizerProfiles = legacyEqualizerProfiles,
+                    onMigrateLegacyEqualizerProfile = onMigrateLegacyEqualizerProfile,
                 )
             }
         }
