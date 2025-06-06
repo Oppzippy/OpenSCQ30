@@ -5,19 +5,14 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.oppzippy.openscq30.features.preferences.Preferences
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
-@AndroidEntryPoint
 class AutoStartReceiver : BroadcastReceiver() {
-    @Inject
-    lateinit var preferences: Preferences
-
     override fun onReceive(context: Context?, intent: Intent?) {
-        if (intent?.action == Intent.ACTION_BOOT_COMPLETED) {
+        if (context != null && intent?.action == Intent.ACTION_BOOT_COMPLETED) {
+            val preferences = Preferences(context.applicationContext)
             if (preferences.autoConnect) {
                 Log.d("AutoStartReceiver", "starting background service")
-                context?.applicationContext?.startService(
+                context.applicationContext.startService(
                     Intent(context.applicationContext, AutoConnectService::class.java),
                 )
             } else {

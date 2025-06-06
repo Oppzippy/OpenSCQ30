@@ -4,51 +4,33 @@ import android.content.Intent
 import android.os.Build
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.lifecycle.lifecycleScope
+import androidx.compose.ui.test.performTextInput
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
-import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
-import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDeviceProvider
-import com.oppzippy.openscq30.features.equalizer.storage.CustomProfileDao
-import com.oppzippy.openscq30.features.equalizer.storage.toCustomProfile
-import com.oppzippy.openscq30.features.soundcoredevice.api.SoundcoreDeviceConnector
-import com.oppzippy.openscq30.features.soundcoredevice.impl.DemoSoundcoreDeviceConnector
-import com.oppzippy.openscq30.features.soundcoredevice.impl.SoundcoreDevice
+import com.oppzippy.openscq30.actions.addAndConnectToDemoDevice
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
-import com.oppzippy.openscq30.features.statusnotification.storage.FallbackQuickPreset
-import com.oppzippy.openscq30.features.statusnotification.storage.QuickPreset
-import com.oppzippy.openscq30.features.statusnotification.storage.QuickPresetRepository
-import com.oppzippy.openscq30.lib.wrapper.AmbientSoundMode
-import com.oppzippy.openscq30.lib.wrapper.PresetEqualizerProfile
 import com.oppzippy.openscq30.ui.OpenSCQ30Root
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
-import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.junit4.MockKRule
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withTimeout
+import java.util.regex.Pattern
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
 @HiltAndroidTest
 class NotificationTest {
-    @get:Rule
+    @get:Rule(order = 0)
     val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(
         android.Manifest.permission.POST_NOTIFICATIONS,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -58,40 +40,30 @@ class NotificationTest {
         },
     )
 
-    @get:Rule
+    @get:Rule(order = 1)
     val mockkRule = MockKRule(this)
 
-    @get:Rule(order = 1)
+    @get:Rule(order = 2)
     val hiltRule = HiltAndroidRule(this)
 
-    @get:Rule(order = 2)
+    @get:Rule(order = 3)
     val composeRule = createAndroidComposeRule<TestActivity>()
-
-    @Inject
-    lateinit var bluetoothDeviceProvider: BluetoothDeviceProvider
-
-    @Inject
-    lateinit var soundcoreDeviceConnector: SoundcoreDeviceConnector
-
-    @Inject
-    lateinit var quickPresetRepository: QuickPresetRepository
-
-    @Inject
-    lateinit var customProfileDao: CustomProfileDao
 
     private lateinit var uiDevice: UiDevice
 
-    private val deviceModel = "0123"
-    private val notificationTitle = By.text("Connected to Demo Device")
+    private val notificationTitle = By.text("Connected to Soundcore Life Q30")
     private val notification: UiObject2
         get() {
             return uiDevice.findObject(notificationTitle).parent.parent.parent!!
         }
 
+    private fun getString(id: Int): String = composeRule.activity.getString(id)
+    private fun getString(id: Int, vararg formatArgs: Any): String = composeRule.activity.getString(id, *formatArgs)
+
     private fun expandNotification() {
         notification.findObject(By.desc("Expand"))?.click()
-        val disconnect = By.desc(composeRule.activity.getString(R.string.disconnect))
-        notification.wait(Until.hasObject(disconnect), 1000)
+        val disconnect = By.desc(getString(R.string.disconnect))
+        notification.wait(Until.hasObject(disconnect), 5000)
     }
 
     @Before
@@ -107,8 +79,11 @@ class NotificationTest {
     }
 
     @Test
-    fun opensAppWhenNotificationIsClicked() = runTest {
-        setUpDevice()
+    fun opensAppWhenNotificationIsClicked() {
+        composeRule.setContent {
+            OpenSCQ30Root()
+        }
+        addAndConnectToDemoDevice(composeRule, "Soundcore Life Q30")
 
         uiDevice.pressHome()
         uiDevice.openNotification()
@@ -119,14 +94,17 @@ class NotificationTest {
     }
 
     @Test
-    fun disconnectsAndClosesNotificationWhenDisconnectIsClicked() = runTest {
-        setUpDevice()
+    fun disconnectsAndClosesNotificationWhenDisconnectIsClicked() {
+        composeRule.setContent {
+            OpenSCQ30Root()
+        }
+        addAndConnectToDemoDevice(composeRule, "Soundcore Life Q30")
 
         uiDevice.openNotification()
         uiDevice.wait(Until.hasObject(notificationTitle), 1000)
         expandNotification()
 
-        val disconnect = By.desc(composeRule.activity.getString(R.string.disconnect))
+        val disconnect = By.desc(getString(R.string.disconnect))
         notification.findObject(disconnect).click()
 
         uiDevice.wait(Until.gone(notificationTitle), 1000)
@@ -137,150 +115,39 @@ class NotificationTest {
     }
 
     @Test
-    fun quickPresetButtonsWork(): Unit = runBlocking {
-        quickPresetRepository.insert(
-            QuickPreset(
-                deviceModel = deviceModel,
-                index = 0,
-                ambientSoundMode = AmbientSoundMode.Transparency,
-            ),
-        )
-        quickPresetRepository.insert(
-            QuickPreset(
-                deviceModel = deviceModel,
-                index = 1,
-                name = "Test Preset 2",
-                ambientSoundMode = AmbientSoundMode.NoiseCanceling,
-            ),
-        )
-        val device = setUpDevice()
-
-        uiDevice.openNotification()
-        uiDevice.wait(Until.hasObject(notificationTitle), 1000)
-        expandNotification()
-
-        val quickPreset1 =
-            By.desc(composeRule.activity.getString(R.string.quick_preset_number, 1))
-        uiDevice.wait(Until.hasObject(quickPreset1.clickable(true)), 1000)
-        notification.findObject(quickPreset1).click()
-
-        withTimeout(1.seconds) {
-            device.stateFlow.first { it.soundModes?.ambientSoundMode == AmbientSoundMode.Transparency }
-        }
-
-        val quickPreset2 = By.desc("Test Preset 2")
-        notification.findObject(quickPreset2).click()
-        withTimeout(1.seconds) {
-            device.stateFlow.first { it.soundModes?.ambientSoundMode == AmbientSoundMode.NoiseCanceling }
-        }
-    }
-
-    @Test
-    fun quickPresetEqualizerConfigurationWorks(): Unit = runBlocking {
-        customProfileDao.upsert(
-            listOf(
-                0.0,
-                0.1,
-                0.2,
-                0.3,
-                0.4,
-                0.5,
-                0.6,
-                0.7,
-            ).toCustomProfile("Test Profile"),
-        )
-        quickPresetRepository.insert(
-            QuickPreset(
-                deviceModel = deviceModel,
-                index = 0,
-                customEqualizerProfileName = "Test Profile",
-            ),
-        )
-        quickPresetRepository.insert(
-            QuickPreset(
-                deviceModel = deviceModel,
-                index = 1,
-                presetEqualizerProfile = PresetEqualizerProfile.SoundcoreSignature,
-            ),
-        )
-        val device = setUpDevice()
-
-        uiDevice.openNotification()
-        uiDevice.wait(Until.hasObject(notificationTitle), 1000)
-        expandNotification()
-
-        // Custom equalizer profile
-        val quickPreset1 = By.desc(composeRule.activity.getString(R.string.quick_preset_number, 1))
-        uiDevice.wait(Until.hasObject(quickPreset1.clickable(true)), 1000)
-        notification.findObject(quickPreset1).click()
-
-        withTimeout(2.seconds) {
-            device.stateFlow.first { it.equalizerConfiguration.presetProfile == null }
-        }
-
-        // Preset equalizer profile
-        val quickPreset2 = By.desc(composeRule.activity.getString(R.string.quick_preset_number, 2))
-        notification.findObject(quickPreset2).click()
-        withTimeout(2.seconds) {
-            device.stateFlow.first {
-                it.equalizerConfiguration.presetProfile == PresetEqualizerProfile.SoundcoreSignature
-            }
-        }
-    }
-
-    @Test
-    fun deviceSpecificProfileNamesOverrideFallbacks() = runTest {
-        quickPresetRepository.insert(
-            QuickPreset(
-                deviceModel = deviceModel,
-                index = 0,
-                name = "device specific 1",
-            ),
-        )
-        quickPresetRepository.insertFallback(
-            FallbackQuickPreset(
-                0,
-                "fallback 1",
-            ),
-        )
-        quickPresetRepository.insertFallback(
-            FallbackQuickPreset(
-                1,
-                "fallback 2",
-            ),
-        )
-
-        setUpDevice()
-
-        uiDevice.openNotification()
-        uiDevice.wait(Until.hasObject(notificationTitle), 1000)
-        expandNotification()
-
-        assertNotNull("device specific 1", notification.findObject(By.desc("device specific 1")))
-        assertNotNull("fallback 2", notification.findObject(By.desc("fallback 2")))
-    }
-
-    private suspend fun setUpDevice(): SoundcoreDevice {
-        val bluetoothDevices = listOf(BluetoothDevice("Demo Device", "00:00:00:00:00:00", true))
-        every { bluetoothDeviceProvider.getDevices() } returns bluetoothDevices
-
-        val device = DemoSoundcoreDeviceConnector().connectToSoundcoreDevice(
-            macAddress = "00:00:00:00:00:00",
-            coroutineScope = composeRule.activity.lifecycleScope,
-        )
-        coEvery {
-            soundcoreDeviceConnector.connectToSoundcoreDevice(
-                "00:00:00:00:00:00",
-                any(),
-            )
-        } coAnswers {
-            device
-        }
-
+    fun quickPresetButtonsWork() {
         composeRule.setContent {
             OpenSCQ30Root()
         }
-        composeRule.onNodeWithText("Demo Device").performClick()
-        return device
+        addAndConnectToDemoDevice(composeRule, "Soundcore Life Q30")
+        // Create the quick preset
+        composeRule.onNodeWithText(getString(R.string.quick_presets)).performClick()
+        composeRule.onNodeWithContentDescription(getString(R.string.create)).performClick()
+        composeRule.onNodeWithText(getString(R.string.name)).performTextInput("My Preset 1")
+        composeRule.onNodeWithText(getString(R.string.create)).performClick()
+        composeRule.onNodeWithText(getString(R.string.edit)).performClick()
+        composeRule.onNodeWithText("Ambient Sound Mode").performClick()
+        composeRule.onNodeWithContentDescription(getString(R.string.back)).performClick()
+        composeRule.onNodeWithContentDescription(getString(R.string.back)).performClick()
+        // Add it to slot 1
+        composeRule.onNodeWithText(getString(R.string.status_notification)).performClick()
+        composeRule.onNodeWithTag(getString(R.string.quick_preset_slot_x, 1) + " select").performClick()
+        composeRule.onNodeWithText("My Preset 1").performClick()
+        composeRule.onNodeWithContentDescription(getString(R.string.back)).performClick()
+        // Change the ambient sound mode away from the quick preset
+        composeRule.onNodeWithText("Sound Modes").performClick()
+        composeRule.onNodeWithText("Noise Canceling").performClick()
+        composeRule.onNodeWithText("Normal").performClick()
+        composeRule.onNodeWithText("Noise Canceling").assertDoesNotExist()
+
+        // Activate the quick preset via the notification
+        uiDevice.openNotification()
+        uiDevice.wait(Until.hasObject(notificationTitle), 5000)
+        expandNotification()
+        notification.findObject(By.text(Pattern.compile("My Preset 1", Pattern.CASE_INSENSITIVE))).click()
+        uiDevice.pressBack()
+
+        composeRule.onNodeWithText("Noise Canceling")
+            .assertExists("ambient sound mode should change when activating quick preset")
     }
 }
