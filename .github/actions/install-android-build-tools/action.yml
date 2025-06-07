@@ -27,10 +27,6 @@ runs:
       if: inputs.cache == 'true'
       uses: Swatinem/rust-cache@v2
 
-    - name: Install protobuf compiler
-      shell: bash
-      run: sudo apt-get install protobuf-compiler
-
     - uses: actions/setup-java@v4
       with:
         distribution: temurin
