@@ -1,21 +1,16 @@
 package com.oppzippy.openscq30.ui
 
-import com.oppzippy.openscq30.features.soundcoredevice.impl.SoundcoreDevice
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
-import com.oppzippy.openscq30.lib.wrapper.DeviceState
 import com.oppzippy.openscq30.test.MainDispatcherRule
-import com.oppzippy.openscq30.ui.devicesettings.models.UiDeviceState
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
-import java.util.UUID
 import junit.framework.TestCase.assertEquals
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.timeout
@@ -43,13 +38,13 @@ class DeviceServiceConnectionTest {
     @Before
     fun setUp() {
         connectionStatusFlow = MutableStateFlow(ConnectionStatus.Disconnected)
-        every { service.connectionManager.connectionStatusFlow } returns connectionStatusFlow
+        every { service.connectionStatusFlow } returns connectionStatusFlow
     }
 
     @Test
     fun startsDisconnected() {
         val connection = DeviceServiceConnection(unbind = {})
-        assertEquals(UiDeviceState.Disconnected, connection.connectionStatusFlow.value)
+        assertEquals(ConnectionStatus.Disconnected, connection.connectionStatusFlow.value)
     }
 
     @Test
@@ -58,57 +53,10 @@ class DeviceServiceConnectionTest {
 
         every { binder.getService() } returns service
         connection.onServiceConnected(null, binder)
-        connectionStatusFlow.value = ConnectionStatus.Connecting("00:00:00:00:00:00", Job())
+        connectionStatusFlow.value = ConnectionStatus.Connecting("00:00:00:00:00:00")
 
         // It will throw an exception if it times out, so no need to assert
-        connection.connectionStatusFlow.timeout(10.milliseconds).first { it is UiDeviceState.Loading }
-    }
-
-    @Test
-    fun movesToConnectedState() = runTest {
-        val connection = DeviceServiceConnection(unbind = {})
-
-        every { binder.getService() } returns service
-        connection.onServiceConnected(null, binder)
-
-        // we aren't linked with openscq30_android.so, so we need to mock SoundcoreDeviceState
-        val deviceStateFlow = MutableStateFlow<DeviceState>(mockk())
-        val device: SoundcoreDevice = mockk()
-        every { device.name } returns "Test"
-        every { device.macAddress } returns "00:00:00:00:00:00"
-        every { device.bleServiceUuid } returns UUID(0, 0)
-        every { device.stateFlow } returns deviceStateFlow
-
-        connectionStatusFlow.value = ConnectionStatus.Connected(device)
-
-        val state = connection.connectionStatusFlow.timeout(10.milliseconds)
-            .first { it is UiDeviceState.Connected } as UiDeviceState.Connected
-        assertEquals(deviceStateFlow.value, state.deviceState)
-    }
-
-    @Test
-    fun movesToDisconnected() = runTest {
-        val connection = DeviceServiceConnection(unbind = {})
-
-        every { binder.getService() } returns service
-        connection.onServiceConnected(null, binder)
-
-        // we aren't linked with openscq30_android.so, so we need to mock SoundcoreDeviceState
-        val deviceStateFlow = MutableStateFlow<DeviceState>(mockk(relaxed = true))
-        val device: SoundcoreDevice = mockk()
-        every { device.stateFlow } returns deviceStateFlow
-        every { device.name } returns "Test"
-        every { device.macAddress } returns "00:00:00:00:00:00"
-        every { device.bleServiceUuid } returns UUID(0, 0)
-
-        connectionStatusFlow.value = ConnectionStatus.Connected(device)
-
-        val state = connection.connectionStatusFlow.timeout(10.milliseconds)
-            .first { it is UiDeviceState.Connected } as UiDeviceState.Connected
-        assertEquals(deviceStateFlow.value, state.deviceState)
-
-        connection.onServiceDisconnected(mockk())
-        assertEquals(UiDeviceState.Disconnected, connection.connectionStatusFlow.value)
+        connection.connectionStatusFlow.timeout(10.milliseconds).first { it is ConnectionStatus.Connecting }
     }
 
     @Test

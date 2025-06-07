@@ -3,9 +3,10 @@ package com.oppzippy.openscq30.ui
 import android.content.Intent
 import com.oppzippy.openscq30.OpenSCQ30Application
 import com.oppzippy.openscq30.android.IntentFactory
-import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDevice
-import com.oppzippy.openscq30.features.bluetoothdeviceprovider.BluetoothDeviceProvider
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
+import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
+import com.oppzippy.openscq30.lib.wrapper.ConnectionDescriptor
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
@@ -22,9 +23,6 @@ class DeviceSettingsManagerTest {
     @RelaxedMockK
     lateinit var application: OpenSCQ30Application
 
-    @RelaxedMockK
-    lateinit var deviceProvider: BluetoothDeviceProvider
-
     @MockK
     lateinit var intentFactory: IntentFactory
 
@@ -33,11 +31,18 @@ class DeviceSettingsManagerTest {
         val mockIntent: Intent = mockk(relaxed = true)
         every { intentFactory(any(), any()) } returns mockIntent
 
-        val device = BluetoothDevice("Test Device", "00:00:00:00:00:00", true)
-        every { deviceProvider.getDevices() } returns listOf(device)
-        val viewModel = DeviceSettingsManager(application, intentFactory)
+        val viewModel = OpenSCQ30RootViewModel(
+            session = mockk<OpenScq30Session>().apply {
+                coEvery { listDemoDevices(any()) } returns listOf(ConnectionDescriptor("Test", "00:00:00:00:00:00"))
+            },
+            quickPresetSlotDao = mockk(relaxed = true),
+            legacyEqualizerProfileDao = mockk(relaxed = true),
+            featuredSettingSlotDao = mockk(relaxed = true),
+            intentFactory = intentFactory,
+            application = application,
+        )
 
-        viewModel.selectDevice(device)
+        viewModel.selectDevice("00:00:00:00:00:00")
         verify { mockIntent.putExtra(DeviceService.MAC_ADDRESS, "00:00:00:00:00:00") }
         verify(exactly = 1) { application.startForegroundService(mockIntent) }
         verify(atMost = 2) { application.bindService(mockIntent, any(), any() as Int) }
@@ -47,7 +52,14 @@ class DeviceSettingsManagerTest {
     fun stopsServiceWhenDeselectingDevice() {
         every { intentFactory(application, DeviceService::class.java) } returns mockk()
 
-        val viewModel = DeviceSettingsManager(application, intentFactory)
+        val viewModel = OpenSCQ30RootViewModel(
+            session = mockk(relaxed = true),
+            quickPresetSlotDao = mockk(relaxed = true),
+            legacyEqualizerProfileDao = mockk(relaxed = true),
+            featuredSettingSlotDao = mockk(relaxed = true),
+            intentFactory = intentFactory,
+            application = application,
+        )
         viewModel.deselectDevice()
         verify(exactly = 1) { application.stopService(any()) }
         verify(exactly = 1) { application.unbindService(any()) }

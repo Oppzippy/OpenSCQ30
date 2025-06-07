@@ -107,7 +107,6 @@ class OpenSCQ30RootViewModel @Inject constructor(
     }
 
     fun deselectDevice() {
-        application.stopService(intentFactory(application, DeviceService::class.java))
         unbindDeviceService()
     }
 
