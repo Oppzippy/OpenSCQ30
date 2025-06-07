@@ -18,10 +18,9 @@ license = "GPL-3.0-or-later"
 strip = true
 lto = true
 
-[profile.release-debuginfo]
+[profile.release-android]
 inherits = "release"
 strip = false
-debug = 2
 
 [workspace.dependencies]
 clap = "4"

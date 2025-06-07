@@ -200,11 +200,11 @@ interface InjectedExecOps {
     val execOps: ExecOperations
 }
 
-listOf("debug", "release").forEach { profile ->
+listOf(Pair("debug", "debug"), Pair("release", "release-android")).forEach { (gradleProfile, cargoProfile) ->
     archTriplets.forEach { (arch, target) ->
         // Build with cargo
-        tasks.register<Exec>("cargo-build-$profile-$arch") {
-            description = "Building core for $profile-$arch"
+        tasks.register<Exec>("cargo-build-$gradleProfile-$arch") {
+            description = "Building core for $gradleProfile-$arch"
             workingDir = rustProjectDir
             commandLine(
                 "cargo",
@@ -215,27 +215,27 @@ listOf("debug", "release").forEach { profile ->
                 "26",
                 "build",
                 "--profile",
-                if (profile == "debug") "dev" else profile,
+                if (cargoProfile == "debug") "dev" else cargoProfile,
             )
         }
         // Copy build libs into this app's libs directory
-        tasks.register<Copy>("rust-deploy-$profile-$arch") {
-            dependsOn("cargo-build-$profile-$arch")
-            description = "Copy rust libs for ($profile-$arch) to jniLibs"
-            from("$cargoTargetDirectory/$target/$profile/libopenscq30_android.so")
-            into("src/main/$profile/jniLibs/$arch")
+        tasks.register<Copy>("rust-deploy-$gradleProfile-$arch") {
+            dependsOn("cargo-build-$gradleProfile-$arch")
+            description = "Copy rust libs for ($gradleProfile-$arch) to jniLibs"
+            from("$cargoTargetDirectory/$target/$cargoProfile/libopenscq30_android.so")
+            into("src/main/$gradleProfile/jniLibs/$arch")
         }
 
         // Hook up clean tasks
-        tasks.register<Delete>("clean-$profile-$arch") {
-            description = "Deleting built libs for $profile-$arch"
-            delete(file("src/main/$profile/jniLibs/$arch/libopenscq30_android.so"))
+        tasks.register<Delete>("clean-$gradleProfile-$arch") {
+            description = "Deleting built libs for $gradleProfile-$arch"
+            delete(file("src/main/$gradleProfile/jniLibs/$arch/libopenscq30_android.so"))
         }
-        tasks.clean.dependsOn("clean-$profile-$arch")
+        tasks.clean.dependsOn("clean-$gradleProfile-$arch")
     }
 
-    tasks.register<Exec>("generate-uniffi-bindings-$profile") {
-        dependsOn("cargo-build-$profile-arm64-v8a")
+    tasks.register<Exec>("generate-uniffi-bindings-$gradleProfile") {
+        dependsOn("cargo-build-$gradleProfile-arm64-v8a")
         description = "Generate kotlin bindings using uniffi-bindgen"
         workingDir = rustWorkspaceDir
         // generate bindings
@@ -247,7 +247,7 @@ listOf("debug", "release").forEach { profile ->
             "--",
             "generate",
             "--library",
-            "./target/aarch64-linux-android/$profile/libopenscq30_android.so",
+            "./target/aarch64-linux-android/$cargoProfile/libopenscq30_android.so",
             "--language",
             "kotlin",
             "--out-dir",

@@ -1,5 +1,5 @@
 #define AppName "OpenSCQ30"
-#define AppExeName "openscq30_gui.exe"
+#define AppExeName "openscq30-gui.exe"
 #define AppVersion "1.19.3"
 
 [Setup]
@@ -9,7 +9,7 @@ VersionInfoVersion={#AppVersion}
 AppCopyright=(C) Kyle Scheuing
 AppPublisher=Oppzippy
 AppPublisherURL=https://github.com/Oppzippy/OpenSCQ30
-OutputBaseFilename=OpenSCQ30_Setup
+OutputBaseFilename=OpenSCQ30-Setup
 WizardStyle=modern
 DefaultDirName={autopf}\{#AppName}
 DefaultGroupName={#AppName}

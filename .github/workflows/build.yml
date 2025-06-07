@@ -15,12 +15,10 @@ jobs:
           persist-credentials: false
 
       - name: Install basic requirements
-        run: sudo apt-get install just
+        run: sudo apt-get install -y just pkg-config libdbus-1-dev libxkbcommon-dev
       - uses: dtolnay/rust-toolchain@stable
-      - name: Build cli
-        run: cargo build --release --package openscq30-cli
-      - name: Build gui
-        run: cargo build --release --package openscq30-gui
+      - name: Build cli and gui
+        run: cargo build --release --package openscq30-cli --package openscq30-gui
 
       - name: Move to artifacts directory
         run: |
@@ -35,32 +33,29 @@ jobs:
           path: artifacts/*
 
   build_windows:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
 
-      - name: Install basic requirements
-        run: sudo apt-get install just
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: x86_64-pc-windows-gnu
-      - name: Build cli
-        run: cargo build --target x86_64-pc-windows-gnu --release --package openscq30-cli
-      - name: Build gui
-        run: cargo build --target x86_64-pc-windows-gnu --release --package openscq30-gui
+      - name: Build cli and gui
+        run: cargo build --release --package openscq30-cli --package openscq30-gui
+      - name: Build installer
+        shell: bash
+        run: ./packaging/windows/build.sh
 
       - name: Move to artifacts directory
         run: |
-          mkdir artifacts
-          mv target/release/openscq30 artifacts/openscq30-cli-linux-x86_64
-          mv target/release/openscq30-gui artifacts/openscq30-gui-linux-x86_64
+          New-Item -Type Directory -Path artifacts
+          Move-Item target\release\openscq30.exe artifacts\openscq30-cli-windows-x86_64.exe
+          Move-Item .\packaging\windows\Output\OpenSCQ30-Setup.exe artifacts\openscq30-gui-windows-x86_64.exe
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux
+          name: windows
           path: artifacts/*
 
   build_android:
@@ -75,10 +70,10 @@ jobs:
           cache: false
 
       - name: Build
-        run: ./gradlew --no-daemon assembleBluetoothRelease
+        run: ./gradlew --no-daemon assembleRelease
         working-directory: android
       - name: Rename apk
-        run: mv android/app/build/outputs/apk/bluetooth/release/app-bluetooth-release-unsigned.apk openscq30-android.apk
+        run: mv android/app/build/outputs/apk/release/app-release-unsigned.apk openscq30-android.apk
       - name: Upload apk
         uses: actions/upload-artifact@v4
         with:

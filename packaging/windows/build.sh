@@ -12,10 +12,15 @@ if [[ ! -d "$script_dir/dependencies/cosmic-icons" ]]; then
 fi
 
 # Copy files into installation directory
+if [[ -d "$script_dir/root" ]]; then
+    rm -rf "$script_dir/root"
+fi
 mkdir --parents "$script_dir/root/bin"
 mkdir --parents "$script_dir/root/share/icons/Cosmic/scalable"
 
 cp "$input_exe" "$script_dir/root/bin/"
-rsync --archive --delete \
-    "$script_dir/dependencies/cosmic-icons/freedesktop/scalable/" \
+cp --archive \
+    "$script_dir/dependencies/cosmic-icons/freedesktop/scalable/." \
     "$script_dir/root/share/icons/Cosmic/scalable/"
+
+ISCC "$script_dir/setup.iss"
