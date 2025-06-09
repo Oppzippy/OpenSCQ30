@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.ui.devicesettings.Screen
@@ -28,7 +29,7 @@ fun ScreenSelection(screens: List<ScreenInfo>, onNavigation: (Screen) -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Icon(screenInfo.icon, contentDescription = null)
-                Text(screenInfo.name.translated())
+                Text(text = screenInfo.name.translated(), textAlign = TextAlign.Center)
             }
         }
     }
