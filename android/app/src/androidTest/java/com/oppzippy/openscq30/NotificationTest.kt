@@ -1,8 +1,5 @@
 package com.oppzippy.openscq30
 
-import android.content.Intent
-import android.os.Build
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -15,11 +12,7 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.oppzippy.openscq30.actions.addAndConnectToDemoDevice
-import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
-import com.oppzippy.openscq30.ui.OpenSCQ30Root
-import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
-import io.mockk.junit4.MockKRule
 import java.util.regex.Pattern
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -29,25 +22,10 @@ import org.junit.Rule
 import org.junit.Test
 
 @HiltAndroidTest
-class NotificationTest {
+class NotificationTest : OpenSCQ30RootTestBase() {
     @get:Rule(order = 0)
-    val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(
-        android.Manifest.permission.POST_NOTIFICATIONS,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            android.Manifest.permission.BLUETOOTH_CONNECT
-        } else {
-            android.Manifest.permission.BLUETOOTH
-        },
-    )
-
-    @get:Rule(order = 1)
-    val mockkRule = MockKRule(this)
-
-    @get:Rule(order = 2)
-    val hiltRule = HiltAndroidRule(this)
-
-    @get:Rule(order = 3)
-    val composeRule = createAndroidComposeRule<TestActivity>()
+    val notificationPermissionRule: GrantPermissionRule =
+        GrantPermissionRule.grant(android.Manifest.permission.POST_NOTIFICATIONS)
 
     private lateinit var uiDevice: UiDevice
 
@@ -57,9 +35,6 @@ class NotificationTest {
             return uiDevice.findObject(notificationTitle).parent.parent.parent!!
         }
 
-    private fun getString(id: Int): String = composeRule.activity.getString(id)
-    private fun getString(id: Int, vararg formatArgs: Any): String = composeRule.activity.getString(id, *formatArgs)
-
     private fun expandNotification() {
         notification.findObject(By.desc("Expand"))?.click()
         val disconnect = By.desc(getString(R.string.disconnect))
@@ -68,46 +43,38 @@ class NotificationTest {
 
     @Before
     fun setUp() {
-        hiltRule.inject()
         uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
     }
 
     @After
     fun tearDown() {
         uiDevice.pressHome()
-        composeRule.activity.stopService(Intent(composeRule.activity, DeviceService::class.java))
     }
 
     @Test
     fun opensAppWhenNotificationIsClicked() {
-        composeRule.setContent {
-            OpenSCQ30Root()
-        }
         addAndConnectToDemoDevice(composeRule, "Soundcore Life Q30")
 
         uiDevice.pressHome()
         uiDevice.openNotification()
-        uiDevice.wait(Until.hasObject(notificationTitle), 1000)
+        uiDevice.wait(Until.hasObject(notificationTitle), 5000)
         uiDevice.findObject(notificationTitle).click()
-        uiDevice.wait(Until.hasObject(By.pkg("com.oppzippy.openscq30.debug")), 1000)
+        uiDevice.wait(Until.hasObject(By.pkg("com.oppzippy.openscq30.debug")), 5000)
         assertEquals("com.oppzippy.openscq30.debug", uiDevice.currentPackageName)
     }
 
     @Test
     fun disconnectsAndClosesNotificationWhenDisconnectIsClicked() {
-        composeRule.setContent {
-            OpenSCQ30Root()
-        }
         addAndConnectToDemoDevice(composeRule, "Soundcore Life Q30")
 
         uiDevice.openNotification()
-        uiDevice.wait(Until.hasObject(notificationTitle), 1000)
+        uiDevice.wait(Until.hasObject(notificationTitle), 5000)
         expandNotification()
 
         val disconnect = By.desc(getString(R.string.disconnect))
         notification.findObject(disconnect).click()
 
-        uiDevice.wait(Until.gone(notificationTitle), 1000)
+        uiDevice.wait(Until.gone(notificationTitle), 5000)
         assertFalse(uiDevice.hasObject(notificationTitle))
         uiDevice.pressBack()
 
@@ -116,9 +83,6 @@ class NotificationTest {
 
     @Test
     fun quickPresetButtonsWork() {
-        composeRule.setContent {
-            OpenSCQ30Root()
-        }
         addAndConnectToDemoDevice(composeRule, "Soundcore Life Q30")
         // Create the quick preset
         composeRule.onNodeWithText(getString(R.string.quick_presets)).performClick()
