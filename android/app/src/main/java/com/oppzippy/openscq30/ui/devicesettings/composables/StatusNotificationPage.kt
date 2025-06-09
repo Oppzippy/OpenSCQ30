@@ -45,7 +45,12 @@ fun StatusNotificationPage(
             onPermissionGranted = {
                 // Since we may have not had notification permission before this point, we need to resend the
                 // notification to ensure it is visible.
-                context.sendBroadcast(Intent().apply { action = SoundcoreDeviceNotification.ACTION_SEND_NOTIFICATION })
+                context.sendBroadcast(
+                    Intent().apply {
+                        action = SoundcoreDeviceNotification.ACTION_SEND_NOTIFICATION
+                        `package` = context.packageName
+                    },
+                )
             },
         ) {
             inner()
