@@ -4,21 +4,16 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.drawable.Icon
-import androidx.core.graphics.createBitmap
 import com.oppzippy.openscq30.MainActivity
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.features.equalizer.visualization.EqualizerLine
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_DISCONNECT
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_QUICK_PRESET
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.INTENT_EXTRA_PRESET_ID
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_CHANNEL_ID
-import com.oppzippy.openscq30.lib.bindings.OpenScq30Device
 import com.oppzippy.openscq30.lib.bindings.translateDeviceModel
 import com.oppzippy.openscq30.lib.bindings.translateSettingId
 import com.oppzippy.openscq30.lib.bindings.translateValue
-import com.oppzippy.openscq30.lib.wrapper.Setting
 import dagger.hilt.android.scopes.ServiceScoped
 import javax.inject.Inject
 
@@ -99,26 +94,6 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
         }
 
         return builder.build()
-    }
-
-    private fun drawEqualizerLine(device: OpenScq30Device): Bitmap? {
-        device.setting("volumeAdjustments")?.let { equalizer ->
-            if (equalizer is Setting.EqualizerSetting) {
-                val bitmap = createBitmap(100, 100)
-
-                EqualizerLine(
-                    values = equalizer.value,
-                    minVolume = equalizer.setting.min,
-                    maxVolume = equalizer.setting.max,
-                ).drawBitmap(
-                    bitmap = bitmap,
-                    yOffset = bitmap.height / 4F,
-                    height = bitmap.height / 2F,
-                )
-                return bitmap
-            }
-        }
-        return null
     }
 
     private fun buildQuickPresetNotificationAction(presetId: Int, name: String, icon: Icon): Notification.Action =

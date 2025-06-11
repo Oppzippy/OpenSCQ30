@@ -68,15 +68,3 @@ data class LegacyEqualizerProfile(
         scaleDownToDouble(band12800),
     )
 }
-
-fun List<Double>.toCustomProfile(name: String): LegacyEqualizerProfile = LegacyEqualizerProfile(
-    name,
-    scaleUpToInt(this[0]),
-    scaleUpToInt(this[1]),
-    scaleUpToInt(this[2]),
-    scaleUpToInt(this[3]),
-    scaleUpToInt(this[4]),
-    scaleUpToInt(this[5]),
-    scaleUpToInt(this[6]),
-    scaleUpToInt(this[7]),
-)

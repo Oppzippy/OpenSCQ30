@@ -127,7 +127,7 @@ class DeviceSettingsManager(
     private val deviceManager: DeviceConnectionManager,
     private val quickPresetSlotDao: QuickPresetSlotDao,
     private val featuredSettingSlotDao: FeaturedSettingSlotDao,
-    private val legacyEqualizerProfileDao: LegacyEqualizerProfileDao,
+    legacyEqualizerProfileDao: LegacyEqualizerProfileDao,
 ) : AutoCloseable {
     private val coroutineScope = CoroutineScope(Job(parent))
     private val quickPresetHandler = session.quickPresetHandler()
