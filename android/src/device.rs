@@ -96,7 +96,7 @@ impl OpenSCQ30Device {
     pub async fn set_setting_values(
         &self,
         setting_values: Vec<SettingIdValuePair>,
-    ) -> Result<(), crate::Error> {
+    ) -> Result<(), crate::OpenSCQ30Error> {
         self.inner
             .set_setting_values(
                 setting_values

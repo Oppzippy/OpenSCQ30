@@ -46,7 +46,7 @@ pub fn init_native_i18n(languages: Vec<serializable::LanguageIdentifier>) {
 
 #[derive(thiserror::Error, Debug, uniffi::Error)]
 #[uniffi(flat_error)]
-pub enum Error {
+pub enum OpenSCQ30Error {
     #[error("JsonError: {0:?}")]
     JsonError(#[from] serde_json::Error),
     #[error("DeviceError: {0:?}")]

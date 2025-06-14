@@ -25,6 +25,13 @@ impl OpenSCQ30Session {
         })
     }
 
+    #[cfg(debug_assertions)]
+    pub async fn new_with_in_memory_db() -> device::Result<Self> {
+        Ok(Self {
+            database: Arc::new(OpenSCQ30Database::new_in_memory().await?),
+        })
+    }
+
     pub async fn pair(&self, paired_device: PairedDevice) -> device::Result<()> {
         self.database
             .upsert_paired_device(paired_device)

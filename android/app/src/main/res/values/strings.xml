@@ -72,4 +72,10 @@
     <string name="close">Close</string>
     <string name="migrate_legacy_equalizer_profiles">Migrate Legacy Equalizer Profiles</string>
     <string name="migrate">Migrate</string>
+    <string name="error_pairing">Error pairing</string>
+    <string name="error_migrating_legacy_profile">Error migrating legacy profile</string>
+    <string name="error_saving_quick_preset">Error saving quick preset</string>
+    <string name="error_activating_quick_preset">Error activating quick preset</string>
+    <string name="error_changing_settings">Error changing settings</string>
+    <string name="error_connecting">Error connecting</string>
 </resources>

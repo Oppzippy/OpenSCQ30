@@ -10,7 +10,7 @@ impl QuickPresetsHandler {
     pub async fn quick_presets(
         &self,
         device: &OpenSCQ30Device,
-    ) -> Result<Vec<serializable::QuickPreset>, crate::Error> {
+    ) -> Result<Vec<serializable::QuickPreset>, crate::OpenSCQ30Error> {
         let quick_presets = self.inner.quick_presets(device.inner.as_ref()).await?;
         Ok(quick_presets
             .into_iter()
@@ -18,7 +18,11 @@ impl QuickPresetsHandler {
             .collect())
     }
 
-    pub async fn save(&self, device: &OpenSCQ30Device, name: String) -> Result<(), crate::Error> {
+    pub async fn save(
+        &self,
+        device: &OpenSCQ30Device,
+        name: String,
+    ) -> Result<(), crate::OpenSCQ30Error> {
         self.inner
             .save(device.inner.as_ref(), name)
             .await
@@ -31,21 +35,29 @@ impl QuickPresetsHandler {
         name: String,
         setting_id: serializable::SettingId,
         is_enabled: bool,
-    ) -> Result<(), crate::Error> {
+    ) -> Result<(), crate::OpenSCQ30Error> {
         self.inner
             .toggle_field(device.inner.as_ref(), name, setting_id.0, is_enabled)
             .await
             .map_err(Into::into)
     }
 
-    pub async fn activate(&self, device: &OpenSCQ30Device, name: &str) -> Result<(), crate::Error> {
+    pub async fn activate(
+        &self,
+        device: &OpenSCQ30Device,
+        name: &str,
+    ) -> Result<(), crate::OpenSCQ30Error> {
         self.inner
             .activate(device.inner.as_ref(), name)
             .await
             .map_err(Into::into)
     }
 
-    pub async fn delete(&self, device: &OpenSCQ30Device, name: String) -> Result<(), crate::Error> {
+    pub async fn delete(
+        &self,
+        device: &OpenSCQ30Device,
+        name: String,
+    ) -> Result<(), crate::OpenSCQ30Error> {
         self.inner
             .activate(device.inner.as_ref(), name)
             .await

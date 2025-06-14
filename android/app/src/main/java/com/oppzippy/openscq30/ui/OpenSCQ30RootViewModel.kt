@@ -1,9 +1,12 @@
 package com.oppzippy.openscq30.ui
 
 import android.app.Application
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.android.IntentFactory
 import com.oppzippy.openscq30.features.equalizer.storage.LegacyEqualizerProfile
 import com.oppzippy.openscq30.features.equalizer.storage.LegacyEqualizerProfileDao
@@ -14,6 +17,7 @@ import com.oppzippy.openscq30.features.statusnotification.storage.FeaturedSettin
 import com.oppzippy.openscq30.features.statusnotification.storage.FeaturedSettingSlotDao
 import com.oppzippy.openscq30.features.statusnotification.storage.QuickPresetSlot
 import com.oppzippy.openscq30.features.statusnotification.storage.QuickPresetSlotDao
+import com.oppzippy.openscq30.lib.bindings.OpenScq30Exception
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
 import com.oppzippy.openscq30.lib.bindings.SettingIdValuePair
 import com.oppzippy.openscq30.lib.wrapper.ModifiableSelectCommandInner
@@ -50,6 +54,10 @@ class OpenSCQ30RootViewModel @Inject constructor(
     var deviceSettingsManager = MutableStateFlow<DeviceSettingsManager?>(null)
         private set
 
+    companion object {
+        const val TAG = "OpenSCQ30RootViewModel"
+    }
+
     init {
         bindDeviceService()
         viewModelScope.launch {
@@ -57,6 +65,7 @@ class OpenSCQ30RootViewModel @Inject constructor(
                 deviceSettingsManager.value?.close()
                 if (it is ConnectionStatus.Connected) {
                     deviceSettingsManager.value = DeviceSettingsManager(
+                        context = application,
                         session = session,
                         deviceManager = it.deviceManager,
                         parent = coroutineContext.job,
@@ -86,7 +95,7 @@ class OpenSCQ30RootViewModel @Inject constructor(
     private fun stopServiceIfNotificationIsGone() {
         if (!DeviceService.doesNotificationExist(application)) {
             Log.i(
-                "OpenSCQ30Root",
+                TAG,
                 "Stopping service since main activity is exiting and notification is not shown.",
             )
             deselectDevice()
@@ -101,7 +110,7 @@ class OpenSCQ30RootViewModel @Inject constructor(
                 0,
             )
         } catch (ex: SecurityException) {
-            Log.e("RootViewModel", "failed to bind service", ex)
+            Log.e(TAG, "failed to bind service", ex)
             unbindDeviceService()
         }
     }
@@ -122,6 +131,7 @@ class OpenSCQ30RootViewModel @Inject constructor(
 }
 
 class DeviceSettingsManager(
+    val context: Context,
     session: OpenScq30Session,
     parent: Job,
     private val deviceManager: DeviceConnectionManager,
@@ -136,6 +146,10 @@ class DeviceSettingsManager(
     private val _quickPresetsFlow = MutableStateFlow(emptyList<QuickPreset>())
     val quickPresetsFlow = _quickPresetsFlow.asStateFlow()
 
+    companion object {
+        const val TAG = "DeviceSettingsManager"
+    }
+
     init {
         coroutineScope.launch { refreshQuickPresets() }
     }
@@ -146,11 +160,16 @@ class DeviceSettingsManager(
 
     fun setSettingValues(settingValues: List<Pair<String, Value>>) {
         coroutineScope.launch {
-            device.setSettingValues(
-                settingValues.map { (settingId, value) ->
-                    SettingIdValuePair(settingId, value)
-                },
-            )
+            try {
+                device.setSettingValues(
+                    settingValues.map { (settingId, value) ->
+                        SettingIdValuePair(settingId, value)
+                    },
+                )
+            } catch (ex: OpenScq30Exception) {
+                Log.e(TAG, "error setting values of settings", ex)
+                Toast.makeText(context, R.string.error_changing_settings, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -207,14 +226,24 @@ class DeviceSettingsManager(
 
     fun activateQuickPreset(name: String) {
         coroutineScope.launch {
-            quickPresetHandler.activate(device, name)
+            try {
+                quickPresetHandler.activate(device, name)
+            } catch (ex: OpenScq30Exception) {
+                Log.e(TAG, "error activating quick preset", ex)
+                Toast.makeText(context, R.string.error_activating_quick_preset, Toast.LENGTH_SHORT).show()
+            }
             refreshQuickPresets()
         }
     }
 
     fun createQuickPreset(name: String) {
         coroutineScope.launch {
-            quickPresetHandler.save(device, name)
+            try {
+                quickPresetHandler.save(device, name)
+            } catch (ex: OpenScq30Exception) {
+                Log.e(TAG, "error saving quick preset", ex)
+                Toast.makeText(context, R.string.error_saving_quick_preset, Toast.LENGTH_SHORT).show()
+            }
             refreshQuickPresets()
         }
     }
@@ -238,20 +267,27 @@ class DeviceSettingsManager(
         if (oldVolumeAdjustments !is Setting.EqualizerSetting) return
 
         coroutineScope.launch {
-            device.setSettingValues(
-                listOf(
-                    SettingIdValuePair(
-                        "volumeAdjustments",
-                        legacyEqualizerProfile.getVolumeAdjustments().map { (it * 10.0).roundToInt().toShort() }
-                            .toValue(),
+            try {
+                device.setSettingValues(
+                    listOf(
+                        SettingIdValuePair(
+                            "volumeAdjustments",
+                            legacyEqualizerProfile.getVolumeAdjustments().map { (it * 10.0).roundToInt().toShort() }
+                                .toValue(),
+                        ),
+                        SettingIdValuePair(
+                            "customEqualizerProfile",
+                            Value.ModifiableSelectCommand(
+                                ModifiableSelectCommandInner.Add(legacyEqualizerProfile.name),
+                            ),
+                        ),
+                        SettingIdValuePair("volumeAdjustments", oldVolumeAdjustments.toValue()),
                     ),
-                    SettingIdValuePair(
-                        "customEqualizerProfile",
-                        Value.ModifiableSelectCommand(ModifiableSelectCommandInner.Add(legacyEqualizerProfile.name)),
-                    ),
-                    SettingIdValuePair("volumeAdjustments", oldVolumeAdjustments.toValue()),
-                ),
-            )
+                )
+            } catch (ex: OpenScq30Exception) {
+                Log.e(TAG, "error migrating legacy equalizer profile", ex)
+                Toast.makeText(context, R.string.error_migrating_legacy_profile, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

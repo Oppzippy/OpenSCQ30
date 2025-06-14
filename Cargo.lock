@@ -4032,6 +4032,7 @@ dependencies = [
  "android_logger",
  "anyhow",
  "async-trait",
+ "cfg-if",
  "i18n-embed",
  "i18n-embed-fl",
  "itertools",

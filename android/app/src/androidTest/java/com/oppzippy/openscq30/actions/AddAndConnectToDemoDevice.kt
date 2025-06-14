@@ -12,9 +12,16 @@ fun <Rule : TestRule, A : ComponentActivity> addAndConnectToDemoDevice(
     composeRule: AndroidComposeTestRule<Rule, A>,
     modelName: String,
 ) {
+    addDemoDevice(composeRule, modelName)
+    composeRule.onNodeWithText(modelName).performClick()
+}
+
+fun <Rule : TestRule, A : ComponentActivity> addDemoDevice(
+    composeRule: AndroidComposeTestRule<Rule, A>,
+    modelName: String,
+) {
     composeRule.onNodeWithContentDescription(composeRule.activity.getString(R.string.add)).performClick()
     composeRule.onNodeWithText(modelName).performClick()
     composeRule.onNodeWithText(composeRule.activity.getString(R.string.demo_mode)).performClick()
-    composeRule.onNodeWithText(modelName).performClick()
     composeRule.onNodeWithText(modelName).performClick()
 }

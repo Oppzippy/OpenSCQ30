@@ -9,9 +9,12 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Binder
 import android.os.IBinder
+import android.util.Log
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
+import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.soundcoredevice.connectionBackends
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_DISCONNECT
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_QUICK_PRESET
@@ -21,6 +24,7 @@ import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNo
 import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_ID
 import com.oppzippy.openscq30.features.statusnotification.storage.FeaturedSettingSlotDao
 import com.oppzippy.openscq30.features.statusnotification.storage.QuickPresetSlotDao
+import com.oppzippy.openscq30.lib.bindings.OpenScq30Exception
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -41,6 +45,8 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class DeviceService : LifecycleService() {
     companion object {
+        private const val TAG = "DeviceService"
+
         /** Intent extra for setting mac address when launching service */
         const val MAC_ADDRESS = "com.oppzippy.openscq30.macAddress"
 
@@ -99,7 +105,11 @@ class DeviceService : LifecycleService() {
                                 session.quickPresetHandler().use { quickPresetHandler ->
                                     val quickPresets = quickPresetHandler.quickPresets(device)
                                     quickPresets.getOrNull(presetIndex)?.let { preset ->
-                                        quickPresetHandler.activate(device, preset.name)
+                                        try {
+                                            quickPresetHandler.activate(device, preset.name)
+                                        } catch (ex: OpenScq30Exception) {
+                                            Log.e(TAG, "error activating quick preset ${preset.name}", ex)
+                                        }
                                     }
                                 }
                             }
@@ -141,15 +151,17 @@ class DeviceService : LifecycleService() {
         startForeground(NOTIFICATION_ID, notification)
 
         intent?.getStringExtra(MAC_ADDRESS)?.let { macAddress ->
-            val job = lifecycleScope.launch {
-                connectionStatusFlow.value = ConnectionStatus.Connected(
-                    DeviceConnectionManager(
-                        session.connectWithBackends(
-                            connectionBackends(applicationContext, lifecycleScope),
-                            macAddress,
-                        ),
-                    ),
-                )
+            lifecycleScope.launch {
+                try {
+                    val device = session.connectWithBackends(
+                        connectionBackends(applicationContext, lifecycleScope),
+                        macAddress,
+                    )
+                    connectionStatusFlow.value = ConnectionStatus.Connected(DeviceConnectionManager(device))
+                } catch (ex: OpenScq30Exception) {
+                    Log.e(TAG, "error connecting to device", ex)
+                    Toast.makeText(applicationContext, R.string.error_connecting, Toast.LENGTH_SHORT).show()
+                }
             }
             connectionStatusFlow.compareAndSet(
                 ConnectionStatus.AwaitingConnection,

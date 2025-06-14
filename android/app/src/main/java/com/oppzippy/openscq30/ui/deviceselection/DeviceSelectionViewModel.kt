@@ -10,9 +10,12 @@ import android.content.Intent
 import android.content.IntentSender
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.soundcoredevice.connectionBackends
+import com.oppzippy.openscq30.lib.bindings.OpenScq30Exception
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
 import com.oppzippy.openscq30.lib.wrapper.ConnectionDescriptor
 import com.oppzippy.openscq30.lib.wrapper.PairedDevice
@@ -29,6 +32,10 @@ class DeviceSelectionViewModel @Inject constructor(
     private val session: OpenScq30Session,
 ) : AndroidViewModel(application) {
     val pageState = MutableStateFlow<DeviceSelectionPage>(DeviceSelectionPage.Loading)
+
+    companion object {
+        const val TAG = "DeviceSelectionViewModel"
+    }
 
     init {
         // Hack to work around older android versions not having onAssociationCreated
@@ -51,14 +58,23 @@ class DeviceSelectionViewModel @Inject constructor(
     }
 
     fun pair(activity: Activity, pairedDevice: PairedDevice) {
-        if (pairedDevice.isDemo) {
-            viewModelScope.launch {
-                session.pair(pairedDevice)
+        viewModelScope.launch {
+            try {
+                if (pairedDevice.isDemo) {
+                    pairDemo(pairedDevice)
+                } else {
+                    pairReal(activity, pairedDevice)
+                }
                 launchConnectScreen()
+            } catch (ex: OpenScq30Exception) {
+                Log.e(TAG, "error pairing with ${pairedDevice.model}", ex)
+                Toast.makeText(application, R.string.error_pairing, Toast.LENGTH_SHORT).show()
             }
-        } else {
-            pairReal(activity, pairedDevice)
         }
+    }
+
+    private suspend fun pairDemo(pairedDevice: PairedDevice) {
+        session.pair(pairedDevice)
     }
 
     private fun pairReal(activity: Activity, pairedDevice: PairedDevice) {
@@ -102,7 +118,8 @@ class DeviceSelectionViewModel @Inject constructor(
                 }
 
                 override fun onFailure(error: CharSequence?) {
-                    Log.w("DeviceSelectionViewModel", "error pairing: $error")
+                    Log.w(TAG, "error pairing: $error")
+                    Toast.makeText(application, R.string.error_pairing, Toast.LENGTH_SHORT).show()
                 }
             },
             null,
