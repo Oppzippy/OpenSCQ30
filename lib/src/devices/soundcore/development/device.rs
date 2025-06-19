@@ -13,39 +13,11 @@ use crate::{
     device_utils,
     devices::{
         DeviceModel,
-        soundcore::standard::{
-            demo::DemoConnectionRegistry,
-            packets::{
-                Packet, inbound::state_update_packet, outbound::RequestStatePacket,
-                packet_io_controller::PacketIOController,
-            },
+        soundcore::standard::packets::{
+            Packet, outbound::RequestStatePacket, packet_io_controller::PacketIOController,
         },
     },
-    storage,
 };
-
-pub fn device_registry<B>(
-    backend: B,
-    _database: Arc<storage::OpenSCQ30Database>,
-    _device_model: DeviceModel,
-) -> SoundcoreDevelopmentDeviceRegistry<B>
-where
-    B: RfcommBackend + Send + Sync + 'static,
-{
-    SoundcoreDevelopmentDeviceRegistry::new(backend)
-}
-
-pub fn demo_device_registry(
-    _database: Arc<storage::OpenSCQ30Database>,
-    device_model: DeviceModel,
-) -> SoundcoreDevelopmentDeviceRegistry<
-    crate::devices::soundcore::standard::demo::DemoConnectionRegistry,
-> {
-    SoundcoreDevelopmentDeviceRegistry::new(DemoConnectionRegistry::new(
-        device_model,
-        HashMap::from([(state_update_packet::COMMAND, vec![1, 2, 3])]),
-    ))
-}
 
 pub struct SoundcoreDevelopmentDeviceRegistry<B: RfcommBackend> {
     backend: B,
