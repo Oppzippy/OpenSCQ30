@@ -96,6 +96,7 @@ pub enum SettingId {
     FirmwareVersionRight,
     TwsStatus,
     HostDevice,
+    StateUpdatePacket,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
