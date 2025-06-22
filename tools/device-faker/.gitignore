@@ -3,6 +3,4 @@
 /build
 *.egg-info
 *.pyc
-/devices/*
-!/devices/example.toml
-
+/.env
