@@ -3,6 +3,7 @@ set dotenv-load := true
 remote_user := env('SOUNDCORE_DEVICE_FAKER_REMOTE_USER')
 remote_host := env('SOUNDCORE_DEVICE_FAKER_REMOTE_HOST')
 remote_path := "~/soundcore-device-faker"
+log_level := "INFO"
 
 # hci-socket:0 for raspberry pi, or usb:0 for usb bluetooth adapter
 
@@ -45,5 +46,5 @@ remote-run device: remote-sync
         --keep=1 \
         --user="$USER" \
         --addamb=cap_net_admin \
-        -- -c "source ./venv/bin/activate && LOG_LEVEL=INFO ./src/soundcore_device_faker/main.py {{ remote_transport_spec }} ./devices/{{ device }}.toml"
+        -- -c "source ./venv/bin/activate && LOG_LEVEL={{ log_level }} ./src/soundcore_device_faker/main.py {{ remote_transport_spec }} ./devices/{{ device }}.toml"
     EOF
