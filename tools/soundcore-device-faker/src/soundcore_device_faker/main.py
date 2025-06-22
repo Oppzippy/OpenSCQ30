@@ -83,7 +83,7 @@ async def main() -> None:
 
         def refresh_responses(config: Dict, soundcore_session: SoundcoreSession):
             if soundcore_session is not None:
-                for entry in config["respones"]:
+                for entry in config["responses"]:
                     soundcore_session.set_response(
                         bytes(entry["command"]), bytes(entry["response"])
                     )

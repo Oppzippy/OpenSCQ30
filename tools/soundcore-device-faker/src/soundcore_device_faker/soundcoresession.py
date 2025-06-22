@@ -13,12 +13,12 @@ class SoundcoreSession:
         command = packet[5:7]
         if response := self.__responses.get(command):
             packet = self.__format_outbound_packet(command, response)
-            self.__rfcomm_session.write(response)
-            logging.debug(f"--> {list(packet)}sent known response")
+            self.__rfcomm_session.write(packet)
+            logging.info(f"--> {list(packet)}sent known response")
         else:
             packet = self.__format_outbound_packet(command, b"")
             self.__rfcomm_session.write(packet)
-            logging.debug(f"--> {list(packet)}no known response, sent ack")
+            logging.warning(f"--> {list(packet)}no known response, sent ack")
 
     def set_response(self, command: bytes, response: bytes):
         self.__responses[command] = response
@@ -30,13 +30,13 @@ class SoundcoreSession:
         packet_length = len(data) + 10
         packet = bytes(
             [
-                0x08,
-                0xEE,
+                0x09,
+                0xFF,
                 0x00,
                 0x00,
-                0x00,
-                *packet_length.to_bytes(2, "little"),
+                0x01,
                 *command,
+                *packet_length.to_bytes(2, "little"),
                 *data,
             ]
         )
