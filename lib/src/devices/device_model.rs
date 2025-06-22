@@ -67,8 +67,9 @@ impl DeviceModel {
             DeviceModel::SoundcoreA3027 | DeviceModel::SoundcoreA3030 => {
                 new_soundcore_device!(soundcore::a3027)
             }
-            DeviceModel::SoundcoreA3028 => new_soundcore_device!(soundcore::a3028),
-            DeviceModel::SoundcoreA3029 => todo!(),
+            DeviceModel::SoundcoreA3028 | DeviceModel::SoundcoreA3029 => {
+                new_soundcore_device!(soundcore::a3028)
+            }
             DeviceModel::SoundcoreA3031 => new_soundcore_device!(soundcore::a3031),
             DeviceModel::SoundcoreA3033 => new_soundcore_device!(soundcore::a3033),
             DeviceModel::SoundcoreA3926 => new_soundcore_device!(soundcore::a3926),
@@ -99,8 +100,9 @@ impl DeviceModel {
             DeviceModel::SoundcoreA3027 | DeviceModel::SoundcoreA3030 => {
                 new_soundcore_device!(soundcore::a3027)
             }
-            DeviceModel::SoundcoreA3028 => new_soundcore_device!(soundcore::a3028),
-            DeviceModel::SoundcoreA3029 => todo!(),
+            DeviceModel::SoundcoreA3028 | DeviceModel::SoundcoreA3029 => {
+                new_soundcore_device!(soundcore::a3028)
+            }
             DeviceModel::SoundcoreA3031 => new_soundcore_device!(soundcore::a3031),
             DeviceModel::SoundcoreA3033 => new_soundcore_device!(soundcore::a3033),
             DeviceModel::SoundcoreA3926 => new_soundcore_device!(soundcore::a3926),
