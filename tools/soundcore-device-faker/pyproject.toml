@@ -3,7 +3,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "device_faker"
+name = "soundcore_device_faker"
 dynamic = ["version"]
 description = "Fake Soundcore devices for reverse engineering"
 dependencies = [

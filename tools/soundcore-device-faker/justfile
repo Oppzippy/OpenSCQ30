@@ -45,5 +45,5 @@ remote-run: remote-sync
         --keep=1 \
         --user="$USER" \
         --addamb=cap_net_admin \
-        -- -c "source ./venv/bin/activate && ./src/device_faker/main.py {{ remote_transport_spec }} ./devices/example.toml"
+        -- -c "source ./venv/bin/activate && ./src/soundcore_device_faker/main.py {{ remote_transport_spec }} ./devices/example.toml"
     EOF
