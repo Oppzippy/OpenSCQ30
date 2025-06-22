@@ -5,15 +5,6 @@ rfcomm_uuid = "00001101-0000-1000-8000-00805f9b34fb"
 # State update
 command = [1, 1]
 response = [
-    9,
-    255,
-    0,
-    0,
-    1,
-    1,
-    1,   # command
-    77,
-    0,   # length
     5,
     0,   # battery
     14,
@@ -81,5 +72,4 @@ response = [
     1,
     1,
     1,   # 7 optional unknown bools ???
-    138, # checksum
 ]
