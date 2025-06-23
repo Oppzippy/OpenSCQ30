@@ -55,7 +55,7 @@ async def main() -> None:
             config = tomllib.load(file)
         if soundcore_session is not None:
             soundcore_session.clear_responses()
-            for entry in config["respones"]:
+            for entry in config["responses"]:
                 soundcore_session.set_response(
                     bytes(entry["command"]), bytes(entry["response"])
                 )
