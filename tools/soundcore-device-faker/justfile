@@ -16,7 +16,13 @@ lint:
     ruff check
 
 remote-sync:
-    rsync -avh . {{ remote_user }}@{{ remote_host }}:{{ remote_path }} --include="**.gitignore" --exclude="/.git" --filter=":- .gitignore" --delete-after
+    rsync -rlptvh . {{ remote_user }}@{{ remote_host }}:{{ remote_path }} --include="**.gitignore" --exclude="/.git" --filter=":- .gitignore" --delete-after
+
+remote-sync-watch:
+    #!/usr/bin/env bash
+    while inotifywait -r -e modify,create,delete ./devices; do
+        just remote-sync
+    done
 
 remote-init: remote-sync
     #!/usr/bin/env bash
