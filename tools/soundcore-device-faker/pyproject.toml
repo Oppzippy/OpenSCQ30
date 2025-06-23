@@ -7,6 +7,6 @@ name = "soundcore_device_faker"
 dynamic = ["version"]
 description = "Fake Soundcore devices for reverse engineering"
 dependencies = [
-    "bumble @ git+https://github.com/google/bumble.git@509df4c6762869ca9e478cf9f8a5aa99ad4f8d86",
+    "bumble @ git+https://github.com/google/bumble.git@3b399ea1a2bc52f64e4f6317fad75fd1b5db3e8c",
     "watchdog >= 6.0.0",
 ]
