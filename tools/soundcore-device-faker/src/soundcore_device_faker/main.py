@@ -4,6 +4,7 @@ import tomllib
 import logging
 import asyncio
 import os
+from pathlib import Path
 from typing import Any, Callable, Dict
 from bumble.core import UUID
 from bumble.device import Device, DeviceConfiguration
@@ -63,7 +64,8 @@ async def main() -> None:
     reload_config()
 
     observer = Observer()
-    observer.schedule(ConfigChangedHandler(reload_config), sys.argv[2])
+    config_path = Path(sys.argv[2])
+    observer.schedule(ConfigChangedHandler(reload_config), str(config_path.parent))
     observer.start()
 
     async with await open_transport_or_link(sys.argv[1]) as hci_transport:
