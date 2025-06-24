@@ -9,5 +9,6 @@ pub(crate) mod a3933;
 pub(crate) mod a3936;
 pub(crate) mod a3945;
 pub(crate) mod a3951;
+pub(crate) mod a3959;
 pub(crate) mod development;
 pub mod standard;

@@ -5,8 +5,8 @@ rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B395B"
 # State update
 command = [1, 1]
 response = [
-    1,    # Left battery charging?
-    1,    # Right battery charging?
+    1,    # Host device
+    1,    # Is TWS connected
     0,    # Left battery (0 is 10%, 9 is 100%)
     9,    # Right battery
     255,  # Unknown
@@ -71,7 +71,7 @@ response = [
     51,   # Ambient Sound Mode Cycle
     0,    # Ambient Sound Mode
     0x55, # Noise Canceling Manual Mode
-    0,    # Unknown
+    0,    # Transparency Mode (unused)
     0,    # Noise Canceling Mode Type (0=manual 1=adaptive 2=multi-scene)
     1,    # Wind Noise Reduction
     255,  # Unknown

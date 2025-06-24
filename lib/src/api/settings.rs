@@ -97,6 +97,7 @@ pub enum SettingId {
     TwsStatus,
     HostDevice,
     StateUpdatePacket,
+    MultiSceneNoiseCanceling,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

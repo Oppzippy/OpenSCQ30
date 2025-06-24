@@ -34,6 +34,10 @@ impl SerialNumber {
         )
         .parse_complete(input)
     }
+
+    pub fn bytes(&self) -> impl Iterator<Item = u8> {
+        self.0.as_bytes().iter().cloned()
+    }
 }
 
 impl Default for SerialNumber {
