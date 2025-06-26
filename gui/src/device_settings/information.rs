@@ -13,14 +13,10 @@ where
     M: Clone + 'a,
 {
     widget::row::with_children(vec![
-        widget::text::heading(setting_id.translate())
+        widget::text(setting_id.translate())
             .width(Length::Fill)
-            .align_x(alignment::Horizontal::Right)
             .into(),
-        widget::text(text)
-            .width(Length::Fill)
-            .align_x(alignment::Horizontal::Left)
-            .into(),
+        widget::text(text).width(Length::Fill).into(),
     ])
     .spacing(15)
     .align_y(alignment::Vertical::Center)

@@ -35,7 +35,7 @@ where
 {
     widget::row()
         .align_y(alignment::Vertical::Center)
-        .push(widget::text::text(label).width(Length::Fill))
+        .push(widget::text(label).width(Length::Fill))
         .push(element.into())
         .into()
 }

@@ -19,7 +19,7 @@ where
 {
     widget::row()
         .align_y(alignment::Vertical::Center)
-        .push(widget::text::body(setting_id.translate()).width(Length::Fill))
+        .push(widget::text(setting_id.translate()).width(Length::Fill))
         .push(widget::slider(range, value, on_change).width(Length::Fill))
         .into()
 }
