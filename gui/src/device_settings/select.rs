@@ -1,12 +1,8 @@
-use std::borrow::Cow;
-
-use cosmic::{
-    Element,
-    iced::{Length, alignment},
-    widget,
-};
+use cosmic::{Element, iced::Length, widget};
 use openscq30_i18n::Translate;
 use openscq30_lib::api::settings::{Select, SettingId};
+
+use crate::device_settings::labeled_setting_row;
 
 pub fn select<'a, M>(
     setting_id: SettingId,
@@ -19,7 +15,7 @@ where
 {
     let selected_index = setting.options.iter().position(|option| option == value);
     let options = setting.options.to_owned();
-    with_label(
+    labeled_setting_row(
         setting_id.translate(),
         widget::dropdown(&setting.localized_options, selected_index, move |index| {
             on_change(&options[index])
@@ -40,7 +36,7 @@ where
     let selected_index =
         value.and_then(|value| setting.options.iter().position(|option| option == value));
     let options = setting.options.to_owned();
-    with_label(
+    labeled_setting_row(
         setting_id.translate(),
         widget::row().push(
             widget::dropdown(&setting.localized_options, selected_index, move |index| {
@@ -66,7 +62,7 @@ where
         value.and_then(|value| setting.options.iter().position(|option| option == value));
     let maybe_deselect_message = value.is_some().then_some(on_remove);
     let options = setting.options.to_owned();
-    with_label(
+    labeled_setting_row(
         setting_id.translate(),
         widget::row()
             .push(
@@ -83,18 +79,4 @@ where
                 widget::button::icon(widget::icon::from_name("list-add-symbolic")).on_press(on_add),
             ),
     )
-}
-
-fn with_label<'a, M>(
-    label: impl Into<Cow<'a, str>> + 'a,
-    element: impl Into<Element<'a, M>>,
-) -> Element<'a, M>
-where
-    M: 'a,
-{
-    widget::row()
-        .align_y(alignment::Vertical::Center)
-        .push(widget::text(label).width(Length::Fill))
-        .push(element.into())
-        .into()
 }

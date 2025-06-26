@@ -32,6 +32,8 @@ use crate::{
     utils::coalesce_result,
 };
 
+const MIN_SETTING_ROW_HEIGHT: Length = Length::Fixed(35f32);
+
 #[derive(Debug, Clone)]
 pub enum Message {
     SetSetting(SettingId, Value),
@@ -311,60 +313,58 @@ impl DeviceSettingsModel {
                     .width(Length::Fill)
                     .align_x(alignment::Horizontal::Center),
             )
-            .extend(self.settings.iter().map(|(setting_id, setting)| {
-                let setting_id = setting_id.to_owned();
-                match setting {
-                    Setting::Toggle { value } => {
-                        toggle::toggle(setting_id, *value, move |new_value| {
-                            Message::SetSetting(setting_id, new_value.into())
-                        })
-                    }
-                    Setting::I32Range { setting, value } => range::i32_range(
-                        setting_id,
-                        setting.range.clone(),
-                        *value,
-                        move |new_value| Message::SetSetting(setting_id, new_value.into()),
-                    ),
-                    Setting::Select { setting, value } => {
-                        select::select(setting_id, setting, value, move |value| {
-                            Message::SetSetting(setting_id, Cow::from(value.to_owned()).into())
-                        })
-                    }
-                    Setting::OptionalSelect { setting, value } => select::optional_select(
-                        setting_id,
-                        setting,
-                        value.as_deref(),
-                        move |value| {
-                            Message::SetSetting(
-                                setting_id,
-                                value.map(ToOwned::to_owned).map(Cow::from).into(),
-                            )
-                        },
-                    ),
-                    Setting::ModifiableSelect { setting, value } => select::modifiable_select(
-                        setting_id,
-                        setting,
-                        value.as_deref(),
-                        {
-                            move |value| {
-                                Message::SetSetting(setting_id, Cow::from(value.to_owned()).into())
-                            }
-                        },
-                        Message::ShowModifiableSelectAddDialog(setting_id),
-                        Message::ShowModifiableSelectRemoveDialog(setting_id),
-                    ),
-                    Setting::Equalizer { setting, value } => {
-                        equalizer::responsive_equalizer(setting, value, move |index, value| {
-                            Message::SetEqualizerBand(setting_id, index, value)
-                        })
-                    }
-                    Setting::Information {
-                        value: _,
-                        translated_value: translated_text,
-                    } => information::information(setting_id, Cow::Borrowed(translated_text)),
-                }
-            }))
+            .extend(
+                self.settings
+                    .iter()
+                    .map(|(setting_id, setting)| Self::view_setting(*setting_id, setting)),
+            )
             .into()
+    }
+
+    fn view_setting<'a>(setting_id: SettingId, setting: &'a Setting) -> Element<'a, Message> {
+        match setting {
+            Setting::Toggle { value } => toggle::toggle(setting_id, *value, move |new_value| {
+                Message::SetSetting(setting_id, new_value.into())
+            }),
+            Setting::I32Range { setting, value } => range::i32_range(
+                setting_id,
+                setting.range.clone(),
+                *value,
+                move |new_value| Message::SetSetting(setting_id, new_value.into()),
+            ),
+            Setting::Select { setting, value } => {
+                select::select(setting_id, setting, value, move |value| {
+                    Message::SetSetting(setting_id, Cow::from(value.to_owned()).into())
+                })
+            }
+            Setting::OptionalSelect { setting, value } => {
+                select::optional_select(setting_id, setting, value.as_deref(), move |value| {
+                    Message::SetSetting(
+                        setting_id,
+                        value.map(ToOwned::to_owned).map(Cow::from).into(),
+                    )
+                })
+            }
+            Setting::ModifiableSelect { setting, value } => select::modifiable_select(
+                setting_id,
+                setting,
+                value.as_deref(),
+                {
+                    move |value| Message::SetSetting(setting_id, Cow::from(value.to_owned()).into())
+                },
+                Message::ShowModifiableSelectAddDialog(setting_id),
+                Message::ShowModifiableSelectRemoveDialog(setting_id),
+            ),
+            Setting::Equalizer { setting, value } => {
+                equalizer::responsive_equalizer(setting, value, move |index, value| {
+                    Message::SetEqualizerBand(setting_id, index, value)
+                })
+            }
+            Setting::Information {
+                value: _,
+                translated_value: translated_text,
+            } => information::information(setting_id, Cow::Borrowed(translated_text)),
+        }
     }
 
     pub fn context_drawer(&self) -> Option<ContextDrawer<Message>> {
@@ -720,4 +720,26 @@ impl DeviceSettingsModel {
             },
         }
     }
+}
+
+fn labeled_setting_row<'a, M>(
+    label: impl Into<Cow<'a, str>> + 'a,
+    element: impl Into<Element<'a, M>>,
+) -> Element<'a, M>
+where
+    M: 'a,
+{
+    widget::row::with_children(vec![
+        widget::vertical_space()
+            .height(MIN_SETTING_ROW_HEIGHT)
+            .into(),
+        widget::text(label)
+            .width(Length::Fill)
+            .align_x(alignment::Horizontal::Right)
+            .into(),
+        element.into(),
+    ])
+    .spacing(20)
+    .align_y(alignment::Vertical::Center)
+    .into()
 }
