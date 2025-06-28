@@ -11,7 +11,7 @@ use std::{borrow::Cow, collections::HashMap, path::PathBuf};
 use cosmic::{
     Element, Task,
     app::context_drawer::ContextDrawer,
-    iced::{Length, alignment},
+    iced::Length,
     widget::{self, nav_bar},
 };
 use legacy_migration::LegacyMigrationModel;
@@ -31,8 +31,6 @@ use crate::{
     openscq30_v1_migration::{self, LegacyEqualizerProfile},
     utils::coalesce_result,
 };
-
-const MIN_SETTING_ROW_HEIGHT: Length = Length::Fixed(35f32);
 
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -307,45 +305,51 @@ impl DeviceSettingsModel {
     }
 
     fn view_settings<'a>(&'a self, category_id: &'a CategoryId) -> Element<'a, Message> {
-        widget::column()
-            .push(
-                widget::text::title2(category_id.translate())
-                    .width(Length::Fill)
-                    .align_x(alignment::Horizontal::Center),
-            )
-            .extend(
-                self.settings
-                    .iter()
-                    .map(|(setting_id, setting)| Self::view_setting(*setting_id, setting)),
-            )
-            .into()
+        widget::scrollable(
+            widget::settings::section()
+                .title(category_id.translate())
+                .extend(
+                    self.settings
+                        .iter()
+                        .map(|(setting_id, setting)| Self::view_setting(*setting_id, setting))
+                        .flatten(),
+                ),
+        )
+        .into()
     }
 
-    fn view_setting<'a>(setting_id: SettingId, setting: &'a Setting) -> Element<'a, Message> {
+    fn view_setting<'a>(setting_id: SettingId, setting: &'a Setting) -> Vec<Element<'a, Message>> {
         match setting {
-            Setting::Toggle { value } => toggle::toggle(setting_id, *value, move |new_value| {
-                Message::SetSetting(setting_id, new_value.into())
-            }),
-            Setting::I32Range { setting, value } => range::i32_range(
+            Setting::Toggle { value } => {
+                vec![toggle::toggle(setting_id, *value, move |new_value| {
+                    Message::SetSetting(setting_id, new_value.into())
+                })]
+            }
+            Setting::I32Range { setting, value } => vec![range::i32_range(
                 setting_id,
                 setting.range.clone(),
                 *value,
                 move |new_value| Message::SetSetting(setting_id, new_value.into()),
-            ),
+            )],
             Setting::Select { setting, value } => {
-                select::select(setting_id, setting, value, move |value| {
+                vec![select::select(setting_id, setting, value, move |value| {
                     Message::SetSetting(setting_id, Cow::from(value.to_owned()).into())
-                })
+                })]
             }
             Setting::OptionalSelect { setting, value } => {
-                select::optional_select(setting_id, setting, value.as_deref(), move |value| {
-                    Message::SetSetting(
-                        setting_id,
-                        value.map(ToOwned::to_owned).map(Cow::from).into(),
-                    )
-                })
+                vec![select::optional_select(
+                    setting_id,
+                    setting,
+                    value.as_deref(),
+                    move |value| {
+                        Message::SetSetting(
+                            setting_id,
+                            value.map(ToOwned::to_owned).map(Cow::from).into(),
+                        )
+                    },
+                )]
             }
-            Setting::ModifiableSelect { setting, value } => select::modifiable_select(
+            Setting::ModifiableSelect { setting, value } => vec![select::modifiable_select(
                 setting_id,
                 setting,
                 value.as_deref(),
@@ -354,16 +358,19 @@ impl DeviceSettingsModel {
                 },
                 Message::ShowModifiableSelectAddDialog(setting_id),
                 Message::ShowModifiableSelectRemoveDialog(setting_id),
-            ),
+            )],
             Setting::Equalizer { setting, value } => {
-                equalizer::responsive_equalizer(setting, value, move |index, value| {
+                equalizer::horizontal_equalizer(setting, value, move |index, value| {
                     Message::SetEqualizerBand(setting_id, index, value)
                 })
             }
             Setting::Information {
                 value: _,
                 translated_value: translated_text,
-            } => information::information(setting_id, Cow::Borrowed(translated_text)),
+            } => vec![information::information(
+                setting_id,
+                Cow::Borrowed(translated_text),
+            )],
         }
     }
 
@@ -727,19 +734,9 @@ fn labeled_setting_row<'a, M>(
     element: impl Into<Element<'a, M>>,
 ) -> Element<'a, M>
 where
-    M: 'a,
+    M: Clone + 'static,
 {
-    widget::row::with_children(vec![
-        widget::vertical_space()
-            .height(MIN_SETTING_ROW_HEIGHT)
-            .into(),
-        widget::text(label)
-            .width(Length::Fill)
-            .align_x(alignment::Horizontal::Right)
-            .into(),
-        element.into(),
-    ])
-    .spacing(20)
-    .align_y(alignment::Vertical::Center)
-    .into()
+    widget::settings::item::builder(label)
+        .flex_control(element)
+        .into()
 }

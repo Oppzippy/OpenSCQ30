@@ -1,6 +1,6 @@
 use std::ops::RangeInclusive;
 
-use cosmic::{Element, iced::Length, widget};
+use cosmic::{Element, widget};
 use openscq30_i18n::Translate;
 use openscq30_lib::api::settings::SettingId;
 
@@ -13,10 +13,10 @@ pub fn i32_range<'a, M>(
     on_change: impl Fn(i32) -> M + 'a,
 ) -> Element<'a, M>
 where
-    M: Clone + 'a,
+    M: Clone + 'static,
 {
     labeled_setting_row(
         setting_id.translate(),
-        widget::slider(range, value, on_change).width(Length::Fill),
+        widget::slider(range, value, on_change),
     )
 }
