@@ -311,8 +311,7 @@ impl DeviceSettingsModel {
                 .extend(
                     self.settings
                         .iter()
-                        .map(|(setting_id, setting)| Self::view_setting(*setting_id, setting))
-                        .flatten(),
+                        .flat_map(|(setting_id, setting)| Self::view_setting(*setting_id, setting)),
                 ),
         )
         .into()
