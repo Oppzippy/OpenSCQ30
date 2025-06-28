@@ -29,7 +29,7 @@ use crate::{
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct A3004StateUpdatePacket {
     pub battery: SingleBattery,
-    pub equalizer_configuration: EqualizerConfiguration<1, 8>,
+    pub equalizer_configuration: EqualizerConfiguration<1, 10>,
     pub sound_modes: SoundModes,
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
@@ -46,7 +46,7 @@ impl InboundPacket for A3004StateUpdatePacket {
                     SingleBattery::take,
                     FirmwareVersion::take,
                     SerialNumber::take,
-                    EqualizerConfiguration::<1, 8>::take,
+                    EqualizerConfiguration::take,
                     SoundModes::take,
                 ),
                 |(
@@ -78,10 +78,10 @@ impl OutboundPacket for A3004StateUpdatePacket {
     fn body(&self) -> Vec<u8> {
         [self.battery.level.0, self.battery.is_charging as u8]
             .into_iter()
-            .chain(self.sound_modes.bytes())
-            .chain(self.equalizer_configuration.bytes())
             .chain(self.firmware_version.to_string().into_bytes())
             .chain(self.serial_number.as_str().as_bytes().iter().cloned())
+            .chain(self.equalizer_configuration.bytes())
+            .chain(self.sound_modes.bytes())
             .collect()
     }
 }
@@ -123,12 +123,12 @@ mod tests {
 
     #[test]
     fn serialize_and_deserialize() {
-        // let bytes = A3004StateUpdatePacket::default().bytes();
-        // let (body, command) = take_inbound_packet_header::<VerboseError<_>>(&bytes).unwrap();
-        // let packet = Packet {
-        //     command,
-        //     body: body.to_vec(),
-        // };
-        // let _: A3004StateUpdatePacket = packet.try_into_inbound_packet().unwrap();
+        let bytes = A3004StateUpdatePacket::default().bytes();
+        let (body, command) = take_inbound_packet_header::<VerboseError<_>>(&bytes).unwrap();
+        let packet = Packet {
+            command,
+            body: body.to_vec(),
+        };
+        let _: A3004StateUpdatePacket = packet.try_into_inbound_packet().unwrap();
     }
 }

@@ -11,7 +11,7 @@ use super::packets::A3004StateUpdatePacket;
 #[derive(Debug, Clone, PartialEq)]
 pub struct A3004State {
     pub battery: SingleBattery,
-    pub equalizer_configuration: EqualizerConfiguration<1, 8>,
+    pub equalizer_configuration: EqualizerConfiguration<1, 10>,
     pub sound_modes: SoundModes,
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
@@ -21,7 +21,7 @@ impl_as_ref_for_field!(
     struct A3004State {
         battery: SingleBattery,
         sound_modes: SoundModes,
-        equalizer_configuration: EqualizerConfiguration<1, 8>,
+        equalizer_configuration: EqualizerConfiguration<1, 10>,
         firmware_version: FirmwareVersion,
         serial_number: SerialNumber,
     }

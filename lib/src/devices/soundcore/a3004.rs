@@ -33,7 +33,7 @@ soundcore_device!(
             transparency_modes: vec![],
             noise_canceling_modes: vec![],
         });
-        builder.equalizer().await;
+        builder.equalizer_with_drc().await;
         builder.single_battery();
         builder.serial_number_and_firmware_version();
     },
