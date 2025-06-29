@@ -1,16 +1,14 @@
 use std::collections::HashMap;
 
-use crate::devices::soundcore::{
-    standard::{
-        device::fetch_state_from_state_update_packet,
-        macros::soundcore_device,
-        modules::sound_modes::AvailableSoundModes,
-        packets::outbound::{OutboundPacketBytesExt, RequestStatePacket},
-        structures::{AmbientSoundMode, NoiseCancelingMode},
-    },
-};
 use crate::devices::soundcore::a3004::packets::A3004StateUpdatePacket;
 use crate::devices::soundcore::a3004::state::A3004State;
+use crate::devices::soundcore::standard::{
+    device::fetch_state_from_state_update_packet,
+    macros::soundcore_device,
+    modules::sound_modes::AvailableSoundModes,
+    packets::outbound::{OutboundPacketBytesExt, RequestStatePacket},
+    structures::{AmbientSoundMode, NoiseCancelingMode},
+};
 
 mod packets;
 mod state;

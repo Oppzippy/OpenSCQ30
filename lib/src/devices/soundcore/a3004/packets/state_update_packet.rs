@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use nom::{
     IResult, Parser,
-    combinator::{map},
+    combinator::map,
     error::{ContextError, ParseError, context},
 };
 use tokio::sync::watch;
@@ -16,11 +16,10 @@ use crate::{
             packets::{
                 Packet,
                 inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
-                outbound::OutboundPacket
+                outbound::OutboundPacket,
             },
             structures::{
-                EqualizerConfiguration, FirmwareVersion,
-                SerialNumber, SingleBattery, SoundModes,
+                EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery, SoundModes,
             },
         },
     },
