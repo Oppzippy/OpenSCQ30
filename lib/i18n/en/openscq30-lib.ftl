@@ -1,3 +1,4 @@
+soundcore-a3004 = Soundcore Q20I
 soundcore-a3027 = Soundcore Life Q35
 soundcore-a3028 = Soundcore Life Q30
 soundcore-a3029 = Soundcore Life Tune
