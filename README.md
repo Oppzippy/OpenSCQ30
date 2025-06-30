@@ -10,7 +10,7 @@ OpenSCQ30 is free software for controlling settings for Soundcore headphones and
 
 [x] Windows - Ready  
 [x] Linux - Ready  
-[x] Android - Ready  
+[x] Android - Ready
 
 ### Supported Devices
 
@@ -18,6 +18,7 @@ It is intended that all devices in this list work, but since I do not own them a
 
 | Model    | Name              | Status  |
 | -------- | ----------------- | ------- |
+| A3004    | Q20i              | Working |
 | A3027    | Life Q35          | Working |
 | A3028    | Life Q30          | Working |
 | A3029    | Life Tune         | Working |
@@ -37,6 +38,7 @@ It is intended that all devices in this list work, but since I do not own them a
 | A3945    | Life Note 3S      | Unknown |
 | A3933    | Life Note 3       | Working |
 | A3939    | Life P3           | Working |
+| A3959    | R50i NC           | Unknown |
 
 ## Installing
 
@@ -57,10 +59,10 @@ See [GitHub Releases](https://github.com/Oppzippy/OpenSCQ30/releases). All files
 
 ## Building
 
--   Windows: [docs/build-windows.md](docs/build-windows.md)
--   MacOS: [docs/build-macos.md](docs/build-macos.md)
--   Linux: [docs/build-linux.md](docs/build-linux.md)
--   Android: [docs/build-android.md](docs/build-android.md)
+- Windows: [docs/build-windows.md](docs/build-windows.md)
+- MacOS: [docs/build-macos.md](docs/build-macos.md)
+- Linux: [docs/build-linux.md](docs/build-linux.md)
+- Android: [docs/build-android.md](docs/build-android.md)
 
 ## Running Tests
 
