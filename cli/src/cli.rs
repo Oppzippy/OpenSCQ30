@@ -4,11 +4,15 @@ mod pair;
 
 use clap::{ArgAction, ArgMatches, Command, arg, value_parser};
 use macaddr::MacAddr6;
+use openscq30_lib::devices::DeviceModel;
 
 pub fn build() -> Command {
     let mac_address_arg = arg!(-a --"mac-address" <MAC_ADDRESS> "Device's mac address")
         .required(true)
         .value_parser(value_parser!(MacAddr6));
+    let device_model_arg = arg!(-m --model <MODEL> "Device model")
+        .required(true)
+        .value_parser(value_parser!(DeviceModel));
     Command::new(env!("CARGO_BIN_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .subcommand_required(true)
@@ -19,7 +23,7 @@ pub fn build() -> Command {
                     Command::new("add")
                         .arg(arg!(-n --name <NAME> "Display name for the device. Does not have to be unique.").required(true))
                         .arg(mac_address_arg.to_owned())
-                        .arg(arg!(-m --model <MODEL> "Device model").required(true)),
+                        .arg(device_model_arg.to_owned()),
                 )
                 .subcommand(
                     Command::new("remove").alias("delete")
