@@ -38,12 +38,12 @@ async fn handle_list_settings(
         .get_one::<MacAddr6>("mac-address")
         .unwrap()
         .to_owned();
-    let no_headers = matches.get_flag("no-headers");
+    let no_categories = matches.get_flag("no-categories");
     let no_extended_info = matches.get_flag("no-extended-info");
 
     let device = session.connect(mac_address).await?;
     for category_id in device.categories() {
-        if !no_headers {
+        if !no_categories {
             println!("-- {category_id} --");
         }
         for setting_id in device.settings_in_category(&category_id) {
