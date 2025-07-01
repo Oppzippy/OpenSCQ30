@@ -21,7 +21,6 @@ pub fn build() -> Command {
                 .subcommand_required(true)
                 .subcommand(
                     Command::new("add")
-                        .arg(arg!(-n --name <NAME> "Display name for the device. Does not have to be unique.").required(true))
                         .arg(mac_address_arg.to_owned())
                         .arg(device_model_arg.to_owned()),
                 )
