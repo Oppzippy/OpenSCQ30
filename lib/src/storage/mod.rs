@@ -41,6 +41,11 @@ pub enum Error {
     NotFound {
         location: &'static Location<'static>,
     },
+    #[error("io error: {source:?}")]
+    IOError {
+        source: std::io::Error,
+        location: &'static Location<'static>,
+    },
     #[error("sql error: {source:?}")]
     RusqliteError {
         source: rusqlite::Error,
@@ -61,6 +66,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 impl_from_source_error_with_location!(Error::JsonError(serde_json::Error));
 impl_from_source_error_with_location!(Error::ParseError(strum::ParseError));
+impl_from_source_error_with_location!(Error::IOError(std::io::Error));
 
 impl From<rusqlite::Error> for Error {
     #[track_caller]
@@ -79,6 +85,9 @@ impl From<rusqlite::Error> for Error {
 
 impl OpenSCQ30Database {
     pub async fn new_file(path: PathBuf) -> Result<Self> {
+        if let Some(parent_dir) = path.parent() {
+            std::fs::create_dir_all(parent_dir)?;
+        }
         Self::new(|| Connection::open(path)).await
     }
 
