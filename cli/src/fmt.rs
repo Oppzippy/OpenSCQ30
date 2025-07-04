@@ -1,7 +1,10 @@
 use std::io::IsTerminal;
 
 use openscq30_lib::api::settings::{Setting, Value};
-use tabled::Table;
+use tabled::{
+    Table,
+    settings::{Alignment, Padding, Settings, Style, Width, peaker::Priority},
+};
 
 pub struct CustomDisplaySetting(pub Setting);
 
@@ -70,15 +73,17 @@ impl std::fmt::Display for DisplayableValue {
 pub fn apply_tabled_settings(table: &mut Table) {
     if std::io::stdout().is_terminal() {
         if let Some((width, _)) = terminal_size::terminal_size() {
-            let settings = tabled::settings::Settings::default()
-                .with(
-                    tabled::settings::Width::wrap(width.0 as usize)
-                        .priority(tabled::settings::peaker::Priority::max(true)),
-                )
-                .with(tabled::settings::style::Style::sharp());
+            let settings = Settings::default()
+                .with(Width::wrap(width.0 as usize).priority(Priority::max(true)))
+                .with(Style::sharp());
             table.with(settings);
         } else {
             tracing::warn!("could not determine terminal size for table formatting");
         }
+    } else {
+        table
+            .with(Style::empty().vertical('\t'))
+            .with(Alignment::left())
+            .with(Padding::zero());
     }
 }
