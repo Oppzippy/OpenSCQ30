@@ -22,7 +22,8 @@ pub fn build() -> Command {
                 .subcommand(
                     Command::new("add")
                         .arg(mac_address_arg.to_owned())
-                        .arg(device_model_arg.to_owned()),
+                        .arg(device_model_arg.to_owned())
+                        .arg(arg!(--"demo" "Enable demo mode for the device")),
                 )
                 .subcommand(
                     Command::new("remove").alias("delete")

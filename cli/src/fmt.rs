@@ -1,6 +1,7 @@
 use std::io::IsTerminal;
 
 use openscq30_lib::api::settings::{Setting, Value};
+use strum::Display;
 use tabled::{
     Table,
     settings::{Alignment, Padding, Settings, Style, Width, peaker::Priority},
@@ -85,5 +86,20 @@ pub fn apply_tabled_settings(table: &mut Table) {
             .with(Style::empty().vertical('\t'))
             .with(Alignment::left())
             .with(Padding::zero());
+    }
+}
+
+#[derive(Debug, Display)]
+pub enum YesOrNo {
+    Yes,
+    No,
+}
+
+impl From<bool> for YesOrNo {
+    fn from(value: bool) -> Self {
+        match value {
+            true => Self::Yes,
+            false => Self::No,
+        }
     }
 }

@@ -3,7 +3,7 @@ use macaddr::MacAddr6;
 use openscq30_lib::{api::OpenSCQ30Session, devices::DeviceModel, storage::PairedDevice};
 use tabled::{Table, Tabled};
 
-use crate::openscq30_session;
+use crate::{fmt::YesOrNo, openscq30_session};
 
 pub async fn handle(matches: &ArgMatches) -> anyhow::Result<()> {
     let session = openscq30_session().await?;
@@ -24,9 +24,7 @@ async fn handle_add(matches: &ArgMatches, session: &OpenSCQ30Session) -> anyhow:
                 .unwrap()
                 .to_owned(),
             model: matches.get_one::<DeviceModel>("model").unwrap().to_owned(),
-            is_demo: std::env::var("OPENSCQ30_DEMO")
-                .map(|var| var == "1")
-                .unwrap_or_default(),
+            is_demo: matches.get_flag("demo"),
         })
         .await?;
     println!("Paired");
@@ -65,6 +63,8 @@ struct PairedDeviceTableItem {
     model: DeviceModel,
     #[tabled(rename = "MAC Address")]
     mac_address: MacAddr6,
+    #[tabled(rename = "Demo Mode")]
+    demo_mode: YesOrNo,
 }
 
 impl From<PairedDevice> for PairedDeviceTableItem {
@@ -72,6 +72,7 @@ impl From<PairedDevice> for PairedDeviceTableItem {
         Self {
             mac_address: value.mac_address,
             model: value.model,
+            demo_mode: value.is_demo.into(),
         }
     }
 }
