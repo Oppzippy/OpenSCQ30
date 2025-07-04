@@ -40,7 +40,7 @@ impl InboundPacket for A3004StateUpdatePacket {
     ) -> IResult<&'a [u8], A3004StateUpdatePacket, E> {
         context(
             "a3004 state update packet",
-            (map(
+            map(
                 (
                     SingleBattery::take,
                     FirmwareVersion::take,
@@ -63,7 +63,7 @@ impl InboundPacket for A3004StateUpdatePacket {
                         serial_number,
                     }
                 },
-            )),
+            ),
         )
         .parse_complete(input)
     }

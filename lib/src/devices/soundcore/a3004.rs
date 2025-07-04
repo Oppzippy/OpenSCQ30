@@ -7,7 +7,7 @@ use crate::devices::soundcore::standard::{
     macros::soundcore_device,
     modules::sound_modes::AvailableSoundModes,
     packets::outbound::{OutboundPacketBytesExt, RequestStatePacket},
-    structures::{AmbientSoundMode, NoiseCancelingMode},
+    structures::AmbientSoundMode,
 };
 
 mod packets;
