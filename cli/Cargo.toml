@@ -24,3 +24,8 @@ dirs = { workspace = true }
 strum = { workspace = true }
 tabled = { workspace = true }
 terminal_size = { workspace = true }
+
+[dev-dependencies]
+insta = { workspace = true }
+insta-cmd = { workspace = true }
+tempfile = { workspace = true }

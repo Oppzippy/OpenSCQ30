@@ -3,13 +3,11 @@ build profile='dev':
 
 test:
     cargo test --bins
-    # TODO integration tests
-    # cargo test --test '*'
+    cargo test --test '*'
 
 test-cov:
     cargo llvm-cov --no-report --bins
-    # TODO integration tests
-    # cargo llvm-cov --no-report --test '*'
+    cargo llvm-cov --no-report --test '*'
 
 install path:
     ./scripts/install.sh "{{path}}"
