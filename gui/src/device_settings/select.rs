@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use cosmic::{Element, iced::Length, widget};
 use openscq30_i18n::Translate;
 use openscq30_lib::api::settings::{Select, SettingId};
@@ -98,4 +100,34 @@ where
                 widget::button::icon(widget::icon::from_name("list-add-symbolic")).on_press(on_add),
             ),
     )
+}
+
+pub fn multi_select<'a, M>(
+    _setting_id: SettingId,
+    setting: &'a Select,
+    values: &'a [Cow<'static, str>],
+    on_change: impl Fn(Vec<Cow<'static, str>>) -> M + Send + Sync + Clone + 'static,
+) -> Vec<Element<'a, M>>
+where
+    M: Clone + 'static,
+{
+    setting
+        .options
+        .iter()
+        .zip(setting.localized_options.iter())
+        .map(|(option, localized_option)| {
+            let option = option.clone();
+            let values = values.to_vec();
+            let on_change = on_change.clone();
+            widget::settings::item::builder(localized_option.to_owned())
+                .toggler(values.contains(&option), move |is_checked| {
+                    if !is_checked {
+                        on_change(values.iter().filter(|o| **o != option).cloned().collect())
+                    } else {
+                        on_change(values.iter().chain([&option]).cloned().collect())
+                    }
+                })
+                .into()
+        })
+        .collect()
 }

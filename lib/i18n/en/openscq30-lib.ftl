@@ -20,6 +20,7 @@ soundcore-development = Soundcore Development Information
 general = General
 sound-modes = Sound Modes
 equalizer = Equalizer
+equalizer-import-export = Equalizer Import/Export
 device-information = Device Information
 
 ambient-sound-mode = Ambient Sound Mode
@@ -29,6 +30,8 @@ custom-noise-canceling = Custom Noise Canceling
 preset-profile = Preset Profile
 custom-profile = Custom Profile
 volume-adjustments = Volume Adjustments
+export-custom-profiles = Export Custom Profiles
+export-custom-profiles-output = Export Custom Profiles Output
 
 noise-canceling = Noise Canceling
 transparency = Transparency

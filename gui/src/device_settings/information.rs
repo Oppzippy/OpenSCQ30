@@ -1,14 +1,18 @@
 use std::borrow::Cow;
 
-use cosmic::{Element, widget};
+use cosmic::{Element, iced_core::text::Wrapping, widget};
 use openscq30_i18n::Translate;
 use openscq30_lib::api::settings::SettingId;
 
-use crate::device_settings::labeled_setting_row;
-
-pub fn information<'a, M>(setting_id: SettingId, text: Cow<'a, str>) -> Element<'a, M>
+pub fn information<'a, M>(setting_id: SettingId, text: Cow<'a, str>, on_copy: M) -> Element<'a, M>
 where
     M: Clone + 'static,
 {
-    labeled_setting_row(setting_id.translate(), widget::text(text))
+    widget::settings::item::builder(setting_id.translate())
+        // The copy button being with the title rather than the value isn't ideal, but putting it with the value causes
+        // layout issues. If those layout issues are ever fixed, remove this comment and replace the flex control with
+        // a row containing text and the icon button.
+        .icon(widget::button::icon(widget::icon::from_name("edit-copy-symbolic")).on_press(on_copy))
+        .flex_control(widget::text(text).wrapping(Wrapping::WordOrGlyph))
+        .into()
 }

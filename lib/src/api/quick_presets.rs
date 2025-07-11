@@ -54,6 +54,7 @@ impl QuickPresetsHandler {
                         super::settings::Setting::ModifiableSelect { .. } => true,
                         super::settings::Setting::Equalizer { .. } => true,
                         super::settings::Setting::Information { .. } => false,
+                        super::settings::Setting::MultiSelect { .. } => true,
                     })
                     .map(|setting| QuickPresetField {
                         setting_id,

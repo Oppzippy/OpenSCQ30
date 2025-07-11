@@ -16,6 +16,7 @@ use crate::{
     devices::{
         DeviceModel,
         soundcore::standard::{
+            modules::equalizer::import_export_setting_handler::ImportExportSettingHandler,
             packets::packet_io_controller::PacketIOController,
             structures::{AgeRange, BasicHearId, CustomHearId, EqualizerConfiguration, Gender},
         },
@@ -25,6 +26,7 @@ use crate::{
 
 use super::ModuleCollection;
 
+mod import_export_setting_handler;
 mod setting_handler;
 mod state_modifier;
 
@@ -58,6 +60,35 @@ impl From<EqualizerSetting> for SettingId {
     }
 }
 
+#[derive(EnumString, EnumIter, IntoStaticStr)]
+enum ImportExportSetting {
+    ExportCustomProfiles,
+    ExportCustomProfilesOutput,
+}
+
+impl From<ImportExportSetting> for SettingId {
+    fn from(value: ImportExportSetting) -> Self {
+        match value {
+            ImportExportSetting::ExportCustomProfiles => SettingId::ExportCustomProfiles,
+            ImportExportSetting::ExportCustomProfilesOutput => {
+                SettingId::ExportCustomProfilesOutput
+            }
+        }
+    }
+}
+
+impl TryFrom<&SettingId> for ImportExportSetting {
+    type Error = ();
+
+    fn try_from(setting_id: &SettingId) -> Result<Self, Self::Error> {
+        match setting_id {
+            SettingId::ExportCustomProfiles => Ok(Self::ExportCustomProfiles),
+            SettingId::ExportCustomProfilesOutput => Ok(Self::ExportCustomProfilesOutput),
+            _ => Err(()),
+        }
+    }
+}
+
 impl<T> ModuleCollection<T> {
     pub async fn add_equalizer<Conn, const CHANNELS: usize, const BANDS: usize>(
         &mut self,
@@ -73,10 +104,8 @@ impl<T> ModuleCollection<T> {
             + Send
             + Sync,
     {
-        self.setting_manager.add_handler(
-            CategoryId::Equalizer,
-            EqualizerSettingHandler::new(database, device_model, change_notify).await,
-        );
+        self.add_equalizer_setting_handlers(database, device_model, change_notify)
+            .await;
         self.state_modifiers
             .push(Box::new(EqualizerStateModifier::new(
                 packet_io,
@@ -98,10 +127,8 @@ impl<T> ModuleCollection<T> {
             + Send
             + Sync,
     {
-        self.setting_manager.add_handler(
-            CategoryId::Equalizer,
-            EqualizerSettingHandler::new(database, device_model, change_notify).await,
-        );
+        self.add_equalizer_setting_handlers(database, device_model, change_notify)
+            .await;
         self.state_modifiers
             .push(Box::new(EqualizerStateModifier::new(
                 packet_io,
@@ -123,11 +150,8 @@ impl<T> ModuleCollection<T> {
             + Sync,
         T: AsRef<BasicHearId<CHANNELS, BANDS>> + AsRef<Gender> + AsRef<AgeRange>,
     {
-        self.setting_manager.add_handler(
-            CategoryId::Equalizer,
-            EqualizerSettingHandler::<CHANNELS, BANDS>::new(database, device_model, change_notify)
-                .await,
-        );
+        self.add_equalizer_setting_handlers(database, device_model, change_notify)
+            .await;
         self.state_modifiers
             .push(Box::new(EqualizerWithBasicHearIdStateModifier::<
                 Conn,
@@ -155,13 +179,38 @@ impl<T> ModuleCollection<T> {
             + Sync,
         T: AsRef<CustomHearId<CHANNELS, BANDS>> + AsRef<Gender> + AsRef<AgeRange>,
     {
-        self.setting_manager.add_handler(
-            CategoryId::Equalizer,
-            EqualizerSettingHandler::new(database, device_model, change_notify).await,
-        );
+        self.add_equalizer_setting_handlers(database, device_model, change_notify)
+            .await;
         self.state_modifiers
             .push(Box::new(EqualizerWithCustomHearIdStateModifier::new(
                 packet_io,
             )));
+    }
+
+    async fn add_equalizer_setting_handlers<const CHANNELS: usize, const BANDS: usize>(
+        &mut self,
+        database: Arc<OpenSCQ30Database>,
+        device_model: DeviceModel,
+        change_notify: watch::Sender<()>,
+    ) where
+        T: AsMut<EqualizerConfiguration<CHANNELS, BANDS>>
+            + AsRef<EqualizerConfiguration<CHANNELS, BANDS>>
+            + Clone
+            + Send
+            + Sync,
+    {
+        self.setting_manager.add_handler(
+            CategoryId::Equalizer,
+            EqualizerSettingHandler::<CHANNELS, BANDS>::new(
+                database.to_owned(),
+                device_model,
+                change_notify.to_owned(),
+            )
+            .await,
+        );
+        self.setting_manager.add_handler(
+            CategoryId::EqualizerImportExport,
+            ImportExportSettingHandler::new(database, device_model, change_notify).await,
+        );
     }
 }

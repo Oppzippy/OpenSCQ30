@@ -231,6 +231,7 @@ fn parse_setting_value(setting: &Setting, unparsed_value: String) -> anyhow::Res
                 Value::String(name.into())
             }
         }
+        Setting::MultiSelect { setting, values } => todo!(),
         Setting::Equalizer { setting, .. } => {
             let values = unparsed_value
                 .split(",")

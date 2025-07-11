@@ -177,6 +177,17 @@ impl Value {
             })
         }
     }
+
+    pub fn try_into_string_vec(self) -> Result<Vec<Cow<'static, str>>, ValueError> {
+        if let Value::StringVec(value) = self {
+            Ok(value)
+        } else {
+            Err(ValueError::WrongType {
+                expected: ValueDiscriminants::StringVec,
+                actual: self,
+            })
+        }
+    }
 }
 
 impl From<bool> for Value {

@@ -36,6 +36,7 @@ pub enum CategoryId {
     General,
     SoundModes,
     Equalizer,
+    EqualizerImportExport,
     ButtonConfiguration,
     DeviceInformation,
 }
@@ -98,6 +99,8 @@ pub enum SettingId {
     HostDevice,
     StateUpdatePacket,
     MultiSceneNoiseCanceling,
+    ExportCustomProfiles,
+    ExportCustomProfilesOutput,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -129,6 +132,10 @@ pub enum Setting {
         setting: Select,
         value: Option<Cow<'static, str>>,
     },
+    MultiSelect {
+        setting: Select,
+        values: Vec<Cow<'static, str>>,
+    },
     Equalizer {
         setting: Equalizer,
         value: Vec<i16>,
@@ -152,6 +159,7 @@ impl From<Setting> for Value {
                 value: text,
                 translated_value: _,
             } => Cow::<str>::Owned(text).into(),
+            Setting::MultiSelect { values, .. } => values.into(),
         }
     }
 }

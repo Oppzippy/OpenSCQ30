@@ -2,16 +2,29 @@
 
 package com.oppzippy.openscq30.ui.devicesettings.composables
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.getSystemService
+import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.bindings.translateSettingId
 import com.oppzippy.openscq30.lib.wrapper.ModifiableSelectCommandInner
 import com.oppzippy.openscq30.lib.wrapper.Range
@@ -77,6 +90,12 @@ fun SettingPage(
                     setting = setting,
                     onChange = { setSetting(settingId, it) },
                 )
+
+                is Setting.MultiSelectSetting -> MultiSelect(
+                    name = name,
+                    setting = setting,
+                    onChange = { setSetting(settingId, it) },
+                )
             }
         }
     }
@@ -89,8 +108,33 @@ private fun Toggle(name: String, isEnabled: Boolean, onChange: (Boolean) -> Unit
 
 @Composable
 private fun InformationSetting(name: String, text: String) {
+    val context = LocalContext.current
     Labeled(label = name) {
-        Text(text)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                modifier = Modifier.weight(1f, fill = false),
+
+                text = text,
+            )
+            IconButton(
+                onClick = {
+                    val clipboardManager = context.getSystemService<ClipboardManager>()
+                    if (clipboardManager != null) {
+                        clipboardManager.setPrimaryClip(ClipData.newPlainText(name, text))
+                    } else {
+                        Log.w("InformationSetting", "failed to acquire ClipboardManager")
+                    }
+                },
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ContentCopy,
+                    contentDescription = stringResource(
+                        R.string.copy_x_to_clipboard,
+                        name,
+                    ),
+                )
+            }
+        }
     }
 }
 
@@ -156,5 +200,18 @@ private fun ModifiableSelect(name: String, setting: Setting.ModifiableSelectSett
         onSelect = { onChange(setting.setting.options[it].toValue()) },
         onAddOption = { onChange(ModifiableSelectCommandInner.Add(it).toValue()) },
         onRemoveOption = { onChange(ModifiableSelectCommandInner.Remove(setting.setting.options[it]).toValue()) },
+    )
+}
+
+@Composable
+private fun MultiSelect(name: String, setting: Setting.MultiSelectSetting, onChange: (Value) -> Unit) {
+    val values = setting.values.toSet()
+    com.oppzippy.openscq30.ui.utils.MultiSelect(
+        name = name,
+        options = setting.setting.localizedOptions,
+        selectedOptions = setting.setting.options.mapIndexed { index, option ->
+            if (values.contains(option)) index else null
+        }.filterNotNull().toSet(),
+        onChange = { onChange(it.map { index -> setting.setting.options[index] }.toValue()) },
     )
 }

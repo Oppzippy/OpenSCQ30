@@ -78,4 +78,5 @@
     <string name="error_activating_quick_preset">Error activating quick preset</string>
     <string name="error_changing_settings">Error changing settings</string>
     <string name="error_connecting">Error connecting</string>
+    <string name="copy_x_to_clipboard">Copy %s to Clipboard</string>
 </resources>

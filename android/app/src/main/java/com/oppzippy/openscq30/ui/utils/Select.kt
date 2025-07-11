@@ -2,6 +2,7 @@
 
 package com.oppzippy.openscq30.ui.utils
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -228,6 +229,84 @@ fun ModifiableSelect(
     }
 }
 
+@Composable
+fun MultiSelect(
+    modifier: Modifier = Modifier,
+    name: String,
+    options: List<String>,
+    selectedOptions: Set<Int>,
+    onChange: (Set<Int>) -> Unit,
+) {
+    var isPickerOpen by remember { mutableStateOf(false) }
+    if (isPickerOpen) {
+        BasicAlertDialog(onDismissRequest = { isPickerOpen = false }) {
+            Surface(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .wrapContentHeight(),
+                shape = MaterialTheme.shapes.large,
+                tonalElevation = AlertDialogDefaults.TonalElevation,
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    ProvideTextStyle(MaterialTheme.typography.titleLarge) {
+                        Text(
+                            text = name,
+                            modifier = Modifier.padding(16.dp),
+                        )
+                    }
+                    LazyColumn(
+                        modifier = Modifier.padding(
+                            start = 16.dp,
+                            end = 16.dp,
+                            bottom = 16.dp,
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        if (options.isEmpty()) {
+                            item { Text(stringResource(R.string.none)) }
+                        } else {
+                            itemsIndexed(options) { index, value ->
+                                LabeledSwitch(
+                                    label = value,
+                                    isChecked = selectedOptions.contains(index),
+                                    onCheckedChange = { isChecked ->
+                                        if (isChecked) {
+                                            onChange(selectedOptions.toMutableSet().apply { add(index) })
+                                        } else {
+                                            onChange(selectedOptions.toMutableSet().apply { remove(index) })
+                                        }
+                                    },
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Labeled(modifier, label = name) {
+        Row {
+            Button(
+                modifier = Modifier
+                    .weight(1f)
+                    .testTag("$name select"),
+                onClick = { isPickerOpen = true },
+            ) {
+                Text(
+                    if (selectedOptions.isEmpty()) {
+                        stringResource(R.string.none)
+                    } else {
+                        selectedOptions.singleOrNull()
+                            ?.let { options.getOrElse(it) { stringResource(R.string.unknown) } }
+                            ?: "…"
+                    },
+                )
+            }
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun PreviewSelect() {
@@ -252,6 +331,45 @@ private fun PreviewModifiableSelect() {
             onSelect = {},
             onAddOption = {},
             onRemoveOption = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewMultiSelectZeroSelections() {
+    OpenSCQ30Theme {
+        MultiSelect(
+            name = "Number",
+            options = listOf("One", "Two", "Three"),
+            selectedOptions = emptySet(),
+            onChange = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewMultiSelectOneSelection() {
+    OpenSCQ30Theme {
+        MultiSelect(
+            name = "Number",
+            options = listOf("One", "Two", "Three"),
+            selectedOptions = setOf(0),
+            onChange = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewMultiSelectMultipleSelections() {
+    OpenSCQ30Theme {
+        MultiSelect(
+            name = "Number",
+            options = listOf("One", "Two", "Three"),
+            selectedOptions = setOf(0, 2),
+            onChange = {},
         )
     }
 }

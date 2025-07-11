@@ -60,6 +60,7 @@ pub enum Message {
     None,
     ShowDeleteQuickPresetDialog(usize),
     DeleteQuickPreset(String),
+    CopyToClipboard(String),
 }
 pub enum Action {
     Task(Task<Message>),
@@ -352,12 +353,15 @@ impl DeviceSettingsModel {
                 setting_id,
                 setting,
                 value.as_deref(),
-                {
-                    move |value| Message::SetSetting(setting_id, Cow::from(value.to_owned()).into())
-                },
+                move |value| Message::SetSetting(setting_id, Cow::from(value.to_owned()).into()),
                 Message::ShowModifiableSelectAddDialog(setting_id),
                 Message::ShowModifiableSelectRemoveDialog(setting_id),
             )],
+            Setting::MultiSelect { setting, values } => {
+                select::multi_select(setting_id, setting, values, move |values| {
+                    Message::SetSetting(setting_id, values.into())
+                })
+            }
             Setting::Equalizer { setting, value } => {
                 equalizer::horizontal_equalizer(setting, value, move |index, value| {
                     Message::SetEqualizerBand(setting_id, index, value)
@@ -369,6 +373,7 @@ impl DeviceSettingsModel {
             } => vec![information::information(
                 setting_id,
                 Cow::Borrowed(translated_text),
+                Message::CopyToClipboard(translated_text.to_owned()),
             )],
         }
     }
@@ -724,6 +729,7 @@ impl DeviceSettingsModel {
                     )
                 }
             },
+            Message::CopyToClipboard(text) => Action::Task(cosmic::iced::clipboard::write(text)),
         }
     }
 }

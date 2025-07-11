@@ -27,6 +27,9 @@ impl std::fmt::Display for CustomDisplaySetting {
             Setting::ModifiableSelect { setting, .. } => {
                 write!(f, "modifiable select ({:?})", setting.options)
             }
+            Setting::MultiSelect { setting, .. } => {
+                write!(f, "multi select ({:?})", setting.options)
+            }
             Setting::Equalizer { setting, .. } => write!(
                 f,
                 "equalizer (bands: {:?}, min: {}, max: {}, fractional digits: {})",

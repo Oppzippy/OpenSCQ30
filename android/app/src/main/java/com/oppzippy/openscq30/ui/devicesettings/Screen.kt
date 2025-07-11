@@ -3,6 +3,7 @@ package com.oppzippy.openscq30.ui.devicesettings
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Equalizer
+import androidx.compose.material.icons.filled.ImportExport
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.RadioButtonChecked
@@ -32,6 +33,7 @@ sealed class Screen {
                 "equalizer" -> Icons.Filled.Equalizer
                 "buttonConfiguration" -> Icons.Filled.RadioButtonChecked
                 "deviceInformation" -> Icons.Filled.Info
+                "equalizerImportExport" -> Icons.Filled.ImportExport
                 else -> Icons.Filled.Settings
             },
         )
