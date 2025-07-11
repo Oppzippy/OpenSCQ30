@@ -38,6 +38,9 @@ fn list_settings() {
     presetEqualizerProfile: optional select (["SoundcoreSignature", "Acoustic", "BassBooster", "BassReducer", "Classical", "Podcast", "Dance", "Deep", "Electronic", "Flat", "HipHop", "Jazz", "Latin", "Lounge", "Piano", "Pop", "RnB", "Rock", "SmallSpeakers", "SpokenWord", "TrebleBooster", "TrebleReducer"])
     customEqualizerProfile: modifiable select ([])
     volumeAdjustments: equalizer (bands: [100, 200, 400, 800, 1600, 3200, 6400, 12800], min: -120, max: 134, fractional digits: 1)
+    -- equalizerImportExport --
+    exportCustomProfiles: multi select ([])
+    exportCustomProfilesOutput: information (read only)
     -- deviceInformation --
     isCharging: information (read only)
     batteryLevel: information (read only)
