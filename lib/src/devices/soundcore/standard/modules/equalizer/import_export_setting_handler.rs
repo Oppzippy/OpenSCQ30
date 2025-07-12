@@ -1,5 +1,6 @@
 use std::{
     borrow::Cow,
+    collections::HashSet,
     sync::{Arc, Mutex},
 };
 
@@ -24,7 +25,7 @@ use super::ImportExportSetting;
 
 pub struct ImportExportSettingHandler<const C: usize, const B: usize> {
     profiles_receiver: watch::Receiver<Vec<(String, Vec<i16>)>>,
-    selected_profiles: Mutex<Vec<String>>,
+    selected_profiles: Mutex<HashSet<String>>,
     change_notify: watch::Sender<()>,
 }
 
@@ -62,6 +63,7 @@ where
         let setting = setting_id.try_into().ok()?;
         Some(match setting {
             ImportExportSetting::ExportCustomProfiles => {
+                let selected_profiles = self.selected_profiles.lock().unwrap();
                 let profile_names = self
                     .profiles_receiver
                     .borrow()
@@ -70,18 +72,16 @@ where
                     .cloned()
                     .collect::<Vec<_>>();
                 settings::Setting::MultiSelect {
+                    values: profile_names
+                        .iter()
+                        .filter(|name| selected_profiles.contains(*name))
+                        .cloned()
+                        .map(Cow::from)
+                        .collect(),
                     setting: settings::Select {
                         options: profile_names.iter().cloned().map(Cow::Owned).collect(),
                         localized_options: profile_names,
                     },
-                    values: self
-                        .selected_profiles
-                        .lock()
-                        .unwrap()
-                        .iter()
-                        .cloned()
-                        .map(Cow::Owned)
-                        .collect(),
                 }
             }
             ImportExportSetting::ExportCustomProfilesOutput => {
