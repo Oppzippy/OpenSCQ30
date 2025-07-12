@@ -1,6 +1,7 @@
 use std::{
     borrow::Cow,
     collections::HashSet,
+    panic::Location,
     sync::{Arc, Mutex},
 };
 
@@ -19,11 +20,13 @@ use crate::{
         modules::equalizer::custom_equalizer_profile_store::CustomEqualizerProfileStore,
         settings_manager::SettingHandler, structures::EqualizerConfiguration,
     },
+    i18n::fl,
 };
 
 use super::ImportExportSetting;
 
 pub struct ImportExportSettingHandler<const C: usize, const B: usize> {
+    profile_store: Arc<CustomEqualizerProfileStore>,
     profiles_receiver: watch::Receiver<Vec<(String, Vec<i16>)>>,
     selected_profiles: Mutex<HashSet<String>>,
     change_notify: watch::Sender<()>,
@@ -44,6 +47,7 @@ impl<const C: usize, const B: usize> ImportExportSettingHandler<C, B> {
     ) -> Self {
         Self {
             profiles_receiver: profile_store.subscribe(),
+            profile_store,
             change_notify,
             selected_profiles: Default::default(),
         }
@@ -62,6 +66,9 @@ where
     fn get(&self, _state: &T, setting_id: &SettingId) -> Option<settings::Setting> {
         let setting = setting_id.try_into().ok()?;
         Some(match setting {
+            ImportExportSetting::ImportCustomProfiles => settings::Setting::ImportString {
+                confirmation_message: Some(fl!("import-custom-profiles-confirm")),
+            },
             ImportExportSetting::ExportCustomProfiles => {
                 let selected_profiles = self.selected_profiles.lock().unwrap();
                 let profile_names = self
@@ -114,6 +121,28 @@ where
             .try_into()
             .expect("already filtered to valid values only by SettingsManager");
         match setting {
+            ImportExportSetting::ImportCustomProfiles => {
+                let json = value.try_as_str()?;
+                let exported_profiles: Vec<ExportedCustomProfile> = serde_json::from_str(json)
+                    .map_err(|err| device::Error::Other {
+                        source: Box::new(err),
+                        location: Location::caller(),
+                    })?;
+                let profiles = exported_profiles
+                    .into_iter()
+                    .map(|exported| {
+                        (
+                            exported.name.into_owned(),
+                            exported
+                                .volume_adjustments
+                                .into_iter()
+                                .map(|value| (value * 10f64).round() as i16)
+                                .collect::<Vec<_>>(),
+                        )
+                    })
+                    .collect();
+                self.profile_store.bulk_upsert(profiles).await?;
+            }
             ImportExportSetting::ExportCustomProfiles => {
                 let values = value.try_into_string_vec()?;
                 *self.selected_profiles.lock().unwrap() =

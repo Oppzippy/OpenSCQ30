@@ -79,4 +79,6 @@
     <string name="error_changing_settings">Error changing settings</string>
     <string name="error_connecting">Error connecting</string>
     <string name="copy_x_to_clipboard">Copy %s to Clipboard</string>
+    <string name="confirm">Confirm</string>
+    <string name="import_">Import</string>
 </resources>

@@ -46,9 +46,17 @@ impl CustomEqualizerProfileStore {
         self.sender.subscribe()
     }
 
-    pub async fn insert(&self, name: String, volume_adjustments: Vec<i16>) -> storage::Result<()> {
+    pub async fn upsert(&self, name: String, volume_adjustments: Vec<i16>) -> storage::Result<()> {
         self.database
             .upsert_equalizer_profile(self.device_model, name, volume_adjustments)
+            .await?;
+        self.refresh().await?;
+        Ok(())
+    }
+
+    pub async fn bulk_upsert(&self, profiles: Vec<(String, Vec<i16>)>) -> storage::Result<()> {
+        self.database
+            .upsert_equalizer_profiles(self.device_model, profiles)
             .await?;
         self.refresh().await?;
         Ok(())

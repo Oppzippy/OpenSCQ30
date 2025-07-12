@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{borrow::Cow, str::FromStr};
 
 use anyhow::{anyhow, bail};
 use clap::ArgMatches;
@@ -253,6 +253,7 @@ fn parse_setting_value(setting: &Setting, unparsed_value: String) -> anyhow::Res
             Value::I16Vec(values)
         }
         Setting::Information { .. } => bail!("can't set value of read only information setting"),
+        Setting::ImportString { .. } => Cow::from(unparsed_value).into(),
     };
     Ok(value)
 }

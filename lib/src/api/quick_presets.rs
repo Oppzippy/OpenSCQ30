@@ -46,16 +46,7 @@ impl QuickPresetsHandler {
             .filter_map(|setting_id| {
                 device
                     .setting(&setting_id)
-                    .filter(|setting| match setting {
-                        super::settings::Setting::Toggle { .. } => true,
-                        super::settings::Setting::I32Range { .. } => true,
-                        super::settings::Setting::Select { .. } => true,
-                        super::settings::Setting::OptionalSelect { .. } => true,
-                        super::settings::Setting::ModifiableSelect { .. } => true,
-                        super::settings::Setting::Equalizer { .. } => true,
-                        super::settings::Setting::Information { .. } => false,
-                        super::settings::Setting::MultiSelect { .. } => true,
-                    })
+                    .filter(|setting| setting.mode().is_writable())
                     .map(|setting| QuickPresetField {
                         setting_id,
                         value: setting.into(),

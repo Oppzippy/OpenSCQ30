@@ -8,16 +8,25 @@ import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -95,6 +104,12 @@ fun SettingPage(
                     name = name,
                     setting = setting,
                     onChange = { setSetting(settingId, it) },
+                )
+
+                is Setting.ImportStringSetting -> ImportString(
+                    name = name,
+                    confirmationMessage = setting.confirmationMessage,
+                    onImport = { setSetting(settingId, it.toValue()) },
                 )
             }
         }
@@ -214,4 +229,49 @@ private fun MultiSelect(name: String, setting: Setting.MultiSelectSetting, onCha
         }.filterNotNull().toSet(),
         onChange = { onChange(it.map { index -> setting.setting.options[index] }.toValue()) },
     )
+}
+
+@Composable
+private fun ImportString(name: String, confirmationMessage: String, onImport: (String) -> Unit) {
+    var isDialogOpen by remember { mutableStateOf(false) }
+    var text by remember { mutableStateOf("") }
+    if (isDialogOpen) {
+        AlertDialog(
+            onDismissRequest = { isDialogOpen = false },
+            title = { Text(name) },
+            text = { Text(confirmationMessage) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onImport(text)
+                        isDialogOpen = false
+                        text = ""
+                    },
+                ) {
+                    Text(stringResource(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                Button(onClick = { isDialogOpen = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+        )
+    }
+    Row {
+        TextField(
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text(name) },
+            value = text,
+            onValueChange = { text = it },
+            trailingIcon = {
+                IconButton(onClick = { isDialogOpen = true }) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = stringResource(R.string.import_),
+                    )
+                }
+            },
+        )
+    }
 }

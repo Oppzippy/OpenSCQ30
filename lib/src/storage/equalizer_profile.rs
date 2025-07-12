@@ -62,6 +62,19 @@ pub fn upsert(
     Ok(())
 }
 
+pub fn bulk_upsert(
+    connection: &mut Connection,
+    model: DeviceModel,
+    profiles: Vec<(String, Vec<i16>)>,
+) -> Result<(), Error> {
+    let tx = connection.transaction()?;
+    for (name, volume_adjustments) in profiles {
+        upsert(&tx, model, name, volume_adjustments)?;
+    }
+    tx.commit()?;
+    Ok(())
+}
+
 pub fn delete(connection: &Connection, model: DeviceModel, name: String) -> Result<(), Error> {
     connection.execute(
         r#"DELETE FROM equalizer_profile WHERE device_model = ?1 AND name = ?2"#,

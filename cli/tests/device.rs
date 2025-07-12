@@ -39,6 +39,7 @@ fn list_settings() {
     customEqualizerProfile: modifiable select ([])
     volumeAdjustments: equalizer (bands: [100, 200, 400, 800, 1600, 3200, 6400, 12800], min: -120, max: 134, fractional digits: 1)
     -- equalizerImportExport --
+    importCustomProfiles: import string
     exportCustomProfiles: multi select ([])
     exportCustomProfilesOutput: information (read only)
     -- deviceInformation --

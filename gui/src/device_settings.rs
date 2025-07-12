@@ -1,4 +1,5 @@
 mod equalizer;
+mod import_string;
 mod information;
 mod legacy_migration;
 mod quick_presets;
@@ -61,6 +62,9 @@ pub enum Message {
     ShowDeleteQuickPresetDialog(usize),
     DeleteQuickPreset(String),
     CopyToClipboard(String),
+    SetImportString(SettingId, String),
+    AskConfirmImportString(SettingId, String),
+    ConfirmImportString,
 }
 pub enum Action {
     Task(Task<Message>),
@@ -78,6 +82,7 @@ pub struct DeviceSettingsModel {
     dialog: Option<Dialog>,
     editing_quick_preset: Option<QuickPreset>,
     legacy_equalizer_migration: Option<legacy_migration::LegacyMigrationModel>,
+    import_strings: HashMap<SettingId, String>,
 }
 
 enum Dialog {
@@ -85,6 +90,7 @@ enum Dialog {
     ModifiableSelectAdd(SettingId, String),
     ModifiableSelectRemove(SettingId, Cow<'static, str>),
     DeleteQuickPreset(String),
+    ImportStringConfirm(SettingId, String),
 }
 
 enum CustomCategory {
@@ -132,6 +138,7 @@ impl DeviceSettingsModel {
             editing_quick_preset: None,
             dialog: None,
             legacy_equalizer_migration: None,
+            import_strings: HashMap::new(),
         };
         let task = Task::batch([
             model.refresh(),
@@ -266,6 +273,29 @@ impl DeviceSettingsModel {
                     widget::button::text(fl!("cancel")).on_press(Message::CancelDialog),
                 )
                 .into(),
+            Dialog::ImportStringConfirm(setting_id, _text) => widget::dialog()
+                .title(setting_id.translate())
+                .body(
+                    if let Some((
+                        _,
+                        Setting::ImportString {
+                            confirmation_message: Some(confirmation_message),
+                        },
+                    )) = self.settings.iter().find(|(id, _)| id == setting_id)
+                    {
+                        confirmation_message.as_str()
+                    } else {
+                        ""
+                    },
+                )
+                .primary_action(
+                    widget::button::suggested(fl!("confirm"))
+                        .on_press(Message::ConfirmImportString),
+                )
+                .secondary_action(
+                    widget::button::text(fl!("cancel")).on_press(Message::CancelDialog),
+                )
+                .into(),
         })
     }
 
@@ -312,13 +342,17 @@ impl DeviceSettingsModel {
                 .extend(
                     self.settings
                         .iter()
-                        .flat_map(|(setting_id, setting)| Self::view_setting(*setting_id, setting)),
+                        .flat_map(|(setting_id, setting)| self.view_setting(*setting_id, setting)),
                 ),
         )
         .into()
     }
 
-    fn view_setting<'a>(setting_id: SettingId, setting: &'a Setting) -> Vec<Element<'a, Message>> {
+    fn view_setting<'a>(
+        &'a self,
+        setting_id: SettingId,
+        setting: &'a Setting,
+    ) -> Vec<Element<'a, Message>> {
         match setting {
             Setting::Toggle { value } => {
                 vec![toggle::toggle(setting_id, *value, move |new_value| {
@@ -374,6 +408,18 @@ impl DeviceSettingsModel {
                 setting_id,
                 Cow::Borrowed(translated_text),
                 Message::CopyToClipboard(translated_text.to_owned()),
+            )],
+            Setting::ImportString {
+                confirmation_message: _,
+            } => vec![import_string::input(
+                setting_id,
+                self.import_strings
+                    .get(&setting_id)
+                    .map(String::as_str)
+                    .map(Cow::Borrowed)
+                    .unwrap_or_else(|| Cow::Borrowed("")),
+                move |text| Message::SetImportString(setting_id, text),
+                move |text| Message::AskConfirmImportString(setting_id, Cow::from(text).into()),
             )],
         }
     }
@@ -730,6 +776,32 @@ impl DeviceSettingsModel {
                 }
             },
             Message::CopyToClipboard(text) => Action::Task(cosmic::iced::clipboard::write(text)),
+            Message::SetImportString(setting_id, text) => {
+                self.import_strings.insert(setting_id, text);
+                Action::None
+            }
+            Message::AskConfirmImportString(setting_id, import_text) => {
+                self.dialog = Some(Dialog::ImportStringConfirm(setting_id, import_text));
+                Action::None
+            }
+            Message::ConfirmImportString => {
+                if let Some(Dialog::ImportStringConfirm(setting_id, text)) = self.dialog.take() {
+                    self.import_strings.remove(&setting_id);
+                    let device = self.device.clone();
+                    Action::Task(
+                        Task::future(async move {
+                            device
+                                .set_setting_values(vec![(setting_id, Cow::from(text).into())])
+                                .await
+                                .map_err(handle_soft_error!())?;
+                            Ok(Message::RefreshSettings)
+                        })
+                        .map(coalesce_result),
+                    )
+                } else {
+                    Action::None
+                }
+            }
         }
     }
 }

@@ -238,5 +238,9 @@ commands!(
         name: String,
         volume_adjustments: Vec<i16>,
     ) -> Result<()>;
+    equalizer_profile::bulk_upsert => fn upsert_equalizer_profiles(
+        model: DeviceModel,
+        name: Vec<(String, Vec<i16>)>,
+    ) -> Result<()>;
     equalizer_profile::delete => fn delete_equalizer_profile(model: DeviceModel, name: String) -> Result<()>;
 );

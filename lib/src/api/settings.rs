@@ -101,6 +101,7 @@ pub enum SettingId {
     MultiSceneNoiseCanceling,
     ExportCustomProfiles,
     ExportCustomProfilesOutput,
+    ImportCustomProfiles,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -144,6 +145,9 @@ pub enum Setting {
         value: String,
         translated_value: String,
     },
+    ImportString {
+        confirmation_message: Option<String>,
+    },
 }
 
 impl From<Setting> for Value {
@@ -160,6 +164,7 @@ impl From<Setting> for Value {
                 translated_value: _,
             } => Cow::<str>::Owned(text).into(),
             Setting::MultiSelect { values, .. } => values.into(),
+            Setting::ImportString { .. } => Cow::from("").into(),
         }
     }
 }
@@ -193,6 +198,44 @@ impl Setting {
         Self::Select {
             setting: Select::from_enum(variants),
             value: Cow::Borrowed(value.into()),
+        }
+    }
+
+    pub fn mode(&self) -> SettingMode {
+        match self {
+            Setting::Toggle { .. } => SettingMode::ReadWrite,
+            Setting::I32Range { .. } => SettingMode::ReadWrite,
+            Setting::Select { .. } => SettingMode::ReadWrite,
+            Setting::OptionalSelect { .. } => SettingMode::ReadWrite,
+            Setting::ModifiableSelect { .. } => SettingMode::ReadWrite,
+            Setting::MultiSelect { .. } => SettingMode::ReadWrite,
+            Setting::Equalizer { .. } => SettingMode::ReadWrite,
+            Setting::Information { .. } => SettingMode::ReadOnly,
+            Setting::ImportString { .. } => SettingMode::WriteOnly,
+        }
+    }
+}
+
+pub enum SettingMode {
+    ReadWrite,
+    ReadOnly,
+    WriteOnly,
+}
+
+impl SettingMode {
+    pub fn is_writable(&self) -> bool {
+        match self {
+            SettingMode::ReadWrite => true,
+            SettingMode::WriteOnly => true,
+            SettingMode::ReadOnly => false,
+        }
+    }
+
+    pub fn is_readable(&self) -> bool {
+        match self {
+            SettingMode::ReadWrite => true,
+            SettingMode::ReadOnly => true,
+            SettingMode::WriteOnly => false,
         }
     }
 }

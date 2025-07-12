@@ -153,7 +153,7 @@ where
                     match command {
                         settings::ModifiableSelectCommand::Add(name) => {
                             self.profile_store
-                                .insert(
+                                .upsert(
                                     name.into_owned(),
                                     equalizer_configuration
                                         .volume_adjustments_channel_1()

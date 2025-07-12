@@ -38,3 +38,4 @@ demo-mode = Demo Mode
 overwrite-with-current-settings = Overwrite with Current Settings
 delete = Delete
 none = None
+confirm = Confirm

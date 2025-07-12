@@ -36,6 +36,7 @@ impl std::fmt::Display for CustomDisplaySetting {
                 setting.band_hz, setting.min, setting.max, setting.fraction_digits,
             ),
             Setting::Information { .. } => write!(f, "information (read only)"),
+            Setting::ImportString { .. } => write!(f, "import string"),
         }?;
         Ok(())
     }
