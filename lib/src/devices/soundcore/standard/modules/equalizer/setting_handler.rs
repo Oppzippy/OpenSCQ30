@@ -1,66 +1,36 @@
-use std::{
-    array,
-    borrow::Cow,
-    sync::{Arc, Mutex},
-};
+use std::{array, borrow::Cow, sync::Arc};
 
 use async_trait::async_trait;
 use strum::IntoEnumIterator;
 use tokio::sync::watch;
-use tracing::{instrument, warn};
+use tracing::instrument;
 
 use crate::{
     api::{
         device,
         settings::{self, Setting, SettingId, Value},
     },
-    devices::{
-        DeviceModel,
-        soundcore::standard::{
-            settings_manager::SettingHandler,
-            structures::{EqualizerConfiguration, VolumeAdjustments},
-        },
+    devices::soundcore::standard::{
+        modules::equalizer::custom_equalizer_profile_store::CustomEqualizerProfileStore,
+        settings_manager::SettingHandler,
+        structures::{EqualizerConfiguration, VolumeAdjustments},
     },
-    storage::OpenSCQ30Database,
 };
 
 use super::EqualizerSetting;
 
 pub struct EqualizerSettingHandler<const C: usize, const B: usize> {
-    device_model: DeviceModel,
-    database: Arc<OpenSCQ30Database>,
-    custom_profiles: Mutex<Vec<(String, Vec<i16>)>>,
-    change_notify: watch::Sender<()>,
+    profile_store: Arc<CustomEqualizerProfileStore>,
+    custom_profiles_receiver: watch::Receiver<Vec<(String, Vec<i16>)>>,
 }
 
 impl<const C: usize, const B: usize> EqualizerSettingHandler<C, B> {
-    #[instrument(skip(database))]
-    pub async fn new(
-        database: Arc<OpenSCQ30Database>,
-        device_model: DeviceModel,
-        change_notify: watch::Sender<()>,
-    ) -> Self {
-        let custom_profiles = database
-            .fetch_all_equalizer_profiles(device_model)
-            .await
-            .unwrap_or_else(|err| {
-                warn!("error fetching custom equalizer profiles, continuing without them: {err:?}");
-                Vec::new()
-            });
+    #[instrument(skip(profile_store))]
+    pub async fn new(profile_store: Arc<CustomEqualizerProfileStore>) -> Self {
         Self {
-            device_model,
-            database,
-            custom_profiles: Mutex::new(custom_profiles),
-            change_notify,
+            custom_profiles_receiver: profile_store.subscribe(),
+            profile_store,
         }
-    }
-
-    async fn refresh(&self) -> device::Result<()> {
-        *self.custom_profiles.lock().unwrap() = self
-            .database
-            .fetch_all_equalizer_profiles(self.device_model)
-            .await?;
-        Ok(())
     }
 
     fn values_to_volume_adjustments(
@@ -100,7 +70,7 @@ where
             ),
             EqualizerSetting::CustomProfile => Setting::ModifiableSelect {
                 setting: {
-                    let custom_profiles = self.custom_profiles.lock().unwrap();
+                    let custom_profiles = self.custom_profiles_receiver.borrow();
                     settings::Select {
                         options: custom_profiles
                             .iter()
@@ -116,9 +86,8 @@ where
                     .preset_profile()
                     .is_none()
                     .then(|| {
-                        self.custom_profiles
-                            .lock()
-                            .unwrap()
+                        self.custom_profiles_receiver
+                            .borrow()
                             .iter()
                             .find(|(_, v)| {
                                 v == equalizer_configuration
@@ -167,9 +136,8 @@ where
             EqualizerSetting::CustomProfile => {
                 if let Ok(name) = value.try_as_str() {
                     if let Some(volume_adjustments) = self
-                        .custom_profiles
-                        .lock()
-                        .unwrap()
+                        .custom_profiles_receiver
+                        .borrow()
                         .iter()
                         .find(|(n, _)| n == name)
                         .map(|(_, volume_adjustments)| volume_adjustments)
@@ -184,9 +152,8 @@ where
                 } else if let Value::ModifiableSelectCommand(command) = value {
                     match command {
                         settings::ModifiableSelectCommand::Add(name) => {
-                            self.database
-                                .upsert_equalizer_profile(
-                                    self.device_model,
+                            self.profile_store
+                                .insert(
                                     name.into_owned(),
                                     equalizer_configuration
                                         .volume_adjustments_channel_1()
@@ -194,15 +161,9 @@ where
                                         .to_vec(),
                                 )
                                 .await?;
-                            self.refresh().await?;
-                            self.change_notify.send_replace(());
                         }
                         settings::ModifiableSelectCommand::Remove(name) => {
-                            self.database
-                                .delete_equalizer_profile(self.device_model, name.into_owned())
-                                .await?;
-                            self.refresh().await?;
-                            self.change_notify.send_replace(());
+                            self.profile_store.delete(name.into_owned()).await?;
                         }
                     }
                 }

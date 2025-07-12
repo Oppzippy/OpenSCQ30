@@ -7,26 +7,23 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
 use tokio::sync::watch;
-use tracing::{instrument, warn};
+use tracing::instrument;
 
 use crate::{
     api::{
         device,
         settings::{self, SettingId, Value},
     },
-    devices::{
-        DeviceModel,
-        soundcore::standard::{
-            settings_manager::SettingHandler, structures::EqualizerConfiguration,
-        },
+    devices::soundcore::standard::{
+        modules::equalizer::custom_equalizer_profile_store::CustomEqualizerProfileStore,
+        settings_manager::SettingHandler, structures::EqualizerConfiguration,
     },
-    storage::OpenSCQ30Database,
 };
 
 use super::ImportExportSetting;
 
 pub struct ImportExportSettingHandler<const C: usize, const B: usize> {
-    custom_profiles: Arc<Mutex<Vec<(String, Vec<i16>)>>>,
+    profiles_receiver: watch::Receiver<Vec<(String, Vec<i16>)>>,
     selected_profiles: Mutex<Vec<String>>,
     change_notify: watch::Sender<()>,
 }
@@ -39,37 +36,13 @@ struct ExportedCustomProfile<'a> {
 }
 
 impl<const C: usize, const B: usize> ImportExportSettingHandler<C, B> {
-    #[instrument(skip(database))]
+    #[instrument(skip(profile_store))]
     pub async fn new(
-        database: Arc<OpenSCQ30Database>,
-        device_model: DeviceModel,
+        profile_store: Arc<CustomEqualizerProfileStore>,
         change_notify: watch::Sender<()>,
     ) -> Self {
-        let custom_profiles = database
-            .fetch_all_equalizer_profiles(device_model)
-            .await
-            .unwrap_or_else(|err| {
-                warn!("error fetching custom equalizer profiles, continuing without them: {err:?}");
-                Vec::new()
-            });
-
-        let custom_profiles = Arc::new(Mutex::new(custom_profiles));
-        // hack to work around bad design. we should instead somehow share state between setting handlers.
-        {
-            let mut notify = change_notify.subscribe();
-            let custom_profiles = custom_profiles.to_owned();
-            let database = database.to_owned();
-            tokio::spawn(async move {
-                while notify.changed().await.is_ok() {
-                    *custom_profiles.lock().unwrap() = database
-                        .fetch_all_equalizer_profiles(device_model)
-                        .await
-                        .unwrap();
-                }
-            });
-        }
         Self {
-            custom_profiles,
+            profiles_receiver: profile_store.subscribe(),
             change_notify,
             selected_profiles: Default::default(),
         }
@@ -90,9 +63,8 @@ where
         Some(match setting {
             ImportExportSetting::ExportCustomProfiles => {
                 let profile_names = self
-                    .custom_profiles
-                    .lock()
-                    .unwrap()
+                    .profiles_receiver
+                    .borrow()
                     .iter()
                     .map(|(name, _)| name)
                     .cloned()
@@ -114,7 +86,7 @@ where
             }
             ImportExportSetting::ExportCustomProfilesOutput => {
                 let selection = self.selected_profiles.lock().unwrap();
-                let custom_profiles = self.custom_profiles.lock().unwrap();
+                let custom_profiles = self.profiles_receiver.borrow();
                 let exported_profiles = custom_profiles
                     .iter()
                     .filter(|(name, _)| selection.contains(name))

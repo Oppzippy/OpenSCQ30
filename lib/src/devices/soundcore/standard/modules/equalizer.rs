@@ -16,7 +16,10 @@ use crate::{
     devices::{
         DeviceModel,
         soundcore::standard::{
-            modules::equalizer::import_export_setting_handler::ImportExportSettingHandler,
+            modules::equalizer::{
+                custom_equalizer_profile_store::CustomEqualizerProfileStore,
+                import_export_setting_handler::ImportExportSettingHandler,
+            },
             packets::packet_io_controller::PacketIOController,
             structures::{AgeRange, BasicHearId, CustomHearId, EqualizerConfiguration, Gender},
         },
@@ -26,6 +29,7 @@ use crate::{
 
 use super::ModuleCollection;
 
+mod custom_equalizer_profile_store;
 mod import_export_setting_handler;
 mod setting_handler;
 mod state_modifier;
@@ -199,18 +203,17 @@ impl<T> ModuleCollection<T> {
             + Send
             + Sync,
     {
+        let profile_store = Arc::new(
+            CustomEqualizerProfileStore::new(database, device_model, change_notify.to_owned())
+                .await,
+        );
         self.setting_manager.add_handler(
             CategoryId::Equalizer,
-            EqualizerSettingHandler::<CHANNELS, BANDS>::new(
-                database.to_owned(),
-                device_model,
-                change_notify.to_owned(),
-            )
-            .await,
+            EqualizerSettingHandler::<CHANNELS, BANDS>::new(profile_store.to_owned()).await,
         );
         self.setting_manager.add_handler(
             CategoryId::EqualizerImportExport,
-            ImportExportSettingHandler::new(database, device_model, change_notify).await,
+            ImportExportSettingHandler::new(profile_store, change_notify).await,
         );
     }
 }
