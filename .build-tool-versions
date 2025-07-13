@@ -1,5 +1,5 @@
 rustup 1.28.1
-rust 1.86.0
+rust 1.88.0
 jdk 21
-ndk 28.1.13356709
+ndk 28.2.13676358
 cargo-ndk 3.5.4
