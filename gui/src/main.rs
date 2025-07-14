@@ -22,6 +22,17 @@ fn main() -> anyhow::Result<()> {
         )
         .pretty()
         .init();
+    #[cfg(windows)]
+    match is_launched_from_console() {
+        Ok(true) => (),
+        Ok(false) => {
+            if let Err(err) = detach_from_console() {
+                tracing::error!("error detaching from console: {err:?}")
+            }
+        }
+        Err(err) => tracing::error!("error checking if we're attached to a console: {err:?}"),
+    }
+
     let requested_languages = i18n_embed::DesktopLanguageRequester::requested_languages();
     i18n::init(&requested_languages);
     openscq30_lib::i18n::init(&requested_languages);
@@ -37,4 +48,25 @@ fn main() -> anyhow::Result<()> {
     )?;
 
     Ok(())
+}
+
+#[cfg(windows)]
+fn is_launched_from_console() -> anyhow::Result<bool> {
+    use sysinfo::{ProcessRefreshKind, RefreshKind, System};
+
+    let sys = System::new_with_specifics(
+        RefreshKind::nothing().with_processes(ProcessRefreshKind::nothing()),
+    );
+    let parent_process_name = sys
+        .process(sysinfo::get_current_pid().map_err(|err| anyhow::anyhow!("{err}"))?)
+        .and_then(|process| process.parent())
+        .and_then(|parent_pid| sys.process(parent_pid))
+        .map(|parent| parent.name())
+        .ok_or_else(|| anyhow::anyhow!("failed to get parent process name"))?;
+    Ok(!parent_process_name.eq_ignore_ascii_case("explorer.exe"))
+}
+
+#[cfg(windows)]
+fn detach_from_console() -> anyhow::Result<()> {
+    unsafe { windows::Win32::System::Console::FreeConsole().map_err(Into::into) }
 }

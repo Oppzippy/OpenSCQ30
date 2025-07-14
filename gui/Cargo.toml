@@ -41,5 +41,9 @@ itertools = { workspace = true }
 [target.'cfg(target_os = "linux")'.dependencies]
 libcosmic = { workspace = true, features = ["wayland", "about"] }
 
+[target.'cfg(target_os = "windows")'.dependencies]
+sysinfo = { workspace = true }
+windows = { workspace = true, features = ["Win32_System_Console"] }
+
 [dev-dependencies]
 tempfile = { workspace = true }
