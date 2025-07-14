@@ -23,6 +23,8 @@ run-remote-windows level='debug':
         --features bundled-dependencies \
         --features rust-embed/debug-embed
 
+    # If it's currently running, we can't overwrite the file
+    ssh "$dest" "taskkill /f /im openscq30-gui.exe" || true
     scp ../target/x86_64-pc-windows-gnu/debug/openscq30-gui.exe "$dest:$path/"
 
     # We can't easily set an environment variable and run openscq30-gui.exe in one go with psexec,
