@@ -29,7 +29,7 @@ run-remote-windows level='debug':
     # so a script is generated and uploaded as a workaround.
     echo """
     \$env:RUST_LOG='none,openscq30_lib=$log_level,openscq30_gui=$log_level,openscq30_i18n=$log_level'
-    C:/Users/$user/openscq30-gui.exe
+    $path/openscq30-gui.exe
     """ | curl -T - "sftp://$dest/$path/launch.ps1"
 
     ssh "$dest" \
