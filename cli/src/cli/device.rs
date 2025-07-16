@@ -231,7 +231,21 @@ fn parse_setting_value(setting: &Setting, unparsed_value: String) -> anyhow::Res
                 Value::String(name.into())
             }
         }
-        Setting::MultiSelect { setting, values } => todo!(),
+        Setting::MultiSelect { setting: _, .. } => {
+            let mut reader = csv::ReaderBuilder::new()
+                .has_headers(false)
+                .from_reader(unparsed_value.as_bytes());
+            let maybe_row = reader.records().next().transpose()?;
+            let strings = maybe_row
+                .map(|row| {
+                    row.into_iter()
+                        .map(|entry| Cow::from(entry.to_string()))
+                        .collect::<Vec<_>>()
+                })
+                .unwrap_or_default();
+
+            Value::StringVec(strings)
+        }
         Setting::Equalizer { setting, .. } => {
             let values = unparsed_value
                 .split(",")

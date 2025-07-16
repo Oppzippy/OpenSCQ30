@@ -60,7 +60,18 @@ impl std::fmt::Display for DisplayableValue {
             Value::I16Vec(items) => write!(f, "{items:?}"),
             Value::I32(value) => write!(f, "{value}"),
             Value::String(value) => write!(f, "{value}"),
-            Value::StringVec(values) => write!(f, "{values:?}"),
+            Value::StringVec(values) => {
+                let mut buffer = Vec::new();
+                let mut writer = csv::WriterBuilder::new()
+                    .has_headers(false)
+                    .from_writer(&mut buffer);
+                // write the fields individually rather than write_record so that we don't get a newline at the end
+                for value in values {
+                    writer.write_field(value.as_bytes()).unwrap();
+                }
+                std::mem::drop(writer);
+                write!(f, "{}", String::from_utf8(buffer).unwrap())
+            }
             Value::OptionalString(value) => {
                 if let Some(value) = value {
                     write!(f, "{value}")
