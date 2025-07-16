@@ -30,6 +30,7 @@ class ErrorHandlingTest : OpenSCQ30RootTestBase() {
 
         addDemoDevice(composeRule, "Soundcore Life Q30")
 
+        composeRule.waitForIdle() // wait for toast to be shown
         verify(exactly = 1) { Toast.makeText(any(), getString(R.string.error_pairing), any()) }
     }
 
@@ -40,6 +41,7 @@ class ErrorHandlingTest : OpenSCQ30RootTestBase() {
 
         addAndConnectToDemoDevice(composeRule, "Soundcore Life Q30")
 
+        composeRule.waitForIdle() // wait for toast to be shown
         verify(exactly = 1) { Toast.makeText(any(), getString(R.string.error_connecting), any()) }
     }
 }

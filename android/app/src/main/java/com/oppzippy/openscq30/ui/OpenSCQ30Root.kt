@@ -26,6 +26,7 @@ import com.oppzippy.openscq30.ui.utils.Loading
 
 @Composable
 fun OpenSCQ30Root(viewModel: OpenSCQ30RootViewModel = hiltViewModel()) {
+    viewModel.toastHandler.Show()
     OpenSCQ30Theme {
         Surface(
             modifier = Modifier.fillMaxSize(),

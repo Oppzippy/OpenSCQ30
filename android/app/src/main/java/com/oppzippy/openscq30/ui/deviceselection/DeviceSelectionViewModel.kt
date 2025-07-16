@@ -19,6 +19,7 @@ import com.oppzippy.openscq30.lib.bindings.OpenScq30Exception
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
 import com.oppzippy.openscq30.lib.wrapper.ConnectionDescriptor
 import com.oppzippy.openscq30.lib.wrapper.PairedDevice
+import com.oppzippy.openscq30.ui.utils.ToastHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
@@ -30,6 +31,7 @@ import kotlinx.coroutines.launch
 class DeviceSelectionViewModel @Inject constructor(
     private val application: Application,
     private val session: OpenScq30Session,
+    private val toastHandler: ToastHandler,
 ) : AndroidViewModel(application) {
     val pageState = MutableStateFlow<DeviceSelectionPage>(DeviceSelectionPage.Loading)
 
@@ -68,7 +70,7 @@ class DeviceSelectionViewModel @Inject constructor(
                 launchConnectScreen()
             } catch (ex: OpenScq30Exception) {
                 Log.e(TAG, "error pairing with ${pairedDevice.model}", ex)
-                Toast.makeText(application, R.string.error_pairing, Toast.LENGTH_SHORT).show()
+                toastHandler.add(R.string.error_pairing, Toast.LENGTH_SHORT)
             }
         }
     }
@@ -119,7 +121,7 @@ class DeviceSelectionViewModel @Inject constructor(
 
                 override fun onFailure(error: CharSequence?) {
                     Log.w(TAG, "error pairing: $error")
-                    Toast.makeText(application, R.string.error_pairing, Toast.LENGTH_SHORT).show()
+                    toastHandler.add(R.string.error_pairing, Toast.LENGTH_SHORT)
                 }
             },
             null,

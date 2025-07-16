@@ -1,7 +1,6 @@
 package com.oppzippy.openscq30.ui
 
 import android.app.Application
-import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
@@ -25,6 +24,7 @@ import com.oppzippy.openscq30.lib.wrapper.QuickPreset
 import com.oppzippy.openscq30.lib.wrapper.Setting
 import com.oppzippy.openscq30.lib.wrapper.Value
 import com.oppzippy.openscq30.lib.wrapper.toValue
+import com.oppzippy.openscq30.ui.utils.ToastHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -46,6 +46,7 @@ class OpenSCQ30RootViewModel @Inject constructor(
     private val quickPresetSlotDao: QuickPresetSlotDao,
     private val featuredSettingSlotDao: FeaturedSettingSlotDao,
     private val legacyEqualizerProfileDao: LegacyEqualizerProfileDao,
+    val toastHandler: ToastHandler,
 ) : AndroidViewModel(application) {
     private val deviceServiceConnection =
         DeviceServiceConnection(unbind = { unbindDeviceService() })
@@ -65,13 +66,13 @@ class OpenSCQ30RootViewModel @Inject constructor(
                 deviceSettingsManager.value?.close()
                 if (it is ConnectionStatus.Connected) {
                     deviceSettingsManager.value = DeviceSettingsManager(
-                        context = application,
                         session = session,
                         deviceManager = it.deviceManager,
                         parent = coroutineContext.job,
                         quickPresetSlotDao = quickPresetSlotDao,
                         featuredSettingSlotDao = featuredSettingSlotDao,
                         legacyEqualizerProfileDao = legacyEqualizerProfileDao,
+                        toastHandler = toastHandler,
                     )
                 } else {
                     deviceSettingsManager.value = null
@@ -131,13 +132,13 @@ class OpenSCQ30RootViewModel @Inject constructor(
 }
 
 class DeviceSettingsManager(
-    val context: Context,
     session: OpenScq30Session,
     parent: Job,
     private val deviceManager: DeviceConnectionManager,
     private val quickPresetSlotDao: QuickPresetSlotDao,
     private val featuredSettingSlotDao: FeaturedSettingSlotDao,
     legacyEqualizerProfileDao: LegacyEqualizerProfileDao,
+    private val toastHandler: ToastHandler,
 ) : AutoCloseable {
     private val coroutineScope = CoroutineScope(Job(parent))
     private val quickPresetHandler = session.quickPresetHandler()
@@ -168,7 +169,7 @@ class DeviceSettingsManager(
                 )
             } catch (ex: OpenScq30Exception) {
                 Log.e(TAG, "error setting values of settings", ex)
-                Toast.makeText(context, R.string.error_changing_settings, Toast.LENGTH_SHORT).show()
+                toastHandler.add(R.string.error_changing_settings, Toast.LENGTH_SHORT)
             }
         }
     }
@@ -230,7 +231,7 @@ class DeviceSettingsManager(
                 quickPresetHandler.activate(device, name)
             } catch (ex: OpenScq30Exception) {
                 Log.e(TAG, "error activating quick preset", ex)
-                Toast.makeText(context, R.string.error_activating_quick_preset, Toast.LENGTH_SHORT).show()
+                toastHandler.add(R.string.error_activating_quick_preset, Toast.LENGTH_SHORT)
             }
             refreshQuickPresets()
         }
@@ -242,7 +243,7 @@ class DeviceSettingsManager(
                 quickPresetHandler.save(device, name)
             } catch (ex: OpenScq30Exception) {
                 Log.e(TAG, "error saving quick preset", ex)
-                Toast.makeText(context, R.string.error_saving_quick_preset, Toast.LENGTH_SHORT).show()
+                toastHandler.add(R.string.error_saving_quick_preset, Toast.LENGTH_SHORT)
             }
             refreshQuickPresets()
         }
@@ -286,7 +287,7 @@ class DeviceSettingsManager(
                 )
             } catch (ex: OpenScq30Exception) {
                 Log.e(TAG, "error migrating legacy equalizer profile", ex)
-                Toast.makeText(context, R.string.error_migrating_legacy_profile, Toast.LENGTH_SHORT).show()
+                toastHandler.add(R.string.error_migrating_legacy_profile, Toast.LENGTH_SHORT)
             }
         }
     }
