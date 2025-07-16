@@ -46,7 +46,7 @@ class OpenSCQ30RootViewModel @Inject constructor(
     private val quickPresetSlotDao: QuickPresetSlotDao,
     private val featuredSettingSlotDao: FeaturedSettingSlotDao,
     private val legacyEqualizerProfileDao: LegacyEqualizerProfileDao,
-    val toastHandler: ToastHandler,
+    val toastHandler: ToastHandler = ToastHandler(),
 ) : AndroidViewModel(application) {
     private val deviceServiceConnection =
         DeviceServiceConnection(unbind = { unbindDeviceService() })
