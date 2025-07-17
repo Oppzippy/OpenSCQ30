@@ -1,7 +1,4 @@
-use std::{
-    path::Path,
-    process::{Command, Stdio},
-};
+use std::{path::Path, process::Command};
 
 use insta_cmd::{assert_cmd_snapshot, get_cargo_bin};
 use tempfile::tempdir;
@@ -36,9 +33,7 @@ fn set_and_get(dir: &Path, setting: &str, value: &str) -> Command {
         .arg("--set")
         .arg(format!("{setting}={value}"))
         .arg("--get")
-        .arg(setting)
-        // TODO include stderr
-        .stderr(Stdio::null());
+        .arg(setting);
     command
 }
 
@@ -96,6 +91,7 @@ fn setting_toggle_invalid() {
     ----- stdout -----
 
     ----- stderr -----
+    Error: provided string was not `true` or `false`
     ");
 }
 
@@ -124,6 +120,7 @@ fn setting_i32_range_invalid() {
     ----- stdout -----
 
     ----- stderr -----
+    Error: invalid digit found in string
     ");
 }
 
@@ -137,6 +134,7 @@ fn setting_i32_range_out_of_range() {
     ----- stdout -----
 
     ----- stderr -----
+    Error: 100 is out of the expected range 0..=10
     ");
 }
 
@@ -159,13 +157,14 @@ fn setting_select() {
 fn setting_select_invalid() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3028");
-    assert_cmd_snapshot!(set_and_get(dir.path(), "ambientSoundMode", "invalid"), @r"
+    assert_cmd_snapshot!(set_and_get(dir.path(), "ambientSoundMode", "invalid"), @r#"
     success: false
     exit_code: 1
     ----- stdout -----
 
     ----- stderr -----
-    ");
+    Error: invalid is not a valid option. Expected one of: ["Normal", "Transparency", "NoiseCanceling"]
+    "#);
 }
 
 #[test]
@@ -291,9 +290,7 @@ fn setting_multi_select() {
         .arg("--set")
         .arg("volumeAdjustments=2,0,0,0,0,0,0,0")
         .arg("--set")
-        .arg("customEqualizerProfile=+other not selected")
-        // TODO enable stderr
-        .stderr(Stdio::null());
+        .arg("customEqualizerProfile=+other not selected");
     assert_cmd_snapshot!(command, @r"
     success: true
     exit_code: 0
@@ -405,6 +402,7 @@ fn setting_equalizer_invalid() {
     ----- stdout -----
 
     ----- stderr -----
+    Error: invalid digit found in string
     ");
 }
 
@@ -469,9 +467,7 @@ fn setting_import_string_set() {
         .arg("--set")
         .arg("customEqualizerProfile=test profile")
         .arg("--get")
-        .arg("customEqualizerProfile")
-        // TODO include stderr
-        .stderr(Stdio::null());
+        .arg("customEqualizerProfile");
     assert_cmd_snapshot!(command, @r"
     success: true
     exit_code: 0
