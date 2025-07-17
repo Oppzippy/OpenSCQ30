@@ -203,7 +203,7 @@ fn setting_optional_select_invalid() {
     ----- stdout -----
 
     ----- stderr -----
-    Error: invalid is not a valid option. Expected either an empty string or one of: ["VolumeUp", "VolumeDown", "PreviousSong", "NextSong", "AmbientSoundMode", "VoiceAssistant", "PlayPause", "GameMode"]
+    Error: invalid is not a valid option. Expected one of: ["VolumeUp", "VolumeDown", "PreviousSong", "NextSong", "AmbientSoundMode", "VoiceAssistant", "PlayPause", "GameMode"]
     "#);
 }
 
@@ -388,7 +388,7 @@ fn setting_equalizer_too_many_values() {
 fn setting_equalizer_out_of_range() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3951");
-    assert_cmd_snapshot!(set_and_get(dir.path(), "volumeAdjustments", "1000,0,0,0,0,0,0,0,0"), @r"
+    assert_cmd_snapshot!(set_and_get(dir.path(), "volumeAdjustments", "1000,0,0,0,0,0,0,0"), @r"
     success: false
     exit_code: 1
     ----- stdout -----

@@ -1,4 +1,6 @@
-use std::{borrow::Cow, collections::HashMap, str::FromStr};
+mod primitives;
+
+use std::borrow::Cow;
 
 use anyhow::{anyhow, bail};
 use openscq30_lib::api::settings::{self, ModifiableSelectCommand, Setting, Value};
@@ -18,46 +20,28 @@ pub fn setting_value(setting: &Setting, unparsed: String) -> anyhow::Result<Valu
 }
 
 fn parse_toggle(unparsed: &str) -> anyhow::Result<Value> {
-    Ok(bool::from_str(&unparsed)?.into())
+    primitives::bool(unparsed).map(Value::from)
 }
 
 fn parse_i32_range(setting: &settings::Range<i32>, unparsed: &str) -> anyhow::Result<Value> {
-    let value = i32::from_str(unparsed)?;
-    if !setting.range.contains(&value) {
-        bail!("{value} is out of the expected range {:?}", setting.range)
+    let number = primitives::i32(unparsed)?;
+    if !setting.range.contains(&number) {
+        bail!("{number} is out of the expected range {:?}", setting.range)
     }
-    Ok(value.into())
+    Ok(number.into())
 }
 
 fn parse_select(setting: &settings::Select, unparsed: &str) -> anyhow::Result<Value> {
-    let value = setting
-        .options
-        .iter()
-        .find(|option| option.eq_ignore_ascii_case(&unparsed))
-        .ok_or_else(|| {
-            anyhow!(
-                "{unparsed} is not a valid option. Expected one of: {:?}",
-                setting.options
-            )
-        })?;
-    Ok(Value::String(value.clone()))
+    let selection = primitives::one_of_options(unparsed, &setting.options)?;
+    Ok(Value::String(selection.clone()))
 }
 
 fn parse_optional_select(setting: &settings::Select, unparsed: &str) -> anyhow::Result<Value> {
     if unparsed.is_empty() {
         Ok(Value::OptionalString(None))
     } else {
-        let value = setting
-                .options
-                .iter()
-                .find(|option| option.eq_ignore_ascii_case(&unparsed))
-                .ok_or_else(|| {
-                    anyhow!(
-                        "{unparsed} is not a valid option. Expected either an empty string or one of: {:?}",
-                        setting.options
-                    )
-                })?;
-        Ok(Value::OptionalString(Some(value.to_owned())))
+        let selection = primitives::one_of_options(unparsed, &setting.options)?;
+        Ok(Value::OptionalString(Some(selection.clone())))
     }
 }
 
@@ -77,80 +61,39 @@ fn parse_modifiable_select(setting: &settings::Select, unparsed: String) -> anyh
             .strip_prefix("\\")
             .map(ToOwned::to_owned)
             .unwrap_or(unparsed);
-        if !setting.options.contains(&Cow::Borrowed(&name)) {
-            bail!(
-                "{name} is not a valid option. Expected one of: {:?}",
-                setting.options
-            );
-        }
-        Ok(Value::String(name.into()))
+        Ok(primitives::one_of_options(&name, &setting.options)?
+            .clone()
+            .into())
     }
 }
 
 fn parse_multi_select(setting: &settings::Select, unparsed: &str) -> anyhow::Result<Value> {
-    let mut reader = csv::ReaderBuilder::new()
-        .has_headers(false)
-        .from_reader(unparsed.as_bytes());
-    let maybe_row = reader.records().next().transpose()?;
-    let strings = maybe_row
-        .map(|row| {
-            row.into_iter()
-                .map(|entry| entry.to_string())
-                .collect::<Vec<_>>()
-        })
-        .unwrap_or_default();
-    let valid_options_lowercase = setting
-        .options
-        .iter()
-        .map(|option| (option.to_lowercase(), option))
-        .collect::<HashMap<_, _>>();
-    let options = strings
-        .iter()
-        .map(|string| {
-            valid_options_lowercase
-                .get(&string.to_lowercase())
-                .cloned()
-                .cloned()
-                .ok_or_else(|| {
-                    anyhow!(
-                        "{string} is not a valid option. Expected one of: {:?}",
-                        setting.options
-                    )
-                })
-        })
-        .collect::<anyhow::Result<Vec<_>>>()?;
-
-    Ok(Value::StringVec(options))
+    primitives::many_of_options(unparsed, &setting.options).map(Value::from)
 }
 
 fn parse_equalizer(setting: &settings::Equalizer, unparsed: &str) -> anyhow::Result<Value> {
-    let values = unparsed
-        .split(",")
-        .enumerate()
-        .map(|(i, unparsed)| {
-            let value = i16::from_str(unparsed).map_err(anyhow::Error::from)?;
-            if value < setting.min || value > setting.max {
-                bail!(
-                    "{} band value {value} is outside of expected range {} to {}",
-                    // ideally display hz, but fall back to index if not possible
-                    setting
-                        .band_hz
-                        .get(i)
-                        .map(|hz| format!("{hz} Hz"))
-                        .unwrap_or_else(|| format!("#{}", i as u16 + 1)),
-                    setting.min,
-                    setting.max
-                );
-            }
-            Ok(value)
-        })
-        .collect::<anyhow::Result<Vec<_>>>()?;
+    let values = primitives::i16_vec(unparsed)?;
     if values.len() != setting.band_hz.len() {
         bail!(
             "wanted {} bands, got {}",
             setting.band_hz.len(),
             values.len()
-        )
+        );
+    }
+    for (i, value) in values.iter().cloned().enumerate() {
+        if value < setting.min || value > setting.max {
+            bail!(
+                "{} band value {value} is outside of expected range {} to {}",
+                // ideally display hz, but fall back to index if not possible
+                setting
+                    .band_hz
+                    .get(i)
+                    .map(|hz| format!("{hz} Hz"))
+                    .unwrap_or_else(|| format!("#{}", i as u16 + 1)),
+                setting.min,
+                setting.max
+            );
+        }
     }
     Ok(Value::I16Vec(values))
 }
