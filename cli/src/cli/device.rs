@@ -224,7 +224,7 @@ fn parse_setting_value(setting: &Setting, unparsed_value: String) -> anyhow::Res
                 Value::OptionalString(Some(value.to_owned()))
             }
         }
-        Setting::ModifiableSelect { setting: _, .. } => {
+        Setting::ModifiableSelect { setting, .. } => {
             if let Some(rest) = unparsed_value.strip_prefix("+") {
                 Value::ModifiableSelectCommand(ModifiableSelectCommand::Add(rest.to_owned().into()))
             } else if let Some(rest) = unparsed_value.strip_prefix("-") {
@@ -238,6 +238,12 @@ fn parse_setting_value(setting: &Setting, unparsed_value: String) -> anyhow::Res
                     .strip_prefix("\\")
                     .map(ToOwned::to_owned)
                     .unwrap_or(unparsed_value);
+                if !setting.options.contains(&Cow::Borrowed(&name)) {
+                    bail!(
+                        "{name} is not a valid option. Expected one of: {:?}",
+                        setting.options
+                    );
+                }
                 Value::String(name.into())
             }
         }

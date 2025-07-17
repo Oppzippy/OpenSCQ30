@@ -242,17 +242,15 @@ fn setting_modifiable_select() {
 
 #[test]
 fn setting_modifiable_select_invalid() {
-    // TODO this is not intended behavior. it should fail on invalid values rather than deselecting.
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3951");
     assert_cmd_snapshot!(set_and_get(dir.path(), "customEqualizerProfile", "invalid"), @r"
-    success: true
-    exit_code: 0
+    success: false
+    exit_code: 1
     ----- stdout -----
-    Setting ID            	Value
-    customEqualizerProfile	     
 
     ----- stderr -----
+    Error: invalid is not a valid option. Expected one of: []
     ");
 }
 
