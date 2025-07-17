@@ -241,6 +241,101 @@ fn setting_modifiable_select() {
 }
 
 #[test]
+fn setting_modifiable_select_exact_match() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    let mut command = cli(dir.path());
+    command
+        .arg("device")
+        .arg("exec")
+        .arg("--mac-address")
+        .arg("00:00:00:00:00:00")
+        .arg("--set")
+        .arg("customEqualizerProfile=+Test")
+        .arg("--set")
+        .arg("volumeAdjustments=1,0,0,0,0,0,0,0")
+        .arg("--set")
+        .arg("customEqualizerProfile=+tesT");
+
+    assert_cmd_snapshot!(command, @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    OK
+
+    ----- stderr -----
+    ");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "customEqualizerProfile", "tesT"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID            	Value
+    customEqualizerProfile	tesT 
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_modifiable_select_case_insensitive_match() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "customEqualizerProfile", "+Test"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID            	Value
+    customEqualizerProfile	     
+
+    ----- stderr -----
+    ");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "customEqualizerProfile", "tesT"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID            	Value
+    customEqualizerProfile	Test 
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_modifiable_select_ambiguity() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    let mut command = cli(dir.path());
+    command
+        .arg("device")
+        .arg("exec")
+        .arg("--mac-address")
+        .arg("00:00:00:00:00:00")
+        .arg("--set")
+        .arg("customEqualizerProfile=+Test")
+        .arg("--set")
+        .arg("volumeAdjustments=1,0,0,0,0,0,0,0")
+        .arg("--set")
+        .arg("customEqualizerProfile=+tesT");
+
+    assert_cmd_snapshot!(command, @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    OK
+
+    ----- stderr -----
+    ");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "customEqualizerProfile", "test"), @r"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    Error: test is ambiguous, could refer to Test or tesT
+    ");
+}
+
+#[test]
 fn setting_modifiable_select_invalid() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3951");
