@@ -362,33 +362,29 @@ fn setting_equalizer() {
 
 #[test]
 fn setting_equalizer_too_few_values() {
-    // TODO This should fail
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3951");
     assert_cmd_snapshot!(set_and_get(dir.path(), "volumeAdjustments", "10,-20,30,-40,50,-60,70"), @r"
-    success: true
-    exit_code: 0
+    success: false
+    exit_code: 1
     ----- stdout -----
-    Setting ID       	Value                             
-    volumeAdjustments	[10, -20, 30, -40, 50, -60, 70, 0]
 
     ----- stderr -----
+    Error: wanted 8 bands, got 7
     ");
 }
 
 #[test]
 fn setting_equalizer_too_many_values() {
-    // TODO This should fail
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3951");
     assert_cmd_snapshot!(set_and_get(dir.path(), "volumeAdjustments", "10,-20,30,-40,50,-60,70,-80,90"), @r"
-    success: true
-    exit_code: 0
+    success: false
+    exit_code: 1
     ----- stdout -----
-    Setting ID       	Value                               
-    volumeAdjustments	[10, -20, 30, -40, 50, -60, 70, -80]
 
     ----- stderr -----
+    Error: wanted 8 bands, got 9
     ");
 }
 

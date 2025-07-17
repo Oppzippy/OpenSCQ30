@@ -268,6 +268,13 @@ fn parse_setting_value(setting: &Setting, unparsed_value: String) -> anyhow::Res
                     Ok(value)
                 })
                 .collect::<anyhow::Result<Vec<_>>>()?;
+            if values.len() != setting.band_hz.len() {
+                bail!(
+                    "wanted {} bands, got {}",
+                    setting.band_hz.len(),
+                    values.len()
+                )
+            }
             Value::I16Vec(values)
         }
         Setting::Information { .. } => bail!("can't set value of read only information setting"),
