@@ -9,6 +9,10 @@ test-cov:
     cargo llvm-cov --no-report --bins
     cargo llvm-cov --no-report --test '*'
 
+snapshot-test:
+    -cargo test --test '*'
+    cargo insta review
+
 install path:
     ./scripts/install.sh "{{path}}"
 

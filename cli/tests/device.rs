@@ -1,4 +1,7 @@
-use std::{path::Path, process::Command};
+use std::{
+    path::Path,
+    process::{Command, Stdio},
+};
 
 use insta_cmd::{assert_cmd_snapshot, get_cargo_bin};
 use tempfile::tempdir;
@@ -21,6 +24,22 @@ fn add_device(dir: &Path, model: &str) {
         .output()
         .unwrap();
     assert!(output.status.success());
+}
+
+fn set_and_get(dir: &Path, setting: &str, value: &str) -> Command {
+    let mut command = cli(dir);
+    command
+        .arg("device")
+        .arg("exec")
+        .arg("--mac-address")
+        .arg("00:00:00:00:00:00")
+        .arg("--set")
+        .arg(format!("{setting}={value}"))
+        .arg("--get")
+        .arg(setting)
+        // TODO include stderr
+        .stderr(Stdio::null());
+    command
 }
 
 #[test]
@@ -50,4 +69,465 @@ fn list_settings() {
 
     ----- stderr -----
     "#);
+}
+
+#[test]
+fn setting_toggle() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3959");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "windNoiseSuppression", "true"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID          	Value
+    windNoiseSuppression	true 
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_toggle_invalid() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3959");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "windNoiseSuppression", "invalid"), @r"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_i32_range() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "customNoiseCanceling", "2"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID          	Value
+    customNoiseCanceling	2    
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_i32_range_invalid() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "customNoiseCanceling", "invalid"), @r"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_i32_range_out_of_range() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "customNoiseCanceling", "100"), @r"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_select() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3028");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "ambientSoundMode", "normal"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID      	Value 
+    ambientSoundMode	Normal
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_select_invalid() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3028");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "ambientSoundMode", "invalid"), @r"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_optional_select() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "leftSinglePress", "normal"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID     	Value
+    leftSinglePress	     
+
+    ----- stderr -----
+    ");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "leftSinglePress", ""), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID     	Value
+    leftSinglePress	     
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_optional_select_invalid() {
+    // TODO this is not intended behavior. it should fail on invalid values rather than deselecting.
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "leftSinglePress", "invalid"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID     	Value
+    leftSinglePress	     
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_modifiable_select() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "customEqualizerProfile", "+test profile"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID            	Value
+    customEqualizerProfile	     
+
+    ----- stderr -----
+    ");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "customEqualizerProfile", "test profile"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID            	Value       
+    customEqualizerProfile	test profile
+
+    ----- stderr -----
+    ");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "customEqualizerProfile", "-test profile"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID            	Value
+    customEqualizerProfile	     
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_modifiable_select_invalid() {
+    // TODO this is not intended behavior. it should fail on invalid values rather than deselecting.
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "customEqualizerProfile", "invalid"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID            	Value
+    customEqualizerProfile	     
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_modifiable_select_remove_invalid() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "customEqualizerProfile", "-invalid"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID            	Value
+    customEqualizerProfile	     
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_multi_select() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    let mut command = cli(dir.path());
+    command
+        .arg("device")
+        .arg("exec")
+        .arg("--mac-address")
+        .arg("00:00:00:00:00:00")
+        .arg("--set")
+        .arg("customEqualizerProfile=+test")
+        .arg("--set")
+        .arg("volumeAdjustments=1,0,0,0,0,0,0,0")
+        .arg("--set")
+        .arg("customEqualizerProfile=+has,comma and\"quote")
+        .arg("--set")
+        .arg("volumeAdjustments=2,0,0,0,0,0,0,0")
+        .arg("--set")
+        .arg("customEqualizerProfile=+other not selected")
+        // TODO enable stderr
+        .stderr(Stdio::null());
+    assert_cmd_snapshot!(command, @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    OK
+
+    ----- stderr -----
+    ");
+    assert_cmd_snapshot!(set_and_get(
+        dir.path(),
+        "exportCustomProfiles",
+        r#"test,"has,comma and""quote""#
+    ), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID          	Value                      
+    exportCustomProfiles	"has,comma and""quote",test
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn setting_multi_select_no_selection() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "exportCustomProfiles", ""), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID          	Value
+    exportCustomProfiles	     
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_multi_select_invalid() {
+    // TODO this should error
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "exportCustomProfiles", "invalid"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID          	Value
+    exportCustomProfiles	     
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_equalizer() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "volumeAdjustments", "10,-20,30,-40,50,-60,70,-80"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID       	Value                               
+    volumeAdjustments	[10, -20, 30, -40, 50, -60, 70, -80]
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_equalizer_too_few_values() {
+    // TODO This should fail
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "volumeAdjustments", "10,-20,30,-40,50,-60,70"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID       	Value                             
+    volumeAdjustments	[10, -20, 30, -40, 50, -60, 70, 0]
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_equalizer_too_many_values() {
+    // TODO This should fail
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "volumeAdjustments", "10,-20,30,-40,50,-60,70,-80,90"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID       	Value                               
+    volumeAdjustments	[10, -20, 30, -40, 50, -60, 70, -80]
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_equalizer_invalid() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "volumeAdjustments", "invalid"), @r"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_information_get() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    let mut command = cli(dir.path());
+    command
+        .arg("device")
+        .arg("exec")
+        .arg("--mac-address")
+        .arg("00:00:00:00:00:00")
+        .arg("--get")
+        .arg("serialNumber");
+    assert_cmd_snapshot!(command, @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID  	Value           
+    serialNumber	0000000000000000
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_information_set() {
+    // TODO improve error message and say what setting id caused the problem
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    let mut command = cli(dir.path());
+    command
+        .arg("device")
+        .arg("exec")
+        .arg("--mac-address")
+        .arg("00:00:00:00:00:00")
+        .arg("--set")
+        .arg("serialNumber=0123456789ABCDEF");
+    assert_cmd_snapshot!(command, @r"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    Error: can't set value of read only information setting
+    ");
+}
+
+#[test]
+fn setting_import_string_set() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    let mut command = cli(dir.path());
+    command
+        .arg("device")
+        .arg("exec")
+        .arg("--mac-address")
+        .arg("00:00:00:00:00:00")
+        .arg("--set")
+        .arg(r#"importCustomProfiles=[{"name": "test profile", "volumeAdjustments": [0,1,2,3,4,5,6,7]}]"#)
+        .arg("--set")
+        .arg("customEqualizerProfile=test profile")
+        .arg("--get")
+        .arg("customEqualizerProfile")
+        // TODO include stderr
+        .stderr(Stdio::null());
+    assert_cmd_snapshot!(command, @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID            	Value       
+    customEqualizerProfile	test profile
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_import_string_set_invalid() {
+    // TODO improve error message
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    let mut command = cli(dir.path());
+    command
+        .arg("device")
+        .arg("exec")
+        .arg("--mac-address")
+        .arg("00:00:00:00:00:00")
+        .arg("--set")
+        .arg(r#"importCustomProfiles=invalid"#);
+    assert_cmd_snapshot!(command, @r#"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    Error: Error("expected value", line: 1, column: 1)
+
+    Caused by:
+        expected value at line 1 column 1
+    "#);
+}
+
+#[test]
+fn setting_import_string_get() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    let mut command = cli(dir.path());
+    command
+        .arg("device")
+        .arg("exec")
+        .arg("--mac-address")
+        .arg("00:00:00:00:00:00")
+        .arg("--get")
+        .arg("importCustomProfiles");
+    assert_cmd_snapshot!(command, @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID          	Value
+    importCustomProfiles	     
+
+    ----- stderr -----
+    ");
 }
