@@ -256,7 +256,11 @@ fn parse_setting_value(setting: &Setting, unparsed_value: String) -> anyhow::Res
                         bail!(
                             "{} band value {value} is outside of expected range {} to {}",
                             // ideally display hz, but fall back to index if not possible
-                            setting.band_hz.get(i).cloned().unwrap_or(i as u16 + 1),
+                            setting
+                                .band_hz
+                                .get(i)
+                                .map(|hz| format!("{hz} Hz"))
+                                .unwrap_or_else(|| format!("#{}", i as u16 + 1)),
                             setting.min,
                             setting.max
                         );

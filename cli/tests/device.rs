@@ -393,6 +393,20 @@ fn setting_equalizer_too_many_values() {
 }
 
 #[test]
+fn setting_equalizer_out_of_range() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "volumeAdjustments", "1000,0,0,0,0,0,0,0,0"), @r"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    Error: 100 Hz band value 1000 is outside of expected range -120 to 134
+    ");
+}
+
+#[test]
 fn setting_equalizer_invalid() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3951");
