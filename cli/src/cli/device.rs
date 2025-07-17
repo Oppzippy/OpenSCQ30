@@ -1,13 +1,7 @@
-use std::{borrow::Cow, collections::HashMap, str::FromStr};
-
-use anyhow::{anyhow, bail};
+use anyhow::anyhow;
 use clap::ArgMatches;
 use macaddr::MacAddr6;
-use openscq30_lib::api::{
-    OpenSCQ30Session,
-    device::OpenSCQ30Device,
-    settings::{ModifiableSelectCommand, Setting, SettingId, Value},
-};
+use openscq30_lib::api::{OpenSCQ30Session, device::OpenSCQ30Device, settings::SettingId};
 use strum::VariantArray;
 use tabled::{Table, Tabled};
 
@@ -167,7 +161,7 @@ async fn execute_commands(
                 device
                     .set_setting_values(vec![(
                         setting_id,
-                        parse_setting_value(&setting, unparsed_value)?,
+                        crate::parse::setting_value(&setting, unparsed_value)?,
                     )])
                     .await?;
             }
@@ -182,139 +176,4 @@ struct SettingIdValueTableItem {
     setting_id: SettingId,
     #[tabled(rename = "Value")]
     value: DisplayableValue,
-}
-
-fn parse_setting_value(setting: &Setting, unparsed_value: String) -> anyhow::Result<Value> {
-    let value: Value = match setting {
-        Setting::Toggle { .. } => bool::from_str(&unparsed_value)?.into(),
-        Setting::I32Range { setting, .. } => {
-            let value = i32::from_str(&unparsed_value)?;
-            if !setting.range.contains(&value) {
-                bail!("{value} is out of the expected range {:?}", setting.range)
-            }
-            value.into()
-        }
-        Setting::Select { setting, .. } => {
-            let value = setting
-                .options
-                .iter()
-                .find(|option| option.eq_ignore_ascii_case(&unparsed_value))
-                .ok_or_else(|| {
-                    anyhow!(
-                        "{unparsed_value} is not a valid option. Expected one of: {:?}",
-                        setting.options
-                    )
-                })?;
-            Value::String(value.clone())
-        }
-        Setting::OptionalSelect { setting, .. } => {
-            if unparsed_value.is_empty() {
-                Value::OptionalString(None)
-            } else {
-                let value = setting
-                .options
-                .iter()
-                .find(|option| option.eq_ignore_ascii_case(&unparsed_value))
-                .ok_or_else(|| {
-                    anyhow!(
-                        "{unparsed_value} is not a valid option. Expected either an empty string or one of: {:?}",
-                        setting.options
-                    )
-                })?;
-                Value::OptionalString(Some(value.to_owned()))
-            }
-        }
-        Setting::ModifiableSelect { setting, .. } => {
-            if let Some(rest) = unparsed_value.strip_prefix("+") {
-                Value::ModifiableSelectCommand(ModifiableSelectCommand::Add(rest.to_owned().into()))
-            } else if let Some(rest) = unparsed_value.strip_prefix("-") {
-                Value::ModifiableSelectCommand(ModifiableSelectCommand::Remove(
-                    rest.to_owned().into(),
-                ))
-            } else {
-                // To allow selecting profiles that start with a '+' or '-' without triggering the other
-                // branches, '\' can be used as a prefix that will be ignored.
-                let name = unparsed_value
-                    .strip_prefix("\\")
-                    .map(ToOwned::to_owned)
-                    .unwrap_or(unparsed_value);
-                if !setting.options.contains(&Cow::Borrowed(&name)) {
-                    bail!(
-                        "{name} is not a valid option. Expected one of: {:?}",
-                        setting.options
-                    );
-                }
-                Value::String(name.into())
-            }
-        }
-        Setting::MultiSelect { setting, .. } => {
-            let mut reader = csv::ReaderBuilder::new()
-                .has_headers(false)
-                .from_reader(unparsed_value.as_bytes());
-            let maybe_row = reader.records().next().transpose()?;
-            let strings = maybe_row
-                .map(|row| {
-                    row.into_iter()
-                        .map(|entry| entry.to_string())
-                        .collect::<Vec<_>>()
-                })
-                .unwrap_or_default();
-            let valid_options_lowercase = setting
-                .options
-                .iter()
-                .map(|option| (option.to_lowercase(), option))
-                .collect::<HashMap<_, _>>();
-            let options = strings
-                .iter()
-                .map(|string| {
-                    valid_options_lowercase
-                        .get(&string.to_lowercase())
-                        .cloned()
-                        .cloned()
-                        .ok_or_else(|| {
-                            anyhow!(
-                                "{string} is not a valid option. Expected one of: {:?}",
-                                setting.options
-                            )
-                        })
-                })
-                .collect::<anyhow::Result<Vec<_>>>()?;
-
-            Value::StringVec(options)
-        }
-        Setting::Equalizer { setting, .. } => {
-            let values = unparsed_value
-                .split(",")
-                .enumerate()
-                .map(|(i, unparsed)| {
-                    let value = i16::from_str(unparsed).map_err(anyhow::Error::from)?;
-                    if value < setting.min || value > setting.max {
-                        bail!(
-                            "{} band value {value} is outside of expected range {} to {}",
-                            // ideally display hz, but fall back to index if not possible
-                            setting
-                                .band_hz
-                                .get(i)
-                                .map(|hz| format!("{hz} Hz"))
-                                .unwrap_or_else(|| format!("#{}", i as u16 + 1)),
-                            setting.min,
-                            setting.max
-                        );
-                    }
-                    Ok(value)
-                })
-                .collect::<anyhow::Result<Vec<_>>>()?;
-            if values.len() != setting.band_hz.len() {
-                bail!(
-                    "wanted {} bands, got {}",
-                    setting.band_hz.len(),
-                    values.len()
-                )
-            }
-            Value::I16Vec(values)
-        }
-        Setting::Information { .. } => bail!("can't set value of read only information setting"),
-        Setting::ImportString { .. } => Cow::from(unparsed_value).into(),
-    };
-    Ok(value)
 }

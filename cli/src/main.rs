@@ -1,5 +1,6 @@
 mod cli;
 mod fmt;
+mod parse;
 
 use std::path::PathBuf;
 
