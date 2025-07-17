@@ -72,12 +72,13 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
                     command: header,
                     body: body.to_vec(),
                 };
-                packet_queues.pop(&header, Some(packet.clone()));
-                match outgoing_sender.send(packet).await {
-                    Ok(_) => (),
-                    Err(err) => tracing::debug!(
-                        "received packet that wasn't an ok, but the channel is closed, so it won't be forwarded: {err:?}"
-                    ),
+                if !packet_queues.pop(&header, Some(packet.clone())) || !packet.body.is_empty() {
+                    match outgoing_sender.send(packet).await {
+                        Ok(_) => (),
+                        Err(err) => tracing::debug!(
+                            "received packet that wasn't an ok, but the channel is closed, so it won't be forwarded: {err:?}"
+                        ),
+                    }
                 }
             }
         });
