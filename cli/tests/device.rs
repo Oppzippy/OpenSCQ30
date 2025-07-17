@@ -329,17 +329,15 @@ fn setting_multi_select_no_selection() {
 
 #[test]
 fn setting_multi_select_invalid() {
-    // TODO this should error
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3951");
     assert_cmd_snapshot!(set_and_get(dir.path(), "exportCustomProfiles", "invalid"), @r"
-    success: true
-    exit_code: 0
+    success: false
+    exit_code: 1
     ----- stdout -----
-    Setting ID          	Value
-    exportCustomProfiles	     
 
     ----- stderr -----
+    Error: invalid is not a valid option. Expected one of: []
     ");
 }
 

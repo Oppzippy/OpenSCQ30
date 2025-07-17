@@ -1,4 +1,4 @@
-use std::{borrow::Cow, str::FromStr};
+use std::{borrow::Cow, collections::HashMap, str::FromStr};
 
 use anyhow::{anyhow, bail};
 use clap::ArgMatches;
@@ -247,7 +247,7 @@ fn parse_setting_value(setting: &Setting, unparsed_value: String) -> anyhow::Res
                 Value::String(name.into())
             }
         }
-        Setting::MultiSelect { setting: _, .. } => {
+        Setting::MultiSelect { setting, .. } => {
             let mut reader = csv::ReaderBuilder::new()
                 .has_headers(false)
                 .from_reader(unparsed_value.as_bytes());
@@ -255,12 +255,32 @@ fn parse_setting_value(setting: &Setting, unparsed_value: String) -> anyhow::Res
             let strings = maybe_row
                 .map(|row| {
                     row.into_iter()
-                        .map(|entry| Cow::from(entry.to_string()))
+                        .map(|entry| entry.to_string())
                         .collect::<Vec<_>>()
                 })
                 .unwrap_or_default();
+            let valid_options_lowercase = setting
+                .options
+                .iter()
+                .map(|option| (option.to_lowercase(), option))
+                .collect::<HashMap<_, _>>();
+            let options = strings
+                .iter()
+                .map(|string| {
+                    valid_options_lowercase
+                        .get(&string.to_lowercase())
+                        .cloned()
+                        .cloned()
+                        .ok_or_else(|| {
+                            anyhow!(
+                                "{string} is not a valid option. Expected one of: {:?}",
+                                setting.options
+                            )
+                        })
+                })
+                .collect::<anyhow::Result<Vec<_>>>()?;
 
-            Value::StringVec(strings)
+            Value::StringVec(options)
         }
         Setting::Equalizer { setting, .. } => {
             let values = unparsed_value
