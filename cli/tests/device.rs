@@ -171,15 +171,17 @@ fn setting_select_invalid() {
 fn setting_optional_select() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3951");
-    assert_cmd_snapshot!(set_and_get(dir.path(), "leftSinglePress", "normal"), @r"
+    // select
+    assert_cmd_snapshot!(set_and_get(dir.path(), "leftSinglePress", "ambientSoundMode"), @r"
     success: true
     exit_code: 0
     ----- stdout -----
-    Setting ID     	Value
-    leftSinglePress	     
+    Setting ID     	Value           
+    leftSinglePress	AmbientSoundMode
 
     ----- stderr -----
     ");
+    // deselect
     assert_cmd_snapshot!(set_and_get(dir.path(), "leftSinglePress", ""), @r"
     success: true
     exit_code: 0
@@ -193,18 +195,16 @@ fn setting_optional_select() {
 
 #[test]
 fn setting_optional_select_invalid() {
-    // TODO this is not intended behavior. it should fail on invalid values rather than deselecting.
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3951");
-    assert_cmd_snapshot!(set_and_get(dir.path(), "leftSinglePress", "invalid"), @r"
-    success: true
-    exit_code: 0
+    assert_cmd_snapshot!(set_and_get(dir.path(), "leftSinglePress", "invalid"), @r#"
+    success: false
+    exit_code: 1
     ----- stdout -----
-    Setting ID     	Value
-    leftSinglePress	     
 
     ----- stderr -----
-    ");
+    Error: invalid is not a valid option. Expected either an empty string or one of: ["VolumeUp", "VolumeDown", "PreviousSong", "NextSong", "AmbientSoundMode", "VoiceAssistant", "PlayPause", "GameMode"]
+    "#);
 }
 
 #[test]

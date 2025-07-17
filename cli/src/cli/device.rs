@@ -208,11 +208,21 @@ fn parse_setting_value(setting: &Setting, unparsed_value: String) -> anyhow::Res
             Value::String(value.clone())
         }
         Setting::OptionalSelect { setting, .. } => {
-            let value = setting
+            if unparsed_value.is_empty() {
+                Value::OptionalString(None)
+            } else {
+                let value = setting
                 .options
                 .iter()
-                .find(|option| option.eq_ignore_ascii_case(&unparsed_value));
-            Value::OptionalString(value.cloned())
+                .find(|option| option.eq_ignore_ascii_case(&unparsed_value))
+                .ok_or_else(|| {
+                    anyhow!(
+                        "{unparsed_value} is not a valid option. Expected either an empty string or one of: {:?}",
+                        setting.options
+                    )
+                })?;
+                Value::OptionalString(Some(value.to_owned()))
+            }
         }
         Setting::ModifiableSelect { setting: _, .. } => {
             if let Some(rest) = unparsed_value.strip_prefix("+") {
