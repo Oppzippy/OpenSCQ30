@@ -13,22 +13,22 @@ use super::{
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
-    #[error("{source:?}")]
+    #[error("connection: {source}")]
     ConnectionError {
         source: connection::Error,
         location: &'static Location<'static>,
     },
-    #[error("{source:?}")]
+    #[error("storage: {source}")]
     StorageError {
         source: storage::Error,
         location: &'static Location<'static>,
     },
-    #[error("{source:?}")]
+    #[error("value: {source}")]
     ValueError {
         source: settings::ValueError,
         location: &'static Location<'static>,
     },
-    #[error("{source:?}")]
+    #[error("{source}")]
     Other {
         source: Box<dyn std::error::Error + Send + Sync>,
         location: &'static Location<'static>,

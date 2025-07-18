@@ -593,17 +593,17 @@ fn setting_import_string_set_invalid() {
         .arg("00:00:00:00:00:00")
         .arg("--set")
         .arg(r#"importCustomProfiles=invalid"#);
-    assert_cmd_snapshot!(command, @r#"
+    assert_cmd_snapshot!(command, @r"
     success: false
     exit_code: 1
     ----- stdout -----
 
     ----- stderr -----
-    Error: Error("expected value", line: 1, column: 1)
+    Error: expected value at line 1 column 1
 
     Caused by:
         expected value at line 1 column 1
-    "#);
+    ");
 }
 
 #[test]

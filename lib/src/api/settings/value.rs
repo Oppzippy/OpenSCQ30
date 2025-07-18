@@ -2,13 +2,14 @@ use std::borrow::Cow;
 
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use strum::{EnumDiscriminants, IntoEnumIterator};
+use strum::{EnumDiscriminants, IntoDiscriminant, IntoEnumIterator};
 use thiserror::Error;
 
 use crate::i18n::fl;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, EnumDiscriminants)]
 #[serde(tag = "type", content = "value", rename_all = "camelCase")]
+#[strum_discriminants(derive(strum::Display))]
 pub enum Value {
     Bool(bool),
     U16(u16),
@@ -31,13 +32,13 @@ pub enum ModifiableSelectCommand {
 
 #[derive(Clone, Debug, Error)]
 pub enum ValueError {
-    #[error("expected value of type {expected:?}, got {actual:?}")]
+    #[error("expected value of type {expected}, got {}", .actual.discriminant())]
     WrongType {
         expected: ValueDiscriminants,
         actual: Value,
     },
 
-    #[error("expected one of {variants:?}, got {actual:?}")]
+    #[error("expected one of {variants:?}, got {actual}")]
     InvalidEnumVariant {
         variants: Box<[&'static str]>,
         actual: Value,
