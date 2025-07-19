@@ -203,6 +203,7 @@ where
             self.device_model,
             self.change_notify.subscribe(),
         )
+        .await
     }
 
     pub fn module_collection(&mut self) -> &mut ModuleCollection<StateType> {
@@ -362,7 +363,7 @@ where
     StateType: Clone + Send + Sync + 'static,
     StateUpdatePacketType: InboundPacket,
 {
-    fn new(
+    async fn new(
         packet_io_controller: Arc<PacketIOController<ConnectionType>>,
         state_sender: watch::Sender<StateType>,
         module_collection: ModuleCollection<StateType>,
@@ -372,11 +373,9 @@ where
     ) -> Self {
         let exit_signal = Arc::new(Semaphore::new(0));
         let module_collection = Arc::new(module_collection);
-        module_collection.spawn_packet_handler(
-            state_sender.clone(),
-            packet_receiver,
-            exit_signal.clone(),
-        );
+        module_collection
+            .spawn_packet_handler(state_sender.clone(), packet_receiver, exit_signal.clone())
+            .await;
 
         Self {
             device_model,

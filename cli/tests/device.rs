@@ -1,4 +1,4 @@
-use std::{path::Path, process::Command};
+use std::{path::Path, process::Command, thread};
 
 use insta_cmd::{assert_cmd_snapshot, get_cargo_bin};
 use tempfile::tempdir;
@@ -624,4 +624,24 @@ fn setting_import_string_get() {
 
     ----- stderr -----
     ");
+}
+
+#[test]
+fn setting_set_and_get_race_condition() {
+    thread::scope(|scope| {
+        for i in 0..500 {
+            scope.spawn(move || {
+                let dir = tempdir().unwrap();
+                add_device(dir.path(), "SoundcoreA3951");
+                let mut command = set_and_get(dir.path(), "customNoiseCanceling", "2");
+                let output = command.output().unwrap();
+                assert!(output.status.success());
+                let stdout = str::from_utf8(&output.stdout).unwrap();
+                assert!(
+                    stdout.contains("2"),
+                    "thread {i} didn't contain 2:\n{stdout}"
+                )
+            });
+        }
+    });
 }

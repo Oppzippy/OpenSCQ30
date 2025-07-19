@@ -68,7 +68,7 @@ where
 }
 
 pub trait ModuleCollectionSpawnPacketHandlerExt<T> {
-    fn spawn_packet_handler(
+    async fn spawn_packet_handler(
         &self,
         state_sender: watch::Sender<T>,
         packet_receiver: mpsc::Receiver<Packet>,
@@ -79,7 +79,7 @@ pub trait ModuleCollectionSpawnPacketHandlerExt<T> {
 }
 
 impl<T> ModuleCollectionSpawnPacketHandlerExt<T> for Arc<ModuleCollection<T>> {
-    fn spawn_packet_handler(
+    async fn spawn_packet_handler(
         &self,
         state_sender: watch::Sender<T>,
         mut packet_receiver: mpsc::Receiver<Packet>,
@@ -90,6 +90,18 @@ impl<T> ModuleCollectionSpawnPacketHandlerExt<T> for Arc<ModuleCollection<T>> {
     {
         let module_collection = self.clone();
         let state_sender = state_sender.clone();
+        while let Ok(packet) = packet_receiver.try_recv() {
+            match module_collection
+                .packet_handlers
+                .handle(&state_sender, &packet)
+                .await
+            {
+                Ok(()) => (),
+                Err(err) => {
+                    tracing::warn!("error handling packet: {packet:?}, error: {err:?}")
+                }
+            }
+        }
         tokio::spawn(
             async move {
                 trace!("started receiving");
