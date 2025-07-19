@@ -5,7 +5,7 @@ use crate::{
     api::settings::{self, Range, Setting, SettingId, Value},
     devices::soundcore::{
         a3959::structures::{A3959SoundModes, ManualNoiseCanceling},
-        standard::settings_manager::{SettingHandler, SettingHandlerResult},
+        standard::settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
     },
 };
 
@@ -85,9 +85,7 @@ where
             SoundModeSetting::NoiseCancelingMode => {
                 sound_modes.noise_canceling_mode = value.try_as_enum_variant()?
             }
-            SoundModeSetting::AdaptiveNoiseCanceling => {
-                tracing::error!("tried to set read only setting {setting_id}")
-            }
+            SoundModeSetting::AdaptiveNoiseCanceling => return Err(SettingHandlerError::ReadOnly),
             SoundModeSetting::ManualNoiseCanceling => {
                 sound_modes.manual_noise_canceling =
                     ManualNoiseCanceling::new(value.try_as_i32()? as u8)
