@@ -1,7 +1,4 @@
-use std::{
-    collections::{HashMap, hash_map},
-    sync::Arc,
-};
+use std::collections::{HashMap, hash_map};
 
 use async_trait::async_trait;
 use thiserror::Error;
@@ -11,10 +8,14 @@ use crate::{
     storage,
 };
 
+#[derive(Copy, Clone)]
+struct SettingHandlerKey(usize);
+
 pub struct SettingsManager<T> {
     categories: Vec<CategoryId>,
     categories_to_settings: HashMap<CategoryId, Vec<SettingId>>,
-    settings_to_handlers: HashMap<SettingId, Arc<dyn SettingHandler<T> + Send + Sync>>,
+    settings_to_handlers: HashMap<SettingId, SettingHandlerKey>,
+    handlers: Vec<Box<dyn SettingHandler<T> + Send + Sync>>,
 }
 
 impl<T> Default for SettingsManager<T> {
@@ -23,6 +24,7 @@ impl<T> Default for SettingsManager<T> {
             categories: Vec::new(),
             categories_to_settings: HashMap::new(),
             settings_to_handlers: HashMap::new(),
+            handlers: Vec::new(),
         }
     }
 }
@@ -33,8 +35,9 @@ impl<StateType> SettingsManager<StateType> {
         category: CategoryId,
         handler: T,
     ) {
-        let handler = Arc::new(handler);
         let settings = handler.settings();
+        let handler_key = SettingHandlerKey(self.handlers.len());
+        self.handlers.push(Box::new(handler));
 
         match self.categories_to_settings.entry(category) {
             hash_map::Entry::Occupied(mut occupied_entry) => {
@@ -46,8 +49,7 @@ impl<StateType> SettingsManager<StateType> {
             }
         }
         settings.into_iter().for_each(|setting| {
-            self.settings_to_handlers
-                .insert(setting, handler.to_owned());
+            self.settings_to_handlers.insert(setting, handler_key);
         });
     }
 
@@ -63,7 +65,7 @@ impl<StateType> SettingsManager<StateType> {
     }
 
     pub fn get(&self, state: &StateType, setting_id: &SettingId) -> Option<Setting> {
-        let handler = self.settings_to_handlers.get(setting_id)?;
+        let handler = self.handler(setting_id)?;
         handler.get(state, setting_id)
     }
 
@@ -73,8 +75,24 @@ impl<StateType> SettingsManager<StateType> {
         setting_id: &SettingId,
         value: Value,
     ) -> Option<SettingHandlerResult<()>> {
-        let handler = self.settings_to_handlers.get(setting_id)?;
+        let handler = self.handler(setting_id)?;
         Some(handler.set(state, setting_id, value).await)
+    }
+
+    fn handler(
+        &self,
+        setting_id: &SettingId,
+    ) -> Option<&(dyn SettingHandler<StateType> + Send + Sync)> {
+        let handler_key = self.settings_to_handlers.get(setting_id)?;
+        match self.handlers.get(handler_key.0) {
+            Some(handler) => Some(handler.as_ref()),
+            None => {
+                tracing::error!(
+                    "{setting_id} has a handler key assigned, but no handler with the key exists"
+                );
+                None
+            }
+        }
     }
 }
 
