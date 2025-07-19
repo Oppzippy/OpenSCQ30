@@ -57,7 +57,8 @@ where
             self.setting_manager
                 .set(&mut target_state, &setting_id, value)
                 .await
-                .unwrap()?;
+                .unwrap()
+                .map_err(|err| err.into_settings_error(setting_id))?;
         }
         for modifier in &self.state_modifiers {
             modifier.move_to_state(state_sender, &target_state).await?;

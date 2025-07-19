@@ -7,22 +7,22 @@ use uuid::Uuid;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
-    #[error("bluetooth adapter unavailable: {}", .source.as_ref().map(|s| s.to_string()).unwrap_or_default())]
+    #[error("bluetooth adapter unavailable")]
     BluetoothAdapterUnavailable {
         source: Option<Box<dyn std::error::Error + Send + Sync>>,
         location: &'static Location<'static>,
     },
-    #[error("device not found: {}", .source.as_ref().map(|s| s.to_string()).unwrap_or_default())]
+    #[error("device not found")]
     DeviceNotFound {
         source: Option<Box<dyn std::error::Error + Send + Sync>>,
         location: &'static Location<'static>,
     },
-    #[error("write error: {}", .source.as_ref().map(|s| s.to_string()).unwrap_or_default())]
+    #[error("write error")]
     WriteError {
         source: Option<Box<dyn std::error::Error + Send + Sync>>,
         location: &'static Location<'static>,
     },
-    #[error("other: {source}")]
+    #[error("other")]
     Other {
         source: Box<dyn std::error::Error + Send + Sync>,
         location: &'static Location<'static>,

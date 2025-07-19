@@ -38,7 +38,7 @@ pub enum ValueError {
         actual: Value,
     },
 
-    #[error("expected one of {variants:?}, got {actual}")]
+    #[error("expected one of {}, got {actual}", .variants.join(", "))]
     InvalidEnumVariant {
         variants: Box<[&'static str]>,
         actual: Value,

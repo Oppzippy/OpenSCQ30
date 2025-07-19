@@ -4,10 +4,11 @@ use std::{
 };
 
 use async_trait::async_trait;
+use thiserror::Error;
 
-use crate::api::{
-    device,
-    settings::{CategoryId, Setting, SettingId, Value},
+use crate::{
+    api::settings::{self, CategoryId, Setting, SettingId, Value, ValueError},
+    storage,
 };
 
 pub struct SettingsManager<T> {
@@ -71,7 +72,7 @@ impl<StateType> SettingsManager<StateType> {
         state: &mut StateType,
         setting_id: &SettingId,
         value: Value,
-    ) -> Option<device::Result<()>> {
+    ) -> Option<SettingHandlerResult<()>> {
         let handler = self.settings_to_handlers.get(setting_id)?;
         Some(handler.set(state, setting_id, value).await)
     }
@@ -81,5 +82,34 @@ impl<StateType> SettingsManager<StateType> {
 pub trait SettingHandler<T> {
     fn settings(&self) -> Vec<SettingId>;
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting>;
-    async fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> device::Result<()>;
+    async fn set(
+        &self,
+        state: &mut T,
+        setting_id: &SettingId,
+        value: Value,
+    ) -> SettingHandlerResult<()>;
+}
+
+pub type SettingHandlerResult<T> = Result<T, SettingHandlerError>;
+
+#[derive(Debug, Error)]
+pub enum SettingHandlerError {
+    #[error("value")]
+    ValueError(#[from] ValueError),
+    #[error("storage")]
+    StorageError(#[from] storage::Error),
+    #[error("setting is read only")]
+    ReadOnly,
+    #[error(transparent)]
+    Other(Box<dyn std::error::Error + Send + Sync>),
+}
+
+impl SettingHandlerError {
+    #[track_caller]
+    pub fn into_settings_error(self, setting_id: SettingId) -> settings::Error {
+        settings::Error {
+            setting_id,
+            source: Box::new(self),
+        }
+    }
 }

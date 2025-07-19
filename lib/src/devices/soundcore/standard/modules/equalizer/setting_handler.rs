@@ -6,13 +6,10 @@ use tokio::sync::watch;
 use tracing::instrument;
 
 use crate::{
-    api::{
-        device,
-        settings::{self, Setting, SettingId, Value},
-    },
+    api::settings::{self, Setting, SettingId, Value},
     devices::soundcore::standard::{
         modules::equalizer::custom_equalizer_profile_store::CustomEqualizerProfileStore,
-        settings_manager::SettingHandler,
+        settings_manager::{SettingHandler, SettingHandlerResult},
         structures::{EqualizerConfiguration, VolumeAdjustments},
     },
 };
@@ -113,7 +110,12 @@ where
         })
     }
 
-    async fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> device::Result<()> {
+    async fn set(
+        &self,
+        state: &mut T,
+        setting_id: &SettingId,
+        value: Value,
+    ) -> SettingHandlerResult<()> {
         let equalizer_configuration = state.as_mut();
         let setting = setting_id
             .try_into()

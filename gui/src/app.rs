@@ -93,7 +93,7 @@ macro_rules! handle_soft_error {
         |err| {
             let err = ::anyhow::Error::from(err);
             ::tracing::warn!("soft_error: {err:?}");
-            Message::Warning($crate::fl!("error-with-message", err = err.to_string()))
+            Message::Warning($crate::fl!("error-with-message", err = format!("{err:#}")))
         }
     };
 }

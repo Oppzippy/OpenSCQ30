@@ -35,28 +35,28 @@ pub struct OpenSCQ30Database {
 
 #[derive(Error, Debug)]
 pub enum Error {
-    #[error("sql error: {source}")]
+    #[error("already exists")]
     AlreadyExists { source: rusqlite::Error },
     #[error("not found")]
     NotFound {
         location: &'static Location<'static>,
     },
-    #[error("io error: {source}")]
+    #[error("io error")]
     IOError {
         source: std::io::Error,
         location: &'static Location<'static>,
     },
-    #[error("sql error: {source}")]
+    #[error("sql error")]
     RusqliteError {
         source: rusqlite::Error,
         location: &'static Location<'static>,
     },
-    #[error("failed to deserialize json: {source}")]
+    #[error("failed to deserialize json")]
     JsonError {
         source: serde_json::Error,
         location: &'static Location<'static>,
     },
-    #[error("failed to parse value: {source}")]
+    #[error("failed to parse value")]
     ParseError {
         source: strum::ParseError,
         location: &'static Location<'static>,

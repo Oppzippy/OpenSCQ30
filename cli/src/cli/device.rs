@@ -1,4 +1,4 @@
-use anyhow::anyhow;
+use anyhow::{Context, anyhow};
 use clap::ArgMatches;
 use macaddr::MacAddr6;
 use openscq30_lib::api::{OpenSCQ30Session, device::OpenSCQ30Device, settings::SettingId};
@@ -161,7 +161,8 @@ async fn execute_commands(
                 device
                     .set_setting_values(vec![(
                         setting_id,
-                        crate::parse::setting_value(&setting, unparsed_value)?,
+                        crate::parse::setting_value(&setting, unparsed_value)
+                            .context(setting_id)?,
                     )])
                     .await?;
             }

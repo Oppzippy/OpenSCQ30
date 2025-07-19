@@ -13,22 +13,22 @@ use super::{
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
-    #[error("connection: {source}")]
+    #[error("connection")]
     ConnectionError {
         source: connection::Error,
         location: &'static Location<'static>,
     },
-    #[error("storage: {source}")]
+    #[error("storage")]
     StorageError {
         source: storage::Error,
         location: &'static Location<'static>,
     },
-    #[error("value: {source}")]
-    ValueError {
-        source: settings::ValueError,
-        location: &'static Location<'static>,
+    #[error("setting")]
+    SettingError {
+        #[from]
+        source: settings::Error,
     },
-    #[error("{source}")]
+    #[error("other")]
     Other {
         source: Box<dyn std::error::Error + Send + Sync>,
         location: &'static Location<'static>,
@@ -43,7 +43,6 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 impl_from_source_error_with_location!(Error::ConnectionError(connection::Error));
 impl_from_source_error_with_location!(Error::StorageError(storage::Error));
-impl_from_source_error_with_location!(Error::ValueError(settings::ValueError));
 impl_from_source_error_with_location!(Error::Other(Box<dyn std::error::Error + Send + Sync>));
 
 impl Error {

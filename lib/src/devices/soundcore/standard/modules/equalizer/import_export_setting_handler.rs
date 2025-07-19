@@ -1,7 +1,6 @@
 use std::{
     borrow::Cow,
     collections::HashSet,
-    panic::Location,
     sync::{Arc, Mutex},
 };
 
@@ -12,13 +11,11 @@ use tokio::sync::watch;
 use tracing::instrument;
 
 use crate::{
-    api::{
-        device,
-        settings::{self, SettingId, Value},
-    },
+    api::settings::{self, SettingId, Value},
     devices::soundcore::standard::{
         modules::equalizer::custom_equalizer_profile_store::CustomEqualizerProfileStore,
-        settings_manager::SettingHandler, structures::EqualizerConfiguration,
+        settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
+        structures::EqualizerConfiguration,
     },
     i18n::fl,
 };
@@ -116,7 +113,7 @@ where
         _state: &mut T,
         setting_id: &SettingId,
         value: Value,
-    ) -> device::Result<()> {
+    ) -> SettingHandlerResult<()> {
         let setting = setting_id
             .try_into()
             .expect("already filtered to valid values only by SettingsManager");
@@ -124,10 +121,7 @@ where
             ImportExportSetting::ImportCustomProfiles => {
                 let json = value.try_as_str()?;
                 let exported_profiles: Vec<ExportedCustomProfile> = serde_json::from_str(json)
-                    .map_err(|err| device::Error::Other {
-                        source: Box::new(err),
-                        location: Location::caller(),
-                    })?;
+                    .map_err(|err| SettingHandlerError::Other(Box::new(err)))?;
                 let profiles = exported_profiles
                     .into_iter()
                     .map(|exported| {
@@ -150,7 +144,7 @@ where
                 self.change_notify.send_replace(());
             }
             ImportExportSetting::ExportCustomProfilesOutput => {
-                unimplemented!()
+                return Err(SettingHandlerError::ReadOnly);
             }
         }
         Ok(())

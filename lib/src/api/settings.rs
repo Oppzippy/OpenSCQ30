@@ -260,3 +260,10 @@ pub fn localize_value(setting: Option<&Setting>, value: &Value) -> String {
         _ => value.to_string(),
     }
 }
+
+#[derive(thiserror::Error, Debug)]
+#[error("setting id {setting_id}")]
+pub struct Error {
+    pub setting_id: SettingId,
+    pub source: Box<dyn std::error::Error + Send + Sync>,
+}

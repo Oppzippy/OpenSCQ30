@@ -6,6 +6,7 @@ use tempfile::tempdir;
 fn cli(dir: &Path) -> Command {
     let mut cmd = Command::new(get_cargo_bin("openscq30"));
     cmd.env("XDG_CONFIG_HOME", dir.to_str().unwrap());
+    cmd.arg("--verbose"); // so that we don't miss errors
     cmd
 }
 
@@ -91,7 +92,7 @@ fn setting_toggle_invalid() {
     ----- stdout -----
 
     ----- stderr -----
-    Error: provided string was not `true` or `false`
+    Error: windNoiseSuppression: provided string was not `true` or `false`
     ");
 }
 
@@ -120,7 +121,7 @@ fn setting_i32_range_invalid() {
     ----- stdout -----
 
     ----- stderr -----
-    Error: invalid digit found in string
+    Error: customNoiseCanceling: invalid digit found in string
     ");
 }
 
@@ -134,7 +135,7 @@ fn setting_i32_range_out_of_range() {
     ----- stdout -----
 
     ----- stderr -----
-    Error: 100 is out of the expected range 0..=10
+    Error: customNoiseCanceling: 100 is out of the expected range 0..=10
     ");
 }
 
@@ -163,7 +164,7 @@ fn setting_select_invalid() {
     ----- stdout -----
 
     ----- stderr -----
-    Error: invalid is not a valid option. Expected one of: ["Normal", "Transparency", "NoiseCanceling"]
+    Error: ambientSoundMode: invalid is not a valid option. Expected one of: ["Normal", "Transparency", "NoiseCanceling"]
     "#);
 }
 
@@ -203,7 +204,7 @@ fn setting_optional_select_invalid() {
     ----- stdout -----
 
     ----- stderr -----
-    Error: invalid is not a valid option. Expected one of: ["VolumeUp", "VolumeDown", "PreviousSong", "NextSong", "AmbientSoundMode", "VoiceAssistant", "PlayPause", "GameMode"]
+    Error: leftSinglePress: invalid is not a valid option. Expected one of: ["VolumeUp", "VolumeDown", "PreviousSong", "NextSong", "AmbientSoundMode", "VoiceAssistant", "PlayPause", "GameMode"]
     "#);
 }
 
@@ -331,7 +332,7 @@ fn setting_modifiable_select_ambiguity() {
     ----- stdout -----
 
     ----- stderr -----
-    Error: test is ambiguous, could refer to Test or tesT
+    Error: customEqualizerProfile: test is ambiguous, could refer to Test or tesT
     ");
 }
 
@@ -345,7 +346,7 @@ fn setting_modifiable_select_invalid() {
     ----- stdout -----
 
     ----- stderr -----
-    Error: invalid is not a valid option. Expected one of: []
+    Error: customEqualizerProfile: invalid is not a valid option. Expected one of: []
     ");
 }
 
@@ -432,7 +433,7 @@ fn setting_multi_select_invalid() {
     ----- stdout -----
 
     ----- stderr -----
-    Error: invalid is not a valid option. Expected one of: []
+    Error: exportCustomProfiles: invalid is not a valid option. Expected one of: []
     ");
 }
 
@@ -461,7 +462,7 @@ fn setting_equalizer_too_few_values() {
     ----- stdout -----
 
     ----- stderr -----
-    Error: wanted 8 bands, got 7
+    Error: volumeAdjustments: wanted 8 bands, got 7
     ");
 }
 
@@ -475,7 +476,7 @@ fn setting_equalizer_too_many_values() {
     ----- stdout -----
 
     ----- stderr -----
-    Error: wanted 8 bands, got 9
+    Error: volumeAdjustments: wanted 8 bands, got 9
     ");
 }
 
@@ -489,7 +490,7 @@ fn setting_equalizer_out_of_range() {
     ----- stdout -----
 
     ----- stderr -----
-    Error: 100 Hz band value 1000 is outside of expected range -120 to 134
+    Error: volumeAdjustments: 100 Hz band value 1000 is outside of expected range -120 to 134
     ");
 }
 
@@ -503,7 +504,7 @@ fn setting_equalizer_invalid() {
     ----- stdout -----
 
     ----- stderr -----
-    Error: invalid digit found in string
+    Error: volumeAdjustments: invalid digit found in string
     ");
 }
 
@@ -549,7 +550,7 @@ fn setting_information_set() {
     ----- stdout -----
 
     ----- stderr -----
-    Error: can't set value of read only information setting
+    Error: serialNumber: can't set value of read only information setting
     ");
 }
 
@@ -582,7 +583,6 @@ fn setting_import_string_set() {
 
 #[test]
 fn setting_import_string_set_invalid() {
-    // TODO improve error message
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3951");
     let mut command = cli(dir.path());
@@ -599,10 +599,7 @@ fn setting_import_string_set_invalid() {
     ----- stdout -----
 
     ----- stderr -----
-    Error: expected value at line 1 column 1
-
-    Caused by:
-        expected value at line 1 column 1
+    Error: setting: setting id importCustomProfiles: expected value at line 1 column 1
     ");
 }
 

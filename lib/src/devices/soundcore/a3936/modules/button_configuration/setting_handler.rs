@@ -2,14 +2,11 @@ use async_trait::async_trait;
 use strum::IntoEnumIterator;
 
 use crate::{
-    api::{
-        device,
-        settings::{Setting, SettingId, Value},
-    },
+    api::settings::{Setting, SettingId, Value},
     devices::soundcore::{
         a3936::structures::{A3936InternalMultiButtonConfiguration, A3936TwsButtonAction},
         standard::{
-            settings_manager::SettingHandler,
+            settings_manager::{SettingHandler, SettingHandlerResult},
             structures::{ButtonAction, TwsStatus},
         },
     },
@@ -87,7 +84,12 @@ where
         })
     }
 
-    async fn set(&self, state: &mut T, setting_id: &SettingId, value: Value) -> device::Result<()> {
+    async fn set(
+        &self,
+        state: &mut T,
+        setting_id: &SettingId,
+        value: Value,
+    ) -> SettingHandlerResult<()> {
         let tws_status: TwsStatus = *state.as_ref();
         let button_config: &mut A3936InternalMultiButtonConfiguration = state.as_mut();
         let setting: ButtonConfigurationSetting = setting_id

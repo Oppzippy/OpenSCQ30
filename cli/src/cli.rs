@@ -15,6 +15,8 @@ pub fn build() -> Command {
         .value_parser(value_parser!(DeviceModel));
     Command::new(env!("CARGO_BIN_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
+        .arg(arg!(--"debug-errors" "Displays additional information with errors for debugging purposes"))
+        .arg(arg!(-v --verbose "Enables logging"))
         .subcommand_required(true)
         .subcommand(
             Command::new("paired-devices")
