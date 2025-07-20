@@ -37,6 +37,8 @@ impl<ConnectionType: RfcommConnection> Drop for PacketIOController<ConnectionTyp
 }
 
 impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
+    /// In addition to the PacketIOController, also returns a channel that all packets received
+    /// that weren't a result of send_with_response will be forwarded to.
     pub async fn new(
         connection: Arc<ConnectionType>,
     ) -> device::Result<(Self, mpsc::Receiver<Packet>)> {
