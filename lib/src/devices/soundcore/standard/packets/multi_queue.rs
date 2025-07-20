@@ -54,7 +54,6 @@ impl<K: Hash + Eq, V> MultiQueue<K, V> {
     pub fn pop(&self, key: &K, value: Option<V>) -> bool {
         let mut queues = self.queues.lock().expect(LOCK_HELD_ERROR);
         if let Some(queue) = queues.get_mut(key) {
-            Self::remove_canceled(queue);
             if let Some(front) = queue.pop_front() {
                 *front.value.lock().expect("mutex should not be tainted") = value;
                 front.semaphore.close();
@@ -64,11 +63,15 @@ impl<K: Hash + Eq, V> MultiQueue<K, V> {
         false
     }
 
-    fn remove_canceled(queue: &mut VecDeque<Arc<SemaphoreWithValue<V>>>) {
-        while let Some(front) = queue.front()
-            && front.semaphore.is_closed()
+    /// Removes a task from a queue without returning a result
+    pub fn cancel(&self, key: &K, handle: MultiQueueHandle<V>) {
+        let mut queues = self.queues.lock().expect(LOCK_HELD_ERROR);
+        if let Some(queue) = queues.get_mut(key)
+            && let Some(index) = queue
+                .iter()
+                .position(|entry| Arc::ptr_eq(entry, &handle.current))
         {
-            queue.pop_front();
+            queue.remove(index);
         }
     }
 }
@@ -102,11 +105,6 @@ impl<T> MultiQueueHandle<T> {
             .lock()
             .expect("mutex should not be tainted")
             .take()
-    }
-
-    /// Removes the task from the queue without returning a result
-    pub fn cancel(&self) {
-        self.current.semaphore.close();
     }
 }
 
@@ -147,7 +145,7 @@ mod tests {
         let first = queues.add(0);
         let second = queues.add(0);
         let third = queues.add(0);
-        second.cancel();
+        queues.cancel(&0, second);
         queues.pop(&0, Some(1));
         queues.pop(&0, Some(3));
         assert_eq!(first.wait_for_end().await, Some(1));

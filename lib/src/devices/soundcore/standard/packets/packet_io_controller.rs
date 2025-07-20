@@ -92,7 +92,8 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
     }
 
     pub async fn send_with_response(&self, packet: &Packet) -> device::Result<Packet> {
-        let handle = self.packet_queues.add(packet.command().to_inbound());
+        let queue_key = packet.command().to_inbound();
+        let handle = self.packet_queues.add(queue_key);
 
         handle.wait_for_start().await;
 
@@ -108,7 +109,7 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
             }
         }
 
-        handle.cancel();
+        self.packet_queues.cancel(&queue_key, handle);
 
         Err(device::Error::ActionTimedOut {
             action: "resending packet until ack received",
