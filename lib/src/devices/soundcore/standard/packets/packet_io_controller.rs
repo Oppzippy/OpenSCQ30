@@ -100,13 +100,10 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
         // retry
         for i in 1..=3 {
             self.connection.write(&packet.bytes()).await?;
-            let result = select! {
-                result = handle.wait_for_end() => result,
-                _ = tokio::time::sleep(Duration::from_millis(500 * i)) => None,
+            select! {
+                _ = handle.wait_for_end() => return Ok(handle.wait_for_value().await),
+                _ = tokio::time::sleep(Duration::from_millis(500 * i)) => (),
             };
-            if let Some(response) = result {
-                return Ok(response);
-            }
         }
 
         self.packet_queues.cancel(&queue_key, handle);

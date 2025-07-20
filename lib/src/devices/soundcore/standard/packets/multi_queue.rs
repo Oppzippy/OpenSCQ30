@@ -95,47 +95,60 @@ impl<T> MultiQueueHandle<T> {
     }
 
     /// Waits for this handle to be popped from the queue and returns its result
-    pub async fn wait_for_end(&self) -> Option<T> {
+    pub async fn wait_for_end(&self) {
         self.current
             .semaphore
             .acquire()
             .await
             .expect_err(PERMIT_ACQUIRED_ERROR);
+    }
+
+    pub async fn wait_for_value(self) -> T {
+        self.wait_for_end().await;
         self.current
             .value
             .lock()
             .expect("mutex should not be tainted")
             .take()
+            .expect("in order to cancel, ownership must be given away, but we still have ownership, so we must have a value")
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::{array, ops::RangeInclusive, time::Duration};
-
-    use tokio::select;
+    use std::{ops::RangeInclusive, time::Duration};
 
     use super::*;
 
     #[tokio::test(start_paused = true)]
     async fn test_independent_queues() {
-        const ITERATIONS: i8 = 5;
+        const RANGE: RangeInclusive<i8> = 1..=5;
         let queues: MultiQueue<i8, i8> = MultiQueue::new();
-        let queue1_handles: [_; ITERATIONS as usize] = array::from_fn(|_| queues.add(1));
-        let queue2_handles: [_; ITERATIONS as usize] = array::from_fn(|_| queues.add(2));
+        let mut queue1_handles = RANGE
+            .into_iter()
+            .map(|_| queues.add(1))
+            .collect::<VecDeque<_>>();
+        let mut queue2_handles = RANGE
+            .into_iter()
+            .map(|_| queues.add(2))
+            .collect::<VecDeque<_>>();
 
-        const RANGE: RangeInclusive<i8> = 1i8..=ITERATIONS;
         for i in RANGE {
             queues.pop(&1, i);
             queues.pop(&2, -i);
         }
         for i in RANGE {
-            assert_eq!(queue1_handles[i as usize - 1].wait_for_end().await, Some(i));
+            let handle = queue1_handles.pop_front().unwrap();
+            assert_eq!(
+                tokio::time::timeout(Duration::from_millis(1), handle.wait_for_value()).await,
+                Ok(i)
+            );
         }
         for i in RANGE {
+            let handle = queue2_handles.pop_front().unwrap();
             assert_eq!(
-                queue2_handles[i as usize - 1].wait_for_end().await,
-                Some(-i)
+                tokio::time::timeout(Duration::from_millis(1), handle.wait_for_value()).await,
+                Ok(-i)
             );
         }
     }
@@ -149,10 +162,13 @@ mod tests {
         queues.cancel(&0, second);
         queues.pop(&0, 1);
         queues.pop(&0, 3);
-        assert_eq!(first.wait_for_end().await, Some(1));
-        select! {
-            result = third.wait_for_end() => assert_eq!(result, Some(3)),
-            _ = tokio::time::sleep(Duration::from_millis(1)) => panic!("timed out"),
-        }
+        assert_eq!(
+            tokio::time::timeout(Duration::from_millis(1), first.wait_for_value()).await,
+            Ok(1)
+        );
+        assert_eq!(
+            tokio::time::timeout(Duration::from_millis(1), third.wait_for_value()).await,
+            Ok(3)
+        );
     }
 }
