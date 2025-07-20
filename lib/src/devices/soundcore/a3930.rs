@@ -24,11 +24,11 @@ soundcore_device!(
     A3930StateUpdatePacket,
     async |packet_io| {
         let state_update_packet: A3930StateUpdatePacket = packet_io
-            .send(&RequestStatePacket::new().into())
+            .send_with_response(&RequestStatePacket::new().into())
             .await?
             .try_into_inbound_packet()?;
         let sn_and_firmware: SerialNumberAndFirmwareVersionUpdatePacket = packet_io
-            .send(&RequestSerialNumberAndFirmwareVersionPacket::new().into())
+            .send_with_response(&RequestSerialNumberAndFirmwareVersionPacket::new().into())
             .await?
             .try_into_inbound_packet()?;
         Ok(A3930State::new(state_update_packet, sn_and_firmware))

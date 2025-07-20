@@ -44,7 +44,7 @@ where
         }
 
         self.packet_io
-            .send(
+            .send_with_response(
                 &SetAmbientSoundModeCyclePacket {
                     cycle: *target_cycle,
                 }

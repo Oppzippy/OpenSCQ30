@@ -41,7 +41,7 @@ where
         }
 
         self.packet_io
-            .send(&A3936SetSoundModesPacket { sound_modes }.into())
+            .send_with_response(&A3936SetSoundModesPacket { sound_modes }.into())
             .await?;
         state_sender.send_modify(|state| *state.as_mut() = *target_sound_modes);
 

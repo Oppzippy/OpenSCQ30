@@ -44,7 +44,9 @@ where
         }
 
         self.packet_io
-            .send(&SetMultiButtonConfigurationPacket::new(*target_button_config).into())
+            .send_with_response(
+                &SetMultiButtonConfigurationPacket::new(*target_button_config).into(),
+            )
             .await?;
         state_sender.send_modify(|state| *state.as_mut() = *target_button_config);
         Ok(())

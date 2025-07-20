@@ -50,7 +50,7 @@ where
     StateUpdate: InboundPacket + Default + Into<State>,
 {
     let state_update_packet: StateUpdate = packet_io
-        .send(&RequestStatePacket::new().into())
+        .send_with_response(&RequestStatePacket::new().into())
         .await?
         .try_into_inbound_packet()
         .map_err(|err| device::Error::other(err))?;

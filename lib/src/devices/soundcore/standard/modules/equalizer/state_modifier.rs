@@ -63,7 +63,7 @@ where
         }
 
         self.packet_io
-            .send(&if self.options.has_drc {
+            .send_with_response(&if self.options.has_drc {
                 SetEqualizerWithDrcPacket {
                     equalizer_configuration: target_equalizer_configuration,
                 }
@@ -123,7 +123,7 @@ where
         }
 
         self.packet_io
-            .send(
+            .send_with_response(
                 &SetEqualizerAndCustomHearIdPacket {
                     equalizer_configuration: target_equalizer_configuration,
                     gender: *target_state.as_ref(),
@@ -192,7 +192,7 @@ where
         }
 
         self.packet_io
-            .send(
+            .send_with_response(
                 &SetEqualizerAndCustomHearIdPacket {
                     equalizer_configuration: target_equalizer_configuration,
                     gender: *target_state.as_ref(),

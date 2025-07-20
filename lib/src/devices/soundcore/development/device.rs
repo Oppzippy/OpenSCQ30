@@ -77,7 +77,10 @@ where
 {
     async fn new(connection: Arc<B::ConnectionType>) -> device::Result<Self> {
         let (packet_io, _packet_receiver) = PacketIOController::new(connection.to_owned()).await?;
-        let state_update_packet = packet_io.send(&RequestStatePacket::new().into()).await.ok();
+        let state_update_packet = packet_io
+            .send_with_response(&RequestStatePacket::new().into())
+            .await
+            .ok();
         Ok(Self {
             backend: connection,
             state_update_packet,

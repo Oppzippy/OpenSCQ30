@@ -72,7 +72,7 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
                     command: header,
                     body: body.to_vec(),
                 };
-                if !packet_queues.pop(&header, Some(packet.clone())) || !packet.body.is_empty() {
+                if !packet_queues.pop(&header, Some(packet.clone())) {
                     match outgoing_sender.send(packet).await {
                         Ok(_) => (),
                         Err(err) => tracing::debug!(
@@ -89,7 +89,7 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
         self.connection.connection_status()
     }
 
-    pub async fn send(&self, packet: &Packet) -> device::Result<Packet> {
+    pub async fn send_with_response(&self, packet: &Packet) -> device::Result<Packet> {
         let handle = self.packet_queues.add(packet.command().to_inbound());
 
         handle.wait_for_start().await;
@@ -141,7 +141,7 @@ mod tests {
             let controller = controller.clone();
             async move {
                 controller
-                    .send(&SetSoundModePacket::default().into())
+                    .send_with_response(&SetSoundModePacket::default().into())
                     .await
                     .expect("should receive ack");
             }
@@ -150,7 +150,7 @@ mod tests {
             let controller = controller.clone();
             async move {
                 controller
-                    .send(&SetSoundModePacket::default().into())
+                    .send_with_response(&SetSoundModePacket::default().into())
                     .await
                     .expect("should receive ack");
             }
@@ -194,7 +194,7 @@ mod tests {
             let controller = controller.clone();
             async move {
                 controller
-                    .send(&set_cycle_packet.into())
+                    .send_with_response(&set_cycle_packet.into())
                     .await
                     .expect("should receive ack");
             }
@@ -203,7 +203,7 @@ mod tests {
             let controller = controller.clone();
             async move {
                 controller
-                    .send(&SetSoundModePacket::default().into())
+                    .send_with_response(&SetSoundModePacket::default().into())
                     .await
                     .expect("should receive ack");
             }
