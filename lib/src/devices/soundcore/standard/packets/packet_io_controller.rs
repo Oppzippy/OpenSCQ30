@@ -74,7 +74,7 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
                     command: header,
                     body: body.to_vec(),
                 };
-                if !packet_queues.pop(&header, Some(packet.clone())) {
+                if !packet_queues.pop(&header, packet.clone()) {
                     match outgoing_sender.send(packet).await {
                         Ok(_) => (),
                         Err(err) => tracing::debug!(

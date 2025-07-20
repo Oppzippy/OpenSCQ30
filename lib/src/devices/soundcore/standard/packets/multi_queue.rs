@@ -51,11 +51,11 @@ impl<K: Hash + Eq, V> MultiQueue<K, V> {
 
     /// When the action being performed in the task at the front of the queue is done, this will assign
     /// a value as a result of the task and pop it from the queue.
-    pub fn pop(&self, key: &K, value: Option<V>) -> bool {
+    pub fn pop(&self, key: &K, value: V) -> bool {
         let mut queues = self.queues.lock().expect(LOCK_HELD_ERROR);
         if let Some(queue) = queues.get_mut(key) {
             if let Some(front) = queue.pop_front() {
-                *front.value.lock().expect("mutex should not be tainted") = value;
+                *front.value.lock().expect("mutex should not be tainted") = Some(value);
                 front.semaphore.close();
                 return true;
             }
@@ -71,6 +71,7 @@ impl<K: Hash + Eq, V> MultiQueue<K, V> {
                 .iter()
                 .position(|entry| Arc::ptr_eq(entry, &handle.current))
         {
+            // No need to close the semaphore since we were given ownership of the only outside reference to it
             queue.remove(index);
         }
     }
@@ -125,8 +126,8 @@ mod tests {
 
         const RANGE: RangeInclusive<i8> = 1i8..=ITERATIONS;
         for i in RANGE {
-            queues.pop(&1, Some(i));
-            queues.pop(&2, Some(-i));
+            queues.pop(&1, i);
+            queues.pop(&2, -i);
         }
         for i in RANGE {
             assert_eq!(queue1_handles[i as usize - 1].wait_for_end().await, Some(i));
@@ -146,8 +147,8 @@ mod tests {
         let second = queues.add(0);
         let third = queues.add(0);
         queues.cancel(&0, second);
-        queues.pop(&0, Some(1));
-        queues.pop(&0, Some(3));
+        queues.pop(&0, 1);
+        queues.pop(&0, 3);
         assert_eq!(first.wait_for_end().await, Some(1));
         select! {
             result = third.wait_for_end() => assert_eq!(result, Some(3)),
