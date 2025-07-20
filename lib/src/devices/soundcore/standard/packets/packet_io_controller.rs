@@ -2,7 +2,6 @@ use std::{sync::Arc, time::Duration};
 
 use nom_language::error::VerboseError;
 use tokio::{
-    select,
     sync::{mpsc, watch},
     task::JoinHandle,
 };
@@ -100,10 +99,12 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
         // retry
         for i in 1..=3 {
             self.connection.write(&packet.bytes()).await?;
-            select! {
-                _ = handle.wait_for_end() => return Ok(handle.wait_for_value().await),
-                _ = tokio::time::sleep(Duration::from_millis(500 * i)) => (),
-            };
+            if tokio::time::timeout(Duration::from_millis(500 * i), handle.wait_for_end())
+                .await
+                .is_ok()
+            {
+                return Ok(handle.wait_for_value().await);
+            }
         }
 
         self.packet_queues.cancel(&queue_key, handle);
