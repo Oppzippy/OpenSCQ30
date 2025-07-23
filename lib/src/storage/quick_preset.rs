@@ -68,7 +68,6 @@ pub fn fetch_all(connection: &Connection, model: DeviceModel) -> Result<Vec<Quic
             Err(err) => Some(Err(Error::from(err))),
         },
     )
-    // TODO collect to Vec<Result<...>> instead so if something goes wrong parsing one quick preset, they don't all fail
     .collect::<Result<Vec<QuickPreset>, Error>>()
 }
 
