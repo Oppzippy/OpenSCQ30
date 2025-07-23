@@ -39,6 +39,7 @@ pub fn fetch(
     Ok(QuickPreset { name, fields })
 }
 
+#[tracing::instrument]
 pub fn fetch_all(connection: &Connection, model: DeviceModel) -> Result<Vec<QuickPreset>, Error> {
     let mut query = connection
         .prepare_cached(r#"SELECT name, json(fields) FROM quick_preset WHERE device_model = ?1"#)?;
@@ -48,14 +49,23 @@ pub fn fetch_all(connection: &Connection, model: DeviceModel) -> Result<Vec<Quic
         let json: String = row.get(1)?;
         Ok((name, json))
     })
-    .map(
+    .filter_map(
         |result: Result<(String, String), rusqlite::Error>| match result {
             Ok((name, json)) => {
-                let fields: Vec<QuickPresetField> =
-                    serde_json::from_str(&json).map_err(Error::from)?;
-                Ok(QuickPreset { name, fields })
+                match serde_json::from_str::<Vec<QuickPresetField>>(&json).map_err(Error::from) {
+                    Ok(fields) => Some(Ok(QuickPreset { name, fields })),
+                    Err(err) => {
+                        tracing::error!(
+                            message = "failed to parse quick preset json",
+                            name = name,
+                            json = json,
+                            error = ?err,
+                        );
+                        None
+                    }
+                }
             }
-            Err(err) => Err(Error::from(err)),
+            Err(err) => Some(Err(Error::from(err))),
         },
     )
     // TODO collect to Vec<Result<...>> instead so if something goes wrong parsing one quick preset, they don't all fail
