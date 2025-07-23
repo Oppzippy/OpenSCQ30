@@ -80,7 +80,7 @@ pub fn upsert(
     mut quick_preset: QuickPreset,
 ) -> Result<(), Error> {
     // Ensure that the currently enabled fields can't change between when we read them and write them back
-    let tx = connection.transaction_with_behavior(rusqlite::TransactionBehavior::Exclusive)?;
+    let tx = connection.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
     let enabled_fields = enabled_fields(&tx, model, &quick_preset.name)?;
 
     for field in &mut quick_preset.fields {
