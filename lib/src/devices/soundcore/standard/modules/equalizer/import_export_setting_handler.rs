@@ -67,7 +67,6 @@ where
                 confirmation_message: Some(fl!("import-custom-profiles-confirm")),
             },
             ImportExportSetting::ExportCustomProfiles => {
-                let selected_profiles = self.selected_profiles.lock().unwrap();
                 let profile_names = self
                     .profiles_receiver
                     .borrow()
@@ -75,6 +74,7 @@ where
                     .map(|(name, _)| name)
                     .cloned()
                     .collect::<Vec<_>>();
+                let selected_profiles = self.selected_profiles.lock().unwrap();
                 settings::Setting::MultiSelect {
                     values: profile_names
                         .iter()
@@ -89,8 +89,8 @@ where
                 }
             }
             ImportExportSetting::ExportCustomProfilesOutput => {
-                let selection = self.selected_profiles.lock().unwrap();
                 let custom_profiles = self.profiles_receiver.borrow();
+                let selection = self.selected_profiles.lock().unwrap();
                 let exported_profiles = custom_profiles
                     .iter()
                     .filter(|(name, _)| selection.contains(name))
