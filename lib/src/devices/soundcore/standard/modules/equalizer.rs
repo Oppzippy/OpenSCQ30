@@ -20,7 +20,7 @@ use crate::{
                 custom_equalizer_profile_store::CustomEqualizerProfileStore,
                 import_export_setting_handler::ImportExportSettingHandler,
             },
-            packets::packet_io_controller::PacketIOController,
+            packet::packet_io_controller::PacketIOController,
             structures::{AgeRange, BasicHearId, CustomHearId, EqualizerConfiguration, Gender},
         },
     },

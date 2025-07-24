@@ -14,7 +14,7 @@ use crate::{
         standard::{
             modules::ModuleCollection,
             packet_manager::PacketHandler,
-            packets::{
+            packet::{
                 Command, Packet,
                 inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
                 outbound::OutboundPacket,
@@ -156,7 +156,7 @@ impl ModuleCollection<A3945State> {
 mod tests {
     use nom_language::error::VerboseError;
 
-    use crate::devices::soundcore::standard::packets::{
+    use crate::devices::soundcore::standard::packet::{
         inbound::TryIntoInboundPacket, outbound::OutboundPacketBytesExt,
     };
 

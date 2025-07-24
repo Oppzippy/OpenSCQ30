@@ -12,7 +12,7 @@ use crate::{
     devices::soundcore::{
         a3959::structures::A3959MultiButtonConfiguration,
         standard::{
-            modules::ModuleCollection, packets::packet_io_controller::PacketIOController,
+            modules::ModuleCollection, packet::packet_io_controller::PacketIOController,
             structures::TwsStatus,
         },
     },

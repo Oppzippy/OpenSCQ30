@@ -13,7 +13,7 @@ use crate::{
     device_utils,
     devices::{
         DeviceModel,
-        soundcore::standard::packets::{
+        soundcore::standard::packet::{
             Packet, outbound::RequestStatePacket, packet_io_controller::PacketIOController,
         },
     },

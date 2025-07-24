@@ -1,6 +1,6 @@
 use crate::{
     devices::soundcore::standard::{
-        packets::inbound::SerialNumberAndFirmwareVersionUpdatePacket,
+        packet::inbound::SerialNumberAndFirmwareVersionUpdatePacket,
         structures::{
             DualBattery, DualFirmwareVersion, EqualizerConfiguration, MultiButtonConfiguration,
             SerialNumber, SoundModes, TwsStatus,

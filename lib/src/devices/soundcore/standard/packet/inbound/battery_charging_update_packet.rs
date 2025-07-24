@@ -5,7 +5,7 @@ use nom::{
     sequence::pair,
 };
 
-use crate::devices::soundcore::standard::{packets::Command, structures::IsBatteryCharging};
+use crate::devices::soundcore::standard::{packet::Command, structures::IsBatteryCharging};
 
 use super::InboundPacket;
 
@@ -61,7 +61,7 @@ impl InboundPacket for DualBatteryChargingUpdatePacket {
 mod tests {
     use nom_language::error::VerboseError;
 
-    use crate::devices::soundcore::standard::packets::Packet;
+    use crate::devices::soundcore::standard::packet::Packet;
 
     use super::*;
 

@@ -6,7 +6,7 @@ use crate::devices::soundcore::{
         device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
         modules::sound_modes::AvailableSoundModes,
-        packets::outbound::{OutboundPacketBytesExt, RequestStatePacket},
+        packet::outbound::{OutboundPacketBytesExt, RequestStatePacket},
         structures::{AmbientSoundMode, NoiseCancelingMode},
     },
 };

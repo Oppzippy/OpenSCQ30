@@ -18,7 +18,7 @@ use crate::{
         standard::{
             modules::ModuleCollection,
             packet_manager::PacketHandler,
-            packets::{
+            packet::{
                 Command, Packet,
                 inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
                 outbound::OutboundPacket,

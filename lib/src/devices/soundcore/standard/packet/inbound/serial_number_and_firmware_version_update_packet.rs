@@ -5,7 +5,7 @@ use nom::{
 };
 
 use crate::devices::soundcore::standard::{
-    packets::{Command, outbound::OutboundPacket},
+    packet::{Command, outbound::OutboundPacket},
     structures::{DualFirmwareVersion, SerialNumber},
 };
 
@@ -61,7 +61,7 @@ mod tests {
     use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::{
-        packets::{
+        packet::{
             Packet,
             inbound::{InboundPacket, SerialNumberAndFirmwareVersionUpdatePacket},
         },

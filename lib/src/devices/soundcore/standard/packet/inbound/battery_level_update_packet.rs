@@ -4,7 +4,7 @@ use nom::{
     error::{ContextError, ParseError, context},
 };
 
-use crate::devices::soundcore::standard::{packets::Command, structures::BatteryLevel};
+use crate::devices::soundcore::standard::{packet::Command, structures::BatteryLevel};
 
 use super::InboundPacket;
 
@@ -66,7 +66,7 @@ impl InboundPacket for DualBatteryLevelUpdatePacket {
 mod tests {
     use nom_language::error::VerboseError;
 
-    use crate::devices::soundcore::standard::packets::Packet;
+    use crate::devices::soundcore::standard::packet::Packet;
 
     use super::*;
 

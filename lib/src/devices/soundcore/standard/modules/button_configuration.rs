@@ -10,7 +10,7 @@ use crate::{
         settings::{CategoryId, SettingId},
     },
     devices::soundcore::standard::{
-        packets::packet_io_controller::PacketIOController,
+        packet::packet_io_controller::PacketIOController,
         structures::{MultiButtonConfiguration, TwsStatus},
     },
 };

@@ -13,7 +13,7 @@ use nom::{
     number::complete::{le_u8, le_u16},
 };
 
-use crate::devices::soundcore::standard::packets::checksum::calculate_checksum;
+use crate::devices::soundcore::standard::packet::checksum::calculate_checksum;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Default, Hash)]
 pub struct Packet {

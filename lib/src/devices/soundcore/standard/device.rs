@@ -21,7 +21,7 @@ use super::{
     modules::{
         ModuleCollection, ModuleCollectionSpawnPacketHandlerExt, sound_modes::AvailableSoundModes,
     },
-    packets::{
+    packet::{
         Packet,
         inbound::{InboundPacket, TryIntoInboundPacket},
         outbound::RequestStatePacket,

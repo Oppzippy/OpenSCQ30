@@ -6,7 +6,7 @@ use nom::{
 
 use crate::devices::soundcore::{
     a3936::structures::A3936SoundModes,
-    standard::packets::{Command, inbound::InboundPacket},
+    standard::packet::{Command, inbound::InboundPacket},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -44,7 +44,7 @@ mod tests {
             structures::{A3936NoiseCancelingMode, AdaptiveNoiseCanceling, ManualNoiseCanceling},
         },
         standard::{
-            packets::{Packet, inbound::InboundPacket},
+            packet::{Packet, inbound::InboundPacket},
             structures::{AmbientSoundMode, TransparencyMode},
         },
     };

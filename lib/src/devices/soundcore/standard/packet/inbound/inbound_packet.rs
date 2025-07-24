@@ -4,7 +4,7 @@ use nom::{
 };
 use nom_language::error::VerboseError;
 
-use crate::{api::device, devices::soundcore::standard::packets::Packet};
+use crate::{api::device, devices::soundcore::standard::packet::Packet};
 
 pub trait InboundPacket
 where

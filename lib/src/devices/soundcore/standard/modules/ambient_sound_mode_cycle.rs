@@ -10,7 +10,7 @@ use crate::{
         settings::{CategoryId, SettingId},
     },
     devices::soundcore::standard::{
-        packets::packet_io_controller::PacketIOController, structures::AmbientSoundModeCycle,
+        packet::packet_io_controller::PacketIOController, structures::AmbientSoundModeCycle,
     },
 };
 

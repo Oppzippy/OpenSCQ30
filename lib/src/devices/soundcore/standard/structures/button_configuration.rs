@@ -8,7 +8,7 @@ use nom::{
 use openscq30_i18n_macros::Translate;
 use strum::{AsRefStr, EnumIter, EnumString, FromRepr, IntoStaticStr};
 
-use crate::devices::soundcore::standard::packets::parsing::take_bool;
+use crate::devices::soundcore::standard::packet::parsing::take_bool;
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub struct MultiButtonConfiguration {

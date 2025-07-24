@@ -4,7 +4,7 @@ use nom::{
     error::{ContextError, ParseError, context},
 };
 
-use crate::devices::soundcore::standard::{packets::Command, structures::SoundModes};
+use crate::devices::soundcore::standard::{packet::Command, structures::SoundModes};
 
 use super::InboundPacket;
 
@@ -41,7 +41,7 @@ mod tests {
     use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::{
-        packets::{
+        packet::{
             Packet,
             inbound::{InboundPacket, SoundModeUpdatePacket},
         },

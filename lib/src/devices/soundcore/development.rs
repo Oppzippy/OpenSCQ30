@@ -6,7 +6,7 @@ use crate::{
         DeviceModel,
         soundcore::{
             development::device::SoundcoreDevelopmentDeviceRegistry,
-            standard::{demo::DemoConnectionRegistry, packets::inbound::state_update_packet},
+            standard::{demo::DemoConnectionRegistry, packet::inbound::state_update_packet},
         },
     },
     storage,

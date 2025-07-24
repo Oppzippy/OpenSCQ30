@@ -3,7 +3,7 @@ pub mod device;
 pub mod macros;
 pub mod modules;
 pub mod packet_manager;
-pub mod packets;
+pub mod packet;
 pub mod settings_manager;
 pub mod state_modifier;
 pub mod structures;

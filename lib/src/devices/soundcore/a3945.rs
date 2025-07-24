@@ -5,7 +5,7 @@ use crate::devices::soundcore::{
     standard::{
         device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
-        packets::outbound::{OutboundPacketBytesExt, RequestStatePacket},
+        packet::outbound::{OutboundPacketBytesExt, RequestStatePacket},
     },
 };
 
@@ -51,7 +51,7 @@ mod tests {
         devices::{
             DeviceModel,
             soundcore::standard::{
-                packets::{
+                packet::{
                     Command, Direction, Packet,
                     inbound::state_update_packet,
                     outbound::{OutboundPacket, OutboundPacketBytesExt, set_equalizer},

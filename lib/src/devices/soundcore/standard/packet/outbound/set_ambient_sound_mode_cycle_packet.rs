@@ -1,5 +1,5 @@
 use crate::devices::soundcore::standard::{
-    packets::{Command, outbound::OutboundPacket},
+    packet::{Command, outbound::OutboundPacket},
     structures::AmbientSoundModeCycle,
 };
 

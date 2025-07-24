@@ -16,7 +16,7 @@ use crate::{
         standard::{
             modules::ModuleCollection,
             packet_manager::PacketHandler,
-            packets::{
+            packet::{
                 Command, Packet,
                 inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
                 outbound::OutboundPacket,
@@ -277,7 +277,7 @@ mod tests {
     use crate::devices::soundcore::{
         a3933::packets::inbound::A3933StateUpdatePacket,
         standard::{
-            packets::{
+            packet::{
                 Packet,
                 inbound::{InboundPacket, TryIntoInboundPacket},
                 outbound::OutboundPacketBytesExt,

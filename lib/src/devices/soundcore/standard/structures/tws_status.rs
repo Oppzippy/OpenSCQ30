@@ -8,7 +8,7 @@ use nom::{
 use openscq30_i18n_macros::Translate;
 use strum::{Display, FromRepr};
 
-use crate::devices::soundcore::standard::packets::parsing::take_bool;
+use crate::devices::soundcore::standard::packet::parsing::take_bool;
 
 #[derive(Debug, Clone, PartialEq, Eq, Copy, PartialOrd, Ord, Hash, Default)]
 pub struct TwsStatus {

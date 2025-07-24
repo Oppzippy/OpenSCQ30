@@ -5,7 +5,7 @@ use crate::{
     api::device,
     devices::soundcore::standard::{
         packet_manager::PacketHandler,
-        packets::{
+        packet::{
             Command, Packet,
             inbound::{SoundModeUpdatePacket, TryIntoInboundPacket},
         },

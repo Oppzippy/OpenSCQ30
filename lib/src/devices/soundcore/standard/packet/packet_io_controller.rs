@@ -12,7 +12,7 @@ use crate::{
         connection::{ConnectionStatus, RfcommConnection},
         device,
     },
-    devices::soundcore::standard::packets::Command,
+    devices::soundcore::standard::packet::Command,
 };
 
 use super::{Packet, multi_queue::MultiQueue};
@@ -115,7 +115,7 @@ mod tests {
 
     use crate::{
         api::connection::test_stub::StubRfcommConnection,
-        devices::soundcore::standard::packets::{
+        devices::soundcore::standard::packet::{
             Direction,
             outbound::{OutboundPacket, SetAmbientSoundModeCyclePacket, SetSoundModePacket},
         },

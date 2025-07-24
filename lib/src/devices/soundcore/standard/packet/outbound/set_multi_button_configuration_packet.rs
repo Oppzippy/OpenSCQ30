@@ -1,4 +1,4 @@
-use crate::devices::soundcore::standard::{packets::Command, structures::MultiButtonConfiguration};
+use crate::devices::soundcore::standard::{packet::Command, structures::MultiButtonConfiguration};
 
 use super::OutboundPacket;
 
@@ -28,7 +28,7 @@ impl OutboundPacket for SetMultiButtonConfigurationPacket {
 #[cfg(test)]
 mod tests {
     use crate::devices::soundcore::standard::{
-        packets::outbound::{OutboundPacketBytesExt, SetMultiButtonConfigurationPacket},
+        packet::outbound::{OutboundPacketBytesExt, SetMultiButtonConfigurationPacket},
         structures::{
             ButtonAction, MultiButtonConfiguration, NoTwsButtonConfiguration,
             TwsButtonConfiguration,

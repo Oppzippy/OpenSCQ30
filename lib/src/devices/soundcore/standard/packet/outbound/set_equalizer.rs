@@ -1,4 +1,4 @@
-use crate::devices::soundcore::standard::{packets::Command, structures::EqualizerConfiguration};
+use crate::devices::soundcore::standard::{packet::Command, structures::EqualizerConfiguration};
 
 use super::outbound_packet::OutboundPacket;
 
@@ -22,7 +22,7 @@ impl<const C: usize, const B: usize> OutboundPacket for SetEqualizerPacket<'_, C
 #[cfg(test)]
 mod tests {
     use crate::devices::soundcore::standard::{
-        packets::outbound::OutboundPacketBytesExt,
+        packet::outbound::OutboundPacketBytesExt,
         structures::{EqualizerConfiguration, PresetEqualizerProfile, VolumeAdjustments},
     };
 

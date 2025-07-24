@@ -16,7 +16,7 @@ use crate::{
     devices::DeviceModel,
 };
 
-use super::packets::{Command, Direction, Packet};
+use super::packet::{Command, Direction, Packet};
 
 pub struct DemoConnectionRegistry {
     model: DeviceModel,

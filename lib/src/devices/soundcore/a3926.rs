@@ -4,7 +4,7 @@ use crate::devices::soundcore::{
     a3926::{packets::A3926StateUpdatePacket, state::A3926State},
     standard::{
         macros::soundcore_device,
-        packets::{
+        packet::{
             inbound::{SerialNumberAndFirmwareVersionUpdatePacket, TryIntoInboundPacket},
             outbound::{
                 OutboundPacketBytesExt, RequestSerialNumberAndFirmwareVersionPacket,

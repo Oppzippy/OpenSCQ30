@@ -1,7 +1,7 @@
 use crate::{
     api::connection::RfcommConnection,
     devices::soundcore::standard::{
-        device::SoundcoreDeviceBuilder, packets::inbound::InboundPacket, structures::TwsStatus,
+        device::SoundcoreDeviceBuilder, packet::inbound::InboundPacket, structures::TwsStatus,
     },
 };
 

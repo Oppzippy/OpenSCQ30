@@ -1,4 +1,4 @@
-use crate::devices::soundcore::standard::packets::Command;
+use crate::devices::soundcore::standard::packet::Command;
 
 use super::outbound_packet::OutboundPacket;
 
@@ -25,7 +25,7 @@ impl OutboundPacket for RequestStatePacket {
 
 #[cfg(test)]
 mod tests {
-    use crate::devices::soundcore::standard::packets::outbound::{
+    use crate::devices::soundcore::standard::packet::outbound::{
         OutboundPacketBytesExt, RequestStatePacket,
     };
 

@@ -8,7 +8,7 @@ use crate::{
     devices::soundcore::{
         a3936::{packets::A3936SetSoundModesPacket, structures::A3936SoundModes},
         standard::{
-            packets::packet_io_controller::PacketIOController, state_modifier::StateModifier,
+            packet::packet_io_controller::PacketIOController, state_modifier::StateModifier,
         },
     },
 };

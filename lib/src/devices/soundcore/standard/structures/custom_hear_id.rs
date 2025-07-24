@@ -7,7 +7,7 @@ use nom::{
     number::complete::le_i32,
 };
 
-use crate::devices::soundcore::standard::packets::parsing::take_bool;
+use crate::devices::soundcore::standard::packet::parsing::take_bool;
 
 use super::{HearIdMusicType, HearIdType, VolumeAdjustments};
 

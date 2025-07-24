@@ -4,7 +4,7 @@ use nom::{
     error::{ContextError, ParseError, context},
 };
 
-use crate::devices::soundcore::standard::packets::{Command, parsing::take_bool};
+use crate::devices::soundcore::standard::packet::{Command, parsing::take_bool};
 
 use super::InboundPacket;
 
@@ -35,7 +35,7 @@ impl InboundPacket for ChineseVoicePromptStateUpdatePacket {
 mod tests {
     use nom_language::error::VerboseError;
 
-    use crate::devices::soundcore::standard::packets::{
+    use crate::devices::soundcore::standard::packet::{
         Packet,
         inbound::{ChineseVoicePromptStateUpdatePacket, InboundPacket},
     };

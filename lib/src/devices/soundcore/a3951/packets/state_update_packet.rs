@@ -13,13 +13,13 @@ use crate::{
         a3951::state::A3951State,
         standard::{
             modules::ModuleCollection,
-            packet_manager::PacketHandler,
-            packets::{
+            packet::{
                 Command, Packet,
                 inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
                 outbound::OutboundPacket,
                 parsing::take_bool,
             },
+            packet_manager::PacketHandler,
             structures::{
                 AgeRange, CustomHearId, DualBattery, EqualizerConfiguration, Gender,
                 MultiButtonConfiguration, SoundModes, TwsStatus, VolumeAdjustments,
@@ -197,7 +197,7 @@ impl ModuleCollection<A3951State> {
 mod tests {
     use nom_language::error::VerboseError;
 
-    use crate::devices::soundcore::standard::packets::{
+    use crate::devices::soundcore::standard::packet::{
         inbound::TryIntoInboundPacket, outbound::OutboundPacketBytesExt,
     };
 

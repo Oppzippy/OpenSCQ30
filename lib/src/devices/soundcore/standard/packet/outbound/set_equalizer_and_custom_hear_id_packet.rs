@@ -1,5 +1,5 @@
 use crate::devices::soundcore::standard::{
-    packets::Command,
+    packet::Command,
     structures::{AgeRange, CustomHearId, EqualizerConfiguration, Gender},
 };
 
@@ -95,7 +95,7 @@ impl<const C: usize, const B: usize> OutboundPacket
 #[cfg(test)]
 mod tests {
     use crate::devices::soundcore::standard::{
-        packets::outbound::OutboundPacketBytesExt,
+        packet::outbound::OutboundPacketBytesExt,
         structures::{
             AgeRange, CustomHearId, EqualizerConfiguration, Gender, HearIdMusicType, HearIdType,
             PresetEqualizerProfile, VolumeAdjustments,

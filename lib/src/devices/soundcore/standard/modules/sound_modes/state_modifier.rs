@@ -6,7 +6,7 @@ use tokio::sync::watch;
 use crate::{
     api::{connection::RfcommConnection, device},
     devices::soundcore::standard::{
-        packets::{outbound::SetSoundModePacket, packet_io_controller::PacketIOController},
+        packet::{outbound::SetSoundModePacket, packet_io_controller::PacketIOController},
         state_modifier::StateModifier,
         structures::{AmbientSoundMode, SoundModes},
     },
