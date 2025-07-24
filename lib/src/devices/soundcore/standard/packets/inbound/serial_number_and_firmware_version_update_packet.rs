@@ -5,8 +5,8 @@ use nom::{
 };
 
 use crate::devices::soundcore::standard::{
-    packets::outbound::OutboundPacket,
-    structures::{Command, DualFirmwareVersion, SerialNumber},
+    packets::{Command, outbound::OutboundPacket},
+    structures::{DualFirmwareVersion, SerialNumber},
 };
 
 use super::InboundPacket;
@@ -20,7 +20,7 @@ pub struct SerialNumberAndFirmwareVersionUpdatePacket {
 }
 
 impl SerialNumberAndFirmwareVersionUpdatePacket {
-    pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x05]);
+    pub const COMMAND: Command = Command([0x01, 0x05]);
 }
 
 impl InboundPacket for SerialNumberAndFirmwareVersionUpdatePacket {
@@ -61,8 +61,9 @@ mod tests {
     use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::{
-        packets::inbound::{
-            InboundPacket, SerialNumberAndFirmwareVersionUpdatePacket, take_inbound_packet_header,
+        packets::{
+            Packet,
+            inbound::{InboundPacket, SerialNumberAndFirmwareVersionUpdatePacket},
         },
         structures::{FirmwareVersion, SerialNumber},
     };
@@ -70,14 +71,15 @@ mod tests {
     #[test]
     fn it_parses_a_manually_crafted_packet() {
         let input: &[u8] = &[
-            0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x05, 0x25, 0x00, 0x31, 0x32, 0x2e, 0x33, 0x34,
+            0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x05, 0x24, 0x00, 0x31, 0x32, 0x2e, 0x33, 0x34,
             0x32, 0x33, 0x2e, 0x34, 0x35, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
-            0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0xca,
+            0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0xc9,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let packet = SerialNumberAndFirmwareVersionUpdatePacket::take::<VerboseError<_>>(body)
-            .unwrap()
-            .1;
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let packet =
+            SerialNumberAndFirmwareVersionUpdatePacket::take::<VerboseError<_>>(&packet.body)
+                .unwrap()
+                .1;
         assert_eq!(
             FirmwareVersion::new(12, 34),
             packet.dual_firmware_version.left

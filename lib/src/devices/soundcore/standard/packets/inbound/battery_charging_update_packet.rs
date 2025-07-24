@@ -5,7 +5,7 @@ use nom::{
     sequence::pair,
 };
 
-use crate::devices::soundcore::standard::structures::{Command, IsBatteryCharging};
+use crate::devices::soundcore::standard::{packets::Command, structures::IsBatteryCharging};
 
 use super::InboundPacket;
 
@@ -15,7 +15,7 @@ pub struct SingleBatteryChargingUpdatePacket {
 }
 
 impl SingleBatteryChargingUpdatePacket {
-    pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04]);
+    pub const COMMAND: Command = Command([0x01, 0x04]);
 }
 
 impl InboundPacket for SingleBatteryChargingUpdatePacket {
@@ -39,7 +39,7 @@ pub struct DualBatteryChargingUpdatePacket {
 }
 
 impl DualBatteryChargingUpdatePacket {
-    pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04]);
+    pub const COMMAND: Command = Command([0x01, 0x04]);
 }
 
 impl InboundPacket for DualBatteryChargingUpdatePacket {
@@ -61,7 +61,7 @@ impl InboundPacket for DualBatteryChargingUpdatePacket {
 mod tests {
     use nom_language::error::VerboseError;
 
-    use crate::devices::soundcore::standard::packets::inbound::take_inbound_packet_header;
+    use crate::devices::soundcore::standard::packets::Packet;
 
     use super::*;
 
@@ -70,8 +70,8 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04, 0x0c, 0x00, 0x01, 0x00, 0x1b,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let packet = DualBatteryChargingUpdatePacket::take::<VerboseError<_>>(body)
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let packet = DualBatteryChargingUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1;
 
@@ -84,8 +84,8 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04, 0x0b, 0x00, 0x01, 0x1a,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let packet = SingleBatteryChargingUpdatePacket::take::<VerboseError<_>>(body)
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let packet = SingleBatteryChargingUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1;
 

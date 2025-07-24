@@ -1,4 +1,4 @@
-use crate::devices::soundcore::standard::structures::Command;
+use crate::devices::soundcore::standard::packets::Command;
 
 use super::outbound_packet::OutboundPacket;
 
@@ -6,7 +6,7 @@ use super::outbound_packet::OutboundPacket;
 pub struct RequestStatePacket {}
 
 impl RequestStatePacket {
-    pub const COMMAND: Command = Command::new([0x08, 0xEE, 0x00, 0x00, 0x00, 0x01, 0x01]);
+    pub const COMMAND: Command = Command([0x01, 0x01]);
 
     pub fn new() -> Self {
         RequestStatePacket {}

@@ -4,7 +4,7 @@ use nom::{
     error::{ContextError, ParseError, context},
 };
 
-use crate::devices::soundcore::standard::{packets::parsing::take_bool, structures::Command};
+use crate::devices::soundcore::standard::packets::{Command, parsing::take_bool};
 
 use super::InboundPacket;
 
@@ -14,7 +14,7 @@ pub struct GameModeUpdatePacket {
 }
 
 impl GameModeUpdatePacket {
-    pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x11]);
+    pub const COMMAND: Command = Command([0x01, 0x11]);
 }
 
 impl InboundPacket for GameModeUpdatePacket {
@@ -35,17 +35,18 @@ impl InboundPacket for GameModeUpdatePacket {
 mod tests {
     use nom_language::error::VerboseError;
 
-    use crate::devices::soundcore::standard::packets::inbound::{
-        GameModeUpdatePacket, InboundPacket, take_inbound_packet_header,
+    use crate::devices::soundcore::standard::packets::{
+        Packet,
+        inbound::{GameModeUpdatePacket, InboundPacket},
     };
 
     #[test]
     fn it_parses_a_known_good_packet() {
         let input: &[u8] = &[
-            0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x11, 0x0c, 0x00, 0x01, 0x28,
+            0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x11, 0x0b, 0x00, 0x01, 0x27,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let packet = GameModeUpdatePacket::take::<VerboseError<_>>(body)
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let packet = GameModeUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1;
         assert!(packet.is_enabled);

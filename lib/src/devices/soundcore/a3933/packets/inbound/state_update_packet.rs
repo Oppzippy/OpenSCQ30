@@ -17,13 +17,13 @@ use crate::{
             modules::ModuleCollection,
             packet_manager::PacketHandler,
             packets::{
-                Packet,
+                Command, Packet,
                 inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
                 outbound::OutboundPacket,
                 parsing::take_bool,
             },
             structures::{
-                AgeRange, AmbientSoundModeCycle, BatteryLevel, Command, CustomHearId, DualBattery,
+                AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
                 DualFirmwareVersion, EqualizerConfiguration, MultiButtonConfiguration,
                 SerialNumber, SoundModes, TwsStatus, VolumeAdjustments,
             },
@@ -279,7 +279,7 @@ mod tests {
         standard::{
             packets::{
                 Packet,
-                inbound::{InboundPacket, TryIntoInboundPacket, take_inbound_packet_header},
+                inbound::{InboundPacket, TryIntoInboundPacket},
                 outbound::OutboundPacketBytesExt,
             },
             structures::{
@@ -293,11 +293,7 @@ mod tests {
     #[test]
     fn serialize_and_deserialize() {
         let bytes = A3933StateUpdatePacket::default().bytes();
-        let (body, command) = take_inbound_packet_header::<VerboseError<_>>(&bytes).unwrap();
-        let packet = Packet {
-            command,
-            body: body.to_vec(),
-        };
+        let (_, packet) = Packet::take::<VerboseError<_>>(&bytes).unwrap();
         let _: A3933StateUpdatePacket = packet.try_into_inbound_packet().unwrap();
     }
 
@@ -323,9 +319,9 @@ mod tests {
             1, 82, 1, 102, 1, 84, 1, 1, 1, 0, 7, 0, 0, 0, 10, 255, 255, 0, 255, 0, 0, 0, 51, 255,
             255, 255, 255, 102,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let (_, packet) =
-            A3933StateUpdatePacket::take::<VerboseError<_>>(body).expect("should parse packet");
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = A3933StateUpdatePacket::take::<VerboseError<_>>(&packet.body)
+            .expect("should parse packet");
 
         assert_eq!(
             TwsStatus {

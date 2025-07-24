@@ -15,13 +15,13 @@ use crate::{
             modules::ModuleCollection,
             packet_manager::PacketHandler,
             packets::{
-                Packet,
+                Command, Packet,
                 inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
                 outbound::OutboundPacket,
                 parsing::take_bool,
             },
             structures::{
-                BatteryLevel, Command, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
+                BatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
                 MultiButtonConfiguration, SerialNumber, TwsStatus,
             },
         },
@@ -157,8 +157,7 @@ mod tests {
     use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::packets::{
-        inbound::{TryIntoInboundPacket, take_inbound_packet_header},
-        outbound::OutboundPacketBytesExt,
+        inbound::TryIntoInboundPacket, outbound::OutboundPacketBytesExt,
     };
 
     use super::*;
@@ -166,11 +165,7 @@ mod tests {
     #[test]
     fn serialize_and_deserialize() {
         let bytes = A3945StateUpdatePacket::default().bytes();
-        let (body, command) = take_inbound_packet_header::<VerboseError<_>>(&bytes).unwrap();
-        let packet = Packet {
-            command,
-            body: body.to_vec(),
-        };
+        let (_, packet) = Packet::take::<VerboseError<_>>(&bytes).unwrap();
         let _: A3945StateUpdatePacket = packet.try_into_inbound_packet().unwrap();
     }
 }

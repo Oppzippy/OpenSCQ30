@@ -7,8 +7,7 @@ use crate::{
         a3959::{packets::A3959SoundModesUpdatePacket, structures::A3959SoundModes},
         standard::{
             packet_manager::PacketHandler,
-            packets::{Packet, inbound::TryIntoInboundPacket},
-            structures::Command,
+            packets::{Command, Packet, inbound::TryIntoInboundPacket},
         },
     },
 };

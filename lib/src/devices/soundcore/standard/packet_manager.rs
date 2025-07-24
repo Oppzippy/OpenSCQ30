@@ -6,7 +6,7 @@ use tracing::warn;
 
 use crate::api::device;
 
-use super::{packets::Packet, structures::Command};
+use super::packets::{Command, Packet};
 
 pub struct PacketManager<T> {
     handlers: HashMap<Command, Box<dyn PacketHandler<T> + Send + Sync>>,

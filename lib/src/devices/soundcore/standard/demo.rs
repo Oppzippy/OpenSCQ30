@@ -13,10 +13,10 @@ use crate::{
     api::connection::{
         self, ConnectionDescriptor, ConnectionStatus, RfcommBackend, RfcommConnection,
     },
-    devices::{DeviceModel, soundcore::standard::packets::inbound::take_inbound_packet_header},
+    devices::DeviceModel,
 };
 
-use super::{packets::Packet, structures::Command};
+use super::packets::{Command, Direction, Packet};
 
 pub struct DemoConnectionRegistry {
     model: DeviceModel,
@@ -76,15 +76,16 @@ impl DemoConnection {
 
 impl RfcommConnection for DemoConnection {
     async fn write(&self, data: &[u8]) -> connection::Result<()> {
-        let (_body, command) = take_inbound_packet_header::<VerboseError<_>>(data).unwrap();
-        if let Some(response) = self.packet_responses.get(&command) {
+        let (_remainder, packet) = Packet::take::<VerboseError<_>>(data).unwrap();
+        if let Some(response) = self.packet_responses.get(&packet.command) {
             self.packet_sender.send(response.to_owned()).await.unwrap();
         } else {
             // ACK
             self.packet_sender
                 .send(
                     Packet {
-                        command: command.to_inbound(),
+                        direction: Direction::Inbound,
+                        command: packet.command,
                         body: Vec::new(),
                     }
                     .bytes(),

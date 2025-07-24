@@ -1,4 +1,4 @@
-use crate::devices::soundcore::standard::structures::Command;
+use crate::devices::soundcore::standard::packets::Command;
 
 use super::OutboundPacket;
 
@@ -7,7 +7,7 @@ pub struct RequestBatteryLevelPacket {}
 
 impl OutboundPacket for RequestBatteryLevelPacket {
     fn command(&self) -> Command {
-        Command::new([0x08, 0xee, 0x00, 0x00, 0x00, 0x01, 0x03])
+        Command([0x01, 0x03])
     }
 
     fn body(&self) -> Vec<u8> {

@@ -12,9 +12,7 @@ use crate::{
         connection::{ConnectionStatus, RfcommConnection},
         device,
     },
-    devices::soundcore::standard::{
-        packets::inbound::take_inbound_packet_header, structures::Command,
-    },
+    devices::soundcore::standard::packets::Command,
 };
 
 use super::{Packet, multi_queue::MultiQueue};
@@ -62,18 +60,14 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
         let (outgoing_sender, outgoing_receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
             while let Some(bytes) = incoming_receiver.recv().await {
-                let (body, header) = match take_inbound_packet_header::<VerboseError<_>>(&bytes) {
+                let (_remainder, packet) = match Packet::take::<VerboseError<_>>(&bytes) {
                     Ok(parsed) => parsed,
                     Err(err) => {
                         tracing::warn!("failed to parse packet: {err:?}");
                         continue;
                     }
                 };
-                let packet = Packet {
-                    command: header,
-                    body: body.to_vec(),
-                };
-                if !packet_queues.pop(&header, packet.clone()) {
+                if !packet_queues.pop(&packet.command, packet.clone()) {
                     match outgoing_sender.send(packet).await {
                         Ok(_) => (),
                         Err(err) => tracing::debug!(
@@ -91,7 +85,7 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
     }
 
     pub async fn send_with_response(&self, packet: &Packet) -> device::Result<Packet> {
-        let queue_key = packet.command().to_inbound();
+        let queue_key = packet.command;
         let handle = self.packet_queues.add(queue_key);
 
         handle.wait_for_start().await;
@@ -121,8 +115,9 @@ mod tests {
 
     use crate::{
         api::connection::test_stub::StubRfcommConnection,
-        devices::soundcore::standard::packets::outbound::{
-            OutboundPacket, SetAmbientSoundModeCyclePacket, SetSoundModePacket,
+        devices::soundcore::standard::packets::{
+            Direction,
+            outbound::{OutboundPacket, SetAmbientSoundModeCyclePacket, SetSoundModePacket},
         },
     };
 
@@ -226,7 +221,8 @@ mod tests {
         sender
             .send(
                 Packet {
-                    command: set_cycle_packet.command().to_inbound(),
+                    direction: Direction::Inbound,
+                    command: set_cycle_packet.command(),
                     body: Vec::new(),
                 }
                 .bytes(),

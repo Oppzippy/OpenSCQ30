@@ -1,4 +1,4 @@
-use crate::devices::soundcore::standard::structures::{Command, EqualizerConfiguration};
+use crate::devices::soundcore::standard::{packets::Command, structures::EqualizerConfiguration};
 
 use super::outbound_packet::OutboundPacket;
 
@@ -7,7 +7,7 @@ pub struct SetEqualizerPacket<'a, const C: usize, const B: usize> {
     pub equalizer_configuration: &'a EqualizerConfiguration<C, B>,
 }
 
-pub const COMMAND: Command = Command::new([0x08, 0xEE, 0x00, 0x00, 0x00, 0x02, 0x81]);
+pub const COMMAND: Command = Command([0x02, 0x81]);
 
 impl<const C: usize, const B: usize> OutboundPacket for SetEqualizerPacket<'_, C, B> {
     fn command(&self) -> Command {

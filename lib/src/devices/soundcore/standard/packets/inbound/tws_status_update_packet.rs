@@ -4,7 +4,7 @@ use nom::{
     error::{ContextError, ParseError, context},
 };
 
-use crate::devices::soundcore::standard::structures::{Command, TwsStatus};
+use crate::devices::soundcore::standard::{packets::Command, structures::TwsStatus};
 
 use super::InboundPacket;
 
@@ -12,7 +12,7 @@ use super::InboundPacket;
 pub struct TwsStatusUpdatePacket(pub TwsStatus);
 
 impl TwsStatusUpdatePacket {
-    pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x02]);
+    pub const COMMAND: Command = Command([0x01, 0x02]);
 }
 
 impl InboundPacket for TwsStatusUpdatePacket {
@@ -32,7 +32,10 @@ mod tests {
     use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::{
-        packets::inbound::{InboundPacket, TwsStatusUpdatePacket, take_inbound_packet_header},
+        packets::{
+            Packet,
+            inbound::{InboundPacket, TwsStatusUpdatePacket},
+        },
         structures::HostDevice,
     };
 
@@ -41,8 +44,8 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x02, 0x0c, 0x00, 0x00, 0x01, 0x19,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let packet = TwsStatusUpdatePacket::take::<VerboseError<_>>(body)
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let packet = TwsStatusUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1;
         assert_eq!(HostDevice::Left, packet.0.host_device);

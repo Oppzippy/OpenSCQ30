@@ -4,7 +4,7 @@ use nom::{
     error::{ContextError, ParseError, context},
 };
 
-use crate::devices::soundcore::standard::{packets::parsing::take_bool, structures::Command};
+use crate::devices::soundcore::standard::packets::{Command, parsing::take_bool};
 
 use super::InboundPacket;
 
@@ -14,7 +14,7 @@ pub struct LdacStateUpdatePacket {
 }
 
 impl LdacStateUpdatePacket {
-    pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x7F]);
+    pub const COMMAND: Command = Command([0x01, 0x7F]);
 }
 
 impl InboundPacket for LdacStateUpdatePacket {
@@ -35,17 +35,18 @@ impl InboundPacket for LdacStateUpdatePacket {
 mod tests {
     use nom_language::error::VerboseError;
 
-    use crate::devices::soundcore::standard::packets::inbound::{
-        InboundPacket, LdacStateUpdatePacket, take_inbound_packet_header,
+    use crate::devices::soundcore::standard::packets::{
+        Packet,
+        inbound::{InboundPacket, LdacStateUpdatePacket},
     };
 
     #[test]
     fn it_parses_a_manually_crafted_packet() {
         let input: &[u8] = &[
-            0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x7F, 0x0c, 0x00, 0x01, 0x96,
+            0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x7F, 0x0b, 0x00, 0x01, 0x95,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let packet = LdacStateUpdatePacket::take::<VerboseError<_>>(body)
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let packet = LdacStateUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1;
         assert!(packet.is_enabled);

@@ -71,11 +71,11 @@ mod tests {
             DeviceModel,
             soundcore::standard::{
                 packets::{
-                    Packet,
+                    Command, Direction, Packet,
                     inbound::state_update_packet,
                     outbound::{OutboundPacket, OutboundPacketBytesExt, set_equalizer},
                 },
-                structures::{Command, EqualizerConfiguration, PresetEqualizerProfile},
+                structures::{EqualizerConfiguration, PresetEqualizerProfile},
             },
         },
         storage::OpenSCQ30Database,
@@ -157,7 +157,8 @@ mod tests {
             inbound_sender
                 .send(
                     Packet {
-                        command: set_equalizer::COMMAND.to_inbound(),
+                        direction: Direction::Inbound,
+                        command: set_equalizer::COMMAND,
                         body: Vec::new(),
                     }
                     .bytes(),

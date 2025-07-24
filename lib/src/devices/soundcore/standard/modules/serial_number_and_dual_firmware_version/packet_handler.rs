@@ -6,10 +6,10 @@ use crate::{
     devices::soundcore::standard::{
         packet_manager::PacketHandler,
         packets::{
-            Packet,
+            Command, Packet,
             inbound::{SerialNumberAndFirmwareVersionUpdatePacket, TryIntoInboundPacket},
         },
-        structures::{Command, DualFirmwareVersion, SerialNumber},
+        structures::{DualFirmwareVersion, SerialNumber},
     },
 };
 

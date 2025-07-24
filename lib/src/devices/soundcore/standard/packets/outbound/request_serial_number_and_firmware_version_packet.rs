@@ -1,4 +1,4 @@
-use crate::devices::soundcore::standard::structures::Command;
+use crate::devices::soundcore::standard::packets::Command;
 
 use super::OutboundPacket;
 
@@ -6,7 +6,7 @@ use super::OutboundPacket;
 pub struct RequestSerialNumberAndFirmwareVersionPacket {}
 
 impl RequestSerialNumberAndFirmwareVersionPacket {
-    pub const COMMAND: Command = Command::new([0x08, 0xee, 0x00, 0x00, 0x00, 0x01, 0x05]);
+    pub const COMMAND: Command = Command([0x01, 0x05]);
 
     pub fn new() -> Self {
         Self {}

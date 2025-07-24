@@ -19,14 +19,14 @@ use crate::{
             modules::ModuleCollection,
             packet_manager::PacketHandler,
             packets::{
-                Packet,
+                Command, Packet,
                 inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
                 outbound::OutboundPacket,
                 parsing::take_bool,
             },
             structures::{
-                AmbientSoundModeCycle, Command, DualBattery, DualFirmwareVersion,
-                EqualizerConfiguration, SerialNumber, TwsStatus,
+                AmbientSoundModeCycle, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
+                SerialNumber, TwsStatus,
             },
         },
     },

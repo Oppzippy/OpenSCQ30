@@ -19,13 +19,13 @@ use crate::{
             modules::ModuleCollection,
             packet_manager::PacketHandler,
             packets::{
-                Packet,
+                Command, Packet,
                 inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
                 outbound::OutboundPacket,
                 parsing::take_bool,
             },
             structures::{
-                AgeRange, AmbientSoundModeCycle, BatteryLevel, Command, CustomHearId, DualBattery,
+                AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
                 DualFirmwareVersion, EqualizerConfiguration, SerialNumber, TwsStatus,
                 VolumeAdjustments,
             },
@@ -251,8 +251,7 @@ mod tests {
     use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::packets::{
-        inbound::{InboundPacket, take_inbound_packet_header},
-        outbound::OutboundPacketBytesExt,
+        inbound::InboundPacket, outbound::OutboundPacketBytesExt,
     };
 
     use super::*;
@@ -260,11 +259,7 @@ mod tests {
     #[test]
     fn serialize_and_deserialize() {
         let bytes = A3936StateUpdatePacket::default().bytes();
-        let (body, command) = take_inbound_packet_header::<VerboseError<_>>(&bytes).unwrap();
-        let packet = Packet {
-            command,
-            body: body.to_vec(),
-        };
+        let (_, packet) = Packet::take::<VerboseError<_>>(&bytes).unwrap();
         let _: A3936StateUpdatePacket = packet.try_into_inbound_packet().unwrap();
     }
 
@@ -283,8 +278,8 @@ mod tests {
             0x0, 0x4, 0x31, 0x0, 0x1, 0x1, 0x0, 0x0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
             0xff, 0xff, 0xff, 0xff, 0xff, 0xdd,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        A3936StateUpdatePacket::take::<VerboseError<_>>(body)
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        A3936StateUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .expect("it should parse successfully as a A3936 state update packet");
     }
 
@@ -299,8 +294,8 @@ mod tests {
             17, 0, 0, 17, 99, 17, 102, 17, 68, 17, 68, 7, 1, 48, 0, 0, 0, 0, 0, 85, 49, 0, 1, 1, 0,
             0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 66,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        A3936StateUpdatePacket::take::<VerboseError<_>>(body)
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        A3936StateUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .expect("it should parse successfully as a A3936 state update packet");
     }
 }

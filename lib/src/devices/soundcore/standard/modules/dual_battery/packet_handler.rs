@@ -6,12 +6,12 @@ use crate::{
     devices::soundcore::standard::{
         packet_manager::PacketHandler,
         packets::{
-            Packet,
+            Command, Packet,
             inbound::{
                 DualBatteryChargingUpdatePacket, DualBatteryLevelUpdatePacket, TryIntoInboundPacket,
             },
         },
-        structures::{Command, DualBattery},
+        structures::DualBattery,
     },
 };
 

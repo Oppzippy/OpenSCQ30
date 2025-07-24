@@ -6,10 +6,10 @@ use crate::{
     devices::soundcore::standard::{
         packet_manager::PacketHandler,
         packets::{
-            Packet,
+            Command, Packet,
             inbound::{SoundModeUpdatePacket, TryIntoInboundPacket},
         },
-        structures::{Command, SoundModes},
+        structures::SoundModes,
     },
 };
 

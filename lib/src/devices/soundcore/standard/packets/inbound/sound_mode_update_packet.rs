@@ -4,7 +4,7 @@ use nom::{
     error::{ContextError, ParseError, context},
 };
 
-use crate::devices::soundcore::standard::structures::{Command, SoundModes};
+use crate::devices::soundcore::standard::{packets::Command, structures::SoundModes};
 
 use super::InboundPacket;
 
@@ -12,7 +12,7 @@ use super::InboundPacket;
 pub struct SoundModeUpdatePacket(pub SoundModes);
 
 impl SoundModeUpdatePacket {
-    pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01]);
+    pub const COMMAND: Command = Command([0x06, 0x01]);
 }
 
 impl InboundPacket for SoundModeUpdatePacket {
@@ -41,7 +41,10 @@ mod tests {
     use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::{
-        packets::inbound::{InboundPacket, SoundModeUpdatePacket, take_inbound_packet_header},
+        packets::{
+            Packet,
+            inbound::{InboundPacket, SoundModeUpdatePacket},
+        },
         structures::{AmbientSoundMode, NoiseCancelingMode},
     };
 
@@ -50,8 +53,8 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x02, 0x02, 0x01, 0x00, 0x23,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let packet = SoundModeUpdatePacket::take::<VerboseError<_>>(body)
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let packet = SoundModeUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1;
         assert_eq!(AmbientSoundMode::Normal, packet.0.ambient_sound_mode);
@@ -64,8 +67,8 @@ mod tests {
             //                                                    max value of 0x02
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x03, 0x02, 0x01, 0x00, 0x24,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let (_, packet) = SoundModeUpdatePacket::take::<VerboseError<_>>(body).unwrap();
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = SoundModeUpdatePacket::take::<VerboseError<_>>(&packet.body).unwrap();
         assert_eq!(AmbientSoundMode::default(), packet.0.ambient_sound_mode);
     }
 
@@ -75,8 +78,8 @@ mod tests {
             //                                                          max value of 0x03
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x02, 0x04, 0x01, 0x00, 0x25,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let (_, packet) = SoundModeUpdatePacket::take::<VerboseError<_>>(body).unwrap();
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = SoundModeUpdatePacket::take::<VerboseError<_>>(&packet.body).unwrap();
         assert_eq!(NoiseCancelingMode::default(), packet.0.noise_canceling_mode);
     }
 }

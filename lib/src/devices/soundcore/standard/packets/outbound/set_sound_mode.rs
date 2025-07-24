@@ -1,4 +1,4 @@
-use crate::devices::soundcore::standard::structures::{Command, SoundModes};
+use crate::devices::soundcore::standard::{packets::Command, structures::SoundModes};
 
 use super::outbound_packet::OutboundPacket;
 
@@ -6,7 +6,7 @@ use super::outbound_packet::OutboundPacket;
 pub struct SetSoundModePacket(pub SoundModes);
 
 impl SetSoundModePacket {
-    pub const COMMAND: Command = Command::new([0x08, 0xee, 0x00, 0x00, 0x00, 0x06, 0x81]);
+    pub const COMMAND: Command = Command([0x06, 0x81]);
 }
 
 impl OutboundPacket for SetSoundModePacket {

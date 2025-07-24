@@ -6,7 +6,7 @@ use nom::{
 
 use crate::devices::soundcore::{
     a3959::structures::A3959SoundModes,
-    standard::{packets::inbound::InboundPacket, structures::Command},
+    standard::packets::{Command, inbound::InboundPacket},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -15,7 +15,7 @@ pub struct A3959SoundModesUpdatePacket {
 }
 
 impl A3959SoundModesUpdatePacket {
-    pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01]);
+    pub const COMMAND: Command = Command([0x06, 0x01]);
 }
 
 impl InboundPacket for A3959SoundModesUpdatePacket {

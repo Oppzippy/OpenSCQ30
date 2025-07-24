@@ -1,6 +1,6 @@
 use crate::devices::soundcore::standard::{
-    packets::outbound::OutboundPacket,
-    structures::{AmbientSoundModeCycle, Command},
+    packets::{Command, outbound::OutboundPacket},
+    structures::AmbientSoundModeCycle,
 };
 
 #[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
@@ -10,7 +10,7 @@ pub struct SetAmbientSoundModeCyclePacket {
 
 impl OutboundPacket for SetAmbientSoundModeCyclePacket {
     fn command(&self) -> Command {
-        Command::new([0x08, 0xEE, 0x00, 0x00, 0x00, 0x06, 0x82])
+        Command([0x06, 0x82])
     }
 
     fn body(&self) -> Vec<u8> {

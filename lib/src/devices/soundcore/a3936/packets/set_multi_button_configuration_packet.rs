@@ -1,6 +1,6 @@
 use crate::devices::soundcore::{
     a3936::structures::A3936InternalMultiButtonConfiguration,
-    standard::{packets::outbound::OutboundPacket, structures::Command},
+    standard::packets::{Command, outbound::OutboundPacket},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -18,7 +18,7 @@ impl A3936SetMultiButtonConfigurationPacket {
 
 impl OutboundPacket for A3936SetMultiButtonConfigurationPacket {
     fn command(&self) -> Command {
-        Command::new([0x08, 0xEE, 0x00, 0x00, 0x00, 0x04, 0x84])
+        Command([0x04, 0x84])
     }
 
     fn body(&self) -> Vec<u8> {

@@ -1,4 +1,4 @@
-use crate::devices::soundcore::standard::{packets::Packet, structures::Command};
+use crate::devices::soundcore::standard::packets::{Command, Direction, Packet};
 
 pub trait OutboundPacket {
     fn command(&self) -> Command;
@@ -24,6 +24,7 @@ where
 {
     fn from(value: T) -> Self {
         Self {
+            direction: Direction::Outbound,
             command: value.command(),
             body: value.body(),
         }

@@ -13,14 +13,13 @@ use crate::devices::soundcore::{
         modules::ModuleCollection,
         packet_manager::PacketHandler,
         packets::{
-            Packet,
+            Command, Packet,
             inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
             outbound::OutboundPacket,
             parsing::take_bool,
         },
         structures::{
-            Command, DualBattery, EqualizerConfiguration, MultiButtonConfiguration, SoundModes,
-            TwsStatus,
+            DualBattery, EqualizerConfiguration, MultiButtonConfiguration, SoundModes, TwsStatus,
         },
     },
 };
@@ -142,8 +141,7 @@ mod tests {
     use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::packets::{
-        inbound::{TryIntoInboundPacket, take_inbound_packet_header},
-        outbound::OutboundPacketBytesExt,
+        inbound::TryIntoInboundPacket, outbound::OutboundPacketBytesExt,
     };
 
     use super::*;
@@ -151,11 +149,7 @@ mod tests {
     #[test]
     fn serialize_and_deserialize() {
         let bytes = A3031StateUpdatePacket::default().bytes();
-        let (body, command) = take_inbound_packet_header::<VerboseError<_>>(&bytes).unwrap();
-        let packet = Packet {
-            command,
-            body: body.to_vec(),
-        };
+        let (_, packet) = Packet::take::<VerboseError<_>>(&bytes).unwrap();
         let _: A3031StateUpdatePacket = packet.try_into_inbound_packet().unwrap();
     }
 }

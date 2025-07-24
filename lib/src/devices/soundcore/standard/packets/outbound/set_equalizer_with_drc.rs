@@ -1,4 +1,4 @@
-use crate::devices::soundcore::standard::structures::{Command, EqualizerConfiguration};
+use crate::devices::soundcore::standard::{packets::Command, structures::EqualizerConfiguration};
 
 use super::outbound_packet::OutboundPacket;
 
@@ -9,7 +9,7 @@ pub struct SetEqualizerWithDrcPacket<'a, const C: usize, const B: usize> {
 
 impl<const C: usize, const B: usize> OutboundPacket for SetEqualizerWithDrcPacket<'_, C, B> {
     fn command(&self) -> Command {
-        Command::new([0x08, 0xEE, 0x00, 0x00, 0x00, 0x02, 0x83])
+        Command([0x02, 0x83])
     }
 
     fn body(&self) -> Vec<u8> {

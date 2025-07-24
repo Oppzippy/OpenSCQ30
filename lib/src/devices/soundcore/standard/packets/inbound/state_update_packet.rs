@@ -1,3 +1,3 @@
-use crate::devices::soundcore::standard::structures::Command;
+use crate::devices::soundcore::standard::packets::Command;
 
-pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01]);
+pub const COMMAND: Command = Command([0x01, 0x01]);

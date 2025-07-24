@@ -16,13 +16,13 @@ use crate::{
             modules::ModuleCollection,
             packet_manager::PacketHandler,
             packets::{
-                Packet,
+                Command, Packet,
                 inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
                 outbound::OutboundPacket,
                 parsing::take_bool,
             },
             structures::{
-                AgeRange, BasicHearId, Command, EqualizerConfiguration, FirmwareVersion, Gender,
+                AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender,
                 SerialNumber, SingleBattery, SoundModes,
             },
         },
@@ -193,7 +193,7 @@ mod tests {
     use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::standard::{
-        packets::{inbound::take_inbound_packet_header, outbound::OutboundPacketBytesExt},
+        packets::outbound::OutboundPacketBytesExt,
         structures::{
             AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
             PresetEqualizerProfile, SoundModes, VolumeAdjustments,
@@ -203,11 +203,7 @@ mod tests {
     #[test]
     fn serialize_and_deserialize() {
         let bytes = A3028StateUpdatePacket::default().bytes();
-        let (body, command) = take_inbound_packet_header::<VerboseError<_>>(&bytes).unwrap();
-        let packet = Packet {
-            command,
-            body: body.to_vec(),
-        };
+        let (_, packet) = Packet::take::<VerboseError<_>>(&bytes).unwrap();
         let _: A3028StateUpdatePacket = packet.try_into_inbound_packet().unwrap();
     }
 
@@ -221,8 +217,8 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x35,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let packet = A3028StateUpdatePacket::take::<VerboseError<_>>(body)
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let packet = A3028StateUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1;
         assert_eq!(
@@ -254,8 +250,8 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x84,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let packet = A3028StateUpdatePacket::take::<VerboseError<_>>(body)
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let packet = A3028StateUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1;
         assert_eq!(
@@ -285,8 +281,8 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x30,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let packet = A3028StateUpdatePacket::take::<VerboseError<_>>(body)
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let packet = A3028StateUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1;
         assert_eq!(
@@ -317,8 +313,8 @@ mod tests {
             0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x2f,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let packet = A3028StateUpdatePacket::take::<VerboseError<_>>(body)
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let packet = A3028StateUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1;
         assert_eq!(
@@ -348,8 +344,8 @@ mod tests {
             0x00, 0x00, 0x03, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x31,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let (_, packet) = A3028StateUpdatePacket::take::<VerboseError<_>>(body).unwrap();
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = A3028StateUpdatePacket::take::<VerboseError<_>>(&packet.body).unwrap();
         assert_eq!(
             AmbientSoundMode::default(),
             packet.sound_modes.ambient_sound_mode
@@ -366,8 +362,8 @@ mod tests {
             0x00, 0x00, 0x01, 0x04, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x33,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let (_, packet) = A3028StateUpdatePacket::take::<VerboseError<_>>(body).unwrap();
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = A3028StateUpdatePacket::take::<VerboseError<_>>(&packet.body).unwrap();
         assert_eq!(
             NoiseCancelingMode::default(),
             packet.sound_modes.noise_canceling_mode
@@ -386,8 +382,8 @@ mod tests {
             0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x00,
             0x00, 0x00, 0x38,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let result = A3028StateUpdatePacket::take::<VerboseError<_>>(body);
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let result = A3028StateUpdatePacket::take::<VerboseError<_>>(&packet.body);
         assert!(result.is_err())
     }
 
@@ -410,7 +406,8 @@ mod tests {
             0, 0, 1, 1, 1, 1, 1,   // 7 optional unknown bools ???
             138, // checksum
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        A3028StateUpdatePacket::take::<VerboseError<_>>(body).expect("it parses successfully");
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        A3028StateUpdatePacket::take::<VerboseError<_>>(&packet.body)
+            .expect("it parses successfully");
     }
 }

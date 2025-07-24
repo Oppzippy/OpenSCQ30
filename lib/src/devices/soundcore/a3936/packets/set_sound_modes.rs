@@ -1,6 +1,6 @@
 use crate::devices::soundcore::{
     a3936::structures::A3936SoundModes,
-    standard::{packets::outbound::OutboundPacket, structures::Command},
+    standard::packets::{Command, outbound::OutboundPacket},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -10,7 +10,7 @@ pub struct A3936SetSoundModesPacket {
 
 impl OutboundPacket for A3936SetSoundModesPacket {
     fn command(&self) -> Command {
-        Command::new([0x08, 0xee, 0x00, 0x00, 0x00, 0x06, 0x81])
+        Command([0x06, 0x81])
     }
 
     fn body(&self) -> Vec<u8> {

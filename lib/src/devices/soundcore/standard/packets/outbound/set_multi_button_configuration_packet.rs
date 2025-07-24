@@ -1,4 +1,4 @@
-use crate::devices::soundcore::standard::structures::{Command, MultiButtonConfiguration};
+use crate::devices::soundcore::standard::{packets::Command, structures::MultiButtonConfiguration};
 
 use super::OutboundPacket;
 
@@ -17,7 +17,7 @@ impl SetMultiButtonConfigurationPacket {
 
 impl OutboundPacket for SetMultiButtonConfigurationPacket {
     fn command(&self) -> Command {
-        Command::new([0x08, 0xEE, 0x00, 0x00, 0x00, 0x04, 0x84])
+        Command([0x04, 0x84])
     }
 
     fn body(&self) -> Vec<u8> {

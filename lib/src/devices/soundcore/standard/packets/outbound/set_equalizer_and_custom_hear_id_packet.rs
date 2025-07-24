@@ -1,5 +1,6 @@
-use crate::devices::soundcore::standard::structures::{
-    AgeRange, Command, CustomHearId, EqualizerConfiguration, Gender,
+use crate::devices::soundcore::standard::{
+    packets::Command,
+    structures::{AgeRange, CustomHearId, EqualizerConfiguration, Gender},
 };
 
 use super::outbound_packet::OutboundPacket;
@@ -16,10 +17,11 @@ impl<const C: usize, const B: usize> OutboundPacket
     for SetEqualizerAndCustomHearIdPacket<'_, C, B>
 {
     fn command(&self) -> Command {
+        // TODO does this apply to all devices?
         if self.age_range.supports_hear_id() {
-            Command::new([0x08, 0xee, 0x00, 0x00, 0x00, 0x03, 0x87])
+            Command([0x03, 0x87])
         } else {
-            Command::new([0x08, 0xee, 0x00, 0x00, 0x00, 0x03, 0x86])
+            Command([0x03, 0x86])
         }
     }
 

@@ -6,7 +6,7 @@ use nom::{
 
 use crate::devices::soundcore::{
     a3936::structures::A3936SoundModes,
-    standard::{packets::inbound::InboundPacket, structures::Command},
+    standard::packets::{Command, inbound::InboundPacket},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -15,7 +15,7 @@ pub struct A3936SoundModesUpdatePacket {
 }
 
 impl A3936SoundModesUpdatePacket {
-    pub const COMMAND: Command = Command::new([0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01]);
+    pub const COMMAND: Command = Command([0x06, 0x01]);
 }
 
 impl InboundPacket for A3936SoundModesUpdatePacket {
@@ -44,7 +44,7 @@ mod tests {
             structures::{A3936NoiseCancelingMode, AdaptiveNoiseCanceling, ManualNoiseCanceling},
         },
         standard::{
-            packets::inbound::{InboundPacket, take_inbound_packet_header},
+            packets::{Packet, inbound::InboundPacket},
             structures::{AmbientSoundMode, TransparencyMode},
         },
     };
@@ -55,18 +55,19 @@ mod tests {
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x10, 0x00, 0x01, 0x30, 0x00, 0x01, 0x00,
             0x00, 0x52,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        A3936SoundModesUpdatePacket::take::<VerboseError<_>>(body).expect("parsing should succeed");
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        A3936SoundModesUpdatePacket::take::<VerboseError<_>>(&packet.body)
+            .expect("parsing should succeed");
     }
 
     #[test]
     fn it_parses_valid_packet() {
         let input: &[u8] = &[
-            0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x02, 0x22, 0x01, 0x01, 0x03,
-            0x05, 0x4C,
+            0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x10, 0x00, 0x02, 0x22, 0x01, 0x01, 0x03,
+            0x05, 0x4e,
         ];
-        let (body, _) = take_inbound_packet_header::<VerboseError<_>>(input).unwrap();
-        let sound_modes = A3936SoundModesUpdatePacket::take::<VerboseError<_>>(body)
+        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let sound_modes = A3936SoundModesUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1
             .sound_modes;

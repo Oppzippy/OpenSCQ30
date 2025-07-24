@@ -4,13 +4,7 @@ use nom::{
 };
 use nom_language::error::VerboseError;
 
-use crate::{
-    api::device,
-    devices::soundcore::standard::{
-        packets::{Packet, parsing::take_checksum},
-        structures::{Command, PacketHeader},
-    },
-};
+use crate::{api::device, devices::soundcore::standard::packets::Packet};
 
 pub trait InboundPacket
 where
@@ -57,25 +51,5 @@ where
         &'b self,
     ) -> Result<T, nom::Err<E>> {
         T::take::<E>(&self.body).map(|(_, packet)| packet)
-    }
-}
-
-pub(crate) fn take_inbound_packet_header<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-    input: &'a [u8],
-) -> IResult<&'a [u8], Command, E> {
-    let input = take_checksum(input)?.0;
-    let (input, header) = PacketHeader::take(input)?;
-    Ok((input, header.packet_type))
-}
-
-#[cfg(test)]
-mod tests {
-    use nom_language::error::VerboseError;
-
-    use crate::devices::soundcore::standard::packets::inbound::take_inbound_packet_header;
-    #[test]
-    fn it_errors_when_nothing_matches() {
-        let result = take_inbound_packet_header::<VerboseError<_>>(&[1, 2, 3]);
-        assert!(result.is_err());
     }
 }
