@@ -34,7 +34,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install shellcheck
-        run: sudo apt-get install -y shellcheck
+        run: sudo apt-get install -y shellcheck fd-find
       - name: Install just
         run: sudo snap install just --classic
       - name: Run shellcheck
