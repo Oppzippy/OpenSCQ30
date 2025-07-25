@@ -197,7 +197,7 @@ impl<const B: usize> VolumeAdjustments<B> {
         let new_adjustments_with_all_bands: [i16; B] = array::from_fn(|i| {
             new_adjustments_8_bands
                 .get(i)
-                .cloned()
+                .copied()
                 .unwrap_or(adjustments[i])
         })
         .map(|adjustment| (adjustment * 10_i16.pow(FRACTION_DIGITS as u32) as f64).round() as i16);

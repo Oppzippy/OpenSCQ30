@@ -80,7 +80,7 @@ fn parse_equalizer(setting: &settings::Equalizer, unparsed: &str) -> anyhow::Res
             values.len()
         );
     }
-    for (i, value) in values.iter().cloned().enumerate() {
+    for (i, value) in values.iter().copied().enumerate() {
         if value < setting.min || value > setting.max {
             bail!(
                 "{} band value {value} is outside of expected range {} to {}",

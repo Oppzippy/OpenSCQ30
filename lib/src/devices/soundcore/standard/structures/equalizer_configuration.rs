@@ -48,7 +48,7 @@ impl<const CHANNELS: usize, const BANDS: usize> EqualizerConfiguration<CHANNELS,
                         Some(preset) => Self::new_from_preset_profile(
                             preset,
                             volume_adjustments.map(|channel| {
-                                channel.adjustments().iter().skip(8).cloned().collect()
+                                channel.adjustments().iter().skip(8).copied().collect()
                             }),
                         ),
                         None => Self::new_custom_profile(volume_adjustments),

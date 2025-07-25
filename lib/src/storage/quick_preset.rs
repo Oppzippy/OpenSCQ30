@@ -85,7 +85,7 @@ pub fn upsert(
     for field in &mut quick_preset.fields {
         if enabled_fields
             .get(&field.setting_id)
-            .cloned()
+            .copied()
             .unwrap_or_default()
         {
             field.is_enabled = true;

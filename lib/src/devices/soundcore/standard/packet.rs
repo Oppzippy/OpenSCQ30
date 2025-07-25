@@ -40,7 +40,7 @@ impl Packet {
             .into_iter()
             .chain(command)
             .chain((length as u16).to_le_bytes())
-            .chain(body.iter().cloned())
+            .chain(body.iter().copied())
             .collect::<Vec<_>>();
         bytes.push(calculate_checksum(&bytes));
 

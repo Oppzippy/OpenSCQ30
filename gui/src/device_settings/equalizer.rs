@@ -23,7 +23,7 @@ where
     setting
         .band_hz
         .iter()
-        .cloned()
+        .copied()
         .enumerate()
         .map(move |(i, hz)| {
             widget::column::with_children(vec![
@@ -51,7 +51,7 @@ where
                         setting.min..=setting.max,
                         value
                             .get(i)
-                            .cloned()
+                            .copied()
                             .unwrap_or((setting.min + setting.max) / 2),
                         {
                             let on_change = on_change.clone();

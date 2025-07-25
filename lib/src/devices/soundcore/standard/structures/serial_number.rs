@@ -36,7 +36,7 @@ impl SerialNumber {
     }
 
     pub fn bytes(&self) -> impl Iterator<Item = u8> {
-        self.0.as_bytes().iter().cloned()
+        self.0.as_bytes().iter().copied()
     }
 }
 

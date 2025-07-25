@@ -127,7 +127,7 @@ where
                         preset,
                         equalizer_configuration
                             .volume_adjustments()
-                            .map(|v| v.adjustments().iter().cloned().skip(8).collect()),
+                            .map(|v| v.adjustments().iter().copied().skip(8).collect()),
                     );
                 } else {
                     *equalizer_configuration = EqualizerConfiguration::new_custom_profile(

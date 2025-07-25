@@ -103,7 +103,7 @@ impl OutboundPacket for A3028StateUpdatePacket {
             .chain(self.hear_id.bytes())
             .chain(self.sound_modes.bytes())
             .chain(self.firmware_version.to_string().into_bytes())
-            .chain(self.serial_number.as_str().as_bytes().iter().cloned())
+            .chain(self.serial_number.as_str().as_bytes().iter().copied())
             .collect()
     }
 }

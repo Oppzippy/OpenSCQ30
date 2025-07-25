@@ -78,7 +78,7 @@ impl OutboundPacket for A3004StateUpdatePacket {
         [self.battery.level.0, self.battery.is_charging as u8]
             .into_iter()
             .chain(self.firmware_version.to_string().into_bytes())
-            .chain(self.serial_number.as_str().as_bytes().iter().cloned())
+            .chain(self.serial_number.as_str().as_bytes().iter().copied())
             .chain(self.equalizer_configuration.bytes())
             .chain(self.sound_modes.bytes())
             .collect()
