@@ -4,10 +4,10 @@ build profile='dev':
 
     case "{{profile}}" in
         dev)
-            ./gradlew assembleBluetoothDebug
+            ./gradlew assembleDebug
             ;;
         release)
-            ./gradlew assembleBluetoothRelease
+            ./gradlew assembleRelease
             ;;
         *)
             echo Invalid profile
