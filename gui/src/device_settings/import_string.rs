@@ -6,12 +6,12 @@ use openscq30_lib::api::settings::SettingId;
 
 use crate::device_settings::labeled_setting_row;
 
-pub fn input<'a, M>(
+pub fn input<M>(
     setting_id: SettingId,
-    text: Cow<'a, str>,
+    text: Cow<'_, str>,
     on_input: impl Fn(String) -> M + 'static,
     on_submit: impl Fn(String) -> M + 'static,
-) -> Element<'a, M>
+) -> Element<'_, M>
 where
     M: Clone + 'static,
 {

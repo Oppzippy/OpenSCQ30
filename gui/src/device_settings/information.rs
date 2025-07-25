@@ -4,7 +4,7 @@ use cosmic::{Element, iced_core::text::Wrapping, widget};
 use openscq30_i18n::Translate;
 use openscq30_lib::api::settings::SettingId;
 
-pub fn information<'a, M>(setting_id: SettingId, text: Cow<'a, str>, on_copy: M) -> Element<'a, M>
+pub fn information<M>(setting_id: SettingId, text: Cow<'_, str>, on_copy: M) -> Element<'_, M>
 where
     M: Clone + 'static,
 {

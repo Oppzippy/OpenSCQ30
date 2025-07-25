@@ -19,6 +19,7 @@ use_self = "warn"
 derive_partial_eq_without_eq = "warn"
 equatable_if_let = "warn"
 redundant_pub_crate = "warn"
+elidable_lifetime_names = "warn"
 
 [profile.release]
 strip = true
