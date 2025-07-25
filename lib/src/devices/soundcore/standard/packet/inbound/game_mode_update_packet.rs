@@ -14,6 +14,7 @@ pub struct GameModeUpdatePacket {
 }
 
 impl GameModeUpdatePacket {
+    #[allow(unused)]
     pub const COMMAND: Command = Command([0x01, 0x11]);
 }
 

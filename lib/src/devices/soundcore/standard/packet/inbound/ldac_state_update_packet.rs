@@ -14,6 +14,7 @@ pub struct LdacStateUpdatePacket {
 }
 
 impl LdacStateUpdatePacket {
+    #[allow(unused)]
     pub const COMMAND: Command = Command([0x01, 0x7F]);
 }
 
