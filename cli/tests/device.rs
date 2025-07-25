@@ -640,7 +640,7 @@ fn setting_set_and_get_race_condition() {
                 assert!(
                     stdout.contains("2"),
                     "thread {i} didn't contain 2:\n{stdout}"
-                )
+                );
             });
         }
     });

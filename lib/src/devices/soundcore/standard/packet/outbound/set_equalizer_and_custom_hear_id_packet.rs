@@ -77,7 +77,7 @@ impl<const C: usize, const B: usize> OutboundPacket
         });
         match &self.custom_hear_id.custom_volume_adjustments {
             Some(adjustments) if supports_hear_id => {
-                bytes.extend(adjustments.iter().flat_map(|v| v.bytes()))
+                bytes.extend(adjustments.iter().flat_map(|v| v.bytes()));
             }
             _ => bytes.extend(&max_value_stereo_eq_wave),
         }

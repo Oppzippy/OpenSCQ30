@@ -86,28 +86,28 @@ where
             .expect("already filtered to valid values only by SettingsManager");
         match sound_mode_setting {
             SoundModeSetting::AmbientSoundMode => {
-                sound_modes.ambient_sound_mode = value.try_as_enum_variant()?
+                sound_modes.ambient_sound_mode = value.try_as_enum_variant()?;
             }
             SoundModeSetting::TransparencyMode => {
-                sound_modes.transparency_mode = value.try_as_enum_variant()?
+                sound_modes.transparency_mode = value.try_as_enum_variant()?;
             }
             SoundModeSetting::NoiseCancelingMode => {
-                sound_modes.noise_canceling_mode = value.try_as_enum_variant()?
+                sound_modes.noise_canceling_mode = value.try_as_enum_variant()?;
             }
             SoundModeSetting::AdaptiveNoiseCanceling => return Err(SettingHandlerError::ReadOnly),
             SoundModeSetting::ManualNoiseCanceling => {
                 sound_modes.manual_noise_canceling =
-                    ManualNoiseCanceling::new(value.try_as_i32()? as u8)
+                    ManualNoiseCanceling::new(value.try_as_i32()? as u8);
             }
             SoundModeSetting::WindNoiseSuppression => {
-                sound_modes.wind_noise.is_suppression_enabled = value.try_as_bool()?
+                sound_modes.wind_noise.is_suppression_enabled = value.try_as_bool()?;
             }
             SoundModeSetting::WindNoiseDetected => return Err(SettingHandlerError::ReadOnly),
             SoundModeSetting::AdaptiveNoiseCancelingSensitivityLevel => {
-                sound_modes.noise_canceling_adaptive_sensitivity_level = value.try_as_i32()? as u8
+                sound_modes.noise_canceling_adaptive_sensitivity_level = value.try_as_i32()? as u8;
             }
             SoundModeSetting::MultiSceneNoiseCanceling => {
-                sound_modes.multi_scene_anc = value.try_as_enum_variant()?
+                sound_modes.multi_scene_anc = value.try_as_enum_variant()?;
             }
         }
         Ok(())

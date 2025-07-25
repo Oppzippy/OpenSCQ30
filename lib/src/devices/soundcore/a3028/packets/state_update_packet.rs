@@ -384,7 +384,7 @@ mod tests {
         ];
         let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
         let result = A3028StateUpdatePacket::take::<VerboseError<_>>(&packet.body);
-        assert!(result.is_err())
+        assert!(result.is_err());
     }
 
     #[test]

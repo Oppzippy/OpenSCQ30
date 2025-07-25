@@ -553,7 +553,7 @@ impl DeviceSettingsModel {
                     self.editing_quick_preset = quick_presets
                         .iter()
                         .find(|preset| preset.name == editing_quick_preset.name)
-                        .cloned()
+                        .cloned();
                 }
                 self.quick_presets = Some(quick_presets);
                 Action::None

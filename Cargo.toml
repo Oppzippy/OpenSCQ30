@@ -20,6 +20,7 @@ derive_partial_eq_without_eq = "warn"
 equatable_if_let = "warn"
 redundant_pub_crate = "warn"
 elidable_lifetime_names = "warn"
+semicolon_if_nothing_returned = "warn"
 
 [profile.release]
 strip = true

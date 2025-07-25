@@ -45,7 +45,7 @@ async fn handle_list_settings(
                 println!("{setting_id}");
             } else {
                 let setting = device.setting(&setting_id).unwrap();
-                println!("{setting_id}: {}", CustomDisplaySetting(setting))
+                println!("{setting_id}: {}", CustomDisplaySetting(setting));
             }
         }
     }

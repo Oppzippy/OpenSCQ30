@@ -88,7 +88,7 @@ pub fn upsert(
             .cloned()
             .unwrap_or_default()
         {
-            field.is_enabled = true
+            field.is_enabled = true;
         }
     }
     let fields_json = serde_json::to_string(&quick_preset.fields)?;

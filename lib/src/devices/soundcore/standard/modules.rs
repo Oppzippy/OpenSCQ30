@@ -98,7 +98,7 @@ impl<T> ModuleCollectionSpawnPacketHandlerExt<T> for Arc<ModuleCollection<T>> {
             {
                 Ok(()) => (),
                 Err(err) => {
-                    tracing::warn!("error handling packet: {packet:?}, error: {err:?}")
+                    tracing::warn!("error handling packet: {packet:?}, error: {err:?}");
                 }
             }
         }
@@ -116,7 +116,7 @@ impl<T> ModuleCollectionSpawnPacketHandlerExt<T> for Arc<ModuleCollection<T>> {
                                 {
                                     Ok(()) => (),
                                     Err(err) => {
-                                        tracing::warn!("error handling packet: {packet:?}, error: {err:?}")
+                                        tracing::warn!("error handling packet: {packet:?}, error: {err:?}");
                                     }
                                 }
                             }

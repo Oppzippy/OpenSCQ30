@@ -63,7 +63,7 @@ impl OpenSCQ30Device {
     }
 
     fn set_watch_for_changes_callback(&self, callback: Arc<dyn NotificationCallback>) {
-        *self.watch_for_changes_callback.lock().unwrap() = Some(callback)
+        *self.watch_for_changes_callback.lock().unwrap() = Some(callback);
     }
 
     pub fn model(&self) -> serializable::DeviceModel {

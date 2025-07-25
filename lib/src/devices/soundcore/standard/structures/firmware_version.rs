@@ -109,7 +109,7 @@ mod tests {
     fn test_major_has_priority_in_ordering() {
         let bigger = FirmwareVersion::new(1, 0);
         let smaller = FirmwareVersion::new(0, 20);
-        assert!(smaller < bigger)
+        assert!(smaller < bigger);
     }
 
     #[test]

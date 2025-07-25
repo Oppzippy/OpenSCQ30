@@ -294,6 +294,6 @@ mod tests {
             .map(|v| (v * 10.0f64).round() as i16),
         );
         let actual = volume_adjustments.apply_drc();
-        assert_eq!(expected, actual)
+        assert_eq!(expected, actual);
     }
 }

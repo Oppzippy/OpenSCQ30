@@ -134,7 +134,7 @@ impl OpenSCQ30Database {
                 tracing::trace!("cleaning up resources");
                 mem::drop(connection);
                 tracing::trace!("dropped sqlite connection, closing semaphore");
-                closed.close()
+                closed.close();
             });
         }
         if let Ok(err) = init_error_receiver.await {

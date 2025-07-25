@@ -71,7 +71,7 @@ impl ToTokens for TranslatableEnum {
                     }
                 }
             }
-        })
+        });
     }
 }
 

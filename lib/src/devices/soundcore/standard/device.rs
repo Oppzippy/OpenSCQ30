@@ -247,7 +247,7 @@ where
                 self.device_model,
                 self.change_notify.clone(),
             )
-            .await
+            .await;
     }
 
     pub async fn equalizer_with_basic_hear_id<const C: usize, const B: usize>(&mut self)
@@ -262,7 +262,7 @@ where
                 self.device_model,
                 self.change_notify.clone(),
             )
-            .await
+            .await;
     }
 
     pub async fn equalizer_with_custom_hear_id<const C: usize, const B: usize>(&mut self)
@@ -277,7 +277,7 @@ where
                 self.device_model,
                 self.change_notify.clone(),
             )
-            .await
+            .await;
     }
 
     pub fn button_configuration(&mut self)
@@ -286,7 +286,7 @@ where
         StateType: AsRef<TwsStatus>,
     {
         self.module_collection
-            .add_button_configuration(self.packet_io_controller.clone())
+            .add_button_configuration(self.packet_io_controller.clone());
     }
 
     pub fn ambient_sound_mode_cycle(&mut self)
@@ -294,7 +294,7 @@ where
         StateType: AsRef<AmbientSoundModeCycle> + AsMut<AmbientSoundModeCycle>,
     {
         self.module_collection
-            .add_ambient_sound_mode_cycle(self.packet_io_controller.clone())
+            .add_ambient_sound_mode_cycle(self.packet_io_controller.clone());
     }
 
     pub fn single_battery(&mut self)

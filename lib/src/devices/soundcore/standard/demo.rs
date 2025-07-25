@@ -91,7 +91,7 @@ impl RfcommConnection for DemoConnection {
                     .bytes(),
                 )
                 .await
-                .unwrap()
+                .unwrap();
         }
         Ok(())
     }

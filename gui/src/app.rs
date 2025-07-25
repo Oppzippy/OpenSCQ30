@@ -251,7 +251,7 @@ impl Application for AppModel {
                         }
                         device_selection::Action::AddDevice => {
                             self.screen =
-                                Screen::AddDevice(AddDeviceModel::new(self.session.clone()))
+                                Screen::AddDevice(AddDeviceModel::new(self.session.clone()));
                         }
                         device_selection::Action::None => (),
                         device_selection::Action::Warning(message) => {

@@ -209,7 +209,7 @@ impl AddDeviceModel {
                         search_query: String::new(),
                         device_model: ui_model.device_model,
                         is_demo_mode,
-                    })
+                    });
                 }
             }
             Message::SetDeviceNameSearchQuery(query) => {

@@ -137,7 +137,7 @@ impl RfcommBackend for BluerRfcommBackend {
                     device.connect_profile(&uuid).await
                 } => {
                     if let Err(err)=res{
-                        warn!("connect profile failed: {err:?}")
+                        warn!("connect profile failed: {err:?}");
                     }
                     tokio::time::sleep(Duration::from_secs(3)).await;
                 }
@@ -242,7 +242,7 @@ impl BluerRfcommConnection {
                                             if let TrySendError::Closed(_) = err {
                                                 break;
                                             }
-                                            warn!("error forwarding packet to channel: {err}",)
+                                            warn!("error forwarding packet to channel: {err}",);
                                         }
                                     }
                                 }

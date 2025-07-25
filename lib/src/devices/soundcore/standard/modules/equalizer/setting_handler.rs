@@ -128,7 +128,7 @@ where
                         equalizer_configuration
                             .volume_adjustments()
                             .map(|v| v.adjustments().iter().cloned().skip(8).collect()),
-                    )
+                    );
                 } else {
                     *equalizer_configuration = EqualizerConfiguration::new_custom_profile(
                         equalizer_configuration.volume_adjustments().to_owned(),
@@ -149,7 +149,7 @@ where
                                 volume_adjustments,
                                 equalizer_configuration.volume_adjustments(),
                             ),
-                        )
+                        );
                     }
                 } else if let Value::ModifiableSelectCommand(command) = value {
                     match command {
