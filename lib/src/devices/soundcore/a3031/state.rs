@@ -11,8 +11,8 @@ use crate::{
 
 use super::packets::A3031StateUpdatePacket;
 
-#[derive(Debug, Clone, PartialEq)]
-pub(crate) struct A3031State {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct A3031State {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
     pub equalizer_configuration: EqualizerConfiguration<2, 8>,
