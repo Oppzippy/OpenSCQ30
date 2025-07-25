@@ -73,10 +73,10 @@ impl From<rusqlite::Error> for Error {
     fn from(err: rusqlite::Error) -> Self {
         if let Some(sqlite_err) = err.sqlite_error() {
             if sqlite_err.extended_code == SQLITE_CONSTRAINT_UNIQUE {
-                return Error::AlreadyExists { source: err };
+                return Self::AlreadyExists { source: err };
             }
         }
-        Error::RusqliteError {
+        Self::RusqliteError {
             source: err,
             location: Location::caller(),
         }

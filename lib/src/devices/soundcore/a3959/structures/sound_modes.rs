@@ -26,7 +26,7 @@ pub struct A3959SoundModes {
 impl A3959SoundModes {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], A3959SoundModes, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "a3959 sound modes",
             map(
@@ -48,7 +48,7 @@ impl A3959SoundModes {
                     noise_canceling_adaptive_sensitivity_level,
                     multi_scene_anc,
                 )| {
-                    A3959SoundModes {
+                    Self {
                         ambient_sound_mode,
                         transparency_mode,
                         adaptive_noise_canceling: noise_canceling_settings.adaptive,
@@ -111,8 +111,8 @@ struct NoiseCancelingSettings {
 impl NoiseCancelingSettings {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], NoiseCancelingSettings, E> {
-        map(le_u8, |b| NoiseCancelingSettings {
+    ) -> IResult<&'a [u8], Self, E> {
+        map(le_u8, |b| Self {
             manual: ManualNoiseCanceling::new((b & 0xF0) >> 4),
             adaptive: AdaptiveNoiseCanceling::new(b & 0x0F),
         })
@@ -146,11 +146,11 @@ pub enum A3959NoiseCancelingMode {
 impl A3959NoiseCancelingMode {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], A3959NoiseCancelingMode, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "a3959 noise canceling mode",
             map(le_u8, |noise_canceling_mode| {
-                A3959NoiseCancelingMode::from_repr(noise_canceling_mode).unwrap_or_default()
+                Self::from_repr(noise_canceling_mode).unwrap_or_default()
             }),
         )
         .parse_complete(input)
@@ -172,10 +172,10 @@ pub struct WindNoise {
 impl WindNoise {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], WindNoise, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "wind noise",
-            map(le_u8, |wind_noise| WindNoise {
+            map(le_u8, |wind_noise| Self {
                 is_suppression_enabled: wind_noise & 1 != 0,
                 is_detected: wind_noise & 2 != 0,
             }),

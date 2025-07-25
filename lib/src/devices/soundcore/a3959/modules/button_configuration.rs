@@ -37,12 +37,12 @@ impl TryFrom<&SettingId> for ButtonConfigurationSetting {
 
     fn try_from(value: &SettingId) -> Result<Self, Self::Error> {
         match value {
-            SettingId::LeftSinglePress => Ok(ButtonConfigurationSetting::LeftSinglePress),
-            SettingId::LeftDoublePress => Ok(ButtonConfigurationSetting::LeftDoublePress),
-            SettingId::LeftLongPress => Ok(ButtonConfigurationSetting::LeftLongPress),
-            SettingId::RightSinglePress => Ok(ButtonConfigurationSetting::RightSinglePress),
-            SettingId::RightDoublePress => Ok(ButtonConfigurationSetting::RightDoublePress),
-            SettingId::RightLongPress => Ok(ButtonConfigurationSetting::RightLongPress),
+            SettingId::LeftSinglePress => Ok(Self::LeftSinglePress),
+            SettingId::LeftDoublePress => Ok(Self::LeftDoublePress),
+            SettingId::LeftLongPress => Ok(Self::LeftLongPress),
+            SettingId::RightSinglePress => Ok(Self::RightSinglePress),
+            SettingId::RightDoublePress => Ok(Self::RightDoublePress),
+            SettingId::RightLongPress => Ok(Self::RightLongPress),
             _ => Err(()),
         }
     }
@@ -51,12 +51,12 @@ impl TryFrom<&SettingId> for ButtonConfigurationSetting {
 impl From<ButtonConfigurationSetting> for SettingId {
     fn from(value: ButtonConfigurationSetting) -> Self {
         match value {
-            ButtonConfigurationSetting::LeftSinglePress => SettingId::LeftSinglePress,
-            ButtonConfigurationSetting::LeftDoublePress => SettingId::LeftDoublePress,
-            ButtonConfigurationSetting::LeftLongPress => SettingId::LeftLongPress,
-            ButtonConfigurationSetting::RightSinglePress => SettingId::RightSinglePress,
-            ButtonConfigurationSetting::RightDoublePress => SettingId::RightDoublePress,
-            ButtonConfigurationSetting::RightLongPress => SettingId::RightLongPress,
+            ButtonConfigurationSetting::LeftSinglePress => Self::LeftSinglePress,
+            ButtonConfigurationSetting::LeftDoublePress => Self::LeftDoublePress,
+            ButtonConfigurationSetting::LeftLongPress => Self::LeftLongPress,
+            ButtonConfigurationSetting::RightSinglePress => Self::RightSinglePress,
+            ButtonConfigurationSetting::RightDoublePress => Self::RightDoublePress,
+            ButtonConfigurationSetting::RightLongPress => Self::RightLongPress,
         }
     }
 }

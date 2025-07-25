@@ -93,7 +93,7 @@ impl A3936TwsButtonAction {
                 );
                 ButtonAction::default()
             };
-            Some(A3936TwsButtonAction {
+            Some(Self {
                 tws_connected_is_enabled: switch & 0x01 == 0x01,
                 tws_disconnected_is_enabled: switch & 0x10 == 0x10,
                 tws_connected_action: ButtonAction::from_repr(num & 0x0F)

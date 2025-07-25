@@ -48,28 +48,28 @@ pub enum ValueError {
 impl std::fmt::Display for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Value::Bool(value) => write!(f, "{value}"),
-            Value::U16(value) => write!(f, "{value}"),
-            Value::U16Vec(value) => write!(f, "{value:?}"),
-            Value::OptionalU16(value) => {
+            Self::Bool(value) => write!(f, "{value}"),
+            Self::U16(value) => write!(f, "{value}"),
+            Self::U16Vec(value) => write!(f, "{value:?}"),
+            Self::OptionalU16(value) => {
                 if let Some(value) = value {
                     write!(f, "{value}")
                 } else {
                     f.write_str(&fl!("none"))
                 }
             }
-            Value::I16Vec(values) => write!(f, "{values:?}"),
-            Value::I32(value) => write!(f, "{value}"),
-            Value::String(value) => f.write_str(value),
-            Value::StringVec(values) => f.write_str(&values.iter().join(", ")),
-            Value::OptionalString(value) => {
+            Self::I16Vec(values) => write!(f, "{values:?}"),
+            Self::I32(value) => write!(f, "{value}"),
+            Self::String(value) => f.write_str(value),
+            Self::StringVec(values) => f.write_str(&values.iter().join(", ")),
+            Self::OptionalString(value) => {
                 if let Some(value) = value {
                     f.write_str(value)
                 } else {
                     f.write_str(&fl!("none"))
                 }
             }
-            Value::ModifiableSelectCommand(_modifiable_select_command) => {
+            Self::ModifiableSelectCommand(_modifiable_select_command) => {
                 f.write_str("ModifiableSelectCommand")
             }
         }
@@ -78,7 +78,7 @@ impl std::fmt::Display for Value {
 
 impl Value {
     pub fn try_as_bool(&self) -> Result<bool, ValueError> {
-        if let Value::Bool(value) = self {
+        if let Self::Bool(value) = self {
             Ok(*value)
         } else {
             Err(ValueError::WrongType {
@@ -90,8 +90,8 @@ impl Value {
 
     pub fn try_as_optional_u16(&self) -> Result<Option<u16>, ValueError> {
         match &self {
-            Value::U16(value) => Ok(Some(*value)),
-            Value::OptionalU16(maybe_value) => Ok(*maybe_value),
+            Self::U16(value) => Ok(Some(*value)),
+            Self::OptionalU16(maybe_value) => Ok(*maybe_value),
             _ => Err(ValueError::WrongType {
                 expected: ValueDiscriminants::OptionalU16,
                 actual: self.clone(),
@@ -101,8 +101,8 @@ impl Value {
 
     pub fn try_as_optional_str(&self) -> Result<Option<&str>, ValueError> {
         match &self {
-            Value::String(cow) => Ok(Some(cow)),
-            Value::OptionalString(cow) => Ok(cow.as_deref()),
+            Self::String(cow) => Ok(Some(cow)),
+            Self::OptionalString(cow) => Ok(cow.as_deref()),
             _ => Err(ValueError::WrongType {
                 expected: ValueDiscriminants::OptionalString,
                 actual: self.clone(),
@@ -111,7 +111,7 @@ impl Value {
     }
 
     pub fn try_as_str(&self) -> Result<&str, ValueError> {
-        if let Value::String(cow) = self {
+        if let Self::String(cow) = self {
             Ok(cow)
         } else {
             Err(ValueError::WrongType {
@@ -147,7 +147,7 @@ impl Value {
     }
 
     pub fn try_as_i32(&self) -> Result<i32, ValueError> {
-        if let Value::I32(i) = self {
+        if let Self::I32(i) = self {
             Ok(*i)
         } else {
             Err(ValueError::WrongType {
@@ -158,7 +158,7 @@ impl Value {
     }
 
     pub fn try_as_i16_slice(&self) -> Result<&[i16], ValueError> {
-        if let Value::I16Vec(value) = self {
+        if let Self::I16Vec(value) = self {
             Ok(value)
         } else {
             Err(ValueError::WrongType {
@@ -169,7 +169,7 @@ impl Value {
     }
 
     pub fn try_into_i16_vec(self) -> Result<Vec<i16>, ValueError> {
-        if let Value::I16Vec(value) = self {
+        if let Self::I16Vec(value) = self {
             Ok(value)
         } else {
             Err(ValueError::WrongType {
@@ -180,7 +180,7 @@ impl Value {
     }
 
     pub fn try_into_string_vec(self) -> Result<Vec<Cow<'static, str>>, ValueError> {
-        if let Value::StringVec(value) = self {
+        if let Self::StringVec(value) = self {
             Ok(value)
         } else {
             Err(ValueError::WrongType {
@@ -193,37 +193,37 @@ impl Value {
 
 impl From<bool> for Value {
     fn from(value: bool) -> Self {
-        Value::Bool(value)
+        Self::Bool(value)
     }
 }
 
 impl From<u16> for Value {
     fn from(value: u16) -> Self {
-        Value::U16(value)
+        Self::U16(value)
     }
 }
 
 impl From<Vec<u16>> for Value {
     fn from(value: Vec<u16>) -> Self {
-        Value::U16Vec(value)
+        Self::U16Vec(value)
     }
 }
 
 impl From<Option<u16>> for Value {
     fn from(value: Option<u16>) -> Self {
-        Value::OptionalU16(value)
+        Self::OptionalU16(value)
     }
 }
 
 impl From<Vec<i16>> for Value {
     fn from(value: Vec<i16>) -> Self {
-        Value::I16Vec(value)
+        Self::I16Vec(value)
     }
 }
 
 impl From<i32> for Value {
     fn from(value: i32) -> Self {
-        Value::I32(value)
+        Self::I32(value)
     }
 }
 

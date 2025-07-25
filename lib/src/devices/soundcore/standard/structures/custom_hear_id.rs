@@ -69,7 +69,7 @@ impl<const C: usize, const B: usize> CustomHearId<C, B> {
                         } else {
                             None
                         };
-                    CustomHearId {
+                    Self {
                         is_enabled,
                         volume_adjustments,
                         time,
@@ -106,7 +106,7 @@ impl<const C: usize, const B: usize> CustomHearId<C, B> {
                     custom_volume_adjustments,
                     _,
                 )| {
-                    CustomHearId {
+                    Self {
                         is_enabled,
                         volume_adjustments: volume_adjustments
                             .try_into()

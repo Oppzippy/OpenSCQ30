@@ -57,9 +57,9 @@ impl TryFrom<&SettingId> for EqualizerSetting {
 impl From<EqualizerSetting> for SettingId {
     fn from(setting: EqualizerSetting) -> Self {
         match setting {
-            EqualizerSetting::PresetProfile => SettingId::PresetEqualizerProfile,
-            EqualizerSetting::CustomProfile => SettingId::CustomEqualizerProfile,
-            EqualizerSetting::VolumeAdjustments => SettingId::VolumeAdjustments,
+            EqualizerSetting::PresetProfile => Self::PresetEqualizerProfile,
+            EqualizerSetting::CustomProfile => Self::CustomEqualizerProfile,
+            EqualizerSetting::VolumeAdjustments => Self::VolumeAdjustments,
         }
     }
 }
@@ -75,13 +75,13 @@ impl From<ImportExportSetting> for SettingId {
     fn from(value: ImportExportSetting) -> Self {
         match value {
             ImportExportSetting::ImportCustomEqualizerProfiles => {
-                SettingId::ImportCustomEqualizerProfiles
+                Self::ImportCustomEqualizerProfiles
             }
             ImportExportSetting::ExportCustomEqualizerProfiles => {
-                SettingId::ExportCustomEqualizerProfiles
+                Self::ExportCustomEqualizerProfiles
             }
             ImportExportSetting::ExportCustomEqualizerProfilesOutput => {
-                SettingId::ExportCustomEqualizerProfilesOutput
+                Self::ExportCustomEqualizerProfilesOutput
             }
         }
     }

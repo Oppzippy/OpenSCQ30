@@ -33,10 +33,10 @@ enum SoundModeSetting {
 impl From<SoundModeSetting> for SettingId {
     fn from(setting: SoundModeSetting) -> Self {
         match setting {
-            SoundModeSetting::AmbientSoundMode => SettingId::AmbientSoundMode,
-            SoundModeSetting::TransparencyMode => SettingId::TransparencyMode,
-            SoundModeSetting::NoiseCancelingMode => SettingId::NoiseCancelingMode,
-            SoundModeSetting::CustomNoiseCanceling => SettingId::CustomNoiseCanceling,
+            SoundModeSetting::AmbientSoundMode => Self::AmbientSoundMode,
+            SoundModeSetting::TransparencyMode => Self::TransparencyMode,
+            SoundModeSetting::NoiseCancelingMode => Self::NoiseCancelingMode,
+            SoundModeSetting::CustomNoiseCanceling => Self::CustomNoiseCanceling,
         }
     }
 }

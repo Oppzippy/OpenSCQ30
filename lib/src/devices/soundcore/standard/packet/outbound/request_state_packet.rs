@@ -9,7 +9,7 @@ impl RequestStatePacket {
     pub const COMMAND: Command = Command([0x01, 0x01]);
 
     pub fn new() -> Self {
-        RequestStatePacket {}
+        Self {}
     }
 }
 

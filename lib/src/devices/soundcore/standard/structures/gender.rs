@@ -11,7 +11,7 @@ pub struct Gender(pub u8);
 impl Gender {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], Gender, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context("gender", map(le_u8, Gender)).parse_complete(input)
     }
 }

@@ -33,7 +33,7 @@ impl<const B: usize> VolumeAdjustments<B> {
         context(
             "volume adjustment",
             map(take(B), |volume_adjustment_bytes: &[u8]| {
-                VolumeAdjustments::from_bytes(
+                Self::from_bytes(
                     volume_adjustment_bytes
                         .try_into()
                         .expect("take guarantees that the length will be B"),
@@ -202,7 +202,7 @@ impl<const B: usize> VolumeAdjustments<B> {
         })
         .map(|adjustment| (adjustment * 10_i16.pow(FRACTION_DIGITS as u32) as f64).round() as i16);
 
-        VolumeAdjustments::new(new_adjustments_with_all_bands)
+        Self::new(new_adjustments_with_all_bands)
     }
 }
 

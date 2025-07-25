@@ -66,28 +66,28 @@ impl DeviceModel {
             };
         }
         match self {
-            DeviceModel::SoundcoreA3004 => new_soundcore_device!(soundcore::a3004),
-            DeviceModel::SoundcoreA3027 | DeviceModel::SoundcoreA3030 => {
+            Self::SoundcoreA3004 => new_soundcore_device!(soundcore::a3004),
+            Self::SoundcoreA3027 | Self::SoundcoreA3030 => {
                 new_soundcore_device!(soundcore::a3027)
             }
-            DeviceModel::SoundcoreA3028 | DeviceModel::SoundcoreA3029 => {
+            Self::SoundcoreA3028 | Self::SoundcoreA3029 => {
                 new_soundcore_device!(soundcore::a3028)
             }
-            DeviceModel::SoundcoreA3031 => new_soundcore_device!(soundcore::a3031),
-            DeviceModel::SoundcoreA3033 => new_soundcore_device!(soundcore::a3033),
-            DeviceModel::SoundcoreA3926 => new_soundcore_device!(soundcore::a3926),
-            DeviceModel::SoundcoreA3930 => new_soundcore_device!(soundcore::a3930),
-            DeviceModel::SoundcoreA3931 | DeviceModel::SoundcoreA3935 => {
+            Self::SoundcoreA3031 => new_soundcore_device!(soundcore::a3031),
+            Self::SoundcoreA3033 => new_soundcore_device!(soundcore::a3033),
+            Self::SoundcoreA3926 => new_soundcore_device!(soundcore::a3926),
+            Self::SoundcoreA3930 => new_soundcore_device!(soundcore::a3930),
+            Self::SoundcoreA3931 | Self::SoundcoreA3935 => {
                 new_soundcore_device!(soundcore::a3931)
             }
-            DeviceModel::SoundcoreA3933 | DeviceModel::SoundcoreA3939 => {
+            Self::SoundcoreA3933 | Self::SoundcoreA3939 => {
                 new_soundcore_device!(soundcore::a3933)
             }
-            DeviceModel::SoundcoreA3936 => new_soundcore_device!(soundcore::a3936),
-            DeviceModel::SoundcoreA3945 => new_soundcore_device!(soundcore::a3945),
-            DeviceModel::SoundcoreA3951 => new_soundcore_device!(soundcore::a3951),
-            DeviceModel::SoundcoreA3959 => new_soundcore_device!(soundcore::a3959),
-            DeviceModel::SoundcoreDevelopment => new_soundcore_device!(soundcore::development),
+            Self::SoundcoreA3936 => new_soundcore_device!(soundcore::a3936),
+            Self::SoundcoreA3945 => new_soundcore_device!(soundcore::a3945),
+            Self::SoundcoreA3951 => new_soundcore_device!(soundcore::a3951),
+            Self::SoundcoreA3959 => new_soundcore_device!(soundcore::a3959),
+            Self::SoundcoreDevelopment => new_soundcore_device!(soundcore::development),
         }
     }
 
@@ -101,29 +101,29 @@ impl DeviceModel {
             };
         }
         match self {
-            DeviceModel::SoundcoreA3004 => new_soundcore_device!(soundcore::a3004),
+            Self::SoundcoreA3004 => new_soundcore_device!(soundcore::a3004),
 
-            DeviceModel::SoundcoreA3027 | DeviceModel::SoundcoreA3030 => {
+            Self::SoundcoreA3027 | Self::SoundcoreA3030 => {
                 new_soundcore_device!(soundcore::a3027)
             }
-            DeviceModel::SoundcoreA3028 | DeviceModel::SoundcoreA3029 => {
+            Self::SoundcoreA3028 | Self::SoundcoreA3029 => {
                 new_soundcore_device!(soundcore::a3028)
             }
-            DeviceModel::SoundcoreA3031 => new_soundcore_device!(soundcore::a3031),
-            DeviceModel::SoundcoreA3033 => new_soundcore_device!(soundcore::a3033),
-            DeviceModel::SoundcoreA3926 => new_soundcore_device!(soundcore::a3926),
-            DeviceModel::SoundcoreA3930 => new_soundcore_device!(soundcore::a3930),
-            DeviceModel::SoundcoreA3931 | DeviceModel::SoundcoreA3935 => {
+            Self::SoundcoreA3031 => new_soundcore_device!(soundcore::a3031),
+            Self::SoundcoreA3033 => new_soundcore_device!(soundcore::a3033),
+            Self::SoundcoreA3926 => new_soundcore_device!(soundcore::a3926),
+            Self::SoundcoreA3930 => new_soundcore_device!(soundcore::a3930),
+            Self::SoundcoreA3931 | Self::SoundcoreA3935 => {
                 new_soundcore_device!(soundcore::a3931)
             }
-            DeviceModel::SoundcoreA3933 | DeviceModel::SoundcoreA3939 => {
+            Self::SoundcoreA3933 | Self::SoundcoreA3939 => {
                 new_soundcore_device!(soundcore::a3933)
             }
-            DeviceModel::SoundcoreA3936 => new_soundcore_device!(soundcore::a3936),
-            DeviceModel::SoundcoreA3945 => new_soundcore_device!(soundcore::a3945),
-            DeviceModel::SoundcoreA3951 => new_soundcore_device!(soundcore::a3951),
-            DeviceModel::SoundcoreA3959 => new_soundcore_device!(soundcore::a3959),
-            DeviceModel::SoundcoreDevelopment => new_soundcore_device!(soundcore::development),
+            Self::SoundcoreA3936 => new_soundcore_device!(soundcore::a3936),
+            Self::SoundcoreA3945 => new_soundcore_device!(soundcore::a3945),
+            Self::SoundcoreA3951 => new_soundcore_device!(soundcore::a3951),
+            Self::SoundcoreA3959 => new_soundcore_device!(soundcore::a3959),
+            Self::SoundcoreDevelopment => new_soundcore_device!(soundcore::development),
         }
     }
 

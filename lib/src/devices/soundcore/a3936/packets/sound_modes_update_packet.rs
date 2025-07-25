@@ -21,12 +21,12 @@ impl A3936SoundModesUpdatePacket {
 impl InboundPacket for A3936SoundModesUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], A3936SoundModesUpdatePacket, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         // offset 9
         context(
             "A3936SoundModesUpdatePacket",
-            all_consuming(map(A3936SoundModes::take, |sound_modes| {
-                A3936SoundModesUpdatePacket { sound_modes }
+            all_consuming(map(A3936SoundModes::take, |sound_modes| Self {
+                sound_modes,
             })),
         )
         .parse_complete(input)

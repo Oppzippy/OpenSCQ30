@@ -18,8 +18,8 @@ enum SerialNumberAndFirmwareVersionSetting {
 impl From<SerialNumberAndFirmwareVersionSetting> for SettingId {
     fn from(setting: SerialNumberAndFirmwareVersionSetting) -> Self {
         match setting {
-            SerialNumberAndFirmwareVersionSetting::SerialNumber => SettingId::SerialNumber,
-            SerialNumberAndFirmwareVersionSetting::FirmwareVersion => SettingId::FirmwareVersion,
+            SerialNumberAndFirmwareVersionSetting::SerialNumber => Self::SerialNumber,
+            SerialNumberAndFirmwareVersionSetting::FirmwareVersion => Self::FirmwareVersion,
         }
     }
 }

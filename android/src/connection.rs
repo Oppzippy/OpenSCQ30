@@ -155,11 +155,9 @@ pub struct ManualRfcommConnection {
 #[uniffi::export]
 impl ManualRfcommConnection {
     #[uniffi::constructor]
-    pub fn new(
-        connection_writer: Arc<dyn AndroidRfcommConnectionWriter>,
-    ) -> ManualRfcommConnection {
+    pub fn new(connection_writer: Arc<dyn AndroidRfcommConnectionWriter>) -> Self {
         let (connection_status_sender, _) = watch::channel(ConnectionStatus::Connected);
-        ManualRfcommConnection {
+        Self {
             connection_status_sender,
             connection_writer,
             inbound_packets_sender: std::sync::RwLock::new(None),

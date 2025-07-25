@@ -11,7 +11,7 @@ use crate::devices::DeviceModel;
 pub struct SqliteMacAddr6(pub MacAddr6);
 impl FromSql for SqliteMacAddr6 {
     fn column_result(value: rusqlite::types::ValueRef<'_>) -> FromSqlResult<Self> {
-        Ok(SqliteMacAddr6(
+        Ok(Self(
             MacAddr6::from_str(value.as_str()?)
                 .map_err(|err| FromSqlError::Other(Box::new(err)))?,
         ))
@@ -26,7 +26,7 @@ impl ToSql for SqliteMacAddr6 {
 pub struct SqliteDeviceModel(pub DeviceModel);
 impl FromSql for SqliteDeviceModel {
     fn column_result(value: rusqlite::types::ValueRef<'_>) -> FromSqlResult<Self> {
-        Ok(SqliteDeviceModel(
+        Ok(Self(
             DeviceModel::from_str(value.as_str()?)
                 .map_err(|err| FromSqlError::Other(Box::new(err)))?,
         ))

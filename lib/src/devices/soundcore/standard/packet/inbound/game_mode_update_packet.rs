@@ -21,12 +21,10 @@ impl GameModeUpdatePacket {
 impl InboundPacket for GameModeUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], GameModeUpdatePacket, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "GameModeUpdatePacket",
-            all_consuming(map(take_bool, |is_enabled| GameModeUpdatePacket {
-                is_enabled,
-            })),
+            all_consuming(map(take_bool, |is_enabled| Self { is_enabled })),
         )
         .parse_complete(input)
     }

@@ -4,6 +4,9 @@ version.workspace = true
 license.workspace = true
 edition = "2024"
 
+[lints]
+workspace = true
+
 [features]
 default = []
 bundled-dependencies = ["rusqlite/bundled", "rust-embed/debug-embed"]

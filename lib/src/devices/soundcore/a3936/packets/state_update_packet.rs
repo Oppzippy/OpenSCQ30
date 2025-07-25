@@ -100,7 +100,7 @@ impl Default for A3936StateUpdatePacket {
 impl InboundPacket for A3936StateUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], A3936StateUpdatePacket, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "a3936 state update packet",
             all_consuming(|input| {
@@ -141,7 +141,7 @@ impl InboundPacket for A3936StateUpdatePacket {
                 let (input, _) = take(12usize)(input)?;
                 Ok((
                     input,
-                    A3936StateUpdatePacket {
+                    Self {
                         tws_status,
                         battery,
                         dual_firmware_version,

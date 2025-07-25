@@ -19,8 +19,8 @@ enum BatterySetting {
 impl From<BatterySetting> for SettingId {
     fn from(setting: BatterySetting) -> Self {
         match setting {
-            BatterySetting::IsCharging => SettingId::IsCharging,
-            BatterySetting::BatteryLevel => SettingId::BatteryLevel,
+            BatterySetting::IsCharging => Self::IsCharging,
+            BatterySetting::BatteryLevel => Self::BatteryLevel,
         }
     }
 }

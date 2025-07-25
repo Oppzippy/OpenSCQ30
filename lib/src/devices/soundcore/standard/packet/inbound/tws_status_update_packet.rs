@@ -18,7 +18,7 @@ impl TwsStatusUpdatePacket {
 impl InboundPacket for TwsStatusUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], TwsStatusUpdatePacket, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "TwsStatusUpdatePacket",
             all_consuming(map(TwsStatus::take, TwsStatusUpdatePacket)),

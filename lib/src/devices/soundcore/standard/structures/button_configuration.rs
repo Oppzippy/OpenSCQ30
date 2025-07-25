@@ -34,7 +34,7 @@ impl MultiButtonConfiguration {
 
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], MultiButtonConfiguration, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "custom button model",
             map(
@@ -54,7 +54,7 @@ impl MultiButtonConfiguration {
                     left_single_press,
                     right_single_press,
                 )| {
-                    MultiButtonConfiguration {
+                    Self {
                         left_double_click,
                         left_long_press,
                         right_double_click,
@@ -87,9 +87,9 @@ impl TwsButtonConfiguration {
 
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], TwsButtonConfiguration, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         map_opt(pair(take_bool, le_u8), |(switch, num)| {
-            Some(TwsButtonConfiguration {
+            Some(Self {
                 tws_connected_action: ButtonAction::from_repr(num & 0x0F)?,
                 tws_disconnected_action: ButtonAction::from_repr((num & 0xF0) >> 4)?,
                 disconnected_switch: switch,
@@ -133,9 +133,9 @@ impl NoTwsButtonConfiguration {
 
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], NoTwsButtonConfiguration, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         map_opt(pair(take_bool, le_u8), |(switch, num)| {
-            Some(NoTwsButtonConfiguration {
+            Some(Self {
                 action: ButtonAction::from_repr(num)?,
                 is_enabled: switch,
             })

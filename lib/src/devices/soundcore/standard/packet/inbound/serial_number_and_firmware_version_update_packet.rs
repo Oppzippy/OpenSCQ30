@@ -26,16 +26,14 @@ impl SerialNumberAndFirmwareVersionUpdatePacket {
 impl InboundPacket for SerialNumberAndFirmwareVersionUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], SerialNumberAndFirmwareVersionUpdatePacket, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "FirmwareVersionUpdatePacket",
             all_consuming(map(
                 (DualFirmwareVersion::take, SerialNumber::take),
-                |(dual_firmware_version, serial_number)| {
-                    SerialNumberAndFirmwareVersionUpdatePacket {
-                        dual_firmware_version,
-                        serial_number,
-                    }
+                |(dual_firmware_version, serial_number)| Self {
+                    dual_firmware_version,
+                    serial_number,
                 },
             )),
         )

@@ -18,12 +18,12 @@ impl SoundModeUpdatePacket {
 impl InboundPacket for SoundModeUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], SoundModeUpdatePacket, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         // offset 9
         context(
             "SoundModeUpdatePacket",
             all_consuming(map(SoundModes::take, |sound_modes| {
-                SoundModeUpdatePacket(SoundModes {
+                Self(SoundModes {
                     ambient_sound_mode: sound_modes.ambient_sound_mode,
                     noise_canceling_mode: sound_modes.noise_canceling_mode,
                     transparency_mode: sound_modes.transparency_mode,

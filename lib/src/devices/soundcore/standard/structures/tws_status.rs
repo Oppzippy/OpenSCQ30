@@ -24,7 +24,7 @@ impl TwsStatus {
             "tws status",
             map(
                 pair(HostDevice::take, take_bool),
-                |(host_device, is_connected)| TwsStatus {
+                |(host_device, is_connected)| Self {
                     is_connected,
                     host_device,
                 },
@@ -51,7 +51,7 @@ pub enum HostDevice {
 impl HostDevice {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], HostDevice, E> {
-        context("host device", map_opt(le_u8, HostDevice::from_repr)).parse_complete(input)
+    ) -> IResult<&'a [u8], Self, E> {
+        context("host device", map_opt(le_u8, Self::from_repr)).parse_complete(input)
     }
 }

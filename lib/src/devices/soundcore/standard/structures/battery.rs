@@ -50,7 +50,7 @@ impl DualBattery {
 impl DualBattery {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], DualBattery, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "dual battery",
             map(
@@ -60,7 +60,7 @@ impl DualBattery {
                     IsBatteryCharging::take,
                     IsBatteryCharging::take,
                 ),
-                |(left_level, right_level, is_left_charging, is_right_charging)| DualBattery {
+                |(left_level, right_level, is_left_charging, is_right_charging)| Self {
                     left: SingleBattery {
                         level: left_level,
                         is_charging: is_left_charging,
@@ -85,12 +85,12 @@ pub struct SingleBattery {
 impl SingleBattery {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], SingleBattery, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "battery",
             map(
                 (BatteryLevel::take, IsBatteryCharging::take),
-                |(level, is_charging)| SingleBattery { level, is_charging },
+                |(level, is_charging)| Self { level, is_charging },
             ),
         )
         .parse_complete(input)
@@ -108,15 +108,11 @@ pub enum IsBatteryCharging {
 impl IsBatteryCharging {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], IsBatteryCharging, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "is battery charging",
-            map(le_u8, |value| -> IsBatteryCharging {
-                if value == 1 {
-                    IsBatteryCharging::Yes
-                } else {
-                    IsBatteryCharging::No
-                }
+            map(le_u8, |value| -> Self {
+                if value == 1 { Self::Yes } else { Self::No }
             }),
         )
         .parse_complete(input)
@@ -126,8 +122,8 @@ impl IsBatteryCharging {
 impl From<bool> for IsBatteryCharging {
     fn from(value: bool) -> Self {
         match value {
-            true => IsBatteryCharging::Yes,
-            false => IsBatteryCharging::No,
+            true => Self::Yes,
+            false => Self::No,
         }
     }
 }
@@ -147,7 +143,7 @@ pub struct BatteryLevel(pub u8);
 impl BatteryLevel {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], BatteryLevel, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context("battery level", map(le_u8, BatteryLevel)).parse_complete(input)
     }
 }

@@ -121,7 +121,7 @@ impl Application for AppModel {
             .expect("database is required to run"),
         );
         let (model, task) = DeviceSelectionModel::new(session.clone());
-        let mut app = AppModel {
+        let mut app = Self {
             core,
             screen: Screen::DeviceSelection(model),
             dialog_page: None,

@@ -19,8 +19,8 @@ enum TwsStatusSetting {
 impl From<TwsStatusSetting> for SettingId {
     fn from(setting: TwsStatusSetting) -> Self {
         match setting {
-            TwsStatusSetting::HostDevice => SettingId::HostDevice,
-            TwsStatusSetting::TwsStatus => SettingId::TwsStatus,
+            TwsStatusSetting::HostDevice => Self::HostDevice,
+            TwsStatusSetting::TwsStatus => Self::TwsStatus,
         }
     }
 }

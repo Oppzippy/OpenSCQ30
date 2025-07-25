@@ -37,7 +37,7 @@ pub struct A3004StateUpdatePacket {
 impl InboundPacket for A3004StateUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], A3004StateUpdatePacket, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "a3004 state update packet",
             map(
@@ -55,7 +55,7 @@ impl InboundPacket for A3004StateUpdatePacket {
                     equalizer_configuration,
                     sound_modes,
                 )| {
-                    A3004StateUpdatePacket {
+                    Self {
                         battery,
                         equalizer_configuration,
                         sound_modes,

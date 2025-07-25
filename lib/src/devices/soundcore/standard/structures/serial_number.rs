@@ -17,7 +17,7 @@ impl SerialNumber {
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], SerialNumber, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "serial number",
             map_opt(take_str(16usize), |s| {
@@ -26,7 +26,7 @@ impl SerialNumber {
                 // The mac address is hex, and the model number is base 10 digits only, so we can use that
                 // to try to avoid parsing things that aren't serial numbers as one.
                 if s.chars().all(|c| c.is_ascii_hexdigit()) {
-                    Some(SerialNumber::from(s))
+                    Some(Self::from(s))
                 } else {
                     None
                 }

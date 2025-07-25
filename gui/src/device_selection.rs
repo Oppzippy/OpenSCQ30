@@ -33,7 +33,7 @@ pub enum Action {
 
 impl DeviceSelectionModel {
     pub fn new(session: Arc<OpenSCQ30Session>) -> (Self, Task<Message>) {
-        let model = DeviceSelectionModel {
+        let model = Self {
             paired_devices: Vec::new(),
         };
         (model, Self::refresh_paired_devices(session))

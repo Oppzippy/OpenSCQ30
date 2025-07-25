@@ -35,15 +35,15 @@ enum SoundModeSetting {
 impl From<SoundModeSetting> for SettingId {
     fn from(setting: SoundModeSetting) -> Self {
         match setting {
-            SoundModeSetting::AmbientSoundMode => SettingId::AmbientSoundMode,
-            SoundModeSetting::TransparencyMode => SettingId::TransparencyMode,
-            SoundModeSetting::NoiseCancelingMode => SettingId::NoiseCancelingMode,
-            SoundModeSetting::AdaptiveNoiseCanceling => SettingId::AdaptiveNoiseCanceling,
-            SoundModeSetting::ManualNoiseCanceling => SettingId::ManualNoiseCanceling,
-            SoundModeSetting::WindNoiseSuppression => SettingId::WindNoiseSuppression,
-            SoundModeSetting::WindNoiseDetected => SettingId::WindNoiseDetected,
+            SoundModeSetting::AmbientSoundMode => Self::AmbientSoundMode,
+            SoundModeSetting::TransparencyMode => Self::TransparencyMode,
+            SoundModeSetting::NoiseCancelingMode => Self::NoiseCancelingMode,
+            SoundModeSetting::AdaptiveNoiseCanceling => Self::AdaptiveNoiseCanceling,
+            SoundModeSetting::ManualNoiseCanceling => Self::ManualNoiseCanceling,
+            SoundModeSetting::WindNoiseSuppression => Self::WindNoiseSuppression,
+            SoundModeSetting::WindNoiseDetected => Self::WindNoiseDetected,
             SoundModeSetting::AdaptiveNoiseCancelingSensitivityLevel => {
-                SettingId::AdaptiveNoiseCancelingSensitivityLevel
+                Self::AdaptiveNoiseCancelingSensitivityLevel
             }
         }
     }
@@ -54,15 +54,15 @@ impl TryFrom<&SettingId> for SoundModeSetting {
 
     fn try_from(setting_id: &SettingId) -> Result<Self, Self::Error> {
         match setting_id {
-            SettingId::AmbientSoundMode => Ok(SoundModeSetting::AmbientSoundMode),
-            SettingId::TransparencyMode => Ok(SoundModeSetting::TransparencyMode),
-            SettingId::AdaptiveNoiseCanceling => Ok(SoundModeSetting::AdaptiveNoiseCanceling),
-            SettingId::ManualNoiseCanceling => Ok(SoundModeSetting::ManualNoiseCanceling),
-            SettingId::NoiseCancelingMode => Ok(SoundModeSetting::NoiseCancelingMode),
-            SettingId::WindNoiseSuppression => Ok(SoundModeSetting::WindNoiseSuppression),
-            SettingId::WindNoiseDetected => Ok(SoundModeSetting::WindNoiseDetected),
+            SettingId::AmbientSoundMode => Ok(Self::AmbientSoundMode),
+            SettingId::TransparencyMode => Ok(Self::TransparencyMode),
+            SettingId::AdaptiveNoiseCanceling => Ok(Self::AdaptiveNoiseCanceling),
+            SettingId::ManualNoiseCanceling => Ok(Self::ManualNoiseCanceling),
+            SettingId::NoiseCancelingMode => Ok(Self::NoiseCancelingMode),
+            SettingId::WindNoiseSuppression => Ok(Self::WindNoiseSuppression),
+            SettingId::WindNoiseDetected => Ok(Self::WindNoiseDetected),
             SettingId::AdaptiveNoiseCancelingSensitivityLevel => {
-                Ok(SoundModeSetting::AdaptiveNoiseCancelingSensitivityLevel)
+                Ok(Self::AdaptiveNoiseCancelingSensitivityLevel)
             }
             _ => Err(()),
         }

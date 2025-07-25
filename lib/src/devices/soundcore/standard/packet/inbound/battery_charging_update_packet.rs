@@ -21,11 +21,11 @@ impl SingleBatteryChargingUpdatePacket {
 impl InboundPacket for SingleBatteryChargingUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], SingleBatteryChargingUpdatePacket, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "SingleBatteryChargingUpdatePacket",
-            all_consuming(map(IsBatteryCharging::take, |is_charging| {
-                SingleBatteryChargingUpdatePacket { is_charging }
+            all_consuming(map(IsBatteryCharging::take, |is_charging| Self {
+                is_charging,
             })),
         )
         .parse_complete(input)
@@ -45,12 +45,12 @@ impl DualBatteryChargingUpdatePacket {
 impl InboundPacket for DualBatteryChargingUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], DualBatteryChargingUpdatePacket, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "DualBatteryChargingUpdatePacket",
             all_consuming(map(
                 pair(IsBatteryCharging::take, IsBatteryCharging::take),
-                |(left, right)| DualBatteryChargingUpdatePacket { left, right },
+                |(left, right)| Self { left, right },
             )),
         )
         .parse_complete(input)

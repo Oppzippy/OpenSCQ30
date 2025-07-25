@@ -46,7 +46,7 @@ pub struct A3027StateUpdatePacket {
 impl InboundPacket for A3027StateUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], A3027StateUpdatePacket, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "a3027 state update packet",
             all_consuming(map(
@@ -74,7 +74,7 @@ impl InboundPacket for A3027StateUpdatePacket {
                     wear_detection,
                     touch_func,
                 )| {
-                    A3027StateUpdatePacket {
+                    Self {
                         battery,
                         equalizer_configuration,
                         gender,

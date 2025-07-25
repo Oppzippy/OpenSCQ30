@@ -41,7 +41,7 @@ pub struct A3926StateUpdatePacket {
 impl InboundPacket for A3926StateUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], A3926StateUpdatePacket, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "a3926 state update packet",
             all_consuming(map(
@@ -63,7 +63,7 @@ impl InboundPacket for A3926StateUpdatePacket {
                     hear_id,
                     button_configuration,
                 )| {
-                    A3926StateUpdatePacket {
+                    Self {
                         tws_status,
                         battery,
                         equalizer_configuration,

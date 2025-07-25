@@ -35,7 +35,7 @@ impl<const C: usize, const B: usize> BasicHearId<C, B> {
             "basic hear id",
             map(
                 (take_bool, count(VolumeAdjustments::take, 2), le_i32),
-                |(is_enabled, volume_adjustments, time)| BasicHearId {
+                |(is_enabled, volume_adjustments, time)| Self {
                     is_enabled,
                     volume_adjustments: volume_adjustments
                         .try_into()

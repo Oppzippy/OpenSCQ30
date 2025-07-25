@@ -11,7 +11,7 @@ pub struct Select {
 }
 
 impl Select {
-    pub(crate) fn from_enum<T>(variants: impl IntoIterator<Item = T>) -> Select
+    pub(crate) fn from_enum<T>(variants: impl IntoIterator<Item = T>) -> Self
     where
         T: Into<&'static str> + Translate,
     {

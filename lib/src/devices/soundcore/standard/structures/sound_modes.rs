@@ -17,7 +17,7 @@ pub struct SoundModes {
 impl SoundModes {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], SoundModes, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "group of sound modes",
             map(
@@ -33,7 +33,7 @@ impl SoundModes {
                     transparency_mode,
                     custom_noise_canceling,
                 )| {
-                    SoundModes {
+                    Self {
                         ambient_sound_mode,
                         noise_canceling_mode,
                         transparency_mode,

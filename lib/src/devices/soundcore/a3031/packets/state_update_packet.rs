@@ -40,7 +40,7 @@ pub struct A3031StateUpdatePacket {
 impl InboundPacket for A3031StateUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], A3031StateUpdatePacket, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "a3031 state update packet",
             all_consuming(map(
@@ -66,7 +66,7 @@ impl InboundPacket for A3031StateUpdatePacket {
                     auto_power_off_on,
                     auto_power_off_on_index,
                 )| {
-                    A3031StateUpdatePacket {
+                    Self {
                         tws_status,
                         battery,
                         equalizer_configuration,

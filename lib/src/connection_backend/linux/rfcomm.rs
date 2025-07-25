@@ -300,7 +300,7 @@ impl Drop for BluerRfcommConnection {
 impl From<bluer::Error> for connection::Error {
     #[track_caller]
     fn from(error: bluer::Error) -> Self {
-        connection::Error::Other {
+        Self::Other {
             source: Box::new(error),
             location: Location::caller(),
         }

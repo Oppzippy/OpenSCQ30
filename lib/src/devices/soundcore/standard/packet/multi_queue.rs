@@ -124,14 +124,8 @@ mod tests {
     async fn test_independent_queues() {
         const RANGE: RangeInclusive<i8> = 1..=5;
         let queues: MultiQueue<i8, i8> = MultiQueue::new();
-        let mut queue1_handles = RANGE
-            .into_iter()
-            .map(|_| queues.add(1))
-            .collect::<VecDeque<_>>();
-        let mut queue2_handles = RANGE
-            .into_iter()
-            .map(|_| queues.add(2))
-            .collect::<VecDeque<_>>();
+        let mut queue1_handles = RANGE.map(|_| queues.add(1)).collect::<VecDeque<_>>();
+        let mut queue2_handles = RANGE.map(|_| queues.add(2)).collect::<VecDeque<_>>();
 
         for i in RANGE {
             queues.pop(&1, i);

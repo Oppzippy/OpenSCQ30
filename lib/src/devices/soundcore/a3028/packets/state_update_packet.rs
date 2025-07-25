@@ -45,7 +45,7 @@ pub struct A3028StateUpdatePacket {
 impl InboundPacket for A3028StateUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], A3028StateUpdatePacket, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "a3028 state update packet",
             all_consuming(map(
@@ -71,7 +71,7 @@ impl InboundPacket for A3028StateUpdatePacket {
                     serial_number,
                     extra_fields,
                 )| {
-                    A3028StateUpdatePacket {
+                    Self {
                         battery,
                         equalizer_configuration,
                         gender,

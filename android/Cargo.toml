@@ -7,6 +7,9 @@ edition = "2024"
 [lib]
 crate-type = ["cdylib"]
 
+[lints]
+workspace = true
+
 [dependencies]
 openscq30-lib = { path = "../lib" }
 openscq30-i18n = { path = "../i18n" }

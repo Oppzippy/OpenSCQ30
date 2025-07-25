@@ -20,12 +20,10 @@ impl SingleBatteryLevelUpdatePacket {
 impl InboundPacket for SingleBatteryLevelUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], SingleBatteryLevelUpdatePacket, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "SingleBatteryLevelUpdatePacket",
-            all_consuming(map(BatteryLevel::take, |level| {
-                SingleBatteryLevelUpdatePacket { level }
-            })),
+            all_consuming(map(BatteryLevel::take, |level| Self { level })),
         )
         .parse_complete(input)
     }
@@ -44,7 +42,7 @@ impl DualBatteryLevelUpdatePacket {
 impl InboundPacket for DualBatteryLevelUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], DualBatteryLevelUpdatePacket, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "DualBatteryLevelUpdatePacket",
             all_consuming(map(
@@ -55,7 +53,7 @@ impl InboundPacket for DualBatteryLevelUpdatePacket {
                     opt(BatteryLevel::take),
                 ),
                 // TODO unsure what new_left and new_right are
-                |(left, right, _new_left, _new_right)| DualBatteryLevelUpdatePacket { left, right },
+                |(left, right, _new_left, _new_right)| Self { left, right },
             )),
         )
         .parse_complete(input)

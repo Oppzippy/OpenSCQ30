@@ -21,7 +21,7 @@ impl DualFirmwareVersion {
             "dual firmware version",
             map(
                 pair(FirmwareVersion::take, FirmwareVersion::take),
-                |(left, right)| DualFirmwareVersion { left, right },
+                |(left, right)| Self { left, right },
             ),
         )
         .parse_complete(input)
@@ -55,7 +55,7 @@ impl FirmwareVersion {
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], FirmwareVersion, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "firmware version",
             map(
@@ -64,7 +64,7 @@ impl FirmwareVersion {
                     tag("."),
                     map_parser(take(2usize), all_consuming(nom::character::complete::u8)),
                 ),
-                |(major, minor)| FirmwareVersion::new(major, minor),
+                |(major, minor)| Self::new(major, minor),
             ),
         )
         .parse_complete(input)

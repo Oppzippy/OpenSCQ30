@@ -185,7 +185,7 @@ impl Setting {
     where
         T: PartialEq + Into<&'static str> + IntoEnumIterator + Translate,
     {
-        Setting::OptionalSelect {
+        Self::OptionalSelect {
             setting: Select::from_enum(T::iter()),
             value: value.map(|v| Cow::Borrowed(v.into())),
         }
@@ -204,15 +204,15 @@ impl Setting {
 
     pub fn mode(&self) -> SettingMode {
         match self {
-            Setting::Toggle { .. } => SettingMode::ReadWrite,
-            Setting::I32Range { .. } => SettingMode::ReadWrite,
-            Setting::Select { .. } => SettingMode::ReadWrite,
-            Setting::OptionalSelect { .. } => SettingMode::ReadWrite,
-            Setting::ModifiableSelect { .. } => SettingMode::ReadWrite,
-            Setting::MultiSelect { .. } => SettingMode::ReadWrite,
-            Setting::Equalizer { .. } => SettingMode::ReadWrite,
-            Setting::Information { .. } => SettingMode::ReadOnly,
-            Setting::ImportString { .. } => SettingMode::WriteOnly,
+            Self::Toggle { .. } => SettingMode::ReadWrite,
+            Self::I32Range { .. } => SettingMode::ReadWrite,
+            Self::Select { .. } => SettingMode::ReadWrite,
+            Self::OptionalSelect { .. } => SettingMode::ReadWrite,
+            Self::ModifiableSelect { .. } => SettingMode::ReadWrite,
+            Self::MultiSelect { .. } => SettingMode::ReadWrite,
+            Self::Equalizer { .. } => SettingMode::ReadWrite,
+            Self::Information { .. } => SettingMode::ReadOnly,
+            Self::ImportString { .. } => SettingMode::WriteOnly,
         }
     }
 }
@@ -226,17 +226,17 @@ pub enum SettingMode {
 impl SettingMode {
     pub fn is_writable(&self) -> bool {
         match self {
-            SettingMode::ReadWrite => true,
-            SettingMode::WriteOnly => true,
-            SettingMode::ReadOnly => false,
+            Self::ReadWrite => true,
+            Self::WriteOnly => true,
+            Self::ReadOnly => false,
         }
     }
 
     pub fn is_readable(&self) -> bool {
         match self {
-            SettingMode::ReadWrite => true,
-            SettingMode::ReadOnly => true,
-            SettingMode::WriteOnly => false,
+            Self::ReadWrite => true,
+            Self::ReadOnly => true,
+            Self::WriteOnly => false,
         }
     }
 }

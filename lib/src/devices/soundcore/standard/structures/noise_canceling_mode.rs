@@ -43,11 +43,11 @@ impl NoiseCancelingMode {
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], NoiseCancelingMode, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "noise canceling mode",
             map(le_u8, |noise_canceling_mode| {
-                NoiseCancelingMode::from_id(noise_canceling_mode).unwrap_or_default()
+                Self::from_id(noise_canceling_mode).unwrap_or_default()
             }),
         )
         .parse_complete(input)

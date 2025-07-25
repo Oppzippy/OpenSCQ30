@@ -30,11 +30,9 @@ enum SoundModeCycleSetting {
 impl From<SoundModeCycleSetting> for SettingId {
     fn from(value: SoundModeCycleSetting) -> Self {
         match value {
-            SoundModeCycleSetting::NormalModeInCycle => SettingId::NormalModeInCycle,
-            SoundModeCycleSetting::TransparencyModeInCycle => SettingId::TransparencyModeInCycle,
-            SoundModeCycleSetting::NoiseCancelingModeInCycle => {
-                SettingId::NoiseCancelingModeInCycle
-            }
+            SoundModeCycleSetting::NormalModeInCycle => Self::NormalModeInCycle,
+            SoundModeCycleSetting::TransparencyModeInCycle => Self::TransparencyModeInCycle,
+            SoundModeCycleSetting::NoiseCancelingModeInCycle => Self::NoiseCancelingModeInCycle,
         }
     }
 }
@@ -44,13 +42,9 @@ impl TryFrom<&SettingId> for SoundModeCycleSetting {
 
     fn try_from(value: &SettingId) -> Result<Self, Self::Error> {
         match value {
-            SettingId::NormalModeInCycle => Ok(SoundModeCycleSetting::NormalModeInCycle),
-            SettingId::TransparencyModeInCycle => {
-                Ok(SoundModeCycleSetting::TransparencyModeInCycle)
-            }
-            SettingId::NoiseCancelingModeInCycle => {
-                Ok(SoundModeCycleSetting::NoiseCancelingModeInCycle)
-            }
+            SettingId::NormalModeInCycle => Ok(Self::NormalModeInCycle),
+            SettingId::TransparencyModeInCycle => Ok(Self::TransparencyModeInCycle),
+            SettingId::NoiseCancelingModeInCycle => Ok(Self::NoiseCancelingModeInCycle),
             _ => Err(()),
         }
     }

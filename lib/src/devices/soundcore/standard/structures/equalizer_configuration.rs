@@ -51,7 +51,7 @@ impl<const CHANNELS: usize, const BANDS: usize> EqualizerConfiguration<CHANNELS,
                                 channel.adjustments().iter().skip(8).cloned().collect()
                             }),
                         ),
-                        None => EqualizerConfiguration::new_custom_profile(volume_adjustments),
+                        None => Self::new_custom_profile(volume_adjustments),
                     }
                 },
             ),

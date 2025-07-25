@@ -94,8 +94,8 @@ pub enum Direction {
 impl Direction {
     pub const fn bytes(&self) -> [u8; 5] {
         match self {
-            Direction::Outbound => [0x08, 0xee, 0x00, 0x00, 0x00],
-            Direction::Inbound => [0x09, 0xff, 0x00, 0x00, 0x01],
+            Self::Outbound => [0x08, 0xee, 0x00, 0x00, 0x00],
+            Self::Inbound => [0x09, 0xff, 0x00, 0x00, 0x01],
         }
     }
 
@@ -125,10 +125,6 @@ impl Command {
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
-        context(
-            "command",
-            map((le_u8, le_u8), |bytes| Command(bytes.into())),
-        )
-        .parse_complete(input)
+        context("command", map((le_u8, le_u8), |bytes| Self(bytes.into()))).parse_complete(input)
     }
 }

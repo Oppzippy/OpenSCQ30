@@ -21,12 +21,10 @@ impl LdacStateUpdatePacket {
 impl InboundPacket for LdacStateUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], LdacStateUpdatePacket, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "LdacStateUpdatePacket",
-            all_consuming(map(take_bool, |is_enabled| LdacStateUpdatePacket {
-                is_enabled,
-            })),
+            all_consuming(map(take_bool, |is_enabled| Self { is_enabled })),
         )
         .parse_complete(input)
     }

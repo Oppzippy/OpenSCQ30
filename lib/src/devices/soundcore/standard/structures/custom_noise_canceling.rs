@@ -29,11 +29,11 @@ impl CustomNoiseCanceling {
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], CustomNoiseCanceling, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "custom noise canceling",
             map(le_u8, |custom_noise_canceling_level| {
-                CustomNoiseCanceling::new(custom_noise_canceling_level)
+                Self::new(custom_noise_canceling_level)
             }),
         )
         .parse_complete(input)

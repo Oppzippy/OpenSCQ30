@@ -20,12 +20,12 @@ enum SerialNumberAndDualFirmwareVersionSetting {
 impl From<SerialNumberAndDualFirmwareVersionSetting> for SettingId {
     fn from(setting: SerialNumberAndDualFirmwareVersionSetting) -> Self {
         match setting {
-            SerialNumberAndDualFirmwareVersionSetting::SerialNumber => SettingId::SerialNumber,
+            SerialNumberAndDualFirmwareVersionSetting::SerialNumber => Self::SerialNumber,
             SerialNumberAndDualFirmwareVersionSetting::FirmwareVersionLeft => {
-                SettingId::FirmwareVersionLeft
+                Self::FirmwareVersionLeft
             }
             SerialNumberAndDualFirmwareVersionSetting::FirmwareVersionRight => {
-                SettingId::FirmwareVersionRight
+                Self::FirmwareVersionRight
             }
         }
     }

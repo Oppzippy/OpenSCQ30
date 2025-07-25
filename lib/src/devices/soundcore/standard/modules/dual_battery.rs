@@ -21,10 +21,10 @@ enum BatterySetting {
 impl From<BatterySetting> for SettingId {
     fn from(setting: BatterySetting) -> Self {
         match setting {
-            BatterySetting::IsChargingLeft => SettingId::IsChargingLeft,
-            BatterySetting::BatteryLevelLeft => SettingId::BatteryLevelLeft,
-            BatterySetting::IsChargingRight => SettingId::IsChargingRight,
-            BatterySetting::BatteryLevelRight => SettingId::BatteryLevelRight,
+            BatterySetting::IsChargingLeft => Self::IsChargingLeft,
+            BatterySetting::BatteryLevelLeft => Self::BatteryLevelLeft,
+            BatterySetting::IsChargingRight => Self::IsChargingRight,
+            BatterySetting::BatteryLevelRight => Self::BatteryLevelRight,
         }
     }
 }

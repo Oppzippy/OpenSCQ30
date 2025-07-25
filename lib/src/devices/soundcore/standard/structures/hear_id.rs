@@ -12,7 +12,7 @@ pub struct HearIdType(pub u8);
 impl HearIdType {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], HearIdType, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context("hear id type", map(le_u8, HearIdType)).parse_complete(input)
     }
 }
@@ -23,7 +23,7 @@ pub struct HearIdMusicType(pub u8);
 impl HearIdMusicType {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], HearIdMusicType, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context("hear id music type", map(le_u8, HearIdMusicType)).parse_complete(input)
     }
 }

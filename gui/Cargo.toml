@@ -4,6 +4,9 @@ edition = "2024"
 version.workspace = true
 license.workspace = true
 
+[lints]
+workspace = true
+
 [features]
 default = []
 bundled-dependencies = ["openscq30-lib/bundled-dependencies"]

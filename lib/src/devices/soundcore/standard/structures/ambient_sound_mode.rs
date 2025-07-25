@@ -42,11 +42,11 @@ impl AmbientSoundMode {
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], AmbientSoundMode, E> {
+    ) -> IResult<&'a [u8], Self, E> {
         context(
             "ambient sound mode",
             map(le_u8, |ambient_sound_mode_id| {
-                AmbientSoundMode::from_id(ambient_sound_mode_id).unwrap_or_default()
+                Self::from_id(ambient_sound_mode_id).unwrap_or_default()
             }),
         )
         .parse_complete(input)
