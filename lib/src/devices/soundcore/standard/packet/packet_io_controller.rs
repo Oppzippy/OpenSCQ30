@@ -69,7 +69,7 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
                 };
                 if !packet_queues.pop(&packet.command, packet.clone()) {
                     match outgoing_sender.send(packet).await {
-                        Ok(_) => (),
+                        Ok(()) => (),
                         Err(err) => tracing::debug!(
                             "received packet that wasn't an ok, but the channel is closed, so it won't be forwarded: {err:?}"
                         ),

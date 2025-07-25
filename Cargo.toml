@@ -24,6 +24,7 @@ semicolon_if_nothing_returned = "warn"
 cloned_instead_of_copied = "warn"
 filter_map_next = "warn"
 map_unwrap_or = "warn"
+ignored_unit_patterns = "warn"
 
 [profile.release]
 strip = true

@@ -151,7 +151,7 @@ impl RfcommBackend for BluerRfcommBackend {
                         req.reject(ReqError::Rejected);
                     }
                 }
-                _ = tokio::time::sleep_until(timeout.into()) => {
+                () = tokio::time::sleep_until(timeout.into()) => {
                     return Err(connection::Error::TimedOut { action: "connect" })
                 }
             }
