@@ -31,6 +31,7 @@ pub use firmware_version::*;
 pub use gender::*;
 pub use hear_id::*;
 pub use noise_canceling_mode::*;
+#[allow(unused_imports, reason = "used only by tests")]
 pub use preset_equalizer_profile::*;
 pub use serial_number::*;
 pub use sound_modes::*;
