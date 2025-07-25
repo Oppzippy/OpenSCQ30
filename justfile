@@ -1,3 +1,10 @@
+mod android
+mod cli
+mod gui
+mod i18n
+mod i18n-macros
+mod lib
+
 default:
     @just --choose
 
@@ -6,17 +13,9 @@ build profile='dev':
     just cli/ build '{{ profile }}'
     just android/ build '{{ profile }}'
 
-test:
-    just lib/ test
-    just cli/ test
-    just gui/ test
-    just android/ test
+test: lib::test cli::test gui::test android::test
 
-test-cov:
-    just lib/ test-cov
-    just cli/ test-cov
-    just gui/ test-cov
-    just android/ test-cov
+test-cov: lib::test-cov cli::test-cov gui::test-cov android::test-cov
 
 llvm-cov-clean:
     cargo llvm-cov clean --workspace
@@ -49,16 +48,8 @@ uninstall path:
     just cli/ uninstall '{{ path }}'
 
 alias fmt := format
-format_dirs := 'android/ cli/ gui/ i18n/ i18n-macros/ lib/'
-format:
-    #!/usr/bin/env bash
-    if command -v parallel > /dev/null; then
-        parallel --jobs {{ num_cpus() }} just {} format ::: {{ format_dirs }}
-    else
-        printf '%s' '{{ format_dirs }}' | xargs -d ' ' -I {} just {} format
-    fi
+[parallel]
+format: android::format cli::format gui::format i18n::format i18n-macros::format lib::format
 
-format-check:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    printf '%s' '{{ format_dirs }}' | xargs -d ' ' -I {} just {} format-check
+[parallel]
+format-check: android::format-check cli::format-check gui::format-check i18n::format-check i18n-macros::format-check lib::format-check

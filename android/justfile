@@ -23,13 +23,19 @@ test-cov:
 
 ktlint-paths := "build.gradle.kts app/build.gradle.kts app/src/**/*.kt"
 alias fmt := format
-format:
+
+[parallel]
+format: format-rust format-kotlin
+format-rust:
     -cargo fmt
+format-kotlin:
     -ktlint --editorconfig=../.editorconfig -F {{ ktlint-paths }}
 
-format-check:
-    #!/usr/bin/env bash
-    set -euo pipefail
 
+[parallel]
+format-check: format-check-rust format-check-kotlin
+format-check-rust:
     cargo fmt --check
+format-check-kotlin:
     ktlint --editorconfig=../.editorconfig {{ ktlint-paths }}
+
