@@ -206,28 +206,26 @@ impl OutboundPacket for A3933StateUpdatePacket {
             .chain(self.serial_number.0.as_bytes().iter().copied())
             .chain(self.equalizer_configuration.bytes())
             .chain([self.age_range.0])
-            .chain(
-                self.hear_id
-                    .as_ref()
-                    .map(|hear_id| {
-                        [hear_id.is_enabled as u8]
-                            .into_iter()
-                            .chain(hear_id.volume_adjustments.iter().flat_map(|v| v.bytes()))
-                            .chain(hear_id.time.to_le_bytes())
-                            .chain([hear_id.hear_id_type.0])
-                            .chain(
-                                hear_id
-                                    .custom_volume_adjustments
-                                    .as_ref()
-                                    .unwrap()
-                                    .iter()
-                                    .flat_map(|v| v.bytes()),
-                            )
-                            .chain([0, 0])
-                            .collect()
-                    })
-                    .unwrap_or_else(|| vec![0; 48]),
-            )
+            .chain(self.hear_id.as_ref().map_or_else(
+                || vec![0; 48],
+                |hear_id| {
+                    [hear_id.is_enabled as u8]
+                        .into_iter()
+                        .chain(hear_id.volume_adjustments.iter().flat_map(|v| v.bytes()))
+                        .chain(hear_id.time.to_le_bytes())
+                        .chain([hear_id.hear_id_type.0])
+                        .chain(
+                            hear_id
+                                .custom_volume_adjustments
+                                .as_ref()
+                                .unwrap()
+                                .iter()
+                                .flat_map(|v| v.bytes()),
+                        )
+                        .chain([0, 0])
+                        .collect()
+                },
+            ))
             .chain(self.button_configuration.bytes())
             .chain([self.ambient_sound_mode_cycle.into()])
             .chain(self.sound_modes.bytes())

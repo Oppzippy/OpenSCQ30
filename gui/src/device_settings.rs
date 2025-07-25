@@ -419,8 +419,7 @@ impl DeviceSettingsModel {
                 self.import_strings
                     .get(&setting_id)
                     .map(String::as_str)
-                    .map(Cow::Borrowed)
-                    .unwrap_or_else(|| Cow::Borrowed("")),
+                    .map_or_else(|| Cow::Borrowed(""), Cow::Borrowed),
                 move |text| Message::SetImportString(setting_id, text),
                 move |text| Message::AskConfirmImportString(setting_id, Cow::from(text).into()),
             )],

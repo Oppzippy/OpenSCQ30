@@ -32,8 +32,10 @@ impl TranslatableEnum {
                         .attrs
                         .iter()
                         .find_map(TranslatableEnumAttribute::from_attribute)
-                        .map(|attr| attr.key)
-                        .unwrap_or_else(|| format!("{}", variant.ident).to_kebab_case()),
+                        .map_or_else(
+                            || format!("{}", variant.ident).to_kebab_case(),
+                            |attr| attr.key,
+                        ),
                 })
                 .collect::<Vec<_>>(),
             _ => panic!("expected enum"),

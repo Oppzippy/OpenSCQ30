@@ -88,8 +88,7 @@ fn parse_equalizer(setting: &settings::Equalizer, unparsed: &str) -> anyhow::Res
                 setting
                     .band_hz
                     .get(i)
-                    .map(|hz| format!("{hz} Hz"))
-                    .unwrap_or_else(|| format!("#{}", i as u16 + 1)),
+                    .map_or_else(|| format!("#{}", i as u16 + 1), |hz| format!("{hz} Hz")),
                 setting.min,
                 setting.max
             );

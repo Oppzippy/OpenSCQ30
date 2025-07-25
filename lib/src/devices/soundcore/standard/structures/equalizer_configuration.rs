@@ -100,8 +100,9 @@ impl<const CHANNELS: usize, const BANDS: usize> EqualizerConfiguration<CHANNELS,
 
     pub fn profile_id(&self) -> u16 {
         self.preset_profile
-            .map(|preset_profile| preset_profile.id())
-            .unwrap_or(Self::CUSTOM_PROFILE_ID)
+            .map_or(Self::CUSTOM_PROFILE_ID, |preset_profile| {
+                preset_profile.id()
+            })
     }
 
     pub fn preset_profile(&self) -> Option<PresetEqualizerProfile> {
