@@ -26,16 +26,20 @@ alias fmt := format
 
 [parallel]
 format: format-rust format-kotlin
+[private]
 format-rust:
     -cargo fmt
+[private]
 format-kotlin:
     -ktlint --editorconfig=../.editorconfig -F {{ ktlint-paths }}
 
 
 [parallel]
 format-check: format-check-rust format-check-kotlin
+[private]
 format-check-rust:
     cargo fmt --check
+[private]
 format-check-kotlin:
     ktlint --editorconfig=../.editorconfig {{ ktlint-paths }}
 
