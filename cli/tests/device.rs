@@ -54,9 +54,9 @@ fn list_settings() {
     customEqualizerProfile: modifiable select ([])
     volumeAdjustments: equalizer (bands: [100, 200, 400, 800, 1600, 3200, 6400, 12800], min: -120, max: 134, fractional digits: 1)
     -- equalizerImportExport --
-    importCustomProfiles: import string
-    exportCustomProfiles: multi select ([])
-    exportCustomProfilesOutput: information (read only)
+    importCustomEqualizerProfiles: import string
+    exportCustomEqualizerProfiles: multi select ([])
+    exportCustomEqualizerProfilesOutput: information (read only)
     -- deviceInformation --
     isCharging: information (read only)
     batteryLevel: information (read only)
@@ -395,14 +395,14 @@ fn setting_multi_select() {
     ");
     assert_cmd_snapshot!(set_and_get(
         dir.path(),
-        "exportCustomProfiles",
+        "exportCustomEqualizerProfiles",
         r#"test,"has,comma and""quote""#
     ), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
-    Setting ID          	Value                      
-    exportCustomProfiles	"has,comma and""quote",test
+    Setting ID                   	Value                      
+    exportCustomEqualizerProfiles	"has,comma and""quote",test
 
     ----- stderr -----
     "#);
@@ -412,12 +412,12 @@ fn setting_multi_select() {
 fn setting_multi_select_no_selection() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3951");
-    assert_cmd_snapshot!(set_and_get(dir.path(), "exportCustomProfiles", ""), @r"
+    assert_cmd_snapshot!(set_and_get(dir.path(), "exportCustomEqualizerProfiles", ""), @r"
     success: true
     exit_code: 0
     ----- stdout -----
-    Setting ID          	Value
-    exportCustomProfiles	     
+    Setting ID                   	Value
+    exportCustomEqualizerProfiles	     
 
     ----- stderr -----
     ");
@@ -427,13 +427,13 @@ fn setting_multi_select_no_selection() {
 fn setting_multi_select_invalid() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3951");
-    assert_cmd_snapshot!(set_and_get(dir.path(), "exportCustomProfiles", "invalid"), @r"
+    assert_cmd_snapshot!(set_and_get(dir.path(), "exportCustomEqualizerProfiles", "invalid"), @r"
     success: false
     exit_code: 1
     ----- stdout -----
 
     ----- stderr -----
-    Error: exportCustomProfiles: invalid is not a valid option. Expected one of: []
+    Error: exportCustomEqualizerProfiles: invalid is not a valid option. Expected one of: []
     ");
 }
 
@@ -565,7 +565,7 @@ fn setting_import_string_set() {
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
         .arg("--set")
-        .arg(r#"importCustomProfiles=[{"name": "test profile", "volumeAdjustments": [0,1,2,3,4,5,6,7]}]"#)
+        .arg(r#"importCustomEqualizerProfiles=[{"name": "test profile", "volumeAdjustments": [0,1,2,3,4,5,6,7]}]"#)
         .arg("--set")
         .arg("customEqualizerProfile=test profile")
         .arg("--get")
@@ -592,14 +592,14 @@ fn setting_import_string_set_invalid() {
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
         .arg("--set")
-        .arg(r#"importCustomProfiles=invalid"#);
+        .arg(r#"importCustomEqualizerProfiles=invalid"#);
     assert_cmd_snapshot!(command, @r"
     success: false
     exit_code: 1
     ----- stdout -----
 
     ----- stderr -----
-    Error: setting: setting id importCustomProfiles: expected value at line 1 column 1
+    Error: setting: setting id importCustomEqualizerProfiles: expected value at line 1 column 1
     ");
 }
 
@@ -614,13 +614,13 @@ fn setting_import_string_get() {
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
         .arg("--get")
-        .arg("importCustomProfiles");
+        .arg("importCustomEqualizerProfiles");
     assert_cmd_snapshot!(command, @r"
     success: true
     exit_code: 0
     ----- stdout -----
-    Setting ID          	Value
-    importCustomProfiles	     
+    Setting ID                   	Value
+    importCustomEqualizerProfiles	     
 
     ----- stderr -----
     ");
