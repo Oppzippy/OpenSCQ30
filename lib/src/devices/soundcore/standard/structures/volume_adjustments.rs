@@ -237,7 +237,7 @@ mod tests {
     fn it_matches_expected_drc_values() {
         let examples = [
             (
-                [-60, 60, 23, 120, 22, -120, -04, 16], // volume adjustments
+                [-60, 60, 23, 120, 22, -120, -4, 16], // volume adjustments
                 [
                     -1.1060872, 1.367825, -0.842687, 1.571185, 0.321646, -1.79549, 0.61513,
                     0.083543,
@@ -263,7 +263,7 @@ mod tests {
                 ],
             ),
             (
-                [-60, 60, 23, 120, 22, -120, -04, 16],
+                [-60, 60, 23, 120, 22, -120, -4, 16],
                 [
                     -1.1060872, 1.367825, -0.842687, 1.571185, 0.321646, -1.79549, 0.61513,
                     0.083543,
@@ -285,7 +285,7 @@ mod tests {
 
     #[test]
     fn it_does_not_modify_band_9_when_applying_drc() {
-        let volume_adjustments = VolumeAdjustments::new([-60, 60, 23, 120, 22, -120, -04, 16, 50]);
+        let volume_adjustments = VolumeAdjustments::new([-60, 60, 23, 120, 22, -120, -4, 16, 50]);
         let expected = VolumeAdjustments::new(
             [
                 -1.1060872, 1.367825, -0.842687, 1.571185, 0.321646, -1.79549, 0.61513, 0.083543,

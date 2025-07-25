@@ -126,13 +126,13 @@ mod tests {
                 is_enabled: true,
                 volume_adjustments: [
                     VolumeAdjustments::new([-67, -104, -72, -111, -44, -51, -76, -50]),
-                    VolumeAdjustments::new([-78, -104, -10, -95, -04, -92, -80, -66]),
+                    VolumeAdjustments::new([-78, -104, -10, -95, -4, -92, -80, -66]),
                 ],
                 time: 100000,
                 hear_id_type: HearIdType(5),
                 hear_id_music_type: HearIdMusicType(0),
                 custom_volume_adjustments: Some([
-                    VolumeAdjustments::new([-109, -52, -73, -02, -101, -116, -118, -39]),
+                    VolumeAdjustments::new([-109, -52, -73, -2, -101, -116, -118, -39]),
                     VolumeAdjustments::new([-12, -112, -36, -41, -24, -113, -106, -21]),
                 ]),
             },
@@ -162,8 +162,8 @@ mod tests {
             custom_hear_id: &CustomHearId {
                 is_enabled: true,
                 volume_adjustments: [
-                    VolumeAdjustments::new([-33, -01, -33, -62, -9, -99, -19, -21]),
-                    VolumeAdjustments::new([-46, -19, -111, -2, -10, -06, -100, -101]),
+                    VolumeAdjustments::new([-33, -1, -33, -62, -9, -99, -19, -21]),
+                    VolumeAdjustments::new([-46, -19, -111, -2, -10, -6, -100, -101]),
                 ],
                 time: 100000,
                 hear_id_type: HearIdType(5),
