@@ -5,7 +5,7 @@ use crate::devices::soundcore::standard::{
 
 use super::outbound_packet::OutboundPacket;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetEqualizerAndCustomHearIdPacket<'a, const C: usize, const B: usize> {
     pub equalizer_configuration: &'a EqualizerConfiguration<C, B>,
     pub gender: Gender,

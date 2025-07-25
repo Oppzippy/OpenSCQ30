@@ -29,7 +29,7 @@ use crate::{
 };
 
 // A3931 and A3935 and A3931XR and A3935W
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct A3931StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,

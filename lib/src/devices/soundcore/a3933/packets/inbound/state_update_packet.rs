@@ -33,7 +33,7 @@ use crate::{
 
 // A3933 and A3939
 // Despite EQ being 10 bands, only the first 8 seem to be used?
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct A3933StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,

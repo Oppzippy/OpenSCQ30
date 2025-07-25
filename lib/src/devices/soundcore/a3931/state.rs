@@ -11,7 +11,7 @@ use crate::{
 
 use super::packets::A3931StateUpdatePacket;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct A3931State {
     tws_status: TwsStatus,
     battery: DualBattery,

@@ -27,7 +27,7 @@ use crate::{
 };
 
 // A3926 and A3926Z11
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct A3926StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,

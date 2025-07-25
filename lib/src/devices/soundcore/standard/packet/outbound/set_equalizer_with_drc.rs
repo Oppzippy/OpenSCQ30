@@ -2,7 +2,7 @@ use crate::devices::soundcore::standard::{packet::Command, structures::Equalizer
 
 use super::outbound_packet::OutboundPacket;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetEqualizerWithDrcPacket<'a, const C: usize, const B: usize> {
     pub equalizer_configuration: &'a EqualizerConfiguration<C, B>,
 }

@@ -24,7 +24,7 @@ use crate::devices::soundcore::{
     },
 };
 
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct A3031StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,

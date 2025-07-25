@@ -12,7 +12,7 @@ use crate::{
     macros::impl_as_ref_for_field,
 };
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct A3959State {
     tws_status: TwsStatus,
     dual_battery: DualBattery,

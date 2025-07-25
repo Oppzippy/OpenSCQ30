@@ -32,7 +32,7 @@ use crate::{
     },
 };
 
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct A3959StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub dual_battery: DualBattery,

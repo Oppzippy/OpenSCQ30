@@ -29,7 +29,7 @@ use crate::{
     },
 };
 
-#[derive(Default, Debug, Clone, PartialEq)]
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct A3028StateUpdatePacket {
     pub battery: SingleBattery,
     pub equalizer_configuration: EqualizerConfiguration<1, 8>,
@@ -108,7 +108,7 @@ impl OutboundPacket for A3028StateUpdatePacket {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ExtraFields {
     unknown1: u8,
     touch_control: bool,

@@ -11,7 +11,7 @@ use nom::{
 
 use super::{VolumeAdjustments, preset_equalizer_profile::PresetEqualizerProfile};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct EqualizerConfiguration<const CHANNELS: usize, const BANDS: usize> {
     preset_profile: Option<PresetEqualizerProfile>,
     volume_adjustments: [VolumeAdjustments<BANDS>; CHANNELS],

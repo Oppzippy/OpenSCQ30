@@ -10,7 +10,7 @@ use crate::devices::soundcore::standard::packet::parsing::take_bool;
 
 use super::VolumeAdjustments;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BasicHearId<const C: usize, const B: usize> {
     pub is_enabled: bool,
     pub volume_adjustments: [VolumeAdjustments<B>; C],

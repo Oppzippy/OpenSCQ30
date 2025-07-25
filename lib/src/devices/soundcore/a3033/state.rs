@@ -7,7 +7,7 @@ use crate::{
 
 use super::packets::A3033StateUpdatePacket;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct A3033State {
     battery: SingleBattery,
     equalizer_configuration: EqualizerConfiguration<1, 8>,

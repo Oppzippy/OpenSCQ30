@@ -9,7 +9,7 @@ use crate::{
 
 use super::packets::inbound::A3933StateUpdatePacket;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct A3933State {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,

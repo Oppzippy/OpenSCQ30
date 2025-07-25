@@ -8,7 +8,7 @@ use crate::{
 
 use super::packets::{A3028StateUpdatePacket, ExtraFields};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct A3028State {
     pub battery: SingleBattery,
     pub equalizer_configuration: EqualizerConfiguration<1, 8>,
