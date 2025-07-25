@@ -5,8 +5,9 @@ use crate::{
     api::settings::{Range, Setting, SettingId, Value},
     devices::soundcore::{
         a3936::structures::A3936SoundModes,
-        standard::settings_manager::{SettingHandler, SettingHandlerResult},
+        standard::settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
     },
+    i18n::fl,
 };
 
 use super::SoundModeSetting;
@@ -43,7 +44,15 @@ where
                 Setting::select_from_enum_all_variants(sound_modes.manual_noise_canceling)
             }
             SoundModeSetting::WindNoiseSuppression => Setting::Toggle {
-                value: sound_modes.wind_noise_suppression,
+                value: sound_modes.wind_noise.is_suppression_enabled,
+            },
+            SoundModeSetting::WindNoiseDetected => Setting::Information {
+                value: sound_modes.wind_noise.is_detected.to_string(),
+                translated_value: if sound_modes.wind_noise.is_detected {
+                    fl!("yes")
+                } else {
+                    fl!("no")
+                },
             },
             SoundModeSetting::AdaptiveNoiseCancelingSensitivityLevel => Setting::I32Range {
                 setting: Range {
@@ -84,8 +93,9 @@ where
                 sound_modes.manual_noise_canceling = value.try_as_enum_variant()?
             }
             SoundModeSetting::WindNoiseSuppression => {
-                sound_modes.wind_noise_suppression = value.try_as_bool()?
+                sound_modes.wind_noise.is_suppression_enabled = value.try_as_bool()?
             }
+            SoundModeSetting::WindNoiseDetected => return Err(SettingHandlerError::ReadOnly),
             SoundModeSetting::AdaptiveNoiseCancelingSensitivityLevel => {
                 sound_modes.noise_canceling_adaptive_sensitivity_level = value.try_as_i32()? as u8
             }

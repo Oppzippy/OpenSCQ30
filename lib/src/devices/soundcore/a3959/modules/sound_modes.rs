@@ -28,6 +28,7 @@ enum SoundModeSetting {
     AdaptiveNoiseCanceling,
     ManualNoiseCanceling,
     WindNoiseSuppression,
+    WindNoiseDetected,
     AdaptiveNoiseCancelingSensitivityLevel,
     MultiSceneNoiseCanceling,
 }
@@ -41,6 +42,7 @@ impl From<SoundModeSetting> for SettingId {
             SoundModeSetting::AdaptiveNoiseCanceling => SettingId::AdaptiveNoiseCanceling,
             SoundModeSetting::ManualNoiseCanceling => SettingId::ManualNoiseCanceling,
             SoundModeSetting::WindNoiseSuppression => SettingId::WindNoiseSuppression,
+            SoundModeSetting::WindNoiseDetected => SettingId::WindNoiseDetected,
             SoundModeSetting::AdaptiveNoiseCancelingSensitivityLevel => {
                 SettingId::AdaptiveNoiseCancelingSensitivityLevel
             }
@@ -60,6 +62,7 @@ impl TryFrom<&SettingId> for SoundModeSetting {
             SettingId::ManualNoiseCanceling => Ok(SoundModeSetting::ManualNoiseCanceling),
             SettingId::NoiseCancelingMode => Ok(SoundModeSetting::NoiseCancelingMode),
             SettingId::WindNoiseSuppression => Ok(SoundModeSetting::WindNoiseSuppression),
+            SettingId::WindNoiseDetected => Ok(SoundModeSetting::WindNoiseDetected),
             SettingId::AdaptiveNoiseCancelingSensitivityLevel => {
                 Ok(SoundModeSetting::AdaptiveNoiseCancelingSensitivityLevel)
             }

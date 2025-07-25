@@ -84,6 +84,7 @@ pub enum SettingId {
     AdaptiveNoiseCanceling,
     ManualNoiseCanceling,
     WindNoiseSuppression,
+    WindNoiseDetected,
     AdaptiveNoiseCancelingSensitivityLevel,
     IsCharging,
     BatteryLevel,

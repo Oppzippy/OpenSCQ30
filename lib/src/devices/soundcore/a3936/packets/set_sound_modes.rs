@@ -25,7 +25,7 @@ mod tests {
             packets::set_sound_modes::A3936SetSoundModesPacket,
             structures::{
                 A3936NoiseCancelingMode, A3936SoundModes, AdaptiveNoiseCanceling,
-                ManualNoiseCanceling,
+                ManualNoiseCanceling, WindNoise,
             },
         },
         standard::{
@@ -47,7 +47,10 @@ mod tests {
                 adaptive_noise_canceling: AdaptiveNoiseCanceling::HighNoise,
                 transparency_mode: TransparencyMode::FullyTransparent,
                 noise_canceling_mode: A3936NoiseCancelingMode::Manual,
-                wind_noise_suppression: true,
+                wind_noise: WindNoise {
+                    is_detected: false,
+                    is_suppression_enabled: true,
+                },
                 noise_canceling_adaptive_sensitivity_level: 2,
             },
         };

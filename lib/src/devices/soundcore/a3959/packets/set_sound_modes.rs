@@ -25,7 +25,7 @@ mod tests {
             packets::set_sound_modes::A3959SetSoundModesPacket,
             structures::{
                 A3959NoiseCancelingMode, A3959SoundModes, AdaptiveNoiseCanceling,
-                ManualNoiseCanceling,
+                ManualNoiseCanceling, WindNoise,
             },
         },
         standard::{
@@ -44,7 +44,10 @@ mod tests {
                 adaptive_noise_canceling: AdaptiveNoiseCanceling::new(5),
                 transparency_mode: TransparencyMode::FullyTransparent,
                 noise_canceling_mode: A3959NoiseCancelingMode::MultiScene,
-                wind_noise_suppression: true,
+                wind_noise: WindNoise {
+                    is_suppression_enabled: true,
+                    is_detected: false,
+                },
                 noise_canceling_adaptive_sensitivity_level: 0,
                 multi_scene_anc: NoiseCancelingMode::Outdoor,
             },

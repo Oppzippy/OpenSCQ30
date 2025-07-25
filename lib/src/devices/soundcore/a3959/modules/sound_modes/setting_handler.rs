@@ -7,6 +7,7 @@ use crate::{
         a3959::structures::{A3959SoundModes, ManualNoiseCanceling},
         standard::settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
     },
+    i18n::fl,
 };
 
 use super::SoundModeSetting;
@@ -48,7 +49,15 @@ where
                 value: sound_modes.manual_noise_canceling.inner().into(),
             },
             SoundModeSetting::WindNoiseSuppression => Setting::Toggle {
-                value: sound_modes.wind_noise_suppression,
+                value: sound_modes.wind_noise.is_suppression_enabled,
+            },
+            SoundModeSetting::WindNoiseDetected => Setting::Information {
+                value: sound_modes.wind_noise.is_detected.to_string(),
+                translated_value: if sound_modes.wind_noise.is_detected {
+                    fl!("yes")
+                } else {
+                    fl!("no")
+                },
             },
             SoundModeSetting::AdaptiveNoiseCancelingSensitivityLevel => Setting::I32Range {
                 setting: Range {
@@ -91,8 +100,9 @@ where
                     ManualNoiseCanceling::new(value.try_as_i32()? as u8)
             }
             SoundModeSetting::WindNoiseSuppression => {
-                sound_modes.wind_noise_suppression = value.try_as_bool()?
+                sound_modes.wind_noise.is_suppression_enabled = value.try_as_bool()?
             }
+            SoundModeSetting::WindNoiseDetected => return Err(SettingHandlerError::ReadOnly),
             SoundModeSetting::AdaptiveNoiseCancelingSensitivityLevel => {
                 sound_modes.noise_canceling_adaptive_sensitivity_level = value.try_as_i32()? as u8
             }

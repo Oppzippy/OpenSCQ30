@@ -85,7 +85,7 @@ mod tests {
             sound_modes.adaptive_noise_canceling
         );
         assert_eq!(TransparencyMode::VocalMode, sound_modes.transparency_mode);
-        assert!(sound_modes.wind_noise_suppression);
+        assert!(sound_modes.wind_noise.is_suppression_enabled);
         assert_eq!(5, sound_modes.noise_canceling_adaptive_sensitivity_level);
     }
 }

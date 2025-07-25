@@ -16,7 +16,7 @@ pub struct A3936SoundModes {
     pub adaptive_noise_canceling: AdaptiveNoiseCanceling,
     pub manual_noise_canceling: ManualNoiseCanceling,
     pub noise_canceling_mode: A3936NoiseCancelingMode,
-    pub wind_noise_suppression: bool,
+    pub wind_noise: WindNoise,
     pub noise_canceling_adaptive_sensitivity_level: u8,
 }
 
@@ -49,7 +49,7 @@ impl A3936SoundModes {
                         adaptive_noise_canceling: noise_canceling_settings.adaptive,
                         manual_noise_canceling: noise_canceling_settings.manual,
                         noise_canceling_mode,
-                        wind_noise_suppression: wind_noise.is_suppression_enabled,
+                        wind_noise,
                         noise_canceling_adaptive_sensitivity_level,
                     }
                 },
@@ -64,7 +64,7 @@ impl A3936SoundModes {
             (self.manual_noise_canceling.id() << 4) | self.adaptive_noise_canceling.id(),
             self.transparency_mode.id(),
             self.noise_canceling_mode.id(), // ANC automation mode?
-            self.wind_noise_suppression.into(),
+            self.wind_noise.byte(),
             self.noise_canceling_adaptive_sensitivity_level,
         ]
     }
@@ -188,6 +188,7 @@ impl A3936NoiseCancelingMode {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct WindNoise {
     pub is_suppression_enabled: bool,
     pub is_detected: bool,
@@ -205,5 +206,9 @@ impl WindNoise {
             }),
         )
         .parse_complete(input)
+    }
+
+    pub fn byte(&self) -> u8 {
+        u8::from(self.is_suppression_enabled) | (u8::from(self.is_detected) << 1)
     }
 }

@@ -55,6 +55,7 @@ weak = Weak
 moderate = Moderate
 strong = Strong
 wind-noise-suppression = Wind Noise Suppression
+wind-noise-detected = Wind Noise Detected
 adaptive-noise-canceling-sensitivity-level = Adaptive Noise Canceling Sensitivity Level
 multi-scene = Multi-Scene
 multi-scene-noise-canceling = Multi-Scene Noise Canceling
@@ -124,3 +125,6 @@ right = Right
 none = None
 
 state-update-packet = State Update Packet
+
+yes = Yes
+no = No
