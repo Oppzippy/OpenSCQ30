@@ -67,14 +67,13 @@ pub fn fetch(
                 is_demo,
             })
         })
-        .filter_map(|result| match result {
+        .find_map(|result| match result {
             Ok(device) => Some(device),
             Err(err) => {
                 warn!("error parsing row: {err:?}");
                 None
             }
-        })
-        .next();
+        });
     Ok(devices)
 }
 

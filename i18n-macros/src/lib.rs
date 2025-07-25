@@ -31,8 +31,7 @@ impl TranslatableEnum {
                     translation_key: variant
                         .attrs
                         .iter()
-                        .filter_map(TranslatableEnumAttribute::from_attribute)
-                        .next()
+                        .find_map(TranslatableEnumAttribute::from_attribute)
                         .map(|attr| attr.key)
                         .unwrap_or_else(|| format!("{}", variant.ident).to_kebab_case()),
                 })
