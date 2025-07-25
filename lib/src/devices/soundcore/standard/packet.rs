@@ -60,7 +60,7 @@ impl Packet {
             ),
         )
         .parse_complete(input)?;
-        let body_length = length - 10; // 5 byte direction, 2 byte command, 2 byte length, 1 byte checksum
+        let body_length = length.saturating_sub(10); // 5 byte direction, 2 byte command, 2 byte length, 1 byte checksum
         let (input, body) = context("body", take(body_length)).parse_complete(input)?;
         let (input, _checksum) = context(
             "checksum",
