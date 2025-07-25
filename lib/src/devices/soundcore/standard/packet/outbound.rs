@@ -11,7 +11,15 @@ mod set_multi_button_configuration_packet;
 mod set_sound_mode;
 
 pub use outbound_packet::*;
+#[allow(
+    unused_imports,
+    reason = "TODO consider polling with one of these every once in a while if it doesn't push this information to us"
+)]
 pub use request_battery_charging_packet::*;
+#[allow(
+    unused_imports,
+    reason = "TODO consider polling with one of these every once in a while if it doesn't push this information to us"
+)]
 pub use request_battery_level_packet::*;
 pub use request_serial_number_and_firmware_version_packet::*;
 pub use request_state_packet::*;
