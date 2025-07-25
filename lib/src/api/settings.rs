@@ -99,9 +99,9 @@ pub enum SettingId {
     HostDevice,
     StateUpdatePacket,
     MultiSceneNoiseCanceling,
-    ExportCustomProfiles,
-    ExportCustomProfilesOutput,
-    ImportCustomProfiles,
+    ExportCustomEqualizerProfiles,
+    ExportCustomEqualizerProfilesOutput,
+    ImportCustomEqualizerProfiles,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

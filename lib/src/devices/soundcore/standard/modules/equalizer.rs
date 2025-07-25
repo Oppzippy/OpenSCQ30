@@ -66,18 +66,22 @@ impl From<EqualizerSetting> for SettingId {
 
 #[derive(EnumString, EnumIter, IntoStaticStr)]
 enum ImportExportSetting {
-    ImportCustomProfiles,
-    ExportCustomProfiles,
-    ExportCustomProfilesOutput,
+    ImportCustomEqualizerProfiles,
+    ExportCustomEqualizerProfiles,
+    ExportCustomEqualizerProfilesOutput,
 }
 
 impl From<ImportExportSetting> for SettingId {
     fn from(value: ImportExportSetting) -> Self {
         match value {
-            ImportExportSetting::ImportCustomProfiles => SettingId::ImportCustomProfiles,
-            ImportExportSetting::ExportCustomProfiles => SettingId::ExportCustomProfiles,
-            ImportExportSetting::ExportCustomProfilesOutput => {
-                SettingId::ExportCustomProfilesOutput
+            ImportExportSetting::ImportCustomEqualizerProfiles => {
+                SettingId::ImportCustomEqualizerProfiles
+            }
+            ImportExportSetting::ExportCustomEqualizerProfiles => {
+                SettingId::ExportCustomEqualizerProfiles
+            }
+            ImportExportSetting::ExportCustomEqualizerProfilesOutput => {
+                SettingId::ExportCustomEqualizerProfilesOutput
             }
         }
     }
@@ -88,9 +92,11 @@ impl TryFrom<&SettingId> for ImportExportSetting {
 
     fn try_from(setting_id: &SettingId) -> Result<Self, Self::Error> {
         match setting_id {
-            SettingId::ImportCustomProfiles => Ok(Self::ImportCustomProfiles),
-            SettingId::ExportCustomProfiles => Ok(Self::ExportCustomProfiles),
-            SettingId::ExportCustomProfilesOutput => Ok(Self::ExportCustomProfilesOutput),
+            SettingId::ImportCustomEqualizerProfiles => Ok(Self::ImportCustomEqualizerProfiles),
+            SettingId::ExportCustomEqualizerProfiles => Ok(Self::ExportCustomEqualizerProfiles),
+            SettingId::ExportCustomEqualizerProfilesOutput => {
+                Ok(Self::ExportCustomEqualizerProfilesOutput)
+            }
             _ => Err(()),
         }
     }

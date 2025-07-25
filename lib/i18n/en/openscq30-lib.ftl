@@ -30,10 +30,10 @@ custom-noise-canceling = Custom Noise Canceling
 preset-profile = Preset Profile
 custom-profile = Custom Profile
 volume-adjustments = Volume Adjustments
-import-custom-profiles = Import Custom Profiles
-import-custom-profiles-confirm = This will overwrite existing profiles that share the same names.
-export-custom-profiles = Export Custom Profiles
-export-custom-profiles-output = Export Custom Profiles Output
+import-custom-equalizer-profiles = Import Custom Profiles
+import-custom-equalizer-profiles-confirm = This will overwrite existing profiles that share the same names.
+export-custom-equalizer-profiles = Export Custom Profiles
+export-custom-equalizer-profiles-output = Export Custom Profiles Output
 
 noise-canceling = Noise Canceling
 transparency = Transparency

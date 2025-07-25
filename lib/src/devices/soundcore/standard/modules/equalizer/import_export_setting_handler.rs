@@ -63,10 +63,10 @@ where
     fn get(&self, _state: &T, setting_id: &SettingId) -> Option<settings::Setting> {
         let setting = setting_id.try_into().ok()?;
         Some(match setting {
-            ImportExportSetting::ImportCustomProfiles => settings::Setting::ImportString {
-                confirmation_message: Some(fl!("import-custom-profiles-confirm")),
+            ImportExportSetting::ImportCustomEqualizerProfiles => settings::Setting::ImportString {
+                confirmation_message: Some(fl!("import-custom-equalizer-profiles-confirm")),
             },
-            ImportExportSetting::ExportCustomProfiles => {
+            ImportExportSetting::ExportCustomEqualizerProfiles => {
                 let profile_names = self
                     .profiles_receiver
                     .borrow()
@@ -88,7 +88,7 @@ where
                     },
                 }
             }
-            ImportExportSetting::ExportCustomProfilesOutput => {
+            ImportExportSetting::ExportCustomEqualizerProfilesOutput => {
                 let custom_profiles = self.profiles_receiver.borrow();
                 let selection = self.selected_profiles.lock().unwrap();
                 let exported_profiles = custom_profiles
@@ -118,7 +118,7 @@ where
             .try_into()
             .expect("already filtered to valid values only by SettingsManager");
         match setting {
-            ImportExportSetting::ImportCustomProfiles => {
+            ImportExportSetting::ImportCustomEqualizerProfiles => {
                 let json = value.try_as_str()?;
                 let exported_profiles: Vec<ExportedCustomProfile> = serde_json::from_str(json)
                     .map_err(|err| SettingHandlerError::Other(Box::new(err)))?;
@@ -137,13 +137,13 @@ where
                     .collect();
                 self.profile_store.bulk_upsert(profiles).await?;
             }
-            ImportExportSetting::ExportCustomProfiles => {
+            ImportExportSetting::ExportCustomEqualizerProfiles => {
                 let values = value.try_into_string_vec()?;
                 *self.selected_profiles.lock().unwrap() =
                     values.into_iter().map(|cow| cow.into_owned()).collect();
                 self.change_notify.send_replace(());
             }
-            ImportExportSetting::ExportCustomProfilesOutput => {
+            ImportExportSetting::ExportCustomEqualizerProfilesOutput => {
                 return Err(SettingHandlerError::ReadOnly);
             }
         }
