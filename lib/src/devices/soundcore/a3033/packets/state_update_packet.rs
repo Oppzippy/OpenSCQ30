@@ -12,13 +12,13 @@ use crate::{
         a3033::state::A3033State,
         standard::{
             modules::ModuleCollection,
-            packet_manager::PacketHandler,
             packet::{
                 Command, Packet,
                 inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
                 outbound::OutboundPacket,
                 parsing::take_bool,
             },
+            packet_manager::PacketHandler,
             structures::{EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery},
         },
     },

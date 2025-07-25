@@ -15,13 +15,13 @@ use crate::{
         a3933::state::A3933State,
         standard::{
             modules::ModuleCollection,
-            packet_manager::PacketHandler,
             packet::{
                 Command, Packet,
                 inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
                 outbound::OutboundPacket,
                 parsing::take_bool,
             },
+            packet_manager::PacketHandler,
             structures::{
                 AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
                 DualFirmwareVersion, EqualizerConfiguration, MultiButtonConfiguration,

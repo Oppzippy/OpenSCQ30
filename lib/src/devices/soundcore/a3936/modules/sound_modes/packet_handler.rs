@@ -6,8 +6,8 @@ use crate::{
     devices::soundcore::{
         a3936::{packets::A3936SoundModesUpdatePacket, structures::A3936SoundModes},
         standard::{
-            packet_manager::PacketHandler,
             packet::{Command, Packet, inbound::TryIntoInboundPacket},
+            packet_manager::PacketHandler,
         },
     },
 };

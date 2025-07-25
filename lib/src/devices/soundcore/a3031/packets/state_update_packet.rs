@@ -11,13 +11,13 @@ use crate::devices::soundcore::{
     a3031::state::A3031State,
     standard::{
         modules::ModuleCollection,
-        packet_manager::PacketHandler,
         packet::{
             Command, Packet,
             inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
             outbound::OutboundPacket,
             parsing::take_bool,
         },
+        packet_manager::PacketHandler,
         structures::{
             DualBattery, EqualizerConfiguration, MultiButtonConfiguration, SoundModes, TwsStatus,
         },

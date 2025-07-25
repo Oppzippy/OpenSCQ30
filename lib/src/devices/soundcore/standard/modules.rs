@@ -13,7 +13,7 @@ use crate::api::{
 };
 
 use super::{
-    packet_manager::PacketManager, packet::Packet, settings_manager::SettingsManager,
+    packet::Packet, packet_manager::PacketManager, settings_manager::SettingsManager,
     state_modifier::StateModifier,
 };
 

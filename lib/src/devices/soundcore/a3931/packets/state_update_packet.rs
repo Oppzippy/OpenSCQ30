@@ -13,13 +13,13 @@ use crate::{
         a3931::state::A3931State,
         standard::{
             modules::ModuleCollection,
-            packet_manager::PacketHandler,
             packet::{
                 Command, Packet,
                 inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
                 outbound::OutboundPacket,
                 parsing::take_bool,
             },
+            packet_manager::PacketHandler,
             structures::{
                 DualBattery, EqualizerConfiguration, MultiButtonConfiguration, SoundModes,
                 TwsStatus,

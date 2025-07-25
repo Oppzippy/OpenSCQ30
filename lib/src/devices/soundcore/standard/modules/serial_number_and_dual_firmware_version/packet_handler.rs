@@ -4,11 +4,11 @@ use tokio::sync::watch;
 use crate::{
     api::device,
     devices::soundcore::standard::{
-        packet_manager::PacketHandler,
         packet::{
             Command, Packet,
             inbound::{SerialNumberAndFirmwareVersionUpdatePacket, TryIntoInboundPacket},
         },
+        packet_manager::PacketHandler,
         structures::{DualFirmwareVersion, SerialNumber},
     },
 };

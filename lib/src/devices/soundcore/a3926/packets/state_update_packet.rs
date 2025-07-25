@@ -12,12 +12,12 @@ use crate::{
         a3926::state::A3926State,
         standard::{
             modules::ModuleCollection,
-            packet_manager::PacketHandler,
             packet::{
                 Command, Packet,
                 inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
                 outbound::OutboundPacket,
             },
+            packet_manager::PacketHandler,
             structures::{
                 AgeRange, BasicHearId, DualBattery, EqualizerConfiguration, Gender,
                 MultiButtonConfiguration, TwsStatus,

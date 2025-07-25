@@ -17,13 +17,13 @@ use crate::{
         },
         standard::{
             modules::ModuleCollection,
-            packet_manager::PacketHandler,
             packet::{
                 Command, Packet,
                 inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
                 outbound::OutboundPacket,
                 parsing::take_bool,
             },
+            packet_manager::PacketHandler,
             structures::{
                 AmbientSoundModeCycle, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
                 SerialNumber, TwsStatus,

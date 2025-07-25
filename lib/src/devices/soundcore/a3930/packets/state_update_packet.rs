@@ -13,13 +13,13 @@ use crate::{
         a3930::state::A3930State,
         standard::{
             modules::ModuleCollection,
-            packet_manager::PacketHandler,
             packet::{
                 Command, Packet,
                 inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
                 outbound::OutboundPacket,
                 parsing::take_bool,
             },
+            packet_manager::PacketHandler,
             structures::{
                 AgeRange, CustomHearId, DualBattery, EqualizerConfiguration, Gender,
                 MultiButtonConfiguration, SoundModes, TwsStatus, VolumeAdjustments,

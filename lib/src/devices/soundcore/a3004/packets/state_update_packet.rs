@@ -12,12 +12,12 @@ use crate::{
         a3004::state::A3004State,
         standard::{
             modules::ModuleCollection,
-            packet_manager::PacketHandler,
             packet::{
                 Command, Packet,
                 inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
                 outbound::OutboundPacket,
             },
+            packet_manager::PacketHandler,
             structures::{
                 EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery, SoundModes,
             },
