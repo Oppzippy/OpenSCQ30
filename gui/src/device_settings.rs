@@ -192,7 +192,10 @@ impl DeviceSettingsModel {
     }
 
     fn refresh_quick_presets(&mut self) -> Task<Message> {
-        if let Some(CustomCategory::QuickPresets) = self.nav_model.active_data() {
+        if matches!(
+            self.nav_model.active_data(),
+            Some(CustomCategory::QuickPresets)
+        ) {
             let device = self.device.clone();
             let quick_presets_handler = self.quick_presets_handler.clone();
             Task::future(async move {
@@ -425,7 +428,10 @@ impl DeviceSettingsModel {
     }
 
     pub fn context_drawer(&self) -> Option<ContextDrawer<Message>> {
-        if let Some(CustomCategory::QuickPresets) = self.nav_model.active_data() {
+        if matches!(
+            self.nav_model.active_data(),
+            Some(CustomCategory::QuickPresets)
+        ) {
             self.editing_quick_preset
                 .as_ref()
                 .map(|editing_quick_preset| ContextDrawer {

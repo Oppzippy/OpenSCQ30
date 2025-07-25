@@ -17,6 +17,7 @@ license = "GPL-3.0-or-later"
 [workspace.lints.clippy]
 use_self = "warn"
 derive_partial_eq_without_eq = "warn"
+equatable_if_let = "warn"
 
 [profile.release]
 strip = true
