@@ -109,12 +109,12 @@ android {
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
 
-    val lifecycleVersion = "2.9.1"
+    val lifecycleVersion = "2.9.2"
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-service:$lifecycleVersion")
 
     // Compose
-    val composeBomVersion = "2025.06.01"
+    val composeBomVersion = "2025.07.00"
     implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     androidTestImplementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     implementation("androidx.compose.ui:ui")
@@ -137,7 +137,7 @@ dependencies {
     // Optional - Integration with ViewModels
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     // Compose navigation
-    implementation("androidx.navigation:navigation-compose:2.9.1")
+    implementation("androidx.navigation:navigation-compose:2.9.2")
 
     val accompanistVersion = "0.37.3"
     implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
@@ -151,7 +151,7 @@ dependencies {
 
     implementation("net.java.dev.jna:jna:5.17.0@aar")
 
-    val hiltVersion = "2.56.2"
+    val hiltVersion = "2.57"
     implementation("com.google.dagger:hilt-android:$hiltVersion")
     kapt("com.google.dagger:hilt-android-compiler:$hiltVersion")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
@@ -166,7 +166,7 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
 
-    val mockkVersion = "1.14.4"
+    val mockkVersion = "1.14.5"
     testImplementation("io.mockk:mockk:$mockkVersion")
     androidTestImplementation("io.mockk:mockk-android:$mockkVersion")
     androidTestImplementation("androidx.test:runner:1.6.2")
