@@ -37,7 +37,7 @@ android {
     defaultConfig {
         applicationId = "com.oppzippy.openscq30"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 38
         versionName = "1.19.3"
 
