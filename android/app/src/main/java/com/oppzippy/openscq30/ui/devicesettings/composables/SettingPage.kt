@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.getSystemService
@@ -155,13 +156,16 @@ private fun InformationSetting(name: String, text: String) {
 
 @Composable
 private fun I32Range(name: String, range: Range<Int>, value: Int, onChange: (Int) -> Unit) {
-    Slider(
-        value = value.toFloat(),
-        steps = (range.to - range.from) / range.step + 1,
-        onValueChangeFinished = { onChange(0) },
-        valueRange = range.from.toFloat()..range.to.toFloat(),
-        onValueChange = { onChange(it.roundToInt()) },
-    )
+    Labeled(label = name) {
+        Slider(
+            modifier = Modifier.testTag("$name slider"),
+            value = value.toFloat(),
+            steps = (range.end - range.start) / range.step + 1,
+            onValueChangeFinished = { onChange(0) },
+            valueRange = range.start.toFloat()..range.end.toFloat(),
+            onValueChange = { onChange(it.roundToInt()) },
+        )
+    }
 }
 
 @Composable

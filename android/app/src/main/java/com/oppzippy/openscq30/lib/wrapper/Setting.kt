@@ -64,7 +64,7 @@ sealed class Setting {
 }
 
 @Serializable
-data class Range<T>(val from: T, val to: T, val step: T)
+data class Range<T>(val start: T, val end: T, val step: T)
 
 @Serializable
 data class Select(val options: List<String>, val localizedOptions: List<String>)
