@@ -118,4 +118,17 @@ class SettingTest : OpenSCQ30RootTestBase() {
         composeRule.onAllNodesWithTag("equalizerSlider").onFirst().performTouchInput { swipeLeft(centerY, left) }
         composeRule.onNode(firstBandTextInput).assertTextContains("-12.0")
     }
+
+    @Test
+    fun testImportString() {
+        addAndConnectToDemoDevice(composeRule, translateDeviceModel("SoundcoreA3951"))
+        composeRule.onNodeWithText(translateCategoryId("equalizerImportExport")).performClick()
+        composeRule.onNodeWithText(translateSettingId("importCustomEqualizerProfiles")).performTextInput(
+            """[{"name": "test profile", "volumeAdjustments": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]}]""",
+        )
+        composeRule.onNodeWithContentDescription(getString(R.string.import_)).performClick()
+        composeRule.onNodeWithText(getString(R.string.confirm)).performClick()
+        composeRule.onNodeWithText(getString(R.string.none)).performClick()
+        composeRule.onNode(hasTextExactly("test profile") and hasAnyAncestor(isDialog())).assertExists()
+    }
 }
