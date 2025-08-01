@@ -10,7 +10,7 @@ pub async fn handle(matches: &ArgMatches) -> anyhow::Result<()> {
     match matches.subcommand().unwrap() {
         ("add", matches) => handle_add(matches, &session).await?,
         ("remove", matches) => handle_remove(matches, &session).await?,
-        ("list", _matches) => handle_list(matches, &session).await?,
+        ("list", matches) => handle_list(matches, &session).await?,
         _ => unreachable!(),
     }
     Ok(())
@@ -44,16 +44,16 @@ async fn handle_remove(matches: &ArgMatches, session: &OpenSCQ30Session) -> anyh
     Ok(())
 }
 
-async fn handle_list(_matches: &ArgMatches, session: &OpenSCQ30Session) -> anyhow::Result<()> {
-    let mut table = Table::new(
-        session
-            .paired_devices()
-            .await?
-            .into_iter()
-            .map(PairedDeviceTableItem::from),
-    );
-    crate::fmt::apply_tabled_settings(&mut table);
-    println!("{table}");
+async fn handle_list(matches: &ArgMatches, session: &OpenSCQ30Session) -> anyhow::Result<()> {
+    let paired_devices = session.paired_devices().await?;
+    if matches.get_flag("json") {
+        let json = serde_json::to_string_pretty(&paired_devices)?;
+        println!("{json}");
+    } else {
+        let mut table = Table::new(paired_devices.into_iter().map(PairedDeviceTableItem::from));
+        crate::fmt::apply_tabled_settings(&mut table);
+        println!("{table}");
+    }
     Ok(())
 }
 

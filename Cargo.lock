@@ -4143,6 +4143,7 @@ dependencies = [
  "insta-cmd",
  "macaddr",
  "openscq30-lib",
+ "serde_json",
  "strum 0.27.1",
  "tabled",
  "tempfile",

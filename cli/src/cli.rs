@@ -13,6 +13,7 @@ pub fn build() -> Command {
     let device_model_arg = arg!(-m --model <MODEL> "Device model")
         .required(true)
         .value_parser(value_parser!(DeviceModel));
+    let json_arg = arg!(-j --json "Output as JSON");
     Command::new(env!("CARGO_BIN_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .arg(arg!(--"debug-errors" "Displays additional information with errors for debugging purposes"))
@@ -31,7 +32,10 @@ pub fn build() -> Command {
                     Command::new("remove").alias("delete")
                         .arg(mac_address_arg.to_owned())
                 )
-                .subcommand(Command::new("list").alias("ls")),
+                .subcommand(
+                    Command::new("list").alias("ls")
+                        .arg(json_arg)
+                ),
         )
         .subcommand(
             Command::new("device")
