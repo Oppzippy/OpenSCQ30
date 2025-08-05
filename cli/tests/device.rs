@@ -68,6 +68,84 @@ fn list_settings() {
 }
 
 #[test]
+fn list_settings_no_categories() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3027");
+    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("list-settings").arg("--mac-address").arg("00:00:00:00:00:00").arg("--no-categories"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    ambientSoundMode: select (["Normal", "Transparency", "NoiseCanceling"])
+    noiseCancelingMode: select (["Transport", "Indoor", "Outdoor"])
+    presetEqualizerProfile: optional select (["SoundcoreSignature", "Acoustic", "BassBooster", "BassReducer", "Classical", "Podcast", "Dance", "Deep", "Electronic", "Flat", "HipHop", "Jazz", "Latin", "Lounge", "Piano", "Pop", "RnB", "Rock", "SmallSpeakers", "SpokenWord", "TrebleBooster", "TrebleReducer"])
+    customEqualizerProfile: modifiable select ([])
+    volumeAdjustments: equalizer (bands: [100, 200, 400, 800, 1600, 3200, 6400, 12800], min: -120, max: 134, fractional digits: 1)
+    importCustomEqualizerProfiles: import string
+    exportCustomEqualizerProfiles: multi select ([])
+    exportCustomEqualizerProfilesOutput: information (read only)
+    isCharging: information (read only)
+    batteryLevel: information (read only)
+    serialNumber: information (read only)
+    firmwareVersion: information (read only)
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn list_settings_no_extended_info() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3027");
+    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("list-settings").arg("--mac-address").arg("00:00:00:00:00:00").arg("--no-extended-info"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    -- soundModes --
+    ambientSoundMode
+    noiseCancelingMode
+    -- equalizer --
+    presetEqualizerProfile
+    customEqualizerProfile
+    volumeAdjustments
+    -- equalizerImportExport --
+    importCustomEqualizerProfiles
+    exportCustomEqualizerProfiles
+    exportCustomEqualizerProfilesOutput
+    -- deviceInformation --
+    isCharging
+    batteryLevel
+    serialNumber
+    firmwareVersion
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn list_settings_no_categories_and_no_extended_info() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3027");
+    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("list-settings").arg("--mac-address").arg("00:00:00:00:00:00").arg("--no-categories").arg("--no-extended-info"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    ambientSoundMode
+    noiseCancelingMode
+    presetEqualizerProfile
+    customEqualizerProfile
+    volumeAdjustments
+    importCustomEqualizerProfiles
+    exportCustomEqualizerProfiles
+    exportCustomEqualizerProfilesOutput
+    isCharging
+    batteryLevel
+    serialNumber
+    firmwareVersion
+
+    ----- stderr -----
+    ");
+}
+#[test]
 fn list_settings_json() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3027");
