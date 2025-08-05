@@ -34,7 +34,7 @@ pub fn build() -> Command {
                 )
                 .subcommand(
                     Command::new("list").alias("ls")
-                        .arg(json_arg)
+                        .arg(json_arg.clone())
                 ),
         )
         .subcommand(
@@ -44,7 +44,8 @@ pub fn build() -> Command {
                     Command::new("list-settings")
                         .arg(mac_address_arg.to_owned())
                         .arg(arg!(--"no-categories" "Don't display category headers"))
-                        .arg(arg!(--"no-extended-info" "Don't display setting information in addition to the setting id")),
+                        .arg(arg!(--"no-extended-info" "Don't display setting information in addition to the setting id"))
+                        .arg(json_arg)
                 )
                 .subcommand(
                     Command::new("exec")

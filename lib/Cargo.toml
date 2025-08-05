@@ -39,6 +39,7 @@ i18n-embed-fl = { workspace = true }
 rust-embed = { workspace = true }
 cfg-if = { workspace = true }
 itertools = { workspace = true }
+indexmap = { workspace = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 bluer = { workspace = true, features = ["bluetoothd", "rfcomm"] }

@@ -28,7 +28,9 @@ strum = { workspace = true }
 tabled = { workspace = true }
 terminal_size = { workspace = true }
 csv = { workspace = true }
+serde = { workspace = true }
 serde_json = { workspace = true }
+indexmap = { workspace = true, features = ["serde"] }
 
 [dev-dependencies]
 insta = { workspace = true }

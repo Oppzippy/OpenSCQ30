@@ -24,6 +24,7 @@ mod value;
     Debug,
     Hash,
     Clone,
+    Copy,
     Serialize,
     Deserialize,
     Translate,

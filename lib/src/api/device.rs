@@ -1,6 +1,7 @@
 use std::{panic::Location, sync::Arc};
 
 use async_trait::async_trait;
+use indexmap::IndexMap;
 use macaddr::MacAddr6;
 use tokio::sync::watch;
 
@@ -65,6 +66,25 @@ pub trait OpenSCQ30DeviceRegistry {
 pub trait OpenSCQ30Device {
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus>;
     fn model(&self) -> DeviceModel;
+
+    fn settings_by_category(&self) -> IndexMap<CategoryId, IndexMap<SettingId, Setting>> {
+        self.categories()
+            .into_iter()
+            .map(|category_id| {
+                (
+                    category_id,
+                    self.settings_in_category(&category_id)
+                        .into_iter()
+                        .filter_map(|setting_id| {
+                            self.setting(&setting_id)
+                                .map(|setting| (setting_id, setting))
+                        })
+                        .collect(),
+                )
+            })
+            .collect()
+    }
+
     fn categories(&self) -> Vec<CategoryId>;
     fn settings_in_category(&self, category_id: &CategoryId) -> Vec<SettingId>;
     fn setting(&self, setting_id: &SettingId) -> Option<Setting>;

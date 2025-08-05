@@ -68,6 +68,408 @@ fn list_settings() {
 }
 
 #[test]
+fn list_settings_json() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3027");
+    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("list-settings").arg("--mac-address").arg("00:00:00:00:00:00").arg("--json"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    {
+      "ambientSoundMode": {
+        "type": "select",
+        "setting": {
+          "options": [
+            "Normal",
+            "Transparency",
+            "NoiseCanceling"
+          ],
+          "localizedOptions": [
+            "Normal",
+            "Transparency",
+            "Noise Canceling"
+          ]
+        }
+      },
+      "noiseCancelingMode": {
+        "type": "select",
+        "setting": {
+          "options": [
+            "Transport",
+            "Indoor",
+            "Outdoor"
+          ],
+          "localizedOptions": [
+            "Transport",
+            "Indoor",
+            "Outdoor"
+          ]
+        }
+      },
+      "presetEqualizerProfile": {
+        "type": "optionalSelect",
+        "setting": {
+          "options": [
+            "SoundcoreSignature",
+            "Acoustic",
+            "BassBooster",
+            "BassReducer",
+            "Classical",
+            "Podcast",
+            "Dance",
+            "Deep",
+            "Electronic",
+            "Flat",
+            "HipHop",
+            "Jazz",
+            "Latin",
+            "Lounge",
+            "Piano",
+            "Pop",
+            "RnB",
+            "Rock",
+            "SmallSpeakers",
+            "SpokenWord",
+            "TrebleBooster",
+            "TrebleReducer"
+          ],
+          "localizedOptions": [
+            "Soundcore Signature",
+            "Acoustic",
+            "Bass Booster",
+            "Bass Reducer",
+            "Classical",
+            "Podcast",
+            "Dance",
+            "Deep",
+            "Electronic",
+            "Flat",
+            "Hip Hop",
+            "Jazz",
+            "Latin",
+            "Lounge",
+            "Piano",
+            "Pop",
+            "RnB",
+            "Rock",
+            "Small Speakers",
+            "Spoken Word",
+            "Treble Booster",
+            "Treble Reducer"
+          ]
+        }
+      },
+      "customEqualizerProfile": {
+        "type": "modifiableSelect",
+        "setting": {
+          "options": [],
+          "localizedOptions": []
+        }
+      },
+      "volumeAdjustments": {
+        "type": "equalizer",
+        "setting": {
+          "bandHz": [
+            100,
+            200,
+            400,
+            800,
+            1600,
+            3200,
+            6400,
+            12800
+          ],
+          "fractionDigits": 1,
+          "min": -120,
+          "max": 134
+        }
+      },
+      "importCustomEqualizerProfiles": {
+        "type": "importString"
+      },
+      "exportCustomEqualizerProfiles": {
+        "type": "multiSelect",
+        "setting": {
+          "options": [],
+          "localizedOptions": []
+        }
+      },
+      "exportCustomEqualizerProfilesOutput": {
+        "type": "information"
+      },
+      "isCharging": {
+        "type": "information"
+      },
+      "batteryLevel": {
+        "type": "information"
+      },
+      "serialNumber": {
+        "type": "information"
+      },
+      "firmwareVersion": {
+        "type": "information"
+      }
+    }
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn list_settings_json_no_categories() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3027");
+    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("list-settings").arg("--mac-address").arg("00:00:00:00:00:00").arg("--json").arg("--no-categories"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    [
+      {
+        "categoryId": "soundModes",
+        "settings": [
+          {
+            "settingId": "ambientSoundMode",
+            "type": "select",
+            "setting": {
+              "options": [
+                "Normal",
+                "Transparency",
+                "NoiseCanceling"
+              ],
+              "localizedOptions": [
+                "Normal",
+                "Transparency",
+                "Noise Canceling"
+              ]
+            }
+          },
+          {
+            "settingId": "noiseCancelingMode",
+            "type": "select",
+            "setting": {
+              "options": [
+                "Transport",
+                "Indoor",
+                "Outdoor"
+              ],
+              "localizedOptions": [
+                "Transport",
+                "Indoor",
+                "Outdoor"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "categoryId": "equalizer",
+        "settings": [
+          {
+            "settingId": "presetEqualizerProfile",
+            "type": "optionalSelect",
+            "setting": {
+              "options": [
+                "SoundcoreSignature",
+                "Acoustic",
+                "BassBooster",
+                "BassReducer",
+                "Classical",
+                "Podcast",
+                "Dance",
+                "Deep",
+                "Electronic",
+                "Flat",
+                "HipHop",
+                "Jazz",
+                "Latin",
+                "Lounge",
+                "Piano",
+                "Pop",
+                "RnB",
+                "Rock",
+                "SmallSpeakers",
+                "SpokenWord",
+                "TrebleBooster",
+                "TrebleReducer"
+              ],
+              "localizedOptions": [
+                "Soundcore Signature",
+                "Acoustic",
+                "Bass Booster",
+                "Bass Reducer",
+                "Classical",
+                "Podcast",
+                "Dance",
+                "Deep",
+                "Electronic",
+                "Flat",
+                "Hip Hop",
+                "Jazz",
+                "Latin",
+                "Lounge",
+                "Piano",
+                "Pop",
+                "RnB",
+                "Rock",
+                "Small Speakers",
+                "Spoken Word",
+                "Treble Booster",
+                "Treble Reducer"
+              ]
+            }
+          },
+          {
+            "settingId": "customEqualizerProfile",
+            "type": "modifiableSelect",
+            "setting": {
+              "options": [],
+              "localizedOptions": []
+            }
+          },
+          {
+            "settingId": "volumeAdjustments",
+            "type": "equalizer",
+            "setting": {
+              "bandHz": [
+                100,
+                200,
+                400,
+                800,
+                1600,
+                3200,
+                6400,
+                12800
+              ],
+              "fractionDigits": 1,
+              "min": -120,
+              "max": 134
+            }
+          }
+        ]
+      },
+      {
+        "categoryId": "equalizerImportExport",
+        "settings": [
+          {
+            "settingId": "importCustomEqualizerProfiles",
+            "type": "importString"
+          },
+          {
+            "settingId": "exportCustomEqualizerProfiles",
+            "type": "multiSelect",
+            "setting": {
+              "options": [],
+              "localizedOptions": []
+            }
+          },
+          {
+            "settingId": "exportCustomEqualizerProfilesOutput",
+            "type": "information"
+          }
+        ]
+      },
+      {
+        "categoryId": "deviceInformation",
+        "settings": [
+          {
+            "settingId": "isCharging",
+            "type": "information"
+          },
+          {
+            "settingId": "batteryLevel",
+            "type": "information"
+          },
+          {
+            "settingId": "serialNumber",
+            "type": "information"
+          },
+          {
+            "settingId": "firmwareVersion",
+            "type": "information"
+          }
+        ]
+      }
+    ]
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn list_settings_json_no_extended_info() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3027");
+    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("list-settings").arg("--mac-address").arg("00:00:00:00:00:00").arg("--json").arg("--no-extended-info"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    [
+      {
+        "categoryId": "soundModes",
+        "settingIds": [
+          "ambientSoundMode",
+          "noiseCancelingMode"
+        ]
+      },
+      {
+        "categoryId": "equalizer",
+        "settingIds": [
+          "presetEqualizerProfile",
+          "customEqualizerProfile",
+          "volumeAdjustments"
+        ]
+      },
+      {
+        "categoryId": "equalizerImportExport",
+        "settingIds": [
+          "importCustomEqualizerProfiles",
+          "exportCustomEqualizerProfiles",
+          "exportCustomEqualizerProfilesOutput"
+        ]
+      },
+      {
+        "categoryId": "deviceInformation",
+        "settingIds": [
+          "isCharging",
+          "batteryLevel",
+          "serialNumber",
+          "firmwareVersion"
+        ]
+      }
+    ]
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn list_settings_json_no_categories_and_no_extended_info() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3027");
+    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("list-settings").arg("--mac-address").arg("00:00:00:00:00:00").arg("--json").arg("--no-categories").arg("--no-extended-info"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    [
+      "ambientSoundMode",
+      "noiseCancelingMode",
+      "presetEqualizerProfile",
+      "customEqualizerProfile",
+      "volumeAdjustments",
+      "importCustomEqualizerProfiles",
+      "exportCustomEqualizerProfiles",
+      "exportCustomEqualizerProfilesOutput",
+      "isCharging",
+      "batteryLevel",
+      "serialNumber",
+      "firmwareVersion"
+    ]
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
 fn setting_toggle() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3959");

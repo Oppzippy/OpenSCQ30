@@ -1,7 +1,13 @@
 use anyhow::{Context, anyhow};
 use clap::ArgMatches;
+use indexmap::IndexMap;
 use macaddr::MacAddr6;
-use openscq30_lib::api::{OpenSCQ30Session, device::OpenSCQ30Device, settings::SettingId};
+use openscq30_lib::api::{
+    OpenSCQ30Session,
+    device::OpenSCQ30Device,
+    settings::{self, CategoryId, SettingId},
+};
+use serde::{Deserialize, Serialize};
 use strum::VariantArray;
 use tabled::{Table, Tabled};
 
@@ -32,25 +38,153 @@ async fn handle_list_settings(
         .get_one::<MacAddr6>("mac-address")
         .unwrap()
         .to_owned();
+    let json = matches.get_flag("json");
     let no_categories = matches.get_flag("no-categories");
     let no_extended_info = matches.get_flag("no-extended-info");
 
     let device = session.connect(mac_address).await?;
-    for category_id in device.categories() {
-        if !no_categories {
-            println!("-- {category_id} --");
+    if json {
+        let settings_by_category = device.settings_by_category();
+        match (no_categories, no_extended_info) {
+            (false, false) => {
+                let settings = settings_by_category
+                    .into_iter()
+                    .flat_map(|(_, settings)| {
+                        settings
+                            .into_iter()
+                            .map(|(setting_id, setting)| (setting_id, JsonSetting::from(setting)))
+                    })
+                    .collect::<IndexMap<_, _>>();
+                println!("{}", serde_json::to_string_pretty(&settings)?);
+            }
+            // no categories
+            (true, false) => {
+                let settings = JsonCategory::from_openscq30_lib(settings_by_category);
+                println!("{}", serde_json::to_string_pretty(&settings)?);
+            }
+            // no extended info
+            (false, true) => {
+                let setting_ids_by_category = device
+                    .categories()
+                    .into_iter()
+                    .map(|category_id| JsonCategoryNoExtendedInfo {
+                        category_id,
+                        setting_ids: device.settings_in_category(&category_id),
+                    })
+                    .collect::<Vec<_>>();
+                println!(
+                    "{}",
+                    serde_json::to_string_pretty(&setting_ids_by_category)?
+                );
+            }
+            // no categories or extended info
+            (true, true) => {
+                let setting_ids = device
+                    .categories()
+                    .into_iter()
+                    .flat_map(|category_id| device.settings_in_category(&category_id))
+                    .collect::<Vec<_>>();
+                println!("{}", serde_json::to_string_pretty(&setting_ids)?);
+            }
         }
-        for setting_id in device.settings_in_category(&category_id) {
-            if no_extended_info {
-                println!("{setting_id}");
-            } else {
-                let setting = device.setting(&setting_id).unwrap();
-                println!("{setting_id}: {}", CustomDisplaySetting(setting));
+    } else {
+        for category_id in device.categories() {
+            if !no_categories {
+                println!("-- {category_id} --");
+            }
+            for setting_id in device.settings_in_category(&category_id) {
+                if no_extended_info {
+                    println!("{setting_id}");
+                } else {
+                    let setting = device.setting(&setting_id).unwrap();
+                    println!("{setting_id}: {}", CustomDisplaySetting(setting));
+                }
             }
         }
     }
 
     Ok(())
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct JsonCategoryNoExtendedInfo {
+    category_id: CategoryId,
+    setting_ids: Vec<SettingId>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct JsonCategory {
+    category_id: CategoryId,
+    settings: Vec<JsonSettingWithId>,
+}
+
+impl JsonCategory {
+    fn from_openscq30_lib(
+        categories: IndexMap<CategoryId, IndexMap<SettingId, settings::Setting>>,
+    ) -> Vec<Self> {
+        categories
+            .into_iter()
+            .map(|(category_id, settings)| {
+                let json_settings = settings
+                    .into_iter()
+                    .map(|(setting_id, setting)| JsonSettingWithId {
+                        setting_id,
+                        setting: setting.into(),
+                    })
+                    .collect::<Vec<_>>();
+                JsonCategory {
+                    category_id,
+                    settings: json_settings,
+                }
+            })
+            .collect()
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct JsonSettingWithId {
+    setting_id: SettingId,
+    #[serde(flatten)]
+    setting: JsonSetting,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(
+    tag = "type",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase"
+)]
+enum JsonSetting {
+    Toggle,
+    I32Range { setting: settings::Range<i32> },
+    Select { setting: settings::Select },
+    OptionalSelect { setting: settings::Select },
+    ModifiableSelect { setting: settings::Select },
+    MultiSelect { setting: settings::Select },
+    Equalizer { setting: settings::Equalizer },
+    Information,
+    ImportString,
+}
+
+impl From<settings::Setting> for JsonSetting {
+    fn from(setting: settings::Setting) -> Self {
+        match setting {
+            settings::Setting::Toggle { .. } => Self::Toggle,
+            settings::Setting::I32Range { setting, .. } => Self::I32Range { setting },
+            settings::Setting::Select { setting, .. } => Self::Select { setting },
+            settings::Setting::OptionalSelect { setting, .. } => Self::OptionalSelect { setting },
+            settings::Setting::ModifiableSelect { setting, .. } => {
+                Self::ModifiableSelect { setting }
+            }
+            settings::Setting::MultiSelect { setting, .. } => Self::MultiSelect { setting },
+            settings::Setting::Equalizer { setting, .. } => Self::Equalizer { setting },
+            settings::Setting::Information { .. } => Self::Information,
+            settings::Setting::ImportString { .. } => Self::ImportString,
+        }
+    }
 }
 
 async fn handle_exec(matches: &ArgMatches, session: &OpenSCQ30Session) -> anyhow::Result<()> {
