@@ -3,7 +3,6 @@ use clap::ArgMatches;
 use indexmap::IndexMap;
 use macaddr::MacAddr6;
 use openscq30_lib::api::{
-    OpenSCQ30Session,
     device::OpenSCQ30Device,
     settings::{self, CategoryId, SettingId},
 };
@@ -18,12 +17,17 @@ use crate::{
 
 pub async fn handle(matches: &ArgMatches) -> anyhow::Result<()> {
     let session = openscq30_session().await?;
+    let mac_address = matches
+        .get_one::<MacAddr6>("mac-address")
+        .unwrap()
+        .to_owned();
+    let device = session.connect(mac_address).await?;
     match matches.subcommand().unwrap() {
         ("list-settings", matches) => {
-            handle_list_settings(matches, &session).await?;
+            handle_list_settings(matches, device.as_ref()).await?;
         }
         ("setting", matches) => {
-            handle_setting(matches, &session).await?;
+            handle_setting(matches, device.as_ref()).await?;
         }
         _ => unreachable!(),
     }
@@ -32,17 +36,12 @@ pub async fn handle(matches: &ArgMatches) -> anyhow::Result<()> {
 
 async fn handle_list_settings(
     matches: &ArgMatches,
-    session: &OpenSCQ30Session,
+    device: &dyn OpenSCQ30Device,
 ) -> anyhow::Result<()> {
-    let mac_address = matches
-        .get_one::<MacAddr6>("mac-address")
-        .unwrap()
-        .to_owned();
     let json = matches.get_flag("json");
     let no_categories = matches.get_flag("no-categories");
     let no_extended_info = matches.get_flag("no-extended-info");
 
-    let device = session.connect(mac_address).await?;
     if json {
         let settings_by_category = device.settings_by_category();
         match (no_categories, no_extended_info) {
@@ -187,21 +186,15 @@ impl From<settings::Setting> for JsonSetting {
     }
 }
 
-async fn handle_setting(matches: &ArgMatches, session: &OpenSCQ30Session) -> anyhow::Result<()> {
-    let mac_address = matches
-        .get_one::<MacAddr6>("mac-address")
-        .unwrap()
-        .to_owned();
+async fn handle_setting(matches: &ArgMatches, device: &dyn OpenSCQ30Device) -> anyhow::Result<()> {
     let json = matches.get_flag("json");
 
     let commands = collect_commands(matches)?;
 
-    let device = session.connect(mac_address).await?;
-
     // Whether this fails at any point or not, we still want to print the table, so make sure to
     // do that before returning the error.
     let mut table_items = Vec::new();
-    let result = execute_commands(device.as_ref(), commands, &mut table_items).await;
+    let result = execute_commands(device, commands, &mut table_items).await;
 
     if json {
         println!("{}", serde_json::to_string_pretty(&table_items)?);

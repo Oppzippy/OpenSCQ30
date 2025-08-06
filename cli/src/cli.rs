@@ -39,17 +39,16 @@ pub fn build() -> Command {
         )
         .subcommand(
             Command::new("device")
+                .arg(mac_address_arg.to_owned())
                 .subcommand_required(true)
                 .subcommand(
                     Command::new("list-settings")
-                        .arg(mac_address_arg.to_owned())
                         .arg(arg!(--"no-categories" "Don't display category headers"))
                         .arg(arg!(--"no-extended-info" "Don't display setting information in addition to the setting id"))
                         .arg(json_arg.clone())
                 )
                 .subcommand(
                     Command::new("setting")
-                        .arg(mac_address_arg.to_owned())
                         .arg(
                             arg!(-g --get <SETTING_ID> "Gets the value of a setting")
                                 .action(ArgAction::Append),

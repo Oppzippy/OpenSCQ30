@@ -28,9 +28,9 @@ fn set_and_get(dir: &Path, setting: &str, value: &str) -> Command {
     let mut command = cli(dir);
     command
         .arg("device")
-        .arg("setting")
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
+        .arg("setting")
         .arg("--set")
         .arg(format!("{setting}={value}"))
         .arg("--get")
@@ -42,7 +42,7 @@ fn set_and_get(dir: &Path, setting: &str, value: &str) -> Command {
 fn list_settings() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3027");
-    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("list-settings").arg("--mac-address").arg("00:00:00:00:00:00"), @r#"
+    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("--mac-address").arg("00:00:00:00:00:00").arg("list-settings"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -71,7 +71,7 @@ fn list_settings() {
 fn list_settings_no_categories() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3027");
-    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("list-settings").arg("--mac-address").arg("00:00:00:00:00:00").arg("--no-categories"), @r#"
+    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("--mac-address").arg("00:00:00:00:00:00").arg("list-settings").arg("--no-categories"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -96,7 +96,7 @@ fn list_settings_no_categories() {
 fn list_settings_no_extended_info() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3027");
-    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("list-settings").arg("--mac-address").arg("00:00:00:00:00:00").arg("--no-extended-info"), @r"
+    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("--mac-address").arg("00:00:00:00:00:00").arg("list-settings").arg("--no-extended-info"), @r"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -125,7 +125,7 @@ fn list_settings_no_extended_info() {
 fn list_settings_no_categories_and_no_extended_info() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3027");
-    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("list-settings").arg("--mac-address").arg("00:00:00:00:00:00").arg("--no-categories").arg("--no-extended-info"), @r"
+    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("--mac-address").arg("00:00:00:00:00:00").arg("list-settings").arg("--no-categories").arg("--no-extended-info"), @r"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -149,7 +149,7 @@ fn list_settings_no_categories_and_no_extended_info() {
 fn list_settings_json() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3027");
-    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("list-settings").arg("--mac-address").arg("00:00:00:00:00:00").arg("--json"), @r#"
+    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("--mac-address").arg("00:00:00:00:00:00").arg("list-settings").arg("--json"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -297,7 +297,7 @@ fn list_settings_json() {
 fn list_settings_json_no_categories() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3027");
-    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("list-settings").arg("--mac-address").arg("00:00:00:00:00:00").arg("--json").arg("--no-categories"), @r#"
+    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("--mac-address").arg("00:00:00:00:00:00").arg("list-settings").arg("--json").arg("--no-categories"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -477,7 +477,7 @@ fn list_settings_json_no_categories() {
 fn list_settings_json_no_extended_info() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3027");
-    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("list-settings").arg("--mac-address").arg("00:00:00:00:00:00").arg("--json").arg("--no-extended-info"), @r#"
+    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("--mac-address").arg("00:00:00:00:00:00").arg("list-settings").arg("--json").arg("--no-extended-info"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -524,7 +524,7 @@ fn list_settings_json_no_extended_info() {
 fn list_settings_json_no_categories_and_no_extended_info() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3027");
-    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("list-settings").arg("--mac-address").arg("00:00:00:00:00:00").arg("--json").arg("--no-categories").arg("--no-extended-info"), @r#"
+    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("--mac-address").arg("00:00:00:00:00:00").arg("list-settings").arg("--json").arg("--no-categories").arg("--no-extended-info"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -728,9 +728,9 @@ fn setting_modifiable_select_exact_match() {
     let mut command = cli(dir.path());
     command
         .arg("device")
-        .arg("setting")
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
+        .arg("setting")
         .arg("--set")
         .arg("customEqualizerProfile=+Test")
         .arg("--set")
@@ -788,9 +788,9 @@ fn setting_modifiable_select_ambiguity() {
     let mut command = cli(dir.path());
     command
         .arg("device")
-        .arg("setting")
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
+        .arg("setting")
         .arg("--set")
         .arg("customEqualizerProfile=+Test")
         .arg("--set")
@@ -852,9 +852,9 @@ fn setting_multi_select() {
     let mut command = cli(dir.path());
     command
         .arg("device")
-        .arg("setting")
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
+        .arg("setting")
         .arg("--set")
         .arg("customEqualizerProfile=+test")
         .arg("--set")
@@ -995,9 +995,9 @@ fn setting_information_get() {
     let mut command = cli(dir.path());
     command
         .arg("device")
-        .arg("setting")
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
+        .arg("setting")
         .arg("--get")
         .arg("serialNumber");
     assert_cmd_snapshot!(command, @r"
@@ -1019,9 +1019,9 @@ fn setting_information_set() {
     let mut command = cli(dir.path());
     command
         .arg("device")
-        .arg("setting")
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
+        .arg("setting")
         .arg("--set")
         .arg("serialNumber=0123456789ABCDEF");
     assert_cmd_snapshot!(command, @r"
@@ -1041,9 +1041,9 @@ fn setting_import_string_set() {
     let mut command = cli(dir.path());
     command
         .arg("device")
-        .arg("setting")
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
+        .arg("setting")
         .arg("--set")
         .arg(r#"importCustomEqualizerProfiles=[{"name": "test profile", "volumeAdjustments": [0,1,2,3,4,5,6,7]}]"#)
         .arg("--set")
@@ -1068,9 +1068,9 @@ fn setting_import_string_set_invalid() {
     let mut command = cli(dir.path());
     command
         .arg("device")
-        .arg("setting")
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
+        .arg("setting")
         .arg("--set")
         .arg(r#"importCustomEqualizerProfiles=invalid"#);
     assert_cmd_snapshot!(command, @r"
@@ -1090,9 +1090,9 @@ fn setting_import_string_get() {
     let mut command = cli(dir.path());
     command
         .arg("device")
-        .arg("setting")
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
+        .arg("setting")
         .arg("--get")
         .arg("importCustomEqualizerProfiles");
     assert_cmd_snapshot!(command, @r"
@@ -1133,9 +1133,9 @@ fn setting_json() {
     let mut command = cli(dir.path());
     command
         .arg("device")
-        .arg("setting")
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
+        .arg("setting")
         .arg("--json")
         .arg("--get")
         .arg("ambientSoundMode")
