@@ -7,7 +7,7 @@ use openscq30_lib::api::{
     device::OpenSCQ30Device,
     settings::{self, CategoryId, SettingId},
 };
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use strum::VariantArray;
 use tabled::{Table, Tabled};
 
@@ -106,14 +106,14 @@ async fn handle_list_settings(
     Ok(())
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct JsonCategoryNoExtendedInfo {
     category_id: CategoryId,
     setting_ids: Vec<SettingId>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct JsonCategory {
     category_id: CategoryId,
@@ -143,7 +143,7 @@ impl JsonCategory {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct JsonSettingWithId {
     setting_id: SettingId,
@@ -151,7 +151,7 @@ struct JsonSettingWithId {
     setting: JsonSetting,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 #[serde(
     tag = "type",
     rename_all = "camelCase",
