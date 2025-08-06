@@ -192,6 +192,8 @@ async fn handle_exec(matches: &ArgMatches, session: &OpenSCQ30Session) -> anyhow
         .get_one::<MacAddr6>("mac-address")
         .unwrap()
         .to_owned();
+    let json = matches.get_flag("json");
+
     let commands = collect_commands(matches)?;
 
     let device = session.connect(mac_address).await?;
@@ -201,12 +203,16 @@ async fn handle_exec(matches: &ArgMatches, session: &OpenSCQ30Session) -> anyhow
     let mut table_items = Vec::new();
     let result = execute_commands(device.as_ref(), commands, &mut table_items).await;
 
-    if !table_items.is_empty() {
-        let mut table = Table::new(&table_items);
-        crate::fmt::apply_tabled_settings(&mut table);
-        println!("{table}");
-    } else if result.is_ok() {
-        println!("OK");
+    if json {
+        println!("{}", serde_json::to_string_pretty(&table_items)?);
+    } else {
+        if !table_items.is_empty() {
+            let mut table = Table::new(table_items.into_iter().map(SettingIdValueTableItem::from));
+            crate::fmt::apply_tabled_settings(&mut table);
+            println!("{table}");
+        } else if result.is_ok() {
+            println!("OK");
+        }
     }
 
     result
@@ -273,7 +279,7 @@ fn setting_id_from_str(setting_id: &str) -> anyhow::Result<SettingId> {
 async fn execute_commands(
     device: &dyn OpenSCQ30Device,
     commands: Vec<ExecCommand>,
-    table_items: &mut Vec<SettingIdValueTableItem>,
+    table_items: &mut Vec<SettingIdValue>,
 ) -> anyhow::Result<()> {
     for command in commands {
         match command {
@@ -282,9 +288,9 @@ async fn execute_commands(
                     "{} does not use setting id {setting_id}.",
                     device.model(),
                 ))?;
-                table_items.push(SettingIdValueTableItem {
+                table_items.push(SettingIdValue {
                     setting_id,
-                    value: DisplayableValue(setting.into()),
+                    value: setting.into(),
                 });
             }
             ExecCommand::Set(setting_id, unparsed_value) => {
@@ -305,10 +311,26 @@ async fn execute_commands(
     Ok(())
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SettingIdValue {
+    setting_id: SettingId,
+    value: settings::Value,
+}
+
 #[derive(Tabled)]
 struct SettingIdValueTableItem {
     #[tabled(rename = "Setting ID")]
     setting_id: SettingId,
     #[tabled(rename = "Value")]
     value: DisplayableValue,
+}
+
+impl From<SettingIdValue> for SettingIdValueTableItem {
+    fn from(value: SettingIdValue) -> Self {
+        Self {
+            setting_id: value.setting_id,
+            value: DisplayableValue(value.value),
+        }
+    }
 }

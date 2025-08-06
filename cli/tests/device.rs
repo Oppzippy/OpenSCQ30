@@ -1125,3 +1125,43 @@ fn setting_set_and_get_race_condition() {
         }
     });
 }
+
+#[test]
+fn setting_json() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3027");
+    let mut command = cli(dir.path());
+    command
+        .arg("device")
+        .arg("exec")
+        .arg("--mac-address")
+        .arg("00:00:00:00:00:00")
+        .arg("--json")
+        .arg("--get")
+        .arg("ambientSoundMode")
+        .arg("--get")
+        .arg("noiseCancelingMode");
+    assert_cmd_snapshot!(command, @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    [
+      {
+        "settingId": "ambientSoundMode",
+        "value": {
+          "type": "string",
+          "value": "NoiseCanceling"
+        }
+      },
+      {
+        "settingId": "noiseCancelingMode",
+        "value": {
+          "type": "string",
+          "value": "Transport"
+        }
+      }
+    ]
+
+    ----- stderr -----
+    "#);
+}

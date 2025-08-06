@@ -45,7 +45,7 @@ pub fn build() -> Command {
                         .arg(mac_address_arg.to_owned())
                         .arg(arg!(--"no-categories" "Don't display category headers"))
                         .arg(arg!(--"no-extended-info" "Don't display setting information in addition to the setting id"))
-                        .arg(json_arg)
+                        .arg(json_arg.clone())
                 )
                 .subcommand(
                     Command::new("exec")
@@ -57,7 +57,8 @@ pub fn build() -> Command {
                         .arg(
                             arg!(-s --set <"SETTING_ID=VALUE"> "Sets the value of a setting.")
                                 .action(ArgAction::Append),
-                        ),
+                        )
+                        .arg(json_arg),
                 )
         )
         .subcommand(
