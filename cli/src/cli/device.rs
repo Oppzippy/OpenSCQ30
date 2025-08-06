@@ -22,8 +22,8 @@ pub async fn handle(matches: &ArgMatches) -> anyhow::Result<()> {
         ("list-settings", matches) => {
             handle_list_settings(matches, &session).await?;
         }
-        ("exec", matches) => {
-            handle_exec(matches, &session).await?;
+        ("setting", matches) => {
+            handle_setting(matches, &session).await?;
         }
         _ => unreachable!(),
     }
@@ -187,7 +187,7 @@ impl From<settings::Setting> for JsonSetting {
     }
 }
 
-async fn handle_exec(matches: &ArgMatches, session: &OpenSCQ30Session) -> anyhow::Result<()> {
+async fn handle_setting(matches: &ArgMatches, session: &OpenSCQ30Session) -> anyhow::Result<()> {
     let mac_address = matches
         .get_one::<MacAddr6>("mac-address")
         .unwrap()

@@ -48,7 +48,7 @@ pub fn build() -> Command {
                         .arg(json_arg.clone())
                 )
                 .subcommand(
-                    Command::new("exec")
+                    Command::new("setting")
                         .arg(mac_address_arg.to_owned())
                         .arg(
                             arg!(-g --get <SETTING_ID> "Gets the value of a setting")

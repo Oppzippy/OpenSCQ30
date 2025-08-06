@@ -28,7 +28,7 @@ fn set_and_get(dir: &Path, setting: &str, value: &str) -> Command {
     let mut command = cli(dir);
     command
         .arg("device")
-        .arg("exec")
+        .arg("setting")
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
         .arg("--set")
@@ -728,7 +728,7 @@ fn setting_modifiable_select_exact_match() {
     let mut command = cli(dir.path());
     command
         .arg("device")
-        .arg("exec")
+        .arg("setting")
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
         .arg("--set")
@@ -788,7 +788,7 @@ fn setting_modifiable_select_ambiguity() {
     let mut command = cli(dir.path());
     command
         .arg("device")
-        .arg("exec")
+        .arg("setting")
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
         .arg("--set")
@@ -852,7 +852,7 @@ fn setting_multi_select() {
     let mut command = cli(dir.path());
     command
         .arg("device")
-        .arg("exec")
+        .arg("setting")
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
         .arg("--set")
@@ -995,7 +995,7 @@ fn setting_information_get() {
     let mut command = cli(dir.path());
     command
         .arg("device")
-        .arg("exec")
+        .arg("setting")
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
         .arg("--get")
@@ -1019,7 +1019,7 @@ fn setting_information_set() {
     let mut command = cli(dir.path());
     command
         .arg("device")
-        .arg("exec")
+        .arg("setting")
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
         .arg("--set")
@@ -1041,7 +1041,7 @@ fn setting_import_string_set() {
     let mut command = cli(dir.path());
     command
         .arg("device")
-        .arg("exec")
+        .arg("setting")
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
         .arg("--set")
@@ -1068,7 +1068,7 @@ fn setting_import_string_set_invalid() {
     let mut command = cli(dir.path());
     command
         .arg("device")
-        .arg("exec")
+        .arg("setting")
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
         .arg("--set")
@@ -1090,7 +1090,7 @@ fn setting_import_string_get() {
     let mut command = cli(dir.path());
     command
         .arg("device")
-        .arg("exec")
+        .arg("setting")
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
         .arg("--get")
@@ -1133,7 +1133,7 @@ fn setting_json() {
     let mut command = cli(dir.path());
     command
         .arg("device")
-        .arg("exec")
+        .arg("setting")
         .arg("--mac-address")
         .arg("00:00:00:00:00:00")
         .arg("--json")
