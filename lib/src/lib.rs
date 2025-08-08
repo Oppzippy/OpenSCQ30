@@ -6,7 +6,6 @@
 #![allow(clippy::type_complexity, async_fn_in_trait)]
 pub mod api;
 pub mod connection_backend;
-pub mod device_utils;
 pub mod devices;
 pub mod i18n;
 pub(crate) mod macros;

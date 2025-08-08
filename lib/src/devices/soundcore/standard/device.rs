@@ -12,8 +12,7 @@ use crate::{
         device::{self, OpenSCQ30Device, OpenSCQ30DeviceRegistry},
         settings::{CategoryId, Setting, SettingId, Value},
     },
-    device_utils,
-    devices::DeviceModel,
+    devices::{DeviceModel, soundcore},
     storage::OpenSCQ30Database,
 };
 
@@ -119,8 +118,8 @@ where
             .backend
             .connect(mac_address, |addr| {
                 addr.into_iter()
-                    .find(device_utils::is_soundcore_vendor_rfcomm_uuid)
-                    .unwrap_or(device_utils::RFCOMM_UUID)
+                    .find(soundcore::is_soundcore_vendor_rfcomm_uuid)
+                    .unwrap_or(soundcore::RFCOMM_UUID)
             })
             .await?;
         let mut builder = SoundcoreDeviceBuilder::new(
