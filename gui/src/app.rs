@@ -156,7 +156,7 @@ impl Application for AppModel {
         }
     }
 
-    fn header_start(&self) -> Vec<cosmic::Element<Self::Message>> {
+    fn header_start(&self) -> Vec<cosmic::Element<'_, Self::Message>> {
         match self.screen {
             Screen::DeviceSelection(_) => Vec::new(),
             _ => vec![
@@ -167,7 +167,7 @@ impl Application for AppModel {
         }
     }
 
-    fn view(&self) -> cosmic::Element<Self::Message> {
+    fn view(&self) -> cosmic::Element<'_, Self::Message> {
         widget::column()
             .push_maybe(
                 self.warnings
@@ -190,7 +190,7 @@ impl Application for AppModel {
             .into()
     }
 
-    fn dialog(&self) -> Option<cosmic::Element<Self::Message>> {
+    fn dialog(&self) -> Option<cosmic::Element<'_, Self::Message>> {
         let dialog = match &self.screen {
             Screen::DeviceSelection(_device_selection_model) => None,
             Screen::AddDevice(_add_device_model) => None,
@@ -218,7 +218,7 @@ impl Application for AppModel {
         })
     }
 
-    fn context_drawer(&self) -> Option<ContextDrawer<Self::Message>> {
+    fn context_drawer(&self) -> Option<ContextDrawer<'_, Self::Message>> {
         match &self.screen {
             Screen::DeviceSelection(_device_selection_model) => None,
             Screen::AddDevice(_add_device_model) => None,

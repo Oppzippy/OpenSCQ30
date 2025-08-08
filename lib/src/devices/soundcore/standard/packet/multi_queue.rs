@@ -53,12 +53,12 @@ impl<K: Hash + Eq, V> MultiQueue<K, V> {
     /// a value as a result of the task and pop it from the queue.
     pub fn pop(&self, key: &K, value: V) -> bool {
         let mut queues = self.queues.lock().expect(LOCK_HELD_ERROR);
-        if let Some(queue) = queues.get_mut(key) {
-            if let Some(front) = queue.pop_front() {
-                *front.value.lock().expect("mutex should not be tainted") = Some(value);
-                front.semaphore.close();
-                return true;
-            }
+        if let Some(queue) = queues.get_mut(key)
+            && let Some(front) = queue.pop_front()
+        {
+            *front.value.lock().expect("mutex should not be tainted") = Some(value);
+            front.semaphore.close();
+            return true;
         }
         false
     }

@@ -133,7 +133,7 @@ impl JsonCategory {
                         setting: setting.into(),
                     })
                     .collect::<Vec<_>>();
-                JsonCategory {
+                Self {
                     category_id,
                     settings: json_settings,
                 }
@@ -198,14 +198,12 @@ async fn handle_setting(matches: &ArgMatches, device: &dyn OpenSCQ30Device) -> a
 
     if json {
         println!("{}", serde_json::to_string_pretty(&table_items)?);
-    } else {
-        if !table_items.is_empty() {
-            let mut table = Table::new(table_items.into_iter().map(SettingIdValueTableItem::from));
-            crate::fmt::apply_tabled_settings(&mut table);
-            println!("{table}");
-        } else if result.is_ok() {
-            println!("OK");
-        }
+    } else if !table_items.is_empty() {
+        let mut table = Table::new(table_items.into_iter().map(SettingIdValueTableItem::from));
+        crate::fmt::apply_tabled_settings(&mut table);
+        println!("{table}");
+    } else if result.is_ok() {
+        println!("OK");
     }
 
     result

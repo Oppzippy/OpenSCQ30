@@ -44,7 +44,7 @@ impl<StateType> SettingsManager<StateType> {
                 occupied_entry.get_mut().extend_from_slice(&settings);
             }
             hash_map::Entry::Vacant(vacant_entry) => {
-                self.categories.push(vacant_entry.key().clone());
+                self.categories.push(*vacant_entry.key());
                 vacant_entry.insert(settings.to_vec());
             }
         }

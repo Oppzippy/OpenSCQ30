@@ -51,7 +51,7 @@ impl DeviceSelectionModel {
         .map(coalesce_result)
     }
 
-    pub fn view(&self) -> Element<Message> {
+    pub fn view(&self) -> Element<'_, Message> {
         widget::scrollable(
             widget::column()
                 .push(

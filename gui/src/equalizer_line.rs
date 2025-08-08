@@ -26,7 +26,7 @@ impl<Message> EqualizerLine<Message> {
         }
     }
 
-    pub fn view(&self) -> Element<Message> {
+    pub fn view(&self) -> Element<'_, Message> {
         widget::canvas(self)
             .width(Length::Fill)
             .height(Length::Fill)

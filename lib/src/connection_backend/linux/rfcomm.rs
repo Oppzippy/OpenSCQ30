@@ -237,14 +237,13 @@ impl BluerRfcommConnection {
                                 Ok(bytes_read) => {
                                     let bytes = &buffer[0..bytes_read];
                                     trace!(event = "rfcomm read", ?bytes);
-                                    if bytes_read > 0 {
-                                        if let Err(err) = sender.try_send(bytes.to_vec()) {
+                                    if bytes_read > 0
+                                        && let Err(err) = sender.try_send(bytes.to_vec()) {
                                             if let TrySendError::Closed(_) = err {
                                                 break;
                                             }
                                             warn!("error forwarding packet to channel: {err}",);
                                         }
-                                    }
                                 }
                                 Err(err) => {
                                     debug!("read failed: {err:?}");

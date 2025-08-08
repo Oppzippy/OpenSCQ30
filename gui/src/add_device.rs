@@ -70,7 +70,7 @@ impl AddDeviceModel {
             }),
         }
     }
-    pub fn view(&self) -> Element<Message> {
+    pub fn view(&self) -> Element<'_, Message> {
         match &self.stage {
             Stage::ModelSelection(ui_model) => Self::device_model_selection(ui_model),
             Stage::LoadingDevices(_ui_model) => Self::loading(fl!("device-list")),
@@ -79,7 +79,7 @@ impl AddDeviceModel {
         }
     }
 
-    fn device_model_selection(ui_model: &ModelSelectionModel) -> Element<Message> {
+    fn device_model_selection(ui_model: &ModelSelectionModel) -> Element<'_, Message> {
         widget::column()
             .push(
                 widget::search_input(fl!("device-model"), &ui_model.search_query)
@@ -106,7 +106,7 @@ impl AddDeviceModel {
             .into()
     }
 
-    fn select_device(ui_model: &SelectDeviceModel) -> Element<Message> {
+    fn select_device(ui_model: &SelectDeviceModel) -> Element<'_, Message> {
         widget::column()
             .push(widget::text::title2(fl!(
                 "select-your",
@@ -164,7 +164,7 @@ impl AddDeviceModel {
             .into()
     }
 
-    fn error(message: &str) -> Element<Message> {
+    fn error(message: &str) -> Element<'_, Message> {
         widget::column()
             .push(widget::text::title2(fl!("error-loading-devices")))
             .push(widget::text::monotext(message))

@@ -71,10 +71,10 @@ impl_from_source_error_with_location!(Error::IOError(std::io::Error));
 impl From<rusqlite::Error> for Error {
     #[track_caller]
     fn from(err: rusqlite::Error) -> Self {
-        if let Some(sqlite_err) = err.sqlite_error() {
-            if sqlite_err.extended_code == SQLITE_CONSTRAINT_UNIQUE {
-                return Self::AlreadyExists { source: err };
-            }
+        if let Some(sqlite_err) = err.sqlite_error()
+            && sqlite_err.extended_code == SQLITE_CONSTRAINT_UNIQUE
+        {
+            return Self::AlreadyExists { source: err };
         }
         Self::RusqliteError {
             source: err,

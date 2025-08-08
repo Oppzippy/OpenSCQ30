@@ -3,6 +3,7 @@ use crate::devices::soundcore::standard::packet::Command;
 use super::OutboundPacket;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+#[allow(dead_code, reason = "TODO send periodically if needed")]
 pub struct RequestBatteryLevelPacket {}
 
 impl OutboundPacket for RequestBatteryLevelPacket {

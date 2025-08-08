@@ -106,10 +106,7 @@ impl DeviceSettingsModel {
     ) -> (Self, Task<Message>) {
         let mut nav_model = nav_bar::Model::default();
         for category in device.categories() {
-            nav_model
-                .insert()
-                .text(category.translate())
-                .data(category.clone());
+            nav_model.insert().text(category.translate()).data(category);
         }
         nav_model
             .insert()
@@ -426,7 +423,7 @@ impl DeviceSettingsModel {
         }
     }
 
-    pub fn context_drawer(&self) -> Option<ContextDrawer<Message>> {
+    pub fn context_drawer(&self) -> Option<ContextDrawer<'_, Message>> {
         if matches!(
             self.nav_model.active_data(),
             Some(CustomCategory::QuickPresets)
