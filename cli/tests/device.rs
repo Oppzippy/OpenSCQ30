@@ -1013,7 +1013,6 @@ fn setting_information_get() {
 
 #[test]
 fn setting_information_set() {
-    // TODO improve error message and say what setting id caused the problem
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3951");
     let mut command = cli(dir.path());
