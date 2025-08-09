@@ -21,11 +21,11 @@ import com.oppzippy.openscq30.lib.wrapper.ConnectionDescriptor
 import com.oppzippy.openscq30.lib.wrapper.PairedDevice
 import com.oppzippy.openscq30.ui.utils.ToastHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class DeviceSelectionViewModel @Inject constructor(

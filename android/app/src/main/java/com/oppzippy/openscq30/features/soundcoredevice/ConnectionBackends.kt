@@ -63,8 +63,12 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
             withContext(Dispatchers.IO) {
                 socket.connect()
             }
-        } catch (ex: CancellationException) {
-            socket.close()
+        } catch (_: CancellationException) {
+            try {
+                socket.close()
+            } catch (ex: IOException) {
+                Log.d("AndroidRfcommConnectionBackendImpl", "closing socket", ex)
+            }
         }
 
         var manualRfcommConnection: ManualRfcommConnection? = null
@@ -79,15 +83,20 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
             withContext(Dispatchers.IO) {
                 while (true) {
                     try {
-                        val inboundPacket = socket.inputStream.readBytes()
-                        manualRfcommConnection.addInboundPacket(inboundPacket)
+                        val buffer = ByteArray(1000)
+                        val size = socket.inputStream.read(buffer)
+                        manualRfcommConnection.addInboundPacket(buffer.sliceArray(0..<size))
                     } catch (ex: IOException) {
                         Log.d("AndroidRfcommConnectionBackendImpl", "disconnected", ex)
                         break
                     }
                 }
                 manualRfcommConnection.setConnectionStatus(ConnectionStatus.Disconnected)
-                socket.close()
+                try {
+                    socket.close()
+                } catch (ex: IOException) {
+                    Log.d("AndroidRfcommConnectionBackendImpl", "closing socket", ex)
+                }
             }
         }
 
