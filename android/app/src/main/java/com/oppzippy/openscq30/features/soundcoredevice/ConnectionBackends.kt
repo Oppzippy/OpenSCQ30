@@ -118,4 +118,12 @@ class AndroidRfcommConnectionWriterImpl(
             }
         }
     }
+
+    override fun closeSocket() {
+        try {
+            socket.close()
+        } catch (ex: IOException) {
+            Log.d("AndroidRfcommConnectionWriterImpl", "closing socket", ex)
+        }
+    }
 }

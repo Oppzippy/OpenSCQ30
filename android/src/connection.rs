@@ -136,6 +136,7 @@ impl RfcommBackend for ManualRfcommConnectionBackend {
 #[async_trait]
 pub trait AndroidRfcommConnectionWriter: Send + Sync {
     async fn write(&self, data: Vec<u8>);
+    fn close_socket(&self);
 }
 
 #[derive(Error, Debug, uniffi::Error)]
@@ -189,6 +190,12 @@ impl ManualRfcommConnection {
 }
 
 pub struct WrappedManualRfcommConnection(Arc<ManualRfcommConnection>);
+
+impl Drop for WrappedManualRfcommConnection {
+    fn drop(&mut self) {
+        self.0.connection_writer.close_socket();
+    }
+}
 
 impl RfcommConnection for WrappedManualRfcommConnection {
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {

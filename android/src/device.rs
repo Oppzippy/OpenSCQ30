@@ -1,6 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use openscq30_lib::api::device::OpenSCQ30Device as LibOpenSCQ30Device;
+use tokio::task::JoinHandle;
 
 use crate::serializable;
 
@@ -8,14 +9,23 @@ use crate::serializable;
 pub struct OpenSCQ30Device {
     pub inner: Arc<dyn LibOpenSCQ30Device + Send + Sync>,
     connection_status_callback: Arc<Mutex<Option<Arc<dyn ConnectionStatusCallback>>>>,
+    connection_status_handle: JoinHandle<()>,
     watch_for_changes_callback: Arc<Mutex<Option<Arc<dyn NotificationCallback>>>>,
+    watch_for_changes_handle: JoinHandle<()>,
+}
+
+impl Drop for OpenSCQ30Device {
+    fn drop(&mut self) {
+        self.connection_status_handle.abort();
+        self.watch_for_changes_handle.abort();
+    }
 }
 
 impl OpenSCQ30Device {
     pub async fn new(inner: Arc<dyn LibOpenSCQ30Device + Send + Sync>) -> Self {
         let connection_status_callback: Arc<Mutex<Option<Arc<dyn ConnectionStatusCallback>>>> =
             Default::default();
-        {
+        let connection_status_handle = {
             let connection_status_callback = connection_status_callback.clone();
             let inner = inner.clone();
             tokio::spawn(async move {
@@ -29,11 +39,11 @@ impl OpenSCQ30Device {
                         ));
                     }
                 }
-            });
-        }
+            })
+        };
         let watch_for_changes_callback: Arc<Mutex<Option<Arc<dyn NotificationCallback>>>> =
             Default::default();
-        {
+        let watch_for_changes_handle = {
             let watch_for_changes_callback = watch_for_changes_callback.clone();
             let inner = inner.clone();
             tokio::spawn(async move {
@@ -46,12 +56,14 @@ impl OpenSCQ30Device {
                         callback.on_notify();
                     }
                 }
-            });
-        }
+            })
+        };
         Self {
             inner,
             connection_status_callback,
+            connection_status_handle,
             watch_for_changes_callback,
+            watch_for_changes_handle,
         }
     }
 }
