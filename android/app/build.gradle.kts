@@ -1,4 +1,6 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
+import org.gradle.kotlin.dsl.kotlin
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -88,8 +90,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_17
+        }
     }
     buildFeatures {
         compose = true
@@ -194,11 +198,6 @@ val archTriplets = mapOf(
     "x86" to "i686-linux-android",
     "x86_64" to "x86_64-linux-android",
 )
-
-interface InjectedExecOps {
-    @get:Inject
-    val execOps: ExecOperations
-}
 
 listOf(Pair("debug", "debug"), Pair("release", "release-android")).forEach { (gradleProfile, cargoProfile) ->
     archTriplets.forEach { (arch, target) ->
