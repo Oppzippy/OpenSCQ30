@@ -12,13 +12,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.app.ActivityCompat
 import androidx.core.content.IntentCompat
-import androidx.lifecycle.lifecycleScope
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
-import com.oppzippy.openscq30.lib.wrapper.PairedDevice
 import com.oppzippy.openscq30.ui.OpenSCQ30Root
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -43,29 +40,22 @@ class MainActivity : ComponentActivity() {
     )
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        when (requestCode) {
-            RESULT_OK -> {
-                val deviceToPair = data?.let {
-                    IntentCompat.getParcelableExtra(
-                        it,
-                        CompanionDeviceManager.EXTRA_DEVICE,
-                        BluetoothDevice::class.java,
-                    )
-                } ?: return
-                val pairedDevice =
-                    IntentCompat.getParcelableExtra(intent, "pairedDevice", PairedDevice::class.java) ?: return
-                if (ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.BLUETOOTH_CONNECT,
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    Toast.makeText(this, getString(R.string.bluetooth_permission_is_required), Toast.LENGTH_SHORT)
-                        .show()
-                    return
-                }
-                deviceToPair.createBond()
-                lifecycleScope.launch { session.pair(pairedDevice) }
+        if (requestCode == 0 && resultCode == RESULT_OK && data != null) {
+            val deviceToPair = IntentCompat.getParcelableExtra(
+                data,
+                CompanionDeviceManager.EXTRA_DEVICE,
+                BluetoothDevice::class.java,
+            ) ?: return
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                Toast.makeText(this, getString(R.string.bluetooth_permission_is_required), Toast.LENGTH_SHORT)
+                    .show()
+                return
             }
+            deviceToPair.createBond()
         }
     }
 }
