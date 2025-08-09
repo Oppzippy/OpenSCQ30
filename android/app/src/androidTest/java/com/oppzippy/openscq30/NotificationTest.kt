@@ -54,6 +54,7 @@ class NotificationTest : OpenSCQ30RootTestBase() {
     @Test
     fun opensAppWhenNotificationIsClicked() {
         addAndConnectToDemoDevice(composeRule, "Soundcore Life Q30")
+        composeRule.waitForIdle()
 
         uiDevice.pressHome()
         uiDevice.openNotification()
@@ -66,6 +67,7 @@ class NotificationTest : OpenSCQ30RootTestBase() {
     @Test
     fun disconnectsAndClosesNotificationWhenDisconnectIsClicked() {
         addAndConnectToDemoDevice(composeRule, "Soundcore Life Q30")
+        composeRule.waitForIdle()
 
         uiDevice.openNotification()
         uiDevice.wait(Until.hasObject(notificationTitle), 5000)
@@ -103,6 +105,7 @@ class NotificationTest : OpenSCQ30RootTestBase() {
         composeRule.onNodeWithText("Noise Canceling").performClick()
         composeRule.onNodeWithText("Normal").performClick()
         composeRule.onNodeWithText("Noise Canceling").assertDoesNotExist()
+        composeRule.waitForIdle()
 
         // Activate the quick preset via the notification
         uiDevice.openNotification()
