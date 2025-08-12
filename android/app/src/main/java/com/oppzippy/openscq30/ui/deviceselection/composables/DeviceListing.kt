@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -63,18 +64,6 @@ fun DeviceListing(
                     Text(text = stringResource(id = R.string.app_name))
                 },
                 actions = {
-                    IconButton(onClick = onAddDeviceClick) {
-                        Icon(
-                            imageVector = Icons.Filled.Add,
-                            contentDescription = stringResource(id = R.string.add),
-                        )
-                    }
-                    IconButton(onClick = onRefreshClick) {
-                        Icon(
-                            imageVector = Icons.Filled.Refresh,
-                            contentDescription = stringResource(id = R.string.refresh),
-                        )
-                    }
                     IconButton(onClick = onInfoClick) {
                         Icon(
                             imageVector = Icons.Filled.Info,
@@ -89,6 +78,14 @@ fun DeviceListing(
                     }
                 },
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = onAddDeviceClick) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = stringResource(id = R.string.add),
+                )
+            }
         },
         content = { innerPadding ->
             val pullToRefreshState = rememberPullToRefreshState()
