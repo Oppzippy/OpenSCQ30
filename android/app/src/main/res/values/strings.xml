@@ -81,4 +81,6 @@
     <string name="copy_x_to_clipboard">Copy %s to Clipboard</string>
     <string name="confirm">Confirm</string>
     <string name="import_">Import</string>
+    <string name="search">Search</string>
+    <string name="no_items_found">No Items Found</string>
 </resources>
