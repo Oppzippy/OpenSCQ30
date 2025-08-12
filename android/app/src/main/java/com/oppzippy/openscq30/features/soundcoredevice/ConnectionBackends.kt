@@ -84,6 +84,8 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
                 while (true) {
                     try {
                         val buffer = ByteArray(1000)
+                        // The socket will be closed from the rust side when we disconnect from the device, so when that
+                        // happens, this will throw and we'll break out of the loop
                         val size = socket.inputStream.read(buffer)
                         manualRfcommConnection.addInboundPacket(buffer.sliceArray(0..<size))
                     } catch (ex: IOException) {

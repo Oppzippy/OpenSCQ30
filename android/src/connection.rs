@@ -39,6 +39,7 @@ impl ConnectionBackends for ManualConnectionBackends {
 #[async_trait]
 pub trait AndroidRfcommConnectionBackend: Send + Sync {
     async fn devices(&self) -> Result<Vec<serializable::ConnectionDescriptor>, AndroidError>;
+    // We can't directly return a rust struct from a foreign implementation, so an output parameter is used instead
     async fn connect(
         &self,
         mac_address: serializable::MacAddr6,
@@ -144,6 +145,33 @@ pub enum ConnectionError {
     #[error("the device connection write queue is full")]
     WriteQueueFullError,
 }
+pub struct WrappedManualRfcommConnection(Arc<ManualRfcommConnection>);
+
+// The inner Arc will still have outstanding references in Kotlin until the socket is closed, so the socket
+// must be closed in this wrapper's Drop rather than the inner value's Drop to avoid leaking the resource.
+impl Drop for WrappedManualRfcommConnection {
+    fn drop(&mut self) {
+        self.0.connection_writer.close_socket();
+    }
+}
+
+impl RfcommConnection for WrappedManualRfcommConnection {
+    fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
+        self.0.connection_status_sender.subscribe()
+    }
+
+    async fn write(&self, data: &[u8]) -> connection::Result<()> {
+        self.0.connection_writer.write(data.to_owned()).await;
+        Ok(())
+    }
+
+    fn read_channel(&self) -> mpsc::Receiver<Vec<u8>> {
+        let (sender, receiver) = mpsc::channel(50);
+        *self.0.inbound_packets_sender.write().unwrap() = Some(sender);
+
+        receiver
+    }
+}
 
 // Locks are from std::sync, so make sure to not hold across await points
 #[derive(uniffi::Object)]
@@ -186,31 +214,5 @@ impl ManualRfcommConnection {
     pub fn set_connection_status(&self, connection_status: serializable::ConnectionStatus) {
         self.connection_status_sender
             .send_replace(connection_status.0);
-    }
-}
-
-pub struct WrappedManualRfcommConnection(Arc<ManualRfcommConnection>);
-
-impl Drop for WrappedManualRfcommConnection {
-    fn drop(&mut self) {
-        self.0.connection_writer.close_socket();
-    }
-}
-
-impl RfcommConnection for WrappedManualRfcommConnection {
-    fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
-        self.0.connection_status_sender.subscribe()
-    }
-
-    async fn write(&self, data: &[u8]) -> connection::Result<()> {
-        self.0.connection_writer.write(data.to_owned()).await;
-        Ok(())
-    }
-
-    fn read_channel(&self) -> mpsc::Receiver<Vec<u8>> {
-        let (sender, receiver) = mpsc::channel(50);
-        *self.0.inbound_packets_sender.write().unwrap() = Some(sender);
-
-        receiver
     }
 }
