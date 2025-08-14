@@ -44,6 +44,7 @@ import com.oppzippy.openscq30.lib.wrapper.toValue
 import com.oppzippy.openscq30.ui.utils.Labeled
 import com.oppzippy.openscq30.ui.utils.LabeledSwitch
 import com.oppzippy.openscq30.ui.utils.Select
+import com.oppzippy.openscq30.ui.utils.throttledState
 import kotlin.math.roundToInt
 
 @Composable
@@ -157,13 +158,17 @@ private fun InformationSetting(name: String, text: String) {
 @Composable
 private fun I32Range(name: String, range: Range<Int>, value: Int, onChange: (Int) -> Unit) {
     Labeled(label = name) {
+        val (displayedValue, setDisplayedValue) = throttledState(
+            value = value,
+            duration = 250,
+            onValueChange = { onChange(it) },
+        )
         Slider(
             modifier = Modifier.testTag("$name slider"),
-            value = value.toFloat(),
+            value = displayedValue.toFloat(),
             steps = (range.end - range.start) / range.step + 1,
-            onValueChangeFinished = { onChange(0) },
             valueRange = range.start.toFloat()..range.end.toFloat(),
-            onValueChange = { onChange(it.roundToInt()) },
+            onValueChange = { setDisplayedValue(it.roundToInt()) },
         )
     }
 }

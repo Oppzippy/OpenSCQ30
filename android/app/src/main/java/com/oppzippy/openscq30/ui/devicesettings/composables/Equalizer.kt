@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
+import com.oppzippy.openscq30.ui.utils.throttledState
 import java.math.BigDecimal
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -37,7 +38,7 @@ fun Equalizer(
 ) {
     Column {
         bands.zip(values).forEachIndexed { index, (hz, value) ->
-            EqualizerSlider(
+            EqualizerRow(
                 hz = hz,
                 value = value,
                 minValue = minValue,
@@ -55,7 +56,7 @@ fun Equalizer(
 private val removeSecondDecimalRegex = Regex("^([^.]*\\.[^.]*)\\..*$")
 
 @Composable
-private fun EqualizerSlider(
+private fun EqualizerRow(
     hz: UShort,
     value: Short,
     minValue: Short,
@@ -63,60 +64,102 @@ private fun EqualizerSlider(
     fractionDigits: Short,
     onValueChange: (Short) -> Unit,
 ) {
+    val (displayedValue, setDisplayedValue) = throttledState(
+        value,
+        250,
+        onValueChange = { onValueChange(it) },
+    )
+
     Column {
         Row {
-            var text by remember(hz, value) {
-                mutableStateOf(BigDecimal(value.toInt()).scaleByPowerOfTen(-fractionDigits).toString())
-            }
-            val matches = removeSecondDecimalRegex.matchEntire(text)
-            val reformattedText = if (matches != null) {
-                matches.groupValues[1]
-            } else {
-                text
-            }
-            TextField(
-                value = reformattedText,
-                onValueChange = {
-                    text = it
-                    try {
-                        val newValue = BigDecimal(it).scaleByPowerOfTen(fractionDigits.toInt()).toShort()
-                        if (newValue in minValue..maxValue) {
-                            onValueChange(newValue)
-                        }
-                    } catch (_: NumberFormatException) {
-                    }
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier
-                    .testTag("equalizerInput")
-                    .width(100.dp),
-                singleLine = true,
-                label = {
-                    if (hz < 1000u) {
-                        Text(stringResource(R.string.hz, hz.toInt()))
-                    } else {
-                        Text(
-                            stringResource(
-                                R.string.khz,
-                                BigDecimal(hz.toInt()).divide(BigDecimal(1000)).toString(),
-                            ),
-                        )
-                    }
-                },
+            EqualizerTextInput(
+                hz = hz,
+                value = displayedValue,
+                minValue = minValue,
+                maxValue = maxValue,
+                fractionDigits = fractionDigits,
+                onValueChange = setDisplayedValue,
             )
-            val divisor = 10f.pow(fractionDigits.toInt())
-            Slider(
-                value = value.toFloat() / divisor,
-                onValueChange = {
-                    onValueChange((it * divisor).roundToInt().toShort())
-                },
-                valueRange = (minValue.toFloat() / divisor)..(maxValue.toFloat() / divisor),
-                // The min/max values are not included in the steps number
-                steps = (maxValue - minValue) - 1,
-                modifier = Modifier.testTag("equalizerSlider"),
+            EqualizerSlider(
+                value = displayedValue,
+                minValue = minValue,
+                maxValue = maxValue,
+                fractionDigits = fractionDigits,
+                onValueChange = setDisplayedValue,
             )
         }
     }
+}
+
+@Composable
+private fun EqualizerTextInput(
+    hz: UShort,
+    value: Short,
+    minValue: Short,
+    maxValue: Short,
+    fractionDigits: Short,
+    onValueChange: (Short) -> Unit,
+) {
+    var text by remember(hz, value) {
+        mutableStateOf(BigDecimal(value.toInt()).scaleByPowerOfTen(-fractionDigits).toString())
+    }
+    val matches = removeSecondDecimalRegex.matchEntire(text)
+    val reformattedText = if (matches != null) {
+        matches.groupValues[1]
+    } else {
+        text
+    }
+    TextField(
+        value = reformattedText,
+        onValueChange = {
+            text = it
+            try {
+                val newValue = BigDecimal(it).scaleByPowerOfTen(fractionDigits.toInt()).toShort()
+                if (newValue in minValue..maxValue) {
+                    onValueChange(newValue)
+                }
+            } catch (_: NumberFormatException) {
+            }
+        },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+        modifier = Modifier
+            .testTag("equalizerInput")
+            .width(100.dp),
+        singleLine = true,
+        label = {
+            if (hz < 1000u) {
+                Text(stringResource(R.string.hz, hz.toInt()))
+            } else {
+                Text(
+                    stringResource(
+                        R.string.khz,
+                        BigDecimal(hz.toInt()).divide(BigDecimal(1000)).toString(),
+                    ),
+                )
+            }
+        },
+    )
+}
+
+@Composable
+private fun EqualizerSlider(
+    value: Short,
+    minValue: Short,
+    maxValue: Short,
+    fractionDigits: Short,
+    onValueChange: (Short) -> Unit,
+) {
+    val divisor = 10f.pow(fractionDigits.toInt())
+    Slider(
+        value = value.toFloat() / divisor,
+        onValueChange = {
+            onValueChange((it * divisor).roundToInt().toShort())
+        },
+        valueRange = (minValue.toFloat() / divisor)..(maxValue.toFloat() / divisor),
+        // The min/max values are not included in the steps number
+        steps = (maxValue - minValue) - 1,
+        modifier = Modifier.testTag("equalizerSlider"),
+    )
 }
 
 @Preview(showBackground = true)

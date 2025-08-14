@@ -160,6 +160,7 @@ class DeviceSettingsManager(
     }
 
     fun setSettingValues(settingValues: List<Pair<String, Value>>) {
+        Log.v(TAG, "Setting settings: $settingValues")
         coroutineScope.launch {
             try {
                 device.setSettingValues(
