@@ -30,6 +30,10 @@ fun connectionBackends(context: Context, coroutineScope: CoroutineScope): Manual
 
 class AndroidRfcommConnectionBackendImpl(private val context: Context, private val coroutineScope: CoroutineScope) :
     AndroidRfcommConnectionBackend {
+    companion object {
+        private const val TAG = "AndroidRfcommConnectionBackendImpl"
+    }
+
     override suspend fun devices(): List<ConnectionDescriptor> {
         val bluetoothManager: BluetoothManager = context.getSystemService(BluetoothManager::class.java)
         return if (ActivityCompat.checkSelfPermission(
@@ -37,7 +41,7 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
                 Manifest.permission.BLUETOOTH_CONNECT,
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            Log.e("AndroidRfcommConnectionBackendImpl", "Missing BLUETOOTH_CONNECT permission")
+            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission")
             emptyList()
         } else {
             bluetoothManager.adapter.bondedDevices.map {
@@ -52,7 +56,7 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
                 Manifest.permission.BLUETOOTH_CONNECT,
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            Log.e("AndroidRfcommConnectionBackendImpl", "Missing BLUETOOTH_CONNECT permission")
+            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission")
             return
         }
         val bluetoothManager: BluetoothManager = context.getSystemService(BluetoothManager::class.java)
@@ -67,7 +71,7 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
             try {
                 socket.close()
             } catch (ex: IOException) {
-                Log.d("AndroidRfcommConnectionBackendImpl", "closing socket", ex)
+                Log.d(TAG, "closing socket", ex)
             }
         }
 
@@ -89,7 +93,7 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
                         val size = socket.inputStream.read(buffer)
                         manualRfcommConnection.addInboundPacket(buffer.sliceArray(0..<size))
                     } catch (ex: IOException) {
-                        Log.d("AndroidRfcommConnectionBackendImpl", "disconnected", ex)
+                        Log.d(TAG, "disconnected", ex)
                         break
                     }
                 }
@@ -97,7 +101,7 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
                 try {
                     socket.close()
                 } catch (ex: IOException) {
-                    Log.d("AndroidRfcommConnectionBackendImpl", "closing socket", ex)
+                    Log.d(TAG, "closing socket", ex)
                 }
             }
         }
@@ -110,12 +114,16 @@ class AndroidRfcommConnectionWriterImpl(
     private val socket: BluetoothSocket,
     private val setConnectionStatus: (ConnectionStatus) -> Unit,
 ) : AndroidRfcommConnectionWriter {
+    companion object {
+        private const val TAG = "AndroidRfcommConnectionWriterImpl"
+    }
+
     override suspend fun write(data: ByteArray) {
         withContext(Dispatchers.IO) {
             try {
                 socket.outputStream.write(data)
             } catch (ex: IOException) {
-                Log.d("AndroidRfcommConnectionWriterImpl", "disconnected", ex)
+                Log.d(TAG, "disconnected", ex)
                 setConnectionStatus(ConnectionStatus.Disconnected)
             }
         }
@@ -125,7 +133,7 @@ class AndroidRfcommConnectionWriterImpl(
         try {
             socket.close()
         } catch (ex: IOException) {
-            Log.d("AndroidRfcommConnectionWriterImpl", "closing socket", ex)
+            Log.d(TAG, "closing socket", ex)
         }
     }
 }

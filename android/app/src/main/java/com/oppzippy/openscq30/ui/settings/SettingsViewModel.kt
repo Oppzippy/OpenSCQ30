@@ -23,6 +23,10 @@ class SettingsViewModel @Inject constructor(
     private val preferences: Preferences,
     private val toastHandler: ToastHandler,
 ) : ViewModel() {
+    companion object {
+        private const val TAG = "SettingsViewModel"
+    }
+
     private val _autoConnect = MutableStateFlow(preferences.autoConnect)
     val autoConnect = _autoConnect.asStateFlow()
 
@@ -39,11 +43,11 @@ class SettingsViewModel @Inject constructor(
 
     fun copyLogs() {
         val process = try {
-            Log.i("SettingsViewModel", "exporting logs")
+            Log.i(TAG, "exporting logs")
             Runtime.getRuntime().exec(arrayOf("logcat", "-d"))
         } catch (ex: Exception) {
             toastHandler.add("Failed to execute logcat: ${ex.message}", Toast.LENGTH_SHORT)
-            Log.e("SettingsViewModel", "Failed to execute logcat", ex)
+            Log.e(TAG, "Failed to execute logcat", ex)
             return
         }
         val logs = process.inputStream.bufferedReader().use {

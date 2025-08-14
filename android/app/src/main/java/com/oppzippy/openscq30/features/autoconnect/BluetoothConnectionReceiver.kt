@@ -18,10 +18,14 @@ class BluetoothConnectionReceiver(
     private val session: OpenScq30Session,
     private val coroutineScope: CoroutineScope,
 ) : BroadcastReceiver() {
+    companion object {
+        private const val TAG = "BluetoothConnectionReceiver"
+    }
+
     override fun onReceive(context: Context?, intent: Intent?) {
         if (!preferences.autoConnect) {
             Log.w(
-                "BluetoothConnectionReceiver",
+                TAG,
                 "Got device connected event, but auto connect is disabled. This service should not be running.",
             )
             return
@@ -39,7 +43,7 @@ class BluetoothConnectionReceiver(
             if (device != null) {
                 coroutineScope.launch {
                     if (isPaired(context, device.address)) {
-                        Log.d("BluetoothConnectionReceiver", "auto connecting to ${device.address}")
+                        Log.d(TAG, "auto connecting to ${device.address}")
                         val serviceIntent = Intent(context, DeviceService::class.java)
                         serviceIntent.putExtra(DeviceService.MAC_ADDRESS, device.address)
                         context.startForegroundService(serviceIntent)
