@@ -2,7 +2,6 @@
     <string name="app_name">OpenSCQ30</string>
     <string name="equalizer">Equalizer</string>
     <string name="hz">%1$d Hz</string>
-    <string name="refresh">Refresh</string>
     <string name="loading">Loading</string>
     <string name="request_permission">Request Permission</string>
     <string name="bluetooth_permission_is_required">Bluetooth Permission is Required</string>
