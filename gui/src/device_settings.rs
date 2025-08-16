@@ -12,17 +12,13 @@ use std::{borrow::Cow, collections::HashMap, path::PathBuf};
 use cosmic::{
     Element, Task,
     app::context_drawer::ContextDrawer,
-    iced::Length,
     widget::{self, nav_bar},
 };
 use legacy_migration::LegacyMigrationModel;
 use openscq30_i18n::Translate;
-use openscq30_lib::{
-    api::{
-        quick_presets::QuickPresetsHandler,
-        settings::{self, CategoryId, Setting, SettingId, Value},
-    },
-    storage::QuickPreset,
+use openscq30_lib::api::{
+    quick_presets::QuickPresetsHandler,
+    settings::{self, CategoryId, Setting, SettingId, Value},
 };
 use tracing::debug;
 
@@ -35,22 +31,12 @@ use crate::{
 
 #[derive(Debug, Clone)]
 pub enum Message {
+    QuickPresets(quick_presets::Message),
     SetSetting(SettingId, Value),
     SetEqualizerBand(SettingId, u8, i16),
-    RefreshQuickPresets,
     RefreshSettings,
     Warning(String),
-    ShowCreateQuickPresetDialog,
-    ActivateQuickPreset(usize),
-    EditQuickPreset(usize),
-    SetQuickPresets(Vec<QuickPreset>),
-    CreateQuickPreset(Option<String>),
-    SnapshotQuickPresetSettings(String),
-    SetCreateQuickPresetName(String),
     CancelDialog,
-    EditQuickPresetToggleField(usize, bool),
-    EditQuickPresetClose,
-    EditQuickPresetModified,
     ShowModifiableSelectAddDialog(SettingId),
     ShowModifiableSelectRemoveDialog(SettingId),
     ModifiableSelectAddDialogSubmit(Option<String>),
@@ -59,13 +45,18 @@ pub enum Message {
     AddLegacyEqualizerMigrationPage(HashMap<String, LegacyEqualizerProfile>),
     LegacyMigration(legacy_migration::Message),
     None,
-    ShowDeleteQuickPresetDialog(usize),
-    DeleteQuickPreset(String),
     CopyToClipboard(String),
     SetImportString(SettingId, String),
     AskConfirmImportString(SettingId, String),
     ConfirmImportString,
 }
+
+impl From<quick_presets::Message> for Message {
+    fn from(message: quick_presets::Message) -> Self {
+        Self::QuickPresets(message)
+    }
+}
+
 pub enum Action {
     Task(Task<Message>),
     Warning(String),
@@ -75,21 +66,17 @@ pub enum Action {
 
 pub struct DeviceSettingsModel {
     device: DebugOpenSCQ30Device,
-    quick_presets_handler: QuickPresetsHandler,
     nav_model: nav_bar::Model,
     settings: Vec<(SettingId, Setting)>,
-    quick_presets: Option<Vec<QuickPreset>>,
     dialog: Option<Dialog>,
-    editing_quick_preset: Option<QuickPreset>,
     legacy_equalizer_migration: Option<legacy_migration::LegacyMigrationModel>,
     import_strings: HashMap<SettingId, String>,
+    quick_presets_model: quick_presets::QuickPresetsModel,
 }
 
 enum Dialog {
-    CreateQuickPreset(String),
     ModifiableSelectAdd(SettingId, String),
     ModifiableSelectRemove(SettingId, Cow<'static, str>),
-    DeleteQuickPreset(String),
     ImportStringConfirm(SettingId, String),
 }
 
@@ -126,19 +113,21 @@ impl DeviceSettingsModel {
             debug!("stopping state change watcher task");
         });
 
+        let (quick_presets_model, quick_presets_refresh_task) =
+            quick_presets::QuickPresetsModel::new(device.clone(), quick_presets_handler);
+
         let mut model = Self {
             device,
             nav_model,
             settings: Vec::new(),
-            quick_presets_handler,
-            quick_presets: None,
-            editing_quick_preset: None,
             dialog: None,
             legacy_equalizer_migration: None,
             import_strings: HashMap::new(),
+            quick_presets_model,
         };
         let task = Task::batch([
             model.refresh(),
+            quick_presets_refresh_task.map(Into::into),
             Self::initialize_legacy_migration(config_dir),
             Task::stream(stream),
         ]);
@@ -169,7 +158,7 @@ impl DeviceSettingsModel {
     }
 
     fn refresh(&mut self) -> Task<Message> {
-        Task::batch([self.refresh_settings(), self.refresh_quick_presets()])
+        Task::batch([self.refresh_settings()])
     }
 
     fn refresh_settings(&mut self) -> Task<Message> {
@@ -188,138 +177,82 @@ impl DeviceSettingsModel {
         Task::none()
     }
 
-    fn refresh_quick_presets(&mut self) -> Task<Message> {
-        if matches!(
-            self.nav_model.active_data(),
-            Some(CustomCategory::QuickPresets)
-        ) {
-            let device = self.device.clone();
-            let quick_presets_handler = self.quick_presets_handler.clone();
-            Task::future(async move {
-                quick_presets_handler
-                    .quick_presets(device.as_ref())
-                    .await
-                    .map(Message::SetQuickPresets)
-                    .map_err(handle_soft_error!())
-            })
-            .map(coalesce_result)
-        } else {
-            Task::none()
-        }
-    }
-
     pub fn nav_model(&self) -> Option<&nav_bar::Model> {
         Some(&self.nav_model)
     }
 
     pub fn dialog(&self) -> Option<Element<'_, Message>> {
-        self.dialog.as_ref().map(|dialog| match dialog {
-            Dialog::CreateQuickPreset(name) => widget::dialog()
-                .title(fl!("create-quick-preset"))
-                .control(
-                    widget::text_input(fl!("name"), name)
-                        .id(widget::Id::new("create-quick-preset-name"))
-                        .on_input(Message::SetCreateQuickPresetName)
-                        .on_submit(|name| Message::CreateQuickPreset(Some(name))),
-                )
-                .primary_action(
-                    widget::button::suggested(fl!("create"))
-                        .on_press(Message::CreateQuickPreset(None)),
-                )
-                .secondary_action(
-                    widget::button::destructive(fl!("cancel")).on_press(Message::CancelDialog),
-                )
-                .into(),
-            Dialog::DeleteQuickPreset(name) => widget::dialog()
-                .title(fl!("delete-quick-preset"))
-                .body(fl!("delete-confirm", name = name))
-                .primary_action(
-                    widget::button::destructive(fl!("delete"))
-                        .on_press(Message::DeleteQuickPreset(name.to_owned())),
-                )
-                .secondary_action(
-                    widget::button::text(fl!("cancel")).on_press(Message::CancelDialog),
-                )
-                .into(),
-            Dialog::ModifiableSelectAdd(setting_id, name) => widget::dialog()
-                .title({
-                    let setting_name = setting_id.translate();
-                    fl!("add-item", name = setting_name.as_str())
+        self.quick_presets_model
+            .dialog()
+            .map(|dialog| dialog.map(Into::into))
+            .or_else(|| {
+                self.dialog.as_ref().map(|dialog| match dialog {
+                    Dialog::ModifiableSelectAdd(setting_id, name) => widget::dialog()
+                        .title({
+                            let setting_name = setting_id.translate();
+                            fl!("add-item", name = setting_name.as_str())
+                        })
+                        .control(
+                            widget::text_input(fl!("name"), name)
+                                .id(widget::Id::new(
+                                    "optional-select-dialog-add-item-text-input",
+                                ))
+                                .on_input(Message::ModifiableSelectAddDialogSetName)
+                                .on_submit(|name| {
+                                    Message::ModifiableSelectAddDialogSubmit(Some(name))
+                                }),
+                        )
+                        .primary_action(
+                            widget::button::suggested(fl!("create"))
+                                .on_press(Message::ModifiableSelectAddDialogSubmit(None)),
+                        )
+                        .secondary_action(
+                            widget::button::destructive(fl!("cancel"))
+                                .on_press(Message::CancelDialog),
+                        )
+                        .into(),
+                    Dialog::ModifiableSelectRemove(_setting_id, name) => widget::dialog()
+                        .title(fl!("remove-item", name = name.as_ref()))
+                        .body(fl!("remove-item-confirm", name = name.as_ref()))
+                        .primary_action(
+                            widget::button::destructive(fl!("remove"))
+                                .on_press(Message::ModifiableSelectRemoveDialogSubmit),
+                        )
+                        .secondary_action(
+                            widget::button::text(fl!("cancel")).on_press(Message::CancelDialog),
+                        )
+                        .into(),
+                    Dialog::ImportStringConfirm(setting_id, _text) => widget::dialog()
+                        .title(setting_id.translate())
+                        .body(
+                            if let Some((
+                                _,
+                                Setting::ImportString {
+                                    confirmation_message: Some(confirmation_message),
+                                },
+                            )) = self.settings.iter().find(|(id, _)| id == setting_id)
+                            {
+                                confirmation_message.as_str()
+                            } else {
+                                ""
+                            },
+                        )
+                        .primary_action(
+                            widget::button::suggested(fl!("confirm"))
+                                .on_press(Message::ConfirmImportString),
+                        )
+                        .secondary_action(
+                            widget::button::text(fl!("cancel")).on_press(Message::CancelDialog),
+                        )
+                        .into(),
                 })
-                .control(
-                    widget::text_input(fl!("name"), name)
-                        .id(widget::Id::new(
-                            "optional-select-dialog-add-item-text-input",
-                        ))
-                        .on_input(Message::ModifiableSelectAddDialogSetName)
-                        .on_submit(|name| Message::ModifiableSelectAddDialogSubmit(Some(name))),
-                )
-                .primary_action(
-                    widget::button::suggested(fl!("create"))
-                        .on_press(Message::ModifiableSelectAddDialogSubmit(None)),
-                )
-                .secondary_action(
-                    widget::button::destructive(fl!("cancel")).on_press(Message::CancelDialog),
-                )
-                .into(),
-            Dialog::ModifiableSelectRemove(_setting_id, name) => widget::dialog()
-                .title(fl!("remove-item", name = name.as_ref()))
-                .body(fl!("remove-item-confirm", name = name.as_ref()))
-                .primary_action(
-                    widget::button::destructive(fl!("remove"))
-                        .on_press(Message::ModifiableSelectRemoveDialogSubmit),
-                )
-                .secondary_action(
-                    widget::button::text(fl!("cancel")).on_press(Message::CancelDialog),
-                )
-                .into(),
-            Dialog::ImportStringConfirm(setting_id, _text) => widget::dialog()
-                .title(setting_id.translate())
-                .body(
-                    if let Some((
-                        _,
-                        Setting::ImportString {
-                            confirmation_message: Some(confirmation_message),
-                        },
-                    )) = self.settings.iter().find(|(id, _)| id == setting_id)
-                    {
-                        confirmation_message.as_str()
-                    } else {
-                        ""
-                    },
-                )
-                .primary_action(
-                    widget::button::suggested(fl!("confirm"))
-                        .on_press(Message::ConfirmImportString),
-                )
-                .secondary_action(
-                    widget::button::text(fl!("cancel")).on_press(Message::CancelDialog),
-                )
-                .into(),
-        })
+            })
     }
 
     pub fn view(&self) -> Element<'_, Message> {
         if let Some(custom_category) = self.nav_model.active_data::<CustomCategory>() {
             match custom_category {
-                CustomCategory::QuickPresets => {
-                    if let Some(quick_presets) = &self.quick_presets {
-                        widget::column()
-                            .push(
-                                widget::button::standard(fl!("create-quick-preset"))
-                                    .on_press(Message::ShowCreateQuickPresetDialog),
-                            )
-                            .push(quick_presets::quick_presets(
-                                quick_presets,
-                                Message::EditQuickPreset,
-                                Message::ActivateQuickPreset,
-                                Message::ShowDeleteQuickPresetDialog,
-                            ))
-                            .into()
-                    } else {
-                        widget::text(fl!("loading-item", item = fl!("quick-presets"))).into()
-                    }
-                }
+                CustomCategory::QuickPresets => self.quick_presets_model.view().map(Into::into),
                 CustomCategory::LegacyEqualizerMigration => {
                     if let Some(model) = &self.legacy_equalizer_migration {
                         model.view().map(Message::LegacyMigration)
@@ -428,46 +361,9 @@ impl DeviceSettingsModel {
             self.nav_model.active_data(),
             Some(CustomCategory::QuickPresets)
         ) {
-            self.editing_quick_preset
-                .as_ref()
-                .map(|editing_quick_preset| ContextDrawer {
-                    title: Some(editing_quick_preset.name.as_str().into()),
-                    header_actions: Vec::new(),
-                    header: None,
-                    content: widget::column()
-                        .extend(
-                            editing_quick_preset
-                                .fields
-                                .iter()
-                                .enumerate()
-                                .map(|(i, field)| {
-                                    widget::column()
-                                        .padding(8)
-                                        .push(
-                                            widget::toggler(field.is_enabled)
-                                                .label(field.setting_id.translate())
-                                                .width(Length::Fill)
-                                                .on_toggle(move |enabled| {
-                                                    Message::EditQuickPresetToggleField(i, enabled)
-                                                }),
-                                        )
-                                        .push(widget::text::body(settings::localize_value(
-                                            self.device.setting(&field.setting_id).as_ref(),
-                                            &field.value,
-                                        )))
-                                        .into()
-                                }),
-                        )
-                        .push(
-                            widget::button::standard(fl!("overwrite-with-current-settings"))
-                                .on_press(Message::SnapshotQuickPresetSettings(
-                                    editing_quick_preset.name.to_owned(),
-                                )),
-                        )
-                        .into(),
-                    footer: None,
-                    on_close: Message::EditQuickPresetClose,
-                })
+            self.quick_presets_model
+                .context_drawer()
+                .map(|context_drawer| context_drawer.map(Into::into))
         } else {
             None
         }
@@ -475,6 +371,12 @@ impl DeviceSettingsModel {
 
     pub fn update(&mut self, message: Message) -> Action {
         match message {
+            Message::QuickPresets(inner) => match self.quick_presets_model.update(inner) {
+                quick_presets::Action::Warning(text) => Action::Warning(text),
+                quick_presets::Action::None => Action::None,
+                quick_presets::Action::Task(task) => Action::Task(task.map(Into::into)),
+                quick_presets::Action::FocusTextInput(id) => Action::FocusTextInput(id),
+            },
             Message::SetSetting(setting_id, value) => {
                 let device = self.device.clone();
                 Action::Task(
@@ -511,160 +413,11 @@ impl DeviceSettingsModel {
                     Action::None
                 }
             }
-            Message::RefreshQuickPresets => Action::Task(self.refresh_quick_presets()),
             Message::RefreshSettings => Action::Task(self.refresh_settings()),
             Message::Warning(message) => Action::Warning(message),
-            Message::ActivateQuickPreset(index) => {
-                let Some(name) = self
-                    .quick_presets
-                    .as_ref()
-                    .and_then(|presets| presets.get(index))
-                    .map(|preset| preset.name.clone())
-                else {
-                    return Action::None;
-                };
-                let device = self.device.0.clone();
-                let quick_presets_handler = self.quick_presets_handler.clone();
-                Action::Task(
-                    Task::future(async move {
-                        quick_presets_handler
-                            .activate(device.as_ref(), name)
-                            .await
-                            .map_err(handle_soft_error!())?;
-                        Ok(Message::RefreshQuickPresets)
-                    })
-                    .map(coalesce_result),
-                )
-            }
-            Message::EditQuickPreset(index) => {
-                self.editing_quick_preset = self
-                    .quick_presets
-                    .as_ref()
-                    .and_then(|presets| presets.get(index))
-                    .cloned();
-                Action::None
-            }
-            Message::SetQuickPresets(quick_presets) => {
-                if let Some(editing_quick_preset) = &self.editing_quick_preset {
-                    self.editing_quick_preset = quick_presets
-                        .iter()
-                        .find(|preset| preset.name == editing_quick_preset.name)
-                        .cloned();
-                }
-                self.quick_presets = Some(quick_presets);
-                Action::None
-            }
-            Message::ShowCreateQuickPresetDialog => {
-                self.dialog = Some(Dialog::CreateQuickPreset(String::new()));
-                Action::FocusTextInput(widget::Id::new("create-quick-preset-name"))
-            }
-            Message::SetCreateQuickPresetName(name) => {
-                self.dialog = Some(Dialog::CreateQuickPreset(name));
-                Action::None
-            }
             Message::CancelDialog => {
                 self.dialog = None;
                 Action::None
-            }
-            Message::CreateQuickPreset(override_name) => {
-                let Some(Dialog::CreateQuickPreset(name)) = self.dialog.take() else {
-                    return Action::None;
-                };
-                let name = override_name.unwrap_or(name);
-
-                let device = self.device.clone();
-                let quick_presets_handler = self.quick_presets_handler.clone();
-                Action::Task(
-                    Task::future(async move {
-                        quick_presets_handler
-                            .save(device.as_ref(), name)
-                            .await
-                            .map_err(handle_soft_error!())?;
-                        Ok(Message::RefreshQuickPresets)
-                    })
-                    .map(coalesce_result),
-                )
-            }
-            Message::ShowDeleteQuickPresetDialog(index) => {
-                if let Some(quick_presets) = &self.quick_presets {
-                    self.dialog = quick_presets
-                        .get(index)
-                        .map(|preset| Dialog::DeleteQuickPreset(preset.name.to_owned()));
-                }
-                Action::None
-            }
-            Message::DeleteQuickPreset(name) => {
-                self.dialog = None;
-                let quick_presets_handler = self.quick_presets_handler.clone();
-                let device = self.device.clone();
-                Action::Task(
-                    Task::future(async move {
-                        quick_presets_handler
-                            .delete(device.as_ref(), name)
-                            .await
-                            .map_err(handle_soft_error!())?;
-                        Ok(Message::RefreshQuickPresets)
-                    })
-                    .map(coalesce_result),
-                )
-            }
-            Message::SnapshotQuickPresetSettings(name) => {
-                let device = self.device.clone();
-                let quick_presets_handler = self.quick_presets_handler.clone();
-                Action::Task(
-                    Task::future(async move {
-                        quick_presets_handler
-                            .save(device.as_ref(), name)
-                            .await
-                            .map_err(handle_soft_error!())?;
-                        Ok(Message::RefreshQuickPresets)
-                    })
-                    .map(coalesce_result),
-                )
-            }
-            Message::EditQuickPresetToggleField(field_index, is_enabled) => {
-                if let Some(preset) = &mut self.editing_quick_preset {
-                    let preset_name = preset.name.to_owned();
-
-                    // eagerly update the dispalyed value. ideally we would revert back to
-                    // what it was if the returned future fails.
-                    let field = &mut preset.fields[field_index];
-                    field.is_enabled = is_enabled;
-
-                    let setting_id = field.setting_id;
-                    let device = self.device.clone();
-                    let quick_presets_handler = self.quick_presets_handler.clone();
-                    return Action::Task(
-                        Task::future(async move {
-                            quick_presets_handler
-                                .toggle_field(device.as_ref(), preset_name, setting_id, is_enabled)
-                                .await
-                                .map_err(handle_soft_error!())?;
-                            Ok(Message::EditQuickPresetModified)
-                        })
-                        .map(coalesce_result),
-                    );
-                }
-                Action::None
-            }
-            Message::EditQuickPresetClose => {
-                self.editing_quick_preset = None;
-                Action::None
-            }
-            Message::EditQuickPresetModified => {
-                // TODO either modify in place instead of re-fetching all presets, or fetch only the modified preset
-                let quick_presets_handler = self.quick_presets_handler.clone();
-                let device = self.device.clone();
-                Action::Task(
-                    Task::future(async move {
-                        quick_presets_handler
-                            .quick_presets(device.as_ref())
-                            .await
-                            .map(Message::SetQuickPresets)
-                            .map_err(handle_soft_error!())
-                    })
-                    .map(coalesce_result),
-                )
             }
             Message::ShowModifiableSelectAddDialog(setting_id) => {
                 self.dialog = Some(Dialog::ModifiableSelectAdd(setting_id, String::new()));
