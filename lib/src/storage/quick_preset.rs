@@ -1,4 +1,4 @@
-use std::{collections::HashMap, panic::Location, str::FromStr};
+use std::{collections::HashMap, mem, panic::Location, str::FromStr};
 
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
@@ -30,45 +30,83 @@ pub fn fetch(
     model: DeviceModel,
     name: String,
 ) -> Result<QuickPreset, Error> {
-    let json: String = connection.query_row(
-        r#"SELECT json(fields) FROM quick_preset WHERE device_model = ?1 AND name = ?2"#,
-        (SqliteDeviceModel(model), &name),
-        |row| row.get(0),
+    let mut query = connection.prepare_cached(
+        r#"SELECT json(value) FROM quick_preset, json_each(fields) WHERE device_model = ?1 AND name = ?2"#,
     )?;
-    let fields = serde_json::from_str(&json).map_err(Error::from)?;
+    let fields = query
+        .query_map((SqliteDeviceModel(model), &name), |row| {
+            let json = row.get_ref(0)?.as_str()?;
+            match serde_json::from_str::<QuickPresetField>(json).map_err(Error::from) {
+                Ok(field) => Ok(Some(field)),
+                Err(err) => {
+                    // Log and ignore invalid fields. This is done so that things don't break when, for example, an
+                    // option is removed from a Setting::Select. We don't remove the invalid field from the database so
+                    // that no data is lost if the field becomes valid again in the future.
+                    tracing::warn!(
+                        message = "failed to parse quick preset field, skipping",
+                        quick_preset_name = name,
+                        field_json = json,
+                        error = ?err,
+                    );
+                    Ok(None)
+                }
+            }
+        })?
+        .filter_map(|result| result.transpose())
+        .collect::<Result<Vec<_>, _>>()?;
     Ok(QuickPreset { name, fields })
 }
 
 #[tracing::instrument]
 pub fn fetch_all(connection: &Connection, model: DeviceModel) -> Result<Vec<QuickPreset>, Error> {
-    let mut query = connection
-        .prepare_cached(r#"SELECT name, json(fields) FROM quick_preset WHERE device_model = ?1"#)?;
-    let rows = query.query([SqliteDeviceModel(model)])?;
-    rows.and_then(|row| {
-        let name: String = row.get(0)?;
-        let json: String = row.get(1)?;
-        Ok((name, json))
-    })
-    .filter_map(
-        |result: Result<(String, String), rusqlite::Error>| match result {
-            Ok((name, json)) => {
-                match serde_json::from_str::<Vec<QuickPresetField>>(&json).map_err(Error::from) {
-                    Ok(fields) => Some(Ok(QuickPreset { name, fields })),
-                    Err(err) => {
-                        tracing::error!(
-                            message = "failed to parse quick preset json",
-                            name = name,
-                            json = json,
-                            error = ?err,
-                        );
-                        None
-                    }
-                }
+    let mut query = connection.prepare_cached(
+        r#"SELECT name, json(value) as fields FROM quick_preset, json_each(fields) WHERE device_model = ?1 ORDER BY name"#,
+    )?;
+    let mut rows = query.query([SqliteDeviceModel(model)])?;
+
+    let mut quick_presets = Vec::new();
+    let mut preset_name: Option<String> = None;
+    let mut preset_fields = Vec::new();
+    while let Some(row) = rows.next().transpose() {
+        let row = row?;
+        let current_name = row.get_ref(0)?.as_str()?;
+        let current_json = row.get_ref(1)?.as_str()?;
+        if preset_name.is_none() {
+            preset_name = Some(current_name.to_owned());
+        } else if preset_name.as_ref().map(|s| s.as_str()) != Some(current_name) {
+            let group_name = preset_name
+                .replace(current_name.to_owned())
+                .expect("the previous if statement covers the none case");
+            quick_presets.push(QuickPreset {
+                name: group_name.to_owned(),
+                fields: mem::take(&mut preset_fields),
+            });
+        }
+
+        match serde_json::from_str::<QuickPresetField>(current_json).map_err(Error::from) {
+            Ok(field) => preset_fields.push(field),
+            Err(err) => {
+                // Log and ignore invalid fields. This is done so that things don't break when, for example, an
+                // option is removed from a Setting::Select. We don't remove the invalid field from the database so
+                // that no data is lost if the field becomes valid again in the future.
+                tracing::warn!(
+                    message = "failed to parse quick preset field, skipping",
+                    quick_preset_name = current_name,
+                    field_json = current_json,
+                    error = ?err,
+                );
             }
-            Err(err) => Some(Err(Error::from(err))),
-        },
-    )
-    .collect::<Result<Vec<QuickPreset>, Error>>()
+        }
+    }
+    if !preset_fields.is_empty() {
+        quick_presets.push(QuickPreset {
+            name: preset_name
+                .take()
+                .expect("if there is a field, there must also be a name"),
+            fields: preset_fields,
+        });
+    }
+    Ok(quick_presets)
 }
 
 /// If the QuickPreset does not exist yet, inserts it as is.

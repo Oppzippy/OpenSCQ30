@@ -51,6 +51,11 @@ pub enum Error {
         source: rusqlite::Error,
         location: &'static Location<'static>,
     },
+    #[error("sql error")]
+    RusqliteFromSqlError {
+        source: rusqlite::types::FromSqlError,
+        location: &'static Location<'static>,
+    },
     #[error("failed to deserialize json")]
     JsonError {
         source: serde_json::Error,
@@ -66,6 +71,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 impl_from_source_error_with_location!(Error::JsonError(serde_json::Error));
 impl_from_source_error_with_location!(Error::ParseError(strum::ParseError));
+impl_from_source_error_with_location!(Error::RusqliteFromSqlError(rusqlite::types::FromSqlError));
 impl_from_source_error_with_location!(Error::IOError(std::io::Error));
 
 impl From<rusqlite::Error> for Error {
