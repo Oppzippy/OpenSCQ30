@@ -453,6 +453,7 @@ where
         &self,
         setting_values: Vec<(SettingId, Value)>,
     ) -> device::Result<()> {
+        tracing::info!("set values: {setting_values:?}");
         self.module_collection
             .set_setting_values(&self.state_sender, setting_values)
             .await

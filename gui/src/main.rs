@@ -8,6 +8,7 @@ mod device_settings;
 pub mod equalizer_line;
 mod i18n;
 mod openscq30_v1_migration;
+mod throttle;
 mod utils;
 
 fn main() -> anyhow::Result<()> {

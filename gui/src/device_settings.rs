@@ -26,12 +26,14 @@ use crate::{
     app::DebugOpenSCQ30Device,
     fl, handle_soft_error,
     openscq30_v1_migration::{self, LegacyEqualizerProfile},
+    throttle,
     utils::coalesce_result,
 };
 
 #[derive(Debug, Clone)]
 pub enum Message {
     QuickPresets(quick_presets::Message),
+    Throttle(throttle::Message),
     SetSetting(SettingId, Value),
     SetEqualizerBand(SettingId, u8, i16),
     RefreshSettings,
@@ -57,6 +59,12 @@ impl From<quick_presets::Message> for Message {
     }
 }
 
+impl From<throttle::Message> for Message {
+    fn from(message: throttle::Message) -> Self {
+        Self::Throttle(message)
+    }
+}
+
 pub enum Action {
     Task(Task<Message>),
     Warning(String),
@@ -72,6 +80,7 @@ pub struct DeviceSettingsModel {
     legacy_equalizer_migration: Option<legacy_migration::LegacyMigrationModel>,
     import_strings: HashMap<SettingId, String>,
     quick_presets_model: quick_presets::QuickPresetsModel,
+    throttle: throttle::Throttle,
 }
 
 enum Dialog {
@@ -117,6 +126,7 @@ impl DeviceSettingsModel {
             quick_presets::QuickPresetsModel::new(device.clone(), quick_presets_handler);
 
         let mut model = Self {
+            throttle: throttle::Throttle::new(device.0.clone()),
             device,
             nav_model,
             settings: Vec::new(),
@@ -168,7 +178,7 @@ impl DeviceSettingsModel {
                 .settings_in_category(category_id)
                 .into_iter()
                 .flat_map(|setting_id| {
-                    self.device
+                    self.throttle
                         .setting(&setting_id)
                         .map(|value| (setting_id, value))
                 })
@@ -379,36 +389,40 @@ impl DeviceSettingsModel {
             },
             Message::SetSetting(setting_id, value) => {
                 let device = self.device.clone();
-                Action::Task(
-                    Task::future(async move {
-                        device
-                            .set_setting_values(vec![(setting_id, value)])
-                            .await
-                            .map_err(handle_soft_error!())?;
-                        Ok(Message::RefreshSettings)
-                    })
-                    .map(coalesce_result),
-                )
-            }
-            Message::SetEqualizerBand(setting_id, index, new_value) => {
-                let device = self.device.clone();
-                if let Some(Setting::Equalizer {
-                    setting: _,
-                    value: values,
-                }) = self.device.setting(&setting_id)
-                {
-                    let mut new_values = values.clone();
-                    new_values[index as usize] = new_value;
+                let should_throttle =
+                    matches!(device.setting(&setting_id), Some(Setting::I32Range { .. }));
+                if should_throttle {
+                    let maybe_task = self.throttle.set_setting(setting_id, value);
+                    _ = self.refresh_settings();
+                    maybe_task
+                        .map(|task| Action::Task(task.map(Into::into)))
+                        .unwrap_or(Action::None)
+                } else {
                     Action::Task(
                         Task::future(async move {
                             device
-                                .set_setting_values(vec![(setting_id, new_values.into())])
+                                .set_setting_values(vec![(setting_id, value)])
                                 .await
                                 .map_err(handle_soft_error!())?;
                             Ok(Message::RefreshSettings)
                         })
                         .map(coalesce_result),
                     )
+                }
+            }
+            Message::SetEqualizerBand(setting_id, index, new_value) => {
+                if let Some(Setting::Equalizer {
+                    setting: _,
+                    value: values,
+                }) = self.throttle.setting(&setting_id)
+                {
+                    let mut new_values = values.clone();
+                    new_values[index as usize] = new_value;
+                    let maybe_task = self.throttle.set_setting(setting_id, new_values.into());
+                    _ = self.refresh_settings();
+                    maybe_task
+                        .map(|task| Action::Task(task.map(Into::into)))
+                        .unwrap_or(Action::None)
                 } else {
                     Action::None
                 }
@@ -557,6 +571,11 @@ impl DeviceSettingsModel {
                     Action::None
                 }
             }
+            Message::Throttle(message) => match self.throttle.update(message) {
+                throttle::Action::Task(task) => Action::Task(task.map(Into::into)),
+                throttle::Action::Error(err) => Action::Task(Task::done(handle_soft_error!()(err))),
+                throttle::Action::None => Action::None,
+            },
         }
     }
 }
