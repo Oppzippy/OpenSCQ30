@@ -1,3 +1,5 @@
+use std::panic::Location;
+
 use rusqlite::Connection;
 
 use crate::devices::DeviceModel;
@@ -5,13 +7,22 @@ use crate::devices::DeviceModel;
 use super::{Error, type_conversions::SqliteDeviceModel};
 
 pub fn fetch(connection: &Connection, model: DeviceModel, name: String) -> Result<Vec<i16>, Error> {
-    let json: String = connection.query_row(
+    let mut query = connection.prepare_cached(
         r#"SELECT volume_adjustments FROM equalizer_profile WHERE device_model = ?1 AND name = ?2"#,
-        (SqliteDeviceModel(model), name),
-        |row| row.get(0),
     )?;
-    let volume_adjustments = serde_json::from_str(&json).map_err(Error::from)?;
-    Ok(volume_adjustments)
+    let mut rows = query.query_and_then(
+        (SqliteDeviceModel(model), name),
+        |row| -> Result<_, Error> {
+            let json = row.get_ref(0)?.as_str()?;
+            let volume_adjustments: Vec<i16> = serde_json::from_str(&json)?;
+            Ok(volume_adjustments)
+        },
+    )?;
+    rows.next()
+        .ok_or(Error::NotFound {
+            location: Location::caller(),
+        })
+        .flatten()
 }
 
 pub fn fetch_all(
@@ -22,22 +33,13 @@ pub fn fetch_all(
         r#"SELECT name, volume_adjustments FROM equalizer_profile WHERE device_model = ?1 ORDER BY name"#,
     )?;
     let rows = query.query([SqliteDeviceModel(model)])?;
-    rows.and_then(|row| {
-        let name: String = row.get(0)?;
-        let volume_adjustments_json: String = row.get(1)?;
-        Ok((name, volume_adjustments_json))
+    rows.and_then(|row| -> Result<_, Error> {
+        let name = row.get(0)?;
+        let volume_adjustments_json = row.get_ref(1)?.as_str()?;
+        let volume_adjustments: Vec<i16> = serde_json::from_str(&volume_adjustments_json)?;
+        Ok((name, volume_adjustments))
     })
-    .map(
-        |result: Result<(String, String), rusqlite::Error>| match result {
-            Ok((name, volume_adjustments_json)) => {
-                let volume_adjustments: Vec<i16> =
-                    serde_json::from_str(&volume_adjustments_json).map_err(Error::from)?;
-                Ok((name, volume_adjustments))
-            }
-            Err(err) => Err(Error::from(err)),
-        },
-    )
-    .collect::<Result<Vec<(String, Vec<i16>)>, Error>>()
+    .collect::<Result<Vec<_>, _>>()
 }
 
 pub fn upsert(

@@ -157,19 +157,14 @@ fn enabled_fields(
                 device_model = ?1 AND name = ?2"#,
     )?;
     statement
-        .query_map((SqliteDeviceModel(model), name), |row| {
-            let setting_id_string: String = row.get(0)?;
-            let is_enabled: bool = row.get(1)?;
-            Ok((setting_id_string, is_enabled))
-        })?
-        .map(|result| match result {
-            Ok((setting_id_string, is_enabled)) => {
-                let setting_id: SettingId =
-                    SettingId::from_str(&setting_id_string).map_err(Error::from)?;
+        .query_and_then(
+            (SqliteDeviceModel(model), name),
+            |row: &rusqlite::Row| -> Result<_, Error> {
+                let setting_id = SettingId::from_str(row.get_ref(0)?.as_str()?)?;
+                let is_enabled: bool = row.get(1)?;
                 Ok((setting_id, is_enabled))
-            }
-            Err(err) => Err(Error::from(err)),
-        })
+            },
+        )?
         .collect::<Result<HashMap<_, _>, _>>()
 }
 
@@ -200,7 +195,7 @@ pub fn toggle_field(
         (
             SqliteDeviceModel(model),
             name,
-            setting_id.to_string(),
+            <SettingId as Into<&'static str>>::into(setting_id),
             if is_enabled { "true" } else { "false" },
         ),
     )?;
