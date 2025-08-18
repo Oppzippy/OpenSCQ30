@@ -285,6 +285,10 @@ mod tests {
                     },
                 ],
             },
+            QuickPreset {
+                name: "Preset 3".into(),
+                fields: vec![],
+            },
         ]
     }
 
