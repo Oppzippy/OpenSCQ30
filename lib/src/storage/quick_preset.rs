@@ -10,14 +10,14 @@ use crate::{
 
 use super::{Error, type_conversions::SqliteDeviceModel};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct QuickPreset {
     pub name: String,
     pub fields: Vec<QuickPresetField>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct QuickPresetField {
     pub setting_id: SettingId,
@@ -216,4 +216,184 @@ pub fn delete(connection: &Connection, model: DeviceModel, name: String) -> Resu
         (SqliteDeviceModel(model), name),
     )?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{borrow::Cow, collections::HashSet, hash::RandomState};
+
+    use crate::{api::settings::Value, storage::OpenSCQ30Database};
+
+    use super::*;
+
+    fn test_data() -> Vec<QuickPreset> {
+        vec![
+            QuickPreset {
+                name: "Preset 1".into(),
+                fields: vec![
+                    QuickPresetField {
+                        setting_id: SettingId::AmbientSoundMode,
+                        value: Cow::from("normal").into(),
+                        is_enabled: true,
+                    },
+                    QuickPresetField {
+                        setting_id: SettingId::NoiseCancelingMode,
+                        value: Cow::from("indoor").into(),
+                        is_enabled: false,
+                    },
+                ],
+            },
+            QuickPreset {
+                name: "Preset 2".into(),
+                fields: vec![
+                    QuickPresetField {
+                        setting_id: SettingId::AmbientSoundMode,
+                        value: Value::I32(5),
+                        is_enabled: true,
+                    },
+                    QuickPresetField {
+                        setting_id: SettingId::NoiseCancelingMode,
+                        value: Value::OptionalString(Some("Asdf".into())),
+                        is_enabled: false,
+                    },
+                ],
+            },
+            QuickPreset {
+                name: "Preset 3".into(),
+                fields: vec![
+                    QuickPresetField {
+                        setting_id: SettingId::ExportCustomEqualizerProfilesOutput,
+                        value: Value::StringVec(vec!["1".into(), "2".into()]),
+                        is_enabled: true,
+                    },
+                    QuickPresetField {
+                        setting_id: SettingId::NoiseCancelingMode,
+                        value: Value::I32(2),
+                        is_enabled: false,
+                    },
+                ],
+            },
+        ]
+    }
+
+    #[tokio::test]
+    async fn test_fetch_all() {
+        let db = OpenSCQ30Database::new_in_memory().await.unwrap();
+        let test_data = test_data();
+        for preset in &test_data {
+            db.upsert_quick_preset(DeviceModel::SoundcoreA3004, preset.clone())
+                .await
+                .unwrap();
+        }
+        // insert one for another device to ensure it is excluded from the results
+        db.upsert_quick_preset(
+            DeviceModel::SoundcoreA3028,
+            QuickPreset {
+                name: "Preset 1".into(),
+                fields: vec![QuickPresetField {
+                    setting_id: SettingId::LeftDoublePress,
+                    value: 100.into(),
+                    is_enabled: true,
+                }],
+            },
+        )
+        .await
+        .unwrap();
+
+        let fetched_presets = db
+            .fetch_all_quick_presets(DeviceModel::SoundcoreA3004)
+            .await
+            .unwrap();
+        assert_eq!(
+            HashSet::<_, RandomState>::from_iter(test_data),
+            HashSet::from_iter(fetched_presets)
+        );
+    }
+
+    #[tokio::test]
+    async fn test_fetch() {
+        let db = OpenSCQ30Database::new_in_memory().await.unwrap();
+        let test_data = test_data();
+        for preset in &test_data {
+            db.upsert_quick_preset(DeviceModel::SoundcoreA3004, preset.clone())
+                .await
+                .unwrap();
+        }
+        // insert one for another device to ensure it is excluded from the results
+        db.upsert_quick_preset(
+            DeviceModel::SoundcoreA3028,
+            QuickPreset {
+                name: "Preset 1".into(),
+                fields: vec![QuickPresetField {
+                    setting_id: SettingId::LeftDoublePress,
+                    value: 100.into(),
+                    is_enabled: true,
+                }],
+            },
+        )
+        .await
+        .unwrap();
+
+        let fetched_preset = db
+            .fetch_quick_preset(DeviceModel::SoundcoreA3004, "Preset 1".into())
+            .await
+            .unwrap();
+        assert_eq!(test_data[0], fetched_preset);
+    }
+
+    #[tokio::test]
+    async fn test_delete() {
+        let db = OpenSCQ30Database::new_in_memory().await.unwrap();
+        let test_data = test_data();
+        for preset in &test_data {
+            db.upsert_quick_preset(DeviceModel::SoundcoreA3004, preset.clone())
+                .await
+                .unwrap();
+        }
+        // insert one for another device to ensure it is excluded from the results
+        db.upsert_quick_preset(
+            DeviceModel::SoundcoreA3028,
+            QuickPreset {
+                name: "Preset 1".into(),
+                fields: vec![QuickPresetField {
+                    setting_id: SettingId::LeftDoublePress,
+                    value: 100.into(),
+                    is_enabled: true,
+                }],
+            },
+        )
+        .await
+        .unwrap();
+
+        db.delete_quick_preset(DeviceModel::SoundcoreA3004, "Preset 1".into())
+            .await
+            .unwrap();
+        let fetch_one_err = db
+            .fetch_quick_preset(DeviceModel::SoundcoreA3004, "Preset 1".into())
+            .await
+            .unwrap_err();
+        assert!(
+            matches!(fetch_one_err, Error::NotFound { .. }),
+            "wanted not found, got {fetch_one_err:?}",
+        );
+
+        let fetched_presets = db
+            .fetch_all_quick_presets(DeviceModel::SoundcoreA3004)
+            .await
+            .unwrap();
+        assert!(
+            fetched_presets.len() > 0,
+            "the other presets for the same device should not have been deleted",
+        );
+        assert!(
+            fetched_presets
+                .iter()
+                .all(|preset| preset.name != "Preset 1"),
+            "the preset should not show up when fetching all presets",
+        );
+
+        db.fetch_quick_preset(DeviceModel::SoundcoreA3028, "Preset 1".into())
+            .await
+            .expect("the other device's preset with the same name should not have been deleted");
+    }
 }

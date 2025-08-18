@@ -7,7 +7,7 @@ use thiserror::Error;
 
 use crate::i18n::fl;
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, EnumDiscriminants)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize, EnumDiscriminants)]
 #[serde(tag = "type", content = "value", rename_all = "camelCase")]
 #[strum_discriminants(derive(strum::Display))]
 pub enum Value {
@@ -23,7 +23,7 @@ pub enum Value {
     ModifiableSelectCommand(ModifiableSelectCommand),
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, EnumDiscriminants)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize, EnumDiscriminants)]
 #[serde(tag = "type", content = "name", rename_all = "camelCase")]
 pub enum ModifiableSelectCommand {
     Add(Cow<'static, str>),
