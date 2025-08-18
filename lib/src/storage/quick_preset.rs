@@ -71,8 +71,9 @@ pub fn fetch(
 
 #[tracing::instrument]
 pub fn fetch_all(connection: &Connection, model: DeviceModel) -> Result<Vec<QuickPreset>, Error> {
+    // The LEFT JOIN ensures that we still get the names of quick presets with no fields
     let mut query = connection.prepare_cached(
-        r#"SELECT name, json(value) as fields FROM quick_preset, json_each(fields) WHERE device_model = ?1 ORDER BY name"#,
+        r#"SELECT name, json(value) as fields FROM quick_preset LEFT JOIN json_each(fields) WHERE device_model = ?1 ORDER BY name"#,
     )?;
     let mut rows = query.query([SqliteDeviceModel(model)])?;
 
@@ -82,7 +83,14 @@ pub fn fetch_all(connection: &Connection, model: DeviceModel) -> Result<Vec<Quic
     while let Some(row) = rows.next().transpose() {
         let row = row?;
         let current_name = row.get_ref(0)?.as_str()?;
-        let current_json = row.get_ref(1)?.as_str()?;
+        let Some(current_json) = row.get_ref(1)?.as_str_or_null()? else {
+            // This will only be None for quick presets that have 0 fields, thanks to the LEFT JOIN
+            quick_presets.push(QuickPreset {
+                name: current_name.to_owned(),
+                fields: Vec::new(),
+            });
+            continue;
+        };
         if preset_name.is_none() {
             preset_name = Some(current_name.to_owned());
         } else if preset_name.as_ref().map(|s| s.as_str()) != Some(current_name) {
@@ -272,6 +280,10 @@ mod tests {
             },
             QuickPreset {
                 name: "Preset 3".into(),
+                fields: vec![],
+            },
+            QuickPreset {
+                name: "Preset 4".into(),
                 fields: vec![
                     QuickPresetField {
                         setting_id: SettingId::ExportCustomEqualizerProfilesOutput,
@@ -286,7 +298,7 @@ mod tests {
                 ],
             },
             QuickPreset {
-                name: "Preset 3".into(),
+                name: "Preset 5".into(),
                 fields: vec![],
             },
         ]
