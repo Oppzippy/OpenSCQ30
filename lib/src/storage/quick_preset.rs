@@ -30,6 +30,18 @@ pub fn fetch(
     model: DeviceModel,
     name: String,
 ) -> Result<QuickPreset, Error> {
+    let mut query = connection
+        .prepare_cached(r#"SELECT 1 FROM quick_preset WHERE device_model = ?1 AND name = ?2"#)?;
+    if query
+        .query((SqliteDeviceModel(model), &name))?
+        .next()?
+        .is_none()
+    {
+        return Err(Error::NotFound {
+            location: Location::caller(),
+        });
+    }
+
     let mut query = connection.prepare_cached(
         r#"SELECT json(value) FROM quick_preset, json_each(fields) WHERE device_model = ?1 AND name = ?2"#,
     )?;
