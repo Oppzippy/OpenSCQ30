@@ -80,7 +80,7 @@ class NotificationTest : OpenSCQ30RootTestBase() {
         assertFalse(uiDevice.hasObject(notificationTitle))
         uiDevice.pressBack()
 
-        composeRule.onNodeWithContentDescription("Refresh").assertExists()
+        composeRule.onNodeWithContentDescription(getString(R.string.info)).assertExists()
     }
 
     @Test
