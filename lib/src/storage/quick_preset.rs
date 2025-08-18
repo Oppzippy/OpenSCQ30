@@ -426,6 +426,95 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn test_upsert() {
+        let db = OpenSCQ30Database::new_in_memory().await.unwrap();
+        db.upsert_quick_preset(
+            DeviceModel::SoundcoreA3004,
+            QuickPreset {
+                name: "Preset 1".into(),
+                fields: vec![
+                    QuickPresetField {
+                        setting_id: SettingId::AmbientSoundMode,
+                        value: Cow::from("normal").into(),
+                        is_enabled: true,
+                    },
+                    QuickPresetField {
+                        setting_id: SettingId::NoiseCancelingMode,
+                        value: Cow::from("indoor").into(),
+                        is_enabled: false,
+                    },
+                    QuickPresetField {
+                        setting_id: SettingId::TransparencyMode,
+                        value: Cow::from("fullyTransparent").into(),
+                        is_enabled: false,
+                    },
+                ],
+            },
+        )
+        .await
+        .unwrap();
+
+        db.upsert_quick_preset(
+            DeviceModel::SoundcoreA3004,
+            QuickPreset {
+                name: "Preset 1".into(),
+                fields: vec![
+                    QuickPresetField {
+                        setting_id: SettingId::AmbientSoundMode,
+                        // change to transparency
+                        value: Cow::from("transparency").into(),
+                        // change to disabled, but this will be ignored
+                        is_enabled: false,
+                    },
+                    QuickPresetField {
+                        setting_id: SettingId::NoiseCancelingMode,
+                        value: Cow::from("indoor").into(),
+                        // change to enabled
+                        is_enabled: true,
+                    },
+                    // remove transparency mode field
+                    // add a new field
+                    QuickPresetField {
+                        setting_id: SettingId::BatteryLevel,
+                        value: 5.into(),
+                        is_enabled: false,
+                    },
+                ],
+            },
+        )
+        .await
+        .unwrap();
+
+        let preset = db
+            .fetch_quick_preset(DeviceModel::SoundcoreA3004, "Preset 1".into())
+            .await
+            .expect("the other device's preset with the same name should not have been deleted");
+        assert_eq!(
+            preset,
+            QuickPreset {
+                name: "Preset 1".into(),
+                fields: vec![
+                    QuickPresetField {
+                        setting_id: SettingId::AmbientSoundMode,
+                        value: Cow::from("transparency").into(),
+                        is_enabled: true,
+                    },
+                    QuickPresetField {
+                        setting_id: SettingId::NoiseCancelingMode,
+                        value: Cow::from("indoor").into(),
+                        is_enabled: true,
+                    },
+                    QuickPresetField {
+                        setting_id: SettingId::BatteryLevel,
+                        value: 5.into(),
+                        is_enabled: false,
+                    },
+                ],
+            },
+        );
+    }
+
+    #[tokio::test]
     async fn test_toggle_field() {
         let db = OpenSCQ30Database::new_in_memory().await.unwrap();
         let test_data = test_data();
