@@ -211,7 +211,7 @@ pub fn toggle_field(
         SET
             fields = jsonb_replace(fields, '$[' || (SELECT key FROM target_field_index) || '].isEnabled', json(?4))
         WHERE
-            device_model = ?1 AND name = ?2"#,
+            device_model = ?1 AND name = ?2 AND (SELECT COUNT(*) FROM target_field_index) = 1"#,
         (
             SqliteDeviceModel(model),
             name,
@@ -423,5 +423,114 @@ mod tests {
         db.fetch_quick_preset(DeviceModel::SoundcoreA3028, "Preset 1".into())
             .await
             .expect("the other device's preset with the same name should not have been deleted");
+    }
+
+    #[tokio::test]
+    async fn test_toggle_field() {
+        let db = OpenSCQ30Database::new_in_memory().await.unwrap();
+        let test_data = test_data();
+        for preset in &test_data {
+            db.upsert_quick_preset(DeviceModel::SoundcoreA3004, preset.clone())
+                .await
+                .unwrap();
+        }
+        // insert one for another device to ensure it is not changed
+        db.upsert_quick_preset(DeviceModel::SoundcoreA3028, test_data[0].clone())
+            .await
+            .unwrap();
+
+        db.toggle_quick_preset_field(
+            DeviceModel::SoundcoreA3004,
+            "Preset 1".into(),
+            SettingId::AmbientSoundMode,
+            false,
+        )
+        .await
+        .unwrap();
+
+        let fetched_preset = db
+            .fetch_quick_preset(DeviceModel::SoundcoreA3004, "Preset 1".into())
+            .await
+            .unwrap();
+        assert_eq!(
+            test_data[0]
+                .fields
+                .iter()
+                .find(|entry| entry.setting_id == SettingId::AmbientSoundMode)
+                .unwrap()
+                .is_enabled,
+            true,
+            "Test data is not as expected",
+        );
+        assert_eq!(
+            fetched_preset
+                .fields
+                .iter()
+                .find(|entry| entry.setting_id == SettingId::AmbientSoundMode)
+                .unwrap()
+                .is_enabled,
+            false,
+        );
+
+        let other_device_fetched_preset = db
+            .fetch_quick_preset(DeviceModel::SoundcoreA3028, "Preset 1".into())
+            .await
+            .unwrap();
+        assert_eq!(
+            test_data[0], other_device_fetched_preset,
+            "the other device's quick preset should not be modified",
+        );
+    }
+
+    #[tokio::test]
+    async fn test_toggle_field_on_nonexistant_preset() {
+        let db = OpenSCQ30Database::new_in_memory().await.unwrap();
+        let test_data = test_data();
+        for preset in &test_data {
+            db.upsert_quick_preset(DeviceModel::SoundcoreA3004, preset.clone())
+                .await
+                .unwrap();
+        }
+
+        let err = db
+            .toggle_quick_preset_field(
+                DeviceModel::SoundcoreA3004,
+                "Preset Does Not Exist".into(),
+                SettingId::AmbientSoundMode,
+                false,
+            )
+            .await
+            .unwrap_err();
+
+        assert!(
+            matches!(err, Error::NotFound { .. }),
+            "should be not found: {err:?}",
+        );
+    }
+
+    #[tokio::test]
+    async fn test_toggle_field_on_nonexistant_field() {
+        let db = OpenSCQ30Database::new_in_memory().await.unwrap();
+        let test_data = test_data();
+        for preset in &test_data {
+            db.upsert_quick_preset(DeviceModel::SoundcoreA3004, preset.clone())
+                .await
+                .unwrap();
+        }
+
+        let err = db
+            .toggle_quick_preset_field(
+                DeviceModel::SoundcoreA3004,
+                "Preset 1".into(),
+                SettingId::FirmwareVersionLeft,
+                false,
+            )
+            .await
+            .unwrap_err();
+
+        assert!(
+            matches!(err, Error::NotFound { .. }),
+            "should be not found: {err:?}",
+        );
     }
 }
