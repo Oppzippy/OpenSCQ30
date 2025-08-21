@@ -1,19 +1,25 @@
 use std::collections::HashMap;
 
-use crate::devices::soundcore::{
-    a3931::{packets::A3931StateUpdatePacket, state::A3931State},
-    standard::{
-        macros::soundcore_device,
-        modules::sound_modes::AvailableSoundModes,
-        packet::{
-            inbound::{SerialNumberAndFirmwareVersionUpdatePacket, TryIntoInboundPacket},
-            outbound::{
-                OutboundPacketBytesExt, RequestSerialNumberAndFirmwareVersionPacket,
-                RequestStatePacket,
+use openscq30_i18n::Translate;
+use strum::{IntoStaticStr, VariantArray};
+
+use crate::{
+    devices::soundcore::{
+        a3931::{packets::A3931StateUpdatePacket, state::A3931State},
+        standard::{
+            macros::soundcore_device,
+            modules::sound_modes::AvailableSoundModes,
+            packet::{
+                inbound::{SerialNumberAndFirmwareVersionUpdatePacket, TryIntoInboundPacket},
+                outbound::{
+                    OutboundPacketBytesExt, RequestSerialNumberAndFirmwareVersionPacket,
+                    RequestStatePacket,
+                },
             },
+            structures::{AmbientSoundMode, TransparencyMode},
         },
-        structures::{AmbientSoundMode, TransparencyMode},
     },
+    i18n::fl,
 };
 
 mod packets;
@@ -45,6 +51,7 @@ soundcore_device!(
         });
         builder.equalizer_with_drc().await;
         builder.button_configuration();
+        builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.tws_status();
         builder.dual_battery();
         builder.serial_number_and_dual_firmware_version();
@@ -62,3 +69,27 @@ soundcore_device!(
         ])
     },
 );
+
+#[repr(u8)]
+#[derive(IntoStaticStr, VariantArray)]
+pub enum AutoPowerOffDuration {
+    #[strum(serialize = "5m")]
+    FiveMinutes = 0,
+    #[strum(serialize = "10m")]
+    TenMinutes = 1,
+    #[strum(serialize = "30m")]
+    ThirtyMinutes = 2,
+    #[strum(serialize = "1h")]
+    OneHour = 3,
+}
+
+impl Translate for AutoPowerOffDuration {
+    fn translate(&self) -> String {
+        match self {
+            AutoPowerOffDuration::FiveMinutes => fl!("x-minutes", minutes = 5),
+            AutoPowerOffDuration::TenMinutes => fl!("x-minutes", minutes = 10),
+            AutoPowerOffDuration::ThirtyMinutes => fl!("x-minutes", minutes = 30),
+            AutoPowerOffDuration::OneHour => fl!("x-minutes", minutes = 60),
+        }
+    }
+}

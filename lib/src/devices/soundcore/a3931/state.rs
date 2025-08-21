@@ -2,8 +2,8 @@ use crate::{
     devices::soundcore::standard::{
         packet::inbound::SerialNumberAndFirmwareVersionUpdatePacket,
         structures::{
-            DualBattery, DualFirmwareVersion, EqualizerConfiguration, MultiButtonConfiguration,
-            SerialNumber, SoundModes, TwsStatus,
+            AutoPowerOff, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
+            MultiButtonConfiguration, SerialNumber, SoundModes, TwsStatus,
         },
     },
     macros::impl_as_ref_for_field,
@@ -20,8 +20,7 @@ pub struct A3931State {
     sound_modes: SoundModes,
     side_tone: bool,
     touch_tone: bool,
-    auto_power_off_on: bool,
-    auto_power_off_index: u8, // 0 to 3
+    auto_power_off: AutoPowerOff,
     serial_number: SerialNumber,
     dual_firmware_version: DualFirmwareVersion,
 }
@@ -35,6 +34,7 @@ impl_as_ref_for_field!(
         sound_modes: SoundModes,
         serial_number: SerialNumber,
         dual_firmware_version: DualFirmwareVersion,
+        auto_power_off: AutoPowerOff,
     }
 );
 
@@ -51,8 +51,7 @@ impl A3931State {
             sound_modes: state_update_packet.sound_modes,
             side_tone: state_update_packet.side_tone,
             touch_tone: state_update_packet.touch_tone,
-            auto_power_off_on: state_update_packet.auto_power_off_on,
-            auto_power_off_index: state_update_packet.auto_power_off_index,
+            auto_power_off: state_update_packet.auto_power_off,
             serial_number: sn_and_firmware.serial_number,
             dual_firmware_version: sn_and_firmware.dual_firmware_version,
         }
@@ -67,8 +66,7 @@ impl A3931State {
             sound_modes,
             side_tone,
             touch_tone,
-            auto_power_off_on,
-            auto_power_off_index,
+            auto_power_off,
         } = packet;
         self.tws_status = tws_status;
         self.battery = battery;
@@ -77,7 +75,6 @@ impl A3931State {
         self.sound_modes = sound_modes;
         self.side_tone = side_tone;
         self.touch_tone = touch_tone;
-        self.auto_power_off_on = auto_power_off_on;
-        self.auto_power_off_index = auto_power_off_index;
+        self.auto_power_off = auto_power_off;
     }
 }

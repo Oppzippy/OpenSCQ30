@@ -21,9 +21,8 @@ use crate::{
             },
             packet_manager::PacketHandler,
             structures::{
-                AgeRange, AutoPowerOff, AutoPowerOffDurationIndex, BasicHearId,
-                EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber, SingleBattery,
-                SoundModes,
+                AgeRange, AutoPowerOff, BasicHearId, EqualizerConfiguration, FirmwareVersion,
+                Gender, SerialNumber, SingleBattery, SoundModes,
             },
         },
     },
@@ -147,14 +146,18 @@ impl ExtraFields {
     ) -> IResult<&'a [u8], Self, E> {
         map_opt(
             (
-                le_u8, take_bool, take_bool, take_bool, le_u8, take_bool, take_bool,
+                le_u8,
+                take_bool,
+                take_bool,
+                AutoPowerOff::take,
+                take_bool,
+                take_bool,
             ),
             |(
                 unknown1,
                 touch_control,
                 dual_connections,
-                auto_power_off_enabled,
-                auto_power_off_duration_index,
+                auto_power_off,
                 ambient_sound_prompt_tone,
                 battery_alert_prompt_tone,
             )| {
@@ -162,10 +165,7 @@ impl ExtraFields {
                     unknown1,
                     touch_control,
                     dual_connections,
-                    auto_power_off: AutoPowerOff {
-                        is_enabled: auto_power_off_enabled,
-                        duration: AutoPowerOffDurationIndex(auto_power_off_duration_index),
-                    },
+                    auto_power_off,
                     ambient_sound_prompt_tone,
                     battery_alert_prompt_tone,
                 })
@@ -174,16 +174,18 @@ impl ExtraFields {
         .parse_complete(input)
     }
 
-    fn bytes(&self) -> [u8; 7] {
+    fn bytes(&self) -> impl IntoIterator<Item = u8> {
         [
             self.unknown1,
             self.touch_control.into(),
             self.dual_connections.into(),
-            self.auto_power_off.is_enabled.into(),
-            self.auto_power_off.duration.0,
+        ]
+        .into_iter()
+        .chain(self.auto_power_off.bytes())
+        .chain([
             self.ambient_sound_prompt_tone.into(),
             self.battery_alert_prompt_tone.into(),
-        ]
+        ])
     }
 }
 
