@@ -1,4 +1,7 @@
-use std::collections::{HashMap, hash_map};
+use std::{
+    collections::{HashMap, hash_map},
+    marker::PhantomData,
+};
 
 use async_trait::async_trait;
 use thiserror::Error;
@@ -130,6 +133,90 @@ impl SettingHandlerError {
         settings::Error {
             setting_id,
             source: Box::new(self),
+        }
+    }
+}
+
+/// Should only be used by OptionalSettingHandler
+pub enum AsRefMut<'a, T> {
+    Ref(&'a T),
+    Mut(&'a mut T),
+}
+impl<'a, T> AsRef<T> for AsRefMut<'a, T> {
+    fn as_ref(&self) -> &T {
+        match self {
+            AsRefMut::Ref(r) => r,
+            AsRefMut::Mut(m) => m,
+        }
+    }
+}
+impl<'a, T> AsMut<T> for AsRefMut<'a, T> {
+    fn as_mut(&mut self) -> &mut T {
+        match self {
+            AsRefMut::Ref(_r) => unreachable!(),
+            AsRefMut::Mut(m) => m,
+        }
+    }
+}
+
+pub struct OptionalSettingHandler<Inner, OptionTRef, T>
+where
+    Inner: for<'a> SettingHandler<AsRefMut<'a, T>> + Send + Sync,
+    OptionTRef: AsRef<Option<T>> + AsMut<Option<T>> + Send + Sync,
+    T: Send + Sync,
+{
+    inner: Inner,
+    _a: PhantomData<OptionTRef>,
+    _b: PhantomData<T>,
+}
+
+impl<Inner, OptionTRef, T> OptionalSettingHandler<Inner, OptionTRef, T>
+where
+    Inner: for<'a> SettingHandler<AsRefMut<'a, T>> + Send + Sync,
+    OptionTRef: AsRef<Option<T>> + AsMut<Option<T>> + Send + Sync,
+    T: Send + Sync,
+{
+    pub fn new(inner: Inner) -> Self {
+        Self {
+            inner,
+            _a: PhantomData,
+            _b: PhantomData,
+        }
+    }
+}
+
+#[async_trait]
+impl<Inner, OptionTRef, T> SettingHandler<OptionTRef>
+    for OptionalSettingHandler<Inner, OptionTRef, T>
+where
+    Inner: for<'a> SettingHandler<AsRefMut<'a, T>> + Send + Sync,
+    OptionTRef: AsRef<Option<T>> + AsMut<Option<T>> + Send + Sync,
+    T: Send + Sync,
+{
+    fn settings(&self) -> Vec<SettingId> {
+        self.inner.settings()
+    }
+
+    fn get(&self, maybe_state: &OptionTRef, setting_id: &SettingId) -> Option<Setting> {
+        if let Some(state) = maybe_state.as_ref() {
+            self.inner.get(&AsRefMut::Ref(state), setting_id)
+        } else {
+            None
+        }
+    }
+
+    async fn set(
+        &self,
+        maybe_state: &mut OptionTRef,
+        setting_id: &SettingId,
+        value: Value,
+    ) -> SettingHandlerResult<()> {
+        if let Some(state) = maybe_state.as_mut() {
+            self.inner
+                .set(&mut AsRefMut::Mut(state), setting_id, value)
+                .await
+        } else {
+            Err(SettingHandlerError::DoesNotExist)
         }
     }
 }

@@ -25,6 +25,44 @@ impl<ConnectionType: RfcommConnection> AutoPowerOffStateModifier<ConnectionType>
 impl<ConnectionType, T> StateModifier<T> for AutoPowerOffStateModifier<ConnectionType>
 where
     ConnectionType: RfcommConnection + Send + Sync,
+    T: AsMut<AutoPowerOff> + AsRef<AutoPowerOff> + Clone + Send + Sync,
+{
+    async fn move_to_state(
+        &self,
+        state_sender: &watch::Sender<T>,
+        target_state: &T,
+    ) -> device::Result<()> {
+        let target = target_state.as_ref();
+        {
+            let state = state_sender.borrow();
+            let current = state.as_ref();
+            if current == target {
+                return Ok(());
+            }
+        }
+
+        self.packet_io
+            .send_with_response(&SetAutoPowerOffPacket(*target).into())
+            .await?;
+        state_sender.send_modify(|state| *state.as_mut() = *target);
+        Ok(())
+    }
+}
+
+pub struct OptionalAutoPowerOffStateModifier<ConnectionType: RfcommConnection> {
+    packet_io: Arc<PacketIOController<ConnectionType>>,
+}
+
+impl<ConnectionType: RfcommConnection> OptionalAutoPowerOffStateModifier<ConnectionType> {
+    pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
+        Self { packet_io }
+    }
+}
+
+#[async_trait]
+impl<ConnectionType, T> StateModifier<T> for OptionalAutoPowerOffStateModifier<ConnectionType>
+where
+    ConnectionType: RfcommConnection + Send + Sync,
     T: AsMut<Option<AutoPowerOff>> + AsRef<Option<AutoPowerOff>> + Clone + Send + Sync,
 {
     async fn move_to_state(
