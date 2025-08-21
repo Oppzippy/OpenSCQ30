@@ -1,6 +1,7 @@
 use std::{marker::PhantomData, pin::Pin, sync::Arc};
 
 use async_trait::async_trait;
+use openscq30_i18n::Translate;
 use tokio::{
     select,
     sync::{Semaphore, mpsc, watch},
@@ -12,7 +13,10 @@ use crate::{
         device::{self, OpenSCQ30Device, OpenSCQ30DeviceRegistry},
         settings::{CategoryId, Setting, SettingId, Value},
     },
-    devices::{DeviceModel, soundcore},
+    devices::{
+        DeviceModel,
+        soundcore::{self, standard::structures::AutoPowerOff},
+    },
     storage::OpenSCQ30Database,
 };
 
@@ -337,6 +341,16 @@ where
         StateType: AsRef<TwsStatus> + AsMut<TwsStatus>,
     {
         self.module_collection.add_tws_status();
+    }
+
+    pub fn optional_auto_power_off<Duration>(&mut self, durations: &'static [Duration])
+    where
+        StateType: AsRef<Option<AutoPowerOff>> + AsMut<Option<AutoPowerOff>>,
+        Duration: Translate + Send + Sync + 'static,
+        &'static str: for<'a> From<&'a Duration>,
+    {
+        self.module_collection
+            .add_optional_auto_power_off(self.packet_io_controller.clone(), durations);
     }
 }
 

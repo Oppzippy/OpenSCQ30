@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use openscq30_i18n::Translate;
 use strum::{EnumIter, EnumString};
 
 use crate::{
@@ -7,15 +8,16 @@ use crate::{
         connection::RfcommConnection,
         settings::{CategoryId, SettingId},
     },
-    devices::soundcore::{
-        a3028::{
-            modules::auto_power_off::{
+    devices::soundcore::standard::{
+        modules::{
+            ModuleCollection,
+            auto_power_off::{
                 setting_handler::AutoPowerOffSettingHandler,
                 state_modifier::AutoPowerOffStateModifier,
             },
-            packets::AutoPowerOff,
         },
-        standard::{modules::ModuleCollection, packet::packet_io_controller::PacketIOController},
+        packet::packet_io_controller::PacketIOController,
+        structures::AutoPowerOff,
     },
 };
 
@@ -50,12 +52,19 @@ impl<T> ModuleCollection<T>
 where
     T: AsMut<Option<AutoPowerOff>> + AsRef<Option<AutoPowerOff>> + Clone + Send + Sync,
 {
-    pub fn add_auto_power_off<C>(&mut self, packet_io: Arc<PacketIOController<C>>)
-    where
+    pub fn add_optional_auto_power_off<C, Duration>(
+        &mut self,
+        packet_io: Arc<PacketIOController<C>>,
+        durations: &'static [Duration],
+    ) where
         C: RfcommConnection + 'static + Send + Sync,
+        Duration: Translate + Send + Sync + 'static,
+        &'static str: for<'a> From<&'a Duration>,
     {
-        self.setting_manager
-            .add_handler(CategoryId::Miscellaneous, AutoPowerOffSettingHandler::new());
+        self.setting_manager.add_handler(
+            CategoryId::Miscellaneous,
+            AutoPowerOffSettingHandler::new(durations),
+        );
         self.state_modifiers
             .push(Box::new(AutoPowerOffStateModifier::new(packet_io)));
     }

@@ -1,6 +1,6 @@
-use crate::devices::soundcore::{
-    a3028::packets::AutoPowerOff,
-    standard::packet::{Command, outbound::OutboundPacket},
+use crate::devices::soundcore::standard::{
+    packet::{Command, outbound::OutboundPacket},
+    structures::AutoPowerOff,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -16,6 +16,6 @@ impl OutboundPacket for SetAutoPowerOffPacket {
     }
 
     fn body(&self) -> Vec<u8> {
-        vec![self.0.enabled.into(), self.0.duration as u8]
+        vec![self.0.is_enabled.into(), self.0.duration.0]
     }
 }

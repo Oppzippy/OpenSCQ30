@@ -6,27 +6,29 @@ use strum::IntoEnumIterator;
 
 use crate::{
     api::settings::{self, Setting, SettingId, Value},
-    devices::soundcore::{
-        a3028::{
-            modules::auto_power_off::AutoPowerOffSetting,
-            packets::{AutoPowerOff, AutoPowerOffDuration},
-        },
-        standard::settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
+    devices::soundcore::standard::{
+        modules::auto_power_off::AutoPowerOffSetting,
+        settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
+        structures::{AutoPowerOff, AutoPowerOffDurationIndex},
     },
     i18n::fl,
 };
 
-pub struct AutoPowerOffSettingHandler {}
+pub struct AutoPowerOffSettingHandler<Duration: 'static> {
+    durations: &'static [Duration],
+}
 
-impl AutoPowerOffSettingHandler {
-    pub fn new() -> Self {
-        Self {}
+impl<Duration> AutoPowerOffSettingHandler<Duration> {
+    pub fn new(durations: &'static [Duration]) -> Self {
+        Self { durations }
     }
 }
 
 #[async_trait]
-impl<T> SettingHandler<T> for AutoPowerOffSettingHandler
+impl<Duration, T> SettingHandler<T> for AutoPowerOffSettingHandler<Duration>
 where
+    Duration: Translate + Send + Sync,
+    &'static str: for<'a> From<&'a Duration>,
     T: AsMut<Option<AutoPowerOff>> + AsRef<Option<AutoPowerOff>> + Send,
 {
     fn settings(&self) -> Vec<SettingId> {
@@ -42,15 +44,18 @@ where
             AutoPowerOffSetting::AutoPowerOff => Setting::Select {
                 setting: settings::Select {
                     options: iter::once("disabled")
-                        .chain(AutoPowerOffDuration::iter().map(Into::into))
+                        .chain(self.durations.iter().map(Into::into))
                         .map(Cow::from)
                         .collect(),
                     localized_options: iter::once(fl!("disabled"))
-                        .chain(AutoPowerOffDuration::iter().map(|duration| duration.translate()))
+                        .chain(self.durations.iter().map(|duration| duration.translate()))
                         .collect(),
                 },
-                value: if auto_power_off.enabled {
-                    Cow::Borrowed(auto_power_off.duration.into())
+                value: if let Some(duration) =
+                    self.durations.get(auto_power_off.duration.0 as usize)
+                    && auto_power_off.is_enabled
+                {
+                    <&'static str>::from(duration).into()
                 } else {
                     "disabled".into()
                 },
@@ -73,13 +78,13 @@ where
         match setting {
             AutoPowerOffSetting::AutoPowerOff => {
                 let selection = value.try_as_str()?;
-                if let Some(duration) = AutoPowerOffDuration::iter().find(|duration| {
-                    selection == (<AutoPowerOffDuration as Into<&'static str>>::into(*duration))
+                if let Some(duration_index) = self.durations.iter().position(|duration| {
+                    <&'static str>::from(duration).eq_ignore_ascii_case(selection)
                 }) {
-                    auto_power_off.enabled = true;
-                    auto_power_off.duration = duration;
+                    auto_power_off.is_enabled = true;
+                    auto_power_off.duration = AutoPowerOffDurationIndex(duration_index as u8);
                 } else {
-                    auto_power_off.enabled = false;
+                    auto_power_off.is_enabled = false;
                 }
             }
         }

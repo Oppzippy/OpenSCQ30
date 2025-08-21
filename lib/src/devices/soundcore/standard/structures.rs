@@ -1,6 +1,7 @@
 mod age_range;
 mod ambient_sound_mode;
 mod ambient_sound_mode_cycle;
+mod auto_power_off;
 mod basic_hear_id;
 mod battery;
 mod button_configuration;
@@ -21,6 +22,7 @@ mod volume_adjustments;
 pub use age_range::*;
 pub use ambient_sound_mode::*;
 pub use ambient_sound_mode_cycle::*;
+pub use auto_power_off::*;
 pub use basic_hear_id::*;
 pub use battery::*;
 pub use button_configuration::*;

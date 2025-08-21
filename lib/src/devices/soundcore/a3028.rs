@@ -1,17 +1,22 @@
 use std::collections::HashMap;
 
-use crate::devices::soundcore::{
-    a3028::{packets::A3028StateUpdatePacket, state::A3028State},
-    standard::{
-        device::fetch_state_from_state_update_packet,
-        macros::soundcore_device,
-        modules::sound_modes::AvailableSoundModes,
-        packet::outbound::{OutboundPacketBytesExt, RequestStatePacket},
-        structures::{AmbientSoundMode, NoiseCancelingMode},
+use openscq30_i18n::Translate;
+use strum::{IntoStaticStr, VariantArray};
+
+use crate::{
+    devices::soundcore::{
+        a3028::{packets::A3028StateUpdatePacket, state::A3028State},
+        standard::{
+            device::fetch_state_from_state_update_packet,
+            macros::soundcore_device,
+            modules::sound_modes::AvailableSoundModes,
+            packet::outbound::{OutboundPacketBytesExt, RequestStatePacket},
+            structures::{AmbientSoundMode, NoiseCancelingMode},
+        },
     },
+    i18n::fl,
 };
 
-mod modules;
 mod packets;
 mod state;
 
@@ -38,10 +43,7 @@ soundcore_device!(
             ],
         });
         builder.equalizer().await;
-
-        let packet_io = builder.packet_io_controller().clone();
-        builder.module_collection().add_auto_power_off(packet_io);
-
+        builder.optional_auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.single_battery();
         builder.serial_number_and_firmware_version();
     },
@@ -52,6 +54,30 @@ soundcore_device!(
         )])
     },
 );
+
+#[repr(u8)]
+#[derive(IntoStaticStr, VariantArray)]
+pub enum AutoPowerOffDuration {
+    #[strum(serialize = "30m")]
+    ThirtyMinutes = 0,
+    #[strum(serialize = "1h")]
+    OneHour = 1,
+    #[strum(serialize = "1h30m")]
+    NinetyMinutes = 2,
+    #[strum(serialize = "2h")]
+    TwoHours = 3,
+}
+
+impl Translate for AutoPowerOffDuration {
+    fn translate(&self) -> String {
+        match self {
+            AutoPowerOffDuration::ThirtyMinutes => fl!("x-minutes", minutes = 30),
+            AutoPowerOffDuration::OneHour => fl!("x-minutes", minutes = 60),
+            AutoPowerOffDuration::NinetyMinutes => fl!("x-minutes", minutes = 90),
+            AutoPowerOffDuration::TwoHours => fl!("x-minutes", minutes = 120),
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {

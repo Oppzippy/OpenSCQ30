@@ -4,11 +4,10 @@ use tokio::sync::watch;
 
 use crate::{
     api::{connection::RfcommConnection, device},
-    devices::soundcore::{
-        a3028::packets::{AutoPowerOff, SetAutoPowerOffPacket},
-        standard::{
-            packet::packet_io_controller::PacketIOController, state_modifier::StateModifier,
-        },
+    devices::soundcore::standard::{
+        packet::{outbound::SetAutoPowerOffPacket, packet_io_controller::PacketIOController},
+        state_modifier::StateModifier,
+        structures::AutoPowerOff,
     },
 };
 

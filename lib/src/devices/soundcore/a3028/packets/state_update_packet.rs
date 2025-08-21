@@ -5,8 +5,6 @@ use nom::{
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
-use openscq30_i18n_macros::Translate;
-use strum::{EnumIter, FromRepr, IntoStaticStr};
 use tokio::sync::watch;
 
 use crate::{
@@ -23,8 +21,9 @@ use crate::{
             },
             packet_manager::PacketHandler,
             structures::{
-                AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender,
-                SerialNumber, SingleBattery, SoundModes,
+                AgeRange, AutoPowerOff, AutoPowerOffDurationIndex, BasicHearId,
+                EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber, SingleBattery,
+                SoundModes,
             },
         },
     },
@@ -155,7 +154,7 @@ impl ExtraFields {
                 touch_control,
                 dual_connections,
                 auto_power_off_enabled,
-                auto_power_off_duration,
+                auto_power_off_duration_index,
                 ambient_sound_prompt_tone,
                 battery_alert_prompt_tone,
             )| {
@@ -164,8 +163,8 @@ impl ExtraFields {
                     touch_control,
                     dual_connections,
                     auto_power_off: AutoPowerOff {
-                        enabled: auto_power_off_enabled,
-                        duration: AutoPowerOffDuration::from_repr(auto_power_off_duration)?,
+                        is_enabled: auto_power_off_enabled,
+                        duration: AutoPowerOffDurationIndex(auto_power_off_duration_index),
                     },
                     ambient_sound_prompt_tone,
                     battery_alert_prompt_tone,
@@ -180,30 +179,12 @@ impl ExtraFields {
             self.unknown1,
             self.touch_control.into(),
             self.dual_connections.into(),
-            self.auto_power_off.enabled.into(),
-            self.auto_power_off.duration as u8,
+            self.auto_power_off.is_enabled.into(),
+            self.auto_power_off.duration.0,
             self.ambient_sound_prompt_tone.into(),
             self.battery_alert_prompt_tone.into(),
         ]
     }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-pub struct AutoPowerOff {
-    pub enabled: bool,
-    pub duration: AutoPowerOffDuration,
-}
-
-#[repr(u8)]
-#[derive(
-    FromRepr, Clone, Copy, Debug, PartialEq, Eq, Hash, Default, EnumIter, Translate, IntoStaticStr,
-)]
-pub enum AutoPowerOffDuration {
-    #[default]
-    ThirtyMinutes = 0,
-    OneHour = 1,
-    NinetyMinutes = 2,
-    TwoHours = 3,
 }
 
 struct StateUpdatePacketHandler {}

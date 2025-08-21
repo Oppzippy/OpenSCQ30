@@ -131,8 +131,8 @@ yes = Yes
 no = No
 
 auto-power-off = Auto Power Off
-thirty-minutes = 30 Minutes
-one-hour = 1 Hour
-ninety-minutes = 1 Hour 30 Minutes
-two-hours = 2 Hours
+x-minutes = { $minutes ->
+    [one] { $minutes } minute
+    *[other] { $minutes } minutes
+}
 disabled = Disabled

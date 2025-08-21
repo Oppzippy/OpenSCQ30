@@ -1,10 +1,7 @@
 use crate::{
-    devices::soundcore::{
-        a3028::packets::AutoPowerOff,
-        standard::structures::{
-            AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
-            SingleBattery, SoundModes,
-        },
+    devices::soundcore::standard::structures::{
+        AgeRange, AutoPowerOff, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender,
+        SerialNumber, SingleBattery, SoundModes,
     },
     macros::impl_as_ref_for_field,
 };
