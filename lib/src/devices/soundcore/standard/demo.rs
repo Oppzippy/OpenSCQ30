@@ -76,6 +76,7 @@ impl DemoConnection {
 
 impl RfcommConnection for DemoConnection {
     async fn write(&self, data: &[u8]) -> connection::Result<()> {
+        tracing::debug!("writing packet {data:?}");
         let (_remainder, packet) = Packet::take::<VerboseError<_>>(data).unwrap();
         if let Some(response) = self.packet_responses.get(&packet.command) {
             self.packet_sender.send(response.to_owned()).await.unwrap();
@@ -97,7 +98,17 @@ impl RfcommConnection for DemoConnection {
     }
 
     fn read_channel(&self) -> mpsc::Receiver<Vec<u8>> {
-        self.packet_receiver.lock().unwrap().take().unwrap()
+        let (sender, receiver) = mpsc::channel(100);
+        let mut inner_receiver = self.packet_receiver.lock().unwrap().take().unwrap();
+        tokio::spawn(async move {
+            while let Some(data) = inner_receiver.recv().await {
+                tracing::debug!("received packet {data:?}");
+                if sender.send(data).await.is_err() {
+                    break;
+                }
+            }
+        });
+        receiver
     }
 
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
