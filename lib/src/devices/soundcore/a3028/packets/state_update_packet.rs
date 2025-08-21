@@ -5,7 +5,8 @@ use nom::{
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
-use strum::FromRepr;
+use openscq30_i18n_macros::Translate;
+use strum::{EnumIter, FromRepr, IntoStaticStr};
 use tokio::sync::watch;
 
 use crate::{
@@ -29,7 +30,7 @@ use crate::{
     },
 };
 
-#[derive(Default, Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct A3028StateUpdatePacket {
     pub battery: SingleBattery,
     pub equalizer_configuration: EqualizerConfiguration<1, 8>,
@@ -40,6 +41,22 @@ pub struct A3028StateUpdatePacket {
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
     pub extra_fields: Option<ExtraFields>,
+}
+
+impl Default for A3028StateUpdatePacket {
+    fn default() -> Self {
+        Self {
+            battery: Default::default(),
+            equalizer_configuration: Default::default(),
+            gender: Default::default(),
+            age_range: Default::default(),
+            hear_id: Default::default(),
+            sound_modes: Default::default(),
+            firmware_version: Default::default(),
+            serial_number: Default::default(),
+            extra_fields: Some(Default::default()),
+        }
+    }
 }
 
 impl InboundPacket for A3028StateUpdatePacket {
@@ -104,20 +121,25 @@ impl OutboundPacket for A3028StateUpdatePacket {
             .chain(self.sound_modes.bytes())
             .chain(self.firmware_version.to_string().into_bytes())
             .chain(self.serial_number.as_str().as_bytes().iter().copied())
+            .chain(
+                self.extra_fields
+                    .as_ref()
+                    .map(|extra_fields| extra_fields.bytes().into_iter())
+                    .into_iter()
+                    .flatten(),
+            )
             .collect()
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct ExtraFields {
-    unknown1: u8,
-    touch_control: bool,
-    dual_connections: bool,
-    auto_power_off_enabled: bool,
-    // 0 is 30 min, 1 is 60 min, 2 is 90 min, 3 is 120 min
-    auto_power_off_duration: AutoPowerOffDuration,
-    ambient_sound_prompt_tone: bool,
-    battery_alert_prompt_tone: bool,
+    pub unknown1: u8,
+    pub touch_control: bool,
+    pub dual_connections: bool,
+    pub auto_power_off: AutoPowerOff,
+    pub ambient_sound_prompt_tone: bool,
+    pub battery_alert_prompt_tone: bool,
 }
 
 impl ExtraFields {
@@ -141,10 +163,10 @@ impl ExtraFields {
                     unknown1,
                     touch_control,
                     dual_connections,
-                    auto_power_off_enabled,
-                    auto_power_off_duration: AutoPowerOffDuration::from_repr(
-                        auto_power_off_duration,
-                    )?,
+                    auto_power_off: AutoPowerOff {
+                        enabled: auto_power_off_enabled,
+                        duration: AutoPowerOffDuration::from_repr(auto_power_off_duration)?,
+                    },
                     ambient_sound_prompt_tone,
                     battery_alert_prompt_tone,
                 })
@@ -152,11 +174,32 @@ impl ExtraFields {
         )
         .parse_complete(input)
     }
+
+    fn bytes(&self) -> [u8; 7] {
+        [
+            self.unknown1,
+            self.touch_control.into(),
+            self.dual_connections.into(),
+            self.auto_power_off.enabled.into(),
+            self.auto_power_off.duration as u8,
+            self.ambient_sound_prompt_tone.into(),
+            self.battery_alert_prompt_tone.into(),
+        ]
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+pub struct AutoPowerOff {
+    pub enabled: bool,
+    pub duration: AutoPowerOffDuration,
 }
 
 #[repr(u8)]
-#[derive(FromRepr, Clone, Copy, Debug, PartialEq, Eq, Hash)]
-enum AutoPowerOffDuration {
+#[derive(
+    FromRepr, Clone, Copy, Debug, PartialEq, Eq, Hash, Default, EnumIter, Translate, IntoStaticStr,
+)]
+pub enum AutoPowerOffDuration {
+    #[default]
     ThirtyMinutes = 0,
     OneHour = 1,
     NinetyMinutes = 2,

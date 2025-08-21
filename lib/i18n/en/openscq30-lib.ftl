@@ -22,6 +22,7 @@ sound-modes = Sound Modes
 equalizer = Equalizer
 equalizer-import-export = Equalizer Import/Export
 device-information = Device Information
+miscellaneous = Miscellaneous
 
 ambient-sound-mode = Ambient Sound Mode
 transparency-mode = Transparency Mode
@@ -128,3 +129,10 @@ state-update-packet = State Update Packet
 
 yes = Yes
 no = No
+
+auto-power-off = Auto Power Off
+thirty-minutes = 30 Minutes
+one-hour = 1 Hour
+ninety-minutes = 1 Hour 30 Minutes
+two-hours = 2 Hours
+disabled = Disabled

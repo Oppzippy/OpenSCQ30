@@ -1,12 +1,15 @@
 use crate::{
-    devices::soundcore::standard::structures::{
-        AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
-        SingleBattery, SoundModes,
+    devices::soundcore::{
+        a3028::packets::AutoPowerOff,
+        standard::structures::{
+            AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
+            SingleBattery, SoundModes,
+        },
     },
     macros::impl_as_ref_for_field,
 };
 
-use super::packets::{A3028StateUpdatePacket, ExtraFields};
+use super::packets::A3028StateUpdatePacket;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct A3028State {
@@ -18,7 +21,7 @@ pub struct A3028State {
     pub sound_modes: SoundModes,
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
-    pub extra_fields: Option<ExtraFields>,
+    pub auto_power_off: Option<AutoPowerOff>,
 }
 
 impl_as_ref_for_field!(
@@ -28,6 +31,7 @@ impl_as_ref_for_field!(
         equalizer_configuration: EqualizerConfiguration<1, 8>,
         firmware_version: FirmwareVersion,
         serial_number: SerialNumber,
+        auto_power_off: Option<AutoPowerOff>,
     }
 );
 
@@ -42,7 +46,7 @@ impl From<A3028StateUpdatePacket> for A3028State {
             sound_modes: value.sound_modes,
             firmware_version: value.firmware_version,
             serial_number: value.serial_number,
-            extra_fields: value.extra_fields,
+            auto_power_off: value.extra_fields.map(|extras| extras.auto_power_off),
         }
     }
 }

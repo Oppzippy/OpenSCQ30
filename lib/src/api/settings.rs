@@ -40,6 +40,7 @@ pub enum CategoryId {
     EqualizerImportExport,
     ButtonConfiguration,
     DeviceInformation,
+    Miscellaneous,
 }
 
 #[derive(
@@ -104,6 +105,7 @@ pub enum SettingId {
     ExportCustomEqualizerProfiles,
     ExportCustomEqualizerProfilesOutput,
     ImportCustomEqualizerProfiles,
+    AutoPowerOff,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

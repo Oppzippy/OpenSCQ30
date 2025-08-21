@@ -11,6 +11,7 @@ use crate::devices::soundcore::{
     },
 };
 
+mod modules;
 mod packets;
 mod state;
 
@@ -37,6 +38,10 @@ soundcore_device!(
             ],
         });
         builder.equalizer().await;
+
+        let packet_io = builder.packet_io_controller().clone();
+        builder.module_collection().add_auto_power_off(packet_io);
+
         builder.single_battery();
         builder.serial_number_and_firmware_version();
     },

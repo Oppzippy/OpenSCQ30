@@ -118,6 +118,8 @@ pub enum SettingHandlerError {
     StorageError(#[from] storage::Error),
     #[error("setting is read only")]
     ReadOnly,
+    #[error("setting does not exist")]
+    DoesNotExist,
     #[error(transparent)]
     Other(Box<dyn std::error::Error + Send + Sync>),
 }
