@@ -45,17 +45,16 @@ soundcore_device!(
     },
 );
 
-#[repr(u8)]
 #[derive(IntoStaticStr, VariantArray)]
 enum AutoPowerOffDuration {
     #[strum(serialize = "10m")]
-    TenMinutes = 0,
+    TenMinutes,
     #[strum(serialize = "20m")]
-    TwentyMinutes = 1,
+    TwentyMinutes,
     #[strum(serialize = "30m")]
-    ThirtyMinutes = 2,
-    #[strum(serialize = "1h")]
-    SixtyMinutes = 3,
+    ThirtyMinutes,
+    #[strum(serialize = "60m")]
+    SixtyMinutes,
 }
 
 impl Translate for AutoPowerOffDuration {
