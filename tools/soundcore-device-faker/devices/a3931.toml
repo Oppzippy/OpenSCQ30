@@ -52,7 +52,7 @@ response = [
 ]
 
 [[responses]]
-# EQ
+# firmware version
 command = [1, 5]
 response = [
     48,
