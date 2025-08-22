@@ -1,12 +1,18 @@
 use std::collections::HashMap;
 
-use crate::devices::soundcore::{
-    a3959::{packets::A3959StateUpdatePacket, state::A3959State},
-    standard::{
-        device::fetch_state_from_state_update_packet,
-        macros::soundcore_device,
-        packet::outbound::{OutboundPacketBytesExt, RequestStatePacket},
+use openscq30_i18n::Translate;
+use strum::{IntoStaticStr, VariantArray};
+
+use crate::{
+    devices::soundcore::{
+        a3959::{packets::A3959StateUpdatePacket, state::A3959State},
+        standard::{
+            device::fetch_state_from_state_update_packet,
+            macros::soundcore_device,
+            packet::outbound::{OutboundPacketBytesExt, RequestStatePacket},
+        },
     },
+    i18n::fl,
 };
 
 mod modules;
@@ -27,6 +33,7 @@ soundcore_device!(
         builder.equalizer().await;
         builder.a3959_button_configuration();
         builder.ambient_sound_mode_cycle();
+        builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.dual_battery();
         builder.serial_number_and_dual_firmware_version();
     },
@@ -37,3 +44,27 @@ soundcore_device!(
         )])
     },
 );
+
+#[repr(u8)]
+#[derive(IntoStaticStr, VariantArray)]
+enum AutoPowerOffDuration {
+    #[strum(serialize = "10m")]
+    TenMinutes = 0,
+    #[strum(serialize = "20m")]
+    TwentyMinutes = 1,
+    #[strum(serialize = "30m")]
+    ThirtyMinutes = 2,
+    #[strum(serialize = "1h")]
+    SixtyMinutes = 3,
+}
+
+impl Translate for AutoPowerOffDuration {
+    fn translate(&self) -> String {
+        match self {
+            AutoPowerOffDuration::TenMinutes => fl!("x-minutes", minutes = 10),
+            AutoPowerOffDuration::TwentyMinutes => fl!("x-minutes", minutes = 20),
+            AutoPowerOffDuration::ThirtyMinutes => fl!("x-minutes", minutes = 30),
+            AutoPowerOffDuration::SixtyMinutes => fl!("x-minutes", minutes = 60),
+        }
+    }
+}

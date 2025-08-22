@@ -5,8 +5,8 @@ use crate::{
             structures::{A3959MultiButtonConfiguration, A3959SoundModes},
         },
         standard::structures::{
-            AmbientSoundModeCycle, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
-            SerialNumber, TwsStatus,
+            AmbientSoundModeCycle, AutoPowerOff, DualBattery, DualFirmwareVersion,
+            EqualizerConfiguration, SerialNumber, TwsStatus,
         },
     },
     macros::impl_as_ref_for_field,
@@ -22,6 +22,7 @@ pub struct A3959State {
     button_configuration: A3959MultiButtonConfiguration,
     ambient_sound_mode_cycle: AmbientSoundModeCycle,
     sound_modes: A3959SoundModes,
+    auto_power_off: AutoPowerOff,
 }
 
 impl_as_ref_for_field!(
@@ -34,6 +35,7 @@ impl_as_ref_for_field!(
         button_configuration: A3959MultiButtonConfiguration,
         ambient_sound_mode_cycle: AmbientSoundModeCycle,
         sound_modes: A3959SoundModes,
+        auto_power_off: AutoPowerOff,
     }
 );
 
@@ -48,6 +50,7 @@ impl From<A3959StateUpdatePacket> for A3959State {
             button_configuration: packet.button_configuration,
             ambient_sound_mode_cycle: packet.ambient_sound_mode_cycle,
             sound_modes: packet.sound_modes,
+            auto_power_off: packet.auto_power_off,
         }
     }
 }

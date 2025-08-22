@@ -4,7 +4,6 @@ use nom::{
     bytes::complete::take,
     combinator::{all_consuming, map},
     error::{ContextError, ParseError, context},
-    number::complete::le_u8,
 };
 use tokio::sync::watch;
 
@@ -25,8 +24,8 @@ use crate::{
             },
             packet_manager::PacketHandler,
             structures::{
-                AmbientSoundModeCycle, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
-                SerialNumber, TwsStatus,
+                AmbientSoundModeCycle, AutoPowerOff, DualBattery, DualFirmwareVersion,
+                EqualizerConfiguration, SerialNumber, TwsStatus,
             },
         },
     },
@@ -43,8 +42,7 @@ pub struct A3959StateUpdatePacket {
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub sound_modes: A3959SoundModes,
     pub touch_tone: bool,
-    pub auto_power_off_enabled: bool,
-    pub auto_power_off_duration: u8,
+    pub auto_power_off: AutoPowerOff,
     pub low_battery_prompt: bool,
     pub gaming_mode: bool,
 }
@@ -69,8 +67,7 @@ impl InboundPacket for A3959StateUpdatePacket {
                     take(1usize),
                     take_bool,
                     take(2usize),
-                    take_bool,
-                    le_u8,
+                    AutoPowerOff::take,
                     take_bool,
                     take_bool,
                     take(12usize),
@@ -88,8 +85,7 @@ impl InboundPacket for A3959StateUpdatePacket {
                     _unknown3,
                     touch_tone,
                     _unknown4,
-                    auto_power_off_enabled,
-                    auto_power_off_duration,
+                    auto_power_off,
                     low_battery_prompt,
                     gaming_mode,
                     _unknown5,
@@ -104,8 +100,7 @@ impl InboundPacket for A3959StateUpdatePacket {
                         ambient_sound_mode_cycle,
                         sound_modes,
                         touch_tone,
-                        auto_power_off_enabled,
-                        auto_power_off_duration,
+                        auto_power_off,
                         low_battery_prompt,
                         gaming_mode,
                     }
@@ -136,12 +131,8 @@ impl OutboundPacket for A3959StateUpdatePacket {
             .chain([0])
             .chain([self.touch_tone as u8])
             .chain([0, 0])
-            .chain([
-                self.auto_power_off_enabled as u8,
-                self.auto_power_off_duration,
-                self.low_battery_prompt as u8,
-                self.gaming_mode as u8,
-            ])
+            .chain(self.auto_power_off.bytes())
+            .chain([self.low_battery_prompt as u8, self.gaming_mode as u8])
             .chain([0; 12])
             .collect()
     }

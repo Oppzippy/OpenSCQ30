@@ -1,6 +1,6 @@
 use crate::{
     devices::soundcore::standard::structures::{
-        AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
+        AgeRange, AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CustomHearId, DualBattery,
         DualFirmwareVersion, EqualizerConfiguration, Gender, SerialNumber, TwsStatus,
     },
     macros::impl_as_ref_for_field,
@@ -28,8 +28,7 @@ pub struct A3936State {
     pub color: u8,
     pub ldac: bool,
     pub supports_two_cnn_switch: bool,
-    pub auto_power_off_switch: bool,
-    pub auto_power_off_index: u8,
+    pub auto_power_off: AutoPowerOff,
     pub game_mode_switch: bool,
 }
 
@@ -45,6 +44,7 @@ impl_as_ref_for_field!(
         sound_modes: A3936SoundModes,
         ambient_sound_mode_cycle: AmbientSoundModeCycle,
         button_configuration: A3936InternalMultiButtonConfiguration,
+        auto_power_off: AutoPowerOff,
     }
 );
 
@@ -72,8 +72,7 @@ impl From<A3936StateUpdatePacket> for A3936State {
             color: value.color,
             ldac: value.ldac,
             supports_two_cnn_switch: value.supports_two_cnn_switch,
-            auto_power_off_switch: value.auto_power_off_switch,
-            auto_power_off_index: value.auto_power_off_index,
+            auto_power_off: value.auto_power_off,
             game_mode_switch: value.game_mode_switch,
         }
     }

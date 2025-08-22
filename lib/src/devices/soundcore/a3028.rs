@@ -57,7 +57,7 @@ soundcore_device!(
 
 #[repr(u8)]
 #[derive(IntoStaticStr, VariantArray)]
-pub enum AutoPowerOffDuration {
+enum AutoPowerOffDuration {
     #[strum(serialize = "30m")]
     ThirtyMinutes = 0,
     #[strum(serialize = "1h")]
