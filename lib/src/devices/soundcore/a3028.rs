@@ -43,7 +43,7 @@ soundcore_device!(
             ],
         });
         builder.equalizer().await;
-        builder.optional_auto_power_off(AutoPowerOffDuration::VARIANTS);
+        builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.single_battery();
         builder.serial_number_and_firmware_version();
     },

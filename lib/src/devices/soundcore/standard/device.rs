@@ -17,6 +17,7 @@ use crate::{
         DeviceModel,
         soundcore::{self, standard::structures::AutoPowerOff},
     },
+    has::MaybeHas,
     storage::OpenSCQ30Database,
 };
 
@@ -345,22 +346,12 @@ where
 
     pub fn auto_power_off<Duration>(&mut self, durations: &'static [Duration])
     where
-        StateType: AsRef<AutoPowerOff> + AsMut<AutoPowerOff>,
+        StateType: MaybeHas<AutoPowerOff>,
         Duration: Translate + Send + Sync + 'static,
         &'static str: for<'a> From<&'a Duration>,
     {
         self.module_collection
             .add_auto_power_off(self.packet_io_controller.clone(), durations);
-    }
-
-    pub fn optional_auto_power_off<Duration>(&mut self, durations: &'static [Duration])
-    where
-        StateType: AsRef<Option<AutoPowerOff>> + AsMut<Option<AutoPowerOff>>,
-        Duration: Translate + Send + Sync + 'static,
-        &'static str: for<'a> From<&'a Duration>,
-    {
-        self.module_collection
-            .add_optional_auto_power_off(self.packet_io_controller.clone(), durations);
     }
 }
 

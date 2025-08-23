@@ -3,6 +3,7 @@ use crate::{
         AgeRange, AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CustomHearId, DualBattery,
         DualFirmwareVersion, EqualizerConfiguration, Gender, SerialNumber, TwsStatus,
     },
+    has::Has,
     macros::impl_as_ref_for_field,
 };
 
@@ -30,6 +31,16 @@ pub struct A3936State {
     pub supports_two_cnn_switch: bool,
     pub auto_power_off: AutoPowerOff,
     pub game_mode_switch: bool,
+}
+
+impl Has<AutoPowerOff> for A3936State {
+    fn get(&self) -> &AutoPowerOff {
+        &self.auto_power_off
+    }
+
+    fn get_mut(&mut self) -> &mut AutoPowerOff {
+        &mut self.auto_power_off
+    }
 }
 
 impl_as_ref_for_field!(

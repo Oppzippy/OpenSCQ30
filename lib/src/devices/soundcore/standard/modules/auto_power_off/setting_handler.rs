@@ -8,9 +8,10 @@ use crate::{
     api::settings::{self, Setting, SettingId, Value},
     devices::soundcore::standard::{
         modules::auto_power_off::AutoPowerOffSetting,
-        settings_manager::{SettingHandler, SettingHandlerResult},
+        settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
         structures::{AutoPowerOff, AutoPowerOffDurationIndex},
     },
+    has::MaybeHas,
     i18n::fl,
 };
 
@@ -29,14 +30,14 @@ impl<Duration, T> SettingHandler<T> for AutoPowerOffSettingHandler<Duration>
 where
     Duration: Translate + Send + Sync,
     &'static str: for<'a> From<&'a Duration>,
-    T: AsMut<AutoPowerOff> + AsRef<AutoPowerOff> + Send,
+    T: MaybeHas<AutoPowerOff> + Send,
 {
     fn settings(&self) -> Vec<SettingId> {
         AutoPowerOffSetting::iter().map(Into::into).collect()
     }
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
-        let auto_power_off = state.as_ref();
+        let auto_power_off = state.maybe_get()?;
         let setting: AutoPowerOffSetting = (*setting_id).try_into().ok()?;
         Some(match setting {
             AutoPowerOffSetting::AutoPowerOff => Setting::Select {
@@ -67,7 +68,9 @@ where
         setting_id: &SettingId,
         value: Value,
     ) -> SettingHandlerResult<()> {
-        let auto_power_off = state.as_mut();
+        let auto_power_off = state
+            .maybe_get_mut()
+            .ok_or(SettingHandlerError::MissingData)?;
         let setting: AutoPowerOffSetting = (*setting_id)
             .try_into()
             .expect("already filtered to valid values only by SettingsManager");

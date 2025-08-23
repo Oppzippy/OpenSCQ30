@@ -4216,6 +4216,7 @@ dependencies = [
  "nom-language",
  "openscq30-i18n",
  "openscq30-i18n-macros",
+ "paste",
  "rusqlite",
  "rust-embed",
  "serde",

@@ -6,6 +6,7 @@ use crate::{
             MultiButtonConfiguration, SerialNumber, SoundModes, TwsStatus,
         },
     },
+    has::Has,
     macros::impl_as_ref_for_field,
 };
 
@@ -23,6 +24,16 @@ pub struct A3931State {
     auto_power_off: AutoPowerOff,
     serial_number: SerialNumber,
     dual_firmware_version: DualFirmwareVersion,
+}
+
+impl Has<AutoPowerOff> for A3931State {
+    fn get(&self) -> &AutoPowerOff {
+        &self.auto_power_off
+    }
+
+    fn get_mut(&mut self) -> &mut AutoPowerOff {
+        &mut self.auto_power_off
+    }
 }
 
 impl_as_ref_for_field!(

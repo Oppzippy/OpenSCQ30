@@ -3,6 +3,7 @@ use crate::{
         AgeRange, AutoPowerOff, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender,
         SerialNumber, SingleBattery, SoundModes,
     },
+    has::MaybeHas,
     macros::impl_as_ref_for_field,
 };
 
@@ -19,6 +20,20 @@ pub struct A3028State {
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
     pub auto_power_off: Option<AutoPowerOff>,
+}
+
+impl MaybeHas<AutoPowerOff> for A3028State {
+    fn maybe_get(&self) -> Option<&AutoPowerOff> {
+        self.auto_power_off.as_ref()
+    }
+
+    fn maybe_get_mut(&mut self) -> Option<&mut AutoPowerOff> {
+        self.auto_power_off.as_mut()
+    }
+
+    fn set_maybe(&mut self, value: Option<AutoPowerOff>) {
+        self.auto_power_off = value;
+    }
 }
 
 impl_as_ref_for_field!(

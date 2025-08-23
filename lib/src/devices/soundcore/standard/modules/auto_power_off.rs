@@ -13,13 +13,13 @@ use crate::{
             ModuleCollection,
             auto_power_off::{
                 setting_handler::AutoPowerOffSettingHandler,
-                state_modifier::{AutoPowerOffStateModifier, OptionalAutoPowerOffStateModifier},
+                state_modifier::AutoPowerOffStateModifier,
             },
         },
         packet::packet_io_controller::PacketIOController,
-        settings_manager::OptionalSettingHandler,
         structures::AutoPowerOff,
     },
+    has::MaybeHas,
 };
 
 mod setting_handler;
@@ -51,7 +51,7 @@ impl TryFrom<SettingId> for AutoPowerOffSetting {
 
 impl<T> ModuleCollection<T>
 where
-    T: AsMut<AutoPowerOff> + AsRef<AutoPowerOff> + Clone + Send + Sync + 'static,
+    T: MaybeHas<AutoPowerOff> + Clone + Send + Sync + 'static,
 {
     pub fn add_auto_power_off<C, Duration>(
         &mut self,
@@ -68,27 +68,5 @@ where
         );
         self.state_modifiers
             .push(Box::new(AutoPowerOffStateModifier::new(packet_io)));
-    }
-}
-
-impl<T> ModuleCollection<T>
-where
-    T: AsMut<Option<AutoPowerOff>> + AsRef<Option<AutoPowerOff>> + Clone + Send + Sync + 'static,
-{
-    pub fn add_optional_auto_power_off<C, Duration>(
-        &mut self,
-        packet_io: Arc<PacketIOController<C>>,
-        durations: &'static [Duration],
-    ) where
-        C: RfcommConnection + 'static + Send + Sync,
-        Duration: Translate + Send + Sync + 'static,
-        &'static str: for<'a> From<&'a Duration>,
-    {
-        self.setting_manager.add_handler(
-            CategoryId::Miscellaneous,
-            OptionalSettingHandler::new(AutoPowerOffSettingHandler::new(durations)),
-        );
-        self.state_modifiers
-            .push(Box::new(OptionalAutoPowerOffStateModifier::new(packet_io)));
     }
 }

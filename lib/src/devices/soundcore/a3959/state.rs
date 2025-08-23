@@ -9,6 +9,7 @@ use crate::{
             EqualizerConfiguration, SerialNumber, TwsStatus,
         },
     },
+    has::Has,
     macros::impl_as_ref_for_field,
 };
 
@@ -23,6 +24,16 @@ pub struct A3959State {
     ambient_sound_mode_cycle: AmbientSoundModeCycle,
     sound_modes: A3959SoundModes,
     auto_power_off: AutoPowerOff,
+}
+
+impl Has<AutoPowerOff> for A3959State {
+    fn get(&self) -> &AutoPowerOff {
+        &self.auto_power_off
+    }
+
+    fn get_mut(&mut self) -> &mut AutoPowerOff {
+        &mut self.auto_power_off
+    }
 }
 
 impl_as_ref_for_field!(
