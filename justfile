@@ -4,6 +4,8 @@ mod gui
 mod i18n
 mod i18n-macros
 mod lib
+mod lib-macros
+mod lib-has
 
 set unstable := true
 fdfind := if which("fdfind") == "" { "fd" } else { "fdfind" }
@@ -52,10 +54,10 @@ uninstall path:
 
 alias fmt := format
 [parallel]
-format: android::format cli::format gui::format i18n::format i18n-macros::format lib::format
+format: android::format cli::format gui::format i18n::format i18n-macros::format lib::format lib-macros::format lib-has::format
 
 [parallel]
-format-check: android::format-check cli::format-check gui::format-check i18n::format-check i18n-macros::format-check lib::format-check
+format-check: android::format-check cli::format-check gui::format-check i18n::format-check i18n-macros::format-check lib::format-check lib-macros::format-check lib-has::format-check
 
 shellcheck:
     {{fdfind}} --type file --extension sh --exec shellcheck {}

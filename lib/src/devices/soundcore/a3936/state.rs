@@ -1,9 +1,10 @@
+use openscq30_lib_macros::Has;
+
 use crate::{
     devices::soundcore::standard::structures::{
         AgeRange, AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CustomHearId, DualBattery,
         DualFirmwareVersion, EqualizerConfiguration, Gender, SerialNumber, TwsStatus,
     },
-    has::Has,
     macros::impl_as_ref_for_field,
 };
 
@@ -12,7 +13,7 @@ use super::{
     structures::{A3936InternalMultiButtonConfiguration, A3936SoundModes},
 };
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Has)]
 pub struct A3936State {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
@@ -29,18 +30,9 @@ pub struct A3936State {
     pub color: u8,
     pub ldac: bool,
     pub supports_two_cnn_switch: bool,
+    #[has]
     pub auto_power_off: AutoPowerOff,
     pub game_mode_switch: bool,
-}
-
-impl Has<AutoPowerOff> for A3936State {
-    fn get(&self) -> &AutoPowerOff {
-        &self.auto_power_off
-    }
-
-    fn get_mut(&mut self) -> &mut AutoPowerOff {
-        &mut self.auto_power_off
-    }
 }
 
 impl_as_ref_for_field!(

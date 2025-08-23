@@ -2,11 +2,12 @@
 members = [
     "cli",
     "lib",
+    "lib-macros",
     "android",
     "uniffi-bindgen",
     "gui",
     "i18n",
-    "i18n-macros",
+    "i18n-macros", "lib-has",
 ]
 resolver = "2"
 

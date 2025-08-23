@@ -1,0 +1,10 @@
+[package]
+name = "openscq30-lib-has"
+edition = "2024"
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+
+[lints]
+workspace = true

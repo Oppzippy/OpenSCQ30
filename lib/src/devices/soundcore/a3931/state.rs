@@ -1,3 +1,5 @@
+use openscq30_lib_macros::Has;
+
 use crate::{
     devices::soundcore::standard::{
         packet::inbound::SerialNumberAndFirmwareVersionUpdatePacket,
@@ -6,13 +8,12 @@ use crate::{
             MultiButtonConfiguration, SerialNumber, SoundModes, TwsStatus,
         },
     },
-    has::Has,
     macros::impl_as_ref_for_field,
 };
 
 use super::packets::A3931StateUpdatePacket;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Has)]
 pub struct A3931State {
     tws_status: TwsStatus,
     battery: DualBattery,
@@ -21,19 +22,10 @@ pub struct A3931State {
     sound_modes: SoundModes,
     side_tone: bool,
     touch_tone: bool,
+    #[has]
     auto_power_off: AutoPowerOff,
     serial_number: SerialNumber,
     dual_firmware_version: DualFirmwareVersion,
-}
-
-impl Has<AutoPowerOff> for A3931State {
-    fn get(&self) -> &AutoPowerOff {
-        &self.auto_power_off
-    }
-
-    fn get_mut(&mut self) -> &mut AutoPowerOff {
-        &mut self.auto_power_off
-    }
 }
 
 impl_as_ref_for_field!(

@@ -7,7 +7,6 @@
 pub mod api;
 pub mod connection_backend;
 pub mod devices;
-pub(crate) mod has;
 pub mod i18n;
 pub(crate) mod macros;
 pub(crate) mod serialization;

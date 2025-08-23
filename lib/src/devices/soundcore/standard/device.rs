@@ -2,6 +2,7 @@ use std::{marker::PhantomData, pin::Pin, sync::Arc};
 
 use async_trait::async_trait;
 use openscq30_i18n::Translate;
+use openscq30_lib_has::MaybeHas;
 use tokio::{
     select,
     sync::{Semaphore, mpsc, watch},
@@ -17,7 +18,6 @@ use crate::{
         DeviceModel,
         soundcore::{self, standard::structures::AutoPowerOff},
     },
-    has::MaybeHas,
     storage::OpenSCQ30Database,
 };
 

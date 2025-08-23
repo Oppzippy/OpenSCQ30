@@ -1,3 +1,5 @@
+use openscq30_lib_macros::Has;
+
 use crate::{
     devices::soundcore::{
         a3959::{
@@ -9,11 +11,10 @@ use crate::{
             EqualizerConfiguration, SerialNumber, TwsStatus,
         },
     },
-    has::Has,
     macros::impl_as_ref_for_field,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Has)]
 pub struct A3959State {
     tws_status: TwsStatus,
     dual_battery: DualBattery,
@@ -23,17 +24,8 @@ pub struct A3959State {
     button_configuration: A3959MultiButtonConfiguration,
     ambient_sound_mode_cycle: AmbientSoundModeCycle,
     sound_modes: A3959SoundModes,
+    #[has]
     auto_power_off: AutoPowerOff,
-}
-
-impl Has<AutoPowerOff> for A3959State {
-    fn get(&self) -> &AutoPowerOff {
-        &self.auto_power_off
-    }
-
-    fn get_mut(&mut self) -> &mut AutoPowerOff {
-        &mut self.auto_power_off
-    }
 }
 
 impl_as_ref_for_field!(

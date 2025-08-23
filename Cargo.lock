@@ -4216,6 +4216,8 @@ dependencies = [
  "nom-language",
  "openscq30-i18n",
  "openscq30-i18n-macros",
+ "openscq30-lib-has",
+ "openscq30-lib-macros",
  "paste",
  "rusqlite",
  "rust-embed",
@@ -4228,6 +4230,22 @@ dependencies = [
  "tracing",
  "uuid",
  "windows 0.61.1",
+]
+
+[[package]]
+name = "openscq30-lib-has"
+version = "1.19.3"
+
+[[package]]
+name = "openscq30-lib-macros"
+version = "1.19.3"
+dependencies = [
+ "heck 0.5.0",
+ "itertools",
+ "openscq30-lib-has",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.101",
 ]
 
 [[package]]

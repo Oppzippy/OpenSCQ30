@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use openscq30_lib_has::MaybeHas;
 use std::sync::Arc;
 use tokio::sync::watch;
 
@@ -9,7 +10,6 @@ use crate::{
         state_modifier::StateModifier,
         structures::AutoPowerOff,
     },
-    has::MaybeHas,
 };
 
 pub struct AutoPowerOffStateModifier<ConnectionType: RfcommConnection> {

@@ -2,6 +2,7 @@ use std::{borrow::Cow, iter};
 
 use async_trait::async_trait;
 use openscq30_i18n::Translate;
+use openscq30_lib_has::MaybeHas;
 use strum::IntoEnumIterator;
 
 use crate::{
@@ -11,7 +12,6 @@ use crate::{
         settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
         structures::{AutoPowerOff, AutoPowerOffDurationIndex},
     },
-    has::MaybeHas,
     i18n::fl,
 };
 

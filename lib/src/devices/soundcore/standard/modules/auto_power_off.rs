@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use openscq30_i18n::Translate;
+use openscq30_lib_has::MaybeHas;
 use strum::{EnumIter, EnumString};
 
 use crate::{
@@ -19,7 +20,6 @@ use crate::{
         packet::packet_io_controller::PacketIOController,
         structures::AutoPowerOff,
     },
-    has::MaybeHas,
 };
 
 mod setting_handler;
