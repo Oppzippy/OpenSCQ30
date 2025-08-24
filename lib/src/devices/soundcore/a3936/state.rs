@@ -25,13 +25,17 @@ pub struct A3936State {
     pub sound_modes: A3936SoundModes,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub button_configuration: A3936InternalMultiButtonConfiguration,
-    pub touch_tone: bool,
     pub charging_case_battery: BatteryLevel,
-    pub color: u8,
-    pub ldac: bool,
-    pub supports_two_cnn_switch: bool,
-    #[has]
     pub auto_power_off: AutoPowerOff,
+    #[has(skip)]
+    pub touch_tone: bool,
+    #[has(skip)]
+    pub color: u8,
+    #[has(skip)]
+    pub ldac: bool,
+    #[has(skip)]
+    pub supports_two_cnn_switch: bool,
+    #[has(skip)]
     pub game_mode_switch: bool,
 }
 

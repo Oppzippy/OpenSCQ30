@@ -14,49 +14,53 @@ impl DeriveHas {
                 .fields
                 .into_iter()
                 .filter_map(|field| {
-                    field
+                    let modifier = field
                         .attrs
                         .iter()
                         .filter_map(|attribute| {
-                            if attribute.path().is_ident("has") {
-                                Some(TraitFieldData {
-                                    struct_ident: struct_ident.clone(),
-                                    field_ident: field
-                                        .ident
-                                        .clone()
-                                        .expect("missing identifier for field"),
-                                    field_type: field.ty.clone(),
-                                    is_maybe: false,
-                                })
-                            } else if attribute.path().is_ident("maybe_has") {
-                                let option_inner_type = if let Type::Path(type_path) = &field.ty {
-                                    let type_params = &type_path.path.segments[0].arguments;
-                                    if let PathArguments::AngleBracketed(params) = type_params {
-                                        if let GenericArgument::Type(ty) = &params.args[0] {
-                                            ty
-                                        } else {
-                                            panic!("expected a type in angle brackets")
-                                        }
+                            attribute.path().is_ident("has").then(|| {
+                                attribute
+                                    .parse_args::<Ident>()
+                                    .expect("missing modifier (such as #[has(skip)])")
+                                    .to_string()
+                            })
+                        })
+                        .next();
+                    match modifier.as_ref().map(String::as_str) {
+                        None => Some(TraitFieldData {
+                            struct_ident: struct_ident.clone(),
+                            field_ident: field.ident.clone().expect("missing identifier for field"),
+                            field_type: field.ty.clone(),
+                            is_maybe: false,
+                        }),
+                        Some("maybe") => {
+                            let option_inner_type = if let Type::Path(type_path) = &field.ty {
+                                let type_params = &type_path.path.segments[0].arguments;
+                                if let PathArguments::AngleBracketed(params) = type_params {
+                                    if let GenericArgument::Type(ty) = &params.args[0] {
+                                        ty
                                     } else {
-                                        panic!("expected angle bracketed args")
+                                        panic!("expected a type in angle brackets")
                                     }
                                 } else {
-                                    panic!("expected path")
-                                };
-                                Some(TraitFieldData {
-                                    struct_ident: struct_ident.clone(),
-                                    field_ident: field
-                                        .ident
-                                        .clone()
-                                        .expect("missing identifier for field"),
-                                    field_type: option_inner_type.clone(),
-                                    is_maybe: true,
-                                })
+                                    panic!("expected angle bracketed args")
+                                }
                             } else {
-                                None
-                            }
-                        })
-                        .next()
+                                panic!("expected path")
+                            };
+                            Some(TraitFieldData {
+                                struct_ident: struct_ident.clone(),
+                                field_ident: field
+                                    .ident
+                                    .clone()
+                                    .expect("missing identifier for field"),
+                                field_type: option_inner_type.clone(),
+                                is_maybe: true,
+                            })
+                        }
+                        Some("skip") => None,
+                        Some(other) => panic!("invalid option {other}"),
+                    }
                 })
                 .collect(),
             _ => panic!("expected struct"),

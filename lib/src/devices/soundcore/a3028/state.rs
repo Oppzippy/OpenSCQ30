@@ -18,7 +18,7 @@ pub struct A3028State {
     pub sound_modes: SoundModes,
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
-    #[maybe_has]
+    #[has(maybe)]
     pub auto_power_off: Option<AutoPowerOff>,
 }
 

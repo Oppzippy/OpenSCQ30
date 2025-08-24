@@ -24,7 +24,6 @@ pub struct A3959State {
     button_configuration: A3959MultiButtonConfiguration,
     ambient_sound_mode_cycle: AmbientSoundModeCycle,
     sound_modes: A3959SoundModes,
-    #[has]
     auto_power_off: AutoPowerOff,
 }
 

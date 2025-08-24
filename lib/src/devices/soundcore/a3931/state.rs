@@ -20,12 +20,13 @@ pub struct A3931State {
     equalizer_configuration: EqualizerConfiguration<2, 8>,
     button_configuration: MultiButtonConfiguration,
     sound_modes: SoundModes,
-    side_tone: bool,
-    touch_tone: bool,
-    #[has]
     auto_power_off: AutoPowerOff,
     serial_number: SerialNumber,
     dual_firmware_version: DualFirmwareVersion,
+    #[has(skip)]
+    side_tone: bool,
+    #[has(skip)]
+    touch_tone: bool,
 }
 
 impl_as_ref_for_field!(
