@@ -1,3 +1,5 @@
+use openscq30_lib_macros::Has;
+
 use crate::{
     devices::soundcore::standard::{
         packet::inbound::SerialNumberAndFirmwareVersionUpdatePacket,
@@ -11,19 +13,23 @@ use crate::{
 
 use super::packets::A3031StateUpdatePacket;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Has)]
 pub struct A3031State {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
     pub equalizer_configuration: EqualizerConfiguration<2, 8>,
     pub button_configuration: MultiButtonConfiguration,
     pub sound_modes: SoundModes,
-    pub side_tone: bool,
-    pub touch_tone: bool,
-    pub auto_power_off_on: bool,
-    pub auto_power_off_on_index: u8,
     pub serial_number: SerialNumber,
     pub dual_firmware_version: DualFirmwareVersion,
+    #[has(skip)]
+    pub side_tone: bool,
+    #[has(skip)]
+    pub touch_tone: bool,
+    #[has(skip)]
+    pub auto_power_off_on: bool,
+    #[has(skip)]
+    pub auto_power_off_on_index: u8,
 }
 
 impl_as_ref_for_field!(

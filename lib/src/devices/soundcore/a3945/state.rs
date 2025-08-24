@@ -1,3 +1,5 @@
+use openscq30_lib_macros::Has;
+
 use crate::{
     devices::soundcore::standard::structures::{
         BatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
@@ -8,7 +10,7 @@ use crate::{
 
 use super::packets::A3945StateUpdatePacket;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Has)]
 pub struct A3945State {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
@@ -16,11 +18,16 @@ pub struct A3945State {
     pub serial_number: SerialNumber,
     pub equalizer_configuration: EqualizerConfiguration<2, 10>,
     pub button_configuration: MultiButtonConfiguration,
-    pub touch_tone_switch: bool,
-    pub wear_detection_switch: bool,
-    pub game_mode_switch: bool,
     pub charging_case_battery_level: BatteryLevel,
+    #[has(skip)]
+    pub touch_tone_switch: bool,
+    #[has(skip)]
+    pub wear_detection_switch: bool,
+    #[has(skip)]
+    pub game_mode_switch: bool,
+    #[has(skip)]
     pub bass_up_switch: bool,
+    #[has(skip)]
     pub device_color: u8,
 }
 

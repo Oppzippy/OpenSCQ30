@@ -1,3 +1,5 @@
+use openscq30_lib_macros::Has;
+
 use crate::{
     devices::soundcore::standard::{
         packet::inbound::SerialNumberAndFirmwareVersionUpdatePacket,
@@ -11,7 +13,7 @@ use crate::{
 
 use super::packets::A3926StateUpdatePacket;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Has)]
 pub struct A3926State {
     tws_status: TwsStatus,
     battery: DualBattery,

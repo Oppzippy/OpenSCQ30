@@ -1,3 +1,5 @@
+use openscq30_lib_macros::Has;
+
 use crate::{
     devices::soundcore::standard::{
         packet::inbound::SerialNumberAndFirmwareVersionUpdatePacket,
@@ -11,7 +13,7 @@ use crate::{
 
 use super::packets::A3951StateUpdatePacket;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Has)]
 pub struct A3951State {
     tws_status: TwsStatus,
     battery: DualBattery,
@@ -21,15 +23,22 @@ pub struct A3951State {
     custom_hear_id: CustomHearId<2, 8>,
     button_configuration: MultiButtonConfiguration,
     sound_modes: SoundModes,
-    side_tone: bool,
-    wear_detection: bool,
-    touch_tone: bool,
-    hear_id_eq_preset: Option<u16>,
-    supports_new_battery: bool, // yes if packet is >98, don't parse
-    left_new_battery: u8,       // 0 to 9
-    right_new_battery: u8,      // 0 to 9
     serial_number: SerialNumber,
     dual_firmware_version: DualFirmwareVersion,
+    #[has(skip)]
+    side_tone: bool,
+    #[has(skip)]
+    wear_detection: bool,
+    #[has(skip)]
+    touch_tone: bool,
+    #[has(skip)]
+    hear_id_eq_preset: Option<u16>,
+    #[has(skip)]
+    supports_new_battery: bool, // yes if packet is >98, don't parse
+    #[has(skip)]
+    left_new_battery: u8, // 0 to 9
+    #[has(skip)]
+    right_new_battery: u8, // 0 to 9
 }
 
 impl_as_ref_for_field!(

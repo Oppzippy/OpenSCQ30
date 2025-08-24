@@ -1,3 +1,5 @@
+use openscq30_lib_macros::Has;
+
 use crate::{
     devices::soundcore::standard::structures::{
         AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
@@ -8,7 +10,7 @@ use crate::{
 
 use super::packets::A3027StateUpdatePacket;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Has)]
 pub struct A3027State {
     pub battery: SingleBattery,
     pub equalizer_configuration: EqualizerConfiguration<1, 8>,
@@ -19,7 +21,9 @@ pub struct A3027State {
     pub sound_modes: SoundModes,
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
+    #[has(skip)]
     pub wear_detection: bool,
+    #[has(skip)]
     pub touch_func: Option<bool>,
 }
 

@@ -1,3 +1,5 @@
+use openscq30_lib_macros::Has;
+
 use crate::{
     devices::soundcore::standard::structures::{
         AgeRange, AutoPowerOff, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender,
@@ -8,7 +10,7 @@ use crate::{
 
 use super::packets::A3028StateUpdatePacket;
 
-#[derive(Debug, Clone, PartialEq, Eq, openscq30_lib_macros::Has)]
+#[derive(Debug, Clone, PartialEq, Eq, Has)]
 pub struct A3028State {
     pub battery: SingleBattery,
     pub equalizer_configuration: EqualizerConfiguration<1, 8>,

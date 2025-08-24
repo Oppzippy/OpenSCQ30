@@ -1,3 +1,5 @@
+use openscq30_lib_macros::Has;
+
 use crate::{
     devices::soundcore::standard::{
         packet::inbound::SerialNumberAndFirmwareVersionUpdatePacket,
@@ -11,7 +13,7 @@ use crate::{
 
 use super::packets::A3930StateUpdatePacket;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Has)]
 pub struct A3930State {
     tws_status: TwsStatus,
     battery: DualBattery,
@@ -21,10 +23,12 @@ pub struct A3930State {
     custom_hear_id: CustomHearId<2, 8>,
     button_configuration: MultiButtonConfiguration,
     sound_modes: SoundModes,
-    side_tone: bool,
-    hear_id_eq_index: Option<u16>,
     serial_number: SerialNumber,
     dual_firmware_version: DualFirmwareVersion,
+    #[has(skip)]
+    side_tone: bool,
+    #[has(skip)]
+    hear_id_eq_index: Option<u16>,
 }
 
 impl_as_ref_for_field!(
