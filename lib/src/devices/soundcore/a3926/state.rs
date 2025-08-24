@@ -1,14 +1,11 @@
 use openscq30_lib_macros::Has;
 
-use crate::{
-    devices::soundcore::standard::{
-        packet::inbound::SerialNumberAndFirmwareVersionUpdatePacket,
-        structures::{
-            AgeRange, BasicHearId, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
-            Gender, MultiButtonConfiguration, SerialNumber, TwsStatus,
-        },
+use crate::devices::soundcore::standard::{
+    packet::inbound::SerialNumberAndFirmwareVersionUpdatePacket,
+    structures::{
+        AgeRange, BasicHearId, DualBattery, DualFirmwareVersion, EqualizerConfiguration, Gender,
+        MultiButtonConfiguration, SerialNumber, TwsStatus,
     },
-    macros::impl_as_ref_for_field,
 };
 
 use super::packets::A3926StateUpdatePacket;
@@ -25,20 +22,6 @@ pub struct A3926State {
     serial_number: SerialNumber,
     dual_firmware_version: DualFirmwareVersion,
 }
-
-impl_as_ref_for_field!(
-    struct A3926State {
-        tws_status: TwsStatus,
-        battery: DualBattery,
-        equalizer_configuration: EqualizerConfiguration<2, 8>,
-        gender: Gender,
-        age_range: AgeRange,
-        hear_id: BasicHearId<2, 8>,
-        button_configuration: MultiButtonConfiguration,
-        serial_number: SerialNumber,
-        dual_firmware_version: DualFirmwareVersion,
-    }
-);
 
 impl A3926State {
     pub fn new(

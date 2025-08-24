@@ -1,12 +1,8 @@
 use openscq30_lib_macros::Has;
 
-use crate::{
-    devices::soundcore::standard::structures::{
-        AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
-        DualFirmwareVersion, EqualizerConfiguration, MultiButtonConfiguration, SerialNumber,
-        SoundModes, TwsStatus,
-    },
-    macros::impl_as_ref_for_field,
+use crate::devices::soundcore::standard::structures::{
+    AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery, DualFirmwareVersion,
+    EqualizerConfiguration, MultiButtonConfiguration, SerialNumber, SoundModes, TwsStatus,
 };
 
 use super::packets::inbound::A3933StateUpdatePacket;
@@ -58,18 +54,3 @@ impl From<A3933StateUpdatePacket> for A3933State {
         }
     }
 }
-
-impl_as_ref_for_field!(
-    struct A3933State {
-        tws_status: TwsStatus,
-        battery: DualBattery,
-        dual_firmware_version: DualFirmwareVersion,
-        serial_number: SerialNumber,
-        equalizer_configuration: EqualizerConfiguration<2, 10>,
-        age_range: AgeRange,
-        hear_id: Option<CustomHearId<2, 10>>,
-        button_configuration: MultiButtonConfiguration,
-        ambient_sound_mode_cycle: AmbientSoundModeCycle,
-        sound_modes: SoundModes,
-    }
-);

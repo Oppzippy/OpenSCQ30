@@ -1,10 +1,7 @@
 use openscq30_lib_macros::Has;
 
-use crate::{
-    devices::soundcore::standard::structures::{
-        EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery, SoundModes,
-    },
-    macros::impl_as_ref_for_field,
+use crate::devices::soundcore::standard::structures::{
+    EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery, SoundModes,
 };
 
 use super::packets::A3004StateUpdatePacket;
@@ -17,16 +14,6 @@ pub struct A3004State {
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
 }
-
-impl_as_ref_for_field!(
-    struct A3004State {
-        battery: SingleBattery,
-        sound_modes: SoundModes,
-        equalizer_configuration: EqualizerConfiguration<1, 10>,
-        firmware_version: FirmwareVersion,
-        serial_number: SerialNumber,
-    }
-);
 
 impl From<A3004StateUpdatePacket> for A3004State {
     fn from(value: A3004StateUpdatePacket) -> Self {

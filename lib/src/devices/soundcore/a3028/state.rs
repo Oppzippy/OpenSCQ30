@@ -1,11 +1,8 @@
 use openscq30_lib_macros::Has;
 
-use crate::{
-    devices::soundcore::standard::structures::{
-        AgeRange, AutoPowerOff, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender,
-        SerialNumber, SingleBattery, SoundModes,
-    },
-    macros::impl_as_ref_for_field,
+use crate::devices::soundcore::standard::structures::{
+    AgeRange, AutoPowerOff, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender,
+    SerialNumber, SingleBattery, SoundModes,
 };
 
 use super::packets::A3028StateUpdatePacket;
@@ -23,17 +20,6 @@ pub struct A3028State {
     #[has(maybe)]
     pub auto_power_off: Option<AutoPowerOff>,
 }
-
-impl_as_ref_for_field!(
-    struct A3028State {
-        battery: SingleBattery,
-        sound_modes: SoundModes,
-        equalizer_configuration: EqualizerConfiguration<1, 8>,
-        firmware_version: FirmwareVersion,
-        serial_number: SerialNumber,
-        auto_power_off: Option<AutoPowerOff>,
-    }
-);
 
 impl From<A3028StateUpdatePacket> for A3028State {
     fn from(value: A3028StateUpdatePacket) -> Self {

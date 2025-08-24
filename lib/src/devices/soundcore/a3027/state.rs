@@ -1,11 +1,8 @@
 use openscq30_lib_macros::Has;
 
-use crate::{
-    devices::soundcore::standard::structures::{
-        AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
-        SingleBattery, SoundModes,
-    },
-    macros::impl_as_ref_for_field,
+use crate::devices::soundcore::standard::structures::{
+    AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
+    SingleBattery, SoundModes,
 };
 
 use super::packets::A3027StateUpdatePacket;
@@ -26,16 +23,6 @@ pub struct A3027State {
     #[has(skip)]
     pub touch_func: Option<bool>,
 }
-
-impl_as_ref_for_field!(
-    struct A3027State {
-        battery: SingleBattery,
-        sound_modes: SoundModes,
-        equalizer_configuration: EqualizerConfiguration<1, 8>,
-        firmware_version: FirmwareVersion,
-        serial_number: SerialNumber,
-    }
-);
 
 impl From<A3027StateUpdatePacket> for A3027State {
     fn from(value: A3027StateUpdatePacket) -> Self {

@@ -1,11 +1,8 @@
 use openscq30_lib_macros::Has;
 
-use crate::{
-    devices::soundcore::standard::structures::{
-        BatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
-        MultiButtonConfiguration, SerialNumber, TwsStatus,
-    },
-    macros::impl_as_ref_for_field,
+use crate::devices::soundcore::standard::structures::{
+    BatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
+    MultiButtonConfiguration, SerialNumber, TwsStatus,
 };
 
 use super::packets::A3945StateUpdatePacket;
@@ -30,17 +27,6 @@ pub struct A3945State {
     #[has(skip)]
     pub device_color: u8,
 }
-
-impl_as_ref_for_field!(
-    struct A3945State {
-        tws_status: TwsStatus,
-        battery: DualBattery,
-        dual_firmware_version: DualFirmwareVersion,
-        serial_number: SerialNumber,
-        equalizer_configuration: EqualizerConfiguration<2, 10>,
-        button_configuration: MultiButtonConfiguration,
-    }
-);
 
 impl From<A3945StateUpdatePacket> for A3945State {
     fn from(value: A3945StateUpdatePacket) -> Self {

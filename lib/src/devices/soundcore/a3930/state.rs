@@ -8,7 +8,6 @@ use crate::{
             Gender, MultiButtonConfiguration, SerialNumber, SoundModes, TwsStatus,
         },
     },
-    macros::impl_as_ref_for_field,
 };
 
 use super::packets::A3930StateUpdatePacket;
@@ -31,20 +30,6 @@ pub struct A3930State {
     hear_id_eq_index: Option<u16>,
 }
 
-impl_as_ref_for_field!(
-    struct A3930State {
-        tws_status: TwsStatus,
-        battery: DualBattery,
-        equalizer_configuration: EqualizerConfiguration<2, 8>,
-        gender: Gender,
-        age_range: AgeRange,
-        custom_hear_id: CustomHearId<2, 8>,
-        button_configuration: MultiButtonConfiguration,
-        sound_modes: SoundModes,
-        serial_number: SerialNumber,
-        dual_firmware_version: DualFirmwareVersion,
-    }
-);
 
 impl A3930State {
     pub fn new(

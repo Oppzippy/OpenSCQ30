@@ -8,7 +8,6 @@ use crate::{
             MultiButtonConfiguration, SerialNumber, SoundModes, TwsStatus,
         },
     },
-    macros::impl_as_ref_for_field,
 };
 
 use super::packets::A3931StateUpdatePacket;
@@ -29,18 +28,6 @@ pub struct A3931State {
     touch_tone: bool,
 }
 
-impl_as_ref_for_field!(
-    struct A3931State {
-        tws_status: TwsStatus,
-        battery: DualBattery,
-        equalizer_configuration: EqualizerConfiguration<2, 8>,
-        button_configuration: MultiButtonConfiguration,
-        sound_modes: SoundModes,
-        serial_number: SerialNumber,
-        dual_firmware_version: DualFirmwareVersion,
-        auto_power_off: AutoPowerOff,
-    }
-);
 
 impl A3931State {
     pub fn new(

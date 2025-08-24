@@ -1,17 +1,14 @@
 use openscq30_lib_macros::Has;
 
-use crate::{
-    devices::soundcore::{
-        a3959::{
-            packets::A3959StateUpdatePacket,
-            structures::{A3959MultiButtonConfiguration, A3959SoundModes},
-        },
-        standard::structures::{
-            AmbientSoundModeCycle, AutoPowerOff, DualBattery, DualFirmwareVersion,
-            EqualizerConfiguration, SerialNumber, TwsStatus,
-        },
+use crate::devices::soundcore::{
+    a3959::{
+        packets::A3959StateUpdatePacket,
+        structures::{A3959MultiButtonConfiguration, A3959SoundModes},
     },
-    macros::impl_as_ref_for_field,
+    standard::structures::{
+        AmbientSoundModeCycle, AutoPowerOff, DualBattery, DualFirmwareVersion,
+        EqualizerConfiguration, SerialNumber, TwsStatus,
+    },
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Has)]
@@ -26,20 +23,6 @@ pub struct A3959State {
     sound_modes: A3959SoundModes,
     auto_power_off: AutoPowerOff,
 }
-
-impl_as_ref_for_field!(
-    struct A3959State {
-        tws_status: TwsStatus,
-        dual_battery: DualBattery,
-        dual_firmware_version: DualFirmwareVersion,
-        serial_number: SerialNumber,
-        equalizer_configuration: EqualizerConfiguration<2, 10>,
-        button_configuration: A3959MultiButtonConfiguration,
-        ambient_sound_mode_cycle: AmbientSoundModeCycle,
-        sound_modes: A3959SoundModes,
-        auto_power_off: AutoPowerOff,
-    }
-);
 
 impl From<A3959StateUpdatePacket> for A3959State {
     fn from(packet: A3959StateUpdatePacket) -> Self {

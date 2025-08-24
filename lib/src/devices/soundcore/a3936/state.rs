@@ -1,11 +1,8 @@
 use openscq30_lib_macros::Has;
 
-use crate::{
-    devices::soundcore::standard::structures::{
-        AgeRange, AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CustomHearId, DualBattery,
-        DualFirmwareVersion, EqualizerConfiguration, Gender, SerialNumber, TwsStatus,
-    },
-    macros::impl_as_ref_for_field,
+use crate::devices::soundcore::standard::structures::{
+    AgeRange, AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CustomHearId, DualBattery,
+    DualFirmwareVersion, EqualizerConfiguration, Gender, SerialNumber, TwsStatus,
 };
 
 use super::{
@@ -39,22 +36,6 @@ pub struct A3936State {
     #[has(skip)]
     pub game_mode_switch: bool,
 }
-
-impl_as_ref_for_field!(
-    struct A3936State {
-        tws_status: TwsStatus,
-        battery: DualBattery,
-        dual_firmware_version: DualFirmwareVersion,
-        serial_number: SerialNumber,
-        equalizer_configuration: EqualizerConfiguration<2, 10>,
-        age_range: AgeRange,
-        custom_hear_id: CustomHearId<2, 10>,
-        sound_modes: A3936SoundModes,
-        ambient_sound_mode_cycle: AmbientSoundModeCycle,
-        button_configuration: A3936InternalMultiButtonConfiguration,
-        auto_power_off: AutoPowerOff,
-    }
-);
 
 impl From<A3936StateUpdatePacket> for A3936State {
     fn from(value: A3936StateUpdatePacket) -> Self {
