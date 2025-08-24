@@ -1,12 +1,10 @@
 use openscq30_lib_macros::Has;
 
-use crate::{
-    devices::soundcore::standard::{
-        packet::inbound::SerialNumberAndFirmwareVersionUpdatePacket,
-        structures::{
-            AgeRange, CustomHearId, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
-            Gender, MultiButtonConfiguration, SerialNumber, SoundModes, TwsStatus,
-        },
+use crate::devices::soundcore::standard::{
+    packet::inbound::SerialNumberAndFirmwareVersionUpdatePacket,
+    structures::{
+        AgeRange, CustomHearId, DualBattery, DualFirmwareVersion, EqualizerConfiguration, Gender,
+        MultiButtonConfiguration, SerialNumber, SoundModes, TwsStatus,
     },
 };
 
@@ -29,7 +27,6 @@ pub struct A3930State {
     #[has(skip)]
     hear_id_eq_index: Option<u16>,
 }
-
 
 impl A3930State {
     pub fn new(

@@ -1,12 +1,10 @@
 use openscq30_lib_macros::Has;
 
-use crate::{
-    devices::soundcore::standard::{
-        packet::inbound::SerialNumberAndFirmwareVersionUpdatePacket,
-        structures::{
-            AutoPowerOff, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
-            MultiButtonConfiguration, SerialNumber, SoundModes, TwsStatus,
-        },
+use crate::devices::soundcore::standard::{
+    packet::inbound::SerialNumberAndFirmwareVersionUpdatePacket,
+    structures::{
+        AutoPowerOff, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
+        MultiButtonConfiguration, SerialNumber, SoundModes, TwsStatus,
     },
 };
 
@@ -27,7 +25,6 @@ pub struct A3931State {
     #[has(skip)]
     touch_tone: bool,
 }
-
 
 impl A3931State {
     pub fn new(
