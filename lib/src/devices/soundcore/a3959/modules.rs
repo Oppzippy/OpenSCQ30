@@ -1,3 +1,5 @@
+use openscq30_lib_has::Has;
+
 use crate::{
     api::connection::RfcommConnection,
     devices::soundcore::standard::{
@@ -15,9 +17,7 @@ impl<ConnectionType, StateType, StateUpdatePacketType>
 where
     ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateUpdatePacketType: InboundPacket + Into<StateType>,
-    StateType: Send + Sync + Clone + 'static,
-    StateType: AsRef<A3959MultiButtonConfiguration> + AsMut<A3959MultiButtonConfiguration>,
-    StateType: AsRef<TwsStatus>,
+    StateType: Has<A3959MultiButtonConfiguration> + Has<TwsStatus> + Send + Sync + Clone + 'static,
 {
     pub fn a3959_button_configuration(&mut self) {
         let packet_io_controller = self.packet_io_controller().clone();
@@ -31,8 +31,7 @@ impl<ConnectionType, StateType, StateUpdatePacketType>
 where
     ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateUpdatePacketType: InboundPacket + Into<StateType>,
-    StateType: Send + Sync + Clone + 'static,
-    StateType: AsRef<A3959SoundModes> + AsMut<A3959SoundModes>,
+    StateType: Has<A3959SoundModes> + Send + Sync + Clone + 'static,
 {
     pub fn a3959_sound_modes(&mut self) {
         let packet_io_controller = self.packet_io_controller().clone();

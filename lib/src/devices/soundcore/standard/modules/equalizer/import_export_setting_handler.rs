@@ -5,6 +5,7 @@ use std::{
 };
 
 use async_trait::async_trait;
+use openscq30_lib_has::Has;
 use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
 use tokio::sync::watch;
@@ -54,7 +55,7 @@ impl<const C: usize, const B: usize> ImportExportSettingHandler<C, B> {
 #[async_trait]
 impl<T, const C: usize, const B: usize> SettingHandler<T> for ImportExportSettingHandler<C, B>
 where
-    T: AsMut<EqualizerConfiguration<C, B>> + AsRef<EqualizerConfiguration<C, B>> + Send,
+    T: Has<EqualizerConfiguration<C, B>> + Send,
 {
     fn settings(&self) -> Vec<SettingId> {
         ImportExportSetting::iter().map(Into::into).collect()

@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use openscq30_lib_has::Has;
 use std::sync::Arc;
 use tokio::sync::watch;
 
@@ -41,11 +42,7 @@ impl<ConnectionType: RfcommConnection, const C: usize, const B: usize>
 impl<ConnectionType, T, const C: usize, const B: usize> StateModifier<T>
     for EqualizerStateModifier<ConnectionType, C, B>
 where
-    T: AsMut<EqualizerConfiguration<C, B>>
-        + AsRef<EqualizerConfiguration<C, B>>
-        + Clone
-        + Send
-        + Sync,
+    T: Has<EqualizerConfiguration<C, B>> + Clone + Send + Sync,
     ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
@@ -53,10 +50,10 @@ where
         state_sender: &watch::Sender<T>,
         target_state: &T,
     ) -> device::Result<()> {
-        let target_equalizer_configuration = target_state.as_ref();
+        let target_equalizer_configuration = target_state.get();
         {
             let state = state_sender.borrow();
-            let equalizer_configuration = state.as_ref();
+            let equalizer_configuration = state.get();
             if equalizer_configuration == target_equalizer_configuration {
                 return Ok(());
             }
@@ -75,7 +72,7 @@ where
                 .into()
             })
             .await?;
-        state_sender.send_modify(|state| *state.as_mut() = target_equalizer_configuration.clone());
+        state_sender.send_modify(|state| *state.get_mut() = target_equalizer_configuration.clone());
         Ok(())
     }
 }
@@ -100,12 +97,13 @@ impl<ConnectionType: RfcommConnection, const C: usize, const B: usize>
 impl<ConnectionType, T, const C: usize, const B: usize> StateModifier<T>
     for EqualizerWithBasicHearIdStateModifier<ConnectionType, C, B>
 where
-    T: AsMut<EqualizerConfiguration<C, B>>
-        + AsRef<EqualizerConfiguration<C, B>>
+    T: Has<EqualizerConfiguration<C, B>>
+        + Has<BasicHearId<C, B>>
+        + Has<Gender>
+        + Has<AgeRange>
         + Clone
         + Send
         + Sync,
-    T: AsRef<BasicHearId<C, B>> + AsRef<Gender> + AsRef<AgeRange>,
     ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
@@ -113,10 +111,10 @@ where
         state_sender: &watch::Sender<T>,
         target_state: &T,
     ) -> device::Result<()> {
-        let target_equalizer_configuration: &EqualizerConfiguration<C, B> = target_state.as_ref();
+        let target_equalizer_configuration: &EqualizerConfiguration<C, B> = target_state.get();
         {
             let state = state_sender.borrow();
-            let equalizer_configuration: &EqualizerConfiguration<C, B> = state.as_ref();
+            let equalizer_configuration: &EqualizerConfiguration<C, B> = state.get();
             if equalizer_configuration == target_equalizer_configuration {
                 return Ok(());
             }
@@ -126,10 +124,10 @@ where
             .send_with_response(
                 &SetEqualizerAndCustomHearIdPacket {
                     equalizer_configuration: target_equalizer_configuration,
-                    gender: *target_state.as_ref(),
-                    age_range: *target_state.as_ref(),
+                    gender: *target_state.get(),
+                    age_range: *target_state.get(),
                     custom_hear_id: &{
-                        let basic_hear_id: &BasicHearId<C, B> = target_state.as_ref();
+                        let basic_hear_id: &BasicHearId<C, B> = target_state.get();
                         // TODO have SetEqualizerAndCustomHearIdPacket take only the wanted fields rather than an entire CustomHearId struct
                         CustomHearId {
                             is_enabled: basic_hear_id.is_enabled,
@@ -144,7 +142,7 @@ where
                 .into(),
             )
             .await?;
-        state_sender.send_modify(|state| *state.as_mut() = target_equalizer_configuration.clone());
+        state_sender.send_modify(|state| *state.get_mut() = target_equalizer_configuration.clone());
         Ok(())
     }
 }
@@ -169,12 +167,13 @@ impl<ConnectionType: RfcommConnection, const C: usize, const B: usize>
 impl<ConnectionType, T, const C: usize, const B: usize> StateModifier<T>
     for EqualizerWithCustomHearIdStateModifier<ConnectionType, C, B>
 where
-    T: AsMut<EqualizerConfiguration<C, B>>
-        + AsRef<EqualizerConfiguration<C, B>>
+    T: Has<EqualizerConfiguration<C, B>>
+        + Has<CustomHearId<C, B>>
+        + Has<Gender>
+        + Has<AgeRange>
         + Clone
         + Send
         + Sync,
-    T: AsRef<CustomHearId<C, B>> + AsRef<Gender> + AsRef<AgeRange>,
     ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
@@ -182,10 +181,10 @@ where
         state_sender: &watch::Sender<T>,
         target_state: &T,
     ) -> device::Result<()> {
-        let target_equalizer_configuration: &EqualizerConfiguration<C, B> = target_state.as_ref();
+        let target_equalizer_configuration: &EqualizerConfiguration<C, B> = target_state.get();
         {
             let state = state_sender.borrow();
-            let equalizer_configuration: &EqualizerConfiguration<C, B> = state.as_ref();
+            let equalizer_configuration: &EqualizerConfiguration<C, B> = state.get();
             if equalizer_configuration == target_equalizer_configuration {
                 return Ok(());
             }
@@ -195,14 +194,14 @@ where
             .send_with_response(
                 &SetEqualizerAndCustomHearIdPacket {
                     equalizer_configuration: target_equalizer_configuration,
-                    gender: *target_state.as_ref(),
-                    age_range: *target_state.as_ref(),
-                    custom_hear_id: target_state.as_ref(),
+                    gender: *target_state.get(),
+                    age_range: *target_state.get(),
+                    custom_hear_id: target_state.get(),
                 }
                 .into(),
             )
             .await?;
-        state_sender.send_modify(|state| *state.as_mut() = target_equalizer_configuration.clone());
+        state_sender.send_modify(|state| *state.get_mut() = target_equalizer_configuration.clone());
         Ok(())
     }
 }

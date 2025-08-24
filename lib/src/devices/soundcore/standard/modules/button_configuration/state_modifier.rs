@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use openscq30_lib_has::Has;
 use std::sync::Arc;
 use tokio::sync::watch;
 
@@ -26,7 +27,7 @@ impl<ConnectionType: RfcommConnection> ButtonConfigurationStateModifier<Connecti
 #[async_trait]
 impl<ConnectionType, T> StateModifier<T> for ButtonConfigurationStateModifier<ConnectionType>
 where
-    T: AsMut<MultiButtonConfiguration> + AsRef<MultiButtonConfiguration> + Clone + Send + Sync,
+    T: Has<MultiButtonConfiguration> + Clone + Send + Sync,
     ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
@@ -34,10 +35,10 @@ where
         state_sender: &watch::Sender<T>,
         target_state: &T,
     ) -> device::Result<()> {
-        let target_button_config = target_state.as_ref();
+        let target_button_config = target_state.get();
         {
             let state = state_sender.borrow();
-            let button_config = state.as_ref();
+            let button_config = state.get();
             if button_config == target_button_config {
                 return Ok(());
             }
@@ -48,7 +49,7 @@ where
                 &SetMultiButtonConfigurationPacket::new(*target_button_config).into(),
             )
             .await?;
-        state_sender.send_modify(|state| *state.as_mut() = *target_button_config);
+        state_sender.send_modify(|state| *state.get_mut() = *target_button_config);
         Ok(())
     }
 }

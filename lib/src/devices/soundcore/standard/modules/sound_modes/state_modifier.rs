@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
+use openscq30_lib_has::Has;
 use tokio::sync::watch;
 
 use crate::{
@@ -25,7 +26,7 @@ impl<ConnectionType: RfcommConnection> SoundModesStateModifier<ConnectionType> {
 #[async_trait]
 impl<ConnectionType, T> StateModifier<T> for SoundModesStateModifier<ConnectionType>
 where
-    T: AsMut<SoundModes> + AsRef<SoundModes> + Clone + Send + Sync,
+    T: Has<SoundModes> + Clone + Send + Sync,
     ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
@@ -33,8 +34,8 @@ where
         state_sender: &watch::Sender<T>,
         target_state: &T,
     ) -> device::Result<()> {
-        let sound_modes = *state_sender.borrow().as_ref();
-        let target_sound_modes = target_state.as_ref();
+        let sound_modes = *state_sender.borrow().get();
+        let target_sound_modes = target_state.get();
         if &sound_modes == target_sound_modes {
             return Ok(());
         }
@@ -58,7 +59,7 @@ where
             self.packet_io
                 .send_with_response(&SetSoundModePacket(new_sound_modes).into())
                 .await?;
-            state_sender.send_modify(|state| *state.as_mut() = new_sound_modes);
+            state_sender.send_modify(|state| *state.get_mut() = new_sound_modes);
         }
 
         {
@@ -77,7 +78,7 @@ where
             self.packet_io
                 .send_with_response(&SetSoundModePacket(new_sound_modes).into())
                 .await?;
-            state_sender.send_modify(|state| *state.as_mut() = new_sound_modes);
+            state_sender.send_modify(|state| *state.get_mut() = new_sound_modes);
         }
 
         // Switch to the target sound mode if we didn't do it in the previous step.
@@ -86,7 +87,7 @@ where
             self.packet_io
                 .send_with_response(&SetSoundModePacket(*target_sound_modes).into())
                 .await?;
-            state_sender.send_modify(|state| *state.as_mut() = *target_sound_modes);
+            state_sender.send_modify(|state| *state.get_mut() = *target_sound_modes);
         }
         Ok(())
     }

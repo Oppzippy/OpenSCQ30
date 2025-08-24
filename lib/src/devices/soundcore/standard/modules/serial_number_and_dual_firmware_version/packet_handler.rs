@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use openscq30_lib_has::Has;
 use tokio::sync::watch;
 
 use crate::{
@@ -23,25 +24,20 @@ impl SerialNumberAndDualFirmwareVersionPacketHandler {
 #[async_trait]
 impl<T> PacketHandler<T> for SerialNumberAndDualFirmwareVersionPacketHandler
 where
-    T: AsMut<SerialNumber>
-        + AsRef<SerialNumber>
-        + AsMut<DualFirmwareVersion>
-        + AsRef<DualFirmwareVersion>
-        + Send
-        + Sync,
+    T: Has<SerialNumber> + Has<DualFirmwareVersion> + Send + Sync,
 {
     async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> device::Result<()> {
         let packet: SerialNumberAndFirmwareVersionUpdatePacket =
             packet.try_into_inbound_packet()?;
         state.send_if_modified(|state| {
             let modified = {
-                let serial_number: &SerialNumber = state.as_ref();
-                let dual_firmware_version: &DualFirmwareVersion = state.as_ref();
+                let serial_number: &SerialNumber = state.get();
+                let dual_firmware_version: &DualFirmwareVersion = state.get();
                 packet.serial_number != *serial_number
                     || packet.dual_firmware_version != *dual_firmware_version
             };
-            *state.as_mut() = packet.serial_number;
-            *state.as_mut() = packet.dual_firmware_version;
+            *state.get_mut() = packet.serial_number;
+            *state.get_mut() = packet.dual_firmware_version;
             modified
         });
         Ok(())

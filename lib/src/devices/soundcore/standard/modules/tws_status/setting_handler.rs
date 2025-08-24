@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use openscq30_i18n::Translate;
+use openscq30_lib_has::Has;
 use strum::IntoEnumIterator;
 
 use crate::{
@@ -19,14 +20,14 @@ pub struct TwsStatusSettingHandler {}
 #[async_trait]
 impl<T> SettingHandler<T> for TwsStatusSettingHandler
 where
-    T: AsMut<TwsStatus> + AsRef<TwsStatus> + Send,
+    T: Has<TwsStatus> + Send,
 {
     fn settings(&self) -> Vec<SettingId> {
         TwsStatusSetting::iter().map(Into::into).collect()
     }
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
-        let tws_status = state.as_ref();
+        let tws_status = state.get();
         let setting: TwsStatusSetting = setting_id.try_into().ok()?;
         Some(match setting {
             TwsStatusSetting::HostDevice => Setting::Information {

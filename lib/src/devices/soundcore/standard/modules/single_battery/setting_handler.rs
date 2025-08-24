@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use openscq30_lib_has::Has;
 use strum::IntoEnumIterator;
 
 use crate::{
@@ -18,14 +19,14 @@ pub struct BatterySettingHandler {}
 #[async_trait]
 impl<T> SettingHandler<T> for BatterySettingHandler
 where
-    T: AsMut<SingleBattery> + AsRef<SingleBattery> + Send,
+    T: Has<SingleBattery> + Send,
 {
     fn settings(&self) -> Vec<SettingId> {
         BatterySetting::iter().map(Into::into).collect()
     }
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
-        let battery = state.as_ref();
+        let battery = state.get();
         let setting: BatterySetting = setting_id.try_into().ok()?;
         Some(match setting {
             BatterySetting::IsCharging => Setting::Information {

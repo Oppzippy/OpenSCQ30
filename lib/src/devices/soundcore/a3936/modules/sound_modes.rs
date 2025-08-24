@@ -4,6 +4,7 @@ mod state_modifier;
 
 use std::sync::Arc;
 
+use openscq30_lib_has::Has;
 use packet_handler::SoundModesPacketHandler;
 use setting_handler::SoundModesSettingHandler;
 use state_modifier::SoundModesStateModifier;
@@ -71,7 +72,7 @@ impl TryFrom<&SettingId> for SoundModeSetting {
 
 impl<T> ModuleCollection<T>
 where
-    T: AsMut<A3936SoundModes> + AsRef<A3936SoundModes> + Clone + Send + Sync,
+    T: Has<A3936SoundModes> + Clone + Send + Sync,
 {
     pub fn add_a3936_sound_modes<C>(&mut self, packet_io: Arc<PacketIOController<C>>)
     where

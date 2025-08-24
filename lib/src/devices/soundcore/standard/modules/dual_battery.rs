@@ -1,6 +1,7 @@
 mod packet_handler;
 mod setting_handler;
 
+use openscq30_lib_has::Has;
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use crate::{
@@ -45,7 +46,7 @@ impl TryFrom<&SettingId> for BatterySetting {
 
 impl<T> ModuleCollection<T>
 where
-    T: AsMut<DualBattery> + AsRef<DualBattery> + Clone + Send + Sync,
+    T: Has<DualBattery> + Clone + Send + Sync,
 {
     pub fn add_dual_battery(&mut self) {
         self.setting_manager.add_handler(

@@ -4,6 +4,7 @@ mod state_modifier;
 
 use std::sync::Arc;
 
+use openscq30_lib_has::Has;
 use packet_handler::SoundModesPacketHandler;
 use setting_handler::SoundModesSettingHandler;
 use state_modifier::SoundModesStateModifier;
@@ -63,7 +64,7 @@ pub struct AvailableSoundModes {
 
 impl<T> ModuleCollection<T>
 where
-    T: AsMut<SoundModes> + AsRef<SoundModes> + Clone + Send + Sync,
+    T: Has<SoundModes> + Clone + Send + Sync,
 {
     pub fn add_sound_modes<C>(
         &mut self,

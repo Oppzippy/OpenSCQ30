@@ -27,6 +27,7 @@ pub struct A3936State {
     pub button_configuration: A3936InternalMultiButtonConfiguration,
     pub charging_case_battery: BatteryLevel,
     pub auto_power_off: AutoPowerOff,
+    pub gender: Gender,
     #[has(skip)]
     pub touch_tone: bool,
     #[has(skip)]
@@ -55,12 +56,6 @@ impl_as_ref_for_field!(
     }
 );
 
-impl AsRef<Gender> for A3936State {
-    fn as_ref(&self) -> &Gender {
-        &Gender(0)
-    }
-}
-
 impl From<A3936StateUpdatePacket> for A3936State {
     fn from(value: A3936StateUpdatePacket) -> Self {
         Self {
@@ -81,6 +76,7 @@ impl From<A3936StateUpdatePacket> for A3936State {
             supports_two_cnn_switch: value.supports_two_cnn_switch,
             auto_power_off: value.auto_power_off,
             game_mode_switch: value.game_mode_switch,
+            gender: Gender::default(),
         }
     }
 }

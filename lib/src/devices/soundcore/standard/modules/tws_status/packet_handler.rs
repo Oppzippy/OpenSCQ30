@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use openscq30_lib_has::Has;
 use tokio::sync::watch;
 
 use crate::{
@@ -23,12 +24,12 @@ impl TwsStatusPacketHandler {
 #[async_trait]
 impl<T> PacketHandler<T> for TwsStatusPacketHandler
 where
-    T: AsMut<TwsStatus> + Send + Sync,
+    T: Has<TwsStatus> + Send + Sync,
 {
     async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> device::Result<()> {
         let packet: TwsStatusUpdatePacket = packet.try_into_inbound_packet()?;
         state.send_if_modified(|state| {
-            let tws_status = state.as_mut();
+            let tws_status = state.get_mut();
             let modified = *tws_status != packet.0;
             *tws_status = packet.0;
             modified

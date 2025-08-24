@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use openscq30_lib_has::Has;
 use setting_handler::EqualizerSettingHandler;
 use state_modifier::{
     EqualizerStateModifier, EqualizerStateModifierOptions, EqualizerWithBasicHearIdStateModifier,
@@ -111,11 +112,7 @@ impl<T> ModuleCollection<T> {
         change_notify: watch::Sender<()>,
     ) where
         Conn: RfcommConnection + 'static + Send + Sync,
-        T: AsMut<EqualizerConfiguration<CHANNELS, BANDS>>
-            + AsRef<EqualizerConfiguration<CHANNELS, BANDS>>
-            + Clone
-            + Send
-            + Sync,
+        T: Has<EqualizerConfiguration<CHANNELS, BANDS>> + Clone + Send + Sync,
     {
         self.add_equalizer_setting_handlers(database, device_model, change_notify)
             .await;
@@ -134,11 +131,7 @@ impl<T> ModuleCollection<T> {
         change_notify: watch::Sender<()>,
     ) where
         Conn: RfcommConnection + 'static + Send + Sync,
-        T: AsMut<EqualizerConfiguration<CHANNELS, BANDS>>
-            + AsRef<EqualizerConfiguration<CHANNELS, BANDS>>
-            + Clone
-            + Send
-            + Sync,
+        T: Has<EqualizerConfiguration<CHANNELS, BANDS>> + Clone + Send + Sync,
     {
         self.add_equalizer_setting_handlers(database, device_model, change_notify)
             .await;
@@ -156,12 +149,13 @@ impl<T> ModuleCollection<T> {
         change_notify: watch::Sender<()>,
     ) where
         Conn: RfcommConnection + 'static + Send + Sync,
-        T: AsMut<EqualizerConfiguration<CHANNELS, BANDS>>
-            + AsRef<EqualizerConfiguration<CHANNELS, BANDS>>
+        T: Has<EqualizerConfiguration<CHANNELS, BANDS>>
+            + Has<BasicHearId<CHANNELS, BANDS>>
+            + Has<Gender>
+            + Has<AgeRange>
             + Clone
             + Send
             + Sync,
-        T: AsRef<BasicHearId<CHANNELS, BANDS>> + AsRef<Gender> + AsRef<AgeRange>,
     {
         self.add_equalizer_setting_handlers(database, device_model, change_notify)
             .await;
@@ -185,12 +179,13 @@ impl<T> ModuleCollection<T> {
         change_notify: watch::Sender<()>,
     ) where
         Conn: RfcommConnection + 'static + Send + Sync,
-        T: AsMut<EqualizerConfiguration<CHANNELS, BANDS>>
-            + AsRef<EqualizerConfiguration<CHANNELS, BANDS>>
+        T: Has<EqualizerConfiguration<CHANNELS, BANDS>>
+            + Has<CustomHearId<CHANNELS, BANDS>>
+            + Has<Gender>
+            + Has<AgeRange>
             + Clone
             + Send
             + Sync,
-        T: AsRef<CustomHearId<CHANNELS, BANDS>> + AsRef<Gender> + AsRef<AgeRange>,
     {
         self.add_equalizer_setting_handlers(database, device_model, change_notify)
             .await;
@@ -206,11 +201,7 @@ impl<T> ModuleCollection<T> {
         device_model: DeviceModel,
         change_notify: watch::Sender<()>,
     ) where
-        T: AsMut<EqualizerConfiguration<CHANNELS, BANDS>>
-            + AsRef<EqualizerConfiguration<CHANNELS, BANDS>>
-            + Clone
-            + Send
-            + Sync,
+        T: Has<EqualizerConfiguration<CHANNELS, BANDS>> + Clone + Send + Sync,
     {
         let profile_store = Arc::new(
             CustomEqualizerProfileStore::new(database, device_model, change_notify.to_owned())

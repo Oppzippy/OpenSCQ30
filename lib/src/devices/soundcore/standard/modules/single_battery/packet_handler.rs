@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use openscq30_lib_has::Has;
 use tokio::sync::watch;
 
 use crate::{
@@ -26,12 +27,12 @@ impl BatteryLevelPacketHandler {
 #[async_trait]
 impl<T> PacketHandler<T> for BatteryLevelPacketHandler
 where
-    T: AsMut<SingleBattery> + Send + Sync,
+    T: Has<SingleBattery> + Send + Sync,
 {
     async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> device::Result<()> {
         let packet: SingleBatteryLevelUpdatePacket = packet.try_into_inbound_packet()?;
         state.send_if_modified(|state| {
-            let battery = state.as_mut();
+            let battery = state.get_mut();
             let modified = packet.level != battery.level;
             battery.level = packet.level;
             modified
@@ -50,12 +51,12 @@ impl BatteryChargingPacketHandler {
 #[async_trait]
 impl<T> PacketHandler<T> for BatteryChargingPacketHandler
 where
-    T: AsMut<SingleBattery> + Send + Sync,
+    T: Has<SingleBattery> + Send + Sync,
 {
     async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> device::Result<()> {
         let packet: SingleBatteryChargingUpdatePacket = packet.try_into_inbound_packet()?;
         state.send_if_modified(|state| {
-            let battery = state.as_mut();
+            let battery = state.get_mut();
             let modified = packet.is_charging != battery.is_charging;
             battery.is_charging = packet.is_charging;
             modified

@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use openscq30_lib_has::Has;
 use std::sync::Arc;
 use tokio::sync::watch;
 
@@ -27,17 +28,17 @@ impl<ConnectionType: RfcommConnection> AmbientSoundModeCycleStateModifier<Connec
 impl<ConnectionType, T> StateModifier<T> for AmbientSoundModeCycleStateModifier<ConnectionType>
 where
     ConnectionType: RfcommConnection + Send + Sync,
-    T: AsMut<AmbientSoundModeCycle> + AsRef<AmbientSoundModeCycle> + Clone + Send + Sync,
+    T: Has<AmbientSoundModeCycle> + Clone + Send + Sync,
 {
     async fn move_to_state(
         &self,
         state_sender: &watch::Sender<T>,
         target_state: &T,
     ) -> device::Result<()> {
-        let target_cycle = target_state.as_ref();
+        let target_cycle = target_state.get();
         {
             let state = state_sender.borrow();
-            let cycle = state.as_ref();
+            let cycle = state.get();
             if cycle == target_cycle {
                 return Ok(());
             }
@@ -51,7 +52,7 @@ where
                 .into(),
             )
             .await?;
-        state_sender.send_modify(|state| *state.as_mut() = *target_cycle);
+        state_sender.send_modify(|state| *state.get_mut() = *target_cycle);
         Ok(())
     }
 }

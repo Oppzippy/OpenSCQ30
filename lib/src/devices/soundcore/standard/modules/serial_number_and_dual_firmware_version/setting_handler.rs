@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use openscq30_lib_has::Has;
 use strum::IntoEnumIterator;
 
 use crate::{
@@ -17,7 +18,7 @@ pub struct SerialNumberAndFirmwareVersionSettingHandler {}
 #[async_trait]
 impl<T> SettingHandler<T> for SerialNumberAndFirmwareVersionSettingHandler
 where
-    T: AsRef<SerialNumber> + AsRef<DualFirmwareVersion> + Send,
+    T: Has<SerialNumber> + Has<DualFirmwareVersion> + Send,
 {
     fn settings(&self) -> Vec<SettingId> {
         SerialNumberAndDualFirmwareVersionSetting::iter()
@@ -26,8 +27,8 @@ where
     }
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
-        let serial_number: &SerialNumber = state.as_ref();
-        let dual_firmware_version: &DualFirmwareVersion = state.as_ref();
+        let serial_number: &SerialNumber = state.get();
+        let dual_firmware_version: &DualFirmwareVersion = state.get();
         let setting: SerialNumberAndDualFirmwareVersionSetting = setting_id.try_into().ok()?;
         Some(match setting {
             SerialNumberAndDualFirmwareVersionSetting::SerialNumber => Setting::Information {

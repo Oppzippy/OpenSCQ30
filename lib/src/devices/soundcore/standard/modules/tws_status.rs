@@ -1,6 +1,7 @@
 mod packet_handler;
 mod setting_handler;
 
+use openscq30_lib_has::Has;
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use crate::{
@@ -39,7 +40,7 @@ impl TryFrom<&SettingId> for TwsStatusSetting {
 
 impl<T> ModuleCollection<T>
 where
-    T: AsMut<TwsStatus> + AsRef<TwsStatus> + Clone + Send + Sync,
+    T: Has<TwsStatus> + Clone + Send + Sync,
 {
     pub fn add_tws_status(&mut self) {
         self.setting_manager.add_handler(

@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use openscq30_lib_has::Has;
 use setting_handler::AmbientSoundModeCycleSettingHandler;
 use state_modifier::AmbientSoundModeCycleStateModifier;
 use strum::{EnumIter, EnumString};
@@ -52,7 +53,7 @@ impl TryFrom<&SettingId> for SoundModeCycleSetting {
 
 impl<T> ModuleCollection<T>
 where
-    T: AsMut<AmbientSoundModeCycle> + AsRef<AmbientSoundModeCycle> + Clone + Send + Sync,
+    T: Has<AmbientSoundModeCycle> + Clone + Send + Sync,
 {
     pub fn add_ambient_sound_mode_cycle<C>(&mut self, packet_io: Arc<PacketIOController<C>>)
     where

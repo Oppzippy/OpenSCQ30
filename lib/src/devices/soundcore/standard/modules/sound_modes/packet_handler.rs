@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use openscq30_lib_has::Has;
 use tokio::sync::watch;
 
 use crate::{
@@ -23,12 +24,12 @@ impl SoundModesPacketHandler {
 #[async_trait]
 impl<T> PacketHandler<T> for SoundModesPacketHandler
 where
-    T: AsMut<SoundModes> + Send + Sync,
+    T: Has<SoundModes> + Send + Sync,
 {
     async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> device::Result<()> {
         let packet: SoundModeUpdatePacket = packet.try_into_inbound_packet()?;
         state.send_if_modified(|state| {
-            let sound_modes = state.as_mut();
+            let sound_modes = state.get_mut();
             let modified = packet.0 != *sound_modes;
             *sound_modes = packet.0;
             modified

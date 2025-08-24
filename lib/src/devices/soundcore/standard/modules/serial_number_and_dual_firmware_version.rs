@@ -1,3 +1,4 @@
+use openscq30_lib_has::Has;
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use crate::{
@@ -46,13 +47,7 @@ impl TryFrom<&SettingId> for SerialNumberAndDualFirmwareVersionSetting {
 
 impl<T> ModuleCollection<T>
 where
-    T: AsRef<SerialNumber>
-        + AsMut<SerialNumber>
-        + AsRef<DualFirmwareVersion>
-        + AsMut<DualFirmwareVersion>
-        + Clone
-        + Send
-        + Sync,
+    T: Has<SerialNumber> + Has<DualFirmwareVersion> + Clone + Send + Sync,
 {
     pub fn add_serial_number_and_dual_firmware_version(&mut self) {
         self.setting_manager.add_handler(

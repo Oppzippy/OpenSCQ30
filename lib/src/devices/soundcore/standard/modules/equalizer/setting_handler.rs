@@ -1,6 +1,7 @@
 use std::{array, borrow::Cow, sync::Arc};
 
 use async_trait::async_trait;
+use openscq30_lib_has::Has;
 use strum::IntoEnumIterator;
 use tokio::sync::watch;
 use tracing::instrument;
@@ -52,14 +53,14 @@ impl<const C: usize, const B: usize> EqualizerSettingHandler<C, B> {
 #[async_trait]
 impl<T, const C: usize, const B: usize> SettingHandler<T> for EqualizerSettingHandler<C, B>
 where
-    T: AsMut<EqualizerConfiguration<C, B>> + AsRef<EqualizerConfiguration<C, B>> + Send,
+    T: Has<EqualizerConfiguration<C, B>> + Send,
 {
     fn settings(&self) -> Vec<SettingId> {
         EqualizerSetting::iter().map(Into::into).collect()
     }
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<crate::api::settings::Setting> {
-        let equalizer_configuration = state.as_ref();
+        let equalizer_configuration = state.get();
         let setting = setting_id.try_into().ok()?;
         Some(match setting {
             EqualizerSetting::PresetProfile => Setting::optional_select_from_enum_all_variants(
@@ -116,7 +117,7 @@ where
         setting_id: &SettingId,
         value: Value,
     ) -> SettingHandlerResult<()> {
-        let equalizer_configuration = state.as_mut();
+        let equalizer_configuration = state.get_mut();
         let setting = setting_id
             .try_into()
             .expect("already filtered to valid values only by SettingsManager");
@@ -144,7 +145,7 @@ where
                         .find(|(n, _)| n == name)
                         .map(|(_, volume_adjustments)| volume_adjustments)
                     {
-                        *state.as_mut() = EqualizerConfiguration::new_custom_profile(
+                        *state.get_mut() = EqualizerConfiguration::new_custom_profile(
                             self.values_to_volume_adjustments(
                                 volume_adjustments,
                                 equalizer_configuration.volume_adjustments(),

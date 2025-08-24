@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use openscq30_lib_has::Has;
 use strum::IntoEnumIterator;
 
 use crate::{
@@ -22,15 +23,14 @@ impl ButtonConfigurationSettingHandler {
 #[async_trait]
 impl<T> SettingHandler<T> for ButtonConfigurationSettingHandler
 where
-    T: AsMut<MultiButtonConfiguration> + AsRef<MultiButtonConfiguration> + Send,
-    T: AsRef<TwsStatus>,
+    T: Has<MultiButtonConfiguration> + Has<TwsStatus> + Send,
 {
     fn settings(&self) -> Vec<SettingId> {
         ButtonConfigurationSetting::iter().map(Into::into).collect()
     }
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
-        let button_config: &MultiButtonConfiguration = state.as_ref();
+        let button_config: &MultiButtonConfiguration = state.get();
         let setting: ButtonConfigurationSetting = setting_id.try_into().ok()?;
         Some(match setting {
             ButtonConfigurationSetting::LeftSinglePress => {
@@ -64,8 +64,8 @@ where
         setting_id: &SettingId,
         value: Value,
     ) -> SettingHandlerResult<()> {
-        let tws_status: TwsStatus = *state.as_ref();
-        let button_config: &mut MultiButtonConfiguration = state.as_mut();
+        let tws_status: TwsStatus = *state.get();
+        let button_config: &mut MultiButtonConfiguration = state.get_mut();
         let setting: ButtonConfigurationSetting = setting_id
             .try_into()
             .expect("already filtered to valid values only by SettingsManager");

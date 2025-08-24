@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use openscq30_lib_has::Has;
 use setting_handler::ButtonConfigurationSettingHandler;
 use state_modifier::ButtonConfigurationStateModifier;
 use strum::{EnumIter, EnumString, IntoStaticStr};
@@ -62,8 +63,7 @@ impl From<ButtonConfigurationSetting> for SettingId {
 
 impl<T> ModuleCollection<T>
 where
-    T: AsMut<MultiButtonConfiguration> + AsRef<MultiButtonConfiguration> + Clone + Send + Sync,
-    T: AsRef<TwsStatus>,
+    T: Has<MultiButtonConfiguration> + Has<TwsStatus> + Clone + Send + Sync,
 {
     pub fn add_button_configuration<C>(&mut self, packet_io: Arc<PacketIOController<C>>)
     where

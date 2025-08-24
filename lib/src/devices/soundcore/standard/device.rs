@@ -2,7 +2,7 @@ use std::{marker::PhantomData, pin::Pin, sync::Arc};
 
 use async_trait::async_trait;
 use openscq30_i18n::Translate;
-use openscq30_lib_has::MaybeHas;
+use openscq30_lib_has::{Has, MaybeHas};
 use tokio::{
     select,
     sync::{Semaphore, mpsc, watch},
@@ -220,7 +220,7 @@ where
 
     pub fn sound_modes(&mut self, available_sound_modes: AvailableSoundModes)
     where
-        StateType: AsRef<SoundModes> + AsMut<SoundModes>,
+        StateType: Has<SoundModes>,
     {
         self.module_collection
             .add_sound_modes(self.packet_io_controller.clone(), available_sound_modes);
@@ -228,7 +228,7 @@ where
 
     pub async fn equalizer<const C: usize, const B: usize>(&mut self)
     where
-        StateType: AsRef<EqualizerConfiguration<C, B>> + AsMut<EqualizerConfiguration<C, B>>,
+        StateType: Has<EqualizerConfiguration<C, B>>,
     {
         self.module_collection
             .add_equalizer(
@@ -242,7 +242,7 @@ where
 
     pub async fn equalizer_with_drc<const C: usize, const B: usize>(&mut self)
     where
-        StateType: AsRef<EqualizerConfiguration<C, B>> + AsMut<EqualizerConfiguration<C, B>>,
+        StateType: Has<EqualizerConfiguration<C, B>>,
     {
         self.module_collection
             .add_equalizer_with_drc(
@@ -256,8 +256,10 @@ where
 
     pub async fn equalizer_with_basic_hear_id<const C: usize, const B: usize>(&mut self)
     where
-        StateType: AsMut<EqualizerConfiguration<C, B>> + AsRef<EqualizerConfiguration<C, B>>,
-        StateType: AsRef<BasicHearId<C, B>> + AsRef<Gender> + AsRef<AgeRange>,
+        StateType: Has<EqualizerConfiguration<C, B>>
+            + Has<BasicHearId<C, B>>
+            + Has<Gender>
+            + Has<AgeRange>,
     {
         self.module_collection
             .add_equalizer_with_basic_hear_id(
@@ -271,8 +273,10 @@ where
 
     pub async fn equalizer_with_custom_hear_id<const C: usize, const B: usize>(&mut self)
     where
-        StateType: AsMut<EqualizerConfiguration<C, B>> + AsRef<EqualizerConfiguration<C, B>>,
-        StateType: AsRef<CustomHearId<C, B>> + AsRef<Gender> + AsRef<AgeRange>,
+        StateType: Has<EqualizerConfiguration<C, B>>
+            + Has<CustomHearId<C, B>>
+            + Has<Gender>
+            + Has<AgeRange>,
     {
         self.module_collection
             .add_equalizer_with_custom_hear_id(
@@ -286,8 +290,7 @@ where
 
     pub fn button_configuration(&mut self)
     where
-        StateType: AsRef<MultiButtonConfiguration> + AsMut<MultiButtonConfiguration>,
-        StateType: AsRef<TwsStatus>,
+        StateType: Has<MultiButtonConfiguration> + Has<TwsStatus>,
     {
         self.module_collection
             .add_button_configuration(self.packet_io_controller.clone());
@@ -295,7 +298,7 @@ where
 
     pub fn ambient_sound_mode_cycle(&mut self)
     where
-        StateType: AsRef<AmbientSoundModeCycle> + AsMut<AmbientSoundModeCycle>,
+        StateType: Has<AmbientSoundModeCycle>,
     {
         self.module_collection
             .add_ambient_sound_mode_cycle(self.packet_io_controller.clone());
@@ -303,24 +306,21 @@ where
 
     pub fn single_battery(&mut self)
     where
-        StateType: AsRef<SingleBattery> + AsMut<SingleBattery>,
+        StateType: Has<SingleBattery>,
     {
         self.module_collection.add_single_battery();
     }
 
     pub fn dual_battery(&mut self)
     where
-        StateType: AsRef<DualBattery> + AsMut<DualBattery>,
+        StateType: Has<DualBattery>,
     {
         self.module_collection.add_dual_battery();
     }
 
     pub fn serial_number_and_firmware_version(&mut self)
     where
-        StateType: AsRef<SerialNumber>
-            + AsMut<SerialNumber>
-            + AsRef<FirmwareVersion>
-            + AsMut<FirmwareVersion>,
+        StateType: Has<SerialNumber> + Has<FirmwareVersion>,
     {
         self.module_collection
             .add_serial_number_and_firmware_version();
@@ -328,10 +328,7 @@ where
 
     pub fn serial_number_and_dual_firmware_version(&mut self)
     where
-        StateType: AsRef<SerialNumber>
-            + AsMut<SerialNumber>
-            + AsRef<DualFirmwareVersion>
-            + AsMut<DualFirmwareVersion>,
+        StateType: Has<SerialNumber> + Has<DualFirmwareVersion>,
     {
         self.module_collection
             .add_serial_number_and_dual_firmware_version();
@@ -339,7 +336,7 @@ where
 
     pub fn tws_status(&mut self)
     where
-        StateType: AsRef<TwsStatus> + AsMut<TwsStatus>,
+        StateType: Has<TwsStatus>,
     {
         self.module_collection.add_tws_status();
     }

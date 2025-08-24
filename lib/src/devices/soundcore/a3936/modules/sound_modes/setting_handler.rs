@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use openscq30_lib_has::Has;
 use strum::IntoEnumIterator;
 
 use crate::{
@@ -18,14 +19,14 @@ pub struct SoundModesSettingHandler {}
 #[async_trait]
 impl<T> SettingHandler<T> for SoundModesSettingHandler
 where
-    T: AsMut<A3936SoundModes> + AsRef<A3936SoundModes> + Send,
+    T: Has<A3936SoundModes> + Send,
 {
     fn settings(&self) -> Vec<SettingId> {
         SoundModeSetting::iter().map(Into::into).collect()
     }
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
-        let sound_modes = state.as_ref();
+        let sound_modes = state.get();
         let sound_mode_setting: SoundModeSetting = setting_id.try_into().ok()?;
         Some(match sound_mode_setting {
             SoundModeSetting::AmbientSoundMode => {
@@ -72,7 +73,7 @@ where
         setting_id: &SettingId,
         value: Value,
     ) -> SettingHandlerResult<()> {
-        let sound_modes = state.as_mut();
+        let sound_modes = state.get_mut();
         let sound_mode_setting: SoundModeSetting = setting_id
             .try_into()
             .expect("already filtered to valid values only by SettingsManager");
