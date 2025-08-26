@@ -29,7 +29,7 @@ use crate::{
 
 use super::InboundPacket;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub(crate) struct StateUpdatePacket {
     pub device_profile: &'static DeviceProfile,
     pub tws_status: Option<TwsStatus>,

@@ -25,7 +25,7 @@ use crate::{
     },
 };
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
+#[derive(Debug, Clone, Copy, Hash)]
 pub(crate) struct DeviceProfile {
     pub features: DeviceFeatures,
     pub compatible_models: &'static [DeviceModel],
