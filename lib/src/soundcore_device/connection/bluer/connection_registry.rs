@@ -54,7 +54,11 @@ impl BluerConnectionRegistry {
                     })?;
 
                     // Needed to ensure GATT services are discovered
-                    Self::ble_scan(&adapter).await?;
+                    if let Err(err) = Self::ble_scan(&adapter).await {
+                        tracing::info!(
+                            "BLE scan failed. This only matters if you have legacy quick presets. {err:?}"
+                        );
+                    }
 
                     let device_addresses = adapter.device_addresses().await?;
                     let mut descriptors = HashSet::new();
