@@ -111,7 +111,7 @@ android {
     ksp {
         arg("room.schemaLocation", "$projectDir/schemas")
     }
-    ndkVersion = "27.2.12479018"
+    ndkVersion = "28.2.13676358"
     packaging {
         resources {
             excludes += "/META-INF/*"
