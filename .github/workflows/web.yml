@@ -15,6 +15,8 @@ jobs:
           submodules: true
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.84.1
       - name: Install node
         uses: actions/setup-node@v4
         with:
@@ -41,6 +43,8 @@ jobs:
           submodules: true
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.84.1
       - name: Install node
         uses: actions/setup-node@v4
         with:
@@ -78,6 +82,8 @@ jobs:
           submodules: true
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.84.1
       - name: Install node
         uses: actions/setup-node@v4
         with:
