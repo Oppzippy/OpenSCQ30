@@ -394,9 +394,7 @@ impl DeviceSettingsModel {
                 if should_throttle {
                     let maybe_task = self.throttle.set_setting(setting_id, value);
                     _ = self.refresh_settings();
-                    maybe_task
-                        .map(|task| Action::Task(task.map(Into::into)))
-                        .unwrap_or(Action::None)
+                    maybe_task.map_or(Action::None, |task| Action::Task(task.map(Into::into)))
                 } else {
                     Action::Task(
                         Task::future(async move {
@@ -420,9 +418,7 @@ impl DeviceSettingsModel {
                     new_values[index as usize] = new_value;
                     let maybe_task = self.throttle.set_setting(setting_id, new_values.into());
                     _ = self.refresh_settings();
-                    maybe_task
-                        .map(|task| Action::Task(task.map(Into::into)))
-                        .unwrap_or(Action::None)
+                    maybe_task.map_or(Action::None, |task| Action::Task(task.map(Into::into)))
                 } else {
                     Action::None
                 }

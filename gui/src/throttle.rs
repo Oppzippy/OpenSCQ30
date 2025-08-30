@@ -48,9 +48,7 @@ impl Throttle {
     }
 
     pub fn setting(&self, setting_id: &SettingId) -> Option<Setting> {
-        let Some(mut setting) = self.device.setting(setting_id) else {
-            return None;
-        };
+        let mut setting = self.device.setting(setting_id)?;
 
         let queued_value = self.queue.get(setting_id).cloned();
 
@@ -59,7 +57,7 @@ impl Throttle {
             Setting::Toggle { value: _ } => (),
             Setting::I32Range { value, .. } => {
                 if let Some(v) = queued_value {
-                    *value = v.try_as_i32().unwrap()
+                    *value = v.try_as_i32().unwrap();
                 }
             }
             Setting::Select { value: _, .. } => (),

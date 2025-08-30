@@ -14,7 +14,7 @@ pub fn fetch(connection: &Connection, model: DeviceModel, name: String) -> Resul
         (SqliteDeviceModel(model), name),
         |row| -> Result<_, Error> {
             let json = row.get_ref(0)?.as_str()?;
-            let volume_adjustments: Vec<i16> = serde_json::from_str(&json)?;
+            let volume_adjustments: Vec<i16> = serde_json::from_str(json)?;
             Ok(volume_adjustments)
         },
     )?;
@@ -36,7 +36,7 @@ pub fn fetch_all(
     rows.and_then(|row| -> Result<_, Error> {
         let name = row.get(0)?;
         let volume_adjustments_json = row.get_ref(1)?.as_str()?;
-        let volume_adjustments: Vec<i16> = serde_json::from_str(&volume_adjustments_json)?;
+        let volume_adjustments: Vec<i16> = serde_json::from_str(volume_adjustments_json)?;
         Ok((name, volume_adjustments))
     })
     .collect::<Result<Vec<_>, _>>()

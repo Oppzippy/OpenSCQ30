@@ -48,6 +48,7 @@ soundcore_device!(
 );
 
 #[derive(IntoStaticStr, VariantArray)]
+#[allow(clippy::enum_variant_names)]
 enum AutoPowerOffDuration {
     #[strum(serialize = "30m")]
     ThirtyMinutes,
@@ -62,10 +63,10 @@ enum AutoPowerOffDuration {
 impl Translate for AutoPowerOffDuration {
     fn translate(&self) -> String {
         match self {
-            AutoPowerOffDuration::ThirtyMinutes => fl!("x-minutes", minutes = 30),
-            AutoPowerOffDuration::SixtyMinutes => fl!("x-minutes", minutes = 60),
-            AutoPowerOffDuration::NinetyMinutes => fl!("x-minutes", minutes = 90),
-            AutoPowerOffDuration::OneHundredTwentyMinutes => fl!("x-minutes", minutes = 120),
+            Self::ThirtyMinutes => fl!("x-minutes", minutes = 30),
+            Self::SixtyMinutes => fl!("x-minutes", minutes = 60),
+            Self::NinetyMinutes => fl!("x-minutes", minutes = 90),
+            Self::OneHundredTwentyMinutes => fl!("x-minutes", minutes = 120),
         }
     }
 }

@@ -93,7 +93,7 @@ pub fn fetch_all(connection: &Connection, model: DeviceModel) -> Result<Vec<Quic
         };
         if preset_name.is_none() {
             preset_name = Some(current_name.to_owned());
-        } else if preset_name.as_ref().map(|s| s.as_str()) != Some(current_name) {
+        } else if preset_name.as_deref() != Some(current_name) {
             let group_name = preset_name
                 .replace(current_name.to_owned())
                 .expect("the previous if statement covers the none case");

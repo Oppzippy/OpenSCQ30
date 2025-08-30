@@ -113,10 +113,10 @@ impl DeviceSelectionModel {
     pub fn update(&mut self, message: Message) -> Action {
         match message {
             Message::ConnectToDevice(index) => {
-                return Action::ConnectToDevice(self.paired_devices[index].clone());
+                return Action::ConnectToDevice(self.paired_devices[index]);
             }
             Message::RemoveDevice(index) => {
-                return Action::RemoveDevice(self.paired_devices[index].clone());
+                return Action::RemoveDevice(self.paired_devices[index]);
             }
             Message::AddDevice => return Action::AddDevice,
             Message::SetPairedDevices(paired_devices) => self.paired_devices = paired_devices,

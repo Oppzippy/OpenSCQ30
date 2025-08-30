@@ -17,16 +17,15 @@ impl DeriveHas {
                     let modifier = field
                         .attrs
                         .iter()
-                        .filter_map(|attribute| {
-                            attribute.path().is_ident("has").then(|| {
-                                attribute
-                                    .parse_args::<Ident>()
-                                    .expect("missing modifier (such as #[has(skip)])")
-                                    .to_string()
-                            })
+                        .filter(|attribute| attribute.path().is_ident("has"))
+                        .map(|attribute| {
+                            attribute
+                                .parse_args::<Ident>()
+                                .expect("missing modifier (such as #[has(skip)])")
+                                .to_string()
                         })
                         .next();
-                    match modifier.as_ref().map(String::as_str) {
+                    match modifier.as_deref() {
                         None => Some(TraitFieldData {
                             struct_ident: struct_ident.clone(),
                             field_ident: field.ident.clone().expect("missing identifier for field"),
@@ -97,7 +96,7 @@ impl ToTokens for TraitFieldData {
 
 impl TraitFieldData {
     fn has_tokens(&self, tokens: &mut TokenStream) {
-        let TraitFieldData {
+        let Self {
             struct_ident,
             field_ident,
             field_type,
@@ -118,7 +117,7 @@ impl TraitFieldData {
     }
 
     fn maybe_has_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let TraitFieldData {
+        let Self {
             struct_ident,
             field_ident,
             field_type,

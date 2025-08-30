@@ -44,10 +44,12 @@ impl QuickPresetsHandler {
             .iter()
             .flat_map(|category_id| device.settings_in_category(category_id))
             // TODO make the SettingId blacklist a part of OpenSCQ30Device?
-            .filter(|setting_id| match setting_id {
-                SettingId::ImportCustomEqualizerProfiles => false,
-                SettingId::ExportCustomEqualizerProfiles => false,
-                _ => true,
+            .filter(|setting_id| {
+                !matches!(
+                    setting_id,
+                    SettingId::ImportCustomEqualizerProfiles
+                        | SettingId::ExportCustomEqualizerProfiles,
+                )
             })
             .filter_map(|setting_id| {
                 device
