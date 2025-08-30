@@ -26,8 +26,8 @@ use crate::{
             packet_manager::PacketHandler,
             structures::{
                 AgeRange, AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CustomHearId,
-                DualBattery, DualFirmwareVersion, EqualizerConfiguration, SerialNumber, TwsStatus,
-                VolumeAdjustments,
+                DualBattery, DualFirmwareVersion, EqualizerConfiguration, SerialNumber, TouchTone,
+                TwsStatus, VolumeAdjustments,
             },
         },
     },
@@ -46,7 +46,7 @@ pub struct A3936StateUpdatePacket {
     pub sound_modes: A3936SoundModes,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub button_configuration: A3936InternalMultiButtonConfiguration,
-    pub touch_tone: bool,
+    pub touch_tone: TouchTone,
     pub charging_case_battery: BatteryLevel,
     pub color: u8,
     pub ldac: bool,
@@ -128,7 +128,7 @@ impl InboundPacket for A3936StateUpdatePacket {
 
                 let (input, ambient_sound_mode_cycle) = AmbientSoundModeCycle::take(input)?;
                 let (input, sound_modes) = A3936SoundModes::take(input)?;
-                let (input, touch_tone) = take_bool(input)?;
+                let (input, touch_tone) = TouchTone::take(input)?;
                 let (input, charging_case_battery) = BatteryLevel::take(input)?;
                 let (input, color) = le_u8(input)?;
                 let (input, ldac) = take_bool(input)?;

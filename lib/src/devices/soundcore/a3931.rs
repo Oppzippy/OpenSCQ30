@@ -52,6 +52,7 @@ soundcore_device!(
         builder.equalizer_with_drc().await;
         builder.button_configuration();
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
+        builder.touch_tone();
         builder.tws_status();
         builder.dual_battery();
         builder.serial_number_and_dual_firmware_version();

@@ -106,6 +106,7 @@ pub enum SettingId {
     ExportCustomEqualizerProfilesOutput,
     ImportCustomEqualizerProfiles,
     AutoPowerOff,
+    TouchTone,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

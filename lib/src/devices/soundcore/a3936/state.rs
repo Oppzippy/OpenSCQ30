@@ -2,7 +2,7 @@ use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::standard::structures::{
     AgeRange, AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CustomHearId, DualBattery,
-    DualFirmwareVersion, EqualizerConfiguration, Gender, SerialNumber, TwsStatus,
+    DualFirmwareVersion, EqualizerConfiguration, Gender, SerialNumber, TouchTone, TwsStatus,
 };
 
 use super::{
@@ -25,8 +25,7 @@ pub struct A3936State {
     pub charging_case_battery: BatteryLevel,
     pub auto_power_off: AutoPowerOff,
     pub gender: Gender,
-    #[has(skip)]
-    pub touch_tone: bool,
+    pub touch_tone: TouchTone,
     #[has(skip)]
     pub color: u8,
     #[has(skip)]

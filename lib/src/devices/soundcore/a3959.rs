@@ -34,6 +34,7 @@ soundcore_device!(
         builder.a3959_button_configuration();
         builder.ambient_sound_mode_cycle();
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
+        builder.touch_tone();
         builder.dual_battery();
         builder.serial_number_and_dual_firmware_version();
     },

@@ -4,7 +4,7 @@ use crate::devices::soundcore::standard::{
     packet::inbound::SerialNumberAndFirmwareVersionUpdatePacket,
     structures::{
         AgeRange, CustomHearId, DualBattery, DualFirmwareVersion, EqualizerConfiguration, Gender,
-        MultiButtonConfiguration, SerialNumber, SoundModes, TwsStatus,
+        MultiButtonConfiguration, SerialNumber, SoundModes, TouchTone, TwsStatus,
     },
 };
 
@@ -22,12 +22,11 @@ pub struct A3951State {
     sound_modes: SoundModes,
     serial_number: SerialNumber,
     dual_firmware_version: DualFirmwareVersion,
+    touch_tone: TouchTone,
     #[has(skip)]
     side_tone: bool,
     #[has(skip)]
     wear_detection: bool,
-    #[has(skip)]
-    touch_tone: bool,
     #[has(skip)]
     hear_id_eq_preset: Option<u16>,
     #[has(skip)]

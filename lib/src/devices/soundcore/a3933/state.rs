@@ -2,7 +2,8 @@ use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::standard::structures::{
     AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery, DualFirmwareVersion,
-    EqualizerConfiguration, MultiButtonConfiguration, SerialNumber, SoundModes, TwsStatus,
+    EqualizerConfiguration, MultiButtonConfiguration, SerialNumber, SoundModes, TouchTone,
+    TwsStatus,
 };
 
 use super::packets::inbound::A3933StateUpdatePacket;
@@ -20,8 +21,7 @@ pub struct A3933State {
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub sound_modes: SoundModes,
     pub charging_case_battery_level: BatteryLevel,
-    #[has(skip)]
-    pub touch_tone_switch: bool,
+    pub touch_tone_switch: TouchTone,
     #[has(skip)]
     pub wear_detection_switch: bool,
     #[has(skip)]
@@ -45,7 +45,7 @@ impl From<A3933StateUpdatePacket> for A3933State {
             button_configuration: value.button_configuration,
             ambient_sound_mode_cycle: value.ambient_sound_mode_cycle,
             sound_modes: value.sound_modes,
-            touch_tone_switch: value.touch_tone_switch,
+            touch_tone_switch: value.touch_tone,
             wear_detection_switch: value.wear_detection_switch,
             game_mode_switch: value.game_mode_switch,
             charging_case_battery_level: value.charging_case_battery_level,

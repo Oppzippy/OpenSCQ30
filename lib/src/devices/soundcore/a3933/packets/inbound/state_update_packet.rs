@@ -25,7 +25,7 @@ use crate::{
             structures::{
                 AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
                 DualFirmwareVersion, EqualizerConfiguration, MultiButtonConfiguration,
-                SerialNumber, SoundModes, TwsStatus, VolumeAdjustments,
+                SerialNumber, SoundModes, TouchTone, TwsStatus, VolumeAdjustments,
             },
         },
     },
@@ -45,7 +45,7 @@ pub struct A3933StateUpdatePacket {
     pub button_configuration: MultiButtonConfiguration,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub sound_modes: SoundModes,
-    pub touch_tone_switch: bool,
+    pub touch_tone: TouchTone,
     pub wear_detection_switch: bool,
     pub game_mode_switch: bool,
     pub charging_case_battery_level: BatteryLevel,
@@ -82,7 +82,7 @@ impl Default for A3933StateUpdatePacket {
             button_configuration: Default::default(),
             ambient_sound_mode_cycle: Default::default(),
             sound_modes: Default::default(),
-            touch_tone_switch: Default::default(),
+            touch_tone: Default::default(),
             wear_detection_switch: Default::default(),
             game_mode_switch: Default::default(),
             charging_case_battery_level: Default::default(),
@@ -153,7 +153,8 @@ impl InboundPacket for A3933StateUpdatePacket {
                         button_configuration,
                         ambient_sound_mode_cycle,
                         sound_modes,
-                        touch_tone_switch: extra.map(|e| e.0.0).unwrap_or_default(),
+                        // TODO make these fields optional?
+                        touch_tone: extra.map(|e| e.0.0).unwrap_or_default(),
                         wear_detection_switch: extra.map(|e| e.0.1).unwrap_or_default(),
                         game_mode_switch: extra.map(|e| e.0.2).unwrap_or_default(),
                         charging_case_battery_level: extra.map(|e| e.0.3).unwrap_or_default(),
@@ -170,13 +171,13 @@ impl InboundPacket for A3933StateUpdatePacket {
 impl A3933StateUpdatePacket {
     fn take_optional_extra_data<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
-    ) -> IResult<&'a [u8], (bool, bool, bool, BatteryLevel, u8, u8, bool), E> {
+    ) -> IResult<&'a [u8], (TouchTone, bool, bool, BatteryLevel, u8, u8, bool), E> {
         context(
             "extra data",
             (
-                take_bool, // touch tone
-                take_bool, // wear detection
-                take_bool, // game mode
+                TouchTone::take, // touch tone
+                take_bool,       // wear detection
+                take_bool,       // game mode
                 BatteryLevel::take,
                 le_u8,     // what is this byte?
                 le_u8,     // device color
@@ -231,7 +232,7 @@ impl OutboundPacket for A3933StateUpdatePacket {
             .chain(self.sound_modes.bytes())
             .chain([0, 0])
             .chain([
-                self.touch_tone_switch as u8,
+                self.touch_tone as u8,
                 self.wear_detection_switch as u8,
                 self.game_mode_switch as u8,
                 self.charging_case_battery_level.0,

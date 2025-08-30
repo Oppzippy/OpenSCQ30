@@ -21,7 +21,7 @@ use crate::{
             packet_manager::PacketHandler,
             structures::{
                 AutoPowerOff, DualBattery, EqualizerConfiguration, MultiButtonConfiguration,
-                SoundModes, TwsStatus,
+                SoundModes, TouchTone, TwsStatus,
             },
         },
     },
@@ -36,7 +36,7 @@ pub struct A3931StateUpdatePacket {
     pub button_configuration: MultiButtonConfiguration,
     pub sound_modes: SoundModes,
     pub side_tone: bool,
-    pub touch_tone: bool,
+    pub touch_tone: TouchTone,
     pub auto_power_off: AutoPowerOff,
 }
 
@@ -54,7 +54,7 @@ impl InboundPacket for A3931StateUpdatePacket {
                     MultiButtonConfiguration::take,
                     SoundModes::take,
                     take_bool,
-                    take_bool,
+                    TouchTone::take,
                     AutoPowerOff::take,
                 ),
                 |(

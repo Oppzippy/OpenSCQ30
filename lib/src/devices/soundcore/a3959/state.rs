@@ -7,7 +7,7 @@ use crate::devices::soundcore::{
     },
     standard::structures::{
         AmbientSoundModeCycle, AutoPowerOff, DualBattery, DualFirmwareVersion,
-        EqualizerConfiguration, SerialNumber, TwsStatus,
+        EqualizerConfiguration, SerialNumber, TouchTone, TwsStatus,
     },
 };
 
@@ -22,6 +22,7 @@ pub struct A3959State {
     ambient_sound_mode_cycle: AmbientSoundModeCycle,
     sound_modes: A3959SoundModes,
     auto_power_off: AutoPowerOff,
+    touch_tone: TouchTone,
 }
 
 impl From<A3959StateUpdatePacket> for A3959State {
@@ -36,6 +37,7 @@ impl From<A3959StateUpdatePacket> for A3959State {
             ambient_sound_mode_cycle: packet.ambient_sound_mode_cycle,
             sound_modes: packet.sound_modes,
             auto_power_off: packet.auto_power_off,
+            touch_tone: packet.touch_tone,
         }
     }
 }

@@ -19,7 +19,7 @@ use crate::devices::soundcore::{
         packet_manager::PacketHandler,
         structures::{
             AutoPowerOff, DualBattery, EqualizerConfiguration, MultiButtonConfiguration,
-            SoundModes, TwsStatus,
+            SoundModes, TouchTone, TwsStatus,
         },
     },
 };
@@ -33,7 +33,7 @@ pub struct A3031StateUpdatePacket {
     pub sound_modes: SoundModes,
     pub auto_power_off: AutoPowerOff,
     pub side_tone: bool,
-    pub touch_tone: bool,
+    pub touch_tone: TouchTone,
 }
 
 impl InboundPacket for A3031StateUpdatePacket {
@@ -50,7 +50,7 @@ impl InboundPacket for A3031StateUpdatePacket {
                     MultiButtonConfiguration::take,
                     SoundModes::take,
                     take_bool,
-                    take_bool,
+                    TouchTone::take,
                     AutoPowerOff::take,
                 ),
                 |(

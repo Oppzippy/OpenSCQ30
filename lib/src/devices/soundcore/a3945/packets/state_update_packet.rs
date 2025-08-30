@@ -22,7 +22,7 @@ use crate::{
             packet_manager::PacketHandler,
             structures::{
                 BatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
-                MultiButtonConfiguration, SerialNumber, TwsStatus,
+                MultiButtonConfiguration, SerialNumber, TouchTone, TwsStatus,
             },
         },
     },
@@ -38,7 +38,7 @@ pub struct A3945StateUpdatePacket {
     pub serial_number: SerialNumber,
     pub equalizer_configuration: EqualizerConfiguration<2, 10>,
     pub button_configuration: MultiButtonConfiguration,
-    pub touch_tone_switch: bool,
+    pub touch_tone: TouchTone,
     pub wear_detection_switch: bool,
     pub game_mode_switch: bool,
     pub charging_case_battery_level: BatteryLevel,
@@ -60,7 +60,7 @@ impl InboundPacket for A3945StateUpdatePacket {
                     SerialNumber::take,
                     EqualizerConfiguration::take,
                     MultiButtonConfiguration::take,
-                    take_bool,
+                    TouchTone::take,
                     take_bool,
                     take_bool,
                     BatteryLevel::take,
@@ -74,7 +74,7 @@ impl InboundPacket for A3945StateUpdatePacket {
                     serial_number,
                     equalizer_configuration,
                     button_configuration,
-                    touch_tone_switch,
+                    touch_tone,
                     wear_detection_switch,
                     game_mode_switch,
                     charging_case_battery_level,
@@ -88,7 +88,7 @@ impl InboundPacket for A3945StateUpdatePacket {
                         serial_number,
                         equalizer_configuration,
                         button_configuration,
-                        touch_tone_switch,
+                        touch_tone,
                         wear_detection_switch,
                         game_mode_switch,
                         charging_case_battery_level,
@@ -116,8 +116,8 @@ impl OutboundPacket for A3945StateUpdatePacket {
             .chain(self.serial_number.to_string().into_bytes())
             .chain(self.equalizer_configuration.bytes())
             .chain(self.button_configuration.bytes())
+            .chain(self.touch_tone.bytes())
             .chain([
-                self.touch_tone_switch as u8,
                 self.wear_detection_switch as u8,
                 self.game_mode_switch as u8,
                 self.charging_case_battery_level.0,

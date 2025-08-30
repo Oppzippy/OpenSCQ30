@@ -26,6 +26,7 @@ pub mod serial_number_and_dual_firmware_version;
 pub mod serial_number_and_firmware_version;
 pub mod single_battery;
 pub mod sound_modes;
+mod touch_tone;
 pub mod tws_status;
 
 pub struct ModuleCollection<StateType> {

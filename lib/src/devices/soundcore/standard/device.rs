@@ -16,7 +16,10 @@ use crate::{
     },
     devices::{
         DeviceModel,
-        soundcore::{self, standard::structures::AutoPowerOff},
+        soundcore::{
+            self,
+            standard::structures::{AutoPowerOff, TouchTone},
+        },
     },
     storage::OpenSCQ30Database,
 };
@@ -349,6 +352,14 @@ where
     {
         self.module_collection
             .add_auto_power_off(self.packet_io_controller.clone(), durations);
+    }
+
+    pub fn touch_tone(&mut self)
+    where
+        StateType: Has<TouchTone>,
+    {
+        self.module_collection
+            .add_touch_tone(self.packet_io_controller.clone());
     }
 }
 

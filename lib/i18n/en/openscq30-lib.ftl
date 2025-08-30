@@ -136,3 +136,5 @@ x-minutes = { $minutes ->
     *[other] { $minutes } minutes
 }
 disabled = Disabled
+
+touch-tone = Touch Tone

@@ -4,7 +4,7 @@ use crate::devices::soundcore::standard::{
     packet::inbound::SerialNumberAndFirmwareVersionUpdatePacket,
     structures::{
         AutoPowerOff, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
-        MultiButtonConfiguration, SerialNumber, SoundModes, TwsStatus,
+        MultiButtonConfiguration, SerialNumber, SoundModes, TouchTone, TwsStatus,
     },
 };
 
@@ -20,10 +20,9 @@ pub struct A3031State {
     pub serial_number: SerialNumber,
     pub dual_firmware_version: DualFirmwareVersion,
     pub auto_power_off: AutoPowerOff,
+    pub touch_tone: TouchTone,
     #[has(skip)]
     pub side_tone: bool,
-    #[has(skip)]
-    pub touch_tone: bool,
 }
 
 impl A3031State {

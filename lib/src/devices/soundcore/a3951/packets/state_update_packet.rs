@@ -22,7 +22,7 @@ use crate::{
             packet_manager::PacketHandler,
             structures::{
                 AgeRange, CustomHearId, DualBattery, EqualizerConfiguration, Gender,
-                MultiButtonConfiguration, SoundModes, TwsStatus, VolumeAdjustments,
+                MultiButtonConfiguration, SoundModes, TouchTone, TwsStatus, VolumeAdjustments,
             },
         },
     },
@@ -41,7 +41,7 @@ pub struct A3951StateUpdatePacket {
     pub sound_modes: SoundModes,
     pub side_tone: bool,
     pub wear_detection: bool,
-    pub touch_tone: bool,
+    pub touch_tone: TouchTone,
     pub hear_id_eq_preset: Option<u16>,
     pub supports_new_battery: bool, // yes if packet is >98, don't parse
     pub left_new_battery: u8,       // 0 to 9
@@ -80,9 +80,9 @@ impl InboundPacket for A3951StateUpdatePacket {
                     CustomHearId::take_with_all_fields,
                     MultiButtonConfiguration::take,
                     SoundModes::take,
-                    take_bool, // side tone
-                    take_bool, // wear detection
-                    take_bool, // touch tone
+                    take_bool,       // side tone
+                    take_bool,       // wear detection
+                    TouchTone::take, // touch tone
                 )
                     .parse_complete(input)?;
 
