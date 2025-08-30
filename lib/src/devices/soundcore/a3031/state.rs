@@ -3,8 +3,8 @@ use openscq30_lib_macros::Has;
 use crate::devices::soundcore::standard::{
     packet::inbound::SerialNumberAndFirmwareVersionUpdatePacket,
     structures::{
-        DualBattery, DualFirmwareVersion, EqualizerConfiguration, MultiButtonConfiguration,
-        SerialNumber, SoundModes, TwsStatus,
+        AutoPowerOff, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
+        MultiButtonConfiguration, SerialNumber, SoundModes, TwsStatus,
     },
 };
 
@@ -19,14 +19,11 @@ pub struct A3031State {
     pub sound_modes: SoundModes,
     pub serial_number: SerialNumber,
     pub dual_firmware_version: DualFirmwareVersion,
+    pub auto_power_off: AutoPowerOff,
     #[has(skip)]
     pub side_tone: bool,
     #[has(skip)]
     pub touch_tone: bool,
-    #[has(skip)]
-    pub auto_power_off_on: bool,
-    #[has(skip)]
-    pub auto_power_off_on_index: u8,
 }
 
 impl A3031State {
@@ -42,8 +39,7 @@ impl A3031State {
             sound_modes: state_update_packet.sound_modes,
             side_tone: state_update_packet.side_tone,
             touch_tone: state_update_packet.touch_tone,
-            auto_power_off_on: state_update_packet.auto_power_off_on,
-            auto_power_off_on_index: state_update_packet.auto_power_off_on_index,
+            auto_power_off: state_update_packet.auto_power_off,
             serial_number: sn_and_firmware.serial_number,
             dual_firmware_version: sn_and_firmware.dual_firmware_version,
         }
@@ -58,8 +54,7 @@ impl A3031State {
             sound_modes,
             side_tone,
             touch_tone,
-            auto_power_off_on,
-            auto_power_off_on_index,
+            auto_power_off,
         } = packet;
         self.tws_status = tws_status;
         self.battery = battery;
@@ -68,7 +63,6 @@ impl A3031State {
         self.sound_modes = sound_modes;
         self.side_tone = side_tone;
         self.touch_tone = touch_tone;
-        self.auto_power_off_on = auto_power_off_on;
-        self.auto_power_off_on_index = auto_power_off_on_index;
+        self.auto_power_off = auto_power_off;
     }
 }

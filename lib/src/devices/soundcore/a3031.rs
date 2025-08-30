@@ -1,19 +1,25 @@
 use std::collections::HashMap;
 
-use crate::devices::soundcore::{
-    a3031::{packets::A3031StateUpdatePacket, state::A3031State},
-    standard::{
-        macros::soundcore_device,
-        modules::sound_modes::AvailableSoundModes,
-        packet::{
-            inbound::{SerialNumberAndFirmwareVersionUpdatePacket, TryIntoInboundPacket},
-            outbound::{
-                OutboundPacketBytesExt, RequestSerialNumberAndFirmwareVersionPacket,
-                RequestStatePacket,
+use openscq30_i18n::Translate;
+use strum::{IntoStaticStr, VariantArray};
+
+use crate::{
+    devices::soundcore::{
+        a3031::{packets::A3031StateUpdatePacket, state::A3031State},
+        standard::{
+            macros::soundcore_device,
+            modules::sound_modes::AvailableSoundModes,
+            packet::{
+                inbound::{SerialNumberAndFirmwareVersionUpdatePacket, TryIntoInboundPacket},
+                outbound::{
+                    OutboundPacketBytesExt, RequestSerialNumberAndFirmwareVersionPacket,
+                    RequestStatePacket,
+                },
             },
+            structures::{AmbientSoundMode, NoiseCancelingMode},
         },
-        structures::{AmbientSoundMode, NoiseCancelingMode},
     },
+    i18n::fl,
 };
 
 mod packets;
@@ -49,6 +55,7 @@ soundcore_device!(
             ],
         });
         builder.equalizer().await;
+        builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.tws_status();
         builder.dual_battery();
         builder.serial_number_and_dual_firmware_version();
@@ -66,3 +73,26 @@ soundcore_device!(
         ])
     },
 );
+
+#[derive(IntoStaticStr, VariantArray)]
+enum AutoPowerOffDuration {
+    #[strum(serialize = "30m")]
+    ThirtyMinutes,
+    #[strum(serialize = "60m")]
+    SixtyMinutes,
+    #[strum(serialize = "90m")]
+    NinetyMinutes,
+    #[strum(serialize = "120m")]
+    OneHundredTwentyMinutes,
+}
+
+impl Translate for AutoPowerOffDuration {
+    fn translate(&self) -> String {
+        match self {
+            AutoPowerOffDuration::ThirtyMinutes => fl!("x-minutes", minutes = 30),
+            AutoPowerOffDuration::SixtyMinutes => fl!("x-minutes", minutes = 60),
+            AutoPowerOffDuration::NinetyMinutes => fl!("x-minutes", minutes = 90),
+            AutoPowerOffDuration::OneHundredTwentyMinutes => fl!("x-minutes", minutes = 120),
+        }
+    }
+}

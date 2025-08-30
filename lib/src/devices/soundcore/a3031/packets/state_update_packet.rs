@@ -3,7 +3,6 @@ use nom::{
     IResult, Parser,
     combinator::{all_consuming, map},
     error::{ContextError, ParseError, context},
-    number::complete::le_u8,
 };
 use tokio::sync::watch;
 
@@ -19,7 +18,8 @@ use crate::devices::soundcore::{
         },
         packet_manager::PacketHandler,
         structures::{
-            DualBattery, EqualizerConfiguration, MultiButtonConfiguration, SoundModes, TwsStatus,
+            AutoPowerOff, DualBattery, EqualizerConfiguration, MultiButtonConfiguration,
+            SoundModes, TwsStatus,
         },
     },
 };
@@ -31,10 +31,9 @@ pub struct A3031StateUpdatePacket {
     pub equalizer_configuration: EqualizerConfiguration<2, 8>,
     pub button_configuration: MultiButtonConfiguration,
     pub sound_modes: SoundModes,
+    pub auto_power_off: AutoPowerOff,
     pub side_tone: bool,
     pub touch_tone: bool,
-    pub auto_power_off_on: bool,
-    pub auto_power_off_on_index: u8,
 }
 
 impl InboundPacket for A3031StateUpdatePacket {
@@ -52,8 +51,7 @@ impl InboundPacket for A3031StateUpdatePacket {
                     SoundModes::take,
                     take_bool,
                     take_bool,
-                    take_bool,
-                    le_u8,
+                    AutoPowerOff::take,
                 ),
                 |(
                     tws_status,
@@ -63,8 +61,7 @@ impl InboundPacket for A3031StateUpdatePacket {
                     sound_modes,
                     side_tone,
                     touch_tone,
-                    auto_power_off_on,
-                    auto_power_off_on_index,
+                    auto_power_off,
                 )| {
                     Self {
                         tws_status,
@@ -74,8 +71,7 @@ impl InboundPacket for A3031StateUpdatePacket {
                         sound_modes,
                         side_tone,
                         touch_tone,
-                        auto_power_off_on,
-                        auto_power_off_on_index,
+                        auto_power_off,
                     }
                 },
             )),
@@ -102,12 +98,8 @@ impl OutboundPacket for A3031StateUpdatePacket {
             .chain(self.equalizer_configuration.bytes())
             .chain(self.button_configuration.bytes())
             .chain(self.sound_modes.bytes())
-            .chain([
-                self.side_tone as u8,
-                self.touch_tone as u8,
-                self.auto_power_off_on as u8,
-                self.auto_power_off_on_index,
-            ])
+            .chain([self.side_tone as u8, self.touch_tone as u8])
+            .chain(self.auto_power_off.bytes())
             .collect()
     }
 }
