@@ -27,7 +27,7 @@ where
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
         let battery = state.get();
-        let setting: BatterySetting = setting_id.try_into().ok()?;
+        let setting: BatterySetting = (*setting_id).try_into().ok()?;
         Some(match setting {
             BatterySetting::IsCharging => Setting::Information {
                 value: battery.is_charging.to_string(),

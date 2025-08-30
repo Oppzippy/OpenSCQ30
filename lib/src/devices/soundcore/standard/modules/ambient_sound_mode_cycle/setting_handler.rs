@@ -31,7 +31,7 @@ where
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
         let cycle = state.get();
-        let setting: SoundModeCycleSetting = setting_id.try_into().ok()?;
+        let setting: SoundModeCycleSetting = (*setting_id).try_into().ok()?;
         Some(match setting {
             SoundModeCycleSetting::NormalModeInCycle => Setting::Toggle {
                 value: cycle.normal_mode,
@@ -52,7 +52,7 @@ where
         value: Value,
     ) -> SettingHandlerResult<()> {
         let cycle = state.get_mut();
-        let setting: SoundModeCycleSetting = setting_id
+        let setting: SoundModeCycleSetting = (*setting_id)
             .try_into()
             .expect("already filtered to valid values only by SettingsManager");
         match setting {

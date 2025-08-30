@@ -19,42 +19,21 @@ use crate::{
         packet::packet_io_controller::PacketIOController,
         structures::{AmbientSoundMode, NoiseCancelingMode, SoundModes, TransparencyMode},
     },
+    macros::enum_subset,
 };
 
 use super::ModuleCollection;
 
-#[derive(EnumString, EnumIter, IntoStaticStr)]
-enum SoundModeSetting {
-    AmbientSoundMode,
-    TransparencyMode,
-    NoiseCancelingMode,
-    CustomNoiseCanceling,
-}
-
-impl From<SoundModeSetting> for SettingId {
-    fn from(setting: SoundModeSetting) -> Self {
-        match setting {
-            SoundModeSetting::AmbientSoundMode => Self::AmbientSoundMode,
-            SoundModeSetting::TransparencyMode => Self::TransparencyMode,
-            SoundModeSetting::NoiseCancelingMode => Self::NoiseCancelingMode,
-            SoundModeSetting::CustomNoiseCanceling => Self::CustomNoiseCanceling,
-        }
+enum_subset!(
+    SettingId,
+    #[derive(EnumString, EnumIter, IntoStaticStr)]
+    enum SoundModeSetting {
+        AmbientSoundMode,
+        TransparencyMode,
+        NoiseCancelingMode,
+        CustomNoiseCanceling,
     }
-}
-
-impl TryFrom<&SettingId> for SoundModeSetting {
-    type Error = ();
-
-    fn try_from(setting_id: &SettingId) -> Result<Self, Self::Error> {
-        match setting_id {
-            SettingId::AmbientSoundMode => Ok(Self::AmbientSoundMode),
-            SettingId::TransparencyMode => Ok(Self::TransparencyMode),
-            SettingId::NoiseCancelingMode => Ok(Self::NoiseCancelingMode),
-            SettingId::CustomNoiseCanceling => Ok(Self::CustomNoiseCanceling),
-            _ => Err(()),
-        }
-    }
-}
+);
 
 pub struct AvailableSoundModes {
     pub ambient_sound_modes: Vec<AmbientSoundMode>,

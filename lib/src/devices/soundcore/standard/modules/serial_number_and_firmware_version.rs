@@ -4,38 +4,21 @@ use strum::{EnumIter, EnumString, IntoStaticStr};
 use crate::{
     api::settings::{CategoryId, SettingId},
     devices::soundcore::standard::structures::{FirmwareVersion, SerialNumber},
+    macros::enum_subset,
 };
 
 use super::ModuleCollection;
 
 mod setting_handler;
 
-#[derive(EnumString, EnumIter, IntoStaticStr)]
-enum SerialNumberAndFirmwareVersionSetting {
-    SerialNumber,
-    FirmwareVersion,
-}
-
-impl From<SerialNumberAndFirmwareVersionSetting> for SettingId {
-    fn from(setting: SerialNumberAndFirmwareVersionSetting) -> Self {
-        match setting {
-            SerialNumberAndFirmwareVersionSetting::SerialNumber => Self::SerialNumber,
-            SerialNumberAndFirmwareVersionSetting::FirmwareVersion => Self::FirmwareVersion,
-        }
+enum_subset!(
+    SettingId,
+    #[derive(EnumString, EnumIter, IntoStaticStr)]
+    enum SerialNumberAndFirmwareVersionSetting {
+        SerialNumber,
+        FirmwareVersion,
     }
-}
-
-impl TryFrom<&SettingId> for SerialNumberAndFirmwareVersionSetting {
-    type Error = ();
-
-    fn try_from(setting_id: &SettingId) -> Result<Self, Self::Error> {
-        match setting_id {
-            SettingId::SerialNumber => Ok(Self::SerialNumber),
-            SettingId::FirmwareVersion => Ok(Self::FirmwareVersion),
-            _ => Err(()),
-        }
-    }
-}
+);
 
 impl<T> ModuleCollection<T>
 where

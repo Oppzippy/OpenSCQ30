@@ -61,12 +61,14 @@ where
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<crate::api::settings::Setting> {
         let equalizer_configuration = state.get();
-        let setting = setting_id.try_into().ok()?;
+        let setting = (*setting_id).try_into().ok()?;
         Some(match setting {
-            EqualizerSetting::PresetProfile => Setting::optional_select_from_enum_all_variants(
-                equalizer_configuration.preset_profile(),
-            ),
-            EqualizerSetting::CustomProfile => Setting::ModifiableSelect {
+            EqualizerSetting::PresetEqualizerProfile => {
+                Setting::optional_select_from_enum_all_variants(
+                    equalizer_configuration.preset_profile(),
+                )
+            }
+            EqualizerSetting::CustomEqualizerProfile => Setting::ModifiableSelect {
                 setting: {
                     let custom_profiles = self.custom_profiles_receiver.borrow();
                     settings::Select {
@@ -118,11 +120,11 @@ where
         value: Value,
     ) -> SettingHandlerResult<()> {
         let equalizer_configuration = state.get_mut();
-        let setting = setting_id
+        let setting = (*setting_id)
             .try_into()
             .expect("already filtered to valid values only by SettingsManager");
         match setting {
-            EqualizerSetting::PresetProfile => {
+            EqualizerSetting::PresetEqualizerProfile => {
                 if let Some(preset) = value.try_as_optional_enum_variant()? {
                     *equalizer_configuration = EqualizerConfiguration::new_from_preset_profile(
                         preset,
@@ -136,7 +138,7 @@ where
                     );
                 }
             }
-            EqualizerSetting::CustomProfile => {
+            EqualizerSetting::CustomEqualizerProfile => {
                 if let Ok(name) = value.try_as_str() {
                     if let Some(volume_adjustments) = self
                         .custom_profiles_receiver

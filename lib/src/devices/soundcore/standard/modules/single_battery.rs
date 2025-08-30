@@ -7,36 +7,19 @@ use strum::{EnumIter, EnumString, IntoStaticStr};
 use crate::{
     api::settings::{CategoryId, SettingId},
     devices::soundcore::standard::structures::SingleBattery,
+    macros::enum_subset,
 };
 
 use super::ModuleCollection;
 
-#[derive(EnumString, EnumIter, IntoStaticStr)]
-enum BatterySetting {
-    IsCharging,
-    BatteryLevel,
-}
-
-impl From<BatterySetting> for SettingId {
-    fn from(setting: BatterySetting) -> Self {
-        match setting {
-            BatterySetting::IsCharging => Self::IsCharging,
-            BatterySetting::BatteryLevel => Self::BatteryLevel,
-        }
+enum_subset!(
+    SettingId,
+    #[derive(EnumString, EnumIter, IntoStaticStr)]
+    enum BatterySetting {
+        IsCharging,
+        BatteryLevel,
     }
-}
-
-impl TryFrom<&SettingId> for BatterySetting {
-    type Error = ();
-
-    fn try_from(setting_id: &SettingId) -> Result<Self, Self::Error> {
-        match setting_id {
-            SettingId::IsCharging => Ok(Self::IsCharging),
-            SettingId::BatteryLevel => Ok(Self::BatteryLevel),
-            _ => Err(()),
-        }
-    }
-}
+);
 
 impl<T> ModuleCollection<T>
 where

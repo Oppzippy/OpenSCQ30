@@ -52,7 +52,7 @@ where
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
         let sound_modes = state.get();
-        let sound_mode_setting: SoundModeSetting = setting_id.try_into().ok()?;
+        let sound_mode_setting: SoundModeSetting = (*setting_id).try_into().ok()?;
         Some(match sound_mode_setting {
             SoundModeSetting::AmbientSoundMode => Setting::select_from_enum(
                 &self.available_sound_modes.ambient_sound_modes,
@@ -83,7 +83,7 @@ where
         value: Value,
     ) -> SettingHandlerResult<()> {
         let sound_modes = state.get_mut();
-        let sound_mode_setting: SoundModeSetting = setting_id
+        let sound_mode_setting: SoundModeSetting = (*setting_id)
             .try_into()
             .expect("already filtered to valid values only by SettingsManager");
         match sound_mode_setting {

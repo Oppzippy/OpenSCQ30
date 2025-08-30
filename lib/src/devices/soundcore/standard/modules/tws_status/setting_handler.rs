@@ -28,7 +28,7 @@ where
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
         let tws_status = state.get();
-        let setting: TwsStatusSetting = setting_id.try_into().ok()?;
+        let setting: TwsStatusSetting = (*setting_id).try_into().ok()?;
         Some(match setting {
             TwsStatusSetting::HostDevice => Setting::Information {
                 value: tws_status.host_device.to_string(),

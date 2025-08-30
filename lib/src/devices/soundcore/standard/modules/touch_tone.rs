@@ -18,34 +18,19 @@ use crate::{
         packet::packet_io_controller::PacketIOController,
         structures::TouchTone,
     },
+    macros::enum_subset,
 };
 
 mod setting_handler;
 mod state_modifier;
 
-#[derive(EnumIter, EnumString)]
-enum TouchToneSetting {
-    TouchTone,
-}
-
-impl From<TouchToneSetting> for SettingId {
-    fn from(value: TouchToneSetting) -> Self {
-        match value {
-            TouchToneSetting::TouchTone => Self::TouchTone,
-        }
+enum_subset!(
+    SettingId,
+    #[derive(EnumIter, EnumString)]
+    enum TouchToneSetting {
+        TouchTone,
     }
-}
-
-impl TryFrom<SettingId> for TouchToneSetting {
-    type Error = ();
-
-    fn try_from(setting_id: SettingId) -> Result<Self, Self::Error> {
-        match setting_id {
-            SettingId::TouchTone => Ok(Self::TouchTone),
-            _ => Err(()),
-        }
-    }
-}
+);
 
 impl<T> ModuleCollection<T>
 where

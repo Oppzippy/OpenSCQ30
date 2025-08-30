@@ -20,34 +20,19 @@ use crate::{
         packet::packet_io_controller::PacketIOController,
         structures::AutoPowerOff,
     },
+    macros::enum_subset,
 };
 
 mod setting_handler;
 mod state_modifier;
 
-#[derive(EnumIter, EnumString)]
-enum AutoPowerOffSetting {
-    AutoPowerOff,
-}
-
-impl From<AutoPowerOffSetting> for SettingId {
-    fn from(value: AutoPowerOffSetting) -> Self {
-        match value {
-            AutoPowerOffSetting::AutoPowerOff => Self::AutoPowerOff,
-        }
+enum_subset!(
+    SettingId,
+    #[derive(EnumIter, EnumString)]
+    enum AutoPowerOffSetting {
+        AutoPowerOff,
     }
-}
-
-impl TryFrom<SettingId> for AutoPowerOffSetting {
-    type Error = ();
-
-    fn try_from(setting_id: SettingId) -> Result<Self, Self::Error> {
-        match setting_id {
-            SettingId::AutoPowerOff => Ok(Self::AutoPowerOff),
-            _ => Err(()),
-        }
-    }
-}
+);
 
 impl<T> ModuleCollection<T>
 where

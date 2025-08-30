@@ -62,7 +62,7 @@ where
     }
 
     fn get(&self, _state: &T, setting_id: &SettingId) -> Option<settings::Setting> {
-        let setting = setting_id.try_into().ok()?;
+        let setting = (*setting_id).try_into().ok()?;
         Some(match setting {
             ImportExportSetting::ImportCustomEqualizerProfiles => settings::Setting::ImportString {
                 confirmation_message: Some(fl!("import-custom-equalizer-profiles-confirm")),
@@ -115,7 +115,7 @@ where
         setting_id: &SettingId,
         value: Value,
     ) -> SettingHandlerResult<()> {
-        let setting = setting_id
+        let setting = (*setting_id)
             .try_into()
             .expect("already filtered to valid values only by SettingsManager");
         match setting {

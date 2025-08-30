@@ -13,6 +13,7 @@ use crate::{
     devices::soundcore::standard::{
         packet::packet_io_controller::PacketIOController, structures::AmbientSoundModeCycle,
     },
+    macros::enum_subset,
 };
 
 use super::ModuleCollection;
@@ -20,36 +21,16 @@ use super::ModuleCollection;
 mod setting_handler;
 mod state_modifier;
 
-#[derive(EnumIter, EnumString)]
-#[allow(clippy::enum_variant_names)]
-enum SoundModeCycleSetting {
-    NormalModeInCycle,
-    TransparencyModeInCycle,
-    NoiseCancelingModeInCycle,
-}
-
-impl From<SoundModeCycleSetting> for SettingId {
-    fn from(value: SoundModeCycleSetting) -> Self {
-        match value {
-            SoundModeCycleSetting::NormalModeInCycle => Self::NormalModeInCycle,
-            SoundModeCycleSetting::TransparencyModeInCycle => Self::TransparencyModeInCycle,
-            SoundModeCycleSetting::NoiseCancelingModeInCycle => Self::NoiseCancelingModeInCycle,
-        }
+enum_subset!(
+    SettingId,
+    #[derive(EnumIter, EnumString)]
+    #[allow(clippy::enum_variant_names)]
+    enum SoundModeCycleSetting {
+        NormalModeInCycle,
+        TransparencyModeInCycle,
+        NoiseCancelingModeInCycle,
     }
-}
-
-impl TryFrom<&SettingId> for SoundModeCycleSetting {
-    type Error = ();
-
-    fn try_from(value: &SettingId) -> Result<Self, Self::Error> {
-        match value {
-            SettingId::NormalModeInCycle => Ok(Self::NormalModeInCycle),
-            SettingId::TransparencyModeInCycle => Ok(Self::TransparencyModeInCycle),
-            SettingId::NoiseCancelingModeInCycle => Ok(Self::NoiseCancelingModeInCycle),
-            _ => Err(()),
-        }
-    }
-}
+);
 
 impl<T> ModuleCollection<T>
 where

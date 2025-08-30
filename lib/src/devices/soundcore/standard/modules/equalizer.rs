@@ -25,6 +25,7 @@ use crate::{
             structures::{AgeRange, BasicHearId, CustomHearId, EqualizerConfiguration, Gender},
         },
     },
+    macros::enum_subset,
     storage::OpenSCQ30Database,
 };
 
@@ -35,73 +36,25 @@ mod import_export_setting_handler;
 mod setting_handler;
 mod state_modifier;
 
-#[derive(EnumString, EnumIter, IntoStaticStr)]
-enum EqualizerSetting {
-    PresetProfile,
-    CustomProfile,
-    VolumeAdjustments,
-}
-
-impl TryFrom<&SettingId> for EqualizerSetting {
-    type Error = ();
-
-    fn try_from(setting_id: &SettingId) -> Result<Self, Self::Error> {
-        match setting_id {
-            SettingId::PresetEqualizerProfile => Ok(Self::PresetProfile),
-            SettingId::CustomEqualizerProfile => Ok(Self::CustomProfile),
-            SettingId::VolumeAdjustments => Ok(Self::VolumeAdjustments),
-            _ => Err(()),
-        }
+enum_subset!(
+    SettingId,
+    #[derive(EnumString, EnumIter, IntoStaticStr)]
+    enum EqualizerSetting {
+        PresetEqualizerProfile,
+        CustomEqualizerProfile,
+        VolumeAdjustments,
     }
-}
+);
 
-impl From<EqualizerSetting> for SettingId {
-    fn from(setting: EqualizerSetting) -> Self {
-        match setting {
-            EqualizerSetting::PresetProfile => Self::PresetEqualizerProfile,
-            EqualizerSetting::CustomProfile => Self::CustomEqualizerProfile,
-            EqualizerSetting::VolumeAdjustments => Self::VolumeAdjustments,
-        }
+enum_subset!(
+    SettingId,
+    #[derive(EnumString, EnumIter, IntoStaticStr)]
+    enum ImportExportSetting {
+        ImportCustomEqualizerProfiles,
+        ExportCustomEqualizerProfiles,
+        ExportCustomEqualizerProfilesOutput,
     }
-}
-
-#[derive(EnumString, EnumIter, IntoStaticStr)]
-enum ImportExportSetting {
-    ImportCustomEqualizerProfiles,
-    ExportCustomEqualizerProfiles,
-    ExportCustomEqualizerProfilesOutput,
-}
-
-impl From<ImportExportSetting> for SettingId {
-    fn from(value: ImportExportSetting) -> Self {
-        match value {
-            ImportExportSetting::ImportCustomEqualizerProfiles => {
-                Self::ImportCustomEqualizerProfiles
-            }
-            ImportExportSetting::ExportCustomEqualizerProfiles => {
-                Self::ExportCustomEqualizerProfiles
-            }
-            ImportExportSetting::ExportCustomEqualizerProfilesOutput => {
-                Self::ExportCustomEqualizerProfilesOutput
-            }
-        }
-    }
-}
-
-impl TryFrom<&SettingId> for ImportExportSetting {
-    type Error = ();
-
-    fn try_from(setting_id: &SettingId) -> Result<Self, Self::Error> {
-        match setting_id {
-            SettingId::ImportCustomEqualizerProfiles => Ok(Self::ImportCustomEqualizerProfiles),
-            SettingId::ExportCustomEqualizerProfiles => Ok(Self::ExportCustomEqualizerProfiles),
-            SettingId::ExportCustomEqualizerProfilesOutput => {
-                Ok(Self::ExportCustomEqualizerProfilesOutput)
-            }
-            _ => Err(()),
-        }
-    }
-}
+);
 
 impl<T> ModuleCollection<T> {
     pub async fn add_equalizer<Conn, const CHANNELS: usize, const BANDS: usize>(

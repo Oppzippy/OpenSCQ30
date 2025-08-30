@@ -7,36 +7,19 @@ use strum::{EnumIter, EnumString, IntoStaticStr};
 use crate::{
     api::settings::{CategoryId, SettingId},
     devices::soundcore::standard::structures::TwsStatus,
+    macros::enum_subset,
 };
 
 use super::ModuleCollection;
 
-#[derive(EnumString, EnumIter, IntoStaticStr)]
-enum TwsStatusSetting {
-    TwsStatus,
-    HostDevice,
-}
-
-impl From<TwsStatusSetting> for SettingId {
-    fn from(setting: TwsStatusSetting) -> Self {
-        match setting {
-            TwsStatusSetting::HostDevice => Self::HostDevice,
-            TwsStatusSetting::TwsStatus => Self::TwsStatus,
-        }
+enum_subset!(
+    SettingId,
+    #[derive(EnumString, EnumIter, IntoStaticStr)]
+    enum TwsStatusSetting {
+        TwsStatus,
+        HostDevice,
     }
-}
-
-impl TryFrom<&SettingId> for TwsStatusSetting {
-    type Error = ();
-
-    fn try_from(setting_id: &SettingId) -> Result<Self, Self::Error> {
-        match setting_id {
-            SettingId::HostDevice => Ok(Self::HostDevice),
-            SettingId::TwsStatus => Ok(Self::TwsStatus),
-            _ => Err(()),
-        }
-    }
-}
+);
 
 impl<T> ModuleCollection<T>
 where

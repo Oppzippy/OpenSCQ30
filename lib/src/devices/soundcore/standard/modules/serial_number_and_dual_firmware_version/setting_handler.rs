@@ -29,7 +29,7 @@ where
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
         let serial_number: &SerialNumber = state.get();
         let dual_firmware_version: &DualFirmwareVersion = state.get();
-        let setting: SerialNumberAndDualFirmwareVersionSetting = setting_id.try_into().ok()?;
+        let setting: SerialNumberAndDualFirmwareVersionSetting = (*setting_id).try_into().ok()?;
         Some(match setting {
             SerialNumberAndDualFirmwareVersionSetting::SerialNumber => Setting::Information {
                 value: serial_number.to_string(),
