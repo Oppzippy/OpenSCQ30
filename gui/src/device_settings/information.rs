@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 use cosmic::{Element, iced_core::text::Wrapping, widget};
 use openscq30_i18n::Translate;
-use openscq30_lib::api::settings::SettingId;
+use openscq30_lib::settings::SettingId;
 
 pub fn information<M>(setting_id: SettingId, text: Cow<'_, str>, on_copy: M) -> Element<'_, M>
 where

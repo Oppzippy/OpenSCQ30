@@ -16,7 +16,7 @@ use cosmic::{
 };
 use legacy_migration::LegacyMigrationModel;
 use openscq30_i18n::Translate;
-use openscq30_lib::api::{
+use openscq30_lib::{
     quick_presets::QuickPresetsHandler,
     settings::{self, CategoryId, Setting, SettingId, Value},
 };

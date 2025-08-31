@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use openscq30_lib::api::device::OpenSCQ30Device as LibOpenSCQ30Device;
+use openscq30_lib::device::OpenSCQ30Device as LibOpenSCQ30Device;
 use tokio::task::JoinHandle;
 
 use crate::serializable;

@@ -1,7 +1,7 @@
 use std::{collections::HashMap, path::PathBuf};
 
 use anyhow::{anyhow, bail};
-use openscq30_lib::api::{
+use openscq30_lib::{
     device::OpenSCQ30Device,
     settings::{self, Setting, SettingId, Value},
 };
@@ -76,17 +76,12 @@ pub async fn migrate_legacy_profile(
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     use std::borrow::Cow;
 
     use macaddr::MacAddr6;
-    use openscq30_lib::{
-        api::{
-            OpenSCQ30Session,
-            settings::{Setting, SettingId, Value},
-        },
-        devices::DeviceModel,
-        storage::PairedDevice,
-    };
+    use openscq30_lib::{DeviceModel, OpenSCQ30Session, storage::PairedDevice};
 
     use crate::openscq30_v1_migration::migrate_legacy_profile;
 

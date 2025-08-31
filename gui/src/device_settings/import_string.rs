@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 use cosmic::{Element, widget};
 use openscq30_i18n::Translate;
-use openscq30_lib::api::settings::SettingId;
+use openscq30_lib::settings::SettingId;
 
 use crate::device_settings::labeled_setting_row;
 

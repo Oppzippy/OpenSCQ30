@@ -5,10 +5,7 @@ use cosmic::{
     widget,
 };
 use openscq30_i18n::Translate;
-use openscq30_lib::{
-    api::{quick_presets::QuickPresetsHandler, settings},
-    storage::QuickPreset,
-};
+use openscq30_lib::{quick_presets::QuickPresetsHandler, settings, storage::QuickPreset};
 
 use crate::{app::DebugOpenSCQ30Device, fl, handle_soft_error, utils::coalesce_result};
 

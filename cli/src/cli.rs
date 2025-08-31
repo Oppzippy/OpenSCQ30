@@ -4,7 +4,7 @@ mod pair;
 
 use clap::{ArgAction, ArgMatches, Command, arg, value_parser};
 use macaddr::MacAddr6;
-use openscq30_lib::devices::DeviceModel;
+use openscq30_lib::DeviceModel;
 
 pub fn build() -> Command {
     let mac_address_arg = arg!(-a --"mac-address" <MAC_ADDRESS> "Device's mac address")

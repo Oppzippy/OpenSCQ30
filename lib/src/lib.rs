@@ -4,10 +4,14 @@
 // --- async_fn_in_trait ---
 // This crate should not be used outside of this git repository, so breaking api changes are fine.
 #![allow(clippy::type_complexity, async_fn_in_trait)]
-pub mod api;
-pub mod connection_backend;
-pub mod devices;
+mod api;
+mod connection_backend;
+mod devices;
 pub mod i18n;
 pub(crate) mod macros;
 pub(crate) mod serialization;
 pub mod storage;
+
+pub use api::*;
+pub use connection_backend::*;
+pub use devices::DeviceModel;

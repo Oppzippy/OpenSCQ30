@@ -13,7 +13,7 @@ cfg_if! {
 
 }
 #[cfg(test)]
-pub mod mock;
+pub(crate) mod mock;
 
 pub trait ConnectionBackends {
     type Rfcomm: RfcommBackend + Send + Sync;

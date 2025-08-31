@@ -1,7 +1,7 @@
 use std::{path::PathBuf, sync::Arc};
 
 use cfg_if::cfg_if;
-use openscq30_lib::api::OpenSCQ30Session as LibSession;
+use openscq30_lib::OpenSCQ30Session as LibSession;
 
 use crate::{
     connection::ManualConnectionBackends, device::OpenSCQ30Device,

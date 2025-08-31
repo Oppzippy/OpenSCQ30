@@ -6,7 +6,7 @@ use std::{path::PathBuf, process::ExitCode};
 
 use anyhow::anyhow;
 use dirs::config_dir;
-use openscq30_lib::api::OpenSCQ30Session;
+use openscq30_lib::OpenSCQ30Session;
 use tracing::Level;
 
 #[tokio::main]

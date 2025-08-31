@@ -7,9 +7,7 @@ use cosmic::{
 };
 use openscq30_i18n::Translate;
 use openscq30_lib::{
-    api::{OpenSCQ30Session, connection::ConnectionDescriptor},
-    devices::DeviceModel,
-    storage::PairedDevice,
+    DeviceModel, OpenSCQ30Session, connection::ConnectionDescriptor, storage::PairedDevice,
 };
 use strum::IntoEnumIterator;
 use tracing::error;

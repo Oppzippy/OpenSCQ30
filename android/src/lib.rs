@@ -9,7 +9,7 @@ pub mod serializable;
 
 use i18n_embed::unic_langid::LanguageIdentifier;
 use log::LevelFilter;
-use openscq30_lib::devices::DeviceModel;
+use openscq30_lib::DeviceModel;
 use strum::IntoEnumIterator;
 use tracing::instrument;
 
@@ -50,7 +50,7 @@ pub enum OpenSCQ30Error {
     #[error("JsonError: {0:?}")]
     JsonError(#[from] serde_json::Error),
     #[error("DeviceError: {0:?}")]
-    DeviceError(#[from] openscq30_lib::api::device::Error),
+    DeviceError(#[from] openscq30_lib::device::Error),
     #[error("StorageError: {0:?}")]
     StorageError(#[from] openscq30_lib::storage::Error),
 }

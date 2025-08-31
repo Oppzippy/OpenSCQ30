@@ -7,10 +7,7 @@ use cosmic::{
 };
 use macaddr::MacAddr6;
 use openscq30_i18n::Translate;
-use openscq30_lib::{
-    api::{OpenSCQ30Session, device::OpenSCQ30Device},
-    storage::PairedDevice,
-};
+use openscq30_lib::{OpenSCQ30Session, device::OpenSCQ30Device, storage::PairedDevice};
 
 use crate::{
     add_device::{self, AddDeviceModel},

@@ -2,7 +2,7 @@ use crate::{device::OpenSCQ30Device, serializable};
 
 #[derive(uniffi::Object)]
 pub struct QuickPresetsHandler {
-    pub inner: openscq30_lib::api::quick_presets::QuickPresetsHandler,
+    pub inner: openscq30_lib::quick_presets::QuickPresetsHandler,
 }
 
 #[uniffi::export(async_runtime = "tokio")]

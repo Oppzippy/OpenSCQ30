@@ -1,6 +1,6 @@
 use clap::ArgMatches;
 use macaddr::MacAddr6;
-use openscq30_lib::{api::OpenSCQ30Session, devices::DeviceModel, storage::PairedDevice};
+use openscq30_lib::{DeviceModel, OpenSCQ30Session, storage::PairedDevice};
 use tabled::{Table, Tabled};
 
 use crate::{fmt::YesOrNo, openscq30_session};

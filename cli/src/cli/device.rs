@@ -2,7 +2,7 @@ use anyhow::{Context, anyhow};
 use clap::ArgMatches;
 use indexmap::IndexMap;
 use macaddr::MacAddr6;
-use openscq30_lib::api::{
+use openscq30_lib::{
     device::OpenSCQ30Device,
     settings::{self, CategoryId, SettingId},
 };

@@ -3,8 +3,8 @@ use std::{collections::HashSet, panic::Location, sync::Arc};
 use async_trait::async_trait;
 use macaddr::MacAddr6;
 use openscq30_lib::{
-    api::connection::{self, ConnectionStatus, RfcommBackend, RfcommConnection},
-    connection_backend::ConnectionBackends,
+    ConnectionBackends,
+    connection::{self, ConnectionStatus, RfcommBackend, RfcommConnection},
 };
 use thiserror::Error;
 use tokio::sync::{mpsc, watch};

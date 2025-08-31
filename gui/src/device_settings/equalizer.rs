@@ -8,7 +8,7 @@ use cosmic::{
     iced::{Alignment, Border, Length, Shadow},
     theme, widget,
 };
-use openscq30_lib::api::settings::Equalizer;
+use openscq30_lib::settings::Equalizer;
 
 use crate::fl;
 

@@ -1,10 +1,7 @@
 use std::str::FromStr;
 
 use i18n_embed::unic_langid::subtags;
-use openscq30_lib::{
-    api::{connection, settings},
-    devices, storage,
-};
+use openscq30_lib::{connection, settings, storage};
 
 pub struct MacAddr6(pub macaddr::MacAddr6);
 uniffi::custom_type!(MacAddr6, String, {
@@ -36,9 +33,9 @@ uniffi::custom_type!(ConnectionStatus, String, {
     lower: |val| serde_json::to_string(&val.0).expect("json serialization shouldn't fail"),
 });
 
-pub struct DeviceModel(pub devices::DeviceModel);
+pub struct DeviceModel(pub openscq30_lib::DeviceModel);
 uniffi::custom_type!(DeviceModel, String, {
-    try_lift: |model| Ok(DeviceModel(devices::DeviceModel::from_str(&model)?)),
+    try_lift: |model| Ok(DeviceModel(openscq30_lib::DeviceModel::from_str(&model)?)),
     lower: |val| val.0.to_string(),
 });
 

@@ -1,7 +1,7 @@
 use std::{collections::HashMap, mem, sync::Arc, time::Duration};
 
 use cosmic::Task;
-use openscq30_lib::api::{
+use openscq30_lib::{
     device::{self, OpenSCQ30Device},
     settings::{Setting, SettingId, Value},
 };

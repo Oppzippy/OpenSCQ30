@@ -1,6 +1,6 @@
 use std::io::IsTerminal;
 
-use openscq30_lib::api::settings::{Setting, Value};
+use openscq30_lib::settings::{Setting, Value};
 use strum::Display;
 use tabled::{
     Table,

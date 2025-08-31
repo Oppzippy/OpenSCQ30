@@ -1,5 +1,5 @@
 use openscq30_i18n::Translate;
-use openscq30_lib::api::settings;
+use openscq30_lib::settings;
 
 use crate::serializable;
 

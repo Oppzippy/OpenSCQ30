@@ -6,7 +6,7 @@ use cosmic::{
     widget,
 };
 use openscq30_i18n::Translate;
-use openscq30_lib::{api::OpenSCQ30Session, storage::PairedDevice};
+use openscq30_lib::{OpenSCQ30Session, storage::PairedDevice};
 
 use crate::{fl, handle_soft_error, utils::coalesce_result};
 

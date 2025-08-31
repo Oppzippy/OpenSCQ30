@@ -3,7 +3,7 @@ mod primitives;
 use std::borrow::Cow;
 
 use anyhow::{anyhow, bail};
-use openscq30_lib::api::settings::{self, ModifiableSelectCommand, Setting, Value};
+use openscq30_lib::settings::{self, ModifiableSelectCommand, Setting, Value};
 
 pub fn setting_value(setting: &Setting, unparsed: String) -> anyhow::Result<Value> {
     match setting {
