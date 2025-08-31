@@ -113,12 +113,12 @@ android {
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
 
-    val lifecycleVersion = "2.9.2"
+    val lifecycleVersion = "2.9.3"
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-service:$lifecycleVersion")
 
     // Compose
-    val composeBomVersion = "2025.07.00"
+    val composeBomVersion = "2025.08.01"
     implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     androidTestImplementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     implementation("androidx.compose.ui:ui")
@@ -155,7 +155,7 @@ dependencies {
 
     implementation("net.java.dev.jna:jna:5.17.0@aar")
 
-    val hiltVersion = "2.57"
+    val hiltVersion = "2.57.1"
     implementation("com.google.dagger:hilt-android:$hiltVersion")
     kapt("com.google.dagger:hilt-android-compiler:$hiltVersion")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
