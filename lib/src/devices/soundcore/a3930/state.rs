@@ -1,7 +1,7 @@
 use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::common::{
-    packet::inbound::SerialNumberAndFirmwareVersionUpdatePacket,
+    packet::inbound::SerialNumberAndFirmwareVersion,
     structures::{
         AgeRange, CustomHearId, DualBattery, DualFirmwareVersion, EqualizerConfiguration, Gender,
         MultiButtonConfiguration, SerialNumber, SoundModes, TwsStatus,
@@ -31,7 +31,7 @@ pub struct A3930State {
 impl A3930State {
     pub fn new(
         state_update_packet: A3930StateUpdatePacket,
-        sn_and_firmware: SerialNumberAndFirmwareVersionUpdatePacket,
+        sn_and_firmware: SerialNumberAndFirmwareVersion,
     ) -> Self {
         Self {
             tws_status: state_update_packet.tws_status,

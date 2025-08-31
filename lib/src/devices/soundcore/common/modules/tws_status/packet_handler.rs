@@ -5,12 +5,9 @@ use tokio::sync::watch;
 use crate::{
     api::device,
     devices::soundcore::common::{
-        packet::{
-            Command, Packet,
-            inbound::{TryIntoInboundPacket, TwsStatusUpdatePacket},
-        },
+        packet::{self, Packet, inbound::TryIntoInboundPacket},
         packet_manager::PacketHandler,
-        structures::TwsStatus,
+        structures,
     },
 };
 
@@ -18,16 +15,16 @@ use crate::{
 pub struct TwsStatusPacketHandler {}
 
 impl TwsStatusPacketHandler {
-    pub const COMMAND: Command = TwsStatusUpdatePacket::COMMAND;
+    pub const COMMAND: packet::Command = packet::inbound::TwsStatus::COMMAND;
 }
 
 #[async_trait]
 impl<T> PacketHandler<T> for TwsStatusPacketHandler
 where
-    T: Has<TwsStatus> + Send + Sync,
+    T: Has<structures::TwsStatus> + Send + Sync,
 {
     async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> device::Result<()> {
-        let packet: TwsStatusUpdatePacket = packet.try_into_inbound_packet()?;
+        let packet: packet::inbound::TwsStatus = packet.try_into_inbound_packet()?;
         state.send_if_modified(|state| {
             let tws_status = state.get_mut();
             let modified = *tws_status != packet.0;

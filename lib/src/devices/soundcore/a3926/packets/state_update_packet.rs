@@ -13,8 +13,8 @@ use crate::{
         common::{
             modules::ModuleCollection,
             packet::{
-                Command, Packet,
-                inbound::{InboundPacket, TryIntoInboundPacket, state_update_packet},
+                self, Command, Packet,
+                inbound::{InboundPacket, TryIntoInboundPacket},
                 outbound::OutboundPacket,
             },
             packet_manager::PacketHandler,
@@ -81,7 +81,7 @@ impl InboundPacket for A3926StateUpdatePacket {
 
 impl OutboundPacket for A3926StateUpdatePacket {
     fn command(&self) -> Command {
-        state_update_packet::COMMAND
+        packet::inbound::STATE_COMMAND
     }
 
     fn body(&self) -> Vec<u8> {
@@ -120,7 +120,7 @@ impl PacketHandler<A3926State> for StateUpdatePacketHandler {
 impl ModuleCollection<A3926State> {
     pub fn add_state_update(&mut self) {
         self.packet_handlers.set_handler(
-            state_update_packet::COMMAND,
+            packet::inbound::STATE_COMMAND,
             Box::new(StateUpdatePacketHandler {}),
         );
     }

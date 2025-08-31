@@ -7,10 +7,7 @@ use crate::{
     devices::soundcore::common::{
         packet::{
             Command, Packet,
-            inbound::{
-                SingleBatteryChargingUpdatePacket, SingleBatteryLevelUpdatePacket,
-                TryIntoInboundPacket,
-            },
+            inbound::{SingleBatteryCharging, SingleBatteryLevel, TryIntoInboundPacket},
         },
         packet_manager::PacketHandler,
         structures::SingleBattery,
@@ -21,7 +18,7 @@ use crate::{
 pub struct BatteryLevelPacketHandler {}
 
 impl BatteryLevelPacketHandler {
-    pub const COMMAND: Command = SingleBatteryLevelUpdatePacket::COMMAND;
+    pub const COMMAND: Command = SingleBatteryLevel::COMMAND;
 }
 
 #[async_trait]
@@ -30,7 +27,7 @@ where
     T: Has<SingleBattery> + Send + Sync,
 {
     async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> device::Result<()> {
-        let packet: SingleBatteryLevelUpdatePacket = packet.try_into_inbound_packet()?;
+        let packet: SingleBatteryLevel = packet.try_into_inbound_packet()?;
         state.send_if_modified(|state| {
             let battery = state.get_mut();
             let modified = packet.level != battery.level;
@@ -45,7 +42,7 @@ where
 pub struct BatteryChargingPacketHandler {}
 
 impl BatteryChargingPacketHandler {
-    pub const COMMAND: Command = SingleBatteryChargingUpdatePacket::COMMAND;
+    pub const COMMAND: Command = SingleBatteryCharging::COMMAND;
 }
 
 #[async_trait]
@@ -54,7 +51,7 @@ where
     T: Has<SingleBattery> + Send + Sync,
 {
     async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> device::Result<()> {
-        let packet: SingleBatteryChargingUpdatePacket = packet.try_into_inbound_packet()?;
+        let packet: SingleBatteryCharging = packet.try_into_inbound_packet()?;
         state.send_if_modified(|state| {
             let battery = state.get_mut();
             let modified = packet.is_charging != battery.is_charging;

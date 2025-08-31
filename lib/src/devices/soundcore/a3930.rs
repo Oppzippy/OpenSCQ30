@@ -6,7 +6,7 @@ use crate::devices::soundcore::{
         macros::soundcore_device,
         modules::sound_modes::AvailableSoundModes,
         packet::{
-            inbound::{SerialNumberAndFirmwareVersionUpdatePacket, TryIntoInboundPacket},
+            inbound::{SerialNumberAndFirmwareVersion, TryIntoInboundPacket},
             outbound::{
                 OutboundPacketBytesExt, RequestSerialNumberAndFirmwareVersionPacket,
                 RequestStatePacket,
@@ -27,7 +27,7 @@ soundcore_device!(
             .send_with_response(&RequestStatePacket::new().into())
             .await?
             .try_into_inbound_packet()?;
-        let sn_and_firmware: SerialNumberAndFirmwareVersionUpdatePacket = packet_io
+        let sn_and_firmware: SerialNumberAndFirmwareVersion = packet_io
             .send_with_response(&RequestSerialNumberAndFirmwareVersionPacket::new().into())
             .await?
             .try_into_inbound_packet()?;
@@ -54,7 +54,7 @@ soundcore_device!(
             ),
             (
                 RequestSerialNumberAndFirmwareVersionPacket::COMMAND,
-                SerialNumberAndFirmwareVersionUpdatePacket::default().bytes(),
+                SerialNumberAndFirmwareVersion::default().bytes(),
             ),
         ])
     },

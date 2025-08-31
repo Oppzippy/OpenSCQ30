@@ -7,7 +7,7 @@ use crate::{
     devices::soundcore::common::{
         packet::{
             Command, Packet,
-            inbound::{SerialNumberAndFirmwareVersionUpdatePacket, TryIntoInboundPacket},
+            inbound::{SerialNumberAndFirmwareVersion, TryIntoInboundPacket},
         },
         packet_manager::PacketHandler,
         structures::{DualFirmwareVersion, SerialNumber},
@@ -18,7 +18,7 @@ use crate::{
 pub struct SerialNumberAndDualFirmwareVersionPacketHandler {}
 
 impl SerialNumberAndDualFirmwareVersionPacketHandler {
-    pub const COMMAND: Command = SerialNumberAndFirmwareVersionUpdatePacket::COMMAND;
+    pub const COMMAND: Command = SerialNumberAndFirmwareVersion::COMMAND;
 }
 
 #[async_trait]
@@ -27,8 +27,7 @@ where
     T: Has<SerialNumber> + Has<DualFirmwareVersion> + Send + Sync,
 {
     async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> device::Result<()> {
-        let packet: SerialNumberAndFirmwareVersionUpdatePacket =
-            packet.try_into_inbound_packet()?;
+        let packet: SerialNumberAndFirmwareVersion = packet.try_into_inbound_packet()?;
         state.send_if_modified(|state| {
             let modified = {
                 let serial_number: &SerialNumber = state.get();

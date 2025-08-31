@@ -53,8 +53,7 @@ mod tests {
             DeviceModel,
             soundcore::common::{
                 packet::{
-                    Command, Direction, Packet,
-                    inbound::state_update_packet,
+                    self, Command, Direction, Packet,
                     outbound::{OutboundPacket, OutboundPacketBytesExt, set_equalizer},
                 },
                 structures::{EqualizerConfiguration, PresetEqualizerProfile},
@@ -68,7 +67,7 @@ mod tests {
     }
     impl OutboundPacket for A3945TestStateUpdatePacket {
         fn command(&self) -> Command {
-            state_update_packet::COMMAND
+            packet::inbound::STATE_COMMAND
         }
 
         fn body(&self) -> Vec<u8> {
