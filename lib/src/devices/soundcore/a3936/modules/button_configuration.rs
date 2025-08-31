@@ -12,10 +12,7 @@ use crate::{
     },
     devices::soundcore::{
         a3936::structures::A3936InternalMultiButtonConfiguration,
-        common::{
-            modules::ModuleCollection, packet::packet_io_controller::PacketIOController,
-            structures::TwsStatus,
-        },
+        common::{modules::ModuleCollection, packet::PacketIOController, structures::TwsStatus},
     },
 };
 

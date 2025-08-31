@@ -11,7 +11,7 @@ use crate::{
         settings::{CategoryId, SettingId},
     },
     devices::soundcore::common::{
-        packet::packet_io_controller::PacketIOController,
+        packet::PacketIOController,
         structures::{MultiButtonConfiguration, TwsStatus},
     },
     macros::enum_subset,

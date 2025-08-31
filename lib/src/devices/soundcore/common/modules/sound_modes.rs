@@ -16,7 +16,7 @@ use crate::{
         settings::{CategoryId, SettingId},
     },
     devices::soundcore::common::{
-        packet::packet_io_controller::PacketIOController,
+        packet::PacketIOController,
         structures::{AmbientSoundMode, NoiseCancelingMode, SoundModes, TransparencyMode},
     },
     macros::enum_subset,

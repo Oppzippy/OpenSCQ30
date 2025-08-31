@@ -8,7 +8,7 @@ use crate::{
     api::{connection::RfcommConnection, device},
     devices::soundcore::{
         a3936::{packets::A3936SetSoundModesPacket, structures::A3936SoundModes},
-        common::{packet::packet_io_controller::PacketIOController, state_modifier::StateModifier},
+        common::{packet::PacketIOController, state_modifier::StateModifier},
     },
 };
 

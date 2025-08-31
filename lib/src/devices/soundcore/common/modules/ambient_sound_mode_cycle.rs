@@ -10,9 +10,7 @@ use crate::{
         connection::RfcommConnection,
         settings::{CategoryId, SettingId},
     },
-    devices::soundcore::common::{
-        packet::packet_io_controller::PacketIOController, structures::AmbientSoundModeCycle,
-    },
+    devices::soundcore::common::{packet::PacketIOController, structures::AmbientSoundModeCycle},
     macros::enum_subset,
 };
 

@@ -15,7 +15,7 @@ use crate::{
                 setting_handler::TouchToneSettingHandler, state_modifier::TouchToneStateModifier,
             },
         },
-        packet::packet_io_controller::PacketIOController,
+        packet::PacketIOController,
         structures::TouchTone,
     },
     macros::enum_subset,

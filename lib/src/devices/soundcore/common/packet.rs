@@ -1,9 +1,11 @@
-pub mod checksum;
+mod checksum;
 pub mod inbound;
-pub mod multi_queue;
+mod multi_queue;
 pub mod outbound;
-pub mod packet_io_controller;
+mod packet_io_controller;
 pub mod parsing;
+
+pub use packet_io_controller::*;
 
 use nom::{
     IResult, Parser,
@@ -12,8 +14,6 @@ use nom::{
     error::{ContextError, ParseError, context},
     number::complete::{le_u8, le_u16},
 };
-
-use crate::devices::soundcore::common::packet::checksum::calculate_checksum;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Default, Hash)]
 pub struct Packet {
@@ -42,7 +42,7 @@ impl Packet {
             .chain((length as u16).to_le_bytes())
             .chain(body.iter().copied())
             .collect::<Vec<_>>();
-        bytes.push(calculate_checksum(&bytes));
+        bytes.push(checksum::calculate_checksum(&bytes));
 
         bytes
     }
@@ -65,7 +65,7 @@ impl Packet {
         let (input, _checksum) = context(
             "checksum",
             map_opt(le_u8, |checksum| {
-                if checksum == calculate_checksum(&full_input[0..full_input.len() - 1]) {
+                if checksum == checksum::calculate_checksum(&full_input[0..full_input.len() - 1]) {
                     Some(checksum)
                 } else {
                     None

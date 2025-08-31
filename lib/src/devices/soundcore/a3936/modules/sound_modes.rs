@@ -17,7 +17,7 @@ use crate::{
     },
     devices::soundcore::{
         a3936::structures::A3936SoundModes,
-        common::{modules::ModuleCollection, packet::packet_io_controller::PacketIOController},
+        common::{modules::ModuleCollection, packet::PacketIOController},
     },
 };
 

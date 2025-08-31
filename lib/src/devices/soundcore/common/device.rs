@@ -18,7 +18,10 @@ use crate::{
         DeviceModel,
         soundcore::{
             self,
-            common::structures::{AutoPowerOff, TouchTone},
+            common::{
+                packet::PacketIOController,
+                structures::{AutoPowerOff, TouchTone},
+            },
         },
     },
     storage::OpenSCQ30Database,
@@ -32,7 +35,6 @@ use super::{
         Packet,
         inbound::{InboundPacket, TryIntoInboundPacket},
         outbound::RequestState,
-        packet_io_controller::PacketIOController,
     },
     structures::{
         AgeRange, AmbientSoundModeCycle, BasicHearId, CustomHearId, DualBattery,

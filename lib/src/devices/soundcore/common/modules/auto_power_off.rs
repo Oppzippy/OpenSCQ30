@@ -17,7 +17,7 @@ use crate::{
                 state_modifier::AutoPowerOffStateModifier,
             },
         },
-        packet::packet_io_controller::PacketIOController,
+        packet::PacketIOController,
         structures::AutoPowerOff,
     },
     macros::enum_subset,
