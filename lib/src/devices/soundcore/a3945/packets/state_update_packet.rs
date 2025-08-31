@@ -11,7 +11,7 @@ use crate::{
     api::device,
     devices::soundcore::{
         a3945::state::A3945State,
-        standard::{
+        common::{
             modules::ModuleCollection,
             packet::{
                 Command, Packet,
@@ -156,7 +156,7 @@ impl ModuleCollection<A3945State> {
 mod tests {
     use nom_language::error::VerboseError;
 
-    use crate::devices::soundcore::standard::packet::{
+    use crate::devices::soundcore::common::packet::{
         inbound::TryIntoInboundPacket, outbound::OutboundPacketBytesExt,
     };
 

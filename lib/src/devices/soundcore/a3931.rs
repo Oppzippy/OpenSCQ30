@@ -6,7 +6,7 @@ use strum::{IntoStaticStr, VariantArray};
 use crate::{
     devices::soundcore::{
         a3931::{packets::A3931StateUpdatePacket, state::A3931State},
-        standard::{
+        common::{
             macros::soundcore_device,
             modules::sound_modes::AvailableSoundModes,
             packet::{

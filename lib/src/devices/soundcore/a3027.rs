@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::devices::soundcore::{
     a3027::{packets::A3027StateUpdatePacket, state::A3027State},
-    standard::{
+    common::{
         device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
         modules::sound_modes::AvailableSoundModes,

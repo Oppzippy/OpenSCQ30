@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::devices::soundcore::{
     a3933::{packets::inbound::A3933StateUpdatePacket, state::A3933State},
-    standard::{
+    common::{
         device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
         modules::sound_modes::AvailableSoundModes,
@@ -70,7 +70,7 @@ mod tests {
         connection_backend::mock::rfcomm::MockRfcommBackend,
         devices::{
             DeviceModel,
-            soundcore::standard::{
+            soundcore::common::{
                 packet::{
                     Command, Direction, Packet,
                     inbound::state_update_packet,

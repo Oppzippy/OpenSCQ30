@@ -8,7 +8,7 @@ use tokio::sync::watch;
 
 use crate::devices::soundcore::{
     a3031::state::A3031State,
-    standard::{
+    common::{
         modules::ModuleCollection,
         packet::{
             Command, Packet,
@@ -132,7 +132,7 @@ impl ModuleCollection<A3031State> {
 mod tests {
     use nom_language::error::VerboseError;
 
-    use crate::devices::soundcore::standard::packet::{
+    use crate::devices::soundcore::common::packet::{
         inbound::TryIntoInboundPacket, outbound::OutboundPacketBytesExt,
     };
 

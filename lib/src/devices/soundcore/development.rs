@@ -5,8 +5,8 @@ use crate::{
     devices::{
         DeviceModel,
         soundcore::{
+            common::{demo::DemoConnectionRegistry, packet::inbound::state_update_packet},
             development::device::SoundcoreDevelopmentDeviceRegistry,
-            standard::{demo::DemoConnectionRegistry, packet::inbound::state_update_packet},
         },
     },
     storage,
@@ -29,7 +29,7 @@ pub fn demo_device_registry(
     _database: Arc<storage::OpenSCQ30Database>,
     device_model: DeviceModel,
 ) -> SoundcoreDevelopmentDeviceRegistry<
-    crate::devices::soundcore::standard::demo::DemoConnectionRegistry,
+    crate::devices::soundcore::common::demo::DemoConnectionRegistry,
 > {
     SoundcoreDevelopmentDeviceRegistry::new(DemoConnectionRegistry::new(
         device_model,

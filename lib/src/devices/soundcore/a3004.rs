@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::devices::soundcore::a3004::packets::A3004StateUpdatePacket;
 use crate::devices::soundcore::a3004::state::A3004State;
-use crate::devices::soundcore::standard::{
+use crate::devices::soundcore::common::{
     device::fetch_state_from_state_update_packet,
     macros::soundcore_device,
     modules::sound_modes::AvailableSoundModes,

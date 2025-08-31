@@ -6,7 +6,7 @@ use crate::{
     api::device,
     devices::soundcore::{
         a3936::{packets::A3936SoundModesUpdatePacket, structures::A3936SoundModes},
-        standard::{
+        common::{
             packet::{Command, Packet, inbound::TryIntoInboundPacket},
             packet_manager::PacketHandler,
         },

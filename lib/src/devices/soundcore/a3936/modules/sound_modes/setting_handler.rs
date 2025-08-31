@@ -6,7 +6,7 @@ use crate::{
     api::settings::{Range, Setting, SettingId, Value},
     devices::soundcore::{
         a3936::structures::A3936SoundModes,
-        standard::settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
+        common::settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
     },
     i18n::fl,
 };

@@ -10,9 +10,7 @@ use crate::{
             packets::A3959SetMultiButtonConfigurationPacket,
             structures::A3959MultiButtonConfiguration,
         },
-        standard::{
-            packet::packet_io_controller::PacketIOController, state_modifier::StateModifier,
-        },
+        common::{packet::packet_io_controller::PacketIOController, state_modifier::StateModifier},
     },
 };
 

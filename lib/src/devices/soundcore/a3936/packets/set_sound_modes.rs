@@ -1,6 +1,6 @@
 use crate::devices::soundcore::{
     a3936::structures::A3936SoundModes,
-    standard::packet::{Command, outbound::OutboundPacket},
+    common::packet::{Command, outbound::OutboundPacket},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -28,7 +28,7 @@ mod tests {
                 ManualNoiseCanceling, WindNoise,
             },
         },
-        standard::{
+        common::{
             packet::outbound::OutboundPacketBytesExt,
             structures::{AmbientSoundMode, TransparencyMode},
         },

@@ -14,7 +14,7 @@ use crate::{
         DeviceModel,
         soundcore::{
             self,
-            standard::packet::{
+            common::packet::{
                 Packet, outbound::RequestStatePacket, packet_io_controller::PacketIOController,
             },
         },

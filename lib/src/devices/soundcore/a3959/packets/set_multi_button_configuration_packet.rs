@@ -1,6 +1,6 @@
 use crate::devices::soundcore::{
     a3959::structures::A3959MultiButtonConfiguration,
-    standard::packet::{Command, outbound::OutboundPacket},
+    common::packet::{Command, outbound::OutboundPacket},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

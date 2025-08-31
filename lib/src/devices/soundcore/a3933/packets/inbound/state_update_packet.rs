@@ -13,7 +13,7 @@ use crate::{
     api::device,
     devices::soundcore::{
         a3933::state::A3933State,
-        standard::{
+        common::{
             modules::ModuleCollection,
             packet::{
                 Command, Packet,
@@ -275,7 +275,7 @@ mod tests {
 
     use crate::devices::soundcore::{
         a3933::packets::inbound::A3933StateUpdatePacket,
-        standard::{
+        common::{
             packet::{
                 Packet,
                 inbound::{InboundPacket, TryIntoInboundPacket},

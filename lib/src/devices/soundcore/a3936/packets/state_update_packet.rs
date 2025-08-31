@@ -15,7 +15,7 @@ use crate::{
             state::A3936State,
             structures::{A3936InternalMultiButtonConfiguration, A3936SoundModes},
         },
-        standard::{
+        common::{
             modules::ModuleCollection,
             packet::{
                 Command, Packet,
@@ -245,7 +245,7 @@ impl ModuleCollection<A3936State> {
 mod tests {
     use nom_language::error::VerboseError;
 
-    use crate::devices::soundcore::standard::packet::{
+    use crate::devices::soundcore::common::packet::{
         inbound::InboundPacket, outbound::OutboundPacketBytesExt,
     };
 

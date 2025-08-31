@@ -6,7 +6,7 @@ use crate::{
     api::settings::{Setting, SettingId, Value},
     devices::soundcore::{
         a3936::structures::{A3936InternalMultiButtonConfiguration, A3936TwsButtonAction},
-        standard::{
+        common::{
             settings_manager::{SettingHandler, SettingHandlerResult},
             structures::{ButtonAction, TwsStatus},
         },

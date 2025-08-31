@@ -1,6 +1,6 @@
 use openscq30_lib_macros::Has;
 
-use crate::devices::soundcore::standard::{
+use crate::devices::soundcore::common::{
     packet::inbound::SerialNumberAndFirmwareVersionUpdatePacket,
     structures::{
         AgeRange, BasicHearId, DualBattery, DualFirmwareVersion, EqualizerConfiguration, Gender,

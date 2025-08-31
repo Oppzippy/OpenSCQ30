@@ -7,7 +7,7 @@ use nom::{
 use openscq30_i18n_macros::Translate;
 use strum::{Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
 
-use crate::devices::soundcore::standard::structures::{AmbientSoundMode, TransparencyMode};
+use crate::devices::soundcore::common::structures::{AmbientSoundMode, TransparencyMode};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct A3936SoundModes {

@@ -11,7 +11,7 @@ use crate::{
     api::device,
     devices::soundcore::{
         a3028::state::A3028State,
-        standard::{
+        common::{
             modules::ModuleCollection,
             packet::{
                 Command, Packet,
@@ -218,7 +218,7 @@ mod tests {
     use super::*;
     use nom_language::error::VerboseError;
 
-    use crate::devices::soundcore::standard::{
+    use crate::devices::soundcore::common::{
         packet::outbound::OutboundPacketBytesExt,
         structures::{
             AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,

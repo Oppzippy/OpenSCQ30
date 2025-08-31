@@ -6,7 +6,7 @@ use crate::{
     api::settings::{self, Range, Setting, SettingId, Value},
     devices::soundcore::{
         a3959::structures::{A3959SoundModes, ManualNoiseCanceling},
-        standard::settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
+        common::settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
     },
     i18n::fl,
 };

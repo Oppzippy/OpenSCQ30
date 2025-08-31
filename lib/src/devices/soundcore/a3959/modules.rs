@@ -2,7 +2,7 @@ use openscq30_lib_has::Has;
 
 use crate::{
     api::connection::RfcommConnection,
-    devices::soundcore::standard::{
+    devices::soundcore::common::{
         device::SoundcoreDeviceBuilder, packet::inbound::InboundPacket, structures::TwsStatus,
     },
 };

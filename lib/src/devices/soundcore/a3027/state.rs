@@ -1,6 +1,6 @@
 use openscq30_lib_macros::Has;
 
-use crate::devices::soundcore::standard::structures::{
+use crate::devices::soundcore::common::structures::{
     AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
     SingleBattery, SoundModes,
 };

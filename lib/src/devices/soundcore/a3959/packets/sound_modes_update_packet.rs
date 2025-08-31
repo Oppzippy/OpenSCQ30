@@ -6,7 +6,7 @@ use nom::{
 
 use crate::devices::soundcore::{
     a3959::structures::A3959SoundModes,
-    standard::packet::{Command, inbound::InboundPacket},
+    common::packet::{Command, inbound::InboundPacket},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

@@ -5,7 +5,7 @@ use crate::devices::soundcore::{
         packets::A3959StateUpdatePacket,
         structures::{A3959MultiButtonConfiguration, A3959SoundModes},
     },
-    standard::structures::{
+    common::structures::{
         AmbientSoundModeCycle, AutoPowerOff, DualBattery, DualFirmwareVersion,
         EqualizerConfiguration, SerialNumber, TouchTone, TwsStatus,
     },

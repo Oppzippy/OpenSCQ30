@@ -14,7 +14,7 @@ use crate::{
             state::A3959State,
             structures::{A3959MultiButtonConfiguration, A3959SoundModes},
         },
-        standard::{
+        common::{
             modules::ModuleCollection,
             packet::{
                 Command, Packet,

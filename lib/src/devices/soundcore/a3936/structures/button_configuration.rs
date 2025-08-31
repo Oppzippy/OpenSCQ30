@@ -6,7 +6,7 @@ use nom::{
     sequence::pair,
 };
 
-use crate::devices::soundcore::standard::structures::ButtonAction;
+use crate::devices::soundcore::common::structures::ButtonAction;
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub struct A3936InternalMultiButtonConfiguration {

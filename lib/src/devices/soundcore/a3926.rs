@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::devices::soundcore::{
     a3926::{packets::A3926StateUpdatePacket, state::A3926State},
-    standard::{
+    common::{
         macros::soundcore_device,
         packet::{
             inbound::{SerialNumberAndFirmwareVersionUpdatePacket, TryIntoInboundPacket},

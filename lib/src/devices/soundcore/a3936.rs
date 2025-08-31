@@ -6,7 +6,7 @@ use strum::{IntoStaticStr, VariantArray};
 use crate::{
     devices::soundcore::{
         a3936::{packets::A3936StateUpdatePacket, state::A3936State},
-        standard::{
+        common::{
             device::fetch_state_from_state_update_packet,
             macros::soundcore_device,
             packet::outbound::{OutboundPacketBytesExt, RequestStatePacket},
