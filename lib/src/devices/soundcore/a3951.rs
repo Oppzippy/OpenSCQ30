@@ -8,8 +8,7 @@ use crate::devices::soundcore::{
         packet::{
             inbound::{SerialNumberAndFirmwareVersion, TryIntoInboundPacket},
             outbound::{
-                OutboundPacketBytesExt, RequestSerialNumberAndFirmwareVersionPacket,
-                RequestStatePacket,
+                OutboundPacketBytesExt, RequestSerialNumberAndFirmwareVersion, RequestState,
             },
         },
         structures::{AmbientSoundMode, NoiseCancelingMode, TransparencyMode},
@@ -24,11 +23,11 @@ soundcore_device!(
     A3951StateUpdatePacket,
     async |packet_io| {
         let state_update_packet: A3951StateUpdatePacket = packet_io
-            .send_with_response(&RequestStatePacket::new().into())
+            .send_with_response(&RequestState::new().into())
             .await?
             .try_into_inbound_packet()?;
         let sn_and_firmware: SerialNumberAndFirmwareVersion = packet_io
-            .send_with_response(&RequestSerialNumberAndFirmwareVersionPacket::new().into())
+            .send_with_response(&RequestSerialNumberAndFirmwareVersion::new().into())
             .await?
             .try_into_inbound_packet()?;
         Ok(A3951State::new(state_update_packet, sn_and_firmware))
@@ -62,11 +61,11 @@ soundcore_device!(
     {
         HashMap::from([
             (
-                RequestStatePacket::COMMAND,
+                RequestState::COMMAND,
                 A3951StateUpdatePacket::default().bytes(),
             ),
             (
-                RequestSerialNumberAndFirmwareVersionPacket::COMMAND,
+                RequestSerialNumberAndFirmwareVersion::COMMAND,
                 SerialNumberAndFirmwareVersion::default().bytes(),
             ),
         ])

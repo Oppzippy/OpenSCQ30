@@ -6,16 +6,14 @@ use crate::devices::soundcore::common::{
 use super::outbound_packet::OutboundPacket;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct SetEqualizerAndCustomHearIdPacket<'a, const C: usize, const B: usize> {
+pub struct SetEqualizerAndCustomHearId<'a, const C: usize, const B: usize> {
     pub equalizer_configuration: &'a EqualizerConfiguration<C, B>,
     pub gender: Gender,
     pub age_range: AgeRange,
     pub custom_hear_id: &'a CustomHearId<C, B>,
 }
 
-impl<const C: usize, const B: usize> OutboundPacket
-    for SetEqualizerAndCustomHearIdPacket<'_, C, B>
-{
+impl<const C: usize, const B: usize> OutboundPacket for SetEqualizerAndCustomHearId<'_, C, B> {
     fn command(&self) -> Command {
         // TODO does this apply to all devices?
         if self.age_range.supports_hear_id() {
@@ -102,7 +100,7 @@ mod tests {
         },
     };
 
-    use super::SetEqualizerAndCustomHearIdPacket;
+    use super::SetEqualizerAndCustomHearId;
 
     #[test]
     fn it_matches_a_generated_packet_with_hear_id_set() {
@@ -115,7 +113,7 @@ mod tests {
             0x74, 0x74, 0x77, 0x6b, 0x7c, 0x75, 0x6c, 0x74, 0x74, 0x74, 0x77, 0x6b, 0x7c, 0x75,
             0x6c, 0x0e,
         ];
-        let actual = SetEqualizerAndCustomHearIdPacket {
+        let actual = SetEqualizerAndCustomHearId {
             equalizer_configuration: &EqualizerConfiguration::new_custom_profile([
                 VolumeAdjustments::new([-52, -66, -64, -67, -108, -22, -49, -101]),
                 VolumeAdjustments::new([-52, -66, -64, -67, -108, -22, -49, -101]),
@@ -152,7 +150,7 @@ mod tests {
             0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x78, 0x78, 0x78,
             0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0xb1,
         ];
-        let actual = SetEqualizerAndCustomHearIdPacket {
+        let actual = SetEqualizerAndCustomHearId {
             equalizer_configuration: &EqualizerConfiguration::new_from_preset_profile(
                 PresetEqualizerProfile::SoundcoreSignature,
                 [Vec::new(), Vec::new()],

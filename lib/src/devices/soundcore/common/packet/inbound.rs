@@ -5,7 +5,7 @@ mod game_mode;
 mod inbound_packet;
 mod ldac;
 mod serial_number_and_firmware_version;
-mod sound_mode;
+mod sound_modes;
 mod state;
 mod tws_status;
 
@@ -19,6 +19,6 @@ pub use inbound_packet::*;
 #[allow(unused_imports, reason = "used by tests, will be used in the future")]
 pub use ldac::*;
 pub use serial_number_and_firmware_version::*;
-pub use sound_mode::*;
+pub use sound_modes::*;
 pub use state::*;
 pub use tws_status::*;

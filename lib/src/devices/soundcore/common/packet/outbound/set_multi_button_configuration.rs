@@ -3,11 +3,11 @@ use crate::devices::soundcore::common::{packet::Command, structures::MultiButton
 use super::OutboundPacket;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct SetMultiButtonConfigurationPacket {
+pub struct SetMultiButtonConfiguration {
     button_configuration: MultiButtonConfiguration,
 }
 
-impl SetMultiButtonConfigurationPacket {
+impl SetMultiButtonConfiguration {
     pub(crate) fn new(button_configuration: MultiButtonConfiguration) -> Self {
         Self {
             button_configuration,
@@ -15,7 +15,7 @@ impl SetMultiButtonConfigurationPacket {
     }
 }
 
-impl OutboundPacket for SetMultiButtonConfigurationPacket {
+impl OutboundPacket for SetMultiButtonConfiguration {
     fn command(&self) -> Command {
         Command([0x04, 0x84])
     }
@@ -28,7 +28,7 @@ impl OutboundPacket for SetMultiButtonConfigurationPacket {
 #[cfg(test)]
 mod tests {
     use crate::devices::soundcore::common::{
-        packet::outbound::{OutboundPacketBytesExt, SetMultiButtonConfigurationPacket},
+        packet::outbound::{OutboundPacketBytesExt, SetMultiButtonConfiguration},
         structures::{
             ButtonAction, MultiButtonConfiguration, NoTwsButtonConfiguration,
             TwsButtonConfiguration,
@@ -42,7 +42,7 @@ mod tests {
             0x15, 0x00, 0x30, 0x01, 0x02, 0x00, 0x03, 0x87,
         ];
 
-        let packet = SetMultiButtonConfigurationPacket::new(MultiButtonConfiguration {
+        let packet = SetMultiButtonConfiguration::new(MultiButtonConfiguration {
             left_double_click: TwsButtonConfiguration {
                 tws_connected_action: ButtonAction::NextSong,
                 tws_disconnected_action: ButtonAction::PlayPause,

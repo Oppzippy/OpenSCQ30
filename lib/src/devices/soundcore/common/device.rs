@@ -31,7 +31,7 @@ use super::{
     packet::{
         Packet,
         inbound::{InboundPacket, TryIntoInboundPacket},
-        outbound::RequestStatePacket,
+        outbound::RequestState,
         packet_io_controller::PacketIOController,
     },
     structures::{
@@ -57,7 +57,7 @@ where
     StateUpdate: InboundPacket + Default + Into<State>,
 {
     let state_update_packet: StateUpdate = packet_io
-        .send_with_response(&RequestStatePacket::new().into())
+        .send_with_response(&RequestState::new().into())
         .await?
         .try_into_inbound_packet()
         .map_err(|err| device::Error::other(err))?;

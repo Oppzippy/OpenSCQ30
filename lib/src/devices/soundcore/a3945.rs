@@ -5,7 +5,7 @@ use crate::devices::soundcore::{
     common::{
         device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
-        packet::outbound::{OutboundPacketBytesExt, RequestStatePacket},
+        packet::outbound::{OutboundPacketBytesExt, RequestState},
     },
 };
 
@@ -30,7 +30,7 @@ soundcore_device!(
     },
     {
         HashMap::from([(
-            RequestStatePacket::COMMAND,
+            RequestState::COMMAND,
             A3945StateUpdatePacket::default().bytes(),
         )])
     },
@@ -140,7 +140,7 @@ mod tests {
 
         let set_eq_packet_bytes = outbound_receiver.recv().await.unwrap();
         assert_eq!(
-            Packet::from(set_equalizer::SetEqualizerPacket {
+            Packet::from(set_equalizer::SetEqualizer {
                 equalizer_configuration: &EqualizerConfiguration::<2, 10>::new_from_preset_profile(
                     PresetEqualizerProfile::TrebleReducer,
                     [vec![1, 2], vec![3, 4]],

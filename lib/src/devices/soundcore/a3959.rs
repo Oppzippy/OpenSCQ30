@@ -9,7 +9,7 @@ use crate::{
         common::{
             device::fetch_state_from_state_update_packet,
             macros::soundcore_device,
-            packet::outbound::{OutboundPacketBytesExt, RequestStatePacket},
+            packet::outbound::{OutboundPacketBytesExt, RequestState},
         },
     },
     i18n::fl,
@@ -40,7 +40,7 @@ soundcore_device!(
     },
     {
         HashMap::from([(
-            RequestStatePacket::COMMAND,
+            RequestState::COMMAND,
             A3959StateUpdatePacket::default().bytes(),
         )])
     },

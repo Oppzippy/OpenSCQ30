@@ -4,13 +4,13 @@ use crate::devices::soundcore::common::{
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct SetAutoPowerOffPacket(pub AutoPowerOff);
+pub struct SetAutoPowerOff(pub AutoPowerOff);
 
-impl SetAutoPowerOffPacket {
+impl SetAutoPowerOff {
     pub const COMMAND: Command = Command([0x01, 0x86]);
 }
 
-impl OutboundPacket for SetAutoPowerOffPacket {
+impl OutboundPacket for SetAutoPowerOff {
     fn command(&self) -> Command {
         Self::COMMAND
     }

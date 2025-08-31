@@ -3,9 +3,9 @@ use crate::devices::soundcore::common::packet::Command;
 use super::OutboundPacket;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-pub struct RequestSerialNumberAndFirmwareVersionPacket {}
+pub struct RequestSerialNumberAndFirmwareVersion {}
 
-impl RequestSerialNumberAndFirmwareVersionPacket {
+impl RequestSerialNumberAndFirmwareVersion {
     pub const COMMAND: Command = Command([0x01, 0x05]);
 
     pub fn new() -> Self {
@@ -13,7 +13,7 @@ impl RequestSerialNumberAndFirmwareVersionPacket {
     }
 }
 
-impl OutboundPacket for RequestSerialNumberAndFirmwareVersionPacket {
+impl OutboundPacket for RequestSerialNumberAndFirmwareVersion {
     fn command(&self) -> Command {
         Self::COMMAND
     }
@@ -26,7 +26,7 @@ impl OutboundPacket for RequestSerialNumberAndFirmwareVersionPacket {
 #[cfg(test)]
 mod tests {
     use crate::devices::soundcore::common::packet::outbound::{
-        OutboundPacketBytesExt, RequestSerialNumberAndFirmwareVersionPacket,
+        OutboundPacketBytesExt, RequestSerialNumberAndFirmwareVersion,
     };
 
     #[test]
@@ -34,7 +34,7 @@ mod tests {
         let expected: &[u8] = &[0x08, 0xee, 0x00, 0x00, 0x00, 0x01, 0x05, 0x0a, 0x00, 0x06];
         assert_eq!(
             expected,
-            RequestSerialNumberAndFirmwareVersionPacket::new().bytes()
+            RequestSerialNumberAndFirmwareVersion::new().bytes()
         );
     }
 }

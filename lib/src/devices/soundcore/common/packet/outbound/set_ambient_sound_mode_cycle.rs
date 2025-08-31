@@ -4,11 +4,11 @@ use crate::devices::soundcore::common::{
 };
 
 #[derive(Clone, Copy, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct SetAmbientSoundModeCyclePacket {
+pub struct SetAmbientSoundModeCycle {
     pub cycle: AmbientSoundModeCycle,
 }
 
-impl OutboundPacket for SetAmbientSoundModeCyclePacket {
+impl OutboundPacket for SetAmbientSoundModeCycle {
     fn command(&self) -> Command {
         Command([0x06, 0x82])
     }

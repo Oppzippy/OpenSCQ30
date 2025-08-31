@@ -3,11 +3,11 @@ use crate::devices::soundcore::common::{packet::Command, structures::EqualizerCo
 use super::outbound_packet::OutboundPacket;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct SetEqualizerWithDrcPacket<'a, const C: usize, const B: usize> {
+pub struct SetEqualizerWithDrc<'a, const C: usize, const B: usize> {
     pub equalizer_configuration: &'a EqualizerConfiguration<C, B>,
 }
 
-impl<const C: usize, const B: usize> OutboundPacket for SetEqualizerWithDrcPacket<'_, C, B> {
+impl<const C: usize, const B: usize> OutboundPacket for SetEqualizerWithDrc<'_, C, B> {
     fn command(&self) -> Command {
         Command([0x02, 0x83])
     }
@@ -28,7 +28,7 @@ impl<const C: usize, const B: usize> OutboundPacket for SetEqualizerWithDrcPacke
 #[cfg(test)]
 mod tests {
     use crate::devices::soundcore::common::{
-        packet::outbound::{OutboundPacketBytesExt, SetEqualizerWithDrcPacket},
+        packet::outbound::{OutboundPacketBytesExt, SetEqualizerWithDrc},
         structures::{EqualizerConfiguration, VolumeAdjustments},
     };
 
@@ -39,7 +39,7 @@ mod tests {
             0xf0, 0x8e, 0x00, 0x74, 0x88, 0x6d, 0x86, 0x70, 0x88, 0x7b, 0x66, 0x7e, 0x79, 0x4f,
         ];
 
-        let actual = SetEqualizerWithDrcPacket {
+        let actual = SetEqualizerWithDrc {
             equalizer_configuration: &EqualizerConfiguration::new_custom_profile([
                 VolumeAdjustments::new([-60, 60, 23, 120, 22, -120, -4, 16]),
             ]),

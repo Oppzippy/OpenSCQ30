@@ -7,9 +7,7 @@ use crate::{
     api::{connection::RfcommConnection, device},
     devices::soundcore::common::{
         packet::{
-            outbound::{
-                SetEqualizerAndCustomHearIdPacket, SetEqualizerWithDrcPacket, set_equalizer,
-            },
+            outbound::{SetEqualizerAndCustomHearId, SetEqualizerWithDrc, set_equalizer},
             packet_io_controller::PacketIOController,
         },
         state_modifier::StateModifier,
@@ -61,12 +59,12 @@ where
 
         self.packet_io
             .send_with_response(&if self.options.has_drc {
-                SetEqualizerWithDrcPacket {
+                SetEqualizerWithDrc {
                     equalizer_configuration: target_equalizer_configuration,
                 }
                 .into()
             } else {
-                set_equalizer::SetEqualizerPacket {
+                set_equalizer::SetEqualizer {
                     equalizer_configuration: target_equalizer_configuration,
                 }
                 .into()
@@ -122,7 +120,7 @@ where
 
         self.packet_io
             .send_with_response(
-                &SetEqualizerAndCustomHearIdPacket {
+                &SetEqualizerAndCustomHearId {
                     equalizer_configuration: target_equalizer_configuration,
                     gender: *target_state.get(),
                     age_range: *target_state.get(),
@@ -192,7 +190,7 @@ where
 
         self.packet_io
             .send_with_response(
-                &SetEqualizerAndCustomHearIdPacket {
+                &SetEqualizerAndCustomHearId {
                     equalizer_configuration: target_equalizer_configuration,
                     gender: *target_state.get(),
                     age_range: *target_state.get(),

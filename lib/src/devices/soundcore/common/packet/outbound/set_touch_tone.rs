@@ -4,13 +4,13 @@ use crate::devices::soundcore::common::{
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct SetTouchTonePacket(pub TouchTone);
+pub struct SetTouchTone(pub TouchTone);
 
-impl SetTouchTonePacket {
+impl SetTouchTone {
     pub const COMMAND: Command = Command([0x01, 0x83]);
 }
 
-impl OutboundPacket for SetTouchTonePacket {
+impl OutboundPacket for SetTouchTone {
     fn command(&self) -> Command {
         Self::COMMAND
     }

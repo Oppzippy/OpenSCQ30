@@ -10,7 +10,7 @@ use crate::{
             device::fetch_state_from_state_update_packet,
             macros::soundcore_device,
             modules::sound_modes::AvailableSoundModes,
-            packet::outbound::{OutboundPacketBytesExt, RequestStatePacket},
+            packet::outbound::{OutboundPacketBytesExt, RequestState},
             structures::{AmbientSoundMode, NoiseCancelingMode},
         },
     },
@@ -49,7 +49,7 @@ soundcore_device!(
     },
     {
         HashMap::from([(
-            RequestStatePacket::COMMAND,
+            RequestState::COMMAND,
             A3028StateUpdatePacket::default().bytes(),
         )])
     },
@@ -97,7 +97,7 @@ mod tests {
             soundcore::common::{
                 packet::{
                     Direction, Packet,
-                    outbound::{SetSoundModePacket, set_equalizer},
+                    outbound::{SetSoundModes, set_equalizer},
                 },
                 structures::{AmbientSoundMode, NoiseCancelingMode, PresetEqualizerProfile},
             },
@@ -250,7 +250,7 @@ mod tests {
                 .send(
                     Packet {
                         direction: Direction::Inbound,
-                        command: SetSoundModePacket::COMMAND,
+                        command: SetSoundModes::COMMAND,
                         body: Vec::new(),
                     }
                     .bytes(),

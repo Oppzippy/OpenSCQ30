@@ -117,7 +117,7 @@ mod tests {
         api::connection::test_stub::StubRfcommConnection,
         devices::soundcore::common::packet::{
             Direction,
-            outbound::{OutboundPacket, SetAmbientSoundModeCyclePacket, SetSoundModePacket},
+            outbound::{OutboundPacket, SetAmbientSoundModeCycle, SetSoundModes},
         },
     };
 
@@ -137,7 +137,7 @@ mod tests {
             let controller = controller.clone();
             async move {
                 controller
-                    .send_with_response(&SetSoundModePacket::default().into())
+                    .send_with_response(&SetSoundModes::default().into())
                     .await
                     .expect("should receive ack");
             }
@@ -146,7 +146,7 @@ mod tests {
             let controller = controller.clone();
             async move {
                 controller
-                    .send_with_response(&SetSoundModePacket::default().into())
+                    .send_with_response(&SetSoundModes::default().into())
                     .await
                     .expect("should receive ack");
             }
@@ -185,7 +185,7 @@ mod tests {
                 .0,
         );
 
-        let set_cycle_packet = SetAmbientSoundModeCyclePacket::default();
+        let set_cycle_packet = SetAmbientSoundModeCycle::default();
         let handle1 = tokio::spawn({
             let controller = controller.clone();
             async move {
@@ -199,7 +199,7 @@ mod tests {
             let controller = controller.clone();
             async move {
                 controller
-                    .send_with_response(&SetSoundModePacket::default().into())
+                    .send_with_response(&SetSoundModes::default().into())
                     .await
                     .expect("should receive ack");
             }
