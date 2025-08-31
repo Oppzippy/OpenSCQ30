@@ -9,18 +9,18 @@ use nom::{
 use crate::devices::soundcore::common::structures::ButtonAction;
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
-pub struct A3959MultiButtonConfiguration {
-    pub left_single_click: A3959TwsButtonAction,
-    pub right_single_click: A3959TwsButtonAction,
-    pub left_double_click: A3959TwsButtonAction,
-    pub right_double_click: A3959TwsButtonAction,
-    pub left_triple_click: A3959TwsButtonAction,
-    pub right_triple_click: A3959TwsButtonAction,
-    pub left_long_press: A3959TwsButtonAction,
-    pub right_long_press: A3959TwsButtonAction,
+pub struct MultiButtonConfiguration {
+    pub left_single_click: TwsButtonAction,
+    pub right_single_click: TwsButtonAction,
+    pub left_double_click: TwsButtonAction,
+    pub right_double_click: TwsButtonAction,
+    pub left_triple_click: TwsButtonAction,
+    pub right_triple_click: TwsButtonAction,
+    pub left_long_press: TwsButtonAction,
+    pub right_long_press: TwsButtonAction,
 }
 
-impl A3959MultiButtonConfiguration {
+impl MultiButtonConfiguration {
     pub fn bytes(&self) -> impl Iterator<Item = u8> {
         self.left_single_click
             .bytes()
@@ -41,14 +41,14 @@ impl A3959MultiButtonConfiguration {
             "custom button configuration",
             map(
                 (
-                    context("left single click", A3959TwsButtonAction::take),
-                    context("right single click", A3959TwsButtonAction::take),
-                    context("left double click", A3959TwsButtonAction::take),
-                    context("right double click", A3959TwsButtonAction::take),
-                    context("left triple click", A3959TwsButtonAction::take),
-                    context("right triple click", A3959TwsButtonAction::take),
-                    context("left long press", A3959TwsButtonAction::take),
-                    context("right long press", A3959TwsButtonAction::take),
+                    context("left single click", TwsButtonAction::take),
+                    context("right single click", TwsButtonAction::take),
+                    context("left double click", TwsButtonAction::take),
+                    context("right double click", TwsButtonAction::take),
+                    context("left triple click", TwsButtonAction::take),
+                    context("right triple click", TwsButtonAction::take),
+                    context("left long press", TwsButtonAction::take),
+                    context("right long press", TwsButtonAction::take),
                 ),
                 |(
                     left_single_click,
@@ -78,14 +78,14 @@ impl A3959MultiButtonConfiguration {
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
-pub struct A3959TwsButtonAction {
+pub struct TwsButtonAction {
     pub tws_connected_action: ButtonAction,
     pub tws_disconnected_action: ButtonAction,
     pub tws_connected_is_enabled: bool,
     pub tws_disconnected_is_enabled: bool,
 }
 
-impl A3959TwsButtonAction {
+impl TwsButtonAction {
     pub fn bytes(&self) -> [u8; 2] {
         [
             (u8::from(self.tws_disconnected_is_enabled) << 4) | u8::from(self.tws_connected_action),

@@ -1,10 +1,7 @@
 use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::{
-    a3959::{
-        packets::A3959StateUpdatePacket,
-        structures::{A3959MultiButtonConfiguration, A3959SoundModes},
-    },
+    a3959,
     common::structures::{
         AmbientSoundModeCycle, AutoPowerOff, DualBattery, DualFirmwareVersion,
         EqualizerConfiguration, SerialNumber, TouchTone, TwsStatus,
@@ -18,15 +15,15 @@ pub struct A3959State {
     dual_firmware_version: DualFirmwareVersion,
     serial_number: SerialNumber,
     equalizer_configuration: EqualizerConfiguration<2, 10>,
-    button_configuration: A3959MultiButtonConfiguration,
+    button_configuration: a3959::structures::MultiButtonConfiguration,
     ambient_sound_mode_cycle: AmbientSoundModeCycle,
-    sound_modes: A3959SoundModes,
+    sound_modes: a3959::structures::SoundModes,
     auto_power_off: AutoPowerOff,
     touch_tone: TouchTone,
 }
 
-impl From<A3959StateUpdatePacket> for A3959State {
-    fn from(packet: A3959StateUpdatePacket) -> Self {
+impl From<a3959::packets::inbound::A3959State> for A3959State {
+    fn from(packet: a3959::packets::inbound::A3959State) -> Self {
         Self {
             tws_status: packet.tws_status,
             dual_battery: packet.dual_battery,

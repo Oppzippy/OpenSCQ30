@@ -11,7 +11,7 @@ use crate::{
         settings::{CategoryId, SettingId},
     },
     devices::soundcore::{
-        a3959::structures::A3959MultiButtonConfiguration,
+        a3959::structures::MultiButtonConfiguration,
         common::{
             modules::ModuleCollection, packet::packet_io_controller::PacketIOController,
             structures::TwsStatus,
@@ -64,7 +64,7 @@ impl From<ButtonConfigurationSetting> for SettingId {
 
 impl<T> ModuleCollection<T>
 where
-    T: Has<A3959MultiButtonConfiguration> + Has<TwsStatus> + Clone + Send + Sync,
+    T: Has<MultiButtonConfiguration> + Has<TwsStatus> + Clone + Send + Sync,
 {
     pub fn add_a3959_button_configuration<C>(&mut self, packet_io: Arc<PacketIOController<C>>)
     where

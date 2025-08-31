@@ -10,11 +10,9 @@ use tokio::sync::watch;
 use crate::{
     api::device,
     devices::soundcore::{
-        a3959::{
-            state::A3959State,
-            structures::{A3959MultiButtonConfiguration, A3959SoundModes},
-        },
+        a3959,
         common::{
+            self,
             modules::ModuleCollection,
             packet::{
                 self, Command, Packet,
@@ -23,31 +21,27 @@ use crate::{
                 parsing::take_bool,
             },
             packet_manager::PacketHandler,
-            structures::{
-                AmbientSoundModeCycle, AutoPowerOff, DualBattery, DualFirmwareVersion,
-                EqualizerConfiguration, SerialNumber, TouchTone, TwsStatus,
-            },
         },
     },
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct A3959StateUpdatePacket {
-    pub tws_status: TwsStatus,
-    pub dual_battery: DualBattery,
-    pub dual_firmware_version: DualFirmwareVersion,
-    pub serial_number: SerialNumber,
-    pub equalizer_configuration: EqualizerConfiguration<2, 10>,
-    pub button_configuration: A3959MultiButtonConfiguration,
-    pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
-    pub sound_modes: A3959SoundModes,
-    pub touch_tone: TouchTone,
-    pub auto_power_off: AutoPowerOff,
+pub struct A3959State {
+    pub tws_status: common::structures::TwsStatus,
+    pub dual_battery: common::structures::DualBattery,
+    pub dual_firmware_version: common::structures::DualFirmwareVersion,
+    pub serial_number: common::structures::SerialNumber,
+    pub equalizer_configuration: common::structures::EqualizerConfiguration<2, 10>,
+    pub button_configuration: a3959::structures::MultiButtonConfiguration,
+    pub ambient_sound_mode_cycle: common::structures::AmbientSoundModeCycle,
+    pub sound_modes: a3959::structures::SoundModes,
+    pub touch_tone: common::structures::TouchTone,
+    pub auto_power_off: common::structures::AutoPowerOff,
     pub low_battery_prompt: bool,
     pub gaming_mode: bool,
 }
 
-impl InboundPacket for A3959StateUpdatePacket {
+impl InboundPacket for A3959State {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
@@ -55,19 +49,19 @@ impl InboundPacket for A3959StateUpdatePacket {
             "a3959 state update packet",
             all_consuming(map(
                 (
-                    TwsStatus::take,
-                    DualBattery::take,
-                    DualFirmwareVersion::take,
-                    SerialNumber::take,
-                    EqualizerConfiguration::take,
+                    common::structures::TwsStatus::take,
+                    common::structures::DualBattery::take,
+                    common::structures::DualFirmwareVersion::take,
+                    common::structures::SerialNumber::take,
+                    common::structures::EqualizerConfiguration::take,
                     take(1usize),
-                    A3959MultiButtonConfiguration::take,
-                    AmbientSoundModeCycle::take,
-                    A3959SoundModes::take,
+                    a3959::structures::MultiButtonConfiguration::take,
+                    common::structures::AmbientSoundModeCycle::take,
+                    a3959::structures::SoundModes::take,
                     take(1usize),
-                    TouchTone::take,
+                    common::structures::TouchTone::take,
                     take(2usize),
-                    AutoPowerOff::take,
+                    common::structures::AutoPowerOff::take,
                     take_bool,
                     take_bool,
                     take(12usize),
@@ -111,7 +105,7 @@ impl InboundPacket for A3959StateUpdatePacket {
     }
 }
 
-impl OutboundPacket for A3959StateUpdatePacket {
+impl OutboundPacket for A3959State {
     fn command(&self) -> Command {
         packet::inbound::STATE_COMMAND
     }
@@ -141,19 +135,19 @@ impl OutboundPacket for A3959StateUpdatePacket {
 struct StateUpdatePacketHandler {}
 
 #[async_trait]
-impl PacketHandler<A3959State> for StateUpdatePacketHandler {
+impl PacketHandler<a3959::state::A3959State> for StateUpdatePacketHandler {
     async fn handle_packet(
         &self,
-        state: &watch::Sender<A3959State>,
+        state: &watch::Sender<a3959::state::A3959State>,
         packet: &Packet,
     ) -> device::Result<()> {
-        let packet: A3959StateUpdatePacket = packet.try_into_inbound_packet()?;
+        let packet: A3959State = packet.try_into_inbound_packet()?;
         state.send_modify(|state| *state = packet.into());
         Ok(())
     }
 }
 
-impl ModuleCollection<A3959State> {
+impl ModuleCollection<a3959::state::A3959State> {
     pub fn add_state_update(&mut self) {
         self.packet_handlers.set_handler(
             packet::inbound::STATE_COMMAND,

@@ -4,13 +4,10 @@ use openscq30_i18n::Translate;
 use strum::{IntoStaticStr, VariantArray};
 
 use crate::{
-    devices::soundcore::{
-        a3959::{packets::A3959StateUpdatePacket, state::A3959State},
-        common::{
-            device::fetch_state_from_state_update_packet,
-            macros::soundcore_device,
-            packet::outbound::{OutboundPacketBytesExt, RequestState},
-        },
+    devices::soundcore::common::{
+        device::fetch_state_from_state_update_packet,
+        macros::soundcore_device,
+        packet::outbound::{OutboundPacketBytesExt, RequestState},
     },
     i18n::fl,
 };
@@ -21,11 +18,13 @@ mod state;
 mod structures;
 
 soundcore_device!(
-    A3959State,
-    A3959StateUpdatePacket,
+    state::A3959State,
+    packets::inbound::A3959State,
     async |packet_io| {
-        fetch_state_from_state_update_packet::<_, A3959State, A3959StateUpdatePacket>(packet_io)
-            .await
+        fetch_state_from_state_update_packet::<_, state::A3959State, packets::inbound::A3959State>(
+            packet_io,
+        )
+        .await
     },
     async |builder| {
         builder.module_collection().add_state_update();
@@ -41,7 +40,7 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            A3959StateUpdatePacket::default().bytes(),
+            packets::inbound::A3959State::default().bytes(),
         )])
     },
 );

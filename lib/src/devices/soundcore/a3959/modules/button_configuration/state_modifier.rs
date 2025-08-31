@@ -6,10 +6,7 @@ use tokio::sync::watch;
 use crate::{
     api::{connection::RfcommConnection, device},
     devices::soundcore::{
-        a3959::{
-            packets::A3959SetMultiButtonConfigurationPacket,
-            structures::A3959MultiButtonConfiguration,
-        },
+        a3959,
         common::{packet::packet_io_controller::PacketIOController, state_modifier::StateModifier},
     },
 };
@@ -27,7 +24,7 @@ impl<ConnectionType: RfcommConnection> ButtonConfigurationStateModifier<Connecti
 #[async_trait]
 impl<ConnectionType, T> StateModifier<T> for ButtonConfigurationStateModifier<ConnectionType>
 where
-    T: Has<A3959MultiButtonConfiguration> + Clone + Send + Sync,
+    T: Has<a3959::structures::MultiButtonConfiguration> + Clone + Send + Sync,
     ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
@@ -46,7 +43,10 @@ where
 
         self.packet_io
             .send_with_response(
-                &A3959SetMultiButtonConfigurationPacket::new(*target_button_config).into(),
+                &a3959::packets::outbound::A3959SetMultiButtonConfiguration::new(
+                    *target_button_config,
+                )
+                .into(),
             )
             .await?;
         state_sender.send_modify(|state| *state.get_mut() = *target_button_config);

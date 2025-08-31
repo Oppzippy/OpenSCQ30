@@ -7,7 +7,7 @@ use tokio::sync::watch;
 use crate::{
     api::{connection::RfcommConnection, device},
     devices::soundcore::{
-        a3959::{packets::A3959SetSoundModesPacket, structures::A3959SoundModes},
+        a3959,
         common::{packet::packet_io_controller::PacketIOController, state_modifier::StateModifier},
     },
 };
@@ -25,7 +25,7 @@ impl<ConnectionType: RfcommConnection> SoundModesStateModifier<ConnectionType> {
 #[async_trait]
 impl<ConnectionType, T> StateModifier<T> for SoundModesStateModifier<ConnectionType>
 where
-    T: Has<A3959SoundModes> + Clone + Send + Sync,
+    T: Has<a3959::structures::SoundModes> + Clone + Send + Sync,
     ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
@@ -40,7 +40,9 @@ where
         }
 
         self.packet_io
-            .send_with_response(&A3959SetSoundModesPacket { sound_modes }.into())
+            .send_with_response(
+                &a3959::packets::outbound::A3959SetSoundModes { sound_modes }.into(),
+            )
             .await?;
         state_sender.send_modify(|state| *state.get_mut() = *target_sound_modes);
 

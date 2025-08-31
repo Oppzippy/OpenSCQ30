@@ -7,23 +7,21 @@ use nom::{
 use openscq30_i18n_macros::Translate;
 use strum::{Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
 
-use crate::devices::soundcore::common::structures::{
-    AmbientSoundMode, NoiseCancelingMode, TransparencyMode,
-};
+use crate::devices::soundcore::common;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-pub struct A3959SoundModes {
-    pub ambient_sound_mode: AmbientSoundMode,
-    pub transparency_mode: TransparencyMode,
+pub struct SoundModes {
+    pub ambient_sound_mode: common::structures::AmbientSoundMode,
+    pub transparency_mode: common::structures::TransparencyMode,
     pub adaptive_noise_canceling: AdaptiveNoiseCanceling,
     pub manual_noise_canceling: ManualNoiseCanceling,
-    pub noise_canceling_mode: A3959NoiseCancelingMode,
+    pub noise_canceling_mode: NoiseCancelingMode,
     pub wind_noise: WindNoise,
     pub noise_canceling_adaptive_sensitivity_level: u8,
-    pub multi_scene_anc: NoiseCancelingMode,
+    pub multi_scene_anc: common::structures::NoiseCancelingMode,
 }
 
-impl A3959SoundModes {
+impl SoundModes {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
@@ -31,13 +29,13 @@ impl A3959SoundModes {
             "a3959 sound modes",
             map(
                 (
-                    AmbientSoundMode::take,
+                    common::structures::AmbientSoundMode::take,
                     NoiseCancelingSettings::take,
-                    TransparencyMode::take,
-                    A3959NoiseCancelingMode::take,
+                    common::structures::TransparencyMode::take,
+                    NoiseCancelingMode::take,
                     WindNoise::take,
                     le_u8,
-                    NoiseCancelingMode::take,
+                    common::structures::NoiseCancelingMode::take,
                 ),
                 |(
                     ambient_sound_mode,
@@ -136,14 +134,14 @@ impl NoiseCancelingSettings {
     EnumIter,
     Translate,
 )]
-pub enum A3959NoiseCancelingMode {
+pub enum NoiseCancelingMode {
     #[default]
     Adaptive = 0,
     Manual = 1,
     MultiScene = 2,
 }
 
-impl A3959NoiseCancelingMode {
+impl NoiseCancelingMode {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
@@ -157,7 +155,7 @@ impl A3959NoiseCancelingMode {
     }
 }
 
-impl A3959NoiseCancelingMode {
+impl NoiseCancelingMode {
     pub fn id(&self) -> u8 {
         *self as u8
     }

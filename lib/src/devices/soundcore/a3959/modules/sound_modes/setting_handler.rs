@@ -5,7 +5,7 @@ use strum::IntoEnumIterator;
 use crate::{
     api::settings::{self, Range, Setting, SettingId, Value},
     devices::soundcore::{
-        a3959::structures::{A3959SoundModes, ManualNoiseCanceling},
+        a3959::structures::{ManualNoiseCanceling, SoundModes},
         common::settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
     },
     i18n::fl,
@@ -19,7 +19,7 @@ pub struct SoundModesSettingHandler {}
 #[async_trait]
 impl<T> SettingHandler<T> for SoundModesSettingHandler
 where
-    T: Has<A3959SoundModes> + Send,
+    T: Has<SoundModes> + Send,
 {
     fn settings(&self) -> Vec<SettingId> {
         SoundModeSetting::iter().map(Into::into).collect()

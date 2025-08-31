@@ -16,7 +16,7 @@ use crate::{
         settings::{CategoryId, SettingId},
     },
     devices::soundcore::{
-        a3959::structures::A3959SoundModes,
+        a3959::structures::SoundModes,
         common::{modules::ModuleCollection, packet::packet_io_controller::PacketIOController},
     },
 };
@@ -75,7 +75,7 @@ impl TryFrom<&SettingId> for SoundModeSetting {
 
 impl<T> ModuleCollection<T>
 where
-    T: Has<A3959SoundModes> + Clone + Send + Sync,
+    T: Has<SoundModes> + Clone + Send + Sync,
 {
     pub fn add_a3959_sound_modes<C>(&mut self, packet_io: Arc<PacketIOController<C>>)
     where
