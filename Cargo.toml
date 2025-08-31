@@ -7,7 +7,8 @@ members = [
     "uniffi-bindgen",
     "gui",
     "i18n",
-    "i18n-macros", "lib-has",
+    "i18n-macros",
+    "lib-has",
 ]
 resolver = "2"
 
@@ -47,7 +48,7 @@ itertools = "0.14"
 futures = "0.3"
 strum = "0.27"
 serde = "1"
-toml = "0.8"
+toml = "0.9"
 anyhow = "1"
 dirs = "6"
 uuid = "1"
@@ -68,20 +69,20 @@ bluer = "0.17"
 hex = "0.4"
 async-trait = "0.1"
 libcosmic = { git = "https://github.com/pop-os/libcosmic.git" }
-rusqlite = "0.36"
+rusqlite = "0.37"
 syn = "2"
 quote = "1"
 proc-macro2 = "1"
-i18n-embed = "0.15"
-i18n-embed-fl = "0.9"
+i18n-embed = "0.16"
+i18n-embed-fl = "0.10"
 rust-embed = "8"
 cfg-if = "1"
-tabled = "0.19"
+tabled = "0.20"
 terminal_size = "0.4"
 glob = "0.3"
 insta = "1"
 insta-cmd = "0.6"
-sysinfo = "0.36"
+sysinfo = "0.37"
 csv = "1"
 indexmap = "2"
 paste = "1"
