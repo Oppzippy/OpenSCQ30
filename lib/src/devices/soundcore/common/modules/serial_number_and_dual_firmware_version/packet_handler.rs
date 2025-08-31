@@ -5,10 +5,7 @@ use tokio::sync::watch;
 use crate::{
     api::device,
     devices::soundcore::common::{
-        packet::{
-            Command, Packet,
-            inbound::{SerialNumberAndFirmwareVersion, TryIntoInboundPacket},
-        },
+        packet::{self, Command, Packet, inbound::TryIntoInboundPacket},
         packet_manager::PacketHandler,
         structures::{DualFirmwareVersion, SerialNumber},
     },
@@ -18,7 +15,7 @@ use crate::{
 pub struct SerialNumberAndDualFirmwareVersionPacketHandler {}
 
 impl SerialNumberAndDualFirmwareVersionPacketHandler {
-    pub const COMMAND: Command = SerialNumberAndFirmwareVersion::COMMAND;
+    pub const COMMAND: Command = packet::inbound::SerialNumberAndFirmwareVersion::COMMAND;
 }
 
 #[async_trait]
@@ -27,7 +24,8 @@ where
     T: Has<SerialNumber> + Has<DualFirmwareVersion> + Send + Sync,
 {
     async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> device::Result<()> {
-        let packet: SerialNumberAndFirmwareVersion = packet.try_into_inbound_packet()?;
+        let packet: packet::inbound::SerialNumberAndFirmwareVersion =
+            packet.try_into_inbound_packet()?;
         state.send_if_modified(|state| {
             let modified = {
                 let serial_number: &SerialNumber = state.get();

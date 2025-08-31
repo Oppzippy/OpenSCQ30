@@ -6,10 +6,7 @@ use tokio::sync::watch;
 use crate::{
     api::{connection::RfcommConnection, device},
     devices::soundcore::common::{
-        packet::{
-            outbound::{SetEqualizerAndCustomHearId, SetEqualizerWithDrc, set_equalizer},
-            packet_io_controller::PacketIOController,
-        },
+        packet::{self, packet_io_controller::PacketIOController},
         state_modifier::StateModifier,
         structures::{AgeRange, BasicHearId, CustomHearId, EqualizerConfiguration, Gender},
     },
@@ -59,12 +56,12 @@ where
 
         self.packet_io
             .send_with_response(&if self.options.has_drc {
-                SetEqualizerWithDrc {
+                packet::outbound::SetEqualizerWithDrc {
                     equalizer_configuration: target_equalizer_configuration,
                 }
                 .into()
             } else {
-                set_equalizer::SetEqualizer {
+                packet::outbound::SetEqualizer {
                     equalizer_configuration: target_equalizer_configuration,
                 }
                 .into()
@@ -120,7 +117,7 @@ where
 
         self.packet_io
             .send_with_response(
-                &SetEqualizerAndCustomHearId {
+                &packet::outbound::SetEqualizerAndCustomHearId {
                     equalizer_configuration: target_equalizer_configuration,
                     gender: *target_state.get(),
                     age_range: *target_state.get(),
@@ -190,7 +187,7 @@ where
 
         self.packet_io
             .send_with_response(
-                &SetEqualizerAndCustomHearId {
+                &packet::outbound::SetEqualizerAndCustomHearId {
                     equalizer_configuration: target_equalizer_configuration,
                     gender: *target_state.get(),
                     age_range: *target_state.get(),

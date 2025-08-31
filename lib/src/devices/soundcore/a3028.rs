@@ -95,10 +95,7 @@ mod tests {
         devices::{
             DeviceModel,
             soundcore::common::{
-                packet::{
-                    Direction, Packet,
-                    outbound::{SetSoundModes, set_equalizer},
-                },
+                packet::{self, Direction, Packet},
                 structures::{AmbientSoundMode, NoiseCancelingMode, PresetEqualizerProfile},
             },
         },
@@ -250,7 +247,7 @@ mod tests {
                 .send(
                     Packet {
                         direction: Direction::Inbound,
-                        command: SetSoundModes::COMMAND,
+                        command: packet::outbound::SetSoundModes::COMMAND,
                         body: Vec::new(),
                     }
                     .bytes(),
@@ -304,7 +301,7 @@ mod tests {
                 .send(
                     Packet {
                         direction: Direction::Inbound,
-                        command: set_equalizer::COMMAND,
+                        command: packet::outbound::SET_EQUALIZER_COMMAND,
                         body: Vec::new(),
                     }
                     .bytes(),

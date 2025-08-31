@@ -6,7 +6,7 @@ use tokio::sync::watch;
 use crate::{
     api::{connection::RfcommConnection, device},
     devices::soundcore::common::{
-        packet::{outbound::SetTouchTone, packet_io_controller::PacketIOController},
+        packet::{self, packet_io_controller::PacketIOController},
         state_modifier::StateModifier,
         structures::TouchTone,
     },
@@ -43,7 +43,7 @@ where
         }
 
         self.packet_io
-            .send_with_response(&SetTouchTone(*target).into())
+            .send_with_response(&packet::outbound::SetTouchTone(*target).into())
             .await?;
         state_sender.send_modify(|state| *state.get_mut() = *target);
         Ok(())

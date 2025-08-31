@@ -6,7 +6,7 @@ use tokio::sync::watch;
 use crate::{
     api::{connection::RfcommConnection, device},
     devices::soundcore::common::{
-        packet::{outbound::SetAmbientSoundModeCycle, packet_io_controller::PacketIOController},
+        packet::{self, packet_io_controller::PacketIOController},
         state_modifier::StateModifier,
         structures::AmbientSoundModeCycle,
     },
@@ -44,7 +44,7 @@ where
 
         self.packet_io
             .send_with_response(
-                &SetAmbientSoundModeCycle {
+                &packet::outbound::SetAmbientSoundModeCycle {
                     cycle: *target_cycle,
                 }
                 .into(),

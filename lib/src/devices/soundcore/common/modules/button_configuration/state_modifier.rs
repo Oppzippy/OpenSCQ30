@@ -6,7 +6,7 @@ use tokio::sync::watch;
 use crate::{
     api::{connection::RfcommConnection, device},
     devices::soundcore::common::{
-        packet::{outbound::SetMultiButtonConfiguration, packet_io_controller::PacketIOController},
+        packet::{self, packet_io_controller::PacketIOController},
         state_modifier::StateModifier,
         structures::MultiButtonConfiguration,
     },
@@ -43,7 +43,9 @@ where
         }
 
         self.packet_io
-            .send_with_response(&SetMultiButtonConfiguration::new(*target_button_config).into())
+            .send_with_response(
+                &packet::outbound::SetMultiButtonConfiguration::new(*target_button_config).into(),
+            )
             .await?;
         state_sender.send_modify(|state| *state.get_mut() = *target_button_config);
         Ok(())

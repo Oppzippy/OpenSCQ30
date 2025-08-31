@@ -7,11 +7,11 @@ pub struct SetEqualizer<'a, const C: usize, const B: usize> {
     pub equalizer_configuration: &'a EqualizerConfiguration<C, B>,
 }
 
-pub const COMMAND: Command = Command([0x02, 0x81]);
+pub const SET_EQUALIZER_COMMAND: Command = Command([0x02, 0x81]);
 
 impl<const C: usize, const B: usize> OutboundPacket for SetEqualizer<'_, C, B> {
     fn command(&self) -> Command {
-        COMMAND
+        SET_EQUALIZER_COMMAND
     }
 
     fn body(&self) -> Vec<u8> {
