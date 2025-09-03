@@ -15,6 +15,7 @@ cfg_if! {
 #[cfg(test)]
 pub(crate) mod mock;
 
+/// Groups together platform specific implementations of various means of connecting to devices.
 pub trait ConnectionBackends {
     type Rfcomm: RfcommBackend + Send + Sync;
 

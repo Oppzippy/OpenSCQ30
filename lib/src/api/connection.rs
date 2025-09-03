@@ -36,7 +36,14 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub trait RfcommBackend {
     type ConnectionType: RfcommConnection + Send + Sync;
 
+    /// List all devices that are currently connected to the bluetooth adapter. On platforms where this isn't practical,
+    /// this may include devices that are not currently connected.
     fn devices(&self) -> impl Future<Output = Result<HashSet<ConnectionDescriptor>>> + Send;
+
+    /// Connect via RFCOMM to the device. It should already be paired.
+    ///
+    /// The RFCOMM UUID to connect to may depend on what is available, so a `select_uuid` function should be passed that
+    /// picks the uuid to connect to from the list of what is available.
     fn connect(
         &self,
         mac_address: MacAddr6,
@@ -45,8 +52,13 @@ pub trait RfcommBackend {
 }
 
 pub trait RfcommConnection {
+    /// Sends `data` over the RFCOMM connection. This will be sent as a single packet when possible.
     fn write(&self, data: &[u8]) -> impl Future<Output = Result<()>> + Send;
+
+    /// Returns a channel that will receive packets from the RFCOMM connection.
     fn read_channel(&self) -> mpsc::Receiver<Vec<u8>>;
+
+    /// Returns a `tokio::sync::watch::Receiver` for tracking when the connection disconnects.
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus>;
 }
 
