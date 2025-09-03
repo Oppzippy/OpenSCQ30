@@ -179,7 +179,7 @@ impl BluerRfcommConnection {
         let (read_stream, write_stream) = stream.into_split();
         let quit = Arc::new(Semaphore::new(0));
 
-        let connection = BluerRfcommConnection {
+        let connection = Self {
             write_stream: Arc::new(Mutex::new(write_stream)),
             read_stream: std::sync::Mutex::new(Some(
                 Self::spawn_inbound_packet_channel(read_stream, quit.to_owned()).await?,
