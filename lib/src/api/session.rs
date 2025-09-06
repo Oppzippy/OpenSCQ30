@@ -19,6 +19,8 @@ pub struct OpenSCQ30Session {
 }
 
 impl OpenSCQ30Session {
+    /// Creates a session with an sqlite database at the specified path. The database will be created if it does not
+    /// exist.
     pub async fn new(db_path: PathBuf) -> device::Result<Self> {
         Ok(Self {
             database: Arc::new(OpenSCQ30Database::new_file(db_path).await?),
@@ -26,12 +28,15 @@ impl OpenSCQ30Session {
     }
 
     #[cfg(debug_assertions)]
+    /// Creates a session with an in memory database that will not be persisted. Used for tests.
     pub async fn new_with_in_memory_db() -> device::Result<Self> {
         Ok(Self {
             database: Arc::new(OpenSCQ30Database::new_in_memory().await?),
         })
     }
 
+    /// Not to be confused with pairing in the bluetooth sense, this associates a `DeviceModel` with a particular mac
+    /// address.
     pub async fn pair(&self, paired_device: PairedDevice) -> device::Result<()> {
         self.database
             .upsert_paired_device(paired_device)
@@ -39,6 +44,7 @@ impl OpenSCQ30Session {
             .map_err(Into::into)
     }
 
+    /// Removes a pairing of mac address and `DeviceModel`.
     pub async fn unpair(&self, mac_address: MacAddr6) -> device::Result<()> {
         self.database
             .delete_paired_device(mac_address)
@@ -46,6 +52,8 @@ impl OpenSCQ30Session {
             .map_err(Into::into)
     }
 
+    /// Returns all paired devices. Not to be confused with pairing in the bluetooth sense, this refers to pairings of
+    /// mac addresses and device models.
     pub async fn paired_devices(&self) -> device::Result<Vec<PairedDevice>> {
         self.database
             .fetch_all_paired_devices()
@@ -53,6 +61,7 @@ impl OpenSCQ30Session {
             .map_err(Into::into)
     }
 
+    /// Lists all potential devices that could be paired with.
     pub async fn list_devices(
         &self,
         model: DeviceModel,
@@ -64,6 +73,7 @@ impl OpenSCQ30Session {
         .await
     }
 
+    /// Lists all potential devices that could be paired with using the specified connection backends.
     pub async fn list_devices_with_backends(
         &self,
         backends: &(impl ConnectionBackends + 'static),
@@ -76,6 +86,7 @@ impl OpenSCQ30Session {
             .await
     }
 
+    /// Lists all potential demo devices that could be paired with.
     pub async fn list_demo_devices(
         &self,
         model: DeviceModel,
@@ -87,6 +98,7 @@ impl OpenSCQ30Session {
             .await
     }
 
+    /// Connects to a paired device.
     pub async fn connect(
         &self,
         mac_address: MacAddr6,
@@ -98,6 +110,7 @@ impl OpenSCQ30Session {
         .await
     }
 
+    /// Connects to a paired device using the specified backends.
     pub async fn connect_with_backends(
         &self,
         backends: &(impl ConnectionBackends + 'static),

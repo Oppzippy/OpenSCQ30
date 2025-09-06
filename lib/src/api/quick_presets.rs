@@ -27,6 +27,7 @@ impl QuickPresetsHandler {
         Self { database }
     }
 
+    /// Returns all saved quick presets for the device.
     pub async fn quick_presets(
         &self,
         device: &(dyn OpenSCQ30Device + Send + Sync),
@@ -34,6 +35,9 @@ impl QuickPresetsHandler {
         self.database.fetch_all_quick_presets(device.model()).await
     }
 
+    /// Saves the device's current settings to a quick preset. By default, all fields will be toggled off. If a quick
+    /// preset with the specified name already exists, the setting values will be updated, but whether or not each
+    /// field is toggled on or not will remain unchanged.
     pub async fn save(
         &self,
         device: &(dyn OpenSCQ30Device + Send + Sync),
@@ -68,6 +72,8 @@ impl QuickPresetsHandler {
             .await
     }
 
+    /// Toggles on/off a field for the specified quick preset. When a quick preset is activated, only the enabled
+    /// fields will be set.
     pub async fn toggle_field(
         &self,
         device: &(dyn OpenSCQ30Device + Send + Sync),
@@ -80,6 +86,7 @@ impl QuickPresetsHandler {
             .await
     }
 
+    /// Activates a quick preset, setting all enabled fields' settings.
     pub async fn activate(
         &self,
         device: &(dyn OpenSCQ30Device + Send + Sync),
@@ -97,6 +104,7 @@ impl QuickPresetsHandler {
         device.set_setting_values(settings).await
     }
 
+    /// Deletes a quick preset.
     pub async fn delete(
         &self,
         device: &(dyn OpenSCQ30Device + Send + Sync),
