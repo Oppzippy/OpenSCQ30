@@ -42,7 +42,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install just
-        run: choco install just
+        run: winget install --exact Casey.Just
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
       - name: Cache cargo dependencies
