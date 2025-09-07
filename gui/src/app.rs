@@ -13,7 +13,6 @@ use crate::{
     add_device::{self, AddDeviceModel},
     device_selection::{self, DeviceSelectionModel},
     device_settings, fl,
-    macros::include_icon,
     utils::coalesce_result,
 };
 
@@ -158,12 +157,9 @@ impl Application for AppModel {
         match self.screen {
             Screen::DeviceSelection(_) => Vec::new(),
             _ => vec![
-                widget::button::icon(include_icon!(
-                    "go-previous-symbolic",
-                    "../icons/go-previous-symbolic.svg",
-                ))
-                .on_press(Message::BackToDeviceSelection)
-                .into(),
+                widget::button::icon(crate::icons::go_previous_symbolic())
+                    .on_press(Message::BackToDeviceSelection)
+                    .into(),
             ],
         }
     }
@@ -207,10 +203,7 @@ impl Application for AppModel {
             DialogPage::RemoveDevice(device) => widget::dialog()
                 .title(fl!("prompt-remove-device-title"))
                 .body(fl!("prompt-remove-device", name = device.model.translate()))
-                .icon(widget::icon(include_icon!(
-                    "dialog-warning-symbolic",
-                    "../icons/dialog-warning-symbolic.svg",
-                )))
+                .icon(widget::icon(crate::icons::dialog_warning_symbolic()))
                 .primary_action(
                     widget::button::destructive(fl!("remove"))
                         .on_press(Message::RemovePairedDevice(device.mac_address)),

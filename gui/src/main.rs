@@ -7,7 +7,7 @@ mod device_selection;
 mod device_settings;
 pub mod equalizer_line;
 mod i18n;
-mod macros;
+pub mod icons;
 mod openscq30_v1_migration;
 mod throttle;
 mod utils;

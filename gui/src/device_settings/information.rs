@@ -4,8 +4,6 @@ use cosmic::{Element, iced_core::text::Wrapping, widget};
 use openscq30_i18n::Translate;
 use openscq30_lib::settings::SettingId;
 
-use crate::macros::include_icon;
-
 pub fn information<M>(setting_id: SettingId, text: Cow<'_, str>, on_copy: M) -> Element<'_, M>
 where
     M: Clone + 'static,
@@ -14,13 +12,7 @@ where
         // The copy button being with the title rather than the value isn't ideal, but putting it with the value causes
         // layout issues. If those layout issues are ever fixed, remove this comment and replace the flex control with
         // a row containing text and the icon button.
-        .icon(
-            widget::button::icon(include_icon!(
-                "edit-copy-symbolic",
-                "../../icons/edit-copy-symbolic.svg"
-            ))
-            .on_press(on_copy),
-        )
+        .icon(widget::button::icon(crate::icons::edit_copy_symbolic()).on_press(on_copy))
         .flex_control(widget::text(text).wrapping(Wrapping::WordOrGlyph))
         .into()
 }

@@ -4,7 +4,7 @@ use cosmic::{Element, iced::Length, widget};
 use openscq30_i18n::Translate;
 use openscq30_lib::settings::{Select, SettingId};
 
-use crate::{device_settings::labeled_setting_row, fl, macros::include_icon};
+use crate::{device_settings::labeled_setting_row, fl};
 
 pub fn select<'a, M>(
     setting_id: SettingId,
@@ -93,19 +93,10 @@ where
                 .width(Length::Fill),
             )
             .push_maybe(maybe_deselect_message.map(|deselect_message| {
-                widget::button::icon(include_icon!(
-                    "list-remove-symbolic",
-                    "../../icons/list-remove-symbolic.svg"
-                ))
-                .on_press(deselect_message)
+                widget::button::icon(crate::icons::list_remove_symbolic())
+                    .on_press(deselect_message)
             }))
-            .push(
-                widget::button::icon(include_icon!(
-                    "list-add-symbolic",
-                    "../../icons/list-add-symbolic.svg"
-                ))
-                .on_press(on_add),
-            ),
+            .push(widget::button::icon(crate::icons::list_add_symbolic()).on_press(on_add)),
     )
 }
 
