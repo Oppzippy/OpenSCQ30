@@ -3,7 +3,7 @@ use std::{collections::VecDeque, ops::Deref, path::PathBuf, sync::Arc};
 use cosmic::{
     Application, ApplicationExt, Task,
     app::{Core, context_drawer::ContextDrawer},
-    widget::{self, icon, nav_bar},
+    widget::{self, nav_bar},
 };
 use macaddr::MacAddr6;
 use openscq30_i18n::Translate;
@@ -13,6 +13,7 @@ use crate::{
     add_device::{self, AddDeviceModel},
     device_selection::{self, DeviceSelectionModel},
     device_settings, fl,
+    macros::include_icon,
     utils::coalesce_result,
 };
 
@@ -157,9 +158,12 @@ impl Application for AppModel {
         match self.screen {
             Screen::DeviceSelection(_) => Vec::new(),
             _ => vec![
-                widget::button::icon(icon::from_name("go-previous-symbolic"))
-                    .on_press(Message::BackToDeviceSelection)
-                    .into(),
+                widget::button::icon(include_icon!(
+                    "go-previous-symbolic",
+                    "../icons/go-previous-symbolic.svg",
+                ))
+                .on_press(Message::BackToDeviceSelection)
+                .into(),
             ],
         }
     }
@@ -203,7 +207,10 @@ impl Application for AppModel {
             DialogPage::RemoveDevice(device) => widget::dialog()
                 .title(fl!("prompt-remove-device-title"))
                 .body(fl!("prompt-remove-device", name = device.model.translate()))
-                .icon(icon::from_name("dialog-warning-symbolic"))
+                .icon(widget::icon(include_icon!(
+                    "dialog-warning-symbolic",
+                    "../icons/dialog-warning-symbolic.svg",
+                )))
                 .primary_action(
                     widget::button::destructive(fl!("remove"))
                         .on_press(Message::RemovePairedDevice(device.mac_address)),

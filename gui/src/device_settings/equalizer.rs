@@ -10,7 +10,7 @@ use cosmic::{
 };
 use openscq30_lib::settings::Equalizer;
 
-use crate::fl;
+use crate::{fl, macros::include_icon};
 
 pub fn horizontal_equalizer<'a, M>(
     setting: &'a Equalizer,
@@ -81,11 +81,14 @@ where
     M: Clone + 'static,
     T: Copy + Sub<Output = T> + Add<Output = T> + PartialOrd,
 {
-    let decrement_button = widget::icon::from_name("list-remove-symbolic")
-        .apply(widget::button::icon)
-        .on_press((on_press)(decrement::<T>(value, step, min, max)));
+    let decrement_button = include_icon!(
+        "list-remove-symbolic",
+        "../../icons/list-remove-symbolic.svg"
+    )
+    .apply(widget::button::icon)
+    .on_press((on_press)(decrement::<T>(value, step, min, max)));
 
-    let increment_button = widget::icon::from_name("list-add-symbolic")
+    let increment_button = include_icon!("list-add-symbolic", "../../icons/list-add-symbolic.svg")
         .apply(widget::button::icon)
         .on_press((on_press)(increment::<T>(value, step, min, max)));
 

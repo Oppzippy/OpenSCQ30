@@ -3,7 +3,7 @@ use std::sync::Arc;
 use cosmic::{
     Apply, Element, Task,
     iced::Length,
-    widget::{self, Id, icon},
+    widget::{self, Id},
 };
 use openscq30_i18n::Translate;
 use openscq30_lib::{
@@ -12,7 +12,7 @@ use openscq30_lib::{
 use strum::IntoEnumIterator;
 use tracing::error;
 
-use crate::fl;
+use crate::{fl, macros::include_icon};
 
 pub struct AddDeviceModel {
     stage: Stage,
@@ -126,7 +126,10 @@ impl AddDeviceModel {
                     )
                     .push(
                         widget::button::standard(fl!("refresh"))
-                            .leading_icon(icon::from_name("view-refresh-symbolic"))
+                            .leading_icon(include_icon!(
+                                "view-refresh-symbolic",
+                                "../icons/view-refresh-symbolic.svg"
+                            ))
                             .on_press(Message::SelectModel(
                                 ui_model.device_model,
                                 ui_model.is_demo_mode,
