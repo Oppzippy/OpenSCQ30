@@ -3,8 +3,8 @@
 Version=1.0
 Type=Application
 Name=OpenSCQ30
-Exec=openscq30_gui
+Exec=openscq30-gui
 Icon=com.oppzippy.OpenSCQ30
 Terminal=false
-Categories=Utility;GTK;
+Categories=Utility;
 Keywords=Soundcore;Bluetooth;Headphones;Q30;
