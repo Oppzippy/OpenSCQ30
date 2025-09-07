@@ -36,13 +36,13 @@ jobs:
   # Only lib is tested on windows since building the gui/cli would take
   # a lot longer, and they don't contain any platform specific code
   rust_test_windows:
-    runs-on: windows-latest
+    runs-on: windows-2025
     steps:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
       - name: Install just
-        run: choco install just
+        run: winget install --disable-interactivity --accept-source-agreements --exact Casey.Just
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
       - name: Cache cargo dependencies
