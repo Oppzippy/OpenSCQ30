@@ -35,14 +35,12 @@ jobs:
           path: artifacts/*
 
   build_windows:
-    runs-on: windows-2025
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
 
-      - name: Install InnoSetup
-        run: winget install --disable-interactivity --accept-source-agreements --exact --id JRSoftware.InnoSetup
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Build cli and gui
