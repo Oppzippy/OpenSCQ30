@@ -42,7 +42,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install just
-        run: winget install --disable-interactivity --accept-source-agreements --exact Casey.Just
+        run: winget install --disable-interactivity --accept-source-agreements --exact --id Casey.Just
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
       - name: Cache cargo dependencies

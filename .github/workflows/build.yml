@@ -42,7 +42,7 @@ jobs:
           persist-credentials: false
 
       - name: Install InnoSetup
-        run: winget install --disable-interactivity --accept-source-agreements --exact JRSoftware.InnoSetup
+        run: winget install --disable-interactivity --accept-source-agreements --exact --id JRSoftware.InnoSetup
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Build cli and gui
