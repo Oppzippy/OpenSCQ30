@@ -24,7 +24,7 @@ Connect to the device with OpenSCQ30 and record the state update packet. Then, d
 
 First, acquire a state update packet either by adding the device in OpenSCQ30 with the model set to Soundcore Development Device or through Wireshark. Alternatively, have someone who does own the device provide you with the state update packet.
 
-In the `tools/soundcore-device-faker/` directory is a small python application that will pretend to be a soundcore device and respond to packets received from the Soundcore app with predefined data. This way, you can add the device configuration in `tools/soundcore-device-faker/devices/your_device.toml` and work in reverse from the previous methods. Rather than changing something from the app and seeing how it affects the state update packet, you can change the state update packet and find what changed in the app. See the `soundcore-device-faker` README for usage instructions (at the time of writing, that readme has not yet been created).
+In the `tools/soundcore-device-faker/` directory is a small python application that will pretend to be a soundcore device and respond to packets received from the Soundcore app with predefined data. This way, you can add the device configuration in `tools/soundcore-device-faker/devices/your_device.toml` and work in reverse from the previous methods. Rather than changing something from the app and seeing how it affects the state update packet, you can change the state update packet and find what changed in the app. See the soundcore-device-faker README for usage instructions (at the time of writing, that readme has not yet been created).
 
 ### Parsing the packet
 
@@ -40,7 +40,7 @@ The various sound mode fields are single bytes with a value in the range of 0 th
 
 ##### Equalizer Configuration
 
-There are a few different variations here, but the equalizer configuration will always start with the preset id. Soundcore Signature is [0, 0] and Custom is [0xff, 0xff]. After that comes the db values for the 8 bands, with 120 being 0.0db (so 119 is -0.1db and 121 is +0.1db). Some devices will have data for 10 bands despite only 8 being used. For earbuds, another 8 (or 10) bands will come next, with the former applying to the left earbud and the latter the right earbud. OpenSCQ30 currently only uses the left values and ignores the right.
+There are a few different variations here, but the equalizer configuration will always start with the preset id. Soundcore Signature is [0, 0] and Custom is [0xfe, 0xfe]. After that comes the db values for the 8 bands, with 120 being 0.0db (so 119 is -0.1db and 121 is +0.1db). Some devices will have data for 10 bands despite only 8 being used. For earbuds, another 8 (or 10) bands will come next, with the former applying to the left earbud and the latter the right earbud. OpenSCQ30 currently only uses the left values and ignores the right.
 
 ##### Button Actions
 
@@ -48,11 +48,11 @@ TODO
 
 ##### Serial number
 
-This will be 16 bytes matching /[0-9A-F]{16}/. It should be relatively easy to identify due to the limited range of the values (48 to 57 and 65 to 70).
+This will be 16 bytes matching `/[0-9A-F]{16}/`. It should be relatively easy to identify due to the limited range of the values (48 to 57 and 65 to 70).
 
 ##### Firmware Version
 
-This will be 5 bytes matching /[0-9]{2}\.[0-9]{2}/, so it should be easy to identify. For earbuds, it will be repeated with the former occurrence being for the left earbud and the latter for the right earbud.
+This will be 5 bytes matching `/[0-9]{2}\.[0-9]{2}/`, so it should be easy to identify. For earbuds, it will be repeated with the former occurrence being for the left earbud and the latter for the right earbud.
 
 ### openscq30-lib implementation
 
