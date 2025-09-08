@@ -23,9 +23,15 @@ pub struct AppModel {
     session: Arc<OpenSCQ30Session>,
     warnings: VecDeque<String>,
     config_dir: PathBuf,
+    about: widget::about::About,
+    context_drawer_screen: Option<ContextDrawerScreen>,
 }
 pub struct AppFlags {
     pub config_dir: PathBuf,
+}
+
+enum ContextDrawerScreen {
+    About,
 }
 
 #[derive(Debug, Clone)]
@@ -41,7 +47,11 @@ pub enum Message {
     ActivateDeviceSelectionScreen,
     Warning(String),
     CloseWarning,
+    ShowAbout,
+    OpenUrl(String),
+    CloseContextDrawer,
 }
+
 impl From<device_selection::Message> for Message {
     fn from(message: device_selection::Message) -> Self {
         Self::DeviceSelectionScreen(message)
@@ -111,6 +121,14 @@ impl Application for AppModel {
     }
 
     fn init(core: Core, flags: Self::Flags) -> (Self, cosmic::app::Task<Self::Message>) {
+        let about = widget::about::About::default()
+            .name(fl!("openscq30"))
+            .icon(crate::icons::openscq30())
+            .version(env!("CARGO_PKG_VERSION"))
+            .author(env!("CARGO_PKG_AUTHORS"))
+            .license(env!("CARGO_PKG_LICENSE"))
+            .links([(env!("CARGO_PKG_REPOSITORY"), env!("CARGO_PKG_REPOSITORY"))]);
+
         let session = Arc::new(
             futures::executor::block_on(OpenSCQ30Session::new(
                 flags.config_dir.join("database.sqlite"),
@@ -125,6 +143,8 @@ impl Application for AppModel {
             session,
             warnings: VecDeque::with_capacity(5),
             config_dir: flags.config_dir,
+            about,
+            context_drawer_screen: None,
         };
         let command = app.update_title();
         (
@@ -155,7 +175,13 @@ impl Application for AppModel {
 
     fn header_start(&self) -> Vec<cosmic::Element<'_, Self::Message>> {
         match self.screen {
-            Screen::DeviceSelection(_) => Vec::new(),
+            Screen::DeviceSelection(_) => vec![
+                // shown on device selection screen not because it's relevant to device selection, but because it is
+                // the default screen
+                widget::button::icon(crate::icons::help_about_symbolic())
+                    .on_press(Message::ShowAbout)
+                    .into(),
+            ],
             _ => vec![
                 widget::button::icon(crate::icons::go_previous_symbolic())
                     .on_press(Message::BackToDeviceSelection)
@@ -216,12 +242,22 @@ impl Application for AppModel {
     }
 
     fn context_drawer(&self) -> Option<ContextDrawer<'_, Self::Message>> {
-        match &self.screen {
-            Screen::DeviceSelection(_device_selection_model) => None,
-            Screen::AddDevice(_add_device_model) => None,
-            Screen::DeviceSettings(device_settings_model) => device_settings_model
-                .context_drawer()
-                .map(|drawer| drawer.map(Message::DeviceSettingsScreen)),
+        if let Some(context_drawer_screen) = &self.context_drawer_screen {
+            match context_drawer_screen {
+                ContextDrawerScreen::About => Some(cosmic::app::context_drawer::about(
+                    &self.about,
+                    Message::OpenUrl,
+                    Message::CloseContextDrawer,
+                )),
+            }
+        } else {
+            match &self.screen {
+                Screen::DeviceSelection(_device_selection_model) => None,
+                Screen::AddDevice(_add_device_model) => None,
+                Screen::DeviceSettings(device_settings_model) => device_settings_model
+                    .context_drawer()
+                    .map(|drawer| drawer.map(Message::DeviceSettingsScreen)),
+            }
         }
     }
 
@@ -344,6 +380,13 @@ impl Application for AppModel {
             }
             Message::CloseWarning => {
                 self.warnings.pop_front();
+            }
+            Message::CloseContextDrawer => self.context_drawer_screen = None,
+            Message::ShowAbout => self.context_drawer_screen = Some(ContextDrawerScreen::About),
+            Message::OpenUrl(url) => {
+                if let Err(err) = open::that_detached(&url) {
+                    tracing::error!("error opening url {url}: {err:?}")
+                }
             }
         }
         Task::none()

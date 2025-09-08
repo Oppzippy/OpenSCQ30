@@ -13,6 +13,11 @@ macro_rules! include_icon {
     }};
 }
 
+pub fn openscq30() -> Handle {
+    cosmic::widget::icon::from_svg_bytes(include_bytes!("../resources/com.oppzippy.OpenSCQ30.svg"))
+        .symbolic(false)
+}
+
 pub fn dialog_warning_symbolic() -> Handle {
     include_icon!(
         "dialog-warning-symbolic",
@@ -41,4 +46,8 @@ pub fn view_refresh_symbolic() -> Handle {
         "view-refresh-symbolic",
         "../icons/view-refresh-symbolic.svg"
     )
+}
+
+pub fn help_about_symbolic() -> Handle {
+    include_icon!("help-about-symbolic", "../icons/help-about-symbolic.svg")
 }

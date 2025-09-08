@@ -3,6 +3,8 @@ name = "openscq30-gui"
 edition = "2024"
 version.workspace = true
 license.workspace = true
+authors.workspace = true
+repository.workspace = true
 
 [lints]
 workspace = true
@@ -21,6 +23,7 @@ libcosmic = { workspace = true, features = [
     "tokio",
     "winit",
     "wgpu",
+    "about",
 ] }
 i18n-embed = { workspace = true, features = [
     "fluent-system",
@@ -40,9 +43,10 @@ thiserror = { workspace = true }
 serde = { workspace = true }
 toml = { workspace = true }
 itertools = { workspace = true }
+open = { workspace = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
-libcosmic = { workspace = true, features = ["wayland", "about"] }
+libcosmic = { workspace = true, features = ["wayland"] }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 sysinfo = { workspace = true }
