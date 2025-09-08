@@ -1,5 +1,55 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Breaking Changes
+
+- Custom equalizer profiles are now device specific. Legacy equalizer profiles can be migrated after connecting to a device.
+- Quick presets are now stored in a different format, and no automatic migration is available, so they must be re-created [1].
+- Device model auto detection is removed, so you now need to select the device model when connecting [2].
+
+[1] For anyone curious about the reason that automatic migration is impractical: Quick presets were made device specific in v1 by using information only retrievable over BLE, but I wanted to entirely move over to RFCOMM only for v2, so it is now not possible to determine which quick preset goes with which device.
+
+[2] This is a minor inconvenience for the user, but makes it easier to potentially add support for devices from other manufacturers in the future.
+
+#### Features
+
+- All clients now share the same database format, so it is possible to share the sqlite file amongst them.
+- Connecting to a demo device is now a runtime option rather than compile time. As an exmaple of what this can be used for, exporting a custom equalizer profile without physically having your device with you is now possible.
+- Quick presets now include any setting available for the device rather than having to add support for each setting individually.
+
+### GUI
+
+#### Breaking Changes
+
+- To migrate legacy equalizer profiles, see the Legacy Equalizer Profile Migration tab after connecting to a device.
+- Rewrite using [libcosmic](https://github.com/pop-os/libcosmic)
+- Executable renamed from openscq30_gui to openscq30-gui
+
+### CLI
+
+#### Breaking Changes
+
+- All commands have changed, so any scripts making use of the CLI will need to be updated
+- Executable renamed from openscq30_cli to openscq30
+
+#### Features
+
+- Add support for custom equalizer profiles
+- It is now possible to set/get multiple settings all in one go, rather than having to invoke openscq30_cli multiple times. This improves performance by only connecting once rather than once per get/set.
+
+### Android
+
+#### Breaking Changes
+
+- To migrate legacy equalizer profiles, see the Legacy Equalizer Profile Migration menu after connecting to a device.
+
+### Web
+
+- Removed web application due to it being impossible to support some devices on this platform
+
 ## v1.19.3
 
 ### General
