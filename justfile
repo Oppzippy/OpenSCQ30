@@ -59,7 +59,7 @@ format: android::format cli::format gui::format i18n::format i18n-macros::format
 format-docs:
     #!/usr/bin/env bash
     if command -v prettier > /dev/null; then
-        prettier --write README.md CHANGELOG.md ROADMAP.md docs/*.md
+        prettier --write README.md CHANGELOG.md ROADMAP.md docs/*.md tools/soundcore-device-faker/README.md
     else
         echo "Prettier not installed, skipping markdown formatting"
     fi
@@ -70,7 +70,7 @@ format-check: android::format-check cli::format-check gui::format-check i18n::fo
 format-check-docs:
     #!/usr/bin/env bash
     if command -v prettier > /dev/null; then
-        prettier --check README.md CHANGELOG.md ROADMAP.md docs/*.md
+        prettier --check README.md CHANGELOG.md ROADMAP.md docs/*.md tools/soundcore-device-faker/README.md
     else
         echo "Prettier not installed, skipping markdown format check"
     fi
