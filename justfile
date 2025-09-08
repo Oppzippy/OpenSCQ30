@@ -54,10 +54,26 @@ uninstall path:
 
 alias fmt := format
 [parallel]
-format: android::format cli::format gui::format i18n::format i18n-macros::format lib::format lib-macros::format lib-has::format
+format: android::format cli::format gui::format i18n::format i18n-macros::format lib::format lib-macros::format lib-has::format format-docs
+
+format-docs:
+    #!/usr/bin/env bash
+    if command -v prettier > /dev/null; then
+        prettier --write README.md CHANGELOG.md ROADMAP.md docs/*.md
+    else
+        echo "Prettier not installed, skipping markdown formatting"
+    fi
 
 [parallel]
-format-check: android::format-check cli::format-check gui::format-check i18n::format-check i18n-macros::format-check lib::format-check lib-macros::format-check lib-has::format-check
+format-check: android::format-check cli::format-check gui::format-check i18n::format-check i18n-macros::format-check lib::format-check lib-macros::format-check lib-has::format-check format-check-docs
+
+format-check-docs:
+    #!/usr/bin/env bash
+    if command -v prettier > /dev/null; then
+        prettier --check README.md CHANGELOG.md ROADMAP.md docs/*.md
+    else
+        echo "Prettier not installed, skipping markdown format check"
+    fi
 
 shellcheck:
     {{fdfind}} --type file --extension sh --exec shellcheck {}
