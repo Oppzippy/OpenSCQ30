@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 abstract class LegacyEqualizerProfileDao {
+    @Query("SELECT COUNT(*) FROM custom_equalizer_profile")
+    abstract suspend fun count(): Int
+
     @Query("SELECT * FROM custom_equalizer_profile")
     abstract suspend fun getAll(): List<LegacyEqualizerProfile>
 

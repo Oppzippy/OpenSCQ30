@@ -82,4 +82,15 @@
     <string name="import_">Import</string>
     <string name="search">Search</string>
     <string name="no_items_found">No Items Found</string>
+    <string name="version_2_breaking_changes">
+        &lt;h1>Updated to OpenSCQ30 v2&lt;/h1>
+        &lt;br>
+        &lt;b>Breaking Changes&lt;/b>
+        &lt;ul>
+            &lt;li>Custom equalizer profiles are now device specific. Legacy equalizer profiles must be migrated on the Migrate Legacy Equalizer Profiles page after connecting to a device.&lt;/li>
+            &lt;li>Quick presets are now stored in a different format, and no automatic migration is available, so they must be re-created.&lt;/li>
+            &lt;li>Device model auto detection is removed, so you now need to select the device model when adding a device.&lt;/li>
+        &lt;/ul>
+        &lt;p>See &lt;a href="https://github.com/Oppzippy/OpenSCQ30/blob/master/CHANGELOG.md">CHANGELOG.md&lt;/a> for details.&lt;/p>
+    </string>
 </resources>

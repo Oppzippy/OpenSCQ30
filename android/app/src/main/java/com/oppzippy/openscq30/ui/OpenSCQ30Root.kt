@@ -17,7 +17,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.ui.deviceselection.DeviceSelectionScreen
 import com.oppzippy.openscq30.ui.devicesettings.DeviceSettingsScreen
@@ -33,6 +35,13 @@ fun OpenSCQ30Root(viewModel: OpenSCQ30RootViewModel = hiltViewModel()) {
             color = MaterialTheme.colorScheme.background,
         ) {
             Box(Modifier.safeDrawingPadding()) {
+                if (viewModel.version2BreakingChangesMessage.shouldShow.collectAsState(false).value) {
+                    WhatsNew(
+                        messageHtml = stringResource(R.string.version_2_breaking_changes),
+                        onClose = { viewModel.version2BreakingChangesMessage.setShown() },
+                    )
+                }
+
                 val connectionStatus by viewModel.connectionStatusFlow.collectAsState()
 
                 val isConnected =

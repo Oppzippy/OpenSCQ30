@@ -16,6 +16,7 @@ import com.oppzippy.openscq30.features.statusnotification.storage.FeaturedSettin
 import com.oppzippy.openscq30.features.statusnotification.storage.FeaturedSettingSlotDao
 import com.oppzippy.openscq30.features.statusnotification.storage.QuickPresetSlot
 import com.oppzippy.openscq30.features.statusnotification.storage.QuickPresetSlotDao
+import com.oppzippy.openscq30.features.whatsnew.Version2BreakingChangesMessage
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Exception
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
 import com.oppzippy.openscq30.lib.bindings.SettingIdValuePair
@@ -46,6 +47,7 @@ class OpenSCQ30RootViewModel @Inject constructor(
     private val quickPresetSlotDao: QuickPresetSlotDao,
     private val featuredSettingSlotDao: FeaturedSettingSlotDao,
     private val legacyEqualizerProfileDao: LegacyEqualizerProfileDao,
+    val version2BreakingChangesMessage: Version2BreakingChangesMessage,
     val toastHandler: ToastHandler = ToastHandler(),
 ) : AndroidViewModel(application) {
     private val deviceServiceConnection =
