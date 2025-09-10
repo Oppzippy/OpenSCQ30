@@ -44,7 +44,9 @@ There are a few different variations here, but the equalizer configuration will 
 
 ##### Button Actions
 
-TODO
+There are a few variations, but the general idea is that the left 4 bits refer to when TWS is not connected, and the right 4 bits refer to when TWS is connected. The button actions will be one byte for if it's enabled, and one byte for the action. So for example, [0x10, 0x23] would mean the button is enabled only when TWS is not connected, and the action is 2 when tws is disconnected and 3 when tws is connected.
+
+Some devices don't have separate tws connected and tws disconnected for some buttons, or they don't have separate values for if the button is enabled.
 
 ##### Serial number
 
