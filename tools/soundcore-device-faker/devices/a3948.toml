@@ -5,23 +5,23 @@ rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B3948"
 # State update
 command = [1, 1]
 response = [
-    0,
-    1,
-    5,
-    5,
-    0,
-    0,
-    50,
+    0,    # host device
+    1,    # tws connected
+    5,    # left battery
+    5,    # right battery
+    0,    # left battery charging
+    0,    # right battery charging
+    50,   # Left firmware start
     52,
     46,
     53,
-    54,
-    50,
+    54,   # Left firmware end
+    50,   # Right firmware start
     52,
     46,
     53,
-    54,
-    51,
+    54,   # Right firmware end
+    51,   # Serial number start
     57,
     52,
     56,
@@ -36,10 +36,10 @@ response = [
     66,
     65,
     50,
-    67,
-    2,
-    0,
-    160,
+    67,   # Serial number end
+    2,    # Equalizer Profile
+    0,    # Equalizer Profile
+    160,  # Left volume adjustments start
     150,
     130,
     120,
@@ -48,6 +48,8 @@ response = [
     120,
     120,
     120,
+    0,    # Left volume adjustments end
+    0,    # Right volume adjustments start
     0,
     0,
     0,
@@ -56,28 +58,26 @@ response = [
     0,
     0,
     0,
-    0,
-    0,
-    0,
+    0,    # Right volume adjustments end
     14,
-    1,
-    246,
-    1,
-    243,
-    1,
-    111,
-    1,
-    98,
-    1,
-    49,
-    1,
-    48,
+    1,    # Left single tap enabled
+    0xF6, # Left single tap action
+    1,    # Right single tap enabled
+    0xF3, # Right single tap action
+    1,    # Left double tap enabled
+    0x6F, # Left double tap action
+    1,    # Right double tap enabled
+    0x62, # Right double tap action
+    1,    # Left tap and hold enabled
+    0x31, # Left tap and hold action
+    1,    # Right tap and hold enabled
+    0x30, # Right tap and hold action
     255,
     255,
     255,
     97,
     0,
-    1,
+    1,    # Touch Tone
     255,
     255,
     255,
