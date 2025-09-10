@@ -40,6 +40,7 @@ class DeviceSettingsManagerTest {
             featuredSettingSlotDao = mockk(relaxed = true),
             intentFactory = intentFactory,
             application = application,
+            version2BreakingChangesMessage = mockk(),
         )
 
         viewModel.selectDevice("00:00:00:00:00:00")
@@ -59,6 +60,7 @@ class DeviceSettingsManagerTest {
             featuredSettingSlotDao = mockk(relaxed = true),
             intentFactory = intentFactory,
             application = application,
+            version2BreakingChangesMessage = mockk(),
         )
         viewModel.deselectDevice()
         verify(exactly = 1) { application.stopService(any()) }
