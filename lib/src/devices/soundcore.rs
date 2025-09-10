@@ -9,6 +9,7 @@ pub mod a3931;
 pub mod a3933;
 pub mod a3936;
 pub mod a3945;
+pub mod a3948;
 pub mod a3951;
 pub mod a3959;
 pub mod common;
