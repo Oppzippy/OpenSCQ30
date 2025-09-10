@@ -58,6 +58,9 @@ This will be 5 bytes matching `/[0-9]{2}\.[0-9]{2}/`, so it should be easy to id
 
 ### openscq30-lib implementation
 
-1. Add the device model the `DeviceModel` enum in `lib/src/devices/device_model.rs`
-2. Add a module for the device in `lib/src/devices/`
-3. TODO
+1. Add the device model the `DeviceModel` enum in `lib/src/devices/device_model.rs` and its name to `lib/i18n/en/openscq30-lib.ftl`
+2. Add match arms for the new device in `DeviceModel`'s `device_registry` and `demo_device_registry` functions
+3. Add a module for the device in `lib/src/devices/`
+4. Create a struct for storing the device's state. Use any of the other devices as an example. The important part is `#[derive(Has)]`.
+5. Create a struct for the device's state update packet, and implement `From<YourStateUpdatePacket>` for your state packet. The state update packet should implement Default, InboundPacket, and OutboundPacket. The OutboundPacket implementation is used for demo devices. Again, refer to other devices here for examples.
+6. Use the `soundcore_device!` macro in the module for your device and call the relevant functions on the builder. Categories will be displayed in order of the first builder call that added the category, so make sure to properly order function calls.
