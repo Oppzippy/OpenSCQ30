@@ -10,7 +10,7 @@ use tokio::sync::watch;
 use crate::{
     device,
     devices::soundcore::{
-        a3948::state::A3948State,
+        a3948::{self, state::A3948State},
         common::{
             modules::ModuleCollection,
             packet::{
@@ -34,6 +34,7 @@ pub struct A3948StateUpdatePacket {
     pub firmware_version: DualFirmwareVersion,
     pub serial_number: SerialNumber,
     pub equalizer_configuration: EqualizerConfiguration<2, 10>,
+    pub button_configuration: a3948::structures::MultiButtonConfiguration,
     pub touch_tone: TouchTone,
 }
 
@@ -50,9 +51,9 @@ impl InboundPacket for A3948StateUpdatePacket {
                     DualFirmwareVersion::take,
                     SerialNumber::take,
                     EqualizerConfiguration::take,
-                    take(1usize),  // padding
-                    take(12usize), // TODO button configuration
-                    take(5usize),  // padding
+                    take(1usize), // padding
+                    a3948::structures::MultiButtonConfiguration::take,
+                    take(5usize), // padding
                     TouchTone::take,
                     take(15usize), // padding
                 ),
@@ -63,7 +64,7 @@ impl InboundPacket for A3948StateUpdatePacket {
                     serial_number,
                     equalizer_configuration,
                     _padding0,
-                    todo_button_configuration,
+                    button_configuration,
                     _padding1,
                     touch_tone,
                     _padding2,
@@ -74,6 +75,7 @@ impl InboundPacket for A3948StateUpdatePacket {
                         firmware_version,
                         serial_number,
                         equalizer_configuration,
+                        button_configuration,
                         touch_tone,
                     }
                 },
@@ -97,7 +99,7 @@ impl OutboundPacket for A3948StateUpdatePacket {
             .chain(self.serial_number.bytes())
             .chain(self.equalizer_configuration.bytes())
             .chain(std::iter::once(0))
-            .chain([0; 12]) // TODO button configuration
+            .chain(self.button_configuration.bytes()) // TODO button configuration
             .chain([0; 5]) // padding
             .chain(self.touch_tone.bytes())
             .chain([0; 15]) // padding
@@ -126,5 +128,23 @@ impl ModuleCollection<A3948State> {
             packet::inbound::STATE_COMMAND,
             Box::new(StateUpdatePacketHandler {}),
         );
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use nom_language::error::VerboseError;
+
+    use crate::devices::soundcore::common::packet::{
+        inbound::TryIntoInboundPacket, outbound::OutboundPacketBytesExt,
+    };
+
+    use super::*;
+
+    #[test]
+    fn serialize_and_deserialize() {
+        let bytes = A3948StateUpdatePacket::default().bytes();
+        let (_, packet) = Packet::take::<VerboseError<_>>(&bytes).unwrap();
+        let _: A3948StateUpdatePacket = packet.try_into_inbound_packet().unwrap();
     }
 }

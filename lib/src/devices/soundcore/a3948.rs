@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::devices::soundcore::{
-    a3948::{packets::A3948StateUpdatePacket, state::A3948State},
+    a3948::{packets::inbound::A3948StateUpdatePacket, state::A3948State},
     common::{
         device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
@@ -9,8 +9,10 @@ use crate::devices::soundcore::{
     },
 };
 
+mod modules;
 mod packets;
 mod state;
+mod structures;
 
 soundcore_device!(
     A3948State,
@@ -22,7 +24,9 @@ soundcore_device!(
     async |builder| {
         builder.module_collection().add_state_update();
         builder.equalizer().await;
-        // TODO builder.button_configuration();
+
+        builder.a3948_button_configuration();
+
         builder.touch_tone();
 
         builder.serial_number_and_dual_firmware_version();
