@@ -146,7 +146,12 @@ mod tests {
         let expected_values: [(SettingId, Value); _] = [
             (SettingId::BatteryLevelLeft, "5".into()),
             (SettingId::BatteryLevelRight, "6".into()),
+            (SettingId::IsChargingLeft, "No".into()),
+            (SettingId::IsChargingRight, "No".into()),
             (SettingId::AmbientSoundMode, "NoiseCanceling".into()),
+            (SettingId::AdaptiveNoiseCanceling, "5/5".into()),
+            (SettingId::ManualNoiseCanceling, 5.into()),
+            (SettingId::MultiSceneNoiseCanceling, "Outdoor".into()),
             (SettingId::WindNoiseSuppression, true.into()),
             (SettingId::LeftSinglePress, Some("VolumeDown").into()),
             (SettingId::LeftDoublePress, Some("PlayPause").into()),
@@ -156,6 +161,8 @@ mod tests {
             (SettingId::RightDoublePress, Some("PlayPause").into()),
             (SettingId::RightTriplePress, Some("NextSong").into()),
             (SettingId::RightLongPress, Some("AmbientSoundMode").into()),
+            (SettingId::TouchTone, true.into()),
+            (SettingId::AutoPowerOff, "10m".into()),
         ];
         for (setting_id, expected) in expected_values {
             assert_eq!(
