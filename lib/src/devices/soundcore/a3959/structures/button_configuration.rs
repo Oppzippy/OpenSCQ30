@@ -3,7 +3,6 @@ use nom::{
     combinator::{map, map_opt},
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
-    sequence::pair,
 };
 
 use crate::devices::soundcore::common::structures::ButtonAction;
@@ -79,51 +78,30 @@ impl MultiButtonConfiguration {
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub struct TwsButtonAction {
-    pub tws_connected_action: ButtonAction,
-    pub tws_disconnected_action: ButtonAction,
-    pub tws_connected_is_enabled: bool,
-    pub tws_disconnected_is_enabled: bool,
+    pub tws_connected_action: Option<ButtonAction>,
+    pub tws_disconnected_action: Option<ButtonAction>,
 }
 
 impl TwsButtonAction {
-    pub fn bytes(&self) -> [u8; 2] {
-        [
-            (u8::from(self.tws_disconnected_is_enabled) << 4) | u8::from(self.tws_connected_action),
-            (u8::from(self.tws_disconnected_action) << 4) | (u8::from(self.tws_connected_action)),
-        ]
+    pub fn bytes(&self) -> impl Iterator<Item = u8> {
+        let tws_disconnected_action = self.tws_disconnected_action.map(u8::from).unwrap_or(0xF);
+        let tws_connected_action = self.tws_connected_action.map(u8::from).unwrap_or(0xF);
+        std::iter::once((tws_disconnected_action << 4) | tws_connected_action)
     }
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
-        map_opt(pair(le_u8, le_u8), |(switch, num)| {
-            let log_and_return_default = || {
-                tracing::warn!(
-                    "A3959: unknown button action {num:#X}, falling back to default value",
-                );
-                ButtonAction::default()
-            };
+        map_opt(le_u8, |num| {
             Some(Self {
-                tws_connected_is_enabled: switch & 0x01 == 0x01,
-                tws_disconnected_is_enabled: switch & 0x10 == 0x10,
-                tws_connected_action: ButtonAction::from_repr(num & 0x0F)
-                    .unwrap_or_else(log_and_return_default),
-                tws_disconnected_action: ButtonAction::from_repr((num & 0xF0) >> 4)
-                    .unwrap_or_else(log_and_return_default),
+                tws_connected_action: ButtonAction::from_repr(num & 0x0F),
+                tws_disconnected_action: ButtonAction::from_repr((num & 0xF0) >> 4),
             })
         })
         .parse_complete(input)
     }
 
-    pub fn action_if_enabled(&self, is_tws_connected: bool) -> Option<ButtonAction> {
-        if self.is_enabled(is_tws_connected) {
-            Some(self.active_action(is_tws_connected))
-        } else {
-            None
-        }
-    }
-
-    pub fn active_action(&self, is_tws_connected: bool) -> ButtonAction {
+    pub fn active_action(&self, is_tws_connected: bool) -> Option<ButtonAction> {
         if is_tws_connected {
             self.tws_connected_action
         } else {
@@ -131,27 +109,11 @@ impl TwsButtonAction {
         }
     }
 
-    pub fn set_action(&mut self, action: ButtonAction, is_tws_connected: bool) {
+    pub fn set_action(&mut self, action: Option<ButtonAction>, is_tws_connected: bool) {
         if is_tws_connected {
             self.tws_connected_action = action;
         } else {
             self.tws_disconnected_action = action;
-        }
-    }
-
-    pub fn is_enabled(&self, is_tws_connected: bool) -> bool {
-        if is_tws_connected {
-            self.tws_connected_is_enabled
-        } else {
-            self.tws_disconnected_is_enabled
-        }
-    }
-
-    pub fn set_enabled(&mut self, is_enabled: bool, is_tws_connected: bool) {
-        if is_tws_connected {
-            self.tws_connected_is_enabled = is_enabled;
-        } else {
-            self.tws_disconnected_is_enabled = is_enabled;
         }
     }
 }
