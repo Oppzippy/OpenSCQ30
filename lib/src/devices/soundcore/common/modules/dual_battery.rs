@@ -30,7 +30,7 @@ where
     pub fn add_dual_battery(&mut self) {
         self.setting_manager.add_handler(
             CategoryId::DeviceInformation,
-            setting_handler::AmbientBatteryCycleSettingHandler::default(),
+            setting_handler::BatterySettingHandler::default(),
         );
         self.packet_handlers.set_handler(
             packet_handler::BatteryLevelPacketHandler::COMMAND,

@@ -14,10 +14,10 @@ use crate::{
 use super::BatterySetting;
 
 #[derive(Default)]
-pub struct AmbientBatteryCycleSettingHandler {}
+pub struct BatterySettingHandler {}
 
 #[async_trait]
-impl<T> SettingHandler<T> for AmbientBatteryCycleSettingHandler
+impl<T> SettingHandler<T> for BatterySettingHandler
 where
     T: Has<DualBattery> + Send,
 {
