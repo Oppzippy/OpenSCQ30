@@ -13,8 +13,15 @@ use crate::{
 
 use super::BatterySetting;
 
-#[derive(Default)]
-pub struct BatterySettingHandler {}
+pub struct BatterySettingHandler {
+    max_level: u8,
+}
+
+impl BatterySettingHandler {
+    pub fn new(max_level: u8) -> Self {
+        Self { max_level }
+    }
+}
 
 #[async_trait]
 impl<T> SettingHandler<T> for BatterySettingHandler
@@ -47,11 +54,11 @@ where
             },
             BatterySetting::BatteryLevelLeft => Setting::Information {
                 value: battery.left.level.0.to_string(),
-                translated_value: format!("{}/5", battery.left.level.0),
+                translated_value: format!("{}/{}", battery.left.level.0, self.max_level),
             },
             BatterySetting::BatteryLevelRight => Setting::Information {
                 value: battery.right.level.0.to_string(),
-                translated_value: format!("{}/5", battery.right.level.0),
+                translated_value: format!("{}/{}", battery.right.level.0, self.max_level),
             },
         })
     }

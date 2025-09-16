@@ -316,11 +316,11 @@ where
         self.module_collection.add_single_battery();
     }
 
-    pub fn dual_battery(&mut self)
+    pub fn dual_battery(&mut self, max_level: u8)
     where
         StateType: Has<DualBattery>,
     {
-        self.module_collection.add_dual_battery();
+        self.module_collection.add_dual_battery(max_level);
     }
 
     pub fn serial_number_and_firmware_version(&mut self)

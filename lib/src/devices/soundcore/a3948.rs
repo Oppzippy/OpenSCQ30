@@ -31,7 +31,7 @@ soundcore_device!(
 
         builder.serial_number_and_dual_firmware_version();
         builder.tws_status();
-        builder.dual_battery();
+        builder.dual_battery(5);
     },
     {
         HashMap::from([(

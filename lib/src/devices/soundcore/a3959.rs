@@ -34,7 +34,7 @@ soundcore_device!(
         builder.ambient_sound_mode_cycle();
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.touch_tone();
-        builder.dual_battery();
+        builder.dual_battery(10);
         builder.serial_number_and_dual_firmware_version();
     },
     {
