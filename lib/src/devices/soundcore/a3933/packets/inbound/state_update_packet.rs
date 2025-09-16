@@ -338,7 +338,7 @@ mod tests {
         );
         assert_eq!(
             FirmwareVersion::new(2, 61),
-            packet.dual_firmware_version.left
+            packet.dual_firmware_version.left().unwrap()
         );
         assert_eq!(
             EqualizerConfiguration::new_from_preset_profile(

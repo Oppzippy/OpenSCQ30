@@ -8,6 +8,7 @@ use crate::{
         settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
         structures::{DualFirmwareVersion, SerialNumber},
     },
+    i18n::fl,
 };
 
 use super::SerialNumberAndDualFirmwareVersionSetting;
@@ -36,15 +37,21 @@ where
                 translated_value: serial_number.to_string(),
             },
             SerialNumberAndDualFirmwareVersionSetting::FirmwareVersionLeft => {
+                let left_version = dual_firmware_version
+                    .left()
+                    .map(|version| version.to_string());
                 Setting::Information {
-                    value: dual_firmware_version.left.to_string(),
-                    translated_value: dual_firmware_version.left.to_string(),
+                    value: left_version.clone().unwrap_or_default(),
+                    translated_value: left_version.unwrap_or_else(|| fl!("none")),
                 }
             }
             SerialNumberAndDualFirmwareVersionSetting::FirmwareVersionRight => {
+                let right_version = dual_firmware_version
+                    .right()
+                    .map(|version| version.to_string());
                 Setting::Information {
-                    value: dual_firmware_version.right.to_string(),
-                    translated_value: dual_firmware_version.right.to_string(),
+                    value: right_version.clone().unwrap_or_default(),
+                    translated_value: right_version.unwrap_or_else(|| fl!("none")),
                 }
             }
         })

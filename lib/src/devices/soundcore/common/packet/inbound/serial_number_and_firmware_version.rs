@@ -63,7 +63,7 @@ mod tests {
             Packet,
             inbound::{InboundPacket, SerialNumberAndFirmwareVersion},
         },
-        structures::{FirmwareVersion, SerialNumber},
+        structures::{DualFirmwareVersion, FirmwareVersion, SerialNumber},
     };
 
     #[test]
@@ -78,16 +78,15 @@ mod tests {
             .unwrap()
             .1;
         assert_eq!(
-            FirmwareVersion::new(12, 34),
-            packet.dual_firmware_version.left
-        );
-        assert_eq!(
-            FirmwareVersion::new(23, 45),
-            packet.dual_firmware_version.right
+            DualFirmwareVersion::Both {
+                left: FirmwareVersion::new(12, 34),
+                right: FirmwareVersion::new(23, 45)
+            },
+            packet.dual_firmware_version,
         );
         assert_eq!(
             SerialNumber("0123456789ABCDEF".into()),
-            packet.serial_number
+            packet.serial_number,
         );
     }
 }

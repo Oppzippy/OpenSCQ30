@@ -40,3 +40,75 @@ soundcore_device!(
         )])
     },
 );
+
+#[cfg(test)]
+mod tests {
+    use std::sync::Arc;
+
+    use macaddr::MacAddr6;
+    use tokio::sync::mpsc;
+
+    use crate::{
+        DeviceModel,
+        device::OpenSCQ30DeviceRegistry,
+        devices::soundcore::common::packet::{Command, Direction, Packet},
+        mock::rfcomm::MockRfcommBackend,
+        settings::{SettingId, Value},
+        storage::OpenSCQ30Database,
+    };
+
+    async fn create_test_connection() -> (
+        impl OpenSCQ30DeviceRegistry,
+        mpsc::Sender<Vec<u8>>,
+        mpsc::Receiver<Vec<u8>>,
+    ) {
+        let (inbound_sender, inbound_receiver) = mpsc::channel(10);
+        let (outbound_sender, outbound_receiver) = mpsc::channel(10);
+        let database = Arc::new(OpenSCQ30Database::new_in_memory().await.unwrap());
+        let registry = super::device_registry(
+            MockRfcommBackend::new(inbound_receiver, outbound_sender),
+            database,
+            DeviceModel::SoundcoreA3948,
+        );
+        (registry, inbound_sender, outbound_receiver)
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn test_new_with_example_state_update_packet() {
+        let (registry, inbound_sender, mut outbound_receiver) = create_test_connection().await;
+        inbound_sender
+            .send(
+                Packet {
+                    direction: Direction::Inbound,
+                    command: Command([1, 1]),
+                    body: vec![
+                        0, 0, 5, 255, 0, 0, 50, 49, 46, 53, 54, 0, 0, 0, 0, 0, 51, 57, 52, 56, 55,
+                        49, 48, 54, 56, 54, 54, 54, 65, 69, 70, 48, 19, 0, 90, 100, 130, 140, 140,
+                        130, 120, 90, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 1, 241, 1, 255, 1,
+                        98, 1, 246, 1, 54, 1, 243, 255, 255, 255, 49, 0, 1, 255, 255, 255, 255,
+                        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                    ],
+                }
+                .bytes(),
+            )
+            .await
+            .unwrap();
+        let device = registry.connect(MacAddr6::nil()).await.unwrap();
+        _ = outbound_receiver
+            .recv()
+            .await
+            .expect("state update packet request");
+        assert_eq!(
+            Value::from(device.setting(&SettingId::FirmwareVersionLeft).unwrap())
+                .try_as_str()
+                .unwrap(),
+            "21.56"
+        );
+        assert_eq!(
+            Value::from(device.setting(&SettingId::FirmwareVersionRight).unwrap())
+                .try_as_str()
+                .unwrap(),
+            ""
+        );
+    }
+}
