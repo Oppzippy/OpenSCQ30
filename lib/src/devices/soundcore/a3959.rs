@@ -143,23 +143,25 @@ mod tests {
             true,
         );
 
-        let expected_button_actions = [
-            (SettingId::LeftSinglePress, Some("VolumeDown")),
-            (SettingId::LeftDoublePress, Some("PlayPause")),
-            (SettingId::LeftTriplePress, Some("PreviousSong")),
-            (SettingId::LeftLongPress, Some("AmbientSoundMode")),
-            (SettingId::RightSinglePress, Some("VolumeUp")),
-            (SettingId::RightDoublePress, Some("PlayPause")),
-            (SettingId::RightTriplePress, Some("NextSong")),
-            (SettingId::RightLongPress, Some("AmbientSoundMode")),
+        let expected_values: [(SettingId, Value); _] = [
+            (SettingId::BatteryLevelLeft, "5".into()),
+            (SettingId::BatteryLevelRight, "6".into()),
+            (SettingId::AmbientSoundMode, "NoiseCanceling".into()),
+            (SettingId::WindNoiseSuppression, true.into()),
+            (SettingId::LeftSinglePress, Some("VolumeDown").into()),
+            (SettingId::LeftDoublePress, Some("PlayPause").into()),
+            (SettingId::LeftTriplePress, Some("PreviousSong").into()),
+            (SettingId::LeftLongPress, Some("AmbientSoundMode").into()),
+            (SettingId::RightSinglePress, Some("VolumeUp").into()),
+            (SettingId::RightDoublePress, Some("PlayPause").into()),
+            (SettingId::RightTriplePress, Some("NextSong").into()),
+            (SettingId::RightLongPress, Some("AmbientSoundMode").into()),
         ];
-        for (setting_id, expected_action) in expected_button_actions {
+        for (setting_id, expected) in expected_values {
             assert_eq!(
-                Value::from(device.setting(&setting_id).unwrap())
-                    .try_as_optional_str()
-                    .unwrap(),
-                expected_action,
-                "{setting_id} should be {expected_action:?}"
+                Value::from(device.setting(&setting_id).unwrap()),
+                expected,
+                "{setting_id} should be {expected:?}"
             );
         }
     }
@@ -194,20 +196,18 @@ mod tests {
             .expect("state update packet request");
 
         let expectation = [
-            (SettingId::LeftSinglePress, None),
-            (SettingId::LeftDoublePress, Some("PlayPause")),
-            (SettingId::LeftTriplePress, None),
-            (SettingId::LeftLongPress, Some("AmbientSoundMode")),
-            (SettingId::RightSinglePress, None),
-            (SettingId::RightDoublePress, Some("PlayPause")),
-            (SettingId::RightTriplePress, None),
-            (SettingId::RightLongPress, Some("AmbientSoundMode")),
+            (SettingId::LeftSinglePress, Value::OptionalString(None)),
+            (SettingId::LeftDoublePress, Some("PlayPause").into()),
+            (SettingId::LeftTriplePress, Value::OptionalString(None)),
+            (SettingId::LeftLongPress, Some("AmbientSoundMode").into()),
+            (SettingId::RightSinglePress, Value::OptionalString(None)),
+            (SettingId::RightDoublePress, Some("PlayPause").into()),
+            (SettingId::RightTriplePress, Value::OptionalString(None)),
+            (SettingId::RightLongPress, Some("AmbientSoundMode").into()),
         ];
         for (setting_id, expected_value) in expectation {
             assert_eq!(
-                Value::from(device.setting(&setting_id).unwrap(),)
-                    .try_as_optional_str()
-                    .unwrap(),
+                Value::from(device.setting(&setting_id).unwrap()),
                 expected_value,
                 "{setting_id} should be {expected_value:?}"
             );

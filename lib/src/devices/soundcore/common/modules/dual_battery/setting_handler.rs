@@ -46,12 +46,12 @@ where
                 },
             },
             BatterySetting::BatteryLevelLeft => Setting::Information {
-                value: battery.right.level.0.to_string(),
+                value: battery.left.level.0.to_string(),
                 translated_value: format!("{}/5", battery.left.level.0),
             },
             BatterySetting::BatteryLevelRight => Setting::Information {
                 value: battery.right.level.0.to_string(),
-                translated_value: format!("{}/5", battery.left.level.0),
+                translated_value: format!("{}/5", battery.right.level.0),
             },
         })
     }

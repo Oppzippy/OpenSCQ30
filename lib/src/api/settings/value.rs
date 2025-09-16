@@ -233,9 +233,21 @@ impl From<Cow<'static, str>> for Value {
     }
 }
 
+impl From<&'static str> for Value {
+    fn from(value: &'static str) -> Self {
+        Self::from(Cow::from(value))
+    }
+}
+
 impl From<Option<Cow<'static, str>>> for Value {
     fn from(value: Option<Cow<'static, str>>) -> Self {
         Self::OptionalString(value)
+    }
+}
+
+impl From<Option<&'static str>> for Value {
+    fn from(value: Option<&'static str>) -> Self {
+        Self::from(value.map(Cow::from))
     }
 }
 
