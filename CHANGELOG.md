@@ -19,6 +19,10 @@
 - All clients now share the same database format, so it is possible to share the sqlite file amongst them.
 - Connecting to a demo device is now a runtime option rather than compile time. As an exmaple of what this can be used for, exporting a custom equalizer profile without physically having your device with you is now possible.
 - Quick presets now include any setting available for the device rather than having to add support for each setting individually.
+- Add support for new devices
+    - Soundcore Q20i
+    - Soundcore A20i
+    - Soundcore R50i
 
 ### GUI
 
@@ -27,6 +31,10 @@
 - To migrate legacy equalizer profiles, see the Legacy Equalizer Profile Migration tab after connecting to a device.
 - Rewrite using [libcosmic](https://github.com/pop-os/libcosmic)
 - Executable renamed from openscq30_gui to openscq30-gui
+
+#### Fixes
+
+- On Windows, a terminal window will no longer be shown. This change is made to match behavior on Linux.
 
 ### CLI
 
@@ -39,6 +47,7 @@
 
 - Add support for custom equalizer profiles
 - It is now possible to set/get multiple settings all in one go, rather than having to invoke openscq30_cli multiple times. This improves performance by only connecting once rather than once per get/set.
+- Flag for JSON output
 
 ### Android
 
