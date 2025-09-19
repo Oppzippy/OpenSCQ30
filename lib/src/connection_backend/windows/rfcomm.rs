@@ -75,7 +75,7 @@ impl RfcommBackend for WindowsRfcommBackend {
                 .into_iter()
                 .map(|service| Ok((service.ServiceId()?.Uuid()?.as_uuid(), service)))
                 .collect::<windows::core::Result<HashMap<_, _>>>()?;
-            let selected_uuid = select_uuid(services_by_uuid.keys().cloned().collect());
+            let selected_uuid = select_uuid(services_by_uuid.keys().copied().collect());
             let service =
                 services_by_uuid
                     .get(&selected_uuid)
@@ -201,12 +201,12 @@ impl WindowsRfcommConnection {
                     let reader = DataReader::FromBuffer(&buffer)?;
                     reader.ReadBytes(&mut packet)?;
                     trace!("received packet: {packet:?}");
-                    if !packet.is_empty() {
-                        if let Err(err) = sender.blocking_send(packet) {
-                            debug!("packet failed to send: {err:?}");
-                            debug!("receiver is closed, aborting");
-                            break;
-                        }
+                    if !packet.is_empty()
+                        && let Err(err) = sender.blocking_send(packet)
+                    {
+                        debug!("packet failed to send: {err:?}");
+                        debug!("receiver is closed, aborting");
+                        break;
                     }
                 }
                 Ok(())
@@ -264,7 +264,7 @@ impl Drop for WindowsRfcommConnection {
         if let Err(err) = self.device.resolve().and_then(|device| {
             device.RemoveConnectionStatusChanged(self.connection_status_changed_token)
         }) {
-            error!("failed to remove ConnectionStatusChanged event handler: {err:?}")
+            error!("failed to remove ConnectionStatusChanged event handler: {err:?}");
         }
     }
 }

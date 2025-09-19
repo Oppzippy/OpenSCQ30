@@ -52,7 +52,7 @@ impl From<windows::core::Error> for connection::Error {
                 source: Some(Box::new(err)),
                 location: Location::caller(),
             },
-            _ => connection::Error::Other {
+            _ => Self::Other {
                 source: Box::new(err),
                 location: Location::caller(),
             },

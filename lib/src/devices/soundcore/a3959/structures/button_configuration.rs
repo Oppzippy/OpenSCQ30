@@ -23,7 +23,6 @@ impl MultiButtonConfiguration {
     pub fn bytes(&self) -> impl Iterator<Item = u8> {
         self.left_single_click
             .bytes()
-            .into_iter()
             .chain(self.right_single_click.bytes())
             .chain(self.left_double_click.bytes())
             .chain(self.right_double_click.bytes())
@@ -84,8 +83,8 @@ pub struct TwsButtonAction {
 
 impl TwsButtonAction {
     pub fn bytes(&self) -> impl Iterator<Item = u8> {
-        let tws_disconnected_action = self.tws_disconnected_action.map(u8::from).unwrap_or(0xF);
-        let tws_connected_action = self.tws_connected_action.map(u8::from).unwrap_or(0xF);
+        let tws_disconnected_action = self.tws_disconnected_action.map_or(0xF, u8::from);
+        let tws_connected_action = self.tws_connected_action.map_or(0xF, u8::from);
         std::iter::once((tws_disconnected_action << 4) | tws_connected_action)
     }
 

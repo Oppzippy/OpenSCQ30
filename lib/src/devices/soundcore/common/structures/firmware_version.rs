@@ -43,9 +43,9 @@ impl DualFirmwareVersion {
                     pair(firmware_version_none(), firmware_version_some()),
                 )),
                 |firmware_versions| match firmware_versions {
-                    (Some(left), Some(right)) => DualFirmwareVersion::Both { left, right },
-                    (Some(left), None) => DualFirmwareVersion::LeftOnly(left),
-                    (None, Some(right)) => DualFirmwareVersion::RightOnly(right),
+                    (Some(left), Some(right)) => Self::Both { left, right },
+                    (Some(left), None) => Self::LeftOnly(left),
+                    (None, Some(right)) => Self::RightOnly(right),
                     (None, None) => unreachable!("parsing will fail in this case"),
                 },
             ),
@@ -55,31 +55,27 @@ impl DualFirmwareVersion {
 
     pub fn bytes(&self) -> impl Iterator<Item = u8> {
         match self {
-            DualFirmwareVersion::LeftOnly(firmware_version) => {
-                firmware_version.bytes().into_iter().chain([0; 5])
-            }
-            DualFirmwareVersion::RightOnly(firmware_version) => {
+            Self::LeftOnly(firmware_version) => firmware_version.bytes().into_iter().chain([0; 5]),
+            Self::RightOnly(firmware_version) => {
                 [0u8; 5].into_iter().chain(firmware_version.bytes())
             }
-            DualFirmwareVersion::Both { left, right } => {
-                left.bytes().into_iter().chain(right.bytes())
-            }
+            Self::Both { left, right } => left.bytes().into_iter().chain(right.bytes()),
         }
     }
 
     pub fn left(&self) -> Option<FirmwareVersion> {
         match self {
-            DualFirmwareVersion::LeftOnly(firmware_version) => Some(*firmware_version),
-            DualFirmwareVersion::RightOnly(_) => None,
-            DualFirmwareVersion::Both { left, right: _ } => Some(*left),
+            Self::LeftOnly(firmware_version) => Some(*firmware_version),
+            Self::RightOnly(_) => None,
+            Self::Both { left, right: _ } => Some(*left),
         }
     }
 
     pub fn right(&self) -> Option<FirmwareVersion> {
         match self {
-            DualFirmwareVersion::LeftOnly(_) => None,
-            DualFirmwareVersion::RightOnly(firmware_version) => Some(*firmware_version),
-            DualFirmwareVersion::Both { left: _, right } => Some(*right),
+            Self::LeftOnly(_) => None,
+            Self::RightOnly(firmware_version) => Some(*firmware_version),
+            Self::Both { left: _, right } => Some(*right),
         }
     }
 }

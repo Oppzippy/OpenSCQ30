@@ -385,7 +385,7 @@ impl Application for AppModel {
             Message::ShowAbout => self.context_drawer_screen = Some(ContextDrawerScreen::About),
             Message::OpenUrl(url) => {
                 if let Err(err) = open::that_detached(&url) {
-                    tracing::error!("error opening url {url}: {err:?}")
+                    tracing::error!("error opening url {url}: {err:?}");
                 }
             }
         }
