@@ -16,26 +16,26 @@ OpenSCQ30 is free software for controlling settings for Soundcore headphones and
 
 It is intended that all devices in this list work, but since I do not own them all, I can not check. Please open an issue if you can confirm that any of the devices with "Unknown" status are working correctly.
 
-| Model    | Name              | Status  |
-| -------- | ----------------- | ------- |
-| A3004    | Q20i              | Working |
-| A3027    | Life Q35          | Working |
-| A3028    | Life Q30          | Working |
-| A3029    | Life Tune         | Working |
-| A3030    | Life Tune Pro     | Unknown |
-| A3031    | Vortex            | Unknown |
-| A3033    | Life 2 Neo        | Unknown |
-| A3926    | Life Dot 2S       | Unknown |
-| A3930    | Liberty 2 Pro     | Unknown |
-| A3931    | Life Dot 2 NC     | Working |
-| A3935    | Life A2 NC        | Working |
-| A3936    | Space A40         | Working |
-| A3951    | Liberty Air 2 Pro | Unknown |
-| A3945    | Life Note 3S      | Unknown |
-| A3948    | A20i              | Unknown |
-| A3933    | Life Note 3       | Working |
-| A3939    | Life P3           | Working |
-| A3959    | R50i NC           | Unknown |
+| Model | Name              | Status  |
+| ----- | ----------------- | ------- |
+| A3004 | Q20i              | Working |
+| A3027 | Life Q35          | Working |
+| A3028 | Life Q30          | Working |
+| A3029 | Life Tune         | Working |
+| A3030 | Life Tune Pro     | Unknown |
+| A3031 | Vortex            | Unknown |
+| A3033 | Life 2 Neo        | Unknown |
+| A3926 | Life Dot 2S       | Unknown |
+| A3930 | Liberty 2 Pro     | Unknown |
+| A3931 | Life Dot 2 NC     | Working |
+| A3935 | Life A2 NC        | Working |
+| A3936 | Space A40         | Working |
+| A3951 | Liberty Air 2 Pro | Unknown |
+| A3945 | Life Note 3S      | Unknown |
+| A3948 | A20i              | Unknown |
+| A3933 | Life Note 3       | Working |
+| A3939 | Life P3           | Working |
+| A3959 | R50i NC           | Unknown |
 
 ## Installing
 
