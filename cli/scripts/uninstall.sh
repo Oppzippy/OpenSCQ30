@@ -2,12 +2,12 @@
 set -euo pipefail
 
 install_path="$1"
-case "$OSTYPE" in
-    msys | cygwin) bin_ext=".exe" ;;
-    *) bin_ext="" ;;
-esac
 
 echo Removing binary
-rm "$install_path/bin/openscq30$bin_ext" || true
+rm "$install_path/bin/openscq30" || true
 echo Removing bash completions
 rm "$install_path/share/bash-completions/completions/openscq30" || true
+echo Removing fish completions
+rm "$install_path/share/fish/completions/openscq30.fish" || true
+echo Removing zsh completions
+rm "$install_path/share/zsh/site-functions/_openscq30" || true
