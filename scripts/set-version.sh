@@ -152,8 +152,6 @@ fi
 set_version_in_changelog CHANGELOG.md "$1"
 set_version_in_cargo_toml Cargo.toml "$1"
 version_code=$(set_version_in_build_gradle android/app/build.gradle.kts "$1")
-set_version_in_package_json web/package.json "$1"
-set_version_in_appimage_builder packaging/appimage/AppImageBuilder.yml "$1"
 set_version_in_iss packaging/windows/setup.iss "$1"
 add_version_to_appstream_metainfo gui/resources/com.oppzippy.OpenSCQ30.metainfo.xml "$1" CHANGELOG.md
 add_version_to_fastlane "fastlane/metadata/android/en-US/changelogs/$version_code.txt" "$1" CHANGELOG.md
