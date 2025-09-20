@@ -4140,7 +4140,7 @@ dependencies = [
 
 [[package]]
 name = "openscq30-android"
-version = "1.19.3"
+version = "2.0.0"
 dependencies = [
  "android_logger",
  "anyhow",
@@ -4164,7 +4164,7 @@ dependencies = [
 
 [[package]]
 name = "openscq30-cli"
-version = "1.19.3"
+version = "2.0.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -4189,7 +4189,7 @@ dependencies = [
 
 [[package]]
 name = "openscq30-gui"
-version = "1.19.3"
+version = "2.0.0"
 dependencies = [
  "anyhow",
  "dirs 6.0.0",
@@ -4217,11 +4217,11 @@ dependencies = [
 
 [[package]]
 name = "openscq30-i18n"
-version = "1.19.3"
+version = "2.0.0"
 
 [[package]]
 name = "openscq30-i18n-macros"
-version = "1.19.3"
+version = "2.0.0"
 dependencies = [
  "heck 0.5.0",
  "openscq30-i18n",
@@ -4232,7 +4232,7 @@ dependencies = [
 
 [[package]]
 name = "openscq30-lib"
-version = "1.19.3"
+version = "2.0.0"
 dependencies = [
  "async-trait",
  "bluer",
@@ -4266,11 +4266,11 @@ dependencies = [
 
 [[package]]
 name = "openscq30-lib-has"
-version = "1.19.3"
+version = "2.0.0"
 
 [[package]]
 name = "openscq30-lib-macros"
-version = "1.19.3"
+version = "2.0.0"
 dependencies = [
  "heck 0.5.0",
  "itertools",
@@ -6185,7 +6185,7 @@ dependencies = [
 
 [[package]]
 name = "uniffi-bindgen"
-version = "1.19.3"
+version = "2.0.0"
 dependencies = [
  "uniffi",
 ]
