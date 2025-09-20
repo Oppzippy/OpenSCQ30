@@ -2,10 +2,6 @@
 set -euo pipefail
 
 install_path="$1"
-case "$OSTYPE" in
-    msys | cygwin) bin_ext=".exe" ;;
-    *) bin_ext="" ;;
-esac
 
 echo "Uninstalling from $install_path"
 echo Removing binary
