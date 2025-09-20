@@ -32,6 +32,11 @@
 - Rewrite using [libcosmic](https://github.com/pop-os/libcosmic)
 - Executable renamed from openscq30_gui to openscq30-gui
 
+#### Packaging Changes
+
+- GTK4 and libadwaita are no longer required
+- [cosmic-icons](https://github.com/pop-os/cosmic-icons/) is required on Linux
+
 #### Fixes
 
 - On Windows, a terminal window will no longer be shown. This change is made to match behavior on Linux.
