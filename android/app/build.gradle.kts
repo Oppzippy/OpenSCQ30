@@ -113,12 +113,12 @@ android {
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
 
-    val lifecycleVersion = "2.9.3"
+    val lifecycleVersion = "2.9.4"
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-service:$lifecycleVersion")
 
     // Compose
-    val composeBomVersion = "2025.08.01"
+    val composeBomVersion = "2025.09.00"
     implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     androidTestImplementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     implementation("androidx.compose.ui:ui")
@@ -137,16 +137,16 @@ dependencies {
     // Optional - Add full set of material icons
     implementation("androidx.compose.material:material-icons-extended")
     // Optional - Integration with activities
-    implementation("androidx.activity:activity-compose:1.10.1")
+    implementation("androidx.activity:activity-compose:1.11.0")
     // Optional - Integration with ViewModels
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     // Compose navigation
-    implementation("androidx.navigation:navigation-compose:2.9.3")
+    implementation("androidx.navigation:navigation-compose:2.9.4")
 
     val accompanistVersion = "0.37.3"
     implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
 
-    val roomVersion = "2.7.2"
+    val roomVersion = "2.8.0"
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     annotationProcessor("androidx.room:room-compiler:$roomVersion")
@@ -158,7 +158,7 @@ dependencies {
     val hiltVersion = "2.57.1"
     implementation("com.google.dagger:hilt-android:$hiltVersion")
     kapt("com.google.dagger:hilt-android-compiler:$hiltVersion")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
 
     // For instrumentation tests
     androidTestImplementation("com.google.dagger:hilt-android-testing:$hiltVersion")
