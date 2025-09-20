@@ -76,9 +76,13 @@ jobs:
         run: ./gradlew --no-daemon assembleRelease
         working-directory: android
       - name: Rename apk
-        run: mv android/app/build/outputs/apk/release/app-release-unsigned.apk openscq30-android.apk
+        run: |
+          mkdir artifacts
+          mv android/app/build/outputs/apk/release/app-*-release-unsigned.apk artifacts/
+          rename app- openscq30-android- artifacts/*
+          rename -- -release '' artifacts/*
       - name: Upload apk
         uses: actions/upload-artifact@v4
         with:
           name: android
-          path: openscq30-android.apk
+          path: artifacts/*
