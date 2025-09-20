@@ -6,10 +6,13 @@ script_dir="$(dirname -- "$script_path")"
 project_root="$script_dir/../.."
 
 install_path="$1"
-case "$OSTYPE" in
-    msys | cygwin) bin_ext=".exe" ;;
-    *) bin_ext="" ;;
-esac
 
 echo Installing binary
-install -Dm755 "$project_root/target/release/openscq30_gui$bin_ext" -t "$install_path/bin/"
+install -Dm755 "$project_root/target/release/openscq30-gui" -t "$install_path/bin/"
+echo Installing desktop file
+install -Dm644 "$project_root/gui/resources/com.oppzippy.OpenSCQ30.desktop" -t "$install_path/share/applications"
+echo Installing appstream metadata
+install -Dm644 "$project_root/gui/resources/com.oppzippy.OpenSCQ30.metainfo.xml" -t "$install_path/share/metainfo"
+echo Installing application icon
+install -Dm644 "$project_root/gui/resources/com.oppzippy.OpenSCQ30.svg" -t "$install_path/share/icons/hicolor/scalable/apps"
+

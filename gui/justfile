@@ -55,6 +55,7 @@ test-cov:
     cargo llvm-cov --no-report --no-cfg-coverage
 
 install path:
+    cargo build --release
     ./scripts/install.sh "{{path}}"
 
 uninstall path:

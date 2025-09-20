@@ -7,5 +7,12 @@ case "$OSTYPE" in
     *) bin_ext="" ;;
 esac
 
+echo "Uninstalling from $install_path"
 echo Removing binary
-rm "$install_path/bin/openscq30_gui$bin_ext" || true
+rm "$install_path/bin/openscq30-gui" || true
+echo Removing desktop file
+rm "$install_path/share/applications/com.oppzippy.OpenSCQ30.desktop" || true
+echo Removing appstream metainfo
+rm "$install_path/share/metainfo/com.oppzippy.OpenSCQ30.metainfo.xml" || true
+echo Removing icon
+rm "$install_path/share/icons/hicolor/scalable/apps/com.oppzippy.OpenSCQ30.svg" || true
