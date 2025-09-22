@@ -34,22 +34,22 @@ where
     ) -> device::Result<()> {
         let target_button_config = target_state.get();
         {
-            let state = state_sender.borrow();
-            let button_config = state.get();
-            if button_config == target_button_config {
-                return Ok(());
+            let button_config = *state_sender.borrow().get();
+            let changed_buttons = target_button_config
+                .iterate_buttons()
+                .filter(|(button, action)| *action != button_config.get_button(*button));
+
+            for (button, action) in changed_buttons {
+                tracing::debug!("{button:?} changed to {action:?}, sending packet");
+                self.packet_io
+                    .send_with_response(
+                        &a3959::packets::outbound::ButtonConfiguration::new(button, action).into(),
+                    )
+                    .await?;
+                state_sender.send_modify(|state| *state.get_mut().get_button_mut(button) = action);
             }
         }
 
-        self.packet_io
-            .send_with_response(
-                &a3959::packets::outbound::A3959SetMultiButtonConfiguration::new(
-                    *target_button_config,
-                )
-                .into(),
-            )
-            .await?;
-        state_sender.send_modify(|state| *state.get_mut() = *target_button_config);
         Ok(())
     }
 }

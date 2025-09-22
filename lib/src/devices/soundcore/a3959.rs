@@ -71,7 +71,7 @@ impl Translate for AutoPowerOffDuration {
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Arc;
+    use std::{collections::BTreeSet, sync::Arc, time::Duration};
 
     use macaddr::MacAddr6;
     use tokio::sync::mpsc;
@@ -249,5 +249,82 @@ mod tests {
             .recv()
             .await
             .expect("state update packet request");
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn test_set_multiple_button_actions() {
+        let (registry, inbound_sender, mut outbound_receiver) = create_test_connection().await;
+        inbound_sender
+            .send(
+                Packet {
+                    direction: Direction::Inbound,
+                    command: Command([1, 1]),
+                    body: vec![
+                        1, 1, 5, 6, 255, 255, 48, 49, 46, 54, 52, 48, 49, 46, 54, 52, 51, 57, 53,
+                        57, 68, 69, 68, 54, 54, 57, 50, 68, 66, 54, 70, 52, 254, 254, 101, 120,
+                        161, 171, 171, 152, 144, 179, 120, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10,
+                        241, 240, 102, 102, 242, 243, 68, 68, 51, 0, 85, 0, 0, 1, 255, 1, 49, 1, 1,
+                        0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    ],
+                }
+                .bytes(),
+            )
+            .await
+            .unwrap();
+        let device = registry
+            .connect(MacAddr6::nil())
+            .await
+            .expect("should parse packet");
+        _ = outbound_receiver
+            .recv()
+            .await
+            .expect("state update packet request");
+
+        tokio::spawn(async move {
+            let ok_packet = Packet {
+                direction: Direction::Inbound,
+                command: Command([0x04, 0x81]),
+                body: Vec::new(),
+            }
+            .bytes();
+            tokio::time::sleep(Duration::from_millis(50)).await;
+            inbound_sender.send(ok_packet.clone()).await.unwrap();
+            tokio::time::sleep(Duration::from_millis(50)).await;
+            inbound_sender.send(ok_packet).await.unwrap();
+        });
+        device
+            .set_setting_values(vec![
+                (SettingId::LeftSinglePress, "VolumeUp".into()),
+                (SettingId::RightSinglePress, "VolumeDown".into()),
+            ])
+            .await
+            .unwrap();
+
+        let packets = BTreeSet::from_iter([
+            outbound_receiver.recv().await.expect("first button action"),
+            outbound_receiver
+                .recv()
+                .await
+                .expect("second button action"),
+        ]);
+
+        let expected_packets = BTreeSet::from_iter([
+            // Left Volume Up
+            Packet {
+                direction: Direction::Outbound,
+                command: Command([0x04, 0x81]),
+                body: vec![0, 2, 0xF0],
+            }
+            .bytes(),
+            // Right Volume Down
+            Packet {
+                direction: Direction::Outbound,
+                command: Command([0x04, 0x81]),
+                body: vec![1, 2, 0xF1],
+            }
+            .bytes(),
+        ]);
+
+        assert_eq!(packets, expected_packets);
     }
 }

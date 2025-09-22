@@ -73,6 +73,46 @@ impl MultiButtonConfiguration {
         )
         .parse_complete(input)
     }
+
+    pub fn iterate_buttons(&self) -> impl Iterator<Item = (Button, TwsButtonAction)> {
+        [
+            (Button::LeftSingleClick, self.left_single_click),
+            (Button::RightSingleClick, self.right_single_click),
+            (Button::LeftDoubleClick, self.left_double_click),
+            (Button::RightDoubleClick, self.right_double_click),
+            (Button::LeftTripleClick, self.left_triple_click),
+            (Button::RightTripleClick, self.right_triple_click),
+            (Button::LeftLongPress, self.left_long_press),
+            (Button::RightLongPress, self.right_long_press),
+        ]
+        .into_iter()
+    }
+
+    pub fn get_button(&self, button: Button) -> TwsButtonAction {
+        match button {
+            Button::LeftSingleClick => self.left_single_click,
+            Button::LeftDoubleClick => self.left_double_click,
+            Button::LeftTripleClick => self.left_triple_click,
+            Button::LeftLongPress => self.left_long_press,
+            Button::RightSingleClick => self.right_single_click,
+            Button::RightDoubleClick => self.right_double_click,
+            Button::RightTripleClick => self.right_triple_click,
+            Button::RightLongPress => self.right_long_press,
+        }
+    }
+
+    pub fn get_button_mut(&mut self, button: Button) -> &mut TwsButtonAction {
+        match button {
+            Button::LeftSingleClick => &mut self.left_single_click,
+            Button::LeftDoubleClick => &mut self.left_double_click,
+            Button::LeftTripleClick => &mut self.left_triple_click,
+            Button::LeftLongPress => &mut self.left_long_press,
+            Button::RightSingleClick => &mut self.right_single_click,
+            Button::RightDoubleClick => &mut self.right_double_click,
+            Button::RightTripleClick => &mut self.right_triple_click,
+            Button::RightLongPress => &mut self.right_long_press,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
@@ -114,5 +154,45 @@ impl TwsButtonAction {
         } else {
             self.tws_disconnected_action = action;
         }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Button {
+    LeftSingleClick,
+    LeftDoubleClick,
+    LeftTripleClick,
+    LeftLongPress,
+    RightSingleClick,
+    RightDoubleClick,
+    RightTripleClick,
+    RightLongPress,
+}
+
+impl Button {
+    pub fn side_id(&self) -> u8 {
+        match self {
+            Button::LeftSingleClick
+            | Button::LeftDoubleClick
+            | Button::LeftTripleClick
+            | Button::LeftLongPress => 0,
+            Button::RightSingleClick
+            | Button::RightDoubleClick
+            | Button::RightTripleClick
+            | Button::RightLongPress => 1,
+        }
+    }
+
+    pub fn button_id(&self) -> u8 {
+        match self {
+            Button::LeftSingleClick | Button::RightSingleClick => 2,
+            Button::LeftDoubleClick | Button::RightDoubleClick => 0,
+            Button::LeftTripleClick | Button::RightTripleClick => 5,
+            Button::LeftLongPress | Button::RightLongPress => 1,
+        }
+    }
+
+    pub fn bytes(&self) -> impl Iterator<Item = u8> {
+        [self.side_id(), self.button_id()].into_iter()
     }
 }
