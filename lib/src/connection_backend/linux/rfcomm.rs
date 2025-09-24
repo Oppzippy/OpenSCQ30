@@ -24,7 +24,7 @@ use tokio::{
     },
     task::JoinHandle,
 };
-use tracing::{Instrument, debug, instrument, trace, trace_span, warn};
+use tracing::{Instrument, debug, debug_span, instrument, trace, trace_span, warn};
 use uuid::Uuid;
 
 use crate::api::connection::{
@@ -169,6 +169,8 @@ pub struct BluerRfcommConnection {
     connection_status_receiver: watch::Receiver<ConnectionStatus>,
     connection_status_handle: JoinHandle<()>,
     quit: Arc<Semaphore>,
+    // We need to not drop device in order for the device.events() stream in spawn_connection_status to not terminate
+    _device: Device,
 }
 
 impl BluerRfcommConnection {
@@ -187,6 +189,7 @@ impl BluerRfcommConnection {
             connection_status_receiver,
             connection_status_handle,
             quit,
+            _device: device,
         };
         Ok(connection)
     }
@@ -199,19 +202,24 @@ impl BluerRfcommConnection {
 
         let connection_status_handle = {
             let mut events = device.events().await?;
-            tokio::spawn(async move {
-                loop {
-                    if let Some(bluer::DeviceEvent::PropertyChanged(DeviceProperty::Connected(
-                        is_connected,
-                    ))) = events.next().await
-                    {
-                        connection_status_sender.send_replace(match is_connected {
-                            true => ConnectionStatus::Connected,
-                            false => ConnectionStatus::Disconnected,
-                        });
+            tokio::spawn(
+                async move {
+                    while let Some(event) = events.next().await {
+                        tracing::debug!("got event {event:?}");
+                        if let bluer::DeviceEvent::PropertyChanged(DeviceProperty::Connected(
+                            is_connected,
+                        )) = event
+                        {
+                            connection_status_sender.send_replace(match is_connected {
+                                true => ConnectionStatus::Connected,
+                                false => ConnectionStatus::Disconnected,
+                            });
+                        }
                     }
+                    tracing::warn!("event stream ended");
                 }
-            })
+                .instrument(debug_span!("spawn_connection_status")),
+            )
         };
 
         Ok((connection_status_receiver, connection_status_handle))
