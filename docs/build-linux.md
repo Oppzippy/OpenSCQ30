@@ -8,4 +8,5 @@ Instructions use Ubuntu package names. Package names may differ on other distros
 4. The compiled binary can be found at `target/release/openscq30-gui`
 
 ## Runtime Dependencies
+
 - [cosmic-icons](https://github.com/pop-os/cosmic-icons/): if a package isn't available, clone the git repo and run `just install`.
