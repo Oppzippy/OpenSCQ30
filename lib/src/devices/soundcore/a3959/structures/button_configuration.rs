@@ -172,23 +172,23 @@ pub enum Button {
 impl Button {
     pub fn side_id(&self) -> u8 {
         match self {
-            Button::LeftSingleClick
-            | Button::LeftDoubleClick
-            | Button::LeftTripleClick
-            | Button::LeftLongPress => 0,
-            Button::RightSingleClick
-            | Button::RightDoubleClick
-            | Button::RightTripleClick
-            | Button::RightLongPress => 1,
+            Self::LeftSingleClick
+            | Self::LeftDoubleClick
+            | Self::LeftTripleClick
+            | Self::LeftLongPress => 0,
+            Self::RightSingleClick
+            | Self::RightDoubleClick
+            | Self::RightTripleClick
+            | Self::RightLongPress => 1,
         }
     }
 
     pub fn button_id(&self) -> u8 {
         match self {
-            Button::LeftSingleClick | Button::RightSingleClick => 2,
-            Button::LeftDoubleClick | Button::RightDoubleClick => 0,
-            Button::LeftTripleClick | Button::RightTripleClick => 5,
-            Button::LeftLongPress | Button::RightLongPress => 1,
+            Self::LeftSingleClick | Self::RightSingleClick => 2,
+            Self::LeftDoubleClick | Self::RightDoubleClick => 0,
+            Self::LeftTripleClick | Self::RightTripleClick => 5,
+            Self::LeftLongPress | Self::RightLongPress => 1,
         }
     }
 
