@@ -1,8 +1,17 @@
-use std::{collections::VecDeque, ops::Deref, path::PathBuf, sync::Arc};
+use std::{
+    collections::VecDeque,
+    ops::Deref,
+    path::PathBuf,
+    sync::{
+        Arc,
+        atomic::{self, AtomicBool},
+    },
+};
 
 use cosmic::{
-    Application, ApplicationExt, Task,
+    Application, ApplicationExt, Apply, Task,
     app::{Core, context_drawer::ContextDrawer},
+    iced::{Length, alignment},
     widget::{self, nav_bar},
 };
 use macaddr::MacAddr6;
@@ -42,7 +51,7 @@ pub enum Message {
     CloseDialog,
     RemovePairedDevice(MacAddr6),
     BackToDeviceSelection,
-    ConnectToDeviceScreen(DebugOpenSCQ30Device),
+    ActivateConnectToDeviceScreen(DebugOpenSCQ30Device),
     CloseDialogAndRefreshPairedDevices,
     ActivateDeviceSelectionScreen,
     Warning(String),
@@ -50,6 +59,9 @@ pub enum Message {
     ShowAbout,
     OpenUrl(String),
     CloseContextDrawer,
+    ConnectToDeviceFailed(String),
+    CancelConnectToDevice,
+    None,
 }
 
 impl From<device_selection::Message> for Message {
@@ -90,6 +102,10 @@ enum DialogPage {
 enum Screen {
     DeviceSelection(device_selection::DeviceSelectionModel),
     AddDevice(add_device::AddDeviceModel),
+    Connecting {
+        canceled: Arc<AtomicBool>,
+        name: String,
+    },
     DeviceSettings(device_settings::DeviceSettingsModel),
 }
 
@@ -206,6 +222,7 @@ impl Application for AppModel {
                 Screen::AddDevice(add_device_model) => {
                     add_device_model.view().map(Message::AddDeviceScreen)
                 }
+                Screen::Connecting { canceled: _, name } => self.view_cancel(name),
                 Screen::DeviceSettings(device_settings_model) => device_settings_model
                     .view()
                     .map(Message::DeviceSettingsScreen),
@@ -217,6 +234,7 @@ impl Application for AppModel {
         let dialog = match &self.screen {
             Screen::DeviceSelection(_device_selection_model) => None,
             Screen::AddDevice(_add_device_model) => None,
+            Screen::Connecting { .. } => None,
             Screen::DeviceSettings(device_settings_model) => device_settings_model
                 .dialog()
                 .map(|e| e.map(Message::DeviceSettingsScreen)),
@@ -254,6 +272,7 @@ impl Application for AppModel {
             match &self.screen {
                 Screen::DeviceSelection(_device_selection_model) => None,
                 Screen::AddDevice(_add_device_model) => None,
+                Screen::Connecting { .. } => None,
                 Screen::DeviceSettings(device_settings_model) => device_settings_model
                     .context_drawer()
                     .map(|drawer| drawer.map(Message::DeviceSettingsScreen)),
@@ -263,19 +282,40 @@ impl Application for AppModel {
 
     fn update(&mut self, message: Self::Message) -> cosmic::app::Task<Self::Message> {
         match message {
+            Message::None => (),
             Message::DeviceSelectionScreen(message) => {
                 if let Screen::DeviceSelection(ref mut screen) = self.screen {
                     match screen.update(message) {
                         device_selection::Action::ConnectToDevice(paired_device) => {
                             let session = self.session.clone();
+                            let canceled = Arc::new(AtomicBool::new(false));
+                            self.screen = Screen::Connecting {
+                                canceled: canceled.clone(),
+                                name: paired_device.model.translate(),
+                            };
                             return Task::future(async move {
                                 let device = session
                                     .connect(paired_device.mac_address)
                                     .await
-                                    .map_err(handle_soft_error!())?;
+                                    .map_err(|err| {
+                                        let err = anyhow::Error::from(err);
+                                        tracing::warn!("soft_error: {err:?}");
+                                        Message::ConnectToDeviceFailed(fl!(
+                                            "error-with-message",
+                                            err = format!("{err:#}")
+                                        ))
+                                    })?;
 
-                                Ok(Message::ConnectToDeviceScreen(DebugOpenSCQ30Device(device))
+                                // Connecting to the device may not be cancel safe (TODO make it cancel safe),
+                                // so wait for it to finish and then drop it if we canceled connecting.
+                                if canceled.load(atomic::Ordering::Relaxed) {
+                                    Ok(Message::None.into())
+                                } else {
+                                    Ok(Message::ActivateConnectToDeviceScreen(
+                                        DebugOpenSCQ30Device(device),
+                                    )
                                     .into())
+                                }
                             })
                             .map(coalesce_result);
                         }
@@ -362,7 +402,19 @@ impl Application for AppModel {
                 self.screen = Screen::DeviceSelection(model);
                 return task.map(Message::DeviceSelectionScreen).map(Into::into);
             }
-            Message::ConnectToDeviceScreen(device) => {
+            Message::CancelConnectToDevice => {
+                if let Screen::Connecting { canceled, .. } = &self.screen {
+                    canceled.store(true, atomic::Ordering::Relaxed);
+                    return Task::done(Message::ActivateDeviceSelectionScreen.into());
+                }
+            }
+            Message::ConnectToDeviceFailed(message) => {
+                return Task::batch([
+                    Task::done(Message::ActivateDeviceSelectionScreen.into()),
+                    Task::done(Message::Warning(message).into()),
+                ]);
+            }
+            Message::ActivateConnectToDeviceScreen(device) => {
                 let (model, task) = device_settings::DeviceSettingsModel::new(
                     device,
                     self.session.quick_preset_handler(),
@@ -401,5 +453,21 @@ impl AppModel {
         } else {
             Task::none()
         }
+    }
+
+    fn view_cancel(&self, device_name: &str) -> cosmic::Element<'_, Message> {
+        widget::column()
+            .spacing(10)
+            .align_x(alignment::Horizontal::Center)
+            .push(widget::text::title2(fl!(
+                "connecting-to",
+                name = device_name
+            )))
+            .push(
+                widget::button::destructive(fl!("cancel")).on_press(Message::CancelConnectToDevice),
+            )
+            .apply(widget::container)
+            .center(Length::Fill)
+            .into()
     }
 }

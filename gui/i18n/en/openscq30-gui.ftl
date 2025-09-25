@@ -2,6 +2,7 @@ openscq30 = OpenSCQ30
 device-selection = Device Selection
 select-device = Select Device
 connect = Connect
+connecting-to = Connecting to { $name }
 remove = Remove
 prompt-remove-device-title = Remove Device
 prompt-remove-device = Are you sure you want to remove { $name }?
