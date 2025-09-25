@@ -2,6 +2,7 @@ use std::marker::PhantomData;
 
 use cosmic::{
     Element,
+    cosmic_theme::palette::WithAlpha,
     iced::{Length, Point},
     widget::{self, canvas},
 };
@@ -60,6 +61,22 @@ impl<Message> canvas::Program<Message, cosmic::Theme, cosmic::Renderer> for Equa
     ) -> Vec<canvas::Geometry<cosmic::iced::Renderer>> {
         let equalizer_line = self.cache.draw(renderer, bounds.size(), |frame| {
             let theme = theme.cosmic();
+
+            for height in [2.0, frame.height() / 2.0, frame.height() - 2.0] {
+                frame.stroke(
+                    &canvas::Path::line(Point::new(0.0, height), Point::new(frame.width(), height)),
+                    canvas::Stroke {
+                        style: canvas::stroke::Style::Solid(
+                            theme.on_bg_color().with_alpha(0.3).into(),
+                        ),
+                        width: 1.0,
+                        line_cap: canvas::LineCap::Square,
+                        line_join: canvas::LineJoin::Bevel,
+                        line_dash: canvas::LineDash::default(),
+                    },
+                );
+            }
+
             let paths = self
                 .points(frame.width(), frame.height(), 4f32)
                 .tuple_windows()
