@@ -24,7 +24,7 @@ pub enum Message {
 
 impl LegacyMigrationModel {
     pub fn new(profiles: HashMap<String, LegacyEqualizerProfile>) -> Self {
-        let profiles = profiles
+        let mut profiles = profiles
             .into_iter()
             .map(|(name, profile)| LegacyProfileInfo {
                 name: name.to_owned(),
@@ -32,6 +32,7 @@ impl LegacyMigrationModel {
                 visualization: EqualizerLine::new(-120, 135, profile.volume_offsets),
             })
             .collect::<Vec<_>>();
+        profiles.sort_unstable_by(|a, b| a.name.cmp(&b.name));
 
         Self { profiles }
     }
