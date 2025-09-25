@@ -64,7 +64,7 @@ impl DeviceSelectionModel {
                         ),
                 )
                 .extend(self.items())
-                .padding(10)
+                .padding([0, 10])
                 .spacing(10),
         )
         .width(Length::Fill)
