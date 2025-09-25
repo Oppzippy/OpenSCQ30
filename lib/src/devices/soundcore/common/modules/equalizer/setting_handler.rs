@@ -38,13 +38,13 @@ impl<const C: usize, const B: usize> EqualizerSettingHandler<C, B> {
     ) -> [VolumeAdjustments<B>; C] {
         // Some devices have extra bands, but those aren't exposed to the user, so I have no idea what they're for
         // We can just add back in whatever was there before (we're only showing the user the first 8 bands)
-        array::from_fn(|i| {
-            VolumeAdjustments::new(array::from_fn(|j| {
-                if j < values.len() {
-                    values[j]
-                } else {
-                    existing_volume_adjustments[i].adjustments()[j - values.len()]
-                }
+        array::from_fn(|band| {
+            let band_adjustments = existing_volume_adjustments[band].adjustments();
+            VolumeAdjustments::new(array::from_fn(|channel| {
+                values
+                    .get(channel)
+                    .copied()
+                    .unwrap_or(band_adjustments[channel])
             }))
         })
     }
