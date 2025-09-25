@@ -37,43 +37,53 @@ impl LegacyMigrationModel {
     }
 
     pub fn view(&self) -> Element<'_, Message> {
-        widget::scrollable(
-            widget::column()
-                .padding(10)
-                .extend(self.profiles.iter().map(|profile| {
-                    widget::row()
-                        .spacing(20)
-                        .align_y(Vertical::Center)
-                        .push(
-                            widget::column()
-                                .align_x(Horizontal::Center)
-                                .push(widget::text::heading(&profile.name))
-                                .push(widget::text(format!(
-                                    "{:?}",
-                                    profile
-                                        .values
-                                        .iter()
-                                        .map(|v| *v as f32 / 10f32)
-                                        .collect::<Vec<_>>()
-                                )))
-                                .push(
+        widget::scrollable(widget::column().padding(10).spacing(10).extend(
+            self.profiles.iter().map(|profile| {
+                widget::row()
+                    .padding(10)
+                    .spacing(20)
+                    .align_y(Vertical::Center)
+                    .push(
+                        widget::column()
+                            .align_x(Horizontal::Center)
+                            .push(widget::text::heading(&profile.name))
+                            .push(widget::text(format!(
+                                "{:?}",
+                                profile
+                                    .values
+                                    .iter()
+                                    .map(|v| *v as f32 / 10f32)
+                                    .collect::<Vec<_>>()
+                            )))
+                            .push(widget::vertical_space().height(4))
+                            .push(
+                                widget::responsive(|size| {
                                     profile
                                         .visualization
                                         .view()
                                         .apply(widget::container)
-                                        .width(400)
-                                        .height(40),
-                                ),
-                        )
-                        .push(
-                            widget::button::standard(fl!("migrate")).on_press(Message::Migrate(
-                                profile.name.to_owned(),
-                                profile.values.to_owned(),
-                            )),
-                        )
-                        .into()
-                })),
-        )
+                                        .width(size.width)
+                                        .height(40)
+                                        .into()
+                                })
+                                .apply(widget::container)
+                                // responsive wants to fill all available height, but that is not desirable
+                                // it will even crash due to being a child of scrollable, so constrain its height
+                                // by wrapping in a container
+                                .height(40),
+                            ),
+                    )
+                    .push(
+                        widget::button::standard(fl!("migrate")).on_press(Message::Migrate(
+                            profile.name.to_owned(),
+                            profile.values.to_owned(),
+                        )),
+                    )
+                    .apply(widget::container)
+                    .class(cosmic::style::Container::Card)
+                    .into()
+            }),
+        ))
         .into()
     }
 }

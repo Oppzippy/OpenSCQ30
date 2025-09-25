@@ -38,7 +38,7 @@ impl<Message> EqualizerLine<Message> {
         let height_without_padding = height - padding * 2.0;
         let range = self.max - self.min;
         self.values.iter().enumerate().map(move |(i, v)| {
-            let normalized_x = i as f32 / self.values.len() as f32;
+            let normalized_x = i as f32 / (self.values.len() - 1) as f32;
             let x = normalized_x * width_without_padding + padding;
             let normalized_y = 1f32 - ((v - self.min) as f32 / range as f32);
             let y = normalized_y * height_without_padding + padding;
