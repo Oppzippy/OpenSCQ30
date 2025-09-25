@@ -8,6 +8,7 @@ prompt-remove-device = Are you sure you want to remove { $name }?
 cancel = Cancel
 add-device = Add Device
 device-model = Device Model
+select-device-model = Select Device Model
 select-your = Select Your { $name }
 device-name = Device Name
 error-loading-devices = Error Loading Devices

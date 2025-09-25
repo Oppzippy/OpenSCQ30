@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use cosmic::{
     Apply, Element, Task,
-    iced::Length,
+    iced::{Length, alignment},
     widget::{self, Id},
 };
 use openscq30_i18n::Translate;
@@ -68,6 +68,7 @@ impl AddDeviceModel {
             }),
         }
     }
+
     pub fn view(&self) -> Element<'_, Message> {
         match &self.stage {
             Stage::ModelSelection(ui_model) => Self::device_model_selection(ui_model),
@@ -79,10 +80,18 @@ impl AddDeviceModel {
 
     fn device_model_selection(ui_model: &ModelSelectionModel) -> Element<'_, Message> {
         widget::column()
+            .spacing(8)
             .push(
-                widget::search_input(fl!("device-model"), &ui_model.search_query)
-                    .id(ui_model.search_id.clone())
-                    .on_input(Message::SetDeviceModelSearchQuery),
+                widget::column()
+                    .spacing(8)
+                    // padding should not apply to the list of devices, since those are buttons with their own padding
+                    .padding([0, 10])
+                    .push(widget::text::title2(fl!("select-device-model")))
+                    .push(
+                        widget::search_input(fl!("device-model"), &ui_model.search_query)
+                            .id(ui_model.search_id.clone())
+                            .on_input(Message::SetDeviceModelSearchQuery),
+                    ),
             )
             .push(widget::scrollable(
                 widget::column().extend(
@@ -105,59 +114,95 @@ impl AddDeviceModel {
     }
 
     fn select_device(ui_model: &SelectDeviceModel) -> Element<'_, Message> {
-        widget::column()
-            .push(widget::text::title2(fl!(
-                "select-your",
-                name = <&'static str>::from(ui_model.device_model)
-            )))
-            .push(
-                widget::row()
-                    .push(
-                        widget::search_input(fl!("device-name"), &ui_model.search_query)
-                            .id(ui_model.search_id.clone())
-                            .on_input(Message::SetDeviceNameSearchQuery),
-                    )
-                    .push(
-                        widget::toggler(ui_model.is_demo_mode)
-                            .label(fl!("demo-mode"))
-                            .on_toggle(|enabled| {
-                                Message::SelectModel(ui_model.device_model, enabled)
-                            }),
-                    )
-                    .push(
-                        widget::button::standard(fl!("refresh"))
-                            .leading_icon(view_refresh_symbolic())
-                            .on_press(Message::SelectModel(
-                                ui_model.device_model,
-                                ui_model.is_demo_mode,
-                            )),
-                    ),
-            )
-            .push(widget::scrollable(
-                widget::column().extend(
-                    ui_model
-                        .devices
-                        .iter()
-                        .enumerate()
-                        .filter(|(_, device)| {
-                            device
-                                .name
-                                .to_lowercase()
-                                .contains(&ui_model.search_query.to_lowercase())
-                        })
-                        .map(|(index, device)| {
-                            widget::button::text(&device.name)
-                                .width(Length::Fill)
-                                .on_press(Message::SelectDevice(index, ui_model.is_demo_mode))
+        widget::responsive(|size| {
+            widget::column()
+                .spacing(8)
+                .push(
+                    widget::column()
+                        .spacing(8)
+                        .padding([0, 10])
+                        .push(widget::text::title2(fl!(
+                            "select-your",
+                            name = ui_model.device_model.translate()
+                        )))
+                        .push({
+                            let search_input =
+                                widget::search_input(fl!("device-name"), &ui_model.search_query)
+                                    .id(ui_model.search_id.clone())
+                                    .on_input(Message::SetDeviceNameSearchQuery);
+                            let demo_toggle = widget::toggler(ui_model.is_demo_mode)
+                                .label(fl!("demo-mode"))
+                                .on_toggle(|enabled| {
+                                    Message::SelectModel(ui_model.device_model, enabled)
+                                });
+                            let refresh = widget::button::standard(fl!("refresh"))
+                                .leading_icon(view_refresh_symbolic())
+                                .on_press(Message::SelectModel(
+                                    ui_model.device_model,
+                                    ui_model.is_demo_mode,
+                                ));
+                            if size.width < 450f32 {
+                                Element::from(
+                                    widget::column()
+                                        .spacing(8)
+                                        .push(search_input)
+                                        .push(
+                                            widget::row::with_children(vec![
+                                                demo_toggle
+                                                    .apply(widget::container)
+                                                    .width(Length::Fill)
+                                                    .into(),
+                                                refresh
+                                                    .apply(widget::container)
+                                                    .width(Length::Fill)
+                                                    .align_x(alignment::Horizontal::Right)
+                                                    .into(),
+                                            ])
+                                            .spacing(8)
+                                            .align_y(alignment::Vertical::Center),
+                                        )
+                                        .spacing(8),
+                                )
+                            } else {
+                                widget::row::with_children(vec![
+                                    search_input.into(),
+                                    demo_toggle.into(),
+                                    refresh.into(),
+                                ])
+                                .align_y(alignment::Vertical::Center)
+                                .spacing(8)
                                 .into()
+                            }
                         }),
-                ),
-            ))
-            .into()
+                )
+                .push(widget::scrollable(
+                    widget::column().extend(
+                        ui_model
+                            .devices
+                            .iter()
+                            .enumerate()
+                            .filter(|(_, device)| {
+                                device
+                                    .name
+                                    .to_lowercase()
+                                    .contains(&ui_model.search_query.to_lowercase())
+                            })
+                            .map(|(index, device)| {
+                                widget::button::text(&device.name)
+                                    .width(Length::Fill)
+                                    .on_press(Message::SelectDevice(index, ui_model.is_demo_mode))
+                                    .into()
+                            }),
+                    ),
+                ))
+                .into()
+        })
+        .into()
     }
 
     fn loading(item: String) -> Element<'static, Message> {
-        widget::container(widget::text::title2(fl!("loading-item", item = item)))
+        widget::text::title2(fl!("loading-item", item = item))
+            .apply(widget::container)
             .center(Length::Fill)
             .into()
     }
