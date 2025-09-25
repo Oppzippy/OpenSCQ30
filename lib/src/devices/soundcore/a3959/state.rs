@@ -14,7 +14,7 @@ pub struct A3959State {
     dual_battery: DualBattery,
     dual_firmware_version: DualFirmwareVersion,
     serial_number: SerialNumber,
-    equalizer_configuration: EqualizerConfiguration<2, 10>,
+    equalizer_configuration: EqualizerConfiguration<1, 10>,
     button_configuration: a3959::structures::MultiButtonConfiguration,
     ambient_sound_mode_cycle: AmbientSoundModeCycle,
     sound_modes: a3959::structures::SoundModes,

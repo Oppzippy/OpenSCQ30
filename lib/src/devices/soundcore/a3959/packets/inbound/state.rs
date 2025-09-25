@@ -31,7 +31,7 @@ pub struct A3959State {
     pub dual_battery: common::structures::DualBattery,
     pub dual_firmware_version: common::structures::DualFirmwareVersion,
     pub serial_number: common::structures::SerialNumber,
-    pub equalizer_configuration: common::structures::EqualizerConfiguration<2, 10>,
+    pub equalizer_configuration: common::structures::EqualizerConfiguration<1, 10>,
     pub button_configuration: a3959::structures::MultiButtonConfiguration,
     pub ambient_sound_mode_cycle: common::structures::AmbientSoundModeCycle,
     pub sound_modes: a3959::structures::SoundModes,
@@ -54,6 +54,7 @@ impl InboundPacket for A3959State {
                     common::structures::DualFirmwareVersion::take,
                     common::structures::SerialNumber::take,
                     common::structures::EqualizerConfiguration::take,
+                    take(10usize),
                     take(1usize),
                     a3959::structures::MultiButtonConfiguration::take,
                     common::structures::AmbientSoundModeCycle::take,
@@ -72,6 +73,7 @@ impl InboundPacket for A3959State {
                     dual_firmware_version,
                     serial_number,
                     equalizer_configuration,
+                    _unknown1,
                     _unknown2,
                     button_configuration,
                     ambient_sound_mode_cycle,
@@ -118,6 +120,7 @@ impl OutboundPacket for A3959State {
             .chain(self.dual_firmware_version.bytes())
             .chain(self.serial_number.bytes())
             .chain(self.equalizer_configuration.bytes())
+            .chain([0; 10])
             .chain([0])
             .chain(self.button_configuration.bytes())
             .chain(self.ambient_sound_mode_cycle.bytes())

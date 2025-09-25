@@ -49,7 +49,7 @@ response = [
     60,
     120,
     120,  # EQ bands end
-    0,    # Probably right side eq start
+    0,    # Start Maybe DRC related?
     0,
     0,
     0,
@@ -58,7 +58,7 @@ response = [
     0,
     0,
     0,
-    0,    # Probably right side eq end
+    0,    # End maybe DRC related
     10,   # Unknown, changing from 10 can enable gaming mode or mess up ambient sound mode
     241,  # Left Single Tap
     240,  # Right Single Tap
