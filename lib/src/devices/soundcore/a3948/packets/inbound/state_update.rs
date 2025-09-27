@@ -33,7 +33,7 @@ pub struct A3948StateUpdatePacket {
     pub battery: DualBattery,
     pub firmware_version: DualFirmwareVersion,
     pub serial_number: SerialNumber,
-    pub equalizer_configuration: EqualizerConfiguration<2, 10>,
+    pub equalizer_configuration: EqualizerConfiguration<1, 10>,
     pub button_configuration: a3948::structures::MultiButtonConfiguration,
     pub touch_tone: TouchTone,
 }
@@ -51,7 +51,7 @@ impl InboundPacket for A3948StateUpdatePacket {
                     DualFirmwareVersion::take,
                     SerialNumber::take,
                     EqualizerConfiguration::take,
-                    take(1usize), // padding
+                    take(11usize), // padding
                     a3948::structures::MultiButtonConfiguration::take,
                     take(5usize), // padding
                     TouchTone::take,
@@ -98,7 +98,7 @@ impl OutboundPacket for A3948StateUpdatePacket {
             .chain(self.firmware_version.bytes())
             .chain(self.serial_number.bytes())
             .chain(self.equalizer_configuration.bytes())
-            .chain(std::iter::once(0))
+            .chain([0; 11]) // padding
             .chain(self.button_configuration.bytes()) // TODO button configuration
             .chain([0; 5]) // padding
             .chain(self.touch_tone.bytes())

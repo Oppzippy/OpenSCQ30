@@ -14,7 +14,7 @@ pub struct A3948State {
     battery: DualBattery,
     firmware_version: DualFirmwareVersion,
     serial_number: SerialNumber,
-    equalizer_configuration: EqualizerConfiguration<2, 10>,
+    equalizer_configuration: EqualizerConfiguration<1, 10>,
     button_configuration: a3948::structures::MultiButtonConfiguration,
     touch_tone: TouchTone,
 }

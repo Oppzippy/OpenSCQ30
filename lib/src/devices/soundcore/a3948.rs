@@ -23,7 +23,7 @@ soundcore_device!(
     },
     async |builder| {
         builder.module_collection().add_state_update();
-        builder.equalizer().await;
+        builder.equalizer_with_drc().await;
 
         builder.a3948_button_configuration();
 
