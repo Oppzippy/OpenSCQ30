@@ -30,7 +30,6 @@ nom = { workspace = true }
 nom-language = { workspace = true }
 serde = { workspace = true, features = ["derive", "rc"] }
 serde_json = { workspace = true }
-static_assertions = { workspace = true }
 async-trait = { workspace = true }
 rusqlite = { workspace = true }
 i18n-embed = { workspace = true, features = [
