@@ -15,7 +15,7 @@ use crate::{
                     OutboundPacketBytesExt, RequestSerialNumberAndFirmwareVersion, RequestState,
                 },
             },
-            structures::{AmbientSoundMode, TransparencyMode},
+            structures::{AmbientSoundMode, NoiseCancelingMode, TransparencyMode},
         },
     },
     i18n::fl,
@@ -41,12 +41,20 @@ soundcore_device!(
     async |builder| {
         builder.module_collection().add_state_update();
         builder.sound_modes(AvailableSoundModes {
-            ambient_sound_modes: vec![AmbientSoundMode::Normal, AmbientSoundMode::Transparency],
+            ambient_sound_modes: vec![
+                AmbientSoundMode::Normal,
+                AmbientSoundMode::Transparency,
+                AmbientSoundMode::NoiseCanceling,
+            ],
             transparency_modes: vec![
                 TransparencyMode::FullyTransparent,
                 TransparencyMode::VocalMode,
             ],
-            noise_canceling_modes: Vec::new(),
+            noise_canceling_modes: vec![
+                NoiseCancelingMode::Transport,
+                NoiseCancelingMode::Outdoor,
+                NoiseCancelingMode::Indoor,
+            ],
         });
         builder.equalizer_with_drc().await;
         builder.button_configuration();
