@@ -19,7 +19,7 @@
         <keyword>earbuds</keyword>
         <keyword>q30</keyword>
     </keywords>
-    <icon type="remote">https://raw.githubusercontent.com/Oppzippy/OpenSCQ30/master/gui/resources/com.oppzippy.OpenSCQ30.svg</icon>
+    <icon type="remote">https://raw.githubusercontent.com/Oppzippy/OpenSCQ30/f66a292401d8e157ffa3356e2e03eca1e8b7a860/gui/resources/com.oppzippy.OpenSCQ30.svg</icon>
     <url type="homepage">https://github.com/Oppzippy/OpenSCQ30</url>
     <developer id="com.oppzippy">
         <name>Oppzippy</name>
@@ -29,16 +29,20 @@
     <launchable type="desktop-id">com.oppzippy.OpenSCQ30.desktop</launchable>
     <screenshots>
         <screenshot type="default">
-            <image>https://raw.githubusercontent.com/Oppzippy/OpenSCQ30/dceaeaf4556ba7ef2096ab67948384a3deef8a16/screenshots/gui_general.png</image>
-            <caption>General Settings</caption>
+            <image>https://raw.githubusercontent.com/Oppzippy/OpenSCQ30/f66a292401d8e157ffa3356e2e03eca1e8b7a860/screenshots/gui-sound-modes.png</image>
+            <caption>Sound Mode Settings</caption>
         </screenshot>
         <screenshot>
-            <image>https://raw.githubusercontent.com/Oppzippy/OpenSCQ30/dceaeaf4556ba7ef2096ab67948384a3deef8a16/screenshots/gui_equalizer.png</image>
+            <image>https://raw.githubusercontent.com/Oppzippy/OpenSCQ30/f66a292401d8e157ffa3356e2e03eca1e8b7a860/screenshots/gui-device-selection.png</image>
+            <caption>Device Selection</caption>
+        </screenshot>
+        <screenshot>
+            <image>https://raw.githubusercontent.com/Oppzippy/OpenSCQ30/f66a292401d8e157ffa3356e2e03eca1e8b7a860/screenshots/gui-equalizer.png</image>
             <caption>Equalizer Settings</caption>
         </screenshot>
         <screenshot>
-            <video container="webm" codec="vp9" width="902" height="386">https://user-images.githubusercontent.com/2236514/229958756-aaa2a6d3-e908-4195-aad6-b0bcfda139a8.webm</video>
-            <caption>Clicking through the different features of the application</caption>
+            <image>https://raw.githubusercontent.com/Oppzippy/OpenSCQ30/f66a292401d8e157ffa3356e2e03eca1e8b7a860/screenshots/gui-quick-presets.png</image>
+            <caption>Quick Presets</caption>
         </screenshot>
     </screenshots>
     <provides>
