@@ -188,10 +188,20 @@ impl AddDeviceModel {
                                     .contains(&ui_model.search_query.to_lowercase())
                             })
                             .map(|(index, device)| {
-                                widget::button::text(&device.name)
-                                    .width(Length::Fill)
-                                    .on_press(Message::SelectDevice(index, ui_model.is_demo_mode))
-                                    .into()
+                                widget::button::custom(
+                                    widget::row::with_children(vec![
+                                        widget::text(&device.name).into(),
+                                        widget::text(device.mac_address.to_string())
+                                            .align_x(alignment::Horizontal::Right)
+                                            .into(),
+                                    ])
+                                    .align_y(alignment::Vertical::Center),
+                                )
+                                .name(&device.name)
+                                .class(widget::button::ButtonClass::Text)
+                                .width(Length::Fill)
+                                .on_press(Message::SelectDevice(index, ui_model.is_demo_mode))
+                                .into()
                             }),
                     ),
                 ))
