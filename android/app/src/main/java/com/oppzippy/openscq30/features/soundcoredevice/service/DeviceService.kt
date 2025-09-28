@@ -168,7 +168,21 @@ class DeviceService : LifecycleService() {
                 ConnectionStatus.Connecting(macAddress),
             )
         }
-
+        // when we are connected to a device that becomes disconnected, update our connection status to disconnected
+        lifecycleScope.launch {
+            connectionStatusFlow.collectLatest { connectionStatus ->
+                if (connectionStatus is ConnectionStatus.Connected) {
+                    connectionStatus.deviceManager.connectionStatusFlow.collectLatest { deviceConnectionStatus ->
+                        if (deviceConnectionStatus ==
+                            com.oppzippy.openscq30.lib.bindings.ConnectionStatus.Disconnected
+                        ) {
+                            Log.d(TAG, "device disconnected")
+                            connectionStatusFlow.value = ConnectionStatus.Disconnected
+                        }
+                    }
+                }
+            }
+        }
         lifecycleScope.launch {
             connectionStatusFlow.first { it == ConnectionStatus.Disconnected }
             stopSelf()
