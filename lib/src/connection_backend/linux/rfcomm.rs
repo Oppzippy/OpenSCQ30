@@ -216,7 +216,7 @@ impl BluerRfcommConnection {
                             });
                         }
                     }
-                    tracing::warn!("event stream ended");
+                    tracing::debug!("event stream ended");
                 }
                 .instrument(debug_span!("spawn_connection_status")),
             )

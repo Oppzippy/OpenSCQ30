@@ -17,10 +17,11 @@ use cosmic::{
 use legacy_migration::LegacyMigrationModel;
 use openscq30_i18n::Translate;
 use openscq30_lib::{
+    connection::ConnectionStatus,
     quick_presets::QuickPresetsHandler,
     settings::{self, CategoryId, Setting, SettingId, Value},
 };
-use tracing::debug;
+use tracing::{Instrument, debug};
 
 use crate::{
     app::DebugOpenSCQ30Device,
@@ -51,6 +52,7 @@ pub enum Message {
     SetImportString(SettingId, String),
     AskConfirmImportString(SettingId, String),
     ConfirmImportString,
+    Disconnect,
 }
 
 impl From<quick_presets::Message> for Message {
@@ -70,6 +72,7 @@ pub enum Action {
     Warning(String),
     FocusTextInput(widget::Id),
     None,
+    Disconnect,
 }
 
 pub struct DeviceSettingsModel {
@@ -125,6 +128,25 @@ impl DeviceSettingsModel {
         let (quick_presets_model, quick_presets_refresh_task) =
             quick_presets::QuickPresetsModel::new(device.clone(), quick_presets_handler);
 
+        let mut connection_status = device.0.connection_status();
+        let watch_for_disconnect_task = Task::future(
+            async move {
+                loop {
+                    if matches!(*connection_status.borrow(), ConnectionStatus::Disconnected) {
+                        tracing::info!("device disconnected");
+                        return Message::Disconnect;
+                    }
+                    if connection_status.changed().await.is_err() {
+                        // sender is dropped, which means device was dropped, which means DeviceSettingsModel was dropped
+                        // in that case, bail
+                        tracing::debug!("connection status sender dropped, bailing");
+                        return Message::None;
+                    }
+                }
+            }
+            .instrument(tracing::info_span!("watch_for_disconnect_task")),
+        );
+
         let mut model = Self {
             throttle: throttle::Throttle::new(device.0.clone()),
             device,
@@ -140,6 +162,7 @@ impl DeviceSettingsModel {
             quick_presets_refresh_task.map(Into::into),
             Self::initialize_legacy_migration(config_dir),
             Task::stream(stream),
+            watch_for_disconnect_task,
         ]);
         (model, task)
     }
@@ -572,6 +595,7 @@ impl DeviceSettingsModel {
                 throttle::Action::Error(err) => Action::Task(Task::done(handle_soft_error!()(err))),
                 throttle::Action::None => Action::None,
             },
+            Message::Disconnect => Action::Disconnect,
         }
     }
 }

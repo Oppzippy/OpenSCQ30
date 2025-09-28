@@ -372,6 +372,9 @@ impl Application for AppModel {
                         device_settings::Action::FocusTextInput(id) => {
                             return widget::text_input::focus(id);
                         }
+                        device_settings::Action::Disconnect => {
+                            return Task::done(Message::ActivateDeviceSelectionScreen.into());
+                        }
                     }
                 }
             }
