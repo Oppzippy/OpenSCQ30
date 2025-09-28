@@ -93,4 +93,6 @@
         &lt;/ul>
         &lt;p>See &lt;a href="https://github.com/Oppzippy/OpenSCQ30/blob/master/CHANGELOG.md">CHANGELOG.md&lt;/a> for details.&lt;/p>
     </string>
+    <string name="delete_quick_preset">Delete Quick Preset</string>
+    <string name="error_deleting_quick_preset">Error deleting quick preset</string>
 </resources>

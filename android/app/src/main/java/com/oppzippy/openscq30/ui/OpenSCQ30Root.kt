@@ -78,6 +78,7 @@ fun OpenSCQ30Root(viewModel: OpenSCQ30RootViewModel = hiltViewModel()) {
                                 quickPresetsFlow = deviceSettings.quickPresetsFlow,
                                 activateQuickPreset = { deviceSettings.activateQuickPreset(it) },
                                 createQuickPreset = { deviceSettings.createQuickPreset(it) },
+                                deleteQuickPreset = { deviceSettings.deleteQuickPreset(it) },
                                 toggleQuickPresetSetting = { name: String, settingId: String, enabled: Boolean ->
                                     deviceSettings.toggleQuickPresetSetting(name, settingId, enabled)
                                 },

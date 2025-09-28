@@ -59,7 +59,7 @@ impl QuickPresetsHandler {
         name: String,
     ) -> Result<(), crate::OpenSCQ30Error> {
         self.inner
-            .activate(device.inner.as_ref(), name)
+            .delete(device.inner.as_ref(), name)
             .await
             .map_err(Into::into)
     }

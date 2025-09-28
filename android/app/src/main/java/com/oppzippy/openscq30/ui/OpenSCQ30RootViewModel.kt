@@ -252,6 +252,18 @@ class DeviceSettingsManager(
         }
     }
 
+    fun deleteQuickPreset(name: String) {
+        coroutineScope.launch {
+            try {
+                quickPresetHandler.delete(device, name)
+            } catch (ex: OpenScq30Exception) {
+                Log.e(TAG, "error deleting quick preset", ex)
+                toastHandler.add(R.string.error_deleting_quick_preset, Toast.LENGTH_SHORT)
+            }
+            refreshQuickPresets()
+        }
+    }
+
     fun toggleQuickPresetSetting(name: String, settingId: String, enabled: Boolean) {
         coroutineScope.launch {
             quickPresetHandler.toggleField(device, name, settingId, enabled)

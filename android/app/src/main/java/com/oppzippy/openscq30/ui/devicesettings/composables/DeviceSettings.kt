@@ -50,6 +50,7 @@ fun DeviceSettings(
     quickPresetsFlow: Flow<List<QuickPreset>>,
     activateQuickPreset: (name: String) -> Unit,
     createQuickPreset: (name: String) -> Unit,
+    deleteQuickPreset: (name: String) -> Unit,
     toggleQuickPresetSetting: (name: String, settingId: String, enabled: Boolean) -> Unit,
     featuredSettingSlotsFlow: Flow<List<String?>>,
     onFeaturedSettingSlotChange: (Int, String?) -> Unit,
@@ -159,6 +160,7 @@ fun DeviceSettings(
                     onActivate = activateQuickPreset,
                     onCreate = createQuickPreset,
                     onEdit = { navController.navigate(Screen.EditQuickPreset(it)) },
+                    onDelete = deleteQuickPreset,
                 )
             }
 

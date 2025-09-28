@@ -21,6 +21,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -53,6 +54,7 @@ fun QuickPresetsPage(
     onActivate: (String) -> Unit,
     onCreate: (String) -> Unit,
     onEdit: (String) -> Unit,
+    onDelete: (String) -> Unit,
 ) {
     Scaffold(
         floatingActionButton = { CreateQuickPresetFloatingButton(onCreate = onCreate) },
@@ -62,13 +64,43 @@ fun QuickPresetsPage(
                 quickPresets = quickPresets,
                 onActivate = onActivate,
                 onEdit = onEdit,
+                onDelete = onDelete,
             )
         }
     }
 }
 
 @Composable
-private fun QuickPresetsList(quickPresets: List<QuickPreset>, onActivate: (String) -> Unit, onEdit: (String) -> Unit) {
+private fun QuickPresetsList(
+    quickPresets: List<QuickPreset>,
+    onActivate: (String) -> Unit,
+    onEdit: (String) -> Unit,
+    onDelete: (String) -> Unit,
+) {
+    var deleteDialog by remember { mutableStateOf<String?>(null) }
+    deleteDialog?.let { currentDeleteDialog ->
+        AlertDialog(
+            onDismissRequest = { deleteDialog = null },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onDelete(currentDeleteDialog)
+                        deleteDialog = null
+                    },
+                ) {
+                    Text(stringResource(R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { deleteDialog = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+            title = { Text(stringResource(R.string.delete_quick_preset)) },
+            text = { Text(stringResource(R.string.delete_confirm, currentDeleteDialog)) },
+        )
+    }
+
     if (quickPresets.isNotEmpty()) {
         LazyColumn(Modifier.fillMaxSize()) {
             items(quickPresets) { preset ->
@@ -83,6 +115,7 @@ private fun QuickPresetsList(quickPresets: List<QuickPreset>, onActivate: (Strin
                             Text(stringResource(R.string.activate))
                         }
                         Button(onClick = { onEdit(preset.name) }) { Text(stringResource(R.string.edit)) }
+                        Button(onClick = { deleteDialog = preset.name }) { Text(stringResource(R.string.delete)) }
                     }
                 }
             }
@@ -201,6 +234,7 @@ private fun PreviewQuickPresetsList() {
             ),
             onEdit = {},
             onActivate = {},
+            onDelete = {},
         )
     }
 }
