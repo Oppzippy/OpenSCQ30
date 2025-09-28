@@ -52,7 +52,7 @@ See [GitHub Releases](https://github.com/Oppzippy/OpenSCQ30/releases). All files
 
 ### Android
 
-[android-demo.webm](https://github.com/Oppzippy/OpenSCQ30/assets/2236514/2d351d63-64b8-4253-abdf-3bb5384888c1)
+[android-demo.webm](https://github.com/user-attachments/assets/bf48a9f3-db73-4f26-b1e7-edac5f3fba32)
 
 ## Building
 
