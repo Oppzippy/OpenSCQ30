@@ -10,7 +10,7 @@ class Version2BreakingChangesMessage @Inject constructor(
 ) {
     // No point in showing breaking changes if the user didn't make use of the feature that requires manual migration
     val shouldShow =
-        store.version2BreakingChangesMessageShown.map { it && legacyEqualizerProfileDao.count() != 0 }
+        store.version2BreakingChangesMessageShown.map { shown -> !shown && legacyEqualizerProfileDao.count() != 0 }
 
     fun setShown() = store.setVersion2BreakingChangesMessageShown(true)
 }
