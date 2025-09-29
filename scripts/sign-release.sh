@@ -5,7 +5,7 @@ unzip android.zip
 unzip windows.zip
 unzip linux.zip
 
-read -s -p "$ANDROID_SIGNING_KEY password: " keystore_password
+read -r -s -p "$ANDROID_SIGNING_KEY password: " keystore_password
 
 echo
 echo Signing APKs
@@ -20,7 +20,7 @@ rename -- -unsigned.apk .apk openscq30-android-*.apk
 echo Signing files
 fd 'openscq30-.*' -x gpg --detach-sign {}
 
-read -p "Delete zip files? [y/N] " delete_zip_files
+read -r -p "Delete zip files? [y/N] " delete_zip_files
 if [[ "$delete_zip_files" == "y" ]]; then
     rm android.zip windows.zip linux.zip
 fi
