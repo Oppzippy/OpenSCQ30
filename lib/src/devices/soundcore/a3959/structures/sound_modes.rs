@@ -5,7 +5,7 @@ use nom::{
     number::complete::le_u8,
 };
 use openscq30_i18n_macros::Translate;
-use strum::{Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
+use strum::{Display, EnumIter, EnumString, FromRepr, IntoStaticStr, VariantArray};
 
 use crate::devices::soundcore::common;
 
@@ -75,6 +75,22 @@ impl SoundModes {
     }
 }
 
+#[cfg(test)]
+impl quickcheck::Arbitrary for SoundModes {
+    fn arbitrary(g: &mut quickcheck::Gen) -> Self {
+        SoundModes {
+            ambient_sound_mode: common::structures::AmbientSoundMode::arbitrary(g),
+            transparency_mode: common::structures::TransparencyMode::arbitrary(g),
+            adaptive_noise_canceling: AdaptiveNoiseCanceling::arbitrary(g),
+            manual_noise_canceling: ManualNoiseCanceling::arbitrary(g),
+            noise_canceling_mode: NoiseCancelingMode::arbitrary(g),
+            wind_noise: WindNoise::arbitrary(g),
+            noise_canceling_adaptive_sensitivity_level: u8::arbitrary(g),
+            multi_scene_anc: common::structures::NoiseCancelingMode::arbitrary(g),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
 pub struct AdaptiveNoiseCanceling(u8);
 
@@ -88,6 +104,14 @@ impl AdaptiveNoiseCanceling {
     }
 }
 
+#[cfg(test)]
+impl quickcheck::Arbitrary for AdaptiveNoiseCanceling {
+    fn arbitrary(g: &mut quickcheck::Gen) -> Self {
+        let options: [_; 5] = std::array::from_fn(|v| AdaptiveNoiseCanceling::new(v as u8 + 1));
+        *g.choose(&options).unwrap()
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
 pub struct ManualNoiseCanceling(u8);
 
@@ -98,6 +122,14 @@ impl ManualNoiseCanceling {
 
     pub fn inner(&self) -> u8 {
         self.0
+    }
+}
+
+#[cfg(test)]
+impl quickcheck::Arbitrary for ManualNoiseCanceling {
+    fn arbitrary(g: &mut quickcheck::Gen) -> Self {
+        let options: [_; 5] = std::array::from_fn(|v| ManualNoiseCanceling::new(v as u8 + 1));
+        *g.choose(&options).unwrap()
     }
 }
 
@@ -132,6 +164,7 @@ impl NoiseCancelingSettings {
     IntoStaticStr,
     EnumString,
     EnumIter,
+    VariantArray,
     Translate,
 )]
 pub enum NoiseCancelingMode {
@@ -161,6 +194,13 @@ impl NoiseCancelingMode {
     }
 }
 
+#[cfg(test)]
+impl quickcheck::Arbitrary for NoiseCancelingMode {
+    fn arbitrary(g: &mut quickcheck::Gen) -> Self {
+        *g.choose(NoiseCancelingMode::VARIANTS).unwrap()
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct WindNoise {
     pub is_suppression_enabled: bool,
@@ -183,5 +223,15 @@ impl WindNoise {
 
     pub fn byte(&self) -> u8 {
         u8::from(self.is_suppression_enabled) | (u8::from(self.is_detected) << 1)
+    }
+}
+
+#[cfg(test)]
+impl quickcheck::Arbitrary for WindNoise {
+    fn arbitrary(g: &mut quickcheck::Gen) -> Self {
+        WindNoise {
+            is_suppression_enabled: bool::arbitrary(g),
+            is_detected: bool::arbitrary(g),
+        }
     }
 }

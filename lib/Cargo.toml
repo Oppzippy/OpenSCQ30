@@ -69,3 +69,5 @@ rust-embed = { workspace = true, features = ["debug-embed"] }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["macros", "test-util"] }
+quickcheck = { workspace = true }
+quickcheck_macros = { workspace = true }
