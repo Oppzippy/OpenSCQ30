@@ -193,6 +193,7 @@ impl AddDeviceModel {
                                         widget::text(&device.name).into(),
                                         widget::text(device.mac_address.to_string())
                                             .align_x(alignment::Horizontal::Right)
+                                            .width(Length::Fill)
                                             .into(),
                                     ])
                                     .align_y(alignment::Vertical::Center),
