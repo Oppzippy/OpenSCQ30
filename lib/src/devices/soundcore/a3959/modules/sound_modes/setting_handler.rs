@@ -6,7 +6,10 @@ use crate::{
     api::settings::{self, Range, Setting, SettingId, Value},
     devices::soundcore::{
         a3959::structures::{ManualNoiseCanceling, SoundModes},
-        common::settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
+        common::{
+            self,
+            settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
+        },
     },
     i18n::fl,
 };
@@ -69,9 +72,14 @@ where
                     .noise_canceling_adaptive_sensitivity_level
                     .into(),
             },
-            SoundModeSetting::MultiSceneNoiseCanceling => {
-                Setting::select_from_enum_all_variants(sound_modes.multi_scene_anc)
-            }
+            SoundModeSetting::MultiSceneNoiseCanceling => Setting::select_from_enum(
+                &[
+                    common::structures::NoiseCancelingMode::Transport,
+                    common::structures::NoiseCancelingMode::Outdoor,
+                    common::structures::NoiseCancelingMode::Indoor,
+                ],
+                sound_modes.multi_scene_anc,
+            ),
         })
     }
 
