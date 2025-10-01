@@ -264,7 +264,7 @@ impl Application for AppModel {
             match context_drawer_screen {
                 ContextDrawerScreen::About => Some(cosmic::app::context_drawer::about(
                     &self.about,
-                    Message::OpenUrl,
+                    |url| Message::OpenUrl(url.to_owned()),
                     Message::CloseContextDrawer,
                 )),
             }
