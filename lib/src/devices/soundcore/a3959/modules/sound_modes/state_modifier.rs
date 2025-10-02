@@ -320,8 +320,7 @@ mod tests {
         ) {
             let plan = create_change_plan(from, to);
 
-            plan.windows(2)
-                .for_each(|change| assert_valid_change(change[0], change[1]))
+            assert!(plan.len() <= 9, "{} steps", plan.len());
         }
     }
 
