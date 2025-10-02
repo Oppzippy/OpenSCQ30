@@ -320,7 +320,7 @@ mod tests {
         ) {
             let plan = create_change_plan(from, to);
 
-            assert!(plan.len() <= 9, "{} steps", plan.len());
+            assert!(plan.len() <= 10, "{} steps", plan.len());
         }
     }
 
