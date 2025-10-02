@@ -63,76 +63,137 @@ fn create_change_plan(
     let mut sequence = Vec::new();
     let mut current = from;
 
-    // Go in order of most to least dependencies so that things are left in their desired state
+    set_noise_canceling_mode_dependants(&mut current, &to, &mut sequence);
+    set_noise_canceling_mode(&mut current, &to, &mut sequence);
+    set_transparency_mode(&mut current, &to, &mut sequence);
+    set_ambient_sound_mode(&mut current, &to, &mut sequence);
+
+    sequence
+}
+
+fn set_ambient_sound_mode(
+    current: &mut a3959::structures::SoundModes,
+    to: &a3959::structures::SoundModes,
+    sequence: &mut Vec<a3959::structures::SoundModes>,
+) {
+    if current.ambient_sound_mode != to.ambient_sound_mode {
+        current.ambient_sound_mode = to.ambient_sound_mode;
+        sequence.push(*current);
+    }
+}
+
+fn set_transparency_mode(
+    current: &mut a3959::structures::SoundModes,
+    to: &a3959::structures::SoundModes,
+    sequence: &mut Vec<a3959::structures::SoundModes>,
+) {
+    if current.transparency_mode != to.transparency_mode || current.wind_noise != to.wind_noise {
+        if current.ambient_sound_mode != common::structures::AmbientSoundMode::Transparency {
+            current.ambient_sound_mode = common::structures::AmbientSoundMode::Transparency;
+            sequence.push(*current);
+        }
+        current.transparency_mode = to.transparency_mode;
+        current.wind_noise = to.wind_noise;
+        sequence.push(*current);
+    }
+}
+
+fn set_noise_canceling_mode(
+    current: &mut a3959::structures::SoundModes,
+    to: &a3959::structures::SoundModes,
+    sequence: &mut Vec<a3959::structures::SoundModes>,
+) {
+    if current.noise_canceling_mode != to.noise_canceling_mode {
+        if current.ambient_sound_mode != common::structures::AmbientSoundMode::NoiseCanceling {
+            current.ambient_sound_mode = common::structures::AmbientSoundMode::NoiseCanceling;
+            sequence.push(*current);
+        }
+        current.noise_canceling_mode = to.noise_canceling_mode;
+        sequence.push(*current);
+    }
+}
+
+fn set_noise_canceling_mode_dependants(
+    current: &mut a3959::structures::SoundModes,
+    to: &a3959::structures::SoundModes,
+    sequence: &mut Vec<a3959::structures::SoundModes>,
+) {
+    let mut actions = [
+        set_adaptive_noise_canceling,
+        set_manual_noise_canceling,
+        set_multi_scene_anc,
+    ];
+    // Start with the current noise canceling mode to decrease total number of steps
+    match current.noise_canceling_mode {
+        a3959::structures::NoiseCancelingMode::Adaptive => (),
+        a3959::structures::NoiseCancelingMode::Manual => actions.swap(0, 1),
+        a3959::structures::NoiseCancelingMode::MultiScene => actions.swap(0, 2),
+    }
+    actions
+        .into_iter()
+        .for_each(|action| action(current, to, sequence));
+}
+
+fn set_adaptive_noise_canceling(
+    current: &mut a3959::structures::SoundModes,
+    to: &a3959::structures::SoundModes,
+    sequence: &mut Vec<a3959::structures::SoundModes>,
+) {
     if current.adaptive_noise_canceling != to.adaptive_noise_canceling
         || current.noise_canceling_adaptive_sensitivity_level
             != to.noise_canceling_adaptive_sensitivity_level
     {
         if current.ambient_sound_mode != common::structures::AmbientSoundMode::NoiseCanceling {
             current.ambient_sound_mode = common::structures::AmbientSoundMode::NoiseCanceling;
-            sequence.push(current);
+            sequence.push(*current);
         }
         if current.noise_canceling_mode != a3959::structures::NoiseCancelingMode::Adaptive {
             current.noise_canceling_mode = a3959::structures::NoiseCancelingMode::Adaptive;
-            sequence.push(current);
+            sequence.push(*current);
         }
         current.adaptive_noise_canceling = to.adaptive_noise_canceling;
         current.noise_canceling_adaptive_sensitivity_level =
             to.noise_canceling_adaptive_sensitivity_level;
-        sequence.push(current);
+        sequence.push(*current);
     }
+}
 
+fn set_manual_noise_canceling(
+    current: &mut a3959::structures::SoundModes,
+    to: &a3959::structures::SoundModes,
+    sequence: &mut Vec<a3959::structures::SoundModes>,
+) {
     if current.manual_noise_canceling != to.manual_noise_canceling {
         if current.ambient_sound_mode != common::structures::AmbientSoundMode::NoiseCanceling {
             current.ambient_sound_mode = common::structures::AmbientSoundMode::NoiseCanceling;
-            sequence.push(current);
+            sequence.push(*current);
         }
         if current.noise_canceling_mode != a3959::structures::NoiseCancelingMode::Manual {
             current.noise_canceling_mode = a3959::structures::NoiseCancelingMode::Manual;
-            sequence.push(current);
+            sequence.push(*current);
         }
         current.manual_noise_canceling = to.manual_noise_canceling;
-        sequence.push(current);
+        sequence.push(*current);
     }
+}
 
+fn set_multi_scene_anc(
+    current: &mut a3959::structures::SoundModes,
+    to: &a3959::structures::SoundModes,
+    sequence: &mut Vec<a3959::structures::SoundModes>,
+) {
     if current.multi_scene_anc != to.multi_scene_anc {
         if current.ambient_sound_mode != common::structures::AmbientSoundMode::NoiseCanceling {
             current.ambient_sound_mode = common::structures::AmbientSoundMode::NoiseCanceling;
-            sequence.push(current);
+            sequence.push(*current);
         }
         if current.noise_canceling_mode != a3959::structures::NoiseCancelingMode::MultiScene {
             current.noise_canceling_mode = a3959::structures::NoiseCancelingMode::MultiScene;
-            sequence.push(current);
+            sequence.push(*current);
         }
         current.multi_scene_anc = to.multi_scene_anc;
-        sequence.push(current);
+        sequence.push(*current);
     }
-
-    if current.noise_canceling_mode != to.noise_canceling_mode {
-        if current.ambient_sound_mode != common::structures::AmbientSoundMode::NoiseCanceling {
-            current.ambient_sound_mode = common::structures::AmbientSoundMode::NoiseCanceling;
-            sequence.push(current);
-        }
-        current.noise_canceling_mode = to.noise_canceling_mode;
-        sequence.push(current);
-    }
-
-    if current.transparency_mode != to.transparency_mode || current.wind_noise != to.wind_noise {
-        if current.ambient_sound_mode != common::structures::AmbientSoundMode::Transparency {
-            current.ambient_sound_mode = common::structures::AmbientSoundMode::Transparency;
-            sequence.push(current);
-        }
-        current.transparency_mode = to.transparency_mode;
-        current.wind_noise = to.wind_noise;
-        sequence.push(current);
-    }
-
-    if current.ambient_sound_mode != to.ambient_sound_mode {
-        current.ambient_sound_mode = to.ambient_sound_mode;
-        sequence.push(current);
-    }
-
-    sequence
 }
 
 #[cfg(test)]
@@ -228,7 +289,7 @@ mod tests {
             return false;
         }
         // the worst case scenario should be 11 steps
-        if plan.len() > 11 {
+        if plan.len() > 10 {
             return false;
         }
 
