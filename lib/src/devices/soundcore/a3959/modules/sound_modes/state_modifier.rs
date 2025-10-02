@@ -131,11 +131,26 @@ fn set_noise_canceling_mode_dependants(
         set_manual_noise_canceling,
         set_multi_scene_anc,
     ];
-    // Start with the current noise canceling mode to decrease total number of steps
-    match current.noise_canceling_mode {
-        a3959::structures::NoiseCancelingMode::Adaptive => (),
-        a3959::structures::NoiseCancelingMode::Manual => actions.swap(0, 1),
-        a3959::structures::NoiseCancelingMode::MultiScene => actions.swap(0, 2),
+    // Start by changing settings dependant on the current noise canceling mode, and end by changing
+    // settings dependant on the target noise canceling mode
+    match (current.noise_canceling_mode, to.noise_canceling_mode) {
+        (
+            a3959::structures::NoiseCancelingMode::Adaptive,
+            a3959::structures::NoiseCancelingMode::Manual,
+        ) => actions.swap(1, 2),
+        (a3959::structures::NoiseCancelingMode::Adaptive, _) => (),
+
+        (
+            a3959::structures::NoiseCancelingMode::Manual,
+            a3959::structures::NoiseCancelingMode::Adaptive,
+        ) => actions.rotate_left(1),
+        (a3959::structures::NoiseCancelingMode::Manual, _) => actions.swap(0, 1),
+
+        (
+            a3959::structures::NoiseCancelingMode::MultiScene,
+            a3959::structures::NoiseCancelingMode::Manual,
+        ) => actions.rotate_right(1),
+        (a3959::structures::NoiseCancelingMode::MultiScene, _) => actions.swap(0, 2),
     }
     actions
         .into_iter()
@@ -336,6 +351,6 @@ mod tests {
         let average = total as f64 / runner.config().cases as f64;
 
         // round up to nearest 10th for leeway
-        assert!(average <= 7.7, "average case: {average} steps",);
+        assert!(average <= 7.4, "average case: {average} steps",);
     }
 }
