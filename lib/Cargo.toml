@@ -69,5 +69,5 @@ rust-embed = { workspace = true, features = ["debug-embed"] }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["macros", "test-util"] }
-proptest = { workspace = true }
+proptest = { workspace = true, default-features = false, features = ["std"] }
 proptest-derive = { workspace = true }
