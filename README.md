@@ -35,7 +35,7 @@ It is intended that all devices in this list work, but since I do not own them a
 | A3948 | A20i              | Unknown |
 | A3933 | Life Note 3       | Working |
 | A3939 | Life P3           | Working |
-| A3959 | R50i NC           | Unknown |
+| A3959 | R50i NC           | Working |
 
 ## Installing
 
