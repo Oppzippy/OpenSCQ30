@@ -63,9 +63,17 @@ fn create_change_plan(
     let mut sequence = Vec::new();
     let mut current = from;
 
-    set_noise_canceling_mode_dependants(&mut current, &to, &mut sequence);
-    set_noise_canceling_mode(&mut current, &to, &mut sequence);
-    set_transparency_mode(&mut current, &to, &mut sequence);
+    if current.ambient_sound_mode == common::structures::AmbientSoundMode::NoiseCanceling
+        || to.ambient_sound_mode == common::structures::AmbientSoundMode::Transparency
+    {
+        set_noise_canceling_mode_dependants(&mut current, &to, &mut sequence);
+        set_noise_canceling_mode(&mut current, &to, &mut sequence);
+        set_transparency_mode(&mut current, &to, &mut sequence);
+    } else {
+        set_transparency_mode(&mut current, &to, &mut sequence);
+        set_noise_canceling_mode_dependants(&mut current, &to, &mut sequence);
+        set_noise_canceling_mode(&mut current, &to, &mut sequence);
+    }
     set_ambient_sound_mode(&mut current, &to, &mut sequence);
 
     sequence
@@ -328,6 +336,6 @@ mod tests {
         let average = total as f64 / runner.config().cases as f64;
 
         // round up to nearest 10th for leeway
-        assert!(average <= 8.1, "average case: {average} steps",);
+        assert!(average <= 7.7, "average case: {average} steps",);
     }
 }
