@@ -198,7 +198,13 @@ fn set_multi_scene_anc(
 
 #[cfg(test)]
 mod tests {
-    use proptest::proptest;
+    use std::sync::atomic::{self, AtomicUsize};
+
+    use proptest::{
+        prelude::*,
+        proptest,
+        test_runner::{Config, TestRunner},
+    };
 
     use super::*;
 
@@ -294,5 +300,34 @@ mod tests {
             plan.windows(2)
                 .for_each(|change| assert_valid_change(change[0], change[1]))
         }
+    }
+
+    #[test]
+    fn average_case() {
+        let mut runner = TestRunner::new(Config {
+            cases: 10000,
+            rng_algorithm: prop::test_runner::RngAlgorithm::ChaCha,
+            rng_seed: prop::test_runner::RngSeed::Fixed(0),
+            ..Config::default()
+        });
+        let total = AtomicUsize::new(0);
+        runner
+            .run(
+                &(
+                    a3959::structures::SoundModes::arbitrary(),
+                    a3959::structures::SoundModes::arbitrary(),
+                ),
+                |(from, to)| {
+                    let steps = create_change_plan(from, to).len();
+                    total.fetch_add(steps, atomic::Ordering::Relaxed);
+                    Ok(())
+                },
+            )
+            .unwrap();
+        let total = total.load(atomic::Ordering::Relaxed);
+        let average = total as f64 / runner.config().cases as f64;
+
+        // round up to nearest 10th for leeway
+        assert!(average <= 8.1, "average case: {average} steps",);
     }
 }

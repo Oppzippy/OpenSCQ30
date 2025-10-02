@@ -1,3 +1,6 @@
+#[cfg(test)]
+use std::ops::RangeInclusive;
+
 use nom::{
     IResult, Parser,
     combinator::map,
@@ -77,8 +80,6 @@ impl SoundModes {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
-#[cfg_attr(test, derive(proptest_derive::Arbitrary))]
-#[cfg_attr(test, proptest(filter = "|value| value.0 >= 1 && value.0 <= 5"))]
 pub struct AdaptiveNoiseCanceling(u8);
 
 impl AdaptiveNoiseCanceling {
@@ -91,9 +92,20 @@ impl AdaptiveNoiseCanceling {
     }
 }
 
+#[cfg(test)]
+impl proptest::arbitrary::Arbitrary for AdaptiveNoiseCanceling {
+    type Parameters = ();
+
+    fn arbitrary_with(_args: Self::Parameters) -> Self::Strategy {
+        use proptest::prelude::Strategy;
+
+        (1u8..=5u8).prop_map(Self::new)
+    }
+
+    type Strategy = proptest::strategy::Map<RangeInclusive<u8>, fn(u8) -> Self>;
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
-#[cfg_attr(test, derive(proptest_derive::Arbitrary))]
-#[cfg_attr(test, proptest(filter = "|value| value.0 >= 1 && value.0 <= 5"))]
 pub struct ManualNoiseCanceling(u8);
 
 impl ManualNoiseCanceling {
@@ -104,6 +116,19 @@ impl ManualNoiseCanceling {
     pub fn inner(&self) -> u8 {
         self.0
     }
+}
+
+#[cfg(test)]
+impl proptest::arbitrary::Arbitrary for ManualNoiseCanceling {
+    type Parameters = ();
+
+    fn arbitrary_with(_args: Self::Parameters) -> Self::Strategy {
+        use proptest::prelude::Strategy;
+
+        (1u8..=5u8).prop_map(Self::new)
+    }
+
+    type Strategy = proptest::strategy::Map<RangeInclusive<u8>, fn(u8) -> Self>;
 }
 
 struct NoiseCancelingSettings {
