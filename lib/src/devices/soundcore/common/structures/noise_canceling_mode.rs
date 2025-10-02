@@ -5,7 +5,7 @@ use nom::{
     number::complete::le_u8,
 };
 use openscq30_i18n_macros::Translate;
-use strum::{AsRefStr, Display, EnumIter, EnumString, FromRepr, IntoStaticStr, VariantArray};
+use strum::{AsRefStr, Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 #[repr(u8)]
 #[derive(
@@ -22,9 +22,9 @@ use strum::{AsRefStr, Display, EnumIter, EnumString, FromRepr, IntoStaticStr, Va
     IntoStaticStr,
     EnumIter,
     EnumString,
-    VariantArray,
     Translate,
 )]
+#[cfg_attr(test, derive(proptest_derive::Arbitrary))]
 pub enum NoiseCancelingMode {
     #[default]
     Transport = 0,
@@ -52,13 +52,6 @@ impl NoiseCancelingMode {
             }),
         )
         .parse_complete(input)
-    }
-}
-
-#[cfg(test)]
-impl quickcheck::Arbitrary for NoiseCancelingMode {
-    fn arbitrary(g: &mut quickcheck::Gen) -> Self {
-        *g.choose(NoiseCancelingMode::VARIANTS).unwrap()
     }
 }
 

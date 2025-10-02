@@ -198,102 +198,101 @@ fn set_multi_scene_anc(
 
 #[cfg(test)]
 mod tests {
-    use quickcheck_macros::quickcheck;
+    use proptest::proptest;
 
     use super::*;
-    fn is_change_valid(
-        from: a3959::structures::SoundModes,
-        to: a3959::structures::SoundModes,
-    ) -> bool {
+
+    fn assert_valid_change(from: a3959::structures::SoundModes, to: a3959::structures::SoundModes) {
         if from.transparency_mode != to.transparency_mode || from.wind_noise != to.wind_noise {
-            if from.ambient_sound_mode != common::structures::AmbientSoundMode::Transparency
-                || from.ambient_sound_mode != to.ambient_sound_mode
-            {
-                return false;
-            }
+            assert_eq!(
+                from.ambient_sound_mode,
+                common::structures::AmbientSoundMode::Transparency
+            );
+            assert_eq!(from.ambient_sound_mode, to.ambient_sound_mode);
         }
 
         if from.noise_canceling_mode != to.noise_canceling_mode {
-            if from.ambient_sound_mode != common::structures::AmbientSoundMode::NoiseCanceling
-                || from.ambient_sound_mode != to.ambient_sound_mode
-            {
-                return false;
-            }
+            assert_eq!(
+                from.ambient_sound_mode,
+                common::structures::AmbientSoundMode::NoiseCanceling
+            );
+            assert_eq!(from.ambient_sound_mode, to.ambient_sound_mode);
         }
 
         if from.adaptive_noise_canceling != to.adaptive_noise_canceling
             || from.noise_canceling_adaptive_sensitivity_level
                 != to.noise_canceling_adaptive_sensitivity_level
         {
-            if from.ambient_sound_mode != common::structures::AmbientSoundMode::NoiseCanceling
-                || from.ambient_sound_mode != to.ambient_sound_mode
-            {
-                return false;
-            }
+            assert_eq!(
+                from.ambient_sound_mode,
+                common::structures::AmbientSoundMode::NoiseCanceling
+            );
+            assert_eq!(from.ambient_sound_mode, to.ambient_sound_mode);
 
-            if from.noise_canceling_mode != a3959::structures::NoiseCancelingMode::Adaptive
-                || from.noise_canceling_mode != to.noise_canceling_mode
-            {
-                return false;
-            }
+            assert_eq!(
+                from.noise_canceling_mode,
+                a3959::structures::NoiseCancelingMode::Adaptive
+            );
+            assert_eq!(from.noise_canceling_mode, to.noise_canceling_mode);
         }
 
         if from.manual_noise_canceling != to.manual_noise_canceling {
-            if from.ambient_sound_mode != common::structures::AmbientSoundMode::NoiseCanceling
-                || from.ambient_sound_mode != to.ambient_sound_mode
-            {
-                return false;
-            }
+            assert_eq!(
+                from.ambient_sound_mode,
+                common::structures::AmbientSoundMode::NoiseCanceling
+            );
+            assert_eq!(from.ambient_sound_mode, to.ambient_sound_mode);
 
-            if from.noise_canceling_mode != a3959::structures::NoiseCancelingMode::Manual
-                || from.noise_canceling_mode != to.noise_canceling_mode
-            {
-                return false;
-            }
+            assert_eq!(
+                from.noise_canceling_mode,
+                a3959::structures::NoiseCancelingMode::Manual
+            );
+            assert_eq!(from.noise_canceling_mode, to.noise_canceling_mode);
         }
 
         if from.multi_scene_anc != to.multi_scene_anc {
-            if from.ambient_sound_mode != common::structures::AmbientSoundMode::NoiseCanceling
-                || from.ambient_sound_mode != to.ambient_sound_mode
-            {
-                return false;
-            }
+            assert_eq!(
+                from.ambient_sound_mode,
+                common::structures::AmbientSoundMode::NoiseCanceling
+            );
+            assert_eq!(from.ambient_sound_mode, to.ambient_sound_mode);
 
-            if from.noise_canceling_mode != a3959::structures::NoiseCancelingMode::MultiScene
-                || from.noise_canceling_mode != to.noise_canceling_mode
-            {
-                return false;
-            }
+            assert_eq!(
+                from.noise_canceling_mode,
+                a3959::structures::NoiseCancelingMode::MultiScene
+            );
+            assert_eq!(from.noise_canceling_mode, to.noise_canceling_mode);
         }
-        true
     }
 
-    #[quickcheck]
-    fn valid_state_transition(
-        from: a3959::structures::SoundModes,
-        to: a3959::structures::SoundModes,
-    ) -> bool {
-        let plan = create_change_plan(from, to);
-        if from == to {
-            return plan.is_empty();
-        }
-        if plan.is_empty() {
-            return false;
-        }
-        // the initial state is not part of the plan, so check that separately
-        if !is_change_valid(from, *plan.first().unwrap()) {
-            return false;
-        }
-        // the final state is a part of the plan, though
-        if *plan.last().unwrap() != to {
-            return false;
-        }
-        // the worst case scenario should be 11 steps
-        if plan.len() > 10 {
-            return false;
+    proptest! {
+        #[test]
+        fn test_valid_state_transitions(
+            from: a3959::structures::SoundModes,
+            to: a3959::structures::SoundModes,
+        ) {
+            let plan = create_change_plan(from, to);
+
+            assert_eq!(from == to, plan.is_empty());
+
+            // the initial state is not part of the plan, so check that separately
+            assert_valid_change(from, *plan.first().unwrap());
+            // the final state is a part of the plan, though
+            assert_eq!(*plan.last().unwrap(), to);
+
+            plan.windows(2)
+                .for_each(|change| assert_valid_change(change[0], change[1]))
         }
 
-        plan.windows(2)
-            .all(|change| is_change_valid(change[0], change[1]))
+        #[test]
+        fn test_worst_case(
+            from: a3959::structures::SoundModes,
+            to: a3959::structures::SoundModes,
+        ) {
+            let plan = create_change_plan(from, to);
+
+            plan.windows(2)
+                .for_each(|change| assert_valid_change(change[0], change[1]))
+        }
     }
 }

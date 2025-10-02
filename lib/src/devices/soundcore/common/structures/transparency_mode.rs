@@ -5,7 +5,7 @@ use nom::{
     number::complete::le_u8,
 };
 use openscq30_i18n_macros::Translate;
-use strum::{AsRefStr, Display, EnumIter, EnumString, FromRepr, IntoStaticStr, VariantArray};
+use strum::{AsRefStr, Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 #[repr(u8)]
 #[derive(
@@ -22,9 +22,9 @@ use strum::{AsRefStr, Display, EnumIter, EnumString, FromRepr, IntoStaticStr, Va
     IntoStaticStr,
     EnumIter,
     EnumString,
-    VariantArray,
     Translate,
 )]
+#[cfg_attr(test, derive(proptest_derive::Arbitrary))]
 pub enum TransparencyMode {
     FullyTransparent = 0,
     #[default]
@@ -50,12 +50,5 @@ impl TransparencyMode {
             }),
         )
         .parse_complete(input)
-    }
-}
-
-#[cfg(test)]
-impl quickcheck::Arbitrary for TransparencyMode {
-    fn arbitrary(g: &mut quickcheck::Gen) -> Self {
-        *g.choose(TransparencyMode::VARIANTS).unwrap()
     }
 }

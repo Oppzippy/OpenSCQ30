@@ -5,7 +5,7 @@ use nom::{
     number::complete::le_u8,
 };
 use openscq30_i18n_macros::Translate;
-use strum::{AsRefStr, Display, EnumIter, EnumString, FromRepr, IntoStaticStr, VariantArray};
+use strum::{AsRefStr, Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 #[repr(u8)]
 #[derive(
@@ -23,8 +23,8 @@ use strum::{AsRefStr, Display, EnumIter, EnumString, FromRepr, IntoStaticStr, Va
     EnumIter,
     EnumString,
     Translate,
-    VariantArray,
 )]
+#[cfg_attr(test, derive(proptest_derive::Arbitrary))]
 pub enum AmbientSoundMode {
     #[default]
     NoiseCanceling = 0,
@@ -51,13 +51,6 @@ impl AmbientSoundMode {
             }),
         )
         .parse_complete(input)
-    }
-}
-
-#[cfg(test)]
-impl quickcheck::Arbitrary for AmbientSoundMode {
-    fn arbitrary(g: &mut quickcheck::Gen) -> Self {
-        *g.choose(AmbientSoundMode::VARIANTS).unwrap()
     }
 }
 
