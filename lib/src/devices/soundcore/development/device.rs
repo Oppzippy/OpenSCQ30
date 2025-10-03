@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{panic::Location, sync::Arc};
 
 use async_trait::async_trait;
 use macaddr::MacAddr6;
@@ -14,7 +14,9 @@ use crate::{
         DeviceModel,
         soundcore::{
             self,
-            common::packet::{Packet, PacketIOController, outbound::RequestState},
+            common::packet::{
+                Command, Direction, Packet, PacketIOController, outbound::RequestState,
+            },
         },
     },
 };
@@ -66,6 +68,7 @@ pub struct SoundcoreDevelopmentDevice<B>
 where
     B: RfcommBackend,
 {
+    packet_io: PacketIOController<B::ConnectionType>,
     backend: Arc<B::ConnectionType>,
     state_update_packet: Option<Packet>,
     changes_signal: watch::Sender<()>,
@@ -82,6 +85,7 @@ where
             .await
             .ok();
         Ok(Self {
+            packet_io,
             backend: connection,
             state_update_packet,
             changes_signal: watch::channel(()).0,
@@ -108,7 +112,7 @@ where
 
     fn settings_in_category(&self, category_id: &CategoryId) -> Vec<SettingId> {
         if *category_id == CategoryId::DeviceInformation {
-            vec![SettingId::StateUpdatePacket]
+            vec![SettingId::StateUpdatePacket, SettingId::SendPacket]
         } else {
             Vec::new()
         }
@@ -123,6 +127,9 @@ where
                     translated_value: text,
                 })
             }
+            SettingId::SendPacket => Some(Setting::ImportString {
+                confirmation_message: None,
+            }),
             _ => None,
         }
     }
@@ -133,8 +140,61 @@ where
 
     async fn set_setting_values(
         &self,
-        _setting_values: Vec<(SettingId, Value)>,
+        setting_values: Vec<(SettingId, Value)>,
     ) -> device::Result<()> {
-        panic!()
+        for (setting_id, value) in setting_values {
+            match setting_id {
+                SettingId::SendPacket => {
+                    let mut data = value
+                        .try_as_str()
+                        .map_err(|err| device::Error::Other {
+                            source: Box::new(err),
+                            location: Location::caller(),
+                        })?
+                        .split(',')
+                        .map(|item| {
+                            let item = item.trim_ascii();
+                            if item.starts_with("0x") {
+                                u8::from_str_radix(&item[2..], 16)
+                            } else {
+                                item.parse::<u8>()
+                            }
+                        })
+                        .collect::<Result<Vec<u8>, _>>()
+                        .map_err(|err| device::Error::Other {
+                            source: Box::new(err),
+                            location: Location::caller(),
+                        })?;
+
+                    if data.len() < 2 {
+                        return Err(device::Error::Other {
+                            source: Box::new(DevelopmentDeviceError::MissingCommand),
+                            location: Location::caller(),
+                        });
+                    }
+
+                    let body = data.split_off(2);
+                    let command = Command(data.try_into().unwrap());
+
+                    self.packet_io
+                        .send_with_response(&Packet {
+                            direction: Direction::Outbound,
+                            command,
+                            body,
+                        })
+                        .await
+                        .unwrap();
+                }
+                _ => (),
+            }
+        }
+
+        Ok(())
     }
+}
+
+#[derive(thiserror::Error, Debug)]
+enum DevelopmentDeviceError {
+    #[error("data length must be at least 2, since the first 2 bytes are used as the command")]
+    MissingCommand,
 }

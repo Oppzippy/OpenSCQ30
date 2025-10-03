@@ -103,6 +103,7 @@ pub enum SettingId {
     TwsStatus,
     HostDevice,
     StateUpdatePacket,
+    SendPacket,
     MultiSceneNoiseCanceling,
     ExportCustomEqualizerProfiles,
     ExportCustomEqualizerProfilesOutput,

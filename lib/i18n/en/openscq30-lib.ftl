@@ -129,6 +129,7 @@ right = Right
 none = None
 
 state-update-packet = State Update Packet
+send-packet = Send Packet
 
 yes = Yes
 no = No
