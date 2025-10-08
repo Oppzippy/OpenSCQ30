@@ -96,6 +96,10 @@ impl InboundPacket for A3926StateUpdatePacket {
 }
 
 impl OutboundPacket for A3926StateUpdatePacket {
+    fn direction(&self) -> packet::Direction {
+        packet::Direction::Inbound
+    }
+
     fn command(&self) -> Command {
         packet::inbound::STATE_COMMAND
     }
