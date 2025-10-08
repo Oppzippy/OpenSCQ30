@@ -484,3 +484,149 @@ where
             .await
     }
 }
+
+#[cfg(test)]
+pub mod test_utils {
+    use std::{
+        collections::VecDeque,
+        time::{Duration, Instant},
+    };
+
+    use macaddr::MacAddr6;
+
+    use crate::{
+        devices::soundcore::common::packet::{
+            Command, Direction,
+            inbound::{InboundPacket, SerialNumberAndFirmwareVersion},
+            outbound::{OutboundPacket, OutboundPacketBytesExt},
+        },
+        mock::rfcomm::{MockRfcommBackend, MockRfcommConnection},
+    };
+
+    use super::*;
+
+    pub struct TestSoundcoreDevice {
+        device: Arc<dyn OpenSCQ30Device + Send + Sync>,
+        inbound_sender: mpsc::Sender<Vec<u8>>,
+        outbound_receiver: mpsc::Receiver<Vec<u8>>,
+    }
+
+    impl TestSoundcoreDevice {
+        pub async fn new<StateType, StateUpdatePacketType>(
+            device_model: DeviceModel,
+            constructor: fn(
+                MockRfcommBackend,
+                Arc<OpenSCQ30Database>,
+                DeviceModel,
+            ) -> SoundcoreDeviceRegistry<
+                MockRfcommBackend,
+                StateType,
+                StateUpdatePacketType,
+            >,
+        ) -> Self
+        where
+            StateType: Clone + Send + Sync + 'static,
+            StateUpdatePacketType:
+                InboundPacket + OutboundPacket + Clone + Send + Sync + Default + 'static,
+            SoundcoreDeviceRegistry<MockRfcommBackend, StateType, StateUpdatePacketType>:
+                BuildDevice<MockRfcommConnection, StateType, StateUpdatePacketType>,
+        {
+            let (inbound_sender, inbound_receiver) = mpsc::channel(100);
+            let (outbound_sender, outbound_receiver) = mpsc::channel(100);
+            let database = Arc::new(OpenSCQ30Database::new_in_memory().await.unwrap());
+
+            let registry = constructor(
+                MockRfcommBackend::new(inbound_receiver, outbound_sender),
+                database,
+                device_model,
+            );
+
+            tokio::spawn({
+                let inbound_sender = inbound_sender.clone();
+                async move {
+                    tokio::time::sleep(Duration::from_millis(10)).await;
+                    inbound_sender
+                        .send(StateUpdatePacketType::default().bytes())
+                        .await
+                        .unwrap();
+                    tokio::time::sleep(Duration::from_millis(10)).await;
+                    inbound_sender
+                        .send(SerialNumberAndFirmwareVersion::default().bytes())
+                        .await
+                        .unwrap();
+                }
+            });
+            let device = registry.connect(MacAddr6::nil()).await.unwrap();
+
+            Self {
+                device,
+                inbound_sender,
+                outbound_receiver,
+            }
+        }
+
+        pub fn device(&self) -> Arc<dyn OpenSCQ30Device + Send + Sync> {
+            self.device.clone()
+        }
+
+        pub fn ack(&self, command: Command) {
+            self.inbound_sender
+                .try_send(
+                    Packet {
+                        direction: Direction::Inbound,
+                        command,
+                        body: Vec::new(),
+                    }
+                    .bytes(),
+                )
+                .unwrap();
+        }
+
+        pub async fn assert_packets_sent_unordered(&mut self, expected_packets: Vec<Packet>) {
+            let timeout = Duration::from_millis(5000);
+
+            // first ack all expected packets
+            for packet in &expected_packets {
+                self.ack(packet.command);
+            }
+
+            tokio::time::sleep(Duration::from_millis(100)).await;
+
+            // then gather sent packets
+            let deadline = Instant::now() + timeout;
+            let mut sent_packets = Vec::new();
+            loop {
+                select! {
+                    maybe_packet = self.outbound_receiver.recv() => {
+                        if let Some(packet) = maybe_packet {
+                            sent_packets.push(packet);
+                        } else {
+                            break;
+                        }
+                    },
+                    _= tokio::time::sleep_until(deadline.into()) => break,
+                }
+            }
+            sent_packets.sort();
+            let mut expected_packets = expected_packets
+                .into_iter()
+                .map(|expected| expected.bytes())
+                .collect::<Vec<_>>();
+            expected_packets.sort();
+            let mut expected_packets = VecDeque::from(expected_packets);
+
+            for sent_packet in &sent_packets {
+                let Some(expected) = expected_packets.front() else {
+                    return;
+                };
+                if sent_packet == expected {
+                    expected_packets.pop_front();
+                }
+            }
+
+            if !expected_packets.is_empty() {
+                panic!("didn't receive {expected_packets:?}, got {sent_packets:?}");
+            }
+        }
+    }
+}

@@ -5,7 +5,7 @@ use nom::{
 };
 
 use crate::devices::soundcore::common::{
-    packet::{Command, outbound::OutboundPacket},
+    packet::{self, Command, outbound::OutboundPacket},
     structures::{DualFirmwareVersion, SerialNumber},
 };
 
@@ -42,6 +42,10 @@ impl InboundPacket for SerialNumberAndFirmwareVersion {
 }
 
 impl OutboundPacket for SerialNumberAndFirmwareVersion {
+    fn direction(&self) -> packet::Direction {
+        packet::Direction::Inbound
+    }
+
     fn command(&self) -> Command {
         Self::COMMAND
     }

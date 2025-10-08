@@ -1,6 +1,10 @@
 use crate::devices::soundcore::common::packet::{Command, Direction, Packet};
 
 pub trait OutboundPacket {
+    fn direction(&self) -> Direction {
+        Direction::Outbound
+    }
+
     fn command(&self) -> Command;
     fn body(&self) -> Vec<u8>;
 }
@@ -24,7 +28,7 @@ where
 {
     fn from(value: T) -> Self {
         Self {
-            direction: Direction::Outbound,
+            direction: value.direction(),
             command: value.command(),
             body: value.body(),
         }
