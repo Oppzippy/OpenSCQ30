@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import time
 import subprocess
 import zipfile
 import requests
@@ -29,6 +30,19 @@ if len(sys.argv) <= 1:
     sys.exit(1)
 actions_run_id = sys.argv[1]
 
+android_keystore_password = getpass(f"{android_signing_key} password: ")
+
+print("Waiting for workflow to finish")
+while True:
+    workflow = requests.get(
+        f"https://api.github.com/repos/Oppzippy/OpenSCQ30/actions/runs/{actions_run_id}",
+        auth=("Bearer", github_token),
+    ).json()
+    if workflow["status"] == "completed":
+        break
+    print("Workflow is still running, waiting 30 sec")
+    time.sleep(30)
+
 print("Downloading artifacts")
 workflow_artifacts = requests.get(
     f"https://api.github.com/repos/Oppzippy/OpenSCQ30/actions/runs/{actions_run_id}/artifacts",
@@ -45,7 +59,6 @@ for artifact in workflow_artifacts["artifacts"]:
     artifact_zip.extractall(path=release_dir)
 
 print("Signing APKs")
-android_keystore_password = getpass(f"{android_signing_key} password: ")
 apk_env = os.environ.copy()
 apk_env["KEYSTORE_PASSWORD"] = android_keystore_password
 for apk in glob.glob("openscq30-android-*-unsigned.apk", root_dir=release_dir):
