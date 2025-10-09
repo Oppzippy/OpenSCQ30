@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+
+import subprocess
+import zipfile
+import requests
+import glob
+import io
+import os
+import sys
+import pathlib
+from getpass import getpass
+
+android_signing_key = os.getenv("ANDROID_SIGNING_KEY")
+if android_signing_key is None:
+    print("ANDROID_SIGNING_KEY must be set")
+    sys.exit(1)
+
+github_token = os.getenv("GITHUB_TOKEN")
+if github_token is None:
+    print("GITHUB_TOKEN must be set")
+    sys.exit(1)
+
+release_dir = pathlib.Path(__file__).parent.parent.joinpath("release-files")
+if not release_dir.exists():
+    release_dir.mkdir()
+
+if len(sys.argv) <= 1:
+    print("Usage: ./sign-release <GITHUB_ACTIONS_RUN_ID>")
+    sys.exit(1)
+actions_run_id = sys.argv[1]
+
+print("Downloading artifacts")
+workflow_artifacts = requests.get(
+    f"https://api.github.com/repos/Oppzippy/OpenSCQ30/actions/runs/{actions_run_id}/artifacts",
+    auth=("Bearer", github_token),
+).json()
+for artifact in workflow_artifacts["artifacts"]:
+    print(f"Downloading {artifact['name']}")
+    response = requests.get(
+        artifact["archive_download_url"],
+        auth=("Bearer", github_token),
+    )
+    file_bytes = io.BytesIO(response.content)
+    artifact_zip = zipfile.ZipFile(file_bytes)
+    artifact_zip.extractall(path=release_dir)
+
+print("Signing APKs")
+android_keystore_password = getpass(f"{android_signing_key} password: ")
+apk_env = os.environ.copy()
+apk_env["KEYSTORE_PASSWORD"] = android_keystore_password
+for apk in glob.glob("openscq30-android-*-unsigned.apk", root_dir=release_dir):
+    print(f"Signing {apk}")
+    subprocess.run(
+        [
+            "apksigner",
+            "sign",
+            "--ks",
+            android_signing_key,
+            "--ks-pass",
+            "env:KEYSTORE_PASSWORD",
+            apk,
+        ],
+        check=True,
+        env=apk_env,
+        cwd=release_dir,
+    )
+    os.remove(release_dir.joinpath(f"{apk}.idsig"))
+    # Remove unsigned from name now that it's signed
+    new_name = apk.replace("-unsigned.apk", ".apk")
+    release_dir.joinpath(apk).rename(release_dir.joinpath(new_name))
+
+print("GPG signing all files")
+for f in glob.glob("openscq30-*", root_dir=release_dir):
+    subprocess.run(
+        ["gpg", "--detach-sign", f],
+        check=True,
+        cwd=release_dir,
+    )
