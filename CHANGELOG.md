@@ -1,5 +1,20 @@
 # Changelog
 
+## v2.0.0-beta2
+
+### General
+
+#### Fixes
+
+- R50i NC sound modes not working
+- Life Q30 not working with firmware version 05.19
+
+### GUI
+
+#### Fixes
+
+- Missing search icon on windows
+
 ## v2.0.0-beta1
 
 ### General
