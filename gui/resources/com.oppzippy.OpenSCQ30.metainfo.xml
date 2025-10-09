@@ -49,6 +49,15 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.0.0-beta2" date="2025-10-09">
+            <description>
+                <p>Fixes</p>
+                <ul>
+                    <li>R50i NC sound modes not working</li>
+                    <li>Life Q30 not working with firmware version 05.19</li>
+                </ul>
+            </description>
+        </release>
         <release version="2.0.0-beta1" date="2025-09-20">
             <description>
                 <p>Breaking Changes</p>
