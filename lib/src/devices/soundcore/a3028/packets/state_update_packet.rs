@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use nom::{
     IResult, Parser,
-    combinator::{all_consuming, map, map_opt, opt},
+    combinator::{map, map_opt, opt},
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
@@ -63,7 +63,7 @@ impl InboundPacket for A3028StateUpdatePacket {
     ) -> IResult<&'a [u8], Self, E> {
         context(
             "a3028 state update packet",
-            all_consuming(map(
+            map(
                 (
                     SingleBattery::take,
                     EqualizerConfiguration::take,
@@ -98,7 +98,7 @@ impl InboundPacket for A3028StateUpdatePacket {
                         extra_fields,
                     }
                 },
-            )),
+            ),
         )
         .parse_complete(input)
     }
@@ -397,23 +397,6 @@ mod tests {
     }
 
     #[test]
-    fn it_does_not_parse_packet_that_goes_over_expected_length() {
-        let input: &[u8] = &[
-            0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01, 0x49, 0x00, 0x05, 0x00, 0x01, 0x00, 0x3c,
-            0xb4, 0x8f, 0xa0, 0x8e, 0xb4, 0x74, 0x88, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
-            // Some extra 0x00s are added on to increase the length without affecting anything
-            // the checksum. The checksum is affected by the 8th byte (packet length) though.
-            0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x00,
-            0x00, 0x00, 0x38,
-        ];
-        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
-        let result = A3028StateUpdatePacket::take::<VerboseError<_>>(&packet.body);
-        assert!(result.is_err());
-    }
-
-    #[test]
     fn it_parses_packet_from_github_issue_141() {
         let input: &[u8] = &[
             9, 255, 0, 0, 1, 1, 1, // command
@@ -435,5 +418,16 @@ mod tests {
         let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
         A3028StateUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .expect("it parses successfully");
+    }
+
+    // https://github.com/flathub/com.oppzippy.OpenSCQ30/issues/34
+    #[test]
+    fn it_parses_packet_from_flathub_issue_34() {
+        let input = &[
+            5, 0, 0, 0, 120, 120, 120, 120, 120, 120, 120, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 48, 53, 46, 49, 57, 51, 48, 50, 56, 66,
+            51, 66, 67, 50, 52, 56, 53, 48, 69, 56, 56, 0, 1, 1, 1, 0, 1, 1, 3, 4, 3,
+        ];
+        A3028StateUpdatePacket::take::<VerboseError<_>>(input).expect("it parses successfully");
     }
 }
