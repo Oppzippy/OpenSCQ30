@@ -1,4 +1,4 @@
-name: "test android"
+name: test android
 
 on:
   push:
