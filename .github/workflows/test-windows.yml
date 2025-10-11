@@ -1,0 +1,31 @@
+name: "test on windows"
+
+on:
+  push:
+    paths: &push_paths
+      - Cargo.lock
+      - lib/**
+      - .github/workflows/test-windows.yml
+  pull_request:
+    paths: *push_paths
+
+permissions:
+  contents: read
+
+jobs:
+  # Only lib is tested on windows since building the gui/cli would take
+  # a lot longer, and they don't contain any platform specific code
+  test-rust:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Install just
+        run: choco install just
+      - name: Install rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cache cargo dependencies
+        uses: Swatinem/rust-cache@v2
+      - name: Run lib tests
+        run: just lib/ test

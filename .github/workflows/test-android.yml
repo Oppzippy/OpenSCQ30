@@ -1,0 +1,33 @@
+name: "test android"
+
+on:
+  push:
+    paths: &push_paths
+      - Cargo.lock
+      - android/**
+      - .github/workflows/test-android.yml
+  pull_request:
+    paths: *push_paths
+
+permissions:
+  contents: read
+
+jobs:
+  test-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Install build tools
+        uses: ./.github/actions/install-android-build-tools
+        with:
+          cache: true
+
+      - name: Run android unit tests
+        working-directory: android
+        run: ./gradlew testDebugUnitTest
+      # disabled since they're really slow
+      # - name: Run android instrumented tests
+      #   working-directory: android
+      #   run: ./gradlew connectedAndroidTest

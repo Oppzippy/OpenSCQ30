@@ -1,14 +1,22 @@
 name: "test"
 
 on:
-  - push
-  - pull_request
+  push:
+    paths-ignore: &push_paths_ignore
+      - "*.md"
+      - docs/**
+      - fastlane/**
+      - screenshots/**
+      - tools/**
+      - packaging/**
+  pull_request:
+    paths-ignore: *push_paths_ignore
 
 permissions:
   contents: read
 
 jobs:
-  rust_test_linux:
+  test-rust:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -24,7 +32,7 @@ jobs:
         uses: taiki-e/install-action@cargo-llvm-cov
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
-      - name: Run rust tests
+      - name: Run all rust tests
         run: just test-cov
       - name: Generate HTML test coverage report
         run: just test-cov-report html
@@ -33,39 +41,3 @@ jobs:
         with:
           name: coverage
           path: target/llvm-cov/html/
-
-  # Only lib is tested on windows since building the gui/cli would take
-  # a lot longer, and they don't contain any platform specific code
-  rust_test_windows:
-    runs-on: windows-2025
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          persist-credentials: false
-      - name: Install just
-        run: choco install just
-      - name: Install rust
-        uses: dtolnay/rust-toolchain@stable
-      - name: Cache cargo dependencies
-        uses: Swatinem/rust-cache@v2
-      - name: Run lib tests
-        run: just lib/ test
-
-  android_test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          persist-credentials: false
-      - name: Install build tools
-        uses: ./.github/actions/install-android-build-tools
-        with:
-          cache: true
-
-      - name: Run android unit tests
-        working-directory: android
-        run: ./gradlew testDebugUnitTest
-      # disabled since they're really slow
-      # - name: Run android instrumented tests
-      #   working-directory: android
-      #   run: ./gradlew connectedAndroidTest
