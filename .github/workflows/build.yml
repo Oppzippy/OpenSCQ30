@@ -7,7 +7,7 @@ permissions:
   contents: read
 
 jobs:
-  build_linux:
+  build-linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -34,7 +34,7 @@ jobs:
           name: linux
           path: artifacts/*
 
-  build_windows:
+  build-windows:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v5
@@ -61,7 +61,7 @@ jobs:
           name: windows
           path: artifacts/*
 
-  build_android:
+  build-android:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
