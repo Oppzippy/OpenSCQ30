@@ -12,7 +12,3 @@ updates:
   #   package-ecosystem: gradle
   #   schedule:
   #     interval: weekly
-  # - directory: /web
-  #   package-ecosystem: npm
-  #   schedule:
-  #     interval: weekly
