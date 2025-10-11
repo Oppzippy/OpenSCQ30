@@ -23,7 +23,8 @@ jobs:
       - name: Install ktlint
         run: |
           curl --silent --show-error --remote-name-all --location https://github.com/pinterest/ktlint/releases/download/1.7.0/ktlint{,.asc}
-          curl -sS https://keybase.io/ktlint/pgp_keys.asc | gpg --import && gpg --verify ktlint.asc
+          curl -sS https://raw.githubusercontent.com/pinterest/ktlint/1e1cdd6b3c7dfc94c9418c7c4706c0dcffcb132c/public-key.asc | gpg --import
+          gpg --verify ktlint.asc
           chmod a+x ktlint && sudo mv ktlint /usr/local/bin/
       - name: Check formatting
         run: just format-check
