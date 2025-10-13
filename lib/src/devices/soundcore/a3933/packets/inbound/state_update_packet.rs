@@ -12,7 +12,7 @@ use tokio::sync::watch;
 use crate::{
     api::device,
     devices::soundcore::{
-        a3933::state::A3933State,
+        a3933::{self, state::A3933State},
         common::{
             modules::ModuleCollection,
             packet::{
@@ -24,8 +24,8 @@ use crate::{
             packet_manager::PacketHandler,
             structures::{
                 AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
-                DualFirmwareVersion, EqualizerConfiguration, MultiButtonConfiguration,
-                SerialNumber, SoundModes, TouchTone, TwsStatus, VolumeAdjustments,
+                DualFirmwareVersion, EqualizerConfiguration, SerialNumber, SoundModes, TouchTone,
+                TwsStatus, VolumeAdjustments, button_configuration_v2::ButtonStatusCollection,
             },
         },
     },
@@ -42,7 +42,7 @@ pub struct A3933StateUpdatePacket {
     pub equalizer_configuration: EqualizerConfiguration<2, 10>,
     pub age_range: AgeRange,
     pub hear_id: Option<CustomHearId<2, 10>>,
-    pub button_configuration: MultiButtonConfiguration,
+    pub button_configuration: ButtonStatusCollection<6>,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub sound_modes: SoundModes,
     pub touch_tone: TouchTone,
@@ -79,7 +79,7 @@ impl Default for A3933StateUpdatePacket {
                     VolumeAdjustments::new([0; 10]),
                 ]),
             }),
-            button_configuration: Default::default(),
+            button_configuration: a3933::BUTTON_CONFIGURATION_SETTINGS.default_status_collection(),
             ambient_sound_mode_cycle: Default::default(),
             sound_modes: Default::default(),
             touch_tone: Default::default(),
@@ -131,7 +131,9 @@ impl InboundPacket for A3933StateUpdatePacket {
                     input,
                     (button_configuration, ambient_sound_mode_cycle, sound_modes, _unknown, extra),
                 ) = (
-                    MultiButtonConfiguration::take,
+                    ButtonStatusCollection::take(
+                        a3933::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
+                    ),
                     AmbientSoundModeCycle::take,
                     SoundModes::take,
                     // Unsure if these two unknown bytes should be inside or outside the optional
@@ -227,7 +229,10 @@ impl OutboundPacket for A3933StateUpdatePacket {
                         .collect()
                 },
             ))
-            .chain(self.button_configuration.bytes())
+            .chain(
+                self.button_configuration
+                    .bytes(a3933::BUTTON_CONFIGURATION_SETTINGS.parse_settings()),
+            )
             .chain([self.ambient_sound_mode_cycle.into()])
             .chain(self.sound_modes.bytes())
             .chain([0, 0])
