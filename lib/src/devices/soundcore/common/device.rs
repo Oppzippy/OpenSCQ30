@@ -19,8 +19,12 @@ use crate::{
         soundcore::{
             self,
             common::{
+                modules::button_configuration_v2::ButtonConfigurationSettings,
                 packet::PacketIOController,
-                structures::{AutoPowerOff, TouchTone},
+                structures::{
+                    AutoPowerOff, TouchTone,
+                    button_configuration_v2::{ButtonStatus, ButtonStatusCollection},
+                },
             },
         },
     },
@@ -299,6 +303,16 @@ where
     {
         self.module_collection
             .add_button_configuration(self.packet_io_controller.clone());
+    }
+
+    pub fn button_configuration_v2<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize>(
+        &mut self,
+        settings: &'static ButtonConfigurationSettings<NUM_BUTTONS, NUM_PRESS_KINDS>,
+    ) where
+        StateType: Has<ButtonStatusCollection<NUM_BUTTONS>> + Has<TwsStatus>,
+    {
+        self.module_collection
+            .add_button_configuration_v2(self.packet_io_controller.clone(), settings);
     }
 
     pub fn ambient_sound_mode_cycle(&mut self)
