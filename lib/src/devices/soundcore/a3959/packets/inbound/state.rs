@@ -21,24 +21,44 @@ use crate::{
                 parsing::take_bool,
             },
             packet_manager::PacketHandler,
+            structures::button_configuration_v2::ButtonStatusCollection,
         },
     },
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct A3959State {
     pub tws_status: common::structures::TwsStatus,
     pub dual_battery: common::structures::DualBattery,
     pub dual_firmware_version: common::structures::DualFirmwareVersion,
     pub serial_number: common::structures::SerialNumber,
     pub equalizer_configuration: common::structures::EqualizerConfiguration<1, 10>,
-    pub button_configuration: a3959::structures::MultiButtonConfiguration,
+    pub button_configuration: ButtonStatusCollection<8>,
     pub ambient_sound_mode_cycle: common::structures::AmbientSoundModeCycle,
     pub sound_modes: a3959::structures::SoundModes,
     pub touch_tone: common::structures::TouchTone,
     pub auto_power_off: common::structures::AutoPowerOff,
     pub low_battery_prompt: bool,
     pub gaming_mode: bool,
+}
+
+impl Default for A3959State {
+    fn default() -> Self {
+        Self {
+            tws_status: Default::default(),
+            dual_battery: Default::default(),
+            dual_firmware_version: Default::default(),
+            serial_number: Default::default(),
+            equalizer_configuration: Default::default(),
+            button_configuration: a3959::BUTTON_CONFIGURATION_SETTINGS.default_status_collection(),
+            ambient_sound_mode_cycle: Default::default(),
+            sound_modes: Default::default(),
+            touch_tone: Default::default(),
+            auto_power_off: Default::default(),
+            low_battery_prompt: Default::default(),
+            gaming_mode: Default::default(),
+        }
+    }
 }
 
 impl InboundPacket for A3959State {
@@ -56,7 +76,9 @@ impl InboundPacket for A3959State {
                     common::structures::EqualizerConfiguration::take,
                     take(10usize),
                     take(1usize),
-                    a3959::structures::MultiButtonConfiguration::take,
+                    ButtonStatusCollection::take(
+                        a3959::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
+                    ),
                     common::structures::AmbientSoundModeCycle::take,
                     a3959::structures::SoundModes::take,
                     take(1usize),
@@ -122,7 +144,10 @@ impl OutboundPacket for A3959State {
             .chain(self.equalizer_configuration.bytes())
             .chain([0; 10])
             .chain([0])
-            .chain(self.button_configuration.bytes())
+            .chain(
+                self.button_configuration
+                    .bytes(a3959::BUTTON_CONFIGURATION_SETTINGS.parse_settings()),
+            )
             .chain(self.ambient_sound_mode_cycle.bytes())
             .chain(self.sound_modes.bytes())
             .chain([0])

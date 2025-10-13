@@ -5,6 +5,7 @@ use crate::devices::soundcore::{
     common::structures::{
         AmbientSoundModeCycle, AutoPowerOff, DualBattery, DualFirmwareVersion,
         EqualizerConfiguration, SerialNumber, TouchTone, TwsStatus,
+        button_configuration_v2::ButtonStatusCollection,
     },
 };
 
@@ -15,7 +16,7 @@ pub struct A3959State {
     dual_firmware_version: DualFirmwareVersion,
     serial_number: SerialNumber,
     equalizer_configuration: EqualizerConfiguration<1, 10>,
-    button_configuration: a3959::structures::MultiButtonConfiguration,
+    button_configuration: ButtonStatusCollection<8>,
     ambient_sound_mode_cycle: AmbientSoundModeCycle,
     sound_modes: a3959::structures::SoundModes,
     auto_power_off: AutoPowerOff,
