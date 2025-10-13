@@ -2,7 +2,6 @@ use std::borrow::Cow;
 
 use async_trait::async_trait;
 use openscq30_lib_has::Has;
-use strum::IntoEnumIterator;
 
 use crate::{
     api::settings::{Setting, SettingId, Value},
@@ -16,8 +15,6 @@ use crate::{
     },
     settings,
 };
-
-use super::ButtonConfigurationSetting;
 
 pub struct ButtonConfigurationSettingHandler<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize>
 {
@@ -41,7 +38,7 @@ where
     T: Has<ButtonStatusCollection<NUM_BUTTONS>> + Has<TwsStatus> + Send,
 {
     fn settings(&self) -> Vec<SettingId> {
-        ButtonConfigurationSetting::iter().map(Into::into).collect()
+        self.settings.order.map(|button| button.into()).to_vec()
     }
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {

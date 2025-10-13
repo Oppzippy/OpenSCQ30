@@ -3,19 +3,14 @@ use std::sync::Arc;
 use openscq30_lib_has::Has;
 use setting_handler::ButtonConfigurationSettingHandler;
 use state_modifier::ButtonConfigurationStateModifier;
-use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use crate::{
-    api::{
-        connection::RfcommConnection,
-        settings::{CategoryId, SettingId},
-    },
+    api::{connection::RfcommConnection, settings::CategoryId},
     devices::soundcore::common::{
         packet::PacketIOController,
         structures::{TwsStatus, button_configuration_v2::*},
     },
     i18n::fl,
-    macros::enum_subset,
 };
 
 use super::ModuleCollection;
@@ -195,20 +190,6 @@ pub const COMMON_TWS_ACTIONS: &'static [ButtonAction] = &[
         localized_name: || fl!("game-mode"),
     },
 ];
-
-enum_subset!(
-    SettingId,
-    #[derive(EnumString, EnumIter, IntoStaticStr)]
-    #[allow(clippy::enum_variant_names)]
-    enum ButtonConfigurationSetting {
-        LeftSinglePress,
-        LeftDoublePress,
-        LeftLongPress,
-        RightSinglePress,
-        RightDoublePress,
-        RightLongPress,
-    }
-);
 
 impl<T> ModuleCollection<T>
 where
