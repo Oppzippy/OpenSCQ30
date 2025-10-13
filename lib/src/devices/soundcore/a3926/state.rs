@@ -4,7 +4,7 @@ use crate::devices::soundcore::common::{
     packet::inbound::SerialNumberAndFirmwareVersion,
     structures::{
         AgeRange, BasicHearId, DualBattery, DualFirmwareVersion, EqualizerConfiguration, Gender,
-        MultiButtonConfiguration, SerialNumber, TwsStatus,
+        SerialNumber, TwsStatus, button_configuration_v2::ButtonStatusCollection,
     },
 };
 
@@ -18,7 +18,7 @@ pub struct A3926State {
     gender: Gender,
     age_range: AgeRange,
     hear_id: BasicHearId<2, 8>,
-    button_configuration: MultiButtonConfiguration,
+    button_configuration: ButtonStatusCollection<6>,
     serial_number: SerialNumber,
     dual_firmware_version: DualFirmwareVersion,
 }

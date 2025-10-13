@@ -9,7 +9,7 @@ use tokio::sync::watch;
 use crate::{
     api::device,
     devices::soundcore::{
-        a3926::state::A3926State,
+        a3926::{self, state::A3926State},
         common::{
             modules::ModuleCollection,
             packet::{
@@ -19,15 +19,15 @@ use crate::{
             },
             packet_manager::PacketHandler,
             structures::{
-                AgeRange, BasicHearId, DualBattery, EqualizerConfiguration, Gender,
-                MultiButtonConfiguration, TwsStatus,
+                AgeRange, BasicHearId, DualBattery, EqualizerConfiguration, Gender, TwsStatus,
+                button_configuration_v2::ButtonStatusCollection,
             },
         },
     },
 };
 
 // A3926 and A3926Z11
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct A3926StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
@@ -35,7 +35,21 @@ pub struct A3926StateUpdatePacket {
     pub gender: Gender,
     pub age_range: AgeRange,
     pub hear_id: BasicHearId<2, 8>,
-    pub button_configuration: MultiButtonConfiguration,
+    pub button_configuration: ButtonStatusCollection<6>,
+}
+
+impl Default for A3926StateUpdatePacket {
+    fn default() -> Self {
+        Self {
+            tws_status: Default::default(),
+            battery: Default::default(),
+            equalizer_configuration: Default::default(),
+            gender: Default::default(),
+            age_range: Default::default(),
+            hear_id: Default::default(),
+            button_configuration: a3926::BUTTON_CONFIGURATION_SETTINGS.default_status_collection(),
+        }
+    }
 }
 
 impl InboundPacket for A3926StateUpdatePacket {
@@ -52,7 +66,9 @@ impl InboundPacket for A3926StateUpdatePacket {
                     Gender::take,
                     AgeRange::take,
                     BasicHearId::take,
-                    MultiButtonConfiguration::take,
+                    ButtonStatusCollection::take(
+                        a3926::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
+                    ),
                 ),
                 |(
                     tws_status,
@@ -97,7 +113,10 @@ impl OutboundPacket for A3926StateUpdatePacket {
             .chain(self.equalizer_configuration.bytes())
             .chain([self.gender.0, self.age_range.0])
             .chain(self.hear_id.bytes())
-            .chain(self.button_configuration.bytes())
+            .chain(
+                self.button_configuration
+                    .bytes(a3926::BUTTON_CONFIGURATION_SETTINGS.parse_settings()),
+            )
             .collect()
     }
 }
