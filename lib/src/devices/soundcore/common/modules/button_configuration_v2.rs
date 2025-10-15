@@ -48,18 +48,16 @@ impl<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize>
             let enabled = match settings.parse_settings.enabled_flag_kind {
                 EnabledFlagKind::None => None,
                 EnabledFlagKind::Single => Some(EnabledStatus::Single(true)),
-                EnabledFlagKind::TwsHighBits | EnabledFlagKind::TwsLowBits => {
-                    Some(EnabledStatus::Tws {
-                        connected: true,
-                        disconnected: true,
-                    })
-                }
+                EnabledFlagKind::TwsLowBits => Some(EnabledStatus::Tws {
+                    connected: true,
+                    disconnected: true,
+                }),
             };
 
             let default_action_id = settings.available_actions.first().unwrap().id;
             let action = match settings.parse_settings.action_kind {
                 ActionKind::Single => ActionStatus::Single(default_action_id),
-                ActionKind::TwsHighBits | ActionKind::TwsLowBits => ActionStatus::Tws {
+                ActionKind::TwsLowBits => ActionStatus::Tws {
                     connected: default_action_id,
                     disconnected: default_action_id,
                 },

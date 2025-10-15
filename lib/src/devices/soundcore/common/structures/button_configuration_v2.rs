@@ -212,7 +212,6 @@ impl ButtonPressKind {
 pub enum EnabledFlagKind {
     None,
     Single,
-    TwsHighBits,
     TwsLowBits,
 }
 
@@ -232,16 +231,6 @@ impl EnabledStatus {
                 EnabledFlagKind::Single => {
                     let (input, is_enabled) = take_bool(input)?;
                     (input, Some(Self::Single(is_enabled)))
-                }
-                EnabledFlagKind::TwsHighBits => {
-                    let (input, is_enabled) = le_u8(input)?;
-                    (
-                        input,
-                        Some(Self::Tws {
-                            connected: is_enabled >> 4 == 1,
-                            disconnected: is_enabled & 0xF == 1,
-                        }),
-                    )
                 }
                 EnabledFlagKind::TwsLowBits => {
                     let (input, is_enabled) = le_u8(input)?;
@@ -266,7 +255,6 @@ impl EnabledStatus {
             } => match enabled_flag_kind {
                 EnabledFlagKind::None => unreachable!(),
                 EnabledFlagKind::Single => unreachable!(),
-                EnabledFlagKind::TwsHighBits => (u8::from(connected) << 4) | u8::from(disconnected),
                 EnabledFlagKind::TwsLowBits => (u8::from(disconnected) << 4) | u8::from(connected),
             },
         }
@@ -314,7 +302,6 @@ impl EnabledStatus {
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum ActionKind {
     Single,
-    TwsHighBits,
     TwsLowBits,
 }
 
@@ -333,16 +320,6 @@ impl ActionStatus {
                 ActionKind::Single => {
                     let (input, action_id) = le_u8(input)?;
                     (input, ActionStatus::Single(action_id))
-                }
-                ActionKind::TwsHighBits => {
-                    let (input, action_ids) = le_u8(input)?;
-                    (
-                        input,
-                        ActionStatus::Tws {
-                            connected: action_ids >> 4,
-                            disconnected: action_ids & 0xF,
-                        },
-                    )
                 }
                 ActionKind::TwsLowBits => {
                     let (input, action_ids) = le_u8(input)?;
@@ -363,13 +340,6 @@ impl ActionStatus {
             ActionKind::Single => match self {
                 ActionStatus::Single(byte) => byte,
                 ActionStatus::Tws { .. } => unreachable!(),
-            },
-            ActionKind::TwsHighBits => match self {
-                ActionStatus::Single(_) => unreachable!(),
-                ActionStatus::Tws {
-                    connected,
-                    disconnected,
-                } => (connected << 4) | disconnected,
             },
             ActionKind::TwsLowBits => match self {
                 ActionStatus::Single(_) => unreachable!(),
