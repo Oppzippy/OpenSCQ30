@@ -11,10 +11,7 @@ use tokio::sync::watch;
 use crate::{
     api::device,
     devices::soundcore::{
-        a3936::{
-            state::A3936State,
-            structures::{A3936InternalMultiButtonConfiguration, A3936SoundModes},
-        },
+        a3936::{self, state::A3936State, structures::A3936SoundModes},
         common::{
             modules::ModuleCollection,
             packet::{
@@ -27,7 +24,7 @@ use crate::{
             structures::{
                 AgeRange, AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CustomHearId,
                 DualBattery, DualFirmwareVersion, EqualizerConfiguration, SerialNumber, TouchTone,
-                TwsStatus, VolumeAdjustments,
+                TwsStatus, VolumeAdjustments, button_configuration_v2::ButtonStatusCollection,
             },
         },
     },
@@ -45,7 +42,7 @@ pub struct A3936StateUpdatePacket {
     pub custom_hear_id: CustomHearId<2, 10>,
     pub sound_modes: A3936SoundModes,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
-    pub button_configuration: A3936InternalMultiButtonConfiguration,
+    pub button_configuration: ButtonStatusCollection<6>,
     pub touch_tone: TouchTone,
     pub charging_case_battery: BatteryLevel,
     pub color: u8,
@@ -83,7 +80,7 @@ impl Default for A3936StateUpdatePacket {
             },
             sound_modes: Default::default(),
             ambient_sound_mode_cycle: Default::default(),
-            button_configuration: Default::default(),
+            button_configuration: a3936::BUTTON_CONFIGURATION_SETTINGS.default_status_collection(),
             touch_tone: Default::default(),
             charging_case_battery: Default::default(),
             color: Default::default(),
@@ -115,8 +112,9 @@ impl InboundPacket for A3936StateUpdatePacket {
                 // there are some extra bytes between the button model and the beginning of the next data to be parsed?
                 let (input, skip_offset) = le_u8(input)?;
                 let remaining_before_button_configuration = input.len();
-                let (input, button_configuration) =
-                    A3936InternalMultiButtonConfiguration::take(input)?;
+                let (input, button_configuration) = ButtonStatusCollection::take(
+                    a3936::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
+                )(input)?;
                 let button_configuration_size = remaining_before_button_configuration - input.len();
                 let (input, _) = take(
                     (skip_offset as usize)
@@ -200,7 +198,10 @@ impl OutboundPacket for A3936StateUpdatePacket {
                     .chain([0, 0]),
             )
             .chain([0]) // TODO skip offset
-            .chain(self.button_configuration.bytes())
+            .chain(
+                self.button_configuration
+                    .bytes(a3936::BUTTON_CONFIGURATION_SETTINGS.parse_settings()),
+            )
             .chain(self.ambient_sound_mode_cycle.bytes())
             .chain(self.sound_modes.bytes())
             .chain([

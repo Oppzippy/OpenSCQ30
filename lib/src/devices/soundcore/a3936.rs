@@ -9,7 +9,13 @@ use crate::{
         common::{
             device::fetch_state_from_state_update_packet,
             macros::soundcore_device,
+            modules::button_configuration_v2::{
+                ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_TWS_ACTIONS,
+            },
             packet::outbound::{OutboundPacketBytesExt, RequestState},
+            structures::button_configuration_v2::{
+                ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
+            },
         },
     },
     i18n::fl,
@@ -31,7 +37,7 @@ soundcore_device!(
         builder.module_collection().add_state_update();
         builder.a3936_sound_modes();
         builder.equalizer_with_custom_hear_id().await;
-        builder.a3936_button_configuration();
+        builder.button_configuration_v2(&BUTTON_CONFIGURATION_SETTINGS);
         builder.ambient_sound_mode_cycle();
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.touch_tone();
@@ -46,6 +52,51 @@ soundcore_device!(
         )])
     },
 );
+
+pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
+    ButtonConfigurationSettings {
+        supports_set_all_packet: false,
+        order: [
+            Button::LeftSinglePress,
+            Button::RightSinglePress,
+            Button::LeftDoublePress,
+            Button::RightDoublePress,
+            Button::LeftLongPress,
+            Button::RightLongPress,
+        ],
+        settings: [
+            ButtonSettings {
+                parse_settings: ButtonParseSettings {
+                    enabled_flag_kind: EnabledFlagKind::TwsLowBits,
+                    action_kind: ActionKind::TwsLowBits,
+                },
+                button_id: 2,
+                press_kind: ButtonPressKind::Single,
+                available_actions: COMMON_TWS_ACTIONS,
+                disable_mode: ButtonDisableMode::DisablingOneSideDisablesOther,
+            },
+            ButtonSettings {
+                parse_settings: ButtonParseSettings {
+                    enabled_flag_kind: EnabledFlagKind::TwsLowBits,
+                    action_kind: ActionKind::TwsLowBits,
+                },
+                button_id: 0,
+                press_kind: ButtonPressKind::Double,
+                available_actions: COMMON_TWS_ACTIONS,
+                disable_mode: ButtonDisableMode::DisablingOneSideDisablesOther,
+            },
+            ButtonSettings {
+                parse_settings: ButtonParseSettings {
+                    enabled_flag_kind: EnabledFlagKind::TwsLowBits,
+                    action_kind: ActionKind::TwsLowBits,
+                },
+                button_id: 1,
+                press_kind: ButtonPressKind::Long,
+                available_actions: COMMON_TWS_ACTIONS,
+                disable_mode: ButtonDisableMode::DisablingOneSideDisablesOther,
+            },
+        ],
+    };
 
 #[derive(IntoStaticStr, VariantArray)]
 #[allow(clippy::enum_variant_names)]

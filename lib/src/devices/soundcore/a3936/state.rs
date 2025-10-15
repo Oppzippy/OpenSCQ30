@@ -3,12 +3,10 @@ use openscq30_lib_macros::Has;
 use crate::devices::soundcore::common::structures::{
     AgeRange, AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CustomHearId, DualBattery,
     DualFirmwareVersion, EqualizerConfiguration, Gender, SerialNumber, TouchTone, TwsStatus,
+    button_configuration_v2::ButtonStatusCollection,
 };
 
-use super::{
-    packets::A3936StateUpdatePacket,
-    structures::{A3936InternalMultiButtonConfiguration, A3936SoundModes},
-};
+use super::{packets::A3936StateUpdatePacket, structures::A3936SoundModes};
 
 #[derive(Debug, Clone, PartialEq, Eq, Has)]
 pub struct A3936State {
@@ -21,7 +19,7 @@ pub struct A3936State {
     pub custom_hear_id: CustomHearId<2, 10>,
     pub sound_modes: A3936SoundModes,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
-    pub button_configuration: A3936InternalMultiButtonConfiguration,
+    pub button_configuration: ButtonStatusCollection<6>,
     pub charging_case_battery: BatteryLevel,
     pub auto_power_off: AutoPowerOff,
     pub gender: Gender,
