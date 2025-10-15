@@ -28,12 +28,6 @@ pub struct ButtonConfigurationSettings<const NUM_BUTTONS: usize, const NUM_PRESS
 impl<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize>
     ButtonConfigurationSettings<NUM_BUTTONS, NUM_PRESS_KINDS>
 {
-    pub fn button_settings_by_position(&self, position: usize) -> ButtonSettings {
-        let button = self.order[position];
-        self.button_settings(button)
-            .expect("if it is found in order, it should also be found in settings")
-    }
-
     pub fn button_settings(&self, button: Button) -> Option<ButtonSettings> {
         self.settings
             .iter()
