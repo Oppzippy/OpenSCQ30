@@ -22,8 +22,7 @@ use crate::{
                 modules::button_configuration_v2::ButtonConfigurationSettings,
                 packet::PacketIOController,
                 structures::{
-                    AutoPowerOff, TouchTone,
-                    button_configuration_v2::{ButtonStatus, ButtonStatusCollection},
+                    AutoPowerOff, TouchTone, button_configuration_v2::ButtonStatusCollection,
                 },
             },
         },
