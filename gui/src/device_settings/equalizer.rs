@@ -5,7 +5,7 @@ use std::{
 
 use cosmic::{
     Apply, Element,
-    iced::{Alignment, Border, Length, Shadow},
+    iced::{Alignment, Border, Length, Shadow, alignment},
     theme, widget,
 };
 use openscq30_lib::settings::Equalizer;
@@ -60,6 +60,7 @@ where
                     )
                     .into(),
                 ])
+                .align_y(alignment::Vertical::Center)
                 .into(),
             ])
             .into()
@@ -90,7 +91,7 @@ where
         .apply(widget::button::icon)
         .on_press((on_press)(increment::<T>(value, step, min, max)));
 
-    let label = widget::text::title4(label)
+    let label = widget::text::body(label)
         .apply(widget::container)
         .width(width)
         .align_x(Alignment::Center)
