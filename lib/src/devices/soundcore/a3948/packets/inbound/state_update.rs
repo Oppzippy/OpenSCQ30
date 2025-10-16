@@ -21,21 +21,35 @@ use crate::{
             packet_manager::PacketHandler,
             structures::{
                 DualBattery, DualFirmwareVersion, EqualizerConfiguration, SerialNumber, TouchTone,
-                TwsStatus,
+                TwsStatus, button_configuration_v2::ButtonStatusCollection,
             },
         },
     },
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct A3948StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
     pub firmware_version: DualFirmwareVersion,
     pub serial_number: SerialNumber,
     pub equalizer_configuration: EqualizerConfiguration<1, 10>,
-    pub button_configuration: a3948::structures::MultiButtonConfiguration,
+    pub button_configuration: ButtonStatusCollection<6>,
     pub touch_tone: TouchTone,
+}
+
+impl Default for A3948StateUpdatePacket {
+    fn default() -> Self {
+        Self {
+            tws_status: Default::default(),
+            battery: Default::default(),
+            firmware_version: Default::default(),
+            serial_number: Default::default(),
+            equalizer_configuration: Default::default(),
+            button_configuration: a3948::BUTTON_CONFIGURATION_SETTINGS.default_status_collection(),
+            touch_tone: Default::default(),
+        }
+    }
 }
 
 impl InboundPacket for A3948StateUpdatePacket {
@@ -52,7 +66,9 @@ impl InboundPacket for A3948StateUpdatePacket {
                     SerialNumber::take,
                     EqualizerConfiguration::take,
                     take(11usize), // padding
-                    a3948::structures::MultiButtonConfiguration::take,
+                    ButtonStatusCollection::take(
+                        a3948::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
+                    ),
                     take(5usize), // padding
                     TouchTone::take,
                     take(15usize), // padding
@@ -99,7 +115,10 @@ impl OutboundPacket for A3948StateUpdatePacket {
             .chain(self.serial_number.bytes())
             .chain(self.equalizer_configuration.bytes())
             .chain([0; 11]) // padding
-            .chain(self.button_configuration.bytes()) // TODO button configuration
+            .chain(
+                self.button_configuration
+                    .bytes(a3948::BUTTON_CONFIGURATION_SETTINGS.parse_settings()),
+            ) // TODO button configuration
             .chain([0; 5]) // padding
             .chain(self.touch_tone.bytes())
             .chain([0; 15]) // padding

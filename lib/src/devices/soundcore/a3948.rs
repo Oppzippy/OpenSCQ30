@@ -5,14 +5,18 @@ use crate::devices::soundcore::{
     common::{
         device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
+        modules::button_configuration_v2::{
+            ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_TWS_ACTIONS,
+        },
         packet::outbound::{OutboundPacketBytesExt, RequestState},
+        structures::button_configuration_v2::{
+            ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
+        },
     },
 };
 
-mod modules;
 mod packets;
 mod state;
-mod structures;
 
 soundcore_device!(
     A3948State,
@@ -25,7 +29,7 @@ soundcore_device!(
         builder.module_collection().add_state_update();
         builder.equalizer_with_drc().await;
 
-        builder.a3948_button_configuration();
+        builder.button_configuration_v2(&BUTTON_CONFIGURATION_SETTINGS);
 
         builder.touch_tone();
 
@@ -40,6 +44,51 @@ soundcore_device!(
         )])
     },
 );
+
+pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
+    ButtonConfigurationSettings {
+        supports_set_all_packet: false,
+        order: [
+            Button::LeftSinglePress,
+            Button::RightSinglePress,
+            Button::LeftDoublePress,
+            Button::RightDoublePress,
+            Button::LeftLongPress,
+            Button::RightLongPress,
+        ],
+        settings: [
+            ButtonSettings {
+                parse_settings: ButtonParseSettings {
+                    enabled_flag_kind: EnabledFlagKind::TwsLowBits,
+                    action_kind: ActionKind::TwsLowBits,
+                },
+                button_id: 2,
+                press_kind: ButtonPressKind::Single,
+                available_actions: COMMON_TWS_ACTIONS,
+                disable_mode: ButtonDisableMode::DisablingOneSideDisablesOther,
+            },
+            ButtonSettings {
+                parse_settings: ButtonParseSettings {
+                    enabled_flag_kind: EnabledFlagKind::TwsLowBits,
+                    action_kind: ActionKind::TwsLowBits,
+                },
+                button_id: 0,
+                press_kind: ButtonPressKind::Double,
+                available_actions: COMMON_TWS_ACTIONS,
+                disable_mode: ButtonDisableMode::DisablingOneSideDisablesOther,
+            },
+            ButtonSettings {
+                parse_settings: ButtonParseSettings {
+                    enabled_flag_kind: EnabledFlagKind::TwsLowBits,
+                    action_kind: ActionKind::TwsLowBits,
+                },
+                button_id: 1,
+                press_kind: ButtonPressKind::Long,
+                available_actions: COMMON_TWS_ACTIONS,
+                disable_mode: ButtonDisableMode::DisablingOneSideDisablesOther,
+            },
+        ],
+    };
 
 #[cfg(test)]
 mod tests {

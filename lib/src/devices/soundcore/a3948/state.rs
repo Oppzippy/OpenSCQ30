@@ -1,10 +1,10 @@
 use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::{
-    a3948::{self, packets::inbound::A3948StateUpdatePacket},
+    a3948::packets::inbound::A3948StateUpdatePacket,
     common::structures::{
         DualBattery, DualFirmwareVersion, EqualizerConfiguration, SerialNumber, TouchTone,
-        TwsStatus,
+        TwsStatus, button_configuration_v2::ButtonStatusCollection,
     },
 };
 
@@ -15,7 +15,7 @@ pub struct A3948State {
     firmware_version: DualFirmwareVersion,
     serial_number: SerialNumber,
     equalizer_configuration: EqualizerConfiguration<1, 10>,
-    button_configuration: a3948::structures::MultiButtonConfiguration,
+    button_configuration: ButtonStatusCollection<6>,
     touch_tone: TouchTone,
 }
 
