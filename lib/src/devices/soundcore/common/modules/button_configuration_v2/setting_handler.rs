@@ -151,11 +151,11 @@ where
                                 } else {
                                     action.id
                                 }),
-                            )
+                            );
                     }
                 } else if maybe_action.is_none() {
                     statuses.0[other_side_pos] =
-                        statuses.0[other_side_pos].with_current_action_id(tws_status, None)
+                        statuses.0[other_side_pos].with_current_action_id(tws_status, None);
                 }
             }
         }

@@ -71,7 +71,7 @@ impl ButtonStatus {
             let (input, enabled) = EnabledStatus::take(parse_settings.enabled_flag_kind)(input)?;
             let (input, action) = ActionStatus::take(parse_settings.action_kind)(input)?;
 
-            Ok((input, ButtonStatus { enabled, action }))
+            Ok((input, Self { enabled, action }))
         }
     }
 
@@ -85,9 +85,10 @@ impl ButtonStatus {
     }
 
     pub fn is_enabled(&self, tws_status: TwsStatus) -> bool {
-        self.enabled
-            .map(|e| e.current(tws_status))
-            .unwrap_or_else(|| self.action.current(tws_status) != 0xF)
+        self.enabled.map_or_else(
+            || self.action.current(tws_status) != 0xF,
+            |e| e.current(tws_status),
+        )
     }
 
     pub fn current_action_id(&self, tws_status: TwsStatus) -> Option<u8> {
@@ -144,23 +145,23 @@ enum_subset!(
 impl Button {
     pub fn press_kind(&self) -> ButtonPressKind {
         match self {
-            Button::LeftSinglePress | Button::RightSinglePress => ButtonPressKind::Single,
-            Button::LeftDoublePress | Button::RightDoublePress => ButtonPressKind::Double,
-            Button::LeftTriplePress | Button::RightTriplePress => ButtonPressKind::Triple,
-            Button::LeftLongPress | Button::RightLongPress => ButtonPressKind::Long,
+            Self::LeftSinglePress | Self::RightSinglePress => ButtonPressKind::Single,
+            Self::LeftDoublePress | Self::RightDoublePress => ButtonPressKind::Double,
+            Self::LeftTriplePress | Self::RightTriplePress => ButtonPressKind::Triple,
+            Self::LeftLongPress | Self::RightLongPress => ButtonPressKind::Long,
         }
     }
 
     pub fn side(&self) -> ButtonSide {
         match self {
-            Button::LeftSinglePress
-            | Button::LeftDoublePress
-            | Button::LeftTriplePress
-            | Button::LeftLongPress => ButtonSide::Left,
-            Button::RightSinglePress
-            | Button::RightDoublePress
-            | Button::RightTriplePress
-            | Button::RightLongPress => ButtonSide::Right,
+            Self::LeftSinglePress
+            | Self::LeftDoublePress
+            | Self::LeftTriplePress
+            | Self::LeftLongPress => ButtonSide::Left,
+            Self::RightSinglePress
+            | Self::RightDoublePress
+            | Self::RightTriplePress
+            | Self::RightLongPress => ButtonSide::Right,
         }
     }
 }
@@ -191,19 +192,19 @@ pub enum ButtonPressKind {
 impl ButtonPressKind {
     pub fn left_button(&self) -> Button {
         match self {
-            ButtonPressKind::Single => Button::LeftSinglePress,
-            ButtonPressKind::Double => Button::LeftDoublePress,
-            ButtonPressKind::Triple => Button::LeftTriplePress,
-            ButtonPressKind::Long => Button::LeftLongPress,
+            Self::Single => Button::LeftSinglePress,
+            Self::Double => Button::LeftDoublePress,
+            Self::Triple => Button::LeftTriplePress,
+            Self::Long => Button::LeftLongPress,
         }
     }
 
     pub fn right_button(&self) -> Button {
         match self {
-            ButtonPressKind::Single => Button::RightSinglePress,
-            ButtonPressKind::Double => Button::RightDoublePress,
-            ButtonPressKind::Triple => Button::RightTriplePress,
-            ButtonPressKind::Long => Button::RightLongPress,
+            Self::Single => Button::RightSinglePress,
+            Self::Double => Button::RightDoublePress,
+            Self::Triple => Button::RightTriplePress,
+            Self::Long => Button::RightLongPress,
         }
     }
 }
@@ -248,8 +249,8 @@ impl EnabledStatus {
 
     pub fn byte(self, enabled_flag_kind: EnabledFlagKind) -> u8 {
         match self {
-            EnabledStatus::Single(is_enabled) => is_enabled.into(),
-            EnabledStatus::Tws {
+            Self::Single(is_enabled) => is_enabled.into(),
+            Self::Tws {
                 connected,
                 disconnected,
             } => match enabled_flag_kind {
@@ -262,8 +263,8 @@ impl EnabledStatus {
 
     pub fn current(self, tws_status: TwsStatus) -> bool {
         match self {
-            EnabledStatus::Single(is_enabled) => is_enabled,
-            EnabledStatus::Tws {
+            Self::Single(is_enabled) => is_enabled,
+            Self::Tws {
                 connected,
                 disconnected,
             } => {
@@ -319,13 +320,13 @@ impl ActionStatus {
             Ok(match tws_action_kind {
                 ActionKind::Single => {
                     let (input, action_id) = le_u8(input)?;
-                    (input, ActionStatus::Single(action_id))
+                    (input, Self::Single(action_id))
                 }
                 ActionKind::TwsLowBits => {
                     let (input, action_ids) = le_u8(input)?;
                     (
                         input,
-                        ActionStatus::Tws {
+                        Self::Tws {
                             connected: action_ids & 0xF,
                             disconnected: action_ids >> 4,
                         },
@@ -338,12 +339,12 @@ impl ActionStatus {
     pub fn byte(self, action_kind: ActionKind) -> u8 {
         match action_kind {
             ActionKind::Single => match self {
-                ActionStatus::Single(byte) => byte,
-                ActionStatus::Tws { .. } => unreachable!(),
+                Self::Single(byte) => byte,
+                Self::Tws { .. } => unreachable!(),
             },
             ActionKind::TwsLowBits => match self {
-                ActionStatus::Single(_) => unreachable!(),
-                ActionStatus::Tws {
+                Self::Single(_) => unreachable!(),
+                Self::Tws {
                     connected,
                     disconnected,
                 } => (disconnected << 4) | connected,
@@ -353,8 +354,8 @@ impl ActionStatus {
 
     pub fn current(self, tws_status: TwsStatus) -> u8 {
         match self {
-            ActionStatus::Single(action) => action,
-            ActionStatus::Tws {
+            Self::Single(action) => action,
+            Self::Tws {
                 connected,
                 disconnected,
             } => {
@@ -369,8 +370,8 @@ impl ActionStatus {
 
     pub fn with_current_action_id(self, tws_status: TwsStatus, action_id: u8) -> Self {
         match self {
-            ActionStatus::Single(_) => Self::Single(action_id),
-            ActionStatus::Tws {
+            Self::Single(_) => Self::Single(action_id),
+            Self::Tws {
                 connected,
                 disconnected,
             } => {

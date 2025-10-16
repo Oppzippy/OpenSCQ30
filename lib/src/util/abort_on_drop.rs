@@ -21,7 +21,7 @@ pub struct AbortOnDropHandle<T>(JoinHandle<T>);
 
 impl<T> Drop for AbortOnDropHandle<T> {
     fn drop(&mut self) {
-        self.0.abort()
+        self.0.abort();
     }
 }
 
@@ -34,7 +34,7 @@ impl<T> AbortOnDropHandle<T> {
     /// Abort the task associated with this handle,
     /// equivalent to [`JoinHandle::abort`].
     pub fn abort(&self) {
-        self.0.abort()
+        self.0.abort();
     }
 
     /// Checks if the task associated with this handle is finished,

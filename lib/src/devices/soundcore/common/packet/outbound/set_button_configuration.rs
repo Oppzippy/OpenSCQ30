@@ -61,7 +61,7 @@ pub struct SetAllButtonConfigurations<'a, const N: usize> {
     pub parse_settings: &'a [ButtonParseSettings; N],
 }
 
-impl<'a, const N: usize> OutboundPacket for SetAllButtonConfigurations<'a, N> {
+impl<const N: usize> OutboundPacket for SetAllButtonConfigurations<'_, N> {
     fn command(&self) -> Command {
         Command([0x04, 0x84])
     }

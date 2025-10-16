@@ -140,7 +140,7 @@ pub const COMMON_SETTINGS: ButtonConfigurationSettings<6, 3> = ButtonConfigurati
     ],
 };
 
-pub const COMMON_TWS_ACTIONS: &'static [ButtonAction] = &[
+pub const COMMON_TWS_ACTIONS: &[ButtonAction] = &[
     ButtonAction {
         id: 0,
         name: "VolumeUp",

@@ -143,49 +143,46 @@ where
         setting_values: Vec<(SettingId, Value)>,
     ) -> device::Result<()> {
         for (setting_id, value) in setting_values {
-            match setting_id {
-                SettingId::SendPacket => {
-                    let mut data = value
-                        .try_as_str()
-                        .map_err(|err| device::Error::Other {
-                            source: Box::new(err),
-                            location: Location::caller(),
-                        })?
-                        .split(',')
-                        .map(|item| {
-                            let item = item.trim_ascii();
-                            if item.starts_with("0x") {
-                                u8::from_str_radix(&item[2..], 16)
-                            } else {
-                                item.parse::<u8>()
-                            }
-                        })
-                        .collect::<Result<Vec<u8>, _>>()
-                        .map_err(|err| device::Error::Other {
-                            source: Box::new(err),
-                            location: Location::caller(),
-                        })?;
+            if setting_id == SettingId::SendPacket {
+                let mut data = value
+                    .try_as_str()
+                    .map_err(|err| device::Error::Other {
+                        source: Box::new(err),
+                        location: Location::caller(),
+                    })?
+                    .split(',')
+                    .map(|item| {
+                        let item = item.trim_ascii();
+                        if let Some(hex_number) = item.strip_prefix("0x") {
+                            u8::from_str_radix(hex_number, 16)
+                        } else {
+                            item.parse::<u8>()
+                        }
+                    })
+                    .collect::<Result<Vec<u8>, _>>()
+                    .map_err(|err| device::Error::Other {
+                        source: Box::new(err),
+                        location: Location::caller(),
+                    })?;
 
-                    if data.len() < 2 {
-                        return Err(device::Error::Other {
-                            source: Box::new(DevelopmentDeviceError::MissingCommand),
-                            location: Location::caller(),
-                        });
-                    }
-
-                    let body = data.split_off(2);
-                    let command = Command(data.try_into().unwrap());
-
-                    self.packet_io
-                        .send_with_response(&Packet {
-                            direction: Direction::Outbound,
-                            command,
-                            body,
-                        })
-                        .await
-                        .unwrap();
+                if data.len() < 2 {
+                    return Err(device::Error::Other {
+                        source: Box::new(DevelopmentDeviceError::MissingCommand),
+                        location: Location::caller(),
+                    });
                 }
-                _ => (),
+
+                let body = data.split_off(2);
+                let command = Command(data.try_into().unwrap());
+
+                self.packet_io
+                    .send_with_response(&Packet {
+                        direction: Direction::Outbound,
+                        command,
+                        body,
+                    })
+                    .await
+                    .unwrap();
             }
         }
 
