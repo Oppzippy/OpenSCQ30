@@ -412,10 +412,14 @@ impl Application for AppModel {
                 }
             }
             Message::ConnectToDeviceFailed(message) => {
-                return Task::batch([
-                    Task::done(Message::ActivateDeviceSelectionScreen.into()),
-                    Task::done(Message::Warning(message).into()),
-                ]);
+                if let Screen::Connecting { canceled, .. } = &self.screen
+                    && !canceled.load(atomic::Ordering::Relaxed)
+                {
+                    return Task::batch([
+                        Task::done(Message::ActivateDeviceSelectionScreen.into()),
+                        Task::done(Message::Warning(message).into()),
+                    ]);
+                }
             }
             Message::ActivateConnectToDeviceScreen(device) => {
                 let (model, task) = device_settings::DeviceSettingsModel::new(
