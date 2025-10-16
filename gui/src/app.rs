@@ -1,12 +1,4 @@
-use std::{
-    collections::VecDeque,
-    ops::Deref,
-    path::PathBuf,
-    sync::{
-        Arc,
-        atomic::{self, AtomicBool},
-    },
-};
+use std::{collections::VecDeque, ops::Deref, path::PathBuf, sync::Arc};
 
 use cosmic::{
     Application, ApplicationExt, Apply, Task,
@@ -17,6 +9,7 @@ use cosmic::{
 use macaddr::MacAddr6;
 use openscq30_i18n::Translate;
 use openscq30_lib::{OpenSCQ30Session, device::OpenSCQ30Device, storage::PairedDevice};
+use tokio::{select, sync::Semaphore};
 
 use crate::{
     add_device::{self, AddDeviceModel},
@@ -103,7 +96,7 @@ enum Screen {
     DeviceSelection(device_selection::DeviceSelectionModel),
     AddDevice(add_device::AddDeviceModel),
     Connecting {
-        canceled: Arc<AtomicBool>,
+        canceled: Arc<Semaphore>,
         name: String,
     },
     DeviceSettings(device_settings::DeviceSettingsModel),
@@ -288,33 +281,32 @@ impl Application for AppModel {
                     match screen.update(message) {
                         device_selection::Action::ConnectToDevice(paired_device) => {
                             let session = self.session.clone();
-                            let canceled = Arc::new(AtomicBool::new(false));
+                            let canceled = Arc::new(Semaphore::new(0));
                             self.screen = Screen::Connecting {
                                 canceled: canceled.clone(),
                                 name: paired_device.model.translate(),
                             };
                             return Task::future(async move {
-                                let device = session
-                                    .connect(paired_device.mac_address)
-                                    .await
-                                    .map_err(|err| {
+                                let connect_result = select! {
+                                    connect_result = session.connect(paired_device.mac_address) => connect_result,
+                                    _ = canceled.acquire() => return Ok(Message::None.into()),
+                                };
+
+                                match connect_result {
+                                    Ok(device) => {
+                                        Ok(Message::ActivateConnectToDeviceScreen(DebugOpenSCQ30Device(
+                                            device,
+                                        ))
+                                        .into())
+                                    },
+                                    Err(err) => {
                                         let err = anyhow::Error::from(err);
                                         tracing::warn!("soft_error: {err:?}");
-                                        Message::ConnectToDeviceFailed(fl!(
-                                            "error-with-message",
-                                            err = format!("{err:#}")
-                                        ))
-                                    })?;
-
-                                // Connecting to the device may not be cancel safe (TODO make it cancel safe),
-                                // so wait for it to finish and then drop it if we canceled connecting.
-                                if canceled.load(atomic::Ordering::Relaxed) {
-                                    Ok(Message::None.into())
-                                } else {
-                                    Ok(Message::ActivateConnectToDeviceScreen(
-                                        DebugOpenSCQ30Device(device),
-                                    )
-                                    .into())
+                                        Ok(Message::ConnectToDeviceFailed(fl!(
+                                                "error-with-message",
+                                                err = format!("{err:#}")
+                                        )).into())
+                                    },
                                 }
                             })
                             .map(coalesce_result);
@@ -407,19 +399,15 @@ impl Application for AppModel {
             }
             Message::CancelConnectToDevice => {
                 if let Screen::Connecting { canceled, .. } = &self.screen {
-                    canceled.store(true, atomic::Ordering::Relaxed);
+                    canceled.close();
                     return Task::done(Message::ActivateDeviceSelectionScreen.into());
                 }
             }
             Message::ConnectToDeviceFailed(message) => {
-                if let Screen::Connecting { canceled, .. } = &self.screen
-                    && !canceled.load(atomic::Ordering::Relaxed)
-                {
-                    return Task::batch([
-                        Task::done(Message::ActivateDeviceSelectionScreen.into()),
-                        Task::done(Message::Warning(message).into()),
-                    ]);
-                }
+                return Task::batch([
+                    Task::done(Message::ActivateDeviceSelectionScreen.into()),
+                    Task::done(Message::Warning(message).into()),
+                ]);
             }
             Message::ActivateConnectToDeviceScreen(device) => {
                 let (model, task) = device_settings::DeviceSettingsModel::new(
