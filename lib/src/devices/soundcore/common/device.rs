@@ -500,7 +500,7 @@ where
 
 #[cfg(test)]
 pub mod test_utils {
-    use std::time::Duration;
+    use std::{collections::HashMap, time::Duration};
 
     use macaddr::MacAddr6;
 
@@ -541,6 +541,29 @@ pub mod test_utils {
             SoundcoreDeviceRegistry<MockRfcommBackend, StateType, StateUpdatePacketType>:
                 BuildDevice<MockRfcommConnection, StateType, StateUpdatePacketType>,
         {
+            Self::new_with_packet_responses(device_model, constructor, HashMap::new()).await
+        }
+
+        pub async fn new_with_packet_responses<StateType, StateUpdatePacketType>(
+            device_model: DeviceModel,
+            constructor: fn(
+                MockRfcommBackend,
+                Arc<OpenSCQ30Database>,
+                DeviceModel,
+            ) -> SoundcoreDeviceRegistry<
+                MockRfcommBackend,
+                StateType,
+                StateUpdatePacketType,
+            >,
+            packet_responses: HashMap<Command, Packet>,
+        ) -> Self
+        where
+            StateType: Clone + Send + Sync + 'static,
+            StateUpdatePacketType:
+                InboundPacket + OutboundPacket + Clone + Send + Sync + Default + 'static,
+            SoundcoreDeviceRegistry<MockRfcommBackend, StateType, StateUpdatePacketType>:
+                BuildDevice<MockRfcommConnection, StateType, StateUpdatePacketType>,
+        {
             let (inbound_sender, inbound_receiver) = mpsc::channel(100);
             let (outbound_sender, outbound_receiver) = mpsc::channel(100);
             let database = Arc::new(OpenSCQ30Database::new_in_memory().await.unwrap());
@@ -555,8 +578,14 @@ pub mod test_utils {
                 let inbound_sender = inbound_sender.clone();
                 async move {
                     tokio::time::sleep(Duration::from_millis(10)).await;
+                    let default_state_update_packet = StateUpdatePacketType::default();
                     inbound_sender
-                        .send(StateUpdatePacketType::default().bytes())
+                        .send(
+                            packet_responses
+                                .get(&default_state_update_packet.command())
+                                .unwrap_or(&default_state_update_packet.into())
+                                .bytes(),
+                        )
                         .await
                         .unwrap();
                     tokio::time::sleep(Duration::from_millis(10)).await;
