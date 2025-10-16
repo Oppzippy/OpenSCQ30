@@ -92,41 +92,24 @@ pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Arc;
-
-    use macaddr::MacAddr6;
-    use tokio::sync::mpsc;
+    use std::collections::HashMap;
 
     use crate::{
         DeviceModel,
-        device::OpenSCQ30DeviceRegistry,
-        devices::soundcore::common::packet::{Command, Direction, Packet},
-        mock::rfcomm::MockRfcommBackend,
-        settings::{SettingId, Value},
-        storage::OpenSCQ30Database,
+        devices::soundcore::common::{
+            device::test_utils::TestSoundcoreDevice,
+            packet::{Command, Direction, Packet},
+        },
+        settings::SettingId,
     };
-
-    async fn create_test_connection() -> (
-        impl OpenSCQ30DeviceRegistry,
-        mpsc::Sender<Vec<u8>>,
-        mpsc::Receiver<Vec<u8>>,
-    ) {
-        let (inbound_sender, inbound_receiver) = mpsc::channel(10);
-        let (outbound_sender, outbound_receiver) = mpsc::channel(10);
-        let database = Arc::new(OpenSCQ30Database::new_in_memory().await.unwrap());
-        let registry = super::device_registry(
-            MockRfcommBackend::new(inbound_receiver, outbound_sender),
-            database,
-            DeviceModel::SoundcoreA3948,
-        );
-        (registry, inbound_sender, outbound_receiver)
-    }
 
     #[tokio::test(start_paused = true)]
     async fn test_new_with_example_state_update_packet() {
-        let (registry, inbound_sender, mut outbound_receiver) = create_test_connection().await;
-        inbound_sender
-            .send(
+        let device = TestSoundcoreDevice::new_with_packet_responses(
+            super::device_registry,
+            DeviceModel::SoundcoreA3948,
+            HashMap::from([(
+                Command([1, 1]),
                 Packet {
                     direction: Direction::Inbound,
                     command: Command([1, 1]),
@@ -137,27 +120,13 @@ mod tests {
                         98, 1, 246, 1, 54, 1, 243, 255, 255, 255, 49, 0, 1, 255, 255, 255, 255,
                         255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
                     ],
-                }
-                .bytes(),
-            )
-            .await
-            .unwrap();
-        let device = registry.connect(MacAddr6::nil()).await.unwrap();
-        _ = outbound_receiver
-            .recv()
-            .await
-            .expect("state update packet request");
-        assert_eq!(
-            Value::from(device.setting(&SettingId::FirmwareVersionLeft).unwrap())
-                .try_as_str()
-                .unwrap(),
-            "21.56"
-        );
-        assert_eq!(
-            Value::from(device.setting(&SettingId::FirmwareVersionRight).unwrap())
-                .try_as_str()
-                .unwrap(),
-            ""
-        );
+                },
+            )]),
+        )
+        .await;
+        device.assert_setting_values([
+            (SettingId::FirmwareVersionLeft, "21.56".into()),
+            (SettingId::FirmwareVersionRight, "".into()),
+        ]);
     }
 }
