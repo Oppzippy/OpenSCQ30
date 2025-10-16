@@ -523,7 +523,6 @@ pub mod test_utils {
 
     impl TestSoundcoreDevice {
         pub async fn new<StateType, StateUpdatePacketType>(
-            device_model: DeviceModel,
             constructor: fn(
                 MockRfcommBackend,
                 Arc<OpenSCQ30Database>,
@@ -533,6 +532,7 @@ pub mod test_utils {
                 StateType,
                 StateUpdatePacketType,
             >,
+            device_model: DeviceModel,
         ) -> Self
         where
             StateType: Clone + Send + Sync + 'static,
@@ -541,11 +541,10 @@ pub mod test_utils {
             SoundcoreDeviceRegistry<MockRfcommBackend, StateType, StateUpdatePacketType>:
                 BuildDevice<MockRfcommConnection, StateType, StateUpdatePacketType>,
         {
-            Self::new_with_packet_responses(device_model, constructor, HashMap::new()).await
+            Self::new_with_packet_responses(constructor, device_model, HashMap::new()).await
         }
 
         pub async fn new_with_packet_responses<StateType, StateUpdatePacketType>(
-            device_model: DeviceModel,
             constructor: fn(
                 MockRfcommBackend,
                 Arc<OpenSCQ30Database>,
@@ -555,6 +554,7 @@ pub mod test_utils {
                 StateType,
                 StateUpdatePacketType,
             >,
+            device_model: DeviceModel,
             packet_responses: HashMap<Command, Packet>,
         ) -> Self
         where

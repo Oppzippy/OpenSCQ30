@@ -119,8 +119,8 @@ mod tests {
         };
 
         let mut device = TestSoundcoreDevice::new_with_packet_responses(
-            DeviceModel::SoundcoreA3933,
             super::device_registry,
+            DeviceModel::SoundcoreA3933,
             HashMap::from([(RequestState::COMMAND, state_update_packet)]),
         )
         .await;

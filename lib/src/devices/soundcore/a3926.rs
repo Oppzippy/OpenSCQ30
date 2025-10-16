@@ -82,7 +82,7 @@ mod tests {
     #[tokio::test(start_paused = true)]
     async fn test_set_left_single_press() {
         let mut test_device =
-            TestSoundcoreDevice::new(DeviceModel::SoundcoreA3926, super::device_registry).await;
+            TestSoundcoreDevice::new(super::device_registry, DeviceModel::SoundcoreA3926).await;
         test_device
             .assert_set_settings_response_unordered(
                 vec![(SettingId::LeftSinglePress, Value::from("PlayPause"))],
