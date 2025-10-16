@@ -506,9 +506,7 @@ pub mod test_utils {
 
     use crate::{
         devices::soundcore::common::packet::{
-            Command, Direction,
-            inbound::{InboundPacket, SerialNumberAndFirmwareVersion},
-            outbound::{OutboundPacket, OutboundPacketBytesExt},
+            self, Command, Direction, inbound::InboundPacket, outbound::OutboundPacket,
         },
         mock::rfcomm::{MockRfcommBackend, MockRfcommConnection},
     };
@@ -541,7 +539,18 @@ pub mod test_utils {
             SoundcoreDeviceRegistry<MockRfcommBackend, StateType, StateUpdatePacketType>:
                 BuildDevice<MockRfcommConnection, StateType, StateUpdatePacketType>,
         {
-            Self::new_with_packet_responses(constructor, device_model, HashMap::new()).await
+            Self::new_with_packet_responses(
+                constructor,
+                device_model,
+                HashMap::from([
+                    (Command([1, 1]), StateUpdatePacketType::default().into()),
+                    (
+                        packet::inbound::SerialNumberAndFirmwareVersion::COMMAND,
+                        packet::inbound::SerialNumberAndFirmwareVersion::default().into(),
+                    ),
+                ]),
+            )
+            .await
         }
 
         pub async fn new_with_packet_responses<StateType, StateUpdatePacketType>(
@@ -565,7 +574,7 @@ pub mod test_utils {
                 BuildDevice<MockRfcommConnection, StateType, StateUpdatePacketType>,
         {
             let (inbound_sender, inbound_receiver) = mpsc::channel(100);
-            let (outbound_sender, outbound_receiver) = mpsc::channel(100);
+            let (outbound_sender, mut outbound_receiver) = mpsc::channel(100);
             let database = Arc::new(OpenSCQ30Database::new_in_memory().await.unwrap());
 
             let registry = constructor(
@@ -574,28 +583,32 @@ pub mod test_utils {
                 device_model,
             );
 
-            tokio::spawn({
-                let inbound_sender = inbound_sender.clone();
-                async move {
-                    tokio::time::sleep(Duration::from_millis(10)).await;
-                    let default_state_update_packet = StateUpdatePacketType::default();
-                    inbound_sender
-                        .send(
-                            packet_responses
-                                .get(&default_state_update_packet.command())
-                                .unwrap_or(&default_state_update_packet.into())
-                                .bytes(),
-                        )
-                        .await
-                        .unwrap();
-                    tokio::time::sleep(Duration::from_millis(10)).await;
-                    inbound_sender
-                        .send(SerialNumberAndFirmwareVersion::default().bytes())
-                        .await
-                        .unwrap();
-                }
+            // spawn a future to connect to the device rather than to handle packets so that we don't have to move
+            // outbound_receiver into the future and back out when it's done
+            let (device_sender, mut device_receiver) = mpsc::channel(1);
+            tokio::spawn(async move {
+                device_sender
+                    .try_send(registry.connect(MacAddr6::nil()).await.unwrap())
+                    .unwrap();
             });
-            let device = registry.connect(MacAddr6::nil()).await.unwrap();
+
+            // respond to packets until the device is ready
+            let device = loop {
+                select! {
+                    maybe_packet = outbound_receiver.recv() => {
+                        if let Some(packet) = maybe_packet {
+                            let command = Command(packet[5..7].try_into().unwrap());
+                            inbound_sender
+                                .send(packet_responses.get(&command).unwrap().bytes())
+                                .await
+                                .unwrap();
+                        }
+                    }
+                    device = device_receiver.recv() => {
+                        break device.unwrap();
+                    }
+                }
+            };
 
             Self {
                 device,
