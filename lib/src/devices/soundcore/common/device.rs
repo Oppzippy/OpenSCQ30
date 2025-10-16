@@ -604,6 +604,23 @@ pub mod test_utils {
             }
         }
 
+        pub fn assert_setting_values(
+            &self,
+            expected_values: impl IntoIterator<Item = (SettingId, Value)>,
+        ) {
+            for (setting_id, expected) in expected_values {
+                let setting = self
+                    .device
+                    .setting(&setting_id)
+                    .expect(&format!("{setting_id} returned None"));
+                assert_eq!(
+                    Value::from(setting),
+                    expected,
+                    "{setting_id} should be {expected:?}"
+                );
+            }
+        }
+
         pub async fn assert_set_settings_response_unordered(
             &mut self,
             settings: Vec<(SettingId, Value)>,

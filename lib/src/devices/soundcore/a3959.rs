@@ -134,41 +134,24 @@ impl Translate for AutoPowerOffDuration {
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::BTreeSet, sync::Arc, time::Duration};
-
-    use macaddr::MacAddr6;
-    use tokio::sync::mpsc;
+    use std::collections::HashMap;
 
     use crate::{
         DeviceModel,
-        device::OpenSCQ30DeviceRegistry,
-        devices::soundcore::common::packet::{Command, Direction, Packet},
-        mock::rfcomm::MockRfcommBackend,
+        devices::soundcore::common::{
+            device::test_utils::TestSoundcoreDevice,
+            packet::{Command, Direction, Packet},
+        },
         settings::{SettingId, Value},
-        storage::OpenSCQ30Database,
     };
-
-    async fn create_test_connection() -> (
-        impl OpenSCQ30DeviceRegistry,
-        mpsc::Sender<Vec<u8>>,
-        mpsc::Receiver<Vec<u8>>,
-    ) {
-        let (inbound_sender, inbound_receiver) = mpsc::channel(10);
-        let (outbound_sender, outbound_receiver) = mpsc::channel(10);
-        let database = Arc::new(OpenSCQ30Database::new_in_memory().await.unwrap());
-        let registry = super::device_registry(
-            MockRfcommBackend::new(inbound_receiver, outbound_sender),
-            database,
-            DeviceModel::SoundcoreA3959,
-        );
-        (registry, inbound_sender, outbound_receiver)
-    }
 
     #[tokio::test(start_paused = true)]
     async fn test_with_packet_from_github_issue_149() {
-        let (registry, inbound_sender, mut outbound_receiver) = create_test_connection().await;
-        inbound_sender
-            .send(
+        let device = TestSoundcoreDevice::new_with_packet_responses(
+            DeviceModel::SoundcoreA3959,
+            super::device_registry,
+            HashMap::from([(
+                Command([1, 1]),
                 Packet {
                     direction: Direction::Inbound,
                     command: Command([1, 1]),
@@ -179,34 +162,12 @@ mod tests {
                         241, 240, 102, 102, 242, 243, 68, 68, 51, 0, 85, 0, 0, 1, 255, 1, 49, 1, 1,
                         0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ],
-                }
-                .bytes(),
-            )
-            .await
-            .unwrap();
-        let device = registry
-            .connect(MacAddr6::nil())
-            .await
-            .expect("should parse packet");
-        _ = outbound_receiver
-            .recv()
-            .await
-            .expect("state update packet request");
+                },
+            )]),
+        )
+        .await;
 
-        assert_eq!(
-            Value::from(device.setting(&SettingId::AmbientSoundMode).unwrap())
-                .try_as_str()
-                .unwrap(),
-            "NoiseCanceling"
-        );
-        assert_eq!(
-            Value::from(device.setting(&SettingId::WindNoiseSuppression).unwrap())
-                .try_as_bool()
-                .unwrap(),
-            true,
-        );
-
-        let expected_values: [(SettingId, Value); _] = [
+        device.assert_setting_values([
             (SettingId::BatteryLevelLeft, "5".into()),
             (SettingId::BatteryLevelRight, "6".into()),
             (SettingId::IsChargingLeft, "No".into()),
@@ -226,24 +187,16 @@ mod tests {
             (SettingId::RightLongPress, Some("AmbientSoundMode").into()),
             (SettingId::TouchTone, true.into()),
             (SettingId::AutoPowerOff, "10m".into()),
-        ];
-        for (setting_id, expected) in expected_values {
-            let setting = device
-                .setting(&setting_id)
-                .expect(&format!("{setting_id} returned None"));
-            assert_eq!(
-                Value::from(setting),
-                expected,
-                "{setting_id} should be {expected:?}"
-            );
-        }
+        ]);
     }
 
     #[tokio::test(start_paused = true)]
     async fn test_with_packet_from_github_issue_149_modified_to_disable_tws() {
-        let (registry, inbound_sender, mut outbound_receiver) = create_test_connection().await;
-        inbound_sender
-            .send(
+        let device = TestSoundcoreDevice::new_with_packet_responses(
+            DeviceModel::SoundcoreA3959,
+            super::device_registry,
+            HashMap::from([(
+                Command([1, 1]),
                 Packet {
                     direction: Direction::Inbound,
                     command: Command([1, 1]),
@@ -254,21 +207,12 @@ mod tests {
                         241, 240, 102, 102, 242, 243, 68, 68, 51, 0, 85, 0, 0, 1, 255, 1, 49, 1, 1,
                         0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ],
-                }
-                .bytes(),
-            )
-            .await
-            .unwrap();
-        let device = registry
-            .connect(MacAddr6::nil())
-            .await
-            .expect("should parse packet");
-        _ = outbound_receiver
-            .recv()
-            .await
-            .expect("state update packet request");
+                },
+            )]),
+        )
+        .await;
 
-        let expectation = [
+        device.assert_setting_values([
             (SettingId::LeftSinglePress, Value::OptionalString(None)),
             (SettingId::LeftDoublePress, Some("PlayPause").into()),
             (SettingId::LeftTriplePress, Value::OptionalString(None)),
@@ -277,24 +221,17 @@ mod tests {
             (SettingId::RightDoublePress, Some("PlayPause").into()),
             (SettingId::RightTriplePress, Value::OptionalString(None)),
             (SettingId::RightLongPress, Some("AmbientSoundMode").into()),
-        ];
-        for (setting_id, expected_value) in expectation {
-            let setting = device
-                .setting(&setting_id)
-                .expect(&format!("{setting_id} returned None"));
-            assert_eq!(
-                Value::from(setting),
-                expected_value,
-                "{setting_id} should be {expected_value:?}"
-            );
-        }
+        ]);
     }
 
     #[tokio::test(start_paused = true)]
     async fn test_with_other_packet_from_github_issue_149() {
-        let (registry, inbound_sender, mut outbound_receiver) = create_test_connection().await;
-        inbound_sender
-            .send(
+        // assert that it successfully connects (it will panic otherwise)
+        let _device = TestSoundcoreDevice::new_with_packet_responses(
+            DeviceModel::SoundcoreA3959,
+            super::device_registry,
+            HashMap::from([(
+                Command([1, 1]),
                 Packet {
                     direction: Direction::Inbound,
                     command: Command([1, 1]),
@@ -305,26 +242,19 @@ mod tests {
                         255, 99, 102, 255, 255, 68, 68, 55, 0, 85, 0, 0, 1, 255, 1, 49, 1, 1, 1, 1,
                         2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ],
-                }
-                .bytes(),
-            )
-            .await
-            .unwrap();
-        let _device = registry
-            .connect(MacAddr6::nil())
-            .await
-            .expect("should parse packet");
-        _ = outbound_receiver
-            .recv()
-            .await
-            .expect("state update packet request");
+                },
+            )]),
+        )
+        .await;
     }
 
     #[tokio::test(start_paused = true)]
     async fn test_set_multiple_button_actions() {
-        let (registry, inbound_sender, mut outbound_receiver) = create_test_connection().await;
-        inbound_sender
-            .send(
+        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+            DeviceModel::SoundcoreA3959,
+            super::device_registry,
+            HashMap::from([(
+                Command([1, 1]),
                 Packet {
                     direction: Direction::Inbound,
                     command: Command([1, 1]),
@@ -335,73 +265,39 @@ mod tests {
                         241, 240, 102, 102, 242, 243, 68, 68, 51, 0, 85, 0, 0, 1, 255, 1, 49, 1, 1,
                         0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ],
-                }
-                .bytes(),
-            )
-            .await
-            .unwrap();
-        let device = registry
-            .connect(MacAddr6::nil())
-            .await
-            .expect("should parse packet");
-        _ = outbound_receiver
-            .recv()
-            .await
-            .expect("state update packet request");
-
-        tokio::spawn(async move {
-            let ok_packet = Packet {
-                direction: Direction::Inbound,
-                command: Command([0x04, 0x81]),
-                body: Vec::new(),
-            }
-            .bytes();
-            tokio::time::sleep(Duration::from_millis(50)).await;
-            inbound_sender.send(ok_packet.clone()).await.unwrap();
-            tokio::time::sleep(Duration::from_millis(50)).await;
-            inbound_sender.send(ok_packet).await.unwrap();
-        });
+                },
+            )]),
+        )
+        .await;
         device
-            .set_setting_values(vec![
-                (SettingId::LeftSinglePress, "VolumeUp".into()),
-                (SettingId::RightSinglePress, "VolumeDown".into()),
-            ])
-            .await
-            .unwrap();
-
-        let packets = BTreeSet::from_iter([
-            outbound_receiver.recv().await.expect("first button action"),
-            outbound_receiver
-                .recv()
-                .await
-                .expect("second button action"),
-        ]);
-
-        let expected_packets = BTreeSet::from_iter([
-            // Left Volume Up
-            Packet {
-                direction: Direction::Outbound,
-                command: Command([0x04, 0x81]),
-                body: vec![0, 2, 0xF0],
-            }
-            .bytes(),
-            // Right Volume Down
-            Packet {
-                direction: Direction::Outbound,
-                command: Command([0x04, 0x81]),
-                body: vec![1, 2, 0xF1],
-            }
-            .bytes(),
-        ]);
-
-        assert_eq!(packets, expected_packets);
+            .assert_set_settings_response_unordered(
+                vec![
+                    (SettingId::LeftSinglePress, "VolumeUp".into()),
+                    (SettingId::RightSinglePress, "VolumeDown".into()),
+                ],
+                vec![
+                    Packet {
+                        direction: Direction::Outbound,
+                        command: Command([0x04, 0x81]),
+                        body: vec![0, 2, 0xF0],
+                    },
+                    Packet {
+                        direction: Direction::Outbound,
+                        command: Command([0x04, 0x81]),
+                        body: vec![1, 2, 0xF1],
+                    },
+                ],
+            )
+            .await;
     }
 
     #[tokio::test(start_paused = true)]
     async fn test_set_equalizer_configuration() {
-        let (registry, inbound_sender, mut outbound_receiver) = create_test_connection().await;
-        inbound_sender
-            .send(
+        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+            DeviceModel::SoundcoreA3959,
+            super::device_registry,
+            HashMap::from([(
+                Command([1, 1]),
                 Packet {
                     direction: Direction::Inbound,
                     command: Command([1, 1]),
@@ -412,49 +308,26 @@ mod tests {
                         241, 240, 102, 102, 242, 243, 68, 68, 51, 0, 0x55, 0, 0, 1, 255, 1, 49, 1,
                         1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ],
-                }
-                .bytes(),
-            )
-            .await
-            .unwrap();
-        let device = registry
-            .connect(MacAddr6::nil())
-            .await
-            .expect("should parse packet");
-        _ = outbound_receiver
-            .recv()
-            .await
-            .expect("state update packet request");
+                },
+            )]),
+        )
+        .await;
 
-        tokio::spawn(async move {
-            let ok_packet = Packet {
-                direction: Direction::Inbound,
-                command: Command([0x02, 0x83]),
-                body: Vec::new(),
-            }
-            .bytes();
-            tokio::time::sleep(Duration::from_millis(50)).await;
-            inbound_sender.send(ok_packet.clone()).await.unwrap();
-        });
         device
-            .set_setting_values(vec![(
-                SettingId::VolumeAdjustments,
-                Value::I16Vec(vec![-19, 0, 41, 51, 51, 32, 13, -35]),
-            )])
-            .await
-            .unwrap();
-
-        let packet = outbound_receiver
-            .recv()
-            .await
-            .expect("set equalizer configuration");
-
-        assert_eq!(
-            packet,
-            vec![
-                8, 238, 0, 0, 0, 2, 131, 32, 0, 254, 254, 101, 120, 161, 171, 171, 152, 133, 85,
-                120, 120, 118, 119, 124, 123, 124, 121, 123, 114, 120, 120, 131
-            ]
-        );
+            .assert_set_settings_response(
+                vec![(
+                    SettingId::VolumeAdjustments,
+                    Value::I16Vec(vec![-19, 0, 41, 51, 51, 32, 13, -35]),
+                )],
+                vec![Packet {
+                    direction: Direction::Outbound,
+                    command: Command([0x2, 0x83]),
+                    body: vec![
+                        254, 254, 101, 120, 161, 171, 171, 152, 133, 85, 120, 120, 118, 119, 124,
+                        123, 124, 121, 123, 114, 120, 120,
+                    ],
+                }],
+            )
+            .await;
     }
 }
