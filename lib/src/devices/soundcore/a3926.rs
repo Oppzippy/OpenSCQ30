@@ -70,8 +70,6 @@ soundcore_device!(
 
 #[cfg(test)]
 mod tests {
-    use std::time::Duration;
-
     use crate::{
         DeviceModel,
         devices::soundcore::common::{
@@ -85,21 +83,15 @@ mod tests {
     async fn test_set_left_single_press() {
         let mut test_device =
             TestSoundcoreDevice::new(DeviceModel::SoundcoreA3926, super::device_registry).await;
-        let device = test_device.device();
-        tokio::spawn(async move {
-            device
-                .set_setting_values(vec![(SettingId::LeftSinglePress, Value::from("PlayPause"))])
-                .await
-                .unwrap();
-        });
-        tokio::time::sleep(Duration::from_millis(100)).await;
-
         test_device
-            .assert_packets_sent_unordered(vec![Packet {
-                direction: Direction::Outbound,
-                command: Command([0x04, 0x81]),
-                body: vec![0x00, 0x02, 0x06],
-            }])
+            .assert_set_settings_response_unordered(
+                vec![(SettingId::LeftSinglePress, Value::from("PlayPause"))],
+                vec![Packet {
+                    direction: Direction::Outbound,
+                    command: Command([0x04, 0x81]),
+                    body: vec![0x00, 0x02, 0x06],
+                }],
+            )
             .await;
     }
 }

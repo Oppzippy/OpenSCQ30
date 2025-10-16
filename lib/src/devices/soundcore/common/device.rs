@@ -500,10 +500,7 @@ where
 
 #[cfg(test)]
 pub mod test_utils {
-    use std::{
-        collections::VecDeque,
-        time::{Duration, Instant},
-    };
+    use std::time::Duration;
 
     use macaddr::MacAddr6;
 
@@ -578,68 +575,87 @@ pub mod test_utils {
             }
         }
 
-        pub fn device(&self) -> Arc<dyn OpenSCQ30Device + Send + Sync> {
-            self.device.clone()
-        }
-
-        pub fn ack(&self, command: Command) {
-            self.inbound_sender
-                .try_send(
-                    Packet {
-                        direction: Direction::Inbound,
-                        command,
-                        body: Vec::new(),
-                    }
-                    .bytes(),
-                )
-                .unwrap();
-        }
-
-        pub async fn assert_packets_sent_unordered(&mut self, expected_packets: Vec<Packet>) {
-            let timeout = Duration::from_millis(5000);
-
-            // first ack all expected packets
-            for packet in &expected_packets {
-                self.ack(packet.command);
-            }
-
-            tokio::time::sleep(Duration::from_millis(100)).await;
-
-            // then gather sent packets
-            let deadline = Instant::now() + timeout;
-            let mut sent_packets = Vec::new();
-            loop {
-                select! {
-                    maybe_packet = self.outbound_receiver.recv() => {
-                        if let Some(packet) = maybe_packet {
-                            sent_packets.push(packet);
-                        } else {
-                            break;
-                        }
-                    },
-                    _= tokio::time::sleep_until(deadline.into()) => break,
-                }
-            }
-            sent_packets.sort();
-            let mut expected_packets = expected_packets
-                .into_iter()
+        pub async fn assert_set_settings_response_unordered(
+            &mut self,
+            settings: Vec<(SettingId, Value)>,
+            expected_packets: Vec<Packet>,
+        ) {
+            let mut expected_packets_bytes = expected_packets
+                .iter()
                 .map(|expected| expected.bytes())
                 .collect::<Vec<_>>();
-            expected_packets.sort();
-            let mut expected_packets = VecDeque::from(expected_packets);
+            let mut sent_packets_bytes = self.set_settings_and_gather_sent_packets(settings).await;
+            expected_packets_bytes.sort();
+            sent_packets_bytes.sort();
 
-            for sent_packet in &sent_packets {
-                let Some(expected) = expected_packets.front() else {
-                    return;
-                };
-                if sent_packet == expected {
-                    expected_packets.pop_front();
+            assert_eq!(sent_packets_bytes, expected_packets_bytes);
+        }
+
+        pub async fn assert_set_settings_response(
+            &mut self,
+            settings: Vec<(SettingId, Value)>,
+            expected_packets: Vec<Packet>,
+        ) {
+            let expected_packets_bytes = expected_packets
+                .iter()
+                .map(|expected| expected.bytes())
+                .collect::<Vec<_>>();
+            let sent_packets_bytes = self.set_settings_and_gather_sent_packets(settings).await;
+            assert_eq!(sent_packets_bytes, expected_packets_bytes);
+        }
+
+        async fn set_settings_and_gather_sent_packets(
+            &mut self,
+            settings: Vec<(SettingId, Value)>,
+        ) -> Vec<Vec<u8>> {
+            self.clear_sent_packets().await;
+            let device = self.device.clone();
+            let join_handle = tokio::spawn(async move {
+                device.set_setting_values(settings).await.unwrap();
+            });
+
+            let mut sent_packets = Vec::new();
+            select! {
+                 _ = self.gather_sent_packets(&mut sent_packets) => (),
+                 _ = join_handle => (),
+            };
+            sent_packets
+        }
+
+        async fn clear_sent_packets(&mut self) {
+            // gather packets and discard return value
+            // start_paused should be set to true to prevent this from taking forever
+            _ = tokio::time::timeout(
+                Duration::from_secs(30),
+                self.gather_sent_packets(&mut Vec::new()),
+            )
+            .await;
+        }
+
+        async fn gather_sent_packets(&mut self, sent_packets: &mut Vec<Vec<u8>>) {
+            loop {
+                if let Some(packet) = self.outbound_receiver.recv().await {
+                    let command = Command(packet[5..7].try_into().unwrap());
+                    eprintln!("acking {command:?}");
+                    self.ack(command).await;
+                    sent_packets.push(packet);
+                } else {
+                    break;
                 }
             }
+        }
 
-            if !expected_packets.is_empty() {
-                panic!("didn't receive {expected_packets:?}, got {sent_packets:?}");
-            }
+        async fn ack(&self, command: Command) {
+            // for cancel safety
+            let permit = self.inbound_sender.reserve().await.unwrap();
+            permit.send(
+                Packet {
+                    direction: Direction::Inbound,
+                    command,
+                    body: Vec::new(),
+                }
+                .bytes(),
+            );
         }
     }
 }
