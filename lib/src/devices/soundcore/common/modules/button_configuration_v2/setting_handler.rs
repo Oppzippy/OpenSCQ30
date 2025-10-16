@@ -53,27 +53,41 @@ where
             .button_settings(button)
             .expect("setting id already validated by caller");
 
-        Some(Setting::OptionalSelect {
-            setting: settings::Select {
-                options: button_settings
-                    .available_actions
-                    .iter()
-                    .map(|action| Cow::from(action.name))
-                    .collect(),
-                localized_options: button_settings
-                    .available_actions
-                    .iter()
-                    .map(|action| (action.localized_name)())
-                    .collect(),
-            },
-            value: status.current_action_id(tws_status).and_then(|action_id| {
-                button_settings
-                    .available_actions
-                    .iter()
-                    .find(|a| a.id == action_id)
-                    .map(|action| Cow::from(action.name))
-            }),
-        })
+        let select = settings::Select {
+            options: button_settings
+                .available_actions
+                .iter()
+                .map(|action| Cow::from(action.name))
+                .collect(),
+            localized_options: button_settings
+                .available_actions
+                .iter()
+                .map(|action| (action.localized_name)())
+                .collect(),
+        };
+        let value = status.current_action_id(tws_status).and_then(|action_id| {
+            button_settings
+                .available_actions
+                .iter()
+                .find(|a| a.id == action_id)
+                .map(|action| Cow::from(action.name))
+        });
+
+        // Show optional select if the button isn't disablable, but we don't have a value for it. This can happen
+        // if the action id is set to an invalid action or if the button is disabled anyway.
+        if button_settings.disable_mode == ButtonDisableMode::NotDisablable
+            && let Some(value) = value
+        {
+            Some(settings::Setting::Select {
+                setting: select,
+                value,
+            })
+        } else {
+            Some(settings::Setting::OptionalSelect {
+                setting: select,
+                value,
+            })
+        }
     }
 
     async fn set(

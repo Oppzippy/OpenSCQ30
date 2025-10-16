@@ -89,7 +89,7 @@ pub struct ButtonAction {
     pub localized_name: fn() -> String,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum ButtonDisableMode {
     NotDisablable,
     DisablingOneSideDisablesOther,
