@@ -11,6 +11,7 @@ pub mod i18n;
 pub(crate) mod macros;
 pub(crate) mod serialization;
 pub mod storage;
+pub mod util;
 
 pub use api::*;
 pub use connection_backend::*;

@@ -44,6 +44,8 @@ pub trait RfcommBackend {
     ///
     /// The RFCOMM UUID to connect to may depend on what is available, so a `select_uuid` function should be passed that
     /// picks the uuid to connect to from the list of what is available.
+    ///
+    /// This method is cancel safe. Implementers should make sure that is the case.
     fn connect(
         &self,
         mac_address: MacAddr6,

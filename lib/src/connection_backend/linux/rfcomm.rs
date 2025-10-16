@@ -18,17 +18,19 @@ use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     select,
     sync::{
-        Mutex, Semaphore,
-        mpsc::{self, error::TrySendError},
+        Mutex,
+        mpsc::{self},
         watch,
     },
-    task::JoinHandle,
 };
 use tracing::{Instrument, debug, debug_span, instrument, trace, trace_span, warn};
 use uuid::Uuid;
 
-use crate::api::connection::{
-    self, ConnectionDescriptor, ConnectionStatus, RfcommBackend, RfcommConnection,
+use crate::{
+    api::connection::{
+        self, ConnectionDescriptor, ConnectionStatus, RfcommBackend, RfcommConnection,
+    },
+    util::AbortOnDropHandle,
 };
 
 pub struct BluerRfcommBackend {
@@ -165,10 +167,10 @@ impl RfcommBackend for BluerRfcommBackend {
 #[derive(Debug)]
 pub struct BluerRfcommConnection {
     write_stream: Arc<Mutex<OwnedWriteHalf>>,
-    read_stream: std::sync::Mutex<Option<mpsc::Receiver<Vec<u8>>>>,
+    inbound_packet_stream: std::sync::Mutex<Option<mpsc::Receiver<Vec<u8>>>>,
+    _inbound_packet_handle: AbortOnDropHandle<()>,
     connection_status_receiver: watch::Receiver<ConnectionStatus>,
-    connection_status_handle: JoinHandle<()>,
-    quit: Arc<Semaphore>,
+    _connection_status_handle: AbortOnDropHandle<()>,
     // We need to not drop device in order for the device.events() stream in spawn_connection_status to not terminate
     _device: Device,
 }
@@ -176,19 +178,19 @@ pub struct BluerRfcommConnection {
 impl BluerRfcommConnection {
     #[instrument(skip(stream))]
     pub async fn new(device: Device, stream: Stream) -> connection::Result<Self> {
+        // AbortOnDropHandle used for all join handles to ensure cancel safety
         let (connection_status_receiver, connection_status_handle) =
             Self::spawn_connection_status(device.to_owned()).await?;
         let (read_stream, write_stream) = stream.into_split();
-        let quit = Arc::new(Semaphore::new(0));
+        let (inbound_packet_stream, inbound_packet_handle) =
+            Self::spawn_inbound_packet_channel(read_stream).await;
 
         let connection = Self {
             write_stream: Arc::new(Mutex::new(write_stream)),
-            read_stream: std::sync::Mutex::new(Some(
-                Self::spawn_inbound_packet_channel(read_stream, quit.to_owned()).await?,
-            )),
+            inbound_packet_stream: std::sync::Mutex::new(Some(inbound_packet_stream)),
+            _inbound_packet_handle: inbound_packet_handle,
             connection_status_receiver,
-            connection_status_handle,
-            quit,
+            _connection_status_handle: connection_status_handle,
             _device: device,
         };
         Ok(connection)
@@ -196,78 +198,67 @@ impl BluerRfcommConnection {
 
     async fn spawn_connection_status(
         device: Device,
-    ) -> connection::Result<(watch::Receiver<ConnectionStatus>, JoinHandle<()>)> {
+    ) -> connection::Result<(watch::Receiver<ConnectionStatus>, AbortOnDropHandle<()>)> {
         let (connection_status_sender, connection_status_receiver) =
             watch::channel(ConnectionStatus::Connected);
 
-        let connection_status_handle = {
-            let mut events = device.events().await?;
-            tokio::spawn(
-                async move {
-                    while let Some(event) = events.next().await {
-                        tracing::debug!("got event {event:?}");
-                        if let bluer::DeviceEvent::PropertyChanged(DeviceProperty::Connected(
-                            is_connected,
-                        )) = event
-                        {
-                            connection_status_sender.send_replace(match is_connected {
-                                true => ConnectionStatus::Connected,
-                                false => ConnectionStatus::Disconnected,
-                            });
-                        }
+        let mut events = device.events().await?;
+        let connection_status_handle = AbortOnDropHandle::new(tokio::spawn(
+            async move {
+                while let Some(event) = events.next().await {
+                    tracing::debug!("got event {event:?}");
+                    if let bluer::DeviceEvent::PropertyChanged(DeviceProperty::Connected(
+                        is_connected,
+                    )) = event
+                    {
+                        connection_status_sender.send_replace(match is_connected {
+                            true => ConnectionStatus::Connected,
+                            false => ConnectionStatus::Disconnected,
+                        });
                     }
-                    tracing::debug!("event stream ended");
                 }
-                .instrument(debug_span!("spawn_connection_status")),
-            )
-        };
+                tracing::debug!("event stream ended");
+            }
+            .instrument(debug_span!("spawn_connection_status")),
+        ));
 
         Ok((connection_status_receiver, connection_status_handle))
     }
 
     async fn spawn_inbound_packet_channel(
         mut read_stream: OwnedReadHalf,
-        quit: Arc<Semaphore>,
-    ) -> connection::Result<mpsc::Receiver<Vec<u8>>> {
+    ) -> (mpsc::Receiver<Vec<u8>>, AbortOnDropHandle<()>) {
         // This queue should always be really small unless something is malfunctioning
         let (sender, receiver) = mpsc::channel(100);
-        tokio::spawn(
+        let abort_handle = AbortOnDropHandle::new(tokio::spawn(
             async move {
                 let mut buffer: Vec<u8> = vec![0; 1024];
                 loop {
-                    select! {
-                        _ = quit.acquire() => {
+                    let Ok(permit) = sender.reserve().await else {
+                        // sender closed
+                        break;
+                    };
+                    match read_stream.read(&mut buffer).await {
+                        Ok(bytes_read) => {
+                            let bytes = &buffer[0..bytes_read];
+                            trace!(event = "rfcomm read", ?bytes);
+                            if bytes_read > 0 {
+                                permit.send(bytes.to_vec());
+                            }
+                        }
+                        Err(err) => {
+                            debug!("read failed: {err:?}");
                             break;
                         }
-                        // Does this read one packet at a time?
-                        result = read_stream.read(&mut buffer) => {
-                            match result {
-                                Ok(bytes_read) => {
-                                    let bytes = &buffer[0..bytes_read];
-                                    trace!(event = "rfcomm read", ?bytes);
-                                    if bytes_read > 0
-                                        && let Err(err) = sender.try_send(bytes.to_vec()) {
-                                            if let TrySendError::Closed(_) = err {
-                                                break;
-                                            }
-                                            warn!("error forwarding packet to channel: {err}",);
-                                        }
-                                }
-                                Err(err) => {
-                                    debug!("read failed: {err:?}");
-                                    break;
-                                },
-                            }
-                        },
                     }
                 }
             }
             .instrument(trace_span!(
                 "bluer_connection inbound_packets_channel reader"
             )),
-        );
+        ));
 
-        Ok(receiver)
+        (receiver, abort_handle)
     }
 }
 
@@ -289,18 +280,11 @@ impl RfcommConnection for BluerRfcommConnection {
     }
 
     fn read_channel(&self) -> mpsc::Receiver<Vec<u8>> {
-        self.read_stream
+        self.inbound_packet_stream
             .lock()
             .unwrap()
             .take()
             .expect("inbound_packets_channel should only be called once")
-    }
-}
-
-impl Drop for BluerRfcommConnection {
-    fn drop(&mut self) {
-        self.connection_status_handle.abort();
-        self.quit.close();
     }
 }
 
