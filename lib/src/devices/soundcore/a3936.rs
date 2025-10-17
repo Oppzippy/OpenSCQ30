@@ -10,7 +10,7 @@ use crate::{
             device::fetch_state_from_state_update_packet,
             macros::soundcore_device,
             modules::button_configuration_v2::{
-                ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_TWS_ACTIONS,
+                ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_ACTIONS,
             },
             packet::outbound::{OutboundPacketBytesExt, RequestState},
             structures::button_configuration_v2::{
@@ -72,7 +72,7 @@ pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
                 },
                 button_id: 2,
                 press_kind: ButtonPressKind::Single,
-                available_actions: COMMON_TWS_ACTIONS,
+                available_actions: COMMON_ACTIONS,
                 disable_mode: ButtonDisableMode::DisablingOneSideDisablesOther,
             },
             ButtonSettings {
@@ -82,7 +82,7 @@ pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
                 },
                 button_id: 0,
                 press_kind: ButtonPressKind::Double,
-                available_actions: COMMON_TWS_ACTIONS,
+                available_actions: COMMON_ACTIONS,
                 disable_mode: ButtonDisableMode::DisablingOneSideDisablesOther,
             },
             ButtonSettings {
@@ -92,7 +92,7 @@ pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
                 },
                 button_id: 1,
                 press_kind: ButtonPressKind::Long,
-                available_actions: COMMON_TWS_ACTIONS,
+                available_actions: COMMON_ACTIONS,
                 disable_mode: ButtonDisableMode::DisablingOneSideDisablesOther,
             },
         ],
