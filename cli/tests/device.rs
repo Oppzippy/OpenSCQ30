@@ -684,7 +684,7 @@ fn setting_optional_select_invalid() {
     ----- stdout -----
 
     ----- stderr -----
-    Error: leftSinglePress: invalid is not a valid option. Expected one of: ["VolumeUp", "VolumeDown", "PreviousSong", "NextSong", "AmbientSoundMode", "VoiceAssistant", "PlayPause", "GameMode"]
+    Error: leftSinglePress: invalid is not a valid option. Expected one of: ["VolumeUp", "VolumeDown", "PreviousSong", "NextSong", "AmbientSoundMode", "VoiceAssistant", "PlayPause"]
     "#);
 }
 
