@@ -21,6 +21,14 @@ mod state_modifier;
 #[derive(Copy, Clone, Debug)]
 pub struct ButtonConfigurationSettings<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize> {
     pub supports_set_all_packet: bool,
+
+    /// Some devices have an enabled flag in their state update packet, but they do not make use of
+    /// the enabled flag for disabling buttons, instead opting to set the action to 0xF. If this
+    /// flag is set, the enabled flag will never be set to 0, but if it was already 0, it will
+    /// become 1 when enabling the button.
+    pub use_enabled_flag_to_disable: bool,
+
+    /// Parse order in state update packet
     pub order: [Button; NUM_BUTTONS],
     pub settings: [ButtonSettings; NUM_PRESS_KINDS],
 }
@@ -98,6 +106,7 @@ pub enum ButtonDisableMode {
 
 pub const COMMON_SETTINGS: ButtonConfigurationSettings<6, 3> = ButtonConfigurationSettings {
     supports_set_all_packet: true,
+    use_enabled_flag_to_disable: true,
     order: [
         Button::LeftDoublePress,
         Button::LeftLongPress,

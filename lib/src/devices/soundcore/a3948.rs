@@ -1,18 +1,21 @@
 use std::collections::HashMap;
 
-use crate::devices::soundcore::{
-    a3948::{packets::inbound::A3948StateUpdatePacket, state::A3948State},
-    common::{
-        device::fetch_state_from_state_update_packet,
-        macros::soundcore_device,
-        modules::button_configuration_v2::{
-            ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_ACTIONS,
-        },
-        packet::outbound::{OutboundPacketBytesExt, RequestState},
-        structures::button_configuration_v2::{
-            ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
+use crate::{
+    devices::soundcore::{
+        a3948::{packets::inbound::A3948StateUpdatePacket, state::A3948State},
+        common::{
+            device::fetch_state_from_state_update_packet,
+            macros::soundcore_device,
+            modules::button_configuration_v2::{
+                ButtonAction, ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings,
+            },
+            packet::outbound::{OutboundPacketBytesExt, RequestState},
+            structures::button_configuration_v2::{
+                ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
+            },
         },
     },
+    i18n::fl,
 };
 
 mod packets;
@@ -48,6 +51,7 @@ soundcore_device!(
 pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
     ButtonConfigurationSettings {
         supports_set_all_packet: false,
+        use_enabled_flag_to_disable: false,
         order: [
             Button::LeftSinglePress,
             Button::RightSinglePress,
@@ -59,36 +63,69 @@ pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
         settings: [
             ButtonSettings {
                 parse_settings: ButtonParseSettings {
-                    enabled_flag_kind: EnabledFlagKind::TwsLowBits,
+                    enabled_flag_kind: EnabledFlagKind::Single,
                     action_kind: ActionKind::TwsLowBits,
                 },
                 button_id: 2,
                 press_kind: ButtonPressKind::Single,
-                available_actions: COMMON_ACTIONS,
-                disable_mode: ButtonDisableMode::DisablingOneSideDisablesOther,
+                available_actions: BUTTON_ACTIONS,
+                disable_mode: ButtonDisableMode::IndividualDisable,
             },
             ButtonSettings {
                 parse_settings: ButtonParseSettings {
-                    enabled_flag_kind: EnabledFlagKind::TwsLowBits,
+                    enabled_flag_kind: EnabledFlagKind::Single,
                     action_kind: ActionKind::TwsLowBits,
                 },
                 button_id: 0,
                 press_kind: ButtonPressKind::Double,
-                available_actions: COMMON_ACTIONS,
-                disable_mode: ButtonDisableMode::DisablingOneSideDisablesOther,
+                available_actions: BUTTON_ACTIONS,
+                disable_mode: ButtonDisableMode::IndividualDisable,
             },
             ButtonSettings {
                 parse_settings: ButtonParseSettings {
-                    enabled_flag_kind: EnabledFlagKind::TwsLowBits,
+                    enabled_flag_kind: EnabledFlagKind::Single,
                     action_kind: ActionKind::TwsLowBits,
                 },
                 button_id: 1,
                 press_kind: ButtonPressKind::Long,
-                available_actions: COMMON_ACTIONS,
-                disable_mode: ButtonDisableMode::DisablingOneSideDisablesOther,
+                available_actions: BUTTON_ACTIONS,
+                disable_mode: ButtonDisableMode::IndividualDisable,
             },
         ],
     };
+
+const BUTTON_ACTIONS: &[ButtonAction] = &[
+    ButtonAction {
+        id: 0,
+        name: "VolumeUp",
+        localized_name: || fl!("volume-up"),
+    },
+    ButtonAction {
+        id: 1,
+        name: "VolumeDown",
+        localized_name: || fl!("volume-down"),
+    },
+    ButtonAction {
+        id: 2,
+        name: "PreviousSong",
+        localized_name: || fl!("previous-song"),
+    },
+    ButtonAction {
+        id: 3,
+        name: "NextSong",
+        localized_name: || fl!("next-song"),
+    },
+    ButtonAction {
+        id: 5,
+        name: "VoiceAssistant",
+        localized_name: || fl!("voice-assistant"),
+    },
+    ButtonAction {
+        id: 6,
+        name: "PlayPause",
+        localized_name: || fl!("play-pause"),
+    },
+];
 
 #[cfg(test)]
 mod tests {
@@ -100,7 +137,7 @@ mod tests {
             device::test_utils::TestSoundcoreDevice,
             packet::{Command, Direction, Packet},
         },
-        settings::SettingId,
+        settings::{SettingId, Value},
     };
 
     #[tokio::test(start_paused = true)]
@@ -128,5 +165,98 @@ mod tests {
             (SettingId::FirmwareVersionLeft, "21.56".into()),
             (SettingId::FirmwareVersionRight, "".into()),
         ]);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn disabled_buttons_in_state_update_packet_parse_correctly() {
+        let state_update_packet = Packet {
+            direction: Direction::Inbound,
+            command: Command([1, 1]),
+            body: vec![
+                0, 1, 5, 5, 0, 0, 50, 52, 46, 53, 54, 50, 52, 46, 53, 54, 51, 57, 52, 56, 49, 57,
+                70, 70, 49, 68, 67, 65, 66, 65, 50, 67, 2, 0, 160, 150, 130, 120, 120, 120, 120,
+                120, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, //
+                1, 0xF6, // Left single press
+                0, 0xF0, // Right single press (disabled, VolumeUp)
+                1, 0x6F, // Left double press
+                1, 0x6F, // Right double press (enabled, 0xF meaning disabled)
+                1, 0x31, // Left long press
+                0, 0x3F, // Right long press (disabled, 0F meaning disabled)
+                255, 255, 255, 97, 0, 1, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255,
+            ],
+        };
+        let device = TestSoundcoreDevice::new_with_packet_responses(
+            super::device_registry,
+            DeviceModel::SoundcoreA3948,
+            HashMap::from([(Command([1, 1]), state_update_packet)]),
+        )
+        .await;
+        device.assert_setting_values([
+            (SettingId::RightSinglePress, Value::OptionalString(None)),
+            (SettingId::RightDoublePress, Value::OptionalString(None)),
+            (SettingId::RightLongPress, Value::OptionalString(None)),
+        ]);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn disabled_buttons_are_moved_to_enabled_state_correctly() {
+        let state_update_packet = Packet {
+            direction: Direction::Inbound,
+            command: Command([1, 1]),
+            body: vec![
+                0, 1, 5, 5, 0, 0, 50, 52, 46, 53, 54, 50, 52, 46, 53, 54, 51, 57, 52, 56, 49, 57,
+                70, 70, 49, 68, 67, 65, 66, 65, 50, 67, 2, 0, 160, 150, 130, 120, 120, 120, 120,
+                120, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, //
+                1, 0xF6, // Left single press
+                0, 0xF0, // Right single press (disabled, VolumeUp)
+                1, 0x6F, // Left double press
+                1, 0x6F, // Right double press (enabled, 0xF meaning disabled)
+                1, 0x31, // Left long press
+                0, 0x3F, // Right long press (disabled, 0F meaning disabled)
+                255, 255, 255, 97, 0, 1, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255,
+            ],
+        };
+        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+            super::device_registry,
+            DeviceModel::SoundcoreA3948,
+            HashMap::from([(Command([1, 1]), state_update_packet)]),
+        )
+        .await;
+        device
+            .assert_set_settings_response_unordered(
+                vec![
+                    (SettingId::RightSinglePress, "VolumeUp".into()),
+                    (SettingId::RightDoublePress, "VolumeUp".into()),
+                    (SettingId::RightLongPress, "VolumeUp".into()),
+                ],
+                vec![
+                    // Single
+                    Packet {
+                        direction: Direction::Outbound,
+                        command: Command([0x04, 0x83]),
+                        body: vec![1, 2, 1],
+                    },
+                    //Double
+                    Packet {
+                        direction: Direction::Outbound,
+                        command: Command([0x04, 0x81]),
+                        body: vec![1, 0, 0x60],
+                    },
+                    // Long
+                    Packet {
+                        direction: Direction::Outbound,
+                        command: Command([0x04, 0x81]),
+                        body: vec![1, 1, 0x30],
+                    },
+                    Packet {
+                        direction: Direction::Outbound,
+                        command: Command([0x04, 0x83]),
+                        body: vec![1, 1, 1],
+                    },
+                ],
+            )
+            .await;
     }
 }

@@ -117,6 +117,15 @@ where
                 .iter()
                 .find(|action| action.name == action_name)
         });
+
+        let maybe_action_id = {
+            if self.settings.use_enabled_flag_to_disable {
+                maybe_action.map(|action| action.id)
+            } else {
+                Some(maybe_action.map(|action| action.id).unwrap_or(0xF))
+            }
+        };
+
         match button_settings.disable_mode {
             ButtonDisableMode::NotDisablable => {
                 if let Some(action) = maybe_action {
@@ -124,12 +133,10 @@ where
                 }
             }
             ButtonDisableMode::IndividualDisable => {
-                *status =
-                    status.with_current_action_id(tws_status, maybe_action.map(|action| action.id));
+                *status = status.with_current_action_id(tws_status, maybe_action_id);
             }
             ButtonDisableMode::DisablingOneSideDisablesOther => {
-                *status =
-                    status.with_current_action_id(tws_status, maybe_action.map(|action| action.id));
+                *status = status.with_current_action_id(tws_status, maybe_action_id);
                 let other_side_pos = self
                     .settings
                     .order
