@@ -15,10 +15,10 @@ pub struct DualBattery {
 impl DualBattery {
     pub fn bytes(&self) -> [u8; 4] {
         [
-            self.left.is_charging as u8,
-            self.right.is_charging as u8,
             self.left.level.0,
             self.right.level.0,
+            self.left.is_charging as u8,
+            self.right.is_charging as u8,
         ]
     }
 }
@@ -121,5 +121,29 @@ impl BatteryLevel {
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         context("battery level", map(le_u8, BatteryLevel)).parse_complete(input)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use nom_language::error::VerboseError;
+
+    use super::*;
+
+    #[test]
+    fn serialize_and_deserialize_dual() {
+        let battery = DualBattery {
+            left: SingleBattery {
+                is_charging: IsBatteryCharging::No,
+                level: BatteryLevel(3),
+            },
+            right: SingleBattery {
+                is_charging: IsBatteryCharging::Yes,
+                level: BatteryLevel(4),
+            },
+        };
+        let serialized = battery.bytes();
+        let deserialized = DualBattery::take::<VerboseError<_>>(&serialized).unwrap().1;
+        assert_eq!(deserialized, battery);
     }
 }
