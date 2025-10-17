@@ -10,7 +10,7 @@ use tokio::sync::watch;
 use crate::{
     api::device,
     devices::soundcore::{
-        a3951::state::A3951State,
+        a3951::{self, state::A3951State},
         common::{
             modules::ModuleCollection,
             packet::{
@@ -21,15 +21,16 @@ use crate::{
             },
             packet_manager::PacketHandler,
             structures::{
-                AgeRange, CustomHearId, DualBattery, EqualizerConfiguration, Gender,
-                MultiButtonConfiguration, SoundModes, TouchTone, TwsStatus, VolumeAdjustments,
+                AgeRange, CustomHearId, DualBattery, EqualizerConfiguration, Gender, SoundModes,
+                TouchTone, TwsStatus, VolumeAdjustments,
+                button_configuration_v2::ButtonStatusCollection,
             },
         },
     },
 };
 
 // A3951
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct A3951StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
@@ -37,7 +38,7 @@ pub struct A3951StateUpdatePacket {
     pub gender: Gender,
     pub age_range: AgeRange,
     pub custom_hear_id: CustomHearId<2, 8>,
-    pub button_configuration: MultiButtonConfiguration,
+    pub button_configuration: ButtonStatusCollection<6>,
     pub sound_modes: SoundModes,
     pub side_tone: bool,
     pub wear_detection: bool,
@@ -46,6 +47,28 @@ pub struct A3951StateUpdatePacket {
     pub supports_new_battery: bool, // yes if packet is >98, don't parse
     pub left_new_battery: u8,       // 0 to 9
     pub right_new_battery: u8,      // 0 to 9
+}
+
+impl Default for A3951StateUpdatePacket {
+    fn default() -> Self {
+        Self {
+            tws_status: Default::default(),
+            battery: Default::default(),
+            equalizer_configuration: Default::default(),
+            gender: Default::default(),
+            age_range: Default::default(),
+            custom_hear_id: Default::default(),
+            button_configuration: a3951::BUTTON_SETTINGS.default_status_collection(),
+            sound_modes: Default::default(),
+            side_tone: Default::default(),
+            wear_detection: Default::default(),
+            touch_tone: Default::default(),
+            hear_id_eq_preset: Default::default(),
+            supports_new_battery: Default::default(),
+            left_new_battery: Default::default(),
+            right_new_battery: Default::default(),
+        }
+    }
 }
 
 impl InboundPacket for A3951StateUpdatePacket {
@@ -78,7 +101,7 @@ impl InboundPacket for A3951StateUpdatePacket {
                     Gender::take,
                     AgeRange::take,
                     CustomHearId::take_with_all_fields,
-                    MultiButtonConfiguration::take,
+                    ButtonStatusCollection::take(a3951::BUTTON_SETTINGS.parse_settings()),
                     SoundModes::take,
                     take_bool,       // side tone
                     take_bool,       // wear detection
@@ -158,7 +181,10 @@ impl OutboundPacket for A3951StateUpdatePacket {
                     .iter()
                     .flat_map(|v| v.bytes()),
             )
-            .chain(self.button_configuration.bytes())
+            .chain(
+                self.button_configuration
+                    .bytes(a3951::BUTTON_SETTINGS.parse_settings()),
+            )
             .chain(self.sound_modes.bytes())
             .chain([
                 self.side_tone as u8,
