@@ -10,7 +10,7 @@ use tokio::sync::watch;
 use crate::{
     api::device,
     devices::soundcore::{
-        a3945::state::A3945State,
+        a3945::{self, state::A3945State},
         common::{
             modules::ModuleCollection,
             packet::{
@@ -22,7 +22,8 @@ use crate::{
             packet_manager::PacketHandler,
             structures::{
                 BatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
-                MultiButtonConfiguration, SerialNumber, TouchTone, TwsStatus,
+                SerialNumber, TouchTone, TwsStatus,
+                button_configuration_v2::ButtonStatusCollection,
             },
         },
     },
@@ -30,20 +31,39 @@ use crate::{
 
 // A3945 only
 // Despite EQ being 10 bands, only the first 8 seem to be used?
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct A3945StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
     pub dual_firmware_version: DualFirmwareVersion,
     pub serial_number: SerialNumber,
     pub equalizer_configuration: EqualizerConfiguration<2, 10>,
-    pub button_configuration: MultiButtonConfiguration,
+    pub button_configuration: ButtonStatusCollection<6>,
     pub touch_tone: TouchTone,
     pub wear_detection_switch: bool,
     pub game_mode_switch: bool,
     pub charging_case_battery_level: BatteryLevel,
     pub bass_up_switch: bool,
     pub device_color: u8,
+}
+
+impl Default for A3945StateUpdatePacket {
+    fn default() -> Self {
+        Self {
+            tws_status: Default::default(),
+            battery: Default::default(),
+            dual_firmware_version: Default::default(),
+            serial_number: Default::default(),
+            equalizer_configuration: Default::default(),
+            button_configuration: a3945::BUTTON_CONFIGURATION_SETTINGS.default_status_collection(),
+            touch_tone: Default::default(),
+            wear_detection_switch: Default::default(),
+            game_mode_switch: Default::default(),
+            charging_case_battery_level: Default::default(),
+            bass_up_switch: Default::default(),
+            device_color: Default::default(),
+        }
+    }
 }
 
 impl InboundPacket for A3945StateUpdatePacket {
@@ -59,7 +79,9 @@ impl InboundPacket for A3945StateUpdatePacket {
                     DualFirmwareVersion::take,
                     SerialNumber::take,
                     EqualizerConfiguration::take,
-                    MultiButtonConfiguration::take,
+                    ButtonStatusCollection::take(
+                        a3945::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
+                    ),
                     TouchTone::take,
                     take_bool,
                     take_bool,
@@ -115,7 +137,10 @@ impl OutboundPacket for A3945StateUpdatePacket {
             .chain(self.dual_firmware_version.bytes())
             .chain(self.serial_number.to_string().into_bytes())
             .chain(self.equalizer_configuration.bytes())
-            .chain(self.button_configuration.bytes())
+            .chain(
+                self.button_configuration
+                    .bytes(a3945::BUTTON_CONFIGURATION_SETTINGS.parse_settings()),
+            )
             .chain(self.touch_tone.bytes())
             .chain([
                 self.wear_detection_switch as u8,

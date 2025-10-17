@@ -184,6 +184,39 @@ pub const COMMON_ACTIONS_MINIMAL: &[ButtonAction] = &[
 // Everything except game mode
 pub const COMMON_ACTIONS: &[ButtonAction] = COMMON_ACTIONS_WITH_GAME_MODE.split_at(7).0;
 
+pub const COMMON_ACTIONS_WITHOUT_SOUND_MODES: &[ButtonAction] = &[
+    ButtonAction {
+        id: 0,
+        name: "VolumeUp",
+        localized_name: || fl!("volume-up"),
+    },
+    ButtonAction {
+        id: 1,
+        name: "VolumeDown",
+        localized_name: || fl!("volume-down"),
+    },
+    ButtonAction {
+        id: 2,
+        name: "PreviousSong",
+        localized_name: || fl!("previous-song"),
+    },
+    ButtonAction {
+        id: 3,
+        name: "NextSong",
+        localized_name: || fl!("next-song"),
+    },
+    ButtonAction {
+        id: 5,
+        name: "VoiceAssistant",
+        localized_name: || fl!("voice-assistant"),
+    },
+    ButtonAction {
+        id: 6,
+        name: "PlayPause",
+        localized_name: || fl!("play-pause"),
+    },
+];
+
 pub const COMMON_ACTIONS_WITH_GAME_MODE: &[ButtonAction] = &[
     ButtonAction {
         id: 0,

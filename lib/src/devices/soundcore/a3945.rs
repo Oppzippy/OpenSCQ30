@@ -5,7 +5,14 @@ use crate::devices::soundcore::{
     common::{
         device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
+        modules::button_configuration_v2::{
+            ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings,
+            COMMON_ACTIONS_WITHOUT_SOUND_MODES,
+        },
         packet::outbound::{OutboundPacketBytesExt, RequestState},
+        structures::button_configuration_v2::{
+            ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
+        },
     },
 };
 
@@ -22,7 +29,7 @@ soundcore_device!(
     async |builder| {
         builder.module_collection().add_state_update();
         builder.equalizer().await;
-        builder.button_configuration();
+        builder.button_configuration_v2(&BUTTON_CONFIGURATION_SETTINGS);
         builder.touch_tone();
         builder.tws_status();
         builder.dual_battery(5);
@@ -35,6 +42,52 @@ soundcore_device!(
         )])
     },
 );
+
+pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
+    ButtonConfigurationSettings {
+        supports_set_all_packet: false,
+        use_enabled_flag_to_disable: false,
+        order: [
+            Button::LeftSinglePress,
+            Button::RightSinglePress,
+            Button::LeftDoublePress,
+            Button::RightDoublePress,
+            Button::LeftLongPress,
+            Button::RightLongPress,
+        ],
+        settings: [
+            ButtonSettings {
+                parse_settings: ButtonParseSettings {
+                    enabled_flag_kind: EnabledFlagKind::Single,
+                    action_kind: ActionKind::TwsLowBits,
+                },
+                button_id: 2,
+                press_kind: ButtonPressKind::Single,
+                available_actions: COMMON_ACTIONS_WITHOUT_SOUND_MODES,
+                disable_mode: ButtonDisableMode::IndividualDisable,
+            },
+            ButtonSettings {
+                parse_settings: ButtonParseSettings {
+                    enabled_flag_kind: EnabledFlagKind::Single,
+                    action_kind: ActionKind::TwsLowBits,
+                },
+                button_id: 0,
+                press_kind: ButtonPressKind::Double,
+                available_actions: COMMON_ACTIONS_WITHOUT_SOUND_MODES,
+                disable_mode: ButtonDisableMode::IndividualDisable,
+            },
+            ButtonSettings {
+                parse_settings: ButtonParseSettings {
+                    enabled_flag_kind: EnabledFlagKind::Single,
+                    action_kind: ActionKind::TwsLowBits,
+                },
+                button_id: 1,
+                press_kind: ButtonPressKind::Long,
+                available_actions: COMMON_ACTIONS_WITHOUT_SOUND_MODES,
+                disable_mode: ButtonDisableMode::IndividualDisable,
+            },
+        ],
+    };
 
 #[cfg(test)]
 mod tests {

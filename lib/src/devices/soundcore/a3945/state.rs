@@ -1,8 +1,8 @@
 use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::common::structures::{
-    BatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
-    MultiButtonConfiguration, SerialNumber, TouchTone, TwsStatus,
+    BatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration, SerialNumber,
+    TouchTone, TwsStatus, button_configuration_v2::ButtonStatusCollection,
 };
 
 use super::packets::A3945StateUpdatePacket;
@@ -14,7 +14,7 @@ pub struct A3945State {
     pub dual_firmware_version: DualFirmwareVersion,
     pub serial_number: SerialNumber,
     pub equalizer_configuration: EqualizerConfiguration<2, 10>,
-    pub button_configuration: MultiButtonConfiguration,
+    pub button_configuration: ButtonStatusCollection<6>,
     pub charging_case_battery_level: BatteryLevel,
     pub touch_tone: TouchTone,
     #[has(skip)]

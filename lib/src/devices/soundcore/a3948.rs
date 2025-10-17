@@ -1,21 +1,19 @@
 use std::collections::HashMap;
 
-use crate::{
-    devices::soundcore::{
-        a3948::{packets::inbound::A3948StateUpdatePacket, state::A3948State},
-        common::{
-            device::fetch_state_from_state_update_packet,
-            macros::soundcore_device,
-            modules::button_configuration_v2::{
-                ButtonAction, ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings,
-            },
-            packet::outbound::{OutboundPacketBytesExt, RequestState},
-            structures::button_configuration_v2::{
-                ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
-            },
+use crate::devices::soundcore::{
+    a3948::{packets::inbound::A3948StateUpdatePacket, state::A3948State},
+    common::{
+        device::fetch_state_from_state_update_packet,
+        macros::soundcore_device,
+        modules::button_configuration_v2::{
+            ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings,
+            COMMON_ACTIONS_WITHOUT_SOUND_MODES,
+        },
+        packet::outbound::{OutboundPacketBytesExt, RequestState},
+        structures::button_configuration_v2::{
+            ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
         },
     },
-    i18n::fl,
 };
 
 mod packets;
@@ -68,7 +66,7 @@ pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
                 },
                 button_id: 2,
                 press_kind: ButtonPressKind::Single,
-                available_actions: BUTTON_ACTIONS,
+                available_actions: COMMON_ACTIONS_WITHOUT_SOUND_MODES,
                 disable_mode: ButtonDisableMode::IndividualDisable,
             },
             ButtonSettings {
@@ -78,7 +76,7 @@ pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
                 },
                 button_id: 0,
                 press_kind: ButtonPressKind::Double,
-                available_actions: BUTTON_ACTIONS,
+                available_actions: COMMON_ACTIONS_WITHOUT_SOUND_MODES,
                 disable_mode: ButtonDisableMode::IndividualDisable,
             },
             ButtonSettings {
@@ -88,44 +86,11 @@ pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
                 },
                 button_id: 1,
                 press_kind: ButtonPressKind::Long,
-                available_actions: BUTTON_ACTIONS,
+                available_actions: COMMON_ACTIONS_WITHOUT_SOUND_MODES,
                 disable_mode: ButtonDisableMode::IndividualDisable,
             },
         ],
     };
-
-const BUTTON_ACTIONS: &[ButtonAction] = &[
-    ButtonAction {
-        id: 0,
-        name: "VolumeUp",
-        localized_name: || fl!("volume-up"),
-    },
-    ButtonAction {
-        id: 1,
-        name: "VolumeDown",
-        localized_name: || fl!("volume-down"),
-    },
-    ButtonAction {
-        id: 2,
-        name: "PreviousSong",
-        localized_name: || fl!("previous-song"),
-    },
-    ButtonAction {
-        id: 3,
-        name: "NextSong",
-        localized_name: || fl!("next-song"),
-    },
-    ButtonAction {
-        id: 5,
-        name: "VoiceAssistant",
-        localized_name: || fl!("voice-assistant"),
-    },
-    ButtonAction {
-        id: 6,
-        name: "PlayPause",
-        localized_name: || fl!("play-pause"),
-    },
-];
 
 #[cfg(test)]
 mod tests {
