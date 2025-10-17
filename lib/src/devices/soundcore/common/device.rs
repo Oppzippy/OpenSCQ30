@@ -695,7 +695,6 @@ pub mod test_utils {
             loop {
                 if let Some(packet) = self.outbound_receiver.recv().await {
                     let command = Command(packet[5..7].try_into().unwrap());
-                    eprintln!("acking {command:?}");
                     self.ack(command).await;
                     sent_packets.push(packet);
                 } else {
