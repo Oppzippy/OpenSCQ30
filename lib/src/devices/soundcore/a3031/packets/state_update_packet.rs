@@ -7,7 +7,7 @@ use nom::{
 use tokio::sync::watch;
 
 use crate::devices::soundcore::{
-    a3031::state::A3031State,
+    a3031::{self, state::A3031State},
     common::{
         modules::ModuleCollection,
         packet::{
@@ -18,22 +18,37 @@ use crate::devices::soundcore::{
         },
         packet_manager::PacketHandler,
         structures::{
-            AutoPowerOff, DualBattery, EqualizerConfiguration, MultiButtonConfiguration,
-            SoundModes, TouchTone, TwsStatus,
+            AutoPowerOff, DualBattery, EqualizerConfiguration, SoundModes, TouchTone, TwsStatus,
+            button_configuration_v2::ButtonStatusCollection,
         },
     },
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct A3031StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
     pub equalizer_configuration: EqualizerConfiguration<2, 8>,
-    pub button_configuration: MultiButtonConfiguration,
+    pub button_configuration: ButtonStatusCollection<6>,
     pub sound_modes: SoundModes,
     pub auto_power_off: AutoPowerOff,
     pub side_tone: bool,
     pub touch_tone: TouchTone,
+}
+
+impl Default for A3031StateUpdatePacket {
+    fn default() -> Self {
+        Self {
+            tws_status: Default::default(),
+            battery: Default::default(),
+            equalizer_configuration: Default::default(),
+            button_configuration: a3031::BUTTON_CONFIGURATION_SETTINGS.default_status_collection(),
+            sound_modes: Default::default(),
+            auto_power_off: Default::default(),
+            side_tone: Default::default(),
+            touch_tone: Default::default(),
+        }
+    }
 }
 
 impl InboundPacket for A3031StateUpdatePacket {
@@ -47,7 +62,9 @@ impl InboundPacket for A3031StateUpdatePacket {
                     TwsStatus::take,
                     DualBattery::take,
                     EqualizerConfiguration::take,
-                    MultiButtonConfiguration::take,
+                    ButtonStatusCollection::take(
+                        a3031::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
+                    ),
                     SoundModes::take,
                     take_bool,
                     TouchTone::take,
@@ -96,7 +113,10 @@ impl OutboundPacket for A3031StateUpdatePacket {
                 self.battery.right.is_charging as u8,
             ])
             .chain(self.equalizer_configuration.bytes())
-            .chain(self.button_configuration.bytes())
+            .chain(
+                self.button_configuration
+                    .bytes(a3031::BUTTON_CONFIGURATION_SETTINGS.parse_settings()),
+            )
             .chain(self.sound_modes.bytes())
             .chain([self.side_tone as u8, self.touch_tone as u8])
             .chain(self.auto_power_off.bytes())
