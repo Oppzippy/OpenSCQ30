@@ -6,10 +6,10 @@ use tokio::sync::watch;
 use crate::{
     api::{connection::RfcommConnection, device},
     devices::soundcore::common::{
-        modules::button_configuration_v2::{ButtonConfigurationSettings, ButtonSettings},
+        modules::button_configuration::{ButtonConfigurationSettings, ButtonSettings},
         packet::{self, PacketIOController},
         state_modifier::StateModifier,
-        structures::button_configuration_v2::{Button, ButtonStatusCollection},
+        structures::button_configuration::{Button, ButtonStatusCollection},
     },
 };
 

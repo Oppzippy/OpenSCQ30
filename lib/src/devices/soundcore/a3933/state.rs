@@ -3,7 +3,7 @@ use openscq30_lib_macros::Has;
 use crate::devices::soundcore::common::structures::{
     AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery, DualFirmwareVersion,
     EqualizerConfiguration, SerialNumber, SoundModes, TouchTone, TwsStatus,
-    button_configuration_v2::ButtonStatusCollection,
+    button_configuration::ButtonStatusCollection,
 };
 
 use super::packets::inbound::A3933StateUpdatePacket;

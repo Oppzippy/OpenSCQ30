@@ -13,7 +13,7 @@ use crate::devices::soundcore::{
     },
 };
 
-pub use crate::devices::soundcore::common::modules::button_configuration_v2::COMMON_SETTINGS as BUTTON_CONFIGURATION_SETTINGS;
+pub use crate::devices::soundcore::common::modules::button_configuration::COMMON_SETTINGS as BUTTON_CONFIGURATION_SETTINGS;
 
 mod packets;
 mod state;
@@ -49,7 +49,7 @@ soundcore_device!(
         //     ],
         // });
         builder.equalizer_with_basic_hear_id().await;
-        builder.button_configuration_v2(&BUTTON_CONFIGURATION_SETTINGS);
+        builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.tws_status();
         builder.dual_battery(5);
         builder.serial_number_and_dual_firmware_version();

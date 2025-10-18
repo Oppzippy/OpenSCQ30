@@ -5,7 +5,7 @@ use crate::devices::soundcore::common::{
     structures::{
         AgeRange, CustomHearId, DualBattery, DualFirmwareVersion, EqualizerConfiguration, Gender,
         SerialNumber, SoundModes, TouchTone, TwsStatus,
-        button_configuration_v2::ButtonStatusCollection,
+        button_configuration::ButtonStatusCollection,
     },
 };
 

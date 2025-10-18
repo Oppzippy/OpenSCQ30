@@ -9,11 +9,11 @@ use crate::{
         common::{
             device::fetch_state_from_state_update_packet,
             macros::soundcore_device,
-            modules::button_configuration_v2::{
+            modules::button_configuration::{
                 ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_ACTIONS,
             },
             packet::outbound::{OutboundPacketBytesExt, RequestState},
-            structures::button_configuration_v2::{
+            structures::button_configuration::{
                 ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
             },
         },
@@ -37,7 +37,7 @@ soundcore_device!(
         builder.module_collection().add_state_update();
         builder.a3936_sound_modes();
         builder.equalizer_with_custom_hear_id().await;
-        builder.button_configuration_v2(&BUTTON_CONFIGURATION_SETTINGS);
+        builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.ambient_sound_mode_cycle();
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.touch_tone();

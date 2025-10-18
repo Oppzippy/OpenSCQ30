@@ -5,7 +5,7 @@ use crate::devices::soundcore::{
     common::{
         macros::soundcore_device,
         modules::{
-            button_configuration_v2::COMMON_SETTINGS as BUTTON_SETTINGS,
+            button_configuration::COMMON_SETTINGS as BUTTON_SETTINGS,
             sound_modes::AvailableSoundModes,
         },
         packet::{
@@ -55,7 +55,7 @@ soundcore_device!(
             ],
         });
         builder.equalizer_with_custom_hear_id().await;
-        builder.button_configuration_v2(&BUTTON_SETTINGS);
+        builder.button_configuration(&BUTTON_SETTINGS);
         builder.touch_tone();
         builder.tws_status();
         builder.dual_battery(5);

@@ -4,7 +4,7 @@ use crate::devices::soundcore::{
     a3948::packets::inbound::A3948StateUpdatePacket,
     common::structures::{
         DualBattery, DualFirmwareVersion, EqualizerConfiguration, SerialNumber, TouchTone,
-        TwsStatus, button_configuration_v2::ButtonStatusCollection,
+        TwsStatus, button_configuration::ButtonStatusCollection,
     },
 };
 

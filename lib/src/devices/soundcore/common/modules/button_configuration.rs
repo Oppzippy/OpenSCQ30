@@ -8,7 +8,7 @@ use crate::{
     api::{connection::RfcommConnection, settings::CategoryId},
     devices::soundcore::common::{
         packet::PacketIOController,
-        structures::{TwsStatus, button_configuration_v2::*},
+        structures::{TwsStatus, button_configuration::*},
     },
     i18n::fl,
 };
@@ -264,7 +264,7 @@ impl<T> ModuleCollection<T>
 where
     T: Has<TwsStatus> + Clone + Send + Sync,
 {
-    pub fn add_button_configuration_v2<
+    pub fn add_button_configuration<
         ConnectionType,
         const NUM_BUTTONS: usize,
         const NUM_PRESS_KINDS: usize,

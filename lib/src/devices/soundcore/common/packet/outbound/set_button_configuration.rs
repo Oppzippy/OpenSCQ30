@@ -1,8 +1,6 @@
 use crate::devices::soundcore::common::{
     packet::{Command, outbound::OutboundPacket},
-    structures::button_configuration_v2::{
-        ButtonParseSettings, ButtonSide, ButtonStatusCollection,
-    },
+    structures::button_configuration::{ButtonParseSettings, ButtonSide, ButtonStatusCollection},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

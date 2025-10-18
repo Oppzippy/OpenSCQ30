@@ -5,12 +5,12 @@ use crate::devices::soundcore::{
     common::{
         device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
-        modules::button_configuration_v2::{
+        modules::button_configuration::{
             ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings,
             COMMON_ACTIONS_WITHOUT_SOUND_MODES,
         },
         packet::outbound::{OutboundPacketBytesExt, RequestState},
-        structures::button_configuration_v2::{
+        structures::button_configuration::{
             ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
         },
     },
@@ -30,7 +30,7 @@ soundcore_device!(
         builder.module_collection().add_state_update();
         builder.equalizer_with_drc().await;
 
-        builder.button_configuration_v2(&BUTTON_CONFIGURATION_SETTINGS);
+        builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
 
         builder.touch_tone();
 

@@ -19,7 +19,7 @@ use super::{
 
 pub mod ambient_sound_mode_cycle;
 mod auto_power_off;
-pub mod button_configuration_v2;
+pub mod button_configuration;
 pub mod dual_battery;
 pub mod equalizer;
 pub mod serial_number_and_dual_firmware_version;

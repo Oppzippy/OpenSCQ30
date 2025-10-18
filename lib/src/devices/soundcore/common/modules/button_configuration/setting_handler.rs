@@ -6,11 +6,11 @@ use openscq30_lib_has::Has;
 use crate::{
     api::settings::{Setting, SettingId, Value},
     devices::soundcore::common::{
-        modules::button_configuration_v2::{ButtonConfigurationSettings, ButtonDisableMode},
+        modules::button_configuration::{ButtonConfigurationSettings, ButtonDisableMode},
         settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
         structures::{
             TwsStatus,
-            button_configuration_v2::{Button, ButtonStatusCollection},
+            button_configuration::{Button, ButtonStatusCollection},
         },
     },
     settings,

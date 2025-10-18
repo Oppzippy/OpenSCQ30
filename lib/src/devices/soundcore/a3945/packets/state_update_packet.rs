@@ -22,8 +22,7 @@ use crate::{
             packet_manager::PacketHandler,
             structures::{
                 BatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
-                SerialNumber, TouchTone, TwsStatus,
-                button_configuration_v2::ButtonStatusCollection,
+                SerialNumber, TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
             },
         },
     },

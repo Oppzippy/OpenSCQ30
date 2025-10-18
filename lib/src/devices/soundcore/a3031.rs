@@ -9,7 +9,7 @@ use crate::{
         common::{
             macros::soundcore_device,
             modules::{
-                button_configuration_v2::COMMON_SETTINGS as BUTTON_CONFIGURATION_SETTINGS,
+                button_configuration::COMMON_SETTINGS as BUTTON_CONFIGURATION_SETTINGS,
                 sound_modes::AvailableSoundModes,
             },
             packet::{

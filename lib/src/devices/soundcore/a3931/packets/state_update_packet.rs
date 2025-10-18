@@ -21,7 +21,7 @@ use crate::{
             packet_manager::PacketHandler,
             structures::{
                 AutoPowerOff, DualBattery, EqualizerConfiguration, SoundModes, TouchTone,
-                TwsStatus, button_configuration_v2::ButtonStatusCollection,
+                TwsStatus, button_configuration::ButtonStatusCollection,
             },
         },
     },

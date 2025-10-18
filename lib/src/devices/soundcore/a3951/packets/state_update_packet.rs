@@ -23,7 +23,7 @@ use crate::{
             structures::{
                 AgeRange, CustomHearId, DualBattery, EqualizerConfiguration, Gender, SoundModes,
                 TouchTone, TwsStatus, VolumeAdjustments,
-                button_configuration_v2::ButtonStatusCollection,
+                button_configuration::ButtonStatusCollection,
             },
         },
     },

@@ -5,7 +5,7 @@ mod auto_power_off;
 mod basic_hear_id;
 mod battery;
 // mod is public rather than pub use to avoid naming conflicts with button_configuration
-pub mod button_configuration_v2;
+pub mod button_configuration;
 mod custom_hear_id;
 mod custom_noise_canceling;
 mod equalizer_configuration;

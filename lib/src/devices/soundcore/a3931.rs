@@ -9,7 +9,7 @@ use crate::{
         common::{
             macros::soundcore_device,
             modules::{
-                button_configuration_v2::{
+                button_configuration::{
                     ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_ACTIONS,
                 },
                 sound_modes::AvailableSoundModes,
@@ -22,7 +22,7 @@ use crate::{
             },
             structures::{
                 AmbientSoundMode, NoiseCancelingMode, TransparencyMode,
-                button_configuration_v2::{
+                button_configuration::{
                     ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
                 },
             },
@@ -67,7 +67,7 @@ soundcore_device!(
             ],
         });
         builder.equalizer_with_drc().await;
-        builder.button_configuration_v2(&BUTTON_CONFIGURATION_SETTINGS);
+        builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.touch_tone();
         builder.tws_status();

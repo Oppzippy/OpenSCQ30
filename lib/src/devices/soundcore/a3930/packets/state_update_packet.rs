@@ -22,7 +22,7 @@ use crate::{
             packet_manager::PacketHandler,
             structures::{
                 AgeRange, CustomHearId, DualBattery, EqualizerConfiguration, Gender, SoundModes,
-                TwsStatus, VolumeAdjustments, button_configuration_v2::ButtonStatusCollection,
+                TwsStatus, VolumeAdjustments, button_configuration::ButtonStatusCollection,
             },
         },
     },

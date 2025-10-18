@@ -5,7 +5,7 @@ use crate::devices::soundcore::{
     common::structures::{
         AmbientSoundModeCycle, AutoPowerOff, DualBattery, DualFirmwareVersion,
         EqualizerConfiguration, SerialNumber, TouchTone, TwsStatus,
-        button_configuration_v2::ButtonStatusCollection,
+        button_configuration::ButtonStatusCollection,
     },
 };
 

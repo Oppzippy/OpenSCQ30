@@ -4,7 +4,7 @@ use crate::devices::soundcore::common::{
     packet::inbound::SerialNumberAndFirmwareVersion,
     structures::{
         AutoPowerOff, DualBattery, DualFirmwareVersion, EqualizerConfiguration, SerialNumber,
-        SoundModes, TouchTone, TwsStatus, button_configuration_v2::ButtonStatusCollection,
+        SoundModes, TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
     },
 };
 

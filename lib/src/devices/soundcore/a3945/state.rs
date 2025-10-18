@@ -2,7 +2,7 @@ use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::common::structures::{
     BatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration, SerialNumber,
-    TouchTone, TwsStatus, button_configuration_v2::ButtonStatusCollection,
+    TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
 };
 
 use super::packets::A3945StateUpdatePacket;

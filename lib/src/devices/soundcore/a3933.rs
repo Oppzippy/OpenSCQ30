@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-pub use crate::devices::soundcore::common::modules::button_configuration_v2::COMMON_SETTINGS as BUTTON_CONFIGURATION_SETTINGS;
+pub use crate::devices::soundcore::common::modules::button_configuration::COMMON_SETTINGS as BUTTON_CONFIGURATION_SETTINGS;
 use crate::devices::soundcore::{
     a3933::{packets::inbound::A3933StateUpdatePacket, state::A3933State},
     common::{
@@ -41,7 +41,7 @@ soundcore_device!(
             ],
         });
         builder.equalizer().await;
-        builder.button_configuration_v2(&BUTTON_CONFIGURATION_SETTINGS);
+        builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.ambient_sound_mode_cycle();
         builder.touch_tone();
         builder.tws_status();

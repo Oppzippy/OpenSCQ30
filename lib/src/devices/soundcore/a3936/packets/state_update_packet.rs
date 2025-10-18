@@ -24,7 +24,7 @@ use crate::{
             structures::{
                 AgeRange, AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CustomHearId,
                 DualBattery, DualFirmwareVersion, EqualizerConfiguration, SerialNumber, TouchTone,
-                TwsStatus, VolumeAdjustments, button_configuration_v2::ButtonStatusCollection,
+                TwsStatus, VolumeAdjustments, button_configuration::ButtonStatusCollection,
             },
         },
     },

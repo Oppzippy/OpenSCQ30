@@ -4,7 +4,7 @@ use crate::devices::soundcore::common::{
     packet::inbound::SerialNumberAndFirmwareVersion,
     structures::{
         AgeRange, BasicHearId, DualBattery, DualFirmwareVersion, EqualizerConfiguration, Gender,
-        SerialNumber, TwsStatus, button_configuration_v2::ButtonStatusCollection,
+        SerialNumber, TwsStatus, button_configuration::ButtonStatusCollection,
     },
 };
 

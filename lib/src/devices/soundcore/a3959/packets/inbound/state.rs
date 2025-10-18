@@ -21,7 +21,7 @@ use crate::{
                 parsing::take_bool,
             },
             packet_manager::PacketHandler,
-            structures::button_configuration_v2::ButtonStatusCollection,
+            structures::button_configuration::ButtonStatusCollection,
         },
     },
 };
