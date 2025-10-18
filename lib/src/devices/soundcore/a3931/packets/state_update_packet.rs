@@ -9,7 +9,7 @@ use tokio::sync::watch;
 use crate::{
     api::device,
     devices::soundcore::{
-        a3931::state::A3931State,
+        a3931::{self, state::A3931State},
         common::{
             modules::ModuleCollection,
             packet::{
@@ -20,24 +20,38 @@ use crate::{
             },
             packet_manager::PacketHandler,
             structures::{
-                AutoPowerOff, DualBattery, EqualizerConfiguration, MultiButtonConfiguration,
-                SoundModes, TouchTone, TwsStatus,
+                AutoPowerOff, DualBattery, EqualizerConfiguration, SoundModes, TouchTone,
+                TwsStatus, button_configuration_v2::ButtonStatusCollection,
             },
         },
     },
 };
 
-// A3931 and A3935 and A3931XR and A3935W
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct A3931StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
     pub equalizer_configuration: EqualizerConfiguration<2, 8>,
-    pub button_configuration: MultiButtonConfiguration,
+    pub button_configuration: ButtonStatusCollection<6>,
     pub sound_modes: SoundModes,
     pub side_tone: bool,
     pub touch_tone: TouchTone,
     pub auto_power_off: AutoPowerOff,
+}
+
+impl Default for A3931StateUpdatePacket {
+    fn default() -> Self {
+        Self {
+            tws_status: Default::default(),
+            battery: Default::default(),
+            equalizer_configuration: Default::default(),
+            button_configuration: a3931::BUTTON_CONFIGURATION_SETTINGS.default_status_collection(),
+            sound_modes: Default::default(),
+            side_tone: Default::default(),
+            touch_tone: Default::default(),
+            auto_power_off: Default::default(),
+        }
+    }
 }
 
 impl InboundPacket for A3931StateUpdatePacket {
@@ -51,7 +65,9 @@ impl InboundPacket for A3931StateUpdatePacket {
                     TwsStatus::take,
                     DualBattery::take,
                     EqualizerConfiguration::take,
-                    MultiButtonConfiguration::take,
+                    ButtonStatusCollection::take(
+                        a3931::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
+                    ),
                     SoundModes::take,
                     take_bool,
                     TouchTone::take,
@@ -100,7 +116,10 @@ impl OutboundPacket for A3931StateUpdatePacket {
                 self.battery.right.level.0,
             ])
             .chain(self.equalizer_configuration.bytes())
-            .chain(self.button_configuration.bytes())
+            .chain(
+                self.button_configuration
+                    .bytes(a3931::BUTTON_CONFIGURATION_SETTINGS.parse_settings()),
+            )
             .chain(self.sound_modes.bytes())
             .chain([self.side_tone as u8, self.touch_tone as u8])
             .chain(self.auto_power_off.bytes())

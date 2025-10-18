@@ -8,14 +8,24 @@ use crate::{
         a3931::{packets::A3931StateUpdatePacket, state::A3931State},
         common::{
             macros::soundcore_device,
-            modules::sound_modes::AvailableSoundModes,
+            modules::{
+                button_configuration_v2::{
+                    ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_ACTIONS,
+                },
+                sound_modes::AvailableSoundModes,
+            },
             packet::{
                 inbound::{SerialNumberAndFirmwareVersion, TryIntoInboundPacket},
                 outbound::{
                     OutboundPacketBytesExt, RequestSerialNumberAndFirmwareVersion, RequestState,
                 },
             },
-            structures::{AmbientSoundMode, NoiseCancelingMode, TransparencyMode},
+            structures::{
+                AmbientSoundMode, NoiseCancelingMode, TransparencyMode,
+                button_configuration_v2::{
+                    ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
+                },
+            },
         },
     },
     i18n::fl,
@@ -57,7 +67,7 @@ soundcore_device!(
             ],
         });
         builder.equalizer_with_drc().await;
-        builder.button_configuration();
+        builder.button_configuration_v2(&BUTTON_CONFIGURATION_SETTINGS);
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.touch_tone();
         builder.tws_status();
@@ -77,6 +87,52 @@ soundcore_device!(
         ])
     },
 );
+
+const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
+    ButtonConfigurationSettings {
+        supports_set_all_packet: false, // unknown so false to be safe
+        use_enabled_flag_to_disable: true,
+        order: [
+            Button::LeftDoublePress,
+            Button::LeftLongPress,
+            Button::RightDoublePress,
+            Button::RightLongPress,
+            Button::LeftSinglePress,
+            Button::RightSinglePress,
+        ],
+        settings: [
+            ButtonSettings {
+                parse_settings: ButtonParseSettings {
+                    enabled_flag_kind: EnabledFlagKind::Single,
+                    action_kind: ActionKind::TwsLowBits,
+                },
+                button_id: 0,
+                press_kind: ButtonPressKind::Double,
+                available_actions: COMMON_ACTIONS,
+                disable_mode: ButtonDisableMode::NotDisablable,
+            },
+            ButtonSettings {
+                parse_settings: ButtonParseSettings {
+                    enabled_flag_kind: EnabledFlagKind::Single,
+                    action_kind: ActionKind::TwsLowBits,
+                },
+                button_id: 1,
+                press_kind: ButtonPressKind::Long,
+                available_actions: COMMON_ACTIONS,
+                disable_mode: ButtonDisableMode::NotDisablable,
+            },
+            ButtonSettings {
+                parse_settings: ButtonParseSettings {
+                    enabled_flag_kind: EnabledFlagKind::Single,
+                    action_kind: ActionKind::Single,
+                },
+                button_id: 2,
+                press_kind: ButtonPressKind::Single,
+                available_actions: COMMON_ACTIONS,
+                disable_mode: ButtonDisableMode::NotDisablable,
+            },
+        ],
+    };
 
 #[derive(IntoStaticStr, VariantArray)]
 #[allow(clippy::enum_variant_names)]
