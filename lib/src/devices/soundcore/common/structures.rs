@@ -4,7 +4,6 @@ mod ambient_sound_mode_cycle;
 mod auto_power_off;
 mod basic_hear_id;
 mod battery;
-mod button_configuration;
 // mod is public rather than pub use to avoid naming conflicts with button_configuration
 pub mod button_configuration_v2;
 mod custom_hear_id;
@@ -28,7 +27,6 @@ pub use ambient_sound_mode_cycle::*;
 pub use auto_power_off::*;
 pub use basic_hear_id::*;
 pub use battery::*;
-pub use button_configuration::*;
 pub use custom_hear_id::*;
 pub use custom_noise_canceling::*;
 pub use equalizer_configuration::*;

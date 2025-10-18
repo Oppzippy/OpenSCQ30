@@ -41,8 +41,8 @@ use super::{
     },
     structures::{
         AgeRange, AmbientSoundModeCycle, BasicHearId, CustomHearId, DualBattery,
-        DualFirmwareVersion, EqualizerConfiguration, FirmwareVersion, Gender,
-        MultiButtonConfiguration, SerialNumber, SingleBattery, SoundModes, TwsStatus,
+        DualFirmwareVersion, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
+        SingleBattery, SoundModes, TwsStatus,
     },
 };
 
@@ -294,14 +294,6 @@ where
                 self.change_notify.clone(),
             )
             .await;
-    }
-
-    pub fn button_configuration(&mut self)
-    where
-        StateType: Has<MultiButtonConfiguration> + Has<TwsStatus>,
-    {
-        self.module_collection
-            .add_button_configuration(self.packet_io_controller.clone());
     }
 
     pub fn button_configuration_v2<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize>(

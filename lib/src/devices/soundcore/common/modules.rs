@@ -19,7 +19,6 @@ use super::{
 
 pub mod ambient_sound_mode_cycle;
 mod auto_power_off;
-pub mod button_configuration;
 pub mod button_configuration_v2;
 pub mod dual_battery;
 pub mod equalizer;
