@@ -50,7 +50,7 @@
                 <p>Fixes</p>
                 <ul>
                     <li>Add missing mac address prefix 88:0E:85</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="1.19.2" date="2025-02-09">
@@ -59,7 +59,7 @@
                 <ul>
                     <li>A3936 packet parsing issues</li>
                     <li>Connection issues on Windows when a device is paired with multiple bluetooth adapters</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="1.19.1" date="2025-01-11">
@@ -67,20 +67,16 @@
                 <p>Fixes</p>
                 <ul>
                     <li>Fix newer Life Q30's failing to connect due to parsing error</li>
-                </ul> 
+                </ul>
             </description>
         </release>
-        <release version="1.19.0" date="2025-01-10">
-            <description>
- 
-            </description>
-        </release>
+        <release version="1.19.0" date="2025-01-10" />
         <release version="1.18.1" date="2025-01-10">
             <description>
                 <p>Fixes</p>
                 <ul>
                     <li>Fix serial number not being retrieved for some devices, leading to quick presets not working</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="1.18.0" date="2025-01-08">
@@ -92,7 +88,7 @@
                     <li>Space A40 (A3936) button action packet serialization mistake</li>
                     <li>State update packet parse error when the right earbud is the TWS host device</li>
                     <li>Connect using BR/EDR instead of BLE. All Soundcore devices support BR/EDR, but only some support BLE.</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="1.17.0" date="2024-12-16" />
