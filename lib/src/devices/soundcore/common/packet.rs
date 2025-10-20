@@ -9,10 +9,10 @@ pub use packet_io_controller::*;
 
 use nom::{
     IResult, Parser,
-    bytes::take,
+    bytes::streaming::take,
     combinator::{map, map_opt},
     error::{ContextError, ParseError, context},
-    number::complete::{le_u8, le_u16},
+    number::streaming::{le_u8, le_u16},
 };
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Default, Hash)]
@@ -47,10 +47,11 @@ impl Packet {
         bytes
     }
 
+    /// This makes use of nom's streaming parsers, so Err::Incomplete will be returned if the packet
+    /// is not done being read yet.
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
+        full_input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
-        let full_input = input;
         let (input, (direction, command, length)) = context(
             "header",
             (
@@ -59,13 +60,14 @@ impl Packet {
                 context("packet length", le_u16),
             ),
         )
-        .parse_complete(input)?;
+        .parse_complete(full_input)?;
         let body_length = length.saturating_sub(10); // 5 byte direction, 2 byte command, 2 byte length, 1 byte checksum
         let (input, body) = context("body", take(body_length)).parse_complete(input)?;
+        let header_and_body = &full_input[..full_input.len() - input.len()];
         let (input, _checksum) = context(
             "checksum",
             map_opt(le_u8, |checksum| {
-                if checksum == checksum::calculate_checksum(&full_input[0..full_input.len() - 1]) {
+                if checksum == checksum::calculate_checksum(header_and_body) {
                     Some(checksum)
                 } else {
                     None

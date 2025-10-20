@@ -5,7 +5,7 @@ use tokio::{
     sync::{mpsc, watch},
     task::JoinHandle,
 };
-use tracing::trace;
+use tracing::{Instrument, info_span, trace};
 
 use crate::{
     api::{
@@ -59,24 +59,42 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
     ) -> (JoinHandle<()>, mpsc::Receiver<Packet>) {
         let (outgoing_sender, outgoing_receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
-            while let Some(bytes) = incoming_receiver.recv().await {
-                let (_remainder, packet) = match Packet::take::<VerboseError<_>>(&bytes) {
-                    Ok(parsed) => parsed,
-                    Err(err) => {
-                        tracing::warn!("failed to parse packet: {err:?}");
-                        continue;
-                    }
-                };
-                if !packet_queues.pop(&packet.command, packet.clone()) {
-                    match outgoing_sender.send(packet).await {
-                        Ok(()) => (),
-                        Err(err) => tracing::debug!(
-                            "received packet that wasn't an ok, but the channel is closed, so it won't be forwarded: {err:?}"
-                        ),
+            let mut buffer = Vec::<u8>::new();
+            while let Some(mut bytes) = incoming_receiver.recv().await {
+                buffer.extend_from_slice(&bytes);
+                let mut start_index = 0;
+                while start_index < buffer.len() {
+                    let (remainder, packet) =
+                        match Packet::take::<VerboseError<_>>(&buffer[start_index..]) {
+                            Ok(parsed) => parsed,
+                            Err(nom::Err::Incomplete(_)) => break,
+                            Err(err) => {
+                                tracing::warn!("failed to parse packet: {err:?}");
+                                tracing::warn!("clearing buffer: {buffer:?}");
+                                buffer.clear();
+                                break;
+                            }
+                        };
+
+                    tracing::debug!("received packet {packet:?}");
+                    let packet_length = buffer.len() - start_index - remainder.len();
+                    start_index += packet_length;
+
+                    if !packet_queues.pop(&packet.command, packet.clone()) {
+                        match outgoing_sender.send(packet).await {
+                            Ok(()) => (),
+                            Err(err) => tracing::debug!(
+                                "received packet that wasn't an ok, but the channel is closed, so it won't be forwarded: {err:?}"
+                            ),
+                        }
                     }
                 }
+                // Reuse bytes allocation for new buffer containing the remaining partial packet
+                bytes.clear();
+                bytes.extend_from_slice(&buffer[start_index..]);
+                buffer = bytes;
             }
-        });
+        }.instrument(info_span!("packet handler")));
         (handle, outgoing_receiver)
     }
 
@@ -116,7 +134,7 @@ mod tests {
     use crate::{
         api::connection::test_stub::StubRfcommConnection,
         devices::soundcore::common::packet::{
-            Direction,
+            self, Direction,
             outbound::{OutboundPacket, SetAmbientSoundModeCycle, SetSoundModes},
         },
     };
@@ -231,5 +249,74 @@ mod tests {
             .unwrap();
         tokio::time::sleep(Duration::from_millis(1)).await;
         assert!(handle1.is_finished());
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn test_fragmented_packet() {
+        let (connection, sender, _receiver) = StubRfcommConnection::new();
+        let packet_io = Arc::new(
+            PacketIOController::new(Arc::new(connection))
+                .await
+                .unwrap()
+                .0,
+        );
+
+        tokio::spawn(async move {
+            tokio::time::sleep(Duration::from_millis(50)).await;
+            for byte in [0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x81, 0x0a, 0x00, 0x9a] {
+                sender.send(vec![byte]).await.unwrap();
+            }
+        });
+        packet_io
+            .send_with_response(&packet::outbound::SetSoundModes::default().into())
+            .await
+            .expect("we should receive the fragmented ACK packet");
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn test_merged_packets() {
+        let (connection, sender, _receiver) = StubRfcommConnection::new();
+        let packet_io = Arc::new(
+            PacketIOController::new(Arc::new(connection))
+                .await
+                .unwrap()
+                .0,
+        );
+
+        let set_sound_modes: Packet = packet::outbound::SetSoundModes::default().into();
+        let set_sound_modes_ack = Packet {
+            direction: Direction::Inbound,
+            command: set_sound_modes.command,
+            body: Vec::new(),
+        };
+        let set_ambient_sound_mode_cycle: Packet =
+            packet::outbound::SetAmbientSoundModeCycle::default().into();
+        let set_ambient_sound_mode_cycle_ack = Packet {
+            direction: Direction::Inbound,
+            command: set_ambient_sound_mode_cycle.command,
+            body: Vec::new(),
+        };
+
+        tokio::spawn(async move {
+            tokio::time::sleep(Duration::from_millis(50)).await;
+            let mut data = set_sound_modes_ack.bytes();
+            data.extend_from_slice(&set_ambient_sound_mode_cycle_ack.bytes());
+            data.extend_from_slice(&set_sound_modes_ack.bytes());
+            sender.send(data).await.unwrap();
+        });
+
+        let (
+            set_sound_modes_result_1,
+            set_ambient_sound_mode_cycle_result,
+            set_sound_modes_result_2,
+        ) = tokio::join!(
+            packet_io.send_with_response(&set_sound_modes),
+            packet_io.send_with_response(&set_ambient_sound_mode_cycle),
+            packet_io.send_with_response(&set_sound_modes),
+        );
+        set_sound_modes_result_1.expect("first set sound modes ack should be received");
+        set_ambient_sound_mode_cycle_result
+            .expect("set ambient sound mode cycle ack should be received");
+        set_sound_modes_result_2.expect("second set sound modes ack should be received");
     }
 }
