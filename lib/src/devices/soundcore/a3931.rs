@@ -66,7 +66,7 @@ soundcore_device!(
                 NoiseCancelingMode::Indoor,
             ],
         });
-        builder.equalizer_with_drc().await;
+        builder.equalizer_with_drc_tws().await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.touch_tone();

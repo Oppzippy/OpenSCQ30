@@ -248,6 +248,20 @@ where
             .await;
     }
 
+    pub async fn equalizer_tws<const C: usize, const B: usize>(&mut self)
+    where
+        StateType: Has<EqualizerConfiguration<C, B>> + Has<TwsStatus>,
+    {
+        self.module_collection
+            .add_equalizer_tws(
+                self.packet_io_controller.clone(),
+                self.database.clone(),
+                self.device_model,
+                self.change_notify.clone(),
+            )
+            .await;
+    }
+
     pub async fn equalizer_with_drc<const C: usize, const B: usize>(&mut self)
     where
         StateType: Has<EqualizerConfiguration<C, B>>,
@@ -262,15 +276,12 @@ where
             .await;
     }
 
-    pub async fn equalizer_with_basic_hear_id<const C: usize, const B: usize>(&mut self)
+    pub async fn equalizer_with_drc_tws<const C: usize, const B: usize>(&mut self)
     where
-        StateType: Has<EqualizerConfiguration<C, B>>
-            + Has<BasicHearId<C, B>>
-            + Has<Gender>
-            + Has<AgeRange>,
+        StateType: Has<EqualizerConfiguration<C, B>> + Has<TwsStatus>,
     {
         self.module_collection
-            .add_equalizer_with_basic_hear_id(
+            .add_equalizer_with_drc_tws(
                 self.packet_io_controller.clone(),
                 self.database.clone(),
                 self.device_model,
@@ -279,15 +290,34 @@ where
             .await;
     }
 
-    pub async fn equalizer_with_custom_hear_id<const C: usize, const B: usize>(&mut self)
+    pub async fn equalizer_with_basic_hear_id_tws<const C: usize, const B: usize>(&mut self)
     where
         StateType: Has<EqualizerConfiguration<C, B>>
+            + Has<TwsStatus>
+            + Has<BasicHearId<C, B>>
+            + Has<Gender>
+            + Has<AgeRange>,
+    {
+        self.module_collection
+            .add_equalizer_with_basic_hear_id_tws(
+                self.packet_io_controller.clone(),
+                self.database.clone(),
+                self.device_model,
+                self.change_notify.clone(),
+            )
+            .await;
+    }
+
+    pub async fn equalizer_with_custom_hear_id_tws<const C: usize, const B: usize>(&mut self)
+    where
+        StateType: Has<EqualizerConfiguration<C, B>>
+            + Has<TwsStatus>
             + Has<CustomHearId<C, B>>
             + Has<Gender>
             + Has<AgeRange>,
     {
         self.module_collection
-            .add_equalizer_with_custom_hear_id(
+            .add_equalizer_with_custom_hear_id_tws(
                 self.packet_io_controller.clone(),
                 self.database.clone(),
                 self.device_model,

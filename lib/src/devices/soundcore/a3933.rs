@@ -40,7 +40,7 @@ soundcore_device!(
                 NoiseCancelingMode::Outdoor,
             ],
         });
-        builder.equalizer().await;
+        builder.equalizer_tws().await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.ambient_sound_mode_cycle();
         builder.touch_tone();
@@ -80,8 +80,8 @@ mod tests {
             direction: Direction::Inbound,
             command: packet::inbound::STATE_COMMAND,
             body: vec![
-                0x01, // host device
-                0x00, // tws status
+                0x00, // host device
+                0x01, // tws status
                 0x00, 0x00, 0x00, 0x00, // dual battery
                 b'0', b'0', b'.', b'0', b'0', // left firmware version
                 b'0', b'0', b'.', b'0', b'0', // right firmware version

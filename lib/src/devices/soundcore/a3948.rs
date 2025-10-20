@@ -28,7 +28,7 @@ soundcore_device!(
     },
     async |builder| {
         builder.module_collection().add_state_update();
-        builder.equalizer_with_drc().await;
+        builder.equalizer_with_drc_tws().await;
 
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
 

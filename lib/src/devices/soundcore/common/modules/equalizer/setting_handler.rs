@@ -11,24 +11,34 @@ use crate::{
     devices::soundcore::common::{
         modules::equalizer::custom_equalizer_profile_store::CustomEqualizerProfileStore,
         settings_manager::{SettingHandler, SettingHandlerResult},
-        structures::{EqualizerConfiguration, VolumeAdjustments},
+        structures::{EqualizerConfiguration, TwsStatus, VolumeAdjustments},
     },
 };
 
 use super::EqualizerSetting;
 
-pub struct EqualizerSettingHandler<const C: usize, const B: usize> {
+pub struct EqualizerSettingHandler<T, const C: usize, const B: usize> {
     profile_store: Arc<CustomEqualizerProfileStore>,
     custom_profiles_receiver: watch::Receiver<Vec<(String, Vec<i16>)>>,
+    get_tws_status: Option<fn(&T) -> TwsStatus>,
 }
 
-impl<const C: usize, const B: usize> EqualizerSettingHandler<C, B> {
+impl<T, const C: usize, const B: usize> EqualizerSettingHandler<T, C, B> {
     #[instrument(skip(profile_store))]
-    pub async fn new(profile_store: Arc<CustomEqualizerProfileStore>) -> Self {
+    pub fn new(profile_store: Arc<CustomEqualizerProfileStore>) -> Self {
         Self {
             custom_profiles_receiver: profile_store.subscribe(),
             profile_store,
+            get_tws_status: None,
         }
+    }
+
+    pub fn with_tws(mut self) -> Self
+    where
+        T: Has<TwsStatus>,
+    {
+        self.get_tws_status = Some(|state| *state.get());
+        self
     }
 
     fn values_to_volume_adjustments(
@@ -51,7 +61,7 @@ impl<const C: usize, const B: usize> EqualizerSettingHandler<C, B> {
 }
 
 #[async_trait]
-impl<T, const C: usize, const B: usize> SettingHandler<T> for EqualizerSettingHandler<C, B>
+impl<T, const C: usize, const B: usize> SettingHandler<T> for EqualizerSettingHandler<T, C, B>
 where
     T: Has<EqualizerConfiguration<C, B>> + Send,
 {
@@ -60,6 +70,14 @@ where
     }
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<crate::api::settings::Setting> {
+        // TODO display as a read only setting. When TWS is disconnected, the equalizer configuration can be read
+        // but not written.
+        if let Some(get_tws_status) = self.get_tws_status
+            && !get_tws_status(state).is_connected
+        {
+            return None;
+        }
+
         let equalizer_configuration = state.get();
         let setting = (*setting_id).try_into().ok()?;
         Some(match setting {
@@ -119,6 +137,13 @@ where
         setting_id: &SettingId,
         value: Value,
     ) -> SettingHandlerResult<()> {
+        // We can't modify the equalizer configuration while TWS is disconnected
+        if let Some(get_tws_status) = self.get_tws_status
+            && !get_tws_status(state).is_connected
+        {
+            return Ok(());
+        }
+
         let equalizer_configuration = state.get_mut();
         let setting = (*setting_id)
             .try_into()

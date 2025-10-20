@@ -36,7 +36,7 @@ soundcore_device!(
     async |builder| {
         builder.module_collection().add_state_update();
         builder.a3936_sound_modes();
-        builder.equalizer_with_custom_hear_id().await;
+        builder.equalizer_with_custom_hear_id_tws().await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.ambient_sound_mode_cycle();
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);

@@ -10,10 +10,19 @@ use strum::{Display, FromRepr};
 
 use crate::devices::soundcore::common::packet::parsing::take_bool;
 
-#[derive(Debug, Clone, PartialEq, Eq, Copy, PartialOrd, Ord, Hash, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Copy, PartialOrd, Ord, Hash)]
 pub struct TwsStatus {
     pub is_connected: bool,
     pub host_device: HostDevice,
+}
+
+impl Default for TwsStatus {
+    fn default() -> Self {
+        Self {
+            is_connected: true,
+            host_device: Default::default(),
+        }
+    }
 }
 
 impl TwsStatus {

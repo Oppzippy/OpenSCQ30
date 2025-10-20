@@ -54,7 +54,7 @@ soundcore_device!(
                 NoiseCancelingMode::Custom,
             ],
         });
-        builder.equalizer_with_custom_hear_id().await;
+        builder.equalizer_with_custom_hear_id_tws().await;
         builder.button_configuration(&BUTTON_SETTINGS);
         builder.touch_tone();
         builder.tws_status();

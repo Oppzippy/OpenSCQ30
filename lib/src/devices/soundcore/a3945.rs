@@ -28,7 +28,7 @@ soundcore_device!(
     },
     async |builder| {
         builder.module_collection().add_state_update();
-        builder.equalizer().await;
+        builder.equalizer_tws().await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.touch_tone();
         builder.tws_status();
@@ -111,8 +111,8 @@ mod tests {
             direction: Direction::Inbound,
             command: packet::inbound::STATE_COMMAND,
             body: vec![
-                0x01, // host device
-                0x00, // tws status
+                0x00, // host device
+                0x01, // tws status
                 0x00, 0x00, 0x00, 0x00, // dual battery
                 b'0', b'0', b'.', b'0', b'0', // left firmware version
                 b'0', b'0', b'.', b'0', b'0', // right firmware version

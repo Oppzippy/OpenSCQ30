@@ -39,7 +39,7 @@ struct ExportedCustomProfile<'a> {
 
 impl<const C: usize, const B: usize> ImportExportSettingHandler<C, B> {
     #[instrument(skip(profile_store))]
-    pub async fn new(
+    pub fn new(
         profile_store: Arc<CustomEqualizerProfileStore>,
         change_notify: watch::Sender<()>,
     ) -> Self {

@@ -56,7 +56,7 @@ soundcore_device!(
                 NoiseCancelingMode::Outdoor,
             ],
         });
-        builder.equalizer().await;
+        builder.equalizer_tws().await;
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.touch_tone();
         builder.tws_status();

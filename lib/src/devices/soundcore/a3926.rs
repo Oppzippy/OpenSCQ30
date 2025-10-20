@@ -48,7 +48,7 @@ soundcore_device!(
         //         NoiseCancelingMode::Outdoor,
         //     ],
         // });
-        builder.equalizer_with_basic_hear_id().await;
+        builder.equalizer_with_basic_hear_id_tws().await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.tws_status();
         builder.dual_battery(5);
