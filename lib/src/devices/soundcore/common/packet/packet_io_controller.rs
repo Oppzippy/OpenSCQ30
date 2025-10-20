@@ -141,7 +141,7 @@ mod tests {
 
     use super::*;
 
-    #[tokio::test]
+    #[tokio::test(start_paused = true)]
     async fn test_send_multiple() {
         let (connection, sender, _receiver) = StubRfcommConnection::new();
         let controller = Arc::new(
@@ -193,7 +193,7 @@ mod tests {
         assert!(handle2.is_finished());
     }
 
-    #[tokio::test]
+    #[tokio::test(start_paused = true)]
     async fn test_out_of_order_responses() {
         let (connection, sender, _receiver) = StubRfcommConnection::new();
         let controller = Arc::new(
@@ -318,5 +318,35 @@ mod tests {
         set_ambient_sound_mode_cycle_result
             .expect("set ambient sound mode cycle ack should be received");
         set_sound_modes_result_2.expect("second set sound modes ack should be received");
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn test_garbage_data_recovery() {
+        let (connection, sender, _receiver) = StubRfcommConnection::new();
+        let packet_io = Arc::new(
+            PacketIOController::new(Arc::new(connection))
+                .await
+                .unwrap()
+                .0,
+        );
+
+        let set_sound_modes: Packet = packet::outbound::SetSoundModes::default().into();
+        let set_sound_modes_ack = Packet {
+            direction: Direction::Inbound,
+            command: set_sound_modes.command,
+            body: Vec::new(),
+        };
+
+        tokio::spawn(async move {
+            tokio::time::sleep(Duration::from_millis(50)).await;
+            sender.send(vec![0; 100]).await.unwrap(); // garbage data
+            // not enough time has passed to recover
+            sender.send(set_sound_modes_ack.bytes()).await.unwrap();
+        });
+
+        packet_io
+            .send_with_response(&set_sound_modes)
+            .await
+            .expect("we should recover from garbage data being sent and receive the ack");
     }
 }
