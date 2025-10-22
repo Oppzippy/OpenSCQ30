@@ -4,9 +4,12 @@ use nom::{
     error::{ContextError, ParseError, context},
 };
 
-use crate::devices::soundcore::common::{packet::Command, structures::BatteryLevel};
+use crate::devices::soundcore::common::{
+    packet::{self, Command},
+    structures::BatteryLevel,
+};
 
-use super::InboundPacket;
+use super::FromPacketBody;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct SingleBatteryLevel {
@@ -17,7 +20,9 @@ impl SingleBatteryLevel {
     pub const COMMAND: Command = Command([0x01, 0x03]);
 }
 
-impl InboundPacket for SingleBatteryLevel {
+impl FromPacketBody for SingleBatteryLevel {
+    type DirectionMarker = packet::InboundMarker;
+
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
@@ -39,7 +44,9 @@ impl DualBatteryLevel {
     pub const COMMAND: Command = Command([0x01, 0x03]);
 }
 
-impl InboundPacket for DualBatteryLevel {
+impl FromPacketBody for DualBatteryLevel {
+    type DirectionMarker = packet::InboundMarker;
+
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
@@ -64,7 +71,7 @@ impl InboundPacket for DualBatteryLevel {
 mod tests {
     use nom_language::error::VerboseError;
 
-    use crate::devices::soundcore::common::packet::Packet;
+    use crate::devices::soundcore::common::packet;
 
     use super::*;
 
@@ -73,7 +80,7 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x03, 0x0c, 0x00, 0x03, 0x04, 0x20,
         ];
-        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
         let packet = DualBatteryLevel::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1;
@@ -86,7 +93,7 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x03, 0x0e, 0x00, 0x04, 0x05, 0x01, 0x02, 0x27,
         ];
-        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
         let packet = DualBatteryLevel::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1;
@@ -99,7 +106,7 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x03, 0x0b, 0x00, 0x02, 0x1a,
         ];
-        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
         let packet = SingleBatteryLevel::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1;

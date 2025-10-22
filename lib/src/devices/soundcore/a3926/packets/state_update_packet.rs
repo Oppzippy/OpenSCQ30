@@ -13,9 +13,9 @@ use crate::{
         common::{
             modules::ModuleCollection,
             packet::{
-                self, Command, Packet,
-                inbound::{InboundPacket, TryIntoInboundPacket},
-                outbound::OutboundPacket,
+                self, Command,
+                inbound::{FromPacketBody, TryIntoPacket},
+                outbound::IntoPacket,
             },
             packet_manager::PacketHandler,
             structures::{
@@ -52,7 +52,9 @@ impl Default for A3926StateUpdatePacket {
     }
 }
 
-impl InboundPacket for A3926StateUpdatePacket {
+impl FromPacketBody for A3926StateUpdatePacket {
+    type DirectionMarker = packet::InboundMarker;
+
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
@@ -95,10 +97,8 @@ impl InboundPacket for A3926StateUpdatePacket {
     }
 }
 
-impl OutboundPacket for A3926StateUpdatePacket {
-    fn direction(&self) -> packet::Direction {
-        packet::Direction::Inbound
-    }
+impl IntoPacket for A3926StateUpdatePacket {
+    type DirectionMarker = packet::InboundMarker;
 
     fn command(&self) -> Command {
         packet::inbound::STATE_COMMAND
@@ -132,9 +132,9 @@ impl PacketHandler<A3926State> for StateUpdatePacketHandler {
     async fn handle_packet(
         &self,
         state: &watch::Sender<A3926State>,
-        packet: &Packet,
+        packet: &packet::Inbound,
     ) -> device::Result<()> {
-        let packet: A3926StateUpdatePacket = packet.try_into_inbound_packet()?;
+        let packet: A3926StateUpdatePacket = packet.try_into_packet()?;
         state.send_modify(|state| state.update_from_state_update_packet(packet));
         Ok(())
     }
@@ -153,16 +153,14 @@ impl ModuleCollection<A3926State> {
 mod tests {
     use nom_language::error::VerboseError;
 
-    use crate::devices::soundcore::common::packet::{
-        inbound::TryIntoInboundPacket, outbound::OutboundPacketBytesExt,
-    };
+    use crate::devices::soundcore::common::packet::inbound::TryIntoPacket;
 
     use super::*;
 
     #[test]
     fn serialize_and_deserialize() {
-        let bytes = A3926StateUpdatePacket::default().bytes();
-        let (_, packet) = Packet::take::<VerboseError<_>>(&bytes).unwrap();
-        let _: A3926StateUpdatePacket = packet.try_into_inbound_packet().unwrap();
+        let bytes = A3926StateUpdatePacket::default().into_packet().bytes();
+        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(&bytes).unwrap();
+        let _: A3926StateUpdatePacket = packet.try_into_packet().unwrap();
     }
 }

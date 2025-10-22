@@ -12,17 +12,17 @@ use crate::{
         connection::{ConnectionStatus, RfcommConnection},
         device,
     },
-    devices::soundcore::common::packet::Command,
+    devices::soundcore::common::packet::{self, Command},
 };
 
-use super::{Packet, multi_queue::MultiQueue};
+use super::multi_queue::MultiQueue;
 
 pub struct PacketIOController<ConnectionType>
 where
     ConnectionType: RfcommConnection,
 {
     connection: Arc<ConnectionType>,
-    packet_queues: Arc<MultiQueue<Command, Packet>>,
+    packet_queues: Arc<MultiQueue<Command, packet::Inbound>>,
     handle: JoinHandle<()>,
 }
 
@@ -38,7 +38,7 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
     /// that weren't a result of send_with_response will be forwarded to.
     pub async fn new(
         connection: Arc<ConnectionType>,
-    ) -> device::Result<(Self, mpsc::Receiver<Packet>)> {
+    ) -> device::Result<(Self, mpsc::Receiver<packet::Inbound>)> {
         let packet_queues = Arc::new(MultiQueue::new());
         let incoming_receiver = connection.read_channel();
         let (handle, outgoing_receiver) =
@@ -54,9 +54,9 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
     }
 
     fn spawn_packet_handler(
-        packet_queues: Arc<MultiQueue<Command, Packet>>,
+        packet_queues: Arc<MultiQueue<Command, packet::Inbound>>,
         mut incoming_receiver: mpsc::Receiver<Vec<u8>>,
-    ) -> (JoinHandle<()>, mpsc::Receiver<Packet>) {
+    ) -> (JoinHandle<()>, mpsc::Receiver<packet::Inbound>) {
         let (outgoing_sender, outgoing_receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
             let mut buffer = Vec::<u8>::new();
@@ -65,7 +65,7 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
                 let mut start_index = 0;
                 while start_index < buffer.len() {
                     let (remainder, packet) =
-                        match Packet::take::<VerboseError<_>>(&buffer[start_index..]) {
+                        match packet::Inbound::take::<VerboseError<_>>(&buffer[start_index..]) {
                             Ok(parsed) => parsed,
                             Err(nom::Err::Incomplete(_)) => break,
                             Err(err) => {
@@ -102,7 +102,10 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
         self.connection.connection_status()
     }
 
-    pub async fn send_with_response(&self, packet: &Packet) -> device::Result<Packet> {
+    pub async fn send_with_response(
+        &self,
+        packet: &packet::Outbound,
+    ) -> device::Result<packet::Inbound> {
         let queue_key = packet.command;
         let handle = self.packet_queues.add(queue_key);
 
@@ -134,8 +137,8 @@ mod tests {
     use crate::{
         api::connection::test_stub::StubRfcommConnection,
         devices::soundcore::common::packet::{
-            self, Direction,
-            outbound::{OutboundPacket, SetAmbientSoundModeCycle, SetSoundModes},
+            self,
+            outbound::{IntoPacket, SetAmbientSoundModeCycle, SetSoundModes},
         },
     };
 
@@ -155,7 +158,7 @@ mod tests {
             let controller = controller.clone();
             async move {
                 controller
-                    .send_with_response(&SetSoundModes::default().into())
+                    .send_with_response(&SetSoundModes::default().into_packet())
                     .await
                     .expect("should receive ack");
             }
@@ -164,7 +167,7 @@ mod tests {
             let controller = controller.clone();
             async move {
                 controller
-                    .send_with_response(&SetSoundModes::default().into())
+                    .send_with_response(&SetSoundModes::default().into_packet())
                     .await
                     .expect("should receive ack");
             }
@@ -203,12 +206,13 @@ mod tests {
                 .0,
         );
 
-        let set_cycle_packet = SetAmbientSoundModeCycle::default();
+        let set_cycle_packet = SetAmbientSoundModeCycle::default().into_packet();
+        let set_cycle_ack = set_cycle_packet.ack();
         let handle1 = tokio::spawn({
             let controller = controller.clone();
             async move {
                 controller
-                    .send_with_response(&set_cycle_packet.into())
+                    .send_with_response(&set_cycle_packet)
                     .await
                     .expect("should receive ack");
             }
@@ -217,7 +221,7 @@ mod tests {
             let controller = controller.clone();
             async move {
                 controller
-                    .send_with_response(&SetSoundModes::default().into())
+                    .send_with_response(&SetSoundModes::default().into_packet())
                     .await
                     .expect("should receive ack");
             }
@@ -236,17 +240,7 @@ mod tests {
         assert!(!handle1.is_finished());
         assert!(handle2.is_finished());
 
-        sender
-            .send(
-                Packet {
-                    direction: Direction::Inbound,
-                    command: set_cycle_packet.command(),
-                    body: Vec::new(),
-                }
-                .bytes(),
-            )
-            .await
-            .unwrap();
+        sender.send(set_cycle_ack.bytes()).await.unwrap();
         tokio::time::sleep(Duration::from_millis(1)).await;
         assert!(handle1.is_finished());
     }
@@ -268,7 +262,7 @@ mod tests {
             }
         });
         packet_io
-            .send_with_response(&packet::outbound::SetSoundModes::default().into())
+            .send_with_response(&packet::outbound::SetSoundModes::default().into_packet())
             .await
             .expect("we should receive the fragmented ACK packet");
     }
@@ -283,19 +277,12 @@ mod tests {
                 .0,
         );
 
-        let set_sound_modes: Packet = packet::outbound::SetSoundModes::default().into();
-        let set_sound_modes_ack = Packet {
-            direction: Direction::Inbound,
-            command: set_sound_modes.command,
-            body: Vec::new(),
-        };
-        let set_ambient_sound_mode_cycle: Packet =
-            packet::outbound::SetAmbientSoundModeCycle::default().into();
-        let set_ambient_sound_mode_cycle_ack = Packet {
-            direction: Direction::Inbound,
-            command: set_ambient_sound_mode_cycle.command,
-            body: Vec::new(),
-        };
+        let set_sound_modes: packet::Outbound =
+            packet::outbound::SetSoundModes::default().into_packet();
+        let set_sound_modes_ack = set_sound_modes.ack();
+        let set_ambient_sound_mode_cycle: packet::Outbound =
+            packet::outbound::SetAmbientSoundModeCycle::default().into_packet();
+        let set_ambient_sound_mode_cycle_ack = set_ambient_sound_mode_cycle.ack();
 
         tokio::spawn(async move {
             tokio::time::sleep(Duration::from_millis(50)).await;
@@ -330,12 +317,9 @@ mod tests {
                 .0,
         );
 
-        let set_sound_modes: Packet = packet::outbound::SetSoundModes::default().into();
-        let set_sound_modes_ack = Packet {
-            direction: Direction::Inbound,
-            command: set_sound_modes.command,
-            body: Vec::new(),
-        };
+        let set_sound_modes: packet::Outbound =
+            packet::outbound::SetSoundModes::default().into_packet();
+        let set_sound_modes_ack = set_sound_modes.ack();
 
         tokio::spawn(async move {
             tokio::time::sleep(Duration::from_millis(50)).await;

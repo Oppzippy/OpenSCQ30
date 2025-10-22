@@ -12,7 +12,7 @@ use crate::{
             modules::button_configuration::{
                 ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_ACTIONS,
             },
-            packet::outbound::{OutboundPacketBytesExt, RequestState},
+            packet::outbound::{IntoPacket, RequestState},
             structures::button_configuration::{
                 ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
             },
@@ -48,7 +48,7 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            A3936StateUpdatePacket::default().bytes(),
+            A3936StateUpdatePacket::default().into_packet().bytes(),
         )])
     },
 );

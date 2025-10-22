@@ -5,46 +5,52 @@ pub mod outbound;
 mod packet_io_controller;
 pub mod parsing;
 
+use std::marker::PhantomData;
+
 pub use packet_io_controller::*;
 
 use nom::{
     IResult, Parser,
-    bytes::streaming::take,
+    bytes::streaming::{tag, take},
     combinator::{map, map_opt},
     error::{ContextError, ParseError, context},
     number::streaming::{le_u8, le_u16},
 };
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Default, Hash)]
-pub struct Packet {
-    pub direction: Direction,
-    pub command: Command,
-    pub body: Vec<u8>,
+pub struct InboundMarker;
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Default, Hash)]
+pub struct OutboundMarker;
+pub trait HasDirection {
+    const DIRECTION: Direction;
+    type ReverseDirection: HasDirection;
+}
+impl HasDirection for InboundMarker {
+    const DIRECTION: Direction = Direction::Inbound;
+    type ReverseDirection = OutboundMarker;
+}
+impl HasDirection for OutboundMarker {
+    const DIRECTION: Direction = Direction::Outbound;
+    type ReverseDirection = InboundMarker;
 }
 
-impl Packet {
-    pub fn bytes(&self) -> Vec<u8> {
-        let direction_indicator = self.direction.bytes();
-        let command = self.command.0;
-        let body = &self.body;
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Default, Hash)]
+pub struct Packet<D> {
+    pub command: Command,
+    pub body: Vec<u8>,
+    _d: PhantomData<D>,
+}
 
-        const PACKET_SIZE_LENGTH: usize = 2;
-        const CHECKSUM_LENGTH: usize = 1;
-        let length = direction_indicator.len()
-            + command.len()
-            + PACKET_SIZE_LENGTH
-            + body.len()
-            + CHECKSUM_LENGTH;
+pub type Inbound = Packet<InboundMarker>;
+pub type Outbound = Packet<OutboundMarker>;
 
-        let mut bytes = direction_indicator
-            .into_iter()
-            .chain(command)
-            .chain((length as u16).to_le_bytes())
-            .chain(body.iter().copied())
-            .collect::<Vec<_>>();
-        bytes.push(checksum::calculate_checksum(&bytes));
-
-        bytes
+impl<D: HasDirection> Packet<D> {
+    pub fn new(command: Command, body: Vec<u8>) -> Self {
+        Self {
+            command,
+            body,
+            _d: PhantomData,
+        }
     }
 
     /// This makes use of nom's streaming parsers, so Err::Incomplete will be returned if the packet
@@ -52,17 +58,17 @@ impl Packet {
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         full_input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
-        let (input, (direction, command, length)) = context(
+        let (input, (_direction, command, length)) = context(
             "header",
             (
-                Direction::take,
+                D::DIRECTION.take(),
                 Command::take,
                 context("packet length", le_u16),
             ),
         )
-        .parse_complete(full_input)?;
+        .parse(full_input)?;
         let body_length = length.saturating_sub(10); // 5 byte direction, 2 byte command, 2 byte length, 1 byte checksum
-        let (input, body) = context("body", take(body_length)).parse_complete(input)?;
+        let (input, body) = context("body", take(body_length)).parse(input)?;
         let header_and_body = &full_input[..full_input.len() - input.len()];
         let (input, _checksum) = context(
             "checksum",
@@ -74,15 +80,36 @@ impl Packet {
                 }
             }),
         )
-        .parse_complete(input)?;
-        Ok((
-            input,
-            Self {
-                direction,
-                command,
-                body: body.to_owned(),
-            },
-        ))
+        .parse(input)?;
+        Ok((input, Self::new(command, body.to_vec())))
+    }
+
+    pub fn bytes(&self) -> Vec<u8> {
+        const PACKET_SIZE_LENGTH: usize = 2;
+        const CHECKSUM_LENGTH: usize = 1;
+
+        let direction_indicator = D::DIRECTION.bytes();
+        let command = self.command.0;
+
+        let length = direction_indicator.len()
+            + command.len()
+            + PACKET_SIZE_LENGTH
+            + self.body.len()
+            + CHECKSUM_LENGTH;
+
+        let mut bytes = direction_indicator
+            .into_iter()
+            .chain(command)
+            .chain((length as u16).to_le_bytes())
+            .chain(self.body.iter().copied())
+            .collect::<Vec<_>>();
+        bytes.push(checksum::calculate_checksum(&bytes));
+
+        bytes
+    }
+
+    pub fn ack(&self) -> Packet<D::ReverseDirection> {
+        Packet::new(self.command, Vec::new())
     }
 }
 
@@ -102,21 +129,15 @@ impl Direction {
     }
 
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        context(
-            "packet direction",
-            map_opt(take(5usize), |direction_indicator: &[u8]| {
-                if direction_indicator == Self::Inbound.bytes() {
-                    Some(Self::Inbound)
-                } else if direction_indicator == Self::Outbound.bytes() {
-                    Some(Self::Outbound)
-                } else {
-                    None
-                }
-            }),
-        )
-        .parse_complete(input)
+        self,
+    ) -> impl Fn(&'a [u8]) -> IResult<&'a [u8], Self, E> {
+        move |input| {
+            context(
+                "packet direction",
+                map(tag(self.bytes().as_slice()), |_| self),
+            )
+            .parse(input)
+        }
     }
 }
 
@@ -127,6 +148,11 @@ impl Command {
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
-        context("command", map((le_u8, le_u8), |bytes| Self(bytes.into()))).parse_complete(input)
+        context("command", map((le_u8, le_u8), |bytes| Self(bytes.into()))).parse(input)
+    }
+
+    #[cfg(test)]
+    pub fn ack<D: HasDirection>(self) -> Packet<D> {
+        Packet::<D>::new(self, Vec::new())
     }
 }

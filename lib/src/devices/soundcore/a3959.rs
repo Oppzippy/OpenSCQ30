@@ -10,7 +10,7 @@ use crate::{
         modules::button_configuration::{
             ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_ACTIONS,
         },
-        packet::outbound::{OutboundPacketBytesExt, RequestState},
+        packet::outbound::{IntoPacket, RequestState},
         structures::button_configuration::{
             ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
         },
@@ -47,7 +47,9 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            packets::inbound::A3959State::default().bytes(),
+            packets::inbound::A3959State::default()
+                .into_packet()
+                .bytes(),
         )])
     },
 );
@@ -140,10 +142,7 @@ mod tests {
 
     use crate::{
         DeviceModel,
-        devices::soundcore::common::{
-            device::test_utils::TestSoundcoreDevice,
-            packet::{Command, Direction, Packet},
-        },
+        devices::soundcore::common::{device::test_utils::TestSoundcoreDevice, packet},
         settings::{SettingId, Value},
     };
 
@@ -153,18 +152,17 @@ mod tests {
             super::device_registry,
             DeviceModel::SoundcoreA3959,
             HashMap::from([(
-                Command([1, 1]),
-                Packet {
-                    direction: Direction::Inbound,
-                    command: Command([1, 1]),
-                    body: vec![
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
                         1, 1, 5, 6, 255, 255, 48, 49, 46, 54, 52, 48, 49, 46, 54, 52, 51, 57, 53,
                         57, 68, 69, 68, 54, 54, 57, 50, 68, 66, 54, 70, 52, 254, 254, 101, 120,
                         161, 171, 171, 152, 144, 179, 120, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10,
                         241, 240, 102, 102, 242, 243, 68, 68, 51, 0, 85, 0, 0, 1, 255, 1, 49, 1, 1,
                         0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ],
-                },
+                ),
             )]),
         )
         .await;
@@ -198,18 +196,17 @@ mod tests {
             super::device_registry,
             DeviceModel::SoundcoreA3959,
             HashMap::from([(
-                Command([1, 1]),
-                Packet {
-                    direction: Direction::Inbound,
-                    command: Command([1, 1]),
-                    body: vec![
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
                         1, 0, 5, 6, 255, 255, 48, 49, 46, 54, 52, 48, 49, 46, 54, 52, 51, 57, 53,
                         57, 68, 69, 68, 54, 54, 57, 50, 68, 66, 54, 70, 52, 254, 254, 101, 120,
                         161, 171, 171, 152, 144, 179, 120, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10,
                         241, 240, 102, 102, 242, 243, 68, 68, 51, 0, 85, 0, 0, 1, 255, 1, 49, 1, 1,
                         0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ],
-                },
+                ),
             )]),
         )
         .await;
@@ -233,18 +230,17 @@ mod tests {
             super::device_registry,
             DeviceModel::SoundcoreA3959,
             HashMap::from([(
-                Command([1, 1]),
-                Packet {
-                    direction: Direction::Inbound,
-                    command: Command([1, 1]),
-                    body: vec![
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
                         0, 1, 6, 6, 255, 255, 48, 49, 46, 54, 53, 48, 49, 46, 54, 53, 51, 57, 53,
                         57, 57, 48, 49, 66, 69, 55, 50, 67, 57, 67, 49, 56, 14, 0, 255, 255, 255,
                         255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 255,
                         255, 99, 102, 255, 255, 68, 68, 55, 0, 85, 0, 0, 1, 255, 1, 49, 1, 1, 1, 1,
                         2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ],
-                },
+                ),
             )]),
         )
         .await;
@@ -256,18 +252,17 @@ mod tests {
             super::device_registry,
             DeviceModel::SoundcoreA3959,
             HashMap::from([(
-                Command([1, 1]),
-                Packet {
-                    direction: Direction::Inbound,
-                    command: Command([1, 1]),
-                    body: vec![
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
                         1, 1, 5, 6, 255, 255, 48, 49, 46, 54, 52, 48, 49, 46, 54, 52, 51, 57, 53,
                         57, 68, 69, 68, 54, 54, 57, 50, 68, 66, 54, 70, 52, 254, 254, 101, 120,
                         161, 171, 171, 152, 144, 179, 120, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10,
                         241, 240, 102, 102, 242, 243, 68, 68, 51, 0, 85, 0, 0, 1, 255, 1, 49, 1, 1,
                         0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ],
-                },
+                ),
             )]),
         )
         .await;
@@ -278,16 +273,8 @@ mod tests {
                     (SettingId::RightSinglePress, "VolumeDown".into()),
                 ],
                 vec![
-                    Packet {
-                        direction: Direction::Outbound,
-                        command: Command([0x04, 0x81]),
-                        body: vec![0, 2, 0xF0],
-                    },
-                    Packet {
-                        direction: Direction::Outbound,
-                        command: Command([0x04, 0x81]),
-                        body: vec![1, 2, 0xF1],
-                    },
+                    packet::Outbound::new(packet::Command([0x04, 0x81]), vec![0, 2, 0xF0]),
+                    packet::Outbound::new(packet::Command([0x04, 0x81]), vec![1, 2, 0xF1]),
                 ],
             )
             .await;
@@ -299,18 +286,17 @@ mod tests {
             super::device_registry,
             DeviceModel::SoundcoreA3959,
             HashMap::from([(
-                Command([1, 1]),
-                Packet {
-                    direction: Direction::Inbound,
-                    command: Command([1, 1]),
-                    body: vec![
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
                         1, 1, 0, 9, 255, 255, 48, 49, 46, 54, 52, 48, 49, 46, 54, 52, 51, 57, 53,
                         57, 68, 69, 68, 54, 54, 57, 50, 68, 66, 54, 70, 52, 254, 254, 101, 120,
                         161, 171, 171, 152, 144, 60, 120, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10,
                         241, 240, 102, 102, 242, 243, 68, 68, 51, 0, 0x55, 0, 0, 1, 255, 1, 49, 1,
                         1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     ],
-                },
+                ),
             )]),
         )
         .await;
@@ -321,14 +307,13 @@ mod tests {
                     SettingId::VolumeAdjustments,
                     Value::I16Vec(vec![-19, 0, 41, 51, 51, 32, 13, -35]),
                 )],
-                vec![Packet {
-                    direction: Direction::Outbound,
-                    command: Command([0x2, 0x83]),
-                    body: vec![
+                vec![packet::Outbound::new(
+                    packet::Command([0x2, 0x83]),
+                    vec![
                         254, 254, 101, 120, 161, 171, 171, 152, 133, 85, 120, 120, 118, 119, 124,
                         123, 124, 121, 123, 114, 120, 120,
                     ],
-                }],
+                )],
             )
             .await;
     }

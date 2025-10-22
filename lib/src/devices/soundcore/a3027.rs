@@ -6,7 +6,7 @@ use crate::devices::soundcore::{
         device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
         modules::sound_modes::AvailableSoundModes,
-        packet::outbound::{OutboundPacketBytesExt, RequestState},
+        packet::outbound::{IntoPacket, RequestState},
         structures::{AmbientSoundMode, NoiseCancelingMode},
     },
 };
@@ -43,7 +43,7 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            A3027StateUpdatePacket::default().bytes(),
+            A3027StateUpdatePacket::default().into_packet().bytes(),
         )])
     },
 );

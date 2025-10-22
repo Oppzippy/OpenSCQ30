@@ -4,9 +4,9 @@ use nom::{
     error::{ContextError, ParseError, context},
 };
 
-use crate::devices::soundcore::common::packet::{Command, parsing::take_bool};
+use crate::devices::soundcore::common::packet::{self, Command, parsing::take_bool};
 
-use super::InboundPacket;
+use super::FromPacketBody;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ChineseVoicePrompt {
@@ -18,7 +18,9 @@ impl ChineseVoicePrompt {
     pub const COMMAND: Command = Command([0x01, 0x0F]);
 }
 
-impl InboundPacket for ChineseVoicePrompt {
+impl FromPacketBody for ChineseVoicePrompt {
+    type DirectionMarker = packet::InboundMarker;
+
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
@@ -35,8 +37,8 @@ mod tests {
     use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::common::packet::{
-        Packet,
-        inbound::{ChineseVoicePrompt, InboundPacket},
+        self,
+        inbound::{ChineseVoicePrompt, FromPacketBody},
     };
 
     #[test]
@@ -44,7 +46,7 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x0F, 0x0b, 0x00, 0x01, 0x25,
         ];
-        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
         let packet = ChineseVoicePrompt::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1;

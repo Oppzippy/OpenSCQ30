@@ -7,7 +7,7 @@ use tokio::sync::watch;
 use crate::{
     api::{connection::RfcommConnection, device},
     devices::soundcore::common::{
-        packet::{self, PacketIOController},
+        packet::{self, PacketIOController, outbound::IntoPacket},
         state_modifier::StateModifier,
         structures::{AmbientSoundMode, SoundModes},
     },
@@ -57,7 +57,7 @@ where
                 custom_noise_canceling: sound_modes.custom_noise_canceling,
             };
             self.packet_io
-                .send_with_response(&packet::outbound::SetSoundModes(new_sound_modes).into())
+                .send_with_response(&packet::outbound::SetSoundModes(new_sound_modes).into_packet())
                 .await?;
             state_sender.send_modify(|state| *state.get_mut() = new_sound_modes);
         }
@@ -76,7 +76,7 @@ where
             // If we need to temporarily be in noise canceling mode to work around the bug, set all fields besides
             // ambient_sound_mode. Otherwise, we set all fields in one go.
             self.packet_io
-                .send_with_response(&packet::outbound::SetSoundModes(new_sound_modes).into())
+                .send_with_response(&packet::outbound::SetSoundModes(new_sound_modes).into_packet())
                 .await?;
             state_sender.send_modify(|state| *state.get_mut() = new_sound_modes);
         }
@@ -85,7 +85,9 @@ where
         // If the target sound mode is noise canceling, we already set it to that, so no change needed.
         if needs_ambient_sound_mode_revert {
             self.packet_io
-                .send_with_response(&packet::outbound::SetSoundModes(*target_sound_modes).into())
+                .send_with_response(
+                    &packet::outbound::SetSoundModes(*target_sound_modes).into_packet(),
+                )
                 .await?;
             state_sender.send_modify(|state| *state.get_mut() = *target_sound_modes);
         }

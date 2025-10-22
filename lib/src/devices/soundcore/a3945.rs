@@ -9,7 +9,7 @@ use crate::devices::soundcore::{
             ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings,
             COMMON_ACTIONS_WITHOUT_SOUND_MODES,
         },
-        packet::outbound::{OutboundPacketBytesExt, RequestState},
+        packet::outbound::{IntoPacket, RequestState},
         structures::button_configuration::{
             ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
         },
@@ -38,7 +38,7 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            A3945StateUpdatePacket::default().bytes(),
+            A3945StateUpdatePacket::default().into_packet().bytes(),
         )])
     },
 );
@@ -99,7 +99,7 @@ mod tests {
             DeviceModel,
             soundcore::common::{
                 device::test_utils::TestSoundcoreDevice,
-                packet::{self, Direction, Packet},
+                packet::{self, outbound::IntoPacket},
                 structures::{EqualizerConfiguration, PresetEqualizerProfile},
             },
         },
@@ -107,10 +107,9 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn it_remembers_band_9_and_10_values() {
-        let state_update_packet = Packet {
-            direction: Direction::Inbound,
-            command: packet::inbound::STATE_COMMAND,
-            body: vec![
+        let state_update_packet = packet::Inbound::new(
+            packet::inbound::STATE_COMMAND,
+            vec![
                 0x00, // host device
                 0x01, // tws status
                 0x00, 0x00, 0x00, 0x00, // dual battery
@@ -130,7 +129,7 @@ mod tests {
                 0x00, // bass up
                 0x00, // device color
             ],
-        };
+        );
 
         let mut device = TestSoundcoreDevice::new_with_packet_responses(
             super::device_registry,
@@ -153,7 +152,7 @@ mod tests {
                                 [vec![1, 2], vec![3, 4]],
                             ),
                     }
-                    .into(),
+                    .into_packet(),
                 ],
             )
             .await;

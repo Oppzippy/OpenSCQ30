@@ -1,15 +1,17 @@
-use crate::devices::soundcore::common::{packet::Command, structures::EqualizerConfiguration};
+use crate::devices::soundcore::common::{packet, structures::EqualizerConfiguration};
 
-use super::outbound_packet::OutboundPacket;
+use super::outbound_packet::IntoPacket;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetEqualizerWithDrc<'a, const C: usize, const B: usize> {
     pub equalizer_configuration: &'a EqualizerConfiguration<C, B>,
 }
 
-impl<const C: usize, const B: usize> OutboundPacket for SetEqualizerWithDrc<'_, C, B> {
-    fn command(&self) -> Command {
-        Command([0x02, 0x83])
+impl<const C: usize, const B: usize> IntoPacket for SetEqualizerWithDrc<'_, C, B> {
+    type DirectionMarker = packet::OutboundMarker;
+
+    fn command(&self) -> packet::Command {
+        packet::Command([0x02, 0x83])
     }
 
     fn body(&self) -> Vec<u8> {
@@ -28,7 +30,7 @@ impl<const C: usize, const B: usize> OutboundPacket for SetEqualizerWithDrc<'_, 
 #[cfg(test)]
 mod tests {
     use crate::devices::soundcore::common::{
-        packet::outbound::{OutboundPacketBytesExt, SetEqualizerWithDrc},
+        packet::outbound::{IntoPacket, SetEqualizerWithDrc},
         structures::{EqualizerConfiguration, VolumeAdjustments},
     };
 
@@ -44,6 +46,7 @@ mod tests {
                 VolumeAdjustments::new([-60, 60, 23, 120, 22, -120, -4, 16]),
             ]),
         }
+        .into_packet()
         .bytes();
         assert_eq!(EXPECTED, actual);
     }

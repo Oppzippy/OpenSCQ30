@@ -9,7 +9,7 @@ use crate::devices::soundcore::{
             ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings,
             COMMON_ACTIONS_WITHOUT_SOUND_MODES,
         },
-        packet::outbound::{OutboundPacketBytesExt, RequestState},
+        packet::outbound::{IntoPacket, RequestState},
         structures::button_configuration::{
             ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
         },
@@ -41,7 +41,7 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            A3948StateUpdatePacket::default().bytes(),
+            A3948StateUpdatePacket::default().into_packet().bytes(),
         )])
     },
 );
@@ -98,10 +98,7 @@ mod tests {
 
     use crate::{
         DeviceModel,
-        devices::soundcore::common::{
-            device::test_utils::TestSoundcoreDevice,
-            packet::{Command, Direction, Packet},
-        },
+        devices::soundcore::common::{device::test_utils::TestSoundcoreDevice, packet},
         settings::{SettingId, Value},
     };
 
@@ -111,18 +108,17 @@ mod tests {
             super::device_registry,
             DeviceModel::SoundcoreA3948,
             HashMap::from([(
-                Command([1, 1]),
-                Packet {
-                    direction: Direction::Inbound,
-                    command: Command([1, 1]),
-                    body: vec![
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
                         0, 0, 5, 255, 0, 0, 50, 49, 46, 53, 54, 0, 0, 0, 0, 0, 51, 57, 52, 56, 55,
                         49, 48, 54, 56, 54, 54, 54, 65, 69, 70, 48, 19, 0, 90, 100, 130, 140, 140,
                         130, 120, 90, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 1, 241, 1, 255, 1,
                         98, 1, 246, 1, 54, 1, 243, 255, 255, 255, 49, 0, 1, 255, 255, 255, 255,
                         255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
                     ],
-                },
+                ),
             )]),
         )
         .await;
@@ -134,10 +130,9 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn disabled_buttons_in_state_update_packet_parse_correctly() {
-        let state_update_packet = Packet {
-            direction: Direction::Inbound,
-            command: Command([1, 1]),
-            body: vec![
+        let state_update_packet = packet::Inbound::new(
+            packet::Command([1, 1]),
+            vec![
                 0, 1, 5, 5, 0, 0, 50, 52, 46, 53, 54, 50, 52, 46, 53, 54, 51, 57, 52, 56, 49, 57,
                 70, 70, 49, 68, 67, 65, 66, 65, 50, 67, 2, 0, 160, 150, 130, 120, 120, 120, 120,
                 120, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, //
@@ -150,11 +145,11 @@ mod tests {
                 255, 255, 255, 97, 0, 1, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
                 255, 255, 255, 255,
             ],
-        };
+        );
         let device = TestSoundcoreDevice::new_with_packet_responses(
             super::device_registry,
             DeviceModel::SoundcoreA3948,
-            HashMap::from([(Command([1, 1]), state_update_packet)]),
+            HashMap::from([(packet::Command([1, 1]), state_update_packet)]),
         )
         .await;
         device.assert_setting_values([
@@ -166,10 +161,9 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn disabled_buttons_are_moved_to_enabled_state_correctly() {
-        let state_update_packet = Packet {
-            direction: Direction::Inbound,
-            command: Command([1, 1]),
-            body: vec![
+        let state_update_packet = packet::Inbound::new(
+            packet::Command([1, 1]),
+            vec![
                 0, 1, 5, 5, 0, 0, 50, 52, 46, 53, 54, 50, 52, 46, 53, 54, 51, 57, 52, 56, 49, 57,
                 70, 70, 49, 68, 67, 65, 66, 65, 50, 67, 2, 0, 160, 150, 130, 120, 120, 120, 120,
                 120, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, //
@@ -182,11 +176,11 @@ mod tests {
                 255, 255, 255, 97, 0, 1, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
                 255, 255, 255, 255,
             ],
-        };
+        );
         let mut device = TestSoundcoreDevice::new_with_packet_responses(
             super::device_registry,
             DeviceModel::SoundcoreA3948,
-            HashMap::from([(Command([1, 1]), state_update_packet)]),
+            HashMap::from([(packet::Command([1, 1]), state_update_packet)]),
         )
         .await;
         device
@@ -198,28 +192,12 @@ mod tests {
                 ],
                 vec![
                     // Single
-                    Packet {
-                        direction: Direction::Outbound,
-                        command: Command([0x04, 0x83]),
-                        body: vec![1, 2, 1],
-                    },
+                    packet::Outbound::new(packet::Command([0x04, 0x83]), vec![1, 2, 1]),
                     //Double
-                    Packet {
-                        direction: Direction::Outbound,
-                        command: Command([0x04, 0x81]),
-                        body: vec![1, 0, 0x60],
-                    },
+                    packet::Outbound::new(packet::Command([0x04, 0x81]), vec![1, 0, 0x60]),
                     // Long
-                    Packet {
-                        direction: Direction::Outbound,
-                        command: Command([0x04, 0x81]),
-                        body: vec![1, 1, 0x30],
-                    },
-                    Packet {
-                        direction: Direction::Outbound,
-                        command: Command([0x04, 0x83]),
-                        body: vec![1, 1, 1],
-                    },
+                    packet::Outbound::new(packet::Command([0x04, 0x81]), vec![1, 1, 0x30]),
+                    packet::Outbound::new(packet::Command([0x04, 0x83]), vec![1, 1, 1]),
                 ],
             )
             .await;

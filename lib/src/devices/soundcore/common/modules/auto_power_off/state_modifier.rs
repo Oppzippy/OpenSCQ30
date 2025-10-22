@@ -6,7 +6,7 @@ use tokio::sync::watch;
 use crate::{
     api::{connection::RfcommConnection, device},
     devices::soundcore::common::{
-        packet::{self, PacketIOController},
+        packet::{self, PacketIOController, outbound::IntoPacket},
         state_modifier::StateModifier,
         structures::AutoPowerOff,
     },
@@ -44,7 +44,7 @@ where
 
         if let Some(target) = target {
             self.packet_io
-                .send_with_response(&packet::outbound::SetAutoPowerOff(*target).into())
+                .send_with_response(&packet::outbound::SetAutoPowerOff(*target).into_packet())
                 .await?;
         }
         state_sender.send_modify(|state| state.set_maybe(target.copied()));

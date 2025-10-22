@@ -15,9 +15,9 @@ use crate::{
         common::{
             modules::ModuleCollection,
             packet::{
-                self, Command, Packet,
-                inbound::{InboundPacket, TryIntoInboundPacket},
-                outbound::OutboundPacket,
+                self, Command,
+                inbound::{FromPacketBody, TryIntoPacket},
+                outbound::IntoPacket,
                 parsing::take_bool,
             },
             packet_manager::PacketHandler,
@@ -92,7 +92,9 @@ impl Default for A3936StateUpdatePacket {
     }
 }
 
-impl InboundPacket for A3936StateUpdatePacket {
+impl FromPacketBody for A3936StateUpdatePacket {
+    type DirectionMarker = packet::InboundMarker;
+
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
@@ -162,7 +164,9 @@ impl InboundPacket for A3936StateUpdatePacket {
     }
 }
 
-impl OutboundPacket for A3936StateUpdatePacket {
+impl IntoPacket for A3936StateUpdatePacket {
+    type DirectionMarker = packet::InboundMarker;
+
     fn command(&self) -> Command {
         packet::inbound::STATE_COMMAND
     }
@@ -225,9 +229,9 @@ impl PacketHandler<A3936State> for StateUpdatePacketHandler {
     async fn handle_packet(
         &self,
         state: &watch::Sender<A3936State>,
-        packet: &Packet,
+        packet: &packet::Inbound,
     ) -> device::Result<()> {
-        let packet: A3936StateUpdatePacket = packet.try_into_inbound_packet()?;
+        let packet: A3936StateUpdatePacket = packet.try_into_packet()?;
         state.send_modify(|state| *state = packet.into());
         Ok(())
     }
@@ -246,17 +250,15 @@ impl ModuleCollection<A3936State> {
 mod tests {
     use nom_language::error::VerboseError;
 
-    use crate::devices::soundcore::common::packet::{
-        inbound::InboundPacket, outbound::OutboundPacketBytesExt,
-    };
+    use crate::devices::soundcore::common::packet::inbound::FromPacketBody;
 
     use super::*;
 
     #[test]
     fn serialize_and_deserialize() {
-        let bytes = A3936StateUpdatePacket::default().bytes();
-        let (_, packet) = Packet::take::<VerboseError<_>>(&bytes).unwrap();
-        let _: A3936StateUpdatePacket = packet.try_into_inbound_packet().unwrap();
+        let bytes = A3936StateUpdatePacket::default().into_packet().bytes();
+        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(&bytes).unwrap();
+        let _: A3936StateUpdatePacket = packet.try_into_packet().unwrap();
     }
 
     #[test]
@@ -274,7 +276,7 @@ mod tests {
             0x0, 0x4, 0x31, 0x0, 0x1, 0x1, 0x0, 0x0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
             0xff, 0xff, 0xff, 0xff, 0xff, 0xdd,
         ];
-        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
         A3936StateUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .expect("it should parse successfully as a A3936 state update packet");
     }
@@ -290,7 +292,7 @@ mod tests {
             17, 0, 0, 17, 99, 17, 102, 17, 68, 17, 68, 7, 1, 48, 0, 0, 0, 0, 0, 85, 49, 0, 1, 1, 0,
             0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 66,
         ];
-        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
         A3936StateUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .expect("it should parse successfully as a A3936 state update packet");
     }

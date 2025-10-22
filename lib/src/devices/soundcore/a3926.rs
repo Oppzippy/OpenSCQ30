@@ -5,10 +5,8 @@ use crate::devices::soundcore::{
     common::{
         macros::soundcore_device,
         packet::{
-            inbound::{SerialNumberAndFirmwareVersion, TryIntoInboundPacket},
-            outbound::{
-                OutboundPacketBytesExt, RequestSerialNumberAndFirmwareVersion, RequestState,
-            },
+            inbound::{SerialNumberAndFirmwareVersion, TryIntoPacket},
+            outbound::{IntoPacket, RequestSerialNumberAndFirmwareVersion, RequestState},
         },
     },
 };
@@ -23,13 +21,13 @@ soundcore_device!(
     A3926StateUpdatePacket,
     async |packet_io| {
         let state_update_packet: A3926StateUpdatePacket = packet_io
-            .send_with_response(&RequestState::new().into())
+            .send_with_response(&RequestState::default().into_packet())
             .await?
-            .try_into_inbound_packet()?;
+            .try_into_packet()?;
         let sn_and_firmware: SerialNumberAndFirmwareVersion = packet_io
-            .send_with_response(&RequestSerialNumberAndFirmwareVersion::new().into())
+            .send_with_response(&RequestSerialNumberAndFirmwareVersion::default().into_packet())
             .await?
-            .try_into_inbound_packet()?;
+            .try_into_packet()?;
         Ok(A3926State::new(state_update_packet, sn_and_firmware))
     },
     async |builder| {
@@ -58,11 +56,13 @@ soundcore_device!(
         HashMap::from([
             (
                 RequestState::COMMAND,
-                A3926StateUpdatePacket::default().bytes(),
+                A3926StateUpdatePacket::default().into_packet().bytes(),
             ),
             (
                 RequestSerialNumberAndFirmwareVersion::COMMAND,
-                SerialNumberAndFirmwareVersion::default().bytes(),
+                SerialNumberAndFirmwareVersion::default()
+                    .into_packet()
+                    .bytes(),
             ),
         ])
     },
@@ -72,10 +72,7 @@ soundcore_device!(
 mod tests {
     use crate::{
         DeviceModel,
-        devices::soundcore::common::{
-            device::test_utils::TestSoundcoreDevice,
-            packet::{Command, Direction, Packet},
-        },
+        devices::soundcore::common::{device::test_utils::TestSoundcoreDevice, packet},
         settings::{SettingId, Value},
     };
 
@@ -86,11 +83,10 @@ mod tests {
         test_device
             .assert_set_settings_response_unordered(
                 vec![(SettingId::LeftSinglePress, Value::from("PlayPause"))],
-                vec![Packet {
-                    direction: Direction::Outbound,
-                    command: Command([0x04, 0x81]),
-                    body: vec![0x00, 0x02, 0x06],
-                }],
+                vec![packet::Outbound::new(
+                    packet::Command([0x04, 0x81]),
+                    vec![0x00, 0x02, 0x06],
+                )],
             )
             .await;
     }

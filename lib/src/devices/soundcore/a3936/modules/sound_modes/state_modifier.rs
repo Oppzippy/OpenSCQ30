@@ -8,7 +8,10 @@ use crate::{
     api::{connection::RfcommConnection, device},
     devices::soundcore::{
         a3936::{packets::A3936SetSoundModesPacket, structures::A3936SoundModes},
-        common::{packet::PacketIOController, state_modifier::StateModifier},
+        common::{
+            packet::{PacketIOController, outbound::IntoPacket},
+            state_modifier::StateModifier,
+        },
     },
 };
 
@@ -40,7 +43,7 @@ where
         }
 
         self.packet_io
-            .send_with_response(&A3936SetSoundModesPacket { sound_modes }.into())
+            .send_with_response(&A3936SetSoundModesPacket { sound_modes }.into_packet())
             .await?;
         state_sender.send_modify(|state| *state.get_mut() = *target_sound_modes);
 

@@ -7,7 +7,7 @@ use crate::devices::soundcore::{
         device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
         modules::sound_modes::AvailableSoundModes,
-        packet::outbound::{OutboundPacketBytesExt, RequestState},
+        packet::outbound::{IntoPacket, RequestState},
         structures::{AmbientSoundMode, NoiseCancelingMode, TransparencyMode},
     },
 };
@@ -51,7 +51,7 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            A3933StateUpdatePacket::default().bytes(),
+            A3933StateUpdatePacket::default().into_packet().bytes(),
         )])
     },
 );
@@ -66,7 +66,7 @@ mod tests {
             DeviceModel,
             soundcore::common::{
                 device::test_utils::TestSoundcoreDevice,
-                packet::{self, Direction, Packet},
+                packet::{self, outbound::IntoPacket},
                 structures::{EqualizerConfiguration, PresetEqualizerProfile},
             },
         },
@@ -76,10 +76,9 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn it_remembers_eq_band_9_and_10_values() {
-        let state_update_packet = Packet {
-            direction: Direction::Inbound,
-            command: packet::inbound::STATE_COMMAND,
-            body: vec![
+        let state_update_packet = packet::Inbound::new(
+            packet::inbound::STATE_COMMAND,
+            vec![
                 0x00, // host device
                 0x01, // tws status
                 0x00, 0x00, 0x00, 0x00, // dual battery
@@ -116,7 +115,7 @@ mod tests {
                 0x00, // wind noise detection
                 0xFF, 0xFF, 0xFF, // three unknown bytes
             ],
-        };
+        );
 
         let mut device = TestSoundcoreDevice::new_with_packet_responses(
             super::device_registry,
@@ -138,7 +137,7 @@ mod tests {
                                 [vec![1, 2], vec![3, 4]],
                             ),
                     }
-                    .into(),
+                    .into_packet(),
                 ],
             )
             .await;

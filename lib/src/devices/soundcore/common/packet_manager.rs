@@ -4,9 +4,9 @@ use async_trait::async_trait;
 use tokio::sync::watch;
 use tracing::warn;
 
-use crate::api::device;
+use crate::{api::device, devices::soundcore::common::packet};
 
-use super::packet::{Command, Packet};
+use super::packet::Command;
 
 pub struct PacketManager<T> {
     handlers: HashMap<Command, Box<dyn PacketHandler<T> + Send + Sync>>,
@@ -32,7 +32,7 @@ impl<T> PacketManager<T> {
     pub async fn handle(
         &self,
         state_sender: &watch::Sender<T>,
-        packet: &Packet,
+        packet: &packet::Inbound,
     ) -> device::Result<()> {
         if let Some(handler) = self.handlers.get(&packet.command) {
             handler.handle_packet(state_sender, packet).await?;
@@ -45,5 +45,9 @@ impl<T> PacketManager<T> {
 
 #[async_trait]
 pub trait PacketHandler<T> {
-    async fn handle_packet(&self, state: &watch::Sender<T>, packet: &Packet) -> device::Result<()>;
+    async fn handle_packet(
+        &self,
+        state: &watch::Sender<T>,
+        packet: &packet::Inbound,
+    ) -> device::Result<()>;
 }

@@ -16,9 +16,9 @@ use crate::{
         common::{
             modules::ModuleCollection,
             packet::{
-                self, Command, Packet,
-                inbound::{InboundPacket, TryIntoInboundPacket},
-                outbound::OutboundPacket,
+                self, Command,
+                inbound::{FromPacketBody, TryIntoPacket},
+                outbound::IntoPacket,
                 parsing::take_bool,
             },
             packet_manager::PacketHandler,
@@ -92,7 +92,9 @@ impl Default for A3933StateUpdatePacket {
     }
 }
 
-impl InboundPacket for A3933StateUpdatePacket {
+impl FromPacketBody for A3933StateUpdatePacket {
+    type DirectionMarker = packet::InboundMarker;
+
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
@@ -190,7 +192,9 @@ impl A3933StateUpdatePacket {
     }
 }
 
-impl OutboundPacket for A3933StateUpdatePacket {
+impl IntoPacket for A3933StateUpdatePacket {
+    type DirectionMarker = packet::InboundMarker;
+
     fn command(&self) -> Command {
         packet::inbound::STATE_COMMAND
     }
@@ -257,9 +261,9 @@ impl PacketHandler<A3933State> for StateUpdatePacketHandler {
     async fn handle_packet(
         &self,
         state: &watch::Sender<A3933State>,
-        packet: &Packet,
+        packet: &packet::Inbound,
     ) -> device::Result<()> {
-        let packet: A3933StateUpdatePacket = packet.try_into_inbound_packet()?;
+        let packet: A3933StateUpdatePacket = packet.try_into_packet()?;
         state.send_modify(|state| *state = packet.into());
         Ok(())
     }
@@ -282,9 +286,9 @@ mod tests {
         a3933::packets::inbound::A3933StateUpdatePacket,
         common::{
             packet::{
-                Packet,
-                inbound::{InboundPacket, TryIntoInboundPacket},
-                outbound::OutboundPacketBytesExt,
+                self,
+                inbound::{FromPacketBody, TryIntoPacket},
+                outbound::IntoPacket,
             },
             structures::{
                 AmbientSoundMode, BatteryLevel, CustomNoiseCanceling, EqualizerConfiguration,
@@ -296,9 +300,9 @@ mod tests {
 
     #[test]
     fn serialize_and_deserialize() {
-        let bytes = A3933StateUpdatePacket::default().bytes();
-        let (_, packet) = Packet::take::<VerboseError<_>>(&bytes).unwrap();
-        let _: A3933StateUpdatePacket = packet.try_into_inbound_packet().unwrap();
+        let bytes = A3933StateUpdatePacket::default().into_packet().bytes();
+        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(&bytes).unwrap();
+        let _: A3933StateUpdatePacket = packet.try_into_packet().unwrap();
     }
 
     #[test]
@@ -323,7 +327,7 @@ mod tests {
             1, 82, 1, 102, 1, 84, 1, 1, 1, 0, 7, 0, 0, 0, 10, 255, 255, 0, 255, 0, 0, 0, 51, 255,
             255, 255, 255, 102,
         ];
-        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
         let (_, packet) = A3933StateUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .expect("should parse packet");
 

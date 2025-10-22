@@ -5,11 +5,11 @@ use nom::{
 };
 
 use crate::devices::soundcore::common::{
-    packet::{self, Command, outbound::OutboundPacket},
+    packet::{self, Command, outbound::IntoPacket},
     structures::{DualFirmwareVersion, SerialNumber},
 };
 
-use super::InboundPacket;
+use super::FromPacketBody;
 
 // TODO think of a better name. this could be misleading since this does not update the firmware on the device,
 // it simply updates our state with the version number of the firmware running on the device.
@@ -23,7 +23,9 @@ impl SerialNumberAndFirmwareVersion {
     pub const COMMAND: Command = Command([0x01, 0x05]);
 }
 
-impl InboundPacket for SerialNumberAndFirmwareVersion {
+impl FromPacketBody for SerialNumberAndFirmwareVersion {
+    type DirectionMarker = packet::InboundMarker;
+
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
@@ -41,10 +43,8 @@ impl InboundPacket for SerialNumberAndFirmwareVersion {
     }
 }
 
-impl OutboundPacket for SerialNumberAndFirmwareVersion {
-    fn direction(&self) -> packet::Direction {
-        packet::Direction::Inbound
-    }
+impl IntoPacket for SerialNumberAndFirmwareVersion {
+    type DirectionMarker = packet::InboundMarker;
 
     fn command(&self) -> Command {
         Self::COMMAND
@@ -64,8 +64,8 @@ mod tests {
 
     use crate::devices::soundcore::common::{
         packet::{
-            Packet,
-            inbound::{InboundPacket, SerialNumberAndFirmwareVersion},
+            self,
+            inbound::{FromPacketBody, SerialNumberAndFirmwareVersion},
         },
         structures::{DualFirmwareVersion, FirmwareVersion, SerialNumber},
     };
@@ -77,7 +77,7 @@ mod tests {
             0x32, 0x33, 0x2e, 0x34, 0x35, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
             0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0xc9,
         ];
-        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
         let packet = SerialNumberAndFirmwareVersion::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1;

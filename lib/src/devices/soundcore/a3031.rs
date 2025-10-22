@@ -13,10 +13,8 @@ use crate::{
                 sound_modes::AvailableSoundModes,
             },
             packet::{
-                inbound::{SerialNumberAndFirmwareVersion, TryIntoInboundPacket},
-                outbound::{
-                    OutboundPacketBytesExt, RequestSerialNumberAndFirmwareVersion, RequestState,
-                },
+                inbound::{SerialNumberAndFirmwareVersion, TryIntoPacket},
+                outbound::{IntoPacket, RequestSerialNumberAndFirmwareVersion, RequestState},
             },
             structures::{AmbientSoundMode, NoiseCancelingMode},
         },
@@ -32,13 +30,13 @@ soundcore_device!(
     A3031StateUpdatePacket,
     async |packet_io| {
         let state_update_packet: A3031StateUpdatePacket = packet_io
-            .send_with_response(&RequestState::new().into())
+            .send_with_response(&RequestState::default().into_packet())
             .await?
-            .try_into_inbound_packet()?;
+            .try_into_packet()?;
         let sn_and_firmware: SerialNumberAndFirmwareVersion = packet_io
-            .send_with_response(&RequestSerialNumberAndFirmwareVersion::new().into())
+            .send_with_response(&RequestSerialNumberAndFirmwareVersion::default().into_packet())
             .await?
-            .try_into_inbound_packet()?;
+            .try_into_packet()?;
         Ok(A3031State::new(state_update_packet, sn_and_firmware))
     },
     async |builder| {
@@ -67,11 +65,13 @@ soundcore_device!(
         HashMap::from([
             (
                 RequestState::COMMAND,
-                A3031StateUpdatePacket::default().bytes(),
+                A3031StateUpdatePacket::default().into_packet().bytes(),
             ),
             (
                 RequestSerialNumberAndFirmwareVersion::COMMAND,
-                SerialNumberAndFirmwareVersion::default().bytes(),
+                SerialNumberAndFirmwareVersion::default()
+                    .into_packet()
+                    .bytes(),
             ),
         ])
     },

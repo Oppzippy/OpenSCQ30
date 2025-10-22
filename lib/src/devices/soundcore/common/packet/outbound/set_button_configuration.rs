@@ -1,5 +1,5 @@
 use crate::devices::soundcore::common::{
-    packet::{Command, outbound::OutboundPacket},
+    packet::{self, outbound::IntoPacket},
     structures::button_configuration::{ButtonParseSettings, ButtonSide, ButtonStatusCollection},
 };
 
@@ -10,9 +10,11 @@ pub struct SetButtonConfiguration {
     pub action_id: u8,
 }
 
-impl OutboundPacket for SetButtonConfiguration {
-    fn command(&self) -> Command {
-        Command([0x04, 0x81])
+impl IntoPacket for SetButtonConfiguration {
+    type DirectionMarker = packet::OutboundMarker;
+
+    fn command(&self) -> packet::Command {
+        packet::Command([0x04, 0x81])
     }
 
     fn body(&self) -> Vec<u8> {
@@ -23,9 +25,11 @@ impl OutboundPacket for SetButtonConfiguration {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ResetButtonConfigurationsToDefault;
 
-impl OutboundPacket for ResetButtonConfigurationsToDefault {
-    fn command(&self) -> Command {
-        Command([0x04, 0x82])
+impl IntoPacket for ResetButtonConfigurationsToDefault {
+    type DirectionMarker = packet::OutboundMarker;
+
+    fn command(&self) -> packet::Command {
+        packet::Command([0x04, 0x82])
     }
 
     fn body(&self) -> Vec<u8> {
@@ -39,13 +43,15 @@ pub struct SetButtonConfigurationEnabled {
     pub enabled: u8,
 }
 
-impl OutboundPacket for SetButtonConfigurationEnabled {
-    fn command(&self) -> Command {
+impl IntoPacket for SetButtonConfigurationEnabled {
+    type DirectionMarker = packet::OutboundMarker;
+
+    fn command(&self) -> packet::Command {
         // 0: unknown, maybe side?
         // 1: button id
         // 2: 0 for disabled, 1 for enabled
         // 00 02 01
-        Command([0x04, 0x83])
+        packet::Command([0x04, 0x83])
     }
 
     fn body(&self) -> Vec<u8> {
@@ -59,9 +65,11 @@ pub struct SetAllButtonConfigurations<'a, const N: usize> {
     pub parse_settings: &'a [ButtonParseSettings; N],
 }
 
-impl<const N: usize> OutboundPacket for SetAllButtonConfigurations<'_, N> {
-    fn command(&self) -> Command {
-        Command([0x04, 0x84])
+impl<const N: usize> IntoPacket for SetAllButtonConfigurations<'_, N> {
+    type DirectionMarker = packet::OutboundMarker;
+
+    fn command(&self) -> packet::Command {
+        packet::Command([0x04, 0x84])
     }
 
     fn body(&self) -> Vec<u8> {

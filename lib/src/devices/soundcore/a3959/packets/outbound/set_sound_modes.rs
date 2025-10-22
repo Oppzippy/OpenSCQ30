@@ -1,6 +1,6 @@
 use crate::devices::soundcore::{
     a3959,
-    common::packet::{Command, outbound::OutboundPacket},
+    common::packet::{self, outbound::IntoPacket},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -8,9 +8,11 @@ pub struct A3959SetSoundModes {
     pub sound_modes: a3959::structures::SoundModes,
 }
 
-impl OutboundPacket for A3959SetSoundModes {
-    fn command(&self) -> Command {
-        Command([0x06, 0x81])
+impl IntoPacket for A3959SetSoundModes {
+    type DirectionMarker = packet::OutboundMarker;
+
+    fn command(&self) -> packet::Command {
+        packet::Command([0x06, 0x81])
     }
 
     fn body(&self) -> Vec<u8> {
@@ -20,10 +22,7 @@ impl OutboundPacket for A3959SetSoundModes {
 
 #[cfg(test)]
 mod tests {
-    use crate::devices::soundcore::{
-        a3959,
-        common::{self, packet::outbound::OutboundPacketBytesExt},
-    };
+    use crate::devices::soundcore::{a3959, common};
 
     use super::*;
 
@@ -45,6 +44,6 @@ mod tests {
                 multi_scene_anc: common::structures::NoiseCancelingMode::Outdoor,
             },
         };
-        assert_eq!(EXPECTED, packet.bytes());
+        assert_eq!(EXPECTED, packet.into_packet().bytes());
     }
 }

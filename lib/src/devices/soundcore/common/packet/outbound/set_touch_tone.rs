@@ -1,5 +1,5 @@
 use crate::devices::soundcore::common::{
-    packet::{Command, outbound::OutboundPacket},
+    packet::{self, outbound::IntoPacket},
     structures::TouchTone,
 };
 
@@ -7,11 +7,13 @@ use crate::devices::soundcore::common::{
 pub struct SetTouchTone(pub TouchTone);
 
 impl SetTouchTone {
-    pub const COMMAND: Command = Command([0x01, 0x83]);
+    pub const COMMAND: packet::Command = packet::Command([0x01, 0x83]);
 }
 
-impl OutboundPacket for SetTouchTone {
-    fn command(&self) -> Command {
+impl IntoPacket for SetTouchTone {
+    type DirectionMarker = packet::OutboundMarker;
+
+    fn command(&self) -> packet::Command {
         Self::COMMAND
     }
 

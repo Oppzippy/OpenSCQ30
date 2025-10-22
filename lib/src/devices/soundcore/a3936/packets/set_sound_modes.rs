@@ -1,6 +1,6 @@
 use crate::devices::soundcore::{
     a3936::structures::A3936SoundModes,
-    common::packet::{Command, outbound::OutboundPacket},
+    common::packet::{self, Command, outbound::IntoPacket},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -8,7 +8,9 @@ pub struct A3936SetSoundModesPacket {
     pub sound_modes: A3936SoundModes,
 }
 
-impl OutboundPacket for A3936SetSoundModesPacket {
+impl IntoPacket for A3936SetSoundModesPacket {
+    type DirectionMarker = packet::OutboundMarker;
+
     fn command(&self) -> Command {
         Command([0x06, 0x81])
     }
@@ -29,7 +31,7 @@ mod tests {
             },
         },
         common::{
-            packet::outbound::OutboundPacketBytesExt,
+            packet::outbound::IntoPacket,
             structures::{AmbientSoundMode, TransparencyMode},
         },
     };
@@ -54,6 +56,6 @@ mod tests {
                 noise_canceling_adaptive_sensitivity_level: 2,
             },
         };
-        assert_eq!(EXPECTED, packet.bytes());
+        assert_eq!(EXPECTED, packet.into_packet().bytes());
     }
 }

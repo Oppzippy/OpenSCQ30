@@ -20,7 +20,7 @@ use crate::{
             self,
             common::{
                 modules::button_configuration::ButtonConfigurationSettings,
-                packet::PacketIOController,
+                packet::{self, PacketIOController, outbound::IntoPacket},
                 structures::{
                     AutoPowerOff, TouchTone, button_configuration::ButtonStatusCollection,
                 },
@@ -35,8 +35,7 @@ use super::{
         ModuleCollection, ModuleCollectionSpawnPacketHandlerExt, sound_modes::AvailableSoundModes,
     },
     packet::{
-        Packet,
-        inbound::{InboundPacket, TryIntoInboundPacket},
+        inbound::{FromPacketBody, TryIntoPacket},
         outbound::RequestState,
     },
     structures::{
@@ -59,12 +58,12 @@ pub async fn fetch_state_from_state_update_packet<C, State, StateUpdate>(
 ) -> device::Result<State>
 where
     C: RfcommConnection,
-    StateUpdate: InboundPacket + Default + Into<State>,
+    StateUpdate: FromPacketBody + Default + Into<State>,
 {
     let state_update_packet: StateUpdate = packet_io
-        .send_with_response(&RequestState::new().into())
+        .send_with_response(&RequestState::default().into_packet())
         .await?
-        .try_into_inbound_packet()
+        .try_into_packet()
         .map_err(|err| device::Error::other(err))?;
     Ok(state_update_packet.into())
 }
@@ -104,7 +103,7 @@ impl<B, StateType, StateUpdatePacketType> OpenSCQ30DeviceRegistry
 where
     B: RfcommBackend + 'static + Send + Sync,
     StateType: Clone + Send + Sync + 'static,
-    StateUpdatePacketType: InboundPacket + Send + Sync + 'static,
+    StateUpdatePacketType: FromPacketBody + Send + Sync + 'static,
     Self: BuildDevice<B::ConnectionType, StateType, StateUpdatePacketType>,
 {
     async fn devices(&self) -> device::Result<Vec<ConnectionDescriptor>> {
@@ -166,7 +165,7 @@ where
     module_collection: ModuleCollection<StateType>,
     packet_io_controller: Arc<PacketIOController<ConnectionType>>,
     database: Arc<OpenSCQ30Database>,
-    packet_receiver: mpsc::Receiver<Packet>,
+    packet_receiver: mpsc::Receiver<packet::Inbound>,
     change_notify: watch::Sender<()>,
     _state_update: PhantomData<StateUpdatePacketType>,
 }
@@ -176,7 +175,7 @@ impl<ConnectionType, StateType, StateUpdatePacketType>
 where
     ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Send + Sync + Clone + 'static,
-    StateUpdatePacketType: InboundPacket,
+    StateUpdatePacketType: FromPacketBody,
 {
     pub async fn new(
         database: Arc<OpenSCQ30Database>,
@@ -420,13 +419,13 @@ impl<ConnectionType, StateType, StateUpdatePacketType>
 where
     ConnectionType: RfcommConnection + 'static + Send + Sync,
     StateType: Clone + Send + Sync + 'static,
-    StateUpdatePacketType: InboundPacket,
+    StateUpdatePacketType: FromPacketBody,
 {
     async fn new(
         packet_io_controller: Arc<PacketIOController<ConnectionType>>,
         state_sender: watch::Sender<StateType>,
         module_collection: ModuleCollection<StateType>,
-        packet_receiver: mpsc::Receiver<Packet>,
+        packet_receiver: mpsc::Receiver<packet::Inbound>,
         device_model: DeviceModel,
         change_notify: watch::Receiver<()>,
     ) -> Self {
@@ -465,7 +464,7 @@ impl<ConnectionType, StateType, StateUpdatePacketType> OpenSCQ30Device
 where
     ConnectionType: RfcommConnection + 'static + Send + Sync,
     StateType: Clone + Send + Sync + 'static,
-    StateUpdatePacketType: InboundPacket + Send + Sync,
+    StateUpdatePacketType: FromPacketBody + Send + Sync,
 {
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
         self.packet_io_controller.connection_status()
@@ -525,10 +524,11 @@ pub mod test_utils {
     use std::{collections::HashMap, time::Duration};
 
     use macaddr::MacAddr6;
+    use nom_language::error::VerboseError;
 
     use crate::{
         devices::soundcore::common::packet::{
-            self, Command, Direction, inbound::InboundPacket, outbound::OutboundPacket,
+            self, Command, inbound::FromPacketBody, outbound::IntoPacket,
         },
         mock::rfcomm::{MockRfcommBackend, MockRfcommConnection},
     };
@@ -556,8 +556,13 @@ pub mod test_utils {
         ) -> Self
         where
             StateType: Clone + Send + Sync + 'static,
-            StateUpdatePacketType:
-                InboundPacket + OutboundPacket + Clone + Send + Sync + Default + 'static,
+            StateUpdatePacketType: FromPacketBody
+                + IntoPacket<DirectionMarker = packet::InboundMarker>
+                + Clone
+                + Send
+                + Sync
+                + Default
+                + 'static,
             SoundcoreDeviceRegistry<MockRfcommBackend, StateType, StateUpdatePacketType>:
                 BuildDevice<MockRfcommConnection, StateType, StateUpdatePacketType>,
         {
@@ -565,10 +570,13 @@ pub mod test_utils {
                 constructor,
                 device_model,
                 HashMap::from([
-                    (Command([1, 1]), StateUpdatePacketType::default().into()),
+                    (
+                        Command([1, 1]),
+                        StateUpdatePacketType::default().into_packet(),
+                    ),
                     (
                         packet::inbound::SerialNumberAndFirmwareVersion::COMMAND,
-                        packet::inbound::SerialNumberAndFirmwareVersion::default().into(),
+                        packet::inbound::SerialNumberAndFirmwareVersion::default().into_packet(),
                     ),
                 ]),
             )
@@ -586,12 +594,12 @@ pub mod test_utils {
                 StateUpdatePacketType,
             >,
             device_model: DeviceModel,
-            packet_responses: HashMap<Command, Packet>,
+            packet_responses: HashMap<Command, packet::Inbound>,
         ) -> Self
         where
             StateType: Clone + Send + Sync + 'static,
             StateUpdatePacketType:
-                InboundPacket + OutboundPacket + Clone + Send + Sync + Default + 'static,
+                FromPacketBody + IntoPacket + Clone + Send + Sync + Default + 'static,
             SoundcoreDeviceRegistry<MockRfcommBackend, StateType, StateUpdatePacketType>:
                 BuildDevice<MockRfcommConnection, StateType, StateUpdatePacketType>,
         {
@@ -659,7 +667,7 @@ pub mod test_utils {
         pub async fn assert_set_settings_response_unordered(
             &mut self,
             settings: Vec<(SettingId, Value)>,
-            expected_packets: Vec<Packet>,
+            expected_packets: Vec<packet::Outbound>,
         ) {
             let mut expected_packets_bytes = expected_packets
                 .iter()
@@ -675,7 +683,7 @@ pub mod test_utils {
         pub async fn assert_set_settings_response(
             &mut self,
             settings: Vec<(SettingId, Value)>,
-            expected_packets: Vec<Packet>,
+            expected_packets: Vec<packet::Outbound>,
         ) {
             let expected_packets_bytes = expected_packets
                 .iter()
@@ -715,27 +723,20 @@ pub mod test_utils {
 
         async fn gather_sent_packets(&mut self, sent_packets: &mut Vec<Vec<u8>>) {
             loop {
-                if let Some(packet) = self.outbound_receiver.recv().await {
-                    let command = Command(packet[5..7].try_into().unwrap());
-                    self.ack(command).await;
-                    sent_packets.push(packet);
+                if let Some(bytes) = self.outbound_receiver.recv().await {
+                    let packet = packet::Outbound::take::<VerboseError<_>>(&bytes).unwrap().1;
+                    self.ack(&packet).await;
+                    sent_packets.push(bytes);
                 } else {
                     break;
                 }
             }
         }
 
-        async fn ack(&self, command: Command) {
+        async fn ack(&self, packet: &packet::Outbound) {
             // for cancel safety
             let permit = self.inbound_sender.reserve().await.unwrap();
-            permit.send(
-                Packet {
-                    direction: Direction::Inbound,
-                    command,
-                    body: Vec::new(),
-                }
-                .bytes(),
-            );
+            permit.send(packet.ack().bytes());
         }
     }
 }

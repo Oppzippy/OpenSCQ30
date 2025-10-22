@@ -1,9 +1,9 @@
 use crate::devices::soundcore::common::{
-    packet::Command,
+    packet,
     structures::{AgeRange, CustomHearId, EqualizerConfiguration, Gender},
 };
 
-use super::outbound_packet::OutboundPacket;
+use super::outbound_packet::IntoPacket;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetEqualizerAndCustomHearId<'a, const C: usize, const B: usize> {
@@ -13,13 +13,15 @@ pub struct SetEqualizerAndCustomHearId<'a, const C: usize, const B: usize> {
     pub custom_hear_id: &'a CustomHearId<C, B>,
 }
 
-impl<const C: usize, const B: usize> OutboundPacket for SetEqualizerAndCustomHearId<'_, C, B> {
-    fn command(&self) -> Command {
+impl<const C: usize, const B: usize> IntoPacket for SetEqualizerAndCustomHearId<'_, C, B> {
+    type DirectionMarker = packet::OutboundMarker;
+
+    fn command(&self) -> packet::Command {
         // TODO does this apply to all devices?
         if self.age_range.supports_hear_id() {
-            Command([0x03, 0x87])
+            packet::Command([0x03, 0x87])
         } else {
-            Command([0x03, 0x86])
+            packet::Command([0x03, 0x86])
         }
     }
 
@@ -93,7 +95,7 @@ impl<const C: usize, const B: usize> OutboundPacket for SetEqualizerAndCustomHea
 #[cfg(test)]
 mod tests {
     use crate::devices::soundcore::common::{
-        packet::outbound::OutboundPacketBytesExt,
+        packet::outbound::IntoPacket,
         structures::{
             AgeRange, CustomHearId, EqualizerConfiguration, Gender, HearIdMusicType, HearIdType,
             PresetEqualizerProfile, VolumeAdjustments,
@@ -135,6 +137,7 @@ mod tests {
                 ]),
             },
         }
+        .into_packet()
         .bytes();
 
         assert_eq!(expected, actual);
@@ -172,6 +175,7 @@ mod tests {
                 ]),
             },
         }
+        .into_packet()
         .bytes();
 
         assert_eq!(expected, actual);

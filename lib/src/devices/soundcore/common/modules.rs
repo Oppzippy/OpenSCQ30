@@ -7,14 +7,16 @@ use tokio::{
 };
 use tracing::{Instrument, debug_span, trace};
 
-use crate::api::{
-    device,
-    settings::{SettingId, Value},
+use crate::{
+    api::{
+        device,
+        settings::{SettingId, Value},
+    },
+    devices::soundcore::common::packet,
 };
 
 use super::{
-    packet::Packet, packet_manager::PacketManager, settings_manager::SettingsManager,
-    state_modifier::StateModifier,
+    packet_manager::PacketManager, settings_manager::SettingsManager, state_modifier::StateModifier,
 };
 
 pub mod ambient_sound_mode_cycle;
@@ -73,7 +75,7 @@ pub trait ModuleCollectionSpawnPacketHandlerExt<T> {
     async fn spawn_packet_handler(
         &self,
         state_sender: watch::Sender<T>,
-        packet_receiver: mpsc::Receiver<Packet>,
+        packet_receiver: mpsc::Receiver<packet::Inbound>,
         exit_signal: Arc<Semaphore>,
     ) -> JoinHandle<()>
     where
@@ -84,7 +86,7 @@ impl<T> ModuleCollectionSpawnPacketHandlerExt<T> for Arc<ModuleCollection<T>> {
     async fn spawn_packet_handler(
         &self,
         state_sender: watch::Sender<T>,
-        mut packet_receiver: mpsc::Receiver<Packet>,
+        mut packet_receiver: mpsc::Receiver<packet::Inbound>,
         exit_signal: Arc<Semaphore>,
     ) -> JoinHandle<()>
     where

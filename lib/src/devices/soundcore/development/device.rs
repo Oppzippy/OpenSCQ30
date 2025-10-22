@@ -15,7 +15,8 @@ use crate::{
         soundcore::{
             self,
             common::packet::{
-                Command, Direction, Packet, PacketIOController, outbound::RequestState,
+                self, Command, PacketIOController,
+                outbound::{IntoPacket, RequestState},
             },
         },
     },
@@ -70,7 +71,7 @@ where
 {
     packet_io: PacketIOController<B::ConnectionType>,
     backend: Arc<B::ConnectionType>,
-    state_update_packet: Option<Packet>,
+    state_update_packet: Option<packet::Inbound>,
     changes_signal: watch::Sender<()>,
 }
 
@@ -81,7 +82,7 @@ where
     async fn new(connection: Arc<B::ConnectionType>) -> device::Result<Self> {
         let (packet_io, _packet_receiver) = PacketIOController::new(connection.to_owned()).await?;
         let state_update_packet = packet_io
-            .send_with_response(&RequestState::new().into())
+            .send_with_response(&RequestState::default().into_packet())
             .await
             .ok();
         Ok(Self {
@@ -176,11 +177,7 @@ where
                 let command = Command(data.try_into().unwrap());
 
                 self.packet_io
-                    .send_with_response(&Packet {
-                        direction: Direction::Outbound,
-                        command,
-                        body,
-                    })
+                    .send_with_response(&packet::Outbound::new(command, body))
                     .await
                     .unwrap();
             }

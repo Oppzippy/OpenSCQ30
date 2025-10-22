@@ -15,9 +15,9 @@ use crate::{
             self,
             modules::ModuleCollection,
             packet::{
-                self, Command, Packet,
-                inbound::{InboundPacket, TryIntoInboundPacket},
-                outbound::OutboundPacket,
+                self, Command,
+                inbound::{FromPacketBody, TryIntoPacket},
+                outbound::IntoPacket,
                 parsing::take_bool,
             },
             packet_manager::PacketHandler,
@@ -61,7 +61,9 @@ impl Default for A3959State {
     }
 }
 
-impl InboundPacket for A3959State {
+impl FromPacketBody for A3959State {
+    type DirectionMarker = packet::InboundMarker;
+
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
@@ -129,7 +131,9 @@ impl InboundPacket for A3959State {
     }
 }
 
-impl OutboundPacket for A3959State {
+impl IntoPacket for A3959State {
+    type DirectionMarker = packet::InboundMarker;
+
     fn command(&self) -> Command {
         packet::inbound::STATE_COMMAND
     }
@@ -167,9 +171,9 @@ impl PacketHandler<a3959::state::A3959State> for StateUpdatePacketHandler {
     async fn handle_packet(
         &self,
         state: &watch::Sender<a3959::state::A3959State>,
-        packet: &Packet,
+        packet: &packet::Inbound,
     ) -> device::Result<()> {
-        let packet: A3959State = packet.try_into_inbound_packet()?;
+        let packet: A3959State = packet.try_into_packet()?;
         state.send_modify(|state| *state = packet.into());
         Ok(())
     }

@@ -10,7 +10,7 @@ use crate::{
             device::fetch_state_from_state_update_packet,
             macros::soundcore_device,
             modules::sound_modes::AvailableSoundModes,
-            packet::outbound::{OutboundPacketBytesExt, RequestState},
+            packet::outbound::{IntoPacket, RequestState},
             structures::{AmbientSoundMode, NoiseCancelingMode},
         },
     },
@@ -50,7 +50,7 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            A3028StateUpdatePacket::default().bytes(),
+            A3028StateUpdatePacket::default().into_packet().bytes(),
         )])
     },
 );
@@ -95,7 +95,7 @@ mod tests {
         devices::{
             DeviceModel,
             soundcore::common::{
-                packet::{self, Direction, Packet},
+                packet,
                 structures::{AmbientSoundMode, NoiseCancelingMode, PresetEqualizerProfile},
             },
         },
@@ -245,12 +245,9 @@ mod tests {
             outbound_receiver.recv().await.expect("sound mode update");
             inbound_sender
                 .send(
-                    Packet {
-                        direction: Direction::Inbound,
-                        command: packet::outbound::SetSoundModes::COMMAND,
-                        body: Vec::new(),
-                    }
-                    .bytes(),
+                    packet::outbound::SetSoundModes::COMMAND
+                        .ack::<packet::InboundMarker>()
+                        .bytes(),
                 )
                 .await
                 .unwrap();
@@ -299,12 +296,9 @@ mod tests {
             outbound_receiver.recv().await.expect("equalizer update");
             inbound_sender
                 .send(
-                    Packet {
-                        direction: Direction::Inbound,
-                        command: packet::outbound::SET_EQUALIZER_COMMAND,
-                        body: Vec::new(),
-                    }
-                    .bytes(),
+                    packet::outbound::SET_EQUALIZER_COMMAND
+                        .ack::<packet::InboundMarker>()
+                        .bytes(),
                 )
                 .await
                 .unwrap();

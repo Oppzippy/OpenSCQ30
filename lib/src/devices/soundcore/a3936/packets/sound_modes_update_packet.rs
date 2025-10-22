@@ -6,7 +6,7 @@ use nom::{
 
 use crate::devices::soundcore::{
     a3936::structures::A3936SoundModes,
-    common::packet::{Command, inbound::InboundPacket},
+    common::packet::{self, Command, inbound::FromPacketBody},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -18,7 +18,9 @@ impl A3936SoundModesUpdatePacket {
     pub const COMMAND: Command = Command([0x06, 0x01]);
 }
 
-impl InboundPacket for A3936SoundModesUpdatePacket {
+impl FromPacketBody for A3936SoundModesUpdatePacket {
+    type DirectionMarker = packet::InboundMarker;
+
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
@@ -44,7 +46,7 @@ mod tests {
             structures::{A3936NoiseCancelingMode, AdaptiveNoiseCanceling, ManualNoiseCanceling},
         },
         common::{
-            packet::{Packet, inbound::InboundPacket},
+            packet::{self, inbound::FromPacketBody},
             structures::{AmbientSoundMode, TransparencyMode},
         },
     };
@@ -55,7 +57,7 @@ mod tests {
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x10, 0x00, 0x01, 0x30, 0x00, 0x01, 0x00,
             0x00, 0x52,
         ];
-        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
         A3936SoundModesUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .expect("parsing should succeed");
     }
@@ -66,7 +68,7 @@ mod tests {
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x10, 0x00, 0x02, 0x22, 0x01, 0x01, 0x03,
             0x05, 0x4e,
         ];
-        let (_, packet) = Packet::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
         let sound_modes = A3936SoundModesUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1
