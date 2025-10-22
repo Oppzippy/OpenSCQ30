@@ -7,7 +7,7 @@ use crate::{
     api::{connection::RfcommConnection, device},
     devices::soundcore::common::{
         modules::button_configuration::{ButtonConfigurationSettings, ButtonSettings},
-        packet::{self, PacketIOController, outbound::IntoPacket},
+        packet::{self, PacketIOController, outbound::ToPacket},
         state_modifier::StateModifier,
         structures::button_configuration::{Button, ButtonStatusCollection},
     },
@@ -85,7 +85,7 @@ where
                             .button_data
                             .map(|data| data.button_settings.parse_settings),
                     }
-                    .into_packet(),
+                    .to_packet(),
                 )
                 .await?;
             state_sender.send_modify(|state| *state.get_mut() = *target_statuses);
@@ -108,7 +108,7 @@ where
                                         .action
                                         .byte(button_settings.parse_settings.action_kind),
                                 }
-                                .into_packet(),
+                                .to_packet(),
                             )
                             .await?;
                     }
@@ -123,7 +123,7 @@ where
                                     enabled: enabled
                                         .byte(button_settings.parse_settings.enabled_flag_kind),
                                 }
-                                .into_packet(),
+                                .to_packet(),
                             )
                             .await?;
                     }

@@ -16,8 +16,8 @@ use crate::{
             modules::ModuleCollection,
             packet::{
                 self, Command,
-                inbound::{FromPacketBody, TryIntoPacket},
-                outbound::IntoPacket,
+                inbound::{FromPacketBody, TryToPacket},
+                outbound::ToPacket,
                 parsing::take_bool,
             },
             packet_manager::PacketHandler,
@@ -164,7 +164,7 @@ impl FromPacketBody for A3936StateUpdatePacket {
     }
 }
 
-impl IntoPacket for A3936StateUpdatePacket {
+impl ToPacket for A3936StateUpdatePacket {
     type DirectionMarker = packet::InboundMarker;
 
     fn command(&self) -> Command {
@@ -231,7 +231,7 @@ impl PacketHandler<A3936State> for StateUpdatePacketHandler {
         state: &watch::Sender<A3936State>,
         packet: &packet::Inbound,
     ) -> device::Result<()> {
-        let packet: A3936StateUpdatePacket = packet.try_into_packet()?;
+        let packet: A3936StateUpdatePacket = packet.try_to_packet()?;
         state.send_modify(|state| *state = packet.into());
         Ok(())
     }
@@ -256,9 +256,9 @@ mod tests {
 
     #[test]
     fn serialize_and_deserialize() {
-        let bytes = A3936StateUpdatePacket::default().into_packet().bytes();
+        let bytes = A3936StateUpdatePacket::default().to_packet().bytes();
         let (_, packet) = packet::Inbound::take::<VerboseError<_>>(&bytes).unwrap();
-        let _: A3936StateUpdatePacket = packet.try_into_packet().unwrap();
+        let _: A3936StateUpdatePacket = packet.try_to_packet().unwrap();
     }
 
     #[test]

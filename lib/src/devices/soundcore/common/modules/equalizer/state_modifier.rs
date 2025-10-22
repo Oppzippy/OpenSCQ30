@@ -6,7 +6,7 @@ use tokio::sync::watch;
 use crate::{
     api::{connection::RfcommConnection, device},
     devices::soundcore::common::{
-        packet::{self, PacketIOController, outbound::IntoPacket},
+        packet::{self, PacketIOController, outbound::ToPacket},
         state_modifier::StateModifier,
         structures::{AgeRange, BasicHearId, CustomHearId, EqualizerConfiguration, Gender},
     },
@@ -59,12 +59,12 @@ where
                 packet::outbound::SetEqualizerWithDrc {
                     equalizer_configuration: target_equalizer_configuration,
                 }
-                .into_packet()
+                .to_packet()
             } else {
                 packet::outbound::SetEqualizer {
                     equalizer_configuration: target_equalizer_configuration,
                 }
-                .into_packet()
+                .to_packet()
             })
             .await?;
         state_sender.send_modify(|state| *state.get_mut() = target_equalizer_configuration.clone());
@@ -134,7 +134,7 @@ where
                         }
                     },
                 }
-                .into_packet(),
+                .to_packet(),
             )
             .await?;
         state_sender.send_modify(|state| *state.get_mut() = target_equalizer_configuration.clone());
@@ -193,7 +193,7 @@ where
                     age_range: *target_state.get(),
                     custom_hear_id: target_state.get(),
                 }
-                .into_packet(),
+                .to_packet(),
             )
             .await?;
         state_sender.send_modify(|state| *state.get_mut() = target_equalizer_configuration.clone());

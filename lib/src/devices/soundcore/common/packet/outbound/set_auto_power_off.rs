@@ -1,5 +1,5 @@
 use crate::devices::soundcore::common::{
-    packet::{self, outbound::IntoPacket},
+    packet::{self, outbound::ToPacket},
     structures::AutoPowerOff,
 };
 
@@ -10,7 +10,7 @@ impl SetAutoPowerOff {
     pub const COMMAND: packet::Command = packet::Command([0x01, 0x86]);
 }
 
-impl IntoPacket for SetAutoPowerOff {
+impl ToPacket for SetAutoPowerOff {
     type DirectionMarker = packet::OutboundMarker;
 
     fn command(&self) -> packet::Command {

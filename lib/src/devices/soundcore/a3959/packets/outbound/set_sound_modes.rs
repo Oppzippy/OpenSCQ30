@@ -1,6 +1,6 @@
 use crate::devices::soundcore::{
     a3959,
-    common::packet::{self, outbound::IntoPacket},
+    common::packet::{self, outbound::ToPacket},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -8,7 +8,7 @@ pub struct A3959SetSoundModes {
     pub sound_modes: a3959::structures::SoundModes,
 }
 
-impl IntoPacket for A3959SetSoundModes {
+impl ToPacket for A3959SetSoundModes {
     type DirectionMarker = packet::OutboundMarker;
 
     fn command(&self) -> packet::Command {
@@ -44,6 +44,6 @@ mod tests {
                 multi_scene_anc: common::structures::NoiseCancelingMode::Outdoor,
             },
         };
-        assert_eq!(EXPECTED, packet.into_packet().bytes());
+        assert_eq!(EXPECTED, packet.to_packet().bytes());
     }
 }

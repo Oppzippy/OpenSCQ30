@@ -1,6 +1,6 @@
 use crate::devices::soundcore::common::{packet, structures::SoundModes};
 
-use super::outbound_packet::IntoPacket;
+use super::outbound_packet::ToPacket;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct SetSoundModes(pub SoundModes);
@@ -9,7 +9,7 @@ impl SetSoundModes {
     pub const COMMAND: packet::Command = packet::Command([0x06, 0x81]);
 }
 
-impl IntoPacket for SetSoundModes {
+impl ToPacket for SetSoundModes {
     type DirectionMarker = packet::OutboundMarker;
 
     fn command(&self) -> packet::Command {
@@ -29,7 +29,7 @@ impl IntoPacket for SetSoundModes {
 #[cfg(test)]
 mod tests {
     use crate::devices::soundcore::common::{
-        packet::outbound::{IntoPacket, SetSoundModes},
+        packet::outbound::{SetSoundModes, ToPacket},
         structures::{
             AmbientSoundMode, CustomNoiseCanceling, NoiseCancelingMode, SoundModes,
             TransparencyMode,
@@ -47,7 +47,7 @@ mod tests {
             transparency_mode: TransparencyMode::VocalMode,
             custom_noise_canceling: CustomNoiseCanceling::new(0),
         });
-        assert_eq!(EXPECTED, packet.into_packet().bytes());
+        assert_eq!(EXPECTED, packet.to_packet().bytes());
     }
 
     #[test]
@@ -61,6 +61,6 @@ mod tests {
             transparency_mode: TransparencyMode::VocalMode,
             custom_noise_canceling: CustomNoiseCanceling::new(0),
         });
-        assert_eq!(EXPECTED, packet.into_packet().bytes());
+        assert_eq!(EXPECTED, packet.to_packet().bytes());
     }
 }

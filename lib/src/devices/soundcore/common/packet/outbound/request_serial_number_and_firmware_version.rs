@@ -1,6 +1,6 @@
 use crate::devices::soundcore::common::packet;
 
-use super::IntoPacket;
+use super::ToPacket;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct RequestSerialNumberAndFirmwareVersion {}
@@ -9,7 +9,7 @@ impl RequestSerialNumberAndFirmwareVersion {
     pub const COMMAND: packet::Command = packet::Command([0x01, 0x05]);
 }
 
-impl IntoPacket for RequestSerialNumberAndFirmwareVersion {
+impl ToPacket for RequestSerialNumberAndFirmwareVersion {
     type DirectionMarker = packet::OutboundMarker;
 
     fn command(&self) -> packet::Command {
@@ -24,7 +24,7 @@ impl IntoPacket for RequestSerialNumberAndFirmwareVersion {
 #[cfg(test)]
 mod tests {
     use crate::devices::soundcore::common::packet::outbound::{
-        IntoPacket, RequestSerialNumberAndFirmwareVersion,
+        RequestSerialNumberAndFirmwareVersion, ToPacket,
     };
 
     #[test]
@@ -33,7 +33,7 @@ mod tests {
         assert_eq!(
             expected,
             RequestSerialNumberAndFirmwareVersion::default()
-                .into_packet()
+                .to_packet()
                 .bytes()
         );
     }

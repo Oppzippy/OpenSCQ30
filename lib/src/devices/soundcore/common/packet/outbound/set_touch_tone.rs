@@ -1,5 +1,5 @@
 use crate::devices::soundcore::common::{
-    packet::{self, outbound::IntoPacket},
+    packet::{self, outbound::ToPacket},
     structures::TouchTone,
 };
 
@@ -10,7 +10,7 @@ impl SetTouchTone {
     pub const COMMAND: packet::Command = packet::Command([0x01, 0x83]);
 }
 
-impl IntoPacket for SetTouchTone {
+impl ToPacket for SetTouchTone {
     type DirectionMarker = packet::OutboundMarker;
 
     fn command(&self) -> packet::Command {

@@ -7,7 +7,7 @@ use crate::devices::soundcore::{
         device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
         modules::sound_modes::AvailableSoundModes,
-        packet::outbound::{IntoPacket, RequestState},
+        packet::outbound::{RequestState, ToPacket},
         structures::{AmbientSoundMode, NoiseCancelingMode, TransparencyMode},
     },
 };
@@ -51,7 +51,7 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            A3933StateUpdatePacket::default().into_packet().bytes(),
+            A3933StateUpdatePacket::default().to_packet().bytes(),
         )])
     },
 );
@@ -66,7 +66,7 @@ mod tests {
             DeviceModel,
             soundcore::common::{
                 device::test_utils::TestSoundcoreDevice,
-                packet::{self, outbound::IntoPacket},
+                packet::{self, outbound::ToPacket},
                 structures::{EqualizerConfiguration, PresetEqualizerProfile},
             },
         },
@@ -137,7 +137,7 @@ mod tests {
                                 [vec![1, 2], vec![3, 4]],
                             ),
                     }
-                    .into_packet(),
+                    .to_packet(),
                 ],
             )
             .await;

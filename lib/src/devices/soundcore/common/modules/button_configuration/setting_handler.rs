@@ -122,7 +122,7 @@ where
             if self.settings.use_enabled_flag_to_disable {
                 maybe_action.map(|action| action.id)
             } else {
-                Some(maybe_action.map(|action| action.id).unwrap_or(0xF))
+                Some(maybe_action.map_or(0xF, |action| action.id))
             }
         };
 

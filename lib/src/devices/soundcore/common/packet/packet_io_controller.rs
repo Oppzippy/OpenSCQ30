@@ -138,7 +138,7 @@ mod tests {
         api::connection::test_stub::StubRfcommConnection,
         devices::soundcore::common::packet::{
             self,
-            outbound::{IntoPacket, SetAmbientSoundModeCycle, SetSoundModes},
+            outbound::{SetAmbientSoundModeCycle, SetSoundModes, ToPacket},
         },
     };
 
@@ -158,7 +158,7 @@ mod tests {
             let controller = controller.clone();
             async move {
                 controller
-                    .send_with_response(&SetSoundModes::default().into_packet())
+                    .send_with_response(&SetSoundModes::default().to_packet())
                     .await
                     .expect("should receive ack");
             }
@@ -167,7 +167,7 @@ mod tests {
             let controller = controller.clone();
             async move {
                 controller
-                    .send_with_response(&SetSoundModes::default().into_packet())
+                    .send_with_response(&SetSoundModes::default().to_packet())
                     .await
                     .expect("should receive ack");
             }
@@ -206,7 +206,7 @@ mod tests {
                 .0,
         );
 
-        let set_cycle_packet = SetAmbientSoundModeCycle::default().into_packet();
+        let set_cycle_packet = SetAmbientSoundModeCycle::default().to_packet();
         let set_cycle_ack = set_cycle_packet.ack();
         let handle1 = tokio::spawn({
             let controller = controller.clone();
@@ -221,7 +221,7 @@ mod tests {
             let controller = controller.clone();
             async move {
                 controller
-                    .send_with_response(&SetSoundModes::default().into_packet())
+                    .send_with_response(&SetSoundModes::default().to_packet())
                     .await
                     .expect("should receive ack");
             }
@@ -262,7 +262,7 @@ mod tests {
             }
         });
         packet_io
-            .send_with_response(&packet::outbound::SetSoundModes::default().into_packet())
+            .send_with_response(&packet::outbound::SetSoundModes::default().to_packet())
             .await
             .expect("we should receive the fragmented ACK packet");
     }
@@ -278,10 +278,10 @@ mod tests {
         );
 
         let set_sound_modes: packet::Outbound =
-            packet::outbound::SetSoundModes::default().into_packet();
+            packet::outbound::SetSoundModes::default().to_packet();
         let set_sound_modes_ack = set_sound_modes.ack();
         let set_ambient_sound_mode_cycle: packet::Outbound =
-            packet::outbound::SetAmbientSoundModeCycle::default().into_packet();
+            packet::outbound::SetAmbientSoundModeCycle::default().to_packet();
         let set_ambient_sound_mode_cycle_ack = set_ambient_sound_mode_cycle.ack();
 
         tokio::spawn(async move {
@@ -318,7 +318,7 @@ mod tests {
         );
 
         let set_sound_modes: packet::Outbound =
-            packet::outbound::SetSoundModes::default().into_packet();
+            packet::outbound::SetSoundModes::default().to_packet();
         let set_sound_modes_ack = set_sound_modes.ack();
 
         tokio::spawn(async move {

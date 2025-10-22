@@ -3,7 +3,7 @@ use crate::devices::soundcore::common::{
     structures::{AgeRange, CustomHearId, EqualizerConfiguration, Gender},
 };
 
-use super::outbound_packet::IntoPacket;
+use super::outbound_packet::ToPacket;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetEqualizerAndCustomHearId<'a, const C: usize, const B: usize> {
@@ -13,7 +13,7 @@ pub struct SetEqualizerAndCustomHearId<'a, const C: usize, const B: usize> {
     pub custom_hear_id: &'a CustomHearId<C, B>,
 }
 
-impl<const C: usize, const B: usize> IntoPacket for SetEqualizerAndCustomHearId<'_, C, B> {
+impl<const C: usize, const B: usize> ToPacket for SetEqualizerAndCustomHearId<'_, C, B> {
     type DirectionMarker = packet::OutboundMarker;
 
     fn command(&self) -> packet::Command {
@@ -95,7 +95,7 @@ impl<const C: usize, const B: usize> IntoPacket for SetEqualizerAndCustomHearId<
 #[cfg(test)]
 mod tests {
     use crate::devices::soundcore::common::{
-        packet::outbound::IntoPacket,
+        packet::outbound::ToPacket,
         structures::{
             AgeRange, CustomHearId, EqualizerConfiguration, Gender, HearIdMusicType, HearIdType,
             PresetEqualizerProfile, VolumeAdjustments,
@@ -137,7 +137,7 @@ mod tests {
                 ]),
             },
         }
-        .into_packet()
+        .to_packet()
         .bytes();
 
         assert_eq!(expected, actual);
@@ -175,7 +175,7 @@ mod tests {
                 ]),
             },
         }
-        .into_packet()
+        .to_packet()
         .bytes();
 
         assert_eq!(expected, actual);

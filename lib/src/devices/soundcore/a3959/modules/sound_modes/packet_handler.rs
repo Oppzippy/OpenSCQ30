@@ -7,7 +7,7 @@ use crate::{
     devices::soundcore::{
         a3959,
         common::{
-            packet::{self, inbound::TryIntoPacket},
+            packet::{self, inbound::TryToPacket},
             packet_manager::PacketHandler,
         },
     },
@@ -30,7 +30,7 @@ where
         state: &watch::Sender<T>,
         packet: &packet::Inbound,
     ) -> device::Result<()> {
-        let packet: a3959::packets::inbound::A3959SoundModes = packet.try_into_packet()?;
+        let packet: a3959::packets::inbound::A3959SoundModes = packet.try_to_packet()?;
         state.send_if_modified(|state| {
             let sound_modes = state.get_mut();
             let modified = packet.sound_modes == *sound_modes;

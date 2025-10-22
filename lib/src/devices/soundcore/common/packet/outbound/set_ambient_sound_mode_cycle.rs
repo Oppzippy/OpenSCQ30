@@ -1,5 +1,5 @@
 use crate::devices::soundcore::common::{
-    packet::{self, outbound::IntoPacket},
+    packet::{self, outbound::ToPacket},
     structures::AmbientSoundModeCycle,
 };
 
@@ -8,7 +8,7 @@ pub struct SetAmbientSoundModeCycle {
     pub cycle: AmbientSoundModeCycle,
 }
 
-impl IntoPacket for SetAmbientSoundModeCycle {
+impl ToPacket for SetAmbientSoundModeCycle {
     type DirectionMarker = packet::OutboundMarker;
 
     fn command(&self) -> packet::Command {

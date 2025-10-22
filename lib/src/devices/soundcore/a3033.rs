@@ -5,7 +5,7 @@ use crate::devices::soundcore::{
     common::{
         device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
-        packet::outbound::{IntoPacket, RequestState},
+        packet::outbound::{RequestState, ToPacket},
     },
 };
 
@@ -28,7 +28,7 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            A3033StateUpdatePacket::default().into_packet().bytes(),
+            A3033StateUpdatePacket::default().to_packet().bytes(),
         )])
     },
 );

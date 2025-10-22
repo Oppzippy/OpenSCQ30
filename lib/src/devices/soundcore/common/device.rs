@@ -20,7 +20,7 @@ use crate::{
             self,
             common::{
                 modules::button_configuration::ButtonConfigurationSettings,
-                packet::{self, PacketIOController, outbound::IntoPacket},
+                packet::{self, PacketIOController, outbound::ToPacket},
                 structures::{
                     AutoPowerOff, TouchTone, button_configuration::ButtonStatusCollection,
                 },
@@ -35,7 +35,7 @@ use super::{
         ModuleCollection, ModuleCollectionSpawnPacketHandlerExt, sound_modes::AvailableSoundModes,
     },
     packet::{
-        inbound::{FromPacketBody, TryIntoPacket},
+        inbound::{FromPacketBody, TryToPacket},
         outbound::RequestState,
     },
     structures::{
@@ -61,9 +61,9 @@ where
     StateUpdate: FromPacketBody + Default + Into<State>,
 {
     let state_update_packet: StateUpdate = packet_io
-        .send_with_response(&RequestState::default().into_packet())
+        .send_with_response(&RequestState::default().to_packet())
         .await?
-        .try_into_packet()
+        .try_to_packet()
         .map_err(|err| device::Error::other(err))?;
     Ok(state_update_packet.into())
 }
@@ -528,7 +528,7 @@ pub mod test_utils {
 
     use crate::{
         devices::soundcore::common::packet::{
-            self, Command, inbound::FromPacketBody, outbound::IntoPacket,
+            self, Command, inbound::FromPacketBody, outbound::ToPacket,
         },
         mock::rfcomm::{MockRfcommBackend, MockRfcommConnection},
     };
@@ -557,7 +557,7 @@ pub mod test_utils {
         where
             StateType: Clone + Send + Sync + 'static,
             StateUpdatePacketType: FromPacketBody
-                + IntoPacket<DirectionMarker = packet::InboundMarker>
+                + ToPacket<DirectionMarker = packet::InboundMarker>
                 + Clone
                 + Send
                 + Sync
@@ -572,11 +572,11 @@ pub mod test_utils {
                 HashMap::from([
                     (
                         Command([1, 1]),
-                        StateUpdatePacketType::default().into_packet(),
+                        StateUpdatePacketType::default().to_packet(),
                     ),
                     (
                         packet::inbound::SerialNumberAndFirmwareVersion::COMMAND,
-                        packet::inbound::SerialNumberAndFirmwareVersion::default().into_packet(),
+                        packet::inbound::SerialNumberAndFirmwareVersion::default().to_packet(),
                     ),
                 ]),
             )
@@ -599,7 +599,7 @@ pub mod test_utils {
         where
             StateType: Clone + Send + Sync + 'static,
             StateUpdatePacketType:
-                FromPacketBody + IntoPacket + Clone + Send + Sync + Default + 'static,
+                FromPacketBody + ToPacket + Clone + Send + Sync + Default + 'static,
             SoundcoreDeviceRegistry<MockRfcommBackend, StateType, StateUpdatePacketType>:
                 BuildDevice<MockRfcommConnection, StateType, StateUpdatePacketType>,
         {

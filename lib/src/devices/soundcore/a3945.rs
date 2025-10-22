@@ -9,7 +9,7 @@ use crate::devices::soundcore::{
             ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings,
             COMMON_ACTIONS_WITHOUT_SOUND_MODES,
         },
-        packet::outbound::{IntoPacket, RequestState},
+        packet::outbound::{RequestState, ToPacket},
         structures::button_configuration::{
             ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
         },
@@ -38,7 +38,7 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            A3945StateUpdatePacket::default().into_packet().bytes(),
+            A3945StateUpdatePacket::default().to_packet().bytes(),
         )])
     },
 );
@@ -99,7 +99,7 @@ mod tests {
             DeviceModel,
             soundcore::common::{
                 device::test_utils::TestSoundcoreDevice,
-                packet::{self, outbound::IntoPacket},
+                packet::{self, outbound::ToPacket},
                 structures::{EqualizerConfiguration, PresetEqualizerProfile},
             },
         },
@@ -152,7 +152,7 @@ mod tests {
                                 [vec![1, 2], vec![3, 4]],
                             ),
                     }
-                    .into_packet(),
+                    .to_packet(),
                 ],
             )
             .await;

@@ -17,8 +17,8 @@ use crate::{
             modules::ModuleCollection,
             packet::{
                 self, Command,
-                inbound::{FromPacketBody, TryIntoPacket},
-                outbound::IntoPacket,
+                inbound::{FromPacketBody, TryToPacket},
+                outbound::ToPacket,
                 parsing::take_bool,
             },
             packet_manager::PacketHandler,
@@ -192,7 +192,7 @@ impl A3933StateUpdatePacket {
     }
 }
 
-impl IntoPacket for A3933StateUpdatePacket {
+impl ToPacket for A3933StateUpdatePacket {
     type DirectionMarker = packet::InboundMarker;
 
     fn command(&self) -> Command {
@@ -263,7 +263,7 @@ impl PacketHandler<A3933State> for StateUpdatePacketHandler {
         state: &watch::Sender<A3933State>,
         packet: &packet::Inbound,
     ) -> device::Result<()> {
-        let packet: A3933StateUpdatePacket = packet.try_into_packet()?;
+        let packet: A3933StateUpdatePacket = packet.try_to_packet()?;
         state.send_modify(|state| *state = packet.into());
         Ok(())
     }
@@ -287,8 +287,8 @@ mod tests {
         common::{
             packet::{
                 self,
-                inbound::{FromPacketBody, TryIntoPacket},
-                outbound::IntoPacket,
+                inbound::{FromPacketBody, TryToPacket},
+                outbound::ToPacket,
             },
             structures::{
                 AmbientSoundMode, BatteryLevel, CustomNoiseCanceling, EqualizerConfiguration,
@@ -300,9 +300,9 @@ mod tests {
 
     #[test]
     fn serialize_and_deserialize() {
-        let bytes = A3933StateUpdatePacket::default().into_packet().bytes();
+        let bytes = A3933StateUpdatePacket::default().to_packet().bytes();
         let (_, packet) = packet::Inbound::take::<VerboseError<_>>(&bytes).unwrap();
-        let _: A3933StateUpdatePacket = packet.try_into_packet().unwrap();
+        let _: A3933StateUpdatePacket = packet.try_to_packet().unwrap();
     }
 
     #[test]

@@ -5,7 +5,7 @@ use tokio::sync::watch;
 use crate::{
     api::device,
     devices::soundcore::common::{
-        packet::{self, Command, inbound::TryIntoPacket},
+        packet::{self, Command, inbound::TryToPacket},
         packet_manager::PacketHandler,
         structures::{DualFirmwareVersion, SerialNumber},
     },
@@ -28,7 +28,7 @@ where
         state: &watch::Sender<T>,
         packet: &packet::Inbound,
     ) -> device::Result<()> {
-        let packet: packet::inbound::SerialNumberAndFirmwareVersion = packet.try_into_packet()?;
+        let packet: packet::inbound::SerialNumberAndFirmwareVersion = packet.try_to_packet()?;
         state.send_if_modified(|state| {
             let modified = {
                 let serial_number: &SerialNumber = state.get();

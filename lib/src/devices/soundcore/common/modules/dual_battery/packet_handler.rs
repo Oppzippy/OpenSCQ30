@@ -5,7 +5,7 @@ use tokio::sync::watch;
 use crate::{
     api::device,
     devices::soundcore::common::{
-        packet::{self, Command, inbound::TryIntoPacket},
+        packet::{self, Command, inbound::TryToPacket},
         packet_manager::PacketHandler,
         structures::DualBattery,
     },
@@ -28,7 +28,7 @@ where
         state: &watch::Sender<T>,
         packet: &packet::Inbound,
     ) -> device::Result<()> {
-        let packet: packet::inbound::DualBatteryLevel = packet.try_into_packet()?;
+        let packet: packet::inbound::DualBatteryLevel = packet.try_to_packet()?;
         state.send_if_modified(|state| {
             let battery = state.get_mut();
             let modified = packet.left != battery.left.level || packet.right != battery.right.level;
@@ -57,7 +57,7 @@ where
         state: &watch::Sender<T>,
         packet: &packet::Inbound,
     ) -> device::Result<()> {
-        let packet: packet::inbound::DualBatteryCharging = packet.try_into_packet()?;
+        let packet: packet::inbound::DualBatteryCharging = packet.try_to_packet()?;
         state.send_if_modified(|state| {
             let battery = state.get_mut();
             let modified = packet.left != battery.left.is_charging

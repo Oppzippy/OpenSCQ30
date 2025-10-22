@@ -10,7 +10,7 @@ use crate::{
         a3959,
         common::{
             self,
-            packet::{PacketIOController, outbound::IntoPacket},
+            packet::{PacketIOController, outbound::ToPacket},
             state_modifier::StateModifier,
         },
     },
@@ -47,8 +47,7 @@ where
         for step in change_plan {
             self.packet_io
                 .send_with_response(
-                    &a3959::packets::outbound::A3959SetSoundModes { sound_modes: step }
-                        .into_packet(),
+                    &a3959::packets::outbound::A3959SetSoundModes { sound_modes: step }.to_packet(),
                 )
                 .await?;
             state_sender.send_modify(|state| *state.get_mut() = step);

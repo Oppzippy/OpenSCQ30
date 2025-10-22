@@ -14,8 +14,8 @@ use crate::{
             modules::ModuleCollection,
             packet::{
                 self, Command,
-                inbound::{FromPacketBody, TryIntoPacket},
-                outbound::IntoPacket,
+                inbound::{FromPacketBody, TryToPacket},
+                outbound::ToPacket,
                 parsing::take_bool,
             },
             packet_manager::PacketHandler,
@@ -71,7 +71,7 @@ impl FromPacketBody for A3033StateUpdatePacket {
     }
 }
 
-impl IntoPacket for A3033StateUpdatePacket {
+impl ToPacket for A3033StateUpdatePacket {
     type DirectionMarker = packet::InboundMarker;
 
     fn command(&self) -> Command {
@@ -98,7 +98,7 @@ impl PacketHandler<A3033State> for StateUpdatePacketHandler {
         state: &watch::Sender<A3033State>,
         packet: &packet::Inbound,
     ) -> device::Result<()> {
-        let packet: A3033StateUpdatePacket = packet.try_into_packet()?;
+        let packet: A3033StateUpdatePacket = packet.try_to_packet()?;
         state.send_modify(|state| *state = packet.into());
         Ok(())
     }
@@ -117,14 +117,14 @@ impl ModuleCollection<A3033State> {
 mod tests {
     use nom_language::error::VerboseError;
 
-    use crate::devices::soundcore::common::packet::inbound::TryIntoPacket;
+    use crate::devices::soundcore::common::packet::inbound::TryToPacket;
 
     use super::*;
 
     #[test]
     fn serialize_and_deserialize() {
-        let bytes = A3033StateUpdatePacket::default().into_packet().bytes();
+        let bytes = A3033StateUpdatePacket::default().to_packet().bytes();
         let (_, packet) = packet::Inbound::take::<VerboseError<_>>(&bytes).unwrap();
-        let _: A3033StateUpdatePacket = packet.try_into_packet().unwrap();
+        let _: A3033StateUpdatePacket = packet.try_to_packet().unwrap();
     }
 }

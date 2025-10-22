@@ -16,8 +16,8 @@ use crate::{
             modules::ModuleCollection,
             packet::{
                 self, Command,
-                inbound::{FromPacketBody, TryIntoPacket},
-                outbound::IntoPacket,
+                inbound::{FromPacketBody, TryToPacket},
+                outbound::ToPacket,
                 parsing::take_bool,
             },
             packet_manager::PacketHandler,
@@ -131,7 +131,7 @@ impl FromPacketBody for A3959State {
     }
 }
 
-impl IntoPacket for A3959State {
+impl ToPacket for A3959State {
     type DirectionMarker = packet::InboundMarker;
 
     fn command(&self) -> Command {
@@ -173,7 +173,7 @@ impl PacketHandler<a3959::state::A3959State> for StateUpdatePacketHandler {
         state: &watch::Sender<a3959::state::A3959State>,
         packet: &packet::Inbound,
     ) -> device::Result<()> {
-        let packet: A3959State = packet.try_into_packet()?;
+        let packet: A3959State = packet.try_to_packet()?;
         state.send_modify(|state| *state = packet.into());
         Ok(())
     }

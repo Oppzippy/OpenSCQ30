@@ -5,7 +5,7 @@ use nom::{
 };
 
 use crate::devices::soundcore::common::{
-    packet::{self, Command, outbound::IntoPacket},
+    packet::{self, Command, outbound::ToPacket},
     structures::{DualFirmwareVersion, SerialNumber},
 };
 
@@ -43,7 +43,7 @@ impl FromPacketBody for SerialNumberAndFirmwareVersion {
     }
 }
 
-impl IntoPacket for SerialNumberAndFirmwareVersion {
+impl ToPacket for SerialNumberAndFirmwareVersion {
     type DirectionMarker = packet::InboundMarker;
 
     fn command(&self) -> Command {

@@ -1,6 +1,6 @@
 use crate::devices::soundcore::common::{packet, structures::EqualizerConfiguration};
 
-use super::outbound_packet::IntoPacket;
+use super::outbound_packet::ToPacket;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetEqualizer<'a, const C: usize, const B: usize> {
@@ -9,7 +9,7 @@ pub struct SetEqualizer<'a, const C: usize, const B: usize> {
 
 pub const SET_EQUALIZER_COMMAND: packet::Command = packet::Command([0x02, 0x81]);
 
-impl<const C: usize, const B: usize> IntoPacket for SetEqualizer<'_, C, B> {
+impl<const C: usize, const B: usize> ToPacket for SetEqualizer<'_, C, B> {
     type DirectionMarker = packet::OutboundMarker;
 
     fn command(&self) -> packet::Command {
@@ -24,7 +24,7 @@ impl<const C: usize, const B: usize> IntoPacket for SetEqualizer<'_, C, B> {
 #[cfg(test)]
 mod tests {
     use crate::devices::soundcore::common::{
-        packet::outbound::IntoPacket,
+        packet::outbound::ToPacket,
         structures::{EqualizerConfiguration, PresetEqualizerProfile, VolumeAdjustments},
     };
 
@@ -41,7 +41,7 @@ mod tests {
                 VolumeAdjustments::new([-60, 60, 23, 40, 22, 60, -4, 16]),
             ]),
         }
-        .into_packet()
+        .to_packet()
         .bytes();
         assert_eq!(EXPECTED, actual);
     }
@@ -58,7 +58,7 @@ mod tests {
                 [Vec::new()],
             ),
         }
-        .into_packet()
+        .to_packet()
         .bytes();
         assert_eq!(EXPECTED, actual);
     }
@@ -75,7 +75,7 @@ mod tests {
                 [Vec::new()],
             ),
         }
-        .into_packet()
+        .to_packet()
         .bytes();
         assert_eq!(EXPECTED, actual);
     }
@@ -92,6 +92,6 @@ mod tests {
                 [Vec::new(), Vec::new()],
             ),
         };
-        assert_eq!(EXPECTED, packet.into_packet().bytes());
+        assert_eq!(EXPECTED, packet.to_packet().bytes());
     }
 }

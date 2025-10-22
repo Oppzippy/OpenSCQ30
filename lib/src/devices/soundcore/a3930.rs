@@ -12,8 +12,8 @@ use crate::devices::soundcore::{
             sound_modes::AvailableSoundModes,
         },
         packet::{
-            inbound::{SerialNumberAndFirmwareVersion, TryIntoPacket},
-            outbound::{IntoPacket, RequestSerialNumberAndFirmwareVersion, RequestState},
+            inbound::{SerialNumberAndFirmwareVersion, TryToPacket},
+            outbound::{RequestSerialNumberAndFirmwareVersion, RequestState, ToPacket},
         },
         structures::{
             AmbientSoundMode,
@@ -32,13 +32,13 @@ soundcore_device!(
     A3930StateUpdatePacket,
     async |packet_io| {
         let state_update_packet: A3930StateUpdatePacket = packet_io
-            .send_with_response(&RequestState::default().into_packet())
+            .send_with_response(&RequestState::default().to_packet())
             .await?
-            .try_into_packet()?;
+            .try_to_packet()?;
         let sn_and_firmware: SerialNumberAndFirmwareVersion = packet_io
-            .send_with_response(&RequestSerialNumberAndFirmwareVersion::default().into_packet())
+            .send_with_response(&RequestSerialNumberAndFirmwareVersion::default().to_packet())
             .await?
-            .try_into_packet()?;
+            .try_to_packet()?;
         Ok(A3930State::new(state_update_packet, sn_and_firmware))
     },
     async |builder| {
@@ -58,12 +58,12 @@ soundcore_device!(
         HashMap::from([
             (
                 RequestState::COMMAND,
-                A3930StateUpdatePacket::default().into_packet().bytes(),
+                A3930StateUpdatePacket::default().to_packet().bytes(),
             ),
             (
                 RequestSerialNumberAndFirmwareVersion::COMMAND,
                 SerialNumberAndFirmwareVersion::default()
-                    .into_packet()
+                    .to_packet()
                     .bytes(),
             ),
         ])

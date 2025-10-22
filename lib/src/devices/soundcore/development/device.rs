@@ -16,7 +16,7 @@ use crate::{
             self,
             common::packet::{
                 self, Command, PacketIOController,
-                outbound::{IntoPacket, RequestState},
+                outbound::{RequestState, ToPacket},
             },
         },
     },
@@ -82,7 +82,7 @@ where
     async fn new(connection: Arc<B::ConnectionType>) -> device::Result<Self> {
         let (packet_io, _packet_receiver) = PacketIOController::new(connection.to_owned()).await?;
         let state_update_packet = packet_io
-            .send_with_response(&RequestState::default().into_packet())
+            .send_with_response(&RequestState::default().to_packet())
             .await
             .ok();
         Ok(Self {

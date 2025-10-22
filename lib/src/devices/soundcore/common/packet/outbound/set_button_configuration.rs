@@ -1,5 +1,5 @@
 use crate::devices::soundcore::common::{
-    packet::{self, outbound::IntoPacket},
+    packet::{self, outbound::ToPacket},
     structures::button_configuration::{ButtonParseSettings, ButtonSide, ButtonStatusCollection},
 };
 
@@ -10,7 +10,7 @@ pub struct SetButtonConfiguration {
     pub action_id: u8,
 }
 
-impl IntoPacket for SetButtonConfiguration {
+impl ToPacket for SetButtonConfiguration {
     type DirectionMarker = packet::OutboundMarker;
 
     fn command(&self) -> packet::Command {
@@ -25,7 +25,7 @@ impl IntoPacket for SetButtonConfiguration {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ResetButtonConfigurationsToDefault;
 
-impl IntoPacket for ResetButtonConfigurationsToDefault {
+impl ToPacket for ResetButtonConfigurationsToDefault {
     type DirectionMarker = packet::OutboundMarker;
 
     fn command(&self) -> packet::Command {
@@ -43,7 +43,7 @@ pub struct SetButtonConfigurationEnabled {
     pub enabled: u8,
 }
 
-impl IntoPacket for SetButtonConfigurationEnabled {
+impl ToPacket for SetButtonConfigurationEnabled {
     type DirectionMarker = packet::OutboundMarker;
 
     fn command(&self) -> packet::Command {
@@ -65,7 +65,7 @@ pub struct SetAllButtonConfigurations<'a, const N: usize> {
     pub parse_settings: &'a [ButtonParseSettings; N],
 }
 
-impl<const N: usize> IntoPacket for SetAllButtonConfigurations<'_, N> {
+impl<const N: usize> ToPacket for SetAllButtonConfigurations<'_, N> {
     type DirectionMarker = packet::OutboundMarker;
 
     fn command(&self) -> packet::Command {
