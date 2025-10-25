@@ -86,6 +86,7 @@ treble-booster = Treble Booster
 treble-reducer = Treble Reducer
 
 button-configuration = Button Configuration
+reset-buttons-to-default = Reset Buttons to Default
 left-single-press = Left Single Press
 left-double-press = Left Double Press
 left-triple-press = Left Triple Press

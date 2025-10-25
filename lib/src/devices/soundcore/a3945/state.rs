@@ -1,8 +1,11 @@
 use openscq30_lib_macros::Has;
 
-use crate::devices::soundcore::common::structures::{
-    BatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration, SerialNumber,
-    TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
+use crate::devices::soundcore::common::{
+    modules::reset_button_configuration::ResetButtonConfigurationPending,
+    structures::{
+        BatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration, SerialNumber,
+        TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
+    },
 };
 
 use super::packets::A3945StateUpdatePacket;
@@ -25,6 +28,7 @@ pub struct A3945State {
     pub bass_up_switch: bool,
     #[has(skip)]
     pub device_color: u8,
+    button_reset_pending: ResetButtonConfigurationPending,
 }
 
 impl From<A3945StateUpdatePacket> for A3945State {
@@ -42,6 +46,7 @@ impl From<A3945StateUpdatePacket> for A3945State {
             charging_case_battery_level: value.charging_case_battery_level,
             bass_up_switch: value.bass_up_switch,
             device_color: value.device_color,
+            button_reset_pending: ResetButtonConfigurationPending::default(),
         }
     }
 }

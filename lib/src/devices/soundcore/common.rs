@@ -5,5 +5,6 @@ pub mod modules;
 pub mod packet;
 pub mod packet_manager;
 pub mod settings_manager;
+pub mod state;
 pub mod state_modifier;
 pub mod structures;

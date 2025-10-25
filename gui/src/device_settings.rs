@@ -1,3 +1,4 @@
+mod action;
 mod equalizer;
 mod import_string;
 mod information;
@@ -385,6 +386,10 @@ impl DeviceSettingsModel {
                     .map_or_else(|| Cow::Borrowed(""), Cow::Borrowed),
                 move |text| Message::SetImportString(setting_id, text),
                 move |text| Message::AskConfirmImportString(setting_id, Cow::from(text).into()),
+            )],
+            Setting::Action => vec![action::action(
+                setting_id,
+                Message::SetSetting(setting_id, true.into()),
             )],
         }
     }

@@ -66,6 +66,9 @@ soundcore_device!(
         });
         builder.equalizer_with_drc_tws().await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
+        builder.reset_button_configuration::<A3931StateUpdatePacket>(
+            RequestState::default().to_packet(),
+        );
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.touch_tone();
         builder.tws_status();

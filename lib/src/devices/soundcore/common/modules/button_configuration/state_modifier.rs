@@ -6,7 +6,10 @@ use tokio::sync::watch;
 use crate::{
     api::{connection::RfcommConnection, device},
     devices::soundcore::common::{
-        modules::button_configuration::{ButtonConfigurationSettings, ButtonSettings},
+        modules::{
+            button_configuration::{ButtonConfigurationSettings, ButtonSettings},
+            reset_button_configuration::ResetButtonConfigurationPending,
+        },
         packet::{self, PacketIOController, outbound::ToPacket},
         state_modifier::StateModifier,
         structures::button_configuration::{Button, ButtonStatusCollection},
@@ -52,7 +55,11 @@ impl<ConnectionType: RfcommConnection, const NUM_BUTTONS: usize, const NUM_PRESS
     StateModifier<T>
     for ButtonConfigurationStateModifier<ConnectionType, NUM_BUTTONS, NUM_PRESS_KINDS>
 where
-    T: Has<ButtonStatusCollection<NUM_BUTTONS>> + Clone + Send + Sync,
+    T: Has<ButtonStatusCollection<NUM_BUTTONS>>
+        + Has<ResetButtonConfigurationPending>
+        + Clone
+        + Send
+        + Sync,
     ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
@@ -60,11 +67,17 @@ where
         state_sender: &watch::Sender<T>,
         target_state: &T,
     ) -> device::Result<()> {
-        let target_statuses = target_state.get();
+        // If we are resetting buttons to default, don't immediately put them back as they were afterwards
+        let is_reset_pending: ResetButtonConfigurationPending = *target_state.get();
+        if is_reset_pending.0 {
+            return Ok(());
+        }
+
+        let target_statuses: &ButtonStatusCollection<NUM_BUTTONS> = target_state.get();
 
         let num_changes: usize = {
             let state = state_sender.borrow();
-            let statuses = state.get();
+            let statuses: &ButtonStatusCollection<NUM_BUTTONS> = state.get();
             statuses
                 .0
                 .iter()
@@ -91,7 +104,9 @@ where
             state_sender.send_modify(|state| *state.get_mut() = *target_statuses);
         } else {
             for (i, target) in target_statuses.0.iter().enumerate() {
-                let current = state_sender.borrow().get().0[i];
+                let current =
+                    <T as Has<ButtonStatusCollection<NUM_BUTTONS>>>::get(&state_sender.borrow()).0
+                        [i];
                 if current != *target {
                     let ButtonData {
                         button,
@@ -127,7 +142,10 @@ where
                             )
                             .await?;
                     }
-                    state_sender.send_modify(|state| state.get_mut().0[i] = *target);
+                    state_sender.send_modify(|state| {
+                        <T as Has<ButtonStatusCollection<NUM_BUTTONS>>>::get_mut(state).0[i] =
+                            *target
+                    });
                 }
             }
         }

@@ -1,9 +1,12 @@
 use openscq30_lib_macros::Has;
 
-use crate::devices::soundcore::common::structures::{
-    AgeRange, AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CustomHearId, DualBattery,
-    DualFirmwareVersion, EqualizerConfiguration, Gender, SerialNumber, TouchTone, TwsStatus,
-    button_configuration::ButtonStatusCollection,
+use crate::devices::soundcore::common::{
+    modules::reset_button_configuration::ResetButtonConfigurationPending,
+    structures::{
+        AgeRange, AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CustomHearId, DualBattery,
+        DualFirmwareVersion, EqualizerConfiguration, Gender, SerialNumber, TouchTone, TwsStatus,
+        button_configuration::ButtonStatusCollection,
+    },
 };
 
 use super::{packets::A3936StateUpdatePacket, structures::A3936SoundModes};
@@ -32,6 +35,7 @@ pub struct A3936State {
     pub supports_two_cnn_switch: bool,
     #[has(skip)]
     pub game_mode_switch: bool,
+    button_reset_pending: ResetButtonConfigurationPending,
 }
 
 impl From<A3936StateUpdatePacket> for A3936State {
@@ -55,6 +59,7 @@ impl From<A3936StateUpdatePacket> for A3936State {
             auto_power_off: value.auto_power_off,
             game_mode_switch: value.game_mode_switch,
             gender: Gender::default(),
+            button_reset_pending: ResetButtonConfigurationPending::default(),
         }
     }
 }

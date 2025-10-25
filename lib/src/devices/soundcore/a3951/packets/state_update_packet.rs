@@ -20,6 +20,7 @@ use crate::{
                 parsing::take_bool,
             },
             packet_manager::PacketHandler,
+            state::Update,
             structures::{
                 AgeRange, CustomHearId, DualBattery, EqualizerConfiguration, Gender, SoundModes,
                 TouchTone, TwsStatus, VolumeAdjustments,
@@ -209,7 +210,7 @@ impl PacketHandler<A3951State> for StateUpdatePacketHandler {
         packet: &packet::Inbound,
     ) -> device::Result<()> {
         let packet: A3951StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| state.update_from_state_update_packet(packet));
+        state.send_modify(|state| state.update(packet));
         Ok(())
     }
 }

@@ -48,6 +48,9 @@ soundcore_device!(
         // });
         builder.equalizer_with_basic_hear_id_tws().await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
+        builder.reset_button_configuration::<A3926StateUpdatePacket>(
+            RequestState::default().to_packet(),
+        );
         builder.tws_status();
         builder.dual_battery(5);
         builder.serial_number_and_dual_firmware_version();

@@ -7,6 +7,7 @@ use state_modifier::ButtonConfigurationStateModifier;
 use crate::{
     api::{connection::RfcommConnection, settings::CategoryId},
     devices::soundcore::common::{
+        modules::reset_button_configuration::ResetButtonConfigurationPending,
         packet::PacketIOController,
         structures::{TwsStatus, button_configuration::*},
     },
@@ -273,7 +274,7 @@ where
         packet_io: Arc<PacketIOController<ConnectionType>>,
         settings: &'static ButtonConfigurationSettings<NUM_BUTTONS, NUM_PRESS_KINDS>,
     ) where
-        T: Has<ButtonStatusCollection<NUM_BUTTONS>>,
+        T: Has<ButtonStatusCollection<NUM_BUTTONS>> + Has<ResetButtonConfigurationPending>,
         ConnectionType: RfcommConnection + 'static + Send + Sync,
     {
         const {

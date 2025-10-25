@@ -2,10 +2,13 @@ use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::{
     a3959,
-    common::structures::{
-        AmbientSoundModeCycle, AutoPowerOff, DualBattery, DualFirmwareVersion,
-        EqualizerConfiguration, SerialNumber, TouchTone, TwsStatus,
-        button_configuration::ButtonStatusCollection,
+    common::{
+        modules::reset_button_configuration::ResetButtonConfigurationPending,
+        structures::{
+            AmbientSoundModeCycle, AutoPowerOff, DualBattery, DualFirmwareVersion,
+            EqualizerConfiguration, SerialNumber, TouchTone, TwsStatus,
+            button_configuration::ButtonStatusCollection,
+        },
     },
 };
 
@@ -21,6 +24,7 @@ pub struct A3959State {
     sound_modes: a3959::structures::SoundModes,
     auto_power_off: AutoPowerOff,
     touch_tone: TouchTone,
+    button_reset_pending: ResetButtonConfigurationPending,
 }
 
 impl From<a3959::packets::inbound::A3959State> for A3959State {
@@ -36,6 +40,7 @@ impl From<a3959::packets::inbound::A3959State> for A3959State {
             sound_modes: packet.sound_modes,
             auto_power_off: packet.auto_power_off,
             touch_tone: packet.touch_tone,
+            button_reset_pending: ResetButtonConfigurationPending::default(),
         }
     }
 }

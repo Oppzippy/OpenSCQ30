@@ -6,6 +6,7 @@ use tokio::sync::watch;
 use crate::{
     api::{connection::RfcommConnection, device},
     devices::soundcore::common::{
+        modules::reset_button_configuration::ResetButtonConfigurationPending,
         packet::{self, PacketIOController, outbound::ToPacket},
         state_modifier::StateModifier,
         structures::AmbientSoundModeCycle,
@@ -26,17 +27,23 @@ impl<ConnectionType: RfcommConnection> AmbientSoundModeCycleStateModifier<Connec
 impl<ConnectionType, T> StateModifier<T> for AmbientSoundModeCycleStateModifier<ConnectionType>
 where
     ConnectionType: RfcommConnection + Send + Sync,
-    T: Has<AmbientSoundModeCycle> + Clone + Send + Sync,
+    T: Has<AmbientSoundModeCycle> + Has<ResetButtonConfigurationPending> + Clone + Send + Sync,
 {
     async fn move_to_state(
         &self,
         state_sender: &watch::Sender<T>,
         target_state: &T,
     ) -> device::Result<()> {
+        // If we are resetting buttons to default, don't immediately put them back as they were afterwards
+        let is_reset_pending: ResetButtonConfigurationPending = *target_state.get();
+        if is_reset_pending.0 {
+            return Ok(());
+        }
+
         let target_cycle = target_state.get();
         {
             let state = state_sender.borrow();
-            let cycle = state.get();
+            let cycle: &AmbientSoundModeCycle = state.get();
             if cycle == target_cycle {
                 return Ok(());
             }

@@ -166,6 +166,7 @@ enum JsonSetting {
     Equalizer { setting: settings::Equalizer },
     Information,
     ImportString,
+    Action,
 }
 
 impl From<settings::Setting> for JsonSetting {
@@ -182,6 +183,7 @@ impl From<settings::Setting> for JsonSetting {
             settings::Setting::Equalizer { setting, .. } => Self::Equalizer { setting },
             settings::Setting::Information { .. } => Self::Information,
             settings::Setting::ImportString { .. } => Self::ImportString,
+            settings::Setting::Action => Self::Action,
         }
     }
 }

@@ -71,6 +71,7 @@ impl Throttle {
             }
             Setting::Information { .. } => (),
             Setting::ImportString { .. } => (),
+            Setting::Action => (),
         }
 
         Some(setting)

@@ -41,3 +41,4 @@ overwrite-with-current-settings = Overwrite with Current Settings
 delete = Delete
 none = None
 confirm = Confirm
+execute = Execute

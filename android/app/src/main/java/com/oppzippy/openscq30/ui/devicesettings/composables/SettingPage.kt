@@ -21,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -112,6 +113,11 @@ fun SettingPage(
                     name = name,
                     confirmationMessage = setting.confirmationMessage,
                     onImport = { setSetting(settingId, it.toValue()) },
+                )
+
+                is Setting.Action -> Action(
+                    name = name,
+                    onExecute = { setSetting(settingId, true.toValue()) },
                 )
             }
         }
@@ -283,4 +289,9 @@ private fun ImportString(name: String, confirmationMessage: String, onImport: (S
             },
         )
     }
+}
+
+@Composable
+private fun Action(name: String, onExecute: () -> Unit) {
+    Button(modifier = Modifier.fillMaxWidth(), onClick = onExecute) { Text(name) }
 }

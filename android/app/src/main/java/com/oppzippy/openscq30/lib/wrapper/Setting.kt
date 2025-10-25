@@ -61,6 +61,12 @@ sealed class Setting {
     data class ImportStringSetting(val confirmationMessage: String) : Setting() {
         override fun toValue() = "".toValue()
     }
+
+    @Serializable
+    @SerialName("action")
+    class Action : Setting() {
+        override fun toValue() = false.toValue()
+    }
 }
 
 @Serializable

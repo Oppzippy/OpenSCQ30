@@ -10,7 +10,10 @@ use crate::{
         connection::RfcommConnection,
         settings::{CategoryId, SettingId},
     },
-    devices::soundcore::common::{packet::PacketIOController, structures::AmbientSoundModeCycle},
+    devices::soundcore::common::{
+        modules::reset_button_configuration::ResetButtonConfigurationPending,
+        packet::PacketIOController, structures::AmbientSoundModeCycle,
+    },
     macros::enum_subset,
 };
 
@@ -32,7 +35,7 @@ enum_subset!(
 
 impl<T> ModuleCollection<T>
 where
-    T: Has<AmbientSoundModeCycle> + Clone + Send + Sync,
+    T: Has<AmbientSoundModeCycle> + Has<ResetButtonConfigurationPending> + Clone + Send + Sync,
 {
     pub fn add_ambient_sound_mode_cycle<C>(&mut self, packet_io: Arc<PacketIOController<C>>)
     where

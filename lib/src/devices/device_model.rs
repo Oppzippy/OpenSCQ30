@@ -175,6 +175,7 @@ mod tests {
                         Setting::ModifiableSelect { .. }
                         | Setting::Information { .. }
                         | Setting::ImportString { .. } => None,
+                        Setting::Action => Some(true.into()),
                     };
                     if let Some(value) = value {
                         device

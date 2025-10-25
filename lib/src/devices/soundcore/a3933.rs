@@ -43,6 +43,9 @@ soundcore_device!(
         builder.equalizer_tws().await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.ambient_sound_mode_cycle();
+        builder.reset_button_configuration::<A3933StateUpdatePacket>(
+            RequestState::default().to_packet(),
+        );
         builder.touch_tone();
         builder.tws_status();
         builder.dual_battery(5);

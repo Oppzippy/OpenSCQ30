@@ -18,6 +18,7 @@ use crate::{
                 outbound::ToPacket,
             },
             packet_manager::PacketHandler,
+            state::Update,
             structures::{
                 AgeRange, BasicHearId, DualBattery, EqualizerConfiguration, Gender, TwsStatus,
                 button_configuration::ButtonStatusCollection,
@@ -135,7 +136,7 @@ impl PacketHandler<A3926State> for StateUpdatePacketHandler {
         packet: &packet::Inbound,
     ) -> device::Result<()> {
         let packet: A3926StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| state.update_from_state_update_packet(packet));
+        state.send_modify(|state| state.update(packet));
         Ok(())
     }
 }

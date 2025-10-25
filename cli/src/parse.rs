@@ -16,6 +16,7 @@ pub fn setting_value(setting: &Setting, unparsed: String) -> anyhow::Result<Valu
         Setting::Equalizer { setting, .. } => parse_equalizer(setting, &unparsed),
         Setting::Information { .. } => parse_information(),
         Setting::ImportString { .. } => parse_import_string(unparsed),
+        Setting::Action => Ok(Value::Bool(true)),
     }
 }
 

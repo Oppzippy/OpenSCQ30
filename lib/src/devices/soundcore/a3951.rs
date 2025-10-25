@@ -54,6 +54,9 @@ soundcore_device!(
         });
         builder.equalizer_with_custom_hear_id_tws().await;
         builder.button_configuration(&BUTTON_SETTINGS);
+        builder.reset_button_configuration::<A3951StateUpdatePacket>(
+            RequestState::default().to_packet(),
+        );
         builder.touch_tone();
         builder.tws_status();
         builder.dual_battery(5);

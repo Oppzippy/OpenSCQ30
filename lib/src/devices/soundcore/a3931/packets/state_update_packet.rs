@@ -19,6 +19,7 @@ use crate::{
                 parsing::take_bool,
             },
             packet_manager::PacketHandler,
+            state::Update,
             structures::{
                 AutoPowerOff, DualBattery, EqualizerConfiguration, SoundModes, TouchTone,
                 TwsStatus, button_configuration::ButtonStatusCollection,
@@ -141,7 +142,7 @@ impl PacketHandler<A3931State> for StateUpdatePacketHandler {
         packet: &packet::Inbound,
     ) -> device::Result<()> {
         let packet: A3931StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| state.update_from_state_update_packet(packet));
+        state.send_modify(|state| state.update(packet));
         Ok(())
     }
 }

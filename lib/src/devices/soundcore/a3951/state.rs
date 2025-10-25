@@ -1,7 +1,9 @@
 use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::common::{
+    modules::reset_button_configuration::ResetButtonConfigurationPending,
     packet::inbound::SerialNumberAndFirmwareVersion,
+    state::Update,
     structures::{
         AgeRange, CustomHearId, DualBattery, DualFirmwareVersion, EqualizerConfiguration, Gender,
         SerialNumber, SoundModes, TouchTone, TwsStatus,
@@ -36,6 +38,7 @@ pub struct A3951State {
     left_new_battery: u8, // 0 to 9
     #[has(skip)]
     right_new_battery: u8, // 0 to 9
+    button_reset_pending: ResetButtonConfigurationPending,
 }
 
 impl A3951State {
@@ -61,10 +64,13 @@ impl A3951State {
             right_new_battery: state_update_packet.right_new_battery,
             serial_number: sn_and_firmware.serial_number,
             dual_firmware_version: sn_and_firmware.dual_firmware_version,
+            button_reset_pending: ResetButtonConfigurationPending::default(),
         }
     }
+}
 
-    pub fn update_from_state_update_packet(&mut self, packet: A3951StateUpdatePacket) {
+impl Update<A3951StateUpdatePacket> for A3951State {
+    fn update(&mut self, partial: A3951StateUpdatePacket) {
         let A3951StateUpdatePacket {
             tws_status,
             battery,
@@ -81,7 +87,7 @@ impl A3951State {
             supports_new_battery,
             left_new_battery,
             right_new_battery,
-        } = packet;
+        } = partial;
         self.tws_status = tws_status;
         self.battery = battery;
         self.equalizer_configuration = equalizer_configuration;

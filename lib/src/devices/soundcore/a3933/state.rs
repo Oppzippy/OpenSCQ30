@@ -1,9 +1,12 @@
 use openscq30_lib_macros::Has;
 
-use crate::devices::soundcore::common::structures::{
-    AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery, DualFirmwareVersion,
-    EqualizerConfiguration, SerialNumber, SoundModes, TouchTone, TwsStatus,
-    button_configuration::ButtonStatusCollection,
+use crate::devices::soundcore::common::{
+    modules::reset_button_configuration::ResetButtonConfigurationPending,
+    structures::{
+        AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
+        DualFirmwareVersion, EqualizerConfiguration, SerialNumber, SoundModes, TouchTone,
+        TwsStatus, button_configuration::ButtonStatusCollection,
+    },
 };
 
 use super::packets::inbound::A3933StateUpdatePacket;
@@ -30,6 +33,7 @@ pub struct A3933State {
     pub device_color: u8,
     #[has(skip)]
     pub wind_noise_detection: bool,
+    button_reset_pending: ResetButtonConfigurationPending,
 }
 
 impl From<A3933StateUpdatePacket> for A3933State {
@@ -51,6 +55,7 @@ impl From<A3933StateUpdatePacket> for A3933State {
             charging_case_battery_level: value.charging_case_battery_level,
             device_color: value.device_color,
             wind_noise_detection: value.wind_noise_detection,
+            button_reset_pending: ResetButtonConfigurationPending::default(),
         }
     }
 }

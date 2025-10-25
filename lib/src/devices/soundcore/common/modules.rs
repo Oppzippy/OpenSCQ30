@@ -24,6 +24,7 @@ mod auto_power_off;
 pub mod button_configuration;
 pub mod dual_battery;
 pub mod equalizer;
+pub mod reset_button_configuration;
 pub mod serial_number_and_dual_firmware_version;
 pub mod serial_number_and_firmware_version;
 pub mod single_battery;

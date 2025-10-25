@@ -19,8 +19,12 @@ use crate::{
         soundcore::{
             self,
             common::{
-                modules::button_configuration::ButtonConfigurationSettings,
+                modules::{
+                    button_configuration::ButtonConfigurationSettings,
+                    reset_button_configuration::ResetButtonConfigurationPending,
+                },
                 packet::{self, PacketIOController, outbound::ToPacket},
+                state::Update,
                 structures::{
                     AutoPowerOff, TouchTone, button_configuration::ButtonStatusCollection,
                 },
@@ -329,7 +333,9 @@ where
         &mut self,
         settings: &'static ButtonConfigurationSettings<NUM_BUTTONS, NUM_PRESS_KINDS>,
     ) where
-        StateType: Has<ButtonStatusCollection<NUM_BUTTONS>> + Has<TwsStatus>,
+        StateType: Has<ButtonStatusCollection<NUM_BUTTONS>>
+            + Has<TwsStatus>
+            + Has<ResetButtonConfigurationPending>,
     {
         self.module_collection
             .add_button_configuration(self.packet_io_controller.clone(), settings);
@@ -337,10 +343,24 @@ where
 
     pub fn ambient_sound_mode_cycle(&mut self)
     where
-        StateType: Has<AmbientSoundModeCycle>,
+        StateType: Has<AmbientSoundModeCycle> + Has<ResetButtonConfigurationPending>,
     {
         self.module_collection
             .add_ambient_sound_mode_cycle(self.packet_io_controller.clone());
+    }
+
+    pub fn reset_button_configuration<ButtonConfigurationPacketType>(
+        &mut self,
+        request_button_configuration_packet: packet::Outbound,
+    ) where
+        StateType: Has<ResetButtonConfigurationPending> + Update<ButtonConfigurationPacketType>,
+        ButtonConfigurationPacketType: FromPacketBody,
+    {
+        self.module_collection
+            .add_reset_button_configuration::<ConnectionType, ButtonConfigurationPacketType>(
+                self.packet_io_controller.clone(),
+                request_button_configuration_packet,
+            );
     }
 
     pub fn single_battery(&mut self)

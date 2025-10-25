@@ -1,7 +1,9 @@
 use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::common::{
+    modules::reset_button_configuration::ResetButtonConfigurationPending,
     packet::inbound::SerialNumberAndFirmwareVersion,
+    state::Update,
     structures::{
         AutoPowerOff, DualBattery, DualFirmwareVersion, EqualizerConfiguration, SerialNumber,
         SoundModes, TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
@@ -23,6 +25,7 @@ pub struct A3931State {
     touch_tone: TouchTone,
     #[has(skip)]
     side_tone: bool,
+    button_reset_pending: ResetButtonConfigurationPending,
 }
 
 impl A3931State {
@@ -41,10 +44,13 @@ impl A3931State {
             auto_power_off: state_update_packet.auto_power_off,
             serial_number: sn_and_firmware.serial_number,
             dual_firmware_version: sn_and_firmware.dual_firmware_version,
+            button_reset_pending: ResetButtonConfigurationPending::default(),
         }
     }
+}
 
-    pub fn update_from_state_update_packet(&mut self, packet: A3931StateUpdatePacket) {
+impl Update<A3931StateUpdatePacket> for A3931State {
+    fn update(&mut self, partial: A3931StateUpdatePacket) {
         let A3931StateUpdatePacket {
             tws_status,
             battery,
@@ -54,7 +60,7 @@ impl A3931State {
             side_tone,
             touch_tone,
             auto_power_off,
-        } = packet;
+        } = partial;
         self.tws_status = tws_status;
         self.battery = battery;
         self.equalizer_configuration = equalizer_configuration;

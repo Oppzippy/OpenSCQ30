@@ -22,7 +22,7 @@ impl ToPacket for SetButtonConfiguration {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct ResetButtonConfigurationsToDefault;
 
 impl ToPacket for ResetButtonConfigurationsToDefault {

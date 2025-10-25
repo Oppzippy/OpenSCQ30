@@ -37,6 +37,7 @@ impl std::fmt::Display for CustomDisplaySetting {
             ),
             Setting::Information { .. } => write!(f, "information (read only)"),
             Setting::ImportString { .. } => write!(f, "import string"),
+            Setting::Action => write!(f, "action"),
         }?;
         Ok(())
     }

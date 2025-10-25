@@ -110,6 +110,7 @@ pub enum SettingId {
     ImportCustomEqualizerProfiles,
     AutoPowerOff,
     TouchTone,
+    ResetButtonsToDefault,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -156,6 +157,7 @@ pub enum Setting {
     ImportString {
         confirmation_message: Option<String>,
     },
+    Action,
 }
 
 impl From<Setting> for Value {
@@ -168,11 +170,12 @@ impl From<Setting> for Value {
             Setting::Equalizer { value, .. } => value.into(),
             Setting::ModifiableSelect { value, .. } => value.into(),
             Setting::Information {
-                value: text,
+                value,
                 translated_value: _,
-            } => Cow::<str>::Owned(text).into(),
+            } => Cow::<str>::Owned(value).into(),
             Setting::MultiSelect { values, .. } => values.into(),
             Setting::ImportString { .. } => Cow::from("").into(),
+            Setting::Action => Value::Bool(false),
         }
     }
 }
@@ -220,6 +223,7 @@ impl Setting {
             Self::Equalizer { .. } => SettingMode::ReadWrite,
             Self::Information { .. } => SettingMode::ReadOnly,
             Self::ImportString { .. } => SettingMode::WriteOnly,
+            Self::Action { .. } => SettingMode::WriteOnly,
         }
     }
 }
