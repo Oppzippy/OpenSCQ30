@@ -5,17 +5,28 @@ use std::borrow::Cow;
 use anyhow::{anyhow, bail};
 use openscq30_lib::settings::{self, ModifiableSelectCommand, Setting, Value};
 
-pub fn setting_value(setting: &Setting, unparsed: String) -> anyhow::Result<Value> {
+pub fn setting_value(setting: &Setting, unparsed: Option<String>) -> anyhow::Result<Value> {
+    let required_err = anyhow!("a value is required");
     match setting {
-        Setting::Toggle { .. } => parse_toggle(&unparsed),
-        Setting::I32Range { setting, .. } => parse_i32_range(setting, &unparsed),
-        Setting::Select { setting, .. } => parse_select(setting, &unparsed),
-        Setting::OptionalSelect { setting, .. } => parse_optional_select(setting, &unparsed),
-        Setting::ModifiableSelect { setting, .. } => parse_modifiable_select(setting, unparsed),
-        Setting::MultiSelect { setting, .. } => parse_multi_select(setting, &unparsed),
-        Setting::Equalizer { setting, .. } => parse_equalizer(setting, &unparsed),
+        Setting::Toggle { .. } => parse_toggle(&unparsed.ok_or(required_err)?),
+        Setting::I32Range { setting, .. } => {
+            parse_i32_range(setting, &unparsed.ok_or(required_err)?)
+        }
+        Setting::Select { setting, .. } => parse_select(setting, &unparsed.ok_or(required_err)?),
+        Setting::OptionalSelect { setting, .. } => {
+            parse_optional_select(setting, &unparsed.ok_or(required_err)?)
+        }
+        Setting::ModifiableSelect { setting, .. } => {
+            parse_modifiable_select(setting, unparsed.ok_or(required_err)?)
+        }
+        Setting::MultiSelect { setting, .. } => {
+            parse_multi_select(setting, &unparsed.ok_or(required_err)?)
+        }
+        Setting::Equalizer { setting, .. } => {
+            parse_equalizer(setting, &unparsed.ok_or(required_err)?)
+        }
         Setting::Information { .. } => parse_information(),
-        Setting::ImportString { .. } => parse_import_string(unparsed),
+        Setting::ImportString { .. } => parse_import_string(unparsed.ok_or(required_err)?),
         Setting::Action => Ok(Value::Bool(true)),
     }
 }

@@ -1118,7 +1118,7 @@ fn setting_action_set() {
         .arg("--set")
         .arg("leftSinglePress=playPause")
         .arg("--set")
-        .arg("resetButtonsToDefault=")
+        .arg("resetButtonsToDefault")
         .arg("--get")
         .arg("leftSinglePress");
     assert_cmd_snapshot!(command, @r"

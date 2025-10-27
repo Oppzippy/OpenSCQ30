@@ -220,7 +220,7 @@ struct ExecCommandWithIndex {
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
 enum ExecCommand {
     Get(SettingId),
-    Set(SettingId, String),
+    Set(SettingId, Option<String>),
 }
 
 fn collect_commands(matches: &ArgMatches) -> anyhow::Result<Vec<ExecCommand>> {
@@ -240,14 +240,15 @@ fn collect_commands(matches: &ArgMatches) -> anyhow::Result<Vec<ExecCommand>> {
         .unwrap_or_default()
         .zip(matches.get_many::<String>("set").unwrap_or_default())
         .map(|(index, setting_id_to_value)| {
-            let (setting_id, unparsed_value) = setting_id_to_value.split_once("=").ok_or(
-                anyhow!("invalid setting id value assignment: {setting_id_to_value}"),
-            )?;
+            let (setting_id, unparsed_value) = setting_id_to_value
+                .split_once("=")
+                .map(|(setting_id, unparsed_value)| (setting_id, Some(unparsed_value)))
+                .unwrap_or((setting_id_to_value, None));
             Ok(ExecCommandWithIndex {
                 index,
                 command: ExecCommand::Set(
                     setting_id_from_str(setting_id)?,
-                    unparsed_value.to_string(),
+                    unparsed_value.map(ToString::to_string),
                 ),
             })
         });
