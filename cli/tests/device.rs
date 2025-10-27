@@ -1106,6 +1106,56 @@ fn setting_import_string_get() {
 }
 
 #[test]
+fn setting_action_set() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    let mut command = cli(dir.path());
+    command
+        .arg("device")
+        .arg("--mac-address")
+        .arg("00:00:00:00:00:00")
+        .arg("setting")
+        .arg("--set")
+        .arg("leftSinglePress=playPause")
+        .arg("--set")
+        .arg("resetButtonsToDefault=")
+        .arg("--get")
+        .arg("leftSinglePress");
+    assert_cmd_snapshot!(command, @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID     	Value   
+    leftSinglePress	VolumeUp
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn setting_action_get() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3951");
+    let mut command = cli(dir.path());
+    command
+        .arg("device")
+        .arg("--mac-address")
+        .arg("00:00:00:00:00:00")
+        .arg("setting")
+        .arg("--get")
+        .arg("resetButtonsToDefault");
+    assert_cmd_snapshot!(command, @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID           	Value
+    resetButtonsToDefault	false
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
 fn setting_set_and_get_race_condition() {
     thread::scope(|scope| {
         for i in 0..500 {
