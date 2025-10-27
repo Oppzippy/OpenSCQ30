@@ -29,7 +29,7 @@ jobs:
           mv target/release/openscq30-gui artifacts/openscq30-gui-linux-x86_64
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: linux
           path: artifacts/*
@@ -56,7 +56,7 @@ jobs:
           Move-Item .\packaging\windows\Output\OpenSCQ30-Setup.exe artifacts\openscq30-gui-windows-x86_64.exe
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: windows
           path: artifacts/*
@@ -82,7 +82,7 @@ jobs:
           rename.ul app- openscq30-android- artifacts/*
           rename.ul -- -release '' artifacts/*
       - name: Upload apk
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: android
           path: artifacts/*
