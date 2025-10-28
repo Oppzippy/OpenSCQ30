@@ -34,11 +34,20 @@ impl HasDirection for OutboundMarker {
     type ReverseDirection = InboundMarker;
 }
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Default, Hash)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Default, Hash)]
 pub struct Packet<D> {
     pub command: Command,
     pub body: Vec<u8>,
     _d: PhantomData<D>,
+}
+
+impl<D> std::fmt::Debug for Packet<D> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Packet")
+            .field("command", &self.command)
+            .field("body", &self.body)
+            .finish()
+    }
 }
 
 pub type Inbound = Packet<InboundMarker>;
