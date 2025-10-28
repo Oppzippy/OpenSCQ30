@@ -1,5 +1,32 @@
 # Changelog
 
+## v2.0.0-beta3
+
+### General
+
+- Add Codeberg mirror: https://codeberg.org/Oppzippy/OpenSCQ30
+
+#### Features
+
+- Add Reset Buttons to Default action
+
+#### Fixes
+
+- Button configuration not working for various devices
+- None option shown for buttons that can't have their actions disabled
+- Equalizer settings shown when only one earbud is connected
+- Soundcore R50i NC missing TWS status in device information category
+
+### GUI
+
+#### Fixes
+
+- Connecting to a powered off device, canceling before it times out, and connecting to a second powered on device will no longer disconnect from the second device when the connection to the first times out.
+
+#### Localization
+
+- Weblate is now used for translations using Codeberg's instance: https://translate.codeberg.org/projects/openscq30/
+
 ## v2.0.0-beta2
 
 ### General

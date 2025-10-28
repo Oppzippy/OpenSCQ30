@@ -1,0 +1,8 @@
+* Features
+  - Add Reset Buttons to Default action
+
+* Fixes
+  - Button configuration not working for various devices
+  - None option shown for buttons that can't have their actions disabled
+  - Equalizer settings shown when only one earbud is connected
+  - Soundcore R50i NC missing TWS status in device information category

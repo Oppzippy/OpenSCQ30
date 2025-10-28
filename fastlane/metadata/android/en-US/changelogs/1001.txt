@@ -1,0 +1,3 @@
+* Fixes
+  - R50i NC sound modes not working
+  - Life Q30 not working with firmware version 05.19
