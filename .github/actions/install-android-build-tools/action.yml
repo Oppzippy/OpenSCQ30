@@ -14,9 +14,11 @@ runs:
       shell: bash
       run: sed "s/ /=/" .build-tool-versions >> "$GITHUB_OUTPUT"
 
-    - name: Set ANDROID_NDK_HOME to specified version
+    - name: Set ANDROID_NDK_HOME and ANDROID_NDK_ROOT to specified version
       shell: bash
-      run: echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ steps.build_tool_versions.outputs.ndk }}" >> "$GITHUB_ENV"
+      run: |
+        echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ steps.build_tool_versions.outputs.ndk }}" >> "$GITHUB_ENV"
+        echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/${{ steps.build_tool_versions.outputs.ndk }}" >> "$GITHUB_ENV"
 
     - uses: dtolnay/rust-toolchain@master
       with:
