@@ -247,10 +247,10 @@ private fun MultiSelect(name: String, setting: Setting.MultiSelectSetting, onCha
 }
 
 @Composable
-private fun ImportString(name: String, confirmationMessage: String, onImport: (String) -> Unit) {
+private fun ImportString(name: String, confirmationMessage: String?, onImport: (String) -> Unit) {
     var isDialogOpen by remember { mutableStateOf(false) }
     var text by remember { mutableStateOf("") }
-    if (isDialogOpen) {
+    if (isDialogOpen && confirmationMessage != null) {
         AlertDialog(
             onDismissRequest = { isDialogOpen = false },
             title = { Text(name) },
@@ -280,7 +280,16 @@ private fun ImportString(name: String, confirmationMessage: String, onImport: (S
             value = text,
             onValueChange = { text = it },
             trailingIcon = {
-                IconButton(onClick = { isDialogOpen = true }) {
+                IconButton(
+                    onClick = {
+                        if (confirmationMessage != null) {
+                            isDialogOpen = true
+                        } else {
+                            onImport(text)
+                            text = ""
+                        }
+                    },
+                ) {
                     Icon(
                         imageVector = Icons.Filled.Check,
                         contentDescription = stringResource(R.string.import_),
