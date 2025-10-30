@@ -15,6 +15,7 @@ import io
 import os
 import sys
 import pathlib
+import re
 from getpass import getpass
 
 android_signing_key = os.getenv("ANDROID_SIGNING_KEY")
@@ -34,7 +35,11 @@ if not release_dir.exists():
 if len(sys.argv) <= 1:
     print("Usage: ./sign-release <GITHUB_ACTIONS_RUN_ID>")
     sys.exit(1)
-actions_run_id = sys.argv[1]
+
+if match := re.match("^https://github.com/Oppzippy/OpenSCQ30/actions/runs/([0-9+]+)", sys.argv[1], re.RegexFlag.IGNORECASE):
+    actions_run_id = match.group(1)
+else:
+    actions_run_id = sys.argv[1]
 
 android_keystore_password = getpass(f"{android_signing_key} password: ")
 
