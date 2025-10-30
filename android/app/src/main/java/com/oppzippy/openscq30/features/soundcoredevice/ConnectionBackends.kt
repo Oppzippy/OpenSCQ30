@@ -3,10 +3,12 @@ package com.oppzippy.openscq30.features.soundcoredevice
 import android.Manifest
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
+import android.bluetooth.BluetoothSocketException
 import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import com.oppzippy.openscq30.lib.bindings.AndroidException
 import com.oppzippy.openscq30.lib.bindings.AndroidRfcommConnectionBackend
 import com.oppzippy.openscq30.lib.bindings.AndroidRfcommConnectionWriter
 import com.oppzippy.openscq30.lib.bindings.MacAddr6
@@ -70,19 +72,25 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
         } catch (_: CancellationException) {
             try {
                 socket.close()
+                return
             } catch (ex: IOException) {
                 Log.d(TAG, "closing socket", ex)
             }
+        } catch (ex: BluetoothSocketException) {
+            Log.w(TAG, "error connecting to device", ex)
+            throw AndroidException.Other("error connecting to device")
+        } catch (ex: IOException) {
+            Log.w(TAG, "error connecting to device", ex)
+            throw AndroidException.Other("error connecting to device")
         }
 
         var manualRfcommConnection: ManualRfcommConnection? = null
-        manualRfcommConnection =
-            ManualRfcommConnection(
-                AndroidRfcommConnectionWriterImpl(
-                    socket = socket,
-                    setConnectionStatus = { manualRfcommConnection?.setConnectionStatus(it) },
-                ),
-            )
+        manualRfcommConnection = ManualRfcommConnection(
+            AndroidRfcommConnectionWriterImpl(
+                socket = socket,
+                setConnectionStatus = { manualRfcommConnection?.setConnectionStatus(it) },
+            ),
+        )
         coroutineScope.launch {
             withContext(Dispatchers.IO) {
                 while (true) {
@@ -90,8 +98,15 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
                         val buffer = ByteArray(1000)
                         // The socket will be closed from the rust side when we disconnect from the device, so when that
                         // happens, this will throw and we'll break out of the loop
-                        val size = socket.inputStream.read(buffer)
-                        manualRfcommConnection.addInboundPacket(buffer.sliceArray(0..<size))
+                        when (val size = socket.inputStream.read(buffer)) {
+                            -1 -> {
+                                Log.d(TAG, "end of stream")
+                                break
+                            }
+
+                            0 -> Unit
+                            else -> manualRfcommConnection.addInboundPacket(buffer.sliceArray(0..<size))
+                        }
                     } catch (ex: IOException) {
                         Log.d(TAG, "disconnected", ex)
                         break
