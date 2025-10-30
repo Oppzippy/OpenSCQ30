@@ -1,0 +1,3 @@
+* Fixes
+  - Crash when connecting to a disconnected device
+  - Crash when viewing device information tab for Soundcore Development Information

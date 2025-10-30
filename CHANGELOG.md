@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.0.0-beta4
+
+### Android
+
+#### Fixes
+
+- Crash when connecting to a disconnected device
+- Crash when viewing device information tab for Soundcore Development Information
+
 ## v2.0.0-beta3
 
 ### General
