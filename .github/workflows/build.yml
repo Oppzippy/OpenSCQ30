@@ -20,7 +20,7 @@ jobs:
         run: sudo snap install just --classic
       - uses: dtolnay/rust-toolchain@stable
       - name: Build cli and gui
-        run: cargo build --release --package openscq30-cli --package openscq30-gui
+        run: cargo build --release --package openscq30-cli --package openscq30-gui --features bundled-dependencies
 
       - name: Move to artifacts directory
         run: |
