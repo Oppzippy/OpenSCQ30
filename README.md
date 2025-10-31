@@ -43,7 +43,6 @@ OpenSCQ30 is free software for controlling settings for Soundcore headphones and
 | A3040 | Soundcore Space Q45     | [GH-103](https://github.com/Oppzippy/OpenSCQ30/issues/103) |
 | A3116 | Soundcore Motion+       | [GH-119](https://github.com/Oppzippy/OpenSCQ30/issues/119) |
 | A3910 | Soundcore Liberty Air 2 | [GH-128](https://github.com/Oppzippy/OpenSCQ30/issues/128) |
-| A3947 | Soundcore Liberty 4 NC  | [GH-107](https://github.com/Oppzippy/OpenSCQ30/issues/107) |
 | A3947 | Soundcore Liberty 4 NC  | [GH-163](https://github.com/Oppzippy/OpenSCQ30/issues/163) |
 | A3949 | Soundcore P20i          | [GH-108](https://github.com/Oppzippy/OpenSCQ30/issues/108) |
 | A3952 | Soundcore Liberty 3 Pro | [GH-134](https://github.com/Oppzippy/OpenSCQ30/issues/134) |
