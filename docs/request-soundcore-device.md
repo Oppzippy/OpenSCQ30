@@ -13,6 +13,6 @@ Click the add device button, then select Soundcore Development Information, and 
 ## CLI
 
 ```bash
-openscq30 paired-devices add --mac-address E8:EE:CC:24:AC:4C --model SoundcoreDevelopment
-openscq30 device --mac-address E8:EE:CC:24:AC:4C setting --get stateUpdatePacket --json
+openscq30 paired-devices add --mac-address YOUR_SOUNDCORE_DEVICE_MAC_ADDRESS --model SoundcoreDevelopment
+openscq30 device --mac-address YOUR_SOUNDCORE_DEVICE_MAC_ADDRESS setting --get stateUpdatePacket --json
 ```
