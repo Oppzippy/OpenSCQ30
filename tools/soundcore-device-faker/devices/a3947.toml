@@ -5,23 +5,23 @@ rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B3947"
 # State update
 command = [1, 1]
 response = [
-    1,
-    1,
-    5,
-    5,
-    0,
-    0,
-    48,
+    1,    # TWS host device
+    1,    # TWS connected
+    2,    # Left battery level
+    4,    # Right battery level
+    0,    # Left battery charging
+    0,    # Right battery charging
+    48,   # Left firmware version start
     53,
     46,
     56,
-    56,
-    48,
+    56,   # Left firmware version end
+    48,   # Right firmware version start
     53,
     46,
     56,
-    56,
-    51,
+    56,   # Right firmware version end
+    51,   # Serial number start
     57,
     52,
     55,
@@ -36,14 +36,15 @@ response = [
     69,
     69,
     69,
-    56,
-    48,
+    56,   # Serial number start
+    48,   # Version of something? maybe case firmware? start
     48,
     46,
     48,
-    48,
+    48,   # Version of something? end
+    254,  # Equalizer profile id
     254,
-    254,
+    120,  # Left equalizer start
     120,
     120,
     120,
@@ -52,8 +53,8 @@ response = [
     120,
     120,
     120,
-    120,
-    120,
+    120,  # Left equalizer end
+    255,  # Right equalizer start
     255,
     255,
     255,
@@ -62,11 +63,10 @@ response = [
     255,
     255,
     255,
-    255,
-    255,
-    0,
-    1,
-    112,
+    255,  # Right equalizer end
+    0,    # Unknown
+    1,    # hear id enabled
+    112,  # Hear id left volume adjustments start
     117,
     140,
     148,
@@ -75,8 +75,8 @@ response = [
     134,
     131,
     60,
-    60,
-    112,
+    60,   # Hear id left volume adjustments end
+    112,  # Hear id right volume adjustments start
     117,
     140,
     148,
@@ -85,13 +85,13 @@ response = [
     134,
     131,
     60,
-    60,
-    104,
+    60,   # Hear id right volume adjustments end
+    104,  # time? start
     100,
     34,
-    64,
-    0,
-    112,
+    64,   # time? end
+    0,    # hear id type (0=initial curve, 1=custom hearid, 2=favorite music genre)
+    112,  # Hear id left custom volume adjustments start
     117,
     140,
     148,
@@ -100,8 +100,8 @@ response = [
     134,
     131,
     60,
-    60,
-    112,
+    60,   # Hear id left custom volume adjustments end
+    112,  # Hear id right custom volume adjustments start
     117,
     140,
     148,
@@ -110,59 +110,59 @@ response = [
     134,
     131,
     60,
-    60,
-    0,
-    0,
-    18,
-    17,
-    102,
-    17,
-    102,
-    17,
-    50,
-    17,
-    51,
-    17,
-    68,
-    17,
-    68,
-    0,
-    33,
-    0,
-    32,
-    53,
-    0,
-    80,
-    1,
-    0,
-    1,
-    1,
-    0,
+    60,   # Hear id right custom volume adjustments end
+    0,    # hear id favorite music genre
+    0,    # hear id favorite music genre
+    18,   # Unknown
+    17,   # left single press enabled
+    102,  # left single press
+    17,   # right single press enabled
+    101,  # right single press
+    17,   # left double enabled
+    50,   # left double press
+    17,   # right double press enabled
+    51,   # right double press
+    17,   # left long press enabled
+    68,   # left long press
+    17,   # right long press enabled
+    68,   # right long press
+    0,    # left triple press enabled
+    33,   # left triple press
+    0,    # right triple press enabled
+    32,   # right triple press
+    53,   # Unknown
+    0,    # ambient sound mode (0=noise canceling, 1=transparency, 2=normal)
+    0x50, # noise canceling levels: manual << 4 | adaptive
+    1,    # transparency mode (0=fully transparent, 1=vocal)
+    0,    # noise canceling mode (0=manual, 1=adaptive, 2=transporation)
+    1,    # Wind noise reduction toggle
+    1,    # environment detection
+    3,    # transportation modes (0=plane, 1=train, 2=bus, 3=car)
     0,
     0,
     0,
     0,
     255,
-    1,
-    2,
+    1,    # case battery charging?
+    2,    # case battery level
     49,
-    1,
+    1,    # Sound leak compensation
+    0,
+    0,    # Gaming mode
+    1,    # Touch Tone
     0,
     0,
     1,
-    0,
-    0,
-    1,
-    0,
-    1,
-    80,
-    1,
-    0,
-    0,
-    1,
-    1,
-    1,
-    1,
+    0,    # 3d surround sound
+    1,    # limit high volume
+    80,   # db limit (75, 80, 85, 90, 95, 100)
+    1,    # decibel reading refresh rate (0=real time, 1=10 seconds, 2=1 minute)
+    0,    # Auto Play/Pause
+    0,    # Wearing Tone
+    1,    # Auto power off enabled
+    1,    # Auto power off duration
+    1,    # Touch Lock
+    1,    # Low Battery Prompt
     255,
 ]
 
@@ -170,5 +170,5 @@ response = [
 # LDAC
 command = [1, 127]
 response = [
-    0, # disabled
+    0, # enabled/disabled
 ]
