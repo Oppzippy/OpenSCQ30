@@ -62,6 +62,5 @@
     <string name="setting_id_with_value">%s: %s</string>
     <string name="information">Information</string>
     <string name="none">Nichts</string>
-    <string name="source_code" tools:ignore="TypographyOther"></string>
     <string name="version_2_breaking_changes">&lt;h1&gt;Aktualisiert auf OpenSCQ30 v2&lt;/h1&gt; &lt;br&gt; &lt;b&gt;Wichtige Änderungen&lt;/b&gt; &lt;ul&gt; &lt;li&gt;Benutzerdefinierte Equalizer-Profile sind jetzt gerätspezifisch. Legacy Equalizer-Profile müssen nach Verbindung mit einem Gerät auf der \"Legacy Equalizer-Profile übertragen\"-Seite übertragen werden.&lt;/li&gt; &lt;li&gt;Schnellvoreinstellungen werden jetzt in einem anderen Format gespeichert, und automatische Aktualisierung ist nicht verfügbar, sie müssen also neu erstellt werden.&lt;/li&gt; &lt;li&gt;Automatisch Gerätemodellerkennung wurde entfernt, das Modell muss jetzt also bei Hinzufügen eines neuen Geräts manuell ausgewählt werden.&lt;/li&gt; &lt;/ul&gt; &lt;p&gt;Siehe &lt;a href=https://github.com/Oppzippy/OpenSCQ30/blob/master/CHANGELOG.md&gt;CHANGELOG.md&lt;/a&gt; für Details.&lt;/p&gt;</string>
 </resources>
