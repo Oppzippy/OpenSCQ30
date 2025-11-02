@@ -1,0 +1,100 @@
+use async_trait::async_trait;
+use openscq30_lib_has::Has;
+use strum::IntoEnumIterator;
+
+use crate::{
+    api::settings::{self, Setting, SettingId, Value},
+    devices::soundcore::{
+        a3947::structures::{ManualNoiseCanceling, SoundModes},
+        common::settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
+    },
+};
+
+use super::SoundModeSetting;
+
+#[derive(Default)]
+pub struct SoundModesSettingHandler {}
+
+#[async_trait]
+impl<T> SettingHandler<T> for SoundModesSettingHandler
+where
+    T: Has<SoundModes> + Send,
+{
+    fn settings(&self) -> Vec<SettingId> {
+        SoundModeSetting::iter().map(Into::into).collect()
+    }
+
+    fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
+        let sound_modes = state.get();
+        let sound_mode_setting: SoundModeSetting = (*setting_id).try_into().ok()?;
+        Some(match sound_mode_setting {
+            SoundModeSetting::AmbientSoundMode => {
+                Setting::select_from_enum_all_variants(sound_modes.ambient_sound_mode)
+            }
+            SoundModeSetting::TransparencyMode => {
+                Setting::select_from_enum_all_variants(sound_modes.transparency_mode)
+            }
+            SoundModeSetting::NoiseCancelingMode => {
+                Setting::select_from_enum_all_variants(sound_modes.noise_canceling_mode)
+            }
+            SoundModeSetting::AdaptiveNoiseCanceling => Setting::Information {
+                value: format!("{}/5", sound_modes.adaptive_noise_canceling.inner()),
+                translated_value: format!("{}/5", sound_modes.adaptive_noise_canceling.inner()),
+            },
+            SoundModeSetting::ManualNoiseCanceling => Setting::I32Range {
+                setting: settings::Range {
+                    range: 1..=5,
+                    step: 1,
+                },
+                value: sound_modes.manual_noise_canceling.inner().into(),
+            },
+            SoundModeSetting::WindNoiseSuppression => Setting::Toggle {
+                value: sound_modes.wind_noise.is_suppression_enabled,
+            },
+            SoundModeSetting::TransportationMode => {
+                Setting::select_from_enum_all_variants(sound_modes.transportation_mode)
+            }
+            SoundModeSetting::EnvironmentDetection => Setting::Toggle {
+                value: sound_modes.environment_detection,
+            },
+        })
+    }
+
+    async fn set(
+        &self,
+        state: &mut T,
+        setting_id: &SettingId,
+        value: Value,
+    ) -> SettingHandlerResult<()> {
+        let sound_modes = state.get_mut();
+        let sound_mode_setting: SoundModeSetting = (*setting_id)
+            .try_into()
+            .expect("already filtered to valid values only by SettingsManager");
+        match sound_mode_setting {
+            SoundModeSetting::AmbientSoundMode => {
+                sound_modes.ambient_sound_mode = value.try_as_enum_variant()?;
+            }
+            SoundModeSetting::TransparencyMode => {
+                sound_modes.transparency_mode = value.try_as_enum_variant()?;
+            }
+            SoundModeSetting::NoiseCancelingMode => {
+                sound_modes.noise_canceling_mode = value.try_as_enum_variant()?;
+            }
+            SoundModeSetting::AdaptiveNoiseCanceling => return Err(SettingHandlerError::ReadOnly),
+            SoundModeSetting::ManualNoiseCanceling => {
+                sound_modes.manual_noise_canceling =
+                    ManualNoiseCanceling::new(value.try_as_i32()? as u8);
+            }
+            SoundModeSetting::WindNoiseSuppression => {
+                sound_modes.wind_noise.is_suppression_enabled = value.try_as_bool()?;
+            }
+            SoundModeSetting::TransportationMode => {
+                sound_modes.transportation_mode = value.try_as_enum_variant()?;
+            }
+            SoundModeSetting::EnvironmentDetection => {
+                sound_modes.environment_detection = value.try_as_bool()?;
+            }
+        }
+        Ok(())
+    }
+}

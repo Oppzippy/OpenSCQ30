@@ -12,6 +12,7 @@ mod equalizer_configuration;
 mod firmware_version;
 mod gender;
 mod hear_id;
+mod limit_high_volume;
 mod noise_canceling_mode;
 mod preset_equalizer_profile;
 mod serial_number;
@@ -33,6 +34,7 @@ pub use equalizer_configuration::*;
 pub use firmware_version::*;
 pub use gender::*;
 pub use hear_id::*;
+pub use limit_high_volume::*;
 pub use noise_canceling_mode::*;
 #[allow(unused_imports, reason = "used only by tests")]
 pub use preset_equalizer_profile::*;

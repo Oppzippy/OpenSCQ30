@@ -1,0 +1,7 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc 91b50fd79dc7f5d7b91f2e17d07bd32eb07d91d2637479f362ea1d402f07af3a # shrinks to from = SoundModes { ambient_sound_mode: NoiseCanceling, transparency_mode: FullyTransparent, noise_canceling_mode: Manual, transportation_mode: Plane, manual_noise_canceling: ManualNoiseCanceling(1), adaptive_noise_canceling: AdaptiveNoiseCanceling(2), wind_noise_reduction: false, environment_detection: false }, to = SoundModes { ambient_sound_mode: NoiseCanceling, transparency_mode: FullyTransparent, noise_canceling_mode: Manual, transportation_mode: Plane, manual_noise_canceling: ManualNoiseCanceling(1), adaptive_noise_canceling: AdaptiveNoiseCanceling(1), wind_noise_reduction: false, environment_detection: true }

@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Features
+
+- Add support for Soundcore Liberty 4 NC
+
 ## v2.0.0-beta4
 
 ### Android

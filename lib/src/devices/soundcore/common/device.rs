@@ -225,8 +225,20 @@ where
         &mut self.module_collection
     }
 
-    pub fn packet_io_controller(&mut self) -> &Arc<PacketIOController<ConnectionType>> {
+    pub fn packet_io_controller(&self) -> &Arc<PacketIOController<ConnectionType>> {
         &self.packet_io_controller
+    }
+
+    pub fn database(&self) -> Arc<OpenSCQ30Database> {
+        self.database.clone()
+    }
+
+    pub fn device_model(&self) -> DeviceModel {
+        self.device_model
+    }
+
+    pub fn change_notify(&self) -> watch::Sender<()> {
+        self.change_notify.clone()
     }
 
     pub fn sound_modes(&mut self, available_sound_modes: AvailableSoundModes)

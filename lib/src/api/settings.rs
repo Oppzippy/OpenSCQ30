@@ -111,6 +111,8 @@ pub enum SettingId {
     AutoPowerOff,
     TouchTone,
     ResetButtonsToDefault,
+    TransportationMode,
+    EnvironmentDetection,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

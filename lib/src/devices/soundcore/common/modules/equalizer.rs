@@ -22,6 +22,7 @@ use crate::{
                 import_export_setting_handler::ImportExportSettingHandler,
             },
             packet::PacketIOController,
+            state_modifier::StateModifier,
             structures::{
                 AgeRange, BasicHearId, CustomHearId, EqualizerConfiguration, Gender, TwsStatus,
             },
@@ -69,13 +70,16 @@ impl<T: 'static> ModuleCollection<T> {
         Conn: RfcommConnection + 'static + Send + Sync,
         T: Has<EqualizerConfiguration<CHANNELS, BANDS>> + Clone + Send + Sync,
     {
-        self.add_equalizer_setting_handlers(database, device_model, change_notify)
-            .await;
-        self.state_modifiers
-            .push(Box::new(EqualizerStateModifier::new(
+        self.add_equalizer_with_custom_state_modifier(
+            database,
+            device_model,
+            change_notify,
+            Box::new(EqualizerStateModifier::new(
                 packet_io,
                 EqualizerStateModifierOptions { has_drc: false },
-            )));
+            )),
+        )
+        .await;
     }
 
     pub async fn add_equalizer_tws<Conn, const CHANNELS: usize, const BANDS: usize>(
@@ -88,13 +92,16 @@ impl<T: 'static> ModuleCollection<T> {
         Conn: RfcommConnection + 'static + Send + Sync,
         T: Has<EqualizerConfiguration<CHANNELS, BANDS>> + Has<TwsStatus> + Clone + Send + Sync,
     {
-        self.add_equalizer_setting_handlers_tws(database, device_model, change_notify)
-            .await;
-        self.state_modifiers
-            .push(Box::new(EqualizerStateModifier::new(
+        self.add_equalizer_with_custom_state_modifier_tws(
+            database,
+            device_model,
+            change_notify,
+            Box::new(EqualizerStateModifier::new(
                 packet_io,
                 EqualizerStateModifierOptions { has_drc: false },
-            )));
+            )),
+        )
+        .await;
     }
 
     pub async fn add_equalizer_with_drc<Conn, const CHANNELS: usize, const BANDS: usize>(
@@ -107,13 +114,16 @@ impl<T: 'static> ModuleCollection<T> {
         Conn: RfcommConnection + 'static + Send + Sync,
         T: Has<EqualizerConfiguration<CHANNELS, BANDS>> + Clone + Send + Sync,
     {
-        self.add_equalizer_setting_handlers(database, device_model, change_notify)
-            .await;
-        self.state_modifiers
-            .push(Box::new(EqualizerStateModifier::new(
+        self.add_equalizer_with_custom_state_modifier(
+            database,
+            device_model,
+            change_notify,
+            Box::new(EqualizerStateModifier::new(
                 packet_io,
                 EqualizerStateModifierOptions { has_drc: true },
-            )));
+            )),
+        )
+        .await;
     }
 
     pub async fn add_equalizer_with_drc_tws<Conn, const CHANNELS: usize, const BANDS: usize>(
@@ -126,13 +136,16 @@ impl<T: 'static> ModuleCollection<T> {
         Conn: RfcommConnection + 'static + Send + Sync,
         T: Has<EqualizerConfiguration<CHANNELS, BANDS>> + Has<TwsStatus> + Clone + Send + Sync,
     {
-        self.add_equalizer_setting_handlers_tws(database, device_model, change_notify)
-            .await;
-        self.state_modifiers
-            .push(Box::new(EqualizerStateModifier::new(
+        self.add_equalizer_with_custom_state_modifier_tws(
+            database,
+            device_model,
+            change_notify,
+            Box::new(EqualizerStateModifier::new(
                 packet_io,
                 EqualizerStateModifierOptions { has_drc: true },
-            )));
+            )),
+        )
+        .await;
     }
 
     pub async fn add_equalizer_with_basic_hear_id_tws<
@@ -156,14 +169,15 @@ impl<T: 'static> ModuleCollection<T> {
             + Send
             + Sync,
     {
-        self.add_equalizer_setting_handlers_tws(database, device_model, change_notify)
-            .await;
-        self.state_modifiers
-            .push(Box::new(EqualizerWithBasicHearIdStateModifier::<
-                Conn,
-                CHANNELS,
-                BANDS,
-            >::new(packet_io)));
+        self.add_equalizer_with_custom_state_modifier_tws(
+            database,
+            device_model,
+            change_notify,
+            Box::new(
+                EqualizerWithBasicHearIdStateModifier::<Conn, CHANNELS, BANDS>::new(packet_io),
+            ),
+        )
+        .await;
     }
 
     pub async fn add_equalizer_with_custom_hear_id_tws<
@@ -187,41 +201,24 @@ impl<T: 'static> ModuleCollection<T> {
             + Send
             + Sync,
     {
-        self.add_equalizer_setting_handlers_tws(database, device_model, change_notify)
-            .await;
-        self.state_modifiers
-            .push(Box::new(EqualizerWithCustomHearIdStateModifier::new(
-                packet_io,
-            )));
+        self.add_equalizer_with_custom_state_modifier_tws(
+            database,
+            device_model,
+            change_notify,
+            Box::new(EqualizerWithCustomHearIdStateModifier::new(packet_io)),
+        )
+        .await;
     }
 
-    async fn add_equalizer_setting_handlers<const CHANNELS: usize, const BANDS: usize>(
+    pub async fn add_equalizer_with_custom_state_modifier_tws<
+        const CHANNELS: usize,
+        const BANDS: usize,
+    >(
         &mut self,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
         change_notify: watch::Sender<()>,
-    ) where
-        T: Has<EqualizerConfiguration<CHANNELS, BANDS>> + Clone + Send + Sync,
-    {
-        let profile_store = Arc::new(
-            CustomEqualizerProfileStore::new(database, device_model, change_notify.to_owned())
-                .await,
-        );
-        self.setting_manager.add_handler(
-            CategoryId::Equalizer,
-            EqualizerSettingHandler::<T, CHANNELS, BANDS>::new(profile_store.to_owned()),
-        );
-        self.setting_manager.add_handler(
-            CategoryId::EqualizerImportExport,
-            ImportExportSettingHandler::new(profile_store, change_notify),
-        );
-    }
-
-    async fn add_equalizer_setting_handlers_tws<const CHANNELS: usize, const BANDS: usize>(
-        &mut self,
-        database: Arc<OpenSCQ30Database>,
-        device_model: DeviceModel,
-        change_notify: watch::Sender<()>,
+        state_modifier: Box<dyn StateModifier<T> + Send + Sync + 'static>,
     ) where
         T: Has<EqualizerConfiguration<CHANNELS, BANDS>> + Has<TwsStatus> + Clone + Send + Sync,
     {
@@ -237,5 +234,30 @@ impl<T: 'static> ModuleCollection<T> {
             CategoryId::EqualizerImportExport,
             ImportExportSettingHandler::new(profile_store, change_notify),
         );
+        self.state_modifiers.push(state_modifier);
+    }
+
+    async fn add_equalizer_with_custom_state_modifier<const CHANNELS: usize, const BANDS: usize>(
+        &mut self,
+        database: Arc<OpenSCQ30Database>,
+        device_model: DeviceModel,
+        change_notify: watch::Sender<()>,
+        state_modifier: Box<dyn StateModifier<T> + Send + Sync + 'static>,
+    ) where
+        T: Has<EqualizerConfiguration<CHANNELS, BANDS>> + Clone + Send + Sync,
+    {
+        let profile_store = Arc::new(
+            CustomEqualizerProfileStore::new(database, device_model, change_notify.to_owned())
+                .await,
+        );
+        self.setting_manager.add_handler(
+            CategoryId::Equalizer,
+            EqualizerSettingHandler::<T, CHANNELS, BANDS>::new(profile_store.to_owned()),
+        );
+        self.setting_manager.add_handler(
+            CategoryId::EqualizerImportExport,
+            ImportExportSettingHandler::new(profile_store, change_notify),
+        );
+        self.state_modifiers.push(state_modifier);
     }
 }

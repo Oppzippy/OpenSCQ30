@@ -25,7 +25,7 @@ pub struct ButtonConfigurationSettings<const NUM_BUTTONS: usize, const NUM_PRESS
 
     /// Some devices have an enabled flag in their state update packet, but they do not make use of
     /// the enabled flag for disabling buttons, instead opting to set the action to 0xF. If this
-    /// flag is set, the enabled flag will never be set to 0, but if it was already 0, it will
+    /// flag is not set, the enabled flag will never be set to 0, but if it was already 0, it will
     /// become 1 when enabling the button.
     pub use_enabled_flag_to_disable: bool,
 
