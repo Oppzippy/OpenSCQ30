@@ -8,6 +8,8 @@ There are a few ways to proceed.
 
 #### Wireshark (recommended)
 
+Install the soundcore wireshark plugin from [tools/wireshark/soundcore.lua](../tools/wireshark/soundcore.lua). To do so, open Help > About > Folders in Wireshark, and open the Personal Lua Plugins directory. Copy or make a symlink to `soundcore.lua`.
+
 Install the official Soundcore app and capture bluetooth packets with Wireshark. Filter for RFCOMM to see only relevant data.
 
 Connect to the device in the Soundcore app, and record the state update packet. Then, change a setting, disconnect, and reconnect. Record the new state update packet. Compare the two, and find what changed. Repeat with all settings.
