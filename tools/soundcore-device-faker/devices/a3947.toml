@@ -130,7 +130,7 @@ response = [
     33,   # left triple press
     0,    # right triple press enabled
     32,   # right triple press
-    53,   # Unknown
+    0x35, # ambient sound mode cycle (tws disconnected << 4 | tws connected)
     0,    # ambient sound mode (0=noise canceling, 1=transparency, 2=normal)
     0x50, # noise canceling levels: manual << 4 | adaptive
     1,    # transparency mode (0=fully transparent, 1=vocal)
