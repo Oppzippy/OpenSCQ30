@@ -58,7 +58,7 @@ soundcore_device!(
 pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<8, 4> =
     ButtonConfigurationSettings {
         supports_set_all_packet: false,
-        use_enabled_flag_to_disable: true,
+        use_enabled_flag_to_disable: false,
         order: [
             Button::LeftSinglePress,
             Button::RightSinglePress,
@@ -277,6 +277,37 @@ mod tests {
                     packet::Outbound::new(packet::Command([0x04, 0x81]), vec![0, 2, 0xF0]),
                     packet::Outbound::new(packet::Command([0x04, 0x81]), vec![1, 2, 0xF1]),
                 ],
+            )
+            .await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn test_disable_button() {
+        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+            super::device_registry,
+            DeviceModel::SoundcoreA3959,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        1, 1, 5, 6, 255, 255, 48, 49, 46, 54, 52, 48, 49, 46, 54, 52, 51, 57, 53,
+                        57, 68, 69, 68, 54, 54, 57, 50, 68, 66, 54, 70, 52, 254, 254, 101, 120,
+                        161, 171, 171, 152, 144, 179, 120, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10,
+                        241, 240, 102, 102, 242, 243, 68, 68, 51, 0, 85, 0, 0, 1, 255, 1, 49, 1, 1,
+                        0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    ],
+                ),
+            )]),
+        )
+        .await;
+        device
+            .assert_set_settings_response_unordered(
+                vec![(SettingId::LeftSinglePress, "None".into())],
+                vec![packet::Outbound::new(
+                    packet::Command([0x04, 0x81]),
+                    vec![0, 2, 0xFF],
+                )],
             )
             .await;
     }
