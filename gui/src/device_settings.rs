@@ -328,7 +328,7 @@ impl DeviceSettingsModel {
             }
             Setting::I32Range { setting, value } => vec![range::i32_range(
                 setting_id,
-                setting.range.clone(),
+                setting.clone(),
                 *value,
                 move |new_value| Message::SetSetting(setting_id, new_value.into()),
             )],
