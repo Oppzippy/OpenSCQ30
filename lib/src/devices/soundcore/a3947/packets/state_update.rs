@@ -99,6 +99,7 @@ impl FromPacketBody for A3947StateUpdatePacket {
                         SerialNumber::take,
                         take(5usize), // unknown, some kind of version number
                         EqualizerConfiguration::take,
+                        take(1usize), // unknown
                         a3947::structures::HearId::take,
                         take(1usize), // unknown
                         ButtonStatusCollection::take(
@@ -115,9 +116,9 @@ impl FromPacketBody for A3947StateUpdatePacket {
                         TouchTone::take,
                         take(3usize), // unknown
                         take_bool,    // 3d surround sound
-                        LimitHighVolume::take,
                     ),
                     (
+                        LimitHighVolume::take,
                         take_bool, // auto play/pause
                         take_bool, // wearing tone
                         AutoPowerOff::take,
@@ -133,23 +134,30 @@ impl FromPacketBody for A3947StateUpdatePacket {
                         serial_number,
                         _unknown1,
                         equalizer_configuration,
-                        hear_id,
                         _unknown2,
+                        hear_id,
+                        _unknown3,
                         button_configuration,
                         ambient_sound_mode_cycle,
                         sound_modes,
-                        _unknown3,
-                        charging_case_battery_level,
                         _unknown4,
-                        sound_leak_compensation,
+                        charging_case_battery_level,
                         _unknown5,
+                        sound_leak_compensation,
+                        _unknown6,
                         gaming_mode,
                         touch_tone,
-                        _unknown6,
+                        _unknown7,
                         surround_sound,
-                        limit_high_volume,
                     ),
-                    (auto_play_pause, wearing_tone, auto_power_off, touch_lock, low_battery_prompt),
+                    (
+                        limit_high_volume,
+                        auto_play_pause,
+                        wearing_tone,
+                        auto_power_off,
+                        touch_lock,
+                        low_battery_prompt,
+                    ),
                 )| {
                     Self {
                         tws_status,
@@ -196,6 +204,7 @@ impl ToPacket for A3947StateUpdatePacket {
             .chain(self.serial_number.to_string().into_bytes())
             .chain("00.00".as_bytes().iter().copied()) // unknown version of some sort
             .chain(self.equalizer_configuration.bytes())
+            .chain(iter::once(0)) // unknown
             .chain(self.hear_id.bytes())
             .chain(iter::once(0)) // unknown
             .chain(
