@@ -140,3 +140,67 @@ impl Translate for AutoPowerOffDuration {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+
+    use crate::{
+        DeviceModel,
+        devices::soundcore::common::{device::test_utils::TestSoundcoreDevice, packet},
+        settings::SettingId,
+    };
+
+    #[tokio::test(start_paused = true)]
+    async fn test_with_known_good_packet() {
+        let device = TestSoundcoreDevice::new_with_packet_responses(
+            super::device_registry,
+            DeviceModel::SoundcoreA3959,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        1, 1, 2, 4, 0, 0, 48, 53, 46, 56, 56, 48, 53, 46, 56, 56, 51, 57, 52, 55,
+                        66, 54, 54, 50, 70, 68, 67, 67, 69, 69, 69, 56, 48, 48, 46, 48, 48, 254,
+                        254, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 255, 255, 255, 255,
+                        255, 255, 255, 255, 255, 255, 0, 1, 112, 117, 140, 148, 150, 142, 134, 131,
+                        60, 60, 112, 117, 140, 148, 150, 142, 134, 131, 60, 60, 104, 100, 34, 64,
+                        0, 112, 117, 140, 148, 150, 142, 134, 131, 60, 60, 112, 117, 140, 148, 150,
+                        142, 134, 131, 60, 60, 0, 0, 18, 17, 102, 17, 101, 17, 50, 17, 51, 17, 68,
+                        17, 68, 0, 33, 0, 32, 0x35, 0, 0x50, 1, 0, 1, 1, 3, 0, 0, 0, 0, 255, 1, 2,
+                        49, 1, 0, 0, 1, 0, 0, 1, 0, 1, 80, 1, 0, 0, 1, 1, 1, 1, 255,
+                    ],
+                ),
+            )]),
+        )
+        .await;
+
+        device.assert_setting_values([
+            (SettingId::BatteryLevelLeft, "2".into()),
+            (SettingId::BatteryLevelRight, "4".into()),
+            (SettingId::IsChargingLeft, "No".into()),
+            (SettingId::IsChargingRight, "No".into()),
+            (SettingId::AmbientSoundMode, "NoiseCanceling".into()),
+            (SettingId::NoiseCancelingMode, "Manual".into()),
+            (SettingId::ManualNoiseCanceling, 5.into()),
+            (SettingId::EnvironmentDetection, true.into()),
+            (SettingId::TransportationMode, "Car".into()),
+            (SettingId::TransparencyMode, "VocalMode".into()),
+            (SettingId::LimitHighVolume, true.into()),
+            (SettingId::LimitHighVolumeDbLimit, 80.into()),
+            (SettingId::LimitHighVolumeRefreshRate, "10s".into()),
+            // TODO the enabled flag for buttons should be entirely ignored
+            // (SettingId::LeftSinglePress, Some("PlayPause").into()),
+            // (SettingId::LeftDoublePress, Some("PreviousSong").into()),
+            // (SettingId::LeftTriplePress, Some("VolumeDown").into()),
+            // (SettingId::LeftLongPress, Some("AmbientSoundMode").into()),
+            // (SettingId::RightSinglePress, Some("VoiceAssistant").into()),
+            // (SettingId::RightDoublePress, Some("NextSong").into()),
+            // (SettingId::RightTriplePress, Some("VolumeUp").into()),
+            // (SettingId::RightLongPress, Some("AmbientSoundMode").into()),
+            (SettingId::TouchTone, true.into()),
+            (SettingId::AutoPowerOff, "20m".into()),
+        ]);
+    }
+}
