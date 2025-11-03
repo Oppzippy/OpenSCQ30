@@ -1,4 +1,4 @@
-use cosmic::{Element, widget};
+use cosmic::{Element, iced::alignment, widget};
 use openscq30_i18n::Translate;
 use openscq30_lib::settings::{self, SettingId};
 
@@ -15,6 +15,12 @@ where
 {
     labeled_setting_row(
         setting_id.translate(),
-        widget::slider(range.range, value, on_change).step(range.step),
+        widget::row::with_children([
+            widget::text::body(value.to_string()).width(40).into(),
+            widget::slider(range.range, value, on_change)
+                .step(range.step)
+                .into(),
+        ])
+        .align_y(alignment::Vertical::Center),
     )
 }
