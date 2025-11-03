@@ -620,6 +620,20 @@ fn setting_i32_range_out_of_range() {
 }
 
 #[test]
+fn setting_i32_range_invalid_step() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3947");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "limitHighVolumeDbLimit", "84"), @r"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    Error: limitHighVolumeDbLimit: 84 does not align with step size 5
+    ");
+}
+
+#[test]
 fn setting_select() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3028");

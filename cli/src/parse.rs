@@ -40,6 +40,9 @@ fn parse_i32_range(setting: &settings::Range<i32>, unparsed: &str) -> anyhow::Re
     if !setting.range.contains(&number) {
         bail!("{number} is out of the expected range {:?}", setting.range)
     }
+    if number % setting.step != 0 {
+        bail!("{number} does not align with step size {:?}", setting.step)
+    }
     Ok(number.into())
 }
 
