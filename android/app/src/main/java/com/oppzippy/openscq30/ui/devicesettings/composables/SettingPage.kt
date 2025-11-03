@@ -6,9 +6,12 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -162,12 +165,22 @@ private fun InformationSetting(name: String, text: String) {
 
 @Composable
 private fun I32Range(name: String, range: Range<Int>, value: Int, onChange: (Int) -> Unit) {
-    Labeled(label = name) {
-        val (displayedValue, setDisplayedValue) = throttledState(
-            value = value,
-            duration = 250,
-            onValueChange = { onChange(it) },
-        )
+    val (displayedValue, setDisplayedValue) = throttledState(
+        value = value,
+        duration = 250,
+        onValueChange = { onChange(it) },
+    )
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(text = name)
+            Text(displayedValue.toString())
+        }
+
         Slider(
             modifier = Modifier.testTag("$name slider"),
             value = displayedValue.toFloat(),
