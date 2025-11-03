@@ -9,6 +9,7 @@ mod set_button_configuration;
 mod set_equalizer;
 mod set_equalizer_and_custom_hear_id;
 mod set_equalizer_with_drc;
+mod set_limit_high_volume;
 mod set_sound_modes;
 mod set_touch_tone;
 
@@ -31,5 +32,6 @@ pub use set_button_configuration::*;
 pub use set_equalizer::*;
 pub use set_equalizer_and_custom_hear_id::*;
 pub use set_equalizer_with_drc::*;
+pub use set_limit_high_volume::*;
 pub use set_sound_modes::*;
 pub use set_touch_tone::*;

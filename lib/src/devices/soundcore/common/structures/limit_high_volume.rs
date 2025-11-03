@@ -4,9 +4,10 @@ use nom::{
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
-use strum::FromRepr;
+use openscq30_i18n::Translate;
+use strum::{EnumIter, EnumString, FromRepr, IntoStaticStr};
 
-use crate::devices::soundcore::common::packet::parsing::take_bool;
+use crate::{devices::soundcore::common::packet::parsing::take_bool, i18n::fl};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct LimitHighVolume {
@@ -48,13 +49,39 @@ impl LimitHighVolume {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, FromRepr)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    Default,
+    FromRepr,
+    EnumIter,
+    EnumString,
+    IntoStaticStr,
+)]
 #[repr(u8)]
 pub enum DecibelReadingRefreshRate {
     #[default]
     RealTime = 0,
+    #[strum(serialize = "10s")]
     TenSeconds = 1,
+    #[strum(serialize = "1m")]
     OneMinute = 2,
+}
+
+impl Translate for DecibelReadingRefreshRate {
+    fn translate(&self) -> String {
+        match self {
+            DecibelReadingRefreshRate::RealTime => fl!("real-time"),
+            DecibelReadingRefreshRate::TenSeconds => fl!("x-seconds", seconds = 10),
+            DecibelReadingRefreshRate::OneMinute => fl!("x-minutes", minutes = 1),
+        }
+    }
 }
 
 impl DecibelReadingRefreshRate {

@@ -41,6 +41,7 @@ pub enum CategoryId {
     ButtonConfiguration,
     DeviceInformation,
     Miscellaneous,
+    LimitHighVolume,
 }
 
 #[derive(
@@ -113,6 +114,11 @@ pub enum SettingId {
     ResetButtonsToDefault,
     TransportationMode,
     EnvironmentDetection,
+    LimitHighVolume,
+    #[translate("db-limit")]
+    LimitHighVolumeDbLimit,
+    #[translate("db-refresh-rate")]
+    LimitHighVolumeRefreshRate,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

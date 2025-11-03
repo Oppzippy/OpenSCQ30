@@ -43,7 +43,7 @@ soundcore_device!(
             RequestState::default().to_packet(),
         );
 
-        // builder.limit_high_volume();
+        builder.limit_high_volume();
         builder.touch_tone();
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
 

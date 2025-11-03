@@ -26,7 +26,8 @@ use crate::{
                 packet::{self, PacketIOController, outbound::ToPacket},
                 state::Update,
                 structures::{
-                    AutoPowerOff, TouchTone, button_configuration::ButtonStatusCollection,
+                    AutoPowerOff, LimitHighVolume, TouchTone,
+                    button_configuration::ButtonStatusCollection,
                 },
             },
         },
@@ -428,6 +429,14 @@ where
     {
         self.module_collection
             .add_touch_tone(self.packet_io_controller.clone());
+    }
+
+    pub fn limit_high_volume(&mut self)
+    where
+        StateType: Has<LimitHighVolume>,
+    {
+        self.module_collection
+            .add_limit_high_volume(self.packet_io_controller.clone());
     }
 }
 

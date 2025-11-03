@@ -148,6 +148,15 @@ x-minutes = { $minutes ->
     [one] { $minutes } minute
     *[other] { $minutes } minutes
 }
+x-seconds = { $seconds ->
+    [one] { $seconds } second
+    *[other] { $seconds } seconds
+}
 disabled = Disabled
 
 touch-tone = Touch Tone
+
+limit-high-volume = Limit High Volume
+db-limit = DB Limit
+db-refresh-rate = DB Refresh Rate
+real-time = Real Time
