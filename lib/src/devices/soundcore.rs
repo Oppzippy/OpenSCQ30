@@ -15,6 +15,7 @@ pub mod a3945;
 pub mod a3947;
 pub mod a3948;
 pub mod a3951;
+pub mod a3955;
 pub mod a3959;
 pub mod common;
 pub mod development;
