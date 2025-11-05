@@ -308,13 +308,15 @@ mod tests {
 
             assert_eq!(from == to, plan.is_empty());
 
-            // the initial state is not part of the plan, so check that separately
-            assert_valid_change(from, *plan.first().unwrap());
-            // the final state is a part of the plan, though
-            assert_eq!(*plan.last().unwrap(), to);
+            if !plan.is_empty() {
+                // the initial state is not part of the plan, so check that separately
+                assert_valid_change(from, *plan.first().unwrap());
+                // the final state is a part of the plan, though
+                assert_eq!(*plan.last().unwrap(), to);
 
-            plan.windows(2)
-                .for_each(|change| assert_valid_change(change[0], change[1]))
+                plan.windows(2)
+                    .for_each(|change| assert_valid_change(change[0], change[1]))
+            }
         }
 
         #[test]
