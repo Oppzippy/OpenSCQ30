@@ -32,7 +32,8 @@ pub fn set_equalizer_configuration<const CHANNELS: usize, const BANDS: usize>(
                 .iter()
                 .flat_map(|v| v.bytes()),
         )
-        .chain([0, 0, 0]) // unknown
+        .chain([0, 0]) // unknown
+        .chain(iter::once(hear_id.is_enabled.into()))
         .chain(hear_id.volume_adjustments.iter().flat_map(|v| v.bytes()))
         .chain(hear_id.time.to_le_bytes())
         .chain(iter::once(hear_id.hear_id_type.0))

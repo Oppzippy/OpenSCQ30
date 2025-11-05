@@ -148,7 +148,7 @@ mod tests {
     use crate::{
         DeviceModel,
         devices::soundcore::common::{device::test_utils::TestSoundcoreDevice, packet},
-        settings::SettingId,
+        settings::{SettingId, Value},
     };
 
     #[tokio::test(start_paused = true)]
@@ -202,5 +202,51 @@ mod tests {
             (SettingId::TouchTone, true.into()),
             (SettingId::AutoPowerOff, "20m".into()),
         ]);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn it_turns_off_hear_id() {
+        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+            super::device_registry,
+            DeviceModel::SoundcoreA3959,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        1, 1, 2, 4, 0, 0, 48, 53, 46, 56, 56, 48, 53, 46, 56, 56, 51, 57, 52, 55,
+                        66, 54, 54, 50, 70, 68, 67, 67, 69, 69, 69, 56, 48, 48, 46, 48, 48, 254,
+                        254, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 255, 255, 255, 255,
+                        255, 255, 255, 255, 255, 255, 0, 1, 112, 117, 140, 148, 150, 142, 134, 131,
+                        60, 60, 112, 117, 140, 148, 150, 142, 134, 131, 60, 60, 104, 100, 34, 64,
+                        0, 112, 117, 140, 148, 150, 142, 134, 131, 60, 60, 112, 117, 140, 148, 150,
+                        142, 134, 131, 60, 60, 0, 0, 18, 17, 102, 17, 101, 17, 50, 17, 51, 17, 68,
+                        17, 68, 0, 33, 0, 32, 0x35, 0, 0x50, 1, 0, 1, 1, 3, 0, 0, 0, 0, 255, 1, 2,
+                        49, 1, 0, 0, 1, 0, 0, 1, 0, 1, 80, 1, 0, 0, 1, 1, 1, 1, 255,
+                    ],
+                ),
+            )]),
+        )
+        .await;
+
+        device
+            .assert_set_settings_response(
+                vec![(
+                    SettingId::VolumeAdjustments,
+                    Value::I16Vec(vec![0, 1, 2, 3, 4, 5, 6, 7]),
+                )],
+                vec![packet::Outbound::new(
+                    packet::Command([0x03, 0x87]),
+                    vec![
+                        254, 254, 0, 0, 120, 121, 122, 123, 124, 125, 126, 127, 120, 120, 120, 121,
+                        122, 123, 124, 125, 126, 127, 254, 254, 0, 0, 0, 112, 117, 140, 148, 150,
+                        142, 134, 131, 60, 60, 112, 117, 140, 148, 150, 142, 134, 131, 60, 60, 104,
+                        100, 34, 64, 0, 112, 117, 140, 148, 150, 142, 134, 131, 60, 60, 112, 117,
+                        140, 148, 150, 142, 134, 131, 60, 60, 120, 120, 120, 120, 120, 120, 120,
+                        121, 120, 0, 120, 120, 120, 120, 120, 120, 120, 121, 254, 0, 0,
+                    ],
+                )],
+            )
+            .await;
     }
 }
