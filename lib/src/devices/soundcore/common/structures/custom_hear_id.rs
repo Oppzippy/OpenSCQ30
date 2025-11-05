@@ -11,7 +11,7 @@ use crate::devices::soundcore::common::packet::parsing::take_bool;
 
 use super::{HearIdMusicType, HearIdType, VolumeAdjustments};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CustomHearId<const C: usize, const B: usize> {
     pub is_enabled: bool,
     pub volume_adjustments: [VolumeAdjustments<B>; C],

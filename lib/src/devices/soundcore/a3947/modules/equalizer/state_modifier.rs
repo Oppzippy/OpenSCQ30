@@ -54,13 +54,21 @@ where
             }
         }
 
+        let mut target_hear_id: a3947::structures::HearId<C, B> = *target_state.get();
+        // We don't expose hear id in any way, so it should be disabled to ensure the equalizer
+        // configuration that we're applying is in effect
+        target_hear_id.is_enabled = false;
+
         self.packet_io
             .send_with_response(&a3947::packets::set_equalizer_configuration(
                 target_equalizer_configuration,
-                target_state.get(),
+                &target_hear_id,
             ))
             .await?;
-        state_sender.send_modify(|state| *state.get_mut() = target_equalizer_configuration.clone());
+        state_sender.send_modify(|state| {
+            *state.get_mut() = *target_equalizer_configuration;
+            *state.get_mut() = target_hear_id;
+        });
         Ok(())
     }
 }

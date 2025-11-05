@@ -262,7 +262,7 @@ impl WindNoise {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct HearId<const C: usize, const B: usize> {
     pub is_enabled: bool,
     pub volume_adjustments: [VolumeAdjustments<B>; C],

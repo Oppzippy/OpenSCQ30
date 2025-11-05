@@ -115,6 +115,11 @@ where
             }
         }
 
+        let mut target_hear_id: BasicHearId<C, B> = *target_state.get();
+        // We don't expose hear id in any way, so it should be disabled to ensure the equalizer
+        // configuration that we're applying is in effect
+        target_hear_id.is_enabled = false;
+
         self.packet_io
             .send_with_response(
                 &packet::outbound::SetEqualizerAndCustomHearId {
@@ -122,12 +127,11 @@ where
                     gender: *target_state.get(),
                     age_range: *target_state.get(),
                     custom_hear_id: &{
-                        let basic_hear_id: &BasicHearId<C, B> = target_state.get();
                         // TODO have SetEqualizerAndCustomHearIdPacket take only the wanted fields rather than an entire CustomHearId struct
                         CustomHearId {
-                            is_enabled: basic_hear_id.is_enabled,
-                            volume_adjustments: basic_hear_id.volume_adjustments.to_owned(),
-                            time: basic_hear_id.time,
+                            is_enabled: target_hear_id.is_enabled,
+                            volume_adjustments: target_hear_id.volume_adjustments.to_owned(),
+                            time: target_hear_id.time,
                             hear_id_type: Default::default(),
                             hear_id_music_type: Default::default(),
                             custom_volume_adjustments: None,
@@ -137,7 +141,10 @@ where
                 .to_packet(),
             )
             .await?;
-        state_sender.send_modify(|state| *state.get_mut() = target_equalizer_configuration.clone());
+        state_sender.send_modify(|state| {
+            *state.get_mut() = *target_equalizer_configuration;
+            *state.get_mut() = target_hear_id;
+        });
         Ok(())
     }
 }
@@ -185,18 +192,26 @@ where
             }
         }
 
+        let mut target_hear_id: CustomHearId<C, B> = *target_state.get();
+        // We don't expose hear id in any way, so it should be disabled to ensure the equalizer
+        // configuration that we're applying is in effect
+        target_hear_id.is_enabled = false;
+
         self.packet_io
             .send_with_response(
                 &packet::outbound::SetEqualizerAndCustomHearId {
                     equalizer_configuration: target_equalizer_configuration,
                     gender: *target_state.get(),
                     age_range: *target_state.get(),
-                    custom_hear_id: target_state.get(),
+                    custom_hear_id: &target_hear_id,
                 }
                 .to_packet(),
             )
             .await?;
-        state_sender.send_modify(|state| *state.get_mut() = target_equalizer_configuration.clone());
+        state_sender.send_modify(|state| {
+            *state.get_mut() = *target_equalizer_configuration;
+            *state.get_mut() = target_hear_id;
+        });
         Ok(())
     }
 }
