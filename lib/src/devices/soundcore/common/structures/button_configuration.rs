@@ -99,6 +99,10 @@ impl ButtonStatus {
         }
     }
 
+    pub fn current_action_id_ignore_enabled(&self, tws_status: TwsStatus) -> u8 {
+        self.action.current(tws_status)
+    }
+
     pub fn with_current_action_id(
         self,
         tws_status: TwsStatus,

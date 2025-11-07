@@ -65,7 +65,17 @@ where
                 .map(|action| (action.localized_name)())
                 .collect(),
         };
-        let value = status.current_action_id(tws_status).and_then(|action_id| {
+        let current_action_id = if !self.settings.ignore_enabled_flag {
+            status.current_action_id(tws_status)
+        } else {
+            let action_id = status.current_action_id_ignore_enabled(tws_status);
+            if action_id == 0xF {
+                None
+            } else {
+                Some(action_id)
+            }
+        };
+        let value = current_action_id.and_then(|action_id| {
             button_settings
                 .available_actions
                 .iter()
@@ -119,7 +129,7 @@ where
         });
 
         let maybe_action_id = {
-            if self.settings.use_enabled_flag_to_disable {
+            if !self.settings.ignore_enabled_flag {
                 maybe_action.map(|action| action.id)
             } else {
                 Some(maybe_action.map_or(0xF, |action| action.id))

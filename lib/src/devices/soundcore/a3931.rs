@@ -94,7 +94,7 @@ soundcore_device!(
 const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
     ButtonConfigurationSettings {
         supports_set_all_packet: false, // unknown so false to be safe
-        use_enabled_flag_to_disable: true,
+        ignore_enabled_flag: false,
         order: [
             Button::LeftDoublePress,
             Button::LeftLongPress,

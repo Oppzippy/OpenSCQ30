@@ -688,6 +688,7 @@ pub mod test_utils {
             }
         }
 
+        #[track_caller]
         pub fn assert_setting_values(
             &self,
             expected_values: impl IntoIterator<Item = (SettingId, Value)>,

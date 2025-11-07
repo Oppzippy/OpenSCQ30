@@ -58,7 +58,7 @@ soundcore_device!(
 pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<8, 4> =
     ButtonConfigurationSettings {
         supports_set_all_packet: false,
-        use_enabled_flag_to_disable: false,
+        ignore_enabled_flag: true,
         order: [
             Button::LeftSinglePress,
             Button::RightSinglePress,

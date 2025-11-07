@@ -62,16 +62,16 @@ soundcore_device!(
 pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<8, 4> =
     ButtonConfigurationSettings {
         supports_set_all_packet: false,
-        use_enabled_flag_to_disable: false,
+        ignore_enabled_flag: true,
         order: [
             Button::LeftSinglePress,
             Button::RightSinglePress,
             Button::LeftDoublePress,
             Button::RightDoublePress,
-            Button::LeftTriplePress,
-            Button::RightTriplePress,
             Button::LeftLongPress,
             Button::RightLongPress,
+            Button::LeftTriplePress,
+            Button::RightTriplePress,
         ],
         settings: [
             ButtonSettings {
@@ -190,15 +190,14 @@ mod tests {
             (SettingId::LimitHighVolume, true.into()),
             (SettingId::LimitHighVolumeDbLimit, 80.into()),
             (SettingId::LimitHighVolumeRefreshRate, "10s".into()),
-            // TODO the enabled flag for buttons should be entirely ignored
-            // (SettingId::LeftSinglePress, Some("PlayPause").into()),
-            // (SettingId::LeftDoublePress, Some("PreviousSong").into()),
-            // (SettingId::LeftTriplePress, Some("VolumeDown").into()),
-            // (SettingId::LeftLongPress, Some("AmbientSoundMode").into()),
-            // (SettingId::RightSinglePress, Some("VoiceAssistant").into()),
-            // (SettingId::RightDoublePress, Some("NextSong").into()),
-            // (SettingId::RightTriplePress, Some("VolumeUp").into()),
-            // (SettingId::RightLongPress, Some("AmbientSoundMode").into()),
+            (SettingId::LeftSinglePress, Some("PlayPause").into()),
+            (SettingId::LeftDoublePress, Some("PreviousSong").into()),
+            (SettingId::LeftTriplePress, Some("VolumeDown").into()),
+            (SettingId::LeftLongPress, Some("AmbientSoundMode").into()),
+            (SettingId::RightSinglePress, Some("VoiceAssistant").into()),
+            (SettingId::RightDoublePress, Some("NextSong").into()),
+            (SettingId::RightTriplePress, Some("VolumeUp").into()),
+            (SettingId::RightLongPress, Some("AmbientSoundMode").into()),
             (SettingId::TouchTone, true.into()),
             (SettingId::AutoPowerOff, "20m".into()),
         ]);

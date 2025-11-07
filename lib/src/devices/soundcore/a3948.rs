@@ -52,7 +52,7 @@ soundcore_device!(
 pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
     ButtonConfigurationSettings {
         supports_set_all_packet: false,
-        use_enabled_flag_to_disable: false,
+        ignore_enabled_flag: true,
         order: [
             Button::LeftSinglePress,
             Button::RightSinglePress,
@@ -132,7 +132,7 @@ mod tests {
     }
 
     #[tokio::test(start_paused = true)]
-    async fn disabled_buttons_in_state_update_packet_parse_correctly() {
+    async fn button_configuration_enabled_flags_are_ignored() {
         let state_update_packet = packet::Inbound::new(
             packet::Command([1, 1]),
             vec![
@@ -156,7 +156,10 @@ mod tests {
         )
         .await;
         device.assert_setting_values([
-            (SettingId::RightSinglePress, Value::OptionalString(None)),
+            (
+                SettingId::RightSinglePress,
+                Value::OptionalString(Some("VolumeUp".into())),
+            ),
             (SettingId::RightDoublePress, Value::OptionalString(None)),
             (SettingId::RightLongPress, Value::OptionalString(None)),
         ]);
