@@ -168,7 +168,7 @@ pub struct AdaptiveNoiseCanceling(u8);
 
 impl AdaptiveNoiseCanceling {
     pub fn new(value: u8) -> Self {
-        Self(value.clamp(1, 5))
+        Self(value.clamp(0, 5))
     }
 
     pub fn inner(&self) -> u8 {
@@ -183,7 +183,7 @@ impl proptest::arbitrary::Arbitrary for AdaptiveNoiseCanceling {
     fn arbitrary_with(_args: Self::Parameters) -> Self::Strategy {
         use proptest::prelude::Strategy;
 
-        (1u8..=5u8).prop_map(Self::new)
+        (0u8..=5u8).prop_map(Self::new)
     }
 
     type Strategy = proptest::strategy::Map<std::ops::RangeInclusive<u8>, fn(u8) -> Self>;
@@ -194,7 +194,7 @@ pub struct ManualNoiseCanceling(u8);
 
 impl ManualNoiseCanceling {
     pub fn new(value: u8) -> Self {
-        Self(value.clamp(1, 5))
+        Self(value.clamp(0, 5))
     }
 
     pub fn inner(&self) -> u8 {
@@ -209,7 +209,7 @@ impl proptest::arbitrary::Arbitrary for ManualNoiseCanceling {
     fn arbitrary_with(_args: Self::Parameters) -> Self::Strategy {
         use proptest::prelude::Strategy;
 
-        (1u8..=5u8).prop_map(Self::new)
+        (0u8..=5u8).prop_map(Self::new)
     }
 
     type Strategy = proptest::strategy::Map<std::ops::RangeInclusive<u8>, fn(u8) -> Self>;
