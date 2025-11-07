@@ -46,29 +46,20 @@ soundcore_device!(
     },
 );
 
+// Like COMMON_SETTINGS but without sound modes
 pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
     ButtonConfigurationSettings {
-        supports_set_all_packet: false,
-        ignore_enabled_flag: true,
+        supports_set_all_packet: true,
+        ignore_enabled_flag: false,
         order: [
+            Button::LeftDoublePress,
+            Button::LeftLongPress,
+            Button::RightDoublePress,
+            Button::RightLongPress,
             Button::LeftSinglePress,
             Button::RightSinglePress,
-            Button::LeftDoublePress,
-            Button::RightDoublePress,
-            Button::LeftLongPress,
-            Button::RightLongPress,
         ],
         settings: [
-            ButtonSettings {
-                parse_settings: ButtonParseSettings {
-                    enabled_flag_kind: EnabledFlagKind::Single,
-                    action_kind: ActionKind::TwsLowBits,
-                },
-                button_id: 2,
-                press_kind: ButtonPressKind::Single,
-                available_actions: COMMON_ACTIONS_WITHOUT_SOUND_MODES,
-                disable_mode: ButtonDisableMode::IndividualDisable,
-            },
             ButtonSettings {
                 parse_settings: ButtonParseSettings {
                     enabled_flag_kind: EnabledFlagKind::Single,
@@ -77,7 +68,7 @@ pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
                 button_id: 0,
                 press_kind: ButtonPressKind::Double,
                 available_actions: COMMON_ACTIONS_WITHOUT_SOUND_MODES,
-                disable_mode: ButtonDisableMode::IndividualDisable,
+                disable_mode: ButtonDisableMode::NotDisablable,
             },
             ButtonSettings {
                 parse_settings: ButtonParseSettings {
@@ -87,7 +78,17 @@ pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
                 button_id: 1,
                 press_kind: ButtonPressKind::Long,
                 available_actions: COMMON_ACTIONS_WITHOUT_SOUND_MODES,
-                disable_mode: ButtonDisableMode::IndividualDisable,
+                disable_mode: ButtonDisableMode::NotDisablable,
+            },
+            ButtonSettings {
+                parse_settings: ButtonParseSettings {
+                    enabled_flag_kind: EnabledFlagKind::Single,
+                    action_kind: ActionKind::Single,
+                },
+                button_id: 2,
+                press_kind: ButtonPressKind::Single,
+                available_actions: COMMON_ACTIONS_WITHOUT_SOUND_MODES,
+                disable_mode: ButtonDisableMode::DisablingOneSideDisablesOther,
             },
         ],
     };
@@ -159,5 +160,52 @@ mod tests {
                 ],
             )
             .await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn it_parses_settings_correctly() {
+        let state_update_packet = packet::Inbound::new(
+            packet::inbound::STATE_COMMAND,
+            vec![
+                0, 1, 4, 5, 0, 0, 48, 48, 46, 48, 48, 48, 48, 46, 48, 48, 48, 48, 48, 48, 48, 48,
+                48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 0, 0, 120, 120, 120, 120, 120, 120, 120,
+                120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 1, 0x66, 1, 0x55,
+                1, 0x33, 1, 0x22, 1, 0x1, 1, 0x0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            ],
+        );
+
+        let device = TestSoundcoreDevice::new_with_packet_responses(
+            super::device_registry,
+            DeviceModel::SoundcoreA3945,
+            HashMap::from([(packet::inbound::STATE_COMMAND, state_update_packet)]),
+        )
+        .await;
+
+        device.assert_setting_values(vec![
+            (
+                SettingId::LeftSinglePress,
+                Value::OptionalString(Some("VolumeDown".into())),
+            ),
+            (
+                SettingId::RightSinglePress,
+                Value::OptionalString(Some("VolumeUp".into())),
+            ),
+            (
+                SettingId::LeftDoublePress,
+                Value::String("PlayPause".into()),
+            ),
+            (
+                SettingId::RightDoublePress,
+                Value::String("NextSong".into()),
+            ),
+            (
+                SettingId::LeftLongPress,
+                Value::String("VoiceAssistant".into()),
+            ),
+            (
+                SettingId::RightLongPress,
+                Value::String("PreviousSong".into()),
+            ),
+        ]);
     }
 }

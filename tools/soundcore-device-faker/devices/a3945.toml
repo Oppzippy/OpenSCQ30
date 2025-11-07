@@ -60,17 +60,17 @@ response = [
     120,
     120,
     1,
-    0,
+    0x66, # Left double tap
     1,
-    0,
+    0x55, # Left long press
     1,
-    0,
+    0x33, # Right double tap
     1,
-    0,
+    0x22, # Right long pres
     1,
-    0,
+    0x1,  # Left single press
     1,
-    0,
+    0x0,  # Right single press
     0,
     0,
     0,

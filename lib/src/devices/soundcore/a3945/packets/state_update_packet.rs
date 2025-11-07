@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use nom::{
     IResult, Parser,
-    combinator::{all_consuming, map},
+    combinator::map,
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
@@ -73,7 +73,7 @@ impl FromPacketBody for A3945StateUpdatePacket {
     ) -> IResult<&'a [u8], Self, E> {
         context(
             "a3945 state update packet",
-            all_consuming(map(
+            map(
                 (
                     TwsStatus::take,
                     DualBattery::take,
@@ -119,7 +119,7 @@ impl FromPacketBody for A3945StateUpdatePacket {
                         device_color,
                     }
                 },
-            )),
+            ),
         )
         .parse_complete(input)
     }
