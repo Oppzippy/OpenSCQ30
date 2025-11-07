@@ -8,6 +8,16 @@
 
 - Add support for Soundcore Liberty 4 NC
 
+#### Fixes
+
+- Disable HearID when modifying the equalizer, since HearID is not shown in the UI and it overrides the equalizer
+- Soundcore A20i incorrectly displaying buttons as disabled in some situations
+- Soundcore Life Note 3s button configuration displaying incorrect button actions
+
+#### Localization
+
+- Add German translations (thanks to Ireozar)
+
 ## v2.0.0-beta4
 
 ### Android
