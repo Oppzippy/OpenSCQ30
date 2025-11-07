@@ -8,7 +8,7 @@ There are a few ways to proceed.
 
 #### Wireshark (recommended)
 
-Install the soundcore wireshark plugin from [tools/wireshark/soundcore.lua](../tools/wireshark/plugins/soundcore.lua). To do so, open Help > About > Folders in Wireshark, and open the Personal Lua Plugins directory. Copy or make a symlink to `soundcore.lua`.
+Install the soundcore wireshark plugin from [tools/wireshark/plugins/soundcore.lua](../tools/wireshark/plugins/soundcore.lua). To do so, open Help > About > Folders in Wireshark, and open the Personal Lua Plugins directory. Copy or make a symlink to `soundcore.lua`.
 
 Install the official Soundcore app and capture bluetooth packets with Wireshark. Filter for RFCOMM to see only relevant data.
 
