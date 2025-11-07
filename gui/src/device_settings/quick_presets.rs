@@ -137,7 +137,7 @@ impl QuickPresetsModel {
             .as_ref()
             .map(|editing_quick_preset| ContextDrawer {
                 title: Some(editing_quick_preset.name.as_str().into()),
-                header_actions: Vec::new(),
+                actions: None,
                 header: None,
                 content: widget::column()
                     .extend(
