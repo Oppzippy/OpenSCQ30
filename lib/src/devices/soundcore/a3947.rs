@@ -155,7 +155,7 @@ mod tests {
     async fn test_with_known_good_packet() {
         let device = TestSoundcoreDevice::new_with_packet_responses(
             super::device_registry,
-            DeviceModel::SoundcoreA3959,
+            DeviceModel::SoundcoreA3947,
             HashMap::from([(
                 packet::Command([1, 1]),
                 packet::Inbound::new(
@@ -207,7 +207,7 @@ mod tests {
     async fn it_turns_off_hear_id() {
         let mut device = TestSoundcoreDevice::new_with_packet_responses(
             super::device_registry,
-            DeviceModel::SoundcoreA3959,
+            DeviceModel::SoundcoreA3947,
             HashMap::from([(
                 packet::Command([1, 1]),
                 packet::Inbound::new(
