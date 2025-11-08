@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="activate">Aktifleştir</string>
+    <string name="edit">Düzenle</string>
+    <string name="equalizer">Ekolayzır</string>
+    <string name="hz">%1$d Hz</string>
+    <string name="loading">Yükleniyor</string>
+    <string name="request_permission">İzin İste</string>
+    <string name="bluetooth_permission_is_required">Bluetooth İzni Gerekli</string>
+    <string name="none">Hiçbiri</string>
+    <string name="add">Ekle</string>
+    <string name="create">Oluştur</string>
+    <string name="cancel">İptal</string>
+    <string name="name">Ad</string>
+    <string name="delete">Sil</string>
+    <string name="back">Geri</string>
+    <string name="info">Bilgi</string>
+    <string name="khz">%s kHz</string>
+    <string name="connected_to">%s Cihazına Bağlandı</string>
+    <string name="connecting_to">%s Cihazına Bağlanılıyor</string>
+    <string name="disconnected">Bağlantı Kesildi</string>
+    <string name="disconnect">Bağlantıyı Kes</string>
+    <string name="awaiting_connection">Bağlantı Bekleniyor</string>
+    <string name="auto_connect">Otomatik Bağlan</string>
+    <string name="settings">Ayarlar</string>
+    <string name="search">Ara</string>
+    <string name="import_">Aktar</string>
+    <string name="confirm">Onayla</string>
+    <string name="error_connecting">Bağlanma hatası</string>
+    <string name="replace">Değiştir</string>
+    <string name="demo_mode">Demo Mod</string>
+    <string name="close">Kapat</string>
+    <string name="source_code" tools:ignore="TypographyOther">&lt;p&gt;Kaynak kodu ve hata raporlarına &lt;a href=https://github.com/Oppzippy/OpenSCQ30&gt;https://github.com/Oppzippy/OpenSCQ30&lt;/a&gt; adresinden ulaşılabilir.&lt;/p&gt; &lt;br&gt; &lt;p&gt;Telif Hakkı (C) Kyle Scheuing&lt;/p&gt; &lt;br&gt; &lt;p&gt;Bu program özgür bir yazılımdır: Özgür Yazılım Vakfı tarafından yayımlanan GNU Genel Kamu Lisansı\'nın 3. sürümü veya (tercihinize göre) daha sonraki herhangi bir sürümü uyarınca yeniden dağıtabilir ve/veya değiştirebilirsiniz.&lt;/p&gt; &lt;br&gt; &lt;p&gt;Bu program, yararlı olacağı umuduyla dağıtılmaktadır, ancak HERHANGİ BİR GARANTİ OLMADAN; hatta SATILABİLİRLİK veya BELİRLİ BİR AMACA UYGUNLUK konusunda ima edilen bir garanti tahsis edilmeme suretiyle. Daha fazla ayrıntı için GNU Genel Kamu Lisansı\'na bakın.&lt;/p&gt; &lt;br&gt; &lt;p&gt;Bu programla birlikte GNU Genel Kamu Lisansı\'nın bir kopyasını almış olmanız gerekir. Aksi takdirde, bkz. &amp;lt;&lt;a href=https://www.gnu.org/licenses/&gt;https://www.gnu.org/licenses/&lt;/a&gt;&gt;.&lt;/p&gt;</string>
+    <string name="no_devices_found">Hiçbir Aygıt Bulunamadı</string>
+    <string name="copy_logs_to_clipboard">Günlük Kayıtlarını Panoya Kopyala</string>
+    <string name="unknown">Bilinmiyor</string>
+    <string name="demo">Demo</string>
+    <string name="select_device_model">Cihaz Modelini Seçin</string>
+    <string name="notification_permission_is_required">Bildirim İzni Gerekiyor</string>
+    <string name="status_notification">­Durum Bildirimi</string>
+    <string name="information">Bilgi</string>
+</resources>
