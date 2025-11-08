@@ -1,10 +1,9 @@
 use nom::{
     IResult, Parser,
-    bytes::complete::take,
     combinator::map,
     error::{ContextError, ParseError, context},
     multi::count,
-    number::complete::le_i32,
+    number::complete::{le_i32, le_u16},
 };
 
 use crate::devices::soundcore::common::packet::parsing::take_bool;
@@ -19,6 +18,7 @@ pub struct CustomHearId<const C: usize, const B: usize> {
     pub hear_id_type: HearIdType,
     pub hear_id_music_type: HearIdMusicType,
     pub custom_volume_adjustments: Option<[VolumeAdjustments<B>; C]>,
+    pub hear_id_preset_profile_id: u16,
 }
 
 impl<const C: usize, const B: usize> Default for CustomHearId<C, B> {
@@ -30,12 +30,13 @@ impl<const C: usize, const B: usize> Default for CustomHearId<C, B> {
             hear_id_type: Default::default(),
             hear_id_music_type: Default::default(),
             custom_volume_adjustments: Default::default(),
+            hear_id_preset_profile_id: Default::default(),
         }
     }
 }
 
 impl<const C: usize, const B: usize> CustomHearId<C, B> {
-    pub(crate) fn take_with_all_fields<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn take_with_all_fields<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         context(
@@ -76,6 +77,7 @@ impl<const C: usize, const B: usize> CustomHearId<C, B> {
                         hear_id_type,
                         hear_id_music_type: music_type,
                         custom_volume_adjustments,
+                        hear_id_preset_profile_id: Default::default(),
                     }
                 },
             ),
@@ -84,7 +86,7 @@ impl<const C: usize, const B: usize> CustomHearId<C, B> {
     }
 
     // TODO maybe use a different struct for this?
-    pub(crate) fn take_without_music_type<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn take_without_music_type<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         context(
@@ -96,7 +98,7 @@ impl<const C: usize, const B: usize> CustomHearId<C, B> {
                     le_i32,
                     HearIdType::take,
                     count(VolumeAdjustments::take, C),
-                    take(2usize), // hear id eq index?
+                    le_u16, // hear id eq index?
                 ),
                 |(
                     is_enabled,
@@ -104,7 +106,7 @@ impl<const C: usize, const B: usize> CustomHearId<C, B> {
                     time,
                     hear_id_type,
                     custom_volume_adjustments,
-                    _,
+                    hear_id_preset_profile_id,
                 )| {
                     Self {
                         is_enabled,
@@ -119,6 +121,7 @@ impl<const C: usize, const B: usize> CustomHearId<C, B> {
                                 "count is guaranteed to return a vec with the desired length",
                             ),
                         ),
+                        hear_id_preset_profile_id,
                     }
                 },
             ),

@@ -88,6 +88,7 @@ pub enum SettingId {
     NoiseCancelingModeInCycle,
     AdaptiveNoiseCanceling,
     ManualNoiseCanceling,
+    ManualTransparency,
     WindNoiseSuppression,
     WindNoiseDetected,
     AdaptiveNoiseCancelingSensitivityLevel,

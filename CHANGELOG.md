@@ -7,6 +7,7 @@
 #### Features
 
 - Add support for Soundcore Liberty 4 NC
+- Add support for Soundcore Space Q45
 
 #### Fixes
 

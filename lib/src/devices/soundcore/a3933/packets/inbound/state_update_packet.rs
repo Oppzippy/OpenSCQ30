@@ -78,6 +78,7 @@ impl Default for A3933StateUpdatePacket {
                     VolumeAdjustments::new([0; 10]),
                     VolumeAdjustments::new([0; 10]),
                 ]),
+                hear_id_preset_profile_id: Default::default(),
             }),
             button_configuration: a3933::BUTTON_CONFIGURATION_SETTINGS.default_status_collection(),
             ambient_sound_mode_cycle: Default::default(),

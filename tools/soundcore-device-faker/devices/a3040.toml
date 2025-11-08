@@ -4,14 +4,14 @@ rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B3040"
 [[responses]]
 command = [1, 1]
 response = [
-    3,
-    255,
-    48,
+    3,    # Battery level
+    255,  # Unknown
+    48,   # Firmware version start
     50,
     46,
     51,
-    52,
-    51,
+    52,   # Firmware version end
+    51,   # Serial number start
     48,
     52,
     48,
@@ -26,10 +26,10 @@ response = [
     69,
     69,
     69,
-    56,
-    17,
-    0,
-    150,
+    56,   # Serial number end
+    17,   # EQ preset
+    0,    # EQ preset
+    150,  # EQ start
     140,
     110,
     110,
@@ -38,8 +38,8 @@ response = [
     160,
     170,
     120,
-    0,
-    122,
+    0,    # EQ end
+    122,  # Unknown, DRC?
     122,
     118,
     119,
@@ -48,17 +48,17 @@ response = [
     122,
     126,
     120,
-    0,
-    4,
-    4,
-    7,
-    7,
-    0,
-    80,
-    0,
-    1,
-    1,
-    5,
+    0,    # Unknown end
+    4,    # Unknown
+    4,    # Unknown
+    7,    # Press twice: 7 for BassUp On/Off, 0xF for disabled
+    7,    # Press once: Sound mode cycle
+    0,    # 0=NC, 1=transparency, 2=normal
+    0x50, # custom noise canceling
+    0,    # 0=custom transparency, 1=talk mode
+    1,    # 0=custom noise canceling, 1=adaptive noise canceling
+    0,    # Wind noise reduction
+    5,    # custom transparency
     255,
     0,
     0,
@@ -69,30 +69,20 @@ response = [
     1,
     255,
     0,
-    1,
-    0,
-    0,
-    90,
-    0,
-    1,
-    1,
+    1,    # auto power off
+    0,    # auto power off duration (30, 60, 90, 120)
+    0,    # Limit high volume
+    90,   # DB limit
+    0,    # refresh rate (real time, 10s, 1m)
+    1,    # prompt: Ambient sound switch
+    1,    # prompt: Battery alert
     1,
     0,
     17,
     50,
     1,
-    1,
-    143,
-    143,
-    128,
-    138,
-    150,
-    150,
-    143,
-    143,
-    60,
-    60,
-    143,
+    1,    # hear id enabled
+    143,  # hear id eq start
     143,
     128,
     138,
@@ -101,13 +91,23 @@ response = [
     143,
     143,
     60,
+    60,   # hear id eq end
+    143,  # hear id right side? but these are headphones, not earbuds
+    143,
+    128,
+    138,
+    150,
+    150,
+    143,
+    143,
     60,
-    100,
+    60,   # right side end
+    100,  # time start
     152,
     140,
-    205,
-    0,
-    143,
+    205,  # time end
+    0,    # hear id type
+    143,  # custom hear id eq start
     143,
     128,
     138,
@@ -116,7 +116,8 @@ response = [
     143,
     143,
     60,
-    60,
+    60,   # custom hear id eq end
+    0,    # custom hear id eq right side?
     0,
     0,
     0,
@@ -125,9 +126,8 @@ response = [
     0,
     0,
     0,
-    0,
-    0,
-    122,
+    0,    # right side end
+    122,  # Unknown eq
     122,
     119,
     121,
@@ -136,9 +136,9 @@ response = [
     121,
     123,
     114,
-    0,
-    17,
-    0,
+    0,    # Unknown eq end
+    17,   # hear id eq preset profile
+    0,    # hear id eq preset profile
     0,
     0,
     0,

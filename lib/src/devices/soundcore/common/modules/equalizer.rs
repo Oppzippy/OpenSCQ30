@@ -237,7 +237,10 @@ impl<T: 'static> ModuleCollection<T> {
         self.state_modifiers.push(state_modifier);
     }
 
-    async fn add_equalizer_with_custom_state_modifier<const CHANNELS: usize, const BANDS: usize>(
+    pub async fn add_equalizer_with_custom_state_modifier<
+        const CHANNELS: usize,
+        const BANDS: usize,
+    >(
         &mut self,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,

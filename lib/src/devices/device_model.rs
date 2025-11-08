@@ -37,6 +37,7 @@ pub enum DeviceModel {
     SoundcoreA3030,
     SoundcoreA3031,
     SoundcoreA3033,
+    SoundcoreA3040,
     SoundcoreA3926,
     SoundcoreA3930,
     SoundcoreA3931,
@@ -77,6 +78,7 @@ impl DeviceModel {
             }
             Self::SoundcoreA3031 => new_soundcore_device!(soundcore::a3031),
             Self::SoundcoreA3033 => new_soundcore_device!(soundcore::a3033),
+            Self::SoundcoreA3040 => new_soundcore_device!(soundcore::a3040),
             Self::SoundcoreA3926 => new_soundcore_device!(soundcore::a3926),
             Self::SoundcoreA3930 => new_soundcore_device!(soundcore::a3930),
             Self::SoundcoreA3931 | Self::SoundcoreA3935 => {
@@ -115,6 +117,7 @@ impl DeviceModel {
             }
             Self::SoundcoreA3031 => new_soundcore_device!(soundcore::a3031),
             Self::SoundcoreA3033 => new_soundcore_device!(soundcore::a3033),
+            Self::SoundcoreA3040 => new_soundcore_device!(soundcore::a3040),
             Self::SoundcoreA3926 => new_soundcore_device!(soundcore::a3926),
             Self::SoundcoreA3930 => new_soundcore_device!(soundcore::a3930),
             Self::SoundcoreA3931 | Self::SoundcoreA3935 => {

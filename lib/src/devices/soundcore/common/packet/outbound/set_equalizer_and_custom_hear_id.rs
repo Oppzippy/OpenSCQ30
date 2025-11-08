@@ -6,14 +6,26 @@ use crate::devices::soundcore::common::{
 use super::outbound_packet::ToPacket;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct SetEqualizerAndCustomHearId<'a, const C: usize, const B: usize> {
-    pub equalizer_configuration: &'a EqualizerConfiguration<C, B>,
+pub struct SetEqualizerAndCustomHearId<
+    'a,
+    const CHANNELS: usize,
+    const BANDS: usize,
+    const HEAR_ID_CHANNELS: usize,
+    const HEAR_ID_BANDS: usize,
+> {
+    pub equalizer_configuration: &'a EqualizerConfiguration<CHANNELS, BANDS>,
     pub gender: Gender,
     pub age_range: AgeRange,
-    pub custom_hear_id: &'a CustomHearId<C, B>,
+    pub custom_hear_id: &'a CustomHearId<HEAR_ID_CHANNELS, HEAR_ID_BANDS>,
 }
 
-impl<const C: usize, const B: usize> ToPacket for SetEqualizerAndCustomHearId<'_, C, B> {
+impl<
+    const CHANNELS: usize,
+    const BANDS: usize,
+    const HEAR_ID_CHANNELS: usize,
+    const HEAR_ID_BANDS: usize,
+> ToPacket for SetEqualizerAndCustomHearId<'_, CHANNELS, BANDS, HEAR_ID_CHANNELS, HEAR_ID_BANDS>
+{
     type DirectionMarker = packet::OutboundMarker;
 
     fn command(&self) -> packet::Command {
@@ -135,6 +147,7 @@ mod tests {
                     VolumeAdjustments::new([-109, -52, -73, -2, -101, -116, -118, -39]),
                     VolumeAdjustments::new([-12, -112, -36, -41, -24, -113, -106, -21]),
                 ]),
+                hear_id_preset_profile_id: Default::default(),
             },
         }
         .to_packet()
@@ -154,7 +167,7 @@ mod tests {
             0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0xb1,
         ];
         let actual = SetEqualizerAndCustomHearId {
-            equalizer_configuration: &EqualizerConfiguration::new_from_preset_profile(
+            equalizer_configuration: &EqualizerConfiguration::<2, 8>::new_from_preset_profile(
                 PresetEqualizerProfile::SoundcoreSignature,
                 [Vec::new(), Vec::new()],
             ),
@@ -173,6 +186,7 @@ mod tests {
                     VolumeAdjustments::new([-90, -67, -53, -79, -13, -12, -73, -99]),
                     VolumeAdjustments::new([-24, -67, -40, -41, -38, -102, -119, -24]),
                 ]),
+                hear_id_preset_profile_id: Default::default(),
             },
         }
         .to_packet()

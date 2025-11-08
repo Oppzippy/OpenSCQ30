@@ -77,6 +77,7 @@ impl Default for A3936StateUpdatePacket {
                     VolumeAdjustments::new([0; 10]),
                     VolumeAdjustments::new([0; 10]),
                 ]),
+                hear_id_preset_profile_id: Default::default(),
             },
             sound_modes: Default::default(),
             ambient_sound_mode_cycle: Default::default(),

@@ -135,6 +135,7 @@ where
                             hear_id_type: Default::default(),
                             hear_id_music_type: Default::default(),
                             custom_volume_adjustments: None,
+                            hear_id_preset_profile_id: Default::default(),
                         }
                     },
                 }
