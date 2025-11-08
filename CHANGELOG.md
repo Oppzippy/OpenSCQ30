@@ -17,6 +17,7 @@
 #### Localization
 
 - Add German translations (thanks to Ireozar)
+- Add Turkish translations (thanks to ozer4)
 
 ## v2.0.0-beta4
 
