@@ -1,0 +1,77 @@
+name = "Soundcore C30i"
+rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B3330"
+
+[[responses]]
+command = [1, 1]
+response = [
+    1,    # host device
+    1,    # tws enabled
+    5,    # left battery level
+    5,    # right battery level
+    48,   # left firmware version start
+    52,
+    46,
+    50,
+    55,   # left firmware version end
+    48,   # right firmware version start
+    52,
+    46,
+    50,
+    55,   # right firmware version end
+    51,   # serial number start
+    51,
+    51,
+    48,
+    57,
+    56,
+    52,
+    55,
+    52,
+    52,
+    55,
+    57,
+    102,
+    54,
+    50,
+    57,   # serial number end
+    48,   # unknown start
+    46,
+    49,
+    46,
+    51,   # unknown end
+    2,    # case battery
+    7,    # unknown
+    0x61, # left double tap
+    0x60, # right double tap
+    0x33, # left tap 3 times
+    0x33, # right tap 3 times
+    0xF6, # left long press
+    0xF6, # right long press
+    0x31, # unknown
+    0,    # 3d surround sound
+    1,    # touch tone
+    1,    # low battery prompt
+    0,    # dual connections
+    0,    # control lock
+    0,    # bass mode
+    254,  # EQ profile
+    254,  # EQ profile
+    131,  # eq start
+    135,
+    136,
+    131,
+    124,
+    120,
+    120,
+    120,
+    120,
+    120,  # EQ end
+    4,    # unknown
+    1,    # call left double tap
+    1,    # call right double tap
+    0,    # call left long press
+    0,    # call right long press
+    255,
+    255,
+    255,
+]
