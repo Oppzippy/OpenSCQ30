@@ -120,6 +120,7 @@ pub enum SettingId {
     LimitHighVolumeDbLimit,
     #[translate("db-refresh-rate")]
     LimitHighVolumeRefreshRate,
+    CaseBatteryLevel,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

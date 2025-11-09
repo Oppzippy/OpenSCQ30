@@ -23,7 +23,7 @@ use crate::{
             },
             packet_manager::PacketHandler,
             structures::{
-                AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, DualBattery,
+                AmbientSoundModeCycle, AutoPowerOff, CaseBatteryLevel, DualBattery,
                 DualFirmwareVersion, EqualizerConfiguration, LimitHighVolume, SerialNumber,
                 TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
             },
@@ -42,7 +42,7 @@ pub struct A3947StateUpdatePacket {
     pub button_configuration: ButtonStatusCollection<8>,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub sound_modes: a3947::structures::SoundModes,
-    pub charging_case_battery_level: BatteryLevel,
+    pub case_battery_level: CaseBatteryLevel,
     pub sound_leak_compensation: bool,
     pub gaming_mode: bool,
     pub touch_tone: TouchTone,
@@ -68,7 +68,7 @@ impl Default for A3947StateUpdatePacket {
             hear_id: Default::default(),
             ambient_sound_mode_cycle: Default::default(),
             sound_modes: Default::default(),
-            charging_case_battery_level: Default::default(),
+            case_battery_level: Default::default(),
             sound_leak_compensation: Default::default(),
             gaming_mode: Default::default(),
             limit_high_volume: Default::default(),
@@ -107,12 +107,12 @@ impl FromPacketBody for A3947StateUpdatePacket {
                         ),
                         AmbientSoundModeCycle::take,
                         a3947::structures::SoundModes::take,
-                        take(6usize),       // unknown
-                        BatteryLevel::take, // case battery
-                        take(1usize),       // unknown
-                        take_bool,          // sound leak compensation
-                        take(1usize),       // unknown
-                        take_bool,          // game mode
+                        take(6usize), // unknown
+                        CaseBatteryLevel::take,
+                        take(1usize), // unknown
+                        take_bool,    // sound leak compensation
+                        take(1usize), // unknown
+                        take_bool,    // game mode
                         TouchTone::take,
                         take(3usize), // unknown
                         take_bool,    // 3d surround sound
@@ -141,7 +141,7 @@ impl FromPacketBody for A3947StateUpdatePacket {
                         ambient_sound_mode_cycle,
                         sound_modes,
                         _unknown4,
-                        charging_case_battery_level,
+                        case_battery_level,
                         _unknown5,
                         sound_leak_compensation,
                         _unknown6,
@@ -167,7 +167,7 @@ impl FromPacketBody for A3947StateUpdatePacket {
                         equalizer_configuration,
                         button_configuration,
                         touch_tone,
-                        charging_case_battery_level,
+                        case_battery_level,
                         hear_id,
                         ambient_sound_mode_cycle,
                         sound_modes,
@@ -215,7 +215,7 @@ impl ToPacket for A3947StateUpdatePacket {
             .chain(self.sound_modes.bytes())
             .chain([0; 6]) // unknown
             .chain([
-                self.charging_case_battery_level.0,
+                self.case_battery_level.0.0,
                 0, // unknown
                 self.sound_leak_compensation.into(),
                 0,

@@ -123,6 +123,7 @@ is-charging-left = Is Charging (Left)
 battery-level-left = Battery Level (Left)
 is-charging-right = Is Charging (Right)
 battery-level-right = Battery Level (Right)
+case-battery-level = Case Battery Level
 charging = Charging
 not-charging = Not Charging
 

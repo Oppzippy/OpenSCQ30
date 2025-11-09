@@ -21,7 +21,7 @@ use crate::{
             },
             packet_manager::PacketHandler,
             structures::{
-                BatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
+                CaseBatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
                 SerialNumber, TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
             },
         },
@@ -41,7 +41,7 @@ pub struct A3945StateUpdatePacket {
     pub touch_tone: TouchTone,
     pub wear_detection_switch: bool,
     pub game_mode_switch: bool,
-    pub charging_case_battery_level: BatteryLevel,
+    pub case_battery_level: CaseBatteryLevel,
     pub bass_up_switch: bool,
     pub device_color: u8,
 }
@@ -58,7 +58,7 @@ impl Default for A3945StateUpdatePacket {
             touch_tone: Default::default(),
             wear_detection_switch: Default::default(),
             game_mode_switch: Default::default(),
-            charging_case_battery_level: Default::default(),
+            case_battery_level: Default::default(),
             bass_up_switch: Default::default(),
             device_color: Default::default(),
         }
@@ -86,7 +86,7 @@ impl FromPacketBody for A3945StateUpdatePacket {
                     TouchTone::take,
                     take_bool,
                     take_bool,
-                    BatteryLevel::take,
+                    CaseBatteryLevel::take,
                     take_bool,
                     le_u8,
                 ),
@@ -100,7 +100,7 @@ impl FromPacketBody for A3945StateUpdatePacket {
                     touch_tone,
                     wear_detection_switch,
                     game_mode_switch,
-                    charging_case_battery_level,
+                    case_battery_level,
                     bass_up_switch,
                     device_color,
                 )| {
@@ -114,7 +114,7 @@ impl FromPacketBody for A3945StateUpdatePacket {
                         touch_tone,
                         wear_detection_switch,
                         game_mode_switch,
-                        charging_case_battery_level,
+                        case_battery_level,
                         bass_up_switch,
                         device_color,
                     }
@@ -148,7 +148,7 @@ impl ToPacket for A3945StateUpdatePacket {
             .chain([
                 self.wear_detection_switch as u8,
                 self.game_mode_switch as u8,
-                self.charging_case_battery_level.0,
+                self.case_battery_level.0.0,
                 self.bass_up_switch as u8,
                 self.device_color,
             ])

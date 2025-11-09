@@ -50,6 +50,7 @@ soundcore_device!(
         builder.serial_number_and_dual_firmware_version();
         builder.tws_status();
         builder.dual_battery(5);
+        builder.case_battery_level(5);
     },
     {
         HashMap::from([(
@@ -179,6 +180,7 @@ mod tests {
         device.assert_setting_values([
             (SettingId::BatteryLevelLeft, "2".into()),
             (SettingId::BatteryLevelRight, "4".into()),
+            (SettingId::CaseBatteryLevel, "2".into()),
             (SettingId::IsChargingLeft, "No".into()),
             (SettingId::IsChargingRight, "No".into()),
             (SettingId::AmbientSoundMode, "NoiseCanceling".into()),

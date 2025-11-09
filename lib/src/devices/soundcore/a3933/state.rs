@@ -3,7 +3,7 @@ use openscq30_lib_macros::Has;
 use crate::devices::soundcore::common::{
     modules::reset_button_configuration::ResetButtonConfigurationPending,
     structures::{
-        AgeRange, AmbientSoundModeCycle, BatteryLevel, CustomHearId, DualBattery,
+        AgeRange, AmbientSoundModeCycle, CaseBatteryLevel, CustomHearId, DualBattery,
         DualFirmwareVersion, EqualizerConfiguration, SerialNumber, SoundModes, TouchTone,
         TwsStatus, button_configuration::ButtonStatusCollection,
     },
@@ -23,7 +23,7 @@ pub struct A3933State {
     pub button_configuration: ButtonStatusCollection<6>,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub sound_modes: SoundModes,
-    pub charging_case_battery_level: BatteryLevel,
+    pub case_battery_level: CaseBatteryLevel,
     pub touch_tone_switch: TouchTone,
     #[has(skip)]
     pub wear_detection_switch: bool,
@@ -52,7 +52,7 @@ impl From<A3933StateUpdatePacket> for A3933State {
             touch_tone_switch: value.touch_tone,
             wear_detection_switch: value.wear_detection_switch,
             game_mode_switch: value.game_mode_switch,
-            charging_case_battery_level: value.charging_case_battery_level,
+            case_battery_level: value.case_battery_level,
             device_color: value.device_color,
             wind_noise_detection: value.wind_noise_detection,
             button_reset_pending: ResetButtonConfigurationPending::default(),

@@ -3,7 +3,7 @@ use openscq30_lib_macros::Has;
 use crate::devices::soundcore::common::{
     modules::reset_button_configuration::ResetButtonConfigurationPending,
     structures::{
-        AgeRange, AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CustomHearId, DualBattery,
+        AgeRange, AmbientSoundModeCycle, AutoPowerOff, CaseBatteryLevel, CustomHearId, DualBattery,
         DualFirmwareVersion, EqualizerConfiguration, Gender, SerialNumber, TouchTone, TwsStatus,
         button_configuration::ButtonStatusCollection,
     },
@@ -23,7 +23,7 @@ pub struct A3936State {
     pub sound_modes: A3936SoundModes,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub button_configuration: ButtonStatusCollection<6>,
-    pub charging_case_battery: BatteryLevel,
+    pub case_battery_level: CaseBatteryLevel,
     pub auto_power_off: AutoPowerOff,
     pub gender: Gender,
     pub touch_tone: TouchTone,
@@ -52,7 +52,7 @@ impl From<A3936StateUpdatePacket> for A3936State {
             ambient_sound_mode_cycle: value.ambient_sound_mode_cycle,
             button_configuration: value.button_configuration,
             touch_tone: value.touch_tone,
-            charging_case_battery: value.charging_case_battery,
+            case_battery_level: value.case_battery_level,
             color: value.color,
             ldac: value.ldac,
             supports_two_cnn_switch: value.supports_two_cnn_switch,

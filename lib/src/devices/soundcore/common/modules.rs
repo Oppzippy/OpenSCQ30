@@ -22,6 +22,7 @@ use super::{
 pub mod ambient_sound_mode_cycle;
 mod auto_power_off;
 pub mod button_configuration;
+mod case_battery_level;
 pub mod dual_battery;
 pub mod equalizer;
 mod limit_high_volume;

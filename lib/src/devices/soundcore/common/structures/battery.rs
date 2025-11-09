@@ -7,6 +7,17 @@ use nom::{
 use strum::Display;
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
+pub struct CaseBatteryLevel(pub BatteryLevel);
+
+impl CaseBatteryLevel {
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> IResult<&'a [u8], Self, E> {
+        map(BatteryLevel::take, Self).parse_complete(input)
+    }
+}
+
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub struct DualBattery {
     pub left: SingleBattery,
     pub right: SingleBattery,

@@ -26,7 +26,7 @@ use crate::{
                 packet::{self, PacketIOController, outbound::ToPacket},
                 state::Update,
                 structures::{
-                    AutoPowerOff, LimitHighVolume, TouchTone,
+                    AutoPowerOff, CaseBatteryLevel, LimitHighVolume, TouchTone,
                     button_configuration::ButtonStatusCollection,
                 },
             },
@@ -388,6 +388,13 @@ where
         StateType: Has<DualBattery>,
     {
         self.module_collection.add_dual_battery(max_level);
+    }
+
+    pub fn case_battery_level(&mut self, max_level: u8)
+    where
+        StateType: Has<CaseBatteryLevel>,
+    {
+        self.module_collection.add_case_battery_level(max_level);
     }
 
     pub fn serial_number_and_firmware_version(&mut self)

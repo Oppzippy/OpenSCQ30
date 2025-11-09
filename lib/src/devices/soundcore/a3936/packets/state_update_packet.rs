@@ -22,7 +22,7 @@ use crate::{
             },
             packet_manager::PacketHandler,
             structures::{
-                AgeRange, AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CustomHearId,
+                AgeRange, AmbientSoundModeCycle, AutoPowerOff, CaseBatteryLevel, CustomHearId,
                 DualBattery, DualFirmwareVersion, EqualizerConfiguration, SerialNumber, TouchTone,
                 TwsStatus, VolumeAdjustments, button_configuration::ButtonStatusCollection,
             },
@@ -44,7 +44,7 @@ pub struct A3936StateUpdatePacket {
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub button_configuration: ButtonStatusCollection<6>,
     pub touch_tone: TouchTone,
-    pub charging_case_battery: BatteryLevel,
+    pub case_battery_level: CaseBatteryLevel,
     pub color: u8,
     pub ldac: bool,
     pub supports_two_cnn_switch: bool,
@@ -83,7 +83,7 @@ impl Default for A3936StateUpdatePacket {
             ambient_sound_mode_cycle: Default::default(),
             button_configuration: a3936::BUTTON_CONFIGURATION_SETTINGS.default_status_collection(),
             touch_tone: Default::default(),
-            charging_case_battery: Default::default(),
+            case_battery_level: Default::default(),
             color: Default::default(),
             ldac: Default::default(),
             supports_two_cnn_switch: Default::default(),
@@ -130,7 +130,7 @@ impl FromPacketBody for A3936StateUpdatePacket {
                 let (input, ambient_sound_mode_cycle) = AmbientSoundModeCycle::take(input)?;
                 let (input, sound_modes) = A3936SoundModes::take(input)?;
                 let (input, touch_tone) = TouchTone::take(input)?;
-                let (input, charging_case_battery) = BatteryLevel::take(input)?;
+                let (input, case_battery_level) = CaseBatteryLevel::take(input)?;
                 let (input, color) = le_u8(input)?;
                 let (input, ldac) = take_bool(input)?;
                 let (input, supports_two_cnn_switch) = take_bool(input)?;
@@ -151,7 +151,7 @@ impl FromPacketBody for A3936StateUpdatePacket {
                         sound_modes,
                         button_configuration,
                         touch_tone,
-                        charging_case_battery,
+                        case_battery_level,
                         color,
                         ldac,
                         supports_two_cnn_switch,
@@ -211,7 +211,7 @@ impl ToPacket for A3936StateUpdatePacket {
             .chain(self.sound_modes.bytes())
             .chain([
                 self.touch_tone as u8,
-                self.charging_case_battery.0,
+                self.case_battery_level.0.0,
                 self.color,
                 self.ldac as u8,
                 self.supports_two_cnn_switch as u8,
