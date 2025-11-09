@@ -182,7 +182,7 @@ pub const COMMON_ACTIONS_MINIMAL: &[ButtonAction] = &[
     },
 ];
 
-// Everything except game mode
+// Everything except gaming mode
 pub const COMMON_ACTIONS: &[ButtonAction] = COMMON_ACTIONS_WITH_GAME_MODE.split_at(7).0;
 
 pub const COMMON_ACTIONS_WITHOUT_SOUND_MODES: &[ButtonAction] = &[
@@ -256,8 +256,8 @@ pub const COMMON_ACTIONS_WITH_GAME_MODE: &[ButtonAction] = &[
     },
     ButtonAction {
         id: 9,
-        name: "GameMode",
-        localized_name: || fl!("game-mode"),
+        name: "GamingMode",
+        localized_name: || fl!("gaming-mode"),
     },
 ];
 

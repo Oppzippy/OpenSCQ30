@@ -121,8 +121,6 @@ pub enum SettingId {
     #[translate("db-refresh-rate")]
     LimitHighVolumeRefreshRate,
     CaseBatteryLevel,
-    // TODO rename to gaming-mode
-    #[translate("game-mode")]
     GamingMode,
 }
 
