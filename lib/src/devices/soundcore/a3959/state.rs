@@ -6,8 +6,8 @@ use crate::devices::soundcore::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         structures::{
             AmbientSoundModeCycle, AutoPowerOff, DualBattery, DualFirmwareVersion,
-            EqualizerConfiguration, LowBatteryPrompt, SerialNumber, TouchTone, TwsStatus,
-            button_configuration::ButtonStatusCollection,
+            EqualizerConfiguration, GamingMode, LowBatteryPrompt, SerialNumber, TouchTone,
+            TwsStatus, button_configuration::ButtonStatusCollection,
         },
     },
 };
@@ -25,6 +25,7 @@ pub struct A3959State {
     auto_power_off: AutoPowerOff,
     touch_tone: TouchTone,
     low_battery_prompt: LowBatteryPrompt,
+    gaming_mode: GamingMode,
     button_reset_pending: ResetButtonConfigurationPending,
 }
 
@@ -42,6 +43,7 @@ impl From<a3959::packets::inbound::A3959State> for A3959State {
             auto_power_off: packet.auto_power_off,
             touch_tone: packet.touch_tone,
             low_battery_prompt: packet.low_battery_prompt,
+            gaming_mode: packet.gaming_mode,
             button_reset_pending: ResetButtonConfigurationPending::default(),
         }
     }

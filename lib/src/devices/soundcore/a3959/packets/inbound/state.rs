@@ -18,10 +18,11 @@ use crate::{
                 self, Command,
                 inbound::{FromPacketBody, TryToPacket},
                 outbound::ToPacket,
-                parsing::take_bool,
             },
             packet_manager::PacketHandler,
-            structures::{LowBatteryPrompt, button_configuration::ButtonStatusCollection},
+            structures::{
+                GamingMode, LowBatteryPrompt, button_configuration::ButtonStatusCollection,
+            },
         },
     },
 };
@@ -39,7 +40,7 @@ pub struct A3959State {
     pub touch_tone: common::structures::TouchTone,
     pub auto_power_off: common::structures::AutoPowerOff,
     pub low_battery_prompt: LowBatteryPrompt,
-    pub gaming_mode: bool,
+    pub gaming_mode: GamingMode,
 }
 
 impl Default for A3959State {
@@ -88,7 +89,7 @@ impl FromPacketBody for A3959State {
                     take(2usize),
                     common::structures::AutoPowerOff::take,
                     LowBatteryPrompt::take,
-                    take_bool,
+                    GamingMode::take,
                     take(12usize),
                 ),
                 |(
@@ -159,7 +160,7 @@ impl ToPacket for A3959State {
             .chain([0, 0])
             .chain(self.auto_power_off.bytes())
             .chain(self.low_battery_prompt.bytes())
-            .chain(std::iter::once(self.gaming_mode.into()))
+            .chain(self.gaming_mode.bytes())
             .chain([0; 12])
             .collect()
     }

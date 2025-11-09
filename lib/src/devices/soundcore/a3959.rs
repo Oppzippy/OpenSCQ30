@@ -45,6 +45,8 @@ soundcore_device!(
         builder.touch_tone();
         builder.tws_status();
         builder.low_battery_prompt();
+        builder.gaming_mode();
+
         builder.dual_battery(10);
         builder.serial_number_and_dual_firmware_version();
     },
