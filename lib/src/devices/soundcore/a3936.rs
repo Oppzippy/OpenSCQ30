@@ -44,6 +44,7 @@ soundcore_device!(
         );
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.touch_tone();
+        builder.gaming_mode();
         builder.tws_status();
         builder.dual_battery(5);
         builder.case_battery_level(5);

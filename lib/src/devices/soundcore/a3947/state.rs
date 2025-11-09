@@ -6,8 +6,8 @@ use crate::devices::soundcore::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         structures::{
             AmbientSoundModeCycle, AutoPowerOff, CaseBatteryLevel, DualBattery,
-            DualFirmwareVersion, EqualizerConfiguration, LimitHighVolume, SerialNumber, TouchTone,
-            TwsStatus, button_configuration::ButtonStatusCollection,
+            DualFirmwareVersion, EqualizerConfiguration, GamingMode, LimitHighVolume, SerialNumber,
+            TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
         },
     },
 };
@@ -27,6 +27,7 @@ pub struct A3947State {
     limit_high_volume: LimitHighVolume,
     auto_power_off: AutoPowerOff,
     case_battery_level: CaseBatteryLevel,
+    gaming_mode: GamingMode,
     reset_button_configuration_pending: ResetButtonConfigurationPending,
 }
 
@@ -44,7 +45,7 @@ impl From<a3947::packets::A3947StateUpdatePacket> for A3947State {
             sound_modes,
             case_battery_level,
             sound_leak_compensation: _,
-            gaming_mode: _,
+            gaming_mode,
             touch_tone,
             surround_sound: _,
             limit_high_volume,
@@ -69,6 +70,7 @@ impl From<a3947::packets::A3947StateUpdatePacket> for A3947State {
             limit_high_volume,
             auto_power_off,
             case_battery_level,
+            gaming_mode,
             reset_button_configuration_pending: ResetButtonConfigurationPending::default(),
         }
     }

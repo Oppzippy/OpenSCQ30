@@ -4,8 +4,8 @@ use crate::devices::soundcore::common::{
     modules::reset_button_configuration::ResetButtonConfigurationPending,
     structures::{
         AgeRange, AmbientSoundModeCycle, CaseBatteryLevel, CustomHearId, DualBattery,
-        DualFirmwareVersion, EqualizerConfiguration, SerialNumber, SoundModes, TouchTone,
-        TwsStatus, button_configuration::ButtonStatusCollection,
+        DualFirmwareVersion, EqualizerConfiguration, GamingMode, SerialNumber, SoundModes,
+        TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
     },
 };
 
@@ -25,10 +25,9 @@ pub struct A3933State {
     pub sound_modes: SoundModes,
     pub case_battery_level: CaseBatteryLevel,
     pub touch_tone_switch: TouchTone,
+    pub gaming_mode: GamingMode,
     #[has(skip)]
     pub wear_detection_switch: bool,
-    #[has(skip)]
-    pub game_mode_switch: bool,
     #[has(skip)]
     pub device_color: u8,
     #[has(skip)]
@@ -51,7 +50,7 @@ impl From<A3933StateUpdatePacket> for A3933State {
             sound_modes: value.sound_modes,
             touch_tone_switch: value.touch_tone,
             wear_detection_switch: value.wear_detection_switch,
-            game_mode_switch: value.game_mode_switch,
+            gaming_mode: value.gaming_mode,
             case_battery_level: value.case_battery_level,
             device_color: value.device_color,
             wind_noise_detection: value.wind_noise_detection,

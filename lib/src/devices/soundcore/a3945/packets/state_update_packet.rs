@@ -22,7 +22,8 @@ use crate::{
             packet_manager::PacketHandler,
             structures::{
                 CaseBatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
-                SerialNumber, TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
+                GamingMode, SerialNumber, TouchTone, TwsStatus,
+                button_configuration::ButtonStatusCollection,
             },
         },
     },
@@ -40,7 +41,7 @@ pub struct A3945StateUpdatePacket {
     pub button_configuration: ButtonStatusCollection<6>,
     pub touch_tone: TouchTone,
     pub wear_detection_switch: bool,
-    pub game_mode_switch: bool,
+    pub gaming_mode: GamingMode,
     pub case_battery_level: CaseBatteryLevel,
     pub bass_up_switch: bool,
     pub device_color: u8,
@@ -57,7 +58,7 @@ impl Default for A3945StateUpdatePacket {
             button_configuration: a3945::BUTTON_CONFIGURATION_SETTINGS.default_status_collection(),
             touch_tone: Default::default(),
             wear_detection_switch: Default::default(),
-            game_mode_switch: Default::default(),
+            gaming_mode: Default::default(),
             case_battery_level: Default::default(),
             bass_up_switch: Default::default(),
             device_color: Default::default(),
@@ -85,7 +86,7 @@ impl FromPacketBody for A3945StateUpdatePacket {
                     ),
                     TouchTone::take,
                     take_bool,
-                    take_bool,
+                    GamingMode::take,
                     CaseBatteryLevel::take,
                     take_bool,
                     le_u8,
@@ -99,7 +100,7 @@ impl FromPacketBody for A3945StateUpdatePacket {
                     button_configuration,
                     touch_tone,
                     wear_detection_switch,
-                    game_mode_switch,
+                    gaming_mode,
                     case_battery_level,
                     bass_up_switch,
                     device_color,
@@ -113,7 +114,7 @@ impl FromPacketBody for A3945StateUpdatePacket {
                         button_configuration,
                         touch_tone,
                         wear_detection_switch,
-                        game_mode_switch,
+                        gaming_mode,
                         case_battery_level,
                         bass_up_switch,
                         device_color,
@@ -145,9 +146,9 @@ impl ToPacket for A3945StateUpdatePacket {
                     .bytes(a3945::BUTTON_CONFIGURATION_SETTINGS.parse_settings()),
             )
             .chain(self.touch_tone.bytes())
+            .chain([self.wear_detection_switch as u8])
+            .chain(self.gaming_mode.bytes())
             .chain([
-                self.wear_detection_switch as u8,
-                self.game_mode_switch as u8,
                 self.case_battery_level.0.0,
                 self.bass_up_switch as u8,
                 self.device_color,

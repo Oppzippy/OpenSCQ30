@@ -4,29 +4,30 @@ use nom::{
     error::{ContextError, ParseError, context},
 };
 
-use crate::devices::soundcore::common::packet::{self, Command, parsing::take_bool};
+use crate::devices::soundcore::common::{
+    packet::{self, Command},
+    structures::GamingMode,
+};
 
 use super::FromPacketBody;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct GameModeUpdate {
-    pub is_enabled: bool,
-}
+pub struct GamingModeUpdate(pub GamingMode);
 
-impl GameModeUpdate {
+impl GamingModeUpdate {
     #[allow(unused)]
     pub const COMMAND: Command = Command([0x01, 0x11]);
 }
 
-impl FromPacketBody for GameModeUpdate {
+impl FromPacketBody for GamingModeUpdate {
     type DirectionMarker = packet::InboundMarker;
 
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         context(
-            "GameModeUpdatePacket",
-            all_consuming(map(take_bool, |is_enabled| Self { is_enabled })),
+            "gaming mode update packet",
+            all_consuming(map(GamingMode::take, Self)),
         )
         .parse_complete(input)
     }
@@ -38,7 +39,7 @@ mod tests {
 
     use crate::devices::soundcore::common::packet::{
         self,
-        inbound::{FromPacketBody, GameModeUpdate},
+        inbound::{FromPacketBody, GamingModeUpdate},
     };
 
     #[test]
@@ -47,9 +48,9 @@ mod tests {
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x11, 0x0b, 0x00, 0x01, 0x27,
         ];
         let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
-        let packet = GameModeUpdate::take::<VerboseError<_>>(&packet.body)
+        let packet = GamingModeUpdate::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1;
-        assert!(packet.is_enabled);
+        assert!(packet.0.is_enabled);
     }
 }

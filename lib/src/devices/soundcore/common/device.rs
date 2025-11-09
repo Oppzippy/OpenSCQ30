@@ -26,7 +26,7 @@ use crate::{
                 packet::{self, PacketIOController, outbound::ToPacket},
                 state::Update,
                 structures::{
-                    AutoPowerOff, CaseBatteryLevel, LimitHighVolume, TouchTone,
+                    AutoPowerOff, CaseBatteryLevel, GamingMode, LimitHighVolume, TouchTone,
                     button_configuration::ButtonStatusCollection,
                 },
             },
@@ -436,6 +436,14 @@ where
     {
         self.module_collection
             .add_touch_tone(self.packet_io_controller.clone());
+    }
+
+    pub fn gaming_mode(&mut self)
+    where
+        StateType: Has<GamingMode>,
+    {
+        self.module_collection
+            .add_gaming_mode(self.packet_io_controller.clone());
     }
 
     pub fn limit_high_volume(&mut self)

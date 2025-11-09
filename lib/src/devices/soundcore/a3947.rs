@@ -45,6 +45,7 @@ soundcore_device!(
 
         builder.limit_high_volume();
         builder.touch_tone();
+        builder.gaming_mode();
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
 
         builder.serial_number_and_dual_firmware_version();
@@ -202,6 +203,7 @@ mod tests {
             (SettingId::RightLongPress, Some("AmbientSoundMode").into()),
             (SettingId::TouchTone, true.into()),
             (SettingId::AutoPowerOff, "20m".into()),
+            (SettingId::GamingMode, false.into()),
         ]);
     }
 
@@ -282,6 +284,38 @@ mod tests {
                     packet::Command([6, 129]),
                     vec![2, 80, 1, 0, 1, 1, 3],
                 )],
+            )
+            .await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn set_gaming_mode() {
+        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+            super::device_registry,
+            DeviceModel::SoundcoreA3947,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        1, 1, 2, 4, 0, 0, 48, 53, 46, 56, 56, 48, 53, 46, 56, 56, 51, 57, 52, 55,
+                        66, 54, 54, 50, 70, 68, 67, 67, 69, 69, 69, 56, 48, 48, 46, 48, 48, 254,
+                        254, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 255, 255, 255, 255,
+                        255, 255, 255, 255, 255, 255, 0, 1, 112, 117, 140, 148, 150, 142, 134, 131,
+                        60, 60, 112, 117, 140, 148, 150, 142, 134, 131, 60, 60, 104, 100, 34, 64,
+                        0, 112, 117, 140, 148, 150, 142, 134, 131, 60, 60, 112, 117, 140, 148, 150,
+                        142, 134, 131, 60, 60, 0, 0, 18, 17, 102, 17, 101, 17, 50, 17, 51, 17, 68,
+                        17, 68, 0, 33, 0, 32, 0x35, 0, 0x50, 1, 0, 1, 1, 3, 0, 0, 0, 0, 255, 1, 2,
+                        49, 1, 0, 0, 1, 0, 0, 1, 0, 1, 80, 1, 0, 0, 1, 1, 1, 1, 255,
+                    ],
+                ),
+            )]),
+        )
+        .await;
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::GamingMode, true.into())],
+                vec![packet::Outbound::new(packet::Command([16, 133]), vec![1])],
             )
             .await;
     }

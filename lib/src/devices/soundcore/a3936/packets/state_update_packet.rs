@@ -23,8 +23,9 @@ use crate::{
             packet_manager::PacketHandler,
             structures::{
                 AgeRange, AmbientSoundModeCycle, AutoPowerOff, CaseBatteryLevel, CustomHearId,
-                DualBattery, DualFirmwareVersion, EqualizerConfiguration, SerialNumber, TouchTone,
-                TwsStatus, VolumeAdjustments, button_configuration::ButtonStatusCollection,
+                DualBattery, DualFirmwareVersion, EqualizerConfiguration, GamingMode, SerialNumber,
+                TouchTone, TwsStatus, VolumeAdjustments,
+                button_configuration::ButtonStatusCollection,
             },
         },
     },
@@ -49,7 +50,7 @@ pub struct A3936StateUpdatePacket {
     pub ldac: bool,
     pub supports_two_cnn_switch: bool,
     pub auto_power_off: AutoPowerOff,
-    pub game_mode_switch: bool,
+    pub gaming_mode: GamingMode,
 }
 
 impl Default for A3936StateUpdatePacket {
@@ -88,7 +89,7 @@ impl Default for A3936StateUpdatePacket {
             ldac: Default::default(),
             supports_two_cnn_switch: Default::default(),
             auto_power_off: Default::default(),
-            game_mode_switch: Default::default(),
+            gaming_mode: Default::default(),
         }
     }
 }
@@ -135,7 +136,7 @@ impl FromPacketBody for A3936StateUpdatePacket {
                 let (input, ldac) = take_bool(input)?;
                 let (input, supports_two_cnn_switch) = take_bool(input)?;
                 let (input, auto_power_off) = AutoPowerOff::take(input)?;
-                let (input, game_mode_switch) = take_bool(input)?;
+                let (input, gaming_mode) = GamingMode::take(input)?;
                 let (input, _) = take(12usize)(input)?;
                 Ok((
                     input,
@@ -156,7 +157,7 @@ impl FromPacketBody for A3936StateUpdatePacket {
                         ldac,
                         supports_two_cnn_switch,
                         auto_power_off,
-                        game_mode_switch,
+                        gaming_mode,
                     },
                 ))
             }),
@@ -217,7 +218,7 @@ impl ToPacket for A3936StateUpdatePacket {
                 self.supports_two_cnn_switch as u8,
             ])
             .chain(self.auto_power_off.bytes())
-            .chain(std::iter::once(self.game_mode_switch.into()))
+            .chain(self.gaming_mode.bytes())
             .chain([0; 12])
             .collect()
     }

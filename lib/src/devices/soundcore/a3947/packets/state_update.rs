@@ -24,8 +24,8 @@ use crate::{
             packet_manager::PacketHandler,
             structures::{
                 AmbientSoundModeCycle, AutoPowerOff, CaseBatteryLevel, DualBattery,
-                DualFirmwareVersion, EqualizerConfiguration, LimitHighVolume, SerialNumber,
-                TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
+                DualFirmwareVersion, EqualizerConfiguration, GamingMode, LimitHighVolume,
+                SerialNumber, TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
             },
         },
     },
@@ -44,7 +44,7 @@ pub struct A3947StateUpdatePacket {
     pub sound_modes: a3947::structures::SoundModes,
     pub case_battery_level: CaseBatteryLevel,
     pub sound_leak_compensation: bool,
-    pub gaming_mode: bool,
+    pub gaming_mode: GamingMode,
     pub touch_tone: TouchTone,
     pub surround_sound: bool,
     pub limit_high_volume: LimitHighVolume,
@@ -112,7 +112,7 @@ impl FromPacketBody for A3947StateUpdatePacket {
                         take(1usize), // unknown
                         take_bool,    // sound leak compensation
                         take(1usize), // unknown
-                        take_bool,    // game mode
+                        GamingMode::take,
                         TouchTone::take,
                         take(3usize), // unknown
                         take_bool,    // 3d surround sound
@@ -219,7 +219,7 @@ impl ToPacket for A3947StateUpdatePacket {
                 0, // unknown
                 self.sound_leak_compensation.into(),
                 0,
-                self.gaming_mode.into(),
+                self.gaming_mode.is_enabled.into(),
             ])
             .chain(self.touch_tone.bytes())
             .chain([0; 3])

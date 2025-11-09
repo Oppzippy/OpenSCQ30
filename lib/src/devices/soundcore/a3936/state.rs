@@ -4,8 +4,8 @@ use crate::devices::soundcore::common::{
     modules::reset_button_configuration::ResetButtonConfigurationPending,
     structures::{
         AgeRange, AmbientSoundModeCycle, AutoPowerOff, CaseBatteryLevel, CustomHearId, DualBattery,
-        DualFirmwareVersion, EqualizerConfiguration, Gender, SerialNumber, TouchTone, TwsStatus,
-        button_configuration::ButtonStatusCollection,
+        DualFirmwareVersion, EqualizerConfiguration, GamingMode, Gender, SerialNumber, TouchTone,
+        TwsStatus, button_configuration::ButtonStatusCollection,
     },
 };
 
@@ -27,14 +27,13 @@ pub struct A3936State {
     pub auto_power_off: AutoPowerOff,
     pub gender: Gender,
     pub touch_tone: TouchTone,
+    pub gaming_mode: GamingMode,
     #[has(skip)]
     pub color: u8,
     #[has(skip)]
     pub ldac: bool,
     #[has(skip)]
     pub supports_two_cnn_switch: bool,
-    #[has(skip)]
-    pub game_mode_switch: bool,
     button_reset_pending: ResetButtonConfigurationPending,
 }
 
@@ -57,7 +56,7 @@ impl From<A3936StateUpdatePacket> for A3936State {
             ldac: value.ldac,
             supports_two_cnn_switch: value.supports_two_cnn_switch,
             auto_power_off: value.auto_power_off,
-            game_mode_switch: value.game_mode_switch,
+            gaming_mode: value.gaming_mode,
             gender: Gender::default(),
             button_reset_pending: ResetButtonConfigurationPending::default(),
         }
