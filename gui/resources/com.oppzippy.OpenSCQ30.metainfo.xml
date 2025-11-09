@@ -49,6 +49,26 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.0.0-beta5" date="2025-11-08">
+            <description>
+                <p>Features</p>
+                <ul>
+                    <li>Add support for Soundcore Liberty 4 NC</li>
+                    <li>Add support for Soundcore Space Q45</li>
+                </ul>
+                <p>Fixes</p>
+                <ul>
+                    <li>Disable HearID when modifying the equalizer, since HearID is not shown in the UI and it overrides the equalizer</li>
+                    <li>Soundcore A20i incorrectly displaying buttons as disabled in some situations</li>
+                    <li> Life Note 3s button configuration displaying incorrect button actions</li>
+                </ul>
+                <p>Localization</p>
+                <ul>
+                    <li>Add German translations (thanks to Ireozar)</li>
+                    <li>Add Turkish translations (thanks to ozer4)</li>
+                </ul>
+            </description>
+        </release>
         <release version="2.0.0-beta4" date="2025-10-30" />
         <release version="2.0.0-beta3" date="2025-10-28">
             <description>
