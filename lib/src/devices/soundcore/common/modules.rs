@@ -25,7 +25,7 @@ pub mod button_configuration;
 mod case_battery_level;
 pub mod dual_battery;
 pub mod equalizer;
-mod gaming_mode;
+mod flag;
 mod limit_high_volume;
 pub mod reset_button_configuration;
 pub mod serial_number_and_dual_firmware_version;

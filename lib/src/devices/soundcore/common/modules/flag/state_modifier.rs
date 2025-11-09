@@ -8,25 +8,35 @@ use crate::{
     devices::soundcore::common::{
         packet::{self, PacketIOController},
         state_modifier::StateModifier,
-        structures::GamingMode,
     },
 };
 
-pub struct GamingModeStateModifier<ConnectionType: RfcommConnection> {
+pub struct FlagStateModifier<ConnectionType: RfcommConnection, Flag> {
     packet_io: Arc<PacketIOController<ConnectionType>>,
+    command: packet::Command,
+    get_flag: fn(&Flag) -> bool,
 }
 
-impl<ConnectionType: RfcommConnection> GamingModeStateModifier<ConnectionType> {
-    pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
-        Self { packet_io }
+impl<ConnectionType: RfcommConnection, Flag> FlagStateModifier<ConnectionType, Flag> {
+    pub fn new(
+        packet_io: Arc<PacketIOController<ConnectionType>>,
+        command: packet::Command,
+        get_flag: fn(&Flag) -> bool,
+    ) -> Self {
+        Self {
+            packet_io,
+            command,
+            get_flag,
+        }
     }
 }
 
 #[async_trait]
-impl<ConnectionType, T> StateModifier<T> for GamingModeStateModifier<ConnectionType>
+impl<ConnectionType, Flag, T> StateModifier<T> for FlagStateModifier<ConnectionType, Flag>
 where
     ConnectionType: RfcommConnection + Send + Sync,
-    T: Has<GamingMode> + Clone + Send + Sync,
+    T: Has<Flag> + Send + Sync,
+    Flag: PartialEq + Copy + Send + Sync,
 {
     async fn move_to_state(
         &self,
@@ -43,7 +53,10 @@ where
         }
 
         self.packet_io
-            .send_with_response(&packet::outbound::set_gaming_mode(target))
+            .send_with_response(&packet::Outbound::new(
+                self.command,
+                vec![(self.get_flag)(target).into()],
+            ))
             .await?;
         state_sender.send_modify(|state| *state.get_mut() = *target);
         Ok(())
