@@ -1,35 +1,35 @@
+use std::marker::PhantomData;
+
 use async_trait::async_trait;
 use openscq30_lib_has::Has;
 
 use crate::{
     api::settings::{Setting, SettingId, Value},
-    devices::soundcore::common::settings_manager::{SettingHandler, SettingHandlerResult},
+    devices::soundcore::common::{
+        settings_manager::{SettingHandler, SettingHandlerResult},
+        structures::Flag,
+    },
 };
 
-pub struct FlagSettingHandler<Flag> {
+pub struct FlagSettingHandler<FlagT> {
     setting_id: SettingId,
-    get_flag: fn(&Flag) -> bool,
-    set_flag: fn(&mut Flag, bool),
+    _flag: PhantomData<FlagT>,
 }
 
-impl<Flag> FlagSettingHandler<Flag> {
-    pub fn new(
-        setting_id: SettingId,
-        get_flag: fn(&Flag) -> bool,
-        set_flag: fn(&mut Flag, bool),
-    ) -> Self {
+impl<FlagT> FlagSettingHandler<FlagT> {
+    pub fn new(setting_id: SettingId) -> Self {
         Self {
             setting_id,
-            get_flag,
-            set_flag,
+            _flag: PhantomData,
         }
     }
 }
 
 #[async_trait]
-impl<Flag, T> SettingHandler<T> for FlagSettingHandler<Flag>
+impl<FlagT, T> SettingHandler<T> for FlagSettingHandler<FlagT>
 where
-    T: Has<Flag> + Send,
+    T: Has<FlagT> + Send,
+    FlagT: Flag + Send + Sync,
 {
     fn settings(&self) -> Vec<SettingId> {
         vec![self.setting_id]
@@ -38,7 +38,7 @@ where
     fn get(&self, state: &T, _setting_id: &SettingId) -> Option<Setting> {
         let flag = state.get();
         Some(Setting::Toggle {
-            value: (self.get_flag)(flag),
+            value: flag.get_bool(),
         })
     }
 
@@ -50,7 +50,7 @@ where
     ) -> SettingHandlerResult<()> {
         let flag = state.get_mut();
         let is_enabled = value.try_as_bool()?;
-        (self.set_flag)(flag, is_enabled);
+        flag.set_bool(is_enabled);
         Ok(())
     }
 }

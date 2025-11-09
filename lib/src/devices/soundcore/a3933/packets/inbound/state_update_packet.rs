@@ -242,7 +242,7 @@ impl ToPacket for A3933StateUpdatePacket {
             .chain([self.ambient_sound_mode_cycle.into()])
             .chain(self.sound_modes.bytes())
             .chain([0, 0])
-            .chain([self.touch_tone as u8, self.wear_detection_switch as u8])
+            .chain([self.touch_tone.0.into(), self.wear_detection_switch as u8])
             .chain(self.gaming_mode.bytes())
             .chain([
                 self.case_battery_level.0.0,

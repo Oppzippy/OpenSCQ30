@@ -155,7 +155,7 @@ impl ToPacket for A3959State {
             .chain(self.ambient_sound_mode_cycle.bytes())
             .chain(self.sound_modes.bytes())
             .chain([0])
-            .chain([self.touch_tone as u8])
+            .chain([self.touch_tone.0.into()])
             .chain([0, 0])
             .chain(self.auto_power_off.bytes())
             .chain([self.low_battery_prompt as u8, self.gaming_mode as u8])

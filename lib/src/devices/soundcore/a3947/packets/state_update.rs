@@ -219,7 +219,7 @@ impl ToPacket for A3947StateUpdatePacket {
                 0, // unknown
                 self.sound_leak_compensation.into(),
                 0,
-                self.gaming_mode.is_enabled.into(),
+                self.gaming_mode.0.into(),
             ])
             .chain(self.touch_tone.bytes())
             .chain([0; 3])

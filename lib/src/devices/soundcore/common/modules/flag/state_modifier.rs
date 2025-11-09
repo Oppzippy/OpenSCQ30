@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use openscq30_lib_has::Has;
-use std::sync::Arc;
+use std::{marker::PhantomData, sync::Arc};
 use tokio::sync::watch;
 
 use crate::{
@@ -8,40 +8,40 @@ use crate::{
     devices::soundcore::common::{
         packet::{self, PacketIOController},
         state_modifier::StateModifier,
+        structures::Flag,
     },
 };
 
-pub struct FlagStateModifier<ConnectionType: RfcommConnection, Flag> {
+pub struct FlagStateModifier<ConnectionType: RfcommConnection, FlagT> {
     packet_io: Arc<PacketIOController<ConnectionType>>,
     command: packet::Command,
-    get_flag: fn(&Flag) -> bool,
+    _flag: PhantomData<FlagT>,
 }
 
-impl<ConnectionType: RfcommConnection, Flag> FlagStateModifier<ConnectionType, Flag> {
+impl<ConnectionType: RfcommConnection, FlagT> FlagStateModifier<ConnectionType, FlagT> {
     pub fn new(
         packet_io: Arc<PacketIOController<ConnectionType>>,
         command: packet::Command,
-        get_flag: fn(&Flag) -> bool,
     ) -> Self {
         Self {
             packet_io,
             command,
-            get_flag,
+            _flag: PhantomData,
         }
     }
 }
 
 #[async_trait]
-impl<ConnectionType, Flag, T> StateModifier<T> for FlagStateModifier<ConnectionType, Flag>
+impl<ConnectionT, FlagT, StateT> StateModifier<StateT> for FlagStateModifier<ConnectionT, FlagT>
 where
-    ConnectionType: RfcommConnection + Send + Sync,
-    T: Has<Flag> + Send + Sync,
-    Flag: PartialEq + Copy + Send + Sync,
+    ConnectionT: RfcommConnection + Send + Sync,
+    StateT: Has<FlagT> + Send + Sync,
+    FlagT: Flag + PartialEq + Copy + Send + Sync,
 {
     async fn move_to_state(
         &self,
-        state_sender: &watch::Sender<T>,
-        target_state: &T,
+        state_sender: &watch::Sender<StateT>,
+        target_state: &StateT,
     ) -> device::Result<()> {
         let target = target_state.get();
         {
@@ -55,7 +55,7 @@ where
         self.packet_io
             .send_with_response(&packet::Outbound::new(
                 self.command,
-                vec![(self.get_flag)(target).into()],
+                vec![target.get_bool().into()],
             ))
             .await?;
         state_sender.send_modify(|state| *state.get_mut() = *target);

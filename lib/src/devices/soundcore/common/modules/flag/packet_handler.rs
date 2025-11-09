@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use async_trait::async_trait;
 use nom::{
     IResult, Parser,
@@ -16,36 +18,36 @@ use crate::{
             parsing::take_bool,
         },
         packet_manager::PacketHandler,
+        structures::Flag,
     },
 };
 
-pub struct FlagPacketHandler<Flag> {
-    get_flag: fn(&Flag) -> bool,
-    set_flag: fn(&mut Flag, bool),
+pub struct FlagPacketHandler<FlagT> {
+    _flag: PhantomData<FlagT>,
 }
 
-impl<Flag> FlagPacketHandler<Flag> {
-    pub fn new(get_flag: fn(&Flag) -> bool, set_flag: fn(&mut Flag, bool)) -> Self {
-        Self { get_flag, set_flag }
+impl<FlagT> Default for FlagPacketHandler<FlagT> {
+    fn default() -> Self {
+        Self { _flag: PhantomData }
     }
 }
 
 #[async_trait]
-impl<Flag, T> PacketHandler<T> for FlagPacketHandler<Flag>
+impl<FlagT, StateT> PacketHandler<StateT> for FlagPacketHandler<FlagT>
 where
-    T: Has<Flag> + Send + Sync,
-    Flag: PartialEq,
+    StateT: Has<FlagT> + Send + Sync,
+    FlagT: Flag + PartialEq + Send + Sync,
 {
     async fn handle_packet(
         &self,
-        state: &watch::Sender<T>,
+        state: &watch::Sender<StateT>,
         packet: &packet::Inbound,
     ) -> device::Result<()> {
         let packet: FlagUpdate = packet.try_to_packet()?;
         state.send_if_modified(|state| {
             let flag = state.get_mut();
-            let modified = packet.0 != (self.get_flag)(flag);
-            (self.set_flag)(flag, packet.0);
+            let modified = packet.0 != flag.get_bool();
+            flag.set_bool(packet.0);
             modified
         });
         Ok(())

@@ -1,66 +1,44 @@
 use nom::{
     IResult, Parser,
     combinator::map,
-    error::{ContextError, ParseError, context},
+    error::{ContextError, ParseError},
 };
 
 use crate::devices::soundcore::common::packet::parsing::take_bool;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-pub enum TouchTone {
-    #[default]
-    Disabled,
-    Enabled,
+pub trait Flag {
+    fn get_bool(&self) -> bool;
+    fn set_bool(&mut self, value: bool);
 }
 
-impl TouchTone {
-    pub fn bytes(&self) -> [u8; 1] {
-        [bool::from(*self).into()]
-    }
+macro_rules! flag {
+    ($name:ident) => {
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+        pub struct $name(pub bool);
 
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        context("touch tone", map(take_bool, Into::into)).parse_complete(input)
-    }
-}
+        impl $name {
+            pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+                input: &'a [u8],
+            ) -> IResult<&'a [u8], Self, E> {
+                map(take_bool, Self).parse_complete(input)
+            }
 
-impl From<TouchTone> for bool {
-    fn from(touch_tone: TouchTone) -> Self {
-        match touch_tone {
-            TouchTone::Disabled => false,
-            TouchTone::Enabled => true,
+            pub fn bytes(&self) -> [u8; 1] {
+                [self.0.into()]
+            }
         }
-    }
-}
 
-impl From<bool> for TouchTone {
-    fn from(is_enabled: bool) -> Self {
-        if is_enabled {
-            Self::Enabled
-        } else {
-            Self::Disabled
+        impl Flag for $name {
+            fn get_bool(&self) -> bool {
+                self.0
+            }
+
+            fn set_bool(&mut self, value: bool) {
+                self.0 = value;
+            }
         }
-    }
+    };
 }
 
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, Default)]
-pub struct GamingMode {
-    pub is_enabled: bool,
-}
-
-impl GamingMode {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        context(
-            "gaming mode",
-            map(take_bool, |is_enabled| GamingMode { is_enabled }),
-        )
-        .parse_complete(input)
-    }
-
-    pub fn bytes(&self) -> [u8; 1] {
-        [self.is_enabled.into()]
-    }
-}
+flag!(TouchTone);
+flag!(GamingMode);

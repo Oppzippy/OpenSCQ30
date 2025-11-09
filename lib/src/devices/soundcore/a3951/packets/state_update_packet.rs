@@ -194,7 +194,7 @@ impl ToPacket for A3951StateUpdatePacket {
             .chain([
                 self.side_tone as u8,
                 self.wear_detection as u8,
-                self.touch_tone as u8,
+                self.touch_tone.0.into(),
             ])
             .collect()
     }

@@ -211,7 +211,7 @@ impl ToPacket for A3936StateUpdatePacket {
             .chain(self.ambient_sound_mode_cycle.bytes())
             .chain(self.sound_modes.bytes())
             .chain([
-                self.touch_tone as u8,
+                self.touch_tone.0.into(),
                 self.case_battery_level.0.0,
                 self.color,
                 self.ldac as u8,

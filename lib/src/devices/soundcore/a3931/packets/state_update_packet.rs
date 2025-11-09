@@ -126,7 +126,7 @@ impl ToPacket for A3931StateUpdatePacket {
                     .bytes(a3931::BUTTON_CONFIGURATION_SETTINGS.parse_settings()),
             )
             .chain(self.sound_modes.bytes())
-            .chain([self.side_tone as u8, self.touch_tone as u8])
+            .chain([self.side_tone as u8, self.touch_tone.0.into()])
             .chain(self.auto_power_off.bytes())
             .collect()
     }
