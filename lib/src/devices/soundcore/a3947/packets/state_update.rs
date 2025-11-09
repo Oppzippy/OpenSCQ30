@@ -19,13 +19,13 @@ use crate::{
                 self,
                 inbound::{FromPacketBody, TryToPacket},
                 outbound::ToPacket,
-                parsing::take_bool,
             },
             packet_manager::PacketHandler,
             structures::{
-                AmbientSoundModeCycle, AutoPowerOff, CaseBatteryLevel, DualBattery,
+                AmbientSoundModeCycle, AutoPlayPause, AutoPowerOff, CaseBatteryLevel, DualBattery,
                 DualFirmwareVersion, EqualizerConfiguration, GamingMode, LimitHighVolume,
-                SerialNumber, TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
+                LowBatteryPrompt, SerialNumber, SoundLeakCompensation, SurroundSound, TouchLock,
+                TouchTone, TwsStatus, WearingTone, button_configuration::ButtonStatusCollection,
             },
         },
     },
@@ -43,16 +43,16 @@ pub struct A3947StateUpdatePacket {
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub sound_modes: a3947::structures::SoundModes,
     pub case_battery_level: CaseBatteryLevel,
-    pub sound_leak_compensation: bool,
+    pub sound_leak_compensation: SoundLeakCompensation,
     pub gaming_mode: GamingMode,
     pub touch_tone: TouchTone,
-    pub surround_sound: bool,
+    pub surround_sound: SurroundSound,
     pub limit_high_volume: LimitHighVolume,
-    pub auto_play_pause: bool,
-    pub wearing_tone: bool,
+    pub auto_play_pause: AutoPlayPause,
+    pub wearing_tone: WearingTone,
     pub auto_power_off: AutoPowerOff,
-    pub touch_lock: bool,
-    pub low_battery_prompt: bool,
+    pub touch_lock: TouchLock,
+    pub low_battery_prompt: LowBatteryPrompt,
 }
 
 impl Default for A3947StateUpdatePacket {
@@ -109,21 +109,21 @@ impl FromPacketBody for A3947StateUpdatePacket {
                         a3947::structures::SoundModes::take,
                         take(6usize), // unknown
                         CaseBatteryLevel::take,
-                        take(1usize), // unknown
-                        take_bool,    // sound leak compensation
-                        take(1usize), // unknown
+                        take(1usize),                // unknown
+                        SoundLeakCompensation::take, // sound leak compensation
+                        take(1usize),                // unknown
                         GamingMode::take,
                         TouchTone::take,
-                        take(3usize), // unknown
-                        take_bool,    // 3d surround sound
+                        take(3usize),        // unknown
+                        SurroundSound::take, // 3d surround sound
                     ),
                     (
                         LimitHighVolume::take,
-                        take_bool, // auto play/pause
-                        take_bool, // wearing tone
+                        AutoPlayPause::take, // auto play/pause
+                        WearingTone::take,   // wearing tone
                         AutoPowerOff::take,
-                        take_bool, // touch lock
-                        take_bool, // low battery prompt
+                        TouchLock::take,        // touch lock
+                        LowBatteryPrompt::take, // low battery prompt
                     ),
                 ),
                 |(
@@ -217,17 +217,17 @@ impl ToPacket for A3947StateUpdatePacket {
             .chain([
                 self.case_battery_level.0.0,
                 0, // unknown
-                self.sound_leak_compensation.into(),
+                self.sound_leak_compensation.0.into(),
                 0,
                 self.gaming_mode.0.into(),
             ])
             .chain(self.touch_tone.bytes())
             .chain([0; 3])
-            .chain(iter::once(self.surround_sound.into()))
+            .chain(iter::once(self.surround_sound.0.into()))
             .chain(self.limit_high_volume.bytes())
-            .chain([self.auto_play_pause.into(), self.wearing_tone.into()])
+            .chain([self.auto_play_pause.0.into(), self.wearing_tone.0.into()])
             .chain(self.auto_power_off.bytes())
-            .chain([self.touch_lock.into(), self.low_battery_prompt.into()])
+            .chain([self.touch_lock.0.into(), self.low_battery_prompt.0.into()])
             .collect()
     }
 }

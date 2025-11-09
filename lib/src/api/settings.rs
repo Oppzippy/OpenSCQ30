@@ -122,6 +122,12 @@ pub enum SettingId {
     LimitHighVolumeRefreshRate,
     CaseBatteryLevel,
     GamingMode,
+    SoundLeakCompensation,
+    SurroundSound,
+    AutoPlayPause,
+    WearingTone,
+    TouchLock,
+    LowBatteryPrompt,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

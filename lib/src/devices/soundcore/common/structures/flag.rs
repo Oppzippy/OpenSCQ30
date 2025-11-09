@@ -16,6 +16,7 @@ macro_rules! flag {
         #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
         pub struct $name(pub bool);
 
+        #[allow(unused)]
         impl $name {
             pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
                 input: &'a [u8],
@@ -42,3 +43,9 @@ macro_rules! flag {
 
 flag!(TouchTone);
 flag!(GamingMode);
+flag!(SoundLeakCompensation);
+flag!(SurroundSound);
+flag!(AutoPlayPause);
+flag!(WearingTone);
+flag!(TouchLock);
+flag!(LowBatteryPrompt);

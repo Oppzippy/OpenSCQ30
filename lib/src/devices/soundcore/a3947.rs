@@ -44,8 +44,17 @@ soundcore_device!(
         );
 
         builder.limit_high_volume();
+
+        // Flags
         builder.touch_tone();
         builder.gaming_mode();
+        builder.sound_leak_compensation();
+        builder.surround_sound();
+        builder.auto_play_pause();
+        builder.wearing_tone();
+        builder.touch_lock();
+        builder.low_battery_prompt();
+
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
 
         builder.serial_number_and_dual_firmware_version();
@@ -316,6 +325,198 @@ mod tests {
             .assert_set_settings_response(
                 vec![(SettingId::GamingMode, true.into())],
                 vec![packet::Outbound::new(packet::Command([16, 133]), vec![1])],
+            )
+            .await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn set_sound_leak_compensation() {
+        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+            super::device_registry,
+            DeviceModel::SoundcoreA3947,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        1, 1, 2, 4, 0, 0, 48, 53, 46, 56, 56, 48, 53, 46, 56, 56, 51, 57, 52, 55,
+                        66, 54, 54, 50, 70, 68, 67, 67, 69, 69, 69, 56, 48, 48, 46, 48, 48, 254,
+                        254, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 255, 255, 255, 255,
+                        255, 255, 255, 255, 255, 255, 0, 1, 112, 117, 140, 148, 150, 142, 134, 131,
+                        60, 60, 112, 117, 140, 148, 150, 142, 134, 131, 60, 60, 104, 100, 34, 64,
+                        0, 112, 117, 140, 148, 150, 142, 134, 131, 60, 60, 112, 117, 140, 148, 150,
+                        142, 134, 131, 60, 60, 0, 0, 18, 17, 102, 17, 101, 17, 50, 17, 51, 17, 68,
+                        17, 68, 0, 33, 0, 32, 0x35, 0, 0x50, 1, 0, 1, 1, 3, 0, 0, 0, 0, 255, 1, 2,
+                        49, 1, 0, 0, 1, 0, 0, 1, 0, 1, 80, 1, 0, 0, 1, 1, 1, 1, 255,
+                    ],
+                ),
+            )]),
+        )
+        .await;
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::SoundLeakCompensation, false.into())],
+                vec![packet::Outbound::new(packet::Command([16, 134]), vec![0])],
+            )
+            .await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn set_surround_sound() {
+        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+            super::device_registry,
+            DeviceModel::SoundcoreA3947,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        1, 1, 2, 4, 0, 0, 48, 53, 46, 56, 56, 48, 53, 46, 56, 56, 51, 57, 52, 55,
+                        66, 54, 54, 50, 70, 68, 67, 67, 69, 69, 69, 56, 48, 48, 46, 48, 48, 254,
+                        254, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 255, 255, 255, 255,
+                        255, 255, 255, 255, 255, 255, 0, 1, 112, 117, 140, 148, 150, 142, 134, 131,
+                        60, 60, 112, 117, 140, 148, 150, 142, 134, 131, 60, 60, 104, 100, 34, 64,
+                        0, 112, 117, 140, 148, 150, 142, 134, 131, 60, 60, 112, 117, 140, 148, 150,
+                        142, 134, 131, 60, 60, 0, 0, 18, 17, 102, 17, 101, 17, 50, 17, 51, 17, 68,
+                        17, 68, 0, 33, 0, 32, 0x35, 0, 0x50, 1, 0, 1, 1, 3, 0, 0, 0, 0, 255, 1, 2,
+                        49, 1, 0, 0, 1, 0, 0, 1, 0, 1, 80, 1, 0, 0, 1, 1, 1, 1, 255,
+                    ],
+                ),
+            )]),
+        )
+        .await;
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::SurroundSound, true.into())],
+                vec![packet::Outbound::new(packet::Command([2, 134]), vec![1])],
+            )
+            .await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn set_wearing_tone() {
+        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+            super::device_registry,
+            DeviceModel::SoundcoreA3947,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        1, 1, 2, 4, 0, 0, 48, 53, 46, 56, 56, 48, 53, 46, 56, 56, 51, 57, 52, 55,
+                        66, 54, 54, 50, 70, 68, 67, 67, 69, 69, 69, 56, 48, 48, 46, 48, 48, 254,
+                        254, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 255, 255, 255, 255,
+                        255, 255, 255, 255, 255, 255, 0, 1, 112, 117, 140, 148, 150, 142, 134, 131,
+                        60, 60, 112, 117, 140, 148, 150, 142, 134, 131, 60, 60, 104, 100, 34, 64,
+                        0, 112, 117, 140, 148, 150, 142, 134, 131, 60, 60, 112, 117, 140, 148, 150,
+                        142, 134, 131, 60, 60, 0, 0, 18, 17, 102, 17, 101, 17, 50, 17, 51, 17, 68,
+                        17, 68, 0, 33, 0, 32, 0x35, 0, 0x50, 1, 0, 1, 1, 3, 0, 0, 0, 0, 255, 1, 2,
+                        49, 1, 0, 0, 1, 0, 0, 1, 0, 1, 80, 1, 0, 0, 1, 1, 1, 1, 255,
+                    ],
+                ),
+            )]),
+        )
+        .await;
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::WearingTone, true.into())],
+                vec![packet::Outbound::new(packet::Command([1, 140]), vec![1])],
+            )
+            .await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn set_auto_play_pause() {
+        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+            super::device_registry,
+            DeviceModel::SoundcoreA3947,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        1, 1, 2, 4, 0, 0, 48, 53, 46, 56, 56, 48, 53, 46, 56, 56, 51, 57, 52, 55,
+                        66, 54, 54, 50, 70, 68, 67, 67, 69, 69, 69, 56, 48, 48, 46, 48, 48, 254,
+                        254, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 255, 255, 255, 255,
+                        255, 255, 255, 255, 255, 255, 0, 1, 112, 117, 140, 148, 150, 142, 134, 131,
+                        60, 60, 112, 117, 140, 148, 150, 142, 134, 131, 60, 60, 104, 100, 34, 64,
+                        0, 112, 117, 140, 148, 150, 142, 134, 131, 60, 60, 112, 117, 140, 148, 150,
+                        142, 134, 131, 60, 60, 0, 0, 18, 17, 102, 17, 101, 17, 50, 17, 51, 17, 68,
+                        17, 68, 0, 33, 0, 32, 0x35, 0, 0x50, 1, 0, 1, 1, 3, 0, 0, 0, 0, 255, 1, 2,
+                        49, 1, 0, 0, 1, 0, 0, 1, 0, 1, 80, 1, 0, 0, 1, 1, 1, 1, 255,
+                    ],
+                ),
+            )]),
+        )
+        .await;
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::AutoPlayPause, true.into())],
+                vec![packet::Outbound::new(packet::Command([1, 129]), vec![1])],
+            )
+            .await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn set_touch_lock() {
+        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+            super::device_registry,
+            DeviceModel::SoundcoreA3947,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        1, 1, 2, 4, 0, 0, 48, 53, 46, 56, 56, 48, 53, 46, 56, 56, 51, 57, 52, 55,
+                        66, 54, 54, 50, 70, 68, 67, 67, 69, 69, 69, 56, 48, 48, 46, 48, 48, 254,
+                        254, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 255, 255, 255, 255,
+                        255, 255, 255, 255, 255, 255, 0, 1, 112, 117, 140, 148, 150, 142, 134, 131,
+                        60, 60, 112, 117, 140, 148, 150, 142, 134, 131, 60, 60, 104, 100, 34, 64,
+                        0, 112, 117, 140, 148, 150, 142, 134, 131, 60, 60, 112, 117, 140, 148, 150,
+                        142, 134, 131, 60, 60, 0, 0, 18, 17, 102, 17, 101, 17, 50, 17, 51, 17, 68,
+                        17, 68, 0, 33, 0, 32, 0x35, 0, 0x50, 1, 0, 1, 1, 3, 0, 0, 0, 0, 255, 1, 2,
+                        49, 1, 0, 0, 1, 0, 0, 1, 0, 1, 80, 1, 0, 0, 1, 1, 1, 1, 255,
+                    ],
+                ),
+            )]),
+        )
+        .await;
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::TouchLock, false.into())],
+                vec![packet::Outbound::new(packet::Command([4, 134]), vec![0])],
+            )
+            .await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn set_low_battery_prompt() {
+        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+            super::device_registry,
+            DeviceModel::SoundcoreA3947,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        1, 1, 2, 4, 0, 0, 48, 53, 46, 56, 56, 48, 53, 46, 56, 56, 51, 57, 52, 55,
+                        66, 54, 54, 50, 70, 68, 67, 67, 69, 69, 69, 56, 48, 48, 46, 48, 48, 254,
+                        254, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 255, 255, 255, 255,
+                        255, 255, 255, 255, 255, 255, 0, 1, 112, 117, 140, 148, 150, 142, 134, 131,
+                        60, 60, 112, 117, 140, 148, 150, 142, 134, 131, 60, 60, 104, 100, 34, 64,
+                        0, 112, 117, 140, 148, 150, 142, 134, 131, 60, 60, 112, 117, 140, 148, 150,
+                        142, 134, 131, 60, 60, 0, 0, 18, 17, 102, 17, 101, 17, 50, 17, 51, 17, 68,
+                        17, 68, 0, 33, 0, 32, 0x35, 0, 0x50, 1, 0, 1, 1, 3, 0, 0, 0, 0, 255, 1, 2,
+                        49, 1, 0, 0, 1, 0, 0, 1, 0, 1, 80, 1, 0, 0, 1, 1, 1, 1, 255,
+                    ],
+                ),
+            )]),
+        )
+        .await;
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::LowBatteryPrompt, false.into())],
+                vec![packet::Outbound::new(packet::Command([16, 130]), vec![0])],
             )
             .await;
     }

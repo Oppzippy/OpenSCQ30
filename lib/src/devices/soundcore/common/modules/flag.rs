@@ -11,7 +11,10 @@ use crate::{
     connection::RfcommConnection,
     devices::soundcore::common::{
         packet::{self, PacketIOController},
-        structures::{Flag, GamingMode, TouchTone},
+        structures::{
+            AutoPlayPause, Flag, GamingMode, LowBatteryPrompt, SoundLeakCompensation,
+            SurroundSound, TouchLock, TouchTone, WearingTone,
+        },
     },
     settings::SettingId,
 };
@@ -21,7 +24,7 @@ use paste::paste;
 use super::ModuleCollection;
 
 macro_rules! flag {
-    ($flag_struct:ty, $flag_configuration:expr $(,)?) => {
+    ($flag_struct:ident, $flag_configuration:expr $(,)?) => {
         impl<T> ModuleCollection<T>
         where
             T: Has<$flag_struct> + Send + Sync,
@@ -53,6 +56,60 @@ flag!(
         setting_id: SettingId::GamingMode,
         set_command: packet::outbound::SET_GAMING_MODE_COMMAND,
         update_command: Some(packet::inbound::GAMING_MODE_UPDATE_COMMAND),
+    },
+);
+
+flag!(
+    SoundLeakCompensation,
+    FlagConfiguration {
+        setting_id: SettingId::SoundLeakCompensation,
+        set_command: packet::outbound::SET_SOUND_LEAK_COMPENSATION_COMMAND,
+        update_command: None,
+    },
+);
+
+flag!(
+    SurroundSound,
+    FlagConfiguration {
+        setting_id: SettingId::SurroundSound,
+        set_command: packet::outbound::SET_SURROUND_SOUND_COMMAND,
+        update_command: None,
+    },
+);
+
+flag!(
+    AutoPlayPause,
+    FlagConfiguration {
+        setting_id: SettingId::AutoPlayPause,
+        set_command: packet::outbound::SET_AUTO_PLAY_PAUSE_COMMAND,
+        update_command: None,
+    },
+);
+
+flag!(
+    WearingTone,
+    FlagConfiguration {
+        setting_id: SettingId::WearingTone,
+        set_command: packet::outbound::SET_WEARING_TONE_COMMAND,
+        update_command: None,
+    },
+);
+
+flag!(
+    TouchLock,
+    FlagConfiguration {
+        setting_id: SettingId::TouchLock,
+        set_command: packet::outbound::SET_TOUCH_LOCK_COMMAND,
+        update_command: None,
+    },
+);
+
+flag!(
+    LowBatteryPrompt,
+    FlagConfiguration {
+        setting_id: SettingId::LowBatteryPrompt,
+        set_command: packet::outbound::SET_LOW_BATTERY_PROMPT_COMMAND,
+        update_command: None,
     },
 );
 

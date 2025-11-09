@@ -112,7 +112,6 @@ previous-song = Previous Song
 next-song = Next Song
 voice-assistant = Voice Assistant
 play-pause = Play Pause
-gaming-mode = Gaming Mode
 normal-mode-in-cycle = Normal Mode in Cycle
 transparency-mode-in-cycle = Transparency Mode in Cycle
 noise-canceling-mode-in-cycle = Noise Canceling Mode in Cycle
@@ -159,6 +158,13 @@ x-seconds = { $seconds ->
 disabled = Disabled
 
 touch-tone = Touch Tone
+gaming-mode = Gaming Mode
+sound-leak-compensation = Sound Leak Compensation
+surround-sound = Surround Sound
+auto-play-pause = Auto Play/Pause
+wearing-tone = Wearing Tone
+touch-lock = Touch Lock
+low-battery-prompt = Low Battery Prompt
 
 limit-high-volume = Limit High Volume
 db-limit = DB Limit

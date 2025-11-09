@@ -5,9 +5,10 @@ use crate::devices::soundcore::{
     common::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         structures::{
-            AmbientSoundModeCycle, AutoPowerOff, CaseBatteryLevel, DualBattery,
-            DualFirmwareVersion, EqualizerConfiguration, GamingMode, LimitHighVolume, SerialNumber,
-            TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
+            AmbientSoundModeCycle, AutoPlayPause, AutoPowerOff, CaseBatteryLevel, DualBattery,
+            DualFirmwareVersion, EqualizerConfiguration, GamingMode, LimitHighVolume,
+            LowBatteryPrompt, SerialNumber, SoundLeakCompensation, SurroundSound, TouchLock,
+            TouchTone, TwsStatus, WearingTone, button_configuration::ButtonStatusCollection,
         },
     },
 };
@@ -28,6 +29,12 @@ pub struct A3947State {
     auto_power_off: AutoPowerOff,
     case_battery_level: CaseBatteryLevel,
     gaming_mode: GamingMode,
+    sound_leak_compensation: SoundLeakCompensation,
+    surround_sound: SurroundSound,
+    auto_play_pause: AutoPlayPause,
+    wearing_tone: WearingTone,
+    touch_lock: TouchLock,
+    low_battery_prompt: LowBatteryPrompt,
     reset_button_configuration_pending: ResetButtonConfigurationPending,
 }
 
@@ -44,19 +51,20 @@ impl From<a3947::packets::A3947StateUpdatePacket> for A3947State {
             ambient_sound_mode_cycle,
             sound_modes,
             case_battery_level,
-            sound_leak_compensation: _,
+            sound_leak_compensation,
             gaming_mode,
             touch_tone,
-            surround_sound: _,
+            surround_sound,
             limit_high_volume,
-            auto_play_pause: _,
-            wearing_tone: _,
+            auto_play_pause,
+            wearing_tone,
             auto_power_off,
-            touch_lock: _,
-            low_battery_prompt: _,
+            touch_lock,
+            low_battery_prompt,
         } = packet;
 
         Self {
+            reset_button_configuration_pending: ResetButtonConfigurationPending::default(),
             tws_status,
             battery,
             dual_firmware_version,
@@ -71,7 +79,12 @@ impl From<a3947::packets::A3947StateUpdatePacket> for A3947State {
             auto_power_off,
             case_battery_level,
             gaming_mode,
-            reset_button_configuration_pending: ResetButtonConfigurationPending::default(),
+            sound_leak_compensation,
+            surround_sound,
+            auto_play_pause,
+            wearing_tone,
+            touch_lock,
+            low_battery_prompt,
         }
     }
 }

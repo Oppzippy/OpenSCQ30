@@ -3,6 +3,7 @@ use std::{marker::PhantomData, pin::Pin, sync::Arc};
 use async_trait::async_trait;
 use openscq30_i18n::Translate;
 use openscq30_lib_has::{Has, MaybeHas};
+use paste::paste;
 use tokio::{
     select,
     sync::{Semaphore, mpsc, watch},
@@ -26,8 +27,9 @@ use crate::{
                 packet::{self, PacketIOController, outbound::ToPacket},
                 state::Update,
                 structures::{
-                    AutoPowerOff, CaseBatteryLevel, GamingMode, LimitHighVolume, TouchTone,
-                    button_configuration::ButtonStatusCollection,
+                    AutoPlayPause, AutoPowerOff, CaseBatteryLevel, GamingMode, LimitHighVolume,
+                    LowBatteryPrompt, SoundLeakCompensation, SurroundSound, TouchLock, TouchTone,
+                    WearingTone, button_configuration::ButtonStatusCollection,
                 },
             },
         },
@@ -173,6 +175,20 @@ where
     packet_receiver: mpsc::Receiver<packet::Inbound>,
     change_notify: watch::Sender<()>,
     _state_update: PhantomData<StateUpdatePacketType>,
+}
+
+macro_rules! flag {
+    ($struct_name:ident) => {
+        paste! {
+            pub fn [< $struct_name:snake >](&mut self)
+            where
+                StateType: Has<$struct_name>,
+            {
+                self.module_collection
+                    .[< add_ $struct_name:snake >](self.packet_io_controller.clone());
+            }
+        }
+    };
 }
 
 impl<ConnectionType, StateType, StateUpdatePacketType>
@@ -430,22 +446,6 @@ where
             .add_auto_power_off(self.packet_io_controller.clone(), durations);
     }
 
-    pub fn touch_tone(&mut self)
-    where
-        StateType: Has<TouchTone>,
-    {
-        self.module_collection
-            .add_touch_tone(self.packet_io_controller.clone());
-    }
-
-    pub fn gaming_mode(&mut self)
-    where
-        StateType: Has<GamingMode>,
-    {
-        self.module_collection
-            .add_gaming_mode(self.packet_io_controller.clone());
-    }
-
     pub fn limit_high_volume(&mut self)
     where
         StateType: Has<LimitHighVolume>,
@@ -453,6 +453,15 @@ where
         self.module_collection
             .add_limit_high_volume(self.packet_io_controller.clone());
     }
+
+    flag!(TouchTone);
+    flag!(GamingMode);
+    flag!(SoundLeakCompensation);
+    flag!(SurroundSound);
+    flag!(AutoPlayPause);
+    flag!(WearingTone);
+    flag!(TouchLock);
+    flag!(LowBatteryPrompt);
 }
 
 pub struct SoundcoreDeviceTemplate<ConnectionType, StateType, StateUpdatePacketType>

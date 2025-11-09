@@ -38,3 +38,9 @@ use crate::devices::soundcore::common::packet;
 
 pub const SET_GAMING_MODE_COMMAND: packet::Command = packet::Command([0x10, 0x85]);
 pub const SET_TOUCH_TONE_COMMAND: packet::Command = packet::Command([0x01, 0x83]);
+pub const SET_SOUND_LEAK_COMPENSATION_COMMAND: packet::Command = packet::Command([0x10, 0x86]);
+pub const SET_SURROUND_SOUND_COMMAND: packet::Command = packet::Command([0x02, 0x86]);
+pub const SET_AUTO_PLAY_PAUSE_COMMAND: packet::Command = packet::Command([0x01, 0x81]);
+pub const SET_WEARING_TONE_COMMAND: packet::Command = packet::Command([0x01, 0x8C]);
+pub const SET_TOUCH_LOCK_COMMAND: packet::Command = packet::Command([0x04, 0x86]);
+pub const SET_LOW_BATTERY_PROMPT_COMMAND: packet::Command = packet::Command([0x10, 0x82]);
