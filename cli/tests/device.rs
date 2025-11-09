@@ -62,6 +62,8 @@ fn list_settings() {
     batteryLevel: information (read only)
     serialNumber: information (read only)
     firmwareVersion: information (read only)
+    -- miscellaneous --
+    wearingDetection: toggle
 
     ----- stderr -----
     "#);
@@ -87,6 +89,7 @@ fn list_settings_no_categories() {
     batteryLevel: information (read only)
     serialNumber: information (read only)
     firmwareVersion: information (read only)
+    wearingDetection: toggle
 
     ----- stderr -----
     "#);
@@ -116,6 +119,8 @@ fn list_settings_no_extended_info() {
     batteryLevel
     serialNumber
     firmwareVersion
+    -- miscellaneous --
+    wearingDetection
 
     ----- stderr -----
     ");
@@ -141,6 +146,7 @@ fn list_settings_no_categories_and_no_extended_info() {
     batteryLevel
     serialNumber
     firmwareVersion
+    wearingDetection
 
     ----- stderr -----
     ");
@@ -286,6 +292,9 @@ fn list_settings_json() {
       },
       "firmwareVersion": {
         "type": "information"
+      },
+      "wearingDetection": {
+        "type": "toggle"
       }
     }
 
@@ -466,6 +475,15 @@ fn list_settings_json_no_categories() {
             "type": "information"
           }
         ]
+      },
+      {
+        "categoryId": "miscellaneous",
+        "settings": [
+          {
+            "settingId": "wearingDetection",
+            "type": "toggle"
+          }
+        ]
       }
     ]
 
@@ -513,6 +531,12 @@ fn list_settings_json_no_extended_info() {
           "serialNumber",
           "firmwareVersion"
         ]
+      },
+      {
+        "categoryId": "miscellaneous",
+        "settingIds": [
+          "wearingDetection"
+        ]
       }
     ]
 
@@ -540,7 +564,8 @@ fn list_settings_json_no_categories_and_no_extended_info() {
       "isCharging",
       "batteryLevel",
       "serialNumber",
-      "firmwareVersion"
+      "firmwareVersion",
+      "wearingDetection"
     ]
 
     ----- stderr -----
