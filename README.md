@@ -14,36 +14,36 @@ OpenSCQ30 is free software for controlling settings for Soundcore headphones and
 
 ### Supported Devices
 
-| Model | Name              | Status |
-| ----- | ----------------- | ------ |
-| A3004 | Q20i              | Done   |
-| A3027 | Life Q35          | Done   |
-| A3028 | Life Q30          | Done   |
-| A3029 | Life Tune         | Done   |
-| A3030 | Life Tune Pro     | Done   |
-| A3031 | Vortex            | Done   |
-| A3033 | Life 2 Neo        | Done   |
-| A3926 | Life Dot 2S       | Done   |
-| A3930 | Liberty 2 Pro     | Done   |
-| A3931 | Life Dot 2 NC     | Done   |
-| A3933 | Life Note 3       | Done   |
-| A3935 | Life A2 NC        | Done   |
-| A3936 | Space A40         | Done   |
-| A3939 | Life P3           | Done   |
-| A3945 | Life Note 3S      | Done   |
-| A3948 | A20i              | Done   |
-| A3951 | Liberty Air 2 Pro | Done   |
-| A3959 | R50i NC           | Done   |
+| Model | Name                        |
+| ----- | --------------------------- |
+| A3004 | Soundcore Q20i              |
+| A3027 | Soundcore Life Q35          |
+| A3028 | Soundcore Life Q30          |
+| A3029 | Soundcore Life Tune         |
+| A3030 | Soundcore Life Tune Pro     |
+| A3031 | Soundcore Vortex            |
+| A3033 | Soundcore Life 2 Neo        |
+| A3040 | Soundcore Space Q45         |
+| A3926 | Soundcore Life Dot 2S       |
+| A3930 | Soundcore Liberty 2 Pro     |
+| A3931 | Soundcore Life Dot 2 NC     |
+| A3933 | Soundcore Life Note 3       |
+| A3935 | Soundcore Life A2 NC        |
+| A3936 | Soundcore Space A40         |
+| A3939 | Soundcore Life P3           |
+| A3945 | Soundcore Life Note 3S      |
+| A3947 | Soundcore Liberty 4 NC      |
+| A3948 | Soundcore A20i              |
+| A3951 | Soundcore Liberty Air 2 Pro |
+| A3959 | Soundcore R50i NC           |
 
 ### Requested Devices
 
 | Model | Name                    | Issue                                                      |
 | ----- | ----------------------- | ---------------------------------------------------------- |
 | A3035 | Soundcore Space One     | [GH-140](https://github.com/Oppzippy/OpenSCQ30/issues/140) |
-| A3040 | Soundcore Space Q45     | [GH-103](https://github.com/Oppzippy/OpenSCQ30/issues/103) |
 | A3116 | Soundcore Motion+       | [GH-119](https://github.com/Oppzippy/OpenSCQ30/issues/119) |
 | A3910 | Soundcore Liberty Air 2 | [GH-128](https://github.com/Oppzippy/OpenSCQ30/issues/128) |
-| A3947 | Soundcore Liberty 4 NC  | [GH-107](https://github.com/Oppzippy/OpenSCQ30/issues/107) |
 | A3949 | Soundcore P20i          | [GH-108](https://github.com/Oppzippy/OpenSCQ30/issues/108) |
 | A3952 | Soundcore Liberty 3 Pro | [GH-134](https://github.com/Oppzippy/OpenSCQ30/issues/134) |
 | A3954 | Soundcore Liberty 4 Pro | [GH-169](https://github.com/Oppzippy/OpenSCQ30/issues/169) |
