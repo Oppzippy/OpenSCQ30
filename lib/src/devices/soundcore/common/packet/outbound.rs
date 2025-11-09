@@ -11,7 +11,6 @@ mod set_equalizer_and_custom_hear_id;
 mod set_equalizer_with_drc;
 mod set_limit_high_volume;
 mod set_sound_modes;
-mod set_touch_tone;
 
 pub use outbound_packet::*;
 #[allow(
@@ -34,8 +33,8 @@ pub use set_equalizer_and_custom_hear_id::*;
 pub use set_equalizer_with_drc::*;
 pub use set_limit_high_volume::*;
 pub use set_sound_modes::*;
-pub use set_touch_tone::*;
 
 use crate::devices::soundcore::common::packet;
 
 pub const SET_GAMING_MODE_COMMAND: packet::Command = packet::Command([0x10, 0x85]);
+pub const SET_TOUCH_TONE_COMMAND: packet::Command = packet::Command([0x01, 0x83]);

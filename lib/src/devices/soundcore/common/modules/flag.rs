@@ -11,12 +11,33 @@ use crate::{
     connection::RfcommConnection,
     devices::soundcore::common::{
         packet::{self, PacketIOController},
-        structures::GamingMode,
+        structures::{GamingMode, TouchTone},
     },
     settings::SettingId,
 };
 
 use super::ModuleCollection;
+
+impl<T> ModuleCollection<T>
+where
+    T: Has<TouchTone> + Send + Sync,
+{
+    pub fn add_touch_tone<C>(&mut self, packet_io: Arc<PacketIOController<C>>)
+    where
+        C: RfcommConnection + 'static + Send + Sync,
+    {
+        self.add_flag(
+            packet_io,
+            FlagConfiguration {
+                setting_id: SettingId::TouchTone,
+                set_command: packet::outbound::SET_TOUCH_TONE_COMMAND,
+                update_command: None,
+                get_flag: |touch_tone| (*touch_tone).into(),
+                set_flag: |touch_tone, is_enabled| *touch_tone = is_enabled.into(),
+            },
+        );
+    }
+}
 
 impl<T> ModuleCollection<T>
 where
