@@ -22,6 +22,7 @@ soundcore_device!(
     async |builder| {
         builder.module_collection().add_state_update();
         builder.equalizer().await;
+        builder.wearing_detection();
         builder.single_battery();
         builder.serial_number_and_firmware_version();
     },

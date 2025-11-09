@@ -22,7 +22,7 @@ use crate::{
             packet_manager::PacketHandler,
             structures::{
                 CaseBatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
-                GamingMode, SerialNumber, TouchTone, TwsStatus,
+                GamingMode, SerialNumber, TouchTone, TwsStatus, WearingDetection,
                 button_configuration::ButtonStatusCollection,
             },
         },
@@ -40,7 +40,7 @@ pub struct A3945StateUpdatePacket {
     pub equalizer_configuration: EqualizerConfiguration<2, 10>,
     pub button_configuration: ButtonStatusCollection<6>,
     pub touch_tone: TouchTone,
-    pub wear_detection_switch: bool,
+    pub wearing_detection: WearingDetection,
     pub gaming_mode: GamingMode,
     pub case_battery_level: CaseBatteryLevel,
     pub bass_up_switch: bool,
@@ -57,7 +57,7 @@ impl Default for A3945StateUpdatePacket {
             equalizer_configuration: Default::default(),
             button_configuration: a3945::BUTTON_CONFIGURATION_SETTINGS.default_status_collection(),
             touch_tone: Default::default(),
-            wear_detection_switch: Default::default(),
+            wearing_detection: Default::default(),
             gaming_mode: Default::default(),
             case_battery_level: Default::default(),
             bass_up_switch: Default::default(),
@@ -85,7 +85,7 @@ impl FromPacketBody for A3945StateUpdatePacket {
                         a3945::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
                     ),
                     TouchTone::take,
-                    take_bool,
+                    WearingDetection::take,
                     GamingMode::take,
                     CaseBatteryLevel::take,
                     take_bool,
@@ -99,7 +99,7 @@ impl FromPacketBody for A3945StateUpdatePacket {
                     equalizer_configuration,
                     button_configuration,
                     touch_tone,
-                    wear_detection_switch,
+                    wearing_detection,
                     gaming_mode,
                     case_battery_level,
                     bass_up_switch,
@@ -113,7 +113,7 @@ impl FromPacketBody for A3945StateUpdatePacket {
                         equalizer_configuration,
                         button_configuration,
                         touch_tone,
-                        wear_detection_switch,
+                        wearing_detection,
                         gaming_mode,
                         case_battery_level,
                         bass_up_switch,
@@ -146,7 +146,7 @@ impl ToPacket for A3945StateUpdatePacket {
                     .bytes(a3945::BUTTON_CONFIGURATION_SETTINGS.parse_settings()),
             )
             .chain(self.touch_tone.bytes())
-            .chain([self.wear_detection_switch as u8])
+            .chain(self.wearing_detection.bytes())
             .chain(self.gaming_mode.bytes())
             .chain([
                 self.case_battery_level.0.0,

@@ -5,7 +5,7 @@ use crate::devices::soundcore::common::{
     structures::{
         AgeRange, AmbientSoundModeCycle, CaseBatteryLevel, CustomHearId, DualBattery,
         DualFirmwareVersion, EqualizerConfiguration, GamingMode, SerialNumber, SoundModes,
-        TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
+        TouchTone, TwsStatus, WearingDetection, button_configuration::ButtonStatusCollection,
     },
 };
 
@@ -26,8 +26,7 @@ pub struct A3933State {
     pub case_battery_level: CaseBatteryLevel,
     pub touch_tone_switch: TouchTone,
     pub gaming_mode: GamingMode,
-    #[has(skip)]
-    pub wear_detection_switch: bool,
+    pub wearing_detection: WearingDetection,
     #[has(skip)]
     pub device_color: u8,
     #[has(skip)]
@@ -49,7 +48,7 @@ impl From<A3933StateUpdatePacket> for A3933State {
             ambient_sound_mode_cycle: value.ambient_sound_mode_cycle,
             sound_modes: value.sound_modes,
             touch_tone_switch: value.touch_tone,
-            wear_detection_switch: value.wear_detection_switch,
+            wearing_detection: value.wearing_detection,
             gaming_mode: value.gaming_mode,
             case_battery_level: value.case_battery_level,
             device_color: value.device_color,

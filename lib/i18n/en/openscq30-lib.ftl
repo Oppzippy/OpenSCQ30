@@ -165,6 +165,7 @@ auto-play-pause = Auto Play/Pause
 wearing-tone = Wearing Tone
 touch-lock = Touch Lock
 low-battery-prompt = Low Battery Prompt
+wearing-detection = Wearing Detection
 
 limit-high-volume = Limit High Volume
 db-limit = DB Limit

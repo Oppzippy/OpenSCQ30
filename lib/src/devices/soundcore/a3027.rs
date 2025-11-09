@@ -38,6 +38,7 @@ soundcore_device!(
         });
         builder.equalizer().await;
         builder.single_battery();
+        builder.wearing_detection();
         builder.serial_number_and_firmware_version();
     },
     {

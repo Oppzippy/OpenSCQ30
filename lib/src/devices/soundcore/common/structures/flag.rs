@@ -49,3 +49,4 @@ flag!(AutoPlayPause);
 flag!(WearingTone);
 flag!(TouchLock);
 flag!(LowBatteryPrompt);
+flag!(WearingDetection);

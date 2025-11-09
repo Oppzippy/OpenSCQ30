@@ -29,7 +29,7 @@ use crate::{
                 structures::{
                     AutoPlayPause, AutoPowerOff, CaseBatteryLevel, GamingMode, LimitHighVolume,
                     LowBatteryPrompt, SoundLeakCompensation, SurroundSound, TouchLock, TouchTone,
-                    WearingTone, button_configuration::ButtonStatusCollection,
+                    WearingDetection, WearingTone, button_configuration::ButtonStatusCollection,
                 },
             },
         },
@@ -462,6 +462,7 @@ where
     flag!(WearingTone);
     flag!(TouchLock);
     flag!(LowBatteryPrompt);
+    flag!(WearingDetection);
 }
 
 pub struct SoundcoreDeviceTemplate<ConnectionType, StateType, StateUpdatePacketType>

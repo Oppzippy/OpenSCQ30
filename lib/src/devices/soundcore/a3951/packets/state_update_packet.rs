@@ -1,3 +1,5 @@
+use std::iter;
+
 use async_trait::async_trait;
 use nom::{
     IResult, Parser,
@@ -23,7 +25,7 @@ use crate::{
             state::Update,
             structures::{
                 AgeRange, CustomHearId, DualBattery, EqualizerConfiguration, Gender, SoundModes,
-                TouchTone, TwsStatus, VolumeAdjustments,
+                TouchTone, TwsStatus, VolumeAdjustments, WearingDetection,
                 button_configuration::ButtonStatusCollection,
             },
         },
@@ -42,7 +44,7 @@ pub struct A3951StateUpdatePacket {
     pub button_configuration: ButtonStatusCollection<6>,
     pub sound_modes: SoundModes,
     pub side_tone: bool,
-    pub wear_detection: bool,
+    pub wearing_detection: WearingDetection,
     pub touch_tone: TouchTone,
     pub hear_id_eq_preset: Option<u16>,
     pub supports_new_battery: bool, // yes if packet is >98, don't parse
@@ -62,7 +64,7 @@ impl Default for A3951StateUpdatePacket {
             button_configuration: a3951::BUTTON_SETTINGS.default_status_collection(),
             sound_modes: Default::default(),
             side_tone: Default::default(),
-            wear_detection: Default::default(),
+            wearing_detection: Default::default(),
             touch_tone: Default::default(),
             hear_id_eq_preset: Default::default(),
             supports_new_battery: Default::default(),
@@ -94,7 +96,7 @@ impl FromPacketBody for A3951StateUpdatePacket {
                         button_configuration,
                         sound_modes,
                         side_tone,
-                        wear_detection,
+                        wearing_detection,
                         touch_tone,
                     ),
                 ) = (
@@ -106,8 +108,8 @@ impl FromPacketBody for A3951StateUpdatePacket {
                     CustomHearId::take_with_all_fields,
                     ButtonStatusCollection::take(a3951::BUTTON_SETTINGS.parse_settings()),
                     SoundModes::take,
-                    take_bool,       // side tone
-                    take_bool,       // wear detection
+                    take_bool, // side tone
+                    WearingDetection::take,
                     TouchTone::take, // touch tone
                 )
                     .parse_complete(input)?;
@@ -130,7 +132,7 @@ impl FromPacketBody for A3951StateUpdatePacket {
                         button_configuration,
                         sound_modes,
                         side_tone,
-                        wear_detection,
+                        wearing_detection,
                         touch_tone,
                         hear_id_eq_preset,
                         supports_new_battery: new_battery.is_some(),
@@ -191,11 +193,9 @@ impl ToPacket for A3951StateUpdatePacket {
                     .bytes(a3951::BUTTON_SETTINGS.parse_settings()),
             )
             .chain(self.sound_modes.bytes())
-            .chain([
-                self.side_tone as u8,
-                self.wear_detection as u8,
-                self.touch_tone.0.into(),
-            ])
+            .chain(iter::once(self.side_tone.into()))
+            .chain(self.wearing_detection.bytes())
+            .chain(self.touch_tone.bytes())
             .collect()
     }
 }

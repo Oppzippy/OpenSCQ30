@@ -35,6 +35,7 @@ soundcore_device!(
         );
         builder.touch_tone();
         builder.gaming_mode();
+        builder.wearing_detection();
         builder.tws_status();
         builder.dual_battery(5);
         builder.case_battery_level(5);

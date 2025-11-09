@@ -128,6 +128,7 @@ pub enum SettingId {
     WearingTone,
     TouchLock,
     LowBatteryPrompt,
+    WearingDetection,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

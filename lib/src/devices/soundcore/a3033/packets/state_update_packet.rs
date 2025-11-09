@@ -16,10 +16,12 @@ use crate::{
                 self, Command,
                 inbound::{FromPacketBody, TryToPacket},
                 outbound::ToPacket,
-                parsing::take_bool,
             },
             packet_manager::PacketHandler,
-            structures::{EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery},
+            structures::{
+                EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery,
+                WearingDetection,
+            },
         },
     },
 };
@@ -31,7 +33,7 @@ pub struct A3033StateUpdatePacket {
     pub equalizer_configuration: EqualizerConfiguration<1, 8>,
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
-    pub wear_detection: bool,
+    pub wearing_detection: WearingDetection,
 }
 
 impl FromPacketBody for A3033StateUpdatePacket {
@@ -48,21 +50,21 @@ impl FromPacketBody for A3033StateUpdatePacket {
                     EqualizerConfiguration::take,
                     FirmwareVersion::take,
                     SerialNumber::take,
-                    take_bool,
+                    WearingDetection::take,
                 ),
                 |(
                     battery,
                     equalizer_configuration,
                     firmware_version,
                     serial_number,
-                    wear_detection,
+                    wearing_detection,
                 )| {
                     Self {
                         battery,
                         equalizer_configuration,
                         firmware_version,
                         serial_number,
-                        wear_detection,
+                        wearing_detection,
                     }
                 },
             )),
@@ -84,7 +86,7 @@ impl ToPacket for A3033StateUpdatePacket {
             .chain(self.equalizer_configuration.bytes())
             .chain(self.firmware_version.to_string().into_bytes())
             .chain(self.serial_number.0.as_bytes().iter().copied())
-            .chain([self.wear_detection as u8])
+            .chain(self.wearing_detection.bytes())
             .collect()
     }
 }

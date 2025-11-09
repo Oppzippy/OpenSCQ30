@@ -6,7 +6,7 @@ use crate::devices::soundcore::common::{
     state::Update,
     structures::{
         AgeRange, CustomHearId, DualBattery, DualFirmwareVersion, EqualizerConfiguration, Gender,
-        SerialNumber, SoundModes, TouchTone, TwsStatus,
+        SerialNumber, SoundModes, TouchTone, TwsStatus, WearingDetection,
         button_configuration::ButtonStatusCollection,
     },
 };
@@ -26,10 +26,9 @@ pub struct A3951State {
     serial_number: SerialNumber,
     dual_firmware_version: DualFirmwareVersion,
     touch_tone: TouchTone,
+    wearing_detection: WearingDetection,
     #[has(skip)]
     side_tone: bool,
-    #[has(skip)]
-    wear_detection: bool,
     #[has(skip)]
     hear_id_eq_preset: Option<u16>,
     #[has(skip)]
@@ -56,7 +55,7 @@ impl A3951State {
             button_configuration: state_update_packet.button_configuration,
             sound_modes: state_update_packet.sound_modes,
             side_tone: state_update_packet.side_tone,
-            wear_detection: state_update_packet.wear_detection,
+            wearing_detection: state_update_packet.wearing_detection,
             touch_tone: state_update_packet.touch_tone,
             hear_id_eq_preset: state_update_packet.hear_id_eq_preset,
             supports_new_battery: state_update_packet.supports_new_battery,
@@ -81,7 +80,7 @@ impl Update<A3951StateUpdatePacket> for A3951State {
             button_configuration,
             sound_modes,
             side_tone,
-            wear_detection,
+            wearing_detection,
             touch_tone,
             hear_id_eq_preset,
             supports_new_battery,
@@ -97,7 +96,7 @@ impl Update<A3951StateUpdatePacket> for A3951State {
         self.button_configuration = button_configuration;
         self.sound_modes = sound_modes;
         self.side_tone = side_tone;
-        self.wear_detection = wear_detection;
+        self.wearing_detection = wearing_detection;
         self.touch_tone = touch_tone;
         self.hear_id_eq_preset = hear_id_eq_preset;
         self.supports_new_battery = supports_new_battery;

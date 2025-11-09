@@ -4,7 +4,8 @@ use crate::devices::soundcore::common::{
     modules::reset_button_configuration::ResetButtonConfigurationPending,
     structures::{
         CaseBatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration, GamingMode,
-        SerialNumber, TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
+        SerialNumber, TouchTone, TwsStatus, WearingDetection,
+        button_configuration::ButtonStatusCollection,
     },
 };
 
@@ -21,8 +22,7 @@ pub struct A3945State {
     pub case_battery_level: CaseBatteryLevel,
     pub touch_tone: TouchTone,
     pub gaming_mode: GamingMode,
-    #[has(skip)]
-    pub wear_detection_switch: bool,
+    pub wearing_detection: WearingDetection,
     #[has(skip)]
     pub bass_up_switch: bool,
     #[has(skip)]
@@ -40,7 +40,7 @@ impl From<A3945StateUpdatePacket> for A3945State {
             equalizer_configuration: value.equalizer_configuration,
             button_configuration: value.button_configuration,
             touch_tone: value.touch_tone,
-            wear_detection_switch: value.wear_detection_switch,
+            wearing_detection: value.wearing_detection,
             gaming_mode: value.gaming_mode,
             case_battery_level: value.case_battery_level,
             bass_up_switch: value.bass_up_switch,

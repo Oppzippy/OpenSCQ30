@@ -21,7 +21,7 @@ use crate::{
             packet_manager::PacketHandler,
             structures::{
                 AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender,
-                SerialNumber, SingleBattery, SoundModes,
+                SerialNumber, SingleBattery, SoundModes, WearingDetection,
             },
         },
     },
@@ -38,7 +38,7 @@ pub struct A3027StateUpdatePacket {
     pub sound_modes: SoundModes,
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
-    pub wear_detection: bool,
+    pub wearing_detection: WearingDetection,
     // if length >= 72
     pub touch_func: Option<bool>,
 }
@@ -61,7 +61,7 @@ impl FromPacketBody for A3027StateUpdatePacket {
                     SoundModes::take,
                     FirmwareVersion::take,
                     SerialNumber::take,
-                    take_bool,
+                    WearingDetection::take,
                     opt(take_bool),
                 ),
                 |(
@@ -73,7 +73,7 @@ impl FromPacketBody for A3027StateUpdatePacket {
                     sound_modes,
                     firmware_version,
                     serial_number,
-                    wear_detection,
+                    wearing_detection,
                     touch_func,
                 )| {
                     Self {
@@ -85,7 +85,7 @@ impl FromPacketBody for A3027StateUpdatePacket {
                         sound_modes,
                         firmware_version,
                         serial_number,
-                        wear_detection,
+                        wearing_detection,
                         touch_func,
                     }
                 },
@@ -112,7 +112,7 @@ impl ToPacket for A3027StateUpdatePacket {
             .chain(self.sound_modes.bytes())
             .chain(self.firmware_version.to_string().into_bytes())
             .chain(self.serial_number.as_str().as_bytes().iter().copied())
-            .chain([self.wear_detection as u8])
+            .chain(self.wearing_detection.bytes())
             .chain(self.touch_func.map(|v| v as u8))
             .collect()
     }

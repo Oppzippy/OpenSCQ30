@@ -13,7 +13,7 @@ use crate::{
         packet::{self, PacketIOController},
         structures::{
             AutoPlayPause, Flag, GamingMode, LowBatteryPrompt, SoundLeakCompensation,
-            SurroundSound, TouchLock, TouchTone, WearingTone,
+            SurroundSound, TouchLock, TouchTone, WearingDetection, WearingTone,
         },
     },
     settings::SettingId,
@@ -109,6 +109,15 @@ flag!(
     FlagConfiguration {
         setting_id: SettingId::LowBatteryPrompt,
         set_command: packet::outbound::SET_LOW_BATTERY_PROMPT_COMMAND,
+        update_command: None,
+    },
+);
+
+flag!(
+    WearingDetection,
+    FlagConfiguration {
+        setting_id: SettingId::WearingDetection,
+        set_command: packet::outbound::SET_WEARING_DETECTION_COMMAND,
         update_command: None,
     },
 );

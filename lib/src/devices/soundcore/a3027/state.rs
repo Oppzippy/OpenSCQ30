@@ -2,7 +2,7 @@ use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::common::structures::{
     AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
-    SingleBattery, SoundModes,
+    SingleBattery, SoundModes, WearingDetection,
 };
 
 use super::packets::A3027StateUpdatePacket;
@@ -18,8 +18,7 @@ pub struct A3027State {
     pub sound_modes: SoundModes,
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
-    #[has(skip)]
-    pub wear_detection: bool,
+    pub wearing_detection: WearingDetection,
     #[has(skip)]
     pub touch_func: Option<bool>,
 }
@@ -35,7 +34,7 @@ impl From<A3027StateUpdatePacket> for A3027State {
             sound_modes: value.sound_modes,
             firmware_version: value.firmware_version,
             serial_number: value.serial_number,
-            wear_detection: value.wear_detection,
+            wearing_detection: value.wearing_detection,
             touch_func: value.touch_func,
         }
     }

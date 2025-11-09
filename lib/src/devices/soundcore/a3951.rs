@@ -58,6 +58,7 @@ soundcore_device!(
             RequestState::default().to_packet(),
         );
         builder.touch_tone();
+        builder.wearing_detection();
         builder.tws_status();
         builder.dual_battery(5);
         builder.serial_number_and_dual_firmware_version();

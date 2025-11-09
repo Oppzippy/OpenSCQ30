@@ -44,3 +44,4 @@ pub const SET_AUTO_PLAY_PAUSE_COMMAND: packet::Command = packet::Command([0x01, 
 pub const SET_WEARING_TONE_COMMAND: packet::Command = packet::Command([0x01, 0x8C]);
 pub const SET_TOUCH_LOCK_COMMAND: packet::Command = packet::Command([0x04, 0x86]);
 pub const SET_LOW_BATTERY_PROMPT_COMMAND: packet::Command = packet::Command([0x10, 0x82]);
+pub const SET_WEARING_DETECTION_COMMAND: packet::Command = packet::Command([0x01, 0x81]);
