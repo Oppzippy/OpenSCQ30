@@ -36,10 +36,18 @@ if len(sys.argv) <= 1:
     print("Usage: ./sign-release <GITHUB_ACTIONS_RUN_ID>")
     sys.exit(1)
 
-if match := re.match("^https://github.com/Oppzippy/OpenSCQ30/actions/runs/([0-9+]+)", sys.argv[1], re.RegexFlag.IGNORECASE):
+if match := re.match(
+    "^https://github.com/Oppzippy/OpenSCQ30/actions/runs/([0-9+]+)",
+    sys.argv[1],
+    re.RegexFlag.IGNORECASE,
+):
     actions_run_id = match.group(1)
 else:
     actions_run_id = sys.argv[1]
+
+print("Deleting old release files")
+for file in release_dir.glob("openscq30-*"):
+    file.unlink()
 
 android_keystore_password = getpass(f"{android_signing_key} password: ")
 
