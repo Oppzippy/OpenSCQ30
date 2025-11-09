@@ -1,0 +1,22 @@
+name: validate appstream metainfo
+
+on:
+  push:
+    paths: &push_paths
+      - gui/resources/com.oppzippy.OpenSCQ30.metainfo.xml
+      - .github/workflows/validate-appstream-metainfo.yml
+  pull_request:
+    paths: *push_paths
+
+permissions:
+  contents: read
+
+jobs:
+  validate-appstream-metainfo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Validate
+        run: appstreamcli validate gui/resources/com.oppzippy.OpenSCQ30.metainfo.xml
