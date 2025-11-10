@@ -87,7 +87,6 @@ previous-song = Önceki Şarkı
 next-song = Sonraki Şarkı
 voice-assistant = Sesli Asistan
 play-pause = Oynat / Durdur
-game-mode = Oyun Modu
 is-charging = Sarj Oluyor Mu
 battery-level = Batarya Seviyesi
 is-charging-left = Sarj Oluyor Mu (Sol)
