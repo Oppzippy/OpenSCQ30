@@ -81,31 +81,27 @@ impl FromPacketBody for A3955State {
                     take(5usize),
                     common::structures::SingleBattery::take,
                     common::structures::EqualizerConfiguration::take,
-                    take(10usize),
-                    take(47usize),
-                    take(1usize), // we dunno what this does
+                    // take(10usize),
+                    // take(47usize),
+                    // take(1usize), // we dunno what this does
+                    take(57usize),
                     ButtonStatusCollection::take(
                         a3955::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
                     ),
                     common::structures::AmbientSoundModeCycle::take,
                     a3955::structures::SoundModes::take,
-                    take(1usize), //manual/adaptive ANC?
-                    take(1usize), //transparency mode
-                    take(1usize), //manual/adaptive/multiscene anc?
-                    take(1usize), // Wind Noise Reduction
-                    take(8usize),
-                    take(1usize), // ANC personalised to ear
-                    take(1usize),
+                    take(14usize), //manual/adaptive ANC?
+                    // take(1usize), //transparency mode
+                    // take(1usize), //manual/adaptive/multiscene anc?
+                    // take(1usize), // Wind Noise Reduction
+                    // take(8usize),
+                    // take(1usize), // ANC personalised to ear
+                    // take(1usize),
                     common::structures::TouchTone::take,
-                    take(1usize),
-                    take(1usize), //limit high volume
-                    take(1usize), // DB level
-                    take(1usize), // DB refresh rate
+                    take(4usize),//limit high volume// DB level// DB refresh rate
 
                     common::structures::AutoPowerOff::take,
-                    take(1usize),
-                    take(1usize), // Low battery prompt
-                    take(10usize),
+                    take(12usize),
                 ),
                 |(
                     tws_status,
@@ -116,8 +112,8 @@ impl FromPacketBody for A3955State {
                     case_battery,
                     equalizer_configuration,
                     _unknown1,
-                    _unknown2,
-                    _unknown3,
+                    // _unknown2,
+                    // _unknown3,
                     button_configuration,
                     ambient_sound_mode_cycle,
                     sound_modes,
@@ -127,7 +123,7 @@ impl FromPacketBody for A3955State {
                     auto_power_off,
                     // low_battery_prompt,
                     // gaming_mode,
-                    _unknown5,
+                    _unknown6,
                 )| {
                     Self {
                         tws_status,
@@ -179,7 +175,7 @@ impl ToPacket for A3955State {
             .chain([self.touch_tone as u8])
             .chain([0, 0])
             .chain(self.auto_power_off.bytes())
-            .chain([self.low_battery_prompt as u8, self.gaming_mode as u8])
+            // .chain([self.low_battery_prompt as u8, self.gaming_mode as u8])
             .chain([0; 12])
             .collect()
     }
