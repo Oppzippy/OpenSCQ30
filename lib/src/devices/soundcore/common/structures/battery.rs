@@ -70,6 +70,15 @@ pub struct SingleBattery {
 }
 
 impl SingleBattery {
+    pub fn bytes(&self) -> [u8; 2] {
+        [
+            self.level.0,
+            self.is_charging as u8,
+        ]
+    }
+}
+
+impl SingleBattery {
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
