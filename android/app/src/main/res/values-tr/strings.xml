@@ -2,7 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="activate">Aktifleştir</string>
     <string name="edit">Düzenle</string>
-    <string name="equalizer">Ekolayzır</string>
+    <string name="equalizer">Ekolayzer</string>
     <string name="hz">%1$d Hz</string>
     <string name="loading">Yükleniyor</string>
     <string name="request_permission">İzin İste</string>
@@ -39,4 +39,29 @@
     <string name="notification_permission_is_required">Bildirim İzni Gerekiyor</string>
     <string name="status_notification">­Durum Bildirimi</string>
     <string name="information">Bilgi</string>
+    <string name="unpair_device">Cihazın Eşleşmesini Kaldır</string>
+    <string name="unpairing_from_device_name">%s Cihazından Eşleşme Kaldırılıyor</string>
+    <string name="unpair">Eşleşmeyi Kaldır</string>
+    <string name="delete_confirm">\"%s\" profilini silmek istediğinize emin misiniz?</string>
+    <string name="quick_presets">Hızlı Ayarlar</string>
+    <string name="copy_x_to_clipboard">%s Panoya Kopyalandı</string>
+    <string name="select_x">%s Cihazını Seç</string>
+    <string name="no_quick_presets">Hızlı Ayar Yok</string>
+    <string name="create_quick_preset">Hızlı Ayar Oluştur</string>
+    <string name="quick_preset_slot_x">Hızlı Ayar Yuvası %d</string>
+    <string name="error_changing_settings">Ayarların değişiminde hata</string>
+    <string name="error_pairing">Eşleştimede hata</string>
+    <string name="error_saving_quick_preset">Hızlı ayarı kaydetmede hata</string>
+    <string name="error_activating_quick_preset">Hızlı ayarı etkinleştirmede hata</string>
+    <string name="load_current_settings">Mevcut Ayarları Yükle</string>
+    <string name="load_current_settings_help">Mevcut Ayarları Yükle, hızlı ayardaki tüm ayarları mevcut değerleriyle değiştirir. Bu, hızlı ayarın bir parçası olarak hangi ayarların etkinleştirileceğini etkilemez.</string>
+    <string name="setting_id_with_value">%s: %s</string>
+    <string name="migrate">Taşı</string>
+    <string name="migrate_legacy_equalizer_profiles">Eski Ekolayzer Profilerini Taşı</string>
+    <string name="error_migrating_legacy_profile">Eski Profil Taşınımında Hata</string>
+    <string name="no_items_found">Hiçbir Öğe Bulunamadı</string>
+    <string name="delete_quick_preset">Hızlı Ayarı Sil</string>
+    <string name="error_deleting_quick_preset">Hızlı ayar silinirken hata</string>
+    <string name="version_2_breaking_changes">&lt;h1&gt;OpenSCQ30 v2\'ye güncellendi&lt;/h1&gt; &lt;br&gt; &lt;b&gt;Son Değişiklikler&lt;/b&gt; &lt;ul&gt; &lt;li&gt;Özel ekolayzer profilleri artık cihaza özeldir. Eski ekolayzer profilleri, bir cihaza bağlandıktan sonra Eski Ekolayzer Profillerini Taşı sayfasından taşınmalıdır.&lt;/li&gt; &lt;li&gt;Hızlı ayarlar artık farklı bir biçimde saklanır ve otomatik taşıma mevcut değildir, bu nedenle yeniden oluşturulmaları gerekir.&lt;/li&gt; &lt;li&gt;Cihaz modeli otomatik algılama kaldırıldı, bu nedenle artık bir cihaz eklerken cihaz modelini seçmeniz gerekiyor.&lt;/li&gt; &lt;/ul&gt; &lt;p&gt;Ayrıntılar için &lt;a href=https://github.com/Oppzippy/OpenSCQ30/blob/master/CHANGELOG.md&gt;CHANGELOG.md&lt;/a&gt; adresine bakın.&lt;/p&gt;</string>
+    <string name="featured_setting_x">Öne Çıkan Ayar %d</string>
 </resources>
