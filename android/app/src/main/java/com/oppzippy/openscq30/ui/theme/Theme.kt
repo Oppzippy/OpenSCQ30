@@ -99,6 +99,7 @@ fun OpenSCQ30Theme(
         }
 
         darkTheme -> darkColorScheme
+
         else -> lightColorScheme
     }
 

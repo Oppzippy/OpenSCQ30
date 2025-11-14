@@ -37,12 +37,14 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
             .setOnlyAlertOnce(true).setSmallIcon(R.drawable.headphones).setContentTitle(
                 when (status) {
                     is ConnectionStatus.AwaitingConnection -> context.getString(R.string.awaiting_connection)
+
                     is ConnectionStatus.Connected -> context.getString(
                         R.string.connected_to,
                         translateDeviceModel(status.deviceManager.device.model()),
                     )
 
                     is ConnectionStatus.Connecting -> context.getString(R.string.connecting_to, status.macAddress)
+
                     ConnectionStatus.Disconnected -> context.getString(R.string.disconnected)
                 },
             ).setContentText(

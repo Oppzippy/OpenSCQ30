@@ -105,6 +105,7 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
                             }
 
                             0 -> Unit
+
                             else -> manualRfcommConnection.addInboundPacket(buffer.sliceArray(0..<size))
                         }
                     } catch (ex: IOException) {

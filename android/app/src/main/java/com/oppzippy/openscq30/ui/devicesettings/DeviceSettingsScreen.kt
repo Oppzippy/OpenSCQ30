@@ -57,7 +57,9 @@ fun DeviceSettingsScreen(
         }
 
         ConnectionStatus.AwaitingConnection -> Loading()
+
         is ConnectionStatus.Connecting -> Loading()
+
         ConnectionStatus.Disconnected -> Disconnected()
     }
 }
