@@ -1,0 +1,51 @@
+name = "Soundcore Motion+"
+rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B3116"
+has_checksum = false
+
+[[responses]]
+command = [1, 1]
+response = [
+    0,   # battery charging
+    5,   # battery level
+    7,   # volume (0 to 16)
+    0,   # unknown
+    2,   # auto power off duration (1=5m, 2=10m, 3=30m, 4=60m)
+    57,  # firmware start
+    57,
+    46,
+    57,
+    57,  # firmware end
+    65,  # SN start
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,  # SN end
+    255, # EQ preset (0=bass up, 1=bass off, 2=voice, 3=heavy, 4=classic, 5=original, 255=custom)
+    6,   # custom EQ start (0=-6db, 12=+6db)
+    7,
+    8,
+    9,
+    10,
+    6,
+    5,
+    4,
+    3,   # custom eq end
+]
+
+[[responses]]
+# TODO has firmware version requirement. determine what it is.
+command = [1, 16]
+response = [
+    1, # voice prompt enabled/disabled
+]
