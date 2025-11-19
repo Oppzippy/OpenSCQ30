@@ -49,6 +49,28 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.0.0-beta6" date="2025-11-19">
+            <description>
+                <p>Features</p>
+                <ul>
+                    <li>Show case battery level for Life Note 3, Space A40, Life Note 3S, and Liberty 4 NC</li>
+                    <li>Add gaming mode toggle for Life Note 3, Space A40, Life Note 3S, Liberty 4 NC, and R50i NC</li>
+                    <li>Add sound leak compensation toggle for Liberty 4 NC</li>
+                    <li>Add surround sound toggle for Liberty 4 NC</li>
+                    <li>Add auto play/pause toggle for Liberty 4 NC</li>
+                    <li>Add wearing tone toggle for Liberty 4 NC</li>
+                    <li>Add touch lock toggle for Liberty 4 NC</li>
+                    <li>Add low battery prompt toggle for Liberty 4 NC and R50i NC</li>
+                    <li>Add wearing detection toggle for Life Q35, Life 2 Neo, Life Note 3, Life Note 3S, and Liberty Air 2 Pro </li>
+                    <li>Add battery level for Space Q45</li>
+                    <li>Add button configuration for Space Q45</li>
+                </ul>
+                <p>Localization</p>
+                <ul>
+                    <li>Add more Turkish translations (thanks to ozer4)</li>
+                </ul>
+            </description>
+        </release>
         <release version="2.0.0-beta5" date="2025-11-08">
             <description>
                 <p>Features</p>

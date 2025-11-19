@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v2.0.0-beta6
 
 ### General
 
@@ -14,7 +14,7 @@
 - Add wearing tone toggle for Liberty 4 NC
 - Add touch lock toggle for Liberty 4 NC
 - Add low battery prompt toggle for Liberty 4 NC and R50i NC
-- Add wearing detection toggle for Life Q35, Life 2 Neo, Life Note 3, Life Note 3S, and Liberty Air 2 Pro 
+- Add wearing detection toggle for Life Q35, Life 2 Neo, Life Note 3, Life Note 3S, and Liberty Air 2 Pro
 - Add battery level for Space Q45
 - Add button configuration for Space Q45
 
