@@ -14,7 +14,7 @@ use tokio::sync::watch;
 use crate::{
     api::device,
     devices::soundcore::{
-        a3040::{self, structures::DoublePressAction},
+        a3040,
         common::{
             modules::ModuleCollection,
             packet::{
@@ -39,7 +39,7 @@ pub struct A3040StateUpdatePacket {
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
     pub equalizer_configuration: EqualizerConfiguration<1, 10>,
-    pub double_press_action: DoublePressAction, // 7 for BassUp On/Off, 0xF for disabled
+    pub button_configuration: a3040::structures::ButtonConfiguration,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub sound_modes: a3040::structures::SoundModes,
     pub auto_power_off: AutoPowerOff,
@@ -56,7 +56,7 @@ impl Default for A3040StateUpdatePacket {
             firmware_version: Default::default(),
             serial_number: Default::default(),
             equalizer_configuration: Default::default(),
-            double_press_action: Default::default(),
+            button_configuration: Default::default(),
             ambient_sound_mode_cycle: Default::default(),
             sound_modes: Default::default(),
             auto_power_off: Default::default(),
@@ -88,7 +88,7 @@ impl FromPacketBody for A3040StateUpdatePacket {
                     EqualizerConfiguration::take,
                     take(10usize), // equalizer dynamic range compression
                     take(2usize),  // unknown
-                    DoublePressAction::take,
+                    a3040::structures::ButtonConfiguration::take,
                     AmbientSoundModeCycle::take,
                     a3040::structures::SoundModes::take,
                     take(10usize), // unknown
@@ -123,7 +123,7 @@ impl FromPacketBody for A3040StateUpdatePacket {
                         firmware_version,
                         serial_number,
                         equalizer_configuration,
-                        double_press_action,
+                        button_configuration: double_press_action,
                         ambient_sound_mode_cycle,
                         sound_modes,
                         auto_power_off,
@@ -199,7 +199,7 @@ impl ToPacket for A3040StateUpdatePacket {
             .chain(self.equalizer_configuration.bytes())
             .chain([0; 10])
             .chain([0; 2])
-            .chain(iter::once(self.double_press_action.0))
+            .chain(self.button_configuration.bytes())
             .chain(self.ambient_sound_mode_cycle.bytes())
             .chain(self.sound_modes.bytes())
             .chain([0; 10])

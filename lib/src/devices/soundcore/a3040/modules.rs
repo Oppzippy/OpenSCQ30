@@ -8,6 +8,7 @@ use crate::{
     },
 };
 
+mod button_configuration;
 mod equalizer;
 mod sound_modes;
 
@@ -45,5 +46,19 @@ where
         self.module_collection()
             .add_a3040_equalizer(packet_io_controller, database, device_model, change_notify)
             .await;
+    }
+}
+
+impl<ConnectionType, StateType, StateUpdatePacketType>
+    SoundcoreDeviceBuilder<ConnectionType, StateType, StateUpdatePacketType>
+where
+    ConnectionType: RfcommConnection + Send + Sync + 'static,
+    StateUpdatePacketType: FromPacketBody + Into<StateType>,
+    StateType: Has<a3040::structures::ButtonConfiguration> + Send + Sync + Clone + 'static,
+{
+    pub fn a3040_button_configuration(&mut self) {
+        let packet_io_controller = self.packet_io_controller().clone();
+        self.module_collection()
+            .add_a3040_button_configuration(packet_io_controller);
     }
 }

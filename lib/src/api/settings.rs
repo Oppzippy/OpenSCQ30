@@ -75,6 +75,8 @@ pub enum SettingId {
     #[translate("custom-profile")]
     CustomEqualizerProfile,
     VolumeAdjustments,
+    SinglePress,
+    DoublePress,
     LeftSinglePress,
     LeftDoublePress,
     LeftTriplePress,

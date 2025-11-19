@@ -232,13 +232,44 @@ impl proptest::arbitrary::Arbitrary for AdaptiveNoiseCanceling {
     type Strategy = proptest::strategy::Map<std::ops::RangeInclusive<u8>, fn(u8) -> Self>;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub struct DoublePressAction(pub u8);
+#[derive(Clone, Copy, Eq, PartialEq, Debug, Default)]
+pub struct ButtonConfiguration {
+    pub double_press_action: Option<ButtonAction>,
+}
 
-impl DoublePressAction {
+impl ButtonConfiguration {
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
-        map(le_u8, Self).parse_complete(input)
+        map(le_u8, |single_press_action| Self {
+            double_press_action: ButtonAction::from_repr(single_press_action),
+        })
+        .parse_complete(input)
     }
+
+    pub fn bytes(&self) -> [u8; 1] {
+        [self
+            .double_press_action
+            .map(|action| action as u8)
+            .unwrap_or(0xF)]
+    }
+}
+
+#[repr(u8)]
+#[derive(
+    Clone,
+    Copy,
+    Eq,
+    PartialEq,
+    Debug,
+    Default,
+    FromRepr,
+    EnumIter,
+    EnumString,
+    IntoStaticStr,
+    Translate,
+)]
+pub enum ButtonAction {
+    #[default]
+    BassUp = 7,
 }

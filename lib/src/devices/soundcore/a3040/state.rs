@@ -1,7 +1,7 @@
 use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::{
-    a3040::{self, packets::A3040StateUpdatePacket, structures::DoublePressAction},
+    a3040::{self, packets::A3040StateUpdatePacket},
     common::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         structures::{
@@ -17,7 +17,7 @@ pub struct A3040State {
     firmware_version: FirmwareVersion,
     serial_number: SerialNumber,
     equalizer_configuration: EqualizerConfiguration<1, 10>,
-    double_press_action: DoublePressAction,
+    button_configuration: a3040::structures::ButtonConfiguration,
     ambient_sound_mode_cycle: AmbientSoundModeCycle,
     sound_modes: a3040::structures::SoundModes,
     auto_power_off: AutoPowerOff,
@@ -33,7 +33,7 @@ impl From<A3040StateUpdatePacket> for A3040State {
             firmware_version,
             serial_number,
             equalizer_configuration,
-            double_press_action,
+            button_configuration,
             ambient_sound_mode_cycle,
             sound_modes,
             auto_power_off,
@@ -48,7 +48,7 @@ impl From<A3040StateUpdatePacket> for A3040State {
             firmware_version,
             serial_number,
             equalizer_configuration,
-            double_press_action,
+            button_configuration,
             ambient_sound_mode_cycle,
             sound_modes,
             auto_power_off,

@@ -98,6 +98,8 @@ treble-reducer = Treble Reducer
 
 button-configuration = Button Configuration
 reset-buttons-to-default = Reset Buttons to Default
+single-press = Single Press
+double-press = Double Press
 left-single-press = Left Single Press
 left-double-press = Left Double Press
 left-triple-press = Left Triple Press
@@ -112,6 +114,7 @@ previous-song = Previous Song
 next-song = Next Song
 voice-assistant = Voice Assistant
 play-pause = Play Pause
+bass-up = Bass Up
 normal-mode-in-cycle = Normal Mode in Cycle
 transparency-mode-in-cycle = Transparency Mode in Cycle
 noise-canceling-mode-in-cycle = Noise Canceling Mode in Cycle
