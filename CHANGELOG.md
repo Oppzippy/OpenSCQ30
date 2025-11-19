@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Features
+
+- Show case battery level for Life Note 3, Space A40, Life Note 3S, and Liberty 4 NC
+- Add gaming mode toggle for Life Note 3, Space A40, Life Note 3S, Liberty 4 NC, and R50i NC
+- Add sound leak compensation toggle for Liberty 4 NC
+- Add surround sound toggle for Liberty 4 NC
+- Add auto play/pause toggle for Liberty 4 NC
+- Add wearing tone toggle for Liberty 4 NC
+- Add touch lock toggle for Liberty 4 NC
+- Add low battery prompt toggle for Liberty 4 NC and R50i NC
+- Add wearing detection toggle for Life Q35, Life 2 Neo, Life Note 3, Life Note 3S, and Liberty Air 2 Pro 
+- Add battery level for Space Q45
+- Add button configuration for Space Q45
+
+#### Localization
+
+- Add more Turkish translations (thanks to ozer4)
+
 ## v2.0.0-beta5
 
 ### General
