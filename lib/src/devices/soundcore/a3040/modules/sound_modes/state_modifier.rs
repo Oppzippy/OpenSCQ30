@@ -65,10 +65,10 @@ fn create_change_plan(
     if current.ambient_sound_mode == common::structures::AmbientSoundMode::NoiseCanceling
         || to.ambient_sound_mode == common::structures::AmbientSoundMode::Transparency
     {
-        set_transparency_mode_dependants(&mut current, &to, &mut sequence);
-        set_transparency_mode(&mut current, &to, &mut sequence);
         set_noise_canceling_mode_dependants(&mut current, &to, &mut sequence);
         set_noise_canceling_mode(&mut current, &to, &mut sequence);
+        set_transparency_mode_dependants(&mut current, &to, &mut sequence);
+        set_transparency_mode(&mut current, &to, &mut sequence);
     } else {
         set_transparency_mode_dependants(&mut current, &to, &mut sequence);
         set_transparency_mode(&mut current, &to, &mut sequence);
@@ -331,6 +331,6 @@ mod tests {
         let average = total as f64 / runner.config().cases as f64;
 
         // round up to nearest 10th for leeway
-        assert!(average <= 7.4, "average case: {average} steps",);
+        assert!(average <= 6.5, "average case: {average} steps",);
     }
 }
