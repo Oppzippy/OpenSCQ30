@@ -31,7 +31,7 @@ where
         );
         self.packet_handlers.set_handler(
             packet_handler::BatteryLevelPacketHandler::COMMAND,
-            Box::new(packet_handler::BatteryLevelPacketHandler::default()),
+            Box::new(packet_handler::BatteryLevelPacketHandler),
         );
     }
 }

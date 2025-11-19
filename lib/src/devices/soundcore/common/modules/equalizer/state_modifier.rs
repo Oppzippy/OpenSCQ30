@@ -67,7 +67,7 @@ where
                 .to_packet()
             })
             .await?;
-        state_sender.send_modify(|state| *state.get_mut() = target_equalizer_configuration.clone());
+        state_sender.send_modify(|state| *state.get_mut() = *target_equalizer_configuration);
         Ok(())
     }
 }

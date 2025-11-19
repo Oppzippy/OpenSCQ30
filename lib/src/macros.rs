@@ -72,6 +72,7 @@ macro_rules! enum_subset {
             $($variant:ident),* $(,)?
         }
     ) => {
+        #[allow(clippy::enum_variant_names)]
         $(#[$($attribute)*])*
         $vis enum $subset_enum {
             $($variant,)*

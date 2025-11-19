@@ -123,14 +123,14 @@ flag!(
 );
 
 impl<T> ModuleCollection<T> {
-    fn add_flag<C, FlagT: Flag>(
+    fn add_flag<C, FlagT>(
         &mut self,
         packet_io: Arc<PacketIOController<C>>,
         flag_configuration: FlagConfiguration,
     ) where
         C: RfcommConnection + 'static + Send + Sync,
         T: Has<FlagT> + Send + Sync,
-        FlagT: Send + Sync + PartialEq + Copy + 'static,
+        FlagT: Flag + Send + Sync + PartialEq + Copy + 'static,
     {
         if let Some(update_command) = flag_configuration.update_command {
             self.packet_handlers.set_handler(

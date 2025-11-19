@@ -50,7 +50,7 @@ where
         if target_state.get().0 {
             self.packet_io
                 .send_with_response(
-                    &packet::outbound::ResetButtonConfigurationsToDefault::default().to_packet(),
+                    &packet::outbound::ResetButtonConfigurationsToDefault.to_packet(),
                 )
                 .await?;
             (self.refresh_button_state)(state_sender.clone()).await?;

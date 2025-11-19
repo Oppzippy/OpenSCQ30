@@ -94,10 +94,7 @@ impl TransparencyMode {
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
-        map(le_u8, |id| {
-            TransparencyMode::from_repr(id).unwrap_or_default()
-        })
-        .parse_complete(input)
+        map(le_u8, |id| Self::from_repr(id).unwrap_or_default()).parse_complete(input)
     }
 }
 
@@ -158,10 +155,7 @@ impl NoiseCancelingMode {
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
-        map(le_u8, |id| {
-            NoiseCancelingMode::from_repr(id).unwrap_or_default()
-        })
-        .parse_complete(input)
+        map(le_u8, |id| Self::from_repr(id).unwrap_or_default()).parse_complete(input)
     }
 }
 
@@ -248,10 +242,7 @@ impl ButtonConfiguration {
     }
 
     pub fn bytes(&self) -> [u8; 1] {
-        [self
-            .double_press_action
-            .map(|action| action as u8)
-            .unwrap_or(0xF)]
+        [self.double_press_action.map_or(0xF, |action| action as u8)]
     }
 }
 

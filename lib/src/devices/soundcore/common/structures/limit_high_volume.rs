@@ -77,9 +77,9 @@ pub enum DecibelReadingRefreshRate {
 impl Translate for DecibelReadingRefreshRate {
     fn translate(&self) -> String {
         match self {
-            DecibelReadingRefreshRate::RealTime => fl!("real-time"),
-            DecibelReadingRefreshRate::TenSeconds => fl!("x-seconds", seconds = 10),
-            DecibelReadingRefreshRate::OneMinute => fl!("x-minutes", minutes = 1),
+            Self::RealTime => fl!("real-time"),
+            Self::TenSeconds => fl!("x-seconds", seconds = 10),
+            Self::OneMinute => fl!("x-minutes", minutes = 1),
         }
     }
 }

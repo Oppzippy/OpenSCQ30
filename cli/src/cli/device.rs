@@ -240,10 +240,10 @@ fn collect_commands(matches: &ArgMatches) -> anyhow::Result<Vec<ExecCommand>> {
         .unwrap_or_default()
         .zip(matches.get_many::<String>("set").unwrap_or_default())
         .map(|(index, setting_id_to_value)| {
-            let (setting_id, unparsed_value) = setting_id_to_value
-                .split_once("=")
-                .map(|(setting_id, unparsed_value)| (setting_id, Some(unparsed_value)))
-                .unwrap_or((setting_id_to_value, None));
+            let (setting_id, unparsed_value) = setting_id_to_value.split_once("=").map_or(
+                (setting_id_to_value.as_str(), None),
+                |(setting_id, unparsed_value)| (setting_id, Some(unparsed_value)),
+            );
             Ok(ExecCommandWithIndex {
                 index,
                 command: ExecCommand::Set(

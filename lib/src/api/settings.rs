@@ -195,7 +195,7 @@ impl From<Setting> for Value {
             } => Cow::<str>::Owned(value).into(),
             Setting::MultiSelect { values, .. } => values.into(),
             Setting::ImportString { .. } => Cow::from("").into(),
-            Setting::Action => Value::Bool(false),
+            Setting::Action => Self::Bool(false),
         }
     }
 }

@@ -144,7 +144,7 @@ where
                     }
                     state_sender.send_modify(|state| {
                         <T as Has<ButtonStatusCollection<NUM_BUTTONS>>>::get_mut(state).0[i] =
-                            *target
+                            *target;
                     });
                 }
             }

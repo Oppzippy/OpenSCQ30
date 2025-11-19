@@ -5,7 +5,7 @@ pub fn set_button_double_press_action(
 ) -> packet::Outbound {
     packet::Outbound::new(
         packet::Command([0x04, 0x81]),
-        vec![0, 0, maybe_action.map(|action| action as u8).unwrap_or(0xF)],
+        vec![0, 0, maybe_action.map_or(0xF, |action| action as u8)],
     )
 }
 
