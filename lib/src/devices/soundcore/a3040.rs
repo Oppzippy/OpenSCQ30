@@ -41,7 +41,7 @@ soundcore_device!(
 
         builder.limit_high_volume();
 
-        // builder.single_battery_level();
+        builder.single_battery_level(5);
         builder.serial_number_and_firmware_version();
     },
     {

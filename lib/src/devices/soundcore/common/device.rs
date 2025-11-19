@@ -27,9 +27,10 @@ use crate::{
                 packet::{self, PacketIOController, outbound::ToPacket},
                 state::Update,
                 structures::{
-                    AutoPlayPause, AutoPowerOff, CaseBatteryLevel, GamingMode, LimitHighVolume,
-                    LowBatteryPrompt, SoundLeakCompensation, SurroundSound, TouchLock, TouchTone,
-                    WearingDetection, WearingTone, button_configuration::ButtonStatusCollection,
+                    AutoPlayPause, AutoPowerOff, BatteryLevel, CaseBatteryLevel, GamingMode,
+                    LimitHighVolume, LowBatteryPrompt, SoundLeakCompensation, SurroundSound,
+                    TouchLock, TouchTone, WearingDetection, WearingTone,
+                    button_configuration::ButtonStatusCollection,
                 },
             },
         },
@@ -397,6 +398,13 @@ where
         StateType: Has<SingleBattery>,
     {
         self.module_collection.add_single_battery();
+    }
+
+    pub fn single_battery_level(&mut self, max_level: u8)
+    where
+        StateType: Has<BatteryLevel>,
+    {
+        self.module_collection.add_single_battery_level(max_level);
     }
 
     pub fn dual_battery(&mut self, max_level: u8)

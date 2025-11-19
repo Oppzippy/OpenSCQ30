@@ -31,6 +31,7 @@ pub mod reset_button_configuration;
 pub mod serial_number_and_dual_firmware_version;
 pub mod serial_number_and_firmware_version;
 pub mod single_battery;
+mod single_battery_level;
 pub mod sound_modes;
 pub mod tws_status;
 
