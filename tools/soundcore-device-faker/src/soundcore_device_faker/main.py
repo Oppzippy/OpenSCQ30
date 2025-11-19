@@ -93,7 +93,7 @@ async def main() -> None:
         def on_session(session: DLC) -> None:
             nonlocal soundcore_session
             nonlocal config
-            soundcore_session = SoundcoreSession(session)
+            soundcore_session = SoundcoreSession(session, config.get("has_checksum", True))
             refresh_responses(config, soundcore_session)
 
         channel_number = rfcomm_server.listen(on_session)
