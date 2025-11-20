@@ -149,3 +149,5 @@ touch-lock = Dokunma Kilidi
 low-battery-prompt = Düşük Pil Uyarı Sesi
 talk-mode = Konuşma Modu
 auto-play-pause = Otomatik Çalma/Duraklatma
+surround-sound = Çevresel Ses
+wearing-detection = Giyilme Algılama
