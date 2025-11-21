@@ -11,7 +11,9 @@ use crate::{
     devices::soundcore::common::{
         modules::equalizer::custom_equalizer_profile_store::CustomEqualizerProfileStore,
         settings_manager::{SettingHandler, SettingHandlerResult},
-        structures::{EqualizerConfiguration, TwsStatus, VolumeAdjustments},
+        structures::{
+            EqualizerConfiguration, PresetEqualizerProfile, TwsStatus, VolumeAdjustments,
+        },
     },
 };
 
@@ -82,9 +84,8 @@ where
         let setting = (*setting_id).try_into().ok()?;
         Some(match setting {
             EqualizerSetting::PresetEqualizerProfile => {
-                Setting::optional_select_from_enum_all_variants(
-                    equalizer_configuration.preset_profile(),
-                )
+                let preset = PresetEqualizerProfile::from_id(equalizer_configuration.preset_id());
+                Setting::optional_select_from_enum_all_variants(preset)
             }
             EqualizerSetting::CustomEqualizerProfile => Setting::ModifiableSelect {
                 setting: {
@@ -100,9 +101,7 @@ where
                             .collect(),
                     }
                 },
-                value: equalizer_configuration
-                    .preset_profile()
-                    .is_none()
+                value: (equalizer_configuration.preset_id() == 0xfefe)
                     .then(|| {
                         self.custom_profiles_receiver
                             .borrow()
@@ -150,16 +149,25 @@ where
             .expect("already filtered to valid values only by SettingsManager");
         match setting {
             EqualizerSetting::PresetEqualizerProfile => {
-                if let Some(preset) = value.try_as_optional_enum_variant()? {
-                    *equalizer_configuration = EqualizerConfiguration::new_from_preset_profile(
-                        preset,
-                        equalizer_configuration
-                            .volume_adjustments()
-                            .map(|v| v.adjustments().iter().copied().skip(8).collect()),
+                if let Some(preset) =
+                    value.try_as_optional_enum_variant::<PresetEqualizerProfile>()?
+                {
+                    let preset_volume_adjustments = *preset.volume_adjustments().adjustments();
+                    *equalizer_configuration = EqualizerConfiguration::new(
+                        preset.id(),
+                        equalizer_configuration.volume_adjustments().map(|v| {
+                            VolumeAdjustments::new(array::from_fn(|i| {
+                                preset_volume_adjustments
+                                    .get(i)
+                                    .copied()
+                                    .unwrap_or(v.adjustments()[i])
+                            }))
+                        }),
                     );
                 } else {
-                    *equalizer_configuration = EqualizerConfiguration::new_custom_profile(
-                        equalizer_configuration.volume_adjustments().to_owned(),
+                    *equalizer_configuration = EqualizerConfiguration::new(
+                        0xfefe,
+                        *equalizer_configuration.volume_adjustments(),
                     );
                 }
             }
@@ -172,7 +180,8 @@ where
                         .find(|(n, _)| n == name)
                         .map(|(_, volume_adjustments)| volume_adjustments)
                     {
-                        *state.get_mut() = EqualizerConfiguration::new_custom_profile(
+                        *state.get_mut() = EqualizerConfiguration::new(
+                            0xfefe,
                             self.values_to_volume_adjustments(
                                 volume_adjustments,
                                 equalizer_configuration.volume_adjustments(),
@@ -200,11 +209,13 @@ where
             }
             EqualizerSetting::VolumeAdjustments => {
                 let volume_adjustments = value.try_as_i16_slice()?;
-                *equalizer_configuration =
-                    EqualizerConfiguration::new_custom_profile(self.values_to_volume_adjustments(
+                *equalizer_configuration = EqualizerConfiguration::new(
+                    0xfefe,
+                    self.values_to_volume_adjustments(
                         volume_adjustments,
                         equalizer_configuration.volume_adjustments(),
-                    ));
+                    ),
+                );
             }
         }
         Ok(())

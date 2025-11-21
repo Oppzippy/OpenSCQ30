@@ -15,7 +15,7 @@ pub fn set_equalizer<
     hear_id: &CustomHearId<HEAR_ID_CHANNELS, HEAR_ID_BANDS>,
 ) -> packet::Outbound {
     let body = equalizer_configuration
-        .profile_id()
+        .preset_id()
         .to_le_bytes()
         .into_iter()
         .chain(hear_id.hear_id_preset_profile_id.to_le_bytes())

@@ -42,9 +42,10 @@ mod tests {
         ];
 
         let actual = SetEqualizerWithDrc {
-            equalizer_configuration: &EqualizerConfiguration::new_custom_profile([
-                VolumeAdjustments::new([-60, 60, 23, 120, 22, -120, -4, 16]),
-            ]),
+            equalizer_configuration: &EqualizerConfiguration::new(
+                0xfefe,
+                [VolumeAdjustments::new([-60, 60, 23, 120, 22, -120, -4, 16])],
+            ),
         }
         .to_packet()
         .bytes();

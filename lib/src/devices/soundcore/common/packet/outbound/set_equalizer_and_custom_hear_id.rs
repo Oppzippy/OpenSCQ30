@@ -50,7 +50,7 @@ impl<
         let mut bytes = Vec::with_capacity(76);
         let supports_hear_id = self.age_range.supports_hear_id();
 
-        bytes.extend(self.equalizer_configuration.profile_id().to_le_bytes());
+        bytes.extend(self.equalizer_configuration.preset_id().to_le_bytes());
         if supports_hear_id {
             bytes.extend(EQ_HEAR_INDEX_ID.to_le_bytes());
         }
@@ -110,7 +110,7 @@ mod tests {
         packet::outbound::ToPacket,
         structures::{
             AgeRange, CustomHearId, EqualizerConfiguration, Gender, HearIdMusicType, HearIdType,
-            PresetEqualizerProfile, VolumeAdjustments,
+            VolumeAdjustments,
         },
     };
 
@@ -128,10 +128,13 @@ mod tests {
             0x6c, 0x0e,
         ];
         let actual = SetEqualizerAndCustomHearId {
-            equalizer_configuration: &EqualizerConfiguration::new_custom_profile([
-                VolumeAdjustments::new([-52, -66, -64, -67, -108, -22, -49, -101]),
-                VolumeAdjustments::new([-52, -66, -64, -67, -108, -22, -49, -101]),
-            ]),
+            equalizer_configuration: &EqualizerConfiguration::new(
+                0xfefe,
+                [
+                    VolumeAdjustments::new([-52, -66, -64, -67, -108, -22, -49, -101]),
+                    VolumeAdjustments::new([-52, -66, -64, -67, -108, -22, -49, -101]),
+                ],
+            ),
             gender: Gender(1),
             age_range: AgeRange(2),
             custom_hear_id: &CustomHearId {
@@ -167,9 +170,9 @@ mod tests {
             0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0xb1,
         ];
         let actual = SetEqualizerAndCustomHearId {
-            equalizer_configuration: &EqualizerConfiguration::<2, 8>::new_from_preset_profile(
-                PresetEqualizerProfile::SoundcoreSignature,
-                [Vec::new(), Vec::new()],
+            equalizer_configuration: &EqualizerConfiguration::<2, 8>::new(
+                0x0000,
+                [VolumeAdjustments::default(), VolumeAdjustments::default()],
             ),
             gender: Gender(1),
             age_range: AgeRange(255),

@@ -224,7 +224,7 @@ mod tests {
 
     use crate::devices::soundcore::common::structures::{
         AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
-        PresetEqualizerProfile, SoundModes, VolumeAdjustments,
+        SoundModes, VolumeAdjustments,
     };
 
     #[test]
@@ -258,43 +258,11 @@ mod tests {
             packet.sound_modes,
         );
         assert_eq!(
-            EqualizerConfiguration::new_from_preset_profile(
-                PresetEqualizerProfile::Acoustic,
-                [Vec::new()]
+            EqualizerConfiguration::new(
+                0x0001,
+                [VolumeAdjustments::new([-60, 60, 23, 40, 22, 60, -4, 16])],
             ),
             packet.equalizer_configuration
-        );
-    }
-
-    #[test]
-    fn it_parses_packet_with_invalid_preset_eq_id_as_a_custom_profile() {
-        let input: &[u8] = &[
-            //                                                                profile id 0x50 is
-            //                                                                invalid
-            0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x01, 0x46, 0x00, 0x05, 0x00, 0x50, 0x00, 0x3c,
-            0xb4, 0x8f, 0xa0, 0x8e, 0xb4, 0x74, 0x88, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x02, 0x00, 0x01, 0x00, 0x30, 0x32, 0x2e, 0x33, 0x30, 0x33, 0x30, 0x32,
-            0x39, 0x30, 0x38, 0x36, 0x45, 0x43, 0x38, 0x32, 0x46, 0x31, 0x32, 0x41, 0x43, 0x84,
-        ];
-        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
-        let packet = A3028StateUpdatePacket::take::<VerboseError<_>>(&packet.body)
-            .unwrap()
-            .1;
-        assert_eq!(
-            AmbientSoundMode::Normal,
-            packet.sound_modes.ambient_sound_mode
-        );
-        assert_eq!(
-            NoiseCancelingMode::Transport,
-            packet.sound_modes.noise_canceling_mode
-        );
-        assert!(packet.equalizer_configuration.preset_profile().is_none());
-        assert_eq!(
-            &VolumeAdjustments::new([-60, 60, 23, 40, 22, 60, -4, 16]),
-            packet
-                .equalizer_configuration
-                .volume_adjustments_channel_1(),
         );
     }
 
@@ -320,7 +288,11 @@ mod tests {
             NoiseCancelingMode::Transport,
             packet.sound_modes.noise_canceling_mode
         );
-        assert!(packet.equalizer_configuration.preset_profile().is_none());
+        assert_eq!(
+            packet.equalizer_configuration.preset_id(),
+            0xfefe,
+            "should be custom preset"
+        );
         assert_eq!(
             &VolumeAdjustments::new([-60, 60, 23, 40, 22, 60, -4, 16]),
             packet
@@ -352,7 +324,11 @@ mod tests {
             NoiseCancelingMode::Transport,
             packet.sound_modes.noise_canceling_mode
         );
-        assert!(packet.equalizer_configuration.preset_profile().is_none());
+        assert_eq!(
+            packet.equalizer_configuration.preset_id(),
+            0xfefe,
+            "should be custom preset"
+        );
         assert_eq!(
             &VolumeAdjustments::new([-60, 60, 23, 40, 22, 60, -4, 16]),
             packet

@@ -61,10 +61,13 @@ impl Default for A3933StateUpdatePacket {
             battery: Default::default(),
             dual_firmware_version: Default::default(),
             serial_number: Default::default(),
-            equalizer_configuration: EqualizerConfiguration::new_custom_profile([
-                VolumeAdjustments::new([0; 10]),
-                VolumeAdjustments::new([0; 10]),
-            ]),
+            equalizer_configuration: EqualizerConfiguration::new(
+                0xfefe,
+                [
+                    VolumeAdjustments::new([0; 10]),
+                    VolumeAdjustments::new([0; 10]),
+                ],
+            ),
             age_range: Default::default(),
             hear_id: Some(CustomHearId {
                 is_enabled: Default::default(),
@@ -306,8 +309,8 @@ mod tests {
             },
             structures::{
                 AmbientSoundMode, BatteryLevel, CustomNoiseCanceling, EqualizerConfiguration,
-                FirmwareVersion, HostDevice, IsBatteryCharging, PresetEqualizerProfile,
-                SingleBattery, TwsStatus,
+                FirmwareVersion, HostDevice, IsBatteryCharging, SingleBattery, TwsStatus,
+                VolumeAdjustments,
             },
         },
     };
@@ -364,9 +367,13 @@ mod tests {
             packet.dual_firmware_version.left().unwrap()
         );
         assert_eq!(
-            EqualizerConfiguration::new_from_preset_profile(
-                PresetEqualizerProfile::SoundcoreSignature,
-                [vec![0, 0], vec![255 - 120, 255 - 120]] // subtract 120 to convert from byte value to volume adjustment
+            EqualizerConfiguration::new(
+                0x0000,
+                // subtract 120 to convert from byte value to volume adjustment
+                [
+                    VolumeAdjustments::new([0; 10]),
+                    VolumeAdjustments::new([255 - 120; 10]),
+                ]
             ),
             packet.equalizer_configuration
         );

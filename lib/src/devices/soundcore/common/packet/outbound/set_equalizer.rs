@@ -25,7 +25,7 @@ impl<const C: usize, const B: usize> ToPacket for SetEqualizer<'_, C, B> {
 mod tests {
     use crate::devices::soundcore::common::{
         packet::outbound::ToPacket,
-        structures::{EqualizerConfiguration, PresetEqualizerProfile, VolumeAdjustments},
+        structures::{EqualizerConfiguration, VolumeAdjustments},
     };
 
     use super::SetEqualizer;
@@ -37,9 +37,10 @@ mod tests {
             0xa0, 0x8e, 0xb4, 0x74, 0x88, 0xe6,
         ];
         let actual = SetEqualizer {
-            equalizer_configuration: &EqualizerConfiguration::new_custom_profile([
-                VolumeAdjustments::new([-60, 60, 23, 40, 22, 60, -4, 16]),
-            ]),
+            equalizer_configuration: &EqualizerConfiguration::new(
+                0xfefe,
+                [VolumeAdjustments::new([-60, 60, 23, 40, 22, 60, -4, 16])],
+            ),
         }
         .to_packet()
         .bytes();
@@ -53,9 +54,9 @@ mod tests {
             0x78, 0x78, 0x78, 0x78, 0x78, 0x4d,
         ];
         let actual = SetEqualizer {
-            equalizer_configuration: &EqualizerConfiguration::<1, 8>::new_from_preset_profile(
-                PresetEqualizerProfile::SoundcoreSignature,
-                [Vec::new()],
+            equalizer_configuration: &EqualizerConfiguration::<1, 8>::new(
+                0x0000,
+                [VolumeAdjustments::default()],
             ),
         }
         .to_packet()
@@ -70,9 +71,9 @@ mod tests {
             0x64, 0x5a, 0x50, 0x50, 0x3c, 0xa4,
         ];
         let actual = SetEqualizer {
-            equalizer_configuration: &EqualizerConfiguration::<1, 8>::new_from_preset_profile(
-                PresetEqualizerProfile::TrebleReducer,
-                [Vec::new()],
+            equalizer_configuration: &EqualizerConfiguration::<1, 8>::new(
+                0x15,
+                [VolumeAdjustments::new([0, 0, 0, -20, -30, -40, -40, -60])],
             ),
         }
         .to_packet()
@@ -87,9 +88,12 @@ mod tests {
             0x64, 0x5a, 0x50, 0x50, 0x3c, 0x78, 0x78, 0x78, 0x64, 0x5a, 0x50, 0x50, 0x3c, 0xae,
         ];
         let packet = SetEqualizer {
-            equalizer_configuration: &EqualizerConfiguration::<2, 8>::new_from_preset_profile(
-                PresetEqualizerProfile::TrebleReducer,
-                [Vec::new(), Vec::new()],
+            equalizer_configuration: &EqualizerConfiguration::<2, 8>::new(
+                0x15,
+                [
+                    VolumeAdjustments::new([0, 0, 0, -20, -30, -40, -40, -60]),
+                    VolumeAdjustments::new([0, 0, 0, -20, -30, -40, -40, -60]),
+                ],
             ),
         };
         assert_eq!(EXPECTED, packet.to_packet().bytes());

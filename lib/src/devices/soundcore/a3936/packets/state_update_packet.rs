@@ -60,10 +60,13 @@ impl Default for A3936StateUpdatePacket {
             battery: Default::default(),
             dual_firmware_version: Default::default(),
             serial_number: Default::default(),
-            equalizer_configuration: EqualizerConfiguration::new_custom_profile([
-                VolumeAdjustments::new([0; 10]),
-                VolumeAdjustments::new([0; 10]),
-            ]),
+            equalizer_configuration: EqualizerConfiguration::new(
+                0xfefe,
+                [
+                    VolumeAdjustments::new([0; 10]),
+                    VolumeAdjustments::new([0; 10]),
+                ],
+            ),
             age_range: Default::default(),
             custom_hear_id: CustomHearId {
                 is_enabled: Default::default(),

@@ -22,7 +22,7 @@ pub fn set_equalizer_configuration<const CHANNELS: usize, const BANDS: usize>(
         equalizer_configuration.volume_adjustments()
     };
     let body = equalizer_configuration
-        .profile_id()
+        .preset_id()
         .to_le_bytes()
         .into_iter()
         .chain([hear_id.music_type.0, 0])
@@ -64,10 +64,13 @@ mod tests {
     #[test]
     fn matches_known_good_packet() {
         let packet = set_equalizer_configuration(
-            &EqualizerConfiguration::new_custom_profile([
-                VolumeAdjustments::new([60, 0, 0, 0, 0, 0, 0, -60, 0, 0]),
-                VolumeAdjustments::new([60, 0, 0, 0, 0, 0, 0, -60, 0, 0]),
-            ]),
+            &EqualizerConfiguration::new(
+                0xfefe,
+                [
+                    VolumeAdjustments::new([60, 0, 0, 0, 0, 0, 0, -60, 0, 0]),
+                    VolumeAdjustments::new([60, 0, 0, 0, 0, 0, 0, -60, 0, 0]),
+                ],
+            ),
             &a3947::structures::HearId {
                 is_enabled: false,
                 volume_adjustments: [
