@@ -131,6 +131,7 @@ pub enum SettingId {
     TouchLock,
     LowBatteryPrompt,
     WearingDetection,
+    Volume,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

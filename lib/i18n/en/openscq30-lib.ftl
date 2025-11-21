@@ -6,6 +6,7 @@ soundcore-a3030 = Soundcore Life Tune Pro
 soundcore-a3031 = Soundcore Vortex
 soundcore-a3033 = Soundcore Life 2 Neo
 soundcore-a3040 = Soundcore Space Q45
+soundcore-a3116 = Soundcore Motion+
 soundcore-a3926 = Soundcore Life Dot 2S
 soundcore-a3930 = Soundcore Liberty 2 Pro
 soundcore-a3931 = Soundcore Life Dot 2 NC
@@ -38,6 +39,8 @@ import-custom-equalizer-profiles = Import Custom Profiles
 import-custom-equalizer-profiles-confirm = This will overwrite existing profiles that share the same names.
 export-custom-equalizer-profiles = Export Custom Profiles
 export-custom-equalizer-profiles-output = Export Custom Profiles Output
+
+volume = Volume
 
 noise-canceling = Noise Canceling
 transparency = Transparency
@@ -95,6 +98,12 @@ small-speakers = Small Speakers
 spoken-word = Spoken Word
 treble-booster = Treble Booster
 treble-reducer = Treble Reducer
+bass-up = Bass Up
+bass-off = Bass Off
+voice = Voice
+heavy = Heavy
+classic = Classic
+original = Original
 
 button-configuration = Button Configuration
 reset-buttons-to-default = Reset Buttons to Default
@@ -114,7 +123,6 @@ previous-song = Previous Song
 next-song = Next Song
 voice-assistant = Voice Assistant
 play-pause = Play Pause
-bass-up = Bass Up
 normal-mode-in-cycle = Normal Mode in Cycle
 transparency-mode-in-cycle = Transparency Mode in Cycle
 noise-canceling-mode-in-cycle = Noise Canceling Mode in Cycle
