@@ -1,10 +1,10 @@
 use std::{
     collections::{HashMap, HashSet},
+    panic::Location,
     sync::Mutex,
 };
 
 use macaddr::MacAddr6;
-use nom_language::error::VerboseError;
 use openscq30_i18n::Translate;
 use tokio::sync::{mpsc, watch};
 use uuid::Uuid;
@@ -76,13 +76,25 @@ impl DemoConnection {
 
 impl RfcommConnection for DemoConnection {
     async fn write(&self, data: &[u8]) -> connection::Result<()> {
+        if data.len() < 7 {
+            tracing::error!("packet should always contain direction and command: {data:?}");
+            return Err(connection::Error::WriteError {
+                source: None,
+                location: Location::caller(),
+            });
+        }
         tracing::debug!("writing packet {data:?}");
-        let (_remainder, packet) = packet::Outbound::take::<VerboseError<_>>(data).unwrap();
-        if let Some(response) = self.packet_responses.get(&packet.command) {
+        // The packet may or may not have a checksum at the end, so rather than actually parsing it,
+        // just look at the command
+        let command = packet::Command([data[5], data[6]]);
+        if let Some(response) = self.packet_responses.get(&command) {
             self.packet_sender.send(response.to_owned()).await.unwrap();
         } else {
             // ACK
-            self.packet_sender.send(packet.ack().bytes()).await.unwrap();
+            self.packet_sender
+                .send(command.ack::<packet::InboundMarker>().bytes())
+                .await
+                .unwrap();
         }
         Ok(())
     }

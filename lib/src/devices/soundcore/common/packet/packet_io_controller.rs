@@ -1,4 +1,10 @@
-use std::{sync::Arc, time::Duration};
+use std::{
+    sync::{
+        Arc,
+        atomic::{self, AtomicBool},
+    },
+    time::Duration,
+};
 
 use nom_language::error::VerboseError;
 use tokio::{
@@ -21,6 +27,7 @@ pub struct PacketIOController<ConnectionType>
 where
     ConnectionType: RfcommConnection,
 {
+    pub uses_checksum: Arc<AtomicBool>,
     connection: Arc<ConnectionType>,
     packet_queues: Arc<MultiQueue<Command, packet::Inbound>>,
     handle: JoinHandle<()>,
@@ -41,10 +48,16 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
     ) -> device::Result<(Self, mpsc::Receiver<packet::Inbound>)> {
         let packet_queues = Arc::new(MultiQueue::new());
         let incoming_receiver = connection.read_channel();
-        let (handle, outgoing_receiver) =
-            Self::spawn_packet_handler(packet_queues.clone(), incoming_receiver);
+
+        let uses_checksum = Arc::new(AtomicBool::new(true));
+        let (handle, outgoing_receiver) = Self::spawn_packet_handler(
+            uses_checksum.clone(),
+            packet_queues.clone(),
+            incoming_receiver,
+        );
         Ok((
             Self {
+                uses_checksum,
                 connection,
                 packet_queues,
                 handle,
@@ -54,6 +67,7 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
     }
 
     fn spawn_packet_handler(
+        uses_checksum: Arc<AtomicBool>,
         packet_queues: Arc<MultiQueue<Command, packet::Inbound>>,
         mut incoming_receiver: mpsc::Receiver<Vec<u8>>,
     ) -> (JoinHandle<()>, mpsc::Receiver<packet::Inbound>) {
@@ -64,8 +78,13 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
                 buffer.extend_from_slice(&bytes);
                 let mut start_index = 0;
                 while start_index < buffer.len() {
+                    let parser = if uses_checksum.load(atomic::Ordering::Relaxed) {
+                        packet::Inbound::take::<VerboseError<_>>
+                    } else {
+                        packet::Inbound::take_without_checksum::<VerboseError<_>>
+                    };
                     let (remainder, packet) =
-                        match packet::Inbound::take::<VerboseError<_>>(&buffer[start_index..]) {
+                        match parser(&buffer[start_index..]) {
                             Ok(parsed) => parsed,
                             Err(nom::Err::Incomplete(_)) => break,
                             Err(err) => {
@@ -113,7 +132,14 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
 
         // retry
         for i in 1..=3 {
-            self.connection.write(&packet.bytes()).await?;
+            self.connection
+                .write(&if self.uses_checksum.load(atomic::Ordering::Relaxed) {
+                    packet.bytes()
+                } else {
+                    packet.bytes_without_checksum()
+                })
+                .await?;
+
             if tokio::time::timeout(Duration::from_millis(500 * i), handle.wait_for_end())
                 .await
                 .is_ok()

@@ -93,6 +93,25 @@ impl<D: HasDirection> Packet<D> {
         Ok((input, Self::new(command, body.to_vec())))
     }
 
+    /// This makes use of nom's streaming parsers, so Err::Incomplete will be returned if the packet
+    /// is not done being read yet.
+    pub fn take_without_checksum<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        full_input: &'a [u8],
+    ) -> IResult<&'a [u8], Self, E> {
+        let (input, (_direction, command, length)) = context(
+            "header",
+            (
+                D::DIRECTION.take(),
+                Command::take,
+                context("packet length", le_u16),
+            ),
+        )
+        .parse(full_input)?;
+        let body_length = length.saturating_sub(10); // 5 byte direction, 2 byte command, 2 byte length, 1 byte checksum
+        let (input, body) = context("body", take(body_length)).parse(input)?;
+        Ok((input, Self::new(command, body.to_vec())))
+    }
+
     pub fn bytes(&self) -> Vec<u8> {
         const PACKET_SIZE_LENGTH: usize = 2;
         const CHECKSUM_LENGTH: usize = 1;
@@ -117,6 +136,24 @@ impl<D: HasDirection> Packet<D> {
         bytes
     }
 
+    pub fn bytes_without_checksum(&self) -> Vec<u8> {
+        const PACKET_SIZE_LENGTH: usize = 2;
+
+        let direction_indicator = D::DIRECTION.bytes();
+        let command = self.command.0;
+
+        let length =
+            direction_indicator.len() + command.len() + PACKET_SIZE_LENGTH + self.body.len();
+
+        direction_indicator
+            .into_iter()
+            .chain(command)
+            .chain((length as u16).to_le_bytes())
+            .chain(self.body.iter().copied())
+            .collect::<Vec<_>>()
+    }
+
+    #[cfg(test)]
     pub fn ack(&self) -> Packet<D::ReverseDirection> {
         Packet::new(self.command, Vec::new())
     }
@@ -160,7 +197,6 @@ impl Command {
         context("command", map((le_u8, le_u8), |bytes| Self(bytes.into()))).parse(input)
     }
 
-    #[cfg(test)]
     pub fn ack<D: HasDirection>(self) -> Packet<D> {
         Packet::<D>::new(self, Vec::new())
     }
