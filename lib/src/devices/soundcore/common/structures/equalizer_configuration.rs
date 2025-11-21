@@ -9,16 +9,32 @@ use nom::{
     sequence::pair,
 };
 
-use super::{VolumeAdjustments, preset_equalizer_profile::PresetEqualizerProfile};
+use super::{CustomVolumeAdjustments, preset_equalizer_profile::PresetEqualizerProfile};
+
+pub type EqualizerConfiguration<const CHANNELS: usize, const BANDS: usize> =
+    CustomEqualizerConfiguration<CHANNELS, BANDS, -120, { (u8::MAX - 121) as i16 }, 1>;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct EqualizerConfiguration<const CHANNELS: usize, const BANDS: usize> {
+pub struct CustomEqualizerConfiguration<
+    const CHANNELS: usize,
+    const BANDS: usize,
+    const MIN_VOLUME: i16,
+    const MAX_VOLUME: i16,
+    const FRACTION_DIGITS: u8,
+> {
     preset_profile: Option<PresetEqualizerProfile>,
-    volume_adjustments: [VolumeAdjustments<BANDS>; CHANNELS],
+    volume_adjustments:
+        [CustomVolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>; CHANNELS],
 }
 
-impl<const CHANNELS: usize, const BANDS: usize> Default
-    for EqualizerConfiguration<CHANNELS, BANDS>
+impl<
+    const CHANNELS: usize,
+    const BANDS: usize,
+    const MIN_VOLUME: i16,
+    const MAX_VOLUME: i16,
+    const FRACTION_DIGITS: u8,
+> Default
+    for CustomEqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
 {
     fn default() -> Self {
         Self::new_from_preset_profile(
@@ -28,7 +44,14 @@ impl<const CHANNELS: usize, const BANDS: usize> Default
     }
 }
 
-impl<const CHANNELS: usize, const BANDS: usize> EqualizerConfiguration<CHANNELS, BANDS> {
+impl<
+    const CHANNELS: usize,
+    const BANDS: usize,
+    const MIN_VOLUME: i16,
+    const MAX_VOLUME: i16,
+    const FRACTION_DIGITS: u8,
+> CustomEqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
+{
     pub const CUSTOM_PROFILE_ID: u16 = 0xfefe;
 
     pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
@@ -37,12 +60,22 @@ impl<const CHANNELS: usize, const BANDS: usize> EqualizerConfiguration<CHANNELS,
         context(
             "equalizer configuration",
             map(
-                pair(le_u16, count(VolumeAdjustments::<BANDS>::take, CHANNELS)),
+                pair(
+                    le_u16,
+                    count(
+                        CustomVolumeAdjustments::<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>::take,
+                        CHANNELS,
+                    ),
+                ),
                 |(profile_id, volume_adjustments)| {
-                    let volume_adjustments: [VolumeAdjustments<BANDS>; CHANNELS] =
-                        volume_adjustments
-                            .try_into()
-                            .expect("count vec is guaranteed to be the specified length");
+                    let volume_adjustments: [CustomVolumeAdjustments<
+                        BANDS,
+                        MIN_VOLUME,
+                        MAX_VOLUME,
+                        FRACTION_DIGITS,
+                    >; CHANNELS] = volume_adjustments
+                        .try_into()
+                        .expect("count vec is guaranteed to be the specified length");
 
                     match PresetEqualizerProfile::from_id(profile_id) {
                         Some(preset) => Self::new_from_preset_profile(
@@ -80,7 +113,7 @@ impl<const CHANNELS: usize, const BANDS: usize> EqualizerConfiguration<CHANNELS,
                     BANDS,
                     "incorrect number of extra bands",
                 );
-                VolumeAdjustments::new(array::from_fn(|i| {
+                CustomVolumeAdjustments::new(array::from_fn(|i| {
                     if i < preset_adjustments.adjustments().len() {
                         preset_adjustments.adjustments()[i]
                     } else {
@@ -91,7 +124,10 @@ impl<const CHANNELS: usize, const BANDS: usize> EqualizerConfiguration<CHANNELS,
         }
     }
 
-    pub fn new_custom_profile(volume_adjustments: [VolumeAdjustments<BANDS>; CHANNELS]) -> Self {
+    pub fn new_custom_profile(
+        volume_adjustments: [CustomVolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>;
+            CHANNELS],
+    ) -> Self {
         Self {
             preset_profile: None,
             volume_adjustments,
@@ -109,11 +145,15 @@ impl<const CHANNELS: usize, const BANDS: usize> EqualizerConfiguration<CHANNELS,
         self.preset_profile
     }
 
-    pub fn volume_adjustments_channel_1(&self) -> &VolumeAdjustments<BANDS> {
+    pub fn volume_adjustments_channel_1(
+        &self,
+    ) -> &CustomVolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS> {
         &self.volume_adjustments[0]
     }
 
-    pub fn volume_adjustments(&self) -> &[VolumeAdjustments<BANDS>; CHANNELS] {
+    pub fn volume_adjustments(
+        &self,
+    ) -> &[CustomVolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>; CHANNELS] {
         &self.volume_adjustments
     }
 

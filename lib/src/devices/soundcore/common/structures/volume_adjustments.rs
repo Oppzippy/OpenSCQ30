@@ -6,23 +6,37 @@ use nom::{
 };
 use std::array;
 
+pub type VolumeAdjustments<const BANDS: usize> =
+    CustomVolumeAdjustments<BANDS, -120, { (u8::MAX - 121) as i16 }, 1>;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct VolumeAdjustments<const BANDS: usize> {
+pub struct CustomVolumeAdjustments<
+    const BANDS: usize,
+    const MIN_VOLUME: i16,
+    const MAX_VOLUME: i16,
+    const FRACTION_DIGITS: u8,
+> {
     inner: [i16; BANDS],
 }
 
-impl<const B: usize> Default for VolumeAdjustments<B> {
+impl<const B: usize, const MIN_VOLUME: i16, const MAX_VOLUME: i16, const FRACTION_DIGITS: u8>
+    Default for CustomVolumeAdjustments<B, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
+{
     fn default() -> Self {
         Self { inner: [0; B] }
     }
 }
 
-const FRACTION_DIGITS: u8 = 1;
-const MIN_VOLUME: i16 = -120;
-const MAX_VOLUME: i16 = (u8::MAX - 121) as i16;
-
-impl<const B: usize> VolumeAdjustments<B> {
+impl<const B: usize, const MIN_VOLUME: i16, const MAX_VOLUME: i16, const FRACTION_DIGITS: u8>
+    CustomVolumeAdjustments<B, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
+{
     pub fn new(volume_adjustments: [i16; B]) -> Self {
+        const {
+            assert!(
+                MIN_VOLUME < MAX_VOLUME,
+                "min volume must be less than max volume"
+            );
+        }
         let clamped = volume_adjustments.map(|vol| vol.clamp(MIN_VOLUME, MAX_VOLUME));
         Self { inner: clamped }
     }
@@ -211,6 +225,8 @@ mod tests {
     use super::*;
     const TEST_BYTES: [u8; 8] = [0, 80, 100, 120, 140, 160, 180, 240];
     const TEST_ADJUSTMENTS: [i16; 8] = [-120, -40, -20, 0, 20, 40, 60, 120];
+    const MIN_VOLUME: i16 = -120;
+    const MAX_VOLUME: i16 = (u8::MAX - 121) as i16;
 
     #[test]
     fn converts_volume_adjustments_to_packet_bytes() {
