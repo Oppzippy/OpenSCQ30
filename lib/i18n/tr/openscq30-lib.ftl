@@ -151,3 +151,6 @@ talk-mode = Konuşma Modu
 auto-play-pause = Otomatik Çalma/Duraklatma
 surround-sound = Çevresel Ses
 wearing-detection = Giyilme Algılama
+single-press = Tek Basış
+double-press = Çift Basış
+bass-up = BaseUp
