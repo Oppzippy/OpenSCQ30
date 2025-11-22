@@ -3,7 +3,7 @@ use openscq30_lib_macros::Has;
 use crate::devices::soundcore::common::{
     packet::inbound::SerialNumberAndFirmwareVersion,
     structures::{
-        AutoPowerOff, DualBattery, DualFirmwareVersion, EqualizerConfiguration, SerialNumber,
+        AutoPowerOff, CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion, SerialNumber,
         SoundModes, TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
     },
 };
@@ -14,7 +14,7 @@ use super::packets::A3031StateUpdatePacket;
 pub struct A3031State {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
-    pub equalizer_configuration: EqualizerConfiguration<2, 8>,
+    pub equalizer_configuration: CommonEqualizerConfiguration<2, 8>,
     pub button_configuration: ButtonStatusCollection<6>,
     pub sound_modes: SoundModes,
     pub serial_number: SerialNumber,

@@ -73,7 +73,7 @@ mod tests {
             soundcore::common::{
                 device::test_utils::TestSoundcoreDevice,
                 packet::{self, outbound::ToPacket},
-                structures::{EqualizerConfiguration, VolumeAdjustments},
+                structures::{CommonEqualizerConfiguration, CommonVolumeAdjustments},
             },
         },
     };
@@ -137,11 +137,15 @@ mod tests {
                 )],
                 vec![
                     packet::outbound::SetEqualizer {
-                        equalizer_configuration: &EqualizerConfiguration::<2, 10>::new(
+                        equalizer_configuration: &CommonEqualizerConfiguration::<2, 10>::new(
                             0x0015,
                             [
-                                VolumeAdjustments::new([0, 0, 0, -20, -30, -40, -40, -60, 1, 2]),
-                                VolumeAdjustments::new([0, 0, 0, -20, -30, -40, -40, -60, 3, 4]),
+                                CommonVolumeAdjustments::new([
+                                    0, 0, 0, -20, -30, -40, -40, -60, 1, 2,
+                                ]),
+                                CommonVolumeAdjustments::new([
+                                    0, 0, 0, -20, -30, -40, -40, -60, 3, 4,
+                                ]),
                             ],
                         ),
                     }

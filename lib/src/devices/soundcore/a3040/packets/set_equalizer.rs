@@ -2,7 +2,7 @@ use std::iter;
 
 use crate::devices::soundcore::common::{
     packet,
-    structures::{CustomHearId, EqualizerConfiguration},
+    structures::{CommonEqualizerConfiguration, CustomHearId},
 };
 
 pub fn set_equalizer<
@@ -11,7 +11,7 @@ pub fn set_equalizer<
     const HEAR_ID_CHANNELS: usize,
     const HEAR_ID_BANDS: usize,
 >(
-    equalizer_configuration: &EqualizerConfiguration<CHANNELS, BANDS>,
+    equalizer_configuration: &CommonEqualizerConfiguration<CHANNELS, BANDS>,
     hear_id: &CustomHearId<HEAR_ID_CHANNELS, HEAR_ID_BANDS>,
 ) -> packet::Outbound {
     let body = equalizer_configuration

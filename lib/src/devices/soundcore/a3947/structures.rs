@@ -13,7 +13,7 @@ use strum::{EnumIter, EnumString, FromRepr, IntoStaticStr};
 use crate::devices::soundcore::common::{
     packet::parsing::take_bool,
     structures::{
-        AmbientSoundMode, HearIdMusicType, HearIdType, TransparencyMode, VolumeAdjustments,
+        AmbientSoundMode, CommonVolumeAdjustments, HearIdMusicType, HearIdType, TransparencyMode,
     },
 };
 
@@ -265,11 +265,11 @@ impl WindNoise {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct HearId<const C: usize, const B: usize> {
     pub is_enabled: bool,
-    pub volume_adjustments: [VolumeAdjustments<B>; C],
+    pub volume_adjustments: [CommonVolumeAdjustments<B>; C],
     pub time: i32,
     pub hear_id_type: HearIdType,
     pub music_type: HearIdMusicType,
-    pub custom_volume_adjustments: [VolumeAdjustments<B>; C],
+    pub custom_volume_adjustments: [CommonVolumeAdjustments<B>; C],
 }
 
 impl<const C: usize, const B: usize> Default for HearId<C, B> {
@@ -294,10 +294,10 @@ impl<const C: usize, const B: usize> HearId<C, B> {
             map(
                 (
                     take_bool,
-                    count(VolumeAdjustments::take, C),
+                    count(CommonVolumeAdjustments::take, C),
                     le_i32,
                     HearIdType::take,
-                    count(VolumeAdjustments::take, C),
+                    count(CommonVolumeAdjustments::take, C),
                     HearIdMusicType::take,
                     le_u8,
                 ),
@@ -310,10 +310,10 @@ impl<const C: usize, const B: usize> HearId<C, B> {
                     music_type,
                     _unknown,
                 )| {
-                    let volume_adjustments: [VolumeAdjustments<B>; C] = volume_adjustments
+                    let volume_adjustments: [CommonVolumeAdjustments<B>; C] = volume_adjustments
                         .try_into()
                         .expect("count is guaranteed to return a vec with the desired length");
-                    let custom_volume_adjustments: [VolumeAdjustments<B>; C] =
+                    let custom_volume_adjustments: [CommonVolumeAdjustments<B>; C] =
                         custom_volume_adjustments
                             .try_into()
                             .expect("count is guaranteed to return a vec with the desired length");

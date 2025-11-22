@@ -21,7 +21,7 @@ use crate::{
             },
             packet_manager::PacketHandler,
             structures::{
-                CaseBatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration,
+                CaseBatteryLevel, CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion,
                 GamingMode, SerialNumber, TouchTone, TwsStatus, WearingDetection,
                 button_configuration::ButtonStatusCollection,
             },
@@ -37,7 +37,7 @@ pub struct A3945StateUpdatePacket {
     pub battery: DualBattery,
     pub dual_firmware_version: DualFirmwareVersion,
     pub serial_number: SerialNumber,
-    pub equalizer_configuration: EqualizerConfiguration<2, 10>,
+    pub equalizer_configuration: CommonEqualizerConfiguration<2, 10>,
     pub button_configuration: ButtonStatusCollection<6>,
     pub touch_tone: TouchTone,
     pub wearing_detection: WearingDetection,
@@ -80,7 +80,7 @@ impl FromPacketBody for A3945StateUpdatePacket {
                     DualBattery::take,
                     DualFirmwareVersion::take,
                     SerialNumber::take,
-                    EqualizerConfiguration::take,
+                    CommonEqualizerConfiguration::take,
                     ButtonStatusCollection::take(
                         a3945::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
                     ),

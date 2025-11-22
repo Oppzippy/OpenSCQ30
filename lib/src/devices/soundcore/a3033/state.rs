@@ -1,7 +1,7 @@
 use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::common::structures::{
-    EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery, WearingDetection,
+    CommonEqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery, WearingDetection,
 };
 
 use super::packets::A3033StateUpdatePacket;
@@ -9,7 +9,7 @@ use super::packets::A3033StateUpdatePacket;
 #[derive(Debug, Clone, PartialEq, Eq, Has)]
 pub struct A3033State {
     battery: SingleBattery,
-    equalizer_configuration: EqualizerConfiguration<1, 8>,
+    equalizer_configuration: CommonEqualizerConfiguration<1, 8>,
     firmware_version: FirmwareVersion,
     serial_number: SerialNumber,
     wearing_detection: WearingDetection,

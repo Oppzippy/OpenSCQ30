@@ -4,12 +4,12 @@ use crate::devices::soundcore::{
     a3947,
     common::{
         packet::{self, Command},
-        structures::{EqualizerConfiguration, HearIdType},
+        structures::{CommonEqualizerConfiguration, HearIdType},
     },
 };
 
 pub fn set_equalizer_configuration<const CHANNELS: usize, const BANDS: usize>(
-    equalizer_configuration: &EqualizerConfiguration<CHANNELS, BANDS>,
+    equalizer_configuration: &CommonEqualizerConfiguration<CHANNELS, BANDS>,
     hear_id: &a3947::structures::HearId<CHANNELS, BANDS>,
 ) -> packet::Outbound {
     let active_volume_adjustments = if hear_id.is_enabled {
@@ -56,7 +56,7 @@ pub fn set_equalizer_configuration<const CHANNELS: usize, const BANDS: usize>(
 #[cfg(test)]
 mod tests {
     use crate::devices::soundcore::common::structures::{
-        HearIdMusicType, HearIdType, VolumeAdjustments,
+        CommonVolumeAdjustments, HearIdMusicType, HearIdType,
     };
 
     use super::*;
@@ -64,25 +64,33 @@ mod tests {
     #[test]
     fn matches_known_good_packet() {
         let packet = set_equalizer_configuration(
-            &EqualizerConfiguration::new(
+            &CommonEqualizerConfiguration::new(
                 0xfefe,
                 [
-                    VolumeAdjustments::new([60, 0, 0, 0, 0, 0, 0, -60, 0, 0]),
-                    VolumeAdjustments::new([60, 0, 0, 0, 0, 0, 0, -60, 0, 0]),
+                    CommonVolumeAdjustments::new([60, 0, 0, 0, 0, 0, 0, -60, 0, 0]),
+                    CommonVolumeAdjustments::new([60, 0, 0, 0, 0, 0, 0, -60, 0, 0]),
                 ],
             ),
             &a3947::structures::HearId {
                 is_enabled: false,
                 volume_adjustments: [
-                    VolumeAdjustments::from_bytes([112, 117, 140, 148, 150, 142, 134, 131, 60, 60]),
-                    VolumeAdjustments::from_bytes([112, 117, 140, 148, 150, 142, 134, 131, 60, 60]),
+                    CommonVolumeAdjustments::from_bytes([
+                        112, 117, 140, 148, 150, 142, 134, 131, 60, 60,
+                    ]),
+                    CommonVolumeAdjustments::from_bytes([
+                        112, 117, 140, 148, 150, 142, 134, 131, 60, 60,
+                    ]),
                 ],
                 time: i32::from_le_bytes([104, 100, 34, 64]),
                 hear_id_type: HearIdType(2),
                 music_type: HearIdMusicType(6),
                 custom_volume_adjustments: [
-                    VolumeAdjustments::from_bytes([112, 117, 140, 148, 150, 142, 134, 131, 60, 60]),
-                    VolumeAdjustments::from_bytes([112, 117, 140, 148, 150, 142, 134, 131, 60, 60]),
+                    CommonVolumeAdjustments::from_bytes([
+                        112, 117, 140, 148, 150, 142, 134, 131, 60, 60,
+                    ]),
+                    CommonVolumeAdjustments::from_bytes([
+                        112, 117, 140, 148, 150, 142, 134, 131, 60, 60,
+                    ]),
                 ],
             },
         );

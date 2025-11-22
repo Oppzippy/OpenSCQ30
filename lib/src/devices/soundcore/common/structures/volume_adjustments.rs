@@ -6,11 +6,11 @@ use nom::{
 };
 use std::array;
 
-pub type VolumeAdjustments<const BANDS: usize> =
-    CustomVolumeAdjustments<BANDS, -120, { (u8::MAX - 121) as i16 }, 1>;
+pub type CommonVolumeAdjustments<const BANDS: usize> =
+    VolumeAdjustments<BANDS, -120, { (u8::MAX - 121) as i16 }, 1>;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct CustomVolumeAdjustments<
+pub struct VolumeAdjustments<
     const BANDS: usize,
     const MIN_VOLUME: i16,
     const MAX_VOLUME: i16,
@@ -20,7 +20,7 @@ pub struct CustomVolumeAdjustments<
 }
 
 impl<const B: usize, const MIN_VOLUME: i16, const MAX_VOLUME: i16, const FRACTION_DIGITS: u8>
-    Default for CustomVolumeAdjustments<B, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
+    Default for VolumeAdjustments<B, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
 {
     fn default() -> Self {
         Self { inner: [0; B] }
@@ -28,7 +28,7 @@ impl<const B: usize, const MIN_VOLUME: i16, const MAX_VOLUME: i16, const FRACTIO
 }
 
 impl<const B: usize, const MIN_VOLUME: i16, const MAX_VOLUME: i16, const FRACTION_DIGITS: u8>
-    CustomVolumeAdjustments<B, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
+    VolumeAdjustments<B, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
 {
     pub fn new(volume_adjustments: [i16; B]) -> Self {
         const {
@@ -230,19 +230,19 @@ mod tests {
 
     #[test]
     fn converts_volume_adjustments_to_packet_bytes() {
-        let band_adjustments = VolumeAdjustments::new(TEST_ADJUSTMENTS);
+        let band_adjustments = CommonVolumeAdjustments::new(TEST_ADJUSTMENTS);
         assert_eq!(TEST_BYTES, band_adjustments.bytes());
     }
 
     #[test]
     fn from_bytes_converts_packet_bytes_to_adjustment() {
-        let band_adjustments = VolumeAdjustments::from_bytes(TEST_BYTES);
+        let band_adjustments = CommonVolumeAdjustments::from_bytes(TEST_BYTES);
         assert_eq!(TEST_ADJUSTMENTS, band_adjustments.adjustments().as_ref());
     }
 
     #[test]
     fn it_clamps_volume_adjustments_outside_of_expected_range() {
-        let band_adjustments = VolumeAdjustments::new([i16::MIN, i16::MAX, 0, 0, 0, 0, 0, 0]);
+        let band_adjustments = CommonVolumeAdjustments::new([i16::MIN, i16::MAX, 0, 0, 0, 0, 0, 0]);
         assert_eq!(
             [MIN_VOLUME, MAX_VOLUME, 0, 0, 0, 0, 0, 0,],
             band_adjustments.adjustments().as_ref()
@@ -292,17 +292,18 @@ mod tests {
         ];
 
         for example in examples {
-            let actual = VolumeAdjustments::new(example.0).apply_drc();
+            let actual = CommonVolumeAdjustments::new(example.0).apply_drc();
             let expected =
-                VolumeAdjustments::new(example.1.map(|v: f64| (v * 10f64).round() as i16));
+                CommonVolumeAdjustments::new(example.1.map(|v: f64| (v * 10f64).round() as i16));
             assert_eq!(expected, actual);
         }
     }
 
     #[test]
     fn it_does_not_modify_band_9_when_applying_drc() {
-        let volume_adjustments = VolumeAdjustments::new([-60, 60, 23, 120, 22, -120, -4, 16, 50]);
-        let expected = VolumeAdjustments::new(
+        let volume_adjustments =
+            CommonVolumeAdjustments::new([-60, 60, 23, 120, 22, -120, -4, 16, 50]);
+        let expected = CommonVolumeAdjustments::new(
             [
                 -1.1060872, 1.367825, -0.842687, 1.571185, 0.321646, -1.79549, 0.61513, 0.083543,
                 5.0,

@@ -1,10 +1,10 @@
-use crate::devices::soundcore::common::{packet, structures::EqualizerConfiguration};
+use crate::devices::soundcore::common::{packet, structures::CommonEqualizerConfiguration};
 
 use super::outbound_packet::ToPacket;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetEqualizer<'a, const C: usize, const B: usize> {
-    pub equalizer_configuration: &'a EqualizerConfiguration<C, B>,
+    pub equalizer_configuration: &'a CommonEqualizerConfiguration<C, B>,
 }
 
 pub const SET_EQUALIZER_COMMAND: packet::Command = packet::Command([0x02, 0x81]);
@@ -25,7 +25,7 @@ impl<const C: usize, const B: usize> ToPacket for SetEqualizer<'_, C, B> {
 mod tests {
     use crate::devices::soundcore::common::{
         packet::outbound::ToPacket,
-        structures::{EqualizerConfiguration, VolumeAdjustments},
+        structures::{CommonEqualizerConfiguration, CommonVolumeAdjustments},
     };
 
     use super::SetEqualizer;
@@ -37,9 +37,11 @@ mod tests {
             0xa0, 0x8e, 0xb4, 0x74, 0x88, 0xe6,
         ];
         let actual = SetEqualizer {
-            equalizer_configuration: &EqualizerConfiguration::new(
+            equalizer_configuration: &CommonEqualizerConfiguration::new(
                 0xfefe,
-                [VolumeAdjustments::new([-60, 60, 23, 40, 22, 60, -4, 16])],
+                [CommonVolumeAdjustments::new([
+                    -60, 60, 23, 40, 22, 60, -4, 16,
+                ])],
             ),
         }
         .to_packet()
@@ -54,9 +56,9 @@ mod tests {
             0x78, 0x78, 0x78, 0x78, 0x78, 0x4d,
         ];
         let actual = SetEqualizer {
-            equalizer_configuration: &EqualizerConfiguration::<1, 8>::new(
+            equalizer_configuration: &CommonEqualizerConfiguration::<1, 8>::new(
                 0x0000,
-                [VolumeAdjustments::default()],
+                [CommonVolumeAdjustments::default()],
             ),
         }
         .to_packet()
@@ -71,9 +73,11 @@ mod tests {
             0x64, 0x5a, 0x50, 0x50, 0x3c, 0xa4,
         ];
         let actual = SetEqualizer {
-            equalizer_configuration: &EqualizerConfiguration::<1, 8>::new(
+            equalizer_configuration: &CommonEqualizerConfiguration::<1, 8>::new(
                 0x15,
-                [VolumeAdjustments::new([0, 0, 0, -20, -30, -40, -40, -60])],
+                [CommonVolumeAdjustments::new([
+                    0, 0, 0, -20, -30, -40, -40, -60,
+                ])],
             ),
         }
         .to_packet()
@@ -88,11 +92,11 @@ mod tests {
             0x64, 0x5a, 0x50, 0x50, 0x3c, 0x78, 0x78, 0x78, 0x64, 0x5a, 0x50, 0x50, 0x3c, 0xae,
         ];
         let packet = SetEqualizer {
-            equalizer_configuration: &EqualizerConfiguration::<2, 8>::new(
+            equalizer_configuration: &CommonEqualizerConfiguration::<2, 8>::new(
                 0x15,
                 [
-                    VolumeAdjustments::new([0, 0, 0, -20, -30, -40, -40, -60]),
-                    VolumeAdjustments::new([0, 0, 0, -20, -30, -40, -40, -60]),
+                    CommonVolumeAdjustments::new([0, 0, 0, -20, -30, -40, -40, -60]),
+                    CommonVolumeAdjustments::new([0, 0, 0, -20, -30, -40, -40, -60]),
                 ],
             ),
         };

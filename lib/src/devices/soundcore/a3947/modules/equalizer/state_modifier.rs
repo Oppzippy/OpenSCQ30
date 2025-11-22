@@ -11,7 +11,7 @@ use crate::{
         a3947,
         common::{
             packet::PacketIOController, state_modifier::StateModifier,
-            structures::EqualizerConfiguration,
+            structures::CommonEqualizerConfiguration,
         },
     },
 };
@@ -33,7 +33,7 @@ impl<ConnectionType: RfcommConnection, const C: usize, const B: usize>
 impl<ConnectionType, T, const C: usize, const B: usize> StateModifier<T>
     for EqualizerStateModifier<ConnectionType, C, B>
 where
-    T: Has<EqualizerConfiguration<C, B>>
+    T: Has<CommonEqualizerConfiguration<C, B>>
         + Has<a3947::structures::HearId<C, B>>
         + Clone
         + Send
@@ -45,10 +45,11 @@ where
         state_sender: &watch::Sender<T>,
         target_state: &T,
     ) -> device::Result<()> {
-        let target_equalizer_configuration: &EqualizerConfiguration<C, B> = target_state.get();
+        let target_equalizer_configuration: &CommonEqualizerConfiguration<C, B> =
+            target_state.get();
         {
             let state = state_sender.borrow();
-            let equalizer_configuration: &EqualizerConfiguration<C, B> = state.get();
+            let equalizer_configuration: &CommonEqualizerConfiguration<C, B> = state.get();
             if equalizer_configuration == target_equalizer_configuration {
                 return Ok(());
             }

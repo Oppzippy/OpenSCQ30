@@ -5,8 +5,8 @@ use crate::devices::soundcore::{
     common::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         structures::{
-            DualBattery, DualFirmwareVersion, EqualizerConfiguration, SerialNumber, TouchTone,
-            TwsStatus, button_configuration::ButtonStatusCollection,
+            CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion, SerialNumber,
+            TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
         },
     },
 };
@@ -17,7 +17,7 @@ pub struct A3948State {
     battery: DualBattery,
     firmware_version: DualFirmwareVersion,
     serial_number: SerialNumber,
-    equalizer_configuration: EqualizerConfiguration<1, 10>,
+    equalizer_configuration: CommonEqualizerConfiguration<1, 10>,
     button_configuration: ButtonStatusCollection<6>,
     touch_tone: TouchTone,
     button_reset_pending: ResetButtonConfigurationPending,

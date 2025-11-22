@@ -19,7 +19,7 @@ use crate::{
             },
             packet_manager::PacketHandler,
             structures::{
-                EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery,
+                CommonEqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery,
                 WearingDetection,
             },
         },
@@ -30,7 +30,7 @@ use crate::{
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct A3033StateUpdatePacket {
     pub battery: SingleBattery,
-    pub equalizer_configuration: EqualizerConfiguration<1, 8>,
+    pub equalizer_configuration: CommonEqualizerConfiguration<1, 8>,
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
     pub wearing_detection: WearingDetection,
@@ -47,7 +47,7 @@ impl FromPacketBody for A3033StateUpdatePacket {
             all_consuming(map(
                 (
                     SingleBattery::take,
-                    EqualizerConfiguration::take,
+                    CommonEqualizerConfiguration::take,
                     FirmwareVersion::take,
                     SerialNumber::take,
                     WearingDetection::take,

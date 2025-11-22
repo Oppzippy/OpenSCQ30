@@ -9,13 +9,13 @@ use nom::{
     sequence::pair,
 };
 
-use super::CustomVolumeAdjustments;
+use super::VolumeAdjustments;
 
-pub type EqualizerConfiguration<const CHANNELS: usize, const BANDS: usize> =
-    CustomEqualizerConfiguration<CHANNELS, BANDS, -120, { (u8::MAX - 121) as i16 }, 1>;
+pub type CommonEqualizerConfiguration<const CHANNELS: usize, const BANDS: usize> =
+    EqualizerConfiguration<CHANNELS, BANDS, -120, 134, 1>;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct CustomEqualizerConfiguration<
+pub struct EqualizerConfiguration<
     const CHANNELS: usize,
     const BANDS: usize,
     const MIN_VOLUME: i16,
@@ -24,7 +24,7 @@ pub struct CustomEqualizerConfiguration<
 > {
     preset_id: u16,
     volume_adjustments:
-        [CustomVolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>; CHANNELS],
+        [VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>; CHANNELS],
 }
 
 impl<
@@ -33,11 +33,10 @@ impl<
     const MIN_VOLUME: i16,
     const MAX_VOLUME: i16,
     const FRACTION_DIGITS: u8,
-> Default
-    for CustomEqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
+> Default for EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
 {
     fn default() -> Self {
-        Self::new(0, array::from_fn(|_| CustomVolumeAdjustments::default()))
+        Self::new(0, array::from_fn(|_| VolumeAdjustments::default()))
     }
 }
 
@@ -47,7 +46,7 @@ impl<
     const MIN_VOLUME: i16,
     const MAX_VOLUME: i16,
     const FRACTION_DIGITS: u8,
-> CustomEqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
+> EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
 {
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
@@ -58,12 +57,12 @@ impl<
                 pair(
                     le_u16,
                     count(
-                        CustomVolumeAdjustments::<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>::take,
+                        VolumeAdjustments::<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>::take,
                         CHANNELS,
                     ),
                 ),
                 |(profile_id, volume_adjustments)| {
-                    let volume_adjustments: [CustomVolumeAdjustments<
+                    let volume_adjustments: [VolumeAdjustments<
                         BANDS,
                         MIN_VOLUME,
                         MAX_VOLUME,
@@ -72,11 +71,10 @@ impl<
                         .try_into()
                         .expect("count vec is guaranteed to be the specified length");
 
-                        Self::new(
-                            profile_id,
-                            volume_adjustments,
-                        )
-                    }))
+                    Self::new(profile_id, volume_adjustments)
+                },
+            ),
+        )
         .parse_complete(input)
     }
 
@@ -89,7 +87,7 @@ impl<
 
     pub fn new(
         preset_id: u16,
-        volume_adjustments: [CustomVolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>;
+        volume_adjustments: [VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>;
             CHANNELS],
     ) -> Self {
         Self {
@@ -104,13 +102,13 @@ impl<
 
     pub fn volume_adjustments_channel_1(
         &self,
-    ) -> &CustomVolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS> {
+    ) -> &VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS> {
         &self.volume_adjustments[0]
     }
 
     pub fn volume_adjustments(
         &self,
-    ) -> &[CustomVolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>; CHANNELS] {
+    ) -> &[VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>; CHANNELS] {
         &self.volume_adjustments
     }
 

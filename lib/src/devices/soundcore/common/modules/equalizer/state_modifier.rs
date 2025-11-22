@@ -8,7 +8,7 @@ use crate::{
     devices::soundcore::common::{
         packet::{self, PacketIOController, outbound::ToPacket},
         state_modifier::StateModifier,
-        structures::{AgeRange, BasicHearId, CustomHearId, EqualizerConfiguration, Gender},
+        structures::{AgeRange, BasicHearId, CommonEqualizerConfiguration, CustomHearId, Gender},
     },
 };
 
@@ -40,7 +40,7 @@ impl<ConnectionType: RfcommConnection, const CHANNELS: usize, const BANDS: usize
 impl<ConnectionType, T, const CHANNELS: usize, const BANDS: usize> StateModifier<T>
     for EqualizerStateModifier<ConnectionType, CHANNELS, BANDS>
 where
-    T: Has<EqualizerConfiguration<CHANNELS, BANDS>> + Clone + Send + Sync,
+    T: Has<CommonEqualizerConfiguration<CHANNELS, BANDS>> + Clone + Send + Sync,
     ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
@@ -95,7 +95,7 @@ impl<ConnectionType: RfcommConnection, const CHANNELS: usize, const BANDS: usize
 impl<ConnectionType, T, const CHANNELS: usize, const BANDS: usize> StateModifier<T>
     for EqualizerWithBasicHearIdStateModifier<ConnectionType, CHANNELS, BANDS>
 where
-    T: Has<EqualizerConfiguration<CHANNELS, BANDS>>
+    T: Has<CommonEqualizerConfiguration<CHANNELS, BANDS>>
         + Has<BasicHearId<CHANNELS, BANDS>>
         + Has<Gender>
         + Has<AgeRange>
@@ -109,11 +109,12 @@ where
         state_sender: &watch::Sender<T>,
         target_state: &T,
     ) -> device::Result<()> {
-        let target_equalizer_configuration: &EqualizerConfiguration<CHANNELS, BANDS> =
+        let target_equalizer_configuration: &CommonEqualizerConfiguration<CHANNELS, BANDS> =
             target_state.get();
         {
             let state = state_sender.borrow();
-            let equalizer_configuration: &EqualizerConfiguration<CHANNELS, BANDS> = state.get();
+            let equalizer_configuration: &CommonEqualizerConfiguration<CHANNELS, BANDS> =
+                state.get();
             if equalizer_configuration == target_equalizer_configuration {
                 return Ok(());
             }
@@ -174,7 +175,7 @@ impl<ConnectionType: RfcommConnection, const CHANNELS: usize, const BANDS: usize
 impl<ConnectionType, T, const CHANNELS: usize, const BANDS: usize> StateModifier<T>
     for EqualizerWithCustomHearIdStateModifier<ConnectionType, CHANNELS, BANDS>
 where
-    T: Has<EqualizerConfiguration<CHANNELS, BANDS>>
+    T: Has<CommonEqualizerConfiguration<CHANNELS, BANDS>>
         + Has<CustomHearId<CHANNELS, BANDS>>
         + Has<Gender>
         + Has<AgeRange>
@@ -188,11 +189,12 @@ where
         state_sender: &watch::Sender<T>,
         target_state: &T,
     ) -> device::Result<()> {
-        let target_equalizer_configuration: &EqualizerConfiguration<CHANNELS, BANDS> =
+        let target_equalizer_configuration: &CommonEqualizerConfiguration<CHANNELS, BANDS> =
             target_state.get();
         {
             let state = state_sender.borrow();
-            let equalizer_configuration: &EqualizerConfiguration<CHANNELS, BANDS> = state.get();
+            let equalizer_configuration: &CommonEqualizerConfiguration<CHANNELS, BANDS> =
+                state.get();
             if equalizer_configuration == target_equalizer_configuration {
                 return Ok(());
             }

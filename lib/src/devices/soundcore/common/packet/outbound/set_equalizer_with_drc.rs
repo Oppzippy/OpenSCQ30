@@ -1,10 +1,10 @@
-use crate::devices::soundcore::common::{packet, structures::EqualizerConfiguration};
+use crate::devices::soundcore::common::{packet, structures::CommonEqualizerConfiguration};
 
 use super::outbound_packet::ToPacket;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetEqualizerWithDrc<'a, const C: usize, const B: usize> {
-    pub equalizer_configuration: &'a EqualizerConfiguration<C, B>,
+    pub equalizer_configuration: &'a CommonEqualizerConfiguration<C, B>,
 }
 
 impl<const C: usize, const B: usize> ToPacket for SetEqualizerWithDrc<'_, C, B> {
@@ -31,7 +31,7 @@ impl<const C: usize, const B: usize> ToPacket for SetEqualizerWithDrc<'_, C, B> 
 mod tests {
     use crate::devices::soundcore::common::{
         packet::outbound::{SetEqualizerWithDrc, ToPacket},
-        structures::{EqualizerConfiguration, VolumeAdjustments},
+        structures::{CommonEqualizerConfiguration, CommonVolumeAdjustments},
     };
 
     #[test]
@@ -42,9 +42,11 @@ mod tests {
         ];
 
         let actual = SetEqualizerWithDrc {
-            equalizer_configuration: &EqualizerConfiguration::new(
+            equalizer_configuration: &CommonEqualizerConfiguration::new(
                 0xfefe,
-                [VolumeAdjustments::new([-60, 60, 23, 120, 22, -120, -4, 16])],
+                [CommonVolumeAdjustments::new([
+                    -60, 60, 23, 120, 22, -120, -4, 16,
+                ])],
             ),
         }
         .to_packet()

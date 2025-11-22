@@ -23,9 +23,9 @@ use crate::{
             },
             packet_manager::PacketHandler,
             structures::{
-                AgeRange, AmbientSoundModeCycle, CaseBatteryLevel, CustomHearId, DualBattery,
-                DualFirmwareVersion, EqualizerConfiguration, GamingMode, SerialNumber, SoundModes,
-                TouchTone, TwsStatus, VolumeAdjustments, WearingDetection,
+                AgeRange, AmbientSoundModeCycle, CaseBatteryLevel, CommonEqualizerConfiguration,
+                CommonVolumeAdjustments, CustomHearId, DualBattery, DualFirmwareVersion,
+                GamingMode, SerialNumber, SoundModes, TouchTone, TwsStatus, WearingDetection,
                 button_configuration::ButtonStatusCollection,
             },
         },
@@ -40,7 +40,7 @@ pub struct A3933StateUpdatePacket {
     pub battery: DualBattery,
     pub dual_firmware_version: DualFirmwareVersion,
     pub serial_number: SerialNumber,
-    pub equalizer_configuration: EqualizerConfiguration<2, 10>,
+    pub equalizer_configuration: CommonEqualizerConfiguration<2, 10>,
     pub age_range: AgeRange,
     pub hear_id: Option<CustomHearId<2, 10>>,
     pub button_configuration: ButtonStatusCollection<6>,
@@ -61,26 +61,26 @@ impl Default for A3933StateUpdatePacket {
             battery: Default::default(),
             dual_firmware_version: Default::default(),
             serial_number: Default::default(),
-            equalizer_configuration: EqualizerConfiguration::new(
+            equalizer_configuration: CommonEqualizerConfiguration::new(
                 0xfefe,
                 [
-                    VolumeAdjustments::new([0; 10]),
-                    VolumeAdjustments::new([0; 10]),
+                    CommonVolumeAdjustments::new([0; 10]),
+                    CommonVolumeAdjustments::new([0; 10]),
                 ],
             ),
             age_range: Default::default(),
             hear_id: Some(CustomHearId {
                 is_enabled: Default::default(),
                 volume_adjustments: [
-                    VolumeAdjustments::new([0; 10]),
-                    VolumeAdjustments::new([0; 10]),
+                    CommonVolumeAdjustments::new([0; 10]),
+                    CommonVolumeAdjustments::new([0; 10]),
                 ],
                 time: Default::default(),
                 hear_id_type: Default::default(),
                 hear_id_music_type: Default::default(),
                 custom_volume_adjustments: Some([
-                    VolumeAdjustments::new([0; 10]),
-                    VolumeAdjustments::new([0; 10]),
+                    CommonVolumeAdjustments::new([0; 10]),
+                    CommonVolumeAdjustments::new([0; 10]),
                 ]),
                 hear_id_preset_profile_id: Default::default(),
             }),
@@ -121,7 +121,7 @@ impl FromPacketBody for A3933StateUpdatePacket {
                     DualBattery::take,
                     DualFirmwareVersion::take,
                     SerialNumber::take,
-                    EqualizerConfiguration::take,
+                    CommonEqualizerConfiguration::take,
                     AgeRange::take,
                 )
                     .parse_complete(input)?;
@@ -308,9 +308,9 @@ mod tests {
                 outbound::ToPacket,
             },
             structures::{
-                AmbientSoundMode, BatteryLevel, CustomNoiseCanceling, EqualizerConfiguration,
-                FirmwareVersion, HostDevice, IsBatteryCharging, SingleBattery, TwsStatus,
-                VolumeAdjustments,
+                AmbientSoundMode, BatteryLevel, CommonEqualizerConfiguration,
+                CommonVolumeAdjustments, CustomNoiseCanceling, FirmwareVersion, HostDevice,
+                IsBatteryCharging, SingleBattery, TwsStatus,
             },
         },
     };
@@ -367,12 +367,12 @@ mod tests {
             packet.dual_firmware_version.left().unwrap()
         );
         assert_eq!(
-            EqualizerConfiguration::new(
+            CommonEqualizerConfiguration::new(
                 0x0000,
                 // subtract 120 to convert from byte value to volume adjustment
                 [
-                    VolumeAdjustments::new([0; 10]),
-                    VolumeAdjustments::new([255 - 120; 10]),
+                    CommonVolumeAdjustments::new([0; 10]),
+                    CommonVolumeAdjustments::new([255 - 120; 10]),
                 ]
             ),
             packet.equalizer_configuration

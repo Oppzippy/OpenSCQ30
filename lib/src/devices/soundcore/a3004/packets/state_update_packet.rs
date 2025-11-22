@@ -19,7 +19,8 @@ use crate::{
             },
             packet_manager::PacketHandler,
             structures::{
-                EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery, SoundModes,
+                CommonEqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery,
+                SoundModes,
             },
         },
     },
@@ -28,7 +29,7 @@ use crate::{
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct A3004StateUpdatePacket {
     pub battery: SingleBattery,
-    pub equalizer_configuration: EqualizerConfiguration<1, 10>,
+    pub equalizer_configuration: CommonEqualizerConfiguration<1, 10>,
     pub sound_modes: SoundModes,
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
@@ -47,7 +48,7 @@ impl FromPacketBody for A3004StateUpdatePacket {
                     SingleBattery::take,
                     FirmwareVersion::take,
                     SerialNumber::take,
-                    EqualizerConfiguration::take,
+                    CommonEqualizerConfiguration::take,
                     SoundModes::take,
                 ),
                 |(

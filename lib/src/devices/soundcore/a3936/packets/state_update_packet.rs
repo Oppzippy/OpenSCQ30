@@ -22,9 +22,9 @@ use crate::{
             },
             packet_manager::PacketHandler,
             structures::{
-                AgeRange, AmbientSoundModeCycle, AutoPowerOff, CaseBatteryLevel, CustomHearId,
-                DualBattery, DualFirmwareVersion, EqualizerConfiguration, GamingMode, SerialNumber,
-                TouchTone, TwsStatus, VolumeAdjustments,
+                AgeRange, AmbientSoundModeCycle, AutoPowerOff, CaseBatteryLevel,
+                CommonEqualizerConfiguration, CommonVolumeAdjustments, CustomHearId, DualBattery,
+                DualFirmwareVersion, GamingMode, SerialNumber, TouchTone, TwsStatus,
                 button_configuration::ButtonStatusCollection,
             },
         },
@@ -38,7 +38,7 @@ pub struct A3936StateUpdatePacket {
     pub battery: DualBattery,
     pub dual_firmware_version: DualFirmwareVersion,
     pub serial_number: SerialNumber,
-    pub equalizer_configuration: EqualizerConfiguration<2, 10>,
+    pub equalizer_configuration: CommonEqualizerConfiguration<2, 10>,
     pub age_range: AgeRange,
     pub custom_hear_id: CustomHearId<2, 10>,
     pub sound_modes: A3936SoundModes,
@@ -60,26 +60,26 @@ impl Default for A3936StateUpdatePacket {
             battery: Default::default(),
             dual_firmware_version: Default::default(),
             serial_number: Default::default(),
-            equalizer_configuration: EqualizerConfiguration::new(
+            equalizer_configuration: CommonEqualizerConfiguration::new(
                 0xfefe,
                 [
-                    VolumeAdjustments::new([0; 10]),
-                    VolumeAdjustments::new([0; 10]),
+                    CommonVolumeAdjustments::new([0; 10]),
+                    CommonVolumeAdjustments::new([0; 10]),
                 ],
             ),
             age_range: Default::default(),
             custom_hear_id: CustomHearId {
                 is_enabled: Default::default(),
                 volume_adjustments: [
-                    VolumeAdjustments::new([0; 10]),
-                    VolumeAdjustments::new([0; 10]),
+                    CommonVolumeAdjustments::new([0; 10]),
+                    CommonVolumeAdjustments::new([0; 10]),
                 ],
                 time: Default::default(),
                 hear_id_type: Default::default(),
                 hear_id_music_type: Default::default(),
                 custom_volume_adjustments: Some([
-                    VolumeAdjustments::new([0; 10]),
-                    VolumeAdjustments::new([0; 10]),
+                    CommonVolumeAdjustments::new([0; 10]),
+                    CommonVolumeAdjustments::new([0; 10]),
                 ]),
                 hear_id_preset_profile_id: Default::default(),
             },
@@ -110,7 +110,7 @@ impl FromPacketBody for A3936StateUpdatePacket {
                 let (input, battery) = DualBattery::take(input)?;
                 let (input, dual_firmware_version) = DualFirmwareVersion::take(input)?;
                 let (input, serial_number) = SerialNumber::take(input)?;
-                let (input, equalizer_configuration) = EqualizerConfiguration::take(input)?;
+                let (input, equalizer_configuration) = CommonEqualizerConfiguration::take(input)?;
                 let (input, age_range) = AgeRange::take(input)?;
                 let (input, custom_hear_id) = CustomHearId::take_without_music_type(input)?;
 

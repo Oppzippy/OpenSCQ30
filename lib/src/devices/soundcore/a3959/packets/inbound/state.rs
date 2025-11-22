@@ -33,7 +33,7 @@ pub struct A3959State {
     pub dual_battery: common::structures::DualBattery,
     pub dual_firmware_version: common::structures::DualFirmwareVersion,
     pub serial_number: common::structures::SerialNumber,
-    pub equalizer_configuration: common::structures::EqualizerConfiguration<1, 10>,
+    pub equalizer_configuration: common::structures::CommonEqualizerConfiguration<1, 10>,
     pub button_configuration: ButtonStatusCollection<8>,
     pub ambient_sound_mode_cycle: common::structures::AmbientSoundModeCycle,
     pub sound_modes: a3959::structures::SoundModes,
@@ -76,7 +76,7 @@ impl FromPacketBody for A3959State {
                     common::structures::DualBattery::take,
                     common::structures::DualFirmwareVersion::take,
                     common::structures::SerialNumber::take,
-                    common::structures::EqualizerConfiguration::take,
+                    common::structures::CommonEqualizerConfiguration::take,
                     take(10usize),
                     take(1usize),
                     ButtonStatusCollection::take(

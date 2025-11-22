@@ -20,8 +20,8 @@ use crate::{
             packet_manager::PacketHandler,
             state::Update,
             structures::{
-                AgeRange, BasicHearId, DualBattery, EqualizerConfiguration, Gender, TwsStatus,
-                button_configuration::ButtonStatusCollection,
+                AgeRange, BasicHearId, CommonEqualizerConfiguration, DualBattery, Gender,
+                TwsStatus, button_configuration::ButtonStatusCollection,
             },
         },
     },
@@ -32,7 +32,7 @@ use crate::{
 pub struct A3926StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
-    pub equalizer_configuration: EqualizerConfiguration<2, 8>,
+    pub equalizer_configuration: CommonEqualizerConfiguration<2, 8>,
     pub gender: Gender,
     pub age_range: AgeRange,
     pub hear_id: BasicHearId<2, 8>,
@@ -65,7 +65,7 @@ impl FromPacketBody for A3926StateUpdatePacket {
                 (
                     TwsStatus::take,
                     DualBattery::take,
-                    EqualizerConfiguration::take,
+                    CommonEqualizerConfiguration::take,
                     Gender::take,
                     AgeRange::take,
                     BasicHearId::take,

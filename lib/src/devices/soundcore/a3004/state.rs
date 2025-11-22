@@ -1,7 +1,7 @@
 use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::common::structures::{
-    EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery, SoundModes,
+    CommonEqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery, SoundModes,
 };
 
 use super::packets::A3004StateUpdatePacket;
@@ -9,7 +9,7 @@ use super::packets::A3004StateUpdatePacket;
 #[derive(Debug, Clone, PartialEq, Eq, Has)]
 pub struct A3004State {
     pub battery: SingleBattery,
-    pub equalizer_configuration: EqualizerConfiguration<1, 10>,
+    pub equalizer_configuration: CommonEqualizerConfiguration<1, 10>,
     pub sound_modes: SoundModes,
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,

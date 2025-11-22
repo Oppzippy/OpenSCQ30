@@ -1,7 +1,7 @@
 use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::common::structures::{
-    AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
+    AgeRange, BasicHearId, CommonEqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
     SingleBattery, SoundModes, WearingDetection,
 };
 
@@ -10,7 +10,7 @@ use super::packets::A3027StateUpdatePacket;
 #[derive(Debug, Clone, PartialEq, Eq, Has)]
 pub struct A3027State {
     pub battery: SingleBattery,
-    pub equalizer_configuration: EqualizerConfiguration<1, 8>,
+    pub equalizer_configuration: CommonEqualizerConfiguration<1, 8>,
     pub gender: Gender,
     pub age_range: AgeRange,
     // Two channels, but the second one is ignored

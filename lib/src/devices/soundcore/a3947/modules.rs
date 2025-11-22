@@ -7,7 +7,7 @@ use crate::{
         common::{
             device::SoundcoreDeviceBuilder,
             packet::inbound::FromPacketBody,
-            structures::{EqualizerConfiguration, TwsStatus},
+            structures::{CommonEqualizerConfiguration, TwsStatus},
         },
     },
 };
@@ -36,7 +36,7 @@ impl<ConnectionType, StateType, StateUpdatePacketType>
 where
     ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateUpdatePacketType: FromPacketBody + Into<StateType>,
-    StateType: Has<EqualizerConfiguration<2, 10>>
+    StateType: Has<CommonEqualizerConfiguration<2, 10>>
         + Has<a3947::structures::HearId<2, 10>>
         + Has<TwsStatus>
         + Send

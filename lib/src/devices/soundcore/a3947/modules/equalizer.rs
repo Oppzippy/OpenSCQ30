@@ -22,7 +22,7 @@ mod state_modifier;
 
 impl<T> ModuleCollection<T>
 where
-    T: Has<common::structures::EqualizerConfiguration<2, 10>>
+    T: Has<common::structures::CommonEqualizerConfiguration<2, 10>>
         + Has<a3947::structures::HearId<2, 10>>
         + Has<TwsStatus>
         + Clone

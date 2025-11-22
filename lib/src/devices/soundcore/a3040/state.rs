@@ -5,8 +5,8 @@ use crate::devices::soundcore::{
     common::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         structures::{
-            AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CustomHearId,
-            EqualizerConfiguration, FirmwareVersion, LimitHighVolume, SerialNumber,
+            AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CommonEqualizerConfiguration,
+            CustomHearId, FirmwareVersion, LimitHighVolume, SerialNumber,
         },
     },
 };
@@ -16,7 +16,7 @@ pub struct A3040State {
     battery_level: BatteryLevel,
     firmware_version: FirmwareVersion,
     serial_number: SerialNumber,
-    equalizer_configuration: EqualizerConfiguration<1, 10>,
+    equalizer_configuration: CommonEqualizerConfiguration<1, 10>,
     button_configuration: a3040::structures::ButtonConfiguration,
     ambient_sound_mode_cycle: AmbientSoundModeCycle,
     sound_modes: a3040::structures::SoundModes,

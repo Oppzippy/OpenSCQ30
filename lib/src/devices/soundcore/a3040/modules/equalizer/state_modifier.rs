@@ -10,7 +10,7 @@ use crate::{
         common::{
             packet::PacketIOController,
             state_modifier::StateModifier,
-            structures::{CustomHearId, EqualizerConfiguration},
+            structures::{CommonEqualizerConfiguration, CustomHearId},
         },
     },
 };
@@ -62,7 +62,7 @@ impl<
         HEAR_ID_BANDS,
     >
 where
-    T: Has<EqualizerConfiguration<CHANNELS, BANDS>>
+    T: Has<CommonEqualizerConfiguration<CHANNELS, BANDS>>
         + Has<CustomHearId<HEAR_ID_CHANNELS, HEAR_ID_BANDS>>
         + Clone
         + Send
@@ -74,11 +74,12 @@ where
         state_sender: &watch::Sender<T>,
         target_state: &T,
     ) -> device::Result<()> {
-        let target_equalizer_configuration: &EqualizerConfiguration<CHANNELS, BANDS> =
+        let target_equalizer_configuration: &CommonEqualizerConfiguration<CHANNELS, BANDS> =
             target_state.get();
         {
             let state = state_sender.borrow();
-            let equalizer_configuration: &EqualizerConfiguration<CHANNELS, BANDS> = state.get();
+            let equalizer_configuration: &CommonEqualizerConfiguration<CHANNELS, BANDS> =
+                state.get();
             if equalizer_configuration == target_equalizer_configuration {
                 return Ok(());
             }

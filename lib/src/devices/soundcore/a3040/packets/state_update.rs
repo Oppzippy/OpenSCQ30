@@ -25,9 +25,9 @@ use crate::{
             },
             packet_manager::PacketHandler,
             structures::{
-                AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CustomHearId,
-                EqualizerConfiguration, FirmwareVersion, HearIdMusicType, HearIdType,
-                LimitHighVolume, SerialNumber, VolumeAdjustments,
+                AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CommonEqualizerConfiguration,
+                CommonVolumeAdjustments, CustomHearId, FirmwareVersion, HearIdMusicType,
+                HearIdType, LimitHighVolume, SerialNumber,
             },
         },
     },
@@ -38,7 +38,7 @@ pub struct A3040StateUpdatePacket {
     pub battery_level: BatteryLevel,
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
-    pub equalizer_configuration: EqualizerConfiguration<1, 10>,
+    pub equalizer_configuration: CommonEqualizerConfiguration<1, 10>,
     pub button_configuration: a3040::structures::ButtonConfiguration,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
     pub sound_modes: a3040::structures::SoundModes,
@@ -85,7 +85,7 @@ impl FromPacketBody for A3040StateUpdatePacket {
                     take(1usize), // unknown
                     FirmwareVersion::take,
                     SerialNumber::take,
-                    EqualizerConfiguration::take,
+                    CommonEqualizerConfiguration::take,
                     take(10usize), // equalizer dynamic range compression
                     take(2usize),  // unknown
                     a3040::structures::ButtonConfiguration::take,
@@ -147,10 +147,10 @@ pub fn take_hear_id<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         map(
             (
                 take_bool,
-                count(VolumeAdjustments::take, 2),
+                count(CommonVolumeAdjustments::take, 2),
                 le_i32,
                 HearIdType::take,
-                count(VolumeAdjustments::take, 2),
+                count(CommonVolumeAdjustments::take, 2),
                 take(10usize), // DRC
                 le_u16,        // hear id eq index?
             ),

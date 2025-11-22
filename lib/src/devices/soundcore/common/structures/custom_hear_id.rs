@@ -8,16 +8,16 @@ use nom::{
 
 use crate::devices::soundcore::common::packet::parsing::take_bool;
 
-use super::{HearIdMusicType, HearIdType, VolumeAdjustments};
+use super::{CommonVolumeAdjustments, HearIdMusicType, HearIdType};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CustomHearId<const C: usize, const B: usize> {
     pub is_enabled: bool,
-    pub volume_adjustments: [VolumeAdjustments<B>; C],
+    pub volume_adjustments: [CommonVolumeAdjustments<B>; C],
     pub time: i32,
     pub hear_id_type: HearIdType,
     pub hear_id_music_type: HearIdMusicType,
-    pub custom_volume_adjustments: Option<[VolumeAdjustments<B>; C]>,
+    pub custom_volume_adjustments: Option<[CommonVolumeAdjustments<B>; C]>,
     pub hear_id_preset_profile_id: u16,
 }
 
@@ -44,11 +44,11 @@ impl<const C: usize, const B: usize> CustomHearId<C, B> {
             map(
                 (
                     take_bool,
-                    count(VolumeAdjustments::take, C),
+                    count(CommonVolumeAdjustments::take, C),
                     le_i32,
                     HearIdType::take,
                     HearIdMusicType::take,
-                    count(VolumeAdjustments::take, C),
+                    count(CommonVolumeAdjustments::take, C),
                 ),
                 |(
                     is_enabled,
@@ -58,11 +58,11 @@ impl<const C: usize, const B: usize> CustomHearId<C, B> {
                     music_type,
                     custom_volume_adjustments,
                 )| {
-                    let volume_adjustments: [VolumeAdjustments<B>; C] = volume_adjustments
+                    let volume_adjustments: [CommonVolumeAdjustments<B>; C] = volume_adjustments
                         .try_into()
                         .expect("count is guaranteed to return a vec with the desired length");
                     // The first byte of the custom volume adjustments determines whether or not they're present
-                    let custom_volume_adjustments: Option<[VolumeAdjustments<B>; C]> =
+                    let custom_volume_adjustments: Option<[CommonVolumeAdjustments<B>; C]> =
                         if custom_volume_adjustments[0].bytes()[0] != 255 {
                             Some(custom_volume_adjustments.try_into().expect(
                                 "count is guaranteed to return a vec with the desired length",
@@ -94,10 +94,10 @@ impl<const C: usize, const B: usize> CustomHearId<C, B> {
             map(
                 (
                     take_bool,
-                    count(VolumeAdjustments::take, C),
+                    count(CommonVolumeAdjustments::take, C),
                     le_i32,
                     HearIdType::take,
-                    count(VolumeAdjustments::take, C),
+                    count(CommonVolumeAdjustments::take, C),
                     le_u16, // hear id eq index?
                 ),
                 |(

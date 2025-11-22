@@ -3,8 +3,8 @@ use openscq30_lib_macros::Has;
 use crate::devices::soundcore::common::{
     modules::reset_button_configuration::ResetButtonConfigurationPending,
     structures::{
-        CaseBatteryLevel, DualBattery, DualFirmwareVersion, EqualizerConfiguration, GamingMode,
-        SerialNumber, TouchTone, TwsStatus, WearingDetection,
+        CaseBatteryLevel, CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion,
+        GamingMode, SerialNumber, TouchTone, TwsStatus, WearingDetection,
         button_configuration::ButtonStatusCollection,
     },
 };
@@ -17,7 +17,7 @@ pub struct A3945State {
     pub battery: DualBattery,
     pub dual_firmware_version: DualFirmwareVersion,
     pub serial_number: SerialNumber,
-    pub equalizer_configuration: EqualizerConfiguration<2, 10>,
+    pub equalizer_configuration: CommonEqualizerConfiguration<2, 10>,
     pub button_configuration: ButtonStatusCollection<6>,
     pub case_battery_level: CaseBatteryLevel,
     pub touch_tone: TouchTone,

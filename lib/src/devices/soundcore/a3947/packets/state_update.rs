@@ -22,10 +22,11 @@ use crate::{
             },
             packet_manager::PacketHandler,
             structures::{
-                AmbientSoundModeCycle, AutoPlayPause, AutoPowerOff, CaseBatteryLevel, DualBattery,
-                DualFirmwareVersion, EqualizerConfiguration, GamingMode, LimitHighVolume,
-                LowBatteryPrompt, SerialNumber, SoundLeakCompensation, SurroundSound, TouchLock,
-                TouchTone, TwsStatus, WearingTone, button_configuration::ButtonStatusCollection,
+                AmbientSoundModeCycle, AutoPlayPause, AutoPowerOff, CaseBatteryLevel,
+                CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion, GamingMode,
+                LimitHighVolume, LowBatteryPrompt, SerialNumber, SoundLeakCompensation,
+                SurroundSound, TouchLock, TouchTone, TwsStatus, WearingTone,
+                button_configuration::ButtonStatusCollection,
             },
         },
     },
@@ -37,7 +38,7 @@ pub struct A3947StateUpdatePacket {
     pub battery: DualBattery,
     pub dual_firmware_version: DualFirmwareVersion,
     pub serial_number: SerialNumber,
-    pub equalizer_configuration: EqualizerConfiguration<2, 10>,
+    pub equalizer_configuration: CommonEqualizerConfiguration<2, 10>,
     pub hear_id: a3947::structures::HearId<2, 10>,
     pub button_configuration: ButtonStatusCollection<8>,
     pub ambient_sound_mode_cycle: AmbientSoundModeCycle,
@@ -98,7 +99,7 @@ impl FromPacketBody for A3947StateUpdatePacket {
                         DualFirmwareVersion::take,
                         SerialNumber::take,
                         take(5usize), // unknown, some kind of version number
-                        EqualizerConfiguration::take,
+                        CommonEqualizerConfiguration::take,
                         take(1usize), // unknown
                         a3947::structures::HearId::take,
                         take(1usize), // unknown

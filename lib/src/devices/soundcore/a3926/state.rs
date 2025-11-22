@@ -5,8 +5,8 @@ use crate::devices::soundcore::common::{
     packet::inbound::SerialNumberAndFirmwareVersion,
     state::Update,
     structures::{
-        AgeRange, BasicHearId, DualBattery, DualFirmwareVersion, EqualizerConfiguration, Gender,
-        SerialNumber, TwsStatus, button_configuration::ButtonStatusCollection,
+        AgeRange, BasicHearId, CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion,
+        Gender, SerialNumber, TwsStatus, button_configuration::ButtonStatusCollection,
     },
 };
 
@@ -16,7 +16,7 @@ use super::packets::A3926StateUpdatePacket;
 pub struct A3926State {
     tws_status: TwsStatus,
     battery: DualBattery,
-    equalizer_configuration: EqualizerConfiguration<2, 8>,
+    equalizer_configuration: CommonEqualizerConfiguration<2, 8>,
     gender: Gender,
     age_range: AgeRange,
     hear_id: BasicHearId<2, 8>,

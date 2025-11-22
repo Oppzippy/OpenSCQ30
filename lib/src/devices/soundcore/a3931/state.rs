@@ -5,7 +5,7 @@ use crate::devices::soundcore::common::{
     packet::inbound::SerialNumberAndFirmwareVersion,
     state::Update,
     structures::{
-        AutoPowerOff, DualBattery, DualFirmwareVersion, EqualizerConfiguration, SerialNumber,
+        AutoPowerOff, CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion, SerialNumber,
         SoundModes, TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
     },
 };
@@ -16,7 +16,7 @@ use super::packets::A3931StateUpdatePacket;
 pub struct A3931State {
     tws_status: TwsStatus,
     battery: DualBattery,
-    equalizer_configuration: EqualizerConfiguration<2, 8>,
+    equalizer_configuration: CommonEqualizerConfiguration<2, 8>,
     button_configuration: ButtonStatusCollection<6>,
     sound_modes: SoundModes,
     auto_power_off: AutoPowerOff,

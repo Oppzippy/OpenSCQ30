@@ -18,8 +18,8 @@ use crate::devices::soundcore::{
         },
         packet_manager::PacketHandler,
         structures::{
-            AutoPowerOff, DualBattery, EqualizerConfiguration, SoundModes, TouchTone, TwsStatus,
-            button_configuration::ButtonStatusCollection,
+            AutoPowerOff, CommonEqualizerConfiguration, DualBattery, SoundModes, TouchTone,
+            TwsStatus, button_configuration::ButtonStatusCollection,
         },
     },
 };
@@ -28,7 +28,7 @@ use crate::devices::soundcore::{
 pub struct A3031StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
-    pub equalizer_configuration: EqualizerConfiguration<2, 8>,
+    pub equalizer_configuration: CommonEqualizerConfiguration<2, 8>,
     pub button_configuration: ButtonStatusCollection<6>,
     pub sound_modes: SoundModes,
     pub auto_power_off: AutoPowerOff,
@@ -63,7 +63,7 @@ impl FromPacketBody for A3031StateUpdatePacket {
                 (
                     TwsStatus::take,
                     DualBattery::take,
-                    EqualizerConfiguration::take,
+                    CommonEqualizerConfiguration::take,
                     ButtonStatusCollection::take(
                         a3031::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
                     ),

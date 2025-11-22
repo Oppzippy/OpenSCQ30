@@ -47,9 +47,9 @@ use super::{
         outbound::RequestState,
     },
     structures::{
-        AgeRange, AmbientSoundModeCycle, BasicHearId, CustomHearId, DualBattery,
-        DualFirmwareVersion, EqualizerConfiguration, FirmwareVersion, Gender, SerialNumber,
-        SingleBattery, SoundModes, TwsStatus,
+        AgeRange, AmbientSoundModeCycle, BasicHearId, CommonEqualizerConfiguration, CustomHearId,
+        DualBattery, DualFirmwareVersion, FirmwareVersion, Gender, SerialNumber, SingleBattery,
+        SoundModes, TwsStatus,
     },
 };
 
@@ -269,7 +269,7 @@ where
 
     pub async fn equalizer<const C: usize, const B: usize>(&mut self)
     where
-        StateType: Has<EqualizerConfiguration<C, B>>,
+        StateType: Has<CommonEqualizerConfiguration<C, B>>,
     {
         self.module_collection
             .add_equalizer(
@@ -283,7 +283,7 @@ where
 
     pub async fn equalizer_tws<const C: usize, const B: usize>(&mut self)
     where
-        StateType: Has<EqualizerConfiguration<C, B>> + Has<TwsStatus>,
+        StateType: Has<CommonEqualizerConfiguration<C, B>> + Has<TwsStatus>,
     {
         self.module_collection
             .add_equalizer_tws(
@@ -297,7 +297,7 @@ where
 
     pub async fn equalizer_with_drc<const C: usize, const B: usize>(&mut self)
     where
-        StateType: Has<EqualizerConfiguration<C, B>>,
+        StateType: Has<CommonEqualizerConfiguration<C, B>>,
     {
         self.module_collection
             .add_equalizer_with_drc(
@@ -311,7 +311,7 @@ where
 
     pub async fn equalizer_with_drc_tws<const C: usize, const B: usize>(&mut self)
     where
-        StateType: Has<EqualizerConfiguration<C, B>> + Has<TwsStatus>,
+        StateType: Has<CommonEqualizerConfiguration<C, B>> + Has<TwsStatus>,
     {
         self.module_collection
             .add_equalizer_with_drc_tws(
@@ -325,7 +325,7 @@ where
 
     pub async fn equalizer_with_basic_hear_id_tws<const C: usize, const B: usize>(&mut self)
     where
-        StateType: Has<EqualizerConfiguration<C, B>>
+        StateType: Has<CommonEqualizerConfiguration<C, B>>
             + Has<TwsStatus>
             + Has<BasicHearId<C, B>>
             + Has<Gender>
@@ -343,7 +343,7 @@ where
 
     pub async fn equalizer_with_custom_hear_id_tws<const C: usize, const B: usize>(&mut self)
     where
-        StateType: Has<EqualizerConfiguration<C, B>>
+        StateType: Has<CommonEqualizerConfiguration<C, B>>
             + Has<TwsStatus>
             + Has<CustomHearId<C, B>>
             + Has<Gender>

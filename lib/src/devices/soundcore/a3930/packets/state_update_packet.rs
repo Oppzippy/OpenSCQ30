@@ -22,8 +22,9 @@ use crate::{
             packet_manager::PacketHandler,
             state::Update,
             structures::{
-                AgeRange, CustomHearId, DualBattery, EqualizerConfiguration, Gender, SoundModes,
-                TwsStatus, VolumeAdjustments, button_configuration::ButtonStatusCollection,
+                AgeRange, CommonEqualizerConfiguration, CommonVolumeAdjustments, CustomHearId,
+                DualBattery, Gender, SoundModes, TwsStatus,
+                button_configuration::ButtonStatusCollection,
             },
         },
     },
@@ -34,7 +35,7 @@ use crate::{
 pub struct A3930StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
-    pub equalizer_configuration: EqualizerConfiguration<2, 8>,
+    pub equalizer_configuration: CommonEqualizerConfiguration<2, 8>,
     pub gender: Gender,
     pub age_range: AgeRange,
     pub custom_hear_id: CustomHearId<2, 8>,
@@ -74,7 +75,7 @@ impl FromPacketBody for A3930StateUpdatePacket {
                 (
                     TwsStatus::take,
                     DualBattery::take,
-                    EqualizerConfiguration::take,
+                    CommonEqualizerConfiguration::take,
                     Gender::take,
                     AgeRange::take,
                     CustomHearId::take_with_all_fields,
@@ -151,8 +152,8 @@ impl ToPacket for A3930StateUpdatePacket {
                     .custom_volume_adjustments
                     .as_ref()
                     .unwrap_or(&[
-                        VolumeAdjustments::new([0; 8]),
-                        VolumeAdjustments::new([0; 8]),
+                        CommonVolumeAdjustments::new([0; 8]),
+                        CommonVolumeAdjustments::new([0; 8]),
                     ])
                     .iter()
                     .flat_map(|v| v.bytes()),

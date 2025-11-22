@@ -31,7 +31,7 @@ impl<ConnectionType, StateType, StateUpdatePacketType>
 where
     ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateUpdatePacketType: FromPacketBody + Into<StateType>,
-    StateType: Has<common::structures::EqualizerConfiguration<1, 10>>
+    StateType: Has<common::structures::CommonEqualizerConfiguration<1, 10>>
         + Has<common::structures::CustomHearId<2, 10>>
         + Send
         + Sync

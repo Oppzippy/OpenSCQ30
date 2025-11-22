@@ -5,10 +5,11 @@ use crate::devices::soundcore::{
     common::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         structures::{
-            AmbientSoundModeCycle, AutoPlayPause, AutoPowerOff, CaseBatteryLevel, DualBattery,
-            DualFirmwareVersion, EqualizerConfiguration, GamingMode, LimitHighVolume,
-            LowBatteryPrompt, SerialNumber, SoundLeakCompensation, SurroundSound, TouchLock,
-            TouchTone, TwsStatus, WearingTone, button_configuration::ButtonStatusCollection,
+            AmbientSoundModeCycle, AutoPlayPause, AutoPowerOff, CaseBatteryLevel,
+            CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion, GamingMode,
+            LimitHighVolume, LowBatteryPrompt, SerialNumber, SoundLeakCompensation, SurroundSound,
+            TouchLock, TouchTone, TwsStatus, WearingTone,
+            button_configuration::ButtonStatusCollection,
         },
     },
 };
@@ -19,7 +20,7 @@ pub struct A3947State {
     battery: DualBattery,
     dual_firmware_version: DualFirmwareVersion,
     serial_number: SerialNumber,
-    equalizer_configuration: EqualizerConfiguration<2, 10>,
+    equalizer_configuration: CommonEqualizerConfiguration<2, 10>,
     hear_id: a3947::structures::HearId<2, 10>,
     button_configuration: ButtonStatusCollection<8>,
     ambient_sound_mode_cycle: AmbientSoundModeCycle,

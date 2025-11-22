@@ -21,7 +21,7 @@ use crate::{
             packet_manager::PacketHandler,
             state::Update,
             structures::{
-                AutoPowerOff, DualBattery, EqualizerConfiguration, SoundModes, TouchTone,
+                AutoPowerOff, CommonEqualizerConfiguration, DualBattery, SoundModes, TouchTone,
                 TwsStatus, button_configuration::ButtonStatusCollection,
             },
         },
@@ -32,7 +32,7 @@ use crate::{
 pub struct A3931StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub battery: DualBattery,
-    pub equalizer_configuration: EqualizerConfiguration<2, 8>,
+    pub equalizer_configuration: CommonEqualizerConfiguration<2, 8>,
     pub button_configuration: ButtonStatusCollection<6>,
     pub sound_modes: SoundModes,
     pub side_tone: bool,
@@ -67,7 +67,7 @@ impl FromPacketBody for A3931StateUpdatePacket {
                 (
                     TwsStatus::take,
                     DualBattery::take,
-                    EqualizerConfiguration::take,
+                    CommonEqualizerConfiguration::take,
                     ButtonStatusCollection::take(
                         a3931::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
                     ),

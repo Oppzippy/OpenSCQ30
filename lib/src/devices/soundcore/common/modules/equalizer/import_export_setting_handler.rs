@@ -16,7 +16,7 @@ use crate::{
     devices::soundcore::common::{
         modules::equalizer::custom_equalizer_profile_store::CustomEqualizerProfileStore,
         settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
-        structures::CustomEqualizerConfiguration,
+        structures::EqualizerConfiguration,
     },
     i18n::fl,
 };
@@ -76,8 +76,7 @@ impl<
 > SettingHandler<T>
     for ImportExportSettingHandler<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
 where
-    T: Has<CustomEqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
-        + Send,
+    T: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>> + Send,
 {
     fn settings(&self) -> Vec<SettingId> {
         ImportExportSetting::iter().map(Into::into).collect()

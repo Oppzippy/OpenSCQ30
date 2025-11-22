@@ -20,7 +20,7 @@ use crate::{
             },
             packet_manager::PacketHandler,
             structures::{
-                AgeRange, BasicHearId, EqualizerConfiguration, FirmwareVersion, Gender,
+                AgeRange, BasicHearId, CommonEqualizerConfiguration, FirmwareVersion, Gender,
                 SerialNumber, SingleBattery, SoundModes, WearingDetection,
             },
         },
@@ -30,7 +30,7 @@ use crate::{
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct A3027StateUpdatePacket {
     pub battery: SingleBattery,
-    pub equalizer_configuration: EqualizerConfiguration<1, 8>,
+    pub equalizer_configuration: CommonEqualizerConfiguration<1, 8>,
     pub gender: Gender,
     pub age_range: AgeRange,
     // Two channels, but the second one is ignored
@@ -54,7 +54,7 @@ impl FromPacketBody for A3027StateUpdatePacket {
             all_consuming(map(
                 (
                     SingleBattery::take,
-                    EqualizerConfiguration::take,
+                    CommonEqualizerConfiguration::take,
                     Gender::take,
                     AgeRange::take,
                     BasicHearId::take,

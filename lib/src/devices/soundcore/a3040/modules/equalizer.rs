@@ -9,7 +9,7 @@ use crate::{
     devices::soundcore::common::{
         modules::{ModuleCollection, equalizer::common_equalizer_module_settings},
         packet::PacketIOController,
-        structures::{CustomHearId, EqualizerConfiguration},
+        structures::{CommonEqualizerConfiguration, CustomHearId},
     },
     storage::OpenSCQ30Database,
 };
@@ -18,7 +18,7 @@ mod state_modifier;
 
 impl<T> ModuleCollection<T>
 where
-    T: Has<EqualizerConfiguration<1, 10>>
+    T: Has<CommonEqualizerConfiguration<1, 10>>
         + Has<CustomHearId<2, 10>>
         + Clone
         + Send

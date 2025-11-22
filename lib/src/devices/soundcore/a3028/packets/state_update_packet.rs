@@ -21,7 +21,7 @@ use crate::{
             },
             packet_manager::PacketHandler,
             structures::{
-                AgeRange, AutoPowerOff, BasicHearId, EqualizerConfiguration, FirmwareVersion,
+                AgeRange, AutoPowerOff, BasicHearId, CommonEqualizerConfiguration, FirmwareVersion,
                 Gender, SerialNumber, SingleBattery, SoundModes,
             },
         },
@@ -31,7 +31,7 @@ use crate::{
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct A3028StateUpdatePacket {
     pub battery: SingleBattery,
-    pub equalizer_configuration: EqualizerConfiguration<1, 8>,
+    pub equalizer_configuration: CommonEqualizerConfiguration<1, 8>,
     pub gender: Gender,
     pub age_range: AgeRange,
     pub hear_id: BasicHearId<2, 8>,
@@ -68,7 +68,7 @@ impl FromPacketBody for A3028StateUpdatePacket {
             map(
                 (
                     SingleBattery::take,
-                    EqualizerConfiguration::take,
+                    CommonEqualizerConfiguration::take,
                     Gender::take,
                     AgeRange::take,
                     BasicHearId::take,
@@ -223,8 +223,8 @@ mod tests {
     use nom_language::error::VerboseError;
 
     use crate::devices::soundcore::common::structures::{
-        AmbientSoundMode, CustomNoiseCanceling, EqualizerConfiguration, NoiseCancelingMode,
-        SoundModes, VolumeAdjustments,
+        AmbientSoundMode, CommonEqualizerConfiguration, CommonVolumeAdjustments,
+        CustomNoiseCanceling, NoiseCancelingMode, SoundModes,
     };
 
     #[test]
@@ -258,9 +258,11 @@ mod tests {
             packet.sound_modes,
         );
         assert_eq!(
-            EqualizerConfiguration::new(
+            CommonEqualizerConfiguration::new(
                 0x0001,
-                [VolumeAdjustments::new([-60, 60, 23, 40, 22, 60, -4, 16])],
+                [CommonVolumeAdjustments::new([
+                    -60, 60, 23, 40, 22, 60, -4, 16
+                ])],
             ),
             packet.equalizer_configuration
         );
@@ -294,7 +296,7 @@ mod tests {
             "should be custom preset"
         );
         assert_eq!(
-            &VolumeAdjustments::new([-60, 60, 23, 40, 22, 60, -4, 16]),
+            &CommonVolumeAdjustments::new([-60, 60, 23, 40, 22, 60, -4, 16]),
             packet
                 .equalizer_configuration
                 .volume_adjustments_channel_1(),
@@ -330,7 +332,7 @@ mod tests {
             "should be custom preset"
         );
         assert_eq!(
-            &VolumeAdjustments::new([-60, 60, 23, 40, 22, 60, -4, 16]),
+            &CommonVolumeAdjustments::new([-60, 60, 23, 40, 22, 60, -4, 16]),
             packet
                 .equalizer_configuration
                 .volume_adjustments_channel_1(),

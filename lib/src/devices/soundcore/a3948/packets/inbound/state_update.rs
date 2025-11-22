@@ -20,8 +20,8 @@ use crate::{
             },
             packet_manager::PacketHandler,
             structures::{
-                DualBattery, DualFirmwareVersion, EqualizerConfiguration, SerialNumber, TouchTone,
-                TwsStatus, button_configuration::ButtonStatusCollection,
+                CommonEqualizerConfiguration, DualBattery, DualFirmwareVersion, SerialNumber,
+                TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
             },
         },
     },
@@ -33,7 +33,7 @@ pub struct A3948StateUpdatePacket {
     pub battery: DualBattery,
     pub firmware_version: DualFirmwareVersion,
     pub serial_number: SerialNumber,
-    pub equalizer_configuration: EqualizerConfiguration<1, 10>,
+    pub equalizer_configuration: CommonEqualizerConfiguration<1, 10>,
     pub button_configuration: ButtonStatusCollection<6>,
     pub touch_tone: TouchTone,
 }
@@ -66,7 +66,7 @@ impl FromPacketBody for A3948StateUpdatePacket {
                     DualBattery::take,
                     DualFirmwareVersion::take,
                     SerialNumber::take,
-                    EqualizerConfiguration::take,
+                    CommonEqualizerConfiguration::take,
                     take(11usize), // padding
                     ButtonStatusCollection::take(
                         a3948::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
