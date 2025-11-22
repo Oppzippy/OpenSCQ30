@@ -34,7 +34,7 @@ mod tests {
             expected,
             RequestSerialNumberAndFirmwareVersion::default()
                 .to_packet()
-                .bytes()
+                .bytes_with_checksum()
         );
     }
 }

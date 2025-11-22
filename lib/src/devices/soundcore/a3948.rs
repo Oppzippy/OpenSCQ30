@@ -43,7 +43,7 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            A3948StateUpdatePacket::default().to_packet().bytes(),
+            A3948StateUpdatePacket::default().to_packet(),
         )])
     },
 );
@@ -100,7 +100,10 @@ mod tests {
 
     use crate::{
         DeviceModel,
-        devices::soundcore::common::{device::test_utils::TestSoundcoreDevice, packet},
+        devices::soundcore::common::{
+            device::{SoundcoreDeviceConfig, test_utils::TestSoundcoreDevice},
+            packet,
+        },
         settings::{SettingId, Value},
     };
 
@@ -122,6 +125,7 @@ mod tests {
                     ],
                 ),
             )]),
+            SoundcoreDeviceConfig::default(),
         )
         .await;
         device.assert_setting_values([
@@ -152,6 +156,7 @@ mod tests {
             super::device_registry,
             DeviceModel::SoundcoreA3948,
             HashMap::from([(packet::Command([1, 1]), state_update_packet)]),
+            SoundcoreDeviceConfig::default(),
         )
         .await;
         device.assert_setting_values([
@@ -186,6 +191,7 @@ mod tests {
             super::device_registry,
             DeviceModel::SoundcoreA3948,
             HashMap::from([(packet::Command([1, 1]), state_update_packet)]),
+            SoundcoreDeviceConfig::default(),
         )
         .await;
         device

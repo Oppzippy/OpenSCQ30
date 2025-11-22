@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use crate::devices::soundcore::a3116::packets::inbound::A3116StateUpdatePacket;
 use crate::devices::soundcore::a3116::state::A3116State;
 use crate::devices::soundcore::common::device::SoundcoreDeviceConfig;
+use crate::devices::soundcore::common::packet;
 use crate::devices::soundcore::common::packet::outbound::ToPacket;
 use crate::devices::soundcore::common::{
     device::fetch_state_from_state_update_packet, macros::soundcore_device,
@@ -31,12 +32,10 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            A3116StateUpdatePacket::default()
-                .to_packet()
-                .bytes_without_checksum(),
+            A3116StateUpdatePacket::default().to_packet(),
         )])
     },
     SoundcoreDeviceConfig {
-        has_packet_checksum: false,
+        checksum_kind: packet::ChecksumKind::None,
     },
 );

@@ -76,17 +76,9 @@ where
     Ok(state_update_packet.into())
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct SoundcoreDeviceConfig {
-    pub has_packet_checksum: bool,
-}
-
-impl Default for SoundcoreDeviceConfig {
-    fn default() -> Self {
-        Self {
-            has_packet_checksum: true,
-        }
-    }
+    pub checksum_kind: packet::ChecksumKind,
 }
 
 pub struct SoundcoreDeviceRegistry<B: RfcommBackend, StateType> {
@@ -214,11 +206,9 @@ where
         fetch_state: &FetchStateFn<ConnectionType, StateType>,
         config: SoundcoreDeviceConfig,
     ) -> device::Result<Self> {
-        let (packet_io_controller, packet_receiver) = PacketIOController::<ConnectionType>::new(
-            Arc::new(connection),
-            config.has_packet_checksum,
-        )
-        .await?;
+        let (packet_io_controller, packet_receiver) =
+            PacketIOController::<ConnectionType>::new(Arc::new(connection), config.checksum_kind)
+                .await?;
         let packet_io_controller = Arc::new(packet_io_controller);
         let state = fetch_state(packet_io_controller.clone()).await?;
         let (state_sender, _) = watch::channel::<StateType>(state);
@@ -614,6 +604,7 @@ pub mod test_utils {
         device: Arc<dyn OpenSCQ30Device + Send + Sync>,
         inbound_sender: mpsc::Sender<Vec<u8>>,
         outbound_receiver: mpsc::Receiver<Vec<u8>>,
+        config: SoundcoreDeviceConfig,
     }
 
     impl TestSoundcoreDevice {
@@ -625,6 +616,7 @@ pub mod test_utils {
             ) -> SoundcoreDeviceRegistry<MockRfcommBackend, StateType>,
             device_model: DeviceModel,
             packet_responses: HashMap<Command, packet::Inbound>,
+            config: SoundcoreDeviceConfig,
         ) -> Self
         where
             StateType: Clone + Send + Sync + 'static,
@@ -657,7 +649,7 @@ pub mod test_utils {
                         if let Some(packet) = maybe_packet {
                             let command = Command(packet[5..7].try_into().unwrap());
                             inbound_sender
-                                .send(packet_responses.get(&command).unwrap().bytes())
+                                .send(packet_responses.get(&command).unwrap().bytes_with_checksum())
                                 .await
                                 .unwrap();
                         }
@@ -672,6 +664,7 @@ pub mod test_utils {
                 device,
                 inbound_sender,
                 outbound_receiver,
+                config,
             }
         }
 
@@ -700,7 +693,7 @@ pub mod test_utils {
         ) {
             let mut expected_packets_bytes = expected_packets
                 .iter()
-                .map(|expected| expected.bytes())
+                .map(|expected| expected.bytes_with_checksum())
                 .collect::<Vec<_>>();
             let mut sent_packets_bytes = self.set_settings_and_gather_sent_packets(settings).await;
             expected_packets_bytes.sort();
@@ -716,7 +709,7 @@ pub mod test_utils {
         ) {
             let expected_packets_bytes = expected_packets
                 .iter()
-                .map(|expected| expected.bytes())
+                .map(|expected| expected.bytes_with_checksum())
                 .collect::<Vec<_>>();
             let sent_packets_bytes = self.set_settings_and_gather_sent_packets(settings).await;
             assert_eq!(sent_packets_bytes, expected_packets_bytes);
@@ -753,7 +746,9 @@ pub mod test_utils {
         async fn gather_sent_packets(&mut self, sent_packets: &mut Vec<Vec<u8>>) {
             loop {
                 if let Some(bytes) = self.outbound_receiver.recv().await {
-                    let packet = packet::Outbound::take::<VerboseError<_>>(&bytes).unwrap().1;
+                    let packet = packet::Outbound::take_with_checksum::<VerboseError<_>>(&bytes)
+                        .unwrap()
+                        .1;
                     self.ack(&packet).await;
                     sent_packets.push(bytes);
                 } else {
@@ -765,7 +760,7 @@ pub mod test_utils {
         async fn ack(&self, packet: &packet::Outbound) {
             // for cancel safety
             let permit = self.inbound_sender.reserve().await.unwrap();
-            permit.send(packet.ack().bytes());
+            permit.send(packet.ack().bytes(self.config.checksum_kind));
         }
     }
 }

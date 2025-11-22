@@ -65,6 +65,15 @@ impl<D: HasDirection> Packet<D> {
     /// This makes use of nom's streaming parsers, so Err::Incomplete will be returned if the packet
     /// is not done being read yet.
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        checksum_kind: ChecksumKind,
+    ) -> impl FnOnce(&'a [u8]) -> IResult<&'a [u8], Self, E> {
+        move |input| match checksum_kind {
+            ChecksumKind::None => Self::take_without_checksum(input),
+            ChecksumKind::Suffix => Self::take_with_checksum(input),
+        }
+    }
+
+    pub fn take_with_checksum<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         full_input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         let (input, (_direction, command, length)) = context(
@@ -93,8 +102,6 @@ impl<D: HasDirection> Packet<D> {
         Ok((input, Self::new(command, body.to_vec())))
     }
 
-    /// This makes use of nom's streaming parsers, so Err::Incomplete will be returned if the packet
-    /// is not done being read yet.
     pub fn take_without_checksum<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         full_input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
@@ -112,7 +119,14 @@ impl<D: HasDirection> Packet<D> {
         Ok((input, Self::new(command, body.to_vec())))
     }
 
-    pub fn bytes(&self) -> Vec<u8> {
+    pub fn bytes(&self, checksum_kind: ChecksumKind) -> Vec<u8> {
+        match checksum_kind {
+            ChecksumKind::None => self.bytes_without_checksum(),
+            ChecksumKind::Suffix => self.bytes_with_checksum(),
+        }
+    }
+
+    pub fn bytes_with_checksum(&self) -> Vec<u8> {
         const PACKET_SIZE_LENGTH: usize = 2;
         const CHECKSUM_LENGTH: usize = 1;
 
@@ -202,6 +216,13 @@ impl Command {
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Default)]
+pub enum ChecksumKind {
+    None,
+    #[default]
+    Suffix,
+}
+
 #[cfg(test)]
 mod tests {
     use nom_language::error::VerboseError;
@@ -211,8 +232,9 @@ mod tests {
     #[test]
     fn to_and_from_bytes() {
         let packet = Outbound::new(Command([0, 1]), vec![2]);
-        let packet_bytes = packet.bytes();
-        let (remainder, parsed_packet) = Outbound::take::<VerboseError<_>>(&packet_bytes).unwrap();
+        let packet_bytes = packet.bytes_with_checksum();
+        let (remainder, parsed_packet) =
+            Outbound::take_with_checksum::<VerboseError<_>>(&packet_bytes).unwrap();
         assert_eq!(remainder, [0u8; 0]);
         assert_eq!(parsed_packet, packet);
     }

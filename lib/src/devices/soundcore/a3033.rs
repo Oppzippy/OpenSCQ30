@@ -28,7 +28,7 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            A3033StateUpdatePacket::default().to_packet().bytes(),
+            A3033StateUpdatePacket::default().to_packet(),
         )])
     },
 );

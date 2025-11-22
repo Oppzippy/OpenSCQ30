@@ -46,7 +46,7 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            A3040StateUpdatePacket::default().to_packet().bytes(),
+            A3040StateUpdatePacket::default().to_packet(),
         )])
     },
 );
@@ -81,7 +81,10 @@ mod tests {
 
     use crate::{
         DeviceModel,
-        devices::soundcore::common::{device::test_utils::TestSoundcoreDevice, packet},
+        devices::soundcore::common::{
+            device::{SoundcoreDeviceConfig, test_utils::TestSoundcoreDevice},
+            packet,
+        },
         settings::{self, SettingId},
     };
 
@@ -106,6 +109,7 @@ mod tests {
                     ],
                 ),
             )]),
+            SoundcoreDeviceConfig::default(),
         )
         .await;
 
@@ -148,6 +152,7 @@ mod tests {
                     ],
                 ),
             )]),
+            SoundcoreDeviceConfig::default(),
         )
         .await;
 
@@ -183,6 +188,7 @@ mod tests {
                     ],
                 ),
             )]),
+            SoundcoreDeviceConfig::default(),
         )
         .await;
 
@@ -228,6 +234,7 @@ mod tests {
                     ],
                 ),
             )]),
+            SoundcoreDeviceConfig::default(),
         )
         .await;
 

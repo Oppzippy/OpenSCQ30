@@ -166,8 +166,10 @@ mod tests {
 
     #[test]
     fn serialize_and_deserialize() {
-        let bytes = A3931StateUpdatePacket::default().to_packet().bytes();
-        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(&bytes).unwrap();
+        let bytes = A3931StateUpdatePacket::default()
+            .to_packet()
+            .bytes_with_checksum();
+        let (_, packet) = packet::Inbound::take_with_checksum::<VerboseError<_>>(&bytes).unwrap();
         let _: A3931StateUpdatePacket = packet.try_to_packet().unwrap();
     }
 }

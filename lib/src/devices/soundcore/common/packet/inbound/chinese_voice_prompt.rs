@@ -46,7 +46,7 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x0F, 0x0b, 0x00, 0x01, 0x25,
         ];
-        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take_with_checksum::<VerboseError<_>>(input).unwrap();
         let packet = ChineseVoicePrompt::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1;

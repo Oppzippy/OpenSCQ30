@@ -58,13 +58,11 @@ soundcore_device!(
         HashMap::from([
             (
                 RequestState::COMMAND,
-                A3926StateUpdatePacket::default().to_packet().bytes(),
+                A3926StateUpdatePacket::default().to_packet(),
             ),
             (
                 RequestSerialNumberAndFirmwareVersion::COMMAND,
-                SerialNumberAndFirmwareVersion::default()
-                    .to_packet()
-                    .bytes(),
+                SerialNumberAndFirmwareVersion::default().to_packet(),
             ),
         ])
     },
@@ -79,7 +77,7 @@ mod tests {
         devices::soundcore::{
             a3926::packets::A3926StateUpdatePacket,
             common::{
-                device::test_utils::TestSoundcoreDevice,
+                device::{SoundcoreDeviceConfig, test_utils::TestSoundcoreDevice},
                 packet::{self, outbound::ToPacket},
             },
         },
@@ -101,6 +99,7 @@ mod tests {
                     packet::inbound::SerialNumberAndFirmwareVersion::default().to_packet(),
                 ),
             ]),
+            SoundcoreDeviceConfig::default(),
         )
         .await;
         test_device

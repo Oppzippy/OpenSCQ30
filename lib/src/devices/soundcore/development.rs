@@ -33,7 +33,10 @@ pub fn demo_device_registry(
 > {
     SoundcoreDevelopmentDeviceRegistry::new(DemoConnectionRegistry::new(
         device_model,
-        HashMap::from([(packet::inbound::STATE_COMMAND, vec![1, 2, 3])]),
+        HashMap::from([(
+            packet::inbound::STATE_COMMAND,
+            packet::Inbound::new(packet::inbound::STATE_COMMAND, vec![1, 2, 3]),
+        )]),
         SoundcoreDeviceConfig::default(),
     ))
 }

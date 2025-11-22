@@ -43,7 +43,7 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            A3945StateUpdatePacket::default().to_packet().bytes(),
+            A3945StateUpdatePacket::default().to_packet(),
         )])
     },
 );
@@ -104,7 +104,7 @@ mod tests {
         devices::{
             DeviceModel,
             soundcore::common::{
-                device::test_utils::TestSoundcoreDevice,
+                device::{SoundcoreDeviceConfig, test_utils::TestSoundcoreDevice},
                 packet::{self, outbound::ToPacket},
                 structures::{CommonEqualizerConfiguration, CommonVolumeAdjustments},
             },
@@ -141,6 +141,7 @@ mod tests {
             super::device_registry,
             DeviceModel::SoundcoreA3945,
             HashMap::from([(packet::inbound::STATE_COMMAND, state_update_packet)]),
+            SoundcoreDeviceConfig::default(),
         )
         .await;
 
@@ -186,6 +187,7 @@ mod tests {
             super::device_registry,
             DeviceModel::SoundcoreA3945,
             HashMap::from([(packet::inbound::STATE_COMMAND, state_update_packet)]),
+            SoundcoreDeviceConfig::default(),
         )
         .await;
 

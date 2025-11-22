@@ -46,7 +46,7 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x7F, 0x0b, 0x00, 0x01, 0x95,
         ];
-        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take_with_checksum::<VerboseError<_>>(input).unwrap();
         let packet = Ldac::take::<VerboseError<_>>(&packet.body).unwrap().1;
         assert!(packet.is_enabled);
     }

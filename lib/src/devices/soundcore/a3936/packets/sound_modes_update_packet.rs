@@ -57,7 +57,7 @@ mod tests {
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x10, 0x00, 0x01, 0x30, 0x00, 0x01, 0x00,
             0x00, 0x52,
         ];
-        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take_with_checksum::<VerboseError<_>>(input).unwrap();
         A3936SoundModesUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .expect("parsing should succeed");
     }
@@ -68,7 +68,7 @@ mod tests {
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x10, 0x00, 0x02, 0x22, 0x01, 0x01, 0x03,
             0x05, 0x4e,
         ];
-        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take_with_checksum::<VerboseError<_>>(input).unwrap();
         let sound_modes = A3936SoundModesUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1

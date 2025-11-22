@@ -12,7 +12,7 @@ use crate::{
         connection::{ConnectionStatus, RfcommConnection},
         device,
     },
-    devices::soundcore::common::packet::{self, Command},
+    devices::soundcore::common::packet::{self, ChecksumKind, Command},
 };
 
 use super::multi_queue::MultiQueue;
@@ -21,7 +21,7 @@ pub struct PacketIOController<ConnectionType>
 where
     ConnectionType: RfcommConnection,
 {
-    has_checksum: bool,
+    checksum_kind: ChecksumKind,
     connection: Arc<ConnectionType>,
     packet_queues: Arc<MultiQueue<Command, packet::Inbound>>,
     handle: JoinHandle<()>,
@@ -39,16 +39,16 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
     /// that weren't a result of send_with_response will be forwarded to.
     pub async fn new(
         connection: Arc<ConnectionType>,
-        has_checksum: bool,
+        checksum_kind: ChecksumKind,
     ) -> device::Result<(Self, mpsc::Receiver<packet::Inbound>)> {
         let packet_queues = Arc::new(MultiQueue::new());
         let incoming_receiver = connection.read_channel();
 
         let (handle, outgoing_receiver) =
-            Self::spawn_packet_handler(has_checksum, packet_queues.clone(), incoming_receiver);
+            Self::spawn_packet_handler(checksum_kind, packet_queues.clone(), incoming_receiver);
         Ok((
             Self {
-                has_checksum,
+                checksum_kind,
                 connection,
                 packet_queues,
                 handle,
@@ -58,7 +58,7 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
     }
 
     fn spawn_packet_handler(
-        has_checksum: bool,
+        checksum_kind: ChecksumKind,
         packet_queues: Arc<MultiQueue<Command, packet::Inbound>>,
         mut incoming_receiver: mpsc::Receiver<Vec<u8>>,
     ) -> (JoinHandle<()>, mpsc::Receiver<packet::Inbound>) {
@@ -71,13 +71,8 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
                 buffer.extend_from_slice(&bytes);
                 let mut start_index = 0;
                 while start_index < buffer.len() {
-                    let parser = if has_checksum {
-                        packet::Inbound::take::<VerboseError<_>>
-                    } else {
-                        packet::Inbound::take_without_checksum::<VerboseError<_>>
-                    };
                     let (remainder, packet) =
-                        match parser(&buffer[start_index..]) {
+                        match packet::Inbound::take::<VerboseError<_>>(checksum_kind)(&buffer[start_index..]) {
                             Ok(parsed) => parsed,
                             Err(nom::Err::Incomplete(_)) => break,
                             Err(err) => {
@@ -126,11 +121,7 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
         // retry
         for i in 1..=3 {
             self.connection
-                .write(&if self.has_checksum {
-                    packet.bytes()
-                } else {
-                    packet.bytes_without_checksum()
-                })
+                .write(&packet.bytes(self.checksum_kind))
                 .await?;
 
             if tokio::time::timeout(Duration::from_millis(500 * i), handle.wait_for_end())
@@ -167,7 +158,7 @@ mod tests {
     async fn test_send_multiple() {
         let (connection, sender, _receiver) = StubRfcommConnection::new();
         let controller = Arc::new(
-            PacketIOController::new(Arc::new(connection), true)
+            PacketIOController::new(Arc::new(connection), ChecksumKind::Suffix)
                 .await
                 .unwrap()
                 .0,
@@ -219,7 +210,7 @@ mod tests {
     async fn test_out_of_order_responses() {
         let (connection, sender, _receiver) = StubRfcommConnection::new();
         let controller = Arc::new(
-            PacketIOController::new(Arc::new(connection), true)
+            PacketIOController::new(Arc::new(connection), ChecksumKind::Suffix)
                 .await
                 .unwrap()
                 .0,
@@ -259,7 +250,10 @@ mod tests {
         assert!(!handle1.is_finished());
         assert!(handle2.is_finished());
 
-        sender.send(set_cycle_ack.bytes()).await.unwrap();
+        sender
+            .send(set_cycle_ack.bytes_with_checksum())
+            .await
+            .unwrap();
         tokio::time::sleep(Duration::from_millis(1)).await;
         assert!(handle1.is_finished());
     }
@@ -268,7 +262,7 @@ mod tests {
     async fn test_fragmented_packet() {
         let (connection, sender, _receiver) = StubRfcommConnection::new();
         let packet_io = Arc::new(
-            PacketIOController::new(Arc::new(connection), true)
+            PacketIOController::new(Arc::new(connection), ChecksumKind::Suffix)
                 .await
                 .unwrap()
                 .0,
@@ -290,7 +284,7 @@ mod tests {
     async fn test_merged_packets() {
         let (connection, sender, _receiver) = StubRfcommConnection::new();
         let packet_io = Arc::new(
-            PacketIOController::new(Arc::new(connection), true)
+            PacketIOController::new(Arc::new(connection), ChecksumKind::Suffix)
                 .await
                 .unwrap()
                 .0,
@@ -305,9 +299,9 @@ mod tests {
 
         tokio::spawn(async move {
             tokio::time::sleep(Duration::from_millis(50)).await;
-            let mut data = set_sound_modes_ack.bytes();
-            data.extend_from_slice(&set_ambient_sound_mode_cycle_ack.bytes());
-            data.extend_from_slice(&set_sound_modes_ack.bytes());
+            let mut data = set_sound_modes_ack.bytes_with_checksum();
+            data.extend_from_slice(&set_ambient_sound_mode_cycle_ack.bytes_with_checksum());
+            data.extend_from_slice(&set_sound_modes_ack.bytes_with_checksum());
             sender.send(data).await.unwrap();
         });
 
@@ -330,7 +324,7 @@ mod tests {
     async fn test_garbage_data_recovery() {
         let (connection, sender, _receiver) = StubRfcommConnection::new();
         let packet_io = Arc::new(
-            PacketIOController::new(Arc::new(connection), true)
+            PacketIOController::new(Arc::new(connection), ChecksumKind::Suffix)
                 .await
                 .unwrap()
                 .0,
@@ -344,7 +338,10 @@ mod tests {
             tokio::time::sleep(Duration::from_millis(50)).await;
             sender.send(vec![0; 100]).await.unwrap(); // garbage data
             // not enough time has passed to recover
-            sender.send(set_sound_modes_ack.bytes()).await.unwrap();
+            sender
+                .send(set_sound_modes_ack.bytes_with_checksum())
+                .await
+                .unwrap();
         });
 
         packet_io

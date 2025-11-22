@@ -49,7 +49,7 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            A3028StateUpdatePacket::default().to_packet().bytes(),
+            A3028StateUpdatePacket::default().to_packet(),
         )])
     },
 );
@@ -246,7 +246,7 @@ mod tests {
                 .send(
                     packet::outbound::SetSoundModes::COMMAND
                         .ack::<packet::InboundMarker>()
-                        .bytes(),
+                        .bytes_with_checksum(),
                 )
                 .await
                 .unwrap();
@@ -297,7 +297,7 @@ mod tests {
                 .send(
                     packet::outbound::SET_EQUALIZER_COMMAND
                         .ack::<packet::InboundMarker>()
-                        .bytes(),
+                        .bytes_with_checksum(),
                 )
                 .await
                 .unwrap();

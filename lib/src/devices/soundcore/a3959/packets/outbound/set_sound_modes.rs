@@ -44,6 +44,6 @@ mod tests {
                 multi_scene_anc: common::structures::NoiseCancelingMode::Outdoor,
             },
         };
-        assert_eq!(EXPECTED, packet.to_packet().bytes());
+        assert_eq!(EXPECTED, packet.to_packet().bytes_with_checksum());
     }
 }

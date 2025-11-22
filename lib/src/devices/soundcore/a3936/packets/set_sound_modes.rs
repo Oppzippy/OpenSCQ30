@@ -56,6 +56,6 @@ mod tests {
                 noise_canceling_adaptive_sensitivity_level: 2,
             },
         };
-        assert_eq!(EXPECTED, packet.to_packet().bytes());
+        assert_eq!(EXPECTED, packet.to_packet().bytes_with_checksum());
     }
 }

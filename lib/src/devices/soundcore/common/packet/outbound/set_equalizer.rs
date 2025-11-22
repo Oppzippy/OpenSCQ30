@@ -45,7 +45,7 @@ mod tests {
             ),
         }
         .to_packet()
-        .bytes();
+        .bytes_with_checksum();
         assert_eq!(EXPECTED, actual);
     }
 
@@ -62,7 +62,7 @@ mod tests {
             ),
         }
         .to_packet()
-        .bytes();
+        .bytes_with_checksum();
         assert_eq!(EXPECTED, actual);
     }
 
@@ -81,7 +81,7 @@ mod tests {
             ),
         }
         .to_packet()
-        .bytes();
+        .bytes_with_checksum();
         assert_eq!(EXPECTED, actual);
     }
 
@@ -100,6 +100,6 @@ mod tests {
                 ],
             ),
         };
-        assert_eq!(EXPECTED, packet.to_packet().bytes());
+        assert_eq!(EXPECTED, packet.to_packet().bytes_with_checksum());
     }
 }

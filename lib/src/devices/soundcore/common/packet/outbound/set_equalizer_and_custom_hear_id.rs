@@ -154,7 +154,7 @@ mod tests {
             },
         }
         .to_packet()
-        .bytes();
+        .bytes_with_checksum();
 
         assert_eq!(expected, actual);
     }
@@ -196,7 +196,7 @@ mod tests {
             },
         }
         .to_packet()
-        .bytes();
+        .bytes_with_checksum();
 
         assert_eq!(expected, actual);
     }

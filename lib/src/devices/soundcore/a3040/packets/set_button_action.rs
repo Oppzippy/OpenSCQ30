@@ -17,7 +17,7 @@ mod tests {
     fn it_matches_known_good_packet() {
         let packet = set_button_double_press_action(Some(a3040::structures::ButtonAction::BassUp));
         assert_eq!(
-            packet.bytes(),
+            packet.bytes_with_checksum(),
             vec![8, 238, 0, 0, 0, 4, 129, 13, 0, 0, 0, 7, 143]
         );
     }
@@ -26,7 +26,7 @@ mod tests {
     fn it_matches_known_good_disabled_packet() {
         let packet = set_button_double_press_action(None);
         assert_eq!(
-            packet.bytes(),
+            packet.bytes_with_checksum(),
             vec![8, 238, 0, 0, 0, 4, 129, 13, 0, 0, 0, 15, 151]
         );
     }

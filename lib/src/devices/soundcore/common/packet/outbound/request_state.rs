@@ -28,6 +28,9 @@ mod tests {
     #[test]
     fn it_matches_an_example_request_state_packet() {
         const EXPECTED: &[u8] = &[0x08, 0xee, 0x00, 0x00, 0x00, 0x01, 0x01, 0x0a, 0x00, 0x02];
-        assert_eq!(EXPECTED, RequestState::default().to_packet().bytes());
+        assert_eq!(
+            EXPECTED,
+            RequestState::default().to_packet().bytes_with_checksum()
+        );
     }
 }

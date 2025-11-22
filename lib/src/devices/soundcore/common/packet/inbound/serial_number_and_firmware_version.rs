@@ -77,7 +77,7 @@ mod tests {
             0x32, 0x33, 0x2e, 0x34, 0x35, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
             0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0xc9,
         ];
-        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take_with_checksum::<VerboseError<_>>(input).unwrap();
         let packet = SerialNumberAndFirmwareVersion::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1;

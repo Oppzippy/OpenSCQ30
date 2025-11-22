@@ -49,7 +49,7 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x02, 0x0c, 0x00, 0x00, 0x01, 0x19,
         ];
-        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take_with_checksum::<VerboseError<_>>(input).unwrap();
         let packet = TwsStatus::take::<VerboseError<_>>(&packet.body).unwrap().1;
         assert_eq!(HostDevice::Left, packet.0.host_device);
         assert!(packet.0.is_connected);

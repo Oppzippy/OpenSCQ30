@@ -24,14 +24,14 @@ use super::packet::Command;
 
 pub struct DemoConnectionRegistry {
     model: DeviceModel,
-    packet_responses: HashMap<Command, Vec<u8>>,
+    packet_responses: HashMap<Command, packet::Inbound>,
     config: SoundcoreDeviceConfig,
 }
 
 impl DemoConnectionRegistry {
     pub fn new(
         model: DeviceModel,
-        packet_responses: HashMap<Command, Vec<u8>>,
+        packet_responses: HashMap<Command, packet::Inbound>,
         config: SoundcoreDeviceConfig,
     ) -> Self {
         Self {
@@ -69,12 +69,15 @@ pub struct DemoConnection {
     connection_status_receiver: Mutex<Option<watch::Receiver<ConnectionStatus>>>,
     packet_sender: mpsc::Sender<Vec<u8>>,
     packet_receiver: Mutex<Option<mpsc::Receiver<Vec<u8>>>>,
-    packet_responses: HashMap<Command, Vec<u8>>,
+    packet_responses: HashMap<Command, packet::Inbound>,
     config: SoundcoreDeviceConfig,
 }
 
 impl DemoConnection {
-    pub fn new(packet_responses: HashMap<Command, Vec<u8>>, config: SoundcoreDeviceConfig) -> Self {
+    pub fn new(
+        packet_responses: HashMap<Command, packet::Inbound>,
+        config: SoundcoreDeviceConfig,
+    ) -> Self {
         let (connection_status_sender, connection_status_receiver) =
             watch::channel(ConnectionStatus::Connected);
         let (packet_sender, packet_receiver) = mpsc::channel(10);
@@ -100,24 +103,19 @@ impl RfcommConnection for DemoConnection {
         }
         tracing::debug!("writing packet {data:?}");
 
-        let (_remainder, packet) = if self.config.has_packet_checksum {
-            packet::Outbound::take::<VerboseError<_>>(data)
-                .expect("we should never send invalid packets")
-        } else {
-            packet::Outbound::take_without_checksum::<VerboseError<_>>(data)
-                .expect("we should never send invalid packets")
-        };
+        let (_remainder, packet) =
+            packet::Outbound::take::<VerboseError<_>>(self.config.checksum_kind)(data)
+                .expect("we should never send invalid packets");
 
         if let Some(response) = self.packet_responses.get(&packet.command) {
-            self.packet_sender.send(response.to_owned()).await.unwrap();
+            self.packet_sender
+                .send(response.bytes(self.config.checksum_kind))
+                .await
+                .unwrap();
         } else {
             // ACK
             self.packet_sender
-                .send(if self.config.has_packet_checksum {
-                    packet.ack().bytes()
-                } else {
-                    packet.ack().bytes_without_checksum()
-                })
+                .send(packet.ack().bytes(self.config.checksum_kind))
                 .await
                 .unwrap();
         }

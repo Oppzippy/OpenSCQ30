@@ -52,7 +52,7 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            packets::inbound::A3959State::default().to_packet().bytes(),
+            packets::inbound::A3959State::default().to_packet(),
         )])
     },
 );
@@ -145,7 +145,10 @@ mod tests {
 
     use crate::{
         DeviceModel,
-        devices::soundcore::common::{device::test_utils::TestSoundcoreDevice, packet},
+        devices::soundcore::common::{
+            device::{SoundcoreDeviceConfig, test_utils::TestSoundcoreDevice},
+            packet,
+        },
         settings::{SettingId, Value},
     };
 
@@ -167,6 +170,7 @@ mod tests {
                     ],
                 ),
             )]),
+            SoundcoreDeviceConfig::default(),
         )
         .await;
 
@@ -211,6 +215,7 @@ mod tests {
                     ],
                 ),
             )]),
+            SoundcoreDeviceConfig::default(),
         )
         .await;
 
@@ -245,6 +250,7 @@ mod tests {
                     ],
                 ),
             )]),
+            SoundcoreDeviceConfig::default(),
         )
         .await;
     }
@@ -267,6 +273,7 @@ mod tests {
                     ],
                 ),
             )]),
+            SoundcoreDeviceConfig::default(),
         )
         .await;
         device
@@ -301,6 +308,7 @@ mod tests {
                     ],
                 ),
             )]),
+            SoundcoreDeviceConfig::default(),
         )
         .await;
         device
@@ -332,6 +340,7 @@ mod tests {
                     ],
                 ),
             )]),
+            SoundcoreDeviceConfig::default(),
         )
         .await;
 

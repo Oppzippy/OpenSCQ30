@@ -50,7 +50,7 @@ mod tests {
             ),
         }
         .to_packet()
-        .bytes();
+        .bytes_with_checksum();
         assert_eq!(EXPECTED, actual);
     }
 }

@@ -64,13 +64,11 @@ soundcore_device!(
         HashMap::from([
             (
                 RequestState::COMMAND,
-                A3031StateUpdatePacket::default().to_packet().bytes(),
+                A3031StateUpdatePacket::default().to_packet(),
             ),
             (
                 RequestSerialNumberAndFirmwareVersion::COMMAND,
-                SerialNumberAndFirmwareVersion::default()
-                    .to_packet()
-                    .bytes(),
+                SerialNumberAndFirmwareVersion::default().to_packet(),
             ),
         ])
     },

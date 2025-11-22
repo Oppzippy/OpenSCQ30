@@ -47,7 +47,7 @@ mod tests {
             transparency_mode: TransparencyMode::VocalMode,
             custom_noise_canceling: CustomNoiseCanceling::new(0),
         });
-        assert_eq!(EXPECTED, packet.to_packet().bytes());
+        assert_eq!(EXPECTED, packet.to_packet().bytes_with_checksum());
     }
 
     #[test]
@@ -61,6 +61,6 @@ mod tests {
             transparency_mode: TransparencyMode::VocalMode,
             custom_noise_canceling: CustomNoiseCanceling::new(0),
         });
-        assert_eq!(EXPECTED, packet.to_packet().bytes());
+        assert_eq!(EXPECTED, packet.to_packet().bytes_with_checksum());
     }
 }

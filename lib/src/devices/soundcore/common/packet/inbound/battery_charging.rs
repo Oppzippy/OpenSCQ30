@@ -77,7 +77,7 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04, 0x0c, 0x00, 0x01, 0x00, 0x1b,
         ];
-        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take_with_checksum::<VerboseError<_>>(input).unwrap();
         let packet = DualBatteryCharging::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1;
@@ -91,7 +91,7 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x01, 0x04, 0x0b, 0x00, 0x01, 0x1a,
         ];
-        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take_with_checksum::<VerboseError<_>>(input).unwrap();
         let packet = SingleBatteryCharging::take::<VerboseError<_>>(&packet.body)
             .unwrap()
             .1;

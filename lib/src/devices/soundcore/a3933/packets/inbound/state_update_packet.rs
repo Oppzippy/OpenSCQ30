@@ -317,8 +317,10 @@ mod tests {
 
     #[test]
     fn serialize_and_deserialize() {
-        let bytes = A3933StateUpdatePacket::default().to_packet().bytes();
-        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(&bytes).unwrap();
+        let bytes = A3933StateUpdatePacket::default()
+            .to_packet()
+            .bytes_with_checksum();
+        let (_, packet) = packet::Inbound::take_with_checksum::<VerboseError<_>>(&bytes).unwrap();
         let _: A3933StateUpdatePacket = packet.try_to_packet().unwrap();
     }
 
@@ -344,7 +346,7 @@ mod tests {
             1, 82, 1, 102, 1, 84, 1, 1, 1, 0, 7, 0, 0, 0, 10, 255, 255, 0, 255, 0, 0, 0, 51, 255,
             255, 255, 255, 102,
         ];
-        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take_with_checksum::<VerboseError<_>>(input).unwrap();
         let (_, packet) = A3933StateUpdatePacket::take::<VerboseError<_>>(&packet.body)
             .expect("should parse packet");
 

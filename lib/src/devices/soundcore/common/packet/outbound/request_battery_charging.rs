@@ -27,7 +27,9 @@ mod tests {
         let expected: &[u8] = &[0x08, 0xee, 0x00, 0x00, 0x00, 0x01, 0x04, 0x0a, 0x00, 0x05];
         assert_eq!(
             expected,
-            RequestBatteryCharging::default().to_packet().bytes()
+            RequestBatteryCharging::default()
+                .to_packet()
+                .bytes_with_checksum()
         );
     }
 }

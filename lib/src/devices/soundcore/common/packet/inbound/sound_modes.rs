@@ -58,7 +58,7 @@ mod tests {
         let input: &[u8] = &[
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x02, 0x02, 0x01, 0x00, 0x23,
         ];
-        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take_with_checksum::<VerboseError<_>>(input).unwrap();
         let packet = SoundModes::take::<VerboseError<_>>(&packet.body).unwrap().1;
         assert_eq!(AmbientSoundMode::Normal, packet.0.ambient_sound_mode);
         assert_eq!(NoiseCancelingMode::Indoor, packet.0.noise_canceling_mode);
@@ -70,7 +70,7 @@ mod tests {
             //                                                    max value of 0x02
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x03, 0x02, 0x01, 0x00, 0x24,
         ];
-        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take_with_checksum::<VerboseError<_>>(input).unwrap();
         let (_, packet) = SoundModes::take::<VerboseError<_>>(&packet.body).unwrap();
         assert_eq!(AmbientSoundMode::default(), packet.0.ambient_sound_mode);
     }
@@ -81,7 +81,7 @@ mod tests {
             //                                                          max value of 0x03
             0x09, 0xff, 0x00, 0x00, 0x01, 0x06, 0x01, 0x0e, 0x00, 0x02, 0x04, 0x01, 0x00, 0x25,
         ];
-        let (_, packet) = packet::Inbound::take::<VerboseError<_>>(input).unwrap();
+        let (_, packet) = packet::Inbound::take_with_checksum::<VerboseError<_>>(input).unwrap();
         let (_, packet) = SoundModes::take::<VerboseError<_>>(&packet.body).unwrap();
         assert_eq!(NoiseCancelingMode::default(), packet.0.noise_canceling_mode);
     }

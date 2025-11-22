@@ -117,6 +117,6 @@ mod tests {
             ]
         }
 
-        assert_eq!(packet.bytes(), expected_packet())
+        assert_eq!(packet.bytes_with_checksum(), expected_packet())
     }
 }
