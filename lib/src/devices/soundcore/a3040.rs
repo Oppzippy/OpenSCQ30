@@ -22,7 +22,6 @@ mod structures;
 
 soundcore_device!(
     A3040State,
-    A3040StateUpdatePacket,
     async |packet_io| {
         fetch_state_from_state_update_packet::<_, A3040State, A3040StateUpdatePacket>(packet_io)
             .await
@@ -88,7 +87,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn test_with_known_good_packet() {
-        let device = TestSoundcoreDevice::new_with_packet_responses(
+        let device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3040,
             HashMap::from([(
@@ -130,7 +129,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn set_ambient_sound_mode() {
-        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+        let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3040,
             HashMap::from([(
@@ -165,7 +164,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn set_equalizer_soundcore_signature() {
-        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+        let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3040,
             HashMap::from([(
@@ -210,7 +209,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn set_equalizer_custom() {
-        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+        let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3040,
             HashMap::from([(

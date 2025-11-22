@@ -18,7 +18,6 @@ mod state;
 
 soundcore_device!(
     A3926State,
-    A3926StateUpdatePacket,
     async |packet_io| {
         let state_update_packet: A3926StateUpdatePacket = packet_io
             .send_with_response(&RequestState::default().to_packet())
@@ -73,16 +72,37 @@ soundcore_device!(
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+
     use crate::{
         DeviceModel,
-        devices::soundcore::common::{device::test_utils::TestSoundcoreDevice, packet},
+        devices::soundcore::{
+            a3926::packets::A3926StateUpdatePacket,
+            common::{
+                device::test_utils::TestSoundcoreDevice,
+                packet::{self, outbound::ToPacket},
+            },
+        },
         settings::{SettingId, Value},
     };
 
     #[tokio::test(start_paused = true)]
     async fn test_set_left_single_press() {
-        let mut test_device =
-            TestSoundcoreDevice::new(super::device_registry, DeviceModel::SoundcoreA3926).await;
+        let mut test_device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreA3926,
+            HashMap::from([
+                (
+                    packet::Command([1, 1]),
+                    A3926StateUpdatePacket::default().to_packet(),
+                ),
+                (
+                    packet::inbound::SerialNumberAndFirmwareVersion::COMMAND,
+                    packet::inbound::SerialNumberAndFirmwareVersion::default().to_packet(),
+                ),
+            ]),
+        )
+        .await;
         test_device
             .assert_set_settings_response_unordered(
                 vec![(SettingId::LeftSinglePress, Value::from("PlayPause"))],

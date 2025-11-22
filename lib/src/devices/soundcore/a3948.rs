@@ -21,7 +21,6 @@ mod state;
 
 soundcore_device!(
     A3948State,
-    A3948StateUpdatePacket,
     async |packet_io| {
         fetch_state_from_state_update_packet::<_, A3948State, A3948StateUpdatePacket>(packet_io)
             .await
@@ -107,7 +106,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn test_new_with_example_state_update_packet() {
-        let device = TestSoundcoreDevice::new_with_packet_responses(
+        let device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3948,
             HashMap::from([(
@@ -149,7 +148,7 @@ mod tests {
                 255, 255, 255, 255,
             ],
         );
-        let device = TestSoundcoreDevice::new_with_packet_responses(
+        let device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3948,
             HashMap::from([(packet::Command([1, 1]), state_update_packet)]),
@@ -183,7 +182,7 @@ mod tests {
                 255, 255, 255, 255,
             ],
         );
-        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+        let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3948,
             HashMap::from([(packet::Command([1, 1]), state_update_packet)]),

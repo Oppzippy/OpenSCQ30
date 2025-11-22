@@ -16,7 +16,6 @@ mod structures;
 
 soundcore_device!(
     A3116State,
-    A3116StateUpdatePacket,
     async |packet_io| {
         packet_io
             .uses_checksum

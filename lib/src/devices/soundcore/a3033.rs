@@ -14,7 +14,6 @@ mod state;
 
 soundcore_device!(
     A3033State,
-    A3033StateUpdatePacket,
     async |packet_io| {
         fetch_state_from_state_update_packet::<_, A3033State, A3033StateUpdatePacket>(packet_io)
             .await

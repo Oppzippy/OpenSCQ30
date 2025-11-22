@@ -76,18 +76,15 @@ where
     Ok(state_update_packet.into())
 }
 
-pub struct SoundcoreDeviceRegistry<B: RfcommBackend, StateType, StateUpdatePacketType> {
+pub struct SoundcoreDeviceRegistry<B: RfcommBackend, StateType> {
     backend: B,
     database: Arc<OpenSCQ30Database>,
     device_model: DeviceModel,
     fetch_state: FetchStateFn<B::ConnectionType, StateType>,
     _state: PhantomData<StateType>,
-    _state_update_packet: PhantomData<StateUpdatePacketType>,
 }
 
-impl<B: RfcommBackend, StateType, StateUpdatePacketType>
-    SoundcoreDeviceRegistry<B, StateType, StateUpdatePacketType>
-{
+impl<B: RfcommBackend, StateType> SoundcoreDeviceRegistry<B, StateType> {
     pub fn new(
         backend: B,
         database: Arc<OpenSCQ30Database>,
@@ -100,19 +97,16 @@ impl<B: RfcommBackend, StateType, StateUpdatePacketType>
             database,
             fetch_state,
             _state: PhantomData,
-            _state_update_packet: PhantomData,
         }
     }
 }
 
 #[async_trait]
-impl<B, StateType, StateUpdatePacketType> OpenSCQ30DeviceRegistry
-    for SoundcoreDeviceRegistry<B, StateType, StateUpdatePacketType>
+impl<B, StateType> OpenSCQ30DeviceRegistry for SoundcoreDeviceRegistry<B, StateType>
 where
     B: RfcommBackend + 'static + Send + Sync,
     StateType: Clone + Send + Sync + 'static,
-    StateUpdatePacketType: FromPacketBody + Send + Sync + 'static,
-    Self: BuildDevice<B::ConnectionType, StateType, StateUpdatePacketType>,
+    Self: BuildDevice<B::ConnectionType, StateType>,
 {
     async fn devices(&self) -> device::Result<Vec<ConnectionDescriptor>> {
         self.backend
@@ -154,17 +148,17 @@ where
     }
 }
 
-pub trait BuildDevice<ConnectionType, StateType, StateUpdateType>
+pub trait BuildDevice<ConnectionType, StateType>
 where
     ConnectionType: RfcommConnection + Send + Sync,
     StateType: Clone + Send + Sync,
 {
     fn build_device(
-        builder: &mut SoundcoreDeviceBuilder<ConnectionType, StateType, StateUpdateType>,
+        builder: &mut SoundcoreDeviceBuilder<ConnectionType, StateType>,
     ) -> impl Future<Output = ()> + Send;
 }
 
-pub struct SoundcoreDeviceBuilder<ConnectionType, StateType, StateUpdatePacketType>
+pub struct SoundcoreDeviceBuilder<ConnectionType, StateType>
 where
     ConnectionType: RfcommConnection + Send + Sync + 'static,
 {
@@ -175,7 +169,6 @@ where
     database: Arc<OpenSCQ30Database>,
     packet_receiver: mpsc::Receiver<packet::Inbound>,
     change_notify: watch::Sender<()>,
-    _state_update: PhantomData<StateUpdatePacketType>,
 }
 
 macro_rules! flag {
@@ -192,12 +185,10 @@ macro_rules! flag {
     };
 }
 
-impl<ConnectionType, StateType, StateUpdatePacketType>
-    SoundcoreDeviceBuilder<ConnectionType, StateType, StateUpdatePacketType>
+impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
 where
     ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Send + Sync + Clone + 'static,
-    StateUpdatePacketType: FromPacketBody,
 {
     pub async fn new(
         database: Arc<OpenSCQ30Database>,
@@ -220,14 +211,11 @@ where
             module_collection,
             database,
             packet_receiver,
-            _state_update: PhantomData,
             change_notify: watch::channel(()).0,
         })
     }
 
-    pub async fn build(
-        self,
-    ) -> SoundcoreDeviceTemplate<ConnectionType, StateType, StateUpdatePacketType> {
+    pub async fn build(self) -> SoundcoreDeviceTemplate<ConnectionType, StateType> {
         SoundcoreDeviceTemplate::new(
             self.packet_io_controller,
             self.state_sender,
@@ -473,7 +461,7 @@ where
     flag!(WearingDetection);
 }
 
-pub struct SoundcoreDeviceTemplate<ConnectionType, StateType, StateUpdatePacketType>
+pub struct SoundcoreDeviceTemplate<ConnectionType, StateType>
 where
     ConnectionType: RfcommConnection + Send + Sync,
     StateType: Clone + Send + Sync,
@@ -485,15 +473,12 @@ where
     // TODO exit signal is necessary due to the PacketIOController Arc spaghetti.
     exit_signal: Arc<Semaphore>,
     change_notify: watch::Receiver<()>,
-    _state_update: PhantomData<StateUpdatePacketType>,
 }
 
-impl<ConnectionType, StateType, StateUpdatePacketType>
-    SoundcoreDeviceTemplate<ConnectionType, StateType, StateUpdatePacketType>
+impl<ConnectionType, StateType> SoundcoreDeviceTemplate<ConnectionType, StateType>
 where
     ConnectionType: RfcommConnection + 'static + Send + Sync,
     StateType: Clone + Send + Sync + 'static,
-    StateUpdatePacketType: FromPacketBody,
 {
     async fn new(
         packet_io_controller: Arc<PacketIOController<ConnectionType>>,
@@ -515,14 +500,12 @@ where
             packet_io_controller,
             module_collection,
             exit_signal,
-            _state_update: PhantomData,
             change_notify,
         }
     }
 }
 
-impl<ConnectionType, StateType, StateUpdatePacketType> Drop
-    for SoundcoreDeviceTemplate<ConnectionType, StateType, StateUpdatePacketType>
+impl<ConnectionType, StateType> Drop for SoundcoreDeviceTemplate<ConnectionType, StateType>
 where
     ConnectionType: RfcommConnection + Send + Sync,
     StateType: Clone + Send + Sync,
@@ -533,12 +516,11 @@ where
 }
 
 #[async_trait]
-impl<ConnectionType, StateType, StateUpdatePacketType> OpenSCQ30Device
-    for SoundcoreDeviceTemplate<ConnectionType, StateType, StateUpdatePacketType>
+impl<ConnectionType, StateType> OpenSCQ30Device
+    for SoundcoreDeviceTemplate<ConnectionType, StateType>
 where
     ConnectionType: RfcommConnection + 'static + Send + Sync,
     StateType: Clone + Send + Sync + 'static,
-    StateUpdatePacketType: FromPacketBody + Send + Sync,
 {
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
         self.packet_io_controller.connection_status()
@@ -601,9 +583,7 @@ pub mod test_utils {
     use nom_language::error::VerboseError;
 
     use crate::{
-        devices::soundcore::common::packet::{
-            self, Command, inbound::FromPacketBody, outbound::ToPacket,
-        },
+        devices::soundcore::common::packet::{self, Command},
         mock::rfcomm::{MockRfcommBackend, MockRfcommConnection},
     };
 
@@ -616,66 +596,19 @@ pub mod test_utils {
     }
 
     impl TestSoundcoreDevice {
-        pub async fn new<StateType, StateUpdatePacketType>(
+        pub async fn new<StateType>(
             constructor: fn(
                 MockRfcommBackend,
                 Arc<OpenSCQ30Database>,
                 DeviceModel,
-            ) -> SoundcoreDeviceRegistry<
-                MockRfcommBackend,
-                StateType,
-                StateUpdatePacketType,
-            >,
-            device_model: DeviceModel,
-        ) -> Self
-        where
-            StateType: Clone + Send + Sync + 'static,
-            StateUpdatePacketType: FromPacketBody
-                + ToPacket<DirectionMarker = packet::InboundMarker>
-                + Clone
-                + Send
-                + Sync
-                + Default
-                + 'static,
-            SoundcoreDeviceRegistry<MockRfcommBackend, StateType, StateUpdatePacketType>:
-                BuildDevice<MockRfcommConnection, StateType, StateUpdatePacketType>,
-        {
-            Self::new_with_packet_responses(
-                constructor,
-                device_model,
-                HashMap::from([
-                    (
-                        Command([1, 1]),
-                        StateUpdatePacketType::default().to_packet(),
-                    ),
-                    (
-                        packet::inbound::SerialNumberAndFirmwareVersion::COMMAND,
-                        packet::inbound::SerialNumberAndFirmwareVersion::default().to_packet(),
-                    ),
-                ]),
-            )
-            .await
-        }
-
-        pub async fn new_with_packet_responses<StateType, StateUpdatePacketType>(
-            constructor: fn(
-                MockRfcommBackend,
-                Arc<OpenSCQ30Database>,
-                DeviceModel,
-            ) -> SoundcoreDeviceRegistry<
-                MockRfcommBackend,
-                StateType,
-                StateUpdatePacketType,
-            >,
+            ) -> SoundcoreDeviceRegistry<MockRfcommBackend, StateType>,
             device_model: DeviceModel,
             packet_responses: HashMap<Command, packet::Inbound>,
         ) -> Self
         where
             StateType: Clone + Send + Sync + 'static,
-            StateUpdatePacketType:
-                FromPacketBody + ToPacket + Clone + Send + Sync + Default + 'static,
-            SoundcoreDeviceRegistry<MockRfcommBackend, StateType, StateUpdatePacketType>:
-                BuildDevice<MockRfcommConnection, StateType, StateUpdatePacketType>,
+            SoundcoreDeviceRegistry<MockRfcommBackend, StateType>:
+                BuildDevice<MockRfcommConnection, StateType>,
         {
             let (inbound_sender, inbound_receiver) = mpsc::channel(100);
             let (outbound_sender, mut outbound_receiver) = mpsc::channel(100);

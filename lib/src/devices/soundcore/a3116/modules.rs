@@ -4,10 +4,7 @@ use crate::{
     connection::RfcommConnection,
     devices::soundcore::{
         a3116,
-        common::{
-            device::SoundcoreDeviceBuilder, packet::inbound::FromPacketBody,
-            structures::EqualizerConfiguration,
-        },
+        common::{device::SoundcoreDeviceBuilder, structures::EqualizerConfiguration},
     },
 };
 
@@ -15,11 +12,9 @@ mod auto_power_off;
 mod equalizer;
 mod volume;
 
-impl<ConnectionType, StateType, StateUpdatePacketType>
-    SoundcoreDeviceBuilder<ConnectionType, StateType, StateUpdatePacketType>
+impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
 where
     ConnectionType: RfcommConnection + Send + Sync + 'static,
-    StateUpdatePacketType: FromPacketBody + Into<StateType>,
     StateType: Has<a3116::structures::AutoPowerOffDuration> + Send + Sync + Clone + 'static,
 {
     pub fn a3116_auto_power_off(&mut self) {
@@ -29,11 +24,9 @@ where
     }
 }
 
-impl<ConnectionType, StateType, StateUpdatePacketType>
-    SoundcoreDeviceBuilder<ConnectionType, StateType, StateUpdatePacketType>
+impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
 where
     ConnectionType: RfcommConnection + Send + Sync + 'static,
-    StateUpdatePacketType: FromPacketBody + Into<StateType>,
     StateType: Has<a3116::structures::Volume> + Send + Sync + Clone + 'static,
 {
     pub fn a3116_volume(&mut self, max_volume: u8) {
@@ -43,11 +36,9 @@ where
     }
 }
 
-impl<ConnectionType, StateType, StateUpdatePacketType>
-    SoundcoreDeviceBuilder<ConnectionType, StateType, StateUpdatePacketType>
+impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
 where
     ConnectionType: RfcommConnection + Send + Sync + 'static,
-    StateUpdatePacketType: FromPacketBody + Into<StateType>,
     StateType: Has<EqualizerConfiguration<1, 9, -6, 6, 0>> + Clone + Send + Sync + 'static,
 {
     pub async fn a3116_equalizer(&mut self) {

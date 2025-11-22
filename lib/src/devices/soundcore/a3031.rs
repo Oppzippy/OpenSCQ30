@@ -27,7 +27,6 @@ mod state;
 
 soundcore_device!(
     A3031State,
-    A3031StateUpdatePacket,
     async |packet_io| {
         let state_update_packet: A3031StateUpdatePacket = packet_io
             .send_with_response(&RequestState::default().to_packet())

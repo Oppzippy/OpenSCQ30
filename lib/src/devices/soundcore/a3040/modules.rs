@@ -4,7 +4,7 @@ use crate::{
     connection::RfcommConnection,
     devices::soundcore::{
         a3040,
-        common::{self, device::SoundcoreDeviceBuilder, packet::inbound::FromPacketBody},
+        common::{self, device::SoundcoreDeviceBuilder},
     },
 };
 
@@ -12,11 +12,9 @@ mod button_configuration;
 mod equalizer;
 mod sound_modes;
 
-impl<ConnectionType, StateType, StateUpdatePacketType>
-    SoundcoreDeviceBuilder<ConnectionType, StateType, StateUpdatePacketType>
+impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
 where
     ConnectionType: RfcommConnection + Send + Sync + 'static,
-    StateUpdatePacketType: FromPacketBody + Into<StateType>,
     StateType: Has<a3040::structures::SoundModes> + Send + Sync + Clone + 'static,
 {
     pub fn a3040_sound_modes(&mut self) {
@@ -26,11 +24,9 @@ where
     }
 }
 
-impl<ConnectionType, StateType, StateUpdatePacketType>
-    SoundcoreDeviceBuilder<ConnectionType, StateType, StateUpdatePacketType>
+impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
 where
     ConnectionType: RfcommConnection + Send + Sync + 'static,
-    StateUpdatePacketType: FromPacketBody + Into<StateType>,
     StateType: Has<common::structures::CommonEqualizerConfiguration<1, 10>>
         + Has<common::structures::CustomHearId<2, 10>>
         + Send
@@ -49,11 +45,9 @@ where
     }
 }
 
-impl<ConnectionType, StateType, StateUpdatePacketType>
-    SoundcoreDeviceBuilder<ConnectionType, StateType, StateUpdatePacketType>
+impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
 where
     ConnectionType: RfcommConnection + Send + Sync + 'static,
-    StateUpdatePacketType: FromPacketBody + Into<StateType>,
     StateType: Has<a3040::structures::ButtonConfiguration> + Send + Sync + Clone + 'static,
 {
     pub fn a3040_button_configuration(&mut self) {

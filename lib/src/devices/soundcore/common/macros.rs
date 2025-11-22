@@ -1,14 +1,12 @@
 macro_rules! soundcore_device {
     (
         $state: ty,
-        $state_update_packet: ty,
         async |$packet_io_controller:ident| $fetch_state:block,
         async |$builder:ident| $block:block,
         $demo_packets:expr$(,)?
     ) => {
         soundcore_device! {
             $state,
-            $state_update_packet,
             async |$packet_io_controller| $fetch_state,
             async |$builder| $block,
             $demo_packets,
@@ -17,7 +15,6 @@ macro_rules! soundcore_device {
     };
     (
         $state: ty,
-        $state_update_packet: ty,
         async |$packet_io_controller:ident| $fetch_state:block,
         async |$builder:ident| $block:block,
         $demo_packets:expr,
@@ -27,11 +24,7 @@ macro_rules! soundcore_device {
             backend: B,
             database: std::sync::Arc<$crate::storage::OpenSCQ30Database>,
             device_model: $crate::devices::DeviceModel,
-        ) -> $crate::devices::soundcore::common::device::SoundcoreDeviceRegistry<
-            B,
-            $state,
-            $state_update_packet,
-        >
+        ) -> $crate::devices::soundcore::common::device::SoundcoreDeviceRegistry<B, $state>
         where
             B: $crate::api::connection::RfcommBackend + Send + Sync + 'static,
         {
@@ -49,7 +42,6 @@ macro_rules! soundcore_device {
         ) -> $crate::devices::soundcore::common::device::SoundcoreDeviceRegistry<
             $crate::devices::soundcore::common::demo::DemoConnectionRegistry,
             $state,
-            $state_update_packet,
         > {
             $crate::devices::soundcore::common::device::SoundcoreDeviceRegistry::new(
                 $crate::devices::soundcore::common::demo::DemoConnectionRegistry::new(
@@ -63,17 +55,8 @@ macro_rules! soundcore_device {
             )
         }
 
-        impl<B>
-            $crate::devices::soundcore::common::device::BuildDevice<
-                B::ConnectionType,
-                $state,
-                $state_update_packet,
-            >
-            for $crate::devices::soundcore::common::device::SoundcoreDeviceRegistry<
-                B,
-                $state,
-                $state_update_packet,
-            >
+        impl<B> $crate::devices::soundcore::common::device::BuildDevice<B::ConnectionType, $state>
+            for $crate::devices::soundcore::common::device::SoundcoreDeviceRegistry<B, $state>
         where
             B: $crate::api::connection::RfcommBackend + Send + Sync + 'static,
         {
@@ -81,7 +64,6 @@ macro_rules! soundcore_device {
                 $builder: &mut $crate::devices::soundcore::common::device::SoundcoreDeviceBuilder<
                     B::ConnectionType,
                     $state,
-                    $state_update_packet,
                 >,
             ) {
                 $block

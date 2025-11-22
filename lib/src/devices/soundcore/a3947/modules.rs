@@ -6,7 +6,6 @@ use crate::{
         a3947,
         common::{
             device::SoundcoreDeviceBuilder,
-            packet::inbound::FromPacketBody,
             structures::{CommonEqualizerConfiguration, TwsStatus},
         },
     },
@@ -17,11 +16,9 @@ use super::structures::SoundModes;
 mod equalizer;
 mod sound_modes;
 
-impl<ConnectionType, StateType, StateUpdatePacketType>
-    SoundcoreDeviceBuilder<ConnectionType, StateType, StateUpdatePacketType>
+impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
 where
     ConnectionType: RfcommConnection + Send + Sync + 'static,
-    StateUpdatePacketType: FromPacketBody + Into<StateType>,
     StateType: Has<SoundModes> + Send + Sync + Clone + 'static,
 {
     pub fn a3947_sound_modes(&mut self) {
@@ -31,11 +28,9 @@ where
     }
 }
 
-impl<ConnectionType, StateType, StateUpdatePacketType>
-    SoundcoreDeviceBuilder<ConnectionType, StateType, StateUpdatePacketType>
+impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
 where
     ConnectionType: RfcommConnection + Send + Sync + 'static,
-    StateUpdatePacketType: FromPacketBody + Into<StateType>,
     StateType: Has<CommonEqualizerConfiguration<2, 10>>
         + Has<a3947::structures::HearId<2, 10>>
         + Has<TwsStatus>

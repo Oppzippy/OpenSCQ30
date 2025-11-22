@@ -28,7 +28,6 @@ mod structures;
 
 soundcore_device!(
     A3947State,
-    A3947StateUpdatePacket,
     async |packet_io| {
         fetch_state_from_state_update_packet::<_, A3947State, A3947StateUpdatePacket>(packet_io)
             .await
@@ -164,7 +163,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn test_with_known_good_packet() {
-        let device = TestSoundcoreDevice::new_with_packet_responses(
+        let device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3947,
             HashMap::from([(
@@ -218,7 +217,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn it_turns_off_hear_id() {
-        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+        let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3947,
             HashMap::from([(
@@ -264,7 +263,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn test_set_sound_mode_normal() {
-        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+        let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3947,
             HashMap::from([(
@@ -299,7 +298,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn set_gaming_mode() {
-        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+        let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3947,
             HashMap::from([(
@@ -331,7 +330,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn set_sound_leak_compensation() {
-        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+        let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3947,
             HashMap::from([(
@@ -363,7 +362,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn set_surround_sound() {
-        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+        let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3947,
             HashMap::from([(
@@ -395,7 +394,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn set_wearing_tone() {
-        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+        let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3947,
             HashMap::from([(
@@ -427,7 +426,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn set_auto_play_pause() {
-        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+        let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3947,
             HashMap::from([(
@@ -459,7 +458,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn set_touch_lock() {
-        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+        let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3947,
             HashMap::from([(
@@ -491,7 +490,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn set_low_battery_prompt() {
-        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+        let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3947,
             HashMap::from([(

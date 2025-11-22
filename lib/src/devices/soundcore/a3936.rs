@@ -28,7 +28,6 @@ mod structures;
 
 soundcore_device!(
     A3936State,
-    A3936StateUpdatePacket,
     async |packet_io| {
         fetch_state_from_state_update_packet::<_, A3936State, A3936StateUpdatePacket>(packet_io)
             .await

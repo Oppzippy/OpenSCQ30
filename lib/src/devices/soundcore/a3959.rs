@@ -25,7 +25,6 @@ mod structures;
 
 soundcore_device!(
     state::A3959State,
-    packets::inbound::A3959State,
     async |packet_io| {
         fetch_state_from_state_update_packet::<_, state::A3959State, packets::inbound::A3959State>(
             packet_io,
@@ -152,7 +151,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn test_with_packet_from_github_issue_149() {
-        let device = TestSoundcoreDevice::new_with_packet_responses(
+        let device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3959,
             HashMap::from([(
@@ -196,7 +195,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn test_with_packet_from_github_issue_149_modified_to_disable_tws() {
-        let device = TestSoundcoreDevice::new_with_packet_responses(
+        let device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3959,
             HashMap::from([(
@@ -230,7 +229,7 @@ mod tests {
     #[tokio::test(start_paused = true)]
     async fn test_with_other_packet_from_github_issue_149() {
         // assert that it successfully connects (it will panic otherwise)
-        let _device = TestSoundcoreDevice::new_with_packet_responses(
+        let _device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3959,
             HashMap::from([(
@@ -252,7 +251,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn test_set_multiple_button_actions() {
-        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+        let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3959,
             HashMap::from([(
@@ -286,7 +285,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn test_disable_button() {
-        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+        let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3959,
             HashMap::from([(
@@ -317,7 +316,7 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn test_set_equalizer_configuration() {
-        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+        let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3959,
             HashMap::from([(

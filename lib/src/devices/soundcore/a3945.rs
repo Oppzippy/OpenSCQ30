@@ -21,7 +21,6 @@ mod state;
 
 soundcore_device!(
     A3945State,
-    A3945StateUpdatePacket,
     async |packet_io| {
         fetch_state_from_state_update_packet::<_, A3945State, A3945StateUpdatePacket>(packet_io)
             .await
@@ -138,7 +137,7 @@ mod tests {
             ],
         );
 
-        let mut device = TestSoundcoreDevice::new_with_packet_responses(
+        let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3945,
             HashMap::from([(packet::inbound::STATE_COMMAND, state_update_packet)]),
@@ -183,7 +182,7 @@ mod tests {
             ],
         );
 
-        let device = TestSoundcoreDevice::new_with_packet_responses(
+        let device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3945,
             HashMap::from([(packet::inbound::STATE_COMMAND, state_update_packet)]),
