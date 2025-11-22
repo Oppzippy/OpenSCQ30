@@ -9,7 +9,10 @@ use crate::{
     devices::soundcore::{
         a3947,
         common::{
-            self, modules::ModuleCollection, packet::PacketIOController, structures::TwsStatus,
+            self,
+            modules::{ModuleCollection, equalizer::COMMON_EQUALIZER_MODULE_SETTINGS},
+            packet::PacketIOController,
+            structures::TwsStatus,
         },
     },
     storage::OpenSCQ30Database,
@@ -41,6 +44,7 @@ where
             device_model,
             change_notify,
             Box::new(state_modifier::EqualizerStateModifier::new(packet_io)),
+            COMMON_EQUALIZER_MODULE_SETTINGS,
         )
         .await;
     }

@@ -24,7 +24,8 @@ use crate::{
             packet::PacketIOController,
             state_modifier::StateModifier,
             structures::{
-                AgeRange, BasicHearId, CustomHearId, EqualizerConfiguration, Gender, TwsStatus,
+                AgeRange, BasicHearId, CustomEqualizerConfiguration, CustomHearId,
+                EqualizerConfiguration, Gender, TwsStatus,
             },
         },
     },
@@ -59,6 +60,16 @@ enum_subset!(
     }
 );
 
+pub struct EqualizerModuleSettings {
+    pub custom_preset_id: u16,
+    pub band_hz: &'static [u16],
+}
+
+pub const COMMON_EQUALIZER_MODULE_SETTINGS: EqualizerModuleSettings = EqualizerModuleSettings {
+    custom_preset_id: 0xfefe,
+    band_hz: &[100, 200, 400, 800, 1600, 3200, 6400, 12800],
+};
+
 impl<T: 'static> ModuleCollection<T> {
     pub async fn add_equalizer<Conn, const CHANNELS: usize, const BANDS: usize>(
         &mut self,
@@ -78,6 +89,7 @@ impl<T: 'static> ModuleCollection<T> {
                 packet_io,
                 EqualizerStateModifierOptions { has_drc: false },
             )),
+            COMMON_EQUALIZER_MODULE_SETTINGS,
         )
         .await;
     }
@@ -100,6 +112,7 @@ impl<T: 'static> ModuleCollection<T> {
                 packet_io,
                 EqualizerStateModifierOptions { has_drc: false },
             )),
+            COMMON_EQUALIZER_MODULE_SETTINGS,
         )
         .await;
     }
@@ -122,6 +135,7 @@ impl<T: 'static> ModuleCollection<T> {
                 packet_io,
                 EqualizerStateModifierOptions { has_drc: true },
             )),
+            COMMON_EQUALIZER_MODULE_SETTINGS,
         )
         .await;
     }
@@ -144,6 +158,7 @@ impl<T: 'static> ModuleCollection<T> {
                 packet_io,
                 EqualizerStateModifierOptions { has_drc: true },
             )),
+            COMMON_EQUALIZER_MODULE_SETTINGS,
         )
         .await;
     }
@@ -176,6 +191,7 @@ impl<T: 'static> ModuleCollection<T> {
             Box::new(
                 EqualizerWithBasicHearIdStateModifier::<Conn, CHANNELS, BANDS>::new(packet_io),
             ),
+            COMMON_EQUALIZER_MODULE_SETTINGS,
         )
         .await;
     }
@@ -206,6 +222,7 @@ impl<T: 'static> ModuleCollection<T> {
             device_model,
             change_notify,
             Box::new(EqualizerWithCustomHearIdStateModifier::new(packet_io)),
+            COMMON_EQUALIZER_MODULE_SETTINGS,
         )
         .await;
     }
@@ -213,14 +230,29 @@ impl<T: 'static> ModuleCollection<T> {
     pub async fn add_equalizer_with_custom_state_modifier_tws<
         const CHANNELS: usize,
         const BANDS: usize,
+        const MIN_VOLUME: i16,
+        const MAX_VOLUME: i16,
+        const FRACTION_DIGITS: u8,
     >(
         &mut self,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
         change_notify: watch::Sender<()>,
         state_modifier: Box<dyn StateModifier<T> + Send + Sync + 'static>,
+        module_settings: EqualizerModuleSettings,
     ) where
-        T: Has<EqualizerConfiguration<CHANNELS, BANDS>> + Has<TwsStatus> + Clone + Send + Sync,
+        T: Has<
+                CustomEqualizerConfiguration<
+                    CHANNELS,
+                    BANDS,
+                    MIN_VOLUME,
+                    MAX_VOLUME,
+                    FRACTION_DIGITS,
+                >,
+            > + Has<TwsStatus>
+            + Clone
+            + Send
+            + Sync,
     {
         let profile_store = Arc::new(
             CustomEqualizerProfileStore::new(database, device_model, change_notify.to_owned())
@@ -228,7 +260,11 @@ impl<T: 'static> ModuleCollection<T> {
         );
         self.setting_manager.add_handler(
             CategoryId::Equalizer,
-            EqualizerSettingHandler::<T, CHANNELS, BANDS>::new(profile_store.to_owned()).with_tws(),
+            EqualizerSettingHandler::<T, CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>::new(
+                profile_store.to_owned(),
+                module_settings.custom_preset_id,
+                module_settings.band_hz,
+            ).with_tws(),
         );
         self.setting_manager.add_handler(
             CategoryId::EqualizerImportExport,
@@ -240,14 +276,28 @@ impl<T: 'static> ModuleCollection<T> {
     pub async fn add_equalizer_with_custom_state_modifier<
         const CHANNELS: usize,
         const BANDS: usize,
+        const MIN_VOLUME: i16,
+        const MAX_VOLUME: i16,
+        const FRACTION_DIGITS: u8,
     >(
         &mut self,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
         change_notify: watch::Sender<()>,
         state_modifier: Box<dyn StateModifier<T> + Send + Sync + 'static>,
+        module_settings: EqualizerModuleSettings,
     ) where
-        T: Has<EqualizerConfiguration<CHANNELS, BANDS>> + Clone + Send + Sync,
+        T: Has<
+                CustomEqualizerConfiguration<
+                    CHANNELS,
+                    BANDS,
+                    MIN_VOLUME,
+                    MAX_VOLUME,
+                    FRACTION_DIGITS,
+                >,
+            > + Clone
+            + Send
+            + Sync,
     {
         let profile_store = Arc::new(
             CustomEqualizerProfileStore::new(database, device_model, change_notify.to_owned())
@@ -255,7 +305,11 @@ impl<T: 'static> ModuleCollection<T> {
         );
         self.setting_manager.add_handler(
             CategoryId::Equalizer,
-            EqualizerSettingHandler::<T, CHANNELS, BANDS>::new(profile_store.to_owned()),
+            EqualizerSettingHandler::<T, CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>::new(
+                profile_store.to_owned(),
+                module_settings.custom_preset_id,
+                module_settings.band_hz,
+            ),
         );
         self.setting_manager.add_handler(
             CategoryId::EqualizerImportExport,

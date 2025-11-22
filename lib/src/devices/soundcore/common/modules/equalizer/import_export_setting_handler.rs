@@ -16,14 +16,20 @@ use crate::{
     devices::soundcore::common::{
         modules::equalizer::custom_equalizer_profile_store::CustomEqualizerProfileStore,
         settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
-        structures::EqualizerConfiguration,
+        structures::CustomEqualizerConfiguration,
     },
     i18n::fl,
 };
 
 use super::ImportExportSetting;
 
-pub struct ImportExportSettingHandler<const C: usize, const B: usize> {
+pub struct ImportExportSettingHandler<
+    const CHANNELS: usize,
+    const BANDS: usize,
+    const MIN_VOLUME: i16,
+    const MAX_VOLUME: i16,
+    const FRACTION_DIGITS: u8,
+> {
     profile_store: Arc<CustomEqualizerProfileStore>,
     profiles_receiver: watch::Receiver<Vec<(String, Vec<i16>)>>,
     selected_profiles: Mutex<HashSet<String>>,
@@ -37,7 +43,14 @@ struct ExportedCustomProfile<'a> {
     pub volume_adjustments: Vec<f64>,
 }
 
-impl<const C: usize, const B: usize> ImportExportSettingHandler<C, B> {
+impl<
+    const CHANNELS: usize,
+    const BANDS: usize,
+    const MIN_VOLUME: i16,
+    const MAX_VOLUME: i16,
+    const FRACTION_DIGITS: u8,
+> ImportExportSettingHandler<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
+{
     #[instrument(skip(profile_store))]
     pub fn new(
         profile_store: Arc<CustomEqualizerProfileStore>,
@@ -53,9 +66,18 @@ impl<const C: usize, const B: usize> ImportExportSettingHandler<C, B> {
 }
 
 #[async_trait]
-impl<T, const C: usize, const B: usize> SettingHandler<T> for ImportExportSettingHandler<C, B>
+impl<
+    T,
+    const CHANNELS: usize,
+    const BANDS: usize,
+    const MIN_VOLUME: i16,
+    const MAX_VOLUME: i16,
+    const FRACTION_DIGITS: u8,
+> SettingHandler<T>
+    for ImportExportSettingHandler<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
 where
-    T: Has<EqualizerConfiguration<C, B>> + Send,
+    T: Has<CustomEqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
+        + Send,
 {
     fn settings(&self) -> Vec<SettingId> {
         ImportExportSetting::iter().map(Into::into).collect()

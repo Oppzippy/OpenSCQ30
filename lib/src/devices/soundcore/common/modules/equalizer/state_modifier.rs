@@ -12,8 +12,11 @@ use crate::{
     },
 };
 
-pub struct EqualizerStateModifier<ConnectionType: RfcommConnection, const C: usize, const B: usize>
-{
+pub struct EqualizerStateModifier<
+    ConnectionType: RfcommConnection,
+    const CHANNELS: usize,
+    const BANDS: usize,
+> {
     packet_io: Arc<PacketIOController<ConnectionType>>,
     options: EqualizerStateModifierOptions,
 }
@@ -22,8 +25,8 @@ pub struct EqualizerStateModifierOptions {
     pub has_drc: bool,
 }
 
-impl<ConnectionType: RfcommConnection, const C: usize, const B: usize>
-    EqualizerStateModifier<ConnectionType, C, B>
+impl<ConnectionType: RfcommConnection, const CHANNELS: usize, const BANDS: usize>
+    EqualizerStateModifier<ConnectionType, CHANNELS, BANDS>
 {
     pub fn new(
         packet_io: Arc<PacketIOController<ConnectionType>>,
@@ -34,10 +37,10 @@ impl<ConnectionType: RfcommConnection, const C: usize, const B: usize>
 }
 
 #[async_trait]
-impl<ConnectionType, T, const C: usize, const B: usize> StateModifier<T>
-    for EqualizerStateModifier<ConnectionType, C, B>
+impl<ConnectionType, T, const CHANNELS: usize, const BANDS: usize> StateModifier<T>
+    for EqualizerStateModifier<ConnectionType, CHANNELS, BANDS>
 where
-    T: Has<EqualizerConfiguration<C, B>> + Clone + Send + Sync,
+    T: Has<EqualizerConfiguration<CHANNELS, BANDS>> + Clone + Send + Sync,
     ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
@@ -74,14 +77,14 @@ where
 
 pub struct EqualizerWithBasicHearIdStateModifier<
     ConnectionType: RfcommConnection,
-    const C: usize,
-    const B: usize,
+    const CHANNELS: usize,
+    const BANDS: usize,
 > {
     packet_io: Arc<PacketIOController<ConnectionType>>,
 }
 
-impl<ConnectionType: RfcommConnection, const C: usize, const B: usize>
-    EqualizerWithBasicHearIdStateModifier<ConnectionType, C, B>
+impl<ConnectionType: RfcommConnection, const CHANNELS: usize, const BANDS: usize>
+    EqualizerWithBasicHearIdStateModifier<ConnectionType, CHANNELS, BANDS>
 {
     pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
         Self { packet_io }
@@ -89,11 +92,11 @@ impl<ConnectionType: RfcommConnection, const C: usize, const B: usize>
 }
 
 #[async_trait]
-impl<ConnectionType, T, const C: usize, const B: usize> StateModifier<T>
-    for EqualizerWithBasicHearIdStateModifier<ConnectionType, C, B>
+impl<ConnectionType, T, const CHANNELS: usize, const BANDS: usize> StateModifier<T>
+    for EqualizerWithBasicHearIdStateModifier<ConnectionType, CHANNELS, BANDS>
 where
-    T: Has<EqualizerConfiguration<C, B>>
-        + Has<BasicHearId<C, B>>
+    T: Has<EqualizerConfiguration<CHANNELS, BANDS>>
+        + Has<BasicHearId<CHANNELS, BANDS>>
         + Has<Gender>
         + Has<AgeRange>
         + Clone
@@ -106,16 +109,17 @@ where
         state_sender: &watch::Sender<T>,
         target_state: &T,
     ) -> device::Result<()> {
-        let target_equalizer_configuration: &EqualizerConfiguration<C, B> = target_state.get();
+        let target_equalizer_configuration: &EqualizerConfiguration<CHANNELS, BANDS> =
+            target_state.get();
         {
             let state = state_sender.borrow();
-            let equalizer_configuration: &EqualizerConfiguration<C, B> = state.get();
+            let equalizer_configuration: &EqualizerConfiguration<CHANNELS, BANDS> = state.get();
             if equalizer_configuration == target_equalizer_configuration {
                 return Ok(());
             }
         }
 
-        let mut target_hear_id: BasicHearId<C, B> = *target_state.get();
+        let mut target_hear_id: BasicHearId<CHANNELS, BANDS> = *target_state.get();
         // We don't expose hear id in any way, so it should be disabled to ensure the equalizer
         // configuration that we're applying is in effect
         target_hear_id.is_enabled = false;
@@ -152,14 +156,14 @@ where
 
 pub struct EqualizerWithCustomHearIdStateModifier<
     ConnectionType: RfcommConnection,
-    const C: usize,
-    const B: usize,
+    const CHANNELS: usize,
+    const BANDS: usize,
 > {
     packet_io: Arc<PacketIOController<ConnectionType>>,
 }
 
-impl<ConnectionType: RfcommConnection, const C: usize, const B: usize>
-    EqualizerWithCustomHearIdStateModifier<ConnectionType, C, B>
+impl<ConnectionType: RfcommConnection, const CHANNELS: usize, const BANDS: usize>
+    EqualizerWithCustomHearIdStateModifier<ConnectionType, CHANNELS, BANDS>
 {
     pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
         Self { packet_io }
@@ -167,11 +171,11 @@ impl<ConnectionType: RfcommConnection, const C: usize, const B: usize>
 }
 
 #[async_trait]
-impl<ConnectionType, T, const C: usize, const B: usize> StateModifier<T>
-    for EqualizerWithCustomHearIdStateModifier<ConnectionType, C, B>
+impl<ConnectionType, T, const CHANNELS: usize, const BANDS: usize> StateModifier<T>
+    for EqualizerWithCustomHearIdStateModifier<ConnectionType, CHANNELS, BANDS>
 where
-    T: Has<EqualizerConfiguration<C, B>>
-        + Has<CustomHearId<C, B>>
+    T: Has<EqualizerConfiguration<CHANNELS, BANDS>>
+        + Has<CustomHearId<CHANNELS, BANDS>>
         + Has<Gender>
         + Has<AgeRange>
         + Clone
@@ -184,16 +188,17 @@ where
         state_sender: &watch::Sender<T>,
         target_state: &T,
     ) -> device::Result<()> {
-        let target_equalizer_configuration: &EqualizerConfiguration<C, B> = target_state.get();
+        let target_equalizer_configuration: &EqualizerConfiguration<CHANNELS, BANDS> =
+            target_state.get();
         {
             let state = state_sender.borrow();
-            let equalizer_configuration: &EqualizerConfiguration<C, B> = state.get();
+            let equalizer_configuration: &EqualizerConfiguration<CHANNELS, BANDS> = state.get();
             if equalizer_configuration == target_equalizer_configuration {
                 return Ok(());
             }
         }
 
-        let mut target_hear_id: CustomHearId<C, B> = *target_state.get();
+        let mut target_hear_id: CustomHearId<CHANNELS, BANDS> = *target_state.get();
         // We don't expose hear id in any way, so it should be disabled to ensure the equalizer
         // configuration that we're applying is in effect
         target_hear_id.is_enabled = false;
