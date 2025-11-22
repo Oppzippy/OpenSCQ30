@@ -5,7 +5,7 @@ use crate::{
     devices::{
         DeviceModel,
         soundcore::{
-            common::{demo::DemoConnectionRegistry, packet},
+            common::{demo::DemoConnectionRegistry, device::SoundcoreDeviceConfig, packet},
             development::device::SoundcoreDevelopmentDeviceRegistry,
         },
     },
@@ -34,6 +34,6 @@ pub fn demo_device_registry(
     SoundcoreDevelopmentDeviceRegistry::new(DemoConnectionRegistry::new(
         device_model,
         HashMap::from([(packet::inbound::STATE_COMMAND, vec![1, 2, 3])]),
-        false,
+        SoundcoreDeviceConfig::default(),
     ))
 }

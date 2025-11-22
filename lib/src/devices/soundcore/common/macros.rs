@@ -10,7 +10,7 @@ macro_rules! soundcore_device {
             async |$packet_io_controller| $fetch_state,
             async |$builder| $block,
             $demo_packets,
-            false,
+            Default::default(),
         }
     };
     (
@@ -18,7 +18,7 @@ macro_rules! soundcore_device {
         async |$packet_io_controller:ident| $fetch_state:block,
         async |$builder:ident| $block:block,
         $demo_packets:expr,
-        $no_checksum:expr$(,)?
+        $config:expr$(,)?
     ) => {
         pub fn device_registry<B>(
             backend: B,
@@ -33,6 +33,7 @@ macro_rules! soundcore_device {
                 database,
                 device_model,
                 Box::new(|$packet_io_controller| Box::pin(async move { $fetch_state })),
+                $config,
             )
         }
 
@@ -47,11 +48,12 @@ macro_rules! soundcore_device {
                 $crate::devices::soundcore::common::demo::DemoConnectionRegistry::new(
                     device_model,
                     $demo_packets,
-                    $no_checksum,
+                    $config,
                 ),
                 database,
                 device_model,
                 Box::new(|$packet_io_controller| Box::pin(async move { $fetch_state })),
+                $config,
             )
         }
 

@@ -80,7 +80,8 @@ where
     B: RfcommBackend,
 {
     async fn new(connection: Arc<B::ConnectionType>) -> device::Result<Self> {
-        let (packet_io, _packet_receiver) = PacketIOController::new(connection.to_owned()).await?;
+        let (packet_io, _packet_receiver) =
+            PacketIOController::new(connection.to_owned(), true).await?;
         let state_update_packet = packet_io
             .send_with_response(&RequestState::default().to_packet())
             .await

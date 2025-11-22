@@ -14,7 +14,10 @@ use crate::{
     api::connection::{
         self, ConnectionDescriptor, ConnectionStatus, RfcommBackend, RfcommConnection,
     },
-    devices::{DeviceModel, soundcore::common::packet},
+    devices::{
+        DeviceModel,
+        soundcore::common::{device::SoundcoreDeviceConfig, packet},
+    },
 };
 
 use super::packet::Command;
@@ -22,19 +25,19 @@ use super::packet::Command;
 pub struct DemoConnectionRegistry {
     model: DeviceModel,
     packet_responses: HashMap<Command, Vec<u8>>,
-    no_checksum: bool,
+    config: SoundcoreDeviceConfig,
 }
 
 impl DemoConnectionRegistry {
     pub fn new(
         model: DeviceModel,
         packet_responses: HashMap<Command, Vec<u8>>,
-        no_checksum: bool,
+        config: SoundcoreDeviceConfig,
     ) -> Self {
         Self {
             model,
             packet_responses,
-            no_checksum,
+            config,
         }
     }
 }
@@ -56,7 +59,7 @@ impl RfcommBackend for DemoConnectionRegistry {
     ) -> connection::Result<Self::ConnectionType> {
         Ok(DemoConnection::new(
             self.packet_responses.to_owned(),
-            self.no_checksum,
+            self.config,
         ))
     }
 }
@@ -67,11 +70,11 @@ pub struct DemoConnection {
     packet_sender: mpsc::Sender<Vec<u8>>,
     packet_receiver: Mutex<Option<mpsc::Receiver<Vec<u8>>>>,
     packet_responses: HashMap<Command, Vec<u8>>,
-    no_checksum: bool,
+    config: SoundcoreDeviceConfig,
 }
 
 impl DemoConnection {
-    pub fn new(packet_responses: HashMap<Command, Vec<u8>>, no_checksum: bool) -> Self {
+    pub fn new(packet_responses: HashMap<Command, Vec<u8>>, config: SoundcoreDeviceConfig) -> Self {
         let (connection_status_sender, connection_status_receiver) =
             watch::channel(ConnectionStatus::Connected);
         let (packet_sender, packet_receiver) = mpsc::channel(10);
@@ -81,7 +84,7 @@ impl DemoConnection {
             packet_sender,
             packet_receiver: Mutex::new(Some(packet_receiver)),
             packet_responses,
-            no_checksum,
+            config,
         }
     }
 }
@@ -97,11 +100,11 @@ impl RfcommConnection for DemoConnection {
         }
         tracing::debug!("writing packet {data:?}");
 
-        let (_remainder, packet) = if self.no_checksum {
-            packet::Outbound::take_without_checksum::<VerboseError<_>>(data)
+        let (_remainder, packet) = if self.config.has_packet_checksum {
+            packet::Outbound::take::<VerboseError<_>>(data)
                 .expect("we should never send invalid packets")
         } else {
-            packet::Outbound::take::<VerboseError<_>>(data)
+            packet::Outbound::take_without_checksum::<VerboseError<_>>(data)
                 .expect("we should never send invalid packets")
         };
 
@@ -110,10 +113,10 @@ impl RfcommConnection for DemoConnection {
         } else {
             // ACK
             self.packet_sender
-                .send(if self.no_checksum {
-                    packet.ack().bytes_without_checksum()
-                } else {
+                .send(if self.config.has_packet_checksum {
                     packet.ack().bytes()
+                } else {
+                    packet.ack().bytes_without_checksum()
                 })
                 .await
                 .unwrap();

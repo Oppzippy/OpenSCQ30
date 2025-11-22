@@ -1,10 +1,4 @@
-use std::{
-    sync::{
-        Arc,
-        atomic::{self, AtomicBool},
-    },
-    time::Duration,
-};
+use std::{sync::Arc, time::Duration};
 
 use nom_language::error::VerboseError;
 use tokio::{
@@ -27,7 +21,7 @@ pub struct PacketIOController<ConnectionType>
 where
     ConnectionType: RfcommConnection,
 {
-    pub uses_checksum: Arc<AtomicBool>,
+    has_checksum: bool,
     connection: Arc<ConnectionType>,
     packet_queues: Arc<MultiQueue<Command, packet::Inbound>>,
     handle: JoinHandle<()>,
@@ -45,19 +39,16 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
     /// that weren't a result of send_with_response will be forwarded to.
     pub async fn new(
         connection: Arc<ConnectionType>,
+        has_checksum: bool,
     ) -> device::Result<(Self, mpsc::Receiver<packet::Inbound>)> {
         let packet_queues = Arc::new(MultiQueue::new());
         let incoming_receiver = connection.read_channel();
 
-        let uses_checksum = Arc::new(AtomicBool::new(true));
-        let (handle, outgoing_receiver) = Self::spawn_packet_handler(
-            uses_checksum.clone(),
-            packet_queues.clone(),
-            incoming_receiver,
-        );
+        let (handle, outgoing_receiver) =
+            Self::spawn_packet_handler(has_checksum, packet_queues.clone(), incoming_receiver);
         Ok((
             Self {
-                uses_checksum,
+                has_checksum,
                 connection,
                 packet_queues,
                 handle,
@@ -67,7 +58,7 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
     }
 
     fn spawn_packet_handler(
-        uses_checksum: Arc<AtomicBool>,
+        has_checksum: bool,
         packet_queues: Arc<MultiQueue<Command, packet::Inbound>>,
         mut incoming_receiver: mpsc::Receiver<Vec<u8>>,
     ) -> (JoinHandle<()>, mpsc::Receiver<packet::Inbound>) {
@@ -80,7 +71,7 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
                 buffer.extend_from_slice(&bytes);
                 let mut start_index = 0;
                 while start_index < buffer.len() {
-                    let parser = if uses_checksum.load(atomic::Ordering::Relaxed) {
+                    let parser = if has_checksum {
                         packet::Inbound::take::<VerboseError<_>>
                     } else {
                         packet::Inbound::take_without_checksum::<VerboseError<_>>
@@ -135,7 +126,7 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
         // retry
         for i in 1..=3 {
             self.connection
-                .write(&if self.uses_checksum.load(atomic::Ordering::Relaxed) {
+                .write(&if self.has_checksum {
                     packet.bytes()
                 } else {
                     packet.bytes_without_checksum()
@@ -176,7 +167,7 @@ mod tests {
     async fn test_send_multiple() {
         let (connection, sender, _receiver) = StubRfcommConnection::new();
         let controller = Arc::new(
-            PacketIOController::new(Arc::new(connection))
+            PacketIOController::new(Arc::new(connection), true)
                 .await
                 .unwrap()
                 .0,
@@ -228,7 +219,7 @@ mod tests {
     async fn test_out_of_order_responses() {
         let (connection, sender, _receiver) = StubRfcommConnection::new();
         let controller = Arc::new(
-            PacketIOController::new(Arc::new(connection))
+            PacketIOController::new(Arc::new(connection), true)
                 .await
                 .unwrap()
                 .0,
@@ -277,7 +268,7 @@ mod tests {
     async fn test_fragmented_packet() {
         let (connection, sender, _receiver) = StubRfcommConnection::new();
         let packet_io = Arc::new(
-            PacketIOController::new(Arc::new(connection))
+            PacketIOController::new(Arc::new(connection), true)
                 .await
                 .unwrap()
                 .0,
@@ -299,7 +290,7 @@ mod tests {
     async fn test_merged_packets() {
         let (connection, sender, _receiver) = StubRfcommConnection::new();
         let packet_io = Arc::new(
-            PacketIOController::new(Arc::new(connection))
+            PacketIOController::new(Arc::new(connection), true)
                 .await
                 .unwrap()
                 .0,
@@ -339,7 +330,7 @@ mod tests {
     async fn test_garbage_data_recovery() {
         let (connection, sender, _receiver) = StubRfcommConnection::new();
         let packet_io = Arc::new(
-            PacketIOController::new(Arc::new(connection))
+            PacketIOController::new(Arc::new(connection), true)
                 .await
                 .unwrap()
                 .0,

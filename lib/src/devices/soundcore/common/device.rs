@@ -76,11 +76,25 @@ where
     Ok(state_update_packet.into())
 }
 
+#[derive(Copy, Clone, Debug)]
+pub struct SoundcoreDeviceConfig {
+    pub has_packet_checksum: bool,
+}
+
+impl Default for SoundcoreDeviceConfig {
+    fn default() -> Self {
+        Self {
+            has_packet_checksum: true,
+        }
+    }
+}
+
 pub struct SoundcoreDeviceRegistry<B: RfcommBackend, StateType> {
     backend: B,
     database: Arc<OpenSCQ30Database>,
     device_model: DeviceModel,
     fetch_state: FetchStateFn<B::ConnectionType, StateType>,
+    config: SoundcoreDeviceConfig,
     _state: PhantomData<StateType>,
 }
 
@@ -90,12 +104,14 @@ impl<B: RfcommBackend, StateType> SoundcoreDeviceRegistry<B, StateType> {
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
         fetch_state: FetchStateFn<B::ConnectionType, StateType>,
+        config: SoundcoreDeviceConfig,
     ) -> Self {
         Self {
             backend,
             device_model,
             database,
             fetch_state,
+            config,
             _state: PhantomData,
         }
     }
@@ -141,6 +157,7 @@ where
             connection,
             self.device_model,
             &self.fetch_state,
+            self.config,
         )
         .await?;
         Self::build_device(&mut builder).await;
@@ -195,9 +212,13 @@ where
         connection: ConnectionType,
         device_model: DeviceModel,
         fetch_state: &FetchStateFn<ConnectionType, StateType>,
+        config: SoundcoreDeviceConfig,
     ) -> device::Result<Self> {
-        let (packet_io_controller, packet_receiver) =
-            PacketIOController::<ConnectionType>::new(Arc::new(connection)).await?;
+        let (packet_io_controller, packet_receiver) = PacketIOController::<ConnectionType>::new(
+            Arc::new(connection),
+            config.has_packet_checksum,
+        )
+        .await?;
         let packet_io_controller = Arc::new(packet_io_controller);
         let state = fetch_state(packet_io_controller.clone()).await?;
         let (state_sender, _) = watch::channel::<StateType>(state);
