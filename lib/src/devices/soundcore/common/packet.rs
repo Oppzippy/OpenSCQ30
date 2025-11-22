@@ -107,7 +107,7 @@ impl<D: HasDirection> Packet<D> {
             ),
         )
         .parse(full_input)?;
-        let body_length = length.saturating_sub(10); // 5 byte direction, 2 byte command, 2 byte length, 1 byte checksum
+        let body_length = length.saturating_sub(9); // 5 byte direction, 2 byte command, 2 byte length
         let (input, body) = context("body", take(body_length)).parse(input)?;
         Ok((input, Self::new(command, body.to_vec())))
     }
@@ -153,7 +153,6 @@ impl<D: HasDirection> Packet<D> {
             .collect::<Vec<_>>()
     }
 
-    #[cfg(test)]
     pub fn ack(&self) -> Packet<D::ReverseDirection> {
         Packet::new(self.command, Vec::new())
     }
@@ -197,7 +196,34 @@ impl Command {
         context("command", map((le_u8, le_u8), |bytes| Self(bytes.into()))).parse(input)
     }
 
+    #[cfg(test)]
     pub fn ack<D: HasDirection>(self) -> Packet<D> {
         Packet::<D>::new(self, Vec::new())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use nom_language::error::VerboseError;
+
+    use super::*;
+
+    #[test]
+    fn to_and_from_bytes() {
+        let packet = Outbound::new(Command([0, 1]), vec![2]);
+        let packet_bytes = packet.bytes();
+        let (remainder, parsed_packet) = Outbound::take::<VerboseError<_>>(&packet_bytes).unwrap();
+        assert_eq!(remainder, [0u8; 0]);
+        assert_eq!(parsed_packet, packet);
+    }
+
+    #[test]
+    fn to_and_from_bytes_without_checksum() {
+        let packet = Outbound::new(Command([0, 1]), vec![2]);
+        let packet_bytes = packet.bytes_without_checksum();
+        let (remainder, parsed_packet) =
+            Outbound::take_without_checksum::<VerboseError<_>>(&packet_bytes).unwrap();
+        assert_eq!(remainder, [0u8; 0]);
+        assert_eq!(parsed_packet, packet);
     }
 }
