@@ -21,7 +21,7 @@ use crate::{
                 outbound::ToPacket,
             },
             packet_manager::PacketHandler,
-            structures::{FirmwareVersion, SerialNumber, SingleBattery},
+            structures::{EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery},
         },
     },
 };
@@ -33,7 +33,7 @@ pub struct A3116StateUpdatePacket {
     pub auto_power_off_duration: a3116::structures::AutoPowerOffDuration,
     pub firmware_version: FirmwareVersion,
     pub serial_number: SerialNumber,
-    pub equalizer_configuration: a3116::structures::EqualizerConfiguration,
+    pub equalizer_configuration: EqualizerConfiguration<1, 9, -6, 6, 0>,
 }
 
 impl FromPacketBody for A3116StateUpdatePacket {
@@ -52,7 +52,7 @@ impl FromPacketBody for A3116StateUpdatePacket {
                     a3116::structures::AutoPowerOffDuration::take,
                     FirmwareVersion::take,
                     SerialNumber::take,
-                    a3116::structures::EqualizerConfiguration::take,
+                    a3116::structures::take_equalizer_configuration,
                 ),
                 |(
                     battery,
@@ -100,7 +100,13 @@ impl ToPacket for A3116StateUpdatePacket {
             .chain(self.auto_power_off_duration.bytes())
             .chain(self.firmware_version.to_string().into_bytes())
             .chain(self.serial_number.as_str().as_bytes().iter().copied())
-            .chain(self.equalizer_configuration.bytes())
+            .chain(iter::once(self.equalizer_configuration.preset_id() as u8))
+            .chain(
+                self.equalizer_configuration
+                    .volume_adjustments()
+                    .iter()
+                    .flat_map(|v| v.bytes()),
+            )
             .collect()
     }
 }

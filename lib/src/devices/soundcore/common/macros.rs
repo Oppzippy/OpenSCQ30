@@ -6,6 +6,23 @@ macro_rules! soundcore_device {
         async |$builder:ident| $block:block,
         $demo_packets:expr$(,)?
     ) => {
+        soundcore_device! {
+            $state,
+            $state_update_packet,
+            async |$packet_io_controller| $fetch_state,
+            async |$builder| $block,
+            $demo_packets,
+            false,
+        }
+    };
+    (
+        $state: ty,
+        $state_update_packet: ty,
+        async |$packet_io_controller:ident| $fetch_state:block,
+        async |$builder:ident| $block:block,
+        $demo_packets:expr,
+        $no_checksum:expr$(,)?
+    ) => {
         pub fn device_registry<B>(
             backend: B,
             database: std::sync::Arc<$crate::storage::OpenSCQ30Database>,
@@ -38,6 +55,7 @@ macro_rules! soundcore_device {
                 $crate::devices::soundcore::common::demo::DemoConnectionRegistry::new(
                     device_model,
                     $demo_packets,
+                    $no_checksum,
                 ),
                 database,
                 device_model,

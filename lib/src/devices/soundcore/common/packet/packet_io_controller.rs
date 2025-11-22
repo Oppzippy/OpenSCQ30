@@ -74,6 +74,8 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
         let (outgoing_sender, outgoing_receiver) = mpsc::channel(100);
         let handle = tokio::spawn(async move {
             let mut buffer = Vec::<u8>::new();
+
+            'receive_packet:
             while let Some(mut bytes) = incoming_receiver.recv().await {
                 buffer.extend_from_slice(&bytes);
                 let mut start_index = 0;
@@ -91,7 +93,7 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
                                 tracing::warn!("failed to parse packet: {err:?}");
                                 tracing::warn!("clearing buffer: {buffer:?}");
                                 buffer.clear();
-                                break;
+                                continue 'receive_packet;
                             }
                         };
 

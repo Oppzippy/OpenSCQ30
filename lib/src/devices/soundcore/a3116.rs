@@ -26,7 +26,7 @@ soundcore_device!(
     },
     async |builder| {
         builder.module_collection().add_state_update();
-        // builder.a3116_equalizer();
+        builder.a3116_equalizer().await;
         builder.a3116_volume(16);
         builder.a3116_auto_power_off();
         builder.single_battery();
@@ -35,7 +35,10 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            A3116StateUpdatePacket::default().to_packet().bytes(),
+            A3116StateUpdatePacket::default()
+                .to_packet()
+                .bytes_without_checksum(),
         )])
     },
+    true, // no checksum
 );

@@ -4,7 +4,10 @@ use crate::{
     connection::RfcommConnection,
     devices::soundcore::{
         a3116,
-        common::{device::SoundcoreDeviceBuilder, packet::inbound::FromPacketBody},
+        common::{
+            device::SoundcoreDeviceBuilder, packet::inbound::FromPacketBody,
+            structures::EqualizerConfiguration,
+        },
     },
 };
 
@@ -37,5 +40,23 @@ where
         let packet_io_controller = self.packet_io_controller().clone();
         self.module_collection()
             .add_a3116_volume(packet_io_controller, max_volume);
+    }
+}
+
+impl<ConnectionType, StateType, StateUpdatePacketType>
+    SoundcoreDeviceBuilder<ConnectionType, StateType, StateUpdatePacketType>
+where
+    ConnectionType: RfcommConnection + Send + Sync + 'static,
+    StateUpdatePacketType: FromPacketBody + Into<StateType>,
+    StateType: Has<EqualizerConfiguration<1, 9, -6, 6, 0>> + Clone + Send + Sync + 'static,
+{
+    pub async fn a3116_equalizer(&mut self) {
+        let packet_io = self.packet_io_controller().clone();
+        let database = self.database();
+        let device_model = self.device_model();
+        let change_notify = self.change_notify();
+        self.module_collection()
+            .add_a3116_equalizer(packet_io, database, device_model, change_notify)
+            .await;
     }
 }

@@ -2,7 +2,7 @@ use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::{
     a3116,
-    common::structures::{FirmwareVersion, SerialNumber, SingleBattery},
+    common::structures::{EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery},
 };
 
 use super::packets::inbound::A3116StateUpdatePacket;
@@ -14,7 +14,7 @@ pub struct A3116State {
     auto_power_off_duration: a3116::structures::AutoPowerOffDuration,
     firmware_version: FirmwareVersion,
     serial_number: SerialNumber,
-    equalizer_configuration: a3116::structures::EqualizerConfiguration,
+    equalizer_configuration: EqualizerConfiguration<1, 9, -6, 6, 0>,
 }
 
 impl From<A3116StateUpdatePacket> for A3116State {

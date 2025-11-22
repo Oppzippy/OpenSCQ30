@@ -5,6 +5,7 @@ use std::{
 };
 
 use macaddr::MacAddr6;
+use nom_language::error::VerboseError;
 use openscq30_i18n::Translate;
 use tokio::sync::{mpsc, watch};
 use uuid::Uuid;
@@ -21,13 +22,19 @@ use super::packet::Command;
 pub struct DemoConnectionRegistry {
     model: DeviceModel,
     packet_responses: HashMap<Command, Vec<u8>>,
+    no_checksum: bool,
 }
 
 impl DemoConnectionRegistry {
-    pub fn new(model: DeviceModel, packet_responses: HashMap<Command, Vec<u8>>) -> Self {
+    pub fn new(
+        model: DeviceModel,
+        packet_responses: HashMap<Command, Vec<u8>>,
+        no_checksum: bool,
+    ) -> Self {
         Self {
             model,
             packet_responses,
+            no_checksum,
         }
     }
 }
@@ -47,7 +54,10 @@ impl RfcommBackend for DemoConnectionRegistry {
         _mac_address: MacAddr6,
         _select_uuid: impl Fn(HashSet<Uuid>) -> Uuid + Send,
     ) -> connection::Result<Self::ConnectionType> {
-        Ok(DemoConnection::new(self.packet_responses.to_owned()))
+        Ok(DemoConnection::new(
+            self.packet_responses.to_owned(),
+            self.no_checksum,
+        ))
     }
 }
 
@@ -57,10 +67,11 @@ pub struct DemoConnection {
     packet_sender: mpsc::Sender<Vec<u8>>,
     packet_receiver: Mutex<Option<mpsc::Receiver<Vec<u8>>>>,
     packet_responses: HashMap<Command, Vec<u8>>,
+    no_checksum: bool,
 }
 
 impl DemoConnection {
-    pub fn new(packet_responses: HashMap<Command, Vec<u8>>) -> Self {
+    pub fn new(packet_responses: HashMap<Command, Vec<u8>>, no_checksum: bool) -> Self {
         let (connection_status_sender, connection_status_receiver) =
             watch::channel(ConnectionStatus::Connected);
         let (packet_sender, packet_receiver) = mpsc::channel(10);
@@ -70,6 +81,7 @@ impl DemoConnection {
             packet_sender,
             packet_receiver: Mutex::new(Some(packet_receiver)),
             packet_responses,
+            no_checksum,
         }
     }
 }
@@ -84,15 +96,25 @@ impl RfcommConnection for DemoConnection {
             });
         }
         tracing::debug!("writing packet {data:?}");
-        // The packet may or may not have a checksum at the end, so rather than actually parsing it,
-        // just look at the command
-        let command = packet::Command([data[5], data[6]]);
-        if let Some(response) = self.packet_responses.get(&command) {
+
+        let (_remainder, packet) = if self.no_checksum {
+            packet::Outbound::take_without_checksum::<VerboseError<_>>(data)
+                .expect("we should never send invalid packets")
+        } else {
+            packet::Outbound::take::<VerboseError<_>>(data)
+                .expect("we should never send invalid packets")
+        };
+
+        if let Some(response) = self.packet_responses.get(&packet.command) {
             self.packet_sender.send(response.to_owned()).await.unwrap();
         } else {
             // ACK
             self.packet_sender
-                .send(command.ack::<packet::InboundMarker>().bytes())
+                .send(if self.no_checksum {
+                    packet.ack().bytes_without_checksum()
+                } else {
+                    packet.ack().bytes()
+                })
                 .await
                 .unwrap();
         }
