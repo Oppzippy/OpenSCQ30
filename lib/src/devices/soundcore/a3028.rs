@@ -96,7 +96,7 @@ mod tests {
             DeviceModel,
             soundcore::common::{
                 packet,
-                structures::{AmbientSoundMode, NoiseCancelingMode, PresetEqualizerProfile},
+                structures::{AmbientSoundMode, NoiseCancelingMode},
             },
         },
         storage::OpenSCQ30Database,
@@ -155,7 +155,7 @@ mod tests {
         assert_eq!(
             None,
             Value::from(device.setting(&SettingId::PresetEqualizerProfile).unwrap())
-                .try_as_optional_enum_variant::<PresetEqualizerProfile>()
+                .try_as_optional_str()
                 .unwrap()
         );
         assert_eq!(

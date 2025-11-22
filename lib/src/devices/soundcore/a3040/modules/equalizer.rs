@@ -7,7 +7,7 @@ use crate::{
     DeviceModel,
     connection::RfcommConnection,
     devices::soundcore::common::{
-        modules::{ModuleCollection, equalizer::COMMON_EQUALIZER_MODULE_SETTINGS},
+        modules::{ModuleCollection, equalizer::common_equalizer_module_settings},
         packet::PacketIOController,
         structures::{CustomHearId, EqualizerConfiguration},
     },
@@ -41,7 +41,7 @@ where
             Box::new(state_modifier::EqualizerWithCustomHearIdStateModifier::new(
                 packet_io,
             )),
-            COMMON_EQUALIZER_MODULE_SETTINGS,
+            common_equalizer_module_settings(),
         )
         .await;
     }

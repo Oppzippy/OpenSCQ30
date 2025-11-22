@@ -4,17 +4,15 @@ use async_trait::async_trait;
 use openscq30_lib_has::Has;
 use strum::IntoEnumIterator;
 use tokio::sync::watch;
-use tracing::instrument;
 
 use crate::{
     api::settings::{self, Setting, SettingId, Value},
     devices::soundcore::common::{
-        modules::equalizer::custom_equalizer_profile_store::CustomEqualizerProfileStore,
-        settings_manager::{SettingHandler, SettingHandlerResult},
-        structures::{
-            CustomEqualizerConfiguration, CustomVolumeAdjustments, PresetEqualizerProfile,
-            TwsStatus,
+        modules::equalizer::{
+            EqualizerPreset, custom_equalizer_profile_store::CustomEqualizerProfileStore,
         },
+        settings_manager::{SettingHandler, SettingHandlerResult},
+        structures::{CustomEqualizerConfiguration, CustomVolumeAdjustments, TwsStatus},
     },
 };
 
@@ -24,6 +22,8 @@ pub struct EqualizerSettingHandler<
     StateT,
     const CHANNELS: usize,
     const BANDS: usize,
+    const VISIBLE_BANDS: usize,
+    const PRESET_BANDS: usize,
     const MIN_VOLUME: i16,
     const MAX_VOLUME: i16,
     const FRACTION_DIGITS: u8,
@@ -32,30 +32,58 @@ pub struct EqualizerSettingHandler<
     custom_profiles_receiver: watch::Receiver<Vec<(String, Vec<i16>)>>,
     get_tws_status: Option<fn(&StateT) -> TwsStatus>,
     custom_preset_id: u16,
-    band_hz: &'static [u16],
+    band_hz: [u16; VISIBLE_BANDS],
+    presets: Vec<EqualizerPreset<PRESET_BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>,
 }
 
 impl<
     StateT,
     const CHANNELS: usize,
     const BANDS: usize,
+    const VISIBLE_BANDS: usize,
+    const PRESET_BANDS: usize,
     const MIN_VOLUME: i16,
     const MAX_VOLUME: i16,
     const FRACTION_DIGITS: u8,
-> EqualizerSettingHandler<StateT, CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
+>
+    EqualizerSettingHandler<
+        StateT,
+        CHANNELS,
+        BANDS,
+        VISIBLE_BANDS,
+        PRESET_BANDS,
+        MIN_VOLUME,
+        MAX_VOLUME,
+        FRACTION_DIGITS,
+    >
 {
-    #[instrument(skip(profile_store))]
     pub fn new(
         profile_store: Arc<CustomEqualizerProfileStore>,
         custom_preset_id: u16,
-        band_hz: &'static [u16],
+        band_hz: [u16; VISIBLE_BANDS],
+        presets: Vec<EqualizerPreset<PRESET_BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>,
     ) -> Self {
+        const {
+            assert!(
+                VISIBLE_BANDS <= BANDS,
+                "there can't be more visible bands than there are total bands",
+            );
+            assert!(
+                PRESET_BANDS <= BANDS,
+                "there can't be more preset bands than there are total bands",
+            );
+            assert!(
+                PRESET_BANDS <= VISIBLE_BANDS,
+                "there can't be fewer preset bands than visible bands",
+            );
+        }
         Self {
             custom_profiles_receiver: profile_store.subscribe(),
             profile_store,
             get_tws_status: None,
             custom_preset_id,
             band_hz,
+            presets,
         }
     }
 
@@ -92,11 +120,22 @@ impl<
     StateT,
     const CHANNELS: usize,
     const BANDS: usize,
+    const VISIBLE_BANDS: usize,
+    const PRESET_BANDS: usize,
     const MIN_VOLUME: i16,
     const MAX_VOLUME: i16,
     const FRACTION_DIGITS: u8,
 > SettingHandler<StateT>
-    for EqualizerSettingHandler<StateT, CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
+    for EqualizerSettingHandler<
+        StateT,
+        CHANNELS,
+        BANDS,
+        VISIBLE_BANDS,
+        PRESET_BANDS,
+        MIN_VOLUME,
+        MAX_VOLUME,
+        FRACTION_DIGITS,
+    >
 where
     StateT: Has<CustomEqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
         + Send,
@@ -118,8 +157,26 @@ where
         let setting = (*setting_id).try_into().ok()?;
         Some(match setting {
             EqualizerSetting::PresetEqualizerProfile => {
-                let preset = PresetEqualizerProfile::from_id(equalizer_configuration.preset_id());
-                Setting::optional_select_from_enum_all_variants(preset)
+                let maybe_preset = self
+                    .presets
+                    .iter()
+                    .find(|preset| preset.id == equalizer_configuration.preset_id())
+                    .copied();
+                Setting::OptionalSelect {
+                    setting: settings::Select {
+                        options: self
+                            .presets
+                            .iter()
+                            .map(|preset| Cow::Borrowed(preset.name))
+                            .collect(),
+                        localized_options: self
+                            .presets
+                            .iter()
+                            .map(|preset| (preset.localized_name)())
+                            .collect(),
+                    },
+                    value: maybe_preset.map(|preset| Cow::Borrowed(preset.name)),
+                }
             }
             EqualizerSetting::CustomEqualizerProfile => Setting::ModifiableSelect {
                 setting: {
@@ -151,7 +208,7 @@ where
             },
             EqualizerSetting::VolumeAdjustments => Setting::Equalizer {
                 setting: settings::Equalizer {
-                    band_hz: Cow::Borrowed(self.band_hz),
+                    band_hz: Cow::Owned(self.band_hz.to_vec()),
                     fraction_digits: FRACTION_DIGITS.into(),
                     min: MIN_VOLUME,
                     max: MAX_VOLUME,
@@ -183,15 +240,17 @@ where
             .expect("already filtered to valid values only by SettingsManager");
         match setting {
             EqualizerSetting::PresetEqualizerProfile => {
-                if let Some(preset) =
-                    value.try_as_optional_enum_variant::<PresetEqualizerProfile>()?
+                if let Some(preset) = value
+                    .try_as_optional_str()?
+                    .and_then(|preset_name| self.presets.iter().find(|it| it.name == preset_name))
                 {
-                    let preset_volume_adjustments = *preset.volume_adjustments().adjustments();
                     *equalizer_configuration = CustomEqualizerConfiguration::new(
-                        preset.id(),
+                        preset.id,
                         equalizer_configuration.volume_adjustments().map(|v| {
                             CustomVolumeAdjustments::new(array::from_fn(|i| {
-                                preset_volume_adjustments
+                                preset
+                                    .volume_adjustments
+                                    .adjustments()
                                     .get(i)
                                     .copied()
                                     .unwrap_or(v.adjustments()[i])
