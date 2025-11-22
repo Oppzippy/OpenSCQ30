@@ -61,6 +61,12 @@ enum_subset!(
     }
 );
 
+/// There are situations where there are 10 equalizer bands, but presets only assign 9 of them, and only 8 of them are
+/// visible. To suit those requirements, all three band numbers are separate. VISIBLE_BANDS <= PRESET_BANDS <= BANDS is
+/// const asserted since it is likely an error, but it is possible a device could violate this assumption in the future.
+///
+/// This is generic over min/max volume and number of fractional digits because it makes it impossible to mix up structs
+/// that aren't compatible with eachother.
 pub struct EqualizerModuleSettings<
     const VISIBLE_BANDS: usize,
     const PRESET_BANDS: usize,

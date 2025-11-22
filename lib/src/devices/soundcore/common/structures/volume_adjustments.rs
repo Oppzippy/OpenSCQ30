@@ -9,6 +9,8 @@ use std::array;
 pub type CommonVolumeAdjustments<const BANDS: usize> =
     VolumeAdjustments<BANDS, -120, { (u8::MAX - 121) as i16 }, 1>;
 
+/// This is generic over min/max volume and number of fractional digits because it makes it impossible to mix up
+/// structs that aren't compatible with eachother.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct VolumeAdjustments<
     const BANDS: usize,

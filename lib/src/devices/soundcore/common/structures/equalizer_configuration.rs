@@ -14,6 +14,8 @@ use super::VolumeAdjustments;
 pub type CommonEqualizerConfiguration<const CHANNELS: usize, const BANDS: usize> =
     EqualizerConfiguration<CHANNELS, BANDS, -120, 134, 1>;
 
+/// This is generic over min/max volume and number of fractional digits because it makes it impossible to mix up
+/// structs that aren't compatible with eachother.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct EqualizerConfiguration<
     const CHANNELS: usize,
