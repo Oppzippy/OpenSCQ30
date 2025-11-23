@@ -78,6 +78,8 @@ where
 
 #[derive(Copy, Clone, Debug, Default)]
 pub struct SoundcoreDeviceConfig {
+    /// Most devices have a checksum at the end of their packets, but for the ones that don't,
+    /// this can be set to ChecksumKind::None to disable checksums.
     pub checksum_kind: packet::ChecksumKind,
 }
 

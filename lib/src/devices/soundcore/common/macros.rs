@@ -1,3 +1,15 @@
+/// Implements `device_registry` and `demo_device_registry` functions.
+///
+/// Parameters:
+/// - state: type that holds state for the device
+/// - initializer: async function that requests data needed to populate state and returns the current state
+/// - builder: adds modules for the device's features
+/// - demo_packets: HashMap<packet::Command, packet::Inbound> that will be referenced in `demo_device_registry` to respond to outbound packets
+/// - config (optional): SoundcoreDeviceConfig for specifying other options, such as whether packets end with checksums
+///
+/// For examples, see any file in lib/src/device/soundcore/a*.rs
+///
+/// ```
 macro_rules! soundcore_device {
     (
         $state: ty,
