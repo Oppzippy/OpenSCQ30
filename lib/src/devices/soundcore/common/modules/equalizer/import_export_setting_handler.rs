@@ -118,7 +118,10 @@ where
                     .filter(|(name, _)| selection.contains(name))
                     .map(|(name, values)| ExportedCustomProfile {
                         name: name.into(),
-                        volume_adjustments: values.iter().map(|i| *i as f64 / 10f64).collect(),
+                        volume_adjustments: values
+                            .iter()
+                            .map(|i| *i as f64 / 10u32.pow(FRACTION_DIGITS.into()) as f64)
+                            .collect(),
                     })
                     .collect::<Vec<_>>();
                 let json = serde_json::to_string(&exported_profiles).unwrap();
@@ -152,7 +155,10 @@ where
                             exported
                                 .volume_adjustments
                                 .into_iter()
-                                .map(|value| (value * 10f64).round() as i16)
+                                .map(|value| {
+                                    (value * 10u32.pow(FRACTION_DIGITS.into()) as f64).round()
+                                        as i16
+                                })
                                 .collect::<Vec<_>>(),
                         )
                     })

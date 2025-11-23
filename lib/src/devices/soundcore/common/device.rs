@@ -649,7 +649,7 @@ pub mod test_utils {
                         if let Some(packet) = maybe_packet {
                             let command = Command(packet[5..7].try_into().unwrap());
                             inbound_sender
-                                .send(packet_responses.get(&command).unwrap().bytes_with_checksum())
+                                .send(packet_responses.get(&command).unwrap().bytes(config.checksum_kind))
                                 .await
                                 .unwrap();
                         }
@@ -693,7 +693,7 @@ pub mod test_utils {
         ) {
             let mut expected_packets_bytes = expected_packets
                 .iter()
-                .map(|expected| expected.bytes_with_checksum())
+                .map(|expected| expected.bytes(self.config.checksum_kind))
                 .collect::<Vec<_>>();
             let mut sent_packets_bytes = self.set_settings_and_gather_sent_packets(settings).await;
             expected_packets_bytes.sort();
@@ -709,7 +709,7 @@ pub mod test_utils {
         ) {
             let expected_packets_bytes = expected_packets
                 .iter()
-                .map(|expected| expected.bytes_with_checksum())
+                .map(|expected| expected.bytes(self.config.checksum_kind))
                 .collect::<Vec<_>>();
             let sent_packets_bytes = self.set_settings_and_gather_sent_packets(settings).await;
             assert_eq!(sent_packets_bytes, expected_packets_bytes);
@@ -746,9 +746,11 @@ pub mod test_utils {
         async fn gather_sent_packets(&mut self, sent_packets: &mut Vec<Vec<u8>>) {
             loop {
                 if let Some(bytes) = self.outbound_receiver.recv().await {
-                    let packet = packet::Outbound::take_with_checksum::<VerboseError<_>>(&bytes)
-                        .unwrap()
-                        .1;
+                    let packet = packet::Outbound::take::<VerboseError<_>>(
+                        self.config.checksum_kind,
+                    )(&bytes)
+                    .unwrap()
+                    .1;
                     self.ack(&packet).await;
                     sent_packets.push(bytes);
                 } else {
