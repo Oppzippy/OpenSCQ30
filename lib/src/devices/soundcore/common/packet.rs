@@ -67,68 +67,72 @@ impl<D: HasDirection> Packet<D> {
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         checksum_kind: ChecksumKind,
     ) -> impl FnOnce(&'a [u8]) -> IResult<&'a [u8], Self, E> {
-        move |input| match checksum_kind {
-            ChecksumKind::None => Self::take_without_checksum(input),
-            ChecksumKind::Suffix => Self::take_with_checksum(input),
+        // match makes sure we we have to update this function if another variant is added
+        let has_checksum = match checksum_kind {
+            ChecksumKind::None => false,
+            ChecksumKind::Suffix => true,
+        };
+        move |full_input| {
+            let (input, (_direction, command, length)) = context(
+                "header",
+                (
+                    D::DIRECTION.take(),
+                    Command::take,
+                    context("packet length", le_u16),
+                ),
+            )
+            .parse(full_input)?;
+
+            // 5 byte direction, 2 byte command, 2 byte length, 1 byte checksum
+            let body_length = length.saturating_sub(5 + 2 + 2 + if has_checksum { 1 } else { 0 });
+
+            let (input, body) = context("body", take(body_length)).parse(input)?;
+            let header_and_body = &full_input[..full_input.len() - input.len()];
+            let input = if has_checksum {
+                let (input, _checksum) = context(
+                    "checksum",
+                    map_opt(le_u8, |checksum| {
+                        if checksum == checksum::calculate_checksum(header_and_body) {
+                            Some(checksum)
+                        } else {
+                            None
+                        }
+                    }),
+                )
+                .parse(input)?;
+                input
+            } else {
+                input
+            };
+            Ok((input, Self::new(command, body.to_vec())))
         }
     }
 
+    /// Shorthand for Packet::take(ChecksumKind::Suffix)
+    #[cfg(test)]
     pub fn take_with_checksum<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        full_input: &'a [u8],
+        input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
-        let (input, (_direction, command, length)) = context(
-            "header",
-            (
-                D::DIRECTION.take(),
-                Command::take,
-                context("packet length", le_u16),
-            ),
-        )
-        .parse(full_input)?;
-        let body_length = length.saturating_sub(10); // 5 byte direction, 2 byte command, 2 byte length, 1 byte checksum
-        let (input, body) = context("body", take(body_length)).parse(input)?;
-        let header_and_body = &full_input[..full_input.len() - input.len()];
-        let (input, _checksum) = context(
-            "checksum",
-            map_opt(le_u8, |checksum| {
-                if checksum == checksum::calculate_checksum(header_and_body) {
-                    Some(checksum)
-                } else {
-                    None
-                }
-            }),
-        )
-        .parse(input)?;
-        Ok((input, Self::new(command, body.to_vec())))
+        Self::take(ChecksumKind::Suffix)(input)
     }
 
+    /// Shorthand for Packet::take(ChecksumKind::None)
+    #[cfg(test)]
     pub fn take_without_checksum<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        full_input: &'a [u8],
+        input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
-        let (input, (_direction, command, length)) = context(
-            "header",
-            (
-                D::DIRECTION.take(),
-                Command::take,
-                context("packet length", le_u16),
-            ),
-        )
-        .parse(full_input)?;
-        let body_length = length.saturating_sub(9); // 5 byte direction, 2 byte command, 2 byte length
-        let (input, body) = context("body", take(body_length)).parse(input)?;
-        Ok((input, Self::new(command, body.to_vec())))
+        Self::take(ChecksumKind::None)(input)
     }
 
     pub fn bytes(&self, checksum_kind: ChecksumKind) -> Vec<u8> {
-        match checksum_kind {
-            ChecksumKind::None => self.bytes_without_checksum(),
-            ChecksumKind::Suffix => self.bytes_with_checksum(),
-        }
-    }
+        // match makes sure we we have to update this function if another variant is added
+        let has_checksum = match checksum_kind {
+            ChecksumKind::None => false,
+            ChecksumKind::Suffix => true,
+        };
 
-    pub fn bytes_with_checksum(&self) -> Vec<u8> {
         const PACKET_SIZE_LENGTH: usize = 2;
-        const CHECKSUM_LENGTH: usize = 1;
+        let checksum_length = if has_checksum { 1 } else { 0 };
 
         let direction_indicator = D::DIRECTION.bytes();
         let command = self.command.0;
@@ -137,34 +141,34 @@ impl<D: HasDirection> Packet<D> {
             + command.len()
             + PACKET_SIZE_LENGTH
             + self.body.len()
-            + CHECKSUM_LENGTH;
+            + checksum_length;
 
-        let mut bytes = direction_indicator
-            .into_iter()
-            .chain(command)
-            .chain((length as u16).to_le_bytes())
-            .chain(self.body.iter().copied())
-            .collect::<Vec<_>>();
-        bytes.push(checksum::calculate_checksum(&bytes));
+        let mut bytes = Vec::with_capacity(length);
+
+        bytes.extend(
+            direction_indicator
+                .into_iter()
+                .chain(command)
+                .chain((length as u16).to_le_bytes())
+                .chain(self.body.iter().copied()),
+        );
+        if has_checksum {
+            bytes.push(checksum::calculate_checksum(&bytes));
+        }
 
         bytes
     }
 
+    /// Shorthand for .bytes(ChecksumKind::Suffix)
+    #[cfg(test)]
+    pub fn bytes_with_checksum(&self) -> Vec<u8> {
+        self.bytes(ChecksumKind::Suffix)
+    }
+
+    /// Shorthand for .bytes(ChecksumKind::None)
+    #[cfg(test)]
     pub fn bytes_without_checksum(&self) -> Vec<u8> {
-        const PACKET_SIZE_LENGTH: usize = 2;
-
-        let direction_indicator = D::DIRECTION.bytes();
-        let command = self.command.0;
-
-        let length =
-            direction_indicator.len() + command.len() + PACKET_SIZE_LENGTH + self.body.len();
-
-        direction_indicator
-            .into_iter()
-            .chain(command)
-            .chain((length as u16).to_le_bytes())
-            .chain(self.body.iter().copied())
-            .collect::<Vec<_>>()
+        self.bytes(ChecksumKind::None)
     }
 
     pub fn ack(&self) -> Packet<D::ReverseDirection> {
