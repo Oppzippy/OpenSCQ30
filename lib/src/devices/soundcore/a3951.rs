@@ -5,7 +5,7 @@ use crate::devices::soundcore::{
     common::{
         macros::soundcore_device,
         modules::{
-            button_configuration::COMMON_SETTINGS as BUTTON_SETTINGS,
+            button_configuration::COMMON_SETTINGS as BUTTON_SETTINGS, equalizer,
             sound_modes::AvailableSoundModes,
         },
         packet::{
@@ -51,7 +51,9 @@ soundcore_device!(
                 NoiseCancelingMode::Custom,
             ],
         });
-        builder.equalizer_with_custom_hear_id_tws().await;
+        builder
+            .equalizer_with_custom_hear_id_tws(equalizer::common_settings())
+            .await;
         builder.button_configuration(&BUTTON_SETTINGS);
         builder.reset_button_configuration::<A3951StateUpdatePacket>(
             RequestState::default().to_packet(),

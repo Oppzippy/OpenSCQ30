@@ -21,16 +21,16 @@ use crate::{
             self,
             common::{
                 modules::{
-                    button_configuration::ButtonConfigurationSettings,
+                    self, button_configuration::ButtonConfigurationSettings,
                     reset_button_configuration::ResetButtonConfigurationPending,
                 },
                 packet::{self, PacketIOController, outbound::ToPacket},
                 state::Update,
                 structures::{
-                    AutoPlayPause, AutoPowerOff, BatteryLevel, CaseBatteryLevel, GamingMode,
-                    LimitHighVolume, LowBatteryPrompt, SoundLeakCompensation, SurroundSound,
-                    TouchLock, TouchTone, WearingDetection, WearingTone,
-                    button_configuration::ButtonStatusCollection,
+                    AutoPlayPause, AutoPowerOff, BatteryLevel, CaseBatteryLevel,
+                    EqualizerConfiguration, GamingMode, LimitHighVolume, LowBatteryPrompt,
+                    SoundLeakCompensation, SurroundSound, TouchLock, TouchTone, WearingDetection,
+                    WearingTone, button_configuration::ButtonStatusCollection,
                 },
             },
         },
@@ -47,9 +47,9 @@ use super::{
         outbound::RequestState,
     },
     structures::{
-        AgeRange, AmbientSoundModeCycle, BasicHearId, CommonEqualizerConfiguration, CustomHearId,
-        DualBattery, DualFirmwareVersion, FirmwareVersion, Gender, SerialNumber, SingleBattery,
-        SoundModes, TwsStatus,
+        AgeRange, AmbientSoundModeCycle, BasicHearId, CustomHearId, DualBattery,
+        DualFirmwareVersion, FirmwareVersion, Gender, SerialNumber, SingleBattery, SoundModes,
+        TwsStatus,
     },
 };
 
@@ -268,9 +268,26 @@ where
             .add_sound_modes(self.packet_io_controller.clone(), available_sound_modes);
     }
 
-    pub async fn equalizer<const C: usize, const B: usize>(&mut self)
-    where
-        StateType: Has<CommonEqualizerConfiguration<C, B>>,
+    pub async fn equalizer<
+        const CHANNELS: usize,
+        const BANDS: usize,
+        const VISIBLE_BANDS: usize,
+        const PRESET_BANDS: usize,
+        const MIN_VOLUME: i16,
+        const MAX_VOLUME: i16,
+        const FRACTION_DIGITS: u8,
+    >(
+        &mut self,
+        settings: modules::equalizer::EqualizerModuleSettings<
+            VISIBLE_BANDS,
+            PRESET_BANDS,
+            MIN_VOLUME,
+            MAX_VOLUME,
+            FRACTION_DIGITS,
+        >,
+    ) where
+        StateType:
+            Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>,
     {
         self.module_collection
             .add_equalizer(
@@ -278,13 +295,31 @@ where
                 self.database.clone(),
                 self.device_model,
                 self.change_notify.clone(),
+                settings,
             )
             .await;
     }
 
-    pub async fn equalizer_tws<const C: usize, const B: usize>(&mut self)
-    where
-        StateType: Has<CommonEqualizerConfiguration<C, B>> + Has<TwsStatus>,
+    pub async fn equalizer_tws<
+        const CHANNELS: usize,
+        const BANDS: usize,
+        const VISIBLE_BANDS: usize,
+        const PRESET_BANDS: usize,
+        const MIN_VOLUME: i16,
+        const MAX_VOLUME: i16,
+        const FRACTION_DIGITS: u8,
+    >(
+        &mut self,
+        settings: modules::equalizer::EqualizerModuleSettings<
+            VISIBLE_BANDS,
+            PRESET_BANDS,
+            MIN_VOLUME,
+            MAX_VOLUME,
+            FRACTION_DIGITS,
+        >,
+    ) where
+        StateType: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
+            + Has<TwsStatus>,
     {
         self.module_collection
             .add_equalizer_tws(
@@ -292,13 +327,31 @@ where
                 self.database.clone(),
                 self.device_model,
                 self.change_notify.clone(),
+                settings,
             )
             .await;
     }
 
-    pub async fn equalizer_with_drc<const C: usize, const B: usize>(&mut self)
-    where
-        StateType: Has<CommonEqualizerConfiguration<C, B>>,
+    pub async fn equalizer_with_drc<
+        const CHANNELS: usize,
+        const BANDS: usize,
+        const VISIBLE_BANDS: usize,
+        const PRESET_BANDS: usize,
+        const MIN_VOLUME: i16,
+        const MAX_VOLUME: i16,
+        const FRACTION_DIGITS: u8,
+    >(
+        &mut self,
+        settings: modules::equalizer::EqualizerModuleSettings<
+            VISIBLE_BANDS,
+            PRESET_BANDS,
+            MIN_VOLUME,
+            MAX_VOLUME,
+            FRACTION_DIGITS,
+        >,
+    ) where
+        StateType:
+            Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>,
     {
         self.module_collection
             .add_equalizer_with_drc(
@@ -306,13 +359,31 @@ where
                 self.database.clone(),
                 self.device_model,
                 self.change_notify.clone(),
+                settings,
             )
             .await;
     }
 
-    pub async fn equalizer_with_drc_tws<const C: usize, const B: usize>(&mut self)
-    where
-        StateType: Has<CommonEqualizerConfiguration<C, B>> + Has<TwsStatus>,
+    pub async fn equalizer_with_drc_tws<
+        const CHANNELS: usize,
+        const BANDS: usize,
+        const VISIBLE_BANDS: usize,
+        const PRESET_BANDS: usize,
+        const MIN_VOLUME: i16,
+        const MAX_VOLUME: i16,
+        const FRACTION_DIGITS: u8,
+    >(
+        &mut self,
+        settings: modules::equalizer::EqualizerModuleSettings<
+            VISIBLE_BANDS,
+            PRESET_BANDS,
+            MIN_VOLUME,
+            MAX_VOLUME,
+            FRACTION_DIGITS,
+        >,
+    ) where
+        StateType: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
+            + Has<TwsStatus>,
     {
         self.module_collection
             .add_equalizer_with_drc_tws(
@@ -320,15 +391,32 @@ where
                 self.database.clone(),
                 self.device_model,
                 self.change_notify.clone(),
+                settings,
             )
             .await;
     }
 
-    pub async fn equalizer_with_basic_hear_id_tws<const C: usize, const B: usize>(&mut self)
-    where
-        StateType: Has<CommonEqualizerConfiguration<C, B>>
+    pub async fn equalizer_with_basic_hear_id_tws<
+        const CHANNELS: usize,
+        const BANDS: usize,
+        const VISIBLE_BANDS: usize,
+        const PRESET_BANDS: usize,
+        const MIN_VOLUME: i16,
+        const MAX_VOLUME: i16,
+        const FRACTION_DIGITS: u8,
+    >(
+        &mut self,
+        settings: modules::equalizer::EqualizerModuleSettings<
+            VISIBLE_BANDS,
+            PRESET_BANDS,
+            MIN_VOLUME,
+            MAX_VOLUME,
+            FRACTION_DIGITS,
+        >,
+    ) where
+        StateType: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
             + Has<TwsStatus>
-            + Has<BasicHearId<C, B>>
+            + Has<BasicHearId<CHANNELS, BANDS>>
             + Has<Gender>
             + Has<AgeRange>,
     {
@@ -338,15 +426,32 @@ where
                 self.database.clone(),
                 self.device_model,
                 self.change_notify.clone(),
+                settings,
             )
             .await;
     }
 
-    pub async fn equalizer_with_custom_hear_id_tws<const C: usize, const B: usize>(&mut self)
-    where
-        StateType: Has<CommonEqualizerConfiguration<C, B>>
+    pub async fn equalizer_with_custom_hear_id_tws<
+        const CHANNELS: usize,
+        const BANDS: usize,
+        const VISIBLE_BANDS: usize,
+        const PRESET_BANDS: usize,
+        const MIN_VOLUME: i16,
+        const MAX_VOLUME: i16,
+        const FRACTION_DIGITS: u8,
+    >(
+        &mut self,
+        settings: modules::equalizer::EqualizerModuleSettings<
+            VISIBLE_BANDS,
+            PRESET_BANDS,
+            MIN_VOLUME,
+            MAX_VOLUME,
+            FRACTION_DIGITS,
+        >,
+    ) where
+        StateType: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
             + Has<TwsStatus>
-            + Has<CustomHearId<C, B>>
+            + Has<CustomHearId<CHANNELS, BANDS>>
             + Has<Gender>
             + Has<AgeRange>,
     {
@@ -356,6 +461,7 @@ where
                 self.database.clone(),
                 self.device_model,
                 self.change_notify.clone(),
+                settings,
             )
             .await;
     }

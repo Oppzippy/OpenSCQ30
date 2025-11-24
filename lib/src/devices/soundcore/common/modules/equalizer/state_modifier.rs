@@ -8,7 +8,7 @@ use crate::{
     devices::soundcore::common::{
         packet::{self, PacketIOController, outbound::ToPacket},
         state_modifier::StateModifier,
-        structures::{AgeRange, BasicHearId, CommonEqualizerConfiguration, CustomHearId, Gender},
+        structures::{AgeRange, BasicHearId, CustomHearId, EqualizerConfiguration, Gender},
     },
 };
 
@@ -16,6 +16,9 @@ pub struct EqualizerStateModifier<
     ConnectionType: RfcommConnection,
     const CHANNELS: usize,
     const BANDS: usize,
+    const MIN_VOLUME: i16,
+    const MAX_VOLUME: i16,
+    const FRACTION_DIGITS: u8,
 > {
     packet_io: Arc<PacketIOController<ConnectionType>>,
     options: EqualizerStateModifierOptions,
@@ -25,8 +28,14 @@ pub struct EqualizerStateModifierOptions {
     pub has_drc: bool,
 }
 
-impl<ConnectionType: RfcommConnection, const CHANNELS: usize, const BANDS: usize>
-    EqualizerStateModifier<ConnectionType, CHANNELS, BANDS>
+impl<
+    ConnectionType: RfcommConnection,
+    const CHANNELS: usize,
+    const BANDS: usize,
+    const MIN_VOLUME: i16,
+    const MAX_VOLUME: i16,
+    const FRACTION_DIGITS: u8,
+> EqualizerStateModifier<ConnectionType, CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
 {
     pub fn new(
         packet_io: Arc<PacketIOController<ConnectionType>>,
@@ -37,10 +46,28 @@ impl<ConnectionType: RfcommConnection, const CHANNELS: usize, const BANDS: usize
 }
 
 #[async_trait]
-impl<ConnectionType, T, const CHANNELS: usize, const BANDS: usize> StateModifier<T>
-    for EqualizerStateModifier<ConnectionType, CHANNELS, BANDS>
+impl<
+    ConnectionType,
+    T,
+    const CHANNELS: usize,
+    const BANDS: usize,
+    const MIN_VOLUME: i16,
+    const MAX_VOLUME: i16,
+    const FRACTION_DIGITS: u8,
+> StateModifier<T>
+    for EqualizerStateModifier<
+        ConnectionType,
+        CHANNELS,
+        BANDS,
+        MIN_VOLUME,
+        MAX_VOLUME,
+        FRACTION_DIGITS,
+    >
 where
-    T: Has<CommonEqualizerConfiguration<CHANNELS, BANDS>> + Clone + Send + Sync,
+    T: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
+        + Clone
+        + Send
+        + Sync,
     ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
@@ -59,15 +86,9 @@ where
 
         self.packet_io
             .send_with_response(&if self.options.has_drc {
-                packet::outbound::SetEqualizerWithDrc {
-                    equalizer_configuration: target_equalizer_configuration,
-                }
-                .to_packet()
+                packet::outbound::set_equalizer_with_drc(target_equalizer_configuration)
             } else {
-                packet::outbound::SetEqualizer {
-                    equalizer_configuration: target_equalizer_configuration,
-                }
-                .to_packet()
+                packet::outbound::set_equalizer(target_equalizer_configuration)
             })
             .await?;
         state_sender.send_modify(|state| *state.get_mut() = *target_equalizer_configuration);
@@ -79,12 +100,29 @@ pub struct EqualizerWithBasicHearIdStateModifier<
     ConnectionType: RfcommConnection,
     const CHANNELS: usize,
     const BANDS: usize,
+    const MIN_VOLUME: i16,
+    const MAX_VOLUME: i16,
+    const FRACTION_DIGITS: u8,
 > {
     packet_io: Arc<PacketIOController<ConnectionType>>,
 }
 
-impl<ConnectionType: RfcommConnection, const CHANNELS: usize, const BANDS: usize>
-    EqualizerWithBasicHearIdStateModifier<ConnectionType, CHANNELS, BANDS>
+impl<
+    ConnectionType: RfcommConnection,
+    const CHANNELS: usize,
+    const BANDS: usize,
+    const MIN_VOLUME: i16,
+    const MAX_VOLUME: i16,
+    const FRACTION_DIGITS: u8,
+>
+    EqualizerWithBasicHearIdStateModifier<
+        ConnectionType,
+        CHANNELS,
+        BANDS,
+        MIN_VOLUME,
+        MAX_VOLUME,
+        FRACTION_DIGITS,
+    >
 {
     pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
         Self { packet_io }
@@ -92,10 +130,25 @@ impl<ConnectionType: RfcommConnection, const CHANNELS: usize, const BANDS: usize
 }
 
 #[async_trait]
-impl<ConnectionType, T, const CHANNELS: usize, const BANDS: usize> StateModifier<T>
-    for EqualizerWithBasicHearIdStateModifier<ConnectionType, CHANNELS, BANDS>
+impl<
+    ConnectionType,
+    T,
+    const CHANNELS: usize,
+    const BANDS: usize,
+    const MIN_VOLUME: i16,
+    const MAX_VOLUME: i16,
+    const FRACTION_DIGITS: u8,
+> StateModifier<T>
+    for EqualizerWithBasicHearIdStateModifier<
+        ConnectionType,
+        CHANNELS,
+        BANDS,
+        MIN_VOLUME,
+        MAX_VOLUME,
+        FRACTION_DIGITS,
+    >
 where
-    T: Has<CommonEqualizerConfiguration<CHANNELS, BANDS>>
+    T: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
         + Has<BasicHearId<CHANNELS, BANDS>>
         + Has<Gender>
         + Has<AgeRange>
@@ -109,12 +162,11 @@ where
         state_sender: &watch::Sender<T>,
         target_state: &T,
     ) -> device::Result<()> {
-        let target_equalizer_configuration: &CommonEqualizerConfiguration<CHANNELS, BANDS> =
+        let target_equalizer_configuration: &EqualizerConfiguration<_, _, _, _, _> =
             target_state.get();
         {
             let state = state_sender.borrow();
-            let equalizer_configuration: &CommonEqualizerConfiguration<CHANNELS, BANDS> =
-                state.get();
+            let equalizer_configuration: &EqualizerConfiguration<_, _, _, _, _> = state.get();
             if equalizer_configuration == target_equalizer_configuration {
                 return Ok(());
             }
@@ -159,12 +211,29 @@ pub struct EqualizerWithCustomHearIdStateModifier<
     ConnectionType: RfcommConnection,
     const CHANNELS: usize,
     const BANDS: usize,
+    const MIN_VOLUME: i16,
+    const MAX_VOLUME: i16,
+    const FRACTION_DIGITS: u8,
 > {
     packet_io: Arc<PacketIOController<ConnectionType>>,
 }
 
-impl<ConnectionType: RfcommConnection, const CHANNELS: usize, const BANDS: usize>
-    EqualizerWithCustomHearIdStateModifier<ConnectionType, CHANNELS, BANDS>
+impl<
+    ConnectionType: RfcommConnection,
+    const CHANNELS: usize,
+    const BANDS: usize,
+    const MIN_VOLUME: i16,
+    const MAX_VOLUME: i16,
+    const FRACTION_DIGITS: u8,
+>
+    EqualizerWithCustomHearIdStateModifier<
+        ConnectionType,
+        CHANNELS,
+        BANDS,
+        MIN_VOLUME,
+        MAX_VOLUME,
+        FRACTION_DIGITS,
+    >
 {
     pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
         Self { packet_io }
@@ -172,10 +241,25 @@ impl<ConnectionType: RfcommConnection, const CHANNELS: usize, const BANDS: usize
 }
 
 #[async_trait]
-impl<ConnectionType, T, const CHANNELS: usize, const BANDS: usize> StateModifier<T>
-    for EqualizerWithCustomHearIdStateModifier<ConnectionType, CHANNELS, BANDS>
+impl<
+    ConnectionType,
+    T,
+    const CHANNELS: usize,
+    const BANDS: usize,
+    const MIN_VOLUME: i16,
+    const MAX_VOLUME: i16,
+    const FRACTION_DIGITS: u8,
+> StateModifier<T>
+    for EqualizerWithCustomHearIdStateModifier<
+        ConnectionType,
+        CHANNELS,
+        BANDS,
+        MIN_VOLUME,
+        MAX_VOLUME,
+        FRACTION_DIGITS,
+    >
 where
-    T: Has<CommonEqualizerConfiguration<CHANNELS, BANDS>>
+    T: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
         + Has<CustomHearId<CHANNELS, BANDS>>
         + Has<Gender>
         + Has<AgeRange>
@@ -189,12 +273,22 @@ where
         state_sender: &watch::Sender<T>,
         target_state: &T,
     ) -> device::Result<()> {
-        let target_equalizer_configuration: &CommonEqualizerConfiguration<CHANNELS, BANDS> =
-            target_state.get();
+        let target_equalizer_configuration: &EqualizerConfiguration<
+            CHANNELS,
+            BANDS,
+            MIN_VOLUME,
+            MAX_VOLUME,
+            FRACTION_DIGITS,
+        > = target_state.get();
         {
             let state = state_sender.borrow();
-            let equalizer_configuration: &CommonEqualizerConfiguration<CHANNELS, BANDS> =
-                state.get();
+            let equalizer_configuration: &EqualizerConfiguration<
+                CHANNELS,
+                BANDS,
+                MIN_VOLUME,
+                MAX_VOLUME,
+                FRACTION_DIGITS,
+            > = state.get();
             if equalizer_configuration == target_equalizer_configuration {
                 return Ok(());
             }

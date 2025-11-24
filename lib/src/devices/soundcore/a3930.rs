@@ -9,6 +9,7 @@ use crate::devices::soundcore::{
                 ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings,
                 COMMON_ACTIONS_WITHOUT_SOUND_MODES,
             },
+            equalizer,
             sound_modes::AvailableSoundModes,
         },
         packet::{
@@ -47,7 +48,9 @@ soundcore_device!(
             transparency_modes: Vec::new(),
             noise_canceling_modes: Vec::new(),
         });
-        builder.equalizer_with_custom_hear_id_tws().await;
+        builder
+            .equalizer_with_custom_hear_id_tws(equalizer::common_settings())
+            .await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.reset_button_configuration::<A3930StateUpdatePacket>(
             RequestState::default().to_packet(),

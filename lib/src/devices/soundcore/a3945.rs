@@ -5,9 +5,12 @@ use crate::devices::soundcore::{
     common::{
         device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
-        modules::button_configuration::{
-            ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings,
-            COMMON_ACTIONS_WITHOUT_SOUND_MODES,
+        modules::{
+            button_configuration::{
+                ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings,
+                COMMON_ACTIONS_WITHOUT_SOUND_MODES,
+            },
+            equalizer,
         },
         packet::outbound::{RequestState, ToPacket},
         structures::button_configuration::{
@@ -27,7 +30,7 @@ soundcore_device!(
     },
     async |builder| {
         builder.module_collection().add_state_update();
-        builder.equalizer_tws().await;
+        builder.equalizer_tws(equalizer::common_settings()).await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.reset_button_configuration::<A3945StateUpdatePacket>(
             RequestState::default().to_packet(),
@@ -105,7 +108,7 @@ mod tests {
             DeviceModel,
             soundcore::common::{
                 device::{SoundcoreDeviceConfig, test_utils::TestSoundcoreDevice},
-                packet::{self, outbound::ToPacket},
+                packet,
                 structures::{CommonEqualizerConfiguration, CommonVolumeAdjustments},
             },
         },
@@ -151,22 +154,15 @@ mod tests {
                     SettingId::PresetEqualizerProfile,
                     Value::OptionalString(Some("TrebleReducer".into())),
                 )],
-                vec![
-                    packet::outbound::SetEqualizer {
-                        equalizer_configuration: &CommonEqualizerConfiguration::<2, 10>::new(
-                            0x0015,
-                            [
-                                CommonVolumeAdjustments::new([
-                                    0, 0, 0, -20, -30, -40, -40, -60, 1, 2,
-                                ]),
-                                CommonVolumeAdjustments::new([
-                                    0, 0, 0, -20, -30, -40, -40, -60, 3, 4,
-                                ]),
-                            ],
-                        ),
-                    }
-                    .to_packet(),
-                ],
+                vec![packet::outbound::set_equalizer(
+                    &CommonEqualizerConfiguration::<2, 10>::new(
+                        0x0015,
+                        [
+                            CommonVolumeAdjustments::new([0, 0, 0, -20, -30, -40, -40, -60, 1, 2]),
+                            CommonVolumeAdjustments::new([0, 0, 0, -20, -30, -40, -40, -60, 3, 4]),
+                        ],
+                    ),
+                )],
             )
             .await;
     }

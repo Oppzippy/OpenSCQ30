@@ -9,7 +9,7 @@ use crate::{
         common::{
             device::fetch_state_from_state_update_packet,
             macros::soundcore_device,
-            modules::sound_modes::AvailableSoundModes,
+            modules::{equalizer, sound_modes::AvailableSoundModes},
             packet::outbound::{RequestState, ToPacket},
             structures::{AmbientSoundMode, NoiseCancelingMode},
         },
@@ -41,7 +41,7 @@ soundcore_device!(
                 NoiseCancelingMode::Outdoor,
             ],
         });
-        builder.equalizer().await;
+        builder.equalizer(equalizer::common_settings()).await;
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.single_battery();
         builder.serial_number_and_firmware_version();

@@ -1,6 +1,6 @@
 use crate::devices::soundcore::common::{
     packet,
-    structures::{AgeRange, CommonEqualizerConfiguration, CustomHearId, Gender},
+    structures::{AgeRange, CustomHearId, EqualizerConfiguration, Gender},
 };
 
 use super::outbound_packet::ToPacket;
@@ -12,8 +12,12 @@ pub struct SetEqualizerAndCustomHearId<
     const BANDS: usize,
     const HEAR_ID_CHANNELS: usize,
     const HEAR_ID_BANDS: usize,
+    const MIN_VOLUME: i16,
+    const MAX_VOLUME: i16,
+    const FRACTION_DIGITS: u8,
 > {
-    pub equalizer_configuration: &'a CommonEqualizerConfiguration<CHANNELS, BANDS>,
+    pub equalizer_configuration:
+        &'a EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>,
     pub gender: Gender,
     pub age_range: AgeRange,
     pub custom_hear_id: &'a CustomHearId<HEAR_ID_CHANNELS, HEAR_ID_BANDS>,
@@ -24,7 +28,20 @@ impl<
     const BANDS: usize,
     const HEAR_ID_CHANNELS: usize,
     const HEAR_ID_BANDS: usize,
-> ToPacket for SetEqualizerAndCustomHearId<'_, CHANNELS, BANDS, HEAR_ID_CHANNELS, HEAR_ID_BANDS>
+    const MIN_VOLUME: i16,
+    const MAX_VOLUME: i16,
+    const FRACTION_DIGITS: u8,
+> ToPacket
+    for SetEqualizerAndCustomHearId<
+        '_,
+        CHANNELS,
+        BANDS,
+        HEAR_ID_CHANNELS,
+        HEAR_ID_BANDS,
+        MIN_VOLUME,
+        MAX_VOLUME,
+        FRACTION_DIGITS,
+    >
 {
     type DirectionMarker = packet::OutboundMarker;
 
@@ -106,15 +123,11 @@ impl<
 
 #[cfg(test)]
 mod tests {
-    use crate::devices::soundcore::common::{
-        packet::outbound::ToPacket,
-        structures::{
-            AgeRange, CommonEqualizerConfiguration, CommonVolumeAdjustments, CustomHearId, Gender,
-            HearIdMusicType, HearIdType,
-        },
+    use crate::devices::soundcore::common::structures::{
+        CommonEqualizerConfiguration, CommonVolumeAdjustments, HearIdMusicType, HearIdType,
     };
 
-    use super::SetEqualizerAndCustomHearId;
+    use super::*;
 
     #[test]
     fn it_matches_a_generated_packet_with_hear_id_set() {

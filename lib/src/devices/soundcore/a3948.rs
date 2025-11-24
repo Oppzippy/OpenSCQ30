@@ -5,9 +5,12 @@ use crate::devices::soundcore::{
     common::{
         device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
-        modules::button_configuration::{
-            ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings,
-            COMMON_ACTIONS_WITHOUT_SOUND_MODES,
+        modules::{
+            button_configuration::{
+                ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings,
+                COMMON_ACTIONS_WITHOUT_SOUND_MODES,
+            },
+            equalizer,
         },
         packet::outbound::{RequestState, ToPacket},
         structures::button_configuration::{
@@ -27,7 +30,9 @@ soundcore_device!(
     },
     async |builder| {
         builder.module_collection().add_state_update();
-        builder.equalizer_with_drc_tws().await;
+        builder
+            .equalizer_with_drc_tws(equalizer::common_settings())
+            .await;
 
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.reset_button_configuration::<A3948StateUpdatePacket>(

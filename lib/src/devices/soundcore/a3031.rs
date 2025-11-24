@@ -9,8 +9,7 @@ use crate::{
         common::{
             macros::soundcore_device,
             modules::{
-                button_configuration::COMMON_SETTINGS as BUTTON_CONFIGURATION_SETTINGS,
-                sound_modes::AvailableSoundModes,
+                button_configuration::COMMON_SETTINGS as BUTTON_CONFIGURATION_SETTINGS, equalizer, sound_modes::AvailableSoundModes
             },
             packet::{
                 inbound::{SerialNumberAndFirmwareVersion, TryToPacket},
@@ -53,7 +52,7 @@ soundcore_device!(
                 NoiseCancelingMode::Outdoor,
             ],
         });
-        builder.equalizer_tws().await;
+        builder.equalizer_tws(equalizer::common_settings()).await;
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.touch_tone();
         builder.tws_status();

@@ -3,9 +3,7 @@ use std::collections::HashMap;
 use crate::devices::soundcore::{
     a3033::{packets::A3033StateUpdatePacket, state::A3033State},
     common::{
-        device::fetch_state_from_state_update_packet,
-        macros::soundcore_device,
-        packet::outbound::{RequestState, ToPacket},
+        device::fetch_state_from_state_update_packet, macros::soundcore_device, modules::{equalizer}, packet::outbound::{RequestState, ToPacket}
     },
 };
 
@@ -20,7 +18,7 @@ soundcore_device!(
     },
     async |builder| {
         builder.module_collection().add_state_update();
-        builder.equalizer().await;
+        builder.equalizer(equalizer::common_settings()).await;
         builder.wearing_detection();
         builder.single_battery();
         builder.serial_number_and_firmware_version();

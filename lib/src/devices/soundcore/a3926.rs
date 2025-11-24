@@ -4,6 +4,7 @@ use crate::devices::soundcore::{
     a3926::{packets::A3926StateUpdatePacket, state::A3926State},
     common::{
         macros::soundcore_device,
+        modules::{equalizer},
         packet::{
             inbound::{SerialNumberAndFirmwareVersion, TryToPacket},
             outbound::{RequestSerialNumberAndFirmwareVersion, RequestState, ToPacket},
@@ -45,7 +46,9 @@ soundcore_device!(
         //         NoiseCancelingMode::Outdoor,
         //     ],
         // });
-        builder.equalizer_with_basic_hear_id_tws().await;
+        builder
+            .equalizer_with_basic_hear_id_tws(equalizer::common_settings())
+            .await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.reset_button_configuration::<A3926StateUpdatePacket>(
             RequestState::default().to_packet(),

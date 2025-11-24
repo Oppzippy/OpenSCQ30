@@ -12,6 +12,7 @@ use crate::{
                 button_configuration::{
                     ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_ACTIONS,
                 },
+                equalizer,
                 sound_modes::AvailableSoundModes,
             },
             packet::{
@@ -63,7 +64,9 @@ soundcore_device!(
                 NoiseCancelingMode::Indoor,
             ],
         });
-        builder.equalizer_with_drc_tws().await;
+        builder
+            .equalizer_with_drc_tws(equalizer::common_settings())
+            .await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.reset_button_configuration::<A3931StateUpdatePacket>(
             RequestState::default().to_packet(),

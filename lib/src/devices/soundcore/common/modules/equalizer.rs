@@ -24,8 +24,8 @@ use crate::{
             packet::PacketIOController,
             state_modifier::StateModifier,
             structures::{
-                AgeRange, BasicHearId, CommonEqualizerConfiguration, CustomHearId,
-                EqualizerConfiguration, Gender, TwsStatus, VolumeAdjustments,
+                AgeRange, BasicHearId, CustomHearId, EqualizerConfiguration, Gender, TwsStatus,
+                VolumeAdjustments,
             },
         },
     },
@@ -92,7 +92,19 @@ pub struct EqualizerPreset<
     pub volume_adjustments: VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>,
 }
 
-pub fn common_equalizer_module_settings() -> EqualizerModuleSettings<8, 8, -120, 134, 1> {
+const COMMON_VISIBLE_BANDS: usize = 8;
+const COMMON_PRESET_BANDS: usize = 8;
+const COMMON_MIN_VOLUME: i16 = -120;
+const COMMON_MAX_VOLUME: i16 = 134;
+const COMMON_FRACTION_DIGITS: u8 = 1;
+
+pub fn common_settings() -> EqualizerModuleSettings<
+    COMMON_VISIBLE_BANDS,
+    COMMON_PRESET_BANDS,
+    COMMON_MIN_VOLUME,
+    COMMON_MAX_VOLUME,
+    COMMON_FRACTION_DIGITS,
+> {
     EqualizerModuleSettings {
         custom_preset_id: 0xfefe,
         band_hz: [100, 200, 400, 800, 1600, 3200, 6400, 12800],
@@ -234,15 +246,34 @@ pub fn common_equalizer_module_settings() -> EqualizerModuleSettings<8, 8, -120,
 }
 
 impl<T: 'static> ModuleCollection<T> {
-    pub async fn add_equalizer<Conn, const CHANNELS: usize, const BANDS: usize>(
+    pub async fn add_equalizer<
+        Conn,
+        const CHANNELS: usize,
+        const BANDS: usize,
+        const VISIBLE_BANDS: usize,
+        const PRESET_BANDS: usize,
+        const MIN_VOLUME: i16,
+        const MAX_VOLUME: i16,
+        const FRACTION_DIGITS: u8,
+    >(
         &mut self,
         packet_io: Arc<PacketIOController<Conn>>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
         change_notify: watch::Sender<()>,
+        settings: EqualizerModuleSettings<
+            VISIBLE_BANDS,
+            PRESET_BANDS,
+            MIN_VOLUME,
+            MAX_VOLUME,
+            FRACTION_DIGITS,
+        >,
     ) where
         Conn: RfcommConnection + 'static + Send + Sync,
-        T: Has<CommonEqualizerConfiguration<CHANNELS, BANDS>> + Clone + Send + Sync,
+        T: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
+            + Clone
+            + Send
+            + Sync,
     {
         self.add_equalizer_with_custom_state_modifier(
             database,
@@ -252,20 +283,36 @@ impl<T: 'static> ModuleCollection<T> {
                 packet_io,
                 EqualizerStateModifierOptions { has_drc: false },
             )),
-            common_equalizer_module_settings(),
+            settings,
         )
         .await;
     }
 
-    pub async fn add_equalizer_tws<Conn, const CHANNELS: usize, const BANDS: usize>(
+    pub async fn add_equalizer_tws<
+        Conn,
+        const CHANNELS: usize,
+        const BANDS: usize,
+        const VISIBLE_BANDS: usize,
+        const PRESET_BANDS: usize,
+        const MIN_VOLUME: i16,
+        const MAX_VOLUME: i16,
+        const FRACTION_DIGITS: u8,
+    >(
         &mut self,
         packet_io: Arc<PacketIOController<Conn>>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
         change_notify: watch::Sender<()>,
+        settings: EqualizerModuleSettings<
+            VISIBLE_BANDS,
+            PRESET_BANDS,
+            MIN_VOLUME,
+            MAX_VOLUME,
+            FRACTION_DIGITS,
+        >,
     ) where
         Conn: RfcommConnection + 'static + Send + Sync,
-        T: Has<CommonEqualizerConfiguration<CHANNELS, BANDS>>
+        T: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
             + Has<TwsStatus>
             + Clone
             + Send
@@ -279,20 +326,39 @@ impl<T: 'static> ModuleCollection<T> {
                 packet_io,
                 EqualizerStateModifierOptions { has_drc: false },
             )),
-            common_equalizer_module_settings(),
+            settings,
         )
         .await;
     }
 
-    pub async fn add_equalizer_with_drc<Conn, const CHANNELS: usize, const BANDS: usize>(
+    pub async fn add_equalizer_with_drc<
+        Conn,
+        const CHANNELS: usize,
+        const BANDS: usize,
+        const VISIBLE_BANDS: usize,
+        const PRESET_BANDS: usize,
+        const MIN_VOLUME: i16,
+        const MAX_VOLUME: i16,
+        const FRACTION_DIGITS: u8,
+    >(
         &mut self,
         packet_io: Arc<PacketIOController<Conn>>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
         change_notify: watch::Sender<()>,
+        settings: EqualizerModuleSettings<
+            VISIBLE_BANDS,
+            PRESET_BANDS,
+            MIN_VOLUME,
+            MAX_VOLUME,
+            FRACTION_DIGITS,
+        >,
     ) where
         Conn: RfcommConnection + 'static + Send + Sync,
-        T: Has<CommonEqualizerConfiguration<CHANNELS, BANDS>> + Clone + Send + Sync,
+        T: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
+            + Clone
+            + Send
+            + Sync,
     {
         self.add_equalizer_with_custom_state_modifier(
             database,
@@ -302,20 +368,36 @@ impl<T: 'static> ModuleCollection<T> {
                 packet_io,
                 EqualizerStateModifierOptions { has_drc: true },
             )),
-            common_equalizer_module_settings(),
+            settings,
         )
         .await;
     }
 
-    pub async fn add_equalizer_with_drc_tws<Conn, const CHANNELS: usize, const BANDS: usize>(
+    pub async fn add_equalizer_with_drc_tws<
+        Conn,
+        const CHANNELS: usize,
+        const BANDS: usize,
+        const VISIBLE_BANDS: usize,
+        const PRESET_BANDS: usize,
+        const MIN_VOLUME: i16,
+        const MAX_VOLUME: i16,
+        const FRACTION_DIGITS: u8,
+    >(
         &mut self,
         packet_io: Arc<PacketIOController<Conn>>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
         change_notify: watch::Sender<()>,
+        settings: EqualizerModuleSettings<
+            VISIBLE_BANDS,
+            PRESET_BANDS,
+            MIN_VOLUME,
+            MAX_VOLUME,
+            FRACTION_DIGITS,
+        >,
     ) where
         Conn: RfcommConnection + 'static + Send + Sync,
-        T: Has<CommonEqualizerConfiguration<CHANNELS, BANDS>>
+        T: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
             + Has<TwsStatus>
             + Clone
             + Send
@@ -329,7 +411,7 @@ impl<T: 'static> ModuleCollection<T> {
                 packet_io,
                 EqualizerStateModifierOptions { has_drc: true },
             )),
-            common_equalizer_module_settings(),
+            settings,
         )
         .await;
     }
@@ -338,15 +420,27 @@ impl<T: 'static> ModuleCollection<T> {
         Conn,
         const CHANNELS: usize,
         const BANDS: usize,
+        const VISIBLE_BANDS: usize,
+        const PRESET_BANDS: usize,
+        const MIN_VOLUME: i16,
+        const MAX_VOLUME: i16,
+        const FRACTION_DIGITS: u8,
     >(
         &mut self,
         packet_io: Arc<PacketIOController<Conn>>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
         change_notify: watch::Sender<()>,
+        settings: EqualizerModuleSettings<
+            VISIBLE_BANDS,
+            PRESET_BANDS,
+            MIN_VOLUME,
+            MAX_VOLUME,
+            FRACTION_DIGITS,
+        >,
     ) where
         Conn: RfcommConnection + 'static + Send + Sync,
-        T: Has<CommonEqualizerConfiguration<CHANNELS, BANDS>>
+        T: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
             + Has<TwsStatus>
             + Has<BasicHearId<CHANNELS, BANDS>>
             + Has<Gender>
@@ -359,10 +453,8 @@ impl<T: 'static> ModuleCollection<T> {
             database,
             device_model,
             change_notify,
-            Box::new(
-                EqualizerWithBasicHearIdStateModifier::<Conn, CHANNELS, BANDS>::new(packet_io),
-            ),
-            common_equalizer_module_settings(),
+            Box::new(EqualizerWithBasicHearIdStateModifier::new(packet_io)),
+            settings,
         )
         .await;
     }
@@ -371,15 +463,27 @@ impl<T: 'static> ModuleCollection<T> {
         Conn,
         const CHANNELS: usize,
         const BANDS: usize,
+        const VISIBLE_BANDS: usize,
+        const PRESET_BANDS: usize,
+        const MIN_VOLUME: i16,
+        const MAX_VOLUME: i16,
+        const FRACTION_DIGITS: u8,
     >(
         &mut self,
         packet_io: Arc<PacketIOController<Conn>>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
         change_notify: watch::Sender<()>,
+        settings: EqualizerModuleSettings<
+            VISIBLE_BANDS,
+            PRESET_BANDS,
+            MIN_VOLUME,
+            MAX_VOLUME,
+            FRACTION_DIGITS,
+        >,
     ) where
         Conn: RfcommConnection + 'static + Send + Sync,
-        T: Has<CommonEqualizerConfiguration<CHANNELS, BANDS>>
+        T: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
             + Has<TwsStatus>
             + Has<CustomHearId<CHANNELS, BANDS>>
             + Has<Gender>
@@ -393,7 +497,7 @@ impl<T: 'static> ModuleCollection<T> {
             device_model,
             change_notify,
             Box::new(EqualizerWithCustomHearIdStateModifier::new(packet_io)),
-            common_equalizer_module_settings(),
+            settings,
         )
         .await;
     }

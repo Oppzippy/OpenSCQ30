@@ -10,7 +10,7 @@ use crate::{
         a3947,
         common::{
             self,
-            modules::{ModuleCollection, equalizer::common_equalizer_module_settings},
+            modules::{self, ModuleCollection},
             packet::PacketIOController,
             structures::TwsStatus,
         },
@@ -44,7 +44,7 @@ where
             device_model,
             change_notify,
             Box::new(state_modifier::EqualizerStateModifier::new(packet_io)),
-            common_equalizer_module_settings(),
+            modules::equalizer::common_settings(),
         )
         .await;
     }
