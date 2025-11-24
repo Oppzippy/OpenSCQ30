@@ -15,16 +15,16 @@ format:
 lint:
     ruff check
 
-remote-sync:
+sync-remote:
     rsync -rlptvh . {{ remote_user }}@{{ remote_host }}:{{ remote_path }} --include="**.gitignore" --exclude="/.git" --filter=":- .gitignore" --delete-after
 
-remote-sync-watch:
+sync-remote-watch: sync-remote
     #!/usr/bin/env bash
     while inotifywait -r -e modify,create,delete ./devices; do
-        just remote-sync
+        just sync-remote
     done
 
-remote-init: remote-sync
+init-remote: sync-remote
     #!/usr/bin/env bash
     set -euxo pipefail
     ssh -t {{ remote_user }}@{{ remote_host }} <<EOF
@@ -42,7 +42,7 @@ remote-init: remote-sync
     pip install .
     EOF
 
-remote-run device: remote-sync
+run-remote device:
     #!/usr/bin/env bash
     set -euxo pipefail
     ssh -tt {{ remote_user }}@{{ remote_host }} <<'EOF'
