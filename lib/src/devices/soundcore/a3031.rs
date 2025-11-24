@@ -9,7 +9,8 @@ use crate::{
         common::{
             macros::soundcore_device,
             modules::{
-                button_configuration::COMMON_SETTINGS as BUTTON_CONFIGURATION_SETTINGS, equalizer, sound_modes::AvailableSoundModes
+                button_configuration::COMMON_SETTINGS as BUTTON_CONFIGURATION_SETTINGS, equalizer,
+                sound_modes::AvailableSoundModes,
             },
             packet::{
                 inbound::{SerialNumberAndFirmwareVersion, TryToPacket},

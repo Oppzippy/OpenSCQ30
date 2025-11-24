@@ -4,7 +4,7 @@ use crate::devices::soundcore::{
     a3926::{packets::A3926StateUpdatePacket, state::A3926State},
     common::{
         macros::soundcore_device,
-        modules::{equalizer},
+        modules::equalizer,
         packet::{
             inbound::{SerialNumberAndFirmwareVersion, TryToPacket},
             outbound::{RequestSerialNumberAndFirmwareVersion, RequestState, ToPacket},

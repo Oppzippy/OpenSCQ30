@@ -3,7 +3,10 @@ use std::collections::HashMap;
 use crate::devices::soundcore::{
     a3033::{packets::A3033StateUpdatePacket, state::A3033State},
     common::{
-        device::fetch_state_from_state_update_packet, macros::soundcore_device, modules::{equalizer}, packet::outbound::{RequestState, ToPacket}
+        device::fetch_state_from_state_update_packet,
+        macros::soundcore_device,
+        modules::equalizer,
+        packet::outbound::{RequestState, ToPacket},
     },
 };
 
