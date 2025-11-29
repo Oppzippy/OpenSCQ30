@@ -367,4 +367,37 @@ mod tests {
             )
             .await;
     }
+
+    #[tokio::test(start_paused = true)]
+    async fn set_manual_noise_canceling() {
+        let mut device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreA3959,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        1, 1, 5, 6, 255, 255, 48, 49, 46, 54, 52, 48, 49, 46, 54, 52, 51, 57, 53,
+                        57, 68, 69, 68, 54, 54, 57, 50, 68, 66, 54, 70, 52, 254, 254, 101, 120,
+                        161, 171, 171, 152, 144, 179, 120, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10,
+                        241, 240, 102, 102, 242, 243, 68, 68, 51, 0, 85, 0, 0, 1, 255, 1, 49, 1, 1,
+                        0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    ],
+                ),
+            )]),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::ManualNoiseCanceling, 2.into())],
+                vec![packet::Outbound::new(
+                    packet::Command([6, 129]),
+                    vec![0, 37, 0, 0, 1, 255, 1],
+                )],
+            )
+            .await;
+    }
 }

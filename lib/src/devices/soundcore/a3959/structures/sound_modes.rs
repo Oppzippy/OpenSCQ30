@@ -166,8 +166,8 @@ impl NoiseCancelingSettings {
 #[cfg_attr(test, derive(proptest_derive::Arbitrary))]
 pub enum NoiseCancelingMode {
     #[default]
-    Adaptive = 0,
-    Manual = 1,
+    Manual = 0,
+    Adaptive = 1,
     MultiScene = 2,
 }
 
