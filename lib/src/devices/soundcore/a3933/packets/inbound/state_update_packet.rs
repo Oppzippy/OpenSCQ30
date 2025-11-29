@@ -236,7 +236,7 @@ impl ToPacket for A3933StateUpdatePacket {
                     [hear_id.is_enabled as u8]
                         .into_iter()
                         .chain(hear_id.volume_adjustments.iter().flat_map(|v| v.bytes()))
-                        .chain(hear_id.time.to_le_bytes())
+                        .chain(hear_id.time.to_be_bytes())
                         .chain([hear_id.hear_id_type.0])
                         .chain(
                             hear_id

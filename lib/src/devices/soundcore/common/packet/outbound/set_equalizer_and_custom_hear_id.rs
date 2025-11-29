@@ -95,7 +95,7 @@ impl<
             bytes.extend(&max_value_stereo_eq_wave);
         }
         bytes.extend(if supports_hear_id {
-            self.custom_hear_id.time.to_le_bytes()
+            self.custom_hear_id.time.to_be_bytes()
         } else {
             [0, 0, 0, 0]
         });
@@ -156,7 +156,7 @@ mod tests {
                     CommonVolumeAdjustments::new([-67, -104, -72, -111, -44, -51, -76, -50]),
                     CommonVolumeAdjustments::new([-78, -104, -10, -95, -4, -92, -80, -66]),
                 ],
-                time: 100000,
+                time: 2693136640,
                 hear_id_type: HearIdType(5),
                 hear_id_music_type: HearIdMusicType(0),
                 custom_volume_adjustments: Some([

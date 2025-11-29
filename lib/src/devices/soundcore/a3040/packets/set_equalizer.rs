@@ -34,7 +34,7 @@ pub fn set_equalizer<
         .chain([0, 1]) // gender, age range
         .chain(iter::once(hear_id.is_enabled.into()))
         .chain(hear_id.volume_adjustments.iter().flat_map(|v| v.bytes()))
-        .chain(hear_id.time.to_le_bytes())
+        .chain(hear_id.time.to_be_bytes())
         .chain(iter::once(hear_id.hear_id_type.0))
         .chain(
             // repeat the left side for the right side value rather than making use of the provided right side value

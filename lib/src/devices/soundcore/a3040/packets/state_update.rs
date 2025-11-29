@@ -217,7 +217,7 @@ impl ToPacket for A3040StateUpdatePacket {
                     .iter()
                     .flat_map(|v| v.bytes()),
             )
-            .chain(self.hear_id.time.to_le_bytes())
+            .chain(self.hear_id.time.to_be_bytes())
             .chain(iter::once(self.hear_id.hear_id_type.0))
             .chain(self.hear_id.custom_volume_adjustments.into_iter().flat_map(
                 |custom_volume_adjustments| {

@@ -5,7 +5,7 @@ use nom::{
     combinator::map,
     error::{ContextError, ParseError, context},
     multi::count,
-    number::complete::{le_i32, le_u8},
+    number::complete::{be_u32, le_u8},
 };
 use openscq30_i18n_macros::Translate;
 use strum::{EnumIter, EnumString, FromRepr, IntoStaticStr};
@@ -266,7 +266,7 @@ impl WindNoise {
 pub struct HearId<const C: usize, const B: usize> {
     pub is_enabled: bool,
     pub volume_adjustments: [CommonVolumeAdjustments<B>; C],
-    pub time: i32,
+    pub time: u32,
     pub hear_id_type: HearIdType,
     pub music_type: HearIdMusicType,
     pub custom_volume_adjustments: [CommonVolumeAdjustments<B>; C],
@@ -295,7 +295,7 @@ impl<const C: usize, const B: usize> HearId<C, B> {
                 (
                     take_bool,
                     count(CommonVolumeAdjustments::take, C),
-                    le_i32,
+                    be_u32,
                     HearIdType::take,
                     count(CommonVolumeAdjustments::take, C),
                     HearIdMusicType::take,
@@ -334,7 +334,7 @@ impl<const C: usize, const B: usize> HearId<C, B> {
     pub fn bytes(&self) -> impl Iterator<Item = u8> {
         iter::once(self.is_enabled.into())
             .chain(self.volume_adjustments.iter().flat_map(|side| side.bytes()))
-            .chain(self.time.to_le_bytes())
+            .chain(self.time.to_be_bytes())
             .chain([self.hear_id_type.0, 0])
             .chain(
                 self.custom_volume_adjustments

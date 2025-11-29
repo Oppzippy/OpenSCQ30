@@ -194,7 +194,7 @@ impl ToPacket for A3936StateUpdatePacket {
                             .iter()
                             .flat_map(|v| v.bytes()),
                     )
-                    .chain(self.custom_hear_id.time.to_le_bytes())
+                    .chain(self.custom_hear_id.time.to_be_bytes())
                     .chain([self.custom_hear_id.hear_id_type.0])
                     .chain(
                         self.custom_hear_id
