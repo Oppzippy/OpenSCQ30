@@ -21,6 +21,8 @@
 
 ### CLI
 
+#### Features
+
 - Show battery level as fraction (for example, 2/5 instead of 2)
 
 ## v2.0.0-beta6
