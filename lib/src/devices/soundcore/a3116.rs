@@ -26,7 +26,7 @@ soundcore_device!(
         builder.a3116_equalizer().await;
         builder.a3116_volume(16);
         builder.a3116_auto_power_off();
-        builder.single_battery();
+        builder.single_battery(5);
         builder.serial_number_and_firmware_version();
     },
     {

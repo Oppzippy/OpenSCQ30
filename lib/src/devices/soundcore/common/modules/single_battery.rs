@@ -25,10 +25,10 @@ impl<T> ModuleCollection<T>
 where
     T: Has<SingleBattery> + Clone + Send + Sync,
 {
-    pub fn add_single_battery(&mut self) {
+    pub fn add_single_battery(&mut self, max_level: u8) {
         self.setting_manager.add_handler(
             CategoryId::DeviceInformation,
-            setting_handler::BatterySettingHandler::default(),
+            setting_handler::BatterySettingHandler::new(max_level),
         );
         self.packet_handlers.set_handler(
             packet_handler::BatteryLevelPacketHandler::COMMAND,

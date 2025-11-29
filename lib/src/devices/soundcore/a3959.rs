@@ -180,8 +180,8 @@ mod tests {
         .await;
 
         device.assert_setting_values([
-            (SettingId::BatteryLevelLeft, "5".into()),
-            (SettingId::BatteryLevelRight, "6".into()),
+            (SettingId::BatteryLevelLeft, "5/10".into()),
+            (SettingId::BatteryLevelRight, "6/10".into()),
             (SettingId::IsChargingLeft, "No".into()),
             (SettingId::IsChargingRight, "No".into()),
             (SettingId::AmbientSoundMode, "NoiseCanceling".into()),

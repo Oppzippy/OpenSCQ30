@@ -8,6 +8,7 @@ use crate::{
         settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
         structures::CaseBatteryLevel,
     },
+    i18n::fl,
 };
 
 use super::CaseBatteryLevelSetting;
@@ -36,8 +37,11 @@ where
         let setting: CaseBatteryLevelSetting = (*setting_id).try_into().ok()?;
         Some(match setting {
             CaseBatteryLevelSetting::CaseBatteryLevel => Setting::Information {
-                value: battery.0.0.to_string(),
-                translated_value: format!("{}/{}", battery.0.0, self.max_level),
+                value: format!("{}/{}", battery.0.0, self.max_level),
+                translated_value: fl!(
+                    "percent",
+                    percent = ((i32::from(battery.0.0) * 100) / i32::from(self.max_level))
+                ),
             },
         })
     }

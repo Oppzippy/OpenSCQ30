@@ -182,3 +182,5 @@ limit-high-volume = Limit High Volume
 db-limit = DB Limit
 db-refresh-rate = DB Refresh Rate
 real-time = Real Time
+
+percent = { $percent }%

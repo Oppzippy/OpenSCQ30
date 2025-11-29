@@ -23,7 +23,7 @@ soundcore_device!(
         builder.module_collection().add_state_update();
         builder.equalizer(equalizer::common_settings()).await;
         builder.wearing_detection();
-        builder.single_battery();
+        builder.single_battery(5);
         builder.serial_number_and_firmware_version();
     },
     {

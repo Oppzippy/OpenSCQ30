@@ -53,12 +53,19 @@ where
                 },
             },
             BatterySetting::BatteryLevelLeft => Setting::Information {
-                value: battery.left.level.0.to_string(),
-                translated_value: format!("{}/{}", battery.left.level.0, self.max_level),
+                value: format!("{}/{}", battery.left.level.0, self.max_level),
+                translated_value: fl!(
+                    "percent",
+                    percent = ((i32::from(battery.left.level.0) * 100) / i32::from(self.max_level))
+                ),
             },
             BatterySetting::BatteryLevelRight => Setting::Information {
-                value: battery.right.level.0.to_string(),
-                translated_value: format!("{}/{}", battery.right.level.0, self.max_level),
+                value: format!("{}/{}", battery.right.level.0, self.max_level),
+                translated_value: fl!(
+                    "percent",
+                    percent =
+                        ((i32::from(battery.right.level.0) * 100) / i32::from(self.max_level))
+                ),
             },
         })
     }

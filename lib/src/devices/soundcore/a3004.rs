@@ -33,7 +33,7 @@ soundcore_device!(
         builder
             .equalizer_with_drc(equalizer::common_settings())
             .await;
-        builder.single_battery();
+        builder.single_battery(5);
         builder.serial_number_and_firmware_version();
     },
     {

@@ -13,8 +13,15 @@ use crate::{
 
 use super::BatterySetting;
 
-#[derive(Default)]
-pub struct BatterySettingHandler {}
+pub struct BatterySettingHandler {
+    max_level: u8,
+}
+
+impl BatterySettingHandler {
+    pub fn new(max_level: u8) -> Self {
+        Self { max_level }
+    }
+}
 
 #[async_trait]
 impl<T> SettingHandler<T> for BatterySettingHandler
@@ -38,8 +45,11 @@ where
                 },
             },
             BatterySetting::BatteryLevel => Setting::Information {
-                value: battery.level.0.to_string(),
-                translated_value: format!("{}/5", battery.level.0),
+                value: format!("{}/5", battery.level.0),
+                translated_value: fl!(
+                    "percent",
+                    percent = ((i32::from(battery.level.0) * 100) / i32::from(self.max_level))
+                ),
             },
         })
     }

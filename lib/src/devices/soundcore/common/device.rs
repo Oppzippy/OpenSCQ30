@@ -500,11 +500,11 @@ where
             );
     }
 
-    pub fn single_battery(&mut self)
+    pub fn single_battery(&mut self, max_level: u8)
     where
         StateType: Has<SingleBattery>,
     {
-        self.module_collection.add_single_battery();
+        self.module_collection.add_single_battery(max_level);
     }
 
     pub fn single_battery_level(&mut self, max_level: u8)
