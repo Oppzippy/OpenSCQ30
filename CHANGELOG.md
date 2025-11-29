@@ -1,5 +1,28 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Features
+
+- Add support for Soundcore Motion+
+- Add support for Soundcore P30i
+- Show battery level as percentage
+
+#### Fixes
+
+- Soundcore R50i NC should not have transparency modes
+
+#### Localization
+
+- Update Turkish translations (thanks to ozer4 and Ferry7466)
+- Update German translations (thanks to Ireozar)
+
+### CLI
+
+- Show battery level as fraction (for example, 2/5 instead of 2)
+
 ## v2.0.0-beta6
 
 ### General
