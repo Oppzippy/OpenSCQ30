@@ -227,7 +227,7 @@ impl ToPacket for A3933StateUpdatePacket {
                 self.battery.right.level.0,
             ])
             .chain(self.dual_firmware_version.bytes())
-            .chain(self.serial_number.0.as_bytes().iter().copied())
+            .chain(self.serial_number.bytes())
             .chain(self.equalizer_configuration.bytes())
             .chain([self.age_range.0])
             .chain(self.hear_id.as_ref().map_or_else(

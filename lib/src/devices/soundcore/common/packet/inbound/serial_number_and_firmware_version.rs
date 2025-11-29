@@ -53,7 +53,7 @@ impl ToPacket for SerialNumberAndFirmwareVersion {
     fn body(&self) -> Vec<u8> {
         self.dual_firmware_version
             .bytes()
-            .chain(self.serial_number.0.to_string().into_bytes())
+            .chain(self.serial_number.as_str().bytes())
             .collect()
     }
 }
@@ -88,9 +88,6 @@ mod tests {
             },
             packet.dual_firmware_version,
         );
-        assert_eq!(
-            SerialNumber("0123456789ABCDEF".into()),
-            packet.serial_number,
-        );
+        assert_eq!(SerialNumber::from("0123456789ABCDEF"), packet.serial_number);
     }
 }

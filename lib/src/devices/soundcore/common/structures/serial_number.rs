@@ -3,12 +3,12 @@ use nom::{
     combinator::map_opt,
     error::{ContextError, ParseError, context},
 };
-use std::{fmt::Display, sync::Arc};
+use std::fmt::Display;
 
 use crate::devices::soundcore::common::packet::parsing::take_str;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct SerialNumber(pub Arc<str>);
+pub struct SerialNumber(String);
 
 impl SerialNumber {
     pub fn as_str(&self) -> &str {

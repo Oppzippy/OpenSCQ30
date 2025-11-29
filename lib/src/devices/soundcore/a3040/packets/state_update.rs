@@ -195,7 +195,7 @@ impl ToPacket for A3040StateUpdatePacket {
         [self.battery_level.0, 0xFF]
             .into_iter()
             .chain(self.firmware_version.to_string().into_bytes())
-            .chain(self.serial_number.0.as_bytes().iter().copied())
+            .chain(self.serial_number.bytes())
             .chain(self.equalizer_configuration.bytes())
             .chain([0; 10])
             .chain([0; 2])
