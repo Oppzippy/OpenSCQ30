@@ -21,7 +21,10 @@ use crate::{
                 outbound::ToPacket,
             },
             packet_manager::PacketHandler,
-            structures::{EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery},
+            structures::{
+                BatteryLevel, EqualizerConfiguration, FirmwareVersion, IsBatteryCharging,
+                SerialNumber, SingleBattery,
+            },
         },
     },
 };
@@ -46,7 +49,7 @@ impl FromPacketBody for A3116StateUpdatePacket {
             "a3116 state update packet",
             map(
                 (
-                    SingleBattery::take,
+                    take_a3116_single_battery,
                     a3116::structures::Volume::take,
                     le_u8, // unknown
                     a3116::structures::AutoPowerOffDuration::take,
@@ -76,6 +79,20 @@ impl FromPacketBody for A3116StateUpdatePacket {
         )
         .parse_complete(input)
     }
+}
+
+// The a3116 has is_charging and level swapped compared to common
+fn take_a3116_single_battery<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    input: &'a [u8],
+) -> IResult<&'a [u8], SingleBattery, E> {
+    context(
+        "battery",
+        map(
+            (IsBatteryCharging::take, BatteryLevel::take),
+            |(is_charging, level)| SingleBattery { level, is_charging },
+        ),
+    )
+    .parse_complete(input)
 }
 
 impl ToPacket for A3116StateUpdatePacket {
