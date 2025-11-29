@@ -1,4 +1,5 @@
 name = "Soundcore Life Dot 2 NC"
+mac_address = "00:00:00:00:39:31"
 rfcomm_uuid = "00001101-0000-1000-8000-00805f9b34fb"
 
 [[responses]]

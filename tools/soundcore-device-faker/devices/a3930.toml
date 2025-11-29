@@ -1,4 +1,5 @@
 name = "Soundcore Liberty 2 Pro"
+mac_address = "00:00:00:00:39:30"
 rfcomm_uuid = "00001101-0000-1000-8000-00805f9b34fb"
 
 [[responses]]

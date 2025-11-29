@@ -1,4 +1,5 @@
 name = "Soundcore Space Q45"
+mac_address = "00:00:00:00:30:40"
 rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B3040"
 
 [[responses]]

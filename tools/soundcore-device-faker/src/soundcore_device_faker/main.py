@@ -5,9 +5,10 @@ import logging
 import asyncio
 import os
 from pathlib import Path
-from typing import Any, Callable, Dict
+from typing import Callable, Dict
+from bumble import hci
 from bumble.core import UUID
-from bumble.device import Device, DeviceConfiguration
+from bumble.device import DEVICE_DEFAULT_ADDRESS, Device, DeviceConfiguration
 from bumble.transport import open_transport_or_link
 from bumble.rfcomm import Server, make_service_sdp_records, DLC
 from bumble.avdtp import (
@@ -69,9 +70,16 @@ async def main() -> None:
     observer.start()
 
     async with await open_transport_or_link(sys.argv[1]) as hci_transport:
+        if mac_address := config.get("mac_address"):
+            mac_address = hci.Address(mac_address)
         device = Device.from_config_with_hci(
             DeviceConfiguration(
-                name=config["name"], class_of_device=2360324, keystore="JsonKeyStore"
+                name=config["name"],
+                class_of_device=2360324,
+                keystore="JsonKeyStore",
+                address=mac_address
+                if mac_address is not None
+                else hci.Address(DEVICE_DEFAULT_ADDRESS),
             ),
             hci_transport.source,
             hci_transport.sink,
@@ -93,7 +101,9 @@ async def main() -> None:
         def on_session(session: DLC) -> None:
             nonlocal soundcore_session
             nonlocal config
-            soundcore_session = SoundcoreSession(session, config.get("has_checksum", True))
+            soundcore_session = SoundcoreSession(
+                session, config.get("has_checksum", True)
+            )
             refresh_responses(config, soundcore_session)
 
         channel_number = rfcomm_server.listen(on_session)
@@ -108,10 +118,25 @@ async def main() -> None:
         }
 
         await device.power_on()
+        if mac_address is not None:
+            print(f"spoofing mac address: {mac_address}")
+            await device.send_command(HCI_Set_BD_ADDR_Command(bd_addr=mac_address))
         await device.set_discoverable(True)
         await device.set_connectable(True)
 
         await hci_transport.source.wait_for_termination()  # type: ignore
+
+
+# Is this raspberry pi specific?
+HCI_SET_BD_ADDR_COMMAND = hci.hci_command_op_code(0x3F, 0x01)
+hci.HCI_Command.register_commands({"HCI_SET_BD_ADDR_COMMAND": HCI_SET_BD_ADDR_COMMAND})
+
+
+@hci.HCI_Command.command(
+    fields=[("bd_addr", hci.Address.parse_address)],
+)
+class HCI_Set_BD_ADDR_Command(hci.HCI_Command):
+    pass
 
 
 # -----------------------------------------------------------------------------
@@ -152,8 +177,10 @@ def on_avdtp_connection(server):
 
 # -----------------------------------------------------------------------------
 
+
 def on_rtp_packet(packet):
     pass
+
 
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "DEBUG").upper())
 asyncio.run(main())
