@@ -14,29 +14,29 @@ OpenSCQ30 is free software for controlling settings for Soundcore headphones and
 
 ### Supported Devices
 
-| Model | Name                        |
-| ----- | --------------------------- |
-| A3004 | Soundcore Q20i              |
-| A3027 | Soundcore Life Q35          |
-| A3028 | Soundcore Life Q30          |
-| A3029 | Soundcore Life Tune         |
-| A3030 | Soundcore Life Tune Pro     |
-| A3031 | Soundcore Vortex            |
-| A3033 | Soundcore Life 2 Neo        |
-| A3040 | Soundcore Space Q45         |
-| A3116 | Soundcore Motion+           |
-| A3926 | Soundcore Life Dot 2S       |
-| A3930 | Soundcore Liberty 2 Pro     |
-| A3931 | Soundcore Life Dot 2 NC     |
-| A3933 | Soundcore Life Note 3       |
-| A3935 | Soundcore Life A2 NC        |
-| A3936 | Soundcore Space A40         |
-| A3939 | Soundcore Life P3           |
-| A3945 | Soundcore Life Note 3S      |
-| A3947 | Soundcore Liberty 4 NC      |
-| A3948 | Soundcore A20i              |
-| A3951 | Soundcore Liberty Air 2 Pro |
-| A3959 | Soundcore R50i NC           |
+| Model | Name                               |
+| ----- | ---------------------------------- |
+| A3004 | Soundcore Q20i                     |
+| A3027 | Soundcore Life Q35                 |
+| A3028 | Soundcore Life Q30                 |
+| A3029 | Soundcore Life Tune                |
+| A3030 | Soundcore Life Tune Pro            |
+| A3031 | Soundcore Vortex                   |
+| A3033 | Soundcore Life 2 Neo               |
+| A3040 | Soundcore Space Q45                |
+| A3116 | Soundcore Motion+                  |
+| A3926 | Soundcore Life Dot 2S              |
+| A3930 | Soundcore Liberty 2 Pro            |
+| A3931 | Soundcore Life Dot 2 NC            |
+| A3933 | Soundcore Life Note 3              |
+| A3935 | Soundcore Life A2 NC               |
+| A3936 | Soundcore Space A40                |
+| A3939 | Soundcore Life P3                  |
+| A3945 | Soundcore Life Note 3S             |
+| A3947 | Soundcore Liberty 4 NC             |
+| A3948 | Soundcore A20i                     |
+| A3951 | Soundcore Liberty Air 2 Pro        |
+| A3959 | Soundcore P30i / Soundcore R50i NC |
 
 ### Requested Devices
 
@@ -48,7 +48,6 @@ OpenSCQ30 is free software for controlling settings for Soundcore headphones and
 | A3952 | Soundcore Liberty 3 Pro | [GH-134](https://github.com/Oppzippy/OpenSCQ30/issues/134) |
 | A3954 | Soundcore Liberty 4 Pro | [GH-169](https://github.com/Oppzippy/OpenSCQ30/issues/169) |
 | A3955 | Soundcore P40i          | [GH-159](https://github.com/Oppzippy/OpenSCQ30/issues/159) |
-| A3959 | Soundcore P30i          | [GH-164](https://github.com/Oppzippy/OpenSCQ30/issues/164) |
 | A3982 | Soundcore Dot 3i        | [GH-147](https://github.com/Oppzippy/OpenSCQ30/issues/147) |
 | A6611 | Soundcore Sleep A20     | [GH-165](https://github.com/Oppzippy/OpenSCQ30/issues/165) |
 
