@@ -151,23 +151,9 @@ def on_avdtp_connection(server):
 
 
 # -----------------------------------------------------------------------------
-Context: Dict[Any, Any] = {"output": None}
-
 
 def on_rtp_packet(packet):
-    header = packet.payload[0]
-    fragmented = header >> 7
-    # start = (header >> 6) & 0x01
-    # last = (header >> 5) & 0x01
-    number_of_frames = header & 0x0F
-
-    if fragmented:
-        print(f"RTP: fragment {number_of_frames}")
-    else:
-        print(f"RTP: {number_of_frames} frames")
-
-    Context["output"].write(packet.payload[1:])
-
+    pass
 
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "DEBUG").upper())
 asyncio.run(main())
