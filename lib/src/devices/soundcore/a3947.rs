@@ -46,7 +46,7 @@ soundcore_device!(
 
         // Flags
         builder.touch_tone();
-        builder.gaming_mode();
+        builder.a3947_gaming_mode();
         builder.sound_leak_compensation();
         builder.surround_sound();
         builder.auto_play_pause();

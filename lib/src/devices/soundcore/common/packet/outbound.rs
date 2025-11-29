@@ -36,7 +36,7 @@ pub use set_sound_modes::*;
 
 use crate::devices::soundcore::common::packet;
 
-pub const SET_GAMING_MODE_COMMAND: packet::Command = packet::Command([0x10, 0x85]);
+pub const SET_GAMING_MODE_COMMAND: packet::Command = packet::Command([0x01, 0x87]);
 pub const SET_TOUCH_TONE_COMMAND: packet::Command = packet::Command([0x01, 0x83]);
 pub const SET_SOUND_LEAK_COMPENSATION_COMMAND: packet::Command = packet::Command([0x10, 0x86]);
 pub const SET_SURROUND_SOUND_COMMAND: packet::Command = packet::Command([0x02, 0x86]);

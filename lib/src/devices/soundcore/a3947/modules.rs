@@ -6,7 +6,7 @@ use crate::{
         a3947,
         common::{
             device::SoundcoreDeviceBuilder,
-            structures::{CommonEqualizerConfiguration, TwsStatus},
+            structures::{CommonEqualizerConfiguration, GamingMode, TwsStatus},
         },
     },
 };
@@ -14,6 +14,7 @@ use crate::{
 use super::structures::SoundModes;
 
 mod equalizer;
+mod flag;
 mod sound_modes;
 
 impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
@@ -47,5 +48,17 @@ where
         self.module_collection()
             .add_a3947_equalizer(database, device_model, change_notify, packet_io)
             .await;
+    }
+}
+
+impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+where
+    ConnectionType: RfcommConnection + Send + Sync + 'static,
+    StateType: Has<GamingMode> + Send + Sync + Clone + 'static,
+{
+    pub fn a3947_gaming_mode(&mut self) {
+        let packet_io_controller = self.packet_io_controller().clone();
+        self.module_collection()
+            .add_a3947_gaming_mode(packet_io_controller);
     }
 }

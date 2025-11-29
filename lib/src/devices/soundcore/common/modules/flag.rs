@@ -123,7 +123,7 @@ flag!(
 );
 
 impl<T> ModuleCollection<T> {
-    fn add_flag<C, FlagT>(
+    pub fn add_flag<C, FlagT>(
         &mut self,
         packet_io: Arc<PacketIOController<C>>,
         flag_configuration: FlagConfiguration,
@@ -150,7 +150,7 @@ impl<T> ModuleCollection<T> {
     }
 }
 
-struct FlagConfiguration {
+pub struct FlagConfiguration {
     pub setting_id: SettingId,
     pub set_command: packet::Command,
     pub update_command: Option<packet::Command>,

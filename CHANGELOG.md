@@ -13,6 +13,7 @@
 #### Fixes
 
 - Soundcore R50i NC should not have transparency modes
+- Gaming mode not working on devices other than Soundcore Liberty 4 NC
 
 #### Localization
 
