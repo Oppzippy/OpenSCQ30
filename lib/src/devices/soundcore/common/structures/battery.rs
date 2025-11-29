@@ -35,7 +35,7 @@ impl DualBattery {
 }
 
 impl DualBattery {
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         context(
@@ -70,7 +70,7 @@ pub struct SingleBattery {
 }
 
 impl SingleBattery {
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         context(
@@ -93,7 +93,7 @@ pub enum IsBatteryCharging {
 }
 
 impl IsBatteryCharging {
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         context(
@@ -128,7 +128,7 @@ impl From<IsBatteryCharging> for bool {
 pub struct BatteryLevel(pub u8);
 
 impl BatteryLevel {
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         context("battery level", map(le_u8, BatteryLevel)).parse_complete(input)

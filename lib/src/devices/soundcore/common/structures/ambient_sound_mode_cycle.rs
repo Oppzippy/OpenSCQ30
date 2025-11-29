@@ -17,13 +17,13 @@ pub struct AmbientSoundModeCycle {
 }
 
 impl AmbientSoundModeCycle {
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         context("ambient sound mode cycle", map(le_u8, Self::from)).parse_complete(input)
     }
 
-    pub(crate) fn bytes(&self) -> [u8; 1] {
+    pub fn bytes(&self) -> [u8; 1] {
         [(*self).into()]
     }
 }

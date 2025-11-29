@@ -25,7 +25,7 @@ pub struct SoundModes {
 }
 
 impl SoundModes {
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         context(
@@ -64,7 +64,7 @@ impl SoundModes {
         .parse_complete(input)
     }
 
-    pub(crate) fn bytes(&self) -> [u8; 7] {
+    pub fn bytes(&self) -> [u8; 7] {
         [
             self.ambient_sound_mode.id(),
             (self.manual_noise_canceling.0 << 4) | self.adaptive_noise_canceling.inner(),
@@ -172,7 +172,7 @@ pub enum NoiseCancelingMode {
 }
 
 impl NoiseCancelingMode {
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         context(
@@ -199,7 +199,7 @@ pub struct WindNoise {
 }
 
 impl WindNoise {
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         context(

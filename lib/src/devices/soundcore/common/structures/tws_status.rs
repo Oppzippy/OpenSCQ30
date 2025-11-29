@@ -26,7 +26,7 @@ impl Default for TwsStatus {
 }
 
 impl TwsStatus {
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         context(
@@ -58,7 +58,7 @@ pub enum HostDevice {
 }
 
 impl HostDevice {
-    pub(crate) fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         context("host device", map_opt(le_u8, Self::from_repr)).parse_complete(input)
