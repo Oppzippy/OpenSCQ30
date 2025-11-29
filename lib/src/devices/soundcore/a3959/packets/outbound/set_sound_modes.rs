@@ -34,7 +34,6 @@ mod tests {
                 ambient_sound_mode: common::structures::AmbientSoundMode::NoiseCanceling,
                 manual_noise_canceling: a3959::structures::ManualNoiseCanceling::new(5),
                 adaptive_noise_canceling: a3959::structures::AdaptiveNoiseCanceling::new(5),
-                transparency_mode: common::structures::TransparencyMode::FullyTransparent,
                 noise_canceling_mode: a3959::structures::NoiseCancelingMode::MultiScene,
                 wind_noise: a3959::structures::WindNoise {
                     is_suppression_enabled: true,

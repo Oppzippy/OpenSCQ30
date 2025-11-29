@@ -16,7 +16,6 @@ use crate::devices::soundcore::common;
 #[cfg_attr(test, derive(proptest_derive::Arbitrary))]
 pub struct SoundModes {
     pub ambient_sound_mode: common::structures::AmbientSoundMode,
-    pub transparency_mode: common::structures::TransparencyMode,
     pub adaptive_noise_canceling: AdaptiveNoiseCanceling,
     pub manual_noise_canceling: ManualNoiseCanceling,
     pub noise_canceling_mode: NoiseCancelingMode,
@@ -35,7 +34,7 @@ impl SoundModes {
                 (
                     common::structures::AmbientSoundMode::take,
                     NoiseCancelingSettings::take,
-                    common::structures::TransparencyMode::take,
+                    common::structures::AmbientSoundMode::take,
                     NoiseCancelingMode::take,
                     WindNoise::take,
                     le_u8,
@@ -44,7 +43,7 @@ impl SoundModes {
                 |(
                     ambient_sound_mode,
                     noise_canceling_settings,
-                    transparency_mode,
+                    _ambient_sound_mode,
                     noise_canceling_mode,
                     wind_noise,
                     noise_canceling_adaptive_sensitivity_level,
@@ -52,7 +51,6 @@ impl SoundModes {
                 )| {
                     Self {
                         ambient_sound_mode,
-                        transparency_mode,
                         adaptive_noise_canceling: noise_canceling_settings.adaptive,
                         manual_noise_canceling: noise_canceling_settings.manual,
                         noise_canceling_mode,
@@ -70,7 +68,7 @@ impl SoundModes {
         [
             self.ambient_sound_mode.id(),
             (self.manual_noise_canceling.0 << 4) | self.adaptive_noise_canceling.inner(),
-            self.transparency_mode.id(),
+            self.ambient_sound_mode.id(),
             self.noise_canceling_mode.id(), // ANC automation mode?
             self.wind_noise.byte(),
             self.noise_canceling_adaptive_sensitivity_level,

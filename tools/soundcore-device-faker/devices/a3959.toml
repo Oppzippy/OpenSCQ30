@@ -71,7 +71,7 @@ response = [
     51,   # Ambient Sound Mode Cycle
     0,    # Ambient Sound Mode
     0x55, # Noise Canceling Manual Mode
-    0,    # Transparency Mode (unused)
+    0,    # Ambient Sound Mode (again)
     0,    # Noise Canceling Mode Type (0=manual 1=adaptive 2=multi-scene)
     1,    # Wind Noise Reduction
     255,  # Unknown

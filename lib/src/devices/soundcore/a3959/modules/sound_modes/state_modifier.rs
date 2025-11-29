@@ -67,20 +67,29 @@ fn create_change_plan(
     let mut sequence = Vec::new();
     let mut current = from;
 
-    if current.ambient_sound_mode == common::structures::AmbientSoundMode::NoiseCanceling
-        || to.ambient_sound_mode == common::structures::AmbientSoundMode::Transparency
-    {
-        set_noise_canceling_mode_dependants(&mut current, &to, &mut sequence);
-        set_noise_canceling_mode(&mut current, &to, &mut sequence);
-        set_transparency_mode(&mut current, &to, &mut sequence);
-    } else {
-        set_transparency_mode(&mut current, &to, &mut sequence);
-        set_noise_canceling_mode_dependants(&mut current, &to, &mut sequence);
-        set_noise_canceling_mode(&mut current, &to, &mut sequence);
-    }
+    set_noise_canceling_mode_dependants(&mut current, &to, &mut sequence);
+    set_noise_canceling_mode(&mut current, &to, &mut sequence);
+    set_wind_noise(&mut current, &to, &mut sequence);
     set_ambient_sound_mode(&mut current, &to, &mut sequence);
 
     sequence
+}
+
+fn set_wind_noise(
+    current: &mut a3959::structures::SoundModes,
+    to: &a3959::structures::SoundModes,
+    sequence: &mut Vec<a3959::structures::SoundModes>,
+) {
+    if current.wind_noise != to.wind_noise {
+        if current.ambient_sound_mode != common::structures::AmbientSoundMode::Transparency
+            && current.ambient_sound_mode != common::structures::AmbientSoundMode::NoiseCanceling
+        {
+            current.ambient_sound_mode = common::structures::AmbientSoundMode::Normal;
+            sequence.push(*current);
+        }
+        current.wind_noise = to.wind_noise;
+        sequence.push(*current);
+    }
 }
 
 fn set_ambient_sound_mode(
@@ -90,22 +99,6 @@ fn set_ambient_sound_mode(
 ) {
     if current.ambient_sound_mode != to.ambient_sound_mode {
         current.ambient_sound_mode = to.ambient_sound_mode;
-        sequence.push(*current);
-    }
-}
-
-fn set_transparency_mode(
-    current: &mut a3959::structures::SoundModes,
-    to: &a3959::structures::SoundModes,
-    sequence: &mut Vec<a3959::structures::SoundModes>,
-) {
-    if current.transparency_mode != to.transparency_mode || current.wind_noise != to.wind_noise {
-        if current.ambient_sound_mode != common::structures::AmbientSoundMode::Transparency {
-            current.ambient_sound_mode = common::structures::AmbientSoundMode::Transparency;
-            sequence.push(*current);
-        }
-        current.transparency_mode = to.transparency_mode;
-        current.wind_noise = to.wind_noise;
         sequence.push(*current);
     }
 }
@@ -236,10 +229,11 @@ mod tests {
     use super::*;
 
     fn assert_valid_change(from: a3959::structures::SoundModes, to: a3959::structures::SoundModes) {
-        if from.transparency_mode != to.transparency_mode || from.wind_noise != to.wind_noise {
-            assert_eq!(
-                from.ambient_sound_mode,
-                common::structures::AmbientSoundMode::Transparency
+        if from.wind_noise != to.wind_noise {
+            assert!(
+                from.ambient_sound_mode == common::structures::AmbientSoundMode::NoiseCanceling
+                    || from.ambient_sound_mode
+                        == common::structures::AmbientSoundMode::NoiseCanceling
             );
             assert_eq!(from.ambient_sound_mode, to.ambient_sound_mode);
         }
@@ -326,7 +320,7 @@ mod tests {
         ) {
             let plan = create_change_plan(from, to);
 
-            assert!(plan.len() <= 10, "{} steps", plan.len());
+            assert!(plan.len() <= 9, "{} steps", plan.len());
         }
     }
 
@@ -356,6 +350,6 @@ mod tests {
         let average = total as f64 / runner.config().cases as f64;
 
         // round up to nearest 10th for leeway
-        assert!(average <= 7.4, "average case: {average} steps",);
+        assert!(average <= 6.8, "average case: {average} steps",);
     }
 }
