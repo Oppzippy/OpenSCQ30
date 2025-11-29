@@ -7,7 +7,7 @@ use nom::{
     combinator::map,
     error::{ContextError, ParseError, context},
     multi::count,
-    number::complete::{le_i32, le_u16},
+    number::complete::{be_u32, le_u16},
 };
 use tokio::sync::watch;
 
@@ -148,7 +148,7 @@ pub fn take_hear_id<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
             (
                 take_bool,
                 count(CommonVolumeAdjustments::take, 2),
-                le_i32,
+                be_u32,
                 HearIdType::take,
                 count(CommonVolumeAdjustments::take, 2),
                 take(10usize), // DRC

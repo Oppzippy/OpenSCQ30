@@ -3,7 +3,7 @@ use nom::{
     combinator::map,
     error::{ContextError, ParseError, context},
     multi::count,
-    number::complete::le_i32,
+    number::complete::be_u32,
 };
 
 use crate::devices::soundcore::common::packet::parsing::take_bool;
@@ -14,7 +14,7 @@ use super::CommonVolumeAdjustments;
 pub struct BasicHearId<const C: usize, const B: usize> {
     pub is_enabled: bool,
     pub volume_adjustments: [CommonVolumeAdjustments<B>; C],
-    pub time: i32,
+    pub time: u32,
 }
 
 impl<const C: usize, const B: usize> Default for BasicHearId<C, B> {
@@ -34,7 +34,7 @@ impl<const C: usize, const B: usize> BasicHearId<C, B> {
         context(
             "basic hear id",
             map(
-                (take_bool, count(CommonVolumeAdjustments::take, 2), le_i32),
+                (take_bool, count(CommonVolumeAdjustments::take, 2), be_u32),
                 |(is_enabled, volume_adjustments, time)| Self {
                     is_enabled,
                     volume_adjustments: volume_adjustments
@@ -51,6 +51,6 @@ impl<const C: usize, const B: usize> BasicHearId<C, B> {
         [self.is_enabled as u8]
             .into_iter()
             .chain(self.volume_adjustments.iter().flat_map(|v| v.bytes()))
-            .chain(self.time.to_le_bytes())
+            .chain(self.time.to_be_bytes())
     }
 }

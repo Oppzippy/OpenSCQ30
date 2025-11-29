@@ -3,7 +3,7 @@ use nom::{
     combinator::map,
     error::{ContextError, ParseError, context},
     multi::count,
-    number::complete::{le_i32, le_u16},
+    number::complete::{be_u32, le_u16},
 };
 
 use crate::devices::soundcore::common::packet::parsing::take_bool;
@@ -14,7 +14,7 @@ use super::{CommonVolumeAdjustments, HearIdMusicType, HearIdType};
 pub struct CustomHearId<const C: usize, const B: usize> {
     pub is_enabled: bool,
     pub volume_adjustments: [CommonVolumeAdjustments<B>; C],
-    pub time: i32,
+    pub time: u32,
     pub hear_id_type: HearIdType,
     pub hear_id_music_type: HearIdMusicType,
     pub custom_volume_adjustments: Option<[CommonVolumeAdjustments<B>; C]>,
@@ -45,7 +45,7 @@ impl<const C: usize, const B: usize> CustomHearId<C, B> {
                 (
                     take_bool,
                     count(CommonVolumeAdjustments::take, C),
-                    le_i32,
+                    be_u32,
                     HearIdType::take,
                     HearIdMusicType::take,
                     count(CommonVolumeAdjustments::take, C),
@@ -95,7 +95,7 @@ impl<const C: usize, const B: usize> CustomHearId<C, B> {
                 (
                     take_bool,
                     count(CommonVolumeAdjustments::take, C),
-                    le_i32,
+                    be_u32,
                     HearIdType::take,
                     count(CommonVolumeAdjustments::take, C),
                     le_u16, // hear id eq index?
