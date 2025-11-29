@@ -28,7 +28,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct A3959State {
+pub struct A3959StateUpdate {
     pub tws_status: common::structures::TwsStatus,
     pub dual_battery: common::structures::DualBattery,
     pub dual_firmware_version: common::structures::DualFirmwareVersion,
@@ -43,7 +43,7 @@ pub struct A3959State {
     pub gaming_mode: GamingMode,
 }
 
-impl Default for A3959State {
+impl Default for A3959StateUpdate {
     fn default() -> Self {
         Self {
             tws_status: Default::default(),
@@ -62,7 +62,7 @@ impl Default for A3959State {
     }
 }
 
-impl FromPacketBody for A3959State {
+impl FromPacketBody for A3959StateUpdate {
     type DirectionMarker = packet::InboundMarker;
 
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
@@ -132,7 +132,7 @@ impl FromPacketBody for A3959State {
     }
 }
 
-impl ToPacket for A3959State {
+impl ToPacket for A3959StateUpdate {
     type DirectionMarker = packet::InboundMarker;
 
     fn command(&self) -> Command {
@@ -175,7 +175,7 @@ impl PacketHandler<a3959::state::A3959State> for StateUpdatePacketHandler {
         state: &watch::Sender<a3959::state::A3959State>,
         packet: &packet::Inbound,
     ) -> device::Result<()> {
-        let packet: A3959State = packet.try_to_packet()?;
+        let packet: A3959StateUpdate = packet.try_to_packet()?;
         state.send_modify(|state| *state = packet.into());
         Ok(())
     }

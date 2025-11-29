@@ -29,9 +29,11 @@ mod structures;
 soundcore_device!(
     state::A3959State,
     async |packet_io| {
-        fetch_state_from_state_update_packet::<_, state::A3959State, packets::inbound::A3959State>(
-            packet_io,
-        )
+        fetch_state_from_state_update_packet::<
+            _,
+            state::A3959State,
+            packets::inbound::A3959StateUpdate,
+        >(packet_io)
         .await
     },
     async |builder| {
@@ -42,7 +44,7 @@ soundcore_device!(
             .await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.ambient_sound_mode_cycle();
-        builder.reset_button_configuration::<packets::inbound::A3959State>(
+        builder.reset_button_configuration::<packets::inbound::A3959StateUpdate>(
             RequestState::default().to_packet(),
         );
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
@@ -57,7 +59,7 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            packets::inbound::A3959State::default().to_packet(),
+            packets::inbound::A3959StateUpdate::default().to_packet(),
         )])
     },
 );

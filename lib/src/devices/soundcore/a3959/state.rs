@@ -29,8 +29,8 @@ pub struct A3959State {
     button_reset_pending: ResetButtonConfigurationPending,
 }
 
-impl From<a3959::packets::inbound::A3959State> for A3959State {
-    fn from(packet: a3959::packets::inbound::A3959State) -> Self {
+impl From<a3959::packets::inbound::A3959StateUpdate> for A3959State {
+    fn from(packet: a3959::packets::inbound::A3959StateUpdate) -> Self {
         Self {
             tws_status: packet.tws_status,
             dual_battery: packet.dual_battery,
