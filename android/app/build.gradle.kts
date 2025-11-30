@@ -121,6 +121,10 @@ android {
             isUniversalApk = true
         }
     }
+    androidResources {
+        @Suppress("UnstableApiUsage")
+        generateLocaleConfig = true
+    }
 }
 
 dependencies {
