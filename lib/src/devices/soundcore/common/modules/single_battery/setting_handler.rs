@@ -45,7 +45,7 @@ where
                 },
             },
             BatterySetting::BatteryLevel => Setting::Information {
-                value: format!("{}/5", battery.level.0),
+                value: format!("{}/{}", battery.level.0, self.max_level),
                 translated_value: fl!(
                     "percent",
                     percent = ((i32::from(battery.level.0) * 100) / i32::from(self.max_level))
