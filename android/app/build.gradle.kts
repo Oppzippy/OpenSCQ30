@@ -34,7 +34,7 @@ android {
     }
     namespace = "com.oppzippy.openscq30"
     compileSdk = 36
-    buildToolsVersion = "36.0.0"
+    buildToolsVersion = "36.1.0"
 
     defaultConfig {
         applicationId = "com.oppzippy.openscq30"
@@ -107,7 +107,7 @@ android {
     ksp {
         arg("room.schemaLocation", "$projectDir/schemas")
     }
-    ndkVersion = "28.2.13676358"
+    ndkVersion = "29.0.14206865"
     packaging {
         resources {
             excludes += "/META-INF/*"
