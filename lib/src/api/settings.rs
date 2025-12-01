@@ -290,6 +290,9 @@ pub fn localize_value(setting: Option<&Setting>, value: &Value) -> String {
             Ok(None) => fl!("none"),
             Err(_) => value.to_string(),
         },
+        Some(Setting::Information {
+            translated_value, ..
+        }) => translated_value.to_owned(),
         _ => value.to_string(),
     }
 }
