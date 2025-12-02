@@ -205,22 +205,24 @@ impl Application for AppModel {
 
     fn header_start(&self) -> Vec<cosmic::Element<'_, Self::Message>> {
         match self.screen {
-            Screen::DeviceSelection(_) => vec![
-                // shown on device selection screen not because it's relevant to device selection, but because it is
-                // the default screen
-                widget::button::icon(widget::icon::from_name("preferences-system-symbolic"))
-                    .on_press(Message::ShowSettings)
-                    .into(),
-                widget::button::icon(crate::icons::help_about_symbolic())
-                    .on_press(Message::ShowAbout)
-                    .into(),
-            ],
+            Screen::DeviceSelection(_) => Vec::new(),
             _ => vec![
                 widget::button::icon(crate::icons::go_previous_symbolic())
                     .on_press(Message::BackToDeviceSelection)
                     .into(),
             ],
         }
+    }
+
+    fn header_end(&self) -> Vec<cosmic::Element<'_, Self::Message>> {
+        vec![
+            widget::button::icon(widget::icon::from_name("preferences-system-symbolic"))
+                .on_press(Message::ShowSettings)
+                .into(),
+            widget::button::icon(crate::icons::help_about_symbolic())
+                .on_press(Message::ShowAbout)
+                .into(),
+        ]
     }
 
     fn view(&self) -> cosmic::Element<'_, Self::Message> {
