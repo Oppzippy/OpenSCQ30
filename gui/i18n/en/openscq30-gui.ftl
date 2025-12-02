@@ -15,7 +15,6 @@ select-your = Select Your { $name }
 device-name = Device Name
 error-loading-devices = Error Loading Devices
 loading-item = Loading { $item }
-device-registry = Device Registry
 device-list = Device List
 refresh = Refresh
 error-with-message = Error: { $err }

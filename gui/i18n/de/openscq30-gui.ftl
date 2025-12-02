@@ -15,7 +15,6 @@ select-your = Wählen sie ihr { $name }
 device-name = Gerätename
 error-loading-devices = Fehler beim Laden der Geräte
 loading-item = Lädt { $item }
-device-registry = Geräteregistrierung
 device-list = Geräteliste
 refresh = Aktualisieren
 error-with-message = Fehler: { $err }

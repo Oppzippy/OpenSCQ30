@@ -27,7 +27,6 @@ save = Kaydet
 refresh = Yenile
 error-with-message = Hata:{ $err }
 error-loading-devices = Aygıtlar Yüklenirken Hata Oluştu
-device-registry = Aygıt Kaydı
 quick-presets = Hızlı Ayarlar
 create-quick-preset = Hızlı Ayar Oluştur
 editing-quick-preset = { $name } Hızlı Ayarı Düzenleniyor
