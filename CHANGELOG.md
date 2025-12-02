@@ -20,11 +20,23 @@
 - Update Turkish translations (thanks to ozer4 and Ferry7466)
 - Update German translations (thanks to Ireozar)
 
+### GUI
+
+#### Features
+
+- Add settings page with option to change preferred language. Use this if you want OpenSCQ30 to be in a different language than the one your operating system is set to.
+
 ### CLI
 
 #### Features
 
 - Show battery level as fraction (for example, 2/5 instead of 2)
+
+### Android
+
+#### Features
+
+- Add support for [per-app language preferences](https://developer.android.com/guide/topics/resources/app-languages)
 
 ## v2.0.0-beta6
 
