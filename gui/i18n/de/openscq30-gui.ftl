@@ -1,3 +1,4 @@
+language-name = Deutsch
 openscq30 = OpenSCQ30
 device-selection = Geräteauswahl
 select-device = Wähle Gerät

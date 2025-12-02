@@ -1,4 +1,6 @@
-use std::{collections::VecDeque, ops::Deref, path::PathBuf, sync::Arc};
+use std::{
+    borrow::Cow, collections::VecDeque, iter, ops::Deref, path::PathBuf, str::FromStr, sync::Arc,
+};
 
 use cosmic::{
     Application, ApplicationExt, Apply, Task,
@@ -6,6 +8,7 @@ use cosmic::{
     iced::{Length, alignment},
     widget::{self, nav_bar},
 };
+use i18n_embed::unic_langid::LanguageIdentifier;
 use macaddr::MacAddr6;
 use openscq30_i18n::Translate;
 use openscq30_lib::{OpenSCQ30Session, device::OpenSCQ30Device, storage::PairedDevice};
@@ -13,6 +16,7 @@ use tokio::{select, sync::Semaphore};
 
 use crate::{
     add_device::{self, AddDeviceModel},
+    config::Config,
     device_selection::{self, DeviceSelectionModel},
     device_settings, fl,
     utils::coalesce_result,
@@ -24,16 +28,21 @@ pub struct AppModel {
     dialog_page: Option<DialogPage>,
     session: Arc<OpenSCQ30Session>,
     warnings: VecDeque<String>,
+    config: Config,
     config_dir: PathBuf,
     about: widget::about::About,
     context_drawer_screen: Option<ContextDrawerScreen>,
+    available_language_names: Vec<Cow<'static, str>>,
+    available_languages: Vec<Option<LanguageIdentifier>>,
 }
 pub struct AppFlags {
+    pub config: Config,
     pub config_dir: PathBuf,
 }
 
 enum ContextDrawerScreen {
     About,
+    Settings,
 }
 
 #[derive(Debug, Clone)]
@@ -54,7 +63,9 @@ pub enum Message {
     CloseContextDrawer,
     ConnectToDeviceFailed(String),
     CancelConnectToDevice,
+    ShowSettings,
     None,
+    SetPreferredLanguage(usize),
 }
 
 impl From<device_selection::Message> for Message {
@@ -145,15 +156,25 @@ impl Application for AppModel {
             .expect("database is required to run"),
         );
         let (model, task) = DeviceSelectionModel::new(session.clone());
+        let (available_languages, available_language_names) =
+            iter::once((None, Cow::Owned(fl!("default"))))
+                .chain(
+                    crate::i18n::languages()
+                        .map(|(identifier, name)| (Some(identifier), Cow::Owned(name))),
+                )
+                .collect::<(Vec<_>, Vec<_>)>();
         let mut app = Self {
             core,
             screen: Screen::DeviceSelection(model),
             dialog_page: None,
             session,
             warnings: VecDeque::with_capacity(5),
+            config: flags.config,
             config_dir: flags.config_dir,
             about,
             context_drawer_screen: None,
+            available_language_names,
+            available_languages,
         };
         let command = app.update_title();
         (
@@ -187,6 +208,9 @@ impl Application for AppModel {
             Screen::DeviceSelection(_) => vec![
                 // shown on device selection screen not because it's relevant to device selection, but because it is
                 // the default screen
+                widget::button::icon(widget::icon::from_name("preferences-system-symbolic"))
+                    .on_press(Message::ShowSettings)
+                    .into(),
                 widget::button::icon(crate::icons::help_about_symbolic())
                     .on_press(Message::ShowAbout)
                     .into(),
@@ -260,6 +284,39 @@ impl Application for AppModel {
                     |url| Message::OpenUrl(url.to_owned()),
                     Message::CloseContextDrawer,
                 )),
+                ContextDrawerScreen::Settings => Some(
+                    cosmic::app::context_drawer::context_drawer(
+                        widget::column().push(
+                            widget::settings::item::builder(fl!("preferred-language"))
+                                .flex_control(widget::dropdown(
+                                    &self.available_language_names,
+                                    Some(
+                                        self.config
+                                            .get()
+                                            .preferred_language
+                                            .as_ref()
+                                            .and_then(|preferred_language| {
+                                                LanguageIdentifier::from_str(&preferred_language)
+                                                    .ok()
+                                            })
+                                            .and_then(|preferred_language| {
+                                                self.available_languages
+                                                    .iter()
+                                                    .skip(1)
+                                                    .position(|l| {
+                                                        l.as_ref() == Some(&preferred_language)
+                                                    })
+                                                    .map(|index| index + 1)
+                                            })
+                                            .unwrap_or_default(),
+                                    ),
+                                    |selection| Message::SetPreferredLanguage(selection),
+                                )),
+                        ),
+                        Message::CloseContextDrawer,
+                    )
+                    .title(fl!("settings")),
+                ),
             }
         } else {
             match &self.screen {
@@ -434,6 +491,26 @@ impl Application for AppModel {
                 if let Err(err) = open::that_detached(&url) {
                     tracing::error!("error opening url {url}: {err:?}");
                 }
+            }
+            Message::ShowSettings => {
+                self.context_drawer_screen = Some(ContextDrawerScreen::Settings)
+            }
+            Message::SetPreferredLanguage(language_index) => {
+                let result_receiver = self.config.modify(|inner| {
+                    inner.preferred_language = self.available_languages[language_index]
+                        .as_ref()
+                        .map(ToString::to_string);
+                });
+
+                return Task::future(async move {
+                    if let Err(err) = result_receiver.await.unwrap() {
+                        tracing::error!("error writing to config file: {err:?}");
+                        Message::Warning(err.to_string())
+                    } else {
+                        Message::None
+                    }
+                })
+                .map(Into::into);
             }
         }
         Task::none()

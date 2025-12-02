@@ -1,3 +1,4 @@
+language-name = English
 openscq30 = OpenSCQ30
 device-selection = Device Selection
 select-device = Select Device
@@ -42,3 +43,6 @@ delete = Delete
 none = None
 confirm = Confirm
 execute = Execute
+default = Default
+settings = Settings
+preferred-language = Preferred Language

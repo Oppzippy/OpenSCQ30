@@ -1,3 +1,4 @@
+language-name = Türkçe
 activate = Aktifleştir
 edit = Düzenle
 none = Hiçbiri

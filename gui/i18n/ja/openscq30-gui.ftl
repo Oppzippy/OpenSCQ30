@@ -1,3 +1,4 @@
+language-name = 日本語
 edit = 編集
 device-selection = デバイス選択
 select-device = デバイスを選択

@@ -1,8 +1,12 @@
+use std::str::FromStr;
+
+use i18n_embed::unic_langid::LanguageIdentifier;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::EnvFilter;
 
 mod add_device;
 mod app;
+mod config;
 mod device_selection;
 mod device_settings;
 pub mod equalizer_line;
@@ -35,19 +39,30 @@ fn main() -> anyhow::Result<()> {
         Err(err) => tracing::error!("error checking if we're attached to a console: {err:?}"),
     }
 
-    let requested_languages = i18n_embed::DesktopLanguageRequester::requested_languages();
+    let config_dir = dirs::config_dir()
+        .expect("failed to find config dir")
+        .join("openscq30");
+
+    let config = config::Config::new(config_dir.join("openscq30-gui-config.toml")).unwrap();
+
+    let requested_languages = {
+        let mut requested_languages = i18n_embed::DesktopLanguageRequester::requested_languages();
+        if let Some(language) = &config.get().preferred_language {
+            match LanguageIdentifier::from_str(&language) {
+                Ok(language_identifier) => requested_languages.insert(0, language_identifier),
+                Err(err) => tracing::warn!(
+                    "failed to parse preferred language from config file: {language}, {err:?}"
+                ),
+            }
+        }
+        requested_languages
+    };
+
     i18n::init(&requested_languages);
     openscq30_lib::i18n::init(&requested_languages);
 
     let settings = cosmic::app::Settings::default();
-    cosmic::app::run::<app::AppModel>(
-        settings,
-        app::AppFlags {
-            config_dir: dirs::config_dir()
-                .expect("failed to find config dir")
-                .join("openscq30"),
-        },
-    )?;
+    cosmic::app::run::<app::AppModel>(settings, app::AppFlags { config, config_dir })?;
 
     Ok(())
 }
