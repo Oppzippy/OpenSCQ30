@@ -161,3 +161,4 @@ heavy = Ağır
 classic = Klasik
 original = Orijinal
 soundcore-a3116 = Soundcore Motion+
+percent = %{ $percent }

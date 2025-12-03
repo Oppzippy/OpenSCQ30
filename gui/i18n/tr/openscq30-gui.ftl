@@ -42,3 +42,6 @@ loading-item = { $item } yükleniyor
 add-item = { $name } profilini ekle
 remove-item = { $name } profilini kaldır
 remove-item-confirm = { $name } profilini kaldırmak istediğine emin misin?
+default = Varsayılan
+settings = Ayarlar
+preferred-language = Tercih Edilen Dil
