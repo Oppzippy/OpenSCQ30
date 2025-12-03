@@ -106,3 +106,6 @@ car = 車
 bus = バス
 train = 列車
 plane = 飛行機
+soundcore-a3116 = Soundcore Motion+
+volume = 音量
+percent = { $percent }％

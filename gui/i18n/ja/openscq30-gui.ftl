@@ -34,3 +34,4 @@ delete = 削除
 none = なし
 confirm = 確認
 openscq30 = OpenSCQ30
+settings = 設定
