@@ -13,6 +13,7 @@
 #### Fixes
 
 - Soundcore R50i NC should not have transparency modes
+- Soundcore R50i NC had manual and automatic nosie canceling mixed up, causing various issues
 - Gaming mode not working on devices other than Soundcore Liberty 4 NC
 
 #### Localization
