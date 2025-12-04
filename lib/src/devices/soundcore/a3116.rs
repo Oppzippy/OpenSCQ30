@@ -44,6 +44,8 @@ const CONFIG: SoundcoreDeviceConfig = SoundcoreDeviceConfig {
 
 #[cfg(test)]
 mod tests {
+    use std::borrow::Cow;
+
     use crate::{
         DeviceModel,
         devices::soundcore::common::device::test_utils::TestSoundcoreDevice,
@@ -51,6 +53,51 @@ mod tests {
     };
 
     use super::*;
+
+    #[tokio::test(start_paused = true)]
+    async fn manually_crafted_packet_matches_soundcore_app() {
+        let device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreA3116,
+            HashMap::from([
+                (
+                    packet::Command([1, 1]),
+                    packet::Inbound::new(
+                        packet::Command([1, 1]),
+                        vec![
+                            0, 5, 7, 0, 2, 57, 57, 46, 57, 57, 65, 66, 67, 68, 69, 70, 65, 66, 67,
+                            68, 69, 70, 65, 66, 67, 68, 255, 6, 7, 8, 9, 10, 6, 5, 4, 3,
+                        ],
+                    ),
+                ),
+                (
+                    packet::Command([1, 16]), // voice prompt (TODO)
+                    packet::Inbound::new(packet::Command([1, 16]), vec![1]),
+                ),
+            ]),
+            CONFIG,
+        )
+        .await;
+
+        device.assert_setting_values([
+            (SettingId::IsCharging, Cow::from("No").into()),
+            (SettingId::BatteryLevel, Cow::from("5/5").into()),
+            (SettingId::Volume, 7.into()),
+            (SettingId::FirmwareVersion, Cow::from("99.99").into()),
+            (
+                SettingId::SerialNumber,
+                Cow::from("ABCDEFABCDEFABCD").into(),
+            ),
+            (
+                SettingId::PresetEqualizerProfile,
+                settings::Value::OptionalString(None),
+            ),
+            (
+                SettingId::VolumeAdjustments,
+                settings::Value::I16Vec(vec![0, 1, 2, 3, 4, 0, -1, -2, -3]),
+            ),
+        ]);
+    }
 
     #[tokio::test(start_paused = true)]
     async fn equalizer_export_has_no_fraction_digits() {
