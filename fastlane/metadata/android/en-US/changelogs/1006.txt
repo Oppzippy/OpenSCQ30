@@ -1,0 +1,15 @@
+* Features
+  - Add support for Soundcore Motion+
+  - Add support for Soundcore P30i
+  - Show battery level as percentage
+  - Add support for [per-app language preferences](https://developer.android.com/guide/topics/resources/app-languages)
+
+* Fixes
+  - Soundcore R50i NC should not have transparency modes
+  - Soundcore R50i NC had manual and automatic nosie canceling mixed up, causing various issues
+  - Gaming mode not working on devices other than Soundcore Liberty 4 NC
+
+* Localization
+  - Update Turkish translations (thanks to ozer4 and Ferry7466)
+  - Update German translations (thanks to Ireozar)
+  - Update Japanese translations

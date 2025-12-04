@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v2.0.0-beta7
 
 ### General
 
@@ -20,6 +20,7 @@
 
 - Update Turkish translations (thanks to ozer4 and Ferry7466)
 - Update German translations (thanks to Ireozar)
+- Update Japanese translations
 
 ### GUI
 

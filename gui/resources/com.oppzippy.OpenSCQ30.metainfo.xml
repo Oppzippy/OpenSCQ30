@@ -49,6 +49,23 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.0.0-beta7" date="2025-12-04">
+            <description>
+                <p>Features</p>
+                <ul>
+                    <li>Add support for Soundcore Motion+</li>
+                    <li>Add support for Soundcore P30i</li>
+                    <li>Show battery level as percentage</li>
+                    <li>Add settings page with option to change preferred language. Use this if you want OpenSCQ30 to be in a different language than the one your operating system is set to.</li>
+                </ul>
+                <p>Fixes</p>
+                <ul>
+                    <li>Soundcore R50i NC should not have transparency modes</li>
+                    <li>Soundcore R50i NC had manual and automatic nosie canceling mixed up, causing various issues</li>
+                    <li>Gaming mode not working on devices other than Soundcore Liberty 4 NC</li>
+                </ul>
+            </description>
+        </release>
         <release version="2.0.0-beta6" date="2025-11-19">
             <description>
                 <p>Features</p>
