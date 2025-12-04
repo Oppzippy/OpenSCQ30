@@ -132,6 +132,7 @@ pub enum SettingId {
     LowBatteryPrompt,
     WearingDetection,
     Volume,
+    VoicePrompt,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

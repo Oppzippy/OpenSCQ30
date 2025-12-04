@@ -12,7 +12,7 @@ use tokio::sync::watch;
 use crate::{
     api::device,
     devices::soundcore::{
-        a3116::{self, state::A3116State},
+        a3116::{self, packets::outbound::REQUEST_VOICE_PROMPT_COMMAND, state::A3116State},
         common::{
             modules::ModuleCollection,
             packet::{
@@ -21,9 +21,10 @@ use crate::{
                 outbound::ToPacket,
             },
             packet_manager::PacketHandler,
+            state::Update,
             structures::{
                 BatteryLevel, EqualizerConfiguration, FirmwareVersion, IsBatteryCharging,
-                SerialNumber, SingleBattery,
+                SerialNumber, SingleBattery, VoicePrompt,
             },
         },
     },
@@ -138,7 +139,7 @@ impl PacketHandler<A3116State> for StateUpdatePacketHandler {
         packet: &packet::Inbound,
     ) -> device::Result<()> {
         let packet: A3116StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| *state = packet.into());
+        state.send_modify(|state| state.update(packet));
         Ok(())
     }
 }
@@ -149,6 +150,33 @@ impl ModuleCollection<A3116State> {
             packet::inbound::STATE_COMMAND,
             Box::new(StateUpdatePacketHandler {}),
         );
+    }
+}
+
+#[derive(Default)]
+pub struct VoicePromptUpdatePacket {
+    pub voice_prompt: VoicePrompt,
+}
+
+impl FromPacketBody for VoicePromptUpdatePacket {
+    type DirectionMarker = packet::InboundMarker;
+
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> IResult<&'a [u8], Self, E> {
+        map(VoicePrompt::take, |voice_prompt| Self { voice_prompt }).parse_complete(input)
+    }
+}
+
+impl ToPacket for VoicePromptUpdatePacket {
+    type DirectionMarker = packet::InboundMarker;
+
+    fn command(&self) -> packet::Command {
+        REQUEST_VOICE_PROMPT_COMMAND
+    }
+
+    fn body(&self) -> Vec<u8> {
+        self.voice_prompt.bytes().to_vec()
     }
 }
 

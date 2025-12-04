@@ -4,7 +4,7 @@ mod state_modifier;
 
 use std::sync::Arc;
 
-use openscq30_lib_has::Has;
+use openscq30_lib_has::MaybeHas;
 
 use crate::{
     api::settings::CategoryId,
@@ -13,7 +13,7 @@ use crate::{
         packet::{self, PacketIOController},
         structures::{
             AutoPlayPause, Flag, GamingMode, LowBatteryPrompt, SoundLeakCompensation,
-            SurroundSound, TouchLock, TouchTone, WearingDetection, WearingTone,
+            SurroundSound, TouchLock, TouchTone, VoicePrompt, WearingDetection, WearingTone,
         },
     },
     settings::SettingId,
@@ -27,7 +27,7 @@ macro_rules! flag {
     ($flag_struct:ident, $flag_configuration:expr $(,)?) => {
         impl<T> ModuleCollection<T>
         where
-            T: Has<$flag_struct> + Send + Sync,
+            T: MaybeHas<$flag_struct> + Send + Sync,
         {
             paste! {
                 pub fn [<add_ $flag_struct:snake>] <C>(&mut self, packet_io: Arc<PacketIOController<C>>)
@@ -122,6 +122,15 @@ flag!(
     },
 );
 
+flag!(
+    VoicePrompt,
+    FlagConfiguration {
+        setting_id: SettingId::VoicePrompt,
+        set_command: packet::Command([0x01, 0x90]),
+        update_command: Some(packet::Command([0x01, 0x10])),
+    },
+);
+
 impl<T> ModuleCollection<T> {
     pub fn add_flag<C, FlagT>(
         &mut self,
@@ -129,7 +138,7 @@ impl<T> ModuleCollection<T> {
         flag_configuration: FlagConfiguration,
     ) where
         C: RfcommConnection + 'static + Send + Sync,
-        T: Has<FlagT> + Send + Sync,
+        T: MaybeHas<FlagT> + Send + Sync,
         FlagT: Flag + Send + Sync + PartialEq + Copy + 'static,
     {
         if let Some(update_command) = flag_configuration.update_command {

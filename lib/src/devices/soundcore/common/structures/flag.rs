@@ -50,3 +50,4 @@ flag!(WearingTone);
 flag!(TouchLock);
 flag!(LowBatteryPrompt);
 flag!(WearingDetection);
+flag!(VoicePrompt);

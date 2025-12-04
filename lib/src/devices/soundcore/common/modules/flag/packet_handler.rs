@@ -6,7 +6,7 @@ use nom::{
     combinator::{all_consuming, map},
     error::{ContextError, ParseError, context},
 };
-use openscq30_lib_has::Has;
+use openscq30_lib_has::MaybeHas;
 use tokio::sync::watch;
 
 use crate::{
@@ -35,7 +35,7 @@ impl<FlagT> Default for FlagPacketHandler<FlagT> {
 #[async_trait]
 impl<FlagT, StateT> PacketHandler<StateT> for FlagPacketHandler<FlagT>
 where
-    StateT: Has<FlagT> + Send + Sync,
+    StateT: MaybeHas<FlagT> + Send + Sync,
     FlagT: Flag + PartialEq + Send + Sync,
 {
     async fn handle_packet(
@@ -45,10 +45,14 @@ where
     ) -> device::Result<()> {
         let packet: FlagUpdate = packet.try_to_packet()?;
         state.send_if_modified(|state| {
-            let flag = state.get_mut();
-            let modified = packet.0 != flag.get_bool();
-            flag.set_bool(packet.0);
-            modified
+            // TODO rather than ignoring if maybe_get returns None, insert a Some
+            if let Some(flag) = state.maybe_get_mut() {
+                let modified = packet.0 != flag.get_bool();
+                flag.set_bool(packet.0);
+                modified
+            } else {
+                false
+            }
         });
         Ok(())
     }

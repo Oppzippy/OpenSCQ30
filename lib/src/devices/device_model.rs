@@ -171,26 +171,27 @@ mod tests {
                 .expect(&format!("{model} device"));
             for category_id in device.categories() {
                 for setting_id in device.settings_in_category(&category_id) {
-                    let setting = device.setting(&setting_id).expect(&format!(
-                        "getting setting {model} -> {category_id} -> {setting_id}"
-                    ));
-                    let value = match setting {
-                        Setting::Toggle { value } => Some(Value::from(!value)),
-                        Setting::I32Range { value, .. } => Some(value.into()),
-                        Setting::Select { value, .. } => Some(value.into()),
-                        Setting::OptionalSelect { value, .. } => Some(value.into()),
-                        Setting::MultiSelect { setting, .. } => Some(setting.options.into()),
-                        Setting::Equalizer { value, .. } => Some(value.into()),
-                        Setting::ModifiableSelect { .. }
-                        | Setting::Information { .. }
-                        | Setting::ImportString { .. } => None,
-                        Setting::Action => Some(true.into()),
-                    };
-                    if let Some(value) = value {
-                        device
-                            .set_setting_values(vec![(setting_id, value)])
-                            .await
-                            .expect(&format!("setting {model} -> {category_id} -> {setting_id}"));
+                    if let Some(setting) = device.setting(&setting_id) {
+                        let value = match setting {
+                            Setting::Toggle { value } => Some(Value::from(!value)),
+                            Setting::I32Range { value, .. } => Some(value.into()),
+                            Setting::Select { value, .. } => Some(value.into()),
+                            Setting::OptionalSelect { value, .. } => Some(value.into()),
+                            Setting::MultiSelect { setting, .. } => Some(setting.options.into()),
+                            Setting::Equalizer { value, .. } => Some(value.into()),
+                            Setting::ModifiableSelect { .. }
+                            | Setting::Information { .. }
+                            | Setting::ImportString { .. } => None,
+                            Setting::Action => Some(true.into()),
+                        };
+                        if let Some(value) = value {
+                            device
+                                .set_setting_values(vec![(setting_id, value)])
+                                .await
+                                .expect(&format!(
+                                    "setting {model} -> {category_id} -> {setting_id}"
+                                ));
+                        }
                     }
                 }
             }

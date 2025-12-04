@@ -23,3 +23,8 @@ pub fn set_equalizer_volume_adjustments(
         volume_adjustments.bytes().to_vec(),
     )
 }
+
+pub const REQUEST_VOICE_PROMPT_COMMAND: packet::Command = packet::Command([0x01, 0x10]);
+pub fn request_voice_prompt() -> packet::Outbound {
+    packet::Outbound::new(REQUEST_VOICE_PROMPT_COMMAND, Vec::new())
+}

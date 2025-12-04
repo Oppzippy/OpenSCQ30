@@ -29,8 +29,8 @@ use crate::{
                 structures::{
                     AutoPlayPause, AutoPowerOff, BatteryLevel, CaseBatteryLevel,
                     EqualizerConfiguration, GamingMode, LimitHighVolume, LowBatteryPrompt,
-                    SoundLeakCompensation, SurroundSound, TouchLock, TouchTone, WearingDetection,
-                    WearingTone, button_configuration::ButtonStatusCollection,
+                    SoundLeakCompensation, SurroundSound, TouchLock, TouchTone, VoicePrompt,
+                    WearingDetection, WearingTone, button_configuration::ButtonStatusCollection,
                 },
             },
         },
@@ -187,7 +187,7 @@ macro_rules! flag {
         paste! {
             pub fn [< $struct_name:snake >](&mut self)
             where
-                StateType: Has<$struct_name>,
+                StateType: MaybeHas<$struct_name>,
             {
                 self.module_collection
                     .[< add_ $struct_name:snake >](self.packet_io_controller.clone());
@@ -578,6 +578,7 @@ where
     flag!(TouchLock);
     flag!(LowBatteryPrompt);
     flag!(WearingDetection);
+    flag!(VoicePrompt);
 }
 
 pub struct SoundcoreDeviceTemplate<ConnectionType, StateType>
@@ -774,6 +775,10 @@ pub mod test_utils {
                 outbound_receiver,
                 config,
             }
+        }
+
+        pub fn inner(&self) -> &Arc<dyn OpenSCQ30Device + Send + Sync> {
+            &self.device
         }
 
         #[track_caller]

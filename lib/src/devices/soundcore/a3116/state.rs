@@ -1,8 +1,13 @@
 use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::{
-    a3116,
-    common::structures::{EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery},
+    a3116::{self, packets::inbound::VoicePromptUpdatePacket},
+    common::{
+        state::Update,
+        structures::{
+            EqualizerConfiguration, FirmwareVersion, SerialNumber, SingleBattery, VoicePrompt,
+        },
+    },
 };
 
 use super::packets::inbound::A3116StateUpdatePacket;
@@ -15,17 +20,42 @@ pub struct A3116State {
     firmware_version: FirmwareVersion,
     serial_number: SerialNumber,
     equalizer_configuration: EqualizerConfiguration<1, 9, -6, 6, 0>,
+    #[has(maybe)]
+    voice_prompt: Option<VoicePrompt>,
 }
 
-impl From<A3116StateUpdatePacket> for A3116State {
-    fn from(value: A3116StateUpdatePacket) -> Self {
+impl A3116State {
+    pub fn new(
+        state_update_packet: A3116StateUpdatePacket,
+        voice_prompt_packet: Option<VoicePromptUpdatePacket>,
+    ) -> Self {
         Self {
-            battery: value.battery,
-            volume: value.volume,
-            auto_power_off_duration: value.auto_power_off_duration,
-            firmware_version: value.firmware_version,
-            serial_number: value.serial_number,
-            equalizer_configuration: value.equalizer_configuration,
+            battery: state_update_packet.battery,
+            volume: state_update_packet.volume,
+            auto_power_off_duration: state_update_packet.auto_power_off_duration,
+            firmware_version: state_update_packet.firmware_version,
+            serial_number: state_update_packet.serial_number,
+            equalizer_configuration: state_update_packet.equalizer_configuration,
+            voice_prompt: voice_prompt_packet.map(|packet| packet.voice_prompt),
         }
+    }
+}
+
+impl Update<A3116StateUpdatePacket> for A3116State {
+    fn update(&mut self, partial: A3116StateUpdatePacket) {
+        let A3116StateUpdatePacket {
+            battery,
+            volume,
+            auto_power_off_duration,
+            firmware_version,
+            serial_number,
+            equalizer_configuration,
+        } = partial;
+        self.battery = battery;
+        self.volume = volume;
+        self.auto_power_off_duration = auto_power_off_duration;
+        self.firmware_version = firmware_version;
+        self.serial_number = serial_number;
+        self.equalizer_configuration = equalizer_configuration;
     }
 }

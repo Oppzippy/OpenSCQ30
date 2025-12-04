@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use openscq30_lib_has::Has;
+use openscq30_lib_has::MaybeHas;
 use std::{marker::PhantomData, sync::Arc};
 use tokio::sync::watch;
 
@@ -35,7 +35,7 @@ impl<ConnectionType: RfcommConnection, FlagT> FlagStateModifier<ConnectionType, 
 impl<ConnectionT, FlagT, StateT> StateModifier<StateT> for FlagStateModifier<ConnectionT, FlagT>
 where
     ConnectionT: RfcommConnection + Send + Sync,
-    StateT: Has<FlagT> + Send + Sync,
+    StateT: MaybeHas<FlagT> + Send + Sync,
     FlagT: Flag + PartialEq + Copy + Send + Sync,
 {
     async fn move_to_state(
@@ -43,11 +43,13 @@ where
         state_sender: &watch::Sender<StateT>,
         target_state: &StateT,
     ) -> device::Result<()> {
-        let target = target_state.get();
+        let Some(target) = target_state.maybe_get() else {
+            return Ok(());
+        };
         {
             let state = state_sender.borrow();
-            let current = state.get();
-            if current == target {
+            let current = state.maybe_get();
+            if current == Some(target) {
                 return Ok(());
             }
         }
@@ -58,7 +60,9 @@ where
                 vec![target.get_bool().into()],
             ))
             .await?;
-        state_sender.send_modify(|state| *state.get_mut() = *target);
+        state_sender.send_modify(|state| {
+            state.set_maybe(Some(*target));
+        });
         Ok(())
     }
 }

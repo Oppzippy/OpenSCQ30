@@ -45,7 +45,7 @@ response = [
 ]
 
 [[responses]]
-# TODO has firmware version requirement. determine what it is.
+# TODO has firmware version >=38.39
 command = [1, 16]
 response = [
     1, # voice prompt enabled/disabled

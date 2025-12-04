@@ -177,6 +177,7 @@ wearing-tone = Wearing Tone
 touch-lock = Touch Lock
 low-battery-prompt = Low Battery Prompt
 wearing-detection = Wearing Detection
+voice-prompt = Voice Prompt
 
 limit-high-volume = Limit High Volume
 db-limit = DB Limit
