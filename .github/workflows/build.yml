@@ -1,39 +1,11 @@
 name: build
 
-on:
-  workflow_dispatch:
+on: push
 
 permissions:
   contents: read
 
 jobs:
-  build-linux:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-
-      - name: Install basic requirements
-        run: sudo apt-get install -y pkg-config libdbus-1-dev libxkbcommon-dev
-      - name: Install just
-        run: sudo snap install just --classic
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Build cli and gui
-        run: cargo build --release --package openscq30-cli --package openscq30-gui --features bundled-dependencies
-
-      - name: Move to artifacts directory
-        run: |
-          mkdir artifacts
-          mv target/release/openscq30 artifacts/openscq30-cli-linux-x86_64
-          mv target/release/openscq30-gui artifacts/openscq30-gui-linux-x86_64
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v5
-        with:
-          name: linux
-          path: artifacts/*
-
   build-windows:
     runs-on: windows-latest
     steps:
@@ -44,6 +16,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Build cli and gui
+        shell: C:\Program Files\Git\bin\bash.exe
         run: cargo build --release --package openscq30-cli --package openscq30-gui
       - name: Build installer
         shell: bash
@@ -59,30 +32,4 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: windows
-          path: artifacts/*
-
-  build-android:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-      - name: Install build tools
-        uses: ./.github/actions/install-android-build-tools
-        with:
-          cache: false
-
-      - name: Build
-        run: ./gradlew --no-daemon assembleRelease
-        working-directory: android
-      - name: Rename apk
-        run: |
-          mkdir artifacts
-          mv android/app/build/outputs/apk/release/app-*-release-unsigned.apk artifacts/
-          rename.ul app- openscq30-android- artifacts/*
-          rename.ul -- -release '' artifacts/*
-      - name: Upload apk
-        uses: actions/upload-artifact@v5
-        with:
-          name: android
           path: artifacts/*
