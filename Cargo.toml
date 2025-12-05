@@ -69,7 +69,7 @@ predicates = "3"
 bluer = "0.17"
 hex = "0.4"
 async-trait = "0.1"
-libcosmic = { git = "https://github.com/pop-os/libcosmic.git" }
+libcosmic = { git = "https://github.com/Oppzippy/libcosmic.git" }
 rusqlite = "0.37"
 syn = "2"
 quote = "1"
