@@ -93,10 +93,12 @@ where
                 .width(Length::Fill),
             )
             .push_maybe(maybe_deselect_message.map(|deselect_message| {
-                widget::button::icon(crate::icons::list_remove_symbolic())
+                widget::button::icon(widget::icon::from_name("list-remove-symbolic"))
                     .on_press(deselect_message)
             }))
-            .push(widget::button::icon(crate::icons::list_add_symbolic()).on_press(on_add)),
+            .push(
+                widget::button::icon(widget::icon::from_name("list-add-symbolic")).on_press(on_add),
+            ),
     )
 }
 

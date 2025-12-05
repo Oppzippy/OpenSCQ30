@@ -207,7 +207,7 @@ impl Application for AppModel {
         match self.screen {
             Screen::DeviceSelection(_) => Vec::new(),
             _ => vec![
-                widget::button::icon(crate::icons::go_previous_symbolic())
+                widget::button::icon(widget::icon::from_name("go-previous-symbolic"))
                     .on_press(Message::BackToDeviceSelection)
                     .into(),
             ],
@@ -219,7 +219,7 @@ impl Application for AppModel {
             widget::button::icon(widget::icon::from_name("preferences-system-symbolic"))
                 .on_press(Message::ShowSettings)
                 .into(),
-            widget::button::icon(crate::icons::help_about_symbolic())
+            widget::button::icon(widget::icon::from_name("help-about-symbolic"))
                 .on_press(Message::ShowAbout)
                 .into(),
         ]
@@ -266,7 +266,7 @@ impl Application for AppModel {
             DialogPage::RemoveDevice(device) => widget::dialog()
                 .title(fl!("prompt-remove-device-title"))
                 .body(fl!("prompt-remove-device", name = device.model.translate()))
-                .icon(widget::icon(crate::icons::dialog_warning_symbolic()))
+                .icon(widget::icon::from_name("dialog-warning-symbolic"))
                 .primary_action(
                     widget::button::destructive(fl!("remove"))
                         .on_press(Message::RemovePairedDevice(device.mac_address)),

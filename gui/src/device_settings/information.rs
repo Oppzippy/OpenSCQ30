@@ -12,7 +12,7 @@ where
         // The copy button being with the title rather than the value isn't ideal, but putting it with the value causes
         // layout issues. If those layout issues are ever fixed, remove this comment and replace the flex control with
         // a row containing text and the icon button.
-        .icon(widget::button::icon(crate::icons::edit_copy_symbolic()).on_press(on_copy))
+        .icon(widget::button::icon(widget::icon::from_name("edit-copy-symbolic")).on_press(on_copy))
         .flex_control(widget::text(text).wrapping(Wrapping::WordOrGlyph))
         .into()
 }

@@ -82,11 +82,11 @@ where
     M: Clone + 'static,
     T: Copy + Sub<Output = T> + Add<Output = T> + PartialOrd,
 {
-    let decrement_button = crate::icons::list_remove_symbolic()
+    let decrement_button = widget::icon::from_name("list-remove-symbolic")
         .apply(widget::button::icon)
         .on_press((on_press)(decrement::<T>(value, step, min, max)));
 
-    let increment_button = crate::icons::list_add_symbolic()
+    let increment_button = widget::icon::from_name("list-add-symbolic")
         .clone()
         .apply(widget::button::icon)
         .on_press((on_press)(increment::<T>(value, step, min, max)));

@@ -12,7 +12,7 @@ use openscq30_lib::{
 use strum::IntoEnumIterator;
 use tracing::error;
 
-use crate::{fl, icons::view_refresh_symbolic};
+use crate::fl;
 
 pub struct AddDeviceModel {
     stage: Stage,
@@ -136,7 +136,7 @@ impl AddDeviceModel {
                                     Message::SelectModel(ui_model.device_model, enabled)
                                 });
                             let refresh = widget::button::standard(fl!("refresh"))
-                                .leading_icon(view_refresh_symbolic())
+                                .leading_icon(widget::icon::from_name("view-refresh-symbolic"))
                                 .on_press(Message::SelectModel(
                                     ui_model.device_model,
                                     ui_model.is_demo_mode,
