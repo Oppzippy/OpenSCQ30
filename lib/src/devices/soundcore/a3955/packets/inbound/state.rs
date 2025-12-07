@@ -33,7 +33,7 @@ pub struct A3955State {
     pub dual_firmware_version: common::structures::DualFirmwareVersion,
     pub serial_number: common::structures::SerialNumber,
     // 5 bytes here
-    pub case_battery: common::structures::SingleBattery,
+    pub case_battery: common::structures::CaseBatteryLevel,
     pub equalizer_configuration: common::structures::EqualizerConfiguration<1, 10>,
     pub button_configuration: ButtonStatusCollection<8>,
     pub ambient_sound_mode_cycle: common::structures::AmbientSoundModeCycle,
@@ -72,25 +72,25 @@ impl FromPacketBody for A3955State {
     ) -> IResult<&'a [u8], Self, E> {
         context(
             "a3955 state update packet",
-            all_consuming(map(
+            map(
                 (
                     common::structures::TwsStatus::take,
                     common::structures::DualBattery::take,
                     common::structures::DualFirmwareVersion::take,
                     common::structures::SerialNumber::take,
                     take(5usize),
-                    common::structures::SingleBattery::take,
+                    common::structures::CaseBatteryLevel::take,
                     common::structures::EqualizerConfiguration::take,
                     // take(10usize),
                     // take(47usize),
                     // take(1usize), // we dunno what this does
-                    take(57usize),
+                    take(60usize),
                     ButtonStatusCollection::take(
                         a3955::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
                     ),
                     common::structures::AmbientSoundModeCycle::take,
                     a3955::structures::SoundModes::take,
-                    take(14usize), //manual/adaptive ANC?
+                    take(8usize), //manual/adaptive ANC?
                     // take(1usize), //transparency mode
                     // take(1usize), //manual/adaptive/multiscene anc?
                     // take(1usize), // Wind Noise Reduction
@@ -141,7 +141,7 @@ impl FromPacketBody for A3955State {
                         // gaming_mode,
                     }
                 },
-            )),
+            ),
         )
         .parse_complete(input)
     }
@@ -162,7 +162,7 @@ impl ToPacket for A3955State {
             .chain(self.dual_firmware_version.bytes())
             .chain(self.serial_number.bytes())
             .chain([0; 5])
-            .chain(self.case_battery.bytes())
+            .chain([self.case_battery.0.0])
             .chain(self.equalizer_configuration.bytes())
             .chain([0; 58])
             .chain(
@@ -172,7 +172,7 @@ impl ToPacket for A3955State {
             .chain(self.ambient_sound_mode_cycle.bytes())
             .chain(self.sound_modes.bytes())
             .chain([0])
-            .chain([self.touch_tone as u8])
+            .chain([self.touch_tone.0.into()])
             .chain([0, 0])
             .chain(self.auto_power_off.bytes())
             // .chain([self.low_battery_prompt as u8, self.gaming_mode as u8])
