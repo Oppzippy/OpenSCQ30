@@ -121,6 +121,9 @@ async def main() -> None:
         if mac_address is not None:
             print(f"spoofing mac address: {mac_address}")
             await device.send_command(HCI_Set_BD_ADDR_Command(bd_addr=mac_address))
+            # restart to activate new mac address
+            await device.power_off()
+            await device.power_on()
         await device.set_discoverable(True)
         await device.set_connectable(True)
 
