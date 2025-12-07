@@ -58,7 +58,7 @@ soundcore_device!(
 pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<8, 4> =
     ButtonConfigurationSettings {
         supports_set_all_packet: false,
-        use_enabled_flag_to_disable: false,
+        ignore_enabled_flag: false,
         order: [
             Button::LeftSinglePress,
             Button::RightSinglePress,
@@ -148,7 +148,8 @@ mod tests {
     };
 
     #[tokio::test(start_paused = true)]
-    async fn test_with_packet_from_github_issue_159() {
+    async fn test_with_packet_from_firmware_1_6_1() {
+        //packet from github issue 159
         let device = TestSoundcoreDevice::new_with_packet_responses(
             super::device_registry,
             DeviceModel::SoundcoreA3955,
