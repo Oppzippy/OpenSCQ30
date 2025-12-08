@@ -6,14 +6,14 @@ rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B3035"
 # State update
 command = [1, 1]
 response = [
-    3,
-    255,
-    48,
+    5,    # battery level
+    255,  # unknown
+    48,   # firmware version start
     54,
     46,
     56,
-    55,
-    51,
+    55,   # firmware version end
+    51,   # serial number start
     48,
     51,
     53,
@@ -28,9 +28,10 @@ response = [
     57,
     68,
     70,
-    52,
-    0,
-    0,
+    52,   # serial number end
+    0,    # EQ preset
+    0,    # EQ preset
+    120,  # EQ Start
     120,
     120,
     120,
@@ -38,12 +39,12 @@ response = [
     120,
     120,
     120,
-    120,
-    120,
+    120,  # EQ End
     0,
     30,
     255,
-    0,
+    0,    # is hearid enabled
+    255,  # hear id start
     255,
     255,
     255,
@@ -52,13 +53,13 @@ response = [
     255,
     255,
     255,
-    255,
-    0,
-    0,
-    0,
-    0,
+    0,    # hear id end
+    0,    # time start
     0,
     0,
+    0,    # time end
+    0,    # hear id 0=initial 1=custom 2=music genre
+    255,  # hear id custom start
     255,
     255,
     255,
@@ -67,37 +68,36 @@ response = [
     255,
     255,
     255,
-    255,
-    0,
-    0,
+    0,    # hear id custom end
+    0,    # favorite music genre
     0,
     4,
     4,
-    7,
-    3,
+    7,    # press twice: bassup toggle (7=bassup on/off, 15=disalbed)
+    3,    # press once: ambient sound mode cycle (noise canceling=1, transparency=2, normal=4)
+    0,    # ambient sound mode
+    0x50, # manual/adaptive noise canceling strength
+    0,    # 0=adaptive noise canceling, 1=custom noise canceling (aka manual)
+    0,    # unknown
+    1,    # wind noise reduction
+    5,    # transparency mode strength
     0,
-    80,
-    0,
-    0,
-    1,
-    5,
-    0,
-    1,
+    1,    # auto play/pause
     0,
     0,
     0,
     49,
+    1,    # LDAC
+    0,    # Dual Connections
     1,
     0,
-    1,
-    0,
-    1,
-    1,
-    0,
-    90,
-    0,
-    1,
-    1,
+    1,    # auto power off
+    2,    # auto power off duration (30, 60, 90, 120)
+    0,    # limit high volume on/off
+    90,   # limit high volume db
+    0,    # limit high volume refresh rate
+    1,    # ambient sound voice prompt
+    1,    # battery alert voice prompt
     0,
     0,
     0,
