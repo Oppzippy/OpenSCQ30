@@ -1,11 +1,3 @@
-use nom::{
-    IResult, Parser,
-    combinator::map,
-    error::{ContextError, ParseError},
-};
-
-use crate::devices::soundcore::common::packet::parsing::take_bool;
-
 pub trait Flag {
     fn get_bool(&self) -> bool;
     fn set_bool(&mut self, value: bool);
@@ -18,10 +10,18 @@ macro_rules! flag {
 
         #[allow(unused)]
         impl $name {
-            pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+            pub fn take<
+                'a,
+                E: ::nom::error::ParseError<&'a [u8]> + ::nom::error::ContextError<&'a [u8]>,
+            >(
                 input: &'a [u8],
-            ) -> IResult<&'a [u8], Self, E> {
-                map(take_bool, Self).parse_complete(input)
+            ) -> ::nom::IResult<&'a [u8], Self, E> {
+                use nom::Parser;
+                ::nom::combinator::map(
+                    $crate::devices::soundcore::common::packet::parsing::take_bool,
+                    Self,
+                )
+                .parse_complete(input)
             }
 
             pub fn bytes(&self) -> [u8; 1] {
@@ -29,7 +29,7 @@ macro_rules! flag {
             }
         }
 
-        impl Flag for $name {
+        impl $crate::devices::soundcore::common::structures::Flag for $name {
             fn get_bool(&self) -> bool {
                 self.0
             }
@@ -40,6 +40,7 @@ macro_rules! flag {
         }
     };
 }
+pub(crate) use flag;
 
 flag!(TouchTone);
 flag!(GamingMode);

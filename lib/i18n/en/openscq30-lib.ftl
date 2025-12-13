@@ -5,6 +5,7 @@ soundcore-a3029 = Soundcore Life Tune
 soundcore-a3030 = Soundcore Life Tune Pro
 soundcore-a3031 = Soundcore Vortex
 soundcore-a3033 = Soundcore Life 2 Neo
+soundcore-a3035 = Soundcore Space One
 soundcore-a3040 = Soundcore Space Q45
 soundcore-a3116 = Soundcore Motion+
 soundcore-a3926 = Soundcore Life Dot 2S

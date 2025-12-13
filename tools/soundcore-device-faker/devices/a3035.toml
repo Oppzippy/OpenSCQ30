@@ -39,8 +39,8 @@ response = [
     120,
     120,
     120,
-    120,  # EQ End
-    0,
+    120,
+    0,    # EQ End
     30,
     255,
     0,    # is hearid enabled
@@ -77,8 +77,8 @@ response = [
     3,    # press once: ambient sound mode cycle (noise canceling=1, transparency=2, normal=4)
     0,    # ambient sound mode
     0x50, # manual/adaptive noise canceling strength
-    0,    # 0=adaptive noise canceling, 1=custom noise canceling (aka manual)
-    0,    # unknown
+    0,    # unused
+    0,    # 0=custom, 1=adaptive noise canceling
     1,    # wind noise reduction
     5,    # transparency mode strength
     0,

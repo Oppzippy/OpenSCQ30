@@ -4,6 +4,10 @@
 
 ### General
 
+#### Features
+
+- Add support for Soundcore Space One
+
 #### Fixes
 
 - Fix bluetooth adapters other than the default one being ignored on Linux
