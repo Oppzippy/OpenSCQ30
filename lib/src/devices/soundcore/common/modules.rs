@@ -33,6 +33,7 @@ pub mod serial_number_and_firmware_version;
 pub mod single_battery;
 mod single_battery_level;
 pub mod sound_modes;
+pub mod sound_modes_v2;
 pub mod tws_status;
 
 pub struct ModuleCollection<StateType> {

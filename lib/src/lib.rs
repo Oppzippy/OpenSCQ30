@@ -16,3 +16,5 @@ pub mod util;
 pub use api::*;
 pub use connection_backend::*;
 pub use devices::DeviceModel;
+
+extern crate self as openscq30_lib;
