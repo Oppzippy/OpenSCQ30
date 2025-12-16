@@ -17,4 +17,4 @@
 2. Add all supported cpu architecture targets: `rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android`
 3. Install [cargo-ndk](https://github.com/bbqsrc/cargo-ndk): `cargo install cargo-ndk`
 4. In the `android` directory, run `./gradlew assembleRelease`
-5. The apk can be found at `android/app/build/outputs/apk/release/app-release-unsigned.apk`
+5. The apk can be found at `android/app/build/outputs/apk/release/app-universal-release-unsigned.apk`
