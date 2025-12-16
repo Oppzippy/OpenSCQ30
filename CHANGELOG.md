@@ -1,5 +1,91 @@
 # Changelog
 
+## v2.0.0
+
+This includes all changes since v1.19.3. For those that have been using the beta versions, there have been no notable changes since v2.0.0-beta7.
+
+### General
+
+#### Breaking Changes
+
+- Custom equalizer profiles are now device specific. Legacy equalizer profiles can be migrated after connecting to a device.
+- Quick presets are now stored in a different format, and no automatic migration is available, so they must be re-created.
+- Device model auto detection is removed, so you now need to select the device model when connecting.
+
+#### Features
+
+- All clients now share the same database format, so it is possible to share the sqlite file amongst them.
+- Connecting to a demo device is now a runtime option rather than compile time. As an exmaple of what this can be used for, exporting a custom equalizer profile without physically having your device with you is now possible.
+- Quick presets now include any setting available for the device rather than having to add support for each setting individually.
+- Add support for new devices
+    - Soundcore Q20i
+    - Soundcore A20i
+    - Soundcore R50i
+    - Soundcore Liberty 4 NC
+    - Soundcore Space Q45
+    - Soundcore Motion+
+    - Soundcore P30i
+- Show case battery level for relevant devices
+- Add toggles for Gaming Mode, Sound Leak Compensation, Surround Sound, Auto Play/Pause, Wearing Tone, Touch Lock, Low Battery Prompt, and Wearing Detection
+
+#### Localization
+
+- Add German translations (thanks to Ireozar)
+- Add Turkish translations (thanks to ozer4 and Ferry7466)
+- Add Japanese translations
+
+### GUI
+
+#### Breaking Changes
+
+- To migrate legacy equalizer profiles, see the Legacy Equalizer Profile Migration tab after connecting to a device.
+- Rewrite using [libcosmic](https://github.com/pop-os/libcosmic)
+- Executable renamed from openscq30_gui to openscq30-gui
+
+#### Features
+- Add settings page with option to change preferred language. Use this if you want OpenSCQ30 to be in a different language than the one your operating system is set to.
+
+#### Packaging Changes
+
+- GTK4 and libadwaita are no longer required
+- [cosmic-icons](https://github.com/pop-os/cosmic-icons/) is required on Linux
+
+#### Fixes
+
+- On Windows, a terminal window will no longer be shown unless openscq30-gui is launched from the terminal. This change is made to match behavior on Linux.
+
+### CLI
+
+#### Breaking Changes
+
+- All commands have changed, so any scripts making use of the CLI will need to be updated
+- Executable renamed from openscq30_cli to openscq30
+
+#### Features
+
+- Add support for custom equalizer profiles
+- It is now possible to set/get multiple settings all in one go, rather than having to invoke openscq30_cli multiple times. This improves performance by only connecting once rather than once per get/set.
+- Flag for JSON output
+
+### Android
+
+#### Breaking Changes
+
+- To migrate legacy equalizer profiles, see the Legacy Equalizer Profile Migration menu after connecting to a device.
+
+#### Features
+
+- Add support for [per-app language preferences](https://developer.android.com/guide/topics/resources/app-languages)
+
+#### Packaging
+
+- Protobuf is no longer used, so `protoc` is no longer needed when building
+- The APK is now split by ABI to reduce file size (in particular, to avoid coming close to the IzzyOnDroid 30MB file size limit). The universal APK is still available, however.
+
+### Web
+
+- Removed web application due to it being impossible to support some devices on this platform. The v1 branch will continue to be available at the same URL for the foreseeable future.
+
 ## v2.0.0-beta7
 
 ### General
