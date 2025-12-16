@@ -1,10 +1,6 @@
-## This branch is for v2, which is a work in progress. See the v1 branch.
-
-[v1 branch here](https://github.com/Oppzippy/OpenSCQ30/tree/v1)
-
 ## About
 
-OpenSCQ30 is free software for controlling settings for Soundcore headphones and earbuds. It was originally intended for the Q30's, after which the project was named, but a range of devices are now supported.
+OpenSCQ30 is free software for controlling settings for Soundcore headphones and earbuds. It was originally intended for the Soundcore Life Q30, after which the project was named, but a range of devices are now supported.
 
 ### Supported Platforms
 
@@ -46,6 +42,13 @@ See [GitHub Releases](https://github.com/Oppzippy/OpenSCQ30/releases). All files
 [![IzzyOnDroid](https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1/shield/com.oppzippy.openscq30)](https://apt.izzysoft.de/fdroid/index/apk/com.oppzippy.openscq30)
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/openscq30.svg)](https://repology.org/project/openscq30/versions)
+
+## Mirrors
+
+Issues and pull requests are accepted on both GitHub and Codeberg, although CI and releases are only on github.
+
+- GitHub: https://github.com/Oppzippy/OpenSCQ30
+- Codeberg: https://codeberg.org/Oppzippy/OpenSCQ30
 
 ## Contributing
 

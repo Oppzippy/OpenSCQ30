@@ -43,6 +43,7 @@ This includes all changes since v1.19.3. For those that have been using the beta
 - Executable renamed from openscq30_gui to openscq30-gui
 
 #### Features
+
 - Add settings page with option to change preferred language. Use this if you want OpenSCQ30 to be in a different language than the one your operating system is set to.
 
 #### Packaging Changes
