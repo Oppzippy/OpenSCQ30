@@ -298,7 +298,7 @@ impl Application for AppModel {
                                             .preferred_language
                                             .as_ref()
                                             .and_then(|preferred_language| {
-                                                LanguageIdentifier::from_str(&preferred_language)
+                                                LanguageIdentifier::from_str(preferred_language)
                                                     .ok()
                                             })
                                             .and_then(|preferred_language| {
@@ -312,7 +312,7 @@ impl Application for AppModel {
                                             })
                                             .unwrap_or_default(),
                                     ),
-                                    |selection| Message::SetPreferredLanguage(selection),
+                                    Message::SetPreferredLanguage,
                                 )),
                         ),
                         Message::CloseContextDrawer,
@@ -495,7 +495,7 @@ impl Application for AppModel {
                 }
             }
             Message::ShowSettings => {
-                self.context_drawer_screen = Some(ContextDrawerScreen::Settings)
+                self.context_drawer_screen = Some(ContextDrawerScreen::Settings);
             }
             Message::SetPreferredLanguage(language_index) => {
                 let result_receiver = self.config.modify(|inner| {

@@ -131,8 +131,6 @@ where
 
 fn container_style(theme: &cosmic::Theme) -> cosmic::iced::widget::container::Style {
     let cosmic_theme = &theme.cosmic();
-    let mut neutral_10 = cosmic_theme.palette.neutral_10;
-    neutral_10.alpha = 0.1;
     let accent = &cosmic_theme.accent;
     let corners = &cosmic_theme.corner_radii;
     cosmic::iced::widget::container::Style {

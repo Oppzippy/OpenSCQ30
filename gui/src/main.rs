@@ -33,7 +33,7 @@ fn main() -> anyhow::Result<()> {
         Ok(true) => (),
         Ok(false) => {
             if let Err(err) = detach_from_console() {
-                tracing::error!("error detaching from console: {err:?}")
+                tracing::error!("error detaching from console: {err:?}");
             }
         }
         Err(err) => tracing::error!("error checking if we're attached to a console: {err:?}"),
@@ -48,7 +48,7 @@ fn main() -> anyhow::Result<()> {
     let requested_languages = {
         let mut requested_languages = i18n_embed::DesktopLanguageRequester::requested_languages();
         if let Some(language) = &config.get().preferred_language {
-            match LanguageIdentifier::from_str(&language) {
+            match LanguageIdentifier::from_str(language) {
                 Ok(language_identifier) => requested_languages.insert(0, language_identifier),
                 Err(err) => tracing::warn!(
                     "failed to parse preferred language from config file: {language}, {err:?}"
