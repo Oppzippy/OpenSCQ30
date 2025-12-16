@@ -60,7 +60,6 @@ windows = { workspace = true, features = [
     "Devices_Bluetooth_GenericAttributeProfile",
     "Devices_Bluetooth_Rfcomm",
     "Networking_Sockets",
-    "deprecated",
 ] }
 
 [target.'cfg(target_os = "android")'.dependencies]
