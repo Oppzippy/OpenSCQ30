@@ -208,6 +208,7 @@ class DeviceService : LifecycleService() {
         cancelNotification()
         connectionStatusFlow.value.let {
             if (it is ConnectionStatus.Connected) {
+                connectionStatusFlow.value = ConnectionStatus.Disconnected
                 it.deviceManager.close()
             }
         }
