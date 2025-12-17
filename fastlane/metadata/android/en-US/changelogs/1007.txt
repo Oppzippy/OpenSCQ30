@@ -1,0 +1,31 @@
+This includes all changes since v1.19.3. For those that have been using the beta versions, there have been no notable changes since v2.0.0-beta7.
+
+* Breaking Changes
+  - Custom equalizer profiles are now device specific. To migrate legacy equalizer profiles, see the Legacy Equalizer Profile Migration menu after connecting to a device.
+  - Quick presets are now stored in a different format, and no automatic migration is available, so they must be re-created.
+  - Device model auto detection is removed, so you now need to select the device model when connecting.
+
+* Features
+  - All clients now share the same database format, so it is possible to share the sqlite file amongst them.
+  - Connecting to a demo device is now a runtime option rather than compile time. As an exmaple of what this can be used for, exporting a custom equalizer profile without physically having your device with you is now possible.
+  - Quick presets now include any setting available for the device rather than having to add support for each setting individually.
+  - Add support for new devices
+    - Soundcore Q20i
+    - Soundcore A20i
+    - Soundcore R50i
+    - Soundcore Liberty 4 NC
+    - Soundcore Space Q45
+    - Soundcore Motion+
+    - Soundcore P30i
+  - Show case battery level for relevant devices
+  - Add toggles for Gaming Mode, Sound Leak Compensation, Surround Sound, Auto Play/Pause, Wearing Tone, Touch Lock, Low Battery Prompt, and Wearing Detection
+  - Add support for per-app language preferences
+
+* Packaging
+  - Protobuf is no longer used, so `protoc` is no longer needed when building
+  - The APK is now split by ABI to reduce file size (in particular, to avoid coming close to the IzzyOnDroid 30MB file size limit). The universal APK is still available, however.
+
+* Localization
+  - Add German translations (thanks to Ireozar)
+  - Add Turkish translations (thanks to ozer4 and Ferry7466)
+  - Add Japanese translations

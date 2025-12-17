@@ -49,7 +49,41 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
-        <release version="2.0.0-beta7" date="2025-12-04">
+        <release version="2.0.0" date="2025-12-17">
+            <description>
+                <p>This includes all changes since v1.19.3. For those that have been using the beta versions, there have been no notable changes since v2.0.0-beta7.</p>
+                <p>Breaking Changes</p>
+                <ul>
+                    <li>Custom equalizer profiles are now device specific. To migrate legacy equalizer profiles, see the Legacy Equalizer Profile Migration tab after connecting to a device.</li>
+                    <li>Quick presets are now stored in a different format, and no automatic migration is available, so they must be re-created.</li>
+                    <li>Device model auto detection is removed, so you now need to select the device model when connecting.</li>
+                    <li>Rewrite using libcosmic</li>
+                    <li>Executable renamed from openscq30_gui to openscq30-gui</li>
+                </ul>
+                <p>Features</p>
+                <ul>
+                    <li>All clients now share the same database format, so it is possible to share the sqlite file amongst them.</li>
+                    <li>Connecting to a demo device is now a runtime option rather than compile time. As an exmaple of what this can be used for, exporting a custom equalizer profile without physically having your device with you is now possible.</li>
+                    <li>Quick presets now include any setting available for the device rather than having to add support for each setting individually.</li>
+                    <li>Add support for new devices: Soundcore Q20i, Soundcore A20i, Soundcore R50i, Soundcore Liberty 4 NC, Soundcore Space Q45, Soundcore Motion+, and Soundcore P30i</li>
+                    <li>Show case battery level for relevant devices</li>
+                    <li>Add toggles for Gaming Mode, Sound Leak Compensation, Surround Sound, Auto Play/Pause, Wearing Tone, Touch Lock, Low Battery Prompt, and Wearing Detection</li>
+                    <li>Add settings page with option to change preferred language. Use this if you want OpenSCQ30 to be in a different language than the one your operating system is set to.</li>
+                </ul>
+                <p>Packaging Changes</p>
+                <ul>
+                    <li>GTK4 and libadwaita are no longer required</li>
+                    <li>cosmic-icons is required on Linux</li>
+                </ul>
+                <p>Localization</p>
+                <ul>
+                    <li>Add German translations (thanks to Ireozar)</li>
+                    <li>Add Turkish translations (thanks to ozer4 and Ferry7466)</li>
+                    <li>Add Japanese translations</li>
+                </ul>
+            </description>
+        </release>
+        <release version="2.0.0~beta7" date="2025-12-04">
             <description>
                 <p>Features</p>
                 <ul>
@@ -66,7 +100,7 @@
                 </ul>
             </description>
         </release>
-        <release version="2.0.0-beta6" date="2025-11-19">
+        <release version="2.0.0~beta6" date="2025-11-19">
             <description>
                 <p>Features</p>
                 <ul>
@@ -88,7 +122,7 @@
                 </ul>
             </description>
         </release>
-        <release version="2.0.0-beta5" date="2025-11-08">
+        <release version="2.0.0~beta5" date="2025-11-08">
             <description>
                 <p>Features</p>
                 <ul>
@@ -108,8 +142,8 @@
                 </ul>
             </description>
         </release>
-        <release version="2.0.0-beta4" date="2025-10-30" />
-        <release version="2.0.0-beta3" date="2025-10-28">
+        <release version="2.0.0~beta4" date="2025-10-30" />
+        <release version="2.0.0~beta3" date="2025-10-28">
             <description>
                 <p>Features</p>
                 <ul>
@@ -124,7 +158,7 @@
                 </ul>
             </description>
         </release>
-        <release version="2.0.0-beta2" date="2025-10-09">
+        <release version="2.0.0~beta2" date="2025-10-09">
             <description>
                 <p>Fixes</p>
                 <ul>
@@ -133,7 +167,7 @@
                 </ul>
             </description>
         </release>
-        <release version="2.0.0-beta1" date="2025-09-20">
+        <release version="2.0.0~beta1" date="2025-09-20">
             <description>
                 <p>Breaking Changes</p>
                 <ul>
