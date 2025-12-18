@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-class DeviceServiceConnection(private val unbind: () -> Unit) : ServiceConnection {
+class DeviceServiceConnection : ServiceConnection {
     val connectionStatusFlow = MutableStateFlow<ConnectionStatus>(ConnectionStatus.Disconnected)
     private var serviceConnectionScope: CoroutineScope? = null
     private var service: WeakReference<DeviceService>? = null
@@ -31,20 +31,12 @@ class DeviceServiceConnection(private val unbind: () -> Unit) : ServiceConnectio
         serviceConnectionScope?.launch {
             service.connectionStatusFlow.first { it is ConnectionStatus.Disconnected }
             connectionStatusFlow.value = ConnectionStatus.Disconnected
-            unbind()
         }
         serviceConnectionScope?.launch {
             service.connectionStatusFlow.collectLatest { connectionStatus ->
                 this@DeviceServiceConnection.connectionStatusFlow.value = connectionStatus
             }
         }
-    }
-
-    override fun onServiceDisconnected(name: ComponentName?) {
-        serviceConnectionScope?.cancel()
-        serviceConnectionScope = null
-        this.service = null
-        connectionStatusFlow.value = ConnectionStatus.Disconnected
     }
 
     override fun onBindingDied(name: ComponentName?) {
@@ -55,7 +47,10 @@ class DeviceServiceConnection(private val unbind: () -> Unit) : ServiceConnectio
         onServiceDisconnected(name)
     }
 
-    fun onUnbind() {
-        onServiceDisconnected(null)
+    override fun onServiceDisconnected(name: ComponentName?) {
+        serviceConnectionScope?.cancel()
+        serviceConnectionScope = null
+        this.service = null
+        connectionStatusFlow.value = ConnectionStatus.Disconnected
     }
 }

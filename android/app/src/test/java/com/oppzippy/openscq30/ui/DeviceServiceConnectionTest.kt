@@ -43,13 +43,13 @@ class DeviceServiceConnectionTest {
 
     @Test
     fun startsDisconnected() {
-        val connection = DeviceServiceConnection(unbind = {})
+        val connection = DeviceServiceConnection()
         assertEquals(ConnectionStatus.Disconnected, connection.connectionStatusFlow.value)
     }
 
     @Test
     fun movesToLoadingState() = runTest {
-        val connection = DeviceServiceConnection(unbind = {})
+        val connection = DeviceServiceConnection()
 
         every { binder.getService() } returns service
         connection.onServiceConnected(null, binder)
@@ -57,17 +57,5 @@ class DeviceServiceConnectionTest {
 
         // It will throw an exception if it times out, so no need to assert
         connection.connectionStatusFlow.timeout(10.milliseconds).first { it is ConnectionStatus.Connecting }
-    }
-
-    @Test
-    fun unbindsOnDisconnect() {
-        val unbind: () -> Unit = mockk(relaxed = true)
-        val connection = DeviceServiceConnection(unbind = unbind)
-
-        every { binder.getService() } returns service
-        connection.onServiceConnected(null, binder)
-        connectionStatusFlow.value = ConnectionStatus.Disconnected
-
-        verify(exactly = 1) { unbind() }
     }
 }

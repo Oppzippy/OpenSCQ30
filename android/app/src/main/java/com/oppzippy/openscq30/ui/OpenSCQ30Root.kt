@@ -47,7 +47,7 @@ fun OpenSCQ30Root(viewModel: OpenSCQ30RootViewModel = hiltViewModel()) {
                 val isConnected =
                     connectionStatus is ConnectionStatus.Connected || connectionStatus is ConnectionStatus.Connecting
                 BackHandler(enabled = isConnected) {
-                    viewModel.deselectDevice()
+                    viewModel.stopDeviceService()
                 }
                 AnimatedContent(
                     targetState = isConnected,
@@ -66,7 +66,7 @@ fun OpenSCQ30Root(viewModel: OpenSCQ30RootViewModel = hiltViewModel()) {
                         if (deviceSettings != null) {
                             DeviceSettingsScreen(
                                 connectionStatus = connectionStatus,
-                                onBack = { viewModel.deselectDevice() },
+                                onBack = { viewModel.stopDeviceService() },
                                 setSettingValues = { deviceSettings.setSettingValues(it) },
                                 allSettingsFlow = deviceSettings.allSettingsFlow,
                                 categoryIdsFlow = deviceSettings.categoryIdsFlow,

@@ -33,6 +33,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.emptyFlow
@@ -50,14 +51,8 @@ class DeviceService : LifecycleService() {
         /** Intent extra for setting mac address when launching service */
         const val MAC_ADDRESS = "com.oppzippy.openscq30.macAddress"
 
-        fun doesNotificationExist(context: Context): Boolean {
-            val notificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            val doesNotificationExist = notificationManager.activeNotifications.any {
-                (it.notification.channelId == NOTIFICATION_CHANNEL_ID) && (it.id == NOTIFICATION_ID)
-            }
-            return doesNotificationExist
-        }
+        private val _isRunning = MutableStateFlow(false)
+        val isRunning = _isRunning.asStateFlow()
     }
 
     @Inject
@@ -127,6 +122,7 @@ class DeviceService : LifecycleService() {
 
     override fun onCreate() {
         super.onCreate()
+        _isRunning.value = true
 
         lifecycleScope.launch { quickPresetNames.collectLatest { sendNotification() } }
         lifecycleScope.launch { featuredSettingIds.collectLatest { sendNotification() } }
@@ -204,6 +200,7 @@ class DeviceService : LifecycleService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.i(TAG, "stopping service")
         unregisterReceiver(broadcastReceiver)
         cancelNotification()
         connectionStatusFlow.value.let {
@@ -212,6 +209,7 @@ class DeviceService : LifecycleService() {
                 it.deviceManager.close()
             }
         }
+        _isRunning.value = false
     }
 
     private fun createNotificationChannel() {

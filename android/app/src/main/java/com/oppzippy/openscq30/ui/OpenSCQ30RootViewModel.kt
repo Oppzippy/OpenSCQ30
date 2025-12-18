@@ -35,6 +35,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
@@ -50,8 +51,7 @@ class OpenSCQ30RootViewModel @Inject constructor(
     val version2BreakingChangesMessage: Version2BreakingChangesMessage,
     val toastHandler: ToastHandler = ToastHandler(),
 ) : AndroidViewModel(application) {
-    private val deviceServiceConnection =
-        DeviceServiceConnection(unbind = { unbindDeviceService() })
+    private val deviceServiceConnection = DeviceServiceConnection()
     val connectionStatusFlow = deviceServiceConnection.connectionStatusFlow.asStateFlow()
 
     var deviceSettingsManager = MutableStateFlow<DeviceSettingsManager?>(null)
@@ -62,7 +62,14 @@ class OpenSCQ30RootViewModel @Inject constructor(
     }
 
     init {
-        bindDeviceService()
+        viewModelScope.launch {
+            DeviceService.isRunning.collectLatest { isRunning ->
+                if (isRunning) {
+                    bindDeviceService()
+                }
+            }
+        }
+
         viewModelScope.launch {
             connectionStatusFlow.collect {
                 deviceSettingsManager.value?.close()
@@ -83,26 +90,11 @@ class OpenSCQ30RootViewModel @Inject constructor(
         }
     }
 
-    override fun onCleared() {
-        unbindDeviceService()
-        stopServiceIfNotificationIsGone()
-    }
-
     fun selectDevice(macAddress: String) {
         val intent = intentFactory(application, DeviceService::class.java)
         intent.putExtra(DeviceService.MAC_ADDRESS, macAddress)
         application.startForegroundService(intent)
         bindDeviceService()
-    }
-
-    private fun stopServiceIfNotificationIsGone() {
-        if (!DeviceService.doesNotificationExist(application)) {
-            Log.i(
-                TAG,
-                "Stopping service since main activity is exiting and notification is not shown.",
-            )
-            deselectDevice()
-        }
     }
 
     private fun bindDeviceService() {
@@ -114,22 +106,16 @@ class OpenSCQ30RootViewModel @Inject constructor(
             )
         } catch (ex: SecurityException) {
             Log.e(TAG, "failed to bind service", ex)
-            unbindDeviceService()
+            stopDeviceService()
         }
     }
 
-    fun deselectDevice() {
-        unbindDeviceService()
+    override fun onCleared() {
+        stopDeviceService()
     }
 
-    private fun unbindDeviceService() {
-        try {
-            application.stopService(intentFactory(application, DeviceService::class.java))
-            application.unbindService(deviceServiceConnection)
-            deviceServiceConnection.onUnbind()
-        } catch (_: IllegalArgumentException) {
-            // service is not bound
-        }
+    fun stopDeviceService() {
+        application.stopService(intentFactory(application, DeviceService::class.java))
     }
 }
 

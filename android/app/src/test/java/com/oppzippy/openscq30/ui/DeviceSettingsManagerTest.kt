@@ -62,8 +62,7 @@ class DeviceSettingsManagerTest {
             application = application,
             version2BreakingChangesMessage = mockk(),
         )
-        viewModel.deselectDevice()
+        viewModel.stopDeviceService()
         verify(exactly = 1) { application.stopService(any()) }
-        verify(exactly = 1) { application.unbindService(any()) }
     }
 }
