@@ -54,3 +54,7 @@ windows = { workspace = true, features = ["Win32_System_Console"] }
 
 [dev-dependencies]
 tempfile = { workspace = true }
+
+[target.'cfg(windows)'.build-dependencies]
+tempfile = { workspace = true }
+embed-resource = { workspace = true }
