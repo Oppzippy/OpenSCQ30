@@ -37,7 +37,7 @@ i18n-embed = { workspace = true, features = [
     "desktop-requester",
 ] }
 i18n-embed-fl = { workspace = true }
-rust-embed = { workspace = true }
+rust-embed = { workspace = true, features = ["deterministic-timestamps"] }
 cfg-if = { workspace = true }
 itertools = { workspace = true }
 indexmap = { workspace = true }
