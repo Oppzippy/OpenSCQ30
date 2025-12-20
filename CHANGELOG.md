@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Fixes
+
+- Soundcore Space A40 case battery should be out of 10
+- Soundcore Space A40 sound modes not working
+
+### Android
+
+#### Packaging
+
+- Separate building for different cpu architectures into their own gradle tasks so when building for a specific one, you don't have to build the rust code for all.
+- Fix timestamps of locale files breaking reproducible builds
+
 ## v2.0.0
 
 This includes all changes since v1.19.3. For those that have been using the beta versions, there have been no notable changes since v2.0.0-beta7.
