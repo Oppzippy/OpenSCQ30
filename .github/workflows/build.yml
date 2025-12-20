@@ -73,12 +73,13 @@ jobs:
           cache: false
 
       - name: Build
-        run: ./gradlew --no-daemon assembleRelease
+        run: ./gradlew --no-daemon assembleRelease assembleRelease-arm64-v8a assembleRelease-armeabi-v7a assembleRelease-x86_64 assembleRelease-x86
         working-directory: android
       - name: Rename apk
         run: |
           mkdir artifacts
-          mv android/app/build/outputs/apk/release/app-*-release-unsigned.apk artifacts/
+          mv android/app/build/outputs/apk/release/app-release-unsigned.apk artifacts/app-release-universal-unsigned.apk
+          mv android/app/build/outputs/apk/release*/app-release-*-unsigned.apk artifacts/
           rename.ul app- openscq30-android- artifacts/*
           rename.ul -- -release '' artifacts/*
       - name: Upload apk
