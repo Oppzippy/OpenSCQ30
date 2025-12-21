@@ -211,8 +211,8 @@ impl NoiseCancelingSettings {
 )]
 pub enum A3936NoiseCancelingMode {
     #[default]
-    Adaptive = 0,
-    Manual = 1,
+    Manual = 0,
+    Adaptive = 1,
 }
 
 impl A3936NoiseCancelingMode {

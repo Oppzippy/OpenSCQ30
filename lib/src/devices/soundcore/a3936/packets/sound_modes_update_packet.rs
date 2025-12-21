@@ -75,7 +75,7 @@ mod tests {
             .sound_modes;
         assert_eq!(AmbientSoundMode::Normal, sound_modes.ambient_sound_mode);
         assert_eq!(
-            A3936NoiseCancelingMode::Manual,
+            A3936NoiseCancelingMode::Adaptive,
             sound_modes.noise_canceling_mode
         );
         assert_eq!(
