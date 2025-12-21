@@ -1,8 +1,6 @@
 use async_trait::async_trait;
 use nom::{
     IResult, Parser,
-    bytes::complete::take,
-    combinator::all_consuming,
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
@@ -103,68 +101,50 @@ impl FromPacketBody for A3936StateUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
-        context(
-            "a3936 state update packet",
-            all_consuming(|input| {
-                let (input, tws_status) = TwsStatus::take(input)?;
-                let (input, battery) = DualBattery::take(input)?;
-                let (input, dual_firmware_version) = DualFirmwareVersion::take(input)?;
-                let (input, serial_number) = SerialNumber::take(input)?;
-                let (input, equalizer_configuration) = CommonEqualizerConfiguration::take(input)?;
-                let (input, age_range) = AgeRange::take(input)?;
-                let (input, custom_hear_id) = CustomHearId::take_without_music_type(input)?;
-
-                // For some reason, an offset value is taken before the custom button model, which refers to how many bytes
-                // until the next data to be read. This offset includes the length of the custom button model. Presumably,
-                // there are some extra bytes between the button model and the beginning of the next data to be parsed?
-                let (input, skip_offset) = le_u8(input)?;
-                let remaining_before_button_configuration = input.len();
-                let (input, button_configuration) = ButtonStatusCollection::take(
-                    a3936::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
-                )(input)?;
-                let button_configuration_size = remaining_before_button_configuration - input.len();
-                let (input, _) = take(
-                    (skip_offset as usize)
-                        // subtract an extra 1 since we want the number of bytes to discard, not
-                        // the offset to the first byte to read
-                        .checked_sub(button_configuration_size + 2)
-                        .unwrap_or_default(),
-                )(input)?;
-
-                let (input, ambient_sound_mode_cycle) = AmbientSoundModeCycle::take(input)?;
-                let (input, sound_modes) = A3936SoundModes::take(input)?;
-                let (input, touch_tone) = TouchTone::take(input)?;
-                let (input, case_battery_level) = CaseBatteryLevel::take(input)?;
-                let (input, color) = le_u8(input)?;
-                let (input, ldac) = take_bool(input)?;
-                let (input, supports_two_cnn_switch) = take_bool(input)?;
-                let (input, auto_power_off) = AutoPowerOff::take(input)?;
-                let (input, gaming_mode) = GamingMode::take(input)?;
-                let (input, _) = take(12usize)(input)?;
-                Ok((
-                    input,
-                    Self {
-                        tws_status,
-                        battery,
-                        dual_firmware_version,
-                        serial_number,
-                        equalizer_configuration,
-                        age_range,
-                        custom_hear_id,
-                        ambient_sound_mode_cycle,
-                        sound_modes,
-                        button_configuration,
-                        touch_tone,
-                        case_battery_level,
-                        color,
-                        ldac,
-                        supports_two_cnn_switch,
-                        auto_power_off,
-                        gaming_mode,
-                    },
-                ))
-            }),
-        )
+        context("a3936 state update packet", |input| {
+            let (input, tws_status) = TwsStatus::take(input)?;
+            let (input, battery) = DualBattery::take(input)?;
+            let (input, dual_firmware_version) = DualFirmwareVersion::take(input)?;
+            let (input, serial_number) = SerialNumber::take(input)?;
+            let (input, equalizer_configuration) = CommonEqualizerConfiguration::take(input)?;
+            let (input, age_range) = AgeRange::take(input)?;
+            let (input, custom_hear_id) = CustomHearId::take_without_music_type(input)?;
+            let (input, _unknown) = le_u8(input)?;
+            let (input, button_configuration) = ButtonStatusCollection::take(
+                a3936::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
+            )(input)?;
+            let (input, ambient_sound_mode_cycle) = AmbientSoundModeCycle::take(input)?;
+            let (input, sound_modes) = A3936SoundModes::take(input)?;
+            let (input, touch_tone) = TouchTone::take(input)?;
+            let (input, case_battery_level) = CaseBatteryLevel::take(input)?;
+            let (input, color) = le_u8(input)?;
+            let (input, ldac) = take_bool(input)?;
+            let (input, supports_two_cnn_switch) = take_bool(input)?;
+            let (input, auto_power_off) = AutoPowerOff::take(input)?;
+            let (input, gaming_mode) = GamingMode::take(input)?;
+            Ok((
+                input,
+                Self {
+                    tws_status,
+                    battery,
+                    dual_firmware_version,
+                    serial_number,
+                    equalizer_configuration,
+                    age_range,
+                    custom_hear_id,
+                    ambient_sound_mode_cycle,
+                    sound_modes,
+                    button_configuration,
+                    touch_tone,
+                    case_battery_level,
+                    color,
+                    ldac,
+                    supports_two_cnn_switch,
+                    auto_power_off,
+                    gaming_mode,
+                },
+            ))
+        })
         .parse_complete(input)
     }
 }

@@ -6,40 +6,41 @@ rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B3936"
 # State update
 command = [1, 1]
 response = [
-    0,
-    1,
-    0,
-    0,
-    0,
-    0,
-    48,
-    48,
+    1,    # host device
+    1,    # is tws connected
+    5,    # left battery level
+    3,    # right battery level
+    1,    # left battery charging
+    1,    # right battery charging
+    48,   # left firmware start
+    52,
     46,
-    48,
-    48,
-    48,
-    48,
+    49,
+    57,   # left firmware end
+    48,   # right firmware end
+    52,
     46,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    254,
-    254,
+    49,
+    57,   # left firmware end
+    51,   # SN start
+    57,
+    51,
+    54,
+    97,
+    52,
+    55,
+    55,
+    53,
+    56,
+    51,
+    100,
+    100,
+    97,
+    57,
+    101,  # SN end
+    0,    # EQ profile
+    0,    # EQ profile
+    120,  # eq left
     120,
     120,
     120,
@@ -48,6 +49,8 @@ response = [
     120,
     120,
     120,
+    0,    # eq left end
+    120,  # eq right
     120,
     120,
     120,
@@ -56,97 +59,94 @@ response = [
     120,
     120,
     120,
-    120,
-    120,
-    120,
-    120,
+    0,    # eq right end
+    255,  # age range
+    0,    #is hear id enabled
+    255,  # hear id left
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    0,    # hear id left end
+    255,  # hear id right
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    0,    # hear id right end
+    0,    # hear id time
     0,
     0,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    0,
-    0,
-    0,
-    0,
-    0,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    120,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    7,
-    0,
-    16,
-    1,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
+    0,    # hear id time end
+    0,    # hear id type
+    255,  # hear id custom left
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    0,    # hear id custom left end
+    255,  # hear id custom right
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    0,    # hear id custom right end
+    0,    # hear id favorite music genre
+    0,    # hear id favorite music genre
+    14,   # skip bytes (after this number of bytes, sound modes starts)
+    0,    # left single press enabled
+    17,   # left single press action
+    0,    # right single press enabled
+    0,    # right single press action
+    17,   # left double press enabled
+    99,   # left double press action
+    17,   # right double press enabled
+    102,  # right double press action
+    17,   # left long press enabled
+    68,   # left long press action
+    17,   # right long press enabled
+    73,   # right long press action
+    7,    # ambient sound mode cycle
+    2,    # ambient sound mode
+    0x30, # adaptive and manual noise canceling strength
+    0,    # transparency mode
+    1,    # noise canceling mode
+    0,    # wind noise suppression
+    0,    # adaptive noise canceling sensitivity level
+    0,    # touch tone
+    8,    # case battery
+    49,   # color?
+    0,    # ldac
+    1,    # supports two cnn (what's that?)
+    1,    # auto power off enabled
+    0,    # auto power off duration
+    0,    # gaming mode
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
 ]
