@@ -132,3 +132,83 @@ impl Translate for AutoPowerOffDuration {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+
+    use crate::{
+        api::settings::SettingId,
+        devices::{
+            DeviceModel,
+            soundcore::common::{
+                device::{SoundcoreDeviceConfig, test_utils::TestSoundcoreDevice},
+                packet,
+            },
+        },
+        settings::Value,
+    };
+
+    #[tokio::test(start_paused = true)]
+    async fn it_parses_settings_correctly() {
+        let state_update_packet = packet::Inbound::new(
+            packet::inbound::STATE_COMMAND,
+            vec![
+                1, 1, 5, 3, 1, 1, 48, 52, 46, 49, 57, 48, 52, 46, 49, 57, 51, 57, 51, 54, 97, 52,
+                55, 55, 53, 56, 51, 100, 100, 97, 57, 101, 0, 0, 120, 120, 120, 120, 120, 120, 120,
+                120, 120, 0, 120, 120, 120, 120, 120, 120, 120, 120, 120, 0, 255, 0, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0,
+                0, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 0, 0, 0, 14, 0, 17, 0, 0, 17, 99, 17, 102, 17, 68, 17, 73,
+                7, 2, 0x30, 0, 1, 0, 0, 0, 8, 49, 0, 1, 1, 0, 0, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255,
+            ],
+        );
+
+        let device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreA3936,
+            HashMap::from([(packet::inbound::STATE_COMMAND, state_update_packet)]),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+
+        device.assert_setting_values(vec![
+            (SettingId::AmbientSoundMode, Value::String("Normal".into())),
+            (
+                SettingId::NoiseCancelingMode,
+                Value::String("Adaptive".into()),
+            ),
+            (
+                SettingId::TransparencyMode,
+                Value::String("FullyTransparent".into()),
+            ),
+            (SettingId::LeftSinglePress, Value::OptionalString(None)),
+            (SettingId::RightSinglePress, Value::OptionalString(None)),
+            (
+                SettingId::LeftDoublePress,
+                Value::OptionalString(Some("NextSong".into())),
+            ),
+            (
+                SettingId::RightDoublePress,
+                Value::OptionalString(Some("PlayPause".into())),
+            ),
+            (
+                SettingId::LeftLongPress,
+                Value::OptionalString(Some("AmbientSoundMode".into())),
+            ),
+            (
+                SettingId::RightLongPress,
+                Value::OptionalString(Some("GamingMode".into())),
+            ),
+            (
+                SettingId::PresetEqualizerProfile,
+                Value::OptionalString(Some("SoundcoreSignature".into())),
+            ),
+            (SettingId::TouchTone, Value::Bool(false)),
+            (SettingId::WindNoiseSuppression, Value::Bool(false)),
+            (SettingId::GamingMode, Value::Bool(false)),
+            (SettingId::AutoPowerOff, Value::String("30m".into())),
+        ]);
+    }
+}
