@@ -11,7 +11,8 @@ use crate::{
             macros::soundcore_device,
             modules::{
                 button_configuration::{
-                    ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_ACTIONS,
+                    ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings,
+                    COMMON_ACTIONS_MINIMAL, COMMON_ACTIONS_WITH_GAME_MODE,
                 },
                 equalizer,
             },
@@ -82,7 +83,7 @@ pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
                 },
                 button_id: 2,
                 press_kind: ButtonPressKind::Single,
-                available_actions: COMMON_ACTIONS,
+                available_actions: COMMON_ACTIONS_MINIMAL,
                 disable_mode: ButtonDisableMode::DisablingOneSideDisablesOther,
             },
             ButtonSettings {
@@ -92,7 +93,7 @@ pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
                 },
                 button_id: 0,
                 press_kind: ButtonPressKind::Double,
-                available_actions: COMMON_ACTIONS,
+                available_actions: COMMON_ACTIONS_WITH_GAME_MODE,
                 disable_mode: ButtonDisableMode::DisablingOneSideDisablesOther,
             },
             ButtonSettings {
@@ -102,7 +103,7 @@ pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
                 },
                 button_id: 1,
                 press_kind: ButtonPressKind::Long,
-                available_actions: COMMON_ACTIONS,
+                available_actions: COMMON_ACTIONS_WITH_GAME_MODE,
                 disable_mode: ButtonDisableMode::DisablingOneSideDisablesOther,
             },
         ],
