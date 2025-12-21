@@ -1,13 +1,11 @@
 mod packet_handler;
 mod setting_handler;
-mod state_modifier;
 
 use std::sync::Arc;
 
 use openscq30_lib_has::Has;
 use packet_handler::SoundModesPacketHandler;
 use setting_handler::SoundModesSettingHandler;
-use state_modifier::SoundModesStateModifier;
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use crate::{
@@ -17,7 +15,10 @@ use crate::{
     },
     devices::soundcore::{
         a3936::structures::A3936SoundModes,
-        common::{modules::ModuleCollection, packet::PacketIOController},
+        common::{
+            modules::{ModuleCollection, sound_modes_v2},
+            packet::PacketIOController,
+        },
     },
 };
 
@@ -78,13 +79,15 @@ where
     where
         C: RfcommConnection + 'static + Send + Sync,
     {
-        self.setting_manager
-            .add_handler(CategoryId::SoundModes, SoundModesSettingHandler::default());
-        self.state_modifiers
-            .push(Box::new(SoundModesStateModifier::new(packet_io)));
         self.packet_handlers.set_handler(
             SoundModesPacketHandler::COMMAND,
             Box::new(SoundModesPacketHandler::default()),
         );
+        self.setting_manager
+            .add_handler(CategoryId::SoundModes, SoundModesSettingHandler::default());
+        self.state_modifiers
+            .push(Box::new(sound_modes_v2::SoundModesStateModifier::new(
+                packet_io,
+            )));
     }
 }
