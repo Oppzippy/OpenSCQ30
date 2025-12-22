@@ -111,6 +111,8 @@ impl<const SIZE: usize> MigrationPlanner<SIZE> {
 
         Self::squish_tree(&mut tree, &from, to);
         Self::reorder_tree(&mut tree, &from, to);
+        Self::remove_noops(&mut tree, &from, to);
+        Self::remove_assignments_with_no_effect(&mut tree, &from, to);
 
         // Convert tree to list of states
         let mut path = Vec::new();
@@ -167,6 +169,63 @@ impl<const SIZE: usize> MigrationPlanner<SIZE> {
         for node in tree {
             Self::reorder_tree(&mut node.children, from, to);
         }
+    }
+
+    /// When a value is assigned to once, and then without first assigning any dependencies, the value is changed,
+    /// the first assignment was useless and can be removed.
+    fn remove_assignments_with_no_effect(
+        tree: &mut Vec<MigrationNode>,
+        from: &[u8; SIZE],
+        to: &[u8; SIZE],
+    ) {
+        for node in tree.iter_mut() {
+            Self::remove_assignments_with_no_effect(&mut node.children, from, to);
+        }
+
+        // First find the last time each index is assigned, then remove anything before that with no children
+        // We may need to deduplicate after, since removing intermediate values can then lead to something getting
+        // assigned twice in a row to the same value. Or not, since deduplication happens at deserialization time (I think).
+        let last_assignment_index =
+            tree.iter()
+                .enumerate()
+                .fold([None; SIZE], |mut acc, (i, curr)| {
+                    acc[curr.index] = Some(i);
+                    acc
+                });
+
+        *tree = mem::take(tree)
+            .into_iter()
+            .enumerate()
+            .filter_map(|(i, node)| {
+                let is_last_assignment = last_assignment_index[node.index]
+                    .map(|last_assignment| i == last_assignment)
+                    .unwrap_or(true);
+
+                if node.children.is_empty() && !is_last_assignment {
+                    None
+                } else {
+                    Some(node)
+                }
+            })
+            .collect::<Vec<_>>();
+    }
+
+    /// remove nodes that assign to the current value
+    fn remove_noops(tree: &mut Vec<MigrationNode>, from: &[u8; SIZE], to: &[u8; SIZE]) {
+        // Recurse first so that if a child node has all children removed, the parent can be removed too
+        for node in tree.iter_mut() {
+            Self::remove_noops(&mut node.children, from, to);
+        }
+
+        let mut values = *from;
+        *tree = mem::take(tree)
+            .into_iter()
+            .filter(|node| {
+                let is_changed = values[node.index] != node.value;
+                values[node.index] = node.value;
+                is_changed || !node.children.is_empty()
+            })
+            .collect::<Vec<_>>();
     }
 
     fn serialize_tree(
@@ -429,7 +488,7 @@ mod tests {
             let migration_planner = SoundModes::migration_planner();
             let plan = SoundModes::migrate(&migration_planner, &from, &to);
 
-            assert_eq!(from == to, plan.is_empty());
+            assert_eq!(from == to, plan.is_empty(), "the plan should be empty if and only if the start and end are the same");
 
             if !plan.is_empty() {
                 // the initial state is not part of the plan, so check that separately
@@ -479,6 +538,6 @@ mod tests {
         let average = total as f64 / runner.config().cases as f64;
 
         // round up to nearest 10th for leeway
-        assert!(average <= 7.4, "average case: {average} steps",);
+        assert!(average <= 7.1, "average case: {average} steps",);
     }
 }
