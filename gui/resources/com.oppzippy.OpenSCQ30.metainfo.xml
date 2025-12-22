@@ -49,6 +49,15 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.0.1" date="2025-12-22">
+            <description>
+                <p>Fixes</p>
+                <ul>
+                    <li>Soundcore Space A40 case battery should be out of 10</li>
+                    <li>Soundcore Space A40 sound modes not working</li>
+                </ul>
+            </description>
+        </release>
         <release version="2.0.0" date="2025-12-17">
             <description>
                 <p>This includes all changes since v1.19.3. For those that have been using the beta versions, there have been no notable changes since v2.0.0-beta7.</p>

@@ -1,0 +1,7 @@
+* Fixes
+  - Soundcore Space A40 case battery should be out of 10
+  - Soundcore Space A40 sound modes not working
+
+* Packaging
+  - Separate building for different cpu architectures into their own gradle tasks so when building for a specific one, you don't have to build the rust code for all.
+  - Fix timestamps of locale files breaking reproducible builds
