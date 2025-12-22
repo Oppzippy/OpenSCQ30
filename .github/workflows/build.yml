@@ -7,7 +7,7 @@ permissions:
   contents: read
 
 jobs:
-  build-linux:
+  build-linux-x86_64:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -16,8 +16,6 @@ jobs:
 
       - name: Install basic requirements
         run: sudo apt-get install -y pkg-config libdbus-1-dev libxkbcommon-dev
-      - name: Install just
-        run: sudo snap install just --classic
       - uses: dtolnay/rust-toolchain@stable
       - name: Build cli and gui
         run: cargo build --release --package openscq30-cli --package openscq30-gui --features bundled-dependencies
@@ -31,7 +29,32 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
         with:
-          name: linux
+          name: linux-x86_64
+          path: artifacts/*
+
+  build-linux-arm64:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Install basic requirements
+        run: sudo apt-get install -y pkg-config libdbus-1-dev libxkbcommon-dev
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build cli and gui
+        run: cargo build --release --package openscq30-cli --package openscq30-gui --features bundled-dependencies
+
+      - name: Move to artifacts directory
+        run: |
+          mkdir artifacts
+          mv target/release/openscq30 artifacts/openscq30-cli-linux-arm64
+          mv target/release/openscq30-gui artifacts/openscq30-gui-linux-arm64
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: linux-arm64
           path: artifacts/*
 
   build-windows:
