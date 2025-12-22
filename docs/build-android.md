@@ -17,8 +17,10 @@
 2. Add all supported cpu architecture targets that you plan to build: `rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android`
 3. Install [cargo-ndk](https://github.com/bbqsrc/cargo-ndk): `cargo install cargo-ndk`
 4. In the `android` directory, run `./gradlew assembleRelease` for a universal apk, or one or more of these for a specific cpu architecture:
-  - `./gradlew assembleRelease-arm64-v8a` 
-  - `./gradlew assembleRelease-armeabi-v7a` 
-  - `./gradlew assembleRelease-x86_64` 
-  - `./gradlew assembleRelease-x86` 
+
+- `./gradlew assembleRelease-arm64-v8a`
+- `./gradlew assembleRelease-armeabi-v7a`
+- `./gradlew assembleRelease-x86_64`
+- `./gradlew assembleRelease-x86`
+
 5. The apk can be found at `android/app/build/outputs/apk/release/app-release-unsigned.apk` for a universal apk or `android/app/build/outputs/apk/release-arm64-v8a/app-release-arm64-v8a-unsigned.apk` for example otherwise.
