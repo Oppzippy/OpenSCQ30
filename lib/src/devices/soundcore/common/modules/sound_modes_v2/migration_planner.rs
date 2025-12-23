@@ -268,37 +268,18 @@ mod tests {
 
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Arbitrary, MigrationSteps)]
     struct SoundModes {
-        #[migration()]
         ambient_sound_mode: AmbientSoundMode,
-        #[migration(
-            required_field = ambient_sound_mode,
-            required_value = AmbientSoundMode::NoiseCanceling,
-        )]
+        #[migration_requirement(field = ambient_sound_mode, value = AmbientSoundMode::NoiseCanceling)]
         noise_canceling_mode: NoiseCancelingMode,
-        #[migration(
-            required_field = noise_canceling_mode,
-            required_value = NoiseCancelingMode::Manual,
-        )]
+        #[migration_requirement(field = noise_canceling_mode, value = NoiseCancelingMode::Manual)]
         manual_noise_canceling: ManualNoiseCanceling,
-        #[migration(
-            required_field = noise_canceling_mode,
-            required_value = NoiseCancelingMode::Adaptive,
-        )]
+        #[migration_requirement(field = noise_canceling_mode, value = NoiseCancelingMode::Adaptive)]
         adaptive_noise_canceling: AdaptiveNoiseCanceling,
-        #[migration(
-            required_field = ambient_sound_mode,
-            required_value = AmbientSoundMode::Transparency,
-        )]
+        #[migration_requirement(field = ambient_sound_mode, value = AmbientSoundMode::Transparency)]
         transparency_mode: TransparencyMode,
-        #[migration(
-            required_field = transparency_mode,
-            required_value = TransparencyMode::Manual,
-        )]
+        #[migration_requirement(field = transparency_mode, value = TransparencyMode::Manual)]
         manual_transparency: ManualTransparency,
-        #[migration(
-            required_field = ambient_sound_mode,
-            required_value = AmbientSoundMode::NoiseCanceling,
-        )]
+        #[migration_requirement(field = ambient_sound_mode, value = AmbientSoundMode::NoiseCanceling)]
         wind_noise_reduction: bool,
     }
 

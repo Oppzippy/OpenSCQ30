@@ -15,37 +15,18 @@ use crate::devices::soundcore::common::{
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, MigrationSteps)]
 pub struct A3936SoundModes {
-    #[migration()]
     pub ambient_sound_mode: AmbientSoundMode,
-    #[migration(
-        required_field = ambient_sound_mode,
-        required_value = AmbientSoundMode::Transparency,
-    )]
+    #[migration_requirement(field = ambient_sound_mode, value = AmbientSoundMode::Transparency)]
     pub transparency_mode: TransparencyMode,
-    #[migration(
-        required_field = ambient_sound_mode,
-        required_value = AmbientSoundMode::NoiseCanceling,
-    )]
+    #[migration_requirement(field = ambient_sound_mode, value = AmbientSoundMode::NoiseCanceling)]
     pub noise_canceling_mode: A3936NoiseCancelingMode,
-    #[migration(
-        required_field = noise_canceling_mode,
-        required_value = A3936NoiseCancelingMode::Adaptive,
-    )]
+    #[migration_requirement(field = noise_canceling_mode, value = A3936NoiseCancelingMode::Adaptive)]
     pub adaptive_noise_canceling: AdaptiveNoiseCanceling,
-    #[migration(
-        required_field = noise_canceling_mode,
-        required_value = A3936NoiseCancelingMode::Manual,
-    )]
+    #[migration_requirement(field = noise_canceling_mode, value = A3936NoiseCancelingMode::Manual)]
     pub manual_noise_canceling: ManualNoiseCanceling,
-    #[migration(
-        required_field = ambient_sound_mode,
-        required_value = AmbientSoundMode::NoiseCanceling,
-    )]
+    #[migration_requirement(field = ambient_sound_mode, value = AmbientSoundMode::NoiseCanceling)]
     pub wind_noise: WindNoise,
-    #[migration(
-        required_field = noise_canceling_mode,
-        required_value = A3936NoiseCancelingMode::Manual,
-    )]
+    #[migration_requirement(field = noise_canceling_mode, value = A3936NoiseCancelingMode::Manual)]
     pub noise_canceling_adaptive_sensitivity_level: u8,
 }
 

@@ -9,75 +9,88 @@ pub fn from_derive_input(input: DeriveInput) -> TokenStream {
     let syn::Data::Struct(data_struct) = input.data else {
         panic!("expected struct");
     };
-    let fields = data_struct
+    let field_requirements = data_struct
         .fields
         .iter()
-        .enumerate()
-        .map(|(index, field)| {
+        .filter_map(|field| {
             field
                 .attrs
                 .iter()
-                .filter(|attribute| attribute.path().is_ident("migration"))
+                .filter(|attribute| attribute.path().is_ident("migration_requirement"))
                 .map(|attribute| {
+                    // this is assigned a name because rustfmt gives up when it's inline
+                    type CommaSeparatedKeyValuePairs =
+                        syn::punctuated::Punctuated<syn::MetaNameValue, syn::Token![,]>;
                     let args = attribute
-                        .parse_args_with(syn::punctuated::Punctuated::<
-                            syn::MetaNameValue,
-                            syn::Token![,],
-                        >::parse_terminated)
+                        .parse_args_with(CommaSeparatedKeyValuePairs::parse_terminated)
                         .expect("attribute arguments should be key=value separated by comma")
-                        .into_iter().map(|name_value| {
-                            (name_value.path.get_ident().unwrap().to_string(), name_value.value)
+                        .into_iter()
+                        .map(|name_value| {
+                            (
+                                name_value.path.get_ident().unwrap().to_string(),
+                                name_value.value,
+                            )
                         })
                         .collect::<HashMap<String, Expr>>();
 
-                    FieldWithArguments {
-                        ident: field.ident.clone().unwrap(),
-                        required_field: args.get("required_field").cloned(),
-                        required_value: args.get("required_value").cloned(),
-                        index,
-                    }
+                    (
+                        field.ident.clone().unwrap(),
+                        FieldRequirement {
+                            required_field: args
+                                .get("field")
+                                .map(|field_expr| {
+                                    format_ident!("{}", field_expr.to_token_stream().to_string())
+                                })
+                                .expect("field is required"),
+                            required_value: args.get("value").cloned().expect("value is required"),
+                        },
+                    )
                 })
                 .next()
-                .expect("every field should have a #[migrate(...)] attribute")
         })
-        .collect::<Vec<FieldWithArguments>>();
+        .collect::<HashMap<Ident, FieldRequirement>>();
 
     let struct_fields_enum = FieldEnum::new(&struct_ident, data_struct.fields.iter());
-    let as_enum = fields.iter().map(|field| {
-        let ident = &field.ident;
-        struct_fields_enum.wrap_field(&field.ident, &quote! { s.#ident })
+    let as_enum = data_struct.fields.iter().map(|field| {
+        let ident = field.ident.as_ref().unwrap();
+        struct_fields_enum.wrap_field(ident, &quote! { s.#ident })
     });
-    let from_enum = fields.iter().map(|field| {
-        let ident = &field.ident;
-        let unwrapped = struct_fields_enum.unwrap_field(&field.ident, field.index);
+    let from_enum = data_struct.fields.iter().enumerate().map(|(index, field)| {
+        let ident = field.ident.as_ref().unwrap();
+        let unwrapped = struct_fields_enum.unwrap_field(ident, index);
         quote! { #ident: #unwrapped }
     });
 
-    let migration_planner_args = fields.iter().map(|field| match &field.required_field {
-        Some(field_name_expr) => {
-            let field_name = field_name_expr.into_token_stream().to_string();
-            let requirement = fields
-                .iter()
-                .find(|f| f.ident.to_string() == field_name)
-                .expect("required field does not exist");
-            let requirement_index = requirement.index;
-            let requirement_value = field
-                .required_value
-                .as_ref()
-                .expect("if required_field is set, required_value must also be set");
-            let requirement_variant_ident = format_ident!(
-                "{}",
-                heck::AsUpperCamelCase(requirement.ident.to_string()).to_string()
-            );
-            let wrapped = struct_fields_enum.wrap_field(&requirement_variant_ident, &requirement_value.to_token_stream());
-            quote! {
-                Some(::openscq30_lib::devices::soundcore::common::modules::sound_modes_v2::Requirement {
-                    index: #requirement_index,
-                    value: #wrapped,
-                })
+    let migration_planner_args = data_struct.fields.iter().map(|field| {
+        match field_requirements.get(field.ident.as_ref().unwrap()) {
+            Some(field_requirement) => {
+                let (requirement_index, requirement) = data_struct
+                    .fields
+                    .iter()
+                    .enumerate()
+                    .find(|(_, f)| *f.ident.as_ref().unwrap() == field_requirement.required_field)
+                    .expect("required field does not exist");
+                let requirement_value = &field_requirement.required_value;
+                let requirement_variant_ident = format_ident!(
+                    "{}",
+                    heck::AsUpperCamelCase(requirement.ident.as_ref().unwrap().to_string())
+                        .to_string()
+                );
+                let wrapped = struct_fields_enum.wrap_field(
+                    &requirement_variant_ident,
+                    &requirement_value.to_token_stream(),
+                );
+                // rustfmt gives up when the full path is specified here rather than just Requirement. Delete up to requirement,
+                // run rustfmt, and then put it back.
+                quote! {
+                    Some(::openscq30_lib::devices::soundcore::common::modules::sound_modes_v2::Requirement {
+                        index: #requirement_index,
+                        value: #wrapped,
+                    })
+                }
             }
+            None => quote! { None },
         }
-        None => quote! { None },
     });
 
     let struct_fields_enum_ident = &struct_fields_enum.ident;
@@ -185,9 +198,7 @@ impl ToTokens for FieldEnum {
     }
 }
 
-struct FieldWithArguments {
-    ident: Ident,
-    required_field: Option<Expr>,
-    required_value: Option<Expr>,
-    index: usize,
+struct FieldRequirement {
+    required_field: Ident,
+    required_value: Expr,
 }
