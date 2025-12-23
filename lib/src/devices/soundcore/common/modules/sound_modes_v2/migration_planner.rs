@@ -119,9 +119,8 @@ where
         }
 
         Self::squish_tree(&mut tree, &from, to);
-        Self::reorder_tree(&mut tree, &from, to);
-        Self::remove_noops(&mut tree, &from, to);
-        Self::remove_assignments_with_no_effect(&mut tree, &from, to);
+
+        Self::recursively_optimize(&mut tree, &from, to);
 
         // Convert tree to list of states
         let mut path = Vec::new();
@@ -167,30 +166,29 @@ where
         }
     }
 
+    fn recursively_optimize(tree: &mut Vec<MigrationNode<T>>, from: &[T; SIZE], to: &[T; SIZE]) {
+        // recursion happens here, so the optimization functions called should not recurse
+        for node in tree.iter_mut() {
+            Self::recursively_optimize(&mut node.children, from, to);
+        }
+
+        Self::reorder_tree(tree, from);
+        Self::remove_noops(tree, from, to);
+        Self::remove_assignments_with_no_effect(tree);
+    }
+
     /// prefer assigning values with their dependencies already in the desired state first
-    fn reorder_tree(tree: &mut Vec<MigrationNode<T>>, from: &[T; SIZE], to: &[T; SIZE]) {
+    fn reorder_tree(tree: &mut Vec<MigrationNode<T>>, from: &[T; SIZE]) {
         let tree_len = tree.len();
         if tree_len > 2 {
             let nodes_except_last = &mut tree[0..tree_len - 1];
             nodes_except_last.sort_by_key(|n| from[n.index] != n.value);
         }
-
-        for node in tree {
-            Self::reorder_tree(&mut node.children, from, to);
-        }
     }
 
     /// When a value is assigned to once, and then without first assigning any dependencies, the value is changed,
     /// the first assignment was useless and can be removed.
-    fn remove_assignments_with_no_effect(
-        tree: &mut Vec<MigrationNode<T>>,
-        from: &[T; SIZE],
-        to: &[T; SIZE],
-    ) {
-        for node in tree.iter_mut() {
-            Self::remove_assignments_with_no_effect(&mut node.children, from, to);
-        }
-
+    fn remove_assignments_with_no_effect(tree: &mut Vec<MigrationNode<T>>) {
         // First find the last time each index is assigned, then remove anything before that with no children
         // We may need to deduplicate after, since removing intermediate values can then lead to something getting
         // assigned twice in a row to the same value. Or not, since deduplication happens at deserialization time (I think).
@@ -516,6 +514,21 @@ mod tests {
         let average = total as f64 / runner.config().cases as f64;
 
         // round up to nearest 10th for leeway
-        assert!(average <= 7.1, "average case: {average} steps",);
+        assert!(average <= 7.0, "average case: {average} steps",);
+    }
+
+    #[test]
+    fn test_change_ambient_sound_mode() {
+        let migration_planner = SoundModes::migration_planner();
+        let from = SoundModes {
+            ambient_sound_mode: AmbientSoundMode::Transparency,
+            ..Default::default()
+        };
+        let to = SoundModes {
+            ambient_sound_mode: AmbientSoundMode::Normal,
+            ..from
+        };
+        let path = SoundModes::migrate(&migration_planner, &from, &to);
+        assert_eq!(path, vec![to]);
     }
 }
