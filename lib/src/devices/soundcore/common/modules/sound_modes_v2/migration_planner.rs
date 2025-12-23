@@ -4,34 +4,43 @@ pub trait Migrate<const SIZE: usize>
 where
     Self: Sized,
 {
-    fn migrate(migration_planner: &MigrationPlanner<SIZE>, from: &Self, to: &Self) -> Vec<Self>;
-    fn migration_planner() -> MigrationPlanner<SIZE>;
+    type T;
+
+    fn migrate(
+        migration_planner: &MigrationPlanner<Self::T, SIZE>,
+        from: &Self,
+        to: &Self,
+    ) -> Vec<Self>;
+    fn migration_planner() -> MigrationPlanner<Self::T, SIZE>;
 }
 
 pub trait ToPacketBody {
     fn bytes(&self) -> Vec<u8>;
 }
 
-pub struct MigrationPlanner<const SIZE: usize> {
+pub struct MigrationPlanner<T, const SIZE: usize> {
     // invariant: parents are ordered before children
-    field_transitive_requirements: [Vec<Requirement>; SIZE],
+    field_transitive_requirements: [Vec<Requirement<T>>; SIZE],
 }
 
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
-pub struct Requirement {
+pub struct Requirement<T> {
     pub index: usize,
-    pub value: u8,
+    pub value: T,
 }
 
 #[derive(Debug, Clone)]
-struct MigrationNode {
+struct MigrationNode<T> {
     index: usize,
-    value: u8,
-    children: Vec<MigrationNode>,
+    value: T,
+    children: Vec<MigrationNode<T>>,
 }
 
-impl<const SIZE: usize> MigrationPlanner<SIZE> {
-    pub fn new(requirements: [Option<Requirement>; SIZE]) -> Self {
+impl<T, const SIZE: usize> MigrationPlanner<T, SIZE>
+where
+    T: PartialEq + Copy + Clone + PartialEq + Eq + std::hash::Hash,
+{
+    pub fn new(requirements: [Option<Requirement<T>>; SIZE]) -> Self {
         for (index, maybe_requirement) in requirements.iter().enumerate() {
             if let Some(requirement) = maybe_requirement
                 && requirement.index >= index
@@ -63,9 +72,9 @@ impl<const SIZE: usize> MigrationPlanner<SIZE> {
     }
 
     fn collect_requirements(
-        collection: &mut Vec<Requirement>,
-        requirements: &[Option<Requirement>; SIZE],
-        requirement: &Requirement,
+        collection: &mut Vec<Requirement<T>>,
+        requirements: &[Option<Requirement<T>>; SIZE],
+        requirement: &Requirement<T>,
     ) {
         if let Some(requirement) = &requirements[requirement.index] {
             Self::collect_requirements(collection, requirements, requirement);
@@ -73,7 +82,7 @@ impl<const SIZE: usize> MigrationPlanner<SIZE> {
         collection.push(*requirement);
     }
 
-    pub fn migrate(&self, from: [u8; SIZE], to: &[u8; SIZE]) -> Vec<[u8; SIZE]> {
+    pub fn migrate(&self, from: [T; SIZE], to: &[T; SIZE]) -> Vec<[T; SIZE]> {
         let mut current = from;
         if current == *to {
             return Vec::new();
@@ -122,8 +131,8 @@ impl<const SIZE: usize> MigrationPlanner<SIZE> {
     }
 
     /// squish identical earlier nodes into the last identical node
-    fn squish_tree(tree: &mut Vec<MigrationNode>, from: &[u8; SIZE], to: &[u8; SIZE]) {
-        let mut identical_node_indices = HashMap::<(usize, u8), Vec<usize>>::new();
+    fn squish_tree(tree: &mut Vec<MigrationNode<T>>, from: &[T; SIZE], to: &[T; SIZE]) {
+        let mut identical_node_indices = HashMap::<(usize, T), Vec<usize>>::new();
         for (i, node) in tree.iter().enumerate() {
             if let Some(indices) = identical_node_indices.get_mut(&(node.index, node.value)) {
                 indices.push(i);
@@ -159,7 +168,7 @@ impl<const SIZE: usize> MigrationPlanner<SIZE> {
     }
 
     /// prefer assigning values with their dependencies already in the desired state first
-    fn reorder_tree(tree: &mut Vec<MigrationNode>, from: &[u8; SIZE], to: &[u8; SIZE]) {
+    fn reorder_tree(tree: &mut Vec<MigrationNode<T>>, from: &[T; SIZE], to: &[T; SIZE]) {
         let tree_len = tree.len();
         if tree_len > 2 {
             let nodes_except_last = &mut tree[0..tree_len - 1];
@@ -174,9 +183,9 @@ impl<const SIZE: usize> MigrationPlanner<SIZE> {
     /// When a value is assigned to once, and then without first assigning any dependencies, the value is changed,
     /// the first assignment was useless and can be removed.
     fn remove_assignments_with_no_effect(
-        tree: &mut Vec<MigrationNode>,
-        from: &[u8; SIZE],
-        to: &[u8; SIZE],
+        tree: &mut Vec<MigrationNode<T>>,
+        from: &[T; SIZE],
+        to: &[T; SIZE],
     ) {
         for node in tree.iter_mut() {
             Self::remove_assignments_with_no_effect(&mut node.children, from, to);
@@ -211,7 +220,7 @@ impl<const SIZE: usize> MigrationPlanner<SIZE> {
     }
 
     /// remove nodes that assign to the current value
-    fn remove_noops(tree: &mut Vec<MigrationNode>, from: &[u8; SIZE], to: &[u8; SIZE]) {
+    fn remove_noops(tree: &mut Vec<MigrationNode<T>>, from: &[T; SIZE], to: &[T; SIZE]) {
         // Recurse first so that if a child node has all children removed, the parent can be removed too
         for node in tree.iter_mut() {
             Self::remove_noops(&mut node.children, from, to);
@@ -229,9 +238,9 @@ impl<const SIZE: usize> MigrationPlanner<SIZE> {
     }
 
     fn serialize_tree(
-        tree: &[MigrationNode],
-        current: &mut [u8; SIZE],
-        dest: &mut Vec<[u8; SIZE]>,
+        tree: &[MigrationNode<T>],
+        current: &mut [T; SIZE],
+        dest: &mut Vec<[T; SIZE]>,
     ) {
         for node in tree {
             if current[node.index] != node.value {
@@ -259,46 +268,34 @@ mod tests {
 
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Arbitrary, MigrationSteps)]
     struct SoundModes {
-        #[migration(to = |mode| mode as u8, from = |b| AmbientSoundMode::from_repr(b).unwrap())]
+        #[migration()]
         ambient_sound_mode: AmbientSoundMode,
         #[migration(
-            to = |mode| mode as u8,
-            from = |b| NoiseCancelingMode::from_repr(b).unwrap(),
             required_field = ambient_sound_mode,
             required_value = AmbientSoundMode::NoiseCanceling,
         )]
         noise_canceling_mode: NoiseCancelingMode,
         #[migration(
-            to = |value: ManualNoiseCanceling| value.0,
-            from = ManualNoiseCanceling,
             required_field = noise_canceling_mode,
             required_value = NoiseCancelingMode::Manual,
         )]
         manual_noise_canceling: ManualNoiseCanceling,
         #[migration(
-            to = |value: AdaptiveNoiseCanceling| value.0,
-            from = AdaptiveNoiseCanceling,
             required_field = noise_canceling_mode,
             required_value = NoiseCancelingMode::Adaptive,
         )]
         adaptive_noise_canceling: AdaptiveNoiseCanceling,
         #[migration(
-            to = |mode| mode as u8,
-            from = |b| TransparencyMode::from_repr(b).unwrap(),
             required_field = ambient_sound_mode,
             required_value = AmbientSoundMode::Transparency,
         )]
         transparency_mode: TransparencyMode,
         #[migration(
-            to = |value: ManualTransparency| value.0,
-            from = ManualTransparency,
             required_field = transparency_mode,
             required_value = TransparencyMode::Manual,
         )]
         manual_transparency: ManualTransparency,
         #[migration(
-            to = |is_enabled| is_enabled as u8,
-            from = |b| b != 0,
             required_field = ambient_sound_mode,
             required_value = AmbientSoundMode::NoiseCanceling,
         )]
@@ -315,14 +312,14 @@ mod tests {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, FromRepr, Arbitrary)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, FromRepr, Arbitrary, Hash)]
     pub enum TransparencyMode {
         #[default]
         TalkMode = 0,
         Manual = 1,
     }
 
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Hash)]
     pub struct ManualTransparency(pub u8);
 
     impl proptest::arbitrary::Arbitrary for ManualTransparency {
@@ -338,14 +335,14 @@ mod tests {
     }
 
     #[repr(u8)]
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, FromRepr, Arbitrary)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Hash, FromRepr, Arbitrary)]
     pub enum NoiseCancelingMode {
         #[default]
         Manual = 0,
         Adaptive = 1,
     }
 
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Hash)]
     pub struct ManualNoiseCanceling(u8);
 
     impl proptest::arbitrary::Arbitrary for ManualNoiseCanceling {
@@ -360,7 +357,7 @@ mod tests {
         type Strategy = proptest::strategy::Map<std::ops::RangeInclusive<u8>, fn(u8) -> Self>;
     }
 
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Hash)]
     pub struct AdaptiveNoiseCanceling(u8);
 
     impl proptest::arbitrary::Arbitrary for AdaptiveNoiseCanceling {

@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use proc_macro2::TokenStream;
-use quote::{ToTokens, quote};
-use syn::{DeriveInput, Expr, Ident};
+use quote::{ToTokens, format_ident, quote};
+use syn::{DeriveInput, Expr, Field, Ident, Type};
 
 pub fn from_derive_input(input: DeriveInput) -> TokenStream {
     let struct_ident = input.ident;
@@ -32,8 +32,6 @@ pub fn from_derive_input(input: DeriveInput) -> TokenStream {
 
                     FieldWithArguments {
                         ident: field.ident.clone().unwrap(),
-                        from: args.get("from").expect("from is required").clone(),
-                        to: args.get("to").expect("to is required").clone(),
                         required_field: args.get("required_field").cloned(),
                         required_value: args.get("required_value").cloned(),
                         index,
@@ -44,18 +42,17 @@ pub fn from_derive_input(input: DeriveInput) -> TokenStream {
         })
         .collect::<Vec<FieldWithArguments>>();
 
-    let size = data_struct.fields.len();
-    let as_byte_array_fields = fields.iter().map(|field| {
+    let struct_fields_enum = FieldEnum::new(&struct_ident, data_struct.fields.iter());
+    let as_enum = fields.iter().map(|field| {
         let ident = &field.ident;
-        let to_u8 = &field.to;
-        quote! { (#to_u8)(s.#ident) }
+        struct_fields_enum.wrap_field(&field.ident, &quote! { s.#ident })
     });
-    let from_byte_array_fields = fields.iter().map(|field| {
+    let from_enum = fields.iter().map(|field| {
         let ident = &field.ident;
-        let from_u8 = &field.from;
-        let index = field.index;
-        quote! { #ident: (#from_u8)(data[#index]) }
+        let unwrapped = struct_fields_enum.unwrap_field(&field.ident, field.index);
+        quote! { #ident: #unwrapped }
     });
+
     let migration_planner_args = fields.iter().map(|field| match &field.required_field {
         Some(field_name_expr) => {
             let field_name = field_name_expr.into_token_stream().to_string();
@@ -64,36 +61,48 @@ pub fn from_derive_input(input: DeriveInput) -> TokenStream {
                 .find(|f| f.ident.to_string() == field_name)
                 .expect("required field does not exist");
             let requirement_index = requirement.index;
-            let requirement_to_byte = &requirement.to;
             let requirement_value = field
                 .required_value
                 .as_ref()
                 .expect("if required_field is set, required_value must also be set");
+            let requirement_variant_ident = format_ident!(
+                "{}",
+                heck::AsUpperCamelCase(requirement.ident.to_string()).to_string()
+            );
+            let wrapped = struct_fields_enum.wrap_field(&requirement_variant_ident, &requirement_value.to_token_stream());
             quote! {
                 Some(::openscq30_lib::devices::soundcore::common::modules::sound_modes_v2::Requirement {
                     index: #requirement_index,
-                    value: (#requirement_to_byte)(#requirement_value),
+                    value: #wrapped,
                 })
             }
         }
         None => quote! { None },
     });
+
+    let struct_fields_enum_ident = &struct_fields_enum.ident;
+    let size = data_struct.fields.len();
+
     quote! {
+        #struct_fields_enum
+
         impl ::openscq30_lib::devices::soundcore::common::modules::sound_modes_v2::Migrate<#size> for #struct_ident {
+            type T = #struct_fields_enum_ident;
+
             fn migrate(
-                migration_planner: &::openscq30_lib::devices::soundcore::common::modules::sound_modes_v2::MigrationPlanner<#size>,
+                migration_planner: &::openscq30_lib::devices::soundcore::common::modules::sound_modes_v2::MigrationPlanner<Self::T, #size>,
                 from: &Self,
                 to: &Self
             ) -> Vec<Self> {
-                fn as_byte_array(s: &#struct_ident) -> [u8; #size] {
+                fn as_byte_array(s: &#struct_ident) -> [#struct_fields_enum_ident; #size] {
                     [
-                        #(#as_byte_array_fields,)*
+                        #(#as_enum,)*
                     ]
                 }
 
-                fn from_byte_array(data: [u8; #size]) -> #struct_ident {
+                fn from_byte_array(data: [#struct_fields_enum_ident; #size]) -> #struct_ident {
                     #struct_ident {
-                        #(#from_byte_array_fields,)*
+                        #(#from_enum,)*
                     }
                 }
 
@@ -103,7 +112,7 @@ pub fn from_derive_input(input: DeriveInput) -> TokenStream {
                     .collect::<Vec<Self>>()
             }
 
-            fn migration_planner() -> ::openscq30_lib::devices::soundcore::common::modules::sound_modes_v2::MigrationPlanner<#size> {
+            fn migration_planner() -> ::openscq30_lib::devices::soundcore::common::modules::sound_modes_v2::MigrationPlanner<Self::T, #size> {
                 ::openscq30_lib::devices::soundcore::common::modules::sound_modes_v2::MigrationPlanner::new([
                     #(#migration_planner_args,)*
                 ])
@@ -112,10 +121,72 @@ pub fn from_derive_input(input: DeriveInput) -> TokenStream {
     }
 }
 
+struct FieldEnum {
+    ident: Ident,
+    fields: Vec<(Ident, Type)>,
+}
+
+impl FieldEnum {
+    pub fn new<'a>(
+        from_struct_ident: &Ident,
+        from_struct_fields: impl IntoIterator<Item = &'a Field>,
+    ) -> Self {
+        let ident = format_ident!("{}Fields", from_struct_ident);
+        let fields = from_struct_fields
+            .into_iter()
+            .map(|field| {
+                let variant_ident =
+                    Self::field_ident_to_variant_ident(&field.ident.clone().unwrap());
+                let ty = field.ty.clone();
+                (variant_ident, ty)
+            })
+            .collect::<Vec<_>>();
+
+        Self { ident, fields }
+    }
+
+    fn wrap_field(&self, ident: &Ident, inner: &TokenStream) -> TokenStream {
+        let enum_ident = &self.ident;
+        let variant_ident = Self::field_ident_to_variant_ident(&ident);
+        quote! { #enum_ident::#variant_ident(#inner) }
+    }
+
+    fn unwrap_field(&self, ident: &Ident, index: usize) -> TokenStream {
+        let enum_ident = &self.ident;
+        let variant_ident = Self::field_ident_to_variant_ident(&ident);
+        quote! {
+            match data[#index] {
+                #enum_ident::#variant_ident(value) => value,
+                _ => unreachable!("the variant is being taken from the same index it was put into, and it shuoldn't have changed"),
+            }
+        }
+    }
+
+    pub fn field_ident_to_variant_ident(field_ident: &Ident) -> Ident {
+        format_ident!(
+            "{}",
+            heck::AsUpperCamelCase(field_ident.to_string()).to_string()
+        )
+    }
+}
+
+impl ToTokens for FieldEnum {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let ident = &self.ident;
+        let variants = self.fields.iter().map(|(field_ident, field_type)| {
+            quote! { #field_ident(#field_type) }
+        });
+        tokens.extend(quote! {
+            #[derive(PartialEq, Eq, Copy, Clone, Hash)]
+            pub enum #ident {
+                #(#variants,)*
+            }
+        });
+    }
+}
+
 struct FieldWithArguments {
     ident: Ident,
-    from: Expr,
-    to: Expr,
     required_field: Option<Expr>,
     required_value: Option<Expr>,
     index: usize,

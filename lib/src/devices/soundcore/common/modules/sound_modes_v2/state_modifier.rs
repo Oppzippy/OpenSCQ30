@@ -12,18 +12,22 @@ use crate::{
     },
 };
 
-pub struct SoundModesStateModifier<ConnectionType: RfcommConnection, MigratableT, const SIZE: usize>
-{
+pub struct SoundModesStateModifier<
+    ConnectionType: RfcommConnection,
+    MigratableT,
+    MigratableTFieldEnum,
+    const SIZE: usize,
+> {
     packet_io: Arc<PacketIOController<ConnectionType>>,
-    migration_planner: MigrationPlanner<SIZE>,
+    migration_planner: MigrationPlanner<MigratableTFieldEnum, SIZE>,
     _migratable: PhantomData<MigratableT>,
 }
 
-impl<ConnectionType, MigratableT, const SIZE: usize>
-    SoundModesStateModifier<ConnectionType, MigratableT, SIZE>
+impl<ConnectionType, MigratableT, MigratableTFieldEnum, const SIZE: usize>
+    SoundModesStateModifier<ConnectionType, MigratableT, MigratableTFieldEnum, SIZE>
 where
     ConnectionType: RfcommConnection,
-    MigratableT: Migrate<SIZE>,
+    MigratableT: Migrate<SIZE, T = MigratableTFieldEnum>,
 {
     pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
         Self {
@@ -35,12 +39,19 @@ where
 }
 
 #[async_trait]
-impl<ConnectionType, StateType, MigratableT, const SIZE: usize> StateModifier<StateType>
-    for SoundModesStateModifier<ConnectionType, MigratableT, SIZE>
+impl<ConnectionType, StateType, MigratableT, MigratableTFieldEnum, const SIZE: usize>
+    StateModifier<StateType>
+    for SoundModesStateModifier<ConnectionType, MigratableT, MigratableTFieldEnum, SIZE>
 where
     ConnectionType: RfcommConnection + Send + Sync,
     StateType: Has<MigratableT> + Clone + Send + Sync,
-    MigratableT: Migrate<SIZE> + ToPacketBody + Send + Sync + PartialEq + std::fmt::Debug,
+    MigratableT: Migrate<SIZE, T = MigratableTFieldEnum>
+        + ToPacketBody
+        + Send
+        + Sync
+        + PartialEq
+        + std::fmt::Debug,
+    MigratableTFieldEnum: Send + Sync,
 {
     async fn move_to_state(
         &self,

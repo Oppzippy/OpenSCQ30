@@ -15,46 +15,34 @@ use crate::devices::soundcore::common::{
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, MigrationSteps)]
 pub struct A3936SoundModes {
-    #[migration(to = |mode| mode as u8, from = |id| AmbientSoundMode::from_repr(id).unwrap())]
+    #[migration()]
     pub ambient_sound_mode: AmbientSoundMode,
     #[migration(
-        to = |mode| mode as u8,
-        from = |id| TransparencyMode::from_repr(id).unwrap(),
         required_field = ambient_sound_mode,
         required_value = AmbientSoundMode::Transparency,
     )]
     pub transparency_mode: TransparencyMode,
     #[migration(
-        to = |mode| mode as u8,
-        from = |id| A3936NoiseCancelingMode::from_repr(id).unwrap(),
         required_field = ambient_sound_mode,
         required_value = AmbientSoundMode::NoiseCanceling,
     )]
     pub noise_canceling_mode: A3936NoiseCancelingMode,
     #[migration(
-        to = |mode| mode as u8,
-        from = |id| AdaptiveNoiseCanceling::from_repr(id).unwrap(),
         required_field = noise_canceling_mode,
         required_value = A3936NoiseCancelingMode::Adaptive,
     )]
     pub adaptive_noise_canceling: AdaptiveNoiseCanceling,
     #[migration(
-        to = |mode| mode as u8,
-        from = |id| ManualNoiseCanceling::from_repr(id).unwrap(),
         required_field = noise_canceling_mode,
         required_value = A3936NoiseCancelingMode::Manual,
     )]
     pub manual_noise_canceling: ManualNoiseCanceling,
     #[migration(
-        to = |wind_noise: WindNoise| wind_noise.byte(),
-        from = |wind_noise_byte| WindNoise::from_byte(wind_noise_byte),
         required_field = ambient_sound_mode,
         required_value = AmbientSoundMode::NoiseCanceling,
     )]
     pub wind_noise: WindNoise,
     #[migration(
-        to = |level| level,
-        from = |level| level,
         required_field = noise_canceling_mode,
         required_value = A3936NoiseCancelingMode::Manual,
     )]
@@ -257,12 +245,5 @@ impl WindNoise {
 
     pub fn byte(&self) -> u8 {
         u8::from(self.is_suppression_enabled) | (u8::from(self.is_detected) << 1)
-    }
-
-    pub fn from_byte(b: u8) -> Self {
-        Self {
-            is_suppression_enabled: b & 1 == 1,
-            is_detected: b & 2 == 2,
-        }
     }
 }
