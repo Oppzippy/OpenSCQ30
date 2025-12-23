@@ -92,11 +92,15 @@ async fn handle_list_settings(
                 println!("-- {category_id} --");
             }
             for setting_id in device.settings_in_category(&category_id) {
-                if no_extended_info {
-                    println!("{setting_id}");
-                } else {
-                    let setting = device.setting(&setting_id).unwrap();
-                    println!("{setting_id}: {}", CustomDisplaySetting(setting));
+                // Settings that are currently unavailable should not be listed. They may be temporarily unavailabe such
+                // as when TWS is disconnected, but they could also be never available such as when a device's firmware
+                // is too old for a particular feature.
+                if let Some(setting) = device.setting(&setting_id) {
+                    if no_extended_info {
+                        println!("{setting_id}");
+                    } else {
+                        println!("{setting_id}: {}", CustomDisplaySetting(setting));
+                    }
                 }
             }
         }
