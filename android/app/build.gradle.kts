@@ -168,7 +168,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-service:$lifecycleVersion")
 
     // Compose
-    val composeBomVersion = "2025.11.01"
+    val composeBomVersion = "2025.12.01"
     implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     androidTestImplementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     implementation("androidx.compose.ui:ui")
@@ -187,7 +187,7 @@ dependencies {
     // Optional - Add full set of material icons
     implementation("androidx.compose.material:material-icons-extended")
     // Optional - Integration with activities
-    implementation("androidx.activity:activity-compose:1.12.0")
+    implementation("androidx.activity:activity-compose:1.12.2")
     // Optional - Integration with ViewModels
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     // Compose navigation
@@ -220,7 +220,7 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
 
-    val mockkVersion = "1.14.6"
+    val mockkVersion = "1.14.7"
     testImplementation("io.mockk:mockk:$mockkVersion")
     androidTestImplementation("io.mockk:mockk-android:$mockkVersion")
     androidTestImplementation("androidx.test:runner:1.7.0")
