@@ -16,6 +16,7 @@ bundled-dependencies = ["openscq30-lib/bundled-dependencies"]
 
 [dependencies]
 openscq30-lib = { path = "../lib" }
+openscq30-i18n = { path = "../i18n" }
 tokio = { workspace = true, features = ["rt"] }
 anyhow = { workspace = true }
 clap = { workspace = true }

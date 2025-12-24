@@ -1,5 +1,6 @@
 mod completions;
 mod device;
+mod list_models;
 mod pair;
 
 use clap::{ArgAction, ArgMatches, Command, arg, value_parser};
@@ -57,8 +58,16 @@ pub fn build() -> Command {
                             arg!(-s --set <"SETTING_ID=VALUE"> "Sets the value of a setting.")
                                 .action(ArgAction::Append),
                         )
-                        .arg(json_arg),
+                        .arg(json_arg.clone()),
                 )
+        )
+        .subcommand(
+            Command::new("list-models")
+                .about("List all supported device models and their names")
+                .after_help(
+                    "Device models are locale-independent identifiers for each device. This command will list all models as well as their names in English. Used for `openscq30 paired-devices add --model`."
+                )
+                .arg(json_arg)
         )
         .subcommand(
             Command::new("completions")
@@ -75,6 +84,7 @@ pub async fn handle(matches: &ArgMatches) -> anyhow::Result<()> {
         ("paired-devices", matches) => pair::handle(matches).await?,
         ("device", matches) => device::handle(matches).await?,
         ("completions", matches) => completions::handle(matches)?,
+        ("list-models", matches) => list_models::handle(matches)?,
         _ => (),
     }
     Ok(())

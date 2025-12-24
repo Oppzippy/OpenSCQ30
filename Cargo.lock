@@ -4129,6 +4129,7 @@ dependencies = [
  "insta",
  "insta-cmd",
  "macaddr",
+ "openscq30-i18n",
  "openscq30-lib",
  "serde",
  "serde_json",
