@@ -209,6 +209,18 @@ mod tests {
             (SettingId::WindNoiseSuppression, Value::Bool(false)),
             (SettingId::GamingMode, Value::Bool(false)),
             (SettingId::AutoPowerOff, Value::String("30m".into())),
+            (
+                SettingId::FirmwareVersionLeft,
+                Value::String("04.19".into()),
+            ),
+            (
+                SettingId::FirmwareVersionRight,
+                Value::String("04.19".into()),
+            ),
+            (
+                SettingId::SerialNumber,
+                Value::String("3936a477583dda9e".into()),
+            ),
         ]);
     }
 }
