@@ -159,157 +159,6 @@ fn list_settings_json() {
     success: true
     exit_code: 0
     ----- stdout -----
-    {
-      "ambientSoundMode": {
-        "type": "select",
-        "setting": {
-          "options": [
-            "Normal",
-            "Transparency",
-            "NoiseCanceling"
-          ],
-          "localizedOptions": [
-            "Normal",
-            "Transparency",
-            "Noise Canceling"
-          ]
-        }
-      },
-      "noiseCancelingMode": {
-        "type": "select",
-        "setting": {
-          "options": [
-            "Transport",
-            "Indoor",
-            "Outdoor"
-          ],
-          "localizedOptions": [
-            "Transport",
-            "Indoor",
-            "Outdoor"
-          ]
-        }
-      },
-      "presetEqualizerProfile": {
-        "type": "optionalSelect",
-        "setting": {
-          "options": [
-            "SoundcoreSignature",
-            "Acoustic",
-            "BassBooster",
-            "BassReducer",
-            "Classical",
-            "Podcast",
-            "Dance",
-            "Deep",
-            "Electronic",
-            "Flat",
-            "HipHop",
-            "Jazz",
-            "Latin",
-            "Lounge",
-            "Piano",
-            "Pop",
-            "RnB",
-            "Rock",
-            "SmallSpeakers",
-            "SpokenWord",
-            "TrebleBooster",
-            "TrebleReducer"
-          ],
-          "localizedOptions": [
-            "Soundcore Signature",
-            "Acoustic",
-            "Bass Booster",
-            "Bass Reducer",
-            "Classical",
-            "Podcast",
-            "Dance",
-            "Deep",
-            "Electronic",
-            "Flat",
-            "Hip Hop",
-            "Jazz",
-            "Latin",
-            "Lounge",
-            "Piano",
-            "Pop",
-            "RnB",
-            "Rock",
-            "Small Speakers",
-            "Spoken Word",
-            "Treble Booster",
-            "Treble Reducer"
-          ]
-        }
-      },
-      "customEqualizerProfile": {
-        "type": "modifiableSelect",
-        "setting": {
-          "options": [],
-          "localizedOptions": []
-        }
-      },
-      "volumeAdjustments": {
-        "type": "equalizer",
-        "setting": {
-          "bandHz": [
-            100,
-            200,
-            400,
-            800,
-            1600,
-            3200,
-            6400,
-            12800
-          ],
-          "fractionDigits": 1,
-          "min": -120,
-          "max": 134
-        }
-      },
-      "importCustomEqualizerProfiles": {
-        "type": "importString"
-      },
-      "exportCustomEqualizerProfiles": {
-        "type": "multiSelect",
-        "setting": {
-          "options": [],
-          "localizedOptions": []
-        }
-      },
-      "exportCustomEqualizerProfilesOutput": {
-        "type": "information"
-      },
-      "isCharging": {
-        "type": "information"
-      },
-      "batteryLevel": {
-        "type": "information"
-      },
-      "serialNumber": {
-        "type": "information"
-      },
-      "firmwareVersion": {
-        "type": "information"
-      },
-      "wearingDetection": {
-        "type": "toggle"
-      }
-    }
-
-    ----- stderr -----
-    "#);
-}
-
-#[test]
-fn list_settings_json_no_categories() {
-    let dir = tempdir().unwrap();
-    add_device(dir.path(), "SoundcoreA3027");
-    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("--mac-address").arg("00:00:00:00:00:00").arg("list-settings").arg("--json").arg("--no-categories"), @r#"
-    success: true
-    exit_code: 0
-    ----- stdout -----
     [
       {
         "categoryId": "soundModes",
@@ -486,6 +335,157 @@ fn list_settings_json_no_categories() {
         ]
       }
     ]
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn list_settings_json_no_categories() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3027");
+    assert_cmd_snapshot!(cli(dir.path()).arg("device").arg("--mac-address").arg("00:00:00:00:00:00").arg("list-settings").arg("--json").arg("--no-categories"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    {
+      "ambientSoundMode": {
+        "type": "select",
+        "setting": {
+          "options": [
+            "Normal",
+            "Transparency",
+            "NoiseCanceling"
+          ],
+          "localizedOptions": [
+            "Normal",
+            "Transparency",
+            "Noise Canceling"
+          ]
+        }
+      },
+      "noiseCancelingMode": {
+        "type": "select",
+        "setting": {
+          "options": [
+            "Transport",
+            "Indoor",
+            "Outdoor"
+          ],
+          "localizedOptions": [
+            "Transport",
+            "Indoor",
+            "Outdoor"
+          ]
+        }
+      },
+      "presetEqualizerProfile": {
+        "type": "optionalSelect",
+        "setting": {
+          "options": [
+            "SoundcoreSignature",
+            "Acoustic",
+            "BassBooster",
+            "BassReducer",
+            "Classical",
+            "Podcast",
+            "Dance",
+            "Deep",
+            "Electronic",
+            "Flat",
+            "HipHop",
+            "Jazz",
+            "Latin",
+            "Lounge",
+            "Piano",
+            "Pop",
+            "RnB",
+            "Rock",
+            "SmallSpeakers",
+            "SpokenWord",
+            "TrebleBooster",
+            "TrebleReducer"
+          ],
+          "localizedOptions": [
+            "Soundcore Signature",
+            "Acoustic",
+            "Bass Booster",
+            "Bass Reducer",
+            "Classical",
+            "Podcast",
+            "Dance",
+            "Deep",
+            "Electronic",
+            "Flat",
+            "Hip Hop",
+            "Jazz",
+            "Latin",
+            "Lounge",
+            "Piano",
+            "Pop",
+            "RnB",
+            "Rock",
+            "Small Speakers",
+            "Spoken Word",
+            "Treble Booster",
+            "Treble Reducer"
+          ]
+        }
+      },
+      "customEqualizerProfile": {
+        "type": "modifiableSelect",
+        "setting": {
+          "options": [],
+          "localizedOptions": []
+        }
+      },
+      "volumeAdjustments": {
+        "type": "equalizer",
+        "setting": {
+          "bandHz": [
+            100,
+            200,
+            400,
+            800,
+            1600,
+            3200,
+            6400,
+            12800
+          ],
+          "fractionDigits": 1,
+          "min": -120,
+          "max": 134
+        }
+      },
+      "importCustomEqualizerProfiles": {
+        "type": "importString"
+      },
+      "exportCustomEqualizerProfiles": {
+        "type": "multiSelect",
+        "setting": {
+          "options": [],
+          "localizedOptions": []
+        }
+      },
+      "exportCustomEqualizerProfilesOutput": {
+        "type": "information"
+      },
+      "isCharging": {
+        "type": "information"
+      },
+      "batteryLevel": {
+        "type": "information"
+      },
+      "serialNumber": {
+        "type": "information"
+      },
+      "firmwareVersion": {
+        "type": "information"
+      },
+      "wearingDetection": {
+        "type": "toggle"
+      }
+    }
 
     ----- stderr -----
     "#);

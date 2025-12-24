@@ -45,7 +45,13 @@ async fn handle_list_settings(
     if json {
         let settings_by_category = device.settings_by_category();
         match (no_categories, no_extended_info) {
+            // all information
             (false, false) => {
+                let settings = JsonCategory::from_openscq30_lib(settings_by_category);
+                println!("{}", serde_json::to_string_pretty(&settings)?);
+            }
+            // no categories
+            (true, false) => {
                 let settings = settings_by_category
                     .into_iter()
                     .flat_map(|(_, settings)| {
@@ -54,11 +60,6 @@ async fn handle_list_settings(
                             .map(|(setting_id, setting)| (setting_id, JsonSetting::from(setting)))
                     })
                     .collect::<IndexMap<_, _>>();
-                println!("{}", serde_json::to_string_pretty(&settings)?);
-            }
-            // no categories
-            (true, false) => {
-                let settings = JsonCategory::from_openscq30_lib(settings_by_category);
                 println!("{}", serde_json::to_string_pretty(&settings)?);
             }
             // no extended info
