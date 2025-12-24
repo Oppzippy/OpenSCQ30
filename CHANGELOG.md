@@ -1,5 +1,25 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Fixes
+
+- Changing from transparency mode to normal mode with the Soundcore Space A40 no longer makes unnecessary intermediate steps, selecting noise canceling along the way
+
+### CLI
+
+#### Features
+
+- Add proper --help text with examples
+- Add `openscq30 list-models` command to list supported device models (and importantly, their names, so that one can discover that Soundcore Life Q30's device model is SoundcoreA3028 for example). This makes `openscq30 paired-devices add` usable.
+
+#### Fixes
+
+- Fix `openscq30 device list-settings`'s `--no-categories` flag having opposite effect when `--json` is used
+- Crash in `openscq30 device list-settings` when a setting is not present (such as when firmware is old and doesn't support a feature)
+
 ## v2.0.1
 
 ### General
