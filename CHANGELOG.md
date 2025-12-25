@@ -20,6 +20,12 @@
 - Fix `openscq30 device list-settings`'s `--no-categories` flag having opposite effect when `--json` is used
 - Crash in `openscq30 device list-settings` when a setting is not present (such as when firmware is old and doesn't support a feature)
 
+### Android
+
+#### Fixes
+
+- Missing page transitions when pairing a device
+
 ## v2.0.1
 
 ### General

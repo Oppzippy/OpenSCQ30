@@ -25,6 +25,7 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -33,41 +34,36 @@ class DeviceSelectionViewModel @Inject constructor(
     private val session: OpenScq30Session,
     private val toastHandler: ToastHandler,
 ) : AndroidViewModel(application) {
-    val pageState = MutableStateFlow<DeviceSelectionPage>(DeviceSelectionPage.Loading)
-
     companion object {
         const val TAG = "DeviceSelectionViewModel"
     }
 
+    private val _pairedDevices = MutableStateFlow<List<PairedDevice>?>(null)
+    val pairedDevices = _pairedDevices.asStateFlow()
+
     init {
-        // Hack to work around older android versions not having onAssociationCreated
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            viewModelScope.launch {
-                while (true) {
-                    delay(5.seconds)
-                    // check once to avoid doing unnecessary work
-                    if (pageState.value is DeviceSelectionPage.Connect) {
-                        val devices = session.pairedDevices()
-                        // check again in case the state is no longer Connect, since pairedDevices is suspend
-                        if (pageState.value is DeviceSelectionPage.Connect) {
-                            pageState.value = DeviceSelectionPage.Connect(devices)
-                        }
-                    }
-                }
-            }
-        }
-        viewModelScope.launch { launchConnectScreen() }
+        viewModelScope.launch { refreshPairedDevices() }
     }
 
-    fun pair(activity: Activity, pairedDevice: PairedDevice) {
+    // Hack to work around older android versions not having onAssociationCreated
+    suspend fun pollPairedDevicesOnOldAndroidVersions() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            while (true) {
+                delay(5.seconds)
+                refreshPairedDevices()
+            }
+        }
+    }
+
+    fun pair(activity: Activity, pairedDevice: PairedDevice, onPaired: () -> Unit) {
         viewModelScope.launch {
             try {
                 if (pairedDevice.isDemo) {
-                    pairDemo(pairedDevice)
+                    pairDemo(pairedDevice, onPaired)
                 } else {
-                    pairReal(activity, pairedDevice)
+                    pairReal(activity, pairedDevice, onPaired)
                 }
-                launchConnectScreen()
+                refreshPairedDevices()
             } catch (ex: OpenScq30Exception) {
                 Log.e(TAG, "error pairing with ${pairedDevice.model}", ex)
                 toastHandler.add(R.string.error_pairing, Toast.LENGTH_SHORT)
@@ -75,11 +71,12 @@ class DeviceSelectionViewModel @Inject constructor(
         }
     }
 
-    private suspend fun pairDemo(pairedDevice: PairedDevice) {
+    private suspend fun pairDemo(pairedDevice: PairedDevice, onPaired: () -> Unit) {
         session.pair(pairedDevice)
+        onPaired()
     }
 
-    private fun pairReal(activity: Activity, pairedDevice: PairedDevice) {
+    private fun pairReal(activity: Activity, pairedDevice: PairedDevice, onPaired: () -> Unit) {
         val pairingRequest = AssociationRequest.Builder()
             .apply {
                 this.setSingleDevice(true)
@@ -105,7 +102,7 @@ class DeviceSelectionViewModel @Inject constructor(
                     super.onAssociationCreated(associationInfo)
                     viewModelScope.launch {
                         session.pair(pairedDevice)
-                        launchConnectScreen()
+                        onPaired()
                     }
                 }
 
@@ -138,91 +135,22 @@ class DeviceSelectionViewModel @Inject constructor(
             // associated but not be paired with openscq30_lib rather than the other way around. The other way around would
             // show the user a device available to connect to that we can't actually connect to.
             session.unpair(pairedDevice.macAddress)
+            refreshPairedDevices()
             // CompanionDeviceManager.disassociate is case sensitive
             deviceManager
                 .associations
                 .find { it.equals(pairedDevice.macAddress, ignoreCase = true) }
                 ?.let { deviceManager.disassociate(it) }
-            launchConnectScreen()
         }
     }
 
-    fun refreshDevices() {
-        viewModelScope.launch { launchConnectScreen() }
+    fun refreshPairedDevices() {
+        viewModelScope.launch { _pairedDevices.value = session.pairedDevices() }
     }
 
-    suspend fun launchConnectScreen() {
-        pageState.value = DeviceSelectionPage.Loading
-        val devices = session.pairedDevices()
-        pageState.value = DeviceSelectionPage.Connect(devices)
-    }
-
-    fun selectModel(model: String) {
-        launchSelectDeviceForPairing(model, false)
-    }
-
-    fun setDemoMode(pageState: DeviceSelectionPage.SelectDeviceForPairing, isDemo: Boolean) {
-        launchSelectDeviceForPairing(pageState.model, isDemo)
-    }
-
-    private fun launchSelectDeviceForPairing(model: String, isDemoMode: Boolean) {
-        this@DeviceSelectionViewModel.pageState.value = DeviceSelectionPage.Loading
-        viewModelScope.launch {
-            val devices = if (isDemoMode) {
-                session.listDemoDevices(model)
-            } else {
-                session.listDevicesWithBackends(connectionBackends(application, viewModelScope), model)
-            }
-            this@DeviceSelectionViewModel.pageState.value =
-                DeviceSelectionPage.SelectDeviceForPairing(model = model, isDemoMode = isDemoMode, devices = devices)
-        }
-    }
-
-    fun back() {
-        pageState.value.let {
-            if (it is Back) {
-                it.back(this)
-            }
-        }
-    }
-
-    val hasBack: Boolean
-        get() = pageState.value is Back
-}
-
-interface Back {
-    fun back(viewModel: DeviceSelectionViewModel)
-}
-
-sealed class DeviceSelectionPage {
-    data object Loading : DeviceSelectionPage()
-    data class Connect(val devices: List<PairedDevice>) : DeviceSelectionPage()
-    data object SelectModelForPairing : DeviceSelectionPage(), Back {
-        override fun back(viewModel: DeviceSelectionViewModel) {
-            viewModel.viewModelScope.launch { viewModel.launchConnectScreen() }
-        }
-    }
-
-    data class SelectDeviceForPairing(
-        val model: String,
-        val isDemoMode: Boolean,
-        val devices: List<ConnectionDescriptor>,
-    ) : DeviceSelectionPage(),
-        Back {
-        override fun back(viewModel: DeviceSelectionViewModel) {
-            viewModel.pageState.value = SelectModelForPairing
-        }
-    }
-
-    data object Info : DeviceSelectionPage(), Back {
-        override fun back(viewModel: DeviceSelectionViewModel) {
-            viewModel.viewModelScope.launch { viewModel.launchConnectScreen() }
-        }
-    }
-
-    data object Settings : DeviceSelectionPage(), Back {
-        override fun back(viewModel: DeviceSelectionViewModel) {
-            viewModel.viewModelScope.launch { viewModel.launchConnectScreen() }
-        }
+    suspend fun listDevices(model: String, isDemoMode: Boolean): List<ConnectionDescriptor> = if (isDemoMode) {
+        session.listDemoDevices(model)
+    } else {
+        session.listDevicesWithBackends(connectionBackends(application, viewModelScope), model)
     }
 }

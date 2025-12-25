@@ -43,12 +43,13 @@ import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.bindings.translateDeviceModel
 import com.oppzippy.openscq30.lib.wrapper.PairedDevice
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
+import com.oppzippy.openscq30.ui.utils.Loading
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeviceListing(
-    devices: List<PairedDevice>,
+    devices: List<PairedDevice>?,
     onRefreshClick: () -> Unit = {},
     onInfoClick: () -> Unit = {},
     onDeviceClick: (PairedDevice) -> Unit = {},
@@ -103,7 +104,9 @@ fun DeviceListing(
                 state = pullToRefreshState,
             ) {
                 // child needs to be scrollable so that pull to refresh works
-                if (devices.isEmpty()) {
+                if (devices == null) {
+                    Loading()
+                } else if (devices.isEmpty()) {
                     CenteredScrollableBox {
                         Text(stringResource(R.string.no_devices_found))
                     }
