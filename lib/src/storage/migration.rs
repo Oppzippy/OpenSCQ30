@@ -19,10 +19,14 @@ pub fn migrate(
     migrations: &[Migration],
 ) -> Result<(), rusqlite::Error> {
     let tx = connection.transaction_with_behavior(TransactionBehavior::Exclusive)?;
-    let version = tx.query_row("SELECT user_version FROM pragma_user_version", [], |row| {
-        row.get(0)
-    })?;
+    let version = usize::try_from(tx.query_row(
+        "SELECT user_version FROM pragma_user_version",
+        [],
+        |row| row.get::<_, u32>(0),
+    )?)
+    .expect("current migration number should fit within usize");
     debug!("on migration version {version}");
+
     if version < migrations.len() {
         for (i, migration) in migrations[version..].iter().enumerate() {
             debug!("starting migration {}", version + i);
@@ -32,7 +36,11 @@ pub fn migrate(
                 }
             }
         }
-        tx.pragma_update(None, "user_version", migrations.len())?;
+        tx.pragma_update(
+            None,
+            "user_version",
+            u32::try_from(migrations.len()).expect("number of migrations should fit in u32"),
+        )?;
         debug!("migrated to {}", migrations.len());
     }
     tx.commit()
