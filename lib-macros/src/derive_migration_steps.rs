@@ -160,13 +160,13 @@ impl FieldEnum {
 
     fn wrap_field(&self, ident: &Ident, inner: &TokenStream) -> TokenStream {
         let enum_ident = &self.ident;
-        let variant_ident = Self::field_ident_to_variant_ident(&ident);
+        let variant_ident = Self::field_ident_to_variant_ident(ident);
         quote! { #enum_ident::#variant_ident(#inner) }
     }
 
     fn unwrap_field(&self, ident: &Ident, index: usize) -> TokenStream {
         let enum_ident = &self.ident;
-        let variant_ident = Self::field_ident_to_variant_ident(&ident);
+        let variant_ident = Self::field_ident_to_variant_ident(ident);
         quote! {
             match data[#index] {
                 #enum_ident::#variant_ident(value) => value,

@@ -33,7 +33,7 @@ pub struct Requirement<T> {
 struct MigrationNode<T> {
     index: usize,
     value: T,
-    children: Vec<MigrationNode<T>>,
+    children: Vec<Self>,
 }
 
 impl<T, const SIZE: usize> MigrationPlanner<T, SIZE>
@@ -130,7 +130,7 @@ where
     }
 
     /// squish identical earlier nodes into the last identical node
-    fn squish_tree(tree: &mut Vec<MigrationNode<T>>, from: &[T; SIZE], to: &[T; SIZE]) {
+    fn squish_tree(tree: &mut Vec<MigrationNode<T>>, _from: &[T; SIZE], _to: &[T; SIZE]) {
         let mut identical_node_indices = HashMap::<(usize, T), Vec<usize>>::new();
         for (i, node) in tree.iter().enumerate() {
             if let Some(indices) = identical_node_indices.get_mut(&(node.index, node.value)) {
@@ -162,7 +162,7 @@ where
         *tree = new_tree;
 
         for node in tree {
-            Self::squish_tree(&mut node.children, from, to);
+            Self::squish_tree(&mut node.children, _from, _to);
         }
     }
 
@@ -178,7 +178,7 @@ where
     }
 
     /// prefer assigning values with their dependencies already in the desired state first
-    fn reorder_tree(tree: &mut Vec<MigrationNode<T>>, from: &[T; SIZE]) {
+    fn reorder_tree(tree: &mut [MigrationNode<T>], from: &[T; SIZE]) {
         let tree_len = tree.len();
         if tree_len > 2 {
             let nodes_except_last = &mut tree[0..tree_len - 1];
@@ -205,8 +205,7 @@ where
             .enumerate()
             .filter_map(|(i, node)| {
                 let is_last_assignment = last_assignment_index[node.index]
-                    .map(|last_assignment| i == last_assignment)
-                    .unwrap_or(true);
+                    .is_none_or(|last_assignment| i == last_assignment);
 
                 if node.children.is_empty() && !is_last_assignment {
                     None
@@ -218,10 +217,10 @@ where
     }
 
     /// remove nodes that assign to the current value
-    fn remove_noops(tree: &mut Vec<MigrationNode<T>>, from: &[T; SIZE], to: &[T; SIZE]) {
+    fn remove_noops(tree: &mut Vec<MigrationNode<T>>, from: &[T; SIZE], _to: &[T; SIZE]) {
         // Recurse first so that if a child node has all children removed, the parent can be removed too
         for node in tree.iter_mut() {
-            Self::remove_noops(&mut node.children, from, to);
+            Self::remove_noops(&mut node.children, from, _to);
         }
 
         let mut values = *from;
