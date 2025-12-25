@@ -11,8 +11,8 @@ crate-type = ["cdylib"]
 workspace = true
 
 [dependencies]
-openscq30-lib = { path = "../lib" }
-openscq30-i18n = { path = "../i18n" }
+openscq30-lib = { workspace = true }
+openscq30-i18n = { workspace = true }
 tracing = { workspace = true, features = ["log-always"] }
 log = { workspace = true }
 tokio = { workspace = true }

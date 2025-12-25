@@ -15,10 +15,10 @@ bundled-dependencies = ["rusqlite/bundled", "rust-embed/debug-embed"]
 crate-type = ["lib"]
 
 [dependencies]
-openscq30-lib-macros = { path = "../lib-macros" }
-openscq30-lib-has = { path = "../lib-has" }
-openscq30-i18n = { path = "../i18n" }
-openscq30-i18n-macros = { path = "../i18n-macros" }
+openscq30-lib-macros = { workspace = true }
+openscq30-lib-has = { workspace = true }
+openscq30-i18n = { workspace = true }
+openscq30-i18n-macros = { workspace = true }
 tokio = { workspace = true, features = ["sync", "time", "rt", "macros"] }
 futures = { workspace = true }
 uuid = { workspace = true }
