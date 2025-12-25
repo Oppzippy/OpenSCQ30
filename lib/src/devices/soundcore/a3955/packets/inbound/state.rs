@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     bytes::complete::take,
-    combinator::{all_consuming, map},
+    combinator::{map},
     error::{ContextError, ParseError, context},
 };
 use tokio::sync::watch;
@@ -18,7 +18,6 @@ use crate::{
                 self, Command,
                 inbound::{FromPacketBody, TryToPacket},
                 outbound::ToPacket,
-                parsing::take_bool,
             },
             packet_manager::PacketHandler,
             structures::button_configuration::ButtonStatusCollection,
@@ -34,7 +33,7 @@ pub struct A3955State {
     pub serial_number: common::structures::SerialNumber,
     // 5 bytes here
     pub case_battery: common::structures::CaseBatteryLevel,
-    pub equalizer_configuration: common::structures::EqualizerConfiguration<1, 10>,
+    pub equalizer_configuration: common::structures::EqualizerConfiguration<1, 10, -6, 6, 0>, // min max and fract guessed
     pub button_configuration: ButtonStatusCollection<8>,
     pub ambient_sound_mode_cycle: common::structures::AmbientSoundModeCycle,
     pub sound_modes: a3955::structures::SoundModes,
