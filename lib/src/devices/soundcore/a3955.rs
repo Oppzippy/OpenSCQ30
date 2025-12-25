@@ -25,7 +25,7 @@ mod structures;
 
 soundcore_device!(
     state::A3955State,
-    packets::inbound::A3955State,
+    // packets::inbound::A3955State,
     async |packet_io| {
         fetch_state_from_state_update_packet::<_, state::A3955State, packets::inbound::A3955State>(
             packet_io,
@@ -35,7 +35,8 @@ soundcore_device!(
     async |builder| {
         builder.module_collection().add_state_update();
         builder.a3955_sound_modes();
-        builder.equalizer_with_drc_tws().await;
+        // TODO: needs custom equaliser for Hear ID
+        // builder.equalizer_with_drc_tws().await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.ambient_sound_mode_cycle();
         builder.reset_button_configuration::<packets::inbound::A3955State>(
@@ -50,7 +51,7 @@ soundcore_device!(
     {
         HashMap::from([(
             RequestState::COMMAND,
-            packets::inbound::A3955State::default().to_packet().bytes(),
+            packets::inbound::A3955State::default().to_packet(),
         )])
     },
 );
@@ -150,7 +151,7 @@ mod tests {
     #[tokio::test(start_paused = true)]
     async fn test_with_packet_from_firmware_1_6_1() {
         //packet from github issue 159
-        let device = TestSoundcoreDevice::new_with_packet_responses(
+        let device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3955,
             HashMap::from([(
@@ -173,6 +174,7 @@ mod tests {
                     ],
                 ),
             )]),
+            SoundcoreDeviceConfig::default(),
         )
         .await;
 

@@ -18,7 +18,7 @@ pub struct A3955State {
     dual_battery: DualBattery,
     dual_firmware_version: DualFirmwareVersion,
     serial_number: SerialNumber,
-    equalizer_configuration: EqualizerConfiguration<1, 10>,
+    equalizer_configuration: EqualizerConfiguration<1, 10, -6, 6, 0>,
     button_configuration: ButtonStatusCollection<8>,
     ambient_sound_mode_cycle: AmbientSoundModeCycle,
     sound_modes: a3955::structures::SoundModes,

@@ -9,11 +9,11 @@ use super::structures::SoundModes;
 
 mod sound_modes;
 
-impl<ConnectionType, StateType, StateUpdatePacketType>
-    SoundcoreDeviceBuilder<ConnectionType, StateType, StateUpdatePacketType>
+impl<ConnectionType, StateType>
+    SoundcoreDeviceBuilder<ConnectionType, StateType>
 where
     ConnectionType: RfcommConnection + Send + Sync + 'static,
-    StateUpdatePacketType: FromPacketBody + Into<StateType>,
+    // StateUpdatePacketType: FromPacketBody + Into<StateType>,
     StateType: Has<SoundModes> + Send + Sync + Clone + 'static,
 {
     pub fn a3955_sound_modes(&mut self) {
