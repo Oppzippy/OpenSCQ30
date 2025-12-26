@@ -1,10 +1,12 @@
 set dotenv-load := true
 
+[arg("level", pattern="trace|debug|info|warn|error|off")]
 run-filtered-logs level='debug':
     RUST_LOG=none,openscq30_lib={{level}},openscq30_gui={{level}},openscq30_i18n={{level}} cargo run
 
 # This can be used to build and run opencq30-gui on a remote windows machine (typically a VM) when developing on Linux
 # Make sure to set the OPENSCQ30_WINDOWS_REMOTE_* environment variables. A .env file can be used.
+[arg("level", pattern="trace|debug|info|warn|error|off")]
 run-remote-windows level='debug':
     #!/usr/bin/env bash
     set -euo pipefail
