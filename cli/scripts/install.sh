@@ -9,7 +9,7 @@ install_path="$1"
 
 echo Installing binary
 mkdir -p "$install_path/bin"
-install -Dm755 "$project_root/target/release/openscq30" -t "$install_path/bin/"
+install -Dm755 "$project_root/build-output/openscq30" -t "$install_path/bin/"
 
 if [[ -z "${OPENSCQ30_SKIP_SHELL_COMPLETIONS:-}" ]]; then
     # bash

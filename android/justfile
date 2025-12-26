@@ -1,18 +1,29 @@
-build profile='dev':
+[arg("arch", pattern="|x86|x86_64|armeabi-v7a|arm64-v8a")]
+[arg("profile", pattern="release|debug")]
+build profile arch='':
     #!/usr/bin/env bash
     set -euo pipefail
 
-    case "{{profile}}" in
-        dev)
-            ./gradlew assembleDebug
+    task_name="assemble"
+
+    case "{{ profile }}" in
+        debug)
+            task_name="${task_name}Debug"
             ;;
         release)
-            ./gradlew assembleRelease
+            task_name="${task_name}Release"
             ;;
         *)
-            echo Invalid profile
+            # unreachable since validation is performed by just
+            echo "Invalid profile. Must specify debug or release."
             exit 1
     esac
+    # empty string means universal build
+    if [[ -n "{{ arch }}" ]]; then
+        task_name="${task_name}-{{ arch }}"
+    fi
+
+    ./gradlew "$task_name"
 
 test:
     cargo test
@@ -22,24 +33,27 @@ test-cov:
     cargo llvm-cov --no-report
 
 ktlint-paths := "build.gradle.kts app/build.gradle.kts app/src/**/*.kt"
+
 alias fmt := format
 
 [parallel]
 format: format-rust format-kotlin
+
 [private]
 format-rust:
     -cargo fmt
+
 [private]
 format-kotlin:
     -ktlint --editorconfig=../.editorconfig -F {{ ktlint-paths }}
 
-
 [parallel]
 format-check: format-check-rust format-check-kotlin
+
 [private]
 format-check-rust:
     cargo fmt --check
+
 [private]
 format-check-kotlin:
     ktlint --editorconfig=../.editorconfig {{ ktlint-paths }}
-

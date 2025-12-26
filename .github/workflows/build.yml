@@ -19,20 +19,17 @@ jobs:
       - name: Install just
         uses: taiki-e/install-action@cd90c312028bce189e6842f44201edaf2dfa4f0d # just
       - uses: dtolnay/rust-toolchain@stable
-      - name: Build cli and gui
-        run: cargo build --release --package openscq30-cli --package openscq30-gui --features bundled-dependencies
 
-      - name: Move to artifacts directory
-        run: |
-          mkdir artifacts
-          mv target/release/openscq30 artifacts/openscq30-cli-linux-x86_64
-          mv target/release/openscq30-gui artifacts/openscq30-gui-linux-x86_64
+      - name: Build cli
+        run: just build-cli bundled-dependencies
+      - name: Build gui
+        run: just build-gui bundled-dependencies
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
         with:
           name: linux-x86_64
-          path: artifacts/*
+          path: build-output/*
 
   build-linux-arm64:
     runs-on: ubuntu-24.04-arm
@@ -46,20 +43,17 @@ jobs:
       - name: Install just
         uses: taiki-e/install-action@cd90c312028bce189e6842f44201edaf2dfa4f0d # just
       - uses: dtolnay/rust-toolchain@stable
-      - name: Build cli and gui
-        run: cargo build --release --package openscq30-cli --package openscq30-gui --features bundled-dependencies
 
-      - name: Move to artifacts directory
-        run: |
-          mkdir artifacts
-          mv target/release/openscq30 artifacts/openscq30-cli-linux-arm64
-          mv target/release/openscq30-gui artifacts/openscq30-gui-linux-arm64
+      - name: Build cli
+        run: just build-cli bundled-dependencies
+      - name: Build gui
+        run: just build-gui bundled-dependencies
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
         with:
           name: linux-arm64
-          path: artifacts/*
+          path: build-output/*
 
   build-windows:
     runs-on: windows-latest
@@ -102,17 +96,10 @@ jobs:
         uses: taiki-e/install-action@cd90c312028bce189e6842f44201edaf2dfa4f0d # just
 
       - name: Build
-        run: ./gradlew --no-daemon assembleRelease assembleRelease-arm64-v8a assembleRelease-armeabi-v7a assembleRelease-x86_64 assembleRelease-x86
-        working-directory: android
-      - name: Rename apk
-        run: |
-          mkdir artifacts
-          mv android/app/build/outputs/apk/release/app-release-unsigned.apk artifacts/app-release-universal-unsigned.apk
-          mv android/app/build/outputs/apk/release*/app-release-*-unsigned.apk artifacts/
-          rename.ul app- openscq30-android- artifacts/*
-          rename.ul -- -release '' artifacts/*
-      - name: Upload apk
+        run: just build-android
+
+      - name: Upload apks
         uses: actions/upload-artifact@v6
         with:
           name: android
-          path: artifacts/*
+          path: build-output/*

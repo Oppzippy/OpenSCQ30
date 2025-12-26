@@ -6,5 +6,6 @@
 /gui/appimage-build
 /lcov.info
 /release-files
+/build-output
 .vscode
 .cargo

@@ -34,6 +34,10 @@ ignored_unit_patterns = "warn"
 strip = true
 lto = true
 
+[profile.release-fast]
+inherits = "release"
+lto = false
+
 [profile.release-android]
 inherits = "release"
 strip = false

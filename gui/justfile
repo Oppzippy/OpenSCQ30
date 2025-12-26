@@ -45,8 +45,9 @@ run-remote-windows level='debug':
             powershell -NonInteractive -Command \"$path/launch.ps1\""
 
 
-build profile='dev':
-    cargo build --profile {{profile}}
+[arg("profile", pattern="dev|release|release-fast")]
+build profile features='':
+    cargo build --profile '{{profile}}' --features '{{features}}'
 
 test:
     cargo test
@@ -55,7 +56,6 @@ test-cov:
     cargo llvm-cov --no-report --no-cfg-coverage
 
 install path:
-    cargo build --release
     ./scripts/install.sh "{{path}}"
 
 uninstall path:

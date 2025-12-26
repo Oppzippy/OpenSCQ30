@@ -8,7 +8,7 @@ project_root="$script_dir/../.."
 install_path="$1"
 
 echo Installing binary
-install -Dm755 "$project_root/target/release/openscq30-gui" -t "$install_path/bin/"
+install -Dm755 "$project_root/build-output/openscq30-gui" -t "$install_path/bin/"
 echo Installing desktop file
 install -Dm644 "$project_root/gui/resources/com.oppzippy.OpenSCQ30.desktop" -t "$install_path/share/applications"
 echo Installing appstream metadata

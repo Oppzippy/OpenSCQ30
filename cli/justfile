@@ -1,5 +1,6 @@
-build profile='dev':
-    cargo build --profile {{profile}}
+[arg("profile", pattern="dev|release|release-fast")]
+build profile features='':
+    cargo build --profile '{{profile}}' --features '{{features}}'
 
 test:
     cargo test --bins
@@ -14,11 +15,10 @@ snapshot-test:
     cargo insta review
 
 install path:
-    cargo build --release
-    ./scripts/install.sh "{{path}}"
+    ./scripts/install.sh '{{path}}'
 
 uninstall path:
-    ./scripts/uninstall.sh "{{path}}"
+    ./scripts/uninstall.sh '{{path}}'
 
 alias fmt := format
 format:
