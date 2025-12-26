@@ -15,7 +15,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install just
-        run: sudo snap install just --classic
+        uses: taiki-e/install-action@just
       - name: Install rust
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -38,6 +38,6 @@ jobs:
       - name: Install shellcheck
         run: sudo apt-get install -y shellcheck fd-find
       - name: Install just
-        run: sudo snap install just --classic
+        uses: taiki-e/install-action@just
       - name: Run shellcheck
         run: just shellcheck
