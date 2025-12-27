@@ -13,9 +13,14 @@
 
 ### Then:
 
+If it's inconvenient to install the latest version of [just](https://github.com/casey/just), use the without just instructions. The catch is that the without just instructions are more likely to change in the future, so if you're packaging openscq30 and the latest version of just is easily available, prefer the with just instructions.
+
 1. Install rustup
 2. Add all supported cpu architecture targets that you plan to build: `rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android`
 3. Install [cargo-ndk](https://github.com/bbqsrc/cargo-ndk): `cargo install cargo-ndk`
+
+#### Without just:
+
 4. In the `android` directory, run `./gradlew assembleRelease` for a universal apk, or one or more of these for a specific cpu architecture:
 
 - `./gradlew assembleRelease-arm64-v8a`
@@ -24,3 +29,16 @@
 - `./gradlew assembleRelease-x86`
 
 5. The apk can be found at `android/app/build/outputs/apk/release/app-release-unsigned.apk` for a universal apk or `android/app/build/outputs/apk/release-arm64-v8a/app-release-arm64-v8a-unsigned.apk` for example otherwise.
+
+#### With just:
+
+4. In the project root directory, run one or more of these commands:
+
+- `just build-android`: builds all of the following
+- `just build-android-universal`: builds a single apk supporting all of the following architectures
+- `just build-android-arm64-v8a`
+- `just build-android-armeabi-v7a`
+- `just build-android-x86_64`
+- `just build-android-x86`
+
+5. The apks can be found at `build-output/openscq30-android-*.apk`
