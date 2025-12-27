@@ -16,8 +16,8 @@ DefaultGroupName={#AppName}
 DisableProgramGroupPage=auto
 SetupIconFile=..\..\gui\resources\com.oppzippy.OpenSCQ30.ico
 UninstallDisplayIcon={app}\{#AppExeName}
-ArchitecturesAllowed=x64
-ArchitecturesInstallIn64BitMode=x64
+ArchitecturesAllowed=x64compatible
+ArchitecturesInstallIn64BitMode=x64compatible
 PrivilegesRequiredOverridesAllowed=dialog commandline
 
 [Languages]
