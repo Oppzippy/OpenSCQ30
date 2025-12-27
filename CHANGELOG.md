@@ -8,6 +8,12 @@
 
 - Changing from transparency mode to normal mode with the Soundcore Space A40 no longer makes unnecessary intermediate steps, selecting noise canceling along the way
 
+#### Packaging
+
+- Added just recipes for building and outputting files to `./build-output/` for stability, so that when the process changes, fewer changes are required on packagers' end. See the build group when running `just --list` in the project root.
+- Added fast release build profile for packages that build from source on the user's machine (AUR, etc.). This cuts the build time in half (or more with more cpu cores) by using thin LTO instead of fat. When it's 1 build per 1 user instead of 1 build per total number of users, build time matters a lot more.
+- `just install` no longer builds as well. Since there are multiple build options now, it shouldn't force a specific one. Also, a pkgbuild from an AUR comment had a patch to remove the build from `just install`, which will now be unnecessary.
+
 ### CLI
 
 #### Features
