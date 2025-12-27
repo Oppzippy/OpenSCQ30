@@ -49,6 +49,14 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.1.0" date="2025-12-27">
+            <description>
+                <p>Fixes</p>
+                <ul>
+                    <li>Changing from transparency mode to normal mode with the Soundcore Space A40 no longer makes unnecessary intermediate steps, selecting noise canceling along the way</li>
+                </ul>
+            </description>
+        </release>
         <release version="2.0.1" date="2025-12-22">
             <description>
                 <p>Fixes</p>

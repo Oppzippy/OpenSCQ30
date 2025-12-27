@@ -1,0 +1,3 @@
+* Fixes
+  - Changing from transparency mode to normal mode with the Soundcore Space A40 no longer makes unnecessary intermediate steps, selecting noise canceling along the way
+  - Missing page transitions when pairing a device
