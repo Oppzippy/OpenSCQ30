@@ -36,7 +36,7 @@ build-gui-fast features='': create-build-output-dir
 [windows]
 build-gui-installer: create-build-output-dir
     ./packaging/windows/build.sh
-    cp packaging/windows/Output/openscq30-gui-installer-windows-x86_64.exe '{{ build-output-dir }}/'
+    cp packaging/windows/Output/openscq30-gui-installer.exe '{{ build-output-dir }}/'
 
 [doc("Run a fully optimized release build")]
 [group("build")]

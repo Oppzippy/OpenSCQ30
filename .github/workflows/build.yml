@@ -25,6 +25,11 @@ jobs:
       - name: Build gui
         run: just build-gui bundled-dependencies
 
+      - name: Add platform to file name
+        run: |
+          mv build-output/openscq30 build-output/openscq30-cli-linux-x86_64
+          mv build-output/openscq30-gui build-output/openscq30-gui-linux-x86_64
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
         with:
@@ -49,6 +54,11 @@ jobs:
       - name: Build gui
         run: just build-gui bundled-dependencies
 
+      - name: Add platform to file name
+        run: |
+          mv build-output/openscq30 build-output/openscq30-cli-linux-arm64
+          mv build-output/openscq30-gui build-output/openscq30-gui-linux-arm64
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
         with:
@@ -72,6 +82,12 @@ jobs:
         run: just build-gui
       - name: Build installer
         run: just build-gui-installer
+
+      - name: Add platform to file name
+        run: |
+          mv build-output/openscq30.exe build-output/openscq30-cli-windows-x86_64.exe
+          mv build-output/openscq30-gui.exe build-output/openscq30-gui-windows-x86_64.exe
+          mv build-output/openscq30-gui-installer.exe build-output/openscq30-gui-installer-windows-x86_64.exe
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6

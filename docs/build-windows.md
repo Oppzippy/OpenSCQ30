@@ -17,4 +17,4 @@
 1. Install rust, [just](https://github.com/casey/just), and [Inno Setup](https://jrsoftware.org/isinfo.php)
 2. Run `just build-gui-fast` (or `just build-gui`, but it's very slow to build) in bash (git bash, msys2, etc.)
 3. Run `just build-gui-installer` in bash (git bash, msys2, etc.)
-4. The installer can be found at `build-output/openscq30-gui-installer-windows-x86_64.exe`
+4. The installer can be found at `build-output/openscq30-gui-installer.exe`
