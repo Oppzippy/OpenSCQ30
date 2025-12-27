@@ -4,7 +4,7 @@ set -euo pipefail
 script_path="$(readlink -f -- "$0")"
 script_dir="$(dirname -- "$script_path")"
 project_root="$script_dir/../.."
-input_exe="$project_root/target/release/openscq30-gui.exe"
+input_exe="$project_root/build-output/openscq30-gui.exe"
 
 mkdir -p "$script_dir/root"
 

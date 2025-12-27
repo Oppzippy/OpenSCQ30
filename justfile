@@ -31,6 +31,13 @@ build-gui-fast features='': create-build-output-dir
     just gui::build release-fast '{{ features }}'
     cp target/release-fast/openscq30-gui '{{ build-output-dir }}/'
 
+[doc("Build the windows installer. The gui must be built first.")]
+[group("build")]
+[windows]
+build-gui-installer: create-build-output-dir
+    ./packaging/windows/build.sh
+    cp packaging/windows/Output/openscq30-gui-installer-windows-x86_64.exe '{{ build-output-dir }}/'
+
 [doc("Run a fully optimized release build")]
 [group("build")]
 build-cli features='': create-build-output-dir

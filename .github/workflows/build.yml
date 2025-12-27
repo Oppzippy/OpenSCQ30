@@ -63,24 +63,21 @@ jobs:
           persist-credentials: false
 
       - uses: dtolnay/rust-toolchain@stable
+      - name: Install just
+        run: choco install just
 
-      - name: Build cli and gui
-        run: cargo build --release --package openscq30-cli --package openscq30-gui
+      - name: Build cli
+        run: just build-cli
+      - name: Build gui
+        run: just build-gui
       - name: Build installer
-        shell: bash
-        run: ./packaging/windows/build.sh
-
-      - name: Move to artifacts directory
-        run: |
-          New-Item -Type Directory -Path artifacts
-          Move-Item target\release\openscq30.exe artifacts\openscq30-cli-windows-x86_64.exe
-          Move-Item .\packaging\windows\Output\OpenSCQ30-Setup.exe artifacts\openscq30-gui-windows-x86_64.exe
+        run: just build-gui-installer
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
         with:
           name: windows
-          path: artifacts/*
+          path: build-output/*
 
   build-android:
     runs-on: ubuntu-latest
