@@ -14,19 +14,19 @@ Install the official Soundcore app and capture bluetooth packets with Wireshark.
 
 Connect to the device in the Soundcore app, and record the state update packet. Then, change a setting, disconnect, and reconnect. Record the new state update packet. Compare the two, and find what changed. Repeat with all settings.
 
-#### OpenSCQ30's Soundcore Development Device with Soundcore app
+#### soundcore-device-faker (recommended)
+
+First, acquire a state update packet either by adding the device in OpenSCQ30 with the model set to Soundcore Development Device or through Wireshark. Alternatively, have someone who does own the device provide you with the state update packet.
+
+In the `tools/soundcore-device-faker/` directory is a small python application that will pretend to be a soundcore device and respond to packets received from the Soundcore app with predefined data. This way, you can add the device configuration in `tools/soundcore-device-faker/devices/your_device.toml` and work in reverse from the previous methods. Rather than changing something from the app and seeing how it affects the state update packet, you can change the state update packet and find what changed in the app. See the soundcore-device-faker README for usage instructions.
+
+#### OpenSCQ30's Soundcore Development Device with Soundcore app (not recommended)
 
 This method should only be used if you can't use Wireshark for whatever reason.
 
 Using OpenSCQ30, add your device with the device model "Soundcore Development Device". When you connect, it will display the state update packet.
 
 Connect to the device with OpenSCQ30 and record the state update packet. Then, disconnect with OpenSCQ30 and connect with the Soundcore app, change a setting, disconnect with the Soundcore app, and reconnect with OpenSCQ30. Record the new state update packet. Compare the two, and find what changed. Repeat with all settings.
-
-#### soundcore-device-faker (recommended for devices you don't own)
-
-First, acquire a state update packet either by adding the device in OpenSCQ30 with the model set to Soundcore Development Device or through Wireshark. Alternatively, have someone who does own the device provide you with the state update packet.
-
-In the `tools/soundcore-device-faker/` directory is a small python application that will pretend to be a soundcore device and respond to packets received from the Soundcore app with predefined data. This way, you can add the device configuration in `tools/soundcore-device-faker/devices/your_device.toml` and work in reverse from the previous methods. Rather than changing something from the app and seeing how it affects the state update packet, you can change the state update packet and find what changed in the app. See the soundcore-device-faker README for usage instructions.
 
 ### Parsing the packet
 
