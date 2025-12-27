@@ -60,7 +60,7 @@ build-android: build-android-universal build-android-x86 build-android-x86_64 bu
 [group("build")]
 build-android-universal: create-build-output-dir
     just android::build release
-    just copy-apks
+    just copy-apks '' '-universal'
 
 [doc("Build an x86 apk")]
 [group("build")]
@@ -90,7 +90,7 @@ build-android-armeabi-v7a: create-build-output-dir
 [group("build")]
 [private]
 [script("bash")]
-copy-apks suffix='':
+copy-apks suffix replace-suffix='':
     set -euo pipefail
 
     prefix='{{ android-apk-path }}/release{{ suffix }}/app-release{{ suffix }}'
@@ -99,12 +99,20 @@ copy-apks suffix='':
     if [[ -f "$signed_apk" ]]; then
         found_one=1
         echo "Signed APK found at $signed_apk, copying to {{ build-output-dir }}"
-        cp "$signed_apk" '{{ build-output-dir }}/openscq30-android{{ suffix }}.apk'
+        if [[ -n '{{ replace-suffix }}' ]]; then
+            cp "$signed_apk" '{{ build-output-dir }}/openscq30-android{{ replace-suffix }}.apk'
+        else
+            cp "$signed_apk" '{{ build-output-dir }}/openscq30-android{{ suffix }}.apk'
+        fi
     fi
     if [[ -f "$unsigned_apk" ]]; then
         found_one=1
         echo "Unsigned APK found at $unsigned_apk, copying to {{ build-output-dir }}"
-        cp "$unsigned_apk" '{{ build-output-dir }}/openscq30-android{{ suffix }}-unsigned.apk'
+        if [[ -n '{{ replace-suffix }}' ]]; then
+            cp "$unsigned_apk" '{{ build-output-dir }}/openscq30-android{{ replace-suffix }}-unsigned.apk'
+        else
+            cp "$unsigned_apk" '{{ build-output-dir }}/openscq30-android{{ suffix }}-unsigned.apk'
+        fi
     fi
 
     if [[ -z "$found_one" ]]; then

@@ -80,7 +80,7 @@ for artifact in workflow_artifacts["artifacts"]:
 print("Signing APKs")
 apk_env = os.environ.copy()
 apk_env["KEYSTORE_PASSWORD"] = android_keystore_password
-for apk in glob.glob("openscq30-android-*-unsigned.apk", root_dir=release_dir):
+for apk in glob.glob("openscq30-android*-unsigned.apk", root_dir=release_dir):
     print(f"Signing {apk}")
     subprocess.run(
         [
