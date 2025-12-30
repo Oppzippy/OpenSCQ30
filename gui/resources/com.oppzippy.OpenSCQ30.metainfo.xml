@@ -21,6 +21,9 @@
     </keywords>
     <icon type="remote">https://raw.githubusercontent.com/Oppzippy/OpenSCQ30/f66a292401d8e157ffa3356e2e03eca1e8b7a860/gui/resources/com.oppzippy.OpenSCQ30.svg</icon>
     <url type="homepage">https://github.com/Oppzippy/OpenSCQ30</url>
+    <url type="bugtracker">https://github.com/Oppzippy/OpenSCQ30/issues</url>
+    <url type="vcs-browser">https://github.com/Oppzippy/OpenSCQ30</url>
+    <url type="translate">https://translate.codeberg.org/engage/openscq30/</url>
     <developer id="com.oppzippy">
         <name>Oppzippy</name>
     </developer>
