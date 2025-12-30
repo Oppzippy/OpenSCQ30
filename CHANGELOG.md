@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Fixes
+
+- Fix bluetooth adapters other than the default one being ignored on Linux
+
 ## v2.1.0
 
 ### General

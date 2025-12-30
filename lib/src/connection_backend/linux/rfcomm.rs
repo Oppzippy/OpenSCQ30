@@ -6,7 +6,7 @@ use std::{
 };
 
 use bluer::{
-    Adapter, Address, Device, DeviceProperty, Session,
+    Adapter, Device, DeviceProperty, Session,
     rfcomm::{
         Profile, ReqError, Stream,
         stream::{OwnedReadHalf, OwnedWriteHalf},
@@ -44,20 +44,78 @@ impl BluerRfcommBackend {
         })
     }
 
-    /// Filters out devices that are not connected and returns descriptors
-    async fn address_to_descriptor(
-        adapter: &Adapter,
-        address: Address,
-    ) -> connection::Result<Option<ConnectionDescriptor>> {
-        let device = adapter.device(address)?;
-        if device.is_connected().await? {
-            Ok(Some(ConnectionDescriptor {
-                name: device.name().await?.unwrap_or_default(),
-                mac_address: address.into(),
-            }))
-        } else {
-            Ok(None)
+    async fn adapters(&self) -> connection::Result<Vec<Adapter>> {
+        let adapters = self
+            .session
+            .adapter_names()
+            .await?
+            .into_iter()
+            .map(|adapter_name| {
+                self.session.adapter(&adapter_name).map_err(|err| {
+                    connection::Error::BluetoothAdapterUnavailable {
+                        source: Some(Box::new(err)),
+                        location: Location::caller(),
+                    }
+                })
+            })
+            .collect::<Result<Vec<Adapter>, connection::Error>>()?;
+
+        if adapters.is_empty() {
+            tracing::warn!("No bluetooth adapters found");
+            return Err(connection::Error::BluetoothAdapterUnavailable {
+                source: None,
+                location: Location::caller(),
+            });
         }
+
+        Ok(adapters)
+    }
+
+    async fn device(&self, mac_address: MacAddr6) -> connection::Result<Device> {
+        for adapter in self.adapters().await? {
+            match Self::device_from_adapter(&adapter, mac_address).await {
+                Ok(Some(device)) => return Ok(device),
+                Ok(None) => (),
+                // Keep going on error in case another adapter has the device
+                Err(err) => tracing::error!(
+                    "failed to find device {mac_address} on bluetoooth adapter {adapter:?}: {err:?}"
+                ),
+            }
+        }
+        Err(connection::Error::DeviceNotFound {
+            source: None,
+            location: Location::caller(),
+        })
+    }
+
+    async fn device_from_adapter(
+        adapter: &Adapter,
+        mac_address: MacAddr6,
+    ) -> bluer::Result<Option<Device>> {
+        match adapter.device(mac_address.into()) {
+            Ok(device) => device
+                .is_connected()
+                .await
+                .map(|is_connected| is_connected.then_some(device)),
+            Err(err) => Err(err),
+        }
+    }
+
+    async fn add_devices_from_adapter(
+        adapter: &Adapter,
+        connection_descriptors: &mut HashSet<ConnectionDescriptor>,
+    ) -> connection::Result<()> {
+        let device_addresses = adapter.device_addresses().await?;
+        for address in device_addresses {
+            let device = adapter.device(address)?;
+            if device.is_connected().await? {
+                connection_descriptors.insert(ConnectionDescriptor {
+                    name: device.name().await?.unwrap_or_default(),
+                    mac_address: address.into(),
+                });
+            }
+        }
+        Ok(())
     }
 }
 
@@ -66,26 +124,12 @@ impl RfcommBackend for BluerRfcommBackend {
 
     #[instrument(skip(self))]
     async fn devices(&self) -> connection::Result<HashSet<ConnectionDescriptor>> {
-        let adapter = self.session.default_adapter().await.map_err(|err| {
-            if err.kind == bluer::ErrorKind::NotFound {
-                connection::Error::BluetoothAdapterUnavailable {
-                    source: Some(Box::new(err)),
-                    location: Location::caller(),
-                }
-            } else {
-                err.into()
-            }
-        })?;
-
-        let device_addresses = adapter.device_addresses().await?;
-        let mut descriptors = HashSet::new();
-        for address in device_addresses {
-            if let Some(descriptor) = Self::address_to_descriptor(&adapter, address).await? {
-                descriptors.insert(descriptor);
-            }
+        let mut connection_descriptors = HashSet::new();
+        for adapter in self.adapters().await? {
+            Self::add_devices_from_adapter(&adapter, &mut connection_descriptors).await?;
         }
-        tracing::debug!("filtered down to {} descriptors", descriptors.len());
-        Ok(descriptors)
+
+        Ok(connection_descriptors)
     }
 
     #[instrument(skip(self, select_uuid))]
@@ -94,29 +138,7 @@ impl RfcommBackend for BluerRfcommBackend {
         mac_address: MacAddr6,
         select_uuid: impl Fn(HashSet<Uuid>) -> Uuid + Send,
     ) -> connection::Result<Self::ConnectionType> {
-        let adapter = self.session.default_adapter().await.map_err(|err| {
-            if err.kind == bluer::ErrorKind::NotFound {
-                connection::Error::BluetoothAdapterUnavailable {
-                    source: Some(Box::new(err)),
-                    location: Location::caller(),
-                }
-            } else {
-                err.into()
-            }
-        })?;
-
-        let device = match adapter.device(mac_address.into_array().into()) {
-            Ok(device) => device,
-            Err(err) => {
-                return match err.kind {
-                    bluer::ErrorKind::NotFound => Err(connection::Error::DeviceNotFound {
-                        source: Some(Box::new(err)),
-                        location: Location::caller(),
-                    }),
-                    _ => Err(connection::Error::from(err)),
-                };
-            }
-        };
+        let device = self.device(mac_address).await?;
         device.connect().await?;
         let uuids = device.uuids().await?.unwrap();
         let uuid = select_uuid(uuids);
