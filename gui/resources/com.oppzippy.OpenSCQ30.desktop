@@ -6,5 +6,5 @@ Name=OpenSCQ30
 Exec=openscq30-gui
 Icon=com.oppzippy.OpenSCQ30
 Terminal=false
-Categories=Utility;
-Keywords=Soundcore;Bluetooth;Headphones;Q30;
+Categories=Utility;Settings;
+Keywords=Soundcore;Bluetooth;Wireless;Headphones;Earbuds;Q30;
