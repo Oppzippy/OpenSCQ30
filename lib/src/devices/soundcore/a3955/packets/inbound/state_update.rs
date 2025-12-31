@@ -40,7 +40,7 @@ pub struct A3955StateUpdatePacket {
     pub touch_tone: common::structures::TouchTone,
     pub limit_high_volume: common::structures::LimitHighVolume,
     pub auto_power_off: common::structures::AutoPowerOff,
-    // pub low_battery_prompt: bool,
+    pub low_battery_prompt: common::structures::LowBatteryPrompt,
     // pub gaming_mode: bool,
 }
 
@@ -59,7 +59,7 @@ impl Default for A3955StateUpdatePacket {
             touch_tone: Default::default(),
             auto_power_off: Default::default(),
             limit_high_volume: Default::default(),
-            // low_battery_prompt: Default::default(),
+            low_battery_prompt: Default::default(),
             // gaming_mode: Default::default(),
         }
     }
@@ -102,7 +102,8 @@ impl FromPacketBody for A3955StateUpdatePacket {
                     take(1usize),
                     common::structures::LimitHighVolume::take,
                     common::structures::AutoPowerOff::take,
-                    take(12usize),
+                    take(1usize),
+                    common::structures::LowBatteryPrompt::take,
                 ),
                 |(
                     tws_status,
@@ -123,9 +124,8 @@ impl FromPacketBody for A3955StateUpdatePacket {
                     _unknown5,
                     limit_high_volume,
                     auto_power_off,
-                    // low_battery_prompt,
-                    // gaming_mode,
                     _unknown6,
+                    low_battery_prompt,
                 )| {
                     Self {
                         tws_status,
@@ -140,7 +140,7 @@ impl FromPacketBody for A3955StateUpdatePacket {
                         touch_tone,
                         limit_high_volume,
                         auto_power_off,
-                        // low_battery_prompt,
+                        low_battery_prompt,
                         // gaming_mode,
                     }
                 },

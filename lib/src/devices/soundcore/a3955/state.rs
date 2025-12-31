@@ -6,8 +6,8 @@ use crate::devices::soundcore::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         structures::{
             AmbientSoundModeCycle, AutoPowerOff, CommonEqualizerConfiguration, DualBattery,
-            DualFirmwareVersion, LimitHighVolume, SerialNumber, TouchTone, TwsStatus,
-            button_configuration::ButtonStatusCollection,
+            DualFirmwareVersion, LimitHighVolume, LowBatteryPrompt, SerialNumber, TouchTone,
+            TwsStatus, button_configuration::ButtonStatusCollection,
         },
     },
 };
@@ -25,6 +25,7 @@ pub struct A3955State {
     auto_power_off: AutoPowerOff,
     limit_high_volume: LimitHighVolume,
     touch_tone: TouchTone,
+    low_battery_prompt: LowBatteryPrompt,
     button_reset_pending: ResetButtonConfigurationPending,
 }
 
@@ -42,6 +43,7 @@ impl From<a3955::packets::inbound::A3955StateUpdatePacket> for A3955State {
             auto_power_off: packet.auto_power_off,
             limit_high_volume: packet.limit_high_volume,
             touch_tone: packet.touch_tone,
+            low_battery_prompt: packet.low_battery_prompt,
             button_reset_pending: ResetButtonConfigurationPending::default(),
         }
     }
