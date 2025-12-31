@@ -26,7 +26,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct A3955State {
+pub struct A3955StateUpdatePacket {
     pub tws_status: common::structures::TwsStatus,
     pub dual_battery: common::structures::DualBattery,
     pub dual_firmware_version: common::structures::DualFirmwareVersion,
@@ -38,12 +38,13 @@ pub struct A3955State {
     pub ambient_sound_mode_cycle: common::structures::AmbientSoundModeCycle,
     pub sound_modes: a3955::structures::SoundModes,
     pub touch_tone: common::structures::TouchTone,
+    pub limit_high_volume: common::structures::LimitHighVolume,
     pub auto_power_off: common::structures::AutoPowerOff,
     // pub low_battery_prompt: bool,
     // pub gaming_mode: bool,
 }
 
-impl Default for A3955State {
+impl Default for A3955StateUpdatePacket {
     fn default() -> Self {
         Self {
             tws_status: Default::default(),
@@ -57,13 +58,14 @@ impl Default for A3955State {
             sound_modes: Default::default(),
             touch_tone: Default::default(),
             auto_power_off: Default::default(),
+            limit_high_volume: Default::default(),
             // low_battery_prompt: Default::default(),
             // gaming_mode: Default::default(),
         }
     }
 }
 
-impl FromPacketBody for A3955State {
+impl FromPacketBody for A3955StateUpdatePacket {
     type DirectionMarker = packet::InboundMarker;
 
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
@@ -97,7 +99,8 @@ impl FromPacketBody for A3955State {
                     // take(1usize), // ANC personalised to ear
                     // take(1usize),
                     common::structures::TouchTone::take,
-                    take(4usize), //limit high volume// DB level// DB refresh rate
+                    take(1usize),
+                    common::structures::LimitHighVolume::take,
                     common::structures::AutoPowerOff::take,
                     take(12usize),
                 ),
@@ -118,6 +121,7 @@ impl FromPacketBody for A3955State {
                     _unknown4,
                     touch_tone,
                     _unknown5,
+                    limit_high_volume,
                     auto_power_off,
                     // low_battery_prompt,
                     // gaming_mode,
@@ -134,6 +138,7 @@ impl FromPacketBody for A3955State {
                         ambient_sound_mode_cycle,
                         sound_modes,
                         touch_tone,
+                        limit_high_volume,
                         auto_power_off,
                         // low_battery_prompt,
                         // gaming_mode,
@@ -145,7 +150,7 @@ impl FromPacketBody for A3955State {
     }
 }
 
-impl ToPacket for A3955State {
+impl ToPacket for A3955StateUpdatePacket {
     type DirectionMarker = packet::InboundMarker;
 
     fn command(&self) -> Command {
@@ -188,7 +193,7 @@ impl PacketHandler<a3955::state::A3955State> for StateUpdatePacketHandler {
         state: &watch::Sender<a3955::state::A3955State>,
         packet: &packet::Inbound,
     ) -> device::Result<()> {
-        let packet: A3955State = packet.try_to_packet()?;
+        let packet: A3955StateUpdatePacket = packet.try_to_packet()?;
         state.send_modify(|state| *state = packet.into());
         Ok(())
     }

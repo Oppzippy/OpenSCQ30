@@ -6,7 +6,7 @@ use crate::devices::soundcore::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         structures::{
             AmbientSoundModeCycle, AutoPowerOff, DualBattery, DualFirmwareVersion,
-            EqualizerConfiguration, SerialNumber, TouchTone, TwsStatus,
+            EqualizerConfiguration, LimitHighVolume, SerialNumber, TouchTone, TwsStatus,
             button_configuration::ButtonStatusCollection,
         },
     },
@@ -23,12 +23,13 @@ pub struct A3955State {
     ambient_sound_mode_cycle: AmbientSoundModeCycle,
     sound_modes: a3955::structures::SoundModes,
     auto_power_off: AutoPowerOff,
+    limit_high_volume: LimitHighVolume,
     touch_tone: TouchTone,
     button_reset_pending: ResetButtonConfigurationPending,
 }
 
-impl From<a3955::packets::inbound::A3955State> for A3955State {
-    fn from(packet: a3955::packets::inbound::A3955State) -> Self {
+impl From<a3955::packets::inbound::A3955StateUpdatePacket> for A3955State {
+    fn from(packet: a3955::packets::inbound::A3955StateUpdatePacket) -> Self {
         Self {
             tws_status: packet.tws_status,
             dual_battery: packet.dual_battery,
@@ -39,6 +40,7 @@ impl From<a3955::packets::inbound::A3955State> for A3955State {
             ambient_sound_mode_cycle: packet.ambient_sound_mode_cycle,
             sound_modes: packet.sound_modes,
             auto_power_off: packet.auto_power_off,
+            limit_high_volume: packet.limit_high_volume,
             touch_tone: packet.touch_tone,
             button_reset_pending: ResetButtonConfigurationPending::default(),
         }
