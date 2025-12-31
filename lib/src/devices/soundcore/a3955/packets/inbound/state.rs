@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     bytes::complete::take,
-    combinator::{map},
+    combinator::map,
     error::{ContextError, ParseError, context},
 };
 use tokio::sync::watch;
@@ -97,8 +97,7 @@ impl FromPacketBody for A3955State {
                     // take(1usize), // ANC personalised to ear
                     // take(1usize),
                     common::structures::TouchTone::take,
-                    take(4usize),//limit high volume// DB level// DB refresh rate
-
+                    take(4usize), //limit high volume// DB level// DB refresh rate
                     common::structures::AutoPowerOff::take,
                     take(12usize),
                 ),

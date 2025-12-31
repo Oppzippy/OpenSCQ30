@@ -8,11 +8,7 @@ use crate::{
     api::{connection::RfcommConnection, device},
     devices::soundcore::{
         a3955,
-        common::{
-            self,
-            packet::{PacketIOController, outbound::ToPacket},
-            state_modifier::StateModifier,
-        },
+        common::{self, packet::PacketIOController, state_modifier::StateModifier},
     },
 };
 
@@ -46,9 +42,7 @@ where
         let change_plan = create_change_plan(sound_modes, *target_sound_modes);
         for step in change_plan {
             self.packet_io
-                .send_with_response(
-                    &a3955::packets::outbound::A3955SetSoundModes { sound_modes: step }.to_packet(),
-                )
+                .send_with_response(&a3955::packets::outbound::set_sound_modes(&step))
                 .await?;
             state_sender.send_modify(|state| *state.get_mut() = step);
         }
