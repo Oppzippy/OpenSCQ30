@@ -56,6 +56,7 @@ soundcore_device!(
 
         builder.tws_status();
         builder.dual_battery(5);
+        builder.case_battery_level(5);
         builder.serial_number_and_dual_firmware_version();
     },
     {
@@ -195,6 +196,7 @@ mod tests {
         device.assert_setting_values([
             (SettingId::BatteryLevelLeft, "5/5".into()),
             (SettingId::BatteryLevelRight, "5/5".into()),
+            (SettingId::CaseBatteryLevel, "3/5".into()),
             (SettingId::IsChargingLeft, "No".into()),
             (SettingId::IsChargingRight, "Yes".into()),
             (SettingId::AmbientSoundMode, "NoiseCanceling".into()),

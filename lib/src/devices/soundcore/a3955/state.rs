@@ -5,9 +5,9 @@ use crate::devices::soundcore::{
     common::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         structures::{
-            AgeRange, AmbientSoundModeCycle, AutoPowerOff, CommonEqualizerConfiguration,
-            CustomHearId, DualBattery, DualFirmwareVersion, Gender, LimitHighVolume,
-            LowBatteryPrompt, SerialNumber, TouchTone, TwsStatus,
+            AgeRange, AmbientSoundModeCycle, AutoPowerOff, CaseBatteryLevel,
+            CommonEqualizerConfiguration, CustomHearId, DualBattery, DualFirmwareVersion, Gender,
+            LimitHighVolume, LowBatteryPrompt, SerialNumber, TouchTone, TwsStatus,
             button_configuration::ButtonStatusCollection,
         },
     },
@@ -17,6 +17,7 @@ use crate::devices::soundcore::{
 pub struct A3955State {
     tws_status: TwsStatus,
     dual_battery: DualBattery,
+    case_battery: CaseBatteryLevel,
     dual_firmware_version: DualFirmwareVersion,
     serial_number: SerialNumber,
     equalizer_configuration: CommonEqualizerConfiguration<2, 10>,
@@ -38,6 +39,7 @@ impl From<a3955::packets::inbound::A3955StateUpdatePacket> for A3955State {
         Self {
             tws_status: packet.tws_status,
             dual_battery: packet.dual_battery,
+            case_battery: packet.case_battery,
             dual_firmware_version: packet.dual_firmware_version,
             serial_number: packet.serial_number,
             equalizer_configuration: packet.equalizer_configuration,
