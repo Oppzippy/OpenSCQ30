@@ -5,8 +5,8 @@ use crate::devices::soundcore::{
     common::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         structures::{
-            AmbientSoundModeCycle, AutoPowerOff, DualBattery, DualFirmwareVersion,
-            EqualizerConfiguration, LimitHighVolume, SerialNumber, TouchTone, TwsStatus,
+            AmbientSoundModeCycle, AutoPowerOff, CommonEqualizerConfiguration, DualBattery,
+            DualFirmwareVersion, LimitHighVolume, SerialNumber, TouchTone, TwsStatus,
             button_configuration::ButtonStatusCollection,
         },
     },
@@ -18,7 +18,7 @@ pub struct A3955State {
     dual_battery: DualBattery,
     dual_firmware_version: DualFirmwareVersion,
     serial_number: SerialNumber,
-    equalizer_configuration: EqualizerConfiguration<1, 10, -6, 6, 0>,
+    equalizer_configuration: CommonEqualizerConfiguration<1, 10>,
     button_configuration: ButtonStatusCollection<8>,
     ambient_sound_mode_cycle: AmbientSoundModeCycle,
     sound_modes: a3955::structures::SoundModes,

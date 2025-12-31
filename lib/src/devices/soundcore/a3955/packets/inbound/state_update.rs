@@ -33,7 +33,7 @@ pub struct A3955StateUpdatePacket {
     pub serial_number: common::structures::SerialNumber,
     // 5 bytes here
     pub case_battery: common::structures::CaseBatteryLevel,
-    pub equalizer_configuration: common::structures::EqualizerConfiguration<1, 10, -6, 6, 0>, // min max and fract guessed
+    pub equalizer_configuration: common::structures::CommonEqualizerConfiguration<1, 10>,
     pub button_configuration: ButtonStatusCollection<8>,
     pub ambient_sound_mode_cycle: common::structures::AmbientSoundModeCycle,
     pub sound_modes: a3955::structures::SoundModes,
