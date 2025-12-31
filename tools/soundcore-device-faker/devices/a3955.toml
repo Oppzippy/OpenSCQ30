@@ -46,7 +46,7 @@ response = [
     1,        # Case Battery Level
     254,      # EQ Profile
     254,      # EQ Profile
-    180,      # 10 EQ Bands, only 8 visible Start
+    180,      # Left eq start
     152,
     140,
     140,
@@ -55,8 +55,8 @@ response = [
     136,
     142,
     120,
-    120,      # EQ Bands End
-    255,      # Right EQ? Or just filler
+    120,      # Left eq end
+    255,      # Right eq start
     255,
     255,
     255,
@@ -65,34 +65,35 @@ response = [
     255,
     255,
     255,
-    255,
-    255,      # Right EQ/filler end
-    0,
-    255,
-    255,
-    255,
-    255,
-    255,
-    255,
-    255,
-    255,
-    255,
-    0,
-    255,
-    255,
-    255,
-    255,
-    255,
-    255,
-    255,
-    255,
-    255,
-    0,
-    0,
-    0,
-    0,
+    255,      # right eq end
+    255,      # if 255, hear id is uninitialized? I guess this is what AgeRange means?
+    1,        # hear id enabled?
+    120,      # Left hear id start
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,      # left hear id end
+    120,      # right hear id start
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,      # right hear id end
+    0,        # time start
     0,
     0,
+    0,        # time end
+    2,        # hear id type
+    255,      # left custom hear id start
     255,
     255,
     255,
@@ -101,10 +102,8 @@ response = [
     255,
     255,
     255,
-    255,
-    0,
-    255,
-    255,
+    0,        # left custom hear id end
+    255,      #right custom hear id start
     255,
     255,
     255,
@@ -112,9 +111,10 @@ response = [
     255,
     255,
     255,
-    0,
-    0,
-    0,
+    255,
+    0,        # right custom hear id end
+    0,        # music genre
+    0,        # music genre
     10,       # Unknown but changing it from 10 disables a lot of settings in the app?
     0x11,     # Left Single Tap, 0xFF is disabled for all of these, 0=volume+, 1=volume-, 2=previous, 3=next, ambient sound=4, voice assistant=5, 6=play/pause
     0xFF,     # Right Single Tap
