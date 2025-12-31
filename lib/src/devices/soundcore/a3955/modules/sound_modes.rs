@@ -20,57 +20,21 @@ use crate::{
             packet::PacketIOController,
         },
     },
+    macros::enum_subset,
 };
 
-#[derive(EnumString, EnumIter, IntoStaticStr)]
-enum SoundModeSetting {
-    AmbientSoundMode,
-    TransparencyMode,
-    NoiseCancelingMode,
-    AdaptiveNoiseCanceling,
-    ManualNoiseCanceling,
-    WindNoiseSuppression,
-    WindNoiseDetected,
-    AdaptiveNoiseCancelingSensitivityLevel,
-    MultiSceneNoiseCanceling,
-}
-
-impl From<SoundModeSetting> for SettingId {
-    fn from(setting: SoundModeSetting) -> Self {
-        match setting {
-            SoundModeSetting::AmbientSoundMode => Self::AmbientSoundMode,
-            SoundModeSetting::TransparencyMode => Self::TransparencyMode,
-            SoundModeSetting::NoiseCancelingMode => Self::NoiseCancelingMode,
-            SoundModeSetting::AdaptiveNoiseCanceling => Self::AdaptiveNoiseCanceling,
-            SoundModeSetting::ManualNoiseCanceling => Self::ManualNoiseCanceling,
-            SoundModeSetting::WindNoiseSuppression => Self::WindNoiseSuppression,
-            SoundModeSetting::WindNoiseDetected => Self::WindNoiseDetected,
-            SoundModeSetting::AdaptiveNoiseCancelingSensitivityLevel => {
-                Self::AdaptiveNoiseCancelingSensitivityLevel
-            }
-            SoundModeSetting::MultiSceneNoiseCanceling => Self::MultiSceneNoiseCanceling,
-        }
-    }
-}
-
-impl TryFrom<&SettingId> for SoundModeSetting {
-    type Error = ();
-
-    fn try_from(setting_id: &SettingId) -> Result<Self, Self::Error> {
-        match setting_id {
-            SettingId::AmbientSoundMode => Ok(Self::AmbientSoundMode),
-            SettingId::TransparencyMode => Ok(Self::TransparencyMode),
-            SettingId::AdaptiveNoiseCanceling => Ok(Self::AdaptiveNoiseCanceling),
-            SettingId::ManualNoiseCanceling => Ok(Self::ManualNoiseCanceling),
-            SettingId::NoiseCancelingMode => Ok(Self::NoiseCancelingMode),
-            SettingId::WindNoiseSuppression => Ok(Self::WindNoiseSuppression),
-            SettingId::WindNoiseDetected => Ok(Self::WindNoiseDetected),
-            SettingId::AdaptiveNoiseCancelingSensitivityLevel => {
-                Ok(Self::AdaptiveNoiseCancelingSensitivityLevel)
-            }
-            SettingId::MultiSceneNoiseCanceling => Ok(Self::MultiSceneNoiseCanceling),
-            _ => Err(()),
-        }
+enum_subset! {
+    SettingId,
+    #[derive(EnumString, EnumIter, IntoStaticStr)]
+    enum SoundModeSetting {
+        AmbientSoundMode,
+        TransparencyMode,
+        NoiseCancelingMode,
+        AdaptiveNoiseCanceling,
+        ManualNoiseCanceling,
+        WindNoiseSuppression,
+        WindNoiseDetected,
+        MultiSceneNoiseCanceling,
     }
 }
 
