@@ -7,8 +7,11 @@ use crate::{
     devices::soundcore::common::{
         device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
-        modules::button_configuration::{
-            ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_ACTIONS,
+        modules::{
+            button_configuration::{
+                ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_ACTIONS,
+            },
+            equalizer,
         },
         packet::outbound::{RequestState, ToPacket},
         structures::button_configuration::{
@@ -36,8 +39,9 @@ soundcore_device!(
     async |builder| {
         builder.module_collection().add_state_update();
         builder.a3955_sound_modes();
-        // TODO: needs custom equaliser for Hear ID
-        // builder.equalizer_with_drc_tws().await;
+        builder
+            .equalizer_with_custom_hear_id_tws(equalizer::common_settings())
+            .await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.ambient_sound_mode_cycle();
         builder.reset_button_configuration::<packets::inbound::A3955StateUpdatePacket>(
@@ -217,6 +221,7 @@ mod tests {
             (SettingId::FirmwareVersionLeft, "01.61".into()),
             (SettingId::FirmwareVersionRight, "01.61".into()),
             (SettingId::SerialNumber, "395598474466f573".into()),
+            (SettingId::PresetEqualizerProfile, Some("Electronic").into()),
         ]);
     }
 
