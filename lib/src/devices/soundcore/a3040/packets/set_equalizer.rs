@@ -18,7 +18,7 @@ pub fn set_equalizer<
         .preset_id()
         .to_le_bytes()
         .into_iter()
-        .chain(hear_id.hear_id_preset_profile_id.to_le_bytes())
+        .chain(hear_id.favorite_music_genre.bytes())
         .chain(
             equalizer_configuration
                 .volume_adjustments_channel_1()
@@ -33,19 +33,15 @@ pub fn set_equalizer<
         )
         .chain([0, 1]) // gender, age range
         .chain(iter::once(hear_id.is_enabled.into()))
-        .chain(hear_id.volume_adjustments.iter().flat_map(|v| v.bytes()))
+        .chain(hear_id.volume_adjustment_bytes())
         .chain(hear_id.time.to_be_bytes())
-        .chain(iter::once(hear_id.hear_id_type.0))
+        .chain(iter::once(hear_id.hear_id_type as u8))
         .chain(
-            // repeat the left side for the right side value rather than making use of the provided right side value
-            iter::repeat_n(
-                hear_id.custom_volume_adjustments.expect(
-                    "hear id custom volume adjustments should always be present for the a3040",
-                )[0]
-                .bytes(),
-                2,
-            )
-            .flatten(),
+            hear_id
+                .custom_volume_adjustment_bytes()
+                .take(HEAR_ID_BANDS)
+                // repeat the left side for the right side value rather than making use of the provided right side value
+                .chain(hear_id.custom_volume_adjustment_bytes().take(HEAR_ID_BANDS)),
         )
         .chain(
             iter::repeat_n(

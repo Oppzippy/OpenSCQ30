@@ -7,7 +7,7 @@ use nom::{
     combinator::map,
     error::{ContextError, ParseError, context},
     multi::count,
-    number::complete::{be_u32, le_u16},
+    number::complete::be_u32,
 };
 use tokio::sync::watch;
 
@@ -26,14 +26,14 @@ use crate::{
             packet_manager::PacketHandler,
             structures::{
                 AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CommonEqualizerConfiguration,
-                CommonVolumeAdjustments, CustomHearId, FirmwareVersion, HearIdMusicType,
+                CommonVolumeAdjustments, CustomHearId, FirmwareVersion, HearIdMusicGenre,
                 HearIdType, LimitHighVolume, SerialNumber,
             },
         },
     },
 };
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct A3040StateUpdatePacket {
     pub battery_level: BatteryLevel,
     pub firmware_version: FirmwareVersion,
@@ -47,28 +47,6 @@ pub struct A3040StateUpdatePacket {
     pub ambient_sound_mode_prompt_tone: bool,
     pub battery_alert_prompt_tone: bool,
     pub hear_id: CustomHearId<2, 10>,
-}
-
-impl Default for A3040StateUpdatePacket {
-    fn default() -> Self {
-        Self {
-            battery_level: Default::default(),
-            firmware_version: Default::default(),
-            serial_number: Default::default(),
-            equalizer_configuration: Default::default(),
-            button_configuration: Default::default(),
-            ambient_sound_mode_cycle: Default::default(),
-            sound_modes: Default::default(),
-            auto_power_off: Default::default(),
-            limit_high_volume: Default::default(),
-            ambient_sound_mode_prompt_tone: Default::default(),
-            battery_alert_prompt_tone: Default::default(),
-            hear_id: CustomHearId {
-                custom_volume_adjustments: Some(Default::default()),
-                ..Default::default()
-            },
-        }
-    }
 }
 
 impl FromPacketBody for A3040StateUpdatePacket {
@@ -147,12 +125,12 @@ pub fn take_hear_id<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         map(
             (
                 take_bool,
-                count(CommonVolumeAdjustments::take, 2),
+                count(CommonVolumeAdjustments::take_optional, 2),
                 be_u32,
                 HearIdType::take,
-                count(CommonVolumeAdjustments::take, 2),
+                count(CommonVolumeAdjustments::take_optional, 2),
                 take(10usize), // DRC
-                le_u16,        // hear id eq index?
+                HearIdMusicGenre::take_two_bytes,
             ),
             |(
                 is_enabled,
@@ -161,7 +139,7 @@ pub fn take_hear_id<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
                 hear_id_type,
                 custom_volume_adjustments,
                 _drc,
-                hear_id_preset_profile_id,
+                favorite_music_genre,
             )| {
                 CustomHearId {
                     is_enabled,
@@ -170,13 +148,10 @@ pub fn take_hear_id<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
                         .expect("count is guaranteed to return a vec with the desired length"),
                     time,
                     hear_id_type,
-                    hear_id_music_type: HearIdMusicType(0),
-                    custom_volume_adjustments: Some(
-                        custom_volume_adjustments
-                            .try_into()
-                            .expect("count is guaranteed to return a vec with the desired length"),
-                    ),
-                    hear_id_preset_profile_id,
+                    favorite_music_genre,
+                    custom_volume_adjustments: custom_volume_adjustments
+                        .try_into()
+                        .expect("count is guaranteed to return a vec with the desired length"),
                 }
             },
         ),
@@ -211,23 +186,12 @@ impl ToPacket for A3040StateUpdatePacket {
             ])
             .chain([0; 5])
             .chain(iter::once(self.hear_id.is_enabled.into()))
-            .chain(
-                self.hear_id
-                    .volume_adjustments
-                    .iter()
-                    .flat_map(|v| v.bytes()),
-            )
+            .chain(self.hear_id.volume_adjustment_bytes())
             .chain(self.hear_id.time.to_be_bytes())
-            .chain(iter::once(self.hear_id.hear_id_type.0))
-            .chain(self.hear_id.custom_volume_adjustments.into_iter().flat_map(
-                |custom_volume_adjustments| {
-                    custom_volume_adjustments
-                        .into_iter()
-                        .flat_map(|v| v.bytes())
-                },
-            ))
+            .chain(iter::once(self.hear_id.hear_id_type as u8))
+            .chain(self.hear_id.custom_volume_adjustment_bytes())
             .chain([0; 10]) // DRC but we ignore it so fill with 0s
-            .chain(self.hear_id.hear_id_preset_profile_id.to_le_bytes())
+            .chain(self.hear_id.favorite_music_genre.bytes())
             .collect()
     }
 }

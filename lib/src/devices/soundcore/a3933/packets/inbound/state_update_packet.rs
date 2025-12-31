@@ -72,17 +72,16 @@ impl Default for A3933StateUpdatePacket {
             hear_id: Some(CustomHearId {
                 is_enabled: Default::default(),
                 volume_adjustments: [
-                    CommonVolumeAdjustments::new([0; 10]),
-                    CommonVolumeAdjustments::new([0; 10]),
+                    Some(CommonVolumeAdjustments::new([0; 10])),
+                    Some(CommonVolumeAdjustments::new([0; 10])),
                 ],
                 time: Default::default(),
                 hear_id_type: Default::default(),
-                hear_id_music_type: Default::default(),
-                custom_volume_adjustments: Some([
-                    CommonVolumeAdjustments::new([0; 10]),
-                    CommonVolumeAdjustments::new([0; 10]),
-                ]),
-                hear_id_preset_profile_id: Default::default(),
+                favorite_music_genre: Default::default(),
+                custom_volume_adjustments: [
+                    Some(CommonVolumeAdjustments::new([0; 10])),
+                    Some(CommonVolumeAdjustments::new([0; 10])),
+                ],
             }),
             button_configuration: a3933::BUTTON_CONFIGURATION_SETTINGS.default_status_collection(),
             ambient_sound_mode_cycle: Default::default(),
@@ -130,7 +129,7 @@ impl FromPacketBody for A3933StateUpdatePacket {
                     let (input, _) = take(48usize)(input)?;
                     (input, None)
                 } else {
-                    let (input, hear_id) = CustomHearId::take_without_music_type(input)?;
+                    let (input, hear_id) = CustomHearId::take_with_music_genre_at_end(input)?;
                     (input, Some(hear_id))
                 };
 
@@ -235,17 +234,10 @@ impl ToPacket for A3933StateUpdatePacket {
                 |hear_id| {
                     [hear_id.is_enabled as u8]
                         .into_iter()
-                        .chain(hear_id.volume_adjustments.iter().flat_map(|v| v.bytes()))
+                        .chain(hear_id.volume_adjustment_bytes())
                         .chain(hear_id.time.to_be_bytes())
-                        .chain([hear_id.hear_id_type.0])
-                        .chain(
-                            hear_id
-                                .custom_volume_adjustments
-                                .as_ref()
-                                .unwrap()
-                                .iter()
-                                .flat_map(|v| v.bytes()),
-                        )
+                        .chain([hear_id.hear_id_type as u8])
+                        .chain(hear_id.custom_volume_adjustment_bytes())
                         .chain([0, 0])
                         .collect()
                 },

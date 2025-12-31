@@ -13,7 +13,7 @@ pub fn set_equalizer_configuration<const CHANNELS: usize, const BANDS: usize>(
     hear_id: &a3947::structures::HearId<CHANNELS, BANDS>,
 ) -> packet::Outbound {
     let active_volume_adjustments = if hear_id.is_enabled {
-        if hear_id.hear_id_type == HearIdType(1) {
+        if hear_id.hear_id_type == HearIdType::Custom {
             &hear_id.custom_volume_adjustments
         } else {
             &hear_id.volume_adjustments
@@ -25,7 +25,7 @@ pub fn set_equalizer_configuration<const CHANNELS: usize, const BANDS: usize>(
         .preset_id()
         .to_le_bytes()
         .into_iter()
-        .chain([hear_id.music_type.0, 0])
+        .chain(hear_id.music_type.bytes())
         .chain(
             equalizer_configuration
                 .volume_adjustments()
@@ -36,7 +36,7 @@ pub fn set_equalizer_configuration<const CHANNELS: usize, const BANDS: usize>(
         .chain(iter::once(hear_id.is_enabled.into()))
         .chain(hear_id.volume_adjustments.iter().flat_map(|v| v.bytes()))
         .chain(hear_id.time.to_be_bytes())
-        .chain(iter::once(hear_id.hear_id_type.0))
+        .chain(iter::once(hear_id.hear_id_type as u8))
         .chain(
             hear_id
                 .custom_volume_adjustments
@@ -56,7 +56,7 @@ pub fn set_equalizer_configuration<const CHANNELS: usize, const BANDS: usize>(
 #[cfg(test)]
 mod tests {
     use crate::devices::soundcore::common::structures::{
-        CommonVolumeAdjustments, HearIdMusicType, HearIdType,
+        CommonVolumeAdjustments, HearIdMusicGenre, HearIdType,
     };
 
     use super::*;
@@ -82,8 +82,8 @@ mod tests {
                     ]),
                 ],
                 time: u32::from_be_bytes([104, 100, 34, 64]),
-                hear_id_type: HearIdType(2),
-                music_type: HearIdMusicType(6),
+                hear_id_type: HearIdType::FavoriteMusicGenre,
+                music_type: HearIdMusicGenre(6),
                 custom_volume_adjustments: [
                     CommonVolumeAdjustments::from_bytes([
                         112, 117, 140, 148, 150, 142, 134, 131, 60, 60,

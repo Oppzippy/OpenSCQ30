@@ -59,6 +59,27 @@ impl<const B: usize, const MIN_VOLUME: i16, const MAX_VOLUME: i16, const FRACTIO
         .parse_complete(input)
     }
 
+    /// 255 indicates not present
+    pub fn take_optional<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> IResult<&'a [u8], Option<Self>, E> {
+        context(
+            "volume adjustment",
+            map(take(B), |volume_adjustment_bytes: &[u8]| {
+                if volume_adjustment_bytes[0] == 0xFF {
+                    None
+                } else {
+                    Some(Self::from_bytes(
+                        volume_adjustment_bytes
+                            .try_into()
+                            .expect("take guarantees that the length will be B"),
+                    ))
+                }
+            }),
+        )
+        .parse_complete(input)
+    }
+
     pub fn bytes(&self) -> [u8; B] {
         self.inner.map(Self::signed_adjustment_to_packet_byte)
     }

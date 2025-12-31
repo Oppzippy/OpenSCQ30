@@ -24,8 +24,8 @@ use crate::{
             packet_manager::PacketHandler,
             state::Update,
             structures::{
-                AgeRange, CommonEqualizerConfiguration, CommonVolumeAdjustments, CustomHearId,
-                DualBattery, Gender, SoundModes, TouchTone, TwsStatus, WearingDetection,
+                AgeRange, CommonEqualizerConfiguration, CustomHearId, DualBattery, Gender,
+                SoundModes, TouchTone, TwsStatus, WearingDetection,
                 button_configuration::ButtonStatusCollection,
             },
         },
@@ -105,7 +105,7 @@ impl FromPacketBody for A3951StateUpdatePacket {
                     CommonEqualizerConfiguration::take,
                     Gender::take,
                     AgeRange::take,
-                    CustomHearId::take_with_all_fields,
+                    CustomHearId::take,
                     ButtonStatusCollection::take(a3951::BUTTON_SETTINGS.parse_settings()),
                     SoundModes::take,
                     take_bool, // side tone
@@ -166,28 +166,13 @@ impl ToPacket for A3951StateUpdatePacket {
             .chain(self.equalizer_configuration.bytes())
             .chain([self.gender.0, self.age_range.0])
             .chain([self.custom_hear_id.is_enabled as u8])
-            .chain(
-                self.custom_hear_id
-                    .volume_adjustments
-                    .iter()
-                    .flat_map(|v| v.bytes()),
-            )
+            .chain(self.custom_hear_id.volume_adjustment_bytes())
             .chain(self.custom_hear_id.time.to_be_bytes())
             .chain([
-                self.custom_hear_id.hear_id_type.0,
-                self.custom_hear_id.hear_id_music_type.0,
+                self.custom_hear_id.hear_id_type as u8,
+                self.custom_hear_id.favorite_music_genre.single_byte(),
             ])
-            .chain(
-                self.custom_hear_id
-                    .custom_volume_adjustments
-                    .as_ref()
-                    .unwrap_or(&[
-                        CommonVolumeAdjustments::new([0; 8]),
-                        CommonVolumeAdjustments::new([0; 8]),
-                    ])
-                    .iter()
-                    .flat_map(|v| v.bytes()),
-            )
+            .chain(self.custom_hear_id.custom_volume_adjustment_bytes())
             .chain(
                 self.button_configuration
                     .bytes(a3951::BUTTON_SETTINGS.parse_settings()),

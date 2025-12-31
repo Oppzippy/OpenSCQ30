@@ -6,7 +6,7 @@ use nom::{
     bytes::complete::take,
     combinator::map,
     error::{ContextError, ParseError, context},
-    number::complete::{be_u32, le_u8},
+    number::complete::be_u32,
 };
 use tokio::sync::watch;
 
@@ -26,13 +26,13 @@ use crate::{
             structures::{
                 AmbientSoundModeCycle, AutoPlayPause, AutoPowerOff, BatteryLevel,
                 CommonEqualizerConfiguration, CommonVolumeAdjustments, CustomHearId,
-                FirmwareVersion, HearIdMusicType, HearIdType, LimitHighVolume, SerialNumber,
+                FirmwareVersion, HearIdMusicGenre, HearIdType, LimitHighVolume, SerialNumber,
             },
         },
     },
 };
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct A3035StateUpdatePacket {
     pub battery_level: BatteryLevel,
     pub firmware_version: FirmwareVersion,
@@ -49,31 +49,6 @@ pub struct A3035StateUpdatePacket {
     pub battery_alert: a3035::structures::BatteryAlert,
     pub ldac: bool,
     pub dual_connections: bool,
-}
-
-impl Default for A3035StateUpdatePacket {
-    fn default() -> Self {
-        Self {
-            battery_level: Default::default(),
-            firmware_version: Default::default(),
-            serial_number: Default::default(),
-            equalizer_configuration: Default::default(),
-            button_configuration: Default::default(),
-            ambient_sound_mode_cycle: Default::default(),
-            sound_modes: Default::default(),
-            auto_power_off: Default::default(),
-            limit_high_volume: Default::default(),
-            hear_id: CustomHearId {
-                custom_volume_adjustments: Some(Default::default()),
-                ..Default::default()
-            },
-            auto_play_pause: Default::default(),
-            ambient_sound_mode_voice_prompt: Default::default(),
-            battery_alert: Default::default(),
-            ldac: Default::default(),
-            dual_connections: Default::default(),
-        }
-    }
 }
 
 impl FromPacketBody for A3035StateUpdatePacket {
@@ -167,7 +142,7 @@ pub fn take_hear_id<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
                 be_u32,
                 HearIdType::take,
                 CommonVolumeAdjustments::take,
-                le_u8,
+                HearIdMusicGenre::take_one_byte,
             ),
             |(
                 is_enabled,
@@ -175,16 +150,15 @@ pub fn take_hear_id<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
                 time,
                 hear_id_type,
                 custom_volume_adjustments,
-                hear_id_favorite_music_genre,
+                favorite_music_genre,
             )| {
                 CustomHearId {
                     is_enabled,
-                    volume_adjustments: [volume_adjustments],
+                    volume_adjustments: [Some(volume_adjustments)],
                     time,
                     hear_id_type,
-                    hear_id_music_type: HearIdMusicType(0),
-                    custom_volume_adjustments: Some([custom_volume_adjustments]),
-                    hear_id_preset_profile_id: hear_id_favorite_music_genre as u16,
+                    custom_volume_adjustments: [Some(custom_volume_adjustments)],
+                    favorite_music_genre,
                 }
             },
         ),
@@ -207,11 +181,11 @@ impl ToPacket for A3035StateUpdatePacket {
             .chain(self.equalizer_configuration.bytes())
             .chain([0; 2])
             .chain(iter::once(self.hear_id.is_enabled.into()))
-            .chain(self.hear_id.volume_adjustments[0].bytes())
+            .chain(self.hear_id.volume_adjustment_bytes())
             .chain(self.hear_id.time.to_be_bytes())
-            .chain(iter::once(self.hear_id.hear_id_type.0))
-            .chain(self.hear_id.custom_volume_adjustments.unwrap()[0].bytes())
-            .chain(iter::once(self.hear_id.hear_id_preset_profile_id as u8))
+            .chain(iter::once(self.hear_id.hear_id_type as u8))
+            .chain(self.hear_id.custom_volume_adjustment_bytes())
+            .chain(iter::once(self.hear_id.favorite_music_genre.single_byte()))
             .chain([0; 3])
             .chain(self.button_configuration.bytes())
             .chain(self.ambient_sound_mode_cycle.bytes())

@@ -13,7 +13,7 @@ use strum::{EnumIter, EnumString, FromRepr, IntoStaticStr};
 use crate::devices::soundcore::common::{
     packet::parsing::take_bool,
     structures::{
-        AmbientSoundMode, CommonVolumeAdjustments, HearIdMusicType, HearIdType, TransparencyMode,
+        AmbientSoundMode, CommonVolumeAdjustments, HearIdMusicGenre, HearIdType, TransparencyMode,
     },
 };
 
@@ -268,7 +268,7 @@ pub struct HearId<const C: usize, const B: usize> {
     pub volume_adjustments: [CommonVolumeAdjustments<B>; C],
     pub time: u32,
     pub hear_id_type: HearIdType,
-    pub music_type: HearIdMusicType,
+    pub music_type: HearIdMusicGenre,
     pub custom_volume_adjustments: [CommonVolumeAdjustments<B>; C],
 }
 
@@ -298,7 +298,7 @@ impl<const C: usize, const B: usize> HearId<C, B> {
                     be_u32,
                     HearIdType::take,
                     count(CommonVolumeAdjustments::take, C),
-                    HearIdMusicType::take,
+                    HearIdMusicGenre::take_one_byte,
                     le_u8,
                 ),
                 |(
@@ -335,12 +335,12 @@ impl<const C: usize, const B: usize> HearId<C, B> {
         iter::once(self.is_enabled.into())
             .chain(self.volume_adjustments.iter().flat_map(|side| side.bytes()))
             .chain(self.time.to_be_bytes())
-            .chain([self.hear_id_type.0, 0])
+            .chain([self.hear_id_type as u8, 0])
             .chain(
                 self.custom_volume_adjustments
                     .iter()
                     .flat_map(|side| side.bytes()),
             )
-            .chain(iter::once(self.music_type.0))
+            .chain(iter::once(self.music_type.single_byte()))
     }
 }

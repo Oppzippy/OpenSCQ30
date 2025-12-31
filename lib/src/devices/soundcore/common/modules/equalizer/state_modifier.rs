@@ -187,12 +187,11 @@ where
                         // TODO have SetEqualizerAndCustomHearIdPacket take only the wanted fields rather than an entire CustomHearId struct
                         CustomHearId {
                             is_enabled: target_hear_id.is_enabled,
-                            volume_adjustments: target_hear_id.volume_adjustments.to_owned(),
+                            volume_adjustments: target_hear_id.volume_adjustments,
                             time: target_hear_id.time,
                             hear_id_type: Default::default(),
-                            hear_id_music_type: Default::default(),
-                            custom_volume_adjustments: None,
-                            hear_id_preset_profile_id: Default::default(),
+                            favorite_music_genre: Default::default(),
+                            custom_volume_adjustments: [None; CHANNELS],
                         }
                     },
                 }

@@ -69,17 +69,16 @@ impl Default for A3936StateUpdatePacket {
             custom_hear_id: CustomHearId {
                 is_enabled: Default::default(),
                 volume_adjustments: [
-                    CommonVolumeAdjustments::new([0; 10]),
-                    CommonVolumeAdjustments::new([0; 10]),
+                    Some(CommonVolumeAdjustments::new([0; 10])),
+                    Some(CommonVolumeAdjustments::new([0; 10])),
                 ],
                 time: Default::default(),
                 hear_id_type: Default::default(),
-                hear_id_music_type: Default::default(),
-                custom_volume_adjustments: Some([
-                    CommonVolumeAdjustments::new([0; 10]),
-                    CommonVolumeAdjustments::new([0; 10]),
-                ]),
-                hear_id_preset_profile_id: Default::default(),
+                favorite_music_genre: Default::default(),
+                custom_volume_adjustments: [
+                    Some(CommonVolumeAdjustments::new([0; 10])),
+                    Some(CommonVolumeAdjustments::new([0; 10])),
+                ],
             },
             sound_modes: Default::default(),
             ambient_sound_mode_cycle: Default::default(),
@@ -108,7 +107,7 @@ impl FromPacketBody for A3936StateUpdatePacket {
             let (input, serial_number) = SerialNumber::take(input)?;
             let (input, equalizer_configuration) = CommonEqualizerConfiguration::take(input)?;
             let (input, age_range) = AgeRange::take(input)?;
-            let (input, custom_hear_id) = CustomHearId::take_without_music_type(input)?;
+            let (input, custom_hear_id) = CustomHearId::take_with_music_genre_at_end(input)?;
             let (input, _unknown) = le_u8(input)?;
             let (input, button_configuration) = ButtonStatusCollection::take(
                 a3936::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
@@ -168,22 +167,10 @@ impl ToPacket for A3936StateUpdatePacket {
             .chain(
                 [self.custom_hear_id.is_enabled as u8]
                     .into_iter()
-                    .chain(
-                        self.custom_hear_id
-                            .volume_adjustments
-                            .iter()
-                            .flat_map(|v| v.bytes()),
-                    )
+                    .chain(self.custom_hear_id.volume_adjustment_bytes())
                     .chain(self.custom_hear_id.time.to_be_bytes())
-                    .chain([self.custom_hear_id.hear_id_type.0])
-                    .chain(
-                        self.custom_hear_id
-                            .custom_volume_adjustments
-                            .as_ref()
-                            .unwrap()
-                            .iter()
-                            .flat_map(|v| v.bytes()),
-                    )
+                    .chain([self.custom_hear_id.hear_id_type as u8])
+                    .chain(self.custom_hear_id.custom_volume_adjustment_bytes())
                     .chain([0, 0]),
             )
             .chain([0]) // TODO skip offset
