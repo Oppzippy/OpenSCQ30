@@ -167,3 +167,13 @@ command = [32, 3]
 response = [
     80, # current db level
 ]
+
+[[responses]]
+# DB level
+command = [5, 1]
+response = [1]
+
+[[responses]]
+# DB level
+command = [5, 129]
+response = [1]
