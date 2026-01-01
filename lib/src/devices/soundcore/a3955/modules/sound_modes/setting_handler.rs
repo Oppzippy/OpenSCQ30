@@ -74,11 +74,9 @@ where
             )),
             SoundModeSetting::AncPersonalizedToEarCanal => {
                 let anc_personalized_to_ear_canal: &AncPersonalizedToEarCanal = state.get();
-                sound_modes
-                    .is_anc_personalized_to_ear_canal_available()
-                    .then_some(Setting::Toggle {
-                        value: anc_personalized_to_ear_canal.0,
-                    })
+                Some(Setting::Toggle {
+                    value: anc_personalized_to_ear_canal.0,
+                })
             }
         }
     }
@@ -121,8 +119,6 @@ where
                 sound_modes.multi_scene_anc = value.try_as_enum_variant()?;
             }
             SoundModeSetting::AncPersonalizedToEarCanal => {
-                // we can allow setting anc personalized to ear canal here even if we're not in the required state
-                // so that order of assignments doesn't matter, and it can be handled by state_modifier.
                 let anc_personalized_to_ear_canal: &mut AncPersonalizedToEarCanal = state.get_mut();
                 *anc_personalized_to_ear_canal = AncPersonalizedToEarCanal(value.try_as_bool()?);
             }

@@ -8,9 +8,7 @@ use openscq30_i18n_macros::Translate;
 use openscq30_lib_macros::MigrationSteps;
 use strum::{Display, EnumIter, EnumString, FromRepr, IntoStaticStr, VariantArray};
 
-use crate::devices::soundcore::common::{
-    self, modules::sound_modes_v2, structures::AmbientSoundMode,
-};
+use crate::devices::soundcore::common::{self, modules::sound_modes_v2};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, MigrationSteps)]
 pub struct SoundModes {
@@ -82,12 +80,6 @@ impl SoundModes {
             self.noise_canceling_adaptive_sensitivity_level,
             self.multi_scene_anc.id(),
         ]
-    }
-
-    pub fn is_anc_personalized_to_ear_canal_available(&self) -> bool {
-        self.ambient_sound_mode == AmbientSoundMode::NoiseCanceling
-            && self.noise_canceling_mode == NoiseCancelingMode::Manual
-            && self.manual_noise_canceling == ManualNoiseCanceling::new(5)
     }
 }
 

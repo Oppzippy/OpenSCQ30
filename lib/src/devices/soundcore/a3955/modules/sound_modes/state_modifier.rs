@@ -44,25 +44,15 @@ where
             }
         }
 
-        let is_anc_personalized_to_ear_canal_available = {
-            let state = state_sender.borrow();
-            let sound_modes: &SoundModes = state.get();
-            sound_modes.is_anc_personalized_to_ear_canal_available()
-        };
-
-        if is_anc_personalized_to_ear_canal_available {
-            self.packet_io
-                .send_with_response(
-                    &a3955::packets::outbound::set_anc_personalized_to_hear_canal(
-                        target_state.get(),
-                    ),
-                )
-                .await?;
-            state_sender.send_modify(|state| {
-                let current: &mut AncPersonalizedToEarCanal = state.get_mut();
-                *current = *target_state.get();
-            });
-        }
+        self.packet_io
+            .send_with_response(
+                &a3955::packets::outbound::set_anc_personalized_to_hear_canal(target_state.get()),
+            )
+            .await?;
+        state_sender.send_modify(|state| {
+            let current: &mut AncPersonalizedToEarCanal = state.get_mut();
+            *current = *target_state.get();
+        });
         Ok(())
     }
 }

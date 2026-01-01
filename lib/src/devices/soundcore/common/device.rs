@@ -781,10 +781,6 @@ pub mod test_utils {
             &self.device
         }
 
-        pub fn setting(&self, setting_id: &SettingId) -> Option<Setting> {
-            self.device.setting(setting_id)
-        }
-
         #[track_caller]
         pub fn assert_setting_values(
             &self,
@@ -817,10 +813,6 @@ pub mod test_utils {
             sent_packets_bytes.sort();
 
             assert_eq!(sent_packets_bytes, expected_packets_bytes);
-        }
-
-        pub async fn set_settings(&mut self, settings: Vec<(SettingId, Value)>) {
-            _ = self.set_settings_and_gather_sent_packets(settings).await;
         }
 
         pub async fn assert_set_settings_response(
