@@ -84,7 +84,7 @@ fn set_wind_noise(
         if current.ambient_sound_mode != common::structures::AmbientSoundMode::Transparency
             && current.ambient_sound_mode != common::structures::AmbientSoundMode::NoiseCanceling
         {
-            current.ambient_sound_mode = common::structures::AmbientSoundMode::Normal;
+            current.ambient_sound_mode = common::structures::AmbientSoundMode::NoiseCanceling;
             sequence.push(*current);
         }
         current.wind_noise = to.wind_noise;
