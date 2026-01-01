@@ -77,6 +77,7 @@ train = Train
 bus = Bus
 car = Car
 talk-mode = Talk Mode
+anc-personalized-to-ear-canal = ANC Personalized to Ear Canal
 
 soundcore-signature = Soundcore Signature
 acoustic = Acoustic

@@ -1,7 +1,10 @@
 use openscq30_lib_has::Has;
 
 use crate::{
-    api::connection::RfcommConnection, devices::soundcore::common::device::SoundcoreDeviceBuilder,
+    api::connection::RfcommConnection,
+    devices::soundcore::{
+        a3955::structures::AncPersonalizedToEarCanal, common::device::SoundcoreDeviceBuilder,
+    },
 };
 
 use super::structures::SoundModes;
@@ -11,7 +14,7 @@ mod sound_modes;
 impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
 where
     ConnectionType: RfcommConnection + Send + Sync + 'static,
-    StateType: Has<SoundModes> + Send + Sync + Clone + 'static,
+    StateType: Has<SoundModes> + Has<AncPersonalizedToEarCanal> + Send + Sync + Clone + 'static,
 {
     pub fn a3955_sound_modes(&mut self) {
         let packet_io_controller = self.packet_io_controller().clone();

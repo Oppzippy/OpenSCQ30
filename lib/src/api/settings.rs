@@ -133,6 +133,7 @@ pub enum SettingId {
     WearingDetection,
     Volume,
     VoicePrompt,
+    AncPersonalizedToEarCanal,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

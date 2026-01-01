@@ -8,7 +8,9 @@ use openscq30_i18n_macros::Translate;
 use openscq30_lib_macros::MigrationSteps;
 use strum::{Display, EnumIter, EnumString, FromRepr, IntoStaticStr, VariantArray};
 
-use crate::devices::soundcore::common::{self, modules::sound_modes_v2};
+use crate::devices::soundcore::common::{
+    self, modules::sound_modes_v2, structures::AmbientSoundMode,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, MigrationSteps)]
 pub struct SoundModes {
@@ -75,11 +77,17 @@ impl SoundModes {
             self.ambient_sound_mode.id(),
             (self.manual_noise_canceling.0 << 4) | self.adaptive_noise_canceling as u8,
             self.transparency_mode.id(),
-            self.noise_canceling_mode.id(), // ANC automation mode?
+            self.noise_canceling_mode.id(),
             self.wind_noise.byte(),
             self.noise_canceling_adaptive_sensitivity_level,
             self.multi_scene_anc.id(),
         ]
+    }
+
+    pub fn is_anc_personalized_to_ear_canal_available(&self) -> bool {
+        self.ambient_sound_mode == AmbientSoundMode::NoiseCanceling
+            && self.noise_canceling_mode == NoiseCancelingMode::Manual
+            && self.manual_noise_canceling == ManualNoiseCanceling::new(5)
     }
 }
 
@@ -160,8 +168,8 @@ impl NoiseCancelingSettings {
 )]
 pub enum NoiseCancelingMode {
     #[default]
-    Adaptive = 0,
-    Manual = 1,
+    Manual = 0,
+    Adaptive = 1,
     MultiScene = 2,
 }
 

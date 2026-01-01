@@ -42,6 +42,7 @@ pub struct A3955StateUpdatePacket {
     pub button_configuration: ButtonStatusCollection<8>,
     pub ambient_sound_mode_cycle: common::structures::AmbientSoundModeCycle,
     pub sound_modes: a3955::structures::SoundModes,
+    pub anc_personalized_to_ear_canal: a3955::structures::AncPersonalizedToEarCanal,
     pub touch_tone: common::structures::TouchTone,
     pub limit_high_volume: common::structures::LimitHighVolume,
     pub auto_power_off: common::structures::AutoPowerOff,
@@ -63,6 +64,7 @@ impl Default for A3955StateUpdatePacket {
             button_configuration: a3955::BUTTON_CONFIGURATION_SETTINGS.default_status_collection(),
             ambient_sound_mode_cycle: Default::default(),
             sound_modes: Default::default(),
+            anc_personalized_to_ear_canal: Default::default(),
             touch_tone: Default::default(),
             auto_power_off: Default::default(),
             limit_high_volume: Default::default(),
@@ -83,51 +85,57 @@ impl FromPacketBody for A3955StateUpdatePacket {
             "a3955 state update packet",
             map(
                 (
-                    common::structures::TwsStatus::take,
-                    common::structures::DualBattery::take,
-                    common::structures::DualFirmwareVersion::take,
-                    common::structures::SerialNumber::take,
-                    take(5usize),
-                    common::structures::CaseBatteryLevel::take,
-                    common::structures::EqualizerConfiguration::take,
-                    common::structures::AgeRange::take,
-                    common::structures::CustomHearId::take_with_music_genre_at_end,
-                    take(1usize), // unknown
-                    ButtonStatusCollection::take(
-                        a3955::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
+                    (
+                        common::structures::TwsStatus::take,
+                        common::structures::DualBattery::take,
+                        common::structures::DualFirmwareVersion::take,
+                        common::structures::SerialNumber::take,
+                        take(5usize),
+                        common::structures::CaseBatteryLevel::take,
+                        common::structures::EqualizerConfiguration::take,
+                        common::structures::AgeRange::take,
+                        common::structures::CustomHearId::take_with_music_genre_at_end,
+                        take(1usize), // unknown
+                        ButtonStatusCollection::take(
+                            a3955::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
+                        ),
+                        common::structures::AmbientSoundModeCycle::take,
+                        a3955::structures::SoundModes::take,
+                        take(6usize), // unknown
+                        a3955::structures::AncPersonalizedToEarCanal::take,
+                        take(1usize),
+                        common::structures::TouchTone::take,
+                        take(1usize),
+                        common::structures::LimitHighVolume::take,
+                        common::structures::AutoPowerOff::take,
+                        take(1usize),
                     ),
-                    common::structures::AmbientSoundModeCycle::take,
-                    a3955::structures::SoundModes::take,
-                    take(8usize), // unknown
-                    common::structures::TouchTone::take,
-                    take(1usize),
-                    common::structures::LimitHighVolume::take,
-                    common::structures::AutoPowerOff::take,
-                    take(1usize),
                     common::structures::LowBatteryPrompt::take,
                 ),
                 |(
-                    tws_status,
-                    dual_battery,
-                    dual_firmware_version,
-                    serial_number,
-                    _unknown0,
-                    case_battery,
-                    equalizer_configuration,
-                    age_range,
-                    hear_id,
-                    _unknown1,
-                    // _unknown2,
-                    // _unknown3,
-                    button_configuration,
-                    ambient_sound_mode_cycle,
-                    sound_modes,
-                    _unknown4,
-                    touch_tone,
-                    _unknown5,
-                    limit_high_volume,
-                    auto_power_off,
-                    _unknown6,
+                    (
+                        tws_status,
+                        dual_battery,
+                        dual_firmware_version,
+                        serial_number,
+                        _unknown0,
+                        case_battery,
+                        equalizer_configuration,
+                        age_range,
+                        hear_id,
+                        _unknown1,
+                        button_configuration,
+                        ambient_sound_mode_cycle,
+                        sound_modes,
+                        _unknown2,
+                        anc_personalized_to_ear_canal,
+                        _unknown3,
+                        touch_tone,
+                        _unknown4,
+                        limit_high_volume,
+                        auto_power_off,
+                        _unknown5,
+                    ),
                     low_battery_prompt,
                 )| {
                     Self {
@@ -142,6 +150,7 @@ impl FromPacketBody for A3955StateUpdatePacket {
                         button_configuration,
                         ambient_sound_mode_cycle,
                         sound_modes,
+                        anc_personalized_to_ear_canal,
                         touch_tone,
                         limit_high_volume,
                         auto_power_off,
@@ -181,7 +190,9 @@ impl ToPacket for A3955StateUpdatePacket {
             )
             .chain(self.ambient_sound_mode_cycle.bytes())
             .chain(self.sound_modes.bytes())
-            .chain([0; 8])
+            .chain([0; 6])
+            .chain(self.anc_personalized_to_ear_canal.bytes())
+            .chain(iter::once(0))
             .chain([self.touch_tone.0.into()])
             .chain(iter::once(0))
             .chain(self.limit_high_volume.bytes())
