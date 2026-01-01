@@ -188,3 +188,6 @@ db-refresh-rate = DB Refresh Rate
 real-time = Real Time
 
 percent = { $percent }%
+
+immersive-experience = Immersive Experience
+movie-mode = Movie Mode

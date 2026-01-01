@@ -1,7 +1,7 @@
 use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::{
-    a3955,
+    a3955::{self, structures::ImmersiveExperience},
     common::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         structures::{
@@ -32,6 +32,7 @@ pub struct A3955State {
     limit_high_volume: LimitHighVolume,
     touch_tone: TouchTone,
     low_battery_prompt: LowBatteryPrompt,
+    immersive_experience: ImmersiveExperience,
     button_reset_pending: ResetButtonConfigurationPending,
 }
 
@@ -55,6 +56,7 @@ impl From<a3955::packets::inbound::A3955StateUpdatePacket> for A3955State {
             limit_high_volume: packet.limit_high_volume,
             touch_tone: packet.touch_tone,
             low_battery_prompt: packet.low_battery_prompt,
+            immersive_experience: packet.immersive_experience,
             button_reset_pending: ResetButtonConfigurationPending::default(),
         }
     }

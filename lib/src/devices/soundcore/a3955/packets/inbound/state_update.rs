@@ -47,6 +47,7 @@ pub struct A3955StateUpdatePacket {
     pub limit_high_volume: common::structures::LimitHighVolume,
     pub auto_power_off: common::structures::AutoPowerOff,
     pub low_battery_prompt: common::structures::LowBatteryPrompt,
+    pub immersive_experience: a3955::structures::ImmersiveExperience,
     // pub gaming_mode: bool,
 }
 
@@ -70,7 +71,7 @@ impl Default for A3955StateUpdatePacket {
             limit_high_volume: Default::default(),
             low_battery_prompt: Default::default(),
             gender: Default::default(),
-            // gaming_mode: Default::default(),
+            immersive_experience: Default::default(),
         }
     }
 }
@@ -155,7 +156,12 @@ impl FromPacketBody for A3955StateUpdatePacket {
                         limit_high_volume,
                         auto_power_off,
                         low_battery_prompt,
-                        gender: Default::default(), // unknown
+                        // TODO figure out where in the packet immersive experience is
+                        // I tried setting all 0 bytes to 1, and that didn't enable immersive experience,
+                        // so maybe there's a separate packet for it?
+                        immersive_experience: Default::default(),
+                        // unknown
+                        gender: Default::default(),
                     }
                 },
             ),
