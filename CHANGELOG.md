@@ -7,6 +7,7 @@
 #### Features
 
 - Add support for Soundcore Space One
+- Add support for Soundcore P20i / Soundcore R50i
 
 #### Fixes
 
