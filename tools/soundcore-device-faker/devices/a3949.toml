@@ -1,0 +1,97 @@
+name = "soundcore P20i"
+mac_address = "00:00:00:00:39:49"
+rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B3949"
+
+[[responses]]
+# State update
+command = [1, 1]
+response = [
+    0,    # host device
+    1,    # tws connected
+    3,    # left battery level
+    4,    # right battery level
+    0,    # left battery charging
+    0,    # right battery charging
+    49,   # left firmware version
+    52,
+    46,
+    52,
+    51,   # left firmware version end
+    49,   # right firmware version
+    52,
+    46,
+    52,
+    51,   # right firmware version end
+    51,   # serial number
+    57,
+    52,
+    57,
+    66,
+    57,
+    65,
+    69,
+    67,
+    55,
+    50,
+    67,
+    57,
+    67,
+    49,
+    56,   # serial number end
+    0,    # EQ preset
+    0,    # EQ preset
+    120,  # left volume adjustments
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    0,    # left volume adjustments end
+    0,    # right volume adjustments
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,    # right volume adjustments end
+    14,   # unknown
+    1,    # left single tap enabled
+    0x00, # left single tap action
+    1,    # right single tap enabled
+    0x11, # right single tap action
+    1,    # left double tap enabled
+    0x22, # left double tap action
+    1,    # right double tap enabled
+    0x33, # right double tap action
+    1,    # left tap and hold enabled
+    0x55, # left tap and hold action
+    1,    # right tap and hold enabled
+    0x66, # right tap and hold action
+    255,  # unknown
+    255,  # unknown
+    255,  # unknown
+    97,   # unknown
+    0,    # gaming mode
+    1,    # touch tone
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+]
