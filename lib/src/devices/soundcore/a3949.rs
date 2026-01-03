@@ -225,4 +225,47 @@ mod tests {
             (SettingId::RightLongPress, Some("NextSong").into()),
         ]);
     }
+
+    #[tokio::test(start_paused = true)]
+    async fn p25i_matches_soundcore_app() {
+        let device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreA3949,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        0, 1, 5, 5, 0, 0, 48, 56, 46, 51, 48, 48, 56, 46, 51, 48, 51, 57, 52, 57,
+                        70, 51, 70, 70, 66, 50, 54, 54, 65, 69, 70, 48, 14, 0, 120, 150, 150, 140,
+                        160, 170, 150, 160, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 1, 255, 1,
+                        255, 1, 101, 1, 102, 1, 50, 1, 51, 255, 255, 255, 49, 0, 1, 255, 255, 255,
+                        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                    ],
+                ),
+            )]),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+        device.assert_setting_values([
+            (SettingId::FirmwareVersionLeft, "08.30".into()),
+            (SettingId::FirmwareVersionRight, "08.30".into()),
+            (SettingId::SerialNumber, "3949F3FFB266AEF0".into()),
+            (SettingId::TouchTone, true.into()),
+            (SettingId::GamingMode, false.into()),
+            (SettingId::PresetEqualizerProfile, Some("Piano").into()),
+            (
+                SettingId::LeftSinglePress,
+                Value::OptionalString(None).into(),
+            ),
+            (
+                SettingId::RightSinglePress,
+                Value::OptionalString(None).into(),
+            ),
+            (SettingId::LeftDoublePress, Some("VoiceAssistant").into()),
+            (SettingId::RightDoublePress, Some("PlayPause").into()),
+            (SettingId::LeftLongPress, Some("PreviousSong").into()),
+            (SettingId::RightLongPress, Some("NextSong").into()),
+        ]);
+    }
 }
