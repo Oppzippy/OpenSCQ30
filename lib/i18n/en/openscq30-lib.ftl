@@ -21,6 +21,7 @@ soundcore-a3951 = Soundcore Liberty Air 2 Pro
 soundcore-a3939 = Soundcore Life P3
 soundcore-a3935 = Soundcore Life A2 NC
 soundcore-a3959 = Soundcore P30i / Soundcore R50i NC
+soundcore-a3955 = Soundcore P40i
 soundcore-development = Soundcore Development Information
 
 general = General
@@ -77,6 +78,7 @@ train = Train
 bus = Bus
 car = Car
 talk-mode = Talk Mode
+anc-personalized-to-ear-canal = ANC Personalized to Ear Canal
 
 soundcore-signature = Soundcore Signature
 acoustic = Acoustic
@@ -187,3 +189,6 @@ db-refresh-rate = DB Refresh Rate
 real-time = Real Time
 
 percent = { $percent }%
+
+immersive-experience = Immersive Experience
+movie-mode = Movie Mode

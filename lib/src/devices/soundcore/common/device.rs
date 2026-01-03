@@ -828,6 +828,7 @@ pub mod test_utils {
             assert_eq!(sent_packets_bytes, expected_packets_bytes);
         }
 
+        #[must_use]
         async fn set_settings_and_gather_sent_packets(
             &mut self,
             settings: Vec<(SettingId, Value)>,

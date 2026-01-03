@@ -1,3 +1,5 @@
+use std::iter;
+
 use nom::{
     IResult, Parser,
     combinator::map,
@@ -117,6 +119,15 @@ impl<const CHANNELS: usize, const BANDS: usize> CustomHearId<CHANNELS, BANDS> {
             ),
         )
         .parse_complete(input)
+    }
+
+    pub fn bytes_with_music_genre_at_end(&self) -> impl Iterator<Item = u8> {
+        iter::once(u8::from(self.is_enabled))
+            .chain(self.volume_adjustment_bytes())
+            .chain(self.time.to_be_bytes())
+            .chain(iter::once(self.hear_id_type as u8))
+            .chain(self.custom_volume_adjustment_bytes())
+            .chain(self.favorite_music_genre.bytes())
     }
 
     pub fn volume_adjustment_bytes(&self) -> impl Iterator<Item = u8> {
