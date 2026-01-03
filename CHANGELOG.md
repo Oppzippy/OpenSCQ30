@@ -8,6 +8,7 @@
 
 - Add support for Soundcore Space One
 - Add support for Soundcore P20i / Soundcore P25i / Soundcore R50i
+- Add support for Soundcore P40i
 
 #### Fixes
 
