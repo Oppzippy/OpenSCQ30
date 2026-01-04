@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.2.1
+
+### General
+
+#### Fixes
+
+- Bluetooth not working at all on Windows
+
 ## v2.2.0
 
 ### General

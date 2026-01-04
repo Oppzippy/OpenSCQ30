@@ -41,6 +41,14 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.2.1" date="2026-01-04">
+            <description>
+                <p>Fixes</p>
+                <ul>
+                    <li>Bluetooth not working at all on Windows</li>
+                </ul> 
+            </description>
+        </release>
         <release version="2.2.0" date="2026-01-04">
             <description>
                 <p>Features</p>
