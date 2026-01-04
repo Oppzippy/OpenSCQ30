@@ -41,11 +41,11 @@ impl RfcommBackend for WindowsRfcommBackend {
                 )
                 .into(),
             )?
-            .GetResults()?;
+            .join()?;
             let mut descriptors = HashSet::with_capacity(devices.Size()? as usize);
             for device in devices {
                 let id = device.Id()?;
-                let bluetooth_device = BluetoothDevice::FromIdAsync(&id)?.GetResults()?;
+                let bluetooth_device = BluetoothDevice::FromIdAsync(&id)?.join()?;
                 let name = bluetooth_device.Name()?.to_string_lossy();
                 let mac_address = MacAddr6::from_windows_u64(bluetooth_device.BluetoothAddress()?);
                 descriptors.insert(connection::ConnectionDescriptor { name, mac_address });
@@ -69,7 +69,7 @@ impl RfcommBackend for WindowsRfcommBackend {
             let device = Self::get_bluetooth_device_from_mac_address(mac_address)?;
 
             trace!("finding desired service");
-            let services = device.GetRfcommServicesAsync()?.GetResults()?.Services()?;
+            let services = device.GetRfcommServicesAsync()?.join()?.Services()?;
             let services_by_uuid = services
                 .clone()
                 .into_iter()
@@ -93,7 +93,7 @@ impl RfcommBackend for WindowsRfcommBackend {
                     &service.ConnectionServiceName()?,
                     SocketProtectionLevel::BluetoothEncryptionAllowNullAuthentication,
                 )?
-                .GetResults()?;
+                .join()?;
 
             WindowsRfcommConnection::new(AgileReference::new(&device)?, socket)
         })
@@ -119,7 +119,7 @@ impl WindowsRfcommBackend {
         let filter: HSTRING = format!("{connected_filter} AND {mac_address_filter} AND System.Devices.Aep.IsPresent:=System.StructuredQueryType.Boolean#True").into();
         trace!("built filter {filter}");
         let device_information_collection =
-            DeviceInformation::FindAllAsyncAqsFilter(&filter)?.GetResults()?;
+            DeviceInformation::FindAllAsyncAqsFilter(&filter)?.join()?;
         trace!(
             "found {} matching devices",
             device_information_collection.Size()?
@@ -132,7 +132,7 @@ impl WindowsRfcommBackend {
         }
         let device_information = device_information_collection.First()?.Current()?;
 
-        Ok(BluetoothDevice::FromIdAsync(&device_information.Id()?)?.GetResults()?)
+        Ok(BluetoothDevice::FromIdAsync(&device_information.Id()?)?.join()?)
     }
 }
 
@@ -195,7 +195,7 @@ impl WindowsRfcommConnection {
                     trace!("waiting for inbound packet");
                     stream
                         .ReadAsync(&buffer, 1000, InputStreamOptions::Partial)?
-                        .GetResults()?;
+                        .join()?;
 
                     let mut packet = vec![0; buffer.Length()? as usize];
                     let reader = DataReader::FromBuffer(&buffer)?;
@@ -234,7 +234,7 @@ impl RfcommConnection for WindowsRfcommConnection {
             let buffer = writer.DetachBuffer()?;
 
             let stream = socket.resolve()?.OutputStream()?;
-            stream.WriteAsync(&buffer)?.GetResults()?;
+            stream.WriteAsync(&buffer)?.join()?;
             trace!("wrote packet: {data:?}");
             Ok(())
         })
