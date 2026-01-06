@@ -63,6 +63,13 @@ impl OpenSCQ30Session {
             .collect())
     }
 
+    pub async fn last_connected_device(
+        &self,
+    ) -> Result<Option<serializable::PairedDevice>, crate::OpenSCQ30Error> {
+        let device = self.inner.last_connected_device().await?;
+        Ok(device.map(serializable::PairedDevice))
+    }
+
     pub async fn list_demo_devices(
         &self,
         model: serializable::DeviceModel,

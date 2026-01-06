@@ -114,6 +114,41 @@ pub fn delete(connection: &Connection, mac_address: MacAddr6) -> Result<(), Erro
     Ok(())
 }
 
+pub fn update_last_connected(connection: &Connection, mac_address: MacAddr6) -> Result<(), Error> {
+    connection.execute(
+        "UPDATE paired_device SET last_connected_at = strftime('%s') WHERE mac_address = ?1",
+        (SqliteMacAddr6(mac_address),),
+    )?;
+    Ok(())
+}
+
+#[instrument(skip(connection))]
+pub fn fetch_last_connected(connection: &Connection) -> Result<Option<PairedDevice>, Error> {
+    let mut statement = connection.prepare_cached(
+        "SELECT mac_address, model, is_demo FROM paired_device ORDER BY last_connected_at DESC LIMIT 1",
+    )?;
+    let devices = statement
+        .query(())?
+        .mapped(|row| {
+            let mac_address: SqliteMacAddr6 = row.get("mac_address")?;
+            let model: SqliteDeviceModel = row.get("model")?;
+            let is_demo: bool = row.get("is_demo")?;
+            Ok(PairedDevice {
+                mac_address: mac_address.0,
+                model: model.0,
+                is_demo,
+            })
+        })
+        .find_map(|result| match result {
+            Ok(device) => Some(device),
+            Err(err) => {
+                warn!("error parsing row: {err:?}");
+                None
+            }
+        });
+    Ok(devices)
+}
+
 #[cfg(test)]
 mod tests {
     use std::collections::HashSet;

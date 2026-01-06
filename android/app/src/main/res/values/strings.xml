@@ -95,4 +95,5 @@
     </string>
     <string name="delete_quick_preset">Delete Quick Preset</string>
     <string name="error_deleting_quick_preset">Error deleting quick preset</string>
+    <string name="modes_widget">Ambient Sound Mode</string>
 </resources>

@@ -154,7 +154,13 @@ class DeviceSelectionViewModel @Inject constructor(
     suspend fun launchConnectScreen() {
         pageState.value = DeviceSelectionPage.Loading
         val devices = session.pairedDevices()
-        pageState.value = DeviceSelectionPage.Connect(devices)
+        val lastConnected = session.lastConnectedDevice()
+        val sortedDevices = if (lastConnected != null) {
+            devices.sortedByDescending { it.macAddress == lastConnected.macAddress }
+        } else {
+            devices
+        }
+        pageState.value = DeviceSelectionPage.Connect(sortedDevices)
     }
 
     fun selectModel(model: String) {

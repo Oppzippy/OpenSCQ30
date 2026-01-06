@@ -214,6 +214,8 @@ commands!(
     paired_device::insert => fn insert_paired_device(paired_device: PairedDevice) -> Result<()>;
     paired_device::upsert => fn upsert_paired_device(paired_device: PairedDevice) -> Result<()>;
     paired_device::delete => fn delete_paired_device(mac_address: MacAddr6) -> Result<()>;
+    paired_device::update_last_connected => fn update_last_connected_device(mac_address: MacAddr6) -> Result<()>;
+    paired_device::fetch_last_connected => fn fetch_last_connected_device() -> Result<Option<PairedDevice>>;
     quick_preset::fetch => fn fetch_quick_preset(
         model: DeviceModel,
         name: String,

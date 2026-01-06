@@ -1,0 +1,15 @@
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:initialLayout="@layout/glance_default_loading_layout"
+    android:previewImage="@drawable/widget_preview"
+    android:maxResizeWidth="2000dp"
+    android:maxResizeHeight="1000dp"
+    android:minWidth="100dp"
+    android:minHeight="40dp"
+    android:resizeMode="horizontal|vertical"
+    android:targetCellWidth="3"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="86400000"
+    android:widgetCategory="home_screen"
+    android:description="@string/modes_widget"
+    android:widgetFeatures="reconfigurable">
+</appwidget-provider>

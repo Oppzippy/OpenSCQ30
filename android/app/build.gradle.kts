@@ -200,6 +200,14 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     testImplementation(kotlin("reflect"))
     androidTestImplementation(kotlin("reflect"))
+
+    // widgets
+    implementation("androidx.glance:glance-appwidget:1.1.1")
+    // For interop APIs with Material 3
+    implementation("androidx.glance:glance-material3:1.1.1")
+    debugImplementation("androidx.glance:glance-preview:1.2.0-rc01")
+    debugImplementation("androidx.glance:glance-appwidget-preview:1.2.0-rc01")
+
 }
 
 kapt {

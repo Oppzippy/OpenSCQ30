@@ -128,10 +128,22 @@ impl OpenSCQ30Session {
                     .device_registry(backends, self.database.clone())
                     .await?
             };
-            registry.connect(mac_address).await
+            let device = registry.connect(mac_address).await?;
+            self.database
+                .update_last_connected_device(mac_address)
+                .await?;
+            Ok(device)
         } else {
             Err(device::Error::DeviceNotFound { mac_address })
         }
+    }
+
+    /// Returns the last connected paired device.
+    pub async fn last_connected_device(&self) -> device::Result<Option<PairedDevice>> {
+        self.database
+            .fetch_last_connected_device()
+            .await
+            .map_err(Into::into)
     }
 
     pub fn quick_preset_handler(&self) -> QuickPresetsHandler {
