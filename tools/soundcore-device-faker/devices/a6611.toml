@@ -6,21 +6,21 @@ rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B6611"
 command = [1, 1]
 # State update
 response = [
-    1,
-    1,
-    9,
-    9,
-    48,
+    1,    # host device
+    1,    # tws connected
+    7,    # left battery level (0=10%, 9=100%)
+    8,    # right battery level (0=10%, 9=100%)
+    48,   # left firmware
     49,
     46,
     53,
-    48,
-    48,
+    48,   # left firmware end
+    48,   # right firmware
     49,
     46,
     53,
-    48,
-    54,
+    48,   # right firmware end
+    54,   # SN start
     54,
     49,
     49,
@@ -35,10 +35,10 @@ response = [
     53,
     54,
     53,
-    67,
-    4,
-    0,
-    150,
+    67,   # SN end
+    4,    # EQ preset
+    0,    # EQ preset
+    150,  # left volume adjustments start
     150,
     100,
     100,
@@ -47,7 +47,8 @@ response = [
     150,
     160,
     120,
-    0,
+    0,    # left volume adjustments end
+    255,  # right volume adjustments start
     255,
     255,
     255,
@@ -56,33 +57,32 @@ response = [
     255,
     255,
     255,
-    255,
-    255,
+    255,  # right volume adjustments end
     6,
-    221,
-    51,
-    17,
-    0,
+    0xdd, # left double tap
+    0x33, # right double tap
+    0x11, # left tap 3 times
+    0x00, # right tap 3 times
+    255,
+    3,    # unknown but if 255 disables next alarm
+    1,    # next alarm enabled?
+    50,   # next alarm minutes
+    8,    # next alarm hours (in some particular timezone?)
     255,
     255,
     255,
-    255,
-    255,
-    255,
-    255,
-    255,
-    0,
-    0,
-    2,
-    120,
-    0,
-    0,
+    0,    # sleep mode
+    0,    # unknown
+    2,    # stop audio after sleep (1=enabled, 2=disabled?)
+    120,  # stop audio after sleep time in minutes (soundcore app allows 1h to 8h in 30m increments)
+    0,    # unknown
+    0,    # sleep smart switch
     255,
     255,
     255,
     1,
-    1,
-    0,
+    1,    # touch tone
+    0,    # low battery prompt
     49,
     0,
     2,
@@ -130,11 +130,229 @@ response = [
     2,
     1,
     3,
+    0,    # auto shutdown notification
+    1,    # mode switch notification (when switching between bluetooth and sleep modes)
+    8,    # case battery level (0=10%, 9=100%)
     0,
+    0,
+    0,
+    0,
+]
+
+[[responses]]
+# maybe firmware version?
+command = [1, 5]
+response = [
+    47,
+    47,
+    46,
+    47,
+    47,
+    47,
+    47,
+    46,
+    47,
+    47,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+]
+
+[[responses]]
+# unknown
+command = [5, 3]
+response = [
     1,
-    8,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+]
+
+[[responses]]
+# unknown
+command = [5, 1]
+response = [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+]
+
+[[responses]]
+# unknown
+command = [1, 166]
+response = [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+]
+
+
+[[responses]]
+# get alarms
+command = [20, 1]
+response = [
+    0,          # alarm 1 id
+    1,          # alarm 1 enabled
+    60,         # alarm 1 time (in minutes since 00:00, little endian)
+    0,          # alarm 1 time (in minutes since 00:00, little endian)
+    0b11111000, # alarm 1 repeat (sun, mon, tues, wed, thurs, fri, sat, unused) 0=no repeat
+    1,          # alarm 1 wake up tune (0=serenity, 1=spring rain, 2=explore, 3=puppy)
     0,
+    1,          # alarm 2 id
+    1,          # alarm 2 enabled
+    120,        # alarm 2 time
+    0,          # alarm 2 time
+    0,          # alarm 2 repeat
+    0,          # alarm 2 wake up tune
     0,
+    2,          # alarm 3 id
+    1,          # alarm 3 enabled
+    180,        # alarm 3 time
+    0,          # alarm 3 time
+    0,          # alarm 3 repeat
+    0,          # alarm 3 wake up tune
     0,
+    3,          # alarm 4 id
+    1,          # alarm 4 enabled
+    240,        # alarm 4 time
+    0,          # alarm 4 time
+    0,          # alarm 4 repeat
+    0,          # alarm 4 wake up tune
+    0,
+    4,          # alarm 5 id
+    1,          # alarm 5 enabled
+    45,         # alarm 5 time
+    1,          # alarm 5 time
+    0,          # alarm 5 repeat
+    0,          # alarm 5 wake up tune
     0,
 ]
