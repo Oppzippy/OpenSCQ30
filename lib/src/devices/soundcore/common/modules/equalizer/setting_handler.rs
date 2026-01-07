@@ -73,7 +73,7 @@ impl<
                 "there can't be more preset bands than there are total bands",
             );
             assert!(
-                PRESET_BANDS <= VISIBLE_BANDS,
+                PRESET_BANDS >= VISIBLE_BANDS,
                 "there can't be fewer preset bands than visible bands",
             );
         }
