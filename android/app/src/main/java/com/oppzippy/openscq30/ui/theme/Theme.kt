@@ -9,6 +9,8 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.glance.GlanceTheme
+import androidx.glance.material3.ColorProviders
 
 private val lightColorScheme = lightColorScheme(
     primary = primaryLight,
@@ -108,4 +110,11 @@ fun OpenSCQ30Theme(
         typography = Typography,
         content = content,
     )
+}
+
+@Composable
+fun OpenSCQ30GlanceTheme(content: @Composable () -> Unit) {
+    GlanceTheme(colors = ColorProviders(light = lightColorScheme, dark = darkColorScheme)) {
+        content()
+    }
 }

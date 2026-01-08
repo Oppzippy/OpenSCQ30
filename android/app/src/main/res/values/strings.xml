@@ -95,4 +95,7 @@
     </string>
     <string name="delete_quick_preset">Delete Quick Preset</string>
     <string name="error_deleting_quick_preset">Error deleting quick preset</string>
+    <string name="connected">Connected</string>
+    <string name="connecting">Connecting</string>
+    <string name="configure_widget">Configure Widget</string>
 </resources>

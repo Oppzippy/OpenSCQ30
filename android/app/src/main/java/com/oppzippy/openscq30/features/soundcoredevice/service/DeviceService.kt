@@ -16,21 +16,19 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.soundcoredevice.connectionBackends
-import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_DISCONNECT
-import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_QUICK_PRESET
-import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_SEND_NOTIFICATION
-import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.INTENT_EXTRA_PRESET_ID
-import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_CHANNEL_ID
-import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_ID
 import com.oppzippy.openscq30.features.statusnotification.storage.FeaturedSettingSlotDao
 import com.oppzippy.openscq30.features.statusnotification.storage.QuickPresetSlotDao
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Exception
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
+import com.oppzippy.openscq30.lib.bindings.SettingIdValuePair
+import com.oppzippy.openscq30.lib.wrapper.Value
+import com.oppzippy.openscq30.widget.updateSettingWidgets
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -49,7 +47,26 @@ class DeviceService : LifecycleService() {
         private const val TAG = "DeviceService"
 
         /** Intent extra for setting mac address when launching service */
-        const val MAC_ADDRESS = "com.oppzippy.openscq30.macAddress"
+        const val INTENT_EXTRA_MAC_ADDRESS = "com.oppzippy.openscq30.macAddress"
+
+        const val NOTIFICATION_CHANNEL_ID = "com.oppzippy.openscq30.notification.DeviceServiceChannel"
+        const val NOTIFICATION_ID = 1
+
+        const val ACTION_QUICK_PRESET = "com.oppzippy.openscq30.broadcast.QuickPreset"
+        const val ACTION_DISCONNECT = "com.oppzippy.openscq30.broadcast.Disconnect"
+        const val ACTION_SEND_NOTIFICATION = "com.oppzippy.openscq30.broadcast.SendNotification"
+        const val ACTION_SET_SETTING_VALUE = "com.oppzippy.openscq30.broadcast.SetSettingValue"
+
+        private val ACTION_INTENT_FILTER = IntentFilter().apply {
+            addAction(ACTION_DISCONNECT)
+            addAction(ACTION_QUICK_PRESET)
+            addAction(ACTION_SEND_NOTIFICATION)
+            addAction(ACTION_SET_SETTING_VALUE)
+        }
+
+        const val INTENT_EXTRA_PRESET_ID = "com.oppzippy.openscq30.presetNumber"
+        const val INTENT_EXTRA_SETTING_ID = "com.oppzippy.openscq30.settingId"
+        const val INTENT_EXTRA_SETTING_VALUE = "com.oppzippy.openscq30.settingValue"
 
         private val _isRunning = MutableStateFlow(false)
         val isRunning = _isRunning.asStateFlow()
@@ -116,6 +133,27 @@ class DeviceService : LifecycleService() {
                 ACTION_SEND_NOTIFICATION -> {
                     sendNotification()
                 }
+
+                ACTION_SET_SETTING_VALUE -> {
+                    lifecycleScope.launch {
+                        val settingId = intent.getStringExtra(INTENT_EXTRA_SETTING_ID)
+                        val value = intent.getParcelableExtra(INTENT_EXTRA_SETTING_VALUE, Value::class.java)
+                        if (settingId != null && value != null) {
+                            connectionStatusFlow.value.let {
+                                if (it is ConnectionStatus.Connected) {
+                                    val device = it.deviceManager.device
+                                    try {
+                                        device.setSettingValues(listOf(SettingIdValuePair(settingId, value)))
+                                    } catch (ex: IllegalStateException) {
+                                        Log.w(TAG, "device was closed, not setting values", ex)
+                                    }
+                                }
+                            }
+                        } else {
+                            Log.e(TAG, "$ACTION_SET_SETTING_VALUE requires settingId and value to be set")
+                        }
+                    }
+                }
             }
         }
     }
@@ -127,14 +165,10 @@ class DeviceService : LifecycleService() {
         lifecycleScope.launch { quickPresetNames.collectLatest { sendNotification() } }
         lifecycleScope.launch { featuredSettingIds.collectLatest { sendNotification() } }
 
-        val filter = IntentFilter(ACTION_DISCONNECT).apply {
-            addAction(ACTION_QUICK_PRESET)
-            addAction(ACTION_SEND_NOTIFICATION)
-        }
         ContextCompat.registerReceiver(
             this,
             broadcastReceiver,
-            filter,
+            ACTION_INTENT_FILTER,
             ContextCompat.RECEIVER_NOT_EXPORTED,
         )
 
@@ -147,7 +181,7 @@ class DeviceService : LifecycleService() {
         val notification = buildNotification()
         startForeground(NOTIFICATION_ID, notification)
 
-        intent?.getStringExtra(MAC_ADDRESS)?.let { macAddress ->
+        intent?.getStringExtra(INTENT_EXTRA_MAC_ADDRESS)?.let { macAddress ->
             lifecycleScope.launch {
                 try {
                     val device = session.connectWithBackends(
@@ -194,6 +228,16 @@ class DeviceService : LifecycleService() {
                 }
             }
         }
+        lifecycleScope.launch {
+            connectionStatusFlow.collectLatest { connectionStatus ->
+                updateSettingWidgets(applicationContext, session, connectionStatus)
+                if (connectionStatus is ConnectionStatus.Connected) {
+                    connectionStatus.deviceManager.watchForChangeNotification.collectLatest {
+                        updateSettingWidgets(applicationContext, session, connectionStatus)
+                    }
+                }
+            }
+        }
 
         return START_REDELIVER_INTENT
     }
@@ -208,6 +252,9 @@ class DeviceService : LifecycleService() {
                 connectionStatusFlow.value = ConnectionStatus.Disconnected
                 it.deviceManager.close()
             }
+        }
+        MainScope().launch {
+            updateSettingWidgets(applicationContext, session, ConnectionStatus.Disconnected)
         }
         _isRunning.value = false
     }
@@ -227,13 +274,13 @@ class DeviceService : LifecycleService() {
 
     private fun sendNotification() {
         val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(NOTIFICATION_ID, buildNotification())
     }
 
     private fun cancelNotification() {
         val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(NOTIFICATION_ID)
     }
 

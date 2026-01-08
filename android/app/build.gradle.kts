@@ -193,6 +193,10 @@ dependencies {
     // Compose navigation
     implementation("androidx.navigation:navigation-compose:2.9.6")
 
+    val glanceVersion = "1.2.0-rc01"
+    implementation("androidx.glance:glance-appwidget:$glanceVersion")
+    implementation("androidx.glance:glance-material3:$glanceVersion")
+
     val accompanistVersion = "0.37.3"
     implementation("com.google.accompanist:accompanist-permissions:$accompanistVersion")
 

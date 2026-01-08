@@ -45,7 +45,7 @@ class BluetoothConnectionReceiver(
                     if (isPaired(context, device.address)) {
                         Log.d(TAG, "auto connecting to ${device.address}")
                         val serviceIntent = Intent(context, DeviceService::class.java)
-                        serviceIntent.putExtra(DeviceService.MAC_ADDRESS, device.address)
+                        serviceIntent.putExtra(DeviceService.INTENT_EXTRA_MAC_ADDRESS, device.address)
                         context.startForegroundService(serviceIntent)
                     }
                 }

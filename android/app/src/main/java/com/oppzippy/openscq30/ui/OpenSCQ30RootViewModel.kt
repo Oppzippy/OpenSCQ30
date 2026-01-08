@@ -92,7 +92,7 @@ class OpenSCQ30RootViewModel @Inject constructor(
 
     fun selectDevice(macAddress: String) {
         val intent = intentFactory(application, DeviceService::class.java)
-        intent.putExtra(DeviceService.MAC_ADDRESS, macAddress)
+        intent.putExtra(DeviceService.INTENT_EXTRA_MAC_ADDRESS, macAddress)
         application.startForegroundService(intent)
         bindDeviceService()
     }

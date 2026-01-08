@@ -12,7 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification
+import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
 import com.oppzippy.openscq30.lib.bindings.translateSettingId
 import com.oppzippy.openscq30.ui.utils.PermissionCheck
 
@@ -47,7 +47,7 @@ fun StatusNotificationPage(
                 // notification to ensure it is visible.
                 context.sendBroadcast(
                     Intent().apply {
-                        action = SoundcoreDeviceNotification.ACTION_SEND_NOTIFICATION
+                        action = DeviceService.ACTION_SEND_NOTIFICATION
                         `package` = context.packageName
                     },
                 )

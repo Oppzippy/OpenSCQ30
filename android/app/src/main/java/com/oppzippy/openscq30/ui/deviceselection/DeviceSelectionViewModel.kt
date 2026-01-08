@@ -20,12 +20,14 @@ import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
 import com.oppzippy.openscq30.lib.wrapper.ConnectionDescriptor
 import com.oppzippy.openscq30.lib.wrapper.PairedDevice
 import com.oppzippy.openscq30.ui.utils.ToastHandler
+import com.oppzippy.openscq30.widget.SettingWidget
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -43,6 +45,13 @@ class DeviceSelectionViewModel @Inject constructor(
 
     init {
         viewModelScope.launch { refreshPairedDevices() }
+
+        viewModelScope.launch {
+            // TODO instead make this a global event of some sort that can be subscribed to
+            pairedDevices.collectLatest {
+                SettingWidget.updatePairedDevices(application, session.pairedDevices())
+            }
+        }
     }
 
     // Hack to work around older android versions not having onAssociationCreated

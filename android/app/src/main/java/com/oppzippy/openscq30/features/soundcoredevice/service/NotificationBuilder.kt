@@ -7,10 +7,6 @@ import android.content.Intent
 import android.graphics.drawable.Icon
 import com.oppzippy.openscq30.MainActivity
 import com.oppzippy.openscq30.R
-import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_DISCONNECT
-import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.ACTION_QUICK_PRESET
-import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.INTENT_EXTRA_PRESET_ID
-import com.oppzippy.openscq30.features.soundcoredevice.service.SoundcoreDeviceNotification.NOTIFICATION_CHANNEL_ID
 import com.oppzippy.openscq30.lib.bindings.translateDeviceModel
 import com.oppzippy.openscq30.lib.bindings.translateSettingId
 import com.oppzippy.openscq30.lib.bindings.translateValue
@@ -33,7 +29,7 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
             null
         }
 
-        val builder = Notification.Builder(context, NOTIFICATION_CHANNEL_ID).setOngoing(true)
+        val builder = Notification.Builder(context, DeviceService.NOTIFICATION_CHANNEL_ID).setOngoing(true)
             .setOnlyAlertOnce(true).setSmallIcon(R.drawable.headphones).setContentTitle(
                 when (status) {
                     is ConnectionStatus.AwaitingConnection -> context.getString(R.string.awaiting_connection)
@@ -74,7 +70,7 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
                         context,
                         1,
                         Intent().apply {
-                            action = ACTION_DISCONNECT
+                            action = DeviceService.ACTION_DISCONNECT
                             `package` = context.packageName
                         },
                         PendingIntent.FLAG_IMMUTABLE,
@@ -106,9 +102,9 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
                 context,
                 presetId + 2,
                 Intent().apply {
-                    action = ACTION_QUICK_PRESET
+                    action = DeviceService.ACTION_QUICK_PRESET
                     `package` = context.packageName
-                    putExtra(INTENT_EXTRA_PRESET_ID, presetId)
+                    putExtra(DeviceService.INTENT_EXTRA_PRESET_ID, presetId)
                 },
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
             ),
