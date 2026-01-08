@@ -109,3 +109,4 @@ plane = 飛行機
 soundcore-a3116 = Soundcore Motion+
 volume = 音量
 percent = { $percent }％
+x-seconds = { $seconds }秒
