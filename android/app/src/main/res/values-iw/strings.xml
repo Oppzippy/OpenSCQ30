@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="equalizer">איקוולייזר</string>
+    <string name="hz">%1$d Hz</string>
+    <string name="request_permission">בקשת הרשאה</string>
+    <string name="bluetooth_permission_is_required">נדרשת הרשאת בלוטות\'</string>
+    <string name="add">הוסף</string>
+    <string name="cancel">ביטול</string>
+    <string name="name">שם</string>
+    <string name="delete_confirm">האם אתה בטוח שאתה רוצה למחוק את \"%s\"?</string>
+    <string name="info">מידע</string>
+    <string name="source_code" tools:ignore="TypographyOther">&lt;p&gt;קוד המקור ודוחות הבאגים זמינים בכתובת &lt;a href=https://github.com/Oppzippy/OpenSCQ30&gt;https://github.com/Oppzippy/OpenSCQ30&lt;/a&gt;.&lt;/p&gt; &lt;br&gt; &lt;p&gt;זכויות יוצרים (C) Kyle Scheuing&lt;/p&gt; &lt;br&gt; &lt;p&gt;תוכנית זו היא תוכנה חופשית: ניתן להפיץ אותה מחדש ו/או לשנות אותה תחת תנאי הרישיון הציבורי הכללי של GNU כפי שפורסם על ידי קרן התוכנה החופשית, בין אם גרסה 3 של הרישיון, או (לפי בחירתך) כל גרסה מאוחרת יותר.&lt;/p&gt; &lt;br&gt; &lt;p&gt;תוכנית זו מופצת בתקווה שתהיה שימושית, אך ללא כל אחריות; אפילו ללא אחריות משתמעת לסחירות או התאמה למטרה מסוימת. עיין ברישיון הציבורי הכללי של GNU לפרטים נוספים.&lt;/p&gt; &lt;br&gt; &lt;p&gt;היית אמור לקבל עותק של הרישיון הציבורי הכללי של GNU יחד עם תוכנית זו. אם לא, ראה &lt;a href=https://www.gnu.org/licenses/&gt;https://www.gnu.org/licenses/&lt;/a&gt;&gt;.&lt;/p&gt;</string>
+    <string name="khz">%s kHz</string>
+    <string name="connecting_to">מתחבר אל %s</string>
+    <string name="loading">טעינה</string>
+</resources>
