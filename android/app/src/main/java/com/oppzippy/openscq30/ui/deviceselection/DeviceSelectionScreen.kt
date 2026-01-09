@@ -92,13 +92,15 @@ fun DeviceSelectionScreen(
             },
         ) {
             composable<Screen.Connect> {
+                val activity = LocalActivity.current!!
+
                 LaunchedEffect(true) {
                     viewModel.pollPairedDevicesOnOldAndroidVersions()
                 }
                 DeviceListing(
                     devices = viewModel.pairedDevices.collectAsState().value,
                     onDeviceClick = { onDeviceSelected(it) },
-                    onUnpair = { viewModel.unpair(it) },
+                    onUnpair = { viewModel.unpair(activity, it) },
                     onAddDeviceClick = { navController.navigate(Screen.SelectModelForPairing) },
                     onRefreshClick = { viewModel.refreshPairedDevices() },
                     onSettingsClick = { navController.navigate(Screen.Settings) },
