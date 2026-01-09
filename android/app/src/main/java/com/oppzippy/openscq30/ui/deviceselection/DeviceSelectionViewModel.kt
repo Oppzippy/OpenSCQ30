@@ -130,17 +130,22 @@ class DeviceSelectionViewModel @Inject constructor(
 
     fun unpair(activity: Activity, pairedDevice: PairedDevice) {
         viewModelScope.launch {
-            val deviceManager = activity.getSystemService(CompanionDeviceManager::class.java)
             // Unpair before removing the association, since if something goes wrong, it's less broken to still be
             // associated but not be paired with openscq30_lib rather than the other way around. The other way around would
             // show the user a device available to connect to that we can't actually connect to.
             session.unpair(pairedDevice.macAddress)
             refreshPairedDevices()
-            // CompanionDeviceManager.disassociate is case sensitive
-            deviceManager
-                .associations
-                .find { it.equals(pairedDevice.macAddress, ignoreCase = true) }
-                ?.let { deviceManager.disassociate(it) }
+            if (!pairedDevice.isDemo) {
+                val deviceManager = activity.getSystemService(CompanionDeviceManager::class.java)
+                // CompanionDeviceManager.disassociate is case sensitive
+                deviceManager
+                    .associations
+                    .find { it.equals(pairedDevice.macAddress, ignoreCase = true) }
+                    ?.let {
+                        Log.i(TAG, "disassociating from $it")
+                        deviceManager.disassociate(it)
+                    }
+            }
         }
     }
 
