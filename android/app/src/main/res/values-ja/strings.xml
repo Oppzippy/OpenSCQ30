@@ -42,4 +42,11 @@
     <string name="hz">%1$d Hz</string>
     <string name="khz">%s kHz</string>
     <string name="setting_id_with_value">%s：　%s</string>
+    <string name="awaiting_connection">未接続</string>
+    <string name="quick_presets">設定プリセット</string>
+    <string name="no_quick_presets">設定プリセットがない</string>
+    <string name="create_quick_preset">設定プリセットを作る</string>
+    <string name="error_pairing">ペアリングエラー</string>
+    <string name="delete_quick_preset">設定プリセットを削除</string>
+    <string name="error_connecting">接続エラー</string>
 </resources>
