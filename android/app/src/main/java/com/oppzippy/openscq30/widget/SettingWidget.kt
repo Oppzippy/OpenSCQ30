@@ -91,16 +91,21 @@ suspend fun updateSettingWidgets(context: Context, session: OpenScq30Session, co
                 is ConnectionStatus.Connecting -> SettingWidgetState.Connecting(connectionStatus.macAddress)
 
                 is ConnectionStatus.Connected -> {
-                    val device = connectionStatus.deviceManager.device
-                    val settingIds = preferences[SettingWidget.settingIdsKey(device.model())]
+                    try {
+                        val device = connectionStatus.deviceManager.device
+                        val settingIds = preferences[SettingWidget.settingIdsKey(device.model())]
 
-                    if (settingIds.isNullOrEmpty()) {
-                        SettingWidgetState.ConnectedUnconfigured(deviceName = translateDeviceModel(device.model()))
-                    } else {
-                        SettingWidgetState.Connected(
-                            deviceName = translateDeviceModel(device.model()),
-                            settings = settingIds.map { settingId -> Pair(settingId, device.setting(settingId)) },
-                        )
+                        if (settingIds.isNullOrEmpty()) {
+                            SettingWidgetState.ConnectedUnconfigured(deviceName = translateDeviceModel(device.model()))
+                        } else {
+                            SettingWidgetState.Connected(
+                                deviceName = translateDeviceModel(device.model()),
+                                settings = settingIds.map { settingId -> Pair(settingId, device.setting(settingId)) },
+                            )
+                        }
+                    } catch (ex: IllegalStateException) {
+                        Log.w("updateSettingWidgets", "device was closed, assuming we're actually disconnected", ex)
+                        SettingWidgetState.Disconnected(emptyList())
                     }
                 }
             }

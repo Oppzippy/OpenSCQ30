@@ -159,29 +159,46 @@ class DeviceSettingsManager(
             } catch (ex: OpenScq30Exception) {
                 Log.e(TAG, "error setting values of settings", ex)
                 toastHandler.add(R.string.error_changing_settings, Toast.LENGTH_SHORT)
+            } catch (ex: IllegalStateException) {
+                Log.w(TAG, "device was closed, not setting values", ex)
             }
         }
     }
 
     val categoryIdsFlow: Flow<List<String>>
         get() = deviceManager.watchForChangeNotification.map {
-            device.categories()
+            try {
+                device.categories()
+            } catch (ex: IllegalStateException) {
+                Log.w(TAG, "device was closed, can't update category ids", ex)
+                emptyList()
+            }
         }
 
     fun getSettingsInCategoryFlow(categoryId: String): Flow<List<Pair<String, Setting>>> =
         deviceManager.watchForChangeNotification.map {
-            device.settingsInCategory(categoryId).mapNotNull { settingId ->
-                device.setting(settingId)?.let { Pair(settingId, it) }
+            try {
+                device.settingsInCategory(categoryId).mapNotNull { settingId ->
+                    device.setting(settingId)?.let { Pair(settingId, it) }
+                }
+            } catch (ex: IllegalStateException) {
+                Log.w(TAG, "device was closed, can't get settings in category $categoryId", ex)
+                emptyList()
             }
         }
 
     val allSettingsFlow: Flow<List<Pair<String, Setting>>>
         get() = deviceManager.watchForChangeNotification.map {
-            device.categories()
-                .flatMap { device.settingsInCategory(it) }
-                .mapNotNull { settingId ->
-                    device.setting(settingId)?.let { setting -> Pair(settingId, setting) }
-                }
+            try {
+                device.categories()
+                    .flatMap { device.settingsInCategory(it) }
+                    .mapNotNull { settingId ->
+                        device.setting(settingId)?.let { setting -> Pair(settingId, setting) }
+                    }
+            } catch (ex: IllegalStateException) {
+                Log.w(TAG, "device was closed, can't get all settings", ex)
+                emptyList()
+            }
         }
 
     val featuredSettingSlots = featuredSettingSlotDao.allSettingIds(device.model()).map { slots ->
