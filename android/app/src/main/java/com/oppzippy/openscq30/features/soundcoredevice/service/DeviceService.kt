@@ -57,12 +57,12 @@ class DeviceService : LifecycleService() {
         const val ACTION_SEND_NOTIFICATION = "com.oppzippy.openscq30.broadcast.SendNotification"
         const val ACTION_SET_SETTING_VALUE = "com.oppzippy.openscq30.broadcast.SetSettingValue"
 
-        private val ACTION_INTENT_FILTER = IntentFilter().apply {
-            addAction(ACTION_DISCONNECT)
-            addAction(ACTION_QUICK_PRESET)
-            addAction(ACTION_SEND_NOTIFICATION)
-            addAction(ACTION_SET_SETTING_VALUE)
-        }
+        private val ACTIONS = listOf(
+            ACTION_DISCONNECT,
+            ACTION_QUICK_PRESET,
+            ACTION_SEND_NOTIFICATION,
+            ACTION_SET_SETTING_VALUE,
+        )
 
         const val INTENT_EXTRA_PRESET_ID = "com.oppzippy.openscq30.presetNumber"
         const val INTENT_EXTRA_SETTING_ID = "com.oppzippy.openscq30.settingId"
@@ -168,7 +168,7 @@ class DeviceService : LifecycleService() {
         ContextCompat.registerReceiver(
             this,
             broadcastReceiver,
-            ACTION_INTENT_FILTER,
+            IntentFilter().apply { ACTIONS.forEach { addAction(it) } },
             ContextCompat.RECEIVER_NOT_EXPORTED,
         )
 
