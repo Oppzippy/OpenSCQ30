@@ -1,4 +1,4 @@
-language-name = English
+language-name = Hebrew
 openscq30 = OpenSCQ30
 device-selection = בחירת מכשיר
 select-device = בחר מכשיר
