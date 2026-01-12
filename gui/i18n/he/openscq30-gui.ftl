@@ -1,3 +1,4 @@
+language-name = English
 openscq30 = OpenSCQ30
 device-selection = בחירת מכשיר
 select-device = בחר מכשיר
@@ -38,3 +39,8 @@ migrate = העבר
 demo-mode = מצב הדגמה
 create-quick-preset = צור הגדרה מהירה
 delete-quick-preset = מחק הגדרה מהירה
+save = שמור
+overwrite-with-current-settings = החלף בהגדרות הנוכחיות
+confirm = אישור
+execute = בצע
+default = ברירת מחדל

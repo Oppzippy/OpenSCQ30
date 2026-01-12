@@ -37,4 +37,17 @@
     <string name="unpair_device">בטל צימוד מכשיר</string>
     <string name="unpairing_from_device_name">מבטל צימוד ל-%s</string>
     <string name="no_devices_found">לא נמצאו מכשירים</string>
+    <string name="select_device_model">בחר דגם מכשיר</string>
+    <string name="create_quick_preset">צור הגדרה מהירה</string>
+    <string name="status_notification">התראת סטטוס</string>
+    <string name="confirm">אישור</string>
+    <string name="featured_setting_x">הגדרה נבחרת %d</string>
+    <string name="demo">הדגמה</string>
+    <string name="quick_preset_slot_x">מיקום הגדרה מהירה %d</string>
+    <string name="notification_permission_is_required">נדרשת הרשאת התראות</string>
+    <string name="setting_id_with_value">%s: %s</string>
+    <string name="information">מידע</string>
+    <string name="close">סגור</string>
+    <string name="import_">ייבוא</string>
+    <string name="search">חיפוש</string>
 </resources>
