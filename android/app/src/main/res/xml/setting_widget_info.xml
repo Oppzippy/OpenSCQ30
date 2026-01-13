@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:initialLayout="@layout/glance_default_loading_layout"
+    android:previewImage="@drawable/widget_preview"
     android:configure="com.oppzippy.openscq30.widget.SettingWidgetConfigurationActivity"
     android:widgetFeatures="reconfigurable"
     android:minWidth="220dp"
