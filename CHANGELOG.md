@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Localization
+
+- Add Hebrew translations (thanks to Lotzi)
+- Update Japanese translations
+
+### Android
+
+#### Features
+
+- Add widget for connecting to devices and displaying a configurable setting. An option to show a disconnect button is planned.
+
+#### Fixes
+
+- Attempt to fix crash on some android versions when adding a device
+
 ## v2.2.1
 
 ### General
