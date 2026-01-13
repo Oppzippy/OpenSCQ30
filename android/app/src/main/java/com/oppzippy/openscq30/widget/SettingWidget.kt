@@ -61,6 +61,7 @@ import com.oppzippy.openscq30.lib.wrapper.Setting
 import com.oppzippy.openscq30.lib.wrapper.Value
 import com.oppzippy.openscq30.lib.wrapper.toValue
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30GlanceTheme
+import java.math.BigDecimal
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -302,7 +303,11 @@ private fun ShowSetting(context: Context, settingId: String, setting: Setting) {
             )
         }
 
-        is Setting.EqualizerSetting -> ReadOnlySettingValue(settingId, setting.value)
+        is Setting.EqualizerSetting -> {
+            val divisor = BigDecimal.ONE.scaleByPowerOfTen(setting.setting.fractionDigits.toInt())
+            val scaledValues = setting.value.map { BigDecimal(it.toInt()).divide(divisor) }
+            ReadOnlySettingValue(settingId, scaledValues.joinToString(separator = ", ", prefix = "[", postfix = "]"))
+        }
 
         is Setting.I32RangeSetting -> {
             Row {
@@ -437,11 +442,15 @@ private fun SelectableButton(modifier: GlanceModifier = GlanceModifier, text: St
 }
 
 @Composable
-private fun <T> ReadOnlySettingValue(settingId: String, value: T) {
+private fun ReadOnlySettingValue(settingId: String, value: String) {
     Row(GlanceModifier.fillMaxWidth()) {
-        Text(translateSettingId(settingId), style = defaultTextStyle())
-        Spacer(GlanceModifier.defaultWeight())
-        Text(value.toString(), style = defaultTextStyle())
+        Text(
+            modifier = GlanceModifier.defaultWeight(),
+            text = translateSettingId(settingId),
+            style = defaultTextStyle(),
+        )
+        Spacer(GlanceModifier.width(4.dp))
+        Text(modifier = GlanceModifier.defaultWeight(), text = value, style = defaultTextStyle())
     }
 }
 
