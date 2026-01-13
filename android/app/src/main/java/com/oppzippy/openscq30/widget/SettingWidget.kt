@@ -45,6 +45,7 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
+import androidx.glance.layout.wrapContentWidth
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.oppzippy.openscq30.R
@@ -348,9 +349,10 @@ class SettingWidget : GlanceAppWidget() {
     @Composable
     private fun Select(context: Context, settingId: String, setting: Select, value: String?, isOptional: Boolean) {
         @Composable
-        fun SelectButtons() {
+        fun SelectButtons(modifier: GlanceModifier = GlanceModifier) {
             if (isOptional) {
                 RadioButton(
+                    modifier = modifier,
                     text = context.getString(R.string.none),
                     onClick = actionSetSettingValue(context, settingId, Value.OptionalStringValue(null)),
                     checked = value == null,
@@ -358,6 +360,7 @@ class SettingWidget : GlanceAppWidget() {
             }
             setting.options.zip(setting.localizedOptions).forEach { (option, localizedOption) ->
                 RadioButton(
+                    modifier = modifier,
                     text = localizedOption,
                     onClick = actionSetSettingValue(context, settingId, option.toValue()),
                     checked = value == option,
@@ -368,8 +371,8 @@ class SettingWidget : GlanceAppWidget() {
         val size = LocalSize.current
         Column(GlanceModifier.fillMaxWidth()) {
             Text(translateSettingId(settingId), style = defaultTextStyle())
-            if (size.width >= 650.dp && setting.options.size <= 3) {
-                Row { SelectButtons() }
+            if (size.width >= 150.dp * setting.options.size) {
+                Row(GlanceModifier.fillMaxWidth()) { SelectButtons(modifier = GlanceModifier.defaultWeight()) }
             } else {
                 Column { SelectButtons() }
             }
