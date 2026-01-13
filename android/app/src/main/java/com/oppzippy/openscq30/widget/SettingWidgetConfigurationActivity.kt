@@ -49,6 +49,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 
 @AndroidEntryPoint
 class SettingWidgetConfigurationActivity : ComponentActivity() {
@@ -93,6 +94,24 @@ class SettingWidgetConfigurationActivity : ComponentActivity() {
                     enabledSettingIds.value = null
                 }
             }
+        }
+
+        lifecycleScope.launch {
+            updateAppWidgetState(this@SettingWidgetConfigurationActivity, glanceId) { state ->
+                state[SettingWidget.STATE_KEY] =
+                    Json.encodeToString<SettingWidgetState>(SettingWidgetState.Disconnected(session.pairedDevices()))
+            }
+            widget.update(applicationContext, glanceId)
+
+            // we want to exit this activity as quickly as possible, so do this in the background rather than waiting for
+            // the service to bind
+            sendBroadcast(
+                Intent().apply {
+                    `package` = packageName
+                    action = DeviceService.ACTION_UPDATE_WIDGET
+                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                },
+            )
         }
 
         enableEdgeToEdge()
@@ -192,8 +211,12 @@ class SettingWidgetConfigurationActivity : ComponentActivity() {
             val preferences = widget.getAppWidgetState<Preferences>(context, glanceId)
             enabledSettingIds.value = preferences[settingIdsKey] ?: emptySet()
 
-            SettingWidget.updateSettingWidgets(context, session, deviceServiceConnection.connectionStatusFlow.value)
-            widget.update(context, glanceId)
+            SettingWidget().updateConnectionStatus(
+                context,
+                session,
+                deviceServiceConnection.connectionStatusFlow.value,
+                glanceId,
+            )
         }
     }
 }

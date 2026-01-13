@@ -3,6 +3,7 @@ package com.oppzippy.openscq30.features.soundcoredevice.service
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.appwidget.AppWidgetManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -13,6 +14,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.oppzippy.openscq30.R
@@ -57,12 +59,14 @@ class DeviceService : LifecycleService() {
         const val ACTION_DISCONNECT = "com.oppzippy.openscq30.broadcast.Disconnect"
         const val ACTION_SEND_NOTIFICATION = "com.oppzippy.openscq30.broadcast.SendNotification"
         const val ACTION_SET_SETTING_VALUE = "com.oppzippy.openscq30.broadcast.SetSettingValue"
+        const val ACTION_UPDATE_WIDGET = "com.oppzippy.openscq30.broadcast.UPDATE_WIDGET"
 
         private val ACTIONS = listOf(
             ACTION_DISCONNECT,
             ACTION_QUICK_PRESET,
             ACTION_SEND_NOTIFICATION,
             ACTION_SET_SETTING_VALUE,
+            ACTION_UPDATE_WIDGET,
         )
 
         const val INTENT_EXTRA_PRESET_ID = "com.oppzippy.openscq30.presetNumber"
@@ -156,6 +160,25 @@ class DeviceService : LifecycleService() {
                         }
                     }
                 }
+
+                ACTION_UPDATE_WIDGET -> {
+                    val appWidgetId =
+                        intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
+                    if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                        val manager = GlanceAppWidgetManager(applicationContext)
+                        val glanceId = manager.getGlanceIdBy(appWidgetId)
+                        lifecycleScope.launch {
+                            SettingWidget().updateConnectionStatus(
+                                applicationContext,
+                                session,
+                                connectionStatusFlow.value,
+                                glanceId,
+                            )
+                        }
+                    } else {
+                        Log.e(TAG, "tried to update widget without specifying EXTRA_APPWIDGET_ID")
+                    }
+                }
             }
         }
     }
@@ -231,11 +254,12 @@ class DeviceService : LifecycleService() {
             }
         }
         lifecycleScope.launch {
+            val widget = SettingWidget()
             connectionStatusFlow.collectLatest { connectionStatus ->
-                SettingWidget.updateSettingWidgets(applicationContext, session, connectionStatus)
+                widget.updateAllConnectionStatus(applicationContext, session, connectionStatus)
                 if (connectionStatus is ConnectionStatus.Connected) {
                     connectionStatus.deviceManager.watchForChangeNotification.collectLatest {
-                        SettingWidget.updateSettingWidgets(applicationContext, session, connectionStatus)
+                        widget.updateAllConnectionStatus(applicationContext, session, connectionStatus)
                     }
                 }
             }
@@ -256,7 +280,7 @@ class DeviceService : LifecycleService() {
             }
         }
         MainScope().launch {
-            SettingWidget.updateSettingWidgets(applicationContext, session, ConnectionStatus.Disconnected)
+            SettingWidget().updateAllConnectionStatus(applicationContext, session, ConnectionStatus.Disconnected)
         }
         _isRunning.value = false
     }

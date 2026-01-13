@@ -47,9 +47,10 @@ class DeviceSelectionViewModel @Inject constructor(
         viewModelScope.launch { refreshPairedDevices() }
 
         viewModelScope.launch {
+            val widget = SettingWidget()
             // TODO instead make this a global event of some sort that can be subscribed to
             pairedDevices.collectLatest {
-                SettingWidget.updatePairedDevices(application, session.pairedDevices())
+                widget.updatePairedDevices(application, session.pairedDevices())
             }
         }
     }
