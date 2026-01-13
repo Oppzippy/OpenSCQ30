@@ -7,15 +7,19 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -25,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -95,14 +100,14 @@ class SettingWidgetConfigurationActivity : ComponentActivity() {
         setContent {
             OpenSCQ30Theme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    Column(
-                        Modifier
-                            .safeDrawingPadding()
+                    Box(
+                        modifier = Modifier
                             .fillMaxSize()
-                            .verticalScroll(rememberScrollState()),
+                            .safeDrawingPadding(),
                     ) {
                         when (
                             val connectionStatus =
@@ -111,7 +116,21 @@ class SettingWidgetConfigurationActivity : ComponentActivity() {
                             ConnectionStatus.Disconnected,
                             ConnectionStatus.AwaitingConnection,
                             is ConnectionStatus.Connecting,
-                            -> Text(getString(R.string.awaiting_connection))
+                            -> Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center,
+                            ) {
+                                // With API <28, this will be shown initially when adding a widget (if not connected)
+                                // since android:widgetFeatures="configuration_optional" is not available.
+                                // Otherwise, the user won't be prompted for configuration until they connect to a device
+                                Text(stringResource(R.string.connect_to_a_device_to_configure_the_widget))
+                                Row {
+                                    Button(onClick = { cancel(appWidgetId) }) { Text(stringResource(R.string.cancel)) }
+                                    Spacer(Modifier.width(8.dp))
+                                    Button(onClick = { finish() }) { Text(stringResource(R.string.configure_later)) }
+                                }
+                            }
 
                             is ConnectionStatus.Connected -> {
                                 val enabledSettingIds = enabledSettingIds.collectAsState().value
@@ -128,7 +147,7 @@ class SettingWidgetConfigurationActivity : ComponentActivity() {
                                         },
                                     )
                                 } else {
-                                    Text(getString(R.string.loading))
+                                    Box(contentAlignment = Alignment.Center) { Text(getString(R.string.loading)) }
                                 }
                             }
                         }
@@ -138,9 +157,18 @@ class SettingWidgetConfigurationActivity : ComponentActivity() {
         }
     }
 
+    fun cancel(appWidgetId: Int) {
+        setResult(RESULT_CANCELED, Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId))
+        finish()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        unbindService(deviceServiceConnection)
+        try {
+            unbindService(deviceServiceConnection)
+        } catch (_: IllegalArgumentException) {
+            // If the service was never bound, that's fine
+        }
     }
 
     private fun setSettingIdEnabled(appWidgetId: Int, model: String, settingId: String, isEnabled: Boolean) {
@@ -176,16 +204,22 @@ private fun SettingToggles(
     settingCategories: List<Pair<String, List<String>>>,
     onToggle: (settingId: String, isEnabled: Boolean) -> Unit,
 ) {
-    settingCategories.forEach { (categoryId, settingIds) ->
-        Column {
-            TitledCard(translateCategoryId(categoryId)) {
-                Column {
-                    settingIds.forEach { settingId ->
-                        SettingToggle(
-                            name = translateSettingId(settingId),
-                            isEnabled = enabledSettingIds.contains(settingId),
-                            onChange = { onToggle(settingId, it) },
-                        )
+    Column(
+        Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+    ) {
+        settingCategories.forEach { (categoryId, settingIds) ->
+            Column {
+                TitledCard(translateCategoryId(categoryId)) {
+                    Column {
+                        settingIds.forEach { settingId ->
+                            SettingToggle(
+                                name = translateSettingId(settingId),
+                                isEnabled = enabledSettingIds.contains(settingId),
+                                onChange = { onToggle(settingId, it) },
+                            )
+                        }
                     }
                 }
             }

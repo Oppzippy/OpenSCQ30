@@ -98,4 +98,6 @@
     <string name="connected">Connected</string>
     <string name="connecting">Connecting</string>
     <string name="configure_widget">Configure Widget</string>
+    <string name="connect_to_a_device_to_configure_the_widget">Connect to a device to configure the widget</string>
+    <string name="configure_later">Configure Later</string>
 </resources>
