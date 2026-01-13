@@ -188,272 +188,278 @@ class SettingWidget : GlanceAppWidget() {
             Content(context, state)
         }
     }
-
-    @Composable
-    private fun Content(context: Context, state: SettingWidgetState?) {
-        OpenSCQ30GlanceTheme {
-            Scaffold(
-                modifier = GlanceModifier.fillMaxSize(),
-                titleBar = {
-                    val titleText = when (state) {
-                        is SettingWidgetState.Connected -> state.deviceName
-                        is SettingWidgetState.ConnectedUnconfigured -> state.deviceName
-                        is SettingWidgetState.Connecting -> state.deviceName
-                        is SettingWidgetState.Disconnected, null -> context.getString(R.string.disconnected)
-                    }
-                    TitleBar(
-                        startIcon = ImageProvider(R.drawable.headphones),
-                        title = titleText,
-                    )
-                },
-            ) {
-                if (state == null) {
-                    Disconnected(context, emptyList())
-                } else {
-                    when (state) {
-                        is SettingWidgetState.Disconnected -> Disconnected(context, state.pairedDevices)
-
-                        is SettingWidgetState.Connecting -> Connecting(context, state.deviceName)
-
-                        is SettingWidgetState.ConnectedUnconfigured -> ConnectedUnconfigured(context)
-
-                        is SettingWidgetState.Connected -> Connected(
-                            context,
-                            state.settings,
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun Disconnected(context: Context, pairedDevices: List<PairedDevice>) {
-        LazyColumn {
-            items(pairedDevices) { pairedDevice ->
-                Column {
-                    Row(
-                        modifier = GlanceModifier
-                            .clickable(actionConnectToPairedDevice(context, pairedDevice.macAddress))
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                            .background(GlanceTheme.colors.surfaceVariant)
-                            .cornerRadius(8.dp),
-                    ) {
-                        val textStyle = TextStyle(
-                            color = GlanceTheme.colors.onSurfaceVariant,
-                        )
-                        Text(translateDeviceModel(pairedDevice.model), style = textStyle)
-                        Spacer(GlanceModifier.defaultWeight())
-                        Text(pairedDevice.macAddress, style = textStyle)
-                    }
-                    Spacer(GlanceModifier.height(4.dp))
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun Connecting(context: Context, deviceName: String) {
-        Box(GlanceModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(context.getString(R.string.connecting_to, deviceName))
-        }
-    }
-
-    @Composable
-    private fun ConnectedUnconfigured(context: Context) {
-        val glanceId = LocalGlanceId.current
-        val appWidgetId = GlanceAppWidgetManager(LocalContext.current).getAppWidgetId(glanceId)
-
-        Box(GlanceModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Button(
-                text = context.getString(R.string.configure_widget),
-                onClick = actionStartActivity(
-                    Intent(context, SettingWidgetConfigurationActivity::class.java).apply {
-                        Intent.FLAG_ACTIVITY_SINGLE_TOP
-                        setPackage(context.packageName)
-
-                        addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-
-                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-                    },
-                ),
-            )
-        }
-    }
-
-    @Composable
-    private fun Connected(context: Context, settings: List<Pair<String, Setting?>>) {
-        LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
-            items(settings.filter { it.second != null }) { (settingId, setting) ->
-                ShowSetting(context, settingId, setting!!)
-            }
-        }
-    }
-
-    @Composable
-    private fun ShowSetting(context: Context, settingId: String, setting: Setting) {
-        when (setting) {
-            is Setting.Action -> {
-                Button(
-                    translateSettingId(settingId),
-                    onClick = actionSetSettingValue(context, settingId, true.toValue()),
-                )
-            }
-
-            is Setting.EqualizerSetting -> ReadOnlySettingValue(settingId, setting.value)
-
-            is Setting.I32RangeSetting -> {
-                Row {
-                    Text(translateSettingId(settingId), style = defaultTextStyle())
-                    Text(setting.value.toString(), style = defaultTextStyle())
-                }
-            }
-
-            is Setting.ImportStringSetting -> ReadOnlySettingValue(settingId, "")
-
-            is Setting.InformationSetting -> ReadOnlySettingValue(settingId, setting.value)
-
-            is Setting.SelectSetting -> Select(context, settingId, setting.setting, setting.value, isOptional = false)
-
-            is Setting.OptionalSelectSetting -> Select(
-                context,
-                settingId,
-                setting.setting,
-                setting.value,
-                isOptional = true,
-            )
-
-            is Setting.ModifiableSelectSetting -> Select(
-                context,
-                settingId,
-                setting.setting,
-                setting.value,
-                isOptional = true,
-            )
-
-            is Setting.MultiSelectSetting -> TODO()
-
-            is Setting.ToggleSetting -> {
-                Row(GlanceModifier.fillMaxWidth()) {
-                    Text(translateSettingId(settingId), style = defaultTextStyle())
-                    Spacer(GlanceModifier.defaultWeight())
-                    Switch(
-                        checked = setting.value,
-                        onCheckedChange = actionSetSettingValue(context, settingId, (!setting.value).toValue()),
-                    )
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun Select(context: Context, settingId: String, setting: Select, value: String?, isOptional: Boolean) {
-        @Composable
-        fun VerticalButtons(modifier: GlanceModifier = GlanceModifier) {
-            if (isOptional) {
-                RadioButton(
-                    modifier = modifier,
-                    text = context.getString(R.string.none),
-                    onClick = actionSetSettingValue(context, settingId, Value.OptionalStringValue(null)),
-                    checked = value == null,
-                )
-            }
-            setting.options.zip(setting.localizedOptions).forEach { (option, localizedOption) ->
-                RadioButton(
-                    modifier = modifier,
-                    text = localizedOption,
-                    onClick = actionSetSettingValue(context, settingId, option.toValue()),
-                    checked = value == option,
-                )
-            }
-        }
-
-        @Composable
-        fun MyButton(modifier: GlanceModifier = GlanceModifier, text: String, isSelected: Boolean) {
-            val backgroundColor =
-                if (isSelected) GlanceTheme.colors.primary else GlanceTheme.colors.secondaryContainer
-            val textStyle = if (isSelected) {
-                TextStyle(color = GlanceTheme.colors.onPrimary, textAlign = TextAlign.Center)
-            } else {
-                TextStyle(color = GlanceTheme.colors.onSecondaryContainer, textAlign = TextAlign.Center)
-            }
-            Box(
-                // Minimal horizontal padding to reduce the likelihood of truncation due to text wrapping
-                modifier = modifier
-                    .padding(horizontal = 2.dp, vertical = 8.dp)
-                    .cornerRadius(4.dp)
-                    .background(backgroundColor),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(text, style = textStyle, maxLines = 1)
-            }
-        }
-
-        @Composable
-        fun HorizontalButtons(modifier: GlanceModifier = GlanceModifier) {
-            if (isOptional) {
-                MyButton(
-                    modifier = modifier.clickable(
-                        actionSetSettingValue(context, settingId, Value.OptionalStringValue(null)),
-                    ),
-                    text = context.getString(R.string.none),
-                    isSelected = value == null,
-                )
-            }
-            var sawFirst = isOptional
-            setting.options.zip(setting.localizedOptions).forEach { (option, localizedOption) ->
-                if (sawFirst) {
-                    Spacer(GlanceModifier.width(6.dp))
-                } else {
-                    sawFirst = true
-                }
-                MyButton(
-                    modifier = modifier.clickable(actionSetSettingValue(context, settingId, option.toValue())),
-                    text = localizedOption,
-                    isSelected = value == option,
-                )
-            }
-        }
-
-        val size = LocalSize.current
-        Column(GlanceModifier.fillMaxWidth()) {
-            Text(translateSettingId(settingId), style = defaultTextStyle())
-            if (size.width >= 80.dp * setting.options.size) {
-                Row(GlanceModifier.fillMaxWidth()) {
-                    HorizontalButtons(GlanceModifier.defaultWeight())
-                }
-            } else {
-                Column { VerticalButtons() }
-            }
-        }
-    }
-
-    @Composable
-    private fun <T> ReadOnlySettingValue(settingId: String, value: T) {
-        Row(GlanceModifier.fillMaxWidth()) {
-            Text(translateSettingId(settingId), style = defaultTextStyle())
-            Spacer(GlanceModifier.defaultWeight())
-            Text(value.toString(), style = defaultTextStyle())
-        }
-    }
-
-    @Composable
-    private fun defaultTextStyle(): TextStyle = TextStyle(color = GlanceTheme.colors.onSurface)
-
-    private fun actionConnectToPairedDevice(context: Context, macAddress: String): Action = actionStartService(
-        Intent(context, DeviceService::class.java).apply {
-            putExtra(DeviceService.INTENT_EXTRA_MAC_ADDRESS, macAddress)
-        },
-        isForegroundService = true,
-    )
-
-    private fun actionSetSettingValue(context: Context, settingId: String, value: Value): Action = actionSendBroadcast(
-        Intent().apply {
-            `package` = context.packageName
-            action = DeviceService.ACTION_SET_SETTING_VALUE
-            putExtra(DeviceService.INTENT_EXTRA_SETTING_ID, settingId)
-            putExtra(DeviceService.INTENT_EXTRA_SETTING_VALUE, value)
-        },
-    )
 }
+
+@Composable
+private fun Content(context: Context, state: SettingWidgetState?) {
+    OpenSCQ30GlanceTheme {
+        Scaffold(
+            modifier = GlanceModifier.fillMaxSize(),
+            titleBar = {
+                val titleText = when (state) {
+                    is SettingWidgetState.Connected -> state.deviceName
+                    is SettingWidgetState.ConnectedUnconfigured -> state.deviceName
+                    is SettingWidgetState.Connecting -> state.deviceName
+                    is SettingWidgetState.Disconnected, null -> context.getString(R.string.disconnected)
+                }
+                TitleBar(
+                    startIcon = ImageProvider(R.drawable.headphones),
+                    title = titleText,
+                )
+            },
+        ) {
+            if (state == null) {
+                Disconnected(context, emptyList())
+            } else {
+                when (state) {
+                    is SettingWidgetState.Disconnected -> Disconnected(context, state.pairedDevices)
+
+                    is SettingWidgetState.Connecting -> Connecting(context, state.deviceName)
+
+                    is SettingWidgetState.ConnectedUnconfigured -> ConnectedUnconfigured(context)
+
+                    is SettingWidgetState.Connected -> Connected(
+                        context,
+                        state.settings,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun Disconnected(context: Context, pairedDevices: List<PairedDevice>) {
+    LazyColumn {
+        items(pairedDevices) { pairedDevice ->
+            Column {
+                Row(
+                    modifier = GlanceModifier
+                        .clickable(actionConnectToPairedDevice(context, pairedDevice.macAddress))
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .background(GlanceTheme.colors.surfaceVariant)
+                        .cornerRadius(8.dp),
+                ) {
+                    val textStyle = TextStyle(
+                        color = GlanceTheme.colors.onSurfaceVariant,
+                    )
+                    Text(translateDeviceModel(pairedDevice.model), style = textStyle)
+                    Spacer(GlanceModifier.defaultWeight())
+                    Text(pairedDevice.macAddress, style = textStyle)
+                }
+                Spacer(GlanceModifier.height(4.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun Connecting(context: Context, deviceName: String) {
+    Box(GlanceModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(context.getString(R.string.connecting_to, deviceName))
+    }
+}
+
+@Composable
+private fun ConnectedUnconfigured(context: Context) {
+    val glanceId = LocalGlanceId.current
+    val appWidgetId = GlanceAppWidgetManager(LocalContext.current).getAppWidgetId(glanceId)
+
+    Box(GlanceModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Button(
+            text = context.getString(R.string.configure_widget),
+            onClick = actionStartActivity(
+                Intent(context, SettingWidgetConfigurationActivity::class.java).apply {
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    setPackage(context.packageName)
+
+                    addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+
+                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                },
+            ),
+        )
+    }
+}
+
+@Composable
+private fun Connected(context: Context, settings: List<Pair<String, Setting?>>) {
+    LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
+        items(settings.filter { it.second != null }) { (settingId, setting) ->
+            ShowSetting(context, settingId, setting!!)
+        }
+    }
+}
+
+@Composable
+private fun ShowSetting(context: Context, settingId: String, setting: Setting) {
+    when (setting) {
+        is Setting.Action -> {
+            Button(
+                translateSettingId(settingId),
+                onClick = actionSetSettingValue(context, settingId, true.toValue()),
+            )
+        }
+
+        is Setting.EqualizerSetting -> ReadOnlySettingValue(settingId, setting.value)
+
+        is Setting.I32RangeSetting -> {
+            Row {
+                Text(translateSettingId(settingId), style = defaultTextStyle())
+                Text(setting.value.toString(), style = defaultTextStyle())
+            }
+        }
+
+        is Setting.ImportStringSetting -> ReadOnlySettingValue(settingId, "")
+
+        is Setting.InformationSetting -> ReadOnlySettingValue(settingId, setting.value)
+
+        is Setting.SelectSetting -> Select(context, settingId, setting.setting, setting.value, isOptional = false)
+
+        is Setting.OptionalSelectSetting -> Select(
+            context,
+            settingId,
+            setting.setting,
+            setting.value,
+            isOptional = true,
+        )
+
+        is Setting.ModifiableSelectSetting -> Select(
+            context,
+            settingId,
+            setting.setting,
+            setting.value,
+            isOptional = true,
+        )
+
+        // TODO implement modification
+        is Setting.MultiSelectSetting -> {
+            val valueSet = setting.values.toHashSet()
+            val values = setting.setting.options.mapIndexed { index, option ->
+                if (valueSet.contains(option)) {
+                    setting.setting.localizedOptions[index]
+                } else {
+                    null
+                }
+            }.filterNotNull().joinToString(", ")
+            ReadOnlySettingValue(settingId, values)
+        }
+
+        is Setting.ToggleSetting -> {
+            Row(GlanceModifier.fillMaxWidth()) {
+                Text(translateSettingId(settingId), style = defaultTextStyle())
+                Spacer(GlanceModifier.defaultWeight())
+                Switch(
+                    checked = setting.value,
+                    onCheckedChange = actionSetSettingValue(context, settingId, (!setting.value).toValue()),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun Select(context: Context, settingId: String, setting: Select, value: String?, isOptional: Boolean) {
+    val size = LocalSize.current
+
+    Column(GlanceModifier.fillMaxWidth()) {
+        Text(translateSettingId(settingId), style = defaultTextStyle())
+        if (size.width >= 80.dp * setting.options.size) {
+            Row(GlanceModifier.fillMaxWidth()) {
+                if (isOptional) {
+                    SelectableButton(
+                        modifier = GlanceModifier.defaultWeight().clickable(
+                            actionSetSettingValue(context, settingId, Value.OptionalStringValue(null)),
+                        ),
+                        text = context.getString(R.string.none),
+                        isSelected = value == null,
+                    )
+                }
+                var sawFirst = isOptional
+                setting.options.zip(setting.localizedOptions).forEach { (option, localizedOption) ->
+                    if (sawFirst) {
+                        Spacer(GlanceModifier.width(6.dp))
+                    } else {
+                        sawFirst = true
+                    }
+                    SelectableButton(
+                        modifier = GlanceModifier.defaultWeight()
+                            .clickable(actionSetSettingValue(context, settingId, option.toValue())),
+                        text = localizedOption,
+                        isSelected = value == option,
+                    )
+                }
+            }
+        } else {
+            Column {
+                if (isOptional) {
+                    RadioButton(
+                        text = context.getString(R.string.none),
+                        onClick = actionSetSettingValue(context, settingId, Value.OptionalStringValue(null)),
+                        checked = value == null,
+                    )
+                }
+                setting.options.zip(setting.localizedOptions).forEach { (option, localizedOption) ->
+                    RadioButton(
+                        text = localizedOption,
+                        onClick = actionSetSettingValue(context, settingId, option.toValue()),
+                        checked = value == option,
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Use GlanceModifier.clickable to specify the on click action
+ */
+@Composable
+private fun SelectableButton(modifier: GlanceModifier = GlanceModifier, text: String, isSelected: Boolean) {
+    val backgroundColor =
+        if (isSelected) GlanceTheme.colors.primary else GlanceTheme.colors.secondaryContainer
+    val textStyle = if (isSelected) {
+        TextStyle(color = GlanceTheme.colors.onPrimary, textAlign = TextAlign.Center)
+    } else {
+        TextStyle(color = GlanceTheme.colors.onSecondaryContainer, textAlign = TextAlign.Center)
+    }
+    Box(
+        // Minimal horizontal padding to reduce the likelihood of truncation due to text wrapping
+        modifier = modifier
+            .padding(horizontal = 2.dp, vertical = 8.dp)
+            .cornerRadius(4.dp)
+            .background(backgroundColor),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(text, style = textStyle, maxLines = 1)
+    }
+}
+
+@Composable
+private fun <T> ReadOnlySettingValue(settingId: String, value: T) {
+    Row(GlanceModifier.fillMaxWidth()) {
+        Text(translateSettingId(settingId), style = defaultTextStyle())
+        Spacer(GlanceModifier.defaultWeight())
+        Text(value.toString(), style = defaultTextStyle())
+    }
+}
+
+@Composable
+private fun defaultTextStyle(): TextStyle = TextStyle(color = GlanceTheme.colors.onSurface)
+
+private fun actionConnectToPairedDevice(context: Context, macAddress: String): Action = actionStartService(
+    Intent(context, DeviceService::class.java).apply {
+        putExtra(DeviceService.INTENT_EXTRA_MAC_ADDRESS, macAddress)
+    },
+    isForegroundService = true,
+)
+
+private fun actionSetSettingValue(context: Context, settingId: String, value: Value): Action = actionSendBroadcast(
+    Intent().apply {
+        `package` = context.packageName
+        action = DeviceService.ACTION_SET_SETTING_VALUE
+        putExtra(DeviceService.INTENT_EXTRA_SETTING_ID, settingId)
+        putExtra(DeviceService.INTENT_EXTRA_SETTING_VALUE, value)
+    },
+)
