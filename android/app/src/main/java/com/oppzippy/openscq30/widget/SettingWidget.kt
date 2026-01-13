@@ -213,7 +213,7 @@ class SettingWidget : GlanceAppWidget() {
 
                         is SettingWidgetState.Connecting -> Connecting(context, state.deviceName)
 
-                        is SettingWidgetState.ConnectedUnconfigured -> ConnectedUnconfigured(context, state.deviceName)
+                        is SettingWidgetState.ConnectedUnconfigured -> ConnectedUnconfigured(context)
 
                         is SettingWidgetState.Connected -> Connected(
                             context,
@@ -259,13 +259,13 @@ class SettingWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun ConnectedUnconfigured(context: Context, deviceName: String) {
+    private fun ConnectedUnconfigured(context: Context) {
         val glanceId = LocalGlanceId.current
         val appWidgetId = GlanceAppWidgetManager(LocalContext.current).getAppWidgetId(glanceId)
 
         Box(GlanceModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Button(
-                text = context.getString(R.string.configure_widget, deviceName),
+                text = context.getString(R.string.configure_widget),
                 onClick = actionStartActivity(
                     Intent(context, SettingWidgetConfigurationActivity::class.java).apply {
                         Intent.FLAG_ACTIVITY_SINGLE_TOP
