@@ -77,53 +77,6 @@ sealed class SettingWidgetState {
     data class Connected(val deviceName: String, val settings: List<Pair<String, Setting?>>) : SettingWidgetState()
 }
 
-suspend fun updateSettingWidgets(context: Context, session: OpenScq30Session, connectionStatus: ConnectionStatus) {
-    val manager = GlanceAppWidgetManager(context)
-    val widget = SettingWidget()
-
-    manager.getGlanceIds(widget.javaClass).forEach { glanceId ->
-        var isChanged = false
-        updateAppWidgetState(context, glanceId) { preferences ->
-            val newState = when (connectionStatus) {
-                ConnectionStatus.Disconnected,
-                ConnectionStatus.AwaitingConnection,
-                -> SettingWidgetState.Disconnected(session.pairedDevices())
-
-                is ConnectionStatus.Connecting -> SettingWidgetState.Connecting(connectionStatus.macAddress)
-
-                is ConnectionStatus.Connected -> {
-                    try {
-                        val device = connectionStatus.deviceManager.device
-                        val settingIds = preferences[SettingWidget.settingIdsKey(device.model())]
-
-                        if (settingIds.isNullOrEmpty()) {
-                            SettingWidgetState.ConnectedUnconfigured(deviceName = translateDeviceModel(device.model()))
-                        } else {
-                            SettingWidgetState.Connected(
-                                deviceName = translateDeviceModel(device.model()),
-                                settings = settingIds.map { settingId -> Pair(settingId, device.setting(settingId)) },
-                            )
-                        }
-                    } catch (ex: IllegalStateException) {
-                        Log.w("updateSettingWidgets", "device was closed, assuming we're actually disconnected", ex)
-                        SettingWidgetState.Disconnected(emptyList())
-                    }
-                }
-            }
-
-            val jsonEncodedState = Json.encodeToString(newState)
-            if (jsonEncodedState != preferences[SettingWidget.STATE_KEY]) {
-                preferences[SettingWidget.STATE_KEY] = jsonEncodedState
-                isChanged = true
-            }
-        }
-        if (isChanged) {
-            Log.d("updateSettingWidgets", "glance widget $glanceId changed, updating")
-            widget.update(context, glanceId)
-        }
-    }
-}
-
 class SettingWidget : GlanceAppWidget() {
     companion object {
         const val TAG = "SettingWidget"
@@ -155,6 +108,68 @@ class SettingWidget : GlanceAppWidget() {
                     }
                 }
                 if (isChanged) {
+                    widget.update(context, glanceId)
+                }
+            }
+        }
+
+        suspend fun updateSettingWidgets(
+            context: Context,
+            session: OpenScq30Session,
+            connectionStatus: ConnectionStatus,
+        ) {
+            val manager = GlanceAppWidgetManager(context)
+            val widget = SettingWidget()
+
+            manager.getGlanceIds(widget.javaClass).forEach { glanceId ->
+                var isChanged = false
+                updateAppWidgetState(context, glanceId) { preferences ->
+                    val newState = when (connectionStatus) {
+                        ConnectionStatus.Disconnected,
+                        ConnectionStatus.AwaitingConnection,
+                        -> SettingWidgetState.Disconnected(session.pairedDevices())
+
+                        is ConnectionStatus.Connecting -> SettingWidgetState.Connecting(connectionStatus.macAddress)
+
+                        is ConnectionStatus.Connected -> {
+                            try {
+                                val device = connectionStatus.deviceManager.device
+                                val settingIds = preferences[settingIdsKey(device.model())]
+
+                                if (settingIds.isNullOrEmpty()) {
+                                    SettingWidgetState.ConnectedUnconfigured(
+                                        deviceName = translateDeviceModel(device.model()),
+                                    )
+                                } else {
+                                    SettingWidgetState.Connected(
+                                        deviceName = translateDeviceModel(device.model()),
+                                        settings = settingIds.map { settingId ->
+                                            Pair(
+                                                settingId,
+                                                device.setting(settingId),
+                                            )
+                                        },
+                                    )
+                                }
+                            } catch (ex: IllegalStateException) {
+                                Log.w(
+                                    TAG,
+                                    "device was closed, assuming we're actually disconnected",
+                                    ex,
+                                )
+                                SettingWidgetState.Disconnected(emptyList())
+                            }
+                        }
+                    }
+
+                    val jsonEncodedState = Json.encodeToString(newState)
+                    if (jsonEncodedState != preferences[STATE_KEY]) {
+                        preferences[STATE_KEY] = jsonEncodedState
+                        isChanged = true
+                    }
+                }
+                if (isChanged) {
+                    Log.d(TAG, "glance widget $glanceId changed, updating")
                     widget.update(context, glanceId)
                 }
             }

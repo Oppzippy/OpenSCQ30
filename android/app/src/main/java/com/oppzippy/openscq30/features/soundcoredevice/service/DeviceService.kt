@@ -22,7 +22,7 @@ import com.oppzippy.openscq30.lib.bindings.OpenScq30Exception
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
 import com.oppzippy.openscq30.lib.bindings.SettingIdValuePair
 import com.oppzippy.openscq30.lib.wrapper.Value
-import com.oppzippy.openscq30.widget.updateSettingWidgets
+import com.oppzippy.openscq30.widget.SettingWidget
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -230,10 +230,10 @@ class DeviceService : LifecycleService() {
         }
         lifecycleScope.launch {
             connectionStatusFlow.collectLatest { connectionStatus ->
-                updateSettingWidgets(applicationContext, session, connectionStatus)
+                SettingWidget.updateSettingWidgets(applicationContext, session, connectionStatus)
                 if (connectionStatus is ConnectionStatus.Connected) {
                     connectionStatus.deviceManager.watchForChangeNotification.collectLatest {
-                        updateSettingWidgets(applicationContext, session, connectionStatus)
+                        SettingWidget.updateSettingWidgets(applicationContext, session, connectionStatus)
                     }
                 }
             }
@@ -254,7 +254,7 @@ class DeviceService : LifecycleService() {
             }
         }
         MainScope().launch {
-            updateSettingWidgets(applicationContext, session, ConnectionStatus.Disconnected)
+            SettingWidget.updateSettingWidgets(applicationContext, session, ConnectionStatus.Disconnected)
         }
         _isRunning.value = false
     }

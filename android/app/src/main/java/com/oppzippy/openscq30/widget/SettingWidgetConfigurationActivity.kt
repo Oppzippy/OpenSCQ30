@@ -164,7 +164,7 @@ class SettingWidgetConfigurationActivity : ComponentActivity() {
             val preferences = widget.getAppWidgetState<Preferences>(context, glanceId)
             enabledSettingIds.value = preferences[settingIdsKey] ?: emptySet()
 
-            updateSettingWidgets(context, session, deviceServiceConnection.connectionStatusFlow.value)
+            SettingWidget.updateSettingWidgets(context, session, deviceServiceConnection.connectionStatusFlow.value)
             widget.update(context, glanceId)
         }
     }
