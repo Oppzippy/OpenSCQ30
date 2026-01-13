@@ -82,6 +82,7 @@ suspend fun updateSettingWidgets(context: Context, session: OpenScq30Session, co
     val widget = SettingWidget()
 
     manager.getGlanceIds(widget.javaClass).forEach { glanceId ->
+        var isChanged = false
         updateAppWidgetState(context, glanceId) { preferences ->
             val newState = when (connectionStatus) {
                 ConnectionStatus.Disconnected,
@@ -110,9 +111,16 @@ suspend fun updateSettingWidgets(context: Context, session: OpenScq30Session, co
                 }
             }
 
-            preferences[SettingWidget.STATE_KEY] = Json.encodeToString(newState)
+            val jsonEncodedState = Json.encodeToString(newState)
+            if (jsonEncodedState != preferences[SettingWidget.STATE_KEY]) {
+                preferences[SettingWidget.STATE_KEY] = jsonEncodedState
+                isChanged = true
+            }
         }
-        widget.update(context, glanceId)
+        if (isChanged) {
+            Log.d("updateSettingWidgets", "glance widget $glanceId changed, updating")
+            widget.update(context, glanceId)
+        }
     }
 }
 
