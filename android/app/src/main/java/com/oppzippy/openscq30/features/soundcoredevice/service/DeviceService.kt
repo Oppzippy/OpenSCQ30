@@ -12,6 +12,7 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.content.IntentCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.oppzippy.openscq30.R
@@ -137,7 +138,8 @@ class DeviceService : LifecycleService() {
                 ACTION_SET_SETTING_VALUE -> {
                     lifecycleScope.launch {
                         val settingId = intent.getStringExtra(INTENT_EXTRA_SETTING_ID)
-                        val value = intent.getParcelableExtra(INTENT_EXTRA_SETTING_VALUE, Value::class.java)
+                        val value =
+                            IntentCompat.getParcelableExtra(intent, INTENT_EXTRA_SETTING_VALUE, Value::class.java)
                         if (settingId != null && value != null) {
                             connectionStatusFlow.value.let {
                                 if (it is ConnectionStatus.Connected) {
