@@ -45,8 +45,9 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
-import androidx.glance.layout.wrapContentWidth
+import androidx.glance.layout.width
 import androidx.glance.text.Text
+import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
@@ -349,7 +350,7 @@ class SettingWidget : GlanceAppWidget() {
     @Composable
     private fun Select(context: Context, settingId: String, setting: Select, value: String?, isOptional: Boolean) {
         @Composable
-        fun SelectButtons(modifier: GlanceModifier = GlanceModifier) {
+        fun VerticalButtons(modifier: GlanceModifier = GlanceModifier) {
             if (isOptional) {
                 RadioButton(
                     modifier = modifier,
@@ -368,13 +369,62 @@ class SettingWidget : GlanceAppWidget() {
             }
         }
 
+        @Composable
+        fun MyButton(modifier: GlanceModifier = GlanceModifier, text: String, isSelected: Boolean) {
+            val backgroundColor =
+                if (isSelected) GlanceTheme.colors.primary else GlanceTheme.colors.secondaryContainer
+            val textStyle = if (isSelected) {
+                TextStyle(color = GlanceTheme.colors.onPrimary, textAlign = TextAlign.Center)
+            } else {
+                TextStyle(color = GlanceTheme.colors.onSecondaryContainer, textAlign = TextAlign.Center)
+            }
+            Box(
+                // Minimal horizontal padding to reduce the likelihood of truncation due to text wrapping
+                modifier = modifier
+                    .padding(horizontal = 2.dp, vertical = 8.dp)
+                    .cornerRadius(4.dp)
+                    .background(backgroundColor),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(text, style = textStyle, maxLines = 1)
+            }
+        }
+
+        @Composable
+        fun HorizontalButtons(modifier: GlanceModifier = GlanceModifier) {
+            if (isOptional) {
+                MyButton(
+                    modifier = modifier.clickable(
+                        actionSetSettingValue(context, settingId, Value.OptionalStringValue(null)),
+                    ),
+                    text = context.getString(R.string.none),
+                    isSelected = value == null,
+                )
+            }
+            var sawFirst = isOptional
+            setting.options.zip(setting.localizedOptions).forEach { (option, localizedOption) ->
+                if (sawFirst) {
+                    Spacer(GlanceModifier.width(6.dp))
+                } else {
+                    sawFirst = true
+                }
+                MyButton(
+                    modifier = modifier.clickable(actionSetSettingValue(context, settingId, option.toValue())),
+                    text = localizedOption,
+                    isSelected = value == option,
+                )
+            }
+        }
+
         val size = LocalSize.current
         Column(GlanceModifier.fillMaxWidth()) {
             Text(translateSettingId(settingId), style = defaultTextStyle())
-            if (size.width >= 150.dp * setting.options.size) {
-                Row(GlanceModifier.fillMaxWidth()) { SelectButtons(modifier = GlanceModifier.defaultWeight()) }
+            if (size.width >= 80.dp * setting.options.size) {
+                Row(GlanceModifier.fillMaxWidth()) {
+                    HorizontalButtons(GlanceModifier.defaultWeight())
+                }
             } else {
-                Column { SelectButtons() }
+                Column { VerticalButtons() }
             }
         }
     }
