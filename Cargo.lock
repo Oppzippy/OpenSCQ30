@@ -3270,7 +3270,6 @@ dependencies = [
  "phf 0.13.1",
  "raw-window-handle",
  "rfd",
- "ron",
  "rust-embed",
  "serde",
  "slotmap",

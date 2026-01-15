@@ -14,12 +14,11 @@ default = []
 bundled-dependencies = ["openscq30-lib/bundled-dependencies"]
 
 [dependencies]
-tokio = { workspace = true }
+tokio = { workspace = true, features = ["fs"] }
 futures = { workspace = true }
 libcosmic = { workspace = true, features = [
     "a11y",
     "dbus-config",
-    "single-instance",
     "tokio",
     "winit",
     "wgpu",
