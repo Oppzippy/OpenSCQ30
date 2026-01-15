@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.3.1
+
+### Android
+
+#### Fixes
+
+- Adding a device should automatically refresh the device listing
+
 ## v2.3.0
 
 ### General
