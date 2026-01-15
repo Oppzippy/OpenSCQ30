@@ -117,62 +117,20 @@ class SettingWidgetConfigurationActivity : ComponentActivity() {
         enableEdgeToEdge()
         actionBar?.hide()
         setContent {
-            OpenSCQ30Theme {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background,
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .safeDrawingPadding(),
-                    ) {
-                        when (
-                            val connectionStatus =
-                                deviceServiceConnection.connectionStatusFlow.collectAsState().value
-                        ) {
-                            ConnectionStatus.Disconnected,
-                            ConnectionStatus.AwaitingConnection,
-                            is ConnectionStatus.Connecting,
-                            -> Column(
-                                modifier = Modifier.fillMaxSize(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center,
-                            ) {
-                                // With API <28, this will be shown initially when adding a widget (if not connected)
-                                // since android:widgetFeatures="configuration_optional" is not available.
-                                // Otherwise, the user won't be prompted for configuration until they connect to a device
-                                Text(stringResource(R.string.connect_to_a_device_to_configure_the_widget))
-                                Row {
-                                    Button(onClick = { cancel(appWidgetId) }) { Text(stringResource(R.string.cancel)) }
-                                    Spacer(Modifier.width(8.dp))
-                                    Button(onClick = { finish() }) { Text(stringResource(R.string.configure_later)) }
-                                }
-                            }
-
-                            is ConnectionStatus.Connected -> {
-                                val enabledSettingIds = enabledSettingIds.collectAsState().value
-                                if (enabledSettingIds != null) {
-                                    val device = connectionStatus.deviceManager.device
-                                    SettingToggles(
-                                        enabledSettingIds = enabledSettingIds,
-                                        settingCategories = device.categories()
-                                            .map { categoryId ->
-                                                Pair(categoryId, device.settingsInCategory(categoryId))
-                                            },
-                                        onToggle = { settingId, isEnabled ->
-                                            setSettingIdEnabled(appWidgetId, device.model(), settingId, isEnabled)
-                                        },
-                                    )
-                                } else {
-                                    Box(contentAlignment = Alignment.Center) { Text(getString(R.string.loading)) }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            Content(
+                connectionStatus = deviceServiceConnection.connectionStatusFlow.collectAsState().value,
+                enabledSettingIds = enabledSettingIds.collectAsState().value,
+                onCancel = { cancel(appWidgetId) },
+                onFinish = { finish() },
+                onSetSettingIdEnabled = { deviceModel, settingId, isEnabled ->
+                    setSettingIdEnabled(
+                        appWidgetId,
+                        deviceModel,
+                        settingId,
+                        isEnabled,
+                    )
+                },
+            )
         }
     }
 
@@ -190,23 +148,23 @@ class SettingWidgetConfigurationActivity : ComponentActivity() {
         }
     }
 
-    private fun setSettingIdEnabled(appWidgetId: Int, model: String, settingId: String, isEnabled: Boolean) {
+    private fun setSettingIdEnabled(appWidgetId: Int, deviceModel: String, settingId: String, isEnabled: Boolean) {
         val context = this
         lifecycleScope.launch {
             val manager = GlanceAppWidgetManager(context)
             val widget = SettingWidget()
             val glanceId = manager.getGlanceIdBy(appWidgetId)
-            val settingIdsKey = SettingWidget.settingIdsKey(model)
+            val settingIdsKey = SettingWidget.settingIdsKey(deviceModel)
 
             updateAppWidgetState(context, glanceId) { state ->
-                val settingIds = state[SettingWidget.settingIdsKey(model)]
+                val settingIds = state[SettingWidget.settingIdsKey(deviceModel)]
                 val newSettingIds = if (isEnabled) {
                     settingIds?.toMutableSet()?.apply { add(settingId) } ?: setOf(settingId)
                 } else {
                     settingIds?.toMutableSet()?.apply { remove(settingId) } ?: emptySet()
                 }
 
-                state[SettingWidget.settingIdsKey(model)] = newSettingIds
+                state[SettingWidget.settingIdsKey(deviceModel)] = newSettingIds
             }
             val preferences = widget.getAppWidgetState<Preferences>(context, glanceId)
             enabledSettingIds.value = preferences[settingIdsKey] ?: emptySet()
@@ -217,6 +175,67 @@ class SettingWidgetConfigurationActivity : ComponentActivity() {
                 deviceServiceConnection.connectionStatusFlow.value,
                 glanceId,
             )
+        }
+    }
+}
+
+@Composable
+private fun Content(
+    connectionStatus: ConnectionStatus,
+    enabledSettingIds: Set<String>?,
+    onCancel: () -> Unit,
+    onFinish: () -> Unit,
+    onSetSettingIdEnabled: (deviceModel: String, settingId: String, isEnabled: Boolean) -> Unit,
+) {
+    OpenSCQ30Theme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background,
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .safeDrawingPadding(),
+            ) {
+                when (connectionStatus) {
+                    ConnectionStatus.Disconnected,
+                    ConnectionStatus.AwaitingConnection,
+                    is ConnectionStatus.Connecting,
+                    -> Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        // With API <28, this will be shown initially when adding a widget (if not connected)
+                        // since android:widgetFeatures="configuration_optional" is not available.
+                        // Otherwise, the user won't be prompted for configuration until they connect to a device
+                        Text(stringResource(R.string.connect_to_a_device_to_configure_the_widget))
+                        Row {
+                            Button(onClick = { onCancel() }) { Text(stringResource(R.string.cancel)) }
+                            Spacer(Modifier.width(8.dp))
+                            Button(onClick = { onFinish() }) { Text(stringResource(R.string.configure_later)) }
+                        }
+                    }
+
+                    is ConnectionStatus.Connected -> {
+                        if (enabledSettingIds != null) {
+                            val device = connectionStatus.deviceManager.device
+                            SettingToggles(
+                                enabledSettingIds = enabledSettingIds,
+                                settingCategories = device.categories()
+                                    .map { categoryId ->
+                                        Pair(categoryId, device.settingsInCategory(categoryId))
+                                    },
+                                onToggle = { settingId, isEnabled ->
+                                    onSetSettingIdEnabled(device.model(), settingId, isEnabled)
+                                },
+                            )
+                        } else {
+                            Box(contentAlignment = Alignment.Center) { Text(stringResource(R.string.loading)) }
+                        }
+                    }
+                }
+            }
         }
     }
 }
