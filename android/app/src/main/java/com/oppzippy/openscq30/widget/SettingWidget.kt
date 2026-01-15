@@ -427,12 +427,20 @@ private fun Select(context: Context, settingId: String, setting: Select, value: 
                         checked = value == null,
                     )
                 }
-                setting.options.zip(setting.localizedOptions).forEach { (option, localizedOption) ->
-                    RadioButton(
-                        text = localizedOption,
-                        onClick = actionSetSettingValue(context, settingId, option.toValue()),
-                        checked = value == option,
-                    )
+                // Columns can have a maximum of 10 children, so chunk into groups of 10 to allow for up to 90 children
+                // (not 100 since the preceding None button takes up 1 slot).
+                // In the future, consider passing the LazyColumn context to this function so we can make all of the
+                // select options lazy.
+                setting.options.zip(setting.localizedOptions).chunked(10).forEach { chunk ->
+                    Column {
+                        chunk.forEach { (option, localizedOption) ->
+                            RadioButton(
+                                text = localizedOption,
+                                onClick = actionSetSettingValue(context, settingId, option.toValue()),
+                                checked = value == option,
+                            )
+                        }
+                    }
                 }
             }
         }
