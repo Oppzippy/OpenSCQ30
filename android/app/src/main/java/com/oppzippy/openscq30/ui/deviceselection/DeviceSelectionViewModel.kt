@@ -112,6 +112,7 @@ class DeviceSelectionViewModel @Inject constructor(
                     super.onAssociationCreated(associationInfo)
                     viewModelScope.launch {
                         session.pair(pairedDevice)
+                        refreshPairedDevices()
                         onPaired()
                     }
                 }
