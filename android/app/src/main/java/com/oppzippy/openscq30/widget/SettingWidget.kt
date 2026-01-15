@@ -27,6 +27,7 @@ import androidx.glance.appwidget.Switch
 import androidx.glance.appwidget.action.actionSendBroadcast
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.action.actionStartService
+import androidx.glance.appwidget.components.CircleIconButton
 import androidx.glance.appwidget.components.Scaffold
 import androidx.glance.appwidget.components.TitleBar
 import androidx.glance.appwidget.cornerRadius
@@ -213,7 +214,21 @@ private fun Content(context: Context, state: SettingWidgetState?) {
                 TitleBar(
                     startIcon = ImageProvider(R.drawable.headphones),
                     title = titleText,
-                )
+                ) {
+                    if (state is SettingWidgetState.Connected || state is SettingWidgetState.ConnectedUnconfigured) {
+                        CircleIconButton(
+                            imageProvider = ImageProvider(R.drawable.material_arrow_back),
+                            contentDescription = context.getString(R.string.disconnect),
+                            backgroundColor = null,
+                            // Not sure why, but for some reason actions don't seem to work when the CircleIconButton
+                            // is in the TitleBar. If I copy the button from here and put it somewhere else, it works in
+                            // the other location, but not here. As a workaround, we can pass a function instead and
+                            // directly call context.sendBroadcast. It's a very strange issue, so it's possible I'm
+                            // doing something wrong.
+                            onClick = { sendDisconnect(context) },
+                        )
+                    }
+                }
             },
         ) {
             if (state == null) {
@@ -470,6 +485,15 @@ private fun actionConnectToPairedDevice(context: Context, macAddress: String): A
     },
     isForegroundService = true,
 )
+
+private fun sendDisconnect(context: Context) {
+    context.sendBroadcast(
+        Intent().apply {
+            `package` = context.packageName
+            action = DeviceService.ACTION_DISCONNECT
+        },
+    )
+}
 
 private fun actionSetSettingValue(context: Context, settingId: String, value: Value): Action = actionSendBroadcast(
     Intent().apply {

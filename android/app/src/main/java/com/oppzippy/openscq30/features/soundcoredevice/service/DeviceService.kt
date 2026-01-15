@@ -112,7 +112,10 @@ class DeviceService : LifecycleService() {
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
-                ACTION_DISCONNECT -> stopSelf()
+                ACTION_DISCONNECT -> {
+                    Log.i(TAG, "got disconnect request, initiating stop service")
+                    stopSelf()
+                }
 
                 ACTION_QUICK_PRESET -> {
                     val presetIndex = intent.getIntExtra(INTENT_EXTRA_PRESET_ID, 0)
