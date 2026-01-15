@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v2.3.0
 
 ### General
 
@@ -13,7 +13,7 @@
 
 #### Features
 
-- Add widget for connecting to devices and displaying a configurable setting. An option to show a disconnect button is planned.
+- Add widget for connecting to devices and displaying a configurable setting
 
 #### Fixes
 

@@ -1,0 +1,9 @@
+* Features
+  - Add widget for connecting to devices and displaying a configurable setting
+
+* Fixes
+  - Attempt to fix crash on some android versions when adding a device
+
+* Localization
+  - Add Hebrew translations (thanks to Lotzi)
+  - Update Japanese translations

@@ -41,6 +41,15 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.3.0" date="2026-01-15">
+            <description>
+                <p>Localization</p>
+                <ul>
+                    <li>Add Hebrew translations (thanks to Lotzi)</li>
+                    <li>Update Japanese translations</li>
+                </ul> 
+            </description>
+        </release>
         <release version="2.2.1" date="2026-01-04">
             <description>
                 <p>Fixes</p>
