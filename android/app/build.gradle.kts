@@ -1,15 +1,12 @@
 import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.gradle.internal.tasks.factory.dependsOn
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import java.io.FileInputStream
 import java.util.Properties
-import org.gradle.kotlin.dsl.kotlin
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
-    id("org.jetbrains.kotlin.kapt")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     kotlin("plugin.serialization")
@@ -36,6 +33,12 @@ val buildProfiles = listOf(
 data class ABI(val android: String, val rust: String)
 
 data class BuildProfile(val gradle: String, val cargo: String, val isDebug: Boolean)
+
+kotlin {
+    compilerOptions {
+        languageVersion = KotlinVersion.KOTLIN_2_3
+    }
+}
 
 android {
     signingConfigs {
@@ -68,19 +71,19 @@ android {
     sourceSets {
         buildProfiles.forEach { buildProfile ->
             getByName(buildProfile.gradle) {
-                jniLibs.srcDir("src/main/${buildProfile.gradle}/jniLibs")
+                jniLibs.directories += "src/main/${buildProfile.gradle}/jniLibs"
             }
             abis.forEach { abi ->
                 create("${buildProfile.gradle}-${abi.android}") {
-                    jniLibs.srcDir("src/main/${buildProfile.gradle}-${abi.android}/jniLibs")
+                    jniLibs.directories += "src/main/${buildProfile.gradle}-${abi.android}/jniLibs"
                 }
             }
         }
         getByName("main") {
-            java.srcDir("${layout.buildDirectory.get()}/generated/source/uniffi/java")
+            kotlin.directories += "${layout.buildDirectory.get()}/generated/source/uniffi/java"
         }
         getByName("androidTest") {
-            assets.srcDir("$projectDir/schemas")
+            assets.directories += "$projectDir/schemas"
         }
     }
 
@@ -135,11 +138,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-    kotlin {
-        compilerOptions {
-            jvmTarget = JvmTarget.JVM_17
-        }
     }
     buildFeatures {
         compose = true
@@ -211,16 +209,16 @@ dependencies {
 
     val hiltVersion = "2.57.2"
     implementation("com.google.dagger:hilt-android:$hiltVersion")
-    kapt("com.google.dagger:hilt-android-compiler:$hiltVersion")
+    ksp("com.google.dagger:hilt-android-compiler:$hiltVersion")
     implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
 
     // For instrumentation tests
     androidTestImplementation("com.google.dagger:hilt-android-testing:$hiltVersion")
-    kaptAndroidTest("com.google.dagger:hilt-compiler:$hiltVersion")
+    kspTest("com.google.dagger:hilt-compiler:$hiltVersion")
 
     // For local unit tests
     testImplementation("com.google.dagger:hilt-android-testing:$hiltVersion")
-    kaptTest("com.google.dagger:hilt-compiler:$hiltVersion")
+    kspTest("com.google.dagger:hilt-compiler:$hiltVersion")
 
     testImplementation("junit:junit:4.13.2")
 
@@ -237,10 +235,6 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     testImplementation(kotlin("reflect"))
     androidTestImplementation(kotlin("reflect"))
-}
-
-kapt {
-    correctErrorTypes = true
 }
 
 val rustProjectDir: File = layout.projectDirectory.asFile.parentFile
