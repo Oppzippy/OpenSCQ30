@@ -13,7 +13,7 @@ if set --local --query _flag_h
     exit
 end
 
-set --local profile release-arm64_v8a
+set --local profile release-arm64-v8a
 
 set --local --query _flag_profile[1]
 and set profile $_flag_profile[1]
