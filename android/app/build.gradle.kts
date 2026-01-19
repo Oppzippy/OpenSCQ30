@@ -161,12 +161,10 @@ android {
 dependencies {
     implementation(libs.kotlinx.serialization.json)
 
-    val lifecycleVersion = "2.10.0"
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.service)
 
     // Compose
-    val composeBomVersion = "2026.01.00"
     implementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
