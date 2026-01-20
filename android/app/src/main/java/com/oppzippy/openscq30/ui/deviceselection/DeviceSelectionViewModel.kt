@@ -109,7 +109,6 @@ class DeviceSelectionViewModel @Inject constructor(
                     ),
                 )
                 override fun onAssociationCreated(associationInfo: AssociationInfo) {
-                    super.onAssociationCreated(associationInfo)
                     viewModelScope.launch {
                         session.pair(pairedDevice)
                         refreshPairedDevices()
@@ -119,7 +118,6 @@ class DeviceSelectionViewModel @Inject constructor(
 
                 @Deprecated("Deprecated in Java")
                 override fun onDeviceFound(intentSender: IntentSender) {
-                    super.onDeviceFound(intentSender)
                     activity.startIntentSenderForResult(
                         intentSender,
                         0,
