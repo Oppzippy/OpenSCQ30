@@ -50,4 +50,23 @@
     <string name="close">סגור</string>
     <string name="import_">ייבוא</string>
     <string name="search">חיפוש</string>
+    <string name="connected">מחובר</string>
+    <string name="connecting">מתחבר</string>
+    <string name="configure_widget">הגדר וידג\'ט</string>
+    <string name="connect_to_a_device_to_configure_the_widget">התחבר למכשיר כדי להגדיר את הווידג\'ט</string>
+    <string name="configure_later">הגדר מאוחר יותר</string>
+    <string name="load_current_settings">טען הגדרות נוכחיות</string>
+    <string name="load_current_settings_help">\'טען הגדרות נוכחיות\' יחליף את כל ההגדרות בהגדרה המהירה בערכים הנוכחיים שלהן. פעולה זו לא תשפיע על אילו הגדרות מופעלות כחלק מההגדרה המהירה.</string>
+    <string name="migrate_legacy_equalizer_profiles">העבר פרופילי אקולייזר ישנים</string>
+    <string name="error_pairing">שגיאה בצימוד</string>
+    <string name="copy_x_to_clipboard">העתק את %s ללוח הגזירים</string>
+    <string name="error_migrating_legacy_profile">שגיאה בהעברת פרופיל ישן</string>
+    <string name="error_saving_quick_preset">שגיאה בשמירת הגדרה מהירה</string>
+    <string name="error_activating_quick_preset">שגיאה בהפעלת הגדרה מהירה</string>
+    <string name="error_changing_settings">שגיאה בשינוי הגדרות</string>
+    <string name="error_connecting">שגיאה בחיבור</string>
+    <string name="no_items_found">לא נמצאו פריטים</string>
+    <string name="version_2_breaking_changes">&lt;h1&gt;עודכן ל-OpenSCQ30 v2&lt;/h1&gt; &lt;br&gt; &lt;b&gt;שינויים שוברי תאימות&lt;/b&gt; &lt;ul&gt; &lt;li&gt;פרופילי אקולייזר מותאמים אישית הם כעת ספציפיים למכשיר. יש להעביר פרופילי אקולייזר ישנים בעמוד \'העבר פרופילי אקולייזר ישנים\' לאחר חיבור למכשיר.&lt;/li&gt; &lt;li&gt;הגדרות מהירות נשמרות כעת בפורמט שונה, ואין אפשרות העברה אוטומטית, לכן יש ליצור אותן מחדש.&lt;/li&gt; &lt;li&gt;זיהוי אוטומטי של דגם המכשיר הוסר, ולכן יש לבחור את דגם המכשיר בעת הוספת מכשיר.&lt;/li&gt; &lt;/ul&gt; &lt;p&gt;לפרטים נוספים, ראה &lt;a href=https://github.com/Oppzippy/OpenSCQ30/blob/master/CHANGELOG.md&gt;CHANGELOG.md&lt;/a&gt;.&lt;/p&gt;</string>
+    <string name="delete_quick_preset">מחק הגדרה מהירה</string>
+    <string name="error_deleting_quick_preset">שגיאה במחיקת הגדרה מהירה</string>
 </resources>

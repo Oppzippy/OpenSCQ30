@@ -1,4 +1,4 @@
-language-name = Hebrew
+language-name = עברית
 openscq30 = OpenSCQ30
 device-selection = בחירת מכשיר
 select-device = בחר מכשיר
@@ -44,3 +44,4 @@ overwrite-with-current-settings = החלף בהגדרות הנוכחיות
 confirm = אישור
 execute = בצע
 default = ברירת מחדל
+preferred-language = שפה מועדפת
