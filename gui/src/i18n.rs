@@ -7,6 +7,11 @@ use i18n_embed::{
 };
 use rust_embed::RustEmbed;
 
+// libcosmic crashes when rendering hebrew text in some contexts, so it should be disabled until that's fixed
+pub fn is_language_enabled(identifier: &LanguageIdentifier) -> bool {
+    identifier.language.as_str() != "he"
+}
+
 /// Applies the requested language(s) to requested translations from the `fl!()` macro.
 pub fn init(requested_languages: &[LanguageIdentifier]) {
     if let Err(why) = localizer().select(requested_languages) {
@@ -25,10 +30,12 @@ pub fn localizer() -> Box<dyn Localizer> {
 struct Localizations;
 
 pub fn languages() -> impl Iterator<Item = (LanguageIdentifier, String)> {
-    language_identifiers().map(|identifier| {
-        let name = language_name(&identifier);
-        (identifier, name)
-    })
+    language_identifiers()
+        .filter(is_language_enabled)
+        .map(|identifier| {
+            let name = language_name(&identifier);
+            (identifier, name)
+        })
 }
 
 fn language_identifiers() -> impl Iterator<Item = LanguageIdentifier> {
