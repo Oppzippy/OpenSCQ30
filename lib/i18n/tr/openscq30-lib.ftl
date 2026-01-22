@@ -163,3 +163,6 @@ original = Orijinal
 soundcore-a3116 = Soundcore Motion+
 percent = %{ $percent }
 voice-prompt = Sesli Komut
+soundcore-a3035 = Soundcore Space One
+soundcore-a3949 = Soundcore P20i / P25i / R50i
+soundcore-a3955 = Soundcore P40i

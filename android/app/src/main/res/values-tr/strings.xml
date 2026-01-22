@@ -64,4 +64,5 @@
     <string name="error_deleting_quick_preset">Hızlı ayar silinirken hata</string>
     <string name="version_2_breaking_changes">&lt;h1&gt;OpenSCQ30 v2\'ye güncellendi&lt;/h1&gt; &lt;br&gt; &lt;b&gt;Son Değişiklikler&lt;/b&gt; &lt;ul&gt; &lt;li&gt;Özel ekolayzer profilleri artık cihaza özeldir. Eski ekolayzer profilleri, bir cihaza bağlandıktan sonra Eski Ekolayzer Profillerini Taşı sayfasından taşınmalıdır.&lt;/li&gt; &lt;li&gt;Hızlı ayarlar artık farklı bir biçimde saklanır ve otomatik taşıma mevcut değildir, bu nedenle yeniden oluşturulmaları gerekir.&lt;/li&gt; &lt;li&gt;Cihaz modeli otomatik algılama kaldırıldı, bu nedenle artık bir cihaz eklerken cihaz modelini seçmeniz gerekiyor.&lt;/li&gt; &lt;/ul&gt; &lt;p&gt;Ayrıntılar için &lt;a href=https://github.com/Oppzippy/OpenSCQ30/blob/master/CHANGELOG.md&gt;CHANGELOG.md&lt;/a&gt; adresine bakın.&lt;/p&gt;</string>
     <string name="featured_setting_x">Öne Çıkan Ayar %d</string>
+    <string name="connected">Bağlandı</string>
 </resources>
