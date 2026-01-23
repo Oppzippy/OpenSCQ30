@@ -41,6 +41,18 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.4.0" date="2026-01-23">
+            <description>
+                <p>Features</p>
+                <ul>
+                    <li>Add power off action for Soundcore Motion+</li>
+                </ul>
+                <p>Fixes</p>
+                <ul>
+                    <li>Temporarily disable Hebrew language due to text rendering related crash</li>
+                </ul>
+            </description>
+        </release>
         <release version="2.3.1" date="2026-01-15" />
         <release version="2.3.0" date="2026-01-15">
             <description>

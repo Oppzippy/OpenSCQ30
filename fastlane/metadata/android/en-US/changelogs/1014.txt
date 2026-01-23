@@ -1,0 +1,5 @@
+* Features
+  - Add power off action for Soundcore Motion+
+
+* Fixes
+  - Crash when adding a device on android 12
