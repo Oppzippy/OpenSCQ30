@@ -23,7 +23,7 @@ impl HearIdType {
         context(
             "hear id type",
             map(le_u8, |hear_id_type_byte| {
-                HearIdType::from_repr(hear_id_type_byte).unwrap_or_default()
+                Self::from_repr(hear_id_type_byte).unwrap_or_default()
             }),
         )
         .parse_complete(input)
@@ -37,7 +37,7 @@ impl HearIdMusicGenre {
     pub fn take_one_byte<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
-        map(le_u8, |genre_index| HearIdMusicGenre(genre_index.into())).parse_complete(input)
+        map(le_u8, |genre_index| Self(genre_index.into())).parse_complete(input)
     }
 
     pub fn take_two_bytes<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
