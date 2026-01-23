@@ -28,3 +28,7 @@ pub const REQUEST_VOICE_PROMPT_COMMAND: packet::Command = packet::Command([0x01,
 pub fn request_voice_prompt() -> packet::Outbound {
     packet::Outbound::new(REQUEST_VOICE_PROMPT_COMMAND, Vec::new())
 }
+
+pub fn power_off() -> packet::Outbound {
+    packet::Outbound::new(packet::Command([0x01, 0x85]), Vec::new())
+}

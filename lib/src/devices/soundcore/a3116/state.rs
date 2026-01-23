@@ -22,6 +22,7 @@ pub struct A3116State {
     equalizer_configuration: EqualizerConfiguration<1, 9, -6, 6, 0>,
     #[has(maybe)]
     voice_prompt: Option<VoicePrompt>,
+    power_off_pending: a3116::structures::PowerOffPending,
 }
 
 impl A3116State {
@@ -37,6 +38,7 @@ impl A3116State {
             serial_number: state_update_packet.serial_number,
             equalizer_configuration: state_update_packet.equalizer_configuration,
             voice_prompt: voice_prompt_packet.map(|packet| packet.voice_prompt),
+            power_off_pending: Default::default(),
         }
     }
 }

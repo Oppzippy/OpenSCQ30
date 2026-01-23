@@ -10,6 +10,7 @@ use crate::{
 
 mod auto_power_off;
 mod equalizer;
+mod power_off;
 mod volume;
 
 impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
@@ -49,5 +50,16 @@ where
         self.module_collection()
             .add_a3116_equalizer(packet_io, database, device_model, change_notify)
             .await;
+    }
+}
+
+impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+where
+    ConnectionType: RfcommConnection + Send + Sync + 'static,
+    StateType: Has<a3116::structures::PowerOffPending> + Clone + Send + Sync + 'static,
+{
+    pub fn a3116_power_off(&mut self) {
+        let packet_io = self.packet_io_controller().clone();
+        self.module_collection().add_a3116_power_off(packet_io);
     }
 }

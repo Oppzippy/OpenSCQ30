@@ -161,6 +161,7 @@ send-packet = Send Packet
 yes = Yes
 no = No
 
+power-off = Power Off
 auto-power-off = Auto Power Off
 x-minutes = { $minutes ->
     [one] { $minutes } minute

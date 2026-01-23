@@ -93,3 +93,6 @@ pub fn take_equalizer_configuration<'a, E: ParseError<&'a [u8]> + ContextError<&
     )
     .parse_complete(input)
 }
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub struct PowerOffPending(pub bool);

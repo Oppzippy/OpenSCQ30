@@ -135,6 +135,7 @@ pub enum SettingId {
     VoicePrompt,
     AncPersonalizedToEarCanal,
     ImmersiveExperience,
+    PowerOff,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
