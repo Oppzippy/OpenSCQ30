@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Features
+
+- Add power off action for Soundcore Motion+
+
+### GUI
+
+#### Fixes
+
+- Temporarily disable Hebrew language due to text rendering related crash
+
+### Android
+
+#### Fixes
+
+- Crash when adding a device on android 12
+
+#### Fixes
+
 ## v2.3.1
 
 ### Android
