@@ -1,0 +1,8 @@
+name = "soundcore R60i NC"
+mac_address = "00:00:00:d1:20:2c"
+rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E71202C"
+
+[[responses]]
+command = [1, 1]
+# State update
+response = []
