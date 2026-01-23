@@ -65,17 +65,18 @@ impl RfcommBackend for WindowsRfcommBackend {
             let span = debug_span!("RfcommBackend::connect");
             let _span_guard = span.enter();
 
-            trace!("finding device with desired mac address");
+            debug!("finding device with desired mac address");
             let device = Self::get_bluetooth_device_from_mac_address(mac_address)?;
 
-            trace!("finding desired service");
             let services = device.GetRfcommServicesAsync()?.join()?.Services()?;
             let services_by_uuid = services
                 .clone()
                 .into_iter()
                 .map(|service| Ok((service.ServiceId()?.Uuid()?.as_uuid(), service)))
                 .collect::<windows::core::Result<HashMap<_, _>>>()?;
+            debug!("found RFCOMM services: {:?}", services_by_uuid.keys());
             let selected_uuid = select_uuid(services_by_uuid.keys().copied().collect());
+            debug!("using RFCOMM service: {selected_uuid:?}");
             let service =
                 services_by_uuid
                     .get(&selected_uuid)
@@ -84,7 +85,7 @@ impl RfcommBackend for WindowsRfcommBackend {
                         location: Location::caller(),
                     })?;
 
-            trace!("creating socket");
+            debug!("creating socket");
             let socket = AgileReference::new(&StreamSocket::new()?)?;
             socket
                 .resolve()?
@@ -117,10 +118,10 @@ impl WindowsRfcommBackend {
             hex::encode(mac_address)
         );
         let filter: HSTRING = format!("{connected_filter} AND {mac_address_filter} AND System.Devices.Aep.IsPresent:=System.StructuredQueryType.Boolean#True").into();
-        trace!("built filter {filter}");
+        debug!("built filter: {filter}");
         let device_information_collection =
             DeviceInformation::FindAllAsyncAqsFilter(&filter)?.join()?;
-        trace!(
+        debug!(
             "found {} matching devices",
             device_information_collection.Size()?
         );

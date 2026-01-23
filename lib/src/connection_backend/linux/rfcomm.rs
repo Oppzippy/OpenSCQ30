@@ -141,8 +141,9 @@ impl RfcommBackend for BluerRfcommBackend {
         let device = self.device(mac_address).await?;
         device.connect().await?;
         let uuids = device.uuids().await?.unwrap();
+        debug!("found RFCOMM services: {uuids:?}");
         let uuid = select_uuid(uuids);
-        debug!("using uuid {uuid} for RFCOMM");
+        debug!("using RFCOMM service {uuid}");
 
         let mut rfcomm_handle = self
             .session
