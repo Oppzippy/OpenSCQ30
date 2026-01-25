@@ -101,3 +101,6 @@ open = "5"
 proptest = { version = "1.0.0", default-features = false }
 proptest-derive = "0.7"
 embed-resource = "3"
+
+[patch.'https://github.com/pop-os/softbuffer']
+softbuffer = { git = "https://github.com/Oppzippy/softbuffer.git" }

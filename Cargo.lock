@@ -5513,7 +5513,7 @@ dependencies = [
 [[package]]
 name = "softbuffer"
 version = "0.4.1"
-source = "git+https://github.com/pop-os/softbuffer?tag=cosmic-4.0#a3f77e251e7422803f693df6e3fc313c010c4dcb"
+source = "git+https://github.com/Oppzippy/softbuffer.git#0c81b1b57e41414bef5ec1494315bf27b67d992e"
 dependencies = [
  "as-raw-xcb-connection",
  "bytemuck",
