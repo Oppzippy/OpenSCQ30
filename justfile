@@ -60,59 +60,51 @@ build-android: build-android-universal build-android-x86 build-android-x86_64 bu
 [group("build")]
 build-android-universal: create-build-output-dir
     just android::build release
-    just copy-apks '' '-universal'
+    just copy-apks universal
 
 [doc("Build an x86 apk")]
 [group("build")]
 build-android-x86: create-build-output-dir
     just android::build release x86
-    just copy-apks -x86
+    just copy-apks x86
 
 [doc("Build an x86_64 apk")]
 [group("build")]
 build-android-x86_64: create-build-output-dir
     just android::build release x86_64
-    just copy-apks -x86_64
+    just copy-apks x86_64
 
 [doc("Build an arm64-v8a apk")]
 [group("build")]
 build-android-arm64-v8a: create-build-output-dir
     just android::build release arm64-v8a
-    just copy-apks -arm64-v8a
+    just copy-apks arm64-v8a
 
 [doc("Build an armeabi-v7a apk")]
 [group("build")]
 build-android-armeabi-v7a: create-build-output-dir
     just android::build release armeabi-v7a
-    just copy-apks -armeabi-v7a
+    just copy-apks armeabi-v7a
 
 [doc('Copy either one or both of the signed/unsigned apks. If neither exist, abort.')]
 [group("build")]
 [private]
 [script("bash")]
-copy-apks suffix replace-suffix='':
+copy-apks arch:
     set -euo pipefail
 
-    prefix='{{ android-apk-path }}/release{{ suffix }}/app-release{{ suffix }}'
+    prefix='{{ android-apk-path }}/{{ arch }}/release/app-{{ arch }}-release'
     signed_apk="$prefix.apk"
     unsigned_apk="$prefix-unsigned.apk"
     if [[ -f "$signed_apk" ]]; then
         found_one=1
         echo "Signed APK found at $signed_apk, copying to {{ build-output-dir }}"
-        if [[ -n '{{ replace-suffix }}' ]]; then
-            cp "$signed_apk" '{{ build-output-dir }}/openscq30-android{{ replace-suffix }}.apk'
-        else
-            cp "$signed_apk" '{{ build-output-dir }}/openscq30-android{{ suffix }}.apk'
-        fi
+        cp "$signed_apk" '{{ build-output-dir }}/openscq30-android-{{ arch }}.apk'
     fi
     if [[ -f "$unsigned_apk" ]]; then
         found_one=1
         echo "Unsigned APK found at $unsigned_apk, copying to {{ build-output-dir }}"
-        if [[ -n '{{ replace-suffix }}' ]]; then
-            cp "$unsigned_apk" '{{ build-output-dir }}/openscq30-android{{ replace-suffix }}-unsigned.apk'
-        else
-            cp "$unsigned_apk" '{{ build-output-dir }}/openscq30-android{{ suffix }}-unsigned.apk'
-        fi
+            cp "$unsigned_apk" '{{ build-output-dir }}/openscq30-android-{{ arch }}-unsigned.apk'
     fi
 
     if [[ -z "$found_one" ]]; then

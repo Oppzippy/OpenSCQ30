@@ -26,7 +26,7 @@ jobs:
 
       - name: Run android unit tests
         working-directory: android
-        run: ./gradlew testDebugUnitTest
+        run: ./gradlew testX86_64DebugUnitTest
       # disabled since they're really slow
       # - name: Run android instrumented tests
       #   working-directory: android

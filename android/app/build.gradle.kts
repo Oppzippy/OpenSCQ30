@@ -1,5 +1,6 @@
-import com.android.build.api.dsl.ApplicationBuildType
-import com.android.build.gradle.internal.tasks.factory.dependsOn
+import com.oppzippy.openscq30.gradle.CopyNativeLibTask
+import com.oppzippy.openscq30.gradle.GenerateUniffiBindingsTask
+import dagger.hilt.android.plugin.util.capitalize
 import java.io.FileInputStream
 import java.util.Properties
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
@@ -19,20 +20,18 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+data class ABI(val android: String, val rust: String)
+
 val abis = listOf(
     ABI(android = "armeabi-v7a", rust = "armv7-linux-androideabi"),
     ABI(android = "arm64-v8a", rust = "aarch64-linux-android"),
     ABI(android = "x86", rust = "i686-linux-android"),
     ABI(android = "x86_64", rust = "x86_64-linux-android"),
 )
-val buildProfiles = listOf(
-    BuildProfile(gradle = "debug", cargo = "debug", isDebug = true),
-    BuildProfile(gradle = "release", cargo = "release-android", isDebug = false),
+val gradleToCargoProfiles = mapOf(
+    "debug" to "debug",
+    "release" to "release-android",
 )
-
-data class ABI(val android: String, val rust: String)
-
-data class BuildProfile(val gradle: String, val cargo: String, val isDebug: Boolean)
 
 kotlin {
     compilerOptions {
@@ -68,37 +67,27 @@ android {
         }
     }
 
-    sourceSets {
-        buildProfiles.forEach { buildProfile ->
-            getByName(buildProfile.gradle) {
-                jniLibs.directories += "src/main/${buildProfile.gradle}/jniLibs"
-            }
-            abis.forEach { abi ->
-                create("${buildProfile.gradle}-${abi.android}") {
-                    jniLibs.directories += "src/main/${buildProfile.gradle}-${abi.android}/jniLibs"
+    flavorDimensions += "abi"
+    productFlavors {
+        abis.forEach { abi ->
+            create(abi.android) {
+                dimension = "abi"
+                ndk {
+                    abiFilters.clear()
+                    abiFilters.add(abi.android)
                 }
             }
         }
-        getByName("main") {
-            kotlin.directories += "${layout.buildDirectory.get()}/generated/source/uniffi/java"
-        }
+    }
+
+    sourceSets {
+        getByName("main") {}
         getByName("androidTest") {
             assets.directories += "$projectDir/schemas"
         }
     }
 
     buildTypes {
-        fun filterAbi(buildType: ApplicationBuildType, abi: String?) {
-            buildType.ndk {
-                abiFilters.clear()
-                if (abi != null) {
-                    abiFilters.add(abi)
-                } else {
-                    abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
-                }
-            }
-        }
-
         named("debug") {
             applicationIdSuffix = ".debug"
             isDebuggable = true
@@ -107,13 +96,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            filterAbi(this, null)
-        }
-        abis.forEach { abi ->
-            create("debug-${abi.android}") {
-                initWith(buildTypes["debug"])
-                filterAbi(this, abi.android)
-            }
         }
 
         named("release") {
@@ -128,15 +110,9 @@ android {
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs["release"]
             }
-            filterAbi(this, null)
-        }
-        abis.forEach { abi ->
-            create("release-${abi.android}") {
-                initWith(buildTypes["release"])
-                filterAbi(this, abi.android)
-            }
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -144,9 +120,6 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
-    }
-    ksp {
-        arg("room.schemaLocation", "$projectDir/schemas")
     }
     ndkVersion = "29.0.14206865"
     packaging {
@@ -158,6 +131,10 @@ android {
         @Suppress("UnstableApiUsage")
         generateLocaleConfig = true
     }
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
@@ -237,11 +214,11 @@ val rustProjectDir: File = layout.projectDirectory.asFile.parentFile
 val rustWorkspaceDir: File = rustProjectDir.parentFile
 val cargoTargetDirectory: File = rustWorkspaceDir.resolve("target")
 
-buildProfiles.forEach { buildProfile ->
+gradleToCargoProfiles.forEach { (gradleBuildProfile, cargoProfile) ->
     abis.forEach { abi ->
         // Build with cargo
-        tasks.register<Exec>("cargo-build-${buildProfile.gradle}-${abi.android}") {
-            description = "Building core for ${buildProfile.gradle}-${abi.android}"
+        tasks.register<Exec>("cargo-build-$gradleBuildProfile-${abi.android}") {
+            description = "Building core for $gradleBuildProfile-${abi.android}"
             workingDir = rustProjectDir
             commandLine(
                 "cargo",
@@ -252,81 +229,51 @@ buildProfiles.forEach { buildProfile ->
                 "26",
                 "build",
                 "--profile",
-                if (buildProfile.cargo == "debug") "dev" else buildProfile.cargo,
+                if (cargoProfile == "debug") "dev" else cargoProfile,
             )
         }
-        // Copy build libs into this app's libs directory
-        tasks.register<Copy>("rust-deploy-${buildProfile.gradle}-${abi.android}") {
-            dependsOn("cargo-build-${buildProfile.gradle}-${abi.android}")
-            description = "Copy rust libs for (${buildProfile.gradle}-${abi.android}) to jniLibs"
-            from("$cargoTargetDirectory/${abi.rust}/${buildProfile.cargo}/libopenscq30_android.so")
-            into("src/main/${buildProfile.gradle}-${abi.android}/jniLibs/${abi.android}")
+
+        val copyNativeLibTask = tasks.register<CopyNativeLibTask>("rust-deploy-$gradleBuildProfile-${abi.android}") {
+            dependsOn("cargo-build-$gradleBuildProfile-${abi.android}")
+            description = "Copy rust libs for ($gradleBuildProfile-${abi.android}) to jniLibs"
+            this.gradleBuildProfile = gradleBuildProfile
+            this.cargoProfile = cargoProfile
+            this.inputFile = File("$cargoTargetDirectory/${abi.rust}/$cargoProfile/libopenscq30_android.so")
+            this.androidAbi = abi.android
+            this.outputDirectory =
+                layout.buildDirectory.get().asFile.resolve(
+                    "generated/native/$gradleBuildProfile-${abi.android}/jniLibs",
+                )
         }
 
-        // Hook up clean tasks
-        tasks.register<Delete>("clean-${buildProfile.gradle}-${abi.android}") {
-            description = "Deleting built libs for ${buildProfile.gradle}-${abi.android}"
-            delete(
-                file("src/main/${buildProfile.gradle}-${abi.android}/jniLibs/${abi.android}/libopenscq30_android.so"),
-            )
-        }
-        tasks.clean.dependsOn("clean-${buildProfile.gradle}-${abi.android}")
+        val generateTask =
+            tasks.register<GenerateUniffiBindingsTask>("generate-uniffi-bindings-$gradleBuildProfile-${abi.android}") {
+                dependsOn("cargo-build-$gradleBuildProfile-${abi.android}")
+                description = "Generate kotlin bindings using uniffi-bindgen"
+                this.rustAbi = abi.rust
+                this.cargoProfile = cargoProfile
+                this.rustWorkspaceDirectory = rustWorkspaceDir
+                this.rustProjectDirectory = rustProjectDir
+                this.outputDirectory = layout.buildDirectory.get().asFile
+                    .resolve("generated/source/uniffi/${abi.android}${gradleBuildProfile.capitalize()}/java")
+            }
 
-        tasks.register<Exec>("generate-uniffi-bindings-${buildProfile.gradle}-${abi.android}") {
-            dependsOn("cargo-build-${buildProfile.gradle}-${abi.android}")
-            description = "Generate kotlin bindings using uniffi-bindgen"
-            workingDir = rustWorkspaceDir
-            // generate bindings
-            commandLine(
-                "cargo",
-                "run",
-                "--bin",
-                "uniffi-bindgen",
-                "--",
-                "generate",
-                "--library",
-                "./target/${abi.rust}/${buildProfile.cargo}/libopenscq30_android.so",
-                "--language",
-                "kotlin",
-                "--out-dir",
-                "${layout.buildDirectory.get()}/generated/source/uniffi/java",
-                "--config",
-                "${layout.projectDirectory.asFile.parentFile.path}/uniffi.toml",
-            )
-        }
-    }
-
-    abis.forEach { abi ->
-        tasks.register<Copy>("rust-deploy-${buildProfile.gradle}-universal-${abi.android}") {
-            dependsOn("cargo-build-${buildProfile.gradle}-${abi.android}")
-            description = "Copy rust libs for (${buildProfile.gradle}-${abi.android}) to jniLibs"
-            from("$cargoTargetDirectory/${abi.rust}/${buildProfile.cargo}/libopenscq30_android.so")
-            into("src/main/${buildProfile.gradle}/jniLibs/${abi.android}")
-        }
-        tasks.register<Delete>("clean-${buildProfile.gradle}-universal-${abi.android}") {
-            description = "Deleting built libs for ${buildProfile.gradle}-${abi.android}"
-            delete(file("src/main/${buildProfile.gradle}/jniLibs/${abi.android}/libopenscq30_android.so"))
-        }
-        tasks.clean.dependsOn("clean-${buildProfile.gradle}-universal-${abi.android}")
-    }
-}
-
-afterEvaluate {
-    android.applicationVariants.forEach { variant ->
-        variant.preBuildProvider.configure {
-            val variantParts = variant.name.split('-', limit = 2)
-            val profile = buildProfiles.find { variantParts[0] == it.gradle }!!
-            if (variantParts.size == 2) {
-                // specific abi
-                val abi = abis.find { variantParts[1] == it.android }!!
-                dependsOn("rust-deploy-${profile.gradle}-${abi.android}")
-                dependsOn("generate-uniffi-bindings-${profile.gradle}-${abi.android}")
-            } else {
-                // all abis
-                abis.forEach { abi ->
-                    dependsOn("rust-deploy-${profile.gradle}-universal-${abi.android}")
-                }
-                dependsOn("generate-uniffi-bindings-${profile.gradle}-${abis[0].android}")
+        androidComponents {
+            onVariants(
+                selector()
+                    .withBuildType(gradleBuildProfile)
+                    .withFlavor("abi" to abi.android),
+            ) { variant ->
+                // TODO switch to variant.sources.kotlin when this issue is fixed:
+                // https://github.com/google/ksp/issues/2494
+                variant.sources.java!!.addGeneratedSourceDirectory(
+                    generateTask,
+                    GenerateUniffiBindingsTask::outputDirectory,
+                )
+                variant.sources.jniLibs!!.addGeneratedSourceDirectory(
+                    copyNativeLibTask,
+                    CopyNativeLibTask::outputDirectory,
+                )
             }
         }
     }
