@@ -53,6 +53,7 @@ pub trait RfcommBackend {
     ) -> impl Future<Output = Result<Self::ConnectionType>> + Send;
 }
 
+#[derive(Copy, Clone)]
 pub enum RfcommServiceSelectionStrategy {
     Constant(Uuid),
     Dynamic(fn(HashSet<Uuid>) -> Uuid),

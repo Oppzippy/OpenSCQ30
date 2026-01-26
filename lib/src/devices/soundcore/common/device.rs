@@ -77,11 +77,28 @@ where
     Ok(state_update_packet.into())
 }
 
-#[derive(Copy, Clone, Debug, Default)]
+#[derive(Copy, Clone)]
 pub struct SoundcoreDeviceConfig {
     /// Most devices have a checksum at the end of their packets, but for the ones that don't,
     /// this can be set to ChecksumKind::None to disable checksums.
     pub checksum_kind: packet::ChecksumKind,
+    pub rfcomm_service_selection_strategy: RfcommServiceSelectionStrategy,
+}
+
+impl Default for SoundcoreDeviceConfig {
+    fn default() -> Self {
+        Self {
+            checksum_kind: Default::default(),
+            rfcomm_service_selection_strategy: RfcommServiceSelectionStrategy::Dynamic(
+                |service_uuids| {
+                    service_uuids
+                        .into_iter()
+                        .find(soundcore::is_soundcore_vendor_rfcomm_uuid)
+                        .unwrap_or(soundcore::RFCOMM_UUID)
+                },
+            ),
+        }
+    }
 }
 
 pub struct SoundcoreDeviceRegistry<B: RfcommBackend, StateType> {
@@ -141,15 +158,7 @@ where
     ) -> device::Result<Arc<dyn OpenSCQ30Device + Send + Sync>> {
         let connection = self
             .backend
-            .connect(
-                mac_address,
-                RfcommServiceSelectionStrategy::Dynamic(|service_uuids| {
-                    service_uuids
-                        .into_iter()
-                        .find(soundcore::is_soundcore_vendor_rfcomm_uuid)
-                        .unwrap_or(soundcore::RFCOMM_UUID)
-                }),
-            )
+            .connect(mac_address, self.config.rfcomm_service_selection_strategy)
             .await?;
         let mut builder = SoundcoreDeviceBuilder::new(
             self.database.clone(),

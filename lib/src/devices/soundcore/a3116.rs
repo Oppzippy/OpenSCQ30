@@ -1,5 +1,8 @@
 use std::collections::HashMap;
 
+use uuid::uuid;
+
+use crate::connection::RfcommServiceSelectionStrategy;
 use crate::devices::soundcore::a3116::packets::inbound::{
     A3116StateUpdatePacket, VoicePromptUpdatePacket,
 };
@@ -62,6 +65,9 @@ soundcore_device!(
 
 const CONFIG: SoundcoreDeviceConfig = SoundcoreDeviceConfig {
     checksum_kind: packet::ChecksumKind::None,
+    rfcomm_service_selection_strategy: RfcommServiceSelectionStrategy::Constant(uuid!(
+        "0cf12d31-fac3-4553-bd80-d6832e7b3116"
+    )),
 };
 
 #[cfg(test)]
