@@ -2,10 +2,12 @@ use std::{collections::HashSet, sync::Mutex};
 
 use macaddr::MacAddr6;
 use tokio::sync::{mpsc, watch};
-use uuid::Uuid;
 
-use crate::api::connection::{
-    self, ConnectionDescriptor, ConnectionStatus, RfcommBackend, RfcommConnection,
+use crate::{
+    api::connection::{
+        self, ConnectionDescriptor, ConnectionStatus, RfcommBackend, RfcommConnection,
+    },
+    connection::RfcommServiceSelectionStrategy,
 };
 
 pub struct MockRfcommBackend {
@@ -37,7 +39,7 @@ impl RfcommBackend for MockRfcommBackend {
     async fn connect(
         &self,
         _mac_address: MacAddr6,
-        _select_uuid: impl Fn(HashSet<Uuid>) -> Uuid + Send,
+        _select_uuid: RfcommServiceSelectionStrategy,
     ) -> connection::Result<Self::ConnectionType> {
         Ok(MockRfcommConnection::new(
             self.inbound

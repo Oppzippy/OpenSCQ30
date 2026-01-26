@@ -2,9 +2,10 @@ use std::collections::HashSet;
 
 use macaddr::MacAddr6;
 use tokio::sync::{mpsc, watch};
-use uuid::Uuid;
 
-use crate::api::connection::{self, RfcommBackend, RfcommConnection};
+use crate::api::connection::{
+    self, RfcommBackend, RfcommConnection, RfcommServiceSelectionStrategy,
+};
 
 pub struct NoneRfcommBackend {}
 pub struct NoneRfcommConnection {}
@@ -18,7 +19,7 @@ impl RfcommBackend for NoneRfcommBackend {
     async fn connect(
         &self,
         _mac_address: MacAddr6,
-        _select_uuid: impl Fn(HashSet<Uuid>) -> Uuid + Send + Sync + 'static,
+        _select_uuid: RfcommServiceSelectionStrategy,
     ) -> connection::Result<Self::ConnectionType> {
         unimplemented!()
     }

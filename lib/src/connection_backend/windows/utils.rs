@@ -44,6 +44,16 @@ impl GuidAsUuidExt for GUID {
     }
 }
 
+pub trait UuidAsGuidExt {
+    fn as_guid(&self) -> GUID;
+}
+
+impl UuidAsGuidExt for Uuid {
+    fn as_guid(&self) -> GUID {
+        GUID::from_u128(self.as_u128())
+    }
+}
+
 impl From<windows::core::Error> for connection::Error {
     #[track_caller]
     fn from(err: windows::core::Error) -> Self {

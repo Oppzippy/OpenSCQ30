@@ -49,8 +49,13 @@ pub trait RfcommBackend {
     fn connect(
         &self,
         mac_address: MacAddr6,
-        select_uuid: impl Fn(HashSet<Uuid>) -> Uuid + Send + Sync + 'static,
+        service_selection_strategy: RfcommServiceSelectionStrategy,
     ) -> impl Future<Output = Result<Self::ConnectionType>> + Send;
+}
+
+pub enum RfcommServiceSelectionStrategy {
+    Constant(Uuid),
+    Dynamic(fn(HashSet<Uuid>) -> Uuid),
 }
 
 pub trait RfcommConnection {

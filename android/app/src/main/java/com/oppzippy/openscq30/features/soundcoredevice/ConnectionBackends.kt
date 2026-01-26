@@ -15,7 +15,7 @@ import com.oppzippy.openscq30.lib.bindings.MacAddr6
 import com.oppzippy.openscq30.lib.bindings.ManualConnectionBackends
 import com.oppzippy.openscq30.lib.bindings.ManualRfcommConnection
 import com.oppzippy.openscq30.lib.bindings.ManualRfcommConnectionBox
-import com.oppzippy.openscq30.lib.bindings.UuidSelector
+import com.oppzippy.openscq30.lib.bindings.RfcommServiceSelectionStrategy
 import com.oppzippy.openscq30.lib.wrapper.ConnectionDescriptor
 import com.oppzippy.openscq30.lib.wrapper.ConnectionStatus
 import java.io.IOException
@@ -52,7 +52,11 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
         }
     }
 
-    override suspend fun connect(macAddress: MacAddr6, selectUuid: UuidSelector, outputBox: ManualRfcommConnectionBox) {
+    override suspend fun connect(
+        macAddress: MacAddr6,
+        serviceSelectionStrategy: RfcommServiceSelectionStrategy,
+        outputBox: ManualRfcommConnectionBox,
+    ) {
         if (ActivityCompat.checkSelfPermission(
                 context,
                 Manifest.permission.BLUETOOTH_CONNECT,
@@ -63,7 +67,17 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
         }
         val bluetoothManager: BluetoothManager = context.getSystemService(BluetoothManager::class.java)
         val device = bluetoothManager.adapter.bondedDevices.find { it.address == macAddress } ?: return
-        val uuid = selectUuid.select(device.uuids.map { it.uuid })
+        Log.d(TAG, "found device")
+        val uuid = when (serviceSelectionStrategy) {
+            is RfcommServiceSelectionStrategy.Constant -> serviceSelectionStrategy.uuid
+
+            is RfcommServiceSelectionStrategy.Dynamic -> {
+                val uuids = device.uuids.map { it.uuid }
+                Log.d(TAG, "found uuids: $uuids")
+                serviceSelectionStrategy.selectService.select(uuids)
+            }
+        }
+        Log.d(TAG, "selected uuid $uuid")
         val socket = device.createRfcommSocketToServiceRecord(uuid)
         try {
             withContext(Dispatchers.IO) {

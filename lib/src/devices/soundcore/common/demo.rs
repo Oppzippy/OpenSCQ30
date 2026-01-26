@@ -8,12 +8,12 @@ use macaddr::MacAddr6;
 use nom_language::error::VerboseError;
 use openscq30_i18n::Translate;
 use tokio::sync::{mpsc, watch};
-use uuid::Uuid;
 
 use crate::{
     api::connection::{
         self, ConnectionDescriptor, ConnectionStatus, RfcommBackend, RfcommConnection,
     },
+    connection::RfcommServiceSelectionStrategy,
     devices::{
         DeviceModel,
         soundcore::common::{device::SoundcoreDeviceConfig, packet},
@@ -55,7 +55,7 @@ impl RfcommBackend for DemoConnectionRegistry {
     async fn connect(
         &self,
         _mac_address: MacAddr6,
-        _select_uuid: impl Fn(HashSet<Uuid>) -> Uuid + Send,
+        _select_uuid: RfcommServiceSelectionStrategy,
     ) -> connection::Result<Self::ConnectionType> {
         Ok(DemoConnection::new(
             self.packet_responses.to_owned(),

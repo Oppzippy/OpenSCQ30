@@ -10,6 +10,7 @@ use crate::{
         device::{self, OpenSCQ30Device, OpenSCQ30DeviceRegistry},
         settings::{CategoryId, Setting, SettingId, Value},
     },
+    connection::RfcommServiceSelectionStrategy,
     devices::{
         DeviceModel,
         soundcore::{
@@ -54,11 +55,15 @@ where
     ) -> device::Result<Arc<dyn OpenSCQ30Device + Send + Sync>> {
         let connection = self
             .backend
-            .connect(mac_address, |addr| {
-                addr.into_iter()
-                    .find(soundcore::is_soundcore_vendor_rfcomm_uuid)
-                    .unwrap_or(soundcore::RFCOMM_UUID)
-            })
+            .connect(
+                mac_address,
+                RfcommServiceSelectionStrategy::Dynamic(|service_uuids| {
+                    service_uuids
+                        .into_iter()
+                        .find(soundcore::is_soundcore_vendor_rfcomm_uuid)
+                        .unwrap_or(soundcore::RFCOMM_UUID)
+                }),
+            )
             .await?;
         let device = SoundcoreDevelopmentDevice::<B>::new(Arc::new(connection)).await?;
         Ok(Arc::new(device))

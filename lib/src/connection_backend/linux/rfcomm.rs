@@ -24,12 +24,12 @@ use tokio::{
     },
 };
 use tracing::{Instrument, debug, debug_span, instrument, trace, trace_span, warn};
-use uuid::Uuid;
 
 use crate::{
     api::connection::{
         self, ConnectionDescriptor, ConnectionStatus, RfcommBackend, RfcommConnection,
     },
+    connection::RfcommServiceSelectionStrategy,
     util::AbortOnDropHandle,
 };
 
@@ -132,17 +132,23 @@ impl RfcommBackend for BluerRfcommBackend {
         Ok(connection_descriptors)
     }
 
-    #[instrument(skip(self, select_uuid))]
+    #[instrument(skip(self, service_selection_strategy))]
     async fn connect(
         &self,
         mac_address: MacAddr6,
-        select_uuid: impl Fn(HashSet<Uuid>) -> Uuid + Send,
+        service_selection_strategy: RfcommServiceSelectionStrategy,
     ) -> connection::Result<Self::ConnectionType> {
         let device = self.device(mac_address).await?;
+        debug!("connecting to device");
         device.connect().await?;
-        let uuids = device.uuids().await?.unwrap();
-        debug!("found RFCOMM services: {uuids:?}");
-        let uuid = select_uuid(uuids);
+        let uuid = match service_selection_strategy {
+            RfcommServiceSelectionStrategy::Constant(uuid) => uuid,
+            RfcommServiceSelectionStrategy::Dynamic(select_uuid) => {
+                let uuids = device.uuids().await?.unwrap();
+                debug!("found RFCOMM services: {uuids:?}");
+                select_uuid(uuids)
+            }
+        };
         debug!("using RFCOMM service {uuid}");
 
         let mut rfcomm_handle = self

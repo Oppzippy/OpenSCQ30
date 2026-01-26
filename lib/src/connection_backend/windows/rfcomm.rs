@@ -7,11 +7,13 @@ use std::{
 
 use macaddr::MacAddr6;
 use tokio::sync::{mpsc, watch};
-use tracing::{debug, debug_span, error, instrument, trace};
-use uuid::Uuid;
+use tracing::{debug, debug_span, error, instrument, trace, warn};
 use windows::{
     Devices::{
-        Bluetooth::{BluetoothConnectionStatus, BluetoothDevice},
+        Bluetooth::{
+            BluetoothConnectionStatus, BluetoothDevice,
+            Rfcomm::{RfcommDeviceService, RfcommServiceId},
+        },
         Enumeration::DeviceInformation,
     },
     Foundation::TypedEventHandler,
@@ -20,7 +22,11 @@ use windows::{
     core::{AgileReference, HSTRING},
 };
 
-use crate::api::connection::{self, RfcommBackend, RfcommConnection};
+use crate::{
+    api::connection::{self, RfcommBackend, RfcommConnection},
+    connection::RfcommServiceSelectionStrategy,
+    connection_backend::windows::utils::UuidAsGuidExt,
+};
 
 use super::utils::{GuidAsUuidExt, WindowsMacAddressExt};
 
@@ -59,31 +65,20 @@ impl RfcommBackend for WindowsRfcommBackend {
     async fn connect(
         &self,
         mac_address: MacAddr6,
-        select_uuid: impl Fn(HashSet<Uuid>) -> Uuid + Send + Sync + 'static,
+        service_selection_strategy: RfcommServiceSelectionStrategy,
     ) -> connection::Result<Self::ConnectionType> {
         tokio::task::spawn_blocking(move || {
-            let span = debug_span!("RfcommBackend::connect");
+            let span = debug_span!(
+                "RfcommBackend::connect",
+                mac_address = tracing::field::display(mac_address),
+            );
             let _span_guard = span.enter();
 
             debug!("finding device with desired mac address");
             let device = Self::get_bluetooth_device_from_mac_address(mac_address)?;
 
-            let services = device.GetRfcommServicesAsync()?.join()?.Services()?;
-            let services_by_uuid = services
-                .clone()
-                .into_iter()
-                .map(|service| Ok((service.ServiceId()?.Uuid()?.as_uuid(), service)))
-                .collect::<windows::core::Result<HashMap<_, _>>>()?;
-            debug!("found RFCOMM services: {:?}", services_by_uuid.keys());
-            let selected_uuid = select_uuid(services_by_uuid.keys().copied().collect());
-            debug!("using RFCOMM service: {selected_uuid:?}");
-            let service =
-                services_by_uuid
-                    .get(&selected_uuid)
-                    .ok_or(connection::Error::DeviceNotFound {
-                        source: None,
-                        location: Location::caller(),
-                    })?;
+            debug!("selecting RFCOMM service");
+            let service = Self::select_service(&device, &service_selection_strategy)?;
 
             debug!("creating socket");
             let socket = AgileReference::new(&StreamSocket::new()?)?;
@@ -134,6 +129,53 @@ impl WindowsRfcommBackend {
         let device_information = device_information_collection.First()?.Current()?;
 
         Ok(BluetoothDevice::FromIdAsync(&device_information.Id()?)?.join()?)
+    }
+
+    fn select_service(
+        device: &BluetoothDevice,
+        service_selection_strategy: &RfcommServiceSelectionStrategy,
+    ) -> connection::Result<RfcommDeviceService> {
+        match service_selection_strategy {
+            RfcommServiceSelectionStrategy::Constant(uuid) => {
+                let service_id = RfcommServiceId::FromUuid(uuid.as_guid())?;
+                let services = device
+                    .GetRfcommServicesForIdAsync(&service_id)?
+                    .join()?
+                    .Services()?;
+                let mut services_by_uuid = services
+                    .clone()
+                    .into_iter()
+                    .map(|service| Ok((service.ServiceId()?.Uuid()?.as_uuid(), service)))
+                    .collect::<windows::core::Result<HashMap<_, _>>>()?;
+                debug!(
+                    "looking for specific RFCOMM service {uuid}, found: {:?}",
+                    services_by_uuid.keys()
+                );
+                services_by_uuid
+                    .remove(&uuid)
+                    .ok_or(connection::Error::DeviceNotFound {
+                        source: None,
+                        location: Location::caller(),
+                    })
+            }
+            RfcommServiceSelectionStrategy::Dynamic(select_service) => {
+                let services = device.GetRfcommServicesAsync()?.join()?.Services()?;
+                let mut services_by_uuid = services
+                    .clone()
+                    .into_iter()
+                    .map(|service| Ok((service.ServiceId()?.Uuid()?.as_uuid(), service)))
+                    .collect::<windows::core::Result<HashMap<_, _>>>()?;
+                debug!("found RFCOMM services: {:?}", services_by_uuid.keys());
+                let uuid = select_service(services_by_uuid.keys().copied().collect());
+                debug!("using RFCOMM service: {uuid:?}");
+                services_by_uuid
+                    .remove(&uuid)
+                    .ok_or(connection::Error::DeviceNotFound {
+                        source: None,
+                        location: Location::caller(),
+                    })
+            }
+        }
     }
 }
 

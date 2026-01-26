@@ -4,7 +4,9 @@ use async_trait::async_trait;
 use macaddr::MacAddr6;
 use openscq30_lib::{
     ConnectionBackends,
-    connection::{self, ConnectionStatus, RfcommBackend, RfcommConnection},
+    connection::{
+        self, ConnectionStatus, RfcommBackend, RfcommConnection, RfcommServiceSelectionStrategy,
+    },
 };
 use thiserror::Error;
 use tokio::sync::{mpsc, watch};
@@ -43,22 +45,38 @@ pub trait AndroidRfcommConnectionBackend: Send + Sync {
     async fn connect(
         &self,
         mac_address: serializable::MacAddr6,
-        select_uuid: Arc<UuidSelector>,
+        service_selection_strategy: AndroidRfcommServiceSelectionStrategy,
         output_box: Arc<ManualRfcommConnectionBox>,
     ) -> Result<(), AndroidError>;
 }
 
-#[derive(uniffi::Object)]
-pub struct UuidSelector {
-    selector: Box<dyn Fn(HashSet<Uuid>) -> Uuid + Send + Sync>,
+#[derive(uniffi::Enum)]
+#[uniffi(name = "RfcommServiceSelectionStrategy")]
+pub enum AndroidRfcommServiceSelectionStrategy {
+    Constant { uuid: serializable::Uuid },
+    Dynamic { select_service: Arc<UuidSelector> },
 }
+
+impl From<RfcommServiceSelectionStrategy> for AndroidRfcommServiceSelectionStrategy {
+    fn from(value: RfcommServiceSelectionStrategy) -> Self {
+        match value {
+            RfcommServiceSelectionStrategy::Constant(uuid) => Self::Constant {
+                uuid: serializable::Uuid(uuid),
+            },
+            RfcommServiceSelectionStrategy::Dynamic(select_uuid) => Self::Dynamic {
+                select_service: Arc::new(UuidSelector(select_uuid)),
+            },
+        }
+    }
+}
+
+#[derive(uniffi::Object)]
+pub struct UuidSelector(fn(HashSet<Uuid>) -> Uuid);
 
 #[uniffi::export]
 impl UuidSelector {
     pub fn select(&self, uuids: Vec<serializable::Uuid>) -> serializable::Uuid {
-        serializable::Uuid((self.selector)(
-            uuids.into_iter().map(|uuid| uuid.0).collect(),
-        ))
+        serializable::Uuid((self.0)(uuids.into_iter().map(|uuid| uuid.0).collect()))
     }
 }
 
@@ -105,18 +123,13 @@ impl RfcommBackend for ManualRfcommConnectionBackend {
     async fn connect(
         &self,
         mac_address: MacAddr6,
-        select_uuid: impl Fn(std::collections::HashSet<uuid::Uuid>) -> uuid::Uuid
-        + Send
-        + Sync
-        + 'static,
+        service_selection_strategy: RfcommServiceSelectionStrategy,
     ) -> connection::Result<Self::ConnectionType> {
         let output_box = Arc::new(ManualRfcommConnectionBox::default());
         self.inner
             .connect(
                 serializable::MacAddr6(mac_address),
-                Arc::new(UuidSelector {
-                    selector: Box::new(select_uuid),
-                }),
+                service_selection_strategy.into(),
                 output_box.clone(),
             )
             .await
