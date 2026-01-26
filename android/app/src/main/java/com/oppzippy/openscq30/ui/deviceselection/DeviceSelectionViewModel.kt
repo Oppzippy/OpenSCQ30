@@ -11,8 +11,10 @@ import android.content.IntentSender
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.result.IntentSenderRequest
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.oppzippy.openscq30.MainActivity
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.soundcoredevice.connectionBackends
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Exception
@@ -51,16 +53,6 @@ class DeviceSelectionViewModel @Inject constructor(
             // TODO instead make this a global event of some sort that can be subscribed to
             pairedDevices.collectLatest {
                 widget.updatePairedDevices(application, session.pairedDevices())
-            }
-        }
-    }
-
-    // Hack to work around older android versions not having onAssociationCreated
-    suspend fun pollPairedDevicesOnOldAndroidVersions() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            while (true) {
-                delay(5.seconds)
-                refreshPairedDevices()
             }
         }
     }
@@ -118,10 +110,17 @@ class DeviceSelectionViewModel @Inject constructor(
 
                 @Deprecated("Deprecated in Java")
                 override fun onDeviceFound(intentSender: IntentSender) {
+                    MainActivity.onPaired = {
+                        viewModelScope.launch {
+                            session.pair(pairedDevice)
+                            refreshPairedDevices()
+                            onPaired()
+                        }
+                    }
                     activity.startIntentSenderForResult(
                         intentSender,
                         0,
-                        Intent().putExtra("pairedDevice", pairedDevice),
+                        null,
                         0,
                         0,
                         0,

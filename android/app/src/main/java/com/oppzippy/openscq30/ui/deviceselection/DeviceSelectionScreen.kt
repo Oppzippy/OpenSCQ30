@@ -94,9 +94,6 @@ fun DeviceSelectionScreen(
             composable<Screen.Connect> {
                 val activity = LocalActivity.current!!
 
-                LaunchedEffect(true) {
-                    viewModel.pollPairedDevicesOnOldAndroidVersions()
-                }
                 DeviceListing(
                     devices = viewModel.pairedDevices.collectAsState().value,
                     onDeviceClick = { onDeviceSelected(it) },
