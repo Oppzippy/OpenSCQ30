@@ -212,7 +212,7 @@ private fun Content(context: Context, state: SettingWidgetState?) {
                     is SettingWidgetState.Disconnected, null -> context.getString(R.string.disconnected)
                 }
                 TitleBar(
-                    startIcon = ImageProvider(R.drawable.headphones),
+                    startIcon = ImageProvider(R.drawable.openscq30_logo_foreground),
                     title = titleText,
                 ) {
                     if (state is SettingWidgetState.Connected || state is SettingWidgetState.ConnectedUnconfigured) {
