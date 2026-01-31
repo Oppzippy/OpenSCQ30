@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,8 +25,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -49,6 +51,7 @@ import com.oppzippy.openscq30.lib.bindings.deviceModels
 import com.oppzippy.openscq30.lib.bindings.translateDeviceModel
 import com.oppzippy.openscq30.lib.wrapper.ConnectionDescriptor
 import com.oppzippy.openscq30.lib.wrapper.PairedDevice
+import com.oppzippy.openscq30.ui.deviceselection.composables.AddDeviceCard
 import com.oppzippy.openscq30.ui.deviceselection.composables.AppInfo
 import com.oppzippy.openscq30.ui.deviceselection.composables.DeviceListing
 import com.oppzippy.openscq30.ui.settings.SettingsPage
@@ -181,16 +184,31 @@ fun SelectModelForPairing(onModelSelected: (String) -> Unit, onBackClick: () -> 
                     .fillMaxSize(),
             ) {
                 var searchQuery by remember { mutableStateOf("") }
-                TextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    label = { Text(stringResource(R.string.search)) },
-                )
+                Box(Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+                    SearchBarDefaults.InputField(
+                        modifier = Modifier.fillMaxWidth(),
+                        query = searchQuery,
+                        onQueryChange = { searchQuery = it },
+                        onSearch = {},
+                        expanded = true,
+                        onExpandedChange = {},
+                        placeholder = { Text(stringResource(R.string.search)) },
+                        leadingIcon = {
+                            IconButton(onClick = onBackClick) {
+                                Icon(
+                                    painter = painterResource(R.drawable.search_24px),
+                                    contentDescription = stringResource(R.string.back),
+                                )
+                            }
+                        },
+                    )
+                }
                 LazyColumn(
                     modifier = Modifier
                         .testTag("modelList")
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
                         .fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     val filteredDeviceModels = deviceModels()
                         .map { Pair(it, translateDeviceModel(it)) }
@@ -199,15 +217,11 @@ fun SelectModelForPairing(onModelSelected: (String) -> Unit, onBackClick: () -> 
                         }
                     if (filteredDeviceModels.isNotEmpty()) {
                         items(filteredDeviceModels) { (model, name) ->
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { onModelSelected(model) }
-                                    .padding(horizontal = 8.dp, vertical = 8.dp),
-                            ) {
-                                Text(text = name)
-                                Text(text = model, color = MaterialTheme.colorScheme.secondary)
-                            }
+                            AddDeviceCard(
+                                modifier = Modifier.clickable { onModelSelected(model) },
+                                name = name,
+                                model = model,
+                            )
                         }
                     } else {
                         item {
