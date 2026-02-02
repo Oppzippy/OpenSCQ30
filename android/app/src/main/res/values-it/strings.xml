@@ -1,5 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="equalizer">Equalizzatore</string>
     <string name="hz">%1$d Hz</string>
+    <string name="loading">Caricamento</string>
+    <string name="request_permission">Richiedi l\'autorizzazione</string>
+    <string name="bluetooth_permission_is_required">È necessaria l\'autorizzazione Bluetooth</string>
+    <string name="none">Non assegnato</string>
+    <string name="add">Aggiungi</string>
+    <string name="create">Crea</string>
+    <string name="cancel">Annulla</string>
+    <string name="name">Nome</string>
+    <string name="delete_confirm">Sei sicuro di voler eliminare \"%s\"?</string>
+    <string name="delete">Elimina</string>
+    <string name="back">Indietro</string>
+    <string name="info">Info</string>
+    <string name="source_code" tools:ignore="TypographyOther">&lt;p&gt;Il codice sorgente e il report dei bug sono disponibili su &lt;a href=https://github.com/Oppzippy/OpenSCQ30&gt;https://github.com/Oppzippy/OpenSCQ30&lt;/a&gt;.&lt;/p&gt; &lt;br&gt; &lt;p&gt;Copyright (C) Kyle Scheuing&lt;/p&gt; &lt;br&gt; &lt;p&gt;Questo programma è software libero: puoi ridistribuirlo e/o modificarlo secondo i termini della GNU General Public License, pubblicata dalla Free Software Foundation, nella versione 3 o (a tua scelta) in qualsiasi versione successiva.&lt;/p&gt; &lt;br&gt; &lt;p&gt;Questo programma è distribuito nella speranza che sia utile, ma SENZA ALCUNA GARANZIA; senza neppure la garanzia implicita di COMMERCIABILITÀ o IDONEITÀ PER UNO SCOPO PARTICOLARE. Per maggiori dettagli, consultare la GNU General Public License.&lt;/p&gt; &lt;br&gt; &lt;p&gt;Dovresti aver ricevuto una copia della GNU General Public License insieme a questo programma. In caso contrario, consulta &amp;lt;&lt;a href=https://www.gnu.org/licenses/&gt;https://www.gnu.org/licenses/&lt;/a&gt;&gt;.&lt;/p&gt;</string>
+    <string name="khz">%s kHz</string>
+    <string name="replace">Sostituisci</string>
+    <string name="connected_to">Connesso a %s</string>
+    <string name="connecting_to">Connessione a %s in corso</string>
+    <string name="disconnected">Disconnesso</string>
+    <string name="disconnect">Disconnetti</string>
+    <string name="awaiting_connection">In attesa di connessione</string>
+    <string name="activate">Attiva</string>
+    <string name="quick_presets">Preset rapidi</string>
+    <string name="auto_connect">Connessione automatica</string>
+    <string name="edit">Modifica</string>
+    <string name="settings">Impostazioni</string>
+    <string name="unpair_device">Dissocia dispositivo</string>
+    <string name="unpairing_from_device_name">Dissociazione da %s in corso</string>
+    <string name="unpair">Dissocia</string>
+    <string name="no_devices_found">Nessun dispositivo trovato</string>
+    <string name="copy_logs_to_clipboard">Copia i log negli Appunti</string>
+    <string name="unknown">Sconosciuto</string>
+    <string name="demo">Demo</string>
+    <string name="select_device_model">Seleziona modello dispositivo</string>
+    <string name="select_x">Seleziona %s</string>
+    <string name="demo_mode">Modalità Demo</string>
+    <string name="migrate">Esegui migrazione</string>
+    <string name="no_quick_presets">Nessun preset rapido</string>
+    <string name="create_quick_preset">Crea Preset rapido</string>
+    <string name="quick_preset_slot_x">Slot Preset rapido %d</string>
+    <string name="notification_permission_is_required">È necessaria l’autorizzazione per le notifiche</string>
+    <string name="status_notification">Notifica di Stato</string>
+    <string name="confirm">Conferma</string>
+    <string name="featured_setting_x">Impostazione in evidenza %d</string>
+    <string name="setting_id_with_value">%s: %s</string>
+    <string name="load_current_settings">Carica impostazioni attuali</string>
+    <string name="information">Informazioni</string>
+    <string name="load_current_settings_help">Carica impostazioni attuali sostituirà tutte le impostazioni del preset rapido con i valori correnti. Questo non influirà su quali impostazioni sono attivate all’interno del preset rapido.</string>
+    <string name="close">Chiudi</string>
+    <string name="migrate_legacy_equalizer_profiles">Migrazione dei profili equalizzatore legacy</string>
 </resources>
