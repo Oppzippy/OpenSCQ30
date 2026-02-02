@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.ui.devicesettings.composables
+package com.oppzippy.openscq30.ui.devicesettings.screens
 
 import android.Manifest
 import android.content.Intent
@@ -14,10 +14,11 @@ import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
 import com.oppzippy.openscq30.lib.bindings.translateSettingId
+import com.oppzippy.openscq30.ui.utils.OptionalSelect
 import com.oppzippy.openscq30.ui.utils.PermissionCheck
 
 @Composable
-fun StatusNotificationPage(
+fun StatusNotificationScreen(
     settingIds: List<String>,
     featuredSettingSlots: List<String?>,
     onFeaturedSettingSlotChange: (Int, String?) -> Unit,
@@ -27,7 +28,7 @@ fun StatusNotificationPage(
 ) {
     val context = LocalContext.current
     val inner = @Composable {
-        StatusNotificationPageContent(
+        StatusNotificationInner(
             settingIds = settingIds,
             featuredSettingSlots = featuredSettingSlots,
             onFeaturedSettingSlotChange = onFeaturedSettingSlotChange,
@@ -61,7 +62,7 @@ fun StatusNotificationPage(
 }
 
 @Composable
-private fun StatusNotificationPageContent(
+private fun StatusNotificationInner(
     settingIds: List<String>,
     featuredSettingSlots: List<String?>,
     onFeaturedSettingSlotChange: (Int, String?) -> Unit,
@@ -71,7 +72,7 @@ private fun StatusNotificationPageContent(
 ) {
     Column {
         featuredSettingSlots.forEachIndexed { index, settingId ->
-            com.oppzippy.openscq30.ui.utils.OptionalSelect(
+            OptionalSelect(
                 name = stringResource(R.string.featured_setting_x, index + 1),
                 options = settingIds.map { translateSettingId(it) },
                 onSelect = { onFeaturedSettingSlotChange(index, it?.let { settingIds[it] }) },
@@ -82,7 +83,7 @@ private fun StatusNotificationPageContent(
         Spacer(Modifier.height(5.dp))
 
         quickPresetSlots.forEachIndexed { index, slot ->
-            com.oppzippy.openscq30.ui.utils.OptionalSelect(
+            OptionalSelect(
                 name = stringResource(R.string.quick_preset_slot_x, index + 1),
                 options = quickPresets,
                 onSelect = { onQuickPresetSlotChange(index, it?.let { quickPresets[it] }) },

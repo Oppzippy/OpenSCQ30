@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.ui.devicesettings.composables
+package com.oppzippy.openscq30.ui.devicesettings.screens
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,7 +13,7 @@ import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.features.equalizer.storage.LegacyEqualizerProfile
 
 @Composable
-fun MigrateLegacyEqualizerProfilesPage(
+fun MigrateLegacyEqualizerProfilesScreen(
     legacyEqualizerProfiles: List<LegacyEqualizerProfile>,
     onMigrateLegacyEqualizerProfile: (LegacyEqualizerProfile) -> Unit,
 ) {
@@ -21,9 +21,11 @@ fun MigrateLegacyEqualizerProfilesPage(
         items(legacyEqualizerProfiles) { profile ->
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(modifier = Modifier.weight(1f), text = profile.name)
-                Button(onClick = {
-                    onMigrateLegacyEqualizerProfile(profile)
-                }) { Text(stringResource(R.string.migrate)) }
+                Button(
+                    onClick = {
+                        onMigrateLegacyEqualizerProfile(profile)
+                    },
+                ) { Text(stringResource(R.string.migrate)) }
             }
         }
     }

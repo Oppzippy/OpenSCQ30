@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.ui.devicesettings.composables
+package com.oppzippy.openscq30.ui.devicesettings.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,7 +18,7 @@ import com.oppzippy.openscq30.ui.devicesettings.ScreenInfo
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
-fun ScreenSelection(screens: List<ScreenInfo>, onNavigation: (Screen) -> Unit) {
+fun CategorySelectionScreen(screens: List<ScreenInfo>, onNavigation: (Screen) -> Unit) {
     FlowRow(horizontalArrangement = Arrangement.SpaceBetween, maxItemsInEachRow = 2) {
         screens.forEach { screenInfo ->
             Column(
@@ -37,9 +37,9 @@ fun ScreenSelection(screens: List<ScreenInfo>, onNavigation: (Screen) -> Unit) {
 
 @Preview
 @Composable
-private fun PreviewScreenSelection() {
+private fun PreviewCategorySelectionScreen() {
     OpenSCQ30Theme(dynamicColor = false) {
-        ScreenSelection(
+        CategorySelectionScreen(
             screens = listOf(
                 Screen.SettingsCategory("general").screenInfo(),
                 Screen.SettingsCategory("equalizer").screenInfo(),

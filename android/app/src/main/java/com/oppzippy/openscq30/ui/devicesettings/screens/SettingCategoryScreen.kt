@@ -1,17 +1,14 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.oppzippy.openscq30.ui.devicesettings.composables
+package com.oppzippy.openscq30.ui.devicesettings.screens
 
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -44,14 +41,18 @@ import com.oppzippy.openscq30.lib.wrapper.Range
 import com.oppzippy.openscq30.lib.wrapper.Setting
 import com.oppzippy.openscq30.lib.wrapper.Value
 import com.oppzippy.openscq30.lib.wrapper.toValue
+import com.oppzippy.openscq30.ui.devicesettings.composables.Equalizer
 import com.oppzippy.openscq30.ui.utils.Labeled
 import com.oppzippy.openscq30.ui.utils.LabeledSwitch
+import com.oppzippy.openscq30.ui.utils.ModifiableSelect
+import com.oppzippy.openscq30.ui.utils.MultiSelect
+import com.oppzippy.openscq30.ui.utils.OptionalSelect
 import com.oppzippy.openscq30.ui.utils.Select
 import com.oppzippy.openscq30.ui.utils.throttledState
 import kotlin.math.roundToInt
 
 @Composable
-fun SettingPage(
+fun SettingCategoryScreen(
     modifier: Modifier = Modifier,
     settings: List<Pair<String, Setting>>,
     setSettings: (List<Pair<String, Value>>) -> Unit,
@@ -225,7 +226,7 @@ private fun StandardSelect(name: String, setting: Setting.SelectSetting, onChang
 
 @Composable
 private fun OptionalSelect(name: String, setting: Setting.OptionalSelectSetting, onChange: (String?) -> Unit) {
-    com.oppzippy.openscq30.ui.utils.OptionalSelect(
+    OptionalSelect(
         name = name,
         options = setting.setting.localizedOptions,
         selectedIndex = setting.value?.let { setting.setting.options.indexOf(it) },
@@ -235,7 +236,7 @@ private fun OptionalSelect(name: String, setting: Setting.OptionalSelectSetting,
 
 @Composable
 private fun ModifiableSelect(name: String, setting: Setting.ModifiableSelectSetting, onChange: (Value) -> Unit) {
-    com.oppzippy.openscq30.ui.utils.ModifiableSelect(
+    ModifiableSelect(
         name = name,
         options = setting.setting.localizedOptions,
         selectedIndex = setting.value?.let { setting.setting.options.indexOf(it) },
@@ -248,7 +249,7 @@ private fun ModifiableSelect(name: String, setting: Setting.ModifiableSelectSett
 @Composable
 private fun MultiSelect(name: String, setting: Setting.MultiSelectSetting, onChange: (Value) -> Unit) {
     val values = setting.values.toSet()
-    com.oppzippy.openscq30.ui.utils.MultiSelect(
+    MultiSelect(
         name = name,
         options = setting.setting.localizedOptions,
         selectedOptions = setting.setting.options.mapIndexed { index, option ->
