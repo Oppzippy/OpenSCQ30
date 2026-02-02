@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.ui.deviceselection.composables
+package com.oppzippy.openscq30.ui.deviceselection.screens
 
 import android.text.Html
 import android.text.method.LinkMovementMethod
@@ -36,7 +36,7 @@ import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppInfo(onBackClick: () -> Unit) {
+fun AppInfoScreen(onBackClick: () -> Unit) {
     Scaffold(topBar = {
         TopAppBar(
             title = {
@@ -94,8 +94,8 @@ private fun HtmlText(text: String, modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewAppInfo() {
+private fun PreviewAppInfoScreen() {
     OpenSCQ30Theme {
-        AppInfo(onBackClick = {})
+        AppInfoScreen(onBackClick = {})
     }
 }

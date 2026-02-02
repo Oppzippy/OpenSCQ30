@@ -1,4 +1,4 @@
-package com.oppzippy.openscq30.ui.deviceselection.composables
+package com.oppzippy.openscq30.ui.deviceselection.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
