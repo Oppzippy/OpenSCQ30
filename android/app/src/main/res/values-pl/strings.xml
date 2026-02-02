@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="loading">Wczytywanie</string>
+    <string name="bluetooth_permission_is_required">Dostęp do Bluetooth jest wymagany</string>
+    <string name="delete_confirm">Jesteś pewien, że chcesz usunąć „%s”?</string>
+    <string name="delete">Usuń</string>
+    <string name="back">Wstecz</string>
+    <string name="replace">Zastąp</string>
+    <string name="connected_to">Połączono z %s</string>
+    <string name="connecting_to">Łączenie z %s</string>
+    <string name="disconnected">Rozłączono</string>
+    <string name="disconnect">Rozłącz</string>
+    <string name="awaiting_connection">Oczekiwanie na połączenie</string>
+    <string name="quick_presets">Szybkie szablony</string>
+    <string name="settings">Ustawienia</string>
+    <string name="unpair_device">Zapomnij urządzenie</string>
+    <string name="unpairing_from_device_name">Zapominanie %s</string>
+    <string name="unpair">Zapomnij</string>
+    <string name="no_devices_found">Nie znaleziono urządzeń</string>
+    <string name="copy_logs_to_clipboard">Kopiuj logi do schowka</string>
+    <string name="unknown">Nieznane</string>
+    <string name="demo">Demonstracyjne</string>
+    <string name="select_device_model">Wybierz model urządzenia</string>
+    <string name="select_x">Wybierz %s</string>
+    <string name="demo_mode">Tryb demo</string>
+    <string name="activate">Aktywuj</string>
+    <string name="edit">Edytuj</string>
+    <string name="no_quick_presets">Brak szybkich szablonów</string>
+    <string name="create_quick_preset">Utwórz szybki szablon</string>
+    <string name="quick_preset_slot_x">Szybki szablon: %d miejsce</string>
+    <string name="notification_permission_is_required">Dostęp do powiadomień jest wymagany</string>
+    <string name="status_notification">Powiadomienie statusu</string>
+    <string name="information">Informacje</string>
+    <string name="close">Zamknij</string>
+    <string name="migrate_legacy_equalizer_profiles">Migruj przestarzałe profile equalizera</string>
+    <string name="migrate">Migruj</string>
+    <string name="error_pairing">Błąd parowania</string>
+</resources>
