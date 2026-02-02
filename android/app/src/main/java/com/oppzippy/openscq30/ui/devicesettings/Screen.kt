@@ -2,6 +2,7 @@ package com.oppzippy.openscq30.ui.devicesettings
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.ImportExport
 import androidx.compose.material.icons.filled.Info
@@ -45,7 +46,7 @@ sealed class Screen {
             ScreenInfo(
                 this,
                 StringResourceOrString.StringResource(R.string.quick_presets),
-                Icons.Filled.Settings,
+                Icons.Filled.Bolt,
             )
     }
 
