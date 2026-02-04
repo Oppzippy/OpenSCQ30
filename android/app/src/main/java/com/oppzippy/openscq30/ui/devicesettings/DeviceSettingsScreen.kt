@@ -207,6 +207,8 @@ private fun DeviceSettingsNavigationScreen(
                 val route = backStackEntry.toRoute<Screen.SettingsCategory>()
                 val settings by getSettingsInCategoryFlow(route.categoryId).collectAsState(emptyList())
                 SettingCategoryScreen(
+                    deviceModel = connectionStatus.deviceManager.device.model(),
+                    categoryId = route.categoryId,
                     settings = settings,
                     setSettings = setSettingValues,
                 )

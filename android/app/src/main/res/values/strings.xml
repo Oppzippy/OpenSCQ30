@@ -103,4 +103,7 @@
     <string name="headphones">Headphones</string>
     <string name="earbuds">Earbuds</string>
     <string name="audio_speaker">Speaker</string>
+    <string name="preset">Preset</string>
+    <string name="custom">Custom</string>
+    <string name="selected">Selected</string>
 </resources>

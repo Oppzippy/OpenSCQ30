@@ -49,6 +49,7 @@ fun Select(
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
     buttons: @Composable () -> Unit = {},
+    showLabel: Boolean = true,
 ) {
     var isPickerOpen by remember { mutableStateOf(false) }
     if (isPickerOpen) {
@@ -91,8 +92,9 @@ fun Select(
         }
     }
 
-    Labeled(modifier, label = name) {
-        Row {
+    @Composable
+    fun Inner() {
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             Button(
                 modifier = Modifier
                     .weight(1f)
@@ -103,6 +105,12 @@ fun Select(
             }
             buttons()
         }
+    }
+
+    if (showLabel) {
+        Labeled(modifier, label = name) { Inner() }
+    } else {
+        Inner()
     }
 }
 
@@ -137,6 +145,7 @@ fun ModifiableSelect(
     onSelect: (Int) -> Unit,
     onAddOption: (String) -> Unit,
     onRemoveOption: (Int) -> Unit,
+    showLabel: Boolean = true,
 ) {
     var dialogState by remember { mutableStateOf<ModifiableSelectDialog?>(null) }
     dialogState?.let { dialog ->
@@ -211,6 +220,7 @@ fun ModifiableSelect(
         Select(
             modifier,
             name = name,
+            showLabel = showLabel,
             options = listOf(stringResource(R.string.none)).plus(options),
             selectedIndex = if (selectedIndex != null) selectedIndex + 1 else 0,
             onSelect = { if (it != 0) onSelect(it - 1) },

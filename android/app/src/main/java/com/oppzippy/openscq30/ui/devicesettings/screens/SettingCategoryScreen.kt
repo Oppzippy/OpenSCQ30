@@ -42,6 +42,7 @@ import com.oppzippy.openscq30.lib.wrapper.Setting
 import com.oppzippy.openscq30.lib.wrapper.Value
 import com.oppzippy.openscq30.lib.wrapper.toValue
 import com.oppzippy.openscq30.ui.devicesettings.composables.Equalizer
+import com.oppzippy.openscq30.ui.devicesettings.screens.categoryoverrides.categoryScreenOverrides
 import com.oppzippy.openscq30.ui.utils.Labeled
 import com.oppzippy.openscq30.ui.utils.LabeledSwitch
 import com.oppzippy.openscq30.ui.utils.ModifiableSelect
@@ -53,7 +54,21 @@ import kotlin.math.roundToInt
 
 @Composable
 fun SettingCategoryScreen(
-    modifier: Modifier = Modifier,
+    deviceModel: String,
+    categoryId: String,
+    settings: List<Pair<String, Setting>>,
+    setSettings: (List<Pair<String, Value>>) -> Unit,
+) {
+    val override = categoryScreenOverrides[categoryId]?.find { it.shouldOverride(deviceModel, settings) }
+    if (override != null) {
+        override.Screen(settings, setSettings)
+    } else {
+        FallbackSettingCategoryScreen(settings, setSettings)
+    }
+}
+
+@Composable
+private fun FallbackSettingCategoryScreen(
     settings: List<Pair<String, Setting>>,
     setSettings: (List<Pair<String, Value>>) -> Unit,
 ) {
@@ -61,7 +76,7 @@ fun SettingCategoryScreen(
         setSettings(listOf(Pair(settingId, value)))
     }
     Column(
-        modifier = modifier.verticalScroll(rememberScrollState()),
+        modifier = Modifier.verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         settings.forEach { (settingId, setting) ->
