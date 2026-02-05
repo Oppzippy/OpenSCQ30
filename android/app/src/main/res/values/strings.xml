@@ -106,4 +106,8 @@
     <string name="preset">Preset</string>
     <string name="custom">Custom</string>
     <string name="selected">Selected</string>
+    <string name="theme">Theme</string>
+    <string name="system_theme">System Theme</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
 </resources>

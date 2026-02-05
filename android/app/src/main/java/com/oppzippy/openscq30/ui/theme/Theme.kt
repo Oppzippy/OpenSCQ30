@@ -8,9 +8,14 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.glance.GlanceTheme
 import androidx.glance.material3.ColorProviders
+import com.oppzippy.openscq30.features.preferences.Preferences
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.serialization.Serializable
 
 private val lightColorScheme = lightColorScheme(
     primary = primaryLight,
@@ -87,6 +92,19 @@ private val darkColorScheme = darkColorScheme(
     surfaceContainerHigh = surfaceContainerHighDark,
     surfaceContainerHighest = surfaceContainerHighestDark,
 )
+
+enum class ThemeType {
+    // The names of the themes must not be changed, since they are used by Preferences for (de)serialization
+    Light,
+    Dark,
+}
+
+@Composable
+fun ThemeType?.prefersDarkTheme(): Boolean = when (this) {
+    null -> isSystemInDarkTheme()
+    ThemeType.Light -> false
+    ThemeType.Dark -> true
+}
 
 @Composable
 fun OpenSCQ30Theme(

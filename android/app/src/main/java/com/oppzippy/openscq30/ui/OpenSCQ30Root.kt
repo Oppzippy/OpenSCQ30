@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.oppzippy.openscq30.R
+import com.oppzippy.openscq30.features.preferences.prefersDarkTheme
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.ui.deviceselection.DeviceSelectionScreen
 import com.oppzippy.openscq30.ui.devicesettings.DeviceSettingsScreen
@@ -29,7 +30,9 @@ import com.oppzippy.openscq30.ui.utils.Loading
 @Composable
 fun OpenSCQ30Root(viewModel: OpenSCQ30RootViewModel = hiltViewModel()) {
     viewModel.toastHandler.Show()
-    OpenSCQ30Theme {
+    OpenSCQ30Theme(
+        darkTheme = prefersDarkTheme(),
+    ) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background,
