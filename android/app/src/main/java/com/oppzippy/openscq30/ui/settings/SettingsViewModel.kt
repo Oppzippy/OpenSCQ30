@@ -28,14 +28,11 @@ class SettingsViewModel @Inject constructor(
         private const val TAG = "SettingsViewModel"
     }
 
-    private val _autoConnect = MutableStateFlow(preferences.autoConnect)
-    val autoConnect = _autoConnect.asStateFlow()
-
+    val autoConnect = preferences.autoConnectFlow
     val theme = preferences.themeFlow
     val dynamicColorEnabled = preferences.dynamicColorFlow
 
     fun setAutoConnect(value: Boolean) {
-        _autoConnect.value = value
         preferences.autoConnect = value
         val intent = Intent(context, AutoConnectService::class.java)
         if (value) {
