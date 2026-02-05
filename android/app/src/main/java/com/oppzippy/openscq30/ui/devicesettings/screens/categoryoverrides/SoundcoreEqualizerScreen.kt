@@ -19,7 +19,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -140,7 +140,7 @@ object SoundcoreEqualizerScreen : CategoryOverride {
         var selectedTabIndex by remember { mutableIntStateOf(if (isPresetSelected) 0 else 1) }
 
         Column {
-            SecondaryTabRow(selectedTabIndex) {
+            PrimaryTabRow(selectedTabIndex) {
                 Tab(
                     selected = selectedTabIndex == 0,
                     onClick = { selectedTabIndex = 0 },
