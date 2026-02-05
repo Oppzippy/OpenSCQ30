@@ -58,13 +58,32 @@ class Preferences @Inject constructor(@ApplicationContext context: Context) {
 
     private val _themeFlow = MutableStateFlow(theme)
     val themeFlow = _themeFlow.asStateFlow()
+
+    var dynamicColor: Boolean
+        get() {
+            return preferences.getBoolean("dynamicColor", true)
+        }
+        set(value) {
+            preferences.edit {
+                _dynamicColorFlow.value = value
+                putBoolean("dynamicColor", value)
+            }
+        }
+
+    private val _dynamicColorFlow = MutableStateFlow(dynamicColor)
+    val dynamicColorFlow = _dynamicColorFlow.asStateFlow()
 }
 
 @HiltViewModel
 class ThemeViewModel @Inject constructor(preferences: Preferences) : ViewModel() {
     val themeFlow = preferences.themeFlow
+    val dynamicColorFlow = preferences.dynamicColorFlow
 }
 
 @Composable
 fun prefersDarkTheme(themeViewModel: ThemeViewModel = hiltViewModel()): Boolean =
     themeViewModel.themeFlow.collectAsState().value.prefersDarkTheme()
+
+@Composable
+fun prefersDynamicColor(themeViewModel: ThemeViewModel = hiltViewModel()): Boolean =
+    themeViewModel.dynamicColorFlow.collectAsState().value

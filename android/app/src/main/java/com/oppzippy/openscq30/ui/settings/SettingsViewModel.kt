@@ -32,6 +32,7 @@ class SettingsViewModel @Inject constructor(
     val autoConnect = _autoConnect.asStateFlow()
 
     val theme = preferences.themeFlow
+    val dynamicColorEnabled = preferences.dynamicColorFlow
 
     fun setAutoConnect(value: Boolean) {
         _autoConnect.value = value
@@ -46,6 +47,10 @@ class SettingsViewModel @Inject constructor(
 
     fun setTheme(theme: ThemeType?) {
         preferences.theme = theme
+    }
+
+    fun setDynamicColor(enabled: Boolean) {
+        preferences.dynamicColor = enabled
     }
 
     fun copyLogs() {
