@@ -179,12 +179,6 @@ dependencies {
     // UI Tests
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-    // Optional - Included automatically by material, only add when you need
-    // the icons but not the material library (e.g. when using Material3 or a
-    // custom design system based on Foundation)
-    implementation(libs.androidx.compose.material.icons.core)
-    // Optional - Add full set of material icons
-    implementation(libs.androidx.compose.material.icons.extended)
     // Optional - Integration with activities
     implementation(libs.androidx.activity.compose)
     // Optional - Integration with ViewModels

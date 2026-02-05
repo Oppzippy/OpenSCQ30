@@ -85,7 +85,7 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
                     name,
                     icon = Icon.createWithResource(
                         context,
-                        if (index == 0) R.drawable.counter_1_48px else R.drawable.counter_2_48px,
+                        if (index == 0) R.drawable.counter_1_24px else R.drawable.counter_2_24px,
                     ),
                 ),
             )

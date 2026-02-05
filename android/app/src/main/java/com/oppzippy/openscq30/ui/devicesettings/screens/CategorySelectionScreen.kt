@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.oppzippy.openscq30.ui.devicesettings.Screen
 import com.oppzippy.openscq30.ui.devicesettings.ScreenInfo
@@ -19,7 +20,7 @@ fun CategorySelectionScreen(screens: List<ScreenInfo>, onNavigation: (Screen) ->
         items(screens) { screenInfo ->
             NavItem(
                 modifier = Modifier.clickable { onNavigation(screenInfo.baseRoute) },
-                icon = { Icon(screenInfo.icon, contentDescription = null) },
+                icon = { Icon(painter = painterResource(screenInfo.icon), contentDescription = null) },
                 text = screenInfo.name.translated(),
             )
         }

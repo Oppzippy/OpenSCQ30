@@ -217,7 +217,7 @@ private fun Content(context: Context, state: SettingWidgetState?) {
                 ) {
                     if (state is SettingWidgetState.Connected || state is SettingWidgetState.ConnectedUnconfigured) {
                         CircleIconButton(
-                            imageProvider = ImageProvider(R.drawable.material_arrow_back),
+                            imageProvider = ImageProvider(R.drawable.arrow_back_24px),
                             contentDescription = context.getString(R.string.disconnect),
                             backgroundColor = null,
                             // Not sure why, but for some reason actions don't seem to work when the CircleIconButton
