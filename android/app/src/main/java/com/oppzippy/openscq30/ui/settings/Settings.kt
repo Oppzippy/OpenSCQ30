@@ -3,6 +3,7 @@ package com.oppzippy.openscq30.ui.settings
 import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -82,6 +83,7 @@ private fun Settings(
         }
 
         Button(
+            modifier = Modifier.fillMaxWidth(),
             onClick = { onCopyLogs() },
             content = { Text(stringResource(R.string.copy_logs_to_clipboard)) },
         )
