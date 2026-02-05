@@ -55,7 +55,7 @@ fun ConnectToDeviceCard(
 }
 
 @Composable
-fun AddDeviceCard(modifier: Modifier = Modifier, name: String, model: String) {
+fun AddDeviceModelCard(modifier: Modifier = Modifier, name: String, model: String) {
     DeviceCardContainer(
         modifier,
         icon = { DeviceModelIcon(Modifier.size(50.dp), model) },
@@ -63,6 +63,24 @@ fun AddDeviceCard(modifier: Modifier = Modifier, name: String, model: String) {
         Text(name)
         Spacer(Modifier.height(4.dp))
         Text(model)
+    }
+}
+
+@Composable
+fun AddDeviceCard(modifier: Modifier = Modifier, name: String, macAddress: String) {
+    DeviceCardContainer(
+        modifier,
+        icon = {
+            Icon(
+                modifier = Modifier.size(50.dp),
+                painter = painterResource(R.drawable.bluetooth_24px),
+                contentDescription = null,
+            )
+        },
+    ) {
+        Text(name)
+        Spacer(Modifier.height(4.dp))
+        Text(macAddress)
     }
 }
 

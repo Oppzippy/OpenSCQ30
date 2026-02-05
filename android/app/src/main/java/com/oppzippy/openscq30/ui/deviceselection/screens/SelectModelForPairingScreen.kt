@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.bindings.deviceModels
 import com.oppzippy.openscq30.lib.bindings.translateDeviceModel
-import com.oppzippy.openscq30.ui.deviceselection.components.AddDeviceCard
+import com.oppzippy.openscq30.ui.deviceselection.components.AddDeviceModelCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,7 +93,7 @@ fun SelectModelForPairingScreen(onModelSelected: (String) -> Unit, onBackClick: 
                         }
                     if (filteredDeviceModels.isNotEmpty()) {
                         items(filteredDeviceModels) { (model, name) ->
-                            AddDeviceCard(
+                            AddDeviceModelCard(
                                 modifier = Modifier.clickable { onModelSelected(model) },
                                 name = name,
                                 model = model,
