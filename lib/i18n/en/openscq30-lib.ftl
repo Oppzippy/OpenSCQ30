@@ -22,6 +22,7 @@ soundcore-a3939 = Soundcore Life P3
 soundcore-a3935 = Soundcore Life A2 NC
 soundcore-a3959 = Soundcore P30i / Soundcore R50i NC
 soundcore-a3955 = Soundcore P40i
+soundcore-a3957 = Soundcore Liberty 5
 soundcore-development = Soundcore Development Information
 
 general = General
@@ -193,3 +194,8 @@ percent = { $percent }%
 
 immersive-experience = Immersive Experience
 movie-mode = Movie Mode
+enabled = Enabled
+pressure-sensitivity = Pressure Sensitivity
+softest = Softest
+medium = Medium
+firmest = Firmest
