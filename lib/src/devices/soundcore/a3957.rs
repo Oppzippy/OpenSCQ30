@@ -197,7 +197,10 @@ mod tests {
             (SettingId::FirmwareVersionLeft, "03.90".into()),
             (SettingId::FirmwareVersionRight, "03.90".into()),
             (SettingId::SerialNumber, "3957F49D8AC20334".into()),
-            (SettingId::PresetEqualizerProfile, Some("SoundcoreSignature").into()),
+            (
+                SettingId::PresetEqualizerProfile,
+                Some("SoundcoreSignature").into(),
+            ),
             (SettingId::AmbientSoundMode, "NoiseCanceling".into()),
             (SettingId::TouchTone, true.into()),
             (SettingId::LowBatteryPrompt, true.into()),

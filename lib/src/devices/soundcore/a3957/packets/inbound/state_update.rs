@@ -68,8 +68,7 @@ impl Default for A3957StateUpdatePacket {
             equalizer_configuration: Default::default(),
             age_range: Default::default(),
             hear_id: Default::default(),
-            button_configuration: a3957::BUTTON_CONFIGURATION_SETTINGS
-                .default_status_collection(),
+            button_configuration: a3957::BUTTON_CONFIGURATION_SETTINGS.default_status_collection(),
             ambient_sound_mode_cycle: Default::default(),
             sound_modes: Default::default(),
             wearing_tone: Default::default(),
@@ -114,24 +113,24 @@ impl FromPacketBody for A3957StateUpdatePacket {
                             a3957::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
                         ),
                         common::structures::AmbientSoundModeCycle::take,
-                        a3957::structures::SoundModes::take,           // 7 bytes: 119-125
-                        take(1usize),                                  // unknown: 126 (always 0x33)
-                        a3957::structures::WearingTone::take,          // 127
-                        common::structures::LowBatteryPrompt::take,    // 128
-                        take_bool,                                     // 129: LDAC
+                        a3957::structures::SoundModes::take, // 7 bytes: 119-125
+                        take(1usize),                        // unknown: 126 (always 0x33)
+                        a3957::structures::WearingTone::take, // 127
+                        common::structures::LowBatteryPrompt::take, // 128
+                        take_bool,                           // 129: LDAC
                         a3957::structures::AncPersonalizedToEarCanal::take, // 130
-                        common::structures::AutoPowerOff::take,        // 131-132
-                        common::structures::LimitHighVolume::take,     // 133-135
-                        a3957::structures::ImmersiveExperience::take,  // 136
+                        common::structures::AutoPowerOff::take, // 131-132
+                        common::structures::LimitHighVolume::take, // 133-135
+                        a3957::structures::ImmersiveExperience::take, // 136
                     ),
                     (
-                        take(6usize),                                           // unknown: 137-142
-                        a3957::structures::SoundLeakageCompensation::take,      // 143
-                        a3957::structures::WearingDetection::take,              // 144
-                        common::structures::TouchTone::take,                    // 145
-                        a3957::structures::GameMode::take,                      // 146
-                        a3957::structures::PressureSensitivity::take,           // 147
-                        take(6usize),                                           // unknown: 148-153
+                        take(6usize),                                      // unknown: 137-142
+                        a3957::structures::SoundLeakageCompensation::take, // 143
+                        a3957::structures::WearingDetection::take,         // 144
+                        common::structures::TouchTone::take,               // 145
+                        a3957::structures::GameMode::take,                 // 146
+                        a3957::structures::PressureSensitivity::take,      // 147
+                        take(6usize),                                      // unknown: 148-153
                     ),
                 ),
                 |(
@@ -216,33 +215,33 @@ impl ToPacket for A3957StateUpdatePacket {
             .chain(self.dual_battery.bytes())
             .chain(self.dual_firmware_version.bytes())
             .chain(self.serial_number.bytes())
-            .chain([0; 5])                                              // unknown: 32-36
+            .chain([0; 5]) // unknown: 32-36
             .chain(iter::once(self.case_battery.0.0))
             .chain(self.equalizer_configuration.bytes())
             .chain(iter::once(self.age_range.0))
             .chain(self.hear_id.bytes_with_music_genre_at_end())
-            .chain(iter::once(0))                                       // unknown: 109
+            .chain(iter::once(0)) // unknown: 109
             .chain(
                 self.button_configuration
                     .bytes(a3957::BUTTON_CONFIGURATION_SETTINGS.parse_settings()),
             )
             .chain(self.ambient_sound_mode_cycle.bytes())
             .chain(self.sound_modes.bytes())
-            .chain(iter::once(0x33))                                    // unknown: 126
-            .chain(self.wearing_tone.bytes())                           // 127
-            .chain(self.low_battery_prompt.bytes())                     // 128
-            .chain(iter::once(self.ldac.into()))                        // 129: LDAC
-            .chain(self.anc_personalized_to_ear_canal.bytes())          // 130
-            .chain(self.auto_power_off.bytes())                         // 131-132
-            .chain(self.limit_high_volume.bytes())                      // 133-135
-            .chain(iter::once(self.immersive_experience as u8))         // 136
-            .chain([0; 6])                                              // unknown: 137-142
-            .chain(self.sound_leakage_compensation.bytes())             // 143
-            .chain(self.wearing_detection.bytes())                      // 144
-            .chain([self.touch_tone.0.into()])                          // 145
-            .chain(self.game_mode.bytes())                              // 146
-            .chain(iter::once(self.pressure_sensitivity as u8))         // 147
-            .chain([0xff; 6])                                           // unknown: 148-153
+            .chain(iter::once(0x33)) // unknown: 126
+            .chain(self.wearing_tone.bytes()) // 127
+            .chain(self.low_battery_prompt.bytes()) // 128
+            .chain(iter::once(self.ldac.into())) // 129: LDAC
+            .chain(self.anc_personalized_to_ear_canal.bytes()) // 130
+            .chain(self.auto_power_off.bytes()) // 131-132
+            .chain(self.limit_high_volume.bytes()) // 133-135
+            .chain(iter::once(self.immersive_experience as u8)) // 136
+            .chain([0; 6]) // unknown: 137-142
+            .chain(self.sound_leakage_compensation.bytes()) // 143
+            .chain(self.wearing_detection.bytes()) // 144
+            .chain([self.touch_tone.0.into()]) // 145
+            .chain(self.game_mode.bytes()) // 146
+            .chain(iter::once(self.pressure_sensitivity as u8)) // 147
+            .chain([0xff; 6]) // unknown: 148-153
             .collect()
     }
 }

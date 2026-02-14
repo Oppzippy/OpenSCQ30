@@ -1,8 +1,7 @@
 use openscq30_lib_has::Has;
 
 use crate::{
-    api::connection::RfcommConnection,
-    devices::soundcore::common::device::SoundcoreDeviceBuilder,
+    api::connection::RfcommConnection, devices::soundcore::common::device::SoundcoreDeviceBuilder,
 };
 
 use super::structures::{AncPersonalizedToEarCanal, ImmersiveExperience, SoundModes};
