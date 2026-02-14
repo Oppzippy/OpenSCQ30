@@ -1,25 +1,32 @@
 use std::collections::HashMap;
 
-use crate::devices::soundcore::{
-    a3930::{packets::A3930StateUpdatePacket, state::A3930State},
-    common::{
-        macros::soundcore_device,
-        modules::{
-            button_configuration::{
-                ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings,
-                COMMON_ACTIONS_WITHOUT_SOUND_MODES,
+use uuid::uuid;
+
+use crate::{
+    connection::RfcommServiceSelectionStrategy,
+    devices::soundcore::{
+        a3930::{packets::A3930StateUpdatePacket, state::A3930State},
+        common::{
+            device::SoundcoreDeviceConfig,
+            macros::soundcore_device,
+            modules::{
+                button_configuration::{
+                    ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings,
+                    COMMON_ACTIONS_WITHOUT_SOUND_MODES,
+                },
+                equalizer,
+                sound_modes::AvailableSoundModes,
             },
-            equalizer,
-            sound_modes::AvailableSoundModes,
-        },
-        packet::{
-            inbound::{SerialNumberAndFirmwareVersion, TryToPacket},
-            outbound::{RequestSerialNumberAndFirmwareVersion, RequestState, ToPacket},
-        },
-        structures::{
-            AmbientSoundMode,
-            button_configuration::{
-                ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
+            packet::{
+                ChecksumKind,
+                inbound::{SerialNumberAndFirmwareVersion, TryToPacket},
+                outbound::{RequestSerialNumberAndFirmwareVersion, RequestState, ToPacket},
+            },
+            structures::{
+                AmbientSoundMode,
+                button_configuration::{
+                    ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
+                },
             },
         },
     },
@@ -71,7 +78,15 @@ soundcore_device!(
             ),
         ])
     },
+    CONFIG,
 );
+
+const CONFIG: SoundcoreDeviceConfig = SoundcoreDeviceConfig {
+    checksum_kind: ChecksumKind::Suffix,
+    rfcomm_service_selection_strategy: RfcommServiceSelectionStrategy::Constant(uuid!(
+        "00001101-0000-1000-8000-00805f9b34fb"
+    )),
+};
 
 const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
     ButtonConfigurationSettings {
