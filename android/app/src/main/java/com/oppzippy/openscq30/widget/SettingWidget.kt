@@ -423,6 +423,7 @@ private fun Select(context: Context, settingId: String, setting: Select, value: 
                 if (isOptional) {
                     RadioButton(
                         text = context.getString(R.string.none),
+                        style = defaultTextStyle(),
                         onClick = actionSetSettingValue(context, settingId, Value.OptionalStringValue(null)),
                         checked = value == null,
                     )
@@ -436,6 +437,7 @@ private fun Select(context: Context, settingId: String, setting: Select, value: 
                         chunk.forEach { (option, localizedOption) ->
                             RadioButton(
                                 text = localizedOption,
+                                style = defaultTextStyle(),
                                 onClick = actionSetSettingValue(context, settingId, option.toValue()),
                                 checked = value == option,
                             )
