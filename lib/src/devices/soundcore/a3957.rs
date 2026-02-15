@@ -24,7 +24,7 @@ use crate::{
 mod modules;
 mod packets;
 mod state;
-pub(crate) mod structures;
+pub mod structures;
 
 soundcore_device!(
     state::A3957State,
@@ -50,14 +50,17 @@ soundcore_device!(
 
         builder.limit_high_volume();
 
-        builder.a3957_immersive_experience();
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.touch_tone();
         builder.low_battery_prompt();
+        builder.wearing_tone();
+        builder.wearing_detection();
+        builder.sound_leak_compensation();
+        builder.gaming_mode();
 
         builder.tws_status();
-        builder.dual_battery(5);
-        builder.case_battery_level(5);
+        builder.a3957_dual_battery(10);
+        builder.a3957_case_battery_level(10);
         builder.serial_number_and_dual_firmware_version();
     },
     {
@@ -201,7 +204,6 @@ mod tests {
                 SettingId::PresetEqualizerProfile,
                 Some("SoundcoreSignature").into(),
             ),
-            (SettingId::ImmersiveExperience, "Disabled".into()),
             (SettingId::AncPersonalizedToEarCanal, true.into()),
             (SettingId::BatteryLevelLeft, "9/10".into()),
             (SettingId::BatteryLevelRight, "9/10".into()),

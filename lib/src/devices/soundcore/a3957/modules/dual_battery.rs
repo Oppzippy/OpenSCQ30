@@ -1,4 +1,3 @@
-pub mod packet_handler;
 mod setting_handler;
 
 use openscq30_lib_has::Has;
@@ -6,11 +5,12 @@ use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use crate::{
     api::settings::{CategoryId, SettingId},
-    devices::soundcore::common::structures::DualBattery,
+    devices::soundcore::common::{
+        modules::{ModuleCollection, dual_battery::packet_handler},
+        structures::DualBattery,
+    },
     macros::enum_subset,
 };
-
-use super::ModuleCollection;
 
 enum_subset!(
     SettingId,
@@ -27,7 +27,7 @@ impl<T> ModuleCollection<T>
 where
     T: Has<DualBattery> + Clone + Send + Sync,
 {
-    pub fn add_dual_battery(&mut self, max_level: u8) {
+    pub fn add_a3957_dual_battery(&mut self, max_level: u8) {
         self.setting_manager.add_handler(
             CategoryId::DeviceInformation,
             setting_handler::BatterySettingHandler::new(max_level),

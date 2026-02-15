@@ -1,12 +1,17 @@
 use openscq30_lib_has::Has;
 
 use crate::{
-    api::connection::RfcommConnection, devices::soundcore::common::device::SoundcoreDeviceBuilder,
+    api::connection::RfcommConnection,
+    devices::soundcore::common::{
+        device::SoundcoreDeviceBuilder,
+        structures::{CaseBatteryLevel, DualBattery},
+    },
 };
 
-use super::structures::{AncPersonalizedToEarCanal, ImmersiveExperience, SoundModes};
+use super::structures::{AncPersonalizedToEarCanal, SoundModes};
 
-mod immersive_experience;
+mod case_battery_level;
+mod dual_battery;
 mod sound_modes;
 
 impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
@@ -24,11 +29,20 @@ where
 impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
 where
     ConnectionType: RfcommConnection + Send + Sync + 'static,
-    StateType: Has<ImmersiveExperience> + Send + Sync + Clone + 'static,
+    StateType: Has<DualBattery> + Send + Sync + Clone + 'static,
 {
-    pub fn a3957_immersive_experience(&mut self) {
-        let packet_io_controller = self.packet_io_controller().clone();
+    pub fn a3957_dual_battery(&mut self, max_level: u8) {
+        self.module_collection().add_a3957_dual_battery(max_level);
+    }
+}
+
+impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+where
+    ConnectionType: RfcommConnection + Send + Sync + 'static,
+    StateType: Has<CaseBatteryLevel> + Send + Sync + Clone + 'static,
+{
+    pub fn a3957_case_battery_level(&mut self, max_level: u8) {
         self.module_collection()
-            .add_a3957_immersive_experience(packet_io_controller);
+            .add_a3957_case_battery_level(max_level);
     }
 }

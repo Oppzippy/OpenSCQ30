@@ -43,17 +43,17 @@ pub struct A3957StateUpdatePacket {
     pub button_configuration: ButtonStatusCollection<8>,
     pub ambient_sound_mode_cycle: common::structures::AmbientSoundModeCycle,
     pub sound_modes: a3957::structures::SoundModes,
-    pub wearing_tone: a3957::structures::WearingTone,
+    pub wearing_tone: common::structures::WearingTone,
     pub low_battery_prompt: common::structures::LowBatteryPrompt,
     pub ldac: bool,
     pub anc_personalized_to_ear_canal: a3957::structures::AncPersonalizedToEarCanal,
     pub auto_power_off: common::structures::AutoPowerOff,
     pub limit_high_volume: common::structures::LimitHighVolume,
     pub immersive_experience: a3957::structures::ImmersiveExperience,
-    pub sound_leakage_compensation: a3957::structures::SoundLeakageCompensation,
-    pub wearing_detection: a3957::structures::WearingDetection,
+    pub sound_leak_compensation: common::structures::SoundLeakCompensation,
+    pub wearing_detection: common::structures::WearingDetection,
     pub touch_tone: common::structures::TouchTone,
-    pub game_mode: a3957::structures::GameMode,
+    pub gaming_mode: common::structures::GamingMode,
     pub pressure_sensitivity: a3957::structures::PressureSensitivity,
 }
 
@@ -78,10 +78,10 @@ impl Default for A3957StateUpdatePacket {
             auto_power_off: Default::default(),
             limit_high_volume: Default::default(),
             immersive_experience: Default::default(),
-            sound_leakage_compensation: Default::default(),
+            sound_leak_compensation: Default::default(),
             wearing_detection: Default::default(),
             touch_tone: Default::default(),
-            game_mode: Default::default(),
+            gaming_mode: Default::default(),
             pressure_sensitivity: Default::default(),
             gender: Default::default(),
         }
@@ -115,7 +115,7 @@ impl FromPacketBody for A3957StateUpdatePacket {
                         common::structures::AmbientSoundModeCycle::take,
                         a3957::structures::SoundModes::take, // 7 bytes: 119-125
                         take(1usize),                        // unknown: 126 (always 0x33)
-                        a3957::structures::WearingTone::take, // 127
+                        common::structures::WearingTone::take, // 127
                         common::structures::LowBatteryPrompt::take, // 128
                         take_bool,                           // 129: LDAC
                         a3957::structures::AncPersonalizedToEarCanal::take, // 130
@@ -124,13 +124,13 @@ impl FromPacketBody for A3957StateUpdatePacket {
                         a3957::structures::ImmersiveExperience::take, // 136
                     ),
                     (
-                        take(6usize),                                      // unknown: 137-142
-                        a3957::structures::SoundLeakageCompensation::take, // 143
-                        a3957::structures::WearingDetection::take,         // 144
-                        common::structures::TouchTone::take,               // 145
-                        a3957::structures::GameMode::take,                 // 146
-                        a3957::structures::PressureSensitivity::take,      // 147
-                        take(6usize),                                      // unknown: 148-153
+                        take(6usize),                                    // unknown: 137-142
+                        common::structures::SoundLeakCompensation::take, // 143
+                        common::structures::WearingDetection::take,      // 144
+                        common::structures::TouchTone::take,             // 145
+                        common::structures::GamingMode::take,            // 146
+                        a3957::structures::PressureSensitivity::take,    // 147
+                        take(6usize),                                    // unknown: 148-153
                     ),
                 ),
                 |(
@@ -159,10 +159,10 @@ impl FromPacketBody for A3957StateUpdatePacket {
                     ),
                     (
                         _unknown4,
-                        sound_leakage_compensation,
+                        sound_leak_compensation,
                         wearing_detection,
                         touch_tone,
-                        game_mode,
+                        gaming_mode,
                         pressure_sensitivity,
                         _unknown5,
                     ),
@@ -186,10 +186,10 @@ impl FromPacketBody for A3957StateUpdatePacket {
                         auto_power_off,
                         limit_high_volume,
                         immersive_experience,
-                        sound_leakage_compensation,
+                        sound_leak_compensation,
                         wearing_detection,
                         touch_tone,
-                        game_mode,
+                        gaming_mode,
                         pressure_sensitivity,
                         // not parsed from packet
                         gender: Default::default(),
@@ -236,10 +236,10 @@ impl ToPacket for A3957StateUpdatePacket {
             .chain(self.limit_high_volume.bytes()) // 133-135
             .chain(iter::once(self.immersive_experience as u8)) // 136
             .chain([0; 6]) // unknown: 137-142
-            .chain(self.sound_leakage_compensation.bytes()) // 143
+            .chain(self.sound_leak_compensation.bytes()) // 143
             .chain(self.wearing_detection.bytes()) // 144
             .chain([self.touch_tone.0.into()]) // 145
-            .chain(self.game_mode.bytes()) // 146
+            .chain(self.gaming_mode.bytes()) // 146
             .chain(iter::once(self.pressure_sensitivity as u8)) // 147
             .chain([0xff; 6]) // unknown: 148-153
             .collect()

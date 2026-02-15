@@ -6,23 +6,23 @@ rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B3957"
 # State update
 command = [1, 1]
 response = [
-    0x00,
-    0x01,
-    0x08,
-    0x08,
-    0x00,
-    0x00,
-    0x30,
+    0x00, # TWS host device
+    0x01, # TWS connected
+    0x08, # Left battery level (0-9, displayed as 9/10)
+    0x08, # Right battery level (0-9, displayed as 9/10)
+    0x00, # Left battery charging
+    0x00, # Right battery charging
+    0x30, # Left firmware version start ("03.90")
     0x33,
     0x2e,
     0x39,
-    0x30,
-    0x30,
+    0x30, # Left firmware version end
+    0x30, # Right firmware version start ("03.90")
     0x33,
     0x2e,
     0x39,
-    0x30,
-    0x33,
+    0x30, # Right firmware version end
+    0x33, # Serial number start ("3957F49D8AC20334")
     0x39,
     0x35,
     0x37,
@@ -37,15 +37,16 @@ response = [
     0x30,
     0x33,
     0x33,
-    0x34,
-    0x30,
+    0x34, # Serial number end
+    0x30, # Unknown, possibly case firmware ("00.00")
     0x30,
     0x2e,
     0x30,
     0x30,
-    0x02,
-    0x00,
-    0x00,
+    0x02, # Case battery level (0-9, displayed as 3/10)
+    0x00, # Left equalizer profile ID
+    0x00, # Right equalizer profile ID
+    0x78, # Left equalizer bands start (10 bands)
     0x78,
     0x78,
     0x78,
@@ -54,8 +55,8 @@ response = [
     0x78,
     0x78,
     0x78,
-    0x78,
-    0x78,
+    0x78, # Left equalizer bands end
+    0xff, # Right equalizer bands start (10 bands)
     0xff,
     0xff,
     0xff,
@@ -64,11 +65,10 @@ response = [
     0xff,
     0xff,
     0xff,
-    0xff,
-    0xff,
-    0x00,
-    0x01,
-    0x91,
+    0xff, # Right equalizer bands end
+    0x00, # Age range
+    0x01, # HearID enabled
+    0x91, # HearID left volume adjustments start (10 bands)
     0x82,
     0x73,
     0x77,
@@ -77,8 +77,8 @@ response = [
     0x8f,
     0x96,
     0x00,
-    0x00,
-    0x91,
+    0x00, # HearID left volume adjustments end
+    0x91, # HearID right volume adjustments start (10 bands)
     0x82,
     0x73,
     0x77,
@@ -87,13 +87,13 @@ response = [
     0x8f,
     0x96,
     0x00,
+    0x00, # HearID right volume adjustments end
+    0x00, # HearID time start
     0x00,
     0x00,
-    0x00,
-    0x00,
-    0x00,
-    0x00,
-    0x91,
+    0x00, # HearID time end
+    0x00, # HearID type (0=initial curve, 1=custom, 2=favorite music)
+    0x91, # HearID left custom volume adjustments start (10 bands)
     0x82,
     0x73,
     0x77,
@@ -102,8 +102,8 @@ response = [
     0x8f,
     0x96,
     0x00,
-    0x00,
-    0x91,
+    0x00, # HearID left custom volume adjustments end
+    0x91, # HearID right custom volume adjustments start (10 bands)
     0x82,
     0x73,
     0x77,
@@ -112,48 +112,48 @@ response = [
     0x8f,
     0x96,
     0x00,
-    0x00,
-    0x00,
-    0x00,
-    0x0a,
-    0x66,
+    0x00, # HearID right custom volume adjustments end
+    0x00, # HearID favorite music genre start
+    0x00, # HearID favorite music genre end
+    0x0a, # Unknown
+    0x66, # Button status start (8 buttons)
     0x66,
     0x32,
     0x33,
     0xff,
     0xff,
     0x44,
-    0x44,
-    0x33,
-    0x00,
-    0x50,
-    0x00,
-    0x00,
-    0x00,
-    0x00,
-    0x00,
-    0x33,
-    0x01,
-    0x01,
-    0x00,
-    0x01,
-    0x01,
-    0x02,
-    0x00,
-    0x5a,
-    0x00,
-    0x00,
+    0x44, # Button status end
+    0x33, # Ambient sound mode cycle
+    0x00, # Ambient sound mode (0=noise canceling, 1=transparency, 2=normal)
+    0x50, # Noise canceling settings: manual << 4 | adaptive (manual=5, adaptive=0)
+    0x00, # Transparency mode (0=fully transparent, 1=vocal)
+    0x00, # Noise canceling mode (0=manual, 1=adaptive, 2=transportation)
+    0x00, # Wind noise (bit 0=suppression enabled, bit 1=detected)
+    0x00, # Adaptive noise canceling sensitivity level
+    0x00, # Transportation mode (0=plane, 3=car)
+    0x33, # Unknown
+    0x01, # Wearing tone
+    0x01, # Low battery prompt
+    0x00, # LDAC
+    0x01, # ANC personalized to ear canal
+    0x01, # Auto power off enabled
+    0x02, # Auto power off duration
+    0x00, # Limit high volume enabled
+    0x5a, # DB limit (90)
+    0x00, # Decibel reading refresh rate
+    0x00, # Immersive experience (Dolby) (0=disabled, 1=enabled)
     0x01,
     0x00,
     0x00,
     0xff,
     0x01,
     0x00,
-    0x00,
-    0x01,
-    0x01,
-    0x00,
-    0x01,
+    0x00, # Sound leak compensation
+    0x01, # Wearing detection
+    0x00, # Touch tone
+    0x01, # Gaming mode
+    0x00, # Pressure sensitivity
     0xff,
     0xff,
     0xff,
@@ -174,10 +174,12 @@ command = [16, 151]
 response = [1]
 
 [[responses]]
+# ANC personalized to ear canal acknowledgment
 command = [3, 148]
 response = [1]
 
 [[responses]]
+# Button capabilities
 command = [5, 1]
 response = [
     1,

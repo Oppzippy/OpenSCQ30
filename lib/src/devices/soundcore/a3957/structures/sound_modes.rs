@@ -21,8 +21,8 @@ pub struct SoundModes {
     pub adaptive_noise_canceling: AdaptiveNoiseCanceling,
     #[migration_requirement(field = noise_canceling_mode, value = NoiseCancelingMode::Manual)]
     pub manual_noise_canceling: ManualNoiseCanceling,
-    #[migration_requirement(field = noise_canceling_mode, value = NoiseCancelingMode::MultiScene)]
-    pub multi_scene_anc: common::structures::NoiseCancelingMode,
+    #[migration_requirement(field = noise_canceling_mode, value = NoiseCancelingMode::Transportation)]
+    pub transportation_mode: TransportationMode,
     #[migration_requirement(field = ambient_sound_mode, value = common::structures::AmbientSoundMode::NoiseCanceling)]
     pub wind_noise: WindNoise,
     #[migration_requirement(field = noise_canceling_mode, value = NoiseCancelingMode::Adaptive)]
@@ -43,7 +43,7 @@ impl SoundModes {
                     NoiseCancelingMode::take,
                     WindNoise::take,
                     le_u8,
-                    common::structures::NoiseCancelingMode::take,
+                    TransportationMode::take,
                 ),
                 |(
                     ambient_sound_mode,
@@ -52,7 +52,7 @@ impl SoundModes {
                     noise_canceling_mode,
                     wind_noise,
                     noise_canceling_adaptive_sensitivity_level,
-                    multi_scene_anc,
+                    transportation_mode,
                 )| {
                     Self {
                         ambient_sound_mode,
@@ -62,7 +62,7 @@ impl SoundModes {
                         noise_canceling_mode,
                         wind_noise,
                         noise_canceling_adaptive_sensitivity_level,
-                        multi_scene_anc,
+                        transportation_mode,
                     }
                 },
             ),
@@ -78,7 +78,7 @@ impl SoundModes {
             self.noise_canceling_mode.id(),
             self.wind_noise.byte(),
             self.noise_canceling_adaptive_sensitivity_level,
-            self.multi_scene_anc.id(),
+            self.transportation_mode as u8,
         ]
     }
 }
@@ -162,7 +162,7 @@ pub enum NoiseCancelingMode {
     #[default]
     Manual = 0,
     Adaptive = 1,
-    MultiScene = 2,
+    Transportation = 2,
 }
 
 impl NoiseCancelingMode {
@@ -182,6 +182,41 @@ impl NoiseCancelingMode {
 impl NoiseCancelingMode {
     pub fn id(&self) -> u8 {
         *self as u8
+    }
+}
+
+#[repr(u8)]
+#[derive(
+    FromRepr,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    Display,
+    Default,
+    IntoStaticStr,
+    EnumString,
+    EnumIter,
+    VariantArray,
+    Translate,
+)]
+pub enum TransportationMode {
+    #[default]
+    Plane = 0,
+    Car = 3,
+}
+
+impl TransportationMode {
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> IResult<&'a [u8], Self, E> {
+        context(
+            "a3957 transportation mode",
+            map(le_u8, |v| Self::from_repr(v).unwrap_or_default()),
+        )
+        .parse_complete(input)
     }
 }
 

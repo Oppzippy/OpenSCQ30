@@ -35,10 +35,9 @@ enum_subset! {
         AmbientSoundMode,
         TransparencyMode,
         NoiseCancelingMode,
-        AdaptiveNoiseCanceling,
         ManualNoiseCanceling,
         AncPersonalizedToEarCanal,
-        MultiSceneNoiseCanceling,
+        TransportationMode,
         WindNoiseSuppression,
         WindNoiseDetected,
     }

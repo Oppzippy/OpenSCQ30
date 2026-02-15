@@ -6,16 +6,16 @@ use crate::devices::soundcore::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         structures::{
             AgeRange, AmbientSoundModeCycle, AutoPowerOff, CaseBatteryLevel,
-            CommonEqualizerConfiguration, CustomHearId, DualBattery, DualFirmwareVersion, Gender,
-            LimitHighVolume, LowBatteryPrompt, SerialNumber, TouchTone, TwsStatus,
+            CommonEqualizerConfiguration, CustomHearId, DualBattery, DualFirmwareVersion,
+            GamingMode, Gender, LimitHighVolume, LowBatteryPrompt, SerialNumber,
+            SoundLeakCompensation, TouchTone, TwsStatus, WearingDetection, WearingTone,
             button_configuration::ButtonStatusCollection,
         },
     },
 };
 
 use super::structures::{
-    AncPersonalizedToEarCanal, GameMode, ImmersiveExperience, PressureSensitivity,
-    SoundLeakageCompensation, SoundModes, WearingDetection, WearingTone,
+    AncPersonalizedToEarCanal, ImmersiveExperience, PressureSensitivity, SoundModes,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Has)]
@@ -40,9 +40,9 @@ pub struct A3957State {
     touch_tone: TouchTone,
     low_battery_prompt: LowBatteryPrompt,
     immersive_experience: ImmersiveExperience,
-    sound_leakage_compensation: SoundLeakageCompensation,
+    sound_leak_compensation: SoundLeakCompensation,
     wearing_detection: WearingDetection,
-    game_mode: GameMode,
+    gaming_mode: GamingMode,
     pressure_sensitivity: PressureSensitivity,
     button_reset_pending: ResetButtonConfigurationPending,
 }
@@ -70,9 +70,9 @@ impl From<a3957::packets::inbound::A3957StateUpdatePacket> for A3957State {
             touch_tone: packet.touch_tone,
             low_battery_prompt: packet.low_battery_prompt,
             immersive_experience: packet.immersive_experience,
-            sound_leakage_compensation: packet.sound_leakage_compensation,
+            sound_leak_compensation: packet.sound_leak_compensation,
             wearing_detection: packet.wearing_detection,
-            game_mode: packet.game_mode,
+            gaming_mode: packet.gaming_mode,
             pressure_sensitivity: packet.pressure_sensitivity,
             button_reset_pending: ResetButtonConfigurationPending::default(),
         }

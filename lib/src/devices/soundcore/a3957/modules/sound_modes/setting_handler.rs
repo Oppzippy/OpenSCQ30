@@ -1,16 +1,14 @@
 use async_trait::async_trait;
-use openscq30_i18n::Translate;
 use openscq30_lib_has::Has;
 use strum::IntoEnumIterator;
 
 use crate::{
     api::settings::{self, Setting, SettingId, Value},
     devices::soundcore::{
-        a3957::structures::{AncPersonalizedToEarCanal, ManualNoiseCanceling, SoundModes},
-        common::{
-            self,
-            settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
+        a3957::structures::{
+            AncPersonalizedToEarCanal, ManualNoiseCanceling, NoiseCancelingMode, SoundModes,
         },
+        common::settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
     },
     i18n::fl,
 };
@@ -39,13 +37,13 @@ where
             SoundModeSetting::TransparencyMode => Some(Setting::select_from_enum_all_variants(
                 sound_modes.transparency_mode,
             )),
-            SoundModeSetting::NoiseCancelingMode => Some(Setting::select_from_enum_all_variants(
+            SoundModeSetting::NoiseCancelingMode => Some(Setting::select_from_enum(
+                &[
+                    NoiseCancelingMode::Manual,
+                    NoiseCancelingMode::Transportation,
+                ],
                 sound_modes.noise_canceling_mode,
             )),
-            SoundModeSetting::AdaptiveNoiseCanceling => Some(Setting::Information {
-                value: <&'static str>::from(sound_modes.adaptive_noise_canceling).to_owned(),
-                translated_value: sound_modes.adaptive_noise_canceling.translate(),
-            }),
             SoundModeSetting::ManualNoiseCanceling => Some(Setting::I32Range {
                 setting: settings::Range {
                     range: 1..=5,
@@ -64,13 +62,8 @@ where
                     fl!("no")
                 },
             }),
-            SoundModeSetting::MultiSceneNoiseCanceling => Some(Setting::select_from_enum(
-                &[
-                    common::structures::NoiseCancelingMode::Transport,
-                    common::structures::NoiseCancelingMode::Outdoor,
-                    common::structures::NoiseCancelingMode::Indoor,
-                ],
-                sound_modes.multi_scene_anc,
+            SoundModeSetting::TransportationMode => Some(Setting::select_from_enum_all_variants(
+                sound_modes.transportation_mode,
             )),
             SoundModeSetting::AncPersonalizedToEarCanal => {
                 let anc_personalized_to_ear_canal: &AncPersonalizedToEarCanal = state.get();
@@ -103,7 +96,6 @@ where
                 let sound_modes: &mut SoundModes = state.get_mut();
                 sound_modes.noise_canceling_mode = value.try_as_enum_variant()?;
             }
-            SoundModeSetting::AdaptiveNoiseCanceling => return Err(SettingHandlerError::ReadOnly),
             SoundModeSetting::ManualNoiseCanceling => {
                 let sound_modes: &mut SoundModes = state.get_mut();
                 sound_modes.manual_noise_canceling =
@@ -114,9 +106,9 @@ where
                 sound_modes.wind_noise.is_suppression_enabled = value.try_as_bool()?;
             }
             SoundModeSetting::WindNoiseDetected => return Err(SettingHandlerError::ReadOnly),
-            SoundModeSetting::MultiSceneNoiseCanceling => {
+            SoundModeSetting::TransportationMode => {
                 let sound_modes: &mut SoundModes = state.get_mut();
-                sound_modes.multi_scene_anc = value.try_as_enum_variant()?;
+                sound_modes.transportation_mode = value.try_as_enum_variant()?;
             }
             SoundModeSetting::AncPersonalizedToEarCanal => {
                 let anc_personalized_to_ear_canal: &mut AncPersonalizedToEarCanal = state.get_mut();

@@ -13,10 +13,6 @@ use strum::{EnumIter, EnumString, FromRepr, IntoStaticStr};
 use crate::devices::soundcore::common;
 
 common::structures::flag!(AncPersonalizedToEarCanal);
-common::structures::flag!(WearingTone);
-common::structures::flag!(SoundLeakageCompensation);
-common::structures::flag!(WearingDetection);
-common::structures::flag!(GameMode);
 
 #[derive(
     Debug,
