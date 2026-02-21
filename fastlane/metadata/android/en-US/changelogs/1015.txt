@@ -1,0 +1,6 @@
+* Features
+  - Add support for Soundcore Liberty 5
+
+* Fixes
+  - Add device not working on Android 12 and older
+  - Widget radio button label color ignoring light/dark theme

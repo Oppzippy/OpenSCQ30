@@ -41,6 +41,20 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.5.0" date="2026-02-21">
+            <description>
+                <p>Features</p>
+                <ul>
+                    <li>Add support for Soundcore Liberty 5</li>
+                </ul>
+                <p>Fixes</p>
+                <ul>
+                    <li>Resizing causes window to freeze on x11</li>
+                    <li>Crash when running with ICED_BACKEND=tiny-skia on x11</li>
+                    <li>Attempt at fixing connection issues for Motion+ and Liberty 2 Pro</li>
+                </ul>
+            </description>
+        </release>
         <release version="2.4.0" date="2026-01-23">
             <description>
                 <p>Features</p>
