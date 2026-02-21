@@ -1,5 +1,28 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Features
+
+- Add support for Soundcore Liberty 5
+
+### GUI
+
+#### Fixes
+
+- Resizing causes window to freeze on x11
+- Crash when running with ICED_BACKEND=tiny-skia on x11
+- Attempt at fixing connection issues for Motion+ and Liberty 2 Pro
+
+### Android
+
+#### Fixes
+
+- Add device not working on Android 12 and older
+- Widget radio button label color ignoring light/dark theme
+
 ## v2.4.0
 
 ### General

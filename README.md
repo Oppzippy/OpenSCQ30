@@ -35,6 +35,7 @@ OpenSCQ30 is free software for controlling settings for Soundcore headphones and
 | A3949 | Soundcore P20i / P25i / R50i       |
 | A3951 | Soundcore Liberty Air 2 Pro        |
 | A3955 | Soundcore P40i                     |
+| A3957 | Soundcore Liberty 5                |
 | A3959 | Soundcore P30i / Soundcore R50i NC |
 
 ## Installing
