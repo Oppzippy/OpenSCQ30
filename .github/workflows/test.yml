@@ -37,7 +37,7 @@ jobs:
       - name: Generate HTML test coverage report
         run: just test-cov-report html
       - name: Upload coverage report
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: coverage
           path: target/llvm-cov/html/
