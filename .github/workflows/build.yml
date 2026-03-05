@@ -31,7 +31,7 @@ jobs:
           mv build-output/openscq30-gui build-output/openscq30-gui-linux-x86_64
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: linux-x86_64
           path: build-output/*
@@ -60,7 +60,7 @@ jobs:
           mv build-output/openscq30-gui build-output/openscq30-gui-linux-arm64
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: linux-arm64
           path: build-output/*
@@ -90,7 +90,7 @@ jobs:
           mv build-output/openscq30-gui-installer.exe build-output/openscq30-gui-installer-windows-x86_64.exe
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: windows
           path: build-output/*
@@ -112,7 +112,7 @@ jobs:
         run: just build-android
 
       - name: Upload apks
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: android
           path: build-output/*
