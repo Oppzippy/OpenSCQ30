@@ -104,7 +104,7 @@ class NotificationBuilder @Inject constructor(private val context: Service) {
                 Intent().apply {
                     action = DeviceService.ACTION_QUICK_PRESET
                     `package` = context.packageName
-                    putExtra(DeviceService.INTENT_EXTRA_PRESET_ID, presetId)
+                    putExtra(DeviceService.INTENT_EXTRA_PRESET_SLOT_INDEX, presetId)
                 },
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
             ),

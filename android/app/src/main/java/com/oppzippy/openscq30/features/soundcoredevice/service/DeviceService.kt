@@ -69,7 +69,7 @@ class DeviceService : LifecycleService() {
             ACTION_UPDATE_WIDGET,
         )
 
-        const val INTENT_EXTRA_PRESET_ID = "com.oppzippy.openscq30.presetNumber"
+        const val INTENT_EXTRA_PRESET_SLOT_INDEX = "com.oppzippy.openscq30.presetNumber"
         const val INTENT_EXTRA_SETTING_ID = "com.oppzippy.openscq30.settingId"
         const val INTENT_EXTRA_SETTING_VALUE = "com.oppzippy.openscq30.settingValue"
 
@@ -118,19 +118,21 @@ class DeviceService : LifecycleService() {
                 }
 
                 ACTION_QUICK_PRESET -> {
-                    val presetIndex = intent.getIntExtra(INTENT_EXTRA_PRESET_ID, 0)
+                    val presetIndex = intent.getIntExtra(INTENT_EXTRA_PRESET_SLOT_INDEX, Int.MIN_VALUE)
+                    if (presetIndex == Int.MIN_VALUE) {
+                        Log.e(TAG, "got ACTION_QUICK_PRESET, but INTENT_EXTRA_PRESET_SLOT_INDEX is not specified")
+                        return
+                    }
+                    val presetName = quickPresetNames.value.getOrNull(presetIndex) ?: return
                     lifecycleScope.launch {
                         connectionStatusFlow.value.let {
                             if (it is ConnectionStatus.Connected) {
                                 val device = it.deviceManager.device
                                 session.quickPresetHandler().use { quickPresetHandler ->
-                                    val quickPresets = quickPresetHandler.quickPresets(device)
-                                    quickPresets.getOrNull(presetIndex)?.let { preset ->
-                                        try {
-                                            quickPresetHandler.activate(device, preset.name)
-                                        } catch (ex: OpenScq30Exception) {
-                                            Log.e(TAG, "error activating quick preset ${preset.name}", ex)
-                                        }
+                                    try {
+                                        quickPresetHandler.activate(device, presetName)
+                                    } catch (ex: OpenScq30Exception) {
+                                        Log.e(TAG, "error activating quick preset $presetName", ex)
                                     }
                                 }
                             }
