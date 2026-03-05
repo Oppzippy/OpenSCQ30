@@ -41,6 +41,7 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.5.1" date="2026-03-05" />
         <release version="2.5.0" date="2026-02-21">
             <description>
                 <p>Features</p>

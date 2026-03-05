@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.5.1
+
+### Android
+
+#### Fixes
+
+- Notification quick preset buttons activate the wrong quick preset
+
 ## v2.5.0
 
 ### General
