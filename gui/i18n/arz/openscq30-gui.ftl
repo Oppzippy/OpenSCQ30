@@ -1,0 +1,10 @@
+none = ولا حاجة
+create = أنشئ
+cancel = إلغاء
+name = اسم
+delete = امسح
+settings = الإعدادات
+activate = فعّل
+edit = عدّل
+migrate = انقل
+confirm = تأكيد
