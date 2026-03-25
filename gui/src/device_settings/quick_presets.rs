@@ -69,6 +69,7 @@ impl QuickPresetsModel {
     pub fn view(&self) -> Element<'_, Message> {
         if let Some(quick_presets) = &self.quick_presets {
             widget::column()
+                .width(Length::Fill)
                 .push(
                     widget::button::standard(fl!("create-quick-preset"))
                         .on_press(Message::ShowCreateQuickPresetDialog),

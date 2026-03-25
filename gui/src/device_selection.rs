@@ -96,7 +96,7 @@ impl DeviceSelectionModel {
                         widget::button::destructive(fl!("remove"))
                             .on_press(Message::RemoveDevice(index)),
                     )
-                    .push(widget::horizontal_space().width(Length::Fixed(6f32)))
+                    .push(widget::space().width(Length::Fixed(6f32)))
                     .push(
                         widget::button::suggested(fl!("connect"))
                             .on_press(Message::ConnectToDevice(index)),

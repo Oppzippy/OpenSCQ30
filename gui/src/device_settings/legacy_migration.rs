@@ -56,7 +56,7 @@ impl LegacyMigrationModel {
                                     .map(|v| *v as f32 / 10f32)
                                     .collect::<Vec<_>>()
                             )))
-                            .push(widget::vertical_space().height(4))
+                            .push(widget::space().height(4))
                             .push(
                                 widget::responsive(|size| {
                                     profile

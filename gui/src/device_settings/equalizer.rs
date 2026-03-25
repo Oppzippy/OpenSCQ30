@@ -143,5 +143,6 @@ fn container_style(theme: &cosmic::Theme) -> cosmic::iced::widget::container::St
             color: accent.base.into(),
         },
         shadow: Shadow::default(),
+        snap: false,
     }
 }

@@ -103,7 +103,9 @@ impl AddDeviceModel {
                                 .contains(&ui_model.search_query.to_lowercase())
                         })
                         .map(|device_model| {
-                            widget::button::text(device_model.translate())
+                            // custom button with ButtonClass::Text because button::text ignores width(Length::Fill)
+                            widget::button::custom(widget::text(device_model.translate()))
+                                .class(widget::button::ButtonClass::Text)
                                 .width(Length::Fill)
                                 .on_press(Message::SelectModel(device_model, false))
                                 .into()
