@@ -9,7 +9,7 @@ use rust_embed::RustEmbed;
 
 // libcosmic crashes when rendering hebrew text in some contexts, so it should be disabled until that's fixed
 pub fn is_language_enabled(identifier: &LanguageIdentifier) -> bool {
-    identifier.language.as_str() != "he"
+    identifier.language.as_str() != "he" && identifier.language != "arz"
 }
 
 /// Applies the requested language(s) to requested translations from the `fl!()` macro.
