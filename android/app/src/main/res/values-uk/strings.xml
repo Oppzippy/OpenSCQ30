@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">OpenSCQ30</string>
     <string name="equalizer">Еквалайзер</string>
     <string name="hz">%1$d Гц</string>
     <string name="loading">Завантаження</string>
@@ -14,7 +15,21 @@
     <string name="delete">Видалити</string>
     <string name="back">Назад</string>
     <string name="info">Інформація</string>
-    <string name="source_code" tools:ignore="TypographyOther">&lt;p&gt;Вихідний код та звіти про помилки доступні за адресою &lt;a href=https://github.com/Oppzippy/OpenSCQ30&gt;https://github.com/Oppzippy/OpenSCQ30&lt;/a&gt;.&lt;/p&gt; &lt;br&gt; &lt;p&gt;Авторські права © Kyle Scheuing&lt;/p&gt; &lt;br&gt; &lt;p&gt;Це вільне програмне забезпечення: ви можете розповсюджувати та/або змінювати його на умовах GNU General Public License, опублікованої Free Software Foundation, версії 3 або (на ваш вибір) будь-якої свіжішої версії.&lt;/p&gt; &lt;br&gt; &lt;p&gt;Ця програма розповсюджується з надією, що вона буде корисною, але БЕЗ ЖОДНИХ ГАРАНТІЙ; навіть без гарантії ТОВАРНОЇ ПРИДАТНОСТІ або ПРИДАТНОСТІ ДЛЯ ПЕВНОЇ МЕТИ. Детальніше дивись у GNU General Public License.&lt;/p&gt; &lt;br&gt; &lt;p&gt;Ви маєте отримати копію GNU General General Public License разом з цією програмою. Якщо ні, дивись &amp;lt;&lt;a href=https://www.gnu.org/licenses/&gt;https://www.gnu.org/licenses/&lt;/a&gt;&gt;.&lt;/p&gt;</string>
+    <string name="source_code" tools:ignore="TypographyOther">
+        &lt;p>Вихідний код та звіти про помилки доступні за адресою &lt;a href="https://github.com/Oppzippy/OpenSCQ30">https://github.com/Oppzippy/OpenSCQ30&lt;/a>.&lt;/p>
+        &lt;br>
+
+        &lt;p>Авторські права (C) Kyle Scheuing&lt;/p>
+        &lt;br>
+
+        &lt;p>Це вільне програмне забезпечення: ви можете розповсюджувати та/або змінювати його на умовах GNU General Public License, опублікованої Free Software Foundation, версії 3 або (на ваш вибір) будь-якої пізнішої версії.&lt;/p>
+        &lt;br>
+
+        &lt;p>Ця програма розповсюджується з надією, що вона буде корисною, але БЕЗ ЖОДНИХ ГАРАНТІЙ; навіть без гарантії ТОВАРНОЇ ПРИДАТНОСТІ або ПРИДАТНОСТІ ДЛЯ ПЕВНОЇ МЕТИ. Детальніше див. у GNU General Public License.&lt;/p>
+        &lt;br>
+
+        &lt;p>Ви повинні отримати копію GNU General General Public License разом з цією програмою. Якщо ні, див. &amp;lt;&lt;a href="https://www.gnu.org/licenses/">https://www.gnu.org/licenses/&lt;/a>&gt;.&lt;/p>
+    </string>
     <string name="khz">%s кГц</string>
     <string name="replace">Замінити</string>
     <string name="connected_to">Підключено до %s</string>
@@ -26,7 +41,7 @@
     <string name="auto_connect">Автопідключення</string>
     <string name="settings">Налаштування</string>
     <string name="unpair_device">Забути пристрій</string>
-    <string name="unpairing_from_device_name">Усунення %s</string>
+    <string name="unpairing_from_device_name">Видалення %s</string>
     <string name="unpair">Забути</string>
     <string name="no_devices_found">Пристрої не знайдено</string>
     <string name="copy_logs_to_clipboard">Копіювати логи до буфера обміну</string>
@@ -37,7 +52,7 @@
     <string name="demo_mode">Демонстраційний режим</string>
     <string name="activate">Активувати</string>
     <string name="edit">Редагувати</string>
-    <string name="no_quick_presets">Немає швидких пресетів</string>
+    <string name="no_quick_presets">Немає швидких налаштувань</string>
     <string name="create_quick_preset">Створити швидке налаштування</string>
     <string name="quick_preset_slot_x">Слот швидкого налаштування %d</string>
     <string name="notification_permission_is_required">Потрібен доступ до сповіщень</string>
@@ -50,14 +65,28 @@
     <string name="close">Закрити</string>
     <string name="migrate_legacy_equalizer_profiles">Мігрувати застарілі профілі еквалайзера</string>
     <string name="migrate">Мігрувати</string>
-    <string name="error_pairing">Помилка створення пари</string>
+    <string name="error_pairing">Помилка підключення</string>
+    <string name="error_migrating_legacy_profile">Помилка міграції старого профілю</string>
+    <string name="error_saving_quick_preset">Помилка збереження швидкого налаштування</string>
+    <string name="error_activating_quick_preset">Помилка активації швидкого налаштування</string>
+    <string name="error_changing_settings">Помилка зміни налаштувань</string>
     <string name="error_connecting">Помилка підключення</string>
     <string name="copy_x_to_clipboard">Копіювати %s до буфера обміну</string>
     <string name="confirm">Підтвердити</string>
     <string name="import_">Імпорт</string>
     <string name="search">Пошук</string>
     <string name="no_items_found">Елементи не знайдено</string>
-    <string name="version_2_breaking_changes">&lt;h1&gt;Оновлено до OpenSCQ30 v2&lt;/h1&gt; &lt;br&gt; &lt;b&gt;Зміни, що порушують сумісність&lt;/b&gt; &lt;ul&gt; &lt;li&gt;Користувацькі профілі еквалайзера тепер залежать від пристрою. Старі профілі еквалайзера потрібно мігрувати на сторінці \"Мігрувати старі профілі еквалайзера\" після підключення до пристрою.&lt;/li&gt; &lt;li&gt;Швидкі налаштування тепер зберігаються в іншому форматі, і автоматична міграція недоступна, тому їх потрібно створити наново.&lt;/li&gt; &lt;li&gt;Автовизначення моделі пристрою видалено, тому тепер потрібно вибирати модель пристрою під час додавання пристрою.&lt;/li&gt; &lt;/ul&gt; &lt;p&gt;See &lt;a href=https://github.com/Oppzippy/OpenSCQ30/blob/master/CHANGELOG.md&gt;CHANGELOG.md&lt;/a&gt; for details.&lt;/p&gt;</string>
+    <string name="version_2_breaking_changes">
+        &lt;h1>Оновлено до OpenSCQ30 v2&lt;/h1>
+        &lt;br>
+        &lt;b>Зміни, що порушують сумісність&lt;/b>
+        &lt;ul>
+            &lt;li>Користувацькі профілі еквалайзера тепер залежать від пристрою. Старі профілі еквалайзера потрібно мігрувати на сторінці \"Мігрувати старі профілі еквалайзера\" після підключення до пристрою.&lt;/li>
+            &lt;li>Швидкі налаштування тепер зберігаються в іншому форматі, і автоматична міграція недоступна, тому їх потрібно створити знову.&lt;/li>
+            &lt;li>Автовизначення моделі пристрою видалено, тому тепер потрібно вибирати модель пристрою під час додавання пристрою.&lt;/li>
+        &lt;/ul>
+        &lt;p>Детальніше дивись у &lt;a href="https://github.com/Oppzippy/OpenSCQ30/blob/master/CHANGELOG.md">CHANGELOG.md&lt;/a>.&lt;/p>
+    </string>
     <string name="delete_quick_preset">Видалити швидке налаштування</string>
     <string name="error_deleting_quick_preset">Помилка видалення швидкого налаштування</string>
     <string name="connected">Підключено</string>
