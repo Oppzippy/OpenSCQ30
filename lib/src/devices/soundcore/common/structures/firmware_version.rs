@@ -32,7 +32,13 @@ impl DualFirmwareVersion {
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         let firmware_version_some = || map(FirmwareVersion::take, Some);
-        let firmware_version_none = || map(tag::<&[u8], _, _>(&[0u8; 5]), |_| None);
+        let firmware_version_none = || {
+            map(
+                // all 0s or all 255s means data is absent
+                tag::<&[u8], _, _>(&[0u8; 5]).or(tag::<&[u8], _, _>(&[255u8; 5])),
+                |_| None,
+            )
+        };
         context(
             "dual firmware version",
             map(

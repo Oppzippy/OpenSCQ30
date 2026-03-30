@@ -266,4 +266,32 @@ mod tests {
             )
             .await;
     }
+
+    #[tokio::test(start_paused = true)]
+    async fn state_update_packet_from_github_issue_241() {
+        // no assertions, just tests that it doesn't error due to bad state update packet
+        TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreA3955,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        1, 0, 5, 5, 255, 0, 255, 255, 255, 255, 255, 48, 49, 46, 55, 50, 51, 57,
+                        53, 53, 57, 56, 52, 55, 52, 52, 98, 48, 55, 52, 56, 53, 48, 46, 49, 46, 56,
+                        5, 0, 0, 120, 120, 120, 120, 120, 120, 120, 120, 120, 0, 255, 255, 255,
+                        255, 255, 255, 255, 255, 255, 255, 5, 0, 138, 145, 142, 142, 123, 110, 102,
+                        97, 60, 60, 138, 145, 142, 142, 123, 110, 102, 97, 60, 60, 105, 150, 134,
+                        241, 0, 138, 145, 142, 142, 123, 110, 102, 97, 60, 60, 138, 145, 142, 142,
+                        123, 110, 102, 97, 60, 60, 0, 0, 10, 255, 255, 99, 102, 255, 255, 68, 68,
+                        51, 2, 81, 0, 0, 1, 255, 0, 0, 0, 0, 0, 255, 255, 0, 49, 1, 1, 0, 85, 0, 1,
+                        2, 1, 1, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                    ],
+                ),
+            )]),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+    }
 }
