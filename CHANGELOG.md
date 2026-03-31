@@ -1,5 +1,32 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Features
+
+- New logo (thanks to Luca Pio Valerio)
+
+#### Fixes
+
+- Parse error when connecting to Soundcore P40i in some situations
+
+### GUI
+
+#### Fixes
+
+- Update pop-os/iced, which has been rebased on iced 0.14, fixing various issues
+- Enable Hebrew and Egyptian Arabic languages now that the crash when using RTL languages has been fixed in pop-os/iced
+
+### Android
+
+#### Features
+
+- Redesign app (thanks to Luca Pio Valerio)
+- Add option to force light/dark theme
+- Add option to disable Material You
+
 ## v2.5.1
 
 ### Android
