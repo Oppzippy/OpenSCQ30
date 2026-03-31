@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -132,7 +133,7 @@ private fun EqualizerTextInput(
     }
     BasicTextField(
         modifier = modifier
-            .testTag("equalizerInput")
+            .testTag("equalizerInput$hz")
             .background(MaterialTheme.colorScheme.surfaceContainerHighest)
             .padding(5.dp)
             .clip(RoundedCornerShape(2.dp)),

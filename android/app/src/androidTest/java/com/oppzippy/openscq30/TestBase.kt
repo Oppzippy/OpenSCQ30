@@ -57,8 +57,8 @@ open class TestBase<A : ComponentActivity>(
         mockkStatic(text)
         mockkStatic(resId)
 
-        every { resId(any(), any(), any()) } answers { callOriginal() }
         every { text(any(), any(), any()) } answers { callOriginal() }
+        every { resId(any(), any(), any()) } answers { callOriginal() }
     }
 }
 

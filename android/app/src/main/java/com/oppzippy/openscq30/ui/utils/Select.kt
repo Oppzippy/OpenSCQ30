@@ -163,6 +163,7 @@ fun ModifiableSelect(
                     },
                     confirmButton = {
                         Button(
+                            modifier = Modifier.testTag("modifiableSelectCreate"),
                             onClick = {
                                 onAddOption(dialog.optionName)
                                 dialogState = null
