@@ -46,10 +46,7 @@ fn main() -> anyhow::Result<()> {
     let config = config::Config::new(config_dir.join("openscq30-gui-config.toml")).unwrap();
 
     let requested_languages = {
-        let mut requested_languages = i18n_embed::DesktopLanguageRequester::requested_languages()
-            .into_iter()
-            .filter(i18n::is_language_enabled)
-            .collect::<Vec<_>>();
+        let mut requested_languages = i18n_embed::DesktopLanguageRequester::requested_languages();
         if let Some(language) = &config.get().preferred_language {
             match LanguageIdentifier::from_str(language) {
                 Ok(language_identifier) => requested_languages.insert(0, language_identifier),
