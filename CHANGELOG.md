@@ -14,6 +14,10 @@
 
 ### GUI
 
+#### Features
+
+- Update libcosmic, enabling [IME](https://en.wikipedia.org/wiki/Input_method) support
+
 #### Fixes
 
 - Update pop-os/iced, which has been rebased on iced 0.14, fixing various issues
