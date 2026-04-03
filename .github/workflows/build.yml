@@ -5,6 +5,8 @@ on:
 
 permissions:
   contents: read
+  id-token: write
+  attestations: write
 
 jobs:
   build-linux-x86_64:
@@ -29,6 +31,11 @@ jobs:
         run: |
           mv build-output/openscq30 build-output/openscq30-cli-linux-x86_64
           mv build-output/openscq30-gui build-output/openscq30-gui-linux-x86_64
+
+      - name: Attest artifacts
+        uses: actions/attest@v4
+        with:
+          subject-path: build-output/*
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
@@ -58,6 +65,11 @@ jobs:
         run: |
           mv build-output/openscq30 build-output/openscq30-cli-linux-arm64
           mv build-output/openscq30-gui build-output/openscq30-gui-linux-arm64
+
+      - name: Attest artifacts
+        uses: actions/attest@v4
+        with:
+          subject-path: build-output/*
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
@@ -89,6 +101,11 @@ jobs:
           mv build-output/openscq30-gui.exe build-output/openscq30-gui-windows-x86_64.exe
           mv build-output/openscq30-gui-installer.exe build-output/openscq30-gui-installer-windows-x86_64.exe
 
+      - name: Attest artifacts
+        uses: actions/attest@v4
+        with:
+          subject-path: build-output/*
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
@@ -110,6 +127,11 @@ jobs:
 
       - name: Build
         run: just build-android
+
+      - name: Attest artifacts
+        uses: actions/attest@v4
+        with:
+          subject-path: build-output/*
 
       - name: Upload apks
         uses: actions/upload-artifact@v7
