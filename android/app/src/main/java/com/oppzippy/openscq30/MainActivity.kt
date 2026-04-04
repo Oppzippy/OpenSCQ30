@@ -15,7 +15,6 @@ import com.oppzippy.openscq30.features.preferences.Preferences
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
 import com.oppzippy.openscq30.ui.OpenSCQ30Root
 import com.oppzippy.openscq30.ui.theme.ThemeType
-import com.oppzippy.openscq30.ui.theme.prefersDarkTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.flow.collectLatest

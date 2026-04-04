@@ -6,12 +6,9 @@ import android.companion.AssociationInfo
 import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
 import android.companion.CompanionDeviceManager
-import android.content.Intent
 import android.content.IntentSender
-import android.os.Build
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.result.IntentSenderRequest
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.oppzippy.openscq30.MainActivity
@@ -25,8 +22,6 @@ import com.oppzippy.openscq30.ui.utils.ToastHandler
 import com.oppzippy.openscq30.widget.SettingWidget
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest

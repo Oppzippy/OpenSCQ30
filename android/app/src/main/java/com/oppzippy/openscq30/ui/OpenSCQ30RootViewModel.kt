@@ -9,7 +9,6 @@ import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.android.IntentFactory
 import com.oppzippy.openscq30.features.equalizer.storage.LegacyEqualizerProfile
 import com.oppzippy.openscq30.features.equalizer.storage.LegacyEqualizerProfileDao
-import com.oppzippy.openscq30.features.preferences.Preferences
 import com.oppzippy.openscq30.features.soundcoredevice.service.ConnectionStatus
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceConnectionManager
 import com.oppzippy.openscq30.features.soundcoredevice.service.DeviceService
