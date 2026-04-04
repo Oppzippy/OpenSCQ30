@@ -2,8 +2,10 @@ package com.oppzippy.openscq30.ui.devicesettings.screens.categoryoverrides
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -144,12 +146,38 @@ object SoundcoreEqualizerScreen : CategoryOverride {
                 Tab(
                     selected = selectedTabIndex == 0,
                     onClick = { selectedTabIndex = 0 },
-                    text = { Text(stringResource(R.string.preset)) },
+                    text = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Text(stringResource(R.string.preset))
+                            if (isPresetSelected) {
+                                Icon(
+                                    painter = painterResource(R.drawable.check_24px),
+                                    contentDescription = stringResource(R.string.in_effect),
+                                )
+                            }
+                        }
+                    },
                 )
                 Tab(
                     selected = selectedTabIndex == 1,
                     onClick = { selectedTabIndex = 1 },
-                    text = { Text(stringResource(R.string.custom)) },
+                    text = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Text(stringResource(R.string.custom))
+                            if (!isPresetSelected) {
+                                Icon(
+                                    painter = painterResource(R.drawable.check_24px),
+                                    contentDescription = stringResource(R.string.in_effect),
+                                )
+                            }
+                        }
+                    },
                 )
             }
 
