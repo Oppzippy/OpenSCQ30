@@ -68,34 +68,25 @@ impl QuickPresetsModel {
 
     pub fn view(&self) -> Element<'_, Message> {
         if let Some(quick_presets) = &self.quick_presets {
-            widget::column()
-                .width(Length::Fill)
-                .push(
-                    widget::button::standard(fl!("create-quick-preset"))
-                        .on_press(Message::ShowCreateQuickPresetDialog),
-                )
-                .push(
-                    widget::column().extend(quick_presets.iter().enumerate().map(|(i, preset)| {
-                        widget::row()
-                            .padding(10)
-                            .align_y(alignment::Vertical::Center)
-                            .push(widget::text(&preset.name).width(Length::Fill))
-                            .push(
-                                widget::button::standard(fl!("activate"))
-                                    .on_press(Message::ActivateQuickPreset(i)),
-                            )
-                            .push(
-                                widget::button::standard(fl!("edit"))
-                                    .on_press(Message::EditQuickPreset(i)),
-                            )
-                            .push(
-                                widget::button::destructive(fl!("delete"))
-                                    .on_press(Message::ShowDeleteQuickPresetDialog(i)),
-                            )
-                            .into()
-                    })),
-                )
-                .into()
+            widget::column![
+                widget::button::standard(fl!("create-quick-preset"))
+                    .on_press(Message::ShowCreateQuickPresetDialog),
+                widget::column(quick_presets.iter().enumerate().map(|(i, preset)| {
+                    widget::row![
+                        widget::text(&preset.name).width(Length::Fill),
+                        widget::button::standard(fl!("activate"))
+                            .on_press(Message::ActivateQuickPreset(i)),
+                        widget::button::standard(fl!("edit")).on_press(Message::EditQuickPreset(i)),
+                        widget::button::destructive(fl!("delete"))
+                            .on_press(Message::ShowDeleteQuickPresetDialog(i)),
+                    ]
+                    .padding(10)
+                    .align_y(alignment::Vertical::Center)
+                    .into()
+                })),
+            ]
+            .width(Length::Fill)
+            .into()
         } else {
             widget::text(fl!("loading-item", item = fl!("quick-presets"))).into()
         }
@@ -140,38 +131,30 @@ impl QuickPresetsModel {
                 title: Some(editing_quick_preset.name.as_str().into()),
                 actions: None,
                 header: None,
-                content: widget::column()
-                    .extend(
-                        editing_quick_preset
-                            .fields
-                            .iter()
-                            .enumerate()
-                            .map(|(i, field)| {
-                                widget::column()
-                                    .padding(8)
-                                    .push(
-                                        widget::toggler(field.is_enabled)
-                                            .label(field.setting_id.translate())
-                                            .width(Length::Fill)
-                                            .on_toggle(move |enabled| {
-                                                Message::EditQuickPresetToggleField(i, enabled)
-                                            }),
-                                    )
-                                    .push(widget::text::body(settings::localize_value(
-                                        self.device.setting(&field.setting_id).as_ref(),
-                                        &field.value,
-                                    )))
-                                    .into()
-                            }),
-                    )
-                    .push(
-                        widget::button::standard(fl!("overwrite-with-current-settings")).on_press(
-                            Message::SnapshotQuickPresetSettings(
-                                editing_quick_preset.name.to_owned(),
-                            ),
-                        ),
-                    )
-                    .into(),
+                content: widget::column(editing_quick_preset.fields.iter().enumerate().map(
+                    |(i, field)| {
+                        widget::column![
+                            widget::toggler(field.is_enabled)
+                                .label(field.setting_id.translate())
+                                .width(Length::Fill)
+                                .on_toggle(move |enabled| {
+                                    Message::EditQuickPresetToggleField(i, enabled)
+                                }),
+                            widget::text::body(settings::localize_value(
+                                self.device.setting(&field.setting_id).as_ref(),
+                                &field.value,
+                            )),
+                        ]
+                        .padding(8)
+                        .into()
+                    },
+                ))
+                .push(
+                    widget::button::standard(fl!("overwrite-with-current-settings")).on_press(
+                        Message::SnapshotQuickPresetSettings(editing_quick_preset.name.to_owned()),
+                    ),
+                )
+                .into(),
                 footer: None,
                 on_close: Message::EditQuickPresetClose,
             })

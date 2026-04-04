@@ -38,53 +38,51 @@ impl LegacyMigrationModel {
     }
 
     pub fn view(&self) -> Element<'_, Message> {
-        widget::scrollable(widget::column().padding(10).spacing(10).extend(
-            self.profiles.iter().map(|profile| {
-                widget::row()
-                    .padding(10)
-                    .spacing(20)
-                    .align_y(Vertical::Center)
-                    .push(
-                        widget::column()
-                            .align_x(Horizontal::Center)
-                            .push(widget::text::heading(&profile.name))
-                            .push(widget::text(format!(
-                                "{:?}",
-                                profile
-                                    .values
-                                    .iter()
-                                    .map(|v| *v as f32 / 10f32)
-                                    .collect::<Vec<_>>()
-                            )))
-                            .push(widget::space().height(4))
-                            .push(
-                                widget::responsive(|size| {
-                                    profile
-                                        .visualization
-                                        .view()
-                                        .apply(widget::container)
-                                        .width(size.width)
-                                        .height(40)
-                                        .into()
-                                })
-                                .apply(widget::container)
-                                // responsive wants to fill all available height, but that is not desirable
-                                // it will even crash due to being a child of scrollable, so constrain its height
-                                // by wrapping in a container
-                                .height(40),
-                            ),
-                    )
-                    .push(
-                        widget::button::standard(fl!("migrate")).on_press(Message::Migrate(
-                            profile.name.to_owned(),
-                            profile.values.to_owned(),
+        widget::scrollable(
+            widget::column(self.profiles.iter().map(|profile| {
+                widget::row![
+                    widget::column![
+                        widget::text::heading(&profile.name),
+                        widget::text(format!(
+                            "{:?}",
+                            profile
+                                .values
+                                .iter()
+                                .map(|v| *v as f32 / 10f32)
+                                .collect::<Vec<_>>()
                         )),
-                    )
-                    .apply(widget::container)
-                    .class(cosmic::style::Container::Card)
-                    .into()
-            }),
-        ))
+                        widget::space().height(4),
+                        widget::responsive(|size| {
+                            profile
+                                .visualization
+                                .view()
+                                .apply(widget::container)
+                                .width(size.width)
+                                .height(40)
+                                .into()
+                        })
+                        .apply(widget::container)
+                        // responsive wants to fill all available height, but that is not desirable
+                        // it will even crash due to being a child of scrollable, so constrain its height
+                        // by wrapping in a container
+                        .height(40),
+                    ]
+                    .align_x(Horizontal::Center),
+                    widget::button::standard(fl!("migrate")).on_press(Message::Migrate(
+                        profile.name.to_owned(),
+                        profile.values.to_owned(),
+                    )),
+                ]
+                .padding(10)
+                .spacing(20)
+                .align_y(Vertical::Center)
+                .apply(widget::container)
+                .class(cosmic::style::Container::Card)
+                .into()
+            }))
+            .padding(10)
+            .spacing(10),
+        )
         .into()
     }
 }

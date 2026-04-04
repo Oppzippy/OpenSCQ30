@@ -15,12 +15,10 @@ where
 {
     labeled_setting_row(
         setting_id.translate(),
-        widget::row::with_children([
-            widget::text::body(value.to_string()).width(40).into(),
-            widget::slider(range.range, value, on_change)
-                .step(range.step)
-                .into(),
-        ])
+        widget::row![
+            widget::text::body(value.to_string()).width(40),
+            widget::slider(range.range, value, on_change).step(range.step),
+        ]
         .align_y(alignment::Vertical::Center),
     )
 }

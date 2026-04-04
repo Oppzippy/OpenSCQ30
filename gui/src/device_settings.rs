@@ -298,7 +298,7 @@ impl DeviceSettingsModel {
         } else if let Some(category_id) = self.nav_model.active_data::<CategoryId>() {
             self.view_settings(category_id)
         } else {
-            widget::row().into()
+            widget::space().into()
         }
     }
 

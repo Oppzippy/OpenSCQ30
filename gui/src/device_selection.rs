@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{iter, sync::Arc};
 
 use cosmic::{
     Apply, Element, Task,
@@ -53,19 +53,19 @@ impl DeviceSelectionModel {
 
     pub fn view(&self) -> Element<'_, Message> {
         widget::scrollable(
-            widget::column()
-                .push(
-                    widget::row()
-                        .align_y(alignment::Vertical::Center)
-                        .push(widget::text::title2(fl!("select-device")).width(Length::Fill))
-                        .push(
-                            widget::button::standard(fl!("add-device"))
-                                .on_press(Message::AddDevice),
-                        ),
+            widget::column(
+                iter::once(
+                    widget::row![
+                        widget::text::title2(fl!("select-device")).width(Length::Fill),
+                        widget::button::standard(fl!("add-device")).on_press(Message::AddDevice),
+                    ]
+                    .align_y(alignment::Vertical::Center)
+                    .into(),
                 )
-                .extend(self.items())
-                .padding([0, 10])
-                .spacing(10),
+                .chain(self.items()),
+            )
+            .padding([0, 10])
+            .spacing(10),
         )
         .width(Length::Fill)
         .height(Length::Fill)
@@ -77,35 +77,31 @@ impl DeviceSelectionModel {
             .iter()
             .enumerate()
             .map(move |(index, device)| {
-                widget::row()
-                    .align_y(alignment::Vertical::Center)
-                    .push(
-                        widget::column()
-                            .push(widget::text::heading(device.model.translate()))
-                            .push(widget::text::body(device.model.to_string()))
-                            .push(widget::text::body(device.mac_address.to_string()))
-                            .push_maybe(
-                                device
-                                    .is_demo
-                                    .then(|| fl!("demo-mode").to_uppercase())
-                                    .map(widget::text::body),
-                            )
-                            .width(Length::Fill),
+                widget::row![
+                    widget::column![
+                        widget::text::heading(device.model.translate()),
+                        widget::text::body(device.model.to_string()),
+                        widget::text::body(device.mac_address.to_string()),
+                    ]
+                    .push_maybe(
+                        device
+                            .is_demo
+                            .then(|| fl!("demo-mode").to_uppercase())
+                            .map(widget::text::body),
                     )
-                    .push(
-                        widget::button::destructive(fl!("remove"))
-                            .on_press(Message::RemoveDevice(index)),
-                    )
-                    .push(widget::space().width(Length::Fixed(6f32)))
-                    .push(
-                        widget::button::suggested(fl!("connect"))
-                            .on_press(Message::ConnectToDevice(index)),
-                    )
-                    .apply(widget::container)
-                    .width(Length::Fill)
-                    .padding(16)
-                    .class(cosmic::style::Container::List)
-                    .into()
+                    .width(Length::Fill),
+                    widget::button::destructive(fl!("remove"))
+                        .on_press(Message::RemoveDevice(index)),
+                    widget::space().width(Length::Fixed(6f32)),
+                    widget::button::suggested(fl!("connect"))
+                        .on_press(Message::ConnectToDevice(index)),
+                ]
+                .align_y(alignment::Vertical::Center)
+                .apply(widget::container)
+                .width(Length::Fill)
+                .padding(16)
+                .class(cosmic::style::Container::List)
+                .into()
             })
     }
 

@@ -226,7 +226,7 @@ impl Application for AppModel {
     }
 
     fn view(&self) -> cosmic::Element<'_, Self::Message> {
-        widget::column()
+        widget::Column::with_capacity(2)
             .push_maybe(
                 self.warnings
                     .front()
@@ -288,7 +288,7 @@ impl Application for AppModel {
                 )),
                 ContextDrawerScreen::Settings => Some(
                     cosmic::app::context_drawer::context_drawer(
-                        widget::column().push(
+                        widget::column![
                             widget::settings::item::builder(fl!("preferred-language"))
                                 .flex_control(widget::dropdown(
                                     &self.available_language_names,
@@ -314,7 +314,7 @@ impl Application for AppModel {
                                     ),
                                     Message::SetPreferredLanguage,
                                 )),
-                        ),
+                        ],
                         Message::CloseContextDrawer,
                     )
                     .title(fl!("settings")),
@@ -530,18 +530,14 @@ impl AppModel {
     }
 
     fn view_cancel(&self, device_name: &str) -> cosmic::Element<'_, Message> {
-        widget::column()
-            .spacing(10)
-            .align_x(alignment::Horizontal::Center)
-            .push(widget::text::title2(fl!(
-                "connecting-to",
-                name = device_name
-            )))
-            .push(
-                widget::button::destructive(fl!("cancel")).on_press(Message::CancelConnectToDevice),
-            )
-            .apply(widget::container)
-            .center(Length::Fill)
-            .into()
+        widget::column![
+            widget::text::title2(fl!("connecting-to", name = device_name)),
+            widget::button::destructive(fl!("cancel")).on_press(Message::CancelConnectToDevice),
+        ]
+        .spacing(10)
+        .align_x(alignment::Horizontal::Center)
+        .apply(widget::container)
+        .center(Length::Fill)
+        .into()
     }
 }

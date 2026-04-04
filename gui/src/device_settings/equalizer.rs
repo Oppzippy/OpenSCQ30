@@ -26,9 +26,9 @@ where
         .copied()
         .enumerate()
         .map(move |(i, hz)| {
-            widget::column::with_children(vec![
-                widget::text(fl!("hz", hz = hz)).into(),
-                widget::row::with_children(vec![
+            widget::column![
+                widget::text(fl!("hz", hz = hz)),
+                widget::row![
                     wider_spin_button(
                         {
                             let divisor = 10i16.pow(setting.fraction_digits as u32);
@@ -57,12 +57,10 @@ where
                             let on_change = on_change.clone();
                             move |band_value| on_change(i as u8, band_value)
                         },
-                    )
-                    .into(),
-                ])
-                .align_y(alignment::Vertical::Center)
-                .into(),
-            ])
+                    ),
+                ]
+                .align_y(alignment::Vertical::Center),
+            ]
             .into()
         })
         .collect()
@@ -97,10 +95,7 @@ where
         .align_x(Alignment::Center)
         .align_y(Alignment::Center);
 
-    widget::row::with_capacity(3)
-        .push(decrement_button)
-        .push(label)
-        .push(increment_button)
+    widget::row![decrement_button, label, increment_button]
         .align_y(Alignment::Center)
         .apply(widget::container)
         .class(theme::Container::custom(container_style))

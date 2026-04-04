@@ -51,7 +51,7 @@ where
     let options = setting.options.to_owned();
     labeled_setting_row(
         setting_id.translate(),
-        widget::row().push(
+        widget::row![
             widget::dropdown(
                 localized_items_with_none_option,
                 Some(selected_index),
@@ -64,7 +64,7 @@ where
                 },
             )
             .width(Length::Fill),
-        ),
+        ],
     )
 }
 
@@ -85,7 +85,7 @@ where
     let options = setting.options.to_owned();
     labeled_setting_row(
         setting_id.translate(),
-        widget::row()
+        widget::Row::with_capacity(3)
             .push(
                 widget::dropdown(&setting.localized_options, selected_index, move |index| {
                     on_change(&options[index])

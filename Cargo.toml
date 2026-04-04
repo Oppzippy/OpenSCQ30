@@ -107,3 +107,6 @@ accesskit = { git = "https://github.com/Oppzippy/accesskit.git", branch = "iced-
 accesskit_windows = { git = "https://github.com/Oppzippy/accesskit.git", branch = "iced-0.14" }
 accesskit_macos = { git = "https://github.com/Oppzippy/accesskit.git", branch = "iced-0.14" }
 accesskit_winit = { git = "https://github.com/Oppzippy/accesskit.git", branch = "iced-0.14" }
+
+[patch.'https://github.com/pop-os/softbuffer']
+softbuffer = { git = "https://github.com/Oppzippy/softbuffer.git" }

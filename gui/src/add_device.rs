@@ -79,136 +79,120 @@ impl AddDeviceModel {
     }
 
     fn device_model_selection(ui_model: &ModelSelectionModel) -> Element<'_, Message> {
-        widget::column()
+        widget::column![
+            widget::column![
+                widget::text::title2(fl!("select-device-model")),
+                widget::search_input(fl!("device-model"), &ui_model.search_query)
+                    .id(ui_model.search_id.clone())
+                    .on_input(Message::SetDeviceModelSearchQuery),
+            ]
             .spacing(8)
-            .push(
-                widget::column()
-                    .spacing(8)
-                    // padding should not apply to the list of devices, since those are buttons with their own padding
-                    .padding([0, 10])
-                    .push(widget::text::title2(fl!("select-device-model")))
-                    .push(
-                        widget::search_input(fl!("device-model"), &ui_model.search_query)
-                            .id(ui_model.search_id.clone())
-                            .on_input(Message::SetDeviceModelSearchQuery),
-                    ),
-            )
-            .push(widget::scrollable(
-                widget::column().extend(
-                    DeviceModel::iter()
-                        .filter(|device_model| {
-                            device_model
-                                .translate()
-                                .to_lowercase()
-                                .contains(&ui_model.search_query.to_lowercase())
-                        })
-                        .map(|device_model| {
-                            // custom button with ButtonClass::Text because button::text ignores width(Length::Fill)
-                            widget::button::custom(widget::text(device_model.translate()))
-                                .class(widget::button::ButtonClass::Text)
-                                .width(Length::Fill)
-                                .on_press(Message::SelectModel(device_model, false))
-                                .into()
-                        }),
-                ),
-            ))
-            .into()
+            // padding should not apply to the list of devices, since those are buttons with their own padding
+            .padding([0, 10]),
+            widget::scrollable(widget::column(
+                DeviceModel::iter()
+                    .filter(|device_model| {
+                        device_model
+                            .translate()
+                            .to_lowercase()
+                            .contains(&ui_model.search_query.to_lowercase())
+                    })
+                    .map(|device_model| {
+                        // custom button with ButtonClass::Text because button::text ignores width(Length::Fill)
+                        widget::button::custom(widget::text(device_model.translate()))
+                            .class(widget::button::ButtonClass::Text)
+                            .width(Length::Fill)
+                            .on_press(Message::SelectModel(device_model, false))
+                            .into()
+                    }),
+            ),)
+        ]
+        .spacing(8)
+        .into()
     }
 
     fn select_device(ui_model: &SelectDeviceModel) -> Element<'_, Message> {
         widget::responsive(|size| {
-            widget::column()
-                .spacing(8)
-                .push(
-                    widget::column()
-                        .spacing(8)
-                        .padding([0, 10])
-                        .push(widget::text::title2(fl!(
-                            "select-your",
-                            name = ui_model.device_model.translate()
-                        )))
-                        .push({
-                            let search_input =
-                                widget::search_input(fl!("device-name"), &ui_model.search_query)
-                                    .id(ui_model.search_id.clone())
-                                    .on_input(Message::SetDeviceNameSearchQuery);
-                            let demo_toggle = widget::toggler(ui_model.is_demo_mode)
-                                .label(fl!("demo-mode"))
-                                .on_toggle(|enabled| {
-                                    Message::SelectModel(ui_model.device_model, enabled)
-                                });
-                            let refresh = widget::button::standard(fl!("refresh"))
-                                .leading_icon(widget::icon::from_name("view-refresh-symbolic"))
-                                .on_press(Message::SelectModel(
-                                    ui_model.device_model,
-                                    ui_model.is_demo_mode,
-                                ));
-                            if size.width < 450f32 {
-                                Element::from(
-                                    widget::column()
-                                        .spacing(8)
-                                        .push(search_input)
-                                        .push(
-                                            widget::row::with_children(vec![
-                                                demo_toggle
-                                                    .apply(widget::container)
-                                                    .width(Length::Fill)
-                                                    .into(),
-                                                refresh
-                                                    .apply(widget::container)
-                                                    .width(Length::Fill)
-                                                    .align_x(alignment::Horizontal::Right)
-                                                    .into(),
-                                            ])
-                                            .spacing(8)
-                                            .align_y(alignment::Vertical::Center),
-                                        )
-                                        .spacing(8),
-                                )
-                            } else {
-                                widget::row::with_children(vec![
-                                    search_input.into(),
-                                    demo_toggle.into(),
-                                    refresh.into(),
-                                ])
+            widget::column![
+                widget::column![
+                    widget::text::title2(fl!(
+                        "select-your",
+                        name = ui_model.device_model.translate()
+                    )),
+                    {
+                        let search_input =
+                            widget::search_input(fl!("device-name"), &ui_model.search_query)
+                                .id(ui_model.search_id.clone())
+                                .on_input(Message::SetDeviceNameSearchQuery);
+                        let demo_toggle = widget::toggler(ui_model.is_demo_mode)
+                            .label(fl!("demo-mode"))
+                            .on_toggle(|enabled| {
+                                Message::SelectModel(ui_model.device_model, enabled)
+                            });
+                        let refresh = widget::button::standard(fl!("refresh"))
+                            .leading_icon(widget::icon::from_name("view-refresh-symbolic"))
+                            .on_press(Message::SelectModel(
+                                ui_model.device_model,
+                                ui_model.is_demo_mode,
+                            ));
+                        if size.width < 450f32 {
+                            Element::from(
+                                widget::column![
+                                    search_input,
+                                    widget::row![
+                                        demo_toggle.apply(widget::container).width(Length::Fill),
+                                        refresh
+                                            .apply(widget::container)
+                                            .width(Length::Fill)
+                                            .align_x(alignment::Horizontal::Right),
+                                    ]
+                                    .spacing(8)
+                                    .align_y(alignment::Vertical::Center),
+                                ]
+                                .spacing(8)
+                                .spacing(8),
+                            )
+                        } else {
+                            widget::row![search_input, demo_toggle, refresh]
                                 .align_y(alignment::Vertical::Center)
                                 .spacing(8)
                                 .into()
-                            }
+                        }
+                    }
+                ]
+                .spacing(8)
+                .padding([0, 10]),
+                widget::scrollable(widget::column(
+                    ui_model
+                        .devices
+                        .iter()
+                        .enumerate()
+                        .filter(|(_, device)| {
+                            device
+                                .name
+                                .to_lowercase()
+                                .contains(&ui_model.search_query.to_lowercase())
+                        })
+                        .map(|(index, device)| {
+                            widget::button::custom(
+                                widget::row![
+                                    widget::text(&device.name),
+                                    widget::text(device.mac_address.to_string())
+                                        .align_x(alignment::Horizontal::Right)
+                                        .width(Length::Fill),
+                                ]
+                                .align_y(alignment::Vertical::Center),
+                            )
+                            .name(&device.name)
+                            .class(widget::button::ButtonClass::Text)
+                            .width(Length::Fill)
+                            .on_press(Message::SelectDevice(index, ui_model.is_demo_mode))
+                            .into()
                         }),
-                )
-                .push(widget::scrollable(
-                    widget::column().extend(
-                        ui_model
-                            .devices
-                            .iter()
-                            .enumerate()
-                            .filter(|(_, device)| {
-                                device
-                                    .name
-                                    .to_lowercase()
-                                    .contains(&ui_model.search_query.to_lowercase())
-                            })
-                            .map(|(index, device)| {
-                                widget::button::custom(
-                                    widget::row::with_children(vec![
-                                        widget::text(&device.name).into(),
-                                        widget::text(device.mac_address.to_string())
-                                            .align_x(alignment::Horizontal::Right)
-                                            .width(Length::Fill)
-                                            .into(),
-                                    ])
-                                    .align_y(alignment::Vertical::Center),
-                                )
-                                .name(&device.name)
-                                .class(widget::button::ButtonClass::Text)
-                                .width(Length::Fill)
-                                .on_press(Message::SelectDevice(index, ui_model.is_demo_mode))
-                                .into()
-                            }),
-                    ),
                 ))
-                .into()
+            ]
+            .spacing(8)
+            .into()
         })
         .into()
     }
@@ -221,12 +205,13 @@ impl AddDeviceModel {
     }
 
     fn error(message: &str) -> Element<'_, Message> {
-        widget::column()
-            .push(widget::text::title2(fl!("error-loading-devices")))
-            .push(widget::text::monotext(message))
-            .apply(widget::container)
-            .center(Length::Fill)
-            .into()
+        widget::column![
+            widget::text::title2(fl!("error-loading-devices")),
+            widget::text::monotext(message),
+        ]
+        .apply(widget::container)
+        .center(Length::Fill)
+        .into()
     }
 
     #[must_use]
