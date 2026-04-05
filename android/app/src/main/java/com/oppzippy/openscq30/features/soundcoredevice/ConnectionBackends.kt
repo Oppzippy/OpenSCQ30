@@ -37,18 +37,24 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
     }
 
     override suspend fun devices(): List<ConnectionDescriptor> {
-        val bluetoothManager: BluetoothManager = context.getSystemService(BluetoothManager::class.java)
-        return if (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.BLUETOOTH_CONNECT,
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission")
-            emptyList()
-        } else {
-            bluetoothManager.adapter.bondedDevices.map {
-                ConnectionDescriptor(name = it.name, macAddress = it.address)
+        try {
+            val bluetoothManager: BluetoothManager = context.getSystemService(BluetoothManager::class.java)
+            return if (ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                Log.e(TAG, "Missing BLUETOOTH_CONNECT permission")
+                emptyList()
+            } else {
+                bluetoothManager.adapter.bondedDevices.map {
+                    ConnectionDescriptor(name = it.name, macAddress = it.address)
+                }
             }
+        } catch (ex: CancellationException) {
+            throw ex
+        } catch (ex: Exception) {
+            throw AndroidException.Other(ex.stackTraceToString())
         }
     }
 
