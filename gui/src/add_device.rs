@@ -3,7 +3,7 @@ use std::sync::Arc;
 use cosmic::{
     Apply, Element, Task,
     iced::{Length, alignment},
-    widget::{self, Id},
+    widget,
 };
 use openscq30_i18n::Translate;
 use openscq30_lib::{
@@ -26,11 +26,9 @@ enum Stage {
 }
 
 struct ModelSelectionModel {
-    search_id: Id,
     search_query: String,
 }
 struct SelectDeviceModel {
-    search_id: Id,
     search_query: String,
     devices: Option<Vec<ConnectionDescriptor>>,
     device_model: DeviceModel,
@@ -59,7 +57,6 @@ impl AddDeviceModel {
         Self {
             session,
             stage: Stage::ModelSelection(ModelSelectionModel {
-                search_id: Id::unique(),
                 search_query: String::new(),
             }),
         }
@@ -78,7 +75,6 @@ impl AddDeviceModel {
             widget::column![
                 widget::text::title2(fl!("select-device-model")),
                 widget::search_input(fl!("device-model"), &ui_model.search_query)
-                    .id(ui_model.search_id.clone())
                     .on_input(Message::SetDeviceModelSearchQuery),
             ]
             .spacing(8)
@@ -117,7 +113,6 @@ impl AddDeviceModel {
                     {
                         let search_input =
                             widget::search_input(fl!("device-name"), &ui_model.search_query)
-                                .id(ui_model.search_id.clone())
                                 .on_input(Message::SetDeviceNameSearchQuery);
                         let demo_toggle = widget::toggler(ui_model.is_demo_mode)
                             .label(fl!("demo-mode"))
@@ -229,7 +224,6 @@ impl AddDeviceModel {
                     ui_model.devices = None;
                 } else {
                     self.stage = Stage::SelectDevice(SelectDeviceModel {
-                        search_id: Id::unique(),
                         search_query: String::new(),
                         devices: None,
                         device_model,
