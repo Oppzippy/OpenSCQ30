@@ -41,6 +41,21 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.6.0" date="2026-04-05">
+            <description>
+                <p>Features</p>
+                <ul>
+                    <li>New logo (thanks to Luca Pio Valerio)</li>
+                    <li>Update libcosmic, enabling [IME](https://en.wikipedia.org/wiki/Input_method) support</li>
+                </ul>
+                <p>Fixes</p>
+                <ul>
+                    <li>Parse error when connecting to Soundcore P40i in some situations</li>
+                    <li>Update pop-os/iced, which has been rebased on iced 0.14, fixing various issues</li>
+                    <li>Enable Hebrew and Egyptian Arabic languages now that the crash when using RTL languages has been fixed in pop-os/iced</li>
+                </ul> 
+            </description>
+        </release>
         <release version="2.5.1" date="2026-03-05" />
         <release version="2.5.0" date="2026-02-21">
             <description>

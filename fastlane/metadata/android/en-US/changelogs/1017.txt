@@ -1,0 +1,8 @@
+* Features
+  - New logo (thanks to Luca Pio Valerio)
+  - Redesign app (thanks to Luca Pio Valerio)
+  - Add option to force light/dark theme
+  - Add option to disable Material You
+
+* Fixes
+  - Parse error when connecting to Soundcore P40i in some situations
