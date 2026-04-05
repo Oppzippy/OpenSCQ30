@@ -21,7 +21,6 @@ pub struct AddDeviceModel {
 
 enum Stage {
     ModelSelection(ModelSelectionModel),
-    LoadingDevices(LoadingDevicesModel),
     SelectDevice(SelectDeviceModel),
     Error(String),
 }
@@ -30,13 +29,10 @@ struct ModelSelectionModel {
     search_id: Id,
     search_query: String,
 }
-struct LoadingDevicesModel {
-    device_model: DeviceModel,
-}
 struct SelectDeviceModel {
     search_id: Id,
     search_query: String,
-    devices: Vec<ConnectionDescriptor>,
+    devices: Option<Vec<ConnectionDescriptor>>,
     device_model: DeviceModel,
     is_demo_mode: bool,
 }
@@ -72,7 +68,6 @@ impl AddDeviceModel {
     pub fn view(&self) -> Element<'_, Message> {
         match &self.stage {
             Stage::ModelSelection(ui_model) => Self::device_model_selection(ui_model),
-            Stage::LoadingDevices(_ui_model) => Self::loading(fl!("device-list")),
             Stage::SelectDevice(ui_model) => Self::select_device(ui_model),
             Stage::Error(message) => Self::error(message),
         }
@@ -126,6 +121,7 @@ impl AddDeviceModel {
                                 .on_input(Message::SetDeviceNameSearchQuery);
                         let demo_toggle = widget::toggler(ui_model.is_demo_mode)
                             .label(fl!("demo-mode"))
+                            .spacing(4)
                             .on_toggle(|enabled| {
                                 Message::SelectModel(ui_model.device_model, enabled)
                             });
@@ -149,7 +145,6 @@ impl AddDeviceModel {
                                     .spacing(8)
                                     .align_y(alignment::Vertical::Center),
                                 ]
-                                .spacing(8)
                                 .spacing(8),
                             )
                         } else {
@@ -162,34 +157,38 @@ impl AddDeviceModel {
                 ]
                 .spacing(8)
                 .padding([0, 10]),
-                widget::scrollable(widget::column(
-                    ui_model
-                        .devices
-                        .iter()
-                        .enumerate()
-                        .filter(|(_, device)| {
-                            device
-                                .name
-                                .to_lowercase()
-                                .contains(&ui_model.search_query.to_lowercase())
-                        })
-                        .map(|(index, device)| {
-                            widget::button::custom(
-                                widget::row![
-                                    widget::text(&device.name),
-                                    widget::text(device.mac_address.to_string())
-                                        .align_x(alignment::Horizontal::Right)
-                                        .width(Length::Fill),
-                                ]
-                                .align_y(alignment::Vertical::Center),
-                            )
-                            .name(&device.name)
-                            .class(widget::button::ButtonClass::Text)
-                            .width(Length::Fill)
-                            .on_press(Message::SelectDevice(index, ui_model.is_demo_mode))
-                            .into()
-                        }),
-                ))
+                if let Some(devices) = &ui_model.devices {
+                    widget::scrollable(widget::column(
+                        devices
+                            .iter()
+                            .enumerate()
+                            .filter(|(_, device)| {
+                                device
+                                    .name
+                                    .to_lowercase()
+                                    .contains(&ui_model.search_query.to_lowercase())
+                            })
+                            .map(|(index, device)| {
+                                widget::button::custom(
+                                    widget::row![
+                                        widget::text(&device.name),
+                                        widget::text(device.mac_address.to_string())
+                                            .align_x(alignment::Horizontal::Right)
+                                            .width(Length::Fill),
+                                    ]
+                                    .align_y(alignment::Vertical::Center),
+                                )
+                                .name(&device.name)
+                                .class(widget::button::ButtonClass::Text)
+                                .width(Length::Fill)
+                                .on_press(Message::SelectDevice(index, ui_model.is_demo_mode))
+                                .into()
+                            }),
+                    ))
+                    .into()
+                } else {
+                    Self::loading(fl!("device-list"))
+                }
             ]
             .spacing(8)
             .into()
@@ -223,7 +222,20 @@ impl AddDeviceModel {
                 }
             }
             Message::SelectModel(device_model, is_demo_mode) => {
-                self.stage = Stage::LoadingDevices(LoadingDevicesModel { device_model });
+                if let Stage::SelectDevice(ref mut ui_model) = self.stage {
+                    // if we're already on the select device page, don't clear the search and such
+                    ui_model.device_model = device_model;
+                    ui_model.is_demo_mode = is_demo_mode;
+                    ui_model.devices = None;
+                } else {
+                    self.stage = Stage::SelectDevice(SelectDeviceModel {
+                        search_id: Id::unique(),
+                        search_query: String::new(),
+                        devices: None,
+                        device_model,
+                        is_demo_mode,
+                    });
+                }
                 let session = self.session.clone();
                 return Action::Task(Task::perform(
                     async move {
@@ -243,14 +255,9 @@ impl AddDeviceModel {
                 ));
             }
             Message::SetDeviceList(devices, is_demo_mode) => {
-                if let Stage::LoadingDevices(ui_model) = &self.stage {
-                    self.stage = Stage::SelectDevice(SelectDeviceModel {
-                        devices,
-                        search_id: Id::unique(),
-                        search_query: String::new(),
-                        device_model: ui_model.device_model,
-                        is_demo_mode,
-                    });
+                if let Stage::SelectDevice(ref mut ui_model) = self.stage {
+                    ui_model.devices = Some(devices);
+                    ui_model.is_demo_mode = is_demo_mode;
                 }
             }
             Message::SetDeviceNameSearchQuery(query) => {
@@ -260,8 +267,10 @@ impl AddDeviceModel {
             }
             Message::SetErrorMessage(message) => self.stage = Stage::Error(message),
             Message::SelectDevice(index, is_demo) => {
-                if let Stage::SelectDevice(ui_model) = &self.stage {
-                    let descriptor = ui_model.devices[index].clone();
+                if let Stage::SelectDevice(ui_model) = &self.stage
+                    && let Some(devices) = &ui_model.devices
+                {
+                    let descriptor = devices[index].clone();
                     return Action::AddDevice(PairedDevice {
                         mac_address: descriptor.mac_address,
                         model: ui_model.device_model,
