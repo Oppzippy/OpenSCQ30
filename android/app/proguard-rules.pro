@@ -26,3 +26,7 @@
 -keep class com.oppzippy.openscq30.lib.bindings.** { *; }
 -keep class com.sun.jna.** { *; }
 -dontwarn java.awt.*
+
+-keepclassmembers class com.oppzippy.openscq30.features.preferences.Preferences {
+    private android.content.SharedPreferences$OnSharedPreferenceChangeListener onChangeListener;
+}

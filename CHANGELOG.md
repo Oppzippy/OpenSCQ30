@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Android
+
+#### Fixes
+
+- Preferences UI randomly stops working in release builds
+
 ## v2.6.0
 
 ### General

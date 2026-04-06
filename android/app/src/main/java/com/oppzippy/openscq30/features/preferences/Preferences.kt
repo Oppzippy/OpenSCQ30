@@ -64,6 +64,35 @@ class Preferences @Inject constructor(@ApplicationContext context: Context) {
         PREFERENCE_THEME to themePreference,
         PREFERENCE_DYNAMIC_COLOR to dynamicColorPreference,
     )
+
+    // Marked as -keepclassmembers in proguard-rules so that it doesn't get optimized out. This would lead to it getting
+    // garbage collected, since registerOnSharedPreferenceChangeListener only stores a weak reference.
+    //
+    // From decompiled release apk with onChangeListener being private (see the new object being passed directly to
+    // registerOnSharedPreferenceChangeListener):
+    //
+    // Without proguard rule:
+    //    sharedPreferences.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+    //        @Override // android.content.SharedPreferences.OnSharedPreferenceChangeListener
+    //        public final void onSharedPreferenceChanged(SharedPreferences sharedPreferences2, String str) {
+    //            g12 g12Var4 = (g12) this.a.e.get(str);
+    //            if (g12Var4 != null) {
+    //                g12Var4.c.j(g12Var4.a.a());
+    //            }
+    //        }
+    //    });
+    // With proguard rule:
+    //        SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() { // from class: m12
+    //            @Override // android.content.SharedPreferences.OnSharedPreferenceChangeListener
+    //            public final void onSharedPreferenceChanged(SharedPreferences sharedPreferences2, String str) {
+    //                g12 g12Var4 = (g12) this.a.e.get(str);
+    //                if (g12Var4 != null) {
+    //                    g12Var4.c.j(g12Var4.a.a());
+    //                }
+    //            }
+    //        };
+    //        this.onChangeListener = onSharedPreferenceChangeListener;
+    //        sharedPreferences.registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
     private val onChangeListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, key -> preferenceKeysToPreferences[key]?.refresh() }
 
