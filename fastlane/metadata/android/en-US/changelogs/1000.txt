@@ -4,9 +4,6 @@
   - Device model auto detection is removed, so you now need to select the device model when connecting.
 
 * Features
-  - All clients now share the same database format, so it is possible to share the sqlite file amongst them.
-  - Connecting to a demo device is now a runtime option rather than compile time. As an exmaple of what this can be used for, exporting a custom equalizer profile without physically having your device with you is now possible.
-  - Quick presets now include any setting available for the device rather than having to add support for each setting individually.
   - Add support for new devices
     - Soundcore Q20i
     - Soundcore A20i
