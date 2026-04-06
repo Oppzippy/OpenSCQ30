@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v2.6.1
 
 ### Android
 
