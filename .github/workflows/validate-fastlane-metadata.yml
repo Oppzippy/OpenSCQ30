@@ -1,0 +1,22 @@
+name: lint
+
+on:
+  push:
+    paths: &push_paths
+      - fastlane/**
+      - .github/workflows/validate-fastlane-metadata.yml
+  pull_request:
+    paths: *push_paths
+
+permissions:
+  contents: read
+
+jobs:
+  validate-fastlane-metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Validate fastlane metadata
+        uses: ashutoshgngwr/validate-fastlane-supply-metadata@v2
