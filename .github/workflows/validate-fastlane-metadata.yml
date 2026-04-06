@@ -1,4 +1,4 @@
-name: lint
+name: validate fastlane metadata
 
 on:
   push:
