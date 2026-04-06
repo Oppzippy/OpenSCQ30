@@ -36,6 +36,7 @@ fun Settings(viewModel: SettingsViewModel = hiltViewModel()) {
         dynamicColorEnabled = dynamicColorEnabled,
         onDynamicColorChange = { viewModel.setDynamicColor(it) },
         onCopyLogs = { viewModel.copyLogs() },
+        onCopyLogsUnfiltered = { viewModel.copyLogsUnfiltered() },
     )
 }
 
@@ -48,6 +49,7 @@ private fun Settings(
     dynamicColorEnabled: Boolean,
     onDynamicColorChange: (Boolean) -> Unit,
     onCopyLogs: () -> Unit,
+    onCopyLogsUnfiltered: () -> Unit,
 ) {
     Column(
         Modifier
@@ -87,6 +89,11 @@ private fun Settings(
             onClick = { onCopyLogs() },
             content = { Text(stringResource(R.string.copy_logs_to_clipboard)) },
         )
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { onCopyLogsUnfiltered() },
+            content = { Text(stringResource(R.string.copy_logs_to_clipboard_unfiltered)) },
+        )
     }
 }
 
@@ -101,6 +108,7 @@ private fun PreviewSettings() {
             onThemeChange = {},
             dynamicColorEnabled = true,
             onDynamicColorChange = {},
+            onCopyLogsUnfiltered = {},
             onCopyLogs = {},
         )
     }

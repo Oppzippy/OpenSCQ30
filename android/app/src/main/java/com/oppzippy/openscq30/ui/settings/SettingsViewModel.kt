@@ -49,18 +49,40 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun copyLogs() {
+        Log.i(TAG, "exporting logs")
         val process = try {
-            Log.i(TAG, "exporting logs")
-            Runtime.getRuntime().exec(arrayOf("logcat", "-d"))
+            // logs get spammed with View : setRequestedFrameRate 60 times a second, so filter that out
+            Runtime.getRuntime().exec(arrayOf("logcat", "-d", "-t", "200", "View:S"))
         } catch (ex: Exception) {
             toastHandler.add("Failed to execute logcat: ${ex.message}", Toast.LENGTH_SHORT)
             Log.e(TAG, "Failed to execute logcat", ex)
             return
         }
-        val logs = process.inputStream.bufferedReader().use {
-            // we probably only need recent lines, and copying too much text to the clipboard makes it annoying to
-            // deal with on a phone
-            it.readLines().takeLast(200).joinToString("\n")
+        val logs = process.inputStream.bufferedReader().use { reader ->
+            reader.useLines { lines -> lines.joinToString("\n") }
+        }
+
+        val clipboardManager = context.getSystemService<ClipboardManager>()
+        if (clipboardManager != null) {
+            clipboardManager.setPrimaryClip(ClipData.newPlainText("OpenSCQ30 logs", logs))
+        } else {
+            toastHandler.add("Failed to get clipboard manager", Toast.LENGTH_SHORT)
+        }
+    }
+
+    fun copyLogsUnfiltered() {
+        Log.i(TAG, "exporting logs (unfiltered)")
+        val process = try {
+            // -d: print logs and exit without blocking
+            // -t: limit number of lines to print
+            Runtime.getRuntime().exec(arrayOf("logcat", "-d", "-t", "4000"))
+        } catch (ex: Exception) {
+            toastHandler.add("Failed to execute logcat: ${ex.message}", Toast.LENGTH_SHORT)
+            Log.e(TAG, "Failed to execute logcat", ex)
+            return
+        }
+        val logs = process.inputStream.bufferedReader().use { reader ->
+            reader.useLines { lines -> lines.joinToString("\n") }
         }
 
         val clipboardManager = context.getSystemService<ClipboardManager>()

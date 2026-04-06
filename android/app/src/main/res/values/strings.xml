@@ -112,4 +112,5 @@
     <string name="dark">Dark</string>
     <string name="dynamic_color">Dynamic Color</string>
     <string name="in_effect">In Effect</string>
+    <string name="copy_logs_to_clipboard_unfiltered">Copy Logs to Clipboard (Unfiltered)</string>
 </resources>

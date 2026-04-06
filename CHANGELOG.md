@@ -7,6 +7,7 @@
 #### Fixes
 
 - Preferences UI randomly stops working in release builds
+- Filter out spam log messages from Copy Logs to Clipboard
 
 ## v2.6.0
 
