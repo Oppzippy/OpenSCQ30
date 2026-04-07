@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="equalizer">Ecualizador</string>
+    <string name="hz">%1$d Hz</string>
+    <string name="loading">Cargando</string>
+    <string name="request_permission">Solicitar permiso</string>
+    <string name="bluetooth_permission_is_required">Se requiere permiso de Bluetooth</string>
+    <string name="none">Ninguno</string>
+    <string name="add">Agregar</string>
+    <string name="create">Crear</string>
+    <string name="cancel">Cancelar</string>
+    <string name="name">Nombre</string>
+    <string name="delete_confirm">¿Estás seguro que deseas borrar \"%s\"?</string>
+    <string name="delete">Eliminar</string>
+    <string name="back">Atrás</string>
+    <string name="info">Información</string>
+    <string name="khz">%s kHz</string>
+    <string name="replace">Reemplazar</string>
+    <string name="connected_to">Conectado a %s</string>
+    <string name="connecting_to">Conectando a %s</string>
+    <string name="disconnected">Desconectado</string>
+    <string name="disconnect">Desconectar</string>
+    <string name="activate">Activar</string>
+    <string name="awaiting_connection">Esperando conexión</string>
+    <string name="edit">Editar</string>
+    <string name="auto_connect">Conectar automáticamente</string>
+    <string name="settings">Opciones</string>
+    <string name="unpair_device">Desemparejar dispositivo</string>
+    <string name="unpairing_from_device_name">Desemparejando de %s</string>
+    <string name="unpair">Desemparejar</string>
+    <string name="no_devices_found">Ningún dispositivo encontrado</string>
+    <string name="copy_logs_to_clipboard">Copiar registros al portapapeles</string>
+    <string name="unknown">Desconocido</string>
+    <string name="demo">Demo</string>
+    <string name="select_device_model">Selecciona el modelo del dispositivo</string>
+    <string name="select_x">Seleccionar %s</string>
+    <string name="demo_mode">Modo demostración</string>
+</resources>
