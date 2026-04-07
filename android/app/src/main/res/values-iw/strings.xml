@@ -8,11 +8,11 @@
     <string name="cancel">ביטול</string>
     <string name="name">שם</string>
     <string name="delete_confirm">האם אתה בטוח שאתה רוצה למחוק את \"%s\"?</string>
-    <string name="info">מידע</string>
+    <string name="info">פרטים</string>
     <string name="source_code" tools:ignore="TypographyOther">&lt;p&gt;קוד המקור ודוחות הבאגים זמינים בכתובת &lt;a href=https://github.com/Oppzippy/OpenSCQ30&gt;https://github.com/Oppzippy/OpenSCQ30&lt;/a&gt;.&lt;/p&gt; &lt;br&gt; &lt;p&gt;זכויות יוצרים (C) Kyle Scheuing&lt;/p&gt; &lt;br&gt; &lt;p&gt;תוכנית זו היא תוכנה חופשית: ניתן להפיץ אותה מחדש ו/או לשנות אותה תחת תנאי הרישיון הציבורי הכללי של GNU כפי שפורסם על ידי קרן התוכנה החופשית, בין אם גרסה 3 של הרישיון, או (לפי בחירתך) כל גרסה מאוחרת יותר.&lt;/p&gt; &lt;br&gt; &lt;p&gt;תוכנית זו מופצת בתקווה שתהיה שימושית, אך ללא כל אחריות; אפילו ללא אחריות משתמעת לסחירות או התאמה למטרה מסוימת. עיין ברישיון הציבורי הכללי של GNU לפרטים נוספים.&lt;/p&gt; &lt;br&gt; &lt;p&gt;היית אמור לקבל עותק של הרישיון הציבורי הכללי של GNU יחד עם תוכנית זו. אם לא, ראה &lt;a href=https://www.gnu.org/licenses/&gt;https://www.gnu.org/licenses/&lt;/a&gt;&gt;.&lt;/p&gt;</string>
     <string name="khz">%s kHz</string>
     <string name="connecting_to">מתחבר אל %s</string>
-    <string name="loading">טעינה</string>
+    <string name="loading">טוען</string>
     <string name="create">צור</string>
     <string name="delete">מחק</string>
     <string name="back">חזרה</string>
@@ -69,4 +69,16 @@
     <string name="version_2_breaking_changes">&lt;h1&gt;עודכן ל-OpenSCQ30 v2&lt;/h1&gt; &lt;br&gt; &lt;b&gt;שינויים שוברי תאימות&lt;/b&gt; &lt;ul&gt; &lt;li&gt;פרופילי אקולייזר מותאמים אישית הם כעת ספציפיים למכשיר. יש להעביר פרופילי אקולייזר ישנים בעמוד \'העבר פרופילי אקולייזר ישנים\' לאחר חיבור למכשיר.&lt;/li&gt; &lt;li&gt;הגדרות מהירות נשמרות כעת בפורמט שונה, ואין אפשרות העברה אוטומטית, לכן יש ליצור אותן מחדש.&lt;/li&gt; &lt;li&gt;זיהוי אוטומטי של דגם המכשיר הוסר, ולכן יש לבחור את דגם המכשיר בעת הוספת מכשיר.&lt;/li&gt; &lt;/ul&gt; &lt;p&gt;לפרטים נוספים, ראה &lt;a href=https://github.com/Oppzippy/OpenSCQ30/blob/master/CHANGELOG.md&gt;CHANGELOG.md&lt;/a&gt;.&lt;/p&gt;</string>
     <string name="delete_quick_preset">מחק הגדרה מהירה</string>
     <string name="error_deleting_quick_preset">שגיאה במחיקת הגדרה מהירה</string>
+    <string name="headphones">אוזניות</string>
+    <string name="earbuds">אוזניות כפתור</string>
+    <string name="audio_speaker">רמקול</string>
+    <string name="preset">הגדרה מראש</string>
+    <string name="custom">מותאם אישית</string>
+    <string name="selected">נבחר</string>
+    <string name="theme">ערכת נושא</string>
+    <string name="system_theme">ערכת נושא של המערכת</string>
+    <string name="light">בהירה</string>
+    <string name="dark">כהה</string>
+    <string name="dynamic_color">צבע דינמי</string>
+    <string name="copy_logs_to_clipboard_unfiltered">העתק יומני רישום ללוח (ללא סינון)</string>
 </resources>
