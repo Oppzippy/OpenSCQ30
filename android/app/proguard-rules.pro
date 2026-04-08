@@ -24,8 +24,12 @@
 # to match native methods, but there's no easy way to do the same for java methods called from
 # native code. Just keep everything native related instead.
 -keep class com.oppzippy.openscq30.lib.bindings.** { *; }
--keep class com.sun.jna.** { *; }
+
+# Recommended rules from https://github.com/java-native-access/jna/blob/master/www/FrequentlyAskedQuestions.md#jna-on-android
 -dontwarn java.awt.*
+-keep class com.sun.jna.** { *; }
+-keep class * extends com.sun.jna.* { *; }
+-keepclassmembers class * extends com.sun.jna.* { public *; }
 
 -keepclassmembers class com.oppzippy.openscq30.features.preferences.Preferences {
     private android.content.SharedPreferences$OnSharedPreferenceChangeListener onChangeListener;
