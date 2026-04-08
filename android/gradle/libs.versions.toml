@@ -7,6 +7,7 @@ androidxTestExtJunit = "1.3.0"
 androidxTestRules = "1.7.0"
 androidxTestRunner = "1.7.0"
 androidxAppcompat = "1.7.1"
+androidxWork = "2.11.2"
 composeBom = "2026.03.01"
 daggerHilt = "2.59.2"
 espresso = "3.7.0"
@@ -52,6 +53,7 @@ androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "
 androidx-rules = { module = "androidx.test:rules", version.ref = "androidxTestRules" }
 androidx-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
 androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
+androidx-work = { module = "androidx.work:work-runtime-ktx", version.ref = "androidxWork" }
 dagger-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "daggerHilt" }
 dagger-hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "daggerHilt" }
 dagger-hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "daggerHilt" }
