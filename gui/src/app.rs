@@ -531,6 +531,7 @@ impl AppModel {
 
     fn view_cancel(&self, device_name: &str) -> cosmic::Element<'_, Message> {
         widget::column![
+            widget::progress_bar::indeterminate_circular(),
             widget::text::title2(fl!("connecting-to", name = device_name)),
             widget::button::destructive(fl!("cancel")).on_press(Message::CancelConnectToDevice),
         ]

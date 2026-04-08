@@ -182,7 +182,7 @@ impl AddDeviceModel {
                     ))
                     .into()
                 } else {
-                    Self::loading(fl!("device-list"))
+                    Self::loading()
                 }
             ]
             .spacing(8)
@@ -191,8 +191,8 @@ impl AddDeviceModel {
         .into()
     }
 
-    fn loading(item: String) -> Element<'static, Message> {
-        widget::text::title2(fl!("loading-item", item = item))
+    fn loading() -> Element<'static, Message> {
+        widget::progress_bar::indeterminate_circular()
             .apply(widget::container)
             .center(Length::Fill)
             .into()
