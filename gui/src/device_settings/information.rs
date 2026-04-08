@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use cosmic::{Element, iced_core::text::Wrapping, widget};
+use cosmic::{Element, iced::core::text::Wrapping, widget};
 use openscq30_i18n::Translate;
 use openscq30_lib::settings::SettingId;
 

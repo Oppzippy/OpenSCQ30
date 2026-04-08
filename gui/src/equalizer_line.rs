@@ -57,7 +57,7 @@ impl<Message> canvas::Program<Message, cosmic::Theme, cosmic::Renderer> for Equa
         renderer: &cosmic::Renderer,
         theme: &cosmic::Theme,
         bounds: cosmic::iced::Rectangle,
-        _cursor: cosmic::iced_core::mouse::Cursor,
+        _cursor: cosmic::iced::core::mouse::Cursor,
     ) -> Vec<canvas::Geometry<cosmic::iced::Renderer>> {
         let equalizer_line = self.cache.draw(renderer, bounds.size(), |frame| {
             let theme = theme.cosmic();
