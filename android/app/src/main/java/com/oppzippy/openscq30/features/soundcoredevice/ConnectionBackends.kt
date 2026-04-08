@@ -47,8 +47,14 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
                 Log.e(TAG, "Missing BLUETOOTH_CONNECT permission")
                 emptyList()
             } else {
-                bluetoothManager.adapter.bondedDevices.map {
-                    ConnectionDescriptor(name = it.name, macAddress = it.address)
+                val bondedDevices = bluetoothManager.adapter.bondedDevices
+                if (bondedDevices != null) {
+                    bondedDevices.map {
+                        ConnectionDescriptor(name = it.name, macAddress = it.address)
+                    }
+                } else {
+                    Log.e(TAG, "bondedDevices is null, see preceding error message from bluetooth adapter")
+                    emptyList()
                 }
             }
         } catch (ex: CancellationException) {
