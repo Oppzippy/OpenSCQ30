@@ -1,0 +1,3 @@
+* Fixes
+  - Widget crashes in release builds
+  - Crash on add device screen when there is an error getting bonded devices

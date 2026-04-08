@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.6.2
+
+### Android
+
+#### Fixes
+
+- Widget crashes in release builds
+- Crash on add device screen when there is an error getting bonded devices
+
 ## v2.6.1
 
 ### Android
