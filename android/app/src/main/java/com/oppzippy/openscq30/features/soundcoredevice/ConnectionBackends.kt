@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.bindings.AndroidException
 import com.oppzippy.openscq30.lib.bindings.AndroidRfcommConnectionBackend
 import com.oppzippy.openscq30.lib.bindings.AndroidRfcommConnectionWriter
@@ -50,7 +51,10 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
                 val bondedDevices = bluetoothManager.adapter.bondedDevices
                 if (bondedDevices != null) {
                     bondedDevices.map {
-                        ConnectionDescriptor(name = it.name, macAddress = it.address)
+                        ConnectionDescriptor(
+                            name = it.name ?: context.getString(R.string.unknown),
+                            macAddress = it.address,
+                        )
                     }
                 } else {
                     Log.e(TAG, "bondedDevices is null, see preceding error message from bluetooth adapter")
