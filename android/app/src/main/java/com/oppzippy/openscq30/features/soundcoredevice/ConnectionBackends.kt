@@ -4,7 +4,6 @@ import android.Manifest
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
-import android.bluetooth.BluetoothSocketException
 import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
@@ -111,9 +110,6 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
             } catch (ex: IOException) {
                 Log.d(TAG, "closing socket", ex)
             }
-        } catch (ex: BluetoothSocketException) {
-            Log.w(TAG, "error connecting to device", ex)
-            throw AndroidException.Other("error connecting to device")
         } catch (ex: IOException) {
             Log.w(TAG, "error connecting to device", ex)
             throw AndroidException.Other("error connecting to device")
