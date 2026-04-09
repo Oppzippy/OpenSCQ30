@@ -27,7 +27,7 @@ val abis = listOf(
 )
 val buildProfiles = listOf(
     BuildProfile(gradle = "debug", cargo = "debug", isDebug = true),
-    BuildProfile(gradle = "release", cargo = "release-android", isDebug = false),
+    BuildProfile(gradle = "release", cargo = "release", isDebug = false),
 )
 
 data class ABI(val android: String, val rust: String)
