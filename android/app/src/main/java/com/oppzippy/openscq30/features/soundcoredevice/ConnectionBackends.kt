@@ -39,31 +39,37 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
 
     override suspend fun devices(): List<ConnectionDescriptor> {
         try {
-            val bluetoothManager: BluetoothManager = context.getSystemService(BluetoothManager::class.java)
-            return if (ActivityCompat.checkSelfPermission(
+            val bluetoothManager: BluetoothManager? = context.getSystemService(BluetoothManager::class.java)
+            if (bluetoothManager == null) {
+                Log.e(TAG, "BluetoothManager is null. Does the system not support bluetooth?")
+                return emptyList()
+            }
+
+            if (
+                ActivityCompat.checkSelfPermission(
                     context,
                     Manifest.permission.BLUETOOTH_CONNECT,
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 Log.e(TAG, "Missing BLUETOOTH_CONNECT permission")
-                emptyList()
-            } else {
-                val bondedDevices: Set<BluetoothDevice>? = bluetoothManager.adapter.bondedDevices
-                if (bondedDevices != null) {
-                    bondedDevices.map {
-                        val name: String? = it.name
-                        if (name == null) {
-                            Log.w(TAG, "bonded device with mac address ${it.address} has null name")
-                        }
-                        ConnectionDescriptor(
-                            name = name ?: context.getString(R.string.unknown),
-                            macAddress = it.address,
-                        )
-                    }
-                } else {
-                    Log.e(TAG, "bondedDevices is null, see preceding error message from bluetooth adapter")
-                    emptyList()
+                return emptyList()
+            }
+
+            val bondedDevices: Set<BluetoothDevice>? = bluetoothManager.adapter.bondedDevices
+            if (bondedDevices == null) {
+                Log.e(TAG, "bondedDevices is null, see preceding error message from bluetooth adapter")
+                return emptyList()
+            }
+
+            return bondedDevices.map {
+                val name: String? = it.name
+                if (name == null) {
+                    Log.w(TAG, "bonded device with mac address ${it.address} has null name")
                 }
+                ConnectionDescriptor(
+                    name = name ?: context.getString(R.string.unknown),
+                    macAddress = it.address,
+                )
             }
         } catch (ex: CancellationException) {
             throw ex
@@ -85,30 +91,59 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
             Log.e(TAG, "Missing BLUETOOTH_CONNECT permission")
             return
         }
-        val bluetoothManager: BluetoothManager = context.getSystemService(BluetoothManager::class.java)
-        val device = bluetoothManager.adapter.bondedDevices.find { it.address == macAddress } ?: return
-        Log.d(TAG, "found device")
+
+        val bluetoothManager: BluetoothManager? = context.getSystemService(BluetoothManager::class.java)
+        if (bluetoothManager == null) {
+            Log.e(TAG, "BluetoothManager is null. Does the system not support bluetooth?")
+            return
+        }
+
+        val bondedDevices: Set<BluetoothDevice>? = bluetoothManager.adapter.bondedDevices
+        if (bondedDevices == null) {
+            Log.e(TAG, "bondedDevices is null, see preceding error message from bluetooth adapter")
+            return
+        }
+        val device = bondedDevices.find { it.address == macAddress }
+        if (device == null) {
+            Log.w(TAG, "device with mac address $macAddress not found")
+            return
+        }
+
+        Log.d(TAG, "found device $macAddress")
         val uuid = when (serviceSelectionStrategy) {
             is RfcommServiceSelectionStrategy.Constant -> serviceSelectionStrategy.uuid
 
             is RfcommServiceSelectionStrategy.Dynamic -> {
-                val uuids = device.uuids.map { it.uuid }
+                val uuids = device.uuids?.map { it.uuid }
+                if (uuids == null) {
+                    Log.e(TAG, "error getting device service uuids")
+                    return
+                }
                 Log.d(TAG, "found uuids: $uuids")
                 serviceSelectionStrategy.selectService.select(uuids)
             }
         }
+
         Log.d(TAG, "selected uuid $uuid")
-        val socket = device.createRfcommSocketToServiceRecord(uuid)
+
+        val socket = try {
+            device.createRfcommSocketToServiceRecord(uuid)
+        } catch (ex: IOException) {
+            Log.e(TAG, "error creating rfcomm socket", ex)
+            return
+        }
+
         try {
             withContext(Dispatchers.IO) {
                 socket.connect()
             }
         } catch (_: CancellationException) {
             try {
+                Log.d(TAG, "connection canceled, closing socket")
                 socket.close()
                 return
             } catch (ex: IOException) {
-                Log.d(TAG, "closing socket", ex)
+                Log.d(TAG, "error closing socket during cancellation", ex)
             }
         } catch (ex: IOException) {
             Log.w(TAG, "error connecting to device", ex)
@@ -128,7 +163,7 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
                     try {
                         val buffer = ByteArray(1000)
                         // The socket will be closed from the rust side when we disconnect from the device, so when that
-                        // happens, this will throw and we'll break out of the loop
+                        // happens, this will throw, and we'll break out of the loop
                         when (val size = socket.inputStream.read(buffer)) {
                             -1 -> {
                                 Log.d(TAG, "end of stream")
