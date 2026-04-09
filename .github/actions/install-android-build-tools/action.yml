@@ -20,23 +20,29 @@ runs:
         echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ steps.build_tool_versions.outputs.ndk }}" >> "$GITHUB_ENV"
         echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/${{ steps.build_tool_versions.outputs.ndk }}" >> "$GITHUB_ENV"
 
-    - uses: dtolnay/rust-toolchain@master
-      with:
-        toolchain: ${{ steps.build_tool_versions.outputs.rust }}
-        targets: armv7-linux-androideabi,aarch64-linux-android,i686-linux-android,x86_64-linux-android
+    - name: Install rust
+      shell: bash
+      env:
+        RUST_TOOLCHAIN_VERSION: ${{ steps.build_tool_versions.outputs.rust }}
+      run: |
+        rustup install \
+          --profile minimal \
+          --target armv7-linux-androideabi,aarch64-linux-android,i686-linux-android,x86_64-linux-android \
+          "$RUST_TOOLCHAIN_VERSION"
+        rustup default "$RUST_TOOLCHAIN_VERSION"
 
     - name: Cache cargo artifacts
       if: inputs.cache == 'true'
-      uses: Swatinem/rust-cache@v2
+      uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
 
-    - uses: actions/setup-java@v4
+    - uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4.8.0
       with:
         distribution: temurin
         java-version: ${{ steps.build_tool_versions.outputs.jdk }}
 
     - name: Cache gradle artifacts
       if: inputs.cache == 'true'
-      uses: gradle/actions/setup-gradle@v4
+      uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
 
     - name: Install cargo-ndk
       shell: bash
