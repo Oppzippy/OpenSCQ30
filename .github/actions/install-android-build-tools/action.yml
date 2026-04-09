@@ -16,9 +16,11 @@ runs:
 
     - name: Set ANDROID_NDK_HOME and ANDROID_NDK_ROOT to specified version
       shell: bash
+      env:
+        NDK_VERSION: ${{ steps.build_tool_versions.outputs.ndk }}
       run: |
-        echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ steps.build_tool_versions.outputs.ndk }}" >> "$GITHUB_ENV"
-        echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/${{ steps.build_tool_versions.outputs.ndk }}" >> "$GITHUB_ENV"
+        echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/$NDK_VERSION" >> "$GITHUB_ENV"
+        echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/$NDK_VERSION" >> "$GITHUB_ENV"
 
     - name: Install rust
       shell: bash
@@ -46,4 +48,6 @@ runs:
 
     - name: Install cargo-ndk
       shell: bash
-      run: cargo install cargo-ndk --version ${{ steps.build_tool_versions.outputs.cargo-ndk }}
+      env:
+        CARGO_NDK_VERSION: ${{ steps.build_tool_versions.outputs.cargo-ndk }}
+      run: cargo install cargo-ndk --version "$CARGO_NDK_VERSION"
