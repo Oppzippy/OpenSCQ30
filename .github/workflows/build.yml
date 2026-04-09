@@ -2,6 +2,22 @@ name: build
 
 on:
   workflow_dispatch:
+    inputs:
+      linux:
+        description: "Enable Linux build"
+        required: true
+        default: true
+        type: boolean
+      windows:
+        description: "Enable Windows build"
+        required: true
+        default: true
+        type: boolean
+      android:
+        description: "Enable Android build"
+        required: true
+        default: true
+        type: boolean
 
 permissions:
   contents: read
@@ -9,6 +25,7 @@ permissions:
 jobs:
   build-linux-x86_64:
     runs-on: ubuntu-latest
+    if: inputs.linux
     permissions:
       id-token: write
       attestations: write
@@ -47,6 +64,7 @@ jobs:
 
   build-linux-arm64:
     runs-on: ubuntu-24.04-arm
+    if: inputs.linux
     permissions:
       id-token: write
       attestations: write
@@ -85,6 +103,7 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
+    if: inputs.windows
     permissions:
       id-token: write
       attestations: write
@@ -124,6 +143,7 @@ jobs:
 
   build-android:
     runs-on: ubuntu-latest
+    if: inputs.android
     permissions:
       id-token: write
       attestations: write
