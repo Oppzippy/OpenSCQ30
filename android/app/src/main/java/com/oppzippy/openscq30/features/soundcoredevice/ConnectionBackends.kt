@@ -1,6 +1,7 @@
 package com.oppzippy.openscq30.features.soundcoredevice
 
 import android.Manifest
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
 import android.bluetooth.BluetoothSocketException
@@ -48,11 +49,15 @@ class AndroidRfcommConnectionBackendImpl(private val context: Context, private v
                 Log.e(TAG, "Missing BLUETOOTH_CONNECT permission")
                 emptyList()
             } else {
-                val bondedDevices = bluetoothManager.adapter.bondedDevices
+                val bondedDevices: Set<BluetoothDevice>? = bluetoothManager.adapter.bondedDevices
                 if (bondedDevices != null) {
                     bondedDevices.map {
+                        val name: String? = it.name
+                        if (name == null) {
+                            Log.w(TAG, "bonded device with mac address ${it.address} has null name")
+                        }
                         ConnectionDescriptor(
-                            name = it.name ?: context.getString(R.string.unknown),
+                            name = name ?: context.getString(R.string.unknown),
                             macAddress = it.address,
                         )
                     }
