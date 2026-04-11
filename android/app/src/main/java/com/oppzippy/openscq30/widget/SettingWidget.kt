@@ -6,13 +6,16 @@ import android.content.Intent
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.glance.Button
+import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
+import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalGlanceId
@@ -46,7 +49,9 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
+import androidx.glance.layout.size
 import androidx.glance.layout.width
+import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
@@ -211,12 +216,33 @@ private fun Content(context: Context, state: SettingWidgetState?) {
                     is SettingWidgetState.Connecting -> state.deviceName
                     is SettingWidgetState.Disconnected, null -> context.getString(R.string.disconnected)
                 }
-                TitleBar(
-                    startIcon = ImageProvider(R.drawable.openscq30_logo_foreground),
-                    title = titleText,
-                ) {
-                    if (state is SettingWidgetState.Connected || state is SettingWidgetState.ConnectedUnconfigured) {
+
+                // Smaller title bar with less padding when displaying multiple settings so that more fit without having
+                // to scroll down
+                if (state is SettingWidgetState.Connected && state.settings.size > 1) {
+                    Row(
+                        modifier = GlanceModifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Image(
+                            modifier = GlanceModifier.size(24.dp),
+                            provider = ImageProvider(R.drawable.openscq30_logo_foreground),
+                            contentDescription = "",
+                            colorFilter = ColorFilter.tint(GlanceTheme.colors.onSurface),
+                        )
+                        Spacer(GlanceModifier.width(4.dp))
+                        Text(
+                            titleText,
+                            modifier = GlanceModifier.defaultWeight(),
+                            style = TextStyle(
+                                color = GlanceTheme.colors.onSurface,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 16.sp,
+                            ),
+                            maxLines = 1,
+                        )
                         CircleIconButton(
+                            modifier = GlanceModifier.size(32.dp),
                             imageProvider = ImageProvider(R.drawable.arrow_back_24px),
                             contentDescription = context.getString(R.string.disconnect),
                             backgroundColor = null,
@@ -227,6 +253,27 @@ private fun Content(context: Context, state: SettingWidgetState?) {
                             // doing something wrong.
                             onClick = { sendDisconnect(context) },
                         )
+                    }
+                } else {
+                    TitleBar(
+                        startIcon = ImageProvider(R.drawable.openscq30_logo_foreground),
+                        title = titleText,
+                    ) {
+                        if (state is SettingWidgetState.Connected ||
+                            state is SettingWidgetState.ConnectedUnconfigured
+                        ) {
+                            CircleIconButton(
+                                imageProvider = ImageProvider(R.drawable.arrow_back_24px),
+                                contentDescription = context.getString(R.string.disconnect),
+                                backgroundColor = null,
+                                // Not sure why, but for some reason actions don't seem to work when the CircleIconButton
+                                // is in the TitleBar. If I copy the button from here and put it somewhere else, it works in
+                                // the other location, but not here. As a workaround, we can pass a function instead and
+                                // directly call context.sendBroadcast. It's a very strange issue, so it's possible I'm
+                                // doing something wrong.
+                                onClick = { sendDisconnect(context) },
+                            )
+                        }
                     }
                 }
             },
