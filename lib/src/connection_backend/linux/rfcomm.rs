@@ -8,7 +8,7 @@ use std::{
 use bluer::{
     Adapter, Device, DeviceProperty, Session,
     rfcomm::{
-        Profile, ReqError, Stream,
+        Profile, ReqError, Role, Stream,
         stream::{OwnedReadHalf, OwnedWriteHalf},
     },
 };
@@ -159,6 +159,7 @@ impl RfcommBackend for BluerRfcommBackend {
             .session
             .register_profile(Profile {
                 uuid,
+                role: Some(Role::Client),
                 ..Default::default()
             })
             .await?;
