@@ -45,20 +45,24 @@ impl BluerRfcommBackend {
     }
 
     async fn adapters(&self) -> connection::Result<Vec<Adapter>> {
-        let adapters = self
-            .session
-            .adapter_names()
-            .await?
+        let adapter_names = self.session.adapter_names().await.map_err(|err| {
+            warn!("failed to get bluetooth adapter names");
+            connection::Error::BluetoothAdapterUnavailable {
+                source: Some(Box::new(err)),
+                location: Location::caller(),
+            }
+        })?;
+
+        let adapters = adapter_names
             .into_iter()
-            .map(|adapter_name| {
-                self.session.adapter(&adapter_name).map_err(|err| {
-                    connection::Error::BluetoothAdapterUnavailable {
-                        source: Some(Box::new(err)),
-                        location: Location::caller(),
-                    }
-                })
+            .filter_map(|adapter_name| match self.session.adapter(&adapter_name) {
+                Ok(adapter) => Some(adapter),
+                Err(err) => {
+                    warn!("bluetooth adapter {adapter_name} unavailable: {err:?}");
+                    None
+                }
             })
-            .collect::<Result<Vec<Adapter>, connection::Error>>()?;
+            .collect::<Vec<Adapter>>();
 
         if adapters.is_empty() {
             tracing::warn!("No bluetooth adapters found");
