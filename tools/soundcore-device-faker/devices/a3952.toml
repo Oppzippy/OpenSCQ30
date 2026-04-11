@@ -1,0 +1,162 @@
+name = "Soundcore Liberty 3 Pro"
+mac_address = "00:00:00:00:39:52"
+rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B3952"
+
+[[responses]]
+# State update
+command = [1, 1]
+response = [
+    1,    # host device
+    1,    # tws connected
+    4,    # left battery level
+    4,    # right battery level
+    0,    # left battery charging
+    0,    # right battery charging
+    48,   # left FW start
+    52,
+    46,
+    57,
+    54,   # left FW end
+    48,   # right FW start
+    52,
+    46,
+    57,
+    54,   # right FW end
+    51,   # SN start
+    57,
+    53,
+    50,
+    50,
+    48,
+    54,
+    54,
+    51,
+    49,
+    67,
+    67,
+    69,
+    69,
+    69,
+    56,   # SN end
+    0x00, # EQ preset
+    0x00, # EQ preset
+    120,  # left eq start
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,  # left eq end
+    255,  # right eq start?
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,  # right eq end?
+    2,    # unknown
+    1,    # hear id enabled
+    120,  # left hear id start
+    150,
+    180,
+    180,
+    120,
+    120,
+    120,
+    180,
+    0,
+    0,    # left hear id end
+    120,  # right hear id start
+    180,
+    180,
+    180,
+    120,
+    150,
+    180,
+    180,
+    0,
+    0,    # right hear id end
+    101,  # hear id timestamp start
+    86,
+    138,
+    244,  # hear id timestamp end
+    2,    # 0=hear id initial curve, 1=custom hear id, 2=favorite music genre
+    120,  # left hear id custom start
+    150,
+    180,
+    180,
+    120,
+    120,
+    120,
+    180,
+    0,
+    0,    # left hear id custom end
+    180,  # right hear id custom start
+    180,
+    180,
+    180,
+    120,
+    150,
+    180,
+    180,
+    0,
+    0,    # right hear id custom end
+    0,    # favorite music genre low byte
+    0,    # favorite music genre high byte?
+    0x12, # unknown
+    0x11, # left single press enabled
+    0x61, # left single press (options: vol-, vol+, next, prev, play/pause, voice assist, ambient sound mode)
+    0x11, # right single press enabled
+    0x61, # right single press
+    0x11, # left double press enabled
+    0x64, # left double press
+    0x11, # right double press enabled
+    0x66, # right double press
+    0x11, # left long press enabled
+    0x54, # left long press
+    0x11, # right long press enabled
+    0x54, # right long press
+    0,
+    65,
+    0,
+    64,
+    3,    # ambient sound mode cycle
+    0,    # 0=hearid anc, 1=transparency, 2=normal
+    0x30, # 0x10=weak, 0x20=moderate, 0x30=strong, 0=low noise, 1=medium noise, 2=high noise
+    0,    # 0=fully transparent, 1=vocal mode
+    0,    # 0=manual anc, 1=adaptive anc
+    1,    # wind noise reduction (requires not normal mode)
+    1,    # unknown
+    1,    # touch tone
+    1,    # wear detection
+    0,    # case battery charging?
+    4,    # case battery level
+    0,
+    0,
+    0,    # LDAC
+    0,
+    1,
+    0,    # wearing tone
+    0,
+    1,    # auto power off enabled
+    0,    # 0=30m, 1=60m, 2=90m, 3=120m
+    58,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    101,
+    86,
+    137,
+    249,
+    70,
+    9,
+]
