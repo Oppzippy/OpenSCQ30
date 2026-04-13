@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="equalizer">ইকুয়ালাইজার</string>
+    <string name="hz">%1$d Hz</string>
+    <string name="cancel">বাদ দিন</string>
+    <string name="activate">চালু করুন</string>
+    <string name="edit">এডিট</string>
+    <string name="name">নাম</string>
+    <string name="create">তৈরি করুন</string>
+    <string name="migrate">মাইগ্রেট</string>
+    <string name="delete">ডিলেট</string>
+    <string name="confirm">নিশ্চিত</string>
+    <string name="settings">সেটিংস</string>
+    <string name="none">নেই</string>
+</resources>
