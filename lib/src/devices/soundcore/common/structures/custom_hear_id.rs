@@ -93,7 +93,7 @@ impl<const CHANNELS: usize, const BANDS: usize> CustomHearId<CHANNELS, BANDS> {
                     be_u32,
                     HearIdType::take,
                     count(CommonVolumeAdjustments::take_optional, CHANNELS),
-                    HearIdMusicGenre::take_two_bytes, // hear id eq index?
+                    HearIdMusicGenre::take_two_bytes,
                 ),
                 |(
                     is_enabled,

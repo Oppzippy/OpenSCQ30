@@ -15,6 +15,10 @@ impl CaseBatteryLevel {
     ) -> IResult<&'a [u8], Self, E> {
         map(BatteryLevel::take, Self).parse_complete(input)
     }
+
+    pub fn bytes(&self) -> [u8; 1] {
+        [self.0.0]
+    }
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]

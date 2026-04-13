@@ -60,7 +60,7 @@ response = [
     255,
     255,
     255,  # right eq end?
-    2,    # unknown
+    2,    # age range
     1,    # hear id enabled
     120,  # left hear id start
     150,
@@ -108,7 +108,7 @@ response = [
     0,
     0,    # right hear id custom end
     0,    # favorite music genre low byte
-    0,    # favorite music genre high byte?
+    0,    # favorite music genre high byte
     0x12, # unknown
     0x11, # left single press enabled
     0x61, # left single press (options: vol-, vol+, next, prev, play/pause, voice assist, ambient sound mode)
