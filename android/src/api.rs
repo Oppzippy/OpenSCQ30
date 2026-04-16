@@ -1,6 +1,5 @@
 use std::{path::PathBuf, sync::Arc};
 
-use cfg_if::cfg_if;
 use openscq30_lib::OpenSCQ30Session as LibSession;
 
 use crate::{
@@ -23,13 +22,14 @@ pub async fn new_session(db_path: String) -> Result<OpenSCQ30Session, crate::Ope
 
 #[uniffi::export(async_runtime = "tokio")]
 pub async fn new_session_with_in_memory_db() -> Result<OpenSCQ30Session, crate::OpenSCQ30Error> {
-    cfg_if! {
-        if #[cfg(debug_assertions)] {
+    cfg_select! {
+        debug_assertions => {
             let inner_session = LibSession::new_with_in_memory_db().await?;
             Ok(OpenSCQ30Session {
                 inner: inner_session,
             })
-        } else {
+        }
+        _ => {
             unimplemented!()
         }
     }

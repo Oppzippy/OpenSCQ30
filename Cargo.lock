@@ -3915,7 +3915,6 @@ dependencies = [
  "android_logger",
  "anyhow",
  "async-trait",
- "cfg-if",
  "i18n-embed",
  "i18n-embed-fl",
  "itertools",
@@ -4008,7 +4007,6 @@ version = "2.6.2"
 dependencies = [
  "async-trait",
  "bluer",
- "cfg-if",
  "futures",
  "hex",
  "i18n-embed",

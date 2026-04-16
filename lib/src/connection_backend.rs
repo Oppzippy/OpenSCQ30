@@ -1,16 +1,16 @@
-use cfg_if::cfg_if;
-
 use crate::api::connection::{self, RfcommBackend};
 
-cfg_if! {
-    if #[cfg(target_os = "linux")] {
+cfg_select! {
+    target_os = "linux" => {
         mod linux;
-    } else if #[cfg(target_os = "windows")] {
+
+    }
+    target_os = "windows" => {
         mod windows;
-    } else {
+    }
+    _ => {
         mod none;
     }
-
 }
 #[cfg(test)]
 pub(crate) mod mock;
@@ -23,12 +23,14 @@ pub trait ConnectionBackends {
 }
 
 pub fn default_backends() -> Option<impl ConnectionBackends> {
-    cfg_if::cfg_if! {
-        if #[cfg(target_os = "linux")] {
+    cfg_select! {
+        target_os = "linux" => {
             Some(linux::PlatformConnectionBackends::default())
-        } else if #[cfg(target_os = "windows")] {
+        }
+        target_os = "windows" => {
             Some(windows::PlatformConnectionBackends::default())
-        } else {
+        }
+        _ => {
             None::<none::NoneConnectionBackends>
         }
     }
