@@ -29,6 +29,7 @@ cloned_instead_of_copied = "warn"
 filter_map_next = "warn"
 map_unwrap_or = "warn"
 ignored_unit_patterns = "warn"
+unnecessary_trailing_comma = "warn"
 
 [profile.release]
 strip = true
