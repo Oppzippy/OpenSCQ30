@@ -88,15 +88,15 @@ object SoundcoreEqualizerScreen : CategoryOverride {
             volumeAdjustments.setting.min == (-120).toShort() &&
             volumeAdjustments.setting.max == 134.toShort() &&
             volumeAdjustments.setting.bandHz == listOf(
-            100.toUShort(),
-            200.toUShort(),
-            400.toUShort(),
-            800.toUShort(),
-            1600.toUShort(),
-            3200.toUShort(),
-            6400.toUShort(),
-            12800.toUShort(),
-        )
+                100.toUShort(),
+                200.toUShort(),
+                400.toUShort(),
+                800.toUShort(),
+                1600.toUShort(),
+                3200.toUShort(),
+                6400.toUShort(),
+                12800.toUShort(),
+            )
     }
 
     @Composable
