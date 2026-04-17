@@ -61,39 +61,11 @@ private const val SETTING_ID_PRESET_EQUALIZER_PROFILE = "presetEqualizerProfile"
 private const val SETTING_ID_CUSTOM_EQUALIZER_PROFILE = "customEqualizerProfile"
 private const val SETTING_ID_VOLUME_ADJUSTMENTS = "volumeAdjustments"
 
-// Since this screen is very specific to a particular set of settings in the Equalizer category, it's safest to enable
-// it per-device and otherwise fall back to the generic display.
-private val enabledDevices = hashSetOf(
-    "SoundcoreA3004",
-    "SoundcoreA3027",
-    "SoundcoreA3028",
-    "SoundcoreA3029",
-    "SoundcoreA3030",
-    "SoundcoreA3031",
-    "SoundcoreA3033",
-    "SoundcoreA3035",
-    "SoundcoreA3040",
-    "SoundcoreA3926",
-    "SoundcoreA3930",
-    "SoundcoreA3931",
-    "SoundcoreA3933",
-    "SoundcoreA3936",
-    "SoundcoreA3945",
-    "SoundcoreA3951",
-    "SoundcoreA3939",
-    "SoundcoreA3935",
-    "SoundcoreA3955",
-    "SoundcoreA3959",
-    "SoundcoreA3947",
-    "SoundcoreA3948",
-    "SoundcoreA3949",
-)
-
 object SoundcoreEqualizerScreen : CategoryOverride {
     // Be overly cautious and ensure all settings are as expected. It's better to not use this override when we should
     // rather than the other way around.
     override fun shouldOverride(deviceModel: String, settings: List<Pair<String, Setting>>): Boolean {
-        if (deviceModel !in enabledDevices) return false
+        if (!deviceModel.startsWith("Soundcore")) return false
         if (settings.size != 3) return false
 
         val preset = getSettingById<Setting.OptionalSelectSetting>(
@@ -112,7 +84,10 @@ object SoundcoreEqualizerScreen : CategoryOverride {
         ) {
             return false
         }
-        return volumeAdjustments.setting.bandHz == listOf(
+        return volumeAdjustments.setting.fractionDigits == 1.toShort() &&
+            volumeAdjustments.setting.min == (-120).toShort() &&
+            volumeAdjustments.setting.max == 134.toShort() &&
+            volumeAdjustments.setting.bandHz == listOf(
             100.toUShort(),
             200.toUShort(),
             400.toUShort(),
@@ -121,7 +96,7 @@ object SoundcoreEqualizerScreen : CategoryOverride {
             3200.toUShort(),
             6400.toUShort(),
             12800.toUShort(),
-        ) && volumeAdjustments.setting.fractionDigits == 1.toShort()
+        )
     }
 
     @Composable
