@@ -33,6 +33,16 @@ pub fn from_derive_input(input: DeriveInput) -> TokenStream {
                         })
                         .collect::<HashMap<String, Expr>>();
 
+                    let mut required_values =
+                        vec![args.get("value").cloned().expect("value is required")];
+                    for i in 2..1000 {
+                        if let Some(value) = args.get(&format!("value{i}")) {
+                            required_values.push(value.clone());
+                        } else {
+                            break;
+                        }
+                    }
+
                     (
                         field.ident.clone().unwrap(),
                         FieldRequirement {
@@ -42,7 +52,7 @@ pub fn from_derive_input(input: DeriveInput) -> TokenStream {
                                     format_ident!("{}", field_expr.to_token_stream().to_string())
                                 })
                                 .expect("field is required"),
-                            required_value: args.get("value").cloned().expect("value is required"),
+                            required_values,
                         },
                     )
                 })
@@ -70,22 +80,26 @@ pub fn from_derive_input(input: DeriveInput) -> TokenStream {
                     .enumerate()
                     .find(|(_, f)| *f.ident.as_ref().unwrap() == field_requirement.required_field)
                     .expect("required field does not exist");
-                let requirement_value = &field_requirement.required_value;
                 let requirement_variant_ident = format_ident!(
                     "{}",
                     heck::AsUpperCamelCase(requirement.ident.as_ref().unwrap().to_string())
                         .to_string()
                 );
-                let wrapped = struct_fields_enum.wrap_field(
-                    &requirement_variant_ident,
-                    &requirement_value.to_token_stream(),
-                );
+                let wrapped = field_requirement
+                    .required_values
+                    .iter()
+                    .map(|value_expr| {
+                        struct_fields_enum.wrap_field(
+                            &requirement_variant_ident,
+                            &value_expr.to_token_stream(),
+                        )
+                    });
                 // rustfmt gives up when the full path is specified here rather than just Requirement. Delete up to requirement,
                 // run rustfmt, and then put it back.
                 quote! {
                     Some(::openscq30_lib::devices::soundcore::common::modules::sound_modes_v2::Requirement {
                         index: #requirement_index,
-                        value: #wrapped,
+                        values: vec![#(#wrapped),*],
                     })
                 }
             }
@@ -200,5 +214,5 @@ impl ToTokens for FieldEnum {
 
 struct FieldRequirement {
     required_field: Ident,
-    required_value: Expr,
+    required_values: Vec<Expr>,
 }

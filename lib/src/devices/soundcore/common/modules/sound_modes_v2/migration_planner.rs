@@ -23,7 +23,7 @@ pub struct MigrationPlanner<T, const SIZE: usize> {
 #[derive(Debug, Clone)]
 pub struct Requirement<T> {
     pub index: usize,
-    pub value: T,
+    pub values: Vec<T>,
 }
 
 #[derive(Debug, Clone)]
@@ -34,7 +34,7 @@ pub struct MigrationTree<T> {
 #[derive(Debug, Clone)]
 struct MigrationNode<T> {
     pub index: usize,
-    pub required_parent_value: Option<T>,
+    pub required_parent_value: Vec<T>,
     pub children_indices: Vec<usize>,
 }
 
@@ -51,7 +51,7 @@ where
         let mut reachable = Vec::new();
         for node in &self.nodes {
             // root nodes
-            if node.required_parent_value.is_none() {
+            if node.required_parent_value.is_empty() {
                 if current[node.index] != target[node.index] {
                     reachable.push((node.index, target[node.index].clone()));
                 }
@@ -71,10 +71,12 @@ where
         let children = &self.nodes[parent.index];
         for child_index in &children.children_indices {
             let child = &self.nodes[*child_index];
-            let required_value = child.required_parent_value.as_ref().expect(
-                "this function is only called on non-root nodes, so there must be a parent",
+            debug_assert!(
+                !child.required_parent_value.is_empty(),
+                "child node should have parent requirements"
             );
-            if required_value == &current[parent.index] {
+
+            if child.required_parent_value.contains(&current[parent.index]) {
                 // requirement met to change this field's value, so add the target value plus any values that enable
                 // changing another field that depends on this one
                 if current[child.index] != target[child.index] {
@@ -82,14 +84,17 @@ where
                 }
                 self.interesting_reachable_nodes_inner(child, current, target, reachable);
             } else {
-                // the requirement isn't met, so add moving into the required state as a reachable node so that we can
-                // get there in the future. This may be a duplicate, and it's much better time complexity to check here
-                // than to explore the same path multiple times.
-                if !reachable
-                    .iter()
-                    .any(|(index, value)| *index == parent.index && value == required_value)
-                {
-                    reachable.push((parent.index, required_value.clone()))
+                // The requirement isn't met, so add moving into any required state as a reachable node so that we can
+                // get there in the future.
+                for required_value in &child.required_parent_value {
+                    // This may be a duplicate, and it's much better time complexity to check here
+                    // than to explore the same path multiple times.
+                    if !reachable
+                        .iter()
+                        .any(|(index, value)| *index == parent.index && value == required_value)
+                    {
+                        reachable.push((parent.index, required_value.clone()))
+                    }
                 }
             }
         }
@@ -122,14 +127,14 @@ where
                 parent_node.children_indices.push(index);
                 nodes.push(MigrationNode {
                     index,
-                    required_parent_value: Some(requirement.value),
+                    required_parent_value: requirement.values,
                     children_indices: Vec::new(),
                 });
             } else {
                 // root node
                 nodes.push(MigrationNode {
                     index: index,
-                    required_parent_value: None,
+                    required_parent_value: Vec::new(),
                     children_indices: Vec::new(),
                 });
             }
@@ -199,7 +204,11 @@ mod tests {
         transparency_mode: TransparencyMode,
         #[migration_requirement(field = transparency_mode, value = TransparencyMode::Manual)]
         manual_transparency: ManualTransparency,
-        #[migration_requirement(field = ambient_sound_mode, value = AmbientSoundMode::NoiseCanceling)]
+        #[migration_requirement(
+            field = ambient_sound_mode,
+            value = AmbientSoundMode::NoiseCanceling,
+            value2 = AmbientSoundMode::Transparency,
+        )]
         wind_noise_reduction: bool,
     }
 
@@ -448,6 +457,40 @@ mod tests {
         };
         let to = SoundModes {
             ambient_sound_mode: AmbientSoundMode::Normal,
+            ..from
+        };
+        let path = SoundModes::migrate(&migration_planner, &from, &to);
+        assert_eq!(path, vec![to]);
+    }
+
+    #[test]
+    fn test_change_wind_noise_suppression_from_noise_canceling() {
+        let migration_planner = SoundModes::migration_planner();
+        let from = SoundModes {
+            ambient_sound_mode: AmbientSoundMode::NoiseCanceling,
+            wind_noise_reduction: false,
+            ..Default::default()
+        };
+        let to = SoundModes {
+            ambient_sound_mode: AmbientSoundMode::NoiseCanceling,
+            wind_noise_reduction: true,
+            ..from
+        };
+        let path = SoundModes::migrate(&migration_planner, &from, &to);
+        assert_eq!(path, vec![to]);
+    }
+
+    #[test]
+    fn test_change_wind_noise_suppression_from_transparency() {
+        let migration_planner = SoundModes::migration_planner();
+        let from = SoundModes {
+            ambient_sound_mode: AmbientSoundMode::Transparency,
+            wind_noise_reduction: false,
+            ..Default::default()
+        };
+        let to = SoundModes {
+            ambient_sound_mode: AmbientSoundMode::Transparency,
+            wind_noise_reduction: true,
             ..from
         };
         let path = SoundModes::migrate(&migration_planner, &from, &to);
