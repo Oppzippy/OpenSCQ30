@@ -1,5 +1,3 @@
-use std::{collections::HashMap, mem};
-
 pub trait Migrate<const SIZE: usize>
 where
     Self: Sized,
@@ -19,21 +17,83 @@ pub trait ToPacketBody {
 }
 
 pub struct MigrationPlanner<T, const SIZE: usize> {
-    // invariant: parents are ordered before children
-    field_transitive_requirements: [Vec<Requirement<T>>; SIZE],
+    tree: MigrationTree<T>,
 }
 
-#[derive(Clone, Copy, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct Requirement<T> {
     pub index: usize,
     pub value: T,
 }
 
 #[derive(Debug, Clone)]
+pub struct MigrationTree<T> {
+    nodes: Vec<MigrationNode<T>>,
+}
+
+#[derive(Debug, Clone)]
 struct MigrationNode<T> {
-    index: usize,
-    value: T,
-    children: Vec<Self>,
+    pub index: usize,
+    pub required_parent_value: Option<T>,
+    pub children_indices: Vec<usize>,
+}
+
+impl<T> MigrationTree<T>
+where
+    T: PartialEq + Clone,
+{
+    /// Returns reachable nodes that are either the target state or a dependency of another field
+    fn interesting_reachable_nodes<const SIZE: usize>(
+        &self,
+        current: &[T; SIZE],
+        target: &[T; SIZE],
+    ) -> Vec<(usize, T)> {
+        let mut reachable = Vec::new();
+        for node in &self.nodes {
+            // root nodes
+            if node.required_parent_value.is_none() {
+                if current[node.index] != target[node.index] {
+                    reachable.push((node.index, target[node.index].clone()));
+                }
+                self.interesting_reachable_nodes_inner(node, current, target, &mut reachable);
+            }
+        }
+        reachable
+    }
+
+    fn interesting_reachable_nodes_inner<const SIZE: usize>(
+        &self,
+        parent: &MigrationNode<T>,
+        current: &[T; SIZE],
+        target: &[T; SIZE],
+        reachable: &mut Vec<(usize, T)>,
+    ) {
+        let children = &self.nodes[parent.index];
+        for child_index in &children.children_indices {
+            let child = &self.nodes[*child_index];
+            let required_value = child.required_parent_value.as_ref().expect(
+                "this function is only called on non-root nodes, so there must be a parent",
+            );
+            if required_value == &current[parent.index] {
+                // requirement met to change this field's value, so add the target value plus any values that enable
+                // changing another field that depends on this one
+                if current[child.index] != target[child.index] {
+                    reachable.push((child.index, target[child.index].clone()));
+                }
+                self.interesting_reachable_nodes_inner(child, current, target, reachable);
+            } else {
+                // the requirement isn't met, so add moving into the required state as a reachable node so that we can
+                // get there in the future. This may be a duplicate, and it's much better time complexity to check here
+                // than to explore the same path multiple times.
+                if !reachable
+                    .iter()
+                    .any(|(index, value)| *index == parent.index && value == required_value)
+                {
+                    reachable.push((parent.index, required_value.clone()))
+                }
+            }
+        }
+    }
 }
 
 impl<T, const SIZE: usize> MigrationPlanner<T, SIZE>
@@ -52,200 +112,63 @@ where
             }
         }
 
-        let field_transitive_requirements = requirements.map(|maybe_requirement| {
-            maybe_requirement
-                .map(|requirement| {
-                    let mut transitive_requirements = Vec::new();
-                    Self::collect_requirements(
-                        &mut transitive_requirements,
-                        &requirements,
-                        &requirement,
-                    );
-                    transitive_requirements
-                })
-                .unwrap_or_default()
-        });
+        let mut nodes = Vec::with_capacity(SIZE);
+        for (index, requirement) in requirements.into_iter().enumerate() {
+            if let Some(requirement) = requirement {
+                // child node
+                let parent_node: &mut MigrationNode<T> = nodes
+                    .get_mut(requirement.index)
+                    .expect("requirements should be defined in order");
+                parent_node.children_indices.push(index);
+                nodes.push(MigrationNode {
+                    index,
+                    required_parent_value: Some(requirement.value),
+                    children_indices: Vec::new(),
+                });
+            } else {
+                // root node
+                nodes.push(MigrationNode {
+                    index: index,
+                    required_parent_value: None,
+                    children_indices: Vec::new(),
+                });
+            }
+        }
 
         Self {
-            field_transitive_requirements,
+            tree: MigrationTree { nodes: nodes },
         }
-    }
-
-    fn collect_requirements(
-        collection: &mut Vec<Requirement<T>>,
-        requirements: &[Option<Requirement<T>>; SIZE],
-        requirement: &Requirement<T>,
-    ) {
-        if let Some(requirement) = &requirements[requirement.index] {
-            Self::collect_requirements(collection, requirements, requirement);
-        }
-        collection.push(*requirement);
     }
 
     pub fn migrate(&self, from: [T; SIZE], to: &[T; SIZE]) -> Vec<[T; SIZE]> {
-        let mut current = from;
-        if current == *to {
+        if from == *to {
             return Vec::new();
         }
-        // Start by building a dependency tree
-        let mut tree = Vec::new();
-        for (index, transitive_requirements) in
-            self.field_transitive_requirements.iter().enumerate().rev()
-        {
-            let node = MigrationNode {
-                index,
-                value: to[index],
-                children: Vec::new(),
-            };
-            if let Some(first_requirement) = transitive_requirements.first() {
-                tree.push(MigrationNode {
-                    index: first_requirement.index,
-                    value: first_requirement.value,
-                    children: Vec::new(),
-                });
-                let mut current = tree.last_mut().unwrap();
-                for requirement in transitive_requirements.iter().skip(1) {
-                    current.children.push(MigrationNode {
-                        index: requirement.index,
-                        value: requirement.value,
-                        children: Vec::new(),
-                    });
-                    current = current.children.first_mut().unwrap();
-                }
-                current.children.push(node);
-            } else {
-                tree.push(node);
-            }
-        }
 
-        Self::squish_tree(&mut tree, &from, to);
+        let mut path = pathfinding::directed::bfs::bfs(
+            &from,
+            |current| {
+                let reachable_nodes = self.tree.interesting_reachable_nodes(current, to);
+                let current = *current;
 
-        Self::recursively_optimize(&mut tree, &from, to);
+                reachable_nodes.into_iter().map(move |(index, value)| {
+                    // TODO use debug_assert_eq once T implements debug
+                    debug_assert!(
+                        current[index] != value,
+                        "duplicates should be filtered out before being added to the vec"
+                    );
+                    let mut new_state = current.clone();
+                    new_state[index] = value;
+                    new_state
+                })
+            },
+            |node| node == to,
+        )
+        .expect("a path should always be available");
 
-        // Convert tree to list of states
-        let mut path = Vec::new();
-        Self::serialize_tree(&tree, &mut current, &mut path);
-
+        // remove the initial state from the path
+        path.remove(0);
         path
-    }
-
-    /// squish identical earlier nodes into the last identical node
-    fn squish_tree(tree: &mut Vec<MigrationNode<T>>, _from: &[T; SIZE], _to: &[T; SIZE]) {
-        let mut identical_node_indices = HashMap::<(usize, T), Vec<usize>>::new();
-        for (i, node) in tree.iter().enumerate() {
-            if let Some(indices) = identical_node_indices.get_mut(&(node.index, node.value)) {
-                indices.push(i);
-            } else {
-                identical_node_indices.insert((node.index, node.value), vec![i]);
-            }
-        }
-
-        let mut new_tree = Vec::new();
-        // We need to not hold a reference to tree inside of the loop so that we can mem::take from arbitrary indices
-        for i in 0..tree.len() {
-            let node = &tree[i];
-            let indices = identical_node_indices
-                .get(&(node.index, node.value))
-                .unwrap();
-
-            if i == *indices.last().unwrap() {
-                new_tree.push(MigrationNode {
-                    index: node.index,
-                    value: node.value,
-                    children: indices
-                        .iter()
-                        .flat_map(|index| mem::take(&mut tree[*index].children))
-                        .collect(),
-                });
-            }
-        }
-        *tree = new_tree;
-
-        for node in tree {
-            Self::squish_tree(&mut node.children, _from, _to);
-        }
-    }
-
-    fn recursively_optimize(tree: &mut Vec<MigrationNode<T>>, from: &[T; SIZE], to: &[T; SIZE]) {
-        // recursion happens here, so the optimization functions called should not recurse
-        for node in tree.iter_mut() {
-            Self::recursively_optimize(&mut node.children, from, to);
-        }
-
-        Self::reorder_tree(tree, from);
-        Self::remove_noops(tree, from, to);
-        Self::remove_assignments_with_no_effect(tree);
-    }
-
-    /// prefer assigning values with their dependencies already in the desired state first
-    fn reorder_tree(tree: &mut [MigrationNode<T>], from: &[T; SIZE]) {
-        let tree_len = tree.len();
-        if tree_len > 2 {
-            let nodes_except_last = &mut tree[0..tree_len - 1];
-            nodes_except_last.sort_by_key(|n| from[n.index] != n.value);
-        }
-    }
-
-    /// When a value is assigned to once, and then without first assigning any dependencies, the value is changed,
-    /// the first assignment was useless and can be removed.
-    fn remove_assignments_with_no_effect(tree: &mut Vec<MigrationNode<T>>) {
-        // First find the last time each index is assigned, then remove anything before that with no children
-        // We may need to deduplicate after, since removing intermediate values can then lead to something getting
-        // assigned twice in a row to the same value. Or not, since deduplication happens at deserialization time (I think).
-        let last_assignment_index =
-            tree.iter()
-                .enumerate()
-                .fold([None; SIZE], |mut acc, (i, curr)| {
-                    acc[curr.index] = Some(i);
-                    acc
-                });
-
-        *tree = mem::take(tree)
-            .into_iter()
-            .enumerate()
-            .filter_map(|(i, node)| {
-                let is_last_assignment = last_assignment_index[node.index]
-                    .is_none_or(|last_assignment| i == last_assignment);
-
-                if node.children.is_empty() && !is_last_assignment {
-                    None
-                } else {
-                    Some(node)
-                }
-            })
-            .collect::<Vec<_>>();
-    }
-
-    /// remove nodes that assign to the current value
-    fn remove_noops(tree: &mut Vec<MigrationNode<T>>, from: &[T; SIZE], _to: &[T; SIZE]) {
-        // Recurse first so that if a child node has all children removed, the parent can be removed too
-        for node in tree.iter_mut() {
-            Self::remove_noops(&mut node.children, from, _to);
-        }
-
-        let mut values = *from;
-        *tree = mem::take(tree)
-            .into_iter()
-            .filter(|node| {
-                let is_changed = values[node.index] != node.value;
-                values[node.index] = node.value;
-                is_changed || !node.children.is_empty()
-            })
-            .collect::<Vec<_>>();
-    }
-
-    fn serialize_tree(
-        tree: &[MigrationNode<T>],
-        current: &mut [T; SIZE],
-        dest: &mut Vec<[T; SIZE]>,
-    ) {
-        for node in tree {
-            if current[node.index] != node.value {
-                current[node.index] = node.value;
-                dest.push(*current);
-            }
-            Self::serialize_tree(&node.children, current, dest);
-        }
     }
 }
 

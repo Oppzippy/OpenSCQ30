@@ -97,6 +97,7 @@ open = "5"
 proptest = { version = "1.0.0", default-features = false }
 proptest-derive = "0.8"
 embed-resource = "3"
+pathfinding = "4"
 
 [patch.'https://github.com/wash2/accesskit']
 accesskit = { git = "https://github.com/Oppzippy/accesskit.git", branch = "iced-0.14" }

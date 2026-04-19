@@ -41,6 +41,7 @@ rust-embed = { workspace = true, features = ["deterministic-timestamps"] }
 itertools = { workspace = true }
 indexmap = { workspace = true }
 paste = { workspace = true }
+pathfinding = { workspace = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 bluer = { workspace = true, features = ["bluetoothd", "rfcomm"] }
