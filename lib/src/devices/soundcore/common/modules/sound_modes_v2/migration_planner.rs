@@ -145,8 +145,8 @@ where
         }
     }
 
-    pub fn migrate(&self, from: [T; SIZE], to: &[T; SIZE]) -> Vec<[T; SIZE]> {
-        if from == *to {
+    pub fn migrate(&self, from: &[T; SIZE], to: &[T; SIZE]) -> Vec<[T; SIZE]> {
+        if from == to {
             return Vec::new();
         }
 
@@ -172,7 +172,7 @@ where
         }
 
         let mut path = pathfinding::directed::bfs::bfs_bidirectional(
-            &from,
+            from,
             to,
             |current| {
                 let reachable_nodes = self.tree.interesting_reachable_nodes(current, to);

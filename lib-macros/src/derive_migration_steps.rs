@@ -133,7 +133,7 @@ pub fn from_derive_input(input: DeriveInput) -> TokenStream {
                     }
                 }
 
-                migration_planner.migrate(as_byte_array(from), &as_byte_array(to))
+                migration_planner.migrate(&as_byte_array(from), &as_byte_array(to))
                     .into_iter()
                     .map(from_byte_array)
                     .collect::<Vec<Self>>()
