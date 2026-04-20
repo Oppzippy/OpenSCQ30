@@ -103,7 +103,7 @@ where
 
 impl<T, const SIZE: usize> MigrationPlanner<T, SIZE>
 where
-    T: PartialEq + Copy + Clone + PartialEq + Eq + std::hash::Hash,
+    T: Clone + PartialEq + Eq + std::hash::Hash,
 {
     pub fn new(requirements: [Option<Requirement<T>>; SIZE]) -> Self {
         for (index, maybe_requirement) in requirements.iter().enumerate() {
