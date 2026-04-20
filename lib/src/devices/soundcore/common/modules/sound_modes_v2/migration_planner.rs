@@ -150,24 +150,44 @@ where
             return Vec::new();
         }
 
-        let mut path = pathfinding::directed::bfs::bfs(
+        // needs to be its own function since bfs_bidirectional's successors_fn and predecessors_fn use the same
+        // generic paramter, and different closuers would have different types. For a similar reason, this can't take
+        // a reference to current.
+        fn map_node_to_new_state<T, const SIZE: usize>(
+            current: [T; SIZE],
+        ) -> impl Fn((usize, T)) -> [T; SIZE]
+        where
+            T: PartialEq + Clone,
+        {
+            move |(index, value)| {
+                // TODO use debug_assert_eq once T implements debug
+                debug_assert!(
+                    current[index] != value,
+                    "duplicates should be filtered out before being added to the vec"
+                );
+                let mut new_state = current.clone();
+                new_state[index] = value;
+                new_state
+            }
+        }
+
+        let mut path = pathfinding::directed::bfs::bfs_bidirectional(
             &from,
+            to,
             |current| {
                 let reachable_nodes = self.tree.interesting_reachable_nodes(current, to);
-                let current = *current;
 
-                reachable_nodes.into_iter().map(move |(index, value)| {
-                    // TODO use debug_assert_eq once T implements debug
-                    debug_assert!(
-                        current[index] != value,
-                        "duplicates should be filtered out before being added to the vec"
-                    );
-                    let mut new_state = current.clone();
-                    new_state[index] = value;
-                    new_state
-                })
+                reachable_nodes
+                    .into_iter()
+                    .map(map_node_to_new_state(current.clone()))
             },
-            |node| node == to,
+            |current| {
+                let reachable_nodes = self.tree.interesting_reachable_nodes(current, &from);
+
+                reachable_nodes
+                    .into_iter()
+                    .map(map_node_to_new_state(current.clone()))
+            },
         )
         .expect("a path should always be available");
 
