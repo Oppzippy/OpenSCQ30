@@ -1,6 +1,3 @@
-#[cfg(test)]
-use std::ops::RangeInclusive;
-
 use nom::{
     IResult, Parser,
     combinator::map,
@@ -8,20 +5,29 @@ use nom::{
     number::complete::le_u8,
 };
 use openscq30_i18n_macros::Translate;
+use openscq30_lib_macros::MigrationSteps;
 use strum::{Display, EnumIter, EnumString, FromRepr, IntoStaticStr, VariantArray};
 
-use crate::devices::soundcore::common;
+use crate::devices::soundcore::common::{self, modules::sound_modes_v2};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-#[cfg_attr(test, derive(proptest_derive::Arbitrary))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, MigrationSteps)]
 pub struct SoundModes {
     pub ambient_sound_mode: common::structures::AmbientSoundMode,
-    pub adaptive_noise_canceling: AdaptiveNoiseCanceling,
-    pub manual_noise_canceling: ManualNoiseCanceling,
+    #[migration_requirement(field = ambient_sound_mode, value = common::structures::AmbientSoundMode::NoiseCanceling)]
     pub noise_canceling_mode: NoiseCancelingMode,
+    #[migration_requirement(field = noise_canceling_mode, value = NoiseCancelingMode::Adaptive)]
+    pub adaptive_noise_canceling: AdaptiveNoiseCanceling,
+    #[migration_requirement(field = noise_canceling_mode, value = NoiseCancelingMode::Manual)]
+    pub manual_noise_canceling: ManualNoiseCanceling,
+    #[migration_requirement(field = noise_canceling_mode, value = NoiseCancelingMode::MultiScene)]
+    pub multi_scene_anc: common::structures::NoiseCancelingMode,
+    #[migration_requirement(
+        field = ambient_sound_mode,
+        value = common::structures::AmbientSoundMode::NoiseCanceling,
+        value2 = common::structures::AmbientSoundMode::Transparency,
+    )]
     pub wind_noise: WindNoise,
     pub noise_canceling_adaptive_sensitivity_level: u8,
-    pub multi_scene_anc: common::structures::NoiseCancelingMode,
 }
 
 impl SoundModes {
@@ -77,6 +83,12 @@ impl SoundModes {
     }
 }
 
+impl sound_modes_v2::ToPacketBody for SoundModes {
+    fn bytes(&self) -> Vec<u8> {
+        self.bytes().to_vec()
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
 pub struct AdaptiveNoiseCanceling(u8);
 
@@ -90,19 +102,6 @@ impl AdaptiveNoiseCanceling {
     }
 }
 
-#[cfg(test)]
-impl proptest::arbitrary::Arbitrary for AdaptiveNoiseCanceling {
-    type Parameters = ();
-
-    fn arbitrary_with(_args: Self::Parameters) -> Self::Strategy {
-        use proptest::prelude::Strategy;
-
-        (1u8..=5u8).prop_map(Self::new)
-    }
-
-    type Strategy = proptest::strategy::Map<RangeInclusive<u8>, fn(u8) -> Self>;
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
 pub struct ManualNoiseCanceling(u8);
 
@@ -114,19 +113,6 @@ impl ManualNoiseCanceling {
     pub fn inner(&self) -> u8 {
         self.0
     }
-}
-
-#[cfg(test)]
-impl proptest::arbitrary::Arbitrary for ManualNoiseCanceling {
-    type Parameters = ();
-
-    fn arbitrary_with(_args: Self::Parameters) -> Self::Strategy {
-        use proptest::prelude::Strategy;
-
-        (1u8..=5u8).prop_map(Self::new)
-    }
-
-    type Strategy = proptest::strategy::Map<RangeInclusive<u8>, fn(u8) -> Self>;
 }
 
 struct NoiseCancelingSettings {
@@ -163,7 +149,6 @@ impl NoiseCancelingSettings {
     VariantArray,
     Translate,
 )]
-#[cfg_attr(test, derive(proptest_derive::Arbitrary))]
 pub enum NoiseCancelingMode {
     #[default]
     Manual = 0,
@@ -192,7 +177,6 @@ impl NoiseCancelingMode {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-#[cfg_attr(test, derive(proptest_derive::Arbitrary))]
 pub struct WindNoise {
     pub is_suppression_enabled: bool,
     pub is_detected: bool,

@@ -144,19 +144,6 @@ impl AdaptiveNoiseCanceling {
     }
 }
 
-#[cfg(test)]
-impl proptest::arbitrary::Arbitrary for AdaptiveNoiseCanceling {
-    type Parameters = ();
-
-    fn arbitrary_with(_args: Self::Parameters) -> Self::Strategy {
-        use proptest::prelude::Strategy;
-
-        (1u8..=5u8).prop_map(Self::new)
-    }
-
-    type Strategy = proptest::strategy::Map<std::ops::RangeInclusive<u8>, fn(u8) -> Self>;
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Hash)]
 pub struct CustomNoiseCanceling(u8);
 
@@ -168,19 +155,6 @@ impl CustomNoiseCanceling {
     pub fn inner(&self) -> u8 {
         self.0
     }
-}
-
-#[cfg(test)]
-impl proptest::arbitrary::Arbitrary for CustomNoiseCanceling {
-    type Parameters = ();
-
-    fn arbitrary_with(_args: Self::Parameters) -> Self::Strategy {
-        use proptest::prelude::Strategy;
-
-        (1u8..=5u8).prop_map(Self::new)
-    }
-
-    type Strategy = proptest::strategy::Map<std::ops::RangeInclusive<u8>, fn(u8) -> Self>;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Hash)]
@@ -202,21 +176,7 @@ impl CustomTransparency {
     }
 }
 
-#[cfg(test)]
-impl proptest::arbitrary::Arbitrary for CustomTransparency {
-    type Parameters = ();
-
-    fn arbitrary_with(_args: Self::Parameters) -> Self::Strategy {
-        use proptest::prelude::Strategy;
-
-        (1u8..=5u8).prop_map(Self::new)
-    }
-
-    type Strategy = proptest::strategy::Map<std::ops::RangeInclusive<u8>, fn(u8) -> Self>;
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Hash)]
-#[cfg_attr(test, derive(proptest_derive::Arbitrary))]
 pub struct WindNoiseReduction(pub bool);
 
 impl WindNoiseReduction {

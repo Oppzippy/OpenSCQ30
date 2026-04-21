@@ -24,7 +24,6 @@ use strum::{AsRefStr, Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
     EnumString,
     Translate,
 )]
-#[cfg_attr(test, derive(proptest_derive::Arbitrary))]
 pub enum AmbientSoundMode {
     #[default]
     NoiseCanceling = 0,
