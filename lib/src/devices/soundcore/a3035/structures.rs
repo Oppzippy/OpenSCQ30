@@ -26,7 +26,11 @@ pub struct SoundModes {
     pub custom_noise_canceling: CustomNoiseCanceling,
     #[migration_requirement(field = ambient_sound_mode, value = AmbientSoundMode::Transparency)]
     pub custom_transparency: CustomTransparency,
-    #[migration_requirement(field = ambient_sound_mode, value = AmbientSoundMode::NoiseCanceling)]
+    #[migration_requirement(
+        field = ambient_sound_mode,
+        value = AmbientSoundMode::NoiseCanceling,
+        value2 = AmbientSoundMode::Transparency,
+    )]
     pub wind_noise_reduction: WindNoiseReduction,
 }
 

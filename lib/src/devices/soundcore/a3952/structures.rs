@@ -21,7 +21,11 @@ pub struct SoundModes {
     pub manual_noise_canceling: ManualNoiseCanceling,
     #[migration_requirement(field = noise_canceling_mode, value = NoiseCancelingMode::Adaptive)]
     pub adaptive_noise_canceling: AdaptiveNoiseCanceling,
-    #[migration_requirement(field = ambient_sound_mode, value = common::structures::AmbientSoundMode::NoiseCanceling)]
+    #[migration_requirement(
+        field = ambient_sound_mode,
+        value = common::structures::AmbientSoundMode::NoiseCanceling,
+        value2 = common::structures::AmbientSoundMode::Transparency,
+    )]
     pub wind_noise: WindNoise,
     pub unknown: u8,
 }

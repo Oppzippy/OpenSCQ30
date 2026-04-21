@@ -24,7 +24,11 @@ pub struct A3936SoundModes {
     pub adaptive_noise_canceling: AdaptiveNoiseCanceling,
     #[migration_requirement(field = noise_canceling_mode, value = A3936NoiseCancelingMode::Manual)]
     pub manual_noise_canceling: ManualNoiseCanceling,
-    #[migration_requirement(field = ambient_sound_mode, value = AmbientSoundMode::NoiseCanceling)]
+    #[migration_requirement(
+        field = ambient_sound_mode,
+        value = AmbientSoundMode::NoiseCanceling,
+        value2 = AmbientSoundMode::Transparency,
+    )]
     pub wind_noise: WindNoise,
     #[migration_requirement(field = noise_canceling_mode, value = A3936NoiseCancelingMode::Manual)]
     pub noise_canceling_adaptive_sensitivity_level: u8,
