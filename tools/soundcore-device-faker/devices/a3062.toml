@@ -5,14 +5,14 @@ rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B3062"
 [[responses]]
 command = [1, 1]
 response = [
-    4,
-    255,
-    48,
+    9,    # battery level (0=10%, 9=100%)
+    255,  # battery charging
+    48,   # firmware version start
     51,
     46,
     51,
-    55,
-    51,
+    55,   # firmware version end
+    51,   # serial number start
     48,
     54,
     50,
@@ -27,10 +27,10 @@ response = [
     69,
     57,
     55,
-    67,
-    5,
-    0,
-    90,
+    67,   # serial number end
+    5,    # EQ preset
+    0,    # EQ preset
+    90,   # volume adjustments start
     140,
     160,
     160,
@@ -39,59 +39,59 @@ response = [
     120,
     100,
     120,
-    0,
-    30,
-    255,
-    0,
-    255,
-    255,
-    255,
-    255,
-    255,
-    255,
-    255,
-    255,
-    255,
-    0,
-    0,
-    0,
-    0,
+    0,    # volume adjustments end
+    30,   # unknown
+    0,    # hear id initialized
+    1,    # hear id enabled
+    120,  # hear id start
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    0,    # hear id end
+    0,    # hear id time start?
     0,
     0,
-    255,
-    255,
-    255,
-    255,
-    255,
-    255,
-    255,
-    255,
-    255,
-    0,
-    0,
-    0,
-    4,
-    4,
-    7,
-    3,
-    1,
-    80,
-    1,
-    1,
-    0,
-    5,
-    49,
-    1,
-    1,
-    0,
-    1,
-    1,
-    1,
-    0,
-    90,
-    0,
-    0,
-    1,
+    0,    # hear id time end?
+    2,    # hear id type (0=initial, 1=custom, 2=favorite music genre)
+    130,  # hear id start
+    130,
+    130,
+    130,
+    130,
+    130,
+    130,
+    130,
+    130,
+    0,    # hear id end
+    0,    # hear id favorite music genre
+    0,    # hear id favorite music genre
+    4,    # unknown
+    4,    # unknown
+    7,    # press twice (7=bassup on/off, 15=none)
+    3,    # ambient sound mode cycle
+    1,    # 0=noise canceling, 1=transparency, 2=normal
+    0x50, # custom noise canceling
+    1,    # transparency mode (always 1)
+    1,    # 0=custom noise canceling, 1=adaptive noise canceling
+    0,    # wind noise reduction
+    5,    # custom transparency
+    0x31, # unknown
+    1,    # low battery prompt
+    0,    # dolby audio
+    0,    # LDAC
+    1,    # dual connections
+    1,    # auto power off
+    1,    # auto power off duration
+    0,    # safe volume enabled
+    90,   # safe volume limit
+    0,    # safe volume refresh rate
+    0,    # side tone
+    1,    # ambient sound mode voice prompt
     0,
     0,
     0,

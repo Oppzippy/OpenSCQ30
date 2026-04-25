@@ -1,4 +1,4 @@
-mod packet_handler;
+pub mod packet_handler;
 mod setting_handler;
 
 use openscq30_lib_has::Has;

@@ -136,6 +136,8 @@ pub enum SettingId {
     AncPersonalizedToEarCanal,
     ImmersiveExperience,
     PowerOff,
+    SideTone,
+    DolbyAudio,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

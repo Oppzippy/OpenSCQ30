@@ -7,6 +7,7 @@ soundcore-a3031 = Soundcore Vortex
 soundcore-a3033 = Soundcore Life 2 Neo
 soundcore-a3035 = Soundcore Space One
 soundcore-a3040 = Soundcore Space Q45
+soundcore-a3062 = Soundcore Space One Pro
 soundcore-a3116 = Soundcore Motion+
 soundcore-a3926 = Soundcore Life Dot 2S
 soundcore-a3930 = Soundcore Liberty 2 Pro
@@ -185,6 +186,8 @@ touch-lock = Touch Lock
 low-battery-prompt = Low Battery Prompt
 wearing-detection = Wearing Detection
 voice-prompt = Voice Prompt
+side-tone = Side Tone
+dolby-audio = Dolby Audio
 
 limit-high-volume = Limit High Volume
 db-limit = DB Limit

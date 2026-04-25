@@ -86,6 +86,10 @@ impl SingleBattery {
         )
         .parse_complete(input)
     }
+
+    pub fn bytes(&self) -> [u8; 2] {
+        [self.level.0, self.is_charging as u8]
+    }
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default, Display)]
