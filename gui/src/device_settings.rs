@@ -98,6 +98,39 @@ enum CustomCategory {
     LegacyEqualizerMigration,
 }
 
+enum SettingDisplayKind<'a, Message> {
+    Single(Element<'a, Message>),
+    Vec(Vec<Element<'a, Message>>),
+    ListButton(widget::list::ListButton<'a, Message>),
+    ListButtonVec(Vec<widget::list::ListButton<'a, Message>>),
+}
+
+impl<'a, Message> From<Element<'a, Message>> for SettingDisplayKind<'a, Message> {
+    fn from(value: Element<'a, Message>) -> Self {
+        Self::Single(value)
+    }
+}
+
+impl<'a, Message> From<Vec<Element<'a, Message>>> for SettingDisplayKind<'a, Message> {
+    fn from(value: Vec<Element<'a, Message>>) -> Self {
+        Self::Vec(value)
+    }
+}
+
+impl<'a, Message> From<widget::list::ListButton<'a, Message>> for SettingDisplayKind<'a, Message> {
+    fn from(value: widget::list::ListButton<'a, Message>) -> Self {
+        Self::ListButton(value)
+    }
+}
+
+impl<'a, Message> From<Vec<widget::list::ListButton<'a, Message>>>
+    for SettingDisplayKind<'a, Message>
+{
+    fn from(value: Vec<widget::list::ListButton<'a, Message>>) -> Self {
+        Self::ListButtonVec(value)
+    }
+}
+
 impl DeviceSettingsModel {
     pub fn new(
         device: DebugOpenSCQ30Device,
@@ -303,82 +336,91 @@ impl DeviceSettingsModel {
     }
 
     fn view_settings<'a>(&'a self, category_id: &'a CategoryId) -> Element<'a, Message> {
-        widget::scrollable(
-            widget::settings::section()
-                .title(category_id.translate())
-                .extend(
-                    self.settings
-                        .iter()
-                        .flat_map(|(setting_id, setting)| self.view_setting(*setting_id, setting)),
-                ),
-        )
-        .into()
+        let mut section = widget::settings::section().title(category_id.translate());
+        for (setting_id, setting) in &self.settings {
+            match self.view_setting(*setting_id, setting) {
+                SettingDisplayKind::Single(element) => {
+                    section = section.add(element);
+                }
+                SettingDisplayKind::Vec(elements) => {
+                    section = section.extend(elements);
+                }
+                SettingDisplayKind::ListButton(list_button) => {
+                    section = section.add(list_button);
+                }
+                SettingDisplayKind::ListButtonVec(list_buttons) => {
+                    section = section.extend(list_buttons);
+                }
+            }
+        }
+
+        widget::scrollable(section).into()
     }
 
     fn view_setting<'a>(
         &'a self,
         setting_id: SettingId,
         setting: &'a Setting,
-    ) -> Vec<Element<'a, Message>> {
+    ) -> SettingDisplayKind<'a, Message> {
         match setting {
-            Setting::Toggle { value } => {
-                vec![toggle::toggle(setting_id, *value, move |new_value| {
+            Setting::Toggle { value } => toggle::toggle(setting_id, *value, move |new_value| {
+                Message::SetSetting(setting_id, new_value.into())
+            })
+            .into(),
+            Setting::I32Range { setting, value } => {
+                range::i32_range(setting_id, setting.clone(), *value, move |new_value| {
                     Message::SetSetting(setting_id, new_value.into())
-                })]
+                })
+                .into()
             }
-            Setting::I32Range { setting, value } => vec![range::i32_range(
-                setting_id,
-                setting.clone(),
-                *value,
-                move |new_value| Message::SetSetting(setting_id, new_value.into()),
-            )],
             Setting::Select { setting, value } => {
-                vec![select::select(setting_id, setting, value, move |value| {
+                select::select(setting_id, setting, value, move |value| {
                     Message::SetSetting(setting_id, Cow::from(value.to_owned()).into())
-                })]
+                })
+                .into()
             }
             Setting::OptionalSelect { setting, value } => {
-                vec![select::optional_select(
-                    setting_id,
-                    setting,
-                    value.as_deref(),
-                    move |value| {
-                        Message::SetSetting(
-                            setting_id,
-                            value.map(ToOwned::to_owned).map(Cow::from).into(),
-                        )
-                    },
-                )]
+                select::optional_select(setting_id, setting, value.as_deref(), move |value| {
+                    Message::SetSetting(
+                        setting_id,
+                        value.map(ToOwned::to_owned).map(Cow::from).into(),
+                    )
+                })
+                .into()
             }
-            Setting::ModifiableSelect { setting, value } => vec![select::modifiable_select(
+            Setting::ModifiableSelect { setting, value } => select::modifiable_select(
                 setting_id,
                 setting,
                 value.as_deref(),
                 move |value| Message::SetSetting(setting_id, Cow::from(value.to_owned()).into()),
                 Message::ShowModifiableSelectAddDialog(setting_id),
                 Message::ShowModifiableSelectRemoveDialog(setting_id),
-            )],
+            )
+            .into(),
             Setting::MultiSelect { setting, values } => {
                 select::multi_select(setting_id, setting, values, move |values| {
                     Message::SetSetting(setting_id, values.into())
                 })
+                .into()
             }
             Setting::Equalizer { setting, value } => {
                 equalizer::horizontal_equalizer(setting, value, move |index, value| {
                     Message::SetEqualizerBand(setting_id, index, value)
                 })
+                .into()
             }
             Setting::Information {
                 value: _,
                 translated_value: translated_text,
-            } => vec![information::information(
+            } => information::information(
                 setting_id,
                 Cow::Borrowed(translated_text),
                 Message::CopyToClipboard(translated_text.to_owned()),
-            )],
+            )
+            .into(),
             Setting::ImportString {
                 confirmation_message: _,
-            } => vec![import_string::input(
+            } => import_string::input(
                 setting_id,
                 self.import_strings
                     .get(&setting_id)
@@ -386,11 +428,11 @@ impl DeviceSettingsModel {
                     .map_or_else(|| Cow::Borrowed(""), Cow::Borrowed),
                 move |text| Message::SetImportString(setting_id, text),
                 move |text| Message::AskConfirmImportString(setting_id, Cow::from(text).into()),
-            )],
-            Setting::Action => vec![action::action(
-                setting_id,
-                Message::SetSetting(setting_id, true.into()),
-            )],
+            )
+            .into(),
+            Setting::Action => {
+                action::action(setting_id, Message::SetSetting(setting_id, true.into())).into()
+            }
         }
     }
 

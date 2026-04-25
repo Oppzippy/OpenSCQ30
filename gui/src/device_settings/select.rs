@@ -107,7 +107,7 @@ pub fn multi_select<'a, M>(
     setting: &'a Select,
     values: &'a [Cow<'static, str>],
     on_change: impl Fn(Vec<Cow<'static, str>>) -> M + Send + Sync + Clone + 'static,
-) -> Vec<Element<'a, M>>
+) -> Vec<widget::list::ListButton<'a, M>>
 where
     M: Clone + 'static,
 {
@@ -119,15 +119,16 @@ where
             let option = option.clone();
             let values = values.to_vec();
             let on_change = on_change.clone();
-            widget::settings::item::builder(localized_option.to_owned())
-                .toggler(values.contains(&option), move |is_checked| {
+            widget::settings::item::builder(localized_option.to_owned()).toggler(
+                values.contains(&option),
+                move |is_checked| {
                     if !is_checked {
                         on_change(values.iter().filter(|o| **o != option).cloned().collect())
                     } else {
                         on_change(values.iter().chain([&option]).cloned().collect())
                     }
-                })
-                .into()
+                },
+            )
         })
         .collect()
 }
