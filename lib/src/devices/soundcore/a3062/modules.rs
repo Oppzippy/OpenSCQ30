@@ -4,11 +4,10 @@ use crate::{
     connection::RfcommConnection,
     devices::soundcore::{
         a3062,
-        common::{self, device::SoundcoreDeviceBuilder, structures::SingleBattery},
+        common::{self, device::SoundcoreDeviceBuilder},
     },
 };
 
-mod battery;
 mod button_configuration;
 mod equalizer;
 mod flag;
@@ -56,16 +55,6 @@ where
         let packet_io_controller = self.packet_io_controller().clone();
         self.module_collection()
             .add_a3062_button_configuration(packet_io_controller);
-    }
-}
-
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
-where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
-    StateType: Has<SingleBattery> + Send + Sync + Clone + 'static,
-{
-    pub fn a3062_battery(&mut self, max_level: u8) {
-        self.module_collection().add_a3062_battery(max_level);
     }
 }
 

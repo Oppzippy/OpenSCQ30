@@ -5,6 +5,7 @@ use strum::{IntoStaticStr, VariantArray};
 
 use crate::{
     devices::soundcore::common::{
+        self,
         device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
         modules::{
@@ -59,8 +60,16 @@ soundcore_device!(
         builder.gaming_mode();
 
         builder.tws_status();
-        builder.a3957_dual_battery(10);
-        builder.a3957_case_battery_level(10);
+        builder.dual_battery_custom(common::modules::dual_battery::DualBatteryConfiguration {
+            max_level: 10,
+            level_offset: 1,
+        });
+        builder.case_battery_level_custom(
+            common::modules::case_battery_level::CaseBatteryLevelConfiguration {
+                max_level: 10,
+                level_offset: 1,
+            },
+        );
         builder.serial_number_and_dual_firmware_version();
     },
     {

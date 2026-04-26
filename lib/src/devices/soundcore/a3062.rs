@@ -7,6 +7,7 @@ use crate::{
     devices::soundcore::{
         a3062::{packets::inbound::A3062StateUpdatePacket, state::A3062State},
         common::{
+            self,
             device::fetch_state_from_state_update_packet,
             macros::soundcore_device,
             packet::outbound::{RequestState, ToPacket},
@@ -44,8 +45,12 @@ soundcore_device!(
         builder.a3062_side_tone();
         builder.a3062_ambient_sound_mode_voice_prompt();
 
-        // TODO: add common module for battery with level where 0=10% and 9=100%
-        builder.a3062_battery(10);
+        builder.single_battery_custom(
+            common::modules::single_battery::SingleBatteryConfiguration {
+                max_level: 10,
+                level_offset: 1,
+            },
+        );
         builder.serial_number_and_firmware_version();
     },
     {

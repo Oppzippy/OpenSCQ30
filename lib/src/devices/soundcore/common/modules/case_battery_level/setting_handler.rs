@@ -5,6 +5,7 @@ use strum::IntoEnumIterator;
 use crate::{
     api::settings::{Setting, SettingId, Value},
     devices::soundcore::common::{
+        modules::case_battery_level::CaseBatteryLevelConfiguration,
         settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
         structures::CaseBatteryLevel,
     },
@@ -15,11 +16,15 @@ use super::CaseBatteryLevelSetting;
 
 pub struct CaseBatteryLevelSettingHandler {
     max_level: u8,
+    level_offset: u8,
 }
 
 impl CaseBatteryLevelSettingHandler {
-    pub fn new(max_level: u8) -> Self {
-        Self { max_level }
+    pub fn new(configuration: &CaseBatteryLevelConfiguration) -> Self {
+        Self {
+            max_level: configuration.max_level,
+            level_offset: configuration.level_offset,
+        }
     }
 }
 
@@ -37,10 +42,11 @@ where
         let setting: CaseBatteryLevelSetting = (*setting_id).try_into().ok()?;
         Some(match setting {
             CaseBatteryLevelSetting::CaseBatteryLevel => Setting::Information {
-                value: format!("{}/{}", battery.0.0, self.max_level),
+                value: format!("{}/{}", battery.0.0 + self.level_offset, self.max_level),
                 translated_value: fl!(
                     "percent",
-                    percent = ((i32::from(battery.0.0) * 100) / i32::from(self.max_level))
+                    percent = ((i32::from(battery.0.0 + self.level_offset) * 100)
+                        / i32::from(self.max_level))
                 ),
             },
         })

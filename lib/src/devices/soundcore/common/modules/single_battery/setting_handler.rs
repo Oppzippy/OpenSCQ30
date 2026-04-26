@@ -5,6 +5,7 @@ use strum::IntoEnumIterator;
 use crate::{
     api::settings::{Setting, SettingId, Value},
     devices::soundcore::common::{
+        modules::single_battery::SingleBatteryConfiguration,
         settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
         structures::SingleBattery,
     },
@@ -15,11 +16,15 @@ use super::BatterySetting;
 
 pub struct BatterySettingHandler {
     max_level: u8,
+    level_offset: u8,
 }
 
 impl BatterySettingHandler {
-    pub fn new(max_level: u8) -> Self {
-        Self { max_level }
+    pub fn new(configuration: &SingleBatteryConfiguration) -> Self {
+        Self {
+            max_level: configuration.max_level,
+            level_offset: configuration.level_offset,
+        }
     }
 }
 
@@ -45,10 +50,11 @@ where
                 },
             },
             BatterySetting::BatteryLevel => Setting::Information {
-                value: format!("{}/{}", battery.level.0, self.max_level),
+                value: format!("{}/{}", battery.level.0 + self.level_offset, self.max_level),
                 translated_value: fl!(
                     "percent",
-                    percent = ((i32::from(battery.level.0) * 100) / i32::from(self.max_level))
+                    percent = ((i32::from(battery.level.0 + self.level_offset) * 100)
+                        / i32::from(self.max_level))
                 ),
             },
         })

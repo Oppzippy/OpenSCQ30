@@ -518,7 +518,21 @@ where
     where
         StateType: Has<SingleBattery>,
     {
-        self.module_collection.add_single_battery(max_level);
+        self.module_collection.add_single_battery(
+            modules::single_battery::SingleBatteryConfiguration {
+                max_level,
+                ..Default::default()
+            },
+        );
+    }
+
+    pub fn single_battery_custom(
+        &mut self,
+        configuration: modules::single_battery::SingleBatteryConfiguration,
+    ) where
+        StateType: Has<SingleBattery>,
+    {
+        self.module_collection.add_single_battery(configuration);
     }
 
     pub fn single_battery_level(&mut self, max_level: u8)
@@ -532,14 +546,41 @@ where
     where
         StateType: Has<DualBattery>,
     {
-        self.module_collection.add_dual_battery(max_level);
+        self.module_collection
+            .add_dual_battery(modules::dual_battery::DualBatteryConfiguration {
+                max_level,
+                ..Default::default()
+            });
+    }
+
+    pub fn dual_battery_custom(
+        &mut self,
+        configuration: modules::dual_battery::DualBatteryConfiguration,
+    ) where
+        StateType: Has<DualBattery>,
+    {
+        self.module_collection.add_dual_battery(configuration);
     }
 
     pub fn case_battery_level(&mut self, max_level: u8)
     where
         StateType: Has<CaseBatteryLevel>,
     {
-        self.module_collection.add_case_battery_level(max_level);
+        self.module_collection.add_case_battery_level(
+            modules::case_battery_level::CaseBatteryLevelConfiguration {
+                max_level,
+                ..Default::default()
+            },
+        );
+    }
+
+    pub fn case_battery_level_custom(
+        &mut self,
+        configuration: modules::case_battery_level::CaseBatteryLevelConfiguration,
+    ) where
+        StateType: Has<CaseBatteryLevel>,
+    {
+        self.module_collection.add_case_battery_level(configuration);
     }
 
     pub fn serial_number_and_firmware_version(&mut self)
