@@ -117,10 +117,7 @@ impl NoiseCancelingMode {
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
-        map(le_u8, |b| {
-            NoiseCancelingMode::from_repr(b).unwrap_or_default()
-        })
-        .parse_complete(input)
+        map(le_u8, |b| Self::from_repr(b).unwrap_or_default()).parse_complete(input)
     }
 }
 
@@ -162,6 +159,7 @@ pub enum ManualNoiseCanceling {
     EnumString,
 )]
 #[repr(u8)]
+#[allow(clippy::enum_variant_names)]
 pub enum AdaptiveNoiseCanceling {
     #[default]
     LowNoise = 0,

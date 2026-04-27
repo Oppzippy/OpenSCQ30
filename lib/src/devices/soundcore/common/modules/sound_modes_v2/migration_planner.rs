@@ -93,7 +93,7 @@ where
                         .iter()
                         .any(|(index, value)| *index == parent.index && value == required_value)
                     {
-                        reachable.push((parent.index, required_value.clone()))
+                        reachable.push((parent.index, required_value.clone()));
                     }
                 }
             }
@@ -133,7 +133,7 @@ where
             } else {
                 // root node
                 nodes.push(MigrationNode {
-                    index: index,
+                    index,
                     required_parent_value: Vec::new(),
                     children_indices: Vec::new(),
                 });
@@ -141,7 +141,7 @@ where
         }
 
         Self {
-            tree: MigrationTree { nodes: nodes },
+            tree: MigrationTree { nodes },
         }
     }
 
@@ -182,7 +182,7 @@ where
                     .map(map_node_to_new_state(current.clone()))
             },
             |current| {
-                let reachable_nodes = self.tree.interesting_reachable_nodes(current, &from);
+                let reachable_nodes = self.tree.interesting_reachable_nodes(current, from);
 
                 reachable_nodes
                     .into_iter()
