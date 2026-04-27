@@ -25,7 +25,7 @@ use crate::{
 mod modules;
 mod packets;
 mod state;
-pub mod structures;
+mod structures;
 
 soundcore_device!(
     state::A3957State,
