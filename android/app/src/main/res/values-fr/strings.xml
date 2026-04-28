@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hz">%1$d Hz</string>
+    <string name="loading">Chargement</string>
+    <string name="request_permission">Demande de permission</string>
+    <string name="bluetooth_permission_is_required">L\'autorisation d\'accès au Bluetooth est nécéssaire</string>
+    <string name="none">Aucun</string>
+    <string name="add">Ajouter</string>
+    <string name="create">Créer</string>
+    <string name="cancel">Annuler</string>
+    <string name="name">Nom</string>
+    <string name="delete_confirm">Etes vous certain de vouloir supprimer \"%s\" ?</string>
+    <string name="delete">Supprimer</string>
+    <string name="back">Retour</string>
+    <string name="info">Information</string>
+    <string name="khz">%s kHz</string>
+    <string name="replace">Remplacer</string>
+    <string name="connected_to">Connecté à %s</string>
+    <string name="connecting_to">Connection à %s</string>
+    <string name="disconnected">Déconnecté</string>
+    <string name="disconnect">Déconnection</string>
+    <string name="activate">Activer</string>
+    <string name="awaiting_connection">En attente de connection</string>
+    <string name="edit">Modifier</string>
+    <string name="auto_connect">Connection automatique</string>
+    <string name="settings">Configurations</string>
+    <string name="unpair_device">Desappairer l\'appareil</string>
+    <string name="unpairing_from_device_name">Désappairage de %s</string>
+    <string name="unpair">Désappairer</string>
+    <string name="no_devices_found">Aucun appareil trouvé</string>
+    <string name="equalizer">Egaliseur</string>
+    <string name="copy_logs_to_clipboard">Copier les logs dans le presse papier</string>
+</resources>
