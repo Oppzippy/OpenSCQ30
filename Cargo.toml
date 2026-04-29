@@ -39,6 +39,10 @@ lto = true
 inherits = "release"
 lto = "thin"
 
+[profile.release-android]
+inherits = "release"
+strip = false        # uniffi-bindgen requires debug info
+
 [workspace.dependencies]
 openscq30-lib = { path = "./lib" }
 openscq30-lib-has = { path = "./lib-has" }
