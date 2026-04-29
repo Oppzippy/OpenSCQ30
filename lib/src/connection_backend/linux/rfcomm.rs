@@ -144,7 +144,10 @@ impl RfcommBackend for BluerRfcommBackend {
     ) -> connection::Result<Self::ConnectionType> {
         let device = self.device(mac_address).await?;
         debug!("connecting to device");
-        device.connect().await?;
+        if let Err(err) = device.connect().await {
+            // Connect can fail with br-connection-busy even when already connected
+            debug!("connect failed, continuing anyway: {err:?}");
+        };
         let uuid = match service_selection_strategy {
             RfcommServiceSelectionStrategy::Constant(uuid) => uuid,
             RfcommServiceSelectionStrategy::Dynamic(select_uuid) => {
