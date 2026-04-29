@@ -41,6 +41,22 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.7.0" date="2026-04-29">
+            <description>
+                <p>Features</p>
+                <ul>
+                    <li>Add support for Soundcore Liberty 3 Pro (A3952)</li>
+                    <li>Add support for Soundcore Space One Pro (A3062)</li>
+                    <li>Add LDAC toggle for relevant devices. If I missed a device that supports LDAC, please open an issue.</li>
+                </ul>
+                <p>Fixes</p>
+                <ul>
+                    <li>Error connecting on Linux (br-connection-busy)</li>
+                    <li>On Linux, when multiple bluetooth adapters are availabe, don't give up if there is an error with only one of them</li>
+                    <li>For devices with wind noise suppression, the device not be in normal mode while toggling wind noise suppression, so if you were to toggle it while in normal mode, it would first switch to noise canceling, toggle it, and then switch back. This 3 step process was unnecessarily being done while in transparency mode as well, despite it being possible to it in one step. This is now fixed, so the 3 step process is only done for normal mode.</li>
+                </ul> 
+            </description>
+        </release>
         <release version="2.6.2" date="2026-04-08" />
         <release version="2.6.1" date="2026-04-06" />
         <release version="2.6.0" date="2026-04-05">
