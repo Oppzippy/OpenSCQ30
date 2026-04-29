@@ -138,6 +138,7 @@ pub enum SettingId {
     PowerOff,
     SideTone,
     DolbyAudio,
+    Ldac,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

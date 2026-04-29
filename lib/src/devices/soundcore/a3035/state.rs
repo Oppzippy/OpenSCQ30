@@ -6,7 +6,7 @@ use crate::devices::soundcore::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         structures::{
             AmbientSoundModeCycle, AutoPlayPause, AutoPowerOff, BatteryLevel,
-            CommonEqualizerConfiguration, CustomHearId, FirmwareVersion, LimitHighVolume,
+            CommonEqualizerConfiguration, CustomHearId, FirmwareVersion, Ldac, LimitHighVolume,
             SerialNumber,
         },
     },
@@ -27,6 +27,7 @@ pub struct A3035State {
     limit_high_volume: LimitHighVolume,
     ambient_sound_mode_voice_prompt: a3035::structures::AmbientSoundModeVoicePrompt,
     battery_alert: a3035::structures::BatteryAlert,
+    ldac: Ldac,
     button_reset_pending: ResetButtonConfigurationPending,
 }
 
@@ -46,6 +47,7 @@ impl From<A3035StateUpdatePacket> for A3035State {
             limit_high_volume: value.limit_high_volume,
             ambient_sound_mode_voice_prompt: value.ambient_sound_mode_voice_prompt,
             battery_alert: value.battery_alert,
+            ldac: value.ldac,
             button_reset_pending: ResetButtonConfigurationPending::default(),
         }
     }

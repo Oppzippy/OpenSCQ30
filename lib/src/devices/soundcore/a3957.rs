@@ -51,6 +51,7 @@ soundcore_device!(
 
         builder.limit_high_volume();
 
+        builder.ldac();
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.touch_tone();
         builder.low_battery_prompt();

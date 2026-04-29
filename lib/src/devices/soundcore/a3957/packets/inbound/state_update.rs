@@ -20,10 +20,9 @@ use crate::{
                 self, Command,
                 inbound::{FromPacketBody, TryToPacket},
                 outbound::ToPacket,
-                parsing::take_bool,
             },
             packet_manager::PacketHandler,
-            structures::button_configuration::ButtonStatusCollection,
+            structures::{Ldac, button_configuration::ButtonStatusCollection},
         },
     },
 };
@@ -45,7 +44,7 @@ pub struct A3957StateUpdatePacket {
     pub sound_modes: a3957::structures::SoundModes,
     pub wearing_tone: common::structures::WearingTone,
     pub low_battery_prompt: common::structures::LowBatteryPrompt,
-    pub ldac: bool,
+    pub ldac: Ldac,
     pub anc_personalized_to_ear_canal: a3957::structures::AncPersonalizedToEarCanal,
     pub auto_power_off: common::structures::AutoPowerOff,
     pub limit_high_volume: common::structures::LimitHighVolume,
@@ -117,7 +116,7 @@ impl FromPacketBody for A3957StateUpdatePacket {
                         take(1usize),                        // unknown: 126 (always 0x33)
                         common::structures::WearingTone::take, // 127
                         common::structures::LowBatteryPrompt::take, // 128
-                        take_bool,                           // 129: LDAC
+                        Ldac::take,                          // 129: Ldac
                         a3957::structures::AncPersonalizedToEarCanal::take, // 130
                         common::structures::AutoPowerOff::take, // 131-132
                         common::structures::LimitHighVolume::take, // 133-135
@@ -230,7 +229,7 @@ impl ToPacket for A3957StateUpdatePacket {
             .chain(iter::once(0x33)) // unknown: 126
             .chain(self.wearing_tone.bytes()) // 127
             .chain(self.low_battery_prompt.bytes()) // 128
-            .chain(iter::once(self.ldac.into())) // 129: LDAC
+            .chain(self.ldac.bytes()) // 129: Ldac
             .chain(self.anc_personalized_to_ear_canal.bytes()) // 130
             .chain(self.auto_power_off.bytes()) // 131-132
             .chain(self.limit_high_volume.bytes()) // 133-135

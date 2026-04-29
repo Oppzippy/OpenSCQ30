@@ -38,8 +38,8 @@ soundcore_device!(
 
         builder.limit_high_volume();
 
+        builder.ldac();
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
-
         builder.a3062_dolby_audio();
         builder.low_battery_prompt();
         builder.a3062_side_tone();

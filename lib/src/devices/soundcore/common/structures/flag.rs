@@ -52,3 +52,4 @@ flag!(TouchLock);
 flag!(LowBatteryPrompt);
 flag!(WearingDetection);
 flag!(VoicePrompt);
+flag!(Ldac);

@@ -7,7 +7,7 @@ use crate::devices::soundcore::{
         structures::{
             AgeRange, AmbientSoundModeCycle, AutoPowerOff, CaseBatteryLevel,
             CommonEqualizerConfiguration, CustomHearId, DualBattery, DualFirmwareVersion,
-            GamingMode, Gender, LimitHighVolume, LowBatteryPrompt, SerialNumber,
+            GamingMode, Gender, Ldac, LimitHighVolume, LowBatteryPrompt, SerialNumber,
             SoundLeakCompensation, TouchTone, TwsStatus, WearingDetection, WearingTone,
             button_configuration::ButtonStatusCollection,
         },
@@ -33,7 +33,7 @@ pub struct A3957State {
     ambient_sound_mode_cycle: AmbientSoundModeCycle,
     sound_modes: SoundModes,
     anc_personalized_to_ear_canal: AncPersonalizedToEarCanal,
-    ldac: bool,
+    ldac: Ldac,
     wearing_tone: WearingTone,
     auto_power_off: AutoPowerOff,
     limit_high_volume: LimitHighVolume,

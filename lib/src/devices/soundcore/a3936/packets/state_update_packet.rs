@@ -22,7 +22,7 @@ use crate::{
             structures::{
                 AgeRange, AmbientSoundModeCycle, AutoPowerOff, CaseBatteryLevel,
                 CommonEqualizerConfiguration, CommonVolumeAdjustments, CustomHearId, DualBattery,
-                DualFirmwareVersion, GamingMode, SerialNumber, TouchTone, TwsStatus,
+                DualFirmwareVersion, GamingMode, Ldac, SerialNumber, TouchTone, TwsStatus,
                 button_configuration::ButtonStatusCollection,
             },
         },
@@ -45,7 +45,7 @@ pub struct A3936StateUpdatePacket {
     pub touch_tone: TouchTone,
     pub case_battery_level: CaseBatteryLevel,
     pub color: u8,
-    pub ldac: bool,
+    pub ldac: Ldac,
     pub supports_two_cnn_switch: bool,
     pub auto_power_off: AutoPowerOff,
     pub gaming_mode: GamingMode,
@@ -117,7 +117,7 @@ impl FromPacketBody for A3936StateUpdatePacket {
             let (input, touch_tone) = TouchTone::take(input)?;
             let (input, case_battery_level) = CaseBatteryLevel::take(input)?;
             let (input, color) = le_u8(input)?;
-            let (input, ldac) = take_bool(input)?;
+            let (input, ldac) = Ldac::take(input)?;
             let (input, supports_two_cnn_switch) = take_bool(input)?;
             let (input, auto_power_off) = AutoPowerOff::take(input)?;
             let (input, gaming_mode) = GamingMode::take(input)?;
@@ -184,9 +184,9 @@ impl ToPacket for A3936StateUpdatePacket {
                 self.touch_tone.0.into(),
                 self.case_battery_level.0.0,
                 self.color,
-                self.ldac as u8,
-                self.supports_two_cnn_switch as u8,
             ])
+            .chain(self.ldac.bytes())
+            .chain([self.supports_two_cnn_switch as u8])
             .chain(self.auto_power_off.bytes())
             .chain(self.gaming_mode.bytes())
             .chain([0; 12])

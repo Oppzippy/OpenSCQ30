@@ -12,7 +12,7 @@ use crate::{
     devices::soundcore::common::{
         packet::{self, PacketIOController},
         structures::{
-            AutoPlayPause, Flag, GamingMode, LowBatteryPrompt, SoundLeakCompensation,
+            AutoPlayPause, Flag, GamingMode, Ldac, LowBatteryPrompt, SoundLeakCompensation,
             SurroundSound, TouchLock, TouchTone, VoicePrompt, WearingDetection, WearingTone,
         },
     },
@@ -128,6 +128,15 @@ flag!(
         setting_id: SettingId::VoicePrompt,
         set_command: packet::Command([0x01, 0x90]),
         update_command: Some(packet::Command([0x01, 0x10])),
+    },
+);
+
+flag!(
+    Ldac,
+    FlagConfiguration {
+        setting_id: SettingId::Ldac,
+        set_command: packet::Command([0x01, 0xFF,]),
+        update_command: Some(packet::Command([0x01, 0x7F,])),
     },
 );
 

@@ -26,7 +26,7 @@ use crate::{
             structures::{
                 AmbientSoundModeCycle, AutoPlayPause, AutoPowerOff, BatteryLevel,
                 CommonEqualizerConfiguration, CommonVolumeAdjustments, CustomHearId,
-                FirmwareVersion, HearIdMusicGenre, HearIdType, LimitHighVolume, SerialNumber,
+                FirmwareVersion, HearIdMusicGenre, HearIdType, Ldac, LimitHighVolume, SerialNumber,
             },
         },
     },
@@ -47,7 +47,7 @@ pub struct A3035StateUpdatePacket {
     pub limit_high_volume: LimitHighVolume,
     pub ambient_sound_mode_voice_prompt: a3035::structures::AmbientSoundModeVoicePrompt,
     pub battery_alert: a3035::structures::BatteryAlert,
-    pub ldac: bool,
+    pub ldac: Ldac,
     pub dual_connections: bool,
 }
 
@@ -75,7 +75,7 @@ impl FromPacketBody for A3035StateUpdatePacket {
                     take(1usize), //unknown
                     AutoPlayPause::take,
                     take(4usize), //unknown
-                    take_bool,    // LDAC
+                    Ldac::take,
                     take_bool,    // dual connections
                     take(2usize), // unknown
                     AutoPowerOff::take,
@@ -193,7 +193,7 @@ impl ToPacket for A3035StateUpdatePacket {
             .chain([0; 1])
             .chain(self.auto_play_pause.bytes())
             .chain([0; 4])
-            .chain(iter::once(self.ldac.into()))
+            .chain(self.ldac.bytes())
             .chain(iter::once(self.dual_connections.into()))
             .chain([0; 2])
             .chain(self.auto_power_off.bytes())

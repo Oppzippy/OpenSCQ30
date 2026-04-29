@@ -38,6 +38,7 @@ soundcore_device!(
 
         builder.limit_high_volume();
 
+        builder.ldac();
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.auto_play_pause();
         builder.a3035_battery_alert();

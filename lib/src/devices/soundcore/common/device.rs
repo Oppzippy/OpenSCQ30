@@ -29,7 +29,7 @@ use crate::{
                 state::Update,
                 structures::{
                     AutoPlayPause, AutoPowerOff, BatteryLevel, CaseBatteryLevel,
-                    EqualizerConfiguration, GamingMode, LimitHighVolume, LowBatteryPrompt,
+                    EqualizerConfiguration, GamingMode, Ldac, LimitHighVolume, LowBatteryPrompt,
                     SoundLeakCompensation, SurroundSound, TouchLock, TouchTone, VoicePrompt,
                     WearingDetection, WearingTone, button_configuration::ButtonStatusCollection,
                 },
@@ -634,6 +634,7 @@ where
     flag!(LowBatteryPrompt);
     flag!(WearingDetection);
     flag!(VoicePrompt);
+    flag!(Ldac);
 }
 
 pub struct SoundcoreDeviceTemplate<ConnectionType, StateType>

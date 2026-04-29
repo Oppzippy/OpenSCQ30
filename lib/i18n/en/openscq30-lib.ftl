@@ -188,6 +188,7 @@ wearing-detection = Wearing Detection
 voice-prompt = Voice Prompt
 side-tone = Side Tone
 dolby-audio = Dolby Audio
+ldac = LDAC
 
 limit-high-volume = Limit High Volume
 db-limit = DB Limit

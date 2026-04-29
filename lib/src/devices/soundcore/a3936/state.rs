@@ -5,7 +5,8 @@ use crate::devices::soundcore::common::{
     structures::{
         AgeRange, AmbientSoundModeCycle, AutoPowerOff, CaseBatteryLevel,
         CommonEqualizerConfiguration, CustomHearId, DualBattery, DualFirmwareVersion, GamingMode,
-        Gender, SerialNumber, TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
+        Gender, Ldac, SerialNumber, TouchTone, TwsStatus,
+        button_configuration::ButtonStatusCollection,
     },
 };
 
@@ -28,10 +29,9 @@ pub struct A3936State {
     pub gender: Gender,
     pub touch_tone: TouchTone,
     pub gaming_mode: GamingMode,
+    pub ldac: Ldac,
     #[has(skip)]
     pub color: u8,
-    #[has(skip)]
-    pub ldac: bool,
     #[has(skip)]
     pub supports_two_cnn_switch: bool,
     button_reset_pending: ResetButtonConfigurationPending,

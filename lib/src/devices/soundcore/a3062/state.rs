@@ -6,7 +6,7 @@ use crate::devices::soundcore::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         structures::{
             AmbientSoundModeCycle, AutoPowerOff, CommonEqualizerConfiguration, CustomHearId,
-            FirmwareVersion, LimitHighVolume, LowBatteryPrompt, SerialNumber, SingleBattery,
+            FirmwareVersion, Ldac, LimitHighVolume, LowBatteryPrompt, SerialNumber, SingleBattery,
         },
     },
 };
@@ -29,6 +29,7 @@ pub struct A3062State {
     side_tone: a3062::structures::SideTone,
     ambient_sound_mode_voice_prompt: a3062::structures::AmbientSoundModeVoicePrompt,
     dolby_audio: a3062::structures::DolbyAudio,
+    ldac: Ldac,
     button_configuration_reset: ResetButtonConfigurationPending,
 }
 
@@ -49,6 +50,7 @@ impl From<A3062StateUpdatePacket> for A3062State {
             side_tone: value.side_tone,
             ambient_sound_mode_voice_prompt: value.ambient_sound_mode_voice_prompt,
             dolby_audio: value.dolby_audio,
+            ldac: value.ldac,
             button_configuration_reset: ResetButtonConfigurationPending::default(),
         }
     }

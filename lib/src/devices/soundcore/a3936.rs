@@ -48,6 +48,7 @@ soundcore_device!(
             RequestState::default().to_packet(),
         );
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
+        builder.ldac();
         builder.touch_tone();
         builder.gaming_mode();
         builder.tws_status();

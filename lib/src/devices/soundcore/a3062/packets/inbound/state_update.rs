@@ -22,7 +22,7 @@ use crate::{
             packet_manager::PacketHandler,
             structures::{
                 AmbientSoundModeCycle, AutoPowerOff, CommonEqualizerConfiguration, CustomHearId,
-                EqualizerConfiguration, FirmwareVersion, LimitHighVolume, LowBatteryPrompt,
+                EqualizerConfiguration, FirmwareVersion, Ldac, LimitHighVolume, LowBatteryPrompt,
                 SerialNumber, SingleBattery,
             },
         },
@@ -41,7 +41,7 @@ pub struct A3062StateUpdatePacket {
     pub sound_modes: a3062::structures::SoundModes,
     pub low_battery_prompt: LowBatteryPrompt,
     pub dolby_audio: a3062::structures::DolbyAudio,
-    pub ldac: bool,
+    pub ldac: Ldac,
     pub dual_connections: bool,
     pub auto_power_off: AutoPowerOff,
     pub limit_high_volume: LimitHighVolume,
@@ -71,9 +71,9 @@ impl FromPacketBody for A3062StateUpdatePacket {
                     a3062::structures::SoundModes::take,
                     take(1usize), // unknown
                     LowBatteryPrompt::take,
-                    a3062::structures::DolbyAudio::take, // dolby audio
-                    take_bool,                           // LDAC
-                    take_bool,                           // dual connections
+                    a3062::structures::DolbyAudio::take,
+                    Ldac::take,
+                    take_bool, // dual connections
                     AutoPowerOff::take,
                     LimitHighVolume::take,
                     a3062::structures::SideTone::take,
@@ -146,7 +146,8 @@ impl ToPacket for A3062StateUpdatePacket {
             .chain([0; 1]) // unknown
             .chain(self.low_battery_prompt.bytes())
             .chain(self.dolby_audio.bytes())
-            .chain([0, 0]) // dolby audio, ldac, dual connections
+            .chain(self.ldac.bytes())
+            .chain([0]) // dual connections
             .chain(self.auto_power_off.bytes())
             .chain(self.limit_high_volume.bytes())
             .chain(self.side_tone.bytes())
