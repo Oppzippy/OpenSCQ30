@@ -1,5 +1,28 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Features
+
+- Add support for Soundcore Liberty 3 Pro (A3952)
+- Add support for Soundcore Space One Pro (A3062)
+- Add LDAC toggle for relevant devices. If I missed a device that supports LDAC, please open an issue.
+
+#### Fixes
+
+- Error connecting on Linux (br-connection-busy)
+- On Linux, when multiple bluetooth adapters are availabe, don't give up if there is an error with only one of them
+- For devices with wind noise suppression, the device not be in normal mode while toggling wind noise suppression, so if you were to toggle it while in normal mode, it would first switch to noise canceling, toggle it, and then switch back. This 3 step process was unnecessarily being done while in transparency mode as well, despite it being possible to it in one step. This is now fixed, so the 3 step process is only done for normal mode.
+
+### Android
+
+#### Fixes
+
+- Decrease height of widget title bar so that more settings fit without having to scroll
+- Crash when a bluetooth device with a null name is paired
+
 ## v2.6.2
 
 ### Android
