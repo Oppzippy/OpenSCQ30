@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_path="$(readlink -f -- "$0")"
+cd "$(dirname "$script_path")/.."
+
+table=$(
+    printf '%s\n%s\n%s' \
+        '|Model|Name|' \
+        '|-|-|' \
+        "$(cargo run --bin openscq30 -- list-models --json |
+            jq --raw-output '.[] |
+                select(.model != "SoundcoreDevelopment") |
+                "|" + (.model | ltrimstr("Soundcore")) + "|" + .name + "|"'
+        )"
+)
+
+cat README.md.in |
+    sd --fixed-strings '@SUPPORTED_DEVICES_TABLE@' "$table" |
+    prettier --parser markdown > README.md
