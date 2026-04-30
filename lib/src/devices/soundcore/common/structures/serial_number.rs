@@ -21,11 +21,16 @@ impl SerialNumber {
         context(
             "serial number",
             map_opt(take_str(16usize), |s| {
-                // Serial number is 4 digit model number followed by mac address with pairs in reverse order.
-                // ie. device model 1234 with max address 55:66:77:88:99:AA would be 1234AA9988776655
-                // The mac address is hex, and the model number is base 10 digits only, so we can use that
-                // to try to avoid parsing things that aren't serial numbers as one.
-                if s.chars().all(|c| c.is_ascii_hexdigit()) {
+                // Serial number for most devices is 4 digit model number followed by mac address with pairs in reverse
+                // order. ie. device model 1234 with max address 55:66:77:88:99:AA would be 1234AA9988776655
+                // The mac address is hex, and the model number is base 10 digits only, so if this applied to all devices,
+                // we would be able to use that to try to avoid parsing things that aren't serial numbers as one if this
+                // applied to all devices.
+                //
+                // HOWEVER:
+                // On newer devices, a counterexample has been found: a serial number starting with ACCR7L. So now we
+                // have a wider range of acceptable characters: all alphanumeric.
+                if s.chars().all(|c| c.is_ascii_alphanumeric()) {
                     Some(Self::from(s))
                 } else {
                     None
