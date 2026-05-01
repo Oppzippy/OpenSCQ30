@@ -36,6 +36,9 @@ soundcore_device!(
         builder.a3040_button_configuration();
         builder.ambient_sound_mode_cycle();
 
+        builder.ldac();
+        builder.a3040_voice_prompt();
+        builder.a3040_low_battery_prompt();
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
 
         builder.limit_high_volume();
@@ -128,6 +131,9 @@ mod tests {
             (SettingId::TransparencyModeInCycle, true.into()),
             (SettingId::NormalModeInCycle, true.into()),
             (SettingId::AutoPowerOff, "30m".into()),
+            (SettingId::Ldac, false.into()),
+            (SettingId::VoicePrompt, true.into()),
+            (SettingId::LowBatteryPrompt, true.into()),
         ]);
     }
 

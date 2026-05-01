@@ -9,8 +9,13 @@ use openscq30_lib_macros::MigrationSteps;
 use strum::{EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 use crate::devices::soundcore::common::{
-    modules::sound_modes_v2, packet::parsing::take_bool, structures::AmbientSoundMode,
+    modules::sound_modes_v2,
+    packet::parsing::take_bool,
+    structures::{AmbientSoundMode, flag},
 };
+
+flag!(VoicePrompt);
+flag!(LowBatteryPrompt);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, MigrationSteps)]
 pub struct SoundModes {

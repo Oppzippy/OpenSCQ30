@@ -10,6 +10,7 @@ use crate::{
 
 mod button_configuration;
 mod equalizer;
+mod flag;
 mod sound_modes;
 
 impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
@@ -54,5 +55,29 @@ where
         let packet_io_controller = self.packet_io_controller().clone();
         self.module_collection()
             .add_a3040_button_configuration(packet_io_controller);
+    }
+}
+
+impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+where
+    ConnectionType: RfcommConnection + Send + Sync + 'static,
+    StateType: Has<a3040::structures::LowBatteryPrompt> + Send + Sync + Clone + 'static,
+{
+    pub fn a3040_low_battery_prompt(&mut self) {
+        let packet_io_controller = self.packet_io_controller().clone();
+        self.module_collection()
+            .add_a3040_low_battery_prompt(packet_io_controller);
+    }
+}
+
+impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+where
+    ConnectionType: RfcommConnection + Send + Sync + 'static,
+    StateType: Has<a3040::structures::VoicePrompt> + Send + Sync + Clone + 'static,
+{
+    pub fn a3040_voice_prompt(&mut self) {
+        let packet_io_controller = self.packet_io_controller().clone();
+        self.module_collection()
+            .add_a3040_voice_prompt(packet_io_controller);
     }
 }

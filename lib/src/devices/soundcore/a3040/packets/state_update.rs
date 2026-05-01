@@ -27,7 +27,7 @@ use crate::{
             structures::{
                 AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CommonEqualizerConfiguration,
                 CommonVolumeAdjustments, CustomHearId, FirmwareVersion, HearIdMusicGenre,
-                HearIdType, LimitHighVolume, SerialNumber,
+                HearIdType, Ldac, LimitHighVolume, SerialNumber,
             },
         },
     },
@@ -44,9 +44,11 @@ pub struct A3040StateUpdatePacket {
     pub sound_modes: a3040::structures::SoundModes,
     pub auto_power_off: AutoPowerOff,
     pub limit_high_volume: LimitHighVolume,
-    pub ambient_sound_mode_prompt_tone: bool,
-    pub battery_alert_prompt_tone: bool,
+    pub voice_prompt: a3040::structures::VoicePrompt,
+    pub low_battery_prompt: a3040::structures::LowBatteryPrompt,
     pub hear_id: CustomHearId<2, 10>,
+    pub ldac: Ldac,
+    pub dual_connections: bool,
 }
 
 impl FromPacketBody for A3040StateUpdatePacket {
@@ -69,11 +71,14 @@ impl FromPacketBody for A3040StateUpdatePacket {
                     a3040::structures::ButtonConfiguration::take,
                     AmbientSoundModeCycle::take,
                     a3040::structures::SoundModes::take,
-                    take(10usize), // unknown
+                    take(6usize), // unknown
+                    Ldac::take,
+                    take_bool,    // dual connections
+                    take(2usize), // unknown
                     AutoPowerOff::take,
                     LimitHighVolume::take,
-                    take_bool,    // ambient sound mode prompt
-                    take_bool,    // battery alert
+                    a3040::structures::VoicePrompt::take,
+                    a3040::structures::LowBatteryPrompt::take,
                     take(5usize), // unknown
                     take_hear_id,
                 ),
@@ -89,11 +94,14 @@ impl FromPacketBody for A3040StateUpdatePacket {
                     ambient_sound_mode_cycle,
                     sound_modes,
                     _unknown3,
+                    ldac,
+                    dual_connections,
+                    _unknown4,
                     auto_power_off,
                     limit_high_volume,
-                    ambient_sound_mode_prompt_tone,
-                    battery_alert_prompt_tone,
-                    _unknown4,
+                    voice_prompt,
+                    low_battery_prompt,
+                    _unknown5,
                     hear_id,
                 )| {
                     Self {
@@ -104,10 +112,12 @@ impl FromPacketBody for A3040StateUpdatePacket {
                         button_configuration: double_press_action,
                         ambient_sound_mode_cycle,
                         sound_modes,
+                        ldac,
+                        dual_connections,
                         auto_power_off,
                         limit_high_volume,
-                        ambient_sound_mode_prompt_tone,
-                        battery_alert_prompt_tone,
+                        voice_prompt,
+                        low_battery_prompt,
                         hear_id,
                     }
                 },
@@ -177,13 +187,14 @@ impl ToPacket for A3040StateUpdatePacket {
             .chain(self.button_configuration.bytes())
             .chain(self.ambient_sound_mode_cycle.bytes())
             .chain(self.sound_modes.bytes())
-            .chain([0; 10])
+            .chain([0; 6]) // unknown
+            .chain(self.ldac.bytes())
+            .chain([self.dual_connections as u8])
+            .chain([0; 2]) // unknown
             .chain(self.auto_power_off.bytes())
             .chain(self.limit_high_volume.bytes())
-            .chain([
-                self.ambient_sound_mode_prompt_tone.into(),
-                self.battery_alert_prompt_tone.into(),
-            ])
+            .chain(self.voice_prompt.bytes())
+            .chain(self.low_battery_prompt.bytes())
             .chain([0; 5])
             .chain(iter::once(self.hear_id.is_enabled.into()))
             .chain(self.hear_id.volume_adjustment_bytes())

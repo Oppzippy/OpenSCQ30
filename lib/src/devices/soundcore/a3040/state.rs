@@ -6,7 +6,7 @@ use crate::devices::soundcore::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         structures::{
             AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CommonEqualizerConfiguration,
-            CustomHearId, FirmwareVersion, LimitHighVolume, SerialNumber,
+            CustomHearId, FirmwareVersion, Ldac, LimitHighVolume, SerialNumber,
         },
     },
 };
@@ -23,6 +23,9 @@ pub struct A3040State {
     auto_power_off: AutoPowerOff,
     limit_high_volume: LimitHighVolume,
     hear_id: CustomHearId<2, 10>,
+    voice_prompt: a3040::structures::VoicePrompt,
+    low_battery_prompt: a3040::structures::LowBatteryPrompt,
+    ldac: Ldac,
     button_reset_pending: ResetButtonConfigurationPending,
 }
 
@@ -38,9 +41,11 @@ impl From<A3040StateUpdatePacket> for A3040State {
             sound_modes,
             auto_power_off,
             limit_high_volume,
-            ambient_sound_mode_prompt_tone: _,
-            battery_alert_prompt_tone: _,
+            voice_prompt,
+            low_battery_prompt,
             hear_id,
+            ldac,
+            dual_connections: _,
         } = value;
 
         Self {
@@ -54,6 +59,9 @@ impl From<A3040StateUpdatePacket> for A3040State {
             auto_power_off,
             limit_high_volume,
             hear_id,
+            voice_prompt,
+            low_battery_prompt,
+            ldac,
             button_reset_pending: ResetButtonConfigurationPending::default(),
         }
     }

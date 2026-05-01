@@ -66,8 +66,8 @@ response = [
     255,
     0,
     49,
-    0,
-    1,
+    0,    # LDAC
+    0,    # dual connections
     255,
     0,
     1,    # auto power off
