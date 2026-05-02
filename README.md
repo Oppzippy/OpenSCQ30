@@ -24,7 +24,7 @@ OpenSCQ30 is free software for controlling settings for Soundcore headphones and
 | A3062 | Soundcore Space One Pro            |
 | A3116 | Soundcore Motion+                  |
 | A3926 | Soundcore Life Dot 2S              |
-| A3930 | Soundcore Liberty 2 Pro            |
+| A3930 | Soundcore Liberty 2 Pro+           |
 | A3931 | Soundcore Life Dot 2 NC            |
 | A3933 | Soundcore Life Note 3              |
 | A3935 | Soundcore Life A2 NC               |
