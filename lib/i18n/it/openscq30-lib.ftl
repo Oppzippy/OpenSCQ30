@@ -11,6 +11,7 @@ soundcore-a3035 = Soundcore Space One
 soundcore-a3040 = Soundcore Space Q45
 soundcore-a3116 = Soundcore Motion+
 soundcore-a3926 = Soundcore Life Dot 2S
+soundcore-a3909 = Soundcore Liberty 2 Pro
 soundcore-a3930 = Soundcore Liberty 2 Pro+
 soundcore-a3931 = Soundcore Life Dot 2 NC
 soundcore-a3933 = Soundcore Life Note 3

@@ -1,0 +1,35 @@
+name = "Soundcore Liberty 2 Pro"
+mac_address = "00:00:00:00:39:09"
+rfcomm_uuid = "00001101-0000-1000-8000-00805f9b34fb"
+
+[[responses]]
+# State update
+command = [1, 1]
+response = [
+    # tws_status: host=Left(0), is_connected=true(1)
+    0, 1,
+    # battery: left_level=5, right_level=5, left_charging=0, right_charging=0
+    5, 5, 0, 0,
+    # equalizer_configuration: preset_id=0xfefe (le), ch1 (8 bands), ch2 (8 bands)
+    254, 254,
+    120, 120, 120, 120, 120, 120, 120, 120,
+    120, 120, 120, 120, 120, 120, 120, 120,
+    # gender=0, age_range=0
+    0, 0,
+    # hear_id_is_enabled=0
+    0,
+    # hear_id_time=0 (be_u32)
+    0, 0, 0, 0,
+    # sound_modes: ambient=Normal(2), nc=Indoor(1), transparency=FullyTransparent(3), custom_nc=0
+    2, 1, 3, 0,
+    # side_tone=0
+    0,
+]
+
+[[responses]]
+# firmware version
+command = [1, 5]
+response = [
+    48, 48, 46, 48, 48, 48, 48, 46, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48,
+]

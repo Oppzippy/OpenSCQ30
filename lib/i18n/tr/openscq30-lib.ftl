@@ -17,6 +17,7 @@ soundcore-a3030 = Soundcore Life Tune Pro
 soundcore-a3031 = Soundcore Vortex
 soundcore-a3033 = Soundcore Life 2 Neo
 soundcore-a3926 = Soundcore Life Dot 2S
+soundcore-a3909 = Soundcore Liberty 2 Pro
 soundcore-a3930 = Soundcore Liberty 2 Pro+
 soundcore-a3931 = Soundcore Life Dot 2 NC
 soundcore-a3948 = Soundcore A20i
