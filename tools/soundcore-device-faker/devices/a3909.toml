@@ -1,0 +1,77 @@
+name = "Soundcore Liberty 2 Pro"
+mac_address = "00:00:00:00:39:09"
+rfcomm_uuid = "00001101-0000-1000-8000-00805f9b34fb"
+
+[[responses]]
+# State update
+command = [1, 1]
+response = [
+    1,   # host device
+    1,   # tws connected
+    4,   # left battery level
+    5,   # right battery level
+    0,   # left battery charging
+    0,   # right battery charging
+    254, # active eq profile
+    254, # active eq profile
+    1,   # gender
+    1,   # age range
+    0,   # hear id enabled
+    6,   # left hear id start
+    12,
+    12,
+    12,
+    12,
+    12,
+    18,  # left hear id end
+    12,  # unknown
+    18,  # right hear id start
+    12,
+    12,
+    12,
+    12,
+    12,
+    6,   # right hear id end
+    12,  # unknown
+    105, # hear id time start
+    142,
+    168,
+    103, # hear id time end
+    2,   # left double press
+    1,   # left hold 1s
+    3,   # right double press
+    0,   # right hold 1s
+    0,   # unknown
+]
+
+[[responses]]
+# firmware version
+command = [1, 5]
+response = [
+    57,
+    48,
+    46,
+    48,
+    48,
+    57,
+    48,
+    46,
+    48,
+    48,
+    48,
+    48,
+    48,
+    48,
+    48,
+    48,
+    48,
+    48,
+    48,
+    48,
+    48,
+    48,
+    48,
+    48,
+    48,
+    48,
+]
