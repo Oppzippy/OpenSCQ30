@@ -6,72 +6,72 @@ rfcomm_uuid = "00001101-0000-1000-8000-00805f9b34fb"
 # State update
 command = [1, 1]
 response = [
-    1,   # host device
-    1,   # tws connected
-    4,   # left battery level
-    5,   # right battery level
-    0,   # left battery charging
-    0,   # right battery charging
-    254, # active eq profile
-    254, # active eq profile
-    1,   # gender
-    1,   # age range
-    0,   # hear id enabled
-    6,   # left hear id start
+    1,    # host device
+    1,    # tws status
+    5,    # left battery level
+    5,    # right battery level
+    0,    # left battery charging
+    1,    # right battery charging
+    6,    # active eq profile
+    0,    # active eq profile
+    1,    # gender
+    1,    # age range
+    0,    # hear id enabled
+    12,   # left hear id start
+    12,
+    12,
+    15,
+    12,
+    12,
+    12,
+    12,   # left hear id end
+    12,   # right hear id start
     12,
     12,
     12,
     12,
     12,
-    18,  # left hear id end
-    12,  # unknown
-    18,  # right hear id start
     12,
-    12,
-    12,
-    12,
-    12,
-    6,   # right hear id end
-    12,  # unknown
-    105, # hear id time start
-    142,
-    168,
-    103, # hear id time end
-    2,   # left double press
-    1,   # left hold 1s
-    3,   # right double press
-    0,   # right hold 1s
-    0,   # unknown
+    12,   # right hear id end
+    0x69, # hear id time start
+    0x8e,
+    0xa8,
+    0x67, # hear id time end
+    2,    # left double press
+    1,    # left hold 1s
+    3,    # right double press
+    0,    # right hold 1s
+    0,    # unknown
 ]
 
 [[responses]]
 # firmware version
 command = [1, 5]
 response = [
-    57,
-    48,
-    46,
-    48,
-    48,
-    57,
-    48,
-    46,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
-    48,
+    0x30, # left firmware version start
+    0x31,
+    0x2e,
+    0x32,
+    0x38, # left firmware version end
+    0x30, # right firmware version start
+    0x31,
+    0x2e,
+    0x32,
+    0x38, # right firmware version end
+    0x33, # SN start
+    0x39,
+    0x30,
+    0x39,
+    0x39,
+    0x38,
+    0x35,
+    0x32,
+    0x33,
+    0x44,
+    0x38,
+    0x43,
+    0x42,
+    0x45,
+    0x41,
+    0x46, # SN end
 ]
