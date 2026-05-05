@@ -11,7 +11,7 @@ use tracing::{debug, debug_span, error, instrument, trace, warn};
 use windows::{
     Devices::{
         Bluetooth::{
-            BluetoothConnectionStatus, BluetoothDevice,
+            BluetoothCacheMode, BluetoothConnectionStatus, BluetoothDevice,
             Rfcomm::{RfcommDeviceService, RfcommServiceId},
         },
         Enumeration::DeviceInformation,
@@ -139,7 +139,10 @@ impl WindowsRfcommBackend {
             RfcommServiceSelectionStrategy::Constant(uuid) => {
                 let service_id = RfcommServiceId::FromUuid(uuid.as_guid())?;
                 let services = device
-                    .GetRfcommServicesForIdAsync(&service_id)?
+                    .GetRfcommServicesForIdWithCacheModeAsync(
+                        &service_id,
+                        BluetoothCacheMode::Uncached,
+                    )?
                     .join()?
                     .Services()?;
                 let mut services_by_uuid = services
