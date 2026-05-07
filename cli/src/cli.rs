@@ -24,7 +24,10 @@ pub fn build() -> Command {
 
 Once the device is paired, see `openscq30 device` to interact with device settings."
         )
-        .arg(arg!(--"debug-errors" "Displays additional information with errors for debugging purposes"))
+        .arg(
+            arg!(--"debug-errors" "Displays additional information with errors for debugging purposes. Deprecated, use --verbose instead.")
+                .hide(true)
+        )
         .arg(
             arg!(-v --verbose "Enables logging with warn log level. Using this argument multiple times will decrease min log level, up to -vvvv.")
                 .action(ArgAction::Count),

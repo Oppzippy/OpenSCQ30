@@ -21,7 +21,7 @@ async fn main() -> ExitCode {
     }
 
     if let Err(err) = cli::handle(&matches).await {
-        if matches.get_flag("debug-errors") {
+        if matches.get_count("verbose") > 0 || matches.get_flag("debug-errors") {
             eprintln!("Error: {err:?}");
         } else {
             // display anyhow context chain on one line

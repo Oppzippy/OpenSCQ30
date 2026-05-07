@@ -6,7 +6,6 @@ use tempfile::tempdir;
 fn cli(dir: &Path) -> Command {
     let mut cmd = Command::new(get_cargo_bin("openscq30"));
     cmd.env("XDG_CONFIG_HOME", dir.to_str().unwrap());
-    cmd.arg("--verbose"); // so that we don't miss errors
     cmd
 }
 
