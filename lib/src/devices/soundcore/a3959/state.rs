@@ -25,7 +25,8 @@ pub struct A3959State {
     auto_power_off: AutoPowerOff,
     touch_tone: TouchTone,
     low_battery_prompt: LowBatteryPrompt,
-    gaming_mode: GamingMode,
+    #[has(maybe)]
+    gaming_mode: Option<GamingMode>,
     button_reset_pending: ResetButtonConfigurationPending,
 }
 

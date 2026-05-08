@@ -21,7 +21,8 @@ use crate::{
             },
             packet_manager::PacketHandler,
             structures::{
-                GamingMode, LowBatteryPrompt, button_configuration::ButtonStatusCollection,
+                FirmwareVersion, GamingMode, LowBatteryPrompt,
+                button_configuration::ButtonStatusCollection,
             },
         },
     },
@@ -40,7 +41,7 @@ pub struct A3959StateUpdate {
     pub touch_tone: common::structures::TouchTone,
     pub auto_power_off: common::structures::AutoPowerOff,
     pub low_battery_prompt: LowBatteryPrompt,
-    pub gaming_mode: GamingMode,
+    pub gaming_mode: Option<GamingMode>,
 }
 
 impl Default for A3959StateUpdate {
@@ -89,7 +90,7 @@ impl FromPacketBody for A3959StateUpdate {
                     take(2usize),
                     common::structures::AutoPowerOff::take,
                     LowBatteryPrompt::take,
-                    GamingMode::take,
+                    GamingMode::take, // requires firmware version >= 01.60, but we can just parse and check that later
                     take(12usize),
                 ),
                 |(
@@ -123,7 +124,8 @@ impl FromPacketBody for A3959StateUpdate {
                         touch_tone,
                         auto_power_off,
                         low_battery_prompt,
-                        gaming_mode,
+                        gaming_mode: (dual_firmware_version.min() >= FirmwareVersion::new(1, 60))
+                            .then_some(gaming_mode),
                     }
                 },
             )),
@@ -160,7 +162,7 @@ impl ToPacket for A3959StateUpdate {
             .chain([0, 0])
             .chain(self.auto_power_off.bytes())
             .chain(self.low_battery_prompt.bytes())
-            .chain(self.gaming_mode.bytes())
+            .chain(self.gaming_mode.unwrap_or_default().bytes())
             .chain([0; 12])
             .collect()
     }
