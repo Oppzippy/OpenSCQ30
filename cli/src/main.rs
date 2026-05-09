@@ -66,7 +66,6 @@ fn initialize_logging(matches: &ArgMatches) -> anyhow::Result<()> {
             .with_writer(std::io::stderr)
             .pretty()
             .init();
-        tracing::trace!("test");
     }
     Ok(())
 }
