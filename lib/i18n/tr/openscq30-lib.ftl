@@ -166,3 +166,4 @@ voice-prompt = Sesli Komut
 soundcore-a3035 = Soundcore Space One
 soundcore-a3949 = Soundcore P20i / P25i / R50i
 soundcore-a3955 = Soundcore P40i
+soundcore-a3062 = Soundcore Space One Pro
