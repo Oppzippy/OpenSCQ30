@@ -51,9 +51,7 @@ impl HearId {
                 self.volume_adjustments
                     .iter()
                     .flat_map(|maybe_adjustments| {
-                        maybe_adjustments
-                            .map(|adjustments| adjustments.bytes())
-                            .unwrap_or([0xFF; 8])
+                        maybe_adjustments.map_or([0xFF; 8], |adjustments| adjustments.bytes())
                     }),
             )
             .chain(self.time.to_be_bytes())

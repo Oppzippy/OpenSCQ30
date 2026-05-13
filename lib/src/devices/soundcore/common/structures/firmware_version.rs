@@ -87,9 +87,9 @@ impl DualFirmwareVersion {
 
     pub fn min(self) -> FirmwareVersion {
         match self {
-            DualFirmwareVersion::LeftOnly(firmware_version) => firmware_version,
-            DualFirmwareVersion::RightOnly(firmware_version) => firmware_version,
-            DualFirmwareVersion::Both { left, right } => left.min(right),
+            Self::LeftOnly(firmware_version) => firmware_version,
+            Self::RightOnly(firmware_version) => firmware_version,
+            Self::Both { left, right } => left.min(right),
         }
     }
 }

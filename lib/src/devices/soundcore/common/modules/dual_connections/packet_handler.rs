@@ -35,9 +35,8 @@ where
             if dual_connections
                 .devices
                 .get(packet.index as usize)
-                .map(|maybe_device| maybe_device.as_ref())
-                .flatten()
-                .map_or(true, |device| *device != packet.device)
+                .and_then(|maybe_device| maybe_device.as_ref())
+                .is_none_or(|device| *device != packet.device)
                 || dual_connections.devices.len() != packet.total_devices as usize
             {
                 let devices = &mut dual_connections.devices;

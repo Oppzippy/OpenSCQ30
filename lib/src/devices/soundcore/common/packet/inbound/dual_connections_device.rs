@@ -39,7 +39,7 @@ impl ToPacket for DualConnectionsDevicePacket {
         ]
         .into_iter()
         .chain(self.device.mac_address.into_array())
-        .chain(self.device.name.as_bytes().iter().take(32).cloned())
+        .chain(self.device.name.as_bytes().iter().take(32).copied())
         .chain(std::iter::repeat_n(
             0,
             32usize.saturating_sub(self.device.name.len()),

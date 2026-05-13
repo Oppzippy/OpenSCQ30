@@ -63,7 +63,7 @@ pub static PRESETS: LazyLock<Vec<EqualizerPreset<8, -12, 12, 0>>> = LazyLock::ne
                 preset
                     .volume_adjustments
                     .adjustments()
-                    .into_iter()
+                    .iter()
                     .map(|db| db / 10)
                     .collect_array()
                     .expect("we didn't filter the iterator, so the output will have the same size"),

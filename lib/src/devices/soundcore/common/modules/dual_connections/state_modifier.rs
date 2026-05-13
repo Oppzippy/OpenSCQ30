@@ -119,14 +119,14 @@ where
         if let Some(target_device) = target_devices
             .iter()
             .find(|d| d.mac_address == device.mac_address)
+            && device.is_connected
+            && !target_device.is_connected
         {
-            if device.is_connected && !target_device.is_connected {
-                packet_io
-                    .send_without_response(&packet::outbound::dual_connections_disconnect(
-                        device.mac_address,
-                    ))
-                    .await?;
-            }
+            packet_io
+                .send_without_response(&packet::outbound::dual_connections_disconnect(
+                    device.mac_address,
+                ))
+                .await?;
         }
     }
 
@@ -134,14 +134,14 @@ where
         if let Some(target_device) = target_devices
             .iter()
             .find(|d| d.mac_address == device.mac_address)
+            && !device.is_connected
+            && target_device.is_connected
         {
-            if !device.is_connected && target_device.is_connected {
-                packet_io
-                    .send_without_response(&packet::outbound::dual_connections_connect(
-                        device.mac_address,
-                    ))
-                    .await?;
-            }
+            packet_io
+                .send_without_response(&packet::outbound::dual_connections_connect(
+                    device.mac_address,
+                ))
+                .await?;
         }
     }
 
