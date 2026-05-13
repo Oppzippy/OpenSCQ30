@@ -24,6 +24,7 @@ pub mod auto_power_off;
 pub mod button_configuration;
 pub mod case_battery_level;
 pub mod dual_battery;
+pub mod dual_connections;
 pub mod equalizer;
 pub mod flag;
 pub mod limit_high_volume;

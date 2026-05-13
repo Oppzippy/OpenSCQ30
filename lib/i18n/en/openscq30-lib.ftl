@@ -205,3 +205,6 @@ pressure-sensitivity = Pressure Sensitivity
 softest = Softest
 medium = Medium
 firmest = Firmest
+
+dual-connections = Dual Connections
+dual-connections-devices = Dual Connections Devices

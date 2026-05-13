@@ -7,7 +7,6 @@ use crate::{
     devices::soundcore::{
         a3936::{packets::A3936StateUpdatePacket, state::A3936State},
         common::{
-            device::fetch_state_from_state_update_packet,
             macros::soundcore_device,
             modules::{
                 button_configuration::{
@@ -16,7 +15,11 @@ use crate::{
                 },
                 equalizer,
             },
-            packet::outbound::{RequestState, ToPacket},
+            packet::{
+                self,
+                inbound::TryToPacket,
+                outbound::{RequestState, ToPacket},
+            },
             structures::button_configuration::{
                 ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
             },
@@ -33,8 +36,14 @@ mod structures;
 soundcore_device!(
     A3936State,
     async |packet_io| {
-        fetch_state_from_state_update_packet::<_, A3936State, A3936StateUpdatePacket>(packet_io)
-            .await
+        let state_update_packet: A3936StateUpdatePacket = packet_io
+            .send_with_response(&RequestState::default().to_packet())
+            .await?
+            .try_to_packet()?;
+        packet_io
+            .send_without_response(&packet::outbound::request_dual_connections_devices())
+            .await?;
+        Ok(A3936State::new(state_update_packet))
     },
     async |builder| {
         builder.module_collection().add_state_update();
@@ -47,6 +56,7 @@ soundcore_device!(
         builder.reset_button_configuration::<A3936StateUpdatePacket>(
             RequestState::default().to_packet(),
         );
+        builder.dual_connections();
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.ldac();
         builder.touch_tone();
@@ -222,6 +232,7 @@ mod tests {
                 SettingId::SerialNumber,
                 Value::String("3936a477583dda9e".into()),
             ),
+            (SettingId::DualConnections, Value::Bool(true)),
         ]);
     }
 }

@@ -1,6 +1,7 @@
 mod battery_charging;
 mod battery_level;
 mod chinese_voice_prompt;
+mod dual_connections_device;
 mod inbound_packet;
 mod serial_number_and_firmware_version;
 mod sound_modes;
@@ -11,6 +12,7 @@ pub use battery_charging::*;
 pub use battery_level::*;
 #[allow(unused_imports, reason = "used by tests, will be used in the future")]
 pub use chinese_voice_prompt::*;
+pub use dual_connections_device::*;
 pub use inbound_packet::*;
 pub use serial_number_and_firmware_version::*;
 pub use sound_modes::*;

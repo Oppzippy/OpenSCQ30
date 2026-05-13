@@ -21,6 +21,9 @@ local KNOWN_COMMANDS = {
     [0x0682] = "Set ambient sound mode cycle",
     [0xFF01] = "Set LDAC",
     [0x7F01] = "LDAC update",
+    [0x010B] = "Dual connections devices",
+    [0x820B] = "Connect to device via dual connections",
+    [0x810B] = "Disconnect from device via dual connections",
 }
 
 local soundcore_protocol = Proto("Soundcore", "Soundcore Protocol")

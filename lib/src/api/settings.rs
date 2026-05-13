@@ -42,6 +42,7 @@ pub enum CategoryId {
     DeviceInformation,
     Miscellaneous,
     LimitHighVolume,
+    DualConnections,
 }
 
 #[derive(
@@ -139,6 +140,8 @@ pub enum SettingId {
     SideTone,
     DolbyAudio,
     Ldac,
+    DualConnections,
+    DualConnectionsDevices,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

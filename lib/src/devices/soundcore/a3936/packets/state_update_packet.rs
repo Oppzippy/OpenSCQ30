@@ -19,6 +19,7 @@ use crate::{
                 parsing::take_bool,
             },
             packet_manager::PacketHandler,
+            state::Update,
             structures::{
                 AgeRange, AmbientSoundModeCycle, AutoPowerOff, CaseBatteryLevel,
                 CommonEqualizerConfiguration, CommonVolumeAdjustments, CustomHearId, DualBattery,
@@ -46,7 +47,7 @@ pub struct A3936StateUpdatePacket {
     pub case_battery_level: CaseBatteryLevel,
     pub color: u8,
     pub ldac: Ldac,
-    pub supports_two_cnn_switch: bool,
+    pub dual_connections_enabled: bool,
     pub auto_power_off: AutoPowerOff,
     pub gaming_mode: GamingMode,
 }
@@ -87,7 +88,7 @@ impl Default for A3936StateUpdatePacket {
             case_battery_level: Default::default(),
             color: Default::default(),
             ldac: Default::default(),
-            supports_two_cnn_switch: Default::default(),
+            dual_connections_enabled: Default::default(),
             auto_power_off: Default::default(),
             gaming_mode: Default::default(),
         }
@@ -118,7 +119,7 @@ impl FromPacketBody for A3936StateUpdatePacket {
             let (input, case_battery_level) = CaseBatteryLevel::take(input)?;
             let (input, color) = le_u8(input)?;
             let (input, ldac) = Ldac::take(input)?;
-            let (input, supports_two_cnn_switch) = take_bool(input)?;
+            let (input, dual_connections_enabled) = take_bool(input)?;
             let (input, auto_power_off) = AutoPowerOff::take(input)?;
             let (input, gaming_mode) = GamingMode::take(input)?;
             Ok((
@@ -138,7 +139,7 @@ impl FromPacketBody for A3936StateUpdatePacket {
                     case_battery_level,
                     color,
                     ldac,
-                    supports_two_cnn_switch,
+                    dual_connections_enabled,
                     auto_power_off,
                     gaming_mode,
                 },
@@ -186,7 +187,7 @@ impl ToPacket for A3936StateUpdatePacket {
                 self.color,
             ])
             .chain(self.ldac.bytes())
-            .chain([self.supports_two_cnn_switch as u8])
+            .chain([self.dual_connections_enabled as u8])
             .chain(self.auto_power_off.bytes())
             .chain(self.gaming_mode.bytes())
             .chain([0; 12])
@@ -204,7 +205,7 @@ impl PacketHandler<A3936State> for StateUpdatePacketHandler {
         packet: &packet::Inbound,
     ) -> device::Result<()> {
         let packet: A3936StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| *state = packet.into());
+        state.send_modify(|state| state.update(packet));
         Ok(())
     }
 }

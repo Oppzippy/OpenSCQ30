@@ -1,3 +1,4 @@
+mod dual_connections;
 mod outbound_packet;
 mod request_battery_charging;
 mod request_battery_level;
@@ -12,6 +13,7 @@ mod set_equalizer_with_drc;
 mod set_limit_high_volume;
 mod set_sound_modes;
 
+pub use dual_connections::*;
 pub use outbound_packet::*;
 #[allow(
     unused_imports,

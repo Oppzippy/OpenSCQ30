@@ -17,11 +17,11 @@ response = [
     46,
     49,
     57,   # left firmware end
-    48,   # right firmware end
+    48,   # right firmware start
     52,
     46,
     49,
-    57,   # left firmware end
+    57,   # right firmware end
     51,   # SN start
     57,
     51,
@@ -61,7 +61,7 @@ response = [
     120,
     0,    # eq right end
     255,  # age range
-    0,    #is hear id enabled
+    0,    # is hear id enabled
     255,  # hear id left
     255,
     255,
@@ -133,7 +133,7 @@ response = [
     8,    # case battery
     49,   # color?
     0,    # ldac
-    1,    # supports two cnn (what's that?)
+    1,    # dual connections
     1,    # auto power off enabled
     0,    # auto power off duration
     0,    # gaming mode

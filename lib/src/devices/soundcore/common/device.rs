@@ -28,7 +28,7 @@ use crate::{
                 packet::{self, PacketIOController, outbound::ToPacket},
                 state::Update,
                 structures::{
-                    AutoPlayPause, AutoPowerOff, BatteryLevel, CaseBatteryLevel,
+                    AutoPlayPause, AutoPowerOff, BatteryLevel, CaseBatteryLevel, DualConnections,
                     EqualizerConfiguration, GamingMode, Ldac, LimitHighVolume, LowBatteryPrompt,
                     SoundLeakCompensation, SurroundSound, TouchLock, TouchTone, VoicePrompt,
                     WearingDetection, WearingTone, button_configuration::ButtonStatusCollection,
@@ -622,6 +622,14 @@ where
     {
         self.module_collection
             .add_limit_high_volume(self.packet_io_controller.clone());
+    }
+
+    pub fn dual_connections(&mut self)
+    where
+        StateType: Has<DualConnections>,
+    {
+        self.module_collection
+            .add_dual_connections(self.packet_io_controller.clone());
     }
 
     flag!(TouchTone);
