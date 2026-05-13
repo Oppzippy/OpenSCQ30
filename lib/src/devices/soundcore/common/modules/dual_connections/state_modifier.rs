@@ -122,6 +122,9 @@ where
             && device.is_connected
             && !target_device.is_connected
         {
+            // TODO acquire a lock so that multiple disconnections can't be going on at the same time
+            // The lock should then be released by watching state sender with a timeout for when the device
+            // becomes not connected.
             packet_io
                 .send_without_response(&packet::outbound::dual_connections_disconnect(
                     device.mac_address,
@@ -137,6 +140,9 @@ where
             && !device.is_connected
             && target_device.is_connected
         {
+            // TODO acquire a lock so that multiple connections can't be going on at the same time
+            // The lock should then be released by watching state sender with a timeout for when the device
+            // becomes not connected.
             packet_io
                 .send_without_response(&packet::outbound::dual_connections_connect(
                     device.mac_address,
