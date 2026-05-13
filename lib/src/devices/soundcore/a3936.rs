@@ -7,6 +7,7 @@ use crate::{
     devices::soundcore::{
         a3936::{packets::A3936StateUpdatePacket, state::A3936State},
         common::{
+            self,
             macros::soundcore_device,
             modules::{
                 button_configuration::{
@@ -16,7 +17,6 @@ use crate::{
                 equalizer,
             },
             packet::{
-                self,
                 inbound::TryToPacket,
                 outbound::{RequestState, ToPacket},
             },
@@ -40,10 +40,15 @@ soundcore_device!(
             .send_with_response(&RequestState::default().to_packet())
             .await?
             .try_to_packet()?;
-        packet_io
-            .send_without_response(&packet::outbound::request_dual_connections_devices())
-            .await?;
-        Ok(A3936State::new(state_update_packet))
+        let dual_connections_devices = if state_update_packet.dual_connections_enabled {
+            common::modules::dual_connections::take_dual_connection_devices(&packet_io).await?
+        } else {
+            Vec::new()
+        };
+        Ok(A3936State::new(
+            state_update_packet,
+            dual_connections_devices,
+        ))
     },
     async |builder| {
         builder.module_collection().add_state_update();
@@ -146,7 +151,7 @@ impl Translate for AutoPowerOffDuration {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
+    use macaddr::MacAddr6;
 
     use crate::{
         api::settings::SettingId,
@@ -155,10 +160,13 @@ mod tests {
             soundcore::common::{
                 device::{SoundcoreDeviceConfig, test_utils::TestSoundcoreDevice},
                 packet,
+                structures::DualConnectionsDevice,
             },
         },
         settings::Value,
     };
+
+    use super::*;
 
     #[tokio::test(start_paused = true)]
     async fn it_parses_settings_correctly() {
@@ -179,7 +187,22 @@ mod tests {
         let device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3936,
-            HashMap::from([(packet::inbound::STATE_COMMAND, state_update_packet)]),
+            HashMap::from([
+                (packet::inbound::STATE_COMMAND, state_update_packet),
+                (
+                    packet::Command([0x0b, 0x01]),
+                    packet::inbound::DualConnectionsDevicePacket {
+                        total_devices: 1,
+                        index: 1,
+                        device: DualConnectionsDevice {
+                            is_connected: true,
+                            mac_address: MacAddr6::nil(),
+                            name: "Test Device".to_string(),
+                        },
+                    }
+                    .to_packet(),
+                ),
+            ]),
             SoundcoreDeviceConfig::default(),
         )
         .await;

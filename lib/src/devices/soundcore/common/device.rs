@@ -822,7 +822,12 @@ pub mod test_utils {
                         if let Some(packet) = maybe_packet {
                             let command = Command(packet[5..7].try_into().unwrap());
                             inbound_sender
-                                .send(packet_responses.get(&command).unwrap().bytes(config.checksum_kind))
+                                .send(
+                                    packet_responses
+                                        .get(&command)
+                                        .expect(&format!("missing response for {command:?}"))
+                                        .bytes(config.checksum_kind)
+                                )
                                 .await
                                 .unwrap();
                         }

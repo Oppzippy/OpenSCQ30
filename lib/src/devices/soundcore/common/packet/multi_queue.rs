@@ -49,6 +49,29 @@ impl<K: Hash + Eq, V> MultiQueue<K, V> {
         }
     }
 
+    /// Adds new tasks to the end of the queue for the specified key and returns the handles for the
+    /// newly added tasks.
+    pub fn add_n(&self, key: K, num: usize) -> VecDeque<MultiQueueHandle<V>> {
+        let mut queues = self.queues.lock().expect(LOCK_HELD_ERROR);
+        let queue = queues.entry(key).or_default();
+
+        let mut handles = VecDeque::with_capacity(num);
+        let mut preceeding = queue.back().cloned();
+        for _ in 0..num {
+            let current = Arc::new(SemaphoreWithValue {
+                semaphore: Semaphore::new(0),
+                value: std::sync::Mutex::new(None),
+            });
+            queue.push_back(current.clone());
+            handles.push_back(MultiQueueHandle {
+                preceeding,
+                current: current.clone(),
+            });
+            preceeding = Some(current);
+        }
+        handles
+    }
+
     /// When the action being performed in the task at the front of the queue is done, this will assign
     /// a value as a result of the task and pop it from the queue.
     pub fn pop(&self, key: &K, value: V) -> bool {

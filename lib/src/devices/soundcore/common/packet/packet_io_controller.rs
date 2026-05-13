@@ -139,6 +139,59 @@ impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
         })
     }
 
+    /// Sends a request packet, and then receives up to `limit` responses via `on_receive` until `on_receive` returns `false`.
+    /// Times out after 500ms of no packets received.
+    #[tracing::instrument(level = "warn", skip(self, on_receive))]
+    pub async fn send_with_multi_response(
+        &self,
+        packet: &packet::Outbound,
+        mut on_receive: impl FnMut(packet::Inbound) -> bool,
+        limit: usize,
+    ) -> device::Result<()> {
+        let queue_key = packet.command;
+
+        // HACK: We should be smarter about this and not have to add `num` handles to the list. Instead,
+        // it could be a single handle of a special type for receiving more than one value. Alternatively,
+        // all handles could be this special type, and receiving one packet could be a special case of receiving many.
+        // It would also be a good idea to not have to specify the maximum number of packets received in advance.
+        let mut handles = self.packet_queues.add_n(queue_key, limit);
+
+        handles[0].wait_for_start().await;
+
+        tracing::debug!("starting multi response");
+        self.connection
+            .write(&packet.bytes(self.checksum_kind))
+            .await?;
+
+        loop {
+            if let Some(handle) = handles.pop_front() {
+                if tokio::time::timeout(Duration::from_millis(500), handle.wait_for_end())
+                    .await
+                    .is_ok()
+                {
+                    tracing::trace!("got multi response packet");
+                    let packet = handle.wait_for_value().await;
+                    if !on_receive(packet) {
+                        tracing::debug!("multi response ended");
+                        for handle in handles {
+                            self.packet_queues.cancel(&queue_key, handle);
+                        }
+                        return Ok(());
+                    }
+                } else {
+                    tracing::debug!("timed out waiting for response");
+                    for handle in handles {
+                        self.packet_queues.cancel(&queue_key, handle);
+                    }
+                    return Ok(());
+                }
+            } else {
+                tracing::warn!("limit reached: {limit}");
+                return Ok(());
+            }
+        }
+    }
+
     pub async fn send_without_response(&self, packet: &packet::Outbound) -> device::Result<()> {
         self.connection
             .write(&packet.bytes(self.checksum_kind))

@@ -6,8 +6,8 @@ use crate::devices::soundcore::common::{
     structures::{
         AgeRange, AmbientSoundModeCycle, AutoPowerOff, CaseBatteryLevel,
         CommonEqualizerConfiguration, CustomHearId, DualBattery, DualConnections,
-        DualFirmwareVersion, GamingMode, Gender, Ldac, SerialNumber, TouchTone, TwsStatus,
-        button_configuration::ButtonStatusCollection,
+        DualConnectionsDevice, DualFirmwareVersion, GamingMode, Gender, Ldac, SerialNumber,
+        TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
     },
 };
 
@@ -38,7 +38,10 @@ pub struct A3936State {
 }
 
 impl A3936State {
-    pub fn new(state_update_packet: A3936StateUpdatePacket) -> Self {
+    pub fn new(
+        state_update_packet: A3936StateUpdatePacket,
+        dual_connections_devices: Vec<Option<DualConnectionsDevice>>,
+    ) -> Self {
         Self {
             tws_status: state_update_packet.tws_status,
             battery: state_update_packet.battery,
@@ -56,7 +59,7 @@ impl A3936State {
             ldac: state_update_packet.ldac,
             dual_connections: DualConnections {
                 is_enabled: state_update_packet.dual_connections_enabled,
-                devices: Vec::new(),
+                devices: dual_connections_devices,
             },
             auto_power_off: state_update_packet.auto_power_off,
             gaming_mode: state_update_packet.gaming_mode,
