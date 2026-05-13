@@ -84,8 +84,11 @@ where
                     .map(|mac_address_str| MacAddr6::from_str(&mac_address_str))
                     .collect::<Result<Vec<MacAddr6>, macaddr::ParseError>>()
                     .map_err(|err| SettingHandlerError::Other(Box::new(err)))?;
-                for device in &mut dual_connections.devices.iter_mut().flatten() {
-                    device.is_connected = desired_connections.contains(&device.mac_address);
+                // Dual connections only allows for 2 connections, so don't allow connecting to more than that
+                if desired_connections.len() <= 2 {
+                    for device in &mut dual_connections.devices.iter_mut().flatten() {
+                        device.is_connected = desired_connections.contains(&device.mac_address);
+                    }
                 }
             }
         }
