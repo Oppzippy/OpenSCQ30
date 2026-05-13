@@ -74,20 +74,30 @@ where
                 };
 
                 // In case the length somehow changes during the response
-                devices.truncate(packet.total_devices.into());
-                while devices.len() < packet.total_devices.into() {
+                devices.truncate(usize::from(packet.total_devices));
+                while devices.len() < usize::from(packet.total_devices) {
                     devices.push(None);
                 }
 
-                let index = packet
-                    .index
-                    .checked_sub(1)
-                    .expect("device index should start from 1")
-                    as usize;
-                devices[index] = Some(packet.device);
+                // devices sends indices starting from 1, but our vec starts from 0
+                match packet.index.checked_sub(1) {
+                    Some(index) => {
+                        devices[usize::from(index)] = Some(packet.device);
+                    }
+                    None => {
+                        // If for some reason there is an index 0, we will ignore it and proceed as normal. This may
+                        // lead to the last index never becoming Some if it's because all indices are offset by -1, but
+                        // that's fine. We can just let send_with_multi_response time out.
+                        tracing::error!(
+                            "device index should start from 1, got {} of {} total",
+                            packet.index,
+                            packet.total_devices,
+                        );
+                    }
+                };
 
-                devices.len() < packet.total_devices.into()
-                    || devices.iter().any(|device| device.is_none())
+                // devices is already the max length but padded with None, so we don't need to check the length
+                devices.iter().any(|device| device.is_none())
             },
             20,
         )
