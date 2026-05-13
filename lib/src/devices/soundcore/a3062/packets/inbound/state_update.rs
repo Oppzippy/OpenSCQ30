@@ -20,6 +20,7 @@ use crate::{
                 parsing::take_bool,
             },
             packet_manager::PacketHandler,
+            state::Update,
             structures::{
                 AmbientSoundModeCycle, AutoPowerOff, CommonEqualizerConfiguration, CustomHearId,
                 EqualizerConfiguration, FirmwareVersion, Ldac, LimitHighVolume, LowBatteryPrompt,
@@ -42,7 +43,7 @@ pub struct A3062StateUpdatePacket {
     pub low_battery_prompt: LowBatteryPrompt,
     pub dolby_audio: a3062::structures::DolbyAudio,
     pub ldac: Ldac,
-    pub dual_connections: bool,
+    pub dual_connections_enabled: bool,
     pub auto_power_off: AutoPowerOff,
     pub limit_high_volume: LimitHighVolume,
     pub side_tone: a3062::structures::SideTone,
@@ -94,7 +95,7 @@ impl FromPacketBody for A3062StateUpdatePacket {
                     low_battery_prompt,
                     dolby_audio,
                     ldac,
-                    dual_connections,
+                    dual_connections_enabled,
                     auto_power_off,
                     limit_high_volume,
                     side_tone,
@@ -111,7 +112,7 @@ impl FromPacketBody for A3062StateUpdatePacket {
                     low_battery_prompt,
                     dolby_audio,
                     ldac,
-                    dual_connections,
+                    dual_connections_enabled,
                     auto_power_off,
                     limit_high_volume,
                     side_tone,
@@ -166,7 +167,7 @@ impl PacketHandler<A3062State> for StateUpdatePacketHandler {
         packet: &packet::Inbound,
     ) -> device::Result<()> {
         let packet: A3062StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| *state = packet.into());
+        state.send_modify(|state| state.update(packet));
         Ok(())
     }
 }

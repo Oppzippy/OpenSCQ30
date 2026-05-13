@@ -767,7 +767,10 @@ pub mod test_utils {
     use nom_language::error::VerboseError;
 
     use crate::{
-        devices::soundcore::common::packet::{self, Command},
+        devices::soundcore::common::{
+            packet::{self, Command},
+            structures::DualConnectionsDevice,
+        },
         mock::rfcomm::{MockRfcommBackend, MockRfcommConnection},
     };
 
@@ -946,6 +949,23 @@ pub mod test_utils {
             // for cancel safety
             let permit = self.inbound_sender.reserve().await.unwrap();
             permit.send(packet.ack().bytes(self.config.checksum_kind));
+        }
+
+        /// Use when you need a response in order to connect, but you don't care what the reponse is
+        pub fn basic_dual_connections_response() -> (packet::Command, packet::Inbound) {
+            (
+                packet::Command([0x0b, 0x01]),
+                packet::inbound::DualConnectionsDevicePacket {
+                    total_devices: 1,
+                    index: 1,
+                    device: DualConnectionsDevice {
+                        is_connected: true,
+                        mac_address: MacAddr6::nil(),
+                        name: "Test Device".to_string(),
+                    },
+                }
+                .to_packet(),
+            )
         }
     }
 }

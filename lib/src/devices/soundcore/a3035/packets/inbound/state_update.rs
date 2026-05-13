@@ -23,6 +23,7 @@ use crate::{
                 parsing::take_bool,
             },
             packet_manager::PacketHandler,
+            state::Update,
             structures::{
                 AmbientSoundModeCycle, AutoPlayPause, AutoPowerOff, BatteryLevel,
                 CommonEqualizerConfiguration, CommonVolumeAdjustments, CustomHearId,
@@ -48,7 +49,7 @@ pub struct A3035StateUpdatePacket {
     pub ambient_sound_mode_voice_prompt: a3035::structures::AmbientSoundModeVoicePrompt,
     pub battery_alert: a3035::structures::BatteryAlert,
     pub ldac: Ldac,
-    pub dual_connections: bool,
+    pub dual_connections_enabled: bool,
 }
 
 impl FromPacketBody for A3035StateUpdatePacket {
@@ -76,7 +77,7 @@ impl FromPacketBody for A3035StateUpdatePacket {
                     AutoPlayPause::take,
                     take(4usize), //unknown
                     Ldac::take,
-                    take_bool,    // dual connections
+                    take_bool,    // dual connections enabled
                     take(2usize), // unknown
                     AutoPowerOff::take,
                     LimitHighVolume::take,
@@ -99,7 +100,7 @@ impl FromPacketBody for A3035StateUpdatePacket {
                     auto_play_pause,
                     _unkonwn5,
                     ldac,
-                    dual_connections,
+                    dual_connections_enabled,
                     _unknown6,
                     auto_power_off,
                     limit_high_volume,
@@ -117,7 +118,7 @@ impl FromPacketBody for A3035StateUpdatePacket {
                         sound_modes,
                         auto_play_pause,
                         ldac,
-                        dual_connections,
+                        dual_connections_enabled,
                         auto_power_off,
                         limit_high_volume,
                         ambient_sound_mode_voice_prompt,
@@ -194,7 +195,7 @@ impl ToPacket for A3035StateUpdatePacket {
             .chain(self.auto_play_pause.bytes())
             .chain([0; 4])
             .chain(self.ldac.bytes())
-            .chain(iter::once(self.dual_connections.into()))
+            .chain(iter::once(self.dual_connections_enabled.into()))
             .chain([0; 2])
             .chain(self.auto_power_off.bytes())
             .chain(self.limit_high_volume.bytes())
@@ -214,7 +215,7 @@ impl PacketHandler<a3035::state::A3035State> for StateUpdatePacketHandler {
         packet: &packet::Inbound,
     ) -> device::Result<()> {
         let packet: A3035StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| *state = packet.into());
+        state.send_modify(|state| state.update(packet));
         Ok(())
     }
 }

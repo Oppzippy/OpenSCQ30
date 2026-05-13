@@ -7,9 +7,12 @@ use crate::{
     devices::soundcore::{
         a3035::{packets::inbound::A3035StateUpdatePacket, state::A3035State},
         common::{
-            device::fetch_state_from_state_update_packet,
+            self,
             macros::soundcore_device,
-            packet::outbound::{RequestState, ToPacket},
+            packet::{
+                inbound::TryToPacket,
+                outbound::{RequestState, ToPacket},
+            },
         },
     },
     i18n::fl,
@@ -23,8 +26,19 @@ mod structures;
 soundcore_device!(
     A3035State,
     async |packet_io| {
-        fetch_state_from_state_update_packet::<_, A3035State, A3035StateUpdatePacket>(packet_io)
-            .await
+        let state_update_packet: A3035StateUpdatePacket = packet_io
+            .send_with_response(&RequestState::default().to_packet())
+            .await?
+            .try_to_packet()?;
+        let dual_connections_devices = if state_update_packet.dual_connections_enabled {
+            common::modules::dual_connections::take_dual_connection_devices(&packet_io).await?
+        } else {
+            Vec::new()
+        };
+        Ok(A3035State::new(
+            state_update_packet,
+            dual_connections_devices,
+        ))
     },
     async |builder| {
         builder.module_collection().add_state_update();
@@ -37,6 +51,8 @@ soundcore_device!(
         builder.ambient_sound_mode_cycle();
 
         builder.limit_high_volume();
+
+        builder.dual_connections();
 
         builder.ldac();
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
@@ -87,7 +103,7 @@ mod tests {
         DeviceModel,
         devices::soundcore::common::{
             device::{SoundcoreDeviceConfig, test_utils::TestSoundcoreDevice},
-            packet,
+            packet::{self},
         },
         settings::SettingId,
     };
@@ -97,19 +113,23 @@ mod tests {
         let device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3035,
-            HashMap::from([(
-                packet::Command([1, 1]),
-                packet::Inbound::new(
+            HashMap::from([
+                (
                     packet::Command([1, 1]),
-                    vec![
-                        5, 255, 48, 54, 46, 56, 55, 51, 48, 51, 53, 55, 48, 53, 48, 50, 56, 56, 65,
-                        57, 68, 70, 52, 0, 0, 120, 120, 120, 120, 120, 120, 120, 120, 120, 0, 30,
-                        255, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 255,
-                        255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 4, 4, 7, 3, 0, 0x50, 0, 0,
-                        1, 5, 0, 1, 0, 0, 0, 49, 1, 0, 1, 0, 1, 2, 0, 90, 0, 1, 1, 0, 0, 0,
-                    ],
+                    packet::Inbound::new(
+                        packet::Command([1, 1]),
+                        vec![
+                            5, 255, 48, 54, 46, 56, 55, 51, 48, 51, 53, 55, 48, 53, 48, 50, 56, 56,
+                            65, 57, 68, 70, 52, 0, 0, 120, 120, 120, 120, 120, 120, 120, 120, 120,
+                            0, 30, 255, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0,
+                            0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 4, 4, 7, 3,
+                            0, 0x50, 0, 0, 1, 5, 0, 1, 0, 0, 0, 49, 1, 0, 1, 0, 1, 2, 0, 90, 0, 1,
+                            1, 0, 0, 0,
+                        ],
+                    ),
                 ),
-            )]),
+                TestSoundcoreDevice::basic_dual_connections_response(),
+            ]),
             SoundcoreDeviceConfig::default(),
         )
         .await;
@@ -135,6 +155,7 @@ mod tests {
                 SettingId::PresetEqualizerProfile,
                 Some("SoundcoreSignature").into(),
             ),
+            (SettingId::DualConnections, false.into()),
         ]);
     }
 
@@ -143,19 +164,23 @@ mod tests {
         let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3035,
-            HashMap::from([(
-                packet::Command([1, 1]),
-                packet::Inbound::new(
+            HashMap::from([
+                (
                     packet::Command([1, 1]),
-                    vec![
-                        5, 255, 48, 54, 46, 56, 55, 51, 48, 51, 53, 55, 48, 53, 48, 50, 56, 56, 65,
-                        57, 68, 70, 52, 0, 0, 120, 120, 120, 120, 120, 120, 120, 120, 120, 0, 30,
-                        255, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 255,
-                        255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 4, 4, 7, 3, 0, 0x50, 0, 0,
-                        1, 5, 0, 1, 0, 0, 0, 49, 1, 0, 1, 0, 1, 2, 0, 90, 0, 1, 1, 0, 0, 0,
-                    ],
+                    packet::Inbound::new(
+                        packet::Command([1, 1]),
+                        vec![
+                            5, 255, 48, 54, 46, 56, 55, 51, 48, 51, 53, 55, 48, 53, 48, 50, 56, 56,
+                            65, 57, 68, 70, 52, 0, 0, 120, 120, 120, 120, 120, 120, 120, 120, 120,
+                            0, 30, 255, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0,
+                            0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 4, 4, 7, 3,
+                            0, 0x50, 0, 0, 1, 5, 0, 1, 0, 0, 0, 49, 1, 0, 1, 0, 1, 2, 0, 90, 0, 1,
+                            1, 0, 0, 0,
+                        ],
+                    ),
                 ),
-            )]),
+                TestSoundcoreDevice::basic_dual_connections_response(),
+            ]),
             SoundcoreDeviceConfig::default(),
         )
         .await;

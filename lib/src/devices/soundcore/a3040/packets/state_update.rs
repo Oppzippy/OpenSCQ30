@@ -24,6 +24,7 @@ use crate::{
                 parsing::take_bool,
             },
             packet_manager::PacketHandler,
+            state::Update,
             structures::{
                 AmbientSoundModeCycle, AutoPowerOff, BatteryLevel, CommonEqualizerConfiguration,
                 CommonVolumeAdjustments, CustomHearId, FirmwareVersion, HearIdMusicGenre,
@@ -48,7 +49,7 @@ pub struct A3040StateUpdatePacket {
     pub low_battery_prompt: a3040::structures::LowBatteryPrompt,
     pub hear_id: CustomHearId<2, 10>,
     pub ldac: Ldac,
-    pub dual_connections: bool,
+    pub dual_connections_enabled: bool,
 }
 
 impl FromPacketBody for A3040StateUpdatePacket {
@@ -95,7 +96,7 @@ impl FromPacketBody for A3040StateUpdatePacket {
                     sound_modes,
                     _unknown3,
                     ldac,
-                    dual_connections,
+                    dual_connections_enabled,
                     _unknown4,
                     auto_power_off,
                     limit_high_volume,
@@ -113,7 +114,7 @@ impl FromPacketBody for A3040StateUpdatePacket {
                         ambient_sound_mode_cycle,
                         sound_modes,
                         ldac,
-                        dual_connections,
+                        dual_connections_enabled,
                         auto_power_off,
                         limit_high_volume,
                         voice_prompt,
@@ -189,7 +190,7 @@ impl ToPacket for A3040StateUpdatePacket {
             .chain(self.sound_modes.bytes())
             .chain([0; 6]) // unknown
             .chain(self.ldac.bytes())
-            .chain([self.dual_connections as u8])
+            .chain([self.dual_connections_enabled as u8])
             .chain([0; 2]) // unknown
             .chain(self.auto_power_off.bytes())
             .chain(self.limit_high_volume.bytes())
@@ -217,7 +218,7 @@ impl PacketHandler<a3040::state::A3040State> for StateUpdatePacketHandler {
         packet: &packet::Inbound,
     ) -> device::Result<()> {
         let packet: A3040StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| *state = packet.into());
+        state.send_modify(|state| state.update(packet));
         Ok(())
     }
 }

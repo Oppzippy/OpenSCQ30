@@ -7,9 +7,12 @@ use crate::{
     devices::soundcore::{
         a3040::{packets::A3040StateUpdatePacket, state::A3040State},
         common::{
-            device::fetch_state_from_state_update_packet,
+            self,
             macros::soundcore_device,
-            packet::outbound::{RequestState, ToPacket},
+            packet::{
+                inbound::TryToPacket,
+                outbound::{RequestState, ToPacket},
+            },
         },
     },
     i18n::fl,
@@ -23,8 +26,19 @@ mod structures;
 soundcore_device!(
     A3040State,
     async |packet_io| {
-        fetch_state_from_state_update_packet::<_, A3040State, A3040StateUpdatePacket>(packet_io)
-            .await
+        let state_update_packet: A3040StateUpdatePacket = packet_io
+            .send_with_response(&RequestState::default().to_packet())
+            .await?
+            .try_to_packet()?;
+        let dual_connections_devices = if state_update_packet.dual_connections_enabled {
+            common::modules::dual_connections::take_dual_connection_devices(&packet_io).await?
+        } else {
+            Vec::new()
+        };
+        Ok(A3040State::new(
+            state_update_packet,
+            dual_connections_devices,
+        ))
     },
     async |builder| {
         builder.module_collection().add_state_update();
@@ -35,6 +49,8 @@ soundcore_device!(
 
         builder.a3040_button_configuration();
         builder.ambient_sound_mode_cycle();
+
+        builder.dual_connections();
 
         builder.ldac();
         builder.a3040_voice_prompt();
@@ -96,22 +112,26 @@ mod tests {
         let device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3040,
-            HashMap::from([(
-                packet::Command([1, 1]),
-                packet::Inbound::new(
+            HashMap::from([
+                (
                     packet::Command([1, 1]),
-                    vec![
-                        3, 255, 48, 50, 46, 51, 52, 51, 48, 52, 48, 49, 65, 49, 65, 50, 70, 67, 67,
-                        69, 69, 69, 56, 17, 0, 150, 140, 110, 110, 130, 150, 160, 170, 120, 0, 122,
-                        122, 118, 119, 121, 122, 122, 126, 120, 0, 4, 4, 7, 7, 0, 0x50, 0, 1, 0, 5,
-                        255, 0, 0, 255, 0, 49, 0, 1, 255, 0, 1, 0, 0, 90, 0, 1, 1, 1, 0, 17, 50, 1,
-                        1, 143, 143, 128, 138, 150, 150, 143, 143, 60, 60, 143, 143, 128, 138, 150,
-                        150, 143, 143, 60, 60, 100, 152, 140, 205, 0, 143, 143, 128, 138, 150, 150,
-                        143, 143, 60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 122, 122, 119, 121, 122,
-                        122, 121, 123, 114, 0, 17, 0, 0, 0, 0, 0, 0, 0, 0,
-                    ],
+                    packet::Inbound::new(
+                        packet::Command([1, 1]),
+                        vec![
+                            3, 255, 48, 50, 46, 51, 52, 51, 48, 52, 48, 49, 65, 49, 65, 50, 70, 67,
+                            67, 69, 69, 69, 56, 17, 0, 150, 140, 110, 110, 130, 150, 160, 170, 120,
+                            0, 122, 122, 118, 119, 121, 122, 122, 126, 120, 0, 4, 4, 7, 7, 0, 0x50,
+                            0, 1, 0, 5, 255, 0, 0, 255, 0, 49, 0, 1, 255, 0, 1, 0, 0, 90, 0, 1, 1,
+                            1, 0, 17, 50, 1, 1, 143, 143, 128, 138, 150, 150, 143, 143, 60, 60,
+                            143, 143, 128, 138, 150, 150, 143, 143, 60, 60, 100, 152, 140, 205, 0,
+                            143, 143, 128, 138, 150, 150, 143, 143, 60, 60, 0, 0, 0, 0, 0, 0, 0, 0,
+                            0, 0, 122, 122, 119, 121, 122, 122, 121, 123, 114, 0, 17, 0, 0, 0, 0,
+                            0, 0, 0, 0,
+                        ],
+                    ),
                 ),
-            )]),
+                TestSoundcoreDevice::basic_dual_connections_response(),
+            ]),
             SoundcoreDeviceConfig::default(),
         )
         .await;
@@ -134,6 +154,7 @@ mod tests {
             (SettingId::Ldac, false.into()),
             (SettingId::VoicePrompt, true.into()),
             (SettingId::LowBatteryPrompt, true.into()),
+            (SettingId::DualConnections, true.into()),
         ]);
     }
 
@@ -142,22 +163,26 @@ mod tests {
         let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3040,
-            HashMap::from([(
-                packet::Command([1, 1]),
-                packet::Inbound::new(
+            HashMap::from([
+                (
                     packet::Command([1, 1]),
-                    vec![
-                        3, 255, 48, 50, 46, 51, 52, 51, 48, 52, 48, 49, 65, 49, 65, 50, 70, 67, 67,
-                        69, 69, 69, 56, 17, 0, 150, 140, 110, 110, 130, 150, 160, 170, 120, 0, 122,
-                        122, 118, 119, 121, 122, 122, 126, 120, 0, 4, 4, 7, 7, 0, 0x50, 0, 1, 0, 5,
-                        255, 0, 0, 255, 0, 49, 0, 1, 255, 0, 1, 0, 0, 90, 0, 1, 1, 1, 0, 17, 50, 1,
-                        1, 143, 143, 128, 138, 150, 150, 143, 143, 60, 60, 143, 143, 128, 138, 150,
-                        150, 143, 143, 60, 60, 100, 152, 140, 205, 0, 143, 143, 128, 138, 150, 150,
-                        143, 143, 60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 122, 122, 119, 121, 122,
-                        122, 121, 123, 114, 0, 17, 0, 0, 0, 0, 0, 0, 0, 0,
-                    ],
+                    packet::Inbound::new(
+                        packet::Command([1, 1]),
+                        vec![
+                            3, 255, 48, 50, 46, 51, 52, 51, 48, 52, 48, 49, 65, 49, 65, 50, 70, 67,
+                            67, 69, 69, 69, 56, 17, 0, 150, 140, 110, 110, 130, 150, 160, 170, 120,
+                            0, 122, 122, 118, 119, 121, 122, 122, 126, 120, 0, 4, 4, 7, 7, 0, 0x50,
+                            0, 1, 0, 5, 255, 0, 0, 255, 0, 49, 0, 1, 255, 0, 1, 0, 0, 90, 0, 1, 1,
+                            1, 0, 17, 50, 1, 1, 143, 143, 128, 138, 150, 150, 143, 143, 60, 60,
+                            143, 143, 128, 138, 150, 150, 143, 143, 60, 60, 100, 152, 140, 205, 0,
+                            143, 143, 128, 138, 150, 150, 143, 143, 60, 60, 0, 0, 0, 0, 0, 0, 0, 0,
+                            0, 0, 122, 122, 119, 121, 122, 122, 121, 123, 114, 0, 17, 0, 0, 0, 0,
+                            0, 0, 0, 0,
+                        ],
+                    ),
                 ),
-            )]),
+                TestSoundcoreDevice::basic_dual_connections_response(),
+            ]),
             SoundcoreDeviceConfig::default(),
         )
         .await;
@@ -178,22 +203,26 @@ mod tests {
         let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3040,
-            HashMap::from([(
-                packet::Command([1, 1]),
-                packet::Inbound::new(
+            HashMap::from([
+                (
                     packet::Command([1, 1]),
-                    vec![
-                        3, 255, 48, 50, 46, 51, 52, 51, 48, 52, 48, 49, 65, 49, 65, 50, 70, 67, 67,
-                        69, 69, 69, 56, 17, 0, 150, 140, 110, 110, 130, 150, 160, 170, 120, 0, 122,
-                        122, 118, 119, 121, 122, 122, 126, 120, 0, 4, 4, 7, 7, 0, 0x50, 0, 1, 0, 5,
-                        255, 0, 0, 255, 0, 49, 0, 1, 255, 0, 1, 0, 0, 90, 0, 1, 1, 1, 0, 17, 50, 1,
-                        1, 143, 143, 128, 138, 150, 150, 143, 143, 60, 60, 143, 143, 128, 138, 150,
-                        150, 143, 143, 60, 60, 100, 152, 140, 205, 0, 143, 143, 128, 138, 150, 150,
-                        143, 143, 60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 122, 122, 119, 121, 122,
-                        122, 121, 123, 114, 0, 17, 0, 0, 0, 0, 0, 0, 0, 0,
-                    ],
+                    packet::Inbound::new(
+                        packet::Command([1, 1]),
+                        vec![
+                            3, 255, 48, 50, 46, 51, 52, 51, 48, 52, 48, 49, 65, 49, 65, 50, 70, 67,
+                            67, 69, 69, 69, 56, 17, 0, 150, 140, 110, 110, 130, 150, 160, 170, 120,
+                            0, 122, 122, 118, 119, 121, 122, 122, 126, 120, 0, 4, 4, 7, 7, 0, 0x50,
+                            0, 1, 0, 5, 255, 0, 0, 255, 0, 49, 0, 1, 255, 0, 1, 0, 0, 90, 0, 1, 1,
+                            1, 0, 17, 50, 1, 1, 143, 143, 128, 138, 150, 150, 143, 143, 60, 60,
+                            143, 143, 128, 138, 150, 150, 143, 143, 60, 60, 100, 152, 140, 205, 0,
+                            143, 143, 128, 138, 150, 150, 143, 143, 60, 60, 0, 0, 0, 0, 0, 0, 0, 0,
+                            0, 0, 122, 122, 119, 121, 122, 122, 121, 123, 114, 0, 17, 0, 0, 0, 0,
+                            0, 0, 0, 0,
+                        ],
+                    ),
                 ),
-            )]),
+                TestSoundcoreDevice::basic_dual_connections_response(),
+            ]),
             SoundcoreDeviceConfig::default(),
         )
         .await;
@@ -224,22 +253,26 @@ mod tests {
         let mut device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3040,
-            HashMap::from([(
-                packet::Command([1, 1]),
-                packet::Inbound::new(
+            HashMap::from([
+                (
                     packet::Command([1, 1]),
-                    vec![
-                        3, 255, 48, 50, 46, 51, 52, 51, 48, 52, 48, 49, 65, 49, 65, 50, 70, 67, 67,
-                        69, 69, 69, 56, 17, 0, 150, 140, 110, 110, 130, 150, 160, 170, 120, 0, 122,
-                        122, 118, 119, 121, 122, 122, 126, 120, 0, 4, 4, 7, 7, 0, 0x50, 0, 1, 0, 5,
-                        255, 0, 0, 255, 0, 49, 0, 1, 255, 0, 1, 0, 0, 90, 0, 1, 1, 1, 0, 17, 50, 1,
-                        1, 143, 143, 128, 138, 150, 150, 143, 143, 60, 60, 143, 143, 128, 138, 150,
-                        150, 143, 143, 60, 60, 100, 152, 140, 205, 0, 143, 143, 128, 138, 150, 150,
-                        143, 143, 60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 122, 122, 119, 121, 122,
-                        122, 121, 123, 114, 0, 17, 0, 0, 0, 0, 0, 0, 0, 0,
-                    ],
+                    packet::Inbound::new(
+                        packet::Command([1, 1]),
+                        vec![
+                            3, 255, 48, 50, 46, 51, 52, 51, 48, 52, 48, 49, 65, 49, 65, 50, 70, 67,
+                            67, 69, 69, 69, 56, 17, 0, 150, 140, 110, 110, 130, 150, 160, 170, 120,
+                            0, 122, 122, 118, 119, 121, 122, 122, 126, 120, 0, 4, 4, 7, 7, 0, 0x50,
+                            0, 1, 0, 5, 255, 0, 0, 255, 0, 49, 0, 1, 255, 0, 1, 0, 0, 90, 0, 1, 1,
+                            1, 0, 17, 50, 1, 1, 143, 143, 128, 138, 150, 150, 143, 143, 60, 60,
+                            143, 143, 128, 138, 150, 150, 143, 143, 60, 60, 100, 152, 140, 205, 0,
+                            143, 143, 128, 138, 150, 150, 143, 143, 60, 60, 0, 0, 0, 0, 0, 0, 0, 0,
+                            0, 0, 122, 122, 119, 121, 122, 122, 121, 123, 114, 0, 17, 0, 0, 0, 0,
+                            0, 0, 0, 0,
+                        ],
+                    ),
                 ),
-            )]),
+                TestSoundcoreDevice::basic_dual_connections_response(),
+            ]),
             SoundcoreDeviceConfig::default(),
         )
         .await;

@@ -151,8 +151,6 @@ impl Translate for AutoPowerOffDuration {
 
 #[cfg(test)]
 mod tests {
-    use macaddr::MacAddr6;
-
     use crate::{
         api::settings::SettingId,
         devices::{
@@ -160,7 +158,6 @@ mod tests {
             soundcore::common::{
                 device::{SoundcoreDeviceConfig, test_utils::TestSoundcoreDevice},
                 packet,
-                structures::DualConnectionsDevice,
             },
         },
         settings::Value,
@@ -189,19 +186,7 @@ mod tests {
             DeviceModel::SoundcoreA3936,
             HashMap::from([
                 (packet::inbound::STATE_COMMAND, state_update_packet),
-                (
-                    packet::Command([0x0b, 0x01]),
-                    packet::inbound::DualConnectionsDevicePacket {
-                        total_devices: 1,
-                        index: 1,
-                        device: DualConnectionsDevice {
-                            is_connected: true,
-                            mac_address: MacAddr6::nil(),
-                            name: "Test Device".to_string(),
-                        },
-                    }
-                    .to_packet(),
-                ),
+                TestSoundcoreDevice::basic_dual_connections_response(),
             ]),
             SoundcoreDeviceConfig::default(),
         )
