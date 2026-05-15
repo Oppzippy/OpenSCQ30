@@ -79,7 +79,7 @@ response = [
     1,    # Multi-Scene ANC (0=transport 1=outdoor 2=indoor)
     49,   # Unknown
     1,    # Touch Tone
-    1,    # Unknown
+    1,    # Dual Connections
     0,    # Unknown
     1,    # Auto power off enabled
     0,    # Auto power off duration
