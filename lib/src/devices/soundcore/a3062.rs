@@ -105,7 +105,6 @@ mod tests {
                         ],
                     ),
                 ),
-                TestSoundcoreDevice::basic_dual_connections_response(),
             ]),
             SoundcoreDeviceConfig::default(),
         )

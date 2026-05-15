@@ -158,7 +158,6 @@ mod tests {
             DeviceModel::SoundcoreA3936,
             HashMap::from([
                 (packet::inbound::STATE_COMMAND, state_update_packet),
-                TestSoundcoreDevice::basic_dual_connections_response(),
             ]),
             SoundcoreDeviceConfig::default(),
         )
