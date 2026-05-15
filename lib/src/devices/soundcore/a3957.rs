@@ -1,25 +1,19 @@
 use std::collections::HashMap;
 
-use openscq30_i18n::Translate;
-use strum::{IntoStaticStr, VariantArray};
-
-use crate::{
-    devices::soundcore::common::{
-        self,
-        device::fetch_state_from_state_update_packet,
-        macros::soundcore_device,
-        modules::{
-            button_configuration::{
-                ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_ACTIONS,
-            },
-            equalizer,
+use crate::devices::soundcore::common::{
+    self,
+    device::fetch_state_from_state_update_packet,
+    macros::soundcore_device,
+    modules::{
+        button_configuration::{
+            ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_ACTIONS,
         },
-        packet::outbound::{RequestState, ToPacket},
-        structures::button_configuration::{
-            ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
-        },
+        equalizer,
     },
-    i18n::fl,
+    packet::outbound::{RequestState, ToPacket},
+    structures::button_configuration::{
+        ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
+    },
 };
 
 mod modules;
@@ -52,7 +46,9 @@ soundcore_device!(
         builder.limit_high_volume();
 
         builder.ldac();
-        builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
+        builder.auto_power_off(
+            common::modules::auto_power_off::AutoPowerOffDuration::ten_twenty_thirty_sixty(),
+        );
         builder.touch_tone();
         builder.low_battery_prompt();
         builder.wearing_tone();
@@ -138,30 +134,6 @@ pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<8, 4> =
             },
         ],
     };
-
-#[derive(IntoStaticStr, VariantArray)]
-#[allow(clippy::enum_variant_names)]
-enum AutoPowerOffDuration {
-    #[strum(serialize = "10m")]
-    TenMinutes,
-    #[strum(serialize = "20m")]
-    TwentyMinutes,
-    #[strum(serialize = "30m")]
-    ThirtyMinutes,
-    #[strum(serialize = "60m")]
-    SixtyMinutes,
-}
-
-impl Translate for AutoPowerOffDuration {
-    fn translate(&self) -> String {
-        match self {
-            Self::TenMinutes => fl!("x-minutes", minutes = 10),
-            Self::TwentyMinutes => fl!("x-minutes", minutes = 20),
-            Self::ThirtyMinutes => fl!("x-minutes", minutes = 30),
-            Self::SixtyMinutes => fl!("x-minutes", minutes = 60),
-        }
-    }
-}
 
 #[cfg(test)]
 mod tests {

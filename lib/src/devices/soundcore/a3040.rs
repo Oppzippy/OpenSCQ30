@@ -1,21 +1,15 @@
 use std::collections::HashMap;
 
-use openscq30_i18n::Translate;
-use strum::{IntoStaticStr, VariantArray};
-
-use crate::{
-    devices::soundcore::{
-        a3040::{packets::A3040StateUpdatePacket, state::A3040State},
-        common::{
-            self,
-            macros::soundcore_device,
-            packet::{
-                inbound::TryToPacket,
-                outbound::{RequestState, ToPacket},
-            },
+use crate::devices::soundcore::{
+    a3040::{packets::A3040StateUpdatePacket, state::A3040State},
+    common::{
+        self,
+        macros::soundcore_device,
+        packet::{
+            inbound::TryToPacket,
+            outbound::{RequestState, ToPacket},
         },
     },
-    i18n::fl,
 };
 
 mod modules;
@@ -55,7 +49,9 @@ soundcore_device!(
         builder.ldac();
         builder.a3040_voice_prompt();
         builder.a3040_low_battery_prompt();
-        builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
+        builder.auto_power_off(
+            common::modules::auto_power_off::AutoPowerOffDuration::half_hour_increments(),
+        );
 
         builder.limit_high_volume();
 
@@ -69,30 +65,6 @@ soundcore_device!(
         )])
     },
 );
-
-#[derive(IntoStaticStr, VariantArray)]
-#[allow(clippy::enum_variant_names)]
-enum AutoPowerOffDuration {
-    #[strum(serialize = "30m")]
-    ThirtyMinutes,
-    #[strum(serialize = "60m")]
-    SixtyMinutes,
-    #[strum(serialize = "90m")]
-    NinetyMinutes,
-    #[strum(serialize = "120m")]
-    OneHundredTwentyMinutes,
-}
-
-impl Translate for AutoPowerOffDuration {
-    fn translate(&self) -> String {
-        match self {
-            Self::ThirtyMinutes => fl!("x-minutes", minutes = 30),
-            Self::SixtyMinutes => fl!("x-minutes", minutes = 60),
-            Self::NinetyMinutes => fl!("x-minutes", minutes = 90),
-            Self::OneHundredTwentyMinutes => fl!("x-minutes", minutes = 120),
-        }
-    }
-}
 
 #[cfg(test)]
 mod tests {
