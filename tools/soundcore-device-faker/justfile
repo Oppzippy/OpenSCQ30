@@ -9,6 +9,7 @@ log_level := "INFO"
 
 remote_transport_spec := env('SOUNDCORE_DEVICE_FAKER_REMOTE_TRANSPORT_SPEC')
 
+alias fmt := format
 format:
     ruff format
 
