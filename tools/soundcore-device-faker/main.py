@@ -28,7 +28,7 @@ from watchdog.events import (
     FileSystemEventHandler,
 )
 from watchdog.observers import Observer
-from soundcoresession import SoundcoreSession
+from soundcoredevicefaker.soundcoresession import SoundcoreSession
 
 
 class ConfigChangedHandler(FileSystemEventHandler):
@@ -42,8 +42,8 @@ class ConfigChangedHandler(FileSystemEventHandler):
 async def main() -> None:
     if len(sys.argv) < 3:
         print(
-            "Usage: ./src/device_faker/main.py <transport-spec> <device-config>\n"
-            "Example: ./src/device_faker/main.py usb:0 devices/q30.toml"
+            "Usage: ./main.py <transport-spec> <device-config>\n"
+            "Example: ./main.py usb:0 devices/q30.toml"
         )
         return
 

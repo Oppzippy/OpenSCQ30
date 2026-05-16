@@ -52,5 +52,5 @@ run-remote device:
         --keep=1 \
         --user="$USER" \
         --addamb=cap_net_admin \
-        -- -c "source ./venv/bin/activate && LOG_LEVEL={{ log_level }} ./src/soundcore_device_faker/main.py {{ remote_transport_spec }} ./devices/{{ device }}.toml"
+        -- -c "source ./venv/bin/activate && LOG_LEVEL={{ log_level }} ./main.py {{ remote_transport_spec }} ./devices/{{ device }}.toml"
     EOF
