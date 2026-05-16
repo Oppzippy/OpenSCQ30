@@ -219,12 +219,7 @@ impl ToPacket for A3933StateUpdatePacket {
         self.tws_status
             .bytes()
             .into_iter()
-            .chain([
-                self.battery.left.is_charging as u8,
-                self.battery.right.is_charging as u8,
-                self.battery.left.level.0,
-                self.battery.right.level.0,
-            ])
+            .chain(self.battery.bytes())
             .chain(self.dual_firmware_version.bytes())
             .chain(self.serial_number.bytes())
             .chain(self.equalizer_configuration.bytes())
