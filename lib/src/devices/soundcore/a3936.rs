@@ -156,9 +156,7 @@ mod tests {
         let device = TestSoundcoreDevice::new(
             super::device_registry,
             DeviceModel::SoundcoreA3936,
-            HashMap::from([
-                (packet::inbound::STATE_COMMAND, state_update_packet),
-            ]),
+            HashMap::from([(packet::inbound::STATE_COMMAND, state_update_packet)]),
             SoundcoreDeviceConfig::default(),
         )
         .await;
