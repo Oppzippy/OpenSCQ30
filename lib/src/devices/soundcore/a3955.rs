@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use crate::devices::soundcore::common::{
     self,
-    device::fetch_state_from_state_update_packet,
     macros::soundcore_device,
     modules::{
         button_configuration::{
@@ -10,7 +9,10 @@ use crate::devices::soundcore::common::{
         },
         equalizer,
     },
-    packet::outbound::{RequestState, ToPacket},
+    packet::{
+        inbound::TryToPacket,
+        outbound::{RequestState, ToPacket},
+    },
     structures::button_configuration::{
         ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
     },
@@ -24,12 +26,19 @@ mod structures;
 soundcore_device!(
     state::A3955State,
     async |packet_io| {
-        fetch_state_from_state_update_packet::<
-            _,
-            state::A3955State,
-            packets::inbound::A3955StateUpdatePacket,
-        >(packet_io)
-        .await
+        let state_update_packet: packets::inbound::A3955StateUpdatePacket = packet_io
+            .send_with_response(&RequestState::default().to_packet())
+            .await?
+            .try_to_packet()?;
+        let dual_connections_devices = if state_update_packet.dual_connections_enabled {
+            common::modules::dual_connections::take_dual_connection_devices(&packet_io).await?
+        } else {
+            Vec::new()
+        };
+        Ok(state::A3955State::new(
+            state_update_packet,
+            dual_connections_devices,
+        ))
     },
     async |builder| {
         builder.module_collection().add_state_update();
@@ -44,6 +53,8 @@ soundcore_device!(
         );
 
         builder.limit_high_volume();
+
+        builder.dual_connections();
 
         builder.a3955_immersive_experience();
         builder.auto_power_off(

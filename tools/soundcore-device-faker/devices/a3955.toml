@@ -141,7 +141,7 @@ response = [
     1,        # ANC Personalized to ear canal
     49,
     1,        # Touch Tone
-    1,
+    1,        # dual connections
     1,        # Limit High Volume
     82,       # DB level, expects 75, 80, 85, 90, 95, 100
     2,        # DB reading refresh rate. 0=real time, 1=10 seconds, 2=1 minute

@@ -20,8 +20,10 @@ use crate::{
                 self, Command,
                 inbound::{FromPacketBody, TryToPacket},
                 outbound::ToPacket,
+                parsing::take_bool,
             },
             packet_manager::PacketHandler,
+            state::Update,
             structures::button_configuration::ButtonStatusCollection,
         },
     },
@@ -48,6 +50,7 @@ pub struct A3955StateUpdatePacket {
     pub auto_power_off: common::structures::AutoPowerOff,
     pub low_battery_prompt: common::structures::LowBatteryPrompt,
     pub immersive_experience: a3955::structures::ImmersiveExperience,
+    pub dual_connections_enabled: bool,
     // pub gaming_mode: bool,
 }
 
@@ -72,6 +75,7 @@ impl Default for A3955StateUpdatePacket {
             low_battery_prompt: Default::default(),
             gender: Default::default(),
             immersive_experience: Default::default(),
+            dual_connections_enabled: Default::default(),
         }
     }
 }
@@ -106,7 +110,7 @@ impl FromPacketBody for A3955StateUpdatePacket {
                         a3955::structures::AncPersonalizedToEarCanal::take,
                         take(1usize),
                         common::structures::TouchTone::take,
-                        take(1usize),
+                        take_bool,
                         common::structures::LimitHighVolume::take,
                         common::structures::AutoPowerOff::take,
                         take(1usize),
@@ -132,7 +136,7 @@ impl FromPacketBody for A3955StateUpdatePacket {
                         anc_personalized_to_ear_canal,
                         _unknown3,
                         touch_tone,
-                        _unknown4,
+                        dual_connections_enabled,
                         limit_high_volume,
                         auto_power_off,
                         _unknown5,
@@ -156,6 +160,7 @@ impl FromPacketBody for A3955StateUpdatePacket {
                         limit_high_volume,
                         auto_power_off,
                         low_battery_prompt,
+                        dual_connections_enabled,
                         // TODO figure out where in the packet immersive experience is
                         // I tried setting all 0 bytes to 1, and that didn't enable immersive experience,
                         // so maybe there's a separate packet for it?
@@ -219,7 +224,7 @@ impl PacketHandler<a3955::state::A3955State> for StateUpdatePacketHandler {
         packet: &packet::Inbound,
     ) -> device::Result<()> {
         let packet: A3955StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| *state = packet.into());
+        state.send_modify(|state| state.update(packet));
         Ok(())
     }
 }
