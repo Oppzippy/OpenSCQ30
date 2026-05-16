@@ -1,0 +1,10 @@
+* Features
+  - Add support for dual connections
+  - Add LDAC for more devices
+  - Add missing settings for Soundcore Space Q45
+  - Add support for Soundcore Liberty 2 Pro
+
+* Fixes
+  - Error connecting to devices with serial numbers containing non-hexidecimal characters
+  - Soundcore Liberty 2 Pro+ was incorrectly labeled as Soundcore Liberty 2 Pro
+  - Battery level for a disconnected earbud is displayed as 2550%

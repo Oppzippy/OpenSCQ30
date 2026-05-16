@@ -1,5 +1,36 @@
 # Changelog
 
+## v2.8.0
+
+### General
+
+#### Features
+
+- Add support for dual connections on all relevant devices
+- Add Voice Prompt, Low Battery Alert, and LDAC for Soundcore Space Q45
+- Add LDAC for Soundcore Liberty 2 Pro+, Liberty Air 2 Pro, and Liberty 3 Pro
+- Add support for Soundcore Liberty 2 Pro. A known issue is that while the device will remember EQ settings between reconnects, the UI won't, and will show the default EQ settings after a reconnect. This will likely never be fixed in OpenSCQ30, since it's due to weirdness with this specific device that I don't want to bother working around.
+
+#### Fixes
+
+- Error connecting to devices with serial numbers containing non-hexidecimal characters
+- Soundcore Liberty 2 Pro+ was incorrectly labeled as Soundcore Liberty 2 Pro
+- Another attempt at fixing Soundcore Motion+ connection issues. I don't think it's likely to succeed, but worth a try.
+- Don't show Soundcore P30i/R50i NC's Gaming Mode on older firmware versions that don't support it
+- Remove ANC Personalized to Ear Canal setting for Soundcore Liberty 5, since the device doesn't actually support that setting
+- Battery level for a disconnected earbud is displayed as 2550%
+
+### CLI
+
+#### Features
+
+- Add `-v` through `-vvvv` for varying levels of verbosity as an alternative to setting `RUST_LOG`.
+
+#### Fixes
+
+- `RUST_LOG` was ignored, leading to the log level not being configurable
+- Deprecate `--debug-errors`, since I don't think it ever makes sense to use it but not `-v`
+
 ## v2.7.0
 
 ### General

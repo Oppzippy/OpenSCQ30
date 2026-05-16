@@ -41,6 +41,26 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.8.0" date="2026-05-16">
+            <description>
+                <p>Features</p>
+                <ul>
+                    <li>Add support for dual connections on all relevant devices</li>
+                    <li>Add Voice Prompt, Low Battery Alert, and LDAC for Soundcore Space Q45</li>
+                    <li>Add LDAC for Soundcore Liberty 2 Pro+, Liberty Air 2 Pro, and Liberty 3 Pro</li>
+                    <li>Add support for Soundcore Liberty 2 Pro. A known issue is that while the device will remember EQ settings between reconnects, the UI won't, and will show the default EQ settings after a reconnect. This will likely never be fixed in OpenSCQ30, since it's due to weirdness with this specific device that I don't want to bother working around.</li>
+                </ul>
+                <p>Fixes</p>
+                <ul>
+                    <li>Error connecting to devices with serial numbers containing non-hexidecimal characters</li>
+                    <li>Soundcore Liberty 2 Pro+ was incorrectly labeled as Soundcore Liberty 2 Pro</li>
+                    <li>Another attempt at fixing Soundcore Motion+ connection issues. I don't think it's likely to succeed, but worth a try.</li>
+                    <li>Don't show Soundcore P30i/R50i NC's Gaming Mode on older firmware versions that don't support it</li>
+                    <li>Remove ANC Personalized to Ear Canal setting for Soundcore Liberty 5, since the device doesn't actually support that setting</li>
+                    <li>Battery level for a disconnected earbud is displayed as 2550%</li>
+                </ul>
+            </description>
+        </release>
         <release version="2.7.0" date="2026-04-29">
             <description>
                 <p>Features</p>
@@ -54,7 +74,7 @@
                     <li>Error connecting on Linux (br-connection-busy)</li>
                     <li>On Linux, when multiple bluetooth adapters are availabe, don't give up if there is an error with only one of them</li>
                     <li>For devices with wind noise suppression, the device not be in normal mode while toggling wind noise suppression, so if you were to toggle it while in normal mode, it would first switch to noise canceling, toggle it, and then switch back. This 3 step process was unnecessarily being done while in transparency mode as well, despite it being possible to it in one step. This is now fixed, so the 3 step process is only done for normal mode.</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="2.6.2" date="2026-04-08" />
