@@ -181,15 +181,23 @@ mod tests {
                 SettingId::VolumeAdjustments,
                 settings::Value::I16Vec(vec![0; 8]),
             ),
-            (SettingId::BatteryLevelLeft, "255/5".into()), // TODO this should instead be None
             (SettingId::BatteryLevelRight, "5/5".into()),
-            (SettingId::IsChargingLeft, "No".into()),
             (SettingId::IsChargingRight, "No".into()),
             (SettingId::LeftDoublePress, "PreviousSong".into()),
             (SettingId::RightDoublePress, "NextSong".into()),
             (SettingId::LeftLongPress, "VolumeDown".into()),
             (SettingId::RightLongPress, "VolumeUp".into()),
         ]);
+        assert_eq!(
+            device.inner().setting(&SettingId::IsChargingLeft),
+            None,
+            "left battery level is 255, which means this side is disconnected, so we don't know if it's charging",
+        );
+        assert_eq!(
+            device.inner().setting(&SettingId::BatteryLevelLeft),
+            None,
+            "left battery level is 255, which means this side is disconnected, so we don't know its level",
+        )
     }
 
     #[tokio::test(start_paused = true)]

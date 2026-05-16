@@ -40,24 +40,28 @@ where
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
         let battery = state.get();
         let setting: BatterySetting = (*setting_id).try_into().ok()?;
-        Some(match setting {
-            BatterySetting::IsChargingLeft => Setting::Information {
+        // battery level 255 means TWS is disconnected and the host device is the other side
+        // in other words, the side for which the battery level is 255 is disconnected
+        let left_side_present = battery.left.level.0 != 255;
+        let right_side_present = battery.right.level.0 != 255;
+        match setting {
+            BatterySetting::IsChargingLeft if left_side_present => Some(Setting::Information {
                 value: battery.left.is_charging.to_string(),
                 translated_value: if battery.left.is_charging.into() {
                     fl!("charging")
                 } else {
                     fl!("not-charging")
                 },
-            },
-            BatterySetting::IsChargingRight => Setting::Information {
+            }),
+            BatterySetting::IsChargingRight if right_side_present => Some(Setting::Information {
                 value: battery.right.is_charging.to_string(),
                 translated_value: if battery.right.is_charging.into() {
                     fl!("charging")
                 } else {
                     fl!("not-charging")
                 },
-            },
-            BatterySetting::BatteryLevelLeft => Setting::Information {
+            }),
+            BatterySetting::BatteryLevelLeft if left_side_present => Some(Setting::Information {
                 value: format!(
                     "{}/{}",
                     battery.left.level.0 + self.level_offset,
@@ -68,8 +72,8 @@ where
                     percent = ((i32::from(battery.left.level.0 + self.level_offset) * 100)
                         / i32::from(self.max_level))
                 ),
-            },
-            BatterySetting::BatteryLevelRight => Setting::Information {
+            }),
+            BatterySetting::BatteryLevelRight if right_side_present => Some(Setting::Information {
                 value: format!(
                     "{}/{}",
                     battery.right.level.0 + self.level_offset,
@@ -80,8 +84,9 @@ where
                     percent = ((i32::from(battery.right.level.0 + self.level_offset) * 100)
                         / i32::from(self.max_level))
                 ),
-            },
-        })
+            }),
+            _ => None,
+        }
     }
 
     async fn set(
