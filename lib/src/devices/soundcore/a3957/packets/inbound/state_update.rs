@@ -20,8 +20,10 @@ use crate::{
                 self, Command,
                 inbound::{FromPacketBody, TryToPacket},
                 outbound::ToPacket,
+                parsing::take_bool,
             },
             packet_manager::PacketHandler,
+            state::Update,
             structures::{Ldac, button_configuration::ButtonStatusCollection},
         },
     },
@@ -45,7 +47,7 @@ pub struct A3957StateUpdatePacket {
     pub wearing_tone: common::structures::WearingTone,
     pub low_battery_prompt: common::structures::LowBatteryPrompt,
     pub ldac: Ldac,
-    pub anc_personalized_to_ear_canal: a3957::structures::AncPersonalizedToEarCanal,
+    pub dual_connections_enabled: bool,
     pub auto_power_off: common::structures::AutoPowerOff,
     pub limit_high_volume: common::structures::LimitHighVolume,
     pub immersive_experience: a3957::structures::ImmersiveExperience,
@@ -73,7 +75,7 @@ impl Default for A3957StateUpdatePacket {
             wearing_tone: Default::default(),
             low_battery_prompt: Default::default(),
             ldac: Default::default(),
-            anc_personalized_to_ear_canal: Default::default(),
+            dual_connections_enabled: Default::default(),
             auto_power_off: Default::default(),
             limit_high_volume: Default::default(),
             immersive_experience: Default::default(),
@@ -117,7 +119,7 @@ impl FromPacketBody for A3957StateUpdatePacket {
                         common::structures::WearingTone::take, // 127
                         common::structures::LowBatteryPrompt::take, // 128
                         Ldac::take,                          // 129: Ldac
-                        a3957::structures::AncPersonalizedToEarCanal::take, // 130
+                        take_bool,                           // 130: dual connections enabled
                         common::structures::AutoPowerOff::take, // 131-132
                         common::structures::LimitHighVolume::take, // 133-135
                         a3957::structures::ImmersiveExperience::take, // 136
@@ -151,7 +153,7 @@ impl FromPacketBody for A3957StateUpdatePacket {
                         wearing_tone,
                         low_battery_prompt,
                         ldac,
-                        anc_personalized_to_ear_canal,
+                        dual_connections_enabled,
                         auto_power_off,
                         limit_high_volume,
                         immersive_experience,
@@ -181,7 +183,7 @@ impl FromPacketBody for A3957StateUpdatePacket {
                         wearing_tone,
                         low_battery_prompt,
                         ldac,
-                        anc_personalized_to_ear_canal,
+                        dual_connections_enabled,
                         auto_power_off,
                         limit_high_volume,
                         immersive_experience,
@@ -230,7 +232,7 @@ impl ToPacket for A3957StateUpdatePacket {
             .chain(self.wearing_tone.bytes()) // 127
             .chain(self.low_battery_prompt.bytes()) // 128
             .chain(self.ldac.bytes()) // 129: Ldac
-            .chain(self.anc_personalized_to_ear_canal.bytes()) // 130
+            .chain([self.dual_connections_enabled.into()]) // 130
             .chain(self.auto_power_off.bytes()) // 131-132
             .chain(self.limit_high_volume.bytes()) // 133-135
             .chain(iter::once(self.immersive_experience as u8)) // 136
@@ -255,7 +257,7 @@ impl PacketHandler<a3957::state::A3957State> for StateUpdatePacketHandler {
         packet: &packet::Inbound,
     ) -> device::Result<()> {
         let packet: A3957StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| *state = packet.into());
+        state.send_modify(|state| state.update(packet));
         Ok(())
     }
 }

@@ -10,10 +10,6 @@ use openscq30_i18n_macros::Translate;
 pub use sound_modes::*;
 use strum::{EnumIter, EnumString, FromRepr, IntoStaticStr};
 
-use crate::devices::soundcore::common;
-
-common::structures::flag!(AncPersonalizedToEarCanal);
-
 #[derive(
     Debug,
     Default,

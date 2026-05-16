@@ -4,14 +4,14 @@ use crate::{
     api::connection::RfcommConnection, devices::soundcore::common::device::SoundcoreDeviceBuilder,
 };
 
-use super::structures::{AncPersonalizedToEarCanal, SoundModes};
+use super::structures::SoundModes;
 
 mod sound_modes;
 
 impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
 where
     ConnectionType: RfcommConnection + Send + Sync + 'static,
-    StateType: Has<SoundModes> + Has<AncPersonalizedToEarCanal> + Send + Sync + Clone + 'static,
+    StateType: Has<SoundModes> + Send + Sync + Clone + 'static,
 {
     pub fn a3957_sound_modes(&mut self) {
         let packet_io_controller = self.packet_io_controller().clone();

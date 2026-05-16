@@ -5,9 +5,7 @@ use strum::IntoEnumIterator;
 use crate::{
     api::settings::{self, Setting, SettingId, Value},
     devices::soundcore::{
-        a3957::structures::{
-            AncPersonalizedToEarCanal, ManualNoiseCanceling, NoiseCancelingMode, SoundModes,
-        },
+        a3957::structures::{ManualNoiseCanceling, NoiseCancelingMode, SoundModes},
         common::settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
     },
     i18n::fl,
@@ -21,7 +19,7 @@ pub struct SoundModesSettingHandler {}
 #[async_trait]
 impl<T> SettingHandler<T> for SoundModesSettingHandler
 where
-    T: Has<SoundModes> + Has<AncPersonalizedToEarCanal> + Send,
+    T: Has<SoundModes> + Send,
 {
     fn settings(&self) -> Vec<SettingId> {
         SoundModeSetting::iter().map(Into::into).collect()
@@ -65,12 +63,6 @@ where
             SoundModeSetting::TransportationMode => Some(Setting::select_from_enum_all_variants(
                 sound_modes.transportation_mode,
             )),
-            SoundModeSetting::AncPersonalizedToEarCanal => {
-                let anc_personalized_to_ear_canal: &AncPersonalizedToEarCanal = state.get();
-                Some(Setting::Toggle {
-                    value: anc_personalized_to_ear_canal.0,
-                })
-            }
         }
     }
 
@@ -109,10 +101,6 @@ where
             SoundModeSetting::TransportationMode => {
                 let sound_modes: &mut SoundModes = state.get_mut();
                 sound_modes.transportation_mode = value.try_as_enum_variant()?;
-            }
-            SoundModeSetting::AncPersonalizedToEarCanal => {
-                let anc_personalized_to_ear_canal: &mut AncPersonalizedToEarCanal = state.get_mut();
-                *anc_personalized_to_ear_canal = AncPersonalizedToEarCanal(value.try_as_bool()?);
             }
         }
         Ok(())

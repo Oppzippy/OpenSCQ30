@@ -1,6 +1,5 @@
 mod packet_handler;
 mod setting_handler;
-mod state_modifier;
 
 use std::sync::Arc;
 
@@ -15,11 +14,7 @@ use crate::{
         settings::{CategoryId, SettingId},
     },
     devices::soundcore::{
-        a3957::{
-            self,
-            modules::sound_modes::state_modifier::AncPersonalizedToEarCanalStateModifier,
-            structures::{AncPersonalizedToEarCanal, SoundModes},
-        },
+        a3957::{self, structures::SoundModes},
         common::{
             modules::{ModuleCollection, sound_modes_v2},
             packet::PacketIOController,
@@ -36,7 +31,6 @@ enum_subset! {
         TransparencyMode,
         NoiseCancelingMode,
         ManualNoiseCanceling,
-        AncPersonalizedToEarCanal,
         TransportationMode,
         WindNoiseSuppression,
         WindNoiseDetected,
@@ -45,7 +39,7 @@ enum_subset! {
 
 impl<T> ModuleCollection<T>
 where
-    T: Has<SoundModes> + Has<AncPersonalizedToEarCanal> + Clone + Send + Sync,
+    T: Has<SoundModes> + Clone + Send + Sync,
 {
     pub fn add_a3957_sound_modes<ConnectionT>(
         &mut self,
@@ -62,13 +56,6 @@ where
                 a3957::structures::SoundModesFields,
                 8,
             >::new(packet_io.clone())));
-        // This comes after the sound modes state modifier so that when moving to the required
-        // state, we can set anc personalized to ear canal, but when moving away from the required
-        // state, we can't. This is required to work properly with quick presets.
-        self.state_modifiers
-            .push(Box::new(AncPersonalizedToEarCanalStateModifier::new(
-                packet_io,
-            )));
         self.packet_handlers.set_handler(
             SoundModesPacketHandler::COMMAND,
             Box::new(SoundModesPacketHandler::default()),
