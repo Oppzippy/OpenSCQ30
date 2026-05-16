@@ -45,6 +45,7 @@ soundcore_device!(
             RequestState::default().to_packet(),
         );
 
+        builder.ldac();
         builder.touch_tone();
         builder.wearing_detection();
         builder.wearing_tone();
@@ -181,6 +182,7 @@ mod tests {
             (SettingId::AutoPowerOff, "30m".into()),
             (SettingId::FirmwareVersionLeft, "04.96".into()),
             (SettingId::FirmwareVersionRight, "04.96".into()),
+            (SettingId::Ldac, false.into()),
         ]);
     }
 }

@@ -7,7 +7,7 @@ use crate::devices::soundcore::{
         structures::{
             AgeRange, AmbientSoundModeCycle, AutoPowerOff, CaseBatteryLevel,
             CommonEqualizerConfiguration, CustomHearId, DualBattery, DualFirmwareVersion, Gender,
-            SerialNumber, TouchTone, TwsStatus, WearingDetection, WearingTone,
+            Ldac, SerialNumber, TouchTone, TwsStatus, WearingDetection, WearingTone,
             button_configuration::ButtonStatusCollection,
         },
     },
@@ -33,6 +33,7 @@ pub struct A3952State {
     auto_power_off: AutoPowerOff,
     gender: Gender,
     age_range: AgeRange,
+    ldac: Ldac,
     reset_pending: ResetButtonConfigurationPending,
 }
 
@@ -55,6 +56,7 @@ impl From<A3952StateUpdatePacket> for A3952State {
             auto_power_off: value.auto_power_off,
             age_range: value.age_range,
             gender: Gender::default(), // unknown
+            ldac: value.ldac,
             reset_pending: ResetButtonConfigurationPending::default(),
         }
     }

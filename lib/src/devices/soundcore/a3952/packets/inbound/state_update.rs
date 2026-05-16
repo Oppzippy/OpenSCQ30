@@ -23,7 +23,7 @@ use crate::{
             packet_manager::PacketHandler,
             structures::{
                 AgeRange, AmbientSoundModeCycle, AutoPowerOff, CaseBatteryLevel,
-                CommonEqualizerConfiguration, CustomHearId, DualBattery, DualFirmwareVersion,
+                CommonEqualizerConfiguration, CustomHearId, DualBattery, DualFirmwareVersion, Ldac,
                 SerialNumber, TouchTone, TwsStatus, WearingDetection, WearingTone,
                 button_configuration::ButtonStatusCollection,
             },
@@ -48,6 +48,7 @@ pub struct A3952StateUpdatePacket {
     pub case_battery_level: CaseBatteryLevel,
     pub wearing_tone: WearingTone,
     pub auto_power_off: AutoPowerOff,
+    pub ldac: Ldac,
 }
 
 impl Default for A3952StateUpdatePacket {
@@ -68,6 +69,7 @@ impl Default for A3952StateUpdatePacket {
             case_battery_level: Default::default(),
             wearing_tone: Default::default(),
             auto_power_off: Default::default(),
+            ldac: Default::default(),
         }
     }
 }
@@ -82,50 +84,57 @@ impl FromPacketBody for A3952StateUpdatePacket {
             "a3952 state update packet",
             map(
                 (
-                    TwsStatus::take,
-                    DualBattery::take,
-                    DualFirmwareVersion::take,
-                    SerialNumber::take,
-                    CommonEqualizerConfiguration::take,
-                    AgeRange::take,
-                    CustomHearId::take_with_music_genre_at_end,
-                    take(1usize), // unknown
-                    ButtonStatusCollection::take(
-                        a3952::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
+                    (
+                        TwsStatus::take,
+                        DualBattery::take,
+                        DualFirmwareVersion::take,
+                        SerialNumber::take,
+                        CommonEqualizerConfiguration::take,
+                        AgeRange::take,
+                        CustomHearId::take_with_music_genre_at_end,
+                        take(1usize), // unknown
+                        ButtonStatusCollection::take(
+                            a3952::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
+                        ),
+                        take(4usize), // unknown
+                        AmbientSoundModeCycle::take,
+                        a3952::structures::SoundModes::take,
+                        TouchTone::take,
+                        WearingDetection::take,
+                        take(1usize), // unknown
+                        CaseBatteryLevel::take,
+                        take(2usize), // unknown
+                        Ldac::take,
                     ),
-                    take(4usize), // unknown
-                    AmbientSoundModeCycle::take,
-                    a3952::structures::SoundModes::take,
-                    TouchTone::take,
-                    WearingDetection::take,
-                    take(1usize), // unknown
-                    CaseBatteryLevel::take,
-                    take(5usize), // unknown
-                    WearingTone::take,
-                    take(1usize), // unknown
-                    AutoPowerOff::take,
+                    (
+                        take(2usize), // unknown
+                        WearingTone::take,
+                        take(1usize), // unknown
+                        AutoPowerOff::take,
+                    ),
                 ),
                 |(
-                    tws_status,
-                    battery,
-                    firmware_version,
-                    serial_number,
-                    equalizer_configuration,
-                    age_range,
-                    hear_id,
-                    _unknown1,
-                    buttons,
-                    _unknown2,
-                    ambient_sound_mode_cycle,
-                    sound_modes,
-                    touch_tone,
-                    wear_detection,
-                    _unknown3,
-                    case_battery_level,
-                    _unknown4,
-                    wearing_tone,
-                    _unknown5,
-                    auto_power_off,
+                    (
+                        tws_status,
+                        battery,
+                        firmware_version,
+                        serial_number,
+                        equalizer_configuration,
+                        age_range,
+                        hear_id,
+                        _unknown1,
+                        buttons,
+                        _unknown2,
+                        ambient_sound_mode_cycle,
+                        sound_modes,
+                        touch_tone,
+                        wear_detection,
+                        _unknown3,
+                        case_battery_level,
+                        _unknown4,
+                        ldac,
+                    ),
+                    (_unknown5, wearing_tone, _unknown6, auto_power_off),
                 )| Self {
                     tws_status,
                     battery,
@@ -142,6 +151,7 @@ impl FromPacketBody for A3952StateUpdatePacket {
                     case_battery_level,
                     wearing_tone,
                     auto_power_off,
+                    ldac,
                 },
             ),
         )
