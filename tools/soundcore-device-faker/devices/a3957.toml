@@ -136,7 +136,7 @@ response = [
     0x01, # Wearing tone
     0x01, # Low battery prompt
     0x00, # LDAC
-    0x01, # ANC personalized to ear canal
+    0x01, # Dual Connections
     0x01, # Auto power off enabled
     0x02, # Auto power off duration
     0x00, # Limit high volume enabled
@@ -174,9 +174,8 @@ command = [16, 151]
 response = [1]
 
 [[responses]]
-# ANC personalized to ear canal acknowledgment
 command = [3, 148]
-response = [1]
+response = [1, 1, 1, 1, 1, 1, 1, 1]
 
 [[responses]]
 # Button capabilities
