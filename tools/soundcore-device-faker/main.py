@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from bumble.keys import JsonKeyStore
 from bumble.transport import open_transport
 import sys
 import tomllib
@@ -85,6 +86,8 @@ async def main() -> None:
             hci_transport.source,
             hci_transport.sink,
         )
+        if mac_address is not None:
+            device.keystore = JsonKeyStore(str(mac_address))
         device.classic_enabled = True
 
         audio_listener = Listener.for_device(device)
