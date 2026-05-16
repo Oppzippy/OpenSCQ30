@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
+from bumble.transport import open_transport
 import sys
 import tomllib
 import logging
 import asyncio
 import os
+import dataclasses
 from pathlib import Path
 from typing import Callable, Dict
 from bumble import hci
 from bumble.core import UUID
 from bumble.device import DEVICE_DEFAULT_ADDRESS, Device, DeviceConfiguration
-from bumble.transport import open_transport_or_link
 from bumble.rfcomm import Server, make_service_sdp_records, DLC
 from bumble.avdtp import (
     AVDTP_AUDIO_MEDIA_TYPE,
@@ -69,7 +70,7 @@ async def main() -> None:
     observer.schedule(ConfigChangedHandler(reload_config), str(config_path.parent))
     observer.start()
 
-    async with await open_transport_or_link(sys.argv[1]) as hci_transport:
+    async with await open_transport(sys.argv[1]) as hci_transport:
         if mac_address := config.get("mac_address"):
             mac_address = hci.Address(mac_address)
         device = Device.from_config_with_hci(
@@ -135,11 +136,17 @@ HCI_SET_BD_ADDR_COMMAND = hci.hci_command_op_code(0x3F, 0x01)
 hci.HCI_Command.register_commands({"HCI_SET_BD_ADDR_COMMAND": HCI_SET_BD_ADDR_COMMAND})
 
 
-@hci.HCI_Command.command(
-    fields=[("bd_addr", hci.Address.parse_address)],
-)
-class HCI_Set_BD_ADDR_Command(hci.HCI_Command):
+@dataclasses.dataclass
+class HCI_Set_BD_ADDR_ReturnParameters(hci.HCI_StatusReturnParameters):
     pass
+
+
+@hci.HCI_SyncCommand.sync_command(HCI_Set_BD_ADDR_ReturnParameters)
+@dataclasses.dataclass
+class HCI_Set_BD_ADDR_Command(hci.HCI_SyncCommand[HCI_Set_BD_ADDR_ReturnParameters]):
+    bd_addr: hci.Address = dataclasses.field(
+        metadata=hci.metadata(hci.Address.parse_address)
+    )
 
 
 # -----------------------------------------------------------------------------
