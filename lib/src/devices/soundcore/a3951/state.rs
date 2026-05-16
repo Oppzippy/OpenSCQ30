@@ -6,7 +6,7 @@ use crate::devices::soundcore::common::{
     state::Update,
     structures::{
         AgeRange, CommonEqualizerConfiguration, CustomHearId, DualBattery, DualFirmwareVersion,
-        Gender, SerialNumber, SoundModes, TouchTone, TwsStatus, WearingDetection,
+        Gender, Ldac, SerialNumber, SoundModes, TouchTone, TwsStatus, WearingDetection,
         button_configuration::ButtonStatusCollection,
     },
 };
@@ -27,6 +27,7 @@ pub struct A3951State {
     dual_firmware_version: DualFirmwareVersion,
     touch_tone: TouchTone,
     wearing_detection: WearingDetection,
+    ldac: Ldac,
     #[has(skip)]
     side_tone: bool,
     #[has(skip)]
@@ -44,6 +45,7 @@ impl A3951State {
     pub fn new(
         state_update_packet: A3951StateUpdatePacket,
         sn_and_firmware: SerialNumberAndFirmwareVersion,
+        ldac: Ldac,
     ) -> Self {
         Self {
             tws_status: state_update_packet.tws_status,
@@ -63,6 +65,7 @@ impl A3951State {
             right_new_battery: state_update_packet.right_new_battery,
             serial_number: sn_and_firmware.serial_number,
             dual_firmware_version: sn_and_firmware.dual_firmware_version,
+            ldac,
             button_reset_pending: ResetButtonConfigurationPending::default(),
         }
     }

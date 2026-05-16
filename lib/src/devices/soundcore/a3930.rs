@@ -7,6 +7,7 @@ use crate::{
     devices::soundcore::{
         a3930::{packets::A3930StateUpdatePacket, state::A3930State},
         common::{
+            self,
             device::SoundcoreDeviceConfig,
             macros::soundcore_device,
             modules::{
@@ -46,7 +47,15 @@ soundcore_device!(
             .send_with_response(&RequestSerialNumberAndFirmwareVersion::default().to_packet())
             .await?
             .try_to_packet()?;
-        Ok(A3930State::new(state_update_packet, sn_and_firmware))
+        let ldac_state: common::packet::inbound::LdacState = packet_io
+            .send_with_response(&common::packet::outbound::request_ldac_state())
+            .await?
+            .try_to_packet()?;
+        Ok(A3930State::new(
+            state_update_packet,
+            sn_and_firmware,
+            ldac_state.0,
+        ))
     },
     async |builder| {
         builder.module_collection().add_state_update();
@@ -75,6 +84,10 @@ soundcore_device!(
             (
                 RequestSerialNumberAndFirmwareVersion::COMMAND,
                 SerialNumberAndFirmwareVersion::default().to_packet(),
+            ),
+            (
+                common::packet::outbound::REQUEST_LDAC_STATE_COMMAND,
+                common::packet::inbound::LdacState::default().to_packet(),
             ),
         ])
     },

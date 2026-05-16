@@ -6,7 +6,8 @@ use crate::devices::soundcore::common::{
     state::Update,
     structures::{
         AgeRange, CommonEqualizerConfiguration, CustomHearId, DualBattery, DualFirmwareVersion,
-        Gender, SerialNumber, SoundModes, TwsStatus, button_configuration::ButtonStatusCollection,
+        Gender, Ldac, SerialNumber, SoundModes, TwsStatus,
+        button_configuration::ButtonStatusCollection,
     },
 };
 
@@ -24,6 +25,7 @@ pub struct A3930State {
     sound_modes: SoundModes,
     serial_number: SerialNumber,
     dual_firmware_version: DualFirmwareVersion,
+    ldac: Ldac,
     #[has(skip)]
     side_tone: bool,
     #[has(skip)]
@@ -35,6 +37,7 @@ impl A3930State {
     pub fn new(
         state_update_packet: A3930StateUpdatePacket,
         sn_and_firmware: SerialNumberAndFirmwareVersion,
+        ldac: Ldac,
     ) -> Self {
         Self {
             tws_status: state_update_packet.tws_status,
@@ -49,6 +52,7 @@ impl A3930State {
             hear_id_eq_index: state_update_packet.hear_id_eq_index,
             serial_number: sn_and_firmware.serial_number,
             dual_firmware_version: sn_and_firmware.dual_firmware_version,
+            ldac,
             button_reset_pending: ResetButtonConfigurationPending::default(),
         }
     }

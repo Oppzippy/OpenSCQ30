@@ -2,6 +2,7 @@ mod dual_connections;
 mod outbound_packet;
 mod request_battery_charging;
 mod request_battery_level;
+mod request_ldac_state;
 mod request_serial_number_and_firmware_version;
 mod request_state;
 mod set_ambient_sound_mode_cycle;
@@ -25,6 +26,7 @@ pub use request_battery_charging::*;
     reason = "TODO consider polling with one of these every once in a while if it doesn't push this information to us"
 )]
 pub use request_battery_level::*;
+pub use request_ldac_state::*;
 pub use request_serial_number_and_firmware_version::*;
 pub use request_state::*;
 pub use set_ambient_sound_mode_cycle::*;
@@ -47,3 +49,4 @@ pub const SET_WEARING_TONE_COMMAND: packet::Command = packet::Command([0x01, 0x8
 pub const SET_TOUCH_LOCK_COMMAND: packet::Command = packet::Command([0x04, 0x86]);
 pub const SET_LOW_BATTERY_PROMPT_COMMAND: packet::Command = packet::Command([0x10, 0x82]);
 pub const SET_WEARING_DETECTION_COMMAND: packet::Command = packet::Command([0x01, 0x81]);
+pub const REQUEST_LDAC_STATE_COMMAND: packet::Command = packet::Command([0x01, 0x7F]);

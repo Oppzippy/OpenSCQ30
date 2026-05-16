@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use crate::devices::soundcore::{
     a3951::{packets::A3951StateUpdatePacket, state::A3951State},
     common::{
+        self,
         macros::soundcore_device,
         modules::{
             button_configuration::COMMON_SETTINGS as BUTTON_SETTINGS, equalizer,
@@ -30,7 +31,15 @@ soundcore_device!(
             .send_with_response(&RequestSerialNumberAndFirmwareVersion::default().to_packet())
             .await?
             .try_to_packet()?;
-        Ok(A3951State::new(state_update_packet, sn_and_firmware))
+        let ldac_state: common::packet::inbound::LdacState = packet_io
+            .send_with_response(&common::packet::outbound::request_ldac_state())
+            .await?
+            .try_to_packet()?;
+        Ok(A3951State::new(
+            state_update_packet,
+            sn_and_firmware,
+            ldac_state.0,
+        ))
     },
     async |builder| {
         builder.module_collection().add_state_update();
@@ -58,6 +67,7 @@ soundcore_device!(
         builder.reset_button_configuration::<A3951StateUpdatePacket>(
             RequestState::default().to_packet(),
         );
+        builder.ldac();
         builder.touch_tone();
         builder.wearing_detection();
         builder.tws_status();
@@ -73,6 +83,10 @@ soundcore_device!(
             (
                 RequestSerialNumberAndFirmwareVersion::COMMAND,
                 SerialNumberAndFirmwareVersion::default().to_packet(),
+            ),
+            (
+                common::packet::outbound::REQUEST_LDAC_STATE_COMMAND,
+                common::packet::inbound::LdacState::default().to_packet(),
             ),
         ])
     },
