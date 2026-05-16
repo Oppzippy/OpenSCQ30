@@ -121,3 +121,10 @@ response = [
     48,
     48,
 ]
+
+[[responses]]
+# LDAC
+command = [1, 127]
+response = [
+    1, # enabled/disabled
+]
