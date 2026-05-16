@@ -124,3 +124,8 @@ response = [
     48,
     48,
 ]
+
+[[responses]]
+# Query LDAC status
+command = [1, 127]
+response = [1]
