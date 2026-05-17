@@ -42,3 +42,6 @@ confirm = Bestätigen
 execute = Ausführen
 db = { $db } dB
 none = Nichts
+settings = Einstellungen
+preferred-language = Bevorzugte Sprache
+default = Voreinstellung
