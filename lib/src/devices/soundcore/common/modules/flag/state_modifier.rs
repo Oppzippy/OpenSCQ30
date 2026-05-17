@@ -4,7 +4,7 @@ use std::{marker::PhantomData, sync::Arc};
 use tokio::sync::watch;
 
 use crate::{
-    api::{connection::RfcommConnection, device},
+    api::device,
     devices::soundcore::common::{
         packet::{self, PacketIOController},
         state_modifier::StateModifier,
@@ -12,17 +12,14 @@ use crate::{
     },
 };
 
-pub struct FlagStateModifier<ConnectionType: RfcommConnection, FlagT> {
-    packet_io: Arc<PacketIOController<ConnectionType>>,
+pub struct FlagStateModifier<FlagT> {
+    packet_io: Arc<PacketIOController>,
     command: packet::Command,
     _flag: PhantomData<FlagT>,
 }
 
-impl<ConnectionType: RfcommConnection, FlagT> FlagStateModifier<ConnectionType, FlagT> {
-    pub fn new(
-        packet_io: Arc<PacketIOController<ConnectionType>>,
-        command: packet::Command,
-    ) -> Self {
+impl<FlagT> FlagStateModifier<FlagT> {
+    pub fn new(packet_io: Arc<PacketIOController>, command: packet::Command) -> Self {
         Self {
             packet_io,
             command,
@@ -32,9 +29,8 @@ impl<ConnectionType: RfcommConnection, FlagT> FlagStateModifier<ConnectionType, 
 }
 
 #[async_trait]
-impl<ConnectionT, FlagT, StateT> StateModifier<StateT> for FlagStateModifier<ConnectionT, FlagT>
+impl<FlagT, StateT> StateModifier<StateT> for FlagStateModifier<FlagT>
 where
-    ConnectionT: RfcommConnection + Send + Sync,
     StateT: MaybeHas<FlagT> + Send + Sync,
     FlagT: Flag + PartialEq + Copy + Send + Sync,
 {

@@ -1,5 +1,6 @@
 use std::{collections::HashSet, panic::Location};
 
+use async_trait::async_trait;
 use macaddr::MacAddr6;
 use serde::{Deserialize, Serialize};
 use tokio::sync::{mpsc, watch};
@@ -59,9 +60,10 @@ pub enum RfcommServiceSelectionStrategy {
     Dynamic(fn(HashSet<Uuid>) -> Uuid),
 }
 
+#[async_trait]
 pub trait RfcommConnection {
     /// Sends `data` over the RFCOMM connection. This will be sent as a single packet when possible.
-    fn write(&self, data: &[u8]) -> impl Future<Output = Result<()>> + Send;
+    async fn write(&self, data: &[u8]) -> Result<()>;
 
     /// Returns a channel that will receive packets from the RFCOMM connection.
     fn read_channel(&self) -> mpsc::Receiver<Vec<u8>>;
@@ -112,6 +114,7 @@ pub mod test_stub {
         }
     }
 
+    #[async_trait]
     impl RfcommConnection for StubRfcommConnection {
         async fn write(&self, data: &[u8]) -> Result<()> {
             self.outbound_sender.send(data.to_owned()).await.unwrap();

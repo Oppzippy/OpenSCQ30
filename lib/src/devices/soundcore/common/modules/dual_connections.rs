@@ -4,7 +4,6 @@ use openscq30_lib_has::Has;
 use strum::{EnumIter, EnumString};
 
 use crate::{
-    connection::RfcommConnection,
     device,
     devices::soundcore::common::{
         modules::ModuleCollection,
@@ -32,10 +31,7 @@ impl<T> ModuleCollection<T>
 where
     T: Has<DualConnections> + Clone + Send + Sync,
 {
-    pub fn add_dual_connections<C>(&mut self, packet_io: Arc<PacketIOController<C>>)
-    where
-        C: RfcommConnection + 'static + Send + Sync,
-    {
+    pub fn add_dual_connections(&mut self, packet_io: Arc<PacketIOController>) {
         self.packet_handlers.set_handler(
             packet_handler::DualConnectionsDevicePacketHandler::COMMAND,
             Box::new(packet_handler::DualConnectionsDevicePacketHandler),
@@ -51,12 +47,9 @@ where
     }
 }
 
-pub async fn take_dual_connection_devices<ConnectionT>(
-    packet_io: &PacketIOController<ConnectionT>,
-) -> device::Result<Vec<Option<DualConnectionsDevice>>>
-where
-    ConnectionT: RfcommConnection + Send,
-{
+pub async fn take_dual_connection_devices(
+    packet_io: &PacketIOController,
+) -> device::Result<Vec<Option<DualConnectionsDevice>>> {
     // allow receiving packets out of order. this shouldn't happen, but just to be safe in case a device I'm not aware of does this.
     let mut devices: Vec<Option<DualConnectionsDevice>> = Vec::new();
     packet_io

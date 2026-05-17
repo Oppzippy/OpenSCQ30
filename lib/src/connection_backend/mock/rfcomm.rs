@@ -1,5 +1,6 @@
 use std::{collections::HashSet, sync::Mutex};
 
+use async_trait::async_trait;
 use macaddr::MacAddr6;
 use tokio::sync::{mpsc, watch};
 
@@ -72,6 +73,7 @@ impl MockRfcommConnection {
     }
 }
 
+#[async_trait]
 impl RfcommConnection for MockRfcommConnection {
     async fn write(&self, data: &[u8]) -> connection::Result<()> {
         self.outbound.send(data.to_vec()).await.unwrap();

@@ -27,8 +27,7 @@ mod structures;
 soundcore_device!(
     A3952State,
     async |packet_io| {
-        fetch_state_from_state_update_packet::<_, A3952State, A3952StateUpdatePacket>(packet_io)
-            .await
+        fetch_state_from_state_update_packet::<A3952State, A3952StateUpdatePacket>(packet_io).await
     },
     async |builder| {
         builder.module_collection().add_state_update();

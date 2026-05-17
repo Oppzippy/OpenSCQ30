@@ -17,28 +17,25 @@ use crate::{
 
 use super::multi_queue::MultiQueue;
 
-pub struct PacketIOController<ConnectionType>
-where
-    ConnectionType: RfcommConnection,
-{
+pub struct PacketIOController {
     checksum_kind: ChecksumKind,
-    connection: Arc<ConnectionType>,
+    connection: Arc<dyn RfcommConnection + Send + Sync>,
     packet_queues: Arc<MultiQueue<Command, packet::Inbound>>,
     handle: JoinHandle<()>,
 }
 
-impl<ConnectionType: RfcommConnection> Drop for PacketIOController<ConnectionType> {
+impl Drop for PacketIOController {
     fn drop(&mut self) {
         self.handle.abort();
         trace!("dropped PacketIOController");
     }
 }
 
-impl<ConnectionType: RfcommConnection> PacketIOController<ConnectionType> {
+impl PacketIOController {
     /// In addition to the PacketIOController, also returns a channel that all packets received
     /// that weren't a result of send_with_response will be forwarded to.
     pub async fn new(
-        connection: Arc<ConnectionType>,
+        connection: Arc<dyn RfcommConnection + Send + Sync>,
         checksum_kind: ChecksumKind,
     ) -> device::Result<(Self, mpsc::Receiver<packet::Inbound>)> {
         let packet_queues = Arc::new(MultiQueue::new());

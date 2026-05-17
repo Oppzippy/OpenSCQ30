@@ -5,7 +5,7 @@ use setting_handler::ButtonConfigurationSettingHandler;
 use state_modifier::ButtonConfigurationStateModifier;
 
 use crate::{
-    api::{connection::RfcommConnection, settings::CategoryId},
+    api::settings::CategoryId,
     devices::soundcore::common::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         packet::PacketIOController,
@@ -265,17 +265,12 @@ impl<T> ModuleCollection<T>
 where
     T: Has<TwsStatus> + Clone + Send + Sync,
 {
-    pub fn add_button_configuration<
-        ConnectionType,
-        const NUM_BUTTONS: usize,
-        const NUM_PRESS_KINDS: usize,
-    >(
+    pub fn add_button_configuration<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize>(
         &mut self,
-        packet_io: Arc<PacketIOController<ConnectionType>>,
+        packet_io: Arc<PacketIOController>,
         settings: &'static ButtonConfigurationSettings<NUM_BUTTONS, NUM_PRESS_KINDS>,
     ) where
         T: Has<ButtonStatusCollection<NUM_BUTTONS>> + Has<ResetButtonConfigurationPending>,
-        ConnectionType: RfcommConnection + 'static + Send + Sync,
     {
         const {
             assert!(

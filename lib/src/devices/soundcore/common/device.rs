@@ -54,19 +54,18 @@ use super::{
     },
 };
 
-type FetchStateFn<ConnectionType, StateType> = Box<
+type FetchStateFn<StateType> = Box<
     dyn Fn(
-            Arc<PacketIOController<ConnectionType>>,
+            Arc<PacketIOController>,
         ) -> Pin<Box<dyn Future<Output = device::Result<StateType>> + Send>>
         + Send
         + Sync,
 >;
 
-pub async fn fetch_state_from_state_update_packet<C, State, StateUpdate>(
-    packet_io: Arc<PacketIOController<C>>,
+pub async fn fetch_state_from_state_update_packet<State, StateUpdate>(
+    packet_io: Arc<PacketIOController>,
 ) -> device::Result<State>
 where
-    C: RfcommConnection,
     StateUpdate: FromPacketBody + Default + Into<State>,
 {
     let state_update_packet: StateUpdate = packet_io
@@ -105,7 +104,7 @@ pub struct SoundcoreDeviceRegistry<B: RfcommBackend, StateType> {
     backend: B,
     database: Arc<OpenSCQ30Database>,
     device_model: DeviceModel,
-    fetch_state: FetchStateFn<B::ConnectionType, StateType>,
+    fetch_state: FetchStateFn<StateType>,
     config: SoundcoreDeviceConfig,
     _state: PhantomData<StateType>,
 }
@@ -115,7 +114,7 @@ impl<B: RfcommBackend, StateType> SoundcoreDeviceRegistry<B, StateType> {
         backend: B,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
-        fetch_state: FetchStateFn<B::ConnectionType, StateType>,
+        fetch_state: FetchStateFn<StateType>,
         config: SoundcoreDeviceConfig,
     ) -> Self {
         Self {
@@ -134,7 +133,7 @@ impl<B, StateType> OpenSCQ30DeviceRegistry for SoundcoreDeviceRegistry<B, StateT
 where
     B: RfcommBackend + 'static + Send + Sync,
     StateType: Clone + Send + Sync + 'static,
-    Self: BuildDevice<B::ConnectionType, StateType>,
+    Self: BuildDevice<StateType>,
 {
     async fn devices(&self) -> device::Result<Vec<ConnectionDescriptor>> {
         self.backend
@@ -162,7 +161,7 @@ where
             .await?;
         let mut builder = SoundcoreDeviceBuilder::new(
             self.database.clone(),
-            connection,
+            Arc::new(connection),
             self.device_model,
             &self.fetch_state,
             self.config,
@@ -173,24 +172,20 @@ where
     }
 }
 
-pub trait BuildDevice<ConnectionType, StateType>
+pub trait BuildDevice<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync,
     StateType: Clone + Send + Sync,
 {
     fn build_device(
-        builder: &mut SoundcoreDeviceBuilder<ConnectionType, StateType>,
+        builder: &mut SoundcoreDeviceBuilder<StateType>,
     ) -> impl Future<Output = ()> + Send;
 }
 
-pub struct SoundcoreDeviceBuilder<ConnectionType, StateType>
-where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
-{
+pub struct SoundcoreDeviceBuilder<StateType> {
     device_model: DeviceModel,
     state_sender: watch::Sender<StateType>,
     module_collection: ModuleCollection<StateType>,
-    packet_io_controller: Arc<PacketIOController<ConnectionType>>,
+    packet_io_controller: Arc<PacketIOController>,
     database: Arc<OpenSCQ30Database>,
     packet_receiver: mpsc::Receiver<packet::Inbound>,
     change_notify: watch::Sender<()>,
@@ -210,21 +205,19 @@ macro_rules! flag {
     };
 }
 
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Send + Sync + Clone + 'static,
 {
     pub async fn new(
         database: Arc<OpenSCQ30Database>,
-        connection: ConnectionType,
+        connection: Arc<dyn RfcommConnection + Send + Sync>,
         device_model: DeviceModel,
-        fetch_state: &FetchStateFn<ConnectionType, StateType>,
+        fetch_state: &FetchStateFn<StateType>,
         config: SoundcoreDeviceConfig,
     ) -> device::Result<Self> {
         let (packet_io_controller, packet_receiver) =
-            PacketIOController::<ConnectionType>::new(Arc::new(connection), config.checksum_kind)
-                .await?;
+            PacketIOController::new(connection, config.checksum_kind).await?;
         let packet_io_controller = Arc::new(packet_io_controller);
         let state = fetch_state(packet_io_controller.clone()).await?;
         let (state_sender, _) = watch::channel::<StateType>(state);
@@ -242,7 +235,7 @@ where
         })
     }
 
-    pub async fn build(self) -> SoundcoreDeviceTemplate<ConnectionType, StateType> {
+    pub async fn build(self) -> SoundcoreDeviceTemplate<StateType> {
         SoundcoreDeviceTemplate::new(
             self.packet_io_controller,
             self.state_sender,
@@ -258,7 +251,7 @@ where
         &mut self.module_collection
     }
 
-    pub fn packet_io_controller(&self) -> &Arc<PacketIOController<ConnectionType>> {
+    pub fn packet_io_controller(&self) -> &Arc<PacketIOController> {
         &self.packet_io_controller
     }
 
@@ -508,7 +501,7 @@ where
         ButtonConfigurationPacketType: FromPacketBody,
     {
         self.module_collection
-            .add_reset_button_configuration::<ConnectionType, ButtonConfigurationPacketType>(
+            .add_reset_button_configuration::<ButtonConfigurationPacketType>(
                 self.packet_io_controller.clone(),
                 request_button_configuration_packet,
             );
@@ -645,27 +638,25 @@ where
     flag!(Ldac);
 }
 
-pub struct SoundcoreDeviceTemplate<ConnectionType, StateType>
+pub struct SoundcoreDeviceTemplate<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync,
     StateType: Clone + Send + Sync,
 {
     device_model: DeviceModel,
     state_sender: watch::Sender<StateType>,
     module_collection: Arc<ModuleCollection<StateType>>,
-    packet_io_controller: Arc<PacketIOController<ConnectionType>>,
+    packet_io_controller: Arc<PacketIOController>,
     // TODO exit signal is necessary due to the PacketIOController Arc spaghetti.
     exit_signal: Arc<Semaphore>,
     change_notify: watch::Receiver<()>,
 }
 
-impl<ConnectionType, StateType> SoundcoreDeviceTemplate<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceTemplate<StateType>
 where
-    ConnectionType: RfcommConnection + 'static + Send + Sync,
     StateType: Clone + Send + Sync + 'static,
 {
     async fn new(
-        packet_io_controller: Arc<PacketIOController<ConnectionType>>,
+        packet_io_controller: Arc<PacketIOController>,
         state_sender: watch::Sender<StateType>,
         module_collection: ModuleCollection<StateType>,
         packet_receiver: mpsc::Receiver<packet::Inbound>,
@@ -689,9 +680,8 @@ where
     }
 }
 
-impl<ConnectionType, StateType> Drop for SoundcoreDeviceTemplate<ConnectionType, StateType>
+impl<StateType> Drop for SoundcoreDeviceTemplate<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync,
     StateType: Clone + Send + Sync,
 {
     fn drop(&mut self) {
@@ -700,10 +690,8 @@ where
 }
 
 #[async_trait]
-impl<ConnectionType, StateType> OpenSCQ30Device
-    for SoundcoreDeviceTemplate<ConnectionType, StateType>
+impl<StateType> OpenSCQ30Device for SoundcoreDeviceTemplate<StateType>
 where
-    ConnectionType: RfcommConnection + 'static + Send + Sync,
     StateType: Clone + Send + Sync + 'static,
 {
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
@@ -768,7 +756,7 @@ pub mod test_utils {
 
     use crate::{
         devices::soundcore::common::packet::{self, Command},
-        mock::rfcomm::{MockRfcommBackend, MockRfcommConnection},
+        mock::rfcomm::MockRfcommBackend,
     };
 
     use super::*;
@@ -793,8 +781,7 @@ pub mod test_utils {
         ) -> Self
         where
             StateType: Clone + Send + Sync + 'static,
-            SoundcoreDeviceRegistry<MockRfcommBackend, StateType>:
-                BuildDevice<MockRfcommConnection, StateType>,
+            SoundcoreDeviceRegistry<MockRfcommBackend, StateType>: BuildDevice<StateType>,
         {
             let (inbound_sender, inbound_receiver) = mpsc::channel(100);
             let (outbound_sender, mut outbound_receiver) = mpsc::channel(100);

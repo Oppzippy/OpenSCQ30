@@ -5,7 +5,6 @@ use strum::{EnumIter, EnumString};
 use tokio::sync::watch;
 
 use crate::{
-    connection::RfcommConnection,
     device,
     devices::soundcore::common::{
         modules::{
@@ -44,12 +43,11 @@ impl<T> ModuleCollection<T>
 where
     T: Has<ResetButtonConfigurationPending> + Clone + Send + Sync,
 {
-    pub fn add_reset_button_configuration<C, ButtonConfigurationPacketType>(
+    pub fn add_reset_button_configuration<ButtonConfigurationPacketType>(
         &mut self,
-        packet_io: Arc<PacketIOController<C>>,
+        packet_io: Arc<PacketIOController>,
         request_packet: packet::Outbound,
     ) where
-        C: RfcommConnection + 'static + Send + Sync,
         T: Update<ButtonConfigurationPacketType>,
         ButtonConfigurationPacketType: FromPacketBody,
     {

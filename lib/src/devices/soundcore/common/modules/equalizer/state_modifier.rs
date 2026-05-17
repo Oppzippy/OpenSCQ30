@@ -4,7 +4,7 @@ use std::sync::Arc;
 use tokio::sync::watch;
 
 use crate::{
-    api::{connection::RfcommConnection, device},
+    api::device,
     devices::soundcore::common::{
         packet::{self, PacketIOController, outbound::ToPacket},
         state_modifier::StateModifier,
@@ -13,14 +13,13 @@ use crate::{
 };
 
 pub struct EqualizerStateModifier<
-    ConnectionType: RfcommConnection,
     const CHANNELS: usize,
     const BANDS: usize,
     const MIN_VOLUME: i16,
     const MAX_VOLUME: i16,
     const FRACTION_DIGITS: u8,
 > {
-    packet_io: Arc<PacketIOController<ConnectionType>>,
+    packet_io: Arc<PacketIOController>,
     options: EqualizerStateModifierOptions,
 }
 
@@ -29,25 +28,20 @@ pub struct EqualizerStateModifierOptions {
 }
 
 impl<
-    ConnectionType: RfcommConnection,
     const CHANNELS: usize,
     const BANDS: usize,
     const MIN_VOLUME: i16,
     const MAX_VOLUME: i16,
     const FRACTION_DIGITS: u8,
-> EqualizerStateModifier<ConnectionType, CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
+> EqualizerStateModifier<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
 {
-    pub fn new(
-        packet_io: Arc<PacketIOController<ConnectionType>>,
-        options: EqualizerStateModifierOptions,
-    ) -> Self {
+    pub fn new(packet_io: Arc<PacketIOController>, options: EqualizerStateModifierOptions) -> Self {
         Self { packet_io, options }
     }
 }
 
 #[async_trait]
 impl<
-    ConnectionType,
     T,
     const CHANNELS: usize,
     const BANDS: usize,
@@ -55,20 +49,12 @@ impl<
     const MAX_VOLUME: i16,
     const FRACTION_DIGITS: u8,
 > StateModifier<T>
-    for EqualizerStateModifier<
-        ConnectionType,
-        CHANNELS,
-        BANDS,
-        MIN_VOLUME,
-        MAX_VOLUME,
-        FRACTION_DIGITS,
-    >
+    for EqualizerStateModifier<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
 where
     T: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
         + Clone
         + Send
         + Sync,
-    ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
         &self,
@@ -97,41 +83,30 @@ where
 }
 
 pub struct EqualizerWithBasicHearIdStateModifier<
-    ConnectionType: RfcommConnection,
     const CHANNELS: usize,
     const BANDS: usize,
     const MIN_VOLUME: i16,
     const MAX_VOLUME: i16,
     const FRACTION_DIGITS: u8,
 > {
-    packet_io: Arc<PacketIOController<ConnectionType>>,
+    packet_io: Arc<PacketIOController>,
 }
 
 impl<
-    ConnectionType: RfcommConnection,
     const CHANNELS: usize,
     const BANDS: usize,
     const MIN_VOLUME: i16,
     const MAX_VOLUME: i16,
     const FRACTION_DIGITS: u8,
->
-    EqualizerWithBasicHearIdStateModifier<
-        ConnectionType,
-        CHANNELS,
-        BANDS,
-        MIN_VOLUME,
-        MAX_VOLUME,
-        FRACTION_DIGITS,
-    >
+> EqualizerWithBasicHearIdStateModifier<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
 {
-    pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
+    pub fn new(packet_io: Arc<PacketIOController>) -> Self {
         Self { packet_io }
     }
 }
 
 #[async_trait]
 impl<
-    ConnectionType,
     T,
     const CHANNELS: usize,
     const BANDS: usize,
@@ -140,7 +115,6 @@ impl<
     const FRACTION_DIGITS: u8,
 > StateModifier<T>
     for EqualizerWithBasicHearIdStateModifier<
-        ConnectionType,
         CHANNELS,
         BANDS,
         MIN_VOLUME,
@@ -155,7 +129,6 @@ where
         + Clone
         + Send
         + Sync,
-    ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
         &self,
@@ -207,41 +180,30 @@ where
 }
 
 pub struct EqualizerWithCustomHearIdStateModifier<
-    ConnectionType: RfcommConnection,
     const CHANNELS: usize,
     const BANDS: usize,
     const MIN_VOLUME: i16,
     const MAX_VOLUME: i16,
     const FRACTION_DIGITS: u8,
 > {
-    packet_io: Arc<PacketIOController<ConnectionType>>,
+    packet_io: Arc<PacketIOController>,
 }
 
 impl<
-    ConnectionType: RfcommConnection,
     const CHANNELS: usize,
     const BANDS: usize,
     const MIN_VOLUME: i16,
     const MAX_VOLUME: i16,
     const FRACTION_DIGITS: u8,
->
-    EqualizerWithCustomHearIdStateModifier<
-        ConnectionType,
-        CHANNELS,
-        BANDS,
-        MIN_VOLUME,
-        MAX_VOLUME,
-        FRACTION_DIGITS,
-    >
+> EqualizerWithCustomHearIdStateModifier<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
 {
-    pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
+    pub fn new(packet_io: Arc<PacketIOController>) -> Self {
         Self { packet_io }
     }
 }
 
 #[async_trait]
 impl<
-    ConnectionType,
     T,
     const CHANNELS: usize,
     const BANDS: usize,
@@ -250,7 +212,6 @@ impl<
     const FRACTION_DIGITS: u8,
 > StateModifier<T>
     for EqualizerWithCustomHearIdStateModifier<
-        ConnectionType,
         CHANNELS,
         BANDS,
         MIN_VOLUME,
@@ -265,7 +226,6 @@ where
         + Clone
         + Send
         + Sync,
-    ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
         &self,

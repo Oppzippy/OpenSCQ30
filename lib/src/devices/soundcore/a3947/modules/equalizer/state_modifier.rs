@@ -5,7 +5,6 @@ use openscq30_lib_has::Has;
 use tokio::sync::watch;
 
 use crate::{
-    connection::RfcommConnection,
     device,
     devices::soundcore::{
         a3947,
@@ -16,29 +15,24 @@ use crate::{
     },
 };
 
-pub struct EqualizerStateModifier<ConnectionType: RfcommConnection, const C: usize, const B: usize>
-{
-    packet_io: Arc<PacketIOController<ConnectionType>>,
+pub struct EqualizerStateModifier<const C: usize, const B: usize> {
+    packet_io: Arc<PacketIOController>,
 }
 
-impl<ConnectionType: RfcommConnection, const C: usize, const B: usize>
-    EqualizerStateModifier<ConnectionType, C, B>
-{
-    pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
+impl<const C: usize, const B: usize> EqualizerStateModifier<C, B> {
+    pub fn new(packet_io: Arc<PacketIOController>) -> Self {
         Self { packet_io }
     }
 }
 
 #[async_trait]
-impl<ConnectionType, T, const C: usize, const B: usize> StateModifier<T>
-    for EqualizerStateModifier<ConnectionType, C, B>
+impl<T, const C: usize, const B: usize> StateModifier<T> for EqualizerStateModifier<C, B>
 where
     T: Has<CommonEqualizerConfiguration<C, B>>
         + Has<a3947::structures::HearId<C, B>>
         + Clone
         + Send
         + Sync,
-    ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
         &self,

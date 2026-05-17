@@ -69,14 +69,13 @@ macro_rules! soundcore_device {
             )
         }
 
-        impl<B> $crate::devices::soundcore::common::device::BuildDevice<B::ConnectionType, $state>
+        impl<B> $crate::devices::soundcore::common::device::BuildDevice<$state>
             for $crate::devices::soundcore::common::device::SoundcoreDeviceRegistry<B, $state>
         where
             B: $crate::api::connection::RfcommBackend + Send + Sync + 'static,
         {
             async fn build_device(
                 $builder: &mut $crate::devices::soundcore::common::device::SoundcoreDeviceBuilder<
-                    B::ConnectionType,
                     $state,
                 >,
             ) {

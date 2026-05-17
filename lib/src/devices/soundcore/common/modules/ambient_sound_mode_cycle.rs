@@ -6,10 +6,7 @@ use state_modifier::AmbientSoundModeCycleStateModifier;
 use strum::{EnumIter, EnumString};
 
 use crate::{
-    api::{
-        connection::RfcommConnection,
-        settings::{CategoryId, SettingId},
-    },
+    api::settings::{CategoryId, SettingId},
     devices::soundcore::common::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         packet::PacketIOController, structures::AmbientSoundModeCycle,
@@ -37,10 +34,7 @@ impl<T> ModuleCollection<T>
 where
     T: Has<AmbientSoundModeCycle> + Has<ResetButtonConfigurationPending> + Clone + Send + Sync,
 {
-    pub fn add_ambient_sound_mode_cycle<C>(&mut self, packet_io: Arc<PacketIOController<C>>)
-    where
-        C: RfcommConnection + 'static + Send + Sync,
-    {
+    pub fn add_ambient_sound_mode_cycle(&mut self, packet_io: Arc<PacketIOController>) {
         self.setting_manager.add_handler(
             CategoryId::ButtonConfiguration,
             AmbientSoundModeCycleSettingHandler::new(),

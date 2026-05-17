@@ -8,7 +8,6 @@ use openscq30_lib_has::MaybeHas;
 
 use crate::{
     api::settings::CategoryId,
-    connection::RfcommConnection,
     devices::soundcore::common::{
         packet::{self, PacketIOController},
         structures::{
@@ -30,10 +29,7 @@ macro_rules! flag {
             T: MaybeHas<$flag_struct> + Send + Sync,
         {
             paste! {
-                pub fn [<add_ $flag_struct:snake>] <C>(&mut self, packet_io: Arc<PacketIOController<C>>)
-                where
-                    C: RfcommConnection + 'static + Send + Sync,
-                {
+                pub fn [<add_ $flag_struct:snake>](&mut self, packet_io: Arc<PacketIOController>) {
                     self.add_flag(packet_io, $flag_configuration);
                 }
             }
@@ -141,12 +137,11 @@ flag!(
 );
 
 impl<T> ModuleCollection<T> {
-    pub fn add_flag<C, FlagT>(
+    pub fn add_flag<FlagT>(
         &mut self,
-        packet_io: Arc<PacketIOController<C>>,
+        packet_io: Arc<PacketIOController>,
         flag_configuration: FlagConfiguration,
     ) where
-        C: RfcommConnection + 'static + Send + Sync,
         T: MaybeHas<FlagT> + Send + Sync,
         FlagT: Flag + Send + Sync + PartialEq + Copy + 'static,
     {

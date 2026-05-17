@@ -4,6 +4,7 @@ use std::{
     sync::Mutex,
 };
 
+use async_trait::async_trait;
 use macaddr::MacAddr6;
 use nom_language::error::VerboseError;
 use openscq30_i18n::Translate;
@@ -92,6 +93,7 @@ impl DemoConnection {
     }
 }
 
+#[async_trait]
 impl RfcommConnection for DemoConnection {
     async fn write(&self, data: &[u8]) -> connection::Result<()> {
         if data.len() < 7 {

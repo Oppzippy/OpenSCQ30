@@ -5,7 +5,6 @@ use tokio::sync::watch;
 
 use crate::{
     DeviceModel,
-    connection::RfcommConnection,
     devices::soundcore::common::{
         modules::{self, ModuleCollection},
         packet::PacketIOController,
@@ -25,15 +24,13 @@ where
         + Sync
         + 'static,
 {
-    pub async fn add_a3062_equalizer<C>(
+    pub async fn add_a3062_equalizer(
         &mut self,
-        packet_io: Arc<PacketIOController<C>>,
+        packet_io: Arc<PacketIOController>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
         change_notify: watch::Sender<()>,
-    ) where
-        C: RfcommConnection + 'static + Send + Sync,
-    {
+    ) {
         self.add_equalizer_with_custom_state_modifier(
             database,
             device_model,

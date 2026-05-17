@@ -5,28 +5,27 @@ use openscq30_lib_has::Has;
 use tokio::sync::watch;
 
 use crate::{
-    api::{connection::RfcommConnection, device},
+    api::device,
     devices::soundcore::{
         a3035,
         common::{packet::PacketIOController, state_modifier::StateModifier},
     },
 };
 
-pub struct ButtonConfigurationStateModifier<ConnectionType: RfcommConnection> {
-    packet_io: Arc<PacketIOController<ConnectionType>>,
+pub struct ButtonConfigurationStateModifier {
+    packet_io: Arc<PacketIOController>,
 }
 
-impl<ConnectionType: RfcommConnection> ButtonConfigurationStateModifier<ConnectionType> {
-    pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
+impl ButtonConfigurationStateModifier {
+    pub fn new(packet_io: Arc<PacketIOController>) -> Self {
         Self { packet_io }
     }
 }
 
 #[async_trait]
-impl<ConnectionType, T> StateModifier<T> for ButtonConfigurationStateModifier<ConnectionType>
+impl<T> StateModifier<T> for ButtonConfigurationStateModifier
 where
     T: Has<a3035::structures::ButtonConfiguration> + Clone + Send + Sync,
-    ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
         &self,

@@ -4,7 +4,7 @@ use std::sync::Arc;
 use tokio::sync::watch;
 
 use crate::{
-    api::{connection::RfcommConnection, device},
+    api::device,
     devices::soundcore::{
         a3955::{
             self,
@@ -14,21 +14,19 @@ use crate::{
     },
 };
 
-pub struct AncPersonalizedToEarCanalStateModifier<ConnectionType: RfcommConnection> {
-    packet_io: Arc<PacketIOController<ConnectionType>>,
+pub struct AncPersonalizedToEarCanalStateModifier {
+    packet_io: Arc<PacketIOController>,
 }
 
-impl<ConnectionType: RfcommConnection> AncPersonalizedToEarCanalStateModifier<ConnectionType> {
-    pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
+impl AncPersonalizedToEarCanalStateModifier {
+    pub fn new(packet_io: Arc<PacketIOController>) -> Self {
         Self { packet_io }
     }
 }
 
 #[async_trait]
-impl<ConnectionT, StateT> StateModifier<StateT>
-    for AncPersonalizedToEarCanalStateModifier<ConnectionT>
+impl<StateT> StateModifier<StateT> for AncPersonalizedToEarCanalStateModifier
 where
-    ConnectionT: RfcommConnection + Send + Sync,
     StateT: Has<SoundModes> + Has<AncPersonalizedToEarCanal> + Send + Sync,
 {
     async fn move_to_state(

@@ -4,7 +4,7 @@ use std::{marker::PhantomData, sync::Arc};
 use tokio::sync::watch;
 
 use crate::{
-    api::{connection::RfcommConnection, device},
+    api::device,
     devices::soundcore::common::{
         modules::sound_modes_v2::{Migrate, MigrationPlanner, ToPacketBody},
         packet::{self, PacketIOController},
@@ -12,24 +12,18 @@ use crate::{
     },
 };
 
-pub struct SoundModesStateModifier<
-    ConnectionType: RfcommConnection,
-    MigratableT,
-    MigratableTFieldEnum,
-    const SIZE: usize,
-> {
-    packet_io: Arc<PacketIOController<ConnectionType>>,
+pub struct SoundModesStateModifier<MigratableT, MigratableTFieldEnum, const SIZE: usize> {
+    packet_io: Arc<PacketIOController>,
     migration_planner: MigrationPlanner<MigratableTFieldEnum, SIZE>,
     _migratable: PhantomData<MigratableT>,
 }
 
-impl<ConnectionType, MigratableT, MigratableTFieldEnum, const SIZE: usize>
-    SoundModesStateModifier<ConnectionType, MigratableT, MigratableTFieldEnum, SIZE>
+impl<MigratableT, MigratableTFieldEnum, const SIZE: usize>
+    SoundModesStateModifier<MigratableT, MigratableTFieldEnum, SIZE>
 where
-    ConnectionType: RfcommConnection,
     MigratableT: Migrate<SIZE, T = MigratableTFieldEnum>,
 {
-    pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
+    pub fn new(packet_io: Arc<PacketIOController>) -> Self {
         Self {
             packet_io,
             migration_planner: MigratableT::migration_planner(),
@@ -39,11 +33,9 @@ where
 }
 
 #[async_trait]
-impl<ConnectionType, StateType, MigratableT, MigratableTFieldEnum, const SIZE: usize>
-    StateModifier<StateType>
-    for SoundModesStateModifier<ConnectionType, MigratableT, MigratableTFieldEnum, SIZE>
+impl<StateType, MigratableT, MigratableTFieldEnum, const SIZE: usize> StateModifier<StateType>
+    for SoundModesStateModifier<MigratableT, MigratableTFieldEnum, SIZE>
 where
-    ConnectionType: RfcommConnection + Send + Sync,
     StateType: Has<MigratableT> + Clone + Send + Sync,
     MigratableT: Migrate<SIZE, T = MigratableTFieldEnum>
         + ToPacketBody

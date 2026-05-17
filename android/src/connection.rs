@@ -168,6 +168,7 @@ impl Drop for WrappedManualRfcommConnection {
     }
 }
 
+#[async_trait]
 impl RfcommConnection for WrappedManualRfcommConnection {
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
         self.0.connection_status_sender.subscribe()

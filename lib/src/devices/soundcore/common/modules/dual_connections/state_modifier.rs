@@ -5,7 +5,7 @@ use std::sync::Arc;
 use tokio::sync::watch;
 
 use crate::{
-    api::{connection::RfcommConnection, device},
+    api::device,
     devices::soundcore::common::{
         packet::{self, PacketIOController},
         state_modifier::StateModifier,
@@ -13,20 +13,19 @@ use crate::{
     },
 };
 
-pub struct DualConnectionsStateModifier<ConnectionType: RfcommConnection> {
-    packet_io: Arc<PacketIOController<ConnectionType>>,
+pub struct DualConnectionsStateModifier {
+    packet_io: Arc<PacketIOController>,
 }
 
-impl<ConnectionType: RfcommConnection> DualConnectionsStateModifier<ConnectionType> {
-    pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
+impl DualConnectionsStateModifier {
+    pub fn new(packet_io: Arc<PacketIOController>) -> Self {
         Self { packet_io }
     }
 }
 
 #[async_trait]
-impl<ConnectionT, StateT> StateModifier<StateT> for DualConnectionsStateModifier<ConnectionT>
+impl<StateT> StateModifier<StateT> for DualConnectionsStateModifier
 where
-    ConnectionT: RfcommConnection + Send + Sync,
     StateT: MaybeHas<DualConnections> + Send + Sync,
 {
     async fn move_to_state(
@@ -40,13 +39,12 @@ where
     }
 }
 
-async fn set_enabled<ConnectionT, StateT>(
-    packet_io: &PacketIOController<ConnectionT>,
+async fn set_enabled<StateT>(
+    packet_io: &PacketIOController,
     state_sender: &watch::Sender<StateT>,
     target_state: &StateT,
 ) -> device::Result<()>
 where
-    ConnectionT: RfcommConnection + Send + Sync,
     StateT: MaybeHas<DualConnections> + Send + Sync,
 {
     let Some(target) = target_state.maybe_get() else {
@@ -71,13 +69,12 @@ where
     Ok(())
 }
 
-async fn set_connected_devices<ConnectionT, StateT>(
-    packet_io: &PacketIOController<ConnectionT>,
+async fn set_connected_devices<StateT>(
+    packet_io: &PacketIOController,
     state_sender: &watch::Sender<StateT>,
     target_state: &StateT,
 ) -> device::Result<()>
 where
-    ConnectionT: RfcommConnection + Send + Sync,
     StateT: MaybeHas<DualConnections> + Send + Sync,
 {
     let Some(target) = target_state.maybe_get() else {

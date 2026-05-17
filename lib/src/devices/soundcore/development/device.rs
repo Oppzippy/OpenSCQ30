@@ -74,7 +74,7 @@ pub struct SoundcoreDevelopmentDevice<B>
 where
     B: RfcommBackend,
 {
-    packet_io: PacketIOController<B::ConnectionType>,
+    packet_io: PacketIOController,
     backend: Arc<B::ConnectionType>,
     state_update_packet: Option<packet::Inbound>,
     changes_signal: watch::Sender<()>,
@@ -82,7 +82,7 @@ where
 
 impl<B> SoundcoreDevelopmentDevice<B>
 where
-    B: RfcommBackend,
+    B: RfcommBackend + 'static,
 {
     async fn new(connection: Arc<B::ConnectionType>) -> device::Result<Self> {
         let (packet_io, _packet_receiver) =

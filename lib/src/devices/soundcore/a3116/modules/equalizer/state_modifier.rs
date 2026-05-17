@@ -4,7 +4,7 @@ use std::sync::Arc;
 use tokio::sync::watch;
 
 use crate::{
-    api::{connection::RfcommConnection, device},
+    api::device,
     devices::soundcore::{
         a3116,
         common::{
@@ -14,20 +14,19 @@ use crate::{
     },
 };
 
-pub struct EqualizerStateModifier<ConnectionType: RfcommConnection> {
-    packet_io: Arc<PacketIOController<ConnectionType>>,
+pub struct EqualizerStateModifier {
+    packet_io: Arc<PacketIOController>,
 }
 
-impl<ConnectionType: RfcommConnection> EqualizerStateModifier<ConnectionType> {
-    pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
+impl EqualizerStateModifier {
+    pub fn new(packet_io: Arc<PacketIOController>) -> Self {
         Self { packet_io }
     }
 }
 
 #[async_trait]
-impl<ConnectionType, T> StateModifier<T> for EqualizerStateModifier<ConnectionType>
+impl<T> StateModifier<T> for EqualizerStateModifier
 where
-    ConnectionType: RfcommConnection + Send + Sync,
     T: Has<EqualizerConfiguration<1, 9, -6, 6, 0>> + Clone + Send + Sync + 'static,
 {
     async fn move_to_state(

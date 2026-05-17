@@ -4,7 +4,7 @@ use std::sync::Arc;
 use tokio::sync::watch;
 
 use crate::{
-    api::{connection::RfcommConnection, device},
+    api::device,
     devices::soundcore::common::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         packet::{self, PacketIOController, outbound::ToPacket},
@@ -12,20 +12,13 @@ use crate::{
     },
 };
 
-pub struct ResetButtonConfigurationStateModifier<ConnectionType: RfcommConnection, RefreshStateFn> {
-    packet_io: Arc<PacketIOController<ConnectionType>>,
+pub struct ResetButtonConfigurationStateModifier<RefreshStateFn> {
+    packet_io: Arc<PacketIOController>,
     refresh_button_state: RefreshStateFn,
 }
 
-impl<ConnectionType, RefreshStateFn>
-    ResetButtonConfigurationStateModifier<ConnectionType, RefreshStateFn>
-where
-    ConnectionType: RfcommConnection,
-{
-    pub fn new(
-        packet_io: Arc<PacketIOController<ConnectionType>>,
-        refresh_button_state: RefreshStateFn,
-    ) -> Self {
+impl<RefreshStateFn> ResetButtonConfigurationStateModifier<RefreshStateFn> {
+    pub fn new(packet_io: Arc<PacketIOController>, refresh_button_state: RefreshStateFn) -> Self {
         Self {
             packet_io,
             refresh_button_state,
@@ -34,10 +27,9 @@ where
 }
 
 #[async_trait]
-impl<ConnectionType, StateType, RefreshStateFn, RefreshStateFut> StateModifier<StateType>
-    for ResetButtonConfigurationStateModifier<ConnectionType, RefreshStateFn>
+impl<StateType, RefreshStateFn, RefreshStateFut> StateModifier<StateType>
+    for ResetButtonConfigurationStateModifier<RefreshStateFn>
 where
-    ConnectionType: RfcommConnection + Send + Sync,
     StateType: Has<ResetButtonConfigurationPending> + Clone + Send + Sync,
     RefreshStateFn: Fn(watch::Sender<StateType>) -> RefreshStateFut + Sync,
     RefreshStateFut: Future<Output = device::Result<()>> + Send,

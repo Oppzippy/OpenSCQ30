@@ -4,7 +4,7 @@ use std::sync::Arc;
 use tokio::sync::watch;
 
 use crate::{
-    api::{connection::RfcommConnection, device},
+    api::device,
     devices::soundcore::{
         a3040,
         common::{
@@ -16,31 +16,22 @@ use crate::{
 };
 
 pub struct EqualizerWithCustomHearIdStateModifier<
-    ConnectionType: RfcommConnection,
     const CHANNELS: usize,
     const BANDS: usize,
     const HEAR_ID_CHANNELS: usize,
     const HEAR_ID_BANDS: usize,
 > {
-    packet_io: Arc<PacketIOController<ConnectionType>>,
+    packet_io: Arc<PacketIOController>,
 }
 
 impl<
-    ConnectionType: RfcommConnection,
     const CHANNELS: usize,
     const BANDS: usize,
     const HEAR_ID_CHANNELS: usize,
     const HEAR_ID_BANDS: usize,
->
-    EqualizerWithCustomHearIdStateModifier<
-        ConnectionType,
-        CHANNELS,
-        BANDS,
-        HEAR_ID_CHANNELS,
-        HEAR_ID_BANDS,
-    >
+> EqualizerWithCustomHearIdStateModifier<CHANNELS, BANDS, HEAR_ID_CHANNELS, HEAR_ID_BANDS>
 {
-    pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
+    pub fn new(packet_io: Arc<PacketIOController>) -> Self {
         Self { packet_io }
     }
 }
@@ -48,26 +39,18 @@ impl<
 #[async_trait]
 impl<
     T,
-    ConnectionType: RfcommConnection,
     const CHANNELS: usize,
     const BANDS: usize,
     const HEAR_ID_CHANNELS: usize,
     const HEAR_ID_BANDS: usize,
 > StateModifier<T>
-    for EqualizerWithCustomHearIdStateModifier<
-        ConnectionType,
-        CHANNELS,
-        BANDS,
-        HEAR_ID_CHANNELS,
-        HEAR_ID_BANDS,
-    >
+    for EqualizerWithCustomHearIdStateModifier<CHANNELS, BANDS, HEAR_ID_CHANNELS, HEAR_ID_BANDS>
 where
     T: Has<CommonEqualizerConfiguration<CHANNELS, BANDS>>
         + Has<CustomHearId<HEAR_ID_CHANNELS, HEAR_ID_BANDS>>
         + Clone
         + Send
         + Sync,
-    ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
         &self,

@@ -3,7 +3,6 @@ use std::sync::Arc;
 use openscq30_lib_has::Has;
 
 use crate::{
-    connection::RfcommConnection,
     devices::soundcore::{
         a3035,
         common::{
@@ -18,10 +17,7 @@ impl<T> ModuleCollection<T>
 where
     T: Has<a3035::structures::BatteryAlert> + Clone + Send + Sync,
 {
-    pub fn add_a3035_battery_alert<C>(&mut self, packet_io: Arc<PacketIOController<C>>)
-    where
-        C: RfcommConnection + 'static + Send + Sync,
-    {
+    pub fn add_a3035_battery_alert(&mut self, packet_io: Arc<PacketIOController>) {
         self.add_flag(
             packet_io,
             FlagConfiguration {
@@ -37,12 +33,10 @@ impl<T> ModuleCollection<T>
 where
     T: Has<a3035::structures::AmbientSoundModeVoicePrompt> + Clone + Send + Sync,
 {
-    pub fn add_a3035_ambient_sound_mode_voice_prompt<C>(
+    pub fn add_a3035_ambient_sound_mode_voice_prompt(
         &mut self,
-        packet_io: Arc<PacketIOController<C>>,
-    ) where
-        C: RfcommConnection + 'static + Send + Sync,
-    {
+        packet_io: Arc<PacketIOController>,
+    ) {
         self.add_flag(
             packet_io,
             FlagConfiguration {

@@ -1,13 +1,10 @@
 use openscq30_lib_has::Has;
 
-use crate::{
-    api::connection::RfcommConnection,
-    devices::soundcore::{
-        a3947,
-        common::{
-            device::SoundcoreDeviceBuilder,
-            structures::{CommonEqualizerConfiguration, GamingMode, TwsStatus},
-        },
+use crate::devices::soundcore::{
+    a3947,
+    common::{
+        device::SoundcoreDeviceBuilder,
+        structures::{CommonEqualizerConfiguration, GamingMode, TwsStatus},
     },
 };
 
@@ -17,9 +14,8 @@ mod equalizer;
 mod flag;
 mod sound_modes;
 
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Has<SoundModes> + Send + Sync + Clone + 'static,
 {
     pub fn a3947_sound_modes(&mut self) {
@@ -29,9 +25,8 @@ where
     }
 }
 
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Has<CommonEqualizerConfiguration<2, 10>>
         + Has<a3947::structures::HearId<2, 10>>
         + Has<TwsStatus>
@@ -51,9 +46,8 @@ where
     }
 }
 
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Has<GamingMode> + Send + Sync + Clone + 'static,
 {
     pub fn a3947_gaming_mode(&mut self) {

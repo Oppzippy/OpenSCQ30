@@ -3,7 +3,6 @@ use std::sync::Arc;
 use openscq30_lib_has::Has;
 
 use crate::{
-    connection::RfcommConnection,
     devices::soundcore::{
         a3062,
         common::{
@@ -18,10 +17,7 @@ impl<T> ModuleCollection<T>
 where
     T: Has<a3062::structures::DolbyAudio> + Clone + Send + Sync,
 {
-    pub fn add_a3062_dolby_audio<C>(&mut self, packet_io: Arc<PacketIOController<C>>)
-    where
-        C: RfcommConnection + 'static + Send + Sync,
-    {
+    pub fn add_a3062_dolby_audio(&mut self, packet_io: Arc<PacketIOController>) {
         self.add_flag(
             packet_io,
             FlagConfiguration {
@@ -37,10 +33,7 @@ impl<T> ModuleCollection<T>
 where
     T: Has<a3062::structures::SideTone> + Clone + Send + Sync,
 {
-    pub fn add_a3062_side_tone<C>(&mut self, packet_io: Arc<PacketIOController<C>>)
-    where
-        C: RfcommConnection + 'static + Send + Sync,
-    {
+    pub fn add_a3062_side_tone(&mut self, packet_io: Arc<PacketIOController>) {
         self.add_flag(
             packet_io,
             FlagConfiguration {
@@ -56,12 +49,10 @@ impl<T> ModuleCollection<T>
 where
     T: Has<a3062::structures::AmbientSoundModeVoicePrompt> + Clone + Send + Sync,
 {
-    pub fn add_a3062_ambient_sound_mode_voice_prompt<C>(
+    pub fn add_a3062_ambient_sound_mode_voice_prompt(
         &mut self,
-        packet_io: Arc<PacketIOController<C>>,
-    ) where
-        C: RfcommConnection + 'static + Send + Sync,
-    {
+        packet_io: Arc<PacketIOController>,
+    ) {
         self.add_flag(
             packet_io,
             FlagConfiguration {

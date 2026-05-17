@@ -4,27 +4,26 @@ use std::sync::Arc;
 use tokio::sync::watch;
 
 use crate::{
-    api::{connection::RfcommConnection, device},
+    api::device,
     devices::soundcore::{
         a3955::{self, structures::ImmersiveExperience},
         common::{packet::PacketIOController, state_modifier::StateModifier},
     },
 };
 
-pub struct ImmersiveExperienceStateModifier<ConnectionType: RfcommConnection> {
-    packet_io: Arc<PacketIOController<ConnectionType>>,
+pub struct ImmersiveExperienceStateModifier {
+    packet_io: Arc<PacketIOController>,
 }
 
-impl<ConnectionType: RfcommConnection> ImmersiveExperienceStateModifier<ConnectionType> {
-    pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
+impl ImmersiveExperienceStateModifier {
+    pub fn new(packet_io: Arc<PacketIOController>) -> Self {
         Self { packet_io }
     }
 }
 
 #[async_trait]
-impl<ConnectionT, StateT> StateModifier<StateT> for ImmersiveExperienceStateModifier<ConnectionT>
+impl<StateT> StateModifier<StateT> for ImmersiveExperienceStateModifier
 where
-    ConnectionT: RfcommConnection + Send + Sync,
     StateT: Has<ImmersiveExperience> + Send + Sync,
 {
     async fn move_to_state(

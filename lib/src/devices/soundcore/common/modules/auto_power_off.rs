@@ -5,10 +5,7 @@ use openscq30_lib_has::MaybeHas;
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use crate::{
-    api::{
-        connection::RfcommConnection,
-        settings::{CategoryId, SettingId},
-    },
+    api::settings::{CategoryId, SettingId},
     devices::soundcore::common::{
         modules::{
             ModuleCollection,
@@ -39,12 +36,11 @@ impl<T> ModuleCollection<T>
 where
     T: MaybeHas<AutoPowerOff> + Clone + Send + Sync + 'static,
 {
-    pub fn add_auto_power_off<C, Duration>(
+    pub fn add_auto_power_off<Duration>(
         &mut self,
-        packet_io: Arc<PacketIOController<C>>,
+        packet_io: Arc<PacketIOController>,
         durations: &'static [Duration],
     ) where
-        C: RfcommConnection + 'static + Send + Sync,
         Duration: Translate + Send + Sync + 'static,
         &'static str: for<'a> From<&'a Duration>,
     {

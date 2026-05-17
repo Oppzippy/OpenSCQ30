@@ -9,10 +9,7 @@ use state_modifier::ImmersiveExperienceStateModifier;
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use crate::{
-    api::{
-        connection::RfcommConnection,
-        settings::{CategoryId, SettingId},
-    },
+    api::settings::{CategoryId, SettingId},
     devices::soundcore::{
         a3955::structures::ImmersiveExperience,
         common::{modules::ModuleCollection, packet::PacketIOController},
@@ -32,12 +29,7 @@ impl<T> ModuleCollection<T>
 where
     T: Has<ImmersiveExperience> + Clone + Send + Sync,
 {
-    pub fn add_a3955_immersive_experience<ConnectionT>(
-        &mut self,
-        packet_io: Arc<PacketIOController<ConnectionT>>,
-    ) where
-        ConnectionT: RfcommConnection + 'static + Send + Sync,
-    {
+    pub fn add_a3955_immersive_experience(&mut self, packet_io: Arc<PacketIOController>) {
         self.setting_manager.add_handler(
             CategoryId::Miscellaneous,
             ImmersiveExperienceSettingHandler::default(),

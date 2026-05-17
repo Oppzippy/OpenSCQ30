@@ -4,27 +4,26 @@ use std::sync::Arc;
 use tokio::sync::watch;
 
 use crate::{
-    api::{connection::RfcommConnection, device},
+    api::device,
     devices::soundcore::{
         a3116,
         common::{packet::PacketIOController, state_modifier::StateModifier},
     },
 };
 
-pub struct AutoPowerOffStateModifier<ConnectionType: RfcommConnection> {
-    packet_io: Arc<PacketIOController<ConnectionType>>,
+pub struct AutoPowerOffStateModifier {
+    packet_io: Arc<PacketIOController>,
 }
 
-impl<ConnectionType: RfcommConnection> AutoPowerOffStateModifier<ConnectionType> {
-    pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
+impl AutoPowerOffStateModifier {
+    pub fn new(packet_io: Arc<PacketIOController>) -> Self {
         Self { packet_io }
     }
 }
 
 #[async_trait]
-impl<ConnectionType, T> StateModifier<T> for AutoPowerOffStateModifier<ConnectionType>
+impl<T> StateModifier<T> for AutoPowerOffStateModifier
 where
-    ConnectionType: RfcommConnection + Send + Sync,
     T: MaybeHas<a3116::structures::AutoPowerOffDuration> + Clone + Send + Sync,
 {
     async fn move_to_state(

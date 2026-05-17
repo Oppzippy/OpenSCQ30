@@ -4,7 +4,7 @@ use std::sync::Arc;
 use tokio::sync::watch;
 
 use crate::{
-    api::{connection::RfcommConnection, device},
+    api::device,
     devices::soundcore::common::{
         modules::{
             button_configuration::{ButtonConfigurationSettings, ButtonSettings},
@@ -16,12 +16,9 @@ use crate::{
     },
 };
 
-pub struct ButtonConfigurationStateModifier<
-    ConnectionType: RfcommConnection,
-    const NUM_BUTTONS: usize,
-    const NUM_PRESS_KINDS: usize,
-> {
-    packet_io: Arc<PacketIOController<ConnectionType>>,
+pub struct ButtonConfigurationStateModifier<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize>
+{
+    packet_io: Arc<PacketIOController>,
     supports_set_all_packet: bool,
     button_data: [ButtonData; NUM_BUTTONS],
 }
@@ -32,11 +29,11 @@ struct ButtonData {
     button_settings: ButtonSettings,
 }
 
-impl<ConnectionType: RfcommConnection, const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize>
-    ButtonConfigurationStateModifier<ConnectionType, NUM_BUTTONS, NUM_PRESS_KINDS>
+impl<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize>
+    ButtonConfigurationStateModifier<NUM_BUTTONS, NUM_PRESS_KINDS>
 {
     pub fn new(
-        packet_io: Arc<PacketIOController<ConnectionType>>,
+        packet_io: Arc<PacketIOController>,
         settings: &ButtonConfigurationSettings<NUM_BUTTONS, NUM_PRESS_KINDS>,
     ) -> Self {
         Self {
@@ -51,16 +48,14 @@ impl<ConnectionType: RfcommConnection, const NUM_BUTTONS: usize, const NUM_PRESS
 }
 
 #[async_trait]
-impl<ConnectionType: RfcommConnection, const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize, T>
-    StateModifier<T>
-    for ButtonConfigurationStateModifier<ConnectionType, NUM_BUTTONS, NUM_PRESS_KINDS>
+impl<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize, T> StateModifier<T>
+    for ButtonConfigurationStateModifier<NUM_BUTTONS, NUM_PRESS_KINDS>
 where
     T: Has<ButtonStatusCollection<NUM_BUTTONS>>
         + Has<ResetButtonConfigurationPending>
         + Clone
         + Send
         + Sync,
-    ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
         &self,

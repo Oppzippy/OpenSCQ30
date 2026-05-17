@@ -5,7 +5,7 @@ use openscq30_lib_has::Has;
 use tokio::sync::watch;
 
 use crate::{
-    api::{connection::RfcommConnection, device},
+    api::device,
     devices::soundcore::common::{
         packet::{self, PacketIOController, outbound::ToPacket},
         state_modifier::StateModifier,
@@ -13,21 +13,20 @@ use crate::{
     },
 };
 
-pub struct SoundModesStateModifier<ConnectionType: RfcommConnection> {
-    packet_io: Arc<PacketIOController<ConnectionType>>,
+pub struct SoundModesStateModifier {
+    packet_io: Arc<PacketIOController>,
 }
 
-impl<ConnectionType: RfcommConnection> SoundModesStateModifier<ConnectionType> {
-    pub fn new(packet_io: Arc<PacketIOController<ConnectionType>>) -> Self {
+impl SoundModesStateModifier {
+    pub fn new(packet_io: Arc<PacketIOController>) -> Self {
         Self { packet_io }
     }
 }
 
 #[async_trait]
-impl<ConnectionType, T> StateModifier<T> for SoundModesStateModifier<ConnectionType>
+impl<T> StateModifier<T> for SoundModesStateModifier
 where
     T: Has<SoundModes> + Clone + Send + Sync,
-    ConnectionType: RfcommConnection + Send + Sync,
 {
     async fn move_to_state(
         &self,

@@ -11,10 +11,7 @@ use state_modifier::SoundModesStateModifier;
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use crate::{
-    api::{
-        connection::RfcommConnection,
-        settings::{CategoryId, SettingId},
-    },
+    api::settings::{CategoryId, SettingId},
     devices::soundcore::common::{
         packet::PacketIOController,
         structures::{AmbientSoundMode, NoiseCancelingMode, SoundModes, TransparencyMode},
@@ -45,13 +42,11 @@ impl<T> ModuleCollection<T>
 where
     T: Has<SoundModes> + Clone + Send + Sync,
 {
-    pub fn add_sound_modes<C>(
+    pub fn add_sound_modes(
         &mut self,
-        packet_io: Arc<PacketIOController<C>>,
+        packet_io: Arc<PacketIOController>,
         available_sound_modes: AvailableSoundModes,
-    ) where
-        C: RfcommConnection + 'static + Send + Sync,
-    {
+    ) {
         self.setting_manager.add_handler(
             CategoryId::SoundModes,
             SoundModesSettingHandler::new(available_sound_modes),

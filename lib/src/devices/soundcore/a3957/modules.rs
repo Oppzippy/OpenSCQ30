@@ -1,16 +1,13 @@
 use openscq30_lib_has::Has;
 
-use crate::{
-    api::connection::RfcommConnection, devices::soundcore::common::device::SoundcoreDeviceBuilder,
-};
+use crate::devices::soundcore::common::device::SoundcoreDeviceBuilder;
 
 use super::structures::SoundModes;
 
 mod sound_modes;
 
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Has<SoundModes> + Send + Sync + Clone + 'static,
 {
     pub fn a3957_sound_modes(&mut self) {

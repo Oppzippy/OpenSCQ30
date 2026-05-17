@@ -1,15 +1,11 @@
 use openscq30_lib_has::Has;
 
-use crate::{
-    connection::RfcommConnection,
-    devices::soundcore::{a3909, common::device::SoundcoreDeviceBuilder},
-};
+use crate::devices::soundcore::{a3909, common::device::SoundcoreDeviceBuilder};
 
 pub mod equalizer;
 
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Has<a3909::structures::EqualizerConfiguration> + Clone + Send + Sync + 'static,
 {
     pub async fn a3909_equalizer(&mut self) {

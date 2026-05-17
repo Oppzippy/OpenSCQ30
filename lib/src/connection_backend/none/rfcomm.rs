@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+use async_trait::async_trait;
 use macaddr::MacAddr6;
 use tokio::sync::{mpsc, watch};
 
@@ -9,6 +10,7 @@ use crate::api::connection::{
 
 pub struct NoneRfcommBackend {}
 pub struct NoneRfcommConnection {}
+
 impl RfcommBackend for NoneRfcommBackend {
     type ConnectionType = NoneRfcommConnection;
 
@@ -24,6 +26,8 @@ impl RfcommBackend for NoneRfcommBackend {
         unimplemented!()
     }
 }
+
+#[async_trait]
 impl RfcommConnection for NoneRfcommConnection {
     async fn write(&self, _data: &[u8]) -> connection::Result<()> {
         unimplemented!()

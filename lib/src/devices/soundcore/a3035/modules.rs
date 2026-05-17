@@ -1,11 +1,8 @@
 use openscq30_lib_has::Has;
 
-use crate::{
-    connection::RfcommConnection,
-    devices::soundcore::{
-        a3035,
-        common::{self, device::SoundcoreDeviceBuilder},
-    },
+use crate::devices::soundcore::{
+    a3035,
+    common::{self, device::SoundcoreDeviceBuilder},
 };
 
 mod button_configuration;
@@ -13,9 +10,8 @@ mod equalizer;
 mod flag;
 mod sound_modes;
 
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Has<a3035::structures::SoundModes> + Send + Sync + Clone + 'static,
 {
     pub fn a3035_sound_modes(&mut self) {
@@ -25,9 +21,8 @@ where
     }
 }
 
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Has<a3035::structures::ButtonConfiguration> + Send + Sync + Clone + 'static,
 {
     pub fn a3035_button_configuration(&mut self) {
@@ -37,9 +32,8 @@ where
     }
 }
 
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Has<common::structures::CommonEqualizerConfiguration<1, 10>>
         + Has<common::structures::CustomHearId<1, 10>>
         + Send
@@ -58,9 +52,8 @@ where
     }
 }
 
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Has<a3035::structures::BatteryAlert> + Send + Sync + Clone + 'static,
 {
     pub fn a3035_battery_alert(&mut self) {
@@ -70,9 +63,8 @@ where
     }
 }
 
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Has<a3035::structures::AmbientSoundModeVoicePrompt> + Send + Sync + Clone + 'static,
 {
     pub fn a3035_ambient_sound_mode_voice_prompt(&mut self) {

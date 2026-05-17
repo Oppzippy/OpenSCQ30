@@ -18,8 +18,7 @@ mod state;
 soundcore_device!(
     A3028State,
     async |packet_io| {
-        fetch_state_from_state_update_packet::<_, A3028State, A3028StateUpdatePacket>(packet_io)
-            .await
+        fetch_state_from_state_update_packet::<A3028State, A3028StateUpdatePacket>(packet_io).await
     },
     async |builder| {
         builder.module_collection().add_state_update();

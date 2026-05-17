@@ -4,7 +4,6 @@ use openscq30_lib_has::Has;
 use strum::{EnumIter, EnumString};
 
 use crate::{
-    connection::RfcommConnection,
     devices::soundcore::common::{
         modules::{
             ModuleCollection, limit_high_volume::state_modifier::LimitHighVolumeStateModifier,
@@ -33,10 +32,7 @@ impl<T> ModuleCollection<T>
 where
     T: Has<LimitHighVolume> + Clone + Send + Sync,
 {
-    pub fn add_limit_high_volume<C>(&mut self, packet_io: Arc<PacketIOController<C>>)
-    where
-        C: RfcommConnection + 'static + Send + Sync,
-    {
+    pub fn add_limit_high_volume(&mut self, packet_io: Arc<PacketIOController>) {
         self.setting_manager.add_handler(
             CategoryId::LimitHighVolume,
             setting_handler::LimitHighVolumeSettingHandler,

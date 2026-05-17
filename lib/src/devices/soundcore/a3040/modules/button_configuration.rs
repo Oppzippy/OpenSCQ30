@@ -9,10 +9,7 @@ use state_modifier::ButtonConfigurationStateModifier;
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use crate::{
-    api::{
-        connection::RfcommConnection,
-        settings::{CategoryId, SettingId},
-    },
+    api::settings::{CategoryId, SettingId},
     devices::soundcore::{
         a3040,
         common::{modules::ModuleCollection, packet::PacketIOController},
@@ -33,10 +30,7 @@ impl<T> ModuleCollection<T>
 where
     T: Has<a3040::structures::ButtonConfiguration> + Clone + Send + Sync,
 {
-    pub fn add_a3040_button_configuration<C>(&mut self, packet_io: Arc<PacketIOController<C>>)
-    where
-        C: RfcommConnection + 'static + Send + Sync,
-    {
+    pub fn add_a3040_button_configuration(&mut self, packet_io: Arc<PacketIOController>) {
         self.setting_manager.add_handler(
             CategoryId::ButtonConfiguration,
             ButtonConfigurationSettingHandler::default(),

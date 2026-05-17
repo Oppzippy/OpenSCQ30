@@ -1,11 +1,8 @@
 use openscq30_lib_has::Has;
 
-use crate::{
-    connection::RfcommConnection,
-    devices::soundcore::{
-        a3040,
-        common::{self, device::SoundcoreDeviceBuilder},
-    },
+use crate::devices::soundcore::{
+    a3040,
+    common::{self, device::SoundcoreDeviceBuilder},
 };
 
 mod button_configuration;
@@ -13,9 +10,8 @@ mod equalizer;
 mod flag;
 mod sound_modes;
 
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Has<a3040::structures::SoundModes> + Send + Sync + Clone + 'static,
 {
     pub fn a3040_sound_modes(&mut self) {
@@ -25,9 +21,8 @@ where
     }
 }
 
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Has<common::structures::CommonEqualizerConfiguration<1, 10>>
         + Has<common::structures::CustomHearId<2, 10>>
         + Send
@@ -46,9 +41,8 @@ where
     }
 }
 
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Has<a3040::structures::ButtonConfiguration> + Send + Sync + Clone + 'static,
 {
     pub fn a3040_button_configuration(&mut self) {
@@ -58,9 +52,8 @@ where
     }
 }
 
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Has<a3040::structures::LowBatteryPrompt> + Send + Sync + Clone + 'static,
 {
     pub fn a3040_low_battery_prompt(&mut self) {
@@ -70,9 +63,8 @@ where
     }
 }
 
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Has<a3040::structures::VoicePrompt> + Send + Sync + Clone + 'static,
 {
     pub fn a3040_voice_prompt(&mut self) {

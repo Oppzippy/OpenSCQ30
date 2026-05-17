@@ -10,10 +10,7 @@ use strum::{EnumIter, EnumString, IntoStaticStr};
 use tokio::sync::watch;
 
 use crate::{
-    api::{
-        connection::RfcommConnection,
-        settings::{CategoryId, SettingId},
-    },
+    api::settings::{CategoryId, SettingId},
     devices::{
         DeviceModel,
         soundcore::common::{
@@ -247,7 +244,6 @@ pub fn common_settings() -> EqualizerModuleSettings<
 
 impl<T: 'static> ModuleCollection<T> {
     pub async fn add_equalizer<
-        Conn,
         const CHANNELS: usize,
         const BANDS: usize,
         const VISIBLE_BANDS: usize,
@@ -257,7 +253,7 @@ impl<T: 'static> ModuleCollection<T> {
         const FRACTION_DIGITS: u8,
     >(
         &mut self,
-        packet_io: Arc<PacketIOController<Conn>>,
+        packet_io: Arc<PacketIOController>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
         change_notify: watch::Sender<()>,
@@ -269,7 +265,6 @@ impl<T: 'static> ModuleCollection<T> {
             FRACTION_DIGITS,
         >,
     ) where
-        Conn: RfcommConnection + 'static + Send + Sync,
         T: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
             + Clone
             + Send
@@ -289,7 +284,6 @@ impl<T: 'static> ModuleCollection<T> {
     }
 
     pub async fn add_equalizer_tws<
-        Conn,
         const CHANNELS: usize,
         const BANDS: usize,
         const VISIBLE_BANDS: usize,
@@ -299,7 +293,7 @@ impl<T: 'static> ModuleCollection<T> {
         const FRACTION_DIGITS: u8,
     >(
         &mut self,
-        packet_io: Arc<PacketIOController<Conn>>,
+        packet_io: Arc<PacketIOController>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
         change_notify: watch::Sender<()>,
@@ -311,7 +305,6 @@ impl<T: 'static> ModuleCollection<T> {
             FRACTION_DIGITS,
         >,
     ) where
-        Conn: RfcommConnection + 'static + Send + Sync,
         T: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
             + Has<TwsStatus>
             + Clone
@@ -332,7 +325,6 @@ impl<T: 'static> ModuleCollection<T> {
     }
 
     pub async fn add_equalizer_with_drc<
-        Conn,
         const CHANNELS: usize,
         const BANDS: usize,
         const VISIBLE_BANDS: usize,
@@ -342,7 +334,7 @@ impl<T: 'static> ModuleCollection<T> {
         const FRACTION_DIGITS: u8,
     >(
         &mut self,
-        packet_io: Arc<PacketIOController<Conn>>,
+        packet_io: Arc<PacketIOController>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
         change_notify: watch::Sender<()>,
@@ -354,7 +346,6 @@ impl<T: 'static> ModuleCollection<T> {
             FRACTION_DIGITS,
         >,
     ) where
-        Conn: RfcommConnection + 'static + Send + Sync,
         T: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
             + Clone
             + Send
@@ -374,7 +365,6 @@ impl<T: 'static> ModuleCollection<T> {
     }
 
     pub async fn add_equalizer_with_drc_tws<
-        Conn,
         const CHANNELS: usize,
         const BANDS: usize,
         const VISIBLE_BANDS: usize,
@@ -384,7 +374,7 @@ impl<T: 'static> ModuleCollection<T> {
         const FRACTION_DIGITS: u8,
     >(
         &mut self,
-        packet_io: Arc<PacketIOController<Conn>>,
+        packet_io: Arc<PacketIOController>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
         change_notify: watch::Sender<()>,
@@ -396,7 +386,6 @@ impl<T: 'static> ModuleCollection<T> {
             FRACTION_DIGITS,
         >,
     ) where
-        Conn: RfcommConnection + 'static + Send + Sync,
         T: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
             + Has<TwsStatus>
             + Clone
@@ -417,7 +406,6 @@ impl<T: 'static> ModuleCollection<T> {
     }
 
     pub async fn add_equalizer_with_basic_hear_id_tws<
-        Conn,
         const CHANNELS: usize,
         const BANDS: usize,
         const VISIBLE_BANDS: usize,
@@ -427,7 +415,7 @@ impl<T: 'static> ModuleCollection<T> {
         const FRACTION_DIGITS: u8,
     >(
         &mut self,
-        packet_io: Arc<PacketIOController<Conn>>,
+        packet_io: Arc<PacketIOController>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
         change_notify: watch::Sender<()>,
@@ -439,7 +427,6 @@ impl<T: 'static> ModuleCollection<T> {
             FRACTION_DIGITS,
         >,
     ) where
-        Conn: RfcommConnection + 'static + Send + Sync,
         T: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
             + Has<TwsStatus>
             + Has<BasicHearId<CHANNELS, BANDS>>
@@ -460,7 +447,6 @@ impl<T: 'static> ModuleCollection<T> {
     }
 
     pub async fn add_equalizer_with_custom_hear_id_tws<
-        Conn,
         const CHANNELS: usize,
         const BANDS: usize,
         const VISIBLE_BANDS: usize,
@@ -470,7 +456,7 @@ impl<T: 'static> ModuleCollection<T> {
         const FRACTION_DIGITS: u8,
     >(
         &mut self,
-        packet_io: Arc<PacketIOController<Conn>>,
+        packet_io: Arc<PacketIOController>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
         change_notify: watch::Sender<()>,
@@ -482,7 +468,6 @@ impl<T: 'static> ModuleCollection<T> {
             FRACTION_DIGITS,
         >,
     ) where
-        Conn: RfcommConnection + 'static + Send + Sync,
         T: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
             + Has<TwsStatus>
             + Has<CustomHearId<CHANNELS, BANDS>>

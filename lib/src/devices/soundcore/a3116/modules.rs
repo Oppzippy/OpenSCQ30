@@ -1,11 +1,8 @@
 use openscq30_lib_has::Has;
 
-use crate::{
-    connection::RfcommConnection,
-    devices::soundcore::{
-        a3116,
-        common::{device::SoundcoreDeviceBuilder, structures::EqualizerConfiguration},
-    },
+use crate::devices::soundcore::{
+    a3116,
+    common::{device::SoundcoreDeviceBuilder, structures::EqualizerConfiguration},
 };
 
 mod auto_power_off;
@@ -13,9 +10,8 @@ mod equalizer;
 mod power_off;
 mod volume;
 
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Has<a3116::structures::AutoPowerOffDuration> + Send + Sync + Clone + 'static,
 {
     pub fn a3116_auto_power_off(&mut self) {
@@ -25,9 +21,8 @@ where
     }
 }
 
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Has<a3116::structures::Volume> + Send + Sync + Clone + 'static,
 {
     pub fn a3116_volume(&mut self, max_volume: u8) {
@@ -37,9 +32,8 @@ where
     }
 }
 
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Has<EqualizerConfiguration<1, 9, -6, 6, 0>> + Clone + Send + Sync + 'static,
 {
     pub async fn a3116_equalizer(&mut self) {
@@ -53,9 +47,8 @@ where
     }
 }
 
-impl<ConnectionType, StateType> SoundcoreDeviceBuilder<ConnectionType, StateType>
+impl<StateType> SoundcoreDeviceBuilder<StateType>
 where
-    ConnectionType: RfcommConnection + Send + Sync + 'static,
     StateType: Has<a3116::structures::PowerOffPending> + Clone + Send + Sync + 'static,
 {
     pub fn a3116_power_off(&mut self) {

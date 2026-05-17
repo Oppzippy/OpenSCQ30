@@ -9,10 +9,7 @@ use setting_handler::SoundModesSettingHandler;
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use crate::{
-    api::{
-        connection::RfcommConnection,
-        settings::{CategoryId, SettingId},
-    },
+    api::settings::{CategoryId, SettingId},
     devices::soundcore::{
         a3957::{self, structures::SoundModes},
         common::{
@@ -41,17 +38,11 @@ impl<T> ModuleCollection<T>
 where
     T: Has<SoundModes> + Clone + Send + Sync,
 {
-    pub fn add_a3957_sound_modes<ConnectionT>(
-        &mut self,
-        packet_io: Arc<PacketIOController<ConnectionT>>,
-    ) where
-        ConnectionT: RfcommConnection + 'static + Send + Sync,
-    {
+    pub fn add_a3957_sound_modes(&mut self, packet_io: Arc<PacketIOController>) {
         self.setting_manager
             .add_handler(CategoryId::SoundModes, SoundModesSettingHandler::default());
         self.state_modifiers
             .push(Box::new(sound_modes_v2::SoundModesStateModifier::<
-                ConnectionT,
                 SoundModes,
                 a3957::structures::SoundModesFields,
                 8,

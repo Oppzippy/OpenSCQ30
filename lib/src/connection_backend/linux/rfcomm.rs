@@ -5,6 +5,7 @@ use std::{
     time::{Duration, Instant},
 };
 
+use async_trait::async_trait;
 use bluer::{
     Adapter, Device, DeviceProperty, Session,
     rfcomm::{
@@ -299,6 +300,7 @@ impl BluerRfcommConnection {
     }
 }
 
+#[async_trait]
 impl RfcommConnection for BluerRfcommConnection {
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
         self.connection_status_receiver.clone()

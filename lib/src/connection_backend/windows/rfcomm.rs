@@ -5,6 +5,7 @@ use std::{
     thread,
 };
 
+use async_trait::async_trait;
 use macaddr::MacAddr6;
 use tokio::sync::{mpsc, watch};
 use tracing::{debug, debug_span, error, instrument, trace, warn};
@@ -267,6 +268,7 @@ impl WindowsRfcommConnection {
     }
 }
 
+#[async_trait]
 impl RfcommConnection for WindowsRfcommConnection {
     async fn write(&self, data: &[u8]) -> connection::Result<()> {
         let socket = self.socket.clone();
