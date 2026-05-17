@@ -31,18 +31,7 @@ where
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
         let cycle = state.get();
-        let setting: SoundModeCycleSetting = (*setting_id).try_into().ok()?;
-        Some(match setting {
-            SoundModeCycleSetting::NormalModeInCycle => Setting::Toggle {
-                value: cycle.normal_mode,
-            },
-            SoundModeCycleSetting::TransparencyModeInCycle => Setting::Toggle {
-                value: cycle.transparency_mode,
-            },
-            SoundModeCycleSetting::NoiseCancelingModeInCycle => Setting::Toggle {
-                value: cycle.noise_canceling_mode,
-            },
-        })
+        get_inner(cycle, setting_id)
     }
 
     async fn set(
@@ -52,20 +41,45 @@ where
         value: Value,
     ) -> SettingHandlerResult<()> {
         let cycle = state.get_mut();
-        let setting: SoundModeCycleSetting = (*setting_id)
-            .try_into()
-            .expect("already filtered to valid values only by SettingsManager");
-        match setting {
-            SoundModeCycleSetting::NormalModeInCycle => {
-                cycle.normal_mode = value.try_as_bool()?;
-            }
-            SoundModeCycleSetting::TransparencyModeInCycle => {
-                cycle.transparency_mode = value.try_as_bool()?;
-            }
-            SoundModeCycleSetting::NoiseCancelingModeInCycle => {
-                cycle.noise_canceling_mode = value.try_as_bool()?;
-            }
-        }
-        Ok(())
+        set_inner(cycle, setting_id, value)
     }
+}
+
+#[inline(never)]
+fn get_inner(cycle: &AmbientSoundModeCycle, setting_id: &SettingId) -> Option<Setting> {
+    let setting: SoundModeCycleSetting = (*setting_id).try_into().ok()?;
+    Some(match setting {
+        SoundModeCycleSetting::NormalModeInCycle => Setting::Toggle {
+            value: cycle.normal_mode,
+        },
+        SoundModeCycleSetting::TransparencyModeInCycle => Setting::Toggle {
+            value: cycle.transparency_mode,
+        },
+        SoundModeCycleSetting::NoiseCancelingModeInCycle => Setting::Toggle {
+            value: cycle.noise_canceling_mode,
+        },
+    })
+}
+
+#[inline(never)]
+fn set_inner(
+    cycle: &mut AmbientSoundModeCycle,
+    setting_id: &SettingId,
+    value: Value,
+) -> SettingHandlerResult<()> {
+    let setting: SoundModeCycleSetting = (*setting_id)
+        .try_into()
+        .expect("already filtered to valid values only by SettingsManager");
+    match setting {
+        SoundModeCycleSetting::NormalModeInCycle => {
+            cycle.normal_mode = value.try_as_bool()?;
+        }
+        SoundModeCycleSetting::TransparencyModeInCycle => {
+            cycle.transparency_mode = value.try_as_bool()?;
+        }
+        SoundModeCycleSetting::NoiseCancelingModeInCycle => {
+            cycle.noise_canceling_mode = value.try_as_bool()?;
+        }
+    }
+    Ok(())
 }

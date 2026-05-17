@@ -30,6 +30,28 @@ where
     T: Has<SoundModes> + Send,
 {
     fn settings(&self) -> Vec<SettingId> {
+        self.settings_inner()
+    }
+
+    fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
+        let sound_modes = state.get();
+        self.get_inner(sound_modes, setting_id)
+    }
+
+    async fn set(
+        &self,
+        state: &mut T,
+        setting_id: &SettingId,
+        value: Value,
+    ) -> SettingHandlerResult<()> {
+        let sound_modes = state.get_mut();
+        self.set_inner(sound_modes, setting_id, value)
+    }
+}
+
+impl SoundModesSettingHandler {
+    #[inline(never)]
+    fn settings_inner(&self) -> Vec<SettingId> {
         SoundModeSetting::iter()
             .filter(|setting| match setting {
                 SoundModeSetting::AmbientSoundMode => {
@@ -50,8 +72,8 @@ where
             .collect()
     }
 
-    fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
-        let sound_modes = state.get();
+    #[inline(never)]
+    fn get_inner(&self, sound_modes: &SoundModes, setting_id: &SettingId) -> Option<Setting> {
         let sound_mode_setting: SoundModeSetting = (*setting_id).try_into().ok()?;
         Some(match sound_mode_setting {
             SoundModeSetting::AmbientSoundMode => Setting::select_from_enum(
@@ -76,13 +98,13 @@ where
         })
     }
 
-    async fn set(
+    #[inline(never)]
+    fn set_inner(
         &self,
-        state: &mut T,
+        sound_modes: &mut SoundModes,
         setting_id: &SettingId,
         value: Value,
     ) -> SettingHandlerResult<()> {
-        let sound_modes = state.get_mut();
         let sound_mode_setting: SoundModeSetting = (*setting_id)
             .try_into()
             .expect("already filtered to valid values only by SettingsManager");

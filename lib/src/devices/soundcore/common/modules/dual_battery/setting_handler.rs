@@ -39,6 +39,22 @@ where
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
         let battery = state.get();
+        self.get_inner(battery, setting_id)
+    }
+
+    async fn set(
+        &self,
+        _state: &mut T,
+        _setting_id: &SettingId,
+        _value: Value,
+    ) -> SettingHandlerResult<()> {
+        Err(SettingHandlerError::ReadOnly)
+    }
+}
+
+impl BatterySettingHandler {
+    #[inline(never)]
+    fn get_inner(&self, battery: &DualBattery, setting_id: &SettingId) -> Option<Setting> {
         let setting: BatterySetting = (*setting_id).try_into().ok()?;
         // battery level 255 means TWS is disconnected and the host device is the other side
         // in other words, the side for which the battery level is 255 is disconnected
@@ -87,14 +103,5 @@ where
             }),
             _ => None,
         }
-    }
-
-    async fn set(
-        &self,
-        _state: &mut T,
-        _setting_id: &SettingId,
-        _value: Value,
-    ) -> SettingHandlerResult<()> {
-        Err(SettingHandlerError::ReadOnly)
     }
 }

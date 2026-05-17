@@ -29,6 +29,27 @@ where
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
         let serial_number: &SerialNumber = state.get();
         let firmware_version: &FirmwareVersion = state.get();
+        self.get_inner(serial_number, firmware_version, setting_id)
+    }
+
+    async fn set(
+        &self,
+        _state: &mut T,
+        _setting_id: &SettingId,
+        _value: Value,
+    ) -> SettingHandlerResult<()> {
+        Err(SettingHandlerError::ReadOnly)
+    }
+}
+
+impl SerialNumberAndFirmwareVersionSettingHandler {
+    #[inline(never)]
+    fn get_inner(
+        &self,
+        serial_number: &SerialNumber,
+        firmware_version: &FirmwareVersion,
+        setting_id: &SettingId,
+    ) -> Option<Setting> {
         let setting: SerialNumberAndFirmwareVersionSetting = (*setting_id).try_into().ok()?;
         Some(match setting {
             SerialNumberAndFirmwareVersionSetting::SerialNumber => Setting::Information {
@@ -40,14 +61,5 @@ where
                 translated_value: firmware_version.to_string(),
             },
         })
-    }
-
-    async fn set(
-        &self,
-        _state: &mut T,
-        _setting_id: &SettingId,
-        _value: Value,
-    ) -> SettingHandlerResult<()> {
-        Err(SettingHandlerError::ReadOnly)
     }
 }

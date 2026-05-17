@@ -38,6 +38,29 @@ where
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
         let auto_power_off = state.maybe_get()?;
+        self.get_inner(auto_power_off, setting_id)
+    }
+
+    async fn set(
+        &self,
+        state: &mut T,
+        setting_id: &SettingId,
+        value: Value,
+    ) -> SettingHandlerResult<()> {
+        let auto_power_off = state
+            .maybe_get_mut()
+            .ok_or(SettingHandlerError::MissingData)?;
+        self.set_inner(auto_power_off, setting_id, value)
+    }
+}
+
+impl<Duration> AutoPowerOffSettingHandler<Duration>
+where
+    Duration: Translate + Send + Sync,
+    &'static str: for<'a> From<&'a Duration>,
+{
+    #[inline(never)]
+    fn get_inner(&self, auto_power_off: &AutoPowerOff, setting_id: &SettingId) -> Option<Setting> {
         let setting: AutoPowerOffSetting = (*setting_id).try_into().ok()?;
         Some(match setting {
             AutoPowerOffSetting::AutoPowerOff => Setting::Select {
@@ -62,15 +85,13 @@ where
         })
     }
 
-    async fn set(
+    #[inline(never)]
+    fn set_inner(
         &self,
-        state: &mut T,
+        auto_power_off: &mut AutoPowerOff,
         setting_id: &SettingId,
         value: Value,
     ) -> SettingHandlerResult<()> {
-        let auto_power_off = state
-            .maybe_get_mut()
-            .ok_or(SettingHandlerError::MissingData)?;
         let setting: AutoPowerOffSetting = (*setting_id)
             .try_into()
             .expect("already filtered to valid values only by SettingsManager");

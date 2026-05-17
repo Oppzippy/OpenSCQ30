@@ -39,6 +39,22 @@ where
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
         let battery = state.get();
+        self.get_inner(battery, setting_id)
+    }
+
+    async fn set(
+        &self,
+        _state: &mut T,
+        _setting_id: &SettingId,
+        _value: Value,
+    ) -> SettingHandlerResult<()> {
+        Err(SettingHandlerError::ReadOnly)
+    }
+}
+
+impl BatterySettingHandler {
+    #[inline(never)]
+    fn get_inner(&self, battery: &SingleBattery, setting_id: &SettingId) -> Option<Setting> {
         let setting: BatterySetting = (*setting_id).try_into().ok()?;
         Some(match setting {
             BatterySetting::IsCharging => Setting::Information {
@@ -58,14 +74,5 @@ where
                 ),
             },
         })
-    }
-
-    async fn set(
-        &self,
-        _state: &mut T,
-        _setting_id: &SettingId,
-        _value: Value,
-    ) -> SettingHandlerResult<()> {
-        Err(SettingHandlerError::ReadOnly)
     }
 }

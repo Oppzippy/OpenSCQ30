@@ -28,6 +28,22 @@ where
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
         let tws_status = state.get();
+        self.get_inner(tws_status, setting_id)
+    }
+
+    async fn set(
+        &self,
+        _state: &mut T,
+        _setting_id: &SettingId,
+        _value: Value,
+    ) -> SettingHandlerResult<()> {
+        Err(SettingHandlerError::ReadOnly)
+    }
+}
+
+impl TwsStatusSettingHandler {
+    #[inline(never)]
+    fn get_inner(&self, tws_status: &TwsStatus, setting_id: &SettingId) -> Option<Setting> {
         let setting: TwsStatusSetting = (*setting_id).try_into().ok()?;
         Some(match setting {
             TwsStatusSetting::HostDevice => Setting::Information {
@@ -47,14 +63,5 @@ where
                 },
             },
         })
-    }
-
-    async fn set(
-        &self,
-        _state: &mut T,
-        _setting_id: &SettingId,
-        _value: Value,
-    ) -> SettingHandlerResult<()> {
-        Err(SettingHandlerError::ReadOnly)
     }
 }

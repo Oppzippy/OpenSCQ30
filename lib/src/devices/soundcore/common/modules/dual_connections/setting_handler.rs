@@ -29,6 +29,27 @@ where
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
         let dual_connections = state.get();
+        self.get_inner(dual_connections, setting_id)
+    }
+
+    async fn set(
+        &self,
+        state: &mut T,
+        setting_id: &SettingId,
+        value: Value,
+    ) -> SettingHandlerResult<()> {
+        let dual_connections = state.get_mut();
+        self.set_inner(dual_connections, setting_id, value)
+    }
+}
+
+impl DualConnectionsSettingHandler {
+    #[inline(never)]
+    fn get_inner(
+        &self,
+        dual_connections: &DualConnections,
+        setting_id: &SettingId,
+    ) -> Option<Setting> {
         let setting: DualConnectionsSetting = (*setting_id).try_into().ok()?;
         Some(match setting {
             DualConnectionsSetting::DualConnections => Setting::Toggle {
@@ -63,13 +84,13 @@ where
         })
     }
 
-    async fn set(
+    #[inline(never)]
+    fn set_inner(
         &self,
-        state: &mut T,
+        dual_connections: &mut DualConnections,
         setting_id: &SettingId,
         value: Value,
     ) -> SettingHandlerResult<()> {
-        let dual_connections = state.get_mut();
         let setting: DualConnectionsSetting = (*setting_id)
             .try_into()
             .expect("already filtered to valid values only by SettingsManager");

@@ -31,42 +31,49 @@ where
         let packet: packet::inbound::DualConnectionsDevicePacket = packet.try_to_packet()?;
         state.send_if_modified(|state| {
             let dual_connections = state.get_mut();
-
-            if dual_connections
-                .devices
-                .get(packet.index as usize)
-                .and_then(|maybe_device| maybe_device.as_ref())
-                .is_none_or(|device| *device != packet.device)
-                || dual_connections.devices.len() != packet.total_devices as usize
-            {
-                let devices = &mut dual_connections.devices;
-
-                devices.truncate(packet.total_devices as usize);
-                while devices.len() < packet.total_devices as usize {
-                    devices.push(None);
-                }
-
-                if let Some(index) = packet.index.checked_sub(1) {
-                    tracing::trace!(
-                        "updating dual connections device {}/{}",
-                        packet.index,
-                        packet.total_devices
-                    );
-                    devices[index as usize] = Some(packet.device);
-                } else {
-                    tracing::error!(
-                        "dual connections device index should start from 1, but got {} ({} total)",
-                        packet.index,
-                        packet.total_devices,
-                    );
-                }
-                true
-            } else {
-                tracing::trace!("got dual connections packet but no change");
-                false
-            }
+            modify_state(dual_connections, packet)
         });
         Ok(())
+    }
+}
+
+#[inline(never)]
+fn modify_state(
+    dual_connections: &mut DualConnections,
+    packet: packet::inbound::DualConnectionsDevicePacket,
+) -> bool {
+    if dual_connections
+        .devices
+        .get(packet.index as usize)
+        .and_then(|maybe_device| maybe_device.as_ref())
+        .is_none_or(|device| *device != packet.device)
+        || dual_connections.devices.len() != packet.total_devices as usize
+    {
+        let devices = &mut dual_connections.devices;
+
+        devices.truncate(packet.total_devices as usize);
+        while devices.len() < packet.total_devices as usize {
+            devices.push(None);
+        }
+
+        if let Some(index) = packet.index.checked_sub(1) {
+            tracing::trace!(
+                "updating dual connections device {}/{}",
+                packet.index,
+                packet.total_devices
+            );
+            devices[index as usize] = Some(packet.device);
+        } else {
+            tracing::error!(
+                "dual connections device index should start from 1, but got {} ({} total)",
+                packet.index,
+                packet.total_devices,
+            );
+        }
+        true
+    } else {
+        tracing::trace!("got dual connections packet but no change");
+        false
     }
 }
 

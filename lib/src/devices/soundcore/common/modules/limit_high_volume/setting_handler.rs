@@ -25,6 +25,27 @@ where
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
         let limit_high_volume = state.get();
+        self.get_inner(limit_high_volume, setting_id)
+    }
+
+    async fn set(
+        &self,
+        state: &mut T,
+        setting_id: &SettingId,
+        value: Value,
+    ) -> SettingHandlerResult<()> {
+        let limit_high_volume = state.get_mut();
+        self.set_inner(limit_high_volume, setting_id, value)
+    }
+}
+
+impl LimitHighVolumeSettingHandler {
+    #[inline(never)]
+    fn get_inner(
+        &self,
+        limit_high_volume: &LimitHighVolume,
+        setting_id: &SettingId,
+    ) -> Option<Setting> {
         let setting: LimitHighVolumeSetting = (*setting_id).try_into().ok()?;
         Some(match setting {
             LimitHighVolumeSetting::LimitHighVolume => Setting::Toggle {
@@ -43,13 +64,13 @@ where
         })
     }
 
-    async fn set(
+    #[inline(never)]
+    fn set_inner(
         &self,
-        state: &mut T,
+        limit_high_volume: &mut LimitHighVolume,
         setting_id: &SettingId,
         value: Value,
     ) -> SettingHandlerResult<()> {
-        let limit_high_volume = state.get_mut();
         let setting: LimitHighVolumeSetting = (*setting_id)
             .try_into()
             .expect("already filtered to valid values only by SettingsManager");

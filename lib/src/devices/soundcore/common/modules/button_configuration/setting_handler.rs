@@ -38,13 +38,48 @@ where
     T: Has<ButtonStatusCollection<NUM_BUTTONS>> + Has<TwsStatus> + Send,
 {
     fn settings(&self) -> Vec<SettingId> {
-        self.settings.order.map(|button| button.into()).to_vec()
+        self.settings_inner(self.settings)
     }
 
     fn get(&self, state: &T, setting_id: &SettingId) -> Option<Setting> {
-        let button = Button::try_from(*setting_id).ok()?;
         let tws_status: TwsStatus = *state.get();
         let statuses: &ButtonStatusCollection<_> = state.get();
+
+        self.get_inner(tws_status, statuses, setting_id)
+    }
+
+    async fn set(
+        &self,
+        state: &mut T,
+        setting_id: &SettingId,
+        value: Value,
+    ) -> SettingHandlerResult<()> {
+        let tws_status: TwsStatus = *state.get();
+        let statuses: &mut ButtonStatusCollection<_> = state.get_mut();
+
+        self.set_inner(tws_status, statuses, setting_id, value)
+    }
+}
+
+impl<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize>
+    ButtonConfigurationSettingHandler<NUM_BUTTONS, NUM_PRESS_KINDS>
+{
+    #[inline(never)]
+    fn settings_inner(
+        &self,
+        settings: &'static ButtonConfigurationSettings<NUM_BUTTONS, NUM_PRESS_KINDS>,
+    ) -> Vec<SettingId> {
+        settings.order.map(|button| button.into()).to_vec()
+    }
+
+    #[inline(never)]
+    fn get_inner(
+        &self,
+        tws_status: TwsStatus,
+        statuses: &ButtonStatusCollection<NUM_BUTTONS>,
+        setting_id: &SettingId,
+    ) -> Option<Setting> {
+        let button = Button::try_from(*setting_id).ok()?;
 
         let position = self.settings.position(button)?;
         let status = statuses.0[position];
@@ -100,16 +135,16 @@ where
         }
     }
 
-    async fn set(
+    #[inline(never)]
+    fn set_inner(
         &self,
-        state: &mut T,
+        tws_status: TwsStatus,
+        statuses: &mut ButtonStatusCollection<NUM_BUTTONS>,
         setting_id: &SettingId,
         value: Value,
     ) -> SettingHandlerResult<()> {
         let button = Button::try_from(*setting_id)
             .expect("already filtered to valid values only by SettingsManager");
-        let tws_status: TwsStatus = *state.get();
-        let statuses: &mut ButtonStatusCollection<_> = state.get_mut();
 
         let position = self
             .settings
