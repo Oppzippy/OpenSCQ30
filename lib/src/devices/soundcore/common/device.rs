@@ -100,8 +100,8 @@ impl Default for SoundcoreDeviceConfig {
     }
 }
 
-pub struct SoundcoreDeviceRegistry<B: RfcommBackend, StateType> {
-    backend: B,
+pub struct SoundcoreDeviceRegistry<StateType> {
+    backend: Arc<dyn RfcommBackend + Send + Sync>,
     database: Arc<OpenSCQ30Database>,
     device_model: DeviceModel,
     fetch_state: FetchStateFn<StateType>,
@@ -109,9 +109,9 @@ pub struct SoundcoreDeviceRegistry<B: RfcommBackend, StateType> {
     _state: PhantomData<StateType>,
 }
 
-impl<B: RfcommBackend, StateType> SoundcoreDeviceRegistry<B, StateType> {
+impl<StateType> SoundcoreDeviceRegistry<StateType> {
     pub fn new(
-        backend: B,
+        backend: Arc<dyn RfcommBackend + Send + Sync>,
         database: Arc<OpenSCQ30Database>,
         device_model: DeviceModel,
         fetch_state: FetchStateFn<StateType>,
@@ -129,9 +129,8 @@ impl<B: RfcommBackend, StateType> SoundcoreDeviceRegistry<B, StateType> {
 }
 
 #[async_trait]
-impl<B, StateType> OpenSCQ30DeviceRegistry for SoundcoreDeviceRegistry<B, StateType>
+impl<StateType> OpenSCQ30DeviceRegistry for SoundcoreDeviceRegistry<StateType>
 where
-    B: RfcommBackend + 'static + Send + Sync,
     StateType: Clone + Send + Sync + 'static,
     Self: BuildDevice<StateType>,
 {
@@ -161,7 +160,7 @@ where
             .await?;
         let mut builder = SoundcoreDeviceBuilder::new(
             self.database.clone(),
-            Arc::new(connection),
+            connection,
             self.device_model,
             &self.fetch_state,
             self.config,
@@ -771,24 +770,24 @@ pub mod test_utils {
     impl TestSoundcoreDevice {
         pub async fn new<StateType>(
             constructor: fn(
-                MockRfcommBackend,
+                Arc<dyn RfcommBackend + Send + Sync>,
                 Arc<OpenSCQ30Database>,
                 DeviceModel,
-            ) -> SoundcoreDeviceRegistry<MockRfcommBackend, StateType>,
+            ) -> SoundcoreDeviceRegistry<StateType>,
             device_model: DeviceModel,
             packet_responses: HashMap<Command, packet::Inbound>,
             config: SoundcoreDeviceConfig,
         ) -> Self
         where
             StateType: Clone + Send + Sync + 'static,
-            SoundcoreDeviceRegistry<MockRfcommBackend, StateType>: BuildDevice<StateType>,
+            SoundcoreDeviceRegistry<StateType>: BuildDevice<StateType>,
         {
             let (inbound_sender, inbound_receiver) = mpsc::channel(100);
             let (outbound_sender, mut outbound_receiver) = mpsc::channel(100);
             let database = Arc::new(OpenSCQ30Database::new_in_memory().await.unwrap());
 
             let registry = constructor(
-                MockRfcommBackend::new(inbound_receiver, outbound_sender),
+                Arc::new(MockRfcommBackend::new(inbound_receiver, outbound_sender)),
                 database,
                 device_model,
             );

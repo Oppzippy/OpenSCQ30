@@ -69,8 +69,8 @@ impl DeviceModel {
     ) -> device::Result<Arc<dyn OpenSCQ30DeviceRegistry + Send + Sync>> {
         macro_rules! new_soundcore_device {
             ($($module:tt)*) => {
-                Ok(Arc::new($($module)*::device_registry::<B::Rfcomm>(
-                    backends.rfcomm().await?,
+                Ok(Arc::new($($module)*::device_registry(
+                    Arc::new(backends.rfcomm().await?),
                     database,
                     *self,
                 )))

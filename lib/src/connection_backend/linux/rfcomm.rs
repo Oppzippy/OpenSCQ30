@@ -124,9 +124,8 @@ impl BluerRfcommBackend {
     }
 }
 
+#[async_trait]
 impl RfcommBackend for BluerRfcommBackend {
-    type ConnectionType = BluerRfcommConnection;
-
     #[instrument(skip(self))]
     async fn devices(&self) -> connection::Result<HashSet<ConnectionDescriptor>> {
         let mut connection_descriptors = HashSet::new();
@@ -142,7 +141,7 @@ impl RfcommBackend for BluerRfcommBackend {
         &self,
         mac_address: MacAddr6,
         service_selection_strategy: RfcommServiceSelectionStrategy,
-    ) -> connection::Result<Self::ConnectionType> {
+    ) -> connection::Result<Arc<dyn RfcommConnection + Send + Sync>> {
         let device = self.device(mac_address).await?;
         debug!("connecting to device");
         if let Err(err) = device.connect().await {
@@ -198,7 +197,7 @@ impl RfcommBackend for BluerRfcommBackend {
         };
         debug!("connected");
         let connection = BluerRfcommConnection::new(device, stream).await?;
-        Ok(connection)
+        Ok(Arc::new(connection))
     }
 }
 

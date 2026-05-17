@@ -102,9 +102,8 @@ pub struct ManualRfcommConnectionBackend {
     inner: Arc<dyn AndroidRfcommConnectionBackend>,
 }
 
+#[async_trait]
 impl RfcommBackend for ManualRfcommConnectionBackend {
-    type ConnectionType = WrappedManualRfcommConnection;
-
     async fn devices(&self) -> connection::Result<HashSet<connection::ConnectionDescriptor>> {
         let descriptors = self
             .inner
@@ -124,7 +123,7 @@ impl RfcommBackend for ManualRfcommConnectionBackend {
         &self,
         mac_address: MacAddr6,
         service_selection_strategy: RfcommServiceSelectionStrategy,
-    ) -> connection::Result<Self::ConnectionType> {
+    ) -> connection::Result<Arc<dyn RfcommConnection + Send + Sync>> {
         let output_box = Arc::new(ManualRfcommConnectionBox::default());
         self.inner
             .connect(
@@ -137,12 +136,14 @@ impl RfcommBackend for ManualRfcommConnectionBackend {
                 source: Box::new(err),
                 location: Location::caller(),
             })?;
-        Ok(WrappedManualRfcommConnection(output_box.get().ok_or_else(
-            || connection::Error::DeviceNotFound {
-                source: None,
-                location: Location::caller(),
-            },
-        )?))
+        Ok(Arc::new(WrappedManualRfcommConnection(
+            output_box
+                .get()
+                .ok_or_else(|| connection::Error::DeviceNotFound {
+                    source: None,
+                    location: Location::caller(),
+                })?,
+        )))
     }
 }
 

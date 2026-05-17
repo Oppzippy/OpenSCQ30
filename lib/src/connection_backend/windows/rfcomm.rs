@@ -99,6 +99,7 @@ impl RfcommBackend for WindowsRfcommBackend {
     }
 }
 
+#[async_trait]
 impl WindowsRfcommBackend {
     #[instrument]
     fn get_bluetooth_device_from_mac_address(

@@ -1,4 +1,4 @@
-use std::{collections::HashSet, panic::Location};
+use std::{collections::HashSet, panic::Location, sync::Arc};
 
 use async_trait::async_trait;
 use macaddr::MacAddr6;
@@ -34,12 +34,11 @@ pub enum Error {
 }
 pub type Result<T> = std::result::Result<T, Error>;
 
+#[async_trait]
 pub trait RfcommBackend {
-    type ConnectionType: RfcommConnection + Send + Sync;
-
     /// List all devices that are currently connected to the bluetooth adapter. On platforms where this isn't practical,
     /// this may include devices that are not currently connected.
-    fn devices(&self) -> impl Future<Output = Result<HashSet<ConnectionDescriptor>>> + Send;
+    async fn devices(&self) -> Result<HashSet<ConnectionDescriptor>>;
 
     /// Connect via RFCOMM to the device. It should already be paired.
     ///
@@ -47,11 +46,11 @@ pub trait RfcommBackend {
     /// picks the uuid to connect to from the list of what is available.
     ///
     /// This method is cancel safe. Implementers should make sure that is the case.
-    fn connect(
+    async fn connect(
         &self,
         mac_address: MacAddr6,
         service_selection_strategy: RfcommServiceSelectionStrategy,
-    ) -> impl Future<Output = Result<Self::ConnectionType>> + Send;
+    ) -> Result<Arc<dyn RfcommConnection + Send + Sync>>;
 }
 
 #[derive(Copy, Clone)]

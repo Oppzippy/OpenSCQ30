@@ -92,7 +92,7 @@ mod tests {
         let (outbound_sender, outbound_receiver) = mpsc::channel(10);
         let database = Arc::new(OpenSCQ30Database::new_in_memory().await.unwrap());
         let registry = super::device_registry(
-            MockRfcommBackend::new(inbound_receiver, outbound_sender),
+            Arc::new(MockRfcommBackend::new(inbound_receiver, outbound_sender)),
             database,
             DeviceModel::SoundcoreA3028,
         );

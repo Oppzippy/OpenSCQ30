@@ -1,4 +1,7 @@
-use std::{collections::HashSet, sync::Mutex};
+use std::{
+    collections::HashSet,
+    sync::{Arc, Mutex},
+};
 
 use async_trait::async_trait;
 use macaddr::MacAddr6;
@@ -25,9 +28,8 @@ impl MockRfcommBackend {
     }
 }
 
+#[async_trait]
 impl RfcommBackend for MockRfcommBackend {
-    type ConnectionType = MockRfcommConnection;
-
     async fn devices(&self) -> connection::Result<HashSet<ConnectionDescriptor>> {
         Ok([ConnectionDescriptor {
             name: "Mock Device".to_owned(),
@@ -41,8 +43,8 @@ impl RfcommBackend for MockRfcommBackend {
         &self,
         _mac_address: MacAddr6,
         _select_uuid: RfcommServiceSelectionStrategy,
-    ) -> connection::Result<Self::ConnectionType> {
-        Ok(MockRfcommConnection::new(
+    ) -> connection::Result<Arc<dyn RfcommConnection + Send + Sync>> {
+        Ok(Arc::new(MockRfcommConnection::new(
             self.inbound
                 .lock()
                 .unwrap()
@@ -53,7 +55,7 @@ impl RfcommBackend for MockRfcommBackend {
                 .unwrap()
                 .take()
                 .expect("connect should only be called once"),
-        ))
+        )))
     }
 }
 

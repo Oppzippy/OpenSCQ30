@@ -23,24 +23,18 @@ use crate::{
     },
 };
 
-pub struct SoundcoreDevelopmentDeviceRegistry<B: RfcommBackend> {
-    backend: B,
+pub struct SoundcoreDevelopmentDeviceRegistry {
+    backend: Arc<dyn RfcommBackend + Send + Sync>,
 }
 
-impl<B> SoundcoreDevelopmentDeviceRegistry<B>
-where
-    B: RfcommBackend,
-{
-    pub fn new(backend: B) -> Self {
+impl SoundcoreDevelopmentDeviceRegistry {
+    pub fn new(backend: Arc<dyn RfcommBackend + Send + Sync>) -> Self {
         Self { backend }
     }
 }
 
 #[async_trait]
-impl<B> OpenSCQ30DeviceRegistry for SoundcoreDevelopmentDeviceRegistry<B>
-where
-    B: RfcommBackend + Send + Sync + 'static,
-{
+impl OpenSCQ30DeviceRegistry for SoundcoreDevelopmentDeviceRegistry {
     async fn devices(&self) -> device::Result<Vec<ConnectionDescriptor>> {
         self.backend
             .devices()
@@ -65,26 +59,20 @@ where
                 }),
             )
             .await?;
-        let device = SoundcoreDevelopmentDevice::<B>::new(Arc::new(connection)).await?;
+        let device = SoundcoreDevelopmentDevice::new(connection).await?;
         Ok(Arc::new(device))
     }
 }
 
-pub struct SoundcoreDevelopmentDevice<B>
-where
-    B: RfcommBackend,
-{
+pub struct SoundcoreDevelopmentDevice {
     packet_io: PacketIOController,
-    backend: Arc<B::ConnectionType>,
+    backend: Arc<dyn RfcommConnection + Send + Sync>,
     state_update_packet: Option<packet::Inbound>,
     changes_signal: watch::Sender<()>,
 }
 
-impl<B> SoundcoreDevelopmentDevice<B>
-where
-    B: RfcommBackend + 'static,
-{
-    async fn new(connection: Arc<B::ConnectionType>) -> device::Result<Self> {
+impl SoundcoreDevelopmentDevice {
+    async fn new(connection: Arc<dyn RfcommConnection + Send + Sync>) -> device::Result<Self> {
         let (packet_io, _packet_receiver) =
             PacketIOController::new(connection.to_owned(), packet::ChecksumKind::Suffix).await?;
         let state_update_packet = packet_io
@@ -101,10 +89,7 @@ where
 }
 
 #[async_trait]
-impl<B> OpenSCQ30Device for SoundcoreDevelopmentDevice<B>
-where
-    B: RfcommBackend,
-{
+impl OpenSCQ30Device for SoundcoreDevelopmentDevice {
     fn connection_status(&self) -> watch::Receiver<ConnectionStatus> {
         self.backend.connection_status()
     }

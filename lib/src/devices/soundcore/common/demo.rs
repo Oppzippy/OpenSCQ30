@@ -1,7 +1,7 @@
 use std::{
     collections::{HashMap, HashSet},
     panic::Location,
-    sync::Mutex,
+    sync::{Arc, Mutex},
 };
 
 use async_trait::async_trait;
@@ -43,9 +43,8 @@ impl DemoConnectionRegistry {
     }
 }
 
+#[async_trait]
 impl RfcommBackend for DemoConnectionRegistry {
-    type ConnectionType = DemoConnection;
-
     async fn devices(&self) -> connection::Result<HashSet<ConnectionDescriptor>> {
         Ok(HashSet::from([ConnectionDescriptor {
             name: self.model.translate().clone(),
@@ -57,11 +56,11 @@ impl RfcommBackend for DemoConnectionRegistry {
         &self,
         _mac_address: MacAddr6,
         _select_uuid: RfcommServiceSelectionStrategy,
-    ) -> connection::Result<Self::ConnectionType> {
-        Ok(DemoConnection::new(
+    ) -> connection::Result<Arc<dyn RfcommConnection + Send + Sync>> {
+        Ok(Arc::new(DemoConnection::new(
             self.packet_responses.to_owned(),
             self.config,
-        ))
+        )))
     }
 }
 
