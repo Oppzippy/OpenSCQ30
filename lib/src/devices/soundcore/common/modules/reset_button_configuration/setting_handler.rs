@@ -12,7 +12,7 @@ use crate::{
 
 use super::ResetButtonConfigurationSetting;
 
-pub struct ResetButtonConfigurationSettingHandler {}
+pub struct ResetButtonConfigurationSettingHandler;
 
 impl ResetButtonConfigurationSettingHandler {
     pub fn new() -> Self {

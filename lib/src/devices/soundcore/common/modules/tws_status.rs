@@ -28,11 +28,11 @@ where
     pub fn add_tws_status(&mut self) {
         self.setting_manager.add_handler(
             CategoryId::DeviceInformation,
-            setting_handler::TwsStatusSettingHandler::default(),
+            setting_handler::TwsStatusSettingHandler,
         );
         self.packet_handlers.set_handler(
             packet_handler::TwsStatusPacketHandler::COMMAND,
-            Box::new(packet_handler::TwsStatusPacketHandler::default()),
+            Box::new(packet_handler::TwsStatusPacketHandler),
         );
     }
 }

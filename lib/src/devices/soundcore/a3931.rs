@@ -37,11 +37,11 @@ soundcore_device!(
     A3931State,
     async |packet_io| {
         let state_update_packet: A3931StateUpdatePacket = packet_io
-            .send_with_response(&RequestState::default().to_packet())
+            .send_with_response(&RequestState.to_packet())
             .await?
             .try_to_packet()?;
         let sn_and_firmware: SerialNumberAndFirmwareVersion = packet_io
-            .send_with_response(&RequestSerialNumberAndFirmwareVersion::default().to_packet())
+            .send_with_response(&RequestSerialNumberAndFirmwareVersion.to_packet())
             .await?
             .try_to_packet()?;
         Ok(A3931State::new(state_update_packet, sn_and_firmware))
@@ -68,9 +68,7 @@ soundcore_device!(
             .equalizer_with_drc_tws(equalizer::common_settings())
             .await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
-        builder.reset_button_configuration::<A3931StateUpdatePacket>(
-            RequestState::default().to_packet(),
-        );
+        builder.reset_button_configuration::<A3931StateUpdatePacket>(RequestState.to_packet());
         builder.auto_power_off(AutoPowerOffDuration::VARIANTS);
         builder.touch_tone();
         builder.tws_status();

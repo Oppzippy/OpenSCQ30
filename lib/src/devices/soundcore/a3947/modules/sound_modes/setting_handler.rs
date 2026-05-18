@@ -13,7 +13,7 @@ use crate::{
 use super::SoundModeSetting;
 
 #[derive(Default)]
-pub struct SoundModesSettingHandler {}
+pub struct SoundModesSettingHandler;
 
 #[async_trait]
 impl<T> SettingHandler<T> for SoundModesSettingHandler

@@ -24,11 +24,11 @@ soundcore_device!(
     A3951State,
     async |packet_io| {
         let state_update_packet: A3951StateUpdatePacket = packet_io
-            .send_with_response(&RequestState::default().to_packet())
+            .send_with_response(&RequestState.to_packet())
             .await?
             .try_to_packet()?;
         let sn_and_firmware: SerialNumberAndFirmwareVersion = packet_io
-            .send_with_response(&RequestSerialNumberAndFirmwareVersion::default().to_packet())
+            .send_with_response(&RequestSerialNumberAndFirmwareVersion.to_packet())
             .await?
             .try_to_packet()?;
         let ldac_state: common::packet::inbound::LdacState = packet_io
@@ -64,9 +64,7 @@ soundcore_device!(
             .equalizer_with_custom_hear_id_tws(equalizer::common_settings())
             .await;
         builder.button_configuration(&BUTTON_SETTINGS);
-        builder.reset_button_configuration::<A3951StateUpdatePacket>(
-            RequestState::default().to_packet(),
-        );
+        builder.reset_button_configuration::<A3951StateUpdatePacket>(RequestState.to_packet());
         builder.ldac();
         builder.touch_tone();
         builder.wearing_detection();

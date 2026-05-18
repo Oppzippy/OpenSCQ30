@@ -41,7 +41,7 @@ impl SoundModes {
     pub fn bytes(&self) -> [u8; 6] {
         [
             self.ambient_sound_mode.id(),
-            self.custom_noise_canceling.inner() << 4 | self.adaptive_noise_canceling.inner(),
+            (self.custom_noise_canceling.inner() << 4) | self.adaptive_noise_canceling.inner(),
             self.ambient_sound_mode.id(), // unused, repeats ambient sound mode
             self.noise_canceling_mode as u8,
             self.wind_noise_reduction.0.into(),

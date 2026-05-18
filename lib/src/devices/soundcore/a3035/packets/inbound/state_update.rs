@@ -205,7 +205,7 @@ impl ToPacket for A3035StateUpdatePacket {
     }
 }
 
-struct StateUpdatePacketHandler {}
+struct StateUpdatePacketHandler;
 
 #[async_trait]
 impl PacketHandler<a3035::state::A3035State> for StateUpdatePacketHandler {

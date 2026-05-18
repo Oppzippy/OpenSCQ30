@@ -226,7 +226,7 @@ impl NoiseCancelingSettings {
     }
 
     fn byte(&self) -> u8 {
-        self.manual.0 << 4 | self.adaptive.0
+        (self.manual.0 << 4) | self.adaptive.0
     }
 }
 

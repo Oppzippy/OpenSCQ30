@@ -55,7 +55,7 @@ where
             .push(Box::new(SoundModesStateModifier::new(packet_io)));
         self.packet_handlers.set_handler(
             SoundModesPacketHandler::COMMAND,
-            Box::new(SoundModesPacketHandler::default()),
+            Box::new(SoundModesPacketHandler),
         );
     }
 }

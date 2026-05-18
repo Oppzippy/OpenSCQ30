@@ -50,7 +50,7 @@ fn initialize_logging(matches: &ArgMatches) -> anyhow::Result<()> {
         1 => Some(LevelFilter::WARN),
         2 => Some(LevelFilter::INFO),
         3 => Some(LevelFilter::DEBUG),
-        4 | _ => Some(LevelFilter::TRACE),
+        _ => Some(LevelFilter::TRACE),
     };
 
     if let Some(log_level_filter) = log_level_filter {

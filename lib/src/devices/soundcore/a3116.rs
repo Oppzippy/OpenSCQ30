@@ -21,7 +21,7 @@ soundcore_device!(
     A3116State,
     async |packet_io| {
         let state_update_packet: A3116StateUpdatePacket = packet_io
-            .send_with_response(&RequestState::default().to_packet())
+            .send_with_response(&RequestState.to_packet())
             .await?
             .try_to_packet()?;
 

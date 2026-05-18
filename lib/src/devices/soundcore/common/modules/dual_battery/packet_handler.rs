@@ -12,7 +12,7 @@ use crate::{
 };
 
 #[derive(Default)]
-pub struct BatteryLevelPacketHandler {}
+pub struct BatteryLevelPacketHandler;
 
 impl BatteryLevelPacketHandler {
     pub const COMMAND: Command = packet::inbound::DualBatteryLevel::COMMAND;
@@ -41,7 +41,7 @@ where
 }
 
 #[derive(Default)]
-pub struct BatteryChargingPacketHandler {}
+pub struct BatteryChargingPacketHandler;
 
 impl BatteryChargingPacketHandler {
     pub const COMMAND: Command = packet::inbound::DualBatteryCharging::COMMAND;

@@ -12,7 +12,7 @@ use crate::{
 
 use super::SoundModeCycleSetting;
 
-pub struct AmbientSoundModeCycleSettingHandler {}
+pub struct AmbientSoundModeCycleSettingHandler;
 
 impl AmbientSoundModeCycleSettingHandler {
     pub fn new() -> Self {

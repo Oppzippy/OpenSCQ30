@@ -8,8 +8,8 @@ use crate::api::connection::{
     self, RfcommBackend, RfcommConnection, RfcommServiceSelectionStrategy,
 };
 
-pub struct NoneRfcommBackend {}
-pub struct NoneRfcommConnection {}
+pub struct NoneRfcommBackend;
+pub struct NoneRfcommConnection;
 
 impl RfcommBackend for NoneRfcommBackend {
     type ConnectionType = NoneRfcommConnection;

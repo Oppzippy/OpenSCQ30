@@ -14,7 +14,7 @@ use crate::{
 use super::ButtonConfigurationSetting;
 
 #[derive(Default)]
-pub struct ButtonConfigurationSettingHandler {}
+pub struct ButtonConfigurationSettingHandler;
 
 #[async_trait]
 impl<T> SettingHandler<T> for ButtonConfigurationSettingHandler

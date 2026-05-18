@@ -3,7 +3,7 @@ mod rfcomm;
 use crate::{api::connection, connection_backend::ConnectionBackends};
 
 #[derive(Default)]
-pub struct PlatformConnectionBackends {}
+pub struct PlatformConnectionBackends;
 
 impl ConnectionBackends for PlatformConnectionBackends {
     type Rfcomm = rfcomm::BluerRfcommBackend;

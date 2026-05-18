@@ -41,7 +41,7 @@ soundcore_device!(
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.ambient_sound_mode_cycle();
         builder.reset_button_configuration::<packets::inbound::A3952StateUpdatePacket>(
-            RequestState::default().to_packet(),
+            RequestState.to_packet(),
         );
 
         builder.ldac();

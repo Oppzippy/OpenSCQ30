@@ -69,7 +69,7 @@ where
     StateUpdate: FromPacketBody + Default + Into<State>,
 {
     let state_update_packet: StateUpdate = packet_io
-        .send_with_response(&RequestState::default().to_packet())
+        .send_with_response(&RequestState.to_packet())
         .await?
         .try_to_packet()
         .map_err(|err| device::Error::other(err))?;

@@ -30,10 +30,8 @@ where
     T: Has<ImmersiveExperience> + Clone + Send + Sync,
 {
     pub fn add_a3955_immersive_experience(&mut self, packet_io: Arc<PacketIOController>) {
-        self.setting_manager.add_handler(
-            CategoryId::Miscellaneous,
-            ImmersiveExperienceSettingHandler::default(),
-        );
+        self.setting_manager
+            .add_handler(CategoryId::Miscellaneous, ImmersiveExperienceSettingHandler);
         self.state_modifiers
             .push(Box::new(ImmersiveExperienceStateModifier::new(packet_io)));
     }

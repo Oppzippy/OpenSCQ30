@@ -35,6 +35,6 @@ where
     pub fn add_a3035_sound_modes(&mut self, packet_io: Arc<PacketIOController>) {
         self.add_partial_sound_modes_v2_with_migration(packet_io);
         self.setting_manager
-            .add_handler(CategoryId::SoundModes, SoundModesSettingHandler::default());
+            .add_handler(CategoryId::SoundModes, SoundModesSettingHandler);
     }
 }

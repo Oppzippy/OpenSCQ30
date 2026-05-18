@@ -76,7 +76,7 @@ impl SoundcoreDevelopmentDevice {
         let (packet_io, _packet_receiver) =
             PacketIOController::new(connection.to_owned(), packet::ChecksumKind::Suffix).await?;
         let state_update_packet = packet_io
-            .send_with_response(&RequestState::default().to_packet())
+            .send_with_response(&RequestState.to_packet())
             .await
             .ok();
         Ok(Self {

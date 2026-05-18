@@ -32,9 +32,7 @@ soundcore_device!(
         builder.a3947_equalizer().await;
 
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
-        builder.reset_button_configuration::<A3947StateUpdatePacket>(
-            RequestState::default().to_packet(),
-        );
+        builder.reset_button_configuration::<A3947StateUpdatePacket>(RequestState.to_packet());
 
         builder.limit_high_volume();
 

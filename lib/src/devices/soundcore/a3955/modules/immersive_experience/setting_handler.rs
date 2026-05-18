@@ -13,7 +13,7 @@ use crate::{
 use super::ImmersiveExperienceSetting;
 
 #[derive(Default)]
-pub struct ImmersiveExperienceSettingHandler {}
+pub struct ImmersiveExperienceSettingHandler;
 
 #[async_trait]
 impl<T> SettingHandler<T> for ImmersiveExperienceSettingHandler

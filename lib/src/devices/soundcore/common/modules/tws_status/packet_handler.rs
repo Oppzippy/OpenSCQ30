@@ -12,7 +12,7 @@ use crate::{
 };
 
 #[derive(Default)]
-pub struct TwsStatusPacketHandler {}
+pub struct TwsStatusPacketHandler;
 
 impl TwsStatusPacketHandler {
     pub const COMMAND: packet::Command = packet::inbound::TwsStatus::COMMAND;

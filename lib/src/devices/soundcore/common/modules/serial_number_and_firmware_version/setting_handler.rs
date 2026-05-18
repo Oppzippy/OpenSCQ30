@@ -13,7 +13,7 @@ use crate::{
 use super::SerialNumberAndFirmwareVersionSetting;
 
 #[derive(Default)]
-pub struct SerialNumberAndFirmwareVersionSettingHandler {}
+pub struct SerialNumberAndFirmwareVersionSettingHandler;
 
 #[async_trait]
 impl<T> SettingHandler<T> for SerialNumberAndFirmwareVersionSettingHandler

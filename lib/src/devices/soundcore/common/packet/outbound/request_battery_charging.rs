@@ -4,7 +4,7 @@ use super::ToPacket;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 #[allow(dead_code, reason = "TODO send periodically if needed")]
-pub struct RequestBatteryCharging {}
+pub struct RequestBatteryCharging;
 
 impl ToPacket for RequestBatteryCharging {
     type DirectionMarker = packet::OutboundMarker;

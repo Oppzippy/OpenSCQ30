@@ -3,7 +3,7 @@ use crate::devices::soundcore::common::packet;
 use super::ToPacket;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-pub struct RequestSerialNumberAndFirmwareVersion {}
+pub struct RequestSerialNumberAndFirmwareVersion;
 
 impl RequestSerialNumberAndFirmwareVersion {
     pub const COMMAND: packet::Command = packet::Command([0x01, 0x05]);

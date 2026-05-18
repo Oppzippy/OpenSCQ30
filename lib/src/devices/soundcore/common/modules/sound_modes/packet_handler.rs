@@ -12,7 +12,7 @@ use crate::{
 };
 
 #[derive(Default)]
-pub struct SoundModesPacketHandler {}
+pub struct SoundModesPacketHandler;
 
 impl SoundModesPacketHandler {
     pub const COMMAND: packet::Command = packet::inbound::SoundModes::COMMAND;

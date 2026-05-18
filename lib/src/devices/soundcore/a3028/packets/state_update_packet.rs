@@ -193,7 +193,7 @@ impl ExtraFields {
     }
 }
 
-struct StateUpdatePacketHandler {}
+struct StateUpdatePacketHandler;
 
 #[async_trait]
 impl PacketHandler<A3028State> for StateUpdatePacketHandler {

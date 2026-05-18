@@ -34,9 +34,7 @@ soundcore_device!(
             .await;
 
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
-        builder.reset_button_configuration::<A3948StateUpdatePacket>(
-            RequestState::default().to_packet(),
-        );
+        builder.reset_button_configuration::<A3948StateUpdatePacket>(RequestState.to_packet());
 
         builder.touch_tone();
 

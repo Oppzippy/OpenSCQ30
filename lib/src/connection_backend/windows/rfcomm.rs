@@ -32,7 +32,7 @@ use crate::{
 use super::utils::{GuidAsUuidExt, WindowsMacAddressExt};
 
 #[derive(Default)]
-pub struct WindowsRfcommBackend {}
+pub struct WindowsRfcommBackend;
 
 impl RfcommBackend for WindowsRfcommBackend {
     type ConnectionType = WindowsRfcommConnection;

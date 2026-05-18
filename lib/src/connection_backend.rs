@@ -25,7 +25,7 @@ pub trait ConnectionBackends {
 pub fn default_backends() -> Option<impl ConnectionBackends> {
     cfg_select! {
         target_os = "linux" => {
-            Some(linux::PlatformConnectionBackends::default())
+            Some(linux::PlatformConnectionBackends)
         }
         target_os = "windows" => {
             Some(windows::PlatformConnectionBackends::default())

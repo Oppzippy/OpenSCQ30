@@ -33,7 +33,7 @@ where
     pub fn add_a3035_button_configuration(&mut self, packet_io: Arc<PacketIOController>) {
         self.setting_manager.add_handler(
             CategoryId::ButtonConfiguration,
-            ButtonConfigurationSettingHandler::default(),
+            ButtonConfigurationSettingHandler,
         );
         self.state_modifiers
             .push(Box::new(ButtonConfigurationStateModifier::new(packet_io)));

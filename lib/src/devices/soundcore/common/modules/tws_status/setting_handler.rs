@@ -15,7 +15,7 @@ use crate::{
 use super::TwsStatusSetting;
 
 #[derive(Default)]
-pub struct TwsStatusSettingHandler {}
+pub struct TwsStatusSettingHandler;
 
 #[async_trait]
 impl<T> SettingHandler<T> for TwsStatusSettingHandler

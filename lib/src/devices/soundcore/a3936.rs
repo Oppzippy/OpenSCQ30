@@ -31,7 +31,7 @@ soundcore_device!(
     A3936State,
     async |packet_io| {
         let state_update_packet: A3936StateUpdatePacket = packet_io
-            .send_with_response(&RequestState::default().to_packet())
+            .send_with_response(&RequestState.to_packet())
             .await?
             .try_to_packet()?;
         let dual_connections_devices = if state_update_packet.dual_connections_enabled {
@@ -52,9 +52,7 @@ soundcore_device!(
             .await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.ambient_sound_mode_cycle();
-        builder.reset_button_configuration::<A3936StateUpdatePacket>(
-            RequestState::default().to_packet(),
-        );
+        builder.reset_button_configuration::<A3936StateUpdatePacket>(RequestState.to_packet());
         builder.dual_connections();
         builder.auto_power_off(
             common::modules::auto_power_off::AutoPowerOffDuration::half_hour_increments(),

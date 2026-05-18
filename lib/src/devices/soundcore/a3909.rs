@@ -29,11 +29,11 @@ soundcore_device!(
     A3909State,
     async |packet_io| {
         let state_update_packet: A3909StateUpdatePacket = packet_io
-            .send_with_response(&RequestState::default().to_packet())
+            .send_with_response(&RequestState.to_packet())
             .await?
             .try_to_packet()?;
         let sn_and_firmware: SerialNumberAndFirmwareVersion = packet_io
-            .send_with_response(&RequestSerialNumberAndFirmwareVersion::default().to_packet())
+            .send_with_response(&RequestSerialNumberAndFirmwareVersion.to_packet())
             .await?
             .try_to_packet()?;
         Ok(A3909State::new(state_update_packet, sn_and_firmware))

@@ -27,7 +27,7 @@ where
     pub fn add_serial_number_and_firmware_version(&mut self) {
         self.setting_manager.add_handler(
             CategoryId::DeviceInformation,
-            setting_handler::SerialNumberAndFirmwareVersionSettingHandler::default(),
+            setting_handler::SerialNumberAndFirmwareVersionSettingHandler,
         );
     }
 }

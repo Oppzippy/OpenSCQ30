@@ -3,7 +3,7 @@ use crate::devices::soundcore::common::packet;
 use super::outbound_packet::ToPacket;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
-pub struct RequestState {}
+pub struct RequestState;
 
 impl RequestState {
     pub const COMMAND: packet::Command = packet::Command([0x01, 0x01]);

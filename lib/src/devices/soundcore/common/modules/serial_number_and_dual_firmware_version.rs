@@ -29,11 +29,11 @@ where
     pub fn add_serial_number_and_dual_firmware_version(&mut self) {
         self.setting_manager.add_handler(
             CategoryId::DeviceInformation,
-            setting_handler::SerialNumberAndFirmwareVersionSettingHandler::default(),
+            setting_handler::SerialNumberAndFirmwareVersionSettingHandler,
         );
         self.packet_handlers.set_handler(
             packet_handler::SerialNumberAndDualFirmwareVersionPacketHandler::COMMAND,
-            Box::new(packet_handler::SerialNumberAndDualFirmwareVersionPacketHandler::default()),
+            Box::new(packet_handler::SerialNumberAndDualFirmwareVersionPacketHandler),
         );
     }
 }

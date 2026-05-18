@@ -12,7 +12,7 @@ use crate::{
 };
 
 #[derive(Default)]
-pub struct SerialNumberAndDualFirmwareVersionPacketHandler {}
+pub struct SerialNumberAndDualFirmwareVersionPacketHandler;
 
 impl SerialNumberAndDualFirmwareVersionPacketHandler {
     pub const COMMAND: Command = packet::inbound::SerialNumberAndFirmwareVersion::COMMAND;
