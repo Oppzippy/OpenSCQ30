@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, sync::Arc};
 
 use async_trait::async_trait;
 use macaddr::MacAddr6;
