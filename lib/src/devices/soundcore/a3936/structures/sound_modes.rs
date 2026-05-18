@@ -10,6 +10,7 @@ use strum::{Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 use crate::devices::soundcore::common::{
     modules::sound_modes_v2,
+    packet::{self, inbound::FromPacketBody},
     structures::{AmbientSoundMode, TransparencyMode},
 };
 
@@ -35,7 +36,22 @@ pub struct A3936SoundModes {
 }
 
 impl A3936SoundModes {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn bytes(&self) -> [u8; 6] {
+        [
+            self.ambient_sound_mode.id(),
+            (self.manual_noise_canceling.id() << 4) | self.adaptive_noise_canceling.id(),
+            self.transparency_mode.id(),
+            self.noise_canceling_mode.id(),
+            self.wind_noise.byte(),
+            self.noise_canceling_adaptive_sensitivity_level,
+        ]
+    }
+}
+
+impl FromPacketBody for A3936SoundModes {
+    type DirectionMarker = packet::InboundMarker;
+
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         context(
@@ -70,17 +86,6 @@ impl A3936SoundModes {
             ),
         )
         .parse_complete(input)
-    }
-
-    pub fn bytes(&self) -> [u8; 6] {
-        [
-            self.ambient_sound_mode.id(),
-            (self.manual_noise_canceling.id() << 4) | self.adaptive_noise_canceling.id(),
-            self.transparency_mode.id(),
-            self.noise_canceling_mode.id(),
-            self.wind_noise.byte(),
-            self.noise_canceling_adaptive_sensitivity_level,
-        ]
     }
 }
 

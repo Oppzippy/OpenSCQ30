@@ -1,10 +1,8 @@
-mod packet_handler;
 mod setting_handler;
 
 use std::sync::Arc;
 
 use openscq30_lib_has::Has;
-use packet_handler::SoundModesPacketHandler;
 use setting_handler::SoundModesSettingHandler;
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
@@ -12,10 +10,7 @@ use crate::{
     api::settings::{CategoryId, SettingId},
     devices::soundcore::{
         a3035,
-        common::{
-            modules::{ModuleCollection, sound_modes_v2},
-            packet::PacketIOController,
-        },
+        common::{modules::ModuleCollection, packet::PacketIOController},
     },
     macros::enum_subset,
 };
@@ -38,15 +33,8 @@ where
     T: Has<a3035::structures::SoundModes> + Clone + Send + Sync,
 {
     pub fn add_a3035_sound_modes(&mut self, packet_io: Arc<PacketIOController>) {
-        self.packet_handlers.set_handler(
-            SoundModesPacketHandler::COMMAND,
-            Box::new(SoundModesPacketHandler::default()),
-        );
+        self.add_partial_sound_modes_v2(packet_io);
         self.setting_manager
             .add_handler(CategoryId::SoundModes, SoundModesSettingHandler::default());
-        self.state_modifiers
-            .push(Box::new(sound_modes_v2::SoundModesStateModifier::new(
-                packet_io,
-            )));
     }
 }

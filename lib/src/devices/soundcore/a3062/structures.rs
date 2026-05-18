@@ -9,7 +9,10 @@ use openscq30_lib_macros::MigrationSteps;
 use strum::{EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 use crate::devices::soundcore::common::{
-    self, modules::sound_modes_v2, packet::parsing::take_bool, structures::AmbientSoundMode,
+    self,
+    modules::sound_modes_v2,
+    packet::{self, inbound::FromPacketBody, parsing::take_bool},
+    structures::AmbientSoundMode,
 };
 
 common::structures::flag!(AmbientSoundModeVoicePrompt);
@@ -36,7 +39,22 @@ pub struct SoundModes {
 }
 
 impl SoundModes {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn bytes(&self) -> [u8; 6] {
+        [
+            self.ambient_sound_mode.id(),
+            self.custom_noise_canceling.inner() << 4 | self.adaptive_noise_canceling.inner(),
+            1, // transparency mode: 1 is custom transparency, which is the only available option for this device
+            self.noise_canceling_mode as u8,
+            self.wind_noise_reduction.0.into(),
+            self.custom_transparency.inner(),
+        ]
+    }
+}
+
+impl FromPacketBody for SoundModes {
+    type DirectionMarker = packet::InboundMarker;
+
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         context(
@@ -68,17 +86,6 @@ impl SoundModes {
             ),
         )
         .parse_complete(input)
-    }
-
-    pub fn bytes(&self) -> [u8; 6] {
-        [
-            self.ambient_sound_mode.id(),
-            self.custom_noise_canceling.inner() << 4 | self.adaptive_noise_canceling.inner(),
-            1, // transparency mode: 1 is custom transparency, which is the only available option for this device
-            self.noise_canceling_mode as u8,
-            self.wind_noise_reduction.0.into(),
-            self.custom_transparency.inner(),
-        ]
     }
 }
 

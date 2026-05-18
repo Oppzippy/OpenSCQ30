@@ -8,7 +8,11 @@ use openscq30_i18n_macros::Translate;
 use openscq30_lib_macros::MigrationSteps;
 use strum::{Display, EnumIter, EnumString, FromRepr, IntoStaticStr, VariantArray};
 
-use crate::devices::soundcore::common::{self, modules::sound_modes_v2};
+use crate::devices::soundcore::common::{
+    self,
+    modules::sound_modes_v2,
+    packet::{self, inbound::FromPacketBody},
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, MigrationSteps)]
 pub struct SoundModes {
@@ -34,7 +38,23 @@ pub struct SoundModes {
 }
 
 impl SoundModes {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn bytes(&self) -> [u8; 7] {
+        [
+            self.ambient_sound_mode.id(),
+            (self.manual_noise_canceling.0 << 4) | self.adaptive_noise_canceling as u8,
+            self.transparency_mode.id(),
+            self.noise_canceling_mode.id(),
+            self.wind_noise.byte(),
+            self.noise_canceling_adaptive_sensitivity_level,
+            self.multi_scene_anc.id(),
+        ]
+    }
+}
+
+impl FromPacketBody for SoundModes {
+    type DirectionMarker = packet::InboundMarker;
+
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         context(
@@ -72,18 +92,6 @@ impl SoundModes {
             ),
         )
         .parse_complete(input)
-    }
-
-    pub fn bytes(&self) -> [u8; 7] {
-        [
-            self.ambient_sound_mode.id(),
-            (self.manual_noise_canceling.0 << 4) | self.adaptive_noise_canceling as u8,
-            self.transparency_mode.id(),
-            self.noise_canceling_mode.id(),
-            self.wind_noise.byte(),
-            self.noise_canceling_adaptive_sensitivity_level,
-            self.multi_scene_anc.id(),
-        ]
     }
 }
 

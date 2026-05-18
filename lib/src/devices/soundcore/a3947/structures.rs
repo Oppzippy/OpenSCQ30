@@ -13,7 +13,7 @@ use strum::{EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 use crate::devices::soundcore::common::{
     modules::sound_modes_v2,
-    packet::parsing::take_bool,
+    packet::{self, inbound::FromPacketBody, parsing::take_bool},
     structures::{
         AmbientSoundMode, CommonVolumeAdjustments, HearIdMusicGenre, HearIdType, TransparencyMode,
     },
@@ -43,7 +43,27 @@ pub struct SoundModes {
 }
 
 impl SoundModes {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+    pub fn bytes(&self) -> [u8; 7] {
+        [
+            self.ambient_sound_mode as u8,
+            NoiseCancelingSettings {
+                adaptive: self.adaptive_noise_canceling,
+                manual: self.manual_noise_canceling,
+            }
+            .byte(),
+            self.transparency_mode as u8,
+            self.noise_canceling_mode as u8,
+            self.wind_noise.byte(),
+            self.environment_detection.into(),
+            self.transportation_mode as u8,
+        ]
+    }
+}
+
+impl FromPacketBody for SoundModes {
+    type DirectionMarker = packet::InboundMarker;
+
+    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
         context(
@@ -81,22 +101,6 @@ impl SoundModes {
             ),
         )
         .parse_complete(input)
-    }
-
-    pub fn bytes(&self) -> [u8; 7] {
-        [
-            self.ambient_sound_mode as u8,
-            NoiseCancelingSettings {
-                adaptive: self.adaptive_noise_canceling,
-                manual: self.manual_noise_canceling,
-            }
-            .byte(),
-            self.transparency_mode as u8,
-            self.noise_canceling_mode as u8,
-            self.wind_noise.byte(),
-            self.environment_detection.into(),
-            self.transportation_mode as u8,
-        ]
     }
 }
 
