@@ -6,75 +6,50 @@ use tokio::sync::watch;
 use crate::{
     api::device,
     devices::soundcore::common::{
-        modules::sound_modes_v2::{Migrate, MigrationPlanner, ToPacketBody},
+        modules::sound_modes_v2::ToPacketBody,
         packet::{self, PacketIOController},
         state_modifier::StateModifier,
     },
 };
 
-pub struct SoundModesStateModifier<MigratableT, MigratableTFieldEnum, const SIZE: usize> {
+pub struct SoundModesStateModifier<SoundModesT> {
+    _sound_modes: PhantomData<SoundModesT>,
     packet_io: Arc<PacketIOController>,
-    migration_planner: MigrationPlanner<MigratableTFieldEnum, SIZE>,
-    _migratable: PhantomData<MigratableT>,
 }
 
-impl<MigratableT, MigratableTFieldEnum, const SIZE: usize>
-    SoundModesStateModifier<MigratableT, MigratableTFieldEnum, SIZE>
-where
-    MigratableT: Migrate<SIZE, T = MigratableTFieldEnum>,
-{
+impl<SoundModesT> SoundModesStateModifier<SoundModesT> {
     pub fn new(packet_io: Arc<PacketIOController>) -> Self {
         Self {
             packet_io,
-            migration_planner: MigratableT::migration_planner(),
-            _migratable: PhantomData,
+            _sound_modes: PhantomData,
         }
     }
 }
 
 #[async_trait]
-impl<StateType, MigratableT, MigratableTFieldEnum, const SIZE: usize> StateModifier<StateType>
-    for SoundModesStateModifier<MigratableT, MigratableTFieldEnum, SIZE>
+impl<StateT, SoundModesT> StateModifier<StateT> for SoundModesStateModifier<SoundModesT>
 where
-    StateType: Has<MigratableT> + Clone + Send + Sync,
-    MigratableT: Migrate<SIZE, T = MigratableTFieldEnum>
-        + ToPacketBody
-        + Send
-        + Sync
-        + PartialEq
-        + std::fmt::Debug,
-    MigratableTFieldEnum: Send + Sync,
+    StateT: Has<SoundModesT> + Send + Sync,
+    SoundModesT: ToPacketBody + PartialEq + Clone + Send + Sync,
 {
     async fn move_to_state(
         &self,
-        state_sender: &watch::Sender<StateType>,
-        target_state: &StateType,
+        state_sender: &watch::Sender<StateT>,
+        target_state: &StateT,
     ) -> device::Result<()> {
-        let path = {
-            let from_state = state_sender.borrow();
-            let from = from_state.get();
-            let to = target_state.get();
-            MigratableT::migrate(&self.migration_planner, from, to)
-        };
-        if let Some(last) = path.last() {
-            tracing::info!("migrating sound modes using path {path:?}");
-            assert_eq!(
-                last,
-                target_state.get(),
-                "last element in path should be target state"
-            );
+        let target_sound_modes = target_state.get();
+        if state_sender.borrow().get() == target_sound_modes {
+            return Ok(());
         }
-        for step in path {
-            self.packet_io
-                .send_with_response(&packet::Outbound::new(
-                    packet::Command([0x06, 0x81]),
-                    step.bytes(),
-                ))
-                .await?;
-            state_sender.send_modify(|v| {
-                *v.get_mut() = step;
-            });
-        }
+        self.packet_io
+            .send_with_response(&packet::Outbound::new(
+                packet::Command([0x06, 0x81]),
+                target_sound_modes.bytes(),
+            ))
+            .await?;
+        state_sender.send_modify(|v| {
+            *v.get_mut() = target_sound_modes.clone();
+        });
         Ok(())
     }
 }

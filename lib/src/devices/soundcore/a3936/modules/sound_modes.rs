@@ -34,7 +34,7 @@ where
     T: Has<A3936SoundModes> + Clone + Send + Sync,
 {
     pub fn add_a3936_sound_modes(&mut self, packet_io: Arc<PacketIOController>) {
-        self.add_partial_sound_modes_v2_with_sound_mode_update_lock(packet_io);
+        self.add_partial_sound_modes_v2(packet_io);
         self.setting_manager
             .add_handler(CategoryId::SoundModes, SoundModesSettingHandler::default());
     }

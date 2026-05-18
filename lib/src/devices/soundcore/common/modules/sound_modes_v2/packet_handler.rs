@@ -17,9 +17,16 @@ use crate::{
 
 pub const PACKET_HANDLER_COMMAND: packet::Command = packet::Command([0x06, 0x01]);
 
-#[derive(Default)]
 pub struct SoundModesPacketHandler<SoundModesT> {
     _sound_modes: PhantomData<SoundModesT>,
+}
+
+impl<SoundModesT> Default for SoundModesPacketHandler<SoundModesT> {
+    fn default() -> Self {
+        Self {
+            _sound_modes: PhantomData,
+        }
+    }
 }
 
 #[async_trait]
