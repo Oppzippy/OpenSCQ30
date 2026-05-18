@@ -11,9 +11,8 @@ use crate::api::connection::{
 pub struct NoneRfcommBackend;
 pub struct NoneRfcommConnection;
 
+#[async_trait]
 impl RfcommBackend for NoneRfcommBackend {
-    type ConnectionType = NoneRfcommConnection;
-
     async fn devices(&self) -> connection::Result<HashSet<connection::ConnectionDescriptor>> {
         unimplemented!()
     }
@@ -22,7 +21,7 @@ impl RfcommBackend for NoneRfcommBackend {
         &self,
         _mac_address: MacAddr6,
         _select_uuid: RfcommServiceSelectionStrategy,
-    ) -> connection::Result<Self::ConnectionType> {
+    ) -> connection::Result<Arc<dyn RfcommConnection + Send + Sync>> {
         unimplemented!()
     }
 }

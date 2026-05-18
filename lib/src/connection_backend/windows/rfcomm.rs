@@ -1,7 +1,7 @@
 use std::{
     collections::{HashMap, HashSet},
     panic::Location,
-    sync::Mutex,
+    sync::{Arc, Mutex},
     thread,
 };
 
@@ -34,9 +34,8 @@ use super::utils::{GuidAsUuidExt, WindowsMacAddressExt};
 #[derive(Default)]
 pub struct WindowsRfcommBackend;
 
+#[async_trait]
 impl RfcommBackend for WindowsRfcommBackend {
-    type ConnectionType = WindowsRfcommConnection;
-
     async fn devices(&self) -> connection::Result<HashSet<connection::ConnectionDescriptor>> {
         tokio::task::spawn_blocking(|| {
             let devices = DeviceInformation::FindAllAsyncAqsFilter(
@@ -67,39 +66,42 @@ impl RfcommBackend for WindowsRfcommBackend {
         &self,
         mac_address: MacAddr6,
         service_selection_strategy: RfcommServiceSelectionStrategy,
-    ) -> connection::Result<Self::ConnectionType> {
-        tokio::task::spawn_blocking(move || {
-            let span = debug_span!(
-                "RfcommBackend::connect",
-                mac_address = tracing::field::display(mac_address),
-            );
-            let _span_guard = span.enter();
+    ) -> connection::Result<Arc<dyn RfcommConnection + Send + Sync>> {
+        tokio::task::spawn_blocking(
+            move || -> connection::Result<Arc<dyn RfcommConnection + Send + Sync>> {
+                let span = debug_span!(
+                    "RfcommBackend::connect",
+                    mac_address = tracing::field::display(mac_address),
+                );
+                let _span_guard = span.enter();
 
-            debug!("finding device with desired mac address");
-            let device = Self::get_bluetooth_device_from_mac_address(mac_address)?;
+                debug!("finding device with desired mac address");
+                let device = Self::get_bluetooth_device_from_mac_address(mac_address)?;
 
-            debug!("selecting RFCOMM service");
-            let service = Self::select_service(&device, &service_selection_strategy)?;
+                debug!("selecting RFCOMM service");
+                let service = Self::select_service(&device, &service_selection_strategy)?;
 
-            debug!("creating socket");
-            let socket = AgileReference::new(&StreamSocket::new()?)?;
-            socket
-                .resolve()?
-                .ConnectWithProtectionLevelAsync(
-                    &service.ConnectionHostName()?,
-                    &service.ConnectionServiceName()?,
-                    SocketProtectionLevel::BluetoothEncryptionAllowNullAuthentication,
-                )?
-                .join()?;
+                debug!("creating socket");
+                let socket = AgileReference::new(&StreamSocket::new()?)?;
+                socket
+                    .resolve()?
+                    .ConnectWithProtectionLevelAsync(
+                        &service.ConnectionHostName()?,
+                        &service.ConnectionServiceName()?,
+                        SocketProtectionLevel::BluetoothEncryptionAllowNullAuthentication,
+                    )?
+                    .join()?;
 
-            WindowsRfcommConnection::new(AgileReference::new(&device)?, socket)
-        })
+                let connection =
+                    WindowsRfcommConnection::new(AgileReference::new(&device)?, socket)?;
+                Ok(Arc::new(connection))
+            },
+        )
         .await
         .unwrap()
     }
 }
 
-#[async_trait]
 impl WindowsRfcommBackend {
     #[instrument]
     fn get_bluetooth_device_from_mac_address(
@@ -157,7 +159,7 @@ impl WindowsRfcommBackend {
                     services_by_uuid.keys()
                 );
                 services_by_uuid
-                    .remove(&uuid)
+                    .remove(uuid)
                     .ok_or(connection::Error::DeviceNotFound {
                         source: None,
                         location: Location::caller(),

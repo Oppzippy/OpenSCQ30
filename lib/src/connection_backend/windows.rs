@@ -10,6 +10,6 @@ impl ConnectionBackends for PlatformConnectionBackends {
     type Rfcomm = rfcomm::WindowsRfcommBackend;
 
     async fn rfcomm(&self) -> connection::Result<Self::Rfcomm> {
-        Ok(rfcomm::WindowsRfcommBackend::default())
+        Ok(rfcomm::WindowsRfcommBackend)
     }
 }

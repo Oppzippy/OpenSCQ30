@@ -28,7 +28,7 @@ pub fn default_backends() -> Option<impl ConnectionBackends> {
             Some(linux::PlatformConnectionBackends)
         }
         target_os = "windows" => {
-            Some(windows::PlatformConnectionBackends::default())
+            Some(windows::PlatformConnectionBackends)
         }
         _ => {
             None::<none::NoneConnectionBackends>
