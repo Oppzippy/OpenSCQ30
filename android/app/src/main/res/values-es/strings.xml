@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="equalizer">Ecualizador</string>
     <string name="hz">%1$d Hz</string>
     <string name="loading">Cargando</string>
@@ -35,4 +35,51 @@
     <string name="select_device_model">Selecciona el modelo del dispositivo</string>
     <string name="select_x">Seleccionar %s</string>
     <string name="demo_mode">Modo demostración</string>
+    <string name="source_code" tools:ignore="TypographyOther">&lt;p&gt;El código fuente y los informes de errores están disponibles en &lt;a href=https://github.com/Oppzippy/OpenSCQ30&gt;https://github.com/Oppzippy/OpenSCQ30&lt;/a&gt;. &lt;/p&gt; &lt;br&gt; &lt;p&gt;Copyright (C) Kyle Scheuing&lt;/p&gt; &lt;br&gt; &lt;p&gt;Este programa es software libre: puede redistribuirlo y/o modificarlo bajo los términos de la Licencia Pública General de GNU tal y como la publica la Free Software Foundation, ya sea la versión 3 de la Licencia o (a su elección) cualquier versión posterior. &lt;/p&gt; &lt;br&gt; &lt;p&gt;Este programa se distribuye con la esperanza de que sea útil, pero SIN NINGUNA GARANTÍA; ni siquiera la garantía implícita de COMERCIABILIDAD o IDONEIDAD PARA UN FIN DETERMINADO. Consulte la Licencia Pública General de GNU para obtener más detalles. &lt;/p&gt; &lt;br&gt; &lt;p&gt;Debería haber recibido una copia de la Licencia Pública General de GNU junto con este programa. Si no es así, consulte &amp;lt;&lt;a href=https://www.gnu.org/licenses/&gt;https://www.gnu.org/licenses/&lt;/a&gt;&gt;.&lt;/p&gt;</string>
+    <string name="quick_presets">Ajustes rápidos</string>
+    <string name="no_quick_presets">Sin ajustes rápidos predefinidos</string>
+    <string name="create_quick_preset">Crear preajuste rápido</string>
+    <string name="quick_preset_slot_x">Ubicación de configuración rápida %d</string>
+    <string name="notification_permission_is_required">Se requiere permiso para recibir notificaciones</string>
+    <string name="status_notification">Notificación de estado</string>
+    <string name="featured_setting_x">Ajustes destacados %d</string>
+    <string name="setting_id_with_value">%s: %s</string>
+    <string name="load_current_settings">Cargar ajustes actuales</string>
+    <string name="information">Información</string>
+    <string name="load_current_settings_help">La opción «Cargar ajustes actuales» sustituirá todos los ajustes del preajuste rápido por sus valores actuales. Esto no afectará a los ajustes que estén activados como parte del preajuste rápido.</string>
+    <string name="close">Cerrar</string>
+    <string name="migrate_legacy_equalizer_profiles">Migrar perfiles de ecualizador heredados</string>
+    <string name="migrate">Migrar</string>
+    <string name="error_pairing">Error al emparejar</string>
+    <string name="error_migrating_legacy_profile">Error al migrar el perfil heredado</string>
+    <string name="error_saving_quick_preset">Error al guardar el ajuste rápido</string>
+    <string name="error_activating_quick_preset">Error al activar el ajuste rápido</string>
+    <string name="error_changing_settings">Error al cambiar la configuración</string>
+    <string name="error_connecting">Error al conectarse</string>
+    <string name="copy_x_to_clipboard">Copiar %s al portapapeles</string>
+    <string name="confirm">Confirmar</string>
+    <string name="import_">Importar</string>
+    <string name="search">Buscar</string>
+    <string name="no_items_found">No se han encontrado artículos</string>
+    <string name="version_2_breaking_changes">&lt;h1&gt;Actualizado a OpenSCQ30 v2&lt;/h1&gt; &lt;br&gt; &lt;b&gt;Cambios importantes&lt;/b&gt; &lt;ul&gt; &lt;li&gt;Los perfiles de ecualizador personalizados ahora son específicos para cada dispositivo. Los perfiles de ecualizador heredados deben migrarse en la página «Migrar perfiles de ecualizador heredados» después de conectarse a un dispositivo.&lt;/li&gt; &lt;li&gt;Los preajustes rápidos ahora se almacenan en un formato diferente y no hay migración automática disponible, por lo que deben volver a crearse. &lt;/li&gt; &lt;li&gt;Se ha eliminado la detección automática del modelo de dispositivo, por lo que ahora es necesario seleccionar el modelo al añadir un dispositivo.&lt;/li&gt; &lt;/ul&gt; &lt;p&gt;Consulte &lt;a href=https://github.com/Oppzippy/OpenSCQ30/blob/master/CHANGELOG.md&gt;CHANGELOG.md&lt;/a&gt; para obtener más detalles.&lt;/p&gt;</string>
+    <string name="delete_quick_preset">Eliminar preajuste rápido</string>
+    <string name="error_deleting_quick_preset">Error al eliminar un ajuste rápido</string>
+    <string name="connected">Conectado</string>
+    <string name="connecting">Conectando</string>
+    <string name="configure_widget">Configurar el widget</string>
+    <string name="connect_to_a_device_to_configure_the_widget">Conéctate a un dispositivo para configurar el widget</string>
+    <string name="configure_later">Configurar más tarde</string>
+    <string name="headphones">Auriculares</string>
+    <string name="earbuds">Auriculares de botón</string>
+    <string name="audio_speaker">Altavoz</string>
+    <string name="preset">Preajuste</string>
+    <string name="custom">Personalizado</string>
+    <string name="selected">Seleccionado</string>
+    <string name="theme">Tema</string>
+    <string name="system_theme">Del sistema</string>
+    <string name="light">Claro</string>
+    <string name="dark">Oscuro</string>
+    <string name="dynamic_color">Color dinámico</string>
+    <string name="in_effect">En vigor</string>
+    <string name="copy_logs_to_clipboard_unfiltered">Copiar registros al portapapeles (sin filtrar)</string>
 </resources>

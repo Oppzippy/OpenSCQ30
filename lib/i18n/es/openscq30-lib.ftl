@@ -36,3 +36,5 @@ transparency-mode = Modo transparencia
 noise-canceling-mode = Modo cancelación de ruido
 custom-noise-canceling = Cancelación de ruido personalizada
 preset-profile = Perfil del preajuste
+connected = Conectado
+custom = Personalizado

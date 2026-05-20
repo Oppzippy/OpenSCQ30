@@ -36,3 +36,5 @@ save = Guardar
 add-item = Agregar { $name }
 remove-item = Remover { $name }
 remove-item-confirm = ¿Estás seguro que deseas remover { $name }?
+migrate = Migrar
+confirm = Confirmar
