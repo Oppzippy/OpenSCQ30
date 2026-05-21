@@ -22,6 +22,7 @@ local KNOWN_COMMANDS = {
     [0xFF01] = "Set LDAC",
     [0x7F01] = "LDAC update",
     [0x010B] = "Dual connections devices",
+    [0x840B] = "Set dual connections enabled",
     [0x820B] = "Connect to device via dual connections",
     [0x810B] = "Disconnect from device via dual connections",
 }
