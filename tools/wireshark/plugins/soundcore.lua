@@ -1,30 +1,30 @@
 local KNOWN_COMMANDS = {
     [0x0101] = "State update",
-    [0x0102] = "TWS status",
-    [0x0103] = "Battery level",
-    [0x0104] = "Battery charging",
-    [0x0105] = "Firmware version and serial number",
-    [0x010F] = "Chinese voice prompt",
-    [0x0111] = "Game mode",
-    [0x0183] = "Set touch tone",
-    [0x0186] = "Set auto power off",
-    [0x0281] = "Set equalizer",
-    [0x0283] = "Set equalizer with DRC",
-    [0x0386] = "Set equalizer and hear id (old)",
-    [0x0387] = "Set equalizer and hear id (new)",
-    [0x0481] = "Set button configuration of all buttons",
-    [0x0482] = "Reset button configuration",
-    [0x0483] = "Set button enabled",
-    [0x0484] = "Set button action",
-    [0x0601] = "Sound modes",
-    [0x0681] = "Set sound modes",
-    [0x0682] = "Set ambient sound mode cycle",
-    [0xFF01] = "Set LDAC",
-    [0x7F01] = "LDAC update",
-    [0x010B] = "Dual connections devices",
-    [0x840B] = "Set dual connections enabled",
-    [0x820B] = "Connect to device via dual connections",
-    [0x810B] = "Disconnect from device via dual connections",
+    [0x0106] = "Sound modes",
+    [0x017f] = "LDAC update",
+    [0x01ff] = "Set LDAC",
+    [0x0201] = "TWS status",
+    [0x0301] = "Battery level",
+    [0x0401] = "Battery charging",
+    [0x0501] = "Firmware version and serial number",
+    [0x0b01] = "Dual connections devices",
+    [0x0b81] = "Disconnect from device via dual connections",
+    [0x0b82] = "Connect to device via dual connections",
+    [0x0b84] = "Set dual connections enabled",
+    [0x0f01] = "Chinese voice prompt",
+    [0x1101] = "Game mode",
+    [0x8102] = "Set equalizer",
+    [0x8104] = "Set button configuration of all buttons",
+    [0x8106] = "Set sound modes",
+    [0x8204] = "Reset button configuration",
+    [0x8206] = "Set ambient sound mode cycle",
+    [0x8301] = "Set touch tone",
+    [0x8302] = "Set equalizer with DRC",
+    [0x8304] = "Set button enabled",
+    [0x8404] = "Set button action",
+    [0x8601] = "Set auto power off",
+    [0x8603] = "Set equalizer and hear id (old)",
+    [0x8703] = "Set equalizer and hear id (new)",
 }
 
 local soundcore_protocol = Proto("Soundcore", "Soundcore Protocol")
@@ -55,7 +55,8 @@ function soundcore_protocol.dissector(buffer, pinfo, tree)
     repeat
         subtree:add_le(field_direction, buffer(start_index + 0, 5))
             :append_text(buffer(0, 1):le_uint() == 8 and " (Outbound)" or " (Inbound)")
-        subtree:add_le(field_command, buffer(start_index + 5, 2))
+        -- big endian since that is the same order as the [u8; 2] we use in rust
+        subtree:add(field_command, buffer(start_index + 5, 2))
         subtree:add_le(field_message_length, buffer(start_index + 7, 2))
         local len = buffer(start_index + 7, 2):le_uint()
         subtree:add_le(field_body, buffer(start_index + 9, len - 10))
