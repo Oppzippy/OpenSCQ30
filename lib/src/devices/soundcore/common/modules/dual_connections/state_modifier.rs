@@ -64,7 +64,11 @@ where
                 target.is_enabled,
             ))
             .await?;
-        // The device will restart, so we don't need to send new state here
+        state_sender.send_modify(|state| {
+            if let Some(dual_connections) = state.maybe_get_mut() {
+                dual_connections.is_enabled = target.is_enabled;
+            }
+        });
     }
     Ok(())
 }
