@@ -162,7 +162,7 @@ mod tests {
     }
 
     #[tokio::test(start_paused = true)]
-    async fn dual_connections_devices_realistic_timing() {
+    async fn realistic_dual_connections_devices() {
         let device = TestSoundcoreDevice::new_with_delayed_responses(
             super::device_registry,
             DeviceModel::SoundcoreA3035,
@@ -214,6 +214,6 @@ mod tests {
         );
         let dual_connections_devices = value.try_into_string_vec().unwrap();
 
-        assert_ne!(dual_connections_devices.len(), 0);
+        assert_eq!(dual_connections_devices.len(), 2);
     }
 }

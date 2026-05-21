@@ -35,7 +35,7 @@ pub struct A3040State {
 impl A3040State {
     pub fn new(
         state_update_packet: A3040StateUpdatePacket,
-        dual_connections_devices: Vec<Option<DualConnectionsDevice>>,
+        dual_connections_devices: Vec<DualConnectionsDevice>,
     ) -> Self {
         Self {
             battery_level: state_update_packet.battery_level,

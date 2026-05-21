@@ -1,4 +1,3 @@
-use macaddr::MacAddr6;
 use nom::{
     IResult, Parser,
     error::{ContextError, ParseError, context},
@@ -7,16 +6,18 @@ use nom::{
 
 use crate::devices::soundcore::common::{
     self,
-    packet::{self, Command, outbound::ToPacket, parsing::take_bool},
+    packet::{self, Command, outbound::ToPacket},
+    structures::DualConnectionsDevice,
 };
 
 use super::FromPacketBody;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct DualConnectionsDevicePacket {
-    pub total_devices: u8,
-    pub index: u8,
-    pub device: common::structures::DualConnectionsDevice,
+    pub total_packets: u8,
+    /// Index starts from 1
+    pub current_packet_index: u8,
+    pub devices: Vec<common::structures::DualConnectionsDevice>,
 }
 
 impl DualConnectionsDevicePacket {
@@ -31,20 +32,10 @@ impl ToPacket for DualConnectionsDevicePacket {
     }
 
     fn body(&self) -> Vec<u8> {
-        [
-            self.total_devices,
-            self.index,
-            0x28,
-            self.device.is_connected as u8,
-        ]
-        .into_iter()
-        .chain(self.device.mac_address.into_array())
-        .chain(self.device.name.as_bytes().iter().take(32).copied())
-        .chain(std::iter::repeat_n(
-            0,
-            32usize.saturating_sub(self.device.name.len()),
-        ))
-        .collect()
+        [self.total_packets, self.current_packet_index]
+            .into_iter()
+            .chain(self.devices.iter().flat_map(|device| device.bytes()))
+            .collect()
     }
 }
 
@@ -54,36 +45,23 @@ impl FromPacketBody for DualConnectionsDevicePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
-        context("dual connection device", |input| {
-            let (input, (total_devices, index, _remaining_length, is_connected, mac_address_bytes)) =
-                (
-                    le_u8,
-                    le_u8,
-                    le_u8, // number of bytes from here (including this byte) to the end. name is remaining_length-8.
-                    take_bool,
-                    (le_u8, le_u8, le_u8, le_u8, le_u8, le_u8),
-                )
-                    .parse_complete(input)?;
-            let mac_address = MacAddr6::from(<[u8; 6]>::from(mac_address_bytes));
-            let name_bytes = input
-                .iter()
-                .position(|b| *b == 0)
-                .map_or(input, |index| &input[..index]);
-            let name = str::from_utf8(name_bytes)
-                .map_err(|_| {
-                    nom::Err::Error(E::from_error_kind(input, nom::error::ErrorKind::Char))
-                })?
-                .to_owned();
+        context("dual connection device", |input: &'a [u8]| {
+            let (mut input, (total_packets, current_packet_index)) =
+                (le_u8, le_u8).parse_complete(input)?;
+
+            let mut devices = Vec::new();
+            while !input.is_empty() {
+                let (remaining, device) = DualConnectionsDevice::take(input)?;
+                devices.push(device);
+                input = remaining;
+            }
+
             Ok((
                 &[] as &[u8], // name extends all the way to the end of the packet, so this empties out input
                 Self {
-                    total_devices,
-                    index,
-                    device: common::structures::DualConnectionsDevice {
-                        is_connected,
-                        mac_address,
-                        name,
-                    },
+                    total_packets,
+                    current_packet_index,
+                    devices,
                 },
             ))
         })
@@ -120,6 +98,25 @@ mod tests {
         let (remaining, parsed) =
             DualConnectionsDevicePacket::take::<VerboseError<_>>(&initial).unwrap();
         assert_eq!(remaining.len(), 0);
-        assert_eq!(parsed.device.name, "Pixel 6aAAAAAAAAAAAAAAAAAAAAAAAA");
+        assert_eq!(parsed.devices.len(), 1);
+        assert_eq!(parsed.devices[0].name, "Pixel 6aAAAAAAAAAAAAAAAAAAAAAAAA");
+    }
+
+    #[test]
+    fn multiple_devices_in_one_packet() {
+        let initial = [
+            0x1, 0x1, // current/total
+            0x28, 0x1, 0x66, 0x14, 0x92, 0x2c, 0x3a, 0xd4, 0x50, 0x69, 0x78, 0x65, 0x6c, 0x20,
+            0x36, 0x61, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, // device 1
+            0x28, 0x1, 0x67, 0x14, 0x92, 0x2c, 0x3a, 0xd4, 0x50, 0x69, 0x78, 0x65, 0x6c, 0x20,
+            0x37, 0x61, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, // device 2
+        ];
+        let (remaining, parsed) =
+            DualConnectionsDevicePacket::take::<VerboseError<_>>(&initial).unwrap();
+        assert_eq!(remaining.len(), 0);
+        assert_eq!(parsed.devices[0].name, "Pixel 6a");
+        assert_eq!(parsed.devices[1].name, "Pixel 7a");
     }
 }

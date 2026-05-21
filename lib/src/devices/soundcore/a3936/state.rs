@@ -40,7 +40,7 @@ pub struct A3936State {
 impl A3936State {
     pub fn new(
         state_update_packet: A3936StateUpdatePacket,
-        dual_connections_devices: Vec<Option<DualConnectionsDevice>>,
+        dual_connections_devices: Vec<DualConnectionsDevice>,
     ) -> Self {
         Self {
             tws_status: state_update_packet.tws_status,

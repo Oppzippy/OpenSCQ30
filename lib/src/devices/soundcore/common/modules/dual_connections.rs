@@ -49,9 +49,9 @@ where
 
 pub async fn take_dual_connection_devices(
     packet_io: &PacketIOController,
-) -> device::Result<Vec<Option<DualConnectionsDevice>>> {
+) -> device::Result<Vec<DualConnectionsDevice>> {
     // allow receiving packets out of order. this shouldn't happen, but just to be safe in case a device I'm not aware of does this.
-    let mut devices: Vec<Option<DualConnectionsDevice>> = Vec::new();
+    let mut devices: Vec<DualConnectionsDevice> = Vec::new();
     packet_io
         .send_with_multi_response(
             &packet::outbound::request_dual_connections_devices(),
@@ -66,31 +66,9 @@ pub async fn take_dual_connection_devices(
                     }
                 };
 
-                // In case the length somehow changes during the response
-                devices.truncate(usize::from(packet.total_devices));
-                while devices.len() < usize::from(packet.total_devices) {
-                    devices.push(None);
-                }
+                devices.extend(packet.devices);
 
-                // devices sends indices starting from 1, but our vec starts from 0
-                match packet.index.checked_sub(1) {
-                    Some(index) => {
-                        devices[usize::from(index)] = Some(packet.device);
-                    }
-                    None => {
-                        // If for some reason there is an index 0, we will ignore it and proceed as normal. This may
-                        // lead to the last index never becoming Some if it's because all indices are offset by -1, but
-                        // that's fine. We can just let send_with_multi_response time out.
-                        tracing::error!(
-                            "device index should start from 1, got {} of {} total",
-                            packet.index,
-                            packet.total_devices,
-                        );
-                    }
-                };
-
-                // devices is already the max length but padded with None, so we don't need to check the length
-                devices.iter().any(|device| device.is_none())
+                packet.current_packet_index != packet.total_packets
             },
             20,
         )

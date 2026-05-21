@@ -36,7 +36,7 @@ pub struct A3959State {
 impl A3959State {
     pub fn new(
         packet: a3959::packets::inbound::A3959StateUpdate,
-        dual_connections_devices: Vec<Option<DualConnectionsDevice>>,
+        dual_connections_devices: Vec<DualConnectionsDevice>,
     ) -> Self {
         Self {
             tws_status: packet.tws_status,

@@ -29,9 +29,9 @@ where
         packet: &packet::Inbound,
     ) -> device::Result<()> {
         let packet: packet::inbound::DualConnectionsDevicePacket = packet.try_to_packet()?;
-        state.send_if_modified(|state| {
+        state.send_modify(|state| {
             let dual_connections = state.get_mut();
-            modify_state(dual_connections, packet)
+            modify_state(dual_connections, packet);
         });
         Ok(())
     }
@@ -41,40 +41,16 @@ where
 fn modify_state(
     dual_connections: &mut DualConnections,
     packet: packet::inbound::DualConnectionsDevicePacket,
-) -> bool {
-    if dual_connections
-        .devices
-        .get(packet.index as usize)
-        .and_then(|maybe_device| maybe_device.as_ref())
-        .is_none_or(|device| *device != packet.device)
-        || dual_connections.devices.len() != packet.total_devices as usize
-    {
-        let devices = &mut dual_connections.devices;
-
-        devices.truncate(packet.total_devices as usize);
-        while devices.len() < packet.total_devices as usize {
-            devices.push(None);
-        }
-
-        if let Some(index) = packet.index.checked_sub(1) {
-            tracing::trace!(
-                "updating dual connections device {}/{}",
-                packet.index,
-                packet.total_devices
-            );
-            devices[index as usize] = Some(packet.device);
-        } else {
-            tracing::error!(
-                "dual connections device index should start from 1, but got {} ({} total)",
-                packet.index,
-                packet.total_devices,
-            );
-        }
-        true
-    } else {
-        tracing::trace!("got dual connections packet but no change");
-        false
+) {
+    tracing::debug!(
+        "got dual connections devices packet {}/{}",
+        packet.current_packet_index,
+        packet.total_packets
+    );
+    if packet.current_packet_index == 1 {
+        dual_connections.devices.clear();
     }
+    dual_connections.devices.extend(packet.devices);
 }
 
 #[cfg(test)]
@@ -94,7 +70,7 @@ mod tests {
     }
 
     #[tokio::test(start_paused = true)]
-    async fn devices_in_order() {
+    async fn devices_in_separate_packets() {
         let handler = DualConnectionsDevicePacketHandler;
         let (state_sender, state_receiver) = watch::channel(TestState {
             dual_connections: DualConnections {
@@ -126,9 +102,9 @@ mod tests {
                 .handle_packet(
                     &state_sender,
                     &packet::inbound::DualConnectionsDevicePacket {
-                        total_devices: devices.len() as u8,
-                        index: (i + 1) as u8,
-                        device,
+                        total_packets: devices.len() as u8,
+                        current_packet_index: (i + 1) as u8,
+                        devices: vec![device],
                     }
                     .to_packet(),
                 )
@@ -141,13 +117,13 @@ mod tests {
             state.dual_connections,
             DualConnections {
                 is_enabled: true,
-                devices: devices.into_iter().map(Some).collect(),
+                devices: devices.into_iter().collect(),
             }
         )
     }
 
     #[tokio::test(start_paused = true)]
-    async fn devices_out_of_order() {
+    async fn devices_in_one_packet() {
         let handler = DualConnectionsDevicePacketHandler;
         let (state_sender, state_receiver) = watch::channel(TestState {
             dual_connections: DualConnections {
@@ -174,151 +150,25 @@ mod tests {
             },
         ];
 
-        // iterate in reverse order for out of order devices
-        for (i, device) in devices.iter().cloned().enumerate().rev() {
-            handler
-                .handle_packet(
-                    &state_sender,
-                    &packet::inbound::DualConnectionsDevicePacket {
-                        total_devices: devices.len() as u8,
-                        index: (i + 1) as u8,
-                        device,
-                    }
-                    .to_packet(),
-                )
-                .await
-                .expect(&format!("handle packet {i}"));
-        }
+        handler
+            .handle_packet(
+                &state_sender,
+                &packet::inbound::DualConnectionsDevicePacket {
+                    total_packets: 1,
+                    current_packet_index: 1,
+                    devices: devices.to_owned(),
+                }
+                .to_packet(),
+            )
+            .await
+            .unwrap();
 
         let state = state_receiver.borrow();
         assert_eq!(
             state.dual_connections,
             DualConnections {
                 is_enabled: true,
-                devices: devices.into_iter().map(Some).collect(),
-            }
-        )
-    }
-
-    #[tokio::test(start_paused = true)]
-    async fn missing_devices() {
-        let handler = DualConnectionsDevicePacketHandler;
-        let (state_sender, state_receiver) = watch::channel(TestState {
-            dual_connections: DualConnections {
-                is_enabled: true,
-                devices: Vec::new(),
-            },
-        });
-
-        let devices = vec![
-            Some(DualConnectionsDevice {
-                is_connected: true,
-                mac_address: MacAddr6::new(0, 0, 0, 0, 0, 0),
-                name: "First Device".to_string(),
-            }),
-            None,
-            Some(DualConnectionsDevice {
-                is_connected: true,
-                mac_address: MacAddr6::new(0, 0, 0, 0, 0, 2),
-                name: "Third Device".to_string(),
-            }),
-        ];
-
-        // iterate in reverse order for out of order devices
-        for (i, maybe_device) in devices.iter().cloned().enumerate() {
-            if let Some(device) = maybe_device {
-                handler
-                    .handle_packet(
-                        &state_sender,
-                        &packet::inbound::DualConnectionsDevicePacket {
-                            total_devices: devices.len() as u8,
-                            index: (i + 1) as u8,
-                            device,
-                        }
-                        .to_packet(),
-                    )
-                    .await
-                    .expect(&format!("handle packet {i}"));
-            }
-        }
-
-        let state = state_receiver.borrow();
-        assert_eq!(
-            state.dual_connections,
-            DualConnections {
-                is_enabled: true,
-                devices,
-            }
-        )
-    }
-
-    #[tokio::test(start_paused = true)]
-    async fn decrease_total_devices() {
-        let handler = DualConnectionsDevicePacketHandler;
-        let (state_sender, state_receiver) = watch::channel(TestState {
-            dual_connections: DualConnections {
-                is_enabled: true,
-                devices: Vec::new(),
-            },
-        });
-
-        let mut devices = vec![
-            DualConnectionsDevice {
-                is_connected: true,
-                mac_address: MacAddr6::new(0, 0, 0, 0, 0, 0),
-                name: "First Device".to_string(),
-            },
-            DualConnectionsDevice {
-                is_connected: false,
-                mac_address: MacAddr6::new(0, 0, 0, 0, 0, 1),
-                name: "Second Device".to_string(),
-            },
-            DualConnectionsDevice {
-                is_connected: true,
-                mac_address: MacAddr6::new(0, 0, 0, 0, 0, 2),
-                name: "Third Device".to_string(),
-            },
-        ];
-
-        for (i, device) in devices.iter().cloned().enumerate() {
-            handler
-                .handle_packet(
-                    &state_sender,
-                    &packet::inbound::DualConnectionsDevicePacket {
-                        total_devices: devices.len() as u8,
-                        index: (i + 1) as u8,
-                        device,
-                    }
-                    .to_packet(),
-                )
-                .await
-                .expect(&format!("handle packet {i}"));
-        }
-
-        devices.pop();
-
-        for (i, device) in devices.iter().cloned().enumerate() {
-            handler
-                .handle_packet(
-                    &state_sender,
-                    &packet::inbound::DualConnectionsDevicePacket {
-                        total_devices: devices.len() as u8,
-                        index: (i + 1) as u8,
-                        device,
-                    }
-                    .to_packet(),
-                )
-                .await
-                .expect(&format!("handle packet {i}"));
-        }
-
-        let state = state_receiver.borrow();
-        assert_eq!(state.dual_connections.devices.len(), 2);
-        assert_eq!(
-            state.dual_connections,
-            DualConnections {
-                is_enabled: true,
-                devices: devices.into_iter().map(Some).collect(),
+                devices: devices.into_iter().collect(),
             }
         )
     }

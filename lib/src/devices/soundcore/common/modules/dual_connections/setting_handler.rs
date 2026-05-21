@@ -60,20 +60,17 @@ impl DualConnectionsSettingHandler {
                     options: dual_connections
                         .devices
                         .iter()
-                        .flatten()
                         .map(|device| Cow::from(device.mac_address.to_string()))
                         .collect(),
                     localized_options: dual_connections
                         .devices
                         .iter()
-                        .flatten()
                         .map(|device| device.name.clone())
                         .collect(),
                 },
                 values: dual_connections
                     .devices
                     .iter()
-                    .flatten()
                     .flat_map(|device| {
                         device
                             .is_connected
@@ -107,7 +104,7 @@ impl DualConnectionsSettingHandler {
                     .map_err(|err| SettingHandlerError::Other(Box::new(err)))?;
                 // Dual connections only allows for 2 connections, so don't allow connecting to more than that
                 if desired_connections.len() <= 2 {
-                    for device in &mut dual_connections.devices.iter_mut().flatten() {
+                    for device in &mut dual_connections.devices {
                         device.is_connected = desired_connections.contains(&device.mac_address);
                     }
                 }

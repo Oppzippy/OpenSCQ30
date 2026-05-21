@@ -80,7 +80,7 @@ where
     let Some(target) = target_state.maybe_get() else {
         return Ok(());
     };
-    let target_devices = target.devices.iter().flatten().cloned().collect::<Vec<_>>();
+    let target_devices = target.devices.iter().cloned().collect::<Vec<_>>();
 
     let devices = {
         let current = state_sender.borrow();
@@ -92,7 +92,6 @@ where
             target
                 .devices
                 .iter()
-                .flatten()
                 .filter(|device| device.is_connected)
                 .count()
                 <= 2,
@@ -103,7 +102,6 @@ where
         dual_connections
             .devices
             .iter()
-            .flatten()
             // avoid cloning name strings
             .map(|device| DeviceWithoutName {
                 is_connected: device.is_connected,
