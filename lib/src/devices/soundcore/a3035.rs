@@ -69,7 +69,7 @@ soundcore_device!(
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
+    use std::{collections::HashMap, time::Duration};
 
     use crate::{
         DeviceModel,
@@ -77,7 +77,7 @@ mod tests {
             device::{SoundcoreDeviceConfig, test_utils::TestSoundcoreDevice},
             packet::{self},
         },
-        settings::SettingId,
+        settings::{SettingId, Value},
     };
 
     #[tokio::test(start_paused = true)]
@@ -159,5 +159,61 @@ mod tests {
                 ],
             )
             .await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn dual_connections_devices_realistic_timing() {
+        let device = TestSoundcoreDevice::new_with_delayed_responses(
+            super::device_registry,
+            DeviceModel::SoundcoreA3035,
+            HashMap::from([
+                (
+                    packet::Command([1, 1]),
+                    packet::Inbound::new(
+                        packet::Command([1, 1]),
+                        vec![
+                            5, 255, 48, 54, 46, 56, 55, 51, 48, 51, 53, 55, 48, 53, 48, 50, 56, 56,
+                            65, 57, 68, 70, 52, 0, 0, 120, 120, 120, 120, 120, 120, 120, 120, 120,
+                            0, 30, 255, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0,
+                            0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 4, 4, 7, 3,
+                            0, 0x50, 0, 0, 1, 5, 0, 1, 0, 0, 0, 49, 1, 1, 1, 0, 1, 2, 0, 90, 0, 1,
+                            1, 0, 0, 0,
+                        ],
+                    ),
+                ),
+                (
+                    packet::Command([0x0b, 0x01]),
+                    packet::Inbound::new(
+                        packet::Command([0x0b, 0x01]),
+                        vec![
+                            0x1, 0x1, // current/total
+                            0x28, 0x1, 0x66, 0x14, 0x92, 0x2c, 0x3a, 0xd4, 0x50, 0x69, 0x78, 0x65,
+                            0x6c, 0x20, 0x36, 0x61, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0, // device 1
+                            0x28, 0x1, 0x67, 0x14, 0x92, 0x2c, 0x3a, 0xd4, 0x50, 0x69, 0x78, 0x65,
+                            0x6c, 0x20, 0x37, 0x61, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                            0x0, // device 2
+                        ],
+                    ),
+                ),
+            ]),
+            SoundcoreDeviceConfig::default(),
+            HashMap::from([(packet::Command([0x0b, 0x01]), Duration::from_millis(1500))]),
+        )
+        .await;
+
+        device.assert_setting_values([(SettingId::DualConnections, true.into())]);
+
+        let value = Value::from(
+            device
+                .inner()
+                .setting(&SettingId::DualConnectionsDevices)
+                .unwrap(),
+        );
+        let dual_connections_devices = value.try_into_string_vec().unwrap();
+
+        assert_ne!(dual_connections_devices.len(), 0);
     }
 }

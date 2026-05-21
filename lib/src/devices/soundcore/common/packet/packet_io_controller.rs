@@ -137,7 +137,7 @@ impl PacketIOController {
     }
 
     /// Sends a request packet, and then receives up to `limit` responses via `on_receive` until `on_receive` returns `false`.
-    /// Times out after 500ms of no packets received.
+    /// Times out after 2s of no packets received.
     #[tracing::instrument(level = "warn", skip(self, on_receive))]
     pub async fn send_with_multi_response(
         &self,
@@ -162,7 +162,7 @@ impl PacketIOController {
 
         loop {
             if let Some(handle) = handles.pop_front() {
-                if tokio::time::timeout(Duration::from_millis(500), handle.wait_for_end())
+                if tokio::time::timeout(Duration::from_secs(2), handle.wait_for_end())
                     .await
                     .is_ok()
                 {

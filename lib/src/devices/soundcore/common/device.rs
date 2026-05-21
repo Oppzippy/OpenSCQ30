@@ -768,7 +768,9 @@ pub mod test_utils {
     }
 
     impl TestSoundcoreDevice {
-        pub async fn new<StateType>(
+        // HACK: we should instead have packet_responses's values be async functions that have
+        // PacketIOController as a parameter
+        pub async fn new_with_delayed_responses<StateType>(
             constructor: fn(
                 Arc<dyn RfcommBackend + Send + Sync>,
                 Arc<OpenSCQ30Database>,
@@ -777,6 +779,7 @@ pub mod test_utils {
             device_model: DeviceModel,
             packet_responses: HashMap<Command, packet::Inbound>,
             config: SoundcoreDeviceConfig,
+            delays: HashMap<packet::Command, Duration>,
         ) -> Self
         where
             StateType: Clone + Send + Sync + 'static,
@@ -809,6 +812,9 @@ pub mod test_utils {
                             let command = Command(packet[5..7].try_into().unwrap());
                             match packet_responses.get(&command) {
                                 Some(response) => {
+                                    if let Some(delay) = delays.get(&command) {
+                                        tokio::time::sleep(*delay).await;
+                                    }
                                     inbound_sender.send(response.bytes(config.checksum_kind)).await.unwrap();
                                 },
                                 // default to no response for dual connections. a bit of a hack, but since dual
@@ -831,6 +837,30 @@ pub mod test_utils {
                 outbound_receiver,
                 config,
             }
+        }
+
+        pub async fn new<StateType>(
+            constructor: fn(
+                Arc<dyn RfcommBackend + Send + Sync>,
+                Arc<OpenSCQ30Database>,
+                DeviceModel,
+            ) -> SoundcoreDeviceRegistry<StateType>,
+            device_model: DeviceModel,
+            packet_responses: HashMap<Command, packet::Inbound>,
+            config: SoundcoreDeviceConfig,
+        ) -> Self
+        where
+            StateType: Clone + Send + Sync + 'static,
+            SoundcoreDeviceRegistry<StateType>: BuildDevice<StateType>,
+        {
+            Self::new_with_delayed_responses(
+                constructor,
+                device_model,
+                packet_responses,
+                config,
+                HashMap::new(),
+            )
+            .await
         }
 
         pub fn inner(&self) -> &Arc<dyn OpenSCQ30Device + Send + Sync> {
