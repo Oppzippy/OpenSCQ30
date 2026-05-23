@@ -21,6 +21,7 @@ pub struct SetEqualizerAndCustomHearId<
     pub gender: Gender,
     pub age_range: AgeRange,
     pub custom_hear_id: &'a CustomHearId<HEAR_ID_CHANNELS, HEAR_ID_BANDS>,
+    pub force_supports_hear_id: bool,
 }
 
 impl<
@@ -47,7 +48,7 @@ impl<
 
     fn command(&self) -> packet::Command {
         // TODO does this apply to all devices?
-        if self.age_range.supports_hear_id() {
+        if self.age_range.supports_hear_id() || self.force_supports_hear_id {
             packet::Command([0x03, 0x87])
         } else {
             packet::Command([0x03, 0x86])
@@ -60,7 +61,7 @@ impl<
         let mut bytes = Vec::with_capacity(
             (CHANNELS * BANDS * 2) + (HEAR_ID_CHANNELS * HEAR_ID_BANDS * 2) + 12,
         );
-        let supports_hear_id = self.age_range.supports_hear_id();
+        let supports_hear_id = self.age_range.supports_hear_id() || self.force_supports_hear_id;
 
         let max_value_stereo_eq_wave = [255]
             .repeat(self.equalizer_configuration.channels() * self.equalizer_configuration.bands());
@@ -161,6 +162,7 @@ mod tests {
                     ])),
                 ],
             },
+            force_supports_hear_id: false,
         }
         .to_packet()
         .bytes_with_checksum();
@@ -210,6 +212,7 @@ mod tests {
                     ])),
                 ],
             },
+            force_supports_hear_id: false,
         }
         .to_packet()
         .bytes_with_checksum();

@@ -167,6 +167,7 @@ where
                             custom_volume_adjustments: [None; CHANNELS],
                         }
                     },
+                    force_supports_hear_id: false,
                 }
                 .to_packet(),
             )
@@ -179,6 +180,11 @@ where
     }
 }
 
+#[derive(Default)]
+pub struct EqualizerWithCustomHearIdOptions {
+    pub force_supports_hear_id: bool,
+}
+
 pub struct EqualizerWithCustomHearIdStateModifier<
     const CHANNELS: usize,
     const BANDS: usize,
@@ -187,6 +193,7 @@ pub struct EqualizerWithCustomHearIdStateModifier<
     const FRACTION_DIGITS: u8,
 > {
     packet_io: Arc<PacketIOController>,
+    options: EqualizerWithCustomHearIdOptions,
 }
 
 impl<
@@ -197,8 +204,11 @@ impl<
     const FRACTION_DIGITS: u8,
 > EqualizerWithCustomHearIdStateModifier<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
 {
-    pub fn new(packet_io: Arc<PacketIOController>) -> Self {
-        Self { packet_io }
+    pub fn new(
+        packet_io: Arc<PacketIOController>,
+        options: EqualizerWithCustomHearIdOptions,
+    ) -> Self {
+        Self { packet_io, options }
     }
 }
 
@@ -265,6 +275,7 @@ where
                     gender: *target_state.get(),
                     age_range: *target_state.get(),
                     custom_hear_id: &target_hear_id,
+                    force_supports_hear_id: self.options.force_supports_hear_id,
                 }
                 .to_packet(),
             )

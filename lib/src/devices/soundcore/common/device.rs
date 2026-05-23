@@ -472,6 +472,41 @@ where
             .await;
     }
 
+    pub async fn equalizer_with_custom_hear_id_tws_force_supports_hear_id<
+        const CHANNELS: usize,
+        const BANDS: usize,
+        const VISIBLE_BANDS: usize,
+        const PRESET_BANDS: usize,
+        const MIN_VOLUME: i16,
+        const MAX_VOLUME: i16,
+        const FRACTION_DIGITS: u8,
+    >(
+        &mut self,
+        settings: modules::equalizer::EqualizerModuleSettings<
+            VISIBLE_BANDS,
+            PRESET_BANDS,
+            MIN_VOLUME,
+            MAX_VOLUME,
+            FRACTION_DIGITS,
+        >,
+    ) where
+        StateType: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
+            + Has<TwsStatus>
+            + Has<CustomHearId<CHANNELS, BANDS>>
+            + Has<Gender>
+            + Has<AgeRange>,
+    {
+        self.module_collection
+            .add_equalizer_with_custom_hear_id_tws_force_supports_hear_id(
+                self.packet_io_controller.clone(),
+                self.database.clone(),
+                self.device_model,
+                self.change_notify.clone(),
+                settings,
+            )
+            .await;
+    }
+
     pub fn button_configuration<const NUM_BUTTONS: usize, const NUM_PRESS_KINDS: usize>(
         &mut self,
         settings: &'static ButtonConfigurationSettings<NUM_BUTTONS, NUM_PRESS_KINDS>,

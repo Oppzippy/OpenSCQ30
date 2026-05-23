@@ -17,6 +17,7 @@ use crate::{
             modules::equalizer::{
                 custom_equalizer_profile_store::CustomEqualizerProfileStore,
                 import_export_setting_handler::ImportExportSettingHandler,
+                state_modifier::EqualizerWithCustomHearIdOptions,
             },
             packet::PacketIOController,
             state_modifier::StateModifier,
@@ -481,7 +482,58 @@ impl<T: 'static> ModuleCollection<T> {
             database,
             device_model,
             change_notify,
-            Box::new(EqualizerWithCustomHearIdStateModifier::new(packet_io)),
+            Box::new(EqualizerWithCustomHearIdStateModifier::new(
+                packet_io,
+                EqualizerWithCustomHearIdOptions {
+                    force_supports_hear_id: false,
+                },
+            )),
+            settings,
+        )
+        .await;
+    }
+
+    pub async fn add_equalizer_with_custom_hear_id_tws_force_supports_hear_id<
+        const CHANNELS: usize,
+        const BANDS: usize,
+        const VISIBLE_BANDS: usize,
+        const PRESET_BANDS: usize,
+        const MIN_VOLUME: i16,
+        const MAX_VOLUME: i16,
+        const FRACTION_DIGITS: u8,
+    >(
+        &mut self,
+        packet_io: Arc<PacketIOController>,
+        database: Arc<OpenSCQ30Database>,
+        device_model: DeviceModel,
+        change_notify: watch::Sender<()>,
+        settings: EqualizerModuleSettings<
+            VISIBLE_BANDS,
+            PRESET_BANDS,
+            MIN_VOLUME,
+            MAX_VOLUME,
+            FRACTION_DIGITS,
+        >,
+    ) where
+        T: Has<EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
+            + Has<TwsStatus>
+            + Has<CustomHearId<CHANNELS, BANDS>>
+            + Has<Gender>
+            + Has<AgeRange>
+            + Clone
+            + Send
+            + Sync,
+    {
+        self.add_equalizer_with_custom_state_modifier_tws(
+            database,
+            device_model,
+            change_notify,
+            Box::new(EqualizerWithCustomHearIdStateModifier::new(
+                packet_io,
+                EqualizerWithCustomHearIdOptions {
+                    force_supports_hear_id: true,
+                },
+            )),
             settings,
         )
         .await;
