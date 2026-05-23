@@ -41,6 +41,16 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.8.1" date="2026-05-23">
+            <description>
+                <p>Fixes</p>
+                <ul>
+                    <li>Dual connections not working with some devices</li>
+                    <li>Soundcore Space A40 sound modes fail to set properly and lead to the UI being desynchronized from the device</li>
+                    <li>Soundcore Space A40's adaptive noise canceling setting is now read only, since the setting is changed by the device automatically and not by the user.</li>
+                </ul>
+            </description>
+        </release>
         <release version="2.8.0" date="2026-05-16">
             <description>
                 <p>Features</p>

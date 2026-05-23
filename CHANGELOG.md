@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.8.1
+
+### General
+
+#### Fixes
+
+- Dual connections not working with some devices
+- Soundcore Space A40 sound modes fail to set properly and lead to the UI being desynchronized from the device
+- Soundcore Space A40's adaptive noise canceling setting is now read only, since the setting is changed by the device automatically and not by the user.
+
 ## v2.8.0
 
 ### General
