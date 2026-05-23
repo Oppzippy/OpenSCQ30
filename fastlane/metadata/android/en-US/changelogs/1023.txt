@@ -1,0 +1,2 @@
+* Fixes
+  - Soundcore Space A40 equalizer not working

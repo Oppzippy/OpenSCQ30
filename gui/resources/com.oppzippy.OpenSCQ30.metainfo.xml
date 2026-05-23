@@ -41,6 +41,14 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.8.2" date="2026-05-23">
+            <description>
+                <p>Fixes</p>
+                <ul>
+                    <li>Soundcore Space A40 equalizer not working</li>
+                </ul> 
+            </description>
+        </release>
         <release version="2.8.1" date="2026-05-23">
             <description>
                 <p>Fixes</p>

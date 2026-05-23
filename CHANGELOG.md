@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.8.2
+
+### General
+
+#### Fixes
+
+- Soundcore Space A40 equalizer not working
+
 ## v2.8.1
 
 ### General
