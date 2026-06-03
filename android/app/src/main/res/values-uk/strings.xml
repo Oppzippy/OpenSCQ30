@@ -16,19 +16,19 @@
     <string name="back">Назад</string>
     <string name="info">Інформація</string>
     <string name="source_code" tools:ignore="TypographyOther">
-        &lt;p>Вихідний код та звіти про помилки доступні за адресою &lt;a href="https://github.com/Oppzippy/OpenSCQ30">https://github.com/Oppzippy/OpenSCQ30&lt;/a>.&lt;/p>
-        &lt;br>
+        &lt;p&gt;Вихідний код та звіти про помилки доступні за адресою &lt;a href="https://github.com/Oppzippy/OpenSCQ30"&gt;https://github.com/Oppzippy/OpenSCQ30&lt;/a&gt;.&lt;/p&gt;
+        &lt;br&gt;
 
-        &lt;p>Авторські права (C) Kyle Scheuing&lt;/p>
-        &lt;br>
+        &lt;p&gt;Авторські права (C) Kyle Scheuing&lt;/p&gt;
+        &lt;br&gt;
 
-        &lt;p>Це вільне програмне забезпечення: ви можете розповсюджувати та/або змінювати його на умовах GNU General Public License, опублікованої Free Software Foundation, версії 3 або (на ваш вибір) будь-якої пізнішої версії.&lt;/p>
-        &lt;br>
+        &lt;p&gt;Це вільне програмне забезпечення: ви можете розповсюджувати та/або змінювати його на умовах GNU General Public License, опублікованої Free Software Foundation, версії 3 або (на ваш вибір) будь-якої пізнішої версії.&lt;/p&gt;
+        &lt;br&gt;
 
-        &lt;p>Ця програма розповсюджується з надією, що вона буде корисною, але БЕЗ ЖОДНИХ ГАРАНТІЙ; навіть без гарантії ТОВАРНОЇ ПРИДАТНОСТІ або ПРИДАТНОСТІ ДЛЯ ПЕВНОЇ МЕТИ. Детальніше див. у GNU General Public License.&lt;/p>
-        &lt;br>
+        &lt;p&gt;Ця програма розповсюджується з надією, що вона буде корисною, але БЕЗ ЖОДНИХ ГАРАНТІЙ; навіть без гарантії ТОВАРНОЇ ПРИДАТНОСТІ або ПРИДАТНОСТІ ДЛЯ ПЕВНОЇ МЕТИ. Детальніше див. у GNU General Public License.&lt;/p&gt;
+        &lt;br&gt;
 
-        &lt;p>Ви повинні отримати копію GNU General General Public License разом з цією програмою. Якщо ні, див. &amp;lt;&lt;a href="https://www.gnu.org/licenses/">https://www.gnu.org/licenses/&lt;/a>&gt;.&lt;/p>
+        &lt;p&gt;Ви повинні отримати копію GNU General General Public License разом з цією програмою. Якщо ні, див. &amp;lt;&lt;a href="https://www.gnu.org/licenses/"&gt;https://www.gnu.org/licenses/&lt;/a&gt;&gt;.&lt;/p&gt;
     </string>
     <string name="khz">%s кГц</string>
     <string name="replace">Замінити</string>
@@ -77,15 +77,15 @@
     <string name="search">Пошук</string>
     <string name="no_items_found">Елементи не знайдено</string>
     <string name="version_2_breaking_changes">
-        &lt;h1>Оновлено до OpenSCQ30 v2&lt;/h1>
-        &lt;br>
-        &lt;b>Зміни, що порушують сумісність&lt;/b>
-        &lt;ul>
-            &lt;li>Користувацькі профілі еквалайзера тепер залежать від пристрою. Старі профілі еквалайзера потрібно мігрувати на сторінці \"Мігрувати старі профілі еквалайзера\" після підключення до пристрою.&lt;/li>
-            &lt;li>Швидкі налаштування тепер зберігаються в іншому форматі, і автоматична міграція недоступна, тому їх потрібно створити знову.&lt;/li>
-            &lt;li>Автовизначення моделі пристрою видалено, тому тепер потрібно вибирати модель пристрою під час додавання пристрою.&lt;/li>
-        &lt;/ul>
-        &lt;p>Детальніше дивись у &lt;a href="https://github.com/Oppzippy/OpenSCQ30/blob/master/CHANGELOG.md">CHANGELOG.md&lt;/a>.&lt;/p>
+        &lt;h1&gt;Оновлено до OpenSCQ30 v2&lt;/h1&gt;
+        &lt;br&gt;
+        &lt;b&gt;Зміни, що порушують сумісність&lt;/b&gt;
+        &lt;ul&gt;
+            &lt;li&gt;Користувацькі профілі еквалайзера тепер залежать від пристрою. Старі профілі еквалайзера потрібно мігрувати на сторінці \"Мігрувати старі профілі еквалайзера\" після підключення до пристрою.&lt;/li&gt;
+            &lt;li&gt;Швидкі налаштування тепер зберігаються в іншому форматі, і автоматична міграція недоступна, тому їх потрібно створити знову.&lt;/li&gt;
+            &lt;li&gt;Автовизначення моделі пристрою видалено, тому тепер потрібно вибирати модель пристрою під час додавання пристрою.&lt;/li&gt;
+        &lt;/ul&gt;
+        &lt;p&gt;Детальніше дивись у &lt;a href="https://github.com/Oppzippy/OpenSCQ30/blob/master/CHANGELOG.md"&gt;CHANGELOG.md&lt;/a&gt;.&lt;/p&gt;
     </string>
     <string name="delete_quick_preset">Видалити швидке налаштування</string>
     <string name="error_deleting_quick_preset">Помилка видалення швидкого налаштування</string>
@@ -94,4 +94,16 @@
     <string name="configure_widget">Налаштувати віджет</string>
     <string name="connect_to_a_device_to_configure_the_widget">Підключіть пристрій для налаштування віджета</string>
     <string name="configure_later">Налаштувати пізніше</string>
+    <string name="headphones">Навушники</string>
+    <string name="earbuds">Вкладиші</string>
+    <string name="theme">Тема</string>
+    <string name="system_theme">Системна</string>
+    <string name="light">Світла</string>
+    <string name="dark">Темна</string>
+    <string name="dynamic_color">Мінливий колір</string>
+    <string name="copy_logs_to_clipboard_unfiltered">Копіювати записи до буфера обміну (без фільтрації)</string>
+    <string name="audio_speaker">Гучномовець</string>
+    <string name="custom">Власні</string>
+    <string name="selected">Вибрано</string>
+    <string name="preset">Задані</string>
 </resources>

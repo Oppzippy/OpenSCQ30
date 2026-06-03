@@ -24,14 +24,12 @@ soundcore-a3959 = Soundcore P30i / R50i NC
 soundcore-a3955 = Soundcore P40i
 soundcore-a3957 = Soundcore Liberty 5
 soundcore-development = Soundcore Інформація для розробників
-
 general = Загальне
 sound-modes = Звукові режими
 equalizer = Еквалайзер
-equalizer-import-export = Еквалайзер Імпорт/Експорт
+equalizer-import-export = Імпорт/експорт еквалайзера
 device-information = Інформація про пристрій
 miscellaneous = Різне
-
 ambient-sound-mode = Режим навколишнього звуку
 transparency-mode = Режим прозорості
 noise-canceling-mode = Режим шумозаглушення
@@ -43,16 +41,14 @@ import-custom-equalizer-profiles = Імпортувати користуваць
 import-custom-equalizer-profiles-confirm = Це перезапише існуючі профілі з однаковими назвами.
 export-custom-equalizer-profiles = Експортувати користувацькі профілі
 export-custom-equalizer-profiles-output = Експорт користувацьких профілів
-
 volume = Гучність
-
 noise-canceling = Шумозаглушення
 transparency = Прозорість
 normal = Нормальний
 indoor = Приміщення
 outdoor = На вулиці
 transport = Транспорт
-custom = Користувацький
+custom = Власні
 vocal-mode = Голосовий режим
 fully-transparent = Повністю прозорий
 adaptive = Адаптивний
@@ -80,8 +76,7 @@ bus = Автобус
 car = Автомобіль
 talk-mode = Режим розмови
 anc-personalized-to-ear-canal = ANC персоналізований до слухового каналу
-
-soundcore-signature = Soundcore Signature
+soundcore-signature = Фірмове звучання Soundcore
 acoustic = Акустичний
 bass-booster = Підсилення басів
 bass-reducer = Зменшення басів
@@ -90,26 +85,25 @@ podcast = Подкаст
 dance = Танцювальна
 deep = Глибока
 electronic = Електронна
-flat = Плоска
-hip-hop = Hip Hop
+flat = Нейтральна
+hip-hop = Хіп-хоп
 jazz = Джаз
 latin = Латина
 lounge = Лаунж
 piano = Фортепіано
 pop = Поп
-rnb = RnB
+rnb = Ритм і блюз
 rock = Рок
 small-speakers = Маленькі колонки
-spoken-word = Усне мовлення
+spoken-word = Мовлення
 treble-booster = Підвищення високих
 treble-reducer = Зменшення високих
-bass-up = Бас вгору
+bass-up = Посилення басів
 bass-off = Бас вимкнено
 voice = Голос
 heavy = Важкий
 classic = Класичний
 original = Оригінальний
-
 button-configuration = Налаштування кнопок
 reset-buttons-to-default = Скинути кнопки до стандартних
 single-press = Одне натискання
@@ -131,7 +125,6 @@ play-pause = Відтворення/Пауза
 normal-mode-in-cycle = Нормальний режим у циклі
 transparency-mode-in-cycle = Режим прозорості у циклі
 noise-canceling-mode-in-cycle = Режим шумозаглушення у циклі
-
 is-charging = Заряджається
 battery-level = Рівень заряду
 is-charging-left = Заряджається (лівий)
@@ -141,61 +134,61 @@ battery-level-right = Рівень заряду (правий)
 case-battery-level = Рівень заряду кейсу
 charging = Зарядка
 not-charging = Не заряджається
-
 serial-number = Серійний номер
 firmware-version = Версія прошивки
 firmware-version-left = Версія прошивки (ліва)
 firmware-version-right = Версія прошивки (права)
-
 tws-status = Статус True Wireless (TWS)
 host-device = Хост-пристрій
 connected = Підключено
 disconnected = Відключено
 left = Лівий
 right = Правий
-
 none = Немає
-
 state-update-packet = Пакет оновлення стану
 send-packet = Надіслати пакет
-
 yes = Так
 no = Ні
-
 power-off = Вимкнення
 auto-power-off = Автовимкнення
-x-minutes = { $minutes ->
-    [one] { $minutes } хвилина
-    *[other] { $minutes } хвилин
-}
-x-seconds = { $seconds ->
-    [one] { $seconds } секунда
-    *[other] { $seconds } секунд
-}
+x-minutes =
+    { $minutes ->
+        [one] { $minutes } хвилина
+       *[other] { $minutes } хвилин
+    }
+x-seconds =
+    { $seconds ->
+        [one] { $seconds } секунда
+       *[other] { $seconds } секунд
+    }
 disabled = Вимкнено
-
 touch-tone = Звук дотику
 gaming-mode = Ігровий режим
 sound-leak-compensation = Компенсація витоку звуку
 surround-sound = Об'ємний звук
 auto-play-pause = Автовідтворення/Пауза
-wearing-tone = Звук носіння
+wearing-tone = Звук під час надягання
 touch-lock = Блокування дотику
 low-battery-prompt = Попередження про низький заряд
 wearing-detection = Виявлення носіння
 voice-prompt = Голосова підказка
-
 limit-high-volume = Обмежити високу гучність
 db-limit = Ліміт дБ
 db-refresh-rate = Частота оновлення дБ
 real-time = Реальний час
-
 percent = { $percent }%
-
-immersive-experience = Імерсивний досвід
+immersive-experience = Повне занурення
 movie-mode = Кінорежим
 enabled = Увімкнено
 pressure-sensitivity = Чутливість до тиску
 softest = Найм'якший
 medium = Середній
 firmest = Найжорсткіший
+soundcore-a3062 = Soundcore Space One Pro
+soundcore-a3909 = Soundcore Liberty 2 Pro
+soundcore-a3952 = Soundcore Liberty 3 Pro
+side-tone = Самопрослуховування
+dolby-audio = Dolby Audio
+ldac = LDAC
+dual-connections = Підключення до двох пристроїв
+dual-connections-devices = Підключені пристрої
