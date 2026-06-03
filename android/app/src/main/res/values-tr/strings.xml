@@ -24,7 +24,7 @@
     <string name="auto_connect">Otomatik Bağlan</string>
     <string name="settings">Ayarlar</string>
     <string name="search">Ara</string>
-    <string name="import_">Aktar</string>
+    <string name="import_">İçe Aktar</string>
     <string name="confirm">Onayla</string>
     <string name="error_connecting">Bağlanma hatası</string>
     <string name="replace">Değiştir</string>
@@ -74,4 +74,12 @@
     <string name="light">Aydınlık</string>
     <string name="dark">Karanlık</string>
     <string name="dynamic_color">Dinamik Renk</string>
+    <string name="preset">Ön Ayar</string>
+    <string name="custom">Özel</string>
+    <string name="selected">Seçilmiş</string>
+    <string name="in_effect">Geçerli</string>
+    <string name="copy_logs_to_clipboard_unfiltered">Hata Kayıtlarını Panoya Kopyala (Filtrelemeden)</string>
+    <string name="configure_widget">Ekran Bileşenini Ayarla</string>
+    <string name="connect_to_a_device_to_configure_the_widget">Ekran Bileşenini Ayarlamak için Cihaza Bağlanın</string>
+    <string name="configure_later">Daha sonra Ayarla</string>
 </resources>
