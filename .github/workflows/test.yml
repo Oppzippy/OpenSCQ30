@@ -29,7 +29,7 @@ jobs:
       - name: Install rust
         run: rustup install --profile minimal stable
       - name: Install cargo-llvm-cov
-        uses: taiki-e/install-action@e1c4cd42111751368541a7cb5db3522bd1f846a4 # v2.78.0
+        uses: taiki-e/install-action@6ed6112eb9893c58dd600eebccdf6e77ab7bfa9c # v2.79.12
         with:
           tool: cargo-llvm-cov
       - name: Cache cargo dependencies
