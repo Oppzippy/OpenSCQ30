@@ -1,8 +1,8 @@
-.TH openscq30
+.TH openscq30 1
 
 .Sh NAME
 .B openscq30
-- controll Soundcore devices via bluetooth
+- Control Soundcore devices via bluetooth
 
 .SH SYNOPSIS
 .B openscq30
@@ -11,7 +11,7 @@
 .RB [COMMAND]
 .SH DESCRIPTION
 .B openscq30
-this program can make use of an "option" "sub-option" and "command". commands can also have sub-options
+This program can make use of an "option", "sub-option", and "command". Commands can also have sub-options.
 
 .RS
 .nf
@@ -28,7 +28,7 @@ Device Settings
 .PP
 .TP
 .B paired-devices
-Add bluetooth devices to openscq30, device needs to be paired first
+Add bluetooth devices to openscq30. The device needs to be paired first.
 .PP
 .TP
 .B list-models
@@ -51,15 +51,15 @@ Show a help message
 .PP
 .SS
 .B device
-this options allows you to view or edit Soundcore device options, device needs to be added to openscq30 with the  "paired-devices" option first.
-you need to use
+This option allows you to view or edit Soundcore device options. The device needs to be added to openscq30 with the "paired-devices" option first.
+You need to use
 .B -a or --mac-address
-to specify the device
+to specify the device.
 
 
 .TP
 .B list-settings
-allows you to view all current settings for a given device. you can always refer to "openscq30 device -a MAC_ADDRESS list-settings --help" for a more detailed help message
+Allows you to view all current settings for a given device. You can always refer to "openscq30 device -a MAC_ADDRESS list-settings --help" for a more detailed help message.
 
 .RS
 .B OPTIONS
@@ -74,7 +74,7 @@ allows you to view all current settings for a given device. you can always refer
 -j, --json              Output as JSON
 .RE
 .RS
--h, --help              Print very detailed help message (usefull for advanced users)
+-h, --help              Print very detailed help message (useful for advanced users)
 .RE
 .PP
 .RS
@@ -106,13 +106,13 @@ then 1.34, and so on.
 
 .TP
 .B setting
-you can use
+You can use
 .B --get
-to retrieve the value of a specific setting or
+to retrieve the value of a specific setting, or
 .B --set
-to set a value. you might want to use
+to set a value. You might want to use
 .B list-settings
-first. you can always refer to "openscq30 device -a MAC_ADDRESS setting --help" for a more detailed help message
+first. You can always refer to "openscq30 device -a MAC_ADDRESS setting --help" for a more detailed help message.
 
 
 
@@ -163,12 +163,12 @@ assign [-4, -3, -2, -1, 0, 0.1, 0.2, 0.3].
 .PP
 .SS
 .B paired-devices
-add/remove/list devices to openscq30
+Add/remove/list devices to openscq30
 .PP
 
 .TP
 .B list, ls
-list added devices
+List added devices
 .PP
 .RS
 .B OPTIONS
@@ -189,7 +189,7 @@ of objects with the previously mentioned columns as keys instead.
 
 .TP
 .B add
-add a paired device to openscq30
+Add a paired device to openscq30
 .PP
 .RS
 .B OPTIONS
@@ -219,7 +219,7 @@ is SoundcoreA3028 for example.
 
 .TP
 .B remove
-remove added devices from openscq30
+Remove added devices from openscq30
 
 .RS
 .B OPTIONS
@@ -279,39 +279,37 @@ This guide is intended for new users. it will tell you how to add a device to op
 
 .TP
 .B 1-) Pair and Connect via Bluetooth
-before starting you should Pair and Connect to the device with the Bluetooth manager of you choosing
+Before starting, you should pair and connect to the device with the Bluetooth manager of you choosing.
 
 .TP
 .B 2-) Find the Device model name
 Run
 .B "openscq30 list-models"
-and find your device. at the left side of the table there should be something like
-.B "SoundcoreAXXXX"
-copy or remember the one that matches your device.
-For Example "Soundcore Space One" is "SoundcoreA3035"
+and find your device. At the left side of the table, there should be something like
+.B "SoundcoreAXXXX".
+Copy or remember the one that matches your device.
+For example, "Soundcore Space One" is "SoundcoreA3035"
 
 .RS
 .TP
 .B 2.1-)[Optional]  Having trouble finding your device?
-you can also run
+You can also run
 .B "openscq30 list-models | grep -i YOUR MODEL NAME"
-to find it easier.
+to make finding it easier.
 .RE
 
 .TP
 .B 3-) Adding your device to openscq30
-In order to change the device settings you first need to add it to openscq30 with the model number we just found + mac address of the device. you can use the Bluetooth manager of your choosing to find the mac address of the device
+In order to change the device settings, you first need to add it to openscq30 with the model number we just found, plus the mac address of the device. You can use the Bluetooth manager of your choosing to find the mac address of the device.
 
 .B openscq30 paired-devices add -a MAC_ADDRESS -m SoundcoreAxxxx
 
-If you see
-.B Paired
-you have succesfully added your device to openscq30
+If you see \fBPaired\fR, you have succesfully added your device to openscq30.
 
 .PP
 .SS
 .B Basics of Adjusting the Device Settings
-for more info go to
+For more info go to
 .B setting
 under
 .B Options and their relative commands
@@ -323,49 +321,47 @@ Each device can have different settings. In order to find out your device's sett
 
 .TP
 .B 2-) Adjusting the settings
-If you ran the previous command you will be seeing a list of all the avalible settings for that device. Settings accept 3 diffrent "styles" of options
-.B integer range , toggle , sellect
-integer range will allow you to select a range of numbers (given in the list-settings output). toggle is just on/off. select allows you to sellect multiple options for that setting ( also given in the list-settings output)
+If you ran the previous command, you will see a list of all of the avalible settings for that device. Settings accept 3 different "styles" of options:
+.B integer range, toggle, and select.
+Integer range will allow you to select a range of numbers (given in the list-settings output). Toggle is just on/off. Select allows you to select multiple options for that setting (also given in the list-settings output).
 
 .RS
 .TP
-2.1-) examples of changing a "select" setting
+2.1-) Examples of changing a "select" setting
 .PP
-.B openscq30 device -a MAC_ADDRESS setting  --set autoPowerOff=120m
+.B openscq30 device -a MAC_ADDRESS setting --set autoPowerOff=120m
 .RE
 .RS
-.B openscq30 device -a MAC_ADDRESS setting  --set autoPowerOff=30m
+.B openscq30 device -a MAC_ADDRESS setting --set autoPowerOff=30m
 .RE
 .PP
 .RS
-theese may seem like "integer range" but if we look at the
+These may seem like "integer range", but if we look at the
 .B list-setting
-output we can see it is a "select" that only allows: "disabled", "30m", "60m", "90m", "120m"
+output, we can see it is a "select" that only allows: "disabled", "30m", "60m", "90m", "120m".
 .RE
 
 .PP
 .RS
 .TP
-2.2-) examples of changing a "integer range" setting
+2.2-) Examples of changing a "integer range" setting
 .PP
-.B openscq30 device -a MAC_ADDRESS setting  --set manualNoiseCanceling=1
+.B openscq30 device -a MAC_ADDRESS setting --set manualNoiseCanceling=1
 .RE
 .RS
-.B openscq30 device -a MAC_ADDRESS setting  --set manualNoiseCanceling=5
+.B openscq30 device -a MAC_ADDRESS setting --set manualNoiseCanceling=5
 .RE
 
 .PP
 .RS
 .TP
-2.3-) examples of changing a "toggle" setting
+2.3-) Examples of changing a "toggle" setting
 .PP
-first we have to get the current state of this setting
+First we have to get the current state of this setting.
 .PP
 .B openscq30 device -a MAC_ADDRESS setting  --get  lowBatteryPrompt
 
-for me this was "true". now lets set it to "false"
+For me, this was "true". Now lets set it to "false".
 
 .B openscq30 device -a MAC_ADDRESS setting  --set  lowBatteryPrompt=false
 .RE
-
-
