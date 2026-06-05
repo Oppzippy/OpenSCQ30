@@ -12,36 +12,36 @@ OpenSCQ30 is free software for controlling settings for Soundcore headphones and
 
 If there's a device not in this list that you want to see supported, check if there's an issue for it, and give the issue for it a 👍 so that I can sort by reactions and prioritize. Otherwise, please open an issue to request support for the device.
 
-| Model | Name                               |
-| ----- | ---------------------------------- |
-| A3004 | Soundcore Q20I                     |
-| A3027 | Soundcore Life Q35                 |
-| A3028 | Soundcore Q30 / Life Q30           |
-| A3029 | Soundcore Life Tune                |
-| A3030 | Soundcore Life Tune Pro            |
-| A3031 | Soundcore Vortex                   |
-| A3033 | Soundcore Life 2 Neo               |
-| A3035 | Soundcore Space One                |
-| A3040 | Soundcore Space Q45                |
-| A3062 | Soundcore Space One Pro            |
-| A3116 | Soundcore Motion+                  |
-| A3909 | Soundcore Liberty 2 Pro            |
-| A3926 | Soundcore Life Dot 2S              |
-| A3930 | Soundcore Liberty 2 Pro+           |
-| A3931 | Soundcore Life Dot 2 NC            |
-| A3933 | Soundcore Life Note 3              |
-| A3935 | Soundcore Life A2 NC               |
-| A3936 | Soundcore Space A40                |
-| A3939 | Soundcore Life P3                  |
-| A3945 | Soundcore Life Note 3S             |
-| A3947 | Soundcore Liberty 4 NC             |
-| A3948 | Soundcore A20i                     |
-| A3949 | Soundcore P20i / P25i / R50i       |
-| A3951 | Soundcore Liberty Air 2 Pro        |
-| A3952 | Soundcore Liberty 3 Pro            |
-| A3955 | Soundcore P40i                     |
-| A3957 | Soundcore Liberty 5                |
-| A3959 | Soundcore P30i / Soundcore R50i NC |
+| Model | Name                         |
+| ----- | ---------------------------- |
+| A3004 | Soundcore Q20I               |
+| A3027 | Soundcore Life Q35           |
+| A3028 | Soundcore Q30 / Life Q30     |
+| A3029 | Soundcore Life Tune          |
+| A3030 | Soundcore Life Tune Pro      |
+| A3031 | Soundcore Vortex             |
+| A3033 | Soundcore Life 2 Neo         |
+| A3035 | Soundcore Space One          |
+| A3040 | Soundcore Space Q45          |
+| A3062 | Soundcore Space One Pro      |
+| A3116 | Soundcore Motion+            |
+| A3909 | Soundcore Liberty 2 Pro      |
+| A3926 | Soundcore Life Dot 2S        |
+| A3930 | Soundcore Liberty 2 Pro+     |
+| A3931 | Soundcore Life Dot 2 NC      |
+| A3933 | Soundcore Life Note 3        |
+| A3935 | Soundcore Life A2 NC         |
+| A3936 | Soundcore Space A40          |
+| A3939 | Soundcore Life P3            |
+| A3945 | Soundcore Life Note 3S       |
+| A3947 | Soundcore Liberty 4 NC       |
+| A3948 | Soundcore A20i               |
+| A3949 | Soundcore P20i / P25i / R50i |
+| A3951 | Soundcore Liberty Air 2 Pro  |
+| A3952 | Soundcore Liberty 3 Pro      |
+| A3955 | Soundcore P40i               |
+| A3957 | Soundcore Liberty 5          |
+| A3959 | Soundcore P30i / R50i NC     |
 
 ## Installing
 
