@@ -25,30 +25,30 @@ This program can make use of an "option", "sub-option", and "command". Commands 
 .TP
 .B device
 Device Settings
-.PP
+
 .TP
 .B paired-devices
 Add bluetooth devices to openscq30. The device needs to be paired first.
-.PP
+
 .TP
 .B list-models
 List all supported device models and their names
-.PP
+
 .TP
 .B completions
 Generate shell completions
-.PP
+
 .TP
 .B help
 Show a help message
-.PP
 
 
-.br
-.br
+
+
+
 .SH
 .B Options and their relative commands
-.PP
+
 .SS
 .B device
 This option allows you to view or edit Soundcore device options. The device needs to be added to openscq30 with the "paired-devices" option first.
@@ -76,7 +76,7 @@ Allows you to view all current settings for a given device. You can always refer
 .RS
 -h, --help              Print very detailed help message (useful for advanced users)
 .RE
-.PP
+
 .RS
 All controls exposed by openscq30 have a unique setting id. Those settings can
 be of varying types, such as a toggle, select, range, etc. Setting categories
@@ -132,7 +132,7 @@ first. You can always refer to "openscq30 device -a MAC_ADDRESS setting --help" 
 .RS
 -h, --help                    Print very detailed help message (usefull for advanced users)
 .RE
-.PP
+
 .RS
 `--get` and `--set` may be used multiple times to get/set multiple settings.
 Operations will be executed in the order of the arguments. A get before a set
@@ -160,16 +160,16 @@ Equalizers: All bands must be specified, and numbers should be separated with
 (see `openscq30 device list-settings --help` for info on fractional digits) will
 assign [-4, -3, -2, -1, 0, 0.1, 0.2, 0.3].
 .RE
-.PP
+
 .SS
 .B paired-devices
 Add/remove/list devices to openscq30
-.PP
+
 
 .TP
 .B list, ls
 List added devices
-.PP
+
 .RS
 .B OPTIONS
 .RE
@@ -179,7 +179,7 @@ List added devices
 .RS
 -h, --help  Print help
 .RE
-.PP
+
 .RS
 By default, this will output a table with a column for device model, mac
 address, and if it's a demo or real device.
@@ -190,7 +190,7 @@ of objects with the previously mentioned columns as keys instead.
 .TP
 .B add
 Add a paired device to openscq30
-.PP
+
 .RS
 .B OPTIONS
 .RE
@@ -235,7 +235,7 @@ Remove added devices from openscq30
 .B help
 Prints a help message
 
-.PP
+
 .SS
 .B list-models
 List all supported device models and their names
@@ -256,7 +256,7 @@ will list all models as well as their names in English. Used for `openscq30
 paired-devices add --model`.
 .RE
 
-.PP
+
 .SS
 .B completions
 Generate Shell completions
@@ -271,8 +271,8 @@ Generate Shell completions
 -h, --help           Print help
 .RE
 
-.PP
-.PP
+
+
 .SH
 .B Initial Setup Guide
 This guide is intended for new users. it will tell you how to add a device to openscq30 and the basics of changing the device settings
@@ -306,7 +306,7 @@ In order to change the device settings, you first need to add it to openscq30 wi
 
 If you see \fBPaired\fR, you have succesfully added your device to openscq30.
 
-.PP
+
 .SS
 .B Basics of Adjusting the Device Settings
 For more info go to
@@ -328,37 +328,37 @@ Integer range will allow you to select a range of numbers (given in the list-set
 .RS
 .TP
 2.1-) Examples of changing a "select" setting
-.PP
+
 .B openscq30 device -a MAC_ADDRESS setting --set autoPowerOff=120m
 .RE
 .RS
 .B openscq30 device -a MAC_ADDRESS setting --set autoPowerOff=30m
 .RE
-.PP
+
 .RS
 These may seem like "integer range", but if we look at the
 .B list-setting
 output, we can see it is a "select" that only allows: "disabled", "30m", "60m", "90m", "120m".
 .RE
 
-.PP
+
 .RS
 .TP
 2.2-) Examples of changing a "integer range" setting
-.PP
+
 .B openscq30 device -a MAC_ADDRESS setting --set manualNoiseCanceling=1
 .RE
 .RS
 .B openscq30 device -a MAC_ADDRESS setting --set manualNoiseCanceling=5
 .RE
 
-.PP
+
 .RS
 .TP
 2.3-) Examples of changing a "toggle" setting
-.PP
+
 First we have to get the current state of this setting.
-.PP
+
 .B openscq30 device -a MAC_ADDRESS setting  --get  lowBatteryPrompt
 
 For me, this was "true". Now lets set it to "false".
