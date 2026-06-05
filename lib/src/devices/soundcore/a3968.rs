@@ -20,6 +20,7 @@ soundcore_device!(
     async |builder| {
         builder.module_collection().add_state_update();
         builder.a3959_sound_modes();
+        builder.tws_status();
         builder.dual_battery(5);
         builder.serial_number_and_dual_firmware_version();
     },
@@ -72,6 +73,8 @@ mod tests {
         .await;
 
         device.assert_setting_values([
+            (SettingId::TwsStatus, "Connected".into()),
+            (SettingId::HostDevice, "Left".into()),
             (SettingId::BatteryLevelLeft, "5/5".into()),
             (SettingId::BatteryLevelRight, "5/5".into()),
             (SettingId::IsChargingLeft, "No".into()),

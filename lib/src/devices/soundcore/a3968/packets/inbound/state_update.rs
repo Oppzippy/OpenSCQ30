@@ -20,7 +20,7 @@ use crate::{
                 outbound::ToPacket,
             },
             packet_manager::PacketHandler,
-            structures::{DualBattery, DualFirmwareVersion, SerialNumber},
+            structures::{DualBattery, DualFirmwareVersion, SerialNumber, TwsStatus},
         },
     },
 };
@@ -39,6 +39,7 @@ use crate::{
 ///   124..143 reserved
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct A3968StateUpdatePacket {
+    pub tws_status: TwsStatus,
     pub dual_battery: DualBattery,
     pub dual_firmware_version: DualFirmwareVersion,
     pub serial_number: SerialNumber,
@@ -55,7 +56,7 @@ impl FromPacketBody for A3968StateUpdatePacket {
             "a3968 state update packet",
             all_consuming(map(
                 (
-                    take(2usize),                        // tws status (host, both-connected)
+                    TwsStatus::take,                     // tws status (host, both-connected)
                     DualBattery::take,                   // 4 bytes
                     DualFirmwareVersion::take,           // 10 bytes
                     SerialNumber::take,                  // 16 bytes
@@ -64,7 +65,7 @@ impl FromPacketBody for A3968StateUpdatePacket {
                     take(19usize), // reserved (offsets 124..143)
                 ),
                 |(
-                    _tws,
+                    tws_status,
                     dual_battery,
                     dual_firmware_version,
                     serial_number,
@@ -79,6 +80,7 @@ impl FromPacketBody for A3968StateUpdatePacket {
                     sound_modes.wind_noise.is_suppression_enabled = false;
                     sound_modes.wind_noise.is_detected = false;
                     Self {
+                        tws_status,
                         dual_battery,
                         dual_firmware_version,
                         serial_number,
@@ -99,7 +101,8 @@ impl ToPacket for A3968StateUpdatePacket {
     }
 
     fn body(&self) -> Vec<u8> {
-        [0u8, 0u8] // tws status
+        self.tws_status
+            .bytes()
             .into_iter()
             .chain(self.dual_battery.bytes())
             .chain(self.dual_firmware_version.bytes())
