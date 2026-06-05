@@ -1,7 +1,7 @@
 use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::{
-    a3959,
+    a3968,
     common::structures::{DualBattery, DualFirmwareVersion, SerialNumber, TwsStatus},
 };
 
@@ -13,8 +13,7 @@ pub struct A3968State {
     pub dual_battery: DualBattery,
     pub dual_firmware_version: DualFirmwareVersion,
     pub serial_number: SerialNumber,
-    // The X20 uses the same sound-mode structure as the A3959 (P30i).
-    pub sound_modes: a3959::structures::SoundModes,
+    pub sound_modes: a3968::structures::SoundModes,
 }
 
 impl From<A3968StateUpdatePacket> for A3968State {

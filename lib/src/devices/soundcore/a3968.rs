@@ -9,8 +9,10 @@ use crate::devices::soundcore::{
     },
 };
 
+mod modules;
 mod packets;
 mod state;
+mod structures;
 
 soundcore_device!(
     A3968State,
@@ -19,7 +21,7 @@ soundcore_device!(
     },
     async |builder| {
         builder.module_collection().add_state_update();
-        builder.a3959_sound_modes();
+        builder.a3968_sound_modes();
         builder.tws_status();
         builder.dual_battery(5);
         builder.serial_number_and_dual_firmware_version();

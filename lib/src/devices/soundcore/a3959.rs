@@ -18,10 +18,10 @@ use crate::devices::soundcore::common::{
     },
 };
 
-pub mod modules;
+mod modules;
 mod packets;
 mod state;
-pub mod structures;
+mod structures;
 
 soundcore_device!(
     state::A3959State,

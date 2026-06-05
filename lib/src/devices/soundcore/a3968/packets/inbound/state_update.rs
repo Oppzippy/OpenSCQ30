@@ -10,8 +10,7 @@ use tokio::sync::watch;
 use crate::{
     api::device,
     devices::soundcore::{
-        a3959,
-        a3968::state::A3968State,
+        a3968::{self, state::A3968State},
         common::{
             modules::ModuleCollection,
             packet::{
@@ -35,7 +34,7 @@ use crate::{
 ///   32..117  equalizer (preset id + 8 bands at offset 38, 120 = 0.0 dB) + right-channel /
 ///            HearID data + reserved. Left unparsed for now: the X20 ignores every standard
 ///            EQ "set" command, so EQ is deferred to a follow-up once that's reverse-engineered.
-///   117..124 sound-mode block (A3959 format: ambient sound mode at offset 117)
+///   117..124 sound-mode block (A3968 format: ambient sound mode at offset 117)
 ///   124..143 reserved
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct A3968StateUpdatePacket {
@@ -43,7 +42,7 @@ pub struct A3968StateUpdatePacket {
     pub dual_battery: DualBattery,
     pub dual_firmware_version: DualFirmwareVersion,
     pub serial_number: SerialNumber,
-    pub sound_modes: a3959::structures::SoundModes,
+    pub sound_modes: a3968::structures::SoundModes,
 }
 
 impl FromPacketBody for A3968StateUpdatePacket {
@@ -61,7 +60,7 @@ impl FromPacketBody for A3968StateUpdatePacket {
                     DualFirmwareVersion::take,           // 10 bytes
                     SerialNumber::take,                  // 16 bytes
                     take(85usize), // equalizer + HearID + reserved (offsets 32..117)
-                    a3959::structures::SoundModes::take, // sound-mode block (offsets 117..124)
+                    a3968::structures::SoundModes::take, // sound-mode block (offsets 117..124)
                     take(19usize), // reserved (offsets 124..143)
                 ),
                 |(
