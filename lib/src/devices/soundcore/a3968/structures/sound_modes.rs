@@ -31,7 +31,6 @@ pub struct SoundModes {
         value2 = common::structures::AmbientSoundMode::Transparency,
     )]
     pub wind_noise: WindNoise,
-    pub noise_canceling_adaptive_sensitivity_level: u8,
 }
 
 impl SoundModes {
@@ -42,7 +41,7 @@ impl SoundModes {
             self.ambient_sound_mode.id(),
             self.noise_canceling_mode.id(), // ANC automation mode?
             self.wind_noise.byte(),
-            self.noise_canceling_adaptive_sensitivity_level,
+            0, // unknown
             self.multi_scene_anc.id(),
         ]
     }
@@ -72,7 +71,7 @@ impl FromPacketBody for SoundModes {
                     _ambient_sound_mode,
                     noise_canceling_mode,
                     wind_noise,
-                    noise_canceling_adaptive_sensitivity_level,
+                    _unknown,
                     multi_scene_anc,
                 )| {
                     Self {
@@ -81,7 +80,6 @@ impl FromPacketBody for SoundModes {
                         manual_noise_canceling: noise_canceling_settings.manual,
                         noise_canceling_mode,
                         wind_noise,
-                        noise_canceling_adaptive_sensitivity_level,
                         multi_scene_anc,
                     }
                 },

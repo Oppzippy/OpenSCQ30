@@ -3,7 +3,7 @@ use openscq30_lib_has::Has;
 use strum::IntoEnumIterator;
 
 use crate::{
-    api::settings::{self, Range, Setting, SettingId, Value},
+    api::settings::{self, Setting, SettingId, Value},
     devices::soundcore::{
         a3968::structures::{ManualNoiseCanceling, SoundModes},
         common::{
@@ -60,15 +60,6 @@ where
                     fl!("no")
                 },
             },
-            SoundModeSetting::AdaptiveNoiseCancelingSensitivityLevel => Setting::I32Range {
-                setting: Range {
-                    range: 0..=10,
-                    step: 1,
-                },
-                value: sound_modes
-                    .noise_canceling_adaptive_sensitivity_level
-                    .into(),
-            },
             SoundModeSetting::MultiSceneNoiseCanceling => Setting::select_from_enum(
                 &[
                     common::structures::NoiseCancelingMode::Transport,
@@ -106,9 +97,6 @@ where
                 sound_modes.wind_noise.is_suppression_enabled = value.try_as_bool()?;
             }
             SoundModeSetting::WindNoiseDetected => return Err(SettingHandlerError::ReadOnly),
-            SoundModeSetting::AdaptiveNoiseCancelingSensitivityLevel => {
-                sound_modes.noise_canceling_adaptive_sensitivity_level = value.try_as_i32()? as u8;
-            }
             SoundModeSetting::MultiSceneNoiseCanceling => {
                 sound_modes.multi_scene_anc = value.try_as_enum_variant()?;
             }

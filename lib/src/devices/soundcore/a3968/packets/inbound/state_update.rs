@@ -69,15 +69,9 @@ impl FromPacketBody for A3968StateUpdatePacket {
                     dual_firmware_version,
                     serial_number,
                     _eq_and_reserved,
-                    mut sound_modes,
+                    sound_modes,
                     _reserved,
                 )| {
-                    // The device reports a live adaptive-sensitivity byte (255) and wind flags
-                    // that are invalid as inputs and make the X20 reject NoiseCanceling on set.
-                    // Normalize them so the set path always emits clean, accepted values.
-                    sound_modes.noise_canceling_adaptive_sensitivity_level = 0;
-                    sound_modes.wind_noise.is_suppression_enabled = false;
-                    sound_modes.wind_noise.is_detected = false;
                     Self {
                         tws_status,
                         dual_battery,

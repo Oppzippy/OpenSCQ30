@@ -25,7 +25,6 @@ enum_subset! {
         ManualNoiseCanceling,
         WindNoiseSuppression,
         WindNoiseDetected,
-        AdaptiveNoiseCancelingSensitivityLevel,
         MultiSceneNoiseCanceling,
     }
 }
