@@ -16,7 +16,7 @@ If there's a device not in this list that you want to see supported, check if th
 | ----- | ---------------------------------- |
 | A3004 | Soundcore Q20I                     |
 | A3027 | Soundcore Life Q35                 |
-| A3028 | Soundcore Life Q30                 |
+| A3028 | Soundcore Q30 / Life Q30           |
 | A3029 | Soundcore Life Tune                |
 | A3030 | Soundcore Life Tune Pro            |
 | A3031 | Soundcore Vortex                   |

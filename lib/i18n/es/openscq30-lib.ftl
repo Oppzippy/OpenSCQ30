@@ -1,6 +1,6 @@
 soundcore-a3027 = Soundcore Life Q35
 equalizer = Ecualizador
-soundcore-a3028 = Soundcore Life Q30
+soundcore-a3028 = Soundcore Q30 / Life Q30
 soundcore-a3029 = Soundcore Life Tune
 soundcore-a3030 = Soundcore Life Tune Pro
 soundcore-a3031 = Soundcore Vortex
