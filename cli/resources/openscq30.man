@@ -67,10 +67,10 @@ Allows you to view all current settings for a given device. You can always refer
 .B OPTIONS
 .RE
 .RS
---no-categories     Don't display category headers
+--no-categories         Don't display category headers
 .RE
 .RS
---no-extended-info  Don't display setting information in addition to the setting id
+--no-extended-info      Don't display setting information in addition to the setting id
 .RE
 .RS
 -j, --json              Output as JSON
