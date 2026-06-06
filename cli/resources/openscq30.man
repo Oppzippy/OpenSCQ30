@@ -52,6 +52,8 @@ Show a help message
 .B Options and their relative commands
 
 .SS
+.br
+.SS
 .B device
 This option allows you to view or edit Soundcore device options. The device needs to be added to openscq30 with the "paired-devices" option first.
 You need to use
