@@ -6,23 +6,23 @@ rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B3968"
 command = [1, 1]
 # State update
 response = [
-    0,
-    1,
-    5,
-    5,
-    0,
-    0,
-    48,
+    0,    # host device
+    1,    # tws connected
+    5,    # left battery
+    5,    # right battery
+    0,    # left battery charging
+    0,    # right battery charging
+    48,   # left FW start
     49,
     46,
     54,
-    53,
-    48,
+    53,   # left FW end
+    48,   # right FW start
     49,
     46,
     54,
-    53,
-    51,
+    53,   # right FW end
+    51,   # SN start
     57,
     54,
     56,
@@ -37,15 +37,16 @@ response = [
     98,
     101,
     57,
-    97,
+    97,   # SN end
     0,
     0,
     0,
     0,
     0,
-    2,
-    254,
-    254,
+    2,    # case battery level (0-5)
+    254,  # EQ preset
+    254,  # EQ preset
+    120,  # left EQ start
     120,
     120,
     120,
@@ -54,8 +55,8 @@ response = [
     120,
     120,
     120,
-    120,
-    120,
+    120,  # left EQ end
+    255,  # right EQ start
     255,
     255,
     255,
@@ -64,11 +65,10 @@ response = [
     255,
     255,
     255,
-    255,
-    48,
-    1,
-    1,
-    135,
+    48,   # right EQ end?
+    1,    # unknown
+    1,    # hear id enabled?
+    135,  # left hear id eq start
     114,
     140,
     142,
@@ -77,8 +77,8 @@ response = [
     166,
     134,
     60,
-    60,
-    135,
+    60,   # left hear id eq end
+    135,  # right hear id eq start
     114,
     140,
     142,
@@ -87,23 +87,13 @@ response = [
     166,
     134,
     60,
-    60,
-    255,
-    255,
-    255,
-    255,
-    1,
-    151,
-    151,
-    140,
-    143,
-    151,
-    145,
-    165,
-    134,
-    60,
-    0,
-    151,
+    60,   # right hear id eq end
+    255,  # hear id time?
+    255,  # hear id time?
+    255,  # hear id time?
+    255,  # hear id time?
+    0,    # hear id type (0=initial curve, 1=custom hearid, 2=favorite music genre)
+    151,  # left hear id custom eq start
     151,
     140,
     143,
@@ -112,30 +102,40 @@ response = [
     165,
     134,
     60,
-    0,
-    0,
-    0,
+    0,    # left hear id custom eq end
+    151,  # right hear id custom eq start
+    151,
+    140,
+    143,
+    151,
+    145,
+    165,
+    134,
+    60,
+    0,    # right hear id custom eq end
+    0,    # hear id favorite music genre
+    0,    # hear id favorite music genre
     8,
-    97,
-    102,
-    48,
-    51,
-    68,
-    68,
-    55,
+    0x61, # left single press
+    0x66, # right single press
+    0x30, # left double press
+    0x33, # right double press
+    0x44, # left long press
+    0x44, # right long press
+    0x37,
+    0,    # ambient sound mode
+    0x22, # manual (1-3) / adaptive (0-2) ANC
+    1,    # transparency mode
+    0,    # noise canceling mode
+    0,    # wind noise (unknown if it has a wind noise detected flag)
+    255,  # unknown
+    54,   # multi scene anc
+    1,    # 3d surround sound
     0,
-    50,
-    1,
-    0,
-    0,
-    255,
-    54,
-    1,
-    0,
-    1,
-    0,
-    1,
-    2,
+    1,    # dual connections
+    0,    # press alert
+    1,    # auto power off
+    2,    # auto power off duration
     1,
     255,
     255,
