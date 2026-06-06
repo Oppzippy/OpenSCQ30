@@ -204,7 +204,7 @@ Add a paired device to openscq30
 -m, --model <MODEL>              Device model
 .RE
 .RS
---demo                       Enable demo mode for the device
+--demo                           Enable demo mode for the device
 .RE
 .RS
 -h, --help                       Print help
