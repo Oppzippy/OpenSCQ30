@@ -333,8 +333,10 @@ Integer range will allow you to select a range of numbers (given in the list-set
 .RS
 .TP
 2.1-) Examples of changing a "select" setting
-
+.RE
+.RS
 .B openscq30 device -a MAC_ADDRESS setting --set autoPowerOff=120m
+.RE
 .RE
 .RS
 .B openscq30 device -a MAC_ADDRESS setting --set autoPowerOff=30m
@@ -350,7 +352,8 @@ output, we can see it is a "select" that only allows: "disabled", "30m", "60m", 
 .RS
 .TP
 2.2-) Examples of changing a "integer range" setting
-
+.RE
+.RS
 .B openscq30 device -a MAC_ADDRESS setting --set manualNoiseCanceling=1
 .RE
 .RS
