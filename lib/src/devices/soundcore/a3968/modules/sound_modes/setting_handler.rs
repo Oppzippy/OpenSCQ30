@@ -1,15 +1,13 @@
 use async_trait::async_trait;
+use openscq30_i18n::Translate;
 use openscq30_lib_has::Has;
 use strum::IntoEnumIterator;
 
 use crate::{
-    api::settings::{self, Setting, SettingId, Value},
+    api::settings::{Setting, SettingId, Value},
     devices::soundcore::{
-        a3968::structures::{ManualNoiseCanceling, SoundModes},
-        common::{
-            self,
-            settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
-        },
+        a3968::structures::SoundModes,
+        common::settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
     },
     i18n::fl,
 };
@@ -35,20 +33,19 @@ where
             SoundModeSetting::AmbientSoundMode => {
                 Setting::select_from_enum_all_variants(sound_modes.ambient_sound_mode)
             }
+            SoundModeSetting::TransparencyMode => {
+                Setting::select_from_enum_all_variants(sound_modes.transparency_mode)
+            }
             SoundModeSetting::NoiseCancelingMode => {
                 Setting::select_from_enum_all_variants(sound_modes.noise_canceling_mode)
             }
             SoundModeSetting::AdaptiveNoiseCanceling => Setting::Information {
-                value: format!("{}/5", sound_modes.adaptive_noise_canceling.inner()),
-                translated_value: format!("{}/5", sound_modes.adaptive_noise_canceling.inner()),
+                value: sound_modes.adaptive_noise_canceling.to_string(),
+                translated_value: sound_modes.adaptive_noise_canceling.translate(),
             },
-            SoundModeSetting::ManualNoiseCanceling => Setting::I32Range {
-                setting: settings::Range {
-                    range: 1..=5,
-                    step: 1,
-                },
-                value: sound_modes.manual_noise_canceling.inner().into(),
-            },
+            SoundModeSetting::ManualNoiseCanceling => {
+                Setting::select_from_enum_all_variants(sound_modes.manual_noise_canceling)
+            }
             SoundModeSetting::WindNoiseSuppression => Setting::Toggle {
                 value: sound_modes.wind_noise.is_suppression_enabled,
             },
@@ -60,14 +57,6 @@ where
                     fl!("no")
                 },
             },
-            SoundModeSetting::MultiSceneNoiseCanceling => Setting::select_from_enum(
-                &[
-                    common::structures::NoiseCancelingMode::Transport,
-                    common::structures::NoiseCancelingMode::Outdoor,
-                    common::structures::NoiseCancelingMode::Indoor,
-                ],
-                sound_modes.multi_scene_anc,
-            ),
         })
     }
 
@@ -85,21 +74,20 @@ where
             SoundModeSetting::AmbientSoundMode => {
                 sound_modes.ambient_sound_mode = value.try_as_enum_variant()?;
             }
+            SoundModeSetting::TransparencyMode => {
+                sound_modes.transparency_mode = value.try_as_enum_variant()?;
+            }
             SoundModeSetting::NoiseCancelingMode => {
                 sound_modes.noise_canceling_mode = value.try_as_enum_variant()?;
             }
             SoundModeSetting::AdaptiveNoiseCanceling => return Err(SettingHandlerError::ReadOnly),
             SoundModeSetting::ManualNoiseCanceling => {
-                sound_modes.manual_noise_canceling =
-                    ManualNoiseCanceling::new(value.try_as_i32()? as u8);
+                sound_modes.manual_noise_canceling = value.try_as_enum_variant()?;
             }
             SoundModeSetting::WindNoiseSuppression => {
                 sound_modes.wind_noise.is_suppression_enabled = value.try_as_bool()?;
             }
             SoundModeSetting::WindNoiseDetected => return Err(SettingHandlerError::ReadOnly),
-            SoundModeSetting::MultiSceneNoiseCanceling => {
-                sound_modes.multi_scene_anc = value.try_as_enum_variant()?;
-            }
         }
         Ok(())
     }

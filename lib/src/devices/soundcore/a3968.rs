@@ -86,6 +86,11 @@ mod tests {
             (SettingId::SerialNumber, "3968b038e26bbe9a".into()),
             (SettingId::AmbientSoundMode, "NoiseCanceling".into()),
             (SettingId::NoiseCancelingMode, "Manual".into()),
+            (SettingId::ManualNoiseCanceling, "Strong".into()),
+            (SettingId::AdaptiveNoiseCanceling, "HighNoise".into()),
+            (SettingId::WindNoiseSuppression, false.into()),
+            (SettingId::WindNoiseDetected, "false".into()),
+            (SettingId::TransparencyMode, "VocalMode".into()),
         ]);
     }
 }

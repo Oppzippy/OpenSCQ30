@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     bytes::complete::take,
-    combinator::{all_consuming, map},
+    combinator::map,
     error::{ContextError, ParseError, context},
 };
 use tokio::sync::watch;
@@ -53,7 +53,7 @@ impl FromPacketBody for A3968StateUpdatePacket {
     ) -> IResult<&'a [u8], Self, E> {
         context(
             "a3968 state update packet",
-            all_consuming(map(
+            map(
                 (
                     TwsStatus::take,                     // tws status (host, both-connected)
                     DualBattery::take,                   // 4 bytes
@@ -61,7 +61,6 @@ impl FromPacketBody for A3968StateUpdatePacket {
                     SerialNumber::take,                  // 16 bytes
                     take(85usize), // equalizer + HearID + reserved (offsets 32..117)
                     a3968::structures::SoundModes::take, // sound-mode block (offsets 117..124)
-                    take(19usize), // reserved (offsets 124..143)
                 ),
                 |(
                     tws_status,
@@ -70,7 +69,6 @@ impl FromPacketBody for A3968StateUpdatePacket {
                     serial_number,
                     _eq_and_reserved,
                     sound_modes,
-                    _reserved,
                 )| {
                     Self {
                         tws_status,
@@ -80,7 +78,7 @@ impl FromPacketBody for A3968StateUpdatePacket {
                         sound_modes,
                     }
                 },
-            )),
+            ),
         )
         .parse_complete(input)
     }
