@@ -24,6 +24,7 @@ This program can make use of an "option", "sub-option", and "command". Commands 
 .SH OPTIONS
 .TP
 .B device
+.br
 Device Settings
 
 .TP
@@ -40,6 +41,7 @@ Generate shell completions
 
 .TP
 .B help
+.br
 Show a help message
 
 
@@ -189,6 +191,7 @@ of objects with the previously mentioned columns as keys instead.
 
 .TP
 .B add
+.br
 Add a paired device to openscq30
 
 .RS
@@ -219,6 +222,7 @@ is SoundcoreA3028 for example.
 
 .TP
 .B remove
+.br
 Remove added devices from openscq30
 
 .RS
@@ -233,6 +237,7 @@ Remove added devices from openscq30
 
 .TP
 .B help
+.br
 Prints a help message
 
 
