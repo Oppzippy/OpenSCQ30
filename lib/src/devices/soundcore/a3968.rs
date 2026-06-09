@@ -6,7 +6,14 @@ use crate::devices::soundcore::{
         self,
         device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
+        modules::button_configuration::{
+            ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_ACTIONS,
+            COMMON_ACTIONS_MINIMAL,
+        },
         packet::outbound::{RequestState, ToPacket},
+        structures::button_configuration::{
+            ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
+        },
     },
 };
 
@@ -26,6 +33,7 @@ soundcore_device!(
         builder
             .equalizer_with_custom_hear_id_tws(common::modules::equalizer::common_settings())
             .await;
+        builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.tws_status();
         builder.dual_battery(5);
         builder.case_battery_level(5);
@@ -38,6 +46,52 @@ soundcore_device!(
         )])
     },
 );
+
+pub const BUTTON_CONFIGURATION_SETTINGS: ButtonConfigurationSettings<6, 3> =
+    ButtonConfigurationSettings {
+        supports_set_all_packet: false,
+        ignore_enabled_flag: true,
+        order: [
+            Button::LeftSinglePress,
+            Button::RightSinglePress,
+            Button::LeftDoublePress,
+            Button::RightDoublePress,
+            Button::LeftLongPress,
+            Button::RightLongPress,
+        ],
+        settings: [
+            ButtonSettings {
+                parse_settings: ButtonParseSettings {
+                    enabled_flag_kind: EnabledFlagKind::None,
+                    action_kind: ActionKind::TwsLowBits,
+                },
+                button_id: 2,
+                press_kind: ButtonPressKind::Single,
+                available_actions: COMMON_ACTIONS_MINIMAL,
+                disable_mode: ButtonDisableMode::IndividualDisable,
+            },
+            ButtonSettings {
+                parse_settings: ButtonParseSettings {
+                    enabled_flag_kind: EnabledFlagKind::None,
+                    action_kind: ActionKind::TwsLowBits,
+                },
+                button_id: 0,
+                press_kind: ButtonPressKind::Double,
+                available_actions: COMMON_ACTIONS,
+                disable_mode: ButtonDisableMode::IndividualDisable,
+            },
+            ButtonSettings {
+                parse_settings: ButtonParseSettings {
+                    enabled_flag_kind: EnabledFlagKind::None,
+                    action_kind: ActionKind::TwsLowBits,
+                },
+                button_id: 1,
+                press_kind: ButtonPressKind::Long,
+                available_actions: COMMON_ACTIONS,
+                disable_mode: ButtonDisableMode::IndividualDisable,
+            },
+        ],
+    };
 
 #[cfg(test)]
 mod tests {
@@ -101,6 +155,12 @@ mod tests {
                 Value::OptionalString(None),
             ),
             (SettingId::CaseBatteryLevel, "2/5".into()),
+            (SettingId::LeftSinglePress, Some("VolumeDown").into()),
+            (SettingId::RightSinglePress, Some("PlayPause").into()),
+            (SettingId::LeftDoublePress, Some("VolumeUp").into()),
+            (SettingId::RightDoublePress, Some("NextSong").into()),
+            (SettingId::LeftLongPress, Some("AmbientSoundMode").into()),
+            (SettingId::RightLongPress, Some("AmbientSoundMode").into()),
         ]);
     }
 }

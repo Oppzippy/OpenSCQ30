@@ -2,9 +2,13 @@ use openscq30_lib_macros::Has;
 
 use crate::devices::soundcore::{
     a3968,
-    common::structures::{
-        AgeRange, CaseBatteryLevel, CommonEqualizerConfiguration, CustomHearId, DualBattery,
-        DualFirmwareVersion, Gender, SerialNumber, TwsStatus,
+    common::{
+        modules::reset_button_configuration::ResetButtonConfigurationPending,
+        structures::{
+            AgeRange, CaseBatteryLevel, CommonEqualizerConfiguration, CustomHearId, DualBattery,
+            DualFirmwareVersion, Gender, SerialNumber, TwsStatus,
+            button_configuration::ButtonStatusCollection,
+        },
     },
 };
 
@@ -20,8 +24,10 @@ pub struct A3968State {
     sound_modes: a3968::structures::SoundModes,
     equalizer_configuration: CommonEqualizerConfiguration<2, 10>,
     hear_id: CustomHearId<2, 10>,
+    button_configuration: ButtonStatusCollection<6>,
     age_range: AgeRange,
     gender: Gender,
+    button_reset_pending: ResetButtonConfigurationPending,
 }
 
 impl From<A3968StateUpdatePacket> for A3968State {
@@ -35,8 +41,10 @@ impl From<A3968StateUpdatePacket> for A3968State {
             equalizer_configuration: value.equalizer_configuration,
             hear_id: value.hear_id,
             sound_modes: value.sound_modes,
+            button_configuration: value.button_configuration,
             age_range: AgeRange::default(),
             gender: Gender::default(),
+            button_reset_pending: ResetButtonConfigurationPending::default(),
         }
     }
 }

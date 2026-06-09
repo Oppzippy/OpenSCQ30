@@ -22,6 +22,7 @@ use crate::{
             structures::{
                 CaseBatteryLevel, CommonEqualizerConfiguration, CustomHearId, DualBattery,
                 DualFirmwareVersion, SerialNumber, TwsStatus,
+                button_configuration::ButtonStatusCollection,
             },
         },
     },
@@ -39,7 +40,7 @@ use crate::{
 ///            EQ "set" command, so EQ is deferred to a follow-up once that's reverse-engineered.
 ///   117..124 sound-mode block (A3968 format: ambient sound mode at offset 117)
 ///   124..143 reserved
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct A3968StateUpdatePacket {
     pub tws_status: TwsStatus,
     pub dual_battery: DualBattery,
@@ -48,7 +49,24 @@ pub struct A3968StateUpdatePacket {
     pub case_battery_level: CaseBatteryLevel,
     pub equalizer_configuration: CommonEqualizerConfiguration<2, 10>,
     pub hear_id: CustomHearId<2, 10>,
+    pub button_configuration: ButtonStatusCollection<6>,
     pub sound_modes: a3968::structures::SoundModes,
+}
+
+impl Default for A3968StateUpdatePacket {
+    fn default() -> Self {
+        Self {
+            tws_status: Default::default(),
+            dual_battery: Default::default(),
+            dual_firmware_version: Default::default(),
+            serial_number: Default::default(),
+            case_battery_level: Default::default(),
+            equalizer_configuration: Default::default(),
+            hear_id: Default::default(),
+            button_configuration: a3968::BUTTON_CONFIGURATION_SETTINGS.default_status_collection(),
+            sound_modes: Default::default(),
+        }
+    }
 }
 
 impl FromPacketBody for A3968StateUpdatePacket {
@@ -70,8 +88,10 @@ impl FromPacketBody for A3968StateUpdatePacket {
                     CommonEqualizerConfiguration::take,
                     take(1usize), // unknown
                     CustomHearId::take_with_music_genre_at_end,
-                    take(1usize),                        // unknown,
-                    take(6usize),                        // TODO button configuration,
+                    take(1usize), // unknown,
+                    ButtonStatusCollection::take(
+                        a3968::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
+                    ),
                     take(1usize),                        // unknown,
                     a3968::structures::SoundModes::take, // sound-mode block (offsets 117..124)
                 ),
@@ -86,7 +106,7 @@ impl FromPacketBody for A3968StateUpdatePacket {
                     _unknown2,
                     hear_id,
                     _unknown3,
-                    _todo_button_configuration,
+                    button_configuration,
                     _unknown4,
                     sound_modes,
                 )| {
@@ -98,6 +118,7 @@ impl FromPacketBody for A3968StateUpdatePacket {
                         case_battery_level,
                         equalizer_configuration,
                         hear_id,
+                        button_configuration,
                         sound_modes,
                     }
                 },
@@ -127,7 +148,10 @@ impl ToPacket for A3968StateUpdatePacket {
             .chain(std::iter::once(0))
             .chain(self.hear_id.bytes_with_music_genre_at_end())
             .chain(std::iter::once(0))
-            .chain(std::iter::repeat_n(0, 6)) // TODO button configuration
+            .chain(
+                self.button_configuration
+                    .bytes(a3968::BUTTON_CONFIGURATION_SETTINGS.parse_settings()),
+            )
             .chain(std::iter::once(0))
             .chain(self.sound_modes.bytes())
             .collect()
