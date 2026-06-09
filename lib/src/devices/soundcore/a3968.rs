@@ -51,6 +51,7 @@ soundcore_device!(
             .equalizer_with_custom_hear_id_tws(common::modules::equalizer::common_settings())
             .await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
+        builder.ambient_sound_mode_cycle_tws();
         builder.dual_connections();
         builder.auto_power_off(AutoPowerOffDuration::ten_twenty_thirty_sixty());
         builder.touch_tone();
@@ -181,6 +182,9 @@ mod tests {
             (SettingId::RightDoublePress, Some("NextSong").into()),
             (SettingId::LeftLongPress, Some("AmbientSoundMode").into()),
             (SettingId::RightLongPress, Some("AmbientSoundMode").into()),
+            (SettingId::NormalModeInCycle, true.into()),
+            (SettingId::TransparencyModeInCycle, true.into()),
+            (SettingId::NoiseCancelingModeInCycle, true.into()),
             (SettingId::DualConnections, true.into()),
             (SettingId::AutoPowerOff, "30m".into()),
             (SettingId::TouchTone, false.into()),

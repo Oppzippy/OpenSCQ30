@@ -6,9 +6,10 @@ use crate::devices::soundcore::{
         modules::reset_button_configuration::ResetButtonConfigurationPending,
         state::Update,
         structures::{
-            AgeRange, AutoPowerOff, CaseBatteryLevel, CommonEqualizerConfiguration, CustomHearId,
-            DualBattery, DualConnections, DualConnectionsDevice, DualFirmwareVersion, Gender,
-            SerialNumber, TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
+            AgeRange, AmbientSoundModeCycleTws, AutoPowerOff, CaseBatteryLevel,
+            CommonEqualizerConfiguration, CustomHearId, DualBattery, DualConnections,
+            DualConnectionsDevice, DualFirmwareVersion, Gender, SerialNumber, TouchTone, TwsStatus,
+            button_configuration::ButtonStatusCollection,
         },
     },
 };
@@ -26,6 +27,7 @@ pub struct A3968State {
     equalizer_configuration: CommonEqualizerConfiguration<2, 10>,
     hear_id: CustomHearId<2, 10>,
     button_configuration: ButtonStatusCollection<6>,
+    ambient_sound_mode_cycle: AmbientSoundModeCycleTws,
     dual_connections: DualConnections,
     touch_tone: TouchTone,
     auto_power_off: AutoPowerOff,
@@ -49,6 +51,7 @@ impl A3968State {
             equalizer_configuration: packet.equalizer_configuration,
             hear_id: packet.hear_id,
             button_configuration: packet.button_configuration,
+            ambient_sound_mode_cycle: packet.ambient_sound_mode_cycle,
             dual_connections: DualConnections {
                 is_enabled: packet.dual_connections_enabled,
                 devices: dual_connections_devices,
@@ -77,6 +80,7 @@ impl Update<A3968StateUpdatePacket> for A3968State {
             dual_connections_enabled,
             touch_tone,
             auto_power_off,
+            ambient_sound_mode_cycle,
         } = partial;
         self.tws_status = tws_status;
         self.dual_battery = dual_battery;
@@ -90,5 +94,6 @@ impl Update<A3968StateUpdatePacket> for A3968State {
         self.dual_connections.is_enabled = dual_connections_enabled;
         self.touch_tone = touch_tone;
         self.auto_power_off = auto_power_off;
+        self.ambient_sound_mode_cycle = ambient_sound_mode_cycle;
     }
 }

@@ -122,7 +122,7 @@ response = [
     0x33, # right double press
     0x44, # left long press
     0x44, # right long press
-    0x37,
+    0x37, # ambient sound mode cycle (left 4 bits for tws off, right 4 bits for tws on)
     0,    # ambient sound mode
     0x22, # manual (1-3) / adaptive (0-2) ANC
     1,    # transparency mode

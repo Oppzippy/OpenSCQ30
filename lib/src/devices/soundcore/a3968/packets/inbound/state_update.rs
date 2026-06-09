@@ -22,9 +22,9 @@ use crate::{
             packet_manager::PacketHandler,
             state::Update,
             structures::{
-                AutoPowerOff, CaseBatteryLevel, CommonEqualizerConfiguration, CustomHearId,
-                DualBattery, DualFirmwareVersion, SerialNumber, TouchTone, TwsStatus,
-                button_configuration::ButtonStatusCollection,
+                AmbientSoundModeCycleTws, AutoPowerOff, CaseBatteryLevel,
+                CommonEqualizerConfiguration, CustomHearId, DualBattery, DualFirmwareVersion,
+                SerialNumber, TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
             },
         },
     },
@@ -52,6 +52,7 @@ pub struct A3968StateUpdatePacket {
     pub equalizer_configuration: CommonEqualizerConfiguration<2, 10>,
     pub hear_id: CustomHearId<2, 10>,
     pub button_configuration: ButtonStatusCollection<6>,
+    pub ambient_sound_mode_cycle: AmbientSoundModeCycleTws,
     pub sound_modes: a3968::structures::SoundModes,
     pub dual_connections_enabled: bool,
     pub touch_tone: TouchTone,
@@ -69,6 +70,7 @@ impl Default for A3968StateUpdatePacket {
             equalizer_configuration: Default::default(),
             hear_id: Default::default(),
             button_configuration: a3968::BUTTON_CONFIGURATION_SETTINGS.default_status_collection(),
+            ambient_sound_mode_cycle: Default::default(),
             sound_modes: Default::default(),
             touch_tone: Default::default(),
             auto_power_off: Default::default(),
@@ -100,7 +102,7 @@ impl FromPacketBody for A3968StateUpdatePacket {
                     ButtonStatusCollection::take(
                         a3968::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
                     ),
-                    take(1usize),                        // unknown,
+                    AmbientSoundModeCycleTws::take,
                     a3968::structures::SoundModes::take, // sound-mode block (offsets 117..124)
                     take(1usize),                        // unknown
                     take_bool,                           // 3d surround sound
@@ -121,7 +123,7 @@ impl FromPacketBody for A3968StateUpdatePacket {
                     hear_id,
                     _unknown3,
                     button_configuration,
-                    _unknown4,
+                    ambient_sound_mode_cycle,
                     sound_modes,
                     _unknown5,
                     _3d_surround_sound,
@@ -139,6 +141,7 @@ impl FromPacketBody for A3968StateUpdatePacket {
                         equalizer_configuration,
                         hear_id,
                         button_configuration,
+                        ambient_sound_mode_cycle,
                         sound_modes,
                         dual_connections_enabled,
                         touch_tone,
@@ -175,7 +178,7 @@ impl ToPacket for A3968StateUpdatePacket {
                 self.button_configuration
                     .bytes(a3968::BUTTON_CONFIGURATION_SETTINGS.parse_settings()),
             )
-            .chain(std::iter::once(0))
+            .chain(self.ambient_sound_mode_cycle.bytes())
             .chain(self.sound_modes.bytes())
             .chain(std::iter::once(0)) // unknown
             .chain(std::iter::once(0)) // 3d surround sound

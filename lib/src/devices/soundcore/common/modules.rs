@@ -20,6 +20,7 @@ use super::{
 };
 
 pub mod ambient_sound_mode_cycle;
+mod ambient_sound_mode_cycle_tws;
 pub mod auto_power_off;
 pub mod button_configuration;
 pub mod case_battery_level;
