@@ -24,7 +24,8 @@ use crate::{
             structures::{
                 AmbientSoundModeCycleTws, AutoPowerOff, CaseBatteryLevel,
                 CommonEqualizerConfiguration, CustomHearId, DualBattery, DualFirmwareVersion,
-                SerialNumber, TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
+                SerialNumber, SurroundSound, TouchTone, TwsStatus,
+                button_configuration::ButtonStatusCollection,
             },
         },
     },
@@ -57,6 +58,7 @@ pub struct A3968StateUpdatePacket {
     pub dual_connections_enabled: bool,
     pub touch_tone: TouchTone,
     pub auto_power_off: AutoPowerOff,
+    pub surround_sound: SurroundSound,
 }
 
 impl Default for A3968StateUpdatePacket {
@@ -75,6 +77,7 @@ impl Default for A3968StateUpdatePacket {
             touch_tone: Default::default(),
             auto_power_off: Default::default(),
             dual_connections_enabled: Default::default(),
+            surround_sound: Default::default(),
         }
     }
 }
@@ -105,9 +108,9 @@ impl FromPacketBody for A3968StateUpdatePacket {
                     AmbientSoundModeCycleTws::take,
                     a3968::structures::SoundModes::take, // sound-mode block (offsets 117..124)
                     take(1usize),                        // unknown
-                    take_bool,                           // 3d surround sound
-                    take(1usize),                        // unknown
-                    take_bool,                           // dual connections enabled
+                    SurroundSound::take,
+                    take(1usize), // unknown
+                    take_bool,    // dual connections enabled
                     TouchTone::take,
                     AutoPowerOff::take,
                 ),
@@ -126,7 +129,7 @@ impl FromPacketBody for A3968StateUpdatePacket {
                     ambient_sound_mode_cycle,
                     sound_modes,
                     _unknown5,
-                    _3d_surround_sound,
+                    surround_sound,
                     _unknown6,
                     dual_connections_enabled,
                     touch_tone,
@@ -146,6 +149,7 @@ impl FromPacketBody for A3968StateUpdatePacket {
                         dual_connections_enabled,
                         touch_tone,
                         auto_power_off,
+                        surround_sound,
                     }
                 },
             ),
@@ -181,7 +185,7 @@ impl ToPacket for A3968StateUpdatePacket {
             .chain(self.ambient_sound_mode_cycle.bytes())
             .chain(self.sound_modes.bytes())
             .chain(std::iter::once(0)) // unknown
-            .chain(std::iter::once(0)) // 3d surround sound
+            .chain(self.surround_sound.bytes())
             .chain(std::iter::once(0)) // unknown
             .chain(std::iter::once(self.dual_connections_enabled as u8))
             .chain(self.touch_tone.bytes())

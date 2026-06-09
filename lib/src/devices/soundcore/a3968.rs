@@ -54,6 +54,7 @@ soundcore_device!(
         builder.ambient_sound_mode_cycle_tws();
         builder.dual_connections();
         builder.auto_power_off(AutoPowerOffDuration::ten_twenty_thirty_sixty());
+        builder.surround_sound();
         builder.touch_tone();
         builder.tws_status();
         builder.dual_battery(5);
@@ -188,6 +189,7 @@ mod tests {
             (SettingId::DualConnections, true.into()),
             (SettingId::AutoPowerOff, "30m".into()),
             (SettingId::TouchTone, false.into()),
+            (SettingId::SurroundSound, true.into()),
         ]);
     }
 }

@@ -8,8 +8,8 @@ use crate::devices::soundcore::{
         structures::{
             AgeRange, AmbientSoundModeCycleTws, AutoPowerOff, CaseBatteryLevel,
             CommonEqualizerConfiguration, CustomHearId, DualBattery, DualConnections,
-            DualConnectionsDevice, DualFirmwareVersion, Gender, SerialNumber, TouchTone, TwsStatus,
-            button_configuration::ButtonStatusCollection,
+            DualConnectionsDevice, DualFirmwareVersion, Gender, SerialNumber, SurroundSound,
+            TouchTone, TwsStatus, button_configuration::ButtonStatusCollection,
         },
     },
 };
@@ -31,6 +31,7 @@ pub struct A3968State {
     dual_connections: DualConnections,
     touch_tone: TouchTone,
     auto_power_off: AutoPowerOff,
+    surround_sound: SurroundSound,
     age_range: AgeRange,
     gender: Gender,
     button_reset_pending: ResetButtonConfigurationPending,
@@ -58,6 +59,7 @@ impl A3968State {
             },
             touch_tone: packet.touch_tone,
             auto_power_off: packet.auto_power_off,
+            surround_sound: packet.surround_sound,
             age_range: AgeRange::default(),
             gender: Gender::default(),
             button_reset_pending: ResetButtonConfigurationPending::default(),
@@ -81,6 +83,7 @@ impl Update<A3968StateUpdatePacket> for A3968State {
             touch_tone,
             auto_power_off,
             ambient_sound_mode_cycle,
+            surround_sound,
         } = partial;
         self.tws_status = tws_status;
         self.dual_battery = dual_battery;
@@ -95,5 +98,6 @@ impl Update<A3968StateUpdatePacket> for A3968State {
         self.touch_tone = touch_tone;
         self.auto_power_off = auto_power_off;
         self.ambient_sound_mode_cycle = ambient_sound_mode_cycle;
+        self.surround_sound = surround_sound;
     }
 }
