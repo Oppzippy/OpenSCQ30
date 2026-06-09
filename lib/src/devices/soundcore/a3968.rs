@@ -28,6 +28,7 @@ soundcore_device!(
             .await;
         builder.tws_status();
         builder.dual_battery(5);
+        builder.case_battery_level(5);
         builder.serial_number_and_dual_firmware_version();
     },
     {
@@ -99,6 +100,7 @@ mod tests {
                 SettingId::PresetEqualizerProfile,
                 Value::OptionalString(None),
             ),
+            (SettingId::CaseBatteryLevel, "2/5".into()),
         ]);
     }
 }
