@@ -129,7 +129,7 @@ response = [
     0,    # noise canceling mode
     0,    # wind noise (unknown if it has a wind noise detected flag)
     255,  # unknown
-    54,   # multi scene anc
+    54,   # unknown
     1,    # 3d surround sound
     0,
     1,    # dual connections

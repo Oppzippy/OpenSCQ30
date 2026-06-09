@@ -4,13 +4,18 @@ use crate::devices::soundcore::{
     a3968::{packets::inbound::A3968StateUpdatePacket, state::A3968State},
     common::{
         self,
-        device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
-        modules::button_configuration::{
-            ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_ACTIONS,
-            COMMON_ACTIONS_MINIMAL,
+        modules::{
+            auto_power_off::AutoPowerOffDuration,
+            button_configuration::{
+                ButtonConfigurationSettings, ButtonDisableMode, ButtonSettings, COMMON_ACTIONS,
+                COMMON_ACTIONS_MINIMAL,
+            },
         },
-        packet::outbound::{RequestState, ToPacket},
+        packet::{
+            inbound::TryToPacket,
+            outbound::{RequestState, ToPacket},
+        },
         structures::button_configuration::{
             ActionKind, Button, ButtonParseSettings, ButtonPressKind, EnabledFlagKind,
         },
@@ -25,7 +30,19 @@ mod structures;
 soundcore_device!(
     A3968State,
     async |packet_io| {
-        fetch_state_from_state_update_packet::<A3968State, A3968StateUpdatePacket>(packet_io).await
+        let state_update_packet: packets::inbound::A3968StateUpdatePacket = packet_io
+            .send_with_response(&RequestState.to_packet())
+            .await?
+            .try_to_packet()?;
+        let dual_connections_devices = if state_update_packet.dual_connections_enabled {
+            common::modules::dual_connections::take_dual_connection_devices(&packet_io).await?
+        } else {
+            Vec::new()
+        };
+        Ok(state::A3968State::new(
+            state_update_packet,
+            dual_connections_devices,
+        ))
     },
     async |builder| {
         builder.module_collection().add_state_update();
@@ -34,6 +51,9 @@ soundcore_device!(
             .equalizer_with_custom_hear_id_tws(common::modules::equalizer::common_settings())
             .await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
+        builder.dual_connections();
+        builder.auto_power_off(AutoPowerOffDuration::ten_twenty_thirty_sixty());
+        builder.touch_tone();
         builder.tws_status();
         builder.dual_battery(5);
         builder.case_battery_level(5);
@@ -161,6 +181,9 @@ mod tests {
             (SettingId::RightDoublePress, Some("NextSong").into()),
             (SettingId::LeftLongPress, Some("AmbientSoundMode").into()),
             (SettingId::RightLongPress, Some("AmbientSoundMode").into()),
+            (SettingId::DualConnections, true.into()),
+            (SettingId::AutoPowerOff, "30m".into()),
+            (SettingId::TouchTone, false.into()),
         ]);
     }
 }

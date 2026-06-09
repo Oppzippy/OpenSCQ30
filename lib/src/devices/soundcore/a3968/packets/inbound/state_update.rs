@@ -17,11 +17,13 @@ use crate::{
                 self, Command,
                 inbound::{FromPacketBody, TryToPacket},
                 outbound::ToPacket,
+                parsing::take_bool,
             },
             packet_manager::PacketHandler,
+            state::Update,
             structures::{
-                CaseBatteryLevel, CommonEqualizerConfiguration, CustomHearId, DualBattery,
-                DualFirmwareVersion, SerialNumber, TwsStatus,
+                AutoPowerOff, CaseBatteryLevel, CommonEqualizerConfiguration, CustomHearId,
+                DualBattery, DualFirmwareVersion, SerialNumber, TouchTone, TwsStatus,
                 button_configuration::ButtonStatusCollection,
             },
         },
@@ -51,6 +53,9 @@ pub struct A3968StateUpdatePacket {
     pub hear_id: CustomHearId<2, 10>,
     pub button_configuration: ButtonStatusCollection<6>,
     pub sound_modes: a3968::structures::SoundModes,
+    pub dual_connections_enabled: bool,
+    pub touch_tone: TouchTone,
+    pub auto_power_off: AutoPowerOff,
 }
 
 impl Default for A3968StateUpdatePacket {
@@ -65,6 +70,9 @@ impl Default for A3968StateUpdatePacket {
             hear_id: Default::default(),
             button_configuration: a3968::BUTTON_CONFIGURATION_SETTINGS.default_status_collection(),
             sound_modes: Default::default(),
+            touch_tone: Default::default(),
+            auto_power_off: Default::default(),
+            dual_connections_enabled: Default::default(),
         }
     }
 }
@@ -94,6 +102,12 @@ impl FromPacketBody for A3968StateUpdatePacket {
                     ),
                     take(1usize),                        // unknown,
                     a3968::structures::SoundModes::take, // sound-mode block (offsets 117..124)
+                    take(1usize),                        // unknown
+                    take_bool,                           // 3d surround sound
+                    take(1usize),                        // unknown
+                    take_bool,                           // dual connections enabled
+                    TouchTone::take,
+                    AutoPowerOff::take,
                 ),
                 |(
                     tws_status,
@@ -109,6 +123,12 @@ impl FromPacketBody for A3968StateUpdatePacket {
                     button_configuration,
                     _unknown4,
                     sound_modes,
+                    _unknown5,
+                    _3d_surround_sound,
+                    _unknown6,
+                    dual_connections_enabled,
+                    touch_tone,
+                    auto_power_off,
                 )| {
                     Self {
                         tws_status,
@@ -120,6 +140,9 @@ impl FromPacketBody for A3968StateUpdatePacket {
                         hear_id,
                         button_configuration,
                         sound_modes,
+                        dual_connections_enabled,
+                        touch_tone,
+                        auto_power_off,
                     }
                 },
             ),
@@ -154,6 +177,12 @@ impl ToPacket for A3968StateUpdatePacket {
             )
             .chain(std::iter::once(0))
             .chain(self.sound_modes.bytes())
+            .chain(std::iter::once(0)) // unknown
+            .chain(std::iter::once(0)) // 3d surround sound
+            .chain(std::iter::once(0)) // unknown
+            .chain(std::iter::once(self.dual_connections_enabled as u8))
+            .chain(self.touch_tone.bytes())
+            .chain(self.auto_power_off.bytes())
             .collect()
     }
 }
@@ -168,7 +197,7 @@ impl PacketHandler<A3968State> for StateUpdatePacketHandler {
         packet: &packet::Inbound,
     ) -> device::Result<()> {
         let packet: A3968StateUpdatePacket = packet.try_to_packet()?;
-        state.send_modify(|state| *state = packet.into());
+        state.send_modify(|state| state.update(packet));
         Ok(())
     }
 }
