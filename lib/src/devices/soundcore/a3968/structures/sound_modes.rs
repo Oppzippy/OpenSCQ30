@@ -5,7 +5,6 @@ use nom::{
     number::complete::le_u8,
 };
 use openscq30_i18n_macros::Translate;
-use openscq30_lib_macros::MigrationSteps;
 use strum::{Display, EnumIter, EnumString, FromRepr, IntoStaticStr, VariantArray};
 
 use crate::devices::soundcore::common::{
@@ -15,22 +14,13 @@ use crate::devices::soundcore::common::{
     structures::TransparencyMode,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, MigrationSteps)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct SoundModes {
     pub ambient_sound_mode: common::structures::AmbientSoundMode,
-    #[migration_requirement(field = ambient_sound_mode, value = common::structures::AmbientSoundMode::NoiseCanceling)]
     pub noise_canceling_mode: NoiseCancelingMode,
-    #[migration_requirement(field = noise_canceling_mode, value = NoiseCancelingMode::Adaptive)]
     pub adaptive_noise_canceling: AdaptiveNoiseCanceling,
-    #[migration_requirement(field = noise_canceling_mode, value = NoiseCancelingMode::Manual)]
     pub manual_noise_canceling: ManualNoiseCanceling,
-    #[migration_requirement(field = ambient_sound_mode, value = common::structures::AmbientSoundMode::Transparency)]
     pub transparency_mode: TransparencyMode,
-    #[migration_requirement(
-        field = ambient_sound_mode,
-        value = common::structures::AmbientSoundMode::NoiseCanceling,
-        value2 = common::structures::AmbientSoundMode::Transparency,
-    )]
     pub wind_noise: WindNoise,
 }
 
