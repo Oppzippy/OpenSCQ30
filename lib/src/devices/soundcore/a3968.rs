@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use crate::devices::soundcore::{
     a3968::{packets::inbound::A3968StateUpdatePacket, state::A3968State},
     common::{
+        self,
         device::fetch_state_from_state_update_packet,
         macros::soundcore_device,
         packet::outbound::{RequestState, ToPacket},
@@ -22,6 +23,9 @@ soundcore_device!(
     async |builder| {
         builder.module_collection().add_state_update();
         builder.a3968_sound_modes();
+        builder
+            .equalizer_with_custom_hear_id_tws(common::modules::equalizer::common_settings())
+            .await;
         builder.tws_status();
         builder.dual_battery(5);
         builder.serial_number_and_dual_firmware_version();
@@ -44,7 +48,7 @@ mod tests {
             device::{SoundcoreDeviceConfig, test_utils::TestSoundcoreDevice},
             packet,
         },
-        settings::SettingId,
+        settings::{SettingId, Value},
     };
 
     /// State update packet posted by "Hate9" in GitHub issue #170 (a different X20 unit).
@@ -91,6 +95,10 @@ mod tests {
             (SettingId::WindNoiseSuppression, false.into()),
             (SettingId::WindNoiseDetected, "false".into()),
             (SettingId::TransparencyMode, "VocalMode".into()),
+            (
+                SettingId::PresetEqualizerProfile,
+                Value::OptionalString(None),
+            ),
         ]);
     }
 }
