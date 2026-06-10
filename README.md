@@ -42,6 +42,7 @@ If there's a device not in this list that you want to see supported, check if th
 | A3955 | Soundcore P40i               |
 | A3957 | Soundcore Liberty 5          |
 | A3959 | Soundcore P30i / R50i NC     |
+| A3968 | Soundcore Sport X20          |
 
 ## Installing
 

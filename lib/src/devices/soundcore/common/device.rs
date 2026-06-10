@@ -28,10 +28,11 @@ use crate::{
                 packet::{self, PacketIOController, outbound::ToPacket},
                 state::Update,
                 structures::{
-                    AutoPlayPause, AutoPowerOff, BatteryLevel, CaseBatteryLevel, DualConnections,
-                    EqualizerConfiguration, GamingMode, Ldac, LimitHighVolume, LowBatteryPrompt,
-                    SoundLeakCompensation, SurroundSound, TouchLock, TouchTone, VoicePrompt,
-                    WearingDetection, WearingTone, button_configuration::ButtonStatusCollection,
+                    AmbientSoundModeCycleTws, AutoPlayPause, AutoPowerOff, BatteryLevel,
+                    CaseBatteryLevel, DualConnections, EqualizerConfiguration, GamingMode, Ldac,
+                    LimitHighVolume, LowBatteryPrompt, SoundLeakCompensation, SurroundSound,
+                    TouchLock, TouchTone, VoicePrompt, WearingDetection, WearingTone,
+                    button_configuration::ButtonStatusCollection,
                 },
             },
         },
@@ -525,6 +526,15 @@ where
     {
         self.module_collection
             .add_ambient_sound_mode_cycle(self.packet_io_controller.clone());
+    }
+
+    pub fn ambient_sound_mode_cycle_tws(&mut self)
+    where
+        StateType:
+            Has<TwsStatus> + Has<AmbientSoundModeCycleTws> + Has<ResetButtonConfigurationPending>,
+    {
+        self.module_collection
+            .add_ambient_sound_mode_cycle_tws(self.packet_io_controller.clone());
     }
 
     pub fn reset_button_configuration<ButtonConfigurationPacketType>(
