@@ -2,7 +2,7 @@
 
 .Sh NAME
 .B openscq30
-- Control Soundcore devices via bluetooth
+- Control Soundcore devices via Bluetooth
 
 .SH SYNOPSIS
 .B openscq30
@@ -11,7 +11,7 @@
 .RB [COMMAND]
 .SH DESCRIPTION
 .B openscq30
-This program can make use of an "option", "sub-option", and "command". Commands can also have sub-options.
+makes extensive use of subcommands. Each subcommand can have its own options, and the options for a given subcommand must come before any following subcommands. See --mac-address in the following example:
 
 .RS
 .nf
@@ -29,7 +29,7 @@ Device Settings
 
 .TP
 .B paired-devices
-Add bluetooth devices to openscq30. The device needs to be paired first.
+Add Bluetooth devices to openscq30. The device needs to be paired using your operating system's Bluetooth controls before it can be paired with openscq30.
 
 .TP
 .B list-models
@@ -42,7 +42,7 @@ Generate shell completions
 .TP
 .B help
 .br
-Show a help message
+Show the help message
 
 
 
@@ -91,11 +91,11 @@ This will list all settings that are currently available. Available settings may
 change depending on the device's state. As an example, some devices only support
 some features on newer firmware versions.
 
-If `--no-extended-info` is not used, the type of setting as well as its
+If \fB--no-extended-info\fR is not used, the type of setting as well as its
 parameters will be output in addition to the setting id.
 
-The format of this command's output is only stable in `--json` mode. The format
-of the non-json output may change between versions, so `--json` should always be
+The format of this command's output is only stable in \fB--json\fR mode. The format
+of the non-json output may change between versions, so \fB--json\fR should always be
 used for scripts.
 
 The equalizer setting has one quirk to be aware of, and that's the fractional
@@ -134,11 +134,11 @@ first. You can always refer to "openscq30 device -a MAC_ADDRESS setting --help" 
 -j, --json                    Output as JSON
 .RE
 .RS
--h, --help                    Print very detailed help message (usefull for advanced users)
+-h, --help                    Print very detailed help message (useful for advanced users)
 .RE
 
 .RS
-`--get` and `--set` may be used multiple times to get/set multiple settings.
+\fB--get\fR and \fB--set\fR may be used multiple times to get/set multiple settings.
 Operations will be executed in the order of the arguments. A get before a set
 will print the original value, and a get after a set will print the value it was
 set to.
@@ -146,22 +146,20 @@ set to.
 Most value types are straight forward. For strings and numbers, enter the value
 as is. There are some exceptions:
 
-Optional selects: To deselect the value, set it to an empty string: `--set
-example=`
+Optional selects: To deselect the value, set it to an empty string: \fB--set example=\fR
 
 Modifiable selects: Prefix with '+' to add an item to the list, or '-' to remove
-an item from the list. The prefix can be escaped with '\'. Examples:
-- `--set "customEqualizerProfile=+new profile"` will create a new equalizer
-profile named "new profile".
-- `--set "customEqualizerProfile=-new profile"` will delete an equalizer profile
-named "new profile".
-- `--set "customEqualizerProfile=\+new profile"` will activate an equalizer
-profile named "+new profile".
+an item from the list. The prefix can be escaped with '\\'. Examples:
+.nf
+- \fB--set "customEqualizerProfile=+new profile"\fR will create a new equalizer profile named "new profile".
+- \fB--set "customEqualizerProfile=-new profile"\fR will delete an equalizer profile named "new profile".
+- \fB--set "customEqualizerProfile=\+new profile"\fR will activate an equalizer profile named "+new profile".
+.fi
 
 Equalizers: All bands must be specified, and numbers should be separated with
 ','. Examples:
-- `--set volumeAdjustments -40,-30,-20,-10,0,1,2,3` when fractional digits is 1
-(see `openscq30 device list-settings --help` for info on fractional digits) will
+- \fB--set volumeAdjustments -40,-30,-20,-10,0,1,2,3\fR when fractional digits is 1
+(see \fBopenscq30 device list-settings --help\fR for info on fractional digits) will
 assign [-4, -3, -2, -1, 0, 0.1, 0.2, 0.3].
 .RE
 
@@ -215,9 +213,9 @@ Add a paired device to openscq30
 .RS
 openscq30 needs to know what model your device is. This is where you provide the
 necessary information to be able to connect to a device. It should already be
-paired using bluetooth at this point.
+paired using Bluetooth at this point.
 
-See `openscq30 list-models` for a list of supported device models. This should
+See \fBopenscq30 list-models\fR for a list of supported device models. This should
 also be used to find the model id if you only know the name. Soundcore Life Q30
 is SoundcoreA3028 for example.
 .RE
@@ -259,8 +257,7 @@ List all supported device models and their names
 
 .RS
 Device models are locale-independent identifiers for each device. This command
-will list all models as well as their names in English. Used for `openscq30
-paired-devices add --model`.
+will list all models as well as their names in English. Used for \fBopenscq30 paired-devices add --model\fR.
 .RE
 
 
@@ -282,17 +279,17 @@ Generate Shell completions
 
 .SH
 .B Initial Setup Guide
-This guide is intended for new users. it will tell you how to add a device to openscq30 and the basics of changing the device settings
+This guide is intended for new users. It will describe how to add a device to openscq30 and the basics of changing the device settings.
 
 .TP
 .B 1-) Pair and Connect via Bluetooth
-Before starting, you should pair and connect to the device with the Bluetooth manager of you choosing.
+Before starting, you should pair and connect to the device with the Bluetooth manager of your choosing.
 
 .TP
 .B 2-) Find the Device model name
 Run
 .B "openscq30 list-models"
-and find your device. At the left side of the table, there should be something like
+and find your device. At the left side of the table, you will see something like:
 .B "SoundcoreAXXXX".
 Copy or remember the one that matches your device.
 For example, "Soundcore Space One" is "SoundcoreA3035"
@@ -301,7 +298,7 @@ For example, "Soundcore Space One" is "SoundcoreA3035"
 .TP
 .B 2.1-)[Optional]  Having trouble finding your device?
 You can also run
-.B "openscq30 list-models | grep -i YOUR MODEL NAME"
+.B "openscq30 list-models | grep -i 'YOUR MODEL NAME'"
 to make finding it easier.
 .RE
 
@@ -311,26 +308,26 @@ In order to change the device settings, you first need to add it to openscq30 wi
 
 .B openscq30 paired-devices add -a MAC_ADDRESS -m SoundcoreAxxxx
 
-If you see \fBPaired\fR, you have succesfully added your device to openscq30.
+If you see \fBPaired\fR, you have successfully added your device to openscq30.
 
 
 .SS
-.B Basics of Adjusting the Device Settings
+.B Basics of adjusting the device settings
 For more info go to
 .B setting
 under
 .B Options and their relative commands
 
 .TP
-.B 1-) Finding the avalible Settings
-Each device can have different settings. In order to find out your device's settings run
+.B 1-) Finding the available Settings
+Each device can have different settings. To list the settings that are available for your device, run
 .B openscq30 device -a MAC_ADDRESS  list-settings
 
 .TP
 .B 2-) Adjusting the settings
-If you ran the previous command, you will see a list of all of the avalible settings for that device. Settings accept 3 different "styles" of options:
+If you ran the previous command, you will see a list of all of the available settings for that device. Settings accept 3 different "styles" of options:
 .B integer range, toggle, and select.
-Integer range will allow you to select a range of numbers (given in the list-settings output). Toggle is just on/off. Select allows you to select multiple options for that setting (also given in the list-settings output).
+Integer range will allow you to select a number from within a range (given in the list-settings output). A toggle is simply on/off. Select allows you to select multiple options for that setting (also given in the list-settings output).
 
 .RS
 .TP
@@ -346,7 +343,7 @@ Integer range will allow you to select a range of numbers (given in the list-set
 
 .RS
 These may seem like "integer range", but if we look at the
-.B list-setting
+.B list-settings
 output, we can see it is a "select" that only allows: "disabled", "30m", "60m", "90m", "120m".
 .RE
 
@@ -371,7 +368,7 @@ First we have to get the current state of this setting.
 
 .B openscq30 device -a MAC_ADDRESS setting  --get  lowBatteryPrompt
 
-For me, this was "true". Now lets set it to "false".
+In my case, this was "true". Now lets set it to "false".
 
 .B openscq30 device -a MAC_ADDRESS setting  --set  lowBatteryPrompt=false
 .RE
