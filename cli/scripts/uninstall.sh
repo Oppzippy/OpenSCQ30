@@ -5,6 +5,8 @@ install_path="$1"
 
 echo Removing binary
 rm "$install_path/bin/openscq30" || true
+echo Removing man page
+rm "$install_path/share/man/man1/openscq30.1.gz" || true
 echo Removing bash completions
 rm "$install_path/share/bash-completions/completions/openscq30" || true
 echo Removing fish completions
