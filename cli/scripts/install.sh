@@ -13,7 +13,6 @@ install -Dm755 "$project_root/build-output/openscq30" -t "$install_path/bin/"
 
 echo Installing man page
 mkdir -p "$install_path/share/man/man1"
-
 gzip --stdout "$project_root/cli/resources/manual/openscq30.1" > "$install_path/share/man/man1/openscq30.1.gz"
 
 if [[ -z "${OPENSCQ30_SKIP_SHELL_COMPLETIONS:-}" ]]; then
