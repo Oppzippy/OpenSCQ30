@@ -11,15 +11,14 @@
 .RB [COMMAND]
 .SH DESCRIPTION
 .B openscq30
-makes extensive use of subcommands. Each subcommand can have its own options, and the options for a given subcommand must come before any following subcommands. See --mac-address in the following example:
-
+makes extensive use of subcommands. Each subcommand can have its own options, and the options for a given subcommand must come before any following subcommands. See the positioning of --mac-address in the following examples:
 .RS
 .nf
-- openscq30 device --mac-address AA:AA:AA:AA:AA:AA list-settings
-- openscq30 device --mac-address AA:AA:AA:AA:AA:AA setting --get autoPowerOff
-- openscq30 device --mac-address AA:AA:AA:AA:AA:AA setting --set autoPowerOff=60m
+$ openscq30 device --mac-address AA:AA:AA:AA:AA:AA list-settings
+$ openscq30 device --mac-address AA:AA:AA:AA:AA:AA setting --get autoPowerOff
+$ openscq30 device --mac-address AA:AA:AA:AA:AA:AA setting --set autoPowerOff=60m
+.fi
 .RE
-
 
 .SH OPTIONS
 .TP
