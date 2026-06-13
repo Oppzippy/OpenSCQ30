@@ -149,17 +149,36 @@ Optional selects: To deselect the value, set it to an empty string: \fB--set exa
 
 Modifiable selects: Prefix with '+' to add an item to the list, or '-' to remove
 an item from the list. The prefix can be escaped with '\\'. Examples:
+.IP
+Create a new equalizer profile named "new profile"
 .nf
-- \fB--set "customEqualizerProfile=+new profile"\fR will create a new equalizer profile named "new profile".
-- \fB--set "customEqualizerProfile=-new profile"\fR will delete an equalizer profile named "new profile".
-- \fB--set "customEqualizerProfile=\+new profile"\fR will activate an equalizer profile named "+new profile".
+.B
+--set "customEqualizerProfile=+new profile"
 .fi
+.PP
 
-Equalizers: All bands must be specified, and numbers should be separated with
-','. Examples:
-- \fB--set volumeAdjustments -40,-30,-20,-10,0,1,2,3\fR when fractional digits is 1
+.IP
+Delete an equalizer profile named "new profile"
+.nf
+.B
+--set "customEqualizerProfile=-new profile"
+.fi
+.PP
+
+.IP
+Activate an equalizer profile named "+new profile"
+.nf
+.B
+--set "customEqualizerProfile=\+new profile"
+.fi
+.PP
+
+Equalizers: All bands must be specified, and numbers should be separated with ','. Examples:
+.IP
+\fB--set volumeAdjustments -40,-30,-20,-10,0,1,2,3\fR when fractional digits is 1
 (see \fBopenscq30 device list-settings --help\fR for info on fractional digits) will
 assign [-4, -3, -2, -1, 0, 0.1, 0.2, 0.3].
+.PP
 .RE
 
 .SS
