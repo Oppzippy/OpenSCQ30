@@ -407,8 +407,20 @@ private fun ShowSetting(context: Context, settingId: String, setting: Setting) {
             isOptional = true,
         )
 
-        // TODO implement modification
         is Setting.MultiSelectSetting -> {
+            val valueSet = setting.values.toHashSet()
+            val values = setting.setting.options.mapIndexed { index, option ->
+                if (valueSet.contains(option)) {
+                    setting.setting.localizedOptions[index]
+                } else {
+                    null
+                }
+            }.filterNotNull().joinToString(", ")
+            ReadOnlySettingValue(settingId, values)
+        }
+
+        is Setting.MultiSelectWithRemoveSetting -> {
+            // option removal is intentionally not implemented here since the button would take up space
             val valueSet = setting.values.toHashSet()
             val values = setting.setting.options.mapIndexed { index, option ->
                 if (valueSet.contains(option)) {

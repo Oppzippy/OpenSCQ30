@@ -1,8 +1,10 @@
 package com.oppzippy.openscq30.ui.utils
 
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
@@ -14,6 +16,7 @@ fun LabeledSwitch(
     isChecked: Boolean,
     onCheckedChange: (value: Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    extraButtons: (@Composable () -> Unit)? = null,
 ) {
     Labeled(
         modifier = modifier
@@ -24,10 +27,15 @@ fun LabeledSwitch(
             ),
         label = label,
     ) {
-        Switch(
-            checked = isChecked,
-            onCheckedChange = null,
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (extraButtons != null) {
+                extraButtons()
+            }
+            Switch(
+                checked = isChecked,
+                onCheckedChange = null,
+            )
+        }
     }
 }
 

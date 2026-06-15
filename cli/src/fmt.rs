@@ -30,6 +30,9 @@ impl std::fmt::Display for CustomDisplaySetting {
             Setting::MultiSelect { setting, .. } => {
                 write!(f, "multi select ({:?})", setting.options)
             }
+            Setting::MultiSelectWithRemove { setting, .. } => {
+                write!(f, "multi select with remove ({:?})", setting.options)
+            }
             Setting::Equalizer { setting, .. } => write!(
                 f,
                 "equalizer (bands: {:?}, min: {}, max: {}, fractional digits: {})",
@@ -81,6 +84,9 @@ impl std::fmt::Display for DisplayableValue {
                 }
             }
             Value::ModifiableSelectCommand(_) => {
+                unimplemented!("this should not be shown to the user")
+            }
+            Value::MultiSelectWithRemoveCommand(_) => {
                 unimplemented!("this should not be shown to the user")
             }
         }

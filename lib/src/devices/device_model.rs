@@ -202,6 +202,9 @@ mod tests {
                             Setting::Select { value, .. } => Some(value.into()),
                             Setting::OptionalSelect { value, .. } => Some(value.into()),
                             Setting::MultiSelect { setting, .. } => Some(setting.options.into()),
+                            Setting::MultiSelectWithRemove { setting, .. } => {
+                                Some(setting.options.into())
+                            }
                             Setting::Equalizer { value, .. } => Some(value.into()),
                             Setting::ModifiableSelect { .. }
                             | Setting::Information { .. }

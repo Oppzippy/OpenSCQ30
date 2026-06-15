@@ -88,7 +88,7 @@ impl Default for A3936StateUpdatePacket {
             case_battery_level: Default::default(),
             color: Default::default(),
             ldac: Default::default(),
-            dual_connections_enabled: Default::default(),
+            dual_connections_enabled: true,
             auto_power_off: Default::default(),
             gaming_mode: Default::default(),
         }

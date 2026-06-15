@@ -251,6 +251,7 @@ fun MultiSelect(
     options: List<String>,
     selectedOptions: Set<Int>,
     onChange: (Set<Int>) -> Unit,
+    onRemove: ((Int) -> Unit)? = null,
 ) {
     var isPickerOpen by remember { mutableStateOf(false) }
     if (isPickerOpen) {
@@ -281,14 +282,27 @@ fun MultiSelect(
                             item { Text(stringResource(R.string.none)) }
                         } else {
                             itemsIndexed(options) { index, value ->
+                                val isChecked = selectedOptions.contains(index)
                                 LabeledSwitch(
                                     label = value,
-                                    isChecked = selectedOptions.contains(index),
+                                    isChecked = isChecked,
                                     onCheckedChange = { isChecked ->
                                         if (isChecked) {
                                             onChange(selectedOptions.toMutableSet().apply { add(index) })
                                         } else {
                                             onChange(selectedOptions.toMutableSet().apply { remove(index) })
+                                        }
+                                    },
+                                    extraButtons = {
+                                        if (onRemove != null && !isChecked) {
+                                            FilledIconButton(
+                                                onClick = { onRemove(index) },
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.remove_24px),
+                                                    contentDescription = stringResource(R.string.delete),
+                                                )
+                                            }
                                         }
                                     },
                                 )

@@ -403,6 +403,21 @@ impl DeviceSettingsModel {
                 })
                 .into()
             }
+            Setting::MultiSelectWithRemove { setting, values } => select::multi_select_with_remove(
+                setting_id,
+                setting,
+                values,
+                move |values| Message::SetSetting(setting_id, values.into()),
+                |option| {
+                    Message::SetSetting(
+                        setting_id,
+                        Value::MultiSelectWithRemoveCommand(
+                            settings::MultiSelectWithRemoveCommand::Remove(option),
+                        ),
+                    )
+                },
+            )
+            .into(),
             Setting::Equalizer { setting, value } => {
                 equalizer::horizontal_equalizer(setting, value, move |index, value| {
                     Message::SetEqualizerBand(setting_id, index, value)

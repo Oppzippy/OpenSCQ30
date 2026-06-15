@@ -45,6 +45,12 @@ sealed class Setting {
     }
 
     @Serializable
+    @SerialName("multiSelectWithRemove")
+    data class MultiSelectWithRemoveSetting(val setting: Select, val values: List<String>) : Setting() {
+        override fun toValue() = values.toValue()
+    }
+
+    @Serializable
     @SerialName("equalizer")
     data class EqualizerSetting(val setting: Equalizer, val value: List<Short>) : Setting() {
         override fun toValue() = value.toValue()

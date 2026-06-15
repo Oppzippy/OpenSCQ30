@@ -22,6 +22,9 @@ pub fn setting_value(setting: &Setting, unparsed: Option<String>) -> anyhow::Res
         Setting::MultiSelect { setting, .. } => {
             parse_multi_select(setting, &unparsed.ok_or(required_err)?)
         }
+        Setting::MultiSelectWithRemove { setting, .. } => {
+            parse_multi_select_with_remove(setting, unparsed.ok_or(required_err)?)
+        }
         Setting::Equalizer { setting, .. } => {
             parse_equalizer(setting, &unparsed.ok_or(required_err)?)
         }
@@ -84,6 +87,27 @@ fn parse_modifiable_select(setting: &settings::Select, unparsed: String) -> anyh
 
 fn parse_multi_select(setting: &settings::Select, unparsed: &str) -> anyhow::Result<Value> {
     primitives::many_of_options(unparsed, &setting.options).map(Value::from)
+}
+
+fn parse_multi_select_with_remove(
+    setting: &settings::Select,
+    unparsed: String,
+) -> anyhow::Result<Value> {
+    if let Some(rest) = unparsed.strip_prefix("-") {
+        Ok(Value::MultiSelectWithRemoveCommand(
+            settings::MultiSelectWithRemoveCommand::Remove(rest.to_owned().into()),
+        ))
+    } else {
+        // To allow selecting profiles that start with a '+' or '-' without triggering the other
+        // branches, '\' can be used as a prefix that will be ignored.
+        let name = unparsed
+            .strip_prefix("\\")
+            .map(ToOwned::to_owned)
+            .unwrap_or(unparsed);
+        Ok(primitives::one_of_options(&name, &setting.options)?
+            .clone()
+            .into())
+    }
 }
 
 fn parse_equalizer(setting: &settings::Equalizer, unparsed: &str) -> anyhow::Result<Value> {

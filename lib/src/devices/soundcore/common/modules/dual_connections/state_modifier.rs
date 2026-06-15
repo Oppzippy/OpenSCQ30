@@ -34,6 +34,7 @@ where
         target_state: &StateT,
     ) -> device::Result<()> {
         set_enabled(&self.packet_io, state_sender, target_state).await?;
+        forget_removed_devices(&self.packet_io, state_sender, target_state).await?;
         set_connected_devices(&self.packet_io, state_sender, target_state).await?;
         Ok(())
     }
@@ -70,6 +71,58 @@ where
             }
         });
     }
+    Ok(())
+}
+
+async fn forget_removed_devices<StateT>(
+    packet_io: &PacketIOController,
+    state_sender: &watch::Sender<StateT>,
+    target_state: &StateT,
+) -> device::Result<()>
+where
+    StateT: MaybeHas<DualConnections> + Send + Sync,
+{
+    let Some(target_dual_connections) = target_state.maybe_get() else {
+        return Ok(());
+    };
+    let disconnected_mac_addresses = {
+        let current_state = state_sender.borrow();
+        let Some(dual_connetions) = current_state.maybe_get() else {
+            return Ok(());
+        };
+        if !dual_connetions.is_enabled {
+            return Ok(());
+        }
+        dual_connetions
+            .devices
+            .iter()
+            .filter(|d| !d.is_connected)
+            .map(|d| d.mac_address)
+            .collect::<Vec<_>>()
+    };
+    for mac_address in disconnected_mac_addresses {
+        if !target_dual_connections
+            .devices
+            .iter()
+            .any(|d| d.mac_address == mac_address)
+        {
+            packet_io
+                .send_with_response(&packet::outbound::dual_connections_forget(mac_address))
+                .await?;
+            state_sender.send_modify(|state| {
+                // find the index again to avoid race conditions where someone else shifts the positions around
+                if let Some(dual_connections) = state.maybe_get_mut()
+                    && let Some(position) = dual_connections
+                        .devices
+                        .iter()
+                        .position(|d| d.mac_address == mac_address)
+                {
+                    dual_connections.devices.remove(position);
+                }
+            });
+        }
+    }
+
     Ok(())
 }
 

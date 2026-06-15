@@ -13,7 +13,8 @@ use crate::devices::soundcore::{
             equalizer,
         },
         packet::{
-            inbound::TryToPacket,
+            self,
+            inbound::{DualConnectionsDevicePacket, TryToPacket},
             outbound::{RequestState, ToPacket},
         },
         structures::button_configuration::{
@@ -66,10 +67,16 @@ soundcore_device!(
         builder.serial_number_and_dual_firmware_version();
     },
     {
-        HashMap::from([(
-            RequestState::COMMAND,
-            A3936StateUpdatePacket::default().to_packet(),
-        )])
+        HashMap::from([
+            (
+                RequestState::COMMAND,
+                A3936StateUpdatePacket::default().to_packet(),
+            ),
+            (
+                packet::Command([0x0b, 0x01]),
+                DualConnectionsDevicePacket::demo().to_packet(),
+            ),
+        ])
     },
 );
 

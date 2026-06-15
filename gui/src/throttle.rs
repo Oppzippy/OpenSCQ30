@@ -64,6 +64,7 @@ impl Throttle {
             Setting::OptionalSelect { value: _, .. } => (),
             Setting::ModifiableSelect { value: _, .. } => (),
             Setting::MultiSelect { values: _, .. } => (),
+            Setting::MultiSelectWithRemove { values: _, .. } => (),
             Setting::Equalizer { value, .. } => {
                 if let Some(v) = queued_value {
                     *value = v.try_into_i16_vec().unwrap();

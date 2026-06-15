@@ -21,12 +21,19 @@ pub enum Value {
     StringVec(Vec<Cow<'static, str>>),
     OptionalString(Option<Cow<'static, str>>),
     ModifiableSelectCommand(ModifiableSelectCommand),
+    MultiSelectWithRemoveCommand(MultiSelectWithRemoveCommand),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize, EnumDiscriminants)]
 #[serde(tag = "type", content = "name", rename_all = "camelCase")]
 pub enum ModifiableSelectCommand {
     Add(Cow<'static, str>),
+    Remove(Cow<'static, str>),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize, EnumDiscriminants)]
+#[serde(tag = "type", content = "name", rename_all = "camelCase")]
+pub enum MultiSelectWithRemoveCommand {
     Remove(Cow<'static, str>),
 }
 
@@ -71,6 +78,9 @@ impl std::fmt::Display for Value {
             }
             Self::ModifiableSelectCommand(_modifiable_select_command) => {
                 f.write_str("ModifiableSelectCommand")
+            }
+            Self::MultiSelectWithRemoveCommand(_modifiable_select_command) => {
+                f.write_str("MultiSelectWithRemoveCommand")
             }
         }
     }

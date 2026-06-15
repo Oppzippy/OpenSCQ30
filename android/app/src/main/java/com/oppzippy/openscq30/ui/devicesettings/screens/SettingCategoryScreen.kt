@@ -35,6 +35,7 @@ import androidx.core.content.getSystemService
 import com.oppzippy.openscq30.R
 import com.oppzippy.openscq30.lib.bindings.translateSettingId
 import com.oppzippy.openscq30.lib.wrapper.ModifiableSelectCommandInner
+import com.oppzippy.openscq30.lib.wrapper.MultiSelectWithRemoveCommandInner
 import com.oppzippy.openscq30.lib.wrapper.Range
 import com.oppzippy.openscq30.lib.wrapper.Setting
 import com.oppzippy.openscq30.lib.wrapper.Value
@@ -120,6 +121,12 @@ private fun FallbackSettingCategoryScreen(
                 )
 
                 is Setting.MultiSelectSetting -> MultiSelect(
+                    name = name,
+                    setting = setting,
+                    onChange = { setSetting(settingId, it) },
+                )
+
+                is Setting.MultiSelectWithRemoveSetting -> MultiSelectWithRemove(
                     name = name,
                     setting = setting,
                     onChange = { setSetting(settingId, it) },
@@ -269,6 +276,26 @@ private fun MultiSelect(name: String, setting: Setting.MultiSelectSetting, onCha
             if (values.contains(option)) index else null
         }.filterNotNull().toSet(),
         onChange = { onChange(it.map { index -> setting.setting.options[index] }.toValue()) },
+    )
+}
+
+@Composable
+private fun MultiSelectWithRemove(
+    name: String,
+    setting: Setting.MultiSelectWithRemoveSetting,
+    onChange: (Value) -> Unit,
+) {
+    val values = setting.values.toSet()
+    MultiSelect(
+        name = name,
+        options = setting.setting.localizedOptions,
+        selectedOptions = setting.setting.options.mapIndexed { index, option ->
+            if (values.contains(option)) index else null
+        }.filterNotNull().toSet(),
+        onChange = { onChange(it.map { index -> setting.setting.options[index] }.toValue()) },
+        onRemove = { index ->
+            onChange(MultiSelectWithRemoveCommandInner.Remove(setting.setting.options[index]).toValue())
+        },
     )
 }
 

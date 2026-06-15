@@ -1,3 +1,4 @@
+use macaddr::MacAddr6;
 use nom::{
     IResult, Parser,
     error::{ContextError, ParseError, context},
@@ -22,6 +23,30 @@ pub struct DualConnectionsDevicePacket {
 
 impl DualConnectionsDevicePacket {
     pub const COMMAND: Command = Command([0x0b, 0x01]);
+
+    pub fn demo() -> Self {
+        DualConnectionsDevicePacket {
+            total_packets: 1,
+            current_packet_index: 1,
+            devices: vec![
+                DualConnectionsDevice {
+                    is_connected: true,
+                    mac_address: MacAddr6::new(0, 0, 0, 0, 0, 0),
+                    name: "Device 1".to_string(),
+                },
+                DualConnectionsDevice {
+                    is_connected: false,
+                    mac_address: MacAddr6::new(0, 0, 0, 0, 0, 1),
+                    name: "Device 2".to_string(),
+                },
+                DualConnectionsDevice {
+                    is_connected: false,
+                    mac_address: MacAddr6::new(0, 0, 0, 0, 0, 2),
+                    name: "Device 3".to_string(),
+                },
+            ],
+        }
+    }
 }
 
 impl ToPacket for DualConnectionsDevicePacket {

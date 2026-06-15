@@ -1,6 +1,10 @@
 use std::borrow::Cow;
 
-use cosmic::{Element, iced::Length, widget};
+use cosmic::{
+    Element,
+    iced::{Length, alignment},
+    widget,
+};
 use openscq30_i18n::Translate;
 use openscq30_lib::settings::{Select, SettingId};
 
@@ -129,6 +133,65 @@ where
                     }
                 },
             )
+        })
+        .collect()
+}
+
+pub fn multi_select_with_remove<'a, M>(
+    _setting_id: SettingId,
+    setting: &'a Select,
+    values: &'a [Cow<'static, str>],
+    on_change: impl Fn(Vec<Cow<'static, str>>) -> M + Send + Sync + Clone + 'static,
+    on_remove: impl Fn(Cow<'static, str>) -> M,
+) -> Vec<widget::list::ListButton<'a, M>>
+where
+    M: Clone + 'static,
+{
+    setting
+        .options
+        .iter()
+        .zip(setting.localized_options.iter())
+        .map(|(option, localized_option)| {
+            let option = option.clone();
+            let values = values.to_owned();
+            let is_checked = values.contains(&option);
+            let on_change = on_change.clone();
+
+            let remove_message = on_remove(option.clone());
+            let on_toggle = move |is_checked: bool| {
+                if !is_checked {
+                    on_change(values.iter().filter(|o| **o != option).cloned().collect())
+                } else {
+                    on_change(
+                        values
+                            .iter()
+                            .chain(std::iter::once(&option))
+                            .cloned()
+                            .collect(),
+                    )
+                }
+            };
+
+            let toggle_message = on_toggle(!is_checked);
+            cosmic::widget::list::button(
+                widget::settings::item::builder(localized_option.to_owned()).control(
+                    widget::row::with_capacity(2)
+                        .spacing(8)
+                        .align_y(alignment::Vertical::Center)
+                        .push_maybe((!is_checked).then(|| {
+                            widget::button::icon(widget::icon::from_name("list-remove-symbolic"))
+                                .class(cosmic::theme::Button::Destructive)
+                                .label(fl!("remove"))
+                                .on_press(remove_message)
+                        }))
+                        .push(
+                            widget::toggler(is_checked)
+                                .width(Length::Shrink)
+                                .on_toggle(on_toggle),
+                        ),
+                ),
+            )
+            .on_press(toggle_message)
         })
         .collect()
 }

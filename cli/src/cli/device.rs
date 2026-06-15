@@ -168,6 +168,7 @@ enum JsonSetting {
     OptionalSelect { setting: settings::Select },
     ModifiableSelect { setting: settings::Select },
     MultiSelect { setting: settings::Select },
+    MultiSelectWithRemove { setting: settings::Select },
     Equalizer { setting: settings::Equalizer },
     Information,
     ImportString,
@@ -185,6 +186,9 @@ impl From<settings::Setting> for JsonSetting {
                 Self::ModifiableSelect { setting }
             }
             settings::Setting::MultiSelect { setting, .. } => Self::MultiSelect { setting },
+            settings::Setting::MultiSelectWithRemove { setting, .. } => {
+                Self::MultiSelectWithRemove { setting }
+            }
             settings::Setting::Equalizer { setting, .. } => Self::Equalizer { setting },
             settings::Setting::Information { .. } => Self::Information,
             settings::Setting::ImportString { .. } => Self::ImportString,

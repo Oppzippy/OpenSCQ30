@@ -956,6 +956,23 @@ fn setting_multi_select_invalid() {
 }
 
 #[test]
+fn setting_multi_select_with_remove() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3936");
+    // This is a bad test since we can't verify that it has been removed, but there's not really a
+    // workaround that isn't a lot of work
+    assert_cmd_snapshot!(set_and_get(dir.path(), "dualConnectionsDevices", "-00:00:00:00:00:01"), @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID            	Value            
+    dualConnectionsDevices	00:00:00:00:00:00
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
 fn setting_equalizer() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3951");

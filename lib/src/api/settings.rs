@@ -177,6 +177,10 @@ pub enum Setting {
         setting: Select,
         values: Vec<Cow<'static, str>>,
     },
+    MultiSelectWithRemove {
+        setting: Select,
+        values: Vec<Cow<'static, str>>,
+    },
     Equalizer {
         setting: Equalizer,
         value: Vec<i16>,
@@ -205,6 +209,7 @@ impl From<Setting> for Value {
                 translated_value: _,
             } => Cow::<str>::Owned(value).into(),
             Setting::MultiSelect { values, .. } => values.into(),
+            Setting::MultiSelectWithRemove { values, .. } => values.into(),
             Setting::ImportString { .. } => Cow::from("").into(),
             Setting::Action => Self::Bool(false),
         }
@@ -251,6 +256,7 @@ impl Setting {
             Self::OptionalSelect { .. } => SettingMode::ReadWrite,
             Self::ModifiableSelect { .. } => SettingMode::ReadWrite,
             Self::MultiSelect { .. } => SettingMode::ReadWrite,
+            Self::MultiSelectWithRemove { .. } => SettingMode::ReadWrite,
             Self::Equalizer { .. } => SettingMode::ReadWrite,
             Self::Information { .. } => SettingMode::ReadOnly,
             Self::ImportString { .. } => SettingMode::WriteOnly,

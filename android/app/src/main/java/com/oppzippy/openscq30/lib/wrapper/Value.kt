@@ -58,6 +58,11 @@ sealed class Value : Parcelable {
     @Serializable
     @SerialName("modifiableSelectCommand")
     data class ModifiableSelectCommand(val value: ModifiableSelectCommandInner) : Value()
+
+    @Parcelize
+    @Serializable
+    @SerialName("multiSelectWithRemoveCommand")
+    data class MultiSelectWithRemoveCommand(val value: MultiSelectWithRemoveCommandInner) : Value()
 }
 
 @Parcelize
@@ -74,6 +79,17 @@ sealed class ModifiableSelectCommandInner : Parcelable {
     data class Remove(val name: String) : ModifiableSelectCommandInner()
 
     fun toValue(): Value.ModifiableSelectCommand = Value.ModifiableSelectCommand(this)
+}
+
+@Parcelize
+@Serializable
+sealed class MultiSelectWithRemoveCommandInner : Parcelable {
+    @Parcelize
+    @Serializable
+    @SerialName("remove")
+    data class Remove(val name: String) : MultiSelectWithRemoveCommandInner()
+
+    fun toValue(): Value.MultiSelectWithRemoveCommand = Value.MultiSelectWithRemoveCommand(this)
 }
 
 fun Boolean.toValue(): Value.BoolValue = Value.BoolValue(this)
