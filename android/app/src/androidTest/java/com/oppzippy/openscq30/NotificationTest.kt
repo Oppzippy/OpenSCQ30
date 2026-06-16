@@ -12,6 +12,7 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.oppzippy.openscq30.actions.addAndConnectToDemoDevice
+import com.oppzippy.openscq30.lib.bindings.translateDeviceModel
 import dagger.hilt.android.testing.HiltAndroidTest
 import java.util.regex.Pattern
 import org.junit.After
@@ -29,7 +30,7 @@ class NotificationTest : OpenSCQ30RootTestBase() {
 
     private lateinit var uiDevice: UiDevice
 
-    private val notificationTitle = By.text("Connected to Soundcore Life Q30")
+    private val notificationTitle = By.text("Connected to ${translateDeviceModel("SoundcoreA3028")}")
     private val notification: UiObject2
         get() {
             return uiDevice.findObject(notificationTitle).parent.parent.parent!!
@@ -53,7 +54,7 @@ class NotificationTest : OpenSCQ30RootTestBase() {
 
     @Test
     fun opensAppWhenNotificationIsClicked() {
-        addAndConnectToDemoDevice(composeRule, "Soundcore Life Q30")
+        addAndConnectToDemoDevice(composeRule, translateDeviceModel("SoundcoreA3028"))
         composeRule.waitForIdle()
 
         uiDevice.pressHome()
@@ -66,7 +67,7 @@ class NotificationTest : OpenSCQ30RootTestBase() {
 
     @Test
     fun disconnectsAndClosesNotificationWhenDisconnectIsClicked() {
-        addAndConnectToDemoDevice(composeRule, "Soundcore Life Q30")
+        addAndConnectToDemoDevice(composeRule, translateDeviceModel("SoundcoreA3028"))
         composeRule.waitForIdle()
 
         uiDevice.openNotification()
@@ -85,7 +86,7 @@ class NotificationTest : OpenSCQ30RootTestBase() {
 
     @Test
     fun quickPresetButtonsWork() {
-        addAndConnectToDemoDevice(composeRule, "Soundcore Life Q30")
+        addAndConnectToDemoDevice(composeRule, translateDeviceModel("SoundcoreA3028"))
         // Create the quick preset
         composeRule.onNodeWithText(getString(R.string.quick_presets)).performClick()
         composeRule.onNodeWithContentDescription(getString(R.string.create)).performClick()

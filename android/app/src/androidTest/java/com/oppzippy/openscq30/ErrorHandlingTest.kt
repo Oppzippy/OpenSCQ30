@@ -6,6 +6,7 @@ import com.oppzippy.openscq30.actions.addDemoDevice
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Exception
 import com.oppzippy.openscq30.lib.bindings.OpenScq30Session
 import com.oppzippy.openscq30.lib.bindings.newSessionWithInMemoryDb
+import com.oppzippy.openscq30.lib.bindings.translateDeviceModel
 import com.oppzippy.openscq30.lib.hilt.OpenSCQ30SessionModule
 import dagger.hilt.android.testing.BindValue
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -28,7 +29,7 @@ class ErrorHandlingTest : OpenSCQ30RootTestBase() {
         coEvery { session.pair(any()) } throws mockk<OpenScq30Exception>()
         mockMakeToast()
 
-        addDemoDevice(composeRule, "Soundcore Life Q30")
+        addDemoDevice(composeRule, translateDeviceModel("SoundcoreA3028"))
 
         composeRule.waitForIdle() // wait for toast to be shown
         verify(exactly = 1) { Toast.makeText(any(), getString(R.string.error_pairing), any()) }
@@ -39,7 +40,7 @@ class ErrorHandlingTest : OpenSCQ30RootTestBase() {
         coEvery { session.connectWithBackends(any(), any()) } throws mockk<OpenScq30Exception>()
         mockMakeToast()
 
-        addAndConnectToDemoDevice(composeRule, "Soundcore Life Q30")
+        addAndConnectToDemoDevice(composeRule, translateDeviceModel("SoundcoreA3028"))
 
         composeRule.waitForIdle() // wait for toast to be shown
         verify(exactly = 1) { Toast.makeText(any(), getString(R.string.error_connecting), any()) }

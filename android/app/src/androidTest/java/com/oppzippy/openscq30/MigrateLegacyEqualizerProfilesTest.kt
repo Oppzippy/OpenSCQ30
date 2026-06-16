@@ -7,6 +7,7 @@ import androidx.compose.ui.test.performClick
 import com.oppzippy.openscq30.actions.addAndConnectToDemoDevice
 import com.oppzippy.openscq30.features.equalizer.storage.LegacyEqualizerProfile
 import com.oppzippy.openscq30.features.equalizer.storage.LegacyEqualizerProfileDao
+import com.oppzippy.openscq30.lib.bindings.translateDeviceModel
 import com.oppzippy.openscq30.lib.bindings.translateSettingId
 import dagger.hilt.android.testing.HiltAndroidTest
 import javax.inject.Inject
@@ -33,7 +34,7 @@ class MigrateLegacyEqualizerProfilesTest : OpenSCQ30RootTestBase() {
                 80,
             ),
         )
-        addAndConnectToDemoDevice(composeRule, "Soundcore Life Q30")
+        addAndConnectToDemoDevice(composeRule, translateDeviceModel("SoundcoreA3028"))
 
         composeRule.onNodeWithText(getString(R.string.migrate_legacy_equalizer_profiles)).performClick()
         composeRule.onNodeWithText(getString(R.string.migrate)).performClick()

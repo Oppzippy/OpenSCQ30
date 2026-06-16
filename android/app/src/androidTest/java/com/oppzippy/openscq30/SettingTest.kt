@@ -104,7 +104,6 @@ class SettingTest : OpenSCQ30RootTestBase() {
 
         // Select it for export
         composeRule.onNodeWithText(translateCategoryId("equalizerImportExport")).performClick()
-        composeRule.onNodeWithText(getString(R.string.none)).performClick()
         composeRule.onNode(hasTextExactly("Test Profile") and isToggleable()).performClick()
         composeRule.waitForIdle()
         composeRule.onNode(hasTextExactly("Test Profile") and isToggleable()).assertIsOn()
@@ -132,8 +131,7 @@ class SettingTest : OpenSCQ30RootTestBase() {
         )
         composeRule.onNodeWithContentDescription(getString(R.string.import_)).performClick()
         composeRule.onNodeWithText(getString(R.string.confirm)).performClick()
-        composeRule.onNodeWithText(getString(R.string.none)).performClick()
-        composeRule.onNode(hasTextExactly("test profile") and hasAnyAncestor(isDialog())).assertExists()
+        composeRule.onNodeWithText("test profile").assertExists()
     }
 
     @Test
