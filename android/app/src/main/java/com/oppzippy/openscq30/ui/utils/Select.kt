@@ -5,7 +5,9 @@ package com.oppzippy.openscq30.ui.utils
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -15,6 +17,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
@@ -253,84 +256,67 @@ fun MultiSelect(
     onChange: (Set<Int>) -> Unit,
     onRemove: ((Int) -> Unit)? = null,
 ) {
-    var isPickerOpen by remember { mutableStateOf(false) }
-    if (isPickerOpen) {
-        BasicAlertDialog(onDismissRequest = { isPickerOpen = false }) {
-            Surface(
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .wrapContentHeight(),
-                shape = MaterialTheme.shapes.large,
-                tonalElevation = AlertDialogDefaults.TonalElevation,
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    ProvideTextStyle(MaterialTheme.typography.titleLarge) {
-                        Text(
-                            text = name,
-                            modifier = Modifier.padding(16.dp),
-                        )
-                    }
-                    LazyColumn(
-                        modifier = Modifier.padding(
-                            start = 16.dp,
-                            end = 16.dp,
-                            bottom = 16.dp,
-                        ),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        if (options.isEmpty()) {
-                            item { Text(stringResource(R.string.none)) }
-                        } else {
-                            itemsIndexed(options) { index, value ->
-                                val isChecked = selectedOptions.contains(index)
-                                LabeledSwitch(
-                                    label = value,
-                                    isChecked = isChecked,
-                                    onCheckedChange = { isChecked ->
-                                        if (isChecked) {
-                                            onChange(selectedOptions.toMutableSet().apply { add(index) })
-                                        } else {
-                                            onChange(selectedOptions.toMutableSet().apply { remove(index) })
-                                        }
-                                    },
-                                    extraButtons = {
-                                        if (onRemove != null && !isChecked) {
-                                            FilledIconButton(
-                                                onClick = { onRemove(index) },
-                                            ) {
-                                                Icon(
-                                                    painter = painterResource(R.drawable.remove_24px),
-                                                    contentDescription = stringResource(R.string.delete),
-                                                )
-                                            }
-                                        }
-                                    },
-                                )
-                            }
+    var removeOptionConfirmation by remember { mutableStateOf<Int?>(null) }
+    removeOptionConfirmation?.let { removeIndex ->
+        val optionName = options.getOrElse(removeIndex) { stringResource(R.string.unknown) }
+        AlertDialog(
+            onDismissRequest = { removeOptionConfirmation = null },
+            title = { Text(name) },
+            text = { Text(stringResource(R.string.delete_confirm, optionName)) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        // this should always be true since the remove button will only show when onRemove is not null
+                        if (onRemove != null) {
+                            onRemove(removeIndex)
                         }
-                    }
+                        removeOptionConfirmation = null
+                    },
+                ) {
+                    Text(stringResource(R.string.delete))
                 }
-            }
-        }
+            },
+            dismissButton = {
+                Button(onClick = { removeOptionConfirmation = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+        )
     }
 
-    Labeled(modifier, label = name) {
-        Row {
-            Button(
-                modifier = Modifier
-                    .weight(1f)
-                    .testTag("$name select"),
-                onClick = { isPickerOpen = true },
-            ) {
-                Text(
-                    if (selectedOptions.isEmpty()) {
-                        stringResource(R.string.none)
-                    } else {
-                        selectedOptions.singleOrNull()
-                            ?.let { options.getOrElse(it) { stringResource(R.string.unknown) } }
-                            ?: "…"
-                    },
-                )
+    Card(modifier.padding(vertical = 8.dp)) {
+        Column(Modifier.padding(8.dp)) {
+            Text(text = name)
+            if (options.isEmpty()) {
+                Text(stringResource(R.string.none))
+            } else {
+                options.forEachIndexed { index, value ->
+                    val isChecked = selectedOptions.contains(index)
+                    LabeledSwitch(
+                        label = value,
+                        isChecked = isChecked,
+                        onCheckedChange = { isChecked ->
+                            if (isChecked) {
+                                onChange(selectedOptions.toMutableSet().apply { add(index) })
+                            } else {
+                                onChange(selectedOptions.toMutableSet().apply { remove(index) })
+                            }
+                        },
+                        extraButtons = {
+                            Spacer(Modifier.height(48.dp))
+                            if (onRemove != null && !isChecked) {
+                                FilledIconButton(
+                                    onClick = { removeOptionConfirmation = index },
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.remove_24px),
+                                        contentDescription = stringResource(R.string.delete),
+                                    )
+                                }
+                            }
+                        },
+                    )
+                }
             }
         }
     }

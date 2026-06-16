@@ -1,5 +1,6 @@
 package com.oppzippy.openscq30.ui.utils
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Switch
@@ -8,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30Theme
 
 @Composable
@@ -27,7 +29,10 @@ fun LabeledSwitch(
             ),
         label = label,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             if (extraButtons != null) {
                 extraButtons()
             }
