@@ -1,0 +1,84 @@
+# TODO
+# - find LDAC
+# - figure out what the 20 is after each eq band
+
+name = "Soundcore Motion X600"
+mac_address = "00:00:00:00:31:30"
+rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B3130"
+has_checksum = true
+
+[[responses]]
+command = [1, 1]
+response = [
+    22,  # volume (0-31)
+    5,   # battery (0-5)
+    0,   # is charging
+    0,   # unknown
+    1,   # voice prompt
+    0,   # auto power off
+    2,   # auto power off duration (5m, 10m, 20m, 60m)
+    55,  # FW start (format is x.x.x rather than xx.xx)
+    46,
+    50,
+    46,
+    52,  # FW end
+    65,  # SN start
+    70,
+    78,
+    52,
+    70,
+    90,
+    49,
+    70,
+    49,
+    56,
+    49,
+    48,
+    48,
+    54,
+    54,
+    49,  # SN end
+    1,   # Bass up (not in effect for custom EQ, I think)
+    49,  # unknown
+    0,   # unknown
+    0,   # unknown
+    0,   # unknown, maybe high byte of eq preset?
+    0,   # eq preset (0=soundcore signature, 1=xtra bass, 2=voice, 3=treble boost, 4=balanced, 254=custom)
+    120, # band 1 gain
+    7,   # 0-9, hz step within range (48, 51, 55, 59, 63, 68, 72, 80, 83, 89)
+    20,  # unknown
+    120, # band 2 gain
+    7,   # hz (95, 102, 109, 117, 125, 134, 144, 150, 165, 177)
+    20,  # unknown
+    120, # band 3 gain
+    7,   # hz (190, 203, 218, 233, 250, 268, 287, 300, 330, 353)
+    20,  # unknown
+    120, # band 4 gain
+    7,   # hz (379, 406, 435, 467, 500, 536, 574, 600, 659, 706)
+    20,  # unknown
+    120, # band 5 gain
+    7,   # hz (759, 813, 871, 933, 1.0k, 1.07k, 1.1k, 1.2k, 1.3k, 1.4k)
+    20,  # unknown
+    120, # band 6 gain
+    7,   # hz (1.5k, 1.6k, 1.75k, 1.86k, 2k, 2.15k, 2.3k, 2.5k, 2.6k, 2.8k)
+    20,  # unknown
+    120, # band 7 gain
+    7,   # hz (3k, 3.2k, 3.5k, 3.7k, 4k, 4.3k, 4.6k, 5k, 5.3k, 5.6k)
+    20,  # unknown
+    120, # band 8 gain
+    6,   # hz (6k, 6.5k, 7k, 7.5k, 8k, 8.5k, 9k, 9.8k, 10.5k, 11.3k)
+    20,  # unknown
+    120, # band 9 gain
+    1,   # hz (12.1k, 13.0k, 14k, 15k, 16k, 17.1k, 18.3k, 20k)
+    20,  # unknown (part of band 9)
+    162, # unknown
+    12,  # unknown
+    1,   # unknown
+]
+
+[[responses]]
+# button brightness
+command = [16, 138]
+response = [
+    70, # soundcore app allows 0 for off, 20 for low, 70 for medium, and 100 for high. unknown if any value 0-100 is okay.
+]
