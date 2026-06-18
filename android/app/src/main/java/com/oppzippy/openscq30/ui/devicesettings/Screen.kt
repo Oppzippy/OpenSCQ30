@@ -25,6 +25,8 @@ sealed class Screen {
                 "buttonConfiguration" -> R.drawable.radio_button_checked_24px
                 "deviceInformation" -> R.drawable.info_24px
                 "equalizerImportExport" -> R.drawable.swap_vert_24px
+                "dualConnections" -> R.drawable.devices_other_24px
+                "limitHighVolume" -> R.drawable.volume_down_24px
                 else -> R.drawable.settings_24px
             },
         )
