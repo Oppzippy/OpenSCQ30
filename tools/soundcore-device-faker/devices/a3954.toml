@@ -6,23 +6,23 @@ rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B3954"
 # State update
 command = [1, 1]
 response = [
-    0,
-    1,
-    99,
-    100,
-    0,
-    0,
-    48,
+    0,    # host device
+    1,    # tws connected
+    99,   # left battery level
+    100,  # right battery level
+    0,    # left battery charging
+    0,    # right battery charging
+    48,   # left FW start
     51,
     46,
     50,
-    57,
-    48,
+    57,   # left FW end
+    48,   # right FW start
     51,
     46,
     50,
-    57,
-    51,
+    57,   # right FW end
+    51,   # SN start
     57,
     53,
     52,
@@ -37,21 +37,22 @@ response = [
     57,
     68,
     70,
-    52,
-    48,
+    52,   # SN end
+    48,   # case FW version start
     50,
     46,
     53,
-    56,
-    9,
-    244,
-    157,
-    138,
-    83,
-    43,
-    186,
-    254,
-    254,
+    56,   # case FW version end
+    9,    # case battery level (0-9, 0=10%, 9=100%)
+    0xF4, # case SN start (first 4 characters match SN, after that it's this as is in hex)
+    0x9D,
+    0x8A,
+    0x53,
+    0x2B,
+    0xBA, # case SN end
+    254,  # EQ preset
+    254,  # EQ preset
+    120,  # left EQ start
     120,
     120,
     120,
@@ -60,8 +61,8 @@ response = [
     120,
     120,
     120,
-    120,
-    120,
+    120,  # left EQ end
+    255,  # right EQ start
     255,
     255,
     255,
@@ -70,11 +71,10 @@ response = [
     255,
     255,
     255,
-    255,
-    255,
-    0,
-    1,
-    145,
+    255,  # right EQ end
+    0,    # unknown
+    1,    # hear id enabled
+    145,  # hear id left eq start
     147,
     139,
     141,
@@ -83,8 +83,8 @@ response = [
     105,
     100,
     60,
-    60,
-    145,
+    60,   # hear id left eq end
+    145,  # hear id right eq start
     147,
     139,
     141,
@@ -93,13 +93,13 @@ response = [
     105,
     100,
     60,
-    60,
+    60,   # hear id right eq end
+    0,    # hear id timestamp? start
     0,
     0,
-    0,
-    0,
-    1,
-    145,
+    0,    # hear id timestamp? end
+    1,    # 0=initial curve, 1=custom, 2=favorite music genre
+    145,  # hear id left custom eq start
     147,
     139,
     130,
@@ -108,8 +108,8 @@ response = [
     133,
     114,
     60,
-    60,
-    145,
+    60,   # hear id left custom eq end
+    145,  # hear id right custom eq start
     147,
     139,
     130,
@@ -118,57 +118,67 @@ response = [
     133,
     114,
     60,
-    60,
-    0,
-    0,
+    60,   # hear id right custom eq end
+    0,    # favorite music genre
+    0,    # favorite music genre
     10,
-    102,
-    102,
-    50,
-    51,
-    255,
-    255,
-    68,
-    68,
-    51,
-    2,
-    6,
-    0,
-    0,
+    0x66, # left single press
+    0x66, # right single press
+    0x32, # left double press
+    0x33, # right double press
+    0xFF, # left triple press
+    0xFF, # right triple press
+    0x44, # left long press
+    0x44, # right long press
+    0x33, # ambient sound mode cycle (TWS in low bits)
+    2,    # ambient sound mode (0=noise canceling, 1=transparency, 2=normal, 3=airplane mode)
+    6,    # ambient sound slider number (1-11, <6 is transparency, 6 is normal, >6 is noise canceling)
+    0,    # airplane mode (0=manual update, 1=automatic update)
+    0,    # wind noise reduction
     255,
     1,
     255,
-    0,
-    0,
-    0,
-    0,
-    94,
+    0,    # charging case enable atmospheric
+    0,    # charging case enable remote camera
+    0,    # charging case enable find device
+    0,    # charging case enable spatial audio
+    94,   # current air pressure times 100 in Atm
     1,
     110,
     1,
-    1,
+    0,    # low battery prompt
+    0,    # LDAC
+    0,    # dual connections
+    1,    # auto power off enabled
+    0,    # auto power off duration (10m, 20m, 30m, 60m)
+    1,    # limit high volume enabled
+    95,   # limit high volume db
+    0,    # limit high volume refresh rate
+    0,    # spatial audio enabled
+    1,    # spatial audio music mode (1=fixed, 2=head tracking)
+    0,    # spatial audio mode (0=music, 1=podcast, 2=movie, 3=gaming)
+    0,    # easy chat enabled (unknown where the duration is set)
     0,
-    0,
-    1,
-    0,
-    1,
-    95,
-    0,
-    0,
-    1,
-    1,
-    0,
-    0,
-    0,
+    0,    # ambient sound leakage compensation
     110,
     1,
     0,
-    1,
-    0,
-    0,
+    1,    # charging case language (0=japanese, 1=english, 2=chinese)
+    0,    # easy chat wait time (0=5s, 1=10s, 2=15s)
+    0,    # wearing detection
     255,
-    0,
-    0,
-    17,
-    17,
+    0,    # left slide up (0x0=volume up, 0xf=disabled)
+    0,    # right slide up (0x0=volume up, 0xf=disabled)
+    17,   # left slide down (0x1=volume down, 0xf=disabled)
+    17,   # right slide down (0x1=volume down, 0xf=disabled)
 ]
+
+[[responses]]
+# unknown
+command = [3, 148]
+response = []
+
+[[responses]]
+# unknown
+command = [7, 136]
+response = []
