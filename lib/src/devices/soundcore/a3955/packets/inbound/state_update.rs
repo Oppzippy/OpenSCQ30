@@ -98,7 +98,7 @@ impl FromPacketBody for A3955StateUpdatePacket {
                         take(5usize),
                         common::structures::CaseBatteryLevel::take,
                         common::structures::EqualizerConfiguration::take,
-                        common::structures::AgeRange::take,
+                        take(1usize), // unknown
                         common::structures::CustomHearId::take_with_music_genre_at_end,
                         take(1usize), // unknown
                         ButtonStatusCollection::take(
@@ -126,15 +126,15 @@ impl FromPacketBody for A3955StateUpdatePacket {
                         _unknown0,
                         case_battery,
                         equalizer_configuration,
-                        age_range,
-                        hear_id,
                         _unknown1,
+                        hear_id,
+                        _unknown2,
                         button_configuration,
                         ambient_sound_mode_cycle,
                         sound_modes,
-                        _unknown2,
-                        anc_personalized_to_ear_canal,
                         _unknown3,
+                        anc_personalized_to_ear_canal,
+                        _unknown4,
                         touch_tone,
                         dual_connections_enabled,
                         limit_high_volume,
@@ -149,7 +149,6 @@ impl FromPacketBody for A3955StateUpdatePacket {
                         dual_firmware_version,
                         serial_number,
                         equalizer_configuration,
-                        age_range,
                         hear_id,
                         case_battery,
                         button_configuration,
@@ -167,6 +166,8 @@ impl FromPacketBody for A3955StateUpdatePacket {
                         immersive_experience: Default::default(),
                         // unknown
                         gender: Default::default(),
+                        // unknown
+                        age_range: Default::default(),
                     }
                 },
             ),
