@@ -46,6 +46,7 @@ pub struct AppModel {
 #[derive(Clone, Copy)]
 enum KeyBindAction {
     Settings,
+    CloseDialog,
 }
 
 pub struct AppFlags {
@@ -206,17 +207,19 @@ impl Application for AppModel {
     }
 
     fn subscription(&self) -> cosmic::iced::Subscription<Self::Message> {
-        event::listen_with(|event, _status, _window_id| match event {
+        event::listen_with(|event, status, _window_id| match event {
             event::Event::Keyboard(cosmic::iced::keyboard::Event::KeyPressed {
                 modifiers,
                 key,
                 physical_key,
                 ..
-            }) => Some(Message::KeyPressed {
-                modifiers,
-                key,
-                physical_key,
-            }),
+            }) if matches!(status, cosmic::iced::event::Status::Ignored) => {
+                Some(Message::KeyPressed {
+                    modifiers,
+                    key,
+                    physical_key,
+                })
+            }
             _ => None,
         })
     }
@@ -379,10 +382,14 @@ impl Application for AppModel {
                 enum ActionKind {
                     Global(KeyBindAction),
                     AddDevice(add_device::Action),
+                    DeviceSettings(device_settings::Action),
                 }
                 let action = match &mut self.screen {
                     Screen::AddDevice(add_device) => Some(ActionKind::AddDevice(
                         add_device.on_key_pressed(modifiers, &key, &physical_key),
+                    )),
+                    Screen::DeviceSettings(device_settings) => Some(ActionKind::DeviceSettings(
+                        device_settings.on_key_pressed(modifiers, &key, &physical_key),
                     )),
                     _ => None,
                 }
@@ -397,9 +404,15 @@ impl Application for AppModel {
                 match action {
                     Some(ActionKind::Global(action)) => match action {
                         KeyBindAction::Settings => self.toggle_settings(),
+                        KeyBindAction::CloseDialog => {
+                            self.dialog_page = None;
+                        }
                     },
                     Some(ActionKind::AddDevice(action)) => {
                         return self.handle_add_device_action(action);
+                    }
+                    Some(ActionKind::DeviceSettings(action)) => {
+                        return self.handle_device_settings_action(action);
                     }
                     None => (),
                 }
@@ -483,22 +496,13 @@ impl Application for AppModel {
                 return task.map(Message::DeviceSelectionScreen).map(Into::into);
             }
             Message::DeviceSettingsScreen(message) => {
-                if let Screen::DeviceSettings(ref mut screen) = self.screen {
-                    match screen.update(message) {
-                        device_settings::Action::Task(task) => {
-                            return task.map(Message::DeviceSettingsScreen).map(Into::into);
-                        }
-                        device_settings::Action::None => (),
-                        device_settings::Action::Warning(message) => {
-                            return Task::done(Message::Warning(message).into());
-                        }
-                        device_settings::Action::FocusTextInput(id) => {
-                            return widget::text_input::focus(id);
-                        }
-                        device_settings::Action::Disconnect => {
-                            return Task::done(Message::ActivateDeviceSelectionScreen.into());
-                        }
-                    }
+                let maybe_action = if let Screen::DeviceSettings(ref mut screen) = self.screen {
+                    Some(screen.update(message))
+                } else {
+                    None
+                };
+                if let Some(action) = maybe_action {
+                    return self.handle_device_settings_action(action);
                 }
             }
             Message::CloseDialog => self.dialog_page = None,
@@ -640,6 +644,25 @@ impl AppModel {
         }
     }
 
+    fn handle_device_settings_action(
+        &mut self,
+        action: device_settings::Action,
+    ) -> cosmic::app::Task<Message> {
+        match action {
+            device_settings::Action::None => Task::none(),
+            device_settings::Action::Task(task) => {
+                task.map(Message::DeviceSettingsScreen).map(Into::into)
+            }
+            device_settings::Action::Warning(message) => {
+                Task::done(Message::Warning(message).into())
+            }
+            device_settings::Action::FocusTextInput(id) => widget::text_input::focus(id),
+            device_settings::Action::Disconnect => {
+                Task::done(Message::ActivateDeviceSelectionScreen.into())
+            }
+        }
+    }
+
     fn toggle_settings(&mut self) {
         if matches!(
             self.context_drawer_screen,
@@ -661,6 +684,13 @@ fn key_binds() -> HashMap<KeyBind, KeyBindAction> {
             key: keyboard::Key::Character(",".into()),
         },
         KeyBindAction::Settings,
+    );
+    key_binds.insert(
+        KeyBind {
+            modifiers: Vec::new(),
+            key: keyboard::Key::Named(keyboard::key::Named::Escape),
+        },
+        KeyBindAction::CloseDialog,
     );
 
     key_binds

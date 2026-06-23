@@ -313,7 +313,7 @@ impl QuickPresetsModel {
                 )
             }
             Message::CancelDialog => {
-                self.dialog = None;
+                self.close_dialog();
                 Action::None
             }
         }
@@ -330,5 +330,9 @@ impl QuickPresetsModel {
                 .map_err(handle_soft_error!())
         })
         .map(coalesce_result)
+    }
+
+    pub fn close_dialog(&mut self) {
+        self.dialog = None;
     }
 }

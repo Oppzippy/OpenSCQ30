@@ -13,7 +13,8 @@ use std::{borrow::Cow, collections::HashMap, path::PathBuf};
 use cosmic::{
     Element, Task,
     app::context_drawer::ContextDrawer,
-    widget::{self, nav_bar},
+    iced::keyboard,
+    widget::{self, menu::KeyBind, nav_bar},
 };
 use legacy_migration::LegacyMigrationModel;
 use openscq30_i18n::Translate;
@@ -85,6 +86,7 @@ pub struct DeviceSettingsModel {
     import_strings: HashMap<SettingId, String>,
     quick_presets_model: quick_presets::QuickPresetsModel,
     throttle: throttle::Throttle,
+    key_binds: HashMap<KeyBind, KeyBindAction>,
 }
 
 enum Dialog {
@@ -190,6 +192,7 @@ impl DeviceSettingsModel {
             legacy_equalizer_migration: None,
             import_strings: HashMap::new(),
             quick_presets_model,
+            key_binds: key_binds(),
         };
         let task = Task::batch([
             model.refresh(),
@@ -660,6 +663,36 @@ impl DeviceSettingsModel {
             Message::Disconnect => Action::Disconnect,
         }
     }
+
+    #[must_use]
+    pub fn on_key_pressed(
+        &mut self,
+        modifiers: keyboard::Modifiers,
+        key: &keyboard::Key,
+        physical_key: &keyboard::key::Physical,
+    ) -> Action {
+        let action = self
+            .key_binds
+            .iter()
+            .find(|(bind, _)| bind.matches(modifiers, key, Some(physical_key)))
+            .map(|(_, action)| action)
+            .copied();
+        if let Some(action) = action {
+            self.handle_key_bind_action(action)
+        } else {
+            Action::None
+        }
+    }
+
+    fn handle_key_bind_action(&mut self, action: KeyBindAction) -> Action {
+        match action {
+            KeyBindAction::CloseDialog => {
+                self.dialog = None;
+                self.quick_presets_model.close_dialog();
+                Action::None
+            }
+        }
+    }
 }
 
 fn labeled_setting_row<'a, M>(
@@ -672,4 +705,23 @@ where
     widget::settings::item::builder(label)
         .flex_control(element)
         .into()
+}
+
+#[derive(Clone, Copy)]
+enum KeyBindAction {
+    CloseDialog,
+}
+
+fn key_binds() -> HashMap<KeyBind, KeyBindAction> {
+    let mut key_binds = HashMap::new();
+
+    key_binds.insert(
+        KeyBind {
+            modifiers: Vec::new(),
+            key: keyboard::Key::Named(keyboard::key::Named::Escape),
+        },
+        KeyBindAction::CloseDialog,
+    );
+
+    key_binds
 }
