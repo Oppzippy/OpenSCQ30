@@ -1,9 +1,9 @@
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 use cosmic::{
     Apply, Element, Task,
-    iced::{Length, alignment},
-    widget,
+    iced::{Length, alignment, keyboard},
+    widget::{self, menu::KeyBind},
 };
 use openscq30_i18n::Translate;
 use openscq30_lib::{
@@ -17,6 +17,7 @@ use crate::fl;
 pub struct AddDeviceModel {
     stage: Stage,
     session: Arc<OpenSCQ30Session>,
+    key_binds: HashMap<KeyBind, KeyBindAction>,
 }
 
 enum Stage {
@@ -27,9 +28,11 @@ enum Stage {
 
 struct ModelSelectionModel {
     search_query: String,
+    search_widget_id: widget::Id,
 }
 struct SelectDeviceModel {
     search_query: String,
+    search_widget_id: widget::Id,
     devices: Option<Vec<ConnectionDescriptor>>,
     device_model: DeviceModel,
     is_demo_mode: bool,
@@ -50,6 +53,7 @@ pub enum Action {
     None,
     Task(Task<Message>),
     AddDevice(PairedDevice),
+    FocusTextInput(cosmic::widget::Id),
 }
 
 impl AddDeviceModel {
@@ -58,7 +62,9 @@ impl AddDeviceModel {
             session,
             stage: Stage::ModelSelection(ModelSelectionModel {
                 search_query: String::new(),
+                search_widget_id: widget::Id::unique(),
             }),
+            key_binds: key_binds(),
         }
     }
 
@@ -75,6 +81,7 @@ impl AddDeviceModel {
             widget::column![
                 widget::text::title2(fl!("select-device-model")),
                 widget::search_input(fl!("device-model"), &ui_model.search_query)
+                    .id(ui_model.search_widget_id.clone())
                     .on_input(Message::SetDeviceModelSearchQuery),
             ]
             .spacing(8)
@@ -113,6 +120,7 @@ impl AddDeviceModel {
                     {
                         let search_input =
                             widget::search_input(fl!("device-name"), &ui_model.search_query)
+                                .id(ui_model.search_widget_id.clone())
                                 .on_input(Message::SetDeviceNameSearchQuery);
                         let demo_toggle = widget::toggler(ui_model.is_demo_mode)
                             .label(fl!("demo-mode"))
@@ -225,6 +233,7 @@ impl AddDeviceModel {
                 } else {
                     self.stage = Stage::SelectDevice(SelectDeviceModel {
                         search_query: String::new(),
+                        search_widget_id: widget::Id::unique(),
                         devices: None,
                         device_model,
                         is_demo_mode,
@@ -275,4 +284,57 @@ impl AddDeviceModel {
         }
         Action::None
     }
+
+    #[must_use]
+    pub fn on_key_pressed(
+        &mut self,
+        modifiers: keyboard::Modifiers,
+        key: keyboard::Key,
+        physical_key: keyboard::key::Physical,
+    ) -> Action {
+        let action = self
+            .key_binds
+            .iter()
+            .find(|(bind, _)| bind.matches(modifiers, &key, Some(&physical_key)))
+            .map(|(_, action)| action)
+            .copied();
+        if let Some(action) = action {
+            self.handle_key_bind_action(action)
+        } else {
+            Action::None
+        }
+    }
+
+    fn handle_key_bind_action(&mut self, action: KeyBindAction) -> Action {
+        match action {
+            KeyBindAction::Find => match &self.stage {
+                Stage::ModelSelection(model_selection) => {
+                    Action::FocusTextInput(model_selection.search_widget_id.clone())
+                }
+                Stage::SelectDevice(select_device) => {
+                    Action::FocusTextInput(select_device.search_widget_id.clone())
+                }
+                _ => Action::None,
+            },
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+enum KeyBindAction {
+    Find,
+}
+
+fn key_binds() -> HashMap<KeyBind, KeyBindAction> {
+    let mut key_binds = HashMap::new();
+
+    key_binds.insert(
+        KeyBind {
+            modifiers: vec![cosmic::widget::menu::key_bind::Modifier::Ctrl],
+            key: keyboard::Key::Character("f".into()),
+        },
+        KeyBindAction::Find,
+    );
+
+    key_binds
 }

@@ -5,7 +5,7 @@ use std::{
 use cosmic::{
     Application, ApplicationExt, Apply, Task,
     app::{Core, context_drawer::ContextDrawer},
-    iced::{Length, alignment},
+    iced::{Length, alignment, event, keyboard},
     widget::{self, nav_bar},
 };
 use i18n_embed::unic_langid::LanguageIdentifier;
@@ -66,6 +66,11 @@ pub enum Message {
     ShowSettings,
     None,
     SetPreferredLanguage(usize),
+    KeyPressed {
+        modifiers: keyboard::Modifiers,
+        key: keyboard::Key,
+        physical_key: keyboard::key::Physical,
+    },
 }
 
 impl From<device_selection::Message> for Message {
@@ -184,6 +189,22 @@ impl Application for AppModel {
                 task.map(Message::DeviceSelectionScreen).map(Into::into),
             ]),
         )
+    }
+
+    fn subscription(&self) -> cosmic::iced::Subscription<Self::Message> {
+        event::listen_with(|event, _status, _window_id| match event {
+            event::Event::Keyboard(cosmic::iced::keyboard::Event::KeyPressed {
+                modifiers,
+                key,
+                physical_key,
+                ..
+            }) => Some(Message::KeyPressed {
+                modifiers,
+                key,
+                physical_key,
+            }),
+            _ => None,
+        })
     }
 
     fn nav_model(&self) -> Option<&nav_bar::Model> {
@@ -335,6 +356,28 @@ impl Application for AppModel {
     fn update(&mut self, message: Self::Message) -> cosmic::app::Task<Self::Message> {
         match message {
             Message::None => (),
+            Message::KeyPressed {
+                modifiers,
+                key,
+                physical_key,
+            } => {
+                // workaround for mutable borrow of both self and self.screen in match
+                enum ActionKind {
+                    AddDevice(add_device::Action),
+                }
+                let action = match &mut self.screen {
+                    Screen::AddDevice(add_device) => Some(ActionKind::AddDevice(
+                        add_device.on_key_pressed(modifiers, key, physical_key),
+                    )),
+                    _ => None,
+                };
+                match action {
+                    Some(ActionKind::AddDevice(action)) => {
+                        return self.handle_add_device_action(action);
+                    }
+                    None => (),
+                }
+            }
             Message::DeviceSelectionScreen(message) => {
                 if let Screen::DeviceSelection(ref mut screen) = self.screen {
                     match screen.update(message) {
@@ -401,6 +444,9 @@ impl Application for AppModel {
                                 Ok(Message::ActivateDeviceSelectionScreen.into())
                             })
                             .map(coalesce_result);
+                        }
+                        add_device::Action::FocusTextInput(id) => {
+                            return widget::text_input::focus(id);
                         }
                     }
                 }
@@ -540,5 +586,27 @@ impl AppModel {
         .apply(widget::container)
         .center(Length::Fill)
         .into()
+    }
+
+    fn handle_add_device_action(
+        &mut self,
+        action: add_device::Action,
+    ) -> cosmic::app::Task<Message> {
+        match action {
+            add_device::Action::None => cosmic::app::Task::none(),
+            add_device::Action::Task(task) => task.map(Message::AddDeviceScreen).map(Into::into),
+            add_device::Action::AddDevice(paired_device) => {
+                let database = self.session.clone();
+                Task::future(async move {
+                    database
+                        .pair(paired_device)
+                        .await
+                        .map_err(handle_soft_error!())?;
+                    Ok(Message::ActivateDeviceSelectionScreen.into())
+                })
+                .map(coalesce_result)
+            }
+            add_device::Action::FocusTextInput(id) => widget::text_input::focus(id),
+        }
     }
 }
