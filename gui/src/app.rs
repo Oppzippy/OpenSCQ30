@@ -71,12 +71,12 @@ pub enum Message {
     ActivateDeviceSelectionScreen,
     Warning(String),
     CloseWarning,
-    ShowAbout,
+    ToggleAbout,
     OpenUrl(String),
     CloseContextDrawer,
     ConnectToDeviceFailed(String),
     CancelConnectToDevice,
-    ShowSettings,
+    ToggleSettings,
     None,
     SetPreferredLanguage(usize),
     KeyPressed {
@@ -252,10 +252,10 @@ impl Application for AppModel {
     fn header_end(&self) -> Vec<cosmic::Element<'_, Self::Message>> {
         vec![
             widget::button::icon(widget::icon::from_name("preferences-system-symbolic"))
-                .on_press(Message::ShowSettings)
+                .on_press(Message::ToggleSettings)
                 .into(),
             widget::button::icon(widget::icon::from_name("help-about-symbolic"))
-                .on_press(Message::ShowAbout)
+                .on_press(Message::ToggleAbout)
                 .into(),
         ]
     }
@@ -396,7 +396,7 @@ impl Application for AppModel {
                 });
                 match action {
                     Some(ActionKind::Global(action)) => match action {
-                        KeyBindAction::Settings => self.show_settings(),
+                        KeyBindAction::Settings => self.toggle_settings(),
                     },
                     Some(ActionKind::AddDevice(action)) => {
                         return self.handle_add_device_action(action);
@@ -560,13 +560,19 @@ impl Application for AppModel {
                 self.warnings.pop_front();
             }
             Message::CloseContextDrawer => self.context_drawer_screen = None,
-            Message::ShowAbout => self.context_drawer_screen = Some(ContextDrawerScreen::About),
+            Message::ToggleAbout => {
+                if matches!(self.context_drawer_screen, Some(ContextDrawerScreen::About)) {
+                    self.context_drawer_screen = None;
+                } else {
+                    self.context_drawer_screen = Some(ContextDrawerScreen::About)
+                }
+            }
             Message::OpenUrl(url) => {
                 if let Err(err) = open::that_detached(&url) {
                     tracing::error!("error opening url {url}: {err:?}");
                 }
             }
-            Message::ShowSettings => self.show_settings(),
+            Message::ToggleSettings => self.toggle_settings(),
             Message::SetPreferredLanguage(language_index) => {
                 let result_receiver = self.config.modify(|inner| {
                     inner.preferred_language = self.available_languages[language_index]
@@ -634,8 +640,15 @@ impl AppModel {
         }
     }
 
-    fn show_settings(&mut self) {
-        self.context_drawer_screen = Some(ContextDrawerScreen::Settings);
+    fn toggle_settings(&mut self) {
+        if matches!(
+            self.context_drawer_screen,
+            Some(ContextDrawerScreen::Settings)
+        ) {
+            self.context_drawer_screen = None;
+        } else {
+            self.context_drawer_screen = Some(ContextDrawerScreen::Settings);
+        }
     }
 }
 
