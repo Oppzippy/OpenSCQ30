@@ -289,13 +289,13 @@ impl AddDeviceModel {
     pub fn on_key_pressed(
         &mut self,
         modifiers: keyboard::Modifiers,
-        key: keyboard::Key,
-        physical_key: keyboard::key::Physical,
+        key: &keyboard::Key,
+        physical_key: &keyboard::key::Physical,
     ) -> Action {
         let action = self
             .key_binds
             .iter()
-            .find(|(bind, _)| bind.matches(modifiers, &key, Some(&physical_key)))
+            .find(|(bind, _)| bind.matches(modifiers, key, Some(physical_key)))
             .map(|(_, action)| action)
             .copied();
         if let Some(action) = action {

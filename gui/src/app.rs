@@ -1,12 +1,18 @@
 use std::{
-    borrow::Cow, collections::VecDeque, iter, ops::Deref, path::PathBuf, str::FromStr, sync::Arc,
+    borrow::Cow,
+    collections::{HashMap, VecDeque},
+    iter,
+    ops::Deref,
+    path::PathBuf,
+    str::FromStr,
+    sync::Arc,
 };
 
 use cosmic::{
     Application, ApplicationExt, Apply, Task,
     app::{Core, context_drawer::ContextDrawer},
     iced::{Length, alignment, event, keyboard},
-    widget::{self, nav_bar},
+    widget::{self, menu::KeyBind, nav_bar},
 };
 use i18n_embed::unic_langid::LanguageIdentifier;
 use macaddr::MacAddr6;
@@ -34,7 +40,14 @@ pub struct AppModel {
     context_drawer_screen: Option<ContextDrawerScreen>,
     available_language_names: Vec<Cow<'static, str>>,
     available_languages: Vec<Option<LanguageIdentifier>>,
+    key_binds: HashMap<KeyBind, KeyBindAction>,
 }
+
+#[derive(Clone, Copy)]
+enum KeyBindAction {
+    Settings,
+}
+
 pub struct AppFlags {
     pub config: Config,
     pub config_dir: PathBuf,
@@ -180,6 +193,7 @@ impl Application for AppModel {
             context_drawer_screen: None,
             available_language_names,
             available_languages,
+            key_binds: key_binds(),
         };
         let command = app.update_title();
         (
@@ -363,15 +377,27 @@ impl Application for AppModel {
             } => {
                 // workaround for mutable borrow of both self and self.screen in match
                 enum ActionKind {
+                    Global(KeyBindAction),
                     AddDevice(add_device::Action),
                 }
                 let action = match &mut self.screen {
                     Screen::AddDevice(add_device) => Some(ActionKind::AddDevice(
-                        add_device.on_key_pressed(modifiers, key, physical_key),
+                        add_device.on_key_pressed(modifiers, &key, &physical_key),
                     )),
                     _ => None,
-                };
+                }
+                .or_else(|| {
+                    self.key_binds
+                        .iter()
+                        .find(|(key_bind, _)| {
+                            key_bind.matches(modifiers, &key, Some(&physical_key))
+                        })
+                        .map(|(_, action)| ActionKind::Global(*action))
+                });
                 match action {
+                    Some(ActionKind::Global(action)) => match action {
+                        KeyBindAction::Settings => self.show_settings(),
+                    },
                     Some(ActionKind::AddDevice(action)) => {
                         return self.handle_add_device_action(action);
                     }
@@ -540,9 +566,7 @@ impl Application for AppModel {
                     tracing::error!("error opening url {url}: {err:?}");
                 }
             }
-            Message::ShowSettings => {
-                self.context_drawer_screen = Some(ContextDrawerScreen::Settings);
-            }
+            Message::ShowSettings => self.show_settings(),
             Message::SetPreferredLanguage(language_index) => {
                 let result_receiver = self.config.modify(|inner| {
                     inner.preferred_language = self.available_languages[language_index]
@@ -609,4 +633,22 @@ impl AppModel {
             add_device::Action::FocusTextInput(id) => widget::text_input::focus(id),
         }
     }
+
+    fn show_settings(&mut self) {
+        self.context_drawer_screen = Some(ContextDrawerScreen::Settings);
+    }
+}
+
+fn key_binds() -> HashMap<KeyBind, KeyBindAction> {
+    let mut key_binds = HashMap::new();
+
+    key_binds.insert(
+        KeyBind {
+            modifiers: vec![widget::menu::key_bind::Modifier::Ctrl],
+            key: keyboard::Key::Character(",".into()),
+        },
+        KeyBindAction::Settings,
+    );
+
+    key_binds
 }
