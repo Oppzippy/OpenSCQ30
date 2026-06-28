@@ -7,11 +7,6 @@ mod lib
 mod lib-macros
 mod lib-has
 
-set unstable := true
-
-# `which` is unstable
-
-fdfind := if which("fdfind") == "" { "fd" } else { "fdfind" }
 build-output-dir := "build-output"
 
 [default]
@@ -187,5 +182,13 @@ format-check-docs:
         echo "Prettier not installed, skipping markdown format check"
     fi
 
+[script("bash")]
 shellcheck:
-    {{ fdfind }} --type file --extension sh --exec shellcheck {}
+    set -euxo pipefail
+
+    if command -v fdfind >/dev/null; then
+        fd_command=fdfind
+    else
+        fd_command=fd
+    fi
+    $fd_command --type file --extension sh --exec shellcheck {}
