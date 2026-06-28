@@ -930,6 +930,10 @@ pub mod test_utils {
             }
         }
 
+        pub async fn set_settings(&mut self, settings: Vec<(SettingId, Value)>) {
+            _ = self.set_settings_and_gather_sent_packets(settings).await;
+        }
+
         pub async fn assert_set_settings_response_unordered(
             &mut self,
             settings: Vec<(SettingId, Value)>,

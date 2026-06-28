@@ -25,6 +25,7 @@ soundcore-a3939 = Soundcore Life P3
 soundcore-a3935 = Soundcore Life A2 NC
 soundcore-a3959 = Soundcore P30i / R50i NC
 soundcore-a3968 = Soundcore Sport X20
+soundcore-a3954 = Soundcore Liberty 4 Pro
 soundcore-a3955 = Soundcore P40i
 soundcore-a3957 = Soundcore Liberty 5
 soundcore-development = Soundcore Development Information
@@ -84,6 +85,9 @@ bus = Bus
 car = Car
 talk-mode = Talk Mode
 anc-personalized-to-ear-canal = ANC Personalized to Ear Canal
+manual-update = Manual Update
+automatic-update = Automatic Update
+airplane-mode = Airplane Mode
 
 soundcore-signature = Soundcore Signature
 acoustic = Acoustic
@@ -122,10 +126,14 @@ left-single-press = Left Single Press
 left-double-press = Left Double Press
 left-triple-press = Left Triple Press
 left-long-press = Left Long Press
+left-slide-up = Left Slide Up
+left-slide-down = Left Slide Down
 right-single-press = Right Single Press
 right-double-press = Right Double Press
 right-triple-press = Right Triple Press
 right-long-press = Right Long Press
+right-slide-up = Right Slide Up
+right-slide-down = Right Slide Down
 volume-up = Volume Up
 volume-down = Volume Down
 previous-song = Previous Song
@@ -209,3 +217,27 @@ firmest = Firmest
 
 dual-connections = Dual Connections
 dual-connections-devices = Dual Connections Devices
+
+fixed = Fixed
+head-tracking = Head Tracking
+
+music = Music
+movie = Movie
+gaming = Gaming
+
+case = Case
+case-language = Case Language
+atmospheric = Atmospheric
+remote-camera = Remote Camera
+find-device = Find Device
+spatial-audio = Spatial Audio
+spatial-audio-mode = Spatial Audio Mode
+spatial-audio-music-mode = Spatial Audio Music Mode
+case-serial-number = Case Serial Number
+case-firmware-version = Case Firmware Version
+
+air-pressure = Air Pressure
+x-standard-atmospheres = { $pressure } Atm
+
+easy-chat = Easy Chat
+easy-chat-wait-time = Easy Chat Wait Time

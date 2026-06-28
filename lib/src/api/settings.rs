@@ -43,6 +43,7 @@ pub enum CategoryId {
     Miscellaneous,
     LimitHighVolume,
     DualConnections,
+    Case,
 }
 
 #[derive(
@@ -82,16 +83,21 @@ pub enum SettingId {
     LeftDoublePress,
     LeftTriplePress,
     LeftLongPress,
+    LeftSlideUp,
+    LeftSlideDown,
     RightSinglePress,
     RightDoublePress,
     RightTriplePress,
     RightLongPress,
+    RightSlideUp,
+    RightSlideDown,
     NormalModeInCycle,
     TransparencyModeInCycle,
     NoiseCancelingModeInCycle,
     AdaptiveNoiseCanceling,
     ManualNoiseCanceling,
     ManualTransparency,
+    AirplaneMode,
     WindNoiseSuppression,
     WindNoiseDetected,
     AdaptiveNoiseCancelingSensitivityLevel,
@@ -142,6 +148,18 @@ pub enum SettingId {
     Ldac,
     DualConnections,
     DualConnectionsDevices,
+    Atmospheric,
+    RemoteCamera,
+    FindDevice,
+    SpatialAudio,
+    SpatialAudioMode,
+    SpatialAudioMusicMode,
+    CaseLanguage,
+    CaseSerialNumber,
+    CaseFirmwareVersion,
+    AirPressure,
+    EasyChat,
+    EasyChatWaitTime,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

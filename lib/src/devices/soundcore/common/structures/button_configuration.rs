@@ -143,6 +143,10 @@ enum_subset!(
         RightTriplePress,
         LeftLongPress,
         RightLongPress,
+        LeftSlideUp,
+        RightSlideUp,
+        LeftSlideDown,
+        RightSlideDown,
     }
 );
 
@@ -153,6 +157,8 @@ impl Button {
             Self::LeftDoublePress | Self::RightDoublePress => ButtonPressKind::Double,
             Self::LeftTriplePress | Self::RightTriplePress => ButtonPressKind::Triple,
             Self::LeftLongPress | Self::RightLongPress => ButtonPressKind::Long,
+            Self::LeftSlideUp | Self::RightSlideUp => ButtonPressKind::SlideUp,
+            Self::LeftSlideDown | Self::RightSlideDown => ButtonPressKind::SlideDown,
         }
     }
 
@@ -161,11 +167,15 @@ impl Button {
             Self::LeftSinglePress
             | Self::LeftDoublePress
             | Self::LeftTriplePress
-            | Self::LeftLongPress => ButtonSide::Left,
+            | Self::LeftLongPress
+            | Self::LeftSlideUp
+            | Self::LeftSlideDown => ButtonSide::Left,
             Self::RightSinglePress
             | Self::RightDoublePress
             | Self::RightTriplePress
-            | Self::RightLongPress => ButtonSide::Right,
+            | Self::RightLongPress
+            | Self::RightSlideUp
+            | Self::RightSlideDown => ButtonSide::Right,
         }
     }
 }
@@ -191,6 +201,8 @@ pub enum ButtonPressKind {
     Double,
     Triple,
     Long,
+    SlideUp,
+    SlideDown,
 }
 
 impl ButtonPressKind {
@@ -200,6 +212,8 @@ impl ButtonPressKind {
             Self::Double => Button::LeftDoublePress,
             Self::Triple => Button::LeftTriplePress,
             Self::Long => Button::LeftLongPress,
+            Self::SlideUp => Button::LeftSlideUp,
+            Self::SlideDown => Button::LeftSlideDown,
         }
     }
 
@@ -209,6 +223,8 @@ impl ButtonPressKind {
             Self::Double => Button::RightDoublePress,
             Self::Triple => Button::RightTriplePress,
             Self::Long => Button::RightLongPress,
+            Self::SlideUp => Button::RightSlideUp,
+            Self::SlideDown => Button::RightSlideDown,
         }
     }
 }
