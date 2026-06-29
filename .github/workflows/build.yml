@@ -147,6 +147,9 @@ jobs:
     permissions:
       id-token: write
       attestations: write
+    strategy:
+      matrix:
+        arch: [x86, x86_64, armeabi-v7a, arm64-v8a]
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
@@ -159,7 +162,7 @@ jobs:
         run: sudo snap install just --classic
 
       - name: Build
-        run: just build-android
+        run: just build-android-${{ matrix.arch }}
 
       - name: Attest artifacts
         uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
