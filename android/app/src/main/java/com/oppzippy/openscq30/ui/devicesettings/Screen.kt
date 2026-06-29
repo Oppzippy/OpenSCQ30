@@ -27,6 +27,7 @@ sealed class Screen {
                 "equalizerImportExport" -> R.drawable.swap_vert_24px
                 "dualConnections" -> R.drawable.devices_other_24px
                 "limitHighVolume" -> R.drawable.volume_down_24px
+                "case" -> R.drawable.earbud_case_24px
                 else -> R.drawable.settings_24px
             },
         )
