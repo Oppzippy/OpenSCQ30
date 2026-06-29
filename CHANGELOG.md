@@ -1,5 +1,50 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Features
+
+- Add support for Soundcore Sport X20
+- Add support for Soundcore Liberty 4 Pro
+- Add option to remove devices from dual connections
+
+#### Fixes
+
+- Rename "Soundcore Life Q30" to "Soundcore Q30 / Life Q30" to indicate that both names refer to the same device
+- Fix Soundcore Liberty 5 gaming mode not working
+- Fix Soundcore P40i Equalizer not working
+
+### GUI
+
+#### Features
+
+- Add Ctrl+F key bind to select search text input when relevant
+- Add Ctrl+, key bind to open settings
+- Add Escape key bind to close dialogs
+
+#### Fixes
+
+- Buttons that open the context drawer should instead toggle it
+
+### CLI
+
+#### Documentation
+
+- Add man page
+
+### Android
+
+#### Fixes
+
+- Add category icons for dual connections and limit high volume
+
+#### Build
+
+- The gradle build script now makes use of flavors rather than manually recreating them with profiles. What this means for packagers is that the build command is now `./gradlew assembleArm64-v8aRelease` rather than the now outdated `assembleRelease-arm64-v8a`, and the output file is located at `app/build/outputs/apk/arm64-v8a/release/app-arm64-v8a-release.apk`.
+- Remove universal apk
+
 ## v2.8.2
 
 ### General
