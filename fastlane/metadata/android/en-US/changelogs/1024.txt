@@ -1,0 +1,8 @@
+* Features
+  - Add support for Sport X20 and Liberty 4 Pro
+  - Add option to remove devices from dual connections
+
+* Fixes
+  - Fix Soundcore Liberty 5 gaming mode not working
+  - Fix Soundcore P40i Equalizer not working
+  - Add category icons for dual connections and limit high volume

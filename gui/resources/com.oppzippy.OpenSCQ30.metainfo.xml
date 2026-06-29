@@ -41,12 +41,32 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.9.0" date="2026-06-29">
+            <description>
+                <p>Features</p>
+                <ul>
+                    <li>Add support for Soundcore Sport X20</li>
+                    <li>Add support for Soundcore Liberty 4 Pro</li>
+                    <li>Add option to remove devices from dual connections</li>
+                    <li>Add Ctrl+F key bind to select search text input when relevant</li>
+                    <li>Add Ctrl+, key bind to open settings</li>
+                    <li>Add Escape key bind to close dialogs</li>
+                </ul>
+                <p>Fixes</p>
+                <ul>
+                    <li>Rename "Soundcore Life Q30" to "Soundcore Q30 / Life Q30" to indicate that both names refer to the same device</li>
+                    <li>Fix Soundcore Liberty 5 gaming mode not working</li>
+                    <li>Fix Soundcore P40i Equalizer not working</li>
+                    <li>Buttons that open the context drawer should instead toggle it</li>
+                </ul>
+            </description>
+        </release>
         <release version="2.8.2" date="2026-05-23">
             <description>
                 <p>Fixes</p>
                 <ul>
                     <li>Soundcore Space A40 equalizer not working</li>
-                </ul> 
+                </ul>
             </description>
         </release>
         <release version="2.8.1" date="2026-05-23">
