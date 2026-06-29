@@ -39,7 +39,8 @@ where
                         range: 1..=5,
                         step: 1,
                     },
-                    value: i32::from(sound_modes.sound_mode_slider),
+                    // Strength is the slider's distance from the center, so flip it around for <6
+                    value: i32::from(6 - sound_modes.sound_mode_slider),
                 }),
             SoundModesSetting::ManualTransparency => (7..=11)
                 .contains(&sound_modes.sound_mode_slider)
