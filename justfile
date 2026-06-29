@@ -47,15 +47,9 @@ build-cli-fast features='': create-build-output-dir
 
 android-apk-path := "./android/app/build/outputs/apk"
 
-[doc("Build a universal apk as well as apks for all supported architectures")]
+[doc("Build apks for all supported architectures")]
 [group("build")]
-build-android: build-android-universal build-android-x86 build-android-x86_64 build-android-arm64-v8a build-android-armeabi-v7a
-
-[doc("Build a universal apk")]
-[group("build")]
-build-android-universal: create-build-output-dir
-    just android::build release
-    just copy-apks universal
+build-android: build-android-x86 build-android-x86_64 build-android-arm64-v8a build-android-armeabi-v7a
 
 [doc("Build an x86 apk")]
 [group("build")]
