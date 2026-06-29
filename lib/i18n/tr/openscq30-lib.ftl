@@ -184,3 +184,4 @@ pressure-sensitivity = Basınç Duyarlılığı
 softest = En Yumuşak
 medium = Orta
 firmest = En Sert
+soundcore-a3968 = Soundcore Sport X20
