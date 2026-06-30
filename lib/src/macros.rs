@@ -3,6 +3,8 @@
 ///
 /// # Example
 /// ```ignore
+/// use std::assert_matches;
+///
 /// use crate::macros::impl_from_source_error_with_location;
 ///
 /// enum OuterError {
@@ -20,7 +22,7 @@
 ///     Err(OuterError::from(InnerError))
 /// }
 ///
-/// assert!(matches!(fail().unwrap_err(), OuterError::InnerError { .. }))
+/// assert_matches!(fail().unwrap_err(), OuterError::InnerError { .. })
 /// ```
 macro_rules! impl_from_source_error_with_location {
     ($target_error:ident::$target_variant:ident($source_error:ty)) => {

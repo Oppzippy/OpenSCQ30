@@ -240,7 +240,7 @@ pub fn delete(connection: &Connection, model: DeviceModel, name: String) -> Resu
 
 #[cfg(test)]
 mod tests {
-    use std::{borrow::Cow, collections::HashSet, hash::RandomState};
+    use std::{assert_matches, borrow::Cow, collections::HashSet, hash::RandomState};
 
     use crate::{api::settings::Value, storage::OpenSCQ30Database};
 
@@ -400,8 +400,9 @@ mod tests {
             .fetch_quick_preset(DeviceModel::SoundcoreA3004, "Preset 1".into())
             .await
             .unwrap_err();
-        assert!(
-            matches!(fetch_one_err, Error::NotFound { .. }),
+        assert_matches!(
+            fetch_one_err,
+            Error::NotFound { .. },
             "wanted not found, got {fetch_one_err:?}",
         );
 
@@ -591,10 +592,7 @@ mod tests {
             .await
             .unwrap_err();
 
-        assert!(
-            matches!(err, Error::NotFound { .. }),
-            "should be not found: {err:?}",
-        );
+        assert_matches!(err, Error::NotFound { .. }, "should be not found: {err:?}",);
     }
 
     #[tokio::test]
@@ -617,9 +615,6 @@ mod tests {
             .await
             .unwrap_err();
 
-        assert!(
-            matches!(err, Error::NotFound { .. }),
-            "should be not found: {err:?}",
-        );
+        assert_matches!(err, Error::NotFound { .. }, "should be not found: {err:?}",);
     }
 }
