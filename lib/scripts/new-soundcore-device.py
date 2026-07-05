@@ -164,7 +164,7 @@ mod state;
 soundcore_device!(
     {device_model}State,
     async |packet_io| {{
-        fetch_state_from_state_update_packet::<_, {device_model}State, {device_model}StateUpdatePacket>(packet_io)
+        fetch_state_from_state_update_packet::<{device_model}State, {device_model}StateUpdatePacket>(packet_io)
             .await
     }},
     async |builder| {{
