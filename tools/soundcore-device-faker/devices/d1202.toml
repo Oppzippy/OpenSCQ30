@@ -1,0 +1,259 @@
+name = "soundcore P31i"
+mac_address = "00:00:00:0d:12:02"
+rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7D1202"
+
+[[responses]]
+command = [1, 1]
+# State update
+response = [
+    1,    # host device
+    1,    # tws connected
+    9,    # battery level left (0-9)
+    9,    # battery level right (0-9)
+    0,    # left battery charging
+    0,    # right battery charging
+    48,   # left FW start
+    49,
+    46,
+    56,
+    51,   # left FW end
+    48,   # right FW start
+    49,
+    46,
+    56,
+    51,   # right FW end
+    49,   # SN start
+    50,
+    48,
+    50,
+    51,
+    52,
+    48,
+    57,
+    67,
+    57,
+    66,
+    52,
+    48,
+    51,
+    67,
+    69,   # SN end
+    48,   # case FW? start
+    49,
+    46,
+    56,
+    51,   # case FW? end
+    3,    # case battery level (0-9)
+    0,    # EQ preset
+    0,    # EQ preset
+    120,  # EQ left
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,  # EQ left end
+    255,  # EQ right
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,  # EQ right end
+    0,
+    0,
+    120,  # hear id left start
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,  # hear id left end
+    120,  # hear id right start
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,  # hear id right end
+    0,    # hear id timestamp? start
+    0,
+    0,
+    0,    # hear id timestamp? end
+    2,    # hear id type
+    120,  # hear id custom left start
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,  # hear id custom left end
+    120,  # hear id custom right start
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,  # hear id custom right end
+    0,    # favorite music genre
+    0,    # favorite music genre
+    10,
+    0xff, # left single press
+    0xff, # right single press
+    0x63, # left Double Press
+    0x66, # right Double Press
+    0xff, # left triple press
+    0xff, # right triple press
+    0x44, # left long press
+    0x44, # right long press
+    51,
+    0,    # ambient sound mode (0=NC, 1=transparency, 2=normal)
+    0x50, # manual NC (1-5), adaptive NC (0-2)
+    0,    # transparency mode (0=fully transparent, 1=vocal mode)
+    2,    # NC mode (0=manual, 1=adaptive, 2=multi scene)
+    0,    # wind noise reduction
+    0,    # unknown
+    0,    # multi scene ANC (0=transport, 1=outdoor, 2=indoor)
+    0,    # real time adaptive ANC
+    50,
+    1,    # touch tone
+    1,    # low battery prompt
+    0,    # LDAC
+    1,    # dual connections enabled
+    1,    # auto power off enabled
+    2,    # auto power off duration (10m, 20m, 30m, 60m)
+    0,    # limit high volume enabled
+    90,   # limit high volume level
+    0,    # limit high volume refresh rate (0=real time, 1=10s, 2=1m)
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    255,
+    255,
+    255,
+    255,
+    255,
+]
+
+[[responses]]
+# unknown but required in order for the app to not crash. user statistics maybe?
+command = [5, 1]
+response = [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+]
