@@ -30,12 +30,12 @@ pub struct A3936SoundModes {
 impl A3936SoundModes {
     pub fn bytes(&self) -> [u8; 6] {
         [
-            self.ambient_sound_mode.id(),
+            self.ambient_sound_mode.byte(),
             manual_adaptive_noise_canceling_byte(
                 self.manual_noise_canceling,
                 self.adaptive_noise_canceling,
             ),
-            self.transparency_mode.id(),
+            self.transparency_mode.byte(),
             self.noise_canceling_mode.byte(),
             self.wind_noise.byte(),
             self.noise_canceling_adaptive_sensitivity_level,

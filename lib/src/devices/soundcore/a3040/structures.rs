@@ -42,7 +42,7 @@ pub struct SoundModes {
 impl SoundModes {
     pub fn bytes(&self) -> [u8; 6] {
         [
-            self.ambient_sound_mode.id(),
+            self.ambient_sound_mode.byte(),
             (self.manual_noise_canceling.inner() << 4) | self.adaptive_noise_canceling.inner(),
             self.transparency_mode as u8,
             self.noise_canceling_mode as u8,

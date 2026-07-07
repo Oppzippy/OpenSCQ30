@@ -115,7 +115,10 @@ macro_rules! sound_mode_enum {
                 input: &'a [u8],
             ) -> ::nom::IResult<&'a [u8], Self, E> {
                 use ::nom::Parser;
-                ::nom::combinator::map(le_u8, |i| Self::from_repr(i).unwrap_or_default()).parse_complete(input)
+                ::nom::combinator::map(
+                    ::nom::number::complete::le_u8,
+                    |i| Self::from_repr(i).unwrap_or_default()
+                ).parse_complete(input)
             }
 
             pub fn bytes(&self) -> impl Iterator<Item = u8> {

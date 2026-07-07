@@ -18,9 +18,9 @@ impl ToPacket for SetSoundModes {
 
     fn body(&self) -> Vec<u8> {
         vec![
-            self.0.ambient_sound_mode.id(),
-            self.0.noise_canceling_mode.id(),
-            self.0.transparency_mode.id(),
+            self.0.ambient_sound_mode.byte(),
+            self.0.noise_canceling_mode.byte(),
+            self.0.transparency_mode.byte(),
             self.0.custom_noise_canceling.value(),
         ]
     }

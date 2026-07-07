@@ -47,9 +47,9 @@ impl SoundModes {
 
     pub fn bytes(&self) -> [u8; 4] {
         [
-            self.ambient_sound_mode.id(),
-            self.noise_canceling_mode.id(),
-            self.transparency_mode.id(),
+            self.ambient_sound_mode.byte(),
+            self.noise_canceling_mode.byte(),
+            self.transparency_mode.byte(),
             self.custom_noise_canceling.value(),
         ]
     }

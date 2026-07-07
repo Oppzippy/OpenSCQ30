@@ -30,7 +30,7 @@ pub struct SoundModes {
 impl SoundModes {
     pub fn bytes(&self) -> impl Iterator<Item = u8> {
         [
-            self.ambient_sound_mode.id(),
+            self.ambient_sound_mode.byte(),
             manual_adaptive_noise_canceling_byte(
                 self.manual_noise_canceling,
                 self.adaptive_noise_canceling,

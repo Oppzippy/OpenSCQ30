@@ -224,7 +224,7 @@ mod tests {
 
     use crate::devices::soundcore::common::structures::{
         AmbientSoundMode, CommonEqualizerConfiguration, CommonVolumeAdjustments,
-        CustomNoiseCanceling, NoiseCancelingMode, SoundModes,
+        CustomNoiseCanceling, NoiseCancelingMode, SoundModes, TransparencyMode,
     };
 
     #[test]
@@ -254,7 +254,7 @@ mod tests {
             SoundModes {
                 ambient_sound_mode: AmbientSoundMode::Normal,
                 noise_canceling_mode: NoiseCancelingMode::Transport,
-                transparency_mode: Default::default(),
+                transparency_mode: TransparencyMode::VocalMode,
                 custom_noise_canceling: CustomNoiseCanceling::new(0),
             },
             packet.sound_modes,

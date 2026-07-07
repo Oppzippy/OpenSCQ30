@@ -40,16 +40,16 @@ pub struct SoundModes {
 impl SoundModes {
     pub fn bytes(&self) -> [u8; 7] {
         [
-            self.ambient_sound_mode.id(),
+            self.ambient_sound_mode.byte(),
             manual_adaptive_noise_canceling_byte(
                 self.manual_noise_canceling,
                 self.adaptive_noise_canceling,
             ),
-            self.ambient_sound_mode.id(),
+            self.ambient_sound_mode.byte(),
             self.noise_canceling_mode.byte(), // ANC automation mode?
             self.wind_noise.byte(),
             self.noise_canceling_adaptive_sensitivity_level,
-            self.multi_scene_anc.id(),
+            self.multi_scene_anc.byte(),
         ]
     }
 }
