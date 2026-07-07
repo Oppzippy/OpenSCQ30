@@ -160,6 +160,7 @@ pub enum SettingId {
     AirPressure,
     EasyChat,
     EasyChatWaitTime,
+    RealTimeAdaptiveNoiseCanceling,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

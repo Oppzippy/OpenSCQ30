@@ -66,8 +66,8 @@ response = [
     255,
     255,
     255,  # EQ right end
-    0,
-    0,
+    0,    # unknown
+    0,    # hear id enabled
     120,  # hear id left start
     120,
     120,
@@ -143,8 +143,8 @@ response = [
     0,    # limit high volume enabled
     90,   # limit high volume level
     0,    # limit high volume refresh rate (0=real time, 1=10s, 2=1m)
-    0,
-    0,
+    0,    # spatial audio enabled
+    0,    # spatial audio mode
     0,
     0,
     0,

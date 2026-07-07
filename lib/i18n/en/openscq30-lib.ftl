@@ -28,6 +28,7 @@ soundcore-a3968 = Soundcore Sport X20
 soundcore-a3954 = Soundcore Liberty 4 Pro
 soundcore-a3955 = Soundcore P40i
 soundcore-a3957 = Soundcore Liberty 5
+soundcore-d1202 = Soundcore P31i
 soundcore-development = Soundcore Development Information
 
 general = General
@@ -88,6 +89,7 @@ anc-personalized-to-ear-canal = ANC Personalized to Ear Canal
 manual-update = Manual Update
 automatic-update = Automatic Update
 airplane-mode = Airplane Mode
+real-time-adaptive-noise-canceling = Real Time Adaptive Noise Canceling
 
 soundcore-signature = Soundcore Signature
 acoustic = Acoustic
