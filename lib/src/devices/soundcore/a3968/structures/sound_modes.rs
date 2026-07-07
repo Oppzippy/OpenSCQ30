@@ -4,23 +4,24 @@ use nom::{
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
-use openscq30_i18n_macros::Translate;
-use strum::{Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 use crate::devices::soundcore::common::{
     self,
     macros::sound_mode_enum,
     modules::sound_modes_v2,
     packet::{self, inbound::FromPacketBody},
-    structures::TransparencyMode,
+    structures::{
+        AdaptiveNoiseCancelingNamedNoiseLevel, ManualNoiseCancelingNamed, TransparencyMode,
+        take_manual_adaptive_noise_canceling,
+    },
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct SoundModes {
     pub ambient_sound_mode: common::structures::AmbientSoundMode,
     pub noise_canceling_mode: NoiseCancelingMode,
-    pub adaptive_noise_canceling: AdaptiveNoiseCanceling,
-    pub manual_noise_canceling: ManualNoiseCanceling,
+    pub adaptive_noise_canceling: AdaptiveNoiseCancelingNamedNoiseLevel,
+    pub manual_noise_canceling: ManualNoiseCancelingNamed,
     pub transparency_mode: TransparencyMode,
     pub wind_noise: WindNoise,
 }
@@ -49,7 +50,7 @@ impl FromPacketBody for SoundModes {
             map(
                 (
                     common::structures::AmbientSoundMode::take,
-                    NoiseCancelingSettings::take,
+                    take_manual_adaptive_noise_canceling,
                     common::structures::TransparencyMode::take,
                     NoiseCancelingMode::take,
                     WindNoise::take,
@@ -57,7 +58,7 @@ impl FromPacketBody for SoundModes {
                 ),
                 |(
                     ambient_sound_mode,
-                    noise_canceling_settings,
+                    (manual_noise_canceling, adaptive_noise_canceling),
                     transparency_mode,
                     noise_canceling_mode,
                     wind_noise,
@@ -65,8 +66,8 @@ impl FromPacketBody for SoundModes {
                 )| {
                     Self {
                         ambient_sound_mode,
-                        adaptive_noise_canceling: noise_canceling_settings.adaptive,
-                        manual_noise_canceling: noise_canceling_settings.manual,
+                        adaptive_noise_canceling,
+                        manual_noise_canceling,
                         noise_canceling_mode,
                         transparency_mode,
                         wind_noise,
@@ -81,76 +82,6 @@ impl FromPacketBody for SoundModes {
 impl sound_modes_v2::ToPacketBody for SoundModes {
     fn bytes(&self) -> Vec<u8> {
         self.bytes().to_vec()
-    }
-}
-
-#[repr(u8)]
-#[derive(
-    FromRepr,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    Display,
-    Default,
-    IntoStaticStr,
-    EnumString,
-    EnumIter,
-    Translate,
-)]
-#[allow(clippy::enum_variant_names)]
-pub enum AdaptiveNoiseCanceling {
-    #[default]
-    LowNoise = 0,
-    MediumNoise = 1,
-    HighNoise = 2,
-}
-
-#[repr(u8)]
-#[derive(
-    FromRepr,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    Display,
-    Default,
-    IntoStaticStr,
-    EnumString,
-    EnumIter,
-    Translate,
-)]
-pub enum ManualNoiseCanceling {
-    #[default]
-    Weak = 1,
-    Moderate = 2,
-    Strong = 3,
-}
-
-impl ManualNoiseCanceling {
-    pub fn id(&self) -> u8 {
-        *self as u8
-    }
-}
-
-struct NoiseCancelingSettings {
-    manual: ManualNoiseCanceling,
-    adaptive: AdaptiveNoiseCanceling,
-}
-
-impl NoiseCancelingSettings {
-    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        map(le_u8, |b| Self {
-            manual: ManualNoiseCanceling::from_repr((b & 0xF0) >> 4).unwrap_or_default(),
-            adaptive: AdaptiveNoiseCanceling::from_repr(b & 0x0F).unwrap_or_default(),
-        })
-        .parse_complete(input)
     }
 }
 

@@ -6,7 +6,10 @@ use strum::IntoEnumIterator;
 use crate::{
     api::settings::{self, Setting, SettingId, Value},
     devices::soundcore::{
-        common::settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
+        common::{
+            settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
+            structures::ManualNoiseCanceling,
+        },
         d1202,
     },
     i18n::fl,
@@ -96,7 +99,7 @@ where
             SoundModeSetting::AdaptiveNoiseCanceling => return Err(SettingHandlerError::ReadOnly),
             SoundModeSetting::ManualNoiseCanceling => {
                 sound_modes.manual_noise_canceling =
-                    d1202::structures::ManualNoiseCanceling::new(value.try_as_i32()? as u8);
+                    ManualNoiseCanceling::new(value.try_as_i32()? as u8);
             }
             SoundModeSetting::WindNoiseSuppression => {
                 sound_modes.wind_noise.is_suppression_enabled = value.try_as_bool()?;

@@ -4,15 +4,17 @@ use nom::{
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
-use openscq30_i18n_macros::Translate;
 use openscq30_lib_macros::MigrationSteps;
-use strum::{FromRepr, IntoStaticStr};
 
 use crate::devices::soundcore::common::{
     self,
     macros::sound_mode_enum,
     modules::sound_modes_v2,
     packet::{self, inbound::FromPacketBody},
+    structures::{
+        AdaptiveNoiseCancelingNamedStrength, ManualNoiseCanceling,
+        manual_adaptive_noise_canceling_byte, take_manual_adaptive_noise_canceling,
+    },
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, MigrationSteps)]
@@ -23,7 +25,7 @@ pub struct SoundModes {
     #[migration_requirement(field = ambient_sound_mode, value = common::structures::AmbientSoundMode::NoiseCanceling)]
     pub noise_canceling_mode: NoiseCancelingMode,
     #[migration_requirement(field = noise_canceling_mode, value = NoiseCancelingMode::Adaptive)]
-    pub adaptive_noise_canceling: AdaptiveNoiseCanceling,
+    pub adaptive_noise_canceling: AdaptiveNoiseCancelingNamedStrength,
     #[migration_requirement(field = noise_canceling_mode, value = NoiseCancelingMode::Manual)]
     pub manual_noise_canceling: ManualNoiseCanceling,
     #[migration_requirement(field = noise_canceling_mode, value = NoiseCancelingMode::Transportation)]
@@ -42,7 +44,10 @@ impl SoundModes {
     pub fn bytes(&self) -> [u8; 7] {
         [
             self.ambient_sound_mode.id(),
-            (self.manual_noise_canceling.0 << 4) | self.adaptive_noise_canceling as u8,
+            manual_adaptive_noise_canceling_byte(
+                self.manual_noise_canceling,
+                self.adaptive_noise_canceling,
+            ),
             self.transparency_mode.id(),
             self.noise_canceling_mode.byte(),
             self.wind_noise.byte(),
@@ -63,7 +68,7 @@ impl FromPacketBody for SoundModes {
             map(
                 (
                     common::structures::AmbientSoundMode::take,
-                    NoiseCancelingSettings::take,
+                    take_manual_adaptive_noise_canceling,
                     common::structures::TransparencyMode::take,
                     NoiseCancelingMode::take,
                     WindNoise::take,
@@ -72,7 +77,7 @@ impl FromPacketBody for SoundModes {
                 ),
                 |(
                     ambient_sound_mode,
-                    noise_canceling_settings,
+                    (manual_noise_canceling, adaptive_noise_canceling),
                     transparency_mode,
                     noise_canceling_mode,
                     wind_noise,
@@ -82,8 +87,8 @@ impl FromPacketBody for SoundModes {
                     Self {
                         ambient_sound_mode,
                         transparency_mode,
-                        adaptive_noise_canceling: noise_canceling_settings.adaptive,
-                        manual_noise_canceling: noise_canceling_settings.manual,
+                        adaptive_noise_canceling,
+                        manual_noise_canceling,
                         noise_canceling_mode,
                         wind_noise,
                         noise_canceling_adaptive_sensitivity_level,
@@ -99,58 +104,6 @@ impl FromPacketBody for SoundModes {
 impl sound_modes_v2::ToPacketBody for SoundModes {
     fn bytes(&self) -> Vec<u8> {
         self.bytes().to_vec()
-    }
-}
-
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Default,
-    PartialOrd,
-    Ord,
-    FromRepr,
-    Translate,
-    IntoStaticStr,
-)]
-#[repr(u8)]
-pub enum AdaptiveNoiseCanceling {
-    #[default]
-    Weak = 1,
-    Moderate = 2,
-    Strong = 3,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
-pub struct ManualNoiseCanceling(pub(crate) u8);
-
-impl ManualNoiseCanceling {
-    pub fn new(value: u8) -> Self {
-        Self(value.clamp(1, 5))
-    }
-
-    pub fn inner(&self) -> u8 {
-        self.0
-    }
-}
-
-struct NoiseCancelingSettings {
-    manual: ManualNoiseCanceling,
-    adaptive: AdaptiveNoiseCanceling,
-}
-
-impl NoiseCancelingSettings {
-    fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        map(le_u8, |b| Self {
-            manual: ManualNoiseCanceling::new((b & 0xF0) >> 4),
-            adaptive: AdaptiveNoiseCanceling::from_repr(b & 0x0F).unwrap_or_default(),
-        })
-        .parse_complete(input)
     }
 }
 

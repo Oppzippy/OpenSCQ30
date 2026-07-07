@@ -4,21 +4,22 @@ use nom::{
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
-use openscq30_i18n_macros::Translate;
-use strum::{EnumIter, EnumString, FromRepr, IntoStaticStr, VariantArray};
 
 use crate::devices::soundcore::common::{
     macros::sound_mode_enum,
     modules::sound_modes_v2::ToPacketBody,
     packet::{self, inbound::FromPacketBody, parsing::take_bool},
-    structures::AmbientSoundMode,
+    structures::{
+        AdaptiveNoiseCancelingNamedStrength, AmbientSoundMode, ManualNoiseCanceling,
+        manual_adaptive_noise_canceling_byte, take_manual_adaptive_noise_canceling,
+    },
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct SoundModes {
     pub ambient_sound_mode: AmbientSoundMode,
     pub manual_noise_canceling: ManualNoiseCanceling,
-    pub adaptive_noise_canceling: AdaptiveNoiseCanceling,
+    pub adaptive_noise_canceling: AdaptiveNoiseCancelingNamedStrength,
     pub transparency_mode: TransparencyMode,
     pub noise_canceling_mode: NoiseCancelingMode,
     pub wind_noise: WindNoise,
@@ -30,7 +31,10 @@ impl SoundModes {
     pub fn bytes(&self) -> impl Iterator<Item = u8> {
         [
             self.ambient_sound_mode.id(),
-            (self.manual_noise_canceling.inner() << 4) | (self.adaptive_noise_canceling as u8),
+            manual_adaptive_noise_canceling_byte(
+                self.manual_noise_canceling,
+                self.adaptive_noise_canceling,
+            ),
             self.transparency_mode.byte(),
             self.noise_canceling_mode.byte(),
             self.wind_noise.byte(),
@@ -59,7 +63,7 @@ impl FromPacketBody for SoundModes {
             map(
                 (
                     AmbientSoundMode::take,
-                    take_noise_canceling_strength,
+                    take_manual_adaptive_noise_canceling,
                     TransparencyMode::take,
                     NoiseCancelingMode::take,
                     WindNoise::take,
@@ -114,59 +118,6 @@ sound_mode_enum!(
         Indoor = 2,
     }
 );
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct ManualNoiseCanceling(u8);
-
-impl Default for ManualNoiseCanceling {
-    fn default() -> Self {
-        Self::new(1)
-    }
-}
-
-impl ManualNoiseCanceling {
-    pub fn new(value: u8) -> Self {
-        Self(value.clamp(1, 5))
-    }
-
-    pub fn inner(&self) -> u8 {
-        self.0
-    }
-}
-
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Default,
-    FromRepr,
-    IntoStaticStr,
-    EnumString,
-    EnumIter,
-    VariantArray,
-    Translate,
-)]
-#[repr(u8)]
-pub enum AdaptiveNoiseCanceling {
-    #[default]
-    Weak = 0,
-    Moderate = 1,
-    Strong = 2,
-}
-
-fn take_noise_canceling_strength<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-    input: &'a [u8],
-) -> IResult<&'a [u8], (ManualNoiseCanceling, AdaptiveNoiseCanceling), E> {
-    map(le_u8, |b| {
-        (
-            ManualNoiseCanceling::new((b & 0xF0) >> 4),
-            AdaptiveNoiseCanceling::from_repr(b & 0x0F).unwrap_or_default(),
-        )
-    })
-    .parse_complete(input)
-}
 
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WindNoise {

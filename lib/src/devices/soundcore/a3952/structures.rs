@@ -4,15 +4,17 @@ use nom::{
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
 };
-use openscq30_i18n_macros::Translate;
 use openscq30_lib_macros::MigrationSteps;
-use strum::{Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 use crate::devices::soundcore::common::{
     self,
     macros::sound_mode_enum,
     modules::sound_modes_v2,
     packet::{self, inbound::FromPacketBody},
+    structures::{
+        AdaptiveNoiseCancelingNamedNoiseLevel, ManualNoiseCancelingNamed,
+        manual_adaptive_noise_canceling_byte, take_manual_adaptive_noise_canceling,
+    },
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, MigrationSteps)]
@@ -23,9 +25,9 @@ pub struct SoundModes {
     #[migration_requirement(field = ambient_sound_mode, value = common::structures::AmbientSoundMode::NoiseCanceling)]
     pub noise_canceling_mode: NoiseCancelingMode,
     #[migration_requirement(field = noise_canceling_mode, value = NoiseCancelingMode::Manual)]
-    pub manual_noise_canceling: ManualNoiseCanceling,
+    pub manual_noise_canceling: ManualNoiseCancelingNamed,
     #[migration_requirement(field = noise_canceling_mode, value = NoiseCancelingMode::Adaptive)]
-    pub adaptive_noise_canceling: AdaptiveNoiseCanceling,
+    pub adaptive_noise_canceling: AdaptiveNoiseCancelingNamedNoiseLevel,
     #[migration_requirement(
         field = ambient_sound_mode,
         value = common::structures::AmbientSoundMode::NoiseCanceling,
@@ -39,7 +41,10 @@ impl SoundModes {
     pub fn bytes(&self) -> [u8; 6] {
         [
             self.ambient_sound_mode as u8,
-            ((self.manual_noise_canceling as u8) << 4) | self.adaptive_noise_canceling as u8,
+            manual_adaptive_noise_canceling_byte(
+                self.manual_noise_canceling,
+                self.adaptive_noise_canceling,
+            ),
             self.transparency_mode as u8,
             self.noise_canceling_mode as u8,
             self.wind_noise.byte(),
@@ -59,7 +64,7 @@ impl FromPacketBody for SoundModes {
             map(
                 (
                     common::structures::AmbientSoundMode::take,
-                    le_u8, // manual/adaptive noise canceling level
+                    take_manual_adaptive_noise_canceling, // manual/adaptive noise canceling level
                     common::structures::TransparencyMode::take,
                     NoiseCancelingMode::take,
                     WindNoise::take,
@@ -67,7 +72,7 @@ impl FromPacketBody for SoundModes {
                 ),
                 |(
                     ambient_sound_mode,
-                    manual_adaptive_level,
+                    (manual_noise_canceling, adaptive_noise_canceling),
                     transparency_mode,
                     noise_canceling_mode,
                     wind_noise,
@@ -75,14 +80,8 @@ impl FromPacketBody for SoundModes {
                 )| {
                     Self {
                         ambient_sound_mode,
-                        manual_noise_canceling: ManualNoiseCanceling::from_repr(
-                            (manual_adaptive_level & 0xF0) >> 4,
-                        )
-                        .unwrap_or_default(),
-                        adaptive_noise_canceling: AdaptiveNoiseCanceling::from_repr(
-                            manual_adaptive_level & 0xF,
-                        )
-                        .unwrap_or_default(),
+                        manual_noise_canceling,
+                        adaptive_noise_canceling,
                         transparency_mode,
                         noise_canceling_mode,
                         wind_noise,
@@ -107,38 +106,6 @@ sound_mode_enum!(
         Adaptive = 1,
     }
 );
-
-sound_mode_enum!(
-    pub enum ManualNoiseCanceling {
-        Weak = 1,
-        Moderate = 2,
-        Strong = 3,
-    }
-);
-
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Default,
-    FromRepr,
-    Translate,
-    EnumIter,
-    IntoStaticStr,
-    Display,
-    EnumString,
-)]
-#[repr(u8)]
-#[allow(clippy::enum_variant_names)]
-pub enum AdaptiveNoiseCanceling {
-    #[default]
-    LowNoise = 0,
-    MediumNoise = 1,
-    HighNoise = 2,
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct WindNoise {

@@ -5,8 +5,11 @@ use strum::IntoEnumIterator;
 use crate::{
     api::settings::{self, Setting, SettingId, Value},
     devices::soundcore::{
-        a3957::structures::{ManualNoiseCanceling, NoiseCancelingMode, SoundModes},
-        common::settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
+        a3957::structures::{NoiseCancelingMode, SoundModes},
+        common::{
+            settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
+            structures::ManualNoiseCanceling,
+        },
     },
     i18n::fl,
 };
