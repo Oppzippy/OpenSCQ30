@@ -8,6 +8,7 @@ use openscq30_i18n_macros::Translate;
 use strum::{EnumIter, EnumString, FromRepr, IntoStaticStr, VariantArray};
 
 use crate::devices::soundcore::common::{
+    macros::sound_mode_enum,
     modules::sound_modes_v2::ToPacketBody,
     packet::{self, inbound::FromPacketBody, parsing::take_bool},
     structures::AmbientSoundMode,
@@ -30,11 +31,11 @@ impl SoundModes {
         [
             self.ambient_sound_mode.id(),
             (self.manual_noise_canceling.inner() << 4) | (self.adaptive_noise_canceling as u8),
-            self.transparency_mode as u8,
-            self.noise_canceling_mode as u8,
+            self.transparency_mode.byte(),
+            self.noise_canceling_mode.byte(),
             self.wind_noise.byte(),
             0,
-            self.multi_scene_anc as u8,
+            self.multi_scene_anc.byte(),
             u8::from(self.real_time_adaptive_anc),
         ]
         .into_iter()
@@ -91,94 +92,28 @@ impl FromPacketBody for SoundModes {
     }
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Default,
-    FromRepr,
-    IntoStaticStr,
-    EnumString,
-    EnumIter,
-    VariantArray,
-    Translate,
-)]
-#[repr(u8)]
-pub enum TransparencyMode {
-    #[default]
-    FullyTransparent = 0,
-    VocalMode = 1,
-}
-
-impl TransparencyMode {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        map(le_u8, |i| Self::from_repr(i).unwrap_or_default()).parse_complete(input)
+sound_mode_enum!(
+    pub enum TransparencyMode {
+        FullyTransparent = 0,
+        VocalMode = 1,
     }
-}
+);
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Default,
-    FromRepr,
-    IntoStaticStr,
-    EnumString,
-    EnumIter,
-    VariantArray,
-    Translate,
-)]
-#[repr(u8)]
-pub enum NoiseCancelingMode {
-    #[default]
-    Manual = 0,
-    Adaptive = 1,
-    MultiScene = 2,
-}
-
-impl NoiseCancelingMode {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        map(le_u8, |i| Self::from_repr(i).unwrap_or_default()).parse_complete(input)
+sound_mode_enum!(
+    pub enum NoiseCancelingMode {
+        Manual = 0,
+        Adaptive = 1,
+        MultiScene = 2,
     }
-}
+);
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Default,
-    FromRepr,
-    IntoStaticStr,
-    EnumString,
-    EnumIter,
-    VariantArray,
-    Translate,
-)]
-#[repr(u8)]
-pub enum MultiSceneAnc {
-    #[default]
-    Transport = 0,
-    Outdoor = 1,
-    Indoor = 2,
-}
-
-impl MultiSceneAnc {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        map(le_u8, |i| Self::from_repr(i).unwrap_or_default()).parse_complete(input)
+sound_mode_enum!(
+    pub enum MultiSceneAnc {
+        Transport = 0,
+        Outdoor = 1,
+        Indoor = 2,
     }
-}
+);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ManualNoiseCanceling(u8);
@@ -282,32 +217,10 @@ impl SpatialAudio {
     }
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Default,
-    FromRepr,
-    IntoStaticStr,
-    EnumString,
-    EnumIter,
-    VariantArray,
-    Translate,
-)]
-#[repr(u8)]
-pub enum SpatialAudioMode {
-    #[default]
-    Music = 0,
-    Movie = 2,
-    Gaming = 3,
-}
-
-impl SpatialAudioMode {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        map(le_u8, |i| Self::from_repr(i).unwrap_or_default()).parse_complete(input)
+sound_mode_enum!(
+    pub enum SpatialAudioMode {
+        Music = 0,
+        Movie = 2,
+        Gaming = 3,
     }
-}
+);

@@ -8,6 +8,7 @@ use openscq30_i18n_macros::Translate;
 use strum::{Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 use crate::devices::soundcore::common::{
+    macros::sound_mode_enum,
     modules::sound_modes_v2,
     packet::{self, inbound::FromPacketBody},
     structures::{AmbientSoundMode, TransparencyMode},
@@ -30,7 +31,7 @@ impl A3936SoundModes {
             self.ambient_sound_mode.id(),
             (self.manual_noise_canceling.id() << 4) | self.adaptive_noise_canceling.id(),
             self.transparency_mode.id(),
-            self.noise_canceling_mode.id(),
+            self.noise_canceling_mode.byte(),
             self.wind_noise.byte(),
             self.noise_canceling_adaptive_sensitivity_level,
         ]
@@ -160,47 +161,12 @@ impl NoiseCancelingSettings {
     }
 }
 
-#[repr(u8)]
-#[derive(
-    FromRepr,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    Display,
-    Default,
-    IntoStaticStr,
-    EnumString,
-    EnumIter,
-    Translate,
-)]
-pub enum A3936NoiseCancelingMode {
-    #[default]
-    Manual = 0,
-    Adaptive = 1,
-}
-
-impl A3936NoiseCancelingMode {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        context(
-            "a3936 noise canceling mode",
-            map(le_u8, |noise_canceling_mode| {
-                Self::from_repr(noise_canceling_mode).unwrap_or_default()
-            }),
-        )
-        .parse_complete(input)
+sound_mode_enum!(
+    pub enum A3936NoiseCancelingMode {
+        Manual = 0,
+        Adaptive = 1,
     }
-}
-
-impl A3936NoiseCancelingMode {
-    pub fn id(&self) -> u8 {
-        *self as u8
-    }
-}
+);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct WindNoise {

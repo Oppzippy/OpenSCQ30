@@ -10,6 +10,7 @@ use strum::{EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 use crate::devices::soundcore::common::{
     self,
+    macros::sound_mode_enum,
     modules::sound_modes_v2,
     packet::{self, inbound::FromPacketBody, parsing::take_bool},
     structures::AmbientSoundMode,
@@ -95,34 +96,12 @@ impl sound_modes_v2::ToPacketBody for SoundModes {
     }
 }
 
-#[repr(u8)]
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Default,
-    Hash,
-    FromRepr,
-    EnumIter,
-    Translate,
-    EnumString,
-    IntoStaticStr,
-)]
-pub enum NoiseCancelingMode {
-    #[default]
-    Custom = 0,
-    Adaptive = 1,
-}
-
-impl NoiseCancelingMode {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        map(le_u8, |id| Self::from_repr(id).unwrap_or_default()).parse_complete(input)
+sound_mode_enum!(
+    pub enum NoiseCancelingMode {
+        Custom = 0,
+        Adaptive = 1,
     }
-}
+);
 
 fn take_manual_and_adaptive_noise_canceling<
     'a,

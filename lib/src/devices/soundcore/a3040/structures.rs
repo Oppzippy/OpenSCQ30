@@ -9,6 +9,7 @@ use openscq30_lib_macros::MigrationSteps;
 use strum::{EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 use crate::devices::soundcore::common::{
+    macros::sound_mode_enum,
     modules::sound_modes_v2,
     packet::{self, inbound::FromPacketBody, parsing::take_bool},
     structures::{AmbientSoundMode, flag},
@@ -96,34 +97,12 @@ impl sound_modes_v2::ToPacketBody for SoundModes {
     }
 }
 
-#[repr(u8)]
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Default,
-    FromRepr,
-    EnumIter,
-    Translate,
-    EnumString,
-    IntoStaticStr,
-)]
-pub enum TransparencyMode {
-    #[default]
-    TalkMode = 0,
-    Manual = 1,
-}
-
-impl TransparencyMode {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        map(le_u8, |id| Self::from_repr(id).unwrap_or_default()).parse_complete(input)
+sound_mode_enum!(
+    pub enum TransparencyMode {
+        TalkMode = 0,
+        Manual = 1,
     }
-}
+);
 
 #[derive(Debug, Hash, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ManualTransparency(pub u8);
@@ -144,34 +123,12 @@ impl ManualTransparency {
     }
 }
 
-#[repr(u8)]
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    Hash,
-    PartialEq,
-    Eq,
-    Default,
-    FromRepr,
-    EnumIter,
-    Translate,
-    EnumString,
-    IntoStaticStr,
-)]
-pub enum NoiseCancelingMode {
-    #[default]
-    Manual = 0,
-    Adaptive = 1,
-}
-
-impl NoiseCancelingMode {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        map(le_u8, |id| Self::from_repr(id).unwrap_or_default()).parse_complete(input)
+sound_mode_enum!(
+    pub enum NoiseCancelingMode {
+        Manual = 0,
+        Adaptive = 1,
     }
-}
+);
 
 pub fn take_manual_and_adaptive_noise_canceling<
     'a,

@@ -80,3 +80,53 @@ macro_rules! soundcore_device {
 }
 
 pub(crate) use soundcore_device;
+
+/// Generates derives necessary for use with Setting::select_from_enum_all_variants as well as
+/// take, bytes, and byte functions.
+macro_rules! sound_mode_enum {
+    (pub enum $enum_name:ident {
+        $($variant:ident = $id:expr),+ $(,)?
+    }) => {
+        #[derive(
+            Debug,
+            Clone,
+            Copy,
+            PartialEq,
+            Eq,
+            Hash,
+            Ord,
+            PartialOrd,
+            Default,
+            ::strum::FromRepr,
+            ::strum::IntoStaticStr,
+            ::strum::EnumString,
+            ::strum::EnumIter,
+            ::strum::VariantArray,
+            ::openscq30_i18n_macros::Translate,
+        )]
+        #[repr(u8)]
+        pub enum $enum_name {
+            #[default]
+            $($variant = $id),+
+        }
+
+        impl $enum_name {
+            pub fn take<'a, E: ::nom::error::ParseError<&'a [u8]> + ::nom::error::ContextError<&'a [u8]>>(
+                input: &'a [u8],
+            ) -> ::nom::IResult<&'a [u8], Self, E> {
+                use ::nom::Parser;
+                ::nom::combinator::map(le_u8, |i| Self::from_repr(i).unwrap_or_default()).parse_complete(input)
+            }
+
+            pub fn bytes(&self) -> impl Iterator<Item = u8> {
+                ::std::iter::once(*self as u8)
+            }
+
+            pub fn byte(&self) -> u8 {
+                *self as u8
+            }
+        }
+    };
+}
+
+pub(crate) use sound_mode_enum;

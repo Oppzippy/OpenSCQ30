@@ -10,6 +10,7 @@ use strum::{Display, EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 use crate::devices::soundcore::common::{
     self,
+    macros::sound_mode_enum,
     modules::sound_modes_v2,
     packet::{self, inbound::FromPacketBody},
 };
@@ -100,56 +101,20 @@ impl sound_modes_v2::ToPacketBody for SoundModes {
     }
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Default,
-    FromRepr,
-    Translate,
-    EnumIter,
-    IntoStaticStr,
-    EnumString,
-)]
-#[repr(u8)]
-pub enum NoiseCancelingMode {
-    #[default]
-    Manual = 0,
-    Adaptive = 1,
-}
-
-impl NoiseCancelingMode {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        map(le_u8, |b| Self::from_repr(b).unwrap_or_default()).parse_complete(input)
+sound_mode_enum!(
+    pub enum NoiseCancelingMode {
+        Manual = 0,
+        Adaptive = 1,
     }
-}
+);
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Default,
-    FromRepr,
-    Translate,
-    EnumIter,
-    IntoStaticStr,
-    EnumString,
-)]
-#[repr(u8)]
-pub enum ManualNoiseCanceling {
-    #[default]
-    Weak = 1,
-    Moderate = 2,
-    Strong = 3,
-}
+sound_mode_enum!(
+    pub enum ManualNoiseCanceling {
+        Weak = 1,
+        Moderate = 2,
+        Strong = 3,
+    }
+);
 
 #[derive(
     Debug,

@@ -6,10 +6,11 @@ use nom::{
 };
 use openscq30_i18n_macros::Translate;
 use openscq30_lib_macros::MigrationSteps;
-use strum::{Display, EnumIter, EnumString, FromRepr, IntoStaticStr, VariantArray};
+use strum::{FromRepr, IntoStaticStr};
 
 use crate::devices::soundcore::common::{
     self,
+    macros::sound_mode_enum,
     modules::sound_modes_v2,
     packet::{self, inbound::FromPacketBody},
 };
@@ -43,10 +44,10 @@ impl SoundModes {
             self.ambient_sound_mode.id(),
             (self.manual_noise_canceling.0 << 4) | self.adaptive_noise_canceling as u8,
             self.transparency_mode.id(),
-            self.noise_canceling_mode.id(),
+            self.noise_canceling_mode.byte(),
             self.wind_noise.byte(),
             self.noise_canceling_adaptive_sensitivity_level,
-            self.transportation_mode as u8,
+            self.transportation_mode.byte(),
         ]
     }
 }
@@ -153,84 +154,20 @@ impl NoiseCancelingSettings {
     }
 }
 
-#[repr(u8)]
-#[derive(
-    FromRepr,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    Display,
-    Default,
-    IntoStaticStr,
-    EnumString,
-    EnumIter,
-    VariantArray,
-    Translate,
-)]
-pub enum NoiseCancelingMode {
-    #[default]
-    Manual = 0,
-    Adaptive = 1,
-    Transportation = 2,
-}
-
-impl NoiseCancelingMode {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        context(
-            "a3957 noise canceling mode",
-            map(le_u8, |noise_canceling_mode| {
-                Self::from_repr(noise_canceling_mode).unwrap_or_default()
-            }),
-        )
-        .parse_complete(input)
+sound_mode_enum!(
+    pub enum NoiseCancelingMode {
+        Manual = 0,
+        Adaptive = 1,
+        Transportation = 2,
     }
-}
+);
 
-impl NoiseCancelingMode {
-    pub fn id(&self) -> u8 {
-        *self as u8
+sound_mode_enum!(
+    pub enum TransportationMode {
+        Plane = 0,
+        Car = 3,
     }
-}
-
-#[repr(u8)]
-#[derive(
-    FromRepr,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    Display,
-    Default,
-    IntoStaticStr,
-    EnumString,
-    EnumIter,
-    VariantArray,
-    Translate,
-)]
-pub enum TransportationMode {
-    #[default]
-    Plane = 0,
-    Car = 3,
-}
-
-impl TransportationMode {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        context(
-            "a3957 transportation mode",
-            map(le_u8, |v| Self::from_repr(v).unwrap_or_default()),
-        )
-        .parse_complete(input)
-    }
-}
+);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct WindNoise {

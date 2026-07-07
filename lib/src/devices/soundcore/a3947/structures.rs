@@ -7,11 +7,10 @@ use nom::{
     multi::count,
     number::complete::{be_u32, le_u8},
 };
-use openscq30_i18n_macros::Translate;
 use openscq30_lib_macros::MigrationSteps;
-use strum::{EnumIter, EnumString, FromRepr, IntoStaticStr};
 
 use crate::devices::soundcore::common::{
+    macros::sound_mode_enum,
     modules::sound_modes_v2,
     packet::{self, inbound::FromPacketBody, parsing::take_bool},
     structures::{
@@ -110,78 +109,22 @@ impl sound_modes_v2::ToPacketBody for SoundModes {
     }
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Default,
-    FromRepr,
-    EnumIter,
-    Translate,
-    IntoStaticStr,
-    EnumString,
-)]
-#[repr(u8)]
-pub enum NoiseCancelingMode {
-    #[default]
-    Manual = 0,
-    Adaptive = 1,
-    Transportation = 2,
-}
-
-impl NoiseCancelingMode {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        context(
-            "a3947 noise canceling mode",
-            map(le_u8, |noise_canceling_mode| {
-                Self::from_repr(noise_canceling_mode).unwrap_or_default()
-            }),
-        )
-        .parse_complete(input)
+sound_mode_enum!(
+    pub enum NoiseCancelingMode {
+        Manual = 0,
+        Adaptive = 1,
+        Transportation = 2,
     }
-}
+);
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Default,
-    FromRepr,
-    EnumIter,
-    Translate,
-    IntoStaticStr,
-    EnumString,
-)]
-#[repr(u8)]
-pub enum TransportationMode {
-    #[default]
-    Plane = 0,
-    Train = 1,
-    Bus = 2,
-    Car = 3,
-}
-
-impl TransportationMode {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        context(
-            "a3947 noise canceling mode",
-            map(le_u8, |noise_canceling_mode| {
-                Self::from_repr(noise_canceling_mode).unwrap_or_default()
-            }),
-        )
-        .parse_complete(input)
+sound_mode_enum!(
+    pub enum TransportationMode {
+        Plane = 0,
+        Train = 1,
+        Bus = 2,
+        Car = 3,
     }
-}
+);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, PartialOrd, Ord)]
 pub struct AdaptiveNoiseCanceling(u8);

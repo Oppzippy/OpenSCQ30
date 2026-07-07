@@ -13,6 +13,7 @@ use strum::{Display, EnumIter, EnumString, FromRepr, IntoStaticStr, VariantArray
 use crate::{
     devices::soundcore::common::{
         self,
+        macros::sound_mode_enum,
         modules::sound_modes_v2::ToPacketBody,
         packet::{self, inbound::FromPacketBody, parsing::take_bool},
     },
@@ -155,69 +156,21 @@ impl WindNoise {
     }
 }
 
-#[repr(u8)]
-#[derive(
-    FromRepr,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    Display,
-    Default,
-    IntoStaticStr,
-    EnumString,
-    EnumIter,
-    VariantArray,
-    Translate,
-)]
-pub enum AmbientSoundMode {
-    #[default]
-    NoiseCanceling = 0,
-    Transparency = 1,
-    Normal = 2,
-    AirplaneMode = 3,
-}
-
-impl AmbientSoundMode {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        map(le_u8, |b| Self::from_repr(b).unwrap_or_default()).parse_complete(input)
+sound_mode_enum!(
+    pub enum AmbientSoundMode {
+        NoiseCanceling = 0,
+        Transparency = 1,
+        Normal = 2,
+        AirplaneMode = 3,
     }
-}
+);
 
-#[derive(
-    FromRepr,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    Display,
-    Default,
-    IntoStaticStr,
-    EnumString,
-    EnumIter,
-    VariantArray,
-    Translate,
-)]
-#[repr(u8)]
-pub enum AirplaneMode {
-    #[default]
-    ManualUpdate = 0,
-    AutomaticUpdate = 1,
-}
-
-impl AirplaneMode {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        map(le_u8, |b| Self::from_repr(b).unwrap_or_default()).parse_complete(input)
+sound_mode_enum!(
+    pub enum AirplaneMode {
+        ManualUpdate = 0,
+        AutomaticUpdate = 1,
     }
-}
+);
 
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CaseFeatures {
@@ -318,38 +271,14 @@ impl SpatialAudio {
     }
 }
 
-#[derive(
-    FromRepr,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    Display,
-    Default,
-    IntoStaticStr,
-    EnumString,
-    EnumIter,
-    VariantArray,
-    Translate,
-)]
-#[repr(u8)]
-pub enum SpatialAudioMode {
-    #[default]
-    Music = 0,
-    Podcast = 1,
-    Movie = 2,
-    Gaming = 3,
-}
-
-impl SpatialAudioMode {
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        map(le_u8, |b| Self::from_repr(b).unwrap_or_default()).parse_complete(input)
+sound_mode_enum!(
+    pub enum SpatialAudioMode {
+        Music = 0,
+        Podcast = 1,
+        Movie = 2,
+        Gaming = 3,
     }
-}
+);
 
 #[derive(
     FromRepr,
