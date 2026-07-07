@@ -22,6 +22,7 @@ mod sound_modes;
 mod transparency_mode;
 mod tws_status;
 mod volume_adjustments;
+mod wind_noise;
 
 pub use age_range::*;
 pub use ambient_sound_mode::*;
@@ -45,3 +46,4 @@ pub use sound_modes::*;
 pub use transparency_mode::*;
 pub use tws_status::*;
 pub use volume_adjustments::*;
+pub use wind_noise::*;
