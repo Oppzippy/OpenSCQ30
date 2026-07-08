@@ -29,6 +29,7 @@ soundcore-a3954 = Soundcore Liberty 4 Pro
 soundcore-a3955 = Soundcore P40i
 soundcore-a3957 = Soundcore Liberty 5
 soundcore-d1202 = Soundcore P31i
+soundcore-d1202c = Soundcore R60i NC
 soundcore-development = Soundcore Development Information
 
 general = General
