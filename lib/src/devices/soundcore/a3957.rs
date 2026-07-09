@@ -43,9 +43,7 @@ soundcore_device!(
     async |builder| {
         builder.module_collection().add_state_update();
         builder.a3957_sound_modes();
-        builder
-            .equalizer_with_custom_hear_id_tws(equalizer::common_settings())
-            .await;
+        builder.a3957_equalizer(equalizer::common_settings()).await;
         builder.button_configuration(&BUTTON_CONFIGURATION_SETTINGS);
         builder.ambient_sound_mode_cycle();
         builder.reset_button_configuration::<packets::inbound::A3957StateUpdatePacket>(
