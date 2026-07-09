@@ -1044,6 +1044,21 @@ fn setting_equalizer_invalid() {
 }
 
 #[test]
+fn setting_hue_color_picker() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3876");
+    assert_cmd_snapshot!(set_and_get(dir.path(), "colorfulLightsColor", "270"), @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    Setting ID         	Value    
+    colorfulLightsColor	270.11765
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
 fn setting_information_get() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3951");
@@ -1262,6 +1277,37 @@ fn setting_json() {
         "value": {
           "type": "string",
           "value": "Transport"
+        }
+      }
+    ]
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn hue_color_picker_json() {
+    let dir = tempdir().unwrap();
+    add_device(dir.path(), "SoundcoreA3876");
+    let mut command = cli(dir.path());
+    command
+        .arg("device")
+        .arg("--mac-address")
+        .arg("00:00:00:00:00:00")
+        .arg("setting")
+        .arg("--json")
+        .arg("--get")
+        .arg("colorfulLightsColor");
+    assert_cmd_snapshot!(command, @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    [
+      {
+        "settingId": "colorfulLightsColor",
+        "value": {
+          "type": "f32",
+          "value": 0.0
         }
       }
     ]

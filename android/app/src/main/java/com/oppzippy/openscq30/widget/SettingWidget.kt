@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
@@ -440,6 +441,14 @@ private fun ShowSetting(context: Context, settingId: String, setting: Setting) {
                     checked = setting.value,
                     onCheckedChange = actionSetSettingValue(context, settingId, (!setting.value).toValue()),
                 )
+            }
+        }
+
+        is Setting.HueColorPicker -> {
+            Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(translateSettingId(settingId), style = defaultTextStyle())
+                Spacer(GlanceModifier.defaultWeight())
+                Spacer(GlanceModifier.background(Color.hsv(setting.hue, 1f, 1f)).size(16.dp))
             }
         }
     }

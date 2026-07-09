@@ -10,14 +10,14 @@ use crate::{
 
 use super::{Error, type_conversions::SqliteDeviceModel};
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct QuickPreset {
     pub name: String,
     pub fields: Vec<QuickPresetField>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct QuickPresetField {
     pub setting_id: SettingId,
@@ -240,7 +240,7 @@ pub fn delete(connection: &Connection, model: DeviceModel, name: String) -> Resu
 
 #[cfg(test)]
 mod tests {
-    use std::{assert_matches, borrow::Cow, collections::HashSet, hash::RandomState};
+    use std::{assert_matches, borrow::Cow};
 
     use crate::{api::settings::Value, storage::OpenSCQ30Database};
 
@@ -328,14 +328,14 @@ mod tests {
         .await
         .unwrap();
 
-        let fetched_presets = db
+        let mut fetched_presets = db
             .fetch_all_quick_presets(DeviceModel::SoundcoreA3004)
             .await
             .unwrap();
-        assert_eq!(
-            HashSet::<_, RandomState>::from_iter(test_data),
-            HashSet::from_iter(fetched_presets)
-        );
+
+        // test data is already sorted by name
+        fetched_presets.sort_by(|left, right| left.name.cmp(&right.name));
+        assert_eq!(test_data, fetched_presets);
     }
 
     #[tokio::test]

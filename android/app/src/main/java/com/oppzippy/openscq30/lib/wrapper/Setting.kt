@@ -57,6 +57,12 @@ sealed class Setting {
     }
 
     @Serializable
+    @SerialName("hueColorPicker")
+    data class HueColorPicker(val hue: Float) : Setting() {
+        override fun toValue(): Value = hue.toValue()
+    }
+
+    @Serializable
     @SerialName("information")
     data class InformationSetting(val value: String, val translatedValue: String) : Setting() {
         override fun toValue() = value.toValue()

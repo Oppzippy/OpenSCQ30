@@ -29,10 +29,10 @@ use crate::{
                 state::Update,
                 structures::{
                     AmbientSoundModeCycleTws, AutoPlayPause, AutoPowerOff, BatteryLevel,
-                    CaseBatteryLevel, DualConnections, EqualizerConfiguration, GamingMode, Ldac,
-                    LimitHighVolume, LowBatteryPrompt, SoundLeakCompensation, SurroundSound,
-                    TouchLock, TouchTone, VoicePrompt, WearingDetection, WearingTone,
-                    button_configuration::ButtonStatusCollection,
+                    CaseBatteryLevel, DualBatteryLevel, DualConnections, EqualizerConfiguration,
+                    GamingMode, Ldac, LimitHighVolume, LowBatteryPrompt, SoundLeakCompensation,
+                    SurroundSound, TouchLock, TouchTone, VoicePrompt, WearingDetection,
+                    WearingTone, button_configuration::ButtonStatusCollection,
                 },
             },
         },
@@ -597,6 +597,15 @@ where
         StateType: Has<DualBattery>,
     {
         self.module_collection.add_dual_battery(configuration);
+    }
+
+    pub fn dual_battery_level_custom(
+        &mut self,
+        configuration: modules::dual_battery_level::DualBatteryLevelConfiguration,
+    ) where
+        StateType: Has<DualBatteryLevel>,
+    {
+        self.module_collection.add_dual_battery_level(configuration);
     }
 
     pub fn case_battery_level(&mut self, max_level: u8)

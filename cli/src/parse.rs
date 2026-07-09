@@ -28,6 +28,7 @@ pub fn setting_value(setting: &Setting, unparsed: Option<String>) -> anyhow::Res
         Setting::Equalizer { setting, .. } => {
             parse_equalizer(setting, &unparsed.ok_or(required_err)?)
         }
+        Setting::HueColorPicker { .. } => parse_hue(&unparsed.ok_or(required_err)?),
         Setting::Information { .. } => parse_information(),
         Setting::ImportString { .. } => parse_import_string(unparsed.ok_or(required_err)?),
         Setting::Action => Ok(Value::Bool(true)),
@@ -134,6 +135,11 @@ fn parse_equalizer(setting: &settings::Equalizer, unparsed: &str) -> anyhow::Res
         }
     }
     Ok(Value::I16Vec(values))
+}
+
+fn parse_hue(unparsed: &str) -> anyhow::Result<Value> {
+    let number = primitives::f32(unparsed)?;
+    Ok(number.into())
 }
 
 fn parse_information() -> anyhow::Result<Value> {

@@ -7,7 +7,7 @@ use thiserror::Error;
 
 use crate::i18n::fl;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize, EnumDiscriminants)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, EnumDiscriminants)]
 #[serde(tag = "type", content = "value", rename_all = "camelCase")]
 #[strum_discriminants(derive(strum::Display))]
 pub enum Value {
@@ -17,6 +17,7 @@ pub enum Value {
     OptionalU16(Option<u16>),
     I16Vec(Vec<i16>),
     I32(i32),
+    F32(f32),
     String(Cow<'static, str>),
     StringVec(Vec<Cow<'static, str>>),
     OptionalString(Option<Cow<'static, str>>),
@@ -67,6 +68,7 @@ impl std::fmt::Display for Value {
             }
             Self::I16Vec(values) => write!(f, "{values:?}"),
             Self::I32(value) => write!(f, "{value}"),
+            Self::F32(value) => write!(f, "{value}"),
             Self::String(value) => f.write_str(value),
             Self::StringVec(values) => f.write_str(&values.iter().join(", ")),
             Self::OptionalString(value) => {
@@ -95,6 +97,16 @@ impl Value {
                 expected: ValueDiscriminants::Bool,
                 actual: self.clone(),
             })
+        }
+    }
+
+    pub fn try_as_f32(&self) -> Result<f32, ValueError> {
+        match &self {
+            Self::F32(value) => Ok(*value),
+            _ => Err(ValueError::WrongType {
+                expected: ValueDiscriminants::F32,
+                actual: self.clone(),
+            }),
         }
     }
 
@@ -204,6 +216,12 @@ impl Value {
 impl From<bool> for Value {
     fn from(value: bool) -> Self {
         Self::Bool(value)
+    }
+}
+
+impl From<f32> for Value {
+    fn from(value: f32) -> Self {
+        Self::F32(value)
     }
 }
 

@@ -3,11 +3,13 @@ package com.oppzippy.openscq30.gradle
 import java.io.File
 import javax.inject.Inject
 import org.gradle.api.DefaultTask
+import org.gradle.api.Task
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
@@ -24,7 +26,7 @@ abstract class CopyNativeLibTask @Inject constructor(
     @get:Input
     abstract val androidAbi: Property<String>
 
-    @get:Input
+    @get:InputFile
     abstract val inputFile: Property<File>
 
     @get:OutputDirectory

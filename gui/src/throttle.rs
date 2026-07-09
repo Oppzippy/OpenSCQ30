@@ -72,6 +72,11 @@ impl Throttle {
             }
             Setting::Information { .. } => (),
             Setting::ImportString { .. } => (),
+            Setting::HueColorPicker { hue } => {
+                if let Some(v) = queued_value {
+                    *hue = v.try_as_f32().unwrap();
+                }
+            }
             Setting::Action => (),
         }
 

@@ -1,5 +1,6 @@
 mod action;
 mod equalizer;
+mod hue_color_picker;
 mod import_string;
 mod information;
 mod legacy_migration;
@@ -448,6 +449,12 @@ impl DeviceSettingsModel {
                 move |text| Message::AskConfirmImportString(setting_id, Cow::from(text).into()),
             )
             .into(),
+            Setting::HueColorPicker { hue } => {
+                hue_color_picker::hue_color_picker(setting_id, *hue, move |new_hue| {
+                    Message::SetSetting(setting_id, new_hue.into())
+                })
+                .into()
+            }
             Setting::Action => {
                 action::action(setting_id, Message::SetSetting(setting_id, true.into())).into()
             }
@@ -477,8 +484,10 @@ impl DeviceSettingsModel {
             },
             Message::SetSetting(setting_id, value) => {
                 let device = self.device.clone();
-                let should_throttle =
-                    matches!(device.setting(&setting_id), Some(Setting::I32Range { .. }));
+                let should_throttle = matches!(
+                    device.setting(&setting_id),
+                    Some(Setting::I32Range { .. } | Setting::HueColorPicker { .. }),
+                );
                 if should_throttle {
                     let maybe_task = self.throttle.set_setting(setting_id, value);
                     _ = self.refresh_settings();

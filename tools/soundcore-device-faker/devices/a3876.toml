@@ -1,0 +1,102 @@
+name = "soundcore V20i"
+mac_address = "00:00:00:00:38:76"
+rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7B3876"
+
+[[responses]]
+command = [1, 1]
+response = [
+    1,    # host device
+    1,    # tws connected
+    5,    # left battery level (0-9)
+    9,    # right battery level (0-9)
+    48,   # FW version left start
+    51,
+    46,
+    49,
+    53,   # FW version left end
+    48,   # FW version right start
+    51,
+    46,
+    49,
+    53,   # FW version right end
+    51,   # SN start
+    56,
+    55,
+    54,
+    66,
+    69,
+    52,
+    65,
+    57,
+    54,
+    50,
+    55,
+    54,
+    67,
+    49,
+    52,   # SN end
+    255,
+    255,
+    255,
+    255,
+    255,
+    255,
+    0xfe, # eq preset (not the same presets as normal)
+    0xfe,
+    120,  # left eq
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,  # left eq end
+    120,  # right eq
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,  # right eq end
+    9,
+    0xff, # left single press
+    0xf6, # right single press
+    0xf3, # left double press
+    0x63, # right double press
+    0xff, # left triple press
+    0xf5, # right triple press
+    0xff, # left long press
+    0xf0, # right long press
+    1,    # colorful lights
+    4,    # brightness (1-10)
+    45,   # auto lights off (in minutes, 1-120)
+    1,    # 0=light on, 1=breathing, 2=flash, 3=music follows
+    23,   # light color R
+    187,  # light color G
+    239,  # light color B
+    49,
+    1,    # voice prompt
+    1,    # auto power off enabled
+    2,    # auto power off duration
+    0,
+    0,    # gaming mode
+    100,  # volume balance (94=+6 left, 100=balanced, 106=+6 right)
+    1,    # dual connections
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+]

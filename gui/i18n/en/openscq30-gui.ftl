@@ -45,3 +45,4 @@ execute = Execute
 default = Default
 settings = Settings
 preferred-language = Preferred Language
+color-hue-in-degrees = Color Hue in Degrees

@@ -10,6 +10,10 @@ pub fn i32(unparsed: &str) -> anyhow::Result<i32> {
     i32::from_str(unparsed).map_err(Into::into)
 }
 
+pub fn f32(unparsed: &str) -> anyhow::Result<f32> {
+    f32::from_str(unparsed).map_err(Into::into)
+}
+
 pub fn one_of_options<'a>(
     unparsed: &str,
     options: &'a [Cow<'static, str>],

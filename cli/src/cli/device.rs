@@ -117,7 +117,7 @@ struct JsonCategoryNoExtendedInfo {
     setting_ids: Vec<SettingId>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct JsonCategory {
     category_id: CategoryId,
@@ -147,7 +147,7 @@ impl JsonCategory {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct JsonSettingWithId {
     setting_id: SettingId,
@@ -155,7 +155,7 @@ struct JsonSettingWithId {
     setting: JsonSetting,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(
     tag = "type",
     rename_all = "camelCase",
@@ -170,6 +170,7 @@ enum JsonSetting {
     MultiSelect { setting: settings::Select },
     MultiSelectWithRemove { setting: settings::Select },
     Equalizer { setting: settings::Equalizer },
+    HueColorPicker { hue: f32 },
     Information,
     ImportString,
     Action,
@@ -190,6 +191,7 @@ impl From<settings::Setting> for JsonSetting {
                 Self::MultiSelectWithRemove { setting }
             }
             settings::Setting::Equalizer { setting, .. } => Self::Equalizer { setting },
+            settings::Setting::HueColorPicker { hue } => Self::HueColorPicker { hue },
             settings::Setting::Information { .. } => Self::Information,
             settings::Setting::ImportString { .. } => Self::ImportString,
             settings::Setting::Action => Self::Action,

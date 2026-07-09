@@ -44,6 +44,7 @@ pub enum CategoryId {
     LimitHighVolume,
     DualConnections,
     Case,
+    ColorfulLights,
 }
 
 #[derive(
@@ -161,9 +162,15 @@ pub enum SettingId {
     EasyChat,
     EasyChatWaitTime,
     RealTimeAdaptiveNoiseCanceling,
+    VolumeBalance,
+    ColorfulLightsEnabled,
+    ColorfulLightsBrightness,
+    ColorfulLightsColor,
+    ColorfulLightsMode,
+    AutoLightsOffMinutes,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(
     tag = "type",
     rename_all = "camelCase",
@@ -211,6 +218,10 @@ pub enum Setting {
     ImportString {
         confirmation_message: Option<String>,
     },
+    HueColorPicker {
+        /// in degrees, 0 to 360
+        hue: f32,
+    },
     Action,
 }
 
@@ -230,6 +241,7 @@ impl From<Setting> for Value {
             Setting::MultiSelect { values, .. } => values.into(),
             Setting::MultiSelectWithRemove { values, .. } => values.into(),
             Setting::ImportString { .. } => Cow::from("").into(),
+            Setting::HueColorPicker { hue } => hue.into(),
             Setting::Action => Self::Bool(false),
         }
     }
@@ -279,6 +291,7 @@ impl Setting {
             Self::Equalizer { .. } => SettingMode::ReadWrite,
             Self::Information { .. } => SettingMode::ReadOnly,
             Self::ImportString { .. } => SettingMode::WriteOnly,
+            Self::HueColorPicker { .. } => SettingMode::ReadWrite,
             Self::Action { .. } => SettingMode::WriteOnly,
         }
     }

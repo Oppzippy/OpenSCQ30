@@ -5,11 +5,15 @@ package com.oppzippy.openscq30.ui.devicesettings.screens
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -26,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -124,6 +129,12 @@ private fun FallbackSettingCategoryScreen(
                     name = name,
                     setting = setting,
                     onChange = { setSetting(settingId, it) },
+                )
+
+                is Setting.HueColorPicker -> HueColorPicker(
+                    name = name,
+                    hue = setting.hue,
+                    onChange = { setSetting(settingId, it.toValue()) },
                 )
 
                 is Setting.MultiSelectWithRemoveSetting -> MultiSelectWithRemove(
@@ -297,6 +308,43 @@ private fun MultiSelectWithRemove(
             onChange(MultiSelectWithRemoveCommandInner.Remove(setting.setting.options[index]).toValue())
         },
     )
+}
+
+@Composable
+private fun HueColorPicker(name: String, hue: Float, onChange: (Float) -> Unit) {
+    val (displayedHue, setDisplayedHue) = throttledState(
+        value = hue,
+        duration = 250,
+        onValueChange = { onChange(it) },
+    )
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(text = name)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text(displayedHue.roundToInt().toString())
+                Spacer(
+                    Modifier
+                        .background(Color.hsv(displayedHue, 1f, 1f), CircleShape)
+                        .size(24.dp),
+                )
+            }
+        }
+
+        Slider(
+            modifier = Modifier.testTag("$name hue slider"),
+            value = displayedHue,
+            valueRange = 0f..360f,
+            onValueChange = { setDisplayedHue(it) },
+        )
+    }
 }
 
 @Composable

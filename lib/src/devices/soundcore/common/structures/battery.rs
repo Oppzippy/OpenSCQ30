@@ -36,9 +36,7 @@ impl DualBattery {
             self.right.is_charging as u8,
         ]
     }
-}
 
-impl DualBattery {
     pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
@@ -62,6 +60,30 @@ impl DualBattery {
                     },
                 },
             ),
+        )
+        .parse_complete(input)
+    }
+}
+
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Default)]
+pub struct DualBatteryLevel {
+    pub left: BatteryLevel,
+    pub right: BatteryLevel,
+}
+
+impl DualBatteryLevel {
+    pub fn bytes(&self) -> [u8; 2] {
+        [self.left.0, self.right.0]
+    }
+
+    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
+        input: &'a [u8],
+    ) -> IResult<&'a [u8], Self, E> {
+        context(
+            "dual battery level",
+            map((BatteryLevel::take, BatteryLevel::take), |(left, right)| {
+                Self { left, right }
+            }),
         )
         .parse_complete(input)
     }

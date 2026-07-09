@@ -38,6 +38,7 @@ impl std::fmt::Display for CustomDisplaySetting {
                 "equalizer (bands: {:?}, min: {}, max: {}, fractional digits: {})",
                 setting.band_hz, setting.min, setting.max, setting.fraction_digits,
             ),
+            Setting::HueColorPicker { .. } => write!(f, "hue color picker"),
             Setting::Information { .. } => write!(f, "information (read only)"),
             Setting::ImportString { .. } => write!(f, "import string"),
             Setting::Action => write!(f, "action"),
@@ -63,6 +64,7 @@ impl std::fmt::Display for DisplayableValue {
             }
             Value::I16Vec(items) => write!(f, "{items:?}"),
             Value::I32(value) => write!(f, "{value}"),
+            Value::F32(value) => write!(f, "{value}"),
             Value::String(value) => write!(f, "{value}"),
             Value::StringVec(values) => {
                 let mut buffer = Vec::new();

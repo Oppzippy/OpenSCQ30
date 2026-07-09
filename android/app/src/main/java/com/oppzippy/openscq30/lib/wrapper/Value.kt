@@ -41,6 +41,11 @@ sealed class Value : Parcelable {
 
     @Parcelize
     @Serializable
+    @SerialName("f32")
+    data class F32Value(val value: Float) : Value()
+
+    @Parcelize
+    @Serializable
     @SerialName("string")
     data class StringValue(val value: String) : Value()
 
@@ -103,6 +108,8 @@ fun UShort?.toValue(): Value.OptionalU16Value = Value.OptionalU16Value(this)
 fun List<Short>.toValue(): Value.I16VecValue = Value.I16VecValue(this)
 
 fun Int.toValue(): Value.I32Value = Value.I32Value(this)
+
+fun Float.toValue(): Value.F32Value = Value.F32Value(this)
 
 fun String.toValue(): Value.StringValue = Value.StringValue(this)
 
