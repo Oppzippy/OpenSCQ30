@@ -65,7 +65,7 @@ pub enum CategoryId {
     IntoStaticStr,
 )]
 #[serde(rename_all = "camelCase")]
-#[strum(serialize_all = "camelCase")]
+#[strum(use_phf, serialize_all = "camelCase")]
 // Removing or renaming anything here will break quick presets, so this enum should be append only.
 // If something really needs to be renamed, use #[strum(serialize = "...")] to keep the representation the same.
 pub enum SettingId {
