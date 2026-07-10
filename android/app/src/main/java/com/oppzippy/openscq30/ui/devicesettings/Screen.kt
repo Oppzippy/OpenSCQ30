@@ -28,6 +28,7 @@ sealed class Screen {
                 "dualConnections" -> R.drawable.devices_other_24px
                 "limitHighVolume" -> R.drawable.volume_down_24px
                 "case" -> R.drawable.earbud_case_24px
+                "lights" -> R.drawable.light_mode_24px
                 else -> R.drawable.settings_24px
             },
         )
