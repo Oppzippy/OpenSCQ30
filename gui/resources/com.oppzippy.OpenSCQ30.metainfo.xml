@@ -41,6 +41,19 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.10.0" date="2026-07-10">
+            <description>
+                <p>Features</p>
+                <ul>
+                    <li>Add support for Soundcore P31i and R60i NC</li>
+                    <li>Add support for Soundcore V20i</li>
+                </ul>
+                <p>Fixes</p>
+                <ul>
+                    <li>Soundcore Liberty 5 equalizer not working</li>
+                </ul>
+            </description>
+        </release>
         <release version="2.9.0" date="2026-06-29">
             <description>
                 <p>Features</p>

@@ -1,5 +1,18 @@
 # Changelog
 
+## v2.10.0
+
+### General
+
+#### Features
+
+- Add support for Soundcore P31i and R60i NC
+- Add support for Soundcore V20i
+
+#### Fixes
+
+- Soundcore Liberty 5 equalizer not working
+
 ## v2.9.0
 
 ### General
