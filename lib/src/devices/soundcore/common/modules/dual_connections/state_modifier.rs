@@ -137,7 +137,7 @@ where
     let Some(target) = target_state.maybe_get() else {
         return Ok(());
     };
-    let target_devices = target.devices.iter().cloned().collect::<Vec<_>>();
+    let target_devices = target.devices.to_vec();
 
     let devices = {
         let current = state_sender.borrow();

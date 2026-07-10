@@ -25,7 +25,7 @@ impl DualConnectionsDevicePacket {
     pub const COMMAND: Command = Command([0x0b, 0x01]);
 
     pub fn demo() -> Self {
-        DualConnectionsDevicePacket {
+        Self {
             total_packets: 1,
             current_packet_index: 1,
             devices: vec![

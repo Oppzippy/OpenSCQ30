@@ -60,11 +60,11 @@ impl Throttle {
                     *value = v.try_as_i32().unwrap();
                 }
             }
-            Setting::Select { value: _, .. } => (),
-            Setting::OptionalSelect { value: _, .. } => (),
-            Setting::ModifiableSelect { value: _, .. } => (),
-            Setting::MultiSelect { values: _, .. } => (),
-            Setting::MultiSelectWithRemove { values: _, .. } => (),
+            Setting::Select { .. } => (),
+            Setting::OptionalSelect { .. } => (),
+            Setting::ModifiableSelect { .. } => (),
+            Setting::MultiSelect { .. } => (),
+            Setting::MultiSelectWithRemove { .. } => (),
             Setting::Equalizer { value, .. } => {
                 if let Some(v) = queued_value {
                     *value = v.try_into_i16_vec().unwrap();

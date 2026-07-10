@@ -61,7 +61,7 @@ where
                 )
                 .await?;
             state_sender.send_modify(|state| {
-                state.get_mut().auto_lights_off_duration = target.auto_lights_off_duration
+                state.get_mut().auto_lights_off_duration = target.auto_lights_off_duration;
             });
         }
 

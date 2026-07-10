@@ -568,7 +568,7 @@ impl Application for AppModel {
                 if matches!(self.context_drawer_screen, Some(ContextDrawerScreen::About)) {
                     self.context_drawer_screen = None;
                 } else {
-                    self.context_drawer_screen = Some(ContextDrawerScreen::About)
+                    self.context_drawer_screen = Some(ContextDrawerScreen::About);
                 }
             }
             Message::OpenUrl(url) => {

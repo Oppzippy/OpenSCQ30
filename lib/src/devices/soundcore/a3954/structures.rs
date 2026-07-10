@@ -315,6 +315,7 @@ impl EasyChat {
     VariantArray,
 )]
 #[repr(u8)]
+#[allow(clippy::enum_variant_names)]
 pub enum EasyChatWaitTime {
     #[default]
     #[strum(serialize = "5s")]
@@ -328,9 +329,9 @@ pub enum EasyChatWaitTime {
 impl openscq30_i18n::Translate for EasyChatWaitTime {
     fn translate(&self) -> String {
         match self {
-            EasyChatWaitTime::FiveSeconds => fl!("x-seconds", seconds = 5),
-            EasyChatWaitTime::TenSeconds => fl!("x-seconds", seconds = 10),
-            EasyChatWaitTime::FifteenSeconds => fl!("x-seconds", seconds = 15),
+            Self::FiveSeconds => fl!("x-seconds", seconds = 5),
+            Self::TenSeconds => fl!("x-seconds", seconds = 10),
+            Self::FifteenSeconds => fl!("x-seconds", seconds = 15),
         }
     }
 }
@@ -374,9 +375,9 @@ impl openscq30_i18n::Translate for CaseLanguage {
     fn translate(&self) -> String {
         // TODO do something slimilar to openscq30-gui for using fl! to translate language names
         match self {
-            CaseLanguage::Japanese => "日本語".to_string(),
-            CaseLanguage::English => "English".to_string(),
-            CaseLanguage::Chinese => "中文".into(),
+            Self::Japanese => "日本語".to_string(),
+            Self::English => "English".to_string(),
+            Self::Chinese => "中文".into(),
         }
     }
 }

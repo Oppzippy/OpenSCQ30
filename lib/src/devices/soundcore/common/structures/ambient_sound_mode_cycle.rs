@@ -40,7 +40,7 @@ impl From<u8> for AmbientSoundModeCycleTws {
 
 impl From<AmbientSoundModeCycleTws> for u8 {
     fn from(value: AmbientSoundModeCycleTws) -> Self {
-        (u8::from(value.tws_disabled) << 4) | u8::from(value.tws_enabled)
+        (Self::from(value.tws_disabled) << 4) | Self::from(value.tws_enabled)
     }
 }
 

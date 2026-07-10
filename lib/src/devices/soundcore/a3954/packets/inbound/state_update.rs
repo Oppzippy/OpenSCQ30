@@ -198,7 +198,7 @@ impl FromPacketBody for A3954StateUpdatePacket {
                         main_buttons
                             .0
                             .into_iter()
-                            .chain(slide_buttons.0.into_iter())
+                            .chain(slide_buttons.0)
                             .collect_array::<12>()
                             .expect("we took size 8 and 4, so if that succeeded, we have 12"),
                     ),

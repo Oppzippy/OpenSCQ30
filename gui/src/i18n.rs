@@ -48,7 +48,7 @@ fn language_identifiers() -> impl Iterator<Item = LanguageIdentifier> {
 fn language_name(identifier: &LanguageIdentifier) -> String {
     let loader = FluentLanguageLoader::new("openscq30-gui", identifier.to_owned());
     loader
-        .load_languages(&Localizations, &[identifier.to_owned()])
+        .load_languages(&Localizations, std::slice::from_ref(identifier))
         .unwrap();
     if loader.has("language-name") {
         loader.get("language-name")

@@ -85,13 +85,13 @@ where
                     sound_modes.ambient_sound_mode = ambient_sound_mode;
                     match sound_modes.ambient_sound_mode {
                         a3954::structures::AmbientSoundMode::NoiseCanceling => {
-                            sound_modes.sound_mode_slider = 5
+                            sound_modes.sound_mode_slider = 5;
                         }
                         a3954::structures::AmbientSoundMode::Normal => {
-                            sound_modes.sound_mode_slider = 6
+                            sound_modes.sound_mode_slider = 6;
                         }
                         a3954::structures::AmbientSoundMode::Transparency => {
-                            sound_modes.sound_mode_slider = 7
+                            sound_modes.sound_mode_slider = 7;
                         }
                         a3954::structures::AmbientSoundMode::AirplaneMode => (),
                     }

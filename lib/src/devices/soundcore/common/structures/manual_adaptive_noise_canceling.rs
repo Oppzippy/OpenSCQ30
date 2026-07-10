@@ -32,7 +32,7 @@ where
     ManualT: ManualAdaptiveNoiseCancelingAsByte + ManualNoiseCancelingMarker,
     AdaptiveT: ManualAdaptiveNoiseCancelingAsByte + AdaptiveNoiseCancelingMarker,
 {
-    (manual.byte() << 4) | (adaptive.byte() as u8)
+    (manual.byte() << 4) | adaptive.byte()
 }
 
 pub trait ManualAdaptiveNoiseCancelingAsByte {
@@ -165,6 +165,7 @@ impl ManualAdaptiveNoiseCancelingFromByte for AdaptiveNoiseCancelingNamedStrengt
     Translate,
 )]
 #[repr(u8)]
+#[allow(clippy::enum_variant_names)]
 pub enum AdaptiveNoiseCancelingNamedNoiseLevel {
     #[default]
     LowNoise = 0,
