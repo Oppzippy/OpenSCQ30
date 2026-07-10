@@ -29,7 +29,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar"
-        tools:targetApi="36">
+        tools:targetApi="37">
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -52,12 +52,12 @@ android {
     }
     namespace = "com.oppzippy.openscq30"
     compileSdk = 37
-    buildToolsVersion = "36.1.0"
+    buildToolsVersion = "37.0.0"
 
     defaultConfig {
         applicationId = "com.oppzippy.openscq30"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1024
         versionName = "2.9.0"
 
