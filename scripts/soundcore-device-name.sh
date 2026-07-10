@@ -6,7 +6,7 @@ ftl_path="$(dirname -- "$script_path")/../lib/i18n/en/openscq30-lib.ftl"
 
 search_term="$1"
 
-if [[ "$search_term" =~ ^a[0-9]+$ ]]; then
+if [[ "$search_term" =~ ^[a-z][0-9]+[a-z]?$ ]]; then
     sed -E -n "s/^soundcore-$search_term *= *(.*)$/\1/p" "$ftl_path"
 else
     sed -E -n "s/^soundcore-(a[0-9]+) *= *(.*$search_term.*)$/\1/ip" "$ftl_path"
