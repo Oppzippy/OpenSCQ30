@@ -52,7 +52,7 @@ jobs:
           mv build-output/openscq30-gui build-output/openscq30-gui-linux-x86_64
 
       - name: Attest artifacts
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-path: build-output/*
 
@@ -91,7 +91,7 @@ jobs:
           mv build-output/openscq30-gui build-output/openscq30-gui-linux-arm64
 
       - name: Attest artifacts
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-path: build-output/*
 
@@ -131,7 +131,7 @@ jobs:
           mv build-output/openscq30-gui-installer.exe build-output/openscq30-gui-installer-windows-x86_64.exe
 
       - name: Attest artifacts
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-path: build-output/*
 
@@ -165,7 +165,7 @@ jobs:
         run: just build-android-${{ matrix.arch }}
 
       - name: Attest artifacts
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-path: build-output/*
 
