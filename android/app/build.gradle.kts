@@ -35,7 +35,7 @@ val gradleToCargoProfiles = mapOf(
 
 kotlin {
     compilerOptions {
-        languageVersion = KotlinVersion.KOTLIN_2_3
+        languageVersion = KotlinVersion.KOTLIN_2_4
     }
 }
 
@@ -51,7 +51,7 @@ android {
         }
     }
     namespace = "com.oppzippy.openscq30"
-    compileSdk = 36
+    compileSdk = 37
     buildToolsVersion = "36.1.0"
 
     defaultConfig {
