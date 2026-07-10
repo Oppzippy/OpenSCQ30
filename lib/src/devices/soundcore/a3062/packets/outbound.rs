@@ -41,7 +41,7 @@ pub fn set_equalizer<
                 .iter()
                 .flat_map(|v| v.bytes()),
         )
-        .chain([0, 2]) // unknown
+        .chain([0, 0]) // unknown
         .chain(iter::once(hear_id.is_enabled.into()))
         .chain(hear_id.volume_adjustment_bytes())
         .chain(hear_id.time.to_be_bytes())
@@ -51,4 +51,60 @@ pub fn set_equalizer<
         .chain(iter::once(0)) // unknown
         .collect();
     packet::Outbound::new(packet::Command([0x03, 0x87]), body)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::devices::soundcore::common::structures::{
+        HearIdMusicGenre, HearIdType, VolumeAdjustments,
+    };
+
+    use super::*;
+
+    #[test]
+    fn set_equalizer_matches_known_good_packet() {
+        let packet = set_equalizer(
+            &CommonEqualizerConfiguration::new(
+                0xfefe,
+                [VolumeAdjustments::from_bytes([
+                    60, 125, 60, 148, 113, 95, 144, 111, 120, 120,
+                ])],
+            ),
+            &CustomHearId {
+                is_enabled: false,
+                volume_adjustments: [Some(VolumeAdjustments::from_bytes([
+                    120, 120, 120, 120, 120, 120, 120, 120, 120, 60,
+                ]))],
+                time: 0,
+                hear_id_type: HearIdType::FavoriteMusicGenre,
+                favorite_music_genre: HearIdMusicGenre(0),
+                custom_volume_adjustments: [Some(VolumeAdjustments::from_bytes([
+                    130, 130, 130, 130, 130, 130, 130, 130, 130, 60,
+                ]))],
+            },
+        );
+
+        assert_eq!(
+            packet,
+            packet::Outbound::new(
+                packet::Command([3, 135]),
+                vec![
+                    254, 254, // preset
+                    0, 0, // hear id favorite music genre
+                    60, 125, 60, 148, 113, 95, 144, 111, 120, 120, // volume adjustments
+                    0, 0, // unknkown
+                    0, // hear id enabled
+                    120, 120, 120, 120, 120, 120, 120, 120, 120,
+                    60, // hear id volume adjustments
+                    0, 0, 0, 0, // hear id time
+                    2, // hear id type
+                    130, 130, 130, 130, 130, 130, 130, 130, 130,
+                    60, // hear id custom volume adjustments
+                    60, 125, 60, 148, 113, 95, 144, 111, 120,
+                    120, // active volume adjustments
+                    0,   // unknown
+                ]
+            )
+        )
+    }
 }
