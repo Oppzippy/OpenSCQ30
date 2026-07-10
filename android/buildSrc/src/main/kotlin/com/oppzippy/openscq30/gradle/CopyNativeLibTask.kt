@@ -7,6 +7,7 @@ import org.gradle.api.Task
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.ProjectLayout
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -27,7 +28,7 @@ abstract class CopyNativeLibTask @Inject constructor(
     abstract val androidAbi: Property<String>
 
     @get:InputFile
-    abstract val inputFile: Property<File>
+    abstract val inputFile: RegularFileProperty
 
     @get:OutputDirectory
     abstract val outputDirectory: DirectoryProperty
