@@ -44,7 +44,7 @@ pub enum CategoryId {
     LimitHighVolume,
     DualConnections,
     Case,
-    ColorfulLights,
+    Lights,
 }
 
 #[derive(
@@ -163,10 +163,10 @@ pub enum SettingId {
     EasyChatWaitTime,
     RealTimeAdaptiveNoiseCanceling,
     VolumeBalance,
-    ColorfulLightsEnabled,
-    ColorfulLightsBrightness,
-    ColorfulLightsColor,
-    ColorfulLightsMode,
+    LightsEnabled,
+    LightsBrightness,
+    LightsColor,
+    LightsMode,
     AutoLightsOffMinutes,
 }
 

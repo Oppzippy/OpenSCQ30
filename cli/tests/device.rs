@@ -1047,12 +1047,12 @@ fn setting_equalizer_invalid() {
 fn setting_hue_color_picker() {
     let dir = tempdir().unwrap();
     add_device(dir.path(), "SoundcoreA3876");
-    assert_cmd_snapshot!(set_and_get(dir.path(), "colorfulLightsColor", "270"), @"
+    assert_cmd_snapshot!(set_and_get(dir.path(), "lightsColor", "270"), @"
     success: true
     exit_code: 0
     ----- stdout -----
-    Setting ID         	Value    
-    colorfulLightsColor	270.11765
+    Setting ID 	Value    
+    lightsColor	270.11765
 
     ----- stderr -----
     ");
@@ -1297,14 +1297,14 @@ fn hue_color_picker_json() {
         .arg("setting")
         .arg("--json")
         .arg("--get")
-        .arg("colorfulLightsColor");
+        .arg("lightsColor");
     assert_cmd_snapshot!(command, @r#"
     success: true
     exit_code: 0
     ----- stdout -----
     [
       {
-        "settingId": "colorfulLightsColor",
+        "settingId": "lightsColor",
         "value": {
           "type": "f32",
           "value": 0.0

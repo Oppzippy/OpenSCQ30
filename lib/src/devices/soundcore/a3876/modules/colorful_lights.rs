@@ -19,11 +19,11 @@ enum_subset!(
     SettingId,
     #[derive(EnumString, EnumIter, IntoStaticStr)]
     enum ColorfulLightsSetting {
-        ColorfulLightsEnabled,
-        ColorfulLightsBrightness,
+        LightsEnabled,
+        LightsBrightness,
         AutoLightsOffMinutes,
-        ColorfulLightsColor,
-        ColorfulLightsMode,
+        LightsColor,
+        LightsMode,
     }
 );
 
@@ -33,7 +33,7 @@ where
 {
     pub fn add_a3876_colorful_lights(&mut self, packet_io: Arc<PacketIOController>) {
         self.setting_manager.add_handler(
-            CategoryId::ColorfulLights,
+            CategoryId::Lights,
             setting_handler::ColorfulLightsSettingHandler,
         );
         self.state_modifiers

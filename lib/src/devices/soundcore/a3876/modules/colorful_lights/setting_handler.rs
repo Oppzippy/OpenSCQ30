@@ -35,10 +35,10 @@ where
         let colorful_lights: &ColorfulLights = state.get();
         let colorful_lights_setting: ColorfulLightsSetting = (*setting_id).try_into().ok()?;
         match colorful_lights_setting {
-            ColorfulLightsSetting::ColorfulLightsEnabled => Some(Setting::Toggle {
+            ColorfulLightsSetting::LightsEnabled => Some(Setting::Toggle {
                 value: colorful_lights.is_enabled,
             }),
-            ColorfulLightsSetting::ColorfulLightsBrightness => Some(Setting::I32Range {
+            ColorfulLightsSetting::LightsBrightness => Some(Setting::I32Range {
                 setting: settings::Range {
                     range: 1..=10,
                     step: 1,
@@ -52,7 +52,7 @@ where
                 },
                 value: colorful_lights.auto_lights_off_duration.inner().into(),
             }),
-            ColorfulLightsSetting::ColorfulLightsColor => {
+            ColorfulLightsSetting::LightsColor => {
                 let rgb = Srgb::new(
                     f32::from(colorful_lights.color.red) / 255.0,
                     f32::from(colorful_lights.color.green) / 255.0,
@@ -64,7 +64,7 @@ where
                     hue: hsv.hue.into_positive_degrees(),
                 })
             }
-            ColorfulLightsSetting::ColorfulLightsMode => {
+            ColorfulLightsSetting::LightsMode => {
                 Some(Setting::select_from_enum_all_variants(colorful_lights.mode))
             }
         }
@@ -80,11 +80,11 @@ where
             .try_into()
             .expect("already filtered to valid values only by SettingsManager");
         match colorful_lights_setting {
-            ColorfulLightsSetting::ColorfulLightsEnabled => {
+            ColorfulLightsSetting::LightsEnabled => {
                 let colorful_lights = state.get_mut();
                 colorful_lights.is_enabled = value.try_as_bool()?;
             }
-            ColorfulLightsSetting::ColorfulLightsBrightness => {
+            ColorfulLightsSetting::LightsBrightness => {
                 let colorful_lights = state.get_mut();
                 colorful_lights.brightness = ColorfulLightsBrightness::new(
                     u8::try_from(value.try_as_i32()?.clamp(1, 10))
@@ -98,7 +98,7 @@ where
                         .expect("1-120 is in range for u8"),
                 );
             }
-            ColorfulLightsSetting::ColorfulLightsColor => {
+            ColorfulLightsSetting::LightsColor => {
                 let colorful_lights = state.get_mut();
                 let hue = value.try_as_f32()?;
                 let rgb_f32: Rgb = Hsv::new(hue, 1.0, 1.0).into_color();
@@ -109,7 +109,7 @@ where
                     blue: rgb.blue,
                 };
             }
-            ColorfulLightsSetting::ColorfulLightsMode => {
+            ColorfulLightsSetting::LightsMode => {
                 let colorful_lights = state.get_mut();
                 colorful_lights.mode = value.try_as_enum_variant()?;
             }

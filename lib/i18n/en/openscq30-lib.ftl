@@ -250,11 +250,11 @@ easy-chat-wait-time = Easy Chat Wait Time
 
 volume-balance = Volume Balance
 
-colorful-lights = Colorful Lights
-colorful-lights-enabled = Colorful Lights Enabled
-colorful-lights-brightness = Colorful Lights Brightness
-colorful-lights-color = Colorful Lights Color
-colorful-lights-mode = Colorful Lights Mode
+lights = Lights
+lights-enabled = Colorful Lights Enabled
+lights-brightness = Colorful Lights Brightness
+lights-color = Colorful Lights Color
+lights-mode = Colorful Lights Mode
 auto-lights-off-minutes = Auto Lights Off (minutes)
 light-on = Light On
 breathing = Breathing

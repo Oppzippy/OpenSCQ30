@@ -178,8 +178,8 @@ const BUTTON_ACTIONS: &[ButtonAction] = &[
     },
     ButtonAction {
         id: 14,
-        name: "ColorfulLights",
-        localized_name: || fl!("colorful-lights-enabled"),
+        name: "Lights",
+        localized_name: || fl!("lights-enabled"),
     },
 ];
 
@@ -416,11 +416,11 @@ mod tests {
             (SettingId::RightTriplePress, Some("VoiceAssistant").into()),
             (SettingId::RightLongPress, Some("VolumeUp").into()),
             (SettingId::GamingMode, false.into()),
-            (SettingId::ColorfulLightsEnabled, true.into()),
-            (SettingId::ColorfulLightsBrightness, 4.into()),
+            (SettingId::LightsEnabled, true.into()),
+            (SettingId::LightsBrightness, 4.into()),
             (SettingId::AutoLightsOffMinutes, 45.into()),
-            (SettingId::ColorfulLightsColor, 194.44444.into()), // hsv(194.44444, 1.0, 1.0) #00c4ff
-            (SettingId::ColorfulLightsMode, "Breathing".into()),
+            (SettingId::LightsColor, 194.44444.into()), // hsv(194.44444, 1.0, 1.0) #00c4ff
+            (SettingId::LightsMode, "Breathing".into()),
             (SettingId::VolumeBalance, 0.into()),
             (SettingId::VoicePrompt, true.into()),
             (SettingId::DualConnections, true.into()),
