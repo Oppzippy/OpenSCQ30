@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### General
+
+#### Fixes
+
+- Soundcore Space One Pro equalizer not working
+
 ## v2.10.0
 
 ### General
