@@ -1,0 +1,2 @@
+* Fixes
+  - Soundcore Space One Pro equalizer not working

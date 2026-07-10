@@ -41,6 +41,14 @@
         <id>com.oppzippy.OpenSCQ30.desktop</id>
     </provides>
     <releases>
+        <release version="2.10.1" date="2026-07-10">
+            <description>
+                <p>Fixes</p>
+                <ul>
+                    <li>Soundcore Space One Pro equalizer not working</li>
+                </ul>
+            </description>
+        </release>
         <release version="2.10.0" date="2026-07-10">
             <description>
                 <p>Features</p>
