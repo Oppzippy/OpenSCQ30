@@ -11,8 +11,9 @@ use crate::{
     devices::soundcore::common::{
         packet::{self, PacketIOController},
         structures::{
-            AutoPlayPause, Flag, GamingMode, Ldac, LowBatteryPrompt, SoundLeakCompensation,
-            SurroundSound, TouchLock, TouchTone, VoicePrompt, WearingDetection, WearingTone,
+            AutoPlayPause, DisableAllButtons, Flag, GamingMode, Ldac, LowBatteryPrompt,
+            SoundLeakCompensation, SurroundSound, TouchLock, TouchTone, VoicePrompt,
+            WearingDetection, WearingTone,
         },
     },
     settings::SettingId,
@@ -40,99 +41,132 @@ macro_rules! flag {
 flag!(
     TouchTone,
     FlagConfiguration {
+        category_id: CategoryId::Miscellaneous,
         setting_id: SettingId::TouchTone,
         set_command: packet::outbound::SET_TOUCH_TONE_COMMAND,
         update_command: None,
+        is_inverted: false,
     },
 );
 
 flag!(
     GamingMode,
     FlagConfiguration {
+        category_id: CategoryId::Miscellaneous,
         setting_id: SettingId::GamingMode,
         set_command: packet::outbound::SET_GAMING_MODE_COMMAND,
         update_command: Some(packet::inbound::GAMING_MODE_UPDATE_COMMAND),
+        is_inverted: false,
     },
 );
 
 flag!(
     SoundLeakCompensation,
     FlagConfiguration {
+        category_id: CategoryId::Miscellaneous,
         setting_id: SettingId::SoundLeakCompensation,
         set_command: packet::outbound::SET_SOUND_LEAK_COMPENSATION_COMMAND,
         update_command: None,
+        is_inverted: false,
     },
 );
 
 flag!(
     SurroundSound,
     FlagConfiguration {
+        category_id: CategoryId::Miscellaneous,
         setting_id: SettingId::SurroundSound,
         set_command: packet::outbound::SET_SURROUND_SOUND_COMMAND,
         update_command: None,
+        is_inverted: false,
     },
 );
 
 flag!(
     AutoPlayPause,
     FlagConfiguration {
+        category_id: CategoryId::Miscellaneous,
         setting_id: SettingId::AutoPlayPause,
         set_command: packet::outbound::SET_AUTO_PLAY_PAUSE_COMMAND,
         update_command: None,
+        is_inverted: false,
     },
 );
 
 flag!(
     WearingTone,
     FlagConfiguration {
+        category_id: CategoryId::Miscellaneous,
         setting_id: SettingId::WearingTone,
         set_command: packet::outbound::SET_WEARING_TONE_COMMAND,
         update_command: None,
+        is_inverted: false,
     },
 );
 
 flag!(
     TouchLock,
     FlagConfiguration {
+        category_id: CategoryId::Miscellaneous,
         setting_id: SettingId::TouchLock,
         set_command: packet::outbound::SET_TOUCH_LOCK_COMMAND,
         update_command: None,
+        is_inverted: false,
     },
 );
 
 flag!(
     LowBatteryPrompt,
     FlagConfiguration {
+        category_id: CategoryId::Miscellaneous,
         setting_id: SettingId::LowBatteryPrompt,
         set_command: packet::outbound::SET_LOW_BATTERY_PROMPT_COMMAND,
         update_command: None,
+        is_inverted: false,
     },
 );
 
 flag!(
     WearingDetection,
     FlagConfiguration {
+        category_id: CategoryId::Miscellaneous,
         setting_id: SettingId::WearingDetection,
         set_command: packet::outbound::SET_WEARING_DETECTION_COMMAND,
         update_command: None,
+        is_inverted: false,
     },
 );
 
 flag!(
     VoicePrompt,
     FlagConfiguration {
+        category_id: CategoryId::Miscellaneous,
         setting_id: SettingId::VoicePrompt,
         set_command: packet::Command([0x01, 0x90]),
         update_command: Some(packet::Command([0x01, 0x10])),
+        is_inverted: false,
     },
 );
 
 flag!(
     Ldac,
     FlagConfiguration {
+        category_id: CategoryId::Miscellaneous,
         setting_id: SettingId::Ldac,
-        set_command: packet::Command([0x01, 0xFF,]),
-        update_command: Some(packet::Command([0x01, 0x7F,])),
+        set_command: packet::Command([0x01, 0xFF]),
+        update_command: Some(packet::Command([0x01, 0x7F])),
+        is_inverted: false,
+    },
+);
+
+flag!(
+    DisableAllButtons,
+    FlagConfiguration {
+        category_id: CategoryId::ButtonConfiguration,
+        setting_id: SettingId::ButtonsEnabled,
+        set_command: packet::Command([0x10, 0x94]),
+        update_command: None,
+        is_inverted: true,
     },
 );
 
@@ -152,8 +186,11 @@ impl<T> ModuleCollection<T> {
             );
         }
         self.setting_manager.add_handler(
-            CategoryId::Miscellaneous,
-            setting_handler::FlagSettingHandler::new(flag_configuration.setting_id),
+            flag_configuration.category_id,
+            setting_handler::FlagSettingHandler::new(
+                flag_configuration.setting_id,
+                flag_configuration.is_inverted,
+            ),
         );
         self.state_modifiers
             .push(Box::new(state_modifier::FlagStateModifier::new(
@@ -164,7 +201,11 @@ impl<T> ModuleCollection<T> {
 }
 
 pub struct FlagConfiguration {
+    pub category_id: CategoryId,
     pub setting_id: SettingId,
     pub set_command: packet::Command,
     pub update_command: Option<packet::Command>,
+    /// If true, the setting will have the opposite value as the flag. For example, this is used
+    /// to make the disable button actions flag instead be an enable button actions flag.
+    pub is_inverted: bool,
 }

@@ -8,7 +8,7 @@ use crate::{
         packet::{self, PacketIOController},
         structures::GamingMode,
     },
-    settings::SettingId,
+    settings::{CategoryId, SettingId},
 };
 
 impl<T> ModuleCollection<T>
@@ -19,9 +19,11 @@ where
         self.add_flag(
             packet_io,
             FlagConfiguration {
+                category_id: CategoryId::Miscellaneous,
                 setting_id: SettingId::GamingMode,
                 set_command: packet::Command([0x10, 0x85]),
                 update_command: None,
+                is_inverted: false,
             },
         );
     }

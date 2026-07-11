@@ -13,15 +13,21 @@ use crate::{
 
 pub struct FlagSettingHandler<FlagT> {
     setting_id: SettingId,
+    is_inverted: bool,
     _flag: PhantomData<FlagT>,
 }
 
 impl<FlagT> FlagSettingHandler<FlagT> {
-    pub fn new(setting_id: SettingId) -> Self {
+    pub fn new(setting_id: SettingId, is_inverted: bool) -> Self {
         Self {
             setting_id,
+            is_inverted,
             _flag: PhantomData,
         }
+    }
+
+    pub fn invert_if_needed(&self, value: bool) -> bool {
+        if self.is_inverted { !value } else { value }
     }
 }
 
@@ -37,7 +43,7 @@ where
 
     fn get(&self, state: &T, _setting_id: &SettingId) -> Option<Setting> {
         state.maybe_get().map(|flag| Setting::Toggle {
-            value: flag.get_bool(),
+            value: self.invert_if_needed(flag.get_bool()),
         })
     }
 
@@ -48,7 +54,7 @@ where
         value: Value,
     ) -> SettingHandlerResult<()> {
         if let Some(flag) = state.maybe_get_mut() {
-            let is_enabled = value.try_as_bool()?;
+            let is_enabled = self.invert_if_needed(value.try_as_bool()?);
             flag.set_bool(is_enabled);
             Ok(())
         } else {

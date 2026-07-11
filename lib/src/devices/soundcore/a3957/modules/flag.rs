@@ -9,7 +9,7 @@ use crate::{
             structures::GamingMode,
         },
     },
-    settings::SettingId,
+    settings::{CategoryId, SettingId},
 };
 
 impl ModuleCollection<A3957State> {
@@ -17,9 +17,11 @@ impl ModuleCollection<A3957State> {
         self.add_flag::<GamingMode>(
             packet_io,
             FlagConfiguration {
+                category_id: CategoryId::Miscellaneous,
                 setting_id: SettingId::GamingMode,
                 set_command: packet::Command([16, 133]),
                 update_command: None,
+                is_inverted: false,
             },
         );
     }

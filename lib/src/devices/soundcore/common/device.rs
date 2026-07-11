@@ -29,10 +29,10 @@ use crate::{
                 state::Update,
                 structures::{
                     AmbientSoundModeCycleTws, AutoPlayPause, AutoPowerOff, BatteryLevel,
-                    CaseBatteryLevel, DualBatteryLevel, DualConnections, EqualizerConfiguration,
-                    GamingMode, Ldac, LimitHighVolume, LowBatteryPrompt, SoundLeakCompensation,
-                    SurroundSound, TouchLock, TouchTone, VoicePrompt, WearingDetection,
-                    WearingTone, button_configuration::ButtonStatusCollection,
+                    CaseBatteryLevel, DisableAllButtons, DualBatteryLevel, DualConnections,
+                    EqualizerConfiguration, GamingMode, Ldac, LimitHighVolume, LowBatteryPrompt,
+                    SoundLeakCompensation, SurroundSound, TouchLock, TouchTone, VoicePrompt,
+                    WearingDetection, WearingTone, button_configuration::ButtonStatusCollection,
                 },
             },
         },
@@ -689,6 +689,7 @@ where
     flag!(WearingDetection);
     flag!(VoicePrompt);
     flag!(Ldac);
+    flag!(DisableAllButtons);
 }
 
 pub struct SoundcoreDeviceTemplate<StateType>

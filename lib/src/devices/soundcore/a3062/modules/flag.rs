@@ -10,7 +10,7 @@ use crate::{
             packet::{self, PacketIOController},
         },
     },
-    settings::SettingId,
+    settings::{CategoryId, SettingId},
 };
 
 impl<T> ModuleCollection<T>
@@ -21,9 +21,11 @@ where
         self.add_flag(
             packet_io,
             FlagConfiguration {
+                category_id: CategoryId::Miscellaneous,
                 setting_id: SettingId::DolbyAudio,
                 set_command: packet::Command([2, 134]),
                 update_command: None,
+                is_inverted: false,
             },
         );
     }
@@ -37,9 +39,11 @@ where
         self.add_flag(
             packet_io,
             FlagConfiguration {
+                category_id: CategoryId::Miscellaneous,
                 setting_id: SettingId::SideTone,
                 set_command: packet::Command([1, 132]),
                 update_command: None,
+                is_inverted: false,
             },
         );
     }
@@ -56,9 +60,11 @@ where
         self.add_flag(
             packet_io,
             FlagConfiguration {
+                category_id: CategoryId::Miscellaneous,
                 setting_id: SettingId::VoicePrompt,
                 set_command: packet::Command([1, 174]),
                 update_command: None,
+                is_inverted: false,
             },
         );
     }

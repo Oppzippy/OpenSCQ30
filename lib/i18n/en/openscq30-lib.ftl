@@ -29,6 +29,7 @@ soundcore-a3968 = Soundcore Sport X20
 soundcore-a3954 = Soundcore Liberty 4 Pro
 soundcore-a3955 = Soundcore P40i
 soundcore-a3957 = Soundcore Liberty 5
+soundcore-d1101 = Soundcore C50i
 soundcore-d1202 = Soundcore P31i
 soundcore-d1202c = Soundcore R60i NC
 soundcore-development = Soundcore Development Information
@@ -125,6 +126,7 @@ balanced = Balanced
 volume-booster = Volume Booster
 
 button-configuration = Button Configuration
+buttons-enabled = Buttons Enabled
 reset-buttons-to-default = Reset Buttons to Default
 single-press = Single Press
 double-press = Double Press

@@ -26,6 +26,7 @@ pub mod a3957;
 pub mod a3959;
 pub mod a3968;
 pub mod common;
+pub mod d1101;
 pub mod d1202;
 pub mod development;
 

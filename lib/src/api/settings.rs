@@ -168,6 +168,7 @@ pub enum SettingId {
     LightsColor,
     LightsMode,
     AutoLightsOffMinutes,
+    ButtonsEnabled,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

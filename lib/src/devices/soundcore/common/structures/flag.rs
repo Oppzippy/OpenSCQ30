@@ -53,3 +53,4 @@ flag!(LowBatteryPrompt);
 flag!(WearingDetection);
 flag!(VoicePrompt);
 flag!(Ldac);
+flag!(DisableAllButtons);
