@@ -1,0 +1,77 @@
+name = "soundcore C50i"
+mac_address = "00:00:00:0d:11:01"
+rfcomm_uuid = "0CF12D31-FAC3-4553-BD80-D6832E7D1101"
+
+[[responses]]
+command = [1, 1]
+response = [
+    0,    # host device
+    1,    # tws connected
+    9,    # left battery (0-9)
+    0,    # right battery (0-9)
+    48,   # left FW start
+    49,
+    46,
+    50,
+    56,   # left FW end
+    48,   # right FW start
+    49,
+    46,
+    50,
+    56,   # right FW end
+    49,   # SN start
+    49,
+    48,
+    49,
+    70,
+    54,
+    56,
+    69,
+    69,
+    68,
+    67,
+    57,
+    48,
+    57,
+    51,
+    52,   # SN end
+    0xfe, # EQ preset
+    0xfe, # EQ preset
+    160,  # EQ
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,
+    120,  # EQ end
+    9,    # unknown
+    0x66, # left single press
+    0xf6, # right single press
+    0x32, # left double press
+    0xf3, # right double press
+    0xff, # left triple press
+    0xff, # right triple press
+    0xf1, # left long press
+    0xf0, # right long press
+    0x31, # unknown
+    1,    # low battery prompt
+    1,    # dual connections enabled
+    0,    # button controls disabled
+    1,    # auto power off enabled
+    0,    # auto power off duration (30m, 60m, 90m, 120m)
+    0,    # LDAC
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+]
