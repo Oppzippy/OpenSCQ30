@@ -21,7 +21,7 @@ sync-remote:
 
 sync-remote-watch: sync-remote
     #!/usr/bin/env bash
-    while inotifywait -r -e modify,create,delete ./devices; do
+    while inotifywait -r -e modify,create,delete .; do
         just sync-remote
     done
 
