@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,6 +70,10 @@ import com.oppzippy.openscq30.lib.wrapper.Setting
 import com.oppzippy.openscq30.lib.wrapper.Value
 import com.oppzippy.openscq30.lib.wrapper.toValue
 import com.oppzippy.openscq30.ui.theme.OpenSCQ30GlanceTheme
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import java.math.BigDecimal
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -98,12 +104,29 @@ class SettingWidget : GlanceAppWidget() {
 
     override val sizeMode: SizeMode = SizeMode.Exact
 
-    override suspend fun provideGlance(context: Context, id: GlanceId) {
-        provideContent {
-            val prefs = currentState<Preferences>()
-            val state: SettingWidgetState? = prefs[STATE_KEY]?.let { Json.decodeFromString<SettingWidgetState?>(it) }
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface SettingWidgetHiltEntryPoint {
+        fun preferences(): com.oppzippy.openscq30.features.preferences.Preferences
+    }
 
-            Content(context, state)
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        // see: [Feature Request] Support for Hilt in GlanceAppWidget https://issuetracker.google.com/issues/218520083
+        val hiltEntryPoint =
+            EntryPointAccessors.fromApplication<SettingWidgetHiltEntryPoint>(context.applicationContext)
+        val applicationPreferences = hiltEntryPoint.preferences()
+
+        provideContent {
+            val widgetPreferences = currentState<Preferences>()
+            val state: SettingWidgetState? =
+                widgetPreferences[STATE_KEY]?.let { Json.decodeFromString<SettingWidgetState?>(it) }
+            val prefersDynamicColor by applicationPreferences.dynamicColorFlow.collectAsState()
+
+            Content(
+                context = context,
+                state = state,
+                prefersDynamicColor = prefersDynamicColor,
+            )
         }
     }
 
@@ -206,8 +229,8 @@ class SettingWidget : GlanceAppWidget() {
 }
 
 @Composable
-private fun Content(context: Context, state: SettingWidgetState?) {
-    OpenSCQ30GlanceTheme {
+private fun Content(context: Context, state: SettingWidgetState?, prefersDynamicColor: Boolean) {
+    OpenSCQ30GlanceTheme(dynamicColor = prefersDynamicColor) {
         Scaffold(
             modifier = GlanceModifier.fillMaxSize(),
             titleBar = {

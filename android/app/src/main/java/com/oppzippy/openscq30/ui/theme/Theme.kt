@@ -126,8 +126,14 @@ fun OpenSCQ30Theme(
 }
 
 @Composable
-fun OpenSCQ30GlanceTheme(content: @Composable () -> Unit) {
-    GlanceTheme(colors = ColorProviders(light = lightColorScheme, dark = darkColorScheme)) {
+fun OpenSCQ30GlanceTheme(dynamicColor: Boolean = true, content: @Composable () -> Unit) {
+    GlanceTheme(
+        colors = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && dynamicColor) {
+            GlanceTheme.colors
+        } else {
+            ColorProviders(light = lightColorScheme, dark = darkColorScheme)
+        },
+    ) {
         content()
     }
 }
