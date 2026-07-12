@@ -52,17 +52,23 @@ async def main() -> None:
 
     config: Dict = {}
 
+    def refresh_responses(config: Dict, soundcore_session: SoundcoreSession):
+        soundcore_session.clear_responses()
+        for entry in config["responses"]:
+            soundcore_session.set_response(
+                bytes(entry["command"]),
+                [bytes(r) for r in entry["response"]]
+                if len(entry["response"]) > 0 and isinstance(entry["response"][0], list)
+                else bytes(entry["response"]),
+            )
+
     def reload_config():
         logging.info("reloading device config")
         nonlocal config
         with open(sys.argv[2], mode="rb") as file:
             config = tomllib.load(file)
         if soundcore_session is not None:
-            soundcore_session.clear_responses()
-            for entry in config["responses"]:
-                soundcore_session.set_response(
-                    bytes(entry["command"]), bytes(entry["response"])
-                )
+            refresh_responses(config, soundcore_session)
 
     reload_config()
 
@@ -94,13 +100,6 @@ async def main() -> None:
         audio_listener.on("connection", on_avdtp_connection)
 
         rfcomm_server = Server(device)
-
-        def refresh_responses(config: Dict, soundcore_session: SoundcoreSession):
-            if soundcore_session is not None:
-                for entry in config["responses"]:
-                    soundcore_session.set_response(
-                        bytes(entry["command"]), bytes(entry["response"])
-                    )
 
         def on_session(session: DLC) -> None:
             nonlocal soundcore_session
