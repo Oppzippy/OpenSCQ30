@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     bytes::complete::take,
-    combinator::{all_consuming, map},
+    combinator::map,
     error::{ContextError, ParseError, context},
 };
 use tokio::sync::watch;
@@ -75,7 +75,7 @@ impl FromPacketBody for A3959StateUpdate {
     ) -> IResult<&'a [u8], Self, E> {
         context(
             "a3959 state update packet",
-            all_consuming(map(
+            map(
                 (
                     common::structures::TwsStatus::take,
                     common::structures::DualBattery::take,
@@ -135,7 +135,7 @@ impl FromPacketBody for A3959StateUpdate {
                             .then_some(gaming_mode),
                     }
                 },
-            )),
+            ),
         )
         .parse_complete(input)
     }

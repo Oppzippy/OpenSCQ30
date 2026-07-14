@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use nom::{
     IResult, Parser,
-    combinator::{all_consuming, map},
+    combinator::map,
     error::{ContextError, ParseError, context},
 };
 use tokio::sync::watch;
@@ -63,7 +63,7 @@ impl FromPacketBody for A3931StateUpdatePacket {
     ) -> IResult<&'a [u8], Self, E> {
         context(
             "a3931 state update packet",
-            all_consuming(map(
+            map(
                 (
                     TwsStatus::take,
                     DualBattery::take,
@@ -97,7 +97,7 @@ impl FromPacketBody for A3931StateUpdatePacket {
                         auto_power_off,
                     }
                 },
-            )),
+            ),
         )
         .parse_complete(input)
     }

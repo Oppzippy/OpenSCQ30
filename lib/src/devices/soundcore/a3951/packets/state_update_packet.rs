@@ -3,7 +3,7 @@ use std::iter;
 use async_trait::async_trait;
 use nom::{
     IResult, Parser,
-    combinator::{all_consuming, opt},
+    combinator::opt,
     error::{ContextError, ParseError, context},
     number::complete::{le_u8, le_u16},
 };
@@ -80,68 +80,65 @@ impl FromPacketBody for A3951StateUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
-        context(
-            "a3951 state update packet",
-            all_consuming(|input| {
-                // required fields
-                let (
-                    input,
-                    (
-                        tws_status,
-                        battery,
-                        equalizer_configuration,
-                        gender,
-                        age_range,
-                        custom_hear_id,
-                        button_configuration,
-                        sound_modes,
-                        side_tone,
-                        wearing_detection,
-                        touch_tone,
-                    ),
-                ) = (
-                    TwsStatus::take,
-                    DualBattery::take,
-                    CommonEqualizerConfiguration::take,
-                    Gender::take,
-                    AgeRange::take,
-                    CustomHearId::take,
-                    ButtonStatusCollection::take(a3951::BUTTON_SETTINGS.parse_settings()),
-                    SoundModes::take,
-                    take_bool, // side tone
-                    WearingDetection::take,
-                    TouchTone::take, // touch tone
-                )
-                    .parse_complete(input)?;
+        context("a3951 state update packet", |input| {
+            // required fields
+            let (
+                input,
+                (
+                    tws_status,
+                    battery,
+                    equalizer_configuration,
+                    gender,
+                    age_range,
+                    custom_hear_id,
+                    button_configuration,
+                    sound_modes,
+                    side_tone,
+                    wearing_detection,
+                    touch_tone,
+                ),
+            ) = (
+                TwsStatus::take,
+                DualBattery::take,
+                CommonEqualizerConfiguration::take,
+                Gender::take,
+                AgeRange::take,
+                CustomHearId::take,
+                ButtonStatusCollection::take(a3951::BUTTON_SETTINGS.parse_settings()),
+                SoundModes::take,
+                take_bool, // side tone
+                WearingDetection::take,
+                TouchTone::take, // touch tone
+            )
+                .parse_complete(input)?;
 
-                // >=96 length optional fields
-                let (input, hear_id_eq_preset) = opt(le_u16).parse_complete(input)?;
+            // >=96 length optional fields
+            let (input, hear_id_eq_preset) = opt(le_u16).parse_complete(input)?;
 
-                // >=98 length optional fields
-                let (input, new_battery) = opt((le_u8, le_u8)).parse_complete(input)?;
+            // >=98 length optional fields
+            let (input, new_battery) = opt((le_u8, le_u8)).parse_complete(input)?;
 
-                Ok((
-                    input,
-                    Self {
-                        tws_status,
-                        battery,
-                        equalizer_configuration,
-                        gender,
-                        age_range,
-                        custom_hear_id,
-                        button_configuration,
-                        sound_modes,
-                        side_tone,
-                        wearing_detection,
-                        touch_tone,
-                        hear_id_eq_preset,
-                        supports_new_battery: new_battery.is_some(),
-                        left_new_battery: new_battery.as_ref().map(|b| b.0).unwrap_or_default(),
-                        right_new_battery: new_battery.as_ref().map(|b| b.1).unwrap_or_default(),
-                    },
-                ))
-            }),
-        )
+            Ok((
+                input,
+                Self {
+                    tws_status,
+                    battery,
+                    equalizer_configuration,
+                    gender,
+                    age_range,
+                    custom_hear_id,
+                    button_configuration,
+                    sound_modes,
+                    side_tone,
+                    wearing_detection,
+                    touch_tone,
+                    hear_id_eq_preset,
+                    supports_new_battery: new_battery.is_some(),
+                    left_new_battery: new_battery.as_ref().map(|b| b.0).unwrap_or_default(),
+                    right_new_battery: new_battery.as_ref().map(|b| b.1).unwrap_or_default(),
+                },
+            ))
+        })
         .parse_complete(input)
     }
 }

@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use nom::{
     IResult, Parser,
-    combinator::{all_consuming, map, opt},
+    combinator::{map, opt},
     error::{ContextError, ParseError, context},
 };
 use tokio::sync::watch;
@@ -51,7 +51,7 @@ impl FromPacketBody for A3027StateUpdatePacket {
     ) -> IResult<&'a [u8], Self, E> {
         context(
             "a3027 state update packet",
-            all_consuming(map(
+            map(
                 (
                     SingleBattery::take,
                     CommonEqualizerConfiguration::take,
@@ -89,7 +89,7 @@ impl FromPacketBody for A3027StateUpdatePacket {
                         touch_func,
                     }
                 },
-            )),
+            ),
         )
         .parse_complete(input)
     }

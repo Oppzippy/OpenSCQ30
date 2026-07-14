@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use nom::{
     IResult, Parser,
     bytes::complete::take,
-    combinator::{all_consuming, opt},
+    combinator::opt,
     error::{ContextError, ParseError, context},
     number::complete::le_u8,
     sequence::pair,
@@ -102,76 +102,71 @@ impl FromPacketBody for A3933StateUpdatePacket {
     fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
     ) -> IResult<&'a [u8], Self, E> {
-        context(
-            "a3933 state update packet",
-            all_consuming(|input| {
-                let (
-                    input,
-                    (
-                        tws_status,
-                        battery,
-                        dual_firmware_version,
-                        serial_number,
-                        equalizer_configuration,
-                        age_range,
-                    ),
-                ) = (
-                    TwsStatus::take,
-                    DualBattery::take,
-                    DualFirmwareVersion::take,
-                    SerialNumber::take,
-                    CommonEqualizerConfiguration::take,
-                    AgeRange::take,
-                )
-                    .parse_complete(input)?;
+        context("a3933 state update packet", |input| {
+            let (
+                input,
+                (
+                    tws_status,
+                    battery,
+                    dual_firmware_version,
+                    serial_number,
+                    equalizer_configuration,
+                    age_range,
+                ),
+            ) = (
+                TwsStatus::take,
+                DualBattery::take,
+                DualFirmwareVersion::take,
+                SerialNumber::take,
+                CommonEqualizerConfiguration::take,
+                AgeRange::take,
+            )
+                .parse_complete(input)?;
 
-                let (input, hear_id) = if !age_range.supports_hear_id() {
-                    let (input, _) = take(48usize)(input)?;
-                    (input, None)
-                } else {
-                    let (input, hear_id) = CustomHearId::take_with_music_genre_at_end(input)?;
-                    (input, Some(hear_id))
-                };
+            let (input, hear_id) = if !age_range.supports_hear_id() {
+                let (input, _) = take(48usize)(input)?;
+                (input, None)
+            } else {
+                let (input, hear_id) = CustomHearId::take_with_music_genre_at_end(input)?;
+                (input, Some(hear_id))
+            };
 
-                let (
-                    input,
-                    (button_configuration, ambient_sound_mode_cycle, sound_modes, _unknown, extra),
-                ) = (
-                    ButtonStatusCollection::take(
-                        a3933::BUTTON_CONFIGURATION_SETTINGS.parse_settings(),
-                    ),
-                    AmbientSoundModeCycle::take,
-                    SoundModes::take,
-                    // Unsure if these two unknown bytes should be inside or outside the optional
-                    context("unknown bytes", take(2usize)), // unknown bytes
-                    opt(pair(Self::take_optional_extra_data, take(3usize))),
-                )
-                    .parse_complete(input)?;
+            let (
+                input,
+                (button_configuration, ambient_sound_mode_cycle, sound_modes, _unknown, extra),
+            ) = (
+                ButtonStatusCollection::take(a3933::BUTTON_CONFIGURATION_SETTINGS.parse_settings()),
+                AmbientSoundModeCycle::take,
+                SoundModes::take,
+                // Unsure if these two unknown bytes should be inside or outside the optional
+                context("unknown bytes", take(2usize)), // unknown bytes
+                opt(pair(Self::take_optional_extra_data, take(3usize))),
+            )
+                .parse_complete(input)?;
 
-                Ok((
-                    input,
-                    Self {
-                        tws_status,
-                        battery,
-                        dual_firmware_version,
-                        serial_number,
-                        equalizer_configuration,
-                        age_range,
-                        hear_id,
-                        button_configuration,
-                        ambient_sound_mode_cycle,
-                        sound_modes,
-                        // TODO make these fields optional?
-                        touch_tone: extra.map(|e| e.0.0).unwrap_or_default(),
-                        wearing_detection: extra.map(|e| e.0.1).unwrap_or_default(),
-                        gaming_mode: extra.map(|e| e.0.2).unwrap_or_default(),
-                        case_battery_level: extra.map(|e| e.0.3).unwrap_or_default(),
-                        device_color: extra.map(|e| e.0.5).unwrap_or_default(),
-                        wind_noise_detection: extra.map(|e| e.0.6).unwrap_or_default(),
-                    },
-                ))
-            }),
-        )
+            Ok((
+                input,
+                Self {
+                    tws_status,
+                    battery,
+                    dual_firmware_version,
+                    serial_number,
+                    equalizer_configuration,
+                    age_range,
+                    hear_id,
+                    button_configuration,
+                    ambient_sound_mode_cycle,
+                    sound_modes,
+                    // TODO make these fields optional?
+                    touch_tone: extra.map(|e| e.0.0).unwrap_or_default(),
+                    wearing_detection: extra.map(|e| e.0.1).unwrap_or_default(),
+                    gaming_mode: extra.map(|e| e.0.2).unwrap_or_default(),
+                    case_battery_level: extra.map(|e| e.0.3).unwrap_or_default(),
+                    device_color: extra.map(|e| e.0.5).unwrap_or_default(),
+                    wind_noise_detection: extra.map(|e| e.0.6).unwrap_or_default(),
+                },
+            ))
+        })
         .parse_complete(input)
     }
 }
