@@ -22,11 +22,11 @@ where
                 widget::row![
                     widget::spin_button(
                         {
+                            let sign = if value[i] < 0 { "-" } else { "" };
                             let divisor = 10i16.pow(setting.fraction_digits as u32);
-                            let db_integer_portion = value[i] / divisor;
+                            let db_integer_portion = (value[i] / divisor).abs();
                             let db_decimal_portion = (value[i] % divisor).abs();
-                            let decimal_db = format!("{db_integer_portion}.{db_decimal_portion}");
-                            decimal_db.to_string()
+                            format!("{sign}{db_integer_portion}.{db_decimal_portion}")
                         },
                         fl!("hz", hz = hz),
                         value[i],
