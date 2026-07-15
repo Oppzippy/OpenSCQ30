@@ -112,7 +112,7 @@ mod tests {
     };
 
     #[tokio::test(start_paused = true)]
-    async fn it_remembers_band_9_and_10_values() {
+    async fn it_resets_band_9_and_10_values() {
         let state_update_packet = packet::Inbound::new(
             packet::inbound::STATE_COMMAND,
             vec![
@@ -155,8 +155,12 @@ mod tests {
                     &CommonEqualizerConfiguration::<2, 10>::new_all_bands_present(
                         0x0015,
                         [
-                            CommonVolumeAdjustments::new([0, 0, 0, -20, -30, -40, -40, -60, 1, 2]),
-                            CommonVolumeAdjustments::new([0, 0, 0, -20, -30, -40, -40, -60, 3, 4]),
+                            CommonVolumeAdjustments::new([
+                                0, 0, 0, -20, -30, -40, -40, -60, 0, -120,
+                            ]),
+                            CommonVolumeAdjustments::new([
+                                0, 0, 0, -20, -30, -40, -40, -60, 0, -120,
+                            ]),
                         ],
                     ),
                 )],

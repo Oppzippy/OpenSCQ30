@@ -37,12 +37,45 @@ pub fn set_equalizer<
                 .iter()
                 .flat_map(|v| v.bytes()),
         )
-        .chain([0, 2]) // unknown
+        // unknown
+        .chain(if hear_id.is_enabled {
+            [0; 2]
+        } else {
+            [255, 255]
+        })
         .chain(iter::once(hear_id.is_enabled.into()))
-        .chain(hear_id.volume_adjustment_bytes())
+        .chain(
+            hear_id
+                .volume_adjustments
+                .iter()
+                .flat_map(|maybe_volume_adjustments| {
+                    maybe_volume_adjustments.map_or(
+                        {
+                            let mut bytes = [0xff; HEAR_ID_BANDS];
+                            bytes[bytes.len() - 1] = 0;
+                            bytes
+                        },
+                        |v| v.bytes(),
+                    )
+                }),
+        )
         .chain(hear_id.time.to_be_bytes())
         .chain(iter::once(hear_id.hear_id_type as u8))
-        .chain(hear_id.custom_volume_adjustment_bytes())
+        .chain(
+            hear_id
+                .custom_volume_adjustments
+                .iter()
+                .flat_map(|maybe_volume_adjustments| {
+                    maybe_volume_adjustments.map_or(
+                        {
+                            let mut bytes = [0xff; HEAR_ID_BANDS];
+                            bytes[bytes.len() - 1] = 0;
+                            bytes
+                        },
+                        |v| v.bytes(),
+                    )
+                }),
+        )
         .chain(
             equalizer_configuration
                 .volume_adjustments()

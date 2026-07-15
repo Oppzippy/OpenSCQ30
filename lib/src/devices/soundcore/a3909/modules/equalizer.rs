@@ -41,7 +41,7 @@ where
                 custom_preset_id: 0xfefe,
                 band_hz: [100, 200, 400, 800, 1600, 3200, 6400, 12800],
                 presets: PRESETS.clone(),
-                invisible_bands_mode: InvisibleBandsMode::Remember,
+                invisible_bands_mode: InvisibleBandsMode::Fixed(Vec::new()),
             },
         )
         .await;
@@ -62,6 +62,7 @@ pub static PRESETS: LazyLock<Vec<EqualizerPreset<8, -12, 12, 0>>> = LazyLock::ne
                     .volume_adjustments
                     .adjustments()
                     .iter()
+                    .take(8) // common presets have 10 bands, but we only care about 8
                     .map(|db| db / 10)
                     .collect_array()
                     .expect("we didn't filter the iterator, so the output will have the same size"),

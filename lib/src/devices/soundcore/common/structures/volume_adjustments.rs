@@ -43,22 +43,6 @@ impl<const B: usize, const MIN_VOLUME: i16, const MAX_VOLUME: i16, const FRACTIO
         Self { inner: clamped }
     }
 
-    pub fn take<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
-        input: &'a [u8],
-    ) -> IResult<&'a [u8], Self, E> {
-        context(
-            "volume adjustment",
-            map(take(B), |volume_adjustment_bytes: &[u8]| {
-                Self::from_bytes(
-                    volume_adjustment_bytes
-                        .try_into()
-                        .expect("take guarantees that the length will be B"),
-                )
-            }),
-        )
-        .parse_complete(input)
-    }
-
     /// 255 indicates not present
     pub fn take_optional<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         input: &'a [u8],
@@ -228,16 +212,21 @@ impl<const B: usize, const MIN_VOLUME: i16, const MAX_VOLUME: i16, const FRACTIO
                 })
         });
         // divide afterwards
-        let new_adjustments_8_bands = multiplied_adjustments_8_bands.map(|band| band / 10.0);
+        let new_adjustments_8_bands =
+            multiplied_adjustments_8_bands
+                .map(|band| band / 10.0)
+                .map(|adjustment| {
+                    (adjustment * 10_i16.pow(FRACTION_DIGITS as u32) as f64).round() as i16
+                });
 
         // Add bands 9+ back on to the end
+        const BAND_DEFAULTS: [i16; 10] = [0, 0, 0, 0, 0, 0, 0, 0, 0, -120];
         let new_adjustments_with_all_bands: [i16; B] = array::from_fn(|i| {
             new_adjustments_8_bands
                 .get(i)
                 .copied()
-                .unwrap_or(adjustments[i])
-        })
-        .map(|adjustment| (adjustment * 10_i16.pow(FRACTION_DIGITS as u32) as f64).round() as i16);
+                .unwrap_or(BAND_DEFAULTS.get(i).copied().unwrap_or_default())
+        });
 
         Self::new(new_adjustments_with_all_bands)
     }
@@ -372,13 +361,13 @@ mod tests {
     }
 
     #[test]
-    fn it_does_not_modify_band_9_when_applying_drc() {
+    fn applying_drc_reverts_band_9_and_10_to_defaults() {
         let volume_adjustments =
-            CommonVolumeAdjustments::new([-60, 60, 23, 120, 22, -120, -4, 16, 50]);
+            CommonVolumeAdjustments::new([-60, 60, 23, 120, 22, -120, -4, 16, 50, 60]);
         let expected = CommonVolumeAdjustments::new(
             [
                 -1.1060872, 1.367825, -0.842687, 1.571185, 0.321646, -1.79549, 0.61513, 0.083543,
-                5.0,
+                0.0, -12.0,
             ]
             .map(|v| (v * 10.0f64).round() as i16),
         );

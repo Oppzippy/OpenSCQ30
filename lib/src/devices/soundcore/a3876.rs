@@ -12,7 +12,7 @@ use crate::{
                     COMMON_ACTIONS_MINIMAL,
                 },
                 dual_battery_level::DualBatteryLevelConfiguration,
-                equalizer::{EqualizerModuleSettings, EqualizerPreset, InvisibleBandsMode},
+                equalizer::{EqualizerModuleSettings, EqualizerPreset},
             },
             packet::{
                 inbound::TryToPacket,
@@ -185,9 +185,6 @@ const BUTTON_ACTIONS: &[ButtonAction] = &[
 
 pub fn equalizer_settings() -> EqualizerModuleSettings<8, 10, -120, 134, 1> {
     EqualizerModuleSettings {
-        custom_preset_id: 0xfefe,
-        band_hz: [100, 200, 400, 800, 1600, 3200, 6400, 12800],
-        invisible_bands_mode: InvisibleBandsMode::Remember,
         presets: vec![
             EqualizerPreset {
                 name: "SoundcoreSignature",
@@ -366,6 +363,7 @@ pub fn equalizer_settings() -> EqualizerModuleSettings<8, 10, -120, 134, 1> {
                 ]),
             },
         ],
+        ..common::modules::equalizer::common_settings()
     }
 }
 
@@ -430,5 +428,45 @@ mod tests {
             (SettingId::FirmwareVersionRight, "03.15".into()),
             (SettingId::SerialNumber, "3876BE4A96276C14".into()),
         ]);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn set_custom_eq() {
+        let mut device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreA3876,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        1, 1, 5, 9, 48, 51, 46, 49, 53, 48, 51, 46, 49, 53, 51, 56, 55, 54, 66, 69,
+                        52, 65, 57, 54, 50, 55, 54, 67, 49, 52, 255, 255, 255, 255, 255, 255, 0xfe,
+                        0xfe, 120, 120, 120, 120, 120, 120, 120, 120, 250, 250, 120, 120, 120, 120,
+                        120, 120, 120, 120, 250, 250, 9, 0xff, 0xf6, 0xf3, 0x63, 0xff, 0xf5, 0xff,
+                        0xf0, 1, 4, 45, 1, 23, 187, 239, 49, 1, 1, 2, 0, 0, 100, 1, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0,
+                    ],
+                ),
+            )]),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+
+        device
+            .assert_set_settings_response(
+                vec![(
+                    SettingId::VolumeAdjustments,
+                    Value::I16Vec(vec![0, 0, 0, 0, 0, 0, 0, 60]).into(),
+                )],
+                vec![packet::Outbound::new(
+                    packet::Command([2, 131]),
+                    vec![
+                        254, 254, 120, 120, 120, 120, 120, 120, 120, 180, 120, 120, 120, 120, 120,
+                        120, 120, 121, 116, 129, 120, 0,
+                    ],
+                )],
+            )
+            .await;
     }
 }

@@ -123,8 +123,93 @@ mod tests {
                 SettingId::PresetEqualizerProfile,
                 Some("SoundcoreSignature").into(),
             ),
+            (
+                SettingId::VolumeAdjustments,
+                Value::I16Vec(vec![0, 0, 0, 0, 0, 0, 0, 0]),
+            ),
             (SettingId::DualConnections, false.into()),
         ]);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn set_preset_eq() {
+        let mut device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreA3035,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        5, 255, 48, 54, 46, 56, 55, 51, 48, 51, 53, 55, 48, 53, 48, 50, 56, 56, 65,
+                        57, 68, 70, 52, 0, 0, 120, 120, 120, 120, 120, 120, 120, 120, 250,
+                        250, // band 9-10 changed to 250 so we can verify how they're handled
+                        30, 255, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0,
+                        255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 4, 4, 7, 3, 0, 0x50,
+                        0, 0, 1, 5, 0, 1, 0, 0, 0, 49, 1, 0, 1, 0, 1, 2, 0, 90, 0, 1, 1, 0, 0, 0,
+                    ],
+                ),
+            )]),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+
+        device
+            .assert_set_settings_response(
+                vec![(SettingId::PresetEqualizerProfile, "Acoustic".into())],
+                vec![packet::Outbound::new(
+                    packet::Command([3, 135]),
+                    vec![
+                        1, 0, 0, 0, 160, 130, 140, 140, 160, 160, 160, 140, 120, 0, 255, 255, 0,
+                        255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 255, 255,
+                        255, 255, 255, 255, 255, 255, 255, 0, 125, 118, 123, 120, 124, 122, 124,
+                        121, 120, 0, 0,
+                    ],
+                )],
+            )
+            .await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn set_custom_eq() {
+        let mut device = TestSoundcoreDevice::new(
+            super::device_registry,
+            DeviceModel::SoundcoreA3035,
+            HashMap::from([(
+                packet::Command([1, 1]),
+                packet::Inbound::new(
+                    packet::Command([1, 1]),
+                    vec![
+                        5, 255, 48, 54, 46, 56, 55, 51, 48, 51, 53, 55, 48, 53, 48, 50, 56, 56, 65,
+                        57, 68, 70, 52, 0, 0, 120, 120, 120, 120, 120, 120, 120, 120, 250,
+                        250, // band 9-10 changed to 250 so we can verify how they're handled
+                        30, 255, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0,
+                        255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 4, 4, 7, 3, 0, 0x50,
+                        0, 0, 1, 5, 0, 1, 0, 0, 0, 49, 1, 0, 1, 0, 1, 2, 0, 90, 0, 1, 1, 0, 0, 0,
+                    ],
+                ),
+            )]),
+            SoundcoreDeviceConfig::default(),
+        )
+        .await;
+
+        device
+            .assert_set_settings_response(
+                vec![(
+                    SettingId::VolumeAdjustments,
+                    Value::I16Vec(vec![-60, 0, 0, 0, 0, 0, 0, 60]),
+                )],
+                vec![packet::Outbound::new(
+                    packet::Command([3, 135]),
+                    vec![
+                        254, 254, 0, 0, 60, 120, 120, 120, 120, 120, 120, 180, 120, 120, 255, 255,
+                        0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 255, 255,
+                        255, 255, 255, 255, 255, 255, 255, 0, 112, 124, 119, 121, 119, 121, 116,
+                        129, 120, 0, 0,
+                    ],
+                )],
+            )
+            .await;
     }
 
     #[tokio::test(start_paused = true)]

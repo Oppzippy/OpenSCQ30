@@ -139,10 +139,10 @@ pub fn take_hear_id<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
         map(
             (
                 take_bool,
-                CommonVolumeAdjustments::take,
+                CommonVolumeAdjustments::take_optional,
                 be_u32,
                 HearIdType::take,
-                CommonVolumeAdjustments::take,
+                CommonVolumeAdjustments::take_optional,
                 HearIdMusicGenre::take_one_byte,
             ),
             |(
@@ -155,10 +155,10 @@ pub fn take_hear_id<'a, E: ParseError<&'a [u8]> + ContextError<&'a [u8]>>(
             )| {
                 CustomHearId {
                     is_enabled,
-                    volume_adjustments: [Some(volume_adjustments)],
+                    volume_adjustments: [volume_adjustments],
                     time,
                     hear_id_type,
-                    custom_volume_adjustments: [Some(custom_volume_adjustments)],
+                    custom_volume_adjustments: [custom_volume_adjustments],
                     favorite_music_genre,
                 }
             },

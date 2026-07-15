@@ -78,10 +78,6 @@ impl<
                 "there can't be more visible bands than there are total bands",
             );
             assert!(
-                PRESET_BANDS <= BANDS,
-                "there can't be more preset bands than there are total bands",
-            );
-            assert!(
                 PRESET_BANDS >= VISIBLE_BANDS,
                 "there can't be fewer preset bands than visible bands",
             );
@@ -269,7 +265,7 @@ fn get_inner<
                 .volume_adjustments_channel_1()
                 .copied()
                 .unwrap_or_default()
-                .adjustments()
+                .adjustments()[..VISIBLE_BANDS]
                 .to_vec(),
         },
     })
@@ -324,7 +320,8 @@ async fn set_inner<
                                 .adjustments()
                                 .get(i)
                                 .copied()
-                                .unwrap_or(match &module_settings.invisible_bands_mode {
+                                // or_else so that i - PRESET_BANDS doesn't run for band numbers < PRESET_BANDS, causing overflow
+                                .unwrap_or_else(|| match &module_settings.invisible_bands_mode {
                                     InvisibleBandsMode::Remember => {
                                         v.map_or(0, |v| v.adjustments()[i])
                                     }
@@ -357,7 +354,7 @@ async fn set_inner<
                             volume_adjustments,
                             equalizer_configuration.volume_adjustments(),
                             &module_settings.invisible_bands_mode,
-                            PRESET_BANDS,
+                            VISIBLE_BANDS,
                         ),
                     );
                 }
@@ -390,7 +387,7 @@ async fn set_inner<
                     volume_adjustments,
                     equalizer_configuration.volume_adjustments(),
                     &module_settings.invisible_bands_mode,
-                    PRESET_BANDS,
+                    VISIBLE_BANDS,
                 ),
             );
         }
@@ -409,7 +406,7 @@ fn values_to_volume_adjustments<
     existing_volume_adjustments: &[Option<VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>;
          CHANNELS],
     mode: &InvisibleBandsMode,
-    preset_bands: usize,
+    visible_bands: usize,
 ) -> [Option<VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>; CHANNELS] {
     // Some devices have extra bands, but those aren't exposed to the user, so I have no idea what they're for
     array::from_fn(|channel| match mode {
@@ -420,15 +417,15 @@ fn values_to_volume_adjustments<
             }))
         }),
         InvisibleBandsMode::Fixed(fixed) => Some(VolumeAdjustments::new(array::from_fn(|band| {
-            values
-                .get(band)
-                .copied()
-                .unwrap_or(fixed.get(band - preset_bands).copied().unwrap_or_else(|| {
+            // or_else so that i - visible_bands doesn't run for band numbers < PRESET_BANDS, causing overflow
+            values.get(band).copied().unwrap_or_else(|| {
+                fixed.get(band - visible_bands).copied().unwrap_or_else(|| {
                 tracing::warn!(
                     "using fixed mode for invisible bands, but no value specified for band {band}"
                 );
                 0
-            }))
+            })
+            })
         }))),
     })
 }
