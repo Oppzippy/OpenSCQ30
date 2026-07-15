@@ -313,20 +313,12 @@ async fn set_inner<
             }) {
                 *equalizer_configuration = EqualizerConfiguration::new_all_bands_present(
                     preset.id,
-                    [VolumeAdjustments::new(array::from_fn(|i| {
-                        preset
-                            .volume_adjustments
-                            .adjustments()
-                            .get(i)
-                            .copied()
-                            // or_else so that i - PRESET_BANDS doesn't run for band numbers < PRESET_BANDS, causing overflow
-                            .unwrap_or_else(|| match &module_settings.invisible_bands_mode {
-                                InvisibleBandsMode::Fixed(fixed) => fixed.get(i - PRESET_BANDS).copied().unwrap_or_else(|| {
-                                    tracing::warn!("using fixed mode for invisible bands, but no value specified for band {i}");
-                                    0
-                                }),
-                            })
-                    })); CHANNELS],
+                    values_to_volume_adjustments(
+                        preset.volume_adjustments.adjustments(),
+                        &module_settings.invisible_bands_mode,
+                        // preset values should override invisible band handling
+                        PRESET_BANDS,
+                    ),
                 );
             } else {
                 *equalizer_configuration = EqualizerConfiguration::new(
@@ -343,7 +335,7 @@ async fn set_inner<
                     .find(|(n, _)| n == name)
                     .map(|(_, volume_adjustments)| volume_adjustments)
                 {
-                    *equalizer_configuration = EqualizerConfiguration::new(
+                    *equalizer_configuration = EqualizerConfiguration::new_all_bands_present(
                         module_settings.custom_preset_id,
                         values_to_volume_adjustments(
                             volume_adjustments,
@@ -375,7 +367,7 @@ async fn set_inner<
         }
         EqualizerSetting::VolumeAdjustments => {
             let volume_adjustments = value.try_as_i16_slice()?;
-            *equalizer_configuration = EqualizerConfiguration::new(
+            *equalizer_configuration = EqualizerConfiguration::new_all_bands_present(
                 module_settings.custom_preset_id,
                 values_to_volume_adjustments(
                     volume_adjustments,
@@ -398,10 +390,10 @@ fn values_to_volume_adjustments<
     values: &[i16],
     mode: &InvisibleBandsMode,
     visible_bands: usize,
-) -> [Option<VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>; CHANNELS] {
+) -> [VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>; CHANNELS] {
     // Some devices have extra bands, but those aren't exposed to the user, so I have no idea what they're for
     [match mode {
-        InvisibleBandsMode::Fixed(fixed) => Some(VolumeAdjustments::new(array::from_fn(|band| {
+        InvisibleBandsMode::Fixed(fixed) => VolumeAdjustments::new(array::from_fn(|band| {
             // or_else so that i - visible_bands doesn't run for band numbers < PRESET_BANDS, causing overflow
             values.get(band).copied().unwrap_or_else(|| {
                 fixed.get(band - visible_bands).copied().unwrap_or_else(|| {
@@ -411,6 +403,6 @@ fn values_to_volume_adjustments<
                     0
                 })
             })
-        }))),
+        })),
     }; CHANNELS]
 }
