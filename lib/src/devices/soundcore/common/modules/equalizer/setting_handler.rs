@@ -9,7 +9,8 @@ use crate::{
     api::settings::{self, Setting, SettingId, Value},
     devices::soundcore::common::{
         modules::equalizer::{
-            EqualizerPreset, custom_equalizer_profile_store::CustomEqualizerProfileStore,
+            EqualizerModuleSettings, InvisibleBandsMode,
+            custom_equalizer_profile_store::CustomEqualizerProfileStore,
         },
         settings_manager::{SettingHandler, SettingHandlerResult},
         structures::{EqualizerConfiguration, TwsStatus, VolumeAdjustments},
@@ -31,9 +32,13 @@ pub struct EqualizerSettingHandler<
     profile_store: Arc<CustomEqualizerProfileStore>,
     custom_profiles_receiver: watch::Receiver<Vec<(String, Vec<i16>)>>,
     get_tws_status: Option<fn(&StateT) -> TwsStatus>,
-    custom_preset_id: u16,
-    band_hz: [u16; VISIBLE_BANDS],
-    presets: Vec<EqualizerPreset<PRESET_BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>,
+    module_settings: EqualizerModuleSettings<
+        VISIBLE_BANDS,
+        PRESET_BANDS,
+        MIN_VOLUME,
+        MAX_VOLUME,
+        FRACTION_DIGITS,
+    >,
 }
 
 impl<
@@ -59,9 +64,13 @@ impl<
 {
     pub fn new(
         profile_store: Arc<CustomEqualizerProfileStore>,
-        custom_preset_id: u16,
-        band_hz: [u16; VISIBLE_BANDS],
-        presets: Vec<EqualizerPreset<PRESET_BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>,
+        module_settings: EqualizerModuleSettings<
+            VISIBLE_BANDS,
+            PRESET_BANDS,
+            MIN_VOLUME,
+            MAX_VOLUME,
+            FRACTION_DIGITS,
+        >,
     ) -> Self {
         const {
             assert!(
@@ -81,9 +90,7 @@ impl<
             custom_profiles_receiver: profile_store.subscribe(),
             profile_store,
             get_tws_status: None,
-            custom_preset_id,
-            band_hz,
-            presets,
+            module_settings,
         }
     }
 
@@ -137,9 +144,7 @@ where
 
         get_inner(
             equalizer_configuration,
-            self.band_hz,
-            &self.presets,
-            self.custom_preset_id,
+            &self.module_settings,
             &self.custom_profiles_receiver,
             setting_id,
         )
@@ -161,8 +166,7 @@ where
         let equalizer_configuration = state.get_mut();
         set_inner(
             equalizer_configuration,
-            &self.presets,
-            self.custom_preset_id,
+            &self.module_settings,
             &self.custom_profiles_receiver,
             &self.profile_store,
             setting_id,
@@ -189,26 +193,33 @@ fn get_inner<
         MAX_VOLUME,
         FRACTION_DIGITS,
     >,
-    band_hz: [u16; VISIBLE_BANDS],
-    presets: &[EqualizerPreset<PRESET_BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>],
-    custom_preset_id: u16,
+    module_settings: &EqualizerModuleSettings<
+        VISIBLE_BANDS,
+        PRESET_BANDS,
+        MIN_VOLUME,
+        MAX_VOLUME,
+        FRACTION_DIGITS,
+    >,
     custom_profiles_receiver: &watch::Receiver<Vec<(String, Vec<i16>)>>,
     setting_id: &SettingId,
 ) -> Option<crate::api::settings::Setting> {
     let setting = (*setting_id).try_into().ok()?;
     Some(match setting {
         EqualizerSetting::PresetEqualizerProfile => {
-            let maybe_preset = presets
+            let maybe_preset = module_settings
+                .presets
                 .iter()
                 .find(|preset| preset.id == equalizer_configuration.preset_id())
                 .copied();
             Setting::OptionalSelect {
                 setting: settings::Select {
-                    options: presets
+                    options: module_settings
+                        .presets
                         .iter()
                         .map(|preset| Cow::Borrowed(preset.name))
                         .collect(),
-                    localized_options: presets
+                    localized_options: module_settings
+                        .presets
                         .iter()
                         .map(|preset| (preset.localized_name)())
                         .collect(),
@@ -231,7 +242,7 @@ fn get_inner<
                             .collect(),
                     }
                 },
-                value: (equalizer_configuration.preset_id() == custom_preset_id)
+                value: (equalizer_configuration.preset_id() == module_settings.custom_preset_id)
                     .then(|| {
                         custom_profiles
                             .iter()
@@ -249,7 +260,7 @@ fn get_inner<
         }
         EqualizerSetting::VolumeAdjustments => Setting::Equalizer {
             setting: settings::Equalizer {
-                band_hz: Cow::Owned(band_hz.to_vec()),
+                band_hz: Cow::Owned(module_settings.band_hz.to_vec()),
                 fraction_digits: FRACTION_DIGITS.into(),
                 min: MIN_VOLUME,
                 max: MAX_VOLUME,
@@ -266,6 +277,7 @@ fn get_inner<
 
 #[inline(never)]
 async fn set_inner<
+    const VISIBLE_BANDS: usize,
     const CHANNELS: usize,
     const BANDS: usize,
     const PRESET_BANDS: usize,
@@ -280,8 +292,13 @@ async fn set_inner<
         MAX_VOLUME,
         FRACTION_DIGITS,
     >,
-    presets: &[EqualizerPreset<PRESET_BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>],
-    custom_preset_id: u16,
+    module_settings: &EqualizerModuleSettings<
+        VISIBLE_BANDS,
+        PRESET_BANDS,
+        MIN_VOLUME,
+        MAX_VOLUME,
+        FRACTION_DIGITS,
+    >,
     custom_profiles_receiver: &watch::Receiver<Vec<(String, Vec<i16>)>>,
     profile_store: &CustomEqualizerProfileStore,
     setting_id: &SettingId,
@@ -292,10 +309,12 @@ async fn set_inner<
         .expect("already filtered to valid values only by SettingsManager");
     match setting {
         EqualizerSetting::PresetEqualizerProfile => {
-            if let Some(preset) = value
-                .try_as_optional_str()?
-                .and_then(|preset_name| presets.iter().find(|it| it.name == preset_name))
-            {
+            if let Some(preset) = value.try_as_optional_str()?.and_then(|preset_name| {
+                module_settings
+                    .presets
+                    .iter()
+                    .find(|it| it.name == preset_name)
+            }) {
                 *equalizer_configuration = EqualizerConfiguration::new_all_bands_present(
                     preset.id,
                     equalizer_configuration.volume_adjustments().map(|v| {
@@ -305,13 +324,21 @@ async fn set_inner<
                                 .adjustments()
                                 .get(i)
                                 .copied()
-                                .unwrap_or(v.map_or(0, |v| v.adjustments()[i]))
+                                .unwrap_or(match &module_settings.invisible_bands_mode {
+                                    InvisibleBandsMode::Remember => {
+                                        v.map_or(0, |v| v.adjustments()[i])
+                                    }
+                                    InvisibleBandsMode::Fixed(fixed) => fixed.get(i - PRESET_BANDS).copied().unwrap_or_else(|| {
+                                        tracing::warn!("using fixed mode for invisible bands, but no value specified for band {i}");
+                                        0
+                                    }),
+                                })
                         }))
                     }),
                 );
             } else {
                 *equalizer_configuration = EqualizerConfiguration::new(
-                    custom_preset_id,
+                    module_settings.custom_preset_id,
                     *equalizer_configuration.volume_adjustments(),
                 );
             }
@@ -325,10 +352,12 @@ async fn set_inner<
                     .map(|(_, volume_adjustments)| volume_adjustments)
                 {
                     *equalizer_configuration = EqualizerConfiguration::new(
-                        custom_preset_id,
+                        module_settings.custom_preset_id,
                         values_to_volume_adjustments(
                             volume_adjustments,
                             equalizer_configuration.volume_adjustments(),
+                            &module_settings.invisible_bands_mode,
+                            PRESET_BANDS,
                         ),
                     );
                 }
@@ -356,10 +385,12 @@ async fn set_inner<
         EqualizerSetting::VolumeAdjustments => {
             let volume_adjustments = value.try_as_i16_slice()?;
             *equalizer_configuration = EqualizerConfiguration::new(
-                custom_preset_id,
+                module_settings.custom_preset_id,
                 values_to_volume_adjustments(
                     volume_adjustments,
                     equalizer_configuration.volume_adjustments(),
+                    &module_settings.invisible_bands_mode,
+                    PRESET_BANDS,
                 ),
             );
         }
@@ -377,18 +408,27 @@ fn values_to_volume_adjustments<
     values: &[i16],
     existing_volume_adjustments: &[Option<VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>;
          CHANNELS],
+    mode: &InvisibleBandsMode,
+    preset_bands: usize,
 ) -> [Option<VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>; CHANNELS] {
     // Some devices have extra bands, but those aren't exposed to the user, so I have no idea what they're for
-    // We can just add back in whatever was there before (we're only showing the user the first 8 bands)
-    array::from_fn(|band| {
-        existing_volume_adjustments[band].map(|bands| {
+    array::from_fn(|channel| match mode {
+        InvisibleBandsMode::Remember => existing_volume_adjustments[channel].map(|bands| {
             let band_adjustments = bands.adjustments();
-            VolumeAdjustments::new(array::from_fn(|channel| {
-                values
-                    .get(channel)
-                    .copied()
-                    .unwrap_or(band_adjustments[channel])
+            VolumeAdjustments::new(array::from_fn(|band| {
+                values.get(band).copied().unwrap_or(band_adjustments[band])
             }))
-        })
+        }),
+        InvisibleBandsMode::Fixed(fixed) => Some(VolumeAdjustments::new(array::from_fn(|band| {
+            values
+                .get(band)
+                .copied()
+                .unwrap_or(fixed.get(band - preset_bands).copied().unwrap_or_else(|| {
+                tracing::warn!(
+                    "using fixed mode for invisible bands, but no value specified for band {band}"
+                );
+                0
+            }))
+        }))),
     })
 }

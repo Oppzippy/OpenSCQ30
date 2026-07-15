@@ -12,7 +12,7 @@ use crate::{
             self,
             modules::{
                 ModuleCollection,
-                equalizer::{EqualizerModuleSettings, EqualizerPreset},
+                equalizer::{EqualizerModuleSettings, EqualizerPreset, InvisibleBandsMode},
             },
             packet::PacketIOController,
             structures::VolumeAdjustments,
@@ -41,6 +41,7 @@ where
                 custom_preset_id: 0xfefe,
                 band_hz: [100, 200, 400, 800, 1600, 3200, 6400, 12800],
                 presets: PRESETS.clone(),
+                invisible_bands_mode: InvisibleBandsMode::Remember,
             },
         )
         .await;

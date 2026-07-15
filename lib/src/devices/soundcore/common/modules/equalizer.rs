@@ -75,6 +75,12 @@ pub struct EqualizerModuleSettings<
     pub custom_preset_id: u16,
     pub band_hz: [u16; VISIBLE_BANDS],
     pub presets: Vec<EqualizerPreset<PRESET_BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>,
+    pub invisible_bands_mode: InvisibleBandsMode,
+}
+
+pub enum InvisibleBandsMode {
+    Remember,
+    Fixed(Vec<i16>),
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -106,6 +112,7 @@ pub fn common_settings() -> EqualizerModuleSettings<
     EqualizerModuleSettings {
         custom_preset_id: 0xfefe,
         band_hz: [100, 200, 400, 800, 1600, 3200, 6400, 12800],
+        invisible_bands_mode: InvisibleBandsMode::Remember,
         presets: vec![
             EqualizerPreset {
                 name: "SoundcoreSignature",
@@ -582,12 +589,7 @@ impl<T: 'static> ModuleCollection<T> {
                 MIN_VOLUME,
                 MAX_VOLUME,
                 FRACTION_DIGITS,
-            >::new(
-                profile_store.to_owned(),
-                module_settings.custom_preset_id,
-                module_settings.band_hz,
-                module_settings.presets,
-            )
+            >::new(profile_store.to_owned(), module_settings)
             .with_tws(),
         );
         self.setting_manager.add_handler(
@@ -639,12 +641,7 @@ impl<T: 'static> ModuleCollection<T> {
                 MIN_VOLUME,
                 MAX_VOLUME,
                 FRACTION_DIGITS,
-            >::new(
-                profile_store.to_owned(),
-                module_settings.custom_preset_id,
-                module_settings.band_hz,
-                module_settings.presets,
-            ),
+            >::new(profile_store.to_owned(), module_settings),
         );
         self.setting_manager.add_handler(
             CategoryId::EqualizerImportExport,

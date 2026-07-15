@@ -12,7 +12,7 @@ use crate::{
                     COMMON_ACTIONS_MINIMAL,
                 },
                 dual_battery_level::DualBatteryLevelConfiguration,
-                equalizer::{EqualizerModuleSettings, EqualizerPreset},
+                equalizer::{EqualizerModuleSettings, EqualizerPreset, InvisibleBandsMode},
             },
             packet::{
                 inbound::TryToPacket,
@@ -187,6 +187,7 @@ pub fn equalizer_settings() -> EqualizerModuleSettings<8, 10, -120, 134, 1> {
     EqualizerModuleSettings {
         custom_preset_id: 0xfefe,
         band_hz: [100, 200, 400, 800, 1600, 3200, 6400, 12800],
+        invisible_bands_mode: InvisibleBandsMode::Remember,
         presets: vec![
             EqualizerPreset {
                 name: "SoundcoreSignature",
