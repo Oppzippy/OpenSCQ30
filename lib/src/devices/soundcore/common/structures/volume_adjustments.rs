@@ -243,6 +243,55 @@ impl<const B: usize, const MIN_VOLUME: i16, const MAX_VOLUME: i16, const FRACTIO
     }
 }
 
+pub trait OptionalVolumeAdjustmentsExt<
+    const BANDS: usize,
+    const MIN_VOLUME: i16,
+    const MAX_VOLUME: i16,
+    const FRACTION_DIGITS: u8,
+>
+{
+    fn bytes(&self) -> [u8; BANDS];
+    fn apply_drc(
+        &self,
+    ) -> Option<VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>;
+}
+
+impl<const BANDS: usize, const MIN_VOLUME: i16, const MAX_VOLUME: i16, const FRACTION_DIGITS: u8>
+    OptionalVolumeAdjustmentsExt<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
+    for Option<VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
+{
+    fn bytes(&self) -> [u8; BANDS] {
+        match self {
+            Some(v) => v.bytes(),
+            None => [0xFF; BANDS],
+        }
+    }
+
+    fn apply_drc(
+        &self,
+    ) -> Option<VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>> {
+        self.map(|v| v.apply_drc())
+    }
+}
+
+impl<const BANDS: usize, const MIN_VOLUME: i16, const MAX_VOLUME: i16, const FRACTION_DIGITS: u8>
+    OptionalVolumeAdjustmentsExt<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
+    for Option<&VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>
+{
+    fn bytes(&self) -> [u8; BANDS] {
+        match self {
+            Some(v) => v.bytes(),
+            None => [0xFF; BANDS],
+        }
+    }
+
+    fn apply_drc(
+        &self,
+    ) -> Option<VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>> {
+        self.map(|v| v.apply_drc())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

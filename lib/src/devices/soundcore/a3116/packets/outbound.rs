@@ -1,6 +1,9 @@
 use crate::devices::soundcore::{
     a3116,
-    common::{packet, structures::VolumeAdjustments},
+    common::{
+        packet,
+        structures::{OptionalVolumeAdjustmentsExt, VolumeAdjustments},
+    },
 };
 
 pub fn set_auto_power_off(duration: &a3116::structures::AutoPowerOffDuration) -> packet::Outbound {
@@ -16,7 +19,7 @@ pub fn set_equalizer_preset(preset_id: u8) -> packet::Outbound {
 }
 
 pub fn set_equalizer_volume_adjustments(
-    volume_adjustments: VolumeAdjustments<9, -6, 6, 0>,
+    volume_adjustments: Option<&VolumeAdjustments<9, -6, 6, 0>>,
 ) -> packet::Outbound {
     packet::Outbound::new(
         packet::Command([0x02, 0x83]),

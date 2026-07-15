@@ -3,7 +3,10 @@ use crate::devices::soundcore::{
         AutoLightsOffDurationInMinutes, ColorfulLightsBrightness, ColorfulLightsMode, RgbColor,
         VolumeBalance,
     },
-    common::{packet, structures::EqualizerConfiguration},
+    common::{
+        packet,
+        structures::{EqualizerConfiguration, OptionalVolumeAdjustmentsExt},
+    },
 };
 
 pub fn set_volume_balance(volume_balance: VolumeBalance) -> packet::Outbound {

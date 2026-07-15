@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use crate::devices::soundcore::common::{self, packet};
+use crate::devices::soundcore::common::{self, packet, structures::OptionalVolumeAdjustmentsExt};
 
 pub fn set_equalizer_configuration<
     const CHANNELS: usize,

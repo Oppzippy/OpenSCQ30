@@ -59,7 +59,7 @@ impl Default for A3936StateUpdatePacket {
             battery: Default::default(),
             dual_firmware_version: Default::default(),
             serial_number: Default::default(),
-            equalizer_configuration: CommonEqualizerConfiguration::new(
+            equalizer_configuration: CommonEqualizerConfiguration::new_all_bands_present(
                 0xfefe,
                 [
                     CommonVolumeAdjustments::new([0; 10]),

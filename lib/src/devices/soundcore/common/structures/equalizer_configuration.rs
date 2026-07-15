@@ -9,6 +9,8 @@ use nom::{
     sequence::pair,
 };
 
+use crate::devices::soundcore::common::structures::OptionalVolumeAdjustmentsExt;
+
 use super::VolumeAdjustments;
 
 pub type CommonEqualizerConfiguration<const CHANNELS: usize, const BANDS: usize> =
@@ -26,7 +28,7 @@ pub struct EqualizerConfiguration<
 > {
     preset_id: u16,
     volume_adjustments:
-        [VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>; CHANNELS],
+        [Option<VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>; CHANNELS],
 }
 
 impl<
@@ -38,7 +40,7 @@ impl<
 > Default for EqualizerConfiguration<CHANNELS, BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>
 {
     fn default() -> Self {
-        Self::new(0, array::from_fn(|_| VolumeAdjustments::default()))
+        Self::new(0, array::from_fn(|_| Some(VolumeAdjustments::default())))
     }
 }
 
@@ -59,17 +61,17 @@ impl<
                 pair(
                     le_u16,
                     count(
-                        VolumeAdjustments::<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>::take,
+                        VolumeAdjustments::<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>::take_optional,
                         CHANNELS,
                     ),
                 ),
                 |(profile_id, volume_adjustments)| {
-                    let volume_adjustments: [VolumeAdjustments<
+                    let volume_adjustments: [Option<VolumeAdjustments<
                         BANDS,
                         MIN_VOLUME,
                         MAX_VOLUME,
                         FRACTION_DIGITS,
-                    >; CHANNELS] = volume_adjustments
+                    >>; CHANNELS] = volume_adjustments
                         .try_into()
                         .expect("count vec is guaranteed to be the specified length");
 
@@ -89,12 +91,23 @@ impl<
 
     pub fn new(
         preset_id: u16,
-        volume_adjustments: [VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>;
+        volume_adjustments: [Option<VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>;
             CHANNELS],
     ) -> Self {
         Self {
             preset_id,
             volume_adjustments,
+        }
+    }
+
+    pub fn new_all_bands_present(
+        preset_id: u16,
+        volume_adjustments: [VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>;
+            CHANNELS],
+    ) -> Self {
+        Self {
+            preset_id,
+            volume_adjustments: volume_adjustments.map(Some),
         }
     }
 
@@ -104,13 +117,14 @@ impl<
 
     pub fn volume_adjustments_channel_1(
         &self,
-    ) -> &VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS> {
-        &self.volume_adjustments[0]
+    ) -> Option<&VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>> {
+        self.volume_adjustments.iter().flatten().next()
     }
 
     pub fn volume_adjustments(
         &self,
-    ) -> &[VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>; CHANNELS] {
+    ) -> &[Option<VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>; CHANNELS]
+    {
         &self.volume_adjustments
     }
 
@@ -119,6 +133,6 @@ impl<
     }
 
     pub fn bands(&self) -> usize {
-        self.volume_adjustments_channel_1().adjustments().len()
+        BANDS
     }
 }

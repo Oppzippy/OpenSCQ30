@@ -1,7 +1,7 @@
 use itertools::Itertools;
 
 use crate::devices::soundcore::{
-    common::{self, packet},
+    common::{self, packet, structures::OptionalVolumeAdjustmentsExt},
     d1202,
 };
 

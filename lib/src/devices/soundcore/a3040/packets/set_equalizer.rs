@@ -2,7 +2,7 @@ use std::iter;
 
 use crate::devices::soundcore::common::{
     packet,
-    structures::{CommonEqualizerConfiguration, CustomHearId},
+    structures::{CommonEqualizerConfiguration, CustomHearId, OptionalVolumeAdjustmentsExt},
 };
 
 pub fn set_equalizer<

@@ -260,7 +260,7 @@ mod tests {
             packet.sound_modes,
         );
         assert_eq!(
-            CommonEqualizerConfiguration::new(
+            CommonEqualizerConfiguration::new_all_bands_present(
                 0x0001,
                 [CommonVolumeAdjustments::new([
                     -60, 60, 23, 40, 22, 60, -4, 16
@@ -298,7 +298,9 @@ mod tests {
             "should be custom preset"
         );
         assert_eq!(
-            &CommonVolumeAdjustments::new([-60, 60, 23, 40, 22, 60, -4, 16]),
+            Some(&CommonVolumeAdjustments::new([
+                -60, 60, 23, 40, 22, 60, -4, 16
+            ])),
             packet
                 .equalizer_configuration
                 .volume_adjustments_channel_1(),
@@ -334,7 +336,9 @@ mod tests {
             "should be custom preset"
         );
         assert_eq!(
-            &CommonVolumeAdjustments::new([-60, 60, 23, 40, 22, 60, -4, 16]),
+            Some(&CommonVolumeAdjustments::new([
+                -60, 60, 23, 40, 22, 60, -4, 16
+            ])),
             packet
                 .equalizer_configuration
                 .volume_adjustments_channel_1(),

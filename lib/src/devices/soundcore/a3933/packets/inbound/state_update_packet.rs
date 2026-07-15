@@ -61,7 +61,7 @@ impl Default for A3933StateUpdatePacket {
             battery: Default::default(),
             dual_firmware_version: Default::default(),
             serial_number: Default::default(),
-            equalizer_configuration: CommonEqualizerConfiguration::new(
+            equalizer_configuration: CommonEqualizerConfiguration::new_all_bands_present(
                 0xfefe,
                 [
                     CommonVolumeAdjustments::new([0; 10]),
@@ -353,11 +353,7 @@ mod tests {
         assert_eq!(
             CommonEqualizerConfiguration::new(
                 0x0000,
-                // subtract 120 to convert from byte value to volume adjustment
-                [
-                    CommonVolumeAdjustments::new([0; 10]),
-                    CommonVolumeAdjustments::new([255 - 120; 10]),
-                ]
+                [Some(CommonVolumeAdjustments::new([0; 10])), None,]
             ),
             packet.equalizer_configuration
         );

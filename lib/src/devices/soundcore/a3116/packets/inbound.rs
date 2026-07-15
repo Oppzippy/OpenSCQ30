@@ -24,7 +24,7 @@ use crate::{
             state::Update,
             structures::{
                 BatteryLevel, EqualizerConfiguration, FirmwareVersion, IsBatteryCharging,
-                SerialNumber, SingleBattery, VoicePrompt,
+                OptionalVolumeAdjustmentsExt, SerialNumber, SingleBattery, VoicePrompt,
             },
         },
     },

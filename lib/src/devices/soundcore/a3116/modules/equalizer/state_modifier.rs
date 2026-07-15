@@ -51,7 +51,7 @@ where
         if target.volume_adjustments() != state.volume_adjustments() {
             self.packet_io
                 .send_with_response(&a3116::packets::outbound::set_equalizer_volume_adjustments(
-                    target.volume_adjustments()[0],
+                    target.volume_adjustments_channel_1(),
                 ))
                 .await?;
         }

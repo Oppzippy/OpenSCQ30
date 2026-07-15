@@ -85,7 +85,7 @@ pub fn take_equalizer_configuration<'a, E: ParseError<&'a [u8]> + ContextError<&
     context(
         "equalizer configuration",
         map(
-            (le_u8, VolumeAdjustments::take),
+            (le_u8, VolumeAdjustments::take_optional),
             |(preset_index, volume_adjustments)| {
                 EqualizerConfiguration::new(preset_index.into(), [volume_adjustments])
             },

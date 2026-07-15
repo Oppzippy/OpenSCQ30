@@ -133,7 +133,7 @@ mod tests {
                     Value::OptionalString(Some("TrebleReducer".into())),
                 )],
                 vec![packet::outbound::set_equalizer(
-                    &CommonEqualizerConfiguration::<2, 10>::new(
+                    &CommonEqualizerConfiguration::<2, 10>::new_all_bands_present(
                         0x0015,
                         [
                             CommonVolumeAdjustments::new([0, 0, 0, -20, -30, -40, -40, -60, 1, 2]),

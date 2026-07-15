@@ -1,6 +1,8 @@
 use crate::devices::soundcore::common::{
     packet,
-    structures::{AgeRange, CustomHearId, EqualizerConfiguration, Gender},
+    structures::{
+        AgeRange, CustomHearId, EqualizerConfiguration, Gender, OptionalVolumeAdjustmentsExt,
+    },
 };
 
 use super::outbound_packet::ToPacket;
@@ -131,7 +133,7 @@ mod tests {
             0x6c, 0x0a,
         ];
         let actual = SetEqualizerAndCustomHearId {
-            equalizer_configuration: &CommonEqualizerConfiguration::new(
+            equalizer_configuration: &CommonEqualizerConfiguration::new_all_bands_present(
                 0xfefe,
                 [
                     CommonVolumeAdjustments::new([-52, -66, -64, -67, -108, -22, -49, -101]),
@@ -181,7 +183,7 @@ mod tests {
             0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0x78, 0xb1,
         ];
         let actual = SetEqualizerAndCustomHearId {
-            equalizer_configuration: &CommonEqualizerConfiguration::<2, 8>::new(
+            equalizer_configuration: &CommonEqualizerConfiguration::<2, 8>::new_all_bands_present(
                 0x0000,
                 [
                     CommonVolumeAdjustments::default(),

@@ -110,10 +110,9 @@ impl FromPacketBody for D1101StateUpdatePacket {
                     serial_number,
                     equalizer_configuration: CommonEqualizerConfiguration::new(
                         equalizer_configuration.preset_id(),
-                        [
-                            *equalizer_configuration.volume_adjustments_channel_1(),
-                            *equalizer_configuration.volume_adjustments_channel_1(),
-                        ],
+                        [equalizer_configuration
+                            .volume_adjustments_channel_1()
+                            .copied(); 2],
                     ),
                     button_configuration,
                     low_battery_prompt,

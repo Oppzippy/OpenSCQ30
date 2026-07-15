@@ -4,7 +4,7 @@ use crate::devices::soundcore::{
     a3035,
     common::{
         packet,
-        structures::{CommonEqualizerConfiguration, CustomHearId},
+        structures::{CommonEqualizerConfiguration, CustomHearId, OptionalVolumeAdjustmentsExt},
     },
 };
 

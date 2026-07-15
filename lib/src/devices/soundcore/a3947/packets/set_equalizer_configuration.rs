@@ -4,7 +4,7 @@ use crate::devices::soundcore::{
     a3947,
     common::{
         packet::{self, Command},
-        structures::{CommonEqualizerConfiguration, HearIdType},
+        structures::{CommonEqualizerConfiguration, HearIdType, OptionalVolumeAdjustmentsExt},
     },
 };
 
@@ -64,7 +64,7 @@ mod tests {
     #[test]
     fn matches_known_good_packet() {
         let packet = set_equalizer_configuration(
-            &CommonEqualizerConfiguration::new(
+            &CommonEqualizerConfiguration::new_all_bands_present(
                 0xfefe,
                 [
                     CommonVolumeAdjustments::new([60, 0, 0, 0, 0, 0, 0, -60, 0, 0]),
@@ -74,23 +74,23 @@ mod tests {
             &a3947::structures::HearId {
                 is_enabled: false,
                 volume_adjustments: [
-                    CommonVolumeAdjustments::from_bytes([
+                    Some(CommonVolumeAdjustments::from_bytes([
                         112, 117, 140, 148, 150, 142, 134, 131, 60, 60,
-                    ]),
-                    CommonVolumeAdjustments::from_bytes([
+                    ])),
+                    Some(CommonVolumeAdjustments::from_bytes([
                         112, 117, 140, 148, 150, 142, 134, 131, 60, 60,
-                    ]),
+                    ])),
                 ],
                 time: u32::from_be_bytes([104, 100, 34, 64]),
                 hear_id_type: HearIdType::FavoriteMusicGenre,
                 music_type: HearIdMusicGenre(6),
                 custom_volume_adjustments: [
-                    CommonVolumeAdjustments::from_bytes([
+                    Some(CommonVolumeAdjustments::from_bytes([
                         112, 117, 140, 148, 150, 142, 134, 131, 60, 60,
-                    ]),
-                    CommonVolumeAdjustments::from_bytes([
+                    ])),
+                    Some(CommonVolumeAdjustments::from_bytes([
                         112, 117, 140, 148, 150, 142, 134, 131, 60, 60,
-                    ]),
+                    ])),
                 ],
             },
         );

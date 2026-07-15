@@ -78,9 +78,10 @@ impl FromPacketBody for A3909StateUpdatePacket {
                     battery,
                     equalizer_configuration: a3909::structures::EqualizerConfiguration::new(
                         eq_preset_id,
-                        guess_volume_adjustments(eq_preset_id)
-                            .map(|volume_adjustments| [volume_adjustments, volume_adjustments])
-                            .unwrap_or_default(),
+                        guess_volume_adjustments(eq_preset_id).map_or(
+                            [Some(VolumeAdjustments::default()); 2],
+                            |volume_adjustments| [Some(volume_adjustments); 2],
+                        ),
                     ),
                     gender,
                     age_range,

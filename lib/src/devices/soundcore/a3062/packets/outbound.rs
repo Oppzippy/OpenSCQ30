@@ -4,7 +4,7 @@ use crate::devices::soundcore::{
     a3062,
     common::{
         packet,
-        structures::{CommonEqualizerConfiguration, CustomHearId},
+        structures::{CommonEqualizerConfiguration, CustomHearId, OptionalVolumeAdjustmentsExt},
     },
 };
 
@@ -64,7 +64,7 @@ mod tests {
     #[test]
     fn set_equalizer_matches_known_good_packet() {
         let packet = set_equalizer(
-            &CommonEqualizerConfiguration::new(
+            &CommonEqualizerConfiguration::new_all_bands_present(
                 0xfefe,
                 [VolumeAdjustments::from_bytes([
                     60, 125, 60, 148, 113, 95, 144, 111, 120, 120,

@@ -238,6 +238,8 @@ fn get_inner<
                             .find(|(_, v)| {
                                 v == equalizer_configuration
                                     .volume_adjustments_channel_1()
+                                    .copied()
+                                    .unwrap_or_default()
                                     .adjustments()
                             })
                             .map(|(name, _)| name.clone().into())
@@ -254,6 +256,8 @@ fn get_inner<
             },
             value: equalizer_configuration
                 .volume_adjustments_channel_1()
+                .copied()
+                .unwrap_or_default()
                 .adjustments()
                 .to_vec(),
         },
@@ -292,7 +296,7 @@ async fn set_inner<
                 .try_as_optional_str()?
                 .and_then(|preset_name| presets.iter().find(|it| it.name == preset_name))
             {
-                *equalizer_configuration = EqualizerConfiguration::new(
+                *equalizer_configuration = EqualizerConfiguration::new_all_bands_present(
                     preset.id,
                     equalizer_configuration.volume_adjustments().map(|v| {
                         VolumeAdjustments::new(array::from_fn(|i| {
@@ -301,7 +305,7 @@ async fn set_inner<
                                 .adjustments()
                                 .get(i)
                                 .copied()
-                                .unwrap_or(v.adjustments()[i])
+                                .unwrap_or(v.map_or(0, |v| v.adjustments()[i]))
                         }))
                     }),
                 );
@@ -336,6 +340,8 @@ async fn set_inner<
                                 name.into_owned(),
                                 equalizer_configuration
                                     .volume_adjustments_channel_1()
+                                    .copied()
+                                    .unwrap_or_default()
                                     .adjustments()
                                     .to_vec(),
                             )
@@ -369,18 +375,20 @@ fn values_to_volume_adjustments<
     const FRACTION_DIGITS: u8,
 >(
     values: &[i16],
-    existing_volume_adjustments: &[VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>;
+    existing_volume_adjustments: &[Option<VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>;
          CHANNELS],
-) -> [VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>; CHANNELS] {
+) -> [Option<VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>; CHANNELS] {
     // Some devices have extra bands, but those aren't exposed to the user, so I have no idea what they're for
     // We can just add back in whatever was there before (we're only showing the user the first 8 bands)
     array::from_fn(|band| {
-        let band_adjustments = existing_volume_adjustments[band].adjustments();
-        VolumeAdjustments::new(array::from_fn(|channel| {
-            values
-                .get(channel)
-                .copied()
-                .unwrap_or(band_adjustments[channel])
-        }))
+        existing_volume_adjustments[band].map(|bands| {
+            let band_adjustments = bands.adjustments();
+            VolumeAdjustments::new(array::from_fn(|channel| {
+                values
+                    .get(channel)
+                    .copied()
+                    .unwrap_or(band_adjustments[channel])
+            }))
+        })
     })
 }

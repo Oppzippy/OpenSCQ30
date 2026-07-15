@@ -1,4 +1,7 @@
-use crate::devices::soundcore::common::{packet, structures::EqualizerConfiguration};
+use crate::devices::soundcore::common::{
+    packet,
+    structures::{EqualizerConfiguration, OptionalVolumeAdjustmentsExt},
+};
 
 pub fn set_equalizer_with_drc<
     const CHANNELS: usize,
@@ -44,7 +47,7 @@ mod tests {
             0xf0, 0x8e, 0x00, 0x74, 0x88, 0x6d, 0x86, 0x70, 0x88, 0x7b, 0x66, 0x7e, 0x79, 0x4f,
         ];
 
-        let actual = set_equalizer_with_drc(&CommonEqualizerConfiguration::new(
+        let actual = set_equalizer_with_drc(&CommonEqualizerConfiguration::new_all_bands_present(
             0xfefe,
             [CommonVolumeAdjustments::new([
                 -60, 60, 23, 120, 22, -120, -4, 16,

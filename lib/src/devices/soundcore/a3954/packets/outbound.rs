@@ -2,7 +2,7 @@ use itertools::Itertools;
 
 use crate::devices::soundcore::{
     a3954,
-    common::{self, packet},
+    common::{self, packet, structures::OptionalVolumeAdjustmentsExt},
 };
 
 pub fn set_case_features(case_features: &a3954::structures::CaseFeatures) -> packet::Outbound {

@@ -14,8 +14,8 @@ use crate::devices::soundcore::common::{
     modules::sound_modes_v2,
     packet::{self, inbound::FromPacketBody, parsing::take_bool},
     structures::{
-        AmbientSoundMode, CommonVolumeAdjustments, HearIdMusicGenre, HearIdType, TransparencyMode,
-        WindNoise,
+        AmbientSoundMode, CommonVolumeAdjustments, HearIdMusicGenre, HearIdType,
+        OptionalVolumeAdjustmentsExt, TransparencyMode, WindNoise,
     },
 };
 
@@ -177,11 +177,11 @@ impl NoiseCancelingSettings {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct HearId<const C: usize, const B: usize> {
     pub is_enabled: bool,
-    pub volume_adjustments: [CommonVolumeAdjustments<B>; C],
+    pub volume_adjustments: [Option<CommonVolumeAdjustments<B>>; C],
     pub time: u32,
     pub hear_id_type: HearIdType,
     pub music_type: HearIdMusicGenre,
-    pub custom_volume_adjustments: [CommonVolumeAdjustments<B>; C],
+    pub custom_volume_adjustments: [Option<CommonVolumeAdjustments<B>>; C],
 }
 
 impl<const C: usize, const B: usize> Default for HearId<C, B> {
@@ -206,10 +206,10 @@ impl<const C: usize, const B: usize> HearId<C, B> {
             map(
                 (
                     take_bool,
-                    count(CommonVolumeAdjustments::take, C),
+                    count(CommonVolumeAdjustments::take_optional, C),
                     be_u32,
                     HearIdType::take,
-                    count(CommonVolumeAdjustments::take, C),
+                    count(CommonVolumeAdjustments::take_optional, C),
                     HearIdMusicGenre::take_one_byte,
                     le_u8,
                 ),
@@ -222,10 +222,11 @@ impl<const C: usize, const B: usize> HearId<C, B> {
                     music_type,
                     _unknown,
                 )| {
-                    let volume_adjustments: [CommonVolumeAdjustments<B>; C] = volume_adjustments
-                        .try_into()
-                        .expect("count is guaranteed to return a vec with the desired length");
-                    let custom_volume_adjustments: [CommonVolumeAdjustments<B>; C] =
+                    let volume_adjustments: [Option<CommonVolumeAdjustments<B>>; C] =
+                        volume_adjustments
+                            .try_into()
+                            .expect("count is guaranteed to return a vec with the desired length");
+                    let custom_volume_adjustments: [Option<CommonVolumeAdjustments<B>>; C] =
                         custom_volume_adjustments
                             .try_into()
                             .expect("count is guaranteed to return a vec with the desired length");
