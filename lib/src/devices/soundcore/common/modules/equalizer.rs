@@ -79,7 +79,6 @@ pub struct EqualizerModuleSettings<
 }
 
 pub enum InvisibleBandsMode {
-    Remember,
     Fixed(Vec<i16>),
 }
 

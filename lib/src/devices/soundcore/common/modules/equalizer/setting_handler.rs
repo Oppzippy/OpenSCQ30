@@ -313,25 +313,20 @@ async fn set_inner<
             }) {
                 *equalizer_configuration = EqualizerConfiguration::new_all_bands_present(
                     preset.id,
-                    equalizer_configuration.volume_adjustments().map(|v| {
-                        VolumeAdjustments::new(array::from_fn(|i| {
-                            preset
-                                .volume_adjustments
-                                .adjustments()
-                                .get(i)
-                                .copied()
-                                // or_else so that i - PRESET_BANDS doesn't run for band numbers < PRESET_BANDS, causing overflow
-                                .unwrap_or_else(|| match &module_settings.invisible_bands_mode {
-                                    InvisibleBandsMode::Remember => {
-                                        v.map_or(0, |v| v.adjustments()[i])
-                                    }
-                                    InvisibleBandsMode::Fixed(fixed) => fixed.get(i - PRESET_BANDS).copied().unwrap_or_else(|| {
-                                        tracing::warn!("using fixed mode for invisible bands, but no value specified for band {i}");
-                                        0
-                                    }),
-                                })
-                        }))
-                    }),
+                    [VolumeAdjustments::new(array::from_fn(|i| {
+                        preset
+                            .volume_adjustments
+                            .adjustments()
+                            .get(i)
+                            .copied()
+                            // or_else so that i - PRESET_BANDS doesn't run for band numbers < PRESET_BANDS, causing overflow
+                            .unwrap_or_else(|| match &module_settings.invisible_bands_mode {
+                                InvisibleBandsMode::Fixed(fixed) => fixed.get(i - PRESET_BANDS).copied().unwrap_or_else(|| {
+                                    tracing::warn!("using fixed mode for invisible bands, but no value specified for band {i}");
+                                    0
+                                }),
+                            })
+                    })); CHANNELS],
                 );
             } else {
                 *equalizer_configuration = EqualizerConfiguration::new(
@@ -352,7 +347,6 @@ async fn set_inner<
                         module_settings.custom_preset_id,
                         values_to_volume_adjustments(
                             volume_adjustments,
-                            equalizer_configuration.volume_adjustments(),
                             &module_settings.invisible_bands_mode,
                             VISIBLE_BANDS,
                         ),
@@ -385,7 +379,6 @@ async fn set_inner<
                 module_settings.custom_preset_id,
                 values_to_volume_adjustments(
                     volume_adjustments,
-                    equalizer_configuration.volume_adjustments(),
                     &module_settings.invisible_bands_mode,
                     VISIBLE_BANDS,
                 ),
@@ -403,29 +396,21 @@ fn values_to_volume_adjustments<
     const FRACTION_DIGITS: u8,
 >(
     values: &[i16],
-    existing_volume_adjustments: &[Option<VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>;
-         CHANNELS],
     mode: &InvisibleBandsMode,
     visible_bands: usize,
 ) -> [Option<VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>>; CHANNELS] {
     // Some devices have extra bands, but those aren't exposed to the user, so I have no idea what they're for
-    array::from_fn(|channel| match mode {
-        InvisibleBandsMode::Remember => existing_volume_adjustments[channel].map(|bands| {
-            let band_adjustments = bands.adjustments();
-            VolumeAdjustments::new(array::from_fn(|band| {
-                values.get(band).copied().unwrap_or(band_adjustments[band])
-            }))
-        }),
+    [match mode {
         InvisibleBandsMode::Fixed(fixed) => Some(VolumeAdjustments::new(array::from_fn(|band| {
             // or_else so that i - visible_bands doesn't run for band numbers < PRESET_BANDS, causing overflow
             values.get(band).copied().unwrap_or_else(|| {
                 fixed.get(band - visible_bands).copied().unwrap_or_else(|| {
-                tracing::warn!(
-                    "using fixed mode for invisible bands, but no value specified for band {band}"
-                );
-                0
-            })
+                    tracing::warn!(
+                        "using fixed mode for invisible bands, but no value specified for band {band}"
+                    );
+                    0
+                })
             })
         }))),
-    })
+    }; CHANNELS]
 }
