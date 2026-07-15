@@ -12,7 +12,7 @@ use crate::{
             EqualizerModuleSettings, InvisibleBandsMode,
             custom_equalizer_profile_store::CustomEqualizerProfileStore,
         },
-        settings_manager::{SettingHandler, SettingHandlerResult},
+        settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
         structures::{EqualizerConfiguration, TwsStatus, VolumeAdjustments},
     },
 };
@@ -367,6 +367,14 @@ async fn set_inner<
         }
         EqualizerSetting::VolumeAdjustments => {
             let volume_adjustments = value.try_as_i16_slice()?;
+            if volume_adjustments.len() != VISIBLE_BANDS {
+                return Err(SettingHandlerError::ValueError(
+                    settings::ValueError::WrongLength {
+                        expected: VISIBLE_BANDS,
+                        actual: volume_adjustments.len(),
+                    },
+                ));
+            }
             *equalizer_configuration = EqualizerConfiguration::new_all_bands_present(
                 module_settings.custom_preset_id,
                 values_to_volume_adjustments(

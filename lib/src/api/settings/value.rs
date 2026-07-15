@@ -51,6 +51,9 @@ pub enum ValueError {
         variants: Box<[&'static str]>,
         actual: Value,
     },
+
+    #[error("expected length {expected}, got {actual}")]
+    WrongLength { expected: usize, actual: usize },
 }
 
 impl std::fmt::Display for Value {
