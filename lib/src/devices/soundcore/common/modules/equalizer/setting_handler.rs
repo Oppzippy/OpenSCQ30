@@ -1,6 +1,7 @@
 use std::{array, borrow::Cow, sync::Arc};
 
 use async_trait::async_trait;
+use itertools::Itertools;
 use openscq30_lib_has::Has;
 use strum::IntoEnumIterator;
 use tokio::sync::watch;
@@ -12,7 +13,7 @@ use crate::{
             EqualizerModuleSettings, InvisibleBandsMode,
             custom_equalizer_profile_store::CustomEqualizerProfileStore,
         },
-        settings_manager::{SettingHandler, SettingHandlerError, SettingHandlerResult},
+        settings_manager::{SettingHandler, SettingHandlerResult},
         structures::{EqualizerConfiguration, TwsStatus, VolumeAdjustments},
     },
 };
@@ -314,10 +315,11 @@ async fn set_inner<
                 *equalizer_configuration = EqualizerConfiguration::new_all_bands_present(
                     preset.id,
                     values_to_volume_adjustments(
+                        // preset values should override invisible band handling
+                        // this is done by passing an array of PRESET_BANDS length, so VISIBLE_BANDS will be
+                        // PRESET_BANDS
                         preset.volume_adjustments.adjustments(),
                         &module_settings.invisible_bands_mode,
-                        // preset values should override invisible band handling
-                        PRESET_BANDS,
                     ),
                 );
             } else {
@@ -335,12 +337,23 @@ async fn set_inner<
                     .find(|(n, _)| n == name)
                     .map(|(_, volume_adjustments)| volume_adjustments)
                 {
+                    // it's possible a different OpenSCQ30 version saved a different number of bands than
+                    // we expect, so make sure we have the exact number we want
+                    let fixed_len_volume_adjustments: [i16; VISIBLE_BANDS] = volume_adjustments
+                        .iter()
+                        .copied()
+                        .take(VISIBLE_BANDS)
+                        .chain(std::iter::repeat_n(
+                            0,
+                            VISIBLE_BANDS.saturating_sub(volume_adjustments.len()),
+                        ))
+                        .collect_array()
+                        .expect("we made sure there are exactly VISIBLE_BANDS elements");
                     *equalizer_configuration = EqualizerConfiguration::new_all_bands_present(
                         module_settings.custom_preset_id,
                         values_to_volume_adjustments(
-                            volume_adjustments,
+                            &fixed_len_volume_adjustments,
                             &module_settings.invisible_bands_mode,
-                            VISIBLE_BANDS,
                         ),
                     );
                 }
@@ -369,21 +382,12 @@ async fn set_inner<
             }
         }
         EqualizerSetting::VolumeAdjustments => {
-            let volume_adjustments = value.try_as_i16_slice()?;
-            if volume_adjustments.len() != VISIBLE_BANDS {
-                return Err(SettingHandlerError::ValueError(
-                    settings::ValueError::WrongLength {
-                        expected: VISIBLE_BANDS,
-                        actual: volume_adjustments.len(),
-                    },
-                ));
-            }
+            let volume_adjustments = value.try_as_i16_array::<VISIBLE_BANDS>()?;
             *equalizer_configuration = EqualizerConfiguration::new_all_bands_present(
                 module_settings.custom_preset_id,
                 values_to_volume_adjustments(
                     volume_adjustments,
                     &module_settings.invisible_bands_mode,
-                    VISIBLE_BANDS,
                 ),
             );
         }
@@ -394,26 +398,27 @@ async fn set_inner<
 fn values_to_volume_adjustments<
     const CHANNELS: usize,
     const BANDS: usize,
+    const VISIBLE_BANDS: usize,
     const MIN_VOLUME: i16,
     const MAX_VOLUME: i16,
     const FRACTION_DIGITS: u8,
 >(
-    values: &[i16],
+    values: &[i16; VISIBLE_BANDS],
     mode: &InvisibleBandsMode,
-    visible_bands: usize,
 ) -> [VolumeAdjustments<BANDS, MIN_VOLUME, MAX_VOLUME, FRACTION_DIGITS>; CHANNELS] {
     // Some devices have extra bands, but those aren't exposed to the user, so I have no idea what they're for
     [match mode {
         InvisibleBandsMode::Fixed(fixed) => VolumeAdjustments::new(array::from_fn(|band| {
-            // or_else so that i - visible_bands doesn't run for band numbers < PRESET_BANDS, causing overflow
-            values.get(band).copied().unwrap_or_else(|| {
-                fixed.get(band - visible_bands).copied().unwrap_or_else(|| {
+            if let Some(value) = values.get(band) {
+                *value
+            } else {
+                fixed.get(band - VISIBLE_BANDS).copied().unwrap_or_else(|| {
                     tracing::warn!(
                         "using fixed mode for invisible bands, but no value specified for band {band}"
                     );
                     0
                 })
-            })
+            }
         })),
     }; CHANNELS]
 }
@@ -463,15 +468,59 @@ mod tests {
                 &mut state,
                 &SettingId::CustomEqualizerProfile,
                 Value::ModifiableSelectCommand(settings::ModifiableSelectCommand::Add(
-                    "test preset".into(),
+                    "test profile".into(),
                 )),
             )
             .await
             .unwrap();
         let custom_profile = database
-            .fetch_equalizer_profile(DeviceModel::SoundcoreDevelopment, "test preset".to_owned())
+            .fetch_equalizer_profile(DeviceModel::SoundcoreDevelopment, "test profile".to_owned())
             .await
             .expect("we just created the custom profile, so it should exist");
         assert_eq!(custom_profile, [0; 8])
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn activating_custom_profiles_with_more_bands_than_visible_ignores_invisible_bands() {
+        let database = Arc::new(OpenSCQ30Database::new_in_memory().await.unwrap());
+        let (change_notify_sender, _) = watch::channel(());
+        let profile_store = Arc::new(
+            CustomEqualizerProfileStore::new(
+                database.clone(),
+                DeviceModel::SoundcoreDevelopment, // doesn't matter
+                change_notify_sender,
+            )
+            .await,
+        );
+        profile_store
+            .bulk_upsert(vec![("test profile".to_owned(), vec![1; 10])])
+            .await
+            .unwrap();
+        let setting_handler =
+            EqualizerSettingHandler::<TestStateWithEq, 2, 10, 8, 10, -120, 134, 1>::new(
+                profile_store,
+                common_settings(),
+            );
+        let mut state = TestStateWithEq {
+            equalizer_configuration: EqualizerConfiguration::new_all_bands_present(
+                0xfefe,
+                [VolumeAdjustments::new([0; 10]); 2],
+            ),
+        };
+        setting_handler
+            .set(
+                &mut state,
+                &SettingId::CustomEqualizerProfile,
+                Value::String("test profile".into()),
+            )
+            .await
+            .unwrap();
+        assert_eq!(
+            state.equalizer_configuration,
+            EqualizerConfiguration::new_all_bands_present(
+                0xfefe,
+                [VolumeAdjustments::new([1, 1, 1, 1, 1, 1, 1, 1, 0, 0]); 2]
+            ),
+        )
     }
 }

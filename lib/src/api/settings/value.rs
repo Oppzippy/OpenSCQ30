@@ -193,6 +193,14 @@ impl Value {
         }
     }
 
+    pub fn try_as_i16_array<const SIZE: usize>(&self) -> Result<&[i16; SIZE], ValueError> {
+        let slice = self.try_as_i16_slice()?;
+        slice.as_array::<SIZE>().ok_or(ValueError::WrongLength {
+            expected: SIZE,
+            actual: slice.len(),
+        })
+    }
+
     pub fn try_into_i16_vec(self) -> Result<Vec<i16>, ValueError> {
         if let Self::I16Vec(value) = self {
             Ok(value)
