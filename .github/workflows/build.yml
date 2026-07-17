@@ -158,6 +158,7 @@ jobs:
         uses: ./.github/actions/install-android-build-tools
         with:
           cache: false
+          arch: ${{ matrix.arch }}
       - name: Install just
         run: sudo snap install just --classic
 

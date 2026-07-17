@@ -23,6 +23,7 @@ jobs:
         uses: ./.github/actions/install-android-build-tools
         with:
           cache: true
+          arch: x86_64
 
       - name: Run android unit tests
         working-directory: android

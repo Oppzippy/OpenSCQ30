@@ -2,6 +2,9 @@ name: Install android build tools
 description: Installs correct versions of build tools according to .build-tool-versions
 
 inputs:
+  arch:
+    description: CPU architecture (android style, so arm64-v8a etc.)
+    required: true
   cache:
     description: Cache build artifacts?
     default: "false"
@@ -26,11 +29,27 @@ runs:
       shell: bash
       env:
         RUST_TOOLCHAIN_VERSION: ${{ steps.build_tool_versions.outputs.rust }}
+        ANDROID_ARCH: ${{ inputs.arch }}
       run: |
-        rustup install \
-          --profile minimal \
-          --target armv7-linux-androideabi,aarch64-linux-android,i686-linux-android,x86_64-linux-android \
-          "$RUST_TOOLCHAIN_VERSION"
+        case "$ANRDOID_ARCH" in
+          armeabi-v7a)
+            target="armv7-linux-androideabi"
+            ;;
+          arm64-v8a)
+            target="aarch64-linux-android"
+            ;;
+          x86)
+            target="i686-linux-android"
+            ;;
+          x86_64)
+            target="x86_64-linux-android"
+          *)
+            echo "invalid arch $ANDROID_ARCH"
+            exit 1
+            ;;
+        esac
+
+        rustup install --profile minimal --target $target "$RUST_TOOLCHAIN_VERSION"
         rustup default "$RUST_TOOLCHAIN_VERSION"
 
     - name: Cache cargo artifacts
