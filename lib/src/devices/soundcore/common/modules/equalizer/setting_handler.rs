@@ -440,23 +440,32 @@ mod tests {
         pub equalizer_configuration: CommonEqualizerConfiguration<2, 10>,
     }
 
-    #[tokio::test(start_paused = true)]
-    async fn custom_profiles_only_save_visible_bands() {
+    async fn set_up() -> (
+        Arc<OpenSCQ30Database>,
+        EqualizerSettingHandler<TestStateWithEq, 2, 10, 8, 10, -120, 134, 1>,
+        Arc<CustomEqualizerProfileStore>,
+    ) {
         let database = Arc::new(OpenSCQ30Database::new_in_memory().await.unwrap());
         let (change_notify_sender, _) = watch::channel(());
         let profile_store = Arc::new(
             CustomEqualizerProfileStore::new(
                 database.clone(),
-                DeviceModel::SoundcoreDevelopment, // doesn't matter
+                DeviceModel::SoundcoreDevelopment,
                 change_notify_sender,
             )
             .await,
         );
         let setting_handler =
             EqualizerSettingHandler::<TestStateWithEq, 2, 10, 8, 10, -120, 134, 1>::new(
-                profile_store,
+                profile_store.clone(),
                 common_settings(),
             );
+        (database, setting_handler, profile_store)
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn custom_profiles_only_save_visible_bands() {
+        let (database, setting_handler, _) = set_up().await;
         let mut state = TestStateWithEq {
             equalizer_configuration: EqualizerConfiguration::new_all_bands_present(
                 0xfefe,
@@ -482,25 +491,11 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn activating_custom_profiles_with_more_bands_than_visible_ignores_invisible_bands() {
-        let database = Arc::new(OpenSCQ30Database::new_in_memory().await.unwrap());
-        let (change_notify_sender, _) = watch::channel(());
-        let profile_store = Arc::new(
-            CustomEqualizerProfileStore::new(
-                database.clone(),
-                DeviceModel::SoundcoreDevelopment, // doesn't matter
-                change_notify_sender,
-            )
-            .await,
-        );
+        let (_database, setting_handler, profile_store) = set_up().await;
         profile_store
             .bulk_upsert(vec![("test profile".to_owned(), vec![1; 10])])
             .await
             .unwrap();
-        let setting_handler =
-            EqualizerSettingHandler::<TestStateWithEq, 2, 10, 8, 10, -120, 134, 1>::new(
-                profile_store,
-                common_settings(),
-            );
         let mut state = TestStateWithEq {
             equalizer_configuration: EqualizerConfiguration::new_all_bands_present(
                 0xfefe,
@@ -526,25 +521,11 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn activating_custom_profiles_with_too_few_bands_infers_0() {
-        let database = Arc::new(OpenSCQ30Database::new_in_memory().await.unwrap());
-        let (change_notify_sender, _) = watch::channel(());
-        let profile_store = Arc::new(
-            CustomEqualizerProfileStore::new(
-                database.clone(),
-                DeviceModel::SoundcoreDevelopment, // doesn't matter
-                change_notify_sender,
-            )
-            .await,
-        );
+        let (_database, setting_handler, profile_store) = set_up().await;
         profile_store
             .bulk_upsert(vec![("test profile".to_owned(), vec![1; 1])])
             .await
             .unwrap();
-        let setting_handler =
-            EqualizerSettingHandler::<TestStateWithEq, 2, 10, 8, 10, -120, 134, 1>::new(
-                profile_store,
-                common_settings(),
-            );
         let mut state = TestStateWithEq {
             equalizer_configuration: EqualizerConfiguration::new_all_bands_present(
                 0xfefe,
