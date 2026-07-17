@@ -523,4 +523,48 @@ mod tests {
             ),
         )
     }
+
+    #[tokio::test(start_paused = true)]
+    async fn activating_custom_profiles_with_too_few_bands_infers_0() {
+        let database = Arc::new(OpenSCQ30Database::new_in_memory().await.unwrap());
+        let (change_notify_sender, _) = watch::channel(());
+        let profile_store = Arc::new(
+            CustomEqualizerProfileStore::new(
+                database.clone(),
+                DeviceModel::SoundcoreDevelopment, // doesn't matter
+                change_notify_sender,
+            )
+            .await,
+        );
+        profile_store
+            .bulk_upsert(vec![("test profile".to_owned(), vec![1; 1])])
+            .await
+            .unwrap();
+        let setting_handler =
+            EqualizerSettingHandler::<TestStateWithEq, 2, 10, 8, 10, -120, 134, 1>::new(
+                profile_store,
+                common_settings(),
+            );
+        let mut state = TestStateWithEq {
+            equalizer_configuration: EqualizerConfiguration::new_all_bands_present(
+                0xfefe,
+                [VolumeAdjustments::new([2; 10]); 2],
+            ),
+        };
+        setting_handler
+            .set(
+                &mut state,
+                &SettingId::CustomEqualizerProfile,
+                Value::String("test profile".into()),
+            )
+            .await
+            .unwrap();
+        assert_eq!(
+            state.equalizer_configuration,
+            EqualizerConfiguration::new_all_bands_present(
+                0xfefe,
+                [VolumeAdjustments::new([1, 0, 0, 0, 0, 0, 0, 0, 0, 0]); 2]
+            ),
+        )
+    }
 }
